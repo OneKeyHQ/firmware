@@ -10,6 +10,8 @@ release core fw regular deploy:
   dependencies:
     - core fw regular build
   script:
+    - rm -rf branches/
+    - rm -rf releases/
     - export VERSION=$(./tools/version.sh core/embed/firmware/version.h)
     - export NAME="trezor-fw-regular-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
     - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
