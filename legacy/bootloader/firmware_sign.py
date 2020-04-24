@@ -224,6 +224,11 @@ def main(args):
         print("PUBLIC KEY:")
         print("04" + key.get_verifying_key().to_string().hex())
 
+        print("PUBLIC KEY:")
+        pub_hex = "04" + key.get_verifying_key().to_string().hex()
+        chunks, chunk_size = len(pub_hex), int(len(pub_hex)/2)
+        split_pub = [pub_hex[i:i+2] for i in range(0, chunks, 2)]
+        print('\\x' + '\\x'.join(split_pub))
         return
 
     if not args.path:
