@@ -1,5 +1,15 @@
 Version 2.x.x [not yet released]
+
+Version 2.3.0 [Apr 2020]
+* Passphrase redesign
+* Cache up to 10 sessions (passphrases)
 * SD card protection
+* Properly limit passphrase to 50 bytes and not 50 characters
+* Monero: add confirmation dialog for unlock_time
+* Show xpubs with multisig get_address
+* Upgrade MicroPython to 1.12
+* Introduce FatFS (version 0.14)
+* Support Ed25519 in FIDO2
 
 Version 2.2.0 [Jan 2020]
 * Remove unused ButtonRequest.data field

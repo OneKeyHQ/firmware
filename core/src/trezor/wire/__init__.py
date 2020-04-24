@@ -281,12 +281,16 @@ async def handle_session(iface: WireInterface, session_id: int) -> None:
                 await req_reader.aopen()
 
                 if __debug__:
+                    try:
+                        msg_type = messages.get_type(req_reader.type).__name__
+                    except KeyError:
+                        msg_type = "%d - unknown message type" % req_reader.type
                     log.debug(
                         __name__,
-                        "%s:%x receive: %s",
+                        "%s:%x receive: <%s>",
                         iface.iface_num(),
                         session_id,
-                        messages.get_type(req_reader.type),
+                        msg_type,
                     )
             else:
                 # We have a reader left over from earlier.  We should process
@@ -405,7 +409,7 @@ async def handle_session(iface: WireInterface, session_id: int) -> None:
             # Unload modules imported by the workflow.  Should not raise.
             utils.unimport_end(modules)
 
-        except BaseException as exc:
+        except Exception as exc:
             # The session handling should never exit, just log and continue.
             if __debug__:
                 log.exception(__name__, exc)

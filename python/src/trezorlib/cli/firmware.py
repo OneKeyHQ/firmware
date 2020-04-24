@@ -20,6 +20,7 @@ import click
 import requests
 
 from .. import exceptions, firmware
+from . import with_client
 
 ALLOWED_FIRMWARE_FORMATS = {
     1: (firmware.FirmwareFormat.TREZOR_ONE, firmware.FirmwareFormat.TREZOR_ONE_V2),
@@ -36,18 +37,18 @@ def validate_firmware(version, fw, expected_fingerprint=None):
     if version == firmware.FirmwareFormat.TREZOR_ONE:
         if fw.embedded_onev2:
             click.echo("Trezor One firmware with embedded v2 image (1.8.0 or later)")
-            _print_version(fw.embedded_onev2.firmware_header.version)
+            _print_version(fw.embedded_onev2.header.version)
         else:
             click.echo("Trezor One firmware image.")
     elif version == firmware.FirmwareFormat.TREZOR_ONE_V2:
         click.echo("Trezor One v2 firmware (1.8.0 or later)")
-        _print_version(fw.firmware_header.version)
+        _print_version(fw.header.version)
     elif version == firmware.FirmwareFormat.TREZOR_T:
         click.echo("Trezor T firmware image.")
-        vendor = fw.vendor_header.vendor_string
+        vendor = fw.vendor_header.text
         vendor_version = "{major}.{minor}".format(**fw.vendor_header.version)
         click.echo("Vendor header from {}, version {}".format(vendor, vendor_version))
-        _print_version(fw.firmware_header.version)
+        _print_version(fw.image.header.version)
 
     try:
         firmware.validate(version, fw, allow_unsigned=False)
@@ -94,9 +95,10 @@ def find_best_firmware_version(
         return ".".join(map(str, version))
 
     want_version = requested_version
+    highest_version = releases[0]["version"]
 
     if want_version is None:
-        want_version = releases[0]["version"]
+        want_version = highest_version
         click.echo("Best available version: {}".format(version_str(want_version)))
 
     confirm_different_version = False
@@ -105,7 +107,20 @@ def find_best_firmware_version(
         try:
             release = next(r for r in releases if r["version"] == want_version)
         except StopIteration:
-            click.echo("Version {} not found.".format(want_version_str))
+            click.echo("Version {} not found for your device.".format(want_version_str))
+
+            # look for versions starting with the lowest
+            for release in reversed(releases):
+                closest_version = release["version"]
+                if closest_version > want_version:
+                    # stop at first that is higher than the requested
+                    break
+            # if there was no break, the newest is used
+            click.echo(
+                "Closest available version: {}".format(version_str(closest_version))
+            )
+            if not beta and want_version > highest_version:
+                click.echo("Hint: specify --beta to look for a beta release.")
             sys.exit(1)
 
         if (
@@ -159,9 +174,9 @@ def find_best_firmware_version(
 @click.option("--fingerprint", help="Expected firmware fingerprint in hex")
 @click.option("--skip-vendor-header", help="Skip vendor header validation on Trezor T")
 # fmt: on
-@click.pass_obj
+@with_client
 def firmware_update(
-    connect,
+    client,
     filename,
     url,
     version,
@@ -193,22 +208,32 @@ def firmware_update(
         click.echo("You can use only one of: filename, url, version.")
         sys.exit(1)
 
-    client = connect()
     if not dry_run and not client.features.bootloader_mode:
         click.echo("Please switch your device to bootloader mode.")
         sys.exit(1)
 
+    # bootloader for T1 does not export 'model', so we rely on major_version
     f = client.features
-    bootloader_onev2 = f.major_version == 1 and f.minor_version >= 8
+    bootloader_version = (f.major_version, f.minor_version, f.patch_version)
+    bootloader_onev2 = f.major_version == 1 and bootloader_version >= (1, 8, 0)
+    model = client.features.model or "1"
 
     if filename:
         data = open(filename, "rb").read()
     else:
         if not url:
-            bootloader_version = [f.major_version, f.minor_version, f.patch_version]
-            version_list = [int(x) for x in version.split(".")] if version else None
+            if version:
+                version_list = [int(x) for x in version.split(".")]
+                if version_list[0] != bootloader_version[0]:
+                    click.echo(
+                        "Warning: Trezor {} firmware version should be {}.X.Y (requested: {})".format(
+                            model, bootloader_version[0], version
+                        )
+                    )
+            else:
+                version_list = None
             url, fp = find_best_firmware_version(
-                bootloader_version, version_list, beta, bitcoin_only
+                list(bootloader_version), version_list, beta, bitcoin_only
             )
             if not fingerprint:
                 fingerprint = fp

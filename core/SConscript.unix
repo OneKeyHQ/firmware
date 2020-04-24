@@ -63,6 +63,7 @@ SOURCE_MOD += [
     'vendor/trezor-crypto/chacha20poly1305/chacha_merged.c',
     'vendor/trezor-crypto/chacha20poly1305/poly1305-donna.c',
     'vendor/trezor-crypto/chacha20poly1305/rfc7539.c',
+    'vendor/trezor-crypto/chacha_drbg.c',
     'vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.c',
     'vendor/trezor-crypto/ed25519-donna/curve25519-donna-helpers.c',
     'vendor/trezor-crypto/ed25519-donna/curve25519-donna-scalarmult-base.c',
@@ -131,6 +132,9 @@ SOURCE_MOD += [
 ]
 
 # modtrezorui
+CPPPATH_MOD += [
+        'vendor/micropython/extmod/uzlib',
+]
 CPPDEFINES_MOD += [
     'TREZOR_FONT_BOLD_ENABLE',
     'TREZOR_FONT_NORMAL_ENABLE',
@@ -144,9 +148,11 @@ SOURCE_MOD += [
     'embed/extmod/modtrezorui/font_roboto_regular_20.c',
     'embed/extmod/modtrezorui/font_robotomono_bold_20.c',
     'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
-    'embed/extmod/modtrezorui/inflate.c',
     'embed/extmod/modtrezorui/modtrezorui.c',
     'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+    'vendor/micropython/extmod/uzlib/adler32.c',
+    'vendor/micropython/extmod/uzlib/crc32.c',
+    'vendor/micropython/extmod/uzlib/tinflate.c',
 ]
 if FROZEN:
     CPPDEFINES_MOD += ['TREZOR_EMULATOR_FROZEN']
@@ -265,6 +271,7 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/py/parsenum.c',
     'vendor/micropython/py/parsenumbase.c',
     'vendor/micropython/py/persistentcode.c',
+    'vendor/micropython/py/profile.c',
     'vendor/micropython/py/pystack.c',
     'vendor/micropython/py/qstr.c',
     'vendor/micropython/py/reader.c',
@@ -295,6 +302,7 @@ SOURCE_UNIX = [
     'embed/unix/touch.c',
     'embed/unix/usb.c',
     'vendor/micropython/ports/unix/alloc.c',
+    'vendor/micropython/ports/unix/file.c',
     'vendor/micropython/ports/unix/gccollect.c',
     'vendor/micropython/ports/unix/input.c',
     'vendor/micropython/ports/unix/unix_mphal.c',
@@ -314,21 +322,31 @@ env.Replace(
     LINK='ld',
     SIZE='size',
     STRIP='strip',
-    OBJCOPY='objcopy', )
+    OBJCOPY='objcopy',
+    COPT=os.getenv('OPTIMIZE', '-Os'), )
 
-if env.get('ENV').get('DEBUG_BUILD', 0):
-    import platform
-    platsys = platform.system()
-    env.Replace(
-        OPTIMIZE='-O0',
-        LINKFLAGS='-Wl,-no_pie' if platsys == "Darwin" else '-Wl,-no-pie'
+if ARGUMENTS.get('TREZOR_EMULATOR_ASAN', 0):
+    asan_flags=(
+            ' -fsanitize=address'+
+            ' -fsanitize-blacklist=asan_blacklist.txt'+
+            ' -fno-omit-frame-pointer'+
+            ' -fno-optimize-sibling-calls'
     )
+    env.Replace(
+        CC=os.getenv('CC') or 'clang',
+        LINK=os.getenv('LINK') or 'clang',
+        CFLAGS=asan_flags,
+        LINKFLAGS=' -Wl,-no_pie' + asan_flags, )
+
+if ARGUMENTS.get('TREZOR_EMULATOR_DEBUGGABLE', 0):
+    env.Replace(
+        COPT=' -O0 -ggdb',
+        STRIP='true', )
 
 env.Replace(
     TREZOR_MODEL=env.get('ENV').get('TREZOR_MODEL', 'T'), )
 
 env.Replace(
-    COPT=env.get('OPTIMIZE', env.get('ENV').get('OPTIMIZE', '-Os')),
     CCFLAGS='$COPT '
     '-g3 '
     '-std=gnu99 -Wall -Werror -Wuninitialized -Wno-missing-braces '
@@ -346,7 +364,6 @@ env.Replace(
     CPPDEFINES=[
         'TREZOR_EMULATOR',
         ('TREZOR_MODEL', '$TREZOR_MODEL'),
-        'MICROPY_USE_READLINE',
         ('MP_CONFIGFILE', '\\"embed/unix/mpconfigport.h\\"'),
     ] + CPPDEFINES_MOD,
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
@@ -360,18 +377,10 @@ env.Replace(
     PYTHON='python',
     MAKEQSTRDATA='$PYTHON vendor/micropython/py/makeqstrdata.py',
     MAKEVERSIONHDR='$PYTHON vendor/micropython/py/makeversionhdr.py',
+    MAKEMODULEDEFS='$PYTHON vendor/micropython/py/makemoduledefs.py',
     MPY_TOOL='$PYTHON vendor/micropython/tools/mpy-tool.py',
     MPY_CROSS='vendor/micropython/mpy-cross/mpy-cross -O' + PYOPT
 )
-
-#
-# Micropython version
-#
-
-hdr_version = env.Command(
-    target='genhdr/mpversion.h',
-    source='',
-    action='$MAKEVERSIONHDR $TARGET', )
 
 #
 # Qstrings
@@ -390,6 +399,25 @@ qstr_generated = env.GenerateQstrDefs(
     target='genhdr/qstrdefs.generated.h', source=qstr_preprocessed)
 
 env.Ignore(qstr_collected, qstr_generated)
+
+#
+# Micropython version and modules
+#
+
+hdr_version = env.Command(
+    target='genhdr/mpversion.h',
+    source='',
+    action='$MAKEVERSIONHDR $TARGET', )
+
+hdr_moduledefs = env.Command(
+    target='genhdr/moduledefs.h',
+    source=SOURCE_QSTR,
+    action='$MAKEMODULEDEFS --vpath="." $SOURCES > $TARGET', )
+
+env.Ignore(hdr_moduledefs, hdr_moduledefs)
+env.Ignore(hdr_moduledefs, qstr_collected)
+env.Ignore(hdr_moduledefs, qstr_preprocessed)
+env.Ignore(hdr_moduledefs, qstr_generated)
 
 #
 # Frozen modules

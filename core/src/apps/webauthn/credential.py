@@ -4,27 +4,49 @@ from ubinascii import hexlify
 
 import storage.device
 from trezor import log, utils
-from trezor.crypto import bip32, chacha20poly1305, hashlib, hmac, random
+from trezor.crypto import bip32, chacha20poly1305, der, hashlib, hmac, random
+from trezor.crypto.curve import ed25519, nist256p1
 
 from apps.common import HARDENED, cbor, seed
+from apps.webauthn import common
 
 if False:
-    from typing import Optional
+    from typing import Iterable, Optional
 
 # Credential ID values
 _CRED_ID_VERSION = b"\xf1\xd0\x02\x00"
-_CRED_ID_MIN_LENGTH = const(33)
+CRED_ID_MIN_LENGTH = const(33)
+CRED_ID_MAX_LENGTH = const(1024)
 _KEY_HANDLE_LENGTH = const(64)
 
+# Maximum user handle length in bytes.
+_USER_ID_MAX_LENGTH = const(64)
+
+# Maximum supported length of the RP name, user name or user displayName in bytes.
+# Note: The WebAuthn spec allows authenticators to truncate to 64 bytes or more.
+NAME_MAX_LENGTH = const(100)
+
 # Credential ID keys
-_CRED_ID_RP_ID = const(0x01)
-_CRED_ID_RP_NAME = const(0x02)
-_CRED_ID_USER_ID = const(0x03)
-_CRED_ID_USER_NAME = const(0x04)
-_CRED_ID_USER_DISPLAY_NAME = const(0x05)
-_CRED_ID_CREATION_TIME = const(0x06)
-_CRED_ID_HMAC_SECRET = const(0x07)
-_CRED_ID_USE_SIGN_COUNT = const(0x08)
+_CRED_ID_RP_ID = const(1)
+_CRED_ID_RP_NAME = const(2)
+_CRED_ID_USER_ID = const(3)
+_CRED_ID_USER_NAME = const(4)
+_CRED_ID_USER_DISPLAY_NAME = const(5)
+_CRED_ID_CREATION_TIME = const(6)
+_CRED_ID_HMAC_SECRET = const(7)
+_CRED_ID_USE_SIGN_COUNT = const(8)
+_CRED_ID_ALGORITHM = const(9)
+_CRED_ID_CURVE = const(10)
+
+# Defaults
+_DEFAULT_ALGORITHM = common.COSE_ALG_ES256
+_DEFAULT_CURVE = common.COSE_CURVE_P256
+
+# Curves
+_CURVE_NAME = {
+    common.COSE_CURVE_ED25519: "ed25519",
+    common.COSE_CURVE_P256: "nist256p1",
+}
 
 # Key paths
 _U2F_KEY_PATH = const(0x80553246)
@@ -38,14 +60,33 @@ class Credential:
         self.rp_id_hash = b""  # type: bytes
         self.user_id = None  # type: Optional[bytes]
 
+    def __lt__(self, other: "Credential") -> bool:
+        raise NotImplementedError
+
     def app_name(self) -> str:
-        return ""
+        raise NotImplementedError
 
     def account_name(self) -> Optional[str]:
         return None
 
-    def private_key(self) -> bytes:
-        return b""
+    def public_key(self) -> bytes:
+        raise NotImplementedError
+
+    def _private_key(self) -> bytes:
+        raise NotImplementedError
+
+    def sign(self, data: Iterable[bytes]) -> bytes:
+        raise NotImplementedError
+
+    def _u2f_sign(self, data: Iterable[bytes]) -> bytes:
+        dig = hashlib.sha256()
+        for segment in data:
+            dig.update(segment)
+        sig = nist256p1.sign(self._private_key(), dig.digest(), False)
+        return der.encode_seq((sig[1:33], sig[33:]))
+
+    def bogus_signature(self) -> bytes:
+        raise NotImplementedError
 
     def hmac_secret_key(self) -> Optional[bytes]:
         return None
@@ -71,6 +112,8 @@ class Fido2Credential(Credential):
         self.creation_time = 0  # type: int
         self.hmac_secret = False  # type: bool
         self.use_sign_count = False  # type: bool
+        self.algorithm = _DEFAULT_ALGORITHM  # type: int
+        self.curve = _DEFAULT_CURVE  # type: int
 
     def __lt__(self, other: Credential) -> bool:
         # Sort FIDO2 credentials newest first amongst each other.
@@ -83,37 +126,46 @@ class Fido2Credential(Credential):
     def generate_id(self) -> None:
         self.creation_time = storage.device.next_u2f_counter() or 0
 
-        data = cbor.encode(
-            {
-                key: value
-                for key, value in (
-                    (_CRED_ID_RP_ID, self.rp_id),
-                    (_CRED_ID_RP_NAME, self.rp_name),
-                    (_CRED_ID_USER_ID, self.user_id),
-                    (_CRED_ID_USER_NAME, self.user_name),
-                    (_CRED_ID_USER_DISPLAY_NAME, self.user_display_name),
-                    (_CRED_ID_CREATION_TIME, self.creation_time),
-                    (_CRED_ID_HMAC_SECRET, self.hmac_secret),
-                    (_CRED_ID_USE_SIGN_COUNT, self.use_sign_count),
-                )
-                if value
-            }
-        )
+        if not self.check_required_fields():
+            raise AssertionError
+
+        data = {
+            key: value
+            for key, value in (
+                (_CRED_ID_RP_ID, self.rp_id),
+                (_CRED_ID_RP_NAME, self.rp_name),
+                (_CRED_ID_USER_ID, self.user_id),
+                (_CRED_ID_USER_NAME, self.user_name),
+                (_CRED_ID_USER_DISPLAY_NAME, self.user_display_name),
+                (_CRED_ID_CREATION_TIME, self.creation_time),
+                (_CRED_ID_HMAC_SECRET, self.hmac_secret),
+                (_CRED_ID_USE_SIGN_COUNT, self.use_sign_count),
+            )
+            if value
+        }
+
+        if self.algorithm != _DEFAULT_ALGORITHM or self.curve != _DEFAULT_CURVE:
+            data[_CRED_ID_ALGORITHM] = self.algorithm
+            data[_CRED_ID_CURVE] = self.curve
+
         key = seed.derive_slip21_node_without_passphrase(
             [b"SLIP-0022", _CRED_ID_VERSION, b"Encryption key"]
         ).key()
         iv = random.bytes(12)
         ctx = chacha20poly1305(key, iv)
         ctx.auth(self.rp_id_hash)
-        ciphertext = ctx.encrypt(data)
+        ciphertext = ctx.encrypt(cbor.encode(data))
         tag = ctx.finish()
         self.id = _CRED_ID_VERSION + iv + ciphertext + tag
+
+        if len(self.id) > CRED_ID_MAX_LENGTH:
+            raise AssertionError
 
     @classmethod
     def from_cred_id(
         cls, cred_id: bytes, rp_id_hash: Optional[bytes]
     ) -> "Fido2Credential":
-        if len(cred_id) < _CRED_ID_MIN_LENGTH or cred_id[0:4] != _CRED_ID_VERSION:
+        if len(cred_id) < CRED_ID_MIN_LENGTH or cred_id[0:4] != _CRED_ID_VERSION:
             raise ValueError  # invalid length or version
 
         key = seed.derive_slip21_node_without_passphrase(
@@ -156,10 +208,13 @@ class Fido2Credential(Credential):
         cred.creation_time = data.get(_CRED_ID_CREATION_TIME, 0)
         cred.hmac_secret = data.get(_CRED_ID_HMAC_SECRET, False)
         cred.use_sign_count = data.get(_CRED_ID_USE_SIGN_COUNT, False)
+        cred.algorithm = data.get(_CRED_ID_ALGORITHM, _DEFAULT_ALGORITHM)
+        cred.curve = data.get(_CRED_ID_CURVE, _DEFAULT_CURVE)
         cred.id = cred_id
 
         if (
-            not cred.check_required_fields()
+            (_CRED_ID_ALGORITHM in data) != (_CRED_ID_CURVE in data)
+            or not cred.check_required_fields()
             or not cred.check_data_types()
             or hashlib.sha256(cred.rp_id).digest() != rp_id_hash
         ):
@@ -167,10 +222,23 @@ class Fido2Credential(Credential):
 
         return cred
 
+    def truncate_names(self) -> None:
+        if self.rp_name:
+            self.rp_name = utils.truncate_utf8(self.rp_name, NAME_MAX_LENGTH)
+
+        if self.user_name:
+            self.user_name = utils.truncate_utf8(self.user_name, NAME_MAX_LENGTH)
+
+        if self.user_display_name:
+            self.user_display_name = utils.truncate_utf8(
+                self.user_display_name, NAME_MAX_LENGTH
+            )
+
     def check_required_fields(self) -> bool:
         return (
             self.rp_id is not None
             and self.user_id is not None
+            and len(self.user_id) <= _USER_ID_MAX_LENGTH
             and self.creation_time is not None
         )
 
@@ -178,13 +246,15 @@ class Fido2Credential(Credential):
         return (
             isinstance(self.rp_id, str)
             and isinstance(self.rp_name, (str, type(None)))
-            and isinstance(self.user_id, (bytes, bytearray))
+            and isinstance(self.user_id, bytes)
             and isinstance(self.user_name, (str, type(None)))
             and isinstance(self.user_display_name, (str, type(None)))
             and isinstance(self.hmac_secret, bool)
             and isinstance(self.use_sign_count, bool)
             and isinstance(self.creation_time, (int, type(None)))
-            and isinstance(self.id, (bytes, bytearray))
+            and isinstance(self.algorithm, (int, type(None)))
+            and isinstance(self.curve, (int, type(None)))
+            and isinstance(self.id, bytes)
         )
 
     def app_name(self) -> str:
@@ -200,12 +270,66 @@ class Fido2Credential(Credential):
         else:
             return None
 
-    def private_key(self) -> bytes:
+    def _private_key(self) -> bytes:
         path = [HARDENED | 10022, HARDENED | int.from_bytes(self.id[:4], "big")] + [
             HARDENED | i for i in ustruct.unpack(">4L", self.id[-16:])
         ]
-        node = seed.derive_node_without_passphrase(path, "nist256p1")
+        node = seed.derive_node_without_passphrase(path, _CURVE_NAME[self.curve])
         return node.private_key()
+
+    def public_key(self) -> bytes:
+        if self.curve == common.COSE_CURVE_P256:
+            pubkey = nist256p1.publickey(self._private_key(), False)
+            return cbor.encode(
+                {
+                    common.COSE_KEY_ALG: self.algorithm,
+                    common.COSE_KEY_KTY: common.COSE_KEYTYPE_EC2,
+                    common.COSE_KEY_CRV: self.curve,
+                    common.COSE_KEY_X: pubkey[1:33],
+                    common.COSE_KEY_Y: pubkey[33:],
+                }
+            )
+        elif self.curve == common.COSE_CURVE_ED25519:
+            pubkey = ed25519.publickey(self._private_key())
+            return cbor.encode(
+                {
+                    common.COSE_KEY_ALG: self.algorithm,
+                    common.COSE_KEY_KTY: common.COSE_KEYTYPE_OKP,
+                    common.COSE_KEY_CRV: self.curve,
+                    common.COSE_KEY_X: pubkey,
+                }
+            )
+        raise TypeError
+
+    def sign(self, data: Iterable[bytes]) -> bytes:
+        if (self.algorithm, self.curve) == (
+            common.COSE_ALG_ES256,
+            common.COSE_CURVE_P256,
+        ):
+            return self._u2f_sign(data)
+        elif (self.algorithm, self.curve) == (
+            common.COSE_ALG_EDDSA,
+            common.COSE_CURVE_ED25519,
+        ):
+            return ed25519.sign(
+                self._private_key(), b"".join(segment for segment in data)
+            )
+
+        raise TypeError
+
+    def bogus_signature(self) -> bytes:
+        if (self.algorithm, self.curve) == (
+            common.COSE_ALG_ES256,
+            common.COSE_CURVE_P256,
+        ):
+            return der.encode_seq((b"\x0a" * 32, b"\x0a" * 32))
+        elif (self.algorithm, self.curve) == (
+            common.COSE_ALG_EDDSA,
+            common.COSE_CURVE_ED25519,
+        ):
+            return b"\x0a" * 64
+
+        raise TypeError
 
     def hmac_secret_key(self) -> Optional[bytes]:
         # Returns the symmetric key for the hmac-secret extension also known as CredRandom.
@@ -238,10 +362,19 @@ class U2fCredential(Credential):
         # Sort U2F credentials lexicographically amongst each other.
         return self.id < other.id
 
-    def private_key(self) -> bytes:
+    def _private_key(self) -> bytes:
         if self.node is None:
             return b""
         return self.node.private_key()
+
+    def public_key(self) -> bytes:
+        return nist256p1.publickey(self._private_key(), False)
+
+    def sign(self, data: Iterable[bytes]) -> bytes:
+        return self._u2f_sign(data)
+
+    def bogus_signature(self) -> bytes:
+        return der.encode_seq((b"\x0a" * 32, b"\x0a" * 32))
 
     def generate_key_handle(self) -> None:
         # derivation path is m/U2F'/r'/r'/r'/r'/r'/r'/r'/r'

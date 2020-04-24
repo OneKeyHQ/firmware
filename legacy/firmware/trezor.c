@@ -40,6 +40,58 @@
 #endif
 
 #define autoPowerOffDelayMsDefault (5 * 60 * 1000U)  // 5 minutes
+/* Screen timeout */
+uint32_t system_millis_lock_start = 0;
+
+void check_lock_screen(void) {
+  buttonUpdate();
+
+  // wake from screensaver on any button
+  if (layoutLast == layoutScreensaver && (button.NoUp || button.YesUp)) {
+    layoutHome();
+    return;
+  }
+
+  // button held for long enough (2 seconds)
+  if (layoutLast == layoutHome && button.NoDown >= 285000 * 2) {
+    layoutDialog(&bmp_icon_question, _("Cancel"), _("Lock Device"), NULL,
+                 _("Do you really want to"), _("lock your Trezor?"), NULL, NULL,
+                 NULL, NULL);
+
+    // wait until NoButton is released
+    usbTiny(1);
+    do {
+      usbSleep(5);
+      buttonUpdate();
+    } while (!button.NoUp);
+
+    // wait for confirmation/cancellation of the dialog
+    do {
+      usbSleep(5);
+      buttonUpdate();
+    } while (!button.YesUp && !button.NoUp);
+    usbTiny(0);
+
+    if (button.YesUp) {
+      // lock the screen
+      config_lockDevice();
+      layoutScreensaver();
+    } else {
+      // resume homescreen
+      layoutHome();
+    }
+  }
+
+  // if homescreen is shown for too long
+  if (layoutLast == layoutHome) {
+    if ((timer_ms() - system_millis_lock_start) >=
+        config_getAutoLockDelayMs()) {
+      // lock the screen
+      config_lockDevice();
+      layoutScreensaver();
+    }
+  }
+}
 
 static void collect_hw_entropy(bool privileged) {
 #if EMULATOR

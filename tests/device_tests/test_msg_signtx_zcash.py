@@ -19,9 +19,9 @@ import pytest
 from trezorlib import btc, messages as proto
 from trezorlib.tools import parse_path
 
-from ..tx_cache import tx_cache
+from ..tx_cache import TxCache
 
-TX_API = tx_cache("Zcash Testnet")
+TX_API = TxCache("Zcash Testnet")
 
 TXHASH_aaf51e = bytes.fromhex(
     "aaf51e4606c264e47e5c42c958fe4cf1539c5172684721e38e69f4ef634d75dc"
@@ -39,9 +39,8 @@ class TestMsgSigntxZcash:
         # input 1: 3.0 TAZ
 
         inp1 = proto.TxInputType(
-            address_n=parse_path(
-                "m/Zcash Testnet/0h/0/0"
-            ),  # tmQoJ3PTXgQLaRRZZYT6xk8XtjRbr2kCqwu
+            # tmQoJ3PTXgQLaRRZZYT6xk8XtjRbr2kCqwu
+            address_n=parse_path("m/44h/1h/0h/0/0"),
             amount=300000000,
             prev_hash=TXHASH_aaf51e,
             prev_index=1,
@@ -79,10 +78,7 @@ class TestMsgSigntxZcash:
             )
 
             details = proto.SignTx(
-                version=3,
-                overwintered=True,
-                version_group_id=0x03C48270,
-                branch_id=0x5BA81B19,
+                version=3, version_group_id=0x03C48270, branch_id=0x5BA81B19,
             )
             _, serialized_tx = btc.sign_tx(
                 client,
@@ -104,9 +100,8 @@ class TestMsgSigntxZcash:
         # input 1: 3.0 TAZ
 
         inp1 = proto.TxInputType(
-            address_n=parse_path(
-                "m/Zcash Testnet/0h/0/0"
-            ),  # tmQoJ3PTXgQLaRRZZYT6xk8XtjRbr2kCqwu
+            # tmQoJ3PTXgQLaRRZZYT6xk8XtjRbr2kCqwu
+            address_n=parse_path("m/44h/1h/0h/0/0"),
             amount=300000000,
             prev_hash=TXHASH_e38206,
             prev_index=0,
@@ -144,10 +139,7 @@ class TestMsgSigntxZcash:
             )
 
             details = proto.SignTx(
-                version=4,
-                overwintered=True,
-                version_group_id=0x892F2085,
-                branch_id=0x76B809BB,
+                version=4, version_group_id=0x892F2085, branch_id=0x76B809BB,
             )
             _, serialized_tx = btc.sign_tx(
                 client,

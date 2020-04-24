@@ -21,6 +21,7 @@
 
 #include "usb.h"
 #include "common.h"
+#include "rdi.h"
 #include "usbd_core.h"
 
 #define USB_MAX_CONFIG_DESC_SIZE 256
@@ -177,20 +178,6 @@ static void usb_desc_add_iface(size_t desc_len) {
   usb_next_iface_desc =
       (usb_interface_descriptor_t *)(usb_config_buf +
                                      usb_config_desc->wTotalLength);
-}
-
-static uint8_t usb_ep_set_nak(USBD_HandleTypeDef *dev, uint8_t ep_num) {
-  PCD_HandleTypeDef *hpcd = dev->pData;
-  USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
-  USBx_OUTEP(ep_num)->DOEPCTL |= USB_OTG_DOEPCTL_SNAK;
-  return USBD_OK;
-}
-
-static uint8_t usb_ep_clear_nak(USBD_HandleTypeDef *dev, uint8_t ep_num) {
-  PCD_HandleTypeDef *hpcd = dev->pData;
-  USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
-  USBx_OUTEP(ep_num)->DOEPCTL |= USB_OTG_DOEPCTL_CNAK;
-  return USBD_OK;
 }
 
 /*
@@ -482,6 +469,9 @@ static uint8_t usb_class_setup(USBD_HandleTypeDef *dev,
 }
 
 static uint8_t usb_class_data_in(USBD_HandleTypeDef *dev, uint8_t ep_num) {
+#ifdef RDI
+  rdi_refresh_session_delay();
+#endif
   for (int i = 0; i < USBD_MAX_NUM_INTERFACES; i++) {
     switch (usb_ifaces[i].type) {
       case USB_IFACE_TYPE_HID:
@@ -504,6 +494,9 @@ static uint8_t usb_class_data_in(USBD_HandleTypeDef *dev, uint8_t ep_num) {
 }
 
 static uint8_t usb_class_data_out(USBD_HandleTypeDef *dev, uint8_t ep_num) {
+#ifdef RDI
+  rdi_refresh_session_delay();
+#endif
   for (int i = 0; i < USBD_MAX_NUM_INTERFACES; i++) {
     switch (usb_ifaces[i].type) {
       case USB_IFACE_TYPE_HID:

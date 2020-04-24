@@ -41,6 +41,7 @@ from .CosiCommitment import CosiCommitment
 from .CosiSign import CosiSign
 from .CosiSignature import CosiSignature
 from .DebugLinkDecision import DebugLinkDecision
+from .DebugLinkEraseSdCard import DebugLinkEraseSdCard
 from .DebugLinkFlashErase import DebugLinkFlashErase
 from .DebugLinkGetState import DebugLinkGetState
 from .DebugLinkLayout import DebugLinkLayout
@@ -48,10 +49,16 @@ from .DebugLinkLog import DebugLinkLog
 from .DebugLinkMemory import DebugLinkMemory
 from .DebugLinkMemoryRead import DebugLinkMemoryRead
 from .DebugLinkMemoryWrite import DebugLinkMemoryWrite
+from .DebugLinkRecordScreen import DebugLinkRecordScreen
+from .DebugLinkReseedRandom import DebugLinkReseedRandom
+from .DebugLinkShowText import DebugLinkShowText
+from .DebugLinkShowTextItem import DebugLinkShowTextItem
 from .DebugLinkState import DebugLinkState
 from .DebugLinkStop import DebugLinkStop
 from .DebugMoneroDiagAck import DebugMoneroDiagAck
 from .DebugMoneroDiagRequest import DebugMoneroDiagRequest
+from .Deprecated_PassphraseStateAck import Deprecated_PassphraseStateAck
+from .Deprecated_PassphraseStateRequest import Deprecated_PassphraseStateRequest
 from .ECDHSessionKey import ECDHSessionKey
 from .Entropy import Entropy
 from .EntropyAck import EntropyAck
@@ -193,8 +200,6 @@ from .NEMTransfer import NEMTransfer
 from .NextU2FCounter import NextU2FCounter
 from .PassphraseAck import PassphraseAck
 from .PassphraseRequest import PassphraseRequest
-from .PassphraseStateAck import PassphraseStateAck
-from .PassphraseStateRequest import PassphraseStateRequest
 from .PinMatrixAck import PinMatrixAck
 from .PinMatrixRequest import PinMatrixRequest
 from .Ping import Ping
@@ -269,6 +274,7 @@ from . import BinanceOrderType
 from . import BinanceTimeInForce
 from . import ButtonRequestType
 from . import Capability
+from . import DebugLinkShowTextStyle
 from . import DebugSwipeDirection
 from . import FailureType
 from . import InputScriptType
@@ -279,7 +285,6 @@ from . import NEMModificationType
 from . import NEMMosaicLevy
 from . import NEMSupplyChangeType
 from . import OutputScriptType
-from . import PassphraseSourceType
 from . import PinMatrixRequestType
 from . import RecoveryDeviceType
 from . import RequestType

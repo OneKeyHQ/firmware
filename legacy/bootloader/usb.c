@@ -19,6 +19,7 @@
 
 #include <libopencm3/stm32/flash.h>
 #include <libopencm3/usb/usbd.h>
+#include <vendor/libopencm3/include/libopencmsis/core_cm3.h>
 
 #include <string.h>
 
@@ -554,15 +555,23 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       flash_state = STATE_END;
       if (hash_check_ok) {
         send_msg_success(dev);
-        show_unplug("New firmware", "successfully installed.");
-        shutdown();
+       __disable_irq();
+      // wait 3 seconds
+      char line[] = "will be restarted in _ s.";
+      for (int i = 3; i > 0; i--) {
+        line[21] = '0' + i;
+        layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, "New firmware",
+                     "successfully installed.", NULL, "Your Trezor", line,
+                     NULL);
+        delay(30000 * 1000);
+      }
+      scb_reset_system();
       } else {
-        layoutDialog(&bmp_icon_warning, NULL, NULL, NULL,
-                     "Firmware installation", "aborted.", NULL,
-                     "You need to repeat", "the procedure with",
-                     "the correct firmware.");
-        send_msg_failure(dev);
-        shutdown();
+      layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "Firmware installation",
+                   "aborted.", NULL, "You need to repeat", "the procedure with",
+                   "the correct firmware.");
+      send_msg_failure(dev);
+      shutdown();
       }
       return;
     } else {
@@ -611,23 +620,38 @@ static void set_config(usbd_device *dev, uint16_t wValue) {
 static usbd_device *usbd_dev;
 static uint8_t usbd_control_buffer[256] __attribute__((aligned(2)));
 
-static const struct usb_device_capability_descriptor *capabilities[] = {
+static const struct usb_device_capability_descriptor *capabilities_landing[] = {
     (const struct usb_device_capability_descriptor
-         *)&webusb_platform_capability_descriptor,
+         *)&webusb_platform_capability_descriptor_landing,
 };
 
-static const struct usb_bos_descriptor bos_descriptor = {
+static const struct usb_device_capability_descriptor
+    *capabilities_no_landing[] = {
+        (const struct usb_device_capability_descriptor
+             *)&webusb_platform_capability_descriptor_no_landing,
+};
+
+static const struct usb_bos_descriptor bos_descriptor_landing = {
     .bLength = USB_DT_BOS_SIZE,
     .bDescriptorType = USB_DT_BOS,
-    .bNumDeviceCaps = sizeof(capabilities) / sizeof(capabilities[0]),
-    .capabilities = capabilities};
+    .bNumDeviceCaps =
+        sizeof(capabilities_landing) / sizeof(capabilities_landing[0]),
+    .capabilities = capabilities_landing};
 
-static void usbInit(void) {
+static const struct usb_bos_descriptor bos_descriptor_no_landing = {
+    .bLength = USB_DT_BOS_SIZE,
+    .bDescriptorType = USB_DT_BOS,
+    .bNumDeviceCaps =
+        sizeof(capabilities_no_landing) / sizeof(capabilities_no_landing[0]),
+    .capabilities = capabilities_no_landing};
+
+static void usbInit(bool firmware_present) {
   usbd_dev = usbd_init(&otgfs_usb_driver, &dev_descr, &config, usb_strings,
                        sizeof(usb_strings) / sizeof(const char *),
                        usbd_control_buffer, sizeof(usbd_control_buffer));
   usbd_register_set_config_callback(usbd_dev, set_config);
-  usb21_setup(usbd_dev, &bos_descriptor);
+  usb21_setup(usbd_dev, firmware_present ? &bos_descriptor_no_landing
+                                         : &bos_descriptor_landing);
   webusb_setup(usbd_dev, "trezor.io/start");
   winusb_setup(usbd_dev, USB_INTERFACE_INDEX_MAIN);
 }
@@ -669,7 +693,7 @@ static void i2cSlavePoll(void) {
 
 void usbLoop(void) {
   bool firmware_present = firmware_present_new();
-  usbInit();
+  usbInit(firmware_present);
   for (;;) {
     layoutBootHome();
     usbd_poll(usbd_dev);

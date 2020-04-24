@@ -1,166 +1,187 @@
 image: registry.gitlab.com/satoshilabs/trezor/trezor-firmware/environment
 
-.only_changes_core: &only_changes_core
-  only:
-    changes:
-      - ci/**/*
-      - common/**/*
-      - core/**/*
-      - crypto/**/*
-      - python/**/*
-      - storage/**/*
-      - tests/**/*
-      - tools/**/*
-      - vendor/**/*
-
-.only_changes_legacy: &only_changes_legacy
-  only:
-    changes:
-      - ci/**/*
-      - common/**/*
-      - crypto/**/*
-      - legacy/**/*
-      - python/**/*
-      - storage/**/*
-      - tests/**/*
-      - tools/**/*
-      - vendor/**/*
-
-
 # Core
 
-core unix unit test:
+core unit test:
   stage: test
-  <<: *only_changes_core
   dependencies:
-    - core unix frozen regular build
+    - core unix regular build
   script:
     - cd core
     - pipenv run make test
 
-core unix device test:
+core device ui test:
   stage: test
-  <<: *only_changes_core
   dependencies:
-    - core unix frozen regular build
+    - core unix frozen debug build
+  script:
+    - cd core
+    - pipenv run make test_emu_ui
+    - cd ..
+  after_script:
+    - mv tests/ui_tests/reporting/reports/test/ test_ui_report
+    - pipenv run python ci/prepare_ui_artifacts.py
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ci/ui_test_records/
+      - test_ui_report
+      - tests/ui_tests/screens/
+      - tests/junit.xml
+      - tests/trezor.log
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: tests/junit.xml
+
+core device test:
+  stage: test
+  dependencies:
+    - core unix frozen debug build
+  variables:
+    TREZOR_PROFILING: 1
   script:
     - cd core
     - pipenv run make test_emu
-    - cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
+    - mv ./src/.coverage .coverage.test_emu
   artifacts:
-    name: core-unix-device-test.log
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - trezor.log
+      - tests/trezor.log
+      - tests/junit.xml
+      - core/.coverage.*
     expire_in: 1 week
+    when: always
+    reports:
+      junit: tests/junit.xml
 
-core unix btconly device test:
+core btconly device test:
   stage: test
-  <<: *only_changes_core
   dependencies:
-    - core unix frozen btconly build
+    - core unix frozen btconly debug build
   variables:
-    MICROPYTHON: "../build/unix/micropython-bitcoinonly"
+    MICROPYTHON: "build/unix/micropython-bitcoinonly"
     TREZOR_PYTEST_SKIP_ALTCOINS: 1
   script:
     - cd core
     - pipenv run make test_emu
-    - cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
   artifacts:
-    name: core-unix-btconly-device-test.log
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - trezor.log
+      - tests/trezor.log
+      - tests/junit.xml
     expire_in: 1 week
+    when: always
+    reports:
+      junit: tests/junit.xml
 
-core unix monero test:
+core monero test:
   stage: test
-  <<: *only_changes_core
   dependencies:
-    - core unix frozen regular build
+    - core unix frozen debug build
+  variables:
+    TREZOR_PROFILING: 1
   script:
     - cd core
     - pipenv run make test_emu_monero
-    - cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
+    - mv ./src/.coverage .coverage.test_emu_monero
   artifacts:
-    name: core-unix-monero-test.log
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - trezor.log
+      - tests/trezor.log
+      - core/.coverage.*
     expire_in: 1 week
+    when: always
 
-core unix u2f test:
+core u2f test:
   stage: test
-  <<: *only_changes_core
-  retry: 2  # see https://github.com/trezor/trezor-firmware/issues/596
   dependencies:
-    - core unix frozen regular build
+    - core unix frozen debug build
+  variables:
+    TREZOR_PROFILING: 1
   script:
     - make -C tests/fido_tests/u2f-tests-hid
     - cd core
     - pipenv run make test_emu_u2f
-    - cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
+    - mv ./src/.coverage .coverage.test_emu_u2f
   artifacts:
-    name: core-unix-u2f-test.log
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - trezor.log
+      - tests/trezor.log
+      - core/.coverage.*
     expire_in: 1 week
+    when: always
 
-core unix fido2 test:
+core fido2 test:
   stage: test
-  <<: *only_changes_core
   dependencies:
-    - core unix frozen regular build
+    - core unix frozen debug build
+  variables:
+    TREZOR_PROFILING: 1
   script:
     - cd core
     - pipenv run make test_emu_fido2
-    - cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
+    - mv ./src/.coverage .coverage.test_emu_fido2
   artifacts:
-    name: core-unix-fido2-test.log
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - trezor.log
+      - tests/trezor.log
+      - tests/junit.xml
+      - core/.coverage.*
     expire_in: 1 week
+    reports:
+      junit: tests/junit.xml
+    when: always
 
-core unix click test:
+core click test:
   stage: test
-  <<: *only_changes_core
   dependencies:
     - core unix frozen debug build
   script:
     - cd core
     - pipenv run make test_emu_click
-    - cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
   artifacts:
-    name: core-unix-click-test.log
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - trezor.log
+      - tests/trezor.log
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
     expire_in: 1 week
+    when: always
 
-core unix upgrade test:
+core upgrade test:
   stage: test
-  <<: *only_changes_core
   dependencies:
     - core unix frozen debug build
   variables:
     TREZOR_UPGRADE_TEST: "core"
   script:
     - tests/download_emulators.sh
-    - pipenv run pytest tests/upgrade_tests
+    - pipenv run pytest --junitxml=tests/junit.xml tests/upgrade_tests
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
 
-core unix persistence test:
+core persistence test:
   stage: test
-  <<: *only_changes_core
   dependencies:
     - core unix frozen debug build
   script:
-    - pipenv run pytest tests/persistence_tests
-
-core mypy test:
-  stage: test
-  <<: *only_changes_core
-  dependencies: []  # no artifacts needed
-  script:
-    - cd core
-    - pipenv run mypy --version
-    - pipenv run make res  # needed for clean mypy
-    - pipenv run make mypy
+    - pipenv run pytest --junitxml=tests/junit.xml tests/persistence_tests
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
 
 
 # Crypto
@@ -178,15 +199,22 @@ crypto test:
     - ./tests/aestst
     - ./tests/test_check
     - ./tests/test_openssl 1000
-    - ITERS=10 pipenv run pytest tests
+    - ITERS=10 pipenv run pytest --junitxml=tests/junit.xml tests
     - CK_TIMEOUT_MULTIPLIER=20 valgrind -q --error-exitcode=1 ./tests/test_check
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
 
 
 # Legacy
 
-legacy emu test:
+legacy test:
   stage: test
-  <<: *only_changes_legacy
   dependencies:
     - legacy emu regular build
   variables:
@@ -194,10 +222,17 @@ legacy emu test:
   script:
     - cd legacy
     - pipenv run script/test
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
 
-legacy emu btconly test:
+legacy btconly test:
   stage: test
-  <<: *only_changes_legacy
   dependencies:
     - legacy emu btconly build
   variables:
@@ -207,23 +242,40 @@ legacy emu btconly test:
   script:
     - cd legacy
     - pipenv run script/test
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
 
-legacy emu upgrade test:
+
+legacy upgrade test:
   stage: test
-  <<: *only_changes_legacy
   dependencies:
     - legacy emu regular build
   variables:
     TREZOR_UPGRADE_TEST: "legacy"
   script:
     - tests/download_emulators.sh
-    - pipenv run pytest tests/upgrade_tests
+    - pipenv run pytest --junitxml=tests/junit.xml tests/upgrade_tests
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
 
 
 # Python
 
 python test:
   stage: test
+  dependencies: []
   only:
     changes:
       - ci/**/*
@@ -247,3 +299,36 @@ storage test:
     - cd storage/tests
     - pipenv run make build
     - pipenv run make tests_all
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/junit.xml
+    reports:
+      junit: tests/junit.xml
+    expire_in: 1 week
+    when: always
+
+# Hardware
+hardware legacy device test:
+  stage: test
+  only:
+    - schedules  # nightly build
+    - /^legacy\//
+    - /^release\//
+  tags:
+    - tpmb
+  dependencies:
+    - legacy fw debug build
+  script:
+    - cd ci/hardware_tests
+    - nix-shell --run "./record_video.sh ${CI_COMMIT_SHORT_SHA} start"
+    - nix-shell --run "cd ../.. && pipenv sync"
+    - nix-shell --run "pipenv run python bootstrap.py"
+    - nix-shell --run "pipenv run python bootstrap.py ../../trezor-*.bin"
+    - nix-shell --run "pipenv run pytest ../../tests/device_tests"
+    - nix-shell --run "./record_video.sh ${CI_COMMIT_SHORT_SHA} stop"
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ci/hardware_tests/video*.mp4
+    expire_in: 2 days

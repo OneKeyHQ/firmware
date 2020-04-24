@@ -40,6 +40,9 @@
 #include "display.h"
 #include "flash.h"
 #include "mpu.h"
+#ifdef RDI
+#include "rdi.h"
+#endif
 #include "rng.h"
 #include "sdcard.h"
 #include "supervise.h"
@@ -48,6 +51,9 @@
 int main(void) {
   // initialize pseudo-random number generator
   drbg_init();
+#ifdef RDI
+  rdi_start();
+#endif
 
   // reinitialize HAL for Trezor One
 #if TREZOR_MODEL == 1
@@ -74,6 +80,11 @@ int main(void) {
   sdcard_init();
   touch_init();
   touch_power_on();
+
+  // jump to unprivileged mode
+  // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
+  __asm__ volatile("msr control, %0" ::"r"(0x1));
+  __asm__ volatile("isb");
 
   display_clear();
 #endif
@@ -138,8 +149,6 @@ void BusFault_Handler(void) {
 void UsageFault_Handler(void) {
   error_shutdown("Internal error", "(UF)", NULL, NULL);
 }
-
-void PendSV_Handler(void) { pendsv_isr_handler(); }
 
 void SVC_C_Handler(uint32_t *stack) {
   uint8_t svc_number = ((uint8_t *)stack[6])[-2];

@@ -18,8 +18,8 @@ import base64
 import struct
 import xdrlib
 
-from . import messages
-from .tools import CallException, expect
+from . import exceptions, messages
+from .tools import expect
 
 # Memo types
 MEMO_TYPE_NONE = 0
@@ -113,7 +113,7 @@ def parse_transaction_bytes(tx_bytes):
 
     # text
     if tx.memo_type == MEMO_TYPE_TEXT:
-        tx.memo_text = unpacker.unpack_string()
+        tx.memo_text = unpacker.unpack_string().decode()
     # id (64-bit uint)
     if tx.memo_type == MEMO_TYPE_ID:
         tx.memo_id = unpacker.unpack_uhyper()
@@ -229,7 +229,7 @@ def _parse_operation_bytes(unpacker):
 
         # home domain
         if unpacker.unpack_bool():
-            op.home_domain = unpacker.unpack_string()
+            op.home_domain = unpacker.unpack_string().decode()
 
         # signer
         if unpacker.unpack_bool():
@@ -254,9 +254,9 @@ def _parse_operation_bytes(unpacker):
         )
 
         if op.asset_type == ASSET_TYPE_ALPHA4:
-            op.asset_code = unpacker.unpack_fstring(4)
+            op.asset_code = unpacker.unpack_fstring(4).decode()
         if op.asset_type == ASSET_TYPE_ALPHA12:
-            op.asset_code = unpacker.unpack_fstring(12)
+            op.asset_code = unpacker.unpack_fstring(12).decode()
 
         op.is_authorized = unpacker.unpack_bool()
 
@@ -272,7 +272,7 @@ def _parse_operation_bytes(unpacker):
 
     if type == OP_MANAGE_DATA:
         op = messages.StellarManageDataOp(
-            source_account=source_account, key=unpacker.unpack_string()
+            source_account=source_account, key=unpacker.unpack_string().decode()
         )
 
         # Only set value if the field is present
@@ -296,11 +296,11 @@ def _xdr_read_asset(unpacker):
     asset = messages.StellarAssetType(type=unpacker.unpack_uint())
 
     if asset.type == ASSET_TYPE_ALPHA4:
-        asset.code = unpacker.unpack_fstring(4)
+        asset.code = unpacker.unpack_fstring(4).decode()
         asset.issuer = _xdr_read_address(unpacker)
 
     if asset.type == ASSET_TYPE_ALPHA12:
-        asset.code = unpacker.unpack_fstring(12)
+        asset.code = unpacker.unpack_fstring(12).decode()
         asset.issuer = _xdr_read_address(unpacker)
 
     return asset
@@ -368,18 +368,18 @@ def sign_tx(
             resp = client.call(operations.pop(0))
     except IndexError:
         # pop from empty list
-        raise CallException(
-            "Stellar.UnexpectedEndOfOperations",
-            "Reached end of operations without a signature.",
+        raise exceptions.TrezorException(
+            "Reached end of operations without a signature."
         ) from None
 
     if not isinstance(resp, messages.StellarSignedTx):
-        raise CallException(messages.FailureType.UnexpectedMessage, resp)
+        raise exceptions.TrezorException(
+            "Unexpected message: {}".format(resp.__class__.__name__)
+        )
 
     if operations:
-        raise CallException(
-            "Stellar.UnprocessedOperations",
-            "Received a signature before processing all operations.",
+        raise exceptions.TrezorException(
+            "Received a signature before processing all operations."
         )
 
     return resp

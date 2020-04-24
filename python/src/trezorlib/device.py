@@ -16,32 +16,12 @@
 
 import os
 import time
-import warnings
 
 from . import messages
 from .exceptions import Cancelled
 from .tools import expect, session
-from .transport import enumerate_devices, get_transport
 
 RECOVERY_BACK = "\x08"  # backspace character, sent literally
-
-
-class TrezorDevice:
-    """
-    This class is deprecated. (There is no reason for it to exist in the first
-    place, it is nothing but a collection of two functions.)
-    Instead, please use functions from the ``trezorlib.transport`` module.
-    """
-
-    @classmethod
-    def enumerate(cls):
-        warnings.warn("TrezorDevice is deprecated.", DeprecationWarning)
-        return enumerate_devices()
-
-    @classmethod
-    def find_by_path(cls, path):
-        warnings.warn("TrezorDevice is deprecated.", DeprecationWarning)
-        return get_transport(path, prefix_search=False)
 
 
 @expect(messages.Success, field="message")
@@ -51,7 +31,7 @@ def apply_settings(
     language=None,
     use_passphrase=None,
     homescreen=None,
-    passphrase_source=None,
+    passphrase_always_on_device=None,
     auto_lock_delay_ms=None,
     display_rotation=None,
 ):
@@ -64,8 +44,8 @@ def apply_settings(
         settings.use_passphrase = use_passphrase
     if homescreen is not None:
         settings.homescreen = homescreen
-    if passphrase_source is not None:
-        settings.passphrase_source = passphrase_source
+    if passphrase_always_on_device is not None:
+        settings.passphrase_always_on_device = passphrase_always_on_device
     if auto_lock_delay_ms is not None:
         settings.auto_lock_delay_ms = auto_lock_delay_ms
     if display_rotation is not None:

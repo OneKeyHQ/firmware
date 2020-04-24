@@ -34,6 +34,7 @@
 #endif
 
 #define SDCARD_SIZE (64 * 1024 * 1024)
+#define SDCARD_BLOCKS (SDCARD_SIZE / SDCARD_BLOCK_SIZE)
 
 static uint8_t *sdcard_buffer = NULL;
 static secbool sdcard_powered = secfalse;
@@ -52,20 +53,18 @@ void sdcard_init(void) {
   // check whether the file exists and it has the correct size
   struct stat sb;
   int r = stat(SDCARD_FILE, &sb);
+  int should_clear = 0;
 
   // (re)create if non existant or wrong size
   if (r != 0 || sb.st_size != SDCARD_SIZE) {
     int fd = open(SDCARD_FILE, O_RDWR | O_CREAT | O_TRUNC, (mode_t)0600);
     ensure(sectrue * (fd >= 0), "open failed");
-    for (int i = 0; i < SDCARD_SIZE / 16; i++) {
-      ssize_t s = write(
-          fd,
-          "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
-          16);
-      ensure(sectrue * (s >= 0), "write failed");
-    }
+    r = ftruncate(fd, SDCARD_SIZE);
+    ensure(sectrue * (r == 0), "truncate failed");
     r = close(fd);
     ensure(sectrue * (r == 0), "close failed");
+
+    should_clear = 1;
   }
 
   // mmap file
@@ -77,6 +76,10 @@ void sdcard_init(void) {
 
   sdcard_buffer = (uint8_t *)map;
 
+  if (should_clear) {
+    for (int i = 0; i < SDCARD_SIZE; ++i) sdcard_buffer[i] = 0xFF;
+  }
+
   sdcard_powered = secfalse;
 
   atexit(sdcard_exit);
@@ -85,6 +88,7 @@ void sdcard_init(void) {
 secbool sdcard_is_present(void) { return sectrue; }
 
 secbool sdcard_power_on(void) {
+  sdcard_init();
   sdcard_powered = sectrue;
   return sectrue;
 }
@@ -100,6 +104,12 @@ secbool sdcard_read_blocks(uint32_t *dest, uint32_t block_num,
   if (sectrue != sdcard_powered) {
     return secfalse;
   }
+  if (block_num >= SDCARD_BLOCKS) {
+    return secfalse;
+  }
+  if (num_blocks > SDCARD_BLOCKS - block_num) {
+    return secfalse;
+  }
   memcpy(dest, sdcard_buffer + block_num * SDCARD_BLOCK_SIZE,
          num_blocks * SDCARD_BLOCK_SIZE);
   return sectrue;
@@ -108,6 +118,12 @@ secbool sdcard_read_blocks(uint32_t *dest, uint32_t block_num,
 secbool sdcard_write_blocks(const uint32_t *src, uint32_t block_num,
                             uint32_t num_blocks) {
   if (sectrue != sdcard_powered) {
+    return secfalse;
+  }
+  if (block_num >= SDCARD_BLOCKS) {
+    return secfalse;
+  }
+  if (num_blocks > SDCARD_BLOCKS - block_num) {
     return secfalse;
   }
   memcpy(sdcard_buffer + block_num * SDCARD_BLOCK_SIZE, src,

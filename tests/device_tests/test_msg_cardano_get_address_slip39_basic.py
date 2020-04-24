@@ -25,6 +25,7 @@ from ..common import MNEMONIC_SLIP39_BASIC_20_3of6
 @pytest.mark.altcoin
 @pytest.mark.cardano
 @pytest.mark.skip_t1  # T1 support is not planned
+@pytest.mark.skip_ui
 @pytest.mark.parametrize(
     "path,expected_address",
     [
@@ -46,7 +47,7 @@ from ..common import MNEMONIC_SLIP39_BASIC_20_3of6
 def test_cardano_get_address(client, path, expected_address):
     # enter passphrase
     assert client.features.passphrase_protection is True
-    client.set_passphrase("TREZOR")
+    client.use_passphrase("TREZOR")
 
     address = get_address(client, parse_path(path))
     assert address == expected_address

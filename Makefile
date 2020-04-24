@@ -17,6 +17,9 @@ pystyle_check: ## run code style check on application sources and tests
 	flake8 --version
 	isort --version | awk '/VERSION/{print $$2}'
 	black --version
+	mypy --version
+	@echo [MYPY]
+	@make -C core mypy
 	@echo [FLAKE8]
 	@flake8 $(PY_FILES)
 	@echo [ISORT]
@@ -30,6 +33,8 @@ pystyle: ## apply code style on application sources and tests
 	@isort $(PY_FILES)
 	@echo [BLACK]
 	@black $(PY_FILES)
+	@echo [MYPY]
+	@make -C core mypy
 	@echo [FLAKE8]
 	@flake8 $(PY_FILES)
 	make -C python style
@@ -78,7 +83,5 @@ protobuf_check: ## check that generated protobuf headers are up to date
 	./tools/build_protobuf --check
 
 gen:  mocks templates protobuf icons ## regeneate auto-generated files from sources
-	make -C python coins_json
 
 gen_check: mocks_check templates_check protobuf_check icons_check ## check validity of auto-generated files
-	make -C python coins_json_check

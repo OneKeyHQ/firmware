@@ -1,11 +1,17 @@
 from micropython import const
 
-from trezor import loop, res, ui
-from trezor.ui.button import Button, ButtonCancel, ButtonConfirm, ButtonDefault
+from trezor import loop, res, ui, utils
+from trezor.ui.button import (
+    Button,
+    ButtonAbort,
+    ButtonCancel,
+    ButtonConfirm,
+    ButtonDefault,
+)
 from trezor.ui.loader import Loader, LoaderDefault
 
 if __debug__:
-    from apps.debug import swipe_signal
+    from apps.debug import swipe_signal, confirm_signal
 
 if False:
     from typing import Any, Optional, List, Tuple
@@ -79,6 +85,9 @@ class Confirm(ui.Layout):
         def read_content(self) -> List[str]:
             return self.content.read_content()
 
+        def create_tasks(self) -> Tuple[loop.Task, ...]:
+            return super().create_tasks() + (confirm_signal(),)
+
 
 class Pageable:
     def __init__(self) -> None:
@@ -150,13 +159,19 @@ class ConfirmPageable(Confirm):
             t = ui.pulse(PULSE_PERIOD)
             c = ui.blend(ui.GREY, ui.DARK_GREY, t)
             icon = res.load(ui.ICON_SWIPE_RIGHT)
-            ui.display.icon(18, 68, icon, c, ui.BG)
+            if utils.DISABLE_ANIMATION:
+                ui.display.icon(18, 68, icon, ui.GREY, ui.BG)
+            else:
+                ui.display.icon(18, 68, icon, c, ui.BG)
 
         if not self.pageable.is_last():
             t = ui.pulse(PULSE_PERIOD, PULSE_PERIOD // 2)
             c = ui.blend(ui.GREY, ui.DARK_GREY, t)
             icon = res.load(ui.ICON_SWIPE_LEFT)
-            ui.display.icon(205, 68, icon, c, ui.BG)
+            if utils.DISABLE_ANIMATION:
+                ui.display.icon(205, 68, icon, ui.GREY, ui.BG)
+            else:
+                ui.display.icon(205, 68, icon, c, ui.BG)
 
 
 class InfoConfirm(ui.Layout):
@@ -211,9 +226,12 @@ class InfoConfirm(ui.Layout):
         def read_content(self) -> List[str]:
             return self.content.read_content()
 
+        def create_tasks(self) -> Tuple[loop.Task, ...]:
+            return super().create_tasks() + (confirm_signal(),)
+
 
 class HoldToConfirm(ui.Layout):
-    DEFAULT_CONFIRM = "Hold To Confirm"
+    DEFAULT_CONFIRM = "Hold to confirm"
     DEFAULT_CONFIRM_STYLE = ButtonConfirm
     DEFAULT_LOADER_STYLE = LoaderDefault
 
@@ -223,16 +241,27 @@ class HoldToConfirm(ui.Layout):
         confirm: str = DEFAULT_CONFIRM,
         confirm_style: ButtonStyleType = DEFAULT_CONFIRM_STYLE,
         loader_style: LoaderStyleType = DEFAULT_LOADER_STYLE,
+        cancel: bool = True,
     ):
         self.content = content
 
         self.loader = Loader(loader_style)
         self.loader.on_start = self._on_loader_start  # type: ignore
 
-        self.button = Button(ui.grid(4, n_x=1), confirm, confirm_style)
-        self.button.on_press_start = self._on_press_start  # type: ignore
-        self.button.on_press_end = self._on_press_end  # type: ignore
-        self.button.on_click = self._on_click  # type: ignore
+        if cancel:
+            self.confirm = Button(ui.grid(17, n_x=4, cells_x=3), confirm, confirm_style)
+        else:
+            self.confirm = Button(ui.grid(4, n_x=1), confirm, confirm_style)
+        self.confirm.on_press_start = self._on_press_start  # type: ignore
+        self.confirm.on_press_end = self._on_press_end  # type: ignore
+        self.confirm.on_click = self._on_click  # type: ignore
+
+        self.cancel = None
+        if cancel:
+            self.cancel = Button(
+                ui.grid(16, n_x=4), res.load(ui.ICON_CANCEL), ButtonAbort
+            )
+            self.cancel.on_click = self.on_cancel  # type: ignore
 
     def _on_press_start(self) -> None:
         self.loader.start()
@@ -244,7 +273,7 @@ class HoldToConfirm(ui.Layout):
         # Loader has either started growing, or returned to the 0-position.
         # In the first case we need to clear the content leftovers, in the latter
         # we need to render the content again.
-        ui.display.bar(0, 0, ui.WIDTH, ui.HEIGHT - 60, ui.BG)
+        ui.display.bar(0, 0, ui.WIDTH, ui.HEIGHT - 58, ui.BG)
         self.content.dispatch(ui.REPAINT, 0, 0)
 
     def _on_click(self) -> None:
@@ -256,12 +285,20 @@ class HoldToConfirm(ui.Layout):
             self.loader.dispatch(event, x, y)
         else:
             self.content.dispatch(event, x, y)
-        self.button.dispatch(event, x, y)
+        self.confirm.dispatch(event, x, y)
+        if self.cancel:
+            self.cancel.dispatch(event, x, y)
 
     def on_confirm(self) -> None:
         raise ui.Result(CONFIRMED)
+
+    def on_cancel(self) -> None:
+        raise ui.Result(CANCELLED)
 
     if __debug__:
 
         def read_content(self) -> List[str]:
             return self.content.read_content()
+
+        def create_tasks(self) -> Tuple[loop.Task, ...]:
+            return super().create_tasks() + (confirm_signal(),)

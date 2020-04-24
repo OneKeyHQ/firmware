@@ -19,15 +19,20 @@ SOURCE_MOD += [
 ]
 
 # modtrezorui
+CPPPATH_MOD += [
+        'vendor/micropython/extmod/uzlib',
+]
 CPPDEFINES_MOD += [
     'TREZOR_FONT_BOLD_ENABLE',
 ]
 SOURCE_MOD += [
     'embed/extmod/modtrezorui/display.c',
-    'embed/extmod/modtrezorui/inflate.c',
     'embed/extmod/modtrezorui/font_bitmap.c',
     'embed/extmod/modtrezorui/font_roboto_bold_20.c',
     'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+    'vendor/micropython/extmod/uzlib/adler32.c',
+    'vendor/micropython/extmod/uzlib/crc32.c',
+    'vendor/micropython/extmod/uzlib/tinflate.c',
 ]
 
 SOURCE_STMHAL = [
@@ -131,8 +136,7 @@ env.Replace(
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
 env.Replace(
-    BINCTL='tools/binctl',
-    KEYCTL='tools/keyctl',
+    HEADERTOOL='tools/headertool.py',
 )
 
 #
@@ -167,6 +171,5 @@ program_bin = env.Command(
     source=program_elf,
     action=[
         '$OBJCOPY -O binary -j .vendorheader -j .header -j .flash -j .data $SOURCE $TARGET',
-        '$BINCTL $TARGET -h',
-        '$BINCTL $TARGET -s 1:2 `$KEYCTL sign firmware $TARGET 4747474747474747474747474747474747474747474747474747474747474747 4848484848484848484848484848484848484848484848484848484848484848`' if ARGUMENTS.get('PRODUCTION', '0') == '0' else '',
+        '$HEADERTOOL $TARGET ' + ('-D' if ARGUMENTS.get('PRODUCTION', '0') == '0' else ''),
     ], )

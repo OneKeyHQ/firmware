@@ -16,9 +16,11 @@
 
 import pytest
 
-from trezorlib import btc, ckd_public as bip32, messages as proto
-from trezorlib.tools import H_, CallException, parse_path
+from trezorlib import btc, messages as proto
+from trezorlib.exceptions import TrezorFailure
+from trezorlib.tools import H_, parse_path
 
+from .. import bip32
 from ..common import MNEMONIC12
 
 
@@ -162,7 +164,7 @@ class TestMsgGetaddress:
             node = btc.get_public_node(client, parse_path("44'/0'/%d'" % n))
             xpubs.append(node.xpub)
         for nr in range(1, 4):
-            with pytest.raises(CallException):
+            with pytest.raises(TrezorFailure):
                 btc.get_address(
                     client,
                     "Bitcoin",
@@ -170,7 +172,7 @@ class TestMsgGetaddress:
                     show_display=(nr == 1),
                     multisig=getmultisig(0, 0, xpubs=xpubs),
                 )
-            with pytest.raises(CallException):
+            with pytest.raises(TrezorFailure):
                 btc.get_address(
                     client,
                     "Bitcoin",

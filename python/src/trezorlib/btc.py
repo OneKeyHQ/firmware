@@ -14,8 +14,41 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from . import coins, messages
-from .tools import CallException, expect, normalize_nfc, session
+from decimal import Decimal
+
+from . import exceptions, messages
+from .tools import expect, normalize_nfc, session
+
+
+def from_json(json_dict):
+    def make_input(vin):
+        i = messages.TxInputType()
+        if "coinbase" in vin:
+            i.prev_hash = b"\0" * 32
+            i.prev_index = 0xFFFFFFFF  # signed int -1
+            i.script_sig = bytes.fromhex(vin["coinbase"])
+            i.sequence = vin["sequence"]
+
+        else:
+            i.prev_hash = bytes.fromhex(vin["txid"])
+            i.prev_index = vin["vout"]
+            i.script_sig = bytes.fromhex(vin["scriptSig"]["hex"])
+            i.sequence = vin["sequence"]
+
+        return i
+
+    def make_bin_output(vout):
+        o = messages.TxOutputBinType()
+        o.amount = int(Decimal(vout["value"]) * (10 ** 8))
+        o.script_pubkey = bytes.fromhex(vout["scriptPubKey"]["hex"])
+        return o
+
+    t = messages.TransactionType()
+    t.version = json_dict["version"]
+    t.lock_time = json_dict.get("locktime")
+    t.inputs = [make_input(vin) for vin in json_dict["vin"]]
+    t.bin_outputs = [make_bin_output(vout) for vout in json_dict["vout"]]
+    return t
 
 
 @expect(messages.PublicKey)
@@ -81,34 +114,14 @@ def verify_message(client, coin_name, address, signature, message):
                 coin_name=coin_name,
             )
         )
-    except CallException as e:
-        resp = e
+    except exceptions.TrezorFailure:
+        return False
     return isinstance(resp, messages.Success)
 
 
 @session
 def sign_tx(client, coin_name, inputs, outputs, details=None, prev_txes=None):
-    # set up a transactions dict
-    txes = {None: messages.TransactionType(inputs=inputs, outputs=outputs)}
-    # preload all relevant transactions ahead of time
-    if coin_name in coins.by_name:
-        load_prevtxes = not coins.by_name[coin_name]["force_bip143"]
-    else:
-        load_prevtxes = True
-    if load_prevtxes:
-        for inp in inputs:
-            if inp.script_type not in (
-                messages.InputScriptType.SPENDP2SHWITNESS,
-                messages.InputScriptType.SPENDWITNESS,
-                messages.InputScriptType.EXTERNAL,
-            ):
-                try:
-                    prev_tx = prev_txes[inp.prev_hash]
-                except Exception as e:
-                    raise ValueError("Could not retrieve prev_tx") from e
-                if not isinstance(prev_tx, messages.TransactionType):
-                    raise ValueError("Invalid value for prev_tx") from None
-                txes[inp.prev_hash] = prev_tx
+    this_tx = messages.TransactionType(inputs=inputs, outputs=outputs)
 
     if details is None:
         signtx = messages.SignTx()
@@ -155,7 +168,10 @@ def sign_tx(client, coin_name, inputs, outputs, details=None, prev_txes=None):
             break
 
         # Device asked for one more information, let's process it.
-        current_tx = txes[res.details.tx_hash]
+        if res.details.tx_hash is not None:
+            current_tx = prev_txes[res.details.tx_hash]
+        else:
+            current_tx = this_tx
 
         if res.request_type == R.TXMETA:
             msg = copy_tx_meta(current_tx)
@@ -181,13 +197,10 @@ def sign_tx(client, coin_name, inputs, outputs, details=None, prev_txes=None):
             msg.extra_data = current_tx.extra_data[o : o + l]
             res = client.call(messages.TxAck(tx=msg))
 
-    if isinstance(res, messages.Failure):
-        raise CallException("Signing failed")
-
     if not isinstance(res, messages.TxRequest):
-        raise CallException("Unexpected message")
+        raise exceptions.TrezorException("Unexpected message")
 
     if None in signatures:
-        raise RuntimeError("Some signatures are missing!")
+        raise exceptions.TrezorException("Some signatures are missing!")
 
     return signatures, serialized_tx

@@ -9,6 +9,8 @@ trezor = {editable = true,path = "./python"}
 scons = "*"
 protobuf = "==3.6.1"
 pyblake2 = "*"
+Pyro4 = "*"
+nanopb = "==0.4.1"
 
 ## test tools
 pytest = "*"
@@ -17,11 +19,16 @@ coverage = "<5"  # coverage 5+ uses binary sqlite format
 flaky = ">=3.6.1"  # https://github.com/box/flaky/issues/156
 pytest-ordering = "*"
 pytest-random-order = "*"
+pytest-timeout = "*"
 tox = "*"
+dominate = "*"
+
+# hardware tests
+pyserial = "*"
 
 ## test requirements
 shamir-mnemonic = "*"
-fido2 = "*"
+fido2 = ">=0.8.0"
 
 ## typing
 mypy = "*"
@@ -59,6 +66,7 @@ typing = "*"
 cryptography = "*"
 hypothesis = "==4.38.1"  # let's use this version because of the nixos pipenv/pip issue
 attrs = "==18.2.0"  # let's use this version because of the nixos pipenv/pip issue
+inotify = "*"
 
 [dev-packages]
 scan-build = "*"

@@ -54,7 +54,7 @@ allowing a firmware update via USB.
 * Signature system is Ed25519 (allows combining signatures by multiple keys
   into one).
 * All multibyte integer values are little endian.
-* There is a tool called [binctl](../tools/binctl) which checks validity
+* There is a tool called [headertool.py](https://github.com/trezor/trezor-firmware/blob/master/core/tools/headertool.py) which checks validity
   of the bootloader/firmware images including their headers.
 
 ## Bootloader Format
@@ -161,7 +161,7 @@ Total length of firmware header is always 1024 bytes.
 | 0x0016 | 1      | fix_vpatch | version of last critical bugfix (patch) |
 | 0x0017 | 1      | fix_vbuild | version of last critical bugfix (build) |
 | 0x0018 | 8      | reserved | not used yet (zeroed) |
-| 0x0020 | 32     | hash1 | hash of the first code chunk (128 - 1 KiB), this excludes the header |
+| 0x0020 | 32     | hash1 | hash of the first code chunk excluding both the firmware and the vendor header (128 - 1 - \[vendor header length\] KiB) |
 | 0x0040 | 32     | hash2 | hash of the second code chunk (128 KiB), zeroed if unused |
 | ...    | ...    | ... | ... |
 | 0x0200 | 32     | hash16 | hash of the last possible code chunk (128 KiB), zeroed if unused |

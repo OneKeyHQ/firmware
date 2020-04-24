@@ -39,18 +39,21 @@ _alert_in_progress = False
 
 # in debug mode, display an indicator in top right corner
 if __debug__:
+    from apps.debug import screenshot
 
-    def debug_display_refresh() -> None:
-        display.bar(Display.WIDTH - 8, 0, 8, 8, 0xF800)
+    def refresh() -> None:
+        if not screenshot():
+            display.bar(Display.WIDTH - 8, 0, 8, 8, 0xF800)
         display.refresh()
-        if utils.SAVE_SCREEN:
-            display.save("refresh")
 
-    loop.after_step_hook = debug_display_refresh
+
+else:
+    refresh = display.refresh
+
 
 # in both debug and production, emulator needs to draw the screen explicitly
-elif utils.EMULATOR:
-    loop.after_step_hook = display.refresh
+if utils.EMULATOR:
+    loop.after_step_hook = refresh
 
 
 def lerpi(a: int, b: int, t: float) -> int:
@@ -120,7 +123,7 @@ async def click() -> Pos:
 
 def backlight_fade(val: int, delay: int = 14000, step: int = 15) -> None:
     if __debug__:
-        if utils.DISABLE_FADE:
+        if utils.DISABLE_ANIMATION:
             display.backlight(val)
             return
     current = display.backlight()
@@ -155,6 +158,23 @@ def header_error(message: str, clear: bool = True) -> None:
     display.text_center(WIDTH // 2, 22, message, BOLD, style.WHITE, style.RED)
     if clear:
         display.bar(0, 30, WIDTH, HEIGHT - 30, style.BG)
+
+
+def draw_simple(t: Component) -> None:  # noqa: F405
+    """Render a component synchronously.
+
+    Useful when you need to put something on screen and go on to do other things.
+
+    This function bypasses the UI workflow engine, so other layouts will not know
+    that something was drawn over them. In particular, if no other Layout is shown
+    in a workflow, the homescreen will not redraw when the workflow is finished.
+    Use `workflow.kill_default()` if you need to avoid this situation.
+    """
+    backlight_fade(style.BACKLIGHT_DIM)
+    display.clear()
+    t.on_render()
+    refresh()
+    backlight_fade(style.BACKLIGHT_NORMAL)
 
 
 def grid(
@@ -346,7 +366,7 @@ class Layout(Component):
         # Display is usually refreshed after every loop step, but here we are
         # rendering everything synchronously, so refresh it manually and turn
         # the brightness on again.
-        display.refresh()
+        refresh()
         backlight_fade(style.BACKLIGHT_NORMAL)
         sleep = loop.sleep(_RENDER_DELAY_US)
         while True:

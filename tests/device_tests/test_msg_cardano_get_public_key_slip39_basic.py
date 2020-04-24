@@ -25,6 +25,7 @@ from ..common import MNEMONIC_SLIP39_BASIC_20_3of6
 @pytest.mark.altcoin
 @pytest.mark.cardano
 @pytest.mark.skip_t1  # T1 support is not planned
+@pytest.mark.skip_ui
 @pytest.mark.setup_client(mnemonic=MNEMONIC_SLIP39_BASIC_20_3of6, passphrase=True)
 @pytest.mark.parametrize(
     "path,public_key,chain_code",
@@ -49,7 +50,7 @@ from ..common import MNEMONIC_SLIP39_BASIC_20_3of6
 def test_cardano_get_public_key(client, path, public_key, chain_code):
     # enter passphrase
     assert client.features.passphrase_protection is True
-    client.set_passphrase("TREZOR")
+    client.use_passphrase("TREZOR")
 
     key = get_public_key(client, parse_path(path))
 

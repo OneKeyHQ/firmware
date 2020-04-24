@@ -4,38 +4,10 @@ variables:
   SDL_VIDEODRIVER: "dummy"
   XDG_RUNTIME_DIR: "/var/tmp"
 
-.only_changes_core: &only_changes_core
-  only:
-    changes:
-      - ci/**/*
-      - common/**/*
-      - core/**/*
-      - crypto/**/*
-      - python/**/*
-      - storage/**/*
-      - tests/**/*
-      - tools/**/*
-      - vendor/**/*
-
-.only_changes_legacy: &only_changes_legacy
-  only:
-    changes:
-      - ci/**/*
-      - common/**/*
-      - crypto/**/*
-      - legacy/**/*
-      - python/**/*
-      - storage/**/*
-      - tests/**/*
-      - tools/**/*
-      - vendor/**/*
-
-
 # Core
 
 core fw regular build:
   stage: build
-  <<: *only_changes_core
   script:
     - cd core
     - pipenv run make build_cross
@@ -55,7 +27,6 @@ core fw regular build:
 
 core fw regular debug build:
   stage: build
-  <<: *only_changes_core
   script:
     - cd core
     - PYOPT=0 pipenv run make build_firmware
@@ -70,7 +41,6 @@ core fw regular debug build:
 
 core fw btconly build:
   stage: build
-  <<: *only_changes_core
   variables:
     BITCOIN_ONLY: "1"
   script:
@@ -89,17 +59,9 @@ core fw btconly build:
 
 core unix regular build:
   stage: build
-  <<: *only_changes_core
   script:
     - cd core
     - pipenv run make build_unix
-
-core unix frozen regular build:
-  stage: build
-  <<: *only_changes_core
-  script:
-    - cd core
-    - pipenv run make build_unix_frozen
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -107,10 +69,21 @@ core unix frozen regular build:
     - core/src/trezor/res/resources.py
     expire_in: 1 week
 
-core unix frozen btconly build:
+core unix frozen regular build:
   stage: build
-  <<: *only_changes_core
+  script:
+    - cd core
+    - pipenv run make build_unix_frozen
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+    - core/build/unix/micropython
+    expire_in: 1 week
+
+core unix frozen btconly debug build:
+  stage: build
   variables:
+    PYOPT: "0"
     BITCOIN_ONLY: "1"
   script:
     - cd core
@@ -120,12 +93,10 @@ core unix frozen btconly build:
     name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
     - core/build/unix/micropython-bitcoinonly
-    - core/src/trezor/res/resources.py
     expire_in: 1 week
 
 core unix frozen debug build:
   stage: build
-  <<: *only_changes_core
   variables:
     PYOPT: "0"
   script:
@@ -180,7 +151,6 @@ crypto build:
 
 legacy fw regular build:
   stage: build
-  <<: *only_changes_legacy
   variables:
     MEMORY_PROTECT: "0"
   script:
@@ -198,7 +168,6 @@ legacy fw regular build:
 
 legacy fw debug build:
   stage: build
-  <<: *only_changes_legacy
   variables:
     DEBUG_LINK: "1"
     MEMORY_PROTECT: "0"
@@ -216,7 +185,6 @@ legacy fw debug build:
 
 legacy fw btconly build:
   stage: build
-  <<: *only_changes_legacy
   variables:
     BITCOIN_ONLY: "1"
     MEMORY_PROTECT: "0"
@@ -236,7 +204,6 @@ legacy fw btconly build:
 
 legacy emu regular build:
   stage: build
-  <<: *only_changes_legacy
   variables:
     DEBUG_LINK: "1"
     EMULATOR: "1"
@@ -251,7 +218,6 @@ legacy emu regular build:
 
 legacy emu btconly build:
   stage: build
-  <<: *only_changes_legacy
   variables:
     BITCOIN_ONLY: "1"
     DEBUG_LINK: "1"

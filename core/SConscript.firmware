@@ -3,6 +3,7 @@
 import os
 
 BITCOIN_ONLY = ARGUMENTS.get('BITCOIN_ONLY', '0')
+RDI = ARGUMENTS.get('RDI', '1') == '1'
 EVERYTHING = BITCOIN_ONLY != '1'
 
 CCFLAGS_MOD = ''
@@ -63,6 +64,7 @@ SOURCE_MOD += [
     'vendor/trezor-crypto/chacha20poly1305/chacha_merged.c',
     'vendor/trezor-crypto/chacha20poly1305/poly1305-donna.c',
     'vendor/trezor-crypto/chacha20poly1305/rfc7539.c',
+    'vendor/trezor-crypto/chacha_drbg.c',
     'vendor/trezor-crypto/curves.c',
     'vendor/trezor-crypto/ecdsa.c',
     'vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.c',
@@ -136,6 +138,9 @@ SOURCE_MOD += [
 ]
 
 # modtrezorui
+CPPPATH_MOD += [
+        'vendor/micropython/extmod/uzlib',
+]
 CPPDEFINES_MOD += [
     'TREZOR_FONT_BOLD_ENABLE',
     'TREZOR_FONT_NORMAL_ENABLE',
@@ -149,9 +154,11 @@ SOURCE_MOD += [
     'embed/extmod/modtrezorui/font_roboto_regular_20.c',
     'embed/extmod/modtrezorui/font_robotomono_bold_20.c',
     'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
-    'embed/extmod/modtrezorui/inflate.c',
     'embed/extmod/modtrezorui/modtrezorui.c',
     'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+    'vendor/micropython/extmod/uzlib/adler32.c',
+    'vendor/micropython/extmod/uzlib/crc32.c',
+    'vendor/micropython/extmod/uzlib/tinflate.c',
 ]
 
 # modtrezorutils
@@ -171,13 +178,13 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/extmod/modutimeq.c',
     'vendor/micropython/extmod/utime_mphal.c',
     'vendor/micropython/lib/embed/abort_.c',
-    'vendor/micropython/lib/mp-readline/readline.c',
+    #'vendor/micropython/lib/mp-readline/readline.c',
+    'vendor/micropython/lib/utils/gchelper_m3.s',
     'vendor/micropython/lib/utils/interrupt_char.c',
     'vendor/micropython/lib/utils/printf.c',
     'vendor/micropython/lib/utils/pyexec.c',
     'vendor/micropython/lib/utils/stdout_helpers.c',
     'vendor/micropython/ports/stm32/gccollect.c',
-    'vendor/micropython/ports/stm32/gchelper.s',
     'vendor/micropython/ports/stm32/pendsv.c',
     'vendor/micropython/py/argcheck.c',
     'vendor/micropython/py/asmarm.c',
@@ -330,6 +337,12 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/vectortable.s',
 ]
 
+if RDI:
+    SOURCE_TREZORHAL += [
+        'embed/trezorhal/rdi.c',
+    ]
+    CPPDEFINES_MOD += ['RDI']
+
 SOURCE_QSTR = SOURCE_MOD + SOURCE_MICROPYTHON + SOURCE_MICROPYTHON_SPEED
 
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s -DPYOPT=%s -DBITCOIN_ONLY=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0'), PYOPT, BITCOIN_ONLY))
@@ -392,23 +405,14 @@ env.Replace(
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
 env.Replace(
-    BINCTL='tools/binctl',
-    KEYCTL='tools/keyctl',
+    HEADERTOOL='tools/headertool.py',
     PYTHON='python',
     MAKEQSTRDATA='$PYTHON vendor/micropython/py/makeqstrdata.py',
     MAKEVERSIONHDR='$PYTHON vendor/micropython/py/makeversionhdr.py',
+    MAKEMODULEDEFS='$PYTHON vendor/micropython/py/makemoduledefs.py',
     MPY_TOOL='$PYTHON vendor/micropython/tools/mpy-tool.py',
     MPY_CROSS='vendor/micropython/mpy-cross/mpy-cross -O' + PYOPT
 )
-
-#
-# Micropython version
-#
-
-hdr_version = env.Command(
-    target='genhdr/mpversion.h',
-    source='',
-    action='$MAKEVERSIONHDR $TARGET', )
 
 #
 # Qstrings
@@ -427,6 +431,25 @@ qstr_generated = env.GenerateQstrDefs(
     target='genhdr/qstrdefs.generated.h', source=qstr_preprocessed)
 
 env.Ignore(qstr_collected, qstr_generated)
+
+#
+# Micropython version and modules
+#
+
+hdr_version = env.Command(
+    target='genhdr/mpversion.h',
+    source='',
+    action='$MAKEVERSIONHDR $TARGET', )
+
+hdr_moduledefs = env.Command(
+    target='genhdr/moduledefs.h',
+    source=SOURCE_QSTR,
+    action='$MAKEMODULEDEFS --vpath="." $SOURCES > $TARGET', )
+
+env.Ignore(hdr_moduledefs, hdr_moduledefs)
+env.Ignore(hdr_moduledefs, qstr_collected)
+env.Ignore(hdr_moduledefs, qstr_preprocessed)
+env.Ignore(hdr_moduledefs, qstr_generated)
 
 #
 # Frozen modules
@@ -598,8 +621,7 @@ if env.get('TREZOR_MODEL') == 'T':
         '$OBJCOPY -O binary -j .vendorheader -j .header -j .flash -j .data --pad-to 0x08100000 $SOURCE ${TARGET}.p1',
         '$OBJCOPY -O binary -j .flash2 $SOURCE ${TARGET}.p2',
         '$CAT ${TARGET}.p1 ${TARGET}.p2 > $TARGET',
-        '$BINCTL $TARGET -h',
-        '$BINCTL $TARGET -s 1:2 `$KEYCTL sign firmware $TARGET 4747474747474747474747474747474747474747474747474747474747474747 4848484848484848484848484848484848484848484848484848484848484848`' if ARGUMENTS.get('PRODUCTION', '0') == '0' else '',
+        '$HEADERTOOL $TARGET ' + ('-D' if ARGUMENTS.get('PRODUCTION', '0') == '0' else ''),
         '$DD if=$TARGET of=${TARGET}.p1 skip=0 bs=128k count=6',
     ]
 else:

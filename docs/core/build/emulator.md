@@ -1,6 +1,8 @@
 # Build instructions for Emulator (Unix port)
 
-First clone, initialize submodules and install Pipenv as defined [here](index.md).
+First clone, initialize submodules, install Pipenv and enter the Pipenv shell as 
+defined [here](index.md). **Do not forget you need to be in a `pipenv shell`
+environment!**
 
 ## Dependencies
 
@@ -51,7 +53,7 @@ brew install scons sdl2 sdl2_image pkg-config
 Run the build with:
 
 ```sh
-pipenv run make build_unix
+make build_unix
 ```
 
 ## Run
@@ -59,7 +61,7 @@ pipenv run make build_unix
 Now you can start the emulator:
 
 ```sh
-./emu.sh
+./emu.py
 ```
 
 The emulator has a number of interesting features all documented in the [Emulator](../emulator/index.md) section.

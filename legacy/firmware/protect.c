@@ -143,9 +143,11 @@ const char *requestPin(PinMatrixRequestType type, const char *text) {
     if (msg_tiny_id == MessageType_MessageType_PinMatrixAck) {
       msg_tiny_id = 0xFFFF;
       PinMatrixAck *pma = (PinMatrixAck *)msg_tiny;
-      pinmatrix_done(pma->pin);  // convert via pinmatrix
       usbTiny(0);
-      return pma->pin;
+      if (sectrue == pinmatrix_done(pma->pin))  // convert via pinmatrix
+        return pma->pin;
+      else
+        return 0;
     }
     // check for Cancel / Initialize
     protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
@@ -265,7 +267,7 @@ bool protectChangePin(bool removal) {
     g_ucPromptIndex = DISP_INPUTPIN;
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                      _("Please enter new PIN:"));
-    if (pin == NULL) {
+    if (pin == NULL || pin[0] == '\0') {
       memzero(old_pin, sizeof(old_pin));
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -383,10 +385,12 @@ bool protectChangeWipeCode(bool removal) {
   return ret;
 }
 
-bool protectPassphrase(void) {
+bool protectPassphrase(char *passphrase) {
+  memzero(passphrase, MAX_PASSPHRASE_LEN + 1);
   bool passphrase_protection = false;
   config_getPassphraseProtection(&passphrase_protection);
-  if (!passphrase_protection || session_isPassphraseCached()) {
+  if (!passphrase_protection) {
+    // passphrase already set to empty by memzero above
     return true;
   }
 
@@ -402,12 +406,24 @@ bool protectPassphrase(void) {
   bool result;
   for (;;) {
     usbPoll();
-    // TODO: correctly process PassphraseAck with state field set (mismatch =>
-    // Failure)
     if (msg_tiny_id == MessageType_MessageType_PassphraseAck) {
       msg_tiny_id = 0xFFFF;
       PassphraseAck *ppa = (PassphraseAck *)msg_tiny;
-      session_cachePassphrase(ppa->has_passphrase ? ppa->passphrase : "");
+      if (ppa->has_on_device && ppa->on_device == true) {
+        fsm_sendFailure(
+            FailureType_Failure_DataError,
+            _("This firmware is incapable of passphrase entry on the device."));
+        result = false;
+        break;
+      }
+      if (!ppa->has_passphrase) {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        _("No passphrase provided. Use empty string to set an "
+                          "empty passphrase."));
+        result = false;
+        break;
+      }
+      strlcpy(passphrase, ppa->passphrase, sizeof(ppa->passphrase));
       result = true;
       break;
     }
@@ -416,8 +432,9 @@ bool protectPassphrase(void) {
     protectAbortedByInitialize =
         (msg_tiny_id == MessageType_MessageType_Initialize);
     if (protectAbortedByCancel || protectAbortedByInitialize) {
-      msg_tiny_id = 0xFFFF;
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       result = false;
+      msg_tiny_id = 0xFFFF;
       break;
     }
   }

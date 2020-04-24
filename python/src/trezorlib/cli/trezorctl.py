@@ -17,20 +17,24 @@
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import json
+import logging
 import os
-import sys
+import time
 
 import click
 
-from .. import coins, log, messages, protobuf, ui
+from .. import log, messages, protobuf, ui
 from ..client import TrezorClient
-from ..transport import enumerate_devices, get_transport
+from ..transport import enumerate_devices
+from ..transport.udp import UdpTransport
 from . import (
+    TrezorConnection,
     binance,
     btc,
     cardano,
     cosi,
     crypto,
+    debug,
     device,
     eos,
     ethereum,
@@ -43,13 +47,15 @@ from . import (
     settings,
     stellar,
     tezos,
+    with_client,
 )
+
+LOG = logging.getLogger(__name__)
 
 COMMAND_ALIASES = {
     "change-pin": settings.pin,
     "enable-passphrase": settings.passphrase_enable,
     "disable-passphrase": settings.passphrase_disable,
-    "set-passphrase-source": settings.passphrase_source,
     "wipe-device": device.wipe,
     "reset-device": device.setup,
     "recovery-device": device.recover,
@@ -57,6 +63,7 @@ COMMAND_ALIASES = {
     "sd-protect": device.sd_protect,
     "load-device": device.load,
     "self-test": device.self_test,
+    "show-text": debug.show_text,
     "get-entropy": crypto.get_entropy,
     "encrypt-keyvalue": crypto.encrypt_keyvalue,
     "decrypt-keyvalue": crypto.decrypt_keyvalue,
@@ -113,12 +120,6 @@ class TrezorctlGroup(click.Group):
         except Exception:
             pass
 
-        # try to find a bitcoin-like coin whose shortcut matches the command
-        for coin in coins.coins_list:
-            if cmd_name.lower() == coin["shortcut"].lower():
-                btc.DEFAULT_COIN = coin["coin_name"]
-                return btc.cli
-
         return None
 
 
@@ -139,29 +140,32 @@ def configure_logging(verbose: int):
 @click.option(
     "-j", "--json", "is_json", is_flag=True, help="Print result as JSON object"
 )
+@click.option(
+    "-P", "--passphrase-on-host", is_flag=True, help="Enter passphrase on host.",
+)
+@click.option(
+    "-s",
+    "--session-id",
+    metavar="HEX",
+    help="Resume given session ID.",
+    default=os.environ.get("TREZOR_SESSION_ID"),
+)
 @click.version_option()
 @click.pass_context
-def cli(ctx, path, verbose, is_json):
+def cli(ctx, path, verbose, is_json, passphrase_on_host, session_id):
     configure_logging(verbose)
 
-    def get_device():
+    if session_id:
         try:
-            device = get_transport(path, prefix_search=False)
-        except Exception:
-            try:
-                device = get_transport(path, prefix_search=True)
-            except Exception:
-                click.echo("Failed to find a Trezor device.")
-                if path is not None:
-                    click.echo("Using path: {}".format(path))
-                sys.exit(1)
-        return TrezorClient(transport=device, ui=ui.ClickUI())
+            session_id = bytes.fromhex(session_id)
+        except ValueError:
+            raise click.ClickException("Not a valid session id: {}".format(session_id))
 
-    ctx.obj = get_device
+    ctx.obj = TrezorConnection(path, session_id, passphrase_on_host)
 
 
 @cli.resultcallback()
-def print_result(res, path, verbose, is_json):
+def print_result(res, is_json, **kwargs):
     if is_json:
         if isinstance(res, protobuf.MessageType):
             click.echo(json.dumps({res.__class__.__name__: res.__dict__}))
@@ -180,8 +184,17 @@ def print_result(res, path, verbose, is_json):
                     click.echo("%s: %s" % (k, v))
         elif isinstance(res, protobuf.MessageType):
             click.echo(protobuf.format_message(res))
-        else:
+        elif res is not None:
             click.echo(res)
+
+
+def format_device_name(features):
+    model = features.model or "1"
+    if features.bootloader_mode:
+        return "Trezor {} bootloader".format(model)
+
+    label = features.label or "(unnamed)"
+    return "{} [Trezor {}, {}]".format(label, model, features.device_id)
 
 
 #
@@ -190,15 +203,21 @@ def print_result(res, path, verbose, is_json):
 
 
 @cli.command(name="list")
-def list_devices():
+@click.option("-n", "no_resolve", is_flag=True, help="Do not resolve Trezor names")
+def list_devices(no_resolve):
     """List connected Trezor devices."""
-    return enumerate_devices()
+    if no_resolve:
+        return enumerate_devices()
+
+    for transport in enumerate_devices():
+        client = TrezorClient(transport, ui=ui.ClickUI())
+        click.echo("{} - {}".format(transport, format_device_name(client.features)))
 
 
 @cli.command()
 def version():
     """Show version of trezorctl/trezorlib."""
-    from trezorlib import __version__ as VERSION
+    from .. import __version__ as VERSION
 
     return VERSION
 
@@ -211,31 +230,49 @@ def version():
 @cli.command()
 @click.argument("message")
 @click.option("-b", "--button-protection", is_flag=True)
-@click.option("-p", "--pin-protection", is_flag=True)
-@click.option("-r", "--passphrase-protection", is_flag=True)
-@click.pass_obj
-def ping(connect, message, button_protection, pin_protection, passphrase_protection):
+@with_client
+def ping(client, message, button_protection):
     """Send ping message."""
-    return connect().ping(
-        message,
-        button_protection=button_protection,
-        pin_protection=pin_protection,
-        passphrase_protection=passphrase_protection,
-    )
+    return client.ping(message, button_protection=button_protection)
 
 
 @cli.command()
-@click.pass_obj
-def clear_session(connect):
+@with_client
+def get_session(client):
+    """Get a session ID for subsequent commands.
+
+    Unlocks Trezor with a passphrase and returns a session ID. Use this session ID with
+    `trezorctl -s SESSION_ID`, or set it to an environment variable `TREZOR_SESSION_ID`,
+    to avoid having to enter passphrase for subsequent commands.
+
+    The session ID is valid until another client starts using Trezor, until the next
+    get-session call, or until Trezor is disconnected.
+    """
+    from ..btc import get_address
+    from ..client import PASSPHRASE_TEST_PATH
+
+    if client.features.model == "1" and client.version < (1, 9, 0):
+        raise click.ClickException("Upgrade your firmware to enable session support.")
+
+    get_address(client, "Testnet", PASSPHRASE_TEST_PATH)
+    if client.session_id is None:
+        raise click.ClickException("Passphrase not enabled or firmware too old.")
+    else:
+        return client.session_id.hex()
+
+
+@cli.command()
+@with_client
+def clear_session(client):
     """Clear session (remove cached PIN, passphrase, etc.)."""
-    return connect().clear_session()
+    return client.clear_session()
 
 
 @cli.command()
-@click.pass_obj
-def get_features(connect):
+@with_client
+def get_features(client):
     """Retrieve device features and settings."""
-    return connect().features
+    return client.features
 
 
 @cli.command()
@@ -248,6 +285,27 @@ def usb_reset():
     from trezorlib.transport.webusb import WebUsbTransport
 
     WebUsbTransport.enumerate(usb_reset=True)
+
+
+@cli.command()
+@click.option("-t", "--timeout", type=float, default=10, help="Timeout in seconds")
+@click.pass_obj
+def wait_for_emulator(obj, timeout):
+    """Wait until Trezor Emulator comes up.
+
+    Tries to connect to emulator and returns when it succeeds.
+    """
+    path = obj.path
+    if path:
+        if not path.startswith("udp:"):
+            raise click.ClickException("You must use UDP path, not {}".format(path))
+        path = path.replace("udp:", "")
+
+    start = time.monotonic()
+    UdpTransport(path).wait_until_ready(timeout)
+    end = time.monotonic()
+
+    LOG.info("Waited for {:.3f} seconds".format(end - start))
 
 
 #
@@ -272,7 +330,7 @@ cli.add_command(stellar.cli)
 cli.add_command(tezos.cli)
 
 cli.add_command(firmware.firmware_update)
-
+cli.add_command(debug.cli)
 
 #
 # Main

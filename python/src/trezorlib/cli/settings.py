@@ -16,14 +16,8 @@
 
 import click
 
-from .. import device, messages
-from . import ChoiceType
-
-PASSPHRASE_SOURCE = {
-    "ask": messages.PassphraseSourceType.ASK,
-    "device": messages.PassphraseSourceType.DEVICE,
-    "host": messages.PassphraseSourceType.HOST,
-}
+from .. import device
+from . import ChoiceType, with_client
 
 ROTATION = {"north": 0, "east": 90, "south": 180, "west": 270}
 
@@ -35,51 +29,51 @@ def cli():
 
 @cli.command()
 @click.option("-r", "--remove", is_flag=True)
-@click.pass_obj
-def pin(connect, remove):
+@with_client
+def pin(client, remove):
     """Set, change or remove PIN."""
-    return device.change_pin(connect(), remove)
+    return device.change_pin(client, remove)
 
 
 @cli.command()
 @click.option("-r", "--remove", is_flag=True)
-@click.pass_obj
-def wipe_code(connect, remove):
+@with_client
+def wipe_code(client, remove):
     """Set or remove the wipe code.
 
     The wipe code functions as a "self-destruct PIN". If the wipe code is ever
     entered into any PIN entry dialog, then all private data will be immediately
     removed and the device will be reset to factory defaults.
     """
-    return device.change_wipe_code(connect(), remove)
+    return device.change_wipe_code(client, remove)
 
 
 @cli.command()
 # keep the deprecated -l/--label option, make it do nothing
 @click.option("-l", "--label", "_ignore", is_flag=True, hidden=True, expose_value=False)
 @click.argument("label")
-@click.pass_obj
-def label(connect, label):
+@with_client
+def label(client, label):
     """Set new device label."""
-    return device.apply_settings(connect(), label=label)
+    return device.apply_settings(client, label=label)
 
 
 @cli.command()
 @click.argument("rotation", type=ChoiceType(ROTATION))
-@click.pass_obj
-def display_rotation(connect, rotation):
+@with_client
+def display_rotation(client, rotation):
     """Set display rotation.
 
     Configure display rotation for Trezor Model T. The options are
     north, east, south or west.
     """
-    return device.apply_settings(connect(), display_rotation=rotation)
+    return device.apply_settings(client, display_rotation=rotation)
 
 
 @cli.command()
 @click.argument("delay", type=str)
-@click.pass_obj
-def auto_lock_delay(connect, delay):
+@with_client
+def auto_lock_delay(client, delay):
     """Set auto-lock delay (in seconds)."""
     value, unit = delay[:-1], delay[-1:]
     units = {"s": 1, "m": 60, "h": 3600}
@@ -87,13 +81,13 @@ def auto_lock_delay(connect, delay):
         seconds = float(value) * units[unit]
     else:
         seconds = float(delay)  # assume seconds if no unit is specified
-    return device.apply_settings(connect(), auto_lock_delay_ms=int(seconds * 1000))
+    return device.apply_settings(client, auto_lock_delay_ms=int(seconds * 1000))
 
 
 @cli.command()
 @click.argument("flags")
-@click.pass_obj
-def flags(connect, flags):
+@with_client
+def flags(client, flags):
     """Set device flags."""
     flags = flags.lower()
     if flags.startswith("0b"):
@@ -102,13 +96,13 @@ def flags(connect, flags):
         flags = int(flags, 16)
     else:
         flags = int(flags)
-    return device.apply_flags(connect(), flags=flags)
+    return device.apply_flags(client, flags=flags)
 
 
 @cli.command()
 @click.option("-f", "--filename", default=None)
-@click.pass_obj
-def homescreen(connect, filename):
+@with_client
+def homescreen(client, filename):
     """Set new homescreen."""
     if filename is None:
         img = b"\x00"
@@ -131,7 +125,7 @@ def homescreen(connect, filename):
                     o = i + j * 128
                     img[o // 8] |= 1 << (7 - o % 8)
         img = bytes(img)
-    return device.apply_settings(connect(), homescreen=img)
+    return device.apply_settings(client, homescreen=img)
 
 
 #
@@ -145,30 +139,17 @@ def passphrase():
 
 
 @passphrase.command(name="enabled")
-@click.pass_obj
-def passphrase_enable(connect):
+@click.option("-f/-F", "--force-on-device/--no-force-on-device", default=None)
+@with_client
+def passphrase_enable(client, force_on_device: bool):
     """Enable passphrase."""
-    return device.apply_settings(connect(), use_passphrase=True)
+    return device.apply_settings(
+        client, use_passphrase=True, passphrase_always_on_device=force_on_device
+    )
 
 
 @passphrase.command(name="disabled")
-@click.pass_obj
-def passphrase_disable(connect):
+@with_client
+def passphrase_disable(client):
     """Disable passphrase."""
-    return device.apply_settings(connect(), use_passphrase=False)
-
-
-@passphrase.command(name="source")
-@click.argument("source", type=ChoiceType(PASSPHRASE_SOURCE))
-@click.pass_obj
-def passphrase_source(connect, source):
-    """Set passphrase source.
-
-    Configure how to enter passphrase on Trezor Model T. The options are:
-
-    \b
-    ask - always ask where to enter passphrase
-    device - always enter passphrase on device
-    host - always enter passphrase on host
-    """
-    return device.apply_settings(connect(), passphrase_source=source)
+    return device.apply_settings(client, use_passphrase=False)
