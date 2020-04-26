@@ -603,7 +603,7 @@ static void get_root_node_callback(uint32_t iter, uint32_t total) {
   layoutProgress(_("Waking up"), 1000 * iter / total);
 }
 
-const uint8_t *config_getSeed() {
+const uint8_t *config_getSeed(void) {
   if (!g_bSelectSEFlag) {
     // root node is properly cached
     if ((activeSessionCache != NULL) &&
@@ -636,7 +636,8 @@ const uint8_t *config_getSeed() {
         // this should not happen if the Host behaves and sends Initialize first
         session_startSession(NULL);
       }
-      mnemonic_to_seed(FALSE_BYTE, mnemonic, passphrase, activeSessionCache->seed,
+      mnemonic_to_seed(config_getSeedsExportFlag(), mnemonic, passphrase,
+                       activeSessionCache->seed,
                        get_root_node_callback);  // BIP-0039
       memzero(mnemonic, sizeof(mnemonic));
       memzero(passphrase, sizeof(passphrase));
@@ -648,9 +649,15 @@ const uint8_t *config_getSeed() {
                       _("Device not initialized"));
     }
   } else {
-    mnemonic_to_seed(config_getSeedsExportFlag(), NULL,
-                     "", activeSessionCache->seed,
+    char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
+    if (!protectPassphrase(passphrase)) {
+      memzero(passphrase, sizeof(passphrase));
+      return NULL;
+    }
+    mnemonic_to_seed(config_getSeedsExportFlag(), NULL, passphrase,
+                     activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
+    activeSessionCache->seedCached = sectrue;
     return activeSessionCache->seed;
   }
   return NULL;
