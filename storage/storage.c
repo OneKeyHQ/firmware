@@ -984,23 +984,14 @@ static secbool unlock(uint32_t pin, const uint8_t *ext_salt) {
                      "data has been erased.", NULL);
     }
 
-<<<<<<< HEAD
+    storage_ensure_not_wipe_code(pin);
+
     // Get the pin failure counter
     uint32_t ctr = 0;
     if (sectrue != pin_get_fails(&ctr)) {
       memzero(&pin, sizeof(pin));
       return secfalse;
     }
-=======
-  storage_ensure_not_wipe_code(pin);
-
-  // Get the pin failure counter
-  uint32_t ctr = 0;
-  if (sectrue != pin_get_fails(&ctr)) {
-    memzero(&pin, sizeof(pin));
-    return secfalse;
-  }
->>>>>>> master
 
     // Wipe storage if too many failures
     wait_random();

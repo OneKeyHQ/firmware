@@ -119,14 +119,6 @@ message ApplySettings {
     optional bool use_ble = 10;
     optional bool use_se = 11;
     optional bool use_exportseeds= 12;
-    /**
-    * Structure representing passphrase source
-    */
-    enum PassphraseSourceType {
-        ASK = 0;
-        DEVICE = 1;
-        HOST = 2;
-    }
 }
 
 /**

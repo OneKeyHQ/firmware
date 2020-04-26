@@ -472,7 +472,8 @@ static void config_compute_u2froot(const char *mnemonic,
   static CONFIDENTIAL HDNode node;
   static CONFIDENTIAL uint8_t seed[64];
   char oldTiny = usbTiny(1);
-  mnemonic_to_seed(FALSE_BYTE, mnemonic, "", seed, get_u2froot_callback);  // BIP-0039
+  mnemonic_to_seed(FALSE_BYTE, mnemonic, "", seed,
+                   get_u2froot_callback);  // BIP-0039
   usbTiny(oldTiny);
   hdnode_from_seed(seed, 64, NIST256P1_NAME, &node);
   hdnode_private_ckd(&node, U2F_KEY_PATH);
@@ -602,59 +603,57 @@ static void get_root_node_callback(uint32_t iter, uint32_t total) {
   layoutProgress(_("Waking up"), 1000 * iter / total);
 }
 
-<<<<<<< HEAD
-const uint8_t *config_getSeed(bool usePassphrase) {
-    if (!g_bSelectSEFlag) {
-        // root node is properly cached
-        if ((activeSessionCache != NULL) &&
-            (activeSessionCache->seedCached == sectrue)) {
-            return activeSessionCache->seed;
-        }
-
-        // if storage has mnemonic, convert it to node and use it
-        char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
-        if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
-            char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-            if (!protectPassphrase(passphrase)) {
-                memzero(mnemonic, sizeof(mnemonic));
-                memzero(passphrase, sizeof(passphrase));
-                return NULL;
-            }
-            // if storage was not imported (i.e. it was properly generated or recovered)
-            bool imported = false;
-            config_get_bool(KEY_IMPORTED, &imported);
-            if (!imported) {
-                // test whether mnemonic is a valid BIP-0039 mnemonic
-                if (!mnemonic_check(mnemonic)) {
-                    // and if not then halt the device
-                    error_shutdown(_("Storage failure"), _("detected."), NULL, NULL);
-                }
-                sessionSeedUsesPassphrase = usePassphrase ? sectrue : secfalse;
-                return sessionSeed;
-            }
-            char oldTiny = usbTiny(1);
-            if (activeSessionCache == NULL) {
-                // this should not happen if the Host behaves and sends Initialize first
-                session_startSession(NULL);
-            }
-            mnemonic_to_seed(mnemonic, passphrase, activeSessionCache->seed,
-                             get_root_node_callback);  // BIP-0039
-            memzero(mnemonic, sizeof(mnemonic));
-            memzero(passphrase, sizeof(passphrase));
-            usbTiny(oldTiny);
-            activeSessionCache->seedCached = sectrue;
-            return activeSessionCache->seed;
-        } else {
-            fsm_sendFailure(FailureType_Failure_NotInitialized,
-                            _("Device not initialized"));
-        }
-    } else {
-        mnemonic_to_seed(config_getSeedsExportFlag(), NULL,
-                         usePassphrase ? sessionPassphrase : "", sessionSeed,
-                         get_root_node_callback);  // BIP-0039
-        return sessionSeed; 
+const uint8_t *config_getSeed() {
+  if (!g_bSelectSEFlag) {
+    // root node is properly cached
+    if ((activeSessionCache != NULL) &&
+        (activeSessionCache->seedCached == sectrue)) {
+      return activeSessionCache->seed;
     }
-    return NULL;
+
+    // if storage has mnemonic, convert it to node and use it
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+    if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
+      char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
+      if (!protectPassphrase(passphrase)) {
+        memzero(mnemonic, sizeof(mnemonic));
+        memzero(passphrase, sizeof(passphrase));
+        return NULL;
+      }
+      // if storage was not imported (i.e. it was properly generated or
+      // recovered)
+      bool imported = false;
+      config_get_bool(KEY_IMPORTED, &imported);
+      if (!imported) {
+        // test whether mnemonic is a valid BIP-0039 mnemonic
+        if (!mnemonic_check(mnemonic)) {
+          // and if not then halt the device
+          error_shutdown(_("Storage failure"), _("detected."), NULL, NULL);
+        }
+      }
+      char oldTiny = usbTiny(1);
+      if (activeSessionCache == NULL) {
+        // this should not happen if the Host behaves and sends Initialize first
+        session_startSession(NULL);
+      }
+      mnemonic_to_seed(FALSE_BYTE, mnemonic, passphrase, activeSessionCache->seed,
+                       get_root_node_callback);  // BIP-0039
+      memzero(mnemonic, sizeof(mnemonic));
+      memzero(passphrase, sizeof(passphrase));
+      usbTiny(oldTiny);
+      activeSessionCache->seedCached = sectrue;
+      return activeSessionCache->seed;
+    } else {
+      fsm_sendFailure(FailureType_Failure_NotInitialized,
+                      _("Device not initialized"));
+    }
+  } else {
+    mnemonic_to_seed(config_getSeedsExportFlag(), NULL,
+                     "", activeSessionCache->seed,
+                     get_root_node_callback);  // BIP-0039
+    return activeSessionCache->seed;
+  }
+  return NULL;
 }
 
 static bool config_loadNode(const StorageHDNode *node, const char *curve,

@@ -555,23 +555,24 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       flash_state = STATE_END;
       if (hash_check_ok) {
         send_msg_success(dev);
-       __disable_irq();
-      // wait 3 seconds
-      char line[] = "will be restarted in _ s.";
-      for (int i = 3; i > 0; i--) {
-        line[21] = '0' + i;
-        layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, "New firmware",
-                     "successfully installed.", NULL, "Your Trezor", line,
-                     NULL);
-        delay(30000 * 1000);
-      }
-      scb_reset_system();
+        __disable_irq();
+        // wait 3 seconds
+        char line[] = "will be restarted in _ s.";
+        for (int i = 3; i > 0; i--) {
+          line[21] = '0' + i;
+          layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, "New firmware",
+                       "successfully installed.", NULL, "Your Trezor", line,
+                       NULL);
+          delay(30000 * 1000);
+        }
+        scb_reset_system();
       } else {
-      layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "Firmware installation",
-                   "aborted.", NULL, "You need to repeat", "the procedure with",
-                   "the correct firmware.");
-      send_msg_failure(dev);
-      shutdown();
+        layoutDialog(&bmp_icon_warning, NULL, NULL, NULL,
+                     "Firmware installation", "aborted.", NULL,
+                     "You need to repeat", "the procedure with",
+                     "the correct firmware.");
+        send_msg_failure(dev);
+        shutdown();
       }
       return;
     } else {
