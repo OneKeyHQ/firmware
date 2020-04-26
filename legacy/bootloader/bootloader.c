@@ -103,10 +103,10 @@ int main(void) {
   __stack_chk_guard = random32();  // this supports compiler provided
                                    // unpredictable stack protection checks
 #ifndef APPVER
-  memory_protect();
+  //   memory_protect();
   oledInit();
   sys_poweron();
-  // buttonsIrqInit();
+  buttonsIrqInit();
   timer_init();
   register_timer("layout", timer1s / 2, layoutStatusLogo);
   register_timer("button", timer1s / 2, buttonsTimer);
@@ -116,6 +116,9 @@ int main(void) {
   bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
 
   if (firmware_present_new() && !left_pressed) {
+    oledClear();
+    oledDrawBitmap(56, 18, &bmp_BiXin_logo32);
+    oledRefresh();
     const image_header *hdr =
         (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
 

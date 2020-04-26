@@ -158,7 +158,6 @@ void setup(void) {
   i2c_slave_init_irq();
 
   rtt_log_init();
-  rtt_log_print("segger rtt start\r\n");
 }
 
 void setupApp(void) {
@@ -185,6 +184,8 @@ void setupApp(void) {
 
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
+
+  rtt_log_print("app segger rtt start\r\n");
 
 #if USE_SE
   // master i2c init

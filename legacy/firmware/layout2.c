@@ -45,9 +45,6 @@ uint8_t Disp_buffer[DISP_BUFSIZE];
 static uint16_t s_usCurrentCount;
 static uint16_t s_uiShowLength;
 
-/* Screen timeout */
-uint32_t system_millis_lock_start = 0;
-
 #define BLE_NAME "Ble name:"
 #define BLE_MAC "Ble mac:"
 #define BLE_VER "Ble version:"

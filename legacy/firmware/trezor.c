@@ -40,6 +40,8 @@
 #endif
 
 #define autoPowerOffDelayMsDefault (5 * 60 * 1000U)  // 5 minutes
+/* Screen timeout */
+uint32_t system_millis_lock_start = 0;
 
 void check_lock_screen(void) {
   buttonUpdate();
