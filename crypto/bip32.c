@@ -101,6 +101,9 @@ const curve_info curve25519_info = {
     .hasher_script = HASHER_SHA2,
 };
 
+extern bool g_bSelectSEFlag;                                                                                                                                                                                                                              
+extern uint8_t g_uchash_mode;
+
 int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
                      const uint8_t *chain_code, const uint8_t *public_key,
                      const char *curve, HDNode *out) {

@@ -11,4 +11,4 @@ if __debug__:
 
 
 class BixinUpgrade(p.MessageType):
-    MESSAGE_WIRE_TYPE = 902
+    MESSAGE_WIRE_TYPE = 903

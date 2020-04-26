@@ -177,6 +177,8 @@ void oledClear() {
   memzero(_oledbuffer, sizeof(_oledbuffer) - (OLED_WIDTH * (LOGO_HEIGHT / 8)));
 }
 
+void oledAllDisplay() { memset(_oledbuffer, 0xFF, sizeof(_oledbuffer)); }
+
 void oledInvertDebugLink() {
   if (is_debug_link) {
     oledInvertPixel(OLED_WIDTH - 5, 0);

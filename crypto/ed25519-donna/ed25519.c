@@ -20,6 +20,9 @@
 #include "ed25519-hash-custom.h"
 #include "mi2c.h"
 
+extern bool g_bSelectSEFlag; 
+extern uint8_t g_uchash_mode;
+
 /*
 	Generates a (extsk[0..31]) and aExt (extsk[32..63])
 */

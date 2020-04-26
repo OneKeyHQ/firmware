@@ -17,7 +17,10 @@ from .BinanceSignTx import BinanceSignTx
 from .BinanceSignedTx import BinanceSignedTx
 from .BinanceTransferMsg import BinanceTransferMsg
 from .BinanceTxRequest import BinanceTxRequest
-from .BixinGenSeeds import BixinGenSeeds
+from .BixinGetMessageSE import BixinGetMessageSE
+from .BixinMessageSE import BixinMessageSE
+from .BixinSeedExportData import BixinSeedExportData
+from .BixinSeedOperate import BixinSeedOperate
 from .BixinUpgrade import BixinUpgrade
 from .ButtonAck import ButtonAck
 from .ButtonRequest import ButtonRequest
@@ -277,6 +280,7 @@ from . import ButtonRequestType
 from . import Capability
 from . import DebugLinkShowTextStyle
 from . import DebugSwipeDirection
+from . import ExportType
 from . import FailureType
 from . import InputScriptType
 from . import LiskTransactionType
@@ -290,6 +294,7 @@ from . import PinMatrixRequestType
 from . import RecoveryDeviceType
 from . import RequestType
 from . import SdProtectOperationType
+from . import SeedRequestType
 from . import TezosBallotType
 from . import TezosContractType
 from . import WordRequestType

@@ -119,6 +119,14 @@ message ApplySettings {
     optional bool use_ble = 10;
     optional bool use_se = 11;
     optional bool use_exportseeds= 12;
+    /**
+    * Type of seed and mnemonic export flag
+    */
+    enum ExportType {
+        SeedEncExportType_NO= 0; 
+        SeedEncExportType_YES = 1;
+        MnemonicPlainExportType_YES = 2;
+    }
 }
 
 /**
@@ -359,12 +367,46 @@ message NextU2FCounter {
 }
 
 /**
- * Request: Gen bitcon seeds random
+ * Request: Gen bitcon seeds random or seed encypt import and export
  * @end
  */
-message BixinGenSeeds {
+message BixinSeedOperate {
+    required SeedRequestType type = 1;
+    optional string seed_importData = 2;	
+    /**
+    * Type of Seed request
+    */
+    enum SeedRequestType {
+        SeedRequestType_Gen= 0;
+        SeedRequestType_EncExport = 1;
+        SeedRequestType_EncImport = 2;
+    }
+}
+/**
+ * Request: if seed export success , device sends back the message in Success response
+ * @start
+ * @next Success
+ */
+message BixinSeedExportData {
+    optional string seed_exportdata = 1;
 }
 
+/**
+ * Request: message is se some cmd
+ * @end
+ */
+message BixinMessageSE{
+ required string inputmessage = 1;
+}
+
+/**
+ * Request: if seed export success , device sends back the message in Success response
+ * @start
+ * @next Success
+ */
+message BixinGetMessageSE {
+    optional string getmessage = 1;
+}
 
 /**
  * Request: Upgrade firmware

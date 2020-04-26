@@ -118,7 +118,8 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size);
 
 bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len);
-bool config_getSeedsBytes(uint8_t *dest, uint16_t dest_size);
+bool config_SeedsEncExportBytes(uint8_t *dest);
+bool config_SeedsEncImportBytes(uint8_t *src, uint16_t src_size);
 
 #if DEBUG_LINK
 bool config_dumpNode(HDNodeType *node);
@@ -164,8 +165,10 @@ void config_setBleTrans(bool mode);
 bool config_getBleTrans(void);
 void config_setWhetherUseSE(bool flag);
 bool config_getWhetherUseSE(void);
-void config_setSeedsExportFlag(bool flag);
+void config_setSeedsExportFlag(ExportType flag);
 bool config_getSeedsExportFlag(void);
+bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,
+                         uint8_t *pucRevData);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

@@ -542,24 +542,52 @@ void fsm_msgGetNextU2FCounter() {
   layoutHome();
 }
 
-void fsm_msgBixinGenSeeds(const BixinGenSeeds *msg) {
+void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
   uint8_t ucBuf[65], i = 0;
   uint32_t uiTemp;
 
-  (void)msg;
-  CHECK_NOT_INITIALIZED
-  CHECK_PIN
-  for (i = 0; i < 16; i++) {
-    uiTemp = random32();
-    memcpy(ucBuf + 1 + i * 4, &uiTemp, 4);
-  }
-  ucBuf[0] = config_getSeedsExportFlag();
-  if (!config_setSeedsBytes(ucBuf, 65)) {
-    fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
+  if (msg->type == SeedRequestType_SeedRequestType_Gen) {
+    CHECK_PIN
+    CHECK_NOT_INITIALIZED
+    for (i = 0; i < 16; i++) {
+      uiTemp = random32();
+      memcpy(ucBuf + 1 + i * 4, &uiTemp, 4);
+    }
+    ucBuf[0] = config_getSeedsExportFlag();
+    if (!config_setSeedsBytes(ucBuf, 65)) {
+      fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
+      layoutHome();
+      return;
+    }
+    fsm_sendSuccess(_("device initialied success"));
     layoutHome();
     return;
+  } else if (msg->type == SeedRequestType_SeedRequestType_EncExport) {
+    RESP_INIT(BixinSeedExportData);
+    CHECK_PIN
+    CHECK_INITIALIZED
+    if (!config_SeedsEncExportBytes((uint8_t *)(resp->seed_exportdata))) {
+      fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
+      layoutHome();
+      return;
+    }
+    resp->has_seed_exportdata = true;
+    msg_write(MessageType_MessageType_BixinSeedOperate, resp);
+    layoutHome();
+    return;
+  } else if (msg->type == SeedRequestType_SeedRequestType_EncImport) {
+    CHECK_PIN
+    CHECK_NOT_INITIALIZED
+    if (msg->has_seed_importData) {
+      if (config_SeedsEncImportBytes((uint8_t *)(msg->seed_importData),
+                                     sizeof(msg->seed_importData))) {
+        fsm_sendSuccess(_("seed import success"));
+        layoutHome();
+        return;
+      }
+    }
   }
-  fsm_sendSuccess(_("U2F counter set"));
+  fsm_sendFailure(FailureType_Failure_DataError, NULL);
   layoutHome();
 }
 
@@ -569,4 +597,20 @@ void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
   CHECK_PIN
   fsm_sendSuccess(_("reboot start"));
   sys_backtoboot();
+}
+
+void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
+  RESP_INIT(BixinGetMessageSE);
+
+  if (false == config_getMessageSE((uint8_t *)(msg->inputmessage),
+                                   sizeof(msg->inputmessage),
+                                   (uint8_t *)(resp->getmessage))) {
+    fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+    layoutHome();
+    return;
+  }
+  resp->has_getmessage = true;
+  msg_write(MessageType_MessageType_BixinMessageSE, resp);
+  layoutHome();
+  return;
 }

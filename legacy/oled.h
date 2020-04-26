@@ -52,6 +52,8 @@
 
 void oledInit(void);
 void oledClear(void);
+void oledAllDisplay(void);
+
 void oledRefresh(void);
 
 void oledSetDebugLink(bool set);

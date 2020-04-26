@@ -56,6 +56,11 @@ typedef struct __attribute__((packed)) {
 #define U2F_VENDOR_FIRST        0x40    // First vendor defined command
 #define U2F_VENDOR_LAST         0xbf    // Last vendor defined command
 
+
+//button and oled test
+#define Buttton_Lcd_Test        0x30
+
+
 // U2F_CMD_REGISTER command defines
 
 #define U2F_REGISTER_ID         0x05    // Version 2 registration identifier

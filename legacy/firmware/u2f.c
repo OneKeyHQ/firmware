@@ -32,6 +32,7 @@
 #include "memzero.h"
 #include "mi2c.h"
 #include "nist256p1.h"
+#include "oled.h"
 #include "rng.h"
 #include "si2c.h"
 #include "sys.h"

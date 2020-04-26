@@ -48,6 +48,9 @@ static CONFIDENTIAL struct {
 
 #endif
 
+extern bool g_bSelectSEFlag;                                                                                                                                                                                                                              
+extern uint8_t g_uchash_mode;
+
 const char *mnemonic_generate(int strength) {
   if (strength % 32 || strength < 128 || strength > 256) {
     return 0;
