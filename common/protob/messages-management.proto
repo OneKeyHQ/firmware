@@ -365,3 +365,11 @@ message NextU2FCounter {
 message BixinGenSeeds {
 }
 
+
+/**
+ * Request: Upgrade firmware
+ * @end
+ */
+message BixinUpgrade {
+}
+ 

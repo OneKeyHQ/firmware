@@ -197,3 +197,4 @@ if not utils.BITCOIN_ONLY:
     WebAuthnAddResidentCredential = 802  # type: Literal[802]
     WebAuthnRemoveResidentCredential = 803  # type: Literal[803]
     BixinGenSeeds = 901  # type: Literal[901]
+    BixinUpgrade = 902  # type: Literal[902]

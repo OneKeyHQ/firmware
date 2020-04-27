@@ -138,5 +138,6 @@ void fsm_msgStellarManageDataOp(const StellarManageDataOp *msg);
 void fsm_msgStellarBumpSequenceOp(const StellarBumpSequenceOp *msg);
 
 void fsm_msgBixinGenSeeds(const BixinGenSeeds *msg);
+void fsm_msgBixinUpgrade(const BixinUpgrade*msg);
 
 #endif

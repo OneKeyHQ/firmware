@@ -31,6 +31,7 @@
 #include "curves.h"
 #include "debug.h"
 #include "ecdsa.h"
+#include "sys.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "hmac.h"

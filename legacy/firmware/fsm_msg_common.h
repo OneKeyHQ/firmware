@@ -562,3 +562,12 @@ void fsm_msgBixinGenSeeds(const BixinGenSeeds *msg) {
   fsm_sendSuccess(_("U2F counter set"));
   layoutHome();
 }
+
+void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
+
+  (void)msg;
+  CHECK_NOT_INITIALIZED
+  CHECK_PIN
+  fsm_sendSuccess(_("reboot start"));
+  sys_backtoboot();
+}
