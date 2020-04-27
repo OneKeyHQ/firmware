@@ -334,6 +334,7 @@ void layoutHome(void) {
     oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "NEEDS BACKUP!",
                          FONT_STANDARD);
   }
+  layoutFillBleName(6);
   oledRefresh();
 
   // Reset lock screen timeout
@@ -1171,6 +1172,9 @@ void layoutHomeInfo(void) {
   static uint8_t info_page = 0;
   buttonUpdate();
 
+  if (layoutNeedRefresh()) {
+    layoutHome();
+  }
   if (layoutLast == layoutHome) {
     if (button.UpUp || button.DownUp) {
       layoutDeviceInfo(info_page);

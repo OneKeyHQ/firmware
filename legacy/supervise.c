@@ -18,6 +18,7 @@
  */
 
 #include "supervise.h"
+#include <libopencm3/cm3/scb.h>
 #include <libopencm3/stm32/flash.h>
 #include <stdint.h>
 #include "memory.h"
@@ -62,6 +63,8 @@ static uint32_t svhandler_flash_lock(void) {
   return FLASH_SR;
 }
 
+static void svhandler_system_reset(void) { scb_reset_system(); }
+
 extern volatile uint32_t system_millis;
 
 void svc_handler_main(uint32_t *stack) {
@@ -81,6 +84,9 @@ void svc_handler_main(uint32_t *stack) {
       break;
     case SVC_TIMER_MS:
       stack[0] = system_millis;
+      break;
+    case SVC_SYS_RESET:
+      svhandler_system_reset();
       break;
     default:
       stack[0] = 0xffffffff;

@@ -1,6 +1,8 @@
 #include "ble.h"
 #include "layout.h"
+#include "rtt_log.h"
 #include "sys.h"
+#include "timer.h"
 #include "usart.h"
 
 static usart_msg ble_usart_msg;
@@ -39,7 +41,13 @@ bool ble_connect_state(void) { return ble_connect; }
 bool ble_name_state(void) { return get_ble_name; }
 uint8_t *ble_get_name(void) { return ble_name; }
 
-void bleUartPoll(void) {
+void ble_reset(void) {
+  ble_power_off();
+  delay_ms(100);
+  ble_power_on();
+}
+
+void ble_uart_poll(void) {
   static uint8_t read_status = UARTSTATE_IDLE;
   static uint8_t buf[128] = {0};
   uint8_t passkey[7] = {0};
@@ -110,6 +118,7 @@ void bleUartPoll(void) {
         if (ble_usart_msg.cmd_len == BLE_NAME_LEN) {
           memcpy(ble_name, ble_usart_msg.cmd_vale, BLE_NAME_LEN);
           get_ble_name = true;
+          layoutRefreshSet(true);
         }
         break;
       case BLE_CMD_BATTERY:

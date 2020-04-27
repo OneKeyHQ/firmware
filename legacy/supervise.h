@@ -30,6 +30,8 @@
 #define SVC_FLASH_LOCK 3
 #define SVC_TIMER_MS 4
 
+#define SVC_SYS_RESET 10
+
 /* Unlocks flash.  This function needs to be called before programming
  * or erasing. Multiple calls of flash_program and flash_erase can
  * follow and should be completed with flash_lock().
@@ -71,6 +73,11 @@ inline uint32_t svc_timer_ms(void) {
   return r0;
 }
 
+inline void svc_system_reset(void) {
+  register uint32_t r0 __asm__("r0");
+  __asm__ __volatile__("svc %1" : "=r"(r0) : "i"(SVC_SYS_RESET) : "memory");
+}
+
 #else
 
 extern void svc_flash_unlock(void);
@@ -78,7 +85,7 @@ extern void svc_flash_program(uint32_t program_size);
 extern void svc_flash_erase_sector(uint16_t sector);
 extern uint32_t svc_flash_lock(void);
 extern uint32_t svc_timer_ms(void);
-
+extern void svc_system_reset(void);
 #endif
 
 #endif

@@ -19,7 +19,6 @@
 
 #include <libopencm3/stm32/flash.h>
 #include <libopencm3/usb/usbd.h>
-#include <vendor/libopencm3/include/libopencmsis/core_cm3.h>
 
 #include <string.h>
 
@@ -117,23 +116,6 @@ static void check_and_write_chunk(void) {
     show_halt("Error installing", "firmware.");
     return;
   }
-
-#if 0
-  flash_enter();
-  for (uint32_t i = offset / sizeof(uint32_t); i < chunk_pos / sizeof(uint32_t);
-       i++) {
-    if (UPDATE_ST == update_mode) {
-      flash_program_word(FLASH_FWHEADER_START + chunk_idx * FW_CHUNK_SIZE +
-                             i * sizeof(uint32_t),
-                         FW_CHUNK[i]);
-    } else {
-      flash_program_word(FLASH_BLE_ADDR_START + chunk_idx * FW_CHUNK_SIZE +
-                             i * sizeof(uint32_t),
-                         FW_CHUNK[i]);
-    }
-  }
-  flash_exit();
-#endif
 
   // all done
   if (flash_len == flash_pos) {
@@ -282,7 +264,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         erase_code_progress();
         send_msg_success(dev);
         flash_state = STATE_FLASHSTART;
-        timer_out_set(timer_out_countdown, timer1s * 10);
+        timer_out_set(timer_out_countdown, timer1s * 5);
       } else {
         send_msg_failure(dev);
         flash_state = STATE_END;
@@ -300,7 +282,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         erase_ble_code_progress();
         send_msg_success(dev);
         flash_state = STATE_FLASHSTART;
-        timer_out_set(timer_out_countdown, timer1s * 10);
+        timer_out_set(timer_out_countdown, timer1s * 5);
       } else {
         send_msg_failure(dev);
         flash_state = STATE_END;
@@ -432,7 +414,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     if (msg_id == 0x0000) {
       send_msg_features(dev);
       flash_state = STATE_FLASHSTART;
-      timer_out_set(timer_out_countdown, timer1s * 10);
+      timer_out_set(timer_out_countdown, timer1s * 5);
       return;
     }
 
@@ -443,7 +425,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       show_halt("Error installing", "firmware.");
       return;
     }
-    timer_out_set(timer_out_countdown, timer1s * 10);
+    timer_out_set(timer_out_countdown, timer1s * 5);
     static uint8_t flash_anim = 0;
     if (flash_anim % 32 == 4) {
       layoutProgress("INSTALLING ... Please wait",
@@ -555,17 +537,8 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       flash_state = STATE_END;
       if (hash_check_ok) {
         send_msg_success(dev);
-        __disable_irq();
-        // wait 3 seconds
-        char line[] = "will be restarted in _ s.";
-        for (int i = 3; i > 0; i--) {
-          line[21] = '0' + i;
-          layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, "New firmware",
-                       "successfully installed.", NULL, "Your Trezor", line,
-                       NULL);
-          delay(30000 * 1000);
-        }
-        scb_reset_system();
+        show_unplug("New firmware", "successfully installed.");
+        shutdown();
       } else {
         layoutDialog(&bmp_icon_warning, NULL, NULL, NULL,
                      "Firmware installation", "aborted.", NULL,
@@ -699,9 +672,7 @@ void usbLoop(void) {
     layoutBootHome();
     usbd_poll(usbd_dev);
     i2cSlavePoll();
-    bleUartPoll();
-    if (!firmware_present &&
-        (flash_state == STATE_READY || flash_state == STATE_OPEN)) {
+    if (flash_state == STATE_READY || flash_state == STATE_OPEN) {
       checkButtons();
     }
     if (flash_state == STATE_FLASHSTART || flash_state == STATE_FLASHING) {

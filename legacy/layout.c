@@ -22,6 +22,7 @@
 #include "prompt.h"
 
 #if !EMULATOR
+#include "ble.h"
 #include "sys.h"
 #include "timer.h"
 #endif
@@ -244,9 +245,19 @@ void layoutStatusLogo(void) {
 void layoutBlePasskey(uint8_t *passkey) {
   oledClear();
   oledDrawStringCenter(60, 20, "Bluetooth passkey:", FONT_STANDARD);
-  oledDrawStringCenter(60, 30, (char *)passkey, FONT_STANDARD);
+  oledDrawStringCenter(60, 30, (char *)passkey, FONT_DOUBLE);
   oledRefresh();
 }
+
+void layoutFillBleName(uint8_t line) {
+  uint8_t *ble_name;
+  if (ble_name_state() == true) {
+    ble_name = ble_get_name();
+    oledclearLine(line);
+    oledDrawStringCenter(64, line * 8, (char *)ble_name, FONT_STANDARD);
+  }
+}
+
 #endif
 
 extern void shutdown(void);

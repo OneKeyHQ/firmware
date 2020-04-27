@@ -35,6 +35,7 @@
 #include "util.h"
 #if !EMULATOR
 #include <libopencm3/stm32/desig.h>
+#include "ble.h"
 #include "otp.h"
 #include "sys.h"
 #endif
@@ -127,6 +128,7 @@ int main(void) {
 #else
   // check_bootloader();
   setupApp();
+  ble_reset();
 #if !EMULATOR
   register_timer("layout", timer1s / 2, layoutStatusLogo);
   register_timer("button", timer1s / 2, buttonsTimer);

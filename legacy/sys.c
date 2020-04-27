@@ -28,7 +28,7 @@ bool sys_usbState(void) {
 bool sys_bleState(void) { return ble_connect_state(); }
 
 void sys_shutdown(void) {
-  delay_ms(2000);  // delay for prevois display
+  delay_ms(1000);  // delay for prevois display
   oledClear();
   oledDrawStringCenter(64, 30, "power off ...", FONT_STANDARD);
   oledRefresh();
@@ -60,4 +60,18 @@ void sys_poweron(void) {
   }
   stm32_power_on();
   ble_power_on();
+}
+
+extern uint8_t _ram_start[], _ram_end[];
+
+void sys_backtoboot(void) {
+  oledClear();
+  oledDrawStringCenter(64, 30, "Back to boot", FONT_STANDARD);
+  oledRefresh();
+  delay_ms(1000);  // delay for prevois display
+  ble_power_off();
+  stm32_power_off();
+  delay_ms(100);
+  memcpy((uint8_t*)(ST_RAM_END - 4), "boot", 4);
+  svc_system_reset();
 }

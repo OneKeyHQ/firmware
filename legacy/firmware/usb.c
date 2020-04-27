@@ -34,7 +34,6 @@
 #include "layout2.h"
 #include "si2c.h"
 #include "sys.h"
-#include "usart.h"
 #include "usb.h"
 #include "util.h"
 
@@ -412,15 +411,18 @@ void usbInit(void) {
 
 void i2cSlavePoll(void) {
   uint32_t usLen;
-  uint32_t len;
+  uint32_t total_len, len;
   if (i2c_recv_done) {
     memset(packet_buf, 0x00, sizeof(packet_buf));
     fifo_read_peek(&i2c_fifo_in, packet_buf, 1);
     if (packet_buf[0] == '?') {  // trezor command
-      len = fifo_lockdata_len(&i2c_fifo_in);
-      if (len > 64) layoutError("Trezor cmd", "wrong len");
-      fifo_read_lock(&i2c_fifo_in, packet_buf, len);
-      main_rx_callback(NULL, 0);
+      while (1) {
+        total_len = fifo_lockdata_len(&i2c_fifo_in);
+        if (total_len == 0) break;
+        len = total_len > 64 ? 64 : total_len;
+        fifo_read_lock(&i2c_fifo_in, packet_buf, len);
+        main_rx_callback(NULL, 0);
+      }
     } else {  // apdu command
     }
     i2c_recv_done = false;

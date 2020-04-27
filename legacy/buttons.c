@@ -136,6 +136,7 @@ bool waitButtonResponse(uint8_t btn, uint32_t time_out) {
       break;
     }
   }
+  timer_out_set(timer_out_countdown, 0);
   return flag;
 }
 #endif

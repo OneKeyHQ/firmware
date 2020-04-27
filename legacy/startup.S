@@ -33,7 +33,7 @@ reset_handler:
 #endif
 
   ldr r0, =_ram_start // r0 - point to beginning of SRAM
-  ldr r1, =_ram_end   // r1 - point to byte after the end of SRAM
+  ldr r1, =_ram_end-4   // r1 - point to byte after the end of SRAM
   ldr r2, =0          // r2 - the byte-sized value to be written
   bl memset_reg
 
@@ -68,7 +68,7 @@ shutdown:
   mov r12, r0
   ldr lr, =0xffffffff
   ldr r0, =_ram_start
-  ldr r1, =_ram_end
+  ldr r1, =_ram_end-4
   // set to value in r2
   bl memset_reg
   b sys_shutdown // loop forever

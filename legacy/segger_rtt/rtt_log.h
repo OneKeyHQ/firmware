@@ -25,6 +25,8 @@ void rtt_log_init(void);
     SEGGER_RTT_printf(0, "\r\n");                 \
   }
 
+void rtt_log_hexdump(uint8_t *buf, uint32_t len);
+
 #if RAW_ONLY
 #define rtt_log_fomate(log_level, sFormat, ...)              \
   {                                                          \

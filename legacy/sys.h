@@ -3,6 +3,10 @@
 
 #include <libopencm3/stm32/gpio.h>
 
+#define ST_RAM_START 0x20000000
+#define ST_RAM_LEN 0x20000
+#define ST_RAM_END (ST_RAM_START + ST_RAM_LEN)
+
 #ifndef FEITIAN_PCB_V1_1
 #define FEITIAN_PCB_V1_1 1
 #endif
@@ -22,10 +26,10 @@
 #define SE_POWER_PIN GPIO8
 
 #define USB_INSERT_PORT GPIOA
-#define USB_INSERT_PIN GPIO15
+#define USB_INSERT_PIN GPIO8
 
-#define BLE_POWER_CTRL_PORT GPIOA
-#define BLE_POWER_CTRL_PIN GPIO2
+#define BLE_POWER_CTRL_PORT GPIOC
+#define BLE_POWER_CTRL_PIN GPIO10
 #endif
 
 #define NFC_SHOW_PORT GPIOC
@@ -60,6 +64,7 @@ bool sys_usbState(void);
 bool sys_bleState(void);
 void sys_poweron(void);
 void sys_shutdown(void);
+void sys_backtoboot(void);
 
 // NFC Connected
 #define NFC_LINK 0x09

@@ -185,8 +185,6 @@ void setupApp(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
-  rtt_log_print("app segger rtt start\r\n");
-
 #if USE_SE
   // master i2c init
   vMI2CDRV_Init();
@@ -271,8 +269,6 @@ void mpu_config_bootloader(void) {
 
 // Never use in bootloader! Disables access to PPB (including MPU, NVIC, SCB)
 void mpu_config_firmware(void) {
-  // TODO:for debug
-//   return;
 #if MEMORY_PROTECT
   // Disable MPU
   MPU_CTRL = 0;

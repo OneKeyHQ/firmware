@@ -18,7 +18,6 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "usart.h"
 #include <errno.h>
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/gpio.h>
@@ -26,6 +25,9 @@
 #include <libopencm3/stm32/usart.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "ble.h"
+#include "usart.h"
 
 #if (_SUPPORT_DEBUG_UART_)
 /************************************************************************
@@ -127,7 +129,7 @@ void ble_usart_init(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO2 | GPIO3);
   gpio_set_af(GPIOA, GPIO_AF7, GPIO2 | GPIO3);
 
-  // usart1 set
+  // usart2 set
   usart_set_baudrate(BLE_UART, 115200);
   usart_set_databits(BLE_UART, 8);
   usart_set_stopbits(BLE_UART, USART_STOPBITS_1);
@@ -135,6 +137,11 @@ void ble_usart_init(void) {
   usart_set_flow_control(BLE_UART, USART_FLOWCONTROL_NONE);
   usart_set_mode(BLE_UART, USART_MODE_TX_RX);
   usart_enable(BLE_UART);
+
+  // set NVIC
+  nvic_set_priority(NVIC_USART2_IRQ, 0);
+  nvic_enable_irq(NVIC_USART2_IRQ);
+  usart_enable_rx_interrupt(BLE_UART);
 }
 
 void ble_usart_enable(void) { usart_enable(BLE_UART); }
@@ -163,4 +170,10 @@ bool ble_read_byte(uint8_t *buf) {
     return true;
   }
   return false;
+}
+
+void usart2_isr(void) {
+  if (usart_get_flag(BLE_UART, USART_SR_RXNE) != 0) {
+    ble_uart_poll();
+  }
 }

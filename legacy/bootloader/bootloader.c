@@ -56,14 +56,14 @@ bool get_button_response(void) {
 void show_halt(const char *line1, const char *line2) {
   layoutDialog(&bmp_icon_error, NULL, NULL, NULL, line1, line2, NULL,
                "Your device", "will be restart.", NULL);
-  delay_ms(2000);
+  delay_ms(1000);
   shutdown();
 }
 
 void show_unplug(const char *line1, const char *line2) {
   layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, line1, line2, NULL,
                "Your device", "will be restart.", NULL);
-  delay_ms(2000);
+  delay_ms(1000);
 }
 
 static void show_unofficial_warning(const uint8_t *hash) {
@@ -97,6 +97,11 @@ static void __attribute__((noreturn)) load_app(int signed_firmware) {
 static void bootloader_loop(void) { usbLoop(); }
 
 int main(void) {
+  static bool force_boot = false;
+  if (memcmp((uint8_t *)(ST_RAM_END - 4), "boot", 4) == 0) {
+    force_boot = true;
+  }
+
 #ifndef APPVER
   setup();
 #endif
@@ -115,7 +120,7 @@ int main(void) {
 #ifndef APPVER
   bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
 
-  if (firmware_present_new() && !left_pressed) {
+  if (firmware_present_new() && !left_pressed && !force_boot) {
     oledClear();
     oledDrawBitmap(56, 18, &bmp_BiXin_logo32);
     oledRefresh();
