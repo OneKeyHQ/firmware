@@ -68,17 +68,9 @@
 #define GPIO_MI2C_SCL GPIO8
 #define GPIO_MI2C_SDA GPIO9
 
-#if (FEITIAN_PCB_V1_1)
-// SE power IO
-#define GPIO_SE_PORT GPIOB
-#define GPIO_SE_POWER GPIO13
-#else
-
 // SE power IO
 #define GPIO_SE_PORT GPIOC
 #define GPIO_SE_POWER GPIO8
-
-#endif
 
 // power control SE
 #define POWER_ON_SE() (gpio_set(GPIO_SE_PORT, GPIO_SE_POWER))

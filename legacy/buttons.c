@@ -28,12 +28,17 @@ struct buttonState button;
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/syscfg.h>
 
-#include "sys.h"
-
 static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
 
-uint16_t buttonRead(void) { return gpio_port_read(BTN_PORT); }
+uint16_t buttonRead(void) {
+  uint16_t tmp = 0x00;
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_YES);
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_UP);
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_DOWN);
+  tmp |= gpio_get(BTN_PORT_NO, BTN_PIN_NO);
+  return tmp;
+}
 
 void buttonsIrqInit(void) {
   // enable SYSCFG	clock
@@ -43,15 +48,31 @@ void buttonsIrqInit(void) {
   SYSCFG_EXTICR1 = 0x20;
 
   // set EXTI
-  exti_select_source(BTN_PIN_NO, GPIOC);
+  exti_select_source(BTN_PIN_NO, BTN_PORT_NO);
   exti_set_trigger(BTN_PIN_NO, EXTI_TRIGGER_BOTH);
   exti_enable_request(BTN_PIN_NO);
 
+#if FEITIAN_PCB_V1_3
+  // set NVIC
+  nvic_set_priority(NVIC_EXTI1_IRQ, 0);
+  nvic_enable_irq(NVIC_EXTI1_IRQ);
+#else
   // set NVIC
   nvic_set_priority(NVIC_EXTI0_IRQ, 0);
   nvic_enable_irq(NVIC_EXTI0_IRQ);
+#endif
 }
-
+#if FEITIAN_PCB_V1_3
+void exti1_isr(void) {
+  if (exti_get_flag_status(BTN_PIN_NO)) {
+    exti_reset_request(BTN_PIN_NO);
+    if (gpio_get(BTN_PORT_NO, BTN_PIN_NO)) {
+      button_timer_enable = 1;
+      button_timer_counter = 0;
+    }
+  }
+}
+#else
 void exti0_isr(void) {
   if (exti_get_flag_status(BTN_PIN_NO)) {
     exti_reset_request(BTN_PIN_NO);
@@ -61,7 +82,7 @@ void exti0_isr(void) {
     }
   }
 }
-
+#endif
 void buttonsTimer(void) {
   if (button_timer_enable) {
     button_timer_counter++;

@@ -81,7 +81,6 @@ jump_to_firmware(const vector_table_t *ivt, int trust) {
     SCB_VTOR = (uint32_t)ivt;  // * relocate vector table
     // Set stack pointer
     __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
-    timer_init();
     mpu_config_firmware();  // * configure MPU for the firmware
   }
 

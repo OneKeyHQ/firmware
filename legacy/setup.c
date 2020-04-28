@@ -94,9 +94,9 @@ void setup(void) {
   RCC_CR |= RCC_CR_CSSON;
 
   // set GPIO for buttons
-  gpio_mode_setup(GPIOC, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
+  gpio_mode_setup(BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
                   BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN);
-  gpio_mode_setup(GPIOC, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BTN_PIN_NO);
+  gpio_mode_setup(BTN_PORT_NO, GPIO_MODE_INPUT, GPIO_PUPD_NONE, BTN_PIN_NO);
 
   // set GPIO for usb_insert
   gpio_mode_setup(USB_INSERT_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE,

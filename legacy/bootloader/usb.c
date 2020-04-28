@@ -635,7 +635,8 @@ static void checkButtons(void) {
   if (btn_final) {
     return;
   }
-  uint16_t state = gpio_port_read(BTN_PORT);
+  uint16_t state = gpio_get(BTN_PORT, BTN_PIN_YES);
+  state |= gpio_get(BTN_PORT_NO, BTN_PIN_NO);
   if ((btn_left == false) && (state & BTN_PIN_NO)) {
     btn_left = true;
     oledBox(0, 0, 3, 3, true);

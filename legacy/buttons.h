@@ -23,6 +23,7 @@
 #include <libopencm3/stm32/gpio.h>
 #include <stdbool.h>
 
+#include "sys.h"
 #include "timer.h"
 
 struct buttonState {
@@ -54,8 +55,12 @@ bool waitButtonResponse(uint8_t btn, uint32_t time_out);
 #define BTN_PIN_YES GPIO2
 #endif
 
+#ifndef BTN_PORT_NO
+#define BTN_PORT_NO BTN_POWER_PORT
+#endif
+
 #ifndef BTN_PIN_NO
-#define BTN_PIN_NO GPIO0
+#define BTN_PIN_NO BTN_POWER_PIN
 #endif
 
 #ifndef BTN_PIN_UP
