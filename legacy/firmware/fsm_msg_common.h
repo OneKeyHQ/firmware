@@ -564,7 +564,6 @@ void fsm_msgBixinGenSeeds(const BixinGenSeeds *msg) {
 }
 
 void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
-
   (void)msg;
   CHECK_NOT_INITIALIZED
   CHECK_PIN
