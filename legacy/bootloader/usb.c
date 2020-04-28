@@ -672,7 +672,8 @@ void usbLoop(void) {
     layoutBootHome();
     usbd_poll(usbd_dev);
     i2cSlavePoll();
-    if (flash_state == STATE_READY || flash_state == STATE_OPEN) {
+    if (!firmware_present &&
+        (flash_state == STATE_READY || flash_state == STATE_OPEN)) {
       checkButtons();
     }
     if (flash_state == STATE_FLASHSTART || flash_state == STATE_FLASHING) {

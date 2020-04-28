@@ -68,10 +68,6 @@ void sys_backtoboot(void) {
   oledClear();
   oledDrawStringCenter(64, 30, "Back to boot", FONT_STANDARD);
   oledRefresh();
-  delay_ms(1000);  // delay for prevois display
-  ble_power_off();
-  stm32_power_off();
-  delay_ms(100);
-  memcpy((uint8_t*)(ST_RAM_END - 4), "boot", 4);
+  memcpy((uint8_t *)(ST_RAM_END - 4), "boot", 4);
   svc_system_reset();
 }

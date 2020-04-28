@@ -63,7 +63,7 @@ static uint32_t svhandler_flash_lock(void) {
   return FLASH_SR;
 }
 
-static void svhandler_system_reset(void) { scb_reset_system(); }
+static void svhandler_system_reset(void) { scb_reset_core(); }
 
 extern volatile uint32_t system_millis;
 

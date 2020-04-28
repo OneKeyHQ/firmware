@@ -217,21 +217,18 @@ void layoutStatusLogo(void) {
     refresh = true;
     switch (battery_bak) {
       case 0:
-        oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_0);
-        break;
-      case 1:
         oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_1);
         break;
-      case 2:
+      case 1:
         oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_2);
         break;
-      case 3:
+      case 2:
         oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_3);
         break;
-      case 4:
+      case 3:
         oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_4);
         break;
-      case 5:
+      case 4:
         oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_5);
         break;
       default:
