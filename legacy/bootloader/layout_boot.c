@@ -10,7 +10,7 @@ void layoutBootHome(void) {
                          VERSTR(VERSION_MAJOR) "." VERSTR(
                              VERSION_MINOR) "." VERSTR(VERSION_PATCH),
                          FONT_STANDARD);
-    layoutFillBleName(6);
+    layoutFillBleName(7);
     oledRefresh();
   }
 }

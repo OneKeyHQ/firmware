@@ -160,6 +160,11 @@ void setup(void) {
   rtt_log_init();
 }
 
+void setReboot(void) {
+  ble_usart_init();
+  i2c_slave_init_irq();
+}
+
 void setupApp(void) {
   // for completeness, disable RNG peripheral interrupts for old bootloaders
   // that had enabled them in RNG control register (the RNG interrupt was never

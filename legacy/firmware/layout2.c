@@ -278,11 +278,11 @@ void layoutScreensaver(void) {
 }
 
 void vlayoutLogo(void) {
-  oledDrawBitmap(0, 16, &bmp_logo);
+  oledDrawBitmap(0, 8, &bmp_logo);
   if (!config_isInitialized()) {
     vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
   }
-  vDisp_PromptInfo(DISP_BLE_NAME, false);
+  layoutFillBleName(5);
   oledRefresh();
 }
 
@@ -317,24 +317,20 @@ void layoutHome(void) {
   config_getNeedsBackup(&needs_backup);
   if (no_backup) {
     oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
-    oledclearLine(6);
     oledclearLine(7);
     oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "SEEDLESS",
                          FONT_STANDARD);
   } else if (unfinished_backup) {
     oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
-    oledclearLine(6);
     oledclearLine(7);
     oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "BACKUP FAILED!",
                          FONT_STANDARD);
   } else if (needs_backup) {
     oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
-    oledclearLine(6);
     oledclearLine(7);
     oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "NEEDS BACKUP!",
                          FONT_STANDARD);
   }
-  layoutFillBleName(6);
   oledRefresh();
 
   // Reset lock screen timeout

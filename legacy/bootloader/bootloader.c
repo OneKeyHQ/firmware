@@ -102,44 +102,55 @@ int main(void) {
     force_boot = true;
   }
 
+  if (force_boot) {
+    setReboot();
+    __stack_chk_guard = random32();  // this supports compiler provided
+                                     // unpredictable stack protection check
+    buttonsIrqInit();
+    timer_init();
+    register_timer("layout", timer1s / 2, layoutStatusLogo);
+    register_timer("button", timer1s / 2, buttonsTimer);
+    mpu_config_bootloader();
+  } else {
 #ifndef APPVER
-  setup();
+    setup();
 #endif
-  __stack_chk_guard = random32();  // this supports compiler provided
-                                   // unpredictable stack protection checks
+    __stack_chk_guard = random32();  // this supports compiler provided
+                                     // unpredictable stack protection checks
 #ifndef APPVER
-  //   memory_protect();
-  oledInit();
-  sys_poweron();
-  buttonsIrqInit();
-  timer_init();
-  register_timer("layout", timer1s / 2, layoutStatusLogo);
-  register_timer("button", timer1s / 2, buttonsTimer);
+    memory_protect();
+    oledInit();
+    sys_poweron();
+    buttonsIrqInit();
+    timer_init();
+    register_timer("layout", timer1s / 2, layoutStatusLogo);
+    register_timer("button", timer1s / 2, buttonsTimer);
 #endif
-  mpu_config_bootloader();
+    mpu_config_bootloader();
 #ifndef APPVER
-  bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
+    bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
 
-  if (firmware_present_new() && !left_pressed && !force_boot) {
-    oledClear();
-    oledDrawBitmap(56, 18, &bmp_BiXin_logo32);
-    oledRefresh();
-    const image_header *hdr =
-        (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
+    if (firmware_present_new() && !left_pressed && !force_boot) {
+      oledClear();
+      oledDrawBitmap(56, 18, &bmp_BiXin_logo32);
+      oledRefresh();
+      const image_header *hdr =
+          (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
 
-    uint8_t fingerprint[32] = {0};
-    int signed_firmware = signatures_new_ok(hdr, fingerprint);
-    if (SIG_OK != signed_firmware) {
-      show_unofficial_warning(fingerprint);
+      uint8_t fingerprint[32] = {0};
+      int signed_firmware = signatures_new_ok(hdr, fingerprint);
+      if (SIG_OK != signed_firmware) {
+        show_unofficial_warning(fingerprint);
+      }
+
+      if (SIG_OK != check_firmware_hashes(hdr)) {
+        show_halt("Broken firmware", "detected.");
+      }
+      mpu_config_off();
+      load_app(signed_firmware);
     }
-
-    if (SIG_OK != check_firmware_hashes(hdr)) {
-      show_halt("Broken firmware", "detected.");
-    }
-    mpu_config_off();
-    load_app(signed_firmware);
+#endif
   }
-#endif
 
   layoutBootHome();
   bootloader_loop();

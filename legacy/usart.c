@@ -129,6 +129,7 @@ void ble_usart_init(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO2 | GPIO3);
   gpio_set_af(GPIOA, GPIO_AF7, GPIO2 | GPIO3);
 
+  usart_disable(BLE_UART);
   // usart2 set
   usart_set_baudrate(BLE_UART, 115200);
   usart_set_databits(BLE_UART, 8);
