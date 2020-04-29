@@ -1084,13 +1084,11 @@ bool config_getBleTrans(void) {
 }
 
 #ifdef USE_SE
-void config_setWhetherUseSE(bool flag) {
-  config_set_bool(KEY_SEFLAG, flag);
-}
+void config_setWhetherUseSE(bool flag) { config_set_bool(KEY_SEFLAG, flag); }
 
 bool config_getWhetherUseSE(void) {
   bool flag;
-  return sectrue ==config_get_bool(KEY_SEFLAG, &flag);
+  return sectrue == config_get_bool(KEY_SEFLAG, &flag);
 }
 
 void config_setSeedsExportFlag(ExportType flag) {
@@ -1099,24 +1097,22 @@ void config_setSeedsExportFlag(ExportType flag) {
 
 bool config_getSeedsExportFlag(void) {
   bool flag;
-  return sectrue ==config_get_bool(KEY_EXPORTSEEDFLAG, &flag);
+  return sectrue == config_get_bool(KEY_EXPORTSEEDFLAG, &flag);
 }
 
-bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,uint8_t *pucRevData) {
+bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,
+                         uint8_t *pucRevData) {
   uint16_t usRevLen;
 
-  if (!g_bSelectSEFlag)
-  {
+  if (!g_bSelectSEFlag) {
     return false;
   }
-  if(false ==bMI2CDRV_SendData(pucSendData,usSendLen))
-  {
+  if (false == bMI2CDRV_SendData(pucSendData, usSendLen)) {
     return false;
   }
-  usRevLen = MI2C_BUF_MAX_LEN -1;
-  if(false == bMI2CDRV_ReceiveData(pucRevData,&usRevLen))
-  {
-      return false;
+  usRevLen = MI2C_BUF_MAX_LEN - 1;
+  if (false == bMI2CDRV_ReceiveData(pucRevData, &usRevLen)) {
+    return false;
   }
   pucRevData[usRevLen] = '\0';
   return true;

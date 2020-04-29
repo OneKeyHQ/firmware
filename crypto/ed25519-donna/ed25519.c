@@ -20,8 +20,10 @@
 #include "ed25519-hash-custom.h"
 #include "mi2c.h"
 
+#if USE_SE
 extern bool g_bSelectSEFlag; 
 extern uint8_t g_uchash_mode;
+#endif
 
 /*
 	Generates a (extsk[0..31]) and aExt (extsk[32..63])
@@ -46,7 +48,16 @@ ed25519_hram(hash_512bits hram, const ed25519_signature RS, const ed25519_public
 
 void
 ED25519_FN(ed25519_publickey) (const ed25519_secret_key sk, ed25519_public_key pk) {
-   if (!g_bSelectSEFlag){
+#if USE_SE
+   if (g_bSelectSEFlag){
+    uint16_t usLen;
+    uint8_t ucSendBuf[33];
+    ucSendBuf[0] = g_uchash_mode;
+    memcpy(ucSendBuf+1, (uint8_t *)sk, 0x20); 
+    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_GITPUBKEY,ucSendBuf, 0x21, pk,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA);
+    return;
+   }
+#endif                        
     bignum256modm a = {0};
     ge25519 ALIGN(16) A;
     hash_512bits extsk = {0};
@@ -57,16 +68,6 @@ ED25519_FN(ed25519_publickey) (const ed25519_secret_key sk, ed25519_public_key p
     expand256_modm(a, extsk, 32);
     ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
     ge25519_pack(pk, &A);
-  }
-  else{
-#if USE_SE
-    uint16_t usLen;
-    uint8_t ucSendBuf[33];
-    ucSendBuf[0] = g_uchash_mode;
-    memcpy(ucSendBuf+1, (uint8_t *)sk, 0x20); 
-    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_GITPUBKEY,ucSendBuf, 0x21, pk,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA);
-#endif                       
-  }
 }
 
 #if USE_CARDANO
@@ -114,7 +115,16 @@ ED25519_FN(ed25519_cosi_sign) (const unsigned char *m, size_t mlen, const ed2551
 
 void
 ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_secret_key sk, const ed25519_public_key pk, ed25519_signature RS) {
- if (!g_bSelectSEFlag){
+#if USE_SE
+ if (g_bSelectSEFlag){
+  	uint16_t usLen;
+  	uint8_t ucSendBuf[1024+32];
+  	ucSendBuf[0] = g_uchash_mode;
+    memcpy(ucSendBuf+1, m, mlen); 
+    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_SIGN,ucSendBuf, mlen+1, (uint8_t *)RS,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA); 
+    return;
+   }
+#endif                      
   ed25519_hash_context ctx;
   bignum256modm r = {0}, S = {0}, a = {0};
   ge25519 ALIGN(16) R = {0};
@@ -147,16 +157,7 @@ ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_sec
 
   /* S = (r + H(R,A,m)a) mod L */
   contract256_modm(RS + 32, S);
-  }
-  else{
-#if USE_SE
-  	uint16_t usLen;
-  	uint8_t ucSendBuf[1024+32];
-  	ucSendBuf[0] = g_uchash_mode;
-    memcpy(ucSendBuf+1, m, mlen); 
-    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_SIGN,ucSendBuf, mlen+1, (uint8_t *)RS,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA); 
-#endif                      
-  }
+
 }
 
 #if USE_CARDANO
