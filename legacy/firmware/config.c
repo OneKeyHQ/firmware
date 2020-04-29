@@ -1101,9 +1101,9 @@ bool config_getSeedsExportFlag(void) {
 }
 
 bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,
-                         uint8_t *pucRevData) {
+                         BixinGetMessageSE_getmessage_t *msg) {
   uint16_t usRevLen;
-
+  g_bSelectSEFlag=true;
   if (!g_bSelectSEFlag) {
     return false;
   }
@@ -1111,10 +1111,10 @@ bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,
     return false;
   }
   usRevLen = MI2C_BUF_MAX_LEN - 1;
-  if (false == bMI2CDRV_ReceiveData(pucRevData, &usRevLen)) {
+  if (false == bMI2CDRV_ReceiveData(msg->bytes, &usRevLen)) {
     return false;
   }
-  pucRevData[usRevLen] = '\0';
+  msg->bytes[usRevLen] = '\0';
   return true;
 }
 #endif

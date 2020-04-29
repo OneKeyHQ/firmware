@@ -602,9 +602,9 @@ void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
   RESP_INIT(BixinGetMessageSE);
 
-  if (false == config_getMessageSE((uint8_t *)(msg->inputmessage),
-                                   sizeof(msg->inputmessage),
-                                   (uint8_t *)(resp->getmessage))) {
+  if (false == config_getMessageSE((uint8_t *)(msg->inputmessage.bytes),
+                                   msg->inputmessage.size,
+                                   (BixinGetMessageSE_getmessage_t *)(&resp->getmessage))) {
     fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
     layoutHome();
     return;

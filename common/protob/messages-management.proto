@@ -396,7 +396,7 @@ message BixinSeedExportData {
  * @end
  */
 message BixinMessageSE{
- required string inputmessage = 1;
+ required bytes inputmessage = 1;
 }
 
 /**
@@ -405,7 +405,7 @@ message BixinMessageSE{
  * @next Success
  */
 message BixinGetMessageSE {
-    optional string getmessage = 1;
+    optional bytes getmessage = 1;
 }
 
 /**

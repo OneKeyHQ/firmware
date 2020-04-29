@@ -14,12 +14,12 @@ class BixinGetMessageSE(p.MessageType):
 
     def __init__(
         self,
-        getmessage: str = None,
+        getmessage: bytes = None,
     ) -> None:
         self.getmessage = getmessage
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('getmessage', p.UnicodeType, 0),
+            1: ('getmessage', p.BytesType, 0),
         }
