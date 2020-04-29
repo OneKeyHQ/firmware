@@ -148,6 +148,9 @@ void ble_usart_init(void) {
 void ble_usart_enable(void) { usart_enable(BLE_UART); }
 void ble_usart_disable(void) { usart_disable(BLE_UART); }
 
+void ble_usart_irq_enable(void) { usart_enable_rx_interrupt(BLE_UART); }
+void ble_usart_irq_disable(void) { usart_disable_rx_interrupt(BLE_UART); }
+
 void ble_usart_sendByte(uint8_t data) {
   usart_send_blocking(BLE_UART, data);
   while (!usart_get_flag(BLE_UART, USART_SR_TXE))

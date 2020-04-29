@@ -243,6 +243,7 @@ static void enter_boot(void) {
   delay_ms(100);
   SET_COMBUS_HIGH();
   ble_power_on();
+  ble_usart_irq_disable();
   ble_usart_enable();
   delay_ms(500);  // keep io voltage
   SET_COMBUS_LOW();
@@ -277,7 +278,7 @@ bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
   // firmware
   if (select_object(fw_type) != true) return false;
   while (fm_len > 0) {
-    layoutProgress("INSTALLING BLE firmware...", 1000 * offset_i / totol_len);
+    layoutProgress("Installing BLE firmware...", 1000 * offset_i / totol_len);
     len = fm_len > max_size ? max_size : fm_len;
     if (create_object(fw_type, len) != true) return false;
     crc_i = crc32(firmware, offset_i + len);

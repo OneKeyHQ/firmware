@@ -14,7 +14,7 @@
 #if !FEITIAN_PCB_V1_3
 
 #ifndef FEITIAN_PCB_V1_1
-#define FEITIAN_PCB_V1_1 0
+#define FEITIAN_PCB_V1_1 1
 #endif
 
 #endif

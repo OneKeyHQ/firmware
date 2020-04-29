@@ -479,24 +479,25 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
 
   if (flash_state == STATE_CHECK) {
     timer_out_set(timer_out_countdown, 0);
-    // use the firmware header from RAM
-    const image_header *hdr = (const image_header *)FW_HEADER;
-
-    bool hash_check_ok;
-    // show fingerprint of unsigned firmware
-    if (SIG_OK != signatures_new_ok(hdr, NULL)) {
-      if (msg_id != 0x001B) {  // ButtonAck message (id 27)
-        return;
-      }
-      uint8_t hash[32] = {0};
-      compute_firmware_fingerprint(hdr, hash);
-      layoutFirmwareFingerprint(hash);
-      hash_check_ok = waitButtonResponse(BTN_PIN_YES, default_oper_time);
-    } else {
-      hash_check_ok = true;
-    }
-    layoutProgress("Programing ... Please wait", 1000);
     if (UPDATE_ST == update_mode) {
+      // use the firmware header from RAM
+      const image_header *hdr = (const image_header *)FW_HEADER;
+
+      bool hash_check_ok;
+      // show fingerprint of unsigned firmware
+      if (SIG_OK != signatures_new_ok(hdr, NULL)) {
+        if (msg_id != 0x001B) {  // ButtonAck message (id 27)
+          return;
+        }
+        uint8_t hash[32] = {0};
+        compute_firmware_fingerprint(hdr, hash);
+        layoutFirmwareFingerprint(hash);
+        hash_check_ok = waitButtonResponse(BTN_PIN_YES, default_oper_time);
+      } else {
+        hash_check_ok = true;
+      }
+      layoutProgress("Programing ... Please wait", 1000);
+
       // wipe storage if:
       // 1) old firmware was unsigned or not present
       // 2) signatures are not OK
@@ -551,6 +552,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     } else {
       flash_state = STATE_END;
       send_msg_success(dev);
+      layoutProgress("INSTALLING ... Please wait", 1000);
 
       uint32_t fw_len = flash_len - FLASH_FWHEADER_LEN;
       bool update_status = false;
@@ -572,11 +574,8 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
                      "aborted.", NULL, "You need to repeat",
                      "the procedure with", "the correct firmware.");
         send_msg_failure(dev);
+        shutdown();
       } else {
-        // ble power reset
-        ble_power_off();
-        delay_ms(100);
-        ble_power_on();
         show_unplug("ble firmware", "successfully installed.");
         shutdown();
       }
