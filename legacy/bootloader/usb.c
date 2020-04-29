@@ -275,8 +275,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     } else if (msg_id == 0x0010) {  // FirmwareErase message (id 16)
       bool proceed = false;
       layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL, "Install ble",
-                   "firmware?", NULL, "Never do this without",
-                   "your recovery card!", NULL);
+                   "firmware?", NULL, NULL, NULL, NULL);
       proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       if (proceed) {
         erase_ble_code_progress();
@@ -551,8 +550,8 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       return;
     } else {
       flash_state = STATE_END;
-      send_msg_success(dev);
-      layoutProgress("INSTALLING ... Please wait", 1000);
+
+      layoutProgress("Updating ... Please wait", 1000);
 
       uint32_t fw_len = flash_len - FLASH_FWHEADER_LEN;
       bool update_status = false;
@@ -573,10 +572,13 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "ble installation",
                      "aborted.", NULL, "You need to repeat",
                      "the procedure with", "the correct firmware.");
+        delay_ms(1000);
         send_msg_failure(dev);
         shutdown();
       } else {
         show_unplug("ble firmware", "successfully installed.");
+        delay_ms(1000);
+        send_msg_success(dev);
         shutdown();
       }
     }
