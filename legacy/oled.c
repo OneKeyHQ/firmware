@@ -171,8 +171,9 @@ void oledInit() {
 /*
  * Clears the display buffer (sets all pixels to black)
  */
+void oledClearAll() { memzero(_oledbuffer, sizeof(_oledbuffer)); }
+
 void oledClear() {
-  // memzero(_oledbuffer, sizeof(_oledbuffer));
   // do not clear logo status,logo line 12
   memzero(_oledbuffer, sizeof(_oledbuffer) - (OLED_WIDTH * (LOGO_HEIGHT / 8)));
 }

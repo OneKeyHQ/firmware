@@ -51,6 +51,7 @@
 #define OLED_BUFSIZE (OLED_WIDTH * OLED_HEIGHT / 8)
 
 void oledInit(void);
+void oledClearAll(void);
 void oledClear(void);
 void oledAllDisplay(void);
 

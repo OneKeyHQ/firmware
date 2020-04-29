@@ -317,7 +317,6 @@ void layoutHome(void) {
   config_getNeedsBackup(&needs_backup);
   if (no_backup) {
     oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
-    oledclearLine(7);
     oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "SEEDLESS",
                          FONT_STANDARD);
   } else if (unfinished_backup) {
@@ -1220,7 +1219,8 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
       if (g_ucLanguageFlag) {
         oledDrawBitmap(0, 48, &bmp_cn_unactive);
       } else {
-        oledDrawStringCenter(60, 48, "Not Activated", FONT_STANDARD);
+        oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Not Activated",
+                             FONT_STANDARD);
       }
       break;
     case DISP_TOUCHPH:
