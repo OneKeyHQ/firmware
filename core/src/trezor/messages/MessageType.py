@@ -199,3 +199,4 @@ if not utils.BITCOIN_ONLY:
     BixinSeedOperate = 901  # type: Literal[901]
     BixinMessageSE = 902  # type: Literal[902]
     BixinUpgrade = 903  # type: Literal[903]
+    BixinOutMessageSE = 904  # type: Literal[904]

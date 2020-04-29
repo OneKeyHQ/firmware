@@ -40,3 +40,4 @@ BixinSeedOperate.seed_importData        max_size:512
 
 BixinMessageSE.inputmessage             max_size:1024
 BixinGetMessageSE.getmessage            max_size:1024
+BixinOutMessageSE.outmessage            max_size:1024 

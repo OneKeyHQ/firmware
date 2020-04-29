@@ -167,8 +167,8 @@ void config_setWhetherUseSE(bool flag);
 bool config_getWhetherUseSE(void);
 void config_setSeedsExportFlag(ExportType flag);
 bool config_getSeedsExportFlag(void);
-bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,
-                         BixinGetMessageSE_getmessage_t *msg);
+bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
+                         BixinOutMessageSE_outmessage_t *get_msg);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

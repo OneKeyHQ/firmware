@@ -563,16 +563,16 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     layoutHome();
     return;
   } else if (msg->type == SeedRequestType_SeedRequestType_EncExport) {
-    RESP_INIT(BixinSeedExportData);
+    RESP_INIT(BixinOutMessageSE);
     CHECK_PIN
     CHECK_INITIALIZED
-    if (!config_SeedsEncExportBytes((uint8_t *)(resp->seed_exportdata))) {
+    if (!config_SeedsEncExportBytes((uint8_t *)(&resp->outmessage))) {
       fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
       layoutHome();
       return;
     }
-    resp->has_seed_exportdata = true;
-    msg_write(MessageType_MessageType_BixinSeedOperate, resp);
+    resp->has_outmessage = true;
+    msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
     layoutHome();
     return;
   } else if (msg->type == SeedRequestType_SeedRequestType_EncImport) {
@@ -600,17 +600,16 @@ void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
 }
 
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
-  RESP_INIT(BixinGetMessageSE);
+  RESP_INIT(BixinOutMessageSE);
 
-  if (false == config_getMessageSE((uint8_t *)(msg->inputmessage.bytes),
-                                   msg->inputmessage.size,
-                                   (BixinGetMessageSE_getmessage_t *)(&resp->getmessage))) {
+  if (false == config_getMessageSE((BixinMessageSE_inputmessage_t *)(&msg->inputmessage),
+                                   (BixinOutMessageSE_outmessage_t *)(&resp->outmessage))) {
     fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
     layoutHome();
     return;
   }
-  resp->has_getmessage = true;
-  msg_write(MessageType_MessageType_BixinMessageSE, resp);
+  resp->has_outmessage = true;
+  msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
   layoutHome();
   return;
 }

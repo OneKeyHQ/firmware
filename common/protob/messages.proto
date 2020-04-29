@@ -260,4 +260,5 @@ enum MessageType {
     MessageType_BixinSeedOperate = 901 [(wire_in) = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
     MessageType_BixinUpgrade = 903 [(wire_in) = true];
+    MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
 }

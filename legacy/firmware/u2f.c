@@ -335,12 +335,14 @@ uint8_t *u2f_out_data(void) {
 }
 
 void u2fhid_msg(const APDU *a, uint32_t len) {
+#if 0
   if ((APDU_LEN(*a) + sizeof(APDU)) > len) {
     debugLog(0, "", "BAD APDU LENGTH");
     debugInt(APDU_LEN(*a));
     debugInt(len);
     return;
   }
+#endif
 
   if (a->cla != 0) {
     send_u2f_error(U2F_SW_CLA_NOT_SUPPORTED);

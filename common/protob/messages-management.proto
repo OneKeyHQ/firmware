@@ -408,6 +408,10 @@ message BixinGetMessageSE {
     optional bytes getmessage = 1;
 }
 
+message BixinOutMessageSE {
+    optional bytes outmessage = 1;
+}
+
 /**
  * Request: Upgrade firmware
  * @end

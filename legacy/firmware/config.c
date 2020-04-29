@@ -78,7 +78,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_UNFINISHED_BACKUP (11 | APP)                  // bool
 #define KEY_AUTO_LOCK_DELAY_MS (12 | APP)                 // uint32
 #define KEY_NO_BACKUP (13 | APP)                          // bool
-#define KEY_INITIALIZED (14 | APP | FLAG_PUBLIC_SHIFTED)  // uint32
+#define KEY_INITIALIZED (14 | APP | FLAG_PUBLIC_SHIFTED)  // uint31
 #define KEY_NODE (15 | APP)                               // node
 #define KEY_IMPORTED (16 | APP)                           // bool
 #define KEY_U2F_ROOT (17 | APP | FLAG_PUBLIC_SHIFTED)     // node
@@ -1100,21 +1100,19 @@ bool config_getSeedsExportFlag(void) {
   return sectrue == config_get_bool(KEY_EXPORTSEEDFLAG, &flag);
 }
 
-bool config_getMessageSE(uint8_t *pucSendData, uint16_t usSendLen,
-                         BixinGetMessageSE_getmessage_t *msg) {
-  uint16_t usRevLen;
-  g_bSelectSEFlag=true;
+bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
+                         BixinOutMessageSE_outmessage_t *get_msg) {
   if (!g_bSelectSEFlag) {
     return false;
   }
-  if (false == bMI2CDRV_SendData(pucSendData, usSendLen)) {
+  if (false == bMI2CDRV_SendData(input_msg->bytes, input_msg->size)) {
     return false;
   }
-  usRevLen = MI2C_BUF_MAX_LEN - 1;
-  if (false == bMI2CDRV_ReceiveData(msg->bytes, &usRevLen)) {
+  get_msg->size = 1024;
+  if (false == bMI2CDRV_ReceiveData(get_msg->bytes, &get_msg->size)) {
     return false;
   }
-  msg->bytes[usRevLen] = '\0';
+  get_msg->bytes[get_msg->size] = '\0';
   return true;
 }
 #endif

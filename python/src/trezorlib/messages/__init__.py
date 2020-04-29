@@ -19,6 +19,7 @@ from .BinanceTransferMsg import BinanceTransferMsg
 from .BinanceTxRequest import BinanceTxRequest
 from .BixinGetMessageSE import BixinGetMessageSE
 from .BixinMessageSE import BixinMessageSE
+from .BixinOutMessageSE import BixinOutMessageSE
 from .BixinSeedExportData import BixinSeedExportData
 from .BixinSeedOperate import BixinSeedOperate
 from .BixinUpgrade import BixinUpgrade
