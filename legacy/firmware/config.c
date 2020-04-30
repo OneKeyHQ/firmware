@@ -426,7 +426,7 @@ void config_init(void) {
     storage_unlock(PIN_EMPTY, NULL);
   }
 
-  vMI2CDRV_SynSessionKey();
+  //  vMI2CDRV_SynSessionKey();
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
 
