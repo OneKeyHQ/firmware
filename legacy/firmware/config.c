@@ -1117,4 +1117,4 @@ bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
 }
 #endif
 
-void config_setLabel(const char *label) { g_bIsBixinAPP = true; }
+void config_setIsBixinAPP(void) { g_bIsBixinAPP = true; }
