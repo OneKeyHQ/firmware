@@ -26,6 +26,7 @@ class ApplySettings(p.MessageType):
         use_ble: bool = None,
         use_se: bool = None,
         use_exportseeds: bool = None,
+        is_bixinapp: bool = None,
     ) -> None:
         self.language = language
         self.label = label
@@ -38,6 +39,7 @@ class ApplySettings(p.MessageType):
         self.use_ble = use_ble
         self.use_se = use_se
         self.use_exportseeds = use_exportseeds
+        self.is_bixinapp = is_bixinapp
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -53,4 +55,5 @@ class ApplySettings(p.MessageType):
             10: ('use_ble', p.BoolType, 0),
             11: ('use_se', p.BoolType, 0),
             12: ('use_exportseeds', p.BoolType, 0),
+            13: ('is_bixinapp', p.BoolType, 0),
         }

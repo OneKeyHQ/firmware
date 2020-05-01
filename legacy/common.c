@@ -34,6 +34,7 @@ uint8_t g_ucPromptIndex = 0;
 
 bool g_bBleTransMode = false;
 bool g_bSelectSEFlag = false;
+bool g_bIsBixinAPP = false;
 uint32_t g_uiFreePayFlag = 0;
 uint8_t g_uchash_mode = 0;
 

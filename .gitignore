@@ -11,3 +11,4 @@ __pycache__/
 proto.gv*
 *.map
 .DS_Store
+.*.swp

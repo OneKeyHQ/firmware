@@ -169,6 +169,7 @@ void config_setSeedsExportFlag(ExportType flag);
 bool config_getSeedsExportFlag(void);
 bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
                          BixinOutMessageSE_outmessage_t *get_msg);
+void config_setIsBixinAPP(void);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

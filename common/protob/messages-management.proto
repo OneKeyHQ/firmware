@@ -119,6 +119,7 @@ message ApplySettings {
     optional bool use_ble = 10;
     optional bool use_se = 11;
     optional bool use_exportseeds= 12;
+    optional bool is_bixinapp = 13;
     /**
     * Type of seed and mnemonic export flag
     */

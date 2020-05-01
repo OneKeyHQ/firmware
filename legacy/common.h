@@ -37,6 +37,7 @@ extern uint8_t g_ucPromptIndex;
 
 extern bool g_bBleTransMode;
 extern bool g_bSelectSEFlag;
+extern bool g_bIsBixinAPP;
 extern uint32_t g_uiFreePayFlag;
 extern uint8_t g_uchash_mode;
 

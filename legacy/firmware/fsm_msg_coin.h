@@ -22,7 +22,7 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
 
   CHECK_INITIALIZED
 
-  if (SIGN_FREEPAY_NOPIN != (g_uiFreePayFlag & SIGN_FREEPAY_NOPIN)) {
+  if (!g_bIsBixinAPP) {
     CHECK_PIN
   }
 

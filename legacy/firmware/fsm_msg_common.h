@@ -221,6 +221,9 @@ void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
 }
 
 void fsm_msgWipeDevice(const WipeDevice *msg) {
+  if (g_bIsBixinAPP) {
+    CHECK_PIN_UNCACHED
+  }
   (void)msg;
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Do you really want to"), _("wipe the device?"), NULL,
@@ -361,7 +364,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
 
   CHECK_PARAM(msg->has_label || msg->has_language || msg->has_use_passphrase ||
                   msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-                  msg->has_use_fee_pay,
+                  msg->has_use_fee_pay || msg->has_is_bixinapp,
               _("No setting provided"));
 
   CHECK_PIN
@@ -466,6 +469,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_use_exportseeds) {
     config_setSeedsExportFlag(msg->use_exportseeds);
+  }
+  if (msg->has_is_bixinapp) {
+    config_setIsBixinAPP();
   }
   fsm_sendSuccess(_("Settings applied"));
   layoutHome();
