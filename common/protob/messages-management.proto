@@ -408,6 +408,10 @@ message BixinGetMessageSE {
     optional bytes getmessage = 1;
 }
 
+/**
+ * Request: out se cmd result
+ * @end
+ */ 
 message BixinOutMessageSE {
     optional bytes outmessage = 1;
 }
