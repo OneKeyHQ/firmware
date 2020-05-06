@@ -42,7 +42,6 @@ bool protectAbortedByInitialize = false;
 
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
-  bool request = false;
   bool result = false;
   bool acked = false;
 #if DEBUG_LINK
@@ -56,18 +55,19 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   buttonUpdate();  // Clear button state
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
-  for (;;) {
+  timer_out_set(timer_out_countdown, default_oper_time);
+
+  while (timer_out_get(timer_out_countdown)) {
     usbPoll();
+
+    if (g_bIsBixinAPP) acked = true;
 
     // check for ButtonAck
     if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
-      if (acked) {
-        request = true;
-      }
       msg_tiny_id = 0xFFFF;
       acked = true;
-      buttonUpdate();
     }
+
     // button acked - check buttons
     if (acked) {
       usbSleep(5);
@@ -85,13 +85,6 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
       }
       if (button.DownUp) {
         vDISP_TurnPageDOWN();
-      }
-      if (request) {
-        request = false;
-        memzero(&resp, sizeof(ButtonRequest));
-        resp.has_code = true;
-        resp.code = type;
-        msg_write(MessageType_MessageType_ButtonRequest, &resp);
       }
     }
 
@@ -124,7 +117,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
     }
 #endif
   }
-
+  timer_out_set(timer_out_countdown, 0);
   usbTiny(0);
 
   return result;
