@@ -228,7 +228,7 @@ static bool ping_boot(uint8_t id) {
   uint32_t resp_len = 0;
   cmd[0] = NRF_DFU_OP_PING;
   cmd[1] = id;
-  if (serial_transfer(cmd, 1, resp, &resp_len, default_delay) == true) {
+  if (serial_transfer(cmd, 2, resp, &resp_len, default_delay) == true) {
     if ((resp[0] == resp_header) && (resp[2] == NRF_DFU_RES_CODE_SUCCESS)) {
       if (resp[3] == id) return true;
     }
@@ -237,14 +237,14 @@ static bool ping_boot(uint8_t id) {
 }
 
 static void enter_boot(void) {
+  uint8_t cmd[64] = "\x5a\xa5\x00\x04\x08\x01\x01\xf3";
+  ble_usart_irq_disable();
+  SET_COMBUS_HIGH();
+  ble_usart_send(cmd, 8);
   // ble power rest
   ble_power_off();
-  ble_usart_disable();  // void usart rx drain current
   delay_ms(100);
-  SET_COMBUS_HIGH();
   ble_power_on();
-  ble_usart_irq_disable();
-  ble_usart_enable();
   delay_ms(500);  // keep io voltage
   SET_COMBUS_LOW();
 }
@@ -256,13 +256,15 @@ bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
   uint32_t len;
   uint32_t totol_len = fm_len;
 
+  layoutinfoCenter(NULL, NULL, "Enter BLE boot", NULL, NULL, NULL);
   enter_boot();
-
   for (uint8_t i = 0; i < 5; i++) {
     if (ping_boot(i) == true)
       break;
-    else if (i == 4)
+    else if (i == 4) {
+      layoutinfoCenter(NULL, NULL, "Enter BLE boot", "Failed", NULL, NULL);
       return false;
+    }
   }
 
   if (set_prn() != true) return false;
