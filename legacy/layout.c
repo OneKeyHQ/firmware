@@ -99,6 +99,20 @@ void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
   oledRefresh();
 }
 
+void layoutinfoCenter(const char *line1, const char *line2, const char *line3,
+                      const char *line4, const char *line5, const char *line6) {
+  oledClear();
+
+  if (line1) oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, line1, FONT_STANDARD);
+  if (line2) oledDrawStringCenter(OLED_WIDTH / 2, 2 * 9, line2, FONT_STANDARD);
+  if (line3) oledDrawStringCenter(OLED_WIDTH / 2, 3 * 9, line3, FONT_STANDARD);
+  if (line4) oledDrawStringCenter(OLED_WIDTH / 2, 4 * 9, line4, FONT_STANDARD);
+  if (line5) oledDrawStringCenter(OLED_WIDTH / 2, 5 * 9, line5, FONT_STANDARD);
+  if (line6) oledDrawStringCenter(OLED_WIDTH / 2, 6 * 9, line6, FONT_STANDARD);
+
+  oledRefresh();
+}
+
 void layoutProgressUpdate(bool refresh) {
   static uint8_t step = 0;
   switch (step) {
