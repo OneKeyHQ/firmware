@@ -34,6 +34,7 @@ def apply_settings(
     passphrase_always_on_device=None,
     auto_lock_delay_ms=None,
     display_rotation=None,
+    is_bixinapp=True,
 ):
     settings = messages.ApplySettings()
     if label is not None:
@@ -50,6 +51,8 @@ def apply_settings(
         settings.auto_lock_delay_ms = auto_lock_delay_ms
     if display_rotation is not None:
         settings.display_rotation = display_rotation
+    if is_bixinapp is not None:
+        settings.is_bixinapp = is_bixinapp
 
     out = client.call(settings)
     client.init_device()  # Reload Features
@@ -90,6 +93,11 @@ def wipe(client):
     client.init_device()
     return ret
 
+@expect(messages.Success, field="message")
+def reboot(client):
+    ret = client.call(messages.BixinUpgrade())
+    return ret
+ 
 
 def recover(
     client,
@@ -197,3 +205,8 @@ def reset(
 def backup(client):
     ret = client.call(messages.BackupDevice())
     return ret
+
+@expect(messages.Success, field="message")
+def bixinapp(client):
+    ret = client.call(messages.BackupDevice())
+    return ret 

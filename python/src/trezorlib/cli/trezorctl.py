@@ -63,6 +63,7 @@ COMMAND_ALIASES = {
     "sd-protect": device.sd_protect,
     "load-device": device.load,
     "self-test": device.self_test,
+    "reboot": device.reboot,
     "show-text": debug.show_text,
     "get-entropy": crypto.get_entropy,
     "encrypt-keyvalue": crypto.encrypt_keyvalue,

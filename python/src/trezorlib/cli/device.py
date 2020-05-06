@@ -258,3 +258,10 @@ def sd_protect(client, operation):
     if client.features.model == "1":
         raise click.BadUsage("Trezor One does not support SD card protection.")
     return device.sd_protect(client, operation)
+
+@cli.command()
+@with_client
+def reboot(client):
+    """Perform device reboot."""
+    return device.reboot(client)
+ 
