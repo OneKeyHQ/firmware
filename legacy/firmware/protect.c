@@ -42,7 +42,6 @@ bool protectAbortedByInitialize = false;
 
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
-  bool request = false;
   bool result = false;
   bool acked = false;
 #if DEBUG_LINK
@@ -56,18 +55,19 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   buttonUpdate();  // Clear button state
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
-  for (;;) {
+  timer_out_set(timer_out_countdown, default_oper_time);
+
+  while (timer_out_get(timer_out_countdown)) {
     usbPoll();
+
+    if (g_bIsBixinAPP) acked = true;
 
     // check for ButtonAck
     if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
-      if (acked) {
-        request = true;
-      }
       msg_tiny_id = 0xFFFF;
       acked = true;
-      buttonUpdate();
     }
+
     // button acked - check buttons
     if (acked) {
       usbSleep(5);
@@ -85,13 +85,6 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
       }
       if (button.DownUp) {
         vDISP_TurnPageDOWN();
-      }
-      if (request) {
-        request = false;
-        memzero(&resp, sizeof(ButtonRequest));
-        resp.has_code = true;
-        resp.code = type;
-        msg_write(MessageType_MessageType_ButtonRequest, &resp);
       }
     }
 
@@ -124,14 +117,16 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
     }
 #endif
   }
-
+  timer_out_set(timer_out_countdown, 0);
   usbTiny(0);
 
   return result;
 }
 
-const char *requestPin(PinMatrixRequestType type, const char *text) {
+const char *requestPin(PinMatrixRequestType type, const char *text,
+                       const char **new_pin) {
   PinMatrixRequest resp = {0};
+  *new_pin = NULL;
   memzero(&resp, sizeof(PinMatrixRequest));
   resp.has_type = true;
   resp.type = type;
@@ -144,6 +139,10 @@ const char *requestPin(PinMatrixRequestType type, const char *text) {
       msg_tiny_id = 0xFFFF;
       PinMatrixAck *pma = (PinMatrixAck *)msg_tiny;
       usbTiny(0);
+      if (pma->has_new_pin) {
+        if (sectrue == pinmatrix_done(pma->new_pin))  // convert via pinmatrix
+          *new_pin = pma->new_pin;
+      }
       if (sectrue == pinmatrix_done(pma->pin))  // convert via pinmatrix
         return pma->pin;
       else
@@ -213,6 +212,7 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
 }
 
 bool protectPin(bool use_cached) {
+  const char *newpin = NULL;
   if (use_cached && session_isUnlocked()) {
     return true;
   }
@@ -221,7 +221,7 @@ bool protectPin(bool use_cached) {
   if (config_hasPin()) {
     g_ucPromptIndex = DISP_INPUTPIN;
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                     _("Please enter current PIN:"));
+                     _("Please enter current PIN:"), &newpin);
     if (!pin) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -239,11 +239,17 @@ bool protectChangePin(bool removal) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
+  const char *newpin = NULL;
 
   if (config_hasPin()) {
     g_ucPromptIndex = DISP_INPUTPIN;
-    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                     _("Please enter current PIN:"));
+    if (!g_bIsBixinAPP) {
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                       _("Please enter new PIN:"), &newpin);
+    } else {
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                       _("Please enter the PIN:"), &newpin);
+    }
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -265,8 +271,18 @@ bool protectChangePin(bool removal) {
 
   if (!removal) {
     g_ucPromptIndex = DISP_INPUTPIN;
-    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                     _("Please enter new PIN:"));
+    if (!g_bIsBixinAPP) {
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                       _("Please enter new PIN:"), &newpin);
+    } else {
+      if (new_pin == NULL) {
+        fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
+        layoutHome();
+        return false;
+      }
+      pin = new_pin;
+    }
+
     if (pin == NULL || pin[0] == '\0') {
       memzero(old_pin, sizeof(old_pin));
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
@@ -286,7 +302,7 @@ bool protectChangePin(bool removal) {
     }
 #else
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
-                     _("Please re-enter new PIN:"));
+                     _("Please re-enter new PIN:"), &newpin);
     if (pin == NULL) {
       memzero(old_pin, sizeof(old_pin));
       memzero(new_pin, sizeof(new_pin));
@@ -320,10 +336,11 @@ bool protectChangeWipeCode(bool removal) {
   static CONFIDENTIAL char pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char wipe_code[MAX_PIN_LEN + 1] = "";
   const char *input = NULL;
+  const char *newpin = NULL;
 
   if (config_hasPin()) {
     input = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                       _("Please enter your PIN:"));
+                       _("Please enter your PIN:"), &newpin);
     if (input == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -345,7 +362,7 @@ bool protectChangeWipeCode(bool removal) {
 
   if (!removal) {
     input = requestPin(PinMatrixRequestType_PinMatrixRequestType_WipeCodeFirst,
-                       _("Enter new wipe code:"));
+                       _("Enter new wipe code:"), &newpin);
     if (input == NULL) {
       memzero(pin, sizeof(pin));
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -360,7 +377,7 @@ bool protectChangeWipeCode(bool removal) {
     strlcpy(wipe_code, input, sizeof(wipe_code));
 
     input = requestPin(PinMatrixRequestType_PinMatrixRequestType_WipeCodeSecond,
-                       _("Re-enter new wipe code:"));
+                       _("Re-enter new wipe code:"), &newpin);
     if (input == NULL) {
       memzero(pin, sizeof(pin));
       memzero(wipe_code, sizeof(wipe_code));

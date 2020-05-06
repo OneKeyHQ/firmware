@@ -103,6 +103,7 @@ message PinMatrixRequest {
  */
 message PinMatrixAck {
     required string pin = 1;    // matrix encoded PIN entered by user
+    optional string new_pin = 2;    // matrix encoded PIN entered by user
 }
 
 /**
