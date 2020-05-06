@@ -16,11 +16,14 @@ class PinMatrixAck(p.MessageType):
     def __init__(
         self,
         pin: str = None,
+        new_pin: str = None,
     ) -> None:
         self.pin = pin
+        self.new_pin = new_pin
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('pin', p.UnicodeType, 0),  # required
+            2: ('new_pin', p.UnicodeType, 0),
         }

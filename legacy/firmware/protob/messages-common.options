@@ -3,6 +3,7 @@ Success.message                         max_size:256
 Failure.message                         max_size:256
 
 PinMatrixAck.pin                        max_size:10
+PinMatrixAck.new_pin                    max_size:10
 
 PassphraseAck.passphrase                max_size:51
 

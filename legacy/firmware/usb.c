@@ -409,7 +409,7 @@ void usbInit(void) {
   winusb_setup(usbd_dev, USB_INTERFACE_INDEX_MAIN);
 }
 
-void i2cSlavePoll(void) {
+static void i2c_slave_poll(void) {
   uint32_t usLen;
   uint32_t total_len, len;
   if (i2c_recv_done) {
@@ -437,7 +437,7 @@ void i2cSlavePoll(void) {
 }
 void usbPoll(void) {
   static const uint8_t *data;
-  i2cSlavePoll();
+  i2c_slave_poll();
   if (usbd_dev == NULL) {
     return;
   }
@@ -494,6 +494,6 @@ void usbSleep(uint32_t millis) {
     if (usbd_dev != NULL) {
       usbd_poll(usbd_dev);
     }
-    i2cSlavePoll();
+    i2c_slave_poll();
   }
 }
