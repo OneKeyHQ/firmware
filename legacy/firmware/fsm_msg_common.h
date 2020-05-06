@@ -599,8 +599,7 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 
 void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
   (void)msg;
-  CHECK_NOT_INITIALIZED
-  CHECK_PIN
+  CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
   sys_backtoboot();
 }
