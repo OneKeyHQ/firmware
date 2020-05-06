@@ -76,7 +76,7 @@ void exti1_isr(void) {
 void exti0_isr(void) {
   if (exti_get_flag_status(BTN_PIN_NO)) {
     exti_reset_request(BTN_PIN_NO);
-    if (gpio_get(GPIOC, BTN_PIN_NO)) {
+    if (gpio_get(BTN_PORT_NO, BTN_PIN_NO)) {
       button_timer_enable = 1;
       button_timer_counter = 0;
     }
@@ -88,7 +88,7 @@ void buttonsTimer(void) {
     button_timer_counter++;
     if (button_timer_counter > 1) {
       // buttonUpdateIrq();
-      if (gpio_get(GPIOC, BTN_PIN_NO) == 0) {  // key up
+      if (gpio_get(BTN_PORT_NO, BTN_PIN_NO) == 0) {  // key up
         button_timer_enable = 0;
       }
     }
