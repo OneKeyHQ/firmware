@@ -23,7 +23,7 @@
 #include "secbool.h"
 
 void pinmatrix_start(const char *text);
-secbool pinmatrix_done(char *pin);
+secbool pinmatrix_done(bool clear, char *pin);
 const char *pinmatrix_get(void);
 
 #endif

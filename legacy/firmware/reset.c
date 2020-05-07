@@ -104,7 +104,7 @@ void reset_init(bool display_random, uint32_t _strength,
     }
   }
 
-  if (pin_protection && !protectChangePin(false)) {
+  if (pin_protection && !protectChangePin(true, false)) {
     layoutHome();
     return;
   }

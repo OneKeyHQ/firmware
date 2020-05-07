@@ -491,7 +491,7 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection,
   }
 
   if (!dry_run) {
-    if (pin_protection && !protectChangePin(false)) {
+    if (pin_protection && !protectChangePin(true, false)) {
       layoutHome();
       return;
     }

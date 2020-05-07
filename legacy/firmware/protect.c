@@ -39,6 +39,7 @@
 
 bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
+static const char default_user_pin[7] = "888888";
 
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
@@ -55,12 +56,11 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   buttonUpdate();  // Clear button state
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
-  timer_out_set(timer_out_countdown, default_oper_time);
+  timer_out_set(timer_out_oper, default_oper_time);
+  if (g_bIsBixinAPP) acked = true;
 
-  while (timer_out_get(timer_out_countdown)) {
+  while (timer_out_get(timer_out_oper)) {
     usbPoll();
-
-    if (g_bIsBixinAPP) acked = true;
 
     // check for ButtonAck
     if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
@@ -117,7 +117,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
     }
 #endif
   }
-  timer_out_set(timer_out_countdown, 0);
+  timer_out_set(timer_out_oper, 0);
   usbTiny(0);
 
   return result;
@@ -125,6 +125,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
 
 const char *requestPin(PinMatrixRequestType type, const char *text,
                        const char **new_pin) {
+  bool button_no = false;
   PinMatrixRequest resp = {0};
   *new_pin = NULL;
   memzero(&resp, sizeof(PinMatrixRequest));
@@ -133,30 +134,42 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
   usbTiny(1);
   msg_write(MessageType_MessageType_PinMatrixRequest, &resp);
   pinmatrix_start(text);
-  for (;;) {
+  timer_out_set(timer_out_oper, default_oper_time);
+  while (timer_out_get(timer_out_oper)) {
     usbPoll();
+    buttonUpdate();
     if (msg_tiny_id == MessageType_MessageType_PinMatrixAck) {
+      timer_out_set(timer_out_oper, 0);
       msg_tiny_id = 0xFFFF;
       PinMatrixAck *pma = (PinMatrixAck *)msg_tiny;
       usbTiny(0);
       if (pma->has_new_pin) {
-        if (sectrue == pinmatrix_done(pma->new_pin))  // convert via pinmatrix
+        if (sectrue ==
+            pinmatrix_done(false, pma->new_pin))  // convert via pinmatrix
           *new_pin = pma->new_pin;
       }
-      if (sectrue == pinmatrix_done(pma->pin))  // convert via pinmatrix
+      if (sectrue == pinmatrix_done(true, pma->pin))  // convert via pinmatrix
         return pma->pin;
       else
         return 0;
+    }
+    if (button.NoUp) {
+      timer_out_set(timer_out_oper, 0);
+      button_no = true;
+      msg_tiny_id = MessageType_MessageType_Cancel;
     }
     // check for Cancel / Initialize
     protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
     protectAbortedByInitialize =
         (msg_tiny_id == MessageType_MessageType_Initialize);
     if (protectAbortedByCancel || protectAbortedByInitialize) {
-      pinmatrix_done(0);
+      pinmatrix_done(true, 0);
       msg_tiny_id = 0xFFFF;
       usbTiny(0);
-      return 0;
+      if (button_no)
+        return PIN_CANCELED_BY_BUTTON;
+      else
+        return 0;
     }
 #if DEBUG_LINK
     if (msg_tiny_id == MessageType_MessageType_DebugLinkGetState) {
@@ -165,6 +178,9 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
     }
 #endif
   }
+  msg_tiny_id = 0xFFFF;
+  usbTiny(0);
+  return 0;
 }
 
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
@@ -225,7 +241,8 @@ bool protectPin(bool use_cached) {
     if (!pin) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
-    }
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
   }
 
   bool ret = config_unlock(pin);
@@ -235,25 +252,30 @@ bool protectPin(bool use_cached) {
   return ret;
 }
 
-bool protectChangePin(bool removal) {
+bool protectChangePin(bool init, bool removal) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
   const char *newpin = NULL;
+  bool need_new_pin = true;
+
+  if (init) need_new_pin = false;
 
   if (config_hasPin()) {
     g_ucPromptIndex = DISP_INPUTPIN;
     if (!g_bIsBixinAPP) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       _("Please enter new PIN:"), &newpin);
+                       _("Please enter current PIN:"), &newpin);
     } else {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                        _("Please enter the PIN:"), &newpin);
+      need_new_pin = false;
     }
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
-    }
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
 
     // If removing, defer the check to config_changePin().
     if (!removal) {
@@ -271,51 +293,61 @@ bool protectChangePin(bool removal) {
 
   if (!removal) {
     g_ucPromptIndex = DISP_INPUTPIN;
-    if (!g_bIsBixinAPP) {
+    if (!g_bIsBixinAPP || need_new_pin) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                        _("Please enter new PIN:"), &newpin);
     } else {
-      if (new_pin == NULL) {
-        fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
-        layoutHome();
-        return false;
+      if (init) {
+        pin = default_user_pin;
+      } else {
+        if (newpin == NULL) {
+          fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
+          layoutHome();
+          return false;
+        }
+        pin = newpin;
       }
-      pin = new_pin;
     }
 
     if (pin == NULL || pin[0] == '\0') {
       memzero(old_pin, sizeof(old_pin));
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
-    }
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
     strlcpy(new_pin, pin, sizeof(new_pin));
 
-#if !EMULATOR
-    g_ucPromptIndex = DISP_CONFIRM_PIN;
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Please confirm PIN"), NULL, NULL, new_pin, NULL, NULL);
+    if (!g_bIsBixinAPP) {
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
+                       _("Please re-enter new PIN:"), &newpin);
+      if (pin == NULL) {
+        memzero(old_pin, sizeof(old_pin));
+        memzero(new_pin, sizeof(new_pin));
+        fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+        return false;
+      } else if (pin == PIN_CANCELED_BY_BUTTON)
+        return false;
+      if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
+        memzero(old_pin, sizeof(old_pin));
+        memzero(new_pin, sizeof(new_pin));
+        fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
+        return false;
+      }
+    } else {
+      if (!init) {
+        g_ucPromptIndex = DISP_CONFIRM_PIN;
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
+                          NULL);
 
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return false;
+        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
+                           false)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          layoutHome();
+          return false;
+        }
+      }
     }
-#else
-    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
-                     _("Please re-enter new PIN:"), &newpin);
-    if (pin == NULL) {
-      memzero(old_pin, sizeof(old_pin));
-      memzero(new_pin, sizeof(new_pin));
-      fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
-      return false;
-    }
-    if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
-      memzero(old_pin, sizeof(old_pin));
-      memzero(new_pin, sizeof(new_pin));
-      fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
-      return false;
-    }
-#endif
   }
 
   bool ret = config_changePin(old_pin, new_pin);
@@ -344,7 +376,8 @@ bool protectChangeWipeCode(bool removal) {
     if (input == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
-    }
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
 
     // If removing, defer the check to config_changeWipeCode().
     if (!removal) {
@@ -367,7 +400,8 @@ bool protectChangeWipeCode(bool removal) {
       memzero(pin, sizeof(pin));
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;
-    }
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
     if (strncmp(pin, input, sizeof(pin)) == 0) {
       memzero(pin, sizeof(pin));
       fsm_sendFailure(FailureType_Failure_ProcessError,
@@ -383,7 +417,8 @@ bool protectChangeWipeCode(bool removal) {
       memzero(wipe_code, sizeof(wipe_code));
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;
-    }
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
 
     if (strncmp(wipe_code, input, sizeof(wipe_code)) != 0) {
       memzero(pin, sizeof(pin));
