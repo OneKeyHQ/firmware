@@ -28,7 +28,9 @@
 #include "norcow.h"
 #include "pbkdf2.h"
 #include "rand.h"
+#if USE_SE
 #include "se_chip.h"
+#endif
 #include "sha2.h"
 #include "storage.h"
 
@@ -1181,7 +1183,7 @@ secbool storage_get(const uint16_t key, void *val_dest, const uint16_t max_len,
       return storage_get_encrypted(key, val_dest, max_len, len);
     }
   } else {
-#if USE_SE
+#if !EMULATOR
     if (se_get_value(key, val_dest, max_len, len)) return sectrue;
 #endif
     return secfalse;
@@ -1262,7 +1264,7 @@ secbool storage_set(const uint16_t key, const void *val, const uint16_t len) {
       ret = storage_set_encrypted(key, val, len);
     }
   } else {
-#if USE_SE
+#if !EMULATOR
     if (se_set_value(key, val, len)) return sectrue;
     return secfalse;
 #endif
@@ -1288,7 +1290,7 @@ secbool storage_delete(const uint16_t key) {
     }
     return ret;
   } else {
-#if USE_SE
+#if !EMULATOR
     if (se_delete_key(key)) return sectrue;
 #endif
     return secfalse;

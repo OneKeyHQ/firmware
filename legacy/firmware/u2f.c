@@ -30,7 +30,9 @@
 #include "hmac.h"
 #include "layout2.h"
 #include "memzero.h"
+#if !EMULATOR
 #include "mi2c.h"
+#endif
 #include "nist256p1.h"
 #include "oled.h"
 #include "rng.h"
@@ -362,7 +364,7 @@ void u2fhid_msg(const APDU *a, uint32_t len) {
         debugLog(0, "", "u2f unknown cmd");
         send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
       } else {
-#if USE_SE
+#if !EMULATOR
         // MI2CDRV_Transmit
         if (false == bMI2CDRV_SendData((uint8_t *)&(a->cla), len)) {
           send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);

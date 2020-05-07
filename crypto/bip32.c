@@ -536,7 +536,7 @@ int hdnode_private_ckd_cached(HDNode *inout, const uint32_t *i, size_t i_count,
     // no way how to compute parent fingerprint
     return 1;
   }
-#if USE_SE
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     uint8_t ucRevBuf[256];
     uint16_t usLen;

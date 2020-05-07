@@ -185,7 +185,7 @@ void mnemonic_to_seed(bool ucMode, const char *mnemonic, const char *passphrase,
                       uint8_t seed[512 / 8],
                       void (*progress_callback)(uint32_t current,
                                                 uint32_t total)) {
-#if USE_SE
+#if !EMULATOR
   extern bool g_bSelectSEFlag;
   if (g_bSelectSEFlag) {
     se_get_seed(ucMode, passphrase, seed);

@@ -33,6 +33,7 @@ void emulatorSocketInit(void);
 size_t emulatorSocketRead(int *iface, void *buffer, size_t size);
 size_t emulatorSocketWrite(int iface, const void *buffer, size_t size);
 
+
 #endif
 
 #endif

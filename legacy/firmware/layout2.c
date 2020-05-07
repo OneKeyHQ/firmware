@@ -282,7 +282,9 @@ void vlayoutLogo(void) {
   if (!config_isInitialized()) {
     vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
   }
+#if !EMULATOR
   layoutFillBleName(5);
+#endif
   oledRefresh();
 }
 
@@ -1106,7 +1108,9 @@ void layoutDeviceInfo(uint8_t ucPage) {
                                VERSION_MINOR) "." VERSTR(VERSION_PATCH),
                            FONT_STANDARD);
       oledDrawString(0, 24, "BLE_version:", FONT_STANDARD);
+#if !EMULATOR
       layoutFillBleVersion(4);
+#endif
       break;
     case 1:
       oledClear();

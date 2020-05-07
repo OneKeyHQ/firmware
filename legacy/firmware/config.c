@@ -768,6 +768,7 @@ bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len) {
 
   return true;
 }
+
 bool config_SeedsEncExportBytes(uint8_t *dest) {
   uint16_t dest_size;
   if (!g_bSelectSEFlag) {
@@ -1050,7 +1051,7 @@ void config_wipe(void) {
     storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
     storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   } else {
-#if USE_SE
+#if !EMULATOR
     // wipe user flash
     session_clear(false);
     se_reset_storage(KEY_RESET);
@@ -1080,7 +1081,6 @@ bool config_getBleTrans(void) {
   return sectrue == config_get_bool(KEY_TRANSBLEMODE, &flag);
 }
 
-#ifdef USE_SE
 void config_setWhetherUseSE(bool flag) { config_set_bool(KEY_SEFLAG, flag); }
 
 bool config_getWhetherUseSE(void) {
@@ -1112,6 +1112,5 @@ bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
   get_msg->bytes[get_msg->size] = '\0';
   return true;
 }
-#endif
 
 void config_setIsBixinAPP(void) { g_bIsBixinAPP = true; }

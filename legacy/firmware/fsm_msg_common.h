@@ -611,7 +611,9 @@ void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
   (void)msg;
   CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
+#if !EMULATOR
   sys_backtoboot();
+#endif
 }
 
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {

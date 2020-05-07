@@ -20,10 +20,8 @@
 #include "ed25519-hash-custom.h"
 #include "mi2c.h"
 
-#if USE_SE
 extern bool g_bSelectSEFlag; 
 extern uint8_t g_uchash_mode;
-#endif
 
 /*
 	Generates a (extsk[0..31]) and aExt (extsk[32..63])
@@ -48,7 +46,7 @@ ed25519_hram(hash_512bits hram, const ed25519_signature RS, const ed25519_public
 
 void
 ED25519_FN(ed25519_publickey) (const ed25519_secret_key sk, ed25519_public_key pk) {
-#if USE_SE
+#if !EMULATOR 
    if (g_bSelectSEFlag){
     uint16_t usLen;
     uint8_t ucSendBuf[33];
@@ -115,7 +113,7 @@ ED25519_FN(ed25519_cosi_sign) (const unsigned char *m, size_t mlen, const ed2551
 
 void
 ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_secret_key sk, const ed25519_public_key pk, ed25519_signature RS) {
-#if USE_SE
+#if !EMULATOR
  if (g_bSelectSEFlag){
   	uint16_t usLen;
   	uint8_t ucSendBuf[1024+32];

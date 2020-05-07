@@ -105,6 +105,7 @@ extern uint16_t g_usMI2cRevLen;
 #define SH_IOBUFFER (g_ucMI2cSendBuf + 5)
 #define SH_CMDHEAD (g_ucMI2cSendBuf)
 
+#if !EMULATOR
 extern void vMI2CDRV_Init(void);
 
 extern bool bMI2CDRV_ReceiveData(uint8_t *pucStr, uint16_t *pusRevLen);
@@ -115,5 +116,12 @@ extern uint32_t MI2CDRV_Transmit(uint8_t ucCmd, uint8_t ucIndex,
                                  uint8_t *pucSendData, uint16_t usSendLen,
                                  uint8_t *pucRevData, uint16_t *pusRevLen,
                                  uint8_t ucMode, uint8_t ucWRFlag);
+#else
+#define MI2CDRV_Transmit(...) 0
+#define bMI2CDRV_SendData(...) true
+#define bMI2CDRV_ReceiveData(...) true
+
+#endif
+ 
 
 #endif
