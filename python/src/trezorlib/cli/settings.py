@@ -127,11 +127,13 @@ def homescreen(client, filename):
         img = bytes(img)
     return device.apply_settings(client, homescreen=img)
 
+
 @cli.command(name="bixin")
 @with_client
 def bixin(client):
     """set bixin app."""
-    return device.apply_settings(client, is_bixinapp=True)  
+    return device.apply_settings(client, is_bixinapp=True)
+
 
 #
 # passphrase operations
@@ -158,5 +160,3 @@ def passphrase_enable(client, force_on_device: bool):
 def passphrase_disable(client):
     """Disable passphrase."""
     return device.apply_settings(client, use_passphrase=False)
-
-

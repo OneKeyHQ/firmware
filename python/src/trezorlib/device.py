@@ -93,11 +93,12 @@ def wipe(client):
     client.init_device()
     return ret
 
+
 @expect(messages.Success, field="message")
 def reboot(client):
     ret = client.call(messages.BixinUpgrade())
     return ret
- 
+
 
 def recover(
     client,
@@ -206,7 +207,8 @@ def backup(client):
     ret = client.call(messages.BackupDevice())
     return ret
 
+
 @expect(messages.Success, field="message")
 def bixinapp(client):
     ret = client.call(messages.BackupDevice())
-    return ret 
+    return ret
