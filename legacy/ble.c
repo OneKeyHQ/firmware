@@ -7,8 +7,10 @@
 
 static usart_msg ble_usart_msg;
 static bool get_ble_name = false;
+static bool get_ble_ver = false;
 static bool ble_connect = false;
-static uint8_t ble_name[BLE_NAME_LEN + 1] = {0};
+static char ble_name[BLE_NAME_LEN + 1] = {0};
+static char ble_ver[6] = {0};
 
 static uint8_t calXor(uint8_t *buf, uint32_t len) {
   uint8_t tmp = 0;
@@ -39,7 +41,9 @@ void ble_request_name(void) {
 
 bool ble_connect_state(void) { return ble_connect; }
 bool ble_name_state(void) { return get_ble_name; }
-uint8_t *ble_get_name(void) { return ble_name; }
+bool ble_ver_state(void) { return get_ble_ver; }
+char *ble_get_name(void) { return ble_name; }
+char *ble_get_ver(void) { return ble_ver; }
 
 void ble_reset(void) {
   ble_power_off();
@@ -124,6 +128,12 @@ void ble_uart_poll(void) {
       case BLE_CMD_BATTERY:
         if (ble_usart_msg.cmd_vale[0] <= 5)
           battery_cap = ble_usart_msg.cmd_vale[0];
+        break;
+      case BLE_CMD_VER:
+        if (ble_usart_msg.cmd_len == 5) {
+          memcpy(ble_ver, ble_usart_msg.cmd_vale, 5);
+          get_ble_ver = true;
+        }
         break;
       default:
         break;

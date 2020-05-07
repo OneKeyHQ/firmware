@@ -52,6 +52,7 @@ void layoutProgress(const char *desc, int permil);
 void layoutStatusLogo(void);
 void layoutBlePasskey(uint8_t *passkey);
 void layoutFillBleName(uint8_t line);
+void layoutFillBleVersion(uint8_t line);
 void layoutError(const char *line1, const char *line2);
 void layoutOperationWithCountdown(const char *info, uint32_t counter);
 

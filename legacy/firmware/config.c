@@ -417,10 +417,7 @@ void config_init(void) {
 
   storage_init(&protectPinUiCallback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
-  // FIXME:do not use SE this until change the flash address
-  // vMI2CDRV_SynSessionKey();
-  // whether use se flag store se
-  config_getWhetherUseSE();
+
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);

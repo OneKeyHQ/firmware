@@ -9,7 +9,9 @@
 
 bool ble_connect_state(void);
 bool ble_name_state(void);
-uint8_t *ble_get_name(void);
+bool ble_ver_state(void);
+char *ble_get_name(void);
+char *ble_get_ver(void);
 void ble_request_name(void);
 void ble_reset(void);
 void ble_uart_poll(void);

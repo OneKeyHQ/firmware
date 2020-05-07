@@ -90,6 +90,8 @@ message Features {
     optional bool wipe_code_protection = 34;    // is wipe code protection enabled
     optional bytes session_id = 35;
     optional bool passphrase_always_on_device = 36;  // device enforces passphrase entry on Trezor
+    optional string ble_name = 37;
+    optional string ble_ver = 38;
 }
 
 /**

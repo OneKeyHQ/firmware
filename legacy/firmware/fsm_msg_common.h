@@ -79,6 +79,14 @@ bool get_features(Features *resp) {
   resp->capabilities[6] = Capability_Capability_Stellar;
   resp->capabilities[7] = Capability_Capability_U2F;
 #endif
+  if (ble_name_state()) {
+    resp->has_ble_name = true;
+    strlcpy(resp->ble_name, ble_get_name(), sizeof(resp->ble_name));
+  }
+  if (ble_ver_state()) {
+    resp->has_ble_ver = true;
+    strlcpy(resp->ble_ver, ble_get_ver(), sizeof(resp->ble_ver));
+  }
   return resp;
 }
 
@@ -163,7 +171,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
     return;
   }
 
-  if (protectChangePin(removal)) {
+  if (protectChangePin(false, removal)) {
     if (removal) {
       fsm_sendSuccess(_("PIN removed"));
     } else {
@@ -367,8 +375,6 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
                   msg->has_use_fee_pay || msg->has_is_bixinapp,
               _("No setting provided"));
 
-  CHECK_PIN
-
   if (msg->has_label) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("change name to"),
@@ -456,18 +462,22 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     config_setHomescreen(msg->homescreen.bytes, msg->homescreen.size);
   }
   if (msg->has_auto_lock_delay_ms) {
+    CHECK_PIN
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
   if (msg->has_use_fee_pay) {
+    CHECK_PIN
     config_setFreePayFlag(msg->use_fee_pay);
   }
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);
   }
   if (msg->has_use_se) {
+    CHECK_PIN
     config_setWhetherUseSE(msg->use_se);
   }
   if (msg->has_use_exportseeds) {
+    CHECK_PIN
     config_setSeedsExportFlag(msg->use_exportseeds);
   }
   if (msg->has_is_bixinapp) {

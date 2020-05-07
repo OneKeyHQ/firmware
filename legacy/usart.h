@@ -28,7 +28,8 @@ enum {
   BLE_CMD_PAIR_STATE = 0x02,
   BLE_CMD_PASSKEY = 0x03,
   BLE_CMD_BT_NAME = 0x04,
-  BLE_CMD_BATTERY = 0x05
+  BLE_CMD_BATTERY = 0x05,
+  BLE_CMD_VER = 0x06
 };
 
 enum {

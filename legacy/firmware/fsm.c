@@ -24,6 +24,7 @@
 #include "base58.h"
 #include "bip32.h"
 #include "bip39.h"
+#include "ble.h"
 #include "coins.h"
 #include "common.h"
 #include "config.h"

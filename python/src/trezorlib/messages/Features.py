@@ -51,6 +51,8 @@ class Features(p.MessageType):
         wipe_code_protection: bool = None,
         session_id: bytes = None,
         passphrase_always_on_device: bool = None,
+        ble_name: str = None,
+        ble_ver: str = None,
     ) -> None:
         self.vendor = vendor
         self.major_version = major_version
@@ -86,6 +88,8 @@ class Features(p.MessageType):
         self.wipe_code_protection = wipe_code_protection
         self.session_id = session_id
         self.passphrase_always_on_device = passphrase_always_on_device
+        self.ble_name = ble_name
+        self.ble_ver = ble_ver
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -124,4 +128,6 @@ class Features(p.MessageType):
             34: ('wipe_code_protection', p.BoolType, 0),
             35: ('session_id', p.BytesType, 0),
             36: ('passphrase_always_on_device', p.BoolType, 0),
+            37: ('ble_name', p.UnicodeType, 0),
+            38: ('ble_ver', p.UnicodeType, 0),
         }

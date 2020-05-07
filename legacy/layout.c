@@ -261,14 +261,20 @@ void layoutBlePasskey(uint8_t *passkey) {
 }
 
 void layoutFillBleName(uint8_t line) {
-  uint8_t *ble_name;
-  if (ble_name_state() == true) {
-    ble_name = ble_get_name();
-    oledclearLine(line);
-    oledDrawStringCenter(64, line * 8, (char *)ble_name, FONT_STANDARD);
+  if (line < (OLED_HEIGHT / 8)) {
+    if (ble_name_state() == true) {
+      oledclearLine(line);
+      oledDrawStringCenter(64, line * 8, ble_get_name(), FONT_STANDARD);
+    }
   }
 }
 
+void layoutFillBleVersion(uint8_t line) {
+  if (line < (OLED_HEIGHT / 8)) {
+    if (ble_ver_state())
+      oledDrawStringCenter(64, line * 8, ble_get_ver(), FONT_STANDARD);
+  }
+}
 #endif
 
 extern void shutdown(void);

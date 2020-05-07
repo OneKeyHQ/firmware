@@ -1097,66 +1097,26 @@ void vDISP_TurnPageDOWN(void) {
             Disp_buffer + s_usCurrentCount, 16);
 }
 void layoutDeviceInfo(uint8_t ucPage) {
-  uint8_t ucBuf[66];
-  uint8_t line[17];
-
   switch (ucPage) {
     case 0:
       oledClear();
-      oledDrawString(0, 8, (char *)USB_LABLE, FONT_STANDARD);
-      oledDrawStringCenter(64, 8, (char *)DEFAULTLABE, FONT_STANDARD);
-
-      oledDrawString(0, 16, (char *)USB_SN, FONT_STANDARD);
-      oledDrawStringCenter(64, 16, (char *)DEFAULSN, FONT_STANDARD);
-
-      oledDrawString(0, 24, (char *)USB_VER, FONT_STANDARD);
-      memzero(ucBuf, sizeof(ucBuf));
-      ucBuf[0] = VERSION_MAJOR + '0';
-      ucBuf[1] = '.';
-      ucBuf[2] = VERSION_MINOR + '0';
-      ucBuf[3] = '.';
-      ucBuf[4] = VERSION_PATCH + '0';
-      oledDrawString(64, 24, (char *)ucBuf, FONT_STANDARD);
+      oledDrawString(0, 8, "firmware_version:", FONT_STANDARD);
+      oledDrawStringCenter(OLED_WIDTH / 2, 16,
+                           VERSTR(VERSION_MAJOR) "." VERSTR(
+                               VERSION_MINOR) "." VERSTR(VERSION_PATCH),
+                           FONT_STANDARD);
+      oledDrawString(0, 24, "BLE_version:", FONT_STANDARD);
+      layoutFillBleVersion(4);
       break;
     case 1:
       oledClear();
-      oledDrawString(0, 8, (char *)APP_FINGERPRINT, FONT_STANDARD);
-      memzero(g_usb_info.ucfingerprint, sizeof(g_usb_info.ucfingerprint));
-      sha256_Raw(FLASH_PTR(FLASH_APP_START), (64 - 1) * 1024,
-                 g_usb_info.ucfingerprint);
-      data2hex(g_usb_info.ucfingerprint, 32, (char *)ucBuf);
-      memzero(line, sizeof(line));
-      memcpy(line, ucBuf, 0x10);
-      oledDrawStringCenter(64, 16, (char *)line, FONT_STANDARD);
-      memzero(line, sizeof(line));
-      memcpy(line, ucBuf + 0x10, 0x10);
-      oledDrawStringCenter(64, 24, (char *)line, FONT_STANDARD);
-      memzero(line, sizeof(line));
-      memcpy(line, ucBuf + 0x20, 0x10);
-      oledDrawStringCenter(64, 32, (char *)line, FONT_STANDARD);
-      memzero(line, sizeof(line));
-      memcpy(line, ucBuf + 0x30, 0x10);
-      oledDrawStringCenter(64, 40, (char *)line, FONT_STANDARD);
+      oledDrawStringCenter(OLED_WIDTH / 2, 8, "public key", FONT_STANDARD);
+      // layoutXPUB();
       break;
     case 2:
       oledClear();
-      oledDrawString(0, 8, (char *)BLE_NAME, FONT_STANDARD);
-      oledDrawStringCenter(64, 8, (char *)g_ble_info.ucBle_Name, FONT_STANDARD);
-      oledDrawString(0, 16, (char *)BLE_MAC, FONT_STANDARD);
-      memzero(ucBuf, sizeof(ucBuf));
-      data2hex(g_ble_info.ucBle_Mac, BLE_MAC_LEN, (char *)ucBuf);
-      oledDrawStringCenter(64, 24, (char *)ucBuf, FONT_STANDARD);
-
-      oledDrawString(0, 32, (char *)BLE_VER, FONT_STANDARD);
-      memzero(ucBuf, sizeof(ucBuf));
-      ucBuf[0] = ((g_ble_info.ucBle_Version[0] & 0xF0) >> 4) + '0';
-      ucBuf[1] = '.';
-      ucBuf[2] = (g_ble_info.ucBle_Version[0] & 0x0F) + '0';
-      ucBuf[3] = '.';
-      ucBuf[4] = ((g_ble_info.ucBle_Version[1] & 0xF0) >> 4) + '0';
-      ucBuf[5] = (g_ble_info.ucBle_Version[1] & 0x0F) + '0';
-
-      oledDrawString(64, 48, (char *)ucBuf, FONT_STANDARD);
+      oledDrawStringCenter(OLED_WIDTH / 2, 8, "public key QR", FONT_STANDARD);
+      // layoutAddress();
       break;
   }
   oledRefresh();
