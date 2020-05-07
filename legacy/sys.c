@@ -28,7 +28,7 @@ bool sys_usbState(void) {
 bool sys_bleState(void) { return ble_connect_state(); }
 
 void sys_shutdown(void) {
-  delay_ms(1000);  // delay for prevois display
+  delay_ms(500);  // delay for prevois display
   oledClear();
   oledDrawStringCenter(64, 30, "power off ...", FONT_STANDARD);
   oledRefresh();

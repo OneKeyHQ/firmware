@@ -92,7 +92,7 @@ void buttonsTimer(void) {
         button_timer_enable = 0;
       }
     }
-    if (button_timer_counter > 4) {  // long press
+    if (button_timer_counter > 2) {  // long press
       sys_shutdown();
     }
   }
