@@ -359,19 +359,19 @@ static void render_address_dialog(const CoinInfo *coin, const char *address,
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
   oledClear();
-  oledDrawBitmap(0, 0, &bmp_icon_question);
-  oledDrawString(20, 0 * 9, line1, FONT_STANDARD);
-  oledDrawString(20, 1 * 9, line2, FONT_STANDARD);
+  oledDrawBitmap(0, 1 * 9, &bmp_icon_question);
+  oledDrawString(20, 1 * 9, line1, FONT_STANDARD);
+  oledDrawString(20, 2 * 9, line2, FONT_STANDARD);
   int left = linelen > 18 ? 0 : 20;
-  oledDrawString(left, 2 * 9, str[0], FONT_FIXED);
-  oledDrawString(left, 3 * 9, str[1], FONT_FIXED);
-  oledDrawString(left, 4 * 9, str[2], FONT_FIXED);
-  oledDrawString(left, 5 * 9, str[3], FONT_FIXED);
+  oledDrawString(left, 3 * 9, str[0], FONT_FIXED);
+  oledDrawString(left, 4 * 9, str[1], FONT_FIXED);
+  oledDrawString(left, 5 * 9, str[2], FONT_FIXED);
+  oledDrawString(left, 6 * 9, str[3], FONT_FIXED);
   if (!str[3][0]) {
     if (extra_line) {
-      oledDrawString(0, 5 * 9, extra_line, FONT_STANDARD);
+      oledDrawString(0, 6 * 9, extra_line, FONT_STANDARD);
     } else {
-      oledHLine(OLED_HEIGHT - 13);
+      oledHLine(OLED_HEIGHT - 11);
     }
   }
   layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
