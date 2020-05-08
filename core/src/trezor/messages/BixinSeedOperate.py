@@ -17,7 +17,7 @@ class BixinSeedOperate(p.MessageType):
     def __init__(
         self,
         type: EnumTypeSeedRequestType = None,
-        seed_importData: str = None,
+        seed_importData: bytes = None,
     ) -> None:
         self.type = type
         self.seed_importData = seed_importData
@@ -26,5 +26,5 @@ class BixinSeedOperate(p.MessageType):
     def get_fields(cls) -> Dict:
         return {
             1: ('type', p.EnumType("SeedRequestType", (0, 1, 2)), 0),  # required
-            2: ('seed_importData', p.UnicodeType, 0),
+            2: ('seed_importData', p.BytesType, 0),
         }

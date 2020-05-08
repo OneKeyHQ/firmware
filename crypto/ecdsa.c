@@ -34,10 +34,10 @@
 #include "ecdsa.h"
 #include "hmac.h"
 #include "memzero.h"
+#include "mi2c.h"
 #include "rand.h"
 #include "rfc6979.h"
 #include "secp256k1.h"
-#include "mi2c.h"
 
 // Set cp2 = cp1
 void point_copy(const curve_point *cp1, curve_point *cp2) { *cp2 = *cp1; }

@@ -117,11 +117,14 @@ message ApplySettings {
     optional uint32 auto_lock_delay_ms = 6;
     optional uint32 display_rotation = 7;  // in degrees from North
     optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry
-    optional uint32 use_fee_pay = 9;
+    optional bool fee_pay_pin = 9;
     optional bool use_ble = 10;
     optional bool use_se = 11;
-    optional bool use_exportseeds= 12;
+    //optional bool use_exportseeds= 12;
     optional bool is_bixinapp = 13;
+    optional bool fee_pay_confirm = 14;
+    optional uint64 fee_pay_money_limt = 15;
+    optional uint32 fee_pay_times = 16;
     /**
     * Type of seed and mnemonic export flag
     */
@@ -375,7 +378,7 @@ message NextU2FCounter {
  */
 message BixinSeedOperate {
     required SeedRequestType type = 1;
-    optional string seed_importData = 2;	
+    optional bytes seed_importData = 2;	
     /**
     * Type of Seed request
     */
@@ -386,29 +389,11 @@ message BixinSeedOperate {
     }
 }
 /**
- * Request: if seed export success , device sends back the message in Success response
- * @start
- * @next Success
- */
-message BixinSeedExportData {
-    optional string seed_exportdata = 1;
-}
-
-/**
  * Request: message is se some cmd
  * @end
  */
 message BixinMessageSE{
  required bytes inputmessage = 1;
-}
-
-/**
- * Request: if seed export success , device sends back the message in Success response
- * @start
- * @next Success
- */
-message BixinGetMessageSE {
-    optional bytes getmessage = 1;
 }
 
 /**

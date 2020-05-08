@@ -22,11 +22,13 @@ class ApplySettings(p.MessageType):
         auto_lock_delay_ms: int = None,
         display_rotation: int = None,
         passphrase_always_on_device: bool = None,
-        use_fee_pay: int = None,
+        fee_pay_pin: bool = None,
         use_ble: bool = None,
         use_se: bool = None,
-        use_exportseeds: bool = None,
         is_bixinapp: bool = None,
+        fee_pay_confirm: bool = None,
+        fee_pay_money_limt: int = None,
+        fee_pay_times: int = None,
     ) -> None:
         self.language = language
         self.label = label
@@ -35,11 +37,13 @@ class ApplySettings(p.MessageType):
         self.auto_lock_delay_ms = auto_lock_delay_ms
         self.display_rotation = display_rotation
         self.passphrase_always_on_device = passphrase_always_on_device
-        self.use_fee_pay = use_fee_pay
+        self.fee_pay_pin = fee_pay_pin
         self.use_ble = use_ble
         self.use_se = use_se
-        self.use_exportseeds = use_exportseeds
         self.is_bixinapp = is_bixinapp
+        self.fee_pay_confirm = fee_pay_confirm
+        self.fee_pay_money_limt = fee_pay_money_limt
+        self.fee_pay_times = fee_pay_times
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -51,9 +55,11 @@ class ApplySettings(p.MessageType):
             6: ('auto_lock_delay_ms', p.UVarintType, 0),
             7: ('display_rotation', p.UVarintType, 0),
             8: ('passphrase_always_on_device', p.BoolType, 0),
-            9: ('use_fee_pay', p.UVarintType, 0),
+            9: ('fee_pay_pin', p.BoolType, 0),
             10: ('use_ble', p.BoolType, 0),
             11: ('use_se', p.BoolType, 0),
-            12: ('use_exportseeds', p.BoolType, 0),
             13: ('is_bixinapp', p.BoolType, 0),
+            14: ('fee_pay_confirm', p.BoolType, 0),
+            15: ('fee_pay_money_limt', p.UVarintType, 0),
+            16: ('fee_pay_times', p.UVarintType, 0),
         }
