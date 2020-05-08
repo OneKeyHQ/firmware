@@ -37,9 +37,7 @@ RecoveryDevice.label                    max_size:33
 
 WordAck.word                            max_size:12
 
-BixinSeedExportData.seed_exportdata     max_size:512
 BixinSeedOperate.seed_importData        max_size:512
 
 BixinMessageSE.inputmessage             max_size:1024
-BixinGetMessageSE.getmessage            max_size:1024
 BixinOutMessageSE.outmessage            max_size:1024 

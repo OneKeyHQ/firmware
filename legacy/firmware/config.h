@@ -118,8 +118,8 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size);
 
 bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len);
-bool config_SeedsEncExportBytes(uint8_t *dest);
-bool config_SeedsEncImportBytes(uint8_t *src, uint16_t src_size);
+bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg);
+bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg);
 
 #if DEBUG_LINK
 bool config_dumpNode(HDNodeType *node);
@@ -159,14 +159,20 @@ uint32_t config_getAutoLockDelayMs(void);
 void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms);
 
 void config_wipe(void);
-void config_getFreePayFlag(void);
-void config_setFreePayFlag(uint32_t free);
+void config_setFreePayPinFlag(bool flag);
+bool config_getFreePayPinFlag(void);
+void config_setFreePayConfirmFlag(bool flag);
+bool config_getFreePayConfirmFlag(void);
+void config_setFreePayMoneyLimt(uint64_t MoneyLimt);
+uint64_t config_getFreePayMoneyLimt(void);
+void config_setFreePayTimes(uint32_t times);
+uint32_t config_getFreePayTimes(void);
+
 void config_setBleTrans(bool mode);
 bool config_getBleTrans(void);
 void config_setWhetherUseSE(bool flag);
 bool config_getWhetherUseSE(void);
-void config_setSeedsExportFlag(ExportType flag);
-bool config_getSeedsExportFlag(void);
+ExportType config_setSeedsExportFlag(ExportType flag);
 bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
                          BixinOutMessageSE_outmessage_t *get_msg);
 void config_setIsBixinAPP(void);

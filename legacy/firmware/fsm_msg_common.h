@@ -372,7 +372,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
 
   CHECK_PARAM(msg->has_label || msg->has_language || msg->has_use_passphrase ||
                   msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-                  msg->has_use_fee_pay || msg->has_is_bixinapp,
+                  msg->has_fee_pay_pin || msg->has_use_ble || msg->has_use_se ||
+                  msg->has_fee_pay_confirm || msg->has_fee_pay_money_limt ||
+                  msg->has_fee_pay_times || msg->has_is_bixinapp,
               _("No setting provided"));
 
   if (msg->has_label) {
@@ -428,10 +430,40 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_use_fee_pay && g_bSelectSEFlag) {
+  if (msg->has_fee_pay_pin && g_bSelectSEFlag) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay set"), NULL, NULL,
+                      _("Do you really want to"), _("free pay pin"), NULL, NULL,
                       NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+  }
+  if (msg->has_fee_pay_confirm && g_bSelectSEFlag) {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("free pay confirm"), NULL,
+                      NULL, NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+  }
+  if (msg->has_fee_pay_money_limt && g_bSelectSEFlag) {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("free pay money limt"),
+                      NULL, NULL, NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+  }
+  if (msg->has_fee_pay_times && g_bSelectSEFlag) {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("free pay timest"), NULL,
+                      NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -465,9 +497,21 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     CHECK_PIN
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
-  if (msg->has_use_fee_pay) {
+  if (msg->has_fee_pay_pin) {
     CHECK_PIN
-    config_setFreePayFlag(msg->use_fee_pay);
+    config_setFreePayPinFlag(msg->fee_pay_pin);
+  }
+  if (msg->has_fee_pay_confirm) {
+    CHECK_PIN
+    config_setFreePayConfirmFlag(msg->fee_pay_confirm);
+  }
+  if (msg->has_fee_pay_money_limt) {
+    CHECK_PIN
+    config_setFreePayMoneyLimt(msg->fee_pay_money_limt);
+  }
+  if (msg->has_fee_pay_times) {
+    CHECK_PIN
+    config_setFreePayTimes(msg->fee_pay_times);
   }
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);
@@ -475,10 +519,6 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_use_se) {
     CHECK_PIN
     config_setWhetherUseSE(msg->use_se);
-  }
-  if (msg->has_use_exportseeds) {
-    CHECK_PIN
-    config_setSeedsExportFlag(msg->use_exportseeds);
   }
   if (msg->has_is_bixinapp) {
     config_setIsBixinAPP();
@@ -569,7 +609,7 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
       uiTemp = random32();
       memcpy(ucBuf + 1 + i * 4, &uiTemp, 4);
     }
-    ucBuf[0] = config_getSeedsExportFlag();
+    ucBuf[0] = config_setSeedsExportFlag(ExportType_SeedEncExportType_NO);
     if (!config_setSeedsBytes(ucBuf, 65)) {
       fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
       layoutHome();
@@ -582,7 +622,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     RESP_INIT(BixinOutMessageSE);
     CHECK_PIN
     CHECK_INITIALIZED
-    if (!config_SeedsEncExportBytes((uint8_t *)(&resp->outmessage))) {
+    if (!config_SeedsEncExportBytes(
+            (BixinOutMessageSE_outmessage_t *)(&resp->outmessage))) {
       fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
       layoutHome();
       return;
@@ -595,8 +636,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     CHECK_PIN
     CHECK_NOT_INITIALIZED
     if (msg->has_seed_importData) {
-      if (config_SeedsEncImportBytes((uint8_t *)(msg->seed_importData),
-                                     sizeof(msg->seed_importData))) {
+      if (config_SeedsEncImportBytes(
+              (BixinSeedOperate_seed_importData_t *)(&msg->seed_importData))) {
         fsm_sendSuccess(_("seed import success"));
         layoutHome();
         return;

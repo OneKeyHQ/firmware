@@ -201,7 +201,7 @@ void fsm_msgGetAddress(const GetAddress *msg) {
   RESP_INIT(Address);
 
   CHECK_INITIALIZED
-  if (SIGN_FREEPAY_NOPIN != (g_uiFreePayFlag & SIGN_FREEPAY_NOPIN)) {
+  if (!config_getFreePayPinFlag()) {
     CHECK_PIN
   }
 

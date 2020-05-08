@@ -49,7 +49,6 @@ void delay_us(uint32_t uiDelay_us);
 
 void timer_init(void);
 
-
 #if EMULATOR
 uint32_t timer_ms(void);
 #define timer_out_set(...)

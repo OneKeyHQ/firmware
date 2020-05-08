@@ -89,11 +89,13 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 //#define KEY_VERIFYPIN (22| APP_PIN)      // uint32
 
 #define KEY_TRANSBLEMODE (23 | APP | FLAG_PUBLIC_SHIFTED)  // bool
-#define KEY_FREEPAYFLAG (24 | APP)                         // uint32
+#define KEY_FREEPAYPINFLAG (24 | APP)                      // bool
 #define KEY_SEFLAG (25 | APP)                              // bool
 //#define MNEMONIC_INDEX_TOSEED               (26)
-#define KEY_RESET (27 | APP)           // bool
-#define KEY_EXPORTSEEDFLAG (28 | APP)  // bool
+#define KEY_RESET (27 | APP)               // bool
+#define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
+#define KEY_FREEPAYMONEYLIMT (29 | APP)    // uint64
+#define KEY_FREEPAYPTIMES (30 | APP)       // uint32
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -184,6 +186,11 @@ static uint32_t pin_to_int(const char *pin) {
 }
 
 static secbool config_set_bool(uint16_t key, bool value) {
+  if (key == KEY_INITIALIZED) {
+    if (g_bSelectSEFlag) {
+      key = KEY_INITIALIZED & (~FLAG_PUBLIC_SHIFTED);
+    }
+  }
   if (value) {
     return storage_set(key, &TRUE_BYTE, sizeof(TRUE_BYTE));
   } else {
@@ -417,13 +424,12 @@ void config_init(void) {
 
   storage_init(&protectPinUiCallback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
-
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
   }
 
-  //  vMI2CDRV_SynSessionKey();
+  vMI2CDRV_SynSessionKey();
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
 
@@ -637,7 +643,7 @@ const uint8_t *config_getSeed(void) {
         // this should not happen if the Host behaves and sends Initialize first
         session_startSession(NULL);
       }
-      mnemonic_to_seed(config_getSeedsExportFlag(), mnemonic, passphrase,
+      mnemonic_to_seed(FALSE_BYTE, mnemonic, passphrase,
                        activeSessionCache->seed,
                        get_root_node_callback);  // BIP-0039
       memzero(mnemonic, sizeof(mnemonic));
@@ -655,8 +661,7 @@ const uint8_t *config_getSeed(void) {
       memzero(passphrase, sizeof(passphrase));
       return NULL;
     }
-    mnemonic_to_seed(config_getSeedsExportFlag(), NULL, passphrase,
-                     activeSessionCache->seed,
+    mnemonic_to_seed(FALSE_BYTE, NULL, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
     activeSessionCache->seedCached = sectrue;
     return activeSessionCache->seed;
@@ -768,32 +773,25 @@ bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len) {
 
   return true;
 }
-
-bool config_SeedsEncExportBytes(uint8_t *dest) {
-  uint16_t dest_size;
+bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg) {
   if (!g_bSelectSEFlag) {
     return false;
   }
   if (sectrue != MI2CDRV_Transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF), NULL, 0,
-                                  dest, &dest_size, FLAG_PUBLIC,
+                                  get_msg->bytes, &get_msg->size, FLAG_PUBLIC,
                                   GET_SESTORE_DATA)) {
     return false;
   }
-  dest[dest_size] = '\0';
+  get_msg->bytes[get_msg->size] = '\0';
   return true;
 }
-bool config_SeedsEncImportBytes(uint8_t *src, uint16_t src_size) {
-  uint8_t ucSendBuf[512];
+bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
   if (!g_bSelectSEFlag) {
     return false;
   }
-  if (src_size > 512) {
-    return false;
-  }
-  memcpy(ucSendBuf, src, src_size);
   if (sectrue != MI2CDRV_Transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF),
-                                  ucSendBuf, src_size, NULL, NULL, FLAG_PUBLIC,
-                                  DELETE_SESTORE_DATA)) {
+                                  input_msg->bytes, input_msg->size, NULL, NULL,
+                                  FLAG_PUBLIC, DELETE_SESTORE_DATA)) {
     return false;
   }
   return true;
@@ -948,7 +946,12 @@ bool session_isUnlocked(void) { return sectrue == storage_is_unlocked(); }
 
 bool config_isInitialized(void) {
   bool initialized = false;
-  config_get_bool(KEY_INITIALIZED, &initialized);
+  uint16_t keyinitalized;
+  keyinitalized = KEY_INITIALIZED;
+  if (g_bSelectSEFlag) {
+    keyinitalized = KEY_INITIALIZED & (~FLAG_PUBLIC_SHIFTED);
+  }
+  config_get_bool(keyinitalized, &initialized);
   return initialized;
 }
 bool config_isInitializedSeeds(void) {
@@ -1058,22 +1061,44 @@ void config_wipe(void) {
 #endif
   }
 }
-
-void config_getFreePayFlag() {
-  if (g_bSelectSEFlag) {
-    if (sectrue != config_get_uint32(KEY_FREEPAYFLAG, &g_uiFreePayFlag)) {
-      g_uiFreePayFlag = 0;
-    }
-  } else {
-    g_uiFreePayFlag = 0;
-  }
+#if !EMULATOR
+void config_setFreePayPinFlag(bool flag) {
+  config_set_bool(KEY_FREEPAYPINFLAG, flag);
+}
+bool config_getFreePayPinFlag(void) {
+  bool flag = false;
+  return sectrue == config_get_bool(KEY_FREEPAYPINFLAG, &flag);
 }
 
-void config_setFreePayFlag(uint32_t free) {
-  if (sectrue == storage_set(KEY_FREEPAYFLAG, &free, sizeof(free))) {
-    g_uiFreePayFlag = free;
-  }
+void config_setFreePayConfirmFlag(bool flag) {
+  config_set_bool(KEY_FREEPAYCONFIRMFLAG, flag);
 }
+bool config_getFreePayConfirmFlag(void) {
+  bool flag = false;
+  return sectrue == config_get_bool(KEY_FREEPAYCONFIRMFLAG, &flag);
+}
+
+void config_setFreePayMoneyLimt(uint64_t MoneyLimt) {
+  storage_set(KEY_FREEPAYMONEYLIMT, &MoneyLimt, sizeof(uint64_t));
+}
+uint64_t config_getFreePayMoneyLimt(void) {
+  uint64_t MoneyLimt = 0;
+  uint16_t len;
+  config_get_bytes(KEY_FREEPAYMONEYLIMT, (uint8_t *)&MoneyLimt,
+                   sizeof(uint64_t), &len);
+  return MoneyLimt;
+}
+
+void config_setFreePayTimes(uint32_t times) {
+  storage_set(KEY_FREEPAYPTIMES, &times, sizeof(uint32_t));
+}
+
+uint32_t config_getFreePayTimes(void) {
+  uint32_t times = 0;
+  config_get_uint32(KEY_FREEPAYPTIMES, &times);
+  return times;
+}
+#endif
 void config_setBleTrans(bool mode) { config_set_bool(KEY_TRANSBLEMODE, mode); }
 
 bool config_getBleTrans(void) {
@@ -1088,14 +1113,7 @@ bool config_getWhetherUseSE(void) {
   return sectrue == config_get_bool(KEY_SEFLAG, &flag);
 }
 
-void config_setSeedsExportFlag(ExportType flag) {
-  config_set_bool(KEY_EXPORTSEEDFLAG, flag);
-}
-
-bool config_getSeedsExportFlag(void) {
-  bool flag;
-  return sectrue == config_get_bool(KEY_EXPORTSEEDFLAG, &flag);
-}
+ExportType config_setSeedsExportFlag(ExportType flag) { return flag; }
 
 bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
                          BixinOutMessageSE_outmessage_t *get_msg) {

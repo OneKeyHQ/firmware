@@ -335,14 +335,68 @@ uint8_t *u2f_out_data(void) {
   u2f_out_start = (u2f_out_start + 1) % U2F_OUT_PKT_BUFFER_LEN;
   return u2f_out_packets[t];
 }
+void vButton_Lcd_Test(void) {
+  uint8_t ucStatus;
+  uint32_t uiTimeout;
+
+  oledClear();
+  oledAllDisplay();
+  oledRefresh();
+  ucStatus = 0;
+  uiTimeout = 0;
+  while (1) {
+    buttonUpdate();
+    if (button.YesUp) {
+      oledClearAll();
+      oledDrawStringCenter(60, 32, "Ok Button is OK ", FONT_STANDARD);
+      oledRefresh();
+      if (0x00 == (ucStatus & 0x01)) {
+        ucStatus |= 0x01;
+      }
+    }
+    if (button.NoUp) {
+      oledClearAll();
+      oledDrawStringCenter(60, 32, "Cancel Button is OK ", FONT_STANDARD);
+      oledRefresh();
+      if (0x00 == (ucStatus & 0x02)) {
+        ucStatus |= 0x02;
+      }
+    }
+    if (button.DownUp) {
+      oledClearAll();
+      oledDrawStringCenter(60, 32, "Down Button is OK ", FONT_STANDARD);
+      oledRefresh();
+      if (0x00 == (ucStatus & 0x04)) {
+        ucStatus |= 0x04;
+      }
+    }
+    if (button.UpUp) {
+      oledClearAll();
+      oledDrawStringCenter(60, 32, "UP Button is OK ", FONT_STANDARD);
+      oledRefresh();
+      if (0x00 == (ucStatus & 0x08)) {
+        ucStatus |= 0x08;
+      }
+    }
+    if (ucStatus >= 0x0F) {
+      send_u2f_error(U2F_SW_NO_ERROR);
+      break;
+    }
+    uiTimeout++;
+    if (uiTimeout > 10000000) {
+      send_u2f_error(U2F_SW_CONDITIONS_NOT_SATISFIED);
+      break;
+    }
+  }
+}
 
 void u2fhid_msg(const APDU *a, uint32_t len) {
-  if ((APDU_LEN(*a) + sizeof(APDU)) > len) {
-    debugLog(0, "", "BAD APDU LENGTH");
-    debugInt(APDU_LEN(*a));
-    debugInt(len);
-    return;
-  }
+  //  if ((APDU_LEN(*a) + sizeof(APDU)) > len) {
+  //    debugLog(0, "", "BAD APDU LENGTH");
+  //    debugInt(APDU_LEN(*a));
+  //    debugInt(len);
+  //    return;
+  //  }
 
   if (a->cla != 0) {
     send_u2f_error(U2F_SW_CLA_NOT_SUPPORTED);
@@ -358,6 +412,9 @@ void u2fhid_msg(const APDU *a, uint32_t len) {
       break;
     case U2F_VERSION:
       u2f_version(a);
+      break;
+    case Buttton_Lcd_Test:
+      vButton_Lcd_Test();
       break;
     default:
       if (!g_bSelectSEFlag) {

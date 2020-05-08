@@ -18,10 +18,10 @@ bool ble_ver_state(void);
 char *ble_get_name(void);
 char *ble_get_ver(void);
 #else
-#define ble_name_state(...)  false
-#define ble_ver_state(...)  false
-#define ble_get_name(...)   "BixinKEY814591011"
-#define ble_get_ver(...)    "1.0.1"
+#define ble_name_state(...) false
+#define ble_ver_state(...) false
+#define ble_get_name(...) "BixinKEY814591011"
+#define ble_get_ver(...) "1.0.1"
 #endif
 
 #endif

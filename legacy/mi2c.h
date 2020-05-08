@@ -122,6 +122,5 @@ extern uint32_t MI2CDRV_Transmit(uint8_t ucCmd, uint8_t ucIndex,
 #define bMI2CDRV_ReceiveData(...) true
 
 #endif
- 
 
 #endif

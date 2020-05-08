@@ -320,6 +320,7 @@ void vMI2CDRV_SynSessionKey(void) {
                                       SET_SESTORE_DATA)) {
         memcpy(g_ucSessionKey, ucRandom, SESSION_KEYLEN);
         flash_enter();
+        flash_erase_sector(11, FLASH_CR_PROGRAM_X32);
         for (i = 0; i < SESSION_KEYLEN / sizeof(uint32_t); i++) {
           uiSessionKeyTemp =
               (uint32_t)((g_ucSessionKey[i * sizeof(uint32_t) + 3] << 24) +
