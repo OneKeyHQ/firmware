@@ -429,7 +429,9 @@ void config_init(void) {
     storage_unlock(PIN_EMPTY, NULL);
   }
 
+#if !EMULATOR
   vMI2CDRV_SynSessionKey();
+#endif
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
 
@@ -1061,10 +1063,11 @@ void config_wipe(void) {
 #endif
   }
 }
-#if !EMULATOR
+
 void config_setFreePayPinFlag(bool flag) {
   config_set_bool(KEY_FREEPAYPINFLAG, flag);
 }
+
 bool config_getFreePayPinFlag(void) {
   bool flag = false;
   return sectrue == config_get_bool(KEY_FREEPAYPINFLAG, &flag);
@@ -1081,6 +1084,7 @@ bool config_getFreePayConfirmFlag(void) {
 void config_setFreePayMoneyLimt(uint64_t MoneyLimt) {
   storage_set(KEY_FREEPAYMONEYLIMT, &MoneyLimt, sizeof(uint64_t));
 }
+
 uint64_t config_getFreePayMoneyLimt(void) {
   uint64_t MoneyLimt = 0;
   uint16_t len;
@@ -1098,7 +1102,7 @@ uint32_t config_getFreePayTimes(void) {
   config_get_uint32(KEY_FREEPAYPTIMES, &times);
   return times;
 }
-#endif
+
 void config_setBleTrans(bool mode) { config_set_bool(KEY_TRANSBLEMODE, mode); }
 
 bool config_getBleTrans(void) {
