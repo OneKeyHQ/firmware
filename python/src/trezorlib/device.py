@@ -37,7 +37,10 @@ def apply_settings(
     fee_pay_pin: bool = None,
     use_ble: bool = None,
     use_se: bool = None,
-    is_bixinapp=True,
+    is_bixinapp: bool = None,
+    fee_pay_confirm: bool = None,
+    fee_pay_money_limt: int = None,
+    fee_pay_times: int = None,
 ):
     settings = messages.ApplySettings()
     if label is not None:
