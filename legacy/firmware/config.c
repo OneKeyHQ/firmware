@@ -579,12 +579,12 @@ void config_setLanguage(const char *lang) {
   if (lang == NULL) {
     return;
   }
-
   // Sanity check.
-  if (strcmp(lang, "en-US") != 0) {
-    return;
-  }
-  if (strcmp(lang, "chinese") != 0) {
+  if (strcmp(lang, "en-US") == 0 || strcmp(lang, "englise") == 0) {
+    ui_language = 0;
+  } else if (strcmp(lang, "zh-CN") == 0 || strcmp(lang, "chinese") == 0) {
+    ui_language = 1;
+  } else {
     return;
   }
 
@@ -709,23 +709,20 @@ bool config_getLabel(char *dest, uint16_t dest_size) {
 
 bool config_getLanguage(char *dest, uint16_t dest_size) {
   if (sectrue == config_get_string(KEY_LANGUAGE, dest, dest_size)) {
-    if (dest_size == 7 && (strcmp(dest, "english") != 0)) {
-      // fallthrough -> return "en-US"
-    } else {
-      // other language -> return the value
-      if (strcmp(dest, "chinese") == 0) {
-        ui_language = 1;
-      } else {
-        ui_language = 0;
-      }
+    if (strcmp(dest, "en-US") == 0 || strcmp(dest, "englise") == 0) {
+      ui_language = 0;
+      return true;
+    } else if (strcmp(dest, "zh-CN") == 0 || strcmp(dest, "chinese") == 0) {
+      ui_language = 1;
       return true;
     }
   }
+  ui_language = 0;
   strcpy(dest, "en-US");
   dest_size = 5;
+
   return true;
 }
-
 bool config_getHomescreen(uint8_t *dest, uint16_t dest_size) {
   uint16_t len = 0;
   secbool ret = storage_get(KEY_HOMESCREEN, dest, dest_size, &len);
@@ -933,7 +930,8 @@ uint8_t *session_startSession(const uint8_t *received_session_id) {
   }
 
   if (session_index == MAX_SESSIONS_COUNT) {
-    // Session not found in cache. Use an empty one or the least recently used.
+    // Session not found in cache. Use an empty one or the least recently
+    // used.
     session_index = session_findLeastRecent();
     session_clearCache(sessionsCache + session_index);
     random_buffer(sessionsCache[session_index].id, 32);
