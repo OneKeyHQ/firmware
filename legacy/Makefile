@@ -9,6 +9,7 @@ OBJS += layout.o
 OBJS += oled.o
 OBJS += rng.o
 OBJS += dev_info.o
+OBJS += chinese.o
 
 ifneq ($(EMULATOR),1)
 OBJS += setup.o

@@ -424,6 +424,7 @@ void config_init(void) {
 
   storage_init(&protectPinUiCallback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
+
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
@@ -473,7 +474,7 @@ void session_clearCache(Session *session) {
 void config_lockDevice(void) { storage_lock(); }
 
 static void get_u2froot_callback(uint32_t iter, uint32_t total) {
-  layoutProgress(_("Updating"), 1000 * iter / total);
+  layoutProgress_zh(ui_prompt_updating[ui_language], 1000 * iter / total);
 }
 
 static void config_compute_u2froot(const char *mnemonic,
@@ -609,7 +610,7 @@ void config_setHomescreen(const uint8_t *data, uint32_t size) {
 
 static void get_root_node_callback(uint32_t iter, uint32_t total) {
   usbSleep(1);
-  layoutProgress(_("Waking up"), 1000 * iter / total);
+  layoutProgress_zh(ui_prompt_wakingup[ui_language], 1000 * iter / total);
 }
 
 const uint8_t *config_getSeed(void) {
@@ -713,9 +714,9 @@ bool config_getLanguage(char *dest, uint16_t dest_size) {
     } else {
       // other language -> return the value
       if (strcmp(dest, "chinese") == 0) {
-        g_ucLanguageFlag = 1;
+        ui_language = 1;
       } else {
-        g_ucLanguageFlag = 0;
+        ui_language = 0;
       }
       return true;
     }

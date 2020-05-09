@@ -28,33 +28,19 @@
 static char pinmatrix_perm[10] = "XXXXXXXXX";
 
 void pinmatrix_draw(const char *text) {
-  const BITMAP *bmp_digits[10] = {
-      &bmp_digit0, &bmp_digit1, &bmp_digit2, &bmp_digit3, &bmp_digit4,
-      &bmp_digit5, &bmp_digit6, &bmp_digit7, &bmp_digit8, &bmp_digit9,
-  };
   layoutSwipe();
-  const int w = bmp_digit0.width, h = bmp_digit0.height, pad = 0;
+  const int w = 12, h = 12, pad = 1;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       // use (2 - j) instead of j to achieve 789456123 layout
       int k = pinmatrix_perm[i + (2 - j) * 3] - '0';
-      if (g_ucLanguageFlag) {
-        vDisp_PromptInfo(g_ucPromptIndex, false);
-      } else {
-        if (text) {
-          oledDrawStringCenter(OLED_WIDTH / 2, 8, text, FONT_STANDARD);
-        }
+      if (text) {
+        oledDrawStringCenter_zh(OLED_WIDTH / 2, 8, text);
       }
-      oledDrawBitmap((OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
-                     OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad),
-                     bmp_digits[k]);
+      oledDrawNumber_zh((OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
+                        OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad), k + '0');
+      oledRefresh();
     }
-  }
-  for (int i = 0; i < 3; i++) {
-    // 36 is the maximum pixels used for a pin matrix pixel row
-    // but we use 56 pixels to add some extra
-    // oledSCAInside(12 + i * (h + pad), 12 + i * (h + pad) + h - 1, 56, 38,
-    //              OLED_WIDTH - 38);
   }
   oledRefresh();
 }

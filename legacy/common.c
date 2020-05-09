@@ -29,8 +29,7 @@
 
 uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 
-uint8_t g_ucLanguageFlag = 0;
-uint8_t g_ucPromptIndex = 0;
+uint8_t ui_language = 0;
 
 bool g_bBleTransMode = false;
 bool g_bSelectSEFlag = false;

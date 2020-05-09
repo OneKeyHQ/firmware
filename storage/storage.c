@@ -150,9 +150,9 @@
 #define GUARD_KEY_MODULUS 6311
 #define GUARD_KEY_REMAINDER 15
 
-const char *const VERIFYING_PIN_MSG = "Verifying PIN";
-const char *const PROCESSING_MSG = "Processing";
-const char *const STARTING_MSG = "Starting up";
+const char *VERIFYING_PIN_MSG[2] = {"Verifying PIN", "校验 PIN"};
+const char *PROCESSING_MSG[2] = {"Processing", "处理中..."};
+const char *STARTING_MSG[2] = {"Starting up", "启动中..."};
 
 static secbool initialized = secfalse;
 static secbool unlocked = secfalse;
@@ -673,7 +673,7 @@ static void init_wiped_storage(void) {
 
   ui_total = DERIVE_SECS;
   ui_rem = ui_total;
-  ui_message = PROCESSING_MSG;
+  ui_message = PROCESSING_MSG[ui_language];
   ensure(set_pin(PIN_EMPTY, NULL), "init_pin failed");
 }
 
@@ -1087,12 +1087,13 @@ secbool storage_unlock(uint32_t pin, const uint8_t *ext_salt) {
   ui_rem = ui_total;
   if (pin == PIN_EMPTY) {
     if (ui_message == NULL) {
-      ui_message = STARTING_MSG;
+      ui_message = STARTING_MSG[ui_language];
     } else {
-      ui_message = PROCESSING_MSG;
+      ui_message = PROCESSING_MSG[ui_language];
     }
+
   } else {
-    ui_message = VERIFYING_PIN_MSG;
+    ui_message = VERIFYING_PIN_MSG[ui_language];
   }
   return unlock(pin, ext_salt);
 }
@@ -1402,8 +1403,9 @@ secbool storage_change_pin(uint32_t oldpin, uint32_t newpin,
 
   ui_total = 2 * DERIVE_SECS;
   ui_rem = ui_total;
-  ui_message = (oldpin != PIN_EMPTY && newpin == PIN_EMPTY) ? VERIFYING_PIN_MSG
-                                                            : PROCESSING_MSG;
+  ui_message = (oldpin != PIN_EMPTY && newpin == PIN_EMPTY)
+                   ? VERIFYING_PIN_MSG[ui_language]
+                   : PROCESSING_MSG[ui_language];
 
   if (sectrue != unlock(oldpin, old_ext_salt)) {
     return secfalse;
@@ -1441,8 +1443,9 @@ secbool storage_change_wipe_code(uint32_t pin, const uint8_t *ext_salt,
 
   ui_total = DERIVE_SECS;
   ui_rem = ui_total;
-  ui_message = (pin != PIN_EMPTY && wipe_code == PIN_EMPTY) ? VERIFYING_PIN_MSG
-                                                            : PROCESSING_MSG;
+  ui_message = (pin != PIN_EMPTY && wipe_code == PIN_EMPTY)
+                   ? VERIFYING_PIN_MSG[ui_language]
+                   : PROCESSING_MSG[ui_language];
 
   secbool ret = secfalse;
   if (sectrue == unlock(pin, ext_salt)) {
@@ -1550,7 +1553,7 @@ static secbool storage_upgrade(void) {
     // Set EDEK_PVC_KEY and PIN_NOT_SET_KEY.
     ui_total = DERIVE_SECS;
     ui_rem = ui_total;
-    ui_message = PROCESSING_MSG;
+    ui_message = PROCESSING_MSG[ui_language];
     if (sectrue == norcow_get(V0_PIN_KEY, &val, &len)) {
       set_pin(*(const uint32_t *)val, NULL);
     } else {

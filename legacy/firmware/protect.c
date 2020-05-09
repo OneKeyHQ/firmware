@@ -199,11 +199,22 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
     secstrbuf[16] = 0;
   }
   oledClear();
-  oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, message, FONT_STANDARD);
-  oledDrawStringCenter(OLED_WIDTH / 2, 2 * 9, _("Please wait"), FONT_STANDARD);
-  oledDrawStringCenter(OLED_WIDTH / 2, 3 * 9, secstr, FONT_STANDARD);
-  oledDrawStringCenter(OLED_WIDTH / 2, 4 * 9, _("to continue ..."),
-                       FONT_STANDARD);
+  if (ui_language) {
+    memset(secstrbuf + 10, 0x00, sizeof(secstrbuf) - 10);
+    memcpy(secstrbuf + 10, "秒", strlen("秒"));
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10, message);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 13, "请等待");
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 26, secstr);
+
+  } else {
+    oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, message, FONT_STANDARD);
+    oledDrawStringCenter(OLED_WIDTH / 2, 2 * 9, _("Please wait"),
+                         FONT_STANDARD);
+    oledDrawStringCenter(OLED_WIDTH / 2, 3 * 9, secstr, FONT_STANDARD);
+    oledDrawStringCenter(OLED_WIDTH / 2, 4 * 9, _("to continue ..."),
+                         FONT_STANDARD);
+  }
+
   // progressbar
   oledFrame(0, OLED_HEIGHT - 8, OLED_WIDTH - 1, OLED_HEIGHT - 1);
   oledBox(1, OLED_HEIGHT - 7, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
@@ -235,9 +246,8 @@ bool protectPin(bool use_cached) {
 
   const char *pin = "";
   if (config_hasPin()) {
-    g_ucPromptIndex = DISP_INPUTPIN;
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                     _("Please enter current PIN:"), &newpin);
+                     ui_prompt_current_pin[ui_language], &newpin);
     if (!pin) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -262,13 +272,12 @@ bool protectChangePin(bool init, bool removal) {
   if (init) need_new_pin = false;
 
   if (config_hasPin()) {
-    g_ucPromptIndex = DISP_INPUTPIN;
     if (!g_bIsBixinAPP) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       _("Please enter current PIN:"), &newpin);
+                       ui_prompt_current_pin[ui_language], &newpin);
     } else {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       _("Please enter the PIN:"), &newpin);
+                       ui_prompt_input_pin[ui_language], &newpin);
       need_new_pin = false;
     }
     if (pin == NULL) {
@@ -292,10 +301,9 @@ bool protectChangePin(bool init, bool removal) {
   }
 
   if (!removal) {
-    g_ucPromptIndex = DISP_INPUTPIN;
     if (!g_bIsBixinAPP || need_new_pin) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       _("Please enter new PIN:"), &newpin);
+                       ui_prompt_new_pin[ui_language], &newpin);
     } else {
       if (init) {
         pin = default_user_pin;
@@ -319,7 +327,7 @@ bool protectChangePin(bool init, bool removal) {
 
     if (!g_bIsBixinAPP) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
-                       _("Please re-enter new PIN:"), &newpin);
+                       ui_prompt_new_pin_ack[ui_language], &newpin);
       if (pin == NULL) {
         memzero(old_pin, sizeof(old_pin));
         memzero(new_pin, sizeof(new_pin));
@@ -335,11 +343,14 @@ bool protectChangePin(bool init, bool removal) {
       }
     } else {
       if (!init) {
-        g_ucPromptIndex = DISP_CONFIRM_PIN;
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
-                          NULL);
-
+        if (ui_language) {
+          layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                               "请确认PIN码", NULL, NULL);
+        } else {
+          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                            _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
+                            NULL);
+        }
         if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
                            false)) {
           fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);

@@ -32,8 +32,7 @@ extern uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 #define WORK_MODE_USB 0x20
 #define WORK_MODE_NFC 0x30
 
-extern uint8_t g_ucLanguageFlag;
-extern uint8_t g_ucPromptIndex;
+extern uint8_t ui_language;
 
 extern bool g_bBleTransMode;
 extern bool g_bSelectSEFlag;

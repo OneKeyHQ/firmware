@@ -18,6 +18,7 @@
  */
 
 #include "layout.h"
+#include "chinese.h"
 #include "oled.h"
 #include "prompt.h"
 
@@ -293,3 +294,75 @@ void layoutOperationWithCountdown(const char *info, uint32_t counter) {
   oledRefresh();
 }
 #endif
+
+// layout chinese
+void layoutButtonNo_zh(const char *btnNo, const BITMAP *icon) {
+  int icon_width = 0;
+  if (icon) {
+    oledDrawBitmap(1, OLED_HEIGHT - 8, icon);
+    icon_width = icon->width;
+  }
+  oledDrawString_zh(3 + icon_width, OLED_HEIGHT - 12, btnNo);
+  oledInvert(0, OLED_HEIGHT - 12, icon_width + oledStringWidth_zh(btnNo) + 4,
+             OLED_HEIGHT);
+}
+
+void layoutButtonYes_zh(const char *btnYes, const BITMAP *icon) {
+  int icon_width = 0;
+  if (icon) {
+    oledDrawBitmap(OLED_WIDTH - 8 - 1, OLED_HEIGHT - 8, icon);
+    icon_width = icon->width;
+  }
+  oledDrawStringRight_zh(OLED_WIDTH - icon_width - 3, OLED_HEIGHT - 12, btnYes);
+  oledInvert(OLED_WIDTH - oledStringWidth_zh(btnYes) - icon_width - 4,
+             OLED_HEIGHT - 12, OLED_WIDTH, OLED_HEIGHT);
+}
+
+void layoutDialog_zh(const BITMAP *icon, const char *btnNo, const char *btnYes,
+                     const char *desc, const char *line1, const char *line2,
+                     const char *line3) {
+  int left = 0;
+  oledClear();
+  if (icon) {
+    oledDrawBitmap(0, LOGO_HEIGHT + 1, icon);
+    left = icon->width + 4;
+  }
+  if (line1) oledDrawString_zh(left, 10, line1);
+  if (line2) oledDrawString_zh(left, 10 + 13, line2);
+  if (line3) oledDrawString_zh(left, 10 + 2 * 13, line3);
+  if (desc) {
+  } else {
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - 14);
+    }
+  }
+  if (btnNo) {
+    layoutButtonNo_zh(btnNo, &bmp_btn_cancel);
+  }
+  if (btnYes) {
+    layoutButtonYes_zh(btnYes, &bmp_btn_confirm);
+  }
+  oledRefresh();
+}
+
+void layoutProgress_zh(const char *desc, int permil) {
+  oledClear();
+  layoutProgressPercent(permil / 10);
+  // progressbar
+  oledFrame(0, OLED_HEIGHT - 8, OLED_WIDTH - 1, OLED_HEIGHT - 1);
+  oledBox(1, OLED_HEIGHT - 7, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
+  permil = permil * (OLED_WIDTH - 4) / 1000;
+  if (permil < 0) {
+    permil = 0;
+  }
+  if (permil > OLED_WIDTH - 4) {
+    permil = OLED_WIDTH - 4;
+  }
+  oledBox(2, OLED_HEIGHT - 6, 1 + permil, OLED_HEIGHT - 3, 1);
+  // text
+  oledBox(0, OLED_HEIGHT - 16, OLED_WIDTH - 1, OLED_HEIGHT - 16 + 7, 0);
+  if (desc) {
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - 24, desc);
+  }
+  oledRefresh();
+}
