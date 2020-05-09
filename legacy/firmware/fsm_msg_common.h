@@ -704,7 +704,6 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 
 void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
   (void)msg;
-  CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
 #if !EMULATOR
   sys_backtoboot();
