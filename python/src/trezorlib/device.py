@@ -31,9 +31,12 @@ def apply_settings(
     language=None,
     use_passphrase=None,
     homescreen=None,
-    passphrase_always_on_device=None,
     auto_lock_delay_ms=None,
     display_rotation=None,
+    passphrase_always_on_device: bool = None,
+    fee_pay_pin: bool = None,
+    use_ble: bool = None,
+    use_se: bool = None,
     is_bixinapp=True,
 ):
     settings = messages.ApplySettings()
@@ -51,6 +54,10 @@ def apply_settings(
         settings.auto_lock_delay_ms = auto_lock_delay_ms
     if display_rotation is not None:
         settings.display_rotation = display_rotation
+    if use_ble is not None:
+        settings.use_ble = use_ble
+    if use_se is not None:
+        settings.use_se = use_se
     if is_bixinapp is not None:
         settings.is_bixinapp = is_bixinapp
 

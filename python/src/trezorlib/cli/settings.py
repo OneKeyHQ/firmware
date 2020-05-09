@@ -129,10 +129,35 @@ def homescreen(client, filename):
 
 
 @cli.command(name="bixin")
+@click.argument("is_bixinapp", type=int)
 @with_client
-def bixin(client):
+def bixin(client, is_bixinapp):
     """set bixin app."""
-    return device.apply_settings(client, is_bixinapp=True)
+    return device.apply_settings(client, is_bixinapp=is_bixinapp)
+
+
+@cli.command(name="se")
+@click.argument("use_se", type=int)
+@with_client
+def se(client, use_se):
+    """use/unuse se chip."""
+    return device.apply_settings(client, use_se=use_se)
+
+
+@cli.command(name="ble")
+@with_client
+@click.argument("use_ble", type=int)
+def ble(client, use_ble):
+    """use/unuse ble feature."""
+    return device.apply_settings(client, use_ble=use_ble)
+
+
+@cli.command(name="language")
+@click.argument("language")
+@with_client
+def language(client, language):
+    """set language."""
+    return device.apply_settings(client, language=language)
 
 
 #
