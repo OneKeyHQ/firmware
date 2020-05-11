@@ -1166,7 +1166,7 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
     case DISP_NOT_ACTIVE:
       if (ui_language) {
         oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - HZ_WIDTH,
-                                "未激活");
+                                (uint8_t *)"未激活");
       } else {
         oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Not Activated",
                              FONT_STANDARD);
@@ -1175,7 +1175,7 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
     case DISP_NEED_BACKUP:
       if (ui_language) {
         oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - HZ_WIDTH,
-                                "未备份");
+                                (uint8_t *)"未备份");
       } else {
         oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Needs Backup",
                              FONT_STANDARD);

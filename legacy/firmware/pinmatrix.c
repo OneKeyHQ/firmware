@@ -35,7 +35,7 @@ void pinmatrix_draw(const char *text) {
       // use (2 - j) instead of j to achieve 789456123 layout
       int k = pinmatrix_perm[i + (2 - j) * 3] - '0';
       if (text) {
-        oledDrawStringCenter_zh(OLED_WIDTH / 2, 8, text);
+        oledDrawStringCenter_zh(OLED_WIDTH / 2, 8, (uint8_t *)text);
       }
       oledDrawNumber_zh((OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
                         OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad), k + '0');

@@ -108,7 +108,7 @@ static const uint8_t num_12x12[][24]={
 };
 // clang-format on
 
-const uint8_t *fontChineseData(const char *font) {
+const uint8_t *fontChineseData(const uint8_t *font) {
   uint16_t i;
   uint32_t len = strlen(font_table) / 2;
   for (i = 0; i < len; i++) {
@@ -121,7 +121,7 @@ const uint8_t *fontChineseData(const char *font) {
   return 0;
 }
 
-int oledStringWidth_zh(const char *text) {
+int oledStringWidth_zh(const uint8_t *text) {
   if (!text) return 0;
   int l = 0;
   while (*text) {
@@ -136,7 +136,7 @@ int oledStringWidth_zh(const char *text) {
   return l;
 }
 
-static void oledDrawChar_zh(int x, int y, const char *font) {
+static void oledDrawChar_zh(int x, int y, const uint8_t *font) {
   if (x >= OLED_WIDTH || y >= OLED_HEIGHT || x <= -12 || y <= -12) {
     return;
   }
@@ -175,12 +175,12 @@ void oledDrawNumber_zh(int x, int y, const char font) {
   }
 }
 
-void oledDrawString_zh(int x, int y, const char *text) {
+void oledDrawString_zh(int x, int y, const uint8_t *text) {
   if (!text) return;
   while (*text) {
     if (*text < 0x80) {
       oledDrawChar(x, y + 4, *text, FONT_STANDARD);
-      x += fontCharWidth(FONT_STANDARD & 0x7f, (uint8_t)*text) + 1;
+      x += fontCharWidth(FONT_STANDARD & 0x7f, *text) + 1;
       text++;
     } else {
       oledDrawChar_zh(x, y, text);
@@ -190,13 +190,13 @@ void oledDrawString_zh(int x, int y, const char *text) {
   }
 }
 
-void oledDrawStringCenter_zh(int x, int y, const char *text) {
+void oledDrawStringCenter_zh(int x, int y, const uint8_t *text) {
   if (!text) return;
   x = x - oledStringWidth_zh(text) / 2;
   oledDrawString_zh(x, y, text);
 }
 
-void oledDrawStringRight_zh(int x, int y, const char *text) {
+void oledDrawStringRight_zh(int x, int y, const uint8_t *text) {
   if (!text) return;
   x -= oledStringWidth_zh(text);
   oledDrawString_zh(x, y, text);

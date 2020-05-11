@@ -49,13 +49,12 @@ void delay_us(uint32_t uiDelay_us);
 
 void timer_init(void);
 
-#if EMULATOR
-uint32_t timer_ms(void);
-#define timer_out_set(...)
-#define timer_out_get(...) 0
-#else
 void timer_out_set(TimerOut type, uint32_t val);
 uint32_t timer_out_get(TimerOut type);
+
+#if EMULATOR
+uint32_t timer_ms(void);
+#else
 #define timer_ms svc_timer_ms
 #endif
 

@@ -23,10 +23,26 @@
 
 void timer_init(void) {}
 
+static uint32_t timer_out_array[timer_out_null];
+static void timer_out_decrease(void) {
+  uint32_t i = timer_out_null;
+  while (i--) {
+    if (timer_out_array[i]) timer_out_array[i]--;
+  }
+}
+void timer_out_set(TimerOut type, uint32_t val) { timer_out_array[type] = val; }
+uint32_t timer_out_get(TimerOut type) { return timer_out_array[type]; }
+
 uint32_t timer_ms(void) {
+  static int counter = 0;
   struct timespec t = {0};
+  counter++;
   clock_gettime(CLOCK_MONOTONIC, &t);
 
   uint32_t msec = t.tv_sec * 1000 + (t.tv_nsec / 1000000);
+  if (counter > 1000) {
+    counter = 0;
+    timer_out_decrease();
+  }
   return msec;
 }

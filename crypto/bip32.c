@@ -30,6 +30,7 @@
 #include "base58.h"
 #include "bignum.h"
 #include "bip32.h"
+#include "common.h"
 #include "curves.h"
 #include "ecdsa.h"
 #include "ed25519-donna/ed25519-sha3.h"
@@ -100,11 +101,6 @@ const curve_info curve25519_info = {
     .hasher_pubkey = HASHER_SHA2_RIPEMD,
     .hasher_script = HASHER_SHA2,
 };
-
-#if USE_SE
-extern bool g_bSelectSEFlag;
-extern uint8_t g_uchash_mode;
-#endif
 
 int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
                      const uint8_t *chain_code, const uint8_t *public_key,
