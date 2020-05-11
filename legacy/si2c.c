@@ -146,6 +146,7 @@ void i2c2_ev_isr() {
     if (i2c_recv_done == false) {
       fifo_lockpos_set(&i2c_fifo_in);
       i2c_recv_done = true;
+      i2c_data_outlen = 0;  // discard former response
     }
     SET_COMBUS_LOW();
   }

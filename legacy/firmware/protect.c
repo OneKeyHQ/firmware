@@ -178,9 +178,10 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
     }
 #endif
   }
+  // time out
   msg_tiny_id = 0xFFFF;
   usbTiny(0);
-  return 0;
+  return PIN_CANCELED_BY_BUTTON;
 }
 
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
@@ -202,9 +203,9 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   if (ui_language) {
     memset(secstrbuf + 10, 0x00, sizeof(secstrbuf) - 10);
     memcpy(secstrbuf + 10, "秒", strlen("秒"));
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10, message);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 13, "请等待");
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 26, secstr);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10, (uint8_t *)message);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 13, (uint8_t *)"请等待");
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 26, (uint8_t *)secstr);
 
   } else {
     oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, message, FONT_STANDARD);
