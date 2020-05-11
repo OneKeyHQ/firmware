@@ -130,7 +130,6 @@ int main(void) {
   setupApp();
   ble_reset();
 #if !EMULATOR
-  register_timer("layout", timer1s / 2, layoutStatusLogo);
   register_timer("button", timer1s / 2, buttonsTimer);
 #endif
   __stack_chk_guard = random32();  // this supports compiler provided

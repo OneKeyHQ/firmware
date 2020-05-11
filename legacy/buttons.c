@@ -124,9 +124,9 @@ bool checkButtonOrTimeout(uint8_t btn, TimerOut type) {
 
 bool waitButtonResponse(uint8_t btn, uint32_t time_out) {
   bool flag = false;
-  timer_out_set(timer_out_countdown, time_out);
+  timer_out_set(timer_out_oper, time_out);
   while (1) {
-    if (timer_out_get(timer_out_countdown) == 0) {
+    if (timer_out_get(timer_out_oper) == 0) {
       flag = false;
       break;
     }
@@ -157,7 +157,7 @@ bool waitButtonResponse(uint8_t btn, uint32_t time_out) {
       break;
     }
   }
-  timer_out_set(timer_out_countdown, 0);
+  timer_out_set(timer_out_oper, 0);
   return flag;
 }
 #endif

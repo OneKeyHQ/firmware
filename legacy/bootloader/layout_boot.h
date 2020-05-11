@@ -4,6 +4,7 @@
 #include "ble.h"
 #include "layout.h"
 #include "oled.h"
+#include "timer.h"
 
 #include "bootloader.h"
 

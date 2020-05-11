@@ -108,7 +108,6 @@ int main(void) {
                                      // unpredictable stack protection check
     buttonsIrqInit();
     timer_init();
-    register_timer("layout", timer1s / 2, layoutStatusLogo);
     register_timer("button", timer1s / 2, buttonsTimer);
     mpu_config_bootloader();
   } else {
@@ -123,7 +122,6 @@ int main(void) {
     sys_poweron();
     buttonsIrqInit();
     timer_init();
-    register_timer("layout", timer1s / 2, layoutStatusLogo);
     register_timer("button", timer1s / 2, buttonsTimer);
 #endif
     mpu_config_bootloader();

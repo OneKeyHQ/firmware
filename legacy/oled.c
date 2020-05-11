@@ -171,9 +171,9 @@ void oledInit() {
 /*
  * Clears the display buffer (sets all pixels to black)
  */
-void oledClearAll() { memzero(_oledbuffer, sizeof(_oledbuffer)); }
+void oledClear() { memzero(_oledbuffer, sizeof(_oledbuffer)); }
 
-void oledClear() {
+void oledClearPart() {
   // do not clear logo status,logo line 12
   memzero(_oledbuffer, sizeof(_oledbuffer) - (OLED_WIDTH * (LOGO_HEIGHT / 8)));
 }
@@ -431,7 +431,7 @@ void oledFrame(int x1, int y1, int x2, int y2) {
  */
 void oledSwipeLeft(void) {
   for (int i = 0; i < OLED_WIDTH; i++) {
-    for (int j = 0; j < (OLED_HEIGHT - LOGO_HEIGHT) / 8; j++) {
+    for (int j = 0; j < OLED_HEIGHT / 8; j++) {
       for (int k = OLED_WIDTH - 1; k > 0; k--) {
         _oledbuffer[j * OLED_WIDTH + k] = _oledbuffer[j * OLED_WIDTH + k - 1];
       }
@@ -447,7 +447,7 @@ void oledSwipeLeft(void) {
  */
 void oledSwipeRight(void) {
   for (int i = 0; i < OLED_WIDTH / 4; i++) {
-    for (int j = 0; j < (OLED_HEIGHT - LOGO_HEIGHT) / 8; j++) {
+    for (int j = 0; j < OLED_HEIGHT / 8; j++) {
       for (int k = 0; k < OLED_WIDTH / 4 - 1; k++) {
         _oledbuffer[k * 4 + 0 + j * OLED_WIDTH] =
             _oledbuffer[k * 4 + 4 + j * OLED_WIDTH];

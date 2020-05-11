@@ -25,18 +25,6 @@
 #include <string.h>
 #include "bitmaps.h"
 
-// Ble display
-#define BT_LINK 0x01          // Connect by Bluetooth
-#define BT_UNLINK 0x02        // BLE disconnected
-#define BT_DISPIN 0x03        // Display PIN code
-#define BT_PINERROR 0x04      // PIN code error
-#define BT_PINTIMEOUT 0x05    // Pairing overtime
-#define BT_PAIRINGSCESS 0x06  // Pairing success
-#define BT_PINCANCEL 0x07     // Cancel pairing request
-
-// Pairing code length
-#define BT_PAIR_LEN 0x06
-
 bool layoutNeedRefresh(void);
 void layoutRefreshSet(bool refresh);
 void layoutButtonNo(const char *btnNo, const BITMAP *icon);

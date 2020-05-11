@@ -25,14 +25,14 @@ static void send_response(usbd_device *dev, uint8_t *buf) {
     i2c_data_out_pos = 0;
     SET_COMBUS_HIGH();
     if (host_channel == CHANNEL_SLAVE) {
-      layoutOperationWithCountdown("Sending response...", default_resp_time);
+      timer_out_set(timer_out_oper, default_resp_time);
       while (1) {
-        if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_countdown) == true ||
+        if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_oper) == true ||
             i2c_data_outlen == 0)
           break;
       }
       i2c_data_outlen = 0;
-      timer_out_set(timer_out_countdown, 0);
+      timer_out_set(timer_out_oper, 0);
       SET_COMBUS_LOW();
       layoutRefreshSet(true);
     }

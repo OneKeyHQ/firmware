@@ -1,6 +1,7 @@
 #include "layout_boot.h"
 
 void layoutBootHome(void) {
+  static uint32_t system_millis_logo_refresh = 0;
   if (layoutNeedRefresh()) {
     oledClear();
     oledDrawBitmap(30, 20, &bmp_BiXin_logo32);
@@ -12,5 +13,12 @@ void layoutBootHome(void) {
                          FONT_STANDARD);
     layoutFillBleName(7);
     oledRefresh();
+  }
+  // 1000 ms refresh
+  if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+#if !EMULATOR
+    layoutStatusLogo();
+    system_millis_logo_refresh = timer_ms();
+#endif
   }
 }

@@ -243,8 +243,8 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       bool proceed = false;
       if (firmware_present_new()) {
         layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL,
-                     "Install new", "firmware?", "Never do this without",
-                     "your recovery card!", NULL, NULL);
+                     "Install new", "firmware?", NULL, "Never do this without",
+                     "your recovery card!", NULL);
         proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       } else {
         proceed = true;
@@ -264,7 +264,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         erase_code_progress();
         send_msg_success(dev);
         flash_state = STATE_FLASHSTART;
-        timer_out_set(timer_out_countdown, timer1s * 5);
+        timer_out_set(timer_out_oper, timer1s * 5);
       } else {
         send_msg_failure(dev);
         flash_state = STATE_END;
@@ -281,7 +281,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         erase_ble_code_progress();
         send_msg_success(dev);
         flash_state = STATE_FLASHSTART;
-        timer_out_set(timer_out_countdown, timer1s * 5);
+        timer_out_set(timer_out_oper, timer1s * 5);
       } else {
         send_msg_failure(dev);
         flash_state = STATE_END;
@@ -413,7 +413,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     if (msg_id == 0x0000) {
       send_msg_features(dev);
       flash_state = STATE_FLASHSTART;
-      timer_out_set(timer_out_countdown, timer1s * 5);
+      timer_out_set(timer_out_oper, timer1s * 5);
       return;
     }
 
@@ -424,7 +424,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       show_halt("Error installing", "firmware.");
       return;
     }
-    timer_out_set(timer_out_countdown, timer1s * 5);
+    timer_out_set(timer_out_oper, timer1s * 5);
     static uint8_t flash_anim = 0;
     if (flash_anim % 32 == 4) {
       layoutProgress("INSTALLING ... Please wait",
@@ -477,7 +477,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
   }
 
   if (flash_state == STATE_CHECK) {
-    timer_out_set(timer_out_countdown, 0);
+    timer_out_set(timer_out_oper, 0);
     if (UPDATE_ST == update_mode) {
       // use the firmware header from RAM
       const image_header *hdr = (const image_header *)FW_HEADER;
@@ -671,7 +671,6 @@ void usbLoop(void) {
   bool firmware_present = firmware_present_new();
   usbInit(firmware_present);
   for (;;) {
-    layoutBootHome();
     usbd_poll(usbd_dev);
     i2cSlavePoll();
     if (!firmware_present &&
@@ -679,11 +678,14 @@ void usbLoop(void) {
       checkButtons();
     }
     if (flash_state == STATE_FLASHSTART || flash_state == STATE_FLASHING) {
-      if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_countdown)) {
+      if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_oper)) {
         flash_state = STATE_INTERRPUPT;
         fifo_flush(&i2c_fifo_in);
         layoutRefreshSet(true);
       }
     }
+    if (flash_state == STATE_READY || flash_state == STATE_OPEN ||
+        flash_state == STATE_INTERRPUPT)
+      layoutBootHome();
   }
 }

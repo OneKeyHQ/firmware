@@ -205,14 +205,6 @@ const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen) {
   if (rowlen > 32) {
     rowlen = 32;
   }
-  memset(Disp_buffer, 0x00, DISP_BUFSIZE);
-  if (len < DISP_BUFSIZE) {
-    memcpy(Disp_buffer, msg, len);
-  }
-
-  s_usCurrentCount = 0;
-  s_uiShowLength = len;
-
   memzero(str, sizeof(str));
   strlcpy(str[0], (char *)msg, rowlen + 1);
   if (len > rowlen) {
@@ -224,27 +216,27 @@ const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen) {
   if (len > rowlen * 3) {
     strlcpy(str[3], (char *)msg + rowlen * 3, rowlen + 1);
   }
-  //  if (len > rowlen * 4) {
-  //    str[3][rowlen - 1] = '.';
-  //    str[3][rowlen - 2] = '.';
-  //    str[3][rowlen - 3] = '.';
-  //  }
+  if (len > rowlen * 4) {
+    str[3][rowlen - 1] = '.';
+    str[3][rowlen - 2] = '.';
+    str[3][rowlen - 3] = '.';
+  }
   static const char *ret[4] = {str[0], str[1], str[2], str[3]};
   return ret;
 }
 
 const char **split_message_hex(const uint8_t *msg, uint32_t len) {
-  char hex[1024 * 2 + 1] = {0};
+  char hex[32 * 2 + 1] = {0};
   memzero(hex, sizeof(hex));
   uint32_t size = len;
-  if (len > 1024) {
-    size = 1024;
+  if (len > 32) {
+    size = 32;
   }
   data2hex(msg, size, hex);
-  //  if (len > 32) {
-  //    hex[63] = '.';
-  //    hex[62] = '.';
-  //  }
+  if (len > 32) {
+    hex[63] = '.';
+    hex[62] = '.';
+  }
   return split_message((const uint8_t *)hex, size * 2, 16);
 }
 
@@ -353,19 +345,19 @@ static void render_address_dialog(const CoinInfo *coin, const char *address,
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
   oledClear();
-  oledDrawBitmap(0, 1 * 9, &bmp_icon_question);
-  oledDrawString(20, 1 * 9, line1, FONT_STANDARD);
-  oledDrawString(20, 2 * 9, line2, FONT_STANDARD);
+  oledDrawBitmap(0, 0, &bmp_icon_question);
+  oledDrawString(20, 0 * 9, line1, FONT_STANDARD);
+  oledDrawString(20, 1 * 9, line2, FONT_STANDARD);
   int left = linelen > 18 ? 0 : 20;
-  oledDrawString(left, 3 * 9, str[0], FONT_FIXED);
-  oledDrawString(left, 4 * 9, str[1], FONT_FIXED);
-  oledDrawString(left, 5 * 9, str[2], FONT_FIXED);
-  oledDrawString(left, 6 * 9, str[3], FONT_FIXED);
+  oledDrawString(left, 2 * 9, str[0], FONT_FIXED);
+  oledDrawString(left, 3 * 9, str[1], FONT_FIXED);
+  oledDrawString(left, 4 * 9, str[2], FONT_FIXED);
+  oledDrawString(left, 5 * 9, str[3], FONT_FIXED);
   if (!str[3][0]) {
     if (extra_line) {
-      oledDrawString(0, 6 * 9, extra_line, FONT_STANDARD);
+      oledDrawString(0, 5 * 9, extra_line, FONT_STANDARD);
     } else {
-      oledHLine(OLED_HEIGHT - 11);
+      oledHLine(OLED_HEIGHT - 13);
     }
   }
   layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
@@ -1113,6 +1105,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
 
 void layoutHomeInfo(void) {
   static uint8_t info_page = 0;
+  static uint32_t system_millis_logo_refresh = 0;
   buttonUpdate();
 
   if (layoutNeedRefresh()) {
@@ -1146,6 +1139,13 @@ void layoutHomeInfo(void) {
       // lock the screen
       session_clear(true);
       layoutScreensaver();
+    }
+    // 1000 ms refresh
+    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+#if !EMULATOR
+      layoutStatusLogo();
+      system_millis_logo_refresh = timer_ms();
+#endif
     }
   }
   // wake from screensaver on any button

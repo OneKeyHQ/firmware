@@ -347,7 +347,7 @@ void vButton_Lcd_Test(void) {
   while (1) {
     buttonUpdate();
     if (button.YesUp) {
-      oledClearAll();
+      oledClear();
       oledDrawStringCenter(60, 32, "Ok Button is OK ", FONT_STANDARD);
       oledRefresh();
       if (0x00 == (ucStatus & 0x01)) {
@@ -355,7 +355,7 @@ void vButton_Lcd_Test(void) {
       }
     }
     if (button.NoUp) {
-      oledClearAll();
+      oledClear();
       oledDrawStringCenter(60, 32, "Cancel Button is OK ", FONT_STANDARD);
       oledRefresh();
       if (0x00 == (ucStatus & 0x02)) {
@@ -363,7 +363,7 @@ void vButton_Lcd_Test(void) {
       }
     }
     if (button.DownUp) {
-      oledClearAll();
+      oledClear();
       oledDrawStringCenter(60, 32, "Down Button is OK ", FONT_STANDARD);
       oledRefresh();
       if (0x00 == (ucStatus & 0x04)) {
@@ -371,7 +371,7 @@ void vButton_Lcd_Test(void) {
       }
     }
     if (button.UpUp) {
-      oledClearAll();
+      oledClear();
       oledDrawStringCenter(60, 32, "UP Button is OK ", FONT_STANDARD);
       oledRefresh();
       if (0x00 == (ucStatus & 0x08)) {
