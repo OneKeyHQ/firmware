@@ -62,6 +62,10 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #endif
 
 #define APP (0x01 << 8)
+
+// this flag indicate key-value always in st flash
+#define ST_FLASH (0x02 << 8)
+
 #define FLAG_PUBLIC_SHIFTED (FLAG_PUBLIC << 8)
 #define FLAGS_WRITE_SHIFTED (FLAGS_WRITE << 8)
 
@@ -90,12 +94,15 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 
 #define KEY_TRANSBLEMODE (23 | APP | FLAG_PUBLIC_SHIFTED)  // bool
 #define KEY_FREEPAYPINFLAG (24 | APP)                      // bool
-#define KEY_SEFLAG (25 | APP)                              // bool
+#define KEY_SEFLAG (25 | APP | ST_FLASH)                   // bool
 //#define MNEMONIC_INDEX_TOSEED               (26)
 #define KEY_RESET (27 | APP)               // bool
 #define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
 #define KEY_FREEPAYMONEYLIMT (29 | APP)    // uint64
 #define KEY_FREEPAYPTIMES (30 | APP)       // uint32
+
+#define KEY_SE_SESSIONKEY \
+  (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bytes(16)
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -1135,3 +1142,20 @@ bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
 }
 
 void config_setIsBixinAPP(void) { g_bIsBixinAPP = true; }
+
+void config_setSeSessionKey(uint8_t *data, uint32_t size) {
+  if (data != NULL && size == SE_SESSION_KEY) {
+    storage_set(KEY_SE_SESSIONKEY, data, size);
+  } else {
+    storage_delete(KEY_SE_SESSIONKEY);
+  }
+}
+
+bool config_getSeSessionKey(uint8_t *dest, uint16_t dest_size) {
+  uint16_t len = 0;
+  secbool ret = storage_get(KEY_SE_SESSIONKEY, dest, dest_size, &len);
+  if (sectrue != ret || len != SE_SESSION_KEY) {
+    return false;
+  }
+  return true;
+}

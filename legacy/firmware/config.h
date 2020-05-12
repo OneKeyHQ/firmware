@@ -85,6 +85,7 @@ extern Storage configUpdate;
 #define MAX_MNEMONIC_LEN 240
 #define HOMESCREEN_SIZE 1024
 #define UUID_SIZE 12
+#define SE_SESSION_KEY 16
 
 void config_init(void);
 void session_clear(bool lock);
@@ -176,6 +177,9 @@ ExportType config_setSeedsExportFlag(ExportType flag);
 bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
                          BixinOutMessageSE_outmessage_t *get_msg);
 void config_setIsBixinAPP(void);
+
+void config_setSeSessionKey(uint8_t *data, uint32_t size);
+bool config_getSeSessionKey(uint8_t *dest, uint16_t dest_size);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

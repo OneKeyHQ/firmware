@@ -1161,7 +1161,7 @@ secbool storage_get(const uint16_t key, void *val_dest, const uint16_t max_len,
     return secfalse;
   }
 
-  if (!g_bSelectSEFlag) {
+  if (!g_bSelectSEFlag || app & FLAG_ST) {
     // If the top bit of APP is set, then the value is not encrypted and can be
     // read from a locked device.
     if ((app & FLAG_PUBLIC) != 0) {
@@ -1258,7 +1258,7 @@ secbool storage_set(const uint16_t key, const void *val, const uint16_t len) {
   }
 
   secbool ret = secfalse;
-  if (!g_bSelectSEFlag) {
+  if (!g_bSelectSEFlag || app & FLAG_ST) {
     if ((app & FLAG_PUBLIC) != 0) {
       ret = norcow_set(key, val, len);
     } else {

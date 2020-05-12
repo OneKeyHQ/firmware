@@ -11,8 +11,6 @@
 #include "sys.h"
 #include "usart.h"
 
-extern void config_setWhetherUseSE(bool flag);
-
 const uint8_t SessionModeMode_ROMKEY[16] = {0x80, 0xBA, 0x15, 0x37, 0xD2, 0x84,
                                             0x8D, 0x64, 0xA7, 0xB4, 0x58, 0xF4,
                                             0x58, 0xFE, 0xD8, 0x84};
@@ -25,6 +23,9 @@ uint8_t g_ucMI2cRevBuf[MI2C_BUF_MAX_LEN];
 uint8_t g_ucMI2cSendBuf[MI2C_BUF_MAX_LEN];
 uint8_t g_ucSessionKey[SESSION_KEYLEN];
 uint16_t g_usMI2cRevLen;
+
+extern void config_setSeSessionKey(const uint8_t *data, uint32_t size);
+extern bool config_getSeSessionKey(uint8_t *dest, uint16_t dest_size);
 
 static uint8_t ucXorCheck(uint8_t ucInputXor, uint8_t *pucSrc, uint16_t usLen) {
   uint16_t i;
@@ -282,29 +283,15 @@ void random_buffer_ST(uint8_t *buf, size_t len) {
   }
 }
 
-static void flash_enter(void) {
-  flash_wait_for_last_operation();
-  flash_clear_status_flags();
-  flash_unlock();
-}
-
-static void flash_exit(void) {
-  flash_wait_for_last_operation();
-  flash_lock();
-}
-
 /*
  *master i2c synsessionkey
  */
 void vMI2CDRV_SynSessionKey(void) {
-  uint8_t ucSessionMode, i;
+  uint8_t ucSessionMode;
   uint8_t ucRandom[16];
-  uint32_t uiSessionFlag, uiSessionKeyTemp;
+  uint8_t session_key[16];
 
-  uiSessionFlag = *(uint32_t *)(SESSION_FALG_ADDR);
-
-  if (SESSION_FALG != uiSessionFlag) {
-    config_setWhetherUseSE(true);
+  if (!config_getSeSessionKey(session_key, sizeof(session_key))) {
     // enable mode session
     ucSessionMode = 1;
     memcpy(g_ucSessionKey, (uint8_t *)SessionModeMode_ROMKEY,
@@ -319,26 +306,11 @@ void vMI2CDRV_SynSessionKey(void) {
                                       ucRandom, sizeof(ucRandom), NULL, 0, 0x00,
                                       SET_SESTORE_DATA)) {
         memcpy(g_ucSessionKey, ucRandom, SESSION_KEYLEN);
-        flash_enter();
-        flash_erase_sector(11, FLASH_CR_PROGRAM_X32);
-        for (i = 0; i < SESSION_KEYLEN / sizeof(uint32_t); i++) {
-          uiSessionKeyTemp =
-              (uint32_t)((g_ucSessionKey[i * sizeof(uint32_t) + 3] << 24) +
-                         (g_ucSessionKey[i * sizeof(uint32_t) + 2] << 16) +
-                         (g_ucSessionKey[i * sizeof(uint32_t) + 1] << 8) +
-                         (g_ucSessionKey[i * sizeof(uint32_t)]));
-          flash_program_word(SESSION_ADDR + i * sizeof(uint32_t),
-                             uiSessionKeyTemp);
-        }
-        uiSessionFlag = SESSION_FALG;
-        flash_program_word(SESSION_FALG_ADDR, uiSessionFlag);
-        flash_exit();
+        config_setSeSessionKey(g_ucSessionKey, SESSION_KEYLEN);
       }
     }
   } else {
-    for (i = 0; i < SESSION_KEYLEN; i++) {
-      g_ucSessionKey[i] = *(uint8_t *)(SESSION_ADDR + i);
-    }
+    memcpy(g_ucSessionKey, session_key, SESSION_KEYLEN);
   }
 }
 
