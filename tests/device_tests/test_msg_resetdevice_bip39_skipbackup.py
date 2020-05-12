@@ -23,6 +23,7 @@ from ..common import generate_entropy
 
 
 @pytest.mark.skip_t2
+@pytest.mark.skip_if_se
 class TestMsgResetDeviceSkipbackup:
 
     external_entropy = b"zlutoucky kun upel divoke ody" * 2

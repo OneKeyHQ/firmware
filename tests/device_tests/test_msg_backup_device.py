@@ -32,6 +32,7 @@ from ..common import (
 
 
 @pytest.mark.skip_t1  # TODO we want this for t1 too
+@pytest.mark.skip_if_se
 @pytest.mark.setup_client(needs_backup=True, mnemonic=MNEMONIC12)
 def test_backup_bip39(client):
     assert client.features.needs_backup is True

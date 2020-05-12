@@ -218,6 +218,7 @@ def pytest_configure(config):
     # register known markers
     config.addinivalue_line("markers", "skip_t1: skip the test on Trezor One")
     config.addinivalue_line("markers", "skip_t2: skip the test on Trezor T")
+    config.addinivalue_line("markers", "skip_if_se: skip the test if test se on BixinKey")
     config.addinivalue_line(
         "markers",
         'setup_client(mnemonic="all all all...", pin=None, passphrase=False, uninitialized=False): configure the client instance',
@@ -246,6 +247,10 @@ def pytest_runtest_setup(item):
     skip_altcoins = int(os.environ.get("TREZOR_PYTEST_SKIP_ALTCOINS", 0))
     if item.get_closest_marker("altcoin") and skip_altcoins:
         pytest.skip("Skipping altcoin test")
+
+    skip_if_se = int(os.environ.get("TREZOR_PYTEST_SKIP_IF_SE", 0))
+    if item.get_closest_marker("skip_if_se") and skip_if_se:
+        pytest.skip("Skipping some test if se")
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
