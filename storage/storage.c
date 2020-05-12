@@ -1251,7 +1251,7 @@ secbool storage_set(const uint16_t key, const void *val, const uint16_t len) {
   if (sectrue != initialized || app == APP_STORAGE) {
     return secfalse;
   }
-  if (!g_bSelectSEFlag) {
+  if (!g_bSelectSEFlag || app & FLAG_ST) {
     if (sectrue != unlocked && (app & FLAGS_WRITE) != FLAGS_WRITE) {
       return secfalse;
     }

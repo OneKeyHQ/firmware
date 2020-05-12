@@ -328,7 +328,10 @@ void fsm_msgLoadDevice(const LoadDevice *msg) {
 #endif
 
 void fsm_msgResetDevice(const ResetDevice *msg) {
-  CHECK_PIN
+  if (g_bIsBixinAPP && config_getDeviceState() == DeviceState_ResetSetPin) {
+  } else {
+    CHECK_PIN
+  }
 
   CHECK_NOT_INITIALIZED
 

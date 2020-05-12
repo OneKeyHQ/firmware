@@ -269,6 +269,7 @@ bool protectChangePin(bool init, bool removal) {
   const char *pin = NULL;
   const char *newpin = NULL;
   bool need_new_pin = true;
+  bool init_unlock = false;
 
   if (init) need_new_pin = false;
 
@@ -277,9 +278,14 @@ bool protectChangePin(bool init, bool removal) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                        ui_prompt_current_pin[ui_language], &newpin);
     } else {
-      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       ui_prompt_input_pin[ui_language], &newpin);
-      need_new_pin = false;
+      if (!init) {
+        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                         ui_prompt_input_pin[ui_language], &newpin);
+        need_new_pin = false;
+      } else {
+        pin = default_user_pin;
+        init_unlock = true;
+      }
     }
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
@@ -296,6 +302,7 @@ bool protectChangePin(bool init, bool removal) {
         fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
         return false;
       }
+      if (init_unlock) return true;
     }
 
     strlcpy(old_pin, pin, sizeof(old_pin));
@@ -463,13 +470,19 @@ bool protectPassphrase(char *passphrase) {
   usbTiny(1);
   msg_write(MessageType_MessageType_PassphraseRequest, &resp);
 
-  layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter your"),
-                    _("passphrase using"), _("the computer's"), _("keyboard."),
-                    NULL, NULL);
-
-  bool result;
-  for (;;) {
+  if (ui_language) {
+    layoutDialogSwipe_zh(&bmp_icon_info, NULL, NULL, NULL, "请输入密语", NULL,
+                         NULL);
+  } else {
+    layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter your"),
+                      _("passphrase using"), _("the computer's"),
+                      _("keyboard."), NULL, NULL);
+  }
+  bool result = false;
+  timer_out_set(timer_out_oper, default_oper_time);
+  while (timer_out_get(timer_out_oper)) {
     usbPoll();
+    buttonUpdate();
     if (msg_tiny_id == MessageType_MessageType_PassphraseAck) {
       msg_tiny_id = 0xFFFF;
       PassphraseAck *ppa = (PassphraseAck *)msg_tiny;
@@ -488,6 +501,14 @@ bool protectPassphrase(char *passphrase) {
         break;
       }
       strlcpy(passphrase, ppa->passphrase, sizeof(ppa->passphrase));
+      result = true;
+      break;
+    }
+    if (button.NoUp) {
+      result = false;
+      break;
+    }
+    if (button.YesUp) {
       result = true;
       break;
     }

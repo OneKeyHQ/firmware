@@ -87,6 +87,11 @@ extern Storage configUpdate;
 #define UUID_SIZE 12
 #define SE_SESSION_KEY 16
 
+typedef enum _DeviceState {
+  DeviceState_NULL = 0,
+  DeviceState_ResetSetPin
+} DeviceState;
+
 void config_init(void);
 void session_clear(bool lock);
 void config_lockDevice(void);
@@ -180,6 +185,9 @@ void config_setIsBixinAPP(void);
 
 void config_setSeSessionKey(uint8_t *data, uint32_t size);
 bool config_getSeSessionKey(uint8_t *dest, uint16_t dest_size);
+
+uint32_t config_getDeviceState(void);
+void config_setDeviceState(uint32_t device_state);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

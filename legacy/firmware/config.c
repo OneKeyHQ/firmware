@@ -92,9 +92,9 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 //#define KEY_PINFLAG (21| APP_PIN )      // uint32
 //#define KEY_VERIFYPIN (22| APP_PIN)      // uint32
 
-#define KEY_TRANSBLEMODE (23 | APP | FLAG_PUBLIC_SHIFTED)  // bool
-#define KEY_FREEPAYPINFLAG (24 | APP)                      // bool
-#define KEY_SEFLAG (25 | APP | ST_FLASH)                   // bool
+#define KEY_TRANSBLEMODE (23 | APP | FLAG_PUBLIC_SHIFTED)       // bool
+#define KEY_FREEPAYPINFLAG (24 | APP)                           // bool
+#define KEY_SEFLAG (25 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bool
 //#define MNEMONIC_INDEX_TOSEED               (26)
 #define KEY_RESET (27 | APP)               // bool
 #define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
@@ -103,6 +103,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 
 #define KEY_SE_SESSIONKEY \
   (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bytes(16)
+#define KEY_DEVICE_STATE (32 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // uint32
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -169,6 +170,8 @@ static uint32_t sessionUseCounter = 0;
 
 static secbool autoLockDelayMsCached = secfalse;
 static uint32_t autoLockDelayMs = autoLockDelayMsDefault;
+
+static uint32_t deviceState = 0;
 
 static const uint32_t CONFIG_VERSION = 11;
 
@@ -760,6 +763,7 @@ bool config_setMnemonic(const char *mnemonic) {
       return false;
     }
     config_set_bool(KEY_INITIALIZED, true);
+    config_setDeviceState(DeviceState_NULL);
   }
 
   return true;
@@ -1116,9 +1120,9 @@ bool config_getBleTrans(void) {
   return sectrue == config_get_bool(KEY_TRANSBLEMODE, &flag);
 }
 
-void config_setWhetherUseSE(bool flag) { 
-    config_set_bool(KEY_SEFLAG, flag); 
-    g_bSelectSEFlag = flag;
+void config_setWhetherUseSE(bool flag) {
+  config_set_bool(KEY_SEFLAG, flag);
+  g_bSelectSEFlag = flag;
 }
 
 bool config_getWhetherUseSE(void) {
@@ -1161,4 +1165,18 @@ bool config_getSeSessionKey(uint8_t *dest, uint16_t dest_size) {
     return false;
   }
   return true;
+}
+
+uint32_t config_getDeviceState() {
+  if (sectrue != config_get_uint32(KEY_DEVICE_STATE, &deviceState)) {
+    deviceState = 0;
+  }
+  return deviceState;
+}
+
+void config_setDeviceState(uint32_t device_state) {
+  if (sectrue ==
+      storage_set(KEY_DEVICE_STATE, &device_state, sizeof(device_state))) {
+    deviceState = device_state;
+  }
 }
