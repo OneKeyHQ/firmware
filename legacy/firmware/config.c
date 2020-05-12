@@ -1116,7 +1116,10 @@ bool config_getBleTrans(void) {
   return sectrue == config_get_bool(KEY_TRANSBLEMODE, &flag);
 }
 
-void config_setWhetherUseSE(bool flag) { config_set_bool(KEY_SEFLAG, flag); }
+void config_setWhetherUseSE(bool flag) { 
+    config_set_bool(KEY_SEFLAG, flag); 
+    g_bSelectSEFlag = flag;
+}
 
 bool config_getWhetherUseSE(void) {
   bool flag;
