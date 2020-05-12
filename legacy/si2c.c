@@ -170,13 +170,13 @@ void i2cSlaveResponse(uint8_t *pucStr, uint32_t usStrLen) {
                     (i2c_data_out[7] << 8) + i2c_data_out[8] + 9;
   i2c_data_out_pos = 0;
   SET_COMBUS_HIGH();
-  timer_out_set(timer_out_oper, default_resp_time);
+  timer_out_set(timer_out_resp, default_resp_time);
   while (1) {
-    if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_oper) == true ||
+    if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_resp) == true ||
         i2c_data_outlen == 0)
       break;
   }
   i2c_data_outlen = 0;
-  timer_out_set(timer_out_oper, 0);
+  timer_out_set(timer_out_resp, 0);
   SET_COMBUS_LOW();
 }

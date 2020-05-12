@@ -36,6 +36,7 @@ typedef enum _TimerOut {
   timer_out_cmd = 0,
   timer_out_countdown,
   timer_out_oper,
+  timer_out_resp,
   timer_out_null,
 } TimerOut;
 
