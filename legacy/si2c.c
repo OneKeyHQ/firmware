@@ -156,14 +156,13 @@ void i2c2_ev_isr() {
 }
 void i2c2_er_isr(void) {}
 
-void i2cSlaveResponse(uint8_t *pucStr, uint32_t usStrLen) {
+void i2cSlaveResponse(uint32_t usStrLen) {
   uint32_t len = 0;
   uint32_t i;
-  memcpy(i2c_data_out, pucStr, usStrLen);
   if (usStrLen > 64) len = usStrLen - 64;
   if (len) {
     for (i = 0; i < (len / 64); i++) {
-      memcpy(i2c_data_out + 64 + i * 63, pucStr + (i + 1) * 64 + 1, 63);
+      memmove(i2c_data_out + 64 + i * 63, i2c_data_out + (i + 1) * 64 + 1, 63);
     }
   }
   i2c_data_outlen = (i2c_data_out[5] << 24) + (i2c_data_out[6] << 16) +
