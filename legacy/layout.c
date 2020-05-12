@@ -235,6 +235,7 @@ void layoutStatusLogo(void) {
       oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_4);
       break;
     default:
+      oledClearBitmap(OLED_WIDTH - 16, 0, &bmp_battery_0);
       break;
   }
   oledRefresh();
