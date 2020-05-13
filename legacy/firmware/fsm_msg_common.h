@@ -201,6 +201,9 @@ void fsm_msgChangePin(const ChangePin *msg) {
 
 void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
   CHECK_INITIALIZED
+  if (g_bIsBixinAPP) {
+	  CHECK_PIN
+  } 
 
   bool removal = msg->has_remove && msg->remove;
   bool has_wipe_code = config_hasWipeCode();
