@@ -218,7 +218,9 @@ def pytest_configure(config):
     # register known markers
     config.addinivalue_line("markers", "skip_t1: skip the test on Trezor One")
     config.addinivalue_line("markers", "skip_t2: skip the test on Trezor T")
-    config.addinivalue_line("markers", "skip_if_se: skip the test if test se on BixinKey")
+    config.addinivalue_line(
+        "markers", "skip_if_se: skip the test if test se on BixinKey"
+    )
     config.addinivalue_line(
         "markers",
         'setup_client(mnemonic="all all all...", pin=None, passphrase=False, uninitialized=False): configure the client instance',

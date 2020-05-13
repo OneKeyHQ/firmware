@@ -470,14 +470,17 @@ bool protectPassphrase(char *passphrase) {
   usbTiny(1);
   msg_write(MessageType_MessageType_PassphraseRequest, &resp);
 
-  if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_info, NULL, NULL, NULL, "请输入密语", NULL,
-                         NULL);
-  } else {
-    layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter your"),
-                      _("passphrase using"), _("the computer's"),
-                      _("keyboard."), NULL, NULL);
+  if (!g_bIsBixinAPP) {
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_info, NULL, NULL, NULL, "请输入密语", NULL,
+                           NULL);
+    } else {
+      layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL,
+                        _("Please enter your"), _("passphrase using"),
+                        _("the computer's"), _("keyboard."), NULL, NULL);
+    }
   }
+
   bool result = false;
   timer_out_set(timer_out_oper, default_oper_time);
   while (timer_out_get(timer_out_oper)) {
