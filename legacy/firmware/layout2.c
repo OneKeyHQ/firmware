@@ -23,11 +23,11 @@
 
 #include "bignum.h"
 #include "bitmaps.h"
+#include "ble.h"
 #include "buttons.h"
 #include "chinese.h"
 #include "common.h"
 #include "config.h"
-#include "dev_info.h"
 #include "gettext.h"
 #include "layout2.h"
 #include "memory.h"
@@ -45,6 +45,11 @@ uint8_t Disp_buffer[DISP_BUFSIZE];
 
 static uint16_t s_usCurrentCount;
 static uint16_t s_uiShowLength;
+
+/* Display info timeout */
+uint32_t system_millis_display_info_start = 0;
+
+#define DEVICE_INFO_PAGE_NUM 1
 
 const char *ui_prompt_sign_trans[2] = {"Signing transaction", "签名交易中..."};
 const char *ui_prompt_wakingup[2] = {"Waking up", "唤醒..."};
@@ -276,10 +281,6 @@ void layoutHome(void) {
   }
 
   layoutLast = layoutHome;
-  char label[MAX_LABEL_LEN + 1] = _("Go to trezor.io/start");
-  if (config_isInitialized()) {
-    config_getLabel(label, sizeof(label));
-  }
 
   bool no_backup = false;
   bool unfinished_backup = false;
@@ -1083,24 +1084,48 @@ void vDISP_TurnPageDOWN(void) {
             Disp_buffer + s_usCurrentCount, 16);
 }
 void layoutDeviceInfo(uint8_t ucPage) {
+  int y = 9;
   switch (ucPage) {
-    case 0:
     case 1:
-    case 2:
       oledClear();
-      oledDrawString(0, 8, "firmware_version:", FONT_STANDARD);
-      oledDrawStringCenter(OLED_WIDTH / 2, 16,
-                           VERSTR(VERSION_MAJOR) "." VERSTR(
-                               VERSION_MINOR) "." VERSTR(VERSION_PATCH),
-                           FONT_STANDARD);
-      oledDrawString(0, 24, "BLE_version:", FONT_STANDARD);
-      layoutFillBleVersion(4);
+      oledDrawString(0, y, "firmware_version:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          VERSTR(VERSION_MAJOR) "." VERSTR(
+                              VERSION_MINOR) "." VERSTR(VERSION_PATCH),
+                          FONT_STANDARD);
+      y += 9;
+      if (ble_ver_state()) {
+        oledDrawString(0, y, "ble_version:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
+        y += 9;
+      }
+      if (config_isInitialized()) {
+        char label[MAX_LABEL_LEN + 1] = _("");
+        config_getLabel(label, sizeof(label));
+        oledDrawString(0, y, "label:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
+        y += 9;
+      }
+      if (session_isUnlocked()) {
+        char secstrbuf[] = _("________0 s");
+        char *secstr = secstrbuf + 9;
+        uint32_t secs = 0;
+        secs = config_getAutoLockDelayMs() / 1000;
+        do {
+          secstr--;
+          *secstr = (secs % 10) + '0';
+          secs /= 10;
+        } while (secs > 0 && secstr >= secstrbuf);
+        oledDrawString(0, y, "shutdown delay:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
+      }
       break;
     default:
       break;
   }
   oledRefresh();
   layoutLast = layoutDeviceInfo;
+  system_millis_display_info_start = timer_ms();
 }
 
 void layoutHomeInfo(void) {
@@ -1113,32 +1138,41 @@ void layoutHomeInfo(void) {
   }
   if (layoutLast == layoutHome) {
     if (button.UpUp || button.DownUp) {
+      info_page++;
       layoutDeviceInfo(info_page);
     }
   } else if (layoutLast == layoutDeviceInfo) {
-    if (button.UpUp) {
-      if (info_page)
-        info_page--;
-      else
-        info_page = 2;
-      layoutDeviceInfo(info_page);
-    } else if (button.DownUp) {
-      if (info_page < 2)
-        info_page++;
-      else
-        info_page = 0;
-      layoutDeviceInfo(info_page);
-    } else if (button.NoUp) {
-      layoutHome();
+    // auto display 10 seconds
+    if ((timer_ms() - system_millis_display_info_start) >= 10 * 1000) {
+      info_page = 0;
     }
+    if (button.UpUp) {
+      if (info_page) {
+        info_page--;
+        layoutDeviceInfo(info_page);
+      }
+    } else if (button.DownUp) {
+      if (info_page < DEVICE_INFO_PAGE_NUM) {
+        info_page++;
+        layoutDeviceInfo(info_page);
+      } else
+        info_page = 0;
+    } else if (button.NoUp) {
+      info_page = 0;
+    }
+    if (info_page == 0) layoutHome();
   }
   // if homescreen is shown for too long
   if (layoutLast == layoutHome) {
     if ((timer_ms() - system_millis_lock_start) >=
         config_getAutoLockDelayMs()) {
-      // lock the screen
-      session_clear(true);
-      layoutScreensaver();
+      if (sys_nfcState() || sys_usbState()) {
+        // lock the screen
+        session_clear(true);
+        layoutScreensaver();
+      } else {
+        shutdown();
+      }
     }
     // 1000 ms refresh
     if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
@@ -1149,7 +1183,8 @@ void layoutHomeInfo(void) {
     }
   }
   // wake from screensaver on any button
-  if (layoutLast == layoutScreensaver && (button.NoUp || button.YesUp)) {
+  if (layoutLast == layoutScreensaver &&
+      (button.NoUp || button.YesUp || button.UpUp || button.DownUp)) {
     layoutHome();
     return;
   }

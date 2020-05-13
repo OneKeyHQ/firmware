@@ -8,7 +8,6 @@ OBJS += flash.o
 OBJS += layout.o
 OBJS += oled.o
 OBJS += rng.o
-OBJS += dev_info.o
 OBJS += chinese.o
 
 ifneq ($(EMULATOR),1)

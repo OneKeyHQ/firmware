@@ -166,7 +166,7 @@ static Session *activeSessionCache;
 
 static uint32_t sessionUseCounter = 0;
 
-#define autoLockDelayMsDefault (3 * 60 * 1000U)  // 3 minutes
+#define autoLockDelayMsDefault (1 * 60 * 1000U)  // 1 minutes
 
 static secbool autoLockDelayMsCached = secfalse;
 static uint32_t autoLockDelayMs = autoLockDelayMsDefault;
