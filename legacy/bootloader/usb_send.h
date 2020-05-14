@@ -21,20 +21,7 @@ static void send_response(usbd_device *dev, uint8_t *buf) {
     }
   } else {
     memcpy(i2c_data_out, buf, 64);
-    i2c_data_outlen = (i2c_data_out[7] << 8) + i2c_data_out[8] + 9;
-    i2c_data_out_pos = 0;
-    SET_COMBUS_HIGH();
-    if (host_channel == CHANNEL_SLAVE) {
-      timer_out_set(timer_out_resp, default_resp_time);
-      while (1) {
-        if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_resp) == true ||
-            i2c_data_outlen == 0)
-          break;
-      }
-      i2c_data_outlen = 0;
-      timer_out_set(timer_out_resp, 0);
-      SET_COMBUS_LOW();
-    }
+    i2c_slave_send_ex(64);
   }
 }
 static void send_msg_success(usbd_device *dev) {

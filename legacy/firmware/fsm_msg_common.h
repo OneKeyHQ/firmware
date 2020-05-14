@@ -714,6 +714,7 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
   fsm_sendSuccess(_("reboot start"));
+  usbPoll();  // send response before reboot
 #if !EMULATOR
   sys_backtoboot();
 #endif

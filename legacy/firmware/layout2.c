@@ -36,6 +36,7 @@
 #include "oled.h"
 #include "prompt.h"
 #include "qrcodegen.h"
+#include "se_chip.h"
 #include "secp256k1.h"
 #include "sys.h"
 #include "timer.h"
@@ -1083,6 +1084,8 @@ void vDISP_TurnPageDOWN(void) {
 }
 void layoutDeviceInfo(uint8_t ucPage) {
   int y = 9;
+  uint8_t se_version[8] = {0};
+  uint16_t version_len = sizeof(se_version);
   switch (ucPage) {
     case 1:
       oledClear();
@@ -1095,6 +1098,20 @@ void layoutDeviceInfo(uint8_t ucPage) {
       if (ble_ver_state()) {
         oledDrawString(0, y, "ble_version:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
+        y += 9;
+      }
+      if (se_get_version(se_version, sizeof(se_version), &version_len)) {
+        char se_ver_char[9] = {0};
+        int i = 0;
+        se_ver_char[i++] = (se_version[0] >> 4) + '0';
+        se_ver_char[i++] = '.';
+        se_ver_char[i++] = (se_version[0] & 0x0f) + '0';
+        se_ver_char[i++] = '.';
+        se_ver_char[i++] = (se_version[1] >> 4) + '0';
+        se_ver_char[i++] = '.';
+        se_ver_char[i++] = (se_version[1] & 0x0f) + '0';
+        oledDrawString(0, y, "se_version:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
         y += 9;
       }
       if (config_isInitialized()) {

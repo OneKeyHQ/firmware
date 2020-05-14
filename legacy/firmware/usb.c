@@ -434,7 +434,7 @@ static void i2c_slave_poll(void) {
       offset += 64;
     }
     if (offset) {
-      i2cSlaveResponse(offset);
+      i2c_slave_send(offset);
     }
   }
 }

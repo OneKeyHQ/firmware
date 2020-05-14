@@ -42,7 +42,6 @@ void layoutBlePasskey(uint8_t *passkey);
 void layoutFillBleName(uint8_t line);
 void layoutFillBleVersion(uint8_t line);
 void layoutError(const char *line1, const char *line2);
-void layoutOperationWithCountdown(const char *info, uint32_t counter);
 
 void layoutDialog_zh(const BITMAP *icon, const char *btnNo, const char *btnYes,
                      const char *desc, const char *line1, const char *line2,

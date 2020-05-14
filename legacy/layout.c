@@ -278,15 +278,6 @@ void layoutError(const char *line1, const char *line2) {
   shutdown();
 }
 
-#if !EMULATOR
-void layoutOperationWithCountdown(const char *info, uint32_t counter) {
-  timer_out_set(timer_out_countdown, counter);
-  oledClear();
-  oledDrawStringCenter(OLED_WIDTH / 2, 30, info, FONT_STANDARD);
-  oledRefresh();
-}
-#endif
-
 // layout chinese
 void layoutButtonNo_zh(const char *btnNo, const BITMAP *icon) {
   int icon_width = 0;
