@@ -17,10 +17,16 @@ from .BinanceSignTx import BinanceSignTx
 from .BinanceSignedTx import BinanceSignedTx
 from .BinanceTransferMsg import BinanceTransferMsg
 from .BinanceTxRequest import BinanceTxRequest
+from .BixinBackupAck import BixinBackupAck
+from .BixinBackupRequest import BixinBackupRequest
 from .BixinMessageSE import BixinMessageSE
 from .BixinOutMessageSE import BixinOutMessageSE
+from .BixinReboot import BixinReboot
+from .BixinRestoreAck import BixinRestoreAck
+from .BixinRestoreRequest import BixinRestoreRequest
 from .BixinSeedOperate import BixinSeedOperate
-from .BixinUpgrade import BixinUpgrade
+from .BixinVerifyDeviceAck import BixinVerifyDeviceAck
+from .BixinVerifyDeviceRequest import BixinVerifyDeviceRequest
 from .ButtonAck import ButtonAck
 from .ButtonRequest import ButtonRequest
 from .Cancel import Cancel

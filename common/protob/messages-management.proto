@@ -405,9 +405,55 @@ message BixinOutMessageSE {
 }
 
 /**
- * Request: Upgrade firmware
+ * Request: Reboot firmware
  * @end
  */
-message BixinUpgrade {
+message BixinReboot {
 }
  
+/**
+ * Request: backup request 
+ * @end
+ */
+message BixinBackupRequest {
+}
+ 
+/**
+ * Request: backup ack
+ * @end
+ */
+message BixinBackupAck {
+ required bytes data = 1;
+}
+
+/**
+ * Request: restore request 
+ * @end
+ */
+message BixinRestoreRequest {
+ required bytes data = 1;
+}
+ 
+/**
+ * Request: restore ack
+ * @end
+ */
+message BixinRestoreAck {
+ required bytes data = 1;
+}
+ 
+/**
+ * Request: verify device request
+ * @end
+ */
+message BixinVerifyDeviceRequest {
+ required bytes data = 1;
+}
+ 
+/**
+ * Request: verify device ack
+ * @end
+ */
+message BixinVerifyDeviceAck {
+ required bytes data = 1;
+}

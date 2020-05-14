@@ -41,3 +41,9 @@ BixinSeedOperate.seed_importData        max_size:512
 
 BixinMessageSE.inputmessage             max_size:1024
 BixinOutMessageSE.outmessage            max_size:1024 
+
+BixinBackupAck.data                     max_size:512
+BixinRestoreRequest.data                max_size:512
+BixinRestoreAck.data                    max_size:512
+BixinVerifyDeviceRequest.data           max_size:512
+BixinVerifyDeviceAck.data               max_size:512

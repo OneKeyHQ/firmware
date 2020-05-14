@@ -41,6 +41,7 @@
 #define GET_SESTORE_DATA (0x00)
 #define SET_SESTORE_DATA (0x01)
 #define DELETE_SESTORE_DATA (0x02)
+#define DEVICEINIT_DATA (0x03)
 
 #define MI2C_CMD_WR_PIN (0xE1)
 #define MI2C_CMD_AES (0xE2)
@@ -116,10 +117,13 @@ extern uint32_t MI2CDRV_Transmit(uint8_t ucCmd, uint8_t ucIndex,
                                  uint8_t *pucSendData, uint16_t usSendLen,
                                  uint8_t *pucRevData, uint16_t *pusRevLen,
                                  uint8_t ucMode, uint8_t ucWRFlag);
+extern uint32_t MI2CDRV_TransmitPlain(uint8_t *pucSendData, uint16_t usSendLen,
+                                      uint8_t *pucRevData, uint16_t *pusRevLen);
 #else
 #define MI2CDRV_Transmit(...) 0
 #define bMI2CDRV_SendData(...) true
 #define bMI2CDRV_ReceiveData(...) true
+#define MI2CDRV_TransmitPlain(...) true
 
 #endif
 

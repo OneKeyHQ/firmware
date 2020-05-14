@@ -259,6 +259,12 @@ enum MessageType {
     // bixin
     MessageType_BixinSeedOperate = 901 [(wire_in) = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
-    MessageType_BixinUpgrade = 903 [(wire_in) = true];
+    MessageType_BixinReboot = 903 [(wire_in) = true];
     MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
+    MessageType_BixinBackupRequest = 905 [(wire_in) = true];
+    MessageType_BixinBackupAck = 906 [(wire_out) = true];
+    MessageType_BixinRestoreRequest = 907 [(wire_in) = true];
+    MessageType_BixinRestoreAck = 908 [(wire_out) = true];
+    MessageType_BixinVerifyDeviceRequest = 909 [(wire_in) = true];
+    MessageType_BixinVerifyDeviceAck = 910 [(wire_out) = true];
 }

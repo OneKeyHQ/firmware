@@ -30,6 +30,7 @@ from ..transport.udp import UdpTransport
 from . import (
     TrezorConnection,
     binance,
+    bixin,
     btc,
     cardano,
     cosi,
@@ -332,6 +333,7 @@ cli.add_command(tezos.cli)
 
 cli.add_command(firmware.firmware_update)
 cli.add_command(debug.cli)
+cli.add_command(bixin.cli)
 
 #
 # Main

@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "mi2c.h"
+#include "se_chip.h"
+#include "storage.h"
 
 bool get_features(Features *resp) {
   resp->has_vendor = true;
@@ -669,7 +672,7 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
       uiTemp = random32();
       memcpy(ucBuf + 1 + i * 4, &uiTemp, 4);
     }
-    ucBuf[0] = config_setSeedsExportFlag(ExportType_SeedEncExportType_NO);
+    ucBuf[0] = config_setSeedsExportFlag(ExportType_SeedEncExportType_YES);
     if (!config_setSeedsBytes(ucBuf, 65)) {
       fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
       layoutHome();
@@ -708,7 +711,7 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
   layoutHome();
 }
 
-void fsm_msgBixinUpgrade(const BixinUpgrade *msg) {
+void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
   fsm_sendSuccess(_("reboot start"));
 #if !EMULATOR
@@ -731,3 +734,66 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
   layoutHome();
   return;
 }
+
+void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
+  (void)msg;
+
+  CHECK_PIN
+  CHECK_INITIALIZED
+
+  RESP_INIT(BixinBackupAck);
+  if (g_bSelectSEFlag) {
+    if (false == se_backup((uint8_t *)resp->data.bytes, &resp->data.size)) {
+      fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+      layoutHome();
+      return;
+    }
+  } else {
+    uint16_t menmonic_len = 512 - 92;
+    uint16_t offset = 0;
+    if (!config_hasPin()) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+    storage_getHardwareSalt(resp->data.bytes);
+    offset += 32;
+    // RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE
+    storage_get_EDEK_PVC_KEY(resp->data.bytes + offset);
+    offset += 60;
+    storage_getMnemonicEnc(resp->data.bytes + offset, &menmonic_len);
+    offset += menmonic_len;
+    resp->data.size = offset;
+  }
+
+  msg_write(MessageType_MessageType_BixinBackupAck, resp);
+  layoutHome();
+  return;
+}
+
+void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
+  CHECK_PIN
+  CHECK_NOT_INITIALIZED
+  if (false == se_restore((uint8_t *)msg->data.bytes, msg->data.size)) {
+    fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+    layoutHome();
+    return;
+  }
+  fsm_sendSuccess(_("device initialied success"));
+  layoutHome();
+  return;
+};
+
+void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
+  RESP_INIT(BixinVerifyDeviceAck);
+  resp->data.size = 512;
+  if (false == se_verify((uint8_t *)msg->data.bytes, msg->data.size,
+                         resp->data.bytes, 0x40, &resp->data.size)) {
+    fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+    layoutHome();
+    return;
+  }
+  msg_write(MessageType_MessageType_BixinVerifyDeviceAck, resp);
+  layoutHome();
+  return;
+};

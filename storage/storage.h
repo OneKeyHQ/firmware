@@ -20,6 +20,7 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "secbool.h"
@@ -64,5 +65,9 @@ secbool storage_set(const uint16_t key, const void *val, const uint16_t len);
 secbool storage_delete(const uint16_t key);
 secbool storage_set_counter(const uint16_t key, const uint32_t count);
 secbool storage_next_counter(const uint16_t key, uint32_t *count);
+
+void storage_getHardwareSalt(uint8_t *hw_salt);
+bool storage_get_EDEK_PVC_KEY(uint8_t *key);
+bool storage_getMnemonicEnc(uint8_t *mnemonic_enc, uint16_t *len);
 
 #endif

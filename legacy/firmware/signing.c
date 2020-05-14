@@ -899,7 +899,6 @@ static bool signing_check_output(TxOutputType *txoutput) {
 
 static bool signing_check_fee(void) {
   uint64_t limt_pay;
-  // uint32_t times;
 
   if (coin->negative_fee) {
     // bypass check for negative fee coins, required for reward TX
@@ -913,7 +912,6 @@ static bool signing_check_fee(void) {
     }
   }
   limt_pay = config_getFreePayMoneyLimt();
-  // times = config_getFreePayTimes();
   if ((!config_getFreePayPinFlag()) && ((to_spend - change_spend) > limt_pay)) {
     if (!protectPin(true)) {
       layoutHome();

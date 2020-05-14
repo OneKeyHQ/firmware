@@ -1,10 +1,11 @@
 #include "mi2c.h"
+
 #include <libopencm3/stm32/flash.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/i2c.h>
 #include <libopencm3/stm32/rcc.h>
-
 #include <string.h>
+
 #include "aes/aes.h"
 #include "rand.h"
 #include "secbool.h"
@@ -327,7 +328,7 @@ uint32_t MI2CDRV_Transmit(uint8_t ucCmd, uint8_t ucIndex, uint8_t *pucSendData,
   aes_decrypt_ctx ctxd;
   // se apdu
   if (MI2C_ENCRYPT == ucMode) {
-    if (SET_SESTORE_DATA == ucWRFlag) {
+    if (SET_SESTORE_DATA == ucWRFlag || DEVICEINIT_DATA == ucWRFlag) {
       // data aes encrypt
       randomBuf_SE(ucRandom, sizeof(ucRandom));
       memset(&ctxe, 0, sizeof(aes_encrypt_ctx));
@@ -427,6 +428,16 @@ uint32_t MI2CDRV_Transmit(uint8_t ucCmd, uint8_t ucIndex, uint8_t *pucSendData,
     memcpy(pucRevData, g_ucMI2cRevBuf, g_usMI2cRevLen);
     *pusRevLen = g_usMI2cRevLen;
     ;
+  }
+  return MI2C_OK;
+}
+uint32_t MI2CDRV_TransmitPlain(uint8_t *pucSendData, uint16_t usSendLen,
+                               uint8_t *pucRevData, uint16_t *pusRevLen) {
+  if (false == bMI2CDRV_SendData(pucSendData, usSendLen)) {
+    return MI2C_ERROR;
+  }
+  if (false == bMI2CDRV_ReceiveData(pucRevData, pusRevLen)) {
+    return MI2C_ERROR;
   }
   return MI2C_OK;
 }
