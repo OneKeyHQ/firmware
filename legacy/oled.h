@@ -53,13 +53,14 @@
 void oledInit(void);
 void oledClear(void);
 void oledClearPart(void);
-void oledAllDisplay(void);
 
 void oledRefresh(void);
 
 void oledSetDebugLink(bool set);
 void oledInvertDebugLink(void);
 
+void oledBufferBak(void);
+void oledBufferResume(void);
 void oledSetBuffer(uint8_t *buf, uint16_t usLen);
 void oledclearLine(uint8_t line);
 const uint8_t *oledGetBuffer(void);

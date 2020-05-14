@@ -9,6 +9,7 @@
 #include "buttons.h"
 #include "common.h"
 #include "layout.h"
+#include "oled.h"
 #include "si2c.h"
 #include "sys.h"
 #include "timer.h"
@@ -156,10 +157,13 @@ void i2c2_ev_isr() {
 }
 void i2c2_er_isr(void) {}
 
-void i2cSlaveResponse(uint32_t usStrLen) {
+void i2cSlaveResponse(uint32_t data_len) {
   uint32_t len = 0;
   uint32_t i;
-  if (usStrLen > 64) len = usStrLen - 64;
+  uint32_t counter, counter_bak;
+  bool flag = true;
+
+  if (data_len > 64) len = data_len - 64;
   if (len) {
     for (i = 0; i < (len / 64); i++) {
       memmove(i2c_data_out + 64 + i * 63, i2c_data_out + (i + 1) * 64 + 1, 63);
@@ -170,12 +174,39 @@ void i2cSlaveResponse(uint32_t usStrLen) {
   i2c_data_out_pos = 0;
   SET_COMBUS_HIGH();
   timer_out_set(timer_out_resp, default_resp_time);
+  counter = counter_bak = default_resp_time / timer1s;
   while (1) {
     if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_resp) == true ||
-        i2c_data_outlen == 0)
+        i2c_data_outlen == 0) {
       break;
+    } else {
+      counter = timer_out_get(timer_out_resp) / timer1s;
+      // show timer count down after 2 seconds
+      if (counter <= default_resp_time / timer1s - 2) {
+        if (counter_bak != counter) {
+          if (flag) {
+            flag = false;
+            oledBufferBak();
+            oledClear();
+            oledDrawStringCenter(OLED_WIDTH / 2, 40, "Sending Response...",
+                                 FONT_STANDARD);
+          }
+          uint8_t asc_buf[3] = {0};
+          oledBox(56, 28, 56 + 16, 28 + 8, false);
+          counter_bak = counter;
+          asc_buf[0] = counter / 10 + 0x30;
+          asc_buf[1] = counter % 10 + 0x30;
+          oledDrawString(56, 28, (char *)asc_buf, FONT_STANDARD);
+          oledRefresh();
+        }
+      }
+    }
   }
   i2c_data_outlen = 0;
   timer_out_set(timer_out_resp, 0);
   SET_COMBUS_LOW();
+  if (!flag) {
+    oledBufferResume();
+    oledRefresh();
+  }
 }

@@ -353,7 +353,7 @@ bool protectChangePin(bool init, bool removal) {
       if (!init) {
         if (ui_language) {
           layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                               "请确认PIN码", NULL, NULL);
+                               "请确认PIN码", NULL, new_pin);
         } else {
           layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                             _("Please confirm PIN"), NULL, NULL, new_pin, NULL,

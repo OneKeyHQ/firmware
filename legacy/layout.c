@@ -177,68 +177,72 @@ void layoutProgress(const char *desc, int permil) {
 }
 
 #if !EMULATOR
-void layoutStatusLogo(void) {
+void layoutStatusLogo(bool force_fresh) {
   static bool nfc_status_bak = false;
   static bool ble_status_bak = false;
   static bool usb_status_bak = false;
-  static uint32_t counter = 0, counter_bak = 0;
+  static uint8_t battery_bak = 0;
   uint8_t pad = 16;
+  bool refresh = false;
 
   if (sys_nfcState() == true) {
-    nfc_status_bak = true;
-    oledDrawBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - pad, 0, &bmp_nfc);
-  } else if ((true == nfc_status_bak) && (sys_nfcState() == false)) {
+    if (force_fresh || false == nfc_status_bak) {
+      nfc_status_bak = true;
+      oledDrawBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - pad, 0, &bmp_nfc);
+      refresh = true;
+    }
+  } else if (true == nfc_status_bak) {
     nfc_status_bak = false;
     oledClearBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - pad, 0, &bmp_nfc);
+    refresh = true;
   }
   if (sys_bleState() == true) {
-    ble_status_bak = true;
-    oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
-  } else if ((true == ble_status_bak) && (sys_bleState() == false)) {
+    if (force_fresh || false == ble_status_bak) {
+      ble_status_bak = true;
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+      refresh = true;
+    }
+  } else if (true == ble_status_bak) {
     ble_status_bak = false;
     oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+    refresh = true;
   }
   if (sys_usbState() == true) {
-    usb_status_bak = true;
-    oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
-  } else if ((true == usb_status_bak) && (sys_usbState() == false)) {
+    if (force_fresh || false == usb_status_bak) {
+      usb_status_bak = true;
+      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
+      refresh = true;
+    }
+  } else if (true == usb_status_bak) {
     usb_status_bak = false;
     oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
+    refresh = true;
   }
 
-  counter = timer_out_get(timer_out_countdown) / timer1s;
-  if (counter_bak != counter) {
-    uint8_t asc_buf[3] = {0};
-    oledBox(0, 0, 16, 8, false);
-    counter_bak = counter;
-    asc_buf[0] = counter / 10 + 0x30;
-    asc_buf[1] = counter % 10 + 0x30;
-    if (counter > 0) {
-      oledDrawString(0, 0, (char *)asc_buf, FONT_STANDARD);
+  if (battery_bak != battery_cap || force_fresh) {
+    battery_bak = battery_cap;
+    refresh = true;
+    switch (battery_bak) {
+      case 0:
+        oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_0);
+        break;
+      case 1:
+        oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_1);
+        break;
+      case 2:
+        oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_2);
+        break;
+      case 3:
+        oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_3);
+        break;
+      case 4:
+        oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_4);
+        break;
+      default:
+        break;
     }
   }
-
-  switch (battery_cap) {
-    case 0:
-      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_0);
-      break;
-    case 1:
-      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_1);
-      break;
-    case 2:
-      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_2);
-      break;
-    case 3:
-      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_3);
-      break;
-    case 4:
-      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_4);
-      break;
-    default:
-      oledClearBitmap(OLED_WIDTH - 16, 0, &bmp_battery_0);
-      break;
-  }
-  oledRefresh();
+  if (refresh) oledRefresh();
 }
 
 void layoutBlePasskey(uint8_t *passkey) {

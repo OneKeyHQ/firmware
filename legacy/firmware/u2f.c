@@ -340,7 +340,6 @@ void vButton_Lcd_Test(void) {
   uint32_t uiTimeout;
 
   oledClear();
-  oledAllDisplay();
   oledRefresh();
   ucStatus = 0;
   uiTimeout = 0;

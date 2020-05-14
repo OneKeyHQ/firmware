@@ -37,7 +37,7 @@ void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
                   const char *line6);
 void layoutProgressUpdate(bool refresh);
 void layoutProgress(const char *desc, int permil);
-void layoutStatusLogo(void);
+void layoutStatusLogo(bool force_fresh);
 void layoutBlePasskey(uint8_t *passkey);
 void layoutFillBleName(uint8_t line);
 void layoutFillBleVersion(uint8_t line);

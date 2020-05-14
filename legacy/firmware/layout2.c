@@ -279,7 +279,6 @@ void layoutHome(void) {
   } else {
     layoutSwipe();
   }
-
   layoutLast = layoutHome;
 
   bool no_backup = false;
@@ -314,9 +313,8 @@ void layoutHome(void) {
       }
     }
     layoutFillBleName(5);
-    oledRefresh();
   }
-
+  layoutStatusLogo(true);
   oledRefresh();
 
   // Reset lock screen timeout
@@ -1177,7 +1175,7 @@ void layoutHomeInfo(void) {
     // 1000 ms refresh
     if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
 #if !EMULATOR
-      layoutStatusLogo();
+      layoutStatusLogo(false);
       system_millis_logo_refresh = timer_ms();
 #endif
     }

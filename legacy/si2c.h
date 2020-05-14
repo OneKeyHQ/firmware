@@ -32,7 +32,7 @@ extern trans_fifo i2c_fifo_in, i2c_fifo_out;
 
 void i2c_slave_init_irq(void);
 void i2c_slave_init(void);
-void i2cSlaveResponse(uint32_t usStrLen);
+void i2cSlaveResponse(uint32_t data_len);
 bool i2c2_slave_recevie(void);
 void i2c_slave_send(uint8_t *buf, uint32_t buf_size);
 void i2c2_slave_send(void);

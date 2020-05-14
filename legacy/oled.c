@@ -58,6 +58,7 @@
  */
 
 static uint8_t _oledbuffer[OLED_BUFSIZE];
+static uint8_t _oledbuffer_bak[OLED_BUFSIZE];
 static bool is_debug_link = 0;
 
 /*
@@ -178,8 +179,6 @@ void oledClearPart() {
   memzero(_oledbuffer, sizeof(_oledbuffer) - (OLED_WIDTH * (LOGO_HEIGHT / 8)));
 }
 
-void oledAllDisplay() { memset(_oledbuffer, 0xFF, sizeof(_oledbuffer)); }
-
 void oledInvertDebugLink() {
   if (is_debug_link) {
     oledInvertPixel(OLED_WIDTH - 5, 0);
@@ -244,9 +243,15 @@ void oledSetDebugLink(bool set) {
   oledRefresh();
 }
 
+void oledBufferBak(void) { memcpy(_oledbuffer_bak, _oledbuffer, OLED_BUFSIZE); }
+void oledBufferResume(void) {
+  memcpy(_oledbuffer, _oledbuffer_bak, OLED_BUFSIZE);
+}
+
 void oledSetBuffer(uint8_t *buf, uint16_t usLen) {
   memcpy(_oledbuffer, buf, usLen);
 }
+
 void oledclearLine(uint8_t line) {
   if (line < (OLED_HEIGHT / 8)) {
     memzero(_oledbuffer + OLED_WIDTH * (OLED_HEIGHT / 8 - line - 1),
