@@ -17,7 +17,7 @@ void layoutBootHome(void) {
   // 1000 ms refresh
   if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
 #if !EMULATOR
-    layoutStatusLogo();
+    layoutStatusLogo(true);
     system_millis_logo_refresh = timer_ms();
 #endif
   }
