@@ -70,13 +70,13 @@
 #define ENDPOINT_ADDRESS_U2F_OUT (0x03)
 #endif
 
-#define USB_STRINGS                                \
-  X(MANUFACTURER, "SatoshiLabs")                   \
-  X(PRODUCT, "Bixin")                              \
-  X(SERIAL_NUMBER, config_uuid_str)                \
-  X(INTERFACE_MAIN, "Bixin Interface")             \
-  X(INTERFACE_DEBUG, "Bixin Debug Link Interface") \
-  X(INTERFACE_U2F, "Bixin U2F Interface")
+#define USB_STRINGS                                 \
+  X(MANUFACTURER, "SatoshiLabs")                    \
+  X(PRODUCT, "TREZOR")                              \
+  X(SERIAL_NUMBER, config_uuid_str)                 \
+  X(INTERFACE_MAIN, "TREZOR Interface")             \
+  X(INTERFACE_DEBUG, "TREZOR Debug Link Interface") \
+  X(INTERFACE_U2F, "TREZOR U2F Interface")
 
 #define X(name, value) USB_STRING_##name,
 enum {
@@ -102,7 +102,7 @@ static const struct usb_device_descriptor dev_descr = {
     .bMaxPacketSize0 = 64,
     .idVendor = 0x1209,
     .idProduct = 0x53c1,
-    .bcdDevice = (VERSION_MAJOR << 12) + (VERSION_MINOR << 8) + (VERSION_PATCH),
+    .bcdDevice = 0x0100,
     .iManufacturer = USB_STRING_MANUFACTURER,
     .iProduct = USB_STRING_PRODUCT,
     .iSerialNumber = USB_STRING_SERIAL_NUMBER,
@@ -283,7 +283,7 @@ static const struct usb_config_descriptor config = {
     .bConfigurationValue = 1,
     .iConfiguration = 0,
     .bmAttributes = 0x80,
-    .bMaxPower = 0x64,
+    .bMaxPower = 0x32,
     .interface = ifaces,
 };
 
