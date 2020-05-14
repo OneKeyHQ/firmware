@@ -242,9 +242,3 @@ def se_restore(client, data):
 def se_verify(client, data):
     ret = client.call(messages.BixinVerifyDeviceRequest(data=data))
     return ret
-
-
-@expect(messages.Success, field="message")
-def bixinapp(client):
-    ret = client.call(messages.BackupDevice())
-    return ret

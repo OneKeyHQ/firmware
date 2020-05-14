@@ -8,18 +8,20 @@ void se_get_seed(bool mode, const char *passphrase, uint8_t *seed) {
   rtt_log_print("SE gen seed");
   uint8_t cmd[1024];
   uint16_t resplen;
-  int passphraselen = strnlen(passphrase, 256);
-  uint8_t salt[8 + 256] = {0};
-  memcpy(salt, "mnemonic", 8);
-  memcpy(salt + 8, passphrase, passphraselen);
+  int passphraselen = 0;
+  uint8_t salt[256] = {0};
+  if (passphrase) {
+    passphraselen = strnlen(passphrase, 256);
+    memcpy(salt, passphrase, passphraselen);
+  }
 
   cmd[0] = mode;
   // salt LV
-  cmd[1] = (passphraselen + 8) & 0xFF;
-  cmd[2] = ((passphraselen + 8) >> 8) & 0xFF;
-  memcpy(cmd + 3, salt, passphraselen + 8);
+  cmd[1] = (passphraselen)&0xFF;
+  cmd[2] = (passphraselen >> 8) & 0xFF;
+  memcpy(cmd + 3, salt, passphraselen);
   MI2CDRV_Transmit(MI2C_CMD_WR_PIN, MNEMONIC_INDEX_TOSEED, cmd,
-                   (passphraselen + 8) + 3, seed, &resplen, MI2C_ENCRYPT,
+                   passphraselen + 3, seed, &resplen, MI2C_ENCRYPT,
                    SET_SESTORE_DATA);
   return;
 }
