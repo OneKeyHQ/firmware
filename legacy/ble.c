@@ -39,6 +39,13 @@ void ble_request_name(void) {
   ble_cmd_packet(cmd, BLE_NAME_LEN + 2);
 }
 
+void ble_ctl_onoff(void) {
+  uint8_t cmd[64] = {0};
+  cmd[0] = BLE_CMD_ONOFF_BLE;
+  cmd[1] = 0x01;
+  cmd[2] = 0x03;
+  ble_cmd_packet(cmd, 0x03);
+}
 bool ble_connect_state(void) { return ble_connect; }
 bool ble_name_state(void) { return get_ble_name; }
 bool ble_ver_state(void) { return get_ble_ver; }

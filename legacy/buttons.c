@@ -27,9 +27,12 @@ struct buttonState button;
 #include <libopencm3/stm32/exti.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/syscfg.h>
+#include "ble.h"
 
 static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
+static volatile uint32_t up_btn_timer_counter = 0;
+static volatile int up_btn_timer_enable = 0;
 
 uint16_t buttonRead(void) {
   uint16_t tmp = 0x00;
@@ -95,6 +98,17 @@ void buttonsTimer(void) {
     if (button_timer_counter > 2) {  // long press
       sys_shutdown();
     }
+  }
+  if (gpio_get(BTN_PORT, BTN_PIN_UP) == 0 && up_btn_timer_enable == 0) {
+    up_btn_timer_counter++;
+    if (up_btn_timer_counter > 2) {
+      up_btn_timer_enable = 1;
+      up_btn_timer_counter = 0;
+      ble_ctl_onoff();
+    }
+  } else if (gpio_get(BTN_PORT, BTN_PIN_UP) == 1) {
+    up_btn_timer_counter = 0;
+    up_btn_timer_enable = 0;
   }
 }
 
