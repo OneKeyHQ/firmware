@@ -59,6 +59,7 @@ typedef struct __attribute__((packed)) {
 
 //button and oled test
 #define Buttton_Lcd_Test        0x30
+#define GET_ST_VERSION          0x31
 
 
 // U2F_CMD_REGISTER command defines

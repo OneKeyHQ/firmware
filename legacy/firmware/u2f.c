@@ -389,14 +389,20 @@ void vButton_Lcd_Test(void) {
   }
 }
 
-void u2fhid_msg(const APDU *a, uint32_t len) {
-  //  if ((APDU_LEN(*a) + sizeof(APDU)) > len) {
-  //    debugLog(0, "", "BAD APDU LENGTH");
-  //    debugInt(APDU_LEN(*a));
-  //    debugInt(len);
-  //    return;
-  //  }
+void st_version(void) {
+  uint16_t BixinVersion;
+  uint8_t ucBuf[4];
 
+  BixinVersion = (VERSION_MAJOR << 12) + (VERSION_MINOR << 8) + (VERSION_PATCH);
+
+  ucBuf[0] = BixinVersion >> 8 & 0xFF;
+  ucBuf[1] = BixinVersion & 0xFF;
+  ucBuf[2] = U2F_SW_NO_ERROR >> 8 & 0xFF;
+  ucBuf[3] = U2F_SW_NO_ERROR & 0xFF;
+  send_u2f_msg(ucBuf, 4);
+}
+
+void u2fhid_msg(const APDU *a, uint32_t len) {
   if (a->cla != 0) {
     send_u2f_error(U2F_SW_CLA_NOT_SUPPORTED);
     return;
@@ -411,32 +417,29 @@ void u2fhid_msg(const APDU *a, uint32_t len) {
       break;
     case U2F_VERSION:
       u2f_version(a);
+    case GET_ST_VERSION:
+      st_version();
       break;
     case Buttton_Lcd_Test:
       vButton_Lcd_Test();
       break;
     default:
-      if (!g_bSelectSEFlag) {
-        debugLog(0, "", "u2f unknown cmd");
-        send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
-      } else {
 #if !EMULATOR
-        // MI2CDRV_Transmit
-        if (false == bMI2CDRV_SendData((uint8_t *)&(a->cla), len)) {
-          send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
-          return;
-        }
-        g_usMI2cRevLen = sizeof(g_ucMI2cRevBuf);
-        if (true == bMI2CDRV_ReceiveData(g_ucMI2cRevBuf, &g_usMI2cRevLen)) {
-          g_ucMI2cRevBuf[g_usMI2cRevLen] = U2F_SW_NO_ERROR >> 8 & 0xFF;
-          g_ucMI2cRevBuf[g_usMI2cRevLen + 1] = U2F_SW_NO_ERROR & 0xFF;
-          send_u2f_msg(g_ucMI2cRevBuf, g_usMI2cRevLen + 2);
-        } else {
-          debugLog(0, "", "i2c rev fail");
-          send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
-        }
-#endif
+      // MI2CDRV_Transmit
+      if (false == bMI2CDRV_SendData((uint8_t *)&(a->cla), len)) {
+        send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
+        return;
       }
+      g_usMI2cRevLen = sizeof(g_ucMI2cRevBuf);
+      if (true == bMI2CDRV_ReceiveData(g_ucMI2cRevBuf, &g_usMI2cRevLen)) {
+        g_ucMI2cRevBuf[g_usMI2cRevLen] = U2F_SW_NO_ERROR >> 8 & 0xFF;
+        g_ucMI2cRevBuf[g_usMI2cRevLen + 1] = U2F_SW_NO_ERROR & 0xFF;
+        send_u2f_msg(g_ucMI2cRevBuf, g_usMI2cRevLen + 2);
+      } else {
+        debugLog(0, "", "i2c rev fail");
+        send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
+      }
+#endif
   }
 }
 
