@@ -435,6 +435,9 @@ void config_init(void) {
   storage_init(&protectPinUiCallback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
 
+  // get whether use se flag
+  g_bSelectSEFlag = config_getWhetherUseSE();
+
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
@@ -443,8 +446,6 @@ void config_init(void) {
 #if !EMULATOR
   vMI2CDRV_SynSessionKey();
 #endif
-  // get whether use se flag
-  g_bSelectSEFlag = config_getWhetherUseSE();
 
   uint16_t len = 0;
   // If UUID is not set, then the config is uninitialized.
@@ -1070,6 +1071,7 @@ void config_wipe(void) {
     // wipe user flash
     session_clear(false);
     se_reset_storage(KEY_RESET);
+    storage_delete(KEY_SE_SESSIONKEY);
 #endif
   }
 }

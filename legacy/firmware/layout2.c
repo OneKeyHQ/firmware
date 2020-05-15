@@ -1089,14 +1089,14 @@ void layoutDeviceInfo(uint8_t ucPage) {
   switch (ucPage) {
     case 1:
       oledClear();
-      oledDrawString(0, y, "firmware_version:", FONT_STANDARD);
+      oledDrawString(0, y, "firmware version:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
                           VERSTR(VERSION_MAJOR) "." VERSTR(
                               VERSION_MINOR) "." VERSTR(VERSION_PATCH),
                           FONT_STANDARD);
       y += 9;
       if (ble_ver_state()) {
-        oledDrawString(0, y, "ble_version:", FONT_STANDARD);
+        oledDrawString(0, y, "ble version:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
         y += 9;
       }
@@ -1110,7 +1110,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
         se_ver_char[i++] = (se_version[1] >> 4) + '0';
         se_ver_char[i++] = '.';
         se_ver_char[i++] = (se_version[1] & 0x0f) + '0';
-        oledDrawString(0, y, "se_version:", FONT_STANDARD);
+        oledDrawString(0, y, "se version:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
         y += 9;
       }
