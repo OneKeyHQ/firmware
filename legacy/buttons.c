@@ -99,14 +99,14 @@ void buttonsTimer(void) {
       sys_shutdown();
     }
   }
-  if (gpio_get(BTN_PORT, BTN_PIN_UP) == 0 && up_btn_timer_enable == 0) {
+  if ((buttonRead() & BTN_PIN_UP) == 0 && up_btn_timer_enable == 0) {
     up_btn_timer_counter++;
     if (up_btn_timer_counter > 2) {
       up_btn_timer_enable = 1;
       up_btn_timer_counter = 0;
       ble_ctl_onoff();
     }
-  } else if (gpio_get(BTN_PORT, BTN_PIN_UP) == 1) {
+  } else {
     up_btn_timer_counter = 0;
     up_btn_timer_enable = 0;
   }
