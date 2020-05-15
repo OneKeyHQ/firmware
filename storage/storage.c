@@ -376,83 +376,74 @@ static secbool set_wipe_code(uint32_t wipe_code) {
     // code.
     wipe_code = WIPE_CODE_EMPTY;
   }
-  if (!g_bSelectSEFlag) {
-    // The format of the WIPE_CODE_DATA_KEY entry is:
-    // wipe code (4 bytes), random salt (16 bytes), authentication tag (16
-    // bytes) NOTE: We allocate extra space for the HMAC computation.
-    uint8_t wipe_code_data[WIPE_CODE_SIZE + WIPE_CODE_SALT_SIZE +
-                           SHA256_DIGEST_LENGTH] = {0};
-    uint8_t *salt = wipe_code_data + WIPE_CODE_SIZE;
-    uint8_t *tag = wipe_code_data + WIPE_CODE_SIZE + WIPE_CODE_SALT_SIZE;
-    memcpy(wipe_code_data, &wipe_code, sizeof(wipe_code));
-    memzero(&wipe_code, sizeof(wipe_code));
-    random_buffer(salt, WIPE_CODE_SALT_SIZE);
-    hmac_sha256(salt, WIPE_CODE_SALT_SIZE, wipe_code_data, WIPE_CODE_SIZE, tag);
-    return norcow_set(WIPE_CODE_DATA_KEY, wipe_code_data, WIPE_CODE_DATA_SIZE);
-  } else {
-    return sectrue;
-  }
+  // The format of the WIPE_CODE_DATA_KEY entry is:
+  // wipe code (4 bytes), random salt (16 bytes), authentication tag (16
+  // bytes) NOTE: We allocate extra space for the HMAC computation.
+  uint8_t wipe_code_data[WIPE_CODE_SIZE + WIPE_CODE_SALT_SIZE +
+                         SHA256_DIGEST_LENGTH] = {0};
+  uint8_t *salt = wipe_code_data + WIPE_CODE_SIZE;
+  uint8_t *tag = wipe_code_data + WIPE_CODE_SIZE + WIPE_CODE_SALT_SIZE;
+  memcpy(wipe_code_data, &wipe_code, sizeof(wipe_code));
+  memzero(&wipe_code, sizeof(wipe_code));
+  random_buffer(salt, WIPE_CODE_SALT_SIZE);
+  hmac_sha256(salt, WIPE_CODE_SALT_SIZE, wipe_code_data, WIPE_CODE_SIZE, tag);
+  return norcow_set(WIPE_CODE_DATA_KEY, wipe_code_data, WIPE_CODE_DATA_SIZE);
 }
 
 static secbool is_not_wipe_code(uint32_t pin) {
-  if (!g_bSelectSEFlag) {
-    uint8_t wipe_code[WIPE_CODE_SIZE] = {0};
-    uint8_t salt[WIPE_CODE_SALT_SIZE] = {0};
-    uint8_t stored_tag[WIPE_CODE_TAG_SIZE] = {0};
-    uint8_t computed_tag1[SHA256_DIGEST_LENGTH] = {0};
-    uint8_t computed_tag2[SHA256_DIGEST_LENGTH] = {0};
+  uint8_t wipe_code[WIPE_CODE_SIZE] = {0};
+  uint8_t salt[WIPE_CODE_SALT_SIZE] = {0};
+  uint8_t stored_tag[WIPE_CODE_TAG_SIZE] = {0};
+  uint8_t computed_tag1[SHA256_DIGEST_LENGTH] = {0};
+  uint8_t computed_tag2[SHA256_DIGEST_LENGTH] = {0};
 
-    // Read the wipe code data from the storage.
-    const void *wipe_code_data = NULL;
-    uint16_t len = 0;
-    if (sectrue != norcow_get(WIPE_CODE_DATA_KEY, &wipe_code_data, &len) ||
-        len != WIPE_CODE_DATA_SIZE) {
-      handle_fault("no wipe code");
-      return secfalse;
-    }
-    memcpy(wipe_code, wipe_code_data, sizeof(wipe_code));
-    memcpy(salt, (uint8_t *)wipe_code_data + WIPE_CODE_SIZE, sizeof(salt));
-    memcpy(stored_tag,
-           (uint8_t *)wipe_code_data + WIPE_CODE_SIZE + WIPE_CODE_SALT_SIZE,
-           sizeof(stored_tag));
-
-    // Check integrity in case of flash read manipulation attack.
-    hmac_sha256(salt, WIPE_CODE_SALT_SIZE, wipe_code, sizeof(wipe_code),
-                computed_tag1);
-    memzero(wipe_code, sizeof(wipe_code));
-    if (sectrue != secequal(stored_tag, computed_tag1, sizeof(stored_tag))) {
-      handle_fault("wipe code tag");
-      return secfalse;
-    }
-
-    // Prepare the authentication tag of the entered PIN.
-    wait_random();
-    hmac_sha256(salt, WIPE_CODE_SALT_SIZE, (const uint8_t *)&pin,
-                WIPE_CODE_SIZE, computed_tag1);
-
-    // Recompute to check for fault injection attack.
-    wait_random();
-    hmac_sha256(salt, WIPE_CODE_SALT_SIZE, (const uint8_t *)&pin,
-                WIPE_CODE_SIZE, computed_tag2);
-    memzero(salt, sizeof(salt));
-    if (sectrue !=
-        secequal(computed_tag1, computed_tag2, sizeof(computed_tag1))) {
-      handle_fault("wipe code fault");
-      return secfalse;
-    }
-    memzero(&pin, sizeof(pin));
-
-    // Compare wipe code with the entered PIN via the authentication tag.
-    wait_random();
-    if (secfalse != secequal(stored_tag, computed_tag1, sizeof(stored_tag))) {
-      return secfalse;
-    }
-    memzero(stored_tag, sizeof(stored_tag));
-    return sectrue;
-  } else {
-    memzero(&pin, sizeof(pin));
-    return sectrue;
+  // Read the wipe code data from the storage.
+  const void *wipe_code_data = NULL;
+  uint16_t len = 0;
+  if (sectrue != norcow_get(WIPE_CODE_DATA_KEY, &wipe_code_data, &len) ||
+      len != WIPE_CODE_DATA_SIZE) {
+    handle_fault("no wipe code");
+    return secfalse;
   }
+  memcpy(wipe_code, wipe_code_data, sizeof(wipe_code));
+  memcpy(salt, (uint8_t *)wipe_code_data + WIPE_CODE_SIZE, sizeof(salt));
+  memcpy(stored_tag,
+         (uint8_t *)wipe_code_data + WIPE_CODE_SIZE + WIPE_CODE_SALT_SIZE,
+         sizeof(stored_tag));
+
+  // Check integrity in case of flash read manipulation attack.
+  hmac_sha256(salt, WIPE_CODE_SALT_SIZE, wipe_code, sizeof(wipe_code),
+              computed_tag1);
+  memzero(wipe_code, sizeof(wipe_code));
+  if (sectrue != secequal(stored_tag, computed_tag1, sizeof(stored_tag))) {
+    handle_fault("wipe code tag");
+    return secfalse;
+  }
+
+  // Prepare the authentication tag of the entered PIN.
+  wait_random();
+  hmac_sha256(salt, WIPE_CODE_SALT_SIZE, (const uint8_t *)&pin, WIPE_CODE_SIZE,
+              computed_tag1);
+
+  // Recompute to check for fault injection attack.
+  wait_random();
+  hmac_sha256(salt, WIPE_CODE_SALT_SIZE, (const uint8_t *)&pin, WIPE_CODE_SIZE,
+              computed_tag2);
+  memzero(salt, sizeof(salt));
+  if (sectrue !=
+      secequal(computed_tag1, computed_tag2, sizeof(computed_tag1))) {
+    handle_fault("wipe code fault");
+    return secfalse;
+  }
+  memzero(&pin, sizeof(pin));
+
+  // Compare wipe code with the entered PIN via the authentication tag.
+  wait_random();
+  if (secfalse != secequal(stored_tag, computed_tag1, sizeof(stored_tag))) {
+    return secfalse;
+  }
+  memzero(stored_tag, sizeof(stored_tag));
+  return sectrue;
 }
 static void derive_kek(uint32_t pin, const uint8_t *random_salt,
                        const uint8_t *ext_salt,
@@ -1284,7 +1275,7 @@ secbool storage_delete(const uint16_t key) {
   if (sectrue != unlocked && (app & FLAGS_WRITE) != FLAGS_WRITE) {
     return secfalse;
   }
-  if (!g_bSelectSEFlag) {
+  if (!g_bSelectSEFlag || app & FLAG_ST) {
     secbool ret = norcow_delete(key);
     if (sectrue == ret) {
       ret = auth_update(key);

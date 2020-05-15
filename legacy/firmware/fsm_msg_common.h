@@ -533,19 +533,21 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_use_se) {
-    if (ui_language) {
-      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL, "使用SE?",
-                           NULL, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("set whether use SE"),
-                        NULL, NULL, NULL, NULL);
-    }
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
+  if (config_isInitialized()) {
+    if (msg->has_use_se) {
+      if (ui_language) {
+        layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                             msg->use_se ? "使用SE?" : "禁用SE?", NULL, NULL);
+      } else {
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Do you really want to"), msg->use_se ?_("enable SE?"):_("disable SE?"),
+                          NULL, NULL, NULL, NULL);
+      }
+      if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return;
+      }
     }
   }
 

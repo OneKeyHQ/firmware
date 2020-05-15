@@ -417,6 +417,7 @@ void u2fhid_msg(const APDU *a, uint32_t len) {
       break;
     case U2F_VERSION:
       u2f_version(a);
+      break;
     case GET_ST_VERSION:
       st_version();
       break;
