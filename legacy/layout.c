@@ -181,7 +181,7 @@ void layoutStatusLogo(bool force_fresh) {
   static bool nfc_status_bak = false;
   static bool ble_status_bak = false;
   static bool usb_status_bak = false;
-  static uint8_t battery_bak = 0;
+  static uint8_t battery_bak = 0xff;
   uint8_t pad = 16;
   bool refresh = false;
 
@@ -239,6 +239,7 @@ void layoutStatusLogo(bool force_fresh) {
         oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_battery_4);
         break;
       default:
+        oledClearBitmap(OLED_WIDTH - 16, 0, &bmp_battery_0);
         break;
     }
   }
