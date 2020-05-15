@@ -726,10 +726,8 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
 
 void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   (void)msg;
-
-  CHECK_PIN
   CHECK_INITIALIZED
-
+  CHECK_PIN_UNCACHED
   RESP_INIT(BixinBackupAck);
   if (g_bSelectSEFlag) {
     if (false == se_backup((uint8_t *)resp->data.bytes, &resp->data.size)) {
