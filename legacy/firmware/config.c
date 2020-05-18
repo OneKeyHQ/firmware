@@ -1054,26 +1054,23 @@ void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
 }
 
 void config_wipe(void) {
-  if (!g_bSelectSEFlag) {
-    char oldTiny = usbTiny(1);
-    storage_wipe();
-    if (storage_is_unlocked() != sectrue) {
-      storage_unlock(PIN_EMPTY, NULL);
-    }
-    usbTiny(oldTiny);
-    random_buffer((uint8_t *)config_uuid, sizeof(config_uuid));
-    data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
-    autoLockDelayMsCached = secfalse;
-    storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
-    storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
-  } else {
-#if !EMULATOR
-    // wipe user flash
-    session_clear(false);
-    se_reset_storage(KEY_RESET);
-    storage_delete(KEY_SE_SESSIONKEY);
-#endif
+  char oldTiny = usbTiny(1);
+  storage_wipe();
+  if (storage_is_unlocked() != sectrue) {
+    storage_unlock(PIN_EMPTY, NULL);
   }
+  usbTiny(oldTiny);
+  random_buffer((uint8_t *)config_uuid, sizeof(config_uuid));
+  data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
+  autoLockDelayMsCached = secfalse;
+  storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
+  storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
+#if !EMULATOR
+  if (g_bSelectSEFlag) {
+    se_reset_storage(KEY_RESET);
+    g_bSelectSEFlag = 0;
+  }
+#endif
 }
 
 void config_setFreePayPinFlag(bool flag) {
@@ -1124,7 +1121,10 @@ bool config_getBleTrans(void) {
 
 void config_setWhetherUseSE(bool flag) {
   config_set_bool(KEY_SEFLAG, flag);
-  g_bSelectSEFlag = flag;
+  if (g_bSelectSEFlag != flag) {
+    session_clear(true);
+    g_bSelectSEFlag = flag;
+  }
 }
 
 bool config_getWhetherUseSE(void) {

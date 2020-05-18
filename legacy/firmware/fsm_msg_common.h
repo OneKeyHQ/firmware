@@ -418,6 +418,19 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
 
   if (!msg->has_is_bixinapp) CHECK_PIN
 
+  if (msg->has_is_bixinapp) {
+    if (msg->has_label || msg->has_language || msg->has_use_passphrase ||
+        msg->has_homescreen || msg->has_auto_lock_delay_ms ||
+        msg->has_fee_pay_pin || msg->has_use_ble || msg->has_use_se ||
+        msg->has_fee_pay_confirm || msg->has_fee_pay_money_limt ||
+        msg->has_fee_pay_times) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                      "you should set bixin_app flag only");
+      layoutHome();
+      return;
+    }
+  }
+
   if (msg->has_label) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
