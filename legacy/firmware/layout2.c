@@ -50,7 +50,7 @@ static uint16_t s_uiShowLength;
 /* Display info timeout */
 uint32_t system_millis_display_info_start = 0;
 
-#define DEVICE_INFO_PAGE_NUM 1
+#define DEVICE_INFO_PAGE_NUM 2
 
 const char *ui_prompt_sign_trans[2] = {"Signing transaction", "签名交易中..."};
 const char *ui_prompt_wakingup[2] = {"Waking up", "唤醒..."};
@@ -1084,8 +1084,10 @@ void vDISP_TurnPageDOWN(void) {
 }
 void layoutDeviceInfo(uint8_t ucPage) {
   int y = 9;
-  uint8_t se_version[8] = {0};
+  uint8_t se_version[2] = {0};
+  uint8_t se_sn[32] = {0};
   uint16_t version_len = sizeof(se_version);
+  uint16_t sn_len = sizeof(sn_len);
   switch (ucPage) {
     case 1:
       oledClear();
@@ -1114,6 +1116,12 @@ void layoutDeviceInfo(uint8_t ucPage) {
         oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
         y += 9;
       }
+
+      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
+        oledDrawString(0, y, "se sn:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
+        y += 9;
+      }
       if (config_isInitialized()) {
         char label[MAX_LABEL_LEN + 1] = _("");
         config_getLabel(label, sizeof(label));
@@ -1133,7 +1141,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
         } while (secs > 0 && secstr >= secstrbuf);
         oledDrawString(0, y, "shutdown delay:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
+        y += 9;
       }
+
+      break;
+    case 2:
+      oledClear();
+      oledDrawString(0, y, "device id:", FONT_STANDARD);
+      y += 9;
+      oledDrawString(0, y, config_uuid_str, FONT_STANDARD);
       break;
     default:
       break;
@@ -1153,7 +1169,10 @@ void layoutHomeInfo(void) {
   }
   if (layoutLast == layoutHome) {
     if (button.UpUp || button.DownUp) {
-      info_page++;
+      if (button.UpUp)
+        info_page = DEVICE_INFO_PAGE_NUM;
+      else
+        info_page = 1;
       layoutDeviceInfo(info_page);
     }
   } else if (layoutLast == layoutDeviceInfo) {
