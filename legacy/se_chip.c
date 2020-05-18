@@ -90,7 +90,7 @@ void se_reset_storage(const uint16_t key) {
 }
 
 bool se_get_sn(void *val_dest, uint16_t max_len, uint16_t *len) {
-  uint8_t ucSnCmd[5] = {0x00, 0xf5, 0x00, 00, 0x10};
+  uint8_t ucSnCmd[5] = {0x00, 0xf5, 0x01, 0x00, 0x10};
   rtt_log_print("SE get sn");
   if (MI2C_OK !=
       MI2CDRV_TransmitPlain(ucSnCmd, sizeof(ucSnCmd), val_dest, len)) {
