@@ -248,5 +248,7 @@ clean::
 	rm -f *.log
 	rm -f *.srec
 	rm -f *.map
+	rm -f ../crypto/*.o
+	rm -f ../storage/*.o
 
 -include $(OBJS:.o=.d)
