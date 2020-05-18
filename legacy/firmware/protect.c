@@ -275,11 +275,11 @@ bool protectChangePin(bool init, bool removal) {
 
   if (config_hasPin()) {
     if (!g_bIsBixinAPP) {
-      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
                        ui_prompt_current_pin[ui_language], &newpin);
     } else {
       if (!init) {
-        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
                          ui_prompt_input_pin[ui_language], &newpin);
         need_new_pin = false;
       } else {
