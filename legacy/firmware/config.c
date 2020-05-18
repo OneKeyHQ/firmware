@@ -1054,6 +1054,12 @@ void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
 }
 
 void config_wipe(void) {
+#if !EMULATOR
+  if (g_bSelectSEFlag) {
+    se_reset_storage(KEY_RESET);
+    g_bSelectSEFlag = 0;
+  }
+#endif
   char oldTiny = usbTiny(1);
   storage_wipe();
   if (storage_is_unlocked() != sectrue) {
@@ -1065,12 +1071,6 @@ void config_wipe(void) {
   autoLockDelayMsCached = secfalse;
   storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
-#if !EMULATOR
-  if (g_bSelectSEFlag) {
-    se_reset_storage(KEY_RESET);
-    g_bSelectSEFlag = 0;
-  }
-#endif
 }
 
 void config_setFreePayPinFlag(bool flag) {
