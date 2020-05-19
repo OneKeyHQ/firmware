@@ -297,13 +297,17 @@ void layoutHome(void) {
     b.data = homescreen;
     oledDrawBitmap(0, 0, &b);
   } else {
-    if (!config_isInitialized()) {
-      oledDrawBitmap(0, 8, &bmp_logo);
-    } else {
+    if (config_isInitialized()) {
       char label[MAX_LABEL_LEN + 1] = _("");
       config_getLabel(label, sizeof(label));
-      oledDrawStringCenter(OLED_WIDTH / 2, 16, label, FONT_DOUBLE);
+      if (strlen(label))
+        oledDrawStringCenter(OLED_WIDTH / 2, 16, label, FONT_DOUBLE);
+      else
+        oledDrawBitmap(0, 8, &bmp_logo);
+    } else {
+      oledDrawBitmap(0, 8, &bmp_logo);
     }
+
     if (!config_isInitialized()) {
       vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
     } else {
@@ -1131,9 +1135,11 @@ void layoutDeviceInfo(uint8_t ucPage) {
       if (config_isInitialized()) {
         char label[MAX_LABEL_LEN + 1] = _("");
         config_getLabel(label, sizeof(label));
-        oledDrawString(0, y, "label:", FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
-        y += 9;
+        if (strlen(label)) {
+          oledDrawString(0, y, "label:", FONT_STANDARD);
+          oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
+          y += 9;
+        }
       }
       if (session_isUnlocked()) {
         char secstrbuf[] = _("________0 s");
