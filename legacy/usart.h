@@ -31,7 +31,7 @@ enum {
   BLE_CMD_BATTERY = 0x05,
   BLE_CMD_VER = 0x06,
   BLE_CMD_ONOFF_BLE = 0x07,
-  BLE_CMD_DFU_STA =0x0A
+  BLE_CMD_DFU_STA = 0x0A
 };
 
 enum {

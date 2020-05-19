@@ -22,6 +22,7 @@
 #include "chinese.h"
 #include "oled.h"
 #include "prompt.h"
+#include "usart.h"
 
 #if !EMULATOR
 #include "sys.h"
@@ -274,7 +275,7 @@ void layoutDfuStatus(uint8_t status) {
       break;
     default:
       break;
-  }  
+  }
   oledRefresh();
 }
 

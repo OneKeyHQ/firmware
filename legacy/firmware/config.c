@@ -1112,7 +1112,7 @@ uint32_t config_getFreePayTimes(void) {
   return times;
 }
 
-void config_setBleTrans(bool mode) { 
+void config_setBleTrans(bool mode) {
   config_set_bool(KEY_TRANSBLEMODE, mode);
   g_bBleTransMode = mode;
   change_ble_sta();
