@@ -253,6 +253,31 @@ void layoutBlePasskey(uint8_t *passkey) {
   oledRefresh();
 }
 
+void layoutDfuStatus(uint8_t status) {
+  oledClear();
+  switch (status) {
+    case VALUE_PREPARE_DFU:
+      oledDrawStringCenter(60, 20, "Device will be", FONT_STANDARD);
+      oledDrawStringCenter(60, 30, "updating BLE firmware.", FONT_STANDARD);
+      break;
+    case VALUE_ENTER_DFU:
+      oledDrawStringCenter(60, 20, "Device is update BLE FW...", FONT_STANDARD);
+      break;
+    case VALUE_ENTER_FAILED:
+      oledDrawStringCenter(60, 20, "Enter DFU mode failed!", FONT_STANDARD);
+      break;
+    case VALUE_REP_FAILED:
+      oledDrawStringCenter(60, 20, "Response phone failed!", FONT_STANDARD);
+      break;
+    case VALUE_UNKNOWN_ERR:
+      oledDrawStringCenter(60, 20, "BLE unknown error!", FONT_STANDARD);
+      break;
+    default:
+      break;
+  }  
+  oledRefresh();
+}
+
 #endif
 
 void layoutFillBleName(uint8_t line) {

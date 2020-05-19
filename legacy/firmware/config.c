@@ -27,6 +27,7 @@
 #include "aes/aes.h"
 #include "bip32.h"
 #include "bip39.h"
+#include "ble.h"
 #include "common.h"
 #include "config.h"
 #include "curves.h"
@@ -457,7 +458,6 @@ void config_init(void) {
     storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   }
   config_getLanguage(ucBuf, MAX_LANGUAGE_LEN);
-  g_bBleTransMode = config_getBleTrans();
   data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
 
   session_clear(false);
@@ -1112,7 +1112,11 @@ uint32_t config_getFreePayTimes(void) {
   return times;
 }
 
-void config_setBleTrans(bool mode) { config_set_bool(KEY_TRANSBLEMODE, mode); }
+void config_setBleTrans(bool mode) { 
+  config_set_bool(KEY_TRANSBLEMODE, mode);
+  g_bBleTransMode = mode;
+  change_ble_sta();
+}
 
 bool config_getBleTrans(void) {
   bool flag;

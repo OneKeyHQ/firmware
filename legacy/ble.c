@@ -46,6 +46,15 @@ void ble_ctl_onoff(void) {
   cmd[2] = 0x03;
   ble_cmd_packet(cmd, 0x03);
 }
+
+void change_ble_sta(void) {
+  uint8_t cmd[64] = {0};
+  cmd[0] = BLE_CMD_ONOFF_BLE;
+  cmd[1] = 0x01;
+  cmd[2] = 0x01;
+  ble_cmd_packet(cmd, 0x03);
+}
+
 bool ble_connect_state(void) { return ble_connect; }
 bool ble_name_state(void) { return get_ble_name; }
 bool ble_ver_state(void) { return get_ble_ver; }
@@ -140,6 +149,11 @@ void ble_uart_poll(void) {
         if (ble_usart_msg.cmd_len == 5) {
           memcpy(ble_ver, ble_usart_msg.cmd_vale, 5);
           get_ble_ver = true;
+        }
+        break;
+      case BLE_CMD_DFU_STA:
+        if (ble_usart_msg.cmd_vale[0]) {
+          layoutDfuStatus(ble_usart_msg.cmd_vale[0]);
         }
         break;
       default:

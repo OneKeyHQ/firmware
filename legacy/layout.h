@@ -39,6 +39,7 @@ void layoutProgressUpdate(bool refresh);
 void layoutProgress(const char *desc, int permil);
 void layoutStatusLogo(bool force_fresh);
 void layoutBlePasskey(uint8_t *passkey);
+void layoutDfuStatus(uint8_t status);
 void layoutFillBleName(uint8_t line);
 void layoutFillBleVersion(uint8_t line);
 void layoutError(const char *line1, const char *line2);

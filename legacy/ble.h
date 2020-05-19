@@ -10,6 +10,7 @@
 bool ble_connect_state(void);
 void ble_request_name(void);
 void ble_ctl_onoff(void);
+void change_ble_sta(void);
 void ble_reset(void);
 void ble_uart_poll(void);
 

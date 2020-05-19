@@ -546,6 +546,16 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
+  if ((msg->has_use_ble) && (config_isInitialized())) {    
+    layoutDialogSwipe(&bmp_icon_question,_("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("change bluetooth"),
+                      _("status always?"), NULL, NULL, NULL);    
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+  }
   if ((msg->has_use_se) && (config_isInitialized())) {
     fsm_sendSuccess(_("Can't change se setting after device initialized"));
     layoutHome();
