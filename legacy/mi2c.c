@@ -7,10 +7,13 @@
 #include <string.h>
 
 #include "aes/aes.h"
+#include "bip32.h"
 #include "rand.h"
 #include "secbool.h"
 #include "sys.h"
 #include "usart.h"
+
+const char NIST256P1[] = "nist256p1";
 
 const uint8_t SessionModeMode_ROMKEY[16] = {0x80, 0xBA, 0x15, 0x37, 0xD2, 0x84,
                                             0x8D, 0x64, 0xA7, 0xB4, 0x58, 0xF4,
@@ -309,6 +312,44 @@ void random_buffer_ST(uint8_t *buf, size_t len) {
   }
 }
 
+void vMI2CDRV_EcdhSessionKey(uint8_t *inputdata, uint16_t len) {
+  uint8_t ucRandom[32];
+  uint8_t ucSTPubkey[65];
+  uint8_t ucSEPubkey[65 + 3];
+  uint8_t ucSessionkey[65];
+  uint8_t ucGetPubCmd[5] = {0x00, 0xfa, 0x00, 0x00, 0x00};
+  uint8_t ucEcdhCmd[85] = {0x00, 0xfa, 0x01, 0x00, 0x50};
+  uint16_t usRevLen;
+  uint8_t ucHash[32];
+  uint8_t ucEncData[16];
+  aes_encrypt_ctx ctxe;
+
+  const curve_info *info = get_curve_by_name(NIST256P1);
+  // st gen keypair
+  random_buffer_ST(ucRandom, sizeof(ucRandom));
+  ecdsa_get_public_key65(info->params, ucRandom, ucSTPubkey);
+  // get se pubkey
+  usRevLen = sizeof(ucSEPubkey);
+  MI2CDRV_TransmitPlain(ucGetPubCmd, sizeof(ucGetPubCmd), ucSEPubkey,
+                        &usRevLen);
+  // ecdh hash
+  ecdh_multiply(info->params, ucRandom, ucSEPubkey, ucSessionkey);
+  // x hash256
+  hasher_Raw(HASHER_SHA2, ucSessionkey + 1, 32, ucHash);
+  memcpy(g_ucSessionKey, ucHash, 16);
+  // enc st tag
+  memset(&ctxe, 0, sizeof(aes_encrypt_ctx));
+  aes_encrypt_key128(g_ucSessionKey, &ctxe);
+  aes_ecb_encrypt(inputdata, ucEncData, len, &ctxe);
+  // data: st pubkey+ enc session tag
+  memcpy(ucEcdhCmd + 5, ucSTPubkey + 1, 64);
+  memcpy(ucEcdhCmd + 5 + 64, ucEncData, 16);
+  if (MI2C_OK != MI2CDRV_TransmitPlain(ucEcdhCmd, sizeof(ucEcdhCmd), ucSEPubkey,
+                                       &usRevLen)) {
+    memset(g_ucSessionKey, 0x00, SESSION_KEYLEN);
+  }
+}
+
 /*
  *master i2c synsessionkey
  */
@@ -316,6 +357,7 @@ void vMI2CDRV_SynSessionKey(void) {
   uint8_t ucSessionMode;
   uint8_t ucRandom[16];
   uint8_t session_key[16];
+  uint8_t SessionTag[16];
 
   if (!config_getSeSessionKey(session_key, sizeof(session_key))) {
     // enable mode session
@@ -338,6 +380,9 @@ void vMI2CDRV_SynSessionKey(void) {
   } else {
     memcpy(g_ucSessionKey, session_key, SESSION_KEYLEN);
   }
+  memcpy(SessionTag, g_ucSessionKey, SESSION_KEYLEN);
+
+  vMI2CDRV_EcdhSessionKey(SessionTag, SESSION_KEYLEN);
 }
 
 /*
