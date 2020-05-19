@@ -89,6 +89,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_U2F_ROOT (17 | APP | FLAG_PUBLIC_SHIFTED)     // node
 #define KEY_SEEDS (18 | APP)                              // bytes
 #define KEY_SEEDSFLAG (19 | APP | FLAG_PUBLIC_SHIFTED)    // uint32
+// notice: defined in storage
 //#define KEY_PIN (20| APP_PIN )      // uint32
 //#define KEY_PINFLAG (21| APP_PIN )      // uint32
 //#define KEY_VERIFYPIN (22| APP_PIN)      // uint32
@@ -97,10 +98,11 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_FREEPAYPINFLAG (24 | APP)                           // bool
 #define KEY_SEFLAG (25 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bool
 //#define MNEMONIC_INDEX_TOSEED               (26)
-#define KEY_RESET (27 | APP)               // bool
-#define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
-#define KEY_FREEPAYMONEYLIMT (29 | APP)    // uint64
-#define KEY_FREEPAYPTIMES (30 | APP)       // uint32
+#define KEY_RESET (27 | APP)  // bool
+// useless tag
+//#define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
+#define KEY_FREEPAYMONEYLIMT (29 | APP)  // uint64
+#define KEY_FREEPAYPTIMES (30 | APP)     // uint32
 
 #define KEY_SE_SESSIONKEY \
   (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bytes(16)
@@ -1080,14 +1082,6 @@ void config_setFreePayPinFlag(bool flag) {
 bool config_getFreePayPinFlag(void) {
   bool flag = false;
   return sectrue == config_get_bool(KEY_FREEPAYPINFLAG, &flag);
-}
-
-void config_setFreePayConfirmFlag(bool flag) {
-  config_set_bool(KEY_FREEPAYCONFIRMFLAG, flag);
-}
-bool config_getFreePayConfirmFlag(void) {
-  bool flag = false;
-  return sectrue == config_get_bool(KEY_FREEPAYCONFIRMFLAG, &flag);
 }
 
 void config_setFreePayMoneyLimt(uint64_t MoneyLimt) {

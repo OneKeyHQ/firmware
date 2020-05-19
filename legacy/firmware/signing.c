@@ -898,8 +898,6 @@ static bool signing_check_output(TxOutputType *txoutput) {
 }
 
 static bool signing_check_fee(void) {
-  uint64_t limt_pay;
-
   if (coin->negative_fee) {
     // bypass check for negative fee coins, required for reward TX
   } else {
@@ -911,40 +909,40 @@ static bool signing_check_fee(void) {
       return false;
     }
   }
-  limt_pay = config_getFreePayMoneyLimt();
-  if ((!config_getFreePayPinFlag()) && ((to_spend - change_spend) > limt_pay)) {
-    if (!protectPin(true)) {
-      layoutHome();
-      return false;
-    }
-  }
   uint64_t fee = 0;
   if (spending <= to_spend) {
     fee = to_spend - spending;
     if (fee > ((uint64_t)tx_weight * coin->maxfee_kb) / 4000) {
       layoutFeeOverThreshold(coin, fee);
-      if ((!config_getFreePayConfirmFlag()) &&
-          ((to_spend - change_spend) > limt_pay)) {
-        if (!protectButton(ButtonRequestType_ButtonRequest_FeeOverThreshold,
-                           false)) {
-          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-          signing_abort();
-          return false;
-        }
+      if (!protectButton(ButtonRequestType_ButtonRequest_FeeOverThreshold,
+                         false)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        signing_abort();
+        return false;
       }
     }
   } else {
     fee = 0;
   }
+  if (g_bIsBixinAPP) {
+    if (config_getFreePayPinFlag()) {
+      uint32_t free_pay_times;
+      uint64_t free_pay_amount;
+      free_pay_times = config_getFreePayTimes();
+      free_pay_amount = config_getFreePayMoneyLimt();
+      if (free_pay_times && (to_spend - change_spend < free_pay_amount)) {
+        free_pay_times--;
+        config_setFreePayTimes(free_pay_times);
+        return true;
+      }
+    }
+  }
   // last confirmation
   layoutConfirmTx(coin, to_spend - change_spend, fee);
-  if ((!config_getFreePayConfirmFlag()) &&
-      ((to_spend - change_spend) > limt_pay)) {
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      signing_abort();
-      return false;
-    }
+  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    signing_abort();
+    return false;
   }
 
   return true;

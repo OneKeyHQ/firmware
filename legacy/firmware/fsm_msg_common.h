@@ -579,9 +579,6 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_fee_pay_pin) {
     config_setFreePayPinFlag(msg->fee_pay_pin);
   }
-  if (msg->has_fee_pay_confirm) {
-    config_setFreePayConfirmFlag(msg->fee_pay_confirm);
-  }
   if (msg->has_fee_pay_money_limt) {
     config_setFreePayMoneyLimt(msg->fee_pay_money_limt);
   }

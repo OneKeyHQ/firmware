@@ -18,11 +18,15 @@
  */
 
 #include "transaction.h"
+
 #include <string.h>
+
 #include "address.h"
 #include "base58.h"
 #include "cash_addr.h"
 #include "coins.h"
+#include "common.h"
+#include "config.h"
 #include "crypto.h"
 #include "debug.h"
 #include "ecdsa.h"
@@ -325,6 +329,13 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
     return 0;
   }
 
+  if (g_bIsBixinAPP) {
+    if (config_getFreePayPinFlag() && config_getFreePayTimes()) {
+      uint64_t free_pay_amount;
+      free_pay_amount = config_getFreePayMoneyLimt();
+      if (out->amount < free_pay_amount) needs_confirm = false;
+    }
+  }
   if (needs_confirm) {
     layoutConfirmOutput(coin, in);
     if (!protectButton(ButtonRequestType_ButtonRequest_ConfirmOutput, false)) {
