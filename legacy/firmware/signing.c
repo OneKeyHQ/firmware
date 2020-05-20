@@ -924,7 +924,7 @@ static bool signing_check_fee(void) {
   } else {
     fee = 0;
   }
-  if (g_bIsBixinAPP) {
+  if (g_bIsBixinAPP && g_bSelectSEFlag) {
     if (config_getFreePayPinFlag()) {
       uint32_t free_pay_times;
       uint64_t free_pay_amount;
@@ -944,7 +944,12 @@ static bool signing_check_fee(void) {
     signing_abort();
     return false;
   }
-
+  // check pin
+  if (g_bIsBixinAPP && g_bSelectSEFlag) {
+    if (!protectPin(true)) {
+      return false;
+    }
+  }
   return true;
 }
 

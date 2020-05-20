@@ -329,7 +329,7 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
     return 0;
   }
 
-  if (g_bIsBixinAPP) {
+  if (g_bIsBixinAPP && g_bSelectSEFlag) {
     if (config_getFreePayPinFlag() && config_getFreePayTimes()) {
       uint64_t free_pay_amount;
       free_pay_amount = config_getFreePayMoneyLimt();
