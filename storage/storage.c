@@ -966,55 +966,59 @@ static secbool decrypt_dek(const uint8_t *kek, const uint8_t *keiv) {
 }
 
 static secbool unlock(uint32_t pin, const uint8_t *ext_salt) {
+  secbool pin_verify = secfalse;
   if (sectrue != initialized || pin == PIN_INVALID) {
     return secfalse;
   }
-  if (!g_bSelectSEFlag) {
-    // Check whether the user entered the wipe code.
-    if (sectrue != is_not_wipe_code(pin)) {
-      storage_wipe();
-      error_shutdown("You have entered the", "wipe code. All private",
-                     "data has been erased.", NULL);
-    }
 
-    storage_ensure_not_wipe_code(pin);
+  // Check whether the user entered the wipe code.
+  if (sectrue != is_not_wipe_code(pin)) {
+    storage_wipe();
+    error_shutdown("You have entered the", "wipe code. All private",
+                   "data has been erased.", NULL);
+  }
 
-    // Get the pin failure counter
-    uint32_t ctr = 0;
-    if (sectrue != pin_get_fails(&ctr)) {
-      memzero(&pin, sizeof(pin));
-      return secfalse;
-    }
+  storage_ensure_not_wipe_code(pin);
 
-    // Wipe storage if too many failures
-    wait_random();
-    if (ctr >= PIN_MAX_TRIES) {
-      storage_wipe();
-      error_shutdown("Too many wrong PIN", "attempts. Storage has",
-                     "been wiped.", NULL);
-      return secfalse;
-    }
+  // Get the pin failure counter
+  uint32_t ctr = 0;
+  if (sectrue != pin_get_fails(&ctr)) {
+    memzero(&pin, sizeof(pin));
+    return secfalse;
+  }
 
-    // Sleep for 2^ctr - 1 seconds before checking the PIN.
-    uint32_t wait = (1 << ctr) - 1;
-    ui_total += wait;
-    uint32_t progress = 0;
-    for (ui_rem = ui_total; ui_rem > ui_total - wait; ui_rem--) {
-      for (int i = 0; i < 10; i++) {
-        if (ui_callback && ui_message) {
-          if (ui_total > 1000000) {  // precise enough
-            progress = (ui_total - ui_rem) / (ui_total / 1000);
-          } else {
-            progress = ((ui_total - ui_rem) * 10 + i) * 100 / ui_total;
-          }
-          if (sectrue == ui_callback(ui_rem, progress, ui_message)) {
-            return secfalse;
-          }
+  // Wipe storage if too many failures
+  wait_random();
+  if (ctr >= PIN_MAX_TRIES) {
+    storage_wipe();
+    error_shutdown("Too many wrong PIN", "attempts. Storage has", "been wiped.",
+                   NULL);
+    return secfalse;
+  }
+
+  // Sleep for 2^ctr - 1 seconds before checking the PIN.
+  uint32_t wait = (1 << ctr) - 1;
+  ui_total += wait;
+  uint32_t progress = 0;
+  for (ui_rem = ui_total; ui_rem > ui_total - wait; ui_rem--) {
+    for (int i = 0; i < 10; i++) {
+      if (ui_callback && ui_message) {
+        if (ui_total > 1000000) {  // precise enough
+          progress = (ui_total - ui_rem) / (ui_total / 1000);
+        } else {
+          progress = ((ui_total - ui_rem) * 10 + i) * 100 / ui_total;
         }
-        hal_delay(100);
+        if (sectrue == ui_callback(ui_rem, progress, ui_message)) {
+          return secfalse;
+        }
       }
+      hal_delay(100);
     }
+  }
 
+  uint8_t kek[SHA256_DIGEST_LENGTH] = {0};
+  uint8_t keiv[SHA256_DIGEST_LENGTH] = {0};
+  if (!g_bSelectSEFlag) {
     // Read the random salt from EDEK_PVC_KEY and use it to derive the KEK and
     // KEIV from the PIN.
     const void *rand_salt = NULL;
@@ -1026,51 +1030,47 @@ static secbool unlock(uint32_t pin, const uint8_t *ext_salt) {
       handle_fault("no EDEK");
       return secfalse;
     }
-    uint8_t kek[SHA256_DIGEST_LENGTH] = {0};
-    uint8_t keiv[SHA256_DIGEST_LENGTH] = {0};
     derive_kek(pin, (const uint8_t *)rand_salt, ext_salt, kek, keiv);
     memzero(&pin, sizeof(pin));
-
-    // First, we increase PIN fail counter in storage, even before checking the
-    // PIN.  If the PIN is correct, we reset the counter afterwards.  If not, we
-    // check if this is the last allowed attempt.
-    if (sectrue != storage_pin_fails_increase()) {
-      return secfalse;
-    }
-
-    // Check that the PIN fail counter was incremented.
-    uint32_t ctr_ck = 0;
-    if (sectrue != pin_get_fails(&ctr_ck) || ctr + 1 != ctr_ck) {
-      handle_fault("PIN counter increment");
-      return secfalse;
-    }
-
-    // Check whether the entered PIN is correct.
-    if (sectrue != decrypt_dek(kek, keiv)) {
-      // Wipe storage if too many failures
-      wait_random();
-      if (ctr + 1 >= PIN_MAX_TRIES) {
-        storage_wipe();
-        error_shutdown("Too many wrong PIN", "attempts. Storage has",
-                       "been wiped.", NULL);
-      }
-      return secfalse;
-    }
-    memzero(kek, sizeof(kek));
-    memzero(keiv, sizeof(keiv));
-
-    unlocked = sectrue;
-
-    // Finally set the counter to 0 to indicate success.
-    return pin_fails_reset();
-  } else {
-    if (sectrue != storage_set(KEY_VERIFYPIN, &pin, sizeof(pin))) {
-      unlocked = secfalse;
-      return secfalse;
-    }
-    unlocked = sectrue;
-    return sectrue;
   }
+
+  // First, we increase PIN fail counter in storage, even before checking the
+  // PIN.  If the PIN is correct, we reset the counter afterwards.  If not, we
+  // check if this is the last allowed attempt.
+  if (sectrue != storage_pin_fails_increase()) {
+    return secfalse;
+  }
+
+  // Check that the PIN fail counter was incremented.
+  uint32_t ctr_ck = 0;
+  if (sectrue != pin_get_fails(&ctr_ck) || ctr + 1 != ctr_ck) {
+    handle_fault("PIN counter increment");
+    return secfalse;
+  }
+
+  if (!g_bSelectSEFlag) {
+    pin_verify = decrypt_dek(kek, keiv);
+  } else {
+    pin_verify = storage_set(KEY_VERIFYPIN, &pin, sizeof(pin));
+  }
+  // Check whether the entered PIN is correct.
+  if (sectrue != pin_verify) {
+    // Wipe storage if too many failures
+    wait_random();
+    if (ctr + 1 >= PIN_MAX_TRIES) {
+      storage_wipe();
+      error_shutdown("Too many wrong PIN", "attempts. Storage has",
+                     "been wiped.", NULL);
+    }
+    return secfalse;
+  }
+  memzero(kek, sizeof(kek));
+  memzero(keiv, sizeof(keiv));
+
+  unlocked = sectrue;
+
+  // Finally set the counter to 0 to indicate success.
+  return pin_fails_reset();
 }
 
 secbool storage_unlock(uint32_t pin, const uint8_t *ext_salt) {
