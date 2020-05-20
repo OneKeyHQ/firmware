@@ -47,11 +47,11 @@ void ble_ctl_onoff(void) {
   ble_cmd_packet(cmd, 0x03);
 }
 
-void change_ble_sta(void) {
+void change_ble_sta(uint8_t mode) {
   uint8_t cmd[64] = {0};
   cmd[0] = BLE_CMD_ONOFF_BLE;
   cmd[1] = 0x01;
-  cmd[2] = 0x01;
+  cmd[2] = mode;
   ble_cmd_packet(cmd, 0x03);
 }
 

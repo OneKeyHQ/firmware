@@ -546,7 +546,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if ((msg->has_use_ble) && (config_isInitialized())) {
+  if (msg->has_use_ble) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("change bluetooth"),
                       _("status always?"), NULL, NULL, NULL);
