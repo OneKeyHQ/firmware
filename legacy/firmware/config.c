@@ -1123,6 +1123,10 @@ void config_setWhetherUseSE(bool flag) {
     session_clear(true);
     g_bSelectSEFlag = flag;
   }
+  // Auto-unlock storage if no PIN is set.
+  if (storage_has_pin() == secfalse) {
+    storage_unlock(PIN_EMPTY, NULL);
+  }
 }
 
 bool config_getWhetherUseSE(void) {
