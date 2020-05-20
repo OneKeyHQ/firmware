@@ -53,6 +53,8 @@ class Features(p.MessageType):
         passphrase_always_on_device: bool = None,
         ble_name: str = None,
         ble_ver: str = None,
+        ble_enable: bool = None,
+        se_enable: bool = None,
     ) -> None:
         self.vendor = vendor
         self.major_version = major_version
@@ -90,6 +92,8 @@ class Features(p.MessageType):
         self.passphrase_always_on_device = passphrase_always_on_device
         self.ble_name = ble_name
         self.ble_ver = ble_ver
+        self.ble_enable = ble_enable
+        self.se_enable = se_enable
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -130,4 +134,6 @@ class Features(p.MessageType):
             36: ('passphrase_always_on_device', p.BoolType, 0),
             37: ('ble_name', p.UnicodeType, 0),
             38: ('ble_ver', p.UnicodeType, 0),
+            39: ('ble_enable', p.BoolType, 0),
+            40: ('se_enable', p.BoolType, 0),
         }
