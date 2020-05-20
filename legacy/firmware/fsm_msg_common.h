@@ -90,6 +90,12 @@ bool get_features(Features *resp) {
     resp->has_ble_ver = true;
     strlcpy(resp->ble_ver, ble_get_ver(), sizeof(resp->ble_ver));
   }
+  if (ble_switch_state()) {
+    resp->has_ble_enable = true;
+    resp->ble_enable = ble_get_switch();
+  }
+  resp->has_se_enable = true;
+  resp->se_enable = config_getWhetherUseSE();
   return resp;
 }
 

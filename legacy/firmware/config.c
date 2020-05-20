@@ -1056,12 +1056,16 @@ void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
 }
 
 void config_wipe(void) {
+  uint8_t session_key[16];
+
 #if !EMULATOR
   if (g_bSelectSEFlag) {
     se_reset_storage(KEY_RESET);
     g_bSelectSEFlag = 0;
+    config_getSeSessionKey(session_key, sizeof(session_key));
   }
 #endif
+
   char oldTiny = usbTiny(1);
   storage_wipe();
   if (storage_is_unlocked() != sectrue) {
@@ -1073,6 +1077,7 @@ void config_wipe(void) {
   autoLockDelayMsCached = secfalse;
   storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
+  config_setSeSessionKey(session_key, 16);
 }
 
 void config_setFreePayPinFlag(bool flag) {
@@ -1090,7 +1095,7 @@ void config_setFreePayMoneyLimt(uint64_t MoneyLimt) {
 
 uint64_t config_getFreePayMoneyLimt(void) {
   uint64_t MoneyLimt = 0;
-  uint16_t len;
+  uint16_t len = sizeof(MoneyLimt);
   config_get_bytes(KEY_FREEPAYMONEYLIMT, (uint8_t *)&MoneyLimt,
                    sizeof(uint64_t), &len);
   return MoneyLimt;
@@ -1107,14 +1112,8 @@ uint32_t config_getFreePayTimes(void) {
 }
 
 void config_setBleTrans(bool mode) {
-  config_set_bool(KEY_TRANSBLEMODE, mode);
-  g_bBleTransMode = mode;
+  ble_set_switch(mode);
   change_ble_sta(mode);
-}
-
-bool config_getBleTrans(void) {
-  bool flag;
-  return sectrue == config_get_bool(KEY_TRANSBLEMODE, &flag);
 }
 
 void config_setWhetherUseSE(bool flag) {

@@ -15,10 +15,14 @@ void ble_reset(void);
 void ble_uart_poll(void);
 
 #if !EMULATOR
+bool ble_is_enable(void);
 bool ble_name_state(void);
 bool ble_ver_state(void);
 char *ble_get_name(void);
 char *ble_get_ver(void);
+bool ble_switch_state(void);
+void ble_set_switch(bool flag);
+bool ble_get_switch(void);
 #else
 #define ble_name_state(...) false
 #define ble_ver_state(...) false

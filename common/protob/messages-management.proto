@@ -92,6 +92,9 @@ message Features {
     optional bool passphrase_always_on_device = 36;  // device enforces passphrase entry on Trezor
     optional string ble_name = 37;
     optional string ble_ver = 38;
+    optional bool ble_enable = 39;
+    optional bool se_enable = 40;
+
 }
 
 /**

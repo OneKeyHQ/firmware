@@ -34,7 +34,6 @@ extern uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 
 extern uint8_t ui_language;
 
-extern bool g_bBleTransMode;
 extern bool g_bSelectSEFlag;
 extern bool g_bIsBixinAPP;
 extern uint32_t g_uiFreePayFlag;

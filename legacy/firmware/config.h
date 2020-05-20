@@ -175,7 +175,7 @@ void config_setFreePayTimes(uint32_t times);
 uint32_t config_getFreePayTimes(void);
 
 void config_setBleTrans(bool mode);
-bool config_getBleTrans(void);
+
 void config_setWhetherUseSE(bool flag);
 bool config_getWhetherUseSE(void);
 ExportType config_setSeedsExportFlag(ExportType flag);

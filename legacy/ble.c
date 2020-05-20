@@ -9,6 +9,8 @@ static usart_msg ble_usart_msg;
 static bool get_ble_name = false;
 static bool get_ble_ver = false;
 static bool ble_connect = false;
+static bool ble_switch = true;
+static bool get_ble_switch = false;
 static char ble_name[BLE_NAME_LEN + 1] = {0};
 static char ble_ver[6] = {0};
 
@@ -58,8 +60,12 @@ void change_ble_sta(uint8_t mode) {
 bool ble_connect_state(void) { return ble_connect; }
 bool ble_name_state(void) { return get_ble_name; }
 bool ble_ver_state(void) { return get_ble_ver; }
+bool ble_switch_state(void) { return get_ble_switch; }
 char *ble_get_name(void) { return ble_name; }
 char *ble_get_ver(void) { return ble_ver; }
+
+void ble_set_switch(bool flag) { ble_switch = flag; }
+bool ble_get_switch(void) { return ble_switch; }
 
 void ble_reset(void) {
   ble_power_off();
@@ -149,6 +155,14 @@ void ble_uart_poll(void) {
         if (ble_usart_msg.cmd_len == 5) {
           memcpy(ble_ver, ble_usart_msg.cmd_vale, 5);
           get_ble_ver = true;
+        }
+        break;
+      case BLE_CMD_ONOFF_BLE:
+        get_ble_switch = true;
+        if (ble_usart_msg.cmd_vale[0] == 0) {
+          ble_switch = false;
+        } else {
+          ble_switch = true;
         }
         break;
       case BLE_CMD_DFU_STA:

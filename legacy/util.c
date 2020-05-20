@@ -40,3 +40,21 @@ void data2hex(const void *data, uint32_t len, char *str) {
   }
   str[len * 2] = 0;
 }
+
+// converts data to hexa
+void uint2str(uint32_t num, char *str) {
+  uint8_t i = 0, j;
+  char temp;
+
+  do {
+    str[i++] = hexdigits[num % 10];
+    num /= 10;
+  } while (num);
+  str[i] = 0;
+
+  for (j = 0; j <= (i - 1) / 2; j++) {
+    temp = str[j];
+    str[j] = str[i - 1 - j];
+    str[i - 1 - j] = temp;
+  }
+}

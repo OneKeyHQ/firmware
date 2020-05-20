@@ -36,8 +36,10 @@
 #include "oled.h"
 #include "prompt.h"
 #include "qrcodegen.h"
+#include "recovery.h"
 #include "se_chip.h"
 #include "secp256k1.h"
+#include "signing.h"
 #include "sys.h"
 #include "timer.h"
 #include "util.h"
@@ -50,7 +52,7 @@ static uint16_t s_uiShowLength;
 /* Display info timeout */
 uint32_t system_millis_display_info_start = 0;
 
-#define DEVICE_INFO_PAGE_NUM 2
+#define DEVICE_INFO_PAGE_NUM 3
 
 const char *ui_prompt_sign_trans[2] = {"Signing transaction", "签名交易中..."};
 const char *ui_prompt_wakingup[2] = {"Waking up", "唤醒..."};
@@ -1093,11 +1095,17 @@ void vDISP_TurnPageDOWN(void) {
             Disp_buffer + s_usCurrentCount, 16);
 }
 void layoutDeviceInfo(uint8_t ucPage) {
-  int y = 9;
+  bool init_state = config_isInitialized();
+  uint64_t amount;
+  uint32_t times;
+  char str_out[32 + 3] = {0};
+  char times_str[12] = {0};
   uint8_t se_version[2] = {0};
-  uint8_t se_sn[32] = {0};
   uint16_t version_len = sizeof(se_version);
-  uint16_t sn_len = sizeof(sn_len);
+  uint8_t se_sn[32] = {0};
+  uint16_t sn_len = sizeof(se_sn);
+  int y = 9;
+
   switch (ucPage) {
     case 1:
       oledClear();
@@ -1126,13 +1134,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
         oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
         y += 9;
       }
-
-      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
-        oledDrawString(0, y, "sn:", FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
-        y += 9;
-      }
-      if (config_isInitialized()) {
+      if (init_state) {
         char label[MAX_LABEL_LEN + 1] = _("");
         config_getLabel(label, sizeof(label));
         if (strlen(label)) {
@@ -1159,9 +1161,52 @@ void layoutDeviceInfo(uint8_t ucPage) {
       break;
     case 2:
       oledClear();
+      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
+        oledDrawString(0, y, "sn:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
+        y += 9;
+      }
       oledDrawString(0, y, "device id:", FONT_STANDARD);
+      oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
       y += 9;
-      oledDrawString(0, y, config_uuid_str, FONT_STANDARD);
+      break;
+    case 3:
+      amount = config_getFreePayMoneyLimt();
+      times = config_getFreePayTimes();
+      uint2str(times, times_str);
+      // uint64_2str(amount, amount_str);
+      oledClear();
+
+      if (ble_switch_state()) {
+        oledDrawString(0, y, "ble state:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y,
+                            ble_switch_state() ? "enable" : "disable",
+                            FONT_STANDARD);
+        y += 9;
+      }
+
+      oledDrawString(0, y, "se state:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getWhetherUseSE() ? "enable" : "disable",
+                          FONT_STANDARD);
+      y += 9;
+
+      oledDrawString(0, y, "free pay:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getFreePayPinFlag() ? "enable" : "disable",
+                          FONT_STANDARD);
+      y += 9;
+
+      oledDrawString(0, y, "free pay times:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y, times_str, FONT_STANDARD);
+      y += 9;
+
+      oledDrawString(0, y, "free pay amount:", FONT_STANDARD);
+      bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
+                       sizeof(str_out) - 3);
+      y += 9;
+      oledDrawString(0, y, str_out, FONT_STANDARD);
+      y += 9;
       break;
     default:
       break;
@@ -1233,6 +1278,12 @@ void layoutHomeInfo(void) {
       (button.NoUp || button.YesUp || button.UpUp || button.DownUp)) {
     layoutHome();
     return;
+  }
+  if (layoutLast != layoutHome && layoutLast != layoutScreensaver) {
+    if (button.NoUp) {
+      recovery_abort();
+      signing_abort();
+    }
   }
 }
 

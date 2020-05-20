@@ -31,7 +31,6 @@ uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 
 uint8_t ui_language = 0;
 
-bool g_bBleTransMode = false;
 bool g_bSelectSEFlag = false;
 bool g_bIsBixinAPP = false;
 uint32_t g_uiFreePayFlag = 0;
