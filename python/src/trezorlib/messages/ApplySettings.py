@@ -27,7 +27,7 @@ class ApplySettings(p.MessageType):
         use_se: bool = None,
         is_bixinapp: bool = None,
         fee_pay_confirm: bool = None,
-        fee_pay_money_limt: int = None,
+        fee_pay_money_limit: int = None,
         fee_pay_times: int = None,
     ) -> None:
         self.language = language
@@ -42,7 +42,7 @@ class ApplySettings(p.MessageType):
         self.use_se = use_se
         self.is_bixinapp = is_bixinapp
         self.fee_pay_confirm = fee_pay_confirm
-        self.fee_pay_money_limt = fee_pay_money_limt
+        self.fee_pay_money_limit = fee_pay_money_limit
         self.fee_pay_times = fee_pay_times
 
     @classmethod
@@ -60,6 +60,6 @@ class ApplySettings(p.MessageType):
             11: ('use_se', p.BoolType, 0),
             13: ('is_bixinapp', p.BoolType, 0),
             14: ('fee_pay_confirm', p.BoolType, 0),
-            15: ('fee_pay_money_limt', p.UVarintType, 0),
+            15: ('fee_pay_money_limit', p.UVarintType, 0),
             16: ('fee_pay_times', p.UVarintType, 0),
         }

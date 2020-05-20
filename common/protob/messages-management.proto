@@ -123,7 +123,7 @@ message ApplySettings {
     //optional bool use_exportseeds= 12;
     optional bool is_bixinapp = 13;
     optional bool fee_pay_confirm = 14;
-    optional uint64 fee_pay_money_limt = 15;
+    optional uint64 fee_pay_money_limit = 15;
     optional uint32 fee_pay_times = 16;
     /**
     * Type of seed and mnemonic export flag
