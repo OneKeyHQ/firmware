@@ -799,9 +799,11 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
 
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
   RESP_INIT(BixinVerifyDeviceAck);
-  resp->data.size = 512;
-  if (false == se_verify((uint8_t *)msg->data.bytes, msg->data.size,
-                         resp->data.bytes, 0x40, &resp->data.size)) {
+  resp->cert.size = 1024;
+  resp->signature.size = 512;
+  if (false == se_verify((uint8_t *)msg->data.bytes, msg->data.size, 1024,
+                         resp->cert.bytes, &resp->cert.size,
+                         resp->signature.bytes, &resp->signature.size)) {
     fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
     layoutHome();
     return;

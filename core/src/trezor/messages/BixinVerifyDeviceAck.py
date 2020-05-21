@@ -15,12 +15,15 @@ class BixinVerifyDeviceAck(p.MessageType):
 
     def __init__(
         self,
-        data: bytes = None,
+        cert: bytes = None,
+        signature: bytes = None,
     ) -> None:
-        self.data = data
+        self.cert = cert
+        self.signature = signature
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('data', p.BytesType, 0),  # required
+            1: ('cert', p.BytesType, 0),  # required
+            2: ('signature', p.BytesType, 0),  # required
         }

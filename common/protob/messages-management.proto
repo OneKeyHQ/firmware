@@ -458,5 +458,6 @@ message BixinVerifyDeviceRequest {
  * @end
  */
 message BixinVerifyDeviceAck {
- required bytes data = 1;
+ required bytes cert= 1;
+ required bytes signature = 2;
 }

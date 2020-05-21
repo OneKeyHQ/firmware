@@ -238,7 +238,7 @@ def se_restore(client, data):
     return ret
 
 
-@expect(messages.BixinVerifyDeviceAck, field="data")
+@expect(messages.BixinVerifyDeviceAck)
 def se_verify(client, data):
     ret = client.call(messages.BixinVerifyDeviceRequest(data=data))
     return ret

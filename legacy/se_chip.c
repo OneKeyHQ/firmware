@@ -119,8 +119,23 @@ bool se_get_version(void *val_dest, uint16_t max_len, uint16_t *len) {
   return true;
 }
 
-bool se_verify(void *message, uint16_t message_len, void *val_dest,
-               uint16_t max_len, uint16_t *len) {
+bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
+               void *cert_val, uint16_t *cert_len, void *signature_val,
+               uint16_t *signature_len) {
+  /* get cert data */
+  uint8_t ucCertCmd[5] = {0x00, 0xf8, 0x01, 0x00, 0x00};
+  if (MI2C_OK !=
+      MI2CDRV_TransmitPlain(ucCertCmd, sizeof(ucCertCmd), cert_val, cert_len)) {
+    return false;
+  }
+  if (*cert_len > max_len) {
+    return false;
+  }
+  if (*signature_len > max_len) {
+    return false;
+  }
+
+  /* get signature */
   uint8_t ucSignCmd[37] = {0x00, 0x72, 0x00, 00, 0x20};
   rtt_log_print("SE device sign");
 
@@ -128,12 +143,12 @@ bool se_verify(void *message, uint16_t message_len, void *val_dest,
     return false;
   }
   memcpy(ucSignCmd + 5, message, message_len);
-  if (MI2C_OK !=
-      MI2CDRV_TransmitPlain(ucSignCmd, sizeof(ucSignCmd), val_dest, len)) {
+  if (MI2C_OK != MI2CDRV_TransmitPlain(ucSignCmd, sizeof(ucSignCmd),
+                                       signature_val, signature_len)) {
     rtt_log_print("SE device fail");
     return false;
   }
-  if (*len > max_len) {
+  if (*signature_len > max_len) {
     return false;
   }
   rtt_log_print("SE device sign sucess");

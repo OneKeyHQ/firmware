@@ -51,13 +51,14 @@ def restore(client, hex_data):
 
 
 @cli.command()
-@click.argument("hex_data")
+@click.argument("data")
 @with_client
-def verify(client, hex_data):
+def verify(client, data):
     """Perform device verify."""
-    data = bytes.fromhex(hex_data)
-    ret = device.se_verify(client, data)
-    return "data: {}".format(ret.hex())
+    from hashlib import sha256
+    digest = sha256(data.encode('utf-8')).digest()
+    ret = device.se_verify(client, digest)
+    return "cert: {} \n signature: {}".format(ret.cert.hex(), ret.signature.hex())
 
 
 @cli.command()
