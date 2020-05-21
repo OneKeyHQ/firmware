@@ -114,7 +114,7 @@ def wipe(client):
 
 @expect(messages.Success, field="message")
 def reboot(client):
-    ret = client.call(messages.BixinUpgrade())
+    ret = client.call(messages.BixinReboot())
     return ret
 
 
