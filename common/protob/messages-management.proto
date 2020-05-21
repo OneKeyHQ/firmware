@@ -90,11 +90,11 @@ message Features {
     optional bool wipe_code_protection = 34;    // is wipe code protection enabled
     optional bytes session_id = 35;
     optional bool passphrase_always_on_device = 36;  // device enforces passphrase entry on Trezor
-    optional uint32 offset = 37;
-    optional string ble_name = 38;
-    optional string ble_ver = 39;
-    optional bool ble_enable = 40;
-    optional bool se_enable = 41;
+    optional string ble_name = 37;
+    optional string ble_ver = 38;
+    optional bool ble_enable = 39;
+    optional bool se_enable = 40;
+    optional uint32 offset = 50;
 
 }
 
