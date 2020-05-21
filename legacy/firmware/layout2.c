@@ -1161,6 +1161,20 @@ void layoutDeviceInfo(uint8_t ucPage) {
       break;
     case 2:
       oledClear();
+      if (ble_switch_state()) {
+        oledDrawString(0, y, "ble state:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y,
+                            ble_switch_state() ? "enable" : "disable",
+                            FONT_STANDARD);
+        y += 9;
+      }
+
+      oledDrawString(0, y, "se state:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getWhetherUseSE() ? "enable" : "disable",
+                          FONT_STANDARD);
+      y += 9;
+
       if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
         oledDrawString(0, y, "sn:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
@@ -1176,36 +1190,32 @@ void layoutDeviceInfo(uint8_t ucPage) {
       uint2str(times, times_str);
       // uint64_2str(amount, amount_str);
       oledClear();
+      oledDrawString(0, y, "confirm pay:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getFreePayConfirmFlag() ? "enable" : "disable",
+                          FONT_STANDARD);
+      y += 9;
 
-      if (ble_switch_state()) {
-        oledDrawString(0, y, "ble state:", FONT_STANDARD);
+      if (g_bSelectSEFlag) {
+        oledDrawString(0, y, "free pay:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y,
-                            ble_switch_state() ? "enable" : "disable",
+                            config_getFreePayPinFlag() ? "enable" : "disable",
                             FONT_STANDARD);
         y += 9;
+
+        oledDrawString(0, y, "free pay times:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, times_str, FONT_STANDARD);
+        y += 9;
       }
-
-      oledDrawString(0, y, "se state:", FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getWhetherUseSE() ? "enable" : "disable",
-                          FONT_STANDARD);
+      if (g_bSelectSEFlag) {
+        oledDrawString(0, y, "confirm/free pay amount:", FONT_STANDARD);
+      } else {
+        oledDrawString(0, y, "confirm pay amount:", FONT_STANDARD);
+      }
       y += 9;
-
-      oledDrawString(0, y, "free pay:", FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getFreePayPinFlag() ? "enable" : "disable",
-                          FONT_STANDARD);
-      y += 9;
-
-      oledDrawString(0, y, "free pay times:", FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y, times_str, FONT_STANDARD);
-      y += 9;
-
-      oledDrawString(0, y, "free pay amount:", FONT_STANDARD);
       bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
                        sizeof(str_out) - 3);
-      y += 9;
-      oledDrawString(0, y, str_out, FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y, str_out, FONT_STANDARD);
       y += 9;
       break;
     default:

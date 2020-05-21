@@ -22,7 +22,9 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
 
   CHECK_INITIALIZED
 
-  CHECK_PIN
+  if (!config_getFreePayPinFlag()) {
+    CHECK_PIN
+  }
 
   InputScriptType script_type =
       msg->has_script_type ? msg->script_type : InputScriptType_SPENDADDRESS;

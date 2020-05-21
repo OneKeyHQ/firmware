@@ -522,7 +522,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_confirm && g_bSelectSEFlag) {
+  if (msg->has_fee_pay_confirm) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("free pay confirm"), NULL,
                       NULL, NULL, NULL);
@@ -532,7 +532,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_money_limit && g_bSelectSEFlag) {
+  if (msg->has_fee_pay_money_limit) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("free pay money limit"),
                       NULL, NULL, NULL, NULL);
@@ -584,6 +584,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_fee_pay_pin) {
     config_setFreePayPinFlag(msg->fee_pay_pin);
+  }
+  if (msg->has_fee_pay_confirm) {
+    config_setFreePayConfirmFlag(msg->fee_pay_confirm);
   }
   if (msg->has_fee_pay_money_limit) {
     config_setFreePayMoneyLimt(msg->fee_pay_money_limit);

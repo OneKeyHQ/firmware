@@ -898,6 +898,8 @@ static bool signing_check_output(TxOutputType *txoutput) {
 }
 
 static bool signing_check_fee(void) {
+  bool need_confirm = true;
+  bool need_pin = true;
   if (coin->negative_fee) {
     // bypass check for negative fee coins, required for reward TX
   } else {
@@ -924,28 +926,36 @@ static bool signing_check_fee(void) {
   } else {
     fee = 0;
   }
-  if (g_bIsBixinAPP && g_bSelectSEFlag) {
-    if (config_getFreePayPinFlag()) {
-      uint32_t free_pay_times;
-      uint64_t free_pay_amount;
-      free_pay_times = config_getFreePayTimes();
-      free_pay_amount = config_getFreePayMoneyLimt();
-      if (free_pay_times && (to_spend - change_spend < free_pay_amount)) {
-        free_pay_times--;
-        config_setFreePayTimes(free_pay_times);
-        return true;
+  if (g_bIsBixinAPP) {
+    uint64_t free_pay_amount;
+    free_pay_amount = config_getFreePayMoneyLimt();
+    if (config_getFreePayConfirmFlag()) {
+      if (to_spend - change_spend < free_pay_amount) {
+        need_confirm = false;
+      }
+    }
+    if (g_bSelectSEFlag) {
+      if (config_getFreePayPinFlag()) {
+        uint32_t free_pay_times;
+        free_pay_times = config_getFreePayTimes();
+        if (free_pay_times && (to_spend - change_spend <= free_pay_amount)) {
+          free_pay_times--;
+          config_setFreePayTimes(free_pay_times);
+          need_pin = false;
+        }
       }
     }
   }
-  // last confirmation
-  layoutConfirmTx(coin, to_spend - change_spend, fee);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    signing_abort();
-    return false;
+  if (need_confirm) {
+    // last confirmation
+    layoutConfirmTx(coin, to_spend - change_spend, fee);
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      signing_abort();
+      return false;
+    }
   }
-  // check pin
-  if (g_bIsBixinAPP && g_bSelectSEFlag) {
+  if (need_pin) {
     if (!protectPin(true)) {
       return false;
     }
