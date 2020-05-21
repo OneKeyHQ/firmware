@@ -56,7 +56,8 @@ def restore(client, hex_data):
 def verify(client, data):
     """Perform device verify."""
     from hashlib import sha256
-    digest = sha256(data.encode('utf-8')).digest()
+
+    digest = sha256(data.encode("utf-8")).digest()
     ret = device.se_verify(client, digest)
     return "cert: {} \n signature: {}".format(ret.cert.hex(), ret.signature.hex())
 
