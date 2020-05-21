@@ -1600,27 +1600,3 @@ static secbool storage_upgrade(void) {
   norcow_active_version = NORCOW_VERSION;
   return norcow_upgrade_finish();
 }
-
-void storage_getHardwareSalt(uint8_t *hw_salt) {
-  memcpy(hw_salt, hardware_salt, HARDWARE_SALT_SIZE);
-}
-bool storage_get_EDEK_PVC_KEY(uint8_t *key) {
-  const void *rand_salt = NULL;
-  uint16_t len = 0;
-  if (sectrue != initialized ||
-      sectrue != norcow_get(EDEK_PVC_KEY, &rand_salt, &len) ||
-      len != RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE) {
-    return false;
-  }
-  memcpy(key, rand_salt, RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE);
-  return true;
-}
-
-bool storage_getMnemonicEnc(uint8_t *mnemonic_enc, uint16_t *len) {
-  const void *p_mnemonic_enc;
-  if (sectrue != auth_get(0x0102, &p_mnemonic_enc, len)) {
-    return false;
-  }
-  memcpy(mnemonic_enc, p_mnemonic_enc, *len);
-  return true;
-}

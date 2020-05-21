@@ -755,30 +755,21 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   CHECK_INITIALIZED
   CHECK_PIN_UNCACHED
   RESP_INIT(BixinBackupAck);
+  resp->data.size -= 4;  // 4bytes header,rfu
   if (g_bSelectSEFlag) {
-    if (false == se_backup((uint8_t *)resp->data.bytes, &resp->data.size)) {
+    resp->data.bytes[0] = 0x00;
+    if (false == se_backup((uint8_t *)resp->data.bytes + 4, &resp->data.size)) {
       fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
       layoutHome();
       return;
     }
+    resp->data.size += 4;
   } else {
-    uint16_t menmonic_len = 512 - 92;
-    uint16_t offset = 0;
-    if (!config_hasPin()) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-    storage_getHardwareSalt(resp->data.bytes);
-    offset += 32;
-    // RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE
-    storage_get_EDEK_PVC_KEY(resp->data.bytes + offset);
-    offset += 60;
-    storage_getMnemonicEnc(resp->data.bytes + offset, &menmonic_len);
-    offset += menmonic_len;
-    resp->data.size = offset;
+    resp->data.bytes[0] = 0x01;
+    config_getMnemonic((char *)(resp->data.bytes + 4), resp->data.size - 4);
+    resp->data.size = strlen((char *)(resp->data.bytes + 4)) + 4;
   }
-
+  config_setNeedsBackup(false);
   msg_write(MessageType_MessageType_BixinBackupAck, resp);
   layoutHome();
   return;
@@ -787,12 +778,34 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   CHECK_PIN
   CHECK_NOT_INITIALIZED
-  if (false == se_restore((uint8_t *)msg->data.bytes, msg->data.size)) {
-    fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
-    layoutHome();
-    return;
+  // restore in se
+  if (msg->data.bytes[0] == 0x00) {
+    if (!config_getWhetherUseSE()) {
+      config_setWhetherUseSE(true);
+    }
+    if (false ==
+        se_restore((uint8_t *)(msg->data.bytes + 4), msg->data.size - 4)) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      "Restor seed in se failure");
+    } else {
+      fsm_sendSuccess(_("device initialied success"));
+    }
+
+  } else if (msg->data.bytes[0] == 0x01) {
+    if (config_getWhetherUseSE()) {
+      config_setWhetherUseSE(false);
+    }
+    if (config_setMnemonic((char *)(msg->data.bytes + 4))) {
+      fsm_sendSuccess(_("Device successfully initialized"));
+    } else {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Failed to store mnemonic"));
+    }
+
+  } else {
+    fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
   }
-  fsm_sendSuccess(_("device initialied success"));
+
   layoutHome();
   return;
 };
