@@ -56,13 +56,11 @@ bool se_get_value(const uint16_t key, void *val_dest, uint16_t max_len,
                   uint16_t *len) {
   rtt_log_print("SE get key=%x value", key);
   uint8_t flag = key >> 8;
+  *len = max_len;
   if (MI2C_OK != MI2CDRV_Transmit(MI2C_CMD_WR_PIN, (key & 0xFF), NULL, 0,
                                   val_dest, len, (flag & MI2C_PLAIN),
                                   GET_SESTORE_DATA)) {
     rtt_log_print("SE get key failed");
-    return false;
-  }
-  if (*len > max_len) {
     return false;
   }
   rtt_log_print("SE get key suucess");

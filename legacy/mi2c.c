@@ -488,15 +488,15 @@ uint32_t MI2CDRV_Transmit(uint8_t ucCmd, uint8_t ucIndex, uint8_t *pucSendData,
       }
       g_usMI2cRevLen -= sizeof(ucRandom);
       if (pucRevData != NULL) {
-        memcpy(pucRevData, SH_IOBUFFER + sizeof(ucRandom), g_usMI2cRevLen);
-        *pusRevLen = g_usMI2cRevLen;
+        *pusRevLen = g_usMI2cRevLen > *pusRevLen ? *pusRevLen : g_usMI2cRevLen;
+        memcpy(pucRevData, SH_IOBUFFER + sizeof(ucRandom), *pusRevLen);
         return MI2C_OK;
       }
     }
   }
   if (pucRevData != NULL) {
-    memcpy(pucRevData, g_ucMI2cRevBuf, g_usMI2cRevLen);
-    *pusRevLen = g_usMI2cRevLen;
+    *pusRevLen = g_usMI2cRevLen > *pusRevLen ? *pusRevLen : g_usMI2cRevLen;
+    memcpy(pucRevData, g_ucMI2cRevBuf, *pusRevLen);
     ;
   }
   return MI2C_OK;
