@@ -483,7 +483,7 @@ void layoutSignMessage(const uint8_t *msg, uint32_t len) {
                       _("Sign binary message?"), str[0], str[1], str[2], str[3],
                       NULL, NULL);
   } else {
-    str = split_message(msg, len, 20);
+    str = split_message(msg, len, 18);
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
                       _("Sign message?"), str[0], str[1], str[2], str[3], NULL,
                       NULL);
@@ -1165,8 +1165,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
       if (ble_switch_state()) {
         oledDrawString(0, y, "BLE enable:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y,
-                            ble_switch_state() ? "Yes" : "No",
-                            FONT_STANDARD);
+                            ble_switch_state() ? "Yes" : "No", FONT_STANDARD);
         y += 9;
       }
 
