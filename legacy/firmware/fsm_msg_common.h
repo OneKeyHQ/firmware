@@ -514,7 +514,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_fee_pay_pin && g_bSelectSEFlag) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay pin"), NULL, NULL,
+                      _("Do you really want to"), _("change fastpay pin protect"), NULL, NULL,
                       NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -524,7 +524,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_fee_pay_confirm) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay confirm"), NULL,
+                      _("Do you really want to"), _("change fastpay confirm protect"), NULL,
                       NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -534,7 +534,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_fee_pay_money_limit) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay money limit"),
+                      _("Do you really want to"), _("set fastpay max amount"),
                       NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -544,7 +544,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_fee_pay_times && g_bSelectSEFlag) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay timest"), NULL,
+                      _("Do you really want to"), _("set fastpay max times"), NULL,
                       NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
