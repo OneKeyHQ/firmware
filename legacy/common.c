@@ -33,7 +33,7 @@ uint8_t ui_language = 0;
 
 bool g_bSelectSEFlag = false;
 bool g_bIsBixinAPP = false;
-uint32_t g_uiFreePayFlag = 0;
+uint32_t g_uiFastPayFlag = 0;
 uint8_t g_uchash_mode = 0;
 
 /*poweroff */

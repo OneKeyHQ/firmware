@@ -1078,30 +1078,30 @@ void config_wipe(void) {
   config_setSeSessionKey(session_key, 16);
 }
 
-void config_setFreePayPinFlag(bool flag) {
+void config_setFastPayPinFlag(bool flag) {
   config_set_bool(KEY_FREEPAYPINFLAG, flag);
 }
 
-bool config_getFreePayPinFlag(void) {
+bool config_getFastPayPinFlag(void) {
   bool flag = false;
   config_get_bool(KEY_FREEPAYPINFLAG, &flag);
   return flag;
 }
 
-void config_setFreePayConfirmFlag(bool flag) {
+void config_setFastPayConfirmFlag(bool flag) {
   config_set_bool(KEY_FREEPAYCONFIRMFLAG, flag);
 }
-bool config_getFreePayConfirmFlag(void) {
+bool config_getFastPayConfirmFlag(void) {
   bool flag = false;
   config_get_bool(KEY_FREEPAYCONFIRMFLAG, &flag);
   return flag;
 }
 
-void config_setFreePayMoneyLimt(uint64_t MoneyLimt) {
+void config_setFastPayMoneyLimt(uint64_t MoneyLimt) {
   storage_set(KEY_FREEPAYMONEYLIMT, &MoneyLimt, sizeof(uint64_t));
 }
 
-uint64_t config_getFreePayMoneyLimt(void) {
+uint64_t config_getFastPayMoneyLimt(void) {
   uint64_t MoneyLimt = 0;
   uint16_t len = sizeof(MoneyLimt);
   config_get_bytes(KEY_FREEPAYMONEYLIMT, (uint8_t *)&MoneyLimt,
@@ -1109,11 +1109,11 @@ uint64_t config_getFreePayMoneyLimt(void) {
   return MoneyLimt;
 }
 
-void config_setFreePayTimes(uint32_t times) {
+void config_setFastPayTimes(uint32_t times) {
   storage_set(KEY_FREEPAYPTIMES, &times, sizeof(uint32_t));
 }
 
-uint32_t config_getFreePayTimes(void) {
+uint32_t config_getFastPayTimes(void) {
   uint32_t times = 0;
   config_get_uint32(KEY_FREEPAYPTIMES, &times);
   return times;

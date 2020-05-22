@@ -165,14 +165,14 @@ uint32_t config_getAutoLockDelayMs(void);
 void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms);
 
 void config_wipe(void);
-void config_setFreePayPinFlag(bool flag);
-bool config_getFreePayPinFlag(void);
-void config_setFreePayConfirmFlag(bool flag);
-bool config_getFreePayConfirmFlag(void);
-void config_setFreePayMoneyLimt(uint64_t MoneyLimt);
-uint64_t config_getFreePayMoneyLimt(void);
-void config_setFreePayTimes(uint32_t times);
-uint32_t config_getFreePayTimes(void);
+void config_setFastPayPinFlag(bool flag);
+bool config_getFastPayPinFlag(void);
+void config_setFastPayConfirmFlag(bool flag);
+bool config_getFastPayConfirmFlag(void);
+void config_setFastPayMoneyLimt(uint64_t MoneyLimt);
+uint64_t config_getFastPayMoneyLimt(void);
+void config_setFastPayTimes(uint32_t times);
+uint32_t config_getFastPayTimes(void);
 
 void config_setBleTrans(bool mode);
 

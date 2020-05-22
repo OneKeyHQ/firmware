@@ -22,7 +22,7 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
 
   CHECK_INITIALIZED
 
-  if (!config_getFreePayPinFlag()) {
+  if (!config_getFastPayPinFlag()) {
     CHECK_PIN
   }
 
@@ -203,7 +203,7 @@ void fsm_msgGetAddress(const GetAddress *msg) {
   RESP_INIT(Address);
 
   CHECK_INITIALIZED
-  if (!config_getFreePayPinFlag()) {
+  if (!config_getFastPayPinFlag()) {
     CHECK_PIN
   }
 

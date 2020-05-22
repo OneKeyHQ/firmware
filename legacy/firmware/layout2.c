@@ -1186,20 +1186,20 @@ void layoutDeviceInfo(uint8_t ucPage) {
       y += 9;
       break;
     case 3:
-      amount = config_getFreePayMoneyLimt();
-      times = config_getFreePayTimes();
+      amount = config_getFastPayMoneyLimt();
+      times = config_getFastPayTimes();
       uint2str(times, times_str);
       // uint64_2str(amount, amount_str);
       oledClear();
       oledDrawString(0, y, "Fastpay need pin:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getFreePayPinFlag() ? "Yes" : "No",
+                          config_getFastPayPinFlag() ? "Yes" : "No",
                           FONT_STANDARD);
 
       y += 9;
       oledDrawString(0, y, "Fastpay need confirm:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getFreePayConfirmFlag() ? "Yes" : "No",
+                          config_getFastPayConfirmFlag() ? "Yes" : "No",
                           FONT_STANDARD);
 
       y += 9;

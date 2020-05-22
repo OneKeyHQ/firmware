@@ -417,9 +417,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
 
   CHECK_PARAM(msg->has_label || msg->has_language || msg->has_use_passphrase ||
                   msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-                  msg->has_fee_pay_pin || msg->has_use_ble || msg->has_use_se ||
-                  msg->has_fee_pay_confirm || msg->has_fee_pay_money_limit ||
-                  msg->has_fee_pay_times || msg->has_is_bixinapp,
+                  msg->has_fastpay_pin || msg->has_use_ble || msg->has_use_se ||
+                  msg->has_fastpay_confirm || msg->has_fastpay_money_limit ||
+                  msg->has_fastpay_times || msg->has_is_bixinapp,
               _("No setting provided"));
 
   if (!msg->has_is_bixinapp) CHECK_PIN
@@ -427,9 +427,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_is_bixinapp) {
     if (msg->has_label || msg->has_language || msg->has_use_passphrase ||
         msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-        msg->has_fee_pay_pin || msg->has_use_ble || msg->has_use_se ||
-        msg->has_fee_pay_confirm || msg->has_fee_pay_money_limit ||
-        msg->has_fee_pay_times) {
+        msg->has_fastpay_pin || msg->has_use_ble || msg->has_use_se ||
+        msg->has_fastpay_confirm || msg->has_fastpay_money_limit ||
+        msg->has_fastpay_times) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled,
                       "you should set bixin_app flag only");
       layoutHome();
@@ -512,7 +512,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_pin && g_bSelectSEFlag) {
+  if (msg->has_fastpay_pin && g_bSelectSEFlag) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("change fastpay pin protect"), NULL, NULL,
                       NULL, NULL);
@@ -522,7 +522,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_confirm) {
+  if (msg->has_fastpay_confirm) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("change fastpay confirm protect"), NULL,
                       NULL, NULL, NULL);
@@ -532,7 +532,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_money_limit) {
+  if (msg->has_fastpay_money_limit) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("set fastpay max amount"),
                       NULL, NULL, NULL, NULL);
@@ -542,7 +542,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_times && g_bSelectSEFlag) {
+  if (msg->has_fastpay_times && g_bSelectSEFlag) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("set fastpay max times"), NULL,
                       NULL, NULL, NULL);
@@ -582,17 +582,17 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_auto_lock_delay_ms) {
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
-  if (msg->has_fee_pay_pin) {
-    config_setFreePayPinFlag(msg->fee_pay_pin);
+  if (msg->has_fastpay_pin) {
+    config_setFastPayPinFlag(msg->fastpay_pin);
   }
-  if (msg->has_fee_pay_confirm) {
-    config_setFreePayConfirmFlag(msg->fee_pay_confirm);
+  if (msg->has_fastpay_confirm) {
+    config_setFastPayConfirmFlag(msg->fastpay_confirm);
   }
-  if (msg->has_fee_pay_money_limit) {
-    config_setFreePayMoneyLimt(msg->fee_pay_money_limit);
+  if (msg->has_fastpay_money_limit) {
+    config_setFastPayMoneyLimt(msg->fastpay_money_limit);
   }
-  if (msg->has_fee_pay_times) {
-    config_setFreePayTimes(msg->fee_pay_times);
+  if (msg->has_fastpay_times) {
+    config_setFastPayTimes(msg->fastpay_times);
   }
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);

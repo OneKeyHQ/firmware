@@ -927,20 +927,20 @@ static bool signing_check_fee(void) {
     fee = 0;
   }
   if (g_bIsBixinAPP) {
-    uint64_t free_pay_amount;
-    free_pay_amount = config_getFreePayMoneyLimt();
-    if (config_getFreePayConfirmFlag()) {
-      if (to_spend - change_spend < free_pay_amount) {
+    uint64_t fast_pay_amount;
+    fast_pay_amount = config_getFastPayMoneyLimt();
+    if (config_getFastPayConfirmFlag()) {
+      if (to_spend - change_spend < fast_pay_amount) {
         need_confirm = false;
       }
     }
     if (g_bSelectSEFlag) {
-      if (config_getFreePayPinFlag()) {
-        uint32_t free_pay_times;
-        free_pay_times = config_getFreePayTimes();
-        if (free_pay_times && (to_spend - change_spend <= free_pay_amount)) {
-          free_pay_times--;
-          config_setFreePayTimes(free_pay_times);
+      if (config_getFastPayPinFlag()) {
+        uint32_t fast_pay_times;
+        fast_pay_times = config_getFastPayTimes();
+        if (fast_pay_times && (to_spend - change_spend <= fast_pay_amount)) {
+          fast_pay_times--;
+          config_setFastPayTimes(fast_pay_times);
           need_pin = false;
         }
       }

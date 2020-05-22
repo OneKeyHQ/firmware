@@ -34,13 +34,13 @@ def apply_settings(
     auto_lock_delay_ms=None,
     display_rotation=None,
     passphrase_always_on_device: bool = None,
-    fee_pay_pin: bool = None,
+    fastpay_pin: bool = None,
     use_ble: bool = None,
     use_se: bool = None,
     is_bixinapp: bool = None,
-    fee_pay_confirm: bool = None,
-    fee_pay_money_limit: int = None,
-    fee_pay_times: int = None,
+    fastpay_confirm: bool = None,
+    fastpay_money_limit: int = None,
+    fastpay_times: int = None,
 ):
     settings = messages.ApplySettings()
     if label is not None:
@@ -63,14 +63,14 @@ def apply_settings(
         settings.use_se = use_se
     if is_bixinapp is not None:
         settings.is_bixinapp = is_bixinapp
-    if fee_pay_pin is not None:
-        settings.fee_pay_pin = fee_pay_pin
-    if fee_pay_confirm is not None:
-        settings.fee_pay_confirm = fee_pay_confirm
-    if fee_pay_money_limit is not None:
-        settings.fee_pay_money_limit = fee_pay_money_limit
-    if fee_pay_times is not None:
-        settings.fee_pay_times = fee_pay_times
+    if fastpay_pin is not None:
+        settings.fastpay_pin = fastpay_pin
+    if fastpay_confirm is not None:
+        settings.fastpay_confirm = fastpay_confirm
+    if fastpay_money_limit is not None:
+        settings.fastpay_money_limit = fastpay_money_limit
+    if fastpay_times is not None:
+        settings.fastpay_times = fastpay_times
 
     out = client.call(settings)
     client.init_device()  # Reload Features

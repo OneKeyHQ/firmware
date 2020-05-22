@@ -22,13 +22,13 @@ class ApplySettings(p.MessageType):
         auto_lock_delay_ms: int = None,
         display_rotation: int = None,
         passphrase_always_on_device: bool = None,
-        fee_pay_pin: bool = None,
         use_ble: bool = None,
         use_se: bool = None,
         is_bixinapp: bool = None,
-        fee_pay_confirm: bool = None,
-        fee_pay_money_limit: int = None,
-        fee_pay_times: int = None,
+        fastpay_pin: bool = None,
+        fastpay_confirm: bool = None,
+        fastpay_money_limit: int = None,
+        fastpay_times: int = None,
     ) -> None:
         self.language = language
         self.label = label
@@ -37,13 +37,13 @@ class ApplySettings(p.MessageType):
         self.auto_lock_delay_ms = auto_lock_delay_ms
         self.display_rotation = display_rotation
         self.passphrase_always_on_device = passphrase_always_on_device
-        self.fee_pay_pin = fee_pay_pin
         self.use_ble = use_ble
         self.use_se = use_se
         self.is_bixinapp = is_bixinapp
-        self.fee_pay_confirm = fee_pay_confirm
-        self.fee_pay_money_limit = fee_pay_money_limit
-        self.fee_pay_times = fee_pay_times
+        self.fastpay_pin = fastpay_pin
+        self.fastpay_confirm = fastpay_confirm
+        self.fastpay_money_limit = fastpay_money_limit
+        self.fastpay_times = fastpay_times
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -55,11 +55,11 @@ class ApplySettings(p.MessageType):
             6: ('auto_lock_delay_ms', p.UVarintType, 0),
             7: ('display_rotation', p.UVarintType, 0),
             8: ('passphrase_always_on_device', p.BoolType, 0),
-            9: ('fee_pay_pin', p.BoolType, 0),
-            10: ('use_ble', p.BoolType, 0),
-            11: ('use_se', p.BoolType, 0),
-            13: ('is_bixinapp', p.BoolType, 0),
-            14: ('fee_pay_confirm', p.BoolType, 0),
-            15: ('fee_pay_money_limit', p.UVarintType, 0),
-            16: ('fee_pay_times', p.UVarintType, 0),
+            9: ('use_ble', p.BoolType, 0),
+            10: ('use_se', p.BoolType, 0),
+            11: ('is_bixinapp', p.BoolType, 0),
+            12: ('fastpay_pin', p.BoolType, 0),
+            13: ('fastpay_confirm', p.BoolType, 0),
+            14: ('fastpay_money_limit', p.UVarintType, 0),
+            15: ('fastpay_times', p.UVarintType, 0),
         }
