@@ -8,6 +8,7 @@
 static usart_msg ble_usart_msg;
 static bool get_ble_name = false;
 static bool get_ble_ver = false;
+static bool get_ble_battery = false;
 static bool ble_connect = false;
 static bool ble_switch = true;
 static bool get_ble_switch = false;
@@ -34,11 +35,12 @@ static void ble_cmd_packet(uint8_t *value, uint8_t value_len) {
   ble_usart_send(cmd, value_len + 5);
 }
 
-void ble_request_name(void) {
+void ble_request_info(uint8_t type) {
   uint8_t cmd[64] = {0};
-  cmd[0] = BLE_CMD_BT_NAME;
-  cmd[1] = BLE_NAME_LEN;
-  ble_cmd_packet(cmd, BLE_NAME_LEN + 2);
+  cmd[0] = type;
+  cmd[1] = 0x01;
+  cmd[2] = 0x01;
+  ble_cmd_packet(cmd, 3);
 }
 
 void ble_ctl_onoff(void) {
@@ -60,6 +62,7 @@ void change_ble_sta(uint8_t mode) {
 bool ble_connect_state(void) { return ble_connect; }
 bool ble_name_state(void) { return get_ble_name; }
 bool ble_ver_state(void) { return get_ble_ver; }
+bool ble_battery_state(void) { return get_ble_battery; }
 bool ble_switch_state(void) { return get_ble_switch; }
 char *ble_get_name(void) { return ble_name; }
 char *ble_get_ver(void) { return ble_ver; }
@@ -148,6 +151,7 @@ void ble_uart_poll(void) {
         }
         break;
       case BLE_CMD_BATTERY:
+        get_ble_battery = true;
         if (ble_usart_msg.cmd_vale[0] <= 5)
           battery_cap = ble_usart_msg.cmd_vale[0];
         break;

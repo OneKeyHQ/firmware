@@ -186,6 +186,19 @@ void layoutStatusLogo(bool force_fresh) {
   uint8_t pad = 16;
   bool refresh = false;
 
+  if (!ble_name_state()) {
+    ble_request_info(BLE_CMD_BT_NAME);
+    delay_ms(5);
+  }
+  if (!ble_ver_state()) {
+    ble_request_info(BLE_CMD_VER);
+    delay_ms(5);
+  }
+  if (!ble_battery_state()) {
+    ble_request_info(BLE_CMD_BATTERY);
+    delay_ms(5);
+  }
+
   if (sys_nfcState() == true) {
     if (force_fresh || false == nfc_status_bak) {
       nfc_status_bak = true;
