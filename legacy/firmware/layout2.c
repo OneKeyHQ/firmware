@@ -1170,7 +1170,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
         y += 9;
       }
 
-      oledDrawString(0, y, "USE SE:", FONT_STANDARD);
+      oledDrawString(0, y, "Use SE:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
                           config_getWhetherUseSE() ? "Yes" : "No",
                           FONT_STANDARD);
