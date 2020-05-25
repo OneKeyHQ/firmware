@@ -1142,7 +1142,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
       }
       oledDrawString(0, y, "Device ID:", FONT_STANDARD);
       oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
-      y += 9; 
+      y += 9;
 
       break;
     case 2:

@@ -512,40 +512,10 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fastpay_pin) {
+  if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
+      (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"),
-                      _("change fastpay pin check"), NULL, NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-  if (msg->has_fastpay_confirm) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"),
-                      _("change fastpay confirm check"), NULL, NULL, NULL,
-                      NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-  if (msg->has_fastpay_money_limit) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("set fastpay max amount"),
-                      NULL, NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-  if (msg->has_fastpay_times) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("set fastpay max times"),
+                      _("Do you really want to"), _("change fastpay settings"),
                       NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
