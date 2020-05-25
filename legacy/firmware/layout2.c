@@ -1134,6 +1134,31 @@ void layoutDeviceInfo(uint8_t ucPage) {
         oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
         y += 9;
       }
+
+      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
+        oledDrawString(0, y, "SN:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
+        y += 9;
+      }
+      oledDrawString(0, y, "Device ID:", FONT_STANDARD);
+      oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
+      y += 9; 
+
+      break;
+    case 2:
+      oledClear();
+      if (ble_switch_state()) {
+        oledDrawString(0, y, "BLE enable:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y,
+                            ble_switch_state() ? "Yes" : "No", FONT_STANDARD);
+        y += 9;
+      }
+
+      oledDrawString(0, y, "Use SE:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getWhetherUseSE() ? "Yes" : "No",
+                          FONT_STANDARD);
+      y += 9;
       if (init_state) {
         char label[MAX_LABEL_LEN + 1] = _("");
         config_getLabel(label, sizeof(label));
@@ -1159,30 +1184,6 @@ void layoutDeviceInfo(uint8_t ucPage) {
         y += 9;
       }
 
-      break;
-    case 2:
-      oledClear();
-      if (ble_switch_state()) {
-        oledDrawString(0, y, "BLE enable:", FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y,
-                            ble_switch_state() ? "Yes" : "No", FONT_STANDARD);
-        y += 9;
-      }
-
-      oledDrawString(0, y, "Use SE:", FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getWhetherUseSE() ? "Yes" : "No",
-                          FONT_STANDARD);
-      y += 9;
-
-      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
-        oledDrawString(0, y, "SN:", FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
-        y += 9;
-      }
-      oledDrawString(0, y, "Device ID:", FONT_STANDARD);
-      oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
-      y += 9;
       break;
     case 3:
       amount = config_getFastPayMoneyLimt();
