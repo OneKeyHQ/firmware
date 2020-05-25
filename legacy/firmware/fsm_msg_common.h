@@ -515,7 +515,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_fastpay_pin) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"),
-                      _("change fastpay pin protect"), NULL, NULL, NULL, NULL);
+                      _("change fastpay pin check"), NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -525,7 +525,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_fastpay_confirm) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"),
-                      _("change fastpay confirm protect"), NULL, NULL, NULL,
+                      _("change fastpay confirm check"), NULL, NULL, NULL,
                       NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
