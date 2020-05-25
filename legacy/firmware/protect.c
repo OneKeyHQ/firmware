@@ -324,13 +324,14 @@ bool protectChangePin(bool init, bool removal) {
         pin = newpin;
       }
     }
-
-    if (pin == NULL || pin[0] == '\0') {
+    if (pin == PIN_CANCELED_BY_BUTTON) {
+      return false;
+    } else if (pin == NULL || pin[0] == '\0') {
       memzero(old_pin, sizeof(old_pin));
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
-    } else if (pin == PIN_CANCELED_BY_BUTTON)
-      return false;
+    }
+
     strlcpy(new_pin, pin, sizeof(new_pin));
 
     if (!g_bIsBixinAPP) {
