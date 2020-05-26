@@ -410,8 +410,6 @@ void usbInit(void) {
 }
 
 static void i2c_slave_poll(void) {
-  static const uint8_t *data;
-  uint32_t offset = 0;
   uint32_t total_len, len;
   if (i2c_recv_done) {
     i2c_recv_done = false;
@@ -426,15 +424,6 @@ static void i2c_slave_poll(void) {
         main_rx_callback(NULL, 0);
       }
     } else {  // apdu command
-    }
-  }
-  if (CHANNEL_SLAVE == host_channel) {
-    while ((data = msg_out_data())) {
-      memcpy(i2c_data_out + offset, data, 64);
-      offset += 64;
-    }
-    if (offset) {
-      i2c_slave_send(offset);
     }
   }
 }

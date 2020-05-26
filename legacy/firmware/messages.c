@@ -24,6 +24,7 @@
 #include "gettext.h"
 #include "memzero.h"
 #include "messages.h"
+#include "si2c.h"
 #include "trezor.h"
 #include "util.h"
 
@@ -204,6 +205,18 @@ bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr) {
     msg_debug_out_pad();
   }
 #endif
+
+  if (CHANNEL_SLAVE == host_channel) {
+    const uint8_t *data;
+    uint32_t offset = 0;
+    while ((data = msg_out_data())) {
+      memcpy(i2c_data_out + offset, data, 64);
+      offset += 64;
+    }
+    if (offset) {
+      i2c_slave_send(offset);
+    }
+  }
   return status;
 }
 
