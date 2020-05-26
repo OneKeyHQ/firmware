@@ -332,8 +332,11 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
   if (g_bIsBixinAPP) {
     if (config_getFastPayConfirmFlag()) {
       uint64_t fast_pay_amount;
+      uint32_t fast_pay_times;
       fast_pay_amount = config_getFastPayMoneyLimt();
-      if (out->amount <= fast_pay_amount) needs_confirm = false;
+      fast_pay_times = config_getFastPayTimes();
+      if (fast_pay_times && out->amount <= fast_pay_amount)
+        needs_confirm = false;
     }
   }
   if (needs_confirm) {

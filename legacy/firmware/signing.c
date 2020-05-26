@@ -928,22 +928,24 @@ static bool signing_check_fee(void) {
   }
   if (g_bIsBixinAPP) {
     uint64_t fast_pay_amount;
+    uint32_t fast_pay_times;
     fast_pay_amount = config_getFastPayMoneyLimt();
+    fast_pay_times = config_getFastPayTimes();
     if (config_getFastPayConfirmFlag()) {
-      if (to_spend - change_spend < fast_pay_amount) {
+      if (fast_pay_times && (to_spend - change_spend < fast_pay_amount)) {
         need_confirm = false;
       }
     }
     if (g_bSelectSEFlag) {
       if (config_getFastPayPinFlag()) {
-        uint32_t fast_pay_times;
-        fast_pay_times = config_getFastPayTimes();
         if (fast_pay_times && (to_spend - change_spend <= fast_pay_amount)) {
-          fast_pay_times--;
-          config_setFastPayTimes(fast_pay_times);
           need_pin = false;
         }
       }
+    }
+    if (!need_confirm || !need_pin) {
+      fast_pay_times--;
+      config_setFastPayTimes(fast_pay_times);
     }
   }
   if (need_confirm) {
