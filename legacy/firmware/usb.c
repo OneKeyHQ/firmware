@@ -414,6 +414,7 @@ static void i2c_slave_poll(void) {
   uint32_t offset = 0;
   uint32_t total_len, len;
   if (i2c_recv_done) {
+    i2c_recv_done = false;
     memset(packet_buf, 0x00, sizeof(packet_buf));
     fifo_read_peek(&i2c_fifo_in, packet_buf, 1);
     if (packet_buf[0] == '?') {  // trezor command
@@ -426,7 +427,6 @@ static void i2c_slave_poll(void) {
       }
     } else {  // apdu command
     }
-    i2c_recv_done = false;
   }
   if (CHANNEL_SLAVE == host_channel) {
     while ((data = msg_out_data())) {

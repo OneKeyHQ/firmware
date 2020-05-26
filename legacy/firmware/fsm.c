@@ -48,6 +48,7 @@
 #include "rfc6979.h"
 #include "rng.h"
 #include "secp256k1.h"
+#include "si2c.h"
 #include "signing.h"
 #include "supervise.h"
 #include "sys.h"
@@ -310,6 +311,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
 #if !BITCOIN_ONLY
 
 #include "fsm_msg_ethereum.h"
+
 #include "fsm_msg_lisk.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_stellar.h"
