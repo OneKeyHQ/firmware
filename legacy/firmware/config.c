@@ -625,13 +625,12 @@ static void get_root_node_callback(uint32_t iter, uint32_t total) {
 }
 
 const uint8_t *config_getSeed(void) {
+  // root node is properly cached
+  if ((activeSessionCache != NULL) &&
+      (activeSessionCache->seedCached == sectrue)) {
+    return activeSessionCache->seed;
+  }
   if (!g_bSelectSEFlag) {
-    // root node is properly cached
-    if ((activeSessionCache != NULL) &&
-        (activeSessionCache->seedCached == sectrue)) {
-      return activeSessionCache->seed;
-    }
-
     // if storage has mnemonic, convert it to node and use it
     char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
     if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
@@ -674,6 +673,10 @@ const uint8_t *config_getSeed(void) {
     if (!protectPassphrase(passphrase)) {
       memzero(passphrase, sizeof(passphrase));
       return NULL;
+    }
+    if (activeSessionCache == NULL) {
+      // this should not happen if the Host behaves and sends Initialize first
+      session_startSession(NULL);
     }
     mnemonic_to_seed(FALSE_BYTE, NULL, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
