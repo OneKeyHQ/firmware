@@ -116,6 +116,10 @@ static const uint32_t PIN_EMPTY = 1;
 static uint32_t config_uuid[UUID_SIZE / sizeof(uint32_t)];
 _Static_assert(sizeof(config_uuid) == UUID_SIZE, "config_uuid has wrong size");
 
+static char config_language[MAX_LANGUAGE_LEN];
+_Static_assert(sizeof(config_language) == MAX_LANGUAGE_LEN,
+               "config_language has wrong size");
+
 char config_uuid_str[2 * UUID_SIZE + 1] = {0};
 
 /*
@@ -428,7 +432,6 @@ static secbool config_upgrade_v10(void) {
 }
 
 void config_init(void) {
-  char ucBuf[32];
   char oldTiny = usbTiny(1);
 
   config_upgrade_v10();
@@ -438,6 +441,7 @@ void config_init(void) {
 
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
+  config_getLanguage(config_language, sizeof(config_language));
 
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
@@ -457,7 +461,7 @@ void config_init(void) {
     storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
     storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   }
-  config_getLanguage(ucBuf, MAX_LANGUAGE_LEN);
+
   data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
 
   session_clear(false);
@@ -1079,6 +1083,7 @@ void config_wipe(void) {
   storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   config_setSeSessionKey(session_key, 16);
+  config_getLanguage(config_language, sizeof(config_language));
 }
 
 void config_setFastPayPinFlag(bool flag) {
