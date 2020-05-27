@@ -100,7 +100,9 @@ void fsm_msgSignTx(const SignTx *msg) {
   CHECK_PARAM(msg->inputs_count + msg->outputs_count >= msg->inputs_count,
               _("Value overflow"));
 
-  if (!g_bSelectSEFlag) CHECK_PIN
+  if (!config_getFastPayPinFlag()) {
+    CHECK_PIN
+  }
 
   const CoinInfo *coin = fsm_getCoin(msg->has_coin_name, msg->coin_name);
   if (!coin) return;

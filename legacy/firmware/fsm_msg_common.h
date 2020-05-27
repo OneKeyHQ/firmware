@@ -557,7 +557,12 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
   if (msg->has_fastpay_pin) {
-    config_setFastPayPinFlag(msg->fastpay_pin);
+    // not allowed set true if not use se
+    if (!g_bSelectSEFlag) {
+      config_setFastPayPinFlag(false);
+    } else {
+      config_setFastPayPinFlag(msg->fastpay_pin);
+    }
   }
   if (msg->has_fastpay_confirm) {
     config_setFastPayConfirmFlag(msg->fastpay_confirm);
