@@ -1095,7 +1095,6 @@ void vDISP_TurnPageDOWN(void) {
             Disp_buffer + s_usCurrentCount, 16);
 }
 void layoutDeviceInfo(uint8_t ucPage) {
-  bool init_state = config_isInitialized();
   uint64_t amount;
   uint32_t times;
   char str_out[32 + 3] = {0};
@@ -1105,6 +1104,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint8_t se_sn[32] = {0};
   uint16_t sn_len = sizeof(se_sn);
   int y = 9;
+  char label[MAX_LABEL_LEN + 1] = _("");
 
   switch (ucPage) {
     case 1:
@@ -1159,15 +1159,12 @@ void layoutDeviceInfo(uint8_t ucPage) {
                           config_getWhetherUseSE() ? "Yes" : "No",
                           FONT_STANDARD);
       y += 9;
-      if (init_state) {
-        char label[MAX_LABEL_LEN + 1] = _("");
-        config_getLabel(label, sizeof(label));
-        if (strlen(label)) {
-          oledDrawString(0, y, "LABEL:", FONT_STANDARD);
-          oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
-          y += 9;
-        }
-      }
+
+      config_getLabel(label, sizeof(label));
+      oledDrawString(0, y, "Label:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
+      y += 9;
+
       if (session_isUnlocked()) {
         char secstrbuf[] = _("________0 s");
         char *secstr = secstrbuf + 9;
@@ -1191,28 +1188,32 @@ void layoutDeviceInfo(uint8_t ucPage) {
       uint2str(times, times_str);
       // uint64_2str(amount, amount_str);
       oledClear();
-      oledDrawString(0, y, "Fastpay need pin:", FONT_STANDARD);
+      oledDrawStringCenter(OLED_WIDTH / 2, y, "Fastpay settings",
+                           FONT_STANDARD);
+      y += 9;
+      oledDrawString(0, y, "-------------------------", FONT_STANDARD);
+      y += 9;
+      oledDrawString(0, y, "Skip pin check:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
                           config_getFastPayPinFlag() ? "Yes" : "No",
                           FONT_STANDARD);
 
       y += 9;
-      oledDrawString(0, y, "Fastpay need confirm:", FONT_STANDARD);
+      oledDrawString(0, y, "Skip button confirm:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
                           config_getFastPayConfirmFlag() ? "Yes" : "No",
                           FONT_STANDARD);
 
       y += 9;
-      oledDrawString(0, y, "Fastpay times:", FONT_STANDARD);
+      oledDrawString(0, y, "Remaining times:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y, times_str, FONT_STANDARD);
 
       y += 9;
       if (g_bSelectSEFlag) {
-        oledDrawString(0, y, "Fastpay max amount:", FONT_STANDARD);
+        oledDrawString(0, y, "Quota:", FONT_STANDARD);
       } else {
-        oledDrawString(0, y, "Fastpay max amount:", FONT_STANDARD);
+        oledDrawString(0, y, "Quota:", FONT_STANDARD);
       }
-      y += 9;
       bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
                        sizeof(str_out) - 3);
       oledDrawStringRight(OLED_WIDTH - 1, y, str_out, FONT_STANDARD);
