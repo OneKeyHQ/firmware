@@ -582,7 +582,7 @@ void signing_init(const SignTx *msg, const CoinInfo *_coin,
     hasher_Init(&hasher_check, coin->curve->hasher_sign);
   }
 
-  layoutProgressSwipe(_("Signing transaction"), 0);
+  layoutProgressSwipe(ui_prompt_sign_trans[ui_language], 0);
 
   send_req_1_input();
 }

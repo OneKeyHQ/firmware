@@ -81,12 +81,6 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
         result = false;
         break;
       }
-      if (button.UpUp) {
-        vDISP_TurnPageUP();
-      }
-      if (button.DownUp) {
-        vDISP_TurnPageDOWN();
-      }
     }
 
     // check for Cancel / Initialize
@@ -355,7 +349,7 @@ bool protectChangePin(bool init, bool removal) {
       if (!init) {
         if (ui_language) {
           layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                               "请确认PIN码", NULL, new_pin);
+                               "请确认PIN码", NULL, new_pin, NULL);
         } else {
           layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                             _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
@@ -477,7 +471,7 @@ bool protectPassphrase(char *passphrase) {
   if (!g_bIsBixinAPP) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_info, NULL, NULL, NULL, "请输入密语", NULL,
-                           NULL);
+                           NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL,
                         _("Please enter your"), _("passphrase using"),

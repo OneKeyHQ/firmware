@@ -53,6 +53,8 @@ extern const char *ui_prompt_current_pin[2];
 extern const char *ui_prompt_input_pin[2];
 extern const char *ui_prompt_new_pin[2];
 extern const char *ui_prompt_new_pin_ack[2];
+extern const char *ui_prompt_singing[2];
+extern const char *ui_prompt_verifying[2];
 
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
@@ -118,6 +120,6 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode);
 void layoutDialogSwipe_zh(const BITMAP *icon, const char *btnNo,
                           const char *btnYes, const char *desc,
                           const char *line1, const char *line2,
-                          const char *line3);
+                          const char *line3, const char *line4);
 
 #endif

@@ -296,7 +296,7 @@ void fsm_msgSignMessage(const SignMessage *msg) {
                                     msg->address_n_count, NULL);
   if (!node) return;
 
-  layoutProgressSwipe(_("Signing"), 0);
+  layoutProgressSwipe(ui_prompt_singing[ui_language], 0);
   if (cryptoMessageSign(coin, node, msg->script_type, msg->message.bytes,
                         msg->message.size, resp->signature.bytes) == 0) {
     resp->has_address = true;
@@ -324,7 +324,7 @@ void fsm_msgVerifyMessage(const VerifyMessage *msg) {
 
   const CoinInfo *coin = fsm_getCoin(msg->has_coin_name, msg->coin_name);
   if (!coin) return;
-  layoutProgressSwipe(_("Verifying"), 0);
+  layoutProgressSwipe(ui_prompt_verifying[ui_language], 0);
   if (msg->signature.size == 65 &&
       cryptoMessageVerify(coin, msg->message.bytes, msg->message.size,
                           msg->address, msg->signature.bytes) == 0) {
