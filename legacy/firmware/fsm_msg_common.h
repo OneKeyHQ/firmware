@@ -198,6 +198,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
   }
 
   if (protectChangePin(false, removal)) {
+    i2c_set_wait(false);
     if (removal) {
       fsm_sendSuccess(_("PIN removed"));
     } else {
@@ -272,6 +273,7 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
   }
 
   if (!protectButton(ButtonRequestType_ButtonRequest_WipeDevice, false)) {
+    i2c_set_wait(false);
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
@@ -280,6 +282,7 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
   // the following does not work on Mac anyway :-/ Linux/Windows are fine, so it
   // is not needed usbReconnect(); // force re-enumeration because of the serial
   // number change
+  i2c_set_wait(false);
   fsm_sendSuccess(_("Device wiped"));
   layoutHome();
 }
@@ -417,9 +420,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
 
   CHECK_PARAM(msg->has_label || msg->has_language || msg->has_use_passphrase ||
                   msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-                  msg->has_fee_pay_pin || msg->has_use_ble || msg->has_use_se ||
-                  msg->has_fee_pay_confirm || msg->has_fee_pay_money_limit ||
-                  msg->has_fee_pay_times || msg->has_is_bixinapp,
+                  msg->has_fastpay_pin || msg->has_use_ble || msg->has_use_se ||
+                  msg->has_fastpay_confirm || msg->has_fastpay_money_limit ||
+                  msg->has_fastpay_times || msg->has_is_bixinapp,
               _("No setting provided"));
 
   if (!msg->has_is_bixinapp) CHECK_PIN
@@ -427,9 +430,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_is_bixinapp) {
     if (msg->has_label || msg->has_language || msg->has_use_passphrase ||
         msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-        msg->has_fee_pay_pin || msg->has_use_ble || msg->has_use_se ||
-        msg->has_fee_pay_confirm || msg->has_fee_pay_money_limit ||
-        msg->has_fee_pay_times) {
+        msg->has_fastpay_pin || msg->has_use_ble || msg->has_use_se ||
+        msg->has_fastpay_confirm || msg->has_fastpay_money_limit ||
+        msg->has_fastpay_times) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled,
                       "you should set bixin_app flag only");
       layoutHome();
@@ -512,40 +515,11 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
   }
-  if (msg->has_fee_pay_pin && g_bSelectSEFlag) {
+  if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
+      (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay pin"), NULL, NULL,
-                      NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-  if (msg->has_fee_pay_confirm && g_bSelectSEFlag) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay confirm"), NULL,
-                      NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-  if (msg->has_fee_pay_money_limit && g_bSelectSEFlag) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay money limit"),
+                      _("Do you really want to"), _("change fastpay settings"),
                       NULL, NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-  if (msg->has_fee_pay_times && g_bSelectSEFlag) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("free pay timest"), NULL,
-                      NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -582,14 +556,17 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_auto_lock_delay_ms) {
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
-  if (msg->has_fee_pay_pin) {
-    config_setFreePayPinFlag(msg->fee_pay_pin);
+  if (msg->has_fastpay_pin) {
+    config_setFastPayPinFlag(msg->fastpay_pin);
   }
-  if (msg->has_fee_pay_money_limit) {
-    config_setFreePayMoneyLimt(msg->fee_pay_money_limit);
+  if (msg->has_fastpay_confirm) {
+    config_setFastPayConfirmFlag(msg->fastpay_confirm);
   }
-  if (msg->has_fee_pay_times) {
-    config_setFreePayTimes(msg->fee_pay_times);
+  if (msg->has_fastpay_money_limit) {
+    config_setFastPayMoneyLimt(msg->fastpay_money_limit);
+  }
+  if (msg->has_fastpay_times) {
+    config_setFastPayTimes(msg->fastpay_times);
   }
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);
@@ -755,30 +732,21 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   CHECK_INITIALIZED
   CHECK_PIN_UNCACHED
   RESP_INIT(BixinBackupAck);
+  resp->data.size -= 4;  // 4bytes header,rfu
   if (g_bSelectSEFlag) {
-    if (false == se_backup((uint8_t *)resp->data.bytes, &resp->data.size)) {
+    resp->data.bytes[0] = 0x00;
+    if (false == se_backup((uint8_t *)resp->data.bytes + 4, &resp->data.size)) {
       fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
       layoutHome();
       return;
     }
+    resp->data.size += 4;
   } else {
-    uint16_t menmonic_len = 512 - 92;
-    uint16_t offset = 0;
-    if (!config_hasPin()) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-    storage_getHardwareSalt(resp->data.bytes);
-    offset += 32;
-    // RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE
-    storage_get_EDEK_PVC_KEY(resp->data.bytes + offset);
-    offset += 60;
-    storage_getMnemonicEnc(resp->data.bytes + offset, &menmonic_len);
-    offset += menmonic_len;
-    resp->data.size = offset;
+    resp->data.bytes[0] = 0x01;
+    config_getMnemonic((char *)(resp->data.bytes + 4), resp->data.size - 4);
+    resp->data.size = strlen((char *)(resp->data.bytes + 4)) + 4;
   }
-
+  config_setNeedsBackup(false);
   msg_write(MessageType_MessageType_BixinBackupAck, resp);
   layoutHome();
   return;
@@ -787,21 +755,45 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   CHECK_PIN
   CHECK_NOT_INITIALIZED
-  if (false == se_restore((uint8_t *)msg->data.bytes, msg->data.size)) {
-    fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
-    layoutHome();
-    return;
+  // restore in se
+  if (msg->data.bytes[0] == 0x00) {
+    if (!config_getWhetherUseSE()) {
+      config_setWhetherUseSE(true);
+    }
+    if (false ==
+        se_restore((uint8_t *)(msg->data.bytes + 4), msg->data.size - 4)) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      "Restor seed in se failure");
+    } else {
+      fsm_sendSuccess(_("device initialied success"));
+    }
+
+  } else if (msg->data.bytes[0] == 0x01) {
+    if (config_getWhetherUseSE()) {
+      config_setWhetherUseSE(false);
+    }
+    if (config_setMnemonic((char *)(msg->data.bytes + 4))) {
+      fsm_sendSuccess(_("Device successfully initialized"));
+    } else {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Failed to store mnemonic"));
+    }
+
+  } else {
+    fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
   }
-  fsm_sendSuccess(_("device initialied success"));
+
   layoutHome();
   return;
 };
 
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
   RESP_INIT(BixinVerifyDeviceAck);
-  resp->data.size = 512;
-  if (false == se_verify((uint8_t *)msg->data.bytes, msg->data.size,
-                         resp->data.bytes, 0x40, &resp->data.size)) {
+  resp->cert.size = 1024;
+  resp->signature.size = 512;
+  if (false == se_verify((uint8_t *)msg->data.bytes, msg->data.size, 1024,
+                         resp->cert.bytes, &resp->cert.size,
+                         resp->signature.bytes, &resp->signature.size)) {
     fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
     layoutHome();
     return;

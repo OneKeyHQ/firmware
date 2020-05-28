@@ -55,6 +55,7 @@ class Features(p.MessageType):
         ble_ver: str = None,
         ble_enable: bool = None,
         se_enable: bool = None,
+        offset: int = None,
     ) -> None:
         self.vendor = vendor
         self.major_version = major_version
@@ -94,6 +95,7 @@ class Features(p.MessageType):
         self.ble_ver = ble_ver
         self.ble_enable = ble_enable
         self.se_enable = se_enable
+        self.offset = offset
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -136,4 +138,5 @@ class Features(p.MessageType):
             38: ('ble_ver', p.UnicodeType, 0),
             39: ('ble_enable', p.BoolType, 0),
             40: ('se_enable', p.BoolType, 0),
+            50: ('offset', p.UVarintType, 0),
         }

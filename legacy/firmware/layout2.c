@@ -483,7 +483,7 @@ void layoutSignMessage(const uint8_t *msg, uint32_t len) {
                       _("Sign binary message?"), str[0], str[1], str[2], str[3],
                       NULL, NULL);
   } else {
-    str = split_message(msg, len, 20);
+    str = split_message(msg, len, 18);
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
                       _("Sign message?"), str[0], str[1], str[2], str[3], NULL,
                       NULL);
@@ -1095,7 +1095,6 @@ void vDISP_TurnPageDOWN(void) {
             Disp_buffer + s_usCurrentCount, 16);
 }
 void layoutDeviceInfo(uint8_t ucPage) {
-  bool init_state = config_isInitialized();
   uint64_t amount;
   uint32_t times;
   char str_out[32 + 3] = {0};
@@ -1105,18 +1104,19 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint8_t se_sn[32] = {0};
   uint16_t sn_len = sizeof(se_sn);
   int y = 9;
+  char label[MAX_LABEL_LEN + 1] = _("");
 
   switch (ucPage) {
     case 1:
       oledClear();
-      oledDrawString(0, y, "firmware version:", FONT_STANDARD);
+      oledDrawString(0, y, "STM32 version:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y,
                           VERSTR(VERSION_MAJOR) "." VERSTR(
                               VERSION_MINOR) "." VERSTR(VERSION_PATCH),
                           FONT_STANDARD);
       y += 9;
       if (ble_ver_state()) {
-        oledDrawString(0, y, "ble version:", FONT_STANDARD);
+        oledDrawString(0, y, "BLE version:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
         y += 9;
       }
@@ -1130,19 +1130,41 @@ void layoutDeviceInfo(uint8_t ucPage) {
         se_ver_char[i++] = (se_version[1] >> 4) + '0';
         se_ver_char[i++] = '.';
         se_ver_char[i++] = (se_version[1] & 0x0f) + '0';
-        oledDrawString(0, y, "se version:", FONT_STANDARD);
+        oledDrawString(0, y, "SE version:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
         y += 9;
       }
-      if (init_state) {
-        char label[MAX_LABEL_LEN + 1] = _("");
-        config_getLabel(label, sizeof(label));
-        if (strlen(label)) {
-          oledDrawString(0, y, "label:", FONT_STANDARD);
-          oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
-          y += 9;
-        }
+
+      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
+        oledDrawString(0, y, "SN:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
+        y += 9;
       }
+      oledDrawString(0, y, "Device ID:", FONT_STANDARD);
+      oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
+      y += 9;
+
+      break;
+    case 2:
+      oledClear();
+      if (ble_switch_state()) {
+        oledDrawString(0, y, "BLE enable:", FONT_STANDARD);
+        oledDrawStringRight(OLED_WIDTH - 1, y,
+                            ble_switch_state() ? "Yes" : "No", FONT_STANDARD);
+        y += 9;
+      }
+
+      oledDrawString(0, y, "Use SE:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getWhetherUseSE() ? "Yes" : "No",
+                          FONT_STANDARD);
+      y += 9;
+
+      config_getLabel(label, sizeof(label));
+      oledDrawString(0, y, "Label:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
+      y += 9;
+
       if (session_isUnlocked()) {
         char secstrbuf[] = _("________0 s");
         char *secstr = secstrbuf + 9;
@@ -1153,59 +1175,48 @@ void layoutDeviceInfo(uint8_t ucPage) {
           *secstr = (secs % 10) + '0';
           secs /= 10;
         } while (secs > 0 && secstr >= secstrbuf);
-        oledDrawString(0, y, "shutdown delay:", FONT_STANDARD);
+        oledDrawString(0, y, "Auto-Lock & Shutdown:", FONT_STANDARD);
+        y += 9;
         oledDrawStringRight(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
         y += 9;
       }
 
       break;
-    case 2:
-      oledClear();
-      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
-        oledDrawString(0, y, "sn:", FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
-        y += 9;
-      }
-      oledDrawString(0, y, "device id:", FONT_STANDARD);
-      oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
-      y += 9;
-      break;
     case 3:
-      amount = config_getFreePayMoneyLimt();
-      times = config_getFreePayTimes();
+      amount = config_getFastPayMoneyLimt();
+      times = config_getFastPayTimes();
       uint2str(times, times_str);
       // uint64_2str(amount, amount_str);
       oledClear();
-
-      if (ble_switch_state()) {
-        oledDrawString(0, y, "ble state:", FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y,
-                            ble_switch_state() ? "enable" : "disable",
-                            FONT_STANDARD);
-        y += 9;
-      }
-
-      oledDrawString(0, y, "se state:", FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getWhetherUseSE() ? "enable" : "disable",
-                          FONT_STANDARD);
+      oledDrawStringCenter(OLED_WIDTH / 2, y, "Fastpay settings",
+                           FONT_STANDARD);
       y += 9;
-
-      oledDrawString(0, y, "free pay:", FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y,
-                          config_getFreePayPinFlag() ? "enable" : "disable",
-                          FONT_STANDARD);
+      oledDrawString(0, y, "-------------------------", FONT_STANDARD);
       y += 9;
+      oledDrawString(0, y, "Skip pin check:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getFastPayPinFlag() ? "Yes" : "No",
+                          FONT_STANDARD);
 
-      oledDrawString(0, y, "free pay times:", FONT_STANDARD);
+      y += 9;
+      oledDrawString(0, y, "Skip button confirm:", FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y,
+                          config_getFastPayConfirmFlag() ? "Yes" : "No",
+                          FONT_STANDARD);
+
+      y += 9;
+      oledDrawString(0, y, "Remaining times:", FONT_STANDARD);
       oledDrawStringRight(OLED_WIDTH - 1, y, times_str, FONT_STANDARD);
-      y += 9;
 
-      oledDrawString(0, y, "free pay amount:", FONT_STANDARD);
+      y += 9;
+      if (g_bSelectSEFlag) {
+        oledDrawString(0, y, "Quota:", FONT_STANDARD);
+      } else {
+        oledDrawString(0, y, "Quota:", FONT_STANDARD);
+      }
       bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
                        sizeof(str_out) - 3);
-      y += 9;
-      oledDrawString(0, y, str_out, FONT_STANDARD);
+      oledDrawStringRight(OLED_WIDTH - 1, y, str_out, FONT_STANDARD);
       y += 9;
       break;
     default:

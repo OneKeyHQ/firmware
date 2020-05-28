@@ -94,6 +94,7 @@ message Features {
     optional string ble_ver = 38;
     optional bool ble_enable = 39;
     optional bool se_enable = 40;
+    optional uint32 offset = 50;
 
 }
 
@@ -120,14 +121,13 @@ message ApplySettings {
     optional uint32 auto_lock_delay_ms = 6;
     optional uint32 display_rotation = 7;  // in degrees from North
     optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry
-    optional bool fee_pay_pin = 9;
-    optional bool use_ble = 10;
-    optional bool use_se = 11;
-    //optional bool use_exportseeds= 12;
-    optional bool is_bixinapp = 13;
-    optional bool fee_pay_confirm = 14;
-    optional uint64 fee_pay_money_limit = 15;
-    optional uint32 fee_pay_times = 16;
+    optional bool use_ble = 9;
+    optional bool use_se = 10;
+    optional bool is_bixinapp = 11;
+    optional bool fastpay_pin = 12;
+    optional bool fastpay_confirm = 13;
+    optional uint64 fastpay_money_limit = 14;
+    optional uint32 fastpay_times = 15;
     /**
     * Type of seed and mnemonic export flag
     */
@@ -458,5 +458,6 @@ message BixinVerifyDeviceRequest {
  * @end
  */
 message BixinVerifyDeviceAck {
- required bytes data = 1;
+ required bytes cert= 1;
+ required bytes signature = 2;
 }

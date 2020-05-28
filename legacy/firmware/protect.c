@@ -31,6 +31,7 @@
 #include "messages.pb.h"
 #include "oled.h"
 #include "pinmatrix.h"
+#include "si2c.h"
 #include "sys.h"
 #include "usb.h"
 #include "util.h"
@@ -324,13 +325,14 @@ bool protectChangePin(bool init, bool removal) {
         pin = newpin;
       }
     }
-
-    if (pin == NULL || pin[0] == '\0') {
+    if (pin == PIN_CANCELED_BY_BUTTON) {
+      return false;
+    } else if (pin == NULL || pin[0] == '\0') {
       memzero(old_pin, sizeof(old_pin));
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
-    } else if (pin == PIN_CANCELED_BY_BUTTON)
-      return false;
+    }
+
     strlcpy(new_pin, pin, sizeof(new_pin));
 
     if (!g_bIsBixinAPP) {
@@ -361,6 +363,7 @@ bool protectChangePin(bool init, bool removal) {
         }
         if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
                            false)) {
+          i2c_set_wait(false);
           fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
           layoutHome();
           return false;
@@ -373,6 +376,7 @@ bool protectChangePin(bool init, bool removal) {
   memzero(old_pin, sizeof(old_pin));
   memzero(new_pin, sizeof(new_pin));
   if (ret == false) {
+    i2c_set_wait(false);
     if (removal) {
       fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
     } else {

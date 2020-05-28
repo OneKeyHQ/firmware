@@ -24,17 +24,6 @@ typedef struct _usart_msg {
 } usart_msg;
 
 enum {
-  BLE_CMD_CONNECT_STATE = 0x01,
-  BLE_CMD_PAIR_STATE = 0x02,
-  BLE_CMD_PASSKEY = 0x03,
-  BLE_CMD_BT_NAME = 0x04,
-  BLE_CMD_BATTERY = 0x05,
-  BLE_CMD_VER = 0x06,
-  BLE_CMD_ONOFF_BLE = 0x07,
-  BLE_CMD_DFU_STA = 0x0A
-};
-
-enum {
   VALUE_PREPARE_DFU = 0x01,
   VALUE_ENTER_DFU = 0x02,
   VALUE_ENTER_FAILED = 0x03,

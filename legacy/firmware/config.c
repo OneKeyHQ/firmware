@@ -89,7 +89,6 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_U2F_ROOT (17 | APP | FLAG_PUBLIC_SHIFTED)     // node
 #define KEY_SEEDS (18 | APP)                              // bytes
 #define KEY_SEEDSFLAG (19 | APP | FLAG_PUBLIC_SHIFTED)    // uint32
-// notice: defined in storage
 //#define KEY_PIN (20| APP_PIN )      // uint32
 //#define KEY_PINFLAG (21| APP_PIN )      // uint32
 //#define KEY_VERIFYPIN (22| APP_PIN)      // uint32
@@ -98,11 +97,10 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_FREEPAYPINFLAG (24 | APP)                           // bool
 #define KEY_SEFLAG (25 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bool
 //#define MNEMONIC_INDEX_TOSEED               (26)
-#define KEY_RESET (27 | APP)  // bool
-// useless tag
-//#define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
-#define KEY_FREEPAYMONEYLIMT (29 | APP)  // uint64
-#define KEY_FREEPAYPTIMES (30 | APP)     // uint32
+#define KEY_RESET (27 | APP)               // bool
+#define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
+#define KEY_FREEPAYMONEYLIMT (29 | APP)    // uint64
+#define KEY_FREEPAYPTIMES (30 | APP)       // uint32
 
 #define KEY_SE_SESSIONKEY \
   (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bytes(16)
@@ -117,6 +115,10 @@ static const uint32_t PIN_EMPTY = 1;
 
 static uint32_t config_uuid[UUID_SIZE / sizeof(uint32_t)];
 _Static_assert(sizeof(config_uuid) == UUID_SIZE, "config_uuid has wrong size");
+
+static char config_language[MAX_LANGUAGE_LEN];
+_Static_assert(sizeof(config_language) == MAX_LANGUAGE_LEN,
+               "config_language has wrong size");
 
 char config_uuid_str[2 * UUID_SIZE + 1] = {0};
 
@@ -430,7 +432,6 @@ static secbool config_upgrade_v10(void) {
 }
 
 void config_init(void) {
-  char ucBuf[32];
   char oldTiny = usbTiny(1);
 
   config_upgrade_v10();
@@ -440,6 +441,7 @@ void config_init(void) {
 
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
+  config_getLanguage(config_language, sizeof(config_language));
 
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
@@ -459,7 +461,7 @@ void config_init(void) {
     storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
     storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   }
-  config_getLanguage(ucBuf, MAX_LANGUAGE_LEN);
+
   data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
 
   session_clear(false);
@@ -627,13 +629,12 @@ static void get_root_node_callback(uint32_t iter, uint32_t total) {
 }
 
 const uint8_t *config_getSeed(void) {
+  // root node is properly cached
+  if ((activeSessionCache != NULL) &&
+      (activeSessionCache->seedCached == sectrue)) {
+    return activeSessionCache->seed;
+  }
   if (!g_bSelectSEFlag) {
-    // root node is properly cached
-    if ((activeSessionCache != NULL) &&
-        (activeSessionCache->seedCached == sectrue)) {
-      return activeSessionCache->seed;
-    }
-
     // if storage has mnemonic, convert it to node and use it
     char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
     if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
@@ -676,6 +677,10 @@ const uint8_t *config_getSeed(void) {
     if (!protectPassphrase(passphrase)) {
       memzero(passphrase, sizeof(passphrase));
       return NULL;
+    }
+    if (activeSessionCache == NULL) {
+      // this should not happen if the Host behaves and sends Initialize first
+      session_startSession(NULL);
     }
     mnemonic_to_seed(FALSE_BYTE, NULL, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
@@ -1078,22 +1083,33 @@ void config_wipe(void) {
   storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   config_setSeSessionKey(session_key, 16);
+  config_getLanguage(config_language, sizeof(config_language));
 }
 
-void config_setFreePayPinFlag(bool flag) {
+void config_setFastPayPinFlag(bool flag) {
   config_set_bool(KEY_FREEPAYPINFLAG, flag);
 }
 
-bool config_getFreePayPinFlag(void) {
+bool config_getFastPayPinFlag(void) {
   bool flag = false;
-  return sectrue == config_get_bool(KEY_FREEPAYPINFLAG, &flag);
+  config_get_bool(KEY_FREEPAYPINFLAG, &flag);
+  return flag;
 }
 
-void config_setFreePayMoneyLimt(uint64_t MoneyLimt) {
+void config_setFastPayConfirmFlag(bool flag) {
+  config_set_bool(KEY_FREEPAYCONFIRMFLAG, flag);
+}
+bool config_getFastPayConfirmFlag(void) {
+  bool flag = false;
+  config_get_bool(KEY_FREEPAYCONFIRMFLAG, &flag);
+  return flag;
+}
+
+void config_setFastPayMoneyLimt(uint64_t MoneyLimt) {
   storage_set(KEY_FREEPAYMONEYLIMT, &MoneyLimt, sizeof(uint64_t));
 }
 
-uint64_t config_getFreePayMoneyLimt(void) {
+uint64_t config_getFastPayMoneyLimt(void) {
   uint64_t MoneyLimt = 0;
   uint16_t len = sizeof(MoneyLimt);
   config_get_bytes(KEY_FREEPAYMONEYLIMT, (uint8_t *)&MoneyLimt,
@@ -1101,11 +1117,11 @@ uint64_t config_getFreePayMoneyLimt(void) {
   return MoneyLimt;
 }
 
-void config_setFreePayTimes(uint32_t times) {
+void config_setFastPayTimes(uint32_t times) {
   storage_set(KEY_FREEPAYPTIMES, &times, sizeof(uint32_t));
 }
 
-uint32_t config_getFreePayTimes(void) {
+uint32_t config_getFastPayTimes(void) {
   uint32_t times = 0;
   config_get_uint32(KEY_FREEPAYPTIMES, &times);
   return times;

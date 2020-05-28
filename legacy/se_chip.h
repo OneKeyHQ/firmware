@@ -17,8 +17,9 @@ bool se_delete_key(const uint16_t key);
 void se_reset_storage(const uint16_t key);
 bool se_get_sn(void *val_dest, uint16_t max_len, uint16_t *len);
 bool se_get_version(void *val_dest, uint16_t max_len, uint16_t *len);
-bool se_verify(void *message, uint16_t message_len, void *val_dest,
-               uint16_t max_len, uint16_t *len);
+bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
+               void *cert_val, uint16_t *cert_len, void *signature_val,
+               uint16_t *signature_len);
 bool se_backup(void *val_dest, uint16_t *len);
 bool se_restore(void *val_src, uint16_t src_len);
 #endif
