@@ -449,7 +449,7 @@ void config_init(void) {
   }
 
 #if !EMULATOR
-  vMI2CDRV_SynSessionKey();
+  se_sync_session_key();
 #endif
 
   uint16_t len = 0;
@@ -497,7 +497,7 @@ static void config_compute_u2froot(const char *mnemonic,
   static CONFIDENTIAL HDNode node;
   static CONFIDENTIAL uint8_t seed[64];
   char oldTiny = usbTiny(1);
-  mnemonic_to_seed(FALSE_BYTE, mnemonic, "", seed,
+  mnemonic_to_seed(mnemonic, "", seed,
                    get_u2froot_callback);  // BIP-0039
   usbTiny(oldTiny);
   hdnode_from_seed(seed, 64, NIST256P1_NAME, &node);
@@ -660,8 +660,7 @@ const uint8_t *config_getSeed(void) {
         // this should not happen if the Host behaves and sends Initialize first
         session_startSession(NULL);
       }
-      mnemonic_to_seed(FALSE_BYTE, mnemonic, passphrase,
-                       activeSessionCache->seed,
+      mnemonic_to_seed(mnemonic, passphrase, activeSessionCache->seed,
                        get_root_node_callback);  // BIP-0039
       memzero(mnemonic, sizeof(mnemonic));
       memzero(passphrase, sizeof(passphrase));
@@ -682,7 +681,7 @@ const uint8_t *config_getSeed(void) {
       // this should not happen if the Host behaves and sends Initialize first
       session_startSession(NULL);
     }
-    mnemonic_to_seed(FALSE_BYTE, NULL, passphrase, activeSessionCache->seed,
+    mnemonic_to_seed(NULL, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
     activeSessionCache->seedCached = sectrue;
     return activeSessionCache->seed;
@@ -796,9 +795,9 @@ bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg) {
   if (!g_bSelectSEFlag) {
     return false;
   }
-  if (sectrue != MI2CDRV_Transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF), NULL, 0,
-                                  get_msg->bytes, &get_msg->size, FLAG_PUBLIC,
-                                  GET_SESTORE_DATA)) {
+  if (sectrue != se_transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF), NULL, 0,
+                             get_msg->bytes, &get_msg->size, FLAG_PUBLIC,
+                             GET_SESTORE_DATA)) {
     return false;
   }
   get_msg->bytes[get_msg->size] = '\0';
@@ -808,9 +807,9 @@ bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
   if (!g_bSelectSEFlag) {
     return false;
   }
-  if (sectrue != MI2CDRV_Transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF),
-                                  input_msg->bytes, input_msg->size, NULL, NULL,
-                                  FLAG_PUBLIC, DELETE_SESTORE_DATA)) {
+  if (sectrue != se_transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF),
+                             input_msg->bytes, input_msg->size, NULL, NULL,
+                             FLAG_PUBLIC, DELETE_SESTORE_DATA)) {
     return false;
   }
   return true;

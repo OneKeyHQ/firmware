@@ -787,7 +787,6 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   } else {
     fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
   }
-
   layoutHome();
   return;
 };

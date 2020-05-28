@@ -24,15 +24,15 @@
 #include "common.h"
 #include "hmac.h"
 #include "memzero.h"
-#include "mi2c.h"
 #include "norcow.h"
 #include "pbkdf2.h"
 #include "rand.h"
+#include "sha2.h"
+#include "storage.h"
+
 #if USE_SE
 #include "se_chip.h"
 #endif
-#include "sha2.h"
-#include "storage.h"
 
 #define LOW_MASK 0x55555555
 
@@ -544,14 +544,15 @@ static secbool set_pin(uint32_t pin, const uint8_t *ext_salt) {
     memzero(&pin, sizeof(pin));
     return ret;
   } else {
-    secbool ret;
-
+    secbool ret = secfalse;
+#if USE_SE
     if (pin != PIN_EMPTY) {
       ret = storage_set(KEY_PIN, &pin, sizeof(pin));
     } else {
       ret = sectrue;
     }
     memzero(&pin, sizeof(pin));
+#endif
     return ret;
   }
 }
@@ -1175,7 +1176,7 @@ secbool storage_get(const uint16_t key, void *val_dest, const uint16_t max_len,
       return storage_get_encrypted(key, val_dest, max_len, len);
     }
   } else {
-#if !EMULATOR
+#if USE_SE
     if (se_get_value(key, val_dest, max_len, len)) return sectrue;
 #endif
     return secfalse;
@@ -1256,7 +1257,7 @@ secbool storage_set(const uint16_t key, const void *val, const uint16_t len) {
       ret = storage_set_encrypted(key, val, len);
     }
   } else {
-#if !EMULATOR
+#if USE_SE
     if (se_set_value(key, val, len)) return sectrue;
     return secfalse;
 #endif
@@ -1282,7 +1283,7 @@ secbool storage_delete(const uint16_t key) {
     }
     return ret;
   } else {
-#if !EMULATOR
+#if USE_SE
     if (se_delete_key(key)) return sectrue;
 #endif
     return secfalse;

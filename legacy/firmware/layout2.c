@@ -324,7 +324,9 @@ void layoutHome(void) {
     }
     layoutFillBleName(5);
   }
+#if !EMULATOR
   layoutStatusLogo(true);
+#endif
   oledRefresh();
 
   // Reset lock screen timeout
@@ -1067,6 +1069,9 @@ void layoutDeviceInfo(uint8_t ucPage) {
   int y = 9;
   char label[MAX_LABEL_LEN + 1] = _("");
 
+  (void)version_len;
+  (void)sn_len;
+
   switch (ucPage) {
     case 1:
       oledClear();
@@ -1190,7 +1195,6 @@ void layoutDeviceInfo(uint8_t ucPage) {
 
 void layoutHomeInfo(void) {
   static uint8_t info_page = 0;
-  static uint32_t system_millis_logo_refresh = 0;
   buttonUpdate();
 
   if (layoutNeedRefresh()) {
@@ -1229,6 +1233,7 @@ void layoutHomeInfo(void) {
   if (layoutLast == layoutHome) {
     if ((timer_ms() - system_millis_lock_start) >=
         config_getAutoLockDelayMs()) {
+#if !EMULATOR
       if (sys_nfcState() || sys_usbState()) {
         // lock the screen
         session_clear(true);
@@ -1236,14 +1241,20 @@ void layoutHomeInfo(void) {
       } else {
         shutdown();
       }
-    }
-    // 1000 ms refresh
-    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-#if !EMULATOR
-      layoutStatusLogo(false);
-      system_millis_logo_refresh = timer_ms();
+#else
+      // lock the screen
+      session_clear(true);
+      layoutScreensaver();
 #endif
     }
+#if !EMULATOR
+    static uint32_t system_millis_logo_refresh = 0;
+    // 1000 ms refresh
+    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+      layoutStatusLogo(false);
+      system_millis_logo_refresh = timer_ms();
+    }
+#endif
   }
   // wake from screensaver on any button
   if (layoutLast == layoutScreensaver &&

@@ -20,7 +20,11 @@
 #ifndef __TREZORHAL_COMMON_H__
 #define __TREZORHAL_COMMON_H__
 
+#include <stdbool.h>
 #include "secbool.h"
+
+extern uint8_t ui_language;
+extern bool g_bSelectSEFlag;
 
 void wait_random(void);
 

@@ -79,7 +79,7 @@ for BITCOIN_ONLY in 0 1; do
       pipenv install && \
       pipenv run script/cibuild && \
       mkdir -p build/firmware && \
-      cp firmware/trezor.bin build/firmware/firmware.bin && \
-      cp firmware/trezor.elf build/firmware/firmware.elf"
+      cp firmware/*.bin build/firmware/firmware.bin && \
+      cp firmware/*.elf build/firmware/firmware.elf"
 
 done

@@ -190,10 +190,8 @@ void setupApp(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
-#if USE_SE
   // master i2c init
   vMI2CDRV_Init();
-#endif
 }
 
 #define MPU_RASR_SIZE_32B (0x04UL << MPU_RASR_SIZE_LSB)

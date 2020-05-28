@@ -30,10 +30,14 @@ extern volatile uint32_t i2c_data_outlen, i2c_data_out_pos;
 
 extern trans_fifo i2c_fifo_in, i2c_fifo_out;
 
+#if !EMULATOR
 void i2c_slave_init_irq(void);
 void i2c_slave_init(void);
 void i2c_set_wait(bool flag);
 void i2c_slave_send(uint32_t data_len);
 void i2c_slave_send_ex(uint32_t data_len);
+#else
+#define i2c_set_wait(...)
+#endif
 
 #endif

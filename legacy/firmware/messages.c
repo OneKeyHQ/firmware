@@ -205,7 +205,7 @@ bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr) {
     msg_debug_out_pad();
   }
 #endif
-
+#if !EMULATOR
   if (CHANNEL_SLAVE == host_channel) {
     const uint8_t *data;
     uint32_t offset = 0;
@@ -217,6 +217,7 @@ bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr) {
       i2c_slave_send(offset);
     }
   }
+#endif
   return status;
 }
 

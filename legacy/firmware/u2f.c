@@ -441,6 +441,7 @@ void u2fhid_msg(const APDU *a, uint32_t len) {
         send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);
       }
 #endif
+      break;
   }
 }
 

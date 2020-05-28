@@ -37,8 +37,9 @@ Issue Date: 02/08/2018
 extern "C"
 {
 #endif
-
- #define AES_128     /* if a fast 128 bit key scheduler is needed     */
+#ifndef AES_128
+#define AES_128     /* if a fast 128 bit key scheduler is needed     */
+#endif
 // #define AES_192     /* if a fast 192 bit key scheduler is needed     */
 #define AES_256     /* if a fast 256 bit key scheduler is needed     */
 // #define AES_VAR     /* if variable key size scheduler is needed      */

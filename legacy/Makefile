@@ -23,10 +23,8 @@ OBJS += segger_rtt/SEGGER_RTT.o
 OBJS += segger_rtt/SEGGER_RTT_printf.o
 OBJS += segger_rtt/rtt_log.o
 
-ifeq ($(USE_SE),1)
 OBJS += mi2c.o
 OBJS += se_chip.o
-endif
 
 endif
 

@@ -23,6 +23,9 @@
 
 #include "common.h"
 
+uint8_t ui_language = 0;
+bool g_bSelectSEFlag = false;
+
 void wait_random(void) {}
 
 void __shutdown(void) {

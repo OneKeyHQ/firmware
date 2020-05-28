@@ -187,7 +187,7 @@ upgrade tests legacy deploy:
     - "[[ $TAG == '' ]] && echo 'Tag is not legacy/*: exiting.' && exit 1"
     - DEST=${DEPLOY_PATH}/trezor-emu-$TAG
     - echo "Deploying to $DEST"
-    - rsync --delete -va legacy/firmware/trezor.elf "$DEST"
+    - rsync --delete -va legacy/firmware/*.elf "$DEST"
   only:
     - /^legacy\//
   except:
