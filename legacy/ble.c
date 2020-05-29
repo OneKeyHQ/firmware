@@ -29,7 +29,7 @@ static void ble_cmd_packet(uint8_t *value, uint8_t value_len) {
   cmd[0] = 0x5a;
   cmd[1] = 0xa5;
   cmd[2] = ((value_len + 1) >> 8) & 0xff;
-  cmd[3] = value_len & 0xff;
+  cmd[3] = (value_len + 1) & 0xff;
   memcpy(cmd + 4, value, value_len);
   cmd[value_len + 4] = calXor(cmd, value_len + 4);
   ble_usart_send(cmd, value_len + 5);
