@@ -662,8 +662,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
   uint32_t uiTemp;
 
   if (msg->type == SeedRequestType_SeedRequestType_Gen) {
-    CHECK_PIN
     CHECK_NOT_INITIALIZED
+    CHECK_PIN
     for (i = 0; i < 16; i++) {
       uiTemp = random32();
       memcpy(ucBuf + 1 + i * 4, &uiTemp, 4);
@@ -679,8 +679,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     return;
   } else if (msg->type == SeedRequestType_SeedRequestType_EncExport) {
     RESP_INIT(BixinOutMessageSE);
-    CHECK_PIN
     CHECK_INITIALIZED
+    CHECK_PIN
     if (!config_SeedsEncExportBytes(
             (BixinOutMessageSE_outmessage_t *)(&resp->outmessage))) {
       fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
@@ -692,8 +692,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     layoutHome();
     return;
   } else if (msg->type == SeedRequestType_SeedRequestType_EncImport) {
-    CHECK_PIN
     CHECK_NOT_INITIALIZED
+    CHECK_PIN
     if (msg->has_seed_importData) {
       if (config_SeedsEncImportBytes(
               (BixinSeedOperate_seed_importData_t *)(&msg->seed_importData))) {
@@ -709,6 +709,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
+  CHECK_INITIALIZED
+  CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
   usbPoll();  // send response before reboot
 #if !EMULATOR
