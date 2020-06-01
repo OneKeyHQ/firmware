@@ -24,15 +24,18 @@
 #include <stdbool.h>
 #include <string.h>
 
+#if USE_SE
+#include "common.h"
+#include "se_chip.h"
+#endif
+
 #include "bip39.h"
 #include "bip39_english.h"
 #include "hmac.h"
 #include "memzero.h"
-#include "mi2c.h"
 #include "options.h"
 #include "pbkdf2.h"
 #include "rand.h"
-#include "se_chip.h"
 #include "sha2.h"
 
 #if USE_BIP39_CACHE
@@ -181,14 +184,13 @@ int mnemonic_check(const char *mnemonic) {
 }
 
 // passphrase must be at most 256 characters otherwise it would be truncated
-void mnemonic_to_seed(bool ucMode, const char *mnemonic, const char *passphrase,
+void mnemonic_to_seed(const char *mnemonic, const char *passphrase,
                       uint8_t seed[512 / 8],
                       void (*progress_callback)(uint32_t current,
                                                 uint32_t total)) {
-#if !EMULATOR
-  extern bool g_bSelectSEFlag;
+#if USE_SE
   if (g_bSelectSEFlag) {
-    se_get_seed(ucMode, passphrase, seed);
+    se_get_seed(false, passphrase, seed);
     return;
   }
 #endif
@@ -236,7 +238,6 @@ void mnemonic_to_seed(bool ucMode, const char *mnemonic, const char *passphrase,
     bip39_cache_index = (bip39_cache_index + 1) % BIP39_CACHE_SIZE;
   }
 #endif
-  (void)(ucMode);
 }
 
 // binary search for finding the word in the wordlist

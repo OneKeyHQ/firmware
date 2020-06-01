@@ -21,7 +21,6 @@ enum {
 bool ble_connect_state(void);
 void ble_request_info(uint8_t type);
 void ble_ctl_onoff(void);
-void change_ble_sta(uint8_t mode);
 void ble_reset(void);
 void ble_uart_poll(void);
 
@@ -35,11 +34,16 @@ char *ble_get_ver(void);
 bool ble_switch_state(void);
 void ble_set_switch(bool flag);
 bool ble_get_switch(void);
+void change_ble_sta(uint8_t mode);
 #else
 #define ble_name_state(...) false
 #define ble_ver_state(...) false
 #define ble_get_name(...) "BixinKEY814591011"
 #define ble_get_ver(...) "1.0.1"
+#define ble_switch_state(...) false
+#define ble_set_switch(...)
+#define ble_get_switch(...) false
+#define change_ble_sta(...)
 #endif
 
 #endif

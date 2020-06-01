@@ -345,23 +345,65 @@ void layoutButtonYes_zh(const char *btnYes, const BITMAP *icon) {
       OLED_HEIGHT - 12, OLED_WIDTH, OLED_HEIGHT);
 }
 
+static bool is_valid_ascii(const uint8_t *data, uint32_t size) {
+  for (uint32_t i = 0; i < size; i++) {
+    if (data[i] < ' ' || data[i] > '~') {
+      return false;
+    }
+  }
+  return true;
+}
+
 void layoutDialog_zh(const BITMAP *icon, const char *btnNo, const char *btnYes,
                      const char *desc, const char *line1, const char *line2,
-                     const char *line3) {
+                     const char *line3, const char *line4) {
   int left = 0;
+  int y = 0;
+  int l = 0;
   oledClear();
   if (icon) {
     oledDrawBitmap(0, 0, icon);
     left = icon->width + 4;
   }
-  if (line1) oledDrawString_zh(left, 0 * 13, (uint8_t *)line1);
-  if (line2) oledDrawString_zh(left, 1 * 13, (uint8_t *)line2);
-  if (line3) oledDrawString_zh(left, 2 * 13, (uint8_t *)line3);
+  if (line1) oledDrawString_zh(left, y, (uint8_t *)line1);
+  if (line1 && is_valid_ascii((uint8_t *)line1, strlen(line1))) {
+    y += 9;
+  } else {
+    y += 13;
+  }
+  if (line2) oledDrawString_zh(left, y, (uint8_t *)line2);
+  if (line2 && is_valid_ascii((uint8_t *)line2, strlen(line2))) {
+    y += 9;
+  } else {
+    y += 13;
+  }
+  if (line3) oledDrawString_zh(left, y, (uint8_t *)line3);
+  if (line3 && is_valid_ascii((uint8_t *)line3, strlen(line3))) {
+    y += 9;
+  } else {
+    y += 13;
+  }
+
   if (desc) {
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 12,
+                            (uint8_t *)desc);
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - 25);
+    }
+    // have enough space for line4
+    if (line4 && is_valid_ascii((uint8_t *)line4, strlen(line4))) {
+      l = 9;
+    } else {
+      l = 13;
+    }
+    if (y < OLED_HEIGHT - 25 - l) {
+      if (line4) oledDrawString_zh(left, y, (uint8_t *)line4);
+    }
   } else {
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - 14);
     }
+    if (line4) oledDrawString_zh(left, y, (uint8_t *)line4);
   }
   if (btnNo) {
     layoutButtonNo_zh(btnNo, &bmp_btn_cancel);

@@ -44,11 +44,6 @@
 #include "timer.h"
 #include "util.h"
 
-uint8_t Disp_buffer[DISP_BUFSIZE];
-
-static uint16_t s_usCurrentCount;
-static uint16_t s_uiShowLength;
-
 /* Display info timeout */
 uint32_t system_millis_display_info_start = 0;
 
@@ -66,6 +61,8 @@ const char *ui_prompt_new_pin_ack[2] = {"Please re-enter new PIN:",
 const char *ui_prompt_seed_pin[2] = {"Please enter backup PIN:", "请输入备份PIN"};
 const char *ui_prompt_seed_pin_ack[2] = {"Please re-enter backup PIN:",
                                         "请再次输入备份PIN"};
+const char *ui_prompt_singing[2] = {"Singiing", "签名中..."};
+const char *ui_prompt_verifying[2] = {"Verifying", "验签中..."};
 
 #if !BITCOIN_ONLY
 
@@ -270,7 +267,7 @@ void layoutProgressSwipe(const char *desc, int permil) {
     layoutLast = layoutProgressSwipe;
     layoutSwipe();
   }
-  layoutProgress(desc, permil);
+  layoutProgress_zh(desc, permil);
 }
 
 void layoutScreensaver(void) {
@@ -330,7 +327,9 @@ void layoutHome(void) {
     }
     layoutFillBleName(5);
   }
+#if !EMULATOR
   layoutStatusLogo(true);
+#endif
   oledRefresh();
 
   // Reset lock screen timeout
@@ -482,14 +481,24 @@ void layoutSignMessage(const uint8_t *msg, uint32_t len) {
   const char **str = NULL;
   if (!is_valid_ascii(msg, len)) {
     str = split_message_hex(msg, len);
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
-                      _("Sign binary message?"), str[0], str[1], str[2], str[3],
-                      NULL, NULL);
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", "签名消息",
+                           str[0], str[1], str[2], str[3]);
+    } else {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
+                        _("Sign binary message?"), str[0], str[1], str[2],
+                        str[3], NULL, NULL);
+    }
   } else {
     str = split_message(msg, len, 18);
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
-                      _("Sign message?"), str[0], str[1], str[2], str[3], NULL,
-                      NULL);
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", "签名消息",
+                           str[0], str[1], str[2], str[3]);
+    } else {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
+                        _("Sign message?"), str[0], str[1], str[2], str[3],
+                        NULL, NULL);
+    }
   }
 }
 
@@ -1051,52 +1060,6 @@ void layoutCosiCommitSign(const uint32_t *address_n, size_t address_n_count,
                     str[1], str[2], str[3], NULL, NULL);
 }
 
-void Disp_Page(const BITMAP *icon, const char *btnNo, const char *btnYes,
-               const char *desc, uint8_t *pucInfoBuf, uint16_t usLen) {
-  char j, line1[33], line2[33], line3[33], line4[33], line5[33], line6[33];
-  j = 0;
-  if (usLen > 32) {
-    usLen = 32;
-  }
-  memzero(line1, sizeof(line1));
-  memzero(line2, sizeof(line2));
-  memzero(line3, sizeof(line3));
-  memzero(line4, sizeof(line4));
-  memzero(line5, sizeof(line5));
-  memzero(line6, sizeof(line6));
-  memcpy(line1, (char *)(pucInfoBuf + j * usLen), usLen);
-  j++;
-  memcpy(line2, (char *)(pucInfoBuf + j * usLen), usLen);
-  j++;
-  memcpy(line3, (char *)(pucInfoBuf + j * usLen), usLen);
-  j++;
-  memcpy(line4, (char *)(pucInfoBuf + j * usLen), usLen);
-  j++;
-  memcpy(line5, (char *)(pucInfoBuf + j * usLen), usLen);
-  j++;
-  memcpy(line6, (char *)(pucInfoBuf + j * usLen), usLen);
-
-  layoutDialog(icon, btnNo, btnYes, desc, line1, line2, line3, line4, line5,
-               line6);
-}
-
-void vDISP_TurnPageUP(void) {
-  if (s_usCurrentCount == 0) {
-    return;
-  }
-  s_usCurrentCount = s_usCurrentCount - DISP_PAGESIZE;
-  Disp_Page(&bmp_icon_question, _("Up"), _("Down"), NULL,
-            Disp_buffer + s_usCurrentCount, 16);
-}
-
-void vDISP_TurnPageDOWN(void) {
-  if ((s_usCurrentCount + DISP_PAGESIZE) >= s_uiShowLength) {
-    return;
-  }
-  s_usCurrentCount += DISP_PAGESIZE;
-  Disp_Page(&bmp_icon_question, _("Up"), _("Down"), NULL,
-            Disp_buffer + s_usCurrentCount, 16);
-}
 void layoutDeviceInfo(uint8_t ucPage) {
   uint64_t amount;
   uint32_t times;
@@ -1108,6 +1071,9 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint16_t sn_len = sizeof(se_sn);
   int y = 9;
   char label[MAX_LABEL_LEN + 1] = _("");
+
+  (void)version_len;
+  (void)sn_len;
 
   switch (ucPage) {
     case 1:
@@ -1232,7 +1198,6 @@ void layoutDeviceInfo(uint8_t ucPage) {
 
 void layoutHomeInfo(void) {
   static uint8_t info_page = 0;
-  static uint32_t system_millis_logo_refresh = 0;
   buttonUpdate();
 
   if (layoutNeedRefresh()) {
@@ -1271,6 +1236,7 @@ void layoutHomeInfo(void) {
   if (layoutLast == layoutHome) {
     if ((timer_ms() - system_millis_lock_start) >=
         config_getAutoLockDelayMs()) {
+#if !EMULATOR
       if (sys_nfcState() || sys_usbState()) {
         // lock the screen
         session_clear(true);
@@ -1278,14 +1244,20 @@ void layoutHomeInfo(void) {
       } else {
         shutdown();
       }
-    }
-    // 1000 ms refresh
-    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-#if !EMULATOR
-      layoutStatusLogo(false);
-      system_millis_logo_refresh = timer_ms();
+#else
+      // lock the screen
+      session_clear(true);
+      layoutScreensaver();
 #endif
     }
+#if !EMULATOR
+    static uint32_t system_millis_logo_refresh = 0;
+    // 1000 ms refresh
+    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+      layoutStatusLogo(false);
+      system_millis_logo_refresh = timer_ms();
+    }
+#endif
   }
   // wake from screensaver on any button
   if (layoutLast == layoutScreensaver &&
@@ -1339,8 +1311,8 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
 void layoutDialogSwipe_zh(const BITMAP *icon, const char *btnNo,
                           const char *btnYes, const char *desc,
                           const char *line1, const char *line2,
-                          const char *line3) {
+                          const char *line3, const char *line4) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  layoutDialog_zh(icon, btnNo, btnYes, desc, line1, line2, line3);
+  layoutDialog_zh(icon, btnNo, btnYes, desc, line1, line2, line3, line4);
 }

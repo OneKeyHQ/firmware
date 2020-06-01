@@ -25,7 +25,7 @@ BINDIR = ROOT / "tests" / "emulators"
 
 LOCAL_BUILD_PATHS = {
     "core": ROOT / "core" / "build" / "unix" / "micropython",
-    "legacy": ROOT / "legacy" / "firmware" / "trezor.elf",
+    "legacy": ROOT / "legacy" / "firmware" / "bixin.elf",
 }
 
 CORE_SRC_DIR = ROOT / "core" / "src"

@@ -25,18 +25,20 @@
 #include <stdbool.h>
 #include <string.h>
 
+#if USE_SE
+#include "common.h"
+#include "se_chip.h"
+#endif
 #include "address.h"
 #include "aes/aes.h"
 #include "base58.h"
 #include "bignum.h"
 #include "bip32.h"
-#include "common.h"
 #include "curves.h"
 #include "ecdsa.h"
 #include "ed25519-donna/ed25519-sha3.h"
 #include "ed25519-donna/ed25519.h"
 #include "hmac.h"
-#include "mi2c.h"
 #include "nist256p1.h"
 #include "secp256k1.h"
 #include "sha2.h"
@@ -532,13 +534,13 @@ int hdnode_private_ckd_cached(HDNode *inout, const uint32_t *i, size_t i_count,
     // no way how to compute parent fingerprint
     return 1;
   }
-#if !EMULATOR
+#if USE_SE
   if (g_bSelectSEFlag) {
     uint8_t ucRevBuf[256];
     uint16_t usLen;
-    if (MI2C_OK != MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA, EDDSA_INDEX_CHILDKEY,
-                                    (uint8_t *)i, i_count * 4, ucRevBuf, &usLen,
-                                    MI2C_PLAIN, SET_SESTORE_DATA)) {
+    if (MI2C_OK != se_transmit(MI2C_CMD_ECC_EDDSA, EDDSA_INDEX_CHILDKEY,
+                               (uint8_t *)i, i_count * 4, ucRevBuf, &usLen,
+                               MI2C_PLAIN, SET_SESTORE_DATA)) {
       return 0;
     }
     inout->depth = ucRevBuf[0];
@@ -790,6 +792,8 @@ int hdnode_nem_decrypt(const HDNode *node, const ed25519_public_key public_key,
 int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
                 HasherType hasher_sign, uint8_t *sig, uint8_t *pby,
                 int (*is_canonical)(uint8_t by, uint8_t sig[64])) {
+  uint8_t hash_mode = 0;
+  (void)hash_mode;
   if (node->curve->params) {
     return ecdsa_sign(node->curve->params, hasher_sign, node->private_key, msg,
                       msg_len, sig, pby, is_canonical);
@@ -797,17 +801,17 @@ int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
     return 1;  // signatures are not supported
   } else {
     if (node->curve == &ed25519_info) {
-      g_uchash_mode = 0;
+      hash_mode = 0;
       hdnode_fill_public_key(node);
       ed25519_sign(msg, msg_len, node->private_key, node->public_key + 1, sig);
     } else if (node->curve == &ed25519_sha3_info) {
-      g_uchash_mode = 1;
+      hash_mode = 1;
       hdnode_fill_public_key(node);
       ed25519_sign_sha3(msg, msg_len, node->private_key, node->public_key + 1,
                         sig);
 #if USE_KECCAK
     } else if (node->curve == &ed25519_keccak_info) {
-      g_uchash_mode = 2;
+      hash_mode = 2;
       hdnode_fill_public_key(node);
       ed25519_sign_keccak(msg, msg_len, node->private_key, node->public_key + 1,
                           sig);
@@ -815,6 +819,9 @@ int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
     } else {
       return 1;  // unknown or unsupported curve
     }
+#if USE_SE
+    g_uchash_mode = hash_mode;
+#endif
     return 0;
   }
 }

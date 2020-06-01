@@ -158,7 +158,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
     if (config_hasPin()) {
       if (ui_language) {
         layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                             "移除PIN码", NULL, NULL);
+                             "移除PIN码", NULL, NULL, NULL);
       } else {
         layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                           _("Do you really want to"), _("remove current PIN?"),
@@ -173,7 +173,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
     if (config_hasPin()) {
       if (ui_language) {
         layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                             "修改PIN码", NULL, NULL);
+                             "修改PIN码", NULL, NULL, NULL);
       } else {
         layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                           _("Do you really want to"), _("change current PIN?"),
@@ -183,7 +183,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
     } else {
       if (ui_language) {
         layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                             "设置PIN码", NULL, NULL);
+                             "设置PIN码", NULL, NULL, NULL);
       } else {
         layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                           _("Do you really want to"), _("set new PIN?"), NULL,
@@ -265,7 +265,7 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
   (void)msg;
   if (ui_language) {
     layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL, "删除钱包",
-                         "所有数据将丢失", NULL);
+                         "所有数据将丢失", NULL, NULL);
   } else {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("wipe the device?"), NULL,
@@ -443,7 +443,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_label) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                           "设置钱包名称为:", msg->label, "?");
+                           "设置钱包名称为:", msg->label, "?", NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                         _("Do you really want to"), _("change name to"),
@@ -459,7 +459,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
                            "设置语言为:", (fsm_getLang(msg) ? "中文" : "英语"),
-                           NULL);
+                           NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                         _("Do you really want to"), _("change language to"),
@@ -475,7 +475,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
                            msg->use_passphrase ? "使用密语" : "禁用密语",
-                           "加密?", NULL);
+                           "加密?", NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                         _("Do you really want to"),
@@ -492,7 +492,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_homescreen) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                           "修改屏幕显示", NULL, NULL);
+                           "修改屏幕显示", NULL, NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                         _("Do you really want to"), _("change the home"),
@@ -557,7 +557,12 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
   if (msg->has_fastpay_pin) {
-    config_setFastPayPinFlag(msg->fastpay_pin);
+    // not allowed set true if not use se
+    if (!g_bSelectSEFlag) {
+      config_setFastPayPinFlag(false);
+    } else {
+      config_setFastPayPinFlag(msg->fastpay_pin);
+    }
   }
   if (msg->has_fastpay_confirm) {
     config_setFastPayConfirmFlag(msg->fastpay_confirm);
@@ -657,8 +662,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
   uint32_t uiTemp;
 
   if (msg->type == SeedRequestType_SeedRequestType_Gen) {
-    CHECK_PIN
     CHECK_NOT_INITIALIZED
+    CHECK_PIN
     for (i = 0; i < 16; i++) {
       uiTemp = random32();
       memcpy(ucBuf + 1 + i * 4, &uiTemp, 4);
@@ -674,8 +679,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     return;
   } else if (msg->type == SeedRequestType_SeedRequestType_EncExport) {
     RESP_INIT(BixinOutMessageSE);
-    CHECK_PIN
     CHECK_INITIALIZED
+    CHECK_PIN
     if (!config_SeedsEncExportBytes(
             (BixinOutMessageSE_outmessage_t *)(&resp->outmessage))) {
       fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
@@ -687,8 +692,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
     layoutHome();
     return;
   } else if (msg->type == SeedRequestType_SeedRequestType_EncImport) {
-    CHECK_PIN
     CHECK_NOT_INITIALIZED
+    CHECK_PIN
     if (msg->has_seed_importData) {
       if (config_SeedsEncImportBytes(
               (BixinSeedOperate_seed_importData_t *)(&msg->seed_importData))) {
@@ -704,6 +709,8 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
+  CHECK_INITIALIZED
+  CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
   usbPoll();  // send response before reboot
 #if !EMULATOR
@@ -810,7 +817,6 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   } else {
     fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
   }
-
   layoutHome();
   return;
 };

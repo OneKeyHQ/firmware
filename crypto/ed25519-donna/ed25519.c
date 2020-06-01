@@ -18,11 +18,11 @@
 #include "ed25519.h"
 
 #include "ed25519-hash-custom.h"
-#include "mi2c.h"
 
-extern bool g_bSelectSEFlag; 
-extern uint8_t g_uchash_mode;
-
+#if USE_SE
+#include "common.h"
+#include "se_chip.h"
+#endif
 /*
 	Generates a (extsk[0..31]) and aExt (extsk[32..63])
 */
@@ -46,13 +46,13 @@ ed25519_hram(hash_512bits hram, const ed25519_signature RS, const ed25519_public
 
 void
 ED25519_FN(ed25519_publickey) (const ed25519_secret_key sk, ed25519_public_key pk) {
-#if !EMULATOR 
+#if USE_SE 
    if (g_bSelectSEFlag){
     uint16_t usLen;
     uint8_t ucSendBuf[33];
     ucSendBuf[0] = g_uchash_mode;
     memcpy(ucSendBuf+1, (uint8_t *)sk, 0x20); 
-    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_GITPUBKEY,ucSendBuf, 0x21, pk,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA);
+    se_transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_GITPUBKEY,ucSendBuf, 0x21, pk,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA);
     return;
    }
 #endif                        
@@ -113,13 +113,13 @@ ED25519_FN(ed25519_cosi_sign) (const unsigned char *m, size_t mlen, const ed2551
 
 void
 ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_secret_key sk, const ed25519_public_key pk, ed25519_signature RS) {
-#if !EMULATOR
+#if USE_SE
  if (g_bSelectSEFlag){
   	uint16_t usLen;
   	uint8_t ucSendBuf[1024+32];
   	ucSendBuf[0] = g_uchash_mode;
     memcpy(ucSendBuf+1, m, mlen); 
-    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_SIGN,ucSendBuf, mlen+1, (uint8_t *)RS,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA); 
+    se_transmit(MI2C_CMD_ECC_EDDSA,EDDSA_INDEX_SIGN,ucSendBuf, mlen+1, (uint8_t *)RS,&usLen,MI2C_ENCRYPT,SET_SESTORE_DATA); 
     return;
    }
 #endif                      

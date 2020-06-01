@@ -1,5 +1,7 @@
 CC       ?= gcc
 
+CFLAGS   += -DUSE_SE=0
+
 OPTFLAGS ?= -O3 -g
 
 CFLAGS   += $(OPTFLAGS) \

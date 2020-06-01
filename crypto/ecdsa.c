@@ -27,14 +27,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if USE_SE
+#include "common.h"
+#include "se_chip.h"
+#endif
+
 #include "address.h"
 #include "base58.h"
 #include "bignum.h"
-#include "common.h"
 #include "ecdsa.h"
 #include "hmac.h"
 #include "memzero.h"
-#include "mi2c.h"
 #include "rand.h"
 #include "rfc6979.h"
 #include "secp256k1.h"
@@ -678,7 +681,9 @@ int ecdsa_sign(const ecdsa_curve *curve, HasherType hasher_sign,
 int ecdsa_sign_digest(const ecdsa_curve *curve, const uint8_t *priv_key,
                       const uint8_t *digest, uint8_t *sig, uint8_t *pby,
                       int (*is_canonical)(uint8_t by, uint8_t sig[64])) {
+#if USE_SE
   if (!g_bSelectSEFlag) {
+#endif
     int i = 0;
     curve_point R = {0};
     bignum256 k = {0}, z = {0}, randk = {0};
@@ -701,8 +706,8 @@ int ecdsa_sign_digest(const ecdsa_curve *curve, const uint8_t *priv_key,
         continue;
       }
 #else
-      // generate random number k
-      generate_k_random(&k, &curve->order);
+    // generate random number k
+    generate_k_random(&k, &curve->order);
 #endif
 
       // compute k*G
@@ -767,14 +772,14 @@ int ecdsa_sign_digest(const ecdsa_curve *curve, const uint8_t *priv_key,
     memzero(&rng, sizeof(rng));
 #endif
     return -1;
+#if USE_SE
   } else {
-#if !EMULATOR
     uint8_t ucRevBuf[65];
     uint16_t usLen;
     uint8_t by;  // signature recovery byte
-    if (MI2C_OK != MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA, ECC_INDEX_SIGN,
-                                    (uint8_t *)digest, 0x20, ucRevBuf, &usLen,
-                                    MI2C_ENCRYPT, SET_SESTORE_DATA)) {
+    if (MI2C_OK != se_transmit(MI2C_CMD_ECC_EDDSA, ECC_INDEX_SIGN,
+                               (uint8_t *)digest, 0x20, ucRevBuf, &usLen,
+                               MI2C_ENCRYPT, SET_SESTORE_DATA)) {
       return -1;
     }
     by = ucRevBuf[0];
@@ -782,14 +787,17 @@ int ecdsa_sign_digest(const ecdsa_curve *curve, const uint8_t *priv_key,
       *pby = by;
     }
     memcpy(sig, ucRevBuf + 1, 0x40);
-#endif
+
     return 0;
   }
+#endif
 }
 
 void ecdsa_get_public_key33(const ecdsa_curve *curve, const uint8_t *priv_key,
                             uint8_t *pub_key) {
+#if USE_SE
   if (!g_bSelectSEFlag) {
+#endif
     curve_point R = {0};
     bignum256 k = {0};
 
@@ -800,14 +808,13 @@ void ecdsa_get_public_key33(const ecdsa_curve *curve, const uint8_t *priv_key,
     bn_write_be(&R.x, pub_key + 1);
     memzero(&R, sizeof(R));
     memzero(&k, sizeof(k));
+#if USE_SE
   } else {
-#if !EMULATOR
     uint16_t usLen;
-    MI2CDRV_Transmit(MI2C_CMD_ECC_EDDSA, ECC_INDEX_GITPUBKEY,
-                     (uint8_t *)priv_key, 0x20, pub_key, &usLen, MI2C_ENCRYPT,
-                     SET_SESTORE_DATA);
-#endif
+    se_transmit(MI2C_CMD_ECC_EDDSA, ECC_INDEX_GITPUBKEY, (uint8_t *)priv_key,
+                0x20, pub_key, &usLen, MI2C_ENCRYPT, SET_SESTORE_DATA);
   }
+#endif
 }
 
 void ecdsa_get_public_key65(const ecdsa_curve *curve, const uint8_t *priv_key,

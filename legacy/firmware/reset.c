@@ -61,7 +61,7 @@ void reset_init(bool display_random, uint32_t _strength,
   if (!g_bIsBixinAPP) {
     if (ui_language) {
       layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                           "创建新的钱包?", NULL, NULL);
+                           "创建新的钱包?", NULL, NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                         _("Do you really want to"), _("create a new wallet?"),

@@ -178,7 +178,7 @@ openocd:
 gdb_bootloader: bootloader/bootloader.elf
 	$(GDB) $<
 
-gdb_firmware: firmware/trezor.elf
+gdb_firmware: firmware/*.elf
 	$(GDB) $<
 
 flash: $(NAME).bin
