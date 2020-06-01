@@ -63,6 +63,9 @@ const char *ui_prompt_input_pin[2] = {"Please enter the PIN:", "请输入PIN"};
 const char *ui_prompt_new_pin[2] = {"Please enter new PIN:", "请输入新PIN"};
 const char *ui_prompt_new_pin_ack[2] = {"Please re-enter new PIN:",
                                         "请再次输入新PIN"};
+const char *ui_prompt_seed_pin[2] = {"Please enter backup PIN:", "请输入备份PIN"};
+const char *ui_prompt_seed_pin_ack[2] = {"Please re-enter backup PIN:",
+                                        "请再次输入备份PIN"};
 
 #if !BITCOIN_ONLY
 

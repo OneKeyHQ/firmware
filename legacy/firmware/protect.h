@@ -35,7 +35,7 @@ bool protectPin(bool use_cached);
 bool protectChangePin(bool init, bool removal);
 bool protectChangeWipeCode(bool removal);
 bool protectPassphrase(char* passphrase);
-
+bool protectSeedPin(bool setpin);
 extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
 

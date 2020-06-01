@@ -534,3 +534,44 @@ bool protectPassphrase(char *passphrase) {
   layoutHome();
   return result;
 }
+
+
+
+bool protectSeedPin(bool setpin) {
+  static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
+  const char *pin = NULL;
+  const char *newpin = NULL;
+
+  pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                      ui_prompt_seed_pin[ui_language], &newpin);
+
+
+  if (pin == NULL || pin[0] == '\0') {
+    fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+    return false;
+  } else if (pin == PIN_CANCELED_BY_BUTTON)
+    return false;
+  if(setpin){
+    strlcpy(new_pin, pin, sizeof(new_pin));
+
+    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
+                      ui_prompt_seed_pin_ack[ui_language], &newpin);
+    if (pin == NULL) {
+      memzero(new_pin, sizeof(new_pin));
+      fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+      return false;
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
+    if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
+      memzero(new_pin, sizeof(new_pin));
+      fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
+      return false;
+    }
+
+  }
+  if(!config_setSeedPin(pin)){
+    fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
+    return false;
+  }
+  return true;
+}

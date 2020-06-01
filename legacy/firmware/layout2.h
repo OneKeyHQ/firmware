@@ -53,6 +53,8 @@ extern const char *ui_prompt_current_pin[2];
 extern const char *ui_prompt_input_pin[2];
 extern const char *ui_prompt_new_pin[2];
 extern const char *ui_prompt_new_pin_ack[2];
+extern const char *ui_prompt_seed_pin[2];
+extern const char *ui_prompt_seed_pin_ack[2];
 
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
