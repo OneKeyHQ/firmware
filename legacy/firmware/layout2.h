@@ -53,6 +53,8 @@ extern const char *ui_prompt_current_pin[2];
 extern const char *ui_prompt_input_pin[2];
 extern const char *ui_prompt_new_pin[2];
 extern const char *ui_prompt_new_pin_ack[2];
+extern const char *ui_prompt_seed_pin[2];
+extern const char *ui_prompt_seed_pin_ack[2];
 extern const char *ui_prompt_singing[2];
 extern const char *ui_prompt_verifying[2];
 

@@ -741,6 +741,10 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   RESP_INIT(BixinBackupAck);
   resp->data.size -= 4;  // 4bytes header,rfu
   if (g_bSelectSEFlag) {
+     if(!protectSeedPin(true)){
+      layoutHome();
+      return;
+    }
     resp->data.bytes[0] = 0x00;
     if (false == se_backup((uint8_t *)resp->data.bytes + 4, &resp->data.size)) {
       fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
@@ -750,8 +754,17 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
     resp->data.size += 4;
   } else {
     resp->data.bytes[0] = 0x01;
-    config_getMnemonic((char *)(resp->data.bytes + 4), resp->data.size - 4);
-    resp->data.size = strlen((char *)(resp->data.bytes + 4)) + 4;
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+	  char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
+
+    config_getMnemonic(mnemonic, sizeof(mnemonic));
+    protectPassphrase(passphrase);
+    if (false == config_STSeedBackUp(passphrase,(uint8_t *)mnemonic,strlen(mnemonic),(uint8_t *)(resp->data.bytes + 4), &resp->data.size)) {
+      fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+      layoutHome();
+      return;
+    }
+    resp->data.size += 4;
   }
   config_setNeedsBackup(false);
   msg_write(MessageType_MessageType_BixinBackupAck, resp);
@@ -767,6 +780,10 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     if (!config_getWhetherUseSE()) {
       config_setWhetherUseSE(true);
     }
+	  if(!protectSeedPin(false)){
+      layoutHome();
+      return;
+    }
     if (false ==
         se_restore((uint8_t *)(msg->data.bytes + 4), msg->data.size - 4)) {
       fsm_sendFailure(FailureType_Failure_DataError,
@@ -779,7 +796,18 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     if (config_getWhetherUseSE()) {
       config_setWhetherUseSE(false);
     }
-    if (config_setMnemonic((char *)(msg->data.bytes + 4))) {
+	  char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+    uint16_t mnemonic_len;
+
+    protectPassphrase(passphrase);
+    if (false == config_STSeedRestore(passphrase,(uint8_t *)(msg->data.bytes+4), msg->data.size-4,(uint8_t *)mnemonic, &mnemonic_len)) {
+      fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+      layoutHome();
+      return;
+    }
+    mnemonic[mnemonic_len] = '\0';
+    if (config_setMnemonic(mnemonic)) {
       fsm_sendSuccess(_("Device successfully initialized"));
     } else {
       fsm_sendFailure(FailureType_Failure_ProcessError,

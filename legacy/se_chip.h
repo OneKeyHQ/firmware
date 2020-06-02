@@ -76,6 +76,8 @@ bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
                uint16_t *signature_len);
 bool se_backup(void *val_dest, uint16_t *len);
 bool se_restore(void *val_src, uint16_t src_len);
+bool se_st_seed_en(const uint16_t key,void *plain_data, uint16_t plain_len,void *cipher_data, uint16_t *cipher_len);
+bool se_st_seed_de(const uint16_t key,void *cipher_data, uint16_t cipher_len,void *plain_data, uint16_t *plain_len);
 #else
 #define se_transmit(...) 0
 #define se_get_version(...) false
@@ -84,5 +86,7 @@ bool se_restore(void *val_src, uint16_t src_len);
 #define se_restore(...) false
 #define se_verify(...) false
 #define se_device_init(...) false
+#define se_st_seed_en(...) false
+#define se_st_seed_de(...) false
 #endif
 #endif
