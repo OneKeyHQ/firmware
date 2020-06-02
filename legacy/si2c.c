@@ -231,7 +231,7 @@ void i2c_slave_send(uint32_t data_len) {
 void i2c_slave_send_ex(uint32_t data_len) {
   uint32_t len = 0;
   uint32_t i;
-  uint32_t counter, counter_bak;
+  int32_t counter, counter_bak, counter_set;
   bool flag = true;
 
   if (data_len > 64) len = data_len - 64;
@@ -244,8 +244,15 @@ void i2c_slave_send_ex(uint32_t data_len) {
                     (i2c_data_out[7] << 8) + i2c_data_out[8] + 9;
   i2c_data_out_pos = 0;
   SET_COMBUS_HIGH();
-  timer_out_set(timer_out_resp, default_resp_time);
-  counter = counter_bak = default_resp_time / timer1s;
+  if (wait_response) {
+    timer_out_set(timer_out_resp, default_resp_time);
+    counter = counter_bak = counter_set = default_resp_time / timer1s;
+  } else {
+    wait_response = true;
+    timer_out_set(timer_out_resp, timer1s);
+    counter = counter_bak = counter_set = timer1s / timer1s;
+  }
+
   while (1) {
     if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_resp) == true ||
         i2c_data_outlen == 0) {
@@ -253,13 +260,13 @@ void i2c_slave_send_ex(uint32_t data_len) {
     } else {
       counter = timer_out_get(timer_out_resp) / timer1s;
       // show timer count down after 2 seconds
-      if (counter <= default_resp_time / timer1s - 2) {
+      if (counter <= counter_set - 2) {
         if (counter_bak != counter) {
           if (flag) {
             flag = false;
             oledBufferBak();
             oledClear();
-            oledDrawStringCenter(OLED_WIDTH / 2, 32, "Close to the phone",
+            oledDrawStringCenter(OLED_WIDTH / 2, 32, "Waiting connect...",
                                  FONT_STANDARD);
           }
           uint8_t asc_buf[3] = {0};
