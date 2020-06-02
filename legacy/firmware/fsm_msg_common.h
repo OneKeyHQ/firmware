@@ -744,6 +744,7 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   //     layoutHome();
   //     return;
   //   }
+  config_setSeedPin("");
 
   resp->data.size -= 4;  // 4bytes header,rfu
   if (g_bSelectSEFlag) {
@@ -783,6 +784,8 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   //     layoutHome();
   //     return;
   //   }
+  config_setSeedPin("");
+
   // restore in se
   if (msg->data.bytes[0] == 0x00) {
     if (!config_getWhetherUseSE()) {
