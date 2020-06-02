@@ -105,6 +105,8 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_SE_SESSIONKEY \
   (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bytes(16)
 #define KEY_DEVICE_STATE (32 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // uint32
+#define KEY_SEED_PASSPHRASE (33 | APP)                                // string
+#define KEY_SEED_ST (34 | APP)                                        // string
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -595,7 +597,7 @@ void config_setLanguage(const char *lang) {
     return;
   }
   // Sanity check.
-  if (strcmp(lang, "en-US") == 0 || strcmp(lang, "englise") == 0) {
+  if (strcmp(lang, "en-US") == 0 || strcmp(lang, "english") == 0) {
     ui_language = 0;
   } else if (strcmp(lang, "zh-CN") == 0 || strcmp(lang, "chinese") == 0) {
     ui_language = 1;
@@ -726,7 +728,7 @@ bool config_getLabel(char *dest, uint16_t dest_size) {
 
 bool config_getLanguage(char *dest, uint16_t dest_size) {
   if (sectrue == config_get_string(KEY_LANGUAGE, dest, dest_size)) {
-    if (strcmp(dest, "en-US") == 0 || strcmp(dest, "englise") == 0) {
+    if (strcmp(dest, "en-US") == 0 || strcmp(dest, "english") == 0) {
       ui_language = 0;
       return true;
     } else if (strcmp(dest, "zh-CN") == 0 || strcmp(dest, "chinese") == 0) {
@@ -1197,4 +1199,31 @@ void config_setDeviceState(uint32_t device_state) {
       storage_set(KEY_DEVICE_STATE, &device_state, sizeof(device_state))) {
     deviceState = device_state;
   }
+}
+
+bool config_setSeedPin(const char *pin) {
+  uint32_t seedpin;
+  seedpin = pin_to_int(pin);
+  if (0x00 == seedpin) {
+    return false;
+  }
+  /*
+  if (sectrue !=
+      storage_set(KEY_SEED_PIN, &seedpin, sizeof(uint32_t))) {
+    return false;
+  }
+  return true;
+  */
+  return se_set_value(KEY_SEED_PASSPHRASE, &seedpin, sizeof(uint32_t));
+}
+
+bool config_STSeedBackUp(void *plain_data, uint16_t plain_len,
+                         void *cipher_data, uint16_t *cipher_len) {
+  return se_st_seed_en(KEY_SEED_ST, plain_data, plain_len, cipher_data,
+                       cipher_len);
+}
+bool config_STSeedRestore(void *cipher_data, uint16_t cipher_len,
+                          void *plain_data, uint16_t *plain_len) {
+  return se_st_seed_de(KEY_SEED_ST, cipher_data, cipher_len, plain_data,
+                       plain_len);
 }

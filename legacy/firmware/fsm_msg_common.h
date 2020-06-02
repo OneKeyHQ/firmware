@@ -739,6 +739,12 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   CHECK_INITIALIZED
   CHECK_PIN_UNCACHED
   RESP_INIT(BixinBackupAck);
+  // not used
+  //   if (!protectSeedPin(true)) {
+  //     layoutHome();
+  //     return;
+  //   }
+
   resp->data.size -= 4;  // 4bytes header,rfu
   if (g_bSelectSEFlag) {
     resp->data.bytes[0] = 0x00;
@@ -750,8 +756,17 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
     resp->data.size += 4;
   } else {
     resp->data.bytes[0] = 0x01;
-    config_getMnemonic((char *)(resp->data.bytes + 4), resp->data.size - 4);
-    resp->data.size = strlen((char *)(resp->data.bytes + 4)) + 4;
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+
+    config_getMnemonic(mnemonic, sizeof(mnemonic));
+    if (false == config_STSeedBackUp((uint8_t *)mnemonic, strlen(mnemonic),
+                                     (uint8_t *)(resp->data.bytes + 4),
+                                     &resp->data.size)) {
+      fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+      layoutHome();
+      return;
+    }
+    resp->data.size += 4;
   }
   config_setNeedsBackup(false);
   msg_write(MessageType_MessageType_BixinBackupAck, resp);
@@ -762,6 +777,12 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   CHECK_PIN
   CHECK_NOT_INITIALIZED
+
+  // not used
+  //   if (!protectSeedPin(false)) {
+  //     layoutHome();
+  //     return;
+  //   }
   // restore in se
   if (msg->data.bytes[0] == 0x00) {
     if (!config_getWhetherUseSE()) {
@@ -779,7 +800,18 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     if (config_getWhetherUseSE()) {
       config_setWhetherUseSE(false);
     }
-    if (config_setMnemonic((char *)(msg->data.bytes + 4))) {
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+    uint16_t mnemonic_len;
+
+    if (false == config_STSeedRestore((uint8_t *)(msg->data.bytes + 4),
+                                      msg->data.size - 4, (uint8_t *)mnemonic,
+                                      &mnemonic_len)) {
+      fsm_sendFailure(FailureType_Failure_UnexpectedMessage, NULL);
+      layoutHome();
+      return;
+    }
+    mnemonic[mnemonic_len] = '\0';
+    if (config_setMnemonic(mnemonic)) {
       fsm_sendSuccess(_("Device successfully initialized"));
     } else {
       fsm_sendFailure(FailureType_Failure_ProcessError,

@@ -402,3 +402,24 @@ bool se_device_init(uint8_t mode, const char *passphrase) {
   }
   return true;
 }
+
+bool se_st_seed_en(const uint16_t key, void *plain_data, uint16_t plain_len,
+                   void *cipher_data, uint16_t *cipher_len) {
+  uint8_t flag = key >> 8;
+  if (MI2C_OK != se_transmit(MI2C_CMD_WR_PIN, (key & 0xFF), plain_data,
+                             plain_len, cipher_data, cipher_len,
+                             (flag & MI2C_PLAIN), SET_SESTORE_DATA)) {
+    return false;
+  }
+  return true;
+}
+bool se_st_seed_de(const uint16_t key, void *cipher_data, uint16_t cipher_len,
+                   void *plain_data, uint16_t *plain_len) {
+  uint8_t flag = key >> 8;
+  if (MI2C_OK != se_transmit(MI2C_CMD_WR_PIN, (key & 0xFF), cipher_data,
+                             cipher_len, plain_data, plain_len,
+                             (flag & MI2C_PLAIN), GET_SESTORE_DATA)) {
+    return false;
+  }
+  return true;
+}

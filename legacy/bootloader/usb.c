@@ -273,21 +273,10 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       }
       return;
     } else if (msg_id == 0x0010) {  // FirmwareErase message (id 16)
-      bool proceed = false;
-      layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL, "Install ble",
-                   "firmware?", NULL, NULL, NULL, NULL);
-      proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
-      if (proceed) {
-        erase_ble_code_progress();
-        send_msg_success(dev);
-        flash_state = STATE_FLASHSTART;
-        timer_out_set(timer_out_oper, timer1s * 5);
-      } else {
-        send_msg_failure(dev);
-        flash_state = STATE_END;
-        show_unplug("Firmware installation", "aborted.");
-        shutdown();
-      }
+      erase_ble_code_progress();
+      send_msg_success(dev);
+      flash_state = STATE_FLASHSTART;
+      timer_out_set(timer_out_oper, timer1s * 5);
       return;
     }
     return;
@@ -550,7 +539,8 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       return;
     } else {
       flash_state = STATE_END;
-
+      i2c_set_wait(false);
+      send_msg_success(dev);
       layoutProgress("Updating ... Please wait", 1000);
 
       uint32_t fw_len = flash_len - FLASH_FWHEADER_LEN;
@@ -566,21 +556,16 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       update_status = updateBle(p_init + 4, init_data_len,
                                 (uint8_t *)FLASH_BLE_FIRMWARE_START,
                                 fw_len - FLASH_INIT_DATA_LEN);
-
 #endif
       if (update_status == false) {
         layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "ble installation",
                      "aborted.", NULL, "You need to repeat",
                      "the procedure with", "the correct firmware.");
-        delay_ms(1000);
-        send_msg_failure(dev);
-        shutdown();
       } else {
         show_unplug("ble firmware", "successfully installed.");
-        delay_ms(1000);
-        send_msg_success(dev);
-        shutdown();
       }
+      delay_ms(1000);
+      shutdown();
     }
   }
 }

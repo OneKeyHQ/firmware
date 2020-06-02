@@ -188,7 +188,11 @@ bool config_getSeSessionKey(uint8_t *dest, uint16_t dest_size);
 
 uint32_t config_getDeviceState(void);
 void config_setDeviceState(uint32_t device_state);
-
+bool config_setSeedPin(const char *pin);
+bool config_STSeedBackUp(void *plain_data, uint16_t plain_len,
+                         void *cipher_data, uint16_t *cipher_len);
+bool config_STSeedRestore(void *cipher_data, uint16_t cipher_len,
+                          void *plain_data, uint16_t *plain_len);
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 
 #endif
