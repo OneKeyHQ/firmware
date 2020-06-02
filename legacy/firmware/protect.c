@@ -534,7 +534,7 @@ bool protectSeedPin(bool setpin) {
   const char *pin = NULL;
   const char *newpin = NULL;
 
-  pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+  pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupFirst,
                    ui_prompt_seed_pin[ui_language], &newpin);
 
   if (pin == NULL || pin[0] == '\0') {
@@ -544,8 +544,8 @@ bool protectSeedPin(bool setpin) {
     return false;
   if (setpin) {
     strlcpy(new_pin, pin, sizeof(new_pin));
-
-    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
+#if 0
+    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupSecond,
                      ui_prompt_seed_pin_ack[ui_language], &newpin);
     if (pin == NULL) {
       memzero(new_pin, sizeof(new_pin));
@@ -558,6 +558,21 @@ bool protectSeedPin(bool setpin) {
       fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
       return false;
     }
+#else
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                           "请确认备份PIN码", NULL, new_pin, NULL);
+    } else {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Please confirm backup PIN"), NULL, NULL, new_pin,
+                        NULL, NULL);
+    }
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
+
+#endif
   }
   if (!config_setSeedPin(pin)) {
     fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
