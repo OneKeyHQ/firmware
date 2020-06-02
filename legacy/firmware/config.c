@@ -597,7 +597,7 @@ void config_setLanguage(const char *lang) {
     return;
   }
   // Sanity check.
-  if (strcmp(lang, "en-US") == 0 || strcmp(lang, "englise") == 0) {
+  if (strcmp(lang, "en-US") == 0 || strcmp(lang, "english") == 0) {
     ui_language = 0;
   } else if (strcmp(lang, "zh-CN") == 0 || strcmp(lang, "chinese") == 0) {
     ui_language = 1;
@@ -728,7 +728,7 @@ bool config_getLabel(char *dest, uint16_t dest_size) {
 
 bool config_getLanguage(char *dest, uint16_t dest_size) {
   if (sectrue == config_get_string(KEY_LANGUAGE, dest, dest_size)) {
-    if (strcmp(dest, "en-US") == 0 || strcmp(dest, "englise") == 0) {
+    if (strcmp(dest, "en-US") == 0 || strcmp(dest, "english") == 0) {
       ui_language = 0;
       return true;
     } else if (strcmp(dest, "zh-CN") == 0 || strcmp(dest, "chinese") == 0) {
