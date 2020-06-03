@@ -779,6 +779,17 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   CHECK_PIN
   CHECK_NOT_INITIALIZED
 
+  if (msg->data.bytes[0] != 0x00 && msg->data.bytes[0] != 0x01) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
+    layoutHome();
+    return;
+  }
+
+  config_setPassphraseProtection(
+      msg->has_passphrase_protection ? msg->passphrase_protection : false);
+  config_setLanguage(msg->has_language ? msg->language : 0);
+  config_setLabel(msg->has_label ? msg->label : 0);
+
   // not used
   //   if (!protectSeedPin(false)) {
   //     layoutHome();
@@ -820,9 +831,6 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
       fsm_sendFailure(FailureType_Failure_ProcessError,
                       _("Failed to store mnemonic"));
     }
-
-  } else {
-    fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
   }
   layoutHome();
   return;
