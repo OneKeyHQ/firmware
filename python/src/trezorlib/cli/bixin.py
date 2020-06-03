@@ -43,6 +43,9 @@ def backup(client):
 
 @cli.command()
 @click.argument("hex_data")
+@click.argument("language")
+@click.argument("passphrase_protection")
+@click.argument("label")
 @with_client
 def restore(
     client, hex_data, language="en-US", passphrase_protection=True, label="BiXin Key"
