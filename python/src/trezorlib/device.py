@@ -234,7 +234,7 @@ def se_backup(client):
 
 @expect(messages.Success, field="message")
 def se_restore(
-    client, data, language="en-US", passphrase_protection=True, label="BiXin Key"
+    client, data, language="en-US", label="BiXin Key", passphrase_protection=True
 ):
     ret = client.call(
         messages.BixinRestoreRequest(

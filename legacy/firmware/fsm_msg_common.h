@@ -785,11 +785,6 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     return;
   }
 
-  config_setPassphraseProtection(
-      msg->has_passphrase_protection ? msg->passphrase_protection : false);
-  config_setLanguage(msg->has_language ? msg->language : 0);
-  config_setLabel(msg->has_label ? msg->label : 0);
-
   // not used
   //   if (!protectSeedPin(false)) {
   //     layoutHome();
@@ -832,6 +827,12 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
                       _("Failed to store mnemonic"));
     }
   }
+
+  config_setPassphraseProtection(
+      msg->has_passphrase_protection ? msg->passphrase_protection : true);
+  config_setLanguage(msg->has_language ? msg->language : 0);
+  config_setLabel(msg->has_label ? msg->label : 0);
+
   layoutHome();
   return;
 };

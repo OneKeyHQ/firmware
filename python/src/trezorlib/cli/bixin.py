@@ -44,11 +44,11 @@ def backup(client):
 @cli.command()
 @click.argument("hex_data")
 @click.argument("language")
-@click.argument("passphrase_protection")
 @click.argument("label")
+@click.argument("passphrase_protection")
 @with_client
 def restore(
-    client, hex_data, language="en-US", passphrase_protection=True, label="BiXin Key"
+    client, hex_data, language="en-US", label="BiXin Key", passphrase_protection=True
 ):
     """Perform device seed restore."""
     return device.se_restore(
