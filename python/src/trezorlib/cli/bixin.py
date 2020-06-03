@@ -53,7 +53,7 @@ def restore(
     """Perform device seed restore."""
     return device.se_restore(
         client,
-        data=bytes.fromhex(hex_data),
+        data=hex_data,
         language=language,
         label=label,
         passphrase_protection=bool(passphrase_protection),

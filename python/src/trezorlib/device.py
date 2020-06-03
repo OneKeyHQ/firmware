@@ -238,7 +238,7 @@ def se_restore(
 ):
     ret = client.call(
         messages.BixinRestoreRequest(
-            data=data,
+            data=bytes.fromhex(data),
             language=language,
             label=label,
             passphrase_protection=bool(passphrase_protection),
