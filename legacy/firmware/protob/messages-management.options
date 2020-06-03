@@ -44,6 +44,8 @@ BixinOutMessageSE.outmessage            max_size:1024
 
 BixinBackupAck.data                     max_size:512
 BixinRestoreRequest.data                max_size:512
+BixinRestoreRequest.language            max_size:17
+BixinRestoreRequest.label               max_size:33
 BixinRestoreAck.data                    max_size:512
 BixinVerifyDeviceRequest.data           max_size:512
 BixinVerifyDeviceAck.cert               max_size:1024

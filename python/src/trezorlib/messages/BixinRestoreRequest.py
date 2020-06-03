@@ -16,11 +16,20 @@ class BixinRestoreRequest(p.MessageType):
     def __init__(
         self,
         data: bytes = None,
+        language: str = None,
+        label: str = None,
+        passphrase_protection: bool = None,
     ) -> None:
         self.data = data
+        self.language = language
+        self.label = label
+        self.passphrase_protection = passphrase_protection
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('data', p.BytesType, 0),  # required
+            2: ('language', p.UnicodeType, 0),
+            3: ('label', p.UnicodeType, 0),
+            4: ('passphrase_protection', p.BoolType, 0),
         }
