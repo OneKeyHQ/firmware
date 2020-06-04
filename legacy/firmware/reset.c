@@ -166,6 +166,13 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
       reset_backup(false, mnemonic);
     }
   } else {
+    if (skip_backup || no_backup) {
+      if (no_backup) {
+        config_setNoBackup();
+      } else {
+        config_setNeedsBackup(true);
+      }
+    }
     char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
     if (!protectPassphrase(passphrase)) {
       if (!se_device_init(ExportType_SeedEncExportType_YES, NULL)) {
