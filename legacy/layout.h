@@ -44,6 +44,9 @@ void layoutFillBleName(uint8_t line);
 void layoutFillBleVersion(uint8_t line);
 void layoutError(const char *line1, const char *line2);
 
+void layoutButtonNo_zh(const char *btnNo, const BITMAP *icon);
+void layoutButtonYes_zh(const char *btnYes, const BITMAP *icon);
+
 void layoutDialog_zh(const BITMAP *icon, const char *btnNo, const char *btnYes,
                      const char *desc, const char *line1, const char *line2,
                      const char *line3, const char *line4);

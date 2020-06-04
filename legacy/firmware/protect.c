@@ -198,9 +198,9 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   if (ui_language) {
     memset(secstrbuf + 10, 0x00, sizeof(secstrbuf) - 10);
     memcpy(secstrbuf + 10, "秒", strlen("秒"));
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10, (uint8_t *)message);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 13, (uint8_t *)"请等待");
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 26, (uint8_t *)secstr);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10, (uint8_t *)message, FONT_STANDARD);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 13, (uint8_t *)"请等待", FONT_STANDARD);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 26, (uint8_t *)secstr, FONT_STANDARD);
 
   } else {
     oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, message, FONT_STANDARD);

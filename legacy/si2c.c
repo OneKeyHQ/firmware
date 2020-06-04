@@ -201,7 +201,7 @@ void i2c_slave_send(uint32_t data_len) {
             oledClear();
             if (ui_language) {
               oledDrawStringCenter_zh(OLED_WIDTH / 2, 32,
-                                      (uint8_t *)"等待连接...");
+                                      (uint8_t *)"等待连接...", FONT_STANDARD);
             } else {
               oledDrawStringCenter(OLED_WIDTH / 2, 32, "Waiting connect...",
                                    FONT_STANDARD);

@@ -326,10 +326,12 @@ void layoutButtonNo_zh(const char *btnNo, const BITMAP *icon) {
     oledDrawBitmap(1, OLED_HEIGHT - 8 - 1, icon);
     icon_width = icon->width;
   }
-  oledDrawString_zh(3 + icon_width, OLED_HEIGHT - 12, (uint8_t *)btnNo);
-  oledInvert(0, OLED_HEIGHT - 12,
-             icon_width + oledStringWidth_zh((uint8_t *)btnNo) + 4,
-             OLED_HEIGHT);
+  oledDrawString_zh(3 + icon_width, OLED_HEIGHT - 12, (uint8_t *)btnNo,
+                    FONT_STANDARD);
+  oledInvert(
+      0, OLED_HEIGHT - 12,
+      icon_width + oledStringWidth_zh((uint8_t *)btnNo, FONT_STANDARD) + 4,
+      OLED_HEIGHT);
 }
 
 void layoutButtonYes_zh(const char *btnYes, const BITMAP *icon) {
@@ -339,10 +341,10 @@ void layoutButtonYes_zh(const char *btnYes, const BITMAP *icon) {
     icon_width = icon->width;
   }
   oledDrawStringRight_zh(OLED_WIDTH - icon_width - 3, OLED_HEIGHT - 12,
-                         (uint8_t *)btnYes);
-  oledInvert(
-      OLED_WIDTH - oledStringWidth_zh((uint8_t *)btnYes) - icon_width - 4,
-      OLED_HEIGHT - 12, OLED_WIDTH, OLED_HEIGHT);
+                         (uint8_t *)btnYes, FONT_STANDARD);
+  oledInvert(OLED_WIDTH - oledStringWidth_zh((uint8_t *)btnYes, FONT_STANDARD) -
+                 icon_width - 4,
+             OLED_HEIGHT - 12, OLED_WIDTH, OLED_HEIGHT);
 }
 
 static bool is_valid_ascii(const uint8_t *data, uint32_t size) {
@@ -359,51 +361,60 @@ void layoutDialog_zh(const BITMAP *icon, const char *btnNo, const char *btnYes,
                      const char *line3, const char *line4) {
   int left = 0;
   int y = 0;
-  int l = 0;
+
   oledClear();
   if (icon) {
     oledDrawBitmap(0, 0, icon);
     left = icon->width + 4;
   }
-  if (line1) oledDrawString_zh(left, y, (uint8_t *)line1);
   if (line1 && is_valid_ascii((uint8_t *)line1, strlen(line1))) {
+    oledDrawString(left, y, line1, FONT_STANDARD);
     y += 9;
   } else {
+    oledDrawString_zh(left, y, (uint8_t *)line1, FONT_STANDARD);
     y += 13;
   }
-  if (line2) oledDrawString_zh(left, y, (uint8_t *)line2);
   if (line2 && is_valid_ascii((uint8_t *)line2, strlen(line2))) {
+    oledDrawString(left, y, line2, FONT_STANDARD);
     y += 9;
   } else {
+    oledDrawString_zh(left, y, (uint8_t *)line2, FONT_STANDARD);
     y += 13;
   }
-  if (line3) oledDrawString_zh(left, y, (uint8_t *)line3);
   if (line3 && is_valid_ascii((uint8_t *)line3, strlen(line3))) {
+    oledDrawString(left, y, line3, FONT_STANDARD);
     y += 9;
   } else {
+    oledDrawString_zh(left, y, (uint8_t *)line3, FONT_STANDARD);
     y += 13;
   }
 
   if (desc) {
     oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 12,
-                            (uint8_t *)desc);
+                            (uint8_t *)desc, FONT_STANDARD);
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - 25);
     }
     // have enough space for line4
     if (line4 && is_valid_ascii((uint8_t *)line4, strlen(line4))) {
-      l = 9;
+      if (y < OLED_HEIGHT - 25 - 9) {
+        oledDrawString(left, y, line4, FONT_STANDARD);
+      }
     } else {
-      l = 13;
+      if (y < OLED_HEIGHT - 25 - 13) {
+        oledDrawString_zh(left, y, (uint8_t *)line4, FONT_STANDARD);
+      }
     }
-    if (y < OLED_HEIGHT - 25 - l) {
-      if (line4) oledDrawString_zh(left, y, (uint8_t *)line4);
-    }
+
   } else {
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - 14);
     }
-    if (line4) oledDrawString_zh(left, y, (uint8_t *)line4);
+    if (line3 && is_valid_ascii((uint8_t *)line3, strlen(line3))) {
+      oledDrawString(left, y, line4, FONT_STANDARD);
+    } else {
+      oledDrawString_zh(left, y, (uint8_t *)line4, FONT_STANDARD);
+    }
   }
   if (btnNo) {
     layoutButtonNo_zh(btnNo, &bmp_btn_cancel);
@@ -431,7 +442,8 @@ void layoutProgress_zh(const char *desc, int permil) {
   // text
   oledBox(0, OLED_HEIGHT - 16, OLED_WIDTH - 1, OLED_HEIGHT - 16 + 7, 0);
   if (desc) {
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - 24, (uint8_t *)desc);
+    oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - 24, (uint8_t *)desc,
+                            FONT_STANDARD);
   }
   oledRefresh();
 }
