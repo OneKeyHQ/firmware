@@ -321,7 +321,7 @@ void layoutHome(void) {
     if (config_isInitialized()) {
       char label[MAX_LABEL_LEN + 1] = _("");
       config_getLabel(label, sizeof(label));
-      if (strlen(label))
+      if (strlen(label) && strncmp(label, "BiXin KEY", 9))
         layoutLabel(label);
       else
         oledDrawBitmap(0, 8, &bmp_logo);
