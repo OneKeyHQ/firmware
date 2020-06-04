@@ -709,7 +709,6 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
-  CHECK_INITIALIZED
   CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
   usbPoll();  // send response before reboot
