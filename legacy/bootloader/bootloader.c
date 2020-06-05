@@ -55,14 +55,14 @@ bool get_button_response(void) {
 
 void show_halt(const char *line1, const char *line2) {
   layoutDialog(&bmp_icon_error, NULL, NULL, NULL, line1, line2, NULL,
-               "Your device", "will be restart.", NULL);
+               "Your device", "will be poweroff.", NULL);
   delay_ms(1000);
   shutdown();
 }
 
 void show_unplug(const char *line1, const char *line2) {
   layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, line1, line2, NULL,
-               "Your device", "will be restart.", NULL);
+               "Your device", "will be poweroff.", NULL);
   delay_ms(1000);
 }
 

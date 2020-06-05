@@ -29,8 +29,8 @@
 #define timer1s 1000
 
 #define default_time timer1s * 5
-#define default_oper_time timer1s * 60
-#define default_resp_time timer1s * 60
+#define default_oper_time timer1s * 30
+#define default_resp_time timer1s * 30
 
 typedef enum _TimerOut {
   timer_out_cmd = 0,

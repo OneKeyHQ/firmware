@@ -233,7 +233,6 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           shutdown();
         }
       }
-
       return;
     }
   }
@@ -283,8 +282,13 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
   }
 
   if (flash_state == STATE_FLASHSTART) {
-    if (msg_id == 0x0007) {    // FirmwareUpload message (id 7)
-      if (p_buf[9] != 0x0a) {  // invalid contents
+    if (msg_id == 0x0000) {  // end resume state
+      send_msg_features(dev);
+      flash_state = STATE_OPEN;
+      flash_pos = 0;
+      return;
+    } else if (msg_id == 0x0007) {  // FirmwareUpload message (id 7)
+      if (p_buf[9] != 0x0a) {       // invalid contents
         send_msg_failure(dev);
         flash_state = STATE_END;
         show_halt("Error installing", "firmware.");
@@ -455,10 +459,12 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         check_and_write_chunk();
       }
       flash_state = STATE_CHECK;
-      const image_header *hdr = (const image_header *)FW_HEADER;
-      if (SIG_OK != signatures_new_ok(hdr, NULL)) {
-        send_msg_buttonrequest_firmwarecheck(dev);
-        return;
+      if (UPDATE_ST == update_mode) {
+        const image_header *hdr = (const image_header *)FW_HEADER;
+        if (SIG_OK != signatures_new_ok(hdr, NULL)) {
+          send_msg_buttonrequest_firmwarecheck(dev);
+          return;
+        }
       }
     } else {
       return;
@@ -542,6 +548,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       i2c_set_wait(false);
       send_msg_success(dev);
       layoutProgress("Updating ... Please wait", 1000);
+      delay_ms(500);  // important!!! delay for nordic reset
 
       uint32_t fw_len = flash_len - FLASH_FWHEADER_LEN;
       bool update_status = false;
