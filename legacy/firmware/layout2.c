@@ -1345,9 +1345,9 @@ void layoutDeviceInfo(uint8_t ucPage) {
 
         y += 12;
         if (g_bSelectSEFlag) {
-          oledDrawString_zh(0, y, (uint8_t *)"金额:", FONT_STANDARD);
+          oledDrawString_zh(0, y, (uint8_t *)"单次限额:", FONT_STANDARD);
         } else {
-          oledDrawString_zh(0, y, (uint8_t *)"金额:", FONT_STANDARD);
+          oledDrawString_zh(0, y, (uint8_t *)"单次限额:", FONT_STANDARD);
         }
         bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
                          sizeof(str_out) - 3);
