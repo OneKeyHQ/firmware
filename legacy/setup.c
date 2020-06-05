@@ -161,7 +161,7 @@ void setup(void) {
 }
 
 void setReboot(void) {
-  ble_usart_init();
+  ble_usart_irq_set();
   i2c_slave_init_irq();
 }
 

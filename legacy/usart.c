@@ -140,6 +140,11 @@ void ble_usart_init(void) {
   usart_enable(BLE_UART);
 
   // set NVIC
+  ble_usart_irq_set();
+}
+
+void ble_usart_irq_set(void) {
+  // set NVIC
   nvic_set_priority(NVIC_USART2_IRQ, 0);
   nvic_enable_irq(NVIC_USART2_IRQ);
   usart_enable_rx_interrupt(BLE_UART);

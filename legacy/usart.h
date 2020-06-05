@@ -37,7 +37,7 @@ enum {
   UARTSTATE_READ_DATA,
   UARTSTATE_READ_FINISHED,
 };
-
+void ble_usart_irq_set(void);
 void ble_usart_init(void);
 void ble_usart_enable(void);
 void ble_usart_disable(void);
