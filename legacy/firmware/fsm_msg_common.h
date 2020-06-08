@@ -736,14 +736,14 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
 void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   (void)msg;
   CHECK_INITIALIZED
-  CHECK_PIN_UNCACHED
+  // CHECK_PIN_UNCACHED
+
+  if (!protectSeedPin(false)) {
+    layoutHome();
+    return;
+  }
+
   RESP_INIT(BixinBackupAck);
-  // not used
-  //   if (!protectSeedPin(true)) {
-  //     layoutHome();
-  //     return;
-  //   }
-  config_setSeedPin("");
 
   resp->data.size -= 4;  // 4bytes header,rfu
   if (g_bSelectSEFlag) {
@@ -775,21 +775,18 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
 }
 
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
-  CHECK_PIN
+  // CHECK_PIN
   CHECK_NOT_INITIALIZED
+  if (!protectSeedPin(false)) {
+    layoutHome();
+    return;
+  }
 
   if (msg->data.bytes[0] != 0x00 && msg->data.bytes[0] != 0x01) {
     fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
     layoutHome();
     return;
   }
-
-  // not used
-  //   if (!protectSeedPin(false)) {
-  //     layoutHome();
-  //     return;
-  //   }
-  config_setSeedPin("");
 
   // restore in se
   if (msg->data.bytes[0] == 0x00) {
@@ -824,6 +821,8 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     } else {
       fsm_sendFailure(FailureType_Failure_ProcessError,
                       _("Failed to store mnemonic"));
+      layoutHome();
+      return;
     }
   }
 
@@ -831,6 +830,8 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
       msg->has_passphrase_protection ? msg->passphrase_protection : true);
   config_setLanguage(msg->has_language ? msg->language : 0);
   config_setLabel(msg->has_label ? msg->label : 0);
+
+  protectSeedPin(true);
 
   layoutHome();
   return;

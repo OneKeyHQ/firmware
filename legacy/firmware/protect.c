@@ -608,20 +608,46 @@ bool protectPassphrase(char *passphrase) {
 }
 
 bool protectSeedPin(bool setpin) {
+  static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
   const char *newpin = NULL;
 
-  pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupFirst,
-                   ui_prompt_seed_pin[ui_language], &newpin);
-
-  if (pin == NULL || pin[0] == '\0') {
-    fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
-    return false;
-  } else if (pin == PIN_CANCELED_BY_BUTTON)
-    return false;
   if (setpin) {
-    strlcpy(new_pin, pin, sizeof(new_pin));
+    bool ret = config_changePin(old_pin, new_pin);
+    memzero(old_pin, sizeof(old_pin));
+    memzero(new_pin, sizeof(new_pin));
+    if (ret == false) {
+      i2c_set_wait(false);
+      fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+      return false;
+    }
+  } else {
+    if (config_hasPin()) {
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                       ui_prompt_current_pin[ui_language], &newpin);
+      if (!pin) {
+        fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+        return false;
+      } else if (pin == PIN_CANCELED_BY_BUTTON)
+        return false;
+
+      bool ret = config_unlock(pin);
+      if (!ret) {
+        fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+        return false;
+      }
+
+    } else {
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupFirst,
+                       ui_prompt_seed_pin[ui_language], &newpin);
+      if (pin == PIN_CANCELED_BY_BUTTON) {
+        return false;
+      } else if (pin == NULL || pin[0] == '\0') {
+        fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+        return false;
+      }
+      strlcpy(new_pin, pin, sizeof(new_pin));
 #if 0
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupSecond,
                      ui_prompt_seed_pin_ack[ui_language], &newpin);
@@ -637,24 +663,24 @@ bool protectSeedPin(bool setpin) {
       return false;
     }
 #else
-    if (ui_language) {
-      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                           "请确认备份PIN码", NULL, new_pin, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Please confirm backup PIN"), NULL, NULL, new_pin,
-                        NULL, NULL);
+      if (ui_language) {
+        layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                             "请确认备份PIN码", NULL, pin, NULL);
+      } else {
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Please confirm "), "backup PIN", NULL, pin, NULL,
+                          NULL);
+      }
+      if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        return false;
+      }
+#endif
     }
-    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    if (!config_setSeedPin(pin)) {
+      fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
       return false;
     }
-
-#endif
-  }
-  if (!config_setSeedPin(pin)) {
-    fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
-    return false;
   }
   return true;
 }
