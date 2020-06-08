@@ -66,6 +66,9 @@
  * index */
 #define TXSIZE_DECRED_WITNESS 16
 
+uint32_t tx_output_info_counter = 0;
+TxOutputMini tx_output_info_buf[TX_OUTPUT_INFO_BUF_LEN];
+
 static const uint8_t segwit_header[2] = {0, 1};
 
 static inline uint32_t op_push_size(uint32_t i) {
@@ -328,21 +331,37 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
   } else {
     return 0;
   }
-
-  if (g_bIsBixinAPP) {
-    if (config_getFastPayConfirmFlag()) {
-      uint64_t fast_pay_amount;
-      uint32_t fast_pay_times;
-      fast_pay_amount = config_getFastPayMoneyLimt();
-      fast_pay_times = config_getFastPayTimes();
-      if (fast_pay_times && out->amount <= fast_pay_amount)
-        needs_confirm = false;
-    }
-  }
+  // bixin:save output and confirm at last
   if (needs_confirm) {
-    layoutConfirmOutput(coin, in);
-    if (!protectButton(ButtonRequestType_ButtonRequest_ConfirmOutput, false)) {
-      return -1;  // user aborted
+    if (g_bIsBixinAPP) {
+      if (config_getFastPayConfirmFlag()) {
+        uint64_t fast_pay_amount;
+        uint32_t fast_pay_times;
+        fast_pay_amount = config_getFastPayMoneyLimt();
+        fast_pay_times = config_getFastPayTimes();
+        if (fast_pay_times && out->amount <= fast_pay_amount) {
+          needs_confirm = false;
+        }
+      }
+      if (needs_confirm) {
+        if (tx_output_info_counter == TX_OUTPUT_INFO_BUF_LEN) {
+          // buf if full
+        } else {
+          memset(tx_output_info_buf + tx_output_info_counter, 0x00,
+                 sizeof(tx_output_info_buf));
+          tx_output_info_buf[tx_output_info_counter].amount = out->amount;
+          strncpy(tx_output_info_buf[tx_output_info_counter].address,
+                  in->address,
+                  sizeof(tx_output_info_buf[tx_output_info_counter].address));
+          tx_output_info_counter++;
+        }
+      }
+    } else {
+      layoutConfirmOutput(coin, in);
+      if (!protectButton(ButtonRequestType_ButtonRequest_ConfirmOutput,
+                         false)) {
+        return -1;  // user aborted
+      }
     }
   }
 

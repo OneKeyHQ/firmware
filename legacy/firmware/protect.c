@@ -118,6 +118,81 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   return result;
 }
 
+bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
+  ButtonRequest resp = {0};
+  bool result = false;
+  bool acked = false;
+
+  memzero(&resp, sizeof(ButtonRequest));
+  resp.has_code = true;
+  resp.code = type;
+  usbTiny(1);
+  buttonUpdate();  // Clear button state
+  if (requset) {
+    msg_write(MessageType_MessageType_ButtonRequest, &resp);
+  }
+
+  timer_out_set(timer_out_oper, default_oper_time);
+  if (g_bIsBixinAPP) acked = true;
+
+  while (timer_out_get(timer_out_oper)) {
+    usbPoll();
+
+    // check for ButtonAck
+    if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
+      msg_tiny_id = 0xFFFF;
+      acked = true;
+    }
+
+    // button acked - check buttons
+    if (acked) {
+      usbSleep(5);
+      buttonUpdate();
+      if (button.YesUp) {
+        result = true;
+        break;
+      }
+      if (!confirm_only && button.NoUp) {
+        result = false;
+        break;
+      }
+    }
+
+    // check for Cancel / Initialize
+    protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
+    protectAbortedByInitialize =
+        (msg_tiny_id == MessageType_MessageType_Initialize);
+    if (protectAbortedByCancel || protectAbortedByInitialize) {
+      msg_tiny_id = 0xFFFF;
+      result = false;
+      break;
+    }
+
+#if DEBUG_LINK
+    // check DebugLink
+    if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
+      msg_tiny_id = 0xFFFF;
+      DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
+      result = dld->yes_no;
+      debug_decided = true;
+    }
+
+    if (acked && debug_decided) {
+      break;
+    }
+
+    if (msg_tiny_id == MessageType_MessageType_DebugLinkGetState) {
+      msg_tiny_id = 0xFFFF;
+      fsm_msgDebugLinkGetState((DebugLinkGetState *)msg_tiny);
+    }
+#endif
+  }
+  timer_out_set(timer_out_oper, 0);
+  usbTiny(0);
+
+  return result;
+}
+
 const char *requestPin(PinMatrixRequestType type, const char *text,
                        const char **new_pin) {
   bool button_no = false;
@@ -491,9 +566,9 @@ bool protectPassphrase(char *passphrase) {
       msg_tiny_id = 0xFFFF;
       PassphraseAck *ppa = (PassphraseAck *)msg_tiny;
       if (ppa->has_on_device && ppa->on_device == true) {
-        fsm_sendFailure(
-            FailureType_Failure_DataError,
-            _("This firmware is incapable of passphrase entry on the device."));
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        _("This firmware is incapable of passphrase entry on "
+                          "the device."));
         result = false;
         break;
       }

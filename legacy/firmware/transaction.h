@@ -54,6 +54,15 @@ typedef struct {
   Hasher hasher;
 } TxStruct;
 
+typedef struct _TxOutputMini {
+  char address[130];
+  uint64_t amount;
+} TxOutputMini;
+#define TX_OUTPUT_INFO_BUF_LEN 20
+
+extern uint32_t tx_output_info_counter;
+extern TxOutputMini tx_output_info_buf[TX_OUTPUT_INFO_BUF_LEN];
+
 bool compute_address(const CoinInfo *coin, InputScriptType script_type,
                      const HDNode *node, bool has_multisig,
                      const MultisigRedeemScriptType *multisig,

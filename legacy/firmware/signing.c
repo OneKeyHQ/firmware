@@ -545,6 +545,7 @@ void signing_init(const SignTx *msg, const CoinInfo *_coin,
   multisig_fp_set = false;
   multisig_fp_mismatch = false;
   next_nonsegwit_input = 0xffffffff;
+  tx_output_info_counter = 0;
 
   tx_init(&to, inputs_count, outputs_count, version, lock_time, expiry, 0,
           coin->curve->hasher_sign, coin->overwintered, version_group_id,
@@ -900,6 +901,7 @@ static bool signing_check_output(TxOutputType *txoutput) {
 static bool signing_check_fee(void) {
   bool need_confirm = true;
   bool need_pin = true;
+  bool btn_request = true;
   if (coin->negative_fee) {
     // bypass check for negative fee coins, required for reward TX
   } else {
@@ -929,8 +931,24 @@ static bool signing_check_fee(void) {
   if (g_bIsBixinAPP) {
     uint64_t fast_pay_amount;
     uint32_t fast_pay_times;
+    TxOutputType tx_out;
     fast_pay_amount = config_getFastPayMoneyLimt();
     fast_pay_times = config_getFastPayTimes();
+    // confirm output
+    for (uint32_t i = 0; i < tx_output_info_counter; i++) {
+      tx_out.amount = tx_output_info_buf[i].amount;
+      strncpy(tx_out.address, tx_output_info_buf[i].address,
+              sizeof(tx_out.address));
+      layoutConfirmOutput(coin, &tx_out);
+      if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
+                            btn_request)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        signing_abort();
+        return false;
+      }
+      btn_request = false;
+    }
+
     if (config_getFastPayConfirmFlag()) {
       if (fast_pay_times && (to_spend - change_spend < fast_pay_amount)) {
         need_confirm = false;
@@ -948,10 +966,12 @@ static bool signing_check_fee(void) {
       config_setFastPayTimes(fast_pay_times);
     }
   }
+
   if (need_confirm) {
     // last confirmation
     layoutConfirmTx(coin, to_spend - change_spend, fee);
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+    if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
+                          btn_request)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       signing_abort();
       return false;
