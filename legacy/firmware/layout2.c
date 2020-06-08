@@ -1326,7 +1326,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
         y += 13;
         oledHLine(13);
         y += 3;
-        oledDrawString_zh(0, y, (uint8_t *)"输入PIN:", FONT_STANDARD);
+        oledDrawString_zh(0, y, (uint8_t *)"检查PIN:", FONT_STANDARD);
         oledDrawStringRight_zh(
             OLED_WIDTH - 1, y,
             (uint8_t *)(config_getFastPayConfirmFlag() ? "否" : "是"),
