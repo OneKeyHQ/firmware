@@ -738,14 +738,20 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   CHECK_INITIALIZED
   // CHECK_PIN_UNCACHED
 
-  if (!protectSeedPin(false)) {
+  if (!protectSeedPin(false, false)) {
     layoutHome();
     return;
   }
 
   RESP_INIT(BixinBackupAck);
 
-  resp->data.size -= 4;  // 4bytes header,rfu
+  // 0:SE-0 ST-1
+  // 1:has_pin-1 no_pin-0
+  // 2 3 rfu
+  resp->data.size -= 4;
+
+  resp->data.bytes[1] = config_hasPin() ? 1 : 0;
+
   if (g_bSelectSEFlag) {
     resp->data.bytes[0] = 0x00;
     if (false == se_backup((uint8_t *)resp->data.bytes + 4, &resp->data.size)) {
@@ -777,13 +783,14 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   // CHECK_PIN
   CHECK_NOT_INITIALIZED
-  if (!protectSeedPin(false)) {
+
+  if (msg->data.bytes[0] != 0x00 && msg->data.bytes[0] != 0x01) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
     layoutHome();
     return;
   }
 
-  if (msg->data.bytes[0] != 0x00 && msg->data.bytes[0] != 0x01) {
-    fsm_sendFailure(FailureType_Failure_DataError, "Restor data format error");
+  if (!protectSeedPin(msg->data.bytes[1] == 1 ? true : false, false)) {
     layoutHome();
     return;
   }
@@ -831,11 +838,13 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   config_setLanguage(msg->has_language ? msg->language : 0);
   config_setLabel(msg->has_label ? msg->label : 0);
 
-  protectSeedPin(true);
+  if (msg->data.bytes[1] == 1) {
+    protectSeedPin(false, true);
+  }
 
   layoutHome();
   return;
-};
+}
 
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
   RESP_INIT(BixinVerifyDeviceAck);
@@ -851,4 +860,4 @@ void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
   msg_write(MessageType_MessageType_BixinVerifyDeviceAck, resp);
   layoutHome();
   return;
-};
+}

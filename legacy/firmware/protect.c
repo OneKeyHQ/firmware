@@ -607,7 +607,7 @@ bool protectPassphrase(char *passphrase) {
   return result;
 }
 
-bool protectSeedPin(bool setpin) {
+bool protectSeedPin(bool force_pin, bool setpin) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
@@ -637,46 +637,22 @@ bool protectSeedPin(bool setpin) {
         fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
         return false;
       }
-
     } else {
-      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupFirst,
-                       ui_prompt_seed_pin[ui_language], &newpin);
-      if (pin == PIN_CANCELED_BY_BUTTON) {
-        return false;
-      } else if (pin == NULL || pin[0] == '\0') {
-        fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
-        return false;
-      }
-      strlcpy(new_pin, pin, sizeof(new_pin));
-#if 0
-    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_BackupSecond,
-                     ui_prompt_seed_pin_ack[ui_language], &newpin);
-    if (pin == NULL) {
-      memzero(new_pin, sizeof(new_pin));
-      fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
-      return false;
-    } else if (pin == PIN_CANCELED_BY_BUTTON)
-      return false;
-    if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
-      memzero(new_pin, sizeof(new_pin));
-      fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
-      return false;
-    }
-#else
-      if (ui_language) {
-        layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                             "请确认备份PIN码", NULL, pin, NULL);
+      if (force_pin) {
+        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                         ui_prompt_seed_pin[ui_language], &newpin);
+        if (pin == PIN_CANCELED_BY_BUTTON) {
+          return false;
+        } else if (pin == NULL || pin[0] == '\0') {
+          fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+          return false;
+        }
+        strlcpy(new_pin, pin, sizeof(new_pin));
       } else {
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Please confirm "), "backup PIN", NULL, pin, NULL,
-                          NULL);
+        pin = "";
       }
-      if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-        return false;
-      }
-#endif
     }
+
     if (!config_setSeedPin(pin)) {
       fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
       return false;
