@@ -33,7 +33,7 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char* message);
 bool protectPin(bool use_cached);
 bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset);
-bool protectChangePin(bool init, bool removal);
+bool protectChangePin(bool removal);
 bool protectChangeWipeCode(bool removal);
 bool protectPassphrase(char* passphrase);
 bool protectSeedPin(bool force_pin, bool setpin);

@@ -40,7 +40,6 @@
 
 bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
-static const char default_user_pin[7] = "888888";
 
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
@@ -333,32 +332,25 @@ bool protectPin(bool use_cached) {
   if (!ret) {
     fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
   }
+  config_setSeedPin(pin);
   return ret;
 }
 
-bool protectChangePin(bool init, bool removal) {
+bool protectChangePin(bool removal) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
   const char *newpin = NULL;
   bool need_new_pin = true;
-  bool init_unlock = false;
-
-  if (init) need_new_pin = false;
 
   if (config_hasPin()) {
     if (!g_bIsBixinAPP) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
                        ui_prompt_current_pin[ui_language], &newpin);
     } else {
-      if (!init) {
-        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                         ui_prompt_input_pin[ui_language], &newpin);
-        need_new_pin = false;
-      } else {
-        pin = default_user_pin;
-        init_unlock = true;
-      }
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                       ui_prompt_input_pin[ui_language], &newpin);
+      need_new_pin = false;
     }
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
@@ -375,7 +367,6 @@ bool protectChangePin(bool init, bool removal) {
         fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
         return false;
       }
-      if (init_unlock) return true;
     }
 
     strlcpy(old_pin, pin, sizeof(old_pin));
@@ -386,16 +377,12 @@ bool protectChangePin(bool init, bool removal) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                        ui_prompt_new_pin[ui_language], &newpin);
     } else {
-      if (init) {
-        pin = default_user_pin;
-      } else {
-        if (newpin == NULL) {
-          fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
-          layoutHome();
-          return false;
-        }
-        pin = newpin;
+      if (new_pin == NULL) {
+        fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
+        layoutHome();
+        return false;
       }
+      pin = new_pin;
     }
     if (pin == PIN_CANCELED_BY_BUTTON) {
       return false;
@@ -424,27 +411,27 @@ bool protectChangePin(bool init, bool removal) {
         return false;
       }
     } else {
-      if (!init) {
-        if (ui_language) {
-          layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                               "请确认PIN码", NULL, new_pin, NULL);
-        } else {
-          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                            _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
-                            NULL);
-        }
-        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
-                           false)) {
-          i2c_set_wait(false);
-          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-          layoutHome();
-          return false;
-        }
+      if (ui_language) {
+        layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                             "请确认PIN码", NULL, new_pin, NULL);
+      } else {
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
+                          NULL);
+      }
+      if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+        i2c_set_wait(false);
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return false;
       }
     }
   }
 
   bool ret = config_changePin(old_pin, new_pin);
+  if (ret == true) {
+    config_setSeedPin(new_pin);
+  }
   memzero(old_pin, sizeof(old_pin));
   memzero(new_pin, sizeof(new_pin));
   if (ret == false) {
@@ -456,6 +443,7 @@ bool protectChangePin(bool init, bool removal) {
                       _("The new PIN must be different from your wipe code."));
     }
   }
+
   return ret;
 }
 
@@ -624,18 +612,21 @@ bool protectSeedPin(bool force_pin, bool setpin) {
     }
   } else {
     if (config_hasPin()) {
-      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                       ui_prompt_current_pin[ui_language], &newpin);
-      if (!pin) {
-        fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
-        return false;
-      } else if (pin == PIN_CANCELED_BY_BUTTON)
-        return false;
+      if (session_isUnlocked()) {
+      } else {
+        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                         ui_prompt_current_pin[ui_language], &newpin);
+        if (!pin) {
+          fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+          return false;
+        } else if (pin == PIN_CANCELED_BY_BUTTON)
+          return false;
 
-      bool ret = config_unlock(pin);
-      if (!ret) {
-        fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
-        return false;
+        bool ret = config_unlock(pin);
+        if (!ret) {
+          fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+          return false;
+        }
       }
     } else {
       if (force_pin) {
@@ -653,7 +644,7 @@ bool protectSeedPin(bool force_pin, bool setpin) {
       }
     }
 
-    if (!config_setSeedPin(pin)) {
+    if (pin != NULL && !config_setSeedPin(pin)) {
       fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
       return false;
     }

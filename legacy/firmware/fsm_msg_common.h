@@ -197,7 +197,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
     return;
   }
 
-  if (protectChangePin(false, removal)) {
+  if (protectChangePin(removal)) {
     i2c_set_wait(false);
     if (removal) {
       fsm_sendSuccess(_("PIN removed"));
@@ -343,11 +343,7 @@ void fsm_msgLoadDevice(const LoadDevice *msg) {
 #endif
 
 void fsm_msgResetDevice(const ResetDevice *msg) {
-  if (g_bIsBixinAPP && config_getDeviceState() == DeviceState_ResetSetPin) {
-  } else {
-    CHECK_PIN
-  }
-
+  CHECK_PIN
   CHECK_NOT_INITIALIZED
 
   CHECK_PARAM(!msg->has_strength || msg->strength == 128 ||

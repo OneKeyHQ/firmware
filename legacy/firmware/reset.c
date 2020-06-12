@@ -110,15 +110,9 @@ void reset_init(bool display_random, uint32_t _strength,
       }
     }
   }
-  if (pin_protection) {
-    if (protectChangePin(true, false)) {
-      if (config_getDeviceState() != DeviceState_ResetSetPin) {
-        config_setDeviceState(DeviceState_ResetSetPin);
-      }
-    } else {
-      layoutHome();
-      return;
-    }
+  if (pin_protection && !protectChangePin(false)) {
+    layoutHome();
+    return;
   }
 
   config_setPassphraseProtection(passphrase_protection);

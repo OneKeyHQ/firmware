@@ -772,7 +772,6 @@ bool config_setMnemonic(const char *mnemonic) {
       return false;
     }
     config_set_bool(KEY_INITIALIZED, true);
-    config_setDeviceState(DeviceState_NULL);
   }
 
   return true;
