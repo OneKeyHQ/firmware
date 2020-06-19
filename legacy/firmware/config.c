@@ -76,12 +76,13 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_LANGUAGE (3 | APP | FLAG_PUBLIC_SHIFTED)  // string(17)
 #define KEY_LABEL (4 | APP | FLAG_PUBLIC_SHIFTED)     // string(33)
 #define KEY_PASSPHRASE_PROTECTION (5 | APP | FLAG_PUBLIC_SHIFTED)  // bool
-#define KEY_HOMESCREEN (6 | APP | FLAG_PUBLIC_SHIFTED)    // bytes(1024)
-#define KEY_NEEDS_BACKUP (7 | APP)                        // bool
-#define KEY_FLAGS (8 | APP)                               // uint32
-#define KEY_U2F_COUNTER (9 | APP | FLAGS_WRITE_SHIFTED)   // uint32
-#define KEY_UNFINISHED_BACKUP (11 | APP)                  // bool
-#define KEY_AUTO_LOCK_DELAY_MS (12 | APP)                 // uint32
+#define KEY_HOMESCREEN (6 | APP | FLAG_PUBLIC_SHIFTED)   // bytes(1024)
+#define KEY_NEEDS_BACKUP (7 | APP)                       // bool
+#define KEY_FLAGS (8 | APP)                              // uint32
+#define KEY_U2F_COUNTER (9 | APP | FLAGS_WRITE_SHIFTED)  // uint32
+#define KEY_UNFINISHED_BACKUP (11 | APP)                 // bool
+#define KEY_AUTO_LOCK_DELAY_MS \
+  (12 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)             // uint32
 #define KEY_NO_BACKUP (13 | APP)                          // bool
 #define KEY_INITIALIZED (14 | APP | FLAG_PUBLIC_SHIFTED)  // uint31
 #define KEY_NODE (15 | APP)                               // node
@@ -1039,9 +1040,9 @@ uint32_t config_getAutoLockDelayMs() {
     return autoLockDelayMs;
   }
 
-  if (sectrue != storage_is_unlocked()) {
-    return autoLockDelayMsDefault;
-  }
+  //   if (sectrue != storage_is_unlocked()) {
+  //     return autoLockDelayMsDefault;
+  //   }
 
   if (sectrue != config_get_uint32(KEY_AUTO_LOCK_DELAY_MS, &autoLockDelayMs)) {
     autoLockDelayMs = autoLockDelayMsDefault;

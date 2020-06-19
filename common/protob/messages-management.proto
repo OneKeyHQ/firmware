@@ -95,7 +95,7 @@ message Features {
     optional bool ble_enable = 39;
     optional bool se_enable = 40;
     optional uint32 offset = 50;
-
+    optional uint32 auto_lock_delay_ms = 51;
 }
 
 /**

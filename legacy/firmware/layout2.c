@@ -1291,26 +1291,24 @@ void layoutDeviceInfo(uint8_t ucPage) {
         }
       }
 
-      if (session_isUnlocked()) {
-        char secstrbuf[] = _("________0 s");
-        char *secstr = secstrbuf + 9;
-        uint32_t secs = 0;
-        secs = config_getAutoLockDelayMs() / 1000;
-        do {
-          secstr--;
-          *secstr = (secs % 10) + '0';
-          secs /= 10;
-        } while (secs > 0 && secstr >= secstrbuf);
-        if (ui_language) {
-          oledDrawString_zh(0, y, (uint8_t *)"锁屏&关机时间:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)secstr,
-                                 FONT_STANDARD);
-        } else {
-          oledDrawString(0, y, "Auto-Lock & Shutdown:", FONT_STANDARD);
-          y += 9;
-          oledDrawStringRight(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
-          y += 9;
-        }
+      char secstrbuf[] = _("________0 s");
+      char *secstr = secstrbuf + 9;
+      uint32_t secs = 0;
+      secs = config_getAutoLockDelayMs() / 1000;
+      do {
+        secstr--;
+        *secstr = (secs % 10) + '0';
+        secs /= 10;
+      } while (secs > 0 && secstr >= secstrbuf);
+      if (ui_language) {
+        oledDrawString_zh(0, y, (uint8_t *)"锁屏&关机时间:", FONT_STANDARD);
+        oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)secstr,
+                               FONT_STANDARD);
+      } else {
+        oledDrawString(0, y, "Auto-Lock & Shutdown:", FONT_STANDARD);
+        y += 9;
+        oledDrawStringRight(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
+        y += 9;
       }
 
       break;
