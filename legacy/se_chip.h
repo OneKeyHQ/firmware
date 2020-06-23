@@ -31,6 +31,8 @@
 #define DELETE_SESTORE_DATA (0x02)
 #define DEVICEINIT_DATA (0x03)
 
+#define CURVE_NIST256P1 (0x40)
+
 #define MI2C_CMD_WR_PIN (0xE1)
 #define MI2C_CMD_AES (0xE2)
 #define MI2C_CMD_ECC_EDDSA (0xE3)
@@ -43,6 +45,7 @@
 #define EDDSA_INDEX_SIGN (0x04)
 #define EDDSA_INDEX_VERIFY (0x05)
 #define EDDSA_INDEX_CHILDKEY (0x06)
+#define EDDSA_INDEX_U2FKEY (0x07)
 
 // mnemonic index
 #define MNEMONIC_INDEX_TOSEED (26)

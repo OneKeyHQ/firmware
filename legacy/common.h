@@ -38,6 +38,7 @@ extern bool g_bSelectSEFlag;
 extern bool g_bIsBixinAPP;
 extern uint32_t g_uiFastPayFlag;
 extern uint8_t g_uchash_mode;
+extern uint8_t g_ucSignU2F;
 
 extern volatile uint32_t system_millis_poweroff_start;
 

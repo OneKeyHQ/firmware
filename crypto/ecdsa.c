@@ -682,7 +682,8 @@ int ecdsa_sign_digest(const ecdsa_curve *curve, const uint8_t *priv_key,
                       const uint8_t *digest, uint8_t *sig, uint8_t *pby,
                       int (*is_canonical)(uint8_t by, uint8_t sig[64])) {
 #if USE_SE
-  if (!g_bSelectSEFlag) {
+  if (!g_bSelectSEFlag || g_ucSignU2F == 1) {
+    g_ucSignU2F = 0;
 #endif
     int i = 0;
     curve_point R = {0};
@@ -777,16 +778,26 @@ int ecdsa_sign_digest(const ecdsa_curve *curve, const uint8_t *priv_key,
     uint8_t ucRevBuf[65];
     uint16_t usLen;
     uint8_t by;  // signature recovery byte
+    uint8_t u2f_flag = 0;
+    if (g_ucSignU2F == 2) {
+      g_ucSignU2F = 0;
+      u2f_flag = CURVE_NIST256P1;
+    }
     if (MI2C_OK != se_transmit(MI2C_CMD_ECC_EDDSA, ECC_INDEX_SIGN,
                                (uint8_t *)digest, 0x20, ucRevBuf, &usLen,
-                               MI2C_ENCRYPT, SET_SESTORE_DATA)) {
+                               MI2C_ENCRYPT, SET_SESTORE_DATA | u2f_flag)) {
       return -1;
     }
-    by = ucRevBuf[0];
-    if (pby) {
-      *pby = by;
+
+    if (CURVE_NIST256P1 == u2f_flag) {
+      memcpy(sig, ucRevBuf, 0x40);
+    } else {
+      by = ucRevBuf[0];
+      if (pby) {
+        *pby = by;
+      }
+      memcpy(sig, ucRevBuf + 1, 0x40);
     }
-    memcpy(sig, ucRevBuf + 1, 0x40);
 
     return 0;
   }

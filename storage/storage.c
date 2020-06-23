@@ -1301,7 +1301,11 @@ secbool storage_set_counter(const uint16_t key, const uint32_t count) {
   uint32_t value[1 + COUNTER_TAIL_WORDS] = {0};
   memset(value, 0xff, sizeof(value));
   value[0] = count;
-  return storage_set(key, value, sizeof(value));
+  if (!g_bSelectSEFlag) {
+    return storage_set(key, value, sizeof(value));
+  } else {
+    return storage_set(key, value, 4);
+  }
 }
 
 secbool storage_next_counter(const uint16_t key, uint32_t *count) {
@@ -1343,10 +1347,10 @@ secbool storage_next_counter(const uint16_t key, uint32_t *count) {
     }
   } else {
     uint16_t len = 0;
-    const uint32_t *val_stored = NULL;
+    uint32_t val_stored = 0;
 
-    storage_get(key, (const void **)&val_stored, 4, &len);
-    *count = val_stored[0] + 1;
+    storage_get(key, (void *)&val_stored, 4, &len);
+    *count = val_stored + 1;
     return storage_set_counter(key, *count);
   }
 }

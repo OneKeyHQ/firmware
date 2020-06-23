@@ -132,7 +132,7 @@ uint32_t se_transmit(uint8_t ucCmd, uint8_t ucIndex, uint8_t *pucSendData,
   aes_decrypt_ctx ctxd;
   // se apdu
   if (MI2C_ENCRYPT == ucMode) {
-    if (SET_SESTORE_DATA == ucWRFlag || DEVICEINIT_DATA == ucWRFlag) {
+    if ((SET_SESTORE_DATA & ucWRFlag) || (DEVICEINIT_DATA & ucWRFlag)) {
       // data aes encrypt
       randomBuf_SE(ucRandom, sizeof(ucRandom));
       memset(&ctxe, 0, sizeof(aes_encrypt_ctx));
