@@ -51,6 +51,7 @@
 #include "u2f.h"
 #include "usb.h"
 #include "util.h"
+#include "utxo_cache.h"
 
 /* Magic constants to check validity of storage block for storage versions 1
  * to 10. */
@@ -468,6 +469,8 @@ void config_init(void) {
   data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
 
   session_clear(false);
+
+  utxo_cache_init();
 
   usbTiny(oldTiny);
 }

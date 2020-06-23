@@ -32,6 +32,7 @@
 #include "secp256k1.h"
 #include "sys.h"
 #include "transaction.h"
+#include "utxo_cache.h"
 
 static uint32_t inputs_count;
 static uint32_t outputs_count;
@@ -1383,6 +1384,23 @@ void signing_txack(TransactionType *tx) {
 #endif
         to_spend += tx->inputs[0].amount;
         authorized_bip143_in += tx->inputs[0].amount;
+        if (!utxo_cache_check(tx->inputs[0].prev_hash.bytes,
+                              tx->inputs[0].prev_index, tx->inputs[0].amount)) {
+          if (ui_language) {
+            layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                                 "segwit input amount", "changed", NULL, NULL);
+          } else {
+            layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
+                              NULL, _("segwit input amount"), _("changed"),
+                              NULL, NULL, NULL, NULL);
+          }
+          if (!protectButton_ex(ButtonRequestType_ButtonRequest_ProtectCall,
+                                false, false)) {
+            fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+            layoutHome();
+            return;
+          }
+        }
         phase1_request_next_input();
       } else {
         fsm_sendFailure(FailureType_Failure_DataError,
