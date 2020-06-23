@@ -332,7 +332,6 @@ bool protectPin(bool use_cached) {
   if (!ret) {
     fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
   }
-  config_setSeedPin(pin);
   return ret;
 }
 
@@ -377,12 +376,12 @@ bool protectChangePin(bool removal) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                        ui_prompt_new_pin[ui_language], &newpin);
     } else {
-      if (new_pin == NULL) {
+      if (newpin == NULL) {
         fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
         layoutHome();
         return false;
       }
-      pin = new_pin;
+      pin = newpin;
     }
     if (pin == PIN_CANCELED_BY_BUTTON) {
       return false;
@@ -429,9 +428,6 @@ bool protectChangePin(bool removal) {
   }
 
   bool ret = config_changePin(old_pin, new_pin);
-  if (ret == true) {
-    config_setSeedPin(new_pin);
-  }
   memzero(old_pin, sizeof(old_pin));
   memzero(new_pin, sizeof(new_pin));
   if (ret == false) {
@@ -443,7 +439,6 @@ bool protectChangePin(bool removal) {
                       _("The new PIN must be different from your wipe code."));
     }
   }
-
   return ret;
 }
 
@@ -612,21 +607,18 @@ bool protectSeedPin(bool force_pin, bool setpin) {
     }
   } else {
     if (config_hasPin()) {
-      if (session_isUnlocked()) {
-      } else {
-        pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                         ui_prompt_current_pin[ui_language], &newpin);
-        if (!pin) {
-          fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
-          return false;
-        } else if (pin == PIN_CANCELED_BY_BUTTON)
-          return false;
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                       ui_prompt_current_pin[ui_language], &newpin);
+      if (!pin) {
+        fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+        return false;
+      } else if (pin == PIN_CANCELED_BY_BUTTON)
+        return false;
 
-        bool ret = config_unlock(pin);
-        if (!ret) {
-          fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
-          return false;
-        }
+      bool ret = config_unlock(pin);
+      if (!ret) {
+        fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+        return false;
       }
     } else {
       if (force_pin) {
@@ -644,7 +636,7 @@ bool protectSeedPin(bool force_pin, bool setpin) {
       }
     }
 
-    if (pin != NULL && !config_setSeedPin(pin)) {
+    if (!config_setSeedPin(pin)) {
       fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
       return false;
     }

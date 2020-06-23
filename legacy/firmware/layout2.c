@@ -59,7 +59,7 @@ const char *ui_prompt_new_pin[2] = {"Please enter new PIN:", "请输入新PIN码
 const char *ui_prompt_new_pin_ack[2] = {"Please re-enter new PIN:",
                                         "请再次输入新PIN码"};
 const char *ui_prompt_seed_pin[2] = {"Please enter backup PIN :",
-                                     "请输入备份时的PIN码"};
+                                     "请输入备份PIN码"};
 const char *ui_prompt_seed_pin_ack[2] = {"Please re-enter backup PIN:",
                                          "请再次输入备份PIN码"};
 const char *ui_prompt_singing[2] = {"Singiing", "签名中..."};

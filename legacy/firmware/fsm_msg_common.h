@@ -183,20 +183,24 @@ void fsm_msgChangePin(const ChangePin *msg) {
       }
 
     } else {
-      if (ui_language) {
-        layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                             "设置PIN码", NULL, NULL, NULL);
+      if (g_bIsBixinAPP) {
       } else {
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Do you really want to"), _("set new PIN?"), NULL,
-                          NULL, NULL, NULL);
+        if (ui_language) {
+          layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                               "设置PIN码", NULL, NULL, NULL);
+        } else {
+          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                            _("Do you really want to"), _("set new PIN?"), NULL,
+                            NULL, NULL, NULL);
+        }
+        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
+                           false)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          layoutHome();
+          return;
+        }
       }
     }
-  }
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
   }
 
   if (protectChangePin(removal)) {
@@ -736,7 +740,7 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   CHECK_INITIALIZED
   // CHECK_PIN_UNCACHED
 
-  if (!protectSeedPin(false, false)) {
+  if (!protectSeedPin(true, false)) {
     layoutHome();
     return;
   }
@@ -748,7 +752,9 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   // 2 3 rfu
   resp->data.size -= 4;
 
-  resp->data.bytes[1] = config_hasPin() ? 1 : 0;
+  // resp->data.bytes[1] = config_hasPin() ? 1 : 0;
+  // backup always needs pin
+  resp->data.bytes[1] = 1;
 
   if (g_bSelectSEFlag) {
     resp->data.bytes[0] = 0x00;
