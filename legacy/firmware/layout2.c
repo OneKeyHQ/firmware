@@ -347,7 +347,11 @@ void layoutHome(void) {
     layoutFillBleName(5);
   }
 #if !EMULATOR
-  layoutStatusLogo(true);
+  if (layoutStatusLogo(true)) {
+    recovery_abort();
+    signing_abort();
+    session_clear(true);
+  }
 #endif
   oledRefresh();
 
@@ -1449,7 +1453,12 @@ void layoutHomeInfo(void) {
     static uint32_t system_millis_logo_refresh = 0;
     // 1000 ms refresh
     if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-      layoutStatusLogo(false);
+      if (layoutStatusLogo(false)) {
+        recovery_abort();
+        signing_abort();
+        session_clear(true);
+        layoutHome();
+      }
       system_millis_logo_refresh = timer_ms();
     }
 #endif

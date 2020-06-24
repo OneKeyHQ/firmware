@@ -178,13 +178,14 @@ void layoutProgress(const char *desc, int permil) {
 }
 
 #if !EMULATOR
-void layoutStatusLogo(bool force_fresh) {
+uint8_t layoutStatusLogo(bool force_fresh) {
   static bool nfc_status_bak = false;
   static bool ble_status_bak = false;
   static bool usb_status_bak = false;
   static uint8_t battery_bak = 0xff;
   uint8_t pad = 16;
   bool refresh = false;
+  uint8_t ret = 0;
 
   if (!ble_name_state()) {
     ble_request_info(BLE_CMD_BT_NAME);
@@ -220,6 +221,7 @@ void layoutStatusLogo(bool force_fresh) {
     ble_status_bak = false;
     oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
     refresh = true;
+    ret = 1;
   }
   if (sys_usbState() == true) {
     if (force_fresh || false == usb_status_bak) {
@@ -258,6 +260,7 @@ void layoutStatusLogo(bool force_fresh) {
     }
   }
   if (refresh) oledRefresh();
+  return ret;
 }
 
 void layoutBlePasskey(uint8_t *passkey) {
