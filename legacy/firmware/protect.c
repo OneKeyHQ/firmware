@@ -590,13 +590,13 @@ bool protectPassphrase(char *passphrase) {
   return result;
 }
 
-bool protectSeedPin(bool force_pin, bool setpin) {
+bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
   const char *newpin = NULL;
 
-  if (setpin) {
+  if (update_pin) {
     bool ret = config_changePin(old_pin, new_pin);
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
@@ -623,14 +623,40 @@ bool protectSeedPin(bool force_pin, bool setpin) {
     } else {
       if (force_pin) {
         pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                         ui_prompt_seed_pin[ui_language], &newpin);
+                         ui_prompt_input_pin[ui_language], &newpin);
         if (pin == PIN_CANCELED_BY_BUTTON) {
           return false;
         } else if (pin == NULL || pin[0] == '\0') {
           fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
           return false;
         }
+
+        if (ui_language) {
+          layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                               "请确认PIN码", NULL, pin, NULL);
+        } else {
+          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                            _("Please confirm PIN"), NULL, NULL, pin, NULL,
+                            NULL);
+        }
+        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
+                           false)) {
+          i2c_set_wait(false);
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          layoutHome();
+          return false;
+        }
         strlcpy(new_pin, pin, sizeof(new_pin));
+        if (setpin) {
+          bool ret = config_changePin(old_pin, new_pin);
+          memzero(old_pin, sizeof(old_pin));
+          memzero(new_pin, sizeof(new_pin));
+          if (ret == false) {
+            i2c_set_wait(false);
+            fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+            return false;
+          }
+        }
       } else {
         pin = "";
       }

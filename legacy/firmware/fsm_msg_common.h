@@ -740,7 +740,7 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   CHECK_INITIALIZED
   // CHECK_PIN_UNCACHED
 
-  if (!protectSeedPin(true, false)) {
+  if (!protectSeedPin(true, true, false)) {
     layoutHome();
     return;
   }
@@ -794,7 +794,7 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     return;
   }
 
-  if (!protectSeedPin(msg->data.bytes[1] == 1 ? true : false, false)) {
+  if (!protectSeedPin(msg->data.bytes[1] == 1 ? true : false, false, false)) {
     layoutHome();
     return;
   }
@@ -843,7 +843,7 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   config_setLabel(msg->has_label ? msg->label : 0);
 
   if (msg->data.bytes[1] == 1) {
-    protectSeedPin(false, true);
+    protectSeedPin(false, false, true);
   }
 
   layoutHome();

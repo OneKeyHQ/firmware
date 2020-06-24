@@ -36,7 +36,7 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset);
 bool protectChangePin(bool removal);
 bool protectChangeWipeCode(bool removal);
 bool protectPassphrase(char* passphrase);
-bool protectSeedPin(bool force_pin, bool setpin);
+bool protectSeedPin(bool force_pin, bool setpin, bool update_pin);
 extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
 
