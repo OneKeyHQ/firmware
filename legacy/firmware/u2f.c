@@ -558,6 +558,7 @@ static const HDNode *getDerivedNode(uint32_t *address_n,
   if (g_bSelectSEFlag) {
     uint8_t ucRevBuf[256];
     uint16_t usLen;
+    (void)usLen;
     if (MI2C_OK != se_transmit(MI2C_CMD_ECC_EDDSA, EDDSA_INDEX_U2FKEY,
                                (uint8_t *)address_n, address_n_count * 4,
                                ucRevBuf, &usLen, MI2C_PLAIN,

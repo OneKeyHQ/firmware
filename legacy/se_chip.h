@@ -93,5 +93,6 @@ bool se_st_seed_de(const uint16_t key, void *cipher_data, uint16_t cipher_len,
 #define se_device_init(...) false
 #define se_st_seed_en(...) false
 #define se_st_seed_de(...) false
+#define se_set_value(...) false
 #endif
 #endif

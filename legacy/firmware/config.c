@@ -469,9 +469,9 @@ void config_init(void) {
   data2hex(config_uuid, sizeof(config_uuid), config_uuid_str);
 
   session_clear(false);
-
+#if !EMULATOR
   utxo_cache_init();
-
+#endif
   usbTiny(oldTiny);
 }
 
@@ -1210,13 +1210,6 @@ bool config_setSeedPin(const char *pin) {
   if (0x00 == seedpin) {
     return false;
   }
-  /*
-  if (sectrue !=
-      storage_set(KEY_SEED_PIN, &seedpin, sizeof(uint32_t))) {
-    return false;
-  }
-  return true;
-  */
   return se_set_value(KEY_SEED_PASSPHRASE, &seedpin, sizeof(uint32_t));
 }
 

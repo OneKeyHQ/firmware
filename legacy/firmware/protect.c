@@ -121,6 +121,9 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
   ButtonRequest resp = {0};
   bool result = false;
   bool acked = false;
+#if DEBUG_LINK
+  bool debug_decided = false;
+#endif
 
   memzero(&resp, sizeof(ButtonRequest));
   resp.has_code = true;

@@ -1384,6 +1384,7 @@ void signing_txack(TransactionType *tx) {
 #endif
         to_spend += tx->inputs[0].amount;
         authorized_bip143_in += tx->inputs[0].amount;
+#if !EMULATOR
         if (!utxo_cache_check(tx->inputs[0].prev_hash.bytes,
                               tx->inputs[0].prev_index, tx->inputs[0].amount)) {
           if (ui_language) {
@@ -1401,6 +1402,7 @@ void signing_txack(TransactionType *tx) {
             return;
           }
         }
+#endif
         phase1_request_next_input();
       } else {
         fsm_sendFailure(FailureType_Failure_DataError,

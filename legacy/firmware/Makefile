@@ -9,6 +9,7 @@ OBJS += usb.o
 OBJS += bl_check.o
 OBJS += otp.o
 OBJS += header.o
+OBJS += utxo_cache.o
 endif
 
 OBJS += messages.o
@@ -25,7 +26,6 @@ OBJS += recovery.o
 OBJS += reset.o
 OBJS += signing.o
 OBJS += crypto.o
-OBJS += utxo_cache.o
 
 ifneq ($(BITCOIN_ONLY),1)
 OBJS += u2f.o
