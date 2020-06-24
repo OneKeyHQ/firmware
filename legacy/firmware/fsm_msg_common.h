@@ -156,6 +156,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
   CHECK_INITIALIZED
 
   bool removal = msg->has_remove && msg->remove;
+  bool button_confirm = true;
   if (removal) {
     if (config_hasPin()) {
       if (ui_language) {
@@ -184,6 +185,7 @@ void fsm_msgChangePin(const ChangePin *msg) {
 
     } else {
       if (g_bIsBixinAPP) {
+        button_confirm = false;
       } else {
         if (ui_language) {
           layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
@@ -193,16 +195,15 @@ void fsm_msgChangePin(const ChangePin *msg) {
                             _("Do you really want to"), _("set new PIN?"), NULL,
                             NULL, NULL, NULL);
         }
-        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
-                           false)) {
-          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-          layoutHome();
-          return;
-        }
       }
     }
   }
-
+  if (button_confirm &&
+      !protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
   if (protectChangePin(removal)) {
     i2c_set_wait(false);
     if (removal) {
