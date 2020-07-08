@@ -113,6 +113,7 @@ from .EthereumVerifyMessage import EthereumVerifyMessage
 from .Failure import Failure
 from .Features import Features
 from .FirmwareErase import FirmwareErase
+from .FirmwareErase_ex import FirmwareErase_ex
 from .FirmwareRequest import FirmwareRequest
 from .FirmwareUpload import FirmwareUpload
 from .GetAddress import GetAddress

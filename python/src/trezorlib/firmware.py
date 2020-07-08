@@ -488,7 +488,10 @@ def update(client, data):
     if client.features.bootloader_mode is False:
         raise RuntimeError("Device must be in bootloader mode")
 
-    resp = client.call(messages.FirmwareErase(length=len(data)))
+    if data[:4] == b"5283":
+        resp = client.call(messages.FirmwareErase_ex(length=len(data)))
+    else:
+        resp = client.call(messages.FirmwareErase(length=len(data)))
 
     # TREZORv1 method
     if isinstance(resp, messages.Success):

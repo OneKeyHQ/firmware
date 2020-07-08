@@ -14,13 +14,22 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+import hashlib
+import struct
 import sys
+import zipfile
+from io import BytesIO
 
 import click
 import requests
 
 from .. import exceptions, firmware
 from . import with_client
+
+FWHEADER_SIZE = 1024
+INIT_DATA_SIZE = 512
+SIGNATURES_START = 6 * 4 + 8 + 512
+INDEXES_START = SIGNATURES_START + 3 * 64
 
 ALLOWED_FIRMWARE_FORMATS = {
     1: (firmware.FirmwareFormat.TREZOR_ONE, firmware.FirmwareFormat.TREZOR_ONE_V2),
@@ -161,6 +170,90 @@ def find_best_firmware_version(
     return url, fingerprint
 
 
+def pad_to_size(data, size):
+    if len(data) > size:
+        raise ValueError("Chunk too big already")
+    if len(data) == size:
+        return data
+    return data + b"\xFF" * (size - len(data))
+
+
+def prepare_hashes(data):
+    # process chunks
+    start = 0
+    end = (64 - 1) * 1024
+    hashes = []
+    for i in range(16):
+        sector = data[start:end]
+        if len(sector) > 0:
+            chunk = pad_to_size(sector, end - start)
+            hashes.append(hashlib.sha256(chunk).digest())
+        else:
+            hashes.append(b"\x00" * 32)
+        start = end
+        end += 64 * 1024
+    return hashes
+
+
+def update_hashes_in_header(data):
+    # Store hashes in the firmware header
+    data = bytearray(data)
+    o = 0
+    for h in prepare_hashes(data[FWHEADER_SIZE:]):
+        data[0x20 + o : 0x20 + o + 32] = h
+        o += 32
+    return bytes(data)
+
+
+def parse(zipfile_path: str) -> bytes:
+    """
+    :param zipfile_path: .zip file path
+    :return: the content of the update
+    """
+    file = zipfile.ZipFile(zipfile_path, "r")
+    buffers = BytesIO()
+    buffers.write(b"5283")
+
+    buffers.seek(FWHEADER_SIZE, 0)
+    dat_file_name = ""
+    bin_file_name = ""
+    for f in file.namelist():
+        if f.endswith(".dat"):
+            dat_file_name = f
+        elif f.endswith(".bin"):
+            bin_file_name = f
+    if not dat_file_name or not bin_file_name:
+        raise BaseException(
+            "zip content format error, should contains *.dat and *.bin files"
+        )
+    data = file.read(dat_file_name)
+    buffers.write(struct.pack("i", len(data)))
+    buffers.write(data)
+
+    buffers.seek(FWHEADER_SIZE + INIT_DATA_SIZE, 0)
+
+    data = file.read(bin_file_name)
+    assert len(data) % 4 == 0
+    buffers.write(data)
+    file.close()
+
+    file_len = INIT_DATA_SIZE + len(data)
+
+    buffers.seek(12, 0)
+    buffers.write(struct.pack("i", file_len))
+
+    data = buffers.getvalue()
+
+    if data[:4] != b"5283":
+        raise Exception("Firmware header expected")
+
+    data = update_hashes_in_header(data)
+    print("Firmware size %d bytes" % len(data))
+
+    buffers.close()
+    return data
+
+
 @click.command()
 # fmt: off
 @click.option("-f", "--filename")
@@ -219,7 +312,10 @@ def firmware_update(
     model = client.features.model or "1"
 
     if filename:
-        data = open(filename, "rb").read()
+        if filename.endswith(".zip"):
+            data = parse(filename)
+        else:
+            data = open(filename, "rb").read()
     else:
         if not url:
             if version:
