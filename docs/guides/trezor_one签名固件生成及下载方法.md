@@ -132,3 +132,10 @@ __固件下载__
 安装成功后，在固件目录下打开cmd窗口，确认设备在bootloader状态，执行如下指令下载固件:
 
 - trezorctl firmware-update -f trezor.bin
+
+__使用trezorctl下载Nordic蓝牙固件__
+    Nordic蓝牙固件使用ECC算法签名，最后生成.zip后缀得升级文件，升级文件生成过程请参考Nordic官方相关文档。
+    使用trezorctl升级蓝牙固件，需要重新安装币信修改后的trezorctl。安装方法如下，下载源码后进入python/目录，执行指令：
+- sudo make install
+    使用USB线连接设备和电脑，确认设备在bootloader状态，执行指令：
+- trezorctl firmware-update -s -f *.zip
