@@ -198,7 +198,7 @@ void touch_power_on(void) {
                                sizeof(touch_panel_config), 10)),
       NULL);
 
-  touch_sensitivity(0x06);
+  touch_sensitivity(0x0A);
 }
 
 void touch_power_off(void) {

@@ -48,12 +48,12 @@
 // common shared functions
 
 static void ui_confirm_cancel_buttons(void) {
-  display_bar_radius(9, 184, 108, 50, COLOR_BL_FAIL, COLOR_WHITE, 4);
-  display_icon(9 + (108 - 16) / 2, 184 + (50 - 16) / 2, 16, 16,
+  display_bar_radius(9, 184 + 80, 108, 50, COLOR_BL_FAIL, COLOR_WHITE, 4);
+  display_icon(9 + (108 - 16) / 2, 184 + 80 + (50 - 16) / 2, 16, 16,
                toi_icon_cancel + 12, sizeof(toi_icon_cancel) - 12, COLOR_WHITE,
                COLOR_BL_FAIL);
-  display_bar_radius(123, 184, 108, 50, COLOR_BL_DONE, COLOR_WHITE, 4);
-  display_icon(123 + (108 - 19) / 2, 184 + (50 - 16) / 2, 20, 16,
+  display_bar_radius(123, 184 + 80, 108, 50, COLOR_BL_DONE, COLOR_WHITE, 4);
+  display_icon(123 + (108 - 19) / 2, 184 + 80 + (50 - 16) / 2, 20, 16,
                toi_icon_confirm + 12, sizeof(toi_icon_confirm) - 12,
                COLOR_WHITE, COLOR_BL_DONE);
 }
@@ -122,7 +122,7 @@ void ui_screen_boot_click(void) {
 // welcome UI
 
 void ui_screen_first(void) {
-  display_icon(0, 0, 240, 240, toi_icon_logo + 12, sizeof(toi_icon_logo) - 12,
+  display_icon(0, 0, 240, 320, toi_icon_logo + 12, sizeof(toi_icon_logo) - 12,
                COLOR_BLACK, COLOR_WHITE);
 }
 
@@ -138,7 +138,7 @@ void ui_screen_third(void) {
   display_icon((DISPLAY_RESX - 180) / 2, (DISPLAY_RESY - 30) / 2 - 5, 180, 30,
                toi_icon_welcome + 12, sizeof(toi_icon_welcome) - 12,
                COLOR_BLACK, COLOR_WHITE);
-  display_text_center(120, 220, "Go to trezor.io/start", -1, FONT_NORMAL,
+  display_text_center(120, 220 + 80, "Go to trezor.io/start", -1, FONT_NORMAL,
                       COLOR_BLACK, COLOR_WHITE);
 }
 
@@ -167,23 +167,24 @@ void ui_screen_info(secbool buttons, const vendor_header *const vhdr,
   const char *ver_str = format_ver("Bootloader %d.%d.%d", VERSION_UINT32);
   display_text(16, 32, ver_str, -1, FONT_NORMAL, COLOR_BLACK, COLOR_WHITE);
   display_bar(16, 44, DISPLAY_RESX - 14 * 2, 1, COLOR_BLACK);
-  display_icon(16, 54, 32, 32, toi_icon_info + 12, sizeof(toi_icon_info) - 12,
-               COLOR_BL_GRAY, COLOR_WHITE);
+  display_icon(16, 54 + 25, 32, 32, toi_icon_info + 12,
+               sizeof(toi_icon_info) - 12, COLOR_BL_GRAY, COLOR_WHITE);
   if (vhdr && hdr) {
     ver_str = format_ver("Firmware %d.%d.%d by", (hdr->version));
-    display_text(55, 70, ver_str, -1, FONT_NORMAL, COLOR_BL_GRAY, COLOR_WHITE);
+    display_text(55, 70 + 80, ver_str, -1, FONT_NORMAL, COLOR_BL_GRAY,
+                 COLOR_WHITE);
     display_vendor_string(vhdr->vstr, vhdr->vstr_len, COLOR_BL_GRAY);
   } else {
-    display_text(55, 70, "No Firmware", -1, FONT_NORMAL, COLOR_BL_GRAY,
+    display_text(55, 70 + 80, "No Firmware", -1, FONT_NORMAL, COLOR_BL_GRAY,
                  COLOR_WHITE);
   }
 
   if (sectrue == buttons) {
-    display_text_center(120, 170, "Connect to host?", -1, FONT_NORMAL,
+    display_text_center(120, 170 + 80, "Connect to host?", -1, FONT_NORMAL,
                         COLOR_BLACK, COLOR_WHITE);
     ui_confirm_cancel_buttons();
   } else {
-    display_text_center(120, 220, "Go to trezor.io/start", -1, FONT_NORMAL,
+    display_text_center(120, 220 + 80, "Go to trezor.io/start", -1, FONT_NORMAL,
                         COLOR_BLACK, COLOR_WHITE);
   }
 }
@@ -205,8 +206,8 @@ void ui_screen_info_fingerprint(const image_header *const hdr) {
                         FONT_MONO, COLOR_BLACK, COLOR_WHITE);
   }
 
-  display_bar_radius(9, 184, 222, 50, COLOR_BL_DONE, COLOR_WHITE, 4);
-  display_icon(9 + (222 - 19) / 2, 184 + (50 - 16) / 2, 20, 16,
+  display_bar_radius(9, 184 + 80, 222, 50, COLOR_BL_DONE, COLOR_WHITE, 4);
+  display_icon(9 + (222 - 19) / 2, 184 + 80 + (50 - 16) / 2, 20, 16,
                toi_icon_confirm + 12, sizeof(toi_icon_confirm) - 12,
                COLOR_WHITE, COLOR_BL_DONE);
 }
@@ -351,23 +352,23 @@ int ui_user_input(int zones) {
     uint16_t x = touch_unpack_x(evt);
     uint16_t y = touch_unpack_y(evt);
     // clicked on Cancel button
-    if ((zones & INPUT_CANCEL) && x >= 9 && x < 9 + 108 && y > 184 &&
-        y < 184 + 50) {
+    if ((zones & INPUT_CANCEL) && x >= 240 - 9 - 108 && x < 240 - 9 &&
+        y > 320 - 184 - 50 && y < 320 - 184 - 80) {
       return INPUT_CANCEL;
     }
     // clicked on Confirm button
-    if ((zones & INPUT_CONFIRM) && x >= 123 && x < 123 + 108 && y > 184 &&
-        y < 184 + 50) {
+    if ((zones & INPUT_CONFIRM) && x >= 240 - 123 - 108 && x < 240 - 123 &&
+        y > 320 - 50 - 184 - 80 && y < 320 - 184 - 80) {
       return INPUT_CONFIRM;
     }
     // clicked on Long Confirm button
-    if ((zones & INPUT_LONG_CONFIRM) && x >= 9 && x < 9 + 222 && y > 184 &&
-        y < 184 + 50) {
+    if ((zones & INPUT_LONG_CONFIRM) && x >= 240 - 9 - 222 && x < 240 - 9 &&
+        y > 320 - 184 - 80 - 50 && y < 320 - 184 - 80) {
       return INPUT_LONG_CONFIRM;
     }
     // clicked on Info icon
-    if ((zones & INPUT_INFO) && x >= 16 && x < 16 + 32 && y > 54 &&
-        y < 54 + 32) {
+    if ((zones & INPUT_INFO) && x >= 240 - 32 - 16 && x < 240 - 16 &&
+        y > 320 - 54 - 25 - 32 && y < 320 - 54 - 25) {
       return INPUT_INFO;
     }
   }

@@ -154,6 +154,10 @@ const char *VERIFYING_PIN_MSG[2] = {"Verifying PIN", "校验 PIN"};
 const char *PROCESSING_MSG[2] = {"Processing", "处理中..."};
 const char *STARTING_MSG[2] = {"Starting up", "启动中..."};
 
+#if (TREZOR_MODEL == T)
+static uint8_t ui_language = 0;
+static bool g_bSelectSEFlag = false;
+#endif
 static secbool initialized = secfalse;
 static secbool unlocked = secfalse;
 static PIN_UI_WAIT_CALLBACK ui_callback = NULL;

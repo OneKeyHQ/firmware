@@ -382,8 +382,8 @@ void display_init(void) {
     CMD(0xC0);
     DATA(0x20);  // LCMCTRL: LCM Control: XOR RGB setting
     CMD(0xE4);
-    DATA(0x1D);
-    DATA(0x0A);
+    DATA(0x27);
+    DATA(0x00);
     DATA(0x11);  // GATECTRL: Gate Control; NL = 240 gate lines, first scan line
                  // is gate 80.; gate scan direction 319 -> 0
     // the above config is the most important and definitely necessary
@@ -491,10 +491,10 @@ void display_refresh(void) {
   if (id && (id != DISPLAY_ID_GC9307)) {
     // synchronize with the panel synchronization signal in order to avoid
     // visual tearing effects
-    while (GPIO_PIN_RESET == HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_12)) {
-    }
-    while (GPIO_PIN_SET == HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_12)) {
-    }
+    // while (GPIO_PIN_RESET == HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_12)) {
+    // }
+    // while (GPIO_PIN_SET == HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_12)) {
+    // }
   }
 }
 
