@@ -546,6 +546,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_label) {
     config_setLabel(msg->label);
+    i2c_set_wait(false);
   }
   if (msg->has_language) {
     config_setLanguage(msg->language);

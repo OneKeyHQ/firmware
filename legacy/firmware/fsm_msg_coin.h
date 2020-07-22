@@ -269,6 +269,7 @@ void fsm_msgGetAddress(const GetAddress *msg) {
   }
 
   strlcpy(resp->address, address, sizeof(resp->address));
+  i2c_set_wait(false);
   msg_write(MessageType_MessageType_Address, resp);
   layoutHome();
 }
