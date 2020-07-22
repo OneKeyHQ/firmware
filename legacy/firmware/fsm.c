@@ -241,6 +241,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
                               bool address_is_account,
                               const MultisigRedeemScriptType *multisig,
                               int multisig_index, const CoinInfo *coin) {
+  bool button_request = true;
   int screen = 0, screens = 2;
   if (multisig) {
     screens += 2 * cryptoMultisigPubkeyCount(multisig);
@@ -291,9 +292,11 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
         break;
       }
     }
-    if (protectButton(ButtonRequestType_ButtonRequest_Address, false)) {
+    if (protectButton_ex(ButtonRequestType_ButtonRequest_Address, false,
+                         button_request)) {
       return true;
     }
+    button_request = false;
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
