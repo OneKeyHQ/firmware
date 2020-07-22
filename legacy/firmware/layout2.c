@@ -756,22 +756,27 @@ void layoutAddress(const char *address, const char *desc, bool qrcode,
       }
     }
   } else {
+    uint32_t i = 0;
     if (desc) {
       oledDrawString(0, 0 * 9, desc, FONT_STANDARD);
     }
     if (addrlen > 10) {  // don't split short addresses
-      uint32_t rowlen =
-          (addrlen - 1) / (addrlen <= 42 ? 2 : addrlen <= 63 ? 3 : 4) + 1;
+      uint32_t rowlen = 21;
+      // (addrlen - 1) / (addrlen <= 42 ? 2 : addrlen <= 63 ? 3 : 4);
+      uint32_t num_lines = addrlen <= 42 ? 2 : addrlen <= 63 ? 3 : 4;
+
       const char **str =
           split_message((const uint8_t *)address, addrlen, rowlen);
-      for (int i = 0; i < 4; i++) {
-        oledDrawString(0, (i + 1) * 9 + 4, str[i], FONT_FIXED);
+
+      for (i = 0; i < num_lines; i++) {
+        oledDrawString(0, (i + 1) * 9, str[i], FONT_FIXED);
       }
     } else {
       oledDrawString(0, (0 + 1) * 9 + 4, address, FONT_FIXED);
     }
     oledDrawString(
-        0, 42, address_n_str(address_n, address_n_count, address_is_account),
+        0, (i + 1) * 9,
+        address_n_str(address_n, address_n_count, address_is_account),
         FONT_STANDARD);
   }
 
