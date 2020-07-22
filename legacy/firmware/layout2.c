@@ -47,7 +47,7 @@
 /* Display info timeout */
 uint32_t system_millis_display_info_start = 0;
 
-#define DEVICE_INFO_PAGE_NUM 3
+#define DEVICE_INFO_PAGE_NUM 4
 
 const char *ui_prompt_sign_trans[2] = {"Signing transaction", "签名交易中..."};
 const char *ui_prompt_wakingup[2] = {"Waking up", "唤醒..."};
@@ -1384,6 +1384,20 @@ void layoutDeviceInfo(uint8_t ucPage) {
         bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
                          sizeof(str_out) - 3);
         oledDrawStringRight(OLED_WIDTH - 1, y, str_out, FONT_STANDARD);
+        y += 9;
+      }
+      break;
+    case 4:
+      oledClear();
+      if (ui_language) {
+        oledDrawString_zh(0, y, (uint8_t *)"蓝牙名称:", FONT_STANDARD);
+        y += 13;
+        oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)ble_get_name(),
+                               FONT_STANDARD);
+      } else {
+        oledDrawString(0, y, "BLE Name:", FONT_STANDARD);
+        y += 9;
+        oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_name(), FONT_STANDARD);
         y += 9;
       }
       break;
