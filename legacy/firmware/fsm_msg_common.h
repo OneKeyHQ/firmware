@@ -780,8 +780,9 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
     }
     resp->data.size += 4;
   }
-  config_setNeedsBackup(false);
-  msg_write(MessageType_MessageType_BixinBackupAck, resp);
+  if (msg_write(MessageType_MessageType_BixinBackupAck, resp)) {
+    config_setNeedsBackup(false);
+  }
   layoutHome();
   return;
 }

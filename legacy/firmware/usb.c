@@ -411,20 +411,11 @@ void usbInit(void) {
 
 static void i2c_slave_poll(void) {
   uint32_t total_len, len;
-  if (i2c_recv_done) {
-    i2c_recv_done = false;
+  while ((total_len = fifo_lockdata_len(&i2c_fifo_in)) > 0) {
     memset(packet_buf, 0x00, sizeof(packet_buf));
-    fifo_read_peek(&i2c_fifo_in, packet_buf, 1);
-    if (packet_buf[0] == '?') {  // trezor command
-      while (1) {
-        total_len = fifo_lockdata_len(&i2c_fifo_in);
-        if (total_len == 0) break;
-        len = total_len > 64 ? 64 : total_len;
-        fifo_read_lock(&i2c_fifo_in, packet_buf, len);
-        main_rx_callback(NULL, 0);
-      }
-    } else {  // apdu command
-    }
+    len = total_len > 64 ? 64 : total_len;
+    fifo_read_lock(&i2c_fifo_in, packet_buf, len);
+    main_rx_callback(NULL, 0);
   }
 }
 void usbPoll(void) {

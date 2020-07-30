@@ -214,7 +214,7 @@ bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr) {
       offset += 64;
     }
     if (offset) {
-      i2c_slave_send(offset);
+      status = i2c_slave_send(offset);
     }
   }
 #endif

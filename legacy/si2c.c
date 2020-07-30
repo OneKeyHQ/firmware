@@ -146,11 +146,9 @@ void i2c2_ev_isr() {
   }
   if (sr1 & I2C_SR1_STOPF) {  // EV4
     I2C_CR1(I2C2) |= I2C_CR1_PE;
-    if (i2c_recv_done == false) {
-      fifo_lockpos_set(&i2c_fifo_in);
-      i2c_recv_done = true;
-      i2c_data_outlen = 0;  // discard former response
-    }
+    fifo_lockpos_set(&i2c_fifo_in);
+    i2c_recv_done = true;
+    i2c_data_outlen = 0;  // discard former response
     SET_COMBUS_LOW();
   }
   if (sr1 & I2C_SR1_AF) {  // EV4
@@ -161,11 +159,12 @@ void i2c2_er_isr(void) {}
 
 void i2c_set_wait(bool flag) { wait_response = flag; }
 
-void i2c_slave_send(uint32_t data_len) {
+bool i2c_slave_send(uint32_t data_len) {
   uint32_t len = 0;
   uint32_t i;
   int32_t counter, counter_bak, counter_set;
   bool flag = true;
+  bool status = false;
 
   if (data_len > 64) len = data_len - 64;
   if (len) {
@@ -187,8 +186,11 @@ void i2c_slave_send(uint32_t data_len) {
   }
 
   while (1) {
-    if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_resp) == true ||
-        i2c_data_outlen == 0) {
+    if (checkButtonOrTimeout(BTN_PIN_NO, timer_out_resp) == true) {
+      break;
+    }
+    if (i2c_data_outlen == 0) {
+      status = true;
       break;
     } else {
       counter = timer_out_get(timer_out_resp) / timer1s;
@@ -225,6 +227,7 @@ void i2c_slave_send(uint32_t data_len) {
     oledBufferResume();
     oledRefresh();
   }
+  return status;
 }
 
 // used in bootloader,no chinese prompt
