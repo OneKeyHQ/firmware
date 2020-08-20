@@ -119,6 +119,7 @@ uint8_t *session_startSession(const uint8_t *received_session_id);
 
 bool config_setMnemonic(const char *mnemonic);
 bool config_containsMnemonic(const char *mnemonic);
+bool config_hasMnemonic(void);
 bool config_getMnemonic(char *dest, uint16_t dest_size);
 bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size);
@@ -126,6 +127,9 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
 bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len);
 bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg);
 bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg);
+
+bool config_stBackUpEntoryToSe(uint8_t *seed, uint8_t seed_len);
+bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len);
 
 #if DEBUG_LINK
 bool config_dumpNode(HDNodeType *node);

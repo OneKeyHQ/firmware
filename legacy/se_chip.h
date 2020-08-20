@@ -83,6 +83,10 @@ bool se_st_seed_en(const uint16_t key, void *plain_data, uint16_t plain_len,
                    void *cipher_data, uint16_t *cipher_len);
 bool se_st_seed_de(const uint16_t key, void *cipher_data, uint16_t cipher_len,
                    void *plain_data, uint16_t *plain_len);
+bool st_backup_entory_to_se(const uint16_t key, uint8_t *seed,
+                            uint8_t seed_len);
+bool st_restore_entory_from_se(const uint16_t key, uint8_t *seed,
+                               uint8_t *seed_len);
 #else
 #define se_transmit(...) 0
 #define se_get_version(...) false

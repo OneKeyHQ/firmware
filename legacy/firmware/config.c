@@ -109,6 +109,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_DEVICE_STATE (32 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // uint32
 #define KEY_SEED_PASSPHRASE (33 | APP)                                // string
 #define KEY_SEED_ST (34 | APP)                                        // string
+#define KEY_ST_SEED_EXCHANGE (35 | APP)  // bytes, only used in se
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -825,6 +826,8 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
   return sectrue == config_get_bytes(KEY_MNEMONIC, dest, dest_size, real_size);
 }
 
+bool config_hasMnemonic(void) { return sectrue == storage_has(KEY_MNEMONIC); }
+
 bool config_getMnemonic(char *dest, uint16_t dest_size) {
   return sectrue == config_get_string(KEY_MNEMONIC, dest, dest_size);
 }
@@ -1157,9 +1160,6 @@ ExportType config_setSeedsExportFlag(ExportType flag) { return flag; }
 
 bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
                          BixinOutMessageSE_outmessage_t *get_msg) {
-  if (!g_bSelectSEFlag) {
-    return false;
-  }
   if (false == bMI2CDRV_SendData(input_msg->bytes, input_msg->size)) {
     return false;
   }
@@ -1222,4 +1222,12 @@ bool config_STSeedRestore(void *cipher_data, uint16_t cipher_len,
                           void *plain_data, uint16_t *plain_len) {
   return se_st_seed_de(KEY_SEED_ST, cipher_data, cipher_len, plain_data,
                        plain_len);
+}
+
+bool config_stBackUpEntoryToSe(uint8_t *seed, uint8_t seed_len) {
+  return st_backup_entory_to_se(KEY_ST_SEED_EXCHANGE, seed, seed_len);
+}
+
+bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len) {
+  return st_restore_entory_from_se(KEY_ST_SEED_EXCHANGE, seed, seed_len);
 }

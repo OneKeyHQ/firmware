@@ -741,7 +741,32 @@ void fsm_msgBixinReboot(const BixinReboot *msg) {
 }
 
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
+  bool request_restore = false;
+  bool request_backup = false;
   RESP_INIT(BixinOutMessageSE);
+
+  if (msg->inputmessage.bytes[0] == 0x00 &&
+      msg->inputmessage.bytes[1] == 0xf9 &&
+      msg->inputmessage.bytes[2] == 0x00 && config_hasMnemonic()) {
+    CHECK_INITIALIZED
+    CHECK_PIN
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+    uint8_t entropy[64] = {0};
+    config_getMnemonic(mnemonic, sizeof(mnemonic));
+    entropy[0] = mnemonic_to_entropy(mnemonic, entropy + 1) / 11;
+    if (!config_stBackUpEntoryToSe(entropy, sizeof(entropy))) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("seed import failed"));
+      layoutHome();
+      return;
+    }
+    request_backup = true;
+  } else if (msg->inputmessage.bytes[0] == 0x00 &&
+             msg->inputmessage.bytes[1] == 0xf9 &&
+             msg->inputmessage.bytes[2] == 0x01) {
+    CHECK_NOT_INITIALIZED
+    request_restore = true;
+  }
 
   if (false == config_getMessageSE(
                    (BixinMessageSE_inputmessage_t *)(&msg->inputmessage),
@@ -750,8 +775,46 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
     layoutHome();
     return;
   }
+  if (request_restore) {
+    // restore to st
+    if (resp->outmessage.bytes[0] == 0x55) {
+      uint8_t entropy[64] = {0};
+      uint8_t len = sizeof(entropy);
+      if (config_stRestoreEntoryFromSe(entropy, &len)) {
+        if (len != 64) {
+          fsm_sendFailure(FailureType_Failure_DataError,
+                          _("Entory data error"));
+        } else if (entropy[0] == 12 || entropy[0] == 18 || entropy[0] == 24) {
+          const char *mnemonic =
+              mnemonic_from_data(entropy + 1, entropy[0] * 4 / 3);
+          if (config_setMnemonic(mnemonic)) {
+          } else {
+            fsm_sendFailure(FailureType_Failure_ProcessError,
+                            _("Failed to store mnemonic"));
+            layoutHome();
+            return;
+          }
+        }
+      }
+    } else if (resp->outmessage.bytes[0] == 0xaa) {
+      if (!config_getWhetherUseSE()) {
+        config_setWhetherUseSE(true);
+      }
+    } else {
+      fsm_sendFailure(FailureType_Failure_DataError, _("restore data err"));
+      layoutHome();
+      return;
+    }
+  }
   resp->has_outmessage = true;
-  msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
+  if (request_backup) {
+    if (msg_write(MessageType_MessageType_BixinOutMessageSE, resp)) {
+      config_setNeedsBackup(false);
+    }
+  } else {
+    msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
+  }
+
   layoutHome();
   return;
 }
