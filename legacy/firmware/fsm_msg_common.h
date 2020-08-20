@@ -509,9 +509,23 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
 
   if (msg->has_auto_lock_delay_ms) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("change auto-lock"),
-                      _("delay?"), NULL, NULL, NULL);
+    char secstrbuf[] = _("________0 s");
+    char *secstr = secstrbuf + 9;
+    uint32_t secs = 0;
+    secs = msg->auto_lock_delay_ms / 1000;
+    do {
+      secstr--;
+      *secstr = (secs % 10) + '0';
+      secs /= 10;
+    } while (secs > 0 && secstr >= secstrbuf);
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                           "修改锁屏/关机时间?", NULL, secstr, NULL);
+    } else {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Do you really want to"), _("change auto-lock"),
+                        _("delay?"), NULL, secstr, NULL);
+    }
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -520,9 +534,14 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
       (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("change fastpay settings"),
-                      NULL, NULL, NULL, NULL);
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                           "修改快捷支付信息", NULL, NULL, NULL);
+    } else {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Do you really want to"),
+                        _("change fastpay settings"), NULL, NULL, NULL, NULL);
+    }
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
