@@ -40,14 +40,18 @@
 
 bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
+bool protectAbortedByTimeout = false;
 
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
   bool result = false;
   bool acked = false;
+  bool timeout_flag = true;
 #if DEBUG_LINK
   bool debug_decided = false;
 #endif
+
+  protectAbortedByTimeout = false;
 
   memzero(&resp, sizeof(ButtonRequest));
   resp.has_code = true;
@@ -73,11 +77,13 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
       usbSleep(5);
       buttonUpdate();
       if (button.YesUp) {
+        timeout_flag = false;
         result = true;
         break;
       }
       if (!confirm_only && button.NoUp) {
         result = false;
+        timeout_flag = false;
         break;
       }
     }
@@ -88,6 +94,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
         (msg_tiny_id == MessageType_MessageType_Initialize);
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       msg_tiny_id = 0xFFFF;
+      timeout_flag = false;
       result = false;
       break;
     }
@@ -113,17 +120,22 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   }
   timer_out_set(timer_out_oper, 0);
   usbTiny(0);
+  if (timeout_flag) protectAbortedByTimeout = true;
 
   return result;
 }
 
-bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
+bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
+                      uint32_t timeout_s) {
   ButtonRequest resp = {0};
   bool result = false;
   bool acked = false;
+  bool timeout_flag = true;
 #if DEBUG_LINK
   bool debug_decided = false;
 #endif
+
+  protectAbortedByTimeout = false;
 
   memzero(&resp, sizeof(ButtonRequest));
   resp.has_code = true;
@@ -133,11 +145,15 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
   if (requset) {
     msg_write(MessageType_MessageType_ButtonRequest, &resp);
   }
-
-  timer_out_set(timer_out_oper, default_oper_time);
+  if (timeout_s) {
+    timer_out_set(timer_out_oper, timeout_s);
+  }
   if (g_bIsBixinAPP) acked = true;
 
-  while (timer_out_get(timer_out_oper)) {
+  while (1) {
+    if (timeout_s) {
+      if (timer_out_get(timer_out_oper) == 0) break;
+    }
     usbPoll();
 
     // check for ButtonAck
@@ -152,9 +168,11 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
       buttonUpdate();
       if (button.YesUp) {
         result = true;
+        timeout_flag = false;
         break;
       }
       if (!confirm_only && button.NoUp) {
+        timeout_flag = false;
         result = false;
         break;
       }
@@ -166,6 +184,7 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
         (msg_tiny_id == MessageType_MessageType_Initialize);
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       msg_tiny_id = 0xFFFF;
+      timeout_flag = false;
       result = false;
       break;
     }
@@ -191,6 +210,7 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset) {
   }
   timer_out_set(timer_out_oper, 0);
   usbTiny(0);
+  if (timeout_flag) protectAbortedByTimeout = true;
 
   return result;
 }

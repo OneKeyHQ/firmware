@@ -32,6 +32,7 @@
 #include "secp256k1.h"
 #include "storage_ex.h"
 #include "sys.h"
+#include "timer.h"
 #include "transaction.h"
 
 static uint32_t inputs_count;
@@ -942,7 +943,7 @@ static bool signing_check_fee(void) {
               sizeof(tx_out.address));
       layoutConfirmOutput(coin, &tx_out);
       if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
-                            btn_request)) {
+                            btn_request, default_oper_time)) {
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         signing_abort();
         return false;
@@ -972,7 +973,7 @@ static bool signing_check_fee(void) {
     // last confirmation
     layoutConfirmTx(coin, to_spend - change_spend, fee);
     if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
-                          btn_request)) {
+                          btn_request, default_oper_time)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       signing_abort();
       return false;
@@ -1396,7 +1397,7 @@ void signing_txack(TransactionType *tx) {
                               NULL, NULL, NULL, NULL);
           }
           if (!protectButton_ex(ButtonRequestType_ButtonRequest_ProtectCall,
-                                false, false)) {
+                                false, false, default_oper_time)) {
             fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
             layoutHome();
             return;

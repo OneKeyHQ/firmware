@@ -32,12 +32,13 @@ bool protectButton(ButtonRequestType type, bool confirm_only);
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char* message);
 bool protectPin(bool use_cached);
-bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset);
+bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
+                      uint32_t timeout_s);
 bool protectChangePin(bool removal);
 bool protectChangeWipeCode(bool removal);
 bool protectPassphrase(char* passphrase);
 bool protectSeedPin(bool force_pin, bool setpin, bool update_pin);
 extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
-
+extern bool protectAbortedByTimeout;
 #endif
