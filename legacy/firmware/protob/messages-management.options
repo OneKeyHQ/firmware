@@ -50,3 +50,5 @@ BixinRestoreAck.data                    max_size:512
 BixinVerifyDeviceRequest.data           max_size:512
 BixinVerifyDeviceAck.cert               max_size:1024
 BixinVerifyDeviceAck.signature          max_size:512
+BixinWhiteListRequest.addr_in           max_size:130
+BixinWhiteListAck.address               max_count:10 max_size:130

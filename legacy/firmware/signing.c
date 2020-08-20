@@ -30,9 +30,9 @@
 #include "messages.pb.h"
 #include "protect.h"
 #include "secp256k1.h"
+#include "storage_ex.h"
 #include "sys.h"
 #include "transaction.h"
-#include "utxo_cache.h"
 
 static uint32_t inputs_count;
 static uint32_t outputs_count;

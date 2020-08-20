@@ -27,6 +27,8 @@ from .BixinRestoreRequest import BixinRestoreRequest
 from .BixinSeedOperate import BixinSeedOperate
 from .BixinVerifyDeviceAck import BixinVerifyDeviceAck
 from .BixinVerifyDeviceRequest import BixinVerifyDeviceRequest
+from .BixinWhiteListAck import BixinWhiteListAck
+from .BixinWhiteListRequest import BixinWhiteListRequest
 from .ButtonAck import ButtonAck
 from .ButtonRequest import ButtonRequest
 from .Cancel import Cancel
@@ -303,4 +305,5 @@ from . import SdProtectOperationType
 from . import SeedRequestType
 from . import TezosBallotType
 from . import TezosContractType
+from . import WL_OperationType
 from . import WordRequestType

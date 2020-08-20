@@ -9,7 +9,7 @@ OBJS += usb.o
 OBJS += bl_check.o
 OBJS += otp.o
 OBJS += header.o
-OBJS += utxo_cache.o
+OBJS += storage_ex.o
 endif
 
 OBJS += messages.o

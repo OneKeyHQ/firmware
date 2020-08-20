@@ -207,3 +207,5 @@ if not utils.BITCOIN_ONLY:
     BixinRestoreAck = 908  # type: Literal[908]
     BixinVerifyDeviceRequest = 909  # type: Literal[909]
     BixinVerifyDeviceAck = 910  # type: Literal[910]
+    BixinWhiteListRequest = 911  # type: Literal[911]
+    BixinWhiteListAck = 912  # type: Literal[912]

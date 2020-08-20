@@ -45,13 +45,13 @@
 #include "se_chip.h"
 #include "sha2.h"
 #include "storage.h"
+#include "storage_ex.h"
 #include "supervise.h"
 #include "timer.h"
 #include "trezor.h"
 #include "u2f.h"
 #include "usb.h"
 #include "util.h"
-#include "utxo_cache.h"
 
 /* Magic constants to check validity of storage block for storage versions 1
  * to 10. */
@@ -471,7 +471,7 @@ void config_init(void) {
 
   session_clear(false);
 #if !EMULATOR
-  utxo_cache_init();
+  user_data_init();
 #endif
   usbTiny(oldTiny);
 }

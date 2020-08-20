@@ -464,3 +464,28 @@ message BixinVerifyDeviceAck {
  required bytes cert= 1;
  required bytes signature = 2;
 }
+
+/**
+ * Request: bixin white list operation
+ * @end
+ */
+message BixinWhiteListRequest {
+    required WL_OperationType type = 1;
+    optional string addr_in = 2;	
+    /**
+    * Type of Seed request
+    */
+    enum WL_OperationType {
+        WL_OperationType_Add= 0;
+        WL_OperationType_Delete = 1;
+        WL_OperationType_Inquire = 2;
+    }
+}
+
+/**
+ * Request: output whitelist
+ * @end
+ */
+message BixinWhiteListAck {
+    repeated string address = 1;
+}

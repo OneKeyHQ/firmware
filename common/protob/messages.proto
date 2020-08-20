@@ -268,4 +268,6 @@ enum MessageType {
     MessageType_BixinRestoreAck = 908 [(wire_out) = true];
     MessageType_BixinVerifyDeviceRequest = 909 [(wire_in) = true];
     MessageType_BixinVerifyDeviceAck = 910 [(wire_out) = true];
+    MessageType_BixinWhiteListRequest = 911 [(wire_in) = true];
+    MessageType_BixinWhiteListAck = 912 [(wire_out) = true];
 }
