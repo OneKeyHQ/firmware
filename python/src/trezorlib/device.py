@@ -41,36 +41,26 @@ def apply_settings(
     fastpay_confirm: bool = None,
     fastpay_money_limit: int = None,
     fastpay_times: int = None,
+    safety_checks=None,
 ):
-    settings = messages.ApplySettings()
-    if label is not None:
-        settings.label = label
-    if language:
-        settings.language = language
-    if use_passphrase is not None:
-        settings.use_passphrase = use_passphrase
-    if homescreen is not None:
-        settings.homescreen = homescreen
-    if passphrase_always_on_device is not None:
-        settings.passphrase_always_on_device = passphrase_always_on_device
-    if auto_lock_delay_ms is not None:
-        settings.auto_lock_delay_ms = auto_lock_delay_ms
-    if display_rotation is not None:
-        settings.display_rotation = display_rotation
-    if use_ble is not None:
-        settings.use_ble = use_ble
-    if use_se is not None:
-        settings.use_se = use_se
-    if is_bixinapp is not None:
-        settings.is_bixinapp = is_bixinapp
-    if fastpay_pin is not None:
-        settings.fastpay_pin = fastpay_pin
-    if fastpay_confirm is not None:
-        settings.fastpay_confirm = fastpay_confirm
-    if fastpay_money_limit is not None:
-        settings.fastpay_money_limit = fastpay_money_limit
-    if fastpay_times is not None:
-        settings.fastpay_times = fastpay_times
+
+    settings = messages.ApplySettings(
+        label=label,
+        language=language,
+        use_passphrase=use_passphrase,
+        homescreen=homescreen,
+        passphrase_always_on_device=passphrase_always_on_device,
+        auto_lock_delay_ms=auto_lock_delay_ms,
+        display_rotation=display_rotation,
+        use_ble=use_ble,
+        use_se=use_se,
+        is_bixinapp=is_bixinapp,
+        fastpay_pin=fastpay_pin,
+        fastpay_confirm=fastpay_confirm,
+        fastpay_money_limit=fastpay_money_limit,
+        fastpay_times=fastpay_times,
+        safety_checks=safety_checks,
+    )
 
     out = client.call(settings)
     client.init_device()  # Reload Features

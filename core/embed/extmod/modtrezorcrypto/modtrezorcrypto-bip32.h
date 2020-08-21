@@ -123,7 +123,7 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_make_new(const mp_obj_type_t *type,
     mp_raise_ValueError("curve_name is invalid");
   }
 
-  mp_obj_HDNode_t *o = m_new_obj(mp_obj_HDNode_t);
+  mp_obj_HDNode_t *o = m_new_obj_with_finaliser(mp_obj_HDNode_t);
   o->base.type = type;
   o->fingerprint = fingerprint;
   o->hdnode.depth = depth;
@@ -223,7 +223,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_derive_cardano_obj,
 
 #endif
 
-/// def derive_path(self, path: List[int]) -> None:
+/// def derive_path(self, path: Sequence[int]) -> None:
 ///     """
 ///     Go through a list of indexes and iteratively derive a child node in
 ///     place.
@@ -240,18 +240,17 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_derive_path(mp_obj_t self,
     mp_raise_ValueError("Path cannot be longer than 32 indexes");
   }
 
-  // convert path to int array
-  uint32_t pi;
-  uint32_t pints[plen];
-  for (pi = 0; pi < plen; pi++) {
-    pints[pi] = trezor_obj_get_uint(pitems[pi]);
-  }
-
-  if (!hdnode_private_ckd_cached(&o->hdnode, pints, plen, &o->fingerprint)) {
-    // derivation failed, reset the state and raise
-    o->fingerprint = 0;
-    memzero(&o->hdnode, sizeof(o->hdnode));
-    mp_raise_ValueError("Failed to derive path");
+  for (uint32_t pi = 0; pi < plen; pi++) {
+    if (pi == plen - 1) {
+      // fingerprint is calculated from the parent of the final derivation
+      o->fingerprint = hdnode_fingerprint(&o->hdnode);
+    }
+    uint32_t pitem = trezor_obj_get_uint(pitems[pi]);
+    if (!hdnode_private_ckd(&o->hdnode, pitem)) {
+      o->fingerprint = 0;
+      memzero(&o->hdnode, sizeof(o->hdnode));
+      mp_raise_ValueError("Failed to derive path");
+    }
   }
 
   return mp_const_none;
@@ -286,7 +285,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_serialize_public_obj,
 ///     """
 STATIC mp_obj_t mod_trezorcrypto_HDNode_clone(mp_obj_t self) {
   mp_obj_HDNode_t *o = MP_OBJ_TO_PTR(self);
-  mp_obj_HDNode_t *copy = m_new_obj(mp_obj_HDNode_t);
+  mp_obj_HDNode_t *copy = m_new_obj_with_finaliser(mp_obj_HDNode_t);
   copy->base.type = &mod_trezorcrypto_HDNode_type;
   copy->hdnode = o->hdnode;
   copy->fingerprint = o->fingerprint;
@@ -572,7 +571,7 @@ STATIC mp_obj_t mod_trezorcrypto_bip32_from_seed(mp_obj_t seed,
     mp_raise_ValueError("Failed to derive the root node");
   }
 
-  mp_obj_HDNode_t *o = m_new_obj(mp_obj_HDNode_t);
+  mp_obj_HDNode_t *o = m_new_obj_with_finaliser(mp_obj_HDNode_t);
   o->base.type = &mod_trezorcrypto_HDNode_type;
   o->hdnode = hdnode;
   o->fingerprint = 0;
@@ -615,7 +614,7 @@ STATIC mp_obj_t mod_trezorcrypto_bip32_from_mnemonic_cardano(
     mp_raise_ValueError("Invalid mnemonic");
   }
 
-  mp_obj_HDNode_t *o = m_new_obj(mp_obj_HDNode_t);
+  mp_obj_HDNode_t *o = m_new_obj_with_finaliser(mp_obj_HDNode_t);
   o->base.type = &mod_trezorcrypto_HDNode_type;
   o->hdnode = hdnode;
   o->fingerprint = 0;

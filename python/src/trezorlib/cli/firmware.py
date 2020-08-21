@@ -79,6 +79,11 @@ def validate_firmware(version, fw, expected_fingerprint=None):
 
     fingerprint = firmware.digest(version, fw).hex()
     click.echo("Firmware fingerprint: {}".format(fingerprint))
+    if version == firmware.FirmwareFormat.TREZOR_ONE and fw.embedded_onev2:
+        fingerprint_onev2 = firmware.digest(
+            firmware.FirmwareFormat.TREZOR_ONE_V2, fw.embedded_onev2
+        ).hex()
+        click.echo("Embedded v2 image fingerprint: {}".format(fingerprint_onev2))
     if expected_fingerprint and fingerprint != expected_fingerprint:
         click.echo("Expected fingerprint: {}".format(expected_fingerprint))
         click.echo("Fingerprints do not match, aborting.")
@@ -375,7 +380,7 @@ def firmware_update(
         # for bootloader < 1.8, keep the embedding
         # for bootloader 1.8.0 and up, strip the old OneV1 header
         if bootloader_onev2 and data[:4] == b"TRZR" and data[256 : 256 + 4] == b"TRZF":
-            click.echo("Extracting embedded firmware image (fingerprint may change).")
+            click.echo("Extracting embedded firmware image.")
             data = data[256:]
 
     if dry_run:

@@ -6,6 +6,7 @@ if __debug__:
     try:
         from typing import Dict, List  # noqa: F401
         from typing_extensions import Literal  # noqa: F401
+        EnumTypeSafetyCheckLevel = Literal[0, 1]
     except ImportError:
         pass
 
@@ -29,6 +30,7 @@ class ApplySettings(p.MessageType):
         fastpay_confirm: bool = None,
         fastpay_money_limit: int = None,
         fastpay_times: int = None,
+        safety_checks: EnumTypeSafetyCheckLevel = None,
     ) -> None:
         self.language = language
         self.label = label
@@ -44,6 +46,7 @@ class ApplySettings(p.MessageType):
         self.fastpay_confirm = fastpay_confirm
         self.fastpay_money_limit = fastpay_money_limit
         self.fastpay_times = fastpay_times
+        self.safety_checks = safety_checks
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -62,4 +65,5 @@ class ApplySettings(p.MessageType):
             13: ('fastpay_confirm', p.BoolType, 0),
             14: ('fastpay_money_limit', p.UVarintType, 0),
             15: ('fastpay_times', p.UVarintType, 0),
+            16: ('safety_checks', p.EnumType("SafetyCheckLevel", (0, 1)), 0),
         }

@@ -1,13 +1,15 @@
 from trezor.messages.MoneroAddress import MoneroAddress
 
 from apps.common import paths
+from apps.common.keychain import with_slip44_keychain
 from apps.common.layout import address_n_to_str, show_qr
-from apps.monero import CURVE, misc
+from apps.monero import CURVE, SLIP44_ID, misc
 from apps.monero.layout import confirms
 from apps.monero.xmr import addresses, crypto, monero
 from apps.monero.xmr.networks import net_version
 
 
+@with_slip44_keychain(SLIP44_ID, CURVE, allow_testnet=True)
 async def get_address(ctx, msg, keychain):
     await paths.validate_path(
         ctx, misc.validate_full_path, keychain, msg.address_n, CURVE

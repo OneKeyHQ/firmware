@@ -34,7 +34,7 @@ VENDORS = ("bitcointrezor.com", "trezor.io")
 MAX_PASSPHRASE_LENGTH = 50
 
 PASSPHRASE_ON_DEVICE = object()
-PASSPHRASE_TEST_PATH = tools.parse_path("44h/1h/19h/0/1337")
+PASSPHRASE_TEST_PATH = tools.parse_path("44h/1h/0h/0/0")
 
 OUTDATED_FIRMWARE_ERROR = """
 Your Trezor firmware is out of date. Update it with the following command:
@@ -285,7 +285,7 @@ class TrezorClient:
 
     @tools.session
     def clear_session(self):
-        resp = self.call_raw(messages.ClearSession())
+        resp = self.call_raw(messages.LockDevice())  # TODO fix this
         if isinstance(resp, messages.Success):
             self.session_id = None
             self.init_device()

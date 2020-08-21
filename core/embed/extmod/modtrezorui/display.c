@@ -19,26 +19,48 @@
 
 #define _GNU_SOURCE
 
-#include "font_bitmap.h"
-#ifdef TREZOR_FONT_NORMAL_ENABLE
-#include "font_roboto_regular_20.h"
-#endif
-#ifdef TREZOR_FONT_BOLD_ENABLE
-#include "font_roboto_bold_20.h"
-#endif
-#ifdef TREZOR_FONT_MONO_ENABLE
-#include "font_robotomono_regular_20.h"
-#endif
-#ifdef TREZOR_FONT_MONO_BOLD_ENABLE
-#include "font_robotomono_bold_20.h"
-#endif
-
 #include "qr-code-generator/qrcodegen.h"
 
 #include "uzlib.h"
 
 #include "common.h"
 #include "display.h"
+
+#include "font_bitmap.h"
+
+#if TREZOR_MODEL == T
+
+#ifdef TREZOR_FONT_NORMAL_ENABLE
+#include "font_roboto_regular_20.h"
+#define FONT_NORMAL_DATA Font_Roboto_Regular_20
+#endif
+#ifdef TREZOR_FONT_BOLD_ENABLE
+#include "font_roboto_bold_20.h"
+#define FONT_BOLD_DATA Font_Roboto_Bold_20
+#endif
+#ifdef TREZOR_FONT_MONO_ENABLE
+#include "font_robotomono_regular_20.h"
+#define FONT_MONO_DATA Font_RobotoMono_Regular_20
+#endif
+
+#elif TREZOR_MODEL == 1
+
+#ifdef TREZOR_FONT_NORMAL_ENABLE
+#include "font_pixeloperator_regular_8.h"
+#define FONT_NORMAL_DATA Font_PixelOperator_Regular_8
+#endif
+#ifdef TREZOR_FONT_BOLD_ENABLE
+#include "font_pixeloperator_bold_8.h"
+#define FONT_BOLD_DATA Font_PixelOperator_Bold_8
+#endif
+#ifdef TREZOR_FONT_MONO_ENABLE
+#include "font_pixeloperatormono_regular_8.h"
+#define FONT_MONO_DATA Font_PixelOperatorMono_Regular_8
+#endif
+
+#else
+#error Unknown Trezor model
+#endif
 
 #include <stdarg.h>
 #include <string.h>
@@ -54,9 +76,11 @@ static struct { int x, y; } DISPLAY_OFFSET;
 #include "display-unix.h"
 #else
 #if TREZOR_MODEL == T
-#include "display-stm32_t.h"
+#include "display-stm32_T.h"
 #elif TREZOR_MODEL == 1
 #include "display-stm32_1.h"
+#else
+#error Unknown Trezor model
 #endif
 #endif
 
@@ -524,15 +548,13 @@ void display_printf(const char *fmt, ...) {
 
 #endif  // TREZOR_PRINT_DISABLE
 
-#if TREZOR_MODEL == T
-
 static uint8_t convert_char(const uint8_t c) {
   static char last_was_utf8 = 0;
 
   // non-printable ASCII character
   if (c < ' ') {
     last_was_utf8 = 0;
-    return '_';
+    return 0x7F;
   }
 
   // regular ASCII character
@@ -546,7 +568,7 @@ static uint8_t convert_char(const uint8_t c) {
   // bytes 11xxxxxx are first bytes of UTF-8 characters
   if (c >= 0xC0) {
     last_was_utf8 = 1;
-    return '_';
+    return 0x7F;
   }
 
   if (last_was_utf8) {
@@ -554,7 +576,7 @@ static uint8_t convert_char(const uint8_t c) {
     return 0;  // skip glyph
   } else {
     // ... or they are just non-printable ASCII characters
-    return '_';
+    return 0x7F;
   }
 
   return 0;
@@ -563,30 +585,46 @@ static uint8_t convert_char(const uint8_t c) {
 static const uint8_t *get_glyph(int font, uint8_t c) {
   c = convert_char(c);
   if (!c) return 0;
+
+  // printable ASCII character
+  if (c >= ' ' && c < 0x7F) {
+    switch (font) {
+#ifdef TREZOR_FONT_NORMAL_ENABLE
+      case FONT_NORMAL:
+        return FONT_NORMAL_DATA[c - ' '];
+#endif
+#ifdef TREZOR_FONT_BOLD_ENABLE
+      case FONT_BOLD:
+        return FONT_BOLD_DATA[c - ' '];
+#endif
+#ifdef TREZOR_FONT_MONO_ENABLE
+      case FONT_MONO:
+        return FONT_MONO_DATA[c - ' '];
+#endif
+    }
+    return 0;
+  }
+
+// non-printable character
+#define PASTER(s) s##_glyph_nonprintable
+#define NONPRINTABLE_GLYPH(s) PASTER(s)
+
   switch (font) {
 #ifdef TREZOR_FONT_NORMAL_ENABLE
     case FONT_NORMAL:
-      return Font_Roboto_Regular_20[c - ' '];
+      return NONPRINTABLE_GLYPH(FONT_NORMAL_DATA);
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE
     case FONT_BOLD:
-      return Font_Roboto_Bold_20[c - ' '];
+      return NONPRINTABLE_GLYPH(FONT_BOLD_DATA);
 #endif
 #ifdef TREZOR_FONT_MONO_ENABLE
     case FONT_MONO:
-      return Font_RobotoMono_Regular_20[c - ' '];
-#endif
-#ifdef TREZOR_FONT_MONO_BOLD_ENABLE
-    case FONT_MONO_BOLD:
-      return Font_RobotoMono_Bold_20[c - ' '];
+      return NONPRINTABLE_GLYPH(FONT_MONO_DATA);
 #endif
   }
   return 0;
 }
-
-#endif
-
-#if TREZOR_MODEL == T
 
 static void display_text_render(int x, int y, const char *text, int textlen,
                                 int font, uint16_t fgcolor, uint16_t bgcolor) {
@@ -618,12 +656,16 @@ static void display_text_render(int x, int y, const char *text, int textlen,
           const int rx = i - sx;
           const int ry = j - sy;
           const int a = rx + ry * w;
-#if FONT_BPP == 2
+#if TREZOR_FONT_BPP == 1
+          const uint8_t c = ((g[5 + a / 8] >> (7 - (a % 8) * 1)) & 0x01) * 15;
+#elif TREZOR_FONT_BPP == 2
           const uint8_t c = ((g[5 + a / 4] >> (6 - (a % 4) * 2)) & 0x03) * 5;
-#elif FONT_BPP == 4
+#elif TREZOR_FONT_BPP == 4
           const uint8_t c = (g[5 + a / 2] >> (4 - (a % 2) * 4)) & 0x0F;
+#elif TREZOR_FONT_BPP == 8
+          const uint8_t c = g[5 + a / 1] >> 4;
 #else
-#error Unsupported FONT_BPP value
+#error Unsupported TREZOR_FONT_BPP value
 #endif
           PIXELDATA(colortable[c]);
         }
@@ -633,41 +675,32 @@ static void display_text_render(int x, int y, const char *text, int textlen,
   }
 }
 
-#endif
-
 void display_text(int x, int y, const char *text, int textlen, int font,
                   uint16_t fgcolor, uint16_t bgcolor) {
-#if TREZOR_MODEL == T
   x += DISPLAY_OFFSET.x;
   y += DISPLAY_OFFSET.y;
   display_text_render(x, y, text, textlen, font, fgcolor, bgcolor);
-#endif
 }
 
 void display_text_center(int x, int y, const char *text, int textlen, int font,
                          uint16_t fgcolor, uint16_t bgcolor) {
-#if TREZOR_MODEL == T
   x += DISPLAY_OFFSET.x;
   y += DISPLAY_OFFSET.y;
   int w = display_text_width(text, textlen, font);
   display_text_render(x - w / 2, y, text, textlen, font, fgcolor, bgcolor);
-#endif
 }
 
 void display_text_right(int x, int y, const char *text, int textlen, int font,
                         uint16_t fgcolor, uint16_t bgcolor) {
-#if TREZOR_MODEL == T
   x += DISPLAY_OFFSET.x;
   y += DISPLAY_OFFSET.y;
   int w = display_text_width(text, textlen, font);
   display_text_render(x - w, y, text, textlen, font, fgcolor, bgcolor);
-#endif
 }
 
 // compute the width of the text (in pixels)
 int display_text_width(const char *text, int textlen, int font) {
   int width = 0;
-#if TREZOR_MODEL == T
   // determine text length if not provided
   if (textlen < 0) {
     textlen = strlen(text);
@@ -688,7 +721,6 @@ int display_text_width(const char *text, int textlen, int font) {
     }
     */
   }
-#endif
   return width;
 }
 
@@ -698,7 +730,6 @@ int display_text_split(const char *text, int textlen, int font,
                        int requested_width) {
   int width = 0;
   int lastspace = 0;
-#if TREZOR_MODEL == T
   // determine text length if not provided
   if (textlen < 0) {
     textlen = strlen(text);
@@ -719,7 +750,6 @@ int display_text_split(const char *text, int textlen, int font,
       }
     }
   }
-#endif
   return textlen;
 }
 

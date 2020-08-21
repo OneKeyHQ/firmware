@@ -447,6 +447,11 @@ void config_init(void) {
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
   config_getLanguage(config_language, sizeof(config_language));
+  // imported xprv is not supported anymore so we set initialized to false
+  // if no mnemonic is present
+  if (config_isInitialized() && !config_hasMnemonic()) {
+    config_set_bool(KEY_INITIALIZED, false);
+  }
 
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
@@ -826,11 +831,11 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
   return sectrue == config_get_bytes(KEY_MNEMONIC, dest, dest_size, real_size);
 }
 
-bool config_hasMnemonic(void) { return sectrue == storage_has(KEY_MNEMONIC); }
-
 bool config_getMnemonic(char *dest, uint16_t dest_size) {
   return sectrue == config_get_string(KEY_MNEMONIC, dest, dest_size);
 }
+
+bool config_hasMnemonic(void) { return sectrue == storage_has(KEY_MNEMONIC); }
 
 /* Check whether mnemonic matches storage. The mnemonic must be
  * a null-terminated string.
@@ -1058,8 +1063,7 @@ uint32_t config_getAutoLockDelayMs() {
 }
 
 void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
-  const uint32_t min_delay_ms = 10 * 1000U;  // 10 seconds
-  auto_lock_delay_ms = MAX(auto_lock_delay_ms, min_delay_ms);
+  auto_lock_delay_ms = MAX(auto_lock_delay_ms, MIN_AUTOLOCK_DELAY_MS);
   if (sectrue == storage_set(KEY_AUTO_LOCK_DELAY_MS, &auto_lock_delay_ms,
                              sizeof(auto_lock_delay_ms))) {
     autoLockDelayMs = auto_lock_delay_ms;

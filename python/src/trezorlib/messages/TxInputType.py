@@ -26,7 +26,8 @@ class TxInputType(p.MessageType):
         multisig: MultisigRedeemScriptType = None,
         amount: int = None,
         decred_tree: int = None,
-        decred_script_version: int = None,
+        witness: bytes = None,
+        ownership_proof: bytes = None,
     ) -> None:
         self.address_n = address_n if address_n is not None else []
         self.prev_hash = prev_hash
@@ -37,7 +38,8 @@ class TxInputType(p.MessageType):
         self.multisig = multisig
         self.amount = amount
         self.decred_tree = decred_tree
-        self.decred_script_version = decred_script_version
+        self.witness = witness
+        self.ownership_proof = ownership_proof
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -51,5 +53,6 @@ class TxInputType(p.MessageType):
             7: ('multisig', MultisigRedeemScriptType, 0),
             8: ('amount', p.UVarintType, 0),
             9: ('decred_tree', p.UVarintType, 0),
-            10: ('decred_script_version', p.UVarintType, 0),
+            13: ('witness', p.BytesType, 0),
+            14: ('ownership_proof', p.BytesType, 0),
         }

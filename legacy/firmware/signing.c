@@ -37,6 +37,7 @@
 
 static uint32_t inputs_count;
 static uint32_t outputs_count;
+static uint32_t change_count;
 static const CoinInfo *coin;
 static CONFIDENTIAL HDNode root;
 static CONFIDENTIAL HDNode node;
@@ -73,7 +74,7 @@ static uint8_t hash_prevouts[32], hash_sequence[32], hash_outputs[32];
 static uint8_t decred_hash_prefix[32];
 #endif
 static uint8_t hash_check[32];
-static uint64_t to_spend, authorized_bip143_in, spending, change_spend;
+static uint64_t to_spend, spending, change_spend;
 static uint32_t version = 1;
 static uint32_t lock_time = 0;
 static uint32_t expiry = 0;
@@ -107,6 +108,9 @@ static uint32_t tx_weight;
 #define TXSIZE_FOOTER 4
 /* transaction segwit overhead 2 marker */
 #define TXSIZE_SEGWIT_OVERHEAD 2
+
+/* The maximum number of change-outputs allowed without user confirmation. */
+#define MAX_SILENT_CHANGE_COUNT 2
 
 enum {
   SIGHASH_ALL = 1,
@@ -494,23 +498,46 @@ void signing_init(const SignTx *msg, const CoinInfo *_coin,
   memcpy(&root, _root, sizeof(HDNode));
   version = msg->version;
   lock_time = msg->lock_time;
+
+  if (!coin->overwintered) {
+    if (msg->has_version_group_id) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Version group ID not enabled on this coin."));
+      signing_abort();
+      return;
+    }
+    if (msg->has_branch_id) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Branch ID not enabled on this coin."));
+      signing_abort();
+      return;
+    }
+  }
+
 #if !BITCOIN_ONLY
   expiry = (coin->decred || coin->overwintered) ? msg->expiry : 0;
   timestamp = coin->timestamp ? msg->timestamp : 0;
   if (coin->overwintered) {
+    if (!msg->has_version_group_id) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Version group ID must be set."));
+      signing_abort();
+      return;
+    }
+    if (!msg->has_branch_id) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Branch ID must be set."));
+      signing_abort();
+      return;
+    }
+    if (version != 4) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Unsupported transaction version."));
+      signing_abort();
+      return;
+    }
     version_group_id = msg->version_group_id;
     branch_id = msg->branch_id;
-    if (branch_id == 0) {
-      // set default values for Zcash if branch_id is unset
-      switch (version) {
-        case 3:
-          branch_id = 0x5BA81B19;  // Overwinter
-          break;
-        case 4:
-          branch_id = 0x76B809BB;  // Sapling
-          break;
-      }
-    }
   } else {
     version_group_id = 0;
     branch_id = 0;
@@ -534,7 +561,7 @@ void signing_init(const SignTx *msg, const CoinInfo *_coin,
   to_spend = 0;
   spending = 0;
   change_spend = 0;
-  authorized_bip143_in = 0;
+  change_count = 0;
   memzero(&input, sizeof(TxInputType));
   memzero(&resp, sizeof(TxRequest));
   signing = true;
@@ -657,35 +684,11 @@ static bool signing_validate_input(const TxInputType *txinput) {
     signing_abort();
     return false;
   }
-  if (!coin->decred && txinput->has_decred_script_version) {
-    fsm_sendFailure(
-        FailureType_Failure_DataError,
-        _("Decred details provided but Decred coin not specified."));
-    signing_abort();
-    return false;
-  }
-
-#if !BITCOIN_ONLY
-  if (coin->force_bip143 || coin->overwintered) {
-    if (!txinput->has_amount) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Expected input with amount"));
-      signing_abort();
-      return false;
-    }
-  }
-#endif
 
   if (is_segwit_input_script_type(txinput)) {
     if (!coin->has_segwit) {
       fsm_sendFailure(FailureType_Failure_DataError,
                       _("Segwit not enabled on this coin"));
-      signing_abort();
-      return false;
-    }
-    if (!txinput->has_amount) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Segwit input without amount"));
       signing_abort();
       return false;
     }
@@ -788,13 +791,6 @@ static bool signing_check_input(const TxInputType *txinput) {
   tx_sequence_hash(&hasher_sequence, txinput);
 #if !BITCOIN_ONLY
   if (coin->decred) {
-    if (txinput->decred_script_version > 0) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Decred v1+ scripts are not supported"));
-      signing_abort();
-      return false;
-    }
-
     // serialize Decred prefix in Phase 1
     resp.has_serialized = true;
     resp.serialized.has_serialized_tx = true;
@@ -855,11 +851,18 @@ static bool signing_check_output(TxOutputType *txoutput) {
   }
 
   if (is_change) {
-    if (change_spend == 0) {  // not set
-      change_spend = txoutput->amount;
-    } else {
-      /* We only skip confirmation for the first change output */
-      is_change = false;
+    if (change_spend + txoutput->amount < change_spend) {
+      fsm_sendFailure(FailureType_Failure_DataError, _("Value overflow"));
+      signing_abort();
+      return false;
+    }
+    change_spend += txoutput->amount;
+
+    change_count++;
+    if (change_count <= 0) {
+      fsm_sendFailure(FailureType_Failure_DataError, _("Value overflow"));
+      signing_abort();
+      return false;
     }
   }
 
@@ -900,7 +903,7 @@ static bool signing_check_output(TxOutputType *txoutput) {
   return true;
 }
 
-static bool signing_check_fee(void) {
+static bool signing_confirm_tx(void) {
   bool need_confirm = true;
   bool need_pin = true;
   bool btn_request = true;
@@ -968,7 +971,14 @@ static bool signing_check_fee(void) {
       config_setFastPayTimes(fast_pay_times);
     }
   }
-
+  if (change_count > MAX_SILENT_CHANGE_COUNT) {
+    layoutChangeCountOverThreshold(change_count);
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      signing_abort();
+      return false;
+    }
+  }
   if (need_confirm) {
     // last confirmation
     layoutConfirmTx(coin, to_spend - change_spend, fee);
@@ -979,6 +989,7 @@ static bool signing_check_fee(void) {
       return false;
     }
   }
+
   if (need_pin) {
     if (!protectPin(true)) {
       return false;
@@ -1009,10 +1020,11 @@ static void phase1_request_next_output(void) {
     }
 #endif
     hasher_Final(&hasher_outputs, hash_outputs);
-    if (!signing_check_fee()) {
+    if (!signing_confirm_tx()) {
       return;
     }
-    // Everything was checked, now phase 2 begins and the transaction is signed.
+    // Everything was checked, now phase 2 begins and the transaction is
+    // signed.
     progress_meta_step = progress_step / (inputs_count + outputs_count);
     layoutProgress_zh(ui_prompt_sign_trans[ui_language], progress);
     idx1 = 0;
@@ -1042,46 +1054,14 @@ static void signing_hash_bip143(const TxInputType *txinput, uint8_t *hash) {
                 8);                                   // amount
   tx_sequence_hash(&hasher_preimage, txinput);        // nSequence
   hasher_Update(&hasher_preimage, hash_outputs, 32);  // hashOutputs
-  hasher_Update(&hasher_preimage, (const uint8_t *)&lock_time, 4);  // nLockTime
-  hasher_Update(&hasher_preimage, (const uint8_t *)&hash_type, 4);  // nHashType
+  hasher_Update(&hasher_preimage, (const uint8_t *)&lock_time,
+                4);  // nLockTime
+  hasher_Update(&hasher_preimage, (const uint8_t *)&hash_type,
+                4);  // nHashType
   hasher_Final(&hasher_preimage, hash);
 }
 
 #if !BITCOIN_ONLY
-
-static void signing_hash_zip143(const TxInputType *txinput, uint8_t *hash) {
-  uint32_t hash_type = signing_hash_type();
-  uint8_t personal[16] = {0};
-  memcpy(personal, "ZcashSigHash", 12);
-  memcpy(personal + 12, &branch_id, 4);
-  Hasher hasher_preimage = {0};
-  hasher_InitParam(&hasher_preimage, HASHER_BLAKE2B_PERSONAL, personal,
-                   sizeof(personal));
-  uint32_t ver = version | TX_OVERWINTERED;  // 1. nVersion | fOverwintered
-  hasher_Update(&hasher_preimage, (const uint8_t *)&ver, 4);
-  hasher_Update(&hasher_preimage, (const uint8_t *)&version_group_id,
-                4);                                    // 2. nVersionGroupId
-  hasher_Update(&hasher_preimage, hash_prevouts, 32);  // 3. hashPrevouts
-  hasher_Update(&hasher_preimage, hash_sequence, 32);  // 4. hashSequence
-  hasher_Update(&hasher_preimage, hash_outputs, 32);   // 5. hashOutputs
-                                                       // 6. hashJoinSplits
-  hasher_Update(&hasher_preimage, (const uint8_t *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 32);
-  hasher_Update(&hasher_preimage, (const uint8_t *)&lock_time,
-                4);  // 7. nLockTime
-  hasher_Update(&hasher_preimage, (const uint8_t *)&expiry,
-                4);  // 8. expiryHeight
-  hasher_Update(&hasher_preimage, (const uint8_t *)&hash_type,
-                4);  // 9. nHashType
-
-  tx_prevout_hash(&hasher_preimage, txinput);  // 10a. outpoint
-  tx_script_hash(&hasher_preimage, txinput->script_sig.size,
-                 txinput->script_sig.bytes);  // 10b. scriptCode
-  hasher_Update(&hasher_preimage, (const uint8_t *)&txinput->amount,
-                8);                             // 10c. value
-  tx_sequence_hash(&hasher_preimage, txinput);  // 10d. nSequence
-
-  hasher_Final(&hasher_preimage, hash);
-}
 
 static void signing_hash_zip243(const TxInputType *txinput, uint8_t *hash) {
   uint32_t hash_type = signing_hash_type();
@@ -1207,19 +1187,18 @@ static bool signing_sign_segwit_input(TxInputType *txinput) {
   uint8_t hash[32] = {0};
 
   if (is_segwit_input_script_type(txinput)) {
+    if (!txinput->has_amount) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Segwit input without amount"));
+      signing_abort();
+      return false;
+    }
     if (!compile_input_script_sig(txinput)) {
       fsm_sendFailure(FailureType_Failure_ProcessError,
                       _("Failed to compile input"));
       signing_abort();
       return false;
     }
-    if (txinput->amount > authorized_bip143_in) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Transaction has changed during signing"));
-      signing_abort();
-      return false;
-    }
-    authorized_bip143_in -= txinput->amount;
 
     signing_hash_bip143(txinput, hash);
 
@@ -1328,9 +1307,10 @@ void signing_txack(TransactionType *tx) {
       }
 #endif
 
+      memcpy(&input, tx->inputs, sizeof(TxInputType));
+
       if (tx->inputs[0].script_type == InputScriptType_SPENDMULTISIG ||
           tx->inputs[0].script_type == InputScriptType_SPENDADDRESS) {
-        memcpy(&input, tx->inputs, sizeof(TxInputType));
 #if !ENABLE_SEGWIT_NONSEGWIT_MIXING
         // don't mix segwit and non-segwit inputs
         if (idx1 > 0 && to.is_segwit == true) {
@@ -1350,7 +1330,6 @@ void signing_txack(TransactionType *tx) {
             return;
           }
           to_spend += tx->inputs[0].amount;
-          authorized_bip143_in += tx->inputs[0].amount;
           phase1_request_next_input();
         } else
 #endif
@@ -1361,11 +1340,6 @@ void signing_txack(TransactionType *tx) {
           send_req_2_prev_meta();
         }
       } else if (is_segwit_input_script_type(&tx->inputs[0])) {
-        if (to_spend + tx->inputs[0].amount < to_spend) {
-          fsm_sendFailure(FailureType_Failure_DataError, _("Value overflow"));
-          signing_abort();
-          return;
-        }
         if (!to.is_segwit) {
           tx_weight += TXSIZE_SEGWIT_OVERHEAD + to.inputs_len;
         }
@@ -1384,7 +1358,6 @@ void signing_txack(TransactionType *tx) {
         to.is_segwit = true;
 #endif
         to_spend += tx->inputs[0].amount;
-        authorized_bip143_in += tx->inputs[0].amount;
 #if !EMULATOR
         if (!utxo_cache_check(tx->inputs[0].prev_hash.bytes,
                               tx->inputs[0].prev_index, tx->inputs[0].amount)) {
@@ -1443,6 +1416,27 @@ void signing_txack(TransactionType *tx) {
         signing_abort();
         return;
       }
+      if (coin->overwintered &&
+          (tx->version >= 3) != (tx->has_version_group_id)) {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        _("Version group ID must be set when version >= 3."));
+        signing_abort();
+        return;
+      }
+      if (!coin->overwintered) {
+        if (tx->has_version_group_id) {
+          fsm_sendFailure(FailureType_Failure_DataError,
+                          _("Version group ID not enabled on this coin."));
+          signing_abort();
+          return;
+        }
+        if (tx->has_branch_id) {
+          fsm_sendFailure(FailureType_Failure_DataError,
+                          _("Branch ID not enabled on this coin."));
+          signing_abort();
+          return;
+        }
+      }
       if (tx->inputs_cnt + tx->outputs_cnt < tx->inputs_cnt) {
         fsm_sendFailure(FailureType_Failure_DataError, _("Value overflow"));
         signing_abort();
@@ -1500,6 +1494,12 @@ void signing_txack(TransactionType *tx) {
         return;
       }
       if (idx2 == input.prev_index) {
+        if (input.has_amount && input.amount != tx->bin_outputs[0].amount) {
+          fsm_sendFailure(FailureType_Failure_DataError,
+                          _("Invalid amount specified"));
+          signing_abort();
+          return;
+        }
         if (to_spend + tx->bin_outputs[0].amount < to_spend) {
           fsm_sendFailure(FailureType_Failure_DataError, _("Value overflow"));
           signing_abort();
@@ -1684,31 +1684,24 @@ void signing_txack(TransactionType *tx) {
           signing_abort();
           return;
         }
-        if (tx->inputs[0].amount > authorized_bip143_in) {
+        if (!tx->inputs[0].has_amount) {
           fsm_sendFailure(FailureType_Failure_DataError,
-                          _("Transaction has changed during signing"));
+                          _("Expected input with amount"));
           signing_abort();
           return;
         }
-        authorized_bip143_in -= tx->inputs[0].amount;
 
         uint8_t hash[32] = {0};
 #if !BITCOIN_ONLY
         if (coin->overwintered) {
-          switch (version) {
-            case 3:
-              signing_hash_zip143(&tx->inputs[0], hash);
-              break;
-            case 4:
-              signing_hash_zip243(&tx->inputs[0], hash);
-              break;
-            default:
-              fsm_sendFailure(
-                  FailureType_Failure_DataError,
-                  _("Unsupported version for overwintered transaction"));
-              signing_abort();
-              return;
+          if (version != 4) {
+            fsm_sendFailure(
+                FailureType_Failure_DataError,
+                _("Unsupported version for overwintered transaction"));
+            signing_abort();
+            return;
           }
+          signing_hash_zip243(&tx->inputs[0], hash);
         } else
 #endif
         {

@@ -87,10 +87,8 @@ extern Storage configUpdate;
 #define UUID_SIZE 12
 #define SE_SESSION_KEY 16
 
-typedef enum _DeviceState {
-  DeviceState_NULL = 0,
-  DeviceState_ResetSetPin
-} DeviceState;
+#define MIN_AUTOLOCK_DELAY_MS (10 * 1000U)  // 10 seconds
+#define MAX_AUTOLOCK_DELAY_MS 0x20000000U   // ~6 days
 
 void config_init(void);
 void session_clear(bool lock);
