@@ -98,5 +98,7 @@ bool st_restore_entory_from_se(const uint16_t key, uint8_t *seed,
 #define se_st_seed_en(...) false
 #define se_st_seed_de(...) false
 #define se_set_value(...) false
+#define st_backup_entory_to_se(...) false
+#define st_restore_entory_from_se(...) false
 #endif
 #endif

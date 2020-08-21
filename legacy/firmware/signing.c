@@ -1322,6 +1322,9 @@ void signing_txack(TransactionType *tx) {
         }
 #endif
 
+// origin workflow,add bixin utxo check
+#if !EMULATOR
+
 #if !BITCOIN_ONLY
         if (coin->force_bip143 || coin->overwintered) {
           if (to_spend + tx->inputs[0].amount < to_spend) {
@@ -1358,7 +1361,7 @@ void signing_txack(TransactionType *tx) {
         to.is_segwit = true;
 #endif
         to_spend += tx->inputs[0].amount;
-#if !EMULATOR
+
         if (!utxo_cache_check(tx->inputs[0].prev_hash.bytes,
                               tx->inputs[0].prev_index, tx->inputs[0].amount)) {
           if (ui_language) {
@@ -1376,7 +1379,6 @@ void signing_txack(TransactionType *tx) {
             return;
           }
         }
-#endif
         phase1_request_next_input();
       } else {
         fsm_sendFailure(FailureType_Failure_DataError,
@@ -1385,6 +1387,40 @@ void signing_txack(TransactionType *tx) {
         return;
       }
       return;
+#else
+        if (!coin->force_bip143 && !coin->overwintered) {
+          // remember the first non-segwit input -- this is the first input
+          // we need to sign during phase2
+          if (next_nonsegwit_input == 0xffffffff) next_nonsegwit_input = idx1;
+        }
+      } else if (is_segwit_input_script_type(&tx->inputs[0])) {
+        if (!to.is_segwit) {
+          tx_weight += TXSIZE_SEGWIT_OVERHEAD + to.inputs_len;
+        }
+#if !ENABLE_SEGWIT_NONSEGWIT_MIXING
+        // don't mix segwit and non-segwit inputs
+        if (idx1 == 0) {
+          to.is_segwit = true;
+        } else if (to.is_segwit == false) {
+          fsm_sendFailure(
+              FailureType_Failure_DataError,
+              _("Mixing segwit and non-segwit inputs is not allowed"));
+          signing_abort();
+          return;
+        }
+#else
+        to.is_segwit = true;
+#endif
+      } else {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        _("Wrong input script type"));
+        signing_abort();
+        return;
+      }
+      send_req_2_prev_meta();
+      return;
+#endif
+
     case STAGE_REQUEST_2_PREV_META:
       if (tx->outputs_cnt <= input.prev_index) {
         fsm_sendFailure(FailureType_Failure_DataError,

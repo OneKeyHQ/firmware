@@ -154,7 +154,7 @@ const char *VERIFYING_PIN_MSG[2] = {"Verifying PIN", "校验 PIN"};
 const char *PROCESSING_MSG[2] = {"Processing", "处理中..."};
 const char *STARTING_MSG[2] = {"Starting up", "启动中..."};
 
-#ifdef TREZOR_MODE
+#ifdef TREZOR_MODEL
 static uint8_t ui_language = 0;
 static bool g_bSelectSEFlag = false;
 #endif

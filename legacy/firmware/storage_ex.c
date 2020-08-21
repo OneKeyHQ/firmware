@@ -1,7 +1,7 @@
+#include "storage_ex.h"
 #include "common.h"
 #include "flash.h"
 #include "sha2.h"
-#include "storage_ex.h"
 
 // flash info
 #define FLASH_USER_DATA_SECTOR 10
