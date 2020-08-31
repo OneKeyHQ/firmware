@@ -72,8 +72,8 @@ bool se_get_value(const uint16_t key, void *val_dest, uint16_t max_len,
                   uint16_t *len);
 bool se_delete_key(const uint16_t key);
 void se_reset_storage(const uint16_t key);
-bool se_get_sn(void *val_dest, uint16_t max_len, uint16_t *len);
-bool se_get_version(void *val_dest, uint16_t max_len, uint16_t *len);
+bool se_get_sn(char **serial);
+bool se_get_version(char **version);
 bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
                void *cert_val, uint16_t *cert_len, void *signature_val,
                uint16_t *signature_len);
@@ -83,6 +83,10 @@ bool se_st_seed_en(const uint16_t key, void *plain_data, uint16_t plain_len,
                    void *cipher_data, uint16_t *cipher_len);
 bool se_st_seed_de(const uint16_t key, void *cipher_data, uint16_t cipher_len,
                    void *plain_data, uint16_t *plain_len);
+bool st_backup_entory_to_se(const uint16_t key, uint8_t *seed,
+                            uint8_t seed_len);
+bool st_restore_entory_from_se(const uint16_t key, uint8_t *seed,
+                               uint8_t *seed_len);
 #else
 #define se_transmit(...) 0
 #define se_get_version(...) false
@@ -94,5 +98,7 @@ bool se_st_seed_de(const uint16_t key, void *cipher_data, uint16_t cipher_len,
 #define se_st_seed_en(...) false
 #define se_st_seed_de(...) false
 #define se_set_value(...) false
+#define st_backup_entory_to_se(...) false
+#define st_restore_entory_from_se(...) false
 #endif
 #endif

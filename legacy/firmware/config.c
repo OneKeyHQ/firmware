@@ -45,13 +45,13 @@
 #include "se_chip.h"
 #include "sha2.h"
 #include "storage.h"
+#include "storage_ex.h"
 #include "supervise.h"
 #include "timer.h"
 #include "trezor.h"
 #include "u2f.h"
 #include "usb.h"
 #include "util.h"
-#include "utxo_cache.h"
 
 /* Magic constants to check validity of storage block for storage versions 1
  * to 10. */
@@ -109,6 +109,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_DEVICE_STATE (32 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // uint32
 #define KEY_SEED_PASSPHRASE (33 | APP)                                // string
 #define KEY_SEED_ST (34 | APP)                                        // string
+#define KEY_ST_SEED_EXCHANGE (35 | APP)  // bytes, only used in se
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -446,6 +447,11 @@ void config_init(void) {
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
   config_getLanguage(config_language, sizeof(config_language));
+  // imported xprv is not supported anymore so we set initialized to false
+  // if no mnemonic is present
+  if (config_isInitialized() && !config_hasMnemonic()) {
+    config_set_bool(KEY_INITIALIZED, false);
+  }
 
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
@@ -470,7 +476,7 @@ void config_init(void) {
 
   session_clear(false);
 #if !EMULATOR
-  utxo_cache_init();
+  user_data_init();
 #endif
   usbTiny(oldTiny);
 }
@@ -829,6 +835,8 @@ bool config_getMnemonic(char *dest, uint16_t dest_size) {
   return sectrue == config_get_string(KEY_MNEMONIC, dest, dest_size);
 }
 
+bool config_hasMnemonic(void) { return sectrue == storage_has(KEY_MNEMONIC); }
+
 /* Check whether mnemonic matches storage. The mnemonic must be
  * a null-terminated string.
  */
@@ -1055,8 +1063,7 @@ uint32_t config_getAutoLockDelayMs() {
 }
 
 void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
-  const uint32_t min_delay_ms = 10 * 1000U;  // 10 seconds
-  auto_lock_delay_ms = MAX(auto_lock_delay_ms, min_delay_ms);
+  auto_lock_delay_ms = MAX(auto_lock_delay_ms, MIN_AUTOLOCK_DELAY_MS);
   if (sectrue == storage_set(KEY_AUTO_LOCK_DELAY_MS, &auto_lock_delay_ms,
                              sizeof(auto_lock_delay_ms))) {
     autoLockDelayMs = auto_lock_delay_ms;
@@ -1157,9 +1164,6 @@ ExportType config_setSeedsExportFlag(ExportType flag) { return flag; }
 
 bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
                          BixinOutMessageSE_outmessage_t *get_msg) {
-  if (!g_bSelectSEFlag) {
-    return false;
-  }
   if (false == bMI2CDRV_SendData(input_msg->bytes, input_msg->size)) {
     return false;
   }
@@ -1222,4 +1226,12 @@ bool config_STSeedRestore(void *cipher_data, uint16_t cipher_len,
                           void *plain_data, uint16_t *plain_len) {
   return se_st_seed_de(KEY_SEED_ST, cipher_data, cipher_len, plain_data,
                        plain_len);
+}
+
+bool config_stBackUpEntoryToSe(uint8_t *seed, uint8_t seed_len) {
+  return st_backup_entory_to_se(KEY_ST_SEED_EXCHANGE, seed, seed_len);
+}
+
+bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len) {
+  return st_restore_entory_from_se(KEY_ST_SEED_EXCHANGE, seed, seed_len);
 }

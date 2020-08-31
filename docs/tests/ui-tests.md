@@ -82,7 +82,7 @@ Each `--ui=test` creates a clear report which tests passed and which failed.
 The index file is stored in `tests/ui_tests/reporting/reports/test/index.html`, but for an ease of use
 you will find a link at the end of the pytest summary.
 
-On CI this report is published as an artifact.
+On CI this report is published as an artifact. You can see the latest master report [here](https://gitlab.com/satoshilabs/trezor/trezor-firmware/-/jobs/artifacts/master/file/test_ui_report/index.html?job=core%20device%20ui%20test).
 
 ### Master diff
 
@@ -90,4 +90,6 @@ In the ui tests folder you will also find a Python script `report_master_diff.py
 creates a report where you find which tests were altered, added, or removed relative to
 master. This useful for Pull Requests.
 
-This report is available as an artifact on CI as well.
+This report is available as an artifact on CI as well. You can find it by
+visiting the "core unix ui changes" job in your pipeline - browse the
+artifacts and open `master_diff/index.html`.

@@ -66,6 +66,7 @@ void point_add(const ecdsa_curve *curve, const curve_point *cp1,
     return;
   }
 
+  // lambda = (y2 - y1) / (x2 - x1)
   bn_subtractmod(&(cp2->x), &(cp1->x), &inv, &curve->prime);
   bn_inverse(&inv, &curve->prime);
   bn_subtractmod(&(cp2->y), &(cp1->y), &lambda, &curve->prime);
@@ -106,6 +107,8 @@ void point_double(const ecdsa_curve *curve, curve_point *cp) {
   // lambda = (3 x^2 + a) / (2 y)
   lambda = cp->y;
   bn_mult_k(&lambda, 2, &curve->prime);
+  bn_fast_mod(&lambda, &curve->prime);
+  bn_mod(&lambda, &curve->prime);
   bn_inverse(&lambda, &curve->prime);
 
   xr = cp->x;
@@ -167,22 +170,6 @@ int point_is_negative_of(const curve_point *p, const curve_point *q) {
   return !bn_is_equal(&(p->y), &(q->y));
 }
 
-// Negate a (modulo prime) if cond is 0xffffffff, keep it if cond is 0.
-// The timing of this function does not depend on cond.
-void conditional_negate(uint32_t cond, bignum256 *a, const bignum256 *prime) {
-  int j = 0;
-  uint32_t tmp = 1;
-  assert(a->val[8] < 0x20000);
-  for (j = 0; j < 8; j++) {
-    tmp += 0x3fffffff + 2 * prime->val[j] - a->val[j];
-    a->val[j] = ((tmp & 0x3fffffff) & cond) | (a->val[j] & ~cond);
-    tmp >>= 30;
-  }
-  tmp += 0x3fffffff + 2 * prime->val[j] - a->val[j];
-  a->val[j] = ((tmp & 0x3fffffff) & cond) | (a->val[j] & ~cond);
-  assert(a->val[8] < 0x20000);
-}
-
 typedef struct jacobian_curve_point {
   bignum256 x, y, z;
 } jacobian_curve_point;
@@ -192,9 +179,9 @@ static void generate_k_random(bignum256 *k, const bignum256 *prime) {
   do {
     int i = 0;
     for (i = 0; i < 8; i++) {
-      k->val[i] = random32() & 0x3FFFFFFF;
+      k->val[i] = random32() & ((1u << BN_BITS_PER_LIMB) - 1);
     }
-    k->val[8] = random32() & 0xFFFF;
+    k->val[8] = random32() & ((1u << BN_BITS_LAST_LIMB) - 1);
     // check that k is in range and not zero.
   } while (bn_is_zero(k) || !bn_is_less(k, prime));
 }
@@ -448,12 +435,12 @@ void point_multiply(const ecdsa_curve *curve, const bignum256 *k,
   uint32_t is_non_zero = 0;
   for (j = 0; j < 8; j++) {
     is_non_zero |= k->val[j];
-    tmp += 0x3fffffff + k->val[j] - (curve->order.val[j] & is_even);
-    a.val[j] = tmp & 0x3fffffff;
-    tmp >>= 30;
+    tmp += (BN_BASE - 1) + k->val[j] - (curve->order.val[j] & is_even);
+    a.val[j] = tmp & (BN_BASE - 1);
+    tmp >>= BN_BITS_PER_LIMB;
   }
   is_non_zero |= k->val[j];
-  a.val[j] = tmp + 0xffff + k->val[j] - (curve->order.val[j] & is_even);
+  a.val[j] = tmp + 0xffffff + k->val[j] - (curve->order.val[j] & is_even);
   assert((a.val[0] & 1) != 0);
 
   // special case 0*p:  just return zero. We don't care about constant time.
@@ -495,7 +482,7 @@ void point_multiply(const ecdsa_curve *curve, const bignum256 *k,
   // since a is odd.
   aptr = &a.val[8];
   abits = *aptr;
-  ashift = 12;
+  ashift = 256 - (BN_BITS_PER_LIMB * 8) - 4;
   bits = abits >> ashift;
   sign = (bits >> 4) - 1;
   bits ^= sign;
@@ -518,7 +505,7 @@ void point_multiply(const ecdsa_curve *curve, const bignum256 *k,
       // leaks no private information to a side-channel.
       bits = abits << (-ashift);
       abits = *(--aptr);
-      ashift += 30;
+      ashift += BN_BITS_PER_LIMB;
       bits |= abits >> ashift;
     } else {
       bits = abits >> ashift;
@@ -530,13 +517,13 @@ void point_multiply(const ecdsa_curve *curve, const bignum256 *k,
 
     // negate last result to make signs of this round and the
     // last round equal.
-    conditional_negate(sign ^ nsign, &jres.z, prime);
+    bn_cnegate((sign ^ nsign) & 1, &jres.z, prime);
 
     // add odd factor
     point_jacobian_add(&pmult[bits >> 1], &jres, curve);
     sign = nsign;
   }
-  conditional_negate(sign, &jres.z, prime);
+  bn_cnegate(sign & 1, &jres.z, prime);
   jacobian_to_curve(&jres, res, prime);
   memzero(&a, sizeof(a));
   memzero(&jres, sizeof(jres));
@@ -565,12 +552,12 @@ void scalar_multiply(const ecdsa_curve *curve, const bignum256 *k,
   uint32_t is_non_zero = 0;
   for (j = 0; j < 8; j++) {
     is_non_zero |= k->val[j];
-    tmp += 0x3fffffff + k->val[j] - (curve->order.val[j] & is_even);
-    a.val[j] = tmp & 0x3fffffff;
-    tmp >>= 30;
+    tmp += (BN_BASE - 1) + k->val[j] - (curve->order.val[j] & is_even);
+    a.val[j] = tmp & (BN_BASE - 1);
+    tmp >>= BN_BITS_PER_LIMB;
   }
   is_non_zero |= k->val[j];
-  a.val[j] = tmp + 0xffff + k->val[j] - (curve->order.val[j] & is_even);
+  a.val[j] = tmp + 0xffffff + k->val[j] - (curve->order.val[j] & is_even);
   assert((a.val[0] & 1) != 0);
 
   // special case 0*G:  just return zero. We don't care about constant time.
@@ -608,7 +595,8 @@ void scalar_multiply(const ecdsa_curve *curve, const bignum256 *k,
 
     // shift a by 4 places.
     for (j = 0; j < 8; j++) {
-      a.val[j] = (a.val[j] >> 4) | ((a.val[j + 1] & 0xf) << 26);
+      a.val[j] =
+          (a.val[j] >> 4) | ((a.val[j + 1] & 0xf) << (BN_BITS_PER_LIMB - 4));
     }
     a.val[j] >>= 4;
     // a = old(a)>>(4*i)
@@ -619,12 +607,12 @@ void scalar_multiply(const ecdsa_curve *curve, const bignum256 *k,
     lowbits &= 15;
     // negate last result to make signs of this round and the
     // last round equal.
-    conditional_negate((lowbits & 1) - 1, &jres.y, prime);
+    bn_cnegate(~lowbits & 1, &jres.y, prime);
 
     // add odd factor
     point_jacobian_add(&curve->cp[i][lowbits >> 1], &jres, curve);
   }
-  conditional_negate(((a.val[0] >> 4) & 1) - 1, &jres.y, prime);
+  bn_cnegate(~(a.val[0] >> 4) & 1, &jres.y, prime);
   jacobian_to_curve(&jres, res, prime);
   memzero(&a, sizeof(a));
   memzero(&jres, sizeof(jres));
@@ -1059,19 +1047,22 @@ int ecdsa_recover_pub_from_sig(const ecdsa_curve *curve, uint8_t *pub_key,
   }
   // e = -digest
   bn_read_be(digest, &e);
-  bn_subtractmod(&curve->order, &e, &e, &curve->order);
-  bn_fast_mod(&e, &curve->order);
   bn_mod(&e, &curve->order);
-  // r := r^-1
+  bn_subtract(&curve->order, &e, &e);
+  // r = r^-1
   bn_inverse(&r, &curve->order);
-  // cp := s * R = s * k *G
+  // e = -digest * r^-1
+  bn_multiply(&r, &e, &curve->order);
+  bn_mod(&e, &curve->order);
+  // s = s * r^-1
+  bn_multiply(&r, &s, &curve->order);
+  bn_mod(&s, &curve->order);
+  // cp = s * r^-1 * k * G
   point_multiply(curve, &s, &cp, &cp);
-  // cp2 := -digest * G
+  // cp2 = -digest * r^-1 * G
   scalar_multiply(curve, &e, &cp2);
-  // cp := (s * k - digest) * G = (r*priv) * G = r * Pub
+  // cp = (s * r^-1 * k - digest * r^-1) * G = Pub
   point_add(curve, &cp2, &cp);
-  // cp := r^{-1} * r * Pub = Pub
-  point_multiply(curve, &r, &cp, &cp);
   pub_key[0] = 0x04;
   bn_write_be(&cp.x, pub_key + 1);
   bn_write_be(&cp.y, pub_key + 33);

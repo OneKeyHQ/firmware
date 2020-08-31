@@ -62,7 +62,8 @@ void fsm_msgResetDevice(const ResetDevice *msg);
 void fsm_msgEntropyAck(const EntropyAck *msg);
 void fsm_msgBackupDevice(const BackupDevice *msg);
 void fsm_msgCancel(const Cancel *msg);
-void fsm_msgClearSession(const ClearSession *msg);
+void fsm_msgLockDevice(const LockDevice *msg);
+void fsm_msgEndSession(const EndSession *msg);
 void fsm_msgApplySettings(const ApplySettings *msg);
 void fsm_msgApplyFlags(const ApplyFlags *msg);
 void fsm_msgRecoveryDevice(const RecoveryDevice *msg);
@@ -143,5 +144,6 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg);
 void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg);
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg);
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg);
+void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg);
 
 #endif

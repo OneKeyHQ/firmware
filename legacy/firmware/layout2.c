@@ -18,7 +18,9 @@
  */
 
 #include <ctype.h>
+#include <inttypes.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "bignum.h"
@@ -548,6 +550,14 @@ void layoutFeeOverThreshold(const CoinInfo *coin, uint64_t fee) {
                       _("Fee"), str_fee, _("is unexpectedly high."), NULL,
                       _("Send anyway?"), NULL);
   }
+}
+
+void layoutChangeCountOverThreshold(uint32_t change_count) {
+  char str_change[21] = {0};
+  snprintf(str_change, sizeof(str_change), "There are %" PRIu32, change_count);
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    _("Warning!"), str_change, _("change-outputs."), NULL,
+                    _("Continue?"), NULL);
 }
 
 void layoutSignMessage(const uint8_t *msg, uint32_t len) {
@@ -1167,15 +1177,10 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint32_t times;
   char str_out[32 + 3] = {0};
   char times_str[12] = {0};
-  uint8_t se_version[2] = {0};
-  uint16_t version_len = sizeof(se_version);
-  uint8_t se_sn[32] = {0};
-  uint16_t sn_len = sizeof(se_sn);
+  char *se_version;
+  char *se_sn;
   int y = 0;
   char label[MAX_LABEL_LEN + 1] = _("");
-
-  (void)version_len;
-  (void)sn_len;
 
   switch (ucPage) {
     case 1:
@@ -1210,25 +1215,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
         }
       }
 
-      if (se_get_version(se_version, sizeof(se_version), &version_len)) {
-        char se_ver_char[9] = {0};
-        int i = 0;
-        se_ver_char[i++] = (se_version[0] >> 4) + '0';
-        se_ver_char[i++] = '.';
-        se_ver_char[i++] = (se_version[0] & 0x0f) + '0';
-        se_ver_char[i++] = '.';
-        se_ver_char[i++] = (se_version[1] >> 4) + '0';
-        se_ver_char[i++] = '.';
-        se_ver_char[i++] = (se_version[1] & 0x0f) + '0';
-
+      if (se_get_version(&se_version)) {
         if (ui_language) {
           oledDrawString_zh(0, y, (uint8_t *)"SE 版本:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_ver_char,
+          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_version,
                                  FONT_STANDARD);
           y += 13;
         } else {
           oledDrawString(0, y, "SE version:", FONT_STANDARD);
-          oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
+          oledDrawStringRight(OLED_WIDTH - 1, y, se_version, FONT_STANDARD);
           y += 9;
         }
       }
@@ -1288,14 +1283,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
         }
       }
 
-      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
+      if (se_get_sn(&se_sn)) {
         if (ui_language) {
           oledDrawString_zh(0, y, (uint8_t *)"序列号:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
+          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_sn,
+                                 FONT_STANDARD);
           y += 13;
         } else {
           oledDrawString(0, y, "SN:", FONT_STANDARD);
-          oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
+          oledDrawStringRight(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
           y += 9;
         }
       }
@@ -1538,4 +1534,32 @@ void layoutDialogSwipe_zh(const BITMAP *icon, const char *btnNo,
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
   layoutDialog_zh(icon, btnNo, btnYes, desc, line1, line2, line3, line4);
+}
+void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
+  char line[sizeof("after 4294967296 minutes?")] = {0};
+
+  const char *unit = _("second");
+  uint32_t num = delay_ms / 1000U;
+
+  if (delay_ms >= 60 * 60 * 1000) {
+    unit = _("hour");
+    num /= 60 * 60U;
+  } else if (delay_ms >= 60 * 1000) {
+    unit = _("minute");
+    num /= 60U;
+  }
+
+  strlcpy(line, _("after "), sizeof(line));
+  size_t off = strlen(line);
+  bn_format_uint64(num, NULL, NULL, 0, 0, false, &line[off],
+                   sizeof(line) - off);
+  strlcat(line, " ", sizeof(line));
+  strlcat(line, unit, sizeof(line));
+  if (num > 1) {
+    strlcat(line, "s", sizeof(line));
+  }
+  strlcat(line, "?", sizeof(line));
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    _("Do you really want to"), _("auto-lock your device"),
+                    line, NULL, NULL, NULL);
 }

@@ -19,8 +19,10 @@
 #include "mi2c.h"
 #include "se_chip.h"
 #include "storage.h"
+#include "storage_ex.h"
 
 bool get_features(Features *resp) {
+  char *sn_version;
   resp->has_vendor = true;
   strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   resp->has_major_version = true;
@@ -51,8 +53,8 @@ bool get_features(Features *resp) {
   resp->has_initialized = true;
   resp->initialized = config_isInitialized();
   resp->has_imported = config_getImported(&(resp->imported));
-  resp->has_pin_cached = true;
-  resp->pin_cached = session_isUnlocked() && config_hasPin();
+  resp->has_unlocked = true;
+  resp->unlocked = session_isUnlocked();
   resp->has_needs_backup = true;
   config_getNeedsBackup(&(resp->needs_backup));
   resp->has_unfinished_backup = true;
@@ -98,6 +100,11 @@ bool get_features(Features *resp) {
   }
   resp->has_se_enable = true;
   resp->se_enable = config_getWhetherUseSE();
+
+  if (se_get_version(&sn_version)) {
+    resp->has_se_ver = true;
+    memcpy(resp->se_ver, sn_version, strlen(sn_version));
+  }
   return resp;
 }
 
@@ -400,10 +407,8 @@ void fsm_msgCancel(const Cancel *msg) {
   fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
 }
 
-void fsm_msgClearSession(const ClearSession *msg) {
+void fsm_msgLockDevice(const LockDevice *msg) {
   (void)msg;
-  // we do not actually clear the session, we just lock it
-  // TODO: the message should be called LockSession see #819
   config_lockDevice();
   layoutScreensaver();
   fsm_sendSuccess(_("Session cleared"));
@@ -414,6 +419,12 @@ bool fsm_getLang(const ApplySettings *msg) {
     return true;
   else
     return false;
+}
+
+void fsm_msgEndSession(const EndSession *msg) {
+  (void)msg;
+  // TODO
+  fsm_sendFailure(FailureType_Failure_FirmwareError, "Not implemented");
 }
 
 void fsm_msgApplySettings(const ApplySettings *msg) {
@@ -509,9 +520,27 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
 
   if (msg->has_auto_lock_delay_ms) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("change auto-lock"),
-                      _("delay?"), NULL, NULL, NULL);
+    if (msg->auto_lock_delay_ms < MIN_AUTOLOCK_DELAY_MS) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Auto-lock delay too short"));
+      layoutHome();
+      return;
+    }
+    if (msg->auto_lock_delay_ms > MAX_AUTOLOCK_DELAY_MS) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Auto-lock delay too long"));
+      layoutHome();
+      return;
+    }
+    layoutConfirmAutoLockDelay(msg->auto_lock_delay_ms);
+    // if (ui_language) {
+    //   layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+    //                        "修改锁屏/关机时间?", NULL, secstr, NULL);
+    // } else {
+    //   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    //                     _("Do you really want to"), _("change auto-lock"),
+    //                     _("delay?"), NULL, secstr, NULL);
+    // }
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -520,9 +549,14 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
       (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("change fastpay settings"),
-                      NULL, NULL, NULL, NULL);
+    if (ui_language) {
+      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
+                           "修改快捷支付信息", NULL, NULL, NULL);
+    } else {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Do you really want to"),
+                        _("change fastpay settings"), NULL, NULL, NULL, NULL);
+    }
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -533,6 +567,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Do you really want to"), _("change bluetooth"),
                       _("status always?"), NULL, NULL, NULL);
+
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -722,7 +757,39 @@ void fsm_msgBixinReboot(const BixinReboot *msg) {
 }
 
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
+  bool request_restore = false;
+  bool request_backup = false;
   RESP_INIT(BixinOutMessageSE);
+
+  if (msg->inputmessage.bytes[0] == 0x00 &&
+      msg->inputmessage.bytes[1] == 0xf9 &&
+      msg->inputmessage.bytes[2] == 0x00) {
+    CHECK_INITIALIZED
+    if (config_hasPin()) {
+      CHECK_PIN_UNCACHED
+    } else if (!protectChangePin(false)) {
+      layoutHome();
+      return;
+    }
+    if (config_hasMnemonic()) {
+      char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+      uint8_t entropy[64] = {0};
+      config_getMnemonic(mnemonic, sizeof(mnemonic));
+      entropy[0] = mnemonic_to_entropy(mnemonic, entropy + 1) / 11;
+      if (!config_stBackUpEntoryToSe(entropy, sizeof(entropy))) {
+        fsm_sendFailure(FailureType_Failure_ProcessError,
+                        _("seed import failed"));
+        layoutHome();
+        return;
+      }
+    }
+    request_backup = true;
+  } else if (msg->inputmessage.bytes[0] == 0x00 &&
+             msg->inputmessage.bytes[1] == 0xf9 &&
+             msg->inputmessage.bytes[2] == 0x01) {
+    CHECK_NOT_INITIALIZED
+    request_restore = true;
+  }
 
   if (false == config_getMessageSE(
                    (BixinMessageSE_inputmessage_t *)(&msg->inputmessage),
@@ -731,8 +798,56 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
     layoutHome();
     return;
   }
+  if (request_restore) {
+    // restore to st
+    if (resp->outmessage.bytes[0] == 0x55) {
+      if (!protectChangePin(false)) {
+        layoutHome();
+        return;
+      }
+      uint8_t entropy[64] = {0};
+      uint8_t len = sizeof(entropy);
+      if (config_stRestoreEntoryFromSe(entropy, &len)) {
+        if (len != 64) {
+          fsm_sendFailure(FailureType_Failure_DataError,
+                          _("Entory data error"));
+        } else if (entropy[0] == 12 || entropy[0] == 18 || entropy[0] == 24) {
+          const char *mnemonic =
+              mnemonic_from_data(entropy + 1, entropy[0] * 4 / 3);
+          if (config_setMnemonic(mnemonic)) {
+          } else {
+            fsm_sendFailure(FailureType_Failure_ProcessError,
+                            _("Failed to store mnemonic"));
+            layoutHome();
+            return;
+          }
+        }
+      }
+    } else if (resp->outmessage.bytes[0] == 0xaa) {
+      if (!protectChangePin(false)) {
+        layoutHome();
+        return;
+      }
+      if (!config_getWhetherUseSE()) {
+        config_setWhetherUseSE(true);
+      }
+    } else {
+      fsm_sendFailure(FailureType_Failure_DataError, _("restore data err"));
+      layoutHome();
+      return;
+    }
+  }
   resp->has_outmessage = true;
-  msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
+  if (request_backup) {
+    if (msg_write(MessageType_MessageType_BixinOutMessageSE, resp)) {
+      config_setNeedsBackup(false);
+    }
+  } else if (request_restore) {
+    i2c_set_wait(false);
+    msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
+  } else {
+    msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
+  }
   layoutHome();
   return;
 }
@@ -780,8 +895,9 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
     }
     resp->data.size += 4;
   }
-  config_setNeedsBackup(false);
-  msg_write(MessageType_MessageType_BixinBackupAck, resp);
+  if (msg_write(MessageType_MessageType_BixinBackupAck, resp)) {
+    config_setNeedsBackup(false);
+  }
   layoutHome();
   return;
 }
@@ -864,6 +980,41 @@ void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
     return;
   }
   msg_write(MessageType_MessageType_BixinVerifyDeviceAck, resp);
+  layoutHome();
+  return;
+}
+
+void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg) {
+  CHECK_INITIALIZED
+  CHECK_PIN
+  if (WL_OperationType_WL_OperationType_Add == msg->type) {
+    if (!msg->has_addr_in) {
+      fsm_sendFailure(FailureType_Failure_DataError, _("addres is null"));
+    } else {
+      int ret;
+      ret = white_list_add(msg->addr_in);
+      if (ret == WHILT_LIST_ADDR_EXIST) {
+        fsm_sendFailure(FailureType_Failure_DataError, _("addres is existed"));
+      } else if (ret == WHILT_LIST_FULL) {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        _("addres space is full"));
+      } else if (ret == WHITE_LIST_OK) {
+        fsm_sendSuccess("addres add success");
+      }
+    }
+  } else if (WL_OperationType_WL_OperationType_Delete == msg->type) {
+    if (!msg->has_addr_in) {
+      fsm_sendFailure(FailureType_Failure_DataError, _("addres is null"));
+    } else {
+      white_list_delete(msg->addr_in);
+      fsm_sendSuccess("addres delete success");
+    }
+  } else if (WL_OperationType_WL_OperationType_Inquire == msg->type) {
+    RESP_INIT(BixinWhiteListAck);
+
+    white_list_inquiry(resp->address, &resp->address_count);
+    msg_write(MessageType_MessageType_BixinWhiteListAck, resp);
+  }
   layoutHome();
   return;
 }

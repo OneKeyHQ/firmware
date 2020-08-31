@@ -9,13 +9,13 @@ from trezor.errors import MnemonicError
 from trezor.messages import BackupType
 from trezor.messages.Success import Success
 
-from . import recover
-
 from apps.common import mnemonic
 from apps.common.layout import show_success
 from apps.homescreen.homescreen import homescreen
 from apps.management import backup_types
 from apps.management.recovery_device import layout
+
+from . import recover
 
 if False:
     from typing import Optional, Tuple
@@ -24,7 +24,7 @@ if False:
 
 async def recovery_homescreen() -> None:
     if not storage.recovery.is_in_progress():
-        workflow.replace_default(homescreen)
+        workflow.set_default(homescreen)
         return
 
     # recovery process does not communicate on the wire
@@ -41,7 +41,7 @@ async def recovery_process(ctx: wire.GenericContext) -> Success:
             storage.recovery.end_progress()
         else:
             storage.wipe()
-        raise wire.ActionCancelled("Cancelled")
+        raise wire.ActionCancelled
 
 
 async def _continue_recovery_process(ctx: wire.GenericContext) -> Success:

@@ -21,23 +21,29 @@ from trezorlib.exceptions import TrezorFailure
 
 from ..common import MNEMONIC12
 from ..tx_cache import TxCache
+from .signtx import request_finished, request_input, request_meta, request_output
+
+B = proto.ButtonRequestType
 
 TXHASH_d5f65e = bytes.fromhex(
     "d5f65ee80147b4bcc70b75e4bbf2d7382021b871bd8867ef8fa525ef50864882"
 )
 
+PIN4 = "1234"
+
 
 @pytest.mark.skip_t2
 class TestProtectionLevels:
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_initialize(self, client):
         with client:
             client.set_expected_responses([proto.Features()])
             client.init_device()
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_apply_settings(self, client):
         with client:
+            client.use_pin_sequence([PIN4])
             client.set_expected_responses(
                 [
                     proto.PinMatrixRequest(),
@@ -48,9 +54,10 @@ class TestProtectionLevels:
             )  # TrezorClient reinitializes device
             device.apply_settings(client, label="nazdar")
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_change_pin(self, client):
         with client:
+            client.use_pin_sequence([PIN4, PIN4, PIN4])
             client.set_expected_responses(
                 [
                     proto.ButtonRequest(),
@@ -68,29 +75,31 @@ class TestProtectionLevels:
             client.set_expected_responses([proto.ButtonRequest(), proto.Success()])
             client.ping("msg", True)
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_get_entropy(self, client):
         with client:
             client.set_expected_responses([proto.ButtonRequest(), proto.Entropy()])
             misc.get_entropy(client, 10)
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_get_public_key(self, client):
         with client:
+            client.use_pin_sequence([PIN4])
             client.set_expected_responses(
                 [proto.PinMatrixRequest(), proto.PassphraseRequest(), proto.PublicKey()]
             )
             btc.get_public_node(client, [])
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_get_address(self, client):
         with client:
+            client.use_pin_sequence([PIN4])
             client.set_expected_responses(
                 [proto.PinMatrixRequest(), proto.PassphraseRequest(), proto.Address()]
             )
             btc.get_address(client, "Bitcoin", [])
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_wipe_device(self, client):
         with client:
             client.set_expected_responses(
@@ -150,9 +159,10 @@ class TestProtectionLevels:
                 )
             )
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_sign_message(self, client):
         with client:
+            client.use_pin_sequence([PIN4])
             client.set_expected_responses(
                 [
                     proto.ButtonRequest(),
@@ -163,7 +173,7 @@ class TestProtectionLevels:
             )
             btc.sign_message(client, "Bitcoin", [], "testing message")
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_verify_message(self, client):
         with client:
             client.set_expected_responses(
@@ -179,7 +189,7 @@ class TestProtectionLevels:
                 "This is an example of a signed message.",
             )
 
-    @pytest.mark.setup_client(pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=PIN4, passphrase=True)
     def test_signtx(self, client):
         inp1 = proto.TxInputType(
             address_n=[0],  # 14LmW5k4ssUrtbAB4255zdqv3b4w1TuX9e
@@ -195,55 +205,23 @@ class TestProtectionLevels:
 
         with client:
 
+            client.use_pin_sequence([PIN4])
             client.set_expected_responses(
                 [
                     proto.PinMatrixRequest(),
                     proto.PassphraseRequest(),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXINPUT,
-                        details=proto.TxRequestDetailsType(request_index=0),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXMETA,
-                        details=proto.TxRequestDetailsType(tx_hash=TXHASH_d5f65e),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXINPUT,
-                        details=proto.TxRequestDetailsType(
-                            request_index=0, tx_hash=TXHASH_d5f65e
-                        ),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXINPUT,
-                        details=proto.TxRequestDetailsType(
-                            request_index=1, tx_hash=TXHASH_d5f65e
-                        ),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXOUTPUT,
-                        details=proto.TxRequestDetailsType(
-                            request_index=0, tx_hash=TXHASH_d5f65e
-                        ),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXOUTPUT,
-                        details=proto.TxRequestDetailsType(request_index=0),
-                    ),
-                    proto.ButtonRequest(code=proto.ButtonRequestType.ConfirmOutput),
-                    proto.ButtonRequest(code=proto.ButtonRequestType.SignTx),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXINPUT,
-                        details=proto.TxRequestDetailsType(request_index=0),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXOUTPUT,
-                        details=proto.TxRequestDetailsType(request_index=0),
-                    ),
-                    proto.TxRequest(
-                        request_type=proto.RequestType.TXOUTPUT,
-                        details=proto.TxRequestDetailsType(request_index=0),
-                    ),
-                    proto.TxRequest(request_type=proto.RequestType.TXFINISHED),
+                    request_input(0),
+                    request_meta(TXHASH_d5f65e),
+                    request_input(0, TXHASH_d5f65e),
+                    request_input(1, TXHASH_d5f65e),
+                    request_output(0, TXHASH_d5f65e),
+                    request_output(0),
+                    proto.ButtonRequest(code=B.ConfirmOutput),
+                    proto.ButtonRequest(code=B.SignTx),
+                    request_input(0),
+                    request_output(0),
+                    request_output(0),
+                    request_finished(),
                 ]
             )
             btc.sign_tx(client, "Bitcoin", [inp1], [out1], prev_txes=TxCache("Bitcoin"))
@@ -254,16 +232,17 @@ class TestProtectionLevels:
     # def test_firmware_upload(self):
     #    pass
 
-    @pytest.mark.setup_client(pin=True)
-    def test_pin_cached(self, client):
-        assert client.features.pin_cached is False
+    @pytest.mark.setup_client(pin=PIN4)
+    def test_unlocked(self, client):
+        assert client.features.unlocked is False
 
         with client:
+            client.use_pin_sequence([PIN4])
             client.set_expected_responses([proto.PinMatrixRequest(), proto.Address()])
             btc.get_address(client, "Testnet", [0])
 
         client.init_device()
-        assert client.features.pin_cached is True
+        assert client.features.unlocked is True
         with client:
             client.set_expected_responses([proto.Address()])
             btc.get_address(client, "Testnet", [0])

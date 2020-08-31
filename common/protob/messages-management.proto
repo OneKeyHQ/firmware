@@ -50,7 +50,7 @@ message Features {
     optional bytes revision = 13;               // SCM revision of firmware
     optional bytes bootloader_hash = 14;        // hash of the bootloader
     optional bool imported = 15;                // was storage imported from an external source?
-    optional bool pin_cached = 16;              // is PIN already cached in session?
+    optional bool unlocked = 16;                // is the device unlocked? called "pin_cached" previously
 //    optional bool passphrase_cached = 17;       // is passphrase already cached in session?  DEPRECATED
     optional bool firmware_present = 18;        // is valid firmware loaded?
     optional bool needs_backup = 19;            // does storage need backup? (equals to Storage.needs_backup)
@@ -96,14 +96,25 @@ message Features {
     optional bool se_enable = 40;
     optional uint32 offset = 50;
     optional uint32 auto_lock_delay_ms = 51;
+    optional string se_ver = 52;
 }
 
 /**
- * Request: clear session (removes cached PIN, passphrase, etc).
+ * Request: soft-lock the device. Following actions will require PIN. Passphrases remain cached.
  * @start
  * @next Success
  */
-message ClearSession {
+message LockDevice {
+}
+
+/**
+ * Request: end the current sesson. Following actions must call Initialize again.
+ * Cache for the current session is discarded, other sessions remain intact.
+ * Device is not PIN-locked.
+ * @start
+ * @next Success
+ */
+message EndSession {
 }
 
 /**
@@ -120,14 +131,21 @@ message ApplySettings {
 //    optional PassphraseSourceType passphrase_source = 5;  DEPRECATED
     optional uint32 auto_lock_delay_ms = 6;
     optional uint32 display_rotation = 7;  // in degrees from North
-    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry
-    optional bool use_ble = 9;
-    optional bool use_se = 10;
-    optional bool is_bixinapp = 11;
-    optional bool fastpay_pin = 12;
-    optional bool fastpay_confirm = 13;
-    optional uint64 fastpay_money_limit = 14;
-    optional uint32 fastpay_times = 15;
+    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry    
+    optional SafetyCheckLevel safety_checks = 9;  // Safety check level, set to Prompt to limit path namespace enforcement
+
+    enum SafetyCheckLevel {
+        Strict = 0;
+        Prompt = 1;
+    }
+
+    optional bool use_ble = 100;
+    optional bool use_se = 101;
+    optional bool is_bixinapp = 102;
+    optional bool fastpay_pin = 103;
+    optional bool fastpay_confirm = 104;
+    optional uint64 fastpay_money_limit = 105;
+    optional uint32 fastpay_times = 106;
     /**
     * Type of seed and mnemonic export flag
     */
@@ -463,4 +481,29 @@ message BixinVerifyDeviceRequest {
 message BixinVerifyDeviceAck {
  required bytes cert= 1;
  required bytes signature = 2;
+}
+
+/**
+ * Request: bixin white list operation
+ * @end
+ */
+message BixinWhiteListRequest {
+    required WL_OperationType type = 1;
+    optional string addr_in = 2;	
+    /**
+    * Type of Seed request
+    */
+    enum WL_OperationType {
+        WL_OperationType_Add= 0;
+        WL_OperationType_Delete = 1;
+        WL_OperationType_Inquire = 2;
+    }
+}
+
+/**
+ * Request: output whitelist
+ * @end
+ */
+message BixinWhiteListAck {
+    repeated string address = 1;
 }

@@ -293,12 +293,15 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       }
     }
     if (protectButton_ex(ButtonRequestType_ButtonRequest_Address, false,
-                         button_request)) {
+                         button_request, 0)) {
       return true;
     }
     button_request = false;
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return false;
+    } else if (protectAbortedByTimeout) {
       layoutHome();
       return false;
     }

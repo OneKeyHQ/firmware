@@ -36,6 +36,7 @@
 #include "protect.h"
 #include "ripemd160.h"
 #include "segwit_addr.h"
+#include "storage_ex.h"
 #include "util.h"
 
 #define SEGWIT_VERSION_0 0
@@ -65,6 +66,8 @@
 /* size of a Decred witness (without script): 8 amount, 4 block height, 4 block
  * index */
 #define TXSIZE_DECRED_WITNESS 16
+/* support version of Decred script_version */
+#define DECRED_SCRIPT_VERSION 0
 
 uint32_t tx_output_info_counter = 0;
 TxOutputMini tx_output_info_buf[TX_OUTPUT_INFO_BUF_LEN];
@@ -200,7 +203,7 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
                    TxOutputBinType *out, bool needs_confirm) {
   memzero(out, sizeof(TxOutputBinType));
   out->amount = in->amount;
-  out->decred_script_version = in->decred_script_version;
+  out->decred_script_version = DECRED_SCRIPT_VERSION;
   uint8_t addr_raw[MAX_ADDR_RAW_SIZE] = {0};
   size_t addr_raw_len = 0;
 
@@ -334,26 +337,28 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
   // bixin:save output and confirm at last
   if (needs_confirm) {
     if (g_bIsBixinAPP) {
-      if (config_getFastPayConfirmFlag()) {
-        uint64_t fast_pay_amount;
-        uint32_t fast_pay_times;
-        fast_pay_amount = config_getFastPayMoneyLimt();
-        fast_pay_times = config_getFastPayTimes();
-        if (fast_pay_times && out->amount <= fast_pay_amount) {
-          needs_confirm = false;
+      if (white_list_check(in->address)) {
+        if (config_getFastPayConfirmFlag()) {
+          uint64_t fast_pay_amount;
+          uint32_t fast_pay_times;
+          fast_pay_amount = config_getFastPayMoneyLimt();
+          fast_pay_times = config_getFastPayTimes();
+          if (fast_pay_times && out->amount <= fast_pay_amount) {
+            needs_confirm = false;
+          }
         }
-      }
-      if (needs_confirm) {
-        if (tx_output_info_counter == TX_OUTPUT_INFO_BUF_LEN) {
-          // buf if full
-        } else {
-          memset(tx_output_info_buf + tx_output_info_counter, 0x00,
-                 sizeof(tx_output_info_buf));
-          tx_output_info_buf[tx_output_info_counter].amount = out->amount;
-          strncpy(tx_output_info_buf[tx_output_info_counter].address,
-                  in->address,
-                  sizeof(tx_output_info_buf[tx_output_info_counter].address));
-          tx_output_info_counter++;
+        if (needs_confirm) {
+          if (tx_output_info_counter == TX_OUTPUT_INFO_BUF_LEN) {
+            // buf if full
+          } else {
+            memset(tx_output_info_buf + tx_output_info_counter, 0x00,
+                   sizeof(tx_output_info_buf));
+            tx_output_info_buf[tx_output_info_counter].amount = out->amount;
+            strncpy(tx_output_info_buf[tx_output_info_counter].address,
+                    in->address,
+                    sizeof(tx_output_info_buf[tx_output_info_counter].address));
+            tx_output_info_counter++;
+          }
         }
       }
     } else {
@@ -538,7 +543,7 @@ uint32_t tx_serialize_script(uint32_t size, const uint8_t *data, uint8_t *out) {
 uint32_t tx_serialize_header(TxStruct *tx, uint8_t *out) {
   int r = 4;
 #if !BITCOIN_ONLY
-  if (tx->overwintered) {
+  if (tx->is_zcashlike && tx->version >= 3) {
     uint32_t ver = tx->version | TX_OVERWINTERED;
     memcpy(out, &ver, 4);
     memcpy(out + 4, &(tx->version_group_id), 4);
@@ -564,7 +569,7 @@ uint32_t tx_serialize_header(TxStruct *tx, uint8_t *out) {
 uint32_t tx_serialize_header_hash(TxStruct *tx) {
   int r = 4;
 #if !BITCOIN_ONLY
-  if (tx->overwintered) {
+  if (tx->is_zcashlike && tx->version >= 3) {
     uint32_t ver = tx->version | TX_OVERWINTERED;
     hasher_Update(&(tx->hasher), (const uint8_t *)&ver, 4);
     hasher_Update(&(tx->hasher), (const uint8_t *)&(tx->version_group_id), 4);
@@ -715,19 +720,13 @@ uint32_t tx_serialize_middle_hash(TxStruct *tx) {
 uint32_t tx_serialize_footer(TxStruct *tx, uint8_t *out) {
   memcpy(out, &(tx->lock_time), 4);
 #if !BITCOIN_ONLY
-  if (tx->overwintered) {
-    if (tx->version == 3) {
-      memcpy(out + 4, &(tx->expiry), 4);
-      out[8] = 0x00;  // nJoinSplit
-      return 9;
-    } else if (tx->version == 4) {
-      memcpy(out + 4, &(tx->expiry), 4);
-      memzero(out + 8, 8);  // valueBalance
-      out[16] = 0x00;       // nShieldedSpend
-      out[17] = 0x00;       // nShieldedOutput
-      out[18] = 0x00;       // nJoinSplit
-      return 19;
-    }
+  if (tx->is_zcashlike && tx->version == 4) {
+    memcpy(out + 4, &(tx->expiry), 4);
+    memzero(out + 8, 8);  // valueBalance
+    out[16] = 0x00;       // nShieldedSpend
+    out[17] = 0x00;       // nShieldedOutput
+    out[18] = 0x00;       // nJoinSplit
+    return 19;
   }
   if (tx->is_decred) {
     memcpy(out + 4, &(tx->expiry), 4);
@@ -740,10 +739,9 @@ uint32_t tx_serialize_footer(TxStruct *tx, uint8_t *out) {
 uint32_t tx_serialize_footer_hash(TxStruct *tx) {
   hasher_Update(&(tx->hasher), (const uint8_t *)&(tx->lock_time), 4);
 #if !BITCOIN_ONLY
-  if (tx->overwintered) {
+  if (tx->is_zcashlike && tx->version >= 3) {
     hasher_Update(&(tx->hasher), (const uint8_t *)&(tx->expiry), 4);
-    hasher_Update(&(tx->hasher), (const uint8_t *)"\x00", 1);  // nJoinSplit
-    return 9;
+    return 8;
   }
   if (tx->is_decred) {
     hasher_Update(&(tx->hasher), (const uint8_t *)&(tx->expiry), 4);
@@ -832,7 +830,7 @@ uint32_t tx_serialize_extra_data_hash(TxStruct *tx, const uint8_t *data,
 
 void tx_init(TxStruct *tx, uint32_t inputs_len, uint32_t outputs_len,
              uint32_t version, uint32_t lock_time, uint32_t expiry,
-             uint32_t extra_data_len, HasherType hasher_sign, bool overwintered,
+             uint32_t extra_data_len, HasherType hasher_sign, bool is_zcashlike,
              uint32_t version_group_id, uint32_t timestamp) {
   tx->inputs_len = inputs_len;
   tx->outputs_len = outputs_len;
@@ -846,7 +844,7 @@ void tx_init(TxStruct *tx, uint32_t inputs_len, uint32_t outputs_len,
   tx->size = 0;
   tx->is_segwit = false;
   tx->is_decred = false;
-  tx->overwintered = overwintered;
+  tx->is_zcashlike = is_zcashlike;
   tx->version_group_id = version_group_id;
   tx->timestamp = timestamp;
   hasher_Init(&(tx->hasher), hasher_sign);

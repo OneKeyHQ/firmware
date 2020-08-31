@@ -49,7 +49,7 @@ class TestMsgResetDeviceSkipbackup:
 
         # Provide entropy
         assert isinstance(ret, proto.EntropyRequest)
-        internal_entropy = client.debug.read_reset_entropy()
+        internal_entropy = client.debug.state().reset_entropy
         ret = client.call_raw(proto.EntropyAck(entropy=self.external_entropy))
         assert isinstance(ret, proto.Success)
 

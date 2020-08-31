@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from .reporting import report_test
+from .reporting import testreport
 
 UI_TESTS_DIR = Path(__file__).parent.resolve()
 HASH_FILE = UI_TESTS_DIR / "fixtures.json"
@@ -61,7 +61,7 @@ def _process_tested(fixture_test_path, test_name):
     _rename_records(actual_path)
 
     if actual_hash != expected_hash:
-        file_path = report_test.failed(
+        file_path = testreport.failed(
             fixture_test_path, test_name, actual_hash, expected_hash
         )
 
@@ -71,7 +71,7 @@ def _process_tested(fixture_test_path, test_name):
             )
         )
     else:
-        report_test.passed(fixture_test_path, test_name, actual_hash)
+        testreport.passed(fixture_test_path, test_name, actual_hash)
 
 
 @contextmanager
@@ -82,10 +82,8 @@ def screen_recording(client, request):
 
     if test_ui == "record":
         screen_path = screens_test_path / "recorded"
-    elif test_ui == "test":
-        screen_path = screens_test_path / "actual"
     else:
-        raise ValueError("Invalid 'ui' option.")
+        screen_path = screens_test_path / "actual"
 
     if not screens_test_path.exists():
         screens_test_path.mkdir()
@@ -98,10 +96,8 @@ def screen_recording(client, request):
         yield
         if test_ui == "record":
             _process_recorded(screen_path, test_name)
-        elif test_ui == "test":
-            _process_tested(screens_test_path, test_name)
         else:
-            raise ValueError("Invalid 'ui' option.")
+            _process_tested(screens_test_path, test_name)
     finally:
         client.debug.stop_recording()
 
