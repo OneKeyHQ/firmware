@@ -763,18 +763,25 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
 
   if (msg->inputmessage.bytes[0] == 0x00 &&
       msg->inputmessage.bytes[1] == 0xf9 &&
-      msg->inputmessage.bytes[2] == 0x00 && config_hasMnemonic()) {
+      msg->inputmessage.bytes[2] == 0x00) {
     CHECK_INITIALIZED
-    CHECK_PIN
-    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
-    uint8_t entropy[64] = {0};
-    config_getMnemonic(mnemonic, sizeof(mnemonic));
-    entropy[0] = mnemonic_to_entropy(mnemonic, entropy + 1) / 11;
-    if (!config_stBackUpEntoryToSe(entropy, sizeof(entropy))) {
-      fsm_sendFailure(FailureType_Failure_ProcessError,
-                      _("seed import failed"));
+    if (config_hasPin()) {
+      CHECK_PIN_UNCACHED
+    } else if (!protectChangePin(false)) {
       layoutHome();
       return;
+    }
+    if (config_hasMnemonic()) {
+      char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+      uint8_t entropy[64] = {0};
+      config_getMnemonic(mnemonic, sizeof(mnemonic));
+      entropy[0] = mnemonic_to_entropy(mnemonic, entropy + 1) / 11;
+      if (!config_stBackUpEntoryToSe(entropy, sizeof(entropy))) {
+        fsm_sendFailure(FailureType_Failure_ProcessError,
+                        _("seed import failed"));
+        layoutHome();
+        return;
+      }
     }
     request_backup = true;
   } else if (msg->inputmessage.bytes[0] == 0x00 &&
@@ -794,6 +801,10 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
   if (request_restore) {
     // restore to st
     if (resp->outmessage.bytes[0] == 0x55) {
+      if (!protectChangePin(false)) {
+        layoutHome();
+        return;
+      }
       uint8_t entropy[64] = {0};
       uint8_t len = sizeof(entropy);
       if (config_stRestoreEntoryFromSe(entropy, &len)) {
@@ -813,6 +824,10 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
         }
       }
     } else if (resp->outmessage.bytes[0] == 0xaa) {
+      if (!protectChangePin(false)) {
+        layoutHome();
+        return;
+      }
       if (!config_getWhetherUseSE()) {
         config_setWhetherUseSE(true);
       }
@@ -827,10 +842,12 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
     if (msg_write(MessageType_MessageType_BixinOutMessageSE, resp)) {
       config_setNeedsBackup(false);
     }
+  } else if (request_restore) {
+    i2c_set_wait(false);
+    msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
   } else {
     msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
   }
-
   layoutHome();
   return;
 }
