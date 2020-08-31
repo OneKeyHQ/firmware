@@ -130,14 +130,21 @@ message ApplySettings {
 //    optional PassphraseSourceType passphrase_source = 5;  DEPRECATED
     optional uint32 auto_lock_delay_ms = 6;
     optional uint32 display_rotation = 7;  // in degrees from North
-    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry
-    optional bool use_ble = 9;
-    optional bool use_se = 10;
-    optional bool is_bixinapp = 11;
-    optional bool fastpay_pin = 12;
-    optional bool fastpay_confirm = 13;
-    optional uint64 fastpay_money_limit = 14;
-    optional uint32 fastpay_times = 15;
+    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry    
+    optional SafetyCheckLevel safety_checks = 9;  // Safety check level, set to Prompt to limit path namespace enforcement
+
+    enum SafetyCheckLevel {
+        Strict = 0;
+        Prompt = 1;
+    }
+
+    optional bool use_ble = 100;
+    optional bool use_se = 101;
+    optional bool is_bixinapp = 102;
+    optional bool fastpay_pin = 103;
+    optional bool fastpay_confirm = 104;
+    optional uint64 fastpay_money_limit = 105;
+    optional uint32 fastpay_times = 106;
     /**
     * Type of seed and mnemonic export flag
     */
@@ -145,12 +152,6 @@ message ApplySettings {
         SeedEncExportType_NO= 0; 
         SeedEncExportType_YES = 1;
         MnemonicPlainExportType_YES = 2;
-    }
-    optional SafetyCheckLevel safety_checks = 16;  // Safety check level, set to Prompt to limit path namespace enforcement
-
-    enum SafetyCheckLevel {
-        Strict = 0;
-        Prompt = 1;
     }
 }
 
