@@ -22,6 +22,7 @@
 #include "storage_ex.h"
 
 bool get_features(Features *resp) {
+  char *sn_version;
   resp->has_vendor = true;
   strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   resp->has_major_version = true;
@@ -99,6 +100,11 @@ bool get_features(Features *resp) {
   }
   resp->has_se_enable = true;
   resp->se_enable = config_getWhetherUseSE();
+
+  if (se_get_version(&sn_version)) {
+    resp->has_se_ver = true;
+    memcpy(resp->se_ver, sn_version, strlen(sn_version));
+  }
   return resp;
 }
 

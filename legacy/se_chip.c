@@ -313,25 +313,41 @@ void se_reset_storage(const uint16_t key) {
               SET_SESTORE_DATA);
 }
 
-bool se_get_sn(void *val_dest, uint16_t max_len, uint16_t *len) {
+bool se_get_sn(char **serial) {
   uint8_t ucSnCmd[5] = {0x00, 0xf5, 0x01, 0x00, 0x10};
-  if (MI2C_OK != se_transmit_plain(ucSnCmd, sizeof(ucSnCmd), val_dest, len)) {
+  static char sn[32] = {0};
+  uint16_t sn_len = sizeof(sn);
+  if (MI2C_OK !=
+      se_transmit_plain(ucSnCmd, sizeof(ucSnCmd), (uint8_t *)sn, &sn_len)) {
     return false;
   }
-  if (*len > max_len) {
+  if (sn_len > sizeof(sn)) {
     return false;
   }
+  *serial = sn;
   return true;
 }
 
-bool se_get_version(void *val_dest, uint16_t max_len, uint16_t *len) {
+bool se_get_version(char **version) {
   uint8_t ucVerCmd[5] = {0x00, 0xf7, 0x00, 00, 0x02};
-  if (MI2C_OK != se_transmit_plain(ucVerCmd, sizeof(ucVerCmd), val_dest, len)) {
+  uint8_t ver[2] = {0};
+  uint16_t ver_len = sizeof(ver);
+  static char ver_char[9] = {0};
+  int i = 0;
+
+  if (MI2C_OK != se_transmit_plain(ucVerCmd, sizeof(ucVerCmd), ver, &ver_len)) {
     return false;
   }
-  if (*len > max_len) {
-    return false;
-  }
+
+  ver_char[i++] = (ver[0] >> 4) + '0';
+  ver_char[i++] = '.';
+  ver_char[i++] = (ver[0] & 0x0f) + '0';
+  ver_char[i++] = '.';
+  ver_char[i++] = (ver[1] >> 4) + '0';
+  ver_char[i++] = '.';
+  ver_char[i++] = (ver[1] & 0x0f) + '0';
+
+  *version = ver_char;
   return true;
 }
 

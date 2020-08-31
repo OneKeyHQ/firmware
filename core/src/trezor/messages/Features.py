@@ -57,6 +57,7 @@ class Features(p.MessageType):
         se_enable: bool = None,
         offset: int = None,
         auto_lock_delay_ms: int = None,
+        se_ver: str = None,
     ) -> None:
         self.vendor = vendor
         self.major_version = major_version
@@ -98,6 +99,7 @@ class Features(p.MessageType):
         self.se_enable = se_enable
         self.offset = offset
         self.auto_lock_delay_ms = auto_lock_delay_ms
+        self.se_ver = se_ver
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -142,4 +144,5 @@ class Features(p.MessageType):
             40: ('se_enable', p.BoolType, 0),
             50: ('offset', p.UVarintType, 0),
             51: ('auto_lock_delay_ms', p.UVarintType, 0),
+            52: ('se_ver', p.UnicodeType, 0),
         }

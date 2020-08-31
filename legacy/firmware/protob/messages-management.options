@@ -13,6 +13,7 @@ Features.capabilities                   max_count:32
 Features.session_id                     max_size:32
 Features.ble_name                       max_size:32
 Features.ble_ver                        max_size:16
+Features.se_ver                         max_size:16
 
 ApplySettings.language                  max_size:17
 ApplySettings.label                     max_size:33

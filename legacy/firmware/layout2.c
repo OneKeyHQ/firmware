@@ -1177,15 +1177,10 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint32_t times;
   char str_out[32 + 3] = {0};
   char times_str[12] = {0};
-  uint8_t se_version[2] = {0};
-  uint16_t version_len = sizeof(se_version);
-  uint8_t se_sn[32] = {0};
-  uint16_t sn_len = sizeof(se_sn);
+  char *se_version;
+  char *se_sn;
   int y = 0;
   char label[MAX_LABEL_LEN + 1] = _("");
-
-  (void)version_len;
-  (void)sn_len;
 
   switch (ucPage) {
     case 1:
@@ -1220,25 +1215,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
         }
       }
 
-      if (se_get_version(se_version, sizeof(se_version), &version_len)) {
-        char se_ver_char[9] = {0};
-        int i = 0;
-        se_ver_char[i++] = (se_version[0] >> 4) + '0';
-        se_ver_char[i++] = '.';
-        se_ver_char[i++] = (se_version[0] & 0x0f) + '0';
-        se_ver_char[i++] = '.';
-        se_ver_char[i++] = (se_version[1] >> 4) + '0';
-        se_ver_char[i++] = '.';
-        se_ver_char[i++] = (se_version[1] & 0x0f) + '0';
-
+      if (se_get_version(&se_version)) {
         if (ui_language) {
           oledDrawString_zh(0, y, (uint8_t *)"SE 版本:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_ver_char,
+          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_version,
                                  FONT_STANDARD);
           y += 13;
         } else {
           oledDrawString(0, y, "SE version:", FONT_STANDARD);
-          oledDrawStringRight(OLED_WIDTH - 1, y, se_ver_char, FONT_STANDARD);
+          oledDrawStringRight(OLED_WIDTH - 1, y, se_version, FONT_STANDARD);
           y += 9;
         }
       }
@@ -1298,14 +1283,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
         }
       }
 
-      if (se_get_sn(se_sn, sizeof(se_sn), &sn_len)) {
+      if (se_get_sn(&se_sn)) {
         if (ui_language) {
           oledDrawString_zh(0, y, (uint8_t *)"序列号:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
+          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_sn,
+                                 FONT_STANDARD);
           y += 13;
         } else {
           oledDrawString(0, y, "SN:", FONT_STANDARD);
-          oledDrawStringRight(OLED_WIDTH - 1, y, (char *)se_sn, FONT_STANDARD);
+          oledDrawStringRight(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
           y += 9;
         }
       }
