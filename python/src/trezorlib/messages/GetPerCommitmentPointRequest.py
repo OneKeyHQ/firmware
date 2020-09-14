@@ -14,6 +14,7 @@ if __debug__:
 
 
 class GetPerCommitmentPointRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 821
 
     def __init__(
         self,

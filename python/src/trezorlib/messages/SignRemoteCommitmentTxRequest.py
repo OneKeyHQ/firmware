@@ -16,6 +16,7 @@ if __debug__:
 
 
 class SignRemoteCommitmentTxRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 825
 
     def __init__(
         self,

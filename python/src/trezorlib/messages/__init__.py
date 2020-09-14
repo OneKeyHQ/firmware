@@ -370,7 +370,6 @@ from . import RecoveryDeviceType
 from . import RequestType
 from . import SafetyCheckLevel
 from . import SdProtectOperationType
-from . import SpendType
 from . import TezosBallotType
 from . import TezosContractType
 from . import WordRequestType

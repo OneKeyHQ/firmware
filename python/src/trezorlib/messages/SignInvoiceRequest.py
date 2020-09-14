@@ -13,6 +13,7 @@ if __debug__:
 
 
 class SignInvoiceRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 839
 
     def __init__(
         self,

@@ -13,6 +13,7 @@ if __debug__:
 
 
 class NewChannelReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 812
 
     def __init__(
         self,

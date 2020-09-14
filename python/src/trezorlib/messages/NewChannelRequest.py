@@ -14,6 +14,7 @@ if __debug__:
 
 
 class NewChannelRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 811
 
     def __init__(
         self,

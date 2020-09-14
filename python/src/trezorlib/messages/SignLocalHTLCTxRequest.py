@@ -16,6 +16,7 @@ if __debug__:
 
 
 class SignLocalHTLCTxRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 827
 
     def __init__(
         self,

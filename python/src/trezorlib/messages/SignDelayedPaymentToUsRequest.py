@@ -15,6 +15,7 @@ if __debug__:
 
 
 class SignDelayedPaymentToUsRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 828
 
     def __init__(
         self,

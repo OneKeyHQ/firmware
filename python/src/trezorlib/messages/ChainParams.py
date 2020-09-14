@@ -11,6 +11,7 @@ if __debug__:
 
 
 class ChainParams(p.MessageType):
+    MESSAGE_WIRE_TYPE = 845
 
     def __init__(
         self,

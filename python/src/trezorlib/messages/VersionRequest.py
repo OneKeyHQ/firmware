@@ -11,4 +11,4 @@ if __debug__:
 
 
 class VersionRequest(p.MessageType):
-    pass
+    MESSAGE_WIRE_TYPE = 842

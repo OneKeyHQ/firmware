@@ -16,6 +16,7 @@ if __debug__:
 
 
 class SignPenaltyToUsRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 831
 
     def __init__(
         self,

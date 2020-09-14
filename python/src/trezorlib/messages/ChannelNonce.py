@@ -11,6 +11,7 @@ if __debug__:
 
 
 class ChannelNonce(p.MessageType):
+    MESSAGE_WIRE_TYPE = 847
 
     def __init__(
         self,

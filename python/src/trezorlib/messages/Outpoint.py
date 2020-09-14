@@ -11,6 +11,7 @@ if __debug__:
 
 
 class Outpoint(p.MessageType):
+    MESSAGE_WIRE_TYPE = 871
 
     def __init__(
         self,

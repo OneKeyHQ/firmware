@@ -11,6 +11,7 @@ if __debug__:
 
 
 class PubKey(p.MessageType):
+    MESSAGE_WIRE_TYPE = 848
 
     def __init__(
         self,

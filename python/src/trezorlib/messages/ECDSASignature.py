@@ -11,6 +11,7 @@ if __debug__:
 
 
 class ECDSASignature(p.MessageType):
+    MESSAGE_WIRE_TYPE = 853
 
     def __init__(
         self,

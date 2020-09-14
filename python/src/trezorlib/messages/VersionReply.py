@@ -11,6 +11,7 @@ if __debug__:
 
 
 class VersionReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 843
 
     def __init__(
         self,

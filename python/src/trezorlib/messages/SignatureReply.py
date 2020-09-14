@@ -13,6 +13,7 @@ if __debug__:
 
 
 class SignatureReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 816
 
     def __init__(
         self,

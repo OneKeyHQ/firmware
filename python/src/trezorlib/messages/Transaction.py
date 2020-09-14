@@ -14,6 +14,7 @@ if __debug__:
 
 
 class Transaction(p.MessageType):
+    MESSAGE_WIRE_TYPE = 851
 
     def __init__(
         self,

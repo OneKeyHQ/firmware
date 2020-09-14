@@ -12,6 +12,7 @@ if __debug__:
 
 
 class NodeConfig(p.MessageType):
+    MESSAGE_WIRE_TYPE = 844
 
     def __init__(
         self,

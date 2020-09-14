@@ -11,6 +11,7 @@ if __debug__:
 
 
 class Secret(p.MessageType):
+    MESSAGE_WIRE_TYPE = 849
 
     def __init__(
         self,

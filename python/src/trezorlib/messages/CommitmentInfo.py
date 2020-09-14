@@ -14,6 +14,7 @@ if __debug__:
 
 
 class CommitmentInfo(p.MessageType):
+    MESSAGE_WIRE_TYPE = 870
 
     def __init__(
         self,

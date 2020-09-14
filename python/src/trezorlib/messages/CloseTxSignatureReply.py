@@ -13,6 +13,7 @@ if __debug__:
 
 
 class CloseTxSignatureReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 868
 
     def __init__(
         self,

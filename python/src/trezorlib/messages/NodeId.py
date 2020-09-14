@@ -11,6 +11,7 @@ if __debug__:
 
 
 class NodeId(p.MessageType):
+    MESSAGE_WIRE_TYPE = 846
 
     def __init__(
         self,

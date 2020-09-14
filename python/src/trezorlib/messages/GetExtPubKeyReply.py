@@ -13,6 +13,7 @@ if __debug__:
 
 
 class GetExtPubKeyReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 810
 
     def __init__(
         self,

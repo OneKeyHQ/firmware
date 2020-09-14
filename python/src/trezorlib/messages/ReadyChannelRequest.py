@@ -16,6 +16,7 @@ if __debug__:
 
 
 class ReadyChannelRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 813
 
     def __init__(
         self,

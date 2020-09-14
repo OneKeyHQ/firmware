@@ -13,6 +13,7 @@ if __debug__:
 
 
 class ECDHReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 838
 
     def __init__(
         self,
