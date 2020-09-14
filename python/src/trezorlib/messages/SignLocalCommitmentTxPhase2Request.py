@@ -15,6 +15,7 @@ if __debug__:
 
 
 class SignLocalCommitmentTxPhase2Request(p.MessageType):
+    MESSAGE_WIRE_TYPE = 865
 
     def __init__(
         self,

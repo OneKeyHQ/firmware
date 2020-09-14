@@ -11,6 +11,7 @@ if __debug__:
 
 
 class BIP32Seed(p.MessageType):
+    MESSAGE_WIRE_TYPE = 850
 
     def __init__(
         self,

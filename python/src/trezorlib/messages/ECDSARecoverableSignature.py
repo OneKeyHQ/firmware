@@ -11,6 +11,7 @@ if __debug__:
 
 
 class ECDSARecoverableSignature(p.MessageType):
+    MESSAGE_WIRE_TYPE = 854
 
     def __init__(
         self,

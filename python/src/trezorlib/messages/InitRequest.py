@@ -15,6 +15,7 @@ if __debug__:
 
 
 class InitRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 807
 
     def __init__(
         self,

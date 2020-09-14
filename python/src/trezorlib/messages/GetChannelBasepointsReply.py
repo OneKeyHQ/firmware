@@ -13,6 +13,7 @@ if __debug__:
 
 
 class GetChannelBasepointsReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 820
 
     def __init__(
         self,

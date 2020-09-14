@@ -11,6 +11,7 @@ if __debug__:
 
 
 class TxOut(p.MessageType):
+    MESSAGE_WIRE_TYPE = 858
 
     def __init__(
         self,

@@ -13,6 +13,7 @@ if __debug__:
 
 
 class SignNodeAnnouncementRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 834
 
     def __init__(
         self,

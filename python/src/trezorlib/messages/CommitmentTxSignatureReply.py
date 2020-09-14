@@ -13,6 +13,7 @@ if __debug__:
 
 
 class CommitmentTxSignatureReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 866
 
     def __init__(
         self,

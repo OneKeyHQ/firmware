@@ -11,6 +11,7 @@ if __debug__:
 
 
 class BitcoinSignature(p.MessageType):
+    MESSAGE_WIRE_TYPE = 855
 
     def __init__(
         self,

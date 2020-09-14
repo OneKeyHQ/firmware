@@ -16,6 +16,7 @@ if __debug__:
 
 
 class InputDescriptor(p.MessageType):
+    MESSAGE_WIRE_TYPE = 861
 
     def __init__(
         self,

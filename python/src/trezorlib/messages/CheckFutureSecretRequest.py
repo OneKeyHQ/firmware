@@ -15,6 +15,7 @@ if __debug__:
 
 
 class CheckFutureSecretRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 817
 
     def __init__(
         self,

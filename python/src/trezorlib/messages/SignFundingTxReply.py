@@ -13,6 +13,7 @@ if __debug__:
 
 
 class SignFundingTxReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 824
 
     def __init__(
         self,

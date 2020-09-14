@@ -13,6 +13,7 @@ if __debug__:
 
 
 class InitReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 808
 
     def __init__(
         self,

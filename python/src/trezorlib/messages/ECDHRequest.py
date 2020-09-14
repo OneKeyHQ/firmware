@@ -14,6 +14,7 @@ if __debug__:
 
 
 class ECDHRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 837
 
     def __init__(
         self,

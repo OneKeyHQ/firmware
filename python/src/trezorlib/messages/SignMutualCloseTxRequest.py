@@ -15,6 +15,7 @@ if __debug__:
 
 
 class SignMutualCloseTxRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 815
 
     def __init__(
         self,

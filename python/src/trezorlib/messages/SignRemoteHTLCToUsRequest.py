@@ -16,6 +16,7 @@ if __debug__:
 
 
 class SignRemoteHTLCToUsRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 830
 
     def __init__(
         self,

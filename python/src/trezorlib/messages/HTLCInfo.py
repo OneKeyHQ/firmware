@@ -11,6 +11,7 @@ if __debug__:
 
 
 class HTLCInfo(p.MessageType):
+    MESSAGE_WIRE_TYPE = 869
 
     def __init__(
         self,

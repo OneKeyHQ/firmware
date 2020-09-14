@@ -11,6 +11,7 @@ if __debug__:
 
 
 class PingReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 806
 
     def __init__(
         self,

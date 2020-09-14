@@ -13,6 +13,7 @@ if __debug__:
 
 
 class NodeSignatureReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 835
 
     def __init__(
         self,

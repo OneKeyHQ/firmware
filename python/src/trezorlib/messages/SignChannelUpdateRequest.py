@@ -13,6 +13,7 @@ if __debug__:
 
 
 class SignChannelUpdateRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 836
 
     def __init__(
         self,

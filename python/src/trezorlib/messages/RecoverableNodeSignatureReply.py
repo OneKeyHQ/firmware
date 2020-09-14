@@ -13,6 +13,7 @@ if __debug__:
 
 
 class RecoverableNodeSignatureReply(p.MessageType):
+    MESSAGE_WIRE_TYPE = 840
 
     def __init__(
         self,

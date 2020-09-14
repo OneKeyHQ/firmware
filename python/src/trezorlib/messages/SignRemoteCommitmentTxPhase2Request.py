@@ -15,6 +15,7 @@ if __debug__:
 
 
 class SignRemoteCommitmentTxPhase2Request(p.MessageType):
+    MESSAGE_WIRE_TYPE = 864
 
     def __init__(
         self,

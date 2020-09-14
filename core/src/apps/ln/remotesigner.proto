@@ -1,0 +1,732 @@
+syntax = "proto3";
+
+package remotesigner;
+
+// Phase 1 API
+// -----------
+//
+// In this phase, transactions are provided in serialized form to the
+// signer.  There is also a somewhat redundant passing of
+// channel-constant values into specific signing requests.
+//
+// In phase 2, transactions will be constructed on the signer from
+// detailed information, such as amounts, to_self_delay, etc. .  See
+// the Phase 2 section near the end of this file for a sketch.
+
+service Signer {
+  // Trivial call to test connectivity
+  rpc Ping (PingRequest)
+    returns (PingReply);
+
+  // Provision a signer for a new node
+  rpc Init (InitRequest)
+    returns (InitReply);
+
+  // Get signing XPUB for a node.
+  rpc GetExtPubKey (GetExtPubKeyRequest)
+    returns (GetExtPubKeyReply);
+  
+  // BOLT #2 - Peer Protocol - allocate a new channel
+  rpc NewChannel (NewChannelRequest)
+    returns (NewChannelReply);
+
+  // BOLT #2 - Peer Protocol - memorize remote basepoints and funding outpoint
+  // Signatures can only be requested after this call.
+  rpc ReadyChannel (ReadyChannelRequest)
+    returns (ReadyChannelReply);
+
+  // BOLT #2 - Channel Close - phase 1
+  rpc SignMutualCloseTx (SignMutualCloseTxRequest)
+    returns (SignatureReply);
+
+  // BOLT #2 - Channel Close - phase 2
+  rpc SignMutualCloseTxPhase2 (SignMutualCloseTxPhase2Request)
+    returns (CloseTxSignatureReply);
+
+  // BOLT #2 - Message Retransmission
+  // Used to recover from local data loss by checking that our secret
+  // provided by the peer is correct.
+  rpc CheckFutureSecret (CheckFutureSecretRequest)
+    returns (CheckFutureSecretReply);
+
+  // BOLT #3 - Key Derivation
+  // Get our channel basepoints and funding pubkey
+  rpc GetChannelBasepoints (GetChannelBasepointsRequest)
+    returns (GetChannelBasepointsReply);
+
+  // BOLT #3 - Per-commitment Secret Requirements
+  // Get our current per-commitment point and the secret for the point
+  // at commitment n-2
+  rpc GetPerCommitmentPoint (GetPerCommitmentPointRequest)
+    returns (GetPerCommitmentPointReply);
+
+  // BOLT #3 - Funding Transaction
+  // Sign the funding transaction
+  // TODO this must be done after we know the remote signature on the
+  // commitment tx - need an API call that provides this to the
+  // signer.
+  rpc SignFundingTx (SignFundingTxRequest)
+    returns (SignFundingTxReply);
+
+  // BOLT #3 - Commitment Transaction, phase 1
+  // Sign the remote commitment tx, at commitment time
+  rpc SignRemoteCommitmentTx (SignRemoteCommitmentTxRequest)
+    returns (SignatureReply);
+
+  // BOLT #3 - Commitment Transaction and attached HTLCs, phase 2
+  // Sign the remote commitment tx and attached HTLCs, at commitment time
+  rpc SignRemoteCommitmentTxPhase2 (SignRemoteCommitmentTxPhase2Request)
+    returns (CommitmentTxSignatureReply);
+
+  // BOLT #3 - Commitment Transaction, , phase 1
+  // Sign the local commitment tx, at force-close time
+  rpc SignCommitmentTx (SignCommitmentTxRequest)
+    returns (SignatureReply);
+
+  // BOLT #3 - Commitment Transaction and attached HTLCs, phase 2
+  // Sign the local commitment tx and attached HTLCs, at force-close time.
+  // No further commitments can be signed on this channel.
+  rpc SignLocalCommitmentTxPhase2 (SignLocalCommitmentTxPhase2Request)
+    returns (CommitmentTxSignatureReply);
+
+  // BOLT #3 - HTLC Outputs, phase 1
+  // Sign an htlc-success tx spending a local HTLC output, assuming we
+  // know the preimage, at force-close time
+  rpc SignLocalHTLCTx (SignLocalHTLCTxRequest)
+    returns (SignatureReply);
+
+  // BOLT #5 - Unilateral Close Handling, phase 1
+  // Sign a delayed to-local output - either from the commitment tx or
+  // from an HTLC, at force-close time
+  rpc SignDelayedPaymentToUs (SignDelayedPaymentToUsRequest)
+    returns (SignatureReply);
+
+  // BOLT #3 - HTLC Outputs, phase 1
+  // Sign a remote HTLC tx, at commitment time
+  rpc SignRemoteHTLCTx (SignRemoteHTLCTxRequest)
+    returns (SignatureReply);
+
+  // BOLT #3 - HTLC Outputs, phase 1 Sign an htlc-success tx on a
+  // remote HTLC output offered to us, assuming we know the preimage,
+  // at force-close time
+  rpc SignRemoteHTLCToUs (SignRemoteHTLCToUsRequest)
+    returns (SignatureReply);
+
+  // BOLT #5 - Unilateral Close Handling, phase 1
+  // Sign a penalty tx to us - either sweeping the to-local commitment
+  // tx output or sweeping an HTLC tx output, after the remote
+  // broadcast a revoked commitment transaction.
+  rpc SignPenaltyToUs (SignPenaltyToUsRequest)
+    returns (SignatureReply);
+
+  // BOLT #7 - channel_announcement
+  rpc SignChannelAnnouncement (SignChannelAnnouncementRequest)
+    returns (SignChannelAnnouncementReply);
+
+  // BOLT #7 - node_announcement
+  rpc SignNodeAnnouncement (SignNodeAnnouncementRequest)
+    returns (NodeSignatureReply);
+
+  // BOLT #7 - channel_update
+  rpc SignChannelUpdate (SignChannelUpdateRequest)
+    returns (NodeSignatureReply);
+
+  // BOLT #8 - Authenticated Key Agreement Handshake
+  rpc ECDH (ECDHRequest)
+    returns (ECDHReply);
+
+  // BOLT #11 - Invoice Protocol
+  rpc SignInvoice (SignInvoiceRequest)
+    returns (RecoverableNodeSignatureReply);
+
+  // BOLT #?? - Sign Message
+  rpc SignMessage (SignMessageRequest)
+    returns (RecoverableNodeSignatureReply);
+}
+
+service Version {
+  // Get detailed version information
+  rpc Version (VersionRequest) returns (VersionReply);
+}
+
+// ----------------------------------------------------------------
+
+// BEGIN NOT TESTED
+
+message PingRequest {
+  string message = 1;
+}
+
+message PingReply {
+  string message = 1;
+}
+
+// Initialize a new Lightning node
+message InitRequest {
+  NodeConfig node_config = 1;
+  
+  ChainParams chainparams = 2;
+
+  // Developer field: Flush the node state (support for integration tests).
+  bool coldstart = 3;
+
+  // Developer field: set the HSM secret rather than generate it on
+  // the signer side. Only allowed if this is using a non-production
+  // network.
+  BIP32Seed hsm_secret = 100;
+}
+
+message InitReply {
+  NodeId node_id = 1;
+}
+
+// FIXME - This interface is specific to c-lightning, it returns the
+// XPUB associated with "m/0/0" which won't work for anything else.
+message GetExtPubKeyRequest {
+  NodeId node_id = 1;
+}
+
+message GetExtPubKeyReply {
+  ExtPubKey xpub = 1;
+}
+
+// Initialize a new channel
+message NewChannelRequest {
+  NodeId node_id = 1;
+
+  // optional, will be pseudo-randomly generated if missing
+  ChannelNonce channel_nonce = 2;
+}
+
+message NewChannelReply {
+  ChannelNonce channel_nonce = 1;
+}
+
+// Provide the funding outpoint and information from the remote peer
+// This is provided to signer at the point that the funding transaction was created
+message ReadyChannelRequest {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  bool is_outbound = 3;
+
+  uint64 channel_value_sat = 4;
+
+  uint64 push_value_msat = 5;
+
+  Outpoint funding_outpoint = 6;
+
+  uint32 local_to_self_delay = 7;
+
+  bytes local_shutdown_script = 8;
+
+  Basepoints remote_basepoints = 9;
+
+  uint32 remote_to_self_delay = 10;
+
+  bytes remote_shutdown_script = 11;
+
+  bool option_static_remotekey = 12;
+}
+
+message ReadyChannelReply {
+}
+
+// Sign a happy path mutual close transaction
+message SignMutualCloseTxRequest {
+  NodeId node_id = 1;
+    
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+}
+
+message SignatureReply {
+  BitcoinSignature signature = 1;
+}
+
+// Check if the remote really knows a secret that we haven't generated
+// since being restored from backup.  This proves to us that the state
+// of the channel is at least at commitment number `n + 1`
+message CheckFutureSecretRequest {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  // commitment number
+  uint64 n = 3;
+
+  // our secret that we haven't generated since being restored from
+  // backup, but the remote claims is part of our shachain
+  Secret suggested = 4;
+}
+
+message CheckFutureSecretReply {
+  bool correct = 1;
+}
+
+// Get the basepoints and public keys specific to a channel
+message GetChannelBasepointsRequest {
+  NodeId node_id = 1;
+    
+  ChannelNonce channel_nonce = 2;
+}
+
+message GetChannelBasepointsReply {
+  Basepoints basepoints = 1;
+}
+
+// Get the per-commitment point for a specific commitment number
+message GetPerCommitmentPointRequest {
+  NodeId node_id = 1;
+    
+  ChannelNonce channel_nonce = 2;
+
+  // commitment number
+  uint64 n = 3;
+}
+
+message GetPerCommitmentPointReply {
+  PubKey per_commitment_point = 1;
+
+  // The revocation of the secret of the n-2 commitment, or None if n < 2
+  Secret old_secret = 2;
+}
+
+// Sign a funding tx for this channel
+// The channel must have been readied
+message SignFundingTxRequest {
+  NodeId node_id = 1;
+  
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+}
+
+message SignFundingTxReply {
+  // Witnesses for each of our inputs.  For inputs that are not
+  // ours the elements will be None.
+  repeated Witness witnesses = 1;
+}
+
+// Sign the remote commitment
+message SignRemoteCommitmentTxRequest {
+  NodeId node_id = 1;
+  
+  ChannelNonce channel_nonce = 2;
+
+  PubKey remote_per_commit_point = 3;
+  
+  // TODO deprecate and move to specifying all the
+  // information that is required to rebuild the tx
+  Transaction tx = 4;
+}
+
+// Force close a channel by signing a local commitment tx.  The
+// channel moves to closing state.
+message SignCommitmentTxRequest {
+  NodeId node_id = 1;
+  
+  ChannelNonce channel_nonce = 2;
+    
+  Transaction tx = 3;
+}
+
+// As part of a force close, sweep a local HTLC output hanging off the
+// commitment tx
+message SignLocalHTLCTxRequest {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+
+  uint64 n = 4;
+
+  PubKey per_commit_point = 5;
+}
+
+// As part of a force close, sweep the delayed to local output hanging
+// off the commitment tx
+message SignDelayedPaymentToUsRequest {
+  NodeId node_id = 1;
+    
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+  
+  uint64 n = 4;
+}
+
+// Sign a remote HTLC tx hanging off the remote commitment tx
+message SignRemoteHTLCTxRequest {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+
+  uint32 input = 4;
+
+  PubKey remote_per_commit_point = 5;
+}
+
+// Sweep a remote HTLC to us
+message SignRemoteHTLCToUsRequest {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+
+  uint32 input = 4;
+
+  PubKey remote_per_commit_point = 5;
+}
+
+// Sign a penalty sweep of a remote to_local the peer has revoked
+message SignPenaltyToUsRequest {
+  NodeId node_id = 1;
+    
+  ChannelNonce channel_nonce = 2;
+
+  Transaction tx = 3;
+
+  uint32 input = 4;
+
+  Secret revocation_secret = 5;	// FIXME - should this be remembered instead?
+}
+
+// Sign a channel announcement
+message SignChannelAnnouncementRequest {
+  NodeId node_id = 1;
+  
+  ChannelNonce channel_nonce = 2;
+
+  // Bytes [258:] of the channel_announcement message in BOLT-7 format
+  // (skips the the message type and signature fields)
+  bytes channel_announcement = 3;
+}
+
+message SignChannelAnnouncementReply {
+  ECDSASignature node_signature = 1;
+
+  ECDSASignature bitcoin_signature = 2;
+}
+
+// Sign node announcement message
+message SignNodeAnnouncementRequest {
+  NodeId node_id = 1;
+
+  // Bytes [66:] of the node_announcement message in BOLT-7 format
+  // (skips the the message type and signature field)
+  bytes node_announcement = 2;
+}
+
+message NodeSignatureReply {
+  ECDSASignature signature = 1;
+}
+
+// Sign channel update message
+message SignChannelUpdateRequest {
+  // https://github.com/lightningnetwork/lightning-rfc/blob/master/07-routing-gossip.md#the-channel_update-message
+  
+  NodeId node_id = 1;
+
+  // Bytes [66:] of the channel_update message in BOLT-7 format (skips
+  // the the message type and signature field)
+  bytes channel_update = 2;
+}
+
+// Perform ECDH for p2p communication purposes
+message ECDHRequest {
+  NodeId node_id = 1;
+
+  // The ephemeral pubkey of the peer
+  PubKey point = 2;
+}
+
+message ECDHReply {
+  Secret shared_secret = 1; // 32 bytes
+}
+
+// Sign an invoice with the node secret key
+message SignInvoiceRequest {
+  // https://github.com/lightningnetwork/lightning-rfc/blob/master/11-payment-encoding.md
+
+  NodeId node_id = 1;
+
+  bytes data_part = 2;
+
+  string human_readable_part = 3;
+}
+
+message RecoverableNodeSignatureReply {
+  ECDSARecoverableSignature signature = 1;
+}
+
+// Sign an ad-hoc message with the node secret key
+message SignMessageRequest {
+  NodeId node_id = 1;
+
+  bytes message = 2;
+}
+
+message VersionRequest {
+}
+
+message VersionReply {
+  string version_string = 1;
+  uint32 major = 2;
+  uint32 minor = 3;
+  uint32 patch = 4;
+  string prerelease = 5;
+  string build_metadata = 6;
+}
+
+// ----------------------------------------------------------------
+
+// Node Configuration
+message NodeConfig {
+  // The KeyDerivationStyle controls how nodeid and HD keys are
+  // derived from the seed.  Being compatible with specific node
+  // imlementations allows for comparison during integration testing.
+  enum KeyDerivationStyle {
+    INVALID = 0;
+    NATIVE = 1;
+    LND = 2;
+  }
+  KeyDerivationStyle key_derivation_style = 1;
+}
+
+// Specify the network (e.g. testnet, mainnet)
+message ChainParams {
+  string network_name = 1;
+}
+
+// Compressed ECDSA public key in DER format derived from the node secret
+message NodeId {
+  bytes data = 1;
+}
+
+// A client-side unique ID for the channel, not necessarily related to
+// the BOLT temporary/permanent node ID
+message ChannelNonce {
+  bytes data = 1;
+}
+
+// Compressed ECDSA public key in DER format
+message PubKey {
+  bytes data = 1;
+}
+
+// 256-bit Secret, 32 bytes
+// Can be used for revocation hash pre-image, shared secrets, etc.
+message Secret {
+  bytes data = 1;
+}
+
+// BIP-0032 Seed, must be between 16 and 64 bytes (inclusive) in length.
+message BIP32Seed {
+  bytes data = 1;
+}
+
+// A Bitcoin serialized transaction with additional metadata if needed
+// for signing and validation
+message Transaction {
+  // The raw bytes of the transaction to be signed.
+  bytes raw_tx_bytes = 1;
+
+  // A set of sign descriptors, for each input to be signed.
+  // TODO the input amount for the commitment tx should be specified
+  // in NewChannel instead of here
+  repeated InputDescriptor input_descs = 2;
+  
+  // A set of sign descriptors, for each output.
+  repeated OutputDescriptor output_descs = 3;
+}
+
+// Basepoints and funding pubkey for one side of a channel
+message Basepoints {
+  PubKey revocation = 1;
+  PubKey payment = 2;
+  PubKey htlc = 3;
+  PubKey delayed_payment = 4;
+  PubKey funding_pubkey = 5;
+}
+
+// DER encoded SECP256K1_ECDSA Signature
+message ECDSASignature {
+  bytes data = 1;
+}
+
+// Compact ECDSA signature (64 bytes) + recovery id (1 byte) = 65 bytes
+message ECDSARecoverableSignature {
+  bytes data = 1;
+}
+
+// DER encoded Bitcoin Signature
+message BitcoinSignature {
+  bytes data = 1;
+}
+
+// BIP-32 Extended Public Key (base58 encoded, up to 112 chars)
+message ExtPubKey {
+  string encoded = 1;
+}
+
+// ----------------------------------------------------------------
+
+message KeyLocator {
+  /// The index of the key being identified.
+  int32 key_index = 2;
+}
+
+// A Bitcoin transaction output
+message TxOut {
+  /// The value of the output being spent.
+  int64 value_sat = 1;
+
+  /// The script of the output being spent.
+  bytes pk_script = 2;
+}
+
+enum SpendType {
+  INVALID = 0;
+  P2PKH = 1;
+  P2WPKH = 3;
+  P2SH_P2WPKH = 4;
+}
+
+message UnilateralCloseInfo {
+  // Identifies the old channel closed unilaterally by the peer.
+  ChannelNonce channel_nonce = 1;
+
+  // Will be None if this is a option_static_remotekey commitment.
+  PubKey commitment_point = 2;
+}
+
+message InputDescriptor {
+  KeyLocator key_loc = 1;
+
+  // A description of the utxo being spent. The value and script
+  // MUST be provided.
+  TxOut prev_output = 2;
+
+  SpendType spend_type = 3;
+
+  // Only provided if input from unilateral close by peer on old channel.
+  UnilateralCloseInfo close_info = 4;
+
+  bytes redeem_script = 5;
+}
+
+message OutputDescriptor {
+  KeyLocator key_loc = 1;
+
+  // Empty for p2pkh outputs.
+  bytes witscript = 2;
+}
+
+message Witness {
+  BitcoinSignature signature = 1;
+
+  PubKey pubkey = 2;
+}
+  
+// PHASE 2 messages
+// ----------------
+
+// These messages will be used in an updated API that constructs and
+// signs the commitment and HTLC transactions from elementary info,
+// rather than sending the serialized transaction on the wire.
+
+// Sign the remote commitment
+message SignRemoteCommitmentTxPhase2Request {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  CommitmentInfo commitment_info = 4;
+}
+
+// Sign the local commitment
+message SignLocalCommitmentTxPhase2Request {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  // per_commitment_point will not be populated
+  CommitmentInfo commitment_info = 4;
+}
+
+message CommitmentTxSignatureReply {
+  BitcoinSignature signature = 1;
+  repeated BitcoinSignature htlc_signatures = 2;
+}
+
+message SignMutualCloseTxPhase2Request {
+  NodeId node_id = 1;
+
+  ChannelNonce channel_nonce = 2;
+
+  // Value to us in satoshi, may be zero if dust
+  uint64 to_local_value_sat = 3;
+
+  // Value to them in satoshi, may be zero if dust
+  uint64 to_remote_value_sat = 4;
+
+  // Remote shutdown script, if not previously specified
+  bytes remote_shutdown_script = 5;
+}
+
+message CloseTxSignatureReply {
+  BitcoinSignature signature = 1;
+}
+
+
+// Information required to create HTLC output and a follow-up HTLC transaction
+message HTLCInfo {
+  // The value in satoshis
+  uint64 value_sat = 1;
+  bytes payment_hash = 2;
+  uint32 cltv_expiry = 3;
+}
+
+// Information required to construct a commitment transaction.
+//
+// The notions of "local" "remote", "offered" and "received" are from
+// the point of view of the transaction.  For example, when signing a
+// remote commitment tx, "local" is the remote peer.
+message CommitmentInfo {
+  // Feerate, for building HTLC transactions
+  uint32 feerate_sat_per_kw = 1;
+
+  // Commitment number
+  uint64 n = 2;
+
+  // Value to local in satoshi
+  uint64 to_local_value_sat = 4;
+
+  // Value to remote in satoshi
+  uint64 to_remote_value_sat = 5;
+
+  // Per-commitment point local to the transaction
+  // Omitted if this is a local transaction, because the signer can compute it.
+  PubKey per_commitment_point = 6;
+
+  // Offered HTLC info
+  repeated HTLCInfo offered_htlcs = 10;
+
+  // Received HTLC info
+  repeated HTLCInfo received_htlcs = 11;
+}
+
+// A Bitcoin outpoint, used for the funding output
+message Outpoint {
+  bytes txid = 1;
+  uint32 index = 2;
+}
+
+// END NOT TESTED

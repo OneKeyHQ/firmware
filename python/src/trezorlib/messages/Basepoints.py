@@ -13,6 +13,7 @@ if __debug__:
 
 
 class Basepoints(p.MessageType):
+    MESSAGE_WIRE_TYPE = 852
 
     def __init__(
         self,

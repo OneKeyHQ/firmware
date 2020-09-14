@@ -11,6 +11,7 @@ if __debug__:
 
 
 class KeyLocator(p.MessageType):
+    MESSAGE_WIRE_TYPE = 857
 
     def __init__(
         self,

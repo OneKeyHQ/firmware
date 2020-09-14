@@ -14,6 +14,7 @@ if __debug__:
 
 
 class UnilateralCloseInfo(p.MessageType):
+    MESSAGE_WIRE_TYPE = 860
 
     def __init__(
         self,

@@ -13,6 +13,7 @@ if __debug__:
 
 
 class SignMessageRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 841
 
     def __init__(
         self,

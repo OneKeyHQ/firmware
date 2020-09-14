@@ -13,6 +13,7 @@ if __debug__:
 
 
 class OutputDescriptor(p.MessageType):
+    MESSAGE_WIRE_TYPE = 862
 
     def __init__(
         self,

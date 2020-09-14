@@ -14,6 +14,7 @@ if __debug__:
 
 
 class SignMutualCloseTxPhase2Request(p.MessageType):
+    MESSAGE_WIRE_TYPE = 867
 
     def __init__(
         self,
