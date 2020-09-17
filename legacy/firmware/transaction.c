@@ -347,18 +347,18 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
             needs_confirm = false;
           }
         }
-        if (needs_confirm) {
-          if (tx_output_info_counter == TX_OUTPUT_INFO_BUF_LEN) {
-            // buf if full
-          } else {
-            memset(tx_output_info_buf + tx_output_info_counter, 0x00,
-                   sizeof(tx_output_info_buf));
-            tx_output_info_buf[tx_output_info_counter].amount = out->amount;
-            strncpy(tx_output_info_buf[tx_output_info_counter].address,
-                    in->address,
-                    sizeof(tx_output_info_buf[tx_output_info_counter].address));
-            tx_output_info_counter++;
-          }
+      }
+      if (needs_confirm) {
+        if (tx_output_info_counter == TX_OUTPUT_INFO_BUF_LEN) {
+          // buf if full
+        } else {
+          memset(tx_output_info_buf + tx_output_info_counter, 0x00,
+                 sizeof(tx_output_info_buf));
+          tx_output_info_buf[tx_output_info_counter].amount = out->amount;
+          strncpy(tx_output_info_buf[tx_output_info_counter].address,
+                  in->address,
+                  sizeof(tx_output_info_buf[tx_output_info_counter].address));
+          tx_output_info_counter++;
         }
       }
     } else {

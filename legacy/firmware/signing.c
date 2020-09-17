@@ -940,43 +940,37 @@ static bool signing_confirm_tx(void) {
     fast_pay_amount = config_getFastPayMoneyLimt();
     fast_pay_times = config_getFastPayTimes();
     // confirm output
-    for (uint32_t i = 0; i < tx_output_info_counter; i++) {
-      tx_out.amount = tx_output_info_buf[i].amount;
-      strncpy(tx_out.address, tx_output_info_buf[i].address,
-              sizeof(tx_out.address));
-      layoutConfirmOutput(coin, &tx_out);
-      if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
-                            btn_request, default_oper_time)) {
-        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-        signing_abort();
-        return false;
+    if (tx_output_info_counter) {
+      for (uint32_t i = 0; i < tx_output_info_counter; i++) {
+        tx_out.amount = tx_output_info_buf[i].amount;
+        strncpy(tx_out.address, tx_output_info_buf[i].address,
+                sizeof(tx_out.address));
+        layoutConfirmOutput(coin, &tx_out);
+        if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
+                              btn_request, default_oper_time)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          signing_abort();
+          return false;
+        }
+        btn_request = false;
       }
-      btn_request = false;
-    }
-
-    if (config_getFastPayConfirmFlag()) {
-      if (fast_pay_times && (to_spend - change_spend < fast_pay_amount)) {
-        need_confirm = false;
-      }
-    }
-    if (g_bSelectSEFlag) {
-      if (config_getFastPayPinFlag()) {
-        if (fast_pay_times && (to_spend - change_spend <= fast_pay_amount)) {
-          need_pin = false;
+    } else {
+      if (config_getFastPayConfirmFlag()) {
+        if (fast_pay_times && (to_spend - change_spend < fast_pay_amount)) {
+          need_confirm = false;
         }
       }
-    }
-    if (!need_confirm || !need_pin) {
-      fast_pay_times--;
-      config_setFastPayTimes(fast_pay_times);
-    }
-  }
-  if (change_count > MAX_SILENT_CHANGE_COUNT) {
-    layoutChangeCountOverThreshold(change_count);
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      signing_abort();
-      return false;
+      if (g_bSelectSEFlag) {
+        if (config_getFastPayPinFlag()) {
+          if (fast_pay_times && (to_spend - change_spend <= fast_pay_amount)) {
+            need_pin = false;
+          }
+        }
+      }
+      if (!need_confirm || !need_pin) {
+        fast_pay_times--;
+        config_setFastPayTimes(fast_pay_times);
+      }
     }
   }
   if (need_confirm) {
@@ -984,6 +978,15 @@ static bool signing_confirm_tx(void) {
     layoutConfirmTx(coin, to_spend - change_spend, fee);
     if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
                           btn_request, default_oper_time)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      signing_abort();
+      return false;
+    }
+  }
+
+  if (change_count > MAX_SILENT_CHANGE_COUNT) {
+    layoutChangeCountOverThreshold(change_count);
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       signing_abort();
       return false;
