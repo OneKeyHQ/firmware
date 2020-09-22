@@ -390,6 +390,11 @@ void fsm_msgBackupDevice(const BackupDevice *msg) {
 
   CHECK_PIN_UNCACHED
 
+  if (g_bSelectSEFlag) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                    "not support when SE used");
+    return;
+  }
   char mnemonic[MAX_MNEMONIC_LEN + 1];
   if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
     reset_backup(true, mnemonic);
@@ -896,6 +901,7 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
     resp->data.size += 4;
   }
   if (msg_write(MessageType_MessageType_BixinBackupAck, resp)) {
+    config_setUnfinishedBackup(false);
     config_setNeedsBackup(false);
   }
   layoutHome();
