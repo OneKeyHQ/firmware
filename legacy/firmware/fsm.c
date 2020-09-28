@@ -296,7 +296,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
                          button_request, 0)) {
       return true;
     }
-    button_request = false;
+    if (g_bIsBixinAPP) button_request = false;
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
