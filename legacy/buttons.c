@@ -104,7 +104,14 @@ void buttonsTimer(void) {
     if (up_btn_timer_counter > 2) {
       up_btn_timer_enable = 1;
       up_btn_timer_counter = 0;
-      ble_ctl_onoff();
+      change_ble_sta(BLE_ADV_ON);
+    }
+  } else if ((buttonRead() & BTN_PIN_DOWN) == 0 && up_btn_timer_enable == 0) {
+    up_btn_timer_counter++;
+    if (up_btn_timer_counter > 2) {
+      up_btn_timer_enable = 1;
+      up_btn_timer_counter = 0;
+      change_ble_sta(BLE_ADV_OFF);
     }
   } else {
     up_btn_timer_counter = 0;

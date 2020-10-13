@@ -6,6 +6,8 @@
 #include <string.h>
 
 #define BLE_NAME_LEN 0x12
+#define BLE_ADV_OFF 0x00
+#define BLE_ADV_ON 0x01
 
 enum {
   BLE_CMD_CONNECT_STATE = 0x01,

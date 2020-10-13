@@ -181,6 +181,7 @@ void layoutProgress(const char *desc, int permil) {
 uint8_t layoutStatusLogo(bool force_fresh) {
   static bool nfc_status_bak = false;
   static bool ble_status_bak = false;
+  static bool ble_adv_status_bak = false;
   static bool usb_status_bak = false;
   static uint8_t battery_bak = 0xff;
   uint8_t pad = 16;
@@ -214,11 +215,22 @@ uint8_t layoutStatusLogo(bool force_fresh) {
   if (sys_bleState() == true) {
     if (force_fresh || false == ble_status_bak) {
       ble_status_bak = true;
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_blecon);
       refresh = true;
     }
   } else if (true == ble_status_bak) {
     ble_status_bak = false;
+    oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+    refresh = true;
+    ret = 1;
+  } else if (ble_get_switch() == true) {
+    if (force_fresh || false == ble_adv_status_bak) {
+      ble_adv_status_bak = true;
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+      refresh = true;
+    }
+  } else if (true == ble_adv_status_bak) {
+    ble_adv_status_bak = false;
     oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
     refresh = true;
     ret = 1;
