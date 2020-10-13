@@ -30,6 +30,7 @@ extern const BITMAP bmp_icon_info;
 extern const BITMAP bmp_icon_ok;
 extern const BITMAP bmp_icon_question;
 extern const BITMAP bmp_icon_warning;
+extern const BITMAP bmp_launch_icon;
 extern const BITMAP bmp_logo48;
 extern const BITMAP bmp_logo48_empty;
 extern const BITMAP bmp_logo64;

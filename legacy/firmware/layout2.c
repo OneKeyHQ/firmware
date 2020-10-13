@@ -316,17 +316,14 @@ void layoutHome(void) {
     b.data = homescreen;
     oledDrawBitmap(0, 0, &b);
   } else {
-    if (config_isInitialized()) {
-      char label[MAX_LABEL_LEN + 1] = _("");
-      config_getLabel(label, sizeof(label));
-      if (strlen(label) && strncmp(label, "BIXIN KEY", 9))
-        layoutLabel(label);
-      else
-        oledDrawBitmap(0, 8, &bmp_logo);
-    } else {
-      oledDrawBitmap(0, 8, &bmp_logo);
-    }
-
+    oledDrawBitmap(56, 12, &bmp_home_logo);
+    // char label[MAX_LABEL_LEN + 1] = _("");
+    // if (config_getLabel(label, sizeof(label))) {
+    //   oledDrawStringCenter(64, 40, label, FONT_STANDARD);
+    // } else {
+    //   layoutFillBleName(5);
+    // }
+    layoutFillBleName(5);
     if (!config_isInitialized()) {
       vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
     } else {
@@ -342,7 +339,6 @@ void layoutHome(void) {
         vDisp_PromptInfo(DISP_NEED_BACKUP, false);
       }
     }
-    layoutFillBleName(5);
   }
 #if !EMULATOR
   if (layoutStatusLogo(true)) {
