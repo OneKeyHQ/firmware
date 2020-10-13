@@ -918,10 +918,14 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     return;
   }
 
+  // transfer pin to SE,not set pin,set pin after restore seed success
   if (!protectSeedPin(msg->data.bytes[1] == 1 ? true : false, false, false)) {
     layoutHome();
     return;
   }
+
+  // unlock status is cleared when ble disconnected
+  CHECK_PIN
 
   // restore in se
   if (msg->data.bytes[0] == 0x00) {
