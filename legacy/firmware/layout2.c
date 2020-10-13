@@ -54,16 +54,12 @@ uint32_t system_millis_display_info_start = 0;
 const char *ui_prompt_sign_trans[2] = {"Signing transaction", "签名交易中..."};
 const char *ui_prompt_wakingup[2] = {"Waking up", "唤醒..."};
 const char *ui_prompt_updating[2] = {"Updating", "更新..."};
-const char *ui_prompt_current_pin[2] = {"Please enter current PIN:",
-                                        "请输入当前PIN码"};
-const char *ui_prompt_input_pin[2] = {"Please enter the PIN:", "请输入PIN码"};
-const char *ui_prompt_new_pin[2] = {"Please enter new PIN:", "请输入新PIN码"};
-const char *ui_prompt_new_pin_ack[2] = {"Please re-enter new PIN:",
-                                        "请再次输入新PIN码"};
-const char *ui_prompt_seed_pin[2] = {"Please enter backup PIN :",
-                                     "请输入备份PIN码"};
-const char *ui_prompt_seed_pin_ack[2] = {"Please re-enter backup PIN:",
-                                         "请再次输入备份PIN码"};
+const char *ui_prompt_current_pin[2] = {"PIN REF Table", "PIN码对照表"};
+const char *ui_prompt_input_pin[2] = {"PIN REF Table", "PIN码对照表"};
+const char *ui_prompt_new_pin[2] = {"PIN REF Table", "PIN码对照表"};
+const char *ui_prompt_new_pin_ack[2] = {"PIN REF Table", "PIN码对照表"};
+const char *ui_prompt_seed_pin[2] = {"PIN REF Table", "PIN码对照表"};
+const char *ui_prompt_seed_pin_ack[2] = {"PIN REF Table", "PIN码对照表"};
 const char *ui_prompt_singing[2] = {"Singiing", "签名中..."};
 const char *ui_prompt_verifying[2] = {"Verifying", "验签中..."};
 
