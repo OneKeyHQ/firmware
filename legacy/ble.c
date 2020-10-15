@@ -56,7 +56,11 @@ void change_ble_sta(uint8_t mode) {
   cmd[0] = BLE_CMD_ONOFF_BLE;
   cmd[1] = 0x01;
   cmd[2] = mode;
-  ble_cmd_packet(cmd, 0x03);
+  if (ble_switch != mode) {
+    ble_cmd_packet(cmd, 0x03);
+    ble_switch = mode;
+    layoutRefreshSet(true);
+  }
 }
 
 bool ble_connect_state(void) { return ble_connect; }
@@ -168,6 +172,7 @@ void ble_uart_poll(void) {
         } else {
           ble_switch = true;
         }
+        layoutRefreshSet(true);
         break;
       case BLE_CMD_DFU_STA:
         if (ble_usart_msg.cmd_vale[0]) {
