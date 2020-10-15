@@ -14,6 +14,7 @@ extern const BITMAP bmp_battery_2;
 extern const BITMAP bmp_battery_3;
 extern const BITMAP bmp_battery_4;
 extern const BITMAP bmp_ble;
+extern const BITMAP bmp_blecon;
 extern const BITMAP bmp_home_logo;
 extern const BITMAP bmp_logo;
 extern const BITMAP bmp_nfc;
