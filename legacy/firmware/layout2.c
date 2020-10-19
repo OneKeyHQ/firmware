@@ -317,12 +317,12 @@ void layoutHome(void) {
     oledDrawBitmap(0, 0, &b);
   } else {
     oledDrawBitmap(56, 12, &bmp_home_logo);
-    // char label[MAX_LABEL_LEN + 1] = _("");
-    // if (config_getLabel(label, sizeof(label))) {
-    //   oledDrawStringCenter(64, 40, label, FONT_STANDARD);
-    // } else {
-    //   layoutFillBleName(5);
-    // }
+    char label[MAX_LABEL_LEN + 1] = _("");
+    if (config_getLabel(label, sizeof(label))) {
+      oledDrawStringCenter(64, 40, label, FONT_STANDARD);
+    } else {
+      layoutFillBleName(5);
+    }
     layoutFillBleName(5);
     if (!config_isInitialized()) {
       vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
