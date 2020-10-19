@@ -6,7 +6,7 @@ void layoutBootHome(void) {
   if (layoutNeedRefresh()) {
     oledClear();
     oledDrawBitmap(30, 20, &bmp_home_logo);
-    oledDrawStringCenter(85, 20, "BIXIN", FONT_STANDARD);
+    oledDrawStringCenter(85, 20, "OneKey", FONT_STANDARD);
     oledDrawStringCenter(85, 30, "Bootloader", FONT_STANDARD);
     oledDrawStringCenter(85, 40,
                          VERSTR(VERSION_MAJOR) "." VERSTR(
