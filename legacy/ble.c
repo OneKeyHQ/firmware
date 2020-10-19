@@ -174,11 +174,6 @@ void ble_uart_poll(void) {
         }
         layoutRefreshSet(true);
         break;
-      case BLE_CMD_DFU_STA:
-        if (ble_usart_msg.cmd_vale[0]) {
-          layoutDfuStatus(ble_usart_msg.cmd_vale[0]);
-        }
-        break;
       default:
         break;
     }
