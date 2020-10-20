@@ -20,7 +20,9 @@
 #include "buttons.h"
 #include "common.h"
 
-struct buttonState button;
+struct buttonState button = {0};
+static volatile bool btn_up_long = false, btn_down_long = false;
+#define MIN_PRESS 200
 
 #if !EMULATOR
 #include <libopencm3/cm3/nvic.h>
@@ -33,7 +35,6 @@ static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
 static volatile uint32_t up_btn_timer_counter = 0;
 static volatile int up_btn_timer_enable = 0;
-static volatile uint8_t long_press_flag = 0;
 
 uint16_t buttonRead(void) {
   uint16_t tmp = 0x00;
@@ -105,16 +106,16 @@ void buttonsTimer(void) {
     if (up_btn_timer_counter > 2) {
       up_btn_timer_enable = 1;
       up_btn_timer_counter = 0;
+      btn_up_long = true;
       change_ble_sta(BLE_ADV_ON);
-      long_press_flag = 1;
     }
   } else if ((buttonRead() & BTN_PIN_DOWN) == 0 && up_btn_timer_enable == 0) {
     up_btn_timer_counter++;
     if (up_btn_timer_counter > 2) {
       up_btn_timer_enable = 1;
       up_btn_timer_counter = 0;
+      btn_down_long = true;
       change_ble_sta(BLE_ADV_OFF);
-      long_press_flag = 2;
     }
   } else {
     up_btn_timer_counter = 0;
@@ -192,30 +193,6 @@ void buttonUpdate() {
 
   uint16_t state = buttonRead();
 
-  if (long_press_flag == 1) {
-    if ((state & BTN_PIN_UP) == 0) {  // up button is down
-      last_state = state;
-      return;
-    } else {                                 // up button is up
-      if ((last_state & BTN_PIN_UP) == 0) {  // last up was down
-        last_state = state;
-        long_press_flag = 0;
-        return;
-      }
-    }
-  } else if (long_press_flag == 2) {
-    if ((state & BTN_PIN_DOWN) == 0) {  // up button is down
-      last_state = state;
-      return;
-    } else {                                   // up button is up
-      if ((last_state & BTN_PIN_DOWN) == 0) {  // last up was down
-        last_state = state;
-        long_press_flag = 0;
-        return;
-      }
-    }
-  }
-
   if ((state & BTN_PIN_YES) == 0) {         // Yes button is down
     if ((last_state & BTN_PIN_YES) == 0) {  // last Yes was down
       if (button.YesDown < 2000000000) button.YesDown++;
@@ -280,8 +257,13 @@ void buttonUpdate() {
     }
   } else {                                 // UP button is up
     if ((last_state & BTN_PIN_UP) == 0) {  // last UP was down
+      if (btn_up_long) {
+        btn_up_long = false;
+        button.UpUp = false;
+      } else if (button.UpDown > MIN_PRESS) {
+        button.UpUp = true;
+      }
       button.UpDown = 0;
-      button.UpUp = true;
     } else {  // last UP was up
       button.UpDown = 0;
       button.UpUp = false;
@@ -298,8 +280,13 @@ void buttonUpdate() {
     }
   } else {                                   // down button is up
     if ((last_state & BTN_PIN_DOWN) == 0) {  // last down was down
+      if (btn_down_long) {
+        btn_down_long = false;
+        button.DownUp = false;
+      } else if (button.DownDown > MIN_PRESS) {
+        button.DownUp = true;
+      }
       button.DownDown = 0;
-      button.DownUp = true;
     } else {  // last down was up
       button.DownDown = 0;
       button.DownUp = false;
