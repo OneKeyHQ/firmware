@@ -71,12 +71,12 @@
 #endif
 
 #define USB_STRINGS                                 \
-  X(MANUFACTURER, "SatoshiLabs")                    \
-  X(PRODUCT, "TREZOR")                              \
+  X(MANUFACTURER, "ByteForge")                      \
+  X(PRODUCT, "ONEKEY")                              \
   X(SERIAL_NUMBER, config_uuid_str)                 \
-  X(INTERFACE_MAIN, "TREZOR Interface")             \
-  X(INTERFACE_DEBUG, "TREZOR Debug Link Interface") \
-  X(INTERFACE_U2F, "TREZOR U2F Interface")
+  X(INTERFACE_MAIN, "ONEKEY Interface")             \
+  X(INTERFACE_DEBUG, "ONEKEY Debug Link Interface") \
+  X(INTERFACE_U2F, "ONEKEY U2F Interface")
 
 #define X(name, value) USB_STRING_##name,
 enum {
