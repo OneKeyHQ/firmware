@@ -145,5 +145,7 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg);
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg);
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg);
 void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg);
+void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
+void fsm_msgBixinBackupDevice(void);
 
 #endif

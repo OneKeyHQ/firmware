@@ -111,6 +111,8 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_SEED_ST (34 | APP)                                        // string
 #define KEY_ST_SEED_EXCHANGE (35 | APP)  // bytes, only used in se
 
+#define KEY_MNEMONICS_IMPORTED (36 | APP | FLAG_PUBLIC_SHIFTED)  // bool
+
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
 #define MAX_SESSIONS_COUNT 10
@@ -594,6 +596,19 @@ void config_loadDevice(const LoadDevice *msg) {
 
 #endif
 
+void config_loadDevice_ex(const BixinLoadDevice *msg) {
+  session_clear(false);
+  config_set_bool(KEY_MNEMONICS_IMPORTED, true);
+
+  config_setMnemonic(msg->mnemonics);
+
+  if (msg->has_language) {
+    config_setLanguage(msg->language);
+  }
+
+  config_setLabel(msg->has_label ? msg->label : "");
+}
+
 void config_setLabel(const char *label) {
   if (label == NULL || label[0] == '\0') {
     storage_delete(KEY_LABEL);
@@ -998,6 +1013,10 @@ bool config_getImported(bool *imported) {
 
 void config_setImported(bool imported) {
   config_set_bool(KEY_IMPORTED, imported);
+}
+
+bool config_getMnemonicsImported(bool *imported) {
+  return sectrue == config_get_bool(KEY_MNEMONICS_IMPORTED, imported);
 }
 
 bool config_getNeedsBackup(bool *needs_backup) {

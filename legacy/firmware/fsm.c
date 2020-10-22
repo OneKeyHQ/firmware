@@ -70,6 +70,7 @@
 // message methods
 
 static uint8_t msg_resp[MSG_OUT_SIZE] __attribute__((aligned));
+static bool mnemonic_imported = false;
 
 #define RESP_INIT(TYPE)                                                    \
   TYPE *resp = (TYPE *)(void *)msg_resp;                                   \
@@ -77,12 +78,22 @@ static uint8_t msg_resp[MSG_OUT_SIZE] __attribute__((aligned));
   memzero(resp, sizeof(TYPE));
 
 #define CHECK_INITIALIZED                                      \
+  config_getMnemonicsImported(&mnemonic_imported);             \
+  if (mnemonic_imported) {                                     \
+    fsm_sendFailure(FailureType_Failure_ProcessError,          \
+                    "device used for backup only");            \
+  }                                                            \
   if (!config_isInitialized()) {                               \
     fsm_sendFailure(FailureType_Failure_NotInitialized, NULL); \
     return;                                                    \
   }
 
 #define CHECK_NOT_INITIALIZED                                             \
+  config_getMnemonicsImported(&mnemonic_imported);                        \
+  if (mnemonic_imported) {                                                \
+    fsm_sendFailure(FailureType_Failure_ProcessError,                     \
+                    "device used for backup only");                       \
+  }                                                                       \
   if (config_isInitialized()) {                                           \
     fsm_sendFailure(FailureType_Failure_UnexpectedMessage,                \
                     _("Device is already initialized. Use Wipe first.")); \

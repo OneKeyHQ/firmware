@@ -1028,3 +1028,49 @@ void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg) {
   layoutHome();
   return;
 }
+
+void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg) {
+  CHECK_PIN
+
+  CHECK_NOT_INITIALIZED
+
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("OK"), NULL,
+                    _("If import mnemoncis,"), _("device used for"),
+                    _("backup only"), _("know what you are"), _("doing!"),
+                    NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  if (!(msg->has_skip_checksum && msg->skip_checksum)) {
+    if (!mnemonic_check(msg->mnemonics)) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Mnemonic with wrong checksum provided"));
+      layoutHome();
+      return;
+    }
+  }
+
+  config_loadDevice_ex(msg);
+  fsm_sendSuccess(_("Device loaded"));
+  layoutHome();
+}
+
+void fsm_msgBixinBackupDevice(void) {
+  bool imported = false;
+  config_getMnemonicsImported(&imported);
+  if (!imported) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, "device not support");
+  }
+  CHECK_PIN_UNCACHED
+
+  RESP_INIT(BixinBackupDeviceAck);
+
+  config_getMnemonic(resp->mnemonics, sizeof(resp->mnemonics));
+
+  msg_write(MessageType_MessageType_BixinBackupDeviceAck, resp);
+  layoutHome();
+  return;
+}

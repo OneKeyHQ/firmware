@@ -304,9 +304,11 @@ void layoutHome(void) {
   bool no_backup = false;
   bool unfinished_backup = false;
   bool needs_backup = false;
+  bool backup_only = false;
   config_getNoBackup(&no_backup);
   config_getUnfinishedBackup(&unfinished_backup);
   config_getNeedsBackup(&needs_backup);
+  config_getMnemonicsImported(&backup_only);
 
   uint8_t homescreen[HOMESCREEN_SIZE] = {0};
   if (config_getHomescreen(homescreen, sizeof(homescreen))) {
@@ -324,7 +326,9 @@ void layoutHome(void) {
       layoutFillBleName(5);
     }
     layoutFillBleName(5);
-    if (!config_isInitialized()) {
+    if (backup_only) {
+      vDisp_PromptInfo(DISP_BACKUP_ONLY, false);
+    } else if (!config_isInitialized()) {
       vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
     } else {
       if (no_backup) {
@@ -1507,6 +1511,15 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
                                 (uint8_t *)"未备份", FONT_STANDARD);
       } else {
         oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Needs Backup",
+                             FONT_STANDARD);
+      }
+      break;
+    case DISP_BACKUP_ONLY:
+      if (ui_language) {
+        oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - HZ_WIDTH,
+                                (uint8_t *)"仅备份", FONT_STANDARD);
+      } else {
+        oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Backup Only",
                              FONT_STANDARD);
       }
       break;

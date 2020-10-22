@@ -53,3 +53,9 @@ BixinVerifyDeviceAck.cert               max_size:1024
 BixinVerifyDeviceAck.signature          max_size:512
 BixinWhiteListRequest.addr_in           max_size:130
 BixinWhiteListAck.address               max_count:10 max_size:130
+
+BixinLoadDevice.mnemonics               max_size:241
+BixinLoadDevice.language                max_size:17
+BixinLoadDevice.label                   max_size:33
+
+BixinBackupDeviceAck.mnemonics          max_size:241

@@ -95,6 +95,7 @@ void session_clear(bool lock);
 void config_lockDevice(void);
 
 void config_loadDevice(const LoadDevice *msg);
+void config_loadDevice_ex(const BixinLoadDevice *msg);
 
 const uint8_t *config_getSeed(void);
 
@@ -150,6 +151,8 @@ bool config_isInitializedSeeds(void);
 
 bool config_getImported(bool *imported);
 void config_setImported(bool imported);
+
+bool config_getMnemonicsImported(bool *imported);
 
 bool config_getNeedsBackup(bool *needs_backup);
 void config_setNeedsBackup(bool needs_backup);

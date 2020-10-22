@@ -18,7 +18,10 @@ from .BinanceSignedTx import BinanceSignedTx
 from .BinanceTransferMsg import BinanceTransferMsg
 from .BinanceTxRequest import BinanceTxRequest
 from .BixinBackupAck import BixinBackupAck
+from .BixinBackupDevice import BixinBackupDevice
+from .BixinBackupDeviceAck import BixinBackupDeviceAck
 from .BixinBackupRequest import BixinBackupRequest
+from .BixinLoadDevice import BixinLoadDevice
 from .BixinMessageSE import BixinMessageSE
 from .BixinOutMessageSE import BixinOutMessageSE
 from .BixinReboot import BixinReboot
