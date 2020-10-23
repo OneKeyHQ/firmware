@@ -76,6 +76,8 @@ CFLAGS   += $(OPTFLAGS) \
             -I$(TOP_DIR)vendor/QR-Code-generator/c \
             -I$(TOP_DIR)vendor/trezor-storage
 
+CFLAGS   += -fexec-charset=GBK
+
 LDFLAGS  += -L$(TOP_DIR) \
             $(DBGFLAGS) \
             $(CPUFLAGS) \

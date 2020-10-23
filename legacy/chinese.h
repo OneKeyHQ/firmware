@@ -5,7 +5,8 @@
 #include <string.h>
 
 #define HZ_WIDTH 12
-#define HZ_CODE_LEN 3  // UTF-8
+#define HZ_CODE_LEN 2  // GBK
+//#define HZ_CODE_LEN 3  // UTF-8
 
 int oledStringWidth_zh(const uint8_t *text, uint8_t font);
 void oledDrawNumber_zh(int x, int y, const char font);
