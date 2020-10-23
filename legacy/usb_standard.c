@@ -42,6 +42,10 @@ LGPL License Terms @ref lgpl_license
 #include "usb_private.h"
 #include "util.h"
 
+#if !EMULATOR
+uint8_t usb_connect_status=0;
+#endif
+
 int usbd_register_set_config_callback(usbd_device *usbd_dev,
 				       usbd_set_config_callback callback)
 {
@@ -612,7 +616,9 @@ _usbd_standard_request(usbd_device *usbd_dev, struct usb_setup_data *req,
 	if ((req->bmRequestType & USB_REQ_TYPE_TYPE) != USB_REQ_TYPE_STANDARD) {
 		return USBD_REQ_NOTSUPP;
 	}
-
+#if !EMULATOR	
+	usb_connect_status = 1;
+#endif	
 	switch (req->bmRequestType & USB_REQ_TYPE_RECIPIENT) {
 	case USB_REQ_TYPE_DEVICE:
 		return _usbd_standard_request_device(usbd_dev, req, buf, len);

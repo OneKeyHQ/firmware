@@ -57,6 +57,7 @@ uint32_t timer_out_get(TimerOut type);
 uint32_t timer_ms(void);
 #else
 #define timer_ms svc_timer_ms
+extern uint8_t usb_connect_status;
 #endif
 
 #endif

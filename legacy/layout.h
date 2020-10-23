@@ -25,6 +25,9 @@
 #include <string.h>
 #include "bitmaps.h"
 
+#if !EMULATOR
+void chargeDisTimer(void);
+#endif
 bool layoutNeedRefresh(void);
 void layoutRefreshSet(bool refresh);
 void layoutButtonNo(const char *btnNo, const BITMAP *icon);

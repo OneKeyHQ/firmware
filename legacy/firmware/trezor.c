@@ -130,6 +130,7 @@ int main(void) {
   ble_reset();
 #if !EMULATOR
   register_timer("button", timer1s / 2, buttonsTimer);
+  register_timer("charge_dis", timer1s, chargeDisTimer);
 #endif
   __stack_chk_guard = random32();  // this supports compiler provided
                                    // unpredictable stack protection checks
