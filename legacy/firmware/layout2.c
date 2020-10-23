@@ -321,11 +321,11 @@ void layoutHome(void) {
     oledDrawBitmap(56, 12, &bmp_home_logo);
     char label[MAX_LABEL_LEN + 1] = _("");
     if (config_getLabel(label, sizeof(label))) {
-      oledDrawStringCenter(64, 40, label, FONT_STANDARD);
+      oledDrawStringCenter_zh(64, 40, (uint8_t *)label, FONT_STANDARD);
     } else {
       layoutFillBleName(5);
     }
-    layoutFillBleName(5);
+
     if (backup_only) {
       vDisp_PromptInfo(DISP_BACKUP_ONLY, false);
     } else if (!config_isInitialized()) {
