@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.9.8 [Oct 2020]
+
+### Added
+
+### Changed
+- OneKey first release
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 1.9.4 [Jun 2020]
+
+### Added
+
+### Changed
+- BiXinKey first release
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## 1.9.3 [to be released on 2nd September 2020]
 
 ### Added
