@@ -27,7 +27,7 @@
 #include "util.h"
 
 #if MEMORY_PROTECT
-
+#if 0
 static int known_bootloader(int r, const uint8_t *hash) {
   if (r != 32) return 0;
   if (0 ==
@@ -130,26 +130,54 @@ static int known_bootloader(int r, const uint8_t *hash) {
 }
 #endif
 
+static int onekey_known_bootloader(int r, const uint8_t *hash) {
+  if (r != 32) return 0;
+  if (0 ==
+      memcmp(hash,
+             "\xe5\x83\x74\x1b\xb0\x53\xf2\x29\x29\xf5\x6c\x6f\xaf\xff\xea\xe9"
+             "\xae\x96\x16\x67\xbf\xa5\xf2\x1b\x3d\x51\x8d\xc5\x52\x71\x59\x99",
+             32))
+    return 1;  // 1.8.3
+  if (0 ==
+      memcmp(hash,
+             "\xb5\x32\xd7\x5a\x3c\x38\x5d\x73\xba\x58\xb8\x29\x91\xe8\x36\xd1"
+             "\x26\xea\xb4\x5b\xb3\x87\x10\x0b\xc6\xb4\xf7\x48\x05\xb0\x9f\xb0",
+             32))
+    return 1;  // 1.8.5
+
+  if (0 ==
+      memcmp(hash,
+             "\x7d\xb1\xf2\x20\xf8\x97\x44\x49\x1c\x00\x4d\x04\x3e\xd4\x94\xee"
+             "\xa1\xf7\xe9\x40\x41\x5c\x25\x27\x1f\x41\x4a\xc5\xd7\x05\x0d\x78",
+             32))
+    return 1;  // 1.8.6
+
+  return 0;
+}
+#endif
+
 void check_bootloader(void) {
 #if MEMORY_PROTECT
   uint8_t hash[32] = {0};
   int r = memory_bootloader_hash(hash);
 
-  if (!known_bootloader(r, hash)) {
+  if (!onekey_known_bootloader(r, hash)) {
     layoutDialog(&bmp_icon_error, NULL, NULL, NULL, _("Unknown bootloader"),
                  _("detected."), NULL, _("Unplug your Trezor"),
                  _("contact our support."), NULL);
+    delay_ms(1000);
     shutdown();
   }
 
   if (is_mode_unprivileged()) {
     return;
   }
-
+#if 0
   if (r == 32 && 0 == memcmp(hash, bl_hash, 32)) {
     // all OK -> done
     return;
   }
+  // useless for onekey
 
   // ENABLE THIS AT YOUR OWN RISK
   // ATTEMPTING TO OVERWRITE BOOTLOADER WITH UNSIGNED FIRMWARE MAY BRICK
@@ -191,5 +219,6 @@ void check_bootloader(void) {
                _("broken."), NULL, _("Unplug your Trezor"),
                _("contact our support."), NULL);
   shutdown();
+#endif
 #endif
 }
