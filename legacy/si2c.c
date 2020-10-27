@@ -15,6 +15,7 @@
 #include "sys.h"
 #include "timer.h"
 #include "usart.h"
+#include "util.h"
 
 ChannelType host_channel = CHANNEL_NULL;
 
@@ -209,12 +210,11 @@ bool i2c_slave_send(uint32_t data_len) {
                                    FONT_STANDARD);
             }
           }
-          uint8_t asc_buf[3] = {0};
-          oledBox(56, 20, 56 + 16, 20 + 8, false);
+          char asc_buf[16] = {0};
+          uint2str(counter, asc_buf);
+          oledBox(0, 20, OLED_WIDTH, 20 + 8, false);
           counter_bak = counter;
-          asc_buf[0] = counter / 10 + 0x30;
-          asc_buf[1] = counter % 10 + 0x30;
-          oledDrawString(56, 20, (char *)asc_buf, FONT_STANDARD);
+          oledDrawStringCenter(OLED_WIDTH / 2, 20, asc_buf, FONT_STANDARD);
           oledRefresh();
         }
       }
@@ -272,12 +272,11 @@ void i2c_slave_send_ex(uint32_t data_len) {
             oledDrawStringCenter(OLED_WIDTH / 2, 32, "Waiting connect...",
                                  FONT_STANDARD);
           }
-          uint8_t asc_buf[3] = {0};
-          oledBox(56, 20, 56 + 16, 20 + 8, false);
+          char asc_buf[16] = {0};
+          uint2str(counter, asc_buf);
+          oledBox(0, 20, OLED_WIDTH, 20 + 8, false);
           counter_bak = counter;
-          asc_buf[0] = counter / 10 + 0x30;
-          asc_buf[1] = counter % 10 + 0x30;
-          oledDrawString(56, 20, (char *)asc_buf, FONT_STANDARD);
+          oledDrawStringCenter(OLED_WIDTH / 2, 20, asc_buf, FONT_STANDARD);
           oledRefresh();
         }
       }
