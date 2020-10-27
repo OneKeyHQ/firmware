@@ -13,5 +13,5 @@ if fs > MAXSIZE:
         % (MAXSIZE, fs)
     )
 with open(fn, "ab") as f:
-    f.write(b"\x00" * (TOTALSIZE - fs - 32))
+    f.write(b"\x00" * (TOTALSIZE - fs))
     f.close()
