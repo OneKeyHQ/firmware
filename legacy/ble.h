@@ -9,6 +9,9 @@
 #define BLE_ADV_OFF 0x00
 #define BLE_ADV_ON 0x01
 
+#define BUTTON_PRESS_BLE_ON 0x01
+#define BUTTON_PRESS_BLE_OFF 0x02
+
 enum {
   BLE_CMD_CONNECT_STATE = 0x01,
   BLE_CMD_PAIR_STATE = 0x02,

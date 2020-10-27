@@ -35,8 +35,6 @@
 #include "usart.h"
 #include "util.h"
 
-#include "./segger_rtt/rtt_log.h"
-
 uint32_t __stack_chk_guard;
 
 static inline void __attribute__((noreturn)) fault_handler(const char *line1) {
@@ -156,8 +154,6 @@ void setup(void) {
 #endif
   ble_usart_init();
   i2c_slave_init_irq();
-
-  rtt_log_init();
 }
 
 void setReboot(void) {

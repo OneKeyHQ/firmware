@@ -27,22 +27,9 @@
 #if !EMULATOR
 #include "sys.h"
 #include "timer.h"
-static volatile uint8_t charge_dis_timer_counter = 0;
-static volatile uint8_t dis_hint_timer_counter = 0;
 #endif
 
 static bool refresh_home = true;
-
-#if !EMULATOR
-void chargeDisTimer(void) {
-  charge_dis_timer_counter =
-      charge_dis_timer_counter > 8 ? 0 : charge_dis_timer_counter + 1;
-
-  if ((sys_usbState() == true) && (dis_hint_timer_counter <= 14)) {
-    dis_hint_timer_counter++;
-  }
-}
-#endif
 
 bool layoutNeedRefresh(void) {
   if (refresh_home) {
@@ -213,15 +200,13 @@ void disBatteryLevel(uint8_t cur_level) {
       break;
   }
 }
+
 uint8_t layoutStatusLogo(bool force_fresh) {
   static bool nfc_status_bak = false;
   static bool ble_status_bak = false;
   static bool ble_adv_status_bak = false;
   static bool usb_status_bak = false;
   static uint8_t battery_bak = 0xff;
-  static uint8_t charge_dis_counter_bak = 0;
-  static uint8_t cur_lv_dis = 0xff;
-  static uint8_t dis_power_flag = 0;
   uint8_t pad = 16;
   bool refresh = false;
   uint8_t ret = 0;
@@ -277,33 +262,6 @@ uint8_t layoutStatusLogo(bool force_fresh) {
     usb_connect_status = 0;
   }
   if (sys_usbState() == true) {
-    if (charge_dis_counter_bak != charge_dis_timer_counter) {
-      charge_dis_counter_bak = charge_dis_timer_counter;
-      if (cur_lv_dis == 0xff) {
-        cur_lv_dis = battery_cap;
-      }
-      disBatteryLevel(cur_lv_dis);
-      cur_lv_dis = cur_lv_dis >= 4 ? battery_cap : cur_lv_dis + 1;
-      refresh = true;
-    }
-    if ((dis_power_flag == 0) && (dis_hint_timer_counter == 4)) {
-      dis_power_flag = 1;
-      oledClearPart();
-      if (usb_connect_status == 1) {
-        oledDrawStringCenter(60, 20, "Data Transfer Mode,", FONT_STANDARD);
-        oledDrawStringCenter(60, 30, "use a charger if you ", FONT_STANDARD);
-        oledDrawStringCenter(60, 40, "wanna faster charging.", FONT_STANDARD);
-      } else {
-        oledDrawStringCenter(60, 20, "Speed up charging with ", FONT_STANDARD);
-        oledDrawStringCenter(60, 30, "5V and 200mA+ ", FONT_STANDARD);
-        oledDrawStringCenter(60, 40, "charge heads!", FONT_STANDARD);
-      }
-    }
-
-    if ((dis_power_flag == 1) && (dis_hint_timer_counter == 14)) {
-      dis_hint_timer_counter = 15;
-      layoutRefreshSet(true);
-    }
     if (force_fresh || false == usb_status_bak) {
       usb_status_bak = true;
       oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
@@ -313,16 +271,10 @@ uint8_t layoutStatusLogo(bool force_fresh) {
     usb_status_bak = false;
     oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
     refresh = true;
-    force_fresh = true;
-    cur_lv_dis = battery_bak;
-    dis_power_flag = 0;
-    dis_hint_timer_counter = 0;
-    layoutRefreshSet(true);
   }
 
   if (battery_bak != battery_cap || force_fresh) {
     battery_bak = battery_cap;
-    cur_lv_dis = battery_bak;
     refresh = true;
     disBatteryLevel(battery_bak);
   }

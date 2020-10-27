@@ -31,6 +31,10 @@ static volatile bool btn_up_long = false, btn_down_long = false;
 #include <libopencm3/stm32/syscfg.h>
 #include "ble.h"
 
+#if !EMULATOR
+uint8_t change_ble_sta_flag = 0;
+#endif
+
 static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
 static volatile uint32_t up_btn_timer_counter = 0;
@@ -107,15 +111,13 @@ void buttonsTimer(void) {
       up_btn_timer_enable = 1;
       up_btn_timer_counter = 0;
       btn_up_long = true;
-      change_ble_sta(BLE_ADV_ON);
-    }
-  } else if ((buttonRead() & BTN_PIN_DOWN) == 0 && up_btn_timer_enable == 0) {
-    up_btn_timer_counter++;
-    if (up_btn_timer_counter > 2) {
-      up_btn_timer_enable = 1;
-      up_btn_timer_counter = 0;
-      btn_down_long = true;
-      change_ble_sta(BLE_ADV_OFF);
+      if (ble_get_switch() == true) {
+        change_ble_sta_flag = BUTTON_PRESS_BLE_OFF;
+        change_ble_sta(BLE_ADV_OFF);
+      } else {
+        change_ble_sta_flag = BUTTON_PRESS_BLE_ON;
+        change_ble_sta(BLE_ADV_ON);
+      }
     }
   } else {
     up_btn_timer_counter = 0;
@@ -280,10 +282,7 @@ void buttonUpdate() {
     }
   } else {                                   // down button is up
     if ((last_state & BTN_PIN_DOWN) == 0) {  // last down was down
-      if (btn_down_long) {
-        btn_down_long = false;
-        button.DownUp = false;
-      } else if (button.DownDown > MIN_PRESS) {
+      if (button.DownDown > MIN_PRESS) {
         button.DownUp = true;
       }
       button.DownDown = 0;
