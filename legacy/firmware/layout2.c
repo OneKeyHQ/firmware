@@ -348,28 +348,30 @@ uint8_t refreshBleIcon(bool force_flag) {
   static bool ble_icon_status_old = false;
   uint8_t ret = 0;
 
-  if (sys_bleState() == true) {
-    if (force_flag || false == ble_conn_status_old) {
-      ble_conn_status_old = true;
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_blecon);
-      layout_refresh = true;
-    }
-  } else if (true == ble_conn_status_old) {
-    ble_conn_status_old = false;
-    oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_ble);
-    layout_refresh = true;
-    ret = 1;
-  } else if (ble_get_switch() == true) {
-    if (force_flag || false == ble_icon_status_old) {
+  if (ble_get_switch() == true) {
+    if (sys_bleState() == true) {
+      if (force_flag || false == ble_conn_status_old) {
+        ble_conn_status_old = true;
+        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_blecon);
+        layout_refresh = true;
+      }
+    } else if (force_flag || false == ble_icon_status_old) {
+      if (ble_conn_status_old) {
+        ble_conn_status_old = false;
+        ret = 1;
+      }
       ble_icon_status_old = true;
       oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_ble);
       layout_refresh = true;
     }
   } else if (true == ble_icon_status_old) {
+    if (ble_conn_status_old) {
+      ble_conn_status_old = false;
+      ret = 1;
+    }
     ble_icon_status_old = false;
     oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_ble);
     layout_refresh = true;
-    ret = 1;
   }
   return ret;
 }
@@ -386,7 +388,7 @@ void disLongPressBleTips(void) {
       oledDrawStringCenter(60, 30, "and hold up button ^", FONT_STANDARD);
       oledDrawStringCenter(60, 40, "to turn it off.", FONT_STANDARD);
     }
-    change_ble_sta_flag = 0;
+
   } else if (change_ble_sta_flag == BUTTON_PRESS_BLE_OFF) {
     oledClearPart();
     if (ui_language) {
@@ -401,14 +403,14 @@ void disLongPressBleTips(void) {
       oledDrawStringCenter(60, 30, "press and hold up button^", FONT_STANDARD);
       oledDrawStringCenter(60, 40, "to turn it on.", FONT_STANDARD);
     }
-    change_ble_sta_flag = 0;
   }
   if ((change_ble_sta_flag == BUTTON_PRESS_BLE_OFF) ||
       (change_ble_sta_flag == BUTTON_PRESS_BLE_ON)) {
     oledRefresh();
-    delay_ms(3000);
+    waitButtonResponse(0, timer1s * 3);
     layoutRefreshSet(true);
   }
+  change_ble_sta_flag = 0;
 }
 void disPcConnectTips(void) {
   if (ui_language) {
@@ -478,7 +480,7 @@ void refreshUsbConnectTips(void) {
     layoutRefreshSet(true);
   }
 }
-void disUsbConnectSometing(uint8_t force_flag) {
+void disUsbConnectSomething(uint8_t force_flag) {
   static bool usb_status_old = false;
   if (sys_usbState() == false) {
     usb_connect_status = 0;
@@ -515,7 +517,7 @@ uint8_t layoutStatusLogoEx(bool force_fresh) {
 
   disLongPressBleTips();
 
-  disUsbConnectSometing(force_fresh);
+  disUsbConnectSomething(force_fresh);
 
   refreshBatteryLevel(force_fresh);
 
