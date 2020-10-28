@@ -16,6 +16,7 @@ fi
 make
 
 if [ "$EMULATOR" != 1 ]; then
+	rm bootloader/bootloader.bin
     make -C bootloader align
 fi
 
