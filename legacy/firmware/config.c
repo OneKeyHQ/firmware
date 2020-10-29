@@ -601,6 +601,7 @@ void config_loadDevice_ex(const BixinLoadDevice *msg) {
   config_set_bool(KEY_MNEMONICS_IMPORTED, true);
 
   config_setMnemonic(msg->mnemonics);
+  config_set_bool(KEY_INITIALIZED, false);
 
   if (msg->has_language) {
     config_setLanguage(msg->language);

@@ -160,7 +160,13 @@ void fsm_msgPing(const Ping *msg) {
 }
 
 void fsm_msgChangePin(const ChangePin *msg) {
-  CHECK_INITIALIZED
+  // CHECK_INITIALIZED
+  bool imported = false;
+  config_getMnemonicsImported(&imported);
+  if (!config_isInitialized() && !imported) {
+    fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
+    return;
+  }
 
   bool removal = msg->has_remove && msg->remove;
   bool button_confirm = true;
@@ -1030,12 +1036,12 @@ void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg) {
 }
 
 void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg) {
-  CHECK_PIN
+  //   CHECK_PIN
 
   CHECK_NOT_INITIALIZED
 
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("OK"), NULL,
-                    _("If import mnemoncis,"), _("device used for"),
+                    _("If import seed,"), _("device is used for"),
                     _("backup only"), _("know what you are"), _("doing!"),
                     NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
@@ -1043,7 +1049,6 @@ void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg) {
     layoutHome();
     return;
   }
-
   if (!(msg->has_skip_checksum && msg->skip_checksum)) {
     if (!mnemonic_check(msg->mnemonics)) {
       fsm_sendFailure(FailureType_Failure_DataError,
@@ -1051,6 +1056,12 @@ void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg) {
       layoutHome();
       return;
     }
+  }
+  if (config_hasPin()) {
+    CHECK_PIN
+  } else if (!protectChangePin(false)) {
+    layoutHome();
+    return;
   }
 
   config_loadDevice_ex(msg);
@@ -1062,7 +1073,10 @@ void fsm_msgBixinBackupDevice(void) {
   bool imported = false;
   config_getMnemonicsImported(&imported);
   if (!imported) {
-    fsm_sendFailure(FailureType_Failure_ProcessError, "device not support");
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    "device is not supported");
+    layoutHome();
+    return;
   }
   CHECK_PIN_UNCACHED
 

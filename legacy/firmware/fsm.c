@@ -81,7 +81,8 @@ static bool mnemonic_imported = false;
   config_getMnemonicsImported(&mnemonic_imported);             \
   if (mnemonic_imported) {                                     \
     fsm_sendFailure(FailureType_Failure_ProcessError,          \
-                    "device used for backup only");            \
+                    "device is already used for backup");      \
+    return;                                                    \
   }                                                            \
   if (!config_isInitialized()) {                               \
     fsm_sendFailure(FailureType_Failure_NotInitialized, NULL); \
@@ -92,7 +93,8 @@ static bool mnemonic_imported = false;
   config_getMnemonicsImported(&mnemonic_imported);                        \
   if (mnemonic_imported) {                                                \
     fsm_sendFailure(FailureType_Failure_ProcessError,                     \
-                    "device used for backup only");                       \
+                    "device is already used for backup");                 \
+    return;                                                               \
   }                                                                       \
   if (config_isInitialized()) {                                           \
     fsm_sendFailure(FailureType_Failure_UnexpectedMessage,                \
