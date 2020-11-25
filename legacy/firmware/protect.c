@@ -22,6 +22,7 @@
 #include "common.h"
 #include "config.h"
 #include "debug.h"
+#include "font.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -31,6 +32,7 @@
 #include "messages.pb.h"
 #include "oled.h"
 #include "pinmatrix.h"
+#include "prompt.h"
 #include "si2c.h"
 #include "sys.h"
 #include "usb.h"
@@ -278,36 +280,28 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
 
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char *message) {
+  const struct font_desc *font = find_cur_font();
+  int y = 9;
   // Convert wait to secstr string.
-  char secstrbuf[] = "________0 seconds";
-  char *secstr = secstrbuf + 9;
-  uint32_t secs = wait;
-  do {
-    secstr--;
-    *secstr = (secs % 10) + '0';
-    secs /= 10;
-  } while (secs > 0 && secstr >= secstrbuf);
-  if (wait == 1) {
-    // Change "seconds" to "second".
-    secstrbuf[16] = 0;
-  }
-  oledClear();
-  if (ui_language) {
-    memset(secstrbuf + 10, 0x00, sizeof(secstrbuf) - 10);
-    memcpy(secstrbuf + 10, "秒", strlen("秒"));
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10, message, FONT_STANDARD);
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10 + 13, "请等待",
-                                FONT_STANDARD);
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10 + 26, secstr, FONT_STANDARD);
+  char secstrbuf[32] = "";
+  uint2str(wait, secstrbuf);
 
-  } else {
-    oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, message, FONT_STANDARD);
-    oledDrawStringCenter(OLED_WIDTH / 2, 2 * 9, _("Please wait"),
-                         FONT_STANDARD);
-    oledDrawStringCenter(OLED_WIDTH / 2, 3 * 9, secstr, FONT_STANDARD);
-    oledDrawStringCenter(OLED_WIDTH / 2, 4 * 9, _("to continue ..."),
-                         FONT_STANDARD);
+  strcat(secstrbuf, _("second"));
+
+  if (ui_language == 0) {
+    if (wait > 1) strcat(secstrbuf, "s");
   }
+
+  oledClear();
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _(message), FONT_STANDARD);
+  y += font->pixel + 1;
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Please wait"),
+                              FONT_STANDARD);
+  y += font->pixel + 1;
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, secstrbuf, FONT_STANDARD);
+  y += font->pixel + 1;
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("to continue ..."),
+                              FONT_STANDARD);
 
   // progressbar
   oledFrame(0, OLED_HEIGHT - 8, OLED_WIDTH - 1, OLED_HEIGHT - 1);
@@ -341,7 +335,7 @@ bool protectPin(bool use_cached) {
   const char *pin = "";
   if (config_hasPin()) {
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                     ui_prompt_current_pin[ui_language], &newpin);
+                     _("PIN REF Table"), &newpin);
     if (!pin) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -364,12 +358,9 @@ bool protectChangePin(bool removal) {
   bool need_new_pin = true;
 
   if (config_hasPin()) {
-    if (!g_bIsBixinAPP) {
-      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                       ui_prompt_current_pin[ui_language], &newpin);
-    } else {
-      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                       ui_prompt_input_pin[ui_language], &newpin);
+    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                     _("PIN REF Table"), &newpin);
+    if (g_bIsBixinAPP) {
       need_new_pin = false;
     }
     if (pin == NULL) {
@@ -395,7 +386,7 @@ bool protectChangePin(bool removal) {
   if (!removal) {
     if (!g_bIsBixinAPP || need_new_pin) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       ui_prompt_new_pin[ui_language], &newpin);
+                       _("PIN REF Table"), &newpin);
     } else {
       if (newpin == NULL) {
         fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
@@ -416,7 +407,7 @@ bool protectChangePin(bool removal) {
 
     if (!g_bIsBixinAPP) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
-                       ui_prompt_new_pin_ack[ui_language], &newpin);
+                       _("PIN REF Table"), &newpin);
       if (pin == NULL) {
         memzero(old_pin, sizeof(old_pin));
         memzero(new_pin, sizeof(new_pin));
@@ -431,14 +422,9 @@ bool protectChangePin(bool removal) {
         return false;
       }
     } else {
-      if (ui_language) {
-        layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                                 "请确认PIN码", NULL, new_pin, NULL);
-      } else {
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
-                          NULL);
-      }
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Please confirm PIN"), NULL, new_pin, NULL, NULL,
+                        NULL);
       if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
         i2c_set_wait(false);
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -551,14 +537,9 @@ bool protectPassphrase(char *passphrase) {
   msg_write(MessageType_MessageType_PassphraseRequest, &resp);
 
   if (!g_bIsBixinAPP) {
-    if (ui_language) {
-      layoutDialogSwipeAdapter(&bmp_icon_info, NULL, NULL, NULL, "请输入密语",
-                               NULL, NULL, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL,
-                        _("Please enter your"), _("passphrase using"),
-                        _("the computer's"), _("keyboard."), NULL, NULL);
-    }
+    layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter your"),
+                      _("passphrase using"), _("the computer's"),
+                      _("keyboard."), NULL, NULL);
   }
 
   bool result = false;
@@ -629,7 +610,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
   } else {
     if (config_hasPin()) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                       ui_prompt_current_pin[ui_language], &newpin);
+                       _("PIN REF Table"), &newpin);
       if (!pin) {
         fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
         return false;
@@ -644,7 +625,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
     } else {
       if (force_pin) {
         pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                         ui_prompt_input_pin[ui_language], &newpin);
+                         _("PIN REF Table"), &newpin);
         if (pin == PIN_CANCELED_BY_BUTTON) {
           return false;
         } else if (pin == NULL || pin[0] == '\0') {
@@ -652,14 +633,9 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
           return false;
         }
 
-        if (ui_language) {
-          layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                                   "请确认PIN码", NULL, pin, NULL);
-        } else {
-          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                            _("Please confirm PIN"), NULL, NULL, pin, NULL,
-                            NULL);
-        }
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Please confirm PIN"), NULL, NULL, pin, NULL, NULL);
+
         if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
                            false)) {
           i2c_set_wait(false);

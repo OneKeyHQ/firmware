@@ -612,7 +612,7 @@ void signing_init(const SignTx *msg, const CoinInfo *_coin,
     hasher_Init(&hasher_check, coin->curve->hasher_sign);
   }
 
-  layoutProgressSwipe(ui_prompt_sign_trans[ui_language], 0);
+  layoutProgressSwipe(_("Signing transaction"), 0);
 
   send_req_1_input();
 }
@@ -874,7 +874,7 @@ static bool signing_check_output(TxOutputType *txoutput) {
   spending += txoutput->amount;
   int co = compile_output(coin, &root, txoutput, &bin_output, !is_change);
   if (!is_change) {
-    layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+    layoutProgressAdapter(_("Signing transaction"), progress);
   }
   if (co < 0) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -1029,7 +1029,7 @@ static void phase1_request_next_output(void) {
     // Everything was checked, now phase 2 begins and the transaction is
     // signed.
     progress_meta_step = progress_step / (inputs_count + outputs_count);
-    layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+    layoutProgressAdapter(_("Signing transaction"), progress);
     idx1 = 0;
 #if !BITCOIN_ONLY
     if (coin->decred) {
@@ -1290,7 +1290,7 @@ void signing_txack(TransactionType *tx) {
 
   static int update_ctr = 0;
   if (update_ctr++ == 20) {
-    layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+    layoutProgressAdapter(_("Signing transaction"), progress);
     update_ctr = 0;
   }
 
@@ -1367,15 +1367,9 @@ void signing_txack(TransactionType *tx) {
 
         if (!utxo_cache_check(tx->inputs[0].prev_hash.bytes,
                               tx->inputs[0].prev_index, tx->inputs[0].amount)) {
-          if (ui_language) {
-            layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                                     "segwit input amount", "changed", NULL,
-                                     NULL);
-          } else {
-            layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
-                              NULL, _("segwit input amount"), _("changed"),
-                              NULL, NULL, NULL, NULL);
-          }
+          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                            _("segwit input amount"), _("changed"), NULL, NULL,
+                            NULL, NULL);
           if (!protectButton_ex(ButtonRequestType_ButtonRequest_ProtectCall,
                                 false, false, default_oper_time)) {
             fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -1690,7 +1684,7 @@ void signing_txack(TransactionType *tx) {
         // since this took a longer time, update progress
         signatures++;
         progress = 500 + ((signatures * progress_step) >> PROGRESS_PRECISION);
-        layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+        layoutProgressAdapter(_("Signing transaction"), progress);
         update_ctr = 0;
         if (idx1 < inputs_count - 1) {
           idx1++;
@@ -1753,7 +1747,7 @@ void signing_txack(TransactionType *tx) {
         // since this took a longer time, update progress
         signatures++;
         progress = 500 + ((signatures * progress_step) >> PROGRESS_PRECISION);
-        layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+        layoutProgressAdapter(_("Signing transaction"), progress);
         update_ctr = 0;
       } else if (tx->inputs[0].script_type ==
                      InputScriptType_SPENDP2SHWITNESS &&
@@ -1839,7 +1833,7 @@ void signing_txack(TransactionType *tx) {
       }
       signatures++;
       progress = 500 + ((signatures * progress_step) >> PROGRESS_PRECISION);
-      layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+      layoutProgressAdapter(_("Signing transaction"), progress);
       update_ctr = 0;
       if (idx1 < inputs_count - 1) {
         idx1++;
@@ -1902,7 +1896,7 @@ void signing_txack(TransactionType *tx) {
       // since this took a longer time, update progress
       signatures++;
       progress = 500 + ((signatures * progress_step) >> PROGRESS_PRECISION);
-      layoutProgressAdapter(ui_prompt_sign_trans[ui_language], progress);
+      layoutProgressAdapter(_("Signing transaction"), progress);
       update_ctr = 0;
       if (idx1 < inputs_count - 1) {
         idx1++;

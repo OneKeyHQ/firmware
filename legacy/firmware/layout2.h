@@ -47,18 +47,6 @@ extern void *layoutLast;
 #define DISP_NEED_BACKUP 0x02
 #define DISP_BACKUP_ONLY 0x03
 
-extern const char *ui_prompt_sign_trans[2];
-extern const char *ui_prompt_wakingup[2];
-extern const char *ui_prompt_updating[2];
-extern const char *ui_prompt_current_pin[2];
-extern const char *ui_prompt_input_pin[2];
-extern const char *ui_prompt_new_pin[2];
-extern const char *ui_prompt_new_pin_ack[2];
-extern const char *ui_prompt_seed_pin[2];
-extern const char *ui_prompt_seed_pin_ack[2];
-extern const char *ui_prompt_singing[2];
-extern const char *ui_prompt_verifying[2];
-
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
                        const char *line2, const char *line3, const char *line4,
@@ -126,20 +114,19 @@ void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon);
 void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
                          const char *btnYes, const char *desc,
                          const char *line1, const char *line2,
-                         const char *line3, const char *line4);
+                         const char *line3, const char *line4,
+                         const char *line5, const char *line6);
 void layoutDialogCenterAdapter(const BITMAP *icon, const char *btnNo,
                                const char *btnYes, const char *desc,
                                const char *line1, const char *line2,
-                               const char *line3, const char *line4);
+                               const char *line3, const char *line4,
+                               const char *line5, const char *line6);
 void layoutProgressAdapter(const char *desc, int permil);
 
-void layoutDialogSwipeAdapter(const BITMAP *icon, const char *btnNo,
-                              const char *btnYes, const char *desc,
-                              const char *line1, const char *line2,
-                              const char *line3, const char *line4);
 void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const char *btnNo,
                                     const char *btnYes, const char *desc,
                                     const char *line1, const char *line2,
-                                    const char *line3, const char *line4);
+                                    const char *line3, const char *line4,
+                                    const char *line5, const char *line6);
 
 #endif

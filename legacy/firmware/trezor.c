@@ -54,9 +54,9 @@ void check_lock_screen(void) {
 
   // button held for long enough (2 seconds)
   if (layoutLast == layoutHome && button.NoDown >= 285000 * 2) {
-    layoutDialog(&bmp_icon_question, _("Cancel"), _("Lock Device"), NULL,
-                 _("Do you really want to"), _("lock your Trezor?"), NULL, NULL,
-                 NULL, NULL);
+    layoutDialogAdapter(&bmp_icon_question, _("Cancel"), _("Lock Device"), NULL,
+                        _("Do you really want to"), _("lock your Trezor?"),
+                        NULL, NULL, NULL, NULL);
 
     // wait until NoButton is released
     usbTiny(1);

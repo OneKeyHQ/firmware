@@ -172,42 +172,25 @@ void fsm_msgChangePin(const ChangePin *msg) {
   bool button_confirm = true;
   if (removal) {
     if (config_hasPin()) {
-      if (ui_language) {
-        layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                                 "移除PIN码", NULL, NULL, NULL);
-      } else {
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Do you really want to"), _("remove current PIN?"),
-                          NULL, NULL, NULL, NULL);
-      }
-
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Do you really want to"), _("remove current PIN?"),
+                        NULL, NULL, NULL, NULL);
     } else {
       fsm_sendSuccess(_("PIN removed"));
       return;
     }
   } else {
     if (config_hasPin()) {
-      if (ui_language) {
-        layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                                 "修改PIN码", NULL, NULL, NULL);
-      } else {
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Do you really want to"), _("change current PIN?"),
-                          NULL, NULL, NULL, NULL);
-      }
-
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Do you really want to"), _("change current PIN?"),
+                        NULL, NULL, NULL, NULL);
     } else {
       if (g_bIsBixinAPP) {
         button_confirm = false;
       } else {
-        if (ui_language) {
-          layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                                   "设置PIN码", NULL, NULL, NULL);
-        } else {
-          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                            _("Do you really want to"), _("set new PIN?"), NULL,
-                            NULL, NULL, NULL);
-        }
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Do you really want to"), _("set new PIN?"), NULL,
+                          NULL, NULL, NULL);
       }
     }
   }
@@ -283,14 +266,9 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
     CHECK_PIN_UNCACHED
   }
   (void)msg;
-  if (ui_language) {
-    layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                             "删除钱包", "所有数据将丢失", NULL, NULL);
-  } else {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("wipe the device?"), NULL,
-                      _("All data will be lost."), NULL, NULL);
-  }
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    _("Do you really want to"), _("wipe the device?"), NULL,
+                    _("All data will be lost."), NULL, NULL);
 
   if (!protectButton(ButtonRequestType_ButtonRequest_WipeDevice, false)) {
     i2c_set_wait(false);
@@ -426,7 +404,7 @@ void fsm_msgLockDevice(const LockDevice *msg) {
 }
 
 bool fsm_getLang(const ApplySettings *msg) {
-  if (!strcmp(msg->language, "zh") || !strcmp(msg->language, "chinese"))
+  if (!strcmp(msg->language, "zh-CN") || !strcmp(msg->language, "chinese"))
     return true;
   else
     return false;
@@ -466,14 +444,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
 
   if (msg->has_label) {
-    if (ui_language) {
-      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                               "设置钱包名称为:", msg->label, "?", NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("change name to"),
-                        msg->label, "?", NULL, NULL);
-    }
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("change name to"),
+                      msg->label, "?", NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -481,15 +454,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_language) {
-    if (ui_language) {
-      layoutDialogSwipeAdapter(
-          &bmp_icon_question, "取消", "确认", NULL,
-          "设置语言为:", (fsm_getLang(msg) ? "中文" : "英语"), NULL, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("change language to"),
-                        msg->language, "?", NULL, NULL);
-    }
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("change language to"),
+                      (fsm_getLang(msg) ? "中文" : "English"), "?", NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -497,17 +464,11 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_use_passphrase) {
-    if (ui_language) {
-      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                               msg->use_passphrase ? "使用密语" : "禁用密语",
-                               "加密?", NULL, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"),
-                        msg->use_passphrase ? _("enable passphrase")
-                                            : _("disable passphrase"),
-                        _("protection?"), NULL, NULL, NULL);
-    }
+    layoutDialogSwipe(
+        &bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+        _("Do you really want to"),
+        msg->use_passphrase ? _("enable passphrase") : _("disable passphrase"),
+        _("protection?"), NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -515,14 +476,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_homescreen) {
-    if (ui_language) {
-      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                               "修改屏幕显示", NULL, NULL, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("change the home"),
-                        _("screen?"), NULL, NULL, NULL);
-    }
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("change the home screen"),
+                      NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -544,14 +500,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
       return;
     }
     layoutConfirmAutoLockDelay(msg->auto_lock_delay_ms);
-    // if (ui_language) {
-    //   layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-    //                        "修改锁屏/关机时间?", NULL, secstr, NULL);
-    // } else {
-    //   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-    //                     _("Do you really want to"), _("change auto-lock"),
-    //                     _("delay?"), NULL, secstr, NULL);
-    // }
+
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -560,14 +509,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
       (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
-    if (ui_language) {
-      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
-                               "修改快捷支付信息", NULL, NULL, NULL);
-    } else {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"),
-                        _("change fastpay settings"), NULL, NULL, NULL, NULL);
-    }
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("change fastpay settings"),
+                      NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();

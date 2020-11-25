@@ -506,7 +506,7 @@ void session_clearCache(Session *session) {
 void config_lockDevice(void) { storage_lock(); }
 
 static void get_u2froot_callback(uint32_t iter, uint32_t total) {
-  layoutProgressAdapter(ui_prompt_updating[ui_language], 1000 * iter / total);
+  layoutProgressAdapter(_("Updating"), 1000 * iter / total);
 }
 
 static void config_compute_u2froot(const char *mnemonic,
@@ -657,7 +657,7 @@ void config_setHomescreen(const uint8_t *data, uint32_t size) {
 
 static void get_root_node_callback(uint32_t iter, uint32_t total) {
   usbSleep(1);
-  layoutProgressAdapter(ui_prompt_wakingup[ui_language], 1000 * iter / total);
+  layoutProgressAdapter(_("Waking up"), 1000 * iter / total);
 }
 
 const uint8_t *config_getSeed(void) {

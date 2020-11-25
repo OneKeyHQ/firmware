@@ -122,7 +122,7 @@ void fsm_msgSignIdentity(const SignIdentity *msg) {
       msg->identity.has_proto && (strcmp(msg->identity.proto, "signify") == 0);
 
   int result = 0;
-  layoutProgressSwipe(ui_prompt_singing[ui_language], 0);
+  layoutProgressSwipe(_("Singing"), 0);
   if (sign_ssh) {  // SSH does not sign visual challenge
     result = sshMessageSign(node, msg->challenge_hidden.bytes,
                             msg->challenge_hidden.size, resp->signature.bytes);
