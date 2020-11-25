@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "./firmware/chinese.h"
 #include "buttons.h"
-#include "chinese.h"
 #include "common.h"
 #include "layout.h"
 #include "oled.h"
@@ -203,8 +203,8 @@ bool i2c_slave_send(uint32_t data_len) {
             oledBufferBak();
             oledClear();
             if (ui_language) {
-              oledDrawStringCenter_zh(OLED_WIDTH / 2, 32,
-                                      (uint8_t *)"等待连接...", FONT_STANDARD);
+              oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, "等待连接...",
+                                          FONT_STANDARD);
             } else {
               oledDrawStringCenter(OLED_WIDTH / 2, 32, "Waiting connect...",
                                    FONT_STANDARD);

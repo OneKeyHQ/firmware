@@ -12,6 +12,9 @@ OBJS += header.o
 OBJS += storage_ex.o
 endif
 
+OBJS += font.o
+OBJS += chinese.o
+
 OBJS += messages.o
 OBJS += config.o
 OBJS += trezor.o

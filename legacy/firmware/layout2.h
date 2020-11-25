@@ -118,14 +118,28 @@ const char **split_message_hex(const uint8_t *msg, uint32_t len);
 void Disp_Page(const BITMAP *icon, const char *btnNo, const char *btnYes,
                const char *desc, uint8_t *pucInfoBuf, uint16_t usLen);
 
-void vDISP_TurnPageUP(void);
-void vDISP_TurnPageDOWN(void);
 void layoutHomeInfo(void);
 void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode);
 
-void layoutDialogSwipe_zh(const BITMAP *icon, const char *btnNo,
-                          const char *btnYes, const char *desc,
-                          const char *line1, const char *line2,
-                          const char *line3, const char *line4);
+void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon);
+void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon);
+void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
+                         const char *btnYes, const char *desc,
+                         const char *line1, const char *line2,
+                         const char *line3, const char *line4);
+void layoutDialogCenterAdapter(const BITMAP *icon, const char *btnNo,
+                               const char *btnYes, const char *desc,
+                               const char *line1, const char *line2,
+                               const char *line3, const char *line4);
+void layoutProgressAdapter(const char *desc, int permil);
+
+void layoutDialogSwipeAdapter(const BITMAP *icon, const char *btnNo,
+                              const char *btnYes, const char *desc,
+                              const char *line1, const char *line2,
+                              const char *line3, const char *line4);
+void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const char *btnNo,
+                                    const char *btnYes, const char *desc,
+                                    const char *line1, const char *line2,
+                                    const char *line3, const char *line4);
 
 #endif

@@ -32,6 +32,7 @@
 #include "config.h"
 #include "curves.h"
 #include "debug.h"
+#include "font.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "hmac.h"
@@ -481,6 +482,8 @@ void config_init(void) {
   user_data_init();
 #endif
   usbTiny(oldTiny);
+
+  font_initialize();
 }
 
 void session_clear(bool lock) {
@@ -503,7 +506,7 @@ void session_clearCache(Session *session) {
 void config_lockDevice(void) { storage_lock(); }
 
 static void get_u2froot_callback(uint32_t iter, uint32_t total) {
-  layoutProgress_zh(ui_prompt_updating[ui_language], 1000 * iter / total);
+  layoutProgressAdapter(ui_prompt_updating[ui_language], 1000 * iter / total);
 }
 
 static void config_compute_u2froot(const char *mnemonic,
@@ -632,6 +635,7 @@ void config_setLanguage(const char *lang) {
   }
 
   storage_set(KEY_LANGUAGE, lang, strnlen(lang, MAX_LANGUAGE_LEN));
+  font_initialize();
 }
 
 void config_setPassphraseProtection(bool passphrase_protection) {
@@ -653,7 +657,7 @@ void config_setHomescreen(const uint8_t *data, uint32_t size) {
 
 static void get_root_node_callback(uint32_t iter, uint32_t total) {
   usbSleep(1);
-  layoutProgress_zh(ui_prompt_wakingup[ui_language], 1000 * iter / total);
+  layoutProgressAdapter(ui_prompt_wakingup[ui_language], 1000 * iter / total);
 }
 
 const uint8_t *config_getSeed(void) {

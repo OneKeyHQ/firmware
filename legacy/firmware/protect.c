@@ -295,12 +295,10 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   if (ui_language) {
     memset(secstrbuf + 10, 0x00, sizeof(secstrbuf) - 10);
     memcpy(secstrbuf + 10, "秒", strlen("秒"));
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10, (uint8_t *)message,
-                            FONT_STANDARD);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 13, (uint8_t *)"请等待",
-                            FONT_STANDARD);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 10 + 26, (uint8_t *)secstr,
-                            FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10, message, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10 + 13, "请等待",
+                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10 + 26, secstr, FONT_STANDARD);
 
   } else {
     oledDrawStringCenter(OLED_WIDTH / 2, 1 * 9, message, FONT_STANDARD);
@@ -434,8 +432,8 @@ bool protectChangePin(bool removal) {
       }
     } else {
       if (ui_language) {
-        layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                             "请确认PIN码", NULL, new_pin, NULL);
+        layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
+                                 "请确认PIN码", NULL, new_pin, NULL);
       } else {
         layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                           _("Please confirm PIN"), NULL, NULL, new_pin, NULL,
@@ -554,8 +552,8 @@ bool protectPassphrase(char *passphrase) {
 
   if (!g_bIsBixinAPP) {
     if (ui_language) {
-      layoutDialogSwipe_zh(&bmp_icon_info, NULL, NULL, NULL, "请输入密语", NULL,
-                           NULL, NULL);
+      layoutDialogSwipeAdapter(&bmp_icon_info, NULL, NULL, NULL, "请输入密语",
+                               NULL, NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL,
                         _("Please enter your"), _("passphrase using"),
@@ -655,8 +653,8 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
         }
 
         if (ui_language) {
-          layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", NULL,
-                               "请确认PIN码", NULL, pin, NULL);
+          layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", NULL,
+                                   "请确认PIN码", NULL, pin, NULL);
         } else {
           layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                             _("Please confirm PIN"), NULL, NULL, pin, NULL,

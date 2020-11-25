@@ -30,6 +30,7 @@
 #include "chinese.h"
 #include "common.h"
 #include "config.h"
+#include "font.h"
 #include "gettext.h"
 #include "layout2.h"
 #include "memory.h"
@@ -296,7 +297,7 @@ void layoutProgressSwipe(const char *desc, int permil) {
     layoutLast = layoutProgressSwipe;
     layoutSwipe();
   }
-  layoutProgress_zh(desc, permil);
+  layoutProgressAdapter(desc, permil);
 }
 
 void layoutScreensaver(void) {
@@ -309,8 +310,7 @@ void layoutLabel(char *label) {
   if (is_valid_ascii((uint8_t *)label, strlen(label))) {
     oledDrawStringCenter(OLED_WIDTH / 2, 16, label, FONT_DOUBLE);
   } else {
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 16, (uint8_t *)label,
-                            FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 16, label, FONT_STANDARD);
   }
 }
 #if !EMULATOR
@@ -379,10 +379,10 @@ void disLongPressBleTips(void) {
   if (change_ble_sta_flag == BUTTON_PRESS_BLE_ON) {
     oledClearPart();
     if (ui_language) {
-      oledDrawStringCenter_zh(OLED_WIDTH / 2, 20, (uint8_t *)"蓝牙已开启,",
-                              FONT_STANDARD);
-      oledDrawStringCenter_zh(OLED_WIDTH / 2, 32,
-                              (uint8_t *)"长按向上键 ^ 可关闭", FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, "蓝牙已开启,",
+                                  FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, "长按向上键 ^ 可关闭",
+                                  FONT_STANDARD);
     } else {
       oledDrawStringCenter(60, 20, "Bluetooth enabled,press", FONT_STANDARD);
       oledDrawStringCenter(60, 30, "and hold up button ^", FONT_STANDARD);
@@ -392,10 +392,10 @@ void disLongPressBleTips(void) {
   } else if (change_ble_sta_flag == BUTTON_PRESS_BLE_OFF) {
     oledClearPart();
     if (ui_language) {
-      oledDrawStringCenter_zh(OLED_WIDTH / 2, 20, (uint8_t *)"蓝牙已关闭,",
-                              FONT_STANDARD);
-      oledDrawStringCenter_zh(OLED_WIDTH / 2, 32,
-                              (uint8_t *)"长按向上键 ^ 可开启", FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, "蓝牙已关闭,",
+                                  FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, "长按向上键 ^ 可开启",
+                                  FONT_STANDARD);
 
     } else {
       oledDrawStringCenter(60, 20, (char *)" Bluetooth disabled,",
@@ -414,12 +414,12 @@ void disLongPressBleTips(void) {
 }
 void disPcConnectTips(void) {
   if (ui_language) {
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 20, (uint8_t *)"数据传输模式只提供",
-                            FONT_STANDARD);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 32, (uint8_t *)"基本电力,如需充电",
-                            FONT_STANDARD);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 44, (uint8_t *)"建议使用充电头!",
-                            FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, "数据传输模式只提供",
+                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, "基本电力,如需充电",
+                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 44, "建议使用充电头!",
+                                FONT_STANDARD);
 
   } else {
     oledDrawStringCenter(60, 20, "Data Transfer Mode,", FONT_STANDARD);
@@ -429,12 +429,12 @@ void disPcConnectTips(void) {
 }
 void disPowerChargeTips(void) {
   if (ui_language) {
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 20, (uint8_t *)"使用5V-200mA",
-                            FONT_STANDARD);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 32, (uint8_t *)"以上的充电头",
-                            FONT_STANDARD);
-    oledDrawStringCenter_zh(OLED_WIDTH / 2, 44, (uint8_t *)"可快速充电!",
-                            FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, "使用5V-200mA",
+                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, "以上的充电头",
+                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 44, "可快速充电!",
+                                FONT_STANDARD);
 
   } else {
     oledDrawStringCenter(60, 20, "Speed up charging with ", FONT_STANDARD);
@@ -553,7 +553,7 @@ void layoutHome(void) {
     oledDrawBitmap(56, 12, &bmp_home_logo);
     char label[MAX_LABEL_LEN + 1] = _("");
     if (config_getLabel(label, sizeof(label))) {
-      oledDrawStringCenter_zh(64, 40, (uint8_t *)label, FONT_STANDARD);
+      oledDrawStringCenterAdapter(64, 40, label, FONT_STANDARD);
     } else {
       layoutFillBleName(5);
     }
@@ -615,7 +615,7 @@ static void render_address_dialog(const CoinInfo *coin, const char *address,
   oledDrawBitmap(0, 0, &bmp_icon_question);
   if (ui_language) {
     int y = 0;
-    oledDrawString_zh(20, y, (uint8_t *)line1, FONT_STANDARD);
+    oledDrawStringAdapter(20, y, line1, FONT_STANDARD);
     y += 13;
     oledDrawString(20, y, line2, FONT_STANDARD);
     y += 9;
@@ -635,8 +635,8 @@ static void render_address_dialog(const CoinInfo *coin, const char *address,
         oledHLine(OLED_HEIGHT - 14);
       }
     }
-    layoutButtonNo_zh(_("取消"), &bmp_btn_cancel);
-    layoutButtonYes_zh(_("确认"), &bmp_btn_confirm);
+    layoutButtonNoAdapter(_("取消"), &bmp_btn_cancel);
+    layoutButtonYesAdapter(_("确认"), &bmp_btn_confirm);
   } else {
     oledDrawString(20, 0 * 9, line1, FONT_STANDARD);
     oledDrawString(20, 1 * 9, line2, FONT_STANDARD);
@@ -719,8 +719,8 @@ void layoutConfirmOmni(const uint8_t *data, uint32_t size) {
     str_out[0] = 0;
   }
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, _("取消"), _("确认"), NULL,
-                         _("确认 OMNI 交易:"), desc, NULL, str_out);
+    layoutDialogSwipeAdapter(&bmp_icon_question, _("取消"), _("确认"), NULL,
+                             _("确认 OMNI 交易:"), desc, NULL, str_out);
 
   } else {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
@@ -737,8 +737,9 @@ void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
     str = split_message(data, size, 20);
   }
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, _("取消"), _("确认"),
-                         _("确认 OP_RETURN:"), str[0], str[1], str[2], str[3]);
+    layoutDialogSwipeAdapter(&bmp_icon_question, _("取消"), _("确认"),
+                             _("确认 OP_RETURN:"), str[0], str[1], str[2],
+                             str[3]);
 
   } else {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
@@ -755,8 +756,9 @@ void layoutConfirmTx(const CoinInfo *coin, uint64_t amount_out,
   bn_format_uint64(amount_fee, NULL, coin->coin_shortcut, coin->decimals, 0,
                    false, str_fee, sizeof(str_fee));
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, _("取消"), _("确认"), NULL,
-                         _("确认发送:"), str_out, _("包含手续费 :"), str_fee);
+    layoutDialogSwipeAdapter(&bmp_icon_question, _("取消"), _("确认"), NULL,
+                             _("确认发送:"), str_out, _("包含手续费 :"),
+                             str_fee);
 
   } else {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
@@ -770,8 +772,8 @@ void layoutFeeOverThreshold(const CoinInfo *coin, uint64_t fee) {
   bn_format_uint64(fee, NULL, coin->coin_shortcut, coin->decimals, 0, false,
                    str_fee, sizeof(str_fee));
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, _("取消"), _("确认"), NULL,
-                         _("手续费过高:"), NULL, _("确认发送"), NULL);
+    layoutDialogSwipeAdapter(&bmp_icon_question, _("取消"), _("确认"), NULL,
+                             _("手续费过高:"), NULL, _("确认发送"), NULL);
 
   } else {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
@@ -793,8 +795,8 @@ void layoutSignMessage(const uint8_t *msg, uint32_t len) {
   if (!is_valid_ascii(msg, len)) {
     str = split_message_hex(msg, len);
     if (ui_language) {
-      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", "签名消息",
-                           str[0], str[1], str[2], str[3]);
+      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", "签名消息",
+                               str[0], str[1], str[2], str[3]);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
                         _("Sign binary message?"), str[0], str[1], str[2],
@@ -803,8 +805,8 @@ void layoutSignMessage(const uint8_t *msg, uint32_t len) {
   } else {
     str = split_message(msg, len, 18);
     if (ui_language) {
-      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", "签名消息",
-                           str[0], str[1], str[2], str[3]);
+      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", "签名消息",
+                               str[0], str[1], str[2], str[3]);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
                         _("Sign message?"), str[0], str[1], str[2], str[3],
@@ -824,8 +826,8 @@ void layoutVerifyMessage(const uint8_t *msg, uint32_t len) {
     str = split_message(msg, len, 20);
 
     if (ui_language) {
-      layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认", "验证消息",
-                           str[0], str[1], str[2], str[3]);
+      layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认", "验证消息",
+                               str[0], str[1], str[2], str[3]);
     } else {
       layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Confirm"),
                         _("Verified message"), str[0], str[1], str[2], str[3],
@@ -842,9 +844,9 @@ void layoutVerifyAddress(const CoinInfo *coin, const char *address) {
 void layoutCipherKeyValue(bool encrypt, const char *key) {
   const char **str = split_message((const uint8_t *)key, strlen(key), 16);
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认",
-                         encrypt ? "加密" : "解密", str[0], str[1], str[2],
-                         str[3]);
+    layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认",
+                             encrypt ? "加密" : "解密", str[0], str[1], str[2],
+                             str[3]);
   } else {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
                       encrypt ? _("Encrypt value of this key?")
@@ -856,9 +858,9 @@ void layoutCipherKeyValue(bool encrypt, const char *key) {
 void layoutEncryptMessage(const uint8_t *msg, uint32_t len, bool signing) {
   const char **str = split_message(msg, len, 16);
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, "取消", "确认",
-                         signing ? "加密+签名消息" : "加密消息", str[0], str[1],
-                         str[2], str[3]);
+    layoutDialogSwipeAdapter(&bmp_icon_question, "取消", "确认",
+                             signing ? "加密+签名消息" : "加密消息", str[0],
+                             str[1], str[2], str[3]);
   } else {
     layoutDialogSwipe(
         &bmp_icon_question, _("Cancel"), _("Confirm"),
@@ -871,9 +873,9 @@ void layoutDecryptMessage(const uint8_t *msg, uint32_t len,
                           const char *address) {
   const char **str = split_message(msg, len, 16);
   if (ui_language) {
-    layoutDialogSwipe_zh(&bmp_icon_question, NULL, "确认",
-                         address ? "解密签名消息" : "解密消息", str[0], str[1],
-                         str[2], str[3]);
+    layoutDialogSwipeAdapter(&bmp_icon_question, NULL, "确认",
+                             address ? "解密签名消息" : "解密消息", str[0],
+                             str[1], str[2], str[3]);
   } else {
     layoutDialogSwipe(
         &bmp_icon_info, NULL, _("OK"),
@@ -1415,17 +1417,17 @@ void layoutDeviceInfo(uint8_t ucPage) {
       oledClear();
 
       if (ui_language) {
-        oledDrawString_zh(0, y, (uint8_t *)"STM32 版本:", FONT_STANDARD);
-        oledDrawStringRight_zh(OLED_WIDTH - 1, y,
-                               (uint8_t *)VERSTR(VERSION_MAJOR) "." VERSTR(
-                                   VERSION_MINOR) "." VERSTR(VERSION_PATCH),
-                               FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "STM32 版本:", FONT_STANDARD);
+        oledDrawStringRightAdapter(OLED_WIDTH - 1, y,
+                                   VERSTR(VERSION_MAJOR) "." VERSTR(
+                                       VERSION_MINOR) "." VERSTR(VERSION_PATCH),
+                                   FONT_STANDARD);
         y += 13;
 
         if (ble_ver_state()) {
-          oledDrawString_zh(0, y, (uint8_t *)"蓝牙版本:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)ble_get_ver(),
-                                 FONT_STANDARD);
+          oledDrawStringAdapter(0, y, "蓝牙版本:", FONT_STANDARD);
+          oledDrawStringRightAdapter(OLED_WIDTH - 1, y, ble_get_ver(),
+                                     FONT_STANDARD);
           y += 13;
         }
 
@@ -1445,9 +1447,9 @@ void layoutDeviceInfo(uint8_t ucPage) {
 
       if (se_get_version(&se_version)) {
         if (ui_language) {
-          oledDrawString_zh(0, y, (uint8_t *)"SE 版本:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_version,
-                                 FONT_STANDARD);
+          oledDrawStringAdapter(0, y, "SE 版本:", FONT_STANDARD);
+          oledDrawStringRightAdapter(OLED_WIDTH - 1, y, se_version,
+                                     FONT_STANDARD);
           y += 13;
         } else {
           oledDrawString(0, y, "SE version:", FONT_STANDARD);
@@ -1457,8 +1459,8 @@ void layoutDeviceInfo(uint8_t ucPage) {
       }
 
       if (ui_language) {
-        oledDrawString_zh(0, y, (uint8_t *)"设备ID:", FONT_STANDARD);
-        oledDrawString_zh(40, y, (uint8_t *)config_uuid_str, FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "设备ID:", FONT_STANDARD);
+        oledDrawStringAdapter(40, y, config_uuid_str, FONT_STANDARD);
       } else {
         oledDrawString(0, y, "Device ID:", FONT_STANDARD);
         oledDrawString(50, y, config_uuid_str, FONT_STANDARD);
@@ -1473,20 +1475,19 @@ void layoutDeviceInfo(uint8_t ucPage) {
 
       if (ui_language) {
         if (ble_switch_state()) {
-          oledDrawString_zh(0, y, (uint8_t *)"启用蓝牙:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y,
-                                 (uint8_t *)(ble_switch_state() ? "是" : "否"),
-                                 FONT_STANDARD);
+          oledDrawStringAdapter(0, y, "启用蓝牙:", FONT_STANDARD);
+          oledDrawStringRightAdapter(OLED_WIDTH - 1, y,
+                                     (ble_switch_state() ? "是" : "否"),
+                                     FONT_STANDARD);
           y += 13;
         }
-        oledDrawString_zh(0, y, (uint8_t *)"启用SE:", FONT_STANDARD);
-        oledDrawStringRight_zh(
-            OLED_WIDTH - 1, y,
-            (uint8_t *)(config_getWhetherUseSE() ? "是" : "否"), FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "启用SE:", FONT_STANDARD);
+        oledDrawStringRightAdapter(OLED_WIDTH - 1, y,
+                                   (config_getWhetherUseSE() ? "是" : "否"),
+                                   FONT_STANDARD);
         y += 13;
-        oledDrawString_zh(0, y, (uint8_t *)"设备名称:", FONT_STANDARD);
-        oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)label,
-                               FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "设备名称:", FONT_STANDARD);
+        oledDrawStringRightAdapter(OLED_WIDTH - 1, y, label, FONT_STANDARD);
         y += 13;
       } else {
         if (ble_switch_state()) {
@@ -1505,17 +1506,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
           oledDrawStringRight(OLED_WIDTH - 1, y, label, FONT_STANDARD);
           y += 9;
         } else {
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)label,
-                                 FONT_STANDARD);
+          oledDrawStringRightAdapter(OLED_WIDTH - 1, y, label, FONT_STANDARD);
           y += 13;
         }
       }
 
       if (se_get_sn(&se_sn)) {
         if (ui_language) {
-          oledDrawString_zh(0, y, (uint8_t *)"序列号:", FONT_STANDARD);
-          oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)se_sn,
-                                 FONT_STANDARD);
+          oledDrawStringAdapter(0, y, "序列号:", FONT_STANDARD);
+          oledDrawStringRightAdapter(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
           y += 13;
         } else {
           oledDrawString(0, y, "SN:", FONT_STANDARD);
@@ -1534,9 +1533,8 @@ void layoutDeviceInfo(uint8_t ucPage) {
         secs /= 10;
       } while (secs > 0 && secstr >= secstrbuf);
       if (ui_language) {
-        oledDrawString_zh(0, y, (uint8_t *)"锁屏&关机时间:", FONT_STANDARD);
-        oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)secstr,
-                               FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "锁屏&关机时间:", FONT_STANDARD);
+        oledDrawStringRightAdapter(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
       } else {
         oledDrawString(0, y, "Auto-Lock & Shutdown:", FONT_STANDARD);
         y += 9;
@@ -1552,33 +1550,31 @@ void layoutDeviceInfo(uint8_t ucPage) {
       // uint64_2str(amount, amount_str);
       oledClear();
       if (ui_language) {
-        oledDrawStringCenter_zh(OLED_WIDTH / 2, y, (uint8_t *)"快捷支付",
-                                FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "快捷支付",
+                                    FONT_STANDARD);
         y += 13;
         oledHLine(13);
         y += 3;
-        oledDrawString_zh(0, y, (uint8_t *)"检查PIN:", FONT_STANDARD);
-        oledDrawStringRight_zh(
-            OLED_WIDTH - 1, y,
-            (uint8_t *)(config_getFastPayConfirmFlag() ? "否" : "是"),
+        oledDrawStringAdapter(0, y, "检查PIN:", FONT_STANDARD);
+        oledDrawStringRightAdapter(
+            OLED_WIDTH - 1, y, (config_getFastPayConfirmFlag() ? "否" : "是"),
             FONT_STANDARD);
 
         y += 12;
-        oledDrawString_zh(0, y, (uint8_t *)"按键确认:", FONT_STANDARD);
-        oledDrawStringRight_zh(
-            OLED_WIDTH - 1, y,
-            (uint8_t *)(config_getFastPayConfirmFlag() ? "否" : "是"),
+        oledDrawStringAdapter(0, y, "按键确认:", FONT_STANDARD);
+        oledDrawStringRightAdapter(
+            OLED_WIDTH - 1, y, (config_getFastPayConfirmFlag() ? "否" : "是"),
             FONT_STANDARD);
 
         y += 12;
-        oledDrawString_zh(0, y, (uint8_t *)"剩余次数:", FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "剩余次数:", FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y + 4, times_str, FONT_STANDARD);
 
         y += 12;
         if (g_bSelectSEFlag) {
-          oledDrawString_zh(0, y, (uint8_t *)"单次限额:", FONT_STANDARD);
+          oledDrawStringAdapter(0, y, "单次限额:", FONT_STANDARD);
         } else {
-          oledDrawString_zh(0, y, (uint8_t *)"单次限额:", FONT_STANDARD);
+          oledDrawStringAdapter(0, y, "单次限额:", FONT_STANDARD);
         }
         bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
                          sizeof(str_out) - 3);
@@ -1619,10 +1615,10 @@ void layoutDeviceInfo(uint8_t ucPage) {
     case 4:
       oledClear();
       if (ui_language) {
-        oledDrawString_zh(0, y, (uint8_t *)"蓝牙名称:", FONT_STANDARD);
+        oledDrawStringAdapter(0, y, "蓝牙名称:", FONT_STANDARD);
         y += 13;
-        oledDrawStringRight_zh(OLED_WIDTH - 1, y, (uint8_t *)ble_get_name(),
-                               FONT_STANDARD);
+        oledDrawStringRightAdapter(OLED_WIDTH - 1, y, ble_get_name(),
+                                   FONT_STANDARD);
       } else {
         oledDrawString(0, y, "BLE Name:", FONT_STANDARD);
         y += 9;
@@ -1730,8 +1726,8 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
   switch (ucIndex) {
     case DISP_NOT_ACTIVE:
       if (ui_language) {
-        oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - HZ_WIDTH,
-                                (uint8_t *)"未激活", FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
+                                    "未激活", FONT_STANDARD);
       } else {
         oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Not Activated",
                              FONT_STANDARD);
@@ -1739,8 +1735,8 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
       break;
     case DISP_NEED_BACKUP:
       if (ui_language) {
-        oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - HZ_WIDTH,
-                                (uint8_t *)"未备份", FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
+                                    "未备份", FONT_STANDARD);
       } else {
         oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Needs Backup",
                              FONT_STANDARD);
@@ -1748,8 +1744,8 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
       break;
     case DISP_BACKUP_ONLY:
       if (ui_language) {
-        oledDrawStringCenter_zh(OLED_WIDTH / 2, OLED_HEIGHT - HZ_WIDTH,
-                                (uint8_t *)"仅备份", FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
+                                    "仅备份", FONT_STANDARD);
       } else {
         oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, "Backup Only",
                              FONT_STANDARD);
@@ -1764,14 +1760,25 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
 }
 
 // layout chinese
-void layoutDialogSwipe_zh(const BITMAP *icon, const char *btnNo,
-                          const char *btnYes, const char *desc,
-                          const char *line1, const char *line2,
-                          const char *line3, const char *line4) {
+void layoutDialogSwipeAdapter(const BITMAP *icon, const char *btnNo,
+                              const char *btnYes, const char *desc,
+                              const char *line1, const char *line2,
+                              const char *line3, const char *line4) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  layoutDialog_zh(icon, btnNo, btnYes, desc, line1, line2, line3, line4);
+  layoutDialogAdapter(icon, btnNo, btnYes, desc, line1, line2, line3, line4);
 }
+
+void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const char *btnNo,
+                                    const char *btnYes, const char *desc,
+                                    const char *line1, const char *line2,
+                                    const char *line3, const char *line4) {
+  layoutLast = layoutDialogSwipe;
+  layoutSwipe();
+  layoutDialogCenterAdapter(icon, btnNo, btnYes, desc, line1, line2, line3,
+                            line4);
+}
+
 void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
   char line[sizeof("after 4294967296 minutes?")] = {0};
 
@@ -1792,11 +1799,169 @@ void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
                    sizeof(line) - off);
   strlcat(line, " ", sizeof(line));
   strlcat(line, unit, sizeof(line));
-  if (num > 1) {
+  if (num > 1 && ui_language == 0) {
     strlcat(line, "s", sizeof(line));
   }
   strlcat(line, "?", sizeof(line));
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Do you really want to"), _("auto-lock your device"),
                     line, NULL, NULL, NULL);
+}
+
+// layout chinese
+void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon) {
+  const struct font_desc *font = find_cur_font();
+  int icon_width = 0;
+  if (icon) {
+    oledDrawBitmap(1, OLED_HEIGHT - 8 - 1, icon);
+    icon_width = icon->width;
+  }
+  oledDrawStringAdapter(3 + icon_width, OLED_HEIGHT - (font->pixel + 1), btnNo,
+                        FONT_STANDARD);
+  oledInvert(0, OLED_HEIGHT - (font->pixel + 2),
+             icon_width + oledStringWidth_zh(btnNo, FONT_STANDARD) + 4,
+             OLED_HEIGHT);
+}
+
+void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
+  const struct font_desc *font = find_cur_font();
+  int icon_width = 0;
+  if (icon) {
+    oledDrawBitmap(OLED_WIDTH - 8 - 1, OLED_HEIGHT - 8, icon);
+    icon_width = icon->width;
+  }
+  oledDrawStringRightAdapter(OLED_WIDTH - icon_width - 3,
+                             OLED_HEIGHT - (font->pixel + 1), btnYes,
+                             FONT_STANDARD);
+  oledInvert(
+      OLED_WIDTH - oledStringWidth_zh(btnYes, FONT_STANDARD) - icon_width - 4,
+      OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH, OLED_HEIGHT);
+}
+
+void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
+                         const char *btnYes, const char *desc,
+                         const char *line1, const char *line2,
+                         const char *line3, const char *line4) {
+  int left = 0;
+  int y = 0;
+  const struct font_desc *font = find_cur_font();
+
+  oledClear();
+  if (icon) {
+    oledDrawBitmap(0, 0, icon);
+    left = icon->width + 4;
+  }
+  if (line1) {
+    oledDrawStringAdapter(left, y, line1, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+  if (line2) {
+    oledDrawStringAdapter(left, y, line2, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+  if (line3) {
+    oledDrawStringAdapter(left, y, line3, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+
+  if (desc) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font->pixel),
+                                desc, FONT_STANDARD);
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - 2 * (font->pixel) - 1);
+    }
+    // have enough space for line4
+    if (line4) {
+      if (y < OLED_HEIGHT - 3 * (font->pixel) - 1) {
+        oledDrawStringAdapter(left, y, line4, FONT_STANDARD);
+      }
+    }
+
+  } else {
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - (font->pixel + 4));
+    }
+    if (line3) {
+      oledDrawStringAdapter(left, y, line4, FONT_STANDARD);
+    }
+  }
+  if (btnNo) {
+    layoutButtonNoAdapter(btnNo, &bmp_btn_cancel);
+  }
+  if (btnYes) {
+    layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
+  }
+  oledRefresh();
+}
+
+void layoutDialogCenterAdapter(const BITMAP *icon, const char *btnNo,
+                               const char *btnYes, const char *desc,
+                               const char *line1, const char *line2,
+                               const char *line3, const char *line4) {
+  int y = 18;
+  const struct font_desc *font = find_cur_font();
+
+  oledClear();
+  if (icon) {
+    oledDrawBitmap((OLED_WIDTH - icon->width) / 2, 0, icon);
+  }
+  if (line1) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line1, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+  if (line2) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line2, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+  if (line3) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line3, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+  if (line4) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line4, FONT_STANDARD);
+    y += font->pixel + 1;
+  }
+
+  if (desc) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font->pixel),
+                                desc, FONT_STANDARD);
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - 2 * (font->pixel) - 1);
+    }
+
+  } else {
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - (font->pixel + 4));
+    }
+  }
+  if (btnNo) {
+    layoutButtonNoAdapter(btnNo, &bmp_btn_cancel);
+  }
+  if (btnYes) {
+    layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
+  }
+  oledRefresh();
+}
+
+void layoutProgressAdapter(const char *desc, int permil) {
+  oledClear();
+  layoutProgressPercent(permil / 10);
+  // progressbar
+  oledFrame(0, OLED_HEIGHT - 8, OLED_WIDTH - 1, OLED_HEIGHT - 1);
+  oledBox(1, OLED_HEIGHT - 7, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
+  permil = permil * (OLED_WIDTH - 4) / 1000;
+  if (permil < 0) {
+    permil = 0;
+  }
+  if (permil > OLED_WIDTH - 4) {
+    permil = OLED_WIDTH - 4;
+  }
+  oledBox(2, OLED_HEIGHT - 6, 1 + permil, OLED_HEIGHT - 3, 1);
+  // text
+  oledBox(0, OLED_HEIGHT - 16, OLED_WIDTH - 1, OLED_HEIGHT - 16 + 7, 0);
+  if (desc) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 24, desc,
+                                FONT_STANDARD);
+  }
+  oledRefresh();
 }

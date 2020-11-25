@@ -39,6 +39,7 @@ void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
                   const char *line3, const char *line4, const char *line5,
                   const char *line6);
 void layoutProgressUpdate(bool refresh);
+void layoutProgressPercent(int permil);
 void layoutProgress(const char *desc, int permil);
 uint8_t layoutStatusLogo(bool force_fresh);
 void disBatteryLevel(uint8_t cur_level);
@@ -46,13 +47,5 @@ void layoutBlePasskey(uint8_t *passkey);
 void layoutFillBleName(uint8_t line);
 void layoutFillBleVersion(uint8_t line);
 void layoutError(const char *line1, const char *line2);
-
-void layoutButtonNo_zh(const char *btnNo, const BITMAP *icon);
-void layoutButtonYes_zh(const char *btnYes, const BITMAP *icon);
-
-void layoutDialog_zh(const BITMAP *icon, const char *btnNo, const char *btnYes,
-                     const char *desc, const char *line1, const char *line2,
-                     const char *line3, const char *line4);
-void layoutProgress_zh(const char *desc, int permil);
 
 #endif

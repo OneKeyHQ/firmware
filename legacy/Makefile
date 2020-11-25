@@ -8,8 +8,6 @@ OBJS += flash.o
 OBJS += layout.o
 OBJS += oled.o
 OBJS += rng.o
-OBJS += chinese.o
-OBJS += GB2312.o
 
 ifneq ($(EMULATOR),1)
 OBJS += setup.o
