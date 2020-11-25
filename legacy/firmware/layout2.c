@@ -551,7 +551,7 @@ void layoutHome(void) {
     oledDrawBitmap(0, 0, &b);
   } else {
     oledDrawBitmap(56, 12, &bmp_home_logo);
-    char label[MAX_LABEL_LEN + 1] = _("");
+    char label[MAX_LABEL_LEN + 1] = "";
     if (config_getLabel(label, sizeof(label))) {
       oledDrawStringCenterAdapter(64, 40, label, FONT_STANDARD);
     } else {
@@ -1410,7 +1410,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
   char *se_version;
   char *se_sn;
   int y = 0;
-  char label[MAX_LABEL_LEN + 1] = _("");
+  char label[MAX_LABEL_LEN + 1] = "";
 
   switch (ucPage) {
     case 1:
@@ -1523,7 +1523,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
         }
       }
 
-      char secstrbuf[] = _("________0 s");
+      char secstrbuf[] = "________0 s";
       char *secstr = secstrbuf + 9;
       uint32_t secs = 0;
       secs = config_getAutoLockDelayMs() / 1000;

@@ -20,6 +20,8 @@
 #ifndef __GETTEXT_H__
 #define __GETTEXT_H__
 
-#define _(X) (X)
+char* gettext(const char* msgid);
+
+#define _(X) gettext(X)
 
 #endif

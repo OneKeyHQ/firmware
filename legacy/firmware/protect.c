@@ -279,7 +279,7 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char *message) {
   // Convert wait to secstr string.
-  char secstrbuf[] = _("________0 seconds");
+  char secstrbuf[] = "________0 seconds";
   char *secstr = secstrbuf + 9;
   uint32_t secs = wait;
   do {

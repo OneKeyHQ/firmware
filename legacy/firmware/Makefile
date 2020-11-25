@@ -14,6 +14,8 @@ endif
 
 OBJS += font.o
 OBJS += chinese.o
+OBJS += gettext.o
+OBJS += language.o
 
 OBJS += messages.o
 OBJS += config.o
