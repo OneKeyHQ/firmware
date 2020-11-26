@@ -1,5 +1,4 @@
 #include "font.h"
-#include "common.h"
 
 // #define USE_SONGTI
 #define USE_DINGMAO
@@ -8870,19 +8869,15 @@ static const struct font_desc *current_font = &font_dingmao_9x9;
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define num_fonts ARRAY_SIZE(fonts)
 
-void font_initialize(void) {
-  if (ui_language == 0) {
-    current_font = &font_default;
-  } else {
-    current_font = &font_dingmao_9x9;
-  }
+void font_set(const char *name) {
+  current_font = find_font(name);
+  if (current_font == NULL) current_font = &font_default;
 }
 
 const struct font_desc *find_font(const char *name) {
   unsigned int i;
   for (i = 0; i < num_fonts; i++)
     if (!strcmp(fonts[i]->name, name)) {
-      current_font = fonts[i];
       return fonts[i];
     }
   return NULL;

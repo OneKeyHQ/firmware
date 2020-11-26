@@ -1,5 +1,4 @@
 #include "chinese.h"
-#include "common.h"
 #include "font.h"
 #include "oled.h"
 
@@ -19,17 +18,17 @@ int oledStringWidth_zh(const char *text, uint8_t font) {
   return l;
 }
 
-static void oledDrawChar_zh(int x, int y, const char *zh, uint8_t font) {
+static void oledDrawChar_zh(int x, int y, const char *zh, uint8_t font,
+                            const struct font_desc *font_dc) {
   if (x >= OLED_WIDTH || y >= OLED_HEIGHT || x <= -12 || y <= -12) {
     return;
   }
-  const struct font_desc *font_dese = find_cur_font();
   int zoom = (font & FONT_DOUBLE) ? 2 : 1;
   const uint8_t *char_data = get_font_data(zh);
 
   if (!char_data) return;
 
-  for (int xo = 0; xo < font_dese->pixel; xo++) {
+  for (int xo = 0; xo < font_dc->pixel; xo++) {
     for (int yo = 0; yo < 8; yo++) {
       if (char_data[xo] & (1 << (8 - 1 - yo))) {
         if (zoom <= 1) {
@@ -40,12 +39,12 @@ static void oledDrawChar_zh(int x, int y, const char *zh, uint8_t font) {
         }
       }
     }
-    for (int yo = 0; yo < font_dese->pixel - 8; yo++) {
-      if (char_data[xo + font_dese->pixel] & (1 << (8 - 1 - yo))) {
+    for (int yo = 0; yo < font_dc->pixel - 8; yo++) {
+      if (char_data[xo + font_dc->pixel] & (1 << (8 - 1 - yo))) {
         if (zoom <= 1) {
           oledDrawPixel(x + xo, y + 8 + yo);
         } else {
-          oledBox(x + xo * zoom, y + (font_dese->pixel + yo) * zoom,
+          oledBox(x + xo * zoom, y + (font_dc->pixel + yo) * zoom,
                   x + (xo + 1) * zoom - 1, y + (yo + 8 + 1) * zoom - 1, true);
         }
       }
@@ -71,7 +70,7 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
       x += l;
       text++;
     } else {
-      if (font_desc->idx == DEFAULT_IDX) {
+      if (font_desc_bak->idx == DEFAULT_IDX) {
         font_desc_bak = find_font("dingmao_9x9");
       }
       if (x + HZ_CODE_LEN > OLED_WIDTH) {
@@ -79,7 +78,7 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
         y += font_desc_bak->pixel + 1;
       }
       if (y > OLED_HEIGHT) y = 0;
-      oledDrawChar_zh(x, y, text, font);
+      oledDrawChar_zh(x, y, text, font, font_desc_bak);
       x += (font & FONT_DOUBLE) ? 2 * font_desc_bak->width
                                 : font_desc_bak->width;
       text += HZ_CODE_LEN;

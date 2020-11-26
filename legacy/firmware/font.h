@@ -18,7 +18,7 @@ struct font_desc {
 };
 const struct font_desc *find_font(const char *name);
 const struct font_desc *find_cur_font(void);
-void font_initialize(void);
+void font_set(const char *name);
 const uint8_t *get_font_data(const char *zh);
 
 #endif

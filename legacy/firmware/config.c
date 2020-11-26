@@ -482,8 +482,6 @@ void config_init(void) {
   user_data_init();
 #endif
   usbTiny(oldTiny);
-
-  font_initialize();
 }
 
 void session_clear(bool lock) {
@@ -635,7 +633,7 @@ void config_setLanguage(const char *lang) {
   }
 
   storage_set(KEY_LANGUAGE, lang, strnlen(lang, MAX_LANGUAGE_LEN));
-  font_initialize();
+  font_set(ui_language ? "dingmao_9x9" : "english");
 }
 
 void config_setPassphraseProtection(bool passphrase_protection) {
@@ -760,15 +758,16 @@ bool config_getLanguage(char *dest, uint16_t dest_size) {
   if (sectrue == config_get_string(KEY_LANGUAGE, dest, dest_size)) {
     if (strcmp(dest, "en-US") == 0 || strcmp(dest, "english") == 0) {
       ui_language = 0;
-      return true;
     } else if (strcmp(dest, "zh-CN") == 0 || strcmp(dest, "chinese") == 0) {
       ui_language = 1;
-      return true;
     }
+  } else {
+    ui_language = 0;
+    strcpy(dest, "en-US");
+    dest_size = 5;
   }
-  ui_language = 0;
-  strcpy(dest, "en-US");
-  dest_size = 5;
+
+  font_set(ui_language ? "dingmao_9x9" : "english");
 
   return true;
 }
