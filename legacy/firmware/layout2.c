@@ -524,7 +524,7 @@ void layoutHome(void) {
   config_getNoBackup(&no_backup);
   config_getUnfinishedBackup(&unfinished_backup);
   config_getNeedsBackup(&needs_backup);
-  config_getMnemonicsImported(&backup_only);
+  backup_only = config_getMnemonicsImported();
 
   uint8_t homescreen[HOMESCREEN_SIZE] = {0};
   if (config_getHomescreen(homescreen, sizeof(homescreen))) {
@@ -534,29 +534,32 @@ void layoutHome(void) {
     b.data = homescreen;
     oledDrawBitmap(0, 0, &b);
   } else {
-    oledDrawBitmap(56, 12, &bmp_home_logo);
-    char label[MAX_LABEL_LEN + 1] = "";
-    if (config_getLabel(label, sizeof(label))) {
-      oledDrawStringCenterAdapter(64, 40, label, FONT_STANDARD);
-    } else {
-      layoutFillBleName(5);
-    }
-
     if (backup_only) {
-      vDisp_PromptInfo(DISP_BACKUP_ONLY, false);
-    } else if (!config_isInitialized()) {
-      vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, _("Backup Mode"),
+                                  FONT_STANDARD | FONT_DOUBLE);
+      layoutFillBleName(5);
     } else {
-      if (no_backup) {
-        oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
-                                    _("SEEDLESS"), FONT_STANDARD);
-      } else if (unfinished_backup) {
-        oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
-                                    _("BACKUP FAILED!"), FONT_STANDARD);
-      } else if (needs_backup) {
-        vDisp_PromptInfo(DISP_NEED_BACKUP, false);
+      oledDrawBitmap(56, 12, &bmp_home_logo);
+      char label[MAX_LABEL_LEN + 1] = "";
+      if (config_getLabel(label, sizeof(label))) {
+        oledDrawStringCenterAdapter(64, 40, label, FONT_STANDARD);
+      } else {
+        layoutFillBleName(5);
+      }
+      if (!config_isInitialized()) {
+        vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
+      } else {
+        if (no_backup) {
+          oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
+                                      _("SEEDLESS"), FONT_STANDARD);
+        } else if (unfinished_backup) {
+          oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
+                                      _("BACKUP FAILED!"), FONT_STANDARD);
+        } else if (needs_backup) {
+          vDisp_PromptInfo(DISP_NEED_BACKUP, false);
+        }
       }
     }
   }

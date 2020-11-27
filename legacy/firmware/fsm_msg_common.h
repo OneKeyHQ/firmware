@@ -105,6 +105,9 @@ bool get_features(Features *resp) {
     resp->has_se_ver = true;
     memcpy(resp->se_ver, sn_version, strlen(sn_version));
   }
+
+  resp->has_backup_only = true;
+  resp->backup_only = config_getMnemonicsImported();
   return resp;
 }
 
@@ -161,9 +164,7 @@ void fsm_msgPing(const Ping *msg) {
 
 void fsm_msgChangePin(const ChangePin *msg) {
   // CHECK_INITIALIZED
-  bool imported = false;
-  config_getMnemonicsImported(&imported);
-  if (!config_isInitialized() && !imported) {
+  if (!config_isInitialized() && !config_getMnemonicsImported()) {
     fsm_sendFailure(FailureType_Failure_NotInitialized, NULL);
     return;
   }
@@ -1014,9 +1015,7 @@ void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg) {
 }
 
 void fsm_msgBixinBackupDevice(void) {
-  bool imported = false;
-  config_getMnemonicsImported(&imported);
-  if (!imported) {
+  if (!config_getMnemonicsImported()) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     "device is not supported");
     layoutHome();

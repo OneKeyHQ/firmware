@@ -70,7 +70,6 @@
 // message methods
 
 static uint8_t msg_resp[MSG_OUT_SIZE] __attribute__((aligned));
-static bool mnemonic_imported = false;
 
 #define RESP_INIT(TYPE)                                                    \
   TYPE *resp = (TYPE *)(void *)msg_resp;                                   \
@@ -78,8 +77,7 @@ static bool mnemonic_imported = false;
   memzero(resp, sizeof(TYPE));
 
 #define CHECK_INITIALIZED                                      \
-  config_getMnemonicsImported(&mnemonic_imported);             \
-  if (mnemonic_imported) {                                     \
+  if (config_getMnemonicsImported()) {                         \
     fsm_sendFailure(FailureType_Failure_ProcessError,          \
                     "device is already used for backup");      \
     return;                                                    \
@@ -90,8 +88,7 @@ static bool mnemonic_imported = false;
   }
 
 #define CHECK_NOT_INITIALIZED                                             \
-  config_getMnemonicsImported(&mnemonic_imported);                        \
-  if (mnemonic_imported) {                                                \
+  if (config_getMnemonicsImported()) {                                    \
     fsm_sendFailure(FailureType_Failure_ProcessError,                     \
                     "device is already used for backup");                 \
     return;                                                               \

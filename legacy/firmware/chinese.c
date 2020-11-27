@@ -8,7 +8,8 @@ int oledStringWidth_zh(const char *text, uint8_t font) {
   int l = 0;
   while (*text) {
     if ((uint8_t)*text < 0x80) {
-      l += fontCharWidth(font & 0x7f, (uint8_t)*text) + 1;
+      l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
+           ((font & FONT_DOUBLE) ? 2 : 1);
       text++;
     } else {
       l += (font & FONT_DOUBLE) ? 2 * font_dese->width : font_dese->width;

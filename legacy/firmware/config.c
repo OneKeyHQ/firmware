@@ -602,7 +602,7 @@ void config_loadDevice_ex(const BixinLoadDevice *msg) {
   config_set_bool(KEY_MNEMONICS_IMPORTED, true);
 
   config_setMnemonic(msg->mnemonics);
-  config_set_bool(KEY_INITIALIZED, false);
+  config_set_bool(KEY_INITIALIZED, true);
 
   if (msg->has_language) {
     config_setLanguage(msg->language);
@@ -1019,8 +1019,10 @@ void config_setImported(bool imported) {
   config_set_bool(KEY_IMPORTED, imported);
 }
 
-bool config_getMnemonicsImported(bool *imported) {
-  return sectrue == config_get_bool(KEY_MNEMONICS_IMPORTED, imported);
+bool config_getMnemonicsImported(void) {
+  bool mnemonic_imported = false;
+  config_get_bool(KEY_MNEMONICS_IMPORTED, &mnemonic_imported);
+  return mnemonic_imported;
 }
 
 bool config_getNeedsBackup(bool *needs_backup) {

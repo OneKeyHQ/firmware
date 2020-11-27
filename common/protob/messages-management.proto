@@ -97,6 +97,7 @@ message Features {
     optional uint32 offset = 50;
     optional uint32 auto_lock_delay_ms = 51;
     optional string se_ver = 52;
+    optional bool backup_only = 53;
 }
 
 /**

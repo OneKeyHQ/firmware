@@ -152,7 +152,7 @@ bool config_isInitializedSeeds(void);
 bool config_getImported(bool *imported);
 void config_setImported(bool imported);
 
-bool config_getMnemonicsImported(bool *imported);
+bool config_getMnemonicsImported(void);
 
 bool config_getNeedsBackup(bool *needs_backup);
 void config_setNeedsBackup(bool needs_backup);
