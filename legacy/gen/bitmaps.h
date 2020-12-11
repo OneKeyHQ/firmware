@@ -9,8 +9,12 @@ typedef struct {
 } BITMAP;
 
 extern const BITMAP bmp_BiXin_logo32;
+extern const BITMAP bmp_btn_back;
 extern const BITMAP bmp_btn_cancel;
 extern const BITMAP bmp_btn_confirm;
+extern const BITMAP bmp_btn_down;
+extern const BITMAP bmp_btn_forward;
+extern const BITMAP bmp_btn_up;
 extern const BITMAP bmp_digit0;
 extern const BITMAP bmp_digit1;
 extern const BITMAP bmp_digit2;
