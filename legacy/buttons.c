@@ -22,7 +22,6 @@
 
 struct buttonState button = {0};
 static volatile bool btn_up_long = false, btn_down_long = false;
-#define MIN_PRESS 200
 
 #if !EMULATOR
 #include <libopencm3/cm3/nvic.h>
@@ -262,7 +261,7 @@ void buttonUpdate() {
       if (btn_up_long) {
         btn_up_long = false;
         button.UpUp = false;
-      } else if (button.UpDown > MIN_PRESS) {
+      } else {
         button.UpUp = true;
       }
       button.UpDown = 0;
@@ -282,9 +281,7 @@ void buttonUpdate() {
     }
   } else {                                   // down button is up
     if ((last_state & BTN_PIN_DOWN) == 0) {  // last down was down
-      if (button.DownDown > MIN_PRESS) {
-        button.DownUp = true;
-      }
+      button.DownUp = true;
       button.DownDown = 0;
     } else {  // last down was up
       button.DownDown = 0;
@@ -304,4 +301,36 @@ bool hasbutton(void) {
     return true;
   }
   return false;
+}
+
+uint8_t keyScan(void) {
+  delay_ms(5);
+  buttonUpdate();
+  if (button.YesUp)
+    return KEY_CONFIRM;
+  else if (button.NoUp)
+    return KEY_CANCEL;
+  else if (button.UpUp)
+    return KEY_UP;
+  else if (button.DownUp)
+    return KEY_DOWN;
+
+  return KEY_NULL;
+}
+
+uint8_t waitKey(uint32_t time_out, uint8_t mode) {
+  uint8_t key = KEY_NULL;
+  timer_out_set(timer_out_oper, time_out);
+  while (1) {
+    if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
+    key = keyScan();
+    if (key != KEY_NULL) {
+      if (mode == 0) {
+        return key;
+      } else {
+        if (key == KEY_CONFIRM || key == KEY_CANCEL) return key;
+      }
+    }
+  }
+  return KEY_NULL;
 }

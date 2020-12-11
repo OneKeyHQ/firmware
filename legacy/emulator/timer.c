@@ -46,3 +46,5 @@ uint32_t timer_ms(void) {
   }
   return msec;
 }
+
+void delay_ms(uint32_t uiDelay_Ms) { (void)uiDelay_Ms; }
