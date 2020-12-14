@@ -150,7 +150,8 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
   if (timeout_s) {
     timer_out_set(timer_out_oper, timeout_s);
   }
-  if (g_bIsBixinAPP) acked = true;
+  // if (g_bIsBixinAPP) acked = true;
+  acked = true;
 
   while (1) {
     if (timeout_s) {
@@ -246,6 +247,8 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
         return pma->pin;
       else
         return 0;
+    } else if (msg_tiny_id == MessageType_MessageType_PinInputOnDevice) {
+      return protectInputPin(text, 6);
     }
     if (button.NoUp) {
       timer_out_set(timer_out_oper, 0);
@@ -293,7 +296,7 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   }
 
   oledClear();
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _(message), FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, _(message), FONT_STANDARD);
   y += font->pixel + 1;
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Please wait"),
                               FONT_STANDARD);
@@ -665,4 +668,132 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
     }
   }
   return true;
+}
+
+const char *protectInputPin(const char *text, uint8_t pin_len) {
+  uint8_t key = KEY_NULL;
+  uint8_t counter = 0;
+  char value[2] = "1";
+  static char pin[10] = "";
+
+  memzero(pin, sizeof(pin));
+refresh_menu:
+  layoutInputPin(counter, text, value);
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (value[0] > '1')
+        value[0]--;
+      else
+        value[0] = '9';
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (value[0] < '9')
+        value[0]++;
+      else
+        value[0] = '1';
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      (void)pin;
+      pin[counter++] = value[0];
+      if (counter == pin_len) return pin;
+      value[0] = '1';
+      goto refresh_menu;
+    case KEY_CANCEL:
+      layoutHome();
+      return PIN_CANCELED_BY_BUTTON;
+    default:
+      break;
+  }
+  return NULL;
+}
+
+bool protectPinOnDevice(bool use_cached) {
+  if (use_cached && session_isUnlocked()) {
+    return true;
+  }
+
+  const char *pin = "";
+  if (config_hasPin()) {
+    pin = protectInputPin(_("Please enter currnet PIN"), 6);
+
+    if (!pin) {
+      return false;
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
+  }
+
+  bool ret = config_unlock(pin);
+  if (!ret) {
+    layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                        _("The PIN is"), _("INVALID!"), NULL, NULL, NULL, NULL);
+    waitKey(timer1s * 5, 0);
+  }
+  layoutHome();
+  return ret;
+}
+
+bool protectChangePinOnDevice(void) {
+  static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
+  static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
+  const char *pin = NULL;
+
+  if (config_hasPin()) {
+    pin = protectInputPin(_("Please enter currnet PIN"), 6);
+
+    if (pin == NULL) {
+      return false;
+    } else if (pin == PIN_CANCELED_BY_BUTTON)
+      return false;
+
+    bool ret = config_unlock(pin);
+    if (ret == false) {
+      layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                          _("The PIN is"), _("INVALID!"), NULL, NULL, NULL,
+                          NULL);
+      waitKey(timer1s * 5, 0);
+      return false;
+    }
+
+    strlcpy(old_pin, pin, sizeof(old_pin));
+  }
+
+  pin = protectInputPin(_("Please enter new PIN"), 6);
+  if (pin == PIN_CANCELED_BY_BUTTON) {
+    return false;
+  } else if (pin == NULL || pin[0] == '\0') {
+    memzero(old_pin, sizeof(old_pin));
+    return false;
+  }
+  strlcpy(new_pin, pin, sizeof(new_pin));
+
+  pin = protectInputPin(_("Please re-enter new PIN"), 6);
+  if (pin == NULL) {
+    memzero(old_pin, sizeof(old_pin));
+    memzero(new_pin, sizeof(new_pin));
+    return false;
+  } else if (pin == PIN_CANCELED_BY_BUTTON)
+    return false;
+  if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
+    memzero(old_pin, sizeof(old_pin));
+    memzero(new_pin, sizeof(new_pin));
+    layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                        _("The PIN is"), _("dismatch!"), NULL, NULL, NULL,
+                        NULL);
+    waitKey(timer1s * 5, 0);
+    layoutHome();
+    return false;
+  }
+
+  bool ret = config_changePin(old_pin, new_pin);
+  memzero(old_pin, sizeof(old_pin));
+  memzero(new_pin, sizeof(new_pin));
+  if (ret == false) {
+  } else {
+    layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL, _("The PIN is"),
+                        _("changed!"), NULL, NULL, NULL, NULL);
+    waitKey(timer1s * 5, 0);
+  }
+  layoutHome();
+  return ret;
 }
