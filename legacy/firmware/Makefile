@@ -16,6 +16,9 @@ OBJS += font.o
 OBJS += chinese.o
 OBJS += gettext.o
 OBJS += language.o
+OBJS += menu_para.o
+OBJS += menu_core.o
+OBJS += menu_list.o
 
 OBJS += messages.o
 OBJS += config.o

@@ -35,6 +35,8 @@
 #include "layout2.h"
 #include "memory.h"
 #include "memzero.h"
+#include "menu_core.h"
+#include "menu_list.h"
 #include "nem2.h"
 #include "oled.h"
 #include "prompt.h"
@@ -59,8 +61,6 @@ static uint8_t battery_old = 0xff;
 static uint8_t dis_power_flag = 0;
 static bool layout_refresh = false;
 #endif
-
-#define DEVICE_INFO_PAGE_NUM 4
 
 #if !EMULATOR
 void chargeDisTimer(void) {
@@ -539,12 +539,12 @@ void layoutHome(void) {
                                   FONT_STANDARD | FONT_DOUBLE);
       layoutFillBleName(5);
     } else {
-      oledDrawBitmap(56, 12, &bmp_home_logo);
+      oledDrawBitmap(56, 8, &bmp_home_logo);
       char label[MAX_LABEL_LEN + 1] = "";
       if (config_getLabel(label, sizeof(label))) {
         oledDrawStringCenterAdapter(64, 40, label, FONT_STANDARD);
       } else {
-        layoutFillBleName(5);
+        layoutFillBleName(4);
       }
       if (!config_isInitialized()) {
         vDisp_PromptInfo(DISP_NOT_ACTIVE, false);
@@ -574,6 +574,10 @@ void layoutHome(void) {
 
   // Reset lock screen timeout
   system_millis_lock_start = timer_ms();
+
+  bool initialized = config_isInitialized() | config_getMnemonicsImported();
+
+  main_menu_init(initialized);
 }
 
 static void render_address_dialog(const CoinInfo *coin, const char *address,
@@ -934,6 +938,37 @@ void layoutAddress(const char *address, const char *desc, bool qrcode,
   }
 
   layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
+  oledRefresh();
+}
+
+void layoutQRCode(const char *text) {
+  uint8_t codedata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
+  uint8_t tempdata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
+  uint8_t times = 0;
+
+  int side = 0;
+  oledClear();
+  if (qrcodegen_encodeText(text, tempdata, codedata, qrcodegen_Ecc_LOW,
+                           qrcodegen_VERSION_MIN, QR_MAX_VERSION,
+                           qrcodegen_Mask_AUTO, true)) {
+    side = qrcodegen_getSize(codedata);
+    times = 63 / side;
+    int x = 64 - times * side / 2;
+    int y = 32 - times * side / 2;
+    oledInvert(x - 1, y - 1, x + side * times, y + side * times);
+    for (int i = 0; i < side; i++) {
+      for (int j = 0; j < side; j++) {
+        if (qrcodegen_getModule(codedata, i, j)) {
+          oledBox(x + i * times, y + j * times, x + (i + 1) * times - 1,
+                  y + (j + 1) * times - 1, false);
+        }
+      }
+    }
+  } else {
+    layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), NULL,
+                        _("Generate QR Code fail"), NULL, NULL, NULL, NULL,
+                        NULL);
+  }
   oledRefresh();
 }
 
@@ -1430,40 +1465,18 @@ void layoutDeviceInfo(uint8_t ucPage) {
 }
 
 void layoutHomeInfo(void) {
-  static uint8_t info_page = 0;
-  buttonUpdate();
+  uint8_t key = KEY_NULL;
+  key = keyScan();
 
   if (layoutNeedRefresh()) {
     layoutHome();
   }
   if (layoutLast == layoutHome) {
-    if (button.UpUp || button.DownUp) {
-      if (button.UpUp)
-        info_page = DEVICE_INFO_PAGE_NUM;
-      else
-        info_page = 1;
-      layoutDeviceInfo(info_page);
+    if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
+      menu_run(KEY_NULL, timer_ms());
     }
-  } else if (layoutLast == layoutDeviceInfo) {
-    // auto display 10 seconds
-    if ((timer_ms() - system_millis_display_info_start) >= 10 * 1000) {
-      info_page = 0;
-    }
-    if (button.UpUp) {
-      if (info_page) {
-        info_page--;
-        layoutDeviceInfo(info_page);
-      }
-    } else if (button.DownUp) {
-      if (info_page < DEVICE_INFO_PAGE_NUM) {
-        info_page++;
-        layoutDeviceInfo(info_page);
-      } else
-        info_page = 0;
-    } else if (button.NoUp) {
-      info_page = 0;
-    }
-    if (info_page == 0) layoutHome();
+  } else if (layoutLast == menu_run) {
+    menu_run(key, timer_ms());
   }
   // if homescreen is shown for too long
   if (layoutLast == layoutHome) {
@@ -1590,7 +1603,7 @@ void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon) {
   oledDrawStringAdapter(3 + icon_width, OLED_HEIGHT - (font->pixel + 1), btnNo,
                         FONT_STANDARD);
   oledInvert(0, OLED_HEIGHT - (font->pixel + 2),
-             icon_width + oledStringWidth_zh(btnNo, FONT_STANDARD) + 4,
+             icon_width + oledStringWidthAdapter(btnNo, FONT_STANDARD) + 4,
              OLED_HEIGHT);
 }
 
@@ -1598,15 +1611,15 @@ void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
   const struct font_desc *font = find_cur_font();
   int icon_width = 0;
   if (icon) {
-    oledDrawBitmap(OLED_WIDTH - 8 - 1, OLED_HEIGHT - 8, icon);
+    oledDrawBitmap(OLED_WIDTH - 8 - 1, OLED_HEIGHT - 8 - 1, icon);
     icon_width = icon->width;
   }
   oledDrawStringRightAdapter(OLED_WIDTH - icon_width - 3,
                              OLED_HEIGHT - (font->pixel + 1), btnYes,
                              FONT_STANDARD);
-  oledInvert(
-      OLED_WIDTH - oledStringWidth_zh(btnYes, FONT_STANDARD) - icon_width - 4,
-      OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH, OLED_HEIGHT);
+  oledInvert(OLED_WIDTH - oledStringWidthAdapter(btnYes, FONT_STANDARD) -
+                 icon_width - 4,
+             OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH, OLED_HEIGHT);
 }
 
 void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
@@ -1748,4 +1761,216 @@ void layoutProgressAdapter(const char *desc, int permil) {
                                 FONT_STANDARD);
   }
   oledRefresh();
+}
+
+void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {
+  int l = 0;
+  int y0 = font & FONT_DOUBLE ? 8 : 0;
+  oledBox(x, y - 8, x + 8, y + 16 + y0, false);
+  oledDrawBitmap(x, y - 8, &bmp_btn_up);
+  l = oledStringWidth(text, font);
+  oledDrawStringAdapter(x + 4 - l / 2, y - 1, text, font);
+  oledDrawBitmap(x, y + 8 + y0, &bmp_btn_down);
+  oledRefresh();
+}
+
+void layoutInputPin(uint8_t pos, const char *text, const char *init_number) {
+  int l, y = 0;
+  char pin_show[] = "_  _  _  _  _  _";
+
+  for (uint8_t i = 0; i < pos; i++) {
+    pin_show[i * 3] = '*';
+  }
+  oledClear();
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, text, FONT_STANDARD);
+  y += 18;
+  l = oledStringWidthAdapter(pin_show, FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, pin_show, FONT_STANDARD);
+
+  layoutItemsSelect(64 - l / 2 + pos * 10, y, init_number,
+                    FONT_STANDARD | FONT_DOUBLE);
+  layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
+  if (pos < 5) {
+    layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
+  } else {
+    layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
+  }
+
+  oledRefresh();
+}
+
+void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
+                     const char *letter) {
+  int l, l1, y = 0;
+  char word_show[] = "_  _  _  _  _  _  _  _";
+
+  for (uint8_t i = 0; i < prefix_len; i++) {
+    word_show[i * 3] = prefix[i];
+  }
+  oledClear();
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, text, FONT_STANDARD);
+  y += 27;
+  l1 = oledStringWidthAdapter(prefix, FONT_STANDARD);
+  l = oledStringWidthAdapter(word_show, FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, word_show, FONT_STANDARD);
+
+  layoutItemsSelect(64 - l / 2 + l1 + prefix_len * 4, y, letter, FONT_STANDARD);
+  layoutButtonNoAdapter(_("Back"), &bmp_btn_back);
+  layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
+
+  oledRefresh();
+}
+
+void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                              const char *btnNo, const char *btnYes,
+                              uint32_t index, uint32_t count, const char *title,
+                              const char *prefex, const char *current,
+                              const char *previous, const char *next) {
+  int x, l, l1, y, y1;
+  int step = 3;
+  char index_str[16] = "";
+  const struct font_desc *cur_font = find_cur_font();
+
+  y = 0;
+
+  oledClear();
+  if (title) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, title, FONT_STANDARD);
+    y += cur_font->pixel + 1;
+    y++;
+    oledHLine(y + 1);
+    y += 2;
+    y1 = 34;
+  } else {
+    y1 = 28;
+  }
+
+  if (index > 0) {
+    uint2str(index, index_str);
+    strcat(index_str + strlen(index_str), "/");
+    uint2str(count, index_str + strlen(index_str));
+    oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
+  }
+  if (previous) {
+    oledDrawBitmap(60, y, bmp_up);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1 - cur_font->pixel - step,
+                                previous, FONT_STANDARD);
+  }
+
+  l = oledStringWidthAdapter(current, FONT_STANDARD);
+  x = (OLED_WIDTH - l) / 2;
+
+  if (prefex) {
+    l1 = oledStringWidthAdapter(prefex, FONT_STANDARD);
+    oledDrawStringAdapter(x - l1 - 5, y1, prefex, FONT_STANDARD);
+  }
+
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, current, FONT_STANDARD);
+
+  oledInvert(x - 4, y1 - 1, x + l + 2, y1 + cur_font->pixel);
+  oledClearPixel(x - 4, y1 - 1);
+  oledClearPixel(x - 4, y1 + cur_font->pixel);
+  oledClearPixel(x + l + 2, y1 - 1);
+  oledClearPixel(x + l + 2, y1 + cur_font->pixel);
+
+  if (next) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1 + cur_font->pixel + step,
+                                next, FONT_STANDARD);
+    oledDrawBitmap(60, OLED_HEIGHT - 8, bmp_down);
+  }
+  if (btnNo) {
+    layoutButtonNoAdapter(btnNo, &bmp_btn_cancel);
+  }
+  if (btnYes) {
+    layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
+  }
+
+  oledRefresh();
+}
+
+#define DEVICE_INFO_PAGE_NUM 2
+
+void layouKeyValue(int y, const char *desc, const char *value) {
+  oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
+  oledDrawStringRightAdapter(OLED_WIDTH - 1, y, value, FONT_STANDARD);
+}
+
+void layoutDeviceParameters(int num) {
+  (void)num;
+  const struct font_desc *font = find_cur_font();
+  char *se_version = NULL;
+  char *se_sn;
+  int x = 0, y = 0;
+  int index = 0;
+  char label[MAX_LABEL_LEN + 1] = "";
+  uint8_t key = KEY_NULL;
+
+refresh_menu:
+  y = 0;
+  oledClear();
+  switch (index) {
+    case 0:
+      config_getLabel(label, sizeof(label));
+
+      layouKeyValue(y, _("Label:"), label);
+      y += font->pixel + 1;
+
+      if (se_get_sn(&se_sn)) {
+        layouKeyValue(y, _("Serial:"), se_sn);
+        y += font->pixel + 1;
+      }
+
+      layouKeyValue(y, _("BLE Name:"), ble_get_name());
+      y += font->pixel + 1;
+
+      // layouKeyValue(y, _("Device ID:"), config_uuid_str);
+      oledDrawStringAdapter(0, y, _("Device ID:"), FONT_STANDARD);
+      if (ui_language == 0)
+        x = 55;
+      else
+        x = 32;
+      oledDrawStringAdapter(x, y, config_uuid_str, FONT_STANDARD);
+
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
+                     &bmp_btn_down);
+
+      break;
+    case 1:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+      y += 8;
+      se_get_version(&se_version);
+      layouKeyValue(y, _("Firmware version:"),
+                    VERSTR(VERSION_MAJOR) "." VERSTR(VERSION_MINOR) "." VERSTR(
+                        VERSION_PATCH));
+      y += font->pixel + 1;
+
+      layouKeyValue(y, _("BLE version:"), ble_get_ver());
+      y += font->pixel + 1;
+
+      layouKeyValue(y, _("SE version:"), se_version);
+      y += font->pixel + 1;
+      break;
+
+    default:
+      break;
+  }
+  oledRefresh();
+  key = waitKey(timer1s * 10, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) {
+        index--;
+        goto refresh_menu;
+      }
+      break;
+    case KEY_DOWN:
+      if (index < DEVICE_INFO_PAGE_NUM - 1) {
+        index++;
+        goto refresh_menu;
+      }
+      break;
+    case KEY_CANCEL:
+    case KEY_CONFIRM:
+      return;
+  }
 }

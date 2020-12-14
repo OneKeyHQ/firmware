@@ -106,6 +106,8 @@ const char **split_message_hex(const uint8_t *msg, uint32_t len);
 void Disp_Page(const BITMAP *icon, const char *btnNo, const char *btnYes,
                const char *desc, uint8_t *pucInfoBuf, uint16_t usLen);
 
+void layoutQRCode(const char *text);
+
 void layoutHomeInfo(void);
 void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode);
 
@@ -128,5 +130,24 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const char *btnNo,
                                     const char *line1, const char *line2,
                                     const char *line3, const char *line4,
                                     const char *line5, const char *line6);
+
+void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
+void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                              const char *btnNo, const char *btnYes,
+                              uint32_t index, uint32_t count, const char *title,
+                              const char *prefex, const char *current,
+                              const char *previous, const char *next);
+
+void layoutInputPin(uint8_t pos, const char *text, const char *init_number);
+
+void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
+                     const char *letter);
+
+void layoutDeviceParameters(int num);
+
+#define layoutMenuItems(bmp_up, bmp_down, index, count, title, current,       \
+                        previous, next)                                       \
+  layoutItemsSelectAdapter(bmp_up, bmp_down, NULL, NULL, index, count, title, \
+                           NULL, current, previous, next)
 
 #endif
