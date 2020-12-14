@@ -19,6 +19,7 @@
 
 #include "reset.h"
 #include "bip39.h"
+#include "buttons.h"
 #include "common.h"
 #include "config.h"
 #include "fsm.h"
@@ -40,6 +41,7 @@ static uint8_t int_entropy[32];
 static bool awaiting_entropy = false;
 static bool skip_backup = false;
 static bool no_backup = false;
+static bool reset_byself = false;
 
 void reset_init(bool display_random, uint32_t _strength,
                 bool passphrase_protection, bool pin_protection,
@@ -152,7 +154,10 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
       }
       layoutHome();
     } else {
-      reset_backup(false, mnemonic);
+      if (!reset_byself)
+        reset_backup(false, mnemonic);
+      else
+        writedown_mnemonic(mnemonic);
     }
   } else {
     if (skip_backup || no_backup) {
@@ -244,6 +249,79 @@ void reset_backup(bool separated, const char *mnemonic) {
     }
   }
   layoutHome();
+}
+
+void writedown_mnemonic(const char *mnemonic) {
+  uint8_t key = KEY_NULL;
+  for (int pass = 0; pass < 2; pass++) {
+    int i = 0, word_pos = 1;
+    while (mnemonic[i] != 0) {
+      // copy current_word
+      int j = 0;
+      while (mnemonic[i] != ' ' && mnemonic[i] != 0 &&
+             j + 1 < (int)sizeof(current_word)) {
+        current_word[j] = mnemonic[i];
+        i++;
+        j++;
+      }
+      current_word[j] = 0;
+      if (mnemonic[i] != 0) {
+        i++;
+      }
+      layoutResetWord(current_word, pass, word_pos, mnemonic[i] == 0);
+      key = waitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        word_pos++;
+      } else {
+        return;
+      }
+    }
+  }
+  config_setMnemonic(mnemonic);
+  return;
+}
+
+bool reset_on_device(void) {
+  uint32_t index = 1;
+  uint32_t _strength[3] = {128, 196, 256};
+  char *numbers[3] = {"12", "18", "24"};
+  uint8_t key = KEY_NULL;
+
+  strength = 0;
+
+refresh_menu:
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
+                           _("Confirm"), 0, 0, _("Select mnemonic number"),
+                           NULL, numbers[index],
+                           index > 0 ? numbers[index - 1] : NULL,
+                           index < 2 ? numbers[index + 1] : NULL);
+
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) index--;
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (index < 2) index++;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      strength = _strength[index];
+      break;
+    case KEY_CANCEL:
+      return false;
+    default:
+      break;
+  }
+  skip_backup = false;
+  no_backup = false;
+  awaiting_entropy = true;
+  reset_byself = true;
+
+  random_buffer(int_entropy, 32);
+  reset_entropy(0, 0);
+
+  reset_byself = false;
+  return true;
 }
 
 #if DEBUG_LINK
