@@ -2,7 +2,7 @@
 #include "font.h"
 #include "oled.h"
 
-int oledStringWidth_zh(const char *text, uint8_t font) {
+int oledStringWidthAdapter(const char *text, uint8_t font) {
   if (!text) return 0;
   const struct font_desc *font_dese = find_cur_font();
   int l = 0;
@@ -12,7 +12,7 @@ int oledStringWidth_zh(const char *text, uint8_t font) {
            ((font & FONT_DOUBLE) ? 2 : 1);
       text++;
     } else {
-      l += (font & FONT_DOUBLE) ? 2 * font_dese->width : font_dese->width;
+      l += font_dese->width + ((font & FONT_DOUBLE) ? 2 : 1);
       text += HZ_CODE_LEN;
     }
   }
@@ -35,7 +35,7 @@ static void oledDrawChar_zh(int x, int y, const char *zh, uint8_t font,
         if (zoom <= 1) {
           oledDrawPixel(x + xo, y + yo);
         } else {
-          oledBox(x + xo * zoom, y + yo * zoom, x + (xo + 1) * zoom - 1,
+          oledBox(x + xo, y + yo * zoom, x + (xo + 1) - 1,
                   y + (yo + 1) * zoom - 1, true);
         }
       }
@@ -80,8 +80,7 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
       }
       if (y > OLED_HEIGHT) y = 0;
       oledDrawChar_zh(x, y, text, font, font_desc_bak);
-      x += (font & FONT_DOUBLE) ? 2 * font_desc_bak->width
-                                : font_desc_bak->width;
+      x += font_desc_bak->width + ((font & FONT_DOUBLE) ? 2 : 1);
       text += HZ_CODE_LEN;
     }
   }
@@ -89,12 +88,13 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
 
 void oledDrawStringCenterAdapter(int x, int y, const char *text, uint8_t font) {
   if (!text) return;
-  x = x - oledStringWidth_zh(text, font) / 2;
+  x = x - oledStringWidthAdapter(text, font) / 2;
+  if (x < 0) x = 0;
   oledDrawStringAdapter(x, y, text, font);
 }
 
 void oledDrawStringRightAdapter(int x, int y, const char *text, uint8_t font) {
   if (!text) return;
-  x -= oledStringWidth_zh(text, font);
+  x -= oledStringWidthAdapter(text, font);
   oledDrawStringAdapter(x, y, text, font);
 }

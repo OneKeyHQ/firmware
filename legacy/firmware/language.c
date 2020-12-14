@@ -6,6 +6,8 @@ const char *languages[][2] = {
     // layout2.c
     {" login to:", "登录到"},
     {" to", "到"},
+    // recovery.c
+    {"##th", "第##个"},
     // fsm_msg_coin.h
     {"Abort", "取消"},
     // menu.c
@@ -40,10 +42,12 @@ const char *languages[][2] = {
     {"BLE enable:", "使用蓝牙:"},
     // layout2.c
     {"BLE version:", "蓝牙版本:"},
+    // recovery.c
+    {"Back", "后退"},
     // layout2.c
     {"Backup Only", "仅备份"},
     // layout2.c layout2.c
-    {"Bluetooth enabled", "启用蓝牙"},
+    {"Bluetooth", "蓝牙"},
     // signing.c
     {"Both address and address_n provided.", ""},  // msg
     // signing.c
@@ -128,6 +132,8 @@ const char *languages[][2] = {
     {"Continue only if you", "继续"},
     // layout2.c
     {"Continue?", "继续"},
+    // layout2.c
+    {"Create wallet", "创建新钱包"},
     // fsm.c
     {"Data error", "数据错误"},
     // ethereum.c
@@ -252,6 +258,8 @@ const char *languages[][2] = {
     {"GPG sign for:", ""},
     // layout2.c c fsm_msg_common.h
     {"I take the risk", "确认风险"},
+    // layout2.c c
+    {"Import seed", "从助记词恢复"},
     // recovery.c
     {"INVALID!", "不可用"},
     // fsm_msg_common.h
@@ -300,6 +308,8 @@ const char *languages[][2] = {
     {"Malformed address", ""},
     // ethereum.c
     {"Malformed signature", ""},
+    // layout2.c
+    {"Manual", "用户手册"},
     // layout2.c lisk.c
     {"Message signed by:", ""},
     // messages.c
@@ -320,6 +330,8 @@ const char *languages[][2] = {
     {"Multisig field provided but not expected.", ""},
     // layout2.c
     {"Need Backup", "未备份"},
+    // layout2.c
+    {"Next", "下一个"},
     // layout2.c layout2.c layout2.c layout2.c layout2.c
     // layout2.c layout2.c layout2.c layout2.c
     // layout2.c
@@ -359,7 +371,7 @@ const char *languages[][2] = {
     // u2f.c
     {"Not registered.", ""},
     // layout2.c u2f.c u2f.c fsm_msg_common.h
-    {"OK", ""},
+    {"OK", "确认"},
     // signing.c
     {"OP RETURN data provided but not OP RETURN script type.", ""},
     // signing.c
@@ -368,6 +380,10 @@ const char *languages[][2] = {
     {"OP_RETURN output with non-zero amount", ""},
     // signing.c
     {"Output's address_n provided but not expected.", ""},
+    //
+    {"Off", "关"},
+    //
+    {"On", "开"},
     // protect.c protect.c protect.c protect.c protect.c
     // protect.c
     {"PIN REF Table", "密码对照表"},
@@ -391,8 +407,10 @@ const char *languages[][2] = {
     {"Please check the seed", "请检查助记词"},
     // protect.c protect.c
     {"Please confirm PIN", "请确认密码"},
-    // recovery.c
-    {"Please enter", "请输入"},
+    // protect.c
+    {"Please enter currnet PIN", "请输入当前密码"},
+    // protect.c
+    {"Please enter new PIN", "请输入密码"},
     // recovery.c
     {"Please enter the", "请输入"},
     // protect.c
@@ -401,10 +419,16 @@ const char *languages[][2] = {
     {"Please enter your PIN:", "请输入密码"},
     // layout2.c
     {"Please input PIN", "请输入密码"},
+    // protect.c
+    {"Please re-enter new PIN", "请再次输入密码"},
     // bl_check.c
     {"Please reconnect", ""},
+    // recovery.c
+    {"Please select the", "请选择"},
     // protect.c
     {"Please wait", "请等待"},
+    // layout2.c
+    {"Press 'O' to import seed", "按'O'键导入种子"},
     // fsm.c
     {"Process error", ""},
     // storage.c
@@ -427,6 +451,8 @@ const char *languages[][2] = {
     {"Register", "注册"},
     // layout2.c
     {"Remaining times:", "剩余次数"},
+    //
+    {"Reset", "重置设备"},
     // layout2.c
     {"SE version:", "SE版本:"},
     // layout2.c
@@ -442,7 +468,7 @@ const char *languages[][2] = {
     // signing.c
     {"Segwit not enabled on this coin", ""},
     // layout2.c
-    {"Select mnemonic nums", ""},
+    {"Select mnemonic number", "选择助记词个数"},
     // ethereum.c
     {"Send", ""},
     // layout2.c
@@ -458,7 +484,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"Settings applied", ""},
     // layout2.c layout2.c
-    {"Shutdown:", "关机时间:"},
+    {"Shutdown", "关机时间"},
     // layout2.c
     {"Sign binary message?", ""},
     // layout2.c
@@ -487,7 +513,7 @@ const char *languages[][2] = {
     // protect.c
     {"The new PIN must be different from your wipe code.", ""},
     // recovery.c
-    {"The seed is", ""},
+    {"The seed is", "种子"},
     // recovery.c recovery.c
     {"The seed is valid", ""},
     // recovery.c
@@ -598,6 +624,8 @@ const char *languages[][2] = {
     // layout2.c layout2.c layout2.c layout2.c
     // layout2.c
     {"Yes", "是"},
+    // layout2.c
+    {"active device", "激活设备"},
     // fsm_msg_common.h
     {"addres is existed", ""},
     // fsm_msg_common.h fsm_msg_common.h
@@ -609,7 +637,7 @@ const char *languages[][2] = {
     // recovery.c reset.c
     {"agree to trezor.io/tos", ""},
     // u2f.c
-    {"already registered", ""},
+    {"already registered", "已注册"},
     // recovery.c
     {"and MATCHES", ""},
     // layout2.c
@@ -639,11 +667,11 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"change the current", ""},
     // fsm_msg_common.h
-    {"change the home screen", ""},
+    {"change the home screen", "修改屏保"},
     // layout2.c
     {"change-outputs.", ""},
     // signing.c
-    {"changed", ""},
+    {"changed", "修改"},
     // bl_check.c bl_check.c
     {"contact our support.", ""},
     // reset.c
@@ -651,19 +679,19 @@ const char *languages[][2] = {
     // bl_check.c config.c
     {"detected.", ""},
     // fsm_msg_common.h fsm_msg_common.h
-    {"device initialied success", ""},
+    {"device initialied success", "设备初始化成功"},
     // fsm_msg_common.h
-    {"device is used for", ""},
+    {"device is used for", "设备用于"},
     // fsm_msg_common.h
     {"disable passphrase", "禁用密语"},
     // fsm_msg_common.h
     {"disable wipe code", ""},
     // fsm_msg_common.h fsm_msg_common.h
-    {"doing!", ""},
+    {"doing!", "操作"},
     // fsm_msg_common.h
     {"enable passphrase", "使用密语"},
     // lisk.c
-    {"fee:", ""},
+    {"fee:", "手续费"},
     // ethereum.c
     {"for gas?", ""},
     // fsm_msg_coin.h
@@ -672,6 +700,8 @@ const char *languages[][2] = {
     {"from your wallet?", "从钱包中"},
     // layout2.c
     {"hour", "小时"},
+    // recovery.c
+    {"imported succeed", "导入成功"},
     // layout2.c
     {"in", ""},
     // layout2.c
@@ -689,15 +719,15 @@ const char *languages[][2] = {
     // protect.c
     {"keyboard.", "键盘"},
     // fsm_msg_common.h fsm_msg_common.h
-    {"know what you are", ""},
+    {"know what you are", "清楚你的"},
     // trezor.c
-    {"lock your Trezor?", ""},
+    {"lock your Trezor?", "锁定设备"},
     // ethereum.c ethereum.c
     {"message", "消息"},
     // layout2.c
     {"minute", "分"},
     // recovery.c
-    {"of your mnemonic", ""},
+    {"of your mnemonic", "助记词"},
     // recovery.c
     {"on your computer", "在电脑上"},
     // fsm_msg_coin.h
@@ -725,13 +755,13 @@ const char *languages[][2] = {
     // layout2.c protect.c
     {"second", "秒"},
     // fsm_msg_common.h
-    {"seed import failed", ""},
+    {"seed import failed", "种子导入失败"},
     // fsm_msg_common.h
-    {"seed import success", ""},
+    {"seed import success", "种子导入成功"},
     // signing.c
     {"segwit input amount", ""},
     // fsm_msg_common.h
-    {"send entropy?", ""},
+    {"send entropy?", "发送熵"},
     // fsm_msg_common.h
     {"set a new wipe code?", ""},
     // fsm_msg_common.h
@@ -764,6 +794,8 @@ const char *languages[][2] = {
     {"wipe code?", "擦除密码"},
     // fsm_msg_common.h
     {"wipe the device?", "擦除设备"},
+
+    {"word", "单词"},
 };
 
 int LANGUAGE_ITEMS = sizeof(languages) / sizeof(languages[0]);
