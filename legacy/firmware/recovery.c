@@ -21,6 +21,7 @@
 #include "recovery.h"
 #include <ctype.h>
 #include "bip39.h"
+#include "buttons.h"
 #include "config.h"
 #include "fsm.h"
 #include "gettext.h"
@@ -32,6 +33,7 @@
 #include "protect.h"
 #include "recovery-table.h"
 #include "rng.h"
+#include "timer.h"
 #include "usb.h"
 
 /* number of words expected in the new seed */
@@ -89,6 +91,8 @@ static uint16_t word_pincode;
  */
 static uint8_t word_matrix[9];
 
+static bool recovery_byself = false;
+
 /* The words are stored in two tables.
  *
  * The low bits of the first table (TABLE1) store the index into the
@@ -122,22 +126,33 @@ static uint8_t word_matrix[9];
  * Parameter number gives the number that we should format.
  */
 static void format_number(char *dest, int number) {
-  if (number < 10) {
-    dest[0] = ' ';
+  strcat(dest, _("##th"));
+  if (dest[0] == '#') {
+    if (number < 10) {
+      dest[0] = ' ';
+    } else {
+      dest[0] = '0' + number / 10;
+    }
+    dest[1] = '0' + number % 10;
+    if (number == 1 || number == 21) {
+      dest[2] = 's';
+      dest[3] = 't';
+    } else if (number == 2 || number == 22) {
+      dest[2] = 'n';
+      dest[3] = 'd';
+    } else if (number == 3 || number == 23) {
+      dest[2] = 'r';
+      dest[3] = 'd';
+    }
   } else {
-    dest[0] = '0' + number / 10;
+    if (number < 10) {
+      dest[2] = ' ';
+    } else {
+      dest[2] = '0' + number / 10;
+    }
+    dest[3] = '0' + number % 10;
   }
-  dest[1] = '0' + number % 10;
-  if (number == 1 || number == 21) {
-    dest[2] = 's';
-    dest[3] = 't';
-  } else if (number == 2 || number == 22) {
-    dest[2] = 'n';
-    dest[3] = 'd';
-  } else if (number == 3 || number == 23) {
-    dest[2] = 'r';
-    dest[3] = 'd';
-  }
+  strcat(dest, _("word"));
 }
 
 /* Send a request for a new word/matrix code to the PC.
@@ -157,7 +172,8 @@ static void recovery_request(void) {
 /* Called when the last word was entered.
  * Check mnemonic and send success/failure.
  */
-static void recovery_done(void) {
+static bool recovery_done(void) {
+  bool success = false;
   char new_mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
 
   strlcpy(new_mnemonic, words[0], sizeof(new_mnemonic));
@@ -174,7 +190,16 @@ static void recovery_done(void) {
           // not enforcing => mark config as imported
           config_setImported(true);
         }
-        fsm_sendSuccess(_("Device recovered"));
+        if (!recovery_byself) {
+          fsm_sendSuccess(_("Device recovered"));
+        } else {
+          layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+                              _("The seed is"), _("imported succeed"), NULL,
+                              NULL, NULL, NULL);
+          waitKey(timer1s * 5, 0);
+          success = true;
+        }
+
       } else {
         fsm_sendFailure(FailureType_Failure_ProcessError,
                         _("Failed to store mnemonic"));
@@ -208,6 +233,12 @@ static void recovery_done(void) {
     memzero(new_mnemonic, sizeof(new_mnemonic));
     if (!dry_run) {
       session_clear(true);
+      if (recovery_byself) {
+        layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                            _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
+                            NULL);
+        waitKey(timer1s * 5, 0);
+      }
     } else {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                           _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
@@ -219,6 +250,8 @@ static void recovery_done(void) {
   }
   awaiting_word = 0;
   layoutHome();
+
+  return success;
 }
 
 /* Helper function for matrix recovery:
@@ -586,6 +619,202 @@ void recovery_abort(void) {
     layoutHome();
     awaiting_word = 0;
   }
+}
+
+#define CANDIDATE_MAX_LEN 6
+
+static void select_complete_word(char *title, int start, int len) {
+  uint8_t key = KEY_NULL;
+  int index = 0;
+
+refresh_menu:
+  layoutItemsSelectAdapter(
+      &bmp_btn_up, &bmp_btn_down, _("Cancel"), _("Confirm"), 0, 0, title, NULL,
+      mnemonic_get_word(start + index),
+      index > 0 ? mnemonic_get_word(start + index - 1) : NULL,
+      index < len - 1 ? mnemonic_get_word(start + index + 1) : NULL);
+
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_DOWN:
+      if (index < len - 1) index++;
+      goto refresh_menu;
+    case KEY_UP:
+      if (index > 0) index--;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      strlcpy(words[word_index], mnemonic_get_word(start + index),
+              sizeof(words[word_index]));
+      word_index++;
+      return;
+    case KEY_CANCEL:
+      return;
+    default:
+      break;
+  }
+}
+
+static bool recovery_check_words(void) {
+  uint8_t key = KEY_NULL;
+  uint32_t index = 0;
+  layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), NULL,
+                      _("Please check the"), _("word of mnemonic"), NULL, NULL,
+                      NULL, NULL);
+
+  key = waitKey(timer1s * 60, 1);
+  if (key == KEY_CANCEL) {
+    return false;
+  }
+
+refresh_menu:
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
+                           _("Confirm"), index + 1, word_count,
+                           _("Please check word"), NULL, words[index],
+                           index > 0 ? words[index - 1] : NULL,
+                           index < word_count - 1 ? words[index + 1] : NULL);
+
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_DOWN:
+      if (index < word_count - 1) index++;
+      goto refresh_menu;
+    case KEY_UP:
+      if (index > 0) index--;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      return true;
+    case KEY_CANCEL:
+      return false;
+    default:
+      break;
+  }
+
+  return false;
+}
+
+static bool input_words(void) {
+  uint32_t prefix_len = 0;
+  uint8_t key = KEY_NULL;
+  char letter_list[52] = "";
+  int index = 0;
+  int letter_count = 0;
+  char desc[64] = "";
+
+  memzero(words[word_index], sizeof(words[word_index]));
+
+refresh_menu:
+  memzero(desc, sizeof(desc));
+  strcat(desc, _("Please enter the"));
+  format_number(desc + strlen(desc), word_index + 1);
+  memzero(letter_list, sizeof(letter_list));
+  letter_count = mnemonic_next_letter_with_prefix(words[word_index], prefix_len,
+                                                  letter_list);
+
+  layoutInputWord(desc, prefix_len, words[word_index], letter_list + 2 * index);
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_DOWN:
+      if (index < letter_count - 1)
+        index++;
+      else
+        index = 0;
+      goto refresh_menu;
+    case KEY_UP:
+      if (index > 0)
+        index--;
+      else
+        index = letter_count - 1;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      words[word_index][prefix_len++] = letter_list[2 * index];
+      letter_count = mnemonic_count_with_prefix(words[word_index], prefix_len);
+      if (letter_count > CANDIDATE_MAX_LEN) {
+        index = 0;
+        goto refresh_menu;
+      } else {
+        uint32_t candidate_location =
+            mnemonic_word_index_with_prefix(words[word_index], prefix_len);
+        select_complete_word(desc, candidate_location, letter_count);
+        if (word_index == word_count) {
+          if (recovery_check_words()) {
+            return recovery_done();
+          } else {
+            return false;
+          }
+        } else {  // next word
+          prefix_len = 0;
+          index = 0;
+          memzero(words[word_index], sizeof(words[word_index]));
+          goto refresh_menu;
+        }
+      }
+    case KEY_CANCEL:
+      if (prefix_len > 0) {
+        prefix_len--;
+        index = 0;
+        words[word_index][prefix_len] = 0;
+      } else if (word_index > 0) {
+        word_index--;
+        prefix_len = 0;
+        index = 0;
+        memzero(words[word_index], sizeof(words[word_index]));
+      } else {
+        return false;
+      }
+      goto refresh_menu;
+    default:
+      break;
+  }
+  return false;
+}
+
+static bool recovery_words_on_device(uint32_t count) {
+  bool status = false;
+  word_count = count;
+  word_index = 0;
+  word_pincode = 0;
+  enforce_wordlist = true;
+  dry_run = false;
+  recovery_byself = true;
+
+  status = input_words();
+
+  recovery_byself = false;
+  return status;
+}
+
+bool recovery_on_device(void) {
+  uint32_t index = 1;
+  uint32_t count = 0;
+  uint32_t num_s[3] = {12, 18, 24};
+  char *numbers[3] = {"12", "18", "24"};
+  uint8_t key = KEY_NULL;
+
+refresh_menu:
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
+                           _("Confirm"), 0, 0, _("Select mnemonic number"),
+                           NULL, numbers[index],
+                           index > 0 ? numbers[index - 1] : NULL,
+                           index < 2 ? numbers[index + 1] : NULL);
+
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) index--;
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (index < 2) index++;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      count = num_s[index];
+      break;
+    case KEY_CANCEL:
+      return false;
+    default:
+      break;
+  }
+
+  return recovery_words_on_device(count);
 }
 
 #if DEBUG_LINK

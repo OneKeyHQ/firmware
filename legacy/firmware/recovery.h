@@ -22,6 +22,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 void recovery_init(uint32_t _word_count, bool passphrase_protection,
                    bool pin_protection, const char *language, const char *label,
@@ -31,5 +32,6 @@ void recovery_word(const char *word);
 void recovery_abort(void);
 const char *recovery_get_fake_word(void);
 uint32_t recovery_get_word_pos(void);
+bool recovery_on_device(void);
 
 #endif

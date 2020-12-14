@@ -291,3 +291,92 @@ uint32_t mnemonic_word_completion_mask(const char *prefix, int len) {
   }
   return res;
 }
+
+uint32_t mnemonic_count_with_prefix(char *prefix, uint8_t prefix_len) {
+  if (prefix == 0) return 25;
+  uint8_t index = prefix[0] - 'a';
+  uint32_t start = wordlist_letters_offset[index];
+  uint32_t end = wordlist_letters_offset[index + 1];
+  uint32_t count = 0;
+
+  if (prefix_len == 1) {
+    return end - start;
+  } else {
+    for (uint32_t i = 0; i < end - start; i++) {
+      uint32_t j = 0;
+      while (j < strlen(wordlist[start + i]) && j < prefix_len &&
+             wordlist[start + i][j] == prefix[j]) {
+        j++;
+      }
+      if (j == prefix_len) {
+        count++;
+      } else if (count) {
+        break;
+      }
+    }
+  }
+  return count;
+}
+
+uint32_t mnemonic_next_letter_with_prefix(char *prefix, uint8_t prefix_len,
+                                          char *letters) {
+  if (prefix_len == 0) {
+    for (int i = 0; i < 25; i++) {
+      if (i < 'x' - 'a')
+        letters[2 * i] = 'a' + i;
+      else
+        letters[2 * i] = 'a' + i + 1;
+      letters[2 * i + 1] = 0;  // insert \x0
+    }
+    return 25;
+  }
+
+  uint8_t index = prefix[0] - 'a';
+  uint32_t start = wordlist_letters_offset[index];
+  uint32_t end = wordlist_letters_offset[index + 1];
+  uint32_t count = 0;
+
+  for (uint32_t i = 0; i < end - start; i++) {
+    uint32_t j = 0;
+    while (j < strlen(wordlist[start + i]) && j < prefix_len &&
+           wordlist[start + i][j] == prefix[j]) {
+      j++;
+    }
+    if (j == prefix_len) {
+      if (j < strlen(wordlist[start + i])) {
+        if (count == 0) {
+          *letters = wordlist[start + i][j];
+          count++;
+        } else if (*letters != wordlist[start + i][j]) {
+          letters++;
+          *letters++ = 0;
+          *letters = wordlist[start + i][j];
+          count++;
+        }
+      }
+    } else if (count) {
+      break;
+    }
+  }
+  return count;
+}
+
+uint32_t mnemonic_word_index_with_prefix(char *prefix, uint8_t prefix_len) {
+  if (prefix_len == 0) return 2048;
+
+  uint8_t index = prefix[0] - 'a';
+  uint32_t start = wordlist_letters_offset[index];
+  uint32_t end = wordlist_letters_offset[index + 1];
+
+  for (uint32_t i = 0; i < end - start; i++) {
+    uint32_t j = 0;
+    while (j < strlen(wordlist[start + i]) && j < prefix_len &&
+           wordlist[start + i][j] == prefix[j]) {
+      j++;
+    }
+    if (j == prefix_len) {
+      return start + i;
+    }
+  }
+  return 2048;
+}

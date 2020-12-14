@@ -49,4 +49,9 @@ const char *mnemonic_complete_word(const char *prefix, int len);
 const char *mnemonic_get_word(int index);
 uint32_t mnemonic_word_completion_mask(const char *prefix, int len);
 
+uint32_t mnemonic_count_with_prefix(char *prefix, uint8_t prefix_len);
+uint32_t mnemonic_next_letter_with_prefix(char *prefix, uint8_t prefix_len,
+                                          char *letters);
+uint32_t mnemonic_word_index_with_prefix(char *prefix, uint8_t prefix_len);
+
 #endif

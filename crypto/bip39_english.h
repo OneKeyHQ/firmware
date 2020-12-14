@@ -365,3 +365,8 @@ static const char* const wordlist[] = {
     "yellow",   "you",      "young",    "youth",    "zebra",    "zero",
     "zone",     "zoo",      0,
 };
+
+static unsigned short wordlist_letters_offset[27] = {
+    0,    135,  253,  439,  551,  651,  757,  833,  897,
+    952,  972,  992,  1068, 1173, 1214, 1269, 1401, 1409,
+    1517, 1767, 1888, 1923, 1969, 2038, 2038, 2044, 2048};
