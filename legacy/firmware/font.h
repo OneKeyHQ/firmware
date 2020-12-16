@@ -13,8 +13,8 @@ struct font_desc {
   const char *name;
   int pixel;
   int width;
-  const void *data;
-  const void *empty;
+  const uint8_t *data;
+  const uint8_t *empty;
 };
 const struct font_desc *find_font(const char *name);
 const struct font_desc *find_cur_font(void);

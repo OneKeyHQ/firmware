@@ -830,11 +830,11 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
     index = index_str;
   } else {
     if (word_pos < 10) {
-      index_str_zh[2] = ' ';
+      index_str_zh[3] = ' ';
     } else {
-      index_str_zh[2] = '0' + word_pos / 10;
+      index_str_zh[3] = '0' + word_pos / 10;
     }
-    index_str_zh[3] = '0' + word_pos % 10;
+    index_str_zh[4] = '0' + word_pos % 10;
     index = index_str_zh;
   }
 

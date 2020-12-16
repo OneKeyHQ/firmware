@@ -146,11 +146,11 @@ static void format_number(char *dest, int number) {
     }
   } else {
     if (number < 10) {
-      dest[2] = ' ';
+      dest[3] = ' ';
     } else {
-      dest[2] = '0' + number / 10;
+      dest[3] = '0' + number / 10;
     }
-    dest[3] = '0' + number % 10;
+    dest[4] = '0' + number % 10;
   }
   strcat(dest, _("word"));
 }
