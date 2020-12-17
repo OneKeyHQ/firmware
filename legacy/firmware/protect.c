@@ -670,6 +670,34 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
   return true;
 }
 
+uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
+  uint8_t key = KEY_NULL;
+  usbTiny(1);
+  timer_out_set(timer_out_oper, time_out);
+  while (1) {
+    usbPoll();
+    if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
+    protectAbortedByInitialize =
+        (msg_tiny_id == MessageType_MessageType_Initialize);
+    if (protectAbortedByInitialize) {
+      msg_tiny_id = 0xFFFF;
+      break;
+    }
+    key = keyScan();
+    if (key != KEY_NULL) {
+      if (mode == 0) {
+        break;
+      } else {
+        if (key == KEY_CONFIRM || key == KEY_CANCEL) break;
+      }
+    }
+  }
+  usbTiny(0);
+  if (protectAbortedByInitialize)
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+  return key;
+}
+
 const char *protectInputPin(const char *text, uint8_t pin_len) {
   uint8_t key = KEY_NULL;
   uint8_t counter = 0;
@@ -679,7 +707,7 @@ const char *protectInputPin(const char *text, uint8_t pin_len) {
   memzero(pin, sizeof(pin));
 refresh_menu:
   layoutInputPin(counter, text, value);
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
       if (value[0] > '1')
@@ -727,7 +755,7 @@ bool protectPinOnDevice(bool use_cached) {
   if (!ret) {
     layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                         _("The PIN is"), _("INVALID!"), NULL, NULL, NULL, NULL);
-    waitKey(timer1s * 5, 0);
+    protectWaitKey(timer1s * 5, 0);
   }
   layoutHome();
   return ret;
@@ -751,7 +779,7 @@ bool protectChangePinOnDevice(void) {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                           _("The PIN is"), _("INVALID!"), NULL, NULL, NULL,
                           NULL);
-      waitKey(timer1s * 5, 0);
+      protectWaitKey(timer1s * 5, 0);
       return false;
     }
 
@@ -780,7 +808,7 @@ bool protectChangePinOnDevice(void) {
     layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                         _("The PIN is"), _("dismatch!"), NULL, NULL, NULL,
                         NULL);
-    waitKey(timer1s * 5, 0);
+    protectWaitKey(timer1s * 5, 0);
     layoutHome();
     return false;
   }
@@ -792,7 +820,7 @@ bool protectChangePinOnDevice(void) {
   } else {
     layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL, _("The PIN is"),
                         _("changed!"), NULL, NULL, NULL, NULL);
-    waitKey(timer1s * 5, 0);
+    protectWaitKey(timer1s * 5, 0);
   }
   layoutHome();
   return ret;
