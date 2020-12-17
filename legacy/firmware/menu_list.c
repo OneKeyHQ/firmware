@@ -140,6 +140,7 @@ static struct menu main_uninitilized_menu = {
 void menu_language_init(void) {
   uint8_t key = KEY_NULL;
   menu_init(&language_set_menu);
+  menu_update(&language_set_menu, title, NULL);
 refresh_menu:
   menu_display(&language_set_menu);
   key = protectWaitKey(0, 0);
@@ -152,6 +153,7 @@ refresh_menu:
       goto refresh_menu;
     case KEY_CONFIRM:
       menu_enter();
+      menu_update(&language_set_menu, title, "Language");
       break;
     default:
       break;
