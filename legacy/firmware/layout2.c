@@ -40,6 +40,7 @@
 #include "nem2.h"
 #include "oled.h"
 #include "prompt.h"
+#include "protect.h"
 #include "qrcodegen.h"
 #include "recovery.h"
 #include "se_chip.h"
@@ -1955,7 +1956,7 @@ refresh_menu:
       break;
   }
   oledRefresh();
-  key = waitKey(timer1s * 10, 0);
+  key = protectWaitKey(timer1s * 10, 0);
   switch (key) {
     case KEY_UP:
       if (index > 0) {
@@ -1971,6 +1972,7 @@ refresh_menu:
       break;
     case KEY_CANCEL:
     case KEY_CONFIRM:
+    default:
       return;
   }
 }

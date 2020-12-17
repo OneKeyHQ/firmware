@@ -196,7 +196,7 @@ static bool recovery_done(void) {
           layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
                               _("The seed is"), _("imported succeed"), NULL,
                               NULL, NULL, NULL);
-          waitKey(timer1s * 5, 0);
+          protectWaitKey(timer1s * 5, 0);
           success = true;
         }
 
@@ -237,7 +237,7 @@ static bool recovery_done(void) {
         layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                             _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
                             NULL);
-        waitKey(timer1s * 5, 0);
+        protectWaitKey(timer1s * 5, 0);
       }
     } else {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
@@ -634,7 +634,7 @@ refresh_menu:
       index > 0 ? mnemonic_get_word(start + index - 1) : NULL,
       index < len - 1 ? mnemonic_get_word(start + index + 1) : NULL);
 
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_DOWN:
       if (index < len - 1) index++;
@@ -661,7 +661,7 @@ static bool recovery_check_words(void) {
                       _("Please check the"), _("word of mnemonic"), NULL, NULL,
                       NULL, NULL);
 
-  key = waitKey(timer1s * 60, 1);
+  key = protectWaitKey(timer1s * 60, 1);
   if (key == KEY_CANCEL) {
     return false;
   }
@@ -673,7 +673,7 @@ refresh_menu:
                            index > 0 ? words[index - 1] : NULL,
                            index < word_count - 1 ? words[index + 1] : NULL);
 
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_DOWN:
       if (index < word_count - 1) index++;
@@ -711,7 +711,7 @@ refresh_menu:
                                                   letter_list);
 
   layoutInputWord(desc, prefix_len, words[word_index], letter_list + 2 * index);
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_DOWN:
       if (index < letter_count - 1)
@@ -797,7 +797,7 @@ refresh_menu:
                            index > 0 ? numbers[index - 1] : NULL,
                            index < 2 ? numbers[index + 1] : NULL);
 
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
       if (index > 0) index--;
@@ -811,7 +811,7 @@ refresh_menu:
     case KEY_CANCEL:
       return false;
     default:
-      break;
+      return false;
   }
 
   return recovery_words_on_device(count);

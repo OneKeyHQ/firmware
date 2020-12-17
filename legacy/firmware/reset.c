@@ -269,7 +269,7 @@ void writedown_mnemonic(const char *mnemonic) {
         i++;
       }
       layoutResetWord(current_word, pass, word_pos, mnemonic[i] == 0);
-      key = waitKey(0, 1);
+      key = protectWaitKey(0, 1);
       if (key == KEY_CONFIRM) {
         word_pos++;
       } else {
@@ -296,7 +296,7 @@ refresh_menu:
                            index > 0 ? numbers[index - 1] : NULL,
                            index < 2 ? numbers[index + 1] : NULL);
 
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
       if (index > 0) index--;
@@ -310,7 +310,7 @@ refresh_menu:
     case KEY_CANCEL:
       return false;
     default:
-      break;
+       return false;
   }
   skip_backup = false;
   no_backup = false;

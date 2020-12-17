@@ -33,7 +33,7 @@ void menu_reset_device(int index) {
 void menu_showQRCode(int index) {
   (void)index;
   layoutQRCode("https://onekey.zendesk.com/hc/zh-cn/articles/360002123856");
-  waitKey(timer1s * 30, 0);
+  protectWaitKey(timer1s * 30, 0);
 }
 
 void menu_erase_device(int index) {
@@ -44,7 +44,7 @@ void menu_erase_device(int index) {
                       _("Do you really want to"), _("wipe the device?"), NULL,
                       _("All data will be lost."), NULL, NULL);
 
-    key = waitKey(timer1s * 60, 1);
+    key = protectWaitKey(timer1s * 60, 1);
     if (key == KEY_CONFIRM) config_wipe();
     layoutHome();
   }
@@ -142,7 +142,7 @@ void menu_language_init(void) {
   menu_init(&language_set_menu);
 refresh_menu:
   menu_display(&language_set_menu);
-  key = waitKey(0, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
       menu_up();
