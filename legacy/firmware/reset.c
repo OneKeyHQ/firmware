@@ -251,34 +251,69 @@ void reset_backup(bool separated, const char *mnemonic) {
   layoutHome();
 }
 
-void writedown_mnemonic(const char *mnemonic) {
+bool scroll_mnemonic(const char *pre_desc, const char *mnemonic) {
   uint8_t key = KEY_NULL;
-  for (int pass = 0; pass < 2; pass++) {
-    int i = 0, word_pos = 1;
-    while (mnemonic[i] != 0) {
-      // copy current_word
-      int j = 0;
-      while (mnemonic[i] != ' ' && mnemonic[i] != 0 &&
-             j + 1 < (int)sizeof(current_word)) {
-        current_word[j] = mnemonic[i];
-        i++;
-        j++;
-      }
-      current_word[j] = 0;
-      if (mnemonic[i] != 0) {
-        i++;
-      }
-      layoutResetWord(current_word, pass, word_pos, mnemonic[i] == 0);
-      key = protectWaitKey(0, 1);
-      if (key == KEY_CONFIRM) {
-        word_pos++;
-      } else {
-        return;
-      }
+  char desc[64] = "";
+  char words[24][12];
+  int i = 0, word_count = 0;
+
+  memzero(words, sizeof(words));
+
+  while (mnemonic[i] != 0) {
+    // copy current_word
+    int j = 0;
+    while (mnemonic[i] != ' ' && mnemonic[i] != 0 &&
+           j + 1 < (int)sizeof(words[word_count])) {
+      words[word_count][j] = mnemonic[i];
+      i++;
+      j++;
+    }
+    current_word[j] = 0;
+    word_count++;
+    if (mnemonic[i] != 0) {
+      i++;
     }
   }
-  config_setMnemonic(mnemonic);
-  return;
+
+  for (i = 0; i < word_count; i++) {
+    memzero(desc, sizeof(desc));
+    strcat(desc, pre_desc);
+    strcat(desc, " #");
+    uint2str((uint32_t)(i + 1), desc + strlen(desc));
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_confirm,
+                                   _("Confirm"), NULL, NULL, desc, NULL,
+                                   words[i], NULL, NULL);
+    key = protectWaitKey(0, 0);
+    switch (key) {
+      case KEY_UP:
+      case KEY_CANCEL:
+        if (i > 0) {
+          i -= 2;
+        } else {
+          memzero(words, sizeof(words));
+          layoutHome();
+          return false;
+        }
+        break;
+      case KEY_DOWN:
+      case KEY_CONFIRM:
+        break;
+      default:
+        memzero(words, sizeof(words));
+        layoutHome();
+        return false;
+    }
+  }
+  memzero(words, sizeof(words));
+  return true;
+}
+
+void writedown_mnemonic(const char *mnemonic) {
+  if (scroll_mnemonic(_("Write down the seed"), mnemonic)) {
+    if (scroll_mnemonic(_("Please check the seed"), mnemonic)) {
+      config_setMnemonic(mnemonic);
+    }
+  }
 }
 
 bool reset_on_device(void) {
@@ -310,7 +345,7 @@ refresh_menu:
     case KEY_CANCEL:
       return false;
     default:
-       return false;
+      return false;
   }
   skip_backup = false;
   no_backup = false;

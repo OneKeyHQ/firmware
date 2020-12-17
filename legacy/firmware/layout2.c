@@ -942,20 +942,38 @@ void layoutAddress(const char *address, const char *desc, bool qrcode,
   oledRefresh();
 }
 
-void layoutQRCode(const char *text) {
+void layoutQRCode(const char *index, const BITMAP *bmp_up,
+                  const BITMAP *bmp_down, const char *title, const char *text) {
+  int y = 0, h = OLED_HEIGHT - 1;
+
   uint8_t codedata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
   uint8_t tempdata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
   uint8_t times = 0;
 
   int side = 0;
   oledClear();
+  oledDrawStringAdapter(0, 0, index, FONT_STANDARD);
+  if (bmp_up) {
+    oledDrawBitmap(60, y, bmp_up);
+    y += 8;
+    h -= 8;
+  }
+  if (bmp_down) {
+    oledDrawBitmap(60, OLED_HEIGHT - 8, bmp_down);
+    h -= 8;
+  }
+  if (title) {
+    oledDrawStringCenterAdapter(64, y, title, FONT_STANDARD);
+    y += 9;
+    h -= 9;
+  }
   if (qrcodegen_encodeText(text, tempdata, codedata, qrcodegen_Ecc_LOW,
                            qrcodegen_VERSION_MIN, QR_MAX_VERSION,
                            qrcodegen_Mask_AUTO, true)) {
     side = qrcodegen_getSize(codedata);
-    times = 63 / side;
+    times = h / side;
     int x = 64 - times * side / 2;
-    int y = 32 - times * side / 2;
+    y += (h - times * side) / 2;
     oledInvert(x - 1, y - 1, x + side * times, y + side * times);
     for (int i = 0; i < side; i++) {
       for (int j = 0; j < side; j++) {
@@ -1553,15 +1571,16 @@ void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode) {
   }
 }
 
-void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const char *btnNo,
-                                    const char *btnYes, const char *desc,
-                                    const char *line1, const char *line2,
-                                    const char *line3, const char *line4,
-                                    const char *line5, const char *line6) {
+void layoutDialogSwipeCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
+                                    const BITMAP *bmp_yes, const char *btnYes,
+                                    const char *desc, const char *line1,
+                                    const char *line2, const char *line3,
+                                    const char *line4, const char *line5,
+                                    const char *line6) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  layoutDialogCenterAdapter(icon, btnNo, btnYes, desc, line1, line2, line3,
-                            line4, line5, line6);
+  layoutDialogCenterAdapter(bmp_no, btnNo, bmp_yes, btnYes, desc, line1, line2,
+                            line3, line4, line5, line6);
 }
 
 void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
@@ -1629,7 +1648,6 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
                          const char *line3, const char *line4,
                          const char *line5, const char *line6) {
   int left = 0;
-  int y = 0;
   const struct font_desc *font = find_cur_font();
 
   oledClear();
@@ -1638,20 +1656,16 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
     left = icon->width + 4;
   }
   if (line1) {
-    oledDrawStringAdapter(left, y, line1, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringAdapter(left, 0 * (font->pixel + 1), line1, FONT_STANDARD);
   }
   if (line2) {
-    oledDrawStringAdapter(left, y, line2, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringAdapter(left, 1 * (font->pixel + 1), line2, FONT_STANDARD);
   }
   if (line3) {
-    oledDrawStringAdapter(left, y, line3, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringAdapter(left, 2 * (font->pixel + 1), line3, FONT_STANDARD);
   }
   if (line4) {
-    oledDrawStringAdapter(left, y, line4, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringAdapter(left, 3 * (font->pixel + 1), line4, FONT_STANDARD);
   }
 
   if (desc) {
@@ -1663,12 +1677,10 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
     }
   } else {
     if (line5) {
-      oledDrawStringAdapter(left, y, line5, FONT_STANDARD);
-      y += font->pixel + 1;
+      oledDrawStringAdapter(left, 4 * (font->pixel + 1), line5, FONT_STANDARD);
     }
     if (line6) {
-      oledDrawStringAdapter(left, y, line6, FONT_STANDARD);
-      y += font->pixel + 1;
+      oledDrawStringAdapter(left, 5 * (font->pixel + 1), line6, FONT_STANDARD);
     }
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - (font->pixel + 4));
@@ -1683,33 +1695,30 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
   oledRefresh();
 }
 
-void layoutDialogCenterAdapter(const BITMAP *icon, const char *btnNo,
-                               const char *btnYes, const char *desc,
-                               const char *line1, const char *line2,
-                               const char *line3, const char *line4,
-                               const char *line5, const char *line6) {
-  int y = 18;
+void layoutDialogCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
+                               const BITMAP *bmp_yes, const char *btnYes,
+                               const char *desc, const char *line1,
+                               const char *line2, const char *line3,
+                               const char *line4, const char *line5,
+                               const char *line6) {
   const struct font_desc *font = find_cur_font();
 
   oledClear();
-  if (icon) {
-    oledDrawBitmap((OLED_WIDTH - icon->width) / 2, 0, icon);
-  }
   if (line1) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line1, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0 * (font->pixel + 1), line1,
+                                FONT_STANDARD);
   }
   if (line2) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line2, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 1 * (font->pixel + 1), line2,
+                                FONT_STANDARD);
   }
   if (line3) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line3, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * (font->pixel + 1), line3,
+                                FONT_STANDARD);
   }
   if (line4) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line4, FONT_STANDARD);
-    y += font->pixel + 1;
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * (font->pixel + 1), line4,
+                                FONT_STANDARD);
   }
 
   if (desc) {
@@ -1721,22 +1730,19 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const char *btnNo,
 
   } else {
     if (line5) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line5, FONT_STANDARD);
-      y += font->pixel + 1;
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1), line5,
+                                  FONT_STANDARD);
     }
     if (line6) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, line6, FONT_STANDARD);
-      y += font->pixel + 1;
-    }
-    if (btnYes || btnNo) {
-      oledHLine(OLED_HEIGHT - (font->pixel + 4));
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1), line6,
+                                  FONT_STANDARD);
     }
   }
   if (btnNo) {
-    layoutButtonNoAdapter(btnNo, &bmp_btn_cancel);
+    layoutButtonNoAdapter(btnNo, bmp_no);
   }
   if (btnYes) {
-    layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
+    layoutButtonYesAdapter(btnYes, bmp_yes);
   }
   oledRefresh();
 }
@@ -1810,6 +1816,7 @@ void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
   }
   oledClear();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, text, FONT_STANDARD);
+  oledHLine(11);
   y += 27;
   l1 = oledStringWidthAdapter(prefix, FONT_STANDARD);
   l = oledStringWidthAdapter(word_show, FONT_STANDARD);
@@ -1839,7 +1846,7 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, title, FONT_STANDARD);
     y += cur_font->pixel + 1;
     y++;
-    oledHLine(y + 1);
+    oledHLine(y);
     y += 2;
     y1 = 34;
   } else {
@@ -1903,7 +1910,6 @@ void layoutDeviceParameters(int num) {
   char *se_sn;
   int x = 0, y = 0;
   int index = 0;
-  char label[MAX_LABEL_LEN + 1] = "";
   uint8_t key = KEY_NULL;
 
 refresh_menu:
@@ -1911,11 +1917,6 @@ refresh_menu:
   oledClear();
   switch (index) {
     case 0:
-      config_getLabel(label, sizeof(label));
-
-      layouKeyValue(y, _("Label:"), label);
-      y += font->pixel + 1;
-
       if (se_get_sn(&se_sn)) {
         layouKeyValue(y, _("Serial:"), se_sn);
         y += font->pixel + 1;
@@ -1927,9 +1928,9 @@ refresh_menu:
       // layouKeyValue(y, _("Device ID:"), config_uuid_str);
       oledDrawStringAdapter(0, y, _("Device ID:"), FONT_STANDARD);
       if (ui_language == 0)
-        x = 55;
+        x = 48;
       else
-        x = 32;
+        x = 34;
       oledDrawStringAdapter(x, y, config_uuid_str, FONT_STANDARD);
 
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
@@ -1949,6 +1950,9 @@ refresh_menu:
       y += font->pixel + 1;
 
       layouKeyValue(y, _("SE version:"), se_version);
+      y += font->pixel + 1;
+
+      layouKeyValue(y, _("Font:"), "3type");
       y += font->pixel + 1;
       break;
 

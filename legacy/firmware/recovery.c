@@ -194,8 +194,8 @@ static bool recovery_done(void) {
           fsm_sendSuccess(_("Device recovered"));
         } else {
           layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
-                              _("The seed is"), _("imported succeed"), NULL,
-                              NULL, NULL, NULL);
+                              _("Mnemonic"), _("imported succeed"), NULL, NULL,
+                              NULL, NULL);
           protectWaitKey(timer1s * 5, 0);
           success = true;
         }
@@ -235,7 +235,7 @@ static bool recovery_done(void) {
       session_clear(true);
       if (recovery_byself) {
         layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                            _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
+                            _("Mnemonic"), _("INVALID!"), NULL, NULL, NULL,
                             NULL);
         protectWaitKey(timer1s * 5, 0);
       }
@@ -646,9 +646,9 @@ refresh_menu:
       strlcpy(words[word_index], mnemonic_get_word(start + index),
               sizeof(words[word_index]));
       word_index++;
-      return;
+      break;
     case KEY_CANCEL:
-      return;
+      break;
     default:
       break;
   }
@@ -657,9 +657,9 @@ refresh_menu:
 static bool recovery_check_words(void) {
   uint8_t key = KEY_NULL;
   uint32_t index = 0;
-  layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), NULL,
-                      _("Please check the"), _("word of mnemonic"), NULL, NULL,
-                      NULL, NULL);
+  layoutDialogCenterAdapter(&bmp_btn_cancel, _("Cancel"), &bmp_btn_confirm,
+                            _("Confirm"), NULL, NULL, NULL,
+                            _("Please check the seed"), NULL, NULL, NULL);
 
   key = protectWaitKey(timer1s * 60, 1);
   if (key == KEY_CANCEL) {
@@ -668,9 +668,8 @@ static bool recovery_check_words(void) {
 
 refresh_menu:
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
-                           _("Confirm"), index + 1, word_count,
-                           _("Please check word"), NULL, words[index],
-                           index > 0 ? words[index - 1] : NULL,
+                           _("Confirm"), index + 1, word_count, NULL, NULL,
+                           words[index], index > 0 ? words[index - 1] : NULL,
                            index < word_count - 1 ? words[index + 1] : NULL);
 
   key = protectWaitKey(0, 0);
@@ -684,7 +683,7 @@ refresh_menu:
     case KEY_CONFIRM:
       return true;
     case KEY_CANCEL:
-      return false;
+      break;
     default:
       break;
   }
@@ -759,7 +758,7 @@ refresh_menu:
         index = 0;
         memzero(words[word_index], sizeof(words[word_index]));
       } else {
-        return false;
+        break;
       }
       goto refresh_menu;
     default:
@@ -809,7 +808,6 @@ refresh_menu:
       count = num_s[index];
       break;
     case KEY_CANCEL:
-      return false;
     default:
       return false;
   }
