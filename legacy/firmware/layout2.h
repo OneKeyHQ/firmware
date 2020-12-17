@@ -106,7 +106,8 @@ const char **split_message_hex(const uint8_t *msg, uint32_t len);
 void Disp_Page(const BITMAP *icon, const char *btnNo, const char *btnYes,
                const char *desc, uint8_t *pucInfoBuf, uint16_t usLen);
 
-void layoutQRCode(const char *text);
+void layoutQRCode(const char *index, const BITMAP *bmp_up,
+                  const BITMAP *bmp_down, const char *title, const char *text);
 
 void layoutHomeInfo(void);
 void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode);
@@ -118,18 +119,20 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
                          const char *line1, const char *line2,
                          const char *line3, const char *line4,
                          const char *line5, const char *line6);
-void layoutDialogCenterAdapter(const BITMAP *icon, const char *btnNo,
-                               const char *btnYes, const char *desc,
-                               const char *line1, const char *line2,
-                               const char *line3, const char *line4,
-                               const char *line5, const char *line6);
+void layoutDialogCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
+                               const BITMAP *bmp_yes, const char *btnYes,
+                               const char *desc, const char *line1,
+                               const char *line2, const char *line3,
+                               const char *line4, const char *line5,
+                               const char *line6);
 void layoutProgressAdapter(const char *desc, int permil);
 
-void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const char *btnNo,
-                                    const char *btnYes, const char *desc,
-                                    const char *line1, const char *line2,
-                                    const char *line3, const char *line4,
-                                    const char *line5, const char *line6);
+void layoutDialogSwipeCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
+                                    const BITMAP *bmp_yes, const char *btnYes,
+                                    const char *desc, const char *line1,
+                                    const char *line2, const char *line3,
+                                    const char *line4, const char *line5,
+                                    const char *line6);
 
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,

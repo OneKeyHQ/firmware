@@ -83,6 +83,8 @@ const char *languages[][2] = {
     {"Cancel", "取消"},
     // ethereum.c
     {"Chain Id out of bounds", ""},  // msg
+    //
+    {"Change PIN", "修改密码"},
     // layout2.c
     {"Change language to", "设置语言为"},
     // layout2.c
@@ -183,6 +185,8 @@ const char *languages[][2] = {
     {"Do you want to set", "请确认设置"},
     // layout2.c
     {"Do you want to sign in?", "请确认登录"},
+    //
+    {"Download APP", "下载APP"},
     // ethereum.c
     {"Empty data chunk received", ""},  // msg
     // signing.c signing.c
@@ -252,18 +256,22 @@ const char *languages[][2] = {
     {"Firmware version:", "固件版本:"},
     // fsm_msg_common.h
     {"Flags applied", ""},  // msg
+    //
+    {"Font:", "字体:"},
+    //
+    {"For more information", "了解更多"},
     // fsm_msg_common.h
     {"Forbidden field set in dry-run", ""},  // msg
     // layout2.c
     {"GPG sign for:", ""},
     // layout2.c c fsm_msg_common.h
     {"I take the risk", "确认风险"},
-    // layout2.c c
-    {"Import seed", "从助记词恢复"},
     // recovery.c
     {"INVALID!", "不可用"},
     // fsm_msg_common.h
     {"If import seed,", "如果导入种子"},
+    // layout2.c c
+    {"Import mnemonic", "恢复钱包"},
     // fsm_msg_ethereum.h
     {"Invalid address", ""},  // msg
     // signing.c
@@ -320,6 +328,8 @@ const char *languages[][2] = {
     {"Missing address", ""},
     // signing.c signing.c signing.c
     {"Mixing segwit and non-segwit inputs is not allowed", ""},
+    //
+    {"Mnemonic", "助记词"},
     // fsm_msg_common.h fsm_msg_common.h
     {"Mnemonic with wrong checksum provided", ""},
     // layout2.c
@@ -378,27 +388,31 @@ const char *languages[][2] = {
     {"OP_RETURN output with address or multisig", ""},
     // signing.c
     {"OP_RETURN output with non-zero amount", ""},
-    // signing.c
-    {"Output's address_n provided but not expected.", ""},
     //
     {"Off", "关"},
     //
     {"On", "开"},
+    // signing.c
+    {"Output's address_n provided but not expected.", ""},
     // protect.c protect.c protect.c protect.c protect.c
     // protect.c
     {"PIN REF Table", "密码对照表"},
     // fsm.c
     {"PIN cancelled", ""},
     // fsm_msg_common.h
-    {"PIN changed", ""},
+    {"PIN changed", "密码修改成功"},
     // fsm.c
     {"PIN expected", ""},
     // fsm.c
-    {"PIN invalid", ""},
+    {"PIN invalid", "密码不正确"},
     // fsm.c
-    {"PIN mismatch", ""},
+    {"PIN mismatch", "两次输入不相同"},
     // fsm_msg_common.h fsm_msg_common.h
     {"PIN removed", ""},
+    //
+    {"Page down", "下一页"},
+    //
+    {"Page up", "上一页"},
     // layout2.c
     {"Path: m", ""},
     // layout2.c
@@ -410,7 +424,7 @@ const char *languages[][2] = {
     // protect.c
     {"Please enter currnet PIN", "请输入当前密码"},
     // protect.c
-    {"Please enter new PIN", "请输入密码"},
+    {"Please enter new PIN", "请输入新密码"},
     // recovery.c
     {"Please enter the", "请输入"},
     // protect.c
@@ -420,15 +434,13 @@ const char *languages[][2] = {
     // layout2.c
     {"Please input PIN", "请输入密码"},
     // protect.c
-    {"Please re-enter new PIN", "请再次输入密码"},
+    {"Please re-enter new PIN", "请再次输入新密码"},
     // bl_check.c
     {"Please reconnect", ""},
     // recovery.c
     {"Please select the", "请选择"},
     // protect.c
     {"Please wait", "请等待"},
-    // layout2.c
-    {"Press 'O' to import seed", "按'O'键导入种子"},
     // fsm.c
     {"Process error", ""},
     // storage.c
@@ -453,12 +465,16 @@ const char *languages[][2] = {
     {"Remaining times:", "剩余次数"},
     //
     {"Reset", "重置设备"},
+    //
+    {"Retry", "重试"},
     // layout2.c
     {"SE version:", "SE版本:"},
     // layout2.c
     {"SEEDLESS", ""},
     // ethereum.c
     {"Safety check failed", ""},
+    //
+    {"Security", "安全"},
     // reset.c
     {"Seed already backed up", ""},
     // reset.c
@@ -614,7 +630,7 @@ const char *languages[][2] = {
     // recovery.c
     {"Word not found in a wordlist", ""},
     // layout2.c
-    {"Write down the seed", "请记下助记词"},
+    {"Write down the seed", "请抄写助记词"},
     // fsm_msg_coin.h
     {"Wrong address path", ""},
     // signing.c signing.c

@@ -6,7 +6,10 @@
 
 static struct menu *currentMenu;
 
-void menu_init(struct menu *menu) { currentMenu = menu; }
+void menu_init(struct menu *menu) {
+  currentMenu = menu;
+  currentMenu->current = currentMenu->start;
+}
 
 void menu_display(struct menu *menu) {
   char desc[64] = "";
@@ -44,6 +47,7 @@ void menu_enter(void) {
   if (!currentMenu->items[currentMenu->current].is_function &&
       currentMenu->items[currentMenu->current].sub_menu) {
     currentMenu = currentMenu->items[currentMenu->current].sub_menu;
+    currentMenu->current = currentMenu->start;
   } else if (currentMenu->items[currentMenu->current].func != NULL) {
     currentMenu->items[currentMenu->current].func(currentMenu->current);
     if (currentMenu->previous) currentMenu = currentMenu->previous;

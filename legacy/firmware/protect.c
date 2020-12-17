@@ -754,10 +754,10 @@ bool protectPinOnDevice(bool use_cached) {
   bool ret = config_unlock(pin);
   if (!ret) {
     layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                        _("The PIN is"), _("INVALID!"), NULL, NULL, NULL, NULL);
+                        _("PIN invalid"), NULL, NULL, NULL, NULL, NULL);
     protectWaitKey(timer1s * 5, 0);
+    layoutHome();
   }
-  layoutHome();
   return ret;
 }
 
@@ -777,15 +777,14 @@ bool protectChangePinOnDevice(void) {
     bool ret = config_unlock(pin);
     if (ret == false) {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                          _("The PIN is"), _("INVALID!"), NULL, NULL, NULL,
-                          NULL);
+                          _("PIN invalid"), NULL, NULL, NULL, NULL, NULL);
       protectWaitKey(timer1s * 5, 0);
       return false;
     }
 
     strlcpy(old_pin, pin, sizeof(old_pin));
   }
-
+retry:
   pin = protectInputPin(_("Please enter new PIN"), 6);
   if (pin == PIN_CANCELED_BY_BUTTON) {
     return false;
@@ -805,12 +804,16 @@ bool protectChangePinOnDevice(void) {
   if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
-    layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                        _("The PIN is"), _("dismatch!"), NULL, NULL, NULL,
-                        NULL);
-    protectWaitKey(timer1s * 5, 0);
-    layoutHome();
-    return false;
+    layoutDialogCenterAdapter(&bmp_btn_cancel, _("Cancel"), &bmp_btn_retry,
+                              _("Retry"), NULL, NULL, NULL, _("PIN mismatch"),
+                              NULL, NULL, NULL);
+    uint8_t key = protectWaitKey(0, 1);
+    if (key == KEY_CONFIRM) {
+      goto retry;
+    } else {
+      layoutHome();
+      return false;
+    }
   }
 
   bool ret = config_changePin(old_pin, new_pin);
@@ -818,8 +821,8 @@ bool protectChangePinOnDevice(void) {
   memzero(new_pin, sizeof(new_pin));
   if (ret == false) {
   } else {
-    layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL, _("The PIN is"),
-                        _("changed!"), NULL, NULL, NULL, NULL);
+    layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+                        _("PIN changed"), NULL, NULL, NULL, NULL, NULL);
     protectWaitKey(timer1s * 5, 0);
   }
   layoutHome();
