@@ -107,6 +107,7 @@ void config_setLabel(const char *label);
 
 bool config_getLanguage(char *dest, uint16_t dest_size);
 void config_setLanguage(const char *lang);
+bool config_isLanguageSet(void);
 
 void config_setPassphraseProtection(bool passphrase_protection);
 bool config_getPassphraseProtection(bool *passphrase_protection);

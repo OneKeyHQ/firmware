@@ -39,6 +39,7 @@
 #include "layout2.h"
 #include "memory.h"
 #include "memzero.h"
+#include "menu_list.h"
 #include "mi2c.h"
 #include "pbkdf2.h"
 #include "protect.h"
@@ -449,7 +450,10 @@ void config_init(void) {
 
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
-  config_getLanguage(config_language, sizeof(config_language));
+  if (config_isLanguageSet()) {
+    config_getLanguage(config_language, sizeof(config_language));
+  }
+
   // imported xprv is not supported anymore so we set initialized to false
   // if no mnemonic is present
   if (config_isInitialized() && !config_hasMnemonic()) {
@@ -459,6 +463,11 @@ void config_init(void) {
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
+  }
+
+  if (!config_isLanguageSet()) {
+    ui_language = 0xff;
+    menu_language_init();
   }
 
 #if !EMULATOR
@@ -771,6 +780,15 @@ bool config_getLanguage(char *dest, uint16_t dest_size) {
 
   return true;
 }
+
+bool config_isLanguageSet(void) {
+  char language[MAX_LANGUAGE_LEN];
+  if (sectrue == config_get_string(KEY_LANGUAGE, language, sizeof(language))) {
+    return true;
+  }
+  return false;
+}
+
 bool config_getHomescreen(uint8_t *dest, uint16_t dest_size) {
   uint16_t len = 0;
   secbool ret = storage_get(KEY_HOMESCREEN, dest, dest_size, &len);
