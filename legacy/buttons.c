@@ -104,6 +104,7 @@ void buttonsTimer(void) {
       sys_shutdown();
     }
   }
+#ifdef BLE_SWITCH
   if ((buttonRead() & BTN_PIN_UP) == 0 && up_btn_timer_enable == 0) {
     up_btn_timer_counter++;
     if (up_btn_timer_counter > 2) {
@@ -122,6 +123,7 @@ void buttonsTimer(void) {
     up_btn_timer_counter = 0;
     up_btn_timer_enable = 0;
   }
+#endif
 }
 
 bool checkButtonOrTimeout(uint8_t btn, TimerOut type) {
