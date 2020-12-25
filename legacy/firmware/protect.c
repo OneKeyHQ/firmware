@@ -247,7 +247,7 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
         return pma->pin;
       else
         return 0;
-    } else if (msg_tiny_id == MessageType_MessageType_PinInputOnDevice) {
+    } else if (msg_tiny_id == MessageType_MessageType_BixinPinInputOnDevice) {
       return protectInputPin(text, 6);
     }
     if (button.NoUp) {
@@ -295,7 +295,7 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
     if (wait > 1) strcat(secstrbuf, "s");
   }
 
-  oledClear();
+  oledClear_ex();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, _(message), FONT_STANDARD);
   y += font->pixel + 1;
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Please wait"),
@@ -365,6 +365,9 @@ bool protectChangePin(bool removal) {
                      _("PIN REF Table"), &newpin);
     if (g_bIsBixinAPP) {
       need_new_pin = false;
+      if (newpin == NULL) {
+        newpin = protectInputPin(_("Please enter new PIN"), 6);
+      }
     }
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
@@ -675,6 +678,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
+    layoutEnterSleep();
     usbPoll();
     if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
     protectAbortedByInitialize =
@@ -728,8 +732,7 @@ refresh_menu:
       value[0] = '1';
       goto refresh_menu;
     case KEY_CANCEL:
-      layoutHome();
-      return PIN_CANCELED_BY_BUTTON;
+      break;
     default:
       break;
   }
@@ -737,13 +740,17 @@ refresh_menu:
 }
 
 bool protectPinOnDevice(bool use_cached) {
+  //   static bool input_pin = false;  // void recursive
   if (use_cached && session_isUnlocked()) {
     return true;
   }
-
+  //   if (input_pin) return true;
   const char *pin = "";
+input:
   if (config_hasPin()) {
+    // input_pin = true;
     pin = protectInputPin(_("Please enter currnet PIN"), 6);
+    // input_pin = false;
 
     if (!pin) {
       return false;
@@ -752,11 +759,11 @@ bool protectPinOnDevice(bool use_cached) {
   }
 
   bool ret = config_unlock(pin);
-  if (!ret) {
-    layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                        _("PIN invalid"), NULL, NULL, NULL, NULL, NULL);
-    protectWaitKey(timer1s * 5, 0);
-    layoutHome();
+  if (ret == false) {
+    if (protectPinCheck()) {
+      goto input;
+    } else
+      return false;
   }
   return ret;
 }
@@ -767,6 +774,7 @@ bool protectChangePinOnDevice(void) {
   const char *pin = NULL;
 
   if (config_hasPin()) {
+  input:
     pin = protectInputPin(_("Please enter currnet PIN"), 6);
 
     if (pin == NULL) {
@@ -776,10 +784,10 @@ bool protectChangePinOnDevice(void) {
 
     bool ret = config_unlock(pin);
     if (ret == false) {
-      layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                          _("PIN invalid"), NULL, NULL, NULL, NULL, NULL);
-      protectWaitKey(timer1s * 5, 0);
-      return false;
+      if (protectPinCheck()) {
+        goto input;
+      } else
+        return false;
     }
 
     strlcpy(old_pin, pin, sizeof(old_pin));
@@ -804,15 +812,16 @@ retry:
   if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
-    layoutDialogCenterAdapter(&bmp_btn_cancel, _("Cancel"), &bmp_btn_retry,
-                              _("Retry"), NULL, NULL, NULL, _("PIN mismatch"),
-                              NULL, NULL, NULL);
-    uint8_t key = protectWaitKey(0, 1);
-    if (key == KEY_CONFIRM) {
-      goto retry;
-    } else {
-      layoutHome();
-      return false;
+    layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
+                                   NULL, NULL, _("Inconsistent PIN code"),
+                                   _("Please try again"), NULL, NULL);
+    while (1) {
+      uint8_t key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        goto retry;
+      } else if (key == KEY_NULL) {
+        return false;
+      }
     }
   }
 
@@ -821,10 +830,86 @@ retry:
   memzero(new_pin, sizeof(new_pin));
   if (ret == false) {
   } else {
-    layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
-                        _("PIN changed"), NULL, NULL, NULL, NULL, NULL);
-    protectWaitKey(timer1s * 5, 0);
+    layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Done"),
+                                   NULL, NULL, NULL, _("PIN code change"),
+                                   _("successfully"), NULL, NULL);
+    protectWaitKey(0, 1);
   }
   layoutHome();
   return ret;
+}
+
+bool protectSelectMnemonicNumber(uint32_t *number) {
+  uint8_t key = KEY_NULL;
+  uint32_t index = 0;
+  uint32_t num_s[3] = {12, 18, 24};
+  char *numbers[3] = {"12", "18", "24"};
+
+  layoutDialogSwipeCenterAdapter(
+      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+      _("Please select the"), _("number of Mnemonic"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
+
+refresh_menu:
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
+                           NULL, _("Okay"), index + 1, 3, NULL, NULL,
+                           numbers[index],
+                           index > 0 ? numbers[index - 1] : NULL,
+                           index < 2 ? numbers[index + 1] : NULL);
+
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) index--;
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (index < 2) index++;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      *number = num_s[index];
+      return true;
+    case KEY_CANCEL:
+      goto refresh_menu;
+    default:
+      return false;
+  }
+}
+
+bool protectPinCheck(void) {
+  uint8_t key = KEY_NULL;
+  char desc1[64] = "";
+  char desc2[64] = "";
+
+  uint32_t fails = config_getPinFails();
+  if (fails == 1) {
+    layoutDialogCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
+                              NULL, NULL, _("Incorrect PIN entered"),
+                              "You still have 5 times", "to try", NULL);
+  } else if (fails > 1 && fails < 5) {
+    strcat(desc1, _("Wrong PIN for "));
+    uint2str(fails, desc1 + strlen(desc1));
+    strcat(desc1, _(" times"));
+    strcat(desc2, _("you still have "));
+    uint2str(5 - fails, desc2 + strlen(desc2));
+    strcat(desc2, _(" times"));
+    layoutDialogCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
+                              NULL, NULL, desc1, desc2, "to try", NULL);
+  } else {
+    layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                              _("Device will be erased"), NULL, NULL, NULL);
+    protectWaitKey(timer1s * 2, 0);
+    config_wipe();
+    return false;
+  }
+  while (1) {
+    key = protectWaitKey(0, 1);
+    if (key == KEY_CONFIRM) {
+      return true;
+    } else if (key == KEY_NULL) {
+      return false;
+    }
+  }
 }

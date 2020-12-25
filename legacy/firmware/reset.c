@@ -251,11 +251,11 @@ void reset_backup(bool separated, const char *mnemonic) {
   layoutHome();
 }
 
-bool scroll_mnemonic(const char *pre_desc, const char *mnemonic) {
+bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type) {
   uint8_t key = KEY_NULL;
   char desc[64] = "";
   char words[24][12];
-  int i = 0, word_count = 0;
+  uint32_t i = 0, word_count = 0;
 
   memzero(words, sizeof(words));
 
@@ -274,79 +274,113 @@ bool scroll_mnemonic(const char *pre_desc, const char *mnemonic) {
       i++;
     }
   }
-
-  for (i = 0; i < word_count; i++) {
+  i = 0;
+refresh_menu:
+  if (type == 0) {
+    char *btn_no;
     memzero(desc, sizeof(desc));
     strcat(desc, pre_desc);
     strcat(desc, " #");
-    uint2str((uint32_t)(i + 1), desc + strlen(desc));
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_confirm,
-                                   _("Confirm"), NULL, NULL, desc, NULL,
-                                   words[i], NULL, NULL);
-    key = protectWaitKey(0, 0);
-    switch (key) {
-      case KEY_UP:
-      case KEY_CANCEL:
-        if (i > 0) {
-          i -= 2;
-        } else {
-          memzero(words, sizeof(words));
-          layoutHome();
-          return false;
-        }
-        break;
-      case KEY_DOWN:
-      case KEY_CONFIRM:
-        break;
-      default:
-        memzero(words, sizeof(words));
-        layoutHome();
-        return false;
+    uint2str(i + 1, desc + strlen(desc));
+    if (i == 0) {
+      btn_no = _("Back");
+    } else {
+      btn_no = _("Prev");
     }
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, btn_no, &bmp_btn_confirm,
+                                   _("Confirm"), NULL, NULL, NULL, desc,
+                                   words[i], NULL, NULL);
+  } else if (type == 1) {
+    memzero(desc, sizeof(desc));
+    strcat(desc, " #");
+    uint2str(i + 1, desc + strlen(desc));
+    layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
+                             NULL, _("Okay"), i + 1, word_count, NULL, desc,
+                             words[i], i > 0 ? words[i - 1] : NULL,
+                             i < word_count - 1 ? words[i + 1] : NULL);
   }
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (i > 0) i--;
+      goto refresh_menu;
+    case KEY_CANCEL:
+      if (type == 0) {
+        if (i > 0)
+          i--;
+        else
+          return false;
+      }
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (i < word_count - 1) i++;
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      if (i == word_count - 1)
+        break;
+      else {
+        i++;
+        goto refresh_menu;
+      }
+    default:
+      break;
+  }
+
   memzero(words, sizeof(words));
   return true;
 }
 
 void writedown_mnemonic(const char *mnemonic) {
-  if (scroll_mnemonic(_("Write down the seed"), mnemonic)) {
-    if (scroll_mnemonic(_("Please check the seed"), mnemonic)) {
+  uint8_t key = KEY_NULL;
+  if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
+    layoutDialogSwipeCenterAdapter(
+        &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+        _("Please check the written"), _("seed phrases"), NULL, NULL);
+    key = protectWaitKey(0, 1);
+    if (key != KEY_CONFIRM) {
+      return;
+    }
+    if (scroll_mnemonic(NULL, mnemonic, 1)) {
       config_setMnemonic(mnemonic);
     }
   }
 }
 
 bool reset_on_device(void) {
-  uint32_t index = 1;
-  uint32_t _strength[3] = {128, 196, 256};
-  char *numbers[3] = {"12", "18", "24"};
+  uint32_t words_count = 0;
+  char desc[64] = "";
   uint8_t key = KEY_NULL;
 
-  strength = 0;
-
 refresh_menu:
-  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
-                           _("Confirm"), 0, 0, _("Select mnemonic number"),
-                           NULL, numbers[index],
-                           index > 0 ? numbers[index - 1] : NULL,
-                           index < 2 ? numbers[index + 1] : NULL);
-
-  key = protectWaitKey(0, 0);
-  switch (key) {
-    case KEY_UP:
-      if (index > 0) index--;
-      goto refresh_menu;
-    case KEY_DOWN:
-      if (index < 2) index++;
-      goto refresh_menu;
-    case KEY_CONFIRM:
-      strength = _strength[index];
+  if (!protectSelectMnemonicNumber(&words_count)) return false;
+  switch (words_count) {
+    case 12:
+      strength = 128;
       break;
-    case KEY_CANCEL:
-      return false;
+    case 18:
+      strength = 196;
+      break;
+    case 24:
+      strength = 256;
+      break;
     default:
       return false;
   }
+
+  memzero(desc, sizeof(desc));
+  strcat(desc, _("Write down your "));
+  uint2str(words_count, desc + strlen(desc));
+
+  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                 _("Next"), NULL, NULL, NULL, desc,
+                                 _("seed phrases"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key == KEY_CANCEL) {
+    goto refresh_menu;
+  } else if (key == KEY_NULL) {
+    return false;
+  }
+
   skip_backup = false;
   no_backup = false;
   awaiting_entropy = true;

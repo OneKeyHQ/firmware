@@ -31,7 +31,7 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len);
 void reset_backup(bool separated, const char *mnemonic);
 uint32_t reset_get_int_entropy(uint8_t *entropy);
 const char *reset_get_word(void);
-bool scroll_mnemonic(const char *pre_desc, const char *mnemonic);
+bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type);
 void writedown_mnemonic(const char *mnemonic);
 bool reset_on_device(void);
 

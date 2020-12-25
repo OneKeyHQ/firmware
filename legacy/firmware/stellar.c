@@ -1748,7 +1748,7 @@ void stellar_layoutSigningDialog(const char *line1, const char *line2,
 
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  oledClear();
+  oledClear_ex();
 
   // Load up public address
   char str_pubaddr[56 + 1] = {0};

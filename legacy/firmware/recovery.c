@@ -35,6 +35,7 @@
 #include "rng.h"
 #include "timer.h"
 #include "usb.h"
+#include "util.h"
 
 /* number of words expected in the new seed */
 static uint32_t word_count;
@@ -193,10 +194,6 @@ static bool recovery_done(void) {
         if (!recovery_byself) {
           fsm_sendSuccess(_("Device recovered"));
         } else {
-          layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
-                              _("Mnemonic"), _("imported succeed"), NULL, NULL,
-                              NULL, NULL);
-          protectWaitKey(timer1s * 5, 0);
           success = true;
         }
 
@@ -234,10 +231,10 @@ static bool recovery_done(void) {
     if (!dry_run) {
       session_clear(true);
       if (recovery_byself) {
-        layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                            _("Mnemonic"), _("INVALID!"), NULL, NULL, NULL,
-                            NULL);
-        protectWaitKey(timer1s * 5, 0);
+        layoutDialogSwipeCenterAdapter(
+            NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL, NULL,
+            _("Invalid seed phrases"), _("Please try again"), NULL, NULL);
+        protectWaitKey(0, 1);
       }
     } else {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
@@ -629,8 +626,8 @@ static void select_complete_word(char *title, int start, int len) {
 
 refresh_menu:
   layoutItemsSelectAdapter(
-      &bmp_btn_up, &bmp_btn_down, _("Cancel"), _("Confirm"), 0, 0, title, NULL,
-      mnemonic_get_word(start + index),
+      &bmp_btn_up, &bmp_btn_down, &bmp_btn_back, &bmp_btn_forward, _("Cancel"),
+      _("Confirm"), 0, 0, title, NULL, mnemonic_get_word(start + index),
       index > 0 ? mnemonic_get_word(start + index - 1) : NULL,
       index < len - 1 ? mnemonic_get_word(start + index + 1) : NULL);
 
@@ -657,18 +654,14 @@ refresh_menu:
 static bool recovery_check_words(void) {
   uint8_t key = KEY_NULL;
   uint32_t index = 0;
-  layoutDialogCenterAdapter(&bmp_btn_cancel, _("Cancel"), &bmp_btn_confirm,
-                            _("Confirm"), NULL, NULL, NULL,
-                            _("Please check the seed"), NULL, NULL, NULL);
-
-  key = protectWaitKey(timer1s * 60, 1);
-  if (key == KEY_CANCEL) {
-    return false;
-  }
+  char desc[64] = "";
 
 refresh_menu:
-  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
-                           _("Confirm"), index + 1, word_count, NULL, NULL,
+  memzero(desc, sizeof(desc));
+  strcat(desc, " #");
+  uint2str(index + 1, desc + strlen(desc));
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
+                           NULL, _("Okay"), index + 1, word_count, NULL, desc,
                            words[index], index > 0 ? words[index - 1] : NULL,
                            index < word_count - 1 ? words[index + 1] : NULL);
 
@@ -681,9 +674,13 @@ refresh_menu:
       if (index > 0) index--;
       goto refresh_menu;
     case KEY_CONFIRM:
-      return true;
+      if (index < word_count - 1) {
+        index++;
+        goto refresh_menu;
+      } else
+        return true;
     case KEY_CANCEL:
-      break;
+      goto refresh_menu;
     default:
       break;
   }
@@ -703,8 +700,9 @@ static bool input_words(void) {
 
 refresh_menu:
   memzero(desc, sizeof(desc));
-  strcat(desc, _("Please enter the"));
-  format_number(desc + strlen(desc), word_index + 1);
+  strcat(desc, _("Enter seed phrase "));
+  strcat(desc, _("#"));
+  uint2str(word_index + 1, desc + strlen(desc));
   memzero(letter_list, sizeof(letter_list));
   letter_count = mnemonic_next_letter_with_prefix(words[word_index], prefix_len,
                                                   letter_list);
@@ -733,8 +731,23 @@ refresh_menu:
       } else {
         uint32_t candidate_location =
             mnemonic_word_index_with_prefix(words[word_index], prefix_len);
-        select_complete_word(desc, candidate_location, letter_count);
+        select_complete_word(NULL, candidate_location, letter_count);
         if (word_index == word_count) {
+          layoutDialogCenterAdapter(&bmp_btn_cancel, _("Cancel"),
+                                    &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+                                    NULL, _("Please check the entered"),
+                                    _("seed phrases"), NULL, NULL);
+
+          key = protectWaitKey(0, 1);
+          if (key == KEY_CANCEL) {
+            word_index--;
+            prefix_len = 0;
+            index = 0;
+            memzero(words[word_index], sizeof(words[word_index]));
+            goto refresh_menu;
+          } else if (key == KEY_NULL) {
+            return false;
+          }
           if (recovery_check_words()) {
             return recovery_done();
           } else {
@@ -783,36 +796,27 @@ static bool recovery_words_on_device(uint32_t count) {
 }
 
 bool recovery_on_device(void) {
-  uint32_t index = 1;
-  uint32_t count = 0;
-  uint32_t num_s[3] = {12, 18, 24};
-  char *numbers[3] = {"12", "18", "24"};
+  char desc[64] = "";
   uint8_t key = KEY_NULL;
 
 refresh_menu:
-  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, _("Cancel"),
-                           _("Confirm"), 0, 0, _("Select mnemonic number"),
-                           NULL, numbers[index],
-                           index > 0 ? numbers[index - 1] : NULL,
-                           index < 2 ? numbers[index + 1] : NULL);
+  if (!protectSelectMnemonicNumber(&word_count)) return false;
 
-  key = protectWaitKey(0, 0);
-  switch (key) {
-    case KEY_UP:
-      if (index > 0) index--;
-      goto refresh_menu;
-    case KEY_DOWN:
-      if (index < 2) index++;
-      goto refresh_menu;
-    case KEY_CONFIRM:
-      count = num_s[index];
-      break;
-    case KEY_CANCEL:
-    default:
-      return false;
+  memzero(desc, sizeof(desc));
+  strcat(desc, _("Please enter your"));
+  uint2str(word_count, desc + strlen(desc));
+
+  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                 _("Next"), NULL, NULL, NULL, desc,
+                                 _("seed phrases"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key == KEY_CANCEL) {
+    goto refresh_menu;
+  } else if (key == KEY_NULL) {
+    return false;
   }
 
-  return recovery_words_on_device(count);
+  return recovery_words_on_device(word_count);
 }
 
 #if DEBUG_LINK

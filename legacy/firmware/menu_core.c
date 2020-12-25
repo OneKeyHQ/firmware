@@ -16,6 +16,7 @@ void menu_display(struct menu *menu) {
 
   strcat(desc, _(menu->items[menu->current].name));
   if (menu->items[menu->current].name2) {
+    strcat(desc, " ");
     strcat(desc, _(menu->items[menu->current].name2));
   }
   if (menu->items[menu->current].para != NULL) {
@@ -50,6 +51,7 @@ void menu_enter(void) {
     currentMenu->current = currentMenu->start;
   } else if (currentMenu->items[currentMenu->current].func != NULL) {
     currentMenu->items[currentMenu->current].func(currentMenu->current);
+    layoutLast = menu_run;
     if (currentMenu->previous) currentMenu = currentMenu->previous;
   }
 }

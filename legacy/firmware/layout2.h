@@ -25,6 +25,7 @@
 #include "chinese.h"
 #include "coins.h"
 #include "layout.h"
+#include "oled.h"
 #include "trezor.h"
 
 #include "messages-bitcoin.pb.h"
@@ -41,11 +42,6 @@ extern void *layoutLast;
 #else
 #define layoutSwipe oledSwipeLeft
 #endif
-
-// prompt info display
-#define DISP_NOT_ACTIVE 0x01  // Not Activated
-#define DISP_NEED_BACKUP 0x02
-#define DISP_BACKUP_ONLY 0x03
 
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
@@ -103,14 +99,11 @@ void layoutConfirmAutoLockDelay(uint32_t delay_ms);
 
 const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen);
 const char **split_message_hex(const uint8_t *msg, uint32_t len);
-void Disp_Page(const BITMAP *icon, const char *btnNo, const char *btnYes,
-               const char *desc, uint8_t *pucInfoBuf, uint16_t usLen);
 
 void layoutQRCode(const char *index, const BITMAP *bmp_up,
                   const BITMAP *bmp_down, const char *title, const char *text);
 
 void layoutHomeInfo(void);
-void vDisp_PromptInfo(uint8_t ucIndex, bool ucMode);
 
 void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon);
 void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon);
@@ -136,6 +129,7 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
 
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                              const BITMAP *bmp_no, const BITMAP *bmp_yes,
                               const char *btnNo, const char *btnYes,
                               uint32_t index, uint32_t count, const char *title,
                               const char *prefex, const char *current,
@@ -151,7 +145,15 @@ void layoutEnterSleep(void);
 
 #define layoutMenuItems(bmp_up, bmp_down, index, count, title, current,       \
                         previous, next)                                       \
-  layoutItemsSelectAdapter(bmp_up, bmp_down, NULL, NULL, index, count, title, \
-                           NULL, current, previous, next)
+  layoutItemsSelectAdapter(bmp_up, bmp_down, &bmp_btn_back, &bmp_btn_confirm, \
+                           _("Back"), _("Okay"), index, count, title, NULL,   \
+                           current, previous, next)
+
+uint8_t layoutStatusLogoEx(bool force_fresh);
+
+static inline void oledClear_ex(void) {
+  oledClear();
+  layoutStatusLogoEx(true);
+}
 
 #endif

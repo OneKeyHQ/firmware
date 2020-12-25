@@ -66,5 +66,6 @@ secbool storage_set(const uint16_t key, const void *val, const uint16_t len);
 secbool storage_delete(const uint16_t key);
 secbool storage_set_counter(const uint16_t key, const uint32_t count);
 secbool storage_next_counter(const uint16_t key, uint32_t *count);
+secbool pin_get_fails(uint32_t *ctr);
 
 #endif

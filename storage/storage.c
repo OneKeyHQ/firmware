@@ -797,7 +797,7 @@ static uint32_t hamming_weight(uint32_t value) {
   return value & 0x3F;
 }
 
-static secbool pin_get_fails(uint32_t *ctr) {
+secbool pin_get_fails(uint32_t *ctr) {
   *ctr = PIN_MAX_TRIES;
 
   const void *logs = NULL;

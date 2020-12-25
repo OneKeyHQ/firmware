@@ -15,21 +15,75 @@ static struct menu settings_menu, main_menu;
 
 void menu_recovery_device(int index) {
   (void)index;
-  if (protectPinOnDevice(true)) {
-    recovery_on_device();
-    if (config_isInitialized()) {
-      protectChangePinOnDevice();
+  uint8_t key = KEY_NULL;
+  if (!protectPinOnDevice(true)) {
+    return;
+  }
+  layoutDialogSwipeCenterAdapter(
+      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+      _("Enter seed phrases to"), _("restore wallet"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+  recovery_on_device();
+  if (config_isInitialized()) {
+    layoutDialogSwipeCenterAdapter(
+        NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
+        _("Wallet Recovery Success"), NULL, NULL, NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_NULL) {
+        return;
+      } else if (key == KEY_CONFIRM) {
+        break;
+      }
     }
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                   _("Next"), NULL, NULL, NULL, NULL,
+                                   _("Please set the PIN"), NULL, NULL);
+    key = protectWaitKey(0, 1);
+    if (key != KEY_CONFIRM) {
+      return;
+    }
+    protectChangePinOnDevice();
   }
 }
 
 void menu_reset_device(int index) {
   (void)index;
-  if (protectPinOnDevice(true)) {
-    reset_on_device();
-    if (config_isInitialized()) {
-      protectChangePinOnDevice();
+  uint8_t key = KEY_NULL;
+  if (!protectPinOnDevice(true)) {
+    return;
+  }
+  layoutDialogSwipeCenterAdapter(
+      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+      _("Follow the prompts"), _("to creat wallet"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+  reset_on_device();
+  if (config_isInitialized()) {
+    layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Done"),
+                                   NULL, NULL, NULL, _("Wallet created"),
+                                   _("successfully"), NULL, NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_NULL) {
+        return;
+      } else if (key == KEY_CONFIRM) {
+        break;
+      }
     }
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                   _("Next"), NULL, NULL, NULL, NULL,
+                                   _("Please set the PIN"), NULL, NULL);
+    key = protectWaitKey(0, 1);
+    if (key != KEY_CONFIRM) {
+      return;
+    }
+    protectChangePinOnDevice();
   }
 }
 
@@ -45,7 +99,7 @@ refresh_menu:
 
   switch (page) {
     case 0:
-      oledClear();
+      oledClear_ex();
       oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
       oledDrawBitmap(48, 10, &bmp_btn_enter);
       oledDrawBitmap(48, 2 * 10, &bmp_btn_exit);
@@ -67,7 +121,7 @@ refresh_menu:
       oledRefresh();
       break;
     case 1:
-      layoutQRCode(index_str, &bmp_btn_up, &bmp_btn_down, _("Download APP"),
+      layoutQRCode(index_str, &bmp_btn_up, &bmp_btn_down, _("Download Onekey"),
                    "https://onekey.so/download");
       break;
 
@@ -101,7 +155,7 @@ void menu_erase_device(int index) {
                     _("All data will be lost."), NULL, NULL);
   key = protectWaitKey(timer1s * 60, 1);
   if (key == KEY_CONFIRM) {
-    if (protectPinOnDevice(false)) {
+    if (protectPinOnDevice(true)) {
       config_wipe();
     }
   }
@@ -118,7 +172,7 @@ void menu_showMnemonic(int index) {
   if (protectPinOnDevice(false)) {
     char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
     config_getMnemonic(mnemonic, sizeof(mnemonic));
-    scroll_mnemonic(_("Mnemonic"), mnemonic);
+    scroll_mnemonic(_("Mnemonic"), mnemonic, 0);
     layoutHome();
   }
 }
@@ -128,10 +182,10 @@ static struct menu_item ble_set_menu_items[] = {
     {"Off", NULL, true, menu_para_set_ble, NULL}};
 
 static struct menu ble_set_menu = {
-    .start = (COUNT_OF(ble_set_menu_items) - 1) / 2,
-    .current = (COUNT_OF(ble_set_menu_items) - 1) / 2,
+    .start = 0,
+    .current = 0,
     .counts = COUNT_OF(ble_set_menu_items),
-    .title = "Bluetooth",
+    .title = NULL,
     .items = ble_set_menu_items,
     .previous = &settings_menu,
 };
@@ -141,24 +195,40 @@ static struct menu_item language_set_menu_items[] = {
     {"中文", NULL, true, menu_para_set_language, NULL}};
 
 static struct menu language_set_menu = {
-    .start = (COUNT_OF(language_set_menu_items) - 1) / 2,
-    .current = (COUNT_OF(language_set_menu_items) - 1) / 2,
+    .start = 0,
+    .current = 0,
     .counts = COUNT_OF(language_set_menu_items),
-    .title = "Language",
+    .title = NULL,
     .items = language_set_menu_items,
     .previous = &settings_menu,
 };
 
+static struct menu_item autolock_set_menu_items[] = {
+    {"1", "minute", true, menu_para_set_sleep, NULL},
+    {"2", "minutes", true, menu_para_set_sleep, NULL},
+    {"5", "minutes", true, menu_para_set_sleep, NULL},
+    {"10", "minutes", true, menu_para_set_sleep, NULL}};
+
+static struct menu autolock_set_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(autolock_set_menu_items),
+    .title = NULL,
+    .items = autolock_set_menu_items,
+    .previous = &settings_menu,
+};
+
 static struct menu_item shutdown_set_menu_items[] = {
-    {"60", "s", true, menu_para_set_shutdown, NULL},
-    {"300", "s", true, menu_para_set_shutdown, NULL},
-    {"600", "s", true, menu_para_set_shutdown, NULL}};
+    {"10", "minute", true, menu_para_set_shutdown, NULL},
+    {"30", "minutes", true, menu_para_set_shutdown, NULL},
+    {"1", "hour", true, menu_para_set_shutdown, NULL},
+    {"2", "hours", true, menu_para_set_shutdown, NULL}};
 
 static struct menu shutdown_set_menu = {
-    .start = (COUNT_OF(shutdown_set_menu_items) - 1) / 2,
-    .current = (COUNT_OF(shutdown_set_menu_items) - 1) / 2,
+    .start = 0,
+    .current = 0,
     .counts = COUNT_OF(shutdown_set_menu_items),
-    .title = "Shutdown",
+    .title = NULL,
     .items = shutdown_set_menu_items,
     .previous = &settings_menu,
 };
@@ -167,12 +237,14 @@ static struct menu_item settings_menu_items[] = {
     {"Bluetooth", NULL, false, .sub_menu = &ble_set_menu, menu_para_ble_state},
     {"Language", NULL, false, .sub_menu = &language_set_menu,
      menu_para_language},
+    {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
+     menu_para_autolock},
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
      menu_para_shutdown}};
 
 static struct menu settings_menu = {
-    .start = (COUNT_OF(settings_menu_items) - 1) / 2,
-    .current = (COUNT_OF(settings_menu_items) - 1) / 2,
+    .start = 0,
+    .current = 0,
     .counts = COUNT_OF(settings_menu_items),
     .title = NULL,
     .items = settings_menu_items,
@@ -185,8 +257,8 @@ static struct menu_item security_set_menu_items[] = {
     {"Reset", NULL, true, menu_erase_device, NULL}};
 
 static struct menu security_set_menu = {
-    .start = (COUNT_OF(security_set_menu_items) - 1) / 2,
-    .current = (COUNT_OF(security_set_menu_items) - 1) / 2,
+    .start = 0,
+    .current = 0,
     .counts = COUNT_OF(security_set_menu_items),
     .title = NULL,
     .items = security_set_menu_items,
@@ -199,8 +271,8 @@ static struct menu_item main_menu_items[] = {
     {"Security", NULL, false, .sub_menu = &security_set_menu, NULL}};
 
 static struct menu main_menu = {
-    .start = (COUNT_OF(main_menu_items) - 1) / 2,
-    .current = (COUNT_OF(main_menu_items) - 1) / 2,
+    .start = 0,
+    .current = 0,
     .counts = COUNT_OF(main_menu_items),
     .title = NULL,
     .items = main_menu_items,
@@ -208,9 +280,9 @@ static struct menu main_menu = {
 };
 
 static struct menu_item main_uninitialized_menu_items[] = {
-    {"Manual", NULL, true, menu_manual, NULL},
-    {"Create wallet", NULL, true, menu_reset_device, NULL},
-    {"Import mnemonic", NULL, true, menu_recovery_device, NULL},
+    {"Guide", NULL, true, menu_manual, NULL},
+    {"Create", NULL, true, menu_reset_device, NULL},
+    {"Restore", NULL, true, menu_recovery_device, NULL},
     {"Settings", NULL, false, .sub_menu = &settings_menu, NULL},
     {"About", NULL, true, layoutDeviceParameters, NULL}};
 
@@ -225,21 +297,26 @@ static struct menu main_uninitilized_menu = {
 
 void menu_language_init(void) {
   uint8_t key = KEY_NULL;
-  menu_init(&language_set_menu);
-  menu_update(&language_set_menu, title, NULL);
+  int index = 0;
 refresh_menu:
-  menu_display(&language_set_menu);
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
+                           NULL, index == 0 ? "Okay" : "确认", index + 1, 2,
+                           NULL, NULL, index == 0 ? "English" : "简体中文",
+                           index > 0 ? "English" : NULL,
+                           index == 0 ? "简体中文" : NULL);
+
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
-      menu_up();
+      if (index > 0) index--;
       goto refresh_menu;
     case KEY_DOWN:
-      menu_down();
+      if (index < 1) index++;
+      goto refresh_menu;
+    case KEY_CANCEL:
       goto refresh_menu;
     case KEY_CONFIRM:
-      menu_enter();
-      menu_update(&language_set_menu, title, "Language");
+      menu_para_set_language(index);
       break;
     default:
       break;
