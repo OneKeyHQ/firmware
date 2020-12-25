@@ -66,7 +66,11 @@ static uint32_t svhandler_flash_lock(void) {
   return FLASH_SR;
 }
 
+static void enter_sleep_mode(void) { SCB_SCR |= SCB_SCR_SLEEPONEXIT; }
+
 static void svhandler_system_reset(void) { scb_reset_core(); }
+
+static void svhandler_system_sleep(void) { enter_sleep_mode(); }
 
 extern volatile uint32_t system_millis;
 
@@ -90,6 +94,9 @@ void svc_handler_main(uint32_t *stack) {
       break;
     case SVC_SYS_RESET:
       svhandler_system_reset();
+      break;
+    case SVC_SYS_SLEEP:
+      svhandler_system_sleep();
       break;
     default:
       stack[0] = 0xffffffff;

@@ -147,6 +147,7 @@ void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
                      const char *letter);
 
 void layoutDeviceParameters(int num);
+void layoutEnterSleep(void);
 
 #define layoutMenuItems(bmp_up, bmp_down, index, count, title, current,       \
                         previous, next)                                       \

@@ -1980,3 +1980,53 @@ refresh_menu:
       return;
   }
 }
+
+static void enter_sleep(void) {
+  static int sleep_count = 0;
+  bool unlocked = false;
+  uint8_t oled_prev[OLED_BUFSIZE];
+  void *layoutBack = NULL;
+  sleep_count++;
+  if (sleep_count == 1) {
+    unlocked = session_isUnlocked();
+    layoutBack = layoutLast;
+    config_lockDevice();
+  }
+  oledBufferLoad(oled_prev);
+  oledClear();
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 30, _("Sleep Mode"),
+                              FONT_STANDARD);
+  layoutButtonNoAdapter(_("Exit"), NULL);
+  oledRefresh();
+  svc_system_sleep();
+  while (get_power_key_state()) {
+  }
+  system_millis_button_press = timer_ms();
+  if (unlocked) {
+    if (sleep_count > 1) {
+    } else {
+      while (!protectPinOnDevice(false)) {
+      }
+    }
+  }
+  oledBufferRestore(oled_prev);
+  oledRefresh();
+  sleep_count--;
+  if (sleep_count == 0) {
+    layoutLast = layoutBack;
+  }
+}
+
+void layoutEnterSleep(void) {
+  if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
+#if !EMULATOR
+    enter_sleep();
+#endif
+  }
+  static uint32_t system_millis_logo_refresh = 0;
+  // 1000 ms refresh
+  if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+    layoutStatusLogoEx(false);
+    system_millis_logo_refresh = timer_ms();
+  }
+}

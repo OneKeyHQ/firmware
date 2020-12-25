@@ -40,6 +40,7 @@ struct buttonState {
 extern uint8_t change_ble_sta_flag;
 #endif
 extern struct buttonState button;
+extern volatile uint32_t system_millis_button_press;
 
 uint16_t buttonRead(void);
 void buttonUpdate(void);

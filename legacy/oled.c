@@ -248,6 +248,14 @@ void oledBufferResume(void) {
   memcpy(_oledbuffer, _oledbuffer_bak, OLED_BUFSIZE);
 }
 
+void oledBufferLoad(uint8_t *buffer) {
+  memcpy(buffer, _oledbuffer, OLED_BUFSIZE);
+}
+
+void oledBufferRestore(uint8_t *buffer) {
+  memcpy(_oledbuffer, buffer, OLED_BUFSIZE);
+}
+
 void oledSetBuffer(uint8_t *buf, uint16_t usLen) {
   memcpy(_oledbuffer, buf, usLen);
 }
