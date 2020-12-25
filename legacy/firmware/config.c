@@ -114,6 +114,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_ST_SEED_EXCHANGE (35 | APP)  // bytes, only used in se
 
 #define KEY_MNEMONICS_IMPORTED (36 | APP | FLAG_PUBLIC_SHIFTED)  // bool
+#define KEY_SLEEP_DELAY_MS (37 | APP | FLAG_PUBLIC_SHIFTED)      // uint32
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
 
@@ -180,10 +181,13 @@ static Session *activeSessionCache;
 
 static uint32_t sessionUseCounter = 0;
 
-#define autoLockDelayMsDefault (10 * 60 * 1000U)  // 10 minutes
+#define autoLockDelayMsDefault (30 * 60 * 1000U)  // 30 minutes
+#define sleepDelayMsDefault (2 * 60 * 1000U)      // 2 minutes
 
 static secbool autoLockDelayMsCached = secfalse;
+static secbool sleepDelayMsCached = secfalse;
 static uint32_t autoLockDelayMs = autoLockDelayMsDefault;
+static uint32_t autoSleepDelayMs = sleepDelayMsDefault;
 
 static uint32_t deviceState = 0;
 
@@ -1114,6 +1118,27 @@ void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
   }
 }
 
+uint32_t config_getSleepDelayMs(void) {
+  if (sectrue == sleepDelayMsCached) {
+    return autoSleepDelayMs;
+  }
+
+  if (sectrue != config_get_uint32(KEY_SLEEP_DELAY_MS, &autoSleepDelayMs)) {
+    autoSleepDelayMs = sleepDelayMsDefault;
+  }
+  sleepDelayMsCached = sectrue;
+  return autoSleepDelayMs;
+}
+
+void config_setSleepDelayMs(uint32_t auto_sleep_ms) {
+  auto_sleep_ms = MAX(auto_sleep_ms, MIN_AUTOLOCK_DELAY_MS);
+  if (sectrue ==
+      storage_set(KEY_SLEEP_DELAY_MS, &auto_sleep_ms, sizeof(auto_sleep_ms))) {
+    autoSleepDelayMs = auto_sleep_ms;
+    sleepDelayMsCached = sectrue;
+  }
+}
+
 void config_wipe(void) {
   uint8_t session_key[16];
 
@@ -1277,4 +1302,10 @@ bool config_stBackUpEntoryToSe(uint8_t *seed, uint8_t seed_len) {
 
 bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len) {
   return st_restore_entory_from_se(KEY_ST_SEED_EXCHANGE, seed, seed_len);
+}
+
+uint32_t config_getPinFails(void) {
+  uint32_t count = 0;
+  pin_get_fails(&count);
+  return count;
 }

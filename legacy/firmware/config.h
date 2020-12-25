@@ -170,6 +170,9 @@ bool config_getFlags(uint32_t *flags);
 uint32_t config_getAutoLockDelayMs(void);
 void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms);
 
+uint32_t config_getSleepDelayMs(void);
+void config_setSleepDelayMs(uint32_t auto_sleep_ms);
+
 void config_wipe(void);
 void config_setFastPayPinFlag(bool flag);
 bool config_getFastPayPinFlag(void);
@@ -199,6 +202,8 @@ bool config_STSeedBackUp(void *plain_data, uint16_t plain_len,
                          void *cipher_data, uint16_t *cipher_len);
 bool config_STSeedRestore(void *cipher_data, uint16_t cipher_len,
                           void *plain_data, uint16_t *plain_len);
+uint32_t config_getPinFails(void);
+
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 
 #endif

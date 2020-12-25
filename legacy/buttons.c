@@ -30,6 +30,8 @@ static volatile bool btn_up_long = false, btn_down_long = false;
 #include <libopencm3/stm32/syscfg.h>
 #include "ble.h"
 
+#include <libopencm3/cm3/scb.h>
+
 #if !EMULATOR
 uint8_t change_ble_sta_flag = 0;
 #endif
@@ -38,6 +40,8 @@ static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
 static volatile uint32_t up_btn_timer_counter = 0;
 static volatile int up_btn_timer_enable = 0;
+
+volatile uint32_t system_millis_button_press;
 
 uint16_t buttonRead(void) {
   uint16_t tmp = 0x00;
@@ -73,6 +77,7 @@ void buttonsIrqInit(void) {
 #if FEITIAN_PCB_V1_3
 void exti1_isr(void) {
   if (exti_get_flag_status(BTN_PIN_NO)) {
+    SCB_SCR &= ~SCB_SCR_SLEEPONEXIT;  // exit sleep mode
     exti_reset_request(BTN_PIN_NO);
     if (gpio_get(BTN_PORT_NO, BTN_PIN_NO)) {
       button_timer_enable = 1;
@@ -80,9 +85,16 @@ void exti1_isr(void) {
     }
   }
 }
+
+void clear_button_irq(void) {
+  if (exti_get_flag_status(BTN_PIN_NO)) {
+    exti_reset_request(BTN_PIN_NO);
+  }
+}
 #else
 void exti0_isr(void) {
   if (exti_get_flag_status(BTN_PIN_NO)) {
+    SCB_SCR &= ~SCB_SCR_SLEEPONEXIT;  // exit sleep mode
     exti_reset_request(BTN_PIN_NO);
     if (gpio_get(BTN_PORT_NO, BTN_PIN_NO)) {
       button_timer_enable = 1;
@@ -291,7 +303,7 @@ void buttonUpdate() {
     }
   }
   if (button.YesUp || button.NoUp || button.UpUp || button.DownUp) {
-    system_millis_poweroff_start = 0;
+    system_millis_button_press = timer_ms();
   }
 
   last_state = state;

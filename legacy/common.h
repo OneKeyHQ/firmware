@@ -40,8 +40,6 @@ extern uint32_t g_uiFastPayFlag;
 extern uint8_t g_uchash_mode;
 extern uint8_t g_ucSignU2F;
 
-extern volatile uint32_t system_millis_poweroff_start;
-
 void __attribute__((noreturn))
 __fatal_error(const char *expr, const char *msg, const char *file, int line,
               const char *func);
