@@ -165,5 +165,5 @@ message HDNodeType {
  * Request:
  * @auxend
  */
-message PinInputOnDevice {
+message BixinPinInputOnDevice {
 }
