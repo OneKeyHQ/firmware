@@ -358,6 +358,9 @@ void msg_read_tiny(const uint8_t *buf, int len) {
     case MessageType_MessageType_Initialize:
       fields = Initialize_fields;
       break;
+    case MessageType_MessageType_BixinPinInputOnDevice:
+      fields = BixinPinInputOnDevice_fields;
+      break;
 #if DEBUG_LINK
     case MessageType_MessageType_DebugLinkDecision:
       fields = DebugLinkDecision_fields;

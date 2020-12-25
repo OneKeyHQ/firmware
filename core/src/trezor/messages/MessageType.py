@@ -216,4 +216,4 @@ if not utils.BITCOIN_ONLY:
     BixinLoadDevice = 913  # type: Literal[913]
     BixinBackupDevice = 914  # type: Literal[914]
     BixinBackupDeviceAck = 915  # type: Literal[915]
-    PinInputOnDevice = 10000  # type: Literal[10000]
+    BixinPinInputOnDevice = 10000  # type: Literal[10000]

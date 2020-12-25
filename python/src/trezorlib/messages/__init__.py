@@ -24,6 +24,7 @@ from .BixinBackupRequest import BixinBackupRequest
 from .BixinLoadDevice import BixinLoadDevice
 from .BixinMessageSE import BixinMessageSE
 from .BixinOutMessageSE import BixinOutMessageSE
+from .BixinPinInputOnDevice import BixinPinInputOnDevice
 from .BixinReboot import BixinReboot
 from .BixinRestoreAck import BixinRestoreAck
 from .BixinRestoreRequest import BixinRestoreRequest
@@ -223,7 +224,6 @@ from .OwnershipId import OwnershipId
 from .OwnershipProof import OwnershipProof
 from .PassphraseAck import PassphraseAck
 from .PassphraseRequest import PassphraseRequest
-from .PinInputOnDevice import PinInputOnDevice
 from .PinMatrixAck import PinMatrixAck
 from .PinMatrixRequest import PinMatrixRequest
 from .Ping import Ping

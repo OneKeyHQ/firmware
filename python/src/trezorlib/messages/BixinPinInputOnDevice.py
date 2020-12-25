@@ -10,5 +10,5 @@ if __debug__:
         pass
 
 
-class PinInputOnDevice(p.MessageType):
+class BixinPinInputOnDevice(p.MessageType):
     MESSAGE_WIRE_TYPE = 10000
