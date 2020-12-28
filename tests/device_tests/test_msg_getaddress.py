@@ -16,8 +16,9 @@
 
 import pytest
 
-from trezorlib import btc, messages
+from trezorlib import btc, device, messages
 from trezorlib.exceptions import TrezorFailure
+from trezorlib.messages import SafetyCheckLevel
 from trezorlib.tools import parse_path
 
 from .. import bip32
@@ -226,15 +227,58 @@ def test_invalid_path(client):
 
 
 @pytest.mark.skip_t1
-def test_unknown_path(client):
+def test_unknown_path_tt(client):
+    UNKNOWN_PATH = parse_path("m/44'/9'/0'/0/0")
+    with pytest.raises(TrezorFailure, match="Forbidden key path"):
+        # account number is too high
+        btc.get_address(client, "Bitcoin", UNKNOWN_PATH)
+
+    # disable safety checks
+    device.apply_settings(client, safety_checks=SafetyCheckLevel.PromptTemporarily)
+
     with client:
         client.set_expected_responses(
             [
                 messages.ButtonRequest(
                     code=messages.ButtonRequestType.UnknownDerivationPath
                 ),
-                messages.Address(),
+                messages.ButtonRequest(code=messages.ButtonRequestType.Address),
+                messages.Address,
             ]
         )
-        # account number is too high
-        btc.get_address(client, "Bitcoin", parse_path("m/44'/0'/21'/0/0"))
+        # try again with a warning
+        btc.get_address(client, "Bitcoin", UNKNOWN_PATH, show_display=True)
+
+    with client:
+        # no warning is displayed when the call is silent
+        client.set_expected_responses([messages.Address])
+        btc.get_address(client, "Bitcoin", UNKNOWN_PATH, show_display=False)
+
+
+@pytest.mark.skip_t2
+def test_unknown_path_t1(client):
+    UNKNOWN_PATH = parse_path("m/44'/9'/0'/0/0")
+    with client:
+        client.set_expected_responses(
+            [
+                messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+                messages.ButtonRequest(code=messages.ButtonRequestType.Address),
+                messages.Address,
+            ]
+        )
+        # warning is shown when showing address
+        btc.get_address(client, "Bitcoin", UNKNOWN_PATH, show_display=True)
+
+    with client:
+        # no warning is displayed when the call is silent
+        client.set_expected_responses([messages.Address])
+        btc.get_address(client, "Bitcoin", UNKNOWN_PATH, show_display=False)
+
+
+@pytest.mark.altcoin
+@pytest.mark.skip_ui
+def test_crw(client):
+    assert (
+        btc.get_address(client, "Crown", parse_path("44'/72'/0'/0/0"))
+        == "CRWYdvZM1yXMKQxeN3hRsAbwa7drfvTwys48"
+    )

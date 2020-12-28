@@ -3,17 +3,20 @@ from trezor.messages import InputScriptType
 from trezor.messages.HDNodeType import HDNodeType
 from trezor.messages.PublicKey import PublicKey
 
-from apps.common import coins, layout
+from apps.common import coins, layout, paths
 from apps.common.keychain import get_keychain
 
+if False:
+    from trezor.messages.GetPublicKey import GetPublicKey
 
-async def get_public_key(ctx, msg):
+
+async def get_public_key(ctx: wire.Context, msg: GetPublicKey) -> PublicKey:
     coin_name = msg.coin_name or "Bitcoin"
     script_type = msg.script_type or InputScriptType.SPENDADDRESS
     coin = coins.by_name(coin_name)
     curve_name = msg.ecdsa_curve_name or coin.curve_name
 
-    keychain = await get_keychain(ctx, curve_name, [[]])
+    keychain = await get_keychain(ctx, curve_name, [paths.AlwaysMatchingSchema])
 
     node = keychain.derive(msg.address_n)
 

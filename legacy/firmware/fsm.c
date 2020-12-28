@@ -186,6 +186,9 @@ void fsm_sendFailure(FailureType code, const char *text)
       case FailureType_Failure_WipeCodeMismatch:
         text = _("Wipe code mismatch");
         break;
+      case FailureType_Failure_InvalidSession:
+        text = _("Invalid session");
+        break;
       case FailureType_Failure_FirmwareError:
         text = _("Firmware error");
         break;
@@ -276,7 +279,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       default: {  // show XPUBs
         int index = (screen - 2) / 2;
         int page = (screen - 2) % 2;
-        char xpub[112] = {0};
+        char xpub[XPUB_MAXLEN] = {0};
         const HDNodeType *node_ptr = NULL;
         if (multisig->nodes_count) {  // use multisig->nodes
           node_ptr = &(multisig->nodes[index]);

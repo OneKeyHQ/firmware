@@ -388,7 +388,7 @@ const HDNode *cryptoMultisigPubkey(const CoinInfo *coin,
     return 0;
   }
   if (node_ptr->chain_code.size != 32) return 0;
-  if (!node_ptr->has_public_key || node_ptr->public_key.size != 33) return 0;
+  if (node_ptr->public_key.size != 33) return 0;
   static HDNode node;
   if (!hdnode_from_xpub(node_ptr->depth, node_ptr->child_num,
                         node_ptr->chain_code.bytes, node_ptr->public_key.bytes,
@@ -429,7 +429,7 @@ int cryptoMultisigFingerprint(const MultisigRedeemScriptType *multisig,
   if (n < 1 || n > 15) {
     return 0;
   }
-  if (!multisig->has_m || multisig->m < 1 || multisig->m > 15) {
+  if (multisig->m < 1 || multisig->m > 15) {
     return 0;
   }
   for (uint32_t i = 0; i < n; i++) {
@@ -442,8 +442,7 @@ int cryptoMultisigFingerprint(const MultisigRedeemScriptType *multisig,
     }
   }
   for (uint32_t i = 0; i < n; i++) {
-    if (!pubnodes[i]->has_public_key || pubnodes[i]->public_key.size != 33)
-      return 0;
+    if (pubnodes[i]->public_key.size != 33) return 0;
     if (pubnodes[i]->chain_code.size != 32) return 0;
   }
   // minsort according to pubkey
@@ -506,4 +505,119 @@ int cryptoIdentityFingerprint(const IdentityType *identity, uint8_t *hash) {
   }
   sha256_Final(&ctx, hash);
   return 1;
+}
+
+static bool check_cointype(const CoinInfo *coin, uint32_t slip44, bool full) {
+#if BITCOIN_ONLY
+  (void)full;
+#else
+  if (!full) {
+    // some wallets such as Electron-Cash (BCH) store coins on Bitcoin paths
+    // we can allow spending these coins from Bitcoin paths if the coin has
+    // implemented strong replay protection via SIGHASH_FORKID
+    if (slip44 == 0x80000000 && coin->has_fork_id) {
+      return true;
+    }
+  }
+#endif
+  return coin->coin_type == slip44;
+}
+
+bool coin_known_path_check(const CoinInfo *coin, InputScriptType script_type,
+                           uint32_t address_n_count, const uint32_t *address_n,
+                           bool full) {
+  bool valid = true;
+  // m/44' : BIP44 Legacy
+  // m / purpose' / coin_type' / account' / change / address_index
+  if (address_n_count > 0 && address_n[0] == (0x80000000 + 44)) {
+    if (full) {
+      valid &= (address_n_count == 5);
+    } else {
+      valid &= (address_n_count >= 2);
+    }
+    valid &= check_cointype(coin, address_n[1], full);
+    if (full) {
+      valid &= (script_type == InputScriptType_SPENDADDRESS);
+      valid &= (address_n[2] & 0x80000000) == 0x80000000;
+      valid &= (address_n[3] & 0x80000000) == 0;
+      valid &= (address_n[4] & 0x80000000) == 0;
+    }
+    return valid;
+  }
+
+  // m/45' - BIP45 Copay Abandoned Multisig P2SH
+  // m / purpose' / cosigner_index / change / address_index
+  if (address_n_count > 0 && address_n[0] == (0x80000000 + 45)) {
+    if (full) {
+      valid &= (script_type == InputScriptType_SPENDMULTISIG);
+      valid &= (address_n_count == 4);
+      valid &= (address_n[1] & 0x80000000) == 0;
+      valid &= (address_n[2] & 0x80000000) == 0;
+      valid &= (address_n[3] & 0x80000000) == 0;
+    }
+    return valid;
+  }
+
+  // m/48' - BIP48 Copay Multisig P2SH
+  // m / purpose' / coin_type' / account' / change / address_index
+  // Electrum:
+  // m / purpose' / coin_type' / account' / type' / change / address_index
+  if (address_n_count > 0 && address_n[0] == (0x80000000 + 48)) {
+    if (full) {
+      valid &= (address_n_count == 5) || (address_n_count == 6);
+    } else {
+      valid &= (address_n_count >= 2);
+    }
+    valid &= check_cointype(coin, address_n[1], full);
+    if (full) {
+      valid &= (script_type == InputScriptType_SPENDMULTISIG) ||
+               (script_type == InputScriptType_SPENDP2SHWITNESS) ||
+               (script_type == InputScriptType_SPENDWITNESS);
+      valid &= (address_n[2] & 0x80000000) == 0x80000000;
+      valid &= (address_n[4] & 0x80000000) == 0;
+    }
+    return valid;
+  }
+
+  // m/49' : BIP49 SegWit
+  // m / purpose' / coin_type' / account' / change / address_index
+  if (address_n_count > 0 && address_n[0] == (0x80000000 + 49)) {
+    valid &= coin->has_segwit;
+    if (full) {
+      valid &= (address_n_count == 5);
+    } else {
+      valid &= (address_n_count >= 2);
+    }
+    valid &= check_cointype(coin, address_n[1], full);
+    if (full) {
+      valid &= (script_type == InputScriptType_SPENDP2SHWITNESS);
+      valid &= (address_n[2] & 0x80000000) == 0x80000000;
+      valid &= (address_n[3] & 0x80000000) == 0;
+      valid &= (address_n[4] & 0x80000000) == 0;
+    }
+    return valid;
+  }
+
+  // m/84' : BIP84 Native SegWit
+  // m / purpose' / coin_type' / account' / change / address_index
+  if (address_n_count > 0 && address_n[0] == (0x80000000 + 84)) {
+    valid &= coin->has_segwit;
+    valid &= coin->bech32_prefix != NULL;
+    if (full) {
+      valid &= (address_n_count == 5);
+    } else {
+      valid &= (address_n_count >= 2);
+    }
+    valid &= check_cointype(coin, address_n[1], full);
+    if (full) {
+      valid &= (script_type == InputScriptType_SPENDWITNESS);
+      valid &= (address_n[2] & 0x80000000) == 0x80000000;
+      valid &= (address_n[3] & 0x80000000) == 0;
+      valid &= (address_n[4] & 0x80000000) == 0;
+    }
+    return valid;
+  }
+
+  // we don't check unknown paths
+  return true;
 }

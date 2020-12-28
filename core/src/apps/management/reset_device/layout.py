@@ -524,10 +524,10 @@ class Slip39NumInput(ui.Component):
     SET_GROUP_THRESHOLD = object()
 
     def __init__(self, step, count, min_count, max_count, group_id=None):
+        super().__init__()
         self.step = step
         self.input = NumInput(count, min_count=min_count, max_count=max_count)
         self.input.on_change = self.on_change
-        self.repaint = True
         self.group_id = group_id
 
     def dispatch(self, event, x, y):
@@ -562,12 +562,9 @@ class Slip39NumInput(ui.Component):
                 else:
                     first_line_text = "Set the total number of"
                     second_line_text = "shares in Group %s." % (self.group_id + 1)
-                ui.display.text(
-                    12, 130, first_line_text, ui.NORMAL, ui.FG, ui.BG, ui.WIDTH - 12
-                )
-                ui.display.text(
-                    12, 156, second_line_text, ui.NORMAL, ui.FG, ui.BG, ui.WIDTH - 12
-                )
+                ui.display.bar(0, 110, ui.WIDTH, 52, ui.BG)
+                ui.display.text(12, 130, first_line_text, ui.NORMAL, ui.FG, ui.BG)
+                ui.display.text(12, 156, second_line_text, ui.NORMAL, ui.FG, ui.BG)
             elif self.step is Slip39NumInput.SET_THRESHOLD:
                 if self.group_id is None:
                     first_line_text = "For recovery you need"
@@ -580,29 +577,22 @@ class Slip39NumInput(ui.Component):
                 else:
                     first_line_text = "The required number of "
                     second_line_text = "shares to form Group %s." % (self.group_id + 1)
+                ui.display.bar(0, 110, ui.WIDTH, 52, ui.BG)
                 ui.display.text(12, 130, first_line_text, ui.NORMAL, ui.FG, ui.BG)
-                ui.display.text(
-                    12, 156, second_line_text, ui.NORMAL, ui.FG, ui.BG, ui.WIDTH - 12
-                )
+                ui.display.text(12, 156, second_line_text, ui.NORMAL, ui.FG, ui.BG)
             elif self.step is Slip39NumInput.SET_GROUPS:
+                ui.display.bar(0, 110, ui.WIDTH, 52, ui.BG)
                 ui.display.text(
                     12, 130, "A group is made up of", ui.NORMAL, ui.FG, ui.BG
                 )
-                ui.display.text(
-                    12, 156, "recovery shares.", ui.NORMAL, ui.FG, ui.BG, ui.WIDTH - 12
-                )
+                ui.display.text(12, 156, "recovery shares.", ui.NORMAL, ui.FG, ui.BG)
             elif self.step is Slip39NumInput.SET_GROUP_THRESHOLD:
+                ui.display.bar(0, 110, ui.WIDTH, 52, ui.BG)
                 ui.display.text(
                     12, 130, "The required number of", ui.NORMAL, ui.FG, ui.BG
                 )
                 ui.display.text(
-                    12,
-                    156,
-                    "groups for recovery.",
-                    ui.NORMAL,
-                    ui.FG,
-                    ui.BG,
-                    ui.WIDTH - 12,
+                    12, 156, "groups for recovery.", ui.NORMAL, ui.FG, ui.BG
                 )
 
             self.repaint = False
@@ -615,6 +605,7 @@ class MnemonicWordSelect(ui.Layout):
     NUM_OF_CHOICES = 3
 
     def __init__(self, words, share_index, word_index, count, group_index=None):
+        super().__init__()
         self.words = words
         self.share_index = share_index
         self.word_index = word_index

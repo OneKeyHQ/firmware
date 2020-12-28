@@ -19,22 +19,22 @@
 
 ChannelType host_channel = CHANNEL_NULL;
 
-uint8_t i2c_data_in[SI2C_BUF_MAX_LEN];
+uint8_t i2c_data_in[SI2C_BUF_MAX_IN_LEN];
 volatile uint32_t i2c_data_inlen;
 volatile bool i2c_recv_done = false;
-uint8_t i2c_data_out[SI2C_BUF_MAX_LEN];
+uint8_t i2c_data_out[SI2C_BUF_MAX_OUT_LEN];
 volatile uint32_t i2c_data_outlen, i2c_data_out_pos;
 static volatile bool wait_response = true;
 
 trans_fifo i2c_fifo_in = {.p_buf = i2c_data_in,
-                          .buf_size = SI2C_BUF_MAX_LEN,
+                          .buf_size = SI2C_BUF_MAX_IN_LEN,
                           .over_pre = false,
                           .read_pos = 0,
                           .write_pos = 0,
                           .lock_pos = 0};
 
 trans_fifo i2c_fifo_out = {.p_buf = i2c_data_out,
-                           .buf_size = SI2C_BUF_MAX_LEN,
+                           .buf_size = SI2C_BUF_MAX_OUT_LEN,
                            .over_pre = false,
                            .read_pos = 0,
                            .write_pos = 0,
@@ -72,7 +72,7 @@ void i2c_slave_init_irq(void) {
 
   i2c_enable_ack(I2C2);
 
-  memset(i2c_data_out, 0x00, SI2C_BUF_MAX_LEN);
+  memset(i2c_data_out, 0x00, SI2C_BUF_MAX_OUT_LEN);
 }
 
 void i2c_slave_init(void) {
@@ -99,7 +99,7 @@ void i2c_slave_init(void) {
 
   i2c_enable_ack(I2C2);
 
-  memset(i2c_data_out, 0x00, SI2C_BUF_MAX_LEN);
+  memset(i2c_data_out, 0x00, SI2C_BUF_MAX_OUT_LEN);
 }
 
 static void i2c_delay(void) {

@@ -310,7 +310,7 @@ static void display_choices(bool twoColumn, char choices[9][12], int num) {
   random_permute((char *)word_matrix, displayedChoices);
 
   if (word_index % 4 == 0) {
-    char desc[] = "##th word";
+    char desc[32] = "";
     int nr = (word_index / 4) + 1;
     format_number(desc, nr);
     layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter the"),
@@ -487,8 +487,8 @@ void next_word(void) {
                          FONT_FIXED | FONT_DOUBLE);
   } else {
     fake_word[0] = 0;
-    char desc[] = "the ##th word";
-    format_number(desc + 4, word_pos);
+    char desc[32] = "";
+    format_number(desc, word_pos);
     oledDrawStringCenter(OLED_WIDTH / 2, 24, desc, FONT_FIXED | FONT_DOUBLE);
   }
   oledDrawStringCenter(OLED_WIDTH / 2, 48, _("on your computer"),

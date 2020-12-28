@@ -54,10 +54,15 @@ void layoutHome(void);
 void layoutConfirmOutput(const CoinInfo *coin, const TxOutputType *out);
 void layoutConfirmOmni(const uint8_t *data, uint32_t size);
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size);
-void layoutConfirmTx(const CoinInfo *coin, uint64_t amount_out,
-                     uint64_t amount_fee);
+void layoutConfirmTx(const CoinInfo *coin, uint64_t total_in,
+                     uint64_t total_out, uint64_t change_out);
+void layoutConfirmReplacement(const char *description, uint8_t txid[32]);
+void layoutConfirmModifyFee(const CoinInfo *coin, uint64_t fee_old,
+                            uint64_t fee_new);
 void layoutFeeOverThreshold(const CoinInfo *coin, uint64_t fee);
 void layoutChangeCountOverThreshold(uint32_t change_count);
+void layoutConfirmNondefaultLockTime(uint32_t lock_time,
+                                     bool lock_time_disabled);
 void layoutSignMessage(const uint8_t *msg, uint32_t len);
 void layoutVerifyAddress(const CoinInfo *coin, const char *address);
 void layoutVerifyMessage(const uint8_t *msg, uint32_t len);
@@ -74,6 +79,7 @@ void layoutXPUB(const char *xpub, int index, int page, bool ours);
 void layoutSignIdentity(const IdentityType *identity, const char *challenge);
 void layoutDecryptIdentity(const IdentityType *identity);
 void layoutU2FDialog(const char *verb, const char *appname);
+void layoutShowPassphrase(const char *passphrase);
 
 void layoutNEMDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
                      const char *desc, const char *line1, const char *address);

@@ -6,13 +6,15 @@ from apps.common.layout import address_n_to_str, show_address, show_qr, show_xpu
 from apps.common.paths import validate_path
 
 from . import addresses
-from .keychain import with_keychain
+from .keychain import validate_path_against_script_type, with_keychain
 from .multisig import multisig_pubkey_index
 
 if False:
     from typing import List
-    from trezor.messages import HDNodeType
+    from trezor.messages.GetAddress import GetAddress
+    from trezor.messages.HDNodeType import HDNodeType
     from trezor import wire
+    from apps.common.keychain import Keychain
     from apps.common.coininfo import CoinInfo
 
 
@@ -38,18 +40,20 @@ async def show_xpubs(
 
 
 @with_keychain
-async def get_address(ctx, msg, keychain, coin):
-    await validate_path(
-        ctx,
-        addresses.validate_full_path,
-        keychain,
-        msg.address_n,
-        coin.curve_name,
-        coin=coin,
-        script_type=msg.script_type,
-    )
+async def get_address(
+    ctx: wire.Context, msg: GetAddress, keychain: Keychain, coin: CoinInfo
+) -> Address:
+    if msg.show_display:
+        # skip soft-validation for silent calls
+        await validate_path(
+            ctx,
+            keychain,
+            msg.address_n,
+            validate_path_against_script_type(coin, msg),
+        )
 
     node = keychain.derive(msg.address_n)
+
     address = addresses.get_address(msg.script_type, coin, node, msg.multisig)
     address_short = addresses.address_short(coin, address)
     if msg.script_type == InputScriptType.SPENDWITNESS:
