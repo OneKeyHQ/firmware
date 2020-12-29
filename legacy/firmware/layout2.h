@@ -40,7 +40,7 @@ extern void *layoutLast;
 #if DEBUG_LINK
 #define layoutSwipe oledClear
 #else
-#define layoutSwipe oledSwipeLeft
+// #define layoutSwipe oledSwipeLeft
 #endif
 
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
@@ -159,6 +159,13 @@ uint8_t layoutStatusLogoEx(bool force_fresh);
 
 static inline void oledClear_ex(void) {
   oledClear();
+#if !EMULATOR
+  layoutStatusLogoEx(true);
+#endif
+}
+
+static inline void layoutSwipe(void) {
+  oledSwipeLeft();
 #if !EMULATOR
   layoutStatusLogoEx(true);
 #endif

@@ -2065,12 +2065,12 @@ void layoutEnterSleep(void) {
 #if !EMULATOR
   if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
     enter_sleep();
-    static uint32_t system_millis_logo_refresh = 0;
-    // 1000 ms refresh
-    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-      layoutStatusLogoEx(false);
-      system_millis_logo_refresh = timer_ms();
-    }
+  }
+  static uint32_t system_millis_logo_refresh = 0;
+  // 1000 ms refresh
+  if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+    layoutStatusLogoEx(false);
+    system_millis_logo_refresh = timer_ms();
   }
 #else
   if ((timer_ms() - system_millis_lock_start) >= config_getAutoLockDelayMs()) {
