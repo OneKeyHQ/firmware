@@ -93,23 +93,20 @@ void check_lock_screen(void) {
   }
 }
 
+#if !EMULATOR
 extern volatile uint32_t system_millis;
 void auto_poweroff_timer(void) {
   if ((system_millis - system_millis_button_press) >=
       config_getAutoLockDelayMs()) {
-#if !EMULATOR
     if (sys_nfcState() || sys_usbState()) {
       config_lockDevice();
       layoutScreensaver();
     } else {
       shutdown();
     }
-#else
-    config_lockDevice();
-    layoutScreensaver();
-#endif
   }
 }
+#endif
 
 static void collect_hw_entropy(bool privileged) {
 #if EMULATOR
@@ -143,7 +140,7 @@ int main(void) {
                                    // unpredictable stack protection checks
   oledInit();
 #else
-  check_bootloader();
+  check_bootloader(true);
   setupApp();
   ble_reset();
 #if !EMULATOR

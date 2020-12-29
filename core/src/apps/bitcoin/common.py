@@ -9,14 +9,17 @@ from trezor.utils import ensure
 if False:
     from apps.common.coininfo import CoinInfo
     from typing import Dict
-    from trezor.messages.TxInputType import EnumTypeInputScriptType
-    from trezor.messages.TxOutputType import EnumTypeOutputScriptType
+    from trezor.messages.TxInput import EnumTypeInputScriptType, TxInput
+    from trezor.messages.TxOutput import EnumTypeOutputScriptType
 
 
 BITCOIN_NAMES = ("Bitcoin", "Regtest", "Testnet")
 
 # Default signature hash type in Bitcoin which signs all inputs and all outputs of the transaction.
 SIGHASH_ALL = const(0x01)
+
+# The number of bip32 levels used in a wallet (chain and address)
+BIP32_WALLET_DEPTH = const(2)
 
 # supported witness version for bech32 addresses
 _BECH32_WITVER = const(0x00)
@@ -32,12 +35,14 @@ MULTISIG_OUTPUT_SCRIPT_TYPES = (
     OutputScriptType.PAYTOWITNESS,
 )
 
-CHANGE_OUTPUT_TO_INPUT_SCRIPT_TYPES = {
+CHANGE_OUTPUT_TO_INPUT_SCRIPT_TYPES: Dict[
+    EnumTypeOutputScriptType, EnumTypeInputScriptType
+] = {
     OutputScriptType.PAYTOADDRESS: InputScriptType.SPENDADDRESS,
     OutputScriptType.PAYTOMULTISIG: InputScriptType.SPENDMULTISIG,
     OutputScriptType.PAYTOP2SHWITNESS: InputScriptType.SPENDP2SHWITNESS,
     OutputScriptType.PAYTOWITNESS: InputScriptType.SPENDWITNESS,
-}  # type: Dict[EnumTypeOutputScriptType, EnumTypeInputScriptType]
+}
 INTERNAL_INPUT_SCRIPT_TYPES = tuple(CHANGE_OUTPUT_TO_INPUT_SCRIPT_TYPES.values())
 CHANGE_OUTPUT_SCRIPT_TYPES = tuple(CHANGE_OUTPUT_TO_INPUT_SCRIPT_TYPES.keys())
 
@@ -80,4 +85,21 @@ def decode_bech32_address(prefix: str, address: str) -> bytes:
     witver, raw = bech32.decode(prefix, address)
     if witver != _BECH32_WITVER:
         raise wire.ProcessError("Invalid address witness program")
+    assert raw is not None
     return bytes(raw)
+
+
+def input_is_segwit(txi: TxInput) -> bool:
+    return txi.script_type in SEGWIT_INPUT_SCRIPT_TYPES or (
+        txi.script_type == InputScriptType.EXTERNAL and txi.witness is not None
+    )
+
+
+def input_is_nonsegwit(txi: TxInput) -> bool:
+    return txi.script_type in NONSEGWIT_INPUT_SCRIPT_TYPES or (
+        txi.script_type == InputScriptType.EXTERNAL and txi.witness is None
+    )
+
+
+def input_is_external(txi: TxInput) -> bool:
+    return txi.script_type == InputScriptType.EXTERNAL

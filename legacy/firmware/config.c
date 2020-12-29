@@ -181,8 +181,12 @@ static Session *activeSessionCache;
 
 static uint32_t sessionUseCounter = 0;
 
+#if !EMULATOR
 #define autoLockDelayMsDefault (30 * 60 * 1000U)  // 30 minutes
-#define sleepDelayMsDefault (2 * 60 * 1000U)      // 2 minutes
+#else
+#define autoLockDelayMsDefault (10 * 60 * 1000U)  // 10 minutes
+#endif
+#define sleepDelayMsDefault (2 * 60 * 1000U)  // 2 minutes
 
 static secbool autoLockDelayMsCached = secfalse;
 static secbool sleepDelayMsCached = secfalse;
@@ -468,13 +472,12 @@ void config_init(void) {
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
   }
-
+#if !EMULATOR
   if (!config_isLanguageSet()) {
     ui_language = 0xff;
     menu_language_init();
   }
 
-#if !EMULATOR
   se_sync_session_key();
 #endif
 
@@ -672,9 +675,13 @@ static void get_root_node_callback(uint32_t iter, uint32_t total) {
 }
 
 const uint8_t *config_getSeed(void) {
+  if (activeSessionCache == NULL) {
+    fsm_sendFailure(FailureType_Failure_InvalidSession, "Invalid session");
+    return NULL;
+  }
+
   // root node is properly cached
-  if ((activeSessionCache != NULL) &&
-      (activeSessionCache->seedCached == sectrue)) {
+  if (activeSessionCache->seedCached == sectrue) {
     return activeSessionCache->seed;
   }
   if (!g_bSelectSEFlag) {
@@ -686,6 +693,30 @@ const uint8_t *config_getSeed(void) {
         memzero(mnemonic, sizeof(mnemonic));
         memzero(passphrase, sizeof(passphrase));
         return NULL;
+      }
+      // passphrase is used - confirm on the display
+      if (passphrase[0] != 0) {
+        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                          _("Access hidden wallet?"), NULL,
+                          _("Next screen will show"), _("the passphrase!"),
+                          NULL, NULL);
+        if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+          memzero(mnemonic, sizeof(mnemonic));
+          memzero(passphrase, sizeof(passphrase));
+          fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                          _("Passphrase dismissed"));
+          layoutHome();
+          return NULL;
+        }
+        layoutShowPassphrase(passphrase);
+        if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+          memzero(mnemonic, sizeof(mnemonic));
+          memzero(passphrase, sizeof(passphrase));
+          fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                          _("Passphrase dismissed"));
+          layoutHome();
+          return NULL;
+        }
       }
       // if storage was not imported (i.e. it was properly generated or
       // recovered)
@@ -699,10 +730,6 @@ const uint8_t *config_getSeed(void) {
         }
       }
       char oldTiny = usbTiny(1);
-      if (activeSessionCache == NULL) {
-        // this should not happen if the Host behaves and sends Initialize first
-        session_startSession(NULL);
-      }
       mnemonic_to_seed(mnemonic, passphrase, activeSessionCache->seed,
                        get_root_node_callback);  // BIP-0039
       memzero(mnemonic, sizeof(mnemonic));
@@ -720,9 +747,27 @@ const uint8_t *config_getSeed(void) {
       memzero(passphrase, sizeof(passphrase));
       return NULL;
     }
-    if (activeSessionCache == NULL) {
-      // this should not happen if the Host behaves and sends Initialize first
-      session_startSession(NULL);
+    // passphrase is used - confirm on the display
+    if (passphrase[0] != 0) {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        _("Access hidden wallet?"), NULL,
+                        _("Next screen will show"), _("the passphrase!"), NULL,
+                        NULL);
+      if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+        memzero(passphrase, sizeof(passphrase));
+        fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                        _("Passphrase dismissed"));
+        layoutHome();
+        return NULL;
+      }
+      layoutShowPassphrase(passphrase);
+      if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+        memzero(passphrase, sizeof(passphrase));
+        fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                        _("Passphrase dismissed"));
+        layoutHome();
+        return NULL;
+      }
     }
     mnemonic_to_seed(NULL, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
@@ -1015,6 +1060,12 @@ uint8_t *session_startSession(const uint8_t *received_session_id) {
   return activeSessionCache->id;
 }
 
+void session_endCurrentSession(void) {
+  if (activeSessionCache == NULL) return;
+  session_clearCache(activeSessionCache);
+  activeSessionCache = NULL;
+}
+
 bool session_isUnlocked(void) { return sectrue == storage_is_unlocked(); }
 
 bool config_isInitialized(void) {
@@ -1097,14 +1148,15 @@ uint32_t config_getAutoLockDelayMs() {
   if (sectrue == autoLockDelayMsCached) {
     return autoLockDelayMs;
   }
-
-  //   if (sectrue != storage_is_unlocked()) {
-  //     return autoLockDelayMsDefault;
-  //   }
-
+#if EMULATOR
+  if (sectrue != storage_is_unlocked()) {
+    return autoLockDelayMsDefault;
+  }
+#endif
   if (sectrue != config_get_uint32(KEY_AUTO_LOCK_DELAY_MS, &autoLockDelayMs)) {
     autoLockDelayMs = autoLockDelayMsDefault;
   }
+  autoLockDelayMs = MAX(autoLockDelayMs, MIN_AUTOLOCK_DELAY_MS);
   autoLockDelayMsCached = sectrue;
   return autoLockDelayMs;
 }

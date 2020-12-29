@@ -15,12 +15,13 @@ class BixinVerifyDeviceRequest(p.MessageType):
 
     def __init__(
         self,
-        data: bytes = None,
+        *,
+        data: bytes,
     ) -> None:
         self.data = data
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('data', p.BytesType, 0),  # required
+            1: ('data', p.BytesType, p.FLAG_REQUIRED),
         }

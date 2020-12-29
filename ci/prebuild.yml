@@ -2,42 +2,42 @@ image: registry.gitlab.com/satoshilabs/trezor/trezor-firmware/trezor-firmware-en
 
 style prebuild:
   stage: prebuild
-  only:
-    changes:
-      - ci/**/*
-      - "**/*.c"
-      - "**/*.h"
-      - "**/*.py"
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
   script:
-    - nix-shell --run "pipenv run make style_check"
+    - nix-shell --run "poetry run make style_check"
 
 common prebuild:
   stage: prebuild
-  only:
-    changes:
-      - ci/**/*
-      - "**/*.json"
-      - "**/*.proto"
   script:
-    - nix-shell --run "pipenv run make defs_check"
+    - nix-shell --run "poetry run make defs_check"
 
 gen prebuild:
   stage: prebuild
-  only:
-    changes:
-      - ci/**/*
-      - "**/*.c"
-      - "**/*.h"
-      - "**/*.json"
-      - "**/*.proto"
-      - "**/*.py"
-      - "**/*.pyi"
   script:
-    - nix-shell --run "pipenv run make gen_check"
+    - nix-shell --run "poetry run make gen_check"
+
+editor prebuild:
+  stage: prebuild
+  script:
+    - nix-shell --run "make editor_check"
+
+yaml prebuild:
+  stage: prebuild
+  script:
+    - nix-shell --run "poetry run make yaml_check"
 
 release commit messages prebuild:
   stage: prebuild
+  before_script: []  # nothing needed
+  variables:
+    # We need to clone the repo properly so we can work with origin/master.
+    GIT_STRATEGY: clone
   only:
-    - /^release\//
+    refs:
+      - /^release\//
+    variables:
+      # We want this to run on gitlab.com/satoshilabs/trezor/trezor-firmware only.
+      - $CI_PROJECT_PATH_SLUG == 'satoshilabs-trezor-trezor-firmware'
   script:
     - nix-shell --run "ci/check_release_commit_messages.sh"

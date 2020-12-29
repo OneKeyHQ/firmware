@@ -47,7 +47,7 @@ def token_by_chain_address(chain_id, address):
         elif address == b"\xb9\x8d\x4c\x97\x42\x5d\x99\x08\xe6\x6e\x53\xa6\xfd\xf6\x73\xac\xca\x0b\xe9\x86":
             return (chain_id, address, "ABT", 18)  # eth / ArcBlock Token
         elif address == b"\x0e\x8d\x6b\x47\x1e\x33\x2f\x14\x0e\x7d\x9d\xbb\x99\xe5\xe3\x82\x2f\x72\x8d\xa6":
-            return (chain_id, address, "ABYSS", 18)  # eth / The Abyss
+            return (chain_id, address, "ABYSS", 18)  # eth / Abyss Token
         elif address == b"\x13\xf1\xb7\xfd\xfb\xe1\xfc\x66\x67\x6d\x56\x48\x3e\x21\xb1\xec\xb4\x0b\x58\xe2":
             return (chain_id, address, "ACC", 18)  # eth / Accelerator Network
         elif address == b"\x06\x14\x71\x10\x02\x2b\x76\x8b\xa8\xf9\x9a\x8f\x38\x5d\xf1\x1a\x15\x1a\x9c\xc8":
@@ -66,8 +66,10 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "ADST", 0)  # eth / AdShares
         elif address == b"\xd0\xd6\xd6\xc5\xfe\x4a\x67\x7d\x34\x3c\xc4\x33\x53\x6b\xb7\x17\xba\xe1\x67\xdd":
             return (chain_id, address, "ADT", 9)  # eth / AdToken
+        elif address == b"\xad\xe0\x0c\x28\x24\x4d\x5c\xe1\x7d\x72\xe4\x03\x30\xb1\xc3\x18\xcd\x12\xb7\xc3":
+            return (chain_id, address, "ADX", 18)  # eth / AdEx Network
         elif address == b"\x44\x70\xbb\x87\xd7\x7b\x96\x3a\x01\x3d\xb9\x39\xbe\x33\x2f\x92\x7f\x2b\x99\x2e":
-            return (chain_id, address, "ADX", 4)  # eth / AdEx Network
+            return (chain_id, address, "ADXL", 4)  # eth / AdEx Network (legacy)
         elif address == b"\x5c\xa9\xa7\x1b\x1d\x01\x84\x9c\x0a\x95\x49\x0c\xc0\x05\x59\x71\x7f\xcf\x0d\x1d":
             return (chain_id, address, "AE", 18)  # eth / aeternity
         elif address == b"\x25\x12\x65\x80\x92\xe5\x58\x91\x0a\xef\x76\xb4\xdb\x7e\xbb\xa7\x01\x62\x6a\x15":
@@ -124,6 +126,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "AMO", 18)  # eth / AMO Coin
         elif address == b"\x00\x05\x9a\xe6\x9c\x16\x22\xa7\x54\x2e\xdc\x15\xe8\xd1\x7b\x06\x0f\xe3\x07\xb6":
             return (chain_id, address, "AMON", 18)  # eth / Token AmonD
+        elif address == b"\xff\x20\x81\x77\x65\xcb\x7f\x73\xd4\xbd\xe2\xe6\x6e\x06\x7e\x58\xd1\x10\x95\xc2":
+            return (chain_id, address, "AMP", 18)  # eth / Amp
         elif address == b"\xd4\x6b\xa6\xd9\x42\x05\x0d\x48\x9d\xbd\x93\x8a\x2c\x90\x9a\x5d\x50\x39\xa1\x61":
             return (chain_id, address, "AMPL", 9)  # eth / Ampleforth
         elif address == b"\x84\x93\x6c\xf7\x63\x0a\xa3\xe2\x7d\xd9\xaf\xf9\x68\xb1\x40\xd5\xae\xe4\x9f\x5a":
@@ -132,8 +136,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "ANIME", 8)  # eth / Animeyen
         elif address == b"\xcd\x62\xb1\xc4\x03\xfa\x76\x1b\xaa\xdf\xc7\x4c\x52\x5c\xe2\xb5\x17\x80\xb1\x84":
             return (chain_id, address, "ANJ", 18)  # eth / Aragon Network Juror
-        elif address == b"\x96\x0b\x23\x6a\x07\xcf\x12\x26\x63\xc4\x30\x33\x50\x60\x9a\x66\xa7\xb2\x88\xc0":
-            return (chain_id, address, "ANT", 18)  # eth / Aragon
         elif address == b"\x9a\xb1\x65\xd7\x95\x01\x9b\x6d\x8b\x3e\x97\x1d\xda\x91\x07\x14\x21\x30\x5e\x5a":
             return (chain_id, address, "AOA", 18)  # eth / Aurora
         elif address == b"\x4c\x0f\xbe\x1b\xb4\x66\x12\x91\x5e\x79\x67\xd2\xc3\x21\x3c\xd4\xd8\x72\x57\xad":
@@ -156,6 +158,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "aREP", 18)  # eth / Aave Interest bearing REP
         elif address == b"\xba\x5f\x11\xb1\x6b\x15\x57\x92\xcf\x3b\x2e\x68\x80\xe8\x70\x68\x59\xa8\xae\xb6":
             return (chain_id, address, "ARN", 8)  # eth / Aeron
+        elif address == b"\x0c\x37\xbc\xf4\x56\xbc\x66\x1c\x14\xd5\x96\x68\x33\x25\x62\x30\x76\xd7\xe2\x83":
+            return (chain_id, address, "ARNX", 18)  # eth / Aeron
         elif address == b"\xfe\xc0\xcf\x7f\xe0\x78\xa5\x00\xab\xf1\x5f\x12\x84\x95\x8f\x22\x04\x9c\x2c\x7e":
             return (chain_id, address, "ART", 18)  # eth / Maecenas
         elif address == b"\x77\x05\xfa\xa3\x4b\x16\xeb\x6d\x77\xdf\xc7\x81\x2b\xe2\x36\x7b\xa6\xb0\x24\x8e":
@@ -214,6 +218,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "B2BX", 18)  # eth / B2BX
         elif address == b"\x06\x2e\x3b\xe6\xa7\xc5\x6a\x39\x5b\x18\x81\xa0\xcd\x69\xa4\x92\x3a\xde\x4f\xa2":
             return (chain_id, address, "BAC", 18)  # eth / Bowl A Coin
+        elif address == b"\xba\x10\x00\x00\x62\x5a\x37\x54\x42\x39\x78\xa6\x0c\x93\x17\xc5\x8a\x42\x4e\x3d":
+            return (chain_id, address, "BAL", 18)  # eth / Balancer
         elif address == b"\x01\x3a\x06\x55\x8f\x07\xd9\xe6\xf9\xa0\x0c\x95\xa3\x3f\x3a\x0e\x02\x55\x17\x6b":
             return (chain_id, address, "BALI", 18)  # eth / BALI COIN
         elif address == b"\x99\x8b\x3b\x82\xbc\x9d\xba\x17\x39\x90\xbe\x7a\xfb\x77\x27\x88\xb5\xac\xb8\xbd":
@@ -280,6 +286,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "BHPC", 18)  # eth / BHPCash
         elif address == b"\xfe\x5d\x90\x8c\x9a\xd8\x5f\x65\x11\x85\xda\xa6\xa4\x77\x07\x26\xe2\xb2\x7d\x09":
             return (chain_id, address, "BHR", 18)  # eth / BETHER
+        elif address == b"\x25\xe1\x47\x41\x70\xc4\xc0\xaa\x64\xfa\x98\x12\x3b\xdc\x8d\xb4\x9d\x78\x02\xfa":
+            return (chain_id, address, "BID", 18)  # eth / Bidao
         elif address == b"\x08\x9b\x85\xfa\x15\xf7\x2c\x10\x88\xcb\xbe\xf2\x3a\x49\xdb\x80\xb9\x1d\xd5\x21":
             return (chain_id, address, "BIT", 8)  # eth / BlockEstate Investment Token
         elif address == b"\x08\xb4\xc8\x66\xae\x9d\x1b\xe5\x6a\x06\xe0\xc3\x02\x05\x4b\x4f\xfe\x06\x7b\x43":
@@ -518,8 +526,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "CMC", 18)  # eth / CryptoMart
         elif address == b"\x47\xbc\x01\x59\x77\x98\xdc\xd7\x50\x6d\xcc\xa3\x6a\xc4\x30\x2f\xc9\x3a\x8c\xfb":
             return (chain_id, address, "CMCT", 8)  # eth / Crowd Machine Compute Token
-        elif address == b"\xf8\x5f\xee\xa2\xfd\xd8\x1d\x51\x17\x7f\x6b\x8f\x35\xf0\xe6\x73\x4c\xe4\x5f\x5f":
-            return (chain_id, address, "CMT", 18)  # eth / CyberMiles Token
         elif address == b"\xeb\xf2\xf9\xe8\xde\x96\x0f\x64\xec\x0f\xdc\xda\x6c\xb2\x82\x42\x31\x33\x34\x7b":
             return (chain_id, address, "CNB", 8)  # eth / Canabio
         elif address == b"\xd4\xc4\x35\xf5\xb0\x9f\x85\x5c\x33\x17\xc8\x52\x4c\xb1\xf5\x86\xe4\x27\x95\xfa":
@@ -538,6 +544,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "COFI", 18)  # eth / CoinFi Token
         elif address == b"\x0c\x91\xb0\x15\xab\xa6\xf7\xb4\x73\x8d\xcd\x36\xe7\x41\x01\x38\xb2\x9a\xdc\x29":
             return (chain_id, address, "COIL", 8)  # eth / CoinOil
+        elif address == b"\xc0\x0e\x94\xcb\x66\x2c\x35\x20\x28\x2e\x6f\x57\x17\x21\x40\x04\xa7\xf2\x68\x88":
+            return (chain_id, address, "COMP", 18)  # eth / Compound
         elif address == b"\x72\x5b\x19\x0b\xc0\x77\xff\xde\x17\xcf\x54\x9a\xa8\xba\x25\xe2\x98\x55\x0b\x18":
             return (chain_id, address, "CORI", 2)  # eth / Corrently Invest Token
         elif address == b"\xc4\xbc\xd6\x4c\xb2\x16\xd4\x9f\xd3\xc6\x43\xa3\x27\x62\xf3\x46\x26\xb4\x5a\x1a":
@@ -706,8 +714,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "DGPT", 18)  # eth / DigiPulse
         elif address == b"\x6a\xed\xbf\x8d\xff\x31\x43\x72\x20\xdf\x35\x19\x50\xba\x2a\x33\x62\x16\x8d\x1b":
             return (chain_id, address, "DGS", 8)  # eth / Dragonglass
-        elif address == b"\x1c\x83\x50\x14\x78\xf1\x32\x09\x77\x04\x70\x08\x49\x6d\xac\xbd\x60\xbb\x15\xef":
-            return (chain_id, address, "DGTX", 18)  # eth / DigitexFutures
         elif address == b"\x4f\x3a\xfe\xc4\xe5\xa3\xf2\xa6\xa1\xa4\x11\xde\xf7\xd7\xdf\xe5\x0e\xe0\x57\xbf":
             return (chain_id, address, "DGX", 9)  # eth / Digix Gold Token
         elif address == b"\x55\xb9\xa1\x1c\x2e\x83\x51\xb4\xff\xc7\xb1\x15\x61\x14\x8b\xfa\xc9\x97\x78\x55":
@@ -1056,6 +1062,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "FLX", 18)  # eth / BitFlux
         elif address == b"\xb4\xd0\xfd\xfc\x84\x97\xae\xf9\x7d\x3c\x28\x92\xae\x68\x2e\xe0\x60\x64\xa2\xbc":
             return (chain_id, address, "FMF", 18)  # eth / Formosa Financial Token
+        elif address == b"\xaa\x9d\x86\x66\x66\xc2\xa3\x74\x8d\x6b\x23\xff\x69\xe6\x3e\x52\xf0\x8d\x9a\xb4":
+            return (chain_id, address, "FMTA", 18)  # eth / Fundamenta
         elif address == b"\x4d\xf4\x7b\x49\x69\xb2\x91\x1c\x96\x65\x06\xe3\x59\x2c\x41\x38\x94\x93\x95\x3b":
             return (chain_id, address, "FND", 18)  # eth / FundRequest
         elif address == b"\x07\x07\x68\x1f\x34\x4d\xeb\x24\x18\x40\x37\xfc\x02\x28\x85\x6f\x21\x37\xb0\x2e":
@@ -1084,8 +1092,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "FRV", 8)  # eth / Fitrova
         elif address == b"\x36\xa7\x35\x57\xf5\xbd\xe5\x19\x5e\xc3\x9e\xca\x82\xd2\x8b\x8a\x36\xd2\x11\x41":
             return (chain_id, address, "FRX", 18)  # eth / Forex Coin
-        elif address == b"\xd0\x35\x2a\x01\x9e\x9a\xb9\xd7\x57\x77\x6f\x53\x23\x77\xaa\xeb\xd3\x6f\xd5\x41":
-            return (chain_id, address, "FSN", 18)  # eth / Fusion
         elif address == b"\xcb\xe8\x3d\x63\x23\xa9\xec\x79\x5d\x5c\xb7\x3b\x33\x3b\x23\x37\x7a\x82\x3e\xcc":
             return (chain_id, address, "fstETHDAI", 18)  # eth / Futureswap: ETHUSD
         elif address == b"\x78\xa7\x3b\x6c\xbc\x5d\x18\x3c\xe5\x6e\x78\x6f\x6e\x90\x5c\xad\xec\x63\x54\x7b":
@@ -1114,12 +1120,16 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "FYN", 18)  # eth / Fund Yourself Now
         elif address == b"\x8f\x09\x21\xf3\x05\x55\x62\x41\x43\xd4\x27\xb3\x40\xb1\x15\x69\x14\x88\x2c\x10":
             return (chain_id, address, "FYP", 18)  # eth / FlypMe
+        elif address == b"\x6b\xff\x2f\xe2\x49\x60\x1e\xd0\xdb\x3a\x87\x42\x4a\x2e\x92\x31\x18\xbb\x03\x12":
+            return (chain_id, address, "FYZ", 18)  # eth / Fyooz
         elif address == b"\xe5\xae\xe1\x63\x51\x31\x19\xf4\xf7\x50\x37\x6c\x71\x87\x66\xb4\x0f\xa3\x7a\x5f":
             return (chain_id, address, "Fzcoin", 18)  # eth / Frozencoin Network
         elif address == b"\xa3\xee\x21\xc3\x06\xa7\x00\xe6\x82\xab\xcd\xfe\x9b\xaa\x6a\x08\xf3\x82\x04\x19":
             return (chain_id, address, "G-CRE", 18)  # eth / Creditcoin Token
         elif address == b"\xf6\x74\x51\xdc\x84\x21\xf0\xe0\xaf\xeb\x52\xfa\xa8\x10\x10\x34\xed\x08\x1e\xd9":
             return (chain_id, address, "GAM", 8)  # eth / Gambit
+        elif address == b"\x63\xf8\x8a\x22\x98\xa5\xc4\xae\xe3\xc2\x16\xaa\x6d\x92\x6b\x18\x4a\x4b\x24\x37":
+            return (chain_id, address, "GAME", 18)  # eth / GAME Credits
         elif address == b"\x68\x71\x74\xf8\xc4\x9c\xeb\x77\x29\xd9\x25\xc3\xa9\x61\x50\x7e\xa4\xac\x7b\x28":
             return (chain_id, address, "GAT", 18)  # eth / Global Awards Token
         elif address == b"\x70\x88\x76\xf4\x86\xe4\x48\xee\x89\xeb\x33\x2b\xfb\xc8\xe5\x93\x55\x30\x58\xb9":
@@ -1324,8 +1334,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "ICO", 10)  # eth / ICO
         elif address == b"\x01\x4b\x50\x46\x65\x90\x34\x0d\x41\x30\x7c\xc5\x4d\xce\xe9\x90\xc8\xd5\x8a\xa8":
             return (chain_id, address, "ICOS", 6)  # eth / ICOS
-        elif address == b"\xb5\xa5\xf2\x26\x94\x35\x2c\x15\xb0\x03\x23\x84\x4a\xd5\x45\xab\xb2\xb1\x10\x28":
-            return (chain_id, address, "ICX", 18)  # eth / ICON
         elif address == b"\x6b\xc4\x37\x50\x83\xd3\xad\x56\x3d\xe9\x1c\xad\x84\x38\xf6\x29\x84\x14\x48\xa5":
             return (chain_id, address, "ID7", 18)  # eth / Cryptogeneid Token
         elif address == b"\x81\x4c\xaf\xd4\x78\x2d\x2e\x72\x81\x70\xfd\xa6\x82\x57\x98\x3f\x03\x32\x1c\x58":
@@ -1503,7 +1511,7 @@ def token_by_chain_address(chain_id, address):
         elif address == b"\x5b\x26\xc5\xd0\x77\x2e\x5b\xba\xc8\xb3\x18\x2a\xe9\xa1\x3f\x9b\xb2\xd0\x37\x65":
             return (chain_id, address, "LEDU", 8)  # eth / Education Ecosystem
         elif address == b"\x80\xfb\x78\x4b\x7e\xd6\x67\x30\xe8\xb1\xdb\xd9\x82\x0a\xfd\x29\x93\x1a\xab\x03":
-            return (chain_id, address, "LEND", 18)  # eth / EHTLend
+            return (chain_id, address, "LEND", 18)  # eth / ETHLend
         elif address == b"\xf9\x7b\x5d\x65\xda\x6b\x04\x68\xb9\x0d\x53\x1d\xda\xe2\xa6\x98\x43\xe6\x79\x7d":
             return (chain_id, address, "LEO", 18)  # eth / LEOcoin
         elif address == b"\x0f\x4c\xa9\x26\x60\xef\xad\x97\xa9\xa7\x0c\xb0\xfe\x96\x9c\x75\x54\x39\x77\x2c":
@@ -1604,6 +1612,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "MDT", 18)  # eth / Measurable Data Token
         elif address == b"\xfd\x1e\x80\x50\x8f\x24\x3e\x64\xce\x23\x4e\xa8\x8a\x5f\xd2\x82\x7c\x71\xd4\xb7":
             return (chain_id, address, "MEDX", 8)  # eth / MediBloc [ERC20]
+        elif address == b"\xd5\x52\x5d\x39\x78\x98\xe5\x50\x20\x75\xea\x5e\x83\x0d\x89\x14\xf6\xf0\xaf\xfe":
+            return (chain_id, address, "MEME", 8)  # eth / Meme
         elif address == b"\x42\x01\x67\xd8\x7d\x35\xc3\xa2\x49\xb3\x2e\xf6\x22\x58\x72\xfb\xd9\xab\x85\xd2":
             return (chain_id, address, "MESG", 18)  # eth / MESG
         elif address == b"\x5b\x8d\x43\xff\xde\x4a\x29\x82\xb9\xa5\x38\x7c\xdf\x21\xd5\x4e\xad\x64\xac\x8d":
@@ -1642,6 +1652,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "[deprecated] MLN (old)", 18)  # eth / Melonport
         elif address == b"\x1a\x95\xb2\x71\xb0\x53\x5d\x15\xfa\x49\x93\x2d\xab\xa3\x1b\xa6\x12\xb5\x29\x46":
             return (chain_id, address, "MNE", 8)  # eth / Minereum
+        elif address == b"\x0d\x62\xdc\x6c\xd8\xc8\x1d\xca\x8c\xaa\xdc\xcf\x01\xff\xe7\xc1\xf3\x1d\x94\x02":
+            return (chain_id, address, "MNL", 18)  # eth / Moonlite
         elif address == b"\xa9\x87\x7b\x1e\x05\xd0\x35\x89\x91\x31\xdb\xd1\xe4\x03\x82\x51\x66\xd0\x9f\x92":
             return (chain_id, address, "MNT", 18)  # eth / Media Network Token
         elif address == b"\x83\xce\xe9\xe0\x86\xa7\x7e\x49\x2e\xe0\xbb\x93\xc2\xb0\x43\x7a\xd6\xfd\xec\xcc":
@@ -1692,8 +1704,10 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "MWAT", 18)  # eth / RED MWAT
         elif address == b"\xf7\xe9\x83\x78\x16\x09\x01\x23\x07\xf2\x51\x4f\x63\xd5\x26\xd8\x3d\x24\xf4\x66":
             return (chain_id, address, "MYD", 16)  # eth / MYD
+        elif address == b"\x4c\xf8\x9c\xa0\x6a\xd9\x97\xbc\x73\x2d\xc8\x76\xed\x2a\x7f\x26\xa9\xe7\xf3\x61":
+            return (chain_id, address, "MYST", 18)  # eth / Mysterium
         elif address == b"\xa6\x45\x26\x4c\x56\x03\xe9\x6c\x3b\x0b\x07\x8c\xda\xb6\x87\x33\x79\x4b\x0a\x71":
-            return (chain_id, address, "MYST", 8)  # eth / Mysterium
+            return (chain_id, address, "[deprecated] MYST", 8)  # eth / Mysterium
         elif address == b"\x8d\x80\xde\x8a\x78\x19\x83\x96\x32\x9d\xfa\x76\x9a\xd5\x4d\x24\xbf\x90\xe7\xaa":
             return (chain_id, address, "NAC", 18)  # eth / Nami ICO
         elif address == b"\xa7\x9e\x00\x12\xbb\x33\x79\xf8\x50\x9a\x5a\xb4\x9c\xab\x7e\x6a\xbb\x49\x70\x1d":
@@ -1712,6 +1726,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "NBC", 18)  # eth / Niobium Coin
         elif address == b"\x80\x98\x26\xcc\xea\xb6\x8c\x38\x77\x26\xaf\x96\x27\x13\xb6\x4c\xb5\xcb\x3c\xca":
             return (chain_id, address, "NCASH", 18)  # eth / Nucleus Vision
+        elif address == b"\xdb\x5c\x3c\x46\xe2\x8b\x53\xa3\x9c\x25\x5a\xa3\x9a\x41\x1d\xd6\x4e\x5f\xed\x9c":
+            return (chain_id, address, "NCR", 18)  # eth / Neos Credits
         elif address == b"\x9e\x46\xa3\x8f\x5d\xaa\xbe\x86\x83\xe1\x07\x93\xb0\x67\x49\xee\xf7\xd7\x33\xd1":
             return (chain_id, address, "NCT", 18)  # eth / Nectar
         elif address == b"\xa5\x4d\xdc\x7b\x3c\xce\x7f\xc8\xb1\xe3\xfa\x02\x56\xd0\xdb\x80\xd2\xc1\x09\x70":
@@ -1762,6 +1778,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "NTO", 18)  # eth / Fujinto
         elif address == b"\x22\x33\x79\x9e\xe2\x68\x3d\x75\xdf\xef\xac\xbc\xd2\xa2\x6c\x78\xd3\x4b\x47\x0d":
             return (chain_id, address, "NTWK", 18)  # eth / Network
+        elif address == b"\x4f\xe8\x32\x13\xd5\x63\x08\x33\x0e\xc3\x02\xa8\xbd\x64\x1f\x1d\x01\x13\xa4\xcc":
+            return (chain_id, address, "NU", 18)  # eth / NuCypher Network
         elif address == b"\x24\x5e\xf4\x7d\x4d\x05\x05\xec\xf3\xac\x46\x3f\x4d\x81\xf4\x1a\xde\x8f\x1f\xd1":
             return (chain_id, address, "NUG", 18)  # eth / Nuggets Token
         elif address == b"\xc5\x8c\x0f\xca\x06\x90\x8e\x66\x54\x01\x02\x35\x6f\x2e\x91\xed\xca\xeb\x8d\x81":
@@ -1782,8 +1800,14 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "OAX", 18)  # eth / OAX
         elif address == b"\x02\x35\xfe\x62\x4e\x04\x4a\x05\xee\xd7\xa4\x3e\x16\xe3\x08\x3b\xc8\xa4\x28\x7a":
             return (chain_id, address, "OCC", 18)  # eth / Original Crypto Coin
+        elif address == b"\x96\x7d\xa4\x04\x8c\xd0\x7a\xb3\x78\x55\xc0\x90\xaa\xf3\x66\xe4\xce\x1b\x9f\x48":
+            return (chain_id, address, "OCEAN", 18)  # eth / Ocean Token
+        elif address == b"\x7a\xfe\xbb\xb4\x6f\xdb\x47\xed\x17\xb2\x2e\xd0\x75\xcd\xe2\x44\x76\x94\xfb\x9e":
+            return (chain_id, address, "[deprecated] OCEAN", 18)  # eth / Ocean Token
         elif address == b"\x40\x92\x67\x8e\x4e\x78\x23\x0f\x46\xa1\x53\x4c\x0f\xbc\x8f\xa3\x97\x80\x89\x2b":
             return (chain_id, address, "OCN", 18)  # eth / Odyssey
+        elif address == b"\x72\x40\xac\x91\xf0\x12\x33\xba\xaf\x8b\x06\x42\x48\xe8\x0f\xea\xa5\x91\x2b\xa3":
+            return (chain_id, address, "OCTO", 18)  # eth / OctoFi
         elif address == b"\xbf\x52\xf2\xab\x39\xe2\x6e\x09\x51\xd2\xa0\x2b\x49\xb7\x70\x2a\xbe\x30\x40\x6a":
             return (chain_id, address, "ODE", 18)  # eth / ODEM Token
         elif address == b"\x5f\x45\x06\xdb\x5b\x56\x8e\x10\x35\x32\xf8\x4d\x32\xa2\x85\xcd\xd5\xaa\x57\x51":
@@ -1832,6 +1856,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "ORCA", 18)  # eth / ORCA Token
         elif address == b"\xd2\xfa\x8f\x92\xea\x72\xab\xb3\x5d\xbd\x6d\xec\xa5\x71\x73\xd2\x2d\xb2\xba\x49":
             return (chain_id, address, "ORI", 18)  # eth / Origami
+        elif address == b"\x8f\xb0\x0f\xde\xbb\x4e\x83\xf2\xc5\x8b\x3b\xcd\x67\x32\xac\x1b\x6a\x7b\x72\x21":
+            return (chain_id, address, "ORN", 8)  # eth / Orion Protocol
         elif address == b"\xeb\x9a\x4b\x18\x58\x16\xc3\x54\xdb\x92\xdb\x09\xcc\x3b\x50\xbe\x60\xb9\x01\xb6":
             return (chain_id, address, "ORS", 18)  # eth / Origin Sport
         elif address == b"\x4e\x84\xa6\x5b\x56\x64\xd3\x3b\x67\x75\x07\x71\xf8\xbe\xae\xc4\x58\xbd\x67\x29":
@@ -1846,6 +1872,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "OTO", 18)  # eth / OnTime
         elif address == b"\xc5\x2b\x11\x28\x3f\x4c\xa6\xbd\x20\xcb\xc4\xad\xdd\x2c\x13\x6a\x19\x3f\x6a\xf1":
             return (chain_id, address, "[deprecated] OTO", 18)  # eth / OnTime
+        elif address == b"\x2a\x8e\x1e\x67\x6e\xc2\x38\xd8\xa9\x92\x30\x7b\x49\x5b\x45\xb3\xfe\xaa\x5e\x86":
+            return (chain_id, address, "OUSD", 18)  # eth / Origin Dollar
         elif address == b"\x17\x0b\x27\x5c\xed\x08\x9f\xff\xae\xbf\xe9\x27\xf4\x45\xa3\x50\xed\x91\x60\xdc":
             return (chain_id, address, "OWN", 8)  # eth / OWNDATA
         elif address == b"\xc2\x49\x46\x04\xe9\xdc\xef\xa2\xa7\x0d\xce\xbf\x81\xe6\xd7\xbe\x06\x4a\x33\x4e":
@@ -1908,6 +1936,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "PFR", 8)  # eth / Payfair
         elif address == b"\x13\xc2\xfa\xb6\x35\x4d\x37\x90\xd8\xec\xe4\xf0\xf1\xa3\x28\x0b\x4a\x25\xad\x96":
             return (chain_id, address, "PHI", 18)  # eth / PHI Token
+        elif address == b"\x42\x98\x81\x67\x2b\x9a\xe4\x2b\x8e\xba\x0e\x26\xcd\x9c\x73\x71\x1b\x89\x1c\xa5":
+            return (chain_id, address, "PICKLE", 18)  # eth / Pickle Finance
         elif address == b"\xe6\x45\x09\xf0\xbf\x07\xce\x2d\x29\xa7\xef\x19\xa8\xa9\xbc\x06\x54\x77\xc1\xb4":
             return (chain_id, address, "PIPL", 8)  # eth / PIPL Coin
         elif address == b"\x0f\xf1\x61\x07\x1e\x62\x7a\x0e\x6d\xe1\x38\x10\x5c\x73\x97\x0f\x86\xca\x79\x22":
@@ -1982,6 +2012,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "PST", 18)  # eth / Primas
         elif address == b"\x66\x49\x7a\x28\x3e\x0a\x00\x7b\xa3\x97\x4e\x83\x77\x84\xc6\xae\x32\x34\x47\xde":
             return (chain_id, address, "PT", 18)  # eth / PornToken
+        elif address == b"\x2a\x8e\x98\xe2\x56\xf3\x22\x59\xb5\xe5\xcb\x55\xdd\x63\xc8\xe8\x91\x95\x06\x66":
+            return (chain_id, address, "PTC", 18)  # eth / ParrotCoin
         elif address == b"\x49\x46\x58\x3c\x5b\x86\xe0\x1c\xcd\x30\xc7\x1a\x05\x61\x7d\x06\xe3\xe7\x30\x60":
             return (chain_id, address, "PTON", 18)  # eth / PTON
         elif address == b"\x8a\xe4\xbf\x2c\x33\xa8\xe6\x67\xde\x34\xb5\x49\x38\xb0\xcc\xd0\x3e\xb8\xcc\x06":
@@ -2040,6 +2072,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "RATING", 8)  # eth / DPRating
         elif address == b"\xfc\x2c\x4d\x8f\x95\x00\x2c\x14\xed\x0a\x7a\xa6\x51\x02\xca\xc9\xe5\x95\x3b\x5e":
             return (chain_id, address, "RBLX", 18)  # eth / Rublix
+        elif address == b"\x16\x5b\x67\x49\x81\x29\x00\x53\x84\x02\xcd\x54\x0c\x55\xbe\x68\x41\x1f\x8e\xa0":
+            return (chain_id, address, "RBT", 18)  # eth / realtybits
         elif address == b"\xf9\x70\xb8\xe3\x6e\x23\xf7\xfc\x3f\xd7\x52\xee\xa8\x6f\x8b\xe8\xd8\x33\x75\xa6":
             return (chain_id, address, "RCN", 18)  # eth / Ripio Credit Network
         elif address == b"\x25\x5a\xa6\xdf\x07\x54\x0c\xb5\xd3\xd2\x97\xf0\xd0\xd4\xd8\x4c\xb5\x2b\xc8\xe6":
@@ -2068,6 +2102,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "REP", 18)  # eth / Augur
         elif address == b"\xe9\x43\x27\xd0\x7f\xc1\x79\x07\xb4\xdb\x78\x8e\x5a\xdf\x2e\xd4\x24\xad\xdf\xf6":
             return (chain_id, address, "[deprecated] REP", 18)  # eth / Augur
+        elif address == b"\x22\x16\x57\x77\x68\x46\x89\x09\x89\xa7\x59\xba\x29\x73\xe4\x27\xdf\xf5\xc9\xbb":
+            return (chain_id, address, "REPv2", 18)  # eth / Reputation
         elif address == b"\x8f\x82\x21\xaf\xbb\x33\x99\x8d\x85\x84\xa2\xb0\x57\x49\xba\x73\xc3\x7a\x93\x8a":
             return (chain_id, address, "REQ", 18)  # eth / Request Network
         elif address == b"\x01\xaf\x92\x41\x98\xe8\x93\xfc\x57\xa1\xb2\xd2\xbe\x5a\x6c\xc4\x20\xb8\x76\x4a":
@@ -2118,6 +2154,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "ROCK2PAY", 18)  # eth / ICE ROCK MINING
         elif address == b"\xc9\xde\x4b\x7f\x0c\x3d\x99\x1e\x96\x71\x58\xe4\xd4\xbf\xa4\xb5\x1e\xc0\xb1\x14":
             return (chain_id, address, "ROK", 18)  # eth / Rocketchain
+        elif address == b"\xa3\x1b\x17\x67\xe0\x9f\x84\x2e\xcf\xd4\xbc\x47\x1f\xe4\x4f\x83\x0e\x38\x91\xaa":
+            return (chain_id, address, "ROOBEE", 18)  # eth / ROOBEE
         elif address == b"\x49\x93\xcb\x95\xc7\x44\x3b\xdc\x06\x15\x5c\x5f\x56\x88\xbe\x9d\x8f\x69\x99\xa5":
             return (chain_id, address, "ROUND", 18)  # eth / ROUND
         elif address == b"\xcc\xc8\x5a\xa8\x99\x95\x05\xd6\xf8\x86\xa3\x2d\xa4\xa1\x07\xbb\xe0\xd1\xde\x9e":
@@ -2356,6 +2394,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "[deprecated] SUB (old)", 2)  # eth / Substratum (old contract)
         elif address == b"\xe1\x20\xc1\xec\xbf\xdf\xea\x7f\x0a\x8f\x0e\xe3\x00\x63\x49\x1e\x8c\x26\xfe\xdf":
             return (chain_id, address, "SUR", 8)  # eth / Suretly
+        elif address == b"\x6b\x35\x95\x06\x87\x78\xdd\x59\x2e\x39\xa1\x22\xf4\xf5\xa5\xcf\x09\xc9\x0f\xe2":
+            return (chain_id, address, "SUSHI", 18)  # eth / SushiToken
         elif address == b"\xbd\xeb\x4b\x83\x25\x1f\xb1\x46\x68\x7f\xa1\x9d\x1c\x66\x0f\x99\x41\x1e\xef\xe3":
             return (chain_id, address, "SVD", 18)  # eth / savedroid
         elif address == b"\xff\xc9\x71\x42\x86\x3e\x9b\x25\x83\x58\x8e\x37\x05\xe2\x32\x2e\xf0\x36\x96\x35":
@@ -2384,6 +2424,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "SXUT", 18)  # eth / Spectre.ai U-Token
         elif address == b"\x10\xb1\x23\xfd\xdd\xe0\x03\x24\x31\x99\xaa\xd0\x35\x22\x06\x5d\xc0\x58\x27\xa0":
             return (chain_id, address, "SYN", 18)  # eth / Synapse
+        elif address == b"\x3a\x0d\x74\x6b\x3e\xa1\xd8\xcc\xdf\x19\xad\x91\x59\x13\xbd\x68\x39\x11\x33\xca":
+            return (chain_id, address, "SYSX", 8)  # eth / SyscoinToken
         elif address == b"\xe7\x77\x5a\x6e\x9b\xcf\x90\x4e\xb3\x9d\xa2\xb6\x8c\x5e\xfb\x4f\x93\x60\xe0\x8c":
             return (chain_id, address, "TaaS", 6)  # eth / Token-as-a-Service
         elif address == b"\x1d\x4c\xcc\x31\xda\xb6\xea\x20\xf4\x61\xd3\x29\xa0\x56\x2c\x1c\x58\x41\x25\x15":
@@ -2402,6 +2444,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "TBC2", 8)  # eth / TBC2
         elif address == b"\xaf\xe6\x05\x11\x34\x1a\x37\x48\x8d\xe2\x5b\xef\x35\x19\x52\x56\x2e\x31\xfc\xc1":
             return (chain_id, address, "TBT", 8)  # eth / TBitBot
+        elif address == b"\x8d\xae\xba\xde\x92\x2d\xf7\x35\xc3\x8c\x80\xc7\xeb\xd7\x08\xaf\x50\x81\x5f\xaa":
+            return (chain_id, address, "TBTC", 18)  # eth / TBTC
         elif address == b"\x3a\x92\xbd\x39\x6a\xef\x82\xaf\x98\xeb\xc0\xaa\x90\x30\xd2\x5a\x23\xb1\x1c\x6b":
             return (chain_id, address, "TBX", 18)  # eth / Tokenbox
         elif address == b"\xfa\x0e\xf5\xe0\x34\xca\xe1\xae\x75\x2d\x59\xbd\xb8\xad\xcd\xe3\x7e\xd7\xab\x97":
@@ -2566,6 +2610,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "uLZRX3x", 6)  # eth / bZx Perpetual Long ZRX 3x
         elif address == b"\x39\x2b\x9f\xae\x89\x65\x94\x58\x6b\x4e\x6b\x08\x09\x16\xc6\x87\x2e\x74\xd4\x4f":
             return (chain_id, address, "uLZRX4x", 6)  # eth / bZx Perpetual Long ZRX 4x
+        elif address == b"\x1f\x98\x40\xa8\x5d\x5a\xf5\xbf\x1d\x17\x62\xf9\x25\xbd\xad\xdc\x42\x01\xf9\x84":
+            return (chain_id, address, "UNI", 18)  # eth / Uniswap
         elif address == b"\x70\x15\x64\xaa\x6e\x26\x81\x61\x47\xd4\xfa\x21\x1a\x07\x79\xf1\xb7\x74\xbb\x9b":
             return (chain_id, address, "uni0xBTC", 18)  # eth / Uniswap: 0xBitcoin Token
         elif address == b"\x7c\xfa\xb8\x7a\xac\x08\x99\xc0\x93\x23\x5b\x34\x2a\xc0\xe5\xb1\xac\xf1\x59\xeb":
@@ -2742,6 +2788,296 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "uniUSDC", 18)  # eth / Uniswap: USD//C
         elif address == b"\x7e\xf7\x19\x1a\xb9\x1d\xdb\x4d\x7c\xc3\x47\xfb\xfa\x17\x03\x55\xac\xba\xf0\x2d":
             return (chain_id, address, "uniUSDS", 18)  # eth / Uniswap: StableUSD
+        elif address == b"\xc1\x2c\x4c\x3e\x00\x08\xb8\x38\xf7\x51\x89\xbf\xb3\x92\x83\x46\x7c\xf6\xe5\xb3":
+            return (chain_id, address, "univ20xBTCETH", 18)  # eth / Uniswap V2 0xBTC-ETH
+        elif address == b"\xf4\x91\x44\xe6\x1c\x05\x12\x0f\x1b\x16\x7e\x4b\x4f\x59\xcf\x0a\x5d\x77\x90\x3f":
+            return (chain_id, address, "univ21UPETH", 18)  # eth / Uniswap V2 1UP-ETH
+        elif address == b"\x8c\xb7\x7e\xa8\x69\xde\xf8\xf7\xfd\xea\xb9\xe4\xda\x6c\xf0\x28\x97\xbb\xf0\x76":
+            return (chain_id, address, "univ2AKROETH", 18)  # eth / Uniswap V2 AKRO-ETH
+        elif address == b"\x58\x3c\xad\xd8\x30\x37\x4b\xb5\xc1\xec\x8e\x1b\x64\x8e\x02\x94\xcc\x1e\x01\xf1":
+            return (chain_id, address, "univ2ALEPHETH", 18)  # eth / Uniswap V2 ALEPH-ETH
+        elif address == b"\x49\x0b\x5b\x24\x89\xee\xfc\x41\x06\xc6\x97\x43\xf6\x57\xe3\xc4\xa2\x87\x0a\xc5":
+            return (chain_id, address, "univ2ATISETH", 18)  # eth / Uniswap V2 ATIS-ETH
+        elif address == b"\xf4\x21\xc3\xf2\xe6\x95\xc2\xd4\xc0\x76\x53\x79\xcc\xac\xe8\xad\xe4\xa4\x80\xd9":
+            return (chain_id, address, "univ2BANDETH", 18)  # eth / Uniswap V2 BAND-ETH
+        elif address == b"\xb6\x90\x9b\x96\x0d\xbb\xe7\x39\x2d\x40\x54\x29\xeb\x2b\x36\x49\x75\x2b\x48\x38":
+            return (chain_id, address, "univ2BATETH", 18)  # eth / Uniswap V2 BAT-ETH
+        elif address == b"\xfa\xd8\xb0\x70\x55\xa0\x37\x14\x42\xa3\x10\x6a\x22\x44\xa8\x2b\x24\xe3\x1c\xec":
+            return (chain_id, address, "univ2BIZETH", 18)  # eth / Uniswap V2 BIZ-ETH
+        elif address == b"\x3f\xd4\xcf\x93\x03\xc4\xbc\x9e\x13\x77\x26\x18\x82\x87\x12\xc8\xea\xc7\xdd\x2f":
+            return (chain_id, address, "univ2BNTETH", 18)  # eth / Uniswap V2 BNT-ETH
+        elif address == b"\x6b\x4a\x0b\xd2\xee\xe3\xca\x06\x65\x2f\x75\x88\x44\x93\x7d\xaf\x91\xea\x84\x22":
+            return (chain_id, address, "univ2BOOSTETH", 18)  # eth / Uniswap V2 BOOST-ETH
+        elif address == b"\x13\xe6\x38\xb4\xf8\x97\x40\xa1\xc2\xff\x45\xd7\x1f\x71\xee\x28\x10\x1c\xc1\xdc":
+            return (chain_id, address, "univ2BPTETH", 18)  # eth / Uniswap V2 BPT-ETH
+        elif address == b"\x48\xf4\xa6\xc6\x5a\xbb\x4b\x20\x98\x23\x77\x1b\x0d\x2c\x0f\x15\x6e\xe6\x26\x8b":
+            return (chain_id, address, "univ2CAMOETH", 18)  # eth / Uniswap V2 CAMO-ETH
+        elif address == b"\xa5\xe7\x9b\xae\xe5\x40\xf0\x00\xef\x6f\x23\xd0\x67\xcd\x3a\xc2\x2c\x7d\x9f\xe6":
+            return (chain_id, address, "univ2CELETH", 18)  # eth / Uniswap V2 CEL-ETH
+        elif address == b"\xa6\xf3\xef\x84\x1d\x37\x1a\x82\xca\x75\x7f\xad\x08\xef\xc0\xde\xe2\xf1\xf5\xe2":
+            return (chain_id, address, "univ2CHIETH", 18)  # eth / Uniswap V2 CHI-ETH
+        elif address == b"\xcf\xfd\xde\xd8\x73\x55\x4f\x36\x2a\xc0\x2f\x8f\xb1\xf0\x2e\x5a\xda\x10\x51\x6f":
+            return (chain_id, address, "univ2COMPETH", 18)  # eth / Uniswap V2 COMP-ETH
+        elif address == b"\xdd\xf9\xb7\xa3\x1b\x32\xeb\xaf\x5c\x06\x4c\x80\x90\x00\x46\xc9\xe5\xb7\xc6\x5f":
+            return (chain_id, address, "univ2CREAMETH", 18)  # eth / Uniswap V2 CREAM-ETH
+        elif address == b"\xda\x9a\x09\xed\x40\x01\x53\x46\xf6\xb0\x70\x4c\x5b\xf1\xa2\xcc\xbf\x94\xde\x43":
+            return (chain_id, address, "univ2DAI2KEY", 18)  # eth / Uniswap V2 DAI-2KEY
+        elif address == b"\x18\xe3\x37\x23\xfe\xf4\x3a\x33\xf9\x56\x0a\x8b\x97\x3d\x33\x31\xe5\x26\x9f\xac":
+            return (chain_id, address, "univ2DAIALEPH", 18)  # eth / Uniswap V2 DAI-ALEPH
+        elif address == b"\xa4\x78\xc2\x97\x5a\xb1\xea\x89\xe8\x19\x68\x11\xf5\x1a\x7b\x7a\xde\x33\xeb\x11":
+            return (chain_id, address, "univ2DAIETH", 18)  # eth / Uniswap V2 DAI-ETH
+        elif address == b"\xe4\xa3\x56\xaf\xd9\x25\xf7\x3f\x3d\xd2\x2a\xcb\xeb\x2c\x0c\x87\xa0\x5e\x89\x5d":
+            return (chain_id, address, "univ2DAIJRT", 18)  # eth / Uniswap V2 DAI-JRT
+        elif address == b"\xb6\x03\xc2\xb5\xab\x4e\xe7\x93\x21\x03\xb4\x2f\x8d\xd8\x99\xc8\x72\x1d\xd2\x5e":
+            return (chain_id, address, "univ2DAILEND", 18)  # eth / Uniswap V2 DAI-LEND
+        elif address == b"\xe8\x05\x6b\x83\xba\x7d\xaf\x02\x74\x14\xb5\x80\x48\xa4\x89\x11\xac\xf1\xb2\xa9":
+            return (chain_id, address, "univ2DAIMFT", 18)  # eth / Uniswap V2 DAI-MFT
+        elif address == b"\xae\x46\x1c\xa6\x7b\x15\xdc\x8d\xc8\x1c\xe7\x61\x5e\x03\x20\xda\x1a\x9a\xb8\xd5":
+            return (chain_id, address, "univ2DAIUSDC", 18)  # eth / Uniswap V2 DAI-USDC
+        elif address == b"\xd6\x05\x44\x55\xca\x2e\x1a\xef\x02\x17\x8e\x04\x62\xd9\xab\x95\x3b\xea\x4e\x23":
+            return (chain_id, address, "univ2DATAETH", 18)  # eth / Uniswap V2 DATA-ETH
+        elif address == b"\x3a\xee\xe5\xba\x05\x3e\xf8\x40\x64\x20\xdb\xc5\x80\x1f\xc9\x5e\xc5\x7b\x0e\x0a":
+            return (chain_id, address, "univ2DECETH", 18)  # eth / Uniswap V2 DEC-ETH
+        elif address == b"\x41\x68\xce\xf0\xfc\xa0\x77\x41\x76\x63\x2d\x86\xba\x26\x55\x3e\x3b\x9c\xf5\x9d":
+            return (chain_id, address, "univ2DEVETH", 18)  # eth / Uniswap V2 DEV-ETH
+        elif address == b"\x37\xa0\x46\x4f\x8f\x4c\x20\x7b\x54\x82\x1f\x3c\x79\x9a\xfd\x3d\x26\x2a\xa9\x44":
+            return (chain_id, address, "univ2DEXTETH", 18)  # eth / Uniswap V2 DEXT-ETH
+        elif address == b"\x1c\x90\x52\xe8\x23\xb5\xf4\x61\x1e\xf7\xd5\xfb\x41\x53\x99\x5b\x04\x0c\xcb\xf5":
+            return (chain_id, address, "univ2DXDETH", 18)  # eth / Uniswap V2 DXD-ETH
+        elif address == b"\xc5\xa7\x88\xf6\x3e\x5d\x9c\xf2\xc3\x24\x62\x1e\xed\x51\xa9\x8f\x85\xae\x37\x3b":
+            return (chain_id, address, "univ2DZARETH", 18)  # eth / Uniswap V2 DZAR-ETH
+        elif address == b"\x3b\x0f\x0f\xe3\xbe\x83\x08\x26\xd8\x33\xa6\x7c\xd1\xd7\xc8\x0e\xdf\x3f\xb4\x9b":
+            return (chain_id, address, "univ2EBASEETH", 18)  # eth / Uniswap V2 EBASE-ETH
+        elif address == b"\x8c\x0e\x87\x6f\x1d\xa5\x81\x40\x69\x56\x73\xd0\x7f\xf4\x2d\x47\x86\x20\x7d\x1b":
+            return (chain_id, address, "univ2ESWAETH", 18)  # eth / Uniswap V2 ESWA-ETH
+        elif address == b"\x63\xe7\xaa\x05\xb7\x81\x44\x01\x3c\xfa\x4b\x23\xc9\xb6\x15\x99\xd0\xa2\x90\x23":
+            return (chain_id, address, "univ2ETH2KEY", 18)  # eth / Uniswap V2 ETH-2KEY
+        elif address == b"\xa0\xd0\x6b\xdc\x32\x74\x56\x4d\xdd\xa6\x5b\xfa\xb6\xae\x61\xe5\xf0\x00\xe4\x9b":
+            return (chain_id, address, "univ2ETHACID", 18)  # eth / Uniswap V2 ETH-ACID
+        elif address == b"\xc5\xbe\x99\xa0\x2c\x68\x57\xf9\xea\xc6\x7b\xbc\xe5\x8d\xf5\x57\x24\x98\xf4\x0c":
+            return (chain_id, address, "univ2ETHAMPL", 18)  # eth / Uniswap V2 ETH-AMPL
+        elif address == b"\x0f\xfc\x70\xbe\x6e\x2d\x84\x1e\x10\x96\x53\xdd\xb3\x03\x49\x61\x59\x16\x79\xd6":
+            return (chain_id, address, "univ2ETHANJ", 18)  # eth / Uniswap V2 ETH-ANJ
+        elif address == b"\x63\x80\x4d\x75\x7b\x5b\x7c\x43\x50\x9f\xde\xd8\xf7\xce\x10\xcc\x0b\xac\x2a\xe0":
+            return (chain_id, address, "univ2ETHASKO", 18)  # eth / Uniswap V2 ETH-ASKO
+        elif address == b"\xc0\x47\x44\xab\x87\xa4\xc3\x7a\xfd\x91\x68\x0e\xf2\x80\xb9\x6e\xe2\x1a\x02\x6e":
+            return (chain_id, address, "univ2ETHAUC", 18)  # eth / Uniswap V2 ETH-AUC
+        elif address == b"\x8a\x38\xad\x17\xd1\xad\xcd\xbe\x37\x75\x33\x8d\x14\x70\xfd\x6f\x00\xf7\x78\x02":
+            return (chain_id, address, "univ2ETHBUIDL", 18)  # eth / Uniswap V2 ETH-BUIDL
+        elif address == b"\x93\x8d\x14\x59\xee\x0a\xaf\x8f\xe7\x37\x78\xc5\x90\xa6\x39\x82\x1e\x44\x4d\x45":
+            return (chain_id, address, "univ2ETHCKN", 18)  # eth / Uniswap V2 ETH-CKN
+        elif address == b"\x44\x7f\x8d\x28\x71\x20\xb6\x6f\x39\x85\x6a\xe5\xce\xb0\x15\x12\xa7\xa4\x74\x44":
+            return (chain_id, address, "univ2ETHDAM", 18)  # eth / Uniswap V2 ETH-DAM
+        elif address == b"\x07\x82\xfb\x02\x6d\x1c\x26\x4e\x59\xa2\xb2\x74\x83\x32\x40\xc5\x33\x67\xed\x1a":
+            return (chain_id, address, "univ2ETHDAOX", 18)  # eth / Uniswap V2 ETH-DAOX
+        elif address == b"\x81\x75\x36\x2a\xfb\xee\xe3\x2a\xfb\x22\xd0\x5a\xdc\x0b\xbd\x08\xde\x32\xf5\xae":
+            return (chain_id, address, "univ2ETHDMG", 18)  # eth / Uniswap V2 ETH-DMG
+        elif address == b"\xe5\x6c\x60\xb5\xf9\xf7\xb5\xfc\x70\xde\x0e\xb7\x9c\x6e\xe7\xd0\x0e\xfa\x26\x25":
+            return (chain_id, address, "univ2ETHENJ", 18)  # eth / Uniswap V2 ETH-ENJ
+        elif address == b"\x12\x1b\x38\x2b\x5f\x00\x3c\x41\xfb\x49\xe7\xb8\x8d\x07\x9c\x8f\x51\x3f\xea\xac":
+            return (chain_id, address, "univ2ETHESH", 18)  # eth / Uniswap V2 ETH-ESH
+        elif address == b"\x92\x33\x0d\x88\x18\xe8\xa3\xb5\x0f\x02\x7c\x81\x9f\xa4\x60\x31\xff\xba\x2c\x8c":
+            return (chain_id, address, "univ2ETHFRM", 18)  # eth / Uniswap V2 ETH-FRM
+        elif address == b"\xe2\x75\xeb\x61\x54\xcb\x4a\x73\xf0\xba\x57\x3e\x43\xb2\xb0\x6e\x9e\x78\xb7\xf0":
+            return (chain_id, address, "univ2ETHFSW", 18)  # eth / Uniswap V2 ETH-FSW
+        elif address == b"\xed\xae\xdd\x22\xe6\x53\xc5\x04\xff\x68\x06\xbf\x61\x66\x42\x92\x84\x8e\xb2\x6e":
+            return (chain_id, address, "univ2ETHHEX2T", 18)  # eth / Uniswap V2 ETH-HEX2T
+        elif address == b"\xf4\x9c\x43\xae\x0f\xaf\x37\x21\x7b\xdc\xb0\x0d\xf4\x78\xcf\x79\x3e\xdd\x66\x87":
+            return (chain_id, address, "univ2ETHKNC", 18)  # eth / Uniswap V2 ETH-KNC
+        elif address == b"\x2d\xda\x09\xfb\x92\x9c\x57\x6a\x6a\xb6\xc1\xd1\xee\x62\xe8\xaf\x72\xb2\xf6\xa7":
+            return (chain_id, address, "univ2ETHNEC", 18)  # eth / Uniswap V2 ETH-NEC
+        elif address == b"\x1c\x60\x82\x35\xe6\xa9\x46\x40\x3f\x2a\x04\x8a\x38\x55\x0b\xef\xe4\x1e\x1b\x85":
+            return (chain_id, address, "univ2ETHPAMP", 18)  # eth / Uniswap V2 ETH-PAMP
+        elif address == b"\x1b\x21\x60\x9d\x42\xfa\x32\xf3\x71\xf5\x8d\xf2\x94\xed\x25\xb2\xd2\xe5\xc8\xba":
+            return (chain_id, address, "univ2ETHPAN", 18)  # eth / Uniswap V2 ETH-PAN
+        elif address == b"\x2e\xcf\x24\x5b\x60\xe3\x51\xa7\x11\xe5\x6a\x3a\xe2\x58\x66\xd1\xc8\xbe\xb3\x24":
+            return (chain_id, address, "univ2ETHPDS", 18)  # eth / Uniswap V2 ETH-PDS
+        elif address == b"\x49\xf9\x31\x6e\xb2\x2d\xe9\x0d\x93\x43\xc5\x73\xfb\xd7\xcc\x0b\x5e\xc6\xe1\x9f":
+            return (chain_id, address, "univ2ETHPOWER", 18)  # eth / Uniswap V2 ETH-POWER
+        elif address == b"\xfb\x7a\x31\x12\xc9\x6b\xbc\xfe\x4b\xbf\x3e\x86\x27\xb0\xde\x6f\x49\xe5\x14\x2a":
+            return (chain_id, address, "univ2ETHSHIP", 18)  # eth / Uniswap V2 ETH-SHIP
+        elif address == b"\xd9\x0a\x1b\xa0\xcb\xaa\xaa\xbf\xdc\x6c\x81\x4c\xdf\x16\x11\x30\x6a\x26\xe1\xf8":
+            return (chain_id, address, "univ2ETHSWAP", 18)  # eth / Uniswap V2 ETH-SWAP
+        elif address == b"\xed\x9c\x85\x4c\xb0\x2d\xe7\x5c\xe4\xc9\xbb\xa9\x92\x82\x8d\x6c\xb7\xfd\x5c\x71":
+            return (chain_id, address, "univ2ETHUBOMB", 18)  # eth / Uniswap V2 ETH-UBOMB
+        elif address == b"\x5e\x64\xcd\x6f\x84\xd0\xee\x2a\xd2\xa8\x4c\xad\xc4\x64\x18\x4e\x36\x27\x4e\x0c":
+            return (chain_id, address, "univ2ETHUNC", 18)  # eth / Uniswap V2 ETH-UNC
+        elif address == b"\x0d\x4a\x11\xd5\xee\xaa\xc2\x8e\xc3\xf6\x1d\x10\x0d\xaf\x4d\x40\x47\x1f\x18\x52":
+            return (chain_id, address, "univ2ETHUSDT", 18)  # eth / Uniswap V2 ETH-USDT
+        elif address == b"\x6c\x35\xc4\x04\x47\xe8\x01\x1a\x63\xab\x05\xf0\x88\xfa\x7c\xd9\x14\xd6\x69\x04":
+            return (chain_id, address, "univ2ETHXAMP", 18)  # eth / Uniswap V2 ETH-XAMP
+        elif address == b"\xc6\xf3\x48\xdd\x3b\x91\xa5\x6d\x11\x7e\xc0\x07\x1c\x1e\x9b\x83\xc0\x99\x6d\xe4":
+            return (chain_id, address, "univ2ETHZRX", 18)  # eth / Uniswap V2 ETH-ZRX
+        elif address == b"\xdc\x7d\x8c\xc3\xa2\x2f\xe0\xec\x69\x77\x0e\x02\x93\x1f\x43\x45\x1b\x7b\x97\x5e":
+            return (chain_id, address, "univ2EWTBETH", 18)  # eth / Uniswap V2 EWTB-ETH
+        elif address == b"\x99\x26\x28\x53\x61\xac\xf7\x46\x11\x05\xb4\x64\xae\x9e\xa6\x83\xdf\xb0\x6b\x83":
+            return (chain_id, address, "univ2FMAETH", 18)  # eth / Uniswap V2 FMA-ETH
+        elif address == b"\xd9\xd3\x95\x40\xd6\x1f\x8d\x6e\xb2\xee\x7e\xed\xfa\xe9\x3c\xc0\x9c\xc2\x4f\x0e":
+            return (chain_id, address, "univ2FOAMETH", 18)  # eth / Uniswap V2 FOAM-ETH
+        elif address == b"\x05\xb0\xc1\xd8\x83\x9e\xf3\xa9\x89\xb3\x3b\x6b\x63\xd3\xaa\x96\xcb\x7e\xc1\x42":
+            return (chain_id, address, "univ2FUNETH", 18)  # eth / Uniswap V2 FUN-ETH
+        elif address == b"\x30\x2a\xc8\x7b\x1b\x5e\xf1\x84\x85\x97\x1e\xd0\x11\x5a\x17\x40\x3e\xa3\x09\x11":
+            return (chain_id, address, "univ2FXCETH", 18)  # eth / Uniswap V2 FXC-ETH
+        elif address == b"\xf3\x7e\xd7\x42\x81\x9e\xc0\x06\xb0\x80\x2d\xf5\xc2\xb0\xe9\x13\x2f\x22\xc6\x25":
+            return (chain_id, address, "univ2GENETH", 18)  # eth / Uniswap V2 GEN-ETH
+        elif address == b"\x39\x5a\x13\x50\xdb\x96\x27\x36\x0d\x09\xc8\xb3\xe7\xc3\x1f\xb8\x42\x61\xb8\xf2":
+            return (chain_id, address, "univ2GHOSTETH", 18)  # eth / Uniswap V2 GHOST-ETH
+        elif address == b"\xab\x65\x9d\xee\x30\x30\x60\x2c\x1a\xf8\xc2\x9d\x14\x6f\xac\xd4\xae\xd6\xec\x85":
+            return (chain_id, address, "univ2GHSTETH", 18)  # eth / Uniswap V2 GHST-ETH
+        elif address == b"\x30\x8e\x01\x91\x43\xb5\x60\x21\x57\x75\xa0\xc6\xef\xbd\x26\x73\x41\x3d\x76\xe6":
+            return (chain_id, address, "univ2H3XETH", 18)  # eth / Uniswap V2 H3X-ETH
+        elif address == b"\x55\xd5\xc2\x32\xd9\x21\xb9\xea\xa6\xb3\x7b\x58\x45\xe4\x39\xac\xd0\x4b\x4d\xba":
+            return (chain_id, address, "univ2HEXETH", 18)  # eth / Uniswap V2 HEX-ETH
+        elif address == b"\xf5\x2f\x43\x3b\x79\xd2\x10\x23\xaf\x94\x25\x19\x58\xbe\xd3\xb6\x4a\x2b\x79\x30":
+            return (chain_id, address, "univ2HKMTUSDT", 18)  # eth / Uniswap V2 HKMT-USDT
+        elif address == b"\xad\xea\x64\x59\x07\xdb\xe2\xb9\xbc\xb7\xb1\x02\x69\x5a\xd0\xc3\x21\xf6\xb4\x0c":
+            return (chain_id, address, "univ2HXBETH", 18)  # eth / Uniswap V2 HXB-ETH
+        elif address == b"\xfd\xc3\xf6\x8a\xf2\x0d\x56\xe0\x5a\xd0\xc7\xeb\x51\xda\x4a\x3f\x7d\x75\x3a\x04":
+            return (chain_id, address, "univ2IDXTETH", 18)  # eth / Uniswap V2 IDXT-ETH
+        elif address == b"\x2b\x6a\x25\xf7\xc5\x4f\x43\xc7\x1c\x74\x3e\x62\x7f\x56\x63\x23\x25\x86\xc3\x9f":
+            return (chain_id, address, "univ2JRTETH", 18)  # eth / Uniswap V2 JRT-ETH
+        elif address == b"\x65\x07\xba\x0f\x3e\xb8\x2c\xba\x18\x5c\x08\x8a\x3f\xbd\x04\x35\xf1\xa7\x3b\x28":
+            return (chain_id, address, "univ2KAIETH", 18)  # eth / Uniswap V2 KAI-ETH
+        elif address == b"\xab\x3f\x9b\xf1\xd8\x1d\xdb\x22\x4a\x20\x14\xe9\x8b\x23\x86\x38\x82\x4b\xcf\x20":
+            return (chain_id, address, "univ2LENDETH", 18)  # eth / Uniswap V2 LEND-ETH
+        elif address == b"\x30\x8d\x87\x86\x53\x97\x67\x2a\x74\xec\x62\xb3\xdc\x8e\x73\x23\xa1\x8c\x0f\x1e":
+            return (chain_id, address, "univ2LENDUSDC", 18)  # eth / Uniswap V2 LEND-USDC
+        elif address == b"\xa2\x10\x7f\xa5\xb3\x8d\x9b\xbd\x2c\x46\x1d\x6e\xdf\x11\xb1\x1a\x50\xf6\xb9\x74":
+            return (chain_id, address, "univ2LINKETH", 18)  # eth / Uniswap V2 LINK-ETH
+        elif address == b"\xdd\xb5\x04\x9f\xdb\x73\xea\x84\x42\x9c\xd9\x1f\x31\xd9\x07\x79\x03\x2e\x5e\xde":
+            return (chain_id, address, "univ2LPTDAI", 18)  # eth / Uniswap V2 LPT-DAI
+        elif address == b"\x75\x5c\x1a\x8f\x71\xf4\x21\x0c\xd7\xb6\x0b\x94\x39\x45\x1e\xfc\xbe\xba\x33\xd1":
+            return (chain_id, address, "univ2LPTETH", 18)  # eth / Uniswap V2 LPT-ETH
+        elif address == b"\x88\x78\xdf\x9e\x1a\x7c\x87\xdc\xbf\x6d\x39\x99\xd9\x97\xf2\x62\xc0\x5d\x8c\x70":
+            return (chain_id, address, "univ2LRCETH", 18)  # eth / Uniswap V2 LRC-ETH
+        elif address == b"\x11\xb1\xf5\x32\x04\xd0\x3e\x55\x29\xf0\x9e\xb3\x09\x19\x39\xe4\xfd\x8c\x9c\xf3":
+            return (chain_id, address, "univ2MANAETH", 18)  # eth / Uniswap V2 MANA-ETH
+        elif address == b"\x30\x06\xc0\xd2\xa6\xe5\x4d\x35\x90\xa4\x43\x84\xc6\xf0\x66\xc9\xcf\x9a\x4c\xea":
+            return (chain_id, address, "univ2MATHETH", 18)  # eth / Uniswap V2 MATH-ETH
+        elif address == b"\x10\xcf\xa7\x44\xc7\x7f\x1c\xb9\xa7\x7f\xa4\x18\xac\x4a\x1b\x6e\xc6\x2b\xcc\xe4":
+            return (chain_id, address, "univ2MCBETH", 18)  # eth / Uniswap V2 MCB-ETH
+        elif address == b"\x5d\xfb\xe9\x59\x25\xff\xeb\x68\xf7\xd1\x79\x20\xbe\x7b\x31\x32\x89\xa1\xa5\x83":
+            return (chain_id, address, "univ2MEMEETH", 18)  # eth / Uniswap V2 MEME-ETH
+        elif address == b"\xc2\xad\xda\x86\x1f\x89\xbb\xb3\x33\xc9\x0c\x49\x2c\xb8\x37\x74\x19\x16\xa2\x25":
+            return (chain_id, address, "univ2MKRETH", 18)  # eth / Uniswap V2 MKR-ETH
+        elif address == b"\xad\xea\x7c\x5f\xeb\xf9\x3a\x62\x39\xe7\x3e\x14\xe3\x7a\xb4\x29\x03\x9e\xb9\xb1":
+            return (chain_id, address, "univ2MKRMLN", 18)  # eth / Uniswap V2 MKR-MLN
+        elif address == b"\x34\x0a\x5a\x2f\x73\xeb\xaa\x18\x1e\xc2\x82\x68\x02\xfd\xf8\xed\x21\xfc\x75\x9a":
+            return (chain_id, address, "univ2MKRUSDC", 18)  # eth / Uniswap V2 MKR-USDC
+        elif address == b"\xf8\x94\x03\xad\x67\xd6\x59\xd5\xd1\xfa\xe7\xc6\xec\x16\x31\x10\x50\x6b\x85\x8a":
+            return (chain_id, address, "univ2MOONETH", 18)  # eth / Uniswap V2 MOON-ETH
+        elif address == b"\xaa\xcd\x36\xc8\x77\x40\x88\x24\xee\x59\x54\x0b\x0c\x09\x38\x04\xd7\xe9\xa7\xd9":
+            return (chain_id, address, "univ2MRDNETH", 18)  # eth / Uniswap V2 MRDN-ETH
+        elif address == b"\xb7\x84\xce\xd6\x99\x4c\x92\x81\x70\xb4\x17\xbb\xd0\x52\xa0\x96\xc6\xfb\x17\xe2":
+            return (chain_id, address, "univ2NMRETH", 18)  # eth / Uniswap V2 NMR-ETH
+        elif address == b"\x9b\x7d\xad\x79\xfc\x16\x10\x6b\x47\xa3\xda\xb7\x91\xf3\x89\xc1\x67\xe1\x5e\xb0":
+            return (chain_id, address, "univ2OCEANETH", 18)  # eth / Uniswap V2 OCEAN-ETH
+        elif address == b"\x8f\xd3\xa0\x4c\xb3\x0a\x1f\xd9\xff\xaf\x15\x48\x97\x2b\x2e\x51\x17\xd0\xa5\x2d":
+            return (chain_id, address, "[deprecated] univ2OCEANETH", 18)  # eth / Uniswap V2 OCEAN-ETH
+        elif address == b"\xf0\x63\x80\x6d\x07\xfe\x74\x2b\x03\x1a\x54\x31\x45\xfb\x46\xd1\xbc\x67\x0f\xe8":
+            return (chain_id, address, "[deprecated] univ2OCEANETH", 18)  # eth / Uniswap V2 OCEAN-ETH
+        elif address == b"\xce\x2c\xc0\x51\x36\x34\xce\xf3\xa7\xc9\xc2\x57\xe2\x94\xef\x5e\x30\x92\xf1\x85":
+            return (chain_id, address, "univ2OGNETH", 18)  # eth / Uniswap V2 OGN-ETH
+        elif address == b"\x9c\x4f\xe5\xff\xd9\xa9\xfc\x56\x78\xcf\xbd\x93\xaa\x2d\x4f\xd6\x84\xb6\x7c\x4c":
+            return (chain_id, address, "univ2PAXGETH", 18)  # eth / Uniswap V2 PAXG-ETH
+        elif address == b"\xdc\x98\x55\x6c\xe2\x4f\x00\x7a\x5e\xf6\xdc\x1c\xe9\x63\x22\xd6\x58\x32\xa8\x19":
+            return (chain_id, address, "univ2PICKLEETH", 18)  # eth / Uniswap V2 PICKLE-ETH
+        elif address == b"\xae\x2d\x40\x04\x24\x12\x54\xae\xd3\xf9\x38\x73\x60\x4d\x39\x88\x3c\x82\x59\xf0":
+            return (chain_id, address, "univ2PLRETH", 18)  # eth / Uniswap V2 PLR-ETH
+        elif address == b"\x34\x3f\xd1\x71\xca\xf4\xf0\x28\x7a\xe6\xb8\x7d\x75\xa8\x96\x4d\xc4\x45\x16\xab":
+            return (chain_id, address, "univ2PNKETH", 18)  # eth / Uniswap V2 PNK-ETH
+        elif address == b"\xe7\xcc\xa7\x84\xb1\xd8\x38\xd9\x9f\xf4\xff\xf5\x74\xd3\x18\x70\xd1\x61\x9c\x1d":
+            return (chain_id, address, "univ2PODETH", 18)  # eth / Uniswap V2 POD-ETH
+        elif address == b"\xcb\x7f\x78\xa0\x79\xb5\xfc\x38\x7c\x80\xb9\x3b\xe7\x9d\x40\x30\x9c\x27\xa2\x37":
+            return (chain_id, address, "univ2RAINETH", 18)  # eth / Uniswap V2 RAIN-ETH
+        elif address == b"\x33\xbe\x7e\xd8\x06\x47\x90\x61\xa7\xe6\x2a\x33\xd3\xc9\xb5\x00\xfc\x9b\x47\xbf":
+            return (chain_id, address, "univ2RELETH", 18)  # eth / Uniswap V2 REL-ETH
+        elif address == b"\x8b\xd1\x66\x1d\xa9\x8e\xbd\xd3\xbd\x08\x0f\x0b\xe4\xe6\xd9\xbe\x8c\xe9\x85\x8c":
+            return (chain_id, address, "univ2RENETH", 18)  # eth / Uniswap V2 REN-ETH
+        elif address == b"\xec\x2d\x22\x40\xd0\x2a\x8c\xf6\x3c\x3f\xa0\xb7\xd2\xc5\xa3\x16\x9a\x31\x94\x96":
+            return (chain_id, address, "univ2REPETH", 18)  # eth / Uniswap V2 REP-ETH
+        elif address == b"\xa3\x25\x23\x37\x13\x90\xb0\xcc\x4e\x11\xf6\xbb\x23\x6e\xcf\x4c\x2c\xde\xa1\x01":
+            return (chain_id, address, "univ2RINGETH", 18)  # eth / Uniswap V2 RING-ETH
+        elif address == b"\x6d\x57\xa5\x3a\x45\x34\x31\x87\x90\x5a\xad\x6a\xd8\xed\x53\x2d\x10\x56\x97\xc1":
+            return (chain_id, address, "univ2RLCETH", 18)  # eth / Uniswap V2 RLC-ETH
+        elif address == b"\x70\xea\x56\xe4\x62\x66\xf0\x13\x7b\xac\x6b\x75\x71\x0e\x35\x46\xf4\x7c\x85\x5d":
+            return (chain_id, address, "univ2RPLETH", 18)  # eth / Uniswap V2 RPL-ETH
+        elif address == b"\xba\x65\x01\x68\x90\x70\x9d\xbc\x94\x91\xca\x7b\xf5\xde\x39\x5b\x84\x41\xdc\x8b":
+            return (chain_id, address, "univ2RSRETH", 18)  # eth / Uniswap V2 RSR-ETH
+        elif address == b"\xd2\xe0\xc4\x92\x87\x89\xe5\xdb\x62\x0e\x53\xaf\x29\xf5\xfc\x7b\xca\x26\x26\x35":
+            return (chain_id, address, "univ2SAKEETH", 18)  # eth / Uniswap V2 SAKE-ETH
+        elif address == b"\x59\x8e\x74\x0c\xda\x7c\x52\x50\x80\xd3\xfc\xb9\xfa\x7c\x4e\x1b\xd0\x04\x4b\x34":
+            return (chain_id, address, "univ2sETHETH", 18)  # eth / Uniswap V2 sETH-ETH
+        elif address == b"\x26\x0e\x06\x9d\xea\xd7\x6b\xaa\xc5\x87\xb5\x14\x1b\xb6\x06\xef\x8b\x9b\xab\x6c":
+            return (chain_id, address, "univ2SHUFETH", 18)  # eth / Uniswap V2 SHUF-ETH
+        elif address == b"\x43\xae\x24\x96\x0e\x55\x34\x73\x1f\xc8\x31\x38\x6c\x07\x75\x5a\x2d\xc3\x3d\x47":
+            return (chain_id, address, "univ2SNXETH", 18)  # eth / Uniswap V2 SNX-ETH
+        elif address == b"\xea\xf1\xcc\x33\xb8\xd1\xc4\xc3\xe6\x7c\xf6\x47\xe1\x17\x3f\x06\xaa\x7b\x6d\x0c":
+            return (chain_id, address, "univ2SoETHETH", 18)  # eth / Uniswap V2 SoETH-ETH
+        elif address == b"\x59\xf9\x6b\x85\x71\xe3\xb1\x1f\x85\x9a\x09\xea\xf5\xa7\x90\xa1\x38\xfc\x64\xd0":
+            return (chain_id, address, "univ2STAETH", 18)  # eth / Uniswap V2 STA-ETH
+        elif address == b"\x3b\x3d\x4e\xef\xdc\x60\x3b\x23\x29\x07\xa7\xf3\xd0\xed\x1e\xea\x5c\x62\xb5\xf7":
+            return (chain_id, address, "univ2STAKEETH", 18)  # eth / Uniswap V2 STAKE-ETH
+        elif address == b"\xe0\xa0\x8f\xd1\x36\x6b\x5b\x4c\xf2\x56\xdb\x1a\x85\xb6\xeb\x0e\x01\xaa\xcb\xce":
+            return (chain_id, address, "univ2STONKETH", 18)  # eth / Uniswap V2 STONK-ETH
+        elif address == b"\xae\xf1\x69\x13\xb6\xc5\x0e\xbc\xf6\x27\xa3\x94\x92\x1f\x30\x69\x85\xfc\x86\x04":
+            return (chain_id, address, "univ2STORJETH", 18)  # eth / Uniswap V2 STORJ-ETH
+        elif address == b"\xf8\x07\x58\xab\x42\xc3\xb0\x7d\xa8\x40\x53\xfd\x88\x80\x4b\xcb\x6b\xaa\x4b\x5c":
+            return (chain_id, address, "univ2sUSDETH", 18)  # eth / Uniswap V2 sUSD-ETH
+        elif address == b"\x34\xa0\x21\x6c\x50\x57\xbc\x18\xe5\xd3\x4d\x44\x05\x28\x45\x64\xef\xd7\x59\xb2":
+            return (chain_id, address, "univ2sXAUUSDC", 18)  # eth / Uniswap V2 sXAU-USDC
+        elif address == b"\x1a\x58\xaa\x61\x8d\xf8\xf1\xec\x28\x27\x48\xfe\xf6\x18\x5c\x1a\x1c\xc2\xfa\xa6":
+            return (chain_id, address, "univ2TRACETH", 18)  # eth / Uniswap V2 TRAC-ETH
+        elif address == b"\xb8\x17\x20\x76\xce\xb3\x5b\x67\x01\xf9\x6e\xb9\x08\x88\x18\xef\xc0\x10\xbd\x44":
+            return (chain_id, address, "univ2TRADEETH", 18)  # eth / Uniswap V2 TRADE-ETH
+        elif address == b"\x27\xef\x0c\xb0\x21\x44\x6f\x6d\x43\xad\xf0\xbc\xc7\x4b\x64\xfd\x9c\x0a\xb1\x80":
+            return (chain_id, address, "univ2TRBDAI", 18)  # eth / Uniswap V2 TRB-DAI
+        elif address == b"\x70\x25\x8a\xa9\x83\x0c\x2c\x84\xd8\x55\xdf\x1d\x61\xe1\x2c\x25\x6f\x64\x48\xb4":
+            return (chain_id, address, "univ2TRBETH", 18)  # eth / Uniswap V2 TRB-ETH
+        elif address == b"\xb2\x7d\xe0\xba\x2a\xbf\xbf\xdf\x15\x66\x7a\x93\x9f\x04\x1b\x52\x11\x8a\xf5\xba":
+            return (chain_id, address, "univ2UBTETH", 18)  # eth / Uniswap V2 UBT-ETH
+        elif address == b"\x88\xd9\x7d\x19\x9b\x9e\xd3\x7c\x29\xd8\x46\xd0\x0d\x44\x3d\xe9\x80\x83\x2a\x22":
+            return (chain_id, address, "univ2UMAETH", 18)  # eth / Uniswap V2 UMA-ETH
+        elif address == b"\xd3\xd2\xe2\x69\x25\x01\xa5\xc9\xca\x62\x31\x99\xd3\x88\x26\xe5\x13\x03\x3a\x17":
+            return (chain_id, address, "univ2UNIETH", 18)  # eth / Uniswap V2 UNI-ETH
+        elif address == b"\xbd\x39\xb1\xf2\x4b\x89\x60\xd3\xd7\xcd\x2c\x54\x71\xd0\x49\x34\x96\x88\x81\x85":
+            return (chain_id, address, "univ2UNIUSDETH", 18)  # eth / Uniswap V2 UNIUSD-ETH
+        elif address == b"\xfd\x22\x6c\x17\xa5\x7f\x5e\xef\x0b\x84\x8d\x9b\x65\xbc\x53\xcb\xbf\x7e\xd9\x65":
+            return (chain_id, address, "univ2USDCBUIDL", 18)  # eth / Uniswap V2 USDC-BUIDL
+        elif address == b"\xb4\xe1\x6d\x01\x68\xe5\x2d\x35\xca\xcd\x2c\x61\x85\xb4\x42\x81\xec\x28\xc9\xdc":
+            return (chain_id, address, "univ2USDCETH", 18)  # eth / Uniswap V2 USDC-ETH
+        elif address == b"\x30\x41\xcb\xd3\x68\x88\xbe\xcc\x7b\xbc\xbc\x00\x45\xe3\xb1\xf1\x44\x46\x6f\x5f":
+            return (chain_id, address, "univ2USDCUSDT", 18)  # eth / Uniswap V2 USDC-USDT
+        elif address == b"\x1a\x53\x14\xc1\xb3\xe1\x7a\x78\x1a\xae\xf1\x80\xbb\xa4\x46\xd1\x0e\x50\x6e\x6b":
+            return (chain_id, address, "univ2uTOPIAETH", 18)  # eth / Uniswap V2 uTOPIA-ETH
+        elif address == b"\xb0\x6d\x43\xb9\xf8\xeb\x4e\x64\xe8\xc4\x0f\x81\xe5\x57\x4b\x8a\xea\x6e\x1c\xb7":
+            return (chain_id, address, "univ2VLINKETH", 18)  # eth / Uniswap V2 VLINK-ETH
+        elif address == b"\x96\x60\x53\xca\x4f\xca\x04\x91\x73\xeb\x1f\x27\xe4\xcb\x16\x8c\xcb\x79\x45\x34":
+            return (chain_id, address, "univ2VLTETH", 18)  # eth / Uniswap V2 VLT-ETH
+        elif address == b"\x0c\x9c\x5d\xaf\x1d\x7c\xd8\xb1\x0e\x9f\xc5\xe7\xa1\x07\x62\xf0\xa8\xd1\xc3\x35":
+            return (chain_id, address, "univ2VXVETH", 18)  # eth / Uniswap V2 VXV-ETH
+        elif address == b"\xee\x89\xea\x23\xc1\x84\x10\xf2\xb5\x7e\x7a\xbc\x6e\xb2\x4c\xfc\xde\x4f\x49\xb0":
+            return (chain_id, address, "univ2WBOMBETH", 18)  # eth / Uniswap V2 WBOMB-ETH
+        elif address == b"\xbb\x2b\x80\x38\xa1\x64\x01\x96\xfb\xe3\xe3\x88\x16\xf3\xe6\x7c\xba\x72\xd9\x40":
+            return (chain_id, address, "univ2WBTCETH", 18)  # eth / Uniswap V2 WBTC-ETH
+        elif address == b"\x06\xd5\xb7\x38\x0c\x65\xc8\x89\xab\xd8\x2d\x3d\xf8\xac\x11\x8a\xf3\x11\x56\xa1":
+            return (chain_id, address, "univ2WINGSETH", 18)  # eth / Uniswap V2 WINGS-ETH
+        elif address == b"\x23\xbf\xf8\xca\x20\xaa\xc0\x6e\xfd\xf2\x3c\xee\x3b\x8a\xe2\x96\xa3\x0d\xfd\x27":
+            return (chain_id, address, "univ2wNXMETH", 18)  # eth / Uniswap V2 wNXM-ETH
+        elif address == b"\x23\x1f\x33\x81\xd1\x04\x78\xbf\xc2\xca\x55\x21\x95\xb9\xd8\xb1\x59\x68\xb6\x0c":
+            return (chain_id, address, "univ2XBASEETH", 18)  # eth / Uniswap V2 XBASE-ETH
+        elif address == b"\xe0\xcc\x5a\xfc\x0f\xf2\xc7\x61\x83\x41\x6f\xb8\xd1\xa2\x9f\x67\x99\xfb\x2c\xdf":
+            return (chain_id, address, "univ2XIOETH", 18)  # eth / Uniswap V2 XIO-ETH
+        elif address == b"\xb5\xbd\xb5\x1f\xdc\x63\x53\x59\x18\x11\x11\x43\x9e\xfe\x27\x99\xbc\x23\x36\xc6":
+            return (chain_id, address, "univ2XNSETH", 18)  # eth / Uniswap V2 XNS-ETH
+        elif address == b"\x01\x96\x21\x44\xd4\x14\x15\xcc\xa0\x72\x90\x0f\xe8\x7b\xbe\x29\x92\xa9\x9f\x10":
+            return (chain_id, address, "univ2XORETH", 18)  # eth / Uniswap V2 XOR-ETH
+        elif address == b"\x31\x85\x62\x6c\x14\xac\xb9\x53\x1d\x19\x56\x0d\xec\xb9\xd3\xe5\xe8\x06\x81\xb1":
+            return (chain_id, address, "univ2XRTETH", 18)  # eth / Uniswap V2 XRT-ETH
+        elif address == b"\x2f\xdb\xad\xf3\xc4\xd5\xa8\x66\x6b\xc0\x66\x45\xb8\x35\x8a\xb8\x03\x99\x6e\x28":
+            return (chain_id, address, "univ2YFIETH", 18)  # eth / Uniswap V2 YFI-ETH
+        elif address == b"\x89\x73\xbe\x44\x02\xbf\x0a\x39\x44\x8f\x41\x9c\x2d\x64\xbd\x35\x91\xdd\x22\x99":
+            return (chain_id, address, "univ2YFIIETH", 18)  # eth / Uniswap V2 YFII-ETH
         elif address == b"\x17\xe5\xbf\x07\xd6\x96\xea\xf0\xd1\x4c\xaa\x4b\x44\xff\x8a\x1e\x17\xb3\x4d\xe3":
             return (chain_id, address, "uniVERI", 18)  # eth / Uniswap: Veritaseum
         elif address == b"\x4d\x2f\x5c\xfb\xa5\x5a\xe4\x12\x22\x11\x82\xd8\x47\x5b\xc8\x57\x99\xa5\x64\x4b":
@@ -2828,8 +3164,10 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "usZRX3x", 18)  # eth / bZx Perpetual Short ZRX 3x
         elif address == b"\xde\x37\xdb\x42\x69\xc6\xdf\xd4\xc8\x1b\x9a\x11\x40\x0d\x1b\xcb\xee\xc0\x65\x15":
             return (chain_id, address, "usZRX4x", 18)  # eth / bZx Perpetual Short ZRX 4x
+        elif address == b"\xdc\x9a\xc3\xc2\x0d\x1e\xd0\xb5\x40\xdf\x9b\x1f\xed\xc1\x00\x39\xdf\x13\xf9\x9c":
+            return (chain_id, address, "UTK", 18)  # eth / Utrust
         elif address == b"\x70\xa7\x28\x33\xd6\xbf\x7f\x50\x8c\x82\x24\xce\x59\xea\x1e\xf3\xd0\xea\x3a\x38":
-            return (chain_id, address, "UTK", 18)  # eth / UTRUST
+            return (chain_id, address, "[deprecated] UTK", 18)  # eth / Utrust
         elif address == b"\x9e\x33\x19\x63\x6e\x21\x26\xe3\xc0\xbc\x9e\x31\x34\xae\xc5\xe1\x50\x8a\x46\xc7":
             return (chain_id, address, "UTNP", 18)  # eth / Universa
         elif address == b"\x16\xf8\x12\xbe\x7f\xff\x02\xca\xf6\x62\xb8\x5d\x5d\x58\xa5\xda\x65\x72\xd4\xdf":
@@ -2896,6 +3234,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "VOISE", 8)  # eth / Voise
         elif address == b"\xf7\x22\xb0\x19\x10\xf9\x3b\x84\xed\xa9\xca\x12\x8b\x9f\x05\x82\x1a\x41\xea\xe1":
             return (chain_id, address, "VRE", 18)  # eth / Vrenelium
+        elif address == b"\x10\xbc\x51\x8c\x32\xfb\xae\x5e\x38\xec\xb5\x0a\x61\x21\x60\x57\x1b\xd8\x1e\x44":
+            return (chain_id, address, "VRO", 8)  # eth / VeraOne
         elif address == b"\xba\x3a\x79\xd7\x58\xf1\x9e\xfe\x58\x82\x47\x38\x87\x54\xb8\xe4\xd6\xed\xda\x81":
             return (chain_id, address, "VSF", 18)  # eth / VeriSafe
         elif address == b"\x5c\x54\x3e\x7a\xe0\xa1\x10\x4f\x78\x40\x6c\x34\x0e\x9c\x64\xfd\x9f\xce\x51\x70":
@@ -2920,6 +3260,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "WBA", 7)  # eth / WeBetCrypto
         elif address == b"\x22\x60\xfa\xc5\xe5\x54\x2a\x77\x3a\xa4\x4f\xbc\xfe\xdf\x7c\x19\x3b\xc2\xc5\x99":
             return (chain_id, address, "WBTC", 8)  # eth / Wrapped Bitcoin
+        elif address == b"\xbb\x97\xe3\x81\xf1\xd1\xe9\x4f\xfa\x2a\x58\x44\xf6\x87\x5e\x61\x46\x98\x10\x09":
+            return (chain_id, address, "WBX", 18)  # eth / WiBX Utility Token
         elif address == b"\x09\xfe\x5f\x02\x36\xf0\xea\x5d\x93\x01\x97\xdc\xe2\x54\xd7\x7b\x04\x12\x80\x75":
             return (chain_id, address, "WCK", 18)  # eth / Wrapped CryptoKitties
         elif address == b"\x8f\x93\x6f\xe0\xfa\xf0\x60\x4c\x9c\x0e\xf2\x40\x6b\xde\x0a\x65\x36\x55\x15\xd6":
@@ -2970,6 +3312,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "WYV", 18)  # eth / WyvernToken
         elif address == b"\x91\x0d\xfc\x18\xd6\xea\x3d\x6a\x71\x24\xa6\xf8\xb5\x45\x8f\x28\x10\x60\xfa\x4c":
             return (chain_id, address, "X8X", 18)  # eth / X8X
+        elif address == b"\xf9\x11\xa7\xec\x46\xa2\xc6\xfa\x49\x19\x32\x12\xfe\x4a\x2a\x9b\x95\x85\x1c\x27":
+            return (chain_id, address, "XAMP", 9)  # eth / Antiample
         elif address == b"\x4d\xf8\x12\xf6\x06\x4d\xef\x1e\x5e\x02\x9f\x1c\xa8\x58\x77\x7c\xc9\x8d\x2d\x81":
             return (chain_id, address, "XAUR", 8)  # eth / Xaurum
         elif address == b"\x49\xae\xc0\x75\x2e\x68\xd0\x28\x2d\xb5\x44\xc6\x77\xf6\xba\x40\x7b\xa1\x7e\xd7":
@@ -3056,8 +3400,18 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "xSOL", 18)  # eth / Solana SOL Futures
         elif address == b"\x55\x29\x6f\x69\xf4\x0e\xa6\xd2\x0e\x47\x85\x33\xc1\x5a\x6b\x08\xb6\x54\xe7\x58":
             return (chain_id, address, "XYO", 18)  # eth / XYO
+        elif address == b"\x0e\x22\x98\xe3\xb3\x39\x0e\x3b\x94\x5a\x54\x56\xfb\xf5\x9e\xcc\x3f\x55\xda\x16":
+            return (chain_id, address, "YAM", 18)  # eth / YAM V1
+        elif address == b"\xab\xa8\xca\xc6\x86\x6b\x83\xae\x4e\xec\x97\xdd\x07\xed\x25\x42\x82\xf6\xad\x8a":
+            return (chain_id, address, "YAMv2", 24)  # eth / YAM V2
         elif address == b"\x92\x21\x05\xfa\xd8\x15\x3f\x51\x6b\xcf\xb8\x29\xf5\x6d\xc0\x97\xa0\xe1\xd7\x05":
             return (chain_id, address, "YEE", 18)  # eth / Yee Token
+        elif address == b"\x0b\xc5\x29\xc0\x0c\x64\x01\xae\xf6\xd2\x20\xbe\x8c\x6e\xa1\x66\x7f\x6a\xd9\x3e":
+            return (chain_id, address, "YFI", 18)  # eth / yearn.finance
+        elif address == b"\xa1\xd0\xe2\x15\xa2\x3d\x70\x30\x84\x2f\xc6\x7c\xe5\x82\xa6\xaf\xa3\xcc\xab\x83":
+            return (chain_id, address, "YFII", 18)  # eth / YFII.finance
+        elif address == b"\x45\xf2\x4b\xae\xef\x26\x8b\xb6\xd6\x3a\xee\x51\x29\x01\x5d\x69\x70\x2b\xcd\xfa":
+            return (chain_id, address, "YFV", 18)  # eth / YFValue
         elif address == b"\x1b\xc7\xc1\xde\x0a\xc6\xef\x4f\xde\xc3\x5c\x05\x30\x30\xd9\x0c\xf5\x4c\x7e\x9a":
             return (chain_id, address, "YNN", 18)  # eth / YANG
         elif address == b"\xcb\xea\xec\x69\x94\x31\x85\x7f\xdb\x4d\x37\xad\xdb\xbd\xc2\x0e\x13\x2d\x49\x03":
@@ -3078,8 +3432,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "ZERA", 8)  # eth / ZERACOIN
         elif address == b"\xe7\xe4\x27\x9b\x80\xd3\x19\xed\xe2\x88\x98\x55\x13\x5a\x22\x02\x1b\xaf\x09\x07":
             return (chain_id, address, "ZEUS", 18)  # eth / ZeusNetwork
-        elif address == b"\x05\xf4\xa4\x2e\x25\x1f\x2d\x52\xb8\xed\x15\xe9\xfe\xda\xac\xfc\xef\x1f\xad\x27":
-            return (chain_id, address, "ZIL", 12)  # eth / Zilliqa
         elif address == b"\x4a\xac\x46\x1c\x86\xab\xfa\x71\xe9\xd0\x0d\x9a\x2c\xde\x8d\x74\xe4\xe1\xae\xea":
             return (chain_id, address, "ZINC", 18)  # eth / ZINC
         elif address == b"\xa9\xd2\x92\x7d\x3a\x04\x30\x9e\x00\x8b\x6a\xf6\xe2\xe2\x82\xae\x29\x52\xe7\xfd":
@@ -3142,11 +3494,6 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "RLC", 9)  # rin / iExec RLC
         elif address == b"\x0a\x05\x7a\x87\xce\x9c\x56\xd7\xe3\x36\xb4\x17\xc7\x9c\xf3\x0e\x8d\x27\x86\x0b":
             return (chain_id, address, "WALL", 15)  # rin / WALLETH Community-Token
-    elif chain_id == 5:
-        if False:
-            pass
-        elif address == b"\x7a\xf9\x63\xcf\x6d\x22\x8e\x56\x4e\x2a\x0a\xa0\xdd\xbf\x06\x21\x0b\x38\x61\x5d":
-            return (chain_id, address, "TST", 18)  # gor / goerli Test token
     elif chain_id == 8:
         if False:
             pass
@@ -3203,6 +3550,8 @@ def token_by_chain_address(chain_id, address):
             return (chain_id, address, "UNV", 18)  # etc / UniversalCoin
         elif address == b"\x76\xd0\x18\x4c\xf5\x11\x78\x80\x32\xa7\x4a\x1f\xb9\x11\x46\xe6\x3f\x43\xdd\x53":
             return (chain_id, address, "UVC", 5)  # etc / UniversalCoin
+        elif address == b"\xd6\xdf\x0c\x57\x9f\x2a\x65\x04\x9a\x89\x3f\xda\xec\x9f\xce\x09\x8c\xc1\x9f\x87":
+            return (chain_id, address, "UVCX", 18)  # etc / UniversalCoin X
     elif chain_id == 64:
         if False:
             pass

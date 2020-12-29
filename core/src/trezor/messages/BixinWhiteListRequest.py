@@ -16,7 +16,8 @@ class BixinWhiteListRequest(p.MessageType):
 
     def __init__(
         self,
-        type: EnumTypeWL_OperationType = None,
+        *,
+        type: EnumTypeWL_OperationType,
         addr_in: str = None,
     ) -> None:
         self.type = type
@@ -25,6 +26,6 @@ class BixinWhiteListRequest(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('type', p.EnumType("WL_OperationType", (0, 1, 2)), 0),  # required
-            2: ('addr_in', p.UnicodeType, 0),
+            1: ('type', p.EnumType("WL_OperationType", (0, 1, 2)), p.FLAG_REQUIRED),
+            2: ('addr_in', p.UnicodeType, None),
         }

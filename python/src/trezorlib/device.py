@@ -25,6 +25,7 @@ RECOVERY_BACK = "\x08"  # backspace character, sent literally
 
 
 @expect(messages.Success, field="message")
+@session
 def apply_settings(
     client,
     label=None,
@@ -42,6 +43,7 @@ def apply_settings(
     fastpay_money_limit: int = None,
     fastpay_times: int = None,
     safety_checks=None,
+    experimental_features=None,
 ):
 
     settings = messages.ApplySettings(
@@ -60,54 +62,55 @@ def apply_settings(
         fastpay_money_limit=fastpay_money_limit,
         fastpay_times=fastpay_times,
         safety_checks=safety_checks,
+        experimental_features=experimental_features,
     )
 
     out = client.call(settings)
-    client.init_device()  # Reload Features
+    client.refresh_features()
     return out
 
 
 @expect(messages.Success, field="message")
+@session
 def apply_flags(client, flags):
     out = client.call(messages.ApplyFlags(flags=flags))
-    client.init_device()  # Reload Features
+    client.refresh_features()
     return out
 
 
 @expect(messages.Success, field="message")
+@session
 def change_pin(client, remove=False):
     ret = client.call(messages.ChangePin(remove=remove))
-    client.init_device()  # Re-read features
+    client.refresh_features()
     return ret
 
 
 @expect(messages.Success, field="message")
+@session
 def change_wipe_code(client, remove=False):
     ret = client.call(messages.ChangeWipeCode(remove=remove))
-    client.init_device()  # Re-read features
+    client.refresh_features()
     return ret
 
 
 @expect(messages.Success, field="message")
+@session
 def sd_protect(client, operation):
     ret = client.call(messages.SdProtect(operation=operation))
-    client.init_device()
+    client.refresh_features()
     return ret
 
 
 @expect(messages.Success, field="message")
+@session
 def wipe(client):
     ret = client.call(messages.WipeDevice())
     client.init_device()
     return ret
 
 
-@expect(messages.Success, field="message")
-def reboot(client):
-    ret = client.call(messages.BixinReboot())
-    return ret
-
-
+@session
 def recover(
     client,
     word_count=24,
@@ -211,9 +214,16 @@ def reset(
 
 
 @expect(messages.Success, field="message")
+@session
 def backup(client):
     ret = client.call(messages.BackupDevice())
+    client.refresh_features()
     return ret
+
+
+@expect(messages.Success, field="message")
+def cancel_authorization(client):
+    return client.call(messages.CancelAuthorization())
 
 
 @expect(messages.BixinBackupAck, field="data")
@@ -240,4 +250,10 @@ def se_restore(
 @expect(messages.BixinVerifyDeviceAck)
 def se_verify(client, data):
     ret = client.call(messages.BixinVerifyDeviceRequest(data=data))
+    return ret
+
+
+@expect(messages.Success, field="message")
+def reboot(client):
+    ret = client.call(messages.BixinReboot())
     return ret

@@ -38,13 +38,8 @@ def cli():
 
 
 @cli.command()
-@click.option(
-    "-f",
-    "--file",
-    type=click.File("r"),
-    required=True,
-    help="Transaction in JSON format",
-)
+@click.argument("file", type=click.File("r"))
+@click.option("-f", "--file", "_ignore", is_flag=True, hidden=True, expose_value=False)
 @click.option(
     "-p", "--protocol-magic", type=int, default=cardano.PROTOCOL_MAGICS["mainnet"]
 )
@@ -52,6 +47,7 @@ def cli():
 @click.option("-t", "--testnet", is_flag=True)
 @with_client
 def sign_tx(client, file, protocol_magic, network_id, testnet):
+    print("AAAAA")
     """Sign Cardano transaction."""
     transaction = json.load(file)
 

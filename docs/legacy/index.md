@@ -36,7 +36,7 @@ For firmwares older than 1.8.1, please clone the archived [trezor-mcu](https://g
 
 ## Local development build
 
-Make sure you have Python 3.6 or later and [pipenv](https://pipenv.readthedocs.io/en/latest/install/)
+Make sure you have Python 3.6 or later and [Poetry](https://python-poetry.org/)
 installed.
 
 If you want to build device firmware, also make sure that you have the [GNU ARM Embedded toolchain](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads) installed.
@@ -55,14 +55,14 @@ To run the build process, execute the following commands:
 ```sh
 # enter the legacy subdirectory
 cd legacy
-# set up pipenv
-pipenv sync
+# set up poetry
+poetry install
 # set up environment variables. For example, to build emulator with debuglink:
 export EMULATOR=1 DEBUG_LINK=1
 # clear build artifacts
-pipenv run ./script/setup
+poetry run ./script/setup
 # run build process
-pipenv run ./script/cibuild
+poetry run ./script/cibuild
 ```
 
 A built device firmware will be located in `legacy/firmware/trezor.bin`. A built emulator will be
@@ -99,9 +99,27 @@ Step 3 should produce the same fingerprint like your local build (for the same v
 
 **WARNING: This will erase the recovery seed stored on the device! You should never do this on Trezor that contains coins!**
 
-Build with `MEMORY_PROTECT=0` or you will get a hard fault on your device. 
+Build with `MEMORY_PROTECT=0` or you will get a hard fault on your device.
 
 Switch your device to bootloader mode, then execute:
 ```sh
 trezorctl firmware-update -f build/legacy/firmware/trezor.bin
 ```
+
+## Combining bootloader and firmware with various `MEMORY_PROTECT` settings, signed/unsigned
+
+Not all combinations of bootloader and firmware will work. This depends on
+3 variables: MEMORY_PROTECT of bootloader, MEMORY_PROTECT of firmware, whether firmware is signed
+
+This table shows the result for bootloader 1.8.0+ and 1.9.1+:
+
+| Bootloader MEMORY_PROTECT | Firmware MEMORY_PROTECT | Is firmware officially signed? | Result                                                                                     |
+| ------------------------- | ----------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+|  1                        |  1                      | yes                            | works, official configuration                                                              |
+|  1                        |  1                      | no                             | hardfault in header.S when setting VTOR and stack                                          |
+|  0                        |  1                      | no                             | works, but don't forget to comment out `check_bootloader`, otherwise it'll get overwritten |
+|  0                        |  0                      | no                             | hard fault because header.S doesn't set VTOR and stack right                               |
+|  1                        |  0                      | no                             | works                                                                                      |
+
+The other three possibilities with signed firmware and `MEMORY_PROTECT!=0` for bootloader/firmware don't exist.
+

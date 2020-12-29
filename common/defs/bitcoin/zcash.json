@@ -9,7 +9,7 @@
   "decimals": 8,
   "address_type": 7352,
   "address_type_p2sh": 7357,
-  "maxfee_kb": 1000000,
+  "maxfee_kb": 51000000,
   "minfee_kb": 1000,
   "signed_message_header": "Zcash Signed Message:\n",
   "hash_genesis_block": "00040fe8ec8471911baa1db1266ea15dd06b4a8a5c453883c000b031973dce08",
@@ -32,14 +32,6 @@
   "uri_prefix": "zcash",
   "min_address_length": 35,
   "max_address_length": 95,
-  "bitcore": [],
-  "blockbook": [
-    "https://zec1.trezor.io",
-    "https://zec2.trezor.io",
-    "https://zec3.trezor.io",
-    "https://zec4.trezor.io",
-    "https://zec5.trezor.io"
-  ],
   "negative_fee": false,
   "cooldown": 100,
   "consensus_branch_id": {

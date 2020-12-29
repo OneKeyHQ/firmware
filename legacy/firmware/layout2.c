@@ -73,6 +73,7 @@ void chargeDisTimer(void) {
   }
 }
 #endif
+#define LOCKTIME_TIMESTAMP_MIN_VALUE 500000000
 
 #if !BITCOIN_ONLY
 
@@ -581,6 +582,9 @@ void layoutHome(void) {
   bool initialized = config_isInitialized() | config_getMnemonicsImported();
 
   main_menu_init(initialized);
+
+  // Reset lock screen timeout
+  system_millis_lock_start = timer_ms();
 }
 
 static void render_address_dialog(const CoinInfo *coin, const char *address,
@@ -698,16 +702,64 @@ void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
                     NULL);
 }
 
-void layoutConfirmTx(const CoinInfo *coin, uint64_t amount_out,
-                     uint64_t amount_fee) {
-  char str_out[32] = {0}, str_fee[32] = {0};
-  bn_format_uint64(amount_out, NULL, coin->coin_shortcut, coin->decimals, 0,
-                   false, str_out, sizeof(str_out));
-  bn_format_uint64(amount_fee, NULL, coin->coin_shortcut, coin->decimals, 0,
-                   false, str_fee, sizeof(str_fee));
+static bool formatAmountDifference(const CoinInfo *coin, uint64_t amount1,
+                                   uint64_t amount2, char *output,
+                                   size_t output_length) {
+  uint64_t abs_diff = 0;
+  const char *sign = NULL;
+  if (amount1 >= amount2) {
+    abs_diff = amount1 - amount2;
+  } else {
+    abs_diff = amount2 - amount1;
+    sign = "-";
+  }
+
+  return bn_format_uint64(abs_diff, sign, coin->coin_shortcut, coin->decimals,
+                          0, false, output, output_length) != 0;
+}
+
+void layoutConfirmTx(const CoinInfo *coin, uint64_t total_in,
+                     uint64_t total_out, uint64_t change_out) {
+  char str_out[32] = {0};
+  formatAmountDifference(coin, total_in, change_out, str_out, sizeof(str_out));
+
+  char str_fee[32] = {0};
+  formatAmountDifference(coin, total_in, total_out, str_fee, sizeof(str_fee));
+
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Really send"), str_out, _("from your wallet?"),
                     _("Fee included:"), str_fee, NULL);
+}
+
+void layoutConfirmReplacement(const char *description, uint8_t txid[32]) {
+  const char **str = split_message_hex(txid, 32);
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    description, str[0], str[1], str[2], str[3], NULL);
+}
+
+void layoutConfirmModifyFee(const CoinInfo *coin, uint64_t fee_old,
+                            uint64_t fee_new) {
+  char str_fee_change[32] = {0};
+  char str_fee_new[32] = {0};
+  char *question = NULL;
+
+  uint64_t fee_change = 0;
+  if (fee_old < fee_new) {
+    question = _("Increase your fee by:");
+    fee_change = fee_new - fee_old;
+  } else {
+    question = _("Decrease your fee by:");
+    fee_change = fee_old - fee_new;
+  }
+  bn_format_uint64(fee_change, NULL, coin->coin_shortcut, coin->decimals, 0,
+                   false, str_fee_change, sizeof(str_fee_change));
+
+  bn_format_uint64(fee_new, NULL, coin->coin_shortcut, coin->decimals, 0, false,
+                   str_fee_new, sizeof(str_fee_new));
+
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    question, str_fee_change, NULL, _("Transaction fee:"),
+                    str_fee_new, NULL);
 }
 
 void layoutFeeOverThreshold(const CoinInfo *coin, uint64_t fee) {
@@ -725,6 +777,25 @@ void layoutChangeCountOverThreshold(uint32_t change_count) {
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Warning!"), str_change, _("change-outputs."), NULL,
                     _("Continue?"), NULL);
+}
+
+void layoutConfirmNondefaultLockTime(uint32_t lock_time,
+                                     bool lock_time_disabled) {
+  if (lock_time_disabled) {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Warning!"), _("Locktime is set but"),
+                      _("will have no effect."), NULL, _("Continue?"), NULL);
+
+  } else {
+    char str_locktime[11] = {0};
+    snprintf(str_locktime, sizeof(str_locktime), "%" PRIu32, lock_time);
+    char *str_type = (lock_time < LOCKTIME_TIMESTAMP_MIN_VALUE) ? "blockheight:"
+                                                                : "timestamp:";
+
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Locktime for this"), _("transaction is set to"),
+                      str_type, str_locktime, _("Continue?"), NULL);
+  }
 }
 
 void layoutSignMessage(const uint8_t *msg, uint32_t len) {
@@ -1167,6 +1238,25 @@ void layoutU2FDialog(const char *verb, const char *appname) {
 
 #endif
 
+void layoutShowPassphrase(const char *passphrase) {
+  if (layoutLast != layoutShowPassphrase) {
+    layoutSwipe();
+  } else {
+    oledClear();
+  }
+  const char **str =
+      split_message((const uint8_t *)passphrase, strlen(passphrase), 21);
+  for (int i = 0; i < 3; i++) {
+    oledDrawString(0, i * 9 + 4, str[i], FONT_FIXED);
+  }
+  oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 9 - 1,
+                       _("Use this passphrase?"), FONT_STANDARD);
+  oledHLine(OLED_HEIGHT - 21);
+  layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
+  layoutButtonYes(_("Confirm"), &bmp_btn_confirm);
+  oledRefresh();
+}
+
 #if !BITCOIN_ONLY
 
 void layoutNEMDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
@@ -1493,8 +1583,9 @@ void layoutHomeInfo(void) {
     layoutHome();
   }
   if (layoutLast == layoutHome) {
+#if !EMULATOR
     refreshUsbConnectTips();
-
+#endif
     if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
       if (protectPinOnDevice(true)) {
         menu_run(KEY_NULL, 0);
@@ -1932,6 +2023,7 @@ refresh_menu:
   }
 }
 
+#if !EMULATOR
 static void enter_sleep(void) {
   static int sleep_count = 0;
   bool unlocked = false;
@@ -1967,17 +2059,23 @@ static void enter_sleep(void) {
     layoutLast = layoutBack;
   }
 }
+#endif
 
 void layoutEnterSleep(void) {
-  if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
 #if !EMULATOR
+  if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
     enter_sleep();
+    static uint32_t system_millis_logo_refresh = 0;
+    // 1000 ms refresh
+    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+      layoutStatusLogoEx(false);
+      system_millis_logo_refresh = timer_ms();
+    }
+  }
+#else
+  if ((timer_ms() - system_millis_lock_start) >= config_getAutoLockDelayMs()) {
+    config_lockDevice();
+    layoutScreensaver();
+  }
 #endif
-  }
-  static uint32_t system_millis_logo_refresh = 0;
-  // 1000 ms refresh
-  if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-    layoutStatusLogoEx(false);
-    system_millis_logo_refresh = timer_ms();
-  }
 }

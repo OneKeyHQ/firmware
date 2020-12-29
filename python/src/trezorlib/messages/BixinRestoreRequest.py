@@ -15,7 +15,8 @@ class BixinRestoreRequest(p.MessageType):
 
     def __init__(
         self,
-        data: bytes = None,
+        *,
+        data: bytes,
         language: str = None,
         label: str = None,
         passphrase_protection: bool = None,
@@ -28,8 +29,8 @@ class BixinRestoreRequest(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('data', p.BytesType, 0),  # required
-            2: ('language', p.UnicodeType, 0),
-            3: ('label', p.UnicodeType, 0),
-            4: ('passphrase_protection', p.BoolType, 0),
+            1: ('data', p.BytesType, p.FLAG_REQUIRED),
+            2: ('language', p.UnicodeType, None),
+            3: ('label', p.UnicodeType, None),
+            4: ('passphrase_protection', p.BoolType, None),
         }

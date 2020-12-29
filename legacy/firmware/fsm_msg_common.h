@@ -67,9 +67,9 @@ bool get_features(Features *resp) {
   if (session_isUnlocked()) {
     resp->has_wipe_code_protection = true;
     resp->wipe_code_protection = config_hasWipeCode();
+    resp->has_auto_lock_delay_ms = true;
+    resp->auto_lock_delay_ms = config_getAutoLockDelayMs();
   }
-  resp->has_auto_lock_delay_ms = true;
-  resp->auto_lock_delay_ms = config_getAutoLockDelayMs();
 
 #if BITCOIN_ONLY
   resp->capabilities_count = 2;
@@ -413,8 +413,8 @@ bool fsm_getLang(const ApplySettings *msg) {
 
 void fsm_msgEndSession(const EndSession *msg) {
   (void)msg;
-  // TODO
-  fsm_sendFailure(FailureType_Failure_FirmwareError, "Not implemented");
+  session_endCurrentSession();
+  fsm_sendSuccess(_("Session ended"));
 }
 
 void fsm_msgApplySettings(const ApplySettings *msg) {
@@ -731,7 +731,7 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
       char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
       uint8_t entropy[64] = {0};
       config_getMnemonic(mnemonic, sizeof(mnemonic));
-      entropy[0] = mnemonic_to_entropy(mnemonic, entropy + 1) / 11;
+      entropy[0] = mnemonic_to_bits(mnemonic, entropy + 1) / 11;
       if (!config_stBackUpEntoryToSe(entropy, sizeof(entropy))) {
         fsm_sendFailure(FailureType_Failure_ProcessError,
                         _("seed import failed"));
