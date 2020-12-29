@@ -46,7 +46,7 @@ yaml_check: ## check yaml formatting
 	yamllint .
 
 editor_check: ## check editorconfig formatting
-	editorconfig-checker -exclude '.*\.(so|dat|toif|der)'
+	editorconfig-checker -exclude '.*\.(so|dat|toif|der)|docs/pcb/|legacy/segger_rtt/'
 
 changelog: ## fill out issue links in changelog
 	./tools/linkify-changelogs.py
