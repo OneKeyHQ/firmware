@@ -22,6 +22,7 @@
 
 struct buttonState button = {0};
 static volatile bool btn_up_long = false, btn_down_long = false;
+volatile uint32_t system_millis_button_press;
 
 #if !EMULATOR
 #include <libopencm3/cm3/nvic.h>
@@ -40,8 +41,6 @@ static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
 static volatile uint32_t up_btn_timer_counter = 0;
 static volatile int up_btn_timer_enable = 0;
-
-volatile uint32_t system_millis_button_press;
 
 uint16_t buttonRead(void) {
   uint16_t tmp = 0x00;

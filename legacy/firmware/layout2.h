@@ -159,7 +159,9 @@ uint8_t layoutStatusLogoEx(bool force_fresh);
 
 static inline void oledClear_ex(void) {
   oledClear();
+#if !EMULATOR
   layoutStatusLogoEx(true);
+#endif
 }
 
 #endif

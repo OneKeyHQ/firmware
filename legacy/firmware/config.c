@@ -181,8 +181,12 @@ static Session *activeSessionCache;
 
 static uint32_t sessionUseCounter = 0;
 
+#if !EMULATOR
 #define autoLockDelayMsDefault (30 * 60 * 1000U)  // 30 minutes
-#define sleepDelayMsDefault (2 * 60 * 1000U)      // 2 minutes
+#else
+#define autoLockDelayMsDefault (10 * 60 * 1000U)  // 10 minutes
+#endif
+#define sleepDelayMsDefault (2 * 60 * 1000U)  // 2 minutes
 
 static secbool autoLockDelayMsCached = secfalse;
 static secbool sleepDelayMsCached = secfalse;
@@ -468,13 +472,12 @@ void config_init(void) {
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
   }
-
+#if !EMULATOR
   if (!config_isLanguageSet()) {
     ui_language = 0xff;
     menu_language_init();
   }
 
-#if !EMULATOR
   se_sync_session_key();
 #endif
 
@@ -1145,11 +1148,11 @@ uint32_t config_getAutoLockDelayMs() {
   if (sectrue == autoLockDelayMsCached) {
     return autoLockDelayMs;
   }
-
-  //   if (sectrue != storage_is_unlocked()) {
-  //     return autoLockDelayMsDefault;
-  //   }
-
+#if EMULATOR
+  if (sectrue != storage_is_unlocked()) {
+    return autoLockDelayMsDefault;
+  }
+#endif
   if (sectrue != config_get_uint32(KEY_AUTO_LOCK_DELAY_MS, &autoLockDelayMs)) {
     autoLockDelayMs = autoLockDelayMsDefault;
   }

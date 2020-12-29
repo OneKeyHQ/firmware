@@ -582,6 +582,9 @@ void layoutHome(void) {
   bool initialized = config_isInitialized() | config_getMnemonicsImported();
 
   main_menu_init(initialized);
+
+  // Reset lock screen timeout
+  system_millis_lock_start = timer_ms();
 }
 
 static void render_address_dialog(const CoinInfo *coin, const char *address,
@@ -1580,8 +1583,9 @@ void layoutHomeInfo(void) {
     layoutHome();
   }
   if (layoutLast == layoutHome) {
+#if !EMULATOR
     refreshUsbConnectTips();
-
+#endif
     if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
       if (protectPinOnDevice(true)) {
         menu_run(KEY_NULL, 0);
@@ -2019,6 +2023,7 @@ refresh_menu:
   }
 }
 
+#if !EMULATOR
 static void enter_sleep(void) {
   static int sleep_count = 0;
   bool unlocked = false;
@@ -2054,17 +2059,23 @@ static void enter_sleep(void) {
     layoutLast = layoutBack;
   }
 }
+#endif
 
 void layoutEnterSleep(void) {
-  if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
 #if !EMULATOR
+  if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
     enter_sleep();
+    static uint32_t system_millis_logo_refresh = 0;
+    // 1000 ms refresh
+    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+      layoutStatusLogoEx(false);
+      system_millis_logo_refresh = timer_ms();
+    }
+  }
+#else
+  if ((timer_ms() - system_millis_lock_start) >= config_getAutoLockDelayMs()) {
+    config_lockDevice();
+    layoutScreensaver();
+  }
 #endif
-  }
-  static uint32_t system_millis_logo_refresh = 0;
-  // 1000 ms refresh
-  if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-    layoutStatusLogoEx(false);
-    system_millis_logo_refresh = timer_ms();
-  }
 }
