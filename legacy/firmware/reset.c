@@ -223,7 +223,7 @@ void reset_backup(bool separated, const char *mnemonic) {
         i++;
       }
       layoutResetWord(current_word, pass, word_pos, mnemonic[i] == 0);
-      if (!protectButton(ButtonRequestType_ButtonRequest_ConfirmWord, true)) {
+      if (!protectButton(ButtonRequestType_ButtonRequest_ConfirmWord, false)) {
         if (!separated) {
           session_clear(true);
         }
