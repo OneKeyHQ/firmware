@@ -8,6 +8,7 @@ if __debug__:
         from typing_extensions import Literal  # noqa: F401
         EnumTypeCapability = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
         EnumTypeBackupType = Literal[0, 1, 2]
+        EnumTypeSafetyCheckLevel = Literal[0, 1, 2]
     except ImportError:
         pass
 
@@ -52,12 +53,15 @@ class Features(p.MessageType):
         wipe_code_protection: bool = None,
         session_id: bytes = None,
         passphrase_always_on_device: bool = None,
+        safety_checks: EnumTypeSafetyCheckLevel = None,
+        auto_lock_delay_ms: int = None,
+        display_rotation: int = None,
+        experimental_features: bool = None,
+        offset: int = None,
         ble_name: str = None,
         ble_ver: str = None,
         ble_enable: bool = None,
         se_enable: bool = None,
-        offset: int = None,
-        auto_lock_delay_ms: int = None,
         se_ver: str = None,
         backup_only: bool = None,
     ) -> None:
@@ -95,12 +99,15 @@ class Features(p.MessageType):
         self.wipe_code_protection = wipe_code_protection
         self.session_id = session_id
         self.passphrase_always_on_device = passphrase_always_on_device
+        self.safety_checks = safety_checks
+        self.auto_lock_delay_ms = auto_lock_delay_ms
+        self.display_rotation = display_rotation
+        self.experimental_features = experimental_features
+        self.offset = offset
         self.ble_name = ble_name
         self.ble_ver = ble_ver
         self.ble_enable = ble_enable
         self.se_enable = se_enable
-        self.offset = offset
-        self.auto_lock_delay_ms = auto_lock_delay_ms
         self.se_ver = se_ver
         self.backup_only = backup_only
 
@@ -141,12 +148,15 @@ class Features(p.MessageType):
             34: ('wipe_code_protection', p.BoolType, None),
             35: ('session_id', p.BytesType, None),
             36: ('passphrase_always_on_device', p.BoolType, None),
-            37: ('ble_name', p.UnicodeType, None),
-            38: ('ble_ver', p.UnicodeType, None),
-            39: ('ble_enable', p.BoolType, None),
-            40: ('se_enable', p.BoolType, None),
-            50: ('offset', p.UVarintType, None),
-            51: ('auto_lock_delay_ms', p.UVarintType, None),
-            52: ('se_ver', p.UnicodeType, None),
-            53: ('backup_only', p.BoolType, None),
+            37: ('safety_checks', p.EnumType("SafetyCheckLevel", (0, 1, 2)), None),
+            38: ('auto_lock_delay_ms', p.UVarintType, None),
+            39: ('display_rotation', p.UVarintType, None),
+            40: ('experimental_features', p.BoolType, None),
+            500: ('offset', p.UVarintType, None),
+            501: ('ble_name', p.UnicodeType, None),
+            502: ('ble_ver', p.UnicodeType, None),
+            503: ('ble_enable', p.BoolType, None),
+            504: ('se_enable', p.BoolType, None),
+            506: ('se_ver', p.UnicodeType, None),
+            507: ('backup_only', p.BoolType, None),
         }

@@ -92,7 +92,7 @@ static void send_msg_features(usbd_device *dev) {
          "\xaa"
          "\x01\x01"
          "1"
-         "\x90\x03",
+         "\xa0\x1f",
          37);
   response[8] = 0x1c + len;
   response[30] = firmware_present_new() ? 0x01 : 0x00;
