@@ -22,9 +22,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "common.h"
 #include "trezor.h"
 
-#define MSG_IN_SIZE (15 * 1024)
+#define MSG_IN_SIZE MSG_IN_BUFFER_SIZE
 
 #define MSG_OUT_SIZE (3 * 1024)
 
