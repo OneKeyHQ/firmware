@@ -490,7 +490,7 @@ void disUsbConnectSomething(uint8_t force_flag) {
   }
 }
 
-uint8_t layoutStatusLogoEx(bool force_fresh) {
+uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh) {
   uint8_t ret = 0;
 
   getBleDevInformation();
@@ -505,8 +505,11 @@ uint8_t layoutStatusLogoEx(bool force_fresh) {
 
   refreshBatteryLevel(force_fresh);
 
-  if (layout_refresh) oledRefresh();
-  layout_refresh = false;
+  if (need_fresh) {
+    if (layout_refresh) oledRefresh();
+    layout_refresh = false;
+  }
+
   return ret;
 }
 
@@ -794,7 +797,7 @@ void layoutConfirmNondefaultLockTime(uint32_t lock_time,
 
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Locktime for this"), _("transaction is set to"),
-                      str_type, str_locktime, _("Continue?"), NULL);
+                      _(str_type), str_locktime, _("Continue?"), NULL);
   }
 }
 
@@ -876,9 +879,9 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
 
   const char *action = NULL;
   if (pass == 1) {
-    action = _("Please check the seed");
+    action = _("Check the seed");
   } else {
-    action = _("Write down the seed");
+    action = _("Write down");
   }
 
   char index_str[] = "##th word is:";
@@ -1119,8 +1122,8 @@ void layoutXPUB(const char *xpub, int index, int page, bool ours) {
   for (int i = 0; i < 4; i++) {
     oledDrawString(0, (i + 1) * 9 + 4, str[i], FONT_FIXED);
   }
-  layoutButtonNo(_("Next"), NULL);
-  layoutButtonYes(_("Confirm"), &bmp_btn_confirm);
+  layoutButtonNoAdapter(_("Next"), NULL);
+  layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
   oledRefresh();
 }
 
@@ -1249,11 +1252,11 @@ void layoutShowPassphrase(const char *passphrase) {
   for (int i = 0; i < 3; i++) {
     oledDrawString(0, i * 9 + 4, str[i], FONT_FIXED);
   }
-  oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 9 - 1,
-                       _("Use this passphrase?"), FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 9 - 1,
+                              _("Use this passphrase?"), FONT_STANDARD);
   oledHLine(OLED_HEIGHT - 21);
-  layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
-  layoutButtonYes(_("Confirm"), &bmp_btn_confirm);
+  layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
+  layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
   oledRefresh();
 }
 
@@ -2023,44 +2026,6 @@ refresh_menu:
   }
 }
 
-#if !EMULATOR
-static void enter_sleep(void) {
-  static int sleep_count = 0;
-  bool unlocked = false;
-  uint8_t oled_prev[OLED_BUFSIZE];
-  void *layoutBack = NULL;
-  sleep_count++;
-  if (sleep_count == 1) {
-    unlocked = session_isUnlocked();
-    layoutBack = layoutLast;
-    config_lockDevice();
-  }
-  oledBufferLoad(oled_prev);
-  oledClear();
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 30, _("Sleep Mode"),
-                              FONT_STANDARD);
-  layoutButtonNoAdapter(_("Exit"), NULL);
-  oledRefresh();
-  svc_system_sleep();
-  while (get_power_key_state()) {
-  }
-  system_millis_button_press = timer_ms();
-  if (unlocked) {
-    if (sleep_count > 1) {
-    } else {
-      while (!protectPinOnDevice(false)) {
-      }
-    }
-  }
-  oledBufferRestore(oled_prev);
-  oledRefresh();
-  sleep_count--;
-  if (sleep_count == 0) {
-    layoutLast = layoutBack;
-  }
-}
-#endif
-
 void layoutEnterSleep(void) {
 #if !EMULATOR
   if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
@@ -2069,7 +2034,7 @@ void layoutEnterSleep(void) {
   static uint32_t system_millis_logo_refresh = 0;
   // 1000 ms refresh
   if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-    layoutStatusLogoEx(false);
+    layoutStatusLogoEx(true, false);
     system_millis_logo_refresh = timer_ms();
   }
 #else

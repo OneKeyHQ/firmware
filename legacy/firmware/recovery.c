@@ -478,21 +478,23 @@ static void recovery_digit(const char digit) {
 void next_word(void) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  oledDrawStringCenter(OLED_WIDTH / 2, 8, _("Please enter"), FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 8, _("Please enter"),
+                              FONT_STANDARD);
   word_pos = word_order[word_index];
   if (word_pos == 0) {
     strlcpy(fake_word, mnemonic_get_word(random_uniform(BIP39_WORDS)),
             sizeof(fake_word));
-    oledDrawStringCenter(OLED_WIDTH / 2, 24, fake_word,
-                         FONT_FIXED | FONT_DOUBLE);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, fake_word,
+                                FONT_FIXED | FONT_DOUBLE);
   } else {
     fake_word[0] = 0;
     char desc[32] = "";
     format_number(desc, word_pos);
-    oledDrawStringCenter(OLED_WIDTH / 2, 24, desc, FONT_FIXED | FONT_DOUBLE);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, desc,
+                                FONT_FIXED | FONT_DOUBLE);
   }
-  oledDrawStringCenter(OLED_WIDTH / 2, 48, _("on your computer"),
-                       FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 48, _("on your computer"),
+                              FONT_STANDARD);
   // 35 is the maximum pixels used for a pixel row ("the 21st word")
   oledSCA(24 - 2, 24 + 15 + 2, 35);
   oledInvert(0, 24 - 2, OLED_WIDTH - 1, 24 + 15 + 2);

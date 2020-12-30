@@ -1153,7 +1153,7 @@ static bool signing_check_prevtx_hash(void) {
     // Everything was checked, now phase 2 begins and the transaction is signed.
     progress_meta_step =
         progress_step / (info.inputs_count + info.outputs_count);
-    layoutProgress(_("Signing transaction"), progress);
+    layoutProgressAdapter(_("Signing transaction"), progress);
     idx1 = 0;
 #if !BITCOIN_ONLY
     if (coin->decred) {
@@ -1587,10 +1587,20 @@ static bool signing_confirm_tx(void) {
     if (info.lock_time != 0) {
       bool lock_time_disabled = (info.min_sequence == SEQUENCE_FINAL);
       layoutConfirmNondefaultLockTime(info.lock_time, lock_time_disabled);
-      if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-        signing_abort();
-        return false;
+      if (g_bIsBixinAPP) {
+        if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
+                              btn_request, default_oper_time)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          signing_abort();
+          return false;
+        }
+        btn_request = false;
+      } else {
+        if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          signing_abort();
+          return false;
+        }
       }
     }
 
@@ -1637,7 +1647,8 @@ static bool signing_confirm_tx(void) {
     if (need_confirm) {
       // last confirmation
       layoutConfirmTx(coin, total_in, total_out, change_out);
-      if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      if (!protectButton_ex(ButtonRequestType_ButtonRequest_SignTx, false,
+                            btn_request, default_oper_time)) {
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         signing_abort();
         return false;

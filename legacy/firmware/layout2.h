@@ -37,12 +37,6 @@
 
 extern void *layoutLast;
 
-#if DEBUG_LINK
-#define layoutSwipe oledClear
-#else
-// #define layoutSwipe oledSwipeLeft
-#endif
-
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
                        const char *line2, const char *line3, const char *line4,
@@ -155,20 +149,24 @@ void layoutEnterSleep(void);
                            _("Back"), _("Okay"), index, count, title, NULL,   \
                            current, previous, next)
 
-uint8_t layoutStatusLogoEx(bool force_fresh);
+uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);
 
 static inline void oledClear_ex(void) {
   oledClear();
 #if !EMULATOR
-  layoutStatusLogoEx(true);
+  layoutStatusLogoEx(false, true);
 #endif
 }
 
+#if DEBUG_LINK
+#define layoutSwipe oledClear
+#else
 static inline void layoutSwipe(void) {
-  oledSwipeLeft();
+  oledClear();
 #if !EMULATOR
-  layoutStatusLogoEx(true);
+  layoutStatusLogoEx(false, true);
 #endif
 }
+#endif
 
 #endif
