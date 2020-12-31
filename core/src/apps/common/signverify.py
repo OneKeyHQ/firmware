@@ -10,10 +10,10 @@ from apps.common.writers import write_bitcoin_varint
 
 if False:
     from typing import List
-    from apps.common.coininfo import CoinType
+    from apps.common.coininfo import CoinInfo
 
 
-def message_digest(coin: CoinType, message: bytes) -> bytes:
+def message_digest(coin: CoinInfo, message: bytes) -> bytes:
     if not utils.BITCOIN_ONLY and coin.decred:
         h = utils.HashWriter(blake256())
     else:
@@ -21,7 +21,7 @@ def message_digest(coin: CoinType, message: bytes) -> bytes:
     if not coin.signed_message_header:
         raise wire.DataError("Empty message header not allowed.")
     write_bitcoin_varint(h, len(coin.signed_message_header))
-    h.extend(coin.signed_message_header)
+    h.extend(coin.signed_message_header.encode())
     write_bitcoin_varint(h, len(message))
     h.extend(message)
     ret = h.get_digest()
@@ -41,18 +41,22 @@ def split_message(message: bytes) -> List[str]:
 
 
 async def require_confirm_sign_message(
-    ctx: wire.Context, header: str, message: bytes
+    ctx: wire.Context, coin: str, message: bytes
 ) -> None:
-    message = split_message(message)
+    header = "Sign {} message".format(coin)
+    message_lines = split_message(message)
     text = Text(header, new_lines=False)
-    text.normal(*message)
+    text.normal(*message_lines)
     await require_confirm(ctx, text)
 
 
 async def require_confirm_verify_message(
-    ctx: wire.Context, address: str, header: str, message: bytes
+    ctx: wire.Context, address: str, coin: str, message: bytes
 ) -> None:
-    text = Text("Confirm address", new_lines=False)
+    header = "Verify {} message".format(coin)
+    text = Text(header, new_lines=False)
+    text.bold("Confirm address:")
+    text.br()
     text.mono(*split_address(address))
     await require_confirm(ctx, text)
 

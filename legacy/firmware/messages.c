@@ -228,8 +228,8 @@ enum {
 
 void msg_process(char type, uint16_t msg_id, const pb_msgdesc_t *fields,
                  uint8_t *msg_raw, uint32_t msg_size) {
-  static uint8_t msg_data[MSG_IN_SIZE];
-  memzero(msg_data, sizeof(msg_data));
+  static uint8_t *msg_data = msg_in_buffer;
+  memzero(msg_data, sizeof(msg_in_buffer));
   pb_istream_t stream = pb_istream_from_buffer(msg_raw, msg_size);
   bool status = pb_decode(&stream, fields, msg_data);
   if (status) {

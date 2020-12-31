@@ -15,12 +15,13 @@ class BixinBackupDeviceAck(p.MessageType):
 
     def __init__(
         self,
-        mnemonics: str = None,
+        *,
+        mnemonics: str,
     ) -> None:
         self.mnemonics = mnemonics
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('mnemonics', p.UnicodeType, 0),  # required
+            1: ('mnemonics', p.UnicodeType, p.FLAG_REQUIRED),
         }

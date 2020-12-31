@@ -9,7 +9,7 @@
   "decimals": 8,
   "address_type": 1855,
   "address_type_p2sh": 1818,
-  "maxfee_kb": 1000000,
+  "maxfee_kb": 220000000,
   "minfee_kb": 10000,
   "signed_message_header": "Decred Signed Message:\n",
   "hash_genesis_block": "298e5cc3d985bfe7f81dc135f360abe089edd4396b86d2de66b0cef42b21d980",
@@ -32,10 +32,6 @@
   "uri_prefix": "bitcoin",
   "min_address_length": 35,
   "max_address_length": 35,
-  "bitcore": [
-    "https://mainnet.decred.org"
-  ],
-  "blockbook": [],
   "negative_fee": false,
   "cooldown": 100,
   "consensus_branch_id": null,

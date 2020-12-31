@@ -161,7 +161,13 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
 }
 #endif
 
-void check_bootloader(void) {
+/**
+ * If bootloader is older and known, replace with newer bootloader.
+ * If bootloader is unknown, halt with error message.
+ *
+ * @param shutdown_on_success: if true, shuts down device instead of return
+ */
+void check_bootloader(bool shutdown_on_success) {
 #if MEMORY_PROTECT
   uint8_t hash[32] = {0};
   int r = memory_bootloader_hash(hash);
@@ -211,11 +217,13 @@ void check_bootloader(void) {
     // check whether the write was OK
     r = memory_bootloader_hash(hash);
     if (r == 32 && 0 == memcmp(hash, bl_hash, 32)) {
-      // OK -> show info and halt
-      layoutDialog(&bmp_icon_info, NULL, NULL, NULL, _("Update finished"),
-                   _("successfully."), NULL, _("Please reconnect"),
-                   _("the device."), NULL);
-      shutdown();
+      if (shutdown_on_success) {
+        // OK -> show info and halt
+        layoutDialog(&bmp_icon_info, NULL, NULL, NULL, _("Update finished"),
+                     _("successfully."), NULL, _("Please reconnect"),
+                     _("the device."), NULL);
+        shutdown();
+      }
       return;
     }
   }
@@ -226,4 +234,6 @@ void check_bootloader(void) {
   shutdown();
 #endif
 #endif
+  // prevent compiler warning when MEMORY_PROTECT==0
+  (void)shutdown_on_success;
 }

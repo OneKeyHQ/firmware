@@ -15,8 +15,9 @@ class BixinLoadDevice(p.MessageType):
 
     def __init__(
         self,
-        mnemonics: str = None,
-        language: str = None,
+        *,
+        mnemonics: str,
+        language: str = "en-US",
         label: str = None,
         skip_checksum: bool = None,
     ) -> None:
@@ -28,8 +29,8 @@ class BixinLoadDevice(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('mnemonics', p.UnicodeType, 0),  # required
-            5: ('language', p.UnicodeType, 0),  # default=en-US
-            6: ('label', p.UnicodeType, 0),
-            7: ('skip_checksum', p.BoolType, 0),
+            1: ('mnemonics', p.UnicodeType, p.FLAG_REQUIRED),
+            5: ('language', p.UnicodeType, "en-US"),  # default=en-US
+            6: ('label', p.UnicodeType, None),
+            7: ('skip_checksum', p.BoolType, None),
         }

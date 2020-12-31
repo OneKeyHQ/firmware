@@ -28,6 +28,7 @@
 #include "layout2.h"
 #include "memzero.h"
 #include "oled.h"
+#include "protect.h"
 #include "rng.h"
 #include "setup.h"
 #include "timer.h"
@@ -93,23 +94,58 @@ void check_lock_screen(void) {
   }
 }
 
+#if !EMULATOR
 extern volatile uint32_t system_millis;
+
+void enter_sleep(void) {
+  static int sleep_count = 0;
+  bool unlocked = false;
+  uint8_t oled_prev[OLED_BUFSIZE];
+  void *layoutBack = NULL;
+  sleep_count++;
+  if (sleep_count == 1) {
+    unlocked = session_isUnlocked();
+    layoutBack = layoutLast;
+    config_lockDevice();
+  }
+  oledBufferLoad(oled_prev);
+  oledClear();
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 30, _("Sleep Mode"),
+                              FONT_STANDARD);
+  layoutButtonNoAdapter(_("Exit"), NULL);
+  oledRefresh();
+  svc_system_sleep();
+  while (get_power_key_state()) {
+  }
+  system_millis_button_press = timer_ms();
+  if (unlocked) {
+    if (sleep_count > 1) {
+    } else {
+      while (!protectPinOnDevice(false)) {
+      }
+    }
+  }
+  usbInit();
+  oledBufferRestore(oled_prev);
+  oledRefresh();
+  sleep_count--;
+  if (sleep_count == 0) {
+    layoutLast = layoutBack;
+  }
+}
+
 void auto_poweroff_timer(void) {
   if ((system_millis - system_millis_button_press) >=
       config_getAutoLockDelayMs()) {
-#if !EMULATOR
     if (sys_nfcState() || sys_usbState()) {
       config_lockDevice();
       layoutScreensaver();
     } else {
       shutdown();
     }
-#else
-    config_lockDevice();
-    layoutScreensaver();
-#endif
   }
 }
+#endif
 
 static void collect_hw_entropy(bool privileged) {
 #if EMULATOR
@@ -143,7 +179,7 @@ int main(void) {
                                    // unpredictable stack protection checks
   oledInit();
 #else
-  check_bootloader();
+  check_bootloader(true);
   setupApp();
   ble_reset();
 #if !EMULATOR

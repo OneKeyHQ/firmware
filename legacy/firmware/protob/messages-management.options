@@ -41,7 +41,7 @@ WordAck.word                            max_size:12
 BixinSeedOperate.seed_importData        max_size:512
 
 BixinMessageSE.inputmessage             max_size:1024
-BixinOutMessageSE.outmessage            max_size:1024 
+BixinOutMessageSE.outmessage            max_size:1024
 
 BixinBackupAck.data                     max_size:512
 BixinRestoreRequest.data                max_size:512

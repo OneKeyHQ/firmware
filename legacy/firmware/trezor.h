@@ -37,4 +37,8 @@
 /* Screen timeout */
 extern uint32_t system_millis_lock_start;
 
+#if !EMULATOR
+void enter_sleep(void);
+#endif
+
 #endif

@@ -5,7 +5,8 @@
 #include "trans_fifo.h"
 
 #define _SUPPORT_SOFTI2C_ 0
-#define SI2C_BUF_MAX_LEN (1024 * 15)
+#define SI2C_BUF_MAX_IN_LEN MSG_IN_BUFFER_SIZE
+#define SI2C_BUF_MAX_OUT_LEN (1024 * 3)
 
 typedef enum _ChannelType {
   CHANNEL_NULL,
@@ -22,10 +23,9 @@ extern ChannelType host_channel;
 
 #define SI2C_ADDR 0x48  // 90
 
-extern uint8_t i2c_data_in[SI2C_BUF_MAX_LEN];
 extern volatile uint32_t i2c_data_inlen;
 extern volatile bool i2c_recv_done;
-extern uint8_t i2c_data_out[SI2C_BUF_MAX_LEN];
+extern uint8_t i2c_data_out[SI2C_BUF_MAX_OUT_LEN];
 extern volatile uint32_t i2c_data_outlen, i2c_data_out_pos;
 
 extern trans_fifo i2c_fifo_in, i2c_fifo_out;

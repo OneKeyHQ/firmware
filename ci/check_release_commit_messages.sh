@@ -2,6 +2,8 @@
 
 fail=0
 
+git fetch origin master
+
 # list all commits between HEAD and master
 for commit in $(git rev-list origin/master..)
 do
@@ -14,18 +16,18 @@ do
       # remove last ")" and extract commit hash
       master_commit=$(echo ${message:0:-1} | tr ' ' '\n' | tail -1)
       # check if master really contains this commit hash
-      if [[ $(git branch -a --contains $master_commit | grep --only-matching master) == "master" ]]; then
+      if [[ $(git branch -a --contains $master_commit | grep --only-matching "remotes/origin/master") == "remotes/origin/master" ]]; then
         continue
       fi
     fi
 
-    # 2. [NO MASTER] substring
-    if [[ $message =~ "[NO MASTER]" ]]; then
+    # 2. [RELEASE ONLY] substring
+    if [[ $message =~ "[RELEASE ONLY]" ]]; then
       continue
     fi
 
     fail=1
-    echo "FAILURE! Neither 'cherry picked from..' nor '[NO MASTER]' substring found in this commit message."
+    echo "FAILURE! Neither 'cherry picked from..' nor '[RELEASE ONLY]' substring found in this commit message."
 done
 
 exit $fail

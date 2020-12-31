@@ -616,9 +616,9 @@ _usbd_standard_request(usbd_device *usbd_dev, struct usb_setup_data *req,
 	if ((req->bmRequestType & USB_REQ_TYPE_TYPE) != USB_REQ_TYPE_STANDARD) {
 		return USBD_REQ_NOTSUPP;
 	}
-#if !EMULATOR	
+#if !EMULATOR
 	usb_connect_status = 1;
-#endif	
+#endif
 	switch (req->bmRequestType & USB_REQ_TYPE_RECIPIENT) {
 	case USB_REQ_TYPE_DEVICE:
 		return _usbd_standard_request_device(usbd_dev, req, buf, len);

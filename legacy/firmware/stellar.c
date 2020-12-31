@@ -1792,12 +1792,12 @@ void stellar_layoutSigningDialog(const char *line1, const char *line2,
   offset_y += line_height;
 
   // Cancel button
-  layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
+  layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
 
   // Warnings (drawn centered between the buttons
   if (warning) {
-    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 8, warning,
-                         FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 8, warning,
+                                FONT_STANDARD);
   }
 
   // Next / sign button
@@ -1808,7 +1808,7 @@ void stellar_layoutSigningDialog(const char *line1, const char *line2,
     strlcpy(str_next_label, _("Next"), sizeof(str_next_label));
   }
 
-  layoutButtonYes(str_next_label, &bmp_btn_confirm);
+  layoutButtonYesAdapter(str_next_label, &bmp_btn_confirm);
 
   oledRefresh();
 }

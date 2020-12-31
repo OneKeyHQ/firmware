@@ -251,6 +251,6 @@ clean::
 	rm -f ../crypto/*.o
 	rm -f ../storage/*.o
 	rm -f ../common/*.o
-	$(MAKE) -C firmware/protob clean 
+	$(MAKE) -C firmware/protob clean
 
 -include $(OBJS:.o=.d)

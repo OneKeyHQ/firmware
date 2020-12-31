@@ -15,6 +15,7 @@ class BixinOutMessageSE(p.MessageType):
 
     def __init__(
         self,
+        *,
         outmessage: bytes = None,
     ) -> None:
         self.outmessage = outmessage
@@ -22,5 +23,5 @@ class BixinOutMessageSE(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('outmessage', p.BytesType, 0),
+            1: ('outmessage', p.BytesType, None),
         }

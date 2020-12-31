@@ -150,7 +150,7 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
   if (timeout_s) {
     timer_out_set(timer_out_oper, timeout_s);
   }
-  // if (g_bIsBixinAPP) acked = true;
+  if (g_bIsBixinAPP) acked = true;
   acked = true;
 
   while (1) {

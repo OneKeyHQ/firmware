@@ -15,6 +15,7 @@ class BixinWhiteListAck(p.MessageType):
 
     def __init__(
         self,
+        *,
         address: List[str] = None,
     ) -> None:
         self.address = address if address is not None else []

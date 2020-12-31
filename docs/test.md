@@ -156,7 +156,7 @@ pipenv run script/test
     -> pipenv run make build
     -> pipenv run make tests_all
 ````
-	
+
 #### 2.1.3 Crypto test
 - 测试case路径：./crypto/tests/
 - 测试case数量：1898个
@@ -181,7 +181,7 @@ pipenv run script/test
 - 指令:
 ````
     -> cd legacy
-    -> export EMULATOR=1	
+    -> export EMULATOR=1
     -> pipenv run script/test
 ````
 
@@ -192,7 +192,7 @@ pipenv run script/test
 - 指令:
 ````
     -> cd legacy
-    -> export EMULATOR=1 TREZOR_PYTEST_SKIP_ALTCOINS=1 BITCOIN_ONLY=1	
+    -> export EMULATOR=1 TREZOR_PYTEST_SKIP_ALTCOINS=1 BITCOIN_ONLY=1
     -> pipenv run script/test
 ````
 
@@ -205,7 +205,7 @@ pipenv run script/test
     -> tests/download_emulators.sh
     -> TREZOR_UPGRADE_TEST="legacy" pipenv run pytest tests/upgrade_tests
 ````
-	
+
 ## 2.3 Core (Trezor T) 测试
 
 #### 2.3.1 Unix unit test
@@ -242,7 +242,7 @@ pipenv run script/test
     -> pipenv run make build_unix
     -> export TREZOR_PYTEST_SKIP_ALTCOINS=1
     -> pipenv run make test_emu
-    -> cp /var/tmp/trezor.log ${CI_PROJECT_DIR}		
+    -> cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
 ````
 
 #### 2.3.4 Unix monero test
@@ -254,7 +254,7 @@ pipenv run script/test
     -> cd core
     -> pipenv run make build_unix
     -> pipenv run make test_emu_monero
-    -> cp /var/tmp/trezor.log ${CI_PROJECT_DIR}	
+    -> cp /var/tmp/trezor.log ${CI_PROJECT_DIR}
 ````
 
 #### 2.3.5 Unix u2f test

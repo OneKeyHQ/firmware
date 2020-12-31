@@ -15,6 +15,15 @@ enum BackupType {
 }
 
 /**
+ * Level of safety checks for unsafe actions like spending from invalid path namespace or setting high transaction fee.
+ */
+enum SafetyCheckLevel {
+    Strict = 0;             // disallow unsafe actions, this is the default
+    PromptAlways = 1;       // ask user before unsafe action
+    PromptTemporarily = 2;  // like PromptAlways but reverts to Strict after reboot
+}
+
+/**
  * Request: Reset device to default state and ask for device details
  * @start
  * @next Features
@@ -90,14 +99,19 @@ message Features {
     optional bool wipe_code_protection = 34;    // is wipe code protection enabled
     optional bytes session_id = 35;
     optional bool passphrase_always_on_device = 36;  // device enforces passphrase entry on Trezor
-    optional string ble_name = 37;
-    optional string ble_ver = 38;
-    optional bool ble_enable = 39;
-    optional bool se_enable = 40;
-    optional uint32 offset = 50;
-    optional uint32 auto_lock_delay_ms = 51;
-    optional string se_ver = 52;
-    optional bool backup_only = 53;
+    optional SafetyCheckLevel safety_checks = 37;            // safety check level, set to Prompt to limit path namespace enforcement
+    optional uint32 auto_lock_delay_ms = 38;    // number of milliseconds after which the device locks itself
+    optional uint32 display_rotation = 39;      // in degrees from North
+    optional bool experimental_features = 40;   // are experimental message types enabled?
+
+    //onekey
+    optional uint32 offset = 500;
+    optional string ble_name = 501;
+    optional string ble_ver = 502;
+    optional bool ble_enable = 503;
+    optional bool se_enable = 504;
+    optional string se_ver = 506;
+    optional bool backup_only = 507;
 }
 
 /**
@@ -132,13 +146,9 @@ message ApplySettings {
 //    optional PassphraseSourceType passphrase_source = 5;  DEPRECATED
     optional uint32 auto_lock_delay_ms = 6;
     optional uint32 display_rotation = 7;  // in degrees from North
-    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry    
+    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry
     optional SafetyCheckLevel safety_checks = 9;  // Safety check level, set to Prompt to limit path namespace enforcement
-
-    enum SafetyCheckLevel {
-        Strict = 0;
-        Prompt = 1;
-    }
+    optional bool experimental_features = 10;  // enable experimental message types
 
     optional bool use_ble = 100;
     optional bool use_se = 101;
@@ -151,7 +161,7 @@ message ApplySettings {
     * Type of seed and mnemonic export flag
     */
     enum ExportType {
-        SeedEncExportType_NO= 0; 
+        SeedEncExportType_NO= 0;
         SeedEncExportType_YES = 1;
         MnemonicPlainExportType_YES = 2;
     }
@@ -320,7 +330,7 @@ message RecoveryDevice {
     optional uint32 word_count = 1;                     // number of words in BIP-39 mnemonic
     optional bool passphrase_protection = 2;            // enable master node encryption using passphrase
     optional bool pin_protection = 3;                   // enable PIN protection
-    optional string language = 4 [default='en-US'];     // device language (IETF BCP 47 language tag)
+    optional string language = 4;                       // device language (IETF BCP 47 language tag)
     optional string label = 5;                          // device label
     optional bool enforce_wordlist = 6;                 // enforce BIP-39 wordlist during the process
     // 7 reserved for unused recovery method
@@ -395,12 +405,39 @@ message NextU2FCounter {
 }
 
 /**
+ * Request: Ask device to prepare for a preauthorized operation.
+ * @start
+ * @next PreauthorizedRequest
+ * @next Failure
+ */
+message DoPreauthorized {
+}
+
+/**
+ * Request: Device awaits a preauthorized operation.
+ * @start
+ * @next SignTx
+ * @next GetOwnershipProof
+ */
+message PreauthorizedRequest {
+}
+
+/**
+ * Request: Cancel any outstanding authorization in the current session.
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message CancelAuthorization {
+}
+
+/**
  * Request: Gen bitcon seeds random or seed encypt import and export
  * @end
  */
 message BixinSeedOperate {
     required SeedRequestType type = 1;
-    optional bytes seed_importData = 2;	
+    optional bytes seed_importData = 2;
     /**
     * Type of Seed request
     */
@@ -421,7 +458,7 @@ message BixinMessageSE{
 /**
  * Request: out se cmd result
  * @end
- */ 
+ */
 message BixinOutMessageSE {
     optional bytes outmessage = 1;
 }
@@ -432,14 +469,14 @@ message BixinOutMessageSE {
  */
 message BixinReboot {
 }
- 
+
 /**
- * Request: backup request 
+ * Request: backup request
  * @end
  */
 message BixinBackupRequest {
 }
- 
+
 /**
  * Request: backup ack
  * @end
@@ -449,7 +486,7 @@ message BixinBackupAck {
 }
 
 /**
- * Request: restore request 
+ * Request: restore request
  * @end
  */
 message BixinRestoreRequest {
@@ -458,7 +495,7 @@ message BixinRestoreRequest {
  optional string label = 3;
  optional bool passphrase_protection = 4;
 }
- 
+
 /**
  * Request: restore ack
  * @end
@@ -466,7 +503,7 @@ message BixinRestoreRequest {
 message BixinRestoreAck {
  required bytes data = 1;
 }
- 
+
 /**
  * Request: verify device request
  * @end
@@ -474,7 +511,7 @@ message BixinRestoreAck {
 message BixinVerifyDeviceRequest {
  required bytes data = 1;
 }
- 
+
 /**
  * Request: verify device ack
  * @end
@@ -490,7 +527,7 @@ message BixinVerifyDeviceAck {
  */
 message BixinWhiteListRequest {
     required WL_OperationType type = 1;
-    optional string addr_in = 2;	
+    optional string addr_in = 2;
     /**
     * Type of Seed request
     */
@@ -508,7 +545,6 @@ message BixinWhiteListRequest {
 message BixinWhiteListAck {
     repeated string address = 1;
 }
-
 
 /**
  * Request: Import mnemonics

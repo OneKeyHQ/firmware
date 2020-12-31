@@ -14,6 +14,8 @@ const char *languages[][2] = {
     {"About", "关于设备"},
     // layout2.c
     {"Absolute Levy", ""},
+    //
+    {"Access hidden wallet?", "使用隐藏钱包?"},
     // layout2.c
     {"Acitve", "激活"},
     // fsm.c
@@ -89,6 +91,8 @@ const char *languages[][2] = {
     {"Change PIN", "修改密码"},
     // layout2.c
     {"Change language to", "设置语言为"},
+    //
+    {"Check the seed", "检查助记词"},
     // layout2.c
     {"CoSi commit index #?", ""},
     // layout2.c
@@ -326,6 +330,8 @@ const char *languages[][2] = {
     {"Loading private seed", "导入私钥"},
     // trezor.c
     {"Lock Device", "锁定设备"},
+    //
+    {"Locktime for this", "该交易时间锁定"},
     // layout2.c
     {"Login to:", "登录到"},
     // ethereum.c
@@ -356,6 +362,8 @@ const char *languages[][2] = {
     {"Need Backup", "未备份"},
     // layout2.c
     {"Next", "继续"},
+    //
+    {"Next screen will show", "下一屏幕将显示"},
     // layout2.c layout2.c layout2.c layout2.c layout2.c
     // layout2.c layout2.c layout2.c layout2.c
     // layout2.c
@@ -624,6 +632,8 @@ const char *languages[][2] = {
     {"Updating bootloader", ""},
     // layout2.c
     {"Use SE:", "使用SE:"},
+    //
+    {"Use this passphrase?", "确认密语"},
     // fsm_msg_crypto.h
     {"Value length must be a multiple of 16", ""},
     // signing.c signing.c signing.c signing.c signing.c
@@ -663,6 +673,8 @@ const char *languages[][2] = {
     {"Wipe code set", ""},
     // recovery.c
     {"Word not found in a wordlist", ""},
+    //
+    {"Write down", "请抄写助记词"},
     // layout2.c
     {"Write down your ", "请抄写你的"},
     // fsm_msg_coin.h
@@ -685,7 +697,7 @@ const char *languages[][2] = {
     // layout2.c
     {"after ", ""},
     // recovery.c reset.c
-    {"agree to trezor.io/tos", ""},
+    {"agree to trezor.io/tos", " "},
     // u2f.c
     {"already registered", "已注册"},
     // recovery.c
@@ -700,6 +712,8 @@ const char *languages[][2] = {
     {"auto-lock your device", ""},
     // fsm_msg_common.h
     {"backup only", "仅备份"},
+    //
+    {"blockheight:", "区块高度:"},
     // bl_check.c
     {"broken.", ""},
     // recovery.c
@@ -836,8 +850,12 @@ const char *languages[][2] = {
     {"the computer's", "使用电脑的"},
     // recovery.c recovery.c
     {"the one in the device.", ""},
+    //
+    {"the passphrase!", "密语"},
     // layout2.c
     {"the same mosaic", ""},
+    //
+    {"timestamp:", "时间戳:"},
     // protect.c
     {"to continue ...", " "},
     //
@@ -848,6 +866,8 @@ const char *languages[][2] = {
     {"to:", ""},
     // ethereum.c
     {"token", "代币"},
+    //
+    {"transaction is set to", "被设定为"},
     // layout2.c layout2.c
     {"user: ", "用户:"},
     // u2f.c
