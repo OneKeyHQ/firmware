@@ -108,6 +108,9 @@ bool get_features(Features *resp) {
 
   resp->has_backup_only = true;
   resp->backup_only = config_getMnemonicsImported();
+
+  resp->has_onekey_version = true;
+  strlcpy(resp->onekey_version, ONEKEY_VERSION, sizeof(resp->onekey_version));
   return resp;
 }
 

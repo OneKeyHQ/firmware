@@ -1999,9 +1999,7 @@ refresh_menu:
     case 1:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       se_get_version(&se_version);
-      layouKeyValue(y, _("Firmware version:"),
-                    VERSTR(VERSION_MAJOR) "." VERSTR(VERSION_MINOR) "." VERSTR(
-                        VERSION_PATCH));
+      layouKeyValue(y, _("Firmware version:"), ONEKEY_VERSION);
       y += font->pixel + 1;
 
       layouKeyValue(y, _("BLE version:"), ble_get_ver());

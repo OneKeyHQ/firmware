@@ -64,6 +64,7 @@ class Features(p.MessageType):
         se_enable: bool = None,
         se_ver: str = None,
         backup_only: bool = None,
+        onekey_version: str = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -110,6 +111,7 @@ class Features(p.MessageType):
         self.se_enable = se_enable
         self.se_ver = se_ver
         self.backup_only = backup_only
+        self.onekey_version = onekey_version
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -159,4 +161,5 @@ class Features(p.MessageType):
             504: ('se_enable', p.BoolType, None),
             506: ('se_ver', p.UnicodeType, None),
             507: ('backup_only', p.BoolType, None),
+            508: ('onekey_version', p.UnicodeType, None),
         }

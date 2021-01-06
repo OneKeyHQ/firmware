@@ -112,6 +112,7 @@ message Features {
     optional bool se_enable = 504;
     optional string se_ver = 506;
     optional bool backup_only = 507;
+    optional string onekey_version = 508;
 }
 
 /**
