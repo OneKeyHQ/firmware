@@ -1971,13 +1971,26 @@ refresh_menu:
       layouKeyValue(y, _("BLE Name:"), ble_get_name());
       y += font->pixel + 1;
 
-      // layouKeyValue(y, _("Device ID:"), config_uuid_str);
-      oledDrawStringAdapter(0, y, _("Device ID:"), FONT_STANDARD);
-      if (ui_language == 0)
-        x = 48;
-      else
-        x = 34;
-      oledDrawStringAdapter(x, y, config_uuid_str, FONT_STANDARD);
+      char *id_key = _("Device ID:");
+      oledDrawStringAdapter(0, y, id_key, FONT_STANDARD);
+      x = oledStringWidthAdapter(id_key, FONT_STANDARD) + 1;
+
+      // split uuid
+      char uuid1[32] = {0};
+      char uuid2[32] = {0};
+
+      for (int i = 0; i < 2 * UUID_SIZE; i++) {
+        uuid1[i] = config_uuid_str[i];
+        if (oledStringWidthAdapter(uuid1, FONT_STANDARD) > OLED_WIDTH - x) {
+          uuid1[i] = 0;
+          strcat(uuid2, config_uuid_str + i);
+          break;
+        }
+      }
+
+      oledDrawStringAdapter(x, y, uuid1, FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringRightAdapter(OLED_WIDTH - 1, y, uuid2, FONT_STANDARD);
 
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
                      &bmp_btn_down);
@@ -2004,23 +2017,23 @@ refresh_menu:
     default:
       break;
   }
+  layoutButtonNoAdapter(_("Back"), &bmp_btn_cancel);
   oledRefresh();
-  key = protectWaitKey(timer1s * 10, 0);
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
       if (index > 0) {
         index--;
-        goto refresh_menu;
       }
-      break;
+      goto refresh_menu;
     case KEY_DOWN:
       if (index < DEVICE_INFO_PAGE_NUM - 1) {
         index++;
-        goto refresh_menu;
       }
-      break;
-    case KEY_CANCEL:
+      goto refresh_menu;
     case KEY_CONFIRM:
+      goto refresh_menu;
+    case KEY_CANCEL:
     default:
       return;
   }
