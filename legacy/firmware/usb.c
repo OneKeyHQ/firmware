@@ -331,6 +331,7 @@ static void main_rx_callback(usbd_device *dev, uint8_t ep) {
     memcpy(buf, packet_buf, 64);
     host_channel = CHANNEL_SLAVE;
   }
+  timer_sleep_start_reset();
   debugLog(0, "", "main_rx_callback");
   if (!tiny) {
     msg_read(buf, 64);

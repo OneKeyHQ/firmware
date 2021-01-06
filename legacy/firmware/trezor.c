@@ -117,7 +117,7 @@ void enter_sleep(void) {
   svc_system_sleep();
   while (get_power_key_state()) {
   }
-  system_millis_button_press = timer_ms();
+  timer_sleep_start_reset();
   if (unlocked) {
     if (sleep_count > 1) {
     } else {
@@ -135,8 +135,7 @@ void enter_sleep(void) {
 }
 
 void auto_poweroff_timer(void) {
-  if ((system_millis - system_millis_button_press) >=
-      config_getAutoLockDelayMs()) {
+  if (timer_get_sleep_count() >= config_getAutoLockDelayMs()) {
     if (sys_nfcState() || sys_usbState()) {
       config_lockDevice();
       layoutScreensaver();

@@ -52,6 +52,8 @@ void timer_init(void);
 
 void timer_out_set(TimerOut type, uint32_t val);
 uint32_t timer_out_get(TimerOut type);
+void timer_sleep_start_reset(void);
+uint32_t timer_get_sleep_count(void);
 
 #if EMULATOR
 uint32_t timer_ms(void);

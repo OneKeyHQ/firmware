@@ -30,6 +30,7 @@
 
 /* 1 tick = 1 ms */
 extern volatile uint32_t system_millis;
+uint32_t system_millis_sleep_start = 0;
 
 /*
  * delay ms
@@ -125,6 +126,7 @@ void timer_init(void) {
 void sys_tick_handler(void) {
   int i;
   system_millis++;
+  system_millis_sleep_start++;
   timer_out_decrease();
   for (i = 0; i < TIMER_NUM; i++) {
     if (timer_array[i].fp) {
@@ -135,3 +137,7 @@ void sys_tick_handler(void) {
     }
   }
 }
+
+void timer_sleep_start_reset(void) { system_millis_sleep_start = 0; }
+
+uint32_t timer_get_sleep_count(void) { return system_millis_sleep_start; }

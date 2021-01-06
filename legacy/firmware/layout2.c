@@ -2028,7 +2028,7 @@ refresh_menu:
 
 void layoutEnterSleep(void) {
 #if !EMULATOR
-  if ((timer_ms() - system_millis_button_press) >= config_getSleepDelayMs()) {
+  if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
     enter_sleep();
   }
   static uint32_t system_millis_logo_refresh = 0;
