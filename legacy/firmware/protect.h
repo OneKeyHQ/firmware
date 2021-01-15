@@ -41,7 +41,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin);
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode);
 const char* protectInputPin(const char* text, uint8_t pin_len);
 bool protectPinOnDevice(bool use_cached);
-bool protectChangePinOnDevice(void);
+bool protectChangePinOnDevice(bool is_prompt);
 bool protectSelectMnemonicNumber(uint32_t* number);
 bool protectPinCheck(void);
 extern bool protectAbortedByCancel;

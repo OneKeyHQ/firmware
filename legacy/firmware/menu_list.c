@@ -31,22 +31,8 @@ void menu_recovery_device(int index) {
     layoutDialogSwipeCenterAdapter(
         NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
         _("Wallet Recovery Success"), NULL, NULL, NULL);
-    while (1) {
-      key = protectWaitKey(0, 1);
-      if (key == KEY_NULL) {
-        return;
-      } else if (key == KEY_CONFIRM) {
-        break;
-      }
-    }
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
-                                   _("Next"), NULL, NULL, NULL, NULL,
-                                   _("Please set the PIN"), NULL, NULL);
-    key = protectWaitKey(0, 1);
-    if (key != KEY_CONFIRM) {
-      return;
-    }
-    protectChangePinOnDevice();
+    protectWaitKey(0, 1);
+    layoutHome();
   }
 }
 
@@ -68,22 +54,8 @@ void menu_reset_device(int index) {
     layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Done"),
                                    NULL, NULL, NULL, _("Wallet created"),
                                    _("successfully"), NULL, NULL);
-    while (1) {
-      key = protectWaitKey(0, 1);
-      if (key == KEY_NULL) {
-        return;
-      } else if (key == KEY_CONFIRM) {
-        break;
-      }
-    }
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
-                                   _("Next"), NULL, NULL, NULL, NULL,
-                                   _("Please set the PIN"), NULL, NULL);
-    key = protectWaitKey(0, 1);
-    if (key != KEY_CONFIRM) {
-      return;
-    }
-    protectChangePinOnDevice();
+    protectWaitKey(0, 1);
+    layoutHome();
   }
 }
 
@@ -118,7 +90,6 @@ refresh_menu:
 
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
 
-      oledRefresh();
       break;
     case 1:
       layoutQRCode(index_str, &bmp_btn_up, &bmp_btn_down, _("Download Onekey"),
@@ -130,8 +101,9 @@ refresh_menu:
                    "https://onekey.zendesk.com/hc/zh-cn/articles/360002123856");
       break;
   }
-
-  key = protectWaitKey(timer1s * 30, 0);
+  layoutButtonYesAdapter(_("Okay"), &bmp_btn_confirm);
+  oledRefresh();
+  key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_DOWN:
     case KEY_CONFIRM:
@@ -150,21 +122,37 @@ refresh_menu:
 void menu_erase_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Do you really want to"), _("wipe the device?"), NULL,
-                    _("All data will be lost."), NULL, NULL);
-  key = protectWaitKey(timer1s * 60, 1);
-  if (key == KEY_CONFIRM) {
-    if (protectPinOnDevice(true)) {
-      config_wipe();
-    }
+  layoutDialogSwipeCenterAdapter(
+      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+      _("Make sure you still have"), _("backup of seed phrases"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
   }
+  if (!protectPinOnDevice(false)) {
+    return;
+  }
+  layoutDialogSwipeCenterAdapter(
+      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+      _("All data will be lost."), _("This cannot be undo!"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_confirm,
+                                 _("Reset"), NULL, NULL, NULL, NULL,
+                                 _("Are you sure to reset?"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+  config_wipe();
   layoutHome();
 }
 
 void menu_changePin(int index) {
   (void)index;
-  protectChangePinOnDevice();
+  protectChangePinOnDevice(true);
 }
 
 void menu_showMnemonic(int index) {

@@ -42,6 +42,7 @@ static bool awaiting_entropy = false;
 static bool skip_backup = false;
 static bool no_backup = false;
 static bool reset_byself = false;
+static uint32_t words_count;
 
 void reset_init(bool display_random, uint32_t _strength,
                 bool passphrase_protection, bool pin_protection,
@@ -277,17 +278,11 @@ bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type) {
   i = 0;
 refresh_menu:
   if (type == 0) {
-    char *btn_no;
     memzero(desc, sizeof(desc));
     strcat(desc, pre_desc);
     strcat(desc, " #");
     uint2str(i + 1, desc + strlen(desc));
-    if (i == 0) {
-      btn_no = _("Back");
-    } else {
-      btn_no = _("Prev");
-    }
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, btn_no, &bmp_btn_confirm,
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Prev"), &bmp_btn_confirm,
                                    _("Confirm"), NULL, NULL, NULL, desc,
                                    words[i], NULL, NULL);
   } else if (type == 1) {
@@ -332,25 +327,37 @@ refresh_menu:
 
 void writedown_mnemonic(const char *mnemonic) {
   uint8_t key = KEY_NULL;
+  char desc[32] = "";
+  strcat(desc, _("Please check the written"));
+  uint2str(words_count, desc + strlen(desc));
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
-    layoutDialogSwipeCenterAdapter(
-        &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-        _("Please check the written"), _("seed phrases"), NULL, NULL);
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                   _("Next"), NULL, NULL, NULL, desc,
+                                   _("seed phrases"), NULL, NULL);
     key = protectWaitKey(0, 1);
     if (key != KEY_CONFIRM) {
       return;
     }
     if (scroll_mnemonic(NULL, mnemonic, 1)) {
-      config_setMnemonic(mnemonic);
+      layoutDialogSwipeCenterAdapter(
+          &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+          _("The seed phrases are the"), _("only way to recover your"),
+          _("asset,Keep it safe"), NULL, NULL);
+      key = protectWaitKey(0, 1);
+      if (key != KEY_CONFIRM) {
+        return;
+      }
+      if (protectChangePinOnDevice(false)) {
+        config_setMnemonic(mnemonic);
+      }
     }
   }
 }
 
 bool reset_on_device(void) {
-  uint32_t words_count = 0;
   char desc[64] = "";
   uint8_t key = KEY_NULL;
-
+  words_count = 0;
 refresh_menu:
   if (!protectSelectMnemonicNumber(&words_count)) return false;
   switch (words_count) {
@@ -371,7 +378,7 @@ refresh_menu:
   strcat(desc, _("Write down your "));
   uint2str(words_count, desc + strlen(desc));
 
-  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Prev"), &bmp_btn_forward,
                                  _("Next"), NULL, NULL, NULL, desc,
                                  _("seed phrases"), NULL, NULL);
   key = protectWaitKey(0, 1);

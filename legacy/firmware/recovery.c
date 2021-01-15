@@ -185,6 +185,11 @@ static bool recovery_done(void) {
   if (!enforce_wordlist || mnemonic_check(new_mnemonic)) {
     // New mnemonic is valid.
     if (!dry_run) {
+      if (recovery_byself) {
+        if (!protectChangePinOnDevice(false)) {
+          return false;
+        }
+      }
       // Update mnemonic on config.
       if (config_setMnemonic(new_mnemonic)) {
         if (!enforce_wordlist) {
@@ -314,8 +319,7 @@ static void display_choices(bool twoColumn, char choices[9][12], int num) {
     int nr = (word_index / 4) + 1;
     format_number(desc, nr);
     layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter the"),
-                      (nr < 10 ? desc + 1 : desc), _("of your mnemonic"), NULL,
-                      NULL, NULL);
+                      desc, _("of your mnemonic"), NULL, NULL, NULL);
   } else {
     oledBox(0, 27, 127, 63, false);
   }
@@ -735,9 +739,11 @@ refresh_menu:
             mnemonic_word_index_with_prefix(words[word_index], prefix_len);
         select_complete_word(NULL, candidate_location, letter_count);
         if (word_index == word_count) {
-          layoutDialogCenterAdapter(&bmp_btn_cancel, _("Cancel"),
-                                    &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-                                    NULL, _("Please check the entered"),
+          memzero(desc, sizeof(desc));
+          strcat(desc, _("Please check the entered"));
+          uint2str(word_count, desc + strlen(desc));
+          layoutDialogCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                    _("Next"), NULL, NULL, NULL, desc,
                                     _("seed phrases"), NULL, NULL);
 
           key = protectWaitKey(0, 1);

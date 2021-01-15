@@ -768,12 +768,15 @@ input:
   return ret;
 }
 
-bool protectChangePinOnDevice(void) {
+bool protectChangePinOnDevice(bool is_prompt) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
+  bool is_change = false;
+  uint8_t key;
 
   if (config_hasPin()) {
+    is_change = true;
   input:
     pin = protectInputPin(_("Please enter currnet PIN"), 6);
 
@@ -791,6 +794,14 @@ bool protectChangePinOnDevice(void) {
     }
 
     strlcpy(old_pin, pin, sizeof(old_pin));
+  } else {
+    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
+                                   _("Next"), NULL, NULL, NULL, NULL,
+                                   _("Please set the PIN"), NULL, NULL);
+    key = protectWaitKey(0, 1);
+    if (key != KEY_CONFIRM) {
+      return false;
+    }
   }
 retry:
   pin = protectInputPin(_("Please enter new PIN"), 6);
@@ -816,7 +827,7 @@ retry:
                                    NULL, NULL, _("Inconsistent PIN code"),
                                    _("Please try again"), NULL, NULL);
     while (1) {
-      uint8_t key = protectWaitKey(0, 1);
+      key = protectWaitKey(0, 1);
       if (key == KEY_CONFIRM) {
         goto retry;
       } else if (key == KEY_NULL) {
@@ -830,12 +841,16 @@ retry:
   memzero(new_pin, sizeof(new_pin));
   if (ret == false) {
   } else {
-    layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Done"),
-                                   NULL, NULL, NULL, _("PIN code change"),
-                                   _("successfully"), NULL, NULL);
-    protectWaitKey(0, 1);
+    if (is_prompt) {
+      layoutDialogSwipeCenterAdapter(
+          NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
+          is_change ? _("PIN code change") : _("PIN code set"),
+          _("successfully"), NULL, NULL);
+      protectWaitKey(0, 1);
+
+      layoutHome();
+    }
   }
-  layoutHome();
   return ret;
 }
 
@@ -886,21 +901,21 @@ bool protectPinCheck(void) {
   uint32_t fails = config_getPinFails();
   if (fails == 1) {
     layoutDialogCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
-                              NULL, NULL, _("Incorrect PIN entered"),
+                              NULL, NULL, _("PIN invalid"),
                               "You still have 5 times", "to try", NULL);
   } else if (fails > 1 && fails < 5) {
     strcat(desc1, _("Wrong PIN for "));
     uint2str(fails, desc1 + strlen(desc1));
-    strcat(desc1, _(" times"));
+    strcat(desc1, _("times"));
     strcat(desc2, _("you still have "));
     uint2str(5 - fails, desc2 + strlen(desc2));
-    strcat(desc2, _(" times"));
+    strcat(desc2, _("chances"));
     layoutDialogCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
                               NULL, NULL, desc1, desc2, "to try", NULL);
   } else {
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                              _("Device will be erased"), NULL, NULL, NULL);
-    protectWaitKey(timer1s * 2, 0);
+                              _("Device reset in progress"), NULL, NULL, NULL);
+    protectWaitKey(timer1s * 1, 0);
     config_wipe();
     return false;
   }
