@@ -135,6 +135,7 @@ void enter_sleep(void) {
 }
 
 void auto_poweroff_timer(void) {
+  if (config_getAutoLockDelayMs() == 0) return;
   if (timer_get_sleep_count() >= config_getAutoLockDelayMs()) {
     if (sys_nfcState() || sys_usbState()) {
       config_lockDevice();

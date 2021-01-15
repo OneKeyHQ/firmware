@@ -207,7 +207,8 @@ static struct menu_item autolock_set_menu_items[] = {
     {"1", "minute", true, menu_para_set_sleep, NULL},
     {"2", "minutes", true, menu_para_set_sleep, NULL},
     {"5", "minutes", true, menu_para_set_sleep, NULL},
-    {"10", "minutes", true, menu_para_set_sleep, NULL}};
+    {"10", "minutes", true, menu_para_set_sleep, NULL},
+    {"Never", NULL, true, menu_para_set_sleep, NULL}};
 
 static struct menu autolock_set_menu = {
     .start = 0,
@@ -222,7 +223,8 @@ static struct menu_item shutdown_set_menu_items[] = {
     {"10", "minute", true, menu_para_set_shutdown, NULL},
     {"30", "minutes", true, menu_para_set_shutdown, NULL},
     {"1", "hour", true, menu_para_set_shutdown, NULL},
-    {"2", "hours", true, menu_para_set_shutdown, NULL}};
+    {"2", "hours", true, menu_para_set_shutdown, NULL},
+    {"Never", NULL, true, menu_para_set_shutdown, NULL}};
 
 static struct menu shutdown_set_menu = {
     .start = 0,

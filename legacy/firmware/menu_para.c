@@ -10,6 +10,10 @@ static char* format_time(uint32_t ms) {
   static char line[sizeof("4294967296 minutes?")] = {0};
 
   const char* unit = _("second");
+
+  if (ms == 0) {
+    return _("Never");
+  }
   uint32_t num = ms / 1000U;
 
   if (ms >= 60 * 60 * 1000) {
@@ -56,12 +60,12 @@ void menu_para_set_language(int index) {
 }
 
 void menu_para_set_shutdown(int index) {
-  uint32_t ms[4] = {10 * 60 * 1000, 30 * 60 * 1000, 60 * 60 * 1000,
-                    2 * 60 * 60 * 1000};
+  uint32_t ms[5] = {10 * 60 * 1000, 30 * 60 * 1000, 60 * 60 * 1000,
+                    2 * 60 * 60 * 1000, 0};
   config_setAutoLockDelayMs(ms[index]);
 }
 
 void menu_para_set_sleep(int index) {
-  uint32_t ms[4] = {60 * 1000, 2 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000};
+  uint32_t ms[5] = {60 * 1000, 2 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000, 0};
   config_setSleepDelayMs(ms[index]);
 }

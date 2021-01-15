@@ -2039,6 +2039,7 @@ refresh_menu:
 
 void layoutEnterSleep(void) {
 #if !EMULATOR
+  if (config_getSleepDelayMs() == 0) return;
   if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
     enter_sleep();
   }

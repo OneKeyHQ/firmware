@@ -1162,7 +1162,8 @@ uint32_t config_getAutoLockDelayMs() {
 }
 
 void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms) {
-  auto_lock_delay_ms = MAX(auto_lock_delay_ms, MIN_AUTOLOCK_DELAY_MS);
+  if (auto_lock_delay_ms != 0)
+    auto_lock_delay_ms = MAX(auto_lock_delay_ms, MIN_AUTOLOCK_DELAY_MS);
   if (sectrue == storage_set(KEY_AUTO_LOCK_DELAY_MS, &auto_lock_delay_ms,
                              sizeof(auto_lock_delay_ms))) {
     autoLockDelayMs = auto_lock_delay_ms;
@@ -1183,7 +1184,8 @@ uint32_t config_getSleepDelayMs(void) {
 }
 
 void config_setSleepDelayMs(uint32_t auto_sleep_ms) {
-  auto_sleep_ms = MAX(auto_sleep_ms, MIN_AUTOLOCK_DELAY_MS);
+  if (auto_sleep_ms != 0)
+    auto_sleep_ms = MAX(auto_sleep_ms, MIN_AUTOLOCK_DELAY_MS);
   if (sectrue ==
       storage_set(KEY_SLEEP_DELAY_MS, &auto_sleep_ms, sizeof(auto_sleep_ms))) {
     autoSleepDelayMs = auto_sleep_ms;
