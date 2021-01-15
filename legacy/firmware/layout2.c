@@ -1590,8 +1590,10 @@ void layoutHomeInfo(void) {
     refreshUsbConnectTips();
 #endif
     if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
-      if (protectPinOnDevice(true)) {
+      if (protectPinOnDevice(true, true)) {
         menu_run(KEY_NULL, 0);
+      } else {
+        layoutHome();
       }
     }
   } else if (layoutLast == menu_run) {
@@ -1822,7 +1824,8 @@ void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {
   oledRefresh();
 }
 
-void layoutInputPin(uint8_t pos, const char *text, const char *init_number) {
+void layoutInputPin(uint8_t pos, const char *text, const char *init_number,
+                    bool cancel_allowed) {
   int l, y = 9;
   char pin_show[] = "_  _  _  _  _  _";
 
@@ -1837,7 +1840,8 @@ void layoutInputPin(uint8_t pos, const char *text, const char *init_number) {
 
   layoutItemsSelect(64 - l / 2 + pos * 10, y, init_number,
                     FONT_STANDARD | FONT_DOUBLE);
-  layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
+  if (pos != 0 || cancel_allowed)
+    layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
   if (pos < 5) {
     layoutButtonYesAdapter(_("Confirm"), &bmp_btn_forward);
   } else {

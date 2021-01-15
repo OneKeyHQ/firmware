@@ -16,7 +16,7 @@ static struct menu settings_menu, main_menu;
 void menu_recovery_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
-  if (!protectPinOnDevice(true)) {
+  if (!protectPinOnDevice(true, true)) {
     return;
   }
   layoutDialogSwipeCenterAdapter(
@@ -39,7 +39,7 @@ void menu_recovery_device(int index) {
 void menu_reset_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
-  if (!protectPinOnDevice(true)) {
+  if (!protectPinOnDevice(true, true)) {
     return;
   }
   layoutDialogSwipeCenterAdapter(
@@ -129,7 +129,7 @@ void menu_erase_device(int index) {
   if (key != KEY_CONFIRM) {
     return;
   }
-  if (!protectPinOnDevice(false)) {
+  if (!protectPinOnDevice(false, true)) {
     return;
   }
   layoutDialogSwipeCenterAdapter(
@@ -157,7 +157,7 @@ void menu_changePin(int index) {
 
 void menu_showMnemonic(int index) {
   (void)index;
-  if (protectPinOnDevice(false)) {
+  if (protectPinOnDevice(false, true)) {
     char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
     config_getMnemonic(mnemonic, sizeof(mnemonic));
     scroll_mnemonic(_("Mnemonic"), mnemonic, 0);

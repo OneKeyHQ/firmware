@@ -121,7 +121,7 @@ void enter_sleep(void) {
   if (unlocked) {
     if (sleep_count > 1) {
     } else {
-      while (!protectPinOnDevice(false)) {
+      while (!protectPinOnDevice(false, false)) {
       }
     }
   }

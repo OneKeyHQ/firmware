@@ -248,7 +248,7 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
       else
         return 0;
     } else if (msg_tiny_id == MessageType_MessageType_BixinPinInputOnDevice) {
-      return protectInputPin(text, 6);
+      return protectInputPin(text, 6, true);
     }
     if (button.NoUp) {
       timer_out_set(timer_out_oper, 0);
@@ -366,7 +366,7 @@ bool protectChangePin(bool removal) {
     if (g_bIsBixinAPP) {
       need_new_pin = false;
       if (newpin == NULL) {
-        newpin = protectInputPin(_("Please enter new PIN"), 6);
+        newpin = protectInputPin(_("Please enter new PIN"), 6, true);
       }
     }
     if (pin == NULL) {
@@ -702,7 +702,8 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   return key;
 }
 
-const char *protectInputPin(const char *text, uint8_t pin_len) {
+const char *protectInputPin(const char *text, uint8_t pin_len,
+                            bool cancel_allowed) {
   uint8_t key = KEY_NULL;
   uint8_t counter = 0;
   char value[2] = "1";
@@ -710,7 +711,7 @@ const char *protectInputPin(const char *text, uint8_t pin_len) {
 
   memzero(pin, sizeof(pin));
 refresh_menu:
-  layoutInputPin(counter, text, value);
+  layoutInputPin(counter, text, value, cancel_allowed);
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
@@ -739,7 +740,7 @@ refresh_menu:
   return NULL;
 }
 
-bool protectPinOnDevice(bool use_cached) {
+bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
   //   static bool input_pin = false;  // void recursive
   if (use_cached && session_isUnlocked()) {
     return true;
@@ -749,7 +750,7 @@ bool protectPinOnDevice(bool use_cached) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
-    pin = protectInputPin(_("Please enter currnet PIN"), 6);
+    pin = protectInputPin(_("Please enter currnet PIN"), 6, cancel_allowed);
     // input_pin = false;
 
     if (!pin) {
@@ -778,7 +779,7 @@ bool protectChangePinOnDevice(bool is_prompt) {
   if (config_hasPin()) {
     is_change = true;
   input:
-    pin = protectInputPin(_("Please enter currnet PIN"), 6);
+    pin = protectInputPin(_("Please enter currnet PIN"), 6, true);
 
     if (pin == NULL) {
       return false;
@@ -804,7 +805,7 @@ bool protectChangePinOnDevice(bool is_prompt) {
     }
   }
 retry:
-  pin = protectInputPin(_("Please enter new PIN"), 6);
+  pin = protectInputPin(_("Please enter new PIN"), 6, true);
   if (pin == PIN_CANCELED_BY_BUTTON) {
     return false;
   } else if (pin == NULL || pin[0] == '\0') {
@@ -813,7 +814,7 @@ retry:
   }
   strlcpy(new_pin, pin, sizeof(new_pin));
 
-  pin = protectInputPin(_("Please re-enter new PIN"), 6);
+  pin = protectInputPin(_("Please re-enter new PIN"), 6, true);
   if (pin == NULL) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
