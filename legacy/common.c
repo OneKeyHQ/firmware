@@ -39,7 +39,7 @@ uint8_t g_uchash_mode = 0;
 // 2:U2F authenticate,use hard algorithm if se is enabled
 uint8_t g_ucSignU2F = 0;
 
-uint8_t msg_in_buffer[MSG_IN_BUFFER_SIZE];
+uint8_t msg_in_buffer[MSG_IN_BUFFER_SIZE] __attribute__((aligned(4)));
 
 static HMAC_DRBG_CTX drbg_ctx;
 
