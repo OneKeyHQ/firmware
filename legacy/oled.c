@@ -125,7 +125,7 @@ static inline void SPISend(uint32_t base, const uint8_t *data, int len) {
 void oledInit() {
   static const uint8_t s[25] = {OLED_DISPLAYOFF,
                                 OLED_SETDISPLAYCLOCKDIV,
-                                0x80,
+                                0xC0,
                                 OLED_SETMULTIPLEX,
                                 0x3F,  // 128x64
                                 OLED_SETDISPLAYOFFSET,
@@ -166,6 +166,18 @@ void oledInit() {
 
   oledClear();
   oledRefresh();
+}
+
+void oledUpdateClk(void) {
+  static const uint8_t s[2] = {OLED_SETDISPLAYCLOCKDIV, 0xC0};
+
+  gpio_clear(OLED_DC_PORT, OLED_DC_PIN);  // set to CMD
+  gpio_set(OLED_CS_PORT, OLED_CS_PIN);    // SPI deselect
+
+  // init
+  gpio_clear(OLED_CS_PORT, OLED_CS_PIN);  // SPI select
+  SPISend(SPI_BASE, s, 2);
+  gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
 }
 #endif
 

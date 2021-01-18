@@ -186,6 +186,9 @@ void setupApp(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
+  // change oled refresh frequency
+  oledUpdateClk();
+
   // master i2c init
   vMI2CDRV_Init();
 }
