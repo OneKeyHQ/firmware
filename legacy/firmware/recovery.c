@@ -624,7 +624,7 @@ void recovery_abort(void) {
   }
 }
 
-#define CANDIDATE_MAX_LEN 6
+#define CANDIDATE_MAX_LEN 8  // DO NOT CHANGE THIS
 
 static void select_complete_word(char *title, int start, int len) {
   uint8_t key = KEY_NULL;
