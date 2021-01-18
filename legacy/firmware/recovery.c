@@ -240,6 +240,7 @@ static bool recovery_done(void) {
             NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL, NULL,
             _("Invalid seed phrases"), _("Please try again"), NULL, NULL);
         protectWaitKey(0, 1);
+        return false;
       }
     } else {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,

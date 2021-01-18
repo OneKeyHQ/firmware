@@ -12,6 +12,9 @@ int oledStringWidthAdapter(const char *text, uint8_t font) {
            ((font & FONT_DOUBLE) ? 2 : 1);
       text++;
     } else {
+      if (font_dese->idx == DEFAULT_IDX) {
+        font_dese = find_font("dingmao_9x9");
+      }
       l += font_dese->width + ((font & FONT_DOUBLE) ? 2 : 1);
       text += HZ_CODE_LEN;
     }

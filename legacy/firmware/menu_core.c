@@ -25,9 +25,8 @@ void menu_display(struct menu *menu) {
   }
 
   layoutMenuItems(
-      &bmp_btn_up, &bmp_btn_down, menu->current + 1, menu->counts,
-      menu->title ? _(menu->title) : NULL, desc,
-      menu->current > 0 ? _(menu->items[menu->current - 1].name) : NULL,
+      menu->current + 1, menu->counts, menu->title ? _(menu->title) : NULL,
+      desc, menu->current > 0 ? _(menu->items[menu->current - 1].name) : NULL,
       menu->current < menu->counts - 1 ? _(menu->items[menu->current + 1].name)
                                        : NULL);
 }

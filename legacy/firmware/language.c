@@ -11,7 +11,7 @@ const char *languages[][2] = {
     // fsm_msg_coin.h
     {"Abort", "取消"},
     // menu.c
-    {"About", "关于设备"},
+    {"About", "关于本机"},
     // layout2.c
     {"Absolute Levy", ""},
     //
@@ -30,6 +30,8 @@ const char *languages[][2] = {
     {"Already registered.", "已注册"},
     // u2f.c
     {"Another U2F device", "另外的U2F设备"},
+    //
+    {"Are you sure to reset?", "确定要重置吗?"},
     // u2f.c
     {"Authenticate", "认证"},
     // fsm_msg_common.h
@@ -88,9 +90,11 @@ const char *languages[][2] = {
     // ethereum.c
     {"Chain Id out of bounds", ""},  // msg
     //
-    {"Change PIN", "修改密码"},
+    {"Change PIN", "修改PIN码"},
     // layout2.c
     {"Change language to", "设置语言为"},
+    //
+    {"Check Mnemonic", "查看助记词"},
     //
     {"Check the seed", "检查助记词"},
     // layout2.c
@@ -164,6 +168,8 @@ const char *languages[][2] = {
     {"Device ID:", "设备ID:"},
     // reset.c reset.c
     {"Device failed initialized", ""},  // msg
+    //
+    {"Device has been reset", "设备已重置"},
     // fsm.c
     {"Device is already initialized. Use Wipe first.", ""},  // msg
     // fsm_msg_common.h fsm_msg_common.h
@@ -172,6 +178,8 @@ const char *languages[][2] = {
     {"Device not initialized", ""},  // msg
     // recovery.c
     {"Device recovered", ""},  // msg
+    //
+    {"Device reset in progress", "设备重置中"},
     // reset.c reset.c reset.c fsm_msg_common.h
     {"Device successfully initialized", ""},  // msg
     // fsm_msg_common.h
@@ -210,11 +218,11 @@ const char *languages[][2] = {
     // layout2.c
     {"Encrypted message", "加密信息"},
     // layout2.c layout2.c
-    {"English", "中文"},
+    {"English", "简体中文"},
     //
-    {"Enter PIN to unlock", "输入密码解锁"},
+    {"Enter PIN to unlock", "输入PIN码解锁"},
     // protect.c
-    {"Enter new wipe code:", "输入新的擦除密码"},
+    {"Enter new wipe code:", "输入新的擦除PIN码"},
     //
     {"Enter seed phrase ", "输入助记词"},
     //
@@ -291,7 +299,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"If import seed,", "如果导入种子"},
     //
-    {"Inconsistent PIN code", "两次密码输入不一致"},
+    {"Inconsistent PIN code", "两次PIN码输入不一致"},
     // fsm_msg_ethereum.h
     {"Invalid address", ""},  // msg
     // signing.c
@@ -308,6 +316,8 @@ const char *languages[][2] = {
     {"Invalid identity", ""},  // msg
     // lisk.c
     {"Invalid recipient_id", ""},  // msg
+    //
+    {"Invalid seed phrases", "助记词无效"},
     // fsm_msg_common.h
     {"Invalid seed strength", ""},  // msg
     // recovery.c
@@ -323,7 +333,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Label:", "设备名称:"},
     // layout2.c layout2.c
-    {"Language", "语言设置"},
+    {"Language", "语言"},
     // layout2.c
     {"Levy is", ""},
     // fsm_msg_common.h
@@ -334,6 +344,8 @@ const char *languages[][2] = {
     {"Locktime for this", "该交易时间锁定"},
     // layout2.c
     {"Login to:", "登录到"},
+    //
+    {"Make sure you still have", "请确保您仍掌握"},
     // ethereum.c
     {"Malformed address", ""},
     // ethereum.c
@@ -360,6 +372,8 @@ const char *languages[][2] = {
     {"Multisig field provided but not expected.", ""},
     // layout2.c
     {"Need Backup", "未备份"},
+    //
+    {"Never", "永不"},
     // layout2.c
     {"Next", "继续"},
     //
@@ -420,15 +434,15 @@ const char *languages[][2] = {
     {"Output's address_n provided but not expected.", ""},
     // protect.c protect.c protect.c protect.c protect.c
     // protect.c
-    {"PIN REF Table", "密码对照表"},
+    {"PIN REF Table", "PIN码对照表"},
     // fsm.c
     {"PIN cancelled", ""},
     // fsm_msg_common.h
-    {"PIN code change", "密码修改"},
+    {"PIN code change", "PIN码修改"},
     // fsm.c
     {"PIN expected", ""},
     // fsm.c
-    {"PIN invalid", "密码不正确"},
+    {"PIN invalid", "PIN码错误"},
     // fsm.c
     {"PIN mismatch", "两次输入不相同"},
     // fsm_msg_common.h fsm_msg_common.h
@@ -446,27 +460,29 @@ const char *languages[][2] = {
     // layout2.c
     {"Please check the written", "请检查写下的"},
     // protect.c protect.c
-    {"Please confirm PIN", "请确认密码"},
+    {"Please confirm PIN", "请确认PIN码"},
     // protect.c
-    {"Please enter currnet PIN", "请输入当前密码"},
+    {"Please enter currnet PIN", "请输入当前PIN码"},
     // protect.c
-    {"Please enter new PIN", "请输入新密码"},
+    {"Please enter new PIN", "请输入新PIN码"},
     // recovery.c
     {"Please enter the", "请输入"},
     // protect.c
     {"Please enter your", "请输入你的"},
     // protect.c
-    {"Please enter your PIN:", "请输入密码"},
+    {"Please enter your PIN:", "请输入PIN码"},
     // layout2.c
-    {"Please input PIN", "请输入密码"},
+    {"Please input PIN", "请输入PIN码"},
     // protect.c
-    {"Please re-enter new PIN", "请再次输入新密码"},
+    {"Please re-enter new PIN", "请再次输入新PIN码"},
+    //
+    {"Please reboot", "请重启设备"},
     // bl_check.c
     {"Please reconnect", ""},
     // recovery.c
     {"Please select the", "请选择"},
     //
-    {"Please set the PIN", "请设置密码"},
+    {"Please set the PIN", "请设置PIN码"},
     //
     {"Please try again", "请重试"},
     // protect.c
@@ -536,7 +552,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"Settings applied", ""},
     // layout2.c layout2.c
-    {"Shutdown", "关机时间"},
+    {"Shutdown", "自动关机"},
     // layout2.c
     {"Sign binary message?", ""},
     // layout2.c
@@ -574,10 +590,14 @@ const char *languages[][2] = {
     {"The seed is valid and matches the one in the device", ""},
     // recovery.c
     {"The seed is valid but does not match the one in the device", ""},
+    //
+    {"The seed phrases are the", " "},
     // protect.c
     {"The wipe code must be different from your PIN.", ""},
     // u2f.c
     {"This U2F device is", ""},
+    //
+    {"This cannot be undo!", "本操作不可撤销!"},
     // protect.c fsm_msg_common.h
     {"This firmware is incapable of passphrase entry on the device.", ""},
     // signing.c fsm_msg_coin.h
@@ -677,6 +697,8 @@ const char *languages[][2] = {
     {"Write down", "请抄写助记词"},
     // layout2.c
     {"Write down your ", "请抄写你的"},
+    //
+    {"Wrong PIN for ", "您已输错"},
     // fsm_msg_coin.h
     {"Wrong address path", ""},
     // signing.c signing.c
@@ -686,6 +708,8 @@ const char *languages[][2] = {
     // layout2.c layout2.c layout2.c layout2.c
     // layout2.c
     {"Yes", "是"},
+    //
+    {"You still have 5 times", "连续输入5次将重置设备"},
     // layout2.c
     {"active device", "激活设备"},
     // fsm_msg_common.h
@@ -708,8 +732,12 @@ const char *languages[][2] = {
     {"and network fee of", ""},
     // fsm_msg_common.h
     {"answer to ping?", ""},
+    //
+    {"asset,Keep it safe", "凭证,请妥善保管"},
     // layout2.c
     {"auto-lock your device", ""},
+    //
+    {"backup of seed phrases", "助记词的物理备份"},
     // fsm_msg_common.h
     {"backup only", "仅备份"},
     //
@@ -718,10 +746,12 @@ const char *languages[][2] = {
     {"broken.", ""},
     // recovery.c
     {"but does NOT MATCH", ""},
+    //
+    {"chances", "次机会"},
     // fsm_msg_common.h
     {"change bluetooth", ""},
     // fsm_msg_common.h
-    {"change current PIN?", "修改密码"},
+    {"change current PIN?", "修改PIN码"},
     // fsm_msg_common.h
     {"change fastpay settings", "修改快捷支付"},
     // fsm_msg_common.h
@@ -800,6 +830,8 @@ const char *languages[][2] = {
     {"of your mnemonic", "助记词"},
     // recovery.c
     {"on your computer", "在电脑上"},
+    //
+    {"only way to recover your", "助记词是找回资产唯一"},
     // fsm_msg_coin.h
     {"own risk!", "风险"},
     // protect.c
@@ -839,7 +871,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"set a new wipe code?", ""},
     // fsm_msg_common.h
-    {"set new PIN?", "设置密码"},
+    {"set new PIN?", "设置PIN码"},
     // fsm_msg_common.h
     {"status always?", ""},
     // bl_check.c
@@ -854,6 +886,8 @@ const char *languages[][2] = {
     {"the passphrase!", "密语"},
     // layout2.c
     {"the same mosaic", ""},
+    //
+    {"times", "次"},
     //
     {"timestamp:", "时间戳:"},
     // protect.c
@@ -873,11 +907,12 @@ const char *languages[][2] = {
     // u2f.c
     {"was used to register", "注册"},
     // fsm_msg_common.h
-    {"wipe code?", "擦除密码"},
+    {"wipe code?", "擦除PIN码"},
     // fsm_msg_common.h
     {"wipe the device?", "擦除设备"},
-
+    //
     {"word", "单词"},
-};
+    //
+    {"you still have ", "还有"}};
 
 int LANGUAGE_ITEMS = sizeof(languages) / sizeof(languages[0]);

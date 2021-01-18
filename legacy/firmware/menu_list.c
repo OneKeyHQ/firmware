@@ -11,6 +11,8 @@
 #include "recovery.h"
 #include "reset.h"
 
+extern uint8_t ui_language;
+
 static struct menu settings_menu, main_menu;
 
 void menu_recovery_device(int index) {
@@ -146,8 +148,19 @@ void menu_erase_device(int index) {
   if (key != KEY_CONFIRM) {
     return;
   }
+  uint8_t ui_language_bak = ui_language;
+
   config_wipe();
-  layoutHome();
+  if (ui_language_bak) {
+    ui_language = ui_language_bak;
+  }
+  layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Confirm"),
+                                 NULL, NULL, NULL, _("Device has been reset"),
+                                 NULL, _("Please reboot"), NULL);
+  protectWaitKey(0, 0);
+#if !EMULATOR
+  svc_system_reset();
+#endif
 }
 
 void menu_changePin(int index) {
@@ -161,7 +174,6 @@ void menu_showMnemonic(int index) {
     char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
     config_getMnemonic(mnemonic, sizeof(mnemonic));
     scroll_mnemonic(_("Mnemonic"), mnemonic, 0);
-    layoutHome();
   }
 }
 
@@ -180,7 +192,7 @@ static struct menu ble_set_menu = {
 
 static struct menu_item language_set_menu_items[] = {
     {"English ", NULL, true, menu_para_set_language, NULL},
-    {"中文", NULL, true, menu_para_set_language, NULL}};
+    {"简体中文", NULL, true, menu_para_set_language, NULL}};
 
 static struct menu language_set_menu = {
     .start = 0,
@@ -243,8 +255,8 @@ static struct menu settings_menu = {
 
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL},
-    {"Mnemonic", NULL, true, menu_showMnemonic, NULL},
-    {"Reset", NULL, true, menu_erase_device, NULL}};
+    {"Reset", NULL, true, menu_erase_device, NULL},
+    {"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}};
 
 static struct menu security_set_menu = {
     .start = 0,
