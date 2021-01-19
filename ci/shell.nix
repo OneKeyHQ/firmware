@@ -1,17 +1,17 @@
 { fullDeps ? false }:
 
-# the last successful build of nixos-20.09 (stable) as of 2020-12-15
+# the last successful build of nixpkgs-unstable as of 2020-12-30
 with import
   (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/647cc06986c1ae4a2bb05298e0cf598723e42970.tar.gz";
-    sha256 = "1n1sd5lbds08vxy8x9l94w0z8bbq39fh2rrr6mnq0rmhf4xb2mj1";
+    url = "https://github.com/NixOS/nixpkgs/archive/bea44d5ebe332260aa34a1bd48250b6364527356.tar.gz";
+    sha256 = "14sfk04iyvyh3jl1s2wayw1y077dwpk2d712nhjk1wwfjkdq03r3";
   })
 { };
 
 let
   moneroTests = fetchurl {
-    url = "https://github.com/ph4r05/monero/releases/download/v0.15.0.0-tests-u18.04-03/trezor_tests";
-    sha256 = "1e5dfdb07de4ea46088f4a5bdb0d51f040fe479019efae30f76427eee6edb3f7";
+    url = "https://github.com/ph4r05/monero/releases/download/v0.17.1.9-tests/trezor_tests";
+    sha256 = "410bc4ff2ff1edc65e17f15b549bd1bf8a3776cf67abdea86aed52cf4bce8d9d";
   };
   moneroTestsPatched = runCommandCC "monero_trezor_tests" {} ''
     cp ${moneroTests} $out
@@ -51,11 +51,11 @@ stdenv.mkDerivation ({
     pkgconfig
     poetry
     protobuf3_6
-    valgrind
     wget
     zlib
   ] ++ stdenv.lib.optionals (!stdenv.isDarwin) [
     procps
+    valgrind
   ] ++ stdenv.lib.optionals (stdenv.isDarwin) [
     darwin.apple_sdk.frameworks.CoreAudio
     darwin.apple_sdk.frameworks.AudioToolbox

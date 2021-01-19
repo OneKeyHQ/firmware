@@ -73,50 +73,52 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define FLAG_PUBLIC_SHIFTED (FLAG_PUBLIC << 8)
 #define FLAGS_WRITE_SHIFTED (FLAGS_WRITE << 8)
 
-#define KEY_UUID (0 | APP | FLAG_PUBLIC_SHIFTED)      // bytes(12)
-#define KEY_VERSION (1 | APP)                         // uint32
-#define KEY_MNEMONIC (2 | APP)                        // string(241)
-#define KEY_LANGUAGE (3 | APP | FLAG_PUBLIC_SHIFTED)  // string(17)
-#define KEY_LABEL (4 | APP | FLAG_PUBLIC_SHIFTED)     // string(33)
-#define KEY_PASSPHRASE_PROTECTION (5 | APP | FLAG_PUBLIC_SHIFTED)  // bool
-#define KEY_HOMESCREEN (6 | APP | FLAG_PUBLIC_SHIFTED)   // bytes(1024)
-#define KEY_NEEDS_BACKUP (7 | APP)                       // bool
-#define KEY_FLAGS (8 | APP)                              // uint32
-#define KEY_U2F_COUNTER (9 | APP | FLAGS_WRITE_SHIFTED)  // uint32
-#define KEY_UNFINISHED_BACKUP (11 | APP)                 // bool
+// clang-format off
+#define KEY_UUID (0 | APP | FLAG_PUBLIC_SHIFTED)                        // bytes(12)
+#define KEY_VERSION (1 | APP)                                           // uint32
+#define KEY_MNEMONIC (2 | APP)                                          // string(241)
+#define KEY_LANGUAGE (3 | APP | FLAG_PUBLIC_SHIFTED)                    // string(17)
+#define KEY_LABEL (4 | APP | FLAG_PUBLIC_SHIFTED)                       // string(33)
+#define KEY_PASSPHRASE_PROTECTION (5 | APP | FLAG_PUBLIC_SHIFTED)       // bool
+#define KEY_HOMESCREEN (6 | APP | FLAG_PUBLIC_SHIFTED)                  // bytes(1024)
+#define KEY_NEEDS_BACKUP (7 | APP)                                      // bool
+#define KEY_FLAGS (8 | APP)                                             // uint32
+#define KEY_U2F_COUNTER (9 | APP | FLAGS_WRITE_SHIFTED)                 // uint32
+#define KEY_UNFINISHED_BACKUP (11 | APP)                                // bool
 #define KEY_AUTO_LOCK_DELAY_MS \
-  (12 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)             // uint32
-#define KEY_NO_BACKUP (13 | APP)                          // bool
-#define KEY_INITIALIZED (14 | APP | FLAG_PUBLIC_SHIFTED)  // uint31
-#define KEY_NODE (15 | APP)                               // node
-#define KEY_IMPORTED (16 | APP)                           // bool
-#define KEY_U2F_ROOT (17 | APP | FLAG_PUBLIC_SHIFTED)     // node
-#define KEY_SEEDS (18 | APP)                              // bytes
-#define KEY_SEEDSFLAG (19 | APP | FLAG_PUBLIC_SHIFTED)    // uint32
-//#define KEY_PIN (20| APP_PIN )      // uint32
-//#define KEY_PINFLAG (21| APP_PIN )      // uint32
-//#define KEY_VERIFYPIN (22| APP_PIN)      // uint32
+  (12 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)                           // uint32
+#define KEY_NO_BACKUP (13 | APP)                                        // bool
+#define KEY_INITIALIZED (14 | APP | FLAG_PUBLIC_SHIFTED)                // uint31
+#define KEY_NODE (15 | APP)                                             // node
+#define KEY_IMPORTED (16 | APP)                                         // bool
+#define KEY_U2F_ROOT (17 | APP | FLAG_PUBLIC_SHIFTED)                   // node
+#define KEY_SEEDS (18 | APP)                                            // bytes
+#define KEY_SEEDSFLAG (19 | APP | FLAG_PUBLIC_SHIFTED)                  // uint32
+//#define KEY_PIN (20| APP_PIN )                                        // uint32
+//#define KEY_PINFLAG (21| APP_PIN )                                    // uint32
+//#define KEY_VERIFYPIN (22| APP_PIN)                                   // uint32
 
-#define KEY_TRANSBLEMODE (23 | APP | FLAG_PUBLIC_SHIFTED)       // bool
-#define KEY_FREEPAYPINFLAG (24 | APP)                           // bool
-#define KEY_SEFLAG (25 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bool
-//#define MNEMONIC_INDEX_TOSEED               (26)
-#define KEY_RESET (27 | APP)               // bool
-#define KEY_FREEPAYCONFIRMFLAG (28 | APP)  // bool
-#define KEY_FREEPAYMONEYLIMT (29 | APP)    // uint64
-#define KEY_FREEPAYPTIMES (30 | APP)       // uint32
+#define KEY_TRANSBLEMODE (23 | APP | FLAG_PUBLIC_SHIFTED)               // bool
+#define KEY_FREEPAYPINFLAG (24 | APP)                                   // bool
+#define KEY_SEFLAG (25 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)          // bool
+//#define MNEMONIC_INDEX_TOSEED(26)
+#define KEY_RESET (27 | APP)                                            // bool
+#define KEY_FREEPAYCONFIRMFLAG (28 | APP)                               // bool
+#define KEY_FREEPAYMONEYLIMT (29 | APP)                                 // uint64
+#define KEY_FREEPAYPTIMES (30 | APP)                                    // uint32
 
 #define KEY_SE_SESSIONKEY \
-  (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bytes(16)
-#define KEY_DEVICE_STATE (32 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // uint32
-#define KEY_SEED_PASSPHRASE (33 | APP)                                // string
-#define KEY_SEED_ST (34 | APP)                                        // string
-#define KEY_ST_SEED_EXCHANGE (35 | APP)  // bytes, only used in se
+  (31 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)                           // bytes(16)
+#define KEY_DEVICE_STATE (32 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)    // uint32
+#define KEY_SEED_PASSPHRASE (33 | APP)                                  // string
+#define KEY_SEED_ST (34 | APP)                                          // string
+#define KEY_ST_SEED_EXCHANGE (35 | APP)                                 // bytes, only used in se
 
-#define KEY_MNEMONICS_IMPORTED (36 | APP | FLAG_PUBLIC_SHIFTED)  // bool
-#define KEY_SLEEP_DELAY_MS (37 | APP | FLAG_PUBLIC_SHIFTED)      // uint32
+#define KEY_MNEMONICS_IMPORTED (36 | APP | FLAG_PUBLIC_SHIFTED)         // bool
+#define KEY_SLEEP_DELAY_MS (37 | APP | FLAG_PUBLIC_SHIFTED)             // uint32
 
-#define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)  // string(10)
+#define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)            // string(10)
+// clang-format on
 
 #define MAX_SESSIONS_COUNT 10
 

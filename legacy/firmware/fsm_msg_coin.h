@@ -36,20 +36,18 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
   if (msg->has_ecdsa_curve_name) {
     curve = msg->ecdsa_curve_name;
   }
+
+  // derive m/0' to obtain root_fingerprint
+  uint32_t root_fingerprint;
+  uint32_t path[1] = {0x80000000 | 0};
+  HDNode *node = fsm_getDerivedNode(curve, path, 1, &root_fingerprint);
+  if (!node) return;
+
   uint32_t fingerprint;
-  HDNode *node = node = fsm_getDerivedNode(curve, msg->address_n,
-                                           msg->address_n_count, &fingerprint);
+  node = fsm_getDerivedNode(curve, msg->address_n, msg->address_n_count,
+                            &fingerprint);
   if (!node) return;
   hdnode_fill_public_key(node);
-
-  if (msg->has_show_display && msg->show_display) {
-    layoutPublicKey(node->public_key);
-    if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
 
   resp->has_node = true;
   resp->node.depth = node->depth;
@@ -70,20 +68,45 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
                            script_type == InputScriptType_SPENDMULTISIG)) {
     hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub,
                             sizeof(resp->xpub));
-  } else if (coin->has_segwit && coin->xpub_magic_segwit_p2sh &&
-             script_type == InputScriptType_SPENDP2SHWITNESS) {
+  } else if (coin->has_segwit &&
+             script_type == InputScriptType_SPENDP2SHWITNESS &&
+             !msg->ignore_xpub_magic && coin->xpub_magic_segwit_p2sh) {
     hdnode_serialize_public(node, fingerprint, coin->xpub_magic_segwit_p2sh,
                             resp->xpub, sizeof(resp->xpub));
-  } else if (coin->has_segwit && coin->xpub_magic_segwit_native &&
-             script_type == InputScriptType_SPENDWITNESS) {
+  } else if (coin->has_segwit &&
+             script_type == InputScriptType_SPENDP2SHWITNESS &&
+             msg->ignore_xpub_magic && coin->xpub_magic) {
+    hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub,
+                            sizeof(resp->xpub));
+  } else if (coin->has_segwit && script_type == InputScriptType_SPENDWITNESS &&
+             !msg->ignore_xpub_magic && coin->xpub_magic_segwit_native) {
     hdnode_serialize_public(node, fingerprint, coin->xpub_magic_segwit_native,
                             resp->xpub, sizeof(resp->xpub));
+  } else if (coin->has_segwit && script_type == InputScriptType_SPENDWITNESS &&
+             msg->ignore_xpub_magic && coin->xpub_magic) {
+    hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub,
+                            sizeof(resp->xpub));
   } else {
     fsm_sendFailure(FailureType_Failure_DataError,
                     _("Invalid combination of coin and script_type"));
     layoutHome();
     return;
   }
+
+  if (msg->has_show_display && msg->show_display) {
+    for (int page = 0; page < 2; page++) {
+      layoutXPUB(resp->xpub, page);
+      if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
+        memzero(resp, sizeof(PublicKey));
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return;
+      }
+    }
+  }
+
+  resp->has_root_fingerprint = true;
+  resp->root_fingerprint = root_fingerprint;
 
   msg_write(MessageType_MessageType_PublicKey, resp);
   layoutHome();
