@@ -77,7 +77,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_UUID (0 | APP | FLAG_PUBLIC_SHIFTED)                        // bytes(12)
 #define KEY_VERSION (1 | APP)                                           // uint32
 #define KEY_MNEMONIC (2 | APP)                                          // string(241)
-#define KEY_LANGUAGE (3 | APP | FLAG_PUBLIC_SHIFTED)                    // string(17)
+#define KEY_LANGUAGE (3 | APP| ST_FLASH | FLAG_PUBLIC_SHIFTED)           // string(17)
 #define KEY_LABEL (4 | APP | FLAG_PUBLIC_SHIFTED)                       // string(33)
 #define KEY_PASSPHRASE_PROTECTION (5 | APP | FLAG_PUBLIC_SHIFTED)       // bool
 #define KEY_HOMESCREEN (6 | APP | FLAG_PUBLIC_SHIFTED)                  // bytes(1024)
@@ -114,8 +114,8 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 #define KEY_SEED_ST (34 | APP)                                          // string
 #define KEY_ST_SEED_EXCHANGE (35 | APP)                                 // bytes, only used in se
 
-#define KEY_MNEMONICS_IMPORTED (36 | APP | FLAG_PUBLIC_SHIFTED)         // bool
-#define KEY_SLEEP_DELAY_MS (37 | APP | FLAG_PUBLIC_SHIFTED)             // uint32
+#define KEY_MNEMONICS_IMPORTED (36 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // bool
+#define KEY_SLEEP_DELAY_MS (37 | APP | ST_FLASH | FLAG_PUBLIC_SHIFTED)  // uint32
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)            // string(10)
 // clang-format on
@@ -460,6 +460,7 @@ void config_init(void) {
 
   // get whether use se flag
   g_bSelectSEFlag = config_getWhetherUseSE();
+
   if (config_isLanguageSet()) {
     config_getLanguage(config_language, sizeof(config_language));
   }
@@ -1280,8 +1281,9 @@ void config_setWhetherUseSE(bool flag) {
 }
 
 bool config_getWhetherUseSE(void) {
-  bool flag;
-  return sectrue == config_get_bool(KEY_SEFLAG, &flag);
+  bool flag = false;
+  config_get_bool(KEY_SEFLAG, &flag);
+  return flag;
 }
 
 ExportType config_setSeedsExportFlag(ExportType flag) { return flag; }
