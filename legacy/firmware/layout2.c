@@ -546,16 +546,20 @@ void layoutHome(void) {
       layoutFillBleName(5);
     } else {
       oledDrawBitmap(56, 8, &bmp_home_logo);
+      char desc[64] = "";
       char label[MAX_LABEL_LEN + 1] = "";
       config_getLabel(label, sizeof(label));
       if (strlen(label)) {
-        oledDrawStringCenterAdapter(64, 32, label, FONT_STANDARD);
+        strcat(desc, label);
       } else {
-        layoutFillBleName(4);
+        if (ble_name_state() == true) {
+          strcat(desc, ble_get_name());
+        }
       }
       if (!config_isInitialized()) {
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
-                                    _("Not Actived"), FONT_STANDARD);
+        strcat(desc, "(");
+        strcat(desc, _("Not Actived"));
+        strcat(desc, ")");
       } else {
         if (no_backup) {
           oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
@@ -570,6 +574,7 @@ void layoutHome(void) {
                                       _("Need Backup"), FONT_STANDARD);
         }
       }
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
       if (session_isUnlocked()) {
         oledDrawStringCenterAdapter(
             OLED_WIDTH / 2, 42, _("Press any key to continue"), FONT_STANDARD);
