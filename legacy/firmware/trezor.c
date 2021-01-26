@@ -102,6 +102,7 @@ void enter_sleep(void) {
   bool unlocked = false;
   uint8_t oled_prev[OLED_BUFSIZE];
   void *layoutBack = NULL;
+  bool ble_state_bak = ble_get_switch();
   sleep_count++;
   if (sleep_count == 1) {
     unlocked = session_isUnlocked();
@@ -109,6 +110,9 @@ void enter_sleep(void) {
     config_lockDevice();
   }
   oledBufferLoad(oled_prev);
+  if (ble_state_bak) {
+    change_ble_sta(false);
+  }
   oledClear();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, 30, _("Sleep Mode"),
                               FONT_STANDARD);
@@ -124,6 +128,9 @@ void enter_sleep(void) {
       while (!protectPinOnDevice(false, false)) {
       }
     }
+  }
+  if (ble_state_bak) {
+    change_ble_sta(true);
   }
   usbInit();
   oledBufferRestore(oled_prev);
