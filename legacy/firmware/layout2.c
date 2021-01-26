@@ -1632,16 +1632,16 @@ void layoutHomeInfo(void) {
   }
 }
 
-void layoutDialogSwipeCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
-                                    const BITMAP *bmp_yes, const char *btnYes,
-                                    const char *desc, const char *line1,
-                                    const char *line2, const char *line3,
-                                    const char *line4, const char *line5,
-                                    const char *line6) {
+void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
+                                    const char *btnNo, const BITMAP *bmp_yes,
+                                    const char *btnYes, const char *desc,
+                                    const char *line1, const char *line2,
+                                    const char *line3, const char *line4,
+                                    const char *line5, const char *line6) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  layoutDialogCenterAdapter(bmp_no, btnNo, bmp_yes, btnYes, desc, line1, line2,
-                            line3, line4, line5, line6);
+  layoutDialogCenterAdapter(icon, bmp_no, btnNo, bmp_yes, btnYes, desc, line1,
+                            line2, line3, line4, line5, line6);
 }
 
 void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
@@ -1756,26 +1756,30 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
   oledRefresh();
 }
 
-void layoutDialogCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
-                               const BITMAP *bmp_yes, const char *btnYes,
-                               const char *desc, const char *line1,
-                               const char *line2, const char *line3,
-                               const char *line4, const char *line5,
-                               const char *line6) {
+void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
+                               const char *btnNo, const BITMAP *bmp_yes,
+                               const char *btnYes, const char *desc,
+                               const char *line1, const char *line2,
+                               const char *line3, const char *line4,
+                               const char *line5, const char *line6) {
   const struct font_desc *font = find_cur_font();
 
   oledClear_ex();
-  if (line1) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0 * (font->pixel + 1), line1,
-                                FONT_STANDARD);
-  }
-  if (line2) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 1 * (font->pixel + 1), line2,
-                                FONT_STANDARD);
-  }
-  if (line3) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * (font->pixel + 1), line3,
-                                FONT_STANDARD);
+  if (icon) {
+    oledDrawBitmap(56, 9, icon);
+  } else {
+    if (line1) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0 * (font->pixel + 1), line1,
+                                  FONT_STANDARD);
+    }
+    if (line2) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 1 * (font->pixel + 1), line2,
+                                  FONT_STANDARD);
+    }
+    if (line3) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * (font->pixel + 1), line3,
+                                  FONT_STANDARD);
+    }
   }
   if (line4) {
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * (font->pixel + 1), line4,

@@ -113,20 +113,20 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
                          const char *line1, const char *line2,
                          const char *line3, const char *line4,
                          const char *line5, const char *line6);
-void layoutDialogCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
-                               const BITMAP *bmp_yes, const char *btnYes,
-                               const char *desc, const char *line1,
-                               const char *line2, const char *line3,
-                               const char *line4, const char *line5,
-                               const char *line6);
+void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
+                               const char *btnNo, const BITMAP *bmp_yes,
+                               const char *btnYes, const char *desc,
+                               const char *line1, const char *line2,
+                               const char *line3, const char *line4,
+                               const char *line5, const char *line6);
 void layoutProgressAdapter(const char *desc, int permil);
 
-void layoutDialogSwipeCenterAdapter(const BITMAP *bmp_no, const char *btnNo,
-                                    const BITMAP *bmp_yes, const char *btnYes,
-                                    const char *desc, const char *line1,
-                                    const char *line2, const char *line3,
-                                    const char *line4, const char *line5,
-                                    const char *line6);
+void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
+                                    const char *btnNo, const BITMAP *bmp_yes,
+                                    const char *btnYes, const char *desc,
+                                    const char *line1, const char *line2,
+                                    const char *line3, const char *line4,
+                                    const char *line5, const char *line6);
 
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,

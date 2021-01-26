@@ -801,9 +801,9 @@ bool protectChangePinOnDevice(bool is_prompt) {
 
     strlcpy(old_pin, pin, sizeof(old_pin));
   } else {
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
-                                   _("Next"), NULL, NULL, NULL, NULL,
-                                   _("Please set the PIN"), NULL, NULL);
+    layoutDialogSwipeCenterAdapter(
+        NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+        NULL, NULL, _("Please set the PIN"), NULL, NULL);
     key = protectWaitKey(0, 1);
     if (key != KEY_CONFIRM) {
       return false;
@@ -829,9 +829,9 @@ retry:
   if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
-    layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
-                                   NULL, NULL, _("Inconsistent PIN code"),
-                                   _("Please try again"), NULL, NULL);
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
+        NULL, NULL, _("Inconsistent PIN code"), _("Please try again"), NULL);
     while (1) {
       key = protectWaitKey(0, 1);
       if (key == KEY_CONFIRM) {
@@ -849,7 +849,7 @@ retry:
   } else {
     if (is_prompt) {
       layoutDialogSwipeCenterAdapter(
-          NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
+          NULL, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
           is_change ? _("PIN code change") : _("PIN code set"),
           _("successfully"), NULL, NULL);
       protectWaitKey(0, 1);
@@ -867,8 +867,8 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
   char *numbers[3] = {"12", "18", "24"};
 
   layoutDialogSwipeCenterAdapter(
-      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-      _("Please select the"), _("number of Mnemonic"), NULL, NULL);
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("Please select the"), _("number of Mnemonic"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
@@ -906,9 +906,9 @@ bool protectPinCheck(void) {
 
   uint32_t fails = config_getPinFails();
   if (fails == 1) {
-    layoutDialogCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
-                              NULL, NULL, _("PIN invalid"),
-                              "You still have 5 times", "to try", NULL);
+    layoutDialogCenterAdapter(
+        &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
+        NULL, NULL, _("PIN invalid"), _("You still have 5 times"), _("to try"));
   } else if (fails > 1 && fails < 5) {
     strcat(desc1, _("Wrong PIN for "));
     uint2str(fails, desc1 + strlen(desc1));
@@ -916,10 +916,11 @@ bool protectPinCheck(void) {
     strcat(desc2, _("you still have "));
     uint2str(5 - fails, desc2 + strlen(desc2));
     strcat(desc2, _("chances"));
-    layoutDialogCenterAdapter(NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
-                              NULL, NULL, desc1, desc2, "to try", NULL);
+    layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL, &bmp_btn_retry,
+                              _("Retry"), NULL, NULL, NULL, NULL, desc1, desc2,
+                              _("to try"));
   } else {
-    layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
     protectWaitKey(timer1s * 1, 0);
     config_wipe();

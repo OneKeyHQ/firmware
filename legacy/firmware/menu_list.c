@@ -22,17 +22,17 @@ void menu_recovery_device(int index) {
     return;
   }
   layoutDialogSwipeCenterAdapter(
-      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-      _("Enter seed phrases to"), _("restore wallet"), NULL, NULL);
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("Enter seed phrases to"), _("restore wallet"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
   }
   recovery_on_device();
   if (config_isInitialized()) {
-    layoutDialogSwipeCenterAdapter(
-        NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
-        _("Wallet Recovery Success"), NULL, NULL, NULL);
+    layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
+                                   _("Done"), NULL, NULL, NULL, NULL,
+                                   _("Wallet Recovery Success"), NULL, NULL);
     protectWaitKey(0, 1);
     layoutHome();
   }
@@ -45,17 +45,17 @@ void menu_reset_device(int index) {
     return;
   }
   layoutDialogSwipeCenterAdapter(
-      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-      _("Follow the prompts"), _("to creat wallet"), NULL, NULL);
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("Follow the prompts"), _("to creat wallet"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
   }
   reset_on_device();
   if (config_isInitialized()) {
-    layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Done"),
-                                   NULL, NULL, NULL, _("Wallet created"),
-                                   _("successfully"), NULL, NULL);
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_ok, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
+        NULL, _("Wallet created successfully"), NULL, NULL);
     protectWaitKey(0, 1);
     layoutHome();
   }
@@ -124,9 +124,10 @@ refresh_menu:
 void menu_erase_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
-  layoutDialogSwipeCenterAdapter(
-      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-      _("Make sure you still have"), _("backup of seed phrases"), NULL, NULL);
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+                                 _("Make sure you still have"),
+                                 _("backup of seed phrases"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
@@ -135,15 +136,15 @@ void menu_erase_device(int index) {
     return;
   }
   layoutDialogSwipeCenterAdapter(
-      &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-      _("All data will be lost."), _("This cannot be undo!"), NULL, NULL);
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("All data will be lost."), _("This cannot be undo!"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
   }
-  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_confirm,
-                                 _("Reset"), NULL, NULL, NULL, NULL,
-                                 _("Are you sure to reset?"), NULL, NULL);
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_confirm, _("Reset"), NULL, NULL, NULL,
+                                 NULL, _("Are you sure to reset?"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
@@ -154,9 +155,9 @@ void menu_erase_device(int index) {
   if (ui_language_bak) {
     ui_language = ui_language_bak;
   }
-  layoutDialogSwipeCenterAdapter(NULL, NULL, &bmp_btn_confirm, _("Confirm"),
-                                 NULL, NULL, NULL, _("Device has been reset"),
-                                 NULL, _("Please reboot"), NULL);
+  layoutDialogSwipeCenterAdapter(
+      &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+      NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
   protectWaitKey(0, 0);
 #if !EMULATOR
   svc_system_reset();

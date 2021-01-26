@@ -282,9 +282,9 @@ refresh_menu:
     strcat(desc, pre_desc);
     strcat(desc, " #");
     uint2str(i + 1, desc + strlen(desc));
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Prev"), &bmp_btn_confirm,
-                                   _("Confirm"), NULL, NULL, NULL, desc,
-                                   words[i], NULL, NULL);
+    layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Prev"),
+                                   &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+                                   NULL, desc, words[i], NULL, NULL);
   } else if (type == 1) {
     memzero(desc, sizeof(desc));
     strcat(desc, " #");
@@ -331,17 +331,17 @@ void writedown_mnemonic(const char *mnemonic) {
   strcat(desc, _("Please check the written"));
   uint2str(words_count, desc + strlen(desc));
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
-    layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
-                                   _("Next"), NULL, NULL, NULL, desc,
-                                   _("seed phrases"), NULL, NULL);
+    layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                   &bmp_btn_forward, _("Next"), NULL, NULL,
+                                   NULL, desc, _("seed phrases"), NULL, NULL);
     key = protectWaitKey(0, 1);
     if (key != KEY_CONFIRM) {
       return;
     }
     if (scroll_mnemonic(NULL, mnemonic, 1)) {
       layoutDialogSwipeCenterAdapter(
-          &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-          _("The seed phrases are the"), _("only way to recover your"),
+          NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL,
+          NULL, _("The seed phrases are the"), _("only way to recover your"),
           _("asset,Keep it safe"), NULL, NULL);
       key = protectWaitKey(0, 1);
       if (key != KEY_CONFIRM) {
@@ -378,9 +378,9 @@ refresh_menu:
   strcat(desc, _("Write down your "));
   uint2str(words_count, desc + strlen(desc));
 
-  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Prev"), &bmp_btn_forward,
-                                 _("Next"), NULL, NULL, NULL, desc,
-                                 _("seed phrases"), NULL, NULL);
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Prev"),
+                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+                                 desc, _("seed phrases"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key == KEY_CANCEL) {
     goto refresh_menu;

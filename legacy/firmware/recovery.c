@@ -235,7 +235,7 @@ static bool recovery_done(void) {
       session_clear(true);
       if (recovery_byself) {
         layoutDialogSwipeCenterAdapter(
-            NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL, NULL,
+            NULL, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL, NULL,
             _("Invalid seed phrases"), _("Please try again"), NULL, NULL);
         protectWaitKey(0, 1);
         return false;
@@ -741,9 +741,9 @@ refresh_menu:
           memzero(desc, sizeof(desc));
           strcat(desc, _("Please check the entered"));
           uint2str(word_count, desc + strlen(desc));
-          layoutDialogCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
-                                    _("Next"), NULL, NULL, NULL, desc,
-                                    _("seed phrases"), NULL, NULL);
+          layoutDialogCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                    &bmp_btn_forward, _("Next"), NULL, NULL,
+                                    NULL, desc, _("seed phrases"), NULL, NULL);
 
           key = protectWaitKey(0, 1);
           if (key == KEY_CANCEL) {
@@ -813,9 +813,9 @@ refresh_menu:
   strcat(desc, _("Please enter your"));
   uint2str(word_count, desc + strlen(desc));
 
-  layoutDialogSwipeCenterAdapter(&bmp_btn_back, _("Back"), &bmp_btn_forward,
-                                 _("Next"), NULL, NULL, NULL, desc,
-                                 _("seed phrases"), NULL, NULL);
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+                                 desc, _("seed phrases"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key == KEY_CANCEL) {
     goto refresh_menu;
