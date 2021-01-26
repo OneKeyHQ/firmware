@@ -733,6 +733,11 @@ refresh_menu:
       value[0] = '1';
       goto refresh_menu;
     case KEY_CANCEL:
+      if (counter) {
+        pin[counter] = 0;
+        counter--;
+        goto refresh_menu;
+      }
       break;
     default:
       break;

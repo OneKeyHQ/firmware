@@ -1858,8 +1858,9 @@ void layoutInputPin(uint8_t pos, const char *text, const char *init_number,
 
   layoutItemsSelect(64 - l / 2 + pos * 10, y, init_number,
                     FONT_STANDARD | FONT_DOUBLE);
+
   if (pos != 0 || cancel_allowed)
-    layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
+    layoutButtonNoAdapter(_("Prev"), &bmp_btn_back);
   if (pos < 5) {
     layoutButtonYesAdapter(_("Confirm"), &bmp_btn_forward);
   } else {
