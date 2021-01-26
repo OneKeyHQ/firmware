@@ -188,7 +188,7 @@ static uint32_t sessionUseCounter = 0;
 #else
 #define autoLockDelayMsDefault (10 * 60 * 1000U)  // 10 minutes
 #endif
-#define sleepDelayMsDefault (2 * 60 * 1000U)  // 2 minutes
+#define sleepDelayMsDefault (5 * 60 * 1000U)  // 5 minutes
 
 static secbool autoLockDelayMsCached = secfalse;
 static secbool sleepDelayMsCached = secfalse;
