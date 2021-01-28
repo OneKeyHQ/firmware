@@ -349,6 +349,7 @@ bool protectPin(bool use_cached) {
   bool ret = config_unlock(pin);
   if (!ret) {
     fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+    protectPinCheck(false);
   }
   return ret;
 }
@@ -382,6 +383,7 @@ bool protectChangePin(bool removal) {
       usbTiny(0);
       if (ret == false) {
         fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+        protectPinCheck(false);
         return false;
       }
     }
@@ -626,6 +628,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
       bool ret = config_unlock(pin);
       if (!ret) {
         fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+        protectPinCheck(false);
         return false;
       }
     } else {
@@ -766,7 +769,7 @@ input:
 
   bool ret = config_unlock(pin);
   if (ret == false) {
-    if (protectPinCheck()) {
+    if (protectPinCheck(true)) {
       goto input;
     } else
       return false;
@@ -793,7 +796,7 @@ bool protectChangePinOnDevice(bool is_prompt) {
 
     bool ret = config_unlock(pin);
     if (ret == false) {
-      if (protectPinCheck()) {
+      if (protectPinCheck(true)) {
         goto input;
       } else
         return false;
@@ -899,7 +902,8 @@ refresh_menu:
   }
 }
 
-bool protectPinCheck(void) {
+bool protectPinCheck(bool retry) {
+#if !EMULATOR
   uint8_t key = KEY_NULL;
   char desc1[64] = "";
   char desc2[64] = "";
@@ -907,24 +911,37 @@ bool protectPinCheck(void) {
   uint32_t fails = config_getPinFails();
   if (fails == 1) {
     layoutDialogCenterAdapter(
-        &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-        NULL, NULL, _("PIN invalid"), _("You still have 5 times"), _("to try"));
-  } else if (fails > 1 && fails < 5) {
+        &bmp_icon_error, NULL, NULL, retry ? &bmp_btn_retry : &bmp_btn_confirm,
+        retry ? _("Retry") : _("Okay"), NULL, NULL, NULL, NULL,
+        _("PIN invalid"), _("You still have 9 times"), _("to try"));
+  } else if (fails > 1 && fails < 10) {
     strcat(desc1, _("Wrong PIN for "));
     uint2str(fails, desc1 + strlen(desc1));
     strcat(desc1, _("times"));
     strcat(desc2, _("you still have "));
-    uint2str(5 - fails, desc2 + strlen(desc2));
+    uint2str(10 - fails, desc2 + strlen(desc2));
     strcat(desc2, _("chances"));
-    layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL, &bmp_btn_retry,
-                              _("Retry"), NULL, NULL, NULL, NULL, desc1, desc2,
-                              _("to try"));
+    layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL,
+                              retry ? &bmp_btn_retry : &bmp_btn_confirm,
+                              retry ? _("Retry") : _("Okay"), NULL, NULL, NULL,
+                              NULL, desc1, desc2, _("to try"));
   } else {
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
     protectWaitKey(timer1s * 1, 0);
+
+    uint8_t ui_language_bak = ui_language;
+
     config_wipe();
-    return false;
+    if (ui_language_bak) {
+      ui_language = ui_language_bak;
+    }
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+        NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
+    protectWaitKey(0, 0);
+
+    svc_system_reset();
   }
   while (1) {
     key = protectWaitKey(0, 1);
@@ -934,4 +951,7 @@ bool protectPinCheck(void) {
       return false;
     }
   }
+
+#endif
+  return false;
 }

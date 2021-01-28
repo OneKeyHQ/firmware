@@ -44,7 +44,7 @@ const char* protectInputPin(const char* text, uint8_t pin_len,
 bool protectPinOnDevice(bool use_cached, bool cancel_allowed);
 bool protectChangePinOnDevice(bool is_prompt);
 bool protectSelectMnemonicNumber(uint32_t* number);
-bool protectPinCheck(void);
+bool protectPinCheck(bool retry);
 extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
 extern bool protectAbortedByTimeout;

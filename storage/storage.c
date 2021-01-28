@@ -999,7 +999,7 @@ static secbool unlock(uint32_t pin, const uint8_t *ext_salt) {
                    NULL);
     return secfalse;
   }
-
+#if EMULATOR
   // Sleep for 2^ctr - 1 seconds before checking the PIN.
   uint32_t wait = (1 << ctr) - 1;
   ui_total += wait;
@@ -1019,6 +1019,7 @@ static secbool unlock(uint32_t pin, const uint8_t *ext_salt) {
       hal_delay(100);
     }
   }
+#endif
 
   uint8_t kek[SHA256_DIGEST_LENGTH] = {0};
   uint8_t keiv[SHA256_DIGEST_LENGTH] = {0};
