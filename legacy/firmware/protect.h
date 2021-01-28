@@ -42,7 +42,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode);
 const char* protectInputPin(const char* text, uint8_t pin_len,
                             bool cancel_allowed);
 bool protectPinOnDevice(bool use_cached, bool cancel_allowed);
-bool protectChangePinOnDevice(bool is_prompt);
+bool protectChangePinOnDevice(bool is_prompt, bool set);
 bool protectSelectMnemonicNumber(uint32_t* number);
 bool protectPinCheck(bool retry);
 extern bool protectAbortedByCancel;

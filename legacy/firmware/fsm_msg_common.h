@@ -712,6 +712,14 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_cancel, _("Cancel"), &bmp_btn_confirm, _("Confirm"), NULL,
+      NULL, NULL, NULL, _("Are you sure to update?"), NULL, NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
   CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
   usbPoll();  // send response before reboot

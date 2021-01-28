@@ -41,8 +41,13 @@ static uint8_t int_entropy[32];
 static bool awaiting_entropy = false;
 static bool skip_backup = false;
 static bool no_backup = false;
-static bool reset_byself = false;
 static uint32_t words_count;
+
+#define goto_check(label)       \
+  if (layoutLast == layoutHome) \
+    return false;               \
+  else                          \
+    goto label;
 
 void reset_init(bool display_random, uint32_t _strength,
                 bool passphrase_protection, bool pin_protection,
@@ -155,10 +160,7 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
       }
       layoutHome();
     } else {
-      if (!reset_byself)
-        reset_backup(false, mnemonic);
-      else
-        writedown_mnemonic(mnemonic);
+      reset_backup(false, mnemonic);
     }
   } else {
     if (skip_backup || no_backup) {
@@ -252,6 +254,130 @@ void reset_backup(bool separated, const char *mnemonic) {
   layoutHome();
 }
 
+void random_order(uint32_t *str, size_t len) {
+  for (int i = len - 1; i >= 1; i--) {
+    int j = random_uniform(i + 1);
+    uint32_t t = str[j];
+    str[j] = str[i];
+    str[i] = t;
+  }
+}
+
+bool verify_mnemonic(const char *mnemonic) {
+  uint8_t key = KEY_NULL;
+  char desc[64] = "";
+  char words[24][12];
+  uint32_t words_order[3];
+  uint32_t i = 0, word_count = 0;
+  uint32_t index = 0, rand = 0, selected = 0;
+
+  memzero(words, sizeof(words));
+
+  while (mnemonic[i] != 0) {
+    // copy current_word
+    int j = 0;
+    while (mnemonic[i] != ' ' && mnemonic[i] != 0 &&
+           j + 1 < (int)sizeof(words[word_count])) {
+      words[word_count][j] = mnemonic[i];
+      i++;
+      j++;
+    }
+    current_word[j] = 0;
+    word_count++;
+    if (mnemonic[i] != 0) {
+      i++;
+    }
+  }
+
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, NULL, _("Select correct word below"), NULL, NULL);
+
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
+
+refresh_menu:
+  i = 0;
+  memzero(desc, sizeof(desc));
+  strcat(desc, _("Select your"));
+  strcat(desc, " #");
+  rand = random_uniform(word_count);
+  uint2str(rand + 1, desc + strlen(desc));
+  strcat(desc, " ");
+  strcat(desc, _("mnemonic"));
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+                                 NULL, desc, NULL, NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
+  selected = mnemonic_find_word(words[rand]);
+  words_order[0] = selected;
+  do {
+    words_order[1] = random_uniform(BIP39_WORDS);
+  } while (words_order[1] == rand);
+
+  do {
+    words_order[2] = random_uniform(BIP39_WORDS);
+  } while (words_order[2] == rand || words_order[2] == words_order[1]);
+
+  random_order(words_order, 3);
+
+select_word:
+  layoutItemsSelectAdapter(
+      &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),
+      i + 1, 3, NULL, NULL, mnemonic_get_word(words_order[i]),
+      i > 0 ? mnemonic_get_word(words_order[i - 1]) : NULL,
+      i < 2 ? mnemonic_get_word(words_order[i + 1]) : NULL);
+
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (i > 0) i--;
+      goto select_word;
+    case KEY_CANCEL:
+      goto select_word;
+    case KEY_DOWN:
+      if (i < 2) i++;
+      goto select_word;
+    case KEY_CONFIRM:
+      if (words_order[i] != selected) {
+        layoutDialogSwipeCenterAdapter(
+            &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
+            NULL, NULL, _("Wrong mnemonic"), NULL, NULL);
+
+        key = protectWaitKey(0, 1);
+        if (key != KEY_CONFIRM) {
+          return false;
+        }
+        goto refresh_menu;
+      } else {
+        index++;
+        if (index == 3)
+          break;
+        else
+          goto refresh_menu;
+      }
+    default:
+      return false;
+  }
+
+  layoutDialogSwipeCenterAdapter(&bmp_icon_ok, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+                                 NULL, _("Mnemonic verified pass"), NULL, NULL);
+
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
+
+  memzero(words, sizeof(words));
+  return true;
+}
+
 bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type) {
   uint8_t key = KEY_NULL;
   char desc[64] = "";
@@ -312,7 +438,7 @@ refresh_menu:
       goto refresh_menu;
     case KEY_CONFIRM:
       if (i == word_count - 1)
-        break;
+        return true;
       else {
         i++;
         goto refresh_menu;
@@ -322,44 +448,65 @@ refresh_menu:
   }
 
   memzero(words, sizeof(words));
-  return true;
+  return false;
 }
 
-void writedown_mnemonic(const char *mnemonic) {
+bool writedown_mnemonic(const char *mnemonic) {
   uint8_t key = KEY_NULL;
   char desc[32] = "";
-  strcat(desc, _("Please check the written"));
+  strcat(desc, _("Check the written"));
   uint2str(words_count, desc + strlen(desc));
+write_mnemonic:
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
     layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                    &bmp_btn_forward, _("Next"), NULL, NULL,
                                    NULL, desc, _("seed phrases"), NULL, NULL);
     key = protectWaitKey(0, 1);
     if (key != KEY_CONFIRM) {
-      return;
+      return false;
     }
-    if (scroll_mnemonic(NULL, mnemonic, 1)) {
-      layoutDialogSwipeCenterAdapter(
-          NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL,
-          NULL, _("The seed phrases are the"), _("only way to recover your"),
-          _("asset,Keep it safe"), NULL, NULL);
-      key = protectWaitKey(0, 1);
-      if (key != KEY_CONFIRM) {
-        return;
-      }
-      if (protectChangePinOnDevice(false)) {
-        config_setMnemonic(mnemonic);
-      }
+  check_mnemonic:
+    if (!scroll_mnemonic(NULL, mnemonic, 1)) {
+      goto_check(write_mnemonic);
     }
+    if (!verify_mnemonic(mnemonic)) {
+      goto_check(check_mnemonic);
+    }
+    layoutDialogSwipeCenterAdapter(
+        NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+        _("The seed phrases are the"), _("only way to recover your"),
+        _("asset,Keep it safe"), NULL, NULL);
+    key = protectWaitKey(0, 1);
+    if (key != KEY_CONFIRM) {
+      return false;
+    }
+    if (!protectChangePinOnDevice(false, true)) {
+      goto_check(check_mnemonic);
+    }
+    config_setMnemonic(mnemonic);
+    return true;
   }
+  return false;
 }
 
 bool reset_on_device(void) {
   char desc[64] = "";
   uint8_t key = KEY_NULL;
+
+prompt_creat:
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("Follow the prompts"), _("to creat wallet"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
+
+select_mnemonic_count:
   words_count = 0;
-refresh_menu:
-  if (!protectSelectMnemonicNumber(&words_count)) return false;
+  if (!protectSelectMnemonicNumber(&words_count)) {
+    goto_check(prompt_creat);
+  }
   switch (words_count) {
     case 12:
       strength = 128;
@@ -378,25 +525,29 @@ refresh_menu:
   strcat(desc, _("Write down your "));
   uint2str(words_count, desc + strlen(desc));
 
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Prev"),
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
                                  desc, _("seed phrases"), NULL, NULL);
   key = protectWaitKey(0, 1);
-  if (key == KEY_CANCEL) {
-    goto refresh_menu;
-  } else if (key == KEY_NULL) {
-    return false;
+  if (key != KEY_CONFIRM) {
+    goto_check(select_mnemonic_count);
   }
 
-  skip_backup = false;
-  no_backup = false;
-  awaiting_entropy = true;
-  reset_byself = true;
-
   random_buffer(int_entropy, 32);
-  reset_entropy(0, 0);
 
-  reset_byself = false;
+  SHA256_CTX ctx = {0};
+  sha256_Init(&ctx);
+  sha256_Update(&ctx, int_entropy, 32);
+  sha256_Final(&ctx, int_entropy);
+  const char *mnemonic = mnemonic_from_data(int_entropy, strength / 8);
+  memzero(int_entropy, 32);
+
+  if (!writedown_mnemonic(mnemonic)) {
+    goto_check(select_mnemonic_count);
+  }
+
+  mnemonic_clear();
+
   return true;
 }
 

@@ -121,6 +121,12 @@ static bool recovery_byself = false;
 #define TABLE1(x) MASK_IDX(word_table1[x])
 #define TABLE2(x) MASK_IDX(word_table2[x])
 
+#define goto_check(label)       \
+  if (layoutLast == layoutHome) \
+    return false;               \
+  else                          \
+    goto label;
+
 /* Helper function to format a two digit number.
  * Parameter dest is buffer containing the string. It should already
  * start with "##th".  The number is written in place.
@@ -183,11 +189,6 @@ static bool recovery_done(void) {
   if (!enforce_wordlist || mnemonic_check(new_mnemonic)) {
     // New mnemonic is valid.
     if (!dry_run) {
-      if (recovery_byself) {
-        if (!protectChangePinOnDevice(false)) {
-          return false;
-        }
-      }
       // Update mnemonic on config.
       if (config_setMnemonic(new_mnemonic)) {
         if (!enforce_wordlist) {
@@ -197,9 +198,8 @@ static bool recovery_done(void) {
         if (!recovery_byself) {
           fsm_sendSuccess(_("Device recovered"));
         } else {
-          success = true;
         }
-
+        success = true;
       } else {
         fsm_sendFailure(FailureType_Failure_ProcessError,
                         _("Failed to store mnemonic"));
@@ -233,13 +233,6 @@ static bool recovery_done(void) {
     memzero(new_mnemonic, sizeof(new_mnemonic));
     if (!dry_run) {
       session_clear(true);
-      if (recovery_byself) {
-        layoutDialogSwipeCenterAdapter(
-            NULL, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL, NULL,
-            _("Invalid seed phrases"), _("Please try again"), NULL, NULL);
-        protectWaitKey(0, 1);
-        return false;
-      }
     } else {
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                           _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
@@ -682,8 +675,17 @@ refresh_menu:
       if (index < word_count - 1) {
         index++;
         goto refresh_menu;
-      } else
-        return true;
+      } else {
+        char new_mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+
+        strlcpy(new_mnemonic, words[0], sizeof(new_mnemonic));
+        for (uint32_t i = 1; i < word_count; i++) {
+          strlcat(new_mnemonic, " ", sizeof(new_mnemonic));
+          strlcat(new_mnemonic, words[i], sizeof(new_mnemonic));
+        }
+        if (!mnemonic_check(new_mnemonic)) return false;
+      }
+      return true;
     case KEY_CANCEL:
       goto refresh_menu;
     default:
@@ -738,28 +740,7 @@ refresh_menu:
             mnemonic_word_index_with_prefix(words[word_index], prefix_len);
         select_complete_word(NULL, candidate_location, letter_count);
         if (word_index == word_count) {
-          memzero(desc, sizeof(desc));
-          strcat(desc, _("Please check the entered"));
-          uint2str(word_count, desc + strlen(desc));
-          layoutDialogCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                    &bmp_btn_forward, _("Next"), NULL, NULL,
-                                    NULL, desc, _("seed phrases"), NULL, NULL);
-
-          key = protectWaitKey(0, 1);
-          if (key == KEY_CANCEL) {
-            word_index--;
-            prefix_len = 0;
-            index = 0;
-            memzero(words[word_index], sizeof(words[word_index]));
-            goto refresh_menu;
-          } else if (key == KEY_NULL) {
-            return false;
-          }
-          if (recovery_check_words()) {
-            return recovery_done();
-          } else {
-            return false;
-          }
+          return true;
         } else {  // next word
           prefix_len = 0;
           index = 0;
@@ -787,27 +768,23 @@ refresh_menu:
   return false;
 }
 
-static bool recovery_words_on_device(uint32_t count) {
-  bool status = false;
-  word_count = count;
-  word_index = 0;
-  word_pincode = 0;
-  enforce_wordlist = true;
-  dry_run = false;
-  recovery_byself = true;
-
-  status = input_words();
-
-  recovery_byself = false;
-  return status;
-}
-
 bool recovery_on_device(void) {
   char desc[64] = "";
   uint8_t key = KEY_NULL;
 
-refresh_menu:
-  if (!protectSelectMnemonicNumber(&word_count)) return false;
+prompt_recovery:
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("Enter seed phrases to"), _("restore wallet"), NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
+
+select_mnemonic_count:
+  if (!protectSelectMnemonicNumber(&word_count)) {
+    goto_check(prompt_recovery);
+  }
 
   memzero(desc, sizeof(desc));
   strcat(desc, _("Please enter your"));
@@ -817,13 +794,48 @@ refresh_menu:
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
                                  desc, _("seed phrases"), NULL, NULL);
   key = protectWaitKey(0, 1);
-  if (key == KEY_CANCEL) {
-    goto refresh_menu;
-  } else if (key == KEY_NULL) {
-    return false;
+  if (key != KEY_CONFIRM) {
+    goto_check(select_mnemonic_count);
   }
 
-  return recovery_words_on_device(word_count);
+input_word:
+  word_index = 0;
+  recovery_byself = true;
+  enforce_wordlist = true;
+  dry_run = false;
+
+  if (!input_words()) {
+    goto_check(select_mnemonic_count);
+  }
+
+  memzero(desc, sizeof(desc));
+  strcat(desc, _("Check the entered"));
+  uint2str(word_count, desc + strlen(desc));
+  layoutDialogCenterAdapter(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
+                            _("Next"), NULL, NULL, NULL, desc,
+                            _("seed phrases"), NULL, NULL);
+
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    goto_check(input_word);
+  }
+
+check_word:
+  if (!recovery_check_words()) {
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
+        NULL, NULL, _("Invalid seed phrases"), _("Please try again"), NULL);
+    protectWaitKey(0, 1);
+    goto_check(prompt_recovery);
+  }
+  if (!protectChangePinOnDevice(false, true)) {
+    goto_check(check_word);
+  }
+
+  recovery_done();
+
+  recovery_byself = false;
+  return true;
 }
 
 #if DEBUG_LINK

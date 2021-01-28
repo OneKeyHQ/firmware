@@ -15,11 +15,17 @@ struct menu_item {
   char *((*para)(void));
 };
 
+enum {
+  BTN_TYPE_YES = 0,
+  BTN_TYPE_NEXT,
+};
+
 struct menu {
   int start;    // cursor start position
   int current;  // cursor current position
   int counts;   // items count
   char *title;
+  int button_type;  // yes button text and icon
   struct menu_item *items;
   struct menu *previous;
 };

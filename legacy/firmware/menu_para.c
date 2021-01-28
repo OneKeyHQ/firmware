@@ -34,7 +34,7 @@ static char* format_time(uint32_t ms) {
 }
 
 char* menu_para_ble_state(void) {
-  return ble_get_switch() ? _("On") : _("Off");
+  return ble_get_switch() ? _(" On") : _(" Off");
 }
 
 char* menu_para_language(void) {

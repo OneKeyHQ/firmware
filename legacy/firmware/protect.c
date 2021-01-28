@@ -44,6 +44,12 @@ bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
 bool protectAbortedByTimeout = false;
 
+#define goto_check(label)       \
+  if (layoutLast == layoutHome) \
+    return false;               \
+  else                          \
+    goto label;
+
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
   bool result = false;
@@ -364,12 +370,7 @@ bool protectChangePin(bool removal) {
   if (config_hasPin()) {
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
                      _("PIN REF Table"), &newpin);
-    if (g_bIsBixinAPP) {
-      need_new_pin = false;
-      if (newpin == NULL) {
-        newpin = protectInputPin(_("Please enter new PIN"), 6, true);
-      }
-    }
+
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -387,8 +388,13 @@ bool protectChangePin(bool removal) {
         return false;
       }
     }
-
     strlcpy(old_pin, pin, sizeof(old_pin));
+    if (g_bIsBixinAPP) {
+      need_new_pin = false;
+      if (newpin == NULL) {
+        newpin = protectInputPin(_("Please enter new PIN"), 6, true);
+      }
+    }
   }
 
   if (!removal) {
@@ -678,6 +684,8 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
 
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
+
+  protectAbortedByInitialize = false;
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
@@ -700,8 +708,11 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     }
   }
   usbTiny(0);
-  if (protectAbortedByInitialize)
+  if (protectAbortedByInitialize) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+  }
+
   return key;
 }
 
@@ -760,7 +771,6 @@ input:
     // input_pin = true;
     pin = protectInputPin(_("Please enter currnet PIN"), 6, cancel_allowed);
     // input_pin = false;
-
     if (!pin) {
       return false;
     } else if (pin == PIN_CANCELED_BY_BUTTON)
@@ -777,13 +787,14 @@ input:
   return ret;
 }
 
-bool protectChangePinOnDevice(bool is_prompt) {
+bool protectChangePinOnDevice(bool is_prompt, bool set) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
   bool is_change = false;
   uint8_t key;
 
+pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
@@ -818,6 +829,9 @@ retry:
     return false;
   } else if (pin == NULL || pin[0] == '\0') {
     memzero(old_pin, sizeof(old_pin));
+    if (set) {
+      goto_check(pin_set);
+    }
     return false;
   }
   strlcpy(new_pin, pin, sizeof(new_pin));
@@ -826,6 +840,9 @@ retry:
   if (pin == NULL) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
+    if (set) {
+      goto_check(retry);
+    }
     return false;
   } else if (pin == PIN_CANCELED_BY_BUTTON)
     return false;
@@ -852,11 +869,10 @@ retry:
   } else {
     if (is_prompt) {
       layoutDialogSwipeCenterAdapter(
-          NULL, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL, NULL,
-          is_change ? _("PIN code change") : _("PIN code set"),
-          _("successfully"), NULL, NULL);
+          &bmp_icon_ok, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
+          NULL, NULL, is_change ? _("PIN code change") : _("PIN code set"),
+          _("successfully"), NULL);
       protectWaitKey(0, 1);
-
       layoutHome();
     }
   }

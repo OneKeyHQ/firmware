@@ -145,10 +145,11 @@ void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
 void layoutDeviceParameters(int num);
 void layoutEnterSleep(void);
 
-#define layoutMenuItems(index, count, title, current, previous, next)     \
-  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, &bmp_btn_back,     \
-                           &bmp_btn_confirm, _("Back"), _("Okay"), index, \
-                           count, title, NULL, current, previous, next)
+#define layoutMenuItems(btn_yes, bmp_yes, index, count, title, current,        \
+                        previous, next)                                        \
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, &bmp_btn_back, bmp_yes, \
+                           _("Back"), btn_yes, index, count, title, NULL,      \
+                           current, previous, next)
 
 uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);
 
