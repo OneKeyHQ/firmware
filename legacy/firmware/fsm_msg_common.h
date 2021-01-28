@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "menu_list.h"
 #include "mi2c.h"
 #include "se_chip.h"
 #include "storage.h"
@@ -286,6 +287,10 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
   // number change
   i2c_set_wait(false);
   fsm_sendSuccess(_("Device wiped"));
+#if !EMULATOR
+  usbPoll();  // send response immediately
+  menu_language_init();
+#endif
   layoutHome();
 }
 
