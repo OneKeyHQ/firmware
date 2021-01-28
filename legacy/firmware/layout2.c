@@ -341,15 +341,15 @@ uint8_t refreshBleIcon(bool force_flag) {
         oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_blecon);
         layout_refresh = true;
       }
-    } else if (force_flag || false == ble_icon_status_old) {
+    } else if (force_flag || true == ble_icon_status_old) {
       if (ble_conn_status_old) {
         ble_conn_status_old = false;
         ret = 1;
       }
-      ble_icon_status_old = true;
       oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_ble);
       layout_refresh = true;
     }
+    ble_icon_status_old = true;
   } else if (true == ble_icon_status_old) {
     if (ble_conn_status_old) {
       ble_conn_status_old = false;

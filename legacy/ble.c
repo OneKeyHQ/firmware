@@ -59,7 +59,6 @@ void change_ble_sta(uint8_t mode) {
   if (ble_switch != mode) {
     ble_cmd_packet(cmd, 0x03);
     ble_switch = mode;
-    layoutRefreshSet(true);
   }
 }
 
@@ -86,6 +85,7 @@ void ble_uart_poll(void) {
   uint8_t passkey[7] = {0};
   static uint8_t index = 0;
   volatile uint8_t xor ;
+  static bool need_refresh = false;
   if (ble_read_byte(buf + index) == false) {
     return;
   }
@@ -139,12 +139,16 @@ void ble_uart_poll(void) {
           ble_connect = true;
         else
           ble_connect = false;
-        layoutRefreshSet(true);
+        if (need_refresh) {
+          need_refresh = false;
+          layoutRefreshSet(true);
+        }
         break;
       case BLE_CMD_PASSKEY:
         if (ble_usart_msg.cmd_len == 0x06) {
           memcpy(passkey, ble_usart_msg.cmd_vale, 6);
           layoutBlePasskey(passkey);
+          need_refresh = true;
         }
         break;
       case BLE_CMD_BT_NAME:
