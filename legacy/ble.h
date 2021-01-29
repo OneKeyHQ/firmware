@@ -8,6 +8,8 @@
 #define BLE_NAME_LEN 0x12
 #define BLE_ADV_OFF 0x00
 #define BLE_ADV_ON 0x01
+#define BLE_ADV_ON_TEMP 0x05
+#define BLE_ADV_OFF_TEMP 0x06
 
 #define BUTTON_PRESS_BLE_ON 0x01
 #define BUTTON_PRESS_BLE_OFF 0x02

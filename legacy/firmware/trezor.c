@@ -111,7 +111,7 @@ void enter_sleep(void) {
   }
   oledBufferLoad(oled_prev);
   if (ble_state_bak) {
-    change_ble_sta(false);
+    change_ble_sta(BLE_ADV_OFF_TEMP);
   }
   oledClear();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, 30, _("Sleep Mode"),
@@ -130,7 +130,7 @@ void enter_sleep(void) {
     }
   }
   if (ble_state_bak) {
-    change_ble_sta(true);
+    change_ble_sta(BLE_ADV_ON_TEMP);
   }
   usbInit();
   oledBufferRestore(oled_prev);
