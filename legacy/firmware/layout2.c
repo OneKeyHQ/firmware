@@ -1840,21 +1840,36 @@ void layoutProgressAdapter(const char *desc, int permil) {
   oledRefresh();
 }
 
-void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {
+void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
+                          uint8_t font) {
   int l = 0;
   int y0 = font & FONT_DOUBLE ? 8 : 0;
   oledBox(x, y - 8, x + 8, y + 16 + y0, false);
   oledDrawBitmap(x, y - 8, &bmp_btn_up);
   l = oledStringWidth(text, font);
-  oledDrawStringAdapter(x + 4 - l / 2, y - 1, text, font);
+  if (bmp) {
+    oledDrawBitmap(x + 1 - l / 2, y + 4, bmp);
+  } else {
+    oledDrawStringAdapter(x + 4 - l / 2, y - 1, text, font);
+  }
+
   oledDrawBitmap(x, y + 8 + y0, &bmp_btn_down);
   oledRefresh();
 }
 
-void layoutInputPin(uint8_t pos, const char *text, const char *init_number,
+void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {
+  _layout_iterm_select(x, y, NULL, text, font);
+}
+
+void layoutBmpSelect(int x, int y, const BITMAP *bmp) {
+  _layout_iterm_select(x, y, bmp, NULL, FONT_STANDARD | FONT_DOUBLE);
+}
+
+void layoutInputPin(uint8_t pos, const char *text, int index,
                     bool cancel_allowed) {
   int l, y = 9;
-  char pin_show[] = "_  _  _  _  _  _";
+  char pin_show[] = "_  _  _  _  _  _  _  _  _";
+  char table[][2] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", " "};
 
   for (uint8_t i = 0; i < pos; i++) {
     pin_show[i * 3] = '*';
@@ -1865,12 +1880,16 @@ void layoutInputPin(uint8_t pos, const char *text, const char *init_number,
   l = oledStringWidthAdapter(pin_show, FONT_STANDARD);
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, pin_show, FONT_STANDARD);
 
-  layoutItemsSelect(64 - l / 2 + pos * 10, y, init_number,
-                    FONT_STANDARD | FONT_DOUBLE);
+  if (index > 0 && index < 10) {
+    layoutItemsSelect(64 - l / 2 + pos * 10, y, table[index],
+                      FONT_STANDARD | FONT_DOUBLE);
+  } else {
+    layoutBmpSelect(64 - l / 2 + pos * 10, y, &bmp_btn_confirm);
+  }
 
   if (pos != 0 || cancel_allowed)
     layoutButtonNoAdapter(_("Prev"), &bmp_btn_back);
-  if (pos < 5) {
+  if (pos < MAX_PIN_LEN - 1) {
     layoutButtonYesAdapter(_("Confirm"), &bmp_btn_forward);
   } else {
     layoutButtonYesAdapter(_("Done"), &bmp_btn_confirm);

@@ -129,6 +129,7 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                                     const char *line5, const char *line6);
 
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
+void layoutBmpSelect(int x, int y, const BITMAP *bmp);
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
                               const BITMAP *bmp_no, const BITMAP *bmp_yes,
                               const char *btnNo, const char *btnYes,
@@ -136,7 +137,7 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
                               const char *prefex, const char *current,
                               const char *previous, const char *next);
 
-void layoutInputPin(uint8_t pos, const char *text, const char *init_number,
+void layoutInputPin(uint8_t pos, const char *text, int index,
                     bool cancel_allowed);
 
 void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,

@@ -254,7 +254,7 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
       else
         return 0;
     } else if (msg_tiny_id == MessageType_MessageType_BixinPinInputOnDevice) {
-      return protectInputPin(text, 6, true);
+      return protectInputPin(text, MAX_PIN_LEN, true);
     }
     if (button.NoUp) {
       timer_out_set(timer_out_oper, 0);
@@ -392,7 +392,7 @@ bool protectChangePin(bool removal) {
     if (g_bIsBixinAPP) {
       need_new_pin = false;
       if (newpin == NULL) {
-        newpin = protectInputPin(_("Please enter new PIN"), 6, true);
+        newpin = protectInputPin(_("Please enter new PIN"), MAX_PIN_LEN, true);
       }
     }
   }
@@ -720,36 +720,52 @@ const char *protectInputPin(const char *text, uint8_t pin_len,
                             bool cancel_allowed) {
   uint8_t key = KEY_NULL;
   uint8_t counter = 0;
-  char value[2] = "1";
+  int index = 1;
   static char pin[10] = "";
 
   memzero(pin, sizeof(pin));
 refresh_menu:
-  layoutInputPin(counter, text, value, cancel_allowed);
+  layoutInputPin(counter, text, index, cancel_allowed);
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
-      if (value[0] > '1')
-        value[0]--;
-      else
-        value[0] = '9';
+      if (index > 1)
+        index--;
+      else {
+        if (counter)
+          index = 10;
+        else
+          index = 9;
+      }
       goto refresh_menu;
     case KEY_DOWN:
-      if (value[0] < '9')
-        value[0]++;
-      else
-        value[0] = '1';
+      if (counter) {
+        if (index < 10)
+          index++;
+        else
+          index = 1;
+      } else {
+        if (index < 9)
+          index++;
+        else
+          index = 1;
+      }
       goto refresh_menu;
     case KEY_CONFIRM:
       (void)pin;
-      pin[counter++] = value[0];
-      if (counter == pin_len) return pin;
-      value[0] = '1';
-      goto refresh_menu;
+      if (index == 10) {
+        return pin;
+      } else {
+        pin[counter++] = index + '0';
+        if (counter == pin_len) return pin;
+        index = 1;
+        goto refresh_menu;
+      }
     case KEY_CANCEL:
       if (counter) {
         pin[counter] = 0;
         counter--;
+        index = 1;
         goto refresh_menu;
       }
       break;
@@ -769,7 +785,8 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
-    pin = protectInputPin(_("Please enter currnet PIN"), 6, cancel_allowed);
+    pin = protectInputPin(_("Please enter currnet PIN"), MAX_PIN_LEN,
+                          cancel_allowed);
     // input_pin = false;
     if (!pin) {
       return false;
@@ -798,7 +815,7 @@ pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
-    pin = protectInputPin(_("Please enter currnet PIN"), 6, true);
+    pin = protectInputPin(_("Please enter currnet PIN"), MAX_PIN_LEN, true);
 
     if (pin == NULL) {
       return false;
@@ -824,7 +841,7 @@ pin_set:
     }
   }
 retry:
-  pin = protectInputPin(_("Please enter new PIN"), 6, true);
+  pin = protectInputPin(_("Please enter new PIN"), MAX_PIN_LEN, true);
   if (pin == PIN_CANCELED_BY_BUTTON) {
     return false;
   } else if (pin == NULL || pin[0] == '\0') {
@@ -836,7 +853,7 @@ retry:
   }
   strlcpy(new_pin, pin, sizeof(new_pin));
 
-  pin = protectInputPin(_("Please re-enter new PIN"), 6, true);
+  pin = protectInputPin(_("Please re-enter new PIN"), MAX_PIN_LEN, true);
   if (pin == NULL) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
