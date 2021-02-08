@@ -33,6 +33,7 @@
 #include "oled.h"
 #include "pinmatrix.h"
 #include "prompt.h"
+#include "rng.h"
 #include "si2c.h"
 #include "sys.h"
 #include "usb.h"
@@ -720,10 +721,14 @@ const char *protectInputPin(const char *text, uint8_t pin_len,
                             bool cancel_allowed) {
   uint8_t key = KEY_NULL;
   uint8_t counter = 0;
-  int index = 1;
+  int index = 0;
   static char pin[10] = "";
 
   memzero(pin, sizeof(pin));
+  do {
+    index = random_uniform(10);
+  } while (index == 0);
+
 refresh_menu:
   layoutInputPin(counter, text, index, cancel_allowed);
   key = protectWaitKey(0, 0);
@@ -758,14 +763,19 @@ refresh_menu:
       } else {
         pin[counter++] = index + '0';
         if (counter == pin_len) return pin;
-        index = 1;
+        do {
+          index = random_uniform(10);
+        } while (index == 0);
+
         goto refresh_menu;
       }
     case KEY_CANCEL:
       if (counter) {
-        pin[counter] = 0;
         counter--;
-        index = 1;
+        pin[counter] = 0;
+        do {
+          index = random_uniform(10);
+        } while (index == 0);
         goto refresh_menu;
       }
       break;
