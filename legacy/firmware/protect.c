@@ -795,7 +795,7 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
-    pin = protectInputPin(_("Please enter currnet PIN"), MAX_PIN_LEN,
+    pin = protectInputPin(_("Please enter current PIN"), MAX_PIN_LEN,
                           cancel_allowed);
     // input_pin = false;
     if (!pin) {
@@ -825,7 +825,7 @@ pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
-    pin = protectInputPin(_("Please enter currnet PIN"), MAX_PIN_LEN, true);
+    pin = protectInputPin(_("Please enter current PIN"), MAX_PIN_LEN, true);
 
     if (pin == NULL) {
       return false;

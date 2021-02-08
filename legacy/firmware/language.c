@@ -475,7 +475,7 @@ const char *languages[][2] = {
     // protect.c protect.c
     {"Please confirm PIN", "请确认PIN码"},
     // protect.c
-    {"Please enter currnet PIN", "请输入当前PIN码"},
+    {"Please enter current PIN", "请输入当前PIN码"},
     // protect.c
     {"Please enter new PIN", "请输入新PIN码"},
     // recovery.c
