@@ -269,7 +269,8 @@ bool verify_mnemonic(const char *mnemonic) {
   char words[24][12];
   uint32_t words_order[3];
   uint32_t i = 0, word_count = 0;
-  uint32_t index = 0, rand = 0, selected = 0;
+  uint32_t index = 0, selected = 0;
+  uint32_t rand_list[3] = {0};
 
   memzero(words, sizeof(words));
 
@@ -298,13 +299,21 @@ bool verify_mnemonic(const char *mnemonic) {
     return false;
   }
 
+  rand_list[0] = random_uniform(word_count);
+  do {
+    rand_list[1] = random_uniform(word_count);
+  } while (rand_list[1] == rand_list[0]);
+
+  do {
+    rand_list[2] = random_uniform(word_count);
+  } while (rand_list[2] == rand_list[0] || rand_list[2] == rand_list[1]);
+
 refresh_menu:
   i = 0;
   memzero(desc, sizeof(desc));
   strcat(desc, _("Select your"));
   strcat(desc, " #");
-  rand = random_uniform(word_count);
-  uint2str(rand + 1, desc + strlen(desc));
+  uint2str(rand_list[index] + 1, desc + strlen(desc));
   strcat(desc, " ");
   strcat(desc, _("mnemonic"));
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
@@ -314,15 +323,15 @@ refresh_menu:
   if (key != KEY_CONFIRM) {
     return false;
   }
-  selected = mnemonic_find_word(words[rand]);
+  selected = mnemonic_find_word(words[rand_list[index]]);
   words_order[0] = selected;
   do {
     words_order[1] = random_uniform(BIP39_WORDS);
-  } while (words_order[1] == rand);
+  } while (words_order[1] == selected);
 
   do {
     words_order[2] = random_uniform(BIP39_WORDS);
-  } while (words_order[2] == rand || words_order[2] == words_order[1]);
+  } while (words_order[2] == selected || words_order[2] == words_order[1]);
 
   random_order(words_order, 3);
 
