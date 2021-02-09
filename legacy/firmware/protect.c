@@ -255,6 +255,8 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
       else
         return 0;
     } else if (msg_tiny_id == MessageType_MessageType_BixinPinInputOnDevice) {
+      msg_tiny_id = 0xFFFF;
+      usbTiny(0);
       return protectInputPin(text, MAX_PIN_LEN, true);
     }
     if (button.NoUp) {
