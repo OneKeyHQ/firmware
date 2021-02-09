@@ -505,6 +505,9 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection,
   if (_word_count != 12 && _word_count != 18 && _word_count != 24) return;
 
   word_count = _word_count;
+#if !EMULATOR
+  _enforce_wordlist = true;
+#endif
   enforce_wordlist = _enforce_wordlist;
   dry_run = _dry_run;
 
