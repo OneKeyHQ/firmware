@@ -575,7 +575,7 @@ static void _layout_home(bool update_menu) {
         }
       }
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
-      if (session_isUnlocked()) {
+      if (session_isUnlocked() || !config_hasPin()) {
         oledDrawStringCenterAdapter(
             OLED_WIDTH / 2, 42, _("Press any key to continue"), FONT_STANDARD);
       } else {
@@ -2095,16 +2095,21 @@ refresh_menu:
 void layoutEnterSleep(void) {
 #if !EMULATOR
   static uint32_t system_millis_logo_refresh = 0;
-  // 1000 ms refresh
-  if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
-    layoutStatusLogoEx(true, false);
-    system_millis_logo_refresh = timer_ms();
+
+  if (config_getSleepDelayMs() > 0) {
+    if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
+      timer_sleep_start_reset();
+      enter_sleep();
+    }
   }
-  if (config_getSleepDelayMs() == 0) return;
-  if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
-    timer_sleep_start_reset();
-    enter_sleep();
+  if (layoutLast != layoutScreensaver) {
+    // 1000 ms refresh
+    if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
+      layoutStatusLogoEx(true, false);
+      system_millis_logo_refresh = timer_ms();
+    }
   }
+
 #else
   if ((timer_ms() - system_millis_lock_start) >= config_getAutoLockDelayMs()) {
     config_lockDevice();
