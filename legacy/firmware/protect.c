@@ -45,6 +45,8 @@ bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
 bool protectAbortedByTimeout = false;
 
+static uint8_t device_sleep_state = SLEEP_NONE;
+
 #define goto_check(label)       \
   if (layoutLast == layoutHome) \
     return false;               \
@@ -703,15 +705,20 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     }
     key = keyScan();
     if (key != KEY_NULL) {
+      if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_BUTTON;
       if (mode == 0) {
         break;
       } else {
         if (key == KEY_CONFIRM || key == KEY_CANCEL) break;
       }
     }
+    if (device_sleep_state == SLEEP_REENTER) {
+      break;
+    }
   }
   usbTiny(0);
   if (protectAbortedByInitialize) {
+    if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
   }
@@ -1000,3 +1007,75 @@ bool protectPinCheck(bool retry) {
 #endif
   return false;
 }
+
+#if !EMULATOR
+
+void enter_sleep(void) {
+  static int sleep_count = 0;
+  uint8_t key = KEY_NULL;
+  bool unlocked = false;
+  uint8_t oled_prev[OLED_BUFSIZE];
+  void *layoutBack = NULL;
+  sleep_count++;
+  if (sleep_count == 1) {
+    unlocked = session_isUnlocked();
+    layoutBack = layoutLast;
+    oledBufferLoad(oled_prev);
+    config_lockDevice();
+  }
+
+  layoutScreensaver();
+  if (sleep_count == 1) {
+  sleep_loop:
+    device_sleep_state = SLEEP_ENTER;
+    key = protectWaitKey(0, 0);
+    if (device_sleep_state == SLEEP_REENTER) {
+      goto sleep_loop;
+    }
+    if (key == KEY_NULL) {
+      device_sleep_state = SLEEP_NONE;
+      sleep_count = 0;
+      return;
+    }
+    if (unlocked) {
+      layoutHomeEx();
+      key = protectWaitKey(0, 0);
+      if (device_sleep_state == SLEEP_REENTER) {
+        goto sleep_loop;
+      }
+      if (key == KEY_NULL) {
+        device_sleep_state = SLEEP_NONE;
+        sleep_count = 0;
+        return;
+      }
+    input_pin:
+      if (!protectPinOnDevice(false, false)) {
+        if (device_sleep_state == SLEEP_REENTER) {
+          goto sleep_loop;
+        }
+        if (device_sleep_state == SLEEP_CANCEL_BY_BUTTON) {
+          device_sleep_state = SLEEP_ENTER;
+          goto input_pin;
+        }
+        if (device_sleep_state == SLEEP_CANCEL_BY_USB) {
+          device_sleep_state = SLEEP_NONE;
+          layoutHome();
+          sleep_count = 0;
+          return;
+        }
+      }
+    }
+  }
+  if (sleep_count > 1) {
+    device_sleep_state = SLEEP_REENTER;
+  }
+  sleep_count--;
+  if (sleep_count == 0) {
+    layoutLast = layoutBack;
+    oledBufferRestore(oled_prev);
+    oledRefresh();
+    device_sleep_state = SLEEP_NONE;
+    return;
+  }
+}
+#endif

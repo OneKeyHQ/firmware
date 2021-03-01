@@ -95,51 +95,6 @@ void check_lock_screen(void) {
 }
 
 #if !EMULATOR
-extern volatile uint32_t system_millis;
-
-void enter_sleep(void) {
-  static int sleep_count = 0;
-  bool unlocked = false;
-  uint8_t oled_prev[OLED_BUFSIZE];
-  void *layoutBack = NULL;
-  bool ble_state_bak = ble_get_switch();
-  sleep_count++;
-  if (sleep_count == 1) {
-    unlocked = session_isUnlocked();
-    layoutBack = layoutLast;
-    config_lockDevice();
-  }
-  oledBufferLoad(oled_prev);
-  if (ble_state_bak) {
-    change_ble_sta(BLE_ADV_OFF_TEMP);
-  }
-  oledClear();
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 30, _("Sleep Mode"),
-                              FONT_STANDARD);
-  layoutButtonNoAdapter(_("Exit"), NULL);
-  oledRefresh();
-  svc_system_sleep();
-  while (get_power_key_state()) {
-  }
-  timer_sleep_start_reset();
-  if (unlocked) {
-    if (sleep_count > 1) {
-    } else {
-      while (!protectPinOnDevice(false, false)) {
-      }
-    }
-  }
-  if (ble_state_bak) {
-    change_ble_sta(BLE_ADV_ON_TEMP);
-  }
-  usbInit();
-  oledBufferRestore(oled_prev);
-  oledRefresh();
-  sleep_count--;
-  if (sleep_count == 0) {
-    layoutLast = layoutBack;
-  }
-}
 
 void auto_poweroff_timer(void) {
   if (config_getAutoLockDelayMs() == 0) return;

@@ -28,6 +28,14 @@
 
 #define PIN_CANCELED_BY_BUTTON (void*)1
 
+enum {
+  SLEEP_NONE = 0x00,
+  SLEEP_ENTER = 0x01,
+  SLEEP_REENTER = 0X02,
+  SLEEP_CANCEL_BY_BUTTON = 0x03,
+  SLEEP_CANCEL_BY_USB = 0x04
+};
+
 bool protectButton(ButtonRequestType type, bool confirm_only);
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char* message);
@@ -45,6 +53,11 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed);
 bool protectChangePinOnDevice(bool is_prompt, bool set);
 bool protectSelectMnemonicNumber(uint32_t* number);
 bool protectPinCheck(bool retry);
+
+#if !EMULATOR
+void enter_sleep(void);
+#endif
+
 extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
 extern bool protectAbortedByTimeout;

@@ -515,7 +515,7 @@ uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh) {
 
 #endif
 
-void layoutHome(void) {
+static void _layout_home(bool update_menu) {
   if (layoutLast == layoutHome || layoutLast == layoutScreensaver) {
     oledClear_ex();
   } else {
@@ -589,11 +589,15 @@ void layoutHome(void) {
 
   bool initialized = config_isInitialized() | config_getMnemonicsImported();
 
-  main_menu_init(initialized);
+  if (update_menu) main_menu_init(initialized);
 
   // Reset lock screen timeout
   system_millis_lock_start = timer_ms();
 }
+
+void layoutHome(void) { _layout_home(true); }
+
+void layoutHomeEx(void) { _layout_home(false); }
 
 static void render_address_dialog(const CoinInfo *coin, const char *address,
                                   const char *line1, const char *line2,
@@ -2090,15 +2094,16 @@ refresh_menu:
 
 void layoutEnterSleep(void) {
 #if !EMULATOR
-  if (config_getSleepDelayMs() == 0) return;
-  if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
-    enter_sleep();
-  }
   static uint32_t system_millis_logo_refresh = 0;
   // 1000 ms refresh
   if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
     layoutStatusLogoEx(true, false);
     system_millis_logo_refresh = timer_ms();
+  }
+  if (config_getSleepDelayMs() == 0) return;
+  if (timer_get_sleep_count() >= 10 * 1000) {  // config_getSleepDelayMs()
+    timer_sleep_start_reset();
+    enter_sleep();
   }
 #else
   if ((timer_ms() - system_millis_lock_start) >= config_getAutoLockDelayMs()) {
