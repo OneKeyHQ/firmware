@@ -2101,7 +2101,7 @@ void layoutEnterSleep(void) {
     system_millis_logo_refresh = timer_ms();
   }
   if (config_getSleepDelayMs() == 0) return;
-  if (timer_get_sleep_count() >= 10 * 1000) {  // config_getSleepDelayMs()
+  if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
     timer_sleep_start_reset();
     enter_sleep();
   }
