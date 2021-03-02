@@ -1954,7 +1954,7 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
     uint2str(index, index_str);
     strcat(index_str + strlen(index_str), "/");
     uint2str(count, index_str + strlen(index_str));
-    oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
+    oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD | FONT_FIXED);
   }
   if (previous) {
     oledDrawBitmap(60, y, bmp_up);
