@@ -9,6 +9,20 @@
 #include "secbool.h"
 #include "sys.h"
 
+#define APP (0x01 << 8)
+
+#define SE_NEEDSBACKUP (7 | APP)   // byte
+#define SE_INITIALIZED (14 | APP)  // byte
+#define SE_PIN (20 | APP)          // uint32
+#define SE_PINFLAG (21 | APP)      // uint32
+#define SE_VERIFYPIN (22 | APP)    // uint32
+#define SE_RESET (27 | APP)
+#define SE_SEEDSTRENGTH (30 | APP)  // uint32
+
+#define SE_PIN_RETRY_MAX 16
+
+static uint32_t se_pin_failed_counter = 0;
+
 uint8_t g_ucSessionKey[SESSION_KEYLEN];
 
 const char NIST256P1[] = "nist256p1";
@@ -191,6 +205,10 @@ uint32_t se_transmit(uint8_t ucCmd, uint8_t ucIndex, uint8_t *pucSendData,
   }
   g_usMI2cRevLen = sizeof(g_ucMI2cRevBuf);
   if (false == bMI2CDRV_ReceiveData(g_ucMI2cRevBuf, &g_usMI2cRevLen)) {
+    if (g_usMI2cRevLen && pucRevData) {
+      *pusRevLen = *pusRevLen > g_usMI2cRevLen ? g_usMI2cRevLen : *pusRevLen;
+      memcpy(pucRevData, g_ucMI2cRevBuf, *pusRevLen);
+    }
     return MI2C_ERROR;
   }
   if (MI2C_ENCRYPT == ucMode) {
@@ -308,9 +326,9 @@ bool se_delete_key(const uint16_t key) {
   return true;
 }
 
-void se_reset_storage(const uint16_t key) {
-  se_transmit(MI2C_CMD_WR_PIN, (key & 0xFF), NULL, 0, NULL, NULL, MI2C_ENCRYPT,
-              SET_SESTORE_DATA);
+void se_reset_storage(void) {
+  se_transmit(MI2C_CMD_WR_PIN, (SE_RESET & 0xFF), NULL, 0, NULL, NULL,
+              MI2C_ENCRYPT, SET_SESTORE_DATA);
 }
 
 bool se_get_sn(char **serial) {
@@ -327,8 +345,7 @@ bool se_get_sn(char **serial) {
   *serial = sn;
   return true;
 }
-
-bool se_get_version(char **version) {
+char *se_get_version(void) {
   uint8_t ucVerCmd[5] = {0x00, 0xf7, 0x00, 00, 0x02};
   uint8_t ver[2] = {0};
   uint16_t ver_len = sizeof(ver);
@@ -336,7 +353,7 @@ bool se_get_version(char **version) {
   int i = 0;
 
   if (MI2C_OK != se_transmit_plain(ucVerCmd, sizeof(ucVerCmd), ver, &ver_len)) {
-    return false;
+    return NULL;
   }
 
   ver_char[i++] = (ver[0] >> 4) + '0';
@@ -347,8 +364,7 @@ bool se_get_version(char **version) {
   ver_char[i++] = '.';
   ver_char[i++] = (ver[1] & 0x0f) + '0';
 
-  *version = ver_char;
-  return true;
+  return ver_char;
 }
 
 bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
@@ -458,6 +474,102 @@ bool st_restore_entory_from_se(const uint16_t key, uint8_t *seed,
   if (MI2C_OK != se_transmit(MI2C_CMD_WR_PIN, (key & 0xFF), NULL, 0, seed,
                              (uint16_t *)seed_len, (flag & MI2C_PLAIN),
                              GET_SESTORE_DATA)) {
+    return false;
+  }
+  return true;
+}
+
+bool se_isInitialized(void) {
+  uint16_t len;
+  uint8_t initialized = 0;
+  uint8_t needs_backup = 0;
+
+  se_get_value(SE_NEEDSBACKUP, &needs_backup, 1, &len);
+  se_get_value(SE_INITIALIZED, &initialized, sizeof(initialized), &len);
+
+  if (initialized == 1) {
+    if (needs_backup == 0) {
+      return true;
+    } else {
+      se_reset_storage();
+    }
+  }
+
+  return false;
+}
+
+bool se_hasPin(void) {
+  uint8_t has_pin = 1;
+  uint16_t len;
+  if (se_get_value(SE_PINFLAG, &has_pin, 1, &len)) {
+    if (has_pin == 0) return true;
+  }
+  return false;
+}
+
+bool se_setPin(uint32_t pin) { return se_set_value(SE_PIN, &pin, sizeof(pin)); }
+
+bool se_verifyPin(uint32_t pin) {
+  uint8_t retry = 0;
+  uint16_t len = sizeof(retry);
+  if (MI2C_OK != se_transmit(MI2C_CMD_WR_PIN, (SE_VERIFYPIN & 0xFF),
+                             (uint8_t *)&pin, sizeof(pin), &retry, &len,
+                             MI2C_ENCRYPT, SET_SESTORE_DATA)) {
+    se_pin_failed_counter = SE_PIN_RETRY_MAX - retry;
+    return false;
+  }
+  return true;
+}
+
+bool se_changePin(uint32_t oldpin, uint32_t newpin) {
+  if (!se_verifyPin(oldpin)) return false;
+  return se_setPin(newpin);
+}
+
+uint32_t se_pinFailedCounter(void) { return se_pin_failed_counter; }
+
+bool se_setSeedStrength(uint32_t strength) {
+  if (strength != 128 && strength != 192 && strength != 256) return false;
+  return se_set_value(SE_SEEDSTRENGTH, &strength, sizeof(strength));
+}
+
+bool se_getSeedStrength(uint32_t *strength) {
+  uint16_t len;
+  if (se_get_value(SE_SEEDSTRENGTH, strength, sizeof(uint32_t), &len)) {
+    if (*strength == 128 || *strength == 192 || *strength == 256) return true;
+  }
+  return false;
+}
+
+bool se_getNeedsBackup(bool *needs_backup) {
+  uint16_t len;
+  if (se_get_value(SE_NEEDSBACKUP, needs_backup, 1, &len)) {
+    return true;
+  }
+  return false;
+}
+
+bool se_setNeedsBackup(bool needs_backup) {
+  return se_set_value(SE_NEEDSBACKUP, &needs_backup, sizeof(needs_backup));
+}
+
+bool se_export_seed(uint8_t *seed) {
+  uint16_t seed_len = 0;
+  if (MI2C_OK != se_transmit(MI2C_CMD_WR_PIN, SE_EXPORT_SEED, NULL, 0, seed,
+                             &seed_len, MI2C_ENCRYPT, GET_SESTORE_DATA)) {
+    return false;
+  }
+  if (seed_len != 64) return false;
+
+  return true;
+}
+
+bool se_importSeed(uint8_t *seed) {
+  uint8_t data[65];
+  data[0] = 2;
+  memcpy(data + 1, seed, 64);
+  if (MI2C_OK != se_transmit(MI2C_CMD_WR_PIN, 0x12, data, 65, NULL, NULL,
+                             MI2C_ENCRYPT, SET_SESTORE_DATA)) {
     return false;
   }
   return true;

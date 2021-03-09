@@ -137,6 +137,26 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
   }
   awaiting_entropy = false;
 
+  if (g_bSelectSEFlag) {
+    uint8_t seed[64];
+
+    if (!se_device_init(ExportType_MnemonicPlainExportType_YES, NULL)) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Device failed initialized"));
+      layoutHome();
+      return;
+    }
+    if (!se_export_seed(seed)) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Device failed initialized"));
+      layoutHome();
+      return;
+    }
+    se_setSeedStrength(strength);
+    se_setNeedsBackup(false);
+    memcpy(int_entropy, seed, 32);
+  }
+
   SHA256_CTX ctx = {0};
   sha256_Init(&ctx);
   sha256_Update(&ctx, int_entropy, 32);
@@ -145,50 +165,21 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
   const char *mnemonic = mnemonic_from_data(int_entropy, strength / 8);
   memzero(int_entropy, 32);
 
-  if (!g_bSelectSEFlag) {
-    if (skip_backup || no_backup) {
-      if (no_backup) {
-        config_setNoBackup();
-      } else {
-        config_setNeedsBackup(true);
-      }
-      if (config_setMnemonic(mnemonic)) {
-        fsm_sendSuccess(_("Device successfully initialized"));
-      } else {
-        fsm_sendFailure(FailureType_Failure_ProcessError,
-                        _("Failed to store mnemonic"));
-      }
-      layoutHome();
+  if (skip_backup || no_backup) {
+    if (no_backup) {
+      config_setNoBackup();
     } else {
-      reset_backup(false, mnemonic);
+      config_setNeedsBackup(true);
     }
-  } else {
-    if (skip_backup || no_backup) {
-      if (no_backup) {
-        config_setNoBackup();
-      } else {
-        config_setNeedsBackup(true);
-      }
-    }
-    char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-    if (!protectPassphrase(passphrase)) {
-      if (!se_device_init(ExportType_SeedEncExportType_YES, NULL)) {
-        fsm_sendFailure(FailureType_Failure_ProcessError,
-                        _("Device failed initialized"));
-        layoutHome();
-        return;
-      }
+    if (config_setMnemonic(mnemonic, false)) {
+      fsm_sendSuccess(_("Device successfully initialized"));
     } else {
-      if (!se_device_init(ExportType_SeedEncExportType_YES, passphrase)) {
-        fsm_sendFailure(FailureType_Failure_ProcessError,
-                        _("Device failed initialized"));
-        layoutHome();
-        return;
-      }
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Failed to store mnemonic"));
     }
-    fsm_sendSuccess(_("Device successfully initialized"));
     layoutHome();
-    return;
+  } else {
+    reset_backup(false, mnemonic);
   }
   mnemonic_clear();
 }
@@ -244,7 +235,7 @@ void reset_backup(bool separated, const char *mnemonic) {
     fsm_sendSuccess(_("Seed successfully backed up"));
   } else {
     config_setNeedsBackup(false);
-    if (config_setMnemonic(mnemonic)) {
+    if (config_setMnemonic(mnemonic, false)) {
       fsm_sendSuccess(_("Device successfully initialized"));
     } else {
       fsm_sendFailure(FailureType_Failure_ProcessError,
@@ -492,7 +483,7 @@ write_mnemonic:
     if (!protectChangePinOnDevice(false, true)) {
       goto_check(check_mnemonic);
     }
-    config_setMnemonic(mnemonic);
+    config_setMnemonic(mnemonic, false);
     return true;
   }
   return false;
@@ -521,7 +512,7 @@ select_mnemonic_count:
       strength = 128;
       break;
     case 18:
-      strength = 196;
+      strength = 192;
       break;
     case 24:
       strength = 256;
@@ -542,12 +533,25 @@ select_mnemonic_count:
     goto_check(select_mnemonic_count);
   }
 
-  random_buffer(int_entropy, 32);
+  if (g_bSelectSEFlag) {
+    uint8_t seed[64];
 
-  SHA256_CTX ctx = {0};
-  sha256_Init(&ctx);
-  sha256_Update(&ctx, int_entropy, 32);
-  sha256_Final(&ctx, int_entropy);
+    if (!se_device_init(ExportType_MnemonicPlainExportType_YES, NULL))
+      return false;
+
+    if (!se_export_seed(seed)) return false;
+    memcpy(int_entropy, seed, 32);
+    se_setSeedStrength(strength);
+    se_setNeedsBackup(true);
+
+  } else {
+    random_buffer(int_entropy, 32);
+    SHA256_CTX ctx = {0};
+    sha256_Init(&ctx);
+    sha256_Update(&ctx, int_entropy, 32);
+    sha256_Final(&ctx, int_entropy);
+  }
+
   const char *mnemonic = mnemonic_from_data(int_entropy, strength / 8);
   memzero(int_entropy, 32);
 

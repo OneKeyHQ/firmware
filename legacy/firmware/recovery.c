@@ -190,7 +190,7 @@ static bool recovery_done(void) {
     // New mnemonic is valid.
     if (!dry_run) {
       // Update mnemonic on config.
-      if (config_setMnemonic(new_mnemonic)) {
+      if (config_setMnemonic(new_mnemonic, true)) {
         if (!enforce_wordlist) {
           // not enforcing => mark config as imported
           config_setImported(true);

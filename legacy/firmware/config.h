@@ -122,7 +122,7 @@ void config_setHomescreen(const uint8_t *data, uint32_t size);
 
 uint8_t *session_startSession(const uint8_t *received_session_id);
 
-bool config_setMnemonic(const char *mnemonic);
+bool config_setMnemonic(const char *mnemonic, bool import);
 bool config_containsMnemonic(const char *mnemonic);
 bool config_hasMnemonic(void);
 bool config_getMnemonic(char *dest, uint16_t dest_size);

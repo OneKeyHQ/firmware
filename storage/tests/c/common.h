@@ -23,8 +23,6 @@
 #include <stdbool.h>
 #include "secbool.h"
 
-extern bool g_bSelectSEFlag;
-
 void wait_random(void);
 
 void __fatal_error(const char *expr, const char *msg, const char *file,

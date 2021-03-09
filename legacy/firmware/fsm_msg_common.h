@@ -23,7 +23,7 @@
 #include "storage_ex.h"
 
 bool get_features(Features *resp) {
-  char *sn_version;
+  char *sn_version = NULL;
   resp->has_vendor = true;
   strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   resp->has_major_version = true;
@@ -101,8 +101,8 @@ bool get_features(Features *resp) {
   }
   resp->has_se_enable = true;
   resp->se_enable = config_getWhetherUseSE();
-
-  if (se_get_version(&sn_version)) {
+  sn_version = se_get_version();
+  if (sn_version) {
     resp->has_se_ver = true;
     memcpy(resp->se_ver, sn_version, strlen(sn_version));
   }
@@ -383,11 +383,6 @@ void fsm_msgBackupDevice(const BackupDevice *msg) {
 
   CHECK_PIN_UNCACHED
 
-  if (g_bSelectSEFlag) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                    "not support when SE used");
-    return;
-  }
   char mnemonic[MAX_MNEMONIC_LEN + 1];
   if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
     reset_backup(true, mnemonic);
@@ -432,9 +427,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
 
   CHECK_PARAM(msg->has_label || msg->has_language || msg->has_use_passphrase ||
                   msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-                  msg->has_fastpay_pin || msg->has_use_ble || msg->has_use_se ||
-                  msg->has_fastpay_confirm || msg->has_fastpay_money_limit ||
-                  msg->has_fastpay_times || msg->has_is_bixinapp,
+                  msg->has_use_ble || msg->has_is_bixinapp,
               _("No setting provided"));
 
   if (!msg->has_is_bixinapp) CHECK_PIN
@@ -442,9 +435,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_is_bixinapp) {
     if (msg->has_label || msg->has_language || msg->has_use_passphrase ||
         msg->has_homescreen || msg->has_auto_lock_delay_ms ||
-        msg->has_fastpay_pin || msg->has_use_ble || msg->has_use_se ||
-        msg->has_fastpay_confirm || msg->has_fastpay_money_limit ||
-        msg->has_fastpay_times) {
+        msg->has_use_ble) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled,
                       "you should set bixin_app flag only");
       layoutHome();
@@ -559,28 +550,8 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_auto_lock_delay_ms) {
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
-  if (msg->has_fastpay_pin) {
-    // not allowed set true if not use se
-    if (!g_bSelectSEFlag) {
-      config_setFastPayPinFlag(false);
-    } else {
-      config_setFastPayPinFlag(msg->fastpay_pin);
-    }
-  }
-  if (msg->has_fastpay_confirm) {
-    config_setFastPayConfirmFlag(msg->fastpay_confirm);
-  }
-  if (msg->has_fastpay_money_limit) {
-    config_setFastPayMoneyLimt(msg->fastpay_money_limit);
-  }
-  if (msg->has_fastpay_times) {
-    config_setFastPayTimes(msg->fastpay_times);
-  }
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);
-  }
-  if (msg->has_use_se) {
-    config_setWhetherUseSE(msg->use_se);
   }
   if (msg->has_is_bixinapp) {
     config_setIsBixinAPP();
@@ -786,7 +757,7 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
         } else if (entropy[0] == 12 || entropy[0] == 18 || entropy[0] == 24) {
           const char *mnemonic =
               mnemonic_from_data(entropy + 1, entropy[0] * 4 / 3);
-          if (config_setMnemonic(mnemonic)) {
+          if (config_setMnemonic(mnemonic, true)) {
           } else {
             fsm_sendFailure(FailureType_Failure_ProcessError,
                             _("Failed to store mnemonic"));
@@ -922,7 +893,7 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
       return;
     }
     mnemonic[mnemonic_len] = '\0';
-    if (config_setMnemonic(mnemonic)) {
+    if (config_setMnemonic(mnemonic, true)) {
       fsm_sendSuccess(_("Device successfully initialized"));
     } else {
       fsm_sendFailure(FailureType_Failure_ProcessError,
