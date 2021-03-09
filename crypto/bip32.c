@@ -25,10 +25,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#if USE_SE
-#include "common.h"
-#include "se_chip.h"
-#endif
 #include "address.h"
 #include "aes/aes.h"
 #include "base58.h"
@@ -168,11 +164,7 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, const char *curve,
   if (out->curve == 0) {
     return 0;
   }
-#if USE_SE
-  if (g_bSelectSEFlag) {
-    return 1;
-  }
-#endif
+
   static CONFIDENTIAL HMAC_SHA512_CTX ctx;
   hmac_sha512_Init(&ctx, (const uint8_t *)out->curve->bip32_name,
                    strlen(out->curve->bip32_name));
@@ -534,29 +526,7 @@ int hdnode_private_ckd_cached(HDNode *inout, const uint32_t *i, size_t i_count,
     // no way how to compute parent fingerprint
     return 1;
   }
-#if USE_SE
-  if (g_bSelectSEFlag) {
-    uint8_t ucRevBuf[256];
-    uint16_t usLen;
-    if (MI2C_OK != se_transmit(MI2C_CMD_ECC_EDDSA, EDDSA_INDEX_CHILDKEY,
-                               (uint8_t *)i, i_count * 4, ucRevBuf, &usLen,
-                               MI2C_PLAIN, SET_SESTORE_DATA)) {
-      return 0;
-    }
-    inout->depth = ucRevBuf[0];
-    inout->child_num = ((uint32_t)ucRevBuf[1] << 24) + (ucRevBuf[2] << 16) +
-                       (ucRevBuf[3] << 8) + ucRevBuf[4];
-    memcpy(inout->chain_code, ucRevBuf + 1 + 4, 32);
-    // father public key
-    memcpy(inout->public_key, ucRevBuf + 1 + 4 + 32, 33);
 
-    if (fingerprint) {
-      *fingerprint = hdnode_fingerprint(inout);
-    }
-    memcpy(inout->public_key, ucRevBuf + 1 + 4 + 32 + 33, 33);
-    return 1;
-  }
-#endif
   if (i_count == 1) {
     if (fingerprint) {
       *fingerprint = hdnode_fingerprint(inout);
@@ -669,17 +639,8 @@ int hdnode_get_ethereum_pubkeyhash(const HDNode *node, uint8_t *pubkeyhash) {
   uint8_t buf[65] = {0};
   SHA3_CTX ctx = {0};
 
-#if USE_SE
-  if (g_bSelectSEFlag) {
-    uint8_t compress_pub[33];
-    memcpy(compress_pub, node->public_key, sizeof(node->public_key));
-    ecdsa_uncompress_pubkey(node->curve->params, compress_pub, buf);
-  } else
-#endif
-  {
-    /* get uncompressed public key */
-    ecdsa_get_public_key65(node->curve->params, node->private_key, buf);
-  }
+  /* get uncompressed public key */
+  ecdsa_get_public_key65(node->curve->params, node->private_key, buf);
 
   /* compute sha3 of x and y coordinate without 04 prefix */
   sha3_256_Init(&ctx);
@@ -828,9 +789,7 @@ int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
     } else {
       return 1;  // unknown or unsupported curve
     }
-#if USE_SE
-    g_uchash_mode = hash_mode;
-#endif
+
     return 0;
   }
 }

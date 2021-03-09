@@ -1493,7 +1493,7 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint32_t times;
   char str_out[32 + 3] = {0};
   char times_str[12] = {0};
-  char *se_version;
+  char *se_version = NULL;
   char *se_sn;
   int y = 0;
   char label[MAX_LABEL_LEN + 1] = "";
@@ -1513,8 +1513,8 @@ void layoutDeviceInfo(uint8_t ucPage) {
         oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
         y += font->pixel + 1;
       }
-
-      if (se_get_version(&se_version)) {
+      se_version = se_get_version();
+      if (se_version) {
         oledDrawStringAdapter(0, y, _("SE version:"), FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, se_version, FONT_STANDARD);
         y += font->pixel + 1;
@@ -2053,7 +2053,7 @@ refresh_menu:
       break;
     case 1:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-      se_get_version(&se_version);
+      se_version = se_get_version();
       layouKeyValue(y, _("Firmware version:"), ONEKEY_VERSION);
       y += font->pixel + 1;
 

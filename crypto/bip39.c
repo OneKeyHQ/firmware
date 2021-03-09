@@ -24,11 +24,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#if USE_SE
-#include "common.h"
-#include "se_chip.h"
-#endif
-
 #include "bip39.h"
 #include "bip39_english.h"
 #include "hmac.h"
@@ -192,13 +187,6 @@ void mnemonic_to_seed(const char *mnemonic, const char *passphrase,
                       uint8_t seed[512 / 8],
                       void (*progress_callback)(uint32_t current,
                                                 uint32_t total)) {
-#if USE_SE
-  if (g_bSelectSEFlag) {
-    se_get_seed(false, passphrase, seed);
-    return;
-  }
-#endif
-
   int mnemoniclen = strlen(mnemonic);
   int passphraselen = strnlen(passphrase, 256);
 #if USE_BIP39_CACHE

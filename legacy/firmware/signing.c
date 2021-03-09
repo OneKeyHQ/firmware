@@ -1631,13 +1631,6 @@ static bool signing_confirm_tx(void) {
             need_confirm = false;
           }
         }
-        if (g_bSelectSEFlag) {
-          if (config_getFastPayPinFlag()) {
-            if (fast_pay_times && (total_out - change_out <= fast_pay_amount)) {
-              need_pin = false;
-            }
-          }
-        }
         if (!need_confirm || !need_pin) {
           fast_pay_times--;
           config_setFastPayTimes(fast_pay_times);

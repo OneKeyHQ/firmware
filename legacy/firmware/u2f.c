@@ -542,38 +542,20 @@ static void getReadableAppId(const uint8_t appid[U2F_APPID_SIZE],
 static const HDNode *getDerivedNode(uint32_t *address_n,
                                     size_t address_n_count) {
   static CONFIDENTIAL HDNode node;
-  if (g_bSelectSEFlag) {
-    node.curve = get_curve_by_name(NIST256P1_NAME);
-  } else {
-    if (!config_getU2FRoot(&node)) {
-      layoutHome();
-      debugLog(0, "", "ERR: Device not init");
-      return 0;
-    }
+  if (!config_getU2FRoot(&node)) {
+    layoutHome();
+    debugLog(0, "", "ERR: Device not init");
+    return 0;
   }
 
   if (!address_n || address_n_count == 0) {
     return &node;
   }
-  if (g_bSelectSEFlag) {
-    uint8_t ucRevBuf[256];
-    uint16_t usLen;
-    (void)usLen;
-    if (MI2C_OK != se_transmit(MI2C_CMD_ECC_EDDSA, EDDSA_INDEX_U2FKEY,
-                               (uint8_t *)address_n, address_n_count * 4,
-                               ucRevBuf, &usLen, MI2C_PLAIN,
-                               GET_SESTORE_DATA)) {
+  for (size_t i = 0; i < address_n_count; i++) {
+    if (hdnode_private_ckd(&node, address_n[i]) == 0) {
       layoutHome();
+      debugLog(0, "", "ERR: Derive private failed");
       return 0;
-    }
-    memcpy(node.public_key, ucRevBuf + 1 + 4 + 32 + 33, 33);
-  } else {
-    for (size_t i = 0; i < address_n_count; i++) {
-      if (hdnode_private_ckd(&node, address_n[i]) == 0) {
-        layoutHome();
-        debugLog(0, "", "ERR: Derive private failed");
-        return 0;
-      }
     }
   }
 
@@ -588,23 +570,12 @@ static const HDNode *generateKeyHandle(const uint8_t app_id[],
   // Derivation path is m/U2F'/r'/r'/r'/r'/r'/r'/r'/r'
   uint32_t key_path[KEY_PATH_ENTRIES + 1] = {0};
 
-  if (g_bSelectSEFlag) {
-    key_path[0] = U2F_KEY_PATH;
-    for (uint32_t i = 0; i < KEY_PATH_ENTRIES; i++) {
-      // high bit for hardened keys
-      key_path[i + 1] = 0x80000000 | random32();
-    }
-    // First half of keyhandle is key_path
-    memcpy(key_handle, key_path + 1, KEY_PATH_LEN);
-    path_len += 1;
-  } else {
-    for (uint32_t i = 0; i < KEY_PATH_ENTRIES; i++) {
-      // high bit for hardened keys
-      key_path[i] = 0x80000000 | random32();
-    }
-    // First half of keyhandle is key_path
-    memcpy(key_handle, key_path, KEY_PATH_LEN);
+  for (uint32_t i = 0; i < KEY_PATH_ENTRIES; i++) {
+    // high bit for hardened keys
+    key_path[i] = 0x80000000 | random32();
   }
+  // First half of keyhandle is key_path
+  memcpy(key_handle, key_path, KEY_PATH_LEN);
 
   // prepare keypair from /random data
   const HDNode *node = getDerivedNode(key_path, path_len);
@@ -628,23 +599,11 @@ static const HDNode *validateKeyHandle(const uint8_t app_id[],
                                        const uint8_t key_handle[]) {
   uint32_t key_path[KEY_PATH_ENTRIES + 1] = {0};
   uint8_t path_len = KEY_PATH_ENTRIES;
-  if (g_bSelectSEFlag) {
-    key_path[0] = U2F_KEY_PATH;
-    memcpy(key_path + 1, key_handle, KEY_PATH_LEN);
-    for (unsigned int i = 0; i < KEY_PATH_ENTRIES; i++) {
-      // check high bit for hardened keys
-      if (!(key_path[i + 1] & 0x80000000)) {
-        return NULL;
-      }
-    }
-    path_len += 1;
-  } else {
-    memcpy(key_path, key_handle, KEY_PATH_LEN);
-    for (unsigned int i = 0; i < KEY_PATH_ENTRIES; i++) {
-      // check high bit for hardened keys
-      if (!(key_path[i] & 0x80000000)) {
-        return NULL;
-      }
+  memcpy(key_path, key_handle, KEY_PATH_LEN);
+  for (unsigned int i = 0; i < KEY_PATH_ENTRIES; i++) {
+    // check high bit for hardened keys
+    if (!(key_path[i] & 0x80000000)) {
+      return NULL;
     }
   }
 
@@ -739,16 +698,8 @@ void u2f_register(const APDU *a) {
       send_u2f_error(U2F_SW_WRONG_DATA);  // error:bad key handle
       return;
     }
-    if (g_bSelectSEFlag) {
-      if (!ecdsa_uncompress_pubkey(node->curve->params, node->public_key,
-                                   (uint8_t *)&resp->pubKey)) {
-        send_u2f_error(U2F_SW_WRONG_DATA);
-        return;
-      }
-    } else {
-      ecdsa_get_public_key65(node->curve->params, node->private_key,
-                             (uint8_t *)&resp->pubKey);
-    }
+    ecdsa_get_public_key65(node->curve->params, node->private_key,
+                           (uint8_t *)&resp->pubKey);
     memcpy(resp->keyHandleCertSig + resp->keyHandleLen, U2F_ATT_CERT,
            sizeof(U2F_ATT_CERT));
 

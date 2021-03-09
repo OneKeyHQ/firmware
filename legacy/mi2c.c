@@ -129,6 +129,12 @@ static bool bMI2CDRV_ReadBytes(uint32_t i2c, uint8_t *res,
   usRealLen -= MI2C_XOR_LEN;
 
   if ((0x90 != ucSW[0]) || (0x00 != ucSW[1])) {
+    if (ucSW[0] == 0x6c) {
+      res[0] = ucSW[1];
+      *pusOutLen = 1;
+    } else {
+      *pusOutLen = usRealLen - 2;
+    }
     return false;
   }
   *pusOutLen = usRealLen - 2;

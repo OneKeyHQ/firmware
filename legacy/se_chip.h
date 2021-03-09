@@ -47,6 +47,8 @@
 #define EDDSA_INDEX_CHILDKEY (0x06)
 #define EDDSA_INDEX_U2FKEY (0x07)
 
+#define SE_EXPORT_SEED (0x24)
+
 // mnemonic index
 #define MNEMONIC_INDEX_TOSEED (26)
 
@@ -71,9 +73,9 @@ bool se_set_value(const uint16_t key, const void *val_dest, uint16_t len);
 bool se_get_value(const uint16_t key, void *val_dest, uint16_t max_len,
                   uint16_t *len);
 bool se_delete_key(const uint16_t key);
-void se_reset_storage(const uint16_t key);
+void se_reset_storage(void);
 bool se_get_sn(char **serial);
-bool se_get_version(char **version);
+char *se_get_version(void);
 bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
                void *cert_val, uint16_t *cert_len, void *signature_val,
                uint16_t *signature_len);
@@ -87,10 +89,24 @@ bool st_backup_entory_to_se(const uint16_t key, uint8_t *seed,
                             uint8_t seed_len);
 bool st_restore_entory_from_se(const uint16_t key, uint8_t *seed,
                                uint8_t *seed_len);
+
+bool se_isInitialized(void);
+bool se_hasPin(void);
+bool se_setPin(uint32_t pin);
+bool se_verifyPin(uint32_t pin);
+bool se_changePin(uint32_t oldpin, uint32_t newpin);
+uint32_t se_pinFailedCounter(void);
+bool se_setSeedStrength(uint32_t strength);
+bool se_getSeedStrength(uint32_t *strength);
+bool se_getNeedsBackup(bool *needs_backup);
+bool se_setNeedsBackup(bool needs_backup);
+bool se_export_seed(uint8_t *seed);
+bool se_importSeed(uint8_t *seed);
+
 #else
 #define se_transmit(...) 0
-#define se_get_version(...) false
 #define se_get_sn(...) false
+#define se_get_version(...) "1.1.0.0"
 #define se_backup(...) false
 #define se_restore(...) false
 #define se_verify(...) false
@@ -100,5 +116,18 @@ bool st_restore_entory_from_se(const uint16_t key, uint8_t *seed,
 #define se_set_value(...) false
 #define st_backup_entory_to_se(...) false
 #define st_restore_entory_from_se(...) false
+#define se_reset_storage(...)
+#define se_isInitialized(...) false
+#define se_hasPin(...) false
+#define se_setPin(...) false
+#define se_verifyPin(...) false
+#define se_changePin(...) false
+#define se_pinFailedCounter(...) 0
+#define se_setSeedStrength(...) false
+#define se_getSeedStrength(...) false
+#define se_getNeedsBackup(...) false
+#define se_setNeedsBackup(...) false
+#define se_export_seed(...) false
+#define se_importSeed(...) false
 #endif
 #endif

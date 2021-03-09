@@ -38,8 +38,6 @@
 // Mask for extracting the "real" app_id.
 #define FLAGS_APPID 0x3F
 
-#define FLAG_ST 0x02
-
 typedef secbool (*PIN_UI_WAIT_CALLBACK)(uint32_t wait, uint32_t progress,
                                         const char *message);
 
