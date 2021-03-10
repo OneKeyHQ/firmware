@@ -454,7 +454,7 @@ void config_init(void) {
   // get whether use se flag
   se_version = se_get_version();
   if (se_version) {
-    if (strcmp(se_version, "1.1.0.0")) {
+    if (strcmp(se_version, "1.1.0.0") > 0) {
       g_bSelectSEFlag = true;
     }
   } else {
