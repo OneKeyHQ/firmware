@@ -1,6 +1,6 @@
 #include "ble.h"
 #include "layout.h"
-#include "rtt_log.h"
+#include "oled.h"
 #include "sys.h"
 #include "timer.h"
 #include "usart.h"
@@ -96,12 +96,27 @@ void ble_uart_poll(void) {
     return;
   }
   if (read_status == UARTSTATE_IDLE) {
-    if (index >= 2) {
-      if ((buf[0] != 0x5A) && ((buf[1] != 0xA5))) {
-        index = 0;
-        return;
+    if (index == 2 && buf[0] == 0x0B && buf[1] <= 100) {
+      uint32_t percent = buf[1];
+      if (percent == 99) {
+        oledClear();
+        oledDrawStringCenter(60, 30, "BLE update success", FONT_STANDARD);
+        oledRefresh();
+        layoutRefreshSet(true);
+        delay_ms(500);
+      } else {
+        layoutProgress("Installing ble...", 10 * percent);
       }
-      read_status = UARTSTATE_READ_LEN;
+      index = 0;
+      return;
+    } else {
+      if (index >= 2) {
+        if ((buf[0] != 0x5A) && ((buf[1] != 0xA5))) {
+          index = 0;
+          return;
+        }
+        read_status = UARTSTATE_READ_LEN;
+      }
     }
   } else if (read_status == UARTSTATE_READ_LEN) {
     if (index >= 4) {
