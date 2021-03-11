@@ -24,6 +24,7 @@
 
 bool get_features(Features *resp) {
   char *sn_version = NULL;
+  char *serial = NULL;
   resp->has_vendor = true;
   strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   resp->has_major_version = true;
@@ -112,6 +113,11 @@ bool get_features(Features *resp) {
 
   resp->has_onekey_version = true;
   strlcpy(resp->onekey_version, ONEKEY_VERSION, sizeof(resp->onekey_version));
+
+  if (se_get_sn(&serial)) {
+    resp->has_onekey_serial = true;
+    strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
+  }
   return resp;
 }
 
