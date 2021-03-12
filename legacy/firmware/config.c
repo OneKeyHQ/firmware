@@ -524,7 +524,9 @@ void session_clearCache(Session *session) {
 }
 
 void config_lockDevice(void) {
-  if (!g_bSelectSEFlag) {
+  if (g_bSelectSEFlag) {
+    se_unlocked = secfalse;
+  } else {
     storage_lock();
   }
 }
