@@ -32,6 +32,7 @@
 #include "u2f.h"
 #endif
 #include "layout2.h"
+#include "memory.h"
 #include "si2c.h"
 #include "sys.h"
 #include "usb.h"
@@ -421,6 +422,28 @@ static void i2c_slave_poll(void) {
 }
 void usbPoll(void) {
   static const uint8_t *data;
+
+  bool reset = false;
+
+  static bool usb_status_bak = false;
+
+  if (usb_connect_status && !usb_status_bak) {
+    usb_status_bak = true;
+    if (config_hasPin() && session_isUnlocked()) {
+      reset = true;
+    }
+  } else if (!usb_connect_status && usb_status_bak) {
+    usb_status_bak = false;
+    if (config_hasPin() && session_isUnlocked()) {
+      reset = true;
+    }
+  }
+  if (reset) {
+    vector_table_t *ivt = (vector_table_t *)FLASH_PTR(FLASH_APP_START);
+    __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
+    __asm__ volatile("b reset_handler");
+  }
+
   i2c_slave_poll();
   if (usbd_dev == NULL) {
     return;
