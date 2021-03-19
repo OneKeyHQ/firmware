@@ -1848,16 +1848,16 @@ void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
                           uint8_t font) {
   int l = 0;
   int y0 = font & FONT_DOUBLE ? 8 : 0;
-  oledBox(x, y - 8, x + 8, y + 16 + y0, false);
-  oledDrawBitmap(x, y - 8, &bmp_btn_up);
+  oledBox(x - 4, y - 8, x + 4, y + 16 + y0, false);
+  oledDrawBitmap(x - 4, y - 8, &bmp_btn_up);
   l = oledStringWidth(text, font);
   if (bmp) {
-    oledDrawBitmap(x + 1 - l / 2, y + 4, bmp);
+    oledDrawBitmap(x - 4, y + 1, bmp);
   } else {
-    oledDrawStringAdapter(x + 4 - l / 2, y - 1, text, font);
+    oledDrawStringAdapter(x - l / 2, y, text, font);
   }
 
-  oledDrawBitmap(x, y + 8 + y0, &bmp_btn_down);
+  oledDrawBitmap(x - 4, y + 10 + y0, &bmp_btn_down);
   oledRefresh();
 }
 
@@ -1866,29 +1866,34 @@ void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {
 }
 
 void layoutBmpSelect(int x, int y, const BITMAP *bmp) {
-  _layout_iterm_select(x, y, bmp, NULL, FONT_STANDARD | FONT_DOUBLE);
+  _layout_iterm_select(x, y, bmp, NULL, FONT_STANDARD);
 }
 
 void layoutInputPin(uint8_t pos, const char *text, int index,
                     bool cancel_allowed) {
   int l, y = 9;
-  char pin_show[] = "_  _  _  _  _  _  _  _  _";
+  char pin_show[9] = "_________";
   char table[][2] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", " "};
+  char buf[2] = {0};
+  int x = 6;
 
   for (uint8_t i = 0; i < pos; i++) {
-    pin_show[i * 3] = '*';
+    pin_show[i] = '*';
   }
   oledClear_ex();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, text, FONT_STANDARD);
   y += 18;
-  l = oledStringWidthAdapter(pin_show, FONT_STANDARD);
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, pin_show, FONT_STANDARD);
+
+  for (uint32_t i = 0; i < sizeof(pin_show); i++) {
+    buf[0] = pin_show[i];
+    l = oledStringWidth(buf, FONT_STANDARD);
+    oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+  }
 
   if (index > 0 && index < 10) {
-    layoutItemsSelect(64 - l / 2 + pos * 10, y, table[index],
-                      FONT_STANDARD | FONT_DOUBLE);
+    layoutItemsSelect(x + 13 * pos + 7, y, table[index], FONT_STANDARD);
   } else {
-    layoutBmpSelect(64 - l / 2 + pos * 10, y, &bmp_btn_confirm);
+    layoutBmpSelect(x + 13 * pos + 7, y, &bmp_btn_confirm);
   }
 
   if (pos != 0 || cancel_allowed)
@@ -1904,20 +1909,25 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
 
 void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
                      const char *letter) {
-  int l, l1, y = 9;
-  char word_show[] = "_  _  _  _  _  _  _  _";
+  int l, y = 9;
+  char word_show[8] = "________";
+  char buf[2] = {0};
+
+  int x = 12;
 
   for (uint8_t i = 0; i < prefix_len; i++) {
-    word_show[i * 3] = prefix[i];
+    word_show[i] = prefix[i];
   }
   oledClear_ex();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, text, FONT_STANDARD);
   y += 18;
-  l1 = oledStringWidthAdapter(prefix, FONT_STANDARD);
-  l = oledStringWidthAdapter(word_show, FONT_STANDARD);
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, word_show, FONT_STANDARD);
+  for (uint32_t i = 0; i < sizeof(word_show); i++) {
+    buf[0] = word_show[i];
+    l = oledStringWidth(buf, FONT_STANDARD);
+    oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+  }
 
-  layoutItemsSelect(64 - l / 2 + l1 + prefix_len * 4, y, letter, FONT_STANDARD);
+  layoutItemsSelect(x + 13 * prefix_len + 7, y, letter, FONT_STANDARD);
   layoutButtonNoAdapter(_("Prev"), &bmp_btn_back);
   layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
 
