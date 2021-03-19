@@ -456,6 +456,8 @@ const char *languages[][2] = {
     {"PIN cancelled", ""},
     // fsm_msg_common.h
     {"PIN code change", "PIN码修改"},
+    //
+    {"PIN code set", "PIN设置"},
     // fsm.c
     {"PIN expected", ""},
     // fsm.c
