@@ -22,6 +22,7 @@
 #include <libopencm3/stm32/flash.h>
 #include <stdint.h>
 #include "memory.h"
+#include "util.h"
 
 #define FLASH_UTXO_CACHE_SECTOR 10
 
@@ -72,6 +73,11 @@ static void svhandler_system_reset(void) { scb_reset_core(); }
 
 static void svhandler_system_sleep(void) { enter_sleep_mode(); }
 
+static void svhandler_system_privileged(void) {
+  set_mode_privileged();
+  mpu_config_off();
+}
+
 extern volatile uint32_t system_millis;
 
 void svc_handler_main(uint32_t *stack) {
@@ -97,6 +103,9 @@ void svc_handler_main(uint32_t *stack) {
       break;
     case SVC_SYS_SLEEP:
       svhandler_system_sleep();
+      break;
+    case SVC_SYS_PRIVILEGED:
+      svhandler_system_privileged();
       break;
     default:
       stack[0] = 0xffffffff;
