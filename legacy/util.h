@@ -95,6 +95,11 @@ jump_to_firmware(const vector_table_t *ivt, int trust) {
     ;
 }
 
+static inline void set_mode_privileged(void) {
+  // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
+  __asm__ volatile("msr control, %0" ::"r"(0x0));
+}
+
 static inline void set_mode_unprivileged(void) {
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
   __asm__ volatile("msr control, %0" ::"r"(0x1));

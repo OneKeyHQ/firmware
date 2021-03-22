@@ -34,6 +34,7 @@
 #include "layout2.h"
 #include "memory.h"
 #include "si2c.h"
+#include "supervise.h"
 #include "sys.h"
 #include "usb.h"
 #include "util.h"
@@ -439,6 +440,7 @@ void usbPoll(void) {
     }
   }
   if (reset) {
+    svc_system_privileged();
     vector_table_t *ivt = (vector_table_t *)FLASH_PTR(FLASH_APP_START);
     __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
     __asm__ volatile("b reset_handler");
