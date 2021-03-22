@@ -277,8 +277,8 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
     ethereumFormatAmount(&val, token, amount, sizeof(amount));
   }
 
-  char _to1[] = "to 0x__________";
-  char _to2[] = "_______________";
+  char _to1[30] = "to 0x__________";
+  char _to2[30] = "_______________";
   char _to3[] = "_______________?";
 
   if (to_len) {
@@ -296,17 +296,27 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
     }
 
     ethereum_address_checksum(to, to_str, rskip60, chain_id);
-    memcpy(_to1 + 5, to_str, 10);
-    memcpy(_to2, to_str + 10, 15);
-    memcpy(_to3, to_str + 25, 15);
+    if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
+      memcpy(_to1 + 5, to_str, 18);
+      memcpy(_to2, to_str + 18, 22);
+    } else {
+      memcpy(_to1 + 5, to_str, 10);
+      memcpy(_to2, to_str + 10, 15);
+      memcpy(_to3, to_str + 25, 15);
+    }
+
   } else {
     strlcpy(_to1, _("to new contract?"), sizeof(_to1));
     strlcpy(_to2, "", sizeof(_to2));
     strlcpy(_to3, "", sizeof(_to3));
   }
-
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Send"), amount, _to1, _to2, _to3, NULL);
+  if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Send"), amount, NULL, _to1, _to2, NULL);
+  } else {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Send"), amount, _to1, _to2, _to3, NULL);
+  }
 }
 
 static void layoutEthereumData(const uint8_t *data, uint32_t len,
@@ -371,10 +381,19 @@ static void layoutEthereumFee(const uint8_t *value, uint32_t value_len,
   } else {
     ethereumFormatAmount(&val, NULL, tx_value, sizeof(tx_value));
   }
-
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Really send"), tx_value, _("paying up to"), gas_value,
-                    _("for gas?"), NULL);
+  if (oledStringWidthAdapter(tx_value, FONT_STANDARD) > (OLED_WIDTH - 20)) {
+    char buf[64] = {0};
+    strcat(buf, _("paying up to"));
+    strcat(buf, _(" "));
+    strcat(buf, gas_value);
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Really send"), tx_value, NULL, buf, _("for gas?"),
+                      NULL);
+  } else {
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Really send"), tx_value, _("paying up to"), gas_value,
+                      _("for gas?"), NULL);
+  }
 }
 
 /*

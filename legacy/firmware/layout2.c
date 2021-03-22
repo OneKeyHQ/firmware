@@ -1732,10 +1732,10 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
     oledDrawStringAdapter(left, 1 * (font->pixel + 1), line2, FONT_STANDARD);
   }
   if (line3) {
-    oledDrawStringAdapter(left, 2 * (font->pixel + 1), line3, FONT_STANDARD);
+    oledDrawStringAdapter(0, 2 * (font->pixel + 1), line3, FONT_STANDARD);
   }
   if (line4) {
-    oledDrawStringAdapter(left, 3 * (font->pixel + 1), line4, FONT_STANDARD);
+    oledDrawStringAdapter(0, 3 * (font->pixel + 1), line4, FONT_STANDARD);
   }
 
   if (desc) {
@@ -1747,10 +1747,10 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
     }
   } else {
     if (line5) {
-      oledDrawStringAdapter(left, 4 * (font->pixel + 1), line5, FONT_STANDARD);
+      oledDrawStringAdapter(0, 4 * (font->pixel + 1), line5, FONT_STANDARD);
     }
     if (line6) {
-      oledDrawStringAdapter(left, 5 * (font->pixel + 1), line6, FONT_STANDARD);
+      oledDrawStringAdapter(0, 5 * (font->pixel + 1), line6, FONT_STANDARD);
     }
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - (font->pixel + 4));
