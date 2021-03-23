@@ -7,3 +7,4 @@
 #define FIX_VERSION_PATCH 0
 
 #define ONEKEY_VERSION "2.0.7"
+#define ONEKEY_VERSION_HEX 0x2007

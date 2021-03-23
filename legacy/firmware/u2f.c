@@ -397,13 +397,10 @@ void vButton_Lcd_Test(void) {
 }
 
 void st_version(void) {
-  uint16_t BixinVersion;
   uint8_t ucBuf[4];
 
-  BixinVersion = (VERSION_MAJOR << 12) + (VERSION_MINOR << 8) + (VERSION_PATCH);
-
-  ucBuf[0] = BixinVersion >> 8 & 0xFF;
-  ucBuf[1] = BixinVersion & 0xFF;
+  ucBuf[0] = ONEKEY_VERSION_HEX >> 8 & 0xFF;
+  ucBuf[1] = ONEKEY_VERSION_HEX & 0xFF;
   ucBuf[2] = U2F_SW_NO_ERROR >> 8 & 0xFF;
   ucBuf[3] = U2F_SW_NO_ERROR & 0xFF;
   send_u2f_msg(ucBuf, 4);
