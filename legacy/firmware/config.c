@@ -464,9 +464,7 @@ void config_init(void) {
     shutdown();
   }
 
-  if (config_isLanguageSet()) {
-    config_getLanguage(config_language, sizeof(config_language));
-  }
+  config_getLanguage(config_language, sizeof(config_language));
 
   // imported xprv is not supported anymore so we set initialized to false
   // if no mnemonic is present
@@ -479,11 +477,6 @@ void config_init(void) {
     storage_unlock(PIN_EMPTY, NULL);
   }
 #if !EMULATOR
-  if (!config_isLanguageSet()) {
-    ui_language = 0xff;
-    menu_language_init();
-  }
-
   se_sync_session_key();
 #endif
 

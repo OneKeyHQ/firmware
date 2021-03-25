@@ -515,6 +515,33 @@ uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh) {
 
 #endif
 
+void layout_language_set(uint8_t key) {
+  const char *lang[2] = {"en-US", "zh-CN"};
+  layoutLast = layout_language_set;
+  static int index = 0;
+
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) index--;
+      break;
+    case KEY_DOWN:
+      if (index < 1) index++;
+      break;
+    case KEY_CONFIRM:
+      config_setLanguage(lang[index]);
+      layoutHome();
+      return;
+    default:
+      return;
+  }
+
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
+                           NULL, index == 0 ? "Okay" : "确认", index + 1, 2,
+                           NULL, NULL, index == 0 ? "English" : "简体中文",
+                           index > 0 ? "English" : NULL,
+                           index == 0 ? "简体中文" : NULL);
+}
+
 static void _layout_home(bool update_menu) {
   if (layoutLast == layoutHome || layoutLast == layoutScreensaver) {
     oledClear_ex();
@@ -595,7 +622,16 @@ static void _layout_home(bool update_menu) {
   system_millis_lock_start = timer_ms();
 }
 
-void layoutHome(void) { _layout_home(true); }
+void layoutHome(void) {
+#if !EMULATOR
+  if (!config_isLanguageSet() && !config_isInitialized()) {
+    layout_language_set(KEY_UP);
+  } else
+#endif
+  {
+    _layout_home(true);
+  }
+}
 
 void layoutHomeEx(void) { _layout_home(false); }
 
@@ -1608,35 +1644,39 @@ void layoutDeviceInfo(uint8_t ucPage) {
 void layoutHomeInfo(void) {
   uint8_t key = KEY_NULL;
   key = keyScan();
-  layoutEnterSleep();
-  if (layoutNeedRefresh()) {
-    layoutHome();
-  }
-  if (layoutLast == layoutHome) {
-#if !EMULATOR
-    refreshUsbConnectTips();
-#endif
-    if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
-      if (protectPinOnDevice(true, true)) {
-        menu_run(KEY_NULL, 0);
-      } else {
-        layoutHome();
-      }
+  if (layoutLast == layout_language_set) {
+    layout_language_set(key);
+  } else {
+    layoutEnterSleep();
+    if (layoutNeedRefresh()) {
+      layoutHome();
     }
-  } else if (layoutLast == menu_run) {
-    menu_run(key, 0);
-  }
+    if (layoutLast == layoutHome) {
+#if !EMULATOR
+      refreshUsbConnectTips();
+#endif
+      if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
+        if (protectPinOnDevice(true, true)) {
+          menu_run(KEY_NULL, 0);
+        } else {
+          layoutHome();
+        }
+      }
+    } else if (layoutLast == menu_run) {
+      menu_run(key, 0);
+    }
 
-  // wake from screensaver on any button
-  if (layoutLast == layoutScreensaver &&
-      (button.NoUp || button.YesUp || button.UpUp || button.DownUp)) {
-    layoutHome();
-    return;
-  }
-  if (layoutLast != layoutHome && layoutLast != layoutScreensaver) {
-    if (button.NoUp) {
-      recovery_abort();
-      signing_abort();
+    // wake from screensaver on any button
+    if (layoutLast == layoutScreensaver &&
+        (button.NoUp || button.YesUp || button.UpUp || button.DownUp)) {
+      layoutHome();
+      return;
+    }
+    if (layoutLast != layoutHome && layoutLast != layoutScreensaver) {
+      if (button.NoUp) {
+        recovery_abort();
+        signing_abort();
+      }
     }
   }
 }
