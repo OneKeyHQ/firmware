@@ -574,3 +574,17 @@ bool se_importSeed(uint8_t *seed) {
   }
   return true;
 }
+
+bool se_isFactoryMode(void) {
+  uint8_t cmd[5] = {0x00, 0xf8, 0x04, 00, 0x01};
+  uint8_t mode = 0;
+  uint16_t len = sizeof(mode);
+
+  if (MI2C_OK != se_transmit_plain(cmd, sizeof(cmd), &mode, &len)) {
+    return false;
+  }
+  if (len == 1 && mode == 0xff) {
+    return true;
+  }
+  return false;
+}

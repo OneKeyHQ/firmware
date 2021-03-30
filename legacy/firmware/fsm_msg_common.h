@@ -293,10 +293,6 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
   // number change
   i2c_set_wait(false);
   fsm_sendSuccess(_("Device wiped"));
-#if !EMULATOR
-  usbPoll();  // send response immediately
-  menu_language_init();
-#endif
   layoutHome();
 }
 

@@ -624,7 +624,8 @@ static void _layout_home(bool update_menu) {
 
 void layoutHome(void) {
 #if !EMULATOR
-  if (!config_isLanguageSet() && !config_isInitialized()) {
+  if (!config_isLanguageSet() && !config_isInitialized() &&
+      !se_isFactoryMode()) {
     layout_language_set(KEY_UP);
   } else
 #endif

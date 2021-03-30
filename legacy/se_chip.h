@@ -102,6 +102,7 @@ bool se_getNeedsBackup(bool *needs_backup);
 bool se_setNeedsBackup(bool needs_backup);
 bool se_export_seed(uint8_t *seed);
 bool se_importSeed(uint8_t *seed);
+bool se_isFactoryMode(void);
 
 #else
 #define se_transmit(...) 0
@@ -129,5 +130,6 @@ bool se_importSeed(uint8_t *seed);
 #define se_setNeedsBackup(...) false
 #define se_export_seed(...) false
 #define se_importSeed(...) false
+#define se_isFactoryMode(...) false
 #endif
 #endif
