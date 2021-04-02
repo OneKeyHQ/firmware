@@ -453,6 +453,16 @@ void config_init(void) {
 
   // get whether use se flag
   se_version = se_get_version();
+  for (uint8_t i = 0; i < 5; i++) {
+    if (se_version == NULL) {
+      se_power_off();
+      delay_ms(100);
+      se_power_on();
+      se_version = se_get_version();
+    } else {
+      break;
+    }
+  }
   if (se_version) {
     if (strcmp(se_version, "1.1.0.0") > 0) {
       g_bSelectSEFlag = true;
