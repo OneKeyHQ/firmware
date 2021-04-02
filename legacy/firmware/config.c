@@ -452,13 +452,13 @@ void config_init(void) {
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
 
   // get whether use se flag
-  se_version = se_get_version();
   for (uint8_t i = 0; i < 5; i++) {
+    se_version = se_get_version();
     if (se_version == NULL) {
       se_power_off();
       delay_ms(100);
       se_power_on();
-      se_version = se_get_version();
+      delay_ms(100);
     } else {
       break;
     }
