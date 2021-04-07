@@ -257,9 +257,14 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
       else
         return 0;
     } else if (msg_tiny_id == MessageType_MessageType_BixinPinInputOnDevice) {
+      uint8_t min_pin_len = MIN_PIN_LEN;
+      if (PinMatrixRequestType_PinMatrixRequestType_NewFirst == type ||
+          PinMatrixRequestType_PinMatrixRequestType_NewSecond == type) {
+        min_pin_len = DEFAULT_PIN_LEN;
+      }
       msg_tiny_id = 0xFFFF;
       usbTiny(0);
-      return protectInputPin(text, MAX_PIN_LEN, true);
+      return protectInputPin(text, min_pin_len, MAX_PIN_LEN, true);
     }
     if (button.NoUp) {
       timer_out_set(timer_out_oper, 0);
@@ -397,7 +402,8 @@ bool protectChangePin(bool removal) {
     if (g_bIsBixinAPP) {
       need_new_pin = false;
       if (newpin == NULL) {
-        newpin = protectInputPin(_("Please enter new PIN"), MAX_PIN_LEN, true);
+        newpin = protectInputPin(_("Please enter new PIN"), DEFAULT_PIN_LEN,
+                                 MAX_PIN_LEN, true);
       }
     }
   }
@@ -726,44 +732,54 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   return key;
 }
 
-const char *protectInputPin(const char *text, uint8_t pin_len,
-                            bool cancel_allowed) {
+const char *protectInputPin(const char *text, uint8_t min_pin_len,
+                            uint8_t max_pin_len, bool cancel_allowed) {
   uint8_t key = KEY_NULL;
   uint8_t counter = 0;
-  int index = 0;
+  int index = 0, max_index = 0;
+  bool update = true, first_num = false;
   static char pin[10] = "";
 
   memzero(pin, sizeof(pin));
-  do {
-    index = random_uniform(10);
-  } while (index == 0);
 
 refresh_menu:
+  if (update) {
+    update = false;
+    first_num = false;
+    if (counter >= min_pin_len) {
+      max_index = 10;
+    } else {
+      max_index = 9;
+    }
+    if (counter >= DEFAULT_PIN_LEN) {
+      index = 10;
+      first_num = true;
+    } else {
+      do {
+        index = random_uniform(10);
+      } while (index == 0);
+    }
+  } else if (first_num) {
+    first_num = false;
+    do {
+      index = random_uniform(10);
+    } while (index == 0);
+  }
+
   layoutInputPin(counter, text, index, cancel_allowed);
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
       if (index > 1)
         index--;
-      else {
-        if (counter)
-          index = 10;
-        else
-          index = 9;
-      }
+      else
+        index = max_index;
       goto refresh_menu;
     case KEY_DOWN:
-      if (counter) {
-        if (index < 10)
-          index++;
-        else
-          index = 1;
-      } else {
-        if (index < 9)
-          index++;
-        else
-          index = 1;
-      }
+      if (index < max_index)
+        index++;
+      else
+        index = 1;
       goto refresh_menu;
     case KEY_CONFIRM:
       (void)pin;
@@ -771,20 +787,15 @@ refresh_menu:
         return pin;
       } else {
         pin[counter++] = index + '0';
-        if (counter == pin_len) return pin;
-        do {
-          index = random_uniform(10);
-        } while (index == 0);
-
+        if (counter == max_pin_len) return pin;
+        update = true;
         goto refresh_menu;
       }
     case KEY_CANCEL:
       if (counter) {
         counter--;
         pin[counter] = 0;
-        do {
-          index = random_uniform(10);
-        } while (index == 0);
+        update = true;
         goto refresh_menu;
       }
       break;
@@ -804,8 +815,8 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
-    pin = protectInputPin(_("Please enter current PIN"), MAX_PIN_LEN,
-                          cancel_allowed);
+    pin = protectInputPin(_("Please enter current PIN"), MIN_PIN_LEN,
+                          MAX_PIN_LEN, cancel_allowed);
     // input_pin = false;
     if (!pin) {
       return false;
@@ -834,7 +845,8 @@ pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
-    pin = protectInputPin(_("Please enter current PIN"), MAX_PIN_LEN, true);
+    pin = protectInputPin(_("Please enter current PIN"), MIN_PIN_LEN,
+                          MAX_PIN_LEN, true);
 
     if (pin == NULL) {
       return false;
@@ -860,7 +872,8 @@ pin_set:
     }
   }
 retry:
-  pin = protectInputPin(_("Please enter new PIN"), MAX_PIN_LEN, true);
+  pin = protectInputPin(_("Please enter new PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
+                        true);
   if (pin == PIN_CANCELED_BY_BUTTON) {
     return false;
   } else if (pin == NULL || pin[0] == '\0') {
@@ -872,7 +885,8 @@ retry:
   }
   strlcpy(new_pin, pin, sizeof(new_pin));
 
-  pin = protectInputPin(_("Please re-enter new PIN"), MAX_PIN_LEN, true);
+  pin = protectInputPin(_("Please re-enter new PIN"), DEFAULT_PIN_LEN,
+                        MAX_PIN_LEN, true);
   if (pin == NULL) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));

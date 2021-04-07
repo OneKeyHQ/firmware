@@ -47,8 +47,8 @@ bool protectChangeWipeCode(bool removal);
 bool protectPassphrase(char* passphrase);
 bool protectSeedPin(bool force_pin, bool setpin, bool update_pin);
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode);
-const char* protectInputPin(const char* text, uint8_t pin_len,
-                            bool cancel_allowed);
+const char* protectInputPin(const char* text, uint8_t min_pin_len,
+                            uint8_t max_pin_len, bool cancel_allowed);
 bool protectPinOnDevice(bool use_cached, bool cancel_allowed);
 bool protectChangePinOnDevice(bool is_prompt, bool set);
 bool protectSelectMnemonicNumber(uint32_t* number);
