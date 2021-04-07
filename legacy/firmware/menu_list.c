@@ -52,16 +52,17 @@ void menu_manual(int index) {
   char index_str[] = "1/5";
   char desc[64] = "";
   int offset = 0;
+  int len = 0;
 refresh_menu:
 
   index_str[0] = page + '1';
 
+  oledClear_ex();
+  oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD | FONT_FIXED);
+
   switch (page) {
     case 0:
-      oledClear_ex();
-      oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
-
-      int len = oledStringWidthAdapter(_("Press"), FONT_STANDARD);
+      len = oledStringWidthAdapter(_("Press"), FONT_STANDARD);
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
       strcat(desc, "        ");
@@ -86,9 +87,7 @@ refresh_menu:
 
       break;
     case 1:
-      oledClear_ex();
       oledDrawBitmap(60, 0, &bmp_btn_up);
-      oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
 
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
@@ -114,9 +113,7 @@ refresh_menu:
 
       break;
     case 2:
-      oledClear_ex();
       oledDrawBitmap(60, 0, &bmp_btn_up);
-      oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download Onekey"),
                                   FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10, "onekey.so/download",
@@ -125,9 +122,7 @@ refresh_menu:
       break;
 
     case 3:
-      oledClear_ex();
       oledDrawBitmap(60, 0, &bmp_btn_up);
-      oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10,
                                   _("Scan the QR code below"), FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,

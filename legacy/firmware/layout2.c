@@ -1072,7 +1072,7 @@ void layoutQRCode(const char *index, const BITMAP *bmp_up,
 
   int side = 0;
   oledClear_ex();
-  oledDrawStringAdapter(0, 0, index, FONT_STANDARD);
+  oledDrawStringAdapter(0, 0, index, FONT_STANDARD | FONT_FIXED);
   if (bmp_up) {
     oledDrawBitmap(60, y, bmp_up);
     y += 8;
