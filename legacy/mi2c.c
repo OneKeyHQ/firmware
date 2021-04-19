@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "mi2c.h"
+#include "timer.h"
 
 uint8_t g_ucMI2cRevBuf[MI2C_BUF_MAX_LEN];
 uint8_t g_ucMI2cSendBuf[MI2C_BUF_MAX_LEN];
@@ -229,28 +230,20 @@ void vMI2CDRV_Init(void) {
   rcc_periph_clock_enable(RCC_I2C1);
   rcc_periph_clock_enable(RCC_GPIOB);
 
-  i2c_reset(MI2CX);
-
   gpio_set_output_options(GPIO_MI2C_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ,
                           GPIO_MI2C_SCL | GPIO_MI2C_SDA);
   gpio_set_af(GPIO_MI2C_PORT, GPIO_AF4, GPIO_MI2C_SCL | GPIO_MI2C_SDA);
   gpio_mode_setup(GPIO_MI2C_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE,
                   GPIO_MI2C_SCL | GPIO_MI2C_SDA);
+  i2c_reset(MI2CX);
+  delay_ms(5);
   i2c_peripheral_disable(MI2CX);
 
-  // combus
-  // gpio_mode_setup(GPIO_MI2C_PORT, GPIO_MODE_INPUT, GPIO_PUPD_NONE,
-  // MI2C_COMBUS);
-
-  I2C_CR1(MI2CX) |= I2C_CR1_NOSTRETCH;
-  I2C_CR1(MI2CX) |= I2C_CR1_ENGC;
-  I2C_CR1(MI2CX) |= I2C_CR1_POS;
   // 100k
   i2c_set_speed(MI2CX, i2c_speed_sm_100k, 30);
-  // i2c_set_speed(MI2CX, i2c_speed_sm_100k, 32);
-  i2c_set_own_7bit_slave_address(MI2CX, MI2C_ADDR);
   i2c_peripheral_enable(MI2CX);
-  POWER_ON_SE();
+  while (!(I2C_CR1(MI2CX) & I2C_CR1_PE))
+    ;
 }
 
 /*

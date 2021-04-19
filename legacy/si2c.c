@@ -54,7 +54,7 @@ void i2c_slave_init_irq(void) {
   i2c_peripheral_disable(I2C2);
   /*	//HSI is at 2Mhz */
   i2c_set_fast_mode(I2C2);
-  i2c_set_speed(I2C2, i2c_speed_fm_400k, 32);
+  i2c_set_speed(I2C2, i2c_speed_fm_400k, 30);
   /*	//addressing mode*/
   i2c_set_own_7bit_slave_address(I2C2, SI2C_ADDR);
   i2c_enable_ack(I2C2);
