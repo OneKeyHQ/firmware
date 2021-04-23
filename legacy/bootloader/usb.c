@@ -235,7 +235,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       }
       return;
     }
-    if (msg_id != 0x0006) {
+    if (msg_id != 0x0006 && msg_id != 0x0010) {
       send_msg_failure(dev, 1);  // Failure_UnexpectedMessage
       return;
     }
