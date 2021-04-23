@@ -26,6 +26,8 @@
 #include "memory.h"
 #include "util.h"
 
+char bootloader_version[8] = {0};
+
 #if MEMORY_PROTECT
 #if 0
 static int known_bootloader(int r, const uint8_t *hash) {
@@ -136,32 +138,51 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
       memcmp(hash,
              "\xe5\x83\x74\x1b\xb0\x53\xf2\x29\x29\xf5\x6c\x6f\xaf\xff\xea\xe9"
              "\xae\x96\x16\x67\xbf\xa5\xf2\x1b\x3d\x51\x8d\xc5\x52\x71\x59\x99",
-             32))
+             32)) {
+    memcpy(bootloader_version, "1.8.3", strlen("1.8.3"));
     return 1;  // 1.8.3
+  }
+
   if (0 ==
       memcmp(hash,
              "\xb5\x32\xd7\x5a\x3c\x38\x5d\x73\xba\x58\xb8\x29\x91\xe8\x36\xd1"
              "\x26\xea\xb4\x5b\xb3\x87\x10\x0b\xc6\xb4\xf7\x48\x05\xb0\x9f\xb0",
-             32))
+             32)) {
+    memcpy(bootloader_version, "1.8.5", strlen("1.8.5"));
     return 1;  // 1.8.5
+  }
   if (0 ==
       memcmp(hash,
              "\xbf\x2e\x53\xd3\xcb\x0b\x1a\xf2\x39\xc0\x74\xa4\x1e\x86\xf1\x47"
              "\xc4\x64\x95\xdf\x0d\x13\x9a\xd9\x56\x47\xc3\xf4\x6a\x66\x35\xa0",
-             32))
+             32)) {
+    memcpy(bootloader_version, "1.8.5", strlen("1.8.5"));
     return 1;  // 1.8.5
+  }
   if (0 ==
       memcmp(hash,
              "\xae\xdc\x2f\x7e\xb5\xbc\x6a\x22\x49\xed\x35\xc3\x1f\x9d\x1e\x8d"
              "\x55\x57\xa3\x0e\xc6\xd6\x36\xa6\xba\x9b\x3e\x92\xc9\x6d\x58\x29",
-             32))
+             32)) {
+    memcpy(bootloader_version, "1.8.6", strlen("1.8.6"));
     return 1;  // 1.8.6
+  }
   if (0 ==
       memcmp(hash,
              "\x28\xb1\xaa\x4b\x74\xd1\xdb\xda\xbe\xff\x5b\x24\x8b\xc0\x5f\x97"
              "\xca\x3a\x49\x07\x15\xfd\xa6\xca\x73\xc7\xf7\x6a\xb8\xa8\x49\xb9",
-             32))
+             32)) {
+    memcpy(bootloader_version, "1.8.7", strlen("1.8.7"));
     return 1;  // 1.8.7
+  }
+  if (0 ==
+      memcmp(hash,
+             "\xa7\xb1\xed\xcc\x56\x94\x07\xe8\xaa\x4f\xfa\x60\x5a\xdb\xb9\xa8"
+             "\xb2\x4c\x05\x4f\xe1\xac\xca\x56\xf0\x81\x5c\x9c\x02\xee\x71\xc6",
+             32)) {
+    memcpy(bootloader_version, "1.8.8", strlen("1.8.8"));
+    return 1;  // 1.8.8
+  }
 
   return 0;
 }
