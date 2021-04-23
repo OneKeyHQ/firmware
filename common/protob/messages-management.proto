@@ -114,6 +114,7 @@ message Features {
     optional bool backup_only = 507;
     optional string onekey_version = 508;
     optional string onekey_serial = 509;
+    optional string bootloader_version = 510;
 }
 
 /**

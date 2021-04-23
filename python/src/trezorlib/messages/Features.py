@@ -66,6 +66,7 @@ class Features(p.MessageType):
         backup_only: bool = None,
         onekey_version: str = None,
         onekey_serial: str = None,
+        bootloader_version: str = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -114,6 +115,7 @@ class Features(p.MessageType):
         self.backup_only = backup_only
         self.onekey_version = onekey_version
         self.onekey_serial = onekey_serial
+        self.bootloader_version = bootloader_version
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -165,4 +167,5 @@ class Features(p.MessageType):
             507: ('backup_only', p.BoolType, None),
             508: ('onekey_version', p.UnicodeType, None),
             509: ('onekey_serial', p.UnicodeType, None),
+            510: ('bootloader_version', p.UnicodeType, None),
         }

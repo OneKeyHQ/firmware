@@ -22,6 +22,8 @@
 #include "storage.h"
 #include "storage_ex.h"
 
+extern char bootloader_version[8];
+
 bool get_features(Features *resp) {
   char *sn_version = NULL;
   char *serial = NULL;
@@ -118,6 +120,10 @@ bool get_features(Features *resp) {
     resp->has_onekey_serial = true;
     strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
   }
+
+  resp->has_bootloader_version = true;
+  strlcpy(resp->bootloader_version, bootloader_version,
+          sizeof(resp->bootloader_version));
   return resp;
 }
 
