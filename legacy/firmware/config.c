@@ -950,11 +950,11 @@ bool config_containsMnemonic(const char *mnemonic) {
 
     if (!se_export_seed(seed)) {
       return false;
-
-      const char *mne = mnemonic_from_data(seed, strength / 8);
-      len = strlen(mne);
-      strlcpy((char *)stored_mnemonic, mne, MAX_MNEMONIC_LEN);
     }
+
+    const char *mne = mnemonic_from_data(seed, strength / 8);
+    len = strlen(mne);
+    strlcpy((char *)stored_mnemonic, mne, MAX_MNEMONIC_LEN);
   } else {
     if (sectrue != storage_get(KEY_MNEMONIC, stored_mnemonic,
                                sizeof(stored_mnemonic), &len)) {
