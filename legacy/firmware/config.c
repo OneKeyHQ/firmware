@@ -954,7 +954,7 @@ bool config_containsMnemonic(const char *mnemonic) {
     }
   } else {
     if (sectrue != storage_get(KEY_MNEMONIC, stored_mnemonic,
-                             sizeof(stored_mnemonic), &len)) {
+                               sizeof(stored_mnemonic), &len)) {
       return false;
     }
   }
