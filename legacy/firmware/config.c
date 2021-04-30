@@ -939,9 +939,24 @@ bool config_hasMnemonic(void) {
 bool config_containsMnemonic(const char *mnemonic) {
   uint16_t len = 0;
   uint8_t stored_mnemonic[MAX_MNEMONIC_LEN] = {0};
-  if (sectrue != storage_get(KEY_MNEMONIC, stored_mnemonic,
+
+  if (g_bSelectSEFlag) {
+    uint32_t strength = 0;
+
+    if (!se_getSeedStrength(&strength)) {
+      return false;
+    } else {
+      len = strength;
+    }
+
+    if (!se_export_seed(stored_mnemonic)) {
+      return false;
+    }
+  } else {
+    if (sectrue != storage_get(KEY_MNEMONIC, stored_mnemonic,
                              sizeof(stored_mnemonic), &len)) {
-    return false;
+      return false;
+    }
   }
 
   // Compare the digests to mitigate side-channel attacks.
