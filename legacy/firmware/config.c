@@ -941,16 +941,19 @@ bool config_containsMnemonic(const char *mnemonic) {
   uint8_t stored_mnemonic[MAX_MNEMONIC_LEN] = {0};
 
   if (g_bSelectSEFlag) {
+    uint8_t seed[64];
     uint32_t strength = 0;
 
     if (!se_getSeedStrength(&strength)) {
       return false;
-    } else {
-      len = strength;
     }
 
-    if (!se_export_seed(stored_mnemonic)) {
+    if (!se_export_seed(seed)) {
       return false;
+
+      const char *mne = mnemonic_from_data(seed, strength / 8);
+      len = strlen(mne);
+      strlcpy((char *)stored_mnemonic, mne, MAX_MNEMONIC_LEN);
     }
   } else {
     if (sectrue != storage_get(KEY_MNEMONIC, stored_mnemonic,
