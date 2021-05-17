@@ -844,13 +844,15 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
       random_buffer(seed, sizeof(seed));
       strength = (mnemonic_to_bits(mnemonic, seed) / 11) * 8 * 4 / 3;
       se_setSeedStrength(strength);
-      return se_importSeed(seed);
+      if (!se_importSeed(seed)) {
+        return false;
+      }
     }
-  }
-
-  if (sectrue != storage_set(KEY_MNEMONIC, mnemonic,
-                             strnlen(mnemonic, MAX_MNEMONIC_LEN))) {
-    return false;
+  } else {
+    if (sectrue != storage_set(KEY_MNEMONIC, mnemonic,
+                               strnlen(mnemonic, MAX_MNEMONIC_LEN))) {
+      return false;
+    }
   }
 
   StorageHDNode u2fNode = {0};
