@@ -582,12 +582,8 @@ static const HDNode *generateKeyHandle(const uint8_t app_id[],
   // Signature of app_id and random data
   memcpy(&keybase[0], app_id, U2F_APPID_SIZE);
   memcpy(&keybase[U2F_APPID_SIZE], key_handle, KEY_PATH_LEN);
-  //   hmac_sha256(node->private_key, sizeof(node->private_key), keybase,
-  //               sizeof(keybase), &key_handle[KEY_PATH_LEN]);
-  // can't get private key when use SE
-  hmac_sha256(node->public_key + 1, sizeof(node->private_key), keybase,
+  hmac_sha256(node->private_key, sizeof(node->private_key), keybase,
               sizeof(keybase), &key_handle[KEY_PATH_LEN]);
-
   // Done!
   return node;
 }
@@ -612,7 +608,7 @@ static const HDNode *validateKeyHandle(const uint8_t app_id[],
   memcpy(&keybase[U2F_APPID_SIZE], key_handle, KEY_PATH_LEN);
 
   uint8_t hmac[SHA256_DIGEST_LENGTH] = {0};
-  hmac_sha256(node->public_key + 1, sizeof(node->private_key), keybase,
+  hmac_sha256(node->private_key, sizeof(node->private_key), keybase,
               sizeof(keybase), hmac);
 
   if (memcmp(&key_handle[KEY_PATH_LEN], hmac, SHA256_DIGEST_LENGTH) != 0)
