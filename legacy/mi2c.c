@@ -236,14 +236,13 @@ void vMI2CDRV_Init(void) {
   gpio_mode_setup(GPIO_MI2C_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE,
                   GPIO_MI2C_SCL | GPIO_MI2C_SDA);
   i2c_reset(MI2CX);
-  delay_ms(5);
+  delay_ms(100);
   i2c_peripheral_disable(MI2CX);
 
   // 100k
   i2c_set_speed(MI2CX, i2c_speed_sm_100k, 30);
   i2c_peripheral_enable(MI2CX);
-  while (!(I2C_CR1(MI2CX) & I2C_CR1_PE))
-    ;
+  delay_ms(100);
 }
 
 /*
