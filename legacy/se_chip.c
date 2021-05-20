@@ -345,7 +345,7 @@ bool se_get_sn(char **serial) {
   *serial = sn;
   return true;
 }
-char *se_get_version(void) {
+char *_se_get_version(void) {
   uint8_t ucVerCmd[5] = {0x00, 0xf7, 0x00, 00, 0x02};
   uint8_t ver[2] = {0};
   uint16_t ver_len = sizeof(ver);
@@ -365,6 +365,26 @@ char *se_get_version(void) {
   ver_char[i++] = (ver[1] & 0x0f) + '0';
 
   return ver_char;
+}
+
+char *se_get_version(void) {
+  char *se_sn = NULL;
+  char *se_version = NULL;
+  static char fix_version[] = "1.1.0.3";
+
+  se_version = _se_get_version();
+  if (se_version) {
+    if (strcmp(se_version, "1.1.0.2") == 0) {
+      if (se_get_sn(&se_sn)) {
+        if (strcmp(se_sn, "Bixin21032201500") > 0) {
+          return fix_version;
+        }
+      }
+    }
+    return se_version;
+  }
+
+  return NULL;
 }
 
 bool se_verify(void *message, uint16_t message_len, uint16_t max_len,
