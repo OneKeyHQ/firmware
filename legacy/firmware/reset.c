@@ -153,7 +153,7 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
       return;
     }
     se_setSeedStrength(strength);
-    se_setNeedsBackup(false);
+    se_setNeedsBackup(true);
     memcpy(int_entropy, seed, 32);
   } else {
     SHA256_CTX ctx = {0};
