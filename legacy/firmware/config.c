@@ -482,6 +482,11 @@ void config_init(void) {
     config_set_bool(KEY_INITIALIZED, false);
   }
 
+  // new devcie never use se
+  if (!config_isInitialized() && (g_bSelectSEFlag == true)) {
+    g_bSelectSEFlag = false;
+  }
+
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, NULL);
