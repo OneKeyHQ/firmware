@@ -354,7 +354,7 @@ bool protectPin(bool use_cached) {
   const char *pin = "";
   if (config_hasPin()) {
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                     _("PIN REF Table"), &newpin);
+                     _("Please enter current PIN"), &newpin);
     if (!pin) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -379,7 +379,7 @@ bool protectChangePin(bool removal) {
 
   if (config_hasPin()) {
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                     _("PIN REF Table"), &newpin);
+                     _("Please enter current PIN"), &newpin);
 
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
@@ -411,7 +411,7 @@ bool protectChangePin(bool removal) {
   if (!removal) {
     if (!g_bIsBixinAPP || need_new_pin) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                       _("PIN REF Table"), &newpin);
+                       _("Please enter new PIN"), &newpin);
     } else {
       if (newpin == NULL) {
         fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
@@ -432,7 +432,7 @@ bool protectChangePin(bool removal) {
 
     if (!g_bIsBixinAPP) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewSecond,
-                       _("PIN REF Table"), &newpin);
+                       _("Please re-enter new PIN"), &newpin);
       if (pin == NULL) {
         memzero(old_pin, sizeof(old_pin));
         memzero(new_pin, sizeof(new_pin));
@@ -635,7 +635,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
   } else {
     if (config_hasPin()) {
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
-                       _("PIN REF Table"), &newpin);
+                       _("Please enter current PIN"), &newpin);
       if (!pin) {
         fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
         return false;
@@ -651,7 +651,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
     } else {
       if (force_pin) {
         pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
-                         _("PIN REF Table"), &newpin);
+                         _("Please enter new PIN"), &newpin);
         if (pin == PIN_CANCELED_BY_BUTTON) {
           return false;
         } else if (pin == NULL || pin[0] == '\0') {

@@ -450,8 +450,6 @@ const char *languages[][2] = {
     // signing.c
     {"Output's address_n provided but not expected.", ""},
     // protect.c protect.c protect.c protect.c protect.c
-    // protect.c
-    {"PIN REF Table", "PIN码对照表"},
     // fsm.c
     {"PIN cancelled", ""},
     // fsm_msg_common.h
