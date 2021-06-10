@@ -405,7 +405,7 @@ void usbInit(void) {
                        usbd_control_buffer, sizeof(usbd_control_buffer));
   usbd_register_set_config_callback(usbd_dev, set_config);
   usb21_setup(usbd_dev, &bos_descriptor);
-  static const char *origin_url = "trezor.io/start";
+  static const char *origin_url = "onekey.so";
   webusb_setup(usbd_dev, origin_url);
   // Debug link interface does not have WinUSB set;
   // if you really need debug link on windows, edit the descriptor in winusb.c

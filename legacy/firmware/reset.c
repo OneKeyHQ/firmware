@@ -68,9 +68,8 @@ void reset_init(bool display_random, uint32_t _strength,
 
   if (!g_bIsBixinAPP) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("create a new wallet?"),
-                      _("By continuing you"), _("agree to trezor.io/tos"), NULL,
-                      NULL);
+                      NULL, _("Do you really want to"), _("create a new wallet?"),
+                      NULL, NULL, NULL);
 
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);

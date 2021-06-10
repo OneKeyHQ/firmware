@@ -65,7 +65,7 @@ static void send_msg_features(usbd_device *dev) {
   memzero(response, sizeof(response));
   len = getintprotobuf(response + 37, flash_pos);
   // response: Features message (id 17), payload len 26
-  //           - vendor = "trezor.io"
+  //           - vendor = "onekey.so"
   //           - major_version = VERSION_MAJOR
   //           - minor_version = VERSION_MINOR
   //           - patch_version = VERSION_PATCH
@@ -82,7 +82,7 @@ static void send_msg_features(usbd_device *dev) {
          // data
          "\x0a"
          "\x09"
-         "trezor.io"
+         "onekey.so"
          "\x10" VERSION_MAJOR_CHAR "\x18" VERSION_MINOR_CHAR
          "\x20" VERSION_PATCH_CHAR
          "\x28"
