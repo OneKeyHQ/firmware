@@ -106,9 +106,13 @@ int main(void) {
     setReboot();
     __stack_chk_guard = random32();  // this supports compiler provided
                                      // unpredictable stack protection check
+#if ONEKEY_MINI
+
+#else
     buttonsIrqInit();
     timer_init();
     register_timer("button", timer1s / 2, buttonsTimer);
+#endif
     mpu_config_bootloader();
   } else {
 #ifndef APPVER
@@ -119,10 +123,14 @@ int main(void) {
 #ifndef APPVER
     memory_protect();
     oledInit();
+#if ONEKEY_MINI
+#else
     sys_poweron();
     buttonsIrqInit();
     timer_init();
     register_timer("button", timer1s / 2, buttonsTimer);
+#endif
+
 #endif
     mpu_config_bootloader();
 #ifndef APPVER

@@ -88,6 +88,10 @@ extern uint8_t *emulator_flash_base;
 #define FLASH_STORAGE_SECTOR_FIRST 2
 #define FLASH_STORAGE_SECTOR_LAST 3
 
+#if ONEKEY_MINI
+#define FLASH_CODE_SECTOR_FIRST 4
+#define FLASH_CODE_SECTOR_LAST 11
+#else
 #if BLE_SWD_UPDATE
 #define FLASH_CODE_SECTOR_FIRST 4
 #define FLASH_CODE_SECTOR_LAST 9
@@ -112,6 +116,7 @@ extern uint8_t *emulator_flash_base;
 
 #endif
 
+#endif
 void memory_protect(void);
 void memory_write_unlock(void);
 int memory_bootloader_hash(uint8_t *hash);

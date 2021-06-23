@@ -29,7 +29,7 @@ static void erase_code_progress(void) {
   layoutProgress("INSTALLING ... Please wait", 0);
   flash_exit();
 }
-
+#if !ONEKEY_MINI
 static void erase_ble_code_progress(void) {
   flash_enter();
   for (int i = FLASH_BLE_SECTOR_FIRST; i <= FLASH_BLE_SECTOR_LAST; i++) {
@@ -41,6 +41,7 @@ static void erase_ble_code_progress(void) {
   layoutProgress("INSTALLING ... Please wait", 0);
   flash_exit();
 }
+#endif
 
 static void erase_storage(void) {
   flash_enter();

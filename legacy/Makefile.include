@@ -170,6 +170,12 @@ else
 CFLAGS += -DUSE_SE=0
 endif
 
+ifeq ($(ONEKEY_MINI), 1)
+CFLAGS += -DONEKEY_MINI=1
+else
+CFLAGS += -DONEKEY_MINI=0
+endif
+
 all: $(NAME).bin
 
 openocd:

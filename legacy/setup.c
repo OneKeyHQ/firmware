@@ -25,9 +25,14 @@
 #include <libopencm3/stm32/rng.h>
 #include <libopencm3/stm32/spi.h>
 
+#if ONEKEY_MINI
+
+#else
+#include "mi2c.h"
+#endif
+
 #include "buttons.h"
 #include "layout.h"
-#include "mi2c.h"
 #include "oled.h"
 #include "rng.h"
 #include "si2c.h"
@@ -149,16 +154,24 @@ void setup(void) {
   rcc_periph_clock_enable(RCC_OTGFS);
   // clear USB OTG_FS peripheral dedicated RAM
   memset_reg((void *)0x50020000, (void *)0x50020500, 0);
+
+#if ONEKEY_MINI
+
+#else
+
 #if (_SUPPORT_DEBUG_UART_)
   usart_setup();
 #endif
   ble_usart_init();
   i2c_slave_init_irq();
+#endif
 }
 
 void setReboot(void) {
+#if !ONEKEY_MINI
   ble_usart_irq_set();
   i2c_slave_init_irq();
+#endif
 }
 
 void setupApp(void) {
@@ -186,11 +199,14 @@ void setupApp(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
+#if ONEKEY_MINI
+
+#else
   // change oled refresh frequency
   oledUpdateClk();
-
   // master i2c init
   vMI2CDRV_Init();
+#endif
 }
 
 #define MPU_RASR_SIZE_32B (0x04UL << MPU_RASR_SIZE_LSB)

@@ -275,13 +275,16 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         shutdown();
       }
       return;
-    } else if (msg_id == 0x0010) {  // FirmwareErase message (id 16)
+    }
+#if !ONEKEY_MINI
+    else if (msg_id == 0x0010) {  // FirmwareErase message (id 16)
       erase_ble_code_progress();
       send_msg_success(dev);
       flash_state = STATE_FLASHSTART;
       timer_out_set(timer_out_oper, timer1s * 5);
       return;
     }
+#endif
     send_msg_failure(dev, 1);  // Failure_UnexpectedMessage
     return;
   }
@@ -323,9 +326,12 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
               flash_enter();
               if (UPDATE_ST == update_mode) {
                 flash_program_word(FLASH_FWHEADER_START + flash_pos, w);
-              } else {
+              }
+#if !ONEKEY_MINI
+              else {
                 flash_program_word(FLASH_BLE_ADDR_START + flash_pos, w);
               }
+#endif
               flash_exit();
             }
             flash_pos += 4;
@@ -346,6 +352,17 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           show_halt("Firmware is", "too big.");
           return;
         }
+#if ONEKEY_MINI
+        // check firmware magic
+        if (memcmp(p, &FIRMWARE_MAGIC_NEW, 4) != 0) {
+          send_msg_failure(dev, 9);  // Failure_ProcessError
+          flash_state = STATE_END;
+          show_halt("Wrong firmware", "header.");
+          return;
+        }
+        update_mode = UPDATE_ST;
+
+#else
         // check firmware magic
         if ((memcmp(p, &FIRMWARE_MAGIC_NEW, 4) != 0) &&
             (memcmp(p, &FIRMWARE_MAGIC_BLE, 4) != 0)) {
@@ -359,6 +376,8 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         } else {
           update_mode = UPDATE_BLE;
         }
+
+#endif
 
         if (flash_len <= FLASH_FWHEADER_LEN) {  // firmware is too small
           send_msg_failure(dev, 9);             // Failure_ProcessError
@@ -374,7 +393,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
             show_halt("Firmware is", "too big");
             return;
           }
-        } else {
+        }
+#if !ONEKEY_MINI
+        else {
           if (flash_len >
               FLASH_FWHEADER_LEN + FLASH_BLE_MAX_LEN) {  // firmware is too big
             send_msg_failure(dev, 9);                    // Failure_ProcessError
@@ -383,7 +404,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
             return;
           }
         }
-
+#endif
         memzero(FW_HEADER, sizeof(FW_HEADER));
         memzero(FW_CHUNK, sizeof(FW_CHUNK));
         flash_state = STATE_FLASHING;
@@ -444,9 +465,12 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           flash_enter();
           if (UPDATE_ST == update_mode) {
             flash_program_word(FLASH_FWHEADER_START + flash_pos, w);
-          } else {
+          }
+#if !ONEKEY_MINI
+          else {
             flash_program_word(FLASH_BLE_ADDR_START + flash_pos, w);
           }
+#endif
           flash_exit();
         }
         flash_pos += 4;
@@ -549,7 +573,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         shutdown();
       }
       return;
-    } else {
+    }
+#if !ONEKEY_MINI
+    else {
       flash_state = STATE_END;
       i2c_set_wait(false);
       send_msg_success(dev);
@@ -580,6 +606,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       delay_ms(1000);
       shutdown();
     }
+#endif
   }
 }
 static void set_config(usbd_device *dev, uint16_t wValue) {
@@ -634,8 +661,12 @@ static void checkButtons(void) {
   if (btn_final) {
     return;
   }
+#if ONEKEY_MINI
+  uint16_t state = gpio_get(BTN_PORT, BTN_PIN_YES | BTN_PIN_NO);
+#else
   uint16_t state = gpio_get(BTN_PORT, BTN_PIN_YES);
   state |= gpio_get(BTN_PORT_NO, BTN_PIN_NO);
+#endif
   if ((btn_left == false) && (state & BTN_PIN_NO)) {
     btn_left = true;
     oledBox(0, 0, 3, 3, true);
@@ -651,6 +682,7 @@ static void checkButtons(void) {
   }
 }
 
+#if !ONEKEY_MINI
 static void i2cSlavePoll(void) {
   volatile uint32_t total_len, len;
   if (i2c_recv_done) {
@@ -664,13 +696,17 @@ static void i2cSlavePoll(void) {
     i2c_recv_done = false;
   }
 }
+#endif
 
 void usbLoop(void) {
   bool firmware_present = firmware_present_new();
   usbInit(firmware_present);
   for (;;) {
     usbd_poll(usbd_dev);
+#if ONEKEY_MINI
+#else
     i2cSlavePoll();
+#endif
     if (!firmware_present &&
         (flash_state == STATE_READY || flash_state == STATE_OPEN)) {
       checkButtons();
