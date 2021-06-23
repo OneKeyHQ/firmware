@@ -9,8 +9,6 @@
 #include "sys.h"
 #include "timer.h"
 
-uint8_t g_ucFlag = 0;
-uint8_t g_ucBatValue = 0;
 uint8_t battery_cap = 0xFF;
 
 bool sys_nfcState(void) {
