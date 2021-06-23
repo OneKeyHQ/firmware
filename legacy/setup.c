@@ -130,7 +130,24 @@ void setup(void) {
   gpio_mode_setup(OLED_CS_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, OLED_CS_PIN);
   gpio_mode_setup(OLED_RST_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
                   OLED_RST_PIN);
+#if ONEKEY_MINI
+  // enable SPI 1 for OLED display
+  gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
+  gpio_set_af(GPIOA, GPIO_AF5, GPIO5);
 
+  gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO7);
+  gpio_set(GPIOA, GPIO7);
+
+  // enable SPI 1 for OLED display
+  gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
+  gpio_set_af(GPIOB, GPIO_AF5, GPIO5);
+
+  //	spi_disable_crc(SPI1);
+  spi_init_master(
+      SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_2, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+      SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+
+#else
   // enable SPI 1 for OLED display
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5 | GPIO7);
   gpio_set_af(GPIOA, GPIO_AF5, GPIO5 | GPIO7);
@@ -139,6 +156,7 @@ void setup(void) {
   spi_init_master(
       SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
       SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+#endif
   spi_enable_ss_output(SPI1);
   //	spi_enable_software_slave_management(SPI1);
   //	spi_set_nss_high(SPI1);
@@ -192,10 +210,11 @@ void setupApp(void) {
 
   // hotfix for old bootloader
   gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO9);
+#if !ONEKEY_MINI
   spi_init_master(
       SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
       SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
-
+#endif
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
