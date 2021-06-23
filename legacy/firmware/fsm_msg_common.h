@@ -90,6 +90,8 @@ bool get_features(Features *resp) {
   resp->capabilities[6] = Capability_Capability_Stellar;
   resp->capabilities[7] = Capability_Capability_U2F;
 #endif
+
+#if !ONEKEY_MINI
   if (ble_name_state()) {
     resp->has_ble_name = true;
     strlcpy(resp->ble_name, ble_get_name(), sizeof(resp->ble_name));
@@ -102,6 +104,7 @@ bool get_features(Features *resp) {
     resp->has_ble_enable = true;
     resp->ble_enable = ble_get_switch();
   }
+#endif
   resp->has_se_enable = true;
   resp->se_enable = config_getWhetherUseSE();
   sn_version = se_get_version();
@@ -558,9 +561,11 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_auto_lock_delay_ms) {
     config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
   }
+#if !ONEKEY_MINI
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);
   }
+#endif
   if (msg->has_is_bixinapp) {
     config_setIsBixinAPP();
   }

@@ -176,7 +176,7 @@ void layoutProgress(const char *desc, int permil) {
   oledRefresh();
 }
 
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
 void disBatteryLevel(uint8_t cur_level) {
   switch (cur_level) {
     case 0:

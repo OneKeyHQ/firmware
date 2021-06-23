@@ -1328,10 +1328,12 @@ uint32_t config_getFastPayTimes(void) {
   return times;
 }
 
+#if !ONEKEY_MINI
 void config_setBleTrans(bool mode) {
   ble_set_switch(mode);
   change_ble_sta(mode);
 }
+#endif
 
 void config_setWhetherUseSE(bool flag) {
   config_set_bool(KEY_SEFLAG, flag);

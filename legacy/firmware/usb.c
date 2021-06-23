@@ -412,6 +412,7 @@ void usbInit(void) {
   winusb_setup(usbd_dev, USB_INTERFACE_INDEX_MAIN);
 }
 
+#if !ONEKEY_MINI
 static void i2c_slave_poll(void) {
   uint32_t total_len, len;
   while ((total_len = fifo_lockdata_len(&i2c_fifo_in)) > 0) {
@@ -421,6 +422,8 @@ static void i2c_slave_poll(void) {
     main_rx_callback(NULL, 0);
   }
 }
+#endif
+
 void usbPoll(void) {
   static const uint8_t *data;
 
@@ -445,8 +448,9 @@ void usbPoll(void) {
     __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
     __asm__ volatile("b reset_handler");
   }
-
+#if !ONEKEY_MINI
   i2c_slave_poll();
+#endif
   if (usbd_dev == NULL) {
     return;
   }
@@ -503,6 +507,8 @@ void usbSleep(uint32_t millis) {
     if (usbd_dev != NULL) {
       usbd_poll(usbd_dev);
     }
+#if !ONEKEY_MINI
     i2c_slave_poll();
+#endif
   }
 }

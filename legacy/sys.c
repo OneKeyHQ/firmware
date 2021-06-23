@@ -35,9 +35,12 @@ void sys_shutdown(void) {
   delay_ms(500);
   oledClear();
   oledRefresh();
+#if ONEKEY_MINI
+#else
   ble_power_off();
   stm32_power_off();
   delay_ms(100);
+#endif
   scb_reset_system();
 }
 
