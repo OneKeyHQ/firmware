@@ -95,7 +95,11 @@ void setup(void) {
 
   // enable CSS (Clock Security System)
   RCC_CR |= RCC_CR_CSSON;
-
+#if ONEKEY_MINI
+  // set GPIO for buttons
+  gpio_mode_setup(BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
+                  BTN_PIN_YES | BTN_PIN_NO | BTN_PIN_UP | BTN_PIN_DOWN);
+#else
   // set GPIO for buttons
   gpio_mode_setup(BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
                   BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN);
@@ -124,7 +128,7 @@ void setup(void) {
   gpio_mode_setup(SE_POWER_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
                   SE_POWER_PIN);
   se_power_on();
-
+#endif
   // set GPIO for OLED display
   gpio_mode_setup(OLED_DC_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, OLED_DC_PIN);
   gpio_mode_setup(OLED_CS_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, OLED_CS_PIN);
@@ -157,6 +161,7 @@ void setup(void) {
       SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
       SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
 #endif
+
   spi_enable_ss_output(SPI1);
   //	spi_enable_software_slave_management(SPI1);
   //	spi_set_nss_high(SPI1);

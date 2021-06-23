@@ -41,6 +41,16 @@ static volatile uint32_t button_timer_counter = 0;
 static volatile uint32_t up_btn_timer_counter = 0;
 static volatile int up_btn_timer_enable = 0;
 
+#if ONEKEY_MINI
+uint16_t buttonRead(void) {
+  uint16_t tmp = 0x00;
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_YES);
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_NO);
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_UP);
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_DOWN);
+  return tmp;
+}
+#else
 uint16_t buttonRead(void) {
   uint16_t tmp = 0x00;
   tmp |= gpio_get(BTN_PORT, BTN_PIN_YES);
@@ -49,7 +59,7 @@ uint16_t buttonRead(void) {
   tmp |= gpio_get(BTN_PORT_NO, BTN_PIN_NO);
   return tmp;
 }
-
+#endif
 void buttonsIrqInit(void) {
   // enable SYSCFG	clock
   rcc_periph_clock_enable(RCC_SYSCFG);
@@ -72,6 +82,7 @@ void buttonsIrqInit(void) {
   nvic_enable_irq(NVIC_EXTI0_IRQ);
 #endif
 }
+
 #if FEITIAN_PCB_V1_3
 void exti1_isr(void) {
   if (exti_get_flag_status(BTN_PIN_NO)) {
@@ -101,6 +112,7 @@ void exti0_isr(void) {
   }
 }
 #endif
+
 void buttonsTimer(void) {
   if (button_timer_enable) {
     button_timer_counter++;
@@ -136,7 +148,7 @@ void buttonsTimer(void) {
 #endif
 }
 
-bool checkButtonOrTimeout(uint8_t btn, TimerOut type) {
+bool checkButtonOrTimeout(uint16_t btn, TimerOut type) {
   bool flag = false;
   buttonUpdate();
   if (timer_out_get(type) == 0) flag = true;
@@ -160,7 +172,7 @@ bool checkButtonOrTimeout(uint8_t btn, TimerOut type) {
   return flag;
 }
 
-bool waitButtonResponse(uint8_t btn, uint32_t time_out) {
+bool waitButtonResponse(uint16_t btn, uint32_t time_out) {
   bool flag = false;
   timer_out_set(timer_out_oper, time_out);
   while (1) {
@@ -201,9 +213,13 @@ bool waitButtonResponse(uint8_t btn, uint32_t time_out) {
 #endif
 
 void buttonUpdate() {
+#if ONEKEY_MINI
+  static uint16_t last_state =
+      (BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN) | (BTN_PIN_NO);
+#else
   static uint16_t last_state =
       (BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN) & (~BTN_PIN_NO);
-
+#endif
   uint16_t state = buttonRead();
 
   if ((state & BTN_PIN_YES) == 0) {         // Yes button is down

@@ -46,8 +46,8 @@ void buttonUpdate(void);
 bool hasbutton(void);
 void buttonsIrqInit(void);
 void buttonsTimer(void);
-bool checkButtonOrTimeout(uint8_t btn, TimerOut type);
-bool waitButtonResponse(uint8_t btn, uint32_t time_out);
+bool checkButtonOrTimeout(uint16_t btn, TimerOut type);
+bool waitButtonResponse(uint16_t btn, uint32_t time_out);
 uint8_t keyScan(void);
 uint8_t waitKey(uint32_t time_out, uint8_t mode);
 
@@ -65,6 +65,34 @@ uint8_t waitKey(uint32_t time_out, uint8_t mode);
 #define BTN_PIN_YES GPIO2
 #endif
 
+#if ONEKEY_MINI
+
+#ifndef BTN_PIN_NO
+#define BTN_PIN_NO GPIO5
+#endif
+
+#ifndef BTN_PIN_UP
+#define BTN_PIN_UP GPIO3
+#endif
+
+#ifndef BTN_PIN_DOWN
+#define BTN_PIN_DOWN GPIO11
+#endif
+
+#ifndef BTN_PORT_NO
+#define BTN_PORT_NO BTN_PORT
+#endif
+
+#else
+
+#ifndef BTN_PIN_UP
+#define BTN_PIN_UP GPIO3
+#endif
+
+#ifndef BTN_PIN_DOWN
+#define BTN_PIN_DOWN GPIO5
+#endif
+
 #ifndef BTN_PORT_NO
 #define BTN_PORT_NO BTN_POWER_PORT
 #endif
@@ -73,12 +101,6 @@ uint8_t waitKey(uint32_t time_out, uint8_t mode);
 #define BTN_PIN_NO BTN_POWER_PIN
 #endif
 
-#ifndef BTN_PIN_UP
-#define BTN_PIN_UP GPIO3
-#endif
-
-#ifndef BTN_PIN_DOWN
-#define BTN_PIN_DOWN GPIO5
 #endif
 
 #endif
