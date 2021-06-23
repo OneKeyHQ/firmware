@@ -91,6 +91,14 @@ extern uint8_t *emulator_flash_base;
 #if ONEKEY_MINI
 #define FLASH_CODE_SECTOR_FIRST 4
 #define FLASH_CODE_SECTOR_LAST 11
+
+#define FLASH_STORAGE_DEVICE_INFO (FLASH_BOOT_START + FLASH_BOOT_LEN - 0x400)
+#define FLASH_STORAGE_DEVICE_INFO_LEN 0x200
+
+#define FLASH_STORAGE_SECRETS_INFO \
+  (FLASH_STORAGE_DEVICE_INFO + FLASH_STORAGE_DEVICE_INFO_LEN)
+#define FLASH_STORAGE_SECRETS_INFO_LEN 0x200
+
 #else
 #if BLE_SWD_UPDATE
 #define FLASH_CODE_SECTOR_FIRST 4
@@ -100,7 +108,6 @@ extern uint8_t *emulator_flash_base;
 
 #define FLASH_BLE_ADDR_START (0x080C0000)
 #define FLASH_BLE_MAX_LEN (0x40000)
-
 #else
 #define FLASH_CODE_SECTOR_FIRST 4
 #define FLASH_CODE_SECTOR_LAST 9
@@ -117,6 +124,7 @@ extern uint8_t *emulator_flash_base;
 #endif
 
 #endif
+
 void memory_protect(void);
 void memory_write_unlock(void);
 int memory_bootloader_hash(uint8_t *hash);

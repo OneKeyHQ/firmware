@@ -74,7 +74,8 @@ CFLAGS   += $(OPTFLAGS) \
             -I$(TOP_DIR)segger_rtt \
             -I$(TOP_DIR)vendor/trezor-crypto \
             -I$(TOP_DIR)vendor/QR-Code-generator/c \
-            -I$(TOP_DIR)vendor/trezor-storage
+            -I$(TOP_DIR)vendor/trezor-storage \
+            -I$(TOP_DIR)atca \
 
 LDFLAGS  += -L$(TOP_DIR) \
             $(DBGFLAGS) \
