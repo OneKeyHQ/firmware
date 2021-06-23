@@ -25,7 +25,7 @@ static void send_response(usbd_device *dev, uint8_t *buf) {
     memcpy(i2c_data_out, buf, 64);
     i2c_slave_send_ex(64);
   }
-#endif 
+#endif
 }
 static void send_msg_success(usbd_device *dev) {
   uint8_t response[64];

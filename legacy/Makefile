@@ -19,14 +19,14 @@ ifeq ($(ONEKEY_MINI),1)
 OBJS += atca/atca_hal.o
 OBJS += atca/atca_command.o
 OBJS += atca/atca_api.o
+OBJS += atca/se_atca.o
 else
 OBJS += usart.o
 OBJS += nordic_dfu.o
 OBJS += ble.o
-endif
-
 OBJS += mi2c.o
 OBJS += se_chip.o
+endif
 
 OBJS += segger_rtt/SEGGER_RTT.o
 OBJS += segger_rtt/SEGGER_RTT_printf.o

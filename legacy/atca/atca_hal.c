@@ -1,10 +1,10 @@
-#include <libopencm3/cm3/systick.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 
 #include <string.h>
 
 #include "atca_hal.h"
+#include "supervise.h"
 
 #ifdef ATCA_INTERFACE_I2C
 
@@ -300,7 +300,7 @@ void atca_swi_init(void) {
 
 ATCA_STATUS atca_swi_send_bytes(uint8_t *buffer, uint8_t len) {
   atca_pin_direction(PIN_DIRECTION_OUT);
-  systick_interrupt_disable();
+  svc_system_irq(0);
 
   for (uint8_t i = 0; i < len; i++) {
     for (uint8_t one_bit = 1; one_bit > 0; one_bit <<= 1) {
@@ -325,7 +325,7 @@ ATCA_STATUS atca_swi_send_bytes(uint8_t *buffer, uint8_t len) {
       }
     }
   }
-  systick_interrupt_enable();
+  svc_system_irq(1);
   return ATCA_SUCCESS;
 }
 
@@ -337,7 +337,7 @@ ATCA_STATUS atac_swi_receive_bytes(uint8_t *buffer, uint8_t len) {
   uint8_t plus_count = 0;
 
   atca_pin_direction(PIN_DIRECTION_IN);
-  systick_interrupt_disable();
+  svc_system_irq(0);
   for (uint8_t i = 0; i < len; i++) {
     buffer[i] = 0;
     for (uint8_t one_bit = 1; one_bit > 0; one_bit <<= 1) {
@@ -402,7 +402,7 @@ ATCA_STATUS atac_swi_receive_bytes(uint8_t *buffer, uint8_t len) {
       }
     }
   }
-  systick_interrupt_enable();
+  svc_system_irq(1);
   atca_pin_direction(PIN_DIRECTION_OUT);
   atca_delay_us(93);  // tTURNGROUND
   return status;

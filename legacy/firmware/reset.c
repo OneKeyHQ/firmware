@@ -31,7 +31,7 @@
 #include "oled.h"
 #include "protect.h"
 #include "rng.h"
-#include "se_chip.h"
+#include "se_hal.h"
 #include "sha2.h"
 #include "sys.h"
 #include "util.h"
@@ -67,8 +67,8 @@ void reset_init(bool display_random, uint32_t _strength,
   }
 
   if (!g_bIsBixinAPP) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      NULL, _("Do you really want to"), _("create a new wallet?"),
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
+                      _("Do you really want to"), _("create a new wallet?"),
                       NULL, NULL, NULL);
 
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
@@ -138,7 +138,9 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
 
   if (g_bSelectSEFlag) {
     uint8_t seed[64];
-
+#if ONEKEY_MINI
+    random_buffer(seed, 64);
+#else
     if (!se_device_init(ExportType_MnemonicPlainExportType_YES, NULL)) {
       fsm_sendFailure(FailureType_Failure_ProcessError,
                       _("Device failed initialized"));
@@ -151,8 +153,9 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
       layoutHome();
       return;
     }
-    se_setSeedStrength(strength);
     se_setNeedsBackup(true);
+#endif
+    se_setSeedStrength(strength);
     memcpy(int_entropy, seed, 32);
   } else {
     SHA256_CTX ctx = {0};
@@ -469,6 +472,7 @@ write_mnemonic:
     if (!scroll_mnemonic(NULL, mnemonic, 1)) {
       goto_check(write_mnemonic);
     }
+
     if (!verify_mnemonic(mnemonic)) {
       goto_check(check_mnemonic);
     }
@@ -535,15 +539,17 @@ select_mnemonic_count:
 
   if (g_bSelectSEFlag) {
     uint8_t seed[64];
+#if ONEKEY_MINI
+    random_buffer(seed, 64);
 
+#else
     if (!se_device_init(ExportType_MnemonicPlainExportType_YES, NULL))
       return false;
-
     if (!se_export_seed(seed)) return false;
+    se_setNeedsBackup(true);
+#endif
     memcpy(int_entropy, seed, 32);
     se_setSeedStrength(strength);
-    se_setNeedsBackup(true);
-
   } else {
     random_buffer(int_entropy, 32);
     SHA256_CTX ctx = {0};

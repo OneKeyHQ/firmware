@@ -18,7 +18,7 @@
  */
 #include "menu_list.h"
 #include "mi2c.h"
-#include "se_chip.h"
+#include "se_hal.h"
 #include "storage.h"
 #include "storage_ex.h"
 
@@ -645,6 +645,13 @@ void fsm_msgGetNextU2FCounter() {
 }
 
 void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "This operation is not supported");
+  layoutHome();
+  return;
+#else
   uint8_t ucBuf[65], i = 0;
   uint32_t uiTemp;
 
@@ -692,6 +699,7 @@ void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg) {
   }
   fsm_sendFailure(FailureType_Failure_DataError, NULL);
   layoutHome();
+#endif
 }
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
@@ -713,6 +721,13 @@ void fsm_msgBixinReboot(const BixinReboot *msg) {
 }
 
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "This operation is not supported");
+  layoutHome();
+  return;
+#else
   bool request_restore = false;
   bool request_backup = false;
   RESP_INIT(BixinOutMessageSE);
@@ -804,12 +819,21 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
   } else {
     msg_write(MessageType_MessageType_BixinOutMessageSE, resp);
   }
+#endif
   layoutHome();
   return;
 }
 
 void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
   (void)msg;
+
+#if ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "This operation is not supported");
+  layoutHome();
+  return;
+#else
+
   CHECK_INITIALIZED
   // CHECK_PIN_UNCACHED
 
@@ -855,11 +879,19 @@ void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg) {
     config_setUnfinishedBackup(false);
     config_setNeedsBackup(false);
   }
+#endif
   layoutHome();
   return;
 }
 
 void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "This operation is not supported");
+  layoutHome();
+  return;
+#else
   // CHECK_PIN
   CHECK_NOT_INITIALIZED
 
@@ -924,12 +956,19 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
   if (msg->data.bytes[1] == 1) {
     protectSeedPin(false, false, true);
   }
-
+#endif
   layoutHome();
   return;
 }
 
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "This operation is not supported");
+  layoutHome();
+  return;
+#else
   RESP_INIT(BixinVerifyDeviceAck);
   resp->cert.size = 1024;
   resp->signature.size = 512;
@@ -941,6 +980,7 @@ void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
     return;
   }
   msg_write(MessageType_MessageType_BixinVerifyDeviceAck, resp);
+#endif
   layoutHome();
   return;
 }

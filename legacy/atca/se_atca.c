@@ -36,6 +36,13 @@ static void pin_hash(const char *pin, uint32_t pin_len, uint8_t result[32]) {
   sha256_Update(&ctx, (uint8_t *)pin, pin_len);
   sha256_Update(&ctx, pair_info->hash_mix, sizeof(pair_info->hash_mix));
   sha256_Final(&ctx, result);
+
+  atca_sha_hmac(result, 32, SLOT_PIN_ATTEMPT, result);
+
+  sha256_Init(&ctx);
+  sha256_Update(&ctx, result, 32);
+  sha256_Update(&ctx, pair_info->hash_mix, sizeof(pair_info->hash_mix));
+  sha256_Final(&ctx, result);
 }
 
 char *se_get_version(void) { return "1.0.0"; }

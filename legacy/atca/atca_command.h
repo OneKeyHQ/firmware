@@ -616,6 +616,15 @@ typedef enum {
   ATCA_WORD_ADDRESS_COMMAND
 } ATCA_WORD_ADDRESS_VALUE;
 
+// SHA command functions
+typedef struct atca_sha256_ctx {
+  uint32_t total_msg_size;  //!< Total number of message bytes processed
+  uint32_t block_size;      //!< Number of bytes in current block
+  uint8_t block[ATCA_SHA256_BLOCK_SIZE * 2];  //!< Unprocessed message storage
+} atca_sha256_ctx_t;
+
+typedef atca_sha256_ctx_t atca_hmac_sha256_ctx_t;
+
 typedef struct __attribute__((packed)) {
   // used for transmit/send
   uint8_t word_address;
@@ -663,6 +672,12 @@ ATCA_STATUS atca_checkmac(uint8_t mode, uint16_t key_id,
                           const uint8_t *other_data);
 ATCA_STATUS atca_mac(uint8_t mode, uint16_t key_id, const uint8_t *challenge,
                      uint8_t *digest);
+ATCA_STATUS atca_sha_hmac_init(atca_hmac_sha256_ctx_t *ctx, uint16_t key_slot);
+ATCA_STATUS atca_sha_hmac_update(atca_hmac_sha256_ctx_t *ctx,
+                                 const uint8_t *data, size_t data_size);
+ATCA_STATUS
+atca_sha_hmac_finish(atca_hmac_sha256_ctx_t *ctx, uint8_t *digest,
+                     uint8_t target);
 ATCA_STATUS atca_sign_extern(uint16_t key_id, const uint8_t *msg,
                              uint8_t *signature);
 

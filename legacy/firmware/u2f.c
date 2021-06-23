@@ -48,7 +48,7 @@
 #include "u2f/u2f_keys.h"
 #include "u2f_knownapps.h"
 
-#include "se_chip.h"
+#include "se_hal.h"
 
 // About 1/2 Second according to values used in protect.c
 #define U2F_TIMEOUT (800000 / 2)

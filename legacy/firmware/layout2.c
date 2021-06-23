@@ -43,7 +43,7 @@
 #include "protect.h"
 #include "qrcodegen.h"
 #include "recovery.h"
-#include "se_chip.h"
+#include "se_hal.h"
 #include "secp256k1.h"
 #include "signing.h"
 #include "sys.h"

@@ -703,8 +703,7 @@ void usbLoop(void) {
   usbInit(firmware_present);
   for (;;) {
     usbd_poll(usbd_dev);
-#if ONEKEY_MINI
-#else
+#if !ONEKEY_MINI
     i2cSlavePoll();
 #endif
     if (!firmware_present &&

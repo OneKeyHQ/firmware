@@ -38,7 +38,7 @@ static const ATCAConfiguration atca_init_config = {
     .slot_config =
         {
             0x008F,  // slot 0 private, permanet,int sing,ext sign,ecdh
-            0x2F8F,  // slot 1,io protect ,no read,no write
+            0x8F8F,  // slot 1,io protect ,no read,no write
             0x418F,  // slot 2 ,pin ,no read,encrypt write,wirte key 1
             0x8FAF,  // slot 3,pin attempt,no read and write,limiteuse
             0x410F,  // slot 4 ,counter match ,clear read,encrypt write,wirte
@@ -58,7 +58,7 @@ static const ATCAConfiguration atca_init_config = {
         },
     .counter0 = {0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00},
     .counter1 = {0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00},
-    .use_lock = 0xff,
+    .use_lock = 0x00,
     .volatilekey_permission = 0x00,
     .secure_boot = 0x0000,
     .kdfiv_loc = 0x00,
@@ -69,7 +69,9 @@ static const ATCAConfiguration atca_init_config = {
     .lock_value = ATCA_UNLOCKED,
     .lock_config = ATCA_UNLOCKED,
     .slot_locked = 0xffff,
-    .chip_options = CONFIG_CHIP_OPTION_IO_PROTECT | (SLOT_IO_PROTECT_KEY << 12),
+    .chip_options = CONFIG_CHIP_OPTION_IO_PROTECT |
+                    (SLOT_IO_PROTECT_KEY << 12) | CONFIG_CHIP_OPTION_KDF_PORT |
+                    CONFIG_CHIP_OPTION_ECDH_PORT,
     .x509format = {0x00},
     .key_config = {
         0x01B3,  // slot 0,private key ,reqauth,authkey=1,lockable
@@ -215,8 +217,7 @@ void atca_config_init(void) {
           atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_PIN_ATTEMPT, 0, 0,
                                       rand_buffer, 32),
                       "init pin attempt");
-          atca_assert(atca_lock_data_slot(SLOT_PRIMARY_PRIVATE_KEY),
-                      "lock slot0 ");
+          atca_assert(atca_lock_data_slot(SLOT_PIN_ATTEMPT), "lock slot3 ");
           break;
         case SLOT_COUNTER_MATCH:
           atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_COUNTER_MATCH, 0, 0,
@@ -487,6 +488,21 @@ ATCA_STATUS atca_gendig_counter(uint16_t counter_id, uint32_t counter_value,
   return status;
 }
 
+ATCA_STATUS atca_sha_hmac(const uint8_t *data, size_t data_size,
+                          uint16_t key_slot, uint8_t *digest) {
+  atca_hmac_sha256_ctx_t ctx;
+
+  atca_pair_unlock();
+
+  atca_assert(atca_sha_hmac_init(&ctx, key_slot), "hmac init");
+
+  atca_assert(atca_sha_hmac_update(&ctx, data, data_size), "hmac update");
+
+  atca_assert(atca_sha_hmac_finish(&ctx, digest, SHA_MODE_TARGET_OUT_ONLY),
+              "hmac final");
+  return ATCA_SUCCESS;
+}
+
 /** \brief Executes the Write command, which performs an encrypted write of
  *          a 32 byte block into given slot.
  *
@@ -647,14 +663,14 @@ void atca_update_counter(void) {
   atca_read_slot_counter(SLOT_COUNTER_MATCH, &match_counter);
   atca_read_slot_counter(SLOT_LAST_GOOD_COUNTER, &last_counter);
 
-  if (counter + 2 < match_counter) {
+  if (counter + PIN_MAX_TRIES < match_counter) {
     buf[0] = counter;
     atca_assert(atca_write_enc(SLOT_LAST_GOOD_COUNTER, 0, (uint8_t *)buf,
                                pair_info->protect_key, SLOT_IO_PROTECT_KEY),
                 "update counter");
   } else {
     match_counter = (counter + PIN_MAX_TRIES + 32) & ~31;
-    steps = (match_counter - PIN_MAX_TRIES) - counter;
+    steps = 32 - (counter % 32);
     buf[0] = match_counter;
     buf[1] = match_counter;
     atca_assert(atca_write_enc(SLOT_COUNTER_MATCH, 0, (uint8_t *)buf,
@@ -677,5 +693,5 @@ uint32_t atca_get_failed_counter(void) {
   atca_assert(atca_counter_read(0, &counter), "read counter");
   atca_read_slot_counter(SLOT_LAST_GOOD_COUNTER, &last_counter);
 
-  return counter - last_counter + 1;
+  return counter - last_counter;
 }

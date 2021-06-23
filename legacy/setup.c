@@ -25,9 +25,7 @@
 #include <libopencm3/stm32/rng.h>
 #include <libopencm3/stm32/spi.h>
 
-#if ONEKEY_MINI
-
-#else
+#if !ONEKEY_MINI
 #include "mi2c.h"
 #endif
 
@@ -178,10 +176,7 @@ void setup(void) {
   // clear USB OTG_FS peripheral dedicated RAM
   memset_reg((void *)0x50020000, (void *)0x50020500, 0);
 
-#if ONEKEY_MINI
-
-#else
-
+#if !ONEKEY_MINI
 #if (_SUPPORT_DEBUG_UART_)
   usart_setup();
 #endif
@@ -223,9 +218,7 @@ void setupApp(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
-#if ONEKEY_MINI
-
-#else
+#if !ONEKEY_MINI
   // change oled refresh frequency
   oledUpdateClk();
   // master i2c init

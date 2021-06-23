@@ -1214,6 +1214,160 @@ ATCA_STATUS atca_mac(uint8_t mode, uint16_t key_id, const uint8_t *challenge,
   return status;
 }
 
+/** \brief Executes SHA command, which computes a SHA-256 or HMAC/SHA-256
+ *          digest for general purpose use by the host system.
+ *
+ * Only the Start(0) and Compute(1) modes are available for ATSHA devices.
+ *
+ * \param[in]    mode           SHA command mode Start(0), Update/Compute(1),
+ *                              End(2), Public(3), HMACstart(4), HMACend(5),
+ *                              Read_Context(6), or Write_Context(7). Also
+ *                              message digest target location for the
+ *                              ATECC608A.
+ * \param[in]    length         Number of bytes in the message parameter or
+ *                              KeySlot for the HMAC key if Mode is
+ *                              HMACstart(4) or Public(3).
+ * \param[in]    message        Message bytes to be hashed or Write_Context if
+ *                              restoring a context on the ATECC608A. Can be
+ *                              NULL if not required by the mode.
+ * \param[out]   data_out       Data returned by the command (digest or
+ *                              context).
+ * \param[inout] data_out_size  As input, the size of the data_out buffer. As
+ *                              output, the number of bytes returned in
+ *                              data_out.
+ *
+ * \return ATCA_SUCCESS on success, otherwise an error code.
+ */
+ATCA_STATUS atca_sha_base(uint8_t mode, uint16_t length, const uint8_t *message,
+                          uint8_t *data_out, uint16_t *data_out_size) {
+  ATCAPacket packet;
+  ATCA_STATUS status = ATCA_GEN_FAIL;
+  uint8_t cmd_mode = (mode & SHA_MODE_MASK);
+
+  if (cmd_mode != SHA_MODE_SHA256_PUBLIC && cmd_mode != SHA_MODE_HMAC_START &&
+      length > 0 && message == NULL) {
+    return ATCA_BAD_PARAM;  // message data indicated, but nothing provided
+  }
+  if (data_out != NULL && data_out_size == NULL) {
+    return ATCA_BAD_PARAM;
+  }
+
+  do {
+    // Build Command
+    packet.opcode = ATCA_SHA;
+    packet.param1 = mode;
+    packet.param2 = length;
+    packet.txsize = ATCA_CMD_SIZE_MIN + length;
+
+    if (cmd_mode != SHA_MODE_SHA256_PUBLIC && cmd_mode != SHA_MODE_HMAC_START) {
+      memcpy(packet.data, message, length);
+    }
+
+    if ((status = atca_exec_cmd(&packet)) != ATCA_SUCCESS) {
+      break;
+    }
+
+    if ((data_out != NULL) && (packet.data[ATCA_COUNT_IDX] > 4)) {
+      if (packet.data[ATCA_COUNT_IDX] - ATCA_PACKET_OVERHEAD > *data_out_size) {
+        status = ATCA_SMALL_BUFFER;
+        break;
+      }
+      *data_out_size = packet.data[ATCA_COUNT_IDX] - ATCA_PACKET_OVERHEAD;
+      memcpy(data_out, &packet.data[ATCA_RSP_DATA_IDX], *data_out_size);
+    }
+  } while (0);
+
+  return status;
+}
+
+/** \brief Executes SHA command to start an HMAC/SHA-256 operation
+ *
+ * \param[in] ctx       HMAC/SHA-256 context
+ * \param[in] key_slot  Slot key id to use for the HMAC calculation
+ *
+ * \return ATCA_SUCCESS on success, otherwise an error code.
+ */
+ATCA_STATUS atca_sha_hmac_init(atca_hmac_sha256_ctx_t *ctx, uint16_t key_slot) {
+  memset(ctx, 0, sizeof(*ctx));
+  return atca_sha_base(SHA_MODE_HMAC_START, key_slot, NULL, NULL, NULL);
+}
+
+/** \brief Executes SHA command to add an arbitrary amount of message data to
+ *          a HMAC/SHA-256 operation.
+ *
+ * \param[in] ctx        HMAC/SHA-256 context
+ * \param[in] data       Message data to add
+ * \param[in] data_size  Size of message data in bytes
+ *
+ * \return ATCA_SUCCESS on success, otherwise an error code.
+ */
+ATCA_STATUS atca_sha_hmac_update(atca_hmac_sha256_ctx_t *ctx,
+                                 const uint8_t *data, size_t data_size) {
+  ATCA_STATUS status = ATCA_SUCCESS;
+  uint32_t block_count;
+  uint32_t rem_size = ATCA_SHA256_BLOCK_SIZE - ctx->block_size;
+  uint32_t copy_size = data_size > rem_size ? rem_size : (uint32_t)data_size;
+  uint32_t i = 0;
+
+  // Copy data into current block
+  memcpy(&ctx->block[ctx->block_size], data, copy_size);
+
+  if (ctx->block_size + data_size < ATCA_SHA256_BLOCK_SIZE) {
+    // Not enough data to finish off the current block
+    ctx->block_size += (uint32_t)data_size;
+    return ATCA_SUCCESS;
+  }
+
+  // Process the current block
+  status = atca_sha_base(SHA_MODE_HMAC_UPDATE, ATCA_SHA256_BLOCK_SIZE,
+                         ctx->block, NULL, NULL);
+  if (status != ATCA_SUCCESS) {
+    return status;
+  }
+
+  // Process any additional blocks
+  data_size -= copy_size;  // Adjust to the remaining message bytes
+  block_count = (uint32_t)(data_size / ATCA_SHA256_BLOCK_SIZE);
+  for (i = 0; i < block_count; i++) {
+    status = atca_sha_base(SHA_MODE_HMAC_UPDATE, ATCA_SHA256_BLOCK_SIZE,
+                           &data[copy_size + i * ATCA_SHA256_BLOCK_SIZE], NULL,
+                           NULL);
+    if (status != ATCA_SUCCESS) {
+      return status;
+    }
+  }
+
+  // Save any remaining data
+  ctx->total_msg_size += (block_count + 1) * ATCA_SHA256_BLOCK_SIZE;
+  ctx->block_size = data_size % ATCA_SHA256_BLOCK_SIZE;
+  memcpy(ctx->block, &data[copy_size + block_count * ATCA_SHA256_BLOCK_SIZE],
+         ctx->block_size);
+
+  return ATCA_SUCCESS;
+}
+
+/** \brief Executes SHA command to complete a HMAC/SHA-256 operation.
+ *
+ * \param[in]  ctx     HMAC/SHA-256 context
+ * \param[out] digest  HMAC/SHA-256 result is returned here (32 bytes).
+ * \param[in]  target  Where to save the digest internal to the device.
+ *                     For ATECC608A, can be SHA_MODE_TARGET_TEMPKEY,
+ *                     SHA_MODE_TARGET_MSGDIGBUF, or SHA_MODE_TARGET_OUT_ONLY.
+ *                     For all other devices, SHA_MODE_TARGET_TEMPKEY is the
+ *                     only option.
+ *
+ *  \return ATCA_SUCCESS on success, otherwise an error code.
+ */
+ATCA_STATUS atca_sha_hmac_finish(atca_hmac_sha256_ctx_t *ctx, uint8_t *digest,
+                                 uint8_t target) {
+  uint8_t mode = SHA_MODE_608_HMAC_END;
+  uint16_t digest_size = 32;
+
+  mode |= target;
+
+  return atca_sha_base(mode, ctx->block_size, ctx->block, digest, &digest_size);
+}
+
 /** \brief Executes the Sign command, which generates a signature using the
  *          ECDSA algorithm.
  *

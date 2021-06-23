@@ -43,6 +43,44 @@ uint8_t msg_in_buffer[MSG_IN_BUFFER_SIZE] __attribute__((aligned(4)));
 
 static HMAC_DRBG_CTX drbg_ctx;
 
+#if ONEKEY_MINI
+void __attribute__((noreturn))
+__fatal_error(const char *expr, const char *msg, const char *file, int line_num,
+              const char *func) {
+  const BITMAP *icon = &bmp_icon_error;
+  char line[128] = {0};
+  int y = icon->height + 3;
+  oledClear();
+
+  oledDrawBitmap(0, 0, icon);
+  oledDrawStringCenter(OLED_WIDTH / 2, (icon->height - FONT_HEIGHT) / 2 + 1,
+                       "FATAL  ERROR", FONT_STANDARD);
+
+  oledDrawString(0, y, expr, FONT_STANDARD);
+  y += FONT_HEIGHT + 1;
+
+  oledDrawString(0, 2 * y, msg, FONT_STANDARD);
+  y += FONT_HEIGHT + 1;
+
+  const char *label = "File: ";
+  uint2str(line_num, line);
+  oledDrawStringRight(OLED_WIDTH - 1, 2 * y, file, FONT_STANDARD);
+  oledBox(0, 2 * y, oledStringWidth(label, FONT_STANDARD), y + FONT_HEIGHT,
+          false);
+  oledDrawString(0, 2 * y, label, FONT_STANDARD);
+  oledDrawStringRight(OLED_WIDTH - 1, 2 * y + FONT_HEIGHT + 1, line,
+                      FONT_STANDARD);
+  y += FONT_HEIGHT + 1;
+
+  oledDrawString(0, 2 * y, func, FONT_STANDARD);
+  y += FONT_HEIGHT + 1;
+
+  oledDrawString(0, 2 * y, "Contact Onekey support.", FONT_STANDARD);
+  oledRefresh();
+  delay_ms(2000);
+  shutdown();
+}
+#else
 void __attribute__((noreturn))
 __fatal_error(const char *expr, const char *msg, const char *file, int line_num,
               const char *func) {
@@ -74,11 +112,12 @@ __fatal_error(const char *expr, const char *msg, const char *file, int line_num,
   oledDrawString(0, y, line, FONT_STANDARD);
   y += FONT_HEIGHT + 1;
 
-  oledDrawString(0, y, "Contact Trezor support.", FONT_STANDARD);
+  oledDrawString(0, y, "Contact Onekey support.", FONT_STANDARD);
   oledRefresh();
-
+  delay_ms(2000);
   shutdown();
 }
+#endif
 
 void __attribute__((noreturn))
 error_shutdown(const char *line1, const char *line2, const char *line3,

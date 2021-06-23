@@ -19,6 +19,8 @@ typedef struct __attribute__((packed)) {
 
 ATCA_STATUS atca_get_config(void);
 ATCA_STATUS atca_mac_slot(uint16_t key_id, uint8_t *slot_key);
+ATCA_STATUS atca_sha_hmac(const uint8_t *data, size_t data_size,
+                          uint16_t key_slot, uint8_t *digest);
 void atca_pair_unlock(void);
 void atca_config_init(void);
 void atca_read_slot_data(uint16_t key_id, uint8_t data[32]);

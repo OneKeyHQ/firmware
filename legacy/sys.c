@@ -33,8 +33,7 @@ void sys_shutdown(void) {
   delay_ms(500);
   oledClear();
   oledRefresh();
-#if ONEKEY_MINI
-#else
+#if !ONEKEY_MINI
   ble_power_off();
   stm32_power_off();
   delay_ms(100);

@@ -36,6 +36,11 @@
 #include "usb.h"
 #include "util.h"
 
+#if ONEKEY_MINI
+#include "atca_api.h"
+#include "atca_hal.h"
+#endif
+
 void layoutFirmwareFingerprint(const uint8_t *hash) {
   char str[4][17] = {0};
   for (int i = 0; i < 4; i++) {
@@ -105,10 +110,8 @@ int main(void) {
   if (force_boot) {
     setReboot();
     __stack_chk_guard = random32();  // this supports compiler provided
-                                     // unpredictable stack protection check
-#if ONEKEY_MINI
-
-#else
+// unpredictable stack protection check
+#if !ONEKEY_MINI
     buttonsIrqInit();
     timer_init();
     register_timer("button", timer1s / 2, buttonsTimer);
@@ -121,9 +124,10 @@ int main(void) {
     __stack_chk_guard = random32();  // this supports compiler provided
                                      // unpredictable stack protection checks
 #ifndef APPVER
-    memory_protect();
     oledInit();
 #if ONEKEY_MINI
+    atca_init();
+    atca_config_init();
 #else
     sys_poweron();
     buttonsIrqInit();
@@ -131,9 +135,12 @@ int main(void) {
     register_timer("button", timer1s / 2, buttonsTimer);
 #endif
 
+    memory_protect();
+
 #endif
     mpu_config_bootloader();
 #ifndef APPVER
+
     bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
 
     if (firmware_present_new() && !left_pressed && !force_boot) {
