@@ -60,6 +60,7 @@ void uint2str(uint32_t num, char *str) {
 }
 
 bool check_all_ones(const void *data, int len) {
+  if (!data) return false;
   uint8_t result = 0xff;
   const uint8_t *ptr = (const uint8_t *)data;
 
@@ -71,6 +72,7 @@ bool check_all_ones(const void *data, int len) {
 }
 
 bool check_all_zeros(const void *data, int len) {
+  if (!data) return false;
   uint8_t result = 0x0;
   const uint8_t *ptr = (const uint8_t *)data;
 

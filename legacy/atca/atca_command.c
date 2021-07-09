@@ -9,6 +9,10 @@ void calculate_crc16(uint32_t length, const uint8_t *data, uint8_t *crc16) {
   uint8_t shift_register;
   uint8_t data_bit, crc_bit;
 
+  if (!data) {
+    *crc16 = 0;
+  }
+
   for (counter = 0; counter < length; counter++) {
     for (shift_register = 0x01; shift_register > 0x00; shift_register <<= 1) {
       data_bit = (data[counter] & shift_register) ? 1 : 0;
