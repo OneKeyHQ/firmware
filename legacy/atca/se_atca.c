@@ -53,7 +53,9 @@ bool se_get_sn(char **serial) {
 }
 
 bool se_setSeedStrength(uint32_t strength) {
+  if (strength != 128 && strength != 192 && strength != 256) return false;
   ATCAUserState state;
+
   atca_pair_unlock();
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
   state.strength = strength;
@@ -68,16 +70,22 @@ bool se_setSeedStrength(uint32_t strength) {
 
 bool se_getSeedStrength(uint32_t *strength) {
   ATCAUserState state;
+
   atca_pair_unlock();
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
   *strength = state.strength;
-  return true;
+  if (*strength == 128 || *strength == 192 || *strength == 256) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 void pin_updateCounter(void) { atca_update_counter(); }
 
 bool se_hasPin(void) {
   ATCAUserState state;
+
   atca_pair_unlock();
 
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
