@@ -459,7 +459,7 @@ ATCA_STATUS atca_read_bytes_zone(uint8_t zone, uint16_t slot, size_t offset,
                                  uint8_t *data, size_t length) {
   ATCA_STATUS status = ATCA_GEN_FAIL;
   size_t zone_size = 0;
-  uint8_t read_buf[32];
+  uint8_t read_buf[32] = {0};
   size_t data_idx = 0;
   size_t cur_block = 0;
   size_t cur_offset = 0;
@@ -583,7 +583,7 @@ ATCA_STATUS atca_read_config_zone(uint8_t *config_data) {
  *
  * \return ATCA_SUCCESS on success, otherwise an error code.
  */
-ATCA_STATUS atca_updateextra(uint8_t mode, uint16_t new_value) {
+ATCA_STATUS atca_update_extra(uint8_t mode, uint16_t new_value) {
   ATCAPacket packet;
   ATCA_STATUS status = ATCA_GEN_FAIL;
 
@@ -840,17 +840,6 @@ ATCA_STATUS atca_write_config_zone(const uint8_t *config_data) {
       break;
     }
 
-    // Write the UserExtra and Selector. This may fail if either value is
-    // already non-zero.
-    // status = atca_updateextra(UPDATE_MODE_USER_EXTRA, config_data[84]);
-    // if (status != ATCA_SUCCESS) {
-    //   break;
-    // }
-    // status = atca_updateextra(UPDATE_MODE_SELECTOR, config_data[85]);
-
-    // if (status != ATCA_SUCCESS) {
-    //   break;
-    // }
   } while (0);
 
   return status;

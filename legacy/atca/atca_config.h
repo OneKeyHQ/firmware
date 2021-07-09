@@ -46,10 +46,14 @@
 #define CONFIG_KEY_AUTH_POS 8
 #define CONFIG_KEY_PERSIST_DISABLE 0x1000
 
+#define ATECC608_SN1_SIZE 4
+#define ATECC608_SN2_SIZE 5
+#define ATECC608_SN_SIZE (ATECC608_SN1_SIZE + ATECC608_SN2_SIZE)
+
 typedef struct __attribute__((packed)) {
-  uint8_t sn1[4];
+  uint8_t sn1[ATECC608_SN1_SIZE];
   uint8_t rev_num[4];
-  uint8_t sn2[5];
+  uint8_t sn2[ATECC608_SN2_SIZE];
   uint8_t aes_enable;
   uint8_t i2c_enable;  // i2c swi
   uint8_t reserved_0;

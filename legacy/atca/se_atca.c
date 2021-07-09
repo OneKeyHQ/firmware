@@ -1,5 +1,6 @@
 #include "se_atca.h"
 #include "atca_api.h"
+#include "atca_command.h"
 #include "atca_config.h"
 
 #include "memory.h"
@@ -9,24 +10,24 @@
 
 typedef struct {
   bool cached;
-  uint8_t cache_pin[32];
-} PIN_CACHED;
+  uint8_t cache_pin[ATCA_KEY_SIZE];
+} PINCache;
 
 static bool se_has_pin = false;
 
 static ATCAPairingInfo *pair_info =
     (ATCAPairingInfo *)(FLASH_STORAGE_SECRETS_INFO);
 
-static PIN_CACHED pin_cache = {0};
+static PINCache pin_cache = {0};
 
-static void pin_cacheSave(uint8_t pin[32]) {
+static void pin_cacheSave(uint8_t pin[ATCA_KEY_SIZE]) {
   pin_cache.cached = true;
-  memcpy(pin_cache.cache_pin, pin, 32);
+  memcpy(pin_cache.cache_pin, pin, ATCA_KEY_SIZE);
 }
 
-static void pin_cacheGet(uint8_t pin[32]) {
+static void pin_cacheGet(uint8_t pin[ATCA_KEY_SIZE]) {
   pin_cache.cached = true;
-  memcpy(pin, pin_cache.cache_pin, 32);
+  memcpy(pin, pin_cache.cache_pin, ATCA_KEY_SIZE);
 }
 
 static void pin_hash(const char *pin, uint32_t pin_len, uint8_t result[32]) {
@@ -99,6 +100,7 @@ bool se_hasPin(void) {
 
 bool se_verifyPin(const char *pin) {
   uint8_t hash_pin[32] = {0};
+
   if (!se_has_pin) {
     return true;
   } else {
@@ -117,6 +119,7 @@ bool se_verifyPin(const char *pin) {
 bool se_setPin(const char *pin) {
   uint8_t hash_pin[32] = {0};
   ATCAUserState state;
+
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
   pin_hash(pin, strlen(pin), hash_pin);
   atca_pair_unlock();
@@ -162,6 +165,7 @@ bool se_changePin(const char *old_pin, const char *new_pin) {
 
 bool se_isInitialized(void) {
   ATCAUserState state;
+
   atca_pair_unlock();
 
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
@@ -170,8 +174,9 @@ bool se_isInitialized(void) {
 }
 
 bool se_importSeed(uint8_t *seed) {
-  uint8_t pin[32];
+  uint8_t pin[32] = {0};
   ATCAUserState state;
+
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
   pin_cacheGet(pin);
   atca_pair_unlock();
@@ -194,8 +199,9 @@ bool se_importSeed(uint8_t *seed) {
 }
 
 bool se_export_seed(uint8_t *seed) {
-  uint8_t pin[32];
+  uint8_t pin[32] = {0};
   pin_cacheGet(pin);
+
   atca_pair_unlock();
   if (ATCA_SUCCESS == atca_mac_slot(SLOT_USER_PIN, pin)) {
     if (ATCA_SUCCESS == atca_read_enc(SLOT_USER_SECRET, 0, seed,
@@ -208,6 +214,7 @@ bool se_export_seed(uint8_t *seed) {
 }
 void se_reset_state(void) {
   uint8_t zeros[32] = {0};
+
   atca_pair_unlock();
   atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&zeros, pair_info->protect_key,
                  SLOT_IO_PROTECT_KEY);
@@ -215,6 +222,7 @@ void se_reset_state(void) {
 
 void se_reset_storage(void) {
   uint8_t zeros[32] = {0};
+
   se_reset_pin();
   se_importSeed(zeros);
   se_reset_state();
