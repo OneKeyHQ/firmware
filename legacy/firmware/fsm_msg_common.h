@@ -25,7 +25,7 @@
 extern char bootloader_version[8];
 
 bool get_features(Features *resp) {
-  char *sn_version = NULL;
+  char *se_version = NULL;
   char *serial = NULL;
   resp->has_vendor = true;
   strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
@@ -107,10 +107,10 @@ bool get_features(Features *resp) {
 #endif
   resp->has_se_enable = true;
   resp->se_enable = config_getWhetherUseSE();
-  sn_version = se_get_version();
-  if (sn_version) {
+  se_version = se_get_version();
+  if (se_version) {
     resp->has_se_ver = true;
-    memcpy(resp->se_ver, sn_version, strlen(sn_version));
+    memcpy(resp->se_ver, se_version, strlen(se_version));
   }
 
   resp->has_backup_only = true;
