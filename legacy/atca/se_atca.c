@@ -230,8 +230,6 @@ void se_reset_storage(void) {
 
 uint32_t se_pinFailedCounter(void) { return atca_get_failed_counter(); }
 
-bool se_isFactoryMode(void) { return false; }
-
 bool se_device_init(uint8_t mode, const char *passphrase) {
   (void)mode;
   (void)passphrase;

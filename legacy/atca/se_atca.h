@@ -20,7 +20,6 @@ bool se_changePin(const char *old_pin, const char *new_pin);
 bool se_isInitialized(void);
 void se_reset_storage(void);
 uint32_t se_pinFailedCounter(void);
-bool se_isFactoryMode(void);
 bool se_device_init(uint8_t mode, const char *passphrase);
 
 #endif
