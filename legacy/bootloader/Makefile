@@ -3,8 +3,12 @@ NAME  = bootloader
 OBJS += bootloader.o
 OBJS += signatures.o
 OBJS += usb.o
+
+ifneq ($(ONEKEY_MINI),1)
 OBJS += swd.o
 OBJS += updateble.o
+endif
+
 OBJS += layout_boot.o
 
 # overrides from libtrezor

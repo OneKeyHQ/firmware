@@ -20,22 +20,6 @@
 #define GPIO_MI2C_SCL GPIO8
 #define GPIO_MI2C_SDA GPIO9
 
-#ifdef NORMAL_PCB
-// SE power IO
-#define GPIO_SE_PORT GPIOB
-#define GPIO_SE_POWER GPIO13
-#else
-
-// SE power IO
-#define GPIO_SE_PORT GPIOC
-#define GPIO_SE_POWER GPIO8
-
-#endif
-
-// power control SE
-#define POWER_ON_SE() (gpio_set(GPIO_SE_PORT, GPIO_SE_POWER))
-#define POWER_OFF_SE() (gpio_clear(GPIO_SE_PORT, GPIO_SE_POWER))
-
 // master I2C addr
 #define MI2C_ADDR 0x10
 #define MI2C_READ 0x01

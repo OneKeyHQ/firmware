@@ -9,8 +9,6 @@
 #include "sys.h"
 #include "timer.h"
 
-uint8_t g_ucFlag = 0;
-uint8_t g_ucBatValue = 0;
 uint8_t battery_cap = 0xFF;
 
 bool sys_nfcState(void) {
@@ -35,9 +33,11 @@ void sys_shutdown(void) {
   delay_ms(500);
   oledClear();
   oledRefresh();
+#if !ONEKEY_MINI
   ble_power_off();
   stm32_power_off();
   delay_ms(100);
+#endif
   scb_reset_system();
 }
 

@@ -157,7 +157,7 @@ uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);
 
 static inline void oledClear_ex(void) {
   oledClear();
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
   layoutStatusLogoEx(false, true);
 #endif
 }
@@ -167,7 +167,7 @@ static inline void oledClear_ex(void) {
 #else
 static inline void layoutSwipe(void) {
   oledClear();
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
   layoutStatusLogoEx(false, true);
 #endif
 }

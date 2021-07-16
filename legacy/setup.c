@@ -25,9 +25,12 @@
 #include <libopencm3/stm32/rng.h>
 #include <libopencm3/stm32/spi.h>
 
+#if !ONEKEY_MINI
+#include "mi2c.h"
+#endif
+
 #include "buttons.h"
 #include "layout.h"
-#include "mi2c.h"
 #include "oled.h"
 #include "rng.h"
 #include "si2c.h"
@@ -90,7 +93,11 @@ void setup(void) {
 
   // enable CSS (Clock Security System)
   RCC_CR |= RCC_CR_CSSON;
-
+#if ONEKEY_MINI
+  // set GPIO for buttons
+  gpio_mode_setup(BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
+                  BTN_PIN_YES | BTN_PIN_NO | BTN_PIN_UP | BTN_PIN_DOWN);
+#else
   // set GPIO for buttons
   gpio_mode_setup(BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
                   BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN);
@@ -119,13 +126,30 @@ void setup(void) {
   gpio_mode_setup(SE_POWER_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
                   SE_POWER_PIN);
   se_power_on();
-
+#endif
   // set GPIO for OLED display
   gpio_mode_setup(OLED_DC_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, OLED_DC_PIN);
   gpio_mode_setup(OLED_CS_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, OLED_CS_PIN);
   gpio_mode_setup(OLED_RST_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
                   OLED_RST_PIN);
+#if ONEKEY_MINI
+  // enable SPI 1 for OLED display
+  gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
+  gpio_set_af(GPIOA, GPIO_AF5, GPIO5);
 
+  gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO7);
+  gpio_set(GPIOA, GPIO7);
+
+  // enable SPI 1 for OLED display
+  gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
+  gpio_set_af(GPIOB, GPIO_AF5, GPIO5);
+
+  //	spi_disable_crc(SPI1);
+  spi_init_master(
+      SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_2, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+      SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+
+#else
   // enable SPI 1 for OLED display
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5 | GPIO7);
   gpio_set_af(GPIOA, GPIO_AF5, GPIO5 | GPIO7);
@@ -134,6 +158,8 @@ void setup(void) {
   spi_init_master(
       SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
       SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+#endif
+
   spi_enable_ss_output(SPI1);
   //	spi_enable_software_slave_management(SPI1);
   //	spi_set_nss_high(SPI1);
@@ -149,16 +175,21 @@ void setup(void) {
   rcc_periph_clock_enable(RCC_OTGFS);
   // clear USB OTG_FS peripheral dedicated RAM
   memset_reg((void *)0x50020000, (void *)0x50020500, 0);
+
+#if !ONEKEY_MINI
 #if (_SUPPORT_DEBUG_UART_)
   usart_setup();
 #endif
   ble_usart_init();
   i2c_slave_init_irq();
+#endif
 }
 
 void setReboot(void) {
+#if !ONEKEY_MINI
   ble_usart_irq_set();
   i2c_slave_init_irq();
+#endif
 }
 
 void setupApp(void) {
@@ -207,11 +238,12 @@ void setupApp(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 
+#if !ONEKEY_MINI
   // change oled refresh frequency
   oledUpdateClk();
-
   // master i2c init
   vMI2CDRV_Init();
+#endif
 }
 
 #define MPU_RASR_SIZE_32B (0x04UL << MPU_RASR_SIZE_LSB)

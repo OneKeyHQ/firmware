@@ -44,7 +44,7 @@
 #include "pbkdf2.h"
 #include "protect.h"
 #include "rng.h"
-#include "se_chip.h"
+#include "se_hal.h"
 #include "sha2.h"
 #include "storage.h"
 #include "storage_ex.h"
@@ -443,7 +443,6 @@ static secbool config_upgrade_v10(void) {
 }
 
 void config_init(void) {
-  char *se_version = NULL;
   char oldTiny = usbTiny(1);
 
   config_upgrade_v10();
@@ -451,6 +450,10 @@ void config_init(void) {
   storage_init(&protectPinUiCallback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
 
+#if ONEKEY_MINI
+  g_bSelectSEFlag = true;
+#else
+  char *se_version = NULL;
   // get whether use se flag
   for (uint8_t i = 0; i < 5; i++) {
     se_version = se_get_version();
@@ -473,6 +476,7 @@ void config_init(void) {
     delay_ms(1000);
     shutdown();
   }
+#endif
 
   config_getLanguage(config_language, sizeof(config_language));
 
@@ -482,10 +486,12 @@ void config_init(void) {
     config_set_bool(KEY_INITIALIZED, false);
   }
 
+#if !ONEKEY_MINI
   // new devcie never use se
   if (!config_isInitialized() && (g_bSelectSEFlag == true)) {
     g_bSelectSEFlag = false;
   }
+#endif
 
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
@@ -841,6 +847,14 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
   }
 
   if (g_bSelectSEFlag) {
+#if ONEKEY_MINI
+    (void)import;
+    uint8_t seed[64] = {0};
+    uint32_t strength = 0;
+    strength = (mnemonic_to_bits(mnemonic, seed) / 11) * 8 * 4 / 3;
+    se_setSeedStrength(strength);
+    return se_importSeed(seed);
+#else
     se_setNeedsBackup(false);
     if (import) {
       uint8_t seed[64] = {0};
@@ -853,6 +867,7 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
         return false;
       }
     }
+#endif
   } else {
     if (sectrue != storage_set(KEY_MNEMONIC, mnemonic,
                                strnlen(mnemonic, MAX_MNEMONIC_LEN))) {
@@ -890,6 +905,7 @@ bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len) {
 
   return true;
 }
+#if !ONEKEY_MINI
 bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg) {
   if (!g_bSelectSEFlag) {
     return false;
@@ -913,6 +929,7 @@ bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
   }
   return true;
 }
+#endif
 
 bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size) {
@@ -992,7 +1009,12 @@ bool config_containsMnemonic(const char *mnemonic) {
  */
 bool config_unlock(const char *pin) {
   if (g_bSelectSEFlag) {
-    if (se_verifyPin((pin_to_int(pin)))) {
+#if ONEKEY_MINI
+    if (se_verifyPin(pin))
+#else
+    if (se_verifyPin((pin_to_int(pin))))
+#endif
+    {
       se_unlocked = sectrue;
       return true;
     } else {
@@ -1022,7 +1044,12 @@ bool config_changePin(const char *old_pin, const char *new_pin) {
     return false;
   }
   if (g_bSelectSEFlag) {
-    if (se_changePin(pin_to_int(old_pin), new_pin_int)) {
+#if ONEKEY_MINI
+    if (se_changePin(old_pin, new_pin))
+#else
+    if (se_changePin(pin_to_int(old_pin), new_pin_int))
+#endif
+    {
       se_unlocked = sectrue;
       return true;
     } else {
@@ -1328,10 +1355,12 @@ uint32_t config_getFastPayTimes(void) {
   return times;
 }
 
+#if !ONEKEY_MINI
 void config_setBleTrans(bool mode) {
   ble_set_switch(mode);
   change_ble_sta(mode);
 }
+#endif
 
 void config_setWhetherUseSE(bool flag) {
   config_set_bool(KEY_SEFLAG, flag);
@@ -1395,6 +1424,7 @@ void config_setDeviceState(uint32_t device_state) {
   }
 }
 
+#if !ONEKEY_MINI
 bool config_setSeedPin(const char *pin) {
   uint32_t seedpin;
   seedpin = pin_to_int(pin);
@@ -1422,6 +1452,7 @@ bool config_stBackUpEntoryToSe(uint8_t *seed, uint8_t seed_len) {
 bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len) {
   return st_restore_entory_from_se(KEY_ST_SEED_EXCHANGE, seed, seed_len);
 }
+#endif
 
 uint32_t config_getPinFails(void) {
   uint32_t count = 0;

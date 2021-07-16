@@ -146,8 +146,8 @@ int main(void) {
 #else
   check_bootloader(true);
   setupApp();
+#if !EMULATOR && !ONEKEY_MINI
   ble_reset();
-#if !EMULATOR
   register_timer("button", timer1s / 2, buttonsTimer);
   register_timer("charge_dis", timer1s, chargeDisTimer);
   register_timer("poweroff", timer1s, auto_poweroff_timer);

@@ -58,3 +58,27 @@ void uint2str(uint32_t num, char *str) {
     str[i - 1 - j] = temp;
   }
 }
+
+bool check_all_ones(const void *data, int len) {
+  if (!data) return false;
+  uint8_t result = 0xff;
+  const uint8_t *ptr = (const uint8_t *)data;
+
+  for (; len; len--, ptr++) {
+    result &= *ptr;
+  }
+
+  return (result == 0xff);
+}
+
+bool check_all_zeros(const void *data, int len) {
+  if (!data) return false;
+  uint8_t result = 0x0;
+  const uint8_t *ptr = (const uint8_t *)data;
+
+  for (; len; len--, ptr++) {
+    result |= *ptr;
+  }
+
+  return (result == 0x00);
+}

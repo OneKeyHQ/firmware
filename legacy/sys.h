@@ -94,17 +94,6 @@ void sys_poweron(void);
 void sys_shutdown(void);
 void sys_backtoboot(void);
 
-// NFC Connected
-#define NFC_LINK 0x09
-// USB Connected
-#define USB_LINK 0x08
-
-// APDU TAG
-#define APDU_TAG_BLE 0x44
-#define APDU_TAG_BLE_NFC 0x46
-#define APDU_TAG_BAT 0x47
-#define APDU_TAG_HANDSHAKE 0x55
-
 #define GPIO_CMBUS_PORT GPIOC
 #define GPIO_SI2C_CMBUS GPIO9
 
@@ -112,8 +101,6 @@ void sys_backtoboot(void);
 #define SET_COMBUS_HIGH() (gpio_set(GPIO_CMBUS_PORT, GPIO_SI2C_CMBUS))
 #define SET_COMBUS_LOW() (gpio_clear(GPIO_CMBUS_PORT, GPIO_SI2C_CMBUS))
 
-extern uint8_t g_ucFlag;
-extern uint8_t g_ucBatValue;
 extern uint8_t battery_cap;
 
 #endif

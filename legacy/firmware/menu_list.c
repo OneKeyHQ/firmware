@@ -223,6 +223,7 @@ void menu_showMnemonic(int index) {
   }
 }
 
+#if !ONEKEY_MINI
 static struct menu_item ble_set_menu_items[] = {
     {"On", NULL, true, menu_para_set_ble, NULL},
     {"Off", NULL, true, menu_para_set_ble, NULL}};
@@ -235,6 +236,7 @@ static struct menu ble_set_menu = {
     .items = ble_set_menu_items,
     .previous = &settings_menu,
 };
+#endif
 
 static struct menu_item language_set_menu_items[] = {
     {"English ", NULL, true, menu_para_set_language, NULL},
@@ -265,6 +267,7 @@ static struct menu autolock_set_menu = {
     .previous = &settings_menu,
 };
 
+#if !ONEKEY_MINI
 static struct menu_item shutdown_set_menu_items[] = {
     {"10", "minute", true, menu_para_set_shutdown, NULL},
     {"30", "minutes", true, menu_para_set_shutdown, NULL},
@@ -280,15 +283,21 @@ static struct menu shutdown_set_menu = {
     .items = shutdown_set_menu_items,
     .previous = &settings_menu,
 };
+#endif
 
 static struct menu_item settings_menu_items[] = {
+#if !ONEKEY_MINI
     {"Bluetooth", NULL, false, .sub_menu = &ble_set_menu, menu_para_ble_state},
+#endif
     {"Language", NULL, false, .sub_menu = &language_set_menu,
      menu_para_language},
     {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
      menu_para_autolock},
+#if !ONEKEY_MINI
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
-     menu_para_shutdown}};
+     menu_para_shutdown}
+#endif
+};
 
 static struct menu settings_menu = {
     .start = 0,

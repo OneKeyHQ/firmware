@@ -205,7 +205,7 @@ bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr) {
     msg_debug_out_pad();
   }
 #endif
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
   if (CHANNEL_SLAVE == host_channel) {
     const uint8_t *data;
     uint32_t offset = 0;

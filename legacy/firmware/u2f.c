@@ -48,7 +48,7 @@
 #include "u2f/u2f_keys.h"
 #include "u2f_knownapps.h"
 
-#include "se_chip.h"
+#include "se_hal.h"
 
 // About 1/2 Second according to values used in protect.c
 #define U2F_TIMEOUT (800000 / 2)
@@ -407,6 +407,7 @@ void st_version(void) {
 }
 
 void u2fhid_msg(const APDU *a, uint32_t len) {
+  (void)len;
   if (a->cla != 0) {
     send_u2f_error(U2F_SW_CLA_NOT_SUPPORTED);
     return;
@@ -429,7 +430,7 @@ void u2fhid_msg(const APDU *a, uint32_t len) {
       vButton_Lcd_Test();
       break;
     default:
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
       // MI2CDRV_Transmit
       if (false == bMI2CDRV_SendData((uint8_t *)&(a->cla), len)) {
         send_u2f_error(U2F_SW_INS_NOT_SUPPORTED);

@@ -19,10 +19,13 @@ static void send_response(usbd_device *dev, uint8_t *buf) {
   if (dev != NULL) {
     while (usbd_ep_write_packet(dev, ENDPOINT_ADDRESS_IN, buf, 64) != 64) {
     }
-  } else {
+  }
+#if !ONEKEY_MINI
+  else {
     memcpy(i2c_data_out, buf, 64);
     i2c_slave_send_ex(64);
   }
+#endif
 }
 static void send_msg_success(usbd_device *dev) {
   uint8_t response[64];

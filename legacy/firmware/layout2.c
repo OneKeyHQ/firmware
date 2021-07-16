@@ -43,7 +43,7 @@
 #include "protect.h"
 #include "qrcodegen.h"
 #include "recovery.h"
-#include "se_chip.h"
+#include "se_hal.h"
 #include "secp256k1.h"
 #include "signing.h"
 #include "sys.h"
@@ -53,7 +53,7 @@
 /* Display info timeout */
 uint32_t system_millis_display_info_start = 0;
 
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
 static volatile uint8_t charge_dis_timer_counter = 0;
 static volatile uint8_t dis_hint_timer_counter = 0;
 static uint8_t charge_dis_counter_bak = 0;
@@ -63,7 +63,7 @@ static uint8_t dis_power_flag = 0;
 static bool layout_refresh = false;
 #endif
 
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
 void chargeDisTimer(void) {
   charge_dis_timer_counter =
       charge_dis_timer_counter > 8 ? 0 : charge_dis_timer_counter + 1;
@@ -299,7 +299,7 @@ void layoutScreensaver(void) {
 void layoutLabel(char *label) {
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, 16, label, FONT_STANDARD);
 }
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
 void getBleDevInformation(void) {
   if (!ble_name_state()) {
     ble_request_info(BLE_CMD_BT_NAME);
@@ -570,7 +570,9 @@ static void _layout_home(bool update_menu) {
     if (backup_only) {
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, _("Backup Mode"),
                                   FONT_STANDARD | FONT_DOUBLE);
+#if !ONEKEY_MINI
       layoutFillBleName(5);
+#endif
     } else {
       oledDrawBitmap(56, 8, &bmp_home_logo);
       char desc[64] = "";
@@ -578,11 +580,14 @@ static void _layout_home(bool update_menu) {
       config_getLabel(label, sizeof(label));
       if (strlen(label)) {
         strcat(desc, label);
-      } else {
+      }
+#if !ONEKEY_MINI
+      else {
         if (ble_name_state() == true) {
           strcat(desc, ble_get_name());
         }
       }
+#endif
       if (!config_isInitialized()) {
         strcat(desc, "(");
         strcat(desc, _("Not Actived"));
@@ -623,7 +628,7 @@ static void _layout_home(bool update_menu) {
 }
 
 void layoutHome(void) {
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
   if (!config_isLanguageSet() && !config_isInitialized() &&
       !se_isFactoryMode()) {
     layout_language_set(KEY_UP);
@@ -1653,7 +1658,7 @@ void layoutHomeInfo(void) {
       layoutHome();
     }
     if (layoutLast == layoutHome) {
-#if !EMULATOR
+#if !EMULATOR && !ONEKEY_MINI
       refreshUsbConnectTips();
 #endif
       if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
@@ -2073,10 +2078,10 @@ refresh_menu:
         layouKeyValue(y, _("Serial:"), se_sn);
         y += font->pixel + 1;
       }
-
+#if !ONEKEY_MINI
       layouKeyValue(y, _("BLE Name:"), ble_get_name());
       y += font->pixel + 1;
-
+#endif
       char *id_key = _("Device ID:");
       oledDrawStringAdapter(0, y, id_key, FONT_STANDARD);
       x = oledStringWidthAdapter(id_key, FONT_STANDARD) + 1;
@@ -2107,10 +2112,10 @@ refresh_menu:
       se_version = se_get_version();
       layouKeyValue(y, _("Firmware version:"), ONEKEY_VERSION);
       y += font->pixel + 1;
-
+#if !ONEKEY_MINI
       layouKeyValue(y, _("BLE version:"), ble_get_ver());
       y += font->pixel + 1;
-
+#endif
       layouKeyValue(y, _("SE version:"), se_version);
       y += font->pixel + 1;
 
@@ -2145,7 +2150,6 @@ refresh_menu:
 
 void layoutEnterSleep(void) {
 #if !EMULATOR
-  static uint32_t system_millis_logo_refresh = 0;
 
   if (config_getSleepDelayMs() > 0) {
     if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
@@ -2153,6 +2157,8 @@ void layoutEnterSleep(void) {
       enter_sleep();
     }
   }
+#if !ONEKEY_MINI
+  static uint32_t system_millis_logo_refresh = 0;
   if (layoutLast != layoutScreensaver) {
     // 1000 ms refresh
     if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
@@ -2160,6 +2166,7 @@ void layoutEnterSleep(void) {
       system_millis_logo_refresh = timer_ms();
     }
   }
+#endif
 
 #else
   if ((timer_ms() - system_millis_lock_start) >= config_getAutoLockDelayMs()) {

@@ -60,6 +60,10 @@ void data2hex(const void *data, uint32_t len, char *str);
 
 void uint2str(uint32_t num, char *str);
 
+bool check_all_ones(const void *data, int len);
+
+bool check_all_zeros(const void *data, int len);
+
 // defined in startup.s (or setup.c for emulator)
 extern void __attribute__((noreturn)) shutdown(void);
 

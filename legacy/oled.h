@@ -46,9 +46,33 @@
 #define OLED_RST_PIN GPIO1  // PB1 | Reset display
 #endif
 
+#if ONEKEY_MINI
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 128
+
+#define OLED_X_OFFSET 2
+#define OLED_Y_OFFSET 3
+
+#define COLOR_BLACK 0x0000
+#define COLOR_WHITE 0xffff
+#define COLOR_RED 0xf800
+#define COLOR_GREEN 0x07e0
+#define COLOR_BLUE 0x001f
+
+#define COLOR_FONT COLOR_BLACK
+#define COLOR_BACKGROUND COLOR_WHITE
+
+#else
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
+#endif
 #define OLED_BUFSIZE (OLED_WIDTH * OLED_HEIGHT / 8)
+
+#if ONEKEY_MINI
+void SPISendCmd(uint8_t cmd);
+void SPISendData(uint8_t data);
+void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye);
+#endif
 
 void oledInit(void);
 void oledClear(void);

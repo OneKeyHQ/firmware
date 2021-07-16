@@ -61,12 +61,19 @@ static uint8_t _oledbuffer[OLED_BUFSIZE];
 static uint8_t _oledbuffer_bak[OLED_BUFSIZE];
 static bool is_debug_link = 0;
 
+#if ONEKEY_MINI
+/*
+ * macros to convert coordinate to bit position
+ */
+#define OLED_OFFSET(x, y) (x + (y / 8) * OLED_WIDTH)
+#define OLED_MASK(x, y) (1 << (y % 8))
+#else
 /*
  * macros to convert coordinate to bit position
  */
 #define OLED_OFFSET(x, y) (OLED_BUFSIZE - 1 - (x) - ((y) / 8) * OLED_WIDTH)
 #define OLED_MASK(x, y) (1 << (7 - (y) % 8))
-
+#endif
 /*
  * Return the state of the pixel at x, y
  */
@@ -119,6 +126,173 @@ static inline void SPISend(uint32_t base, const uint8_t *data, int len) {
     ;
 }
 
+#if ONEKEY_MINI
+
+void SPISendByte(uint32_t base, const uint8_t data) { SPISend(base, &data, 1); }
+
+void SPISendCmd(uint8_t cmd) { SPISendByte(SPI_BASE, cmd); }
+
+void SPISendData(uint8_t data) {
+  gpio_set(OLED_DC_PORT, OLED_DC_PIN);  // set to DATA
+  SPISendByte(SPI_BASE, data);
+  gpio_clear(OLED_DC_PORT, OLED_DC_PIN);  // set to CMD
+}
+/*
+ * Initialize the display.
+ */
+// tft lcd st7735s
+void oledInit(void) {
+  //   // Reset the LCD
+  gpio_set(OLED_RST_PORT, OLED_RST_PIN);
+  delay_ms(5);
+  gpio_clear(OLED_RST_PORT, OLED_RST_PIN);
+  delay_ms(5);
+  gpio_set(OLED_RST_PORT, OLED_RST_PIN);
+  delay_ms(100);
+
+  gpio_clear(OLED_CS_PORT, OLED_CS_PIN);  // SPI select
+  gpio_clear(OLED_DC_PORT, OLED_DC_PIN);  // set to CMD
+
+  SPISendCmd(0x11);  // sleep out
+  delay_ms(120);
+
+  SPISendCmd(0xb1);
+  SPISendData(0x05);
+  SPISendData(0x32);
+  SPISendData(0x3a);
+
+  SPISendCmd(0xb2);
+  SPISendData(0x05);
+  SPISendData(0x3a);
+  SPISendData(0x3a);
+
+  SPISendCmd(0xb3);
+  SPISendData(0x05);
+  SPISendData(0x3a);
+  SPISendData(0x3a);
+  SPISendData(0x05);
+  SPISendData(0x3a);
+  SPISendData(0x3a);
+
+  SPISendCmd(0xb4);
+  SPISendData(0x07);
+
+  // power control 1
+  SPISendCmd(0xc0);
+  SPISendData(0x62);
+  SPISendData(0x02);
+  SPISendData(0x04);
+  // power control 2
+  SPISendCmd(0xc1);
+  SPISendData(0xc0);
+  // power control 2
+  SPISendCmd(0xc2);
+  SPISendData(0x0d);
+  SPISendData(0x00);
+  // power control 2
+  SPISendCmd(0xc3);
+  SPISendData(0x8d);
+  SPISendData(0xea);
+  // power control 2
+  SPISendCmd(0xc4);
+  SPISendData(0x8d);
+  SPISendData(0xee);
+
+  // COM Control 1
+  SPISendCmd(0xc5);
+  SPISendData(0x07);
+
+  // COM OFFSET
+  SPISendCmd(0xc7);
+  SPISendData(0xba);
+  SPISendData(0x05);
+  SPISendData(0x0a);
+
+  // tear effect on
+  SPISendCmd(0x35);
+  SPISendData(0x01);
+
+  // Interface Pixel Format,64K
+  SPISendCmd(0x3a);
+  SPISendData(0x05);
+
+  // column address
+  SPISendCmd(0x2a);
+  SPISendData(0x00);
+  SPISendData(OLED_X_OFFSET);
+  SPISendData(0x00);
+  SPISendData(0x7f + OLED_X_OFFSET);
+
+  // row address
+  SPISendCmd(0x2b);
+  SPISendData(0x00);
+  SPISendData(OLED_Y_OFFSET);
+  SPISendData(0x00);
+  SPISendData(0x7f + OLED_Y_OFFSET);
+
+  // MADCTL
+  SPISendCmd(0x36);
+  SPISendData(0xc8);
+
+  SPISendCmd(0xe0);
+  SPISendData(0x0a);
+  SPISendData(0x1f);
+  SPISendData(0x0e);
+  SPISendData(0x17);
+  SPISendData(0x37);
+  SPISendData(0x31);
+  SPISendData(0x2b);
+  SPISendData(0x2e);
+  SPISendData(0x2c);
+  SPISendData(0x29);
+  SPISendData(0x31);
+  SPISendData(0x3c);
+  SPISendData(0x00);
+  SPISendData(0x05);
+  SPISendData(0x03);
+  SPISendData(0x0d);
+
+  SPISendCmd(0xe1);
+  SPISendData(0x0b);
+  SPISendData(0x1f);
+  SPISendData(0x0e);
+  SPISendData(0x12);
+  SPISendData(0x28);
+  SPISendData(0x24);
+  SPISendData(0x1f);
+  SPISendData(0x25);
+  SPISendData(0x25);
+  SPISendData(0x26);
+  SPISendData(0x30);
+  SPISendData(0x3c);
+  SPISendData(0x00);
+  SPISendData(0x05);
+  SPISendData(0x03);
+  SPISendData(0x0d);
+  // Display On
+  SPISendCmd(0x29);
+
+  gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
+}
+
+void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye) {
+  if (xs == xe) xe += 1;
+  if (ys == ye) ye += 1;
+  SPISendCmd(0x2a);
+  SPISendData(xs >> 8);
+  SPISendData((xs + OLED_X_OFFSET) & 0xff);
+  SPISendData((xe - 1) >> 8);
+  SPISendData((xe - 1 + OLED_X_OFFSET) & 0xff);
+
+  SPISendCmd(0x2b);
+  SPISendData(ys >> 8);
+  SPISendData((ys + OLED_Y_OFFSET) & 0xff);
+  SPISendData((ye - 1) >> 8);
+  SPISendData((ye - 1 + OLED_Y_OFFSET) & 0xff);
+
+  SPISendCmd(0x2c);
+}
+#else
 /*
  * Initialize the display.
  */
@@ -167,7 +341,7 @@ void oledInit() {
   oledClear();
   oledRefresh();
 }
-
+#endif
 void oledUpdateClk(void) {
   static const uint8_t s[2] = {OLED_SETDISPLAYCLOCKDIV, 0xC0};
 
@@ -184,6 +358,7 @@ void oledUpdateClk(void) {
 /*
  * Clears the display buffer (sets all pixels to black)
  */
+
 void oledClear() { memzero(_oledbuffer, sizeof(_oledbuffer)); }
 
 void oledClearPart() {
@@ -218,6 +393,25 @@ void oledInvertDebugLink() {
  * not the content of the display.
  */
 #if !EMULATOR
+
+#if ONEKEY_MINI
+void oledRefresh() {
+  gpio_clear(OLED_CS_PORT, OLED_CS_PIN);  // SPI select
+  oledSetAddress(0, 0, OLED_WIDTH, OLED_HEIGHT);
+  for (int y = 0; y < OLED_HEIGHT; y++) {
+    for (int x = 0; x < OLED_WIDTH; x++) {
+      if (_oledbuffer[OLED_OFFSET(x, y)] & OLED_MASK(x, y)) {
+        SPISendData(COLOR_FONT >> 8);
+        SPISendData(COLOR_FONT & 0xff);
+      } else {
+        SPISendData(COLOR_BACKGROUND >> 8);
+        SPISendData(COLOR_BACKGROUND & 0xff);
+      }
+    }
+  }
+  gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
+}
+#else
 void oledRefresh() {
   static const uint8_t s[3] = {OLED_SETLOWCOLUMN | 0x00,
                                OLED_SETHIGHCOLUMN | 0x00,
@@ -245,7 +439,7 @@ void oledRefresh() {
   // return it back
   oledInvertDebugLink();
 }
-
+#endif
 #endif
 
 const uint8_t *oledGetBuffer() { return _oledbuffer; }

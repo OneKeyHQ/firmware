@@ -33,6 +33,7 @@
 #define SVC_SYS_RESET 10
 #define SVC_SYS_SLEEP 11
 #define SVC_SYS_PRIVILEGED 12
+#define SVC_SYS_IRQ_CONTROL 13
 
 /* Unlocks flash.  This function needs to be called before programming
  * or erasing. Multiple calls of flash_program and flash_erase can
@@ -85,6 +86,11 @@ inline void svc_system_sleep(void) {
 
 inline void svc_system_privileged(void) {
   __asm__ __volatile__("svc %0" ::"i"(SVC_SYS_PRIVILEGED) : "memory");
+}
+
+inline void svc_system_irq(uint8_t state) {
+  register uint32_t r0 __asm__("r0") = state;
+  __asm__ __volatile__("svc %0" ::"i"(SVC_SYS_IRQ_CONTROL), "r"(r0) : "memory");
 }
 
 #else
