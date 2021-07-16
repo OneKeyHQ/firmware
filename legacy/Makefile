@@ -20,6 +20,7 @@ OBJS += atca/atca_hal.o
 OBJS += atca/atca_command.o
 OBJS += atca/atca_api.o
 OBJS += atca/se_atca.o
+OBJS += w25qxx.o
 else
 OBJS += usart.o
 OBJS += nordic_dfu.o
