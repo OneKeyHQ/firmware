@@ -179,10 +179,31 @@ void setupApp(void) {
 
   // hotfix for old bootloader
   gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO9);
+#if !ONEKEY_MINI
   spi_init_master(
       SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
       SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+#else
+  // enable SPI clock
+  rcc_periph_clock_enable(RCC_SPI2);
 
+  // NSS
+  gpio_mode_setup(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, GPIO12);
+  gpio_set(GPIOB, GPIO12);
+
+  // SCK, MISO, MOSI
+  gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                  GPIO13 | GPIO14 | GPIO15);
+  gpio_set_af(GPIOB, GPIO_AF5, GPIO13 | GPIO14 | GPIO15);
+
+  // enable SPI 2 for Flash
+  spi_init_master(
+      SPI2, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+      SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_8BIT, SPI_CR1_MSBFIRST);
+
+  spi_enable_ss_output(SPI2);
+  spi_enable(SPI2);
+#endif
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO10);
   gpio_set_af(GPIOA, GPIO_AF10, GPIO10);
 

@@ -39,6 +39,9 @@
 #include "ble.h"
 #include "otp.h"
 #include "sys.h"
+#if ONEKEY_MINI
+#include "w25qxx.h"
+#endif
 #endif
 
 /* Screen timeout */
@@ -170,6 +173,10 @@ int main(void) {
   oledSetDebugLink(1);
 #if !EMULATOR
   config_wipe();
+#endif
+#else
+#if ONEKEY_MINI
+  w25qxx_init();
 #endif
 #endif
 
