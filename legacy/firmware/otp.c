@@ -20,9 +20,6 @@
 #include "otp.h"
 #include <libopencm3/stm32/flash.h>
 
-#define FLASH_OTP_BASE 0x1FFF7800U
-#define FLASH_OTP_LOCK_BASE 0x1FFF7A00U
-
 bool flash_otp_is_locked(uint8_t block) {
   return 0x00 == *(volatile uint8_t *)(FLASH_OTP_LOCK_BASE + block);
 }

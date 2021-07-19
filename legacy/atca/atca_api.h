@@ -1,6 +1,7 @@
 #ifndef _ATCA_API_H_
 #define _ATCA_API_H_
 
+#include "atca_config.h"
 #include "atca_status.h"
 
 typedef struct __attribute__((packed)) {
@@ -12,12 +13,13 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
   uint8_t serial[16];
+  uint8_t rfu[16];
   uint8_t protect_key[32];
   uint8_t init_pin[32];
   uint8_t hash_mix[32];
 } ATCAPairingInfo;
 
-ATCA_STATUS atca_get_config(void);
+ATCA_STATUS atca_get_config(ATCAConfiguration *config);
 ATCA_STATUS atca_mac_slot(uint16_t key_id, uint8_t *slot_key);
 ATCA_STATUS atca_sha_hmac(const uint8_t *data, size_t data_size,
                           uint16_t key_slot, uint8_t *digest);

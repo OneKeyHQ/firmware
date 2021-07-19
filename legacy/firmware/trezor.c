@@ -146,6 +146,9 @@ int main(void) {
 #else
   check_bootloader(true);
   setupApp();
+#if ONEKEY_MINI
+  atca_config_init();
+#endif
 #if !EMULATOR && !ONEKEY_MINI
   ble_reset();
   register_timer("button", timer1s / 2, buttonsTimer);

@@ -1,9 +1,7 @@
-#include <libopencm3/stm32/flash.h>
-
 #include "atca_api.h"
 #include "atca_command.h"
-#include "atca_config.h"
 
+#include "../firmware/otp.h"
 #include "common.h"
 #include "memory.h"
 #include "rng.h"
@@ -11,17 +9,6 @@
 #include "util.h"
 
 #define PIN_MAX_TRIES 10
-
-static void flash_enter(void) {
-  flash_wait_for_last_operation();
-  flash_clear_status_flags();
-  flash_unlock();
-}
-
-static void flash_exit(void) {
-  flash_wait_for_last_operation();
-  flash_lock();
-}
 
 // slot config
 // |write-config|writekey|is secret|encryptread|limituse|nomac|readkey|
@@ -92,8 +79,8 @@ static const ATCAConfiguration atca_init_config = {
         0x003C   // slot 15,lockable
     }};
 
-static ATCAPairingInfo *pair_info =
-    (ATCAPairingInfo *)FLASH_PTR(FLASH_STORAGE_SECRETS_INFO);
+static ATCAPairingInfo pair_info_obj = {0};
+ATCAPairingInfo *pair_info = &pair_info_obj;
 
 static ATCAConfiguration atca_configuration;
 
@@ -105,12 +92,9 @@ static ATCAConfiguration atca_configuration;
 // aligned to 32
 static const uint32_t counter0_init[8] = {32, 32, 0};
 
-_Static_assert(sizeof(atca_configuration) == ATCA_ECC_CONFIG_SIZE,
-               "macro atca configuration packet error");
-
-ATCA_STATUS atca_get_config(void) {
+ATCA_STATUS atca_get_config(ATCAConfiguration *config) {
   ATCA_STATUS status;
-  status = atca_read_config_zone((uint8_t *)&atca_configuration);
+  status = atca_read_config_zone((uint8_t *)config);
   return status;
 }
 
@@ -133,9 +117,14 @@ ATCA_STATUS atca_get_state(ATCADeviceState *atca_stat) {
 
 void atca_config_init(void) {
   uint8_t zeros[32] = {0};
-  uint8_t serial_no[16] = {0};
+  uint8_t serial_no[32] = {0};
   uint8_t rand_buffer[32] = {0};
-  uint8_t init_pin[32] = {0};
+
+  memset(serial_no, 0xff, sizeof(serial_no));
+  memcpy(&pair_info_obj,
+         FLASH_PTR(FLASH_OTP_BASE +
+                   FLASH_OTP_BLOCK_608_SERIAL * FLASH_OTP_BLOCK_SIZE),
+         sizeof(pair_info_obj));
 
   atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
               "get config");
@@ -146,9 +135,13 @@ void atca_config_init(void) {
 
   // new st
   if (check_all_ones(pair_info->serial, sizeof(pair_info->serial))) {
-    flash_enter();
-    flash_program((uint32_t)pair_info->serial, serial_no, ATECC608_SN_SIZE);
-    flash_exit();
+    if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_SERIAL)) {
+      flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, serial_no,
+                      FLASH_OTP_BLOCK_SIZE);
+      flash_otp_lock(FLASH_OTP_BLOCK_608_SERIAL);
+    } else {
+      atca_assert(ATCA_BAD_PARAM, "OTP data err");
+    }
   } else {
     if (memcmp(pair_info->serial, serial_no, ATECC608_SN_SIZE)) {
       atca_assert(ATCA_BAD_PARAM, "se changed");
@@ -157,27 +150,41 @@ void atca_config_init(void) {
 
   if (check_all_ones(pair_info->protect_key, sizeof(pair_info->protect_key))) {
     atca_assert(atca_random(rand_buffer), "get random");
-    flash_enter();
-    flash_program((uint32_t)pair_info->protect_key, rand_buffer,
-                  sizeof(pair_info->protect_key));
-    flash_exit();
+    if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_PROTECT_KEY)) {
+      flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, rand_buffer,
+                      FLASH_OTP_BLOCK_SIZE);
+      flash_otp_lock(FLASH_OTP_BLOCK_608_PROTECT_KEY);
+    } else {
+      atca_assert(ATCA_BAD_PARAM, "OTP data err");
+    }
   }
 
   if (check_all_ones(pair_info->init_pin, sizeof(pair_info->init_pin))) {
-    atca_assert(atca_random(init_pin), "get random");
-    flash_enter();
-    flash_program((uint32_t)pair_info->init_pin, init_pin,
-                  sizeof(pair_info->init_pin));
-    flash_exit();
+    atca_assert(atca_random(rand_buffer), "get random");
+    if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_INIT_PIN)) {
+      flash_otp_write(FLASH_OTP_BLOCK_608_INIT_PIN, 0, rand_buffer,
+                      FLASH_OTP_BLOCK_SIZE);
+      flash_otp_lock(FLASH_OTP_BLOCK_608_INIT_PIN);
+    } else {
+      atca_assert(ATCA_BAD_PARAM, "OTP data err");
+    }
   }
 
   if (check_all_ones(pair_info->hash_mix, sizeof(pair_info->hash_mix))) {
     atca_assert(atca_random(rand_buffer), "get random");
-    flash_enter();
-    flash_program((uint32_t)pair_info->hash_mix, rand_buffer,
-                  sizeof(pair_info->hash_mix));
-    flash_exit();
+    if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_MIX_PIN)) {
+      flash_otp_write(FLASH_OTP_BLOCK_608_MIX_PIN, 0, rand_buffer,
+                      FLASH_OTP_BLOCK_SIZE);
+      flash_otp_lock(FLASH_OTP_BLOCK_608_MIX_PIN);
+    } else {
+      atca_assert(ATCA_BAD_PARAM, "OTP data err");
+    }
   }
+
+  memcpy(&pair_info_obj,
+         FLASH_PTR(FLASH_OTP_BASE +
+                   FLASH_OTP_BLOCK_608_SERIAL * FLASH_OTP_BLOCK_SIZE),
+         sizeof(pair_info_obj));
 
   if (atca_configuration.lock_config == ATCA_UNLOCKED) {
     atca_assert(atca_write_config_zone((uint8_t *)&atca_init_config),

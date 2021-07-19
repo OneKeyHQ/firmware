@@ -15,8 +15,7 @@ typedef struct {
 
 static bool se_has_pin = false;
 
-static ATCAPairingInfo *pair_info =
-    (ATCAPairingInfo *)(FLASH_STORAGE_SECRETS_INFO);
+extern ATCAPairingInfo *pair_info;
 
 static PINCache pin_cache = {0};
 
@@ -85,7 +84,7 @@ bool se_getSeedStrength(uint32_t *strength) {
 void pin_updateCounter(void) { atca_update_counter(); }
 
 bool se_hasPin(void) {
-  ATCAUserState state;
+  ATCAUserState state = {0};
 
   atca_pair_unlock();
 
@@ -164,7 +163,7 @@ bool se_changePin(const char *old_pin, const char *new_pin) {
 }
 
 bool se_isInitialized(void) {
-  ATCAUserState state;
+  ATCAUserState state = {0};
 
   atca_pair_unlock();
 

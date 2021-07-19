@@ -127,7 +127,6 @@ int main(void) {
     oledInit();
 #if ONEKEY_MINI
     atca_init();
-    atca_config_init();
 #else
     sys_poweron();
     buttonsIrqInit();
