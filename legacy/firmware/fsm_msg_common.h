@@ -28,7 +28,7 @@ bool get_features(Features *resp) {
   char *sn_version = NULL;
   char *serial = NULL;
   resp->has_vendor = true;
-  strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+  strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   resp->has_major_version = true;
   resp->major_version = VERSION_MAJOR;
   resp->has_minor_version = true;
