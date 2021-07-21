@@ -115,6 +115,8 @@ bool w25qxx_read_sector(uint8_t *buffer, uint32_t sector_addr, uint32_t offset,
 bool w25qxx_read_block(uint8_t *buffer, uint32_t block_addr, uint32_t offset,
                        uint32_t number);
 
+bool w25qxx_write_buffer(uint8_t *buffer, uint32_t address, uint32_t len);
+
 #ifdef __cplusplus
 }
 #endif

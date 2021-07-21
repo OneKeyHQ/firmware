@@ -985,3 +985,64 @@ bool w25qxx_read_block(uint8_t *buffer, uint32_t block_addr, uint32_t offset,
 
   return true;
 }
+
+bool _w25qxx_write_buffer(uint8_t *buffer, uint32_t address, uint32_t len) {
+  uint32_t page_remain = 0;
+
+  if (address + len > (w25qxx.capacity_in_kilobyte * 1024)) {
+    return false;
+  }
+
+  page_remain = w25qxx.page_size - address % w25qxx.page_size;
+
+  while (len) {
+    page_remain = len > page_remain ? page_remain : len;
+    w25qxx_write_page(buffer, address / w25qxx.page_size,
+                      address % w25qxx.page_size, page_remain);
+    len -= page_remain;
+    buffer += page_remain;
+    address += page_remain;
+    page_remain = w25qxx.page_size;
+  }
+
+  return true;
+}
+
+bool w25qxx_write_buffer(uint8_t *buffer, uint32_t address, uint32_t len) {
+  uint32_t remain = 0, offset = 0, i = 0;
+  uint8_t sector_buffer[4096];
+
+  if (address + len > (w25qxx.capacity_in_kilobyte * 1024)) {
+    return false;
+  }
+
+  offset = address % w25qxx.sector_size;
+  remain = w25qxx.sector_size - offset;
+
+  while (len) {
+    remain = len > remain ? remain : len;
+    w25qxx_read_sector(sector_buffer, address / w25qxx.sector_size, 0,
+                       w25qxx.sector_size);
+    for (i = 0; i < remain; i++) {
+      if (sector_buffer[offset + i] != 0xff) {
+        break;
+      }
+    }
+    // need erase
+    if (i < remain) {
+      w25qxx_erase_sector(address / w25qxx.sector_size);
+      memcpy(sector_buffer + offset, buffer, remain);
+      _w25qxx_write_buffer(sector_buffer, address / w25qxx.sector_size,
+                           w25qxx.sector_size);
+    } else {
+      _w25qxx_write_buffer(buffer, address, remain);
+    }
+    address += remain;
+    buffer += remain;
+    len -= remain;
+    remain = w25qxx.sector_size;
+    offset = 0;
+  }
+
+  return true;
+}

@@ -22,7 +22,9 @@ OBJS += menu_list.o
 
 ifeq ($(ONEKEY_MINI),1)
 OBJS += device.o
+OBJS += flash_enc.o
 endif
+
 OBJS += messages.o
 OBJS += config.o
 OBJS += trezor.o

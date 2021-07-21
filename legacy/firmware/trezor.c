@@ -36,6 +36,7 @@
 #include "util.h"
 #if ONEKEY_MINI
 #include "device.h"
+#include "flash_enc.h"
 #include "se_hal.h"
 #include "w25qxx.h"
 #endif
@@ -152,6 +153,7 @@ int main(void) {
   device_test();
   device_init();
   w25qxx_init();
+  flash_enc_init();
   se_init();
 #endif
 #if !EMULATOR && !ONEKEY_MINI
