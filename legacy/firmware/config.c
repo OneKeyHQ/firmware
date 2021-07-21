@@ -47,7 +47,6 @@
 #include "se_chip.h"
 #include "sha2.h"
 #include "storage.h"
-#include "storage_ex.h"
 #include "supervise.h"
 #include "timer.h"
 #include "trezor.h"
@@ -509,9 +508,7 @@ void config_init(void) {
   data2hex((const uint8_t *)config_uuid, sizeof(config_uuid), config_uuid_str);
 
   session_clear(false);
-#if !EMULATOR
-  user_data_init();
-#endif
+
   usbTiny(oldTiny);
 }
 

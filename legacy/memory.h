@@ -99,8 +99,7 @@ extern uint8_t *emulator_flash_base;
 
 #else
 #define FLASH_CODE_SECTOR_FIRST 4
-#define FLASH_CODE_SECTOR_LAST 9
-#define FLASH_BIXIN_DATE_SECTOR 10
+#define FLASH_CODE_SECTOR_LAST 10
 #define FLASH_BLE_SECTOR_FIRST 11
 #define FLASH_BLE_SECTOR_LAST 11
 
