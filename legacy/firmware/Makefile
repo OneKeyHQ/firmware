@@ -21,6 +21,7 @@ OBJS += menu_core.o
 OBJS += menu_list.o
 
 ifeq ($(ONEKEY_MINI),1)
+OBJS += font_ex.o
 OBJS += device.o
 OBJS += flash_enc.o
 endif

@@ -860,7 +860,7 @@ refresh_menu:
 }
 
 bool recovery_on_device(void) {
-  char desc[64] = "";
+  char desc[72] = "";
   uint8_t key = KEY_NULL;
 
 prompt_recovery:
