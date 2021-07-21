@@ -35,6 +35,8 @@
 #define FLASH_OTP_BLOCK_608_PROTECT_KEY 9
 #define FLASH_OTP_BLOCK_608_INIT_PIN 10
 #define FLASH_OTP_BLOCK_608_MIX_PIN 11
+#define FLASH_OTP_DEVICE_SERIAL 12
+#define FLASH_OTP_FACTORY_TEST 13
 bool flash_otp_is_locked(uint8_t block);
 bool flash_otp_lock(uint8_t block);
 bool flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,

@@ -34,14 +34,15 @@
 #include "timer.h"
 #include "usb.h"
 #include "util.h"
+#if ONEKEY_MINI
+#include "device.h"
+#include "w25qxx.h"
+#endif
 #if !EMULATOR
 #include <libopencm3/stm32/desig.h>
 #include "ble.h"
 #include "otp.h"
 #include "sys.h"
-#if ONEKEY_MINI
-#include "w25qxx.h"
-#endif
 #endif
 
 /* Screen timeout */
@@ -148,6 +149,9 @@ int main(void) {
   setupApp();
 #if ONEKEY_MINI
   atca_config_init();
+  device_test();
+  device_init();
+  w25qxx_init();
 #endif
 #if !EMULATOR && !ONEKEY_MINI
   ble_reset();
@@ -176,10 +180,6 @@ int main(void) {
   oledSetDebugLink(1);
 #if !EMULATOR
   config_wipe();
-#endif
-#else
-#if ONEKEY_MINI
-  w25qxx_init();
 #endif
 #endif
 

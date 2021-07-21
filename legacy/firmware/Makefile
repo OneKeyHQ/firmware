@@ -20,6 +20,9 @@ OBJS += menu_para.o
 OBJS += menu_core.o
 OBJS += menu_list.o
 
+ifeq ($(ONEKEY_MINI),1)
+OBJS += device.o
+endif
 OBJS += messages.o
 OBJS += config.o
 OBJS += trezor.o
