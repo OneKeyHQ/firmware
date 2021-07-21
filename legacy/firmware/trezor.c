@@ -151,12 +151,36 @@ int main(void) {
   check_bootloader(true);
   setupApp();
 #if ONEKEY_MINI
+  bool serial_set = false, font_set = false, cert_set = false;
+  bool usb_init = false;
+  uint32_t cert_len = 0;
+
   device_test();
   device_init();
   w25qxx_init();
   flash_enc_init();
   font_init();
   se_init();
+
+  do {
+    serial_set = device_serial_set();
+    font_set = font_imported();
+    cert_set = se_get_certificate_len(&cert_len);
+
+    if (serial_set && font_set && cert_set) {
+      break;
+    } else {
+      if (!usb_init) {
+        usb_init = true;
+        memset(config_uuid_str, '0', sizeof(config_uuid_str));
+        usbInit();
+      }
+      usbPollFactory();
+      layoutHomeFactory(serial_set, font_set, cert_set);
+    }
+
+  } while (1);
+
 #endif
 #if !EMULATOR && !ONEKEY_MINI
   ble_reset();

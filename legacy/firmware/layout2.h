@@ -217,6 +217,10 @@ void layoutItemsSelectAdapterLeft(const BITMAP *bmp_up, const BITMAP *bmp_down,
 
 uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);
 
+#if ONEKEY_MINI
+void layoutHomeFactory(bool serial, bool font, bool cert);
+#endif
+
 static inline void oledClear_ex(void) {
   oledClear();
 #if !EMULATOR && !ONEKEY_MINI

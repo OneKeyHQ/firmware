@@ -22,6 +22,7 @@
 
 void usbInit(void);
 void usbPoll(void);
+void usbPollFactory(void);
 void usbReconnect(void);
 char usbTiny(char set);
 void usbSleep(uint32_t millis);

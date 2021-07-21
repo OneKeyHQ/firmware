@@ -664,6 +664,35 @@ void layoutHome(void) {
   }
 }
 
+#if ONEKEY_MINI
+void layoutHomeFactory(bool serial, bool font, bool cert) {
+  int y = 9;
+
+  oledClear();
+
+  if (serial) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "序列号已设置",
+                                FONT_STANDARD);
+  } else {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "序列号未设置",
+                                FONT_STANDARD);
+  }
+  y += 10;
+  if (font) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "字库已下载", FONT_STANDARD);
+  } else {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "字库未下载", FONT_STANDARD);
+  }
+  y += 10;
+  if (cert) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "证书已下载", FONT_STANDARD);
+  } else {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "证书未下载", FONT_STANDARD);
+  }
+  oledRefresh();
+}
+#endif
+
 void layoutHomeEx(void) { _layout_home(false); }
 
 static void render_address_dialog(const CoinInfo *coin, const char *address,

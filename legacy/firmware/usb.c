@@ -486,6 +486,42 @@ void usbPoll(void) {
 #endif
 }
 
+void usbPollFactory(void) {
+  static const uint8_t *data;
+
+  if (usbd_dev == NULL) {
+    return;
+  }
+  // poll read buffer
+  usbd_poll(usbd_dev);
+  // write pending data
+  data = msg_out_data();
+  if (data) {
+    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_MAIN_IN, data, 64) !=
+           64) {
+    }
+  }
+
+#if U2F_ENABLED
+  data = u2f_out_data();
+  if (data) {
+    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_U2F_IN, data, 64) !=
+           64) {
+    }
+  }
+#endif
+
+#if DEBUG_LINK
+  // write pending debug data
+  data = msg_debug_out_data();
+  if (data) {
+    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_DEBUG_IN, data,
+                                64) != 64) {
+    }
+  }
+#endif
+}
+
 void usbReconnect(void) {
   if (usbd_dev != NULL) {
     usbd_disconnect(usbd_dev, 1);

@@ -66,6 +66,7 @@ bool check_all_ones(const void *data, int len) {
 
   for (; len; len--, ptr++) {
     result &= *ptr;
+    if (result != 0xff) break;
   }
 
   return (result == 0xff);
@@ -78,6 +79,7 @@ bool check_all_zeros(const void *data, int len) {
 
   for (; len; len--, ptr++) {
     result |= *ptr;
+    if (result) break;
   }
 
   return (result == 0x00);
