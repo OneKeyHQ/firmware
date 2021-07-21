@@ -32,4 +32,10 @@ ATCA_STATUS atca_write_enc(uint16_t key_id, uint8_t block, uint8_t *data,
                            uint8_t *enc_key, uint16_t enc_key_id);
 ATCA_STATUS atca_read_enc(uint16_t key_id, uint8_t block, uint8_t *data,
                           uint8_t *enc_key, uint16_t enc_key_id);
+
+bool atca_cal_pubkey(uint8_t pubkey[64]);
+bool atca_write_certificate(const uint8_t *cert, uint32_t cert_len);
+bool atca_get_certificate_len(uint32_t *cert_len);
+bool atca_read_certificate(uint8_t *cert, uint32_t *cert_len);
+void atca_test(void);
 #endif

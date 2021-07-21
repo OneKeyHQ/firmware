@@ -1,6 +1,7 @@
 #ifndef _ATCA_STATUS_H
 #define _ATCA_STATUS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 

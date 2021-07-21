@@ -248,6 +248,11 @@ void atca_config_init(void) {
                                     zeros, ATCA_BLOCK_SIZE),
                     "init secret");
         break;
+      case SLOT_DEVICE_CERT:
+        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 0, 0,
+                                    zeros, ATCA_BLOCK_SIZE),
+                    "init cert slot");
+        break;
 
       default:
         break;
@@ -706,4 +711,72 @@ uint32_t atca_get_failed_counter(void) {
   atca_read_slot_counter(SLOT_LAST_GOOD_COUNTER, &last_counter);
 
   return counter - last_counter;
+}
+
+bool atca_cal_pubkey(uint8_t pubkey[64]) {
+  if (!pubkey) return false;
+  atca_pair_unlock();
+  if (ATCA_SUCCESS == atca_get_pubkey(SLOT_PRIMARY_PRIVATE_KEY, pubkey)) {
+    return true;
+  }
+  return false;
+}
+
+bool atca_write_certificate(const uint8_t *cert, uint32_t cert_len) {
+  ATCA_STATUS status = ATCA_BAD_PARAM;
+  uint8_t buffer[ATCA_WORD_SIZE] = {0};
+  uint32_t len = 0, res_len = cert_len % ATCA_WORD_SIZE;
+
+  if ((atca_configuration.slot_locked & (1 << SLOT_DEVICE_CERT)) &&
+      cert_len <= (416 - 4)) {
+    if (ATCA_SUCCESS == atca_write_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT,
+                                              0, (uint8_t *)&cert_len, 4)) {
+      if (res_len) {
+        len = (cert_len / ATCA_WORD_SIZE) * ATCA_WORD_SIZE;
+        memcpy(buffer, cert + len, res_len);
+      } else {
+        len = cert_len;
+      }
+      status =
+          atca_write_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 4, cert, len);
+      status |= atca_write_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 4 + len,
+                                      buffer, ATCA_WORD_SIZE);
+      status |= atca_lock_data_slot(SLOT_DEVICE_CERT);
+      atca_get_config(&atca_configuration);
+    }
+  }
+  return (status == ATCA_SUCCESS);
+}
+
+bool atca_get_certificate_len(uint32_t *cert_len) {
+  uint32_t len = 0;
+
+  *cert_len = 0;
+  if (!(atca_configuration.slot_locked & (1 << SLOT_DEVICE_CERT))) {
+    if (ATCA_SUCCESS == atca_read_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT,
+                                             0, (uint8_t *)&len, 4)) {
+      if (len <= (416 - 4)) {
+        *cert_len = len;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool atca_read_certificate(uint8_t *cert, uint32_t *cert_len) {
+  uint32_t len = 0;
+
+  *cert_len = 0;
+  if (!(atca_configuration.slot_locked & (1 << SLOT_DEVICE_CERT))) {
+    if (ATCA_SUCCESS == atca_read_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT,
+                                             0, (uint8_t *)&len, 4)) {
+      if (len <= (416 - 4)) {
+        atca_read_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 4, cert, len);
+        *cert_len = len;
+        return true;
+      }
+    }
+  }
+  return false;
 }

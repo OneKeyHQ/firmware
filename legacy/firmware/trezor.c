@@ -36,6 +36,7 @@
 #include "util.h"
 #if ONEKEY_MINI
 #include "device.h"
+#include "se_hal.h"
 #include "w25qxx.h"
 #endif
 #if !EMULATOR
@@ -148,10 +149,10 @@ int main(void) {
   check_bootloader(true);
   setupApp();
 #if ONEKEY_MINI
-  atca_config_init();
   device_test();
   device_init();
   w25qxx_init();
+  se_init();
 #endif
 #if !EMULATOR && !ONEKEY_MINI
   ble_reset();

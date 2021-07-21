@@ -234,3 +234,19 @@ bool se_device_init(uint8_t mode, const char *passphrase) {
   (void)passphrase;
   return true;
 }
+
+bool se_get_pubkey(uint8_t pubkey[64]) { return atca_cal_pubkey(pubkey); }
+
+bool se_write_certificate(const uint8_t *cert, uint32_t cert_len) {
+  return atca_write_certificate(cert, cert_len);
+}
+
+bool se_get_certificate_len(uint32_t *cert_len) {
+  return atca_get_certificate_len(cert_len);
+}
+
+bool se_read_certificate(uint8_t *cert, uint32_t *cert_len) {
+  return atca_read_certificate(cert, cert_len);
+}
+
+void se_init(void) { atca_config_init(); }

@@ -22,4 +22,10 @@ void se_reset_storage(void);
 uint32_t se_pinFailedCounter(void);
 bool se_device_init(uint8_t mode, const char *passphrase);
 
+bool se_get_pubkey(uint8_t pubkey[64]);
+bool se_write_certificate(const uint8_t *cert, uint32_t cert_len);
+bool se_get_certificate_len(uint32_t *cert_len);
+bool se_read_certificate(uint8_t *cert, uint32_t *cert_len);
+void se_init(void);
+
 #endif
