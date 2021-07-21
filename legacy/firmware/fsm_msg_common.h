@@ -20,7 +20,6 @@
 #include "mi2c.h"
 #include "se_chip.h"
 #include "storage.h"
-#include "storage_ex.h"
 
 extern char bootloader_version[8];
 

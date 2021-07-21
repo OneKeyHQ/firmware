@@ -30,7 +30,6 @@
 #include "messages.pb.h"
 #include "protect.h"
 #include "secp256k1.h"
-#include "storage_ex.h"
 #include "sys.h"
 #include "timer.h"
 #include "transaction.h"
@@ -2447,21 +2446,6 @@ void signing_txack(TransactionType *tx) {
         }
 #else
         to.is_segwit = true;
-#if !EMULATOR
-        // bixin utxo check
-        if (!utxo_cache_check(tx->inputs[0].prev_hash.bytes,
-                              tx->inputs[0].prev_index, tx->inputs[0].amount)) {
-          layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                            _("segwit input amount"), _("changed"), NULL, NULL,
-                            NULL, NULL);
-          if (!protectButton_ex(ButtonRequestType_ButtonRequest_ProtectCall,
-                                false, false, default_oper_time)) {
-            fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-            layoutHome();
-            return;
-          }
-        }
-#endif
 #endif
       } else {
         fsm_sendFailure(FailureType_Failure_DataError,

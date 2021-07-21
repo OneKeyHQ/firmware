@@ -51,7 +51,6 @@ OBJS += usb.o
 OBJS += bl_check.o
 OBJS += otp.o
 OBJS += header.o
-OBJS += storage_ex.o
 endif
 
 OBJS += font.o
