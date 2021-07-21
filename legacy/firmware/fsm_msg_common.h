@@ -20,7 +20,6 @@
 #include "mi2c.h"
 #include "se_hal.h"
 #include "storage.h"
-#include "storage_ex.h"
 
 #if ONEKEY_MINI
 #include "device.h"
@@ -987,41 +986,6 @@ void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
   }
   msg_write(MessageType_MessageType_BixinVerifyDeviceAck, resp);
 #endif
-  layoutHome();
-  return;
-}
-
-void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg) {
-  CHECK_INITIALIZED
-  CHECK_PIN
-  if (WL_OperationType_WL_OperationType_Add == msg->type) {
-    if (!msg->has_addr_in) {
-      fsm_sendFailure(FailureType_Failure_DataError, _("addres is null"));
-    } else {
-      int ret;
-      ret = white_list_add(msg->addr_in);
-      if (ret == WHILT_LIST_ADDR_EXIST) {
-        fsm_sendFailure(FailureType_Failure_DataError, _("addres is existed"));
-      } else if (ret == WHILT_LIST_FULL) {
-        fsm_sendFailure(FailureType_Failure_DataError,
-                        _("addres space is full"));
-      } else if (ret == WHITE_LIST_OK) {
-        fsm_sendSuccess("addres add success");
-      }
-    }
-  } else if (WL_OperationType_WL_OperationType_Delete == msg->type) {
-    if (!msg->has_addr_in) {
-      fsm_sendFailure(FailureType_Failure_DataError, _("addres is null"));
-    } else {
-      white_list_delete(msg->addr_in);
-      fsm_sendSuccess("addres delete success");
-    }
-  } else if (WL_OperationType_WL_OperationType_Inquire == msg->type) {
-    RESP_INIT(BixinWhiteListAck);
-
-    white_list_inquiry(resp->address, &resp->address_count);
-    msg_write(MessageType_MessageType_BixinWhiteListAck, resp);
-  }
   layoutHome();
   return;
 }

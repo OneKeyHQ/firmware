@@ -36,7 +36,6 @@
 #include "protect.h"
 #include "ripemd160.h"
 #include "segwit_addr.h"
-#include "storage_ex.h"
 #include "util.h"
 
 #define SEGWIT_VERSION_0 0
@@ -337,17 +336,6 @@ int compile_output(const CoinInfo *coin, const HDNode *root, TxOutputType *in,
   // bixin:save output and confirm at last
   if (needs_confirm) {
     if (g_bIsBixinAPP) {
-      if (white_list_check(in->address)) {
-        if (config_getFastPayConfirmFlag()) {
-          uint64_t fast_pay_amount;
-          uint32_t fast_pay_times;
-          fast_pay_amount = config_getFastPayMoneyLimt();
-          fast_pay_times = config_getFastPayTimes();
-          if (fast_pay_times && out->amount <= fast_pay_amount) {
-            needs_confirm = false;
-          }
-        }
-      }
       if (needs_confirm) {
         if (tx_output_info_counter == TX_OUTPUT_INFO_BUF_LEN) {
           // buf if full
