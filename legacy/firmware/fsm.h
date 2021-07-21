@@ -148,4 +148,12 @@ void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg);
 void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
 void fsm_msgBixinBackupDevice(void);
 
+void fsm_msgOnekeyDeviceInfoSettings(const OnekeyDeviceInfoSettings *msg);
+void fsm_msgOnekeyGetDeviceInfo(const OnekeyGetDeviceInfo *msg);
+void fsm_msgOnekeyReadSEPublicKey(const OnekeyReadSEPublicKey *msg);
+void fsm_msgOnekeyWriteSEPublicCert(const OnekeyWriteSEPublicCert *msg);
+void fsm_msgOnekeyReadSEPublicCert(const OnekeyReadSEPublicCert *msg);
+void fsm_msgOnekeySpiFlashWrite(const OnekeySpiFlashWrite *msg);
+void fsm_msgOnekeySpiFlashRead(const OnekeySpiFlashRead *msg);
+
 #endif

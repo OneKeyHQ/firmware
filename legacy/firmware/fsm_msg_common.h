@@ -22,6 +22,12 @@
 #include "storage.h"
 #include "storage_ex.h"
 
+#if ONEKEY_MINI
+#include "device.h"
+#include "flash_enc.h"
+#include "w25qxx.h"
+#endif
+
 extern char bootloader_version[8];
 
 bool get_features(Features *resp) {
@@ -1069,5 +1075,113 @@ void fsm_msgBixinBackupDevice(void) {
 
   msg_write(MessageType_MessageType_BixinBackupDeviceAck, resp);
   layoutHome();
+  return;
+}
+
+void fsm_msgOnekeyDeviceInfoSettings(const OnekeyDeviceInfoSettings *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  if (device_set_info((DeviceSerialNo *)(msg->serial_no))) {
+    fsm_sendSuccess(_("Settings applied"));
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
+  }
+#endif
+  return;
+}
+
+void fsm_msgOnekeyGetDeviceInfo(const OnekeyGetDeviceInfo *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  RESP_INIT(OnekeyDeviceInfo);
+  device_get_serial(resp->serial_no);
+  msg_write(MessageType_MessageType_OnekeyDeviceInfo, resp);
+#endif
+  return;
+}
+
+void fsm_msgOnekeyReadSEPublicKey(const OnekeyReadSEPublicKey *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  RESP_INIT(OnekeySEPublicKey);
+  if (se_get_pubkey(resp->public_key.bytes)) {
+    resp->public_key.size = 64;
+    msg_write(MessageType_MessageType_OnekeySEPublicKey, resp);
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Get SE pubkey Failed"));
+  }
+#endif
+  return;
+}
+
+void fsm_msgOnekeyWriteSEPublicCert(const OnekeyWriteSEPublicCert *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  if (se_write_certificate(msg->public_cert.bytes, msg->public_cert.size)) {
+    fsm_sendSuccess(_("Settings applied"));
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
+  }
+#endif
+  return;
+}
+
+void fsm_msgOnekeyReadSEPublicCert(const OnekeyReadSEPublicCert *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  uint32_t cert_len = 0;
+
+  RESP_INIT(OnekeySEPublicCert);
+  if (se_read_certificate(resp->public_cert.bytes, &cert_len)) {
+    resp->public_cert.size = cert_len;
+    msg_write(MessageType_MessageType_OnekeySEPublicCert, resp);
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Get certificate failed"));
+  }
+#endif
+  return;
+}
+
+void fsm_msgOnekeySpiFlashWrite(const OnekeySpiFlashWrite *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  if (flash_write_enc((uint8_t *)msg->data.bytes, msg->address,
+                      msg->data.size)) {
+    fsm_sendSuccess(_("Write success"));
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Write failed"));
+  }
+#endif
+  return;
+}
+
+void fsm_msgOnekeySpiFlashRead(const OnekeySpiFlashRead *msg) {
+  (void)msg;
+#if !ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  RESP_INIT(OnekeySpiFlashData);
+
+  if (flash_read_enc(resp->data.bytes, msg->address, msg->len)) {
+    resp->data.size = msg->len;
+    msg_write(MessageType_MessageType_OnekeySpiFlashData, resp);
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Read failed"));
+  }
+#endif
   return;
 }

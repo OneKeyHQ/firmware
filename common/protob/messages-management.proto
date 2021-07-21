@@ -577,3 +577,96 @@ message BixinBackupDevice {
 message BixinBackupDeviceAck {
     required string mnemonics = 1;                          // seed encoded as mnemonic (12, 18 or 24 words for BIP39, 20 or 33 for SLIP39)
 }
+
+/**
+ * Request: device information settings
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message OnekeyDeviceInfoSettings {
+    required string serial_no = 1;                 
+}
+
+/**
+ * Request: Ask for device details (no device reset)
+ * @start
+ * @next Features
+ */
+message OnekeyGetDeviceInfo {
+}
+
+/**
+ * Response: Reports various information about the device
+ * @end
+ */
+message OnekeyDeviceInfo {
+    required string serial_no = 1;
+
+    optional string spiFlash_info = 2;
+    optional string SE_info = 3;
+}
+
+/**
+ * Request: Read SE public key
+ * @end
+ */
+message OnekeyReadSEPublicKey {
+}
+
+/**
+ * Response: SE public key
+ * @end
+ */
+message OnekeySEPublicKey {
+    required bytes public_key = 1;
+}
+
+/**
+ * Request: Write SE public certificate
+ * @end
+ */
+message OnekeyWriteSEPublicCert {
+    required bytes public_cert = 1;
+}
+
+/**
+ * Request: Read SE public certificate
+ * @end
+ */
+message OnekeyReadSEPublicCert {
+}
+
+/**
+ * Response: SE public certificate
+ * @end
+ */
+message OnekeySEPublicCert {
+    required bytes public_cert = 1;
+}
+
+/**
+ * Request: Write spi_flash data
+ * @end
+ */
+message OnekeySpiFlashWrite {    
+    required uint32 address=2;
+    required bytes data = 1;
+}
+
+/**
+ * Request: Read spi_flash data
+ * @end
+ */
+message OnekeySpiFlashRead {
+    required uint32 address=1;
+    required uint32 len=2;
+}
+
+/**
+ * Response: spi_flash data
+ * @end
+ */
+message OnekeySpiFlashData {
+    required bytes data = 1;
+}

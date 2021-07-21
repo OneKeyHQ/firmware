@@ -227,6 +227,17 @@ from .NEMSignedTx import NEMSignedTx
 from .NEMTransactionCommon import NEMTransactionCommon
 from .NEMTransfer import NEMTransfer
 from .NextU2FCounter import NextU2FCounter
+from .OnekeyDeviceInfo import OnekeyDeviceInfo
+from .OnekeyDeviceInfoSettings import OnekeyDeviceInfoSettings
+from .OnekeyGetDeviceInfo import OnekeyGetDeviceInfo
+from .OnekeyReadSEPublicCert import OnekeyReadSEPublicCert
+from .OnekeyReadSEPublicKey import OnekeyReadSEPublicKey
+from .OnekeySEPublicCert import OnekeySEPublicCert
+from .OnekeySEPublicKey import OnekeySEPublicKey
+from .OnekeySpiFlashData import OnekeySpiFlashData
+from .OnekeySpiFlashRead import OnekeySpiFlashRead
+from .OnekeySpiFlashWrite import OnekeySpiFlashWrite
+from .OnekeyWriteSEPublicCert import OnekeyWriteSEPublicCert
 from .OwnershipId import OwnershipId
 from .OwnershipProof import OwnershipProof
 from .PassphraseAck import PassphraseAck
