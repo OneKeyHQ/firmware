@@ -48,6 +48,7 @@ from . import (
     settings,
     stellar,
     tezos,
+    special,
     with_client,
 )
 
@@ -82,6 +83,7 @@ COMMAND_ALIASES = {
     "update-firmware": firmware.firmware_update,
     "upgrade-firmware": firmware.firmware_update,
     "firmware-upgrade": firmware.firmware_update,
+    "sign-firmware": special.sign_firmware,
 }
 
 
@@ -345,6 +347,8 @@ cli.add_command(tezos.cli)
 cli.add_command(firmware.firmware_update)
 cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
+
+cli.add_command(special.sign_firmware)
 
 #
 # Main

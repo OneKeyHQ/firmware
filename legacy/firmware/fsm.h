@@ -28,6 +28,7 @@
 #include "messages-management.pb.h"
 #include "messages-nem.pb.h"
 #include "messages-stellar.pb.h"
+#include "messages-special.pb.h"
 
 // message functions
 
@@ -147,5 +148,8 @@ void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg);
 void fsm_msgBixinWhiteListRequest(const BixinWhiteListRequest *msg);
 void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
 void fsm_msgBixinBackupDevice(void);
+
+void fsm_msgSignDigest(const SignDigest *msg);
+void fsm_msgSignData(const SignData *msg);
 
 #endif

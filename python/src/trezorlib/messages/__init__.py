@@ -62,6 +62,7 @@ from .CosiCommit import CosiCommit
 from .CosiCommitment import CosiCommitment
 from .CosiSign import CosiSign
 from .CosiSignature import CosiSignature
+from .DataSignature import DataSignature
 from .DebugLinkDecision import DebugLinkDecision
 from .DebugLinkEraseSdCard import DebugLinkEraseSdCard
 from .DebugLinkFlashErase import DebugLinkFlashErase
@@ -82,6 +83,7 @@ from .DebugMoneroDiagAck import DebugMoneroDiagAck
 from .DebugMoneroDiagRequest import DebugMoneroDiagRequest
 from .Deprecated_PassphraseStateAck import Deprecated_PassphraseStateAck
 from .Deprecated_PassphraseStateRequest import Deprecated_PassphraseStateRequest
+from .DigestSignature import DigestSignature
 from .DoPreauthorized import DoPreauthorized
 from .ECDHSessionKey import ECDHSessionKey
 from .EndSession import EndSession
@@ -249,6 +251,8 @@ from .RippleSignedTx import RippleSignedTx
 from .SdProtect import SdProtect
 from .SelfTest import SelfTest
 from .SetU2FCounter import SetU2FCounter
+from .SignData import SignData
+from .SignDigest import SignDigest
 from .SignIdentity import SignIdentity
 from .SignMessage import SignMessage
 from .SignTx import SignTx

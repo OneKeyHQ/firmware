@@ -299,4 +299,10 @@ enum MessageType {
 
     MessageType_BixinPinInputOnDevice = 10000 [(wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
 
+    // Special
+    MessageType_SignDigest = 1001 [(wire_in) = true];
+    MessageType_DigestSignature = 1002 [(wire_out) = true];
+    MessageType_SignData = 1003 [(wire_in) = true];
+    MessageType_DataSignature = 1004 [(wire_out) = true];
+
 }

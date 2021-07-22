@@ -221,3 +221,7 @@ BixinLoadDevice: Literal[913] = 913
 BixinBackupDevice: Literal[914] = 914
 BixinBackupDeviceAck: Literal[915] = 915
 BixinPinInputOnDevice: Literal[10000] = 10000
+SignDigest: Literal[1001] = 1001
+DigestSignature: Literal[1002] = 1002
+SignData: Literal[1003] = 1003
+DataSignature: Literal[1004] = 1004

@@ -1,0 +1,14 @@
+SignDigest.address_n                                           max_count:8
+SignDigest.digest                                              max_size:32
+SignDigest.coin_name                                           max_size:21
+
+DigestSignature.pubkey                                         max_size:65
+DigestSignature.signature                                      max_size:64
+
+SignData.address_n                                             max_count:8
+SignData.data                                                  max_size:8192
+SignData.coin_name                                             max_size:21
+
+DataSignature.pubkey                                           max_size:65
+DataSignature.digest                                           max_size:32
+DataSignature.signature                                        max_size:64

@@ -326,6 +326,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
 #include "fsm_msg_common.h"
 #include "fsm_msg_crypto.h"
 #include "fsm_msg_debug.h"
+#include "fsm_msg_special.h"
 
 #if !BITCOIN_ONLY
 

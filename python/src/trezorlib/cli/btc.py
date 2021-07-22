@@ -309,6 +309,9 @@ def sign_message(client, coin, address, message, script_type):
     """Sign message using address of given path."""
     coin = coin or DEFAULT_COIN
     address_n = tools.parse_path(address)
+    print(address_n, type(address_n))
+    for a in address_n:
+        print(a, type(a))
     res = btc.sign_message(client, coin, address_n, message, script_type)
     return {
         "message": message,

@@ -12,7 +12,7 @@ ifeq ($(BITCOIN_ONLY), 1)
 SKIPPED_MESSAGES += Ethereum Lisk NEM Stellar
 endif
 
-all: messages_map.h messages_map_limits.h messages-bitcoin.pb.h messages-common.pb.h messages-crypto.pb.h messages-debug.pb.h messages-ethereum.pb.h messages-management.pb.h messages-nem.pb.h messages.pb.h messages-stellar.pb.h messages-lisk.pb.h messages_nem_pb2.py
+all: messages_map.h messages_map_limits.h messages-bitcoin.pb.h messages-common.pb.h messages-crypto.pb.h messages-debug.pb.h messages-ethereum.pb.h messages-management.pb.h messages-nem.pb.h messages.pb.h messages-stellar.pb.h messages-lisk.pb.h messages-special.pb.h messages_nem_pb2.py
 
 PYTHON ?= python
 

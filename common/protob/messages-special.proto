@@ -1,0 +1,49 @@
+syntax = "proto2";
+package hw.trezor.messages.special;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageSpecial";
+
+/**
+ * Request: Ask device to sign a hex digest
+ * @start
+ * @next DigestSignature
+ * @next Failure
+ */
+message SignDigest {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+    optional bytes digest = 2;                                          // digest to be signed
+    optional string coin_name = 3 [default='Bitcoin'];                  // coin to use for signing
+}
+
+/**
+ * Response: Signed hex signature
+ * @end
+ */
+message DigestSignature {
+    required bytes pubkey = 1;      // public key used for signing
+    optional bytes signature = 2;   // signature of the hex digest
+}
+
+/**
+ * Request: Ask device to sign raw data, using sha256 as the hash function
+ * @start
+ * @next DataSignature
+ * @next Failure
+ */
+message SignData {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+    optional bytes data = 2;                                            // data to be signed
+    optional string coin_name = 3 [default='Bitcoin'];                  // coin to use for signing
+}
+
+/**
+ * Response: Signed data signature
+ * @end
+ */
+message DataSignature {
+    required bytes pubkey = 1;      // public key used for signing
+    optional bytes digest = 2;      // digest of the raw data, using sha256 as the hash function
+    optional bytes signature = 3;   // signature of the raw data
+}

@@ -157,6 +157,7 @@ def sign_message(
     client, coin_name, n, message, script_type=messages.InputScriptType.SPENDADDRESS
 ):
     message = normalize_nfc(message)
+    print(n, type(n))
     return client.call(
         messages.SignMessage(
             coin_name=coin_name, address_n=n, message=message, script_type=script_type
