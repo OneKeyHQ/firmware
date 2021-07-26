@@ -8,7 +8,11 @@
     .size g_header, .-g_header
 
 g_header:
+#if ONEKEY_MINI
+    .byte 'M','I','N','I'            // magic
+#else
     .byte 'T','R','Z','F'            // magic
+#endif
     .word reset_handler              // reset handler,  replace later with : .word g_header_end - g_header    // hdrlen
     .word 0                          // expiry
     .word _codelen                   // codelen
