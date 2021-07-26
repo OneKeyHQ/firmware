@@ -71,6 +71,7 @@ void show_unplug(const char *line1, const char *line2) {
   delay_ms(1000);
 }
 
+#if !ONEKEY_MINI
 static void show_unofficial_warning(const uint8_t *hash) {
   layoutDialog(&bmp_icon_warning, "Abort", "I'll take the risk", NULL,
                "WARNING!", NULL, "Unofficial firmware", "detected.", NULL,
@@ -90,6 +91,7 @@ static void show_unofficial_warning(const uint8_t *hash) {
 
   // everything is OK, user pressed 2x Continue -> continue program
 }
+#endif
 
 static void __attribute__((noreturn)) load_app(int signed_firmware) {
   // zero out SRAM
@@ -152,7 +154,11 @@ int main(void) {
       uint8_t fingerprint[32] = {0};
       int signed_firmware = signatures_new_ok(hdr, fingerprint);
       if (SIG_OK != signed_firmware) {
+#if !ONEKEY_MINI
         show_unofficial_warning(fingerprint);
+#else
+        show_halt("Unofficial firmware", "aborted.");
+#endif
       }
 
       if (SIG_OK != check_firmware_hashes(hdr)) {
