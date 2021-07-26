@@ -43,6 +43,7 @@ static void erase_ble_code_progress(void) {
 }
 #endif
 
+#if !ONEKEY_MINI
 static void erase_storage(void) {
   flash_enter();
   for (int i = FLASH_STORAGE_SECTOR_FIRST; i <= FLASH_STORAGE_SECTOR_LAST;
@@ -51,3 +52,4 @@ static void erase_storage(void) {
   }
   flash_exit();
 }
+#endif

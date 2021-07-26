@@ -110,8 +110,10 @@ static void check_and_write_chunk(void) {
   const image_header *hdr = (const image_header *)FW_HEADER;
   // invalid chunk sent
   if (0 != memcmp(hash, hdr->hashes + chunk_idx * 32, 32)) {
+#if !ONEKEY_MINI
     // erase storage
     erase_storage();
+#endif
     flash_state = STATE_END;
     show_halt("Error installing", "firmware.");
     return;
@@ -528,6 +530,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       // 3) hashes are not OK
       if (SIG_OK != old_was_signed || SIG_OK != signatures_new_ok(hdr, NULL) ||
           SIG_OK != check_firmware_hashes(hdr)) {
+#if !ONEKEY_MINI
         // erase storage
         erase_storage();
         // check erasure
@@ -543,6 +546,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           show_halt("Error installing", "firmware.");
           return;
         }
+#endif
       }
 
       flash_enter();
