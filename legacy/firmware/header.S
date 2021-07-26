@@ -22,6 +22,17 @@ g_header:
     .byte 0                          // fix_vbuild
     . = . + 8                        // reserved
     . = . + 512                      // hash1 ... hash16
+#if ONEKEY_MINI
+    . = . + 64                       // sig1
+    . = . + 64                       // sig2
+    . = . + 64                       // sig3
+    . = . + 64                       // sig4
+    .byte 0                          // sigindex1
+    .byte 0                          // sigindex2
+    .byte 0                          // sigindex3
+    .byte 0                          // sigindex4
+    . = . + 155                      // reserved
+#else
     . = . + 64                       // sig1
     . = . + 64                       // sig2
     . = . + 64                       // sig3
@@ -29,5 +40,6 @@ g_header:
     .byte 0                          // sigindex2
     .byte 0                          // sigindex3
     . = . + 220                      // reserved
+#endif
     . = . + 65                       // reserved
 g_header_end:

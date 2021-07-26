@@ -38,6 +38,29 @@ int signatures_old_ok(void);
 // and rather introduce fields sig1, sig2, sig3
 // immediately following the chunk hashes
 
+#if ONEKEY_MINI
+typedef struct {
+  uint32_t magic;
+  uint32_t hdrlen;
+  uint32_t expiry;
+  uint32_t codelen;
+  uint32_t version;
+  uint32_t fix_version;
+  uint8_t __reserved1[8];
+  uint8_t hashes[512];
+  uint8_t sig1[64];
+  uint8_t sig2[64];
+  uint8_t sig3[64];
+  uint8_t sig4[64];
+  uint8_t sigindex1;
+  uint8_t sigindex2;
+  uint8_t sigindex3;
+  uint8_t sigindex4;
+  uint8_t __reserved2[155];
+  uint8_t __sigmask;
+  uint8_t __sig[64];
+} __attribute__((packed)) image_header;
+#else
 typedef struct {
   uint32_t magic;
   uint32_t hdrlen;
@@ -57,6 +80,7 @@ typedef struct {
   uint8_t __sigmask;
   uint8_t __sig[64];
 } __attribute__((packed)) image_header;
+#endif
 
 #define FW_CHUNK_SIZE 65536
 
