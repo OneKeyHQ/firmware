@@ -90,7 +90,10 @@ void font_init(void) {
   }
 }
 
-bool font_imported(void) { return has_font; }
+bool font_imported(void) {
+  font_init();
+  return has_font;
+}
 
 static bool font_get_info(const uint8_t *ch, FontInfo *font_info) {
   uint8_t i;
