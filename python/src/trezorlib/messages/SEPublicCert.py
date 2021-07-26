@@ -10,18 +10,18 @@ if __debug__:
         pass
 
 
-class OnekeySpiFlashData(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10011
+class SEPublicCert(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10008
 
     def __init__(
         self,
         *,
-        data: bytes,
+        public_cert: bytes,
     ) -> None:
-        self.data = data
+        self.public_cert = public_cert
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('data', p.BytesType, p.FLAG_REQUIRED),
+            1: ('public_cert', p.BytesType, p.FLAG_REQUIRED),
         }

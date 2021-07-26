@@ -63,15 +63,19 @@ BixinLoadDevice.label                   max_size:33
 
 BixinBackupDeviceAck.mnemonics          max_size:241
 
-OnekeyDeviceInfoSettings.serial_no      max_size:32
+FactorySet.product                      max_size:2
+FactorySet.hardware_id                  max_size:2
+FactorySet.shell_color                  max_size:1
+FactorySet.factory_id                   max_size:2
+FactorySet.utc                          max_size:10
+FactorySet.serial_no                    max_size:7
 
-OnekeyDeviceInfo.serial_no              max_size:32
-OnekeyDeviceInfo.spiFlash_info          max_size:16
-OnekeyDeviceInfo.SE_info                max_size:16
+DeviceInfo.spiFlash_info                max_size:16
+DeviceInfo.SE_info                      max_size:16
 
-OnekeySEPublicKey.public_key            max_size:64
-OnekeyWriteSEPublicCert.public_cert     max_size:416
-OnekeySEPublicCert.public_cert          max_size:416  
+SEPublicKey.public_key                  max_size:64
+WriteSEPublicCert.public_cert           max_size:416
+SEPublicCert.public_cert                max_size:416  
 
-OnekeySpiFlashWrite.data                max_size:1024
-OnekeySpiFlashData.data                 max_size:1024
+SpiFlashWrite.data                      max_size:1024
+SpiFlashData.data                       max_size:1024

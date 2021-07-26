@@ -10,5 +10,5 @@ if __debug__:
         pass
 
 
-class OnekeyReadSEPublicCert(p.MessageType):
+class ReadSEPublicCert(p.MessageType):
     MESSAGE_WIRE_TYPE = 10007

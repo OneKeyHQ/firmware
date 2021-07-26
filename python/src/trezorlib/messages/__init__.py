@@ -82,6 +82,8 @@ from .DebugMoneroDiagAck import DebugMoneroDiagAck
 from .DebugMoneroDiagRequest import DebugMoneroDiagRequest
 from .Deprecated_PassphraseStateAck import Deprecated_PassphraseStateAck
 from .Deprecated_PassphraseStateRequest import Deprecated_PassphraseStateRequest
+from .DeviceInfo import DeviceInfo
+from .DeviceInfoSettings import DeviceInfoSettings
 from .DoPreauthorized import DoPreauthorized
 from .ECDHSessionKey import ECDHSessionKey
 from .EndSession import EndSession
@@ -126,6 +128,7 @@ from .EthereumSignTx import EthereumSignTx
 from .EthereumTxAck import EthereumTxAck
 from .EthereumTxRequest import EthereumTxRequest
 from .EthereumVerifyMessage import EthereumVerifyMessage
+from .FactorySet import FactorySet
 from .Failure import Failure
 from .Features import Features
 from .FirmwareErase import FirmwareErase
@@ -133,6 +136,7 @@ from .FirmwareErase_ex import FirmwareErase_ex
 from .FirmwareRequest import FirmwareRequest
 from .FirmwareUpload import FirmwareUpload
 from .GetAddress import GetAddress
+from .GetDeviceInfo import GetDeviceInfo
 from .GetECDHSessionKey import GetECDHSessionKey
 from .GetEntropy import GetEntropy
 from .GetFeatures import GetFeatures
@@ -227,17 +231,6 @@ from .NEMSignedTx import NEMSignedTx
 from .NEMTransactionCommon import NEMTransactionCommon
 from .NEMTransfer import NEMTransfer
 from .NextU2FCounter import NextU2FCounter
-from .OnekeyDeviceInfo import OnekeyDeviceInfo
-from .OnekeyDeviceInfoSettings import OnekeyDeviceInfoSettings
-from .OnekeyGetDeviceInfo import OnekeyGetDeviceInfo
-from .OnekeyReadSEPublicCert import OnekeyReadSEPublicCert
-from .OnekeyReadSEPublicKey import OnekeyReadSEPublicKey
-from .OnekeySEPublicCert import OnekeySEPublicCert
-from .OnekeySEPublicKey import OnekeySEPublicKey
-from .OnekeySpiFlashData import OnekeySpiFlashData
-from .OnekeySpiFlashRead import OnekeySpiFlashRead
-from .OnekeySpiFlashWrite import OnekeySpiFlashWrite
-from .OnekeyWriteSEPublicCert import OnekeyWriteSEPublicCert
 from .OwnershipId import OwnershipId
 from .OwnershipProof import OwnershipProof
 from .PassphraseAck import PassphraseAck
@@ -250,6 +243,8 @@ from .PrevInput import PrevInput
 from .PrevOutput import PrevOutput
 from .PrevTx import PrevTx
 from .PublicKey import PublicKey
+from .ReadSEPublicCert import ReadSEPublicCert
+from .ReadSEPublicKey import ReadSEPublicKey
 from .RecoveryDevice import RecoveryDevice
 from .ResetDevice import ResetDevice
 from .RippleAddress import RippleAddress
@@ -257,6 +252,8 @@ from .RippleGetAddress import RippleGetAddress
 from .RipplePayment import RipplePayment
 from .RippleSignTx import RippleSignTx
 from .RippleSignedTx import RippleSignedTx
+from .SEPublicCert import SEPublicCert
+from .SEPublicKey import SEPublicKey
 from .SdProtect import SdProtect
 from .SelfTest import SelfTest
 from .SetU2FCounter import SetU2FCounter
@@ -264,6 +261,9 @@ from .SignIdentity import SignIdentity
 from .SignMessage import SignMessage
 from .SignTx import SignTx
 from .SignedIdentity import SignedIdentity
+from .SpiFlashData import SpiFlashData
+from .SpiFlashRead import SpiFlashRead
+from .SpiFlashWrite import SpiFlashWrite
 from .StellarAccountMergeOp import StellarAccountMergeOp
 from .StellarAddress import StellarAddress
 from .StellarAllowTrustOp import StellarAllowTrustOp
@@ -327,6 +327,7 @@ from .WebAuthnRemoveResidentCredential import WebAuthnRemoveResidentCredential
 from .WipeDevice import WipeDevice
 from .WordAck import WordAck
 from .WordRequest import WordRequest
+from .WriteSEPublicCert import WriteSEPublicCert
 from . import BackupType
 from . import BinanceOrderSide
 from . import BinanceOrderType

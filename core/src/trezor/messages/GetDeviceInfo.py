@@ -10,5 +10,5 @@ if __debug__:
         pass
 
 
-class OnekeyReadSEPublicKey(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10004
+class GetDeviceInfo(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10002

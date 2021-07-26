@@ -1042,12 +1042,12 @@ void fsm_msgBixinBackupDevice(void) {
   return;
 }
 
-void fsm_msgOnekeyDeviceInfoSettings(const OnekeyDeviceInfoSettings *msg) {
+void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
-  if (device_set_info((DeviceSerialNo *)(msg->serial_no))) {
+  if (device_set_info((DeviceSerialNo *)(msg->serial.product))) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
@@ -1056,27 +1056,27 @@ void fsm_msgOnekeyDeviceInfoSettings(const OnekeyDeviceInfoSettings *msg) {
   return;
 }
 
-void fsm_msgOnekeyGetDeviceInfo(const OnekeyGetDeviceInfo *msg) {
+void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
-  RESP_INIT(OnekeyDeviceInfo);
-  device_get_serial(resp->serial_no);
-  msg_write(MessageType_MessageType_OnekeyDeviceInfo, resp);
+  RESP_INIT(DeviceInfo);
+  device_get_serial(resp->serial.product);
+  msg_write(MessageType_MessageType_DeviceInfo, resp);
 #endif
   return;
 }
 
-void fsm_msgOnekeyReadSEPublicKey(const OnekeyReadSEPublicKey *msg) {
+void fsm_msgReadSEPublicKey(const ReadSEPublicKey *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
-  RESP_INIT(OnekeySEPublicKey);
+  RESP_INIT(SEPublicKey);
   if (se_get_pubkey(resp->public_key.bytes)) {
     resp->public_key.size = 64;
-    msg_write(MessageType_MessageType_OnekeySEPublicKey, resp);
+    msg_write(MessageType_MessageType_SEPublicKey, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Get SE pubkey Failed"));
@@ -1085,7 +1085,7 @@ void fsm_msgOnekeyReadSEPublicKey(const OnekeyReadSEPublicKey *msg) {
   return;
 }
 
-void fsm_msgOnekeyWriteSEPublicCert(const OnekeyWriteSEPublicCert *msg) {
+void fsm_msgWriteSEPublicCert(const WriteSEPublicCert *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
@@ -1099,17 +1099,17 @@ void fsm_msgOnekeyWriteSEPublicCert(const OnekeyWriteSEPublicCert *msg) {
   return;
 }
 
-void fsm_msgOnekeyReadSEPublicCert(const OnekeyReadSEPublicCert *msg) {
+void fsm_msgReadSEPublicCert(const ReadSEPublicCert *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
   uint32_t cert_len = 0;
 
-  RESP_INIT(OnekeySEPublicCert);
+  RESP_INIT(SEPublicCert);
   if (se_read_certificate(resp->public_cert.bytes, &cert_len)) {
     resp->public_cert.size = cert_len;
-    msg_write(MessageType_MessageType_OnekeySEPublicCert, resp);
+    msg_write(MessageType_MessageType_SEPublicCert, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Get certificate failed"));
@@ -1118,7 +1118,7 @@ void fsm_msgOnekeyReadSEPublicCert(const OnekeyReadSEPublicCert *msg) {
   return;
 }
 
-void fsm_msgOnekeySpiFlashWrite(const OnekeySpiFlashWrite *msg) {
+void fsm_msgSpiFlashWrite(const SpiFlashWrite *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
@@ -1133,16 +1133,16 @@ void fsm_msgOnekeySpiFlashWrite(const OnekeySpiFlashWrite *msg) {
   return;
 }
 
-void fsm_msgOnekeySpiFlashRead(const OnekeySpiFlashRead *msg) {
+void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
   (void)msg;
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
-  RESP_INIT(OnekeySpiFlashData);
+  RESP_INIT(SpiFlashData);
 
   if (flash_read_enc(resp->data.bytes, msg->address, msg->len)) {
     resp->data.size = msg->len;
-    msg_write(MessageType_MessageType_OnekeySpiFlashData, resp);
+    msg_write(MessageType_MessageType_SpiFlashData, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Read failed"));
   }

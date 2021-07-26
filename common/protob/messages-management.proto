@@ -578,14 +578,23 @@ message BixinBackupDeviceAck {
     required string mnemonics = 1;                          // seed encoded as mnemonic (12, 18 or 24 words for BIP39, 20 or 33 for SLIP39)
 }
 
+message FactorySet {
+    required string product = 1;
+    required string hardware_id = 2;
+    required string shell_color = 3;
+    required string factory_id = 4;
+    required string utc = 5;
+    required string serial_no =6;    
+}
+
 /**
  * Request: device information settings
  * @start
  * @next Success
  * @next Failure
  */
-message OnekeyDeviceInfoSettings {
-    required string serial_no = 1;                 
+message DeviceInfoSettings {
+    required FactorySet serial = 1;                 
 }
 
 /**
@@ -593,16 +602,15 @@ message OnekeyDeviceInfoSettings {
  * @start
  * @next Features
  */
-message OnekeyGetDeviceInfo {
+message GetDeviceInfo {
 }
 
 /**
  * Response: Reports various information about the device
  * @end
  */
-message OnekeyDeviceInfo {
-    required string serial_no = 1;
-
+message DeviceInfo {
+    required FactorySet serial = 1;
     optional string spiFlash_info = 2;
     optional string SE_info = 3;
 }
@@ -611,14 +619,14 @@ message OnekeyDeviceInfo {
  * Request: Read SE public key
  * @end
  */
-message OnekeyReadSEPublicKey {
+message ReadSEPublicKey {
 }
 
 /**
  * Response: SE public key
  * @end
  */
-message OnekeySEPublicKey {
+message SEPublicKey {
     required bytes public_key = 1;
 }
 
@@ -626,7 +634,7 @@ message OnekeySEPublicKey {
  * Request: Write SE public certificate
  * @end
  */
-message OnekeyWriteSEPublicCert {
+message WriteSEPublicCert {
     required bytes public_cert = 1;
 }
 
@@ -634,14 +642,14 @@ message OnekeyWriteSEPublicCert {
  * Request: Read SE public certificate
  * @end
  */
-message OnekeyReadSEPublicCert {
+message ReadSEPublicCert {
 }
 
 /**
  * Response: SE public certificate
  * @end
  */
-message OnekeySEPublicCert {
+message SEPublicCert {
     required bytes public_cert = 1;
 }
 
@@ -649,16 +657,16 @@ message OnekeySEPublicCert {
  * Request: Write spi_flash data
  * @end
  */
-message OnekeySpiFlashWrite {    
-    required uint32 address=2;
-    required bytes data = 1;
+message SpiFlashWrite {    
+    required uint32 address = 1;
+    required bytes data = 2;
 }
 
 /**
  * Request: Read spi_flash data
  * @end
  */
-message OnekeySpiFlashRead {
+message SpiFlashRead {
     required uint32 address=1;
     required uint32 len=2;
 }
@@ -667,6 +675,6 @@ message OnekeySpiFlashRead {
  * Response: spi_flash data
  * @end
  */
-message OnekeySpiFlashData {
+message SpiFlashData {
     required bytes data = 1;
 }

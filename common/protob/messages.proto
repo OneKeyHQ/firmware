@@ -299,15 +299,15 @@ enum MessageType {
 
     MessageType_BixinPinInputOnDevice = 10000 [(wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
     //onekey 
-    MessageType_OnekeyDeviceInfoSettings = 10001 [(wire_in) = true];
-    MessageType_OnekeyGetDeviceInfo = 10002 [(wire_in) = true];
-    MessageType_OnekeyDeviceInfo = 10003 [(wire_out) = true];
-    MessageType_OnekeyReadSEPublicKey = 10004 [(wire_in) = true];
-    MessageType_OnekeySEPublicKey = 10005 [(wire_out) = true];
-    MessageType_OnekeyWriteSEPublicCert = 10006 [(wire_in) = true];
-    MessageType_OnekeyReadSEPublicCert = 10007 [(wire_in) = true];
-    MessageType_OnekeySEPublicCert = 10008 [(wire_out) = true];
-    MessageType_OnekeySpiFlashWrite = 10009 [(wire_in) = true];
-    MessageType_OnekeySpiFlashRead = 10010 [(wire_in) = true];
-    MessageType_OnekeySpiFlashData = 10011 [(wire_out) = true];
+    MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
+    MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
+    MessageType_DeviceInfo = 10003 [(wire_out) = true];
+    MessageType_ReadSEPublicKey = 10004 [(wire_in) = true];
+    MessageType_SEPublicKey = 10005 [(wire_out) = true];
+    MessageType_WriteSEPublicCert = 10006 [(wire_in) = true];
+    MessageType_ReadSEPublicCert = 10007 [(wire_in) = true];
+    MessageType_SEPublicCert = 10008 [(wire_out) = true];
+    MessageType_SpiFlashWrite = 10009 [(wire_in) = true];
+    MessageType_SpiFlashRead = 10010 [(wire_in) = true];
+    MessageType_SpiFlashData = 10011 [(wire_out) = true];
 }

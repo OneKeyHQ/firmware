@@ -2,6 +2,8 @@
 # fmt: off
 import protobuf as p
 
+from .FactorySet import FactorySet
+
 if __debug__:
     try:
         from typing import Dict, List  # noqa: F401
@@ -10,18 +12,18 @@ if __debug__:
         pass
 
 
-class OnekeySEPublicKey(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10005
+class DeviceInfoSettings(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10001
 
     def __init__(
         self,
         *,
-        public_key: bytes,
+        serial: FactorySet,
     ) -> None:
-        self.public_key = public_key
+        self.serial = serial
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('public_key', p.BytesType, p.FLAG_REQUIRED),
+            1: ('serial', FactorySet, p.FLAG_REQUIRED),
         }

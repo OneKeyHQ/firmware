@@ -10,18 +10,21 @@ if __debug__:
         pass
 
 
-class OnekeySEPublicCert(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10008
+class SpiFlashWrite(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10009
 
     def __init__(
         self,
         *,
-        public_cert: bytes,
+        address: int,
+        data: bytes,
     ) -> None:
-        self.public_cert = public_cert
+        self.address = address
+        self.data = data
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('public_cert', p.BytesType, p.FLAG_REQUIRED),
+            1: ('address', p.UVarintType, p.FLAG_REQUIRED),
+            2: ('data', p.BytesType, p.FLAG_REQUIRED),
         }

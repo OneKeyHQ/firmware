@@ -10,21 +10,21 @@ if __debug__:
         pass
 
 
-class OnekeySpiFlashWrite(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10009
+class SpiFlashRead(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10010
 
     def __init__(
         self,
         *,
         address: int,
-        data: bytes,
+        len: int,
     ) -> None:
         self.address = address
-        self.data = data
+        self.len = len
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            2: ('address', p.UVarintType, p.FLAG_REQUIRED),
-            1: ('data', p.BytesType, p.FLAG_REQUIRED),
+            1: ('address', p.UVarintType, p.FLAG_REQUIRED),
+            2: ('len', p.UVarintType, p.FLAG_REQUIRED),
         }

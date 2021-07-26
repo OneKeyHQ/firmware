@@ -10,18 +10,21 @@ if __debug__:
         pass
 
 
-class OnekeyDeviceInfoSettings(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10001
+class SpiFlashWrite(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10009
 
     def __init__(
         self,
         *,
-        serial_no: str,
+        address: int,
+        data: bytes,
     ) -> None:
-        self.serial_no = serial_no
+        self.address = address
+        self.data = data
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('serial_no', p.UnicodeType, p.FLAG_REQUIRED),
+            1: ('address', p.UVarintType, p.FLAG_REQUIRED),
+            2: ('data', p.BytesType, p.FLAG_REQUIRED),
         }
