@@ -14,11 +14,16 @@ typedef struct __attribute__((packed)) {
   char serial[7];
 } DeviceSerialNo;
 
+typedef struct __attribute__((packed)) {
+  char atca_config_verson[8];
+} DeviceConfig;
+
 void device_init(void);
 bool device_serial_set(void);
 void device_set_factory_mode(bool mode);
 bool device_is_factory_mode(void);
 bool device_set_info(DeviceSerialNo *dev_serial);
 bool device_get_serial(DeviceSerialNo **serial);
+char *device_get_se_config_version(void);
 
 #endif

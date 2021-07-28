@@ -1,12 +1,11 @@
+#include "device2.h"
 #include "atca_api.h"
 #include "buttons.h"
 #include "chinese.h"
-#include "device2.h"
 #include "layout2.h"
 #include "otp.h"
 #include "util.h"
 #include "w25qxx.h"
-
 
 void device_test(void) {
   uint8_t key = KEY_NULL;
@@ -83,6 +82,12 @@ void device_test(void) {
     while (1) {
     }
   }
+
+  // save ATECC608 configuration version
+  char atca_version[8] = {0};
+  strlcpy(atca_version, ATCA_CONFIG_VERSION, sizeof(atca_version));
+  flash_otp_write(FLASH_OTP_FACTORY_TEST, 0, (uint8_t *)atca_version,
+                  sizeof(atca_version));
 
   flash_otp_lock(FLASH_OTP_FACTORY_TEST);
 }

@@ -5,10 +5,17 @@
 
 static DeviceSerialNo device_serial_obj;
 static DeviceSerialNo *device_serial = &device_serial_obj;
+static DeviceConfig device_config_obj;
+static DeviceConfig *device_config = &device_config_obj;
 static bool serial_set = false;
 static bool factory_mode = false;
 
 void device_init(void) {
+  memcpy(
+      &device_config_obj,
+      FLASH_PTR(FLASH_OTP_BASE + FLASH_OTP_FACTORY_TEST * FLASH_OTP_BLOCK_SIZE),
+      sizeof(DeviceConfig));
+
   if (!flash_otp_is_locked(FLASH_OTP_DEVICE_SERIAL)) {
     serial_set = false;
     return;
@@ -52,4 +59,13 @@ bool device_get_serial(DeviceSerialNo **serial) {
   }
   *serial = device_serial;
   return true;
+}
+
+char *device_get_se_config_version(void) {
+  if (check_all_ones(device_config->atca_config_verson,
+                     sizeof(device_config->atca_config_verson))) {
+    return "0.0.1";
+  } else {
+    return device_config->atca_config_verson;
+  }
 }

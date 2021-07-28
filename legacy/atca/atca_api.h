@@ -4,6 +4,8 @@
 #include "atca_config.h"
 #include "atca_status.h"
 
+#define ATCA_CONFIG_VERSION "0.0.1"
+
 typedef struct __attribute__((packed)) {
   bool pin_set;
   bool initialized;

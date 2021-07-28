@@ -2,7 +2,7 @@
 #include "atca_api.h"
 #include "atca_command.h"
 #include "atca_config.h"
-
+#include "device.h"
 #include "memory.h"
 #include "rng.h"
 #include "sha2.h"
@@ -45,11 +45,11 @@ static void pin_hash(const char *pin, uint32_t pin_len, uint8_t result[32]) {
   sha256_Final(&ctx, result);
 }
 
-char *se_get_version(void) { return "1.0.0"; }
+char *se_get_version(void) { return device_get_se_config_version(); }
 
 bool se_get_sn(char **serial) {
   (void)serial;
-  return true;
+  return false;
 }
 
 bool se_setSeedStrength(uint32_t strength) {
