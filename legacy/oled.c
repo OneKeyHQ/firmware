@@ -67,6 +67,8 @@ static bool is_debug_link = 0;
  */
 #define OLED_OFFSET(x, y) (x + (y / 8) * OLED_WIDTH)
 #define OLED_MASK(x, y) (1 << (y % 8))
+
+PICTURE _bitmap = {false, 0, 0, 0, 0, NULL};
 #else
 /*
  * macros to convert coordinate to bit position
@@ -386,17 +388,43 @@ void oledInvertDebugLink() {
   }
 }
 
+#if !EMULATOR
+
+#if ONEKEY_MINI
+void setRgbBitmap(bool valid) { _bitmap.valid = valid; }
+
+bool isRgbBitmap(void) { return _bitmap.valid; }
+
+void oledDrawRgbBitmap(int x, int y, const BITMAP *bmp) {
+  if ((x < 0) || (y < 0) || (x >= OLED_WIDTH) || (y >= OLED_HEIGHT) ||
+      (bmp == NULL)) {
+    return;
+  }
+
+  _bitmap.x = x;
+  _bitmap.y = y;
+  memcpy(&_bitmap.bitmap, bmp, sizeof(BITMAP));
+}
+
+void oledRgbRefresh(int x, int y, BITMAP *bmp) {
+  for (int i = 0; i < bmp->width; i++) {
+    for (int j = 0; j < bmp->height; j++) {
+      oledSetAddress(x + i, y + j, x + i + 1, y + j + 1);
+      SPISendData(bmp->data[i * bmp->width * 2 + j * 2 + 1]);
+      SPISendData(bmp->data[i * bmp->width * 2 + j * 2]);
+    }
+  }
+}
+
 /*
  * Refresh the display. This copies the buffer to the display to show the
  * contents.  This must be called after every operation to the buffer to
  * make the change visible.  All other operations only change the buffer
  * not the content of the display.
  */
-#if !EMULATOR
-
-#if ONEKEY_MINI
 void oledRefresh() {
   gpio_clear(OLED_CS_PORT, OLED_CS_PIN);  // SPI select
+
   oledSetAddress(0, 0, OLED_WIDTH, OLED_HEIGHT);
   for (int y = 0; y < OLED_HEIGHT; y++) {
     for (int x = 0; x < OLED_WIDTH; x++) {
@@ -409,6 +437,11 @@ void oledRefresh() {
       }
     }
   }
+
+  if (_bitmap.valid) {
+    oledRgbRefresh(_bitmap.x, _bitmap.y, (BITMAP *)&_bitmap.bitmap);
+  }
+
   gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
 }
 #else
@@ -450,6 +483,7 @@ void oledSetDebugLink(bool set) {
 }
 
 void oledBufferBak(void) { memcpy(_oledbuffer_bak, _oledbuffer, OLED_BUFSIZE); }
+
 void oledBufferResume(void) {
   memcpy(_oledbuffer, _oledbuffer_bak, OLED_BUFSIZE);
 }

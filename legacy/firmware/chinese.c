@@ -65,7 +65,7 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
   while (*text) {
     if ((uint8_t)*text < 0x80) {
       l = fontCharWidth(font & 0x7f, *text) + space;
-      if (x + l > OLED_WIDTH) {
+      if ((x + l > OLED_WIDTH) || (*text == '\n')) {
         x = 0;
         y += font_desc->pixel + 1;
       }

@@ -35,6 +35,10 @@
 #define DISP_BUFSIZE (2048)
 #define DISP_PAGESIZE (96)
 
+#if ONEKEY_MINI
+#define WORD_PER_PAGE 8
+#endif
+
 extern void *layoutLast;
 
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
@@ -120,6 +124,24 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                                const char *line1, const char *line2,
                                const char *line3, const char *line4,
                                const char *line5, const char *line6);
+#if ONEKEY_MINI
+void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
+                                 const char *btnNo, const BITMAP *bmp_yes,
+                                 const char *btnYes, const char *desc,
+                                 const char *line1, const char *line2,
+                                 const char *line3, const char *line4,
+                                 const char *line5, const char *line6,
+                                 const char *line7, const char *line8,
+                                 const char *line9, const char *line10,
+                                 const char *line11, const char *line12);
+void layoutDialogCenterAdapterFont(const BITMAP *icon, const BITMAP *bmp_no,
+                                   const char *btnNo, const BITMAP *bmp_yes,
+                                   const char *btnYes, const char *desc,
+                                   uint8_t font, const char *line1,
+                                   const char *line2, const char *line3,
+                                   const char *line4, const char *line5,
+                                   const char *line6);
+#endif
 void layoutProgressAdapter(const char *desc, int permil);
 
 void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
@@ -128,7 +150,22 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                                     const char *line1, const char *line2,
                                     const char *line3, const char *line4,
                                     const char *line5, const char *line6);
-
+#if ONEKEY_MINI
+void layoutDialogSwipeCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
+                                      const char *btnNo, const BITMAP *bmp_yes,
+                                      const char *btnYes, const char *desc,
+                                      const char *line1, const char *line2,
+                                      const char *line3, const char *line4,
+                                      const char *line5, const char *line6,
+                                      const char *line7, const char *line8,
+                                      const char *line9, const char *line10,
+                                      const char *line11, const char *line12);
+void layoutDialogSwipeCenterAdapterFont(
+    const BITMAP *icon, const BITMAP *bmp_no, const char *btnNo,
+    const BITMAP *bmp_yes, const char *btnYes, const char *desc, uint8_t font,
+    const char *line1, const char *line2, const char *line3, const char *line4,
+    const char *line5, const char *line6);
+#endif
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
 void layoutBmpSelect(int x, int y, const BITMAP *bmp);
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
@@ -152,6 +189,31 @@ void layoutEnterSleep(void);
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, &bmp_btn_back, bmp_yes, \
                            _("Back"), btn_yes, index, count, title, NULL,      \
                            current, previous, next)
+
+#if ONEKEY_MINI
+void layoutItemsSelectAdapterEx(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                                const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                                const char *btnNo, const char *btnYes,
+                                uint32_t index, uint32_t count,
+                                const char *title, const char *line1,
+                                const char *line2, const char *line3,
+                                const char *line4, const char *line5,
+                                const char *line6);
+
+#define layoutMenuItemsEx(btn_yes, bmp_yes, index, count, title, line1, line2, \
+                          line3, line4, line5, line6)                          \
+  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_btn_back,        \
+                             bmp_yes, _("Back"), btn_yes, index, count, title, \
+                             line1, line2, line3, line4, line5, line6)
+
+void layoutItemsSelectAdapterLeft(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                                  const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                                  const char *btnNo, const char *btnYes,
+                                  uint32_t index, uint32_t count,
+                                  const char *title, const char *desc,
+                                  const char *prefex, const char *current,
+                                  const char *previous, const char *next);
+#endif
 
 uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);
 

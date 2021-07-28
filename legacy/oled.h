@@ -47,6 +47,9 @@
 #endif
 
 #if ONEKEY_MINI
+#define OLED_CTRL_PORT GPIOA
+#define OLED_CTRL_PIN GPIO7  // PA7 | Back light
+
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 128
 
@@ -62,6 +65,12 @@
 #define COLOR_FONT COLOR_BLACK
 #define COLOR_BACKGROUND COLOR_WHITE
 
+typedef struct {
+  bool valid;
+  uint16_t x;
+  uint16_t y;
+  BITMAP_EX bitmap;
+} PICTURE;
 #else
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
@@ -72,6 +81,9 @@
 void SPISendCmd(uint8_t cmd);
 void SPISendData(uint8_t data);
 void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye);
+void oledDrawRgbBitmap(int x, int y, const BITMAP *bmp);
+void setRgbBitmap(bool valid);
+bool isRgbBitmap(void);
 #endif
 
 void oledInit(void);

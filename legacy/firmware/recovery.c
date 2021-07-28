@@ -23,6 +23,7 @@
 #include "bip39.h"
 #include "buttons.h"
 #include "config.h"
+#include "font.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -654,6 +655,90 @@ refresh_menu:
 static bool recovery_check_words(void) {
   uint8_t key = KEY_NULL;
   uint32_t index = 0;
+
+#if ONEKEY_MINI
+  uint32_t j = 0, pages = 0;
+  const struct font_desc *font = find_cur_font();
+
+  pages = word_count / WORD_PER_PAGE;
+  pages += (word_count % WORD_PER_PAGE) ? 1 : 0;
+  if (pages == 0) return false;
+
+refresh_menu:
+  oledClear_ex();
+
+  switch (index) {
+    case 0:
+      for (j = 0; j < WORD_PER_PAGE; j++) {
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, (j + 2) * (font->pixel + 1),
+                                    words[j], FONT_STANDARD);
+      }
+      oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
+      break;
+    case 1:
+      oledDrawBitmap(OLED_WIDTH / 2, 0, &bmp_btn_up);
+      for (j = 0; j < WORD_PER_PAGE; j++) {
+        if ((j + WORD_PER_PAGE) < word_count) {
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2,
+                                      (j + 2) * (font->pixel + 1),
+                                      words[j + WORD_PER_PAGE], FONT_STANDARD);
+        }
+      }
+      if (pages > 2) {
+        oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
+      } else {
+        layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
+      }
+      break;
+    case 2:
+      oledDrawBitmap(OLED_WIDTH / 2, 0, &bmp_btn_up);
+      for (j = 0; j < WORD_PER_PAGE; j++) {
+        if ((j + WORD_PER_PAGE * 2) < word_count) {
+          oledDrawStringCenterAdapter(
+              OLED_WIDTH / 2, (j + 2) * (font->pixel + 1),
+              words[j + WORD_PER_PAGE * 2], FONT_STANDARD);
+        }
+      }
+      layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
+      break;
+    default:
+      break;
+  }
+
+  oledRefresh();
+
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) index--;
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (index < pages - 1) index++;
+      goto refresh_menu;
+    case KEY_CANCEL:
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      if (index == pages - 1) {
+        char new_mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+
+        strlcpy(new_mnemonic, words[0], sizeof(new_mnemonic));
+
+        for (uint32_t i = 1; i < word_count; i++) {
+          strlcat(new_mnemonic, " ", sizeof(new_mnemonic));
+          strlcat(new_mnemonic, words[i], sizeof(new_mnemonic));
+        }
+
+        if (!mnemonic_check(new_mnemonic)) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+      return false;
+    default:
+      break;
+  }
+#else
   char desc[64] = "";
 
 refresh_menu:
@@ -693,7 +778,7 @@ refresh_menu:
     default:
       break;
   }
-
+#endif
   return false;
 }
 
@@ -709,7 +794,11 @@ static bool input_words(void) {
 
 refresh_menu:
   memzero(desc, sizeof(desc));
+#if ONEKEY_MINI
+  strcat(desc, _("Enter recovery phrase"));
+#else
   strcat(desc, _("Enter seed phrase "));
+#endif
   strcat(desc, _("#"));
   uint2str(word_index + 1, desc + strlen(desc));
   memzero(letter_list, sizeof(letter_list));
@@ -775,9 +864,15 @@ bool recovery_on_device(void) {
   uint8_t key = KEY_NULL;
 
 prompt_recovery:
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, NULL, NULL, _("Follow the guide to recover your wallet"), NULL);
+#else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
       NULL, _("Enter seed phrases to"), _("restore wallet"), NULL, NULL);
+#endif
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
@@ -789,12 +884,32 @@ select_mnemonic_count:
   }
 
   memzero(desc, sizeof(desc));
-  strcat(desc, _("Please enter your"));
-  uint2str(word_count, desc + strlen(desc));
+
+#if ONEKEY_MINI
+  switch (word_count) {
+    case 12:
+      strcat(desc, _("Please enter your 12 words recovery phrase in order"));
+      break;
+    case 18:
+      strcat(desc, _("Please enter your 18 words recovery phrase in order"));
+      break;
+    case 24:
+      strcat(desc, _("Please enter your 24 words recovery phrase in order"));
+      break;
+    default:
+      break;
+  }
 
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+                                 NULL, NULL, desc, NULL);
+#else
+  strcat(desc, _("Please enter your"));
+  uint2str(word_count, desc + strlen(desc));
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
                                  desc, _("seed phrases"), NULL, NULL);
+#endif
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     goto_check(select_mnemonic_count);
@@ -811,11 +926,34 @@ input_word:
   }
 
   memzero(desc, sizeof(desc));
-  strcat(desc, _("Check the entered"));
+#if ONEKEY_MINI
+  switch (word_count) {
+    case 12:
+      strcat(desc, _("Check that the 12 words you entered are the correct "
+                     "recovery phrase"));
+      break;
+    case 18:
+      strcat(desc, _("Check that the 18 words you entered are the correct "
+                     "recovery phrase"));
+      break;
+    case 24:
+      strcat(desc, _("Check that the 24 words you entered are the correct "
+                     "recovery phrase"));
+      break;
+    default:
+      break;
+  }
+
+  layoutDialogCenterAdapterEx(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
+                              _("Next"), NULL, NULL, NULL, desc, NULL, NULL,
+                              NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+#else
+  strcat(desc, _("Check the entered "));
   uint2str(word_count, desc + strlen(desc));
   layoutDialogCenterAdapter(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
                             _("Next"), NULL, NULL, NULL, desc,
                             _("seed phrases"), NULL, NULL);
+#endif
 
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
@@ -824,12 +962,33 @@ input_word:
 
 check_word:
   if (!recovery_check_words()) {
+#if ONEKEY_MINI
+    setRgbBitmap(true);
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
+        NULL, NULL, NULL, NULL, _("Incorrect recovery phrase. Try again."));
+#else
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
         NULL, NULL, _("Invalid seed phrases"), _("Please try again"), NULL);
+#endif
+
     protectWaitKey(0, 1);
+#if ONEKEY_MINI
+    setRgbBitmap(false);
+#endif
     goto_check(prompt_recovery);
   }
+
+#if ONEKEY_MINI
+  setRgbBitmap(true);
+  layoutDialogSwipeCenterAdapter(
+      &bmp_icon_success, NULL, NULL, &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, NULL, NULL, NULL, _("Your wallet has successfully restored"));
+  protectWaitKey(0, 1);
+  setRgbBitmap(false);
+#endif
+
   if (!protectChangePinOnDevice(false, true)) {
     goto_check(check_word);
   }

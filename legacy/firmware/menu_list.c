@@ -22,10 +22,21 @@ void menu_recovery_device(int index) {
   }
   recovery_on_device();
   if (config_isInitialized()) {
+#if ONEKEY_MINI
+    setRgbBitmap(true);
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
+        NULL, NULL, NULL, NULL, _("Wallet Recovery Success"));
+#else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
                                    _("Wallet Recovery Success"), NULL, NULL);
+#endif
+
     protectWaitKey(0, 1);
+#if ONEKEY_MINI
+    setRgbBitmap(false);
+#endif
     layoutHome();
   }
 }
@@ -37,10 +48,21 @@ void menu_reset_device(int index) {
   }
   reset_on_device();
   if (config_isInitialized()) {
+#if ONEKEY_MINI
+    setRgbBitmap(true);
+    layoutDialogSwipeCenterAdapter(
+        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
+        NULL, NULL, NULL, NULL, _("Wallet created success"));
+#else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
                                    _("Wallet created success"), NULL, NULL);
+#endif
+
     protectWaitKey(0, 1);
+#if ONEKEY_MINI
+    setRgbBitmap(false);
+#endif
     layoutHome();
   }
 }
@@ -49,7 +71,11 @@ void menu_manual(int index) {
   (void)index;
   int page = 0;
   uint8_t key = KEY_NULL;
+#if ONEKEY_MINI
+  char index_str[] = "1/3";
+#else
   char index_str[] = "1/5";
+#endif
   char desc[64] = "";
   int offset = 0;
   int len = 0;
@@ -72,7 +98,11 @@ refresh_menu:
         offset = 10;
       else
         offset = 20;
+#if ONEKEY_MINI
+      oledDrawBitmap(offset + len + 2, 20, &bmp_button_up);
+#else
       oledDrawBitmap(offset + len + 2, 16, &bmp_icon_up);
+#endif
       oledDrawStringAdapter(offset, 20, desc, FONT_STANDARD);
 
       memset(desc, 0, sizeof(desc));
@@ -80,12 +110,36 @@ refresh_menu:
       strcat(desc, _("Press"));
       strcat(desc, "        ");
       strcat(desc, _("to scroll down"));
+#if ONEKEY_MINI
+      oledDrawBitmap(offset + len + 2, 34, &bmp_button_down);
+#else
       oledDrawBitmap(offset + len + 2, 30, &bmp_icon_down);
+#endif
       oledDrawStringAdapter(offset, 34, desc, FONT_STANDARD);
+#if ONEKEY_MINI
+      memset(desc, 0, sizeof(desc));
+      strcat(desc, _("Press"));
+      strcat(desc, "        ");
+      strcat(desc, _("to confirm "));
+      oledDrawBitmap(offset + len + 2, 48, &bmp_button_forward);
+      oledDrawStringAdapter(offset, 48, desc, FONT_STANDARD);
 
+      memset(desc, 0, sizeof(desc));
+      strcat(desc, _("Press"));
+      strcat(desc, "        ");
+      strcat(desc, _("to cancel"));
+      // English
+      if (desc[0] == 'P')
+        offset = 10;
+      else
+        offset = 20;
+      oledDrawBitmap(offset + len + 2, 62, &bmp_button_back);
+      oledDrawStringAdapter(offset, 62, desc, FONT_STANDARD);
+#endif
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
 
       break;
+#if !ONEKEY_MINI
     case 1:
       oledDrawBitmap(60, 0, &bmp_btn_up);
 
@@ -113,14 +167,34 @@ refresh_menu:
 
       break;
     case 2:
+#else
+    case 1:
+#endif
       oledDrawBitmap(60, 0, &bmp_btn_up);
+#if ONEKEY_MINI
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,
+                                  _("Download Onekey Apps"), FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "onekey.so/download",
+                                  FONT_STANDARD);
+#else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download Onekey"),
                                   FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10, "onekey.so/download",
                                   FONT_STANDARD);
+#endif
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
       break;
 
+#if ONEKEY_MINI
+    case 2:
+      oledDrawBitmap(60, 0, &bmp_btn_up);
+      oledDrawStringCenterAdapter(
+          OLED_WIDTH / 2, 3 * 10,
+          _("To learn more about how to use, go to the Help Center."),
+          FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "help.onekey.so",
+                                  FONT_STANDARD);
+#else
     case 3:
       oledDrawBitmap(60, 0, &bmp_btn_up);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10,
@@ -128,6 +202,7 @@ refresh_menu:
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,
                                   _("For more information"), FONT_STANDARD);
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
+#endif
       break;
 
     case 4:
@@ -141,7 +216,11 @@ refresh_menu:
   switch (key) {
     case KEY_DOWN:
     case KEY_CONFIRM:
+#if ONEKEY_MINI
+      if (page < 2)
+#else
       if (page < 4)
+#endif
         page++;
       else if (key == KEY_CONFIRM) {
         break;
@@ -160,10 +239,19 @@ refresh_menu:
 void menu_erase_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
+                                 NULL, NULL,
+                                 _("Before you reset the device, please ensure "
+                                   "you've backed up your recovery phrase"),
+                                 NULL);
+#else
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
                                  _("Make sure you still have"),
                                  _("backup of seed phrases"), NULL, NULL);
+#endif
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
@@ -171,16 +259,31 @@ void menu_erase_device(int index) {
   if (!protectPinOnDevice(false, true)) {
     return;
   }
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL,
+      _("All data on the device will be erased if the device is reset, and "
+        "this operation cannot be reversed."),
+      NULL, NULL, NULL);
+#else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
       NULL, _("All data will be lost."), _("This cannot be undo!"), NULL, NULL);
+#endif
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
   }
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Reset "), NULL, NULL,
+      NULL, NULL, NULL, _("Are you sure you want to reset your device?"), NULL);
+#else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Reset "), NULL, NULL,
       NULL, NULL, _("Are you sure to reset?"), NULL, NULL);
+#endif
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
@@ -191,9 +294,16 @@ void menu_erase_device(int index) {
   if (ui_language_bak) {
     ui_language = ui_language_bak;
   }
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(
+      &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+      NULL, NULL, NULL, _("Reset successfully. Please restart the device."),
+      NULL);
+#else
   layoutDialogSwipeCenterAdapter(
       &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
       NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
+#endif
   protectWaitKey(0, 0);
 #if !EMULATOR
   svc_system_reset();
@@ -291,9 +401,13 @@ static struct menu_item settings_menu_items[] = {
 #endif
     {"Language", NULL, false, .sub_menu = &language_set_menu,
      menu_para_language},
+#if ONEKEY_MINI
+    // todo:brightness
     {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
      menu_para_autolock},
-#if !ONEKEY_MINI
+#else
+    {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
+     menu_para_autolock},
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
      menu_para_shutdown}
 #endif

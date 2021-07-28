@@ -29,6 +29,11 @@ const char *languages[][2] = {
     {"Address:", "地址"},
     // layout2.c
     {"Again", "再次"},
+    // menu_list.c
+    {"All data on the device will be erased if the device is reset, and this "
+     "operation cannot be reversed.",
+     "重置设备将抹除本机所有数据,本操作不可撤销"},
+
     // fsm_msg_common.h
     {"All data will be lost.", "所有数据将丢失"},
     // u2f.c
@@ -39,6 +44,7 @@ const char *languages[][2] = {
     {"Are you sure to reset?", "确定要重置吗?"},
     //
     {"Are you sure to update?", "确定升级固件吗?"},
+    {"Are you sure you want to reset your device?", "确定要重置吗?"},
     // u2f.c
     {"Authenticate", "认证"},
     // fsm_msg_common.h
@@ -59,6 +65,10 @@ const char *languages[][2] = {
     {"Back", "返回"},
     // layout2.c
     {"Backup Only", "仅备份"},
+    // menu_list.c
+    {"Before you reset the device, please ensure you've backed up your "
+     "recovery phrase",
+     "在重置设备前,请确保您仍掌握该助记词的物理备份."},
     //
     {"Before your start", "继续操作前"},
     // layout2.c layout2.c
@@ -69,6 +79,7 @@ const char *languages[][2] = {
     {"Branch ID must be set.", ""},  // msg
     // signing.c signing.c
     {"Branch ID not enabled on this coin.", ""},  // msg
+    {"Brightness", "亮度"},
     // fsm.c
     {"Button expected", ""},  // msg
     // recovery.c reset.c
@@ -108,10 +119,21 @@ const char *languages[][2] = {
     {"Check PIN Code", "请先校验设备原PIN码"},
     //
     {"Check the entered", "请检查输入的"},
+    {"Check that the 12 words you entered are the correct recovery phrase",
+     "重新检查已输入的12个单词,确保它是正确的助记词"},
+    {"Check that the 18 words you entered are the correct recovery phrase",
+     "重新检查已输入的18个单词,确保它是正确的助记词"},
+    {"Check that the 24 words you entered are the correct recovery phrase",
+     "重新检查已输入的24个单词,确保它是正确的助记词"},
+    {"Check the recovery phrase once more, and compare it to the backup copy "
+     "in your hand. Make sure the spelling and order are identical.",
+     "再次查看助记词,并与手中的备份进行核对,确保二者完全一致"},
     //
     {"Check the seed", "检查助记词"},
     // layout2.c
     {"Check the written", "请检查写下的"},
+    {"Choose the correct words based on the recovery phrase you've put down.",
+     "接下来,请根据已写下的助记词,选择正确的单词"},
     // layout2.c
     {"CoSi commit index #?", ""},
     // layout2.c
@@ -161,6 +183,7 @@ const char *languages[][2] = {
     {"Continue?", "继续"},
     // layout2.c
     {"Create", "创建新钱包"},
+    {"Dashboard", "控制中心"},
     // fsm.c
     {"Data error", "数据错误"},
     // ethereum.c
@@ -216,8 +239,9 @@ const char *languages[][2] = {
     {"Do you want to sign in?", "请确认登录"},
     //
     {"Done", "完成"},
-    //
     {"Download Onekey", "下载Onekey"},
+    // menu_list.c
+    {"Download Onekey Apps", "官网下载Onekey客户端"},
     // ethereum.c
     {"Empty data chunk received", ""},  // msg
     // signing.c signing.c
@@ -238,6 +262,7 @@ const char *languages[][2] = {
     {"Enter PIN to unlock", "输入PIN码解锁"},
     // protect.c
     {"Enter new wipe code:", "输入新的擦除PIN码"},
+    {"Enter recovery phrase", "输入助记词"},
     //
     {"Enter seed phrase ", "输入助记词"},
     //
@@ -296,6 +321,11 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"Flags applied", ""},  // msg
     //
+    // reset.c
+    {"Follow the guide to create new wallet", "请跟随引导创建新钱包"},
+    // recovery.c
+    {"Follow the guide to recover your wallet",
+     "请跟随引导,依次输入助记恢复钱包"},
     {"Follow the prompts", "按照屏幕提示"},
     //
     {"Font:", "字体支持:"},
@@ -307,6 +337,7 @@ const char *languages[][2] = {
     {"GPG sign for:", ""},
     // layout2.c
     {"Guide", "使用教程"},
+    {"High", "高"},
     // layout2.c c fsm_msg_common.h
     {"I take the risk", "确认风险"},
     // recovery.c
@@ -315,6 +346,8 @@ const char *languages[][2] = {
     {"If import seed,", "如果导入种子"},
     //
     {"Inconsistent PIN code", "PIN码前后不一致"},
+    // recovery.c
+    {"Incorrect recovery phrase. Try again.", "助记词不正确,请重试"},
     // fsm_msg_ethereum.h
     {"Invalid address", ""},  // msg
     // signing.c
@@ -351,6 +384,7 @@ const char *languages[][2] = {
     {"Language", "语言"},
     // layout2.c
     {"Levy is", ""},
+    {"Low", "低"},
     // fsm_msg_common.h
     {"Loading private seed", "导入私钥"},
     // trezor.c
@@ -365,6 +399,7 @@ const char *languages[][2] = {
     {"Malformed address", ""},
     // ethereum.c
     {"Malformed signature", ""},
+    {"Medium", "中"},
     // layout2.c lisk.c
     {"Message signed by:", ""},
     // messages.c
@@ -460,10 +495,15 @@ const char *languages[][2] = {
     {"PIN expected", ""},
     // fsm.c
     {"PIN invalid", "PIN码错误"},
+    {"PIN is used to unlock your device. Please keep it safe.",
+     "PIN码用于解锁设备,请妥善保管."},
     // fsm.c
     {"PIN mismatch", "两次输入不相同"},
     // fsm_msg_common.h fsm_msg_common.h
     {"PIN removed", ""},
+    // protect.c
+    {"PINs do not match. Please enter again.",
+     "PIN码前后输入不一致,请重新输入."},
     //
     {"Page down", "下一页"},
     //
@@ -474,8 +514,21 @@ const char *languages[][2] = {
     {"Percentile Levy", ""},
     // protect.c protect.c
     {"Please confirm PIN", "请确认PIN码"},
+    {"Please copy the following 12 words in order",
+     "请按顺序抄写以下12位助记词"},
+    {"Please copy the following 18 words in order",
+     "请按顺序抄写以下18位助记词"},
+    {"Please copy the following 24 words in order",
+     "请按顺序抄写以下24位助记词"},
     // protect.c
     {"Please enter current PIN", "请输入当前PIN码"},
+    // recovery.c
+    {"Please enter your 12 words recovery phrase in order",
+     "请依次输入12位助记词"},
+    {"Please enter your 18 words recovery phrase in order",
+     "请依次输入18位助记词"},
+    {"Please enter your 24 words recovery phrase in order",
+     "请依次输入24位助记词"},
     // protect.c
     {"Please enter new PIN", "请输入新PIN码"},
     // recovery.c
@@ -494,8 +547,16 @@ const char *languages[][2] = {
     {"Please reconnect", ""},
     // recovery.c
     {"Please select the", "请选择"},
+    // protect.c
+    {"Please select the number of recovery phrase words you want",
+     "选择助记词位数"},
     //
     {"Please set the PIN", "请设置PIN码"},
+    // protect.c
+    {"Please set your PIN", "请设置PIN码"},
+    {"Please set your PIN.\nPIN is the only way to unlock your device. You "
+     "can't retrieve your pin if you forget it.",
+     "请设置PIN码.\nPIN码用于解锁设备,一旦遗忘无法找回."},
     //
     {"Please try again", "请重新输入"},
     // protect.c
@@ -521,9 +582,14 @@ const char *languages[][2] = {
     // layout2.c
     {"Raw levy value is", ""},
     // protect.c
+    {"Enter your PIN again", "再次输入PIN码"},
+    // protect.c
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
     {"Really send", ""},
+    // reset.c
+    {"Recovery Phrase", "助记词"},
+    {"Recovery Phrase verified pass", "助记词校验通过"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
@@ -532,6 +598,7 @@ const char *languages[][2] = {
     {"Reset", "重置设备"},
     //
     {"Reset ", "重置"},
+    {"Reset successfully. Please restart the device.", "重置成功,请重启."},
     //
     {"Restore", "恢复钱包"},
     //
@@ -556,7 +623,6 @@ const char *languages[][2] = {
     {"Segwit input without amount", ""},
     // signing.c
     {"Segwit not enabled on this coin", ""},
-    //
     {"Select correct word below", "按提示选择正确的单词"},
     //
     {"Select your", "选择你的"},
@@ -570,6 +636,7 @@ const char *languages[][2] = {
     {"Session cleared", ""},
     // layout2.c
     {"Set auto power off time", "设置自动关机时间"},
+    {"Set the PIN", "设置PIN码"},
     // menu.c
     {"Settings", "设置项"},
     // fsm_msg_common.h
@@ -627,6 +694,8 @@ const char *languages[][2] = {
     {"Timestamp must be set.", ""},
     // signing.c fsm_msg_coin.h
     {"Timestamp not enabled on this coin.", ""},
+    {"To learn more about how to use, go to the Help Center.",
+     "了解如何使用,请前往帮助中心"},
     // ethereum.c
     {"Too much data", ""},
     // ethereum.c
@@ -726,8 +795,8 @@ const char *languages[][2] = {
     {"Wrong address path", ""},
     // signing.c signing.c
     {"Wrong input script type", ""},
-    //
     {"Wrong mnemonic", "错误的助记词"},
+    {"Wrong recovery phrase", "错误的助记词"},
     // recovery.c
     {"Wrong word retyped", ""},
     // layout2.c layout2.c layout2.c layout2.c
@@ -735,6 +804,8 @@ const char *languages[][2] = {
     {"Yes", "是"},
     //
     {"You still have 9 times", "连续输入10次将重置设备"},
+    // recovery.c
+    {"Your wallet has successfully restored", "钱包恢复成功"},
     // layout2.c
     {"active device", "激活设备"},
     // fsm_msg_common.h
@@ -873,6 +944,7 @@ const char *languages[][2] = {
     {"reboot start", ""},
     // recovery.c
     {"recover the device?", "恢复钱包"},
+    {"recovery phrase", "助记词"},
     // lisk.c
     {"register a delegate?", ""},
     // fsm_msg_common.h
@@ -917,10 +989,10 @@ const char *languages[][2] = {
     {"times", "次"},
     //
     {"timestamp:", "时间戳:"},
-    //
     {"to back", "键返回"},
-    //
+    {"to cancel", "键取消/返回"},
     {"to confirm", "键确认"},
+    {"to confirm ", "键确认/下一步"},
     // protect.c
     {"to continue ...", " "},
     //
@@ -928,9 +1000,9 @@ const char *languages[][2] = {
     // ethereum.c
     {"to new contract?", "新合约"},
     //
-    {"to scroll down", "键查看下一页"},
+    {"to scroll down", "键下一页"},
     //
-    {"to scroll up", "键查看上一页"},
+    {"to scroll up", "键上一页"},
     //
     {"to try", " "},
     // lisk.c

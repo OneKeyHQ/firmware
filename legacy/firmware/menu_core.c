@@ -38,12 +38,23 @@ void menu_display(struct menu *menu) {
       break;
   }
 
+#if ONEKEY_MINI
+  layoutMenuItemsEx(text_yes, bmp_yes, menu->current + 1, menu->counts,
+                    menu->title ? _(menu->title) : NULL,
+                    0 < menu->counts ? _(menu->items[0].name) : NULL,
+                    1 < menu->counts ? _(menu->items[1].name) : NULL,
+                    2 < menu->counts ? _(menu->items[2].name) : NULL,
+                    3 < menu->counts ? _(menu->items[3].name) : NULL,
+                    4 < menu->counts ? _(menu->items[4].name) : NULL,
+                    5 < menu->counts ? _(menu->items[5].name) : NULL);
+#else
   layoutMenuItems(
       text_yes, bmp_yes, menu->current + 1, menu->counts,
       menu->title ? _(menu->title) : NULL, desc,
       menu->current > 0 ? _(menu->items[menu->current - 1].name) : NULL,
       menu->current < menu->counts - 1 ? _(menu->items[menu->current + 1].name)
                                        : NULL);
+#endif
 }
 
 void menu_up(void) {

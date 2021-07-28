@@ -31,6 +31,9 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len);
 void reset_backup(bool separated, const char *mnemonic);
 uint32_t reset_get_int_entropy(uint8_t *entropy);
 const char *reset_get_word(void);
+#if ONEKEY_MINI
+bool show_mnemonic(char words[24][12], uint32_t word_count);
+#endif
 bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type);
 bool writedown_mnemonic(const char *mnemonic);
 bool reset_on_device(void);
