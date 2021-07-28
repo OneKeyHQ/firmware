@@ -14,6 +14,7 @@ OBJS += setup.o
 OBJS += sys.o
 OBJS += si2c.o
 OBJS += trans_fifo.o
+OBJS += otp.o
 
 ifeq ($(ONEKEY_MINI),1)
 OBJS += atca/atca_hal.o
@@ -21,6 +22,7 @@ OBJS += atca/atca_command.o
 OBJS += atca/atca_api.o
 OBJS += atca/se_atca.o
 OBJS += w25qxx.o
+OBJS += device.o
 else
 OBJS += usart.o
 OBJS += nordic_dfu.o

@@ -39,6 +39,7 @@
 #if ONEKEY_MINI
 #include "atca_api.h"
 #include "atca_hal.h"
+#include "device.h"
 #endif
 
 void layoutFirmwareFingerprint(const uint8_t *hash) {
@@ -128,6 +129,7 @@ int main(void) {
 #ifndef APPVER
     oledInit();
 #if ONEKEY_MINI
+    device_init();
     atca_init();
 #else
     sys_poweron();

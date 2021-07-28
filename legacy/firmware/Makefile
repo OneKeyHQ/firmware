@@ -7,7 +7,6 @@ OBJS += udp.o
 else
 OBJS += usb.o
 OBJS += bl_check.o
-OBJS += otp.o
 OBJS += header.o
 endif
 
@@ -21,7 +20,7 @@ OBJS += menu_list.o
 
 ifeq ($(ONEKEY_MINI),1)
 OBJS += font_ex.o
-OBJS += device.o
+OBJS += device2.o
 OBJS += flash_enc.o
 endif
 

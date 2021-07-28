@@ -36,6 +36,7 @@
 #include "util.h"
 #if ONEKEY_MINI
 #include "device.h"
+#include "device2.h"
 #include "flash_enc.h"
 #include "font_ex.h"
 #include "se_hal.h"

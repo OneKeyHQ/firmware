@@ -1,9 +1,9 @@
 #include "atca_api.h"
 #include "atca_command.h"
 
-#include "../firmware/otp.h"
 #include "common.h"
 #include "memory.h"
+#include "otp.h"
 #include "rng.h"
 #include "sha2.h"
 #include "util.h"

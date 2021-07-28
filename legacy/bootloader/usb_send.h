@@ -1,3 +1,4 @@
+#if !ONEKEY_MINI
 static uint8_t getintprotobuf(uint8_t *ptr, uint32_t value) {
   uint8_t i = 0;
 
@@ -14,6 +15,7 @@ static uint8_t getintprotobuf(uint8_t *ptr, uint32_t value) {
   ptr[i - 1] &= 0x7F; /* Unset top bit on last byte */
   return i;
 }
+#endif
 
 static void send_response(usbd_device *dev, uint8_t *buf) {
   if (dev != NULL) {
@@ -62,6 +64,57 @@ static void send_msg_failure(usbd_device *dev, uint8_t code) {
   }
 }
 
+#if ONEKEY_MINI
+#include "device.h"
+#include "messages-management.pb.h"
+#include "messages.h"
+#include "messages.pb.h"
+
+void send_msg_features(usbd_device *dev) {
+  static uint8_t response[MSG_OUT_SIZE];
+
+  Features *resp = (Features *)response;
+  memzero(response, sizeof(response));
+
+  resp->has_vendor = true;
+  strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+  resp->has_major_version = true;
+  resp->major_version = VERSION_MAJOR;
+  resp->has_minor_version = true;
+  resp->minor_version = VERSION_MINOR;
+  resp->has_patch_version = true;
+  resp->patch_version = VERSION_PATCH;
+  resp->has_bootloader_mode = true;
+  resp->bootloader_mode = true;
+  resp->has_firmware_present = true;
+  resp->firmware_present = firmware_present_new() ? true : false;
+
+  resp->has_factory_info = true;
+  if (device_serial_set()) {
+    DeviceSerialNo *serial;
+    device_get_serial(&serial);
+    strlcpy(resp->factory_info.product, serial->product,
+            sizeof(resp->factory_info.product));
+    strlcpy(resp->factory_info.hardware_id, serial->hardware,
+            sizeof(resp->factory_info.hardware_id));
+    strlcpy(resp->factory_info.shell_color, &serial->color,
+            sizeof(resp->factory_info.shell_color));
+    strlcpy(resp->factory_info.factory_id, serial->factory,
+            sizeof(resp->factory_info.factory_id));
+    strlcpy(resp->factory_info.utc, serial->utc,
+            sizeof(resp->factory_info.utc));
+    strlcpy(resp->factory_info.serial_no, serial->serial,
+            sizeof(resp->factory_info.serial_no));
+  }
+
+  msg_write(MessageType_MessageType_Features, resp);
+
+  const uint8_t *data;
+  while ((data = msg_out_data())) {
+    send_response(dev, (uint8_t *)data);
+  }
+}
+#else
 static void send_msg_features(usbd_device *dev) {
   uint8_t response[64];
   uint8_t len;
@@ -101,6 +154,7 @@ static void send_msg_features(usbd_device *dev) {
   response[30] = firmware_present_new() ? 0x01 : 0x00;
   send_response(dev, response);
 }
+#endif
 
 static void send_msg_buttonrequest_firmwarecheck(usbd_device *dev) {
   uint8_t response[64];
