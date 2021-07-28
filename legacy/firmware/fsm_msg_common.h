@@ -132,6 +132,28 @@ bool get_features(Features *resp) {
   resp->has_bootloader_version = true;
   strlcpy(resp->bootloader_version, bootloader_version,
           sizeof(resp->bootloader_version));
+
+#if ONEKEY_MINI
+  resp->has_factory_info = true;
+  if (device_serial_set()) {
+    DeviceSerialNo *dev_serial;
+    device_get_serial(&dev_serial);
+    strlcpy(resp->factory_info.product, dev_serial->product,
+            sizeof(resp->factory_info.product));
+    strlcpy(resp->factory_info.hardware_id, dev_serial->hardware,
+            sizeof(resp->factory_info.hardware_id));
+    strlcpy(resp->factory_info.shell_color, &dev_serial->color,
+            sizeof(resp->factory_info.shell_color));
+    strlcpy(resp->factory_info.factory_id, dev_serial->factory,
+            sizeof(resp->factory_info.factory_id));
+    strlcpy(resp->factory_info.utc, dev_serial->utc,
+            sizeof(resp->factory_info.utc));
+    strlcpy(resp->factory_info.serial_no, dev_serial->serial,
+            sizeof(resp->factory_info.serial_no));
+  }
+  resp->has_spi_flash = true;
+  strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
+#endif
   return resp;
 }
 
@@ -1062,8 +1084,25 @@ void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
   RESP_INIT(DeviceInfo);
-  device_get_serial(resp->serial.product);
-  msg_write(MessageType_MessageType_DeviceInfo, resp);
+  DeviceSerialNo *serial;
+  if (device_get_serial(&serial)) {
+    strlcpy(resp->factory_info.product, serial->product,
+            sizeof(resp->factory_info.product));
+    strlcpy(resp->factory_info.hardware_id, serial->hardware,
+            sizeof(resp->factory_info.hardware_id));
+    strlcpy(resp->factory_info.shell_color, &serial->color,
+            sizeof(resp->factory_info.shell_color));
+    strlcpy(resp->factory_info.factory_id, serial->factory,
+            sizeof(resp->factory_info.factory_id));
+    strlcpy(resp->factory_info.utc, serial->utc,
+            sizeof(resp->factory_info.utc));
+    strlcpy(resp->factory_info.serial_no, serial->serial,
+            sizeof(resp->factory_info.serial_no));
+    msg_write(MessageType_MessageType_DeviceInfo, resp);
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Serial not set"));
+  }
+
 #endif
   return;
 }

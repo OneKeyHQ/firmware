@@ -109,6 +109,8 @@ void send_msg_features(usbd_device *dev) {
   }
   resp->has_spi_flash = true;
   strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
+  resp->has_se_ver = true;
+  strlcpy(resp->se_ver, device_get_se_config_version(), sizeof(resp->se_ver));
 
   msg_write(MessageType_MessageType_Features, resp);
 
