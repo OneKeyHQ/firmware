@@ -17,6 +17,7 @@ Features.se_ver                         max_size:16
 Features.onekey_version                 max_size:16
 Features.onekey_serial                  max_size:32
 Features.bootloader_version             max_size:8
+Features.spi_flash                      max_size:17
 
 ApplySettings.language                  max_size:17
 ApplySettings.label                     max_size:33
@@ -63,12 +64,12 @@ BixinLoadDevice.label                   max_size:33
 
 BixinBackupDeviceAck.mnemonics          max_size:241
 
-FactorySet.product                      max_size:2
-FactorySet.hardware_id                  max_size:2
-FactorySet.shell_color                  max_size:1
-FactorySet.factory_id                   max_size:2
-FactorySet.utc                          max_size:10
-FactorySet.serial_no                    max_size:7
+FactorySet.product                      max_size:3
+FactorySet.hardware_id                  max_size:3
+FactorySet.shell_color                  max_size:2
+FactorySet.factory_id                   max_size:3
+FactorySet.utc                          max_size:11
+FactorySet.serial_no                    max_size:8
 
 DeviceInfo.spiFlash_info                max_size:16
 DeviceInfo.SE_info                      max_size:16

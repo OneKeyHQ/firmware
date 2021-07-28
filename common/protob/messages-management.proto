@@ -115,6 +115,9 @@ message Features {
     optional string onekey_version = 508;
     optional string onekey_serial = 509;
     optional string bootloader_version = 510;
+    optional FactorySet factory_info = 511;
+    optional string spi_flash = 512;
+
 }
 
 /**
@@ -610,7 +613,7 @@ message GetDeviceInfo {
  * @end
  */
 message DeviceInfo {
-    required FactorySet serial = 1;
+    required FactorySet factory_info = 1;
     optional string spiFlash_info = 2;
     optional string SE_info = 3;
 }

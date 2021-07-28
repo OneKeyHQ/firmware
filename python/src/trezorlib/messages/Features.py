@@ -2,6 +2,8 @@
 # fmt: off
 from .. import protobuf as p
 
+from .FactorySet import FactorySet
+
 if __debug__:
     try:
         from typing import Dict, List  # noqa: F401
@@ -67,6 +69,8 @@ class Features(p.MessageType):
         onekey_version: str = None,
         onekey_serial: str = None,
         bootloader_version: str = None,
+        factory_info: FactorySet = None,
+        spi_flash: str = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -116,6 +120,8 @@ class Features(p.MessageType):
         self.onekey_version = onekey_version
         self.onekey_serial = onekey_serial
         self.bootloader_version = bootloader_version
+        self.factory_info = factory_info
+        self.spi_flash = spi_flash
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -168,4 +174,6 @@ class Features(p.MessageType):
             508: ('onekey_version', p.UnicodeType, None),
             509: ('onekey_serial', p.UnicodeType, None),
             510: ('bootloader_version', p.UnicodeType, None),
+            511: ('factory_info', FactorySet, None),
+            512: ('spi_flash', p.UnicodeType, None),
         }

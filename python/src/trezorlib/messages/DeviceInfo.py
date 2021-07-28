@@ -18,18 +18,18 @@ class DeviceInfo(p.MessageType):
     def __init__(
         self,
         *,
-        serial: FactorySet,
+        factory_info: FactorySet,
         spiFlash_info: str = None,
         SE_info: str = None,
     ) -> None:
-        self.serial = serial
+        self.factory_info = factory_info
         self.spiFlash_info = spiFlash_info
         self.SE_info = SE_info
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('serial', FactorySet, p.FLAG_REQUIRED),
+            1: ('factory_info', FactorySet, p.FLAG_REQUIRED),
             2: ('spiFlash_info', p.UnicodeType, None),
             3: ('SE_info', p.UnicodeType, None),
         }
