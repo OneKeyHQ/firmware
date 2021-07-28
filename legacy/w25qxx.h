@@ -74,6 +74,7 @@ typedef struct {
   uint8_t status_register2;
   uint8_t status_register3;
   uint8_t lock;
+  char *desc;
 } w25qxx_t;
 
 extern w25qxx_t w25qxx;
@@ -81,6 +82,7 @@ extern w25qxx_t w25qxx;
 // in Page, Sector and block read/write functions, can put 0 to read maximum
 // bytes
 bool w25qxx_init(void);
+char *w25qxx_get_desc(void);
 
 bool w25qxx_erase_chip(void);
 bool w25qxx_erase_sector(uint32_t sector_addr);

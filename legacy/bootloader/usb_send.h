@@ -69,6 +69,7 @@ static void send_msg_failure(usbd_device *dev, uint8_t code) {
 #include "messages-management.pb.h"
 #include "messages.h"
 #include "messages.pb.h"
+#include "w25qxx.h"
 
 void send_msg_features(usbd_device *dev) {
   static uint8_t response[MSG_OUT_SIZE];
@@ -106,6 +107,8 @@ void send_msg_features(usbd_device *dev) {
     strlcpy(resp->factory_info.serial_no, serial->serial,
             sizeof(resp->factory_info.serial_no));
   }
+  resp->has_spi_flash = true;
+  strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
 
   msg_write(MessageType_MessageType_Features, resp);
 

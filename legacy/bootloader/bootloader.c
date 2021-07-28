@@ -40,6 +40,7 @@
 #include "atca_api.h"
 #include "atca_hal.h"
 #include "device.h"
+#include "w25qxx.h"
 #endif
 
 void layoutFirmwareFingerprint(const uint8_t *hash) {
@@ -130,6 +131,7 @@ int main(void) {
     oledInit();
 #if ONEKEY_MINI
     device_init();
+    w25qxx_init();
     atca_init();
 #else
     sys_poweron();

@@ -5,7 +5,7 @@
 #define W25QXX_DUMMY_BYTE 0xA5
 #define W25QXX_TIMEOUT 10000
 
-w25qxx_t w25qxx;
+w25qxx_t w25qxx = {.desc = "uninitialized"};
 
 void spi_delay(unsigned int delay_ms) {
   uint32_t timeout = delay_ms * 30000;
@@ -194,45 +194,56 @@ bool w25qxx_init(void) {
     case 0x20:  // w25q512
       w25qxx.id = W25Q512;
       w25qxx.block_count = 1024;
+      w25qxx.desc = "64M bytes";
       break;
     case 0x19:  // w25q256
       w25qxx.id = W25Q256;
       w25qxx.block_count = 512;
+      w25qxx.desc = "32M bytes";
       break;
     case 0x18:  // w25q128
       w25qxx.id = W25Q128;
       w25qxx.block_count = 256;
+      w25qxx.desc = "16M bytes";
       break;
     case 0x17:  // w25q64
       w25qxx.id = W25Q64;
       w25qxx.block_count = 128;
+      w25qxx.desc = "8M bytes";
       break;
     case 0x16:  // w25q32
       w25qxx.id = W25Q32;
       w25qxx.block_count = 64;
+      w25qxx.desc = "4M bytes";
       break;
     case 0x15:  // w25q16
       w25qxx.id = W25Q16;
       w25qxx.block_count = 32;
+      w25qxx.desc = "2M bytes";
       break;
     case 0x14:  // w25q80
       w25qxx.id = W25Q80;
       w25qxx.block_count = 16;
+      w25qxx.desc = "1M bytes";
       break;
     case 0x13:  // w25q40
       w25qxx.id = W25Q40;
       w25qxx.block_count = 8;
+      w25qxx.desc = "512K bytes";
       break;
     case 0x12:  // w25q20
       w25qxx.id = W25Q20;
       w25qxx.block_count = 4;
+      w25qxx.desc = "256K bytes";
       break;
     case 0x11:  // w25q10
       w25qxx.id = W25Q10;
       w25qxx.block_count = 2;
+      w25qxx.desc = "128K bytes";
       break;
     default:
       w25qxx.lock = 0;
+      w25qxx.desc = "unknown flash";
       return false;
   }
 
@@ -252,6 +263,8 @@ bool w25qxx_init(void) {
   w25qxx.lock = 0;
   return true;
 }
+
+char *w25qxx_get_desc(void) { return w25qxx.desc; }
 
 bool w25qxx_erase_chip(void) {
   int32_t cnt = W25QXX_TIMEOUT;
