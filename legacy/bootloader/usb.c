@@ -356,7 +356,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         }
 #if ONEKEY_MINI
         // check firmware magic
-        if (memcmp(p, &FIRMWARE_MAGIC_MINI, 4) != 0) {
+        if (memcmp(p, &FIRMWARE_MAGIC_NEW, 4) != 0) {
           send_msg_failure(dev, 9);  // Failure_ProcessError
           flash_state = STATE_END;
           show_halt("Wrong firmware", "header.");

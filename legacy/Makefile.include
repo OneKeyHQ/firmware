@@ -225,7 +225,7 @@ $(NAME).elf: $(OBJS) $(LDSCRIPT) $(LIBDEPS)
 
 %.o: %.S Makefile
 	@printf "  AS      $@\n"
-	$(Q)$(CC) $(CPUFLAGS) -o $@ -c $<
+	$(Q)$(CC) $(CPUFLAGS) $(CFLAGS) -o $@ -c $<
 
 %.o: %.c Makefile
 	@printf "  CC      $@\n"

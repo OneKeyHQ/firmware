@@ -237,7 +237,7 @@ def main(args):
     data = open(args.path, "rb").read()
     assert len(data) % 4 == 0
 
-    if data[:4] != b"TRZF":
+    if data[:4] != b"TRZF" and data[:4] != b"MINI":
         raise Exception("Firmware header expected")
 
     data = update_hashes_in_header(data)
