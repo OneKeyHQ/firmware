@@ -1069,7 +1069,16 @@ void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
-  if (device_set_info((DeviceSerialNo *)(msg->serial.product))) {
+  DeviceSerialNo dev_serial = {0};
+  memcpy(dev_serial.product, msg->serial.product, sizeof(dev_serial.product));
+  memcpy(dev_serial.hardware, msg->serial.hardware_id,
+         sizeof(dev_serial.hardware));
+  dev_serial.color = msg->serial.shell_color[0];
+  memcpy(dev_serial.factory, msg->serial.factory_id,
+         sizeof(dev_serial.factory));
+  memcpy(dev_serial.utc, msg->serial.utc, sizeof(dev_serial.utc));
+  memcpy(dev_serial.serial, msg->serial.serial_no, sizeof(dev_serial.serial));
+  if (device_set_info(&dev_serial)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
