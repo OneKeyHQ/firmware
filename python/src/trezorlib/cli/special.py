@@ -193,7 +193,7 @@ def sign_firmware(client, coin, address, extract, file, slot, dry):
         }
 
     if not slot:
-        raise Exception("-s/--slot is required")
+        slot = int(input("Enter signature slot (1-%d): " % SLOTS))
     if slot < 1 or slot > SLOTS:
         raise Exception("Invalid slot")
 
