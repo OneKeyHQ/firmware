@@ -9,7 +9,15 @@ import ecdsa
 
 # Adapt OneKey Mini firmware header format
 SLOTS = 4
-PUBKEYS = 7
+pubkeys = {
+    1: "04d65c4699409d086327fdd0b3ab1d5ac3b18f80f24b76f4ba6bc71a8ba94d18235d87b9bfd8c92bca8261772f67da848a7942135501fd8e57351e8ea929ab429b",
+    2: "04757f1f9734fcdae4011c93400266b026dd099a6f100e9de90b16ae16262917e8805db5ecae3e27d455c973e4abf77c563bfa73056d42b6187f5a3684fe064471",
+    3: "046dda87edc24289aea929299abb5a279e913734b60642ec7b734891c46cf096fbf52af0f1989a73d86a2fe4353e0552673b1bd30227585e645255448d72e37f2a",
+    4: "049120571ac8cc9d55a291ba52a6ff236b365c830dee9e739c337d33e20644406621010433c4ee644987e5b575b3ba4bf13fa04cbeea4b25a04dbfb10edad29725",
+    5: "04a546fb3af222e8fd2e1835d2e3f9e1fa4379991c9a43108d4c209257f311e4fac4d00a7c5fe3d3f2000edc25a58dd153028ed9cdb26ffb19512a3981d74aeed0",
+    6: "04204766d969b73a0cfdeb1c4f865a193355ba71425f8b7f815be3d15b5b373db054955a1637eb58267dbaab091e9db58980512c067cc7c13b93ada87fad49162d",
+    7: "04fea486ffa8df90b93c712313302e52d948dfc24941bc9ea7740bc20b9a49ebe5ca6549c2c6d2f02581b6ce79e442ab3cb1abc61a005af4b34e0945697b1d6243",
+}
 FWHEADER_SIZE = 1024
 SIGNATURES_START = 6 * 4 + 8 + 512
 INDEXES_START = SIGNATURES_START + 4 * 64
@@ -108,9 +116,18 @@ def check_signatures(data):
             print("Slot #%d signature: DUPLICATE" % (x + 1), signature.hex())
             continue
 
-        used.append(indexes[x])
-        print("Slot #%d signature: FOUND" % (x + 1), signature.hex())
-        #TODO: verify all signature after pubkeys determined
+        pk = pubkeys[indexes[x]]
+        verify = ecdsa.VerifyingKey.from_string(
+            bytes.fromhex(pk)[1:],
+            curve=ecdsa.curves.SECP256k1,
+            hashfunc=hashlib.sha256,
+        )
+        try:
+            verify.verify(signature, to_sign, hashfunc=hashlib.sha256)
+            used.append(indexes[x])
+            print("Slot #%d signature: VALID" % (x + 1), signature.hex())
+        except Exception:
+            print("Slot #%d signature: INVALID" % (x + 1), signature.hex())
 
 
 @click.command()
@@ -120,11 +137,10 @@ def check_signatures(data):
 @click.option("-e", "--extract", is_flag=True, help="Extract public key")
 @click.option("-f", "--file", help="Firmware file path")
 @click.option("-s", "--slot", type=int, help="Signature slot")
-@click.option("-i", "--index", type=int, help="Pubkey index") #TODO: remove after all pubkeys determined
 @click.option("-d", "--dry", is_flag=True, help="Dry run")
 # fmt: on
 @with_client
-def sign_firmware(client, coin, address, extract, file, slot, index, dry):
+def sign_firmware(client, coin, address, extract, file, slot, dry):
     coin = coin or "Bitcoin"
     address_n = tools.parse_path(address)
     if extract:
@@ -151,6 +167,16 @@ def sign_firmware(client, coin, address, extract, file, slot, index, dry):
     to_sign = get_header(data, zero_signatures=True)
     res = special.sign_data(client, coin, address_n, to_sign)
 
+    # Locate proper index of current signing key
+    index = None
+    for i, pk in pubkeys.items():
+        if pk == res.pubkey.hex():
+            index = i
+            break
+    if index is None:
+        raise Exception("Unable to find public key index. Unknown public key?")
+
+    # Cross-verify hardware-signed signature by software
     verify = ecdsa.VerifyingKey.from_string(
         res.pubkey[1:],
         curve=ecdsa.curves.SECP256k1,
@@ -165,20 +191,15 @@ def sign_firmware(client, coin, address, extract, file, slot, index, dry):
             "digest": res.digest.hex(),
             "signature": res.signature.hex()
         }
-    else:
-        if not slot:
-            raise Exception("-s/--slot is required")
-        if slot < 1 or slot > SLOTS:
-            raise Exception("Invalid slot")
 
-        if not index:
-            raise Exception("-i/--index is required")
-        if index < 1 or index > PUBKEYS:
-            raise Exception("Invalid index")
+    if not slot:
+        raise Exception("-s/--slot is required")
+    if slot < 1 or slot > SLOTS:
+        raise Exception("Invalid slot")
 
-        data = modify(data, slot, index, res.signature)
-        fp = open(file, "wb")
-        fp.write(data)
-        fp.close()
-        check_signatures(data)
-        check_hashes(data)
+    data = modify(data, slot, index, res.signature)
+    fp = open(file, "wb")
+    fp.write(data)
+    fp.close()
+    check_signatures(data)
+    check_hashes(data)
