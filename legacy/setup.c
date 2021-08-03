@@ -142,9 +142,6 @@ void setup(void) {
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
   gpio_set_af(GPIOA, GPIO_AF5, GPIO5);
 
-  gpio_mode_setup(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN, GPIO7);
-  gpio_set(GPIOA, GPIO7);
-
   // enable SPI 1 for OLED display
   gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
   gpio_set_af(GPIOB, GPIO_AF5, GPIO5);

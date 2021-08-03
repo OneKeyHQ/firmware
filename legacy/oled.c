@@ -275,6 +275,8 @@ void oledInit(void) {
   SPISendCmd(0x29);
 
   gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
+
+  oledBackligthCtl(true);
 }
 
 void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye) {
@@ -293,6 +295,14 @@ void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye) {
   SPISendData((ye - 1 + OLED_Y_OFFSET) & 0xff);
 
   SPISendCmd(0x2c);
+}
+
+void oledBackligthCtl(bool state) {
+  if (!state) {
+    gpio_clear(OLED_CTRL_PORT, OLED_CTRL_PIN);
+  } else {
+    gpio_set(OLED_CTRL_PORT, OLED_CTRL_PIN);
+  }
 }
 #else
 /*
@@ -342,6 +352,11 @@ void oledInit() {
 
   oledClear();
   oledRefresh();
+}
+
+void oledBackligthCtl(bool state) {
+  (void)state;
+  return;
 }
 #endif
 void oledUpdateClk(void) {
