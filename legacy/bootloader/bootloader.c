@@ -146,7 +146,11 @@ int main(void) {
     mpu_config_bootloader();
 #ifndef APPVER
 
+#if ONEKEY_MINI
+    bool left_pressed = (buttonRead() & BTN_PIN_FUNC) == 0;
+#else
     bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
+#endif
 
     if (firmware_present_new() && !left_pressed && !force_boot) {
       oledClear();

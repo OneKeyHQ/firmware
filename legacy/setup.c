@@ -95,11 +95,12 @@ void setup(void) {
   RCC_CR |= RCC_CR_CSSON;
 #if ONEKEY_MINI
   // set GPIO for buttons
-  gpio_mode_setup(BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
-                  BTN_PIN_YES | BTN_PIN_NO | BTN_PIN_UP | BTN_PIN_DOWN);
+  gpio_mode_setup(
+      BTN_PORT, GPIO_MODE_INPUT, GPIO_PUPD_PULLUP,
+      BTN_PIN_YES | BTN_PIN_NO | BTN_PIN_UP | BTN_PIN_DOWN | BTN_PIN_FUNC);
 
   // back light control
-  gpio_mode_setup(OLED_CTRL_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
+  gpio_mode_setup(OLED_CTRL_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN,
                   OLED_CTRL_PIN);
 #else
   // set GPIO for buttons

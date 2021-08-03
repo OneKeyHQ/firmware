@@ -48,6 +48,7 @@ uint16_t buttonRead(void) {
   tmp |= gpio_get(BTN_PORT, BTN_PIN_NO);
   tmp |= gpio_get(BTN_PORT, BTN_PIN_UP);
   tmp |= gpio_get(BTN_PORT, BTN_PIN_DOWN);
+  tmp |= gpio_get(BTN_PORT, BTN_PIN_FUNC);
   return tmp;
 }
 #else
