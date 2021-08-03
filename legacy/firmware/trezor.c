@@ -169,11 +169,13 @@ int main(void) {
     cert_set = se_get_certificate_len(&cert_len);
 
     if (serial_set && font_set && cert_set) {
+      device_set_factory_mode(false);
       break;
     } else {
       if (!usb_init) {
         usb_init = true;
         memset(config_uuid_str, '0', sizeof(config_uuid_str));
+        device_set_factory_mode(true);
         usbInit();
       }
       usbPollFactory();

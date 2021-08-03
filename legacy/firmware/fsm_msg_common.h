@@ -24,136 +24,153 @@
 #if ONEKEY_MINI
 #include "device.h"
 #include "flash_enc.h"
+#include "font_ex.h"
 #include "w25qxx.h"
 #endif
 
 extern char bootloader_version[8];
 
 bool get_features(Features *resp) {
-  char *se_version = NULL;
-  char *serial = NULL;
-  resp->has_vendor = true;
-  strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
-  resp->has_major_version = true;
-  resp->major_version = VERSION_MAJOR;
-  resp->has_minor_version = true;
-  resp->minor_version = VERSION_MINOR;
-  resp->has_patch_version = true;
-  resp->patch_version = VERSION_PATCH;
-  resp->has_device_id = true;
-  strlcpy(resp->device_id, config_uuid_str, sizeof(resp->device_id));
-  resp->has_pin_protection = true;
-  resp->pin_protection = config_hasPin();
-  resp->has_passphrase_protection = true;
-  config_getPassphraseProtection(&(resp->passphrase_protection));
-#ifdef SCM_REVISION
-  int len = sizeof(SCM_REVISION) - 1;
-  resp->has_revision = true;
-  memcpy(resp->revision.bytes, SCM_REVISION, len);
-  resp->revision.size = len;
+#if ONEKEY_MINI
+  if (device_is_factory_mode()) {
+    uint32_t cert_len = 0;
+    resp->has_vendor = true;
+    strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+    resp->has_model = true;
+    strlcpy(resp->model, "facorty mode", sizeof(resp->model));
+    resp->has_initstates = true;
+    resp->initstates = 0;
+    resp->initstates |= device_serial_set() ? 1 : 0;
+    resp->initstates |= font_imported() ? (1 << 1) : 0;
+    resp->initstates |= se_get_certificate_len(&cert_len) ? (1 << 2) : 0;
+  } else
 #endif
-  resp->has_bootloader_hash = true;
-  resp->bootloader_hash.size =
-      memory_bootloader_hash(resp->bootloader_hash.bytes);
+  {
+    char *se_version = NULL;
+    char *serial = NULL;
+    resp->has_vendor = true;
+    strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+    resp->has_major_version = true;
+    resp->major_version = VERSION_MAJOR;
+    resp->has_minor_version = true;
+    resp->minor_version = VERSION_MINOR;
+    resp->has_patch_version = true;
+    resp->patch_version = VERSION_PATCH;
+    resp->has_device_id = true;
+    strlcpy(resp->device_id, config_uuid_str, sizeof(resp->device_id));
+    resp->has_pin_protection = true;
+    resp->pin_protection = config_hasPin();
+    resp->has_passphrase_protection = true;
+    config_getPassphraseProtection(&(resp->passphrase_protection));
+#ifdef SCM_REVISION
+    int len = sizeof(SCM_REVISION) - 1;
+    resp->has_revision = true;
+    memcpy(resp->revision.bytes, SCM_REVISION, len);
+    resp->revision.size = len;
+#endif
+    resp->has_bootloader_hash = true;
+    resp->bootloader_hash.size =
+        memory_bootloader_hash(resp->bootloader_hash.bytes);
 
-  resp->has_language =
-      config_getLanguage(resp->language, sizeof(resp->language));
-  resp->has_label = config_getLabel(resp->label, sizeof(resp->label));
-  resp->has_initialized = true;
-  resp->initialized = config_isInitialized();
-  resp->has_imported = config_getImported(&(resp->imported));
-  resp->has_unlocked = true;
-  resp->unlocked = session_isUnlocked();
-  resp->has_needs_backup = true;
-  config_getNeedsBackup(&(resp->needs_backup));
-  resp->has_unfinished_backup = true;
-  config_getUnfinishedBackup(&(resp->unfinished_backup));
-  resp->has_no_backup = true;
-  config_getNoBackup(&(resp->no_backup));
-  resp->has_flags = config_getFlags(&(resp->flags));
-  resp->has_model = true;
-  strlcpy(resp->model, "1", sizeof(resp->model));
-  if (session_isUnlocked()) {
-    resp->has_wipe_code_protection = true;
-    resp->wipe_code_protection = config_hasWipeCode();
-    resp->has_auto_lock_delay_ms = true;
-    resp->auto_lock_delay_ms = config_getAutoLockDelayMs();
-  }
+    resp->has_language =
+        config_getLanguage(resp->language, sizeof(resp->language));
+    resp->has_label = config_getLabel(resp->label, sizeof(resp->label));
+    resp->has_initialized = true;
+    resp->initialized = config_isInitialized();
+    resp->has_imported = config_getImported(&(resp->imported));
+    resp->has_unlocked = true;
+    resp->unlocked = session_isUnlocked();
+    resp->has_needs_backup = true;
+    config_getNeedsBackup(&(resp->needs_backup));
+    resp->has_unfinished_backup = true;
+    config_getUnfinishedBackup(&(resp->unfinished_backup));
+    resp->has_no_backup = true;
+    config_getNoBackup(&(resp->no_backup));
+    resp->has_flags = config_getFlags(&(resp->flags));
+    resp->has_model = true;
+    strlcpy(resp->model, "1", sizeof(resp->model));
+    if (session_isUnlocked()) {
+      resp->has_wipe_code_protection = true;
+      resp->wipe_code_protection = config_hasWipeCode();
+      resp->has_auto_lock_delay_ms = true;
+      resp->auto_lock_delay_ms = config_getAutoLockDelayMs();
+    }
 
 #if BITCOIN_ONLY
-  resp->capabilities_count = 2;
-  resp->capabilities[0] = Capability_Capability_Bitcoin;
-  resp->capabilities[1] = Capability_Capability_Crypto;
+    resp->capabilities_count = 2;
+    resp->capabilities[0] = Capability_Capability_Bitcoin;
+    resp->capabilities[1] = Capability_Capability_Crypto;
 #else
-  resp->capabilities_count = 8;
-  resp->capabilities[0] = Capability_Capability_Bitcoin;
-  resp->capabilities[1] = Capability_Capability_Bitcoin_like;
-  resp->capabilities[2] = Capability_Capability_Crypto;
-  resp->capabilities[3] = Capability_Capability_Ethereum;
-  resp->capabilities[4] = Capability_Capability_Lisk;
-  resp->capabilities[5] = Capability_Capability_NEM;
-  resp->capabilities[6] = Capability_Capability_Stellar;
-  resp->capabilities[7] = Capability_Capability_U2F;
+    resp->capabilities_count = 8;
+    resp->capabilities[0] = Capability_Capability_Bitcoin;
+    resp->capabilities[1] = Capability_Capability_Bitcoin_like;
+    resp->capabilities[2] = Capability_Capability_Crypto;
+    resp->capabilities[3] = Capability_Capability_Ethereum;
+    resp->capabilities[4] = Capability_Capability_Lisk;
+    resp->capabilities[5] = Capability_Capability_NEM;
+    resp->capabilities[6] = Capability_Capability_Stellar;
+    resp->capabilities[7] = Capability_Capability_U2F;
 #endif
 
 #if !ONEKEY_MINI
-  if (ble_name_state()) {
-    resp->has_ble_name = true;
-    strlcpy(resp->ble_name, ble_get_name(), sizeof(resp->ble_name));
-  }
-  if (ble_ver_state()) {
-    resp->has_ble_ver = true;
-    strlcpy(resp->ble_ver, ble_get_ver(), sizeof(resp->ble_ver));
-  }
-  if (ble_switch_state()) {
-    resp->has_ble_enable = true;
-    resp->ble_enable = ble_get_switch();
-  }
+    if (ble_name_state()) {
+      resp->has_ble_name = true;
+      strlcpy(resp->ble_name, ble_get_name(), sizeof(resp->ble_name));
+    }
+    if (ble_ver_state()) {
+      resp->has_ble_ver = true;
+      strlcpy(resp->ble_ver, ble_get_ver(), sizeof(resp->ble_ver));
+    }
+    if (ble_switch_state()) {
+      resp->has_ble_enable = true;
+      resp->ble_enable = ble_get_switch();
+    }
 #endif
-  resp->has_se_enable = true;
-  resp->se_enable = config_getWhetherUseSE();
-  se_version = se_get_version();
-  if (se_version) {
-    resp->has_se_ver = true;
-    memcpy(resp->se_ver, se_version, strlen(se_version));
-  }
+    resp->has_se_enable = true;
+    resp->se_enable = config_getWhetherUseSE();
+    se_version = se_get_version();
+    if (se_version) {
+      resp->has_se_ver = true;
+      memcpy(resp->se_ver, se_version, strlen(se_version));
+    }
 
-  resp->has_backup_only = true;
-  resp->backup_only = config_getMnemonicsImported();
+    resp->has_backup_only = true;
+    resp->backup_only = config_getMnemonicsImported();
 
-  resp->has_onekey_version = true;
-  strlcpy(resp->onekey_version, ONEKEY_VERSION, sizeof(resp->onekey_version));
+    resp->has_onekey_version = true;
+    strlcpy(resp->onekey_version, ONEKEY_VERSION, sizeof(resp->onekey_version));
 
-  if (se_get_sn(&serial)) {
-    resp->has_onekey_serial = true;
-    strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
-  }
+    if (se_get_sn(&serial)) {
+      resp->has_onekey_serial = true;
+      strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
+    }
 
-  resp->has_bootloader_version = true;
-  strlcpy(resp->bootloader_version, bootloader_version,
-          sizeof(resp->bootloader_version));
+    resp->has_bootloader_version = true;
+    strlcpy(resp->bootloader_version, bootloader_version,
+            sizeof(resp->bootloader_version));
 
 #if ONEKEY_MINI
-  resp->has_factory_info = true;
-  if (device_serial_set()) {
-    DeviceSerialNo *dev_serial;
-    device_get_serial(&dev_serial);
-    strlcpy(resp->factory_info.product, dev_serial->product,
-            sizeof(resp->factory_info.product));
-    strlcpy(resp->factory_info.hardware_id, dev_serial->hardware,
-            sizeof(resp->factory_info.hardware_id));
-    strlcpy(resp->factory_info.shell_color, &dev_serial->color,
-            sizeof(resp->factory_info.shell_color));
-    strlcpy(resp->factory_info.factory_id, dev_serial->factory,
-            sizeof(resp->factory_info.factory_id));
-    strlcpy(resp->factory_info.utc, dev_serial->utc,
-            sizeof(resp->factory_info.utc));
-    strlcpy(resp->factory_info.serial_no, dev_serial->serial,
-            sizeof(resp->factory_info.serial_no));
-  }
-  resp->has_spi_flash = true;
-  strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
+    resp->has_factory_info = true;
+    if (device_serial_set()) {
+      DeviceSerialNo *dev_serial;
+      device_get_serial(&dev_serial);
+      strlcpy(resp->factory_info.product, dev_serial->product,
+              sizeof(resp->factory_info.product));
+      strlcpy(resp->factory_info.hardware_id, dev_serial->hardware,
+              sizeof(resp->factory_info.hardware_id));
+      strlcpy(resp->factory_info.shell_color, &dev_serial->color,
+              sizeof(resp->factory_info.shell_color));
+      strlcpy(resp->factory_info.factory_id, dev_serial->factory,
+              sizeof(resp->factory_info.factory_id));
+      strlcpy(resp->factory_info.utc, dev_serial->utc,
+              sizeof(resp->factory_info.utc));
+      strlcpy(resp->factory_info.serial_no, dev_serial->serial,
+              sizeof(resp->factory_info.serial_no));
+    }
+    resp->has_spi_flash = true;
+    strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
 #endif
+  }
   return resp;
 }
 
@@ -269,7 +286,8 @@ void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
   bool has_wipe_code = config_hasWipeCode();
 
   if (removal) {
-    // Note that if storage is locked, then config_hasWipeCode() returns false.
+    // Note that if storage is locked, then config_hasWipeCode() returns
+    // false.
     if (has_wipe_code || !session_isUnlocked()) {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                         _("Do you really want to"), _("disable wipe code"),
@@ -324,9 +342,9 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
     return;
   }
   config_wipe();
-  // the following does not work on Mac anyway :-/ Linux/Windows are fine, so it
-  // is not needed usbReconnect(); // force re-enumeration because of the serial
-  // number change
+  // the following does not work on Mac anyway :-/ Linux/Windows are fine, so
+  // it is not needed usbReconnect(); // force re-enumeration because of the
+  // serial number change
   i2c_set_wait(false);
   fsm_sendSuccess(_("Device wiped"));
   layoutHome();

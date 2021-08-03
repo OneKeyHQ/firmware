@@ -71,6 +71,7 @@ class Features(p.MessageType):
         bootloader_version: str = None,
         factory_info: FactorySet = None,
         spi_flash: str = None,
+        initstates: int = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -122,6 +123,7 @@ class Features(p.MessageType):
         self.bootloader_version = bootloader_version
         self.factory_info = factory_info
         self.spi_flash = spi_flash
+        self.initstates = initstates
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -176,4 +178,5 @@ class Features(p.MessageType):
             510: ('bootloader_version', p.UnicodeType, None),
             511: ('factory_info', FactorySet, None),
             512: ('spi_flash', p.UnicodeType, None),
+            513: ('initstates', p.UVarintType, None),
         }
