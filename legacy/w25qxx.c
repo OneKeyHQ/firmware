@@ -8,7 +8,7 @@
 w25qxx_t w25qxx = {.desc = "uninitialized"};
 
 void spi_delay(unsigned int delay_ms) {
-  uint32_t timeout = delay_ms * 30000;
+  uint32_t timeout = delay_ms * 5000;
 
   while (timeout--) {
     __asm__("nop");
@@ -1034,18 +1034,21 @@ bool w25qxx_write_buffer(uint8_t *buffer, uint32_t address, uint32_t len) {
 
   while (len) {
     remain = len > remain ? remain : len;
-    w25qxx_read_sector(sector_buffer, address / w25qxx.sector_size, 0,
-                       w25qxx.sector_size);
+    w25qxx_read_bytes(sector_buffer, address, remain);
     for (i = 0; i < remain; i++) {
-      if (sector_buffer[offset + i] != 0xff) {
+      if (sector_buffer[i] != 0xff) {
         break;
       }
     }
     // need erase
     if (i < remain) {
+      w25qxx_read_bytes(sector_buffer,
+                        (address / w25qxx.sector_size) * w25qxx.sector_size,
+                        w25qxx.sector_size);
       w25qxx_erase_sector(address / w25qxx.sector_size);
       memcpy(sector_buffer + offset, buffer, remain);
-      _w25qxx_write_buffer(sector_buffer, address / w25qxx.sector_size,
+      _w25qxx_write_buffer(sector_buffer,
+                           (address / w25qxx.sector_size) * w25qxx.sector_size,
                            w25qxx.sector_size);
     } else {
       _w25qxx_write_buffer(buffer, address, remain);

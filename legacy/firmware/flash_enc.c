@@ -24,7 +24,9 @@ bool flash_write_enc(uint8_t *buffer, uint32_t address, uint32_t len) {
   uint32_t pre_remain = 0, next_remain = 0;
   aes_encrypt_ctx enc_ctx = {0};
 
-  pre_remain = AES_BLOCK_SIZE - address % AES_BLOCK_SIZE;
+  if (address % AES_BLOCK_SIZE) {
+    pre_remain = AES_BLOCK_SIZE - address % AES_BLOCK_SIZE;
+  }
   next_remain = (address + len) % AES_BLOCK_SIZE;
   len -= pre_remain + next_remain;
 
@@ -66,7 +68,10 @@ bool flash_read_enc(uint8_t *buffer, uint32_t address, uint32_t len) {
     if (check_all_ones(buffer, len)) {
       return true;
     } else {
-      pre_remain = AES_BLOCK_SIZE - address % AES_BLOCK_SIZE;
+      if (address % AES_BLOCK_SIZE) {
+        pre_remain = AES_BLOCK_SIZE - address % AES_BLOCK_SIZE;
+      }
+
       next_remain = (address + len) % AES_BLOCK_SIZE;
       len -= pre_remain + next_remain;
 
