@@ -249,4 +249,20 @@ bool se_read_certificate(uint8_t *cert, uint32_t *cert_len) {
   return atca_read_certificate(cert, cert_len);
 }
 
+bool se_sign_message(uint8_t *msg, uint32_t msg_len, uint8_t *signature) {
+  SHA256_CTX ctx = {0};
+  uint8_t result[32] = {0};
+
+  sha256_Init(&ctx);
+  sha256_Update(&ctx, msg, msg_len);
+  sha256_Final(&ctx, result);
+
+  if (ATCA_SUCCESS ==
+      atca_sign_extern(SLOT_PRIMARY_PRIVATE_KEY, result, signature)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void se_init(void) { atca_config_init(); }

@@ -681,3 +681,19 @@ message SpiFlashRead {
 message SpiFlashData {
     required bytes data = 1;
 }
+
+/**
+ * Request:SE sign message
+ * @end
+ */
+message SESignMessage {
+    required bytes message = 1;     // message to be signed
+}
+
+/**
+ * Response: Signed message
+ * @end
+ */
+message SEMessageSignature {
+    required bytes signature = 1;   // signature of the message
+}

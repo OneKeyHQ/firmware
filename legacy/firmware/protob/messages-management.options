@@ -80,3 +80,6 @@ SEPublicCert.public_cert                max_size:416
 
 SpiFlashWrite.data                      max_size:1024
 SpiFlashData.data                       max_size:1024
+
+SESignMessage.message                   max_size:1024
+SEMessageSignature.signature            max_size:64

@@ -310,4 +310,6 @@ enum MessageType {
     MessageType_SpiFlashWrite = 10009 [(wire_in) = true];
     MessageType_SpiFlashRead = 10010 [(wire_in) = true];
     MessageType_SpiFlashData = 10011 [(wire_out) = true];
+    MessageType_SESignMessage = 10012 [(wire_in) = true];
+    MessageType_SEMessageSignature = 10013 [(wire_out) = true];
 }

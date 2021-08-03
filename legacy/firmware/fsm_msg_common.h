@@ -1197,3 +1197,21 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
 #endif
   return;
 }
+
+void fsm_msgSESignMessage(const SESignMessage *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#else
+  RESP_INIT(SEMessageSignature);
+
+  if (se_sign_message(msg->message.bytes, msg->message.size,
+                      resp->signature.bytes)) {
+    resp->signature.size = 64;
+    msg_write(MessageType_MessageType_SEMessageSignature, resp);
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("SE sign failed"));
+  }
+#endif
+  return;
+}

@@ -26,6 +26,7 @@ bool se_get_pubkey(uint8_t pubkey[64]);
 bool se_write_certificate(const uint8_t *cert, uint32_t cert_len);
 bool se_get_certificate_len(uint32_t *cert_len);
 bool se_read_certificate(uint8_t *cert, uint32_t *cert_len);
+bool se_sign_message(uint8_t *msg, uint32_t msg_len, uint8_t *signature);
 void se_init(void);
 
 #endif

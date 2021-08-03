@@ -252,8 +252,10 @@ from .RippleGetAddress import RippleGetAddress
 from .RipplePayment import RipplePayment
 from .RippleSignTx import RippleSignTx
 from .RippleSignedTx import RippleSignedTx
+from .SEMessageSignature import SEMessageSignature
 from .SEPublicCert import SEPublicCert
 from .SEPublicKey import SEPublicKey
+from .SESignMessage import SESignMessage
 from .SdProtect import SdProtect
 from .SelfTest import SelfTest
 from .SetU2FCounter import SetU2FCounter
