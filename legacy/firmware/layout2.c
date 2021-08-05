@@ -667,29 +667,48 @@ void layoutHome(void) {
 #if ONEKEY_MINI
 void layoutHomeFactory(bool serial, bool font, bool cert) {
   int y = 9;
+  static bool serial_bak = false;
+  static bool font_bak = false;
+  static bool cert_bak = false;
 
-  oledClear();
+  if (serial_bak != serial || font_bak != font || cert_bak != cert ||
+      layoutLast != layoutHomeFactory) {
+    serial_bak = serial;
+    font_bak = font;
+    cert_bak = cert;
+    oledClear();
 
-  if (serial) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "序列号已设置",
-                                FONT_STANDARD);
-  } else {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "序列号未设置",
-                                FONT_STANDARD);
+    if (serial) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "序列号已设置",
+                                  FONT_STANDARD);
+    } else {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "序列号未设置",
+                                  FONT_STANDARD);
+    }
+    y += 10;
+    if (font) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "字库已下载",
+                                  FONT_STANDARD);
+    } else {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "字库未下载",
+                                  FONT_STANDARD);
+    }
+    y += 10;
+    if (cert) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "证书已下载",
+                                  FONT_STANDARD);
+    } else {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "证书未下载",
+                                  FONT_STANDARD);
+    }
+    y += 10;
+    if (serial && font & cert) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "下载完成,请拔下设备",
+                                  FONT_STANDARD);
+    }
+    oledRefresh();
+    layoutLast = layoutHomeFactory;
   }
-  y += 10;
-  if (font) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "字库已下载", FONT_STANDARD);
-  } else {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "字库未下载", FONT_STANDARD);
-  }
-  y += 10;
-  if (cert) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "证书已下载", FONT_STANDARD);
-  } else {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, "证书未下载", FONT_STANDARD);
-  }
-  oledRefresh();
 }
 #endif
 

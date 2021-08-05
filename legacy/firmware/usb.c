@@ -495,10 +495,14 @@ void usbPollFactory(void) {
   // poll read buffer
   usbd_poll(usbd_dev);
   // write pending data
-  data = msg_out_data();
-  if (data) {
-    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_MAIN_IN, data, 64) !=
-           64) {
+  while (1) {
+    data = msg_out_data();
+    if (data) {
+      while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_MAIN_IN, data,
+                                  64) != 64) {
+      }
+    } else {
+      break;
     }
   }
 
