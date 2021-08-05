@@ -84,7 +84,7 @@ uint8_t waitKey(uint32_t time_out, uint8_t mode);
 #endif
 
 #ifndef BTN_PIN_FUNC
-#define BTN_PIN_FUNC GPIO7
+#define BTN_PIN_FUNC GPIO6
 #endif
 
 #else
