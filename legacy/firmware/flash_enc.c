@@ -27,14 +27,19 @@ bool flash_write_enc(uint8_t *buffer, uint32_t address, uint32_t len) {
   if (address % AES_BLOCK_SIZE) {
     pre_remain = AES_BLOCK_SIZE - address % AES_BLOCK_SIZE;
   }
-  next_remain = (address + len) % AES_BLOCK_SIZE;
-  len -= pre_remain + next_remain;
+  if (len > pre_remain) {
+    next_remain = (address + len) % AES_BLOCK_SIZE;
+    len -= pre_remain + next_remain;
+  } else {
+    pre_remain = len;
+    len = 0;
+  }
 
   aes_encrypt_key128(aes_key, &enc_ctx);
   if (pre_remain) {
     w25qxx_read_bytes(enc_buffer, address - address % AES_BLOCK_SIZE,
                       AES_BLOCK_SIZE);
-    memcpy(enc_buffer + AES_BLOCK_SIZE - pre_remain, buffer, pre_remain);
+    memcpy(enc_buffer + address % AES_BLOCK_SIZE, buffer, pre_remain);
     aes_ecb_encrypt(enc_buffer, enc_buffer, AES_BLOCK_SIZE, &enc_ctx);
     if (!w25qxx_write_buffer(enc_buffer, address - address % AES_BLOCK_SIZE,
                              AES_BLOCK_SIZE)) {
@@ -72,8 +77,13 @@ bool flash_read_enc(uint8_t *buffer, uint32_t address, uint32_t len) {
         pre_remain = AES_BLOCK_SIZE - address % AES_BLOCK_SIZE;
       }
 
-      next_remain = (address + len) % AES_BLOCK_SIZE;
-      len -= pre_remain + next_remain;
+      if (len > pre_remain) {
+        next_remain = (address + len) % AES_BLOCK_SIZE;
+        len -= pre_remain + next_remain;
+      } else {
+        pre_remain = len;
+        len = 0;
+      }
 
       aes_decrypt_key128(aes_key, &dec_ctx);
 
@@ -81,7 +91,7 @@ bool flash_read_enc(uint8_t *buffer, uint32_t address, uint32_t len) {
         w25qxx_read_bytes(dec_buffer, address - address % AES_BLOCK_SIZE,
                           AES_BLOCK_SIZE);
         aes_ecb_decrypt(dec_buffer, dec_buffer, AES_BLOCK_SIZE, &dec_ctx);
-        memcpy(buffer, dec_buffer + AES_BLOCK_SIZE - pre_remain, pre_remain);
+        memcpy(buffer, dec_buffer + address % AES_BLOCK_SIZE, pre_remain);
       }
       if (len) {
         w25qxx_read_bytes(buffer + pre_remain, address + pre_remain, len);
@@ -95,6 +105,7 @@ bool flash_read_enc(uint8_t *buffer, uint32_t address, uint32_t len) {
         memcpy(buffer + pre_remain + len, dec_buffer, next_remain);
       }
     }
+    return true;
   }
   return false;
 }
