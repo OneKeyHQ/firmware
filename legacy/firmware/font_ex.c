@@ -84,9 +84,14 @@ static void font_data_read(void *buf, uint32_t offset, uint32_t len) {
 }
 
 void font_init(void) {
+  uint8_t end_flag[4] = {0};
   font_data_read(&font_header, 0, FONT_HEADER_LEN);
-  if (memcmp(font_header.magic, "UFL.", 4) == 0) {
-    has_font = true;
+
+  if (memcmp(font_header.magic, "U3TP", 4) == 0) {
+    font_data_read(&end_flag, font_header.total_len - 4, 4);
+    if (memcmp(end_flag, "ENDU", 4) == 0) {
+      has_font = true;
+    }
   }
 }
 
