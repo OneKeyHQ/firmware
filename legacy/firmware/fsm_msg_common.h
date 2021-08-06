@@ -1218,12 +1218,12 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
 
 void fsm_msgSESignMessage(const SESignMessage *msg) {
   (void)msg;
-#if ONEKEY_MINI
+#if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
   RESP_INIT(SEMessageSignature);
 
-  if (se_sign_message(msg->message.bytes, msg->message.size,
+  if (se_sign_message((uint8_t *)msg->message.bytes, msg->message.size,
                       resp->signature.bytes)) {
     resp->signature.size = 64;
     msg_write(MessageType_MessageType_SEMessageSignature, resp);

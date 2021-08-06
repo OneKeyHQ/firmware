@@ -253,6 +253,8 @@ bool se_sign_message(uint8_t *msg, uint32_t msg_len, uint8_t *signature) {
   SHA256_CTX ctx = {0};
   uint8_t result[32] = {0};
 
+  atca_pair_unlock();
+
   sha256_Init(&ctx);
   sha256_Update(&ctx, msg, msg_len);
   sha256_Final(&ctx, result);
