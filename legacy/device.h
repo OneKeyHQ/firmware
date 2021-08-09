@@ -22,8 +22,8 @@ void device_init(void);
 bool device_serial_set(void);
 void device_set_factory_mode(bool mode);
 bool device_is_factory_mode(void);
-bool device_set_info(DeviceSerialNo *dev_serial);
-bool device_get_serial(DeviceSerialNo **serial);
+bool device_set_info(char *dev_serial);
+bool device_get_serial(char **serial);
 char *device_get_se_config_version(void);
 
 #endif

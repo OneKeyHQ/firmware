@@ -115,9 +115,10 @@ message Features {
     optional string onekey_version = 508;
     optional string onekey_serial = 509;
     optional string bootloader_version = 510;
-    optional FactorySet factory_info = 511;
+    optional string serial_no= 511;
     optional string spi_flash = 512;
     optional uint32 initstates = 513;      // list of facotry state
+    optional bytes NFT_voucher = 514;
 }
 
 /**
@@ -581,15 +582,6 @@ message BixinBackupDeviceAck {
     required string mnemonics = 1;                          // seed encoded as mnemonic (12, 18 or 24 words for BIP39, 20 or 33 for SLIP39)
 }
 
-message FactorySet {
-    required string product = 1;
-    required string hardware_id = 2;
-    required string shell_color = 3;
-    required string factory_id = 4;
-    required string utc = 5;
-    required string serial_no =6;    
-}
-
 /**
  * Request: device information settings
  * @start
@@ -597,7 +589,7 @@ message FactorySet {
  * @next Failure
  */
 message DeviceInfoSettings {
-    required FactorySet serial = 1;                 
+    required string serial_no = 1;                 
 }
 
 /**
@@ -613,7 +605,7 @@ message GetDeviceInfo {
  * @end
  */
 message DeviceInfo {
-    required FactorySet factory_info = 1;
+    required string serial_no = 1;
     optional string spiFlash_info = 2;
     optional string SE_info = 3;
 }

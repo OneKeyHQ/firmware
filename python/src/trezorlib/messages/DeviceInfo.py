@@ -2,8 +2,6 @@
 # fmt: off
 from .. import protobuf as p
 
-from .FactorySet import FactorySet
-
 if __debug__:
     try:
         from typing import Dict, List  # noqa: F401
@@ -18,18 +16,18 @@ class DeviceInfo(p.MessageType):
     def __init__(
         self,
         *,
-        factory_info: FactorySet,
+        serial_no: str,
         spiFlash_info: str = None,
         SE_info: str = None,
     ) -> None:
-        self.factory_info = factory_info
+        self.serial_no = serial_no
         self.spiFlash_info = spiFlash_info
         self.SE_info = SE_info
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('factory_info', FactorySet, p.FLAG_REQUIRED),
+            1: ('serial_no', p.UnicodeType, p.FLAG_REQUIRED),
             2: ('spiFlash_info', p.UnicodeType, None),
             3: ('SE_info', p.UnicodeType, None),
         }

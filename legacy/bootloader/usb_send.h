@@ -90,22 +90,10 @@ void send_msg_features(usbd_device *dev) {
   resp->has_firmware_present = true;
   resp->firmware_present = firmware_present_new() ? true : false;
 
-  resp->has_factory_info = true;
-  if (device_serial_set()) {
-    DeviceSerialNo *serial;
-    device_get_serial(&serial);
-    strlcpy(resp->factory_info.product, serial->product,
-            sizeof(resp->factory_info.product));
-    strlcpy(resp->factory_info.hardware_id, serial->hardware,
-            sizeof(resp->factory_info.hardware_id));
-    strlcpy(resp->factory_info.shell_color, &serial->color,
-            sizeof(resp->factory_info.shell_color));
-    strlcpy(resp->factory_info.factory_id, serial->factory,
-            sizeof(resp->factory_info.factory_id));
-    strlcpy(resp->factory_info.utc, serial->utc,
-            sizeof(resp->factory_info.utc));
-    strlcpy(resp->factory_info.serial_no, serial->serial,
-            sizeof(resp->factory_info.serial_no));
+  char *serial;
+  if (device_get_serial(&serial)) {
+    resp->has_serial_no = true;
+    strlcpy(resp->serial_no, serial, sizeof(resp->serial_no));
   }
   resp->has_spi_flash = true;
   strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));

@@ -128,7 +128,6 @@ from .EthereumSignTx import EthereumSignTx
 from .EthereumTxAck import EthereumTxAck
 from .EthereumTxRequest import EthereumTxRequest
 from .EthereumVerifyMessage import EthereumVerifyMessage
-from .FactorySet import FactorySet
 from .Failure import Failure
 from .Features import Features
 from .FirmwareErase import FirmwareErase
