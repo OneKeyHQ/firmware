@@ -27,7 +27,7 @@ from .messages import Capability
 
 LOG = logging.getLogger(__name__)
 
-VENDORS = ("bitcointrezor.com", "trezor.io")
+VENDORS = ("bitcointrezor.com", "trezor.io", "onekey.so")
 MAX_PASSPHRASE_LENGTH = 50
 
 PASSPHRASE_ON_DEVICE = object()

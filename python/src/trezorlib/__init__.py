@@ -4,5 +4,6 @@ __version__ = "0.13.0"
 MINIMUM_FIRMWARE_VERSION = {
     "1": (1, 8, 0),
     "T": (2, 1, 0),
+    "factory": (0, 0, 0),
 }
 # fmt: on

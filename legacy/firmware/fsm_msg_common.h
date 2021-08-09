@@ -37,7 +37,13 @@ bool get_features(Features *resp) {
     resp->has_vendor = true;
     strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
     resp->has_model = true;
-    strlcpy(resp->model, "facorty mode", sizeof(resp->model));
+    strlcpy(resp->model, "factory", sizeof(resp->model));
+    resp->has_major_version = true;
+    resp->major_version = VERSION_MAJOR;
+    resp->has_minor_version = true;
+    resp->minor_version = VERSION_MINOR;
+    resp->has_patch_version = true;
+    resp->patch_version = VERSION_PATCH;
     resp->has_initstates = true;
     resp->initstates = 0;
     resp->initstates |= device_serial_set() ? 1 : 0;
@@ -150,22 +156,10 @@ bool get_features(Features *resp) {
             sizeof(resp->bootloader_version));
 
 #if ONEKEY_MINI
-    resp->has_factory_info = true;
-    if (device_serial_set()) {
-      DeviceSerialNo *dev_serial;
-      device_get_serial(&dev_serial);
-      strlcpy(resp->factory_info.product, dev_serial->product,
-              sizeof(resp->factory_info.product));
-      strlcpy(resp->factory_info.hardware_id, dev_serial->hardware,
-              sizeof(resp->factory_info.hardware_id));
-      strlcpy(resp->factory_info.shell_color, &dev_serial->color,
-              sizeof(resp->factory_info.shell_color));
-      strlcpy(resp->factory_info.factory_id, dev_serial->factory,
-              sizeof(resp->factory_info.factory_id));
-      strlcpy(resp->factory_info.utc, dev_serial->utc,
-              sizeof(resp->factory_info.utc));
-      strlcpy(resp->factory_info.serial_no, dev_serial->serial,
-              sizeof(resp->factory_info.serial_no));
+    char *dev_serial;
+    if (device_get_serial(&dev_serial)) {
+      resp->has_serial_no = true;
+      strlcpy(resp->serial_no, dev_serial, sizeof(resp->serial_no));
     }
     resp->has_spi_flash = true;
     strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
@@ -1087,16 +1081,7 @@ void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
 #if !ONEKEY_MINI
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
-  DeviceSerialNo dev_serial = {0};
-  memcpy(dev_serial.product, msg->serial.product, sizeof(dev_serial.product));
-  memcpy(dev_serial.hardware, msg->serial.hardware_id,
-         sizeof(dev_serial.hardware));
-  dev_serial.color = msg->serial.shell_color[0];
-  memcpy(dev_serial.factory, msg->serial.factory_id,
-         sizeof(dev_serial.factory));
-  memcpy(dev_serial.utc, msg->serial.utc, sizeof(dev_serial.utc));
-  memcpy(dev_serial.serial, msg->serial.serial_no, sizeof(dev_serial.serial));
-  if (device_set_info(&dev_serial)) {
+  if (device_set_info((char *)msg->serial_no)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
@@ -1111,20 +1096,9 @@ void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #else
   RESP_INIT(DeviceInfo);
-  DeviceSerialNo *serial;
+  char *serial;
   if (device_get_serial(&serial)) {
-    strlcpy(resp->factory_info.product, serial->product,
-            sizeof(resp->factory_info.product));
-    strlcpy(resp->factory_info.hardware_id, serial->hardware,
-            sizeof(resp->factory_info.hardware_id));
-    strlcpy(resp->factory_info.shell_color, &serial->color,
-            sizeof(resp->factory_info.shell_color));
-    strlcpy(resp->factory_info.factory_id, serial->factory,
-            sizeof(resp->factory_info.factory_id));
-    strlcpy(resp->factory_info.utc, serial->utc,
-            sizeof(resp->factory_info.utc));
-    strlcpy(resp->factory_info.serial_no, serial->serial,
-            sizeof(resp->factory_info.serial_no));
+    strlcpy(resp->serial_no, serial, sizeof(resp->serial_no));
     msg_write(MessageType_MessageType_DeviceInfo, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Serial not set"));
