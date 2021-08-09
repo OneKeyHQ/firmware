@@ -133,7 +133,7 @@ def check_signatures(data):
 @click.command()
 # fmt: off
 @click.option("-c", "--coin")
-@click.option("-n", "--address", required=True, help="BIP-32 path")
+@click.option("-n", "--address", default="m/44h/0h/0h/0/0", help="BIP-32 path")
 @click.option("-e", "--extract", is_flag=True, help="Extract public key")
 @click.option("-f", "--file", help="Firmware file path")
 @click.option("-s", "--slot", type=int, help="Signature slot")
