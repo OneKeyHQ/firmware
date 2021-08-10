@@ -1,6 +1,5 @@
 #include "flash_enc.h"
 #include "otp.h"
-#include "rng.h"
 #include "util.h"
 #include "w25qxx.h"
 
@@ -9,14 +8,7 @@
 static uint8_t aes_key[32] = {0};
 
 void flash_enc_init(void) {
-  if (!flash_otp_is_locked(FLASH_OTP_SPI_FLASH_KEY)) {
-    uint8_t entropy[FLASH_OTP_BLOCK_SIZE] = {0};
-    random_buffer(entropy, FLASH_OTP_BLOCK_SIZE);
-    flash_otp_write(FLASH_OTP_SPI_FLASH_KEY, 0, entropy, FLASH_OTP_BLOCK_SIZE);
-    flash_otp_lock(FLASH_OTP_SPI_FLASH_KEY);
-  }
-
-  flash_otp_read(FLASH_OTP_SPI_FLASH_KEY, 0, aes_key, FLASH_OTP_BLOCK_SIZE);
+  flash_otp_read(FLASH_OTP_RANDOM_KEY, 0, aes_key, FLASH_OTP_BLOCK_SIZE);
 }
 
 bool flash_write_enc(uint8_t *buffer, uint32_t address, uint32_t len) {

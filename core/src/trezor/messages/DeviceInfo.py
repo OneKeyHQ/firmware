@@ -19,10 +19,12 @@ class DeviceInfo(p.MessageType):
         serial_no: str,
         spiFlash_info: str = None,
         SE_info: str = None,
+        NFT_voucher: bytes = None,
     ) -> None:
         self.serial_no = serial_no
         self.spiFlash_info = spiFlash_info
         self.SE_info = SE_info
+        self.NFT_voucher = NFT_voucher
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -30,4 +32,5 @@ class DeviceInfo(p.MessageType):
             1: ('serial_no', p.UnicodeType, p.FLAG_REQUIRED),
             2: ('spiFlash_info', p.UnicodeType, None),
             3: ('SE_info', p.UnicodeType, None),
+            4: ('NFT_voucher', p.BytesType, None),
         }

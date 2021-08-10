@@ -71,6 +71,7 @@ DeviceInfoSettings.serial_no            max_size:32
 DeviceInfo.serial_no                    max_size:32
 DeviceInfo.spiFlash_info                max_size:16
 DeviceInfo.SE_info                      max_size:16
+DeviceInfo.NFT_voucher                  max_size:32
 
 SEPublicKey.public_key                  max_size:64
 WriteSEPublicCert.public_cert           max_size:416

@@ -608,6 +608,7 @@ message DeviceInfo {
     required string serial_no = 1;
     optional string spiFlash_info = 2;
     optional string SE_info = 3;
+    optional bytes NFT_voucher = 4;
 }
 
 /**

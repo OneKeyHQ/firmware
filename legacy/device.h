@@ -25,5 +25,6 @@ bool device_is_factory_mode(void);
 bool device_set_info(char *dev_serial);
 bool device_get_serial(char **serial);
 char *device_get_se_config_version(void);
+bool device_get_NFT_voucher(uint8_t voucher[32]);
 
 #endif

@@ -1102,6 +1102,10 @@ void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   char *serial;
   if (device_get_serial(&serial)) {
     strlcpy(resp->serial_no, serial, sizeof(resp->serial_no));
+    if (device_get_NFT_voucher(resp->NFT_voucher.bytes)) {
+      resp->has_NFT_voucher = true;
+      resp->NFT_voucher.size = 32;
+    }
     msg_write(MessageType_MessageType_DeviceInfo, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Serial not set"));
