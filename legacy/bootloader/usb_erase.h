@@ -29,6 +29,19 @@ static void erase_code_progress(void) {
   layoutProgress("INSTALLING ... Please wait", 0);
   flash_exit();
 }
+
+#if ONEKEY_MINI
+static void erase_code_progress_ex(void) {
+  for (int i = 0; i < SPI_FLASH_FIRMWARE_BLOCKS; i++) {
+    layoutProgress("PREPARING ... Please wait",
+                   1000 * i / SPI_FLASH_FIRMWARE_BLOCKS);
+    w25qxx_erase_block((SPI_FLASH_FIRMWARE_ADDR_START / SPI_FLASH_BLOCK_SIZE) +
+                       i);
+  }
+  layoutProgress("DOWNLOADING ... Please wait", 0);
+}
+#endif
+
 #if !ONEKEY_MINI
 static void erase_ble_code_progress(void) {
   flash_enter();

@@ -53,6 +53,10 @@
 
 #include "usb_desc.h"
 
+#if ONEKEY_MINI
+#include "w25qxx.h"
+#endif
+
 enum {
   STATE_READY,
   STATE_OPEN,
@@ -74,7 +78,7 @@ static uint8_t packet_buf[64] __attribute__((aligned(4)));
 #include "usb_send.h"
 
 static uint32_t FW_HEADER[FLASH_FWHEADER_LEN / sizeof(uint32_t)];
-static uint32_t FW_CHUNK[FW_CHUNK_SIZE / sizeof(uint32_t)];
+uint32_t FW_CHUNK[FW_CHUNK_SIZE / sizeof(uint32_t)];
 static uint8_t update_mode = 0;
 static void flash_enter(void) {
   flash_wait_for_last_operation();
@@ -118,6 +122,23 @@ static void check_and_write_chunk(void) {
     show_halt("Error installing", "firmware.");
     return;
   }
+
+#if ONEKEY_MINI
+  if (chunk_idx == 0) {
+    w25qxx_write_buffer_unsafe((uint8_t *)FW_CHUNK + offset,
+                               SPI_FLASH_FIRMWARE_ADDR_START + offset,
+                               chunk_pos - offset);
+  } else {
+    w25qxx_write_buffer_unsafe(
+        (uint8_t *)FW_CHUNK,
+        SPI_FLASH_FIRMWARE_ADDR_START + chunk_idx * FW_CHUNK_SIZE, chunk_pos);
+    memzero(FW_CHUNK, sizeof(FW_CHUNK));
+    w25qxx_read_bytes((uint8_t *)FW_CHUNK,
+                      SPI_FLASH_FIRMWARE_ADDR_START + chunk_idx * FW_CHUNK_SIZE,
+                      chunk_pos);
+    memzero(FW_CHUNK, sizeof(FW_CHUNK));
+  }
+#endif
 
   // all done
   if (flash_len == flash_pos) {
@@ -266,7 +287,11 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         } else {
           old_was_signed = SIG_FAIL;
         }
+#if ONEKEY_MINI
+        erase_code_progress_ex();
+#else
         erase_code_progress();
+#endif
         send_msg_success(dev);
         flash_state = STATE_FLASHSTART;
         timer_out_set(timer_out_oper, timer1s * 5);
@@ -325,16 +350,18 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
               FW_HEADER[flash_pos / 4] = w;
             } else {
               FW_CHUNK[(flash_pos % FW_CHUNK_SIZE) / 4] = w;
+#if ONEKEY_MINI
+              w25qxx_write_buffer_unsafe(
+                  (uint8_t *)&w, SPI_FLASH_FIRMWARE_ADDR_START + flash_pos, 4);
+#else
               flash_enter();
               if (UPDATE_ST == update_mode) {
                 flash_program_word(FLASH_FWHEADER_START + flash_pos, w);
-              }
-#if !ONEKEY_MINI
-              else {
+              } else {
                 flash_program_word(FLASH_BLE_ADDR_START + flash_pos, w);
               }
-#endif
               flash_exit();
+#endif
             }
             flash_pos += 4;
             wi = 0;
@@ -464,16 +491,15 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           FW_HEADER[flash_pos / 4] = w;
         } else {
           FW_CHUNK[(flash_pos % FW_CHUNK_SIZE) / 4] = w;
+#if !ONEKEY_MINI
           flash_enter();
           if (UPDATE_ST == update_mode) {
             flash_program_word(FLASH_FWHEADER_START + flash_pos, w);
-          }
-#if !ONEKEY_MINI
-          else {
+          } else {
             flash_program_word(FLASH_BLE_ADDR_START + flash_pos, w);
           }
-#endif
           flash_exit();
+#endif
         }
         flash_pos += 4;
         wi = 0;
@@ -515,10 +541,15 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         if (msg_id != 0x001B) {  // ButtonAck message (id 27)
           return;
         }
+#if ONEKEY_MINI
+        hash_check_ok = false;
+#else
         uint8_t hash[32] = {0};
         compute_firmware_fingerprint(hdr, hash);
         layoutFirmwareFingerprint(hash);
         hash_check_ok = waitButtonResponse(BTN_PIN_YES, default_oper_time);
+#endif
+
       } else {
         hash_check_ok = true;
       }
@@ -548,7 +579,15 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         }
 #endif
       }
-
+#if ONEKEY_MINI
+      if (hash_check_ok) {
+        w25qxx_write_buffer_unsafe((uint8_t *)FW_HEADER,
+                                   SPI_FLASH_FIRMWARE_ADDR_START,
+                                   FLASH_FWHEADER_LEN);
+        layoutProgress("Verifing ... Please wait", 500);
+        update_from_spi_flash(true);
+      }
+#else
       flash_enter();
       // write firmware header only when hash was confirmed
       if (hash_check_ok) {
@@ -562,6 +601,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         }
       }
       flash_exit();
+#endif
 
       flash_state = STATE_END;
       if (hash_check_ok) {
@@ -726,3 +766,49 @@ void usbLoop(void) {
       layoutBootHome();
   }
 }
+
+#if ONEKEY_MINI
+void update_from_spi_flash(bool force) {
+  image_header *p_hdr, hdr = {0};
+  w25qxx_read_bytes((uint8_t *)&hdr, SPI_FLASH_FIRMWARE_ADDR_START,
+                    sizeof(image_header));
+  if (hdr.magic != FIRMWARE_MAGIC_NEW) return;
+  if (hdr.codelen > FLASH_APP_LEN) return;
+  if (hdr.codelen < 4096) return;
+
+  if (firmware_present_new() && !force) {
+    p_hdr = (image_header *)FLASH_PTR(FLASH_FWHEADER_START);
+    if (p_hdr->onekey_version >= hdr.onekey_version) {
+      return;
+    }
+  }
+  int signed_firmware = signatures_new_ok(&hdr, NULL);
+  if (SIG_OK != signed_firmware) {
+    return;
+  }
+
+  if (SIG_OK != check_firmware_hashes_ex(&hdr)) {
+    return;
+  }
+  erase_code_progress();
+
+  uint32_t total_len = FLASH_FWHEADER_LEN + hdr.codelen;
+  uint32_t offset = 0, packet_len = 0;
+
+  flash_enter();
+
+  while (total_len) {
+    layoutProgress("Programing ... Please wait",
+                   1000 * offset / (FLASH_FWHEADER_LEN + hdr.codelen));
+    packet_len = total_len > FW_CHUNK_SIZE ? FW_CHUNK_SIZE : total_len;
+    w25qxx_read_bytes((uint8_t *)FW_CHUNK,
+                      SPI_FLASH_FIRMWARE_ADDR_START + offset, FW_CHUNK_SIZE);
+    flash_program(FLASH_FWHEADER_START + offset, (uint8_t *)FW_CHUNK,
+                  packet_len);
+    total_len -= packet_len;
+    offset += packet_len;
+  }
+
+  flash_exit();
+}
+#endif

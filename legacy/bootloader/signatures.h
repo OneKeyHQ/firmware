@@ -47,7 +47,8 @@ typedef struct {
   uint32_t codelen;
   uint32_t version;
   uint32_t fix_version;
-  uint8_t __reserved1[8];
+  uint32_t onekey_version;
+  uint8_t __reserved1[4];
   uint8_t hashes[512];
   uint8_t sig1[64];
   uint8_t sig2[64];
@@ -91,5 +92,8 @@ int signatures_new_ok(const image_header *hdr, uint8_t store_fingerprint[32]);
 int check_firmware_hashes(const image_header *hdr);
 
 int mem_is_empty(const uint8_t *src, uint32_t len);
+#if ONEKEY_MINI
+int check_firmware_hashes_ex(const image_header *hdr);
+#endif
 
 #endif

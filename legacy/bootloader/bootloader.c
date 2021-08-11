@@ -148,6 +148,10 @@ int main(void) {
 
 #if ONEKEY_MINI
     bool left_pressed = (buttonRead() & BTN_PIN_FUNC) == 0;
+
+    if (!left_pressed && !force_boot) {
+      update_from_spi_flash(false);
+    }
 #else
     bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
 #endif

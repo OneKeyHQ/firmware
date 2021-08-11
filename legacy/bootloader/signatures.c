@@ -27,6 +27,10 @@
 #include "sha2.h"
 #include "signatures.h"
 
+#if ONEKEY_MINI
+#include "w25qxx.h"
+#endif
+
 const uint32_t FIRMWARE_MAGIC_OLD = 0x525a5254;  // TRZR
 #if ONEKEY_MINI
 const uint32_t FIRMWARE_MAGIC_NEW = 0x494e494d;  // MINI
@@ -240,3 +244,35 @@ int check_firmware_hashes(const image_header *hdr) {
   // all OK
   return SIG_OK;
 }
+
+#if ONEKEY_MINI
+extern uint32_t FW_CHUNK[];
+int check_firmware_hashes_ex(const image_header *hdr) {
+  uint8_t hash[32] = {0};
+  // check hash of the first code chunk
+  w25qxx_read_bytes((uint8_t *)FW_CHUNK,
+                    SPI_FLASH_FIRMWARE_ADDR_START + FLASH_FWHEADER_LEN,
+                    (64 - 1) * 1024);
+  sha256_Raw((uint8_t *)FW_CHUNK, (64 - 1) * 1024, hash);
+  if (0 != memcmp(hash, hdr->hashes, 32)) return SIG_FAIL;
+  // check remaining used chunks
+  uint32_t total_len = FLASH_FWHEADER_LEN + hdr->codelen;
+  int used_chunks = total_len / FW_CHUNK_SIZE;
+  if (total_len % FW_CHUNK_SIZE > 0) {
+    used_chunks++;
+  }
+  for (int i = 1; i < used_chunks; i++) {
+    w25qxx_read_bytes((uint8_t *)FW_CHUNK,
+                      SPI_FLASH_FIRMWARE_ADDR_START + (64 * i) * 1024,
+                      64 * 1024);
+    sha256_Raw((uint8_t *)FW_CHUNK, 64 * 1024, hash);
+    if (0 != memcmp(hdr->hashes + 32 * i, hash, 32)) return SIG_FAIL;
+  }
+  // check unused chunks
+  for (int i = used_chunks; i < 16; i++) {
+    if (!mem_is_empty(hdr->hashes + 32 * i, 32)) return SIG_FAIL;
+  }
+  // all OK
+  return SIG_OK;
+}
+#endif

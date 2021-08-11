@@ -48,14 +48,14 @@ void hal_spi_transmit(uint8_t *data, uint16_t size, uint32_t timeout) {
     ;
 }
 
-void hal_spi_receive(uint8_t *data, uint16_t size, uint32_t timeout) {
+void hal_spi_receive(uint8_t *data, uint32_t size, uint32_t timeout) {
   if (data == NULL) {
     return;
   }
 
   timeout = timeout;
 
-  for (int i = 0; i < size; i++) {
+  for (uint32_t i = 0; i < size; i++) {
     data[i] = (uint8_t)spi_xfer(_W25QXX_SPI, W25QXX_DUMMY_BYTE);
   }
 }
@@ -999,7 +999,8 @@ bool w25qxx_read_block(uint8_t *buffer, uint32_t block_addr, uint32_t offset,
   return true;
 }
 
-bool _w25qxx_write_buffer(uint8_t *buffer, uint32_t address, uint32_t len) {
+bool w25qxx_write_buffer_unsafe(uint8_t *buffer, uint32_t address,
+                                uint32_t len) {
   uint32_t page_remain = 0;
 
   if (address + len > (w25qxx.capacity_in_kilobyte * 1024)) {
@@ -1047,11 +1048,11 @@ bool w25qxx_write_buffer(uint8_t *buffer, uint32_t address, uint32_t len) {
                         w25qxx.sector_size);
       w25qxx_erase_sector(address / w25qxx.sector_size);
       memcpy(sector_buffer + offset, buffer, remain);
-      _w25qxx_write_buffer(sector_buffer,
-                           (address / w25qxx.sector_size) * w25qxx.sector_size,
-                           w25qxx.sector_size);
+      w25qxx_write_buffer_unsafe(
+          sector_buffer, (address / w25qxx.sector_size) * w25qxx.sector_size,
+          w25qxx.sector_size);
     } else {
-      _w25qxx_write_buffer(buffer, address, remain);
+      w25qxx_write_buffer_unsafe(buffer, address, remain);
     }
     address += remain;
     buffer += remain;

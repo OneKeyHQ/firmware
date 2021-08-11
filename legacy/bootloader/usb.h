@@ -20,6 +20,11 @@
 #ifndef __USB_H__
 #define __USB_H__
 
+#include <stdbool.h>
+
 void usbLoop(void);
+#if ONEKEY_MINI
+void update_from_spi_flash(bool force);
+#endif
 
 #endif
