@@ -26,6 +26,7 @@
 #include "oled.h"
 #include "rng.h"
 #include "util.h"
+#include "timer.h"
 
 uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 

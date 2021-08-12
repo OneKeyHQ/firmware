@@ -1380,7 +1380,6 @@ bool config_getMessageSE(BixinMessageSE_inputmessage_t *input_msg,
   if (false == bMI2CDRV_SendData(input_msg->bytes, input_msg->size)) {
     return false;
   }
-  get_msg->size = 1024;
   if (false == bMI2CDRV_ReceiveData(get_msg->bytes, &get_msg->size)) {
     return false;
   }
