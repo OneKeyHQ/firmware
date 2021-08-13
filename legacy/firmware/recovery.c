@@ -962,7 +962,7 @@ input_word:
 
 check_word:
   if (!recovery_check_words()) {
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -974,13 +974,13 @@ check_word:
 #endif
 
     protectWaitKey(0, 1);
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
     setRgbBitmap(false);
 #endif
     goto_check(prompt_recovery);
   }
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapter(
       &bmp_icon_success, NULL, NULL, &bmp_btn_forward, _("Next"), NULL, NULL,

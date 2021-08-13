@@ -361,7 +361,7 @@ select_word:
       goto select_word;
     case KEY_CONFIRM:
       if (words_order[i] != selected) {
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
         setRgbBitmap(true);
         layoutDialogSwipeCenterAdapter(
             &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
@@ -373,7 +373,7 @@ select_word:
 #endif
 
         key = protectWaitKey(0, 1);
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
         setRgbBitmap(false);
 #endif
         if (key != KEY_CONFIRM) {
@@ -391,7 +391,7 @@ select_word:
       return false;
   }
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapter(
       &bmp_icon_success, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"),
@@ -403,7 +403,7 @@ select_word:
 #endif
 
   key = protectWaitKey(0, 1);
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   setRgbBitmap(false);
 #endif
   if (key != KEY_CONFIRM) {

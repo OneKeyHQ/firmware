@@ -1924,8 +1924,8 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
 
   oledClear_ex();
   if (icon) {
-#if ONEKEY_MINI
-    if (isRgbBitmap()) {
+#if ONEKEY_MINI && !EMULATOR
+    if(isRgbBitmap()){
       oledDrawRgbBitmap(56, 9 + 12, icon);
     }
 #else
@@ -1976,7 +1976,7 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
   oledRefresh();
 }
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
 void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
                                  const char *btnNo, const BITMAP *bmp_yes,
                                  const char *btnYes, const char *desc,
