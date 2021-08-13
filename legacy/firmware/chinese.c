@@ -4,7 +4,7 @@
 #include "font_ex.h"
 #include "oled.h"
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
 
 static int oledDrawCharEx(int x, int y, const char *c, uint8_t font) {
   if (x >= OLED_WIDTH || y >= OLED_HEIGHT || y <= -FONT_HEIGHT) {
@@ -116,7 +116,7 @@ static void oledDrawChar_zh(int x, int y, const char *zh, uint8_t font,
 
 int oledStringWidthAdapter(const char *text, uint8_t font) {
   if (!text) return 0;
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   if (font_imported() && !device_is_factory_mode()) {
     return oledStringWidthEx(text, font);
   } else
@@ -143,7 +143,7 @@ int oledStringWidthAdapter(const char *text, uint8_t font) {
 
 void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
   if (!text) return;
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   if (font_imported() && !device_is_factory_mode()) {
     oledDrawStringEx(x, y, text, font);
   } else

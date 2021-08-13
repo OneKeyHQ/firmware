@@ -31,7 +31,7 @@
 extern char bootloader_version[8];
 
 bool get_features(Features *resp) {
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   if (device_is_factory_mode()) {
     uint32_t cert_len = 0;
     resp->has_vendor = true;
