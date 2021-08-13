@@ -843,6 +843,7 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
     return false;
   }
 
+#if !EMULATOR
   if (g_bSelectSEFlag) {
 #if ONEKEY_MINI
     (void)import;
@@ -865,7 +866,9 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
       }
     }
 #endif
-  } else {
+  } else 
+#endif
+  {
     if (sectrue != storage_set(KEY_MNEMONIC, mnemonic,
                                strnlen(mnemonic, MAX_MNEMONIC_LEN))) {
       return false;
@@ -934,6 +937,7 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
 }
 
 bool config_getMnemonic(char *dest, uint16_t dest_size) {
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     uint8_t seed[64];
     uint32_t strength = 0;
@@ -942,7 +946,9 @@ bool config_getMnemonic(char *dest, uint16_t dest_size) {
     const char *mnemonic = mnemonic_from_data(seed, strength / 8);
     strlcpy(dest, mnemonic, dest_size);
     return true;
-  } else {
+  } else 
+  #endif
+  {
     return sectrue == config_get_string(KEY_MNEMONIC, dest, dest_size);
   }
 }
@@ -961,6 +967,7 @@ bool config_containsMnemonic(const char *mnemonic) {
   uint16_t len = 0;
   uint8_t stored_mnemonic[MAX_MNEMONIC_LEN] = {0};
 
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     uint8_t seed[64];
     uint32_t strength = 0;
@@ -982,6 +989,7 @@ bool config_containsMnemonic(const char *mnemonic) {
       return false;
     }
   }
+  #endif
 
   // Compare the digests to mitigate side-channel attacks.
   uint8_t digest_stored[SHA256_DIGEST_LENGTH] = {0};
@@ -1005,6 +1013,7 @@ bool config_containsMnemonic(const char *mnemonic) {
  * a null-terminated string with at most 9 characters.
  */
 bool config_unlock(const char *pin) {
+#if !EMULATOR
   if (g_bSelectSEFlag) {
 #if ONEKEY_MINI
     if (se_verifyPin(pin))
@@ -1019,7 +1028,9 @@ bool config_unlock(const char *pin) {
       return false;
     }
 
-  } else {
+  } else 
+#endif
+  {
     char oldTiny = usbTiny(1);
     secbool ret = storage_unlock(pin_to_int(pin), NULL);
     usbTiny(oldTiny);
@@ -1028,9 +1039,12 @@ bool config_unlock(const char *pin) {
 }
 
 bool config_hasPin(void) {
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     return se_hasPin();
-  } else {
+  } else 
+#endif
+  {
     return sectrue == storage_has_pin();
   }
 }
@@ -1040,6 +1054,8 @@ bool config_changePin(const char *old_pin, const char *new_pin) {
   if (new_pin_int == 0) {
     return false;
   }
+
+#if !EMULATOR
   if (g_bSelectSEFlag) {
 #if ONEKEY_MINI
     if (se_changePin(old_pin, new_pin))
@@ -1053,7 +1069,9 @@ bool config_changePin(const char *old_pin, const char *new_pin) {
       se_unlocked = secfalse;
       return false;
     }
-  } else {
+  } else 
+#endif
+  {
     char oldTiny = usbTiny(1);
     secbool ret =
         storage_change_pin(pin_to_int(old_pin), new_pin_int, NULL, NULL);
@@ -1152,6 +1170,7 @@ void session_endCurrentSession(void) {
 }
 
 bool session_isUnlocked(void) {
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     if (se_hasPin()) {
       return sectrue == se_unlocked;
@@ -1159,16 +1178,21 @@ bool session_isUnlocked(void) {
       return true;
     }
 
-  } else {
+  } else 
+#endif
+  {
     return sectrue == storage_is_unlocked();
   }
 }
 
 bool config_isInitialized(void) {
   bool initialized = false;
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     initialized = se_isInitialized();
-  } else {
+  } else 
+#endif
+  {
     config_get_bool(KEY_INITIALIZED, &initialized);
   }
   return initialized;
@@ -1293,11 +1317,13 @@ void config_setSleepDelayMs(uint32_t auto_sleep_ms) {
 void config_wipe(void) {
   uint8_t session_key[16];
 
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     se_reset_storage();
     config_getSeSessionKey(session_key, sizeof(session_key));
     se_unlocked = secfalse;
   }
+#endif
 
   char oldTiny = usbTiny(1);
   storage_wipe();
@@ -1452,9 +1478,12 @@ bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len) {
 
 uint32_t config_getPinFails(void) {
   uint32_t count = 0;
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     count = se_pinFailedCounter();
-  } else {
+  } else 
+#endif
+  {
     pin_get_fails(&count);
   }
 
