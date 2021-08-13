@@ -21,7 +21,7 @@
 #include "se_hal.h"
 #include "storage.h"
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
 #include "device.h"
 #include "flash_enc.h"
 #include "font_ex.h"
@@ -52,8 +52,6 @@ bool get_features(Features *resp) {
   } else
 #endif
   {
-    char *se_version = NULL;
-    char *serial = NULL;
     resp->has_vendor = true;
     strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
     resp->has_major_version = true;
@@ -132,6 +130,10 @@ bool get_features(Features *resp) {
       resp->ble_enable = ble_get_switch();
     }
 #endif
+
+#if !EMULATOR
+    char *se_version = NULL;
+    char *serial = NULL;
     resp->has_se_enable = true;
     resp->se_enable = config_getWhetherUseSE();
     se_version = se_get_version();
@@ -140,22 +142,25 @@ bool get_features(Features *resp) {
       memcpy(resp->se_ver, se_version, strlen(se_version));
     }
 
+    if (se_get_sn(&serial)) {
+      resp->has_onekey_serial = true;
+      strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
+    }
+#endif
+
     resp->has_backup_only = true;
     resp->backup_only = config_getMnemonicsImported();
 
     resp->has_onekey_version = true;
     strlcpy(resp->onekey_version, ONEKEY_VERSION, sizeof(resp->onekey_version));
 
-    if (se_get_sn(&serial)) {
-      resp->has_onekey_serial = true;
-      strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
-    }
-
+#if !EMULATOR
     resp->has_bootloader_version = true;
     strlcpy(resp->bootloader_version, bootloader_version,
             sizeof(resp->bootloader_version));
+#endif
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
     char *dev_serial;
     if (device_get_serial(&dev_serial)) {
       resp->has_serial_no = true;
@@ -1078,23 +1083,21 @@ void fsm_msgBixinBackupDevice(void) {
 
 void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   if (device_set_info((char *)msg->serial_no)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   RESP_INIT(DeviceInfo);
   char *serial;
   if (device_get_serial(&serial)) {
@@ -1103,16 +1106,15 @@ void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Serial not set"));
   }
-
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgReadSEPublicKey(const ReadSEPublicKey *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   RESP_INIT(SEPublicKey);
   if (se_get_pubkey(resp->public_key.bytes)) {
     resp->public_key.size = 64;
@@ -1121,29 +1123,29 @@ void fsm_msgReadSEPublicKey(const ReadSEPublicKey *msg) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Get SE pubkey Failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgWriteSEPublicCert(const WriteSEPublicCert *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   if (se_write_certificate(msg->public_cert.bytes, msg->public_cert.size)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgReadSEPublicCert(const ReadSEPublicCert *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   uint32_t cert_len = 0;
 
   RESP_INIT(SEPublicCert);
@@ -1154,30 +1156,30 @@ void fsm_msgReadSEPublicCert(const ReadSEPublicCert *msg) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Get certificate failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgSpiFlashWrite(const SpiFlashWrite *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   if (flash_write_enc((uint8_t *)msg->data.bytes, msg->address,
                       msg->data.size)) {
     fsm_sendSuccess(_("Write success"));
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Write failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   RESP_INIT(SpiFlashData);
 
   if (flash_read_enc(resp->data.bytes, msg->address, msg->len)) {
@@ -1186,15 +1188,15 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Read failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
 
 void fsm_msgSESignMessage(const SESignMessage *msg) {
   (void)msg;
-#if !ONEKEY_MINI
-  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
-#else
+#if ONEKEY_MINI && !EMULATOR
   RESP_INIT(SEMessageSignature);
 
   if (se_sign_message((uint8_t *)msg->message.bytes, msg->message.size,
@@ -1204,6 +1206,8 @@ void fsm_msgSESignMessage(const SESignMessage *msg) {
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("SE sign failed"));
   }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
   return;
 }
