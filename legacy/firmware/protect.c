@@ -690,10 +690,12 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
       }
     }
 
+#if !ONEKEY_MINI
     if (!config_setSeedPin(pin)) {
       fsm_sendFailure(FailureType_Failure_PinMismatch, NULL);
       return false;
     }
+#endif
   }
   return true;
 }
@@ -868,7 +870,7 @@ pin_set:
 
     strlcpy(old_pin, pin, sizeof(old_pin));
   } else {
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
         NULL, NULL,

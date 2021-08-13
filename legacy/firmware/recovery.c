@@ -926,7 +926,7 @@ input_word:
   }
 
   memzero(desc, sizeof(desc));
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   switch (word_count) {
     case 12:
       strcat(desc, _("Check that the 12 words you entered are the correct "

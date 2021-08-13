@@ -156,7 +156,10 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
     }
     se_setNeedsBackup(true);
 #endif
+
+#if !EMULATOR
     se_setSeedStrength(strength);
+#endif
     memcpy(int_entropy, seed, 32);
   } else {
     SHA256_CTX ctx = {0};
@@ -517,7 +520,7 @@ refresh_menu:
     strcat(desc, pre_desc);
     strcat(desc, " #");
     uint2str(i + 1, desc + strlen(desc));
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
     layoutDialogSwipeCenterAdapterFont(
         NULL, &bmp_btn_back, _("Prev"), &bmp_btn_confirm, _("Confirm"), NULL,
         FONT_STANDARD | FONT_DOUBLE, NULL, NULL, desc, NULL, NULL, words[i]);
@@ -692,11 +695,11 @@ select_mnemonic_count:
     goto_check(select_mnemonic_count);
   }
 
+#if !EMULATOR
   if (g_bSelectSEFlag) {
     uint8_t seed[64];
 #if ONEKEY_MINI
     random_buffer(seed, 64);
-
 #else
     if (!se_device_init(ExportType_MnemonicPlainExportType_YES, NULL))
       return false;
@@ -705,7 +708,9 @@ select_mnemonic_count:
 #endif
     memcpy(int_entropy, seed, 32);
     se_setSeedStrength(strength);
-  } else {
+  } else 
+#endif
+  {
     random_buffer(int_entropy, 32);
     SHA256_CTX ctx = {0};
     sha256_Init(&ctx);

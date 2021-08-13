@@ -1608,8 +1608,6 @@ void layoutDeviceInfo(uint8_t ucPage) {
   uint32_t times;
   char str_out[32 + 3] = {0};
   char times_str[12] = {0};
-  char *se_version = NULL;
-  char *se_sn;
   int y = 0;
   char label[MAX_LABEL_LEN + 1] = "";
 
@@ -1628,13 +1626,15 @@ void layoutDeviceInfo(uint8_t ucPage) {
         oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
         y += font->pixel + 1;
       }
+#if !EMULATOR
+      char *se_version = NULL;
       se_version = se_get_version();
       if (se_version) {
         oledDrawStringAdapter(0, y, _("SE version:"), FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, se_version, FONT_STANDARD);
         y += font->pixel + 1;
       }
-
+#endif
       oledDrawStringAdapter(0, y, _("Device ID:"), FONT_STANDARD);
       oledDrawStringAdapter(50, y, config_uuid_str, FONT_STANDARD);
       y += font->pixel + 1;
@@ -1658,11 +1658,14 @@ void layoutDeviceInfo(uint8_t ucPage) {
       oledDrawStringRightAdapter(OLED_WIDTH - 1, y, label, FONT_STANDARD);
       y += font->pixel + 1;
 
+#if !EMULATOR
+      char *se_sn;
       if (se_get_sn(&se_sn)) {
         oledDrawStringAdapter(0, y, _("Serial:"), FONT_STANDARD);
         oledDrawStringRight(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
         y += font->pixel + 1;
       }
+#endif
 
       char secstrbuf[] = "________0 s";
       char *secstr = secstrbuf + 9;
@@ -1772,7 +1775,7 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                             line2, line3, line4, line5, line6);
 }
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
 void layoutDialogSwipeCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
                                       const char *btnNo, const BITMAP *bmp_yes,
                                       const char *btnYes, const char *desc,
@@ -2509,8 +2512,6 @@ void layouKeyValue(int y, const char *desc, const char *value) {
 void layoutDeviceParameters(int num) {
   (void)num;
   const struct font_desc *font = find_cur_font();
-  char *se_version = NULL;
-  char *se_sn;
   int x = 0, y = 0;
   int index = 0;
   uint8_t key = KEY_NULL;
@@ -2530,6 +2531,9 @@ refresh_menu:
       oledDrawStringAdapter(0, y, label, FONT_STANDARD);
       y += font->pixel + 1;
 #endif
+
+#if !EMULATOR
+      char *se_sn;
       if (se_get_sn(&se_sn)) {
 #if ONEKEY_MINI
         oledDrawStringAdapter(0, y, _("Serial:"), FONT_STANDARD);
@@ -2540,10 +2544,13 @@ refresh_menu:
 #endif
         y += font->pixel + 1;
       }
+#endif
+
 #if !ONEKEY_MINI
       layouKeyValue(y, _("BLE Name:"), ble_get_name());
       y += font->pixel + 1;
 #endif
+
 #if ONEKEY_MINI
       y += font->pixel + 1;
 #endif
@@ -2581,6 +2588,9 @@ refresh_menu:
       break;
     case 1:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+
+#if !EMULATOR
+      char *se_version = NULL;
       se_version = se_get_version();
 #if ONEKEY_MINI
       oledDrawStringAdapter(0, y, _("Firmware version:"), FONT_STANDARD);
@@ -2601,6 +2611,7 @@ refresh_menu:
       oledDrawStringAdapter(0, y, se_version, FONT_STANDARD);
 #else
       layouKeyValue(y, _("SE version:"), se_version);
+#endif
 #endif
       y += font->pixel + 1;
 
