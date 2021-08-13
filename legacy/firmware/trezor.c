@@ -34,6 +34,7 @@
 #include "timer.h"
 #include "usb.h"
 #include "util.h"
+#if !EMULATOR
 #if ONEKEY_MINI
 #include "device.h"
 #include "device2.h"
@@ -42,7 +43,6 @@
 #include "se_hal.h"
 #include "w25qxx.h"
 #endif
-#if !EMULATOR
 #include <libopencm3/stm32/desig.h>
 #include "ble.h"
 #include "otp.h"
@@ -151,7 +151,7 @@ int main(void) {
 #else
   check_bootloader(true);
   setupApp();
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
   bool serial_set = false, font_set = false, cert_set = false;
   bool usb_init = false;
   uint32_t cert_len = 0;

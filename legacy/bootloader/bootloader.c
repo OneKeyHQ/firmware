@@ -129,7 +129,7 @@ int main(void) {
                                      // unpredictable stack protection checks
 #ifndef APPVER
     oledInit();
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
     device_init();
     w25qxx_init();
     atca_init();

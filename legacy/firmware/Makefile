@@ -5,6 +5,11 @@ NAME  = bixin
 ifeq ($(EMULATOR),1)
 OBJS += udp.o
 else
+ifeq ($(ONEKEY_MINI),1)
+OBJS += font_ex.o
+OBJS += device2.o
+OBJS += flash_enc.o
+endif
 OBJS += usb.o
 OBJS += bl_check.o
 OBJS += header.o
@@ -17,13 +22,6 @@ OBJS += language.o
 OBJS += menu_para.o
 OBJS += menu_core.o
 OBJS += menu_list.o
-
-ifeq ($(ONEKEY_MINI),1)
-OBJS += font_ex.o
-OBJS += device2.o
-OBJS += flash_enc.o
-endif
-
 OBJS += messages.o
 OBJS += config.o
 OBJS += trezor.o
