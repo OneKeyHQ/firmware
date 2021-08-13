@@ -338,6 +338,7 @@ from . import Capability
 from . import CardanoAddressType
 from . import CardanoCertificateType
 from . import CardanoPoolRelayType
+from . import CommandFlags
 from . import DebugLinkShowTextStyle
 from . import DebugSwipeDirection
 from . import ExportType

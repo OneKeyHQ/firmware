@@ -32,9 +32,14 @@
 #include "pb_decode.h"
 #include "pb_encode.h"
 
+#if ONEKEY_MINI
+#include "device.h"
+#endif
+
 struct MessagesMap_t {
   char type;  // n = normal, d = debug
   char dir;   // i = in, o = out
+  uint32_t cmd_flags;
   uint16_t msg_id;
   const pb_msgdesc_t *fields;
   void (*process_func)(const void *ptr);
@@ -43,7 +48,7 @@ struct MessagesMap_t {
 static const struct MessagesMap_t MessagesMap[] = {
 #include "messages_map.h"
     // end
-    {0, 0, 0, 0, 0}};
+    {0, 0, 0, 0, 0, 0}};
 
 #include "messages_map_limits.h"
 
@@ -51,7 +56,16 @@ const pb_msgdesc_t *MessageFields(char type, char dir, uint16_t msg_id) {
   const struct MessagesMap_t *m = MessagesMap;
   while (m->type) {
     if (type == m->type && dir == m->dir && msg_id == m->msg_id) {
-      return m->fields;
+#if ONEKEY_MINI
+      if (!device_is_factory_mode()) {
+        if (!(m->cmd_flags & CommandFlags_Factory_Only)) {
+          return m->fields;
+        }
+      } else
+#endif
+      {
+        return m->fields;
+      }
     }
     m++;
   }

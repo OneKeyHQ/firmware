@@ -164,9 +164,15 @@ int main(void) {
   se_init();
 
   do {
-    serial_set = device_serial_set();
-    font_set = font_imported();
-    cert_set = se_get_certificate_len(&cert_len);
+    if (!serial_set) {
+      serial_set = device_serial_set();
+    }
+    if (!font_set) {
+      font_set = font_imported();
+    }
+    if (!cert_set) {
+      cert_set = se_get_certificate_len(&cert_len);
+    }
 
     if (serial_set && font_set && cert_set && !usb_init) {
       device_set_factory_mode(false);

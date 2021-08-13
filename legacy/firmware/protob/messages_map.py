@@ -16,7 +16,7 @@ fh = open("messages_map.h", "wt")
 fl = open("messages_map_limits.h", "wt")
 
 # len("MessageType_MessageType_") - len("_fields") == 17
-TEMPLATE = "\t{{ {type} {dir} {msg_id:46} {fields:29} {process_func} }},\n"
+TEMPLATE = "\t{{ {type} {dir} {cmd_flags} {msg_id:46} {fields:29} {process_func} }},\n"
 
 LABELS = {
     wire_in: "in messages",
@@ -72,10 +72,17 @@ def handle_message(fh, fl, skipped, message):
     else:
         process_func = "0"
 
+    cmd_flags = "CommandFlags_"
+    if getattr(options, "factory", None):
+        cmd_flags += "Factory_Only"
+    else:
+        cmd_flags += "Default"
+
     fh.write(
         TEMPLATE.format(
             type="'%c'," % interface,
             dir="'%c'," % direction,
+            cmd_flags="%s," % cmd_flags,
             msg_id="MessageType_%s," % name,
             fields="%s_fields," % short_name,
             process_func=process_func,
