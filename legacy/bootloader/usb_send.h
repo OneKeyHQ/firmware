@@ -100,6 +100,14 @@ void send_msg_features(usbd_device *dev) {
   resp->has_se_ver = true;
   strlcpy(resp->se_ver, device_get_se_config_version(), sizeof(resp->se_ver));
 
+  char *cpu, *firmware;
+  if (device_get_cpu_firmware(&cpu, &firmware)) {
+    resp->has_cpu_info = true;
+    resp->has_pre_firmware = true;
+    strlcpy(resp->cpu_info, cpu, sizeof(resp->cpu_info));
+    strlcpy(resp->pre_firmware, firmware, sizeof(resp->pre_firmware));
+  }
+
   msg_write(MessageType_MessageType_Features, resp);
 
   const uint8_t *data;

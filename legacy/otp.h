@@ -39,6 +39,7 @@
 #define FLASH_OTP_DEVICE_SERIAL 12
 #define FLASH_OTP_FACTORY_TEST 13
 #define FLASH_OTP_RANDOM_KEY 14
+#define FLASH_OTP_CPU_FIRMWARE_INFO 15
 
 bool flash_otp_is_locked(uint8_t block);
 bool flash_otp_lock(uint8_t block);

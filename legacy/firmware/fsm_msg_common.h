@@ -49,6 +49,8 @@ bool get_features(Features *resp) {
     resp->initstates |= device_serial_set() ? 1 : 0;
     resp->initstates |= font_imported() ? (1 << 1) : 0;
     resp->initstates |= se_get_certificate_len(&cert_len) ? (1 << 2) : 0;
+    resp->initstates |= device_cpu_firmware_set() ? (1 << 3) : 0;
+
   } else
 #endif
   {
@@ -1084,10 +1086,22 @@ void fsm_msgBixinBackupDevice(void) {
 void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
   (void)msg;
 #if ONEKEY_MINI
-  if (device_set_info((char *)msg->serial_no)) {
+  if (msg->has_serial_no) {
+    if (!device_set_serial((char *)msg->serial_no)) {
+      fsm_sendFailure(FailureType_Failure_ProcessError, _("Set serial failed"));
+    }
+  }
+  if ((msg->has_cpu_info | msg->has_pre_firmware) &&
+      !(msg->has_cpu_info & msg->has_pre_firmware)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Parameter error"));
+  }
+
+  if (device_set_cpu_firmware((char *)msg->cpu_info,
+                              (char *)msg->pre_firmware)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
-    fsm_sendFailure(FailureType_Failure_ProcessError, _("Settings failed"));
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Set cpu/firmware failed"));
   }
 #else
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
@@ -1101,15 +1115,23 @@ void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   RESP_INIT(DeviceInfo);
   char *serial;
   if (device_get_serial(&serial)) {
+    resp->has_serial_no = true;
     strlcpy(resp->serial_no, serial, sizeof(resp->serial_no));
-    if (device_get_NFT_voucher(resp->NFT_voucher.bytes)) {
-      resp->has_NFT_voucher = true;
-      resp->NFT_voucher.size = 32;
-    }
-    msg_write(MessageType_MessageType_DeviceInfo, resp);
-  } else {
-    fsm_sendFailure(FailureType_Failure_ProcessError, _("Serial not set"));
   }
+
+  if (device_get_NFT_voucher(resp->NFT_voucher.bytes)) {
+    resp->has_NFT_voucher = true;
+    resp->NFT_voucher.size = 32;
+  }
+
+  char *cpu, *firmware;
+  if (device_get_cpu_firmware(&cpu, &firmware)) {
+    resp->has_cpu_info = true;
+    resp->has_pre_firmware = true;
+    strlcpy(resp->cpu_info, cpu, sizeof(resp->cpu_info));
+    strlcpy(resp->pre_firmware, firmware, sizeof(resp->pre_firmware));
+  }
+  msg_write(MessageType_MessageType_DeviceInfo, resp);
 #else
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif

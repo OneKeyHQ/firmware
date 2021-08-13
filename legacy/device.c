@@ -6,23 +6,22 @@
 #include "sha2.h"
 #include "util.h"
 
-static char device_serial_obj[32];
-static char *device_serial = device_serial_obj;
-static DeviceConfig device_config_obj;
-static DeviceConfig *device_config = &device_config_obj;
+static DeviceInfomation dev_info = {0};
 static bool serial_set = false;
 static bool factory_mode = false;
-static uint8_t st_id[12] = {0};
-static uint8_t random_key[32];
+
+void device_set_factory_mode(bool mode) { factory_mode = mode; }
+
+bool device_is_factory_mode(void) { return factory_mode; }
 
 void device_init(void) {
-  desig_get_unique_id((uint32_t *)st_id);
+  desig_get_unique_id((uint32_t *)dev_info.st_id);
 
-  if (flash_otp_is_locked(FLASH_OTP_RANDOM_KEY)) {
-    memcpy(&device_config_obj,
-           FLASH_PTR(FLASH_OTP_BASE +
+  if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
+    strlcpy(dev_info.se_config,
+            (char *)(FLASH_OTP_BASE +
                      FLASH_OTP_FACTORY_TEST * FLASH_OTP_BLOCK_SIZE),
-           sizeof(DeviceConfig));
+            sizeof(dev_info.se_config));
   }
 
   if (!flash_otp_is_locked(FLASH_OTP_RANDOM_KEY)) {
@@ -35,27 +34,36 @@ void device_init(void) {
     flash_otp_write(FLASH_OTP_RANDOM_KEY, 0, entropy, FLASH_OTP_BLOCK_SIZE);
     flash_otp_lock(FLASH_OTP_RANDOM_KEY);
   }
-  flash_otp_read(FLASH_OTP_RANDOM_KEY, 0, random_key, FLASH_OTP_BLOCK_SIZE);
+  flash_otp_read(FLASH_OTP_RANDOM_KEY, 0, dev_info.random_key,
+                 FLASH_OTP_BLOCK_SIZE);
+
+  if (flash_otp_is_locked(FLASH_OTP_CPU_FIRMWARE_INFO)) {
+    strlcpy(dev_info.cpu,
+            (char *)(FLASH_OTP_BASE +
+                     FLASH_OTP_CPU_FIRMWARE_INFO * FLASH_OTP_BLOCK_SIZE),
+            sizeof(dev_info.cpu));
+    strlcpy(dev_info.pre_firmware,
+            (char *)(FLASH_OTP_BASE +
+                     FLASH_OTP_CPU_FIRMWARE_INFO * FLASH_OTP_BLOCK_SIZE +
+                     FLASH_OTP_BLOCK_SIZE / 2),
+            sizeof(dev_info.pre_firmware));
+  }
 
   if (!flash_otp_is_locked(FLASH_OTP_DEVICE_SERIAL)) {
     serial_set = false;
     return;
   }
   strlcpy(
-      device_serial_obj,
+      dev_info.serail,
       (char *)(FLASH_OTP_BASE + FLASH_OTP_DEVICE_SERIAL * FLASH_OTP_BLOCK_SIZE),
-      sizeof(device_serial_obj));
+      sizeof(dev_info.serail));
   serial_set = true;
   return;
 }
 
 bool device_serial_set(void) { return serial_set; }
 
-void device_set_factory_mode(bool mode) { factory_mode = mode; }
-
-bool device_is_factory_mode(void) { return factory_mode; }
-
-bool device_set_info(char *dev_serial) {
+bool device_set_serial(char *dev_serial) {
   uint8_t buffer[FLASH_OTP_BLOCK_SIZE] = {0};
 
   if (serial_set) {
@@ -80,16 +88,54 @@ bool device_get_serial(char **serial) {
   if (!serial_set) {
     return false;
   }
-  *serial = device_serial;
+  *serial = dev_info.serail;
   return true;
 }
 
+bool device_cpu_firmware_set(void) {
+  if ((0 < strlen(dev_info.cpu) &&
+       strlen(dev_info.cpu) < FLASH_OTP_BLOCK_SIZE / 2) &&
+      (0 < strlen(dev_info.pre_firmware) &&
+       strlen(dev_info.pre_firmware) < FLASH_OTP_BLOCK_SIZE / 2)) {
+    return true;
+  }
+  return false;
+}
+
+bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver) {
+  uint8_t buffer[FLASH_OTP_BLOCK_SIZE] = {0};
+
+  // check serial
+  if (!flash_otp_is_locked(FLASH_OTP_CPU_FIRMWARE_INFO)) {
+    if (check_all_ones(FLASH_PTR(FLASH_OTP_BASE + FLASH_OTP_CPU_FIRMWARE_INFO *
+                                                      FLASH_OTP_BLOCK_SIZE),
+                       FLASH_OTP_BLOCK_SIZE)) {
+      strlcpy((char *)buffer, cpu_info, sizeof(buffer) / 2);
+      strlcpy((char *)buffer + FLASH_OTP_BLOCK_SIZE / 2, firmware_ver,
+              sizeof(buffer) / 2);
+      flash_otp_write(FLASH_OTP_CPU_FIRMWARE_INFO, 0, buffer,
+                      FLASH_OTP_BLOCK_SIZE);
+      flash_otp_lock(FLASH_OTP_CPU_FIRMWARE_INFO);
+      device_init();
+      return true;
+    }
+  }
+  return false;
+}
+
+bool device_get_cpu_firmware(char **cpu_info, char **firmware_ver) {
+  if (device_cpu_firmware_set()) {
+    *cpu_info = dev_info.cpu;
+    *firmware_ver = dev_info.pre_firmware;
+  }
+  return false;
+}
+
 char *device_get_se_config_version(void) {
-  if (check_all_ones(device_config->atca_config_verson,
-                     sizeof(device_config->atca_config_verson))) {
+  if (check_all_ones(dev_info.se_config, sizeof(dev_info.se_config))) {
     return "0.0.1";
   } else {
-    return device_config->atca_config_verson;
+    return dev_info.se_config;
   }
 }
 
@@ -101,8 +147,8 @@ bool device_get_NFT_voucher(uint8_t voucher[32]) {
   SHA256_CTX ctx = {0};
 
   sha256_Init(&ctx);
-  sha256_Update(&ctx, st_id, sizeof(st_id));
-  sha256_Update(&ctx, random_key, sizeof(random_key));
+  sha256_Update(&ctx, dev_info.st_id, sizeof(dev_info.st_id));
+  sha256_Update(&ctx, dev_info.random_key, sizeof(dev_info.random_key));
   sha256_Final(&ctx, voucher);
   return true;
 }

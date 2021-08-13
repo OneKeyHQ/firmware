@@ -71,6 +71,8 @@ class Features(p.MessageType):
         spi_flash: str = None,
         initstates: int = None,
         NFT_voucher: bytes = None,
+        cpu_info: str = None,
+        pre_firmware: str = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -124,6 +126,8 @@ class Features(p.MessageType):
         self.spi_flash = spi_flash
         self.initstates = initstates
         self.NFT_voucher = NFT_voucher
+        self.cpu_info = cpu_info
+        self.pre_firmware = pre_firmware
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -180,4 +184,6 @@ class Features(p.MessageType):
             512: ('spi_flash', p.UnicodeType, None),
             513: ('initstates', p.UVarintType, None),
             514: ('NFT_voucher', p.BytesType, None),
+            515: ('cpu_info', p.UnicodeType, None),
+            516: ('pre_firmware', p.UnicodeType, None),
         }

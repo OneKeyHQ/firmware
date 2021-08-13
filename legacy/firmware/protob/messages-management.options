@@ -20,6 +20,8 @@ Features.bootloader_version             max_size:8
 Features.spi_flash                      max_size:17
 Features.serial_no                      max_size:32
 Features.NFT_voucher                    max_size:32
+Features.cpu_info                       max_size:16
+Features.pre_firmware                   max_size:16
 
 ApplySettings.language                  max_size:17
 ApplySettings.label                     max_size:33
@@ -67,11 +69,15 @@ BixinLoadDevice.label                   max_size:33
 BixinBackupDeviceAck.mnemonics          max_size:241
 
 DeviceInfoSettings.serial_no            max_size:32
+DeviceInfoSettings.cpu_info             max_size:16
+DeviceInfoSettings.pre_firmware         max_size:16
 
 DeviceInfo.serial_no                    max_size:32
 DeviceInfo.spiFlash_info                max_size:16
 DeviceInfo.SE_info                      max_size:16
 DeviceInfo.NFT_voucher                  max_size:32
+DeviceInfo.cpu_info                     max_size:16
+DeviceInfo.pre_firmware                 max_size:16
 
 SEPublicKey.public_key                  max_size:64
 WriteSEPublicCert.public_cert           max_size:416

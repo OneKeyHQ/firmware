@@ -119,6 +119,8 @@ message Features {
     optional string spi_flash = 512;
     optional uint32 initstates = 513;      // list of facotry state
     optional bytes NFT_voucher = 514;
+    optional string cpu_info = 515;
+    optional string pre_firmware = 516;
 }
 
 /**
@@ -589,7 +591,9 @@ message BixinBackupDeviceAck {
  * @next Failure
  */
 message DeviceInfoSettings {
-    required string serial_no = 1;                 
+    optional string serial_no = 1; 
+    optional string cpu_info = 2;
+    optional string pre_firmware = 3;                
 }
 
 /**
@@ -605,10 +609,12 @@ message GetDeviceInfo {
  * @end
  */
 message DeviceInfo {
-    required string serial_no = 1;
+    optional string serial_no = 1;
     optional string spiFlash_info = 2;
     optional string SE_info = 3;
     optional bytes NFT_voucher = 4;
+    optional string cpu_info = 5;
+    optional string pre_firmware = 6;
 }
 
 /**

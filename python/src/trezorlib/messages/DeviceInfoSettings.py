@@ -16,12 +16,18 @@ class DeviceInfoSettings(p.MessageType):
     def __init__(
         self,
         *,
-        serial_no: str,
+        serial_no: str = None,
+        cpu_info: str = None,
+        pre_firmware: str = None,
     ) -> None:
         self.serial_no = serial_no
+        self.cpu_info = cpu_info
+        self.pre_firmware = pre_firmware
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('serial_no', p.UnicodeType, p.FLAG_REQUIRED),
+            1: ('serial_no', p.UnicodeType, None),
+            2: ('cpu_info', p.UnicodeType, None),
+            3: ('pre_firmware', p.UnicodeType, None),
         }

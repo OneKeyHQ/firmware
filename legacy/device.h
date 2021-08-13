@@ -15,14 +15,22 @@ typedef struct __attribute__((packed)) {
 } DeviceSerialNo;
 
 typedef struct __attribute__((packed)) {
-  char atca_config_verson[8];
-} DeviceConfig;
+  char serail[32];
+  char cpu[16];
+  char pre_firmware[16];
+  char se_config[8];
+  uint8_t st_id[12];
+  uint8_t random_key[32];
+} DeviceInfomation;
 
-void device_init(void);
-bool device_serial_set(void);
 void device_set_factory_mode(bool mode);
 bool device_is_factory_mode(void);
-bool device_set_info(char *dev_serial);
+void device_init(void);
+bool device_serial_set(void);
+bool device_set_serial(char *dev_serial);
+bool device_cpu_firmware_set(void);
+bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver);
+bool device_get_cpu_firmware(char **cpu_info, char **firmware_ver);
 bool device_get_serial(char **serial);
 char *device_get_se_config_version(void);
 bool device_get_NFT_voucher(uint8_t voucher[32]);
