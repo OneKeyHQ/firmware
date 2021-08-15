@@ -1,7 +1,3 @@
-# Trezor Firmware
-
-![img](https://repository-images.githubusercontent.com/180590388/968e6880-6538-11e9-9da6-4aef78157e94)
-
 ## Repository Structure
 
 * **[`ci`](ci/)**: [Gitlab CI](https://gitlab.com/satoshilabs/trezor/trezor-firmware) configuration files
