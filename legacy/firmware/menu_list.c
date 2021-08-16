@@ -22,7 +22,7 @@ void menu_recovery_device(int index) {
   }
   recovery_on_device();
   if (config_isInitialized()) {
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
@@ -34,7 +34,7 @@ void menu_recovery_device(int index) {
 #endif
 
     protectWaitKey(0, 1);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     setRgbBitmap(false);
 #endif
     layoutHome();
@@ -48,7 +48,7 @@ void menu_reset_device(int index) {
   }
   reset_on_device();
   if (config_isInitialized()) {
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI 
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
@@ -60,7 +60,7 @@ void menu_reset_device(int index) {
 #endif
 
     protectWaitKey(0, 1);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     setRgbBitmap(false);
 #endif
     layoutHome();

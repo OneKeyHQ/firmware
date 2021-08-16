@@ -364,7 +364,7 @@ select_word:
       goto select_word;
     case KEY_CONFIRM:
       if (words_order[i] != selected) {
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
         setRgbBitmap(true);
         layoutDialogSwipeCenterAdapter(
             &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
@@ -376,7 +376,7 @@ select_word:
 #endif
 
         key = protectWaitKey(0, 1);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
         setRgbBitmap(false);
 #endif
         if (key != KEY_CONFIRM) {
@@ -394,7 +394,7 @@ select_word:
       return false;
   }
 
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapter(
       &bmp_icon_success, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"),
@@ -406,7 +406,7 @@ select_word:
 #endif
 
   key = protectWaitKey(0, 1);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   setRgbBitmap(false);
 #endif
   if (key != KEY_CONFIRM) {
@@ -520,7 +520,7 @@ refresh_menu:
     strcat(desc, pre_desc);
     strcat(desc, " #");
     uint2str(i + 1, desc + strlen(desc));
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterFont(
         NULL, &bmp_btn_back, _("Prev"), &bmp_btn_confirm, _("Confirm"), NULL,
         FONT_STANDARD | FONT_DOUBLE, NULL, NULL, desc, NULL, NULL, words[i]);

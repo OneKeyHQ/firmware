@@ -870,7 +870,7 @@ pin_set:
 
     strlcpy(old_pin, pin, sizeof(old_pin));
   } else {
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
         NULL, NULL,
@@ -925,7 +925,7 @@ retry:
   if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -937,7 +937,7 @@ retry:
 #endif
     while (1) {
       key = protectWaitKey(0, 1);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
       setRgbBitmap(false);
 #endif
       if (key == KEY_CONFIRM) {
@@ -1092,7 +1092,7 @@ void enter_sleep(void) {
     unlocked = session_isUnlocked();
     layoutBack = layoutLast;
     oledBufferLoad(oled_prev);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     // close back light
     gpio_clear(OLED_CTRL_PORT, OLED_CTRL_PIN);
     if (isRgbBitmap()) {
@@ -1156,7 +1156,7 @@ void enter_sleep(void) {
   if (sleep_count == 0) {
     layoutLast = layoutBack;
     oledBufferRestore(oled_prev);
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     if (backup) {
       setRgbBitmap(true);
       backup = false;

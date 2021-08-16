@@ -151,7 +151,7 @@ int main(void) {
 #else
   check_bootloader(true);
   setupApp();
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   bool serial_set = false, font_set = false, cert_set = false;
   bool usb_init = false;
   uint32_t cert_len = 0;

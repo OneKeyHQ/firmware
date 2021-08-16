@@ -21,7 +21,7 @@
 #include "se_hal.h"
 #include "storage.h"
 
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
 #include "device.h"
 #include "flash_enc.h"
 #include "font_ex.h"
@@ -31,7 +31,7 @@
 extern char bootloader_version[8];
 
 bool get_features(Features *resp) {
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   if (device_is_factory_mode()) {
     uint32_t cert_len = 0;
     resp->has_vendor = true;
@@ -160,7 +160,7 @@ bool get_features(Features *resp) {
             sizeof(resp->bootloader_version));
 #endif
 
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     char *dev_serial;
     if (device_get_serial(&dev_serial)) {
       resp->has_serial_no = true;
@@ -1083,7 +1083,7 @@ void fsm_msgBixinBackupDevice(void) {
 
 void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   if (device_set_info((char *)msg->serial_no)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
@@ -1097,7 +1097,7 @@ void fsm_msgDeviceInfoSettings(const DeviceInfoSettings *msg) {
 
 void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   RESP_INIT(DeviceInfo);
   char *serial;
   if (device_get_serial(&serial)) {
@@ -1114,7 +1114,7 @@ void fsm_msgGetDeviceInfo(const GetDeviceInfo *msg) {
 
 void fsm_msgReadSEPublicKey(const ReadSEPublicKey *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   RESP_INIT(SEPublicKey);
   if (se_get_pubkey(resp->public_key.bytes)) {
     resp->public_key.size = 64;
@@ -1131,7 +1131,7 @@ void fsm_msgReadSEPublicKey(const ReadSEPublicKey *msg) {
 
 void fsm_msgWriteSEPublicCert(const WriteSEPublicCert *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   if (se_write_certificate(msg->public_cert.bytes, msg->public_cert.size)) {
     fsm_sendSuccess(_("Settings applied"));
   } else {
@@ -1145,7 +1145,7 @@ void fsm_msgWriteSEPublicCert(const WriteSEPublicCert *msg) {
 
 void fsm_msgReadSEPublicCert(const ReadSEPublicCert *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   uint32_t cert_len = 0;
 
   RESP_INIT(SEPublicCert);
@@ -1164,7 +1164,7 @@ void fsm_msgReadSEPublicCert(const ReadSEPublicCert *msg) {
 
 void fsm_msgSpiFlashWrite(const SpiFlashWrite *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   if (flash_write_enc((uint8_t *)msg->data.bytes, msg->address,
                       msg->data.size)) {
     fsm_sendSuccess(_("Write success"));
@@ -1179,7 +1179,7 @@ void fsm_msgSpiFlashWrite(const SpiFlashWrite *msg) {
 
 void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   RESP_INIT(SpiFlashData);
 
   if (flash_read_enc(resp->data.bytes, msg->address, msg->len)) {
@@ -1196,7 +1196,7 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
 
 void fsm_msgSESignMessage(const SESignMessage *msg) {
   (void)msg;
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
   RESP_INIT(SEMessageSignature);
 
   if (se_sign_message((uint8_t *)msg->message.bytes, msg->message.size,

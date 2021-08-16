@@ -1775,7 +1775,7 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                             line2, line3, line4, line5, line6);
 }
 
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
 void layoutDialogSwipeCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
                                       const char *btnNo, const BITMAP *bmp_yes,
                                       const char *btnYes, const char *desc,
@@ -1927,7 +1927,7 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
 
   oledClear_ex();
   if (icon) {
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
     if(isRgbBitmap()){
       oledDrawRgbBitmap(56, 9 + 12, icon);
     }
@@ -1979,7 +1979,7 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
   oledRefresh();
 }
 
-#if ONEKEY_MINI && !EMULATOR
+#if ONEKEY_MINI
 void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
                                  const char *btnNo, const BITMAP *bmp_yes,
                                  const char *btnYes, const char *desc,
