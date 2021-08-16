@@ -158,7 +158,11 @@ int main(void) {
 
     if (firmware_present_new() && !boot_button_pressed && !force_boot) {
       oledClear();
+#if ONEKEY_MINI
+      oledDrawBitmap(52, 52, &bmp_boot_icon);
+#else
       oledDrawBitmap(28, 21, &bmp_launch_icon);
+#endif
       oledRefresh();
       const image_header *hdr =
           (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
@@ -177,6 +181,10 @@ int main(void) {
         show_halt("Broken firmware", "detected.");
       }
       mpu_config_off();
+#if ONEKEY_MINI
+      // fix starting flower screen
+      oledBackligthCtl(true);
+#endif
       load_app(signed_firmware);
     }
 #endif

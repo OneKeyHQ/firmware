@@ -18,6 +18,10 @@
  */
 
 #include <libopencm3/stm32/flash.h>
+#if ONEKEY_MINI
+#include <libopencm3/stm32/timer.h>
+#endif
+
 #include <stdint.h>
 #include <string.h>
 
@@ -110,6 +114,7 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 
 #define KEY_MNEMONICS_IMPORTED (36 | APP | FLAG_PUBLIC_SHIFTED)         // bool
 #define KEY_SLEEP_DELAY_MS (37 | APP | FLAG_PUBLIC_SHIFTED)             // uint32
+#define KEY_SCREEN_BRIGHTNESS (38 | APP | FLAG_PUBLIC_SHIFTED)          // uint32
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)            // string(10)
 // clang-format on
@@ -190,6 +195,10 @@ static secbool autoLockDelayMsCached = secfalse;
 static secbool sleepDelayMsCached = secfalse;
 static uint32_t autoLockDelayMs = autoLockDelayMsDefault;
 static uint32_t autoSleepDelayMs = sleepDelayMsDefault;
+#if ONEKEY_MINI
+static secbool brightnessCached = secfalse;
+static uint32_t brightnessValue = brightnessDefault;
+#endif
 
 static uint32_t deviceState = 0;
 
@@ -1313,6 +1322,31 @@ void config_setSleepDelayMs(uint32_t auto_sleep_ms) {
     sleepDelayMsCached = sectrue;
   }
 }
+
+#if ONEKEY_MINI
+uint32_t config_getBrightness(void) {
+  if (sectrue == brightnessCached) {
+    return brightnessValue;
+  }
+
+  if (sectrue != config_get_uint32(KEY_SCREEN_BRIGHTNESS, &brightnessValue)) {
+    brightnessValue = brightnessDefault;
+  }
+  brightnessCached = sectrue;
+  return brightnessValue;
+}
+
+void config_setBrightness(uint32_t value) {
+  if (value != 0) value = MAX(value, brightnessLow);
+
+  if (sectrue == storage_set(KEY_SCREEN_BRIGHTNESS, &value, sizeof(value))) {
+    brightnessValue = value;
+    brightnessCached = sectrue;
+  }
+
+  timer_set_oc_value(TIM3, TIM_OC2, brightnessValue);
+}
+#endif
 
 void config_wipe(void) {
   uint8_t session_key[16];

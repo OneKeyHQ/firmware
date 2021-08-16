@@ -26,6 +26,9 @@
 #include <stdint.h>
 
 #include "bitmaps.h"
+#if ONEKEY_MINI
+#include "rgbicon.h"
+#endif
 #include "fonts.h"
 
 #define SPI_BASE SPI1
@@ -56,14 +59,16 @@
 #define OLED_X_OFFSET 2
 #define OLED_Y_OFFSET 3
 
+#define MINI_ADJUST 4
+
 #define COLOR_BLACK 0x0000
 #define COLOR_WHITE 0xffff
 #define COLOR_RED 0xf800
 #define COLOR_GREEN 0x07e0
 #define COLOR_BLUE 0x001f
 
-#define COLOR_FONT COLOR_BLACK
-#define COLOR_BACKGROUND COLOR_WHITE
+#define COLOR_FONT COLOR_WHITE
+#define COLOR_BACKGROUND COLOR_BLACK
 
 typedef struct {
   bool valid;

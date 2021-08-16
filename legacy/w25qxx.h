@@ -10,6 +10,9 @@ extern "C" {
 #include <string.h>
 #include "util.h"
 
+#define MF_ID_WB 0xEF  // WINBOUND
+#define MF_ID_GD 0xC8  // GigaDevice
+
 // config info
 #define _W25QXX_SPI SPI2
 #define _W25QXX_CS_GPIO GPIOB
@@ -83,6 +86,7 @@ extern w25qxx_t w25qxx;
 // bytes
 bool w25qxx_init(void);
 char *w25qxx_get_desc(void);
+uint32_t w25qxx_read_id(void);
 
 bool w25qxx_erase_chip(void);
 bool w25qxx_erase_sector(uint32_t sector_addr);

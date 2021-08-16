@@ -23,6 +23,7 @@ OBJS += atca/atca_api.o
 OBJS += atca/se_atca.o
 OBJS += w25qxx.o
 OBJS += device.o
+OBJS += gen/rgbicon.o
 else
 OBJS += usart.o
 OBJS += nordic_dfu.o

@@ -275,8 +275,6 @@ void oledInit(void) {
   SPISendCmd(0x29);
 
   gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
-
-  oledBackligthCtl(true);
 }
 
 void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye) {
@@ -298,6 +296,9 @@ void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye) {
 }
 
 void oledBackligthCtl(bool state) {
+  gpio_mode_setup(OLED_CTRL_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLDOWN,
+                  OLED_CTRL_PIN);
+
   if (!state) {
     gpio_clear(OLED_CTRL_PORT, OLED_CTRL_PIN);
   } else {
@@ -602,12 +603,22 @@ void oledDrawString(int x, int y, const char *text, uint8_t font) {
   if (!text) return;
   int space = (font & FONT_DOUBLE) ? 2 : 1;
   int l = 0;
+#if ONEKEY_MINI
+  x += MINI_ADJUST;
+#endif
+
   for (; *text; text++) {
     uint8_t c = convert_char(*text);
     if (c) {
       l = fontCharWidth(font & 0x7f, c) + space;
+#if ONEKEY_MINI
+      if (x + l > OLED_WIDTH - MINI_ADJUST) {
+        x = MINI_ADJUST;
+#else
       if (x + l > OLED_WIDTH) {
         x = 0;
+#endif
+
         y += 9;
       }
       if (y > OLED_HEIGHT) y = 0;

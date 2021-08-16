@@ -96,6 +96,13 @@ extern Storage configUpdate;
 #endif
 #define MAX_AUTOLOCK_DELAY_MS 0x20000000U  // ~6 days
 
+#if !EMULATOR
+#define brightnessLow (100U)
+#define brightnessMedium (500U)
+#define brightnessHigh (1000U)
+#define brightnessDefault brightnessMedium
+#endif
+
 void config_init(void);
 void session_clear(bool lock);
 void session_endCurrentSession(void);
@@ -179,7 +186,10 @@ void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms);
 
 uint32_t config_getSleepDelayMs(void);
 void config_setSleepDelayMs(uint32_t auto_sleep_ms);
-
+#if ONEKEY_MINI
+uint32_t config_getBrightness(void);
+void config_setBrightness(uint32_t value);
+#endif
 void config_wipe(void);
 void config_setFastPayPinFlag(bool flag);
 bool config_getFastPayPinFlag(void);

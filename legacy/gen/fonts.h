@@ -6,11 +6,16 @@
 #define FONT_HEIGHT 8
 #define FONT_STANDARD 0
 
+#if ONEKEY_MINI
+#define FONT_FIXED FONT_STANDARD
+#define FONTS 1
+#else
 #ifndef FONT_SKIP_FIXED
 #define FONT_FIXED 1
 #define FONTS 2
 #else
 #define FONTS 1
+#endif
 #endif
 
 #define FONT_DOUBLE 0x80

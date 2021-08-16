@@ -19,7 +19,9 @@ endif
 OBJS += layout_boot.o
 
 # overrides from libtrezor
+ifneq ($(ONEKEY_MINI),1)
 CFLAGS += -DFONT_SKIP_FIXED=1
+endif
 OBJS += ../gen/fonts.small.o
 
 # overrides from trezor-crypto

@@ -289,11 +289,11 @@ bool verify_mnemonic(const char *mnemonic) {
   }
 
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 NULL, NULL,
-                                 _("Choose the correct words based on the "
-                                   "recovery phrase you've put down."),
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
+                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
+                                 NULL, NULL, NULL,
+                                 _("Choose the correct\nwords based on "
+                                   "the\nrecovery phrase\nyou've put down."),
                                  NULL);
 #else
   layoutDialogSwipeCenterAdapter(
@@ -317,18 +317,27 @@ bool verify_mnemonic(const char *mnemonic) {
 refresh_menu:
   i = 0;
   memzero(desc, sizeof(desc));
+#if ONEKEY_MINI
+  strcat(desc, _("Select word"));
+#else
   strcat(desc, _("Select your"));
+#endif
   strcat(desc, " #");
   uint2str(rand_list[index] + 1, desc + strlen(desc));
   strcat(desc, " ");
-#if ONEKEY_MINI
-  strcat(desc, _("recovery phrase"));
-#else
+#if !ONEKEY_MINI
   strcat(desc, _("mnemonic"));
 #endif
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
+
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
+                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
+                                 NULL, desc, NULL, NULL, NULL);
+#else
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
                                  &bmp_btn_confirm, _("Confirm"), NULL, NULL,
                                  NULL, desc, NULL, NULL, NULL);
+#endif
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
@@ -346,11 +355,19 @@ refresh_menu:
   random_order(words_order, 3);
 
 select_word:
+#if ONEKEY_MINI
+  layoutItemsSelectAdapter(
+      &bmp_btn_up, &bmp_btn_down, NULL, &bmp_button_forward, NULL, _("OK"),
+      i + 1, 3, NULL, NULL, mnemonic_get_word(words_order[i]),
+      i > 0 ? mnemonic_get_word(words_order[i - 1]) : NULL,
+      i < 2 ? mnemonic_get_word(words_order[i + 1]) : NULL);
+#else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),
       i + 1, 3, NULL, NULL, mnemonic_get_word(words_order[i]),
       i > 0 ? mnemonic_get_word(words_order[i - 1]) : NULL,
       i < 2 ? mnemonic_get_word(words_order[i + 1]) : NULL);
+#endif
 
   key = protectWaitKey(0, 0);
   switch (key) {
@@ -367,8 +384,9 @@ select_word:
 #if ONEKEY_MINI
         setRgbBitmap(true);
         layoutDialogSwipeCenterAdapter(
-            &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL,
-            NULL, NULL, NULL, NULL, NULL, _("Wrong recovery phrase"));
+            &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL,
+            NULL, NULL, NULL, NULL, NULL,
+            _("Incorrect recovery\nphrase, try again."));
 #else
         layoutDialogSwipeCenterAdapter(
             &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -396,9 +414,10 @@ select_word:
 
 #if ONEKEY_MINI
   setRgbBitmap(true);
-  layoutDialogSwipeCenterAdapter(
-      &bmp_icon_success, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"),
-      NULL, NULL, NULL, NULL, NULL, NULL, _("Recovery Phrase verified pass"));
+  layoutDialogSwipeCenterAdapter(&bmp_icon_success, &bmp_button_back, _("BACK"),
+                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
+                                 NULL, NULL, NULL, NULL,
+                                 _("Recovery Phrase\nverified pass"));
 #else
   layoutDialogSwipeCenterAdapter(&bmp_icon_ok, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
@@ -419,6 +438,7 @@ select_word:
 
 #if ONEKEY_MINI
 bool show_mnemonic(char words[24][12], uint32_t word_count) {
+  char desc[16] = "";
   uint8_t key = KEY_NULL;
   uint32_t i = 0, j = 0, pages = 0;
   const struct font_desc *font = find_cur_font();
@@ -433,8 +453,18 @@ refresh_menu:
   switch (i) {
     case 0:
       for (j = 0; j < WORD_PER_PAGE; j++) {
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, (j + 2) * (font->pixel + 1),
-                                    words[j], FONT_STANDARD);
+        memzero(desc, sizeof(desc));
+        uint2str(j + 1, desc);
+        strcat(desc, ". ");
+        strcat(desc, words[j]);
+        if ((j + 1) > 9) {
+          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
+                                (j + 2) * (font->pixel + 1), desc,
+                                FONT_STANDARD);
+        } else {
+          oledDrawStringAdapter(OLED_WIDTH / 4, (j + 2) * (font->pixel + 1),
+                                desc, FONT_STANDARD);
+        }
       }
       oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
       break;
@@ -442,9 +472,13 @@ refresh_menu:
       oledDrawBitmap(OLED_WIDTH / 2, 0, &bmp_btn_up);
       for (j = 0; j < WORD_PER_PAGE; j++) {
         if ((j + WORD_PER_PAGE) < word_count) {
-          oledDrawStringCenterAdapter(OLED_WIDTH / 2,
-                                      (j + 2) * (font->pixel + 1),
-                                      words[j + WORD_PER_PAGE], FONT_STANDARD);
+          memzero(desc, sizeof(desc));
+          uint2str(j + WORD_PER_PAGE + 1, desc);
+          strcat(desc, ". ");
+          strcat(desc, words[j + WORD_PER_PAGE]);
+          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
+                                (j + 2) * (font->pixel + 1), desc,
+                                FONT_STANDARD);
         }
       }
       if (pages > 2) {
@@ -457,9 +491,13 @@ refresh_menu:
       oledDrawBitmap(OLED_WIDTH / 2, 0, &bmp_btn_up);
       for (j = 0; j < WORD_PER_PAGE; j++) {
         if ((j + WORD_PER_PAGE * 2) < word_count) {
-          oledDrawStringCenterAdapter(
-              OLED_WIDTH / 2, (j + 2) * (font->pixel + 1),
-              words[j + WORD_PER_PAGE * 2], FONT_STANDARD);
+          memzero(desc, sizeof(desc));
+          uint2str(j + WORD_PER_PAGE * 2 + 1, desc);
+          strcat(desc, ". ");
+          strcat(desc, words[j + WORD_PER_PAGE * 2]);
+          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
+                                (j + 2) * (font->pixel + 1), desc,
+                                FONT_STANDARD);
         }
       }
       layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
@@ -522,7 +560,7 @@ refresh_menu:
     uint2str(i + 1, desc + strlen(desc));
 #if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterFont(
-        NULL, &bmp_btn_back, _("Prev"), &bmp_btn_confirm, _("Confirm"), NULL,
+        NULL, &bmp_btn_back, NULL, &bmp_btn_confirm, NULL, NULL,
         FONT_STANDARD | FONT_DOUBLE, NULL, NULL, desc, NULL, NULL, words[i]);
 #else
     layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Prev"),
@@ -584,12 +622,13 @@ bool writedown_mnemonic(const char *mnemonic) {
 
 write_mnemonic:
 #if ONEKEY_MINI
-  if (scroll_mnemonic(_("Recovery Phrase"), mnemonic, 0)) {
+  if (scroll_mnemonic(_("Word"), mnemonic, 0)) {
     layoutDialogSwipeCenterAdapter(
-        NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-        NULL, NULL,
-        _("Check the recovery phrase once more, and compare it to the backup "
-          "copy in your hand. Make sure the spelling and order are identical."),
+        NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+        NULL, NULL, NULL,
+        _("Check the recovery\nphrase once more and\ncompare it to the\nbackup "
+          "copy "
+          "in your\nhand. Make sure the\nspelling and order\nare identical."),
         NULL, NULL);
 #else
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
@@ -636,9 +675,10 @@ bool reset_on_device(void) {
 
 prompt_creat:
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, NULL, NULL, NULL, _("Follow the guide to create new wallet"));
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
+                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
+                                 NULL, NULL, NULL, NULL,
+                                 _("Follow the guide to\ncreate a new wallet"));
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
@@ -673,15 +713,15 @@ select_mnemonic_count:
 
 #if ONEKEY_MINI
   if (words_count == 12)
-    strcat(desc, _("Please copy the following 12 words in order"));
+    strcat(desc, _("Please copy the\nfollowing 12 words in\norder"));
   else if (words_count == 18)
-    strcat(desc, _("Please copy the following 18 words in order"));
+    strcat(desc, _("Please copy the\nfollowing 18 words in\norder"));
   else
-    strcat(desc, _("Please copy the following 24 words in order"));
+    strcat(desc, _("Please copy the\nfollowing 24 words in\norder"));
 
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 NULL, NULL, desc, NULL);
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
+                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
+                                 NULL, NULL, NULL, desc, NULL);
 #else
   strcat(desc, _("Write down your "));
   uint2str(words_count, desc + strlen(desc));

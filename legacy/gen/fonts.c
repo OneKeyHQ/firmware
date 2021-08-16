@@ -1,6 +1,11 @@
 #include "fonts.h"
 
 const uint8_t *const font_data[FONTS][128 - 32] = {
+#if ONEKEY_MINI
+    {
+#include "fontfixed.inc"
+    },
+#else
     {
 #include "font.inc"
     },
@@ -8,6 +13,7 @@ const uint8_t *const font_data[FONTS][128 - 32] = {
     {
 #include "fontfixed.inc"
     },
+#endif
 #endif
 };
 

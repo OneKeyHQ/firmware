@@ -36,7 +36,7 @@
 #define DISP_PAGESIZE (96)
 
 #if ONEKEY_MINI
-#define WORD_PER_PAGE 8
+#define WORD_PER_PAGE 10
 #endif
 
 extern void *layoutLast;
@@ -195,16 +195,16 @@ void layoutItemsSelectAdapterEx(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                 const BITMAP *bmp_no, const BITMAP *bmp_yes,
                                 const char *btnNo, const char *btnYes,
                                 uint32_t index, uint32_t count,
-                                const char *title, const char *line1,
-                                const char *line2, const char *line3,
-                                const char *line4, const char *line5,
-                                const char *line6);
+                                const char *title, const char *desc,
+                                const char *line1, const char *line2,
+                                const char *line3, const char *line4,
+                                const char *line5, const char *line6);
 
-#define layoutMenuItemsEx(btn_yes, bmp_yes, index, count, title, line1, line2, \
-                          line3, line4, line5, line6)                          \
-  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_btn_back,        \
-                             bmp_yes, _("Back"), btn_yes, index, count, title, \
-                             line1, line2, line3, line4, line5, line6)
+#define layoutMenuItemsEx(btn_yes, bmp_yes, index, count, title, desc, line1, \
+                          line2, line3, line4, line5, line6)                  \
+  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_button_back,    \
+                             bmp_yes, NULL, btn_yes, index, count, title,     \
+                             desc, line1, line2, line3, line4, line5, line6)
 
 void layoutItemsSelectAdapterLeft(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                   const BITMAP *bmp_no, const BITMAP *bmp_yes,

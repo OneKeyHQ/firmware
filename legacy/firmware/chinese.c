@@ -64,14 +64,31 @@ int oledStringWidthEx(const char *text, uint8_t font) {
 void oledDrawStringEx(int x, int y, const char *text, uint8_t font) {
   int steps = 0;
   int l = 0;
+  uint8_t char_width = 0;
+  uint8_t height = font_get_height();
+  const uint8_t *char_data = font_get_data((uint8_t *)text, &char_width);
+  if (!char_data) {
+    height = char_width = 8;
+  }
+
   while (*text) {
     if ((uint8_t)*text < 0x80) {
       l = fontCharWidth(font & 0x7f, *text) + ((font & FONT_DOUBLE) ? 2 : 1);
+      if (x + l > (OLED_WIDTH - MINI_ADJUST) || (*text == '\n')) {
+        x = MINI_ADJUST;
+        y += height + 1;
+      }
+      if (y > OLED_HEIGHT) y = 0;
       oledDrawChar(x, y, *text, font);
       x += l;
       text++;
     } else {
       steps = utf8_get_size(*text);
+      if (x + char_width > (OLED_WIDTH - MINI_ADJUST) || (*text == '\n')) {
+        x = MINI_ADJUST;
+        y += height + 1;
+      }
+      if (y > OLED_HEIGHT) y = 0;
       l = oledDrawCharEx(x, y, text, font);
       text += steps;
       x += l;
@@ -144,6 +161,9 @@ int oledStringWidthAdapter(const char *text, uint8_t font) {
 void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
   if (!text) return;
 #if ONEKEY_MINI
+  x += MINI_ADJUST;
+#endif
+#if ONEKEY_MINI
   if (font_imported() && !device_is_factory_mode()) {
     oledDrawStringEx(x, y, text, font);
   } else
@@ -156,8 +176,13 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
     while (*text) {
       if ((uint8_t)*text < 0x80) {
         l = fontCharWidth(font & 0x7f, *text) + space;
+#if ONEKEY_MINI
+        if (x + l > (OLED_WIDTH - MINI_ADJUST) || (*text == '\n')) {
+          x = MINI_ADJUST;
+#else
         if (x + l > OLED_WIDTH || (*text == '\n')) {
           x = 0;
+#endif
           y += font_desc->pixel + 1;
         }
         if (y > OLED_HEIGHT) y = 0;
@@ -168,8 +193,14 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
         if (font_desc_bak->idx == DEFAULT_IDX) {
           font_desc_bak = find_font("dingmao_9x9");
         }
+#if ONEKEY_MINI
+        if (x + font_desc_bak->width > (OLED_WIDTH - MINI_ADJUST) ||
+            (*text == '\n')) {
+          x = MINI_ADJUST;
+#else
         if (x + font_desc_bak->width > OLED_WIDTH || (*text == '\n')) {
           x = 0;
+#endif
           y += font_desc_bak->pixel + 1;
         }
         if (y > OLED_HEIGHT) y = 0;

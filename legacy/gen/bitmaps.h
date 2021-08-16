@@ -3,30 +3,24 @@
 
 #include <stdint.h>
 
-#define BITMAP_RGB_MAX (16 * 16 * 2)
-
 typedef struct {
   uint8_t width, height;
   const uint8_t *data;
 } BITMAP;
 
-typedef struct {
-  uint8_t width, height;
-  uint8_t *data;
-} BITMAP_EX;
-
 extern const BITMAP bmp_BiXin_logo32;
+extern const BITMAP bmp_boot_icon;
 extern const BITMAP bmp_btn_back;
 extern const BITMAP bmp_btn_cancel;
 extern const BITMAP bmp_btn_confirm;
 extern const BITMAP bmp_btn_down;
 extern const BITMAP bmp_btn_forward;
 extern const BITMAP bmp_btn_retry;
+extern const BITMAP bmp_btn_up;
 extern const BITMAP bmp_button_back;
 extern const BITMAP bmp_button_down;
 extern const BITMAP bmp_button_forward;
 extern const BITMAP bmp_button_up;
-extern const BITMAP bmp_btn_up;
 extern const BITMAP bmp_digit0;
 extern const BITMAP bmp_digit1;
 extern const BITMAP bmp_digit2;
@@ -56,8 +50,5 @@ extern const BITMAP bmp_logo48_empty;
 extern const BITMAP bmp_logo64;
 extern const BITMAP bmp_logo64_empty;
 extern const BITMAP bmp_webauthn;
-
-extern const BITMAP bmp_icon_forbid;
-extern const BITMAP bmp_icon_success;
 
 #endif

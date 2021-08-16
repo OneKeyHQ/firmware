@@ -2,10 +2,166 @@
 #include "prompt.h"
 
 #if ONEKEY_MINI
-#define PRODUCT_STRING "Onekey_Mini"
+#include "../atca/se_atca.h"
+#include "buttons.h"
+#include "device.h"
+#include "memory.h"
+#include "signatures.h"
+#include "util.h"
+#include "w25qxx.h"
+
+#define FONT_HEIGHT 8
+
+void layoutBootDevParam(void) {
+  char *serial;
+  int y = 0;
+  int index = 0;
+  char desc[24] = "";
+  uint8_t jedec_id;
+  uint8_t key = KEY_NULL;
+
+refresh_menu:
+  y = 9;
+  oledClear();
+
+  switch (index) {
+    case 0:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+
+      oledDrawString(0, y, "SERIAL:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      if (device_get_serial(&serial)) {
+        oledDrawString(0, y, serial, FONT_STANDARD);
+      }
+
+      y += FONT_HEIGHT + 1;
+      y += FONT_HEIGHT + 1;
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, "MODAL NAME:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, PRODUCT_STRING, FONT_STANDARD);
+
+      memset(desc, 0, 24);
+      const image_header *hdr =
+          (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
+      uint2str(hdr->version, desc);
+      y += FONT_HEIGHT + 1;
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, "FIRMWARE:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, desc, FONT_STANDARD);
+
+      y += FONT_HEIGHT + 1;
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, "SE:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, SE_NAME, FONT_STANDARD);
+
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
+                     &bmp_btn_down);
+      break;
+    case 1:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+
+      memset(desc, 0, 24);
+      strcat(desc, ST_NAME);
+      strcat(desc, "-");
+      strcat(desc, "1.0.0");  // get factory version
+      oledDrawString(0, y, "ST:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, desc, FONT_STANDARD);
+
+      jedec_id = (w25qxx_read_id() >> 16) & 0xff;
+      y += FONT_HEIGHT + 1;
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, "FLASH:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      memset(desc, 0, 24);
+      if (jedec_id == MF_ID_WB) {
+        strcat(desc, "WB-");
+      } else if (jedec_id == MF_ID_GD) {
+        strcat(desc, "GD-");
+      } else {
+        // Unknown Manufacturer
+        data2hex(&jedec_id, 1, desc);
+        strcat(desc, "-");
+      }
+      strncat(desc, w25qxx_get_desc(), 3);
+      oledDrawString(0, y, desc, FONT_STANDARD);
+
+      y += FONT_HEIGHT + 1;
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y, "BOOTLOADER:", FONT_STANDARD);
+      y += FONT_HEIGHT + 1;
+      oledDrawString(0, y,
+                     VERSTR(VERSION_MAJOR) "." VERSTR(VERSION_MINOR) "." VERSTR(
+                         VERSION_PATCH),
+                     FONT_STANDARD);
+      break;
+    default:
+      break;
+  }
+
+  oledRefresh();
+  key = waitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) {
+        index--;
+      } else {
+        break;
+      }
+      goto refresh_menu;
+    case KEY_DOWN:
+      if (index < 1) {
+        index++;
+      }
+      goto refresh_menu;
+    case KEY_CONFIRM:
+    case KEY_CANCEL:
+      goto refresh_menu;
+    default:
+      return;
+  }
+}
+
+void layoutBootHome(void) {
+  uint8_t key = KEY_NULL;
+  char buf[64] = "";
+
+  if (layoutNeedRefresh()) {
+    strcat(buf, "BOOTLOADER ");
+    strcat(buf, VERSTR(VERSION_MAJOR) "." VERSTR(VERSION_MINOR) "." VERSTR(
+                    VERSION_PATCH));
+
+  refresh:
+    oledClear();
+    oledDrawStringCenter(63, 20, PRODUCT_STRING, FONT_STANDARD);
+    oledDrawStringCenter(63, 45, buf, FONT_STANDARD);
+    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 20, "Dashboard",
+                         FONT_STANDARD);
+    oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
+    oledRefresh();
+    oledBackligthCtl(true);
+
+    key = waitKey(0, 0);
+    switch (key) {
+      case KEY_DOWN:
+        layoutBootDevParam();
+        break;
+      case KEY_UP:
+      case KEY_CONFIRM:
+      case KEY_CANCEL:
+        break;
+      default:
+        return;
+    }
+
+    goto refresh;
+  }
+}
 #else
 #define PRODUCT_STRING "Onekey"
-#endif
 
 void layoutBootHome(void) {
   if (layoutNeedRefresh()) {
@@ -17,12 +173,10 @@ void layoutBootHome(void) {
                          VERSTR(VERSION_MAJOR) "." VERSTR(
                              VERSION_MINOR) "." VERSTR(VERSION_PATCH),
                          FONT_STANDARD);
-#if !ONEKEY_MINI
     layoutFillBleName(7);
-#endif
     oledRefresh();
   }
-#if !ONEKEY_MINI
+
   static uint32_t system_millis_logo_refresh = 0;
   // 1000 ms refresh
   if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
@@ -31,5 +185,5 @@ void layoutBootHome(void) {
     system_millis_logo_refresh = timer_ms();
 #endif
   }
-#endif
 }
+#endif

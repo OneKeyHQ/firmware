@@ -26,7 +26,7 @@ void menu_recovery_device(int index) {
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
-        NULL, NULL, NULL, NULL, _("Wallet Recovery Success"));
+        NULL, NULL, NULL, NULL, _("Wallet restored\nsuccessfully"));
 #else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
@@ -52,7 +52,7 @@ void menu_reset_device(int index) {
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
-        NULL, NULL, NULL, NULL, _("Wallet created success"));
+        NULL, NULL, NULL, NULL, _("Wallet created\nsuccessfully"));
 #else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
@@ -91,15 +91,23 @@ refresh_menu:
       len = oledStringWidthAdapter(_("Press"), FONT_STANDARD);
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
+#if ONEKEY_MINI
+      strcat(desc, "      ");
+#else
       strcat(desc, "        ");
-      strcat(desc, _("to scroll up"));
+#endif
+      strcat(desc, _("Previous Page"));
       // English
       if (desc[0] == 'P')
+#if ONEKEY_MINI
+        offset = 2;
+#else
         offset = 10;
+#endif
       else
         offset = 20;
 #if ONEKEY_MINI
-      oledDrawBitmap(offset + len + 2, 20, &bmp_button_up);
+      oledDrawBitmap(offset + len + 6, 20, &bmp_button_up);
 #else
       oledDrawBitmap(offset + len + 2, 16, &bmp_icon_up);
 #endif
@@ -108,10 +116,14 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
 
       strcat(desc, _("Press"));
-      strcat(desc, "        ");
-      strcat(desc, _("to scroll down"));
 #if ONEKEY_MINI
-      oledDrawBitmap(offset + len + 2, 34, &bmp_button_down);
+      strcat(desc, "      ");
+#else
+      strcat(desc, "        ");
+#endif
+      strcat(desc, _("Next Page"));
+#if ONEKEY_MINI
+      oledDrawBitmap(offset + len + 6, 34, &bmp_button_down);
 #else
       oledDrawBitmap(offset + len + 2, 30, &bmp_icon_down);
 #endif
@@ -119,21 +131,33 @@ refresh_menu:
 #if ONEKEY_MINI
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
+#if ONEKEY_MINI
+      strcat(desc, "      ");
+#else
       strcat(desc, "        ");
-      strcat(desc, _("to confirm "));
-      oledDrawBitmap(offset + len + 2, 48, &bmp_button_forward);
+#endif
+      strcat(desc, _("OK or Next"));
+      oledDrawBitmap(offset + len + 6, 48, &bmp_button_forward);
       oledDrawStringAdapter(offset, 48, desc, FONT_STANDARD);
 
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
+#if ONEKEY_MINI
+      strcat(desc, "      ");
+#else
       strcat(desc, "        ");
-      strcat(desc, _("to cancel"));
+#endif
+      strcat(desc, _("Cancel or Next"));
       // English
       if (desc[0] == 'P')
+#if ONEKEY_MINI
+        offset = 2;
+#else
         offset = 10;
+#endif
       else
         offset = 20;
-      oledDrawBitmap(offset + len + 2, 62, &bmp_button_back);
+      oledDrawBitmap(offset + len + 6, 62, &bmp_button_back);
       oledDrawStringAdapter(offset, 62, desc, FONT_STANDARD);
 #endif
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
@@ -174,8 +198,8 @@ refresh_menu:
 #if ONEKEY_MINI
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,
                                   _("Download Onekey Apps"), FONT_STANDARD);
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "onekey.so/download",
-                                  FONT_STANDARD);
+      oledDrawStringAdapter(11, 6 * 10, "onekey.so/download", FONT_STANDARD);
+      oledBox(15, 70, 117, 70, true);
 #else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download Onekey"),
                                   FONT_STANDARD);
@@ -190,10 +214,11 @@ refresh_menu:
       oledDrawBitmap(60, 0, &bmp_btn_up);
       oledDrawStringCenterAdapter(
           OLED_WIDTH / 2, 3 * 10,
-          _("To learn more about how to use, go to the Help Center."),
+          _("To learn more about\nhow to use, go to the\nHelp Center"),
           FONT_STANDARD);
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "help.onekey.so",
-                                  FONT_STANDARD);
+      oledDrawStringAdapter(20, 7 * 10, "help.onekey.so", FONT_STANDARD);
+      oledBox(24, 80, 102, 80, true);
+      layoutButtonYesAdapter(_("OK"), &bmp_button_forward);
 #else
     case 3:
       oledDrawBitmap(60, 0, &bmp_btn_up);
@@ -210,7 +235,9 @@ refresh_menu:
                    "https://onekey.zendesk.com/hc/zh-cn/articles/360002123856");
       break;
   }
+#if !ONEKEY_MINI
   layoutButtonYesAdapter(_("Okay"), &bmp_btn_confirm);
+#endif
   oledRefresh();
   key = protectWaitKey(0, 0);
   switch (key) {
@@ -240,12 +267,12 @@ void menu_erase_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 NULL, NULL,
-                                 _("Before you reset the device, please ensure "
-                                   "you've backed up your recovery phrase"),
-                                 NULL);
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      NULL, NULL, NULL, NULL,
+      _("Before you reset the\ndevice, please ensure\nyou've backed up "
+        "your\nrecovery phrase"),
+      NULL);
 #else
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
@@ -261,10 +288,10 @@ void menu_erase_device(int index) {
   }
 #if ONEKEY_MINI
   layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL,
-      _("All data on the device will be erased if the device is reset, and "
-        "this operation cannot be reversed."),
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      NULL, NULL,
+      _("All data on the device\nwill be erased if the\ndevice is reset, "
+        "and\nthis operation cannot\nbe reversed."),
       NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
@@ -277,8 +304,9 @@ void menu_erase_device(int index) {
   }
 #if ONEKEY_MINI
   layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Reset "), NULL, NULL,
-      NULL, NULL, NULL, _("Are you sure you want to reset your device?"), NULL);
+      NULL, &bmp_button_back, _("BACK"), &bmp_btn_confirm, _("Reset "), NULL,
+      NULL, NULL, NULL, NULL, _("Are you sure you want\nto reset your device?"),
+      NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Reset "), NULL, NULL,
@@ -297,7 +325,7 @@ void menu_erase_device(int index) {
 #if ONEKEY_MINI
   layoutDialogSwipeCenterAdapter(
       &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-      NULL, NULL, NULL, _("Reset successfully. Please restart the device."),
+      NULL, NULL, NULL, _("Reset successfully.\nPlease restart the\ndevice."),
       NULL);
 #else
   layoutDialogSwipeCenterAdapter(
@@ -314,9 +342,16 @@ void menu_changePin(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
 
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      NULL, NULL, _("Before your start"), _("Check PIN Code"), NULL, NULL);
+#else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Next"), NULL, NULL,
       NULL, _("Before your start"), _("Check PIN Code"), NULL, NULL);
+#endif
+
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
@@ -377,7 +412,6 @@ static struct menu autolock_set_menu = {
     .previous = &settings_menu,
 };
 
-#if !ONEKEY_MINI
 static struct menu_item shutdown_set_menu_items[] = {
     {"10", "minute", true, menu_para_set_shutdown, NULL},
     {"30", "minutes", true, menu_para_set_shutdown, NULL},
@@ -393,6 +427,21 @@ static struct menu shutdown_set_menu = {
     .items = shutdown_set_menu_items,
     .previous = &settings_menu,
 };
+
+#if ONEKEY_MINI
+static struct menu_item brightness_set_menu_items[] = {
+    {"High", NULL, true, menu_para_set_brightness, NULL},
+    {"Medium", NULL, true, menu_para_set_brightness, NULL},
+    {"Low", NULL, true, menu_para_set_brightness, NULL}};
+
+static struct menu brightness_set_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(brightness_set_menu_items),
+    .title = NULL,
+    .items = brightness_set_menu_items,
+    .previous = &settings_menu,
+};
 #endif
 
 static struct menu_item settings_menu_items[] = {
@@ -401,15 +450,13 @@ static struct menu_item settings_menu_items[] = {
 #endif
     {"Language", NULL, false, .sub_menu = &language_set_menu,
      menu_para_language},
-#if ONEKEY_MINI
-    // todo:brightness
-    {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
-     menu_para_autolock},
-#else
     {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
      menu_para_autolock},
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
-     menu_para_shutdown}
+     menu_para_shutdown},
+#if ONEKEY_MINI
+    {"Brightness", NULL, false, .sub_menu = &brightness_set_menu,
+     menu_para_brightness}
 #endif
 };
 
@@ -438,9 +485,18 @@ static struct menu security_set_menu = {
 };
 
 static struct menu_item main_menu_items[] = {
+#if ONEKEY_MINI
+    {"Settings ", NULL, false, .sub_menu = &settings_menu, NULL},
+#else
     {"Settings", NULL, false, .sub_menu = &settings_menu, NULL},
+#endif
     {"Security", NULL, false, .sub_menu = &security_set_menu, NULL},
-    {"About", NULL, true, layoutDeviceParameters, NULL}};
+#if ONEKEY_MINI
+    {"About Device", NULL, true, layoutDeviceParameters, NULL}
+#else
+    {"About", NULL, true, layoutDeviceParameters, NULL}
+#endif
+};
 
 static struct menu main_menu = {
     .start = 0,
@@ -454,9 +510,15 @@ static struct menu main_menu = {
 
 static struct menu_item main_uninitialized_menu_items[] = {
     {"Guide", NULL, true, menu_manual, NULL},
+#if ONEKEY_MINI
+    {"Create New Wallet", NULL, true, menu_reset_device, NULL},
+    {"Restore Wallet", NULL, true, menu_recovery_device, NULL},
+    {"About Device", NULL, true, layoutDeviceParameters, NULL},
+#else
     {"Create", NULL, true, menu_reset_device, NULL},
     {"Restore", NULL, true, menu_recovery_device, NULL},
     {"About", NULL, true, layoutDeviceParameters, NULL},
+#endif
     {"Settings", NULL, false, .sub_menu = &settings_menu, NULL}};
 
 static struct menu main_uninitilized_menu = {

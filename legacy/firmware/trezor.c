@@ -36,6 +36,8 @@
 #include "util.h"
 #if !EMULATOR
 #if ONEKEY_MINI
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/timer.h>
 #include "device.h"
 #include "device2.h"
 #include "flash_enc.h"
@@ -142,6 +144,26 @@ static void collect_hw_entropy(bool privileged) {
 #endif
 }
 
+#if ONEKEY_MINI
+void pwm_config(void) {
+  uint32_t value = config_getBrightness();
+
+  gpio_mode_setup(OLED_CTRL_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, OLED_CTRL_PIN);
+  gpio_set_output_options(OLED_CTRL_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ,
+                          OLED_CTRL_PIN);
+  gpio_set_af(OLED_CTRL_PORT, GPIO_AF2, OLED_CTRL_PIN);
+
+  rcc_periph_clock_enable(RCC_TIM3);
+  timer_set_mode(TIM3, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
+  timer_set_oc_mode(TIM3, TIM_OC2, TIM_OCM_PWM1);
+  timer_enable_oc_output(TIM3, TIM_OC2);
+  timer_enable_break_main_output(TIM3);
+  timer_set_oc_value(TIM3, TIM_OC2, value);
+  timer_set_period(TIM3, 1000);
+  timer_enable_counter(TIM3);
+}
+#endif
+
 int main(void) {
 #ifndef APPVER
   setup();
@@ -222,6 +244,9 @@ int main(void) {
 #endif
 
   config_init();
+#if ONEKEY_MINI
+  pwm_config();
+#endif
   layoutHome();
   usbInit();
 

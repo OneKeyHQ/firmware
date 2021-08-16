@@ -47,6 +47,20 @@ char* menu_para_shutdown(void) {
 
 char* menu_para_autolock(void) { return format_time(config_getSleepDelayMs()); }
 
+char* menu_para_brightness(void) {
+  uint32_t value = config_getBrightness();
+  switch (value) {
+    case brightnessLow:
+      return _("Low");
+    case brightnessMedium:
+      return _("Medium");
+    case brightnessHigh:
+      return _("High");
+    default:
+      return _("Medium");
+  }
+}
+
 void menu_para_set_ble(int index) {
   bool ble_state = index ? false : true;
   if (ble_state != ble_get_switch()) {
@@ -68,4 +82,9 @@ void menu_para_set_shutdown(int index) {
 void menu_para_set_sleep(int index) {
   uint32_t ms[5] = {60 * 1000, 2 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000, 0};
   config_setSleepDelayMs(ms[index]);
+}
+
+void menu_para_set_brightness(int index) {
+  uint32_t value[3] = {brightnessHigh, brightnessMedium, brightnessLow};
+  config_setBrightness(value[index]);
 }

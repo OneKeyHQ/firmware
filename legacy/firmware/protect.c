@@ -38,6 +38,9 @@
 #include "sys.h"
 #include "usb.h"
 #include "util.h"
+#if ONEKEY_MINI
+#include <libopencm3/stm32/timer.h>
+#endif
 
 #define MAX_WRONG_PINS 15
 
@@ -299,6 +302,11 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
 
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char *message) {
+#if ONEKEY_MINI
+  (void)wait;
+  (void)progress;
+  (void)message;
+#else
   const struct font_desc *font = find_cur_font();
   int y = 9;
   // Convert wait to secstr string.
@@ -312,12 +320,8 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   }
 
   oledClear_ex();
-#if ONEKEY_MINI
-  y = 36;
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _(message), FONT_STANDARD);
-#else
+
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, _(message), FONT_STANDARD);
-#endif
   y += font->pixel + 1;
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Please wait"),
                               FONT_STANDARD);
@@ -336,6 +340,8 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   }
   oledBox(2, OLED_HEIGHT - 6, 1 + progress, OLED_HEIGHT - 3, 1);
   oledRefresh();
+#endif
+
   // Check for Cancel / Initialize.
   protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
   protectAbortedByInitialize =
@@ -383,8 +389,13 @@ bool protectChangePin(bool removal) {
   bool need_new_pin = true;
 
   if (config_hasPin()) {
+#if ONEKEY_MINI
+    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                     _("Verify PIN"), &newpin);
+#else
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
                      _("Please enter current PIN"), &newpin);
+#endif
 
     if (pin == NULL) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
@@ -415,8 +426,13 @@ bool protectChangePin(bool removal) {
 
   if (!removal) {
     if (!g_bIsBixinAPP || need_new_pin) {
+#if ONEKEY_MINI
+      pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
+                       _("Set new PIN"), &newpin);
+#else
       pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_NewFirst,
                        _("Please enter new PIN"), &newpin);
+#endif
     } else {
       if (newpin == NULL) {
         fsm_sendFailure(FailureType_Failure_PinExpected, NULL);
@@ -822,8 +838,13 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
+#if ONEKEY_MINI
+    pin = protectInputPin(_("Enter PIN code"), MIN_PIN_LEN, MAX_PIN_LEN,
+                          cancel_allowed);
+#else
     pin = protectInputPin(_("Please enter current PIN"), MIN_PIN_LEN,
                           MAX_PIN_LEN, cancel_allowed);
+#endif
     // input_pin = false;
     if (!pin) {
       return false;
@@ -852,8 +873,12 @@ pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
+#if ONEKEY_MINI
+    pin = protectInputPin(_("Verify PIN"), MIN_PIN_LEN, MAX_PIN_LEN, true);
+#else
     pin = protectInputPin(_("Please enter current PIN"), MIN_PIN_LEN,
                           MAX_PIN_LEN, true);
+#endif
 
     if (pin == NULL) {
       return false;
@@ -872,10 +897,10 @@ pin_set:
   } else {
 #if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterEx(
-        NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-        NULL, NULL,
-        _("Please set your PIN.\nPIN is the only way to unlock your device. "
-          "You can't retrieve your pin if you forget it."),
+        NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+        NULL, NULL, NULL,
+        _("Please set your PIN.\nPIN is used to unlock\nyour device. "
+          "Please\nkeep it safe."),
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(
@@ -889,8 +914,7 @@ pin_set:
   }
 retry:
 #if ONEKEY_MINI
-  pin = protectInputPin(_("Please set your PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
-                        true);
+  pin = protectInputPin(_("Set new PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN, true);
 #else
   pin = protectInputPin(_("Please enter new PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
                         true);
@@ -907,8 +931,8 @@ retry:
   strlcpy(new_pin, pin, sizeof(new_pin));
 
 #if ONEKEY_MINI
-  pin = protectInputPin(_("Enter your PIN again"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
-                        true);
+  pin =
+      protectInputPin(_("Enter PIN again"), DEFAULT_PIN_LEN, MAX_PIN_LEN, true);
 #else
   pin = protectInputPin(_("Please re-enter new PIN"), DEFAULT_PIN_LEN,
                         MAX_PIN_LEN, true);
@@ -927,9 +951,9 @@ retry:
     memzero(new_pin, sizeof(new_pin));
 #if ONEKEY_MINI
     setRgbBitmap(true);
-    layoutDialogSwipeCenterAdapter(
-        &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-        NULL, NULL, NULL, _("PINs do not match. Please enter again."), NULL);
+    layoutDialogSwipeCenterAdapter(&bmp_icon_forbid, NULL, NULL, &bmp_btn_retry,
+                                   _("RETRY"), NULL, NULL, NULL, NULL, NULL,
+                                   NULL, _("PINs do not match,\ntry again"));
 #else
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -970,7 +994,7 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
 #if ONEKEY_MINI
   char desc[64] = "";
   uint32_t index = 1;
-  strcat(desc, _("Please select the number of recovery phrase words you want"));
+  strcat(desc, _("Select the number of\nrecovery phrase word"));
 #else
   uint32_t index = 0;
 #endif
@@ -991,11 +1015,10 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
 
 refresh_menu:
 #if ONEKEY_MINI
-  layoutItemsSelectAdapterLeft(&bmp_btn_up, &bmp_btn_down, NULL,
-                               &bmp_btn_confirm, NULL, _("Okay"), index + 1, 3,
-                               NULL, desc, NULL, numbers[index],
-                               index > 0 ? numbers[index - 1] : NULL,
-                               index < 2 ? numbers[index + 1] : NULL);
+  layoutItemsSelectAdapterLeft(
+      &bmp_btn_up, &bmp_btn_down, NULL, NULL, NULL, NULL, index + 1, 3, NULL,
+      desc, NULL, numbers[index], index > 0 ? numbers[index - 1] : NULL,
+      index < 2 ? numbers[index + 1] : NULL);
 #else
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, _("Okay"), index + 1, 3, NULL, NULL,
@@ -1093,8 +1116,6 @@ void enter_sleep(void) {
     layoutBack = layoutLast;
     oledBufferLoad(oled_prev);
 #if ONEKEY_MINI
-    // close back light
-    gpio_clear(OLED_CTRL_PORT, OLED_CTRL_PIN);
     if (isRgbBitmap()) {
       setRgbBitmap(false);
       backup = true;
@@ -1102,6 +1123,11 @@ void enter_sleep(void) {
 #endif
     config_lockDevice();
   }
+
+#if ONEKEY_MINI
+  // close back light
+  timer_disable_oc_output(TIM3, TIM_OC2);
+#endif
 
   layoutScreensaver();
   if (sleep_count == 1) {
@@ -1117,11 +1143,11 @@ void enter_sleep(void) {
       return;
     }
     if (unlocked) {
+      layoutHomeEx();
 #if ONEKEY_MINI
       // open back light
-      gpio_set(OLED_CTRL_PORT, OLED_CTRL_PIN);
+      timer_enable_oc_output(TIM3, TIM_OC2);
 #endif
-      layoutHomeEx();
       key = protectWaitKey(0, 0);
       if (device_sleep_state == SLEEP_REENTER) {
         goto sleep_loop;
@@ -1163,6 +1189,10 @@ void enter_sleep(void) {
     }
 #endif
     oledRefresh();
+#if ONEKEY_MINI
+    // open back light
+    timer_enable_oc_output(TIM3, TIM_OC2);
+#endif
     device_sleep_state = SLEEP_NONE;
     return;
   }

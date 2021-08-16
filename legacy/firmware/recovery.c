@@ -795,11 +795,13 @@ static bool input_words(void) {
 refresh_menu:
   memzero(desc, sizeof(desc));
 #if ONEKEY_MINI
-  strcat(desc, _("Enter recovery phrase"));
+  strcat(desc, _("Enter word"));
+  strcat(desc, _(" #"));
 #else
   strcat(desc, _("Enter seed phrase "));
-#endif
   strcat(desc, _("#"));
+#endif
+
   uint2str(word_index + 1, desc + strlen(desc));
   memzero(letter_list, sizeof(letter_list));
   letter_count = mnemonic_next_letter_with_prefix(words[word_index], prefix_len,
@@ -866,8 +868,10 @@ bool recovery_on_device(void) {
 prompt_recovery:
 #if ONEKEY_MINI
   layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, NULL, NULL, _("Follow the guide to recover your wallet"), NULL);
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      NULL, NULL, NULL, NULL,
+      _("Follow the guide and\nenter recovery phrase\nto restore wallet."),
+      NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
@@ -888,21 +892,24 @@ select_mnemonic_count:
 #if ONEKEY_MINI
   switch (word_count) {
     case 12:
-      strcat(desc, _("Please enter your 12 words recovery phrase in order"));
+      strcat(desc,
+             _("Please enter your 12-\nwords recovery phrase\nin order."));
       break;
     case 18:
-      strcat(desc, _("Please enter your 18 words recovery phrase in order"));
+      strcat(desc,
+             _("Please enter your 18-\nwords recovery phrase\nin order."));
       break;
     case 24:
-      strcat(desc, _("Please enter your 24 words recovery phrase in order"));
+      strcat(desc,
+             _("Please enter your 24-\nwords recovery phrase\nin order."));
       break;
     default:
       break;
   }
 
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 NULL, NULL, desc, NULL);
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
+                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
+                                 NULL, NULL, NULL, desc, NULL);
 #else
   strcat(desc, _("Please enter your"));
   uint2str(word_count, desc + strlen(desc));
@@ -929,24 +936,24 @@ input_word:
 #if ONEKEY_MINI
   switch (word_count) {
     case 12:
-      strcat(desc, _("Check that the 12 words you entered are the correct "
-                     "recovery phrase"));
+      strcat(desc, _("Check the 12 words\nyou entered are the\ncorrect "
+                     "recovery\nphrase"));
       break;
     case 18:
-      strcat(desc, _("Check that the 18 words you entered are the correct "
-                     "recovery phrase"));
+      strcat(desc, _("Check the 18 words\nyou entered are the\ncorrect "
+                     "recovery\nphrase"));
       break;
     case 24:
-      strcat(desc, _("Check that the 24 words you entered are the correct "
-                     "recovery phrase"));
+      strcat(desc, _("Check the 24 words\nyou entered are the\ncorrect "
+                     "recovery\nphrase"));
       break;
     default:
       break;
   }
 
-  layoutDialogCenterAdapterEx(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
-                              _("Next"), NULL, NULL, NULL, desc, NULL, NULL,
-                              NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  layoutDialogCenterAdapterEx(
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      NULL, NULL, desc, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   strcat(desc, _("Check the entered "));
   uint2str(word_count, desc + strlen(desc));
@@ -966,7 +973,7 @@ check_word:
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-        NULL, NULL, NULL, NULL, _("Incorrect recovery phrase. Try again."));
+        NULL, NULL, NULL, NULL, _("Incorrect recovery\nphrase, try again."));
 #else
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -983,8 +990,8 @@ check_word:
 #if ONEKEY_MINI
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapter(
-      &bmp_icon_success, NULL, NULL, &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, NULL, NULL, NULL, _("Your wallet has successfully restored"));
+      &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("NEXT"), NULL, NULL,
+      NULL, NULL, NULL, NULL, _("Your wallet has\nsuccessfully restored"));
   protectWaitKey(0, 1);
   setRgbBitmap(false);
 #endif
