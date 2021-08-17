@@ -15,8 +15,8 @@ typedef struct __attribute__((packed)) {
 } DeviceSerialNo;
 
 typedef struct __attribute__((packed)) {
-  char serail[32];
-  char cpu[16];
+  char serial[32];
+  char cpu_info[16];
   char pre_firmware[16];
   char se_config[8];
   uint8_t st_id[12];

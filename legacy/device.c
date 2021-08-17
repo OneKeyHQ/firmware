@@ -38,10 +38,10 @@ void device_init(void) {
                  FLASH_OTP_BLOCK_SIZE);
 
   if (flash_otp_is_locked(FLASH_OTP_CPU_FIRMWARE_INFO)) {
-    strlcpy(dev_info.cpu,
+    strlcpy(dev_info.cpu_info,
             (char *)(FLASH_OTP_BASE +
                      FLASH_OTP_CPU_FIRMWARE_INFO * FLASH_OTP_BLOCK_SIZE),
-            sizeof(dev_info.cpu));
+            sizeof(dev_info.cpu_info));
     strlcpy(dev_info.pre_firmware,
             (char *)(FLASH_OTP_BASE +
                      FLASH_OTP_CPU_FIRMWARE_INFO * FLASH_OTP_BLOCK_SIZE +
@@ -54,9 +54,9 @@ void device_init(void) {
     return;
   }
   strlcpy(
-      dev_info.serail,
+      dev_info.serial,
       (char *)(FLASH_OTP_BASE + FLASH_OTP_DEVICE_SERIAL * FLASH_OTP_BLOCK_SIZE),
-      sizeof(dev_info.serail));
+      sizeof(dev_info.serial));
   serial_set = true;
   return;
 }
@@ -88,13 +88,13 @@ bool device_get_serial(char **serial) {
   if (!serial_set) {
     return false;
   }
-  *serial = dev_info.serail;
+  *serial = dev_info.serial;
   return true;
 }
 
 bool device_cpu_firmware_set(void) {
-  if ((0 < strlen(dev_info.cpu) &&
-       strlen(dev_info.cpu) < FLASH_OTP_BLOCK_SIZE / 2) &&
+  if ((0 < strlen(dev_info.cpu_info) &&
+       strlen(dev_info.cpu_info) < FLASH_OTP_BLOCK_SIZE / 2) &&
       (0 < strlen(dev_info.pre_firmware) &&
        strlen(dev_info.pre_firmware) < FLASH_OTP_BLOCK_SIZE / 2)) {
     return true;
@@ -125,7 +125,7 @@ bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver) {
 
 bool device_get_cpu_firmware(char **cpu_info, char **firmware_ver) {
   if (device_cpu_firmware_set()) {
-    *cpu_info = dev_info.cpu;
+    *cpu_info = dev_info.cpu_info;
     *firmware_ver = dev_info.pre_firmware;
   }
   return false;
