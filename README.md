@@ -21,11 +21,11 @@ See [CONTRIBUTING.md](docs/misc/contributing.md).
 
 Using [Conventional Commits](COMMITS.md) is strongly recommended and might be enforced in future.
 
-Also please have a look at the docs, either in the `docs` folder or at  [docs.trezor.io](https://docs.trezor.io) before contributing. The [misc](docs/misc/index.md) chapter should be read in particular because it contains some useful assorted knowledge.
+Also please have a look at the docs, either in the `docs` folder or at [docs.onekey.so](https://docs.onekey.so/) before contributing. The [misc](docs/misc/index.md) chapter should be read in particular because it contains some useful assorted knowledge.
 
 ## Security vulnerability disclosure
 
-Please report suspected security vulnerabilities in private to [security@satoshilabs.com](mailto:security@satoshilabs.com), also see [the disclosure section on the Trezor.io website](https://trezor.io/security/). Please do NOT create publicly viewable issues for suspected security vulnerabilities.
+Please report suspected security vulnerabilities in private to [hi@onekey.so](mailto:hi@onekey.so), Please do NOT create publicly viewable issues for suspected security vulnerabilities.
 
 ## Issue Labels
 
@@ -47,10 +47,6 @@ S2 Critical | Broken feature, workaround too complex & unacceptable
 S3 Major    | Broken feature, workaround acceptable
 S4 Low      | Functionality inconvenience or cosmetic issue
 
-## CI
-
-The complete test suite is running on a public [GitLab CI](https://gitlab.com/satoshilabs/trezor/trezor-firmware). If you are an external contributor, we also have a [Travis instance](https://travis-ci.org/trezor/trezor-firmware) where a small subset of tests is running as well - mostly style and easy fast checks, which are quite common to fail for new contributors.
-
 ## Documentation
 
-See the `docs` folder or visit [docs.trezor.io](https://docs.trezor.io).
+See the `docs` folder or visit [docs.onekey.so](https://docs.onekey.so/) .
