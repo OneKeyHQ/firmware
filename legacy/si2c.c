@@ -101,7 +101,7 @@ void i2c_slave_init(void) {
 
   memset(i2c_data_out, 0x00, SI2C_BUF_MAX_OUT_LEN);
 }
-
+#if !ONEKEY_MINI
 static void i2c_delay(void) {
   volatile uint32_t i = 1000;
   while (i--)
@@ -109,6 +109,7 @@ static void i2c_delay(void) {
 }
 
 extern uint32_t flash_pos;
+
 void i2c2_ev_isr() {
   uint32_t sr1, sr2;
   static uint8_t dir = 0;  // 0-receive 1-send
@@ -157,6 +158,7 @@ void i2c2_ev_isr() {
   }
 }
 void i2c2_er_isr(void) {}
+#endif
 
 void i2c_set_wait(bool flag) { wait_response = flag; }
 
