@@ -866,7 +866,7 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
       }
     }
 #endif
-  } else 
+  } else
 #endif
   {
     if (sectrue != storage_set(KEY_MNEMONIC, mnemonic,
@@ -946,8 +946,8 @@ bool config_getMnemonic(char *dest, uint16_t dest_size) {
     const char *mnemonic = mnemonic_from_data(seed, strength / 8);
     strlcpy(dest, mnemonic, dest_size);
     return true;
-  } else 
-  #endif
+  } else
+#endif
   {
     return sectrue == config_get_string(KEY_MNEMONIC, dest, dest_size);
   }
@@ -989,7 +989,7 @@ bool config_containsMnemonic(const char *mnemonic) {
       return false;
     }
   }
-  #endif
+#endif
 
   // Compare the digests to mitigate side-channel attacks.
   uint8_t digest_stored[SHA256_DIGEST_LENGTH] = {0};
@@ -1028,7 +1028,7 @@ bool config_unlock(const char *pin) {
       return false;
     }
 
-  } else 
+  } else
 #endif
   {
     char oldTiny = usbTiny(1);
@@ -1042,7 +1042,7 @@ bool config_hasPin(void) {
 #if !EMULATOR
   if (g_bSelectSEFlag) {
     return se_hasPin();
-  } else 
+  } else
 #endif
   {
     return sectrue == storage_has_pin();
@@ -1069,7 +1069,7 @@ bool config_changePin(const char *old_pin, const char *new_pin) {
       se_unlocked = secfalse;
       return false;
     }
-  } else 
+  } else
 #endif
   {
     char oldTiny = usbTiny(1);
@@ -1178,7 +1178,7 @@ bool session_isUnlocked(void) {
       return true;
     }
 
-  } else 
+  } else
 #endif
   {
     return sectrue == storage_is_unlocked();
@@ -1190,7 +1190,7 @@ bool config_isInitialized(void) {
 #if !EMULATOR
   if (g_bSelectSEFlag) {
     initialized = se_isInitialized();
-  } else 
+  } else
 #endif
   {
     config_get_bool(KEY_INITIALIZED, &initialized);
@@ -1481,7 +1481,7 @@ uint32_t config_getPinFails(void) {
 #if !EMULATOR
   if (g_bSelectSEFlag) {
     count = se_pinFailedCounter();
-  } else 
+  } else
 #endif
   {
     pin_get_fails(&count);

@@ -708,7 +708,7 @@ select_mnemonic_count:
 #endif
     memcpy(int_entropy, seed, 32);
     se_setSeedStrength(strength);
-  } else 
+  } else
 #endif
   {
     random_buffer(int_entropy, 32);

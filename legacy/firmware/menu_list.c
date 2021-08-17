@@ -48,7 +48,7 @@ void menu_reset_device(int index) {
   }
   reset_on_device();
   if (config_isInitialized()) {
-#if ONEKEY_MINI 
+#if ONEKEY_MINI
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
