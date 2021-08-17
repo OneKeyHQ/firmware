@@ -1,12 +1,11 @@
-# Contribute to Trezor Firmware
+# Contribute to OneKey Firmware
 
 Please read the general instructions you can find on our
-[wiki](https://wiki.trezor.io/Developers_guide:Contributing).
 
 Your Pull Request should follow these criteria:
 
 - The code is properly tested.
-- Tests must pass on [CI](https://travis-ci.org/trezor/trezor-firmware).
+- Tests must pass on CI.
 - The code is properly formatted. Use `make style_check` to check the format
   and `make style` to do the required changes.
 - The generated files are up-to-date. Use `make gen` in repository root to make
