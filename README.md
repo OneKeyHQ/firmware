@@ -33,10 +33,10 @@ Please report suspected security vulnerabilities in private to [hi@onekey.so](ma
 
 Label     | Meaning (SLA)
 ----------|--------------
-P1 Urgent | The current release + potentially immediate hotfix (30 days)
-P2 High   | The next release (60 days)
-P3 Medium | Within the next 3 releases (90 days)
-P4 Low    | Anything outside the next 3 releases (120 days)
+P0 Urgent | The current release + potentially immediate hotfix (7 days)
+P1 High   | The next release (30 days)
+P2 Medium | Within the next 3 releases (45 days)
+P3 Low    | Anything outside the next 3 releases (60 days)
 
 #### Severity
 
