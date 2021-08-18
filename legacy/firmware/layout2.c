@@ -1796,21 +1796,18 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
 }
 
 #if ONEKEY_MINI
-void layoutDialogSwipeCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
-                                      const char *btnNo, const BITMAP *bmp_yes,
-                                      const char *btnYes, const char *desc,
-                                      bool center_align,
-                                      const char *line1, const char *line2,
-                                      const char *line3, const char *line4,
-                                      const char *line5, const char *line6,
-                                      const char *line7, const char *line8,
-                                      const char *line9, const char *line10,
-                                      const char *line11, const char *line12) {
+void layoutDialogSwipeCenterAdapterEx(
+    const BITMAP *icon, const BITMAP *bmp_no, const char *btnNo,
+    const BITMAP *bmp_yes, const char *btnYes, const char *desc,
+    bool center_align, const char *line1, const char *line2, const char *line3,
+    const char *line4, const char *line5, const char *line6, const char *line7,
+    const char *line8, const char *line9, const char *line10,
+    const char *line11, const char *line12) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  layoutDialogCenterAdapterEx(icon, bmp_no, btnNo, bmp_yes, btnYes, desc, center_align,
-                              line1,line2, line3, line4, line5, line6, line7, line8,
-                              line9, line10, line11, line12);
+  layoutDialogCenterAdapterEx(
+      icon, bmp_no, btnNo, bmp_yes, btnYes, desc, center_align, line1, line2,
+      line3, line4, line5, line6, line7, line8, line9, line10, line11, line12);
 }
 
 void layoutDialogSwipeCenterAdapterFont(
@@ -2020,16 +2017,13 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
 }
 
 #if ONEKEY_MINI
-void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
-                                 const char *btnNo, const BITMAP *bmp_yes,
-                                 const char *btnYes, const char *desc,
-                                 bool center_align,
-                                 const char *line1, const char *line2,
-                                 const char *line3, const char *line4,
-                                 const char *line5, const char *line6,
-                                 const char *line7, const char *line8,
-                                 const char *line9, const char *line10,
-                                 const char *line11, const char *line12) {
+void layoutDialogCenterAdapterEx(
+    const BITMAP *icon, const BITMAP *bmp_no, const char *btnNo,
+    const BITMAP *bmp_yes, const char *btnYes, const char *desc,
+    bool center_align, const char *line1, const char *line2, const char *line3,
+    const char *line4, const char *line5, const char *line6, const char *line7,
+    const char *line8, const char *line9, const char *line10,
+    const char *line11, const char *line12) {
   const struct font_desc *font = find_cur_font();
 
   oledClear_ex();
@@ -2040,48 +2034,48 @@ void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
   } else {
     if (line1) {
       if (center_align)
-        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 0 * (font->pixel + 1), line1,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 0 * (font->pixel + 1),
+                                      line1, FONT_STANDARD);
       else
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0 * (font->pixel + 1), line1,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0 * (font->pixel + 1),
+                                    line1, FONT_STANDARD);
     }
 
     if (line2) {
       if (center_align)
-        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 1 * (font->pixel + 1), line2,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 1 * (font->pixel + 1),
+                                      line2, FONT_STANDARD);
       else
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 1 * (font->pixel + 1), line2,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 1 * (font->pixel + 1),
+                                    line2, FONT_STANDARD);
     }
 
     if (line3) {
       if (center_align)
-        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 2 * (font->pixel + 1), line3,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 2 * (font->pixel + 1),
+                                      line3, FONT_STANDARD);
       else
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * (font->pixel + 1), line3,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * (font->pixel + 1),
+                                    line3, FONT_STANDARD);
     }
   }
 
   if (line4) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 3 * (font->pixel + 1), line4,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 3 * (font->pixel + 1),
+                                    line4, FONT_STANDARD);
     else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * (font->pixel + 1), line4,
-                                FONT_STANDARD);
+                                  FONT_STANDARD);
   }
 
   if (desc) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font->pixel),
-                                desc, FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(
+          OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font->pixel), desc, FONT_STANDARD);
     else
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font->pixel),
-                                desc, FONT_STANDARD);
+      oledDrawStringCenterAdapter(
+          OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font->pixel), desc, FONT_STANDARD);
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - 2 * (font->pixel) - 1);
     }
@@ -2089,75 +2083,75 @@ void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
   } else {
     if (line5) {
       if (center_align)
-        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 4 * (font->pixel + 1), line5,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 4 * (font->pixel + 1),
+                                      line5, FONT_STANDARD);
       else
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1), line5,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1),
+                                    line5, FONT_STANDARD);
     }
 
     if (line6) {
       if (center_align)
-        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 5 * (font->pixel + 1), line6,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 5 * (font->pixel + 1),
+                                      line6, FONT_STANDARD);
       else
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1), line6,
-                                  FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1),
+                                    line6, FONT_STANDARD);
     }
   }
 
   if (line7) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 6 * (font->pixel + 1), line7,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 6 * (font->pixel + 1),
+                                    line7, FONT_STANDARD);
     else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * (font->pixel + 1), line7,
-                                FONT_STANDARD);
+                                  FONT_STANDARD);
   }
 
   if (line8) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 7 * (font->pixel + 1), line8,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 7 * (font->pixel + 1),
+                                    line8, FONT_STANDARD);
     else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 7 * (font->pixel + 1), line8,
-                                FONT_STANDARD);
+                                  FONT_STANDARD);
   }
 
   if (line9) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 8 * (font->pixel + 1), line9,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 8 * (font->pixel + 1),
+                                    line9, FONT_STANDARD);
     else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 8 * (font->pixel + 1), line9,
-                                FONT_STANDARD);
+                                  FONT_STANDARD);
   }
 
   if (line10) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 9 * (font->pixel + 1), line10,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 9 * (font->pixel + 1),
+                                    line10, FONT_STANDARD);
     else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * (font->pixel + 1), line10,
-                                FONT_STANDARD);
+                                  FONT_STANDARD);
   }
 
   if (line11) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 10 * (font->pixel + 1), line11,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 10 * (font->pixel + 1),
+                                    line11, FONT_STANDARD);
     else
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10 * (font->pixel + 1), line11,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 10 * (font->pixel + 1),
+                                  line11, FONT_STANDARD);
   }
 
   if (line12) {
     if (center_align)
-      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 11 * (font->pixel + 1), line12,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapterEx(OLED_WIDTH / 2, 11 * (font->pixel + 1),
+                                    line12, FONT_STANDARD);
     else
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 11 * (font->pixel + 1), line12,
-                                FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 11 * (font->pixel + 1),
+                                  line12, FONT_STANDARD);
   }
 
   if (btnNo) {

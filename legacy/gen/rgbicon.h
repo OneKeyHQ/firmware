@@ -12,5 +12,6 @@ typedef struct {
 
 extern const BITMAP bmp_icon_forbid;
 extern const BITMAP bmp_icon_success;
+extern const BITMAP bmp_icon_warn;
 
 #endif

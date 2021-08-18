@@ -24,9 +24,10 @@ void menu_recovery_device(int index) {
   if (config_isInitialized()) {
 #if ONEKEY_MINI
     setRgbBitmap(true);
-    layoutDialogSwipeCenterAdapter(
-        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
-        NULL, NULL, NULL, NULL, _("Wallet restored\nsuccessfully"));
+    layoutDialogSwipeCenterAdapterEx(
+        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, true,
+        NULL, NULL, NULL, NULL, NULL, NULL, _("Wallet restored\nsuccessfully"),
+        NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
@@ -50,9 +51,10 @@ void menu_reset_device(int index) {
   if (config_isInitialized()) {
 #if ONEKEY_MINI
     setRgbBitmap(true);
-    layoutDialogSwipeCenterAdapter(
-        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
-        NULL, NULL, NULL, NULL, _("Wallet created\nsuccessfully"));
+    layoutDialogSwipeCenterAdapterEx(
+        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, true,
+        NULL, NULL, NULL, NULL, NULL, _("Wallet created\nsuccessfully"), NULL,
+        NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
@@ -303,16 +305,21 @@ void menu_erase_device(int index) {
     return;
   }
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_button_back, _("BACK"), &bmp_btn_confirm, _("Reset "), NULL,
-      NULL, NULL, NULL, NULL, _("Are you sure you want\nto reset your device?"),
-      NULL);
+  setRgbBitmap(true);
+  layoutDialogSwipeCenterAdapterEx(
+      &bmp_icon_warn, &bmp_button_back, _("BACK"), &bmp_btn_confirm, _("OK"),
+      NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, _("Reset Device?"), NULL,
+      NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Reset "), NULL, NULL,
       NULL, NULL, _("Are you sure to reset?"), NULL, NULL);
 #endif
   key = protectWaitKey(0, 1);
+#if ONEKEY_MINI
+  setRgbBitmap(false);
+#endif
+
   if (key != KEY_CONFIRM) {
     return;
   }
@@ -323,16 +330,22 @@ void menu_erase_device(int index) {
     ui_language = ui_language_bak;
   }
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
-      &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-      NULL, NULL, NULL, _("Reset successfully.\nPlease restart the\ndevice."),
-      NULL);
+  setRgbBitmap(true);
+  layoutDialogSwipeCenterAdapterEx(&bmp_icon_success, NULL, NULL,
+                                   &bmp_btn_confirm, _("OK"), NULL, true, NULL,
+                                   NULL, NULL, NULL, NULL, NULL,
+                                   _("Reset successfully,\restart the device"),
+                                   NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
       NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
 #endif
   protectWaitKey(0, 0);
+#if ONEKEY_MINI
+  setRgbBitmap(false);
+#endif
+
 #if !EMULATOR
   svc_system_reset();
 #endif

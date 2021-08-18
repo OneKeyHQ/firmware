@@ -898,7 +898,7 @@ pin_set:
 #if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-        NULL, NULL, NULL,
+        false, NULL, NULL, NULL,
         _("Please set your PIN.\nPIN is used to unlock\nyour device. "
           "Please\nkeep it safe."),
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -951,9 +951,10 @@ retry:
     memzero(new_pin, sizeof(new_pin));
 #if ONEKEY_MINI
     setRgbBitmap(true);
-    layoutDialogSwipeCenterAdapter(&bmp_icon_forbid, NULL, NULL, &bmp_btn_retry,
-                                   _("RETRY"), NULL, NULL, NULL, NULL, NULL,
-                                   NULL, _("PINs do not match,\ntry again"));
+    layoutDialogSwipeCenterAdapterEx(
+        &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL, true,
+        NULL, NULL, NULL, NULL, NULL, NULL, _("PINs do not match,\ntry again"),
+        NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -1053,11 +1054,61 @@ bool protectPinCheck(bool retry) {
 
   uint32_t fails = config_getPinFails();
   if (fails == 1) {
+#if ONEKEY_MINI
+    setRgbBitmap(true);
+    layoutDialogCenterAdapterEx(
+        &bmp_icon_forbid, NULL, NULL, retry ? &bmp_btn_retry : &bmp_btn_confirm,
+        retry ? _("RETRY") : _("OK"), NULL, true, NULL, NULL, NULL, NULL, NULL,
+        _("Incorrect PIN code"), NULL,
+        _("WARNING: The device\nwill be reset after\n10 wrong attempts"), NULL,
+        NULL, NULL, NULL);
+#else
     layoutDialogCenterAdapter(
         &bmp_icon_error, NULL, NULL, retry ? &bmp_btn_retry : &bmp_btn_confirm,
         retry ? _("Retry") : _("Okay"), NULL, NULL, NULL, NULL,
         _("PIN invalid"), _("You still have 9 times"), _("to try"));
+#endif
+
   } else if (fails > 1 && fails < 10) {
+#if ONEKEY_MINI
+    (void)desc2;
+    memzero(desc1, sizeof(desc1));
+
+    switch (fails) {
+      case 2:
+        strcat(desc1, _("2 wrong attemps,\nyou have 8 more\nchance"));
+        break;
+      case 3:
+        strcat(desc1, _("3 wrong attemps,\nyou have 7 more\nchance"));
+        break;
+      case 4:
+        strcat(desc1, _("4 wrong attemps,\nyou have 6 more\nchance"));
+        break;
+      case 5:
+        strcat(desc1, _("5 wrong attemps,\nyou have 5 more\nchance"));
+        break;
+      case 6:
+        strcat(desc1, _("6 wrong attemps,\nyou have 4 more\nchance"));
+        break;
+      case 7:
+        strcat(desc1, _("7 wrong attemps,\nyou have 3 more\nchance"));
+        break;
+      case 8:
+        strcat(desc1, _("8 wrong attemps,\nyou have 2 more\nchance"));
+        break;
+      case 9:
+        strcat(desc1, _("9 wrong attemps,\nyou have 1 more\nchance"));
+        break;
+      default:
+        break;
+    }
+
+    setRgbBitmap(true);
+    layoutDialogCenterAdapterEx(
+        &bmp_icon_forbid, NULL, NULL, retry ? &bmp_btn_retry : &bmp_btn_confirm,
+        retry ? _("RETRY") : _("OK"), NULL, true, NULL, NULL, NULL, NULL, NULL,
+        _("Incorrect PIN code"), NULL, desc1, NULL, NULL, NULL, NULL);
+#else
     strcat(desc1, _("Wrong PIN for "));
     uint2str(fails, desc1 + strlen(desc1));
     strcat(desc1, _("times"));
@@ -1068,6 +1119,8 @@ bool protectPinCheck(bool retry) {
                               retry ? &bmp_btn_retry : &bmp_btn_confirm,
                               retry ? _("Retry") : _("Okay"), NULL, NULL, NULL,
                               NULL, desc1, desc2, _("to try"));
+#endif
+
   } else {
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
@@ -1079,15 +1132,29 @@ bool protectPinCheck(bool retry) {
     if (ui_language_bak) {
       ui_language = ui_language_bak;
     }
+#if ONEKEY_MINI
+    setRgbBitmap(true);
+    layoutDialogSwipeCenterAdapterEx(
+        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("RESTART"), NULL,
+        true, NULL, NULL, NULL, NULL, NULL,
+        _("Reset successfully,\restart the device"), NULL, NULL, NULL, NULL,
+        NULL, NULL);
+#else
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
         NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
+#endif
     protectWaitKey(0, 0);
-
+#if ONEKEY_MINI
+    setRgbBitmap(false);
+#endif
     svc_system_reset();
   }
   while (1) {
     key = protectWaitKey(0, 1);
+#if ONEKEY_MINI
+    setRgbBitmap(false);
+#endif
     if (key == KEY_CONFIRM) {
       return true;
     } else if (key == KEY_NULL) {

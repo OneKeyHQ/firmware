@@ -220,7 +220,8 @@ void oledDrawStringCenterAdapter(int x, int y, const char *text, uint8_t font) {
 }
 
 #if ONEKEY_MINI
-void oledDrawStringCenterAdapterEx(int x, int y, const char *text, uint8_t font) {
+void oledDrawStringCenterAdapterEx(int x, int y, const char *text,
+                                   uint8_t font) {
   char *token;
   uint8_t height = 0;
   char buf[256] = "";
@@ -236,7 +237,7 @@ void oledDrawStringCenterAdapterEx(int x, int y, const char *text, uint8_t font)
   if (font_imported() && !device_is_factory_mode()) {
     height = font_get_height();
   } else {
-     height = font_desc->pixel;
+    height = font_desc->pixel;
   }
 
   token = strtok(buf, "\n");

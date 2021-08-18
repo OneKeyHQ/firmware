@@ -657,6 +657,7 @@ static bool recovery_check_words(void) {
   uint32_t index = 0;
 
 #if ONEKEY_MINI
+  char desc[16] = "";
   uint32_t j = 0, pages = 0;
   const struct font_desc *font = find_cur_font();
 
@@ -670,8 +671,18 @@ refresh_menu:
   switch (index) {
     case 0:
       for (j = 0; j < WORD_PER_PAGE; j++) {
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, (j + 2) * (font->pixel + 1),
-                                    words[j], FONT_STANDARD);
+        memzero(desc, sizeof(desc));
+        uint2str(j + 1, desc);
+        strcat(desc, ". ");
+        strcat(desc, words[j]);
+        if ((j + 1) > 9) {
+          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
+                                (j + 2) * (font->pixel + 1), desc,
+                                FONT_STANDARD);
+        } else {
+          oledDrawStringAdapter(OLED_WIDTH / 4, (j + 2) * (font->pixel + 1),
+                                desc, FONT_STANDARD);
+        }
       }
       oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
       break;
@@ -679,9 +690,13 @@ refresh_menu:
       oledDrawBitmap(OLED_WIDTH / 2, 0, &bmp_btn_up);
       for (j = 0; j < WORD_PER_PAGE; j++) {
         if ((j + WORD_PER_PAGE) < word_count) {
-          oledDrawStringCenterAdapter(OLED_WIDTH / 2,
-                                      (j + 2) * (font->pixel + 1),
-                                      words[j + WORD_PER_PAGE], FONT_STANDARD);
+          memzero(desc, sizeof(desc));
+          uint2str(j + WORD_PER_PAGE + 1, desc);
+          strcat(desc, ". ");
+          strcat(desc, words[j + WORD_PER_PAGE]);
+          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
+                                (j + 2) * (font->pixel + 1), desc,
+                                FONT_STANDARD);
         }
       }
       if (pages > 2) {
@@ -694,9 +709,13 @@ refresh_menu:
       oledDrawBitmap(OLED_WIDTH / 2, 0, &bmp_btn_up);
       for (j = 0; j < WORD_PER_PAGE; j++) {
         if ((j + WORD_PER_PAGE * 2) < word_count) {
-          oledDrawStringCenterAdapter(
-              OLED_WIDTH / 2, (j + 2) * (font->pixel + 1),
-              words[j + WORD_PER_PAGE * 2], FONT_STANDARD);
+          memzero(desc, sizeof(desc));
+          uint2str(j + WORD_PER_PAGE * 2 + 1, desc);
+          strcat(desc, ". ");
+          strcat(desc, words[j + WORD_PER_PAGE * 2]);
+          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
+                                (j + 2) * (font->pixel + 1), desc,
+                                FONT_STANDARD);
         }
       }
       layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
@@ -951,9 +970,10 @@ input_word:
       break;
   }
 
-  layoutDialogCenterAdapterEx(
-      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      NULL, NULL, desc, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  layoutDialogCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
+                              &bmp_button_forward, _("NEXT"), NULL, NULL, NULL,
+                              false, desc, NULL, NULL, NULL, NULL, NULL, NULL,
+                              NULL, NULL, NULL);
 #else
   strcat(desc, _("Check the entered "));
   uint2str(word_count, desc + strlen(desc));
@@ -971,9 +991,11 @@ check_word:
   if (!recovery_check_words()) {
 #if ONEKEY_MINI
     setRgbBitmap(true);
-    layoutDialogSwipeCenterAdapter(
-        &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-        NULL, NULL, NULL, NULL, _("Incorrect recovery\nphrase, try again."));
+    layoutDialogSwipeCenterAdapterEx(
+        &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL, true,
+        NULL, NULL, NULL, NULL, NULL, NULL,
+        _("Incorrect recovery\nphrase, try again."), NULL, NULL, NULL, NULL,
+        NULL);
 #else
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -989,9 +1011,10 @@ check_word:
 
 #if ONEKEY_MINI
   setRgbBitmap(true);
-  layoutDialogSwipeCenterAdapter(
-      &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("NEXT"), NULL, NULL,
-      NULL, NULL, NULL, NULL, _("Your wallet has\nsuccessfully restored"));
+  layoutDialogSwipeCenterAdapterEx(
+      &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("NEXT"), NULL, true,
+      NULL, NULL, NULL, NULL, NULL, NULL, _("Recovery Phrase\nimported."), NULL,
+      NULL, NULL, NULL, NULL);
   protectWaitKey(0, 1);
   setRgbBitmap(false);
 #endif

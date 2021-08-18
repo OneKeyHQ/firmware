@@ -1,6 +1,22 @@
 #include "language.h"
 
 const char *languages[][2] = {
+    {"2 wrong attemps,\nyou have 8 more\nchance",
+     "已累计输错2次,还有8\n次输入机会"},
+    {"3 wrong attemps,\nyou have 7 more\nchance",
+     "已累计输错3次,还有7\n次输入机会"},
+    {"4 wrong attemps,\nyou have 6 more\nchance",
+     "已累计输错4次,还有6\n次输入机会"},
+    {"5 wrong attemps,\nyou have 5 more\nchance",
+     "已累计输错5次,还有5\n次输入机会"},
+    {"6 wrong attemps,\nyou have 4 more\nchance",
+     "已累计输错6次,还有4\n次输入机会"},
+    {"7 wrong attemps,\nyou have 3 more\nchance",
+     "已累计输错7次,还有3\n次输入机会"},
+    {"8 wrong attemps,\nyou have 2 more\nchance",
+     "已累计输错8次,还有2\n次输入机会"},
+    {"9 wrong attemps,\nyou have 1 more\nchance",
+     "已累计输错9次,还有1\n次输入机会"},
     //
     {" Off", "已关闭"},
     //
@@ -120,6 +136,7 @@ const char *languages[][2] = {
     {"Check Mnemonic", "查看助记词"},
     //
     {"Check PIN Code", "请先校验设备原PIN码"},
+    {"Check Recovery Phrase", "助记词核对"},
     {"Check the 12 words\nyou entered are the\ncorrect recovery\nphrase",
      "重新检查已输入的12\n个单词,确保它是正确\n的助记词"},
     {"Check the 18 words\nyou entered are the\ncorrect recovery\nphrase",
@@ -605,7 +622,9 @@ const char *languages[][2] = {
     {"Really send", ""},
     // reset.c
     {"Recovery Phrase", "助记词"},
+    {"Recovery Phrase\nverified", "助记词校验通过"},
     {"Recovery Phrase\nverified pass", "助记词校验通过"},
+    {"Recovery Phrase\nimported.", "助记词导入成功"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
@@ -614,6 +633,8 @@ const char *languages[][2] = {
     {"Reset", "重置设备"},
     //
     {"Reset ", "重置"},
+    {"Reset Device?", "确定要重置吗?"},
+    {"Reset successfully,\nrestart the device", "重置成功,请重启"},
     {"Reset successfully.\nPlease restart the\ndevice.", "重置成功,请重启."},
     //
     {"Restore", "恢复钱包"},

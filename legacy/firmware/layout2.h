@@ -125,16 +125,13 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                                const char *line3, const char *line4,
                                const char *line5, const char *line6);
 #if ONEKEY_MINI
-void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
-                                 const char *btnNo, const BITMAP *bmp_yes,
-                                 const char *btnYes, const char *desc,
-                                 bool center_align,
-                                 const char *line1, const char *line2,
-                                 const char *line3, const char *line4,
-                                 const char *line5, const char *line6,
-                                 const char *line7, const char *line8,
-                                 const char *line9, const char *line10,
-                                 const char *line11, const char *line12);
+void layoutDialogCenterAdapterEx(
+    const BITMAP *icon, const BITMAP *bmp_no, const char *btnNo,
+    const BITMAP *bmp_yes, const char *btnYes, const char *desc,
+    bool center_align, const char *line1, const char *line2, const char *line3,
+    const char *line4, const char *line5, const char *line6, const char *line7,
+    const char *line8, const char *line9, const char *line10,
+    const char *line11, const char *line12);
 void layoutDialogCenterAdapterFont(const BITMAP *icon, const BITMAP *bmp_no,
                                    const char *btnNo, const BITMAP *bmp_yes,
                                    const char *btnYes, const char *desc,
@@ -152,16 +149,13 @@ void layoutDialogSwipeCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                                     const char *line3, const char *line4,
                                     const char *line5, const char *line6);
 #if ONEKEY_MINI
-void layoutDialogSwipeCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
-                                      const char *btnNo, const BITMAP *bmp_yes,
-                                      const char *btnYes, const char *desc,
-                                      bool center_align,
-                                      const char *line1, const char *line2,
-                                      const char *line3, const char *line4,
-                                      const char *line5, const char *line6,
-                                      const char *line7, const char *line8,
-                                      const char *line9, const char *line10,
-                                      const char *line11, const char *line12);
+void layoutDialogSwipeCenterAdapterEx(
+    const BITMAP *icon, const BITMAP *bmp_no, const char *btnNo,
+    const BITMAP *bmp_yes, const char *btnYes, const char *desc,
+    bool center_align, const char *line1, const char *line2, const char *line3,
+    const char *line4, const char *line5, const char *line6, const char *line7,
+    const char *line8, const char *line9, const char *line10,
+    const char *line11, const char *line12);
 void layoutDialogSwipeCenterAdapterFont(
     const BITMAP *icon, const BITMAP *bmp_no, const char *btnNo,
     const BITMAP *bmp_yes, const char *btnYes, const char *desc, uint8_t font,

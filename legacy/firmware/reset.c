@@ -383,10 +383,11 @@ select_word:
       if (words_order[i] != selected) {
 #if ONEKEY_MINI
         setRgbBitmap(true);
-        layoutDialogSwipeCenterAdapter(
+        layoutDialogSwipeCenterAdapterEx(
             &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL,
-            NULL, NULL, NULL, NULL, NULL,
-            _("Incorrect recovery\nphrase, try again."));
+            true, NULL, NULL, NULL, NULL, NULL, NULL,
+            _("Incorrect recovery\nphrase, try again."), NULL, NULL, NULL, NULL,
+            NULL);
 #else
         layoutDialogSwipeCenterAdapter(
             &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
@@ -414,10 +415,10 @@ select_word:
 
 #if ONEKEY_MINI
   setRgbBitmap(true);
-  layoutDialogSwipeCenterAdapter(&bmp_icon_success, &bmp_button_back, _("BACK"),
-                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
-                                 NULL, NULL, NULL, NULL,
-                                 _("Recovery Phrase\nverified pass"));
+  layoutDialogSwipeCenterAdapterEx(
+      &bmp_icon_success, &bmp_button_back, NULL, &bmp_button_forward, _("NEXT"),
+      NULL, true, NULL, NULL, NULL, NULL, NULL, NULL,
+      _("Recovery Phrase\nverified"), NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(&bmp_icon_ok, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
