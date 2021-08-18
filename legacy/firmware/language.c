@@ -520,6 +520,7 @@ const char *languages[][2] = {
     // protect.c protect.c protect.c protect.c protect.c
     // fsm.c
     {"PIN cancelled", ""},
+    {"PIN changed", "PIN码修改成功"},
     // fsm_msg_common.h
     {"PIN code change", "PIN码修改"},
     //
@@ -534,6 +535,7 @@ const char *languages[][2] = {
     {"PIN mismatch", "两次输入不相同"},
     // fsm_msg_common.h fsm_msg_common.h
     {"PIN removed", ""},
+    {"PIN set", "PIN设置成功"},
     // protect.c
     {"PINs do not match,\ntry again", "PIN码前后不一致,请\n重新输入."},
     {"PREV", "后退"},

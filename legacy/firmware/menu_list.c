@@ -25,9 +25,9 @@ void menu_recovery_device(int index) {
 #if ONEKEY_MINI
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
-        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, true,
-        NULL, NULL, NULL, NULL, NULL, NULL, _("Wallet restored\nsuccessfully"),
-        NULL, NULL, NULL, NULL, NULL);
+        &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("Done"), NULL,
+        true, NULL, NULL, NULL, NULL, NULL, NULL,
+        _("Wallet restored\nsuccessfully"), NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
@@ -52,9 +52,9 @@ void menu_reset_device(int index) {
 #if ONEKEY_MINI
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
-        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, true,
-        NULL, NULL, NULL, NULL, NULL, _("Wallet created\nsuccessfully"), NULL,
-        NULL, NULL, NULL, NULL, NULL);
+        &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("Done"), NULL,
+        true, NULL, NULL, NULL, NULL, NULL, _("Wallet created\nsuccessfully"),
+        NULL, NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
                                    _("Done"), NULL, NULL, NULL, NULL,
@@ -307,7 +307,7 @@ void menu_erase_device(int index) {
 #if ONEKEY_MINI
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapterEx(
-      &bmp_icon_warn, &bmp_button_back, _("BACK"), &bmp_btn_confirm, _("OK"),
+      &bmp_icon_warn, &bmp_button_back, _("BACK"), &bmp_button_forward, _("OK"),
       NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, _("Reset Device?"), NULL,
       NULL, NULL, NULL, NULL);
 #else

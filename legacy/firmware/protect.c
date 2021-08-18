@@ -979,11 +979,25 @@ retry:
   if (ret == false) {
   } else {
     if (is_prompt) {
+#if ONEKEY_MINI
+      setRgbBitmap(true);
+      layoutDialogSwipeCenterAdapterEx(
+          &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL,
+          true, NULL, NULL, NULL, NULL, NULL, NULL,
+          is_change ? _("PIN changed") : _("PIN set"), NULL, NULL, NULL, NULL,
+          NULL);
+#else
       layoutDialogSwipeCenterAdapter(
           &bmp_icon_ok, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
           NULL, NULL, is_change ? _("PIN code change") : _("PIN code set"),
           _("successfully"), NULL);
+#endif
+
       protectWaitKey(0, 1);
+#if ONEKEY_MINI
+      setRgbBitmap(false);
+#endif
+
       layoutHome();
     }
   }
@@ -1135,9 +1149,9 @@ bool protectPinCheck(bool retry) {
 #if ONEKEY_MINI
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
-        &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("RESTART"), NULL,
+        &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("RESTART"), NULL,
         true, NULL, NULL, NULL, NULL, NULL,
-        _("Reset successfully,\restart the device"), NULL, NULL, NULL, NULL,
+        _("Reset successfully,\nrestart the device"), NULL, NULL, NULL, NULL,
         NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(

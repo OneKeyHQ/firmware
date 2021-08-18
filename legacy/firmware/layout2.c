@@ -2451,11 +2451,19 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, current, FONT_STANDARD);
   }
 
+#if ONEKEY_MINI
+  oledInvert(x - 3 + MINI_ADJUST, y1 - 1, x + l + 2 + 3, y1 + cur_font->pixel);
+  oledClearPixel(x - 3 + MINI_ADJUST, y1 - 1);
+  oledClearPixel(x - 3 + MINI_ADJUST, y1 + cur_font->pixel);
+  oledClearPixel(x + l + 2 + 3, y1 - 1);
+  oledClearPixel(x + l + 2 + 3, y1 + cur_font->pixel);
+#else
   oledInvert(x - 3, y1 - 1, x + l + 2, y1 + cur_font->pixel);
   oledClearPixel(x - 3, y1 - 1);
   oledClearPixel(x - 3, y1 + cur_font->pixel);
   oledClearPixel(x + l + 2, y1 - 1);
   oledClearPixel(x + l + 2, y1 + cur_font->pixel);
+#endif
 
   if (next) {
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1 + cur_font->pixel + step,
