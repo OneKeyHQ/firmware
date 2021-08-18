@@ -147,16 +147,16 @@ int main(void) {
 #ifndef APPVER
 
 #if ONEKEY_MINI
-    bool left_pressed = (buttonRead() & BTN_PIN_FUNC) == 0;
+    bool boot_button_pressed = (buttonRead() & BTN_PIN_FUNC) == 0;
 
-    if (!left_pressed && !force_boot) {
+    if (!boot_button_pressed && !force_boot) {
       update_from_spi_flash(false);
     }
 #else
-    bool left_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
+    bool boot_button_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
 #endif
 
-    if (firmware_present_new() && !left_pressed && !force_boot) {
+    if (firmware_present_new() && !boot_button_pressed && !force_boot) {
       oledClear();
       oledDrawBitmap(28, 21, &bmp_launch_icon);
       oledRefresh();
