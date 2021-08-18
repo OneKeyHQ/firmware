@@ -219,6 +219,35 @@ void oledDrawStringCenterAdapter(int x, int y, const char *text, uint8_t font) {
   oledDrawStringAdapter(x, y, text, font);
 }
 
+#if ONEKEY_MINI
+void oledDrawStringCenterAdapterEx(int x, int y, const char *text, uint8_t font) {
+  char *token;
+  uint8_t height = 0;
+  char buf[256] = "";
+  const struct font_desc *font_desc = find_cur_font();
+
+  if (!text) return;
+
+  if (strlen(text) > 256)
+    memcpy(buf, text, 256);
+  else
+    memcpy(buf, text, strlen(text));
+
+  if (font_imported() && !device_is_factory_mode()) {
+    height = font_get_height();
+  } else {
+     height = font_desc->pixel;
+  }
+
+  token = strtok(buf, "\n");
+  while (token != NULL) {
+    oledDrawStringCenterAdapter(x, y, token, font);
+    y += height + 1;
+    token = strtok(NULL, "\n");
+  }
+}
+#endif
+
 void oledDrawStringRightAdapter(int x, int y, const char *text, uint8_t font) {
   if (!text) return;
   x -= oledStringWidthAdapter(text, font);
