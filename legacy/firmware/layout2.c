@@ -599,7 +599,7 @@ static void _layout_home(bool update_menu) {
       config_getLabel(label, sizeof(label));
       if (strlen(label)) {
 #if ONEKEY_MINI
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 18, label, FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, label, FONT_STANDARD);
 #else
         strcat(desc, label);
 #endif
@@ -609,6 +609,11 @@ static void _layout_home(bool update_menu) {
         if (ble_name_state() == true) {
           strcat(desc, ble_get_name());
         }
+      }
+#else
+      else {
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, "OneKey Mini",
+                                  FONT_STANDARD);
       }
 #endif
       if (!config_isInitialized()) {
@@ -635,8 +640,6 @@ static void _layout_home(bool update_menu) {
       }
 
 #if ONEKEY_MINI
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, "OneKey Mini",
-                                  FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 42, desc, FONT_STANDARD);
 #else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
