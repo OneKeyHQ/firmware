@@ -237,3 +237,5 @@ SpiFlashRead: Literal[10010] = 10010
 SpiFlashData: Literal[10011] = 10011
 SESignMessage: Literal[10012] = 10012
 SEMessageSignature: Literal[10013] = 10013
+NFTWriteInfo: Literal[10014] = 10014
+NFTWriteData: Literal[10015] = 10015

@@ -88,3 +88,7 @@ SpiFlashData.data                       max_size:2048
 
 SESignMessage.message                   max_size:1024
 SEMessageSignature.signature            max_size:64
+
+NFTWriteInfo.name_zh                    max_size:32
+NFTWriteInfo.name_en                    max_size:32
+NFTWriteData.data                       max_size:4096

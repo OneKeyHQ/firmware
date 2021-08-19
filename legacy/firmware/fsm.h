@@ -155,5 +155,7 @@ void fsm_msgReadSEPublicCert(const ReadSEPublicCert *msg);
 void fsm_msgSpiFlashWrite(const SpiFlashWrite *msg);
 void fsm_msgSpiFlashRead(const SpiFlashRead *msg);
 void fsm_msgSESignMessage(const SESignMessage *msg);
+void fsm_msgNFTWriteInfo(const NFTWriteInfo *msg);
+void fsm_msgNFTWriteData(const NFTWriteData *msg);
 
 #endif

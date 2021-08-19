@@ -25,6 +25,7 @@
 #include "device.h"
 #include "flash_enc.h"
 #include "font_ex.h"
+#include "nft.h"
 #include "w25qxx.h"
 #endif
 
@@ -1231,6 +1232,53 @@ void fsm_msgSESignMessage(const SESignMessage *msg) {
     msg_write(MessageType_MessageType_SEMessageSignature, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("SE sign failed"));
+  }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#endif
+  return;
+}
+
+void fsm_msgNFTWriteInfo(const NFTWriteInfo *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+
+  NFTInformation nft_info;
+
+  memzero(&nft_info, sizeof(nft_info));
+
+  nft_info.index = msg->index;
+  nft_info.width = msg->width;
+  nft_info.height = msg->height;
+
+  if (msg->has_name_zh) {
+    strlcpy(nft_info.name_zh, msg->name_zh, sizeof(nft_info.name_zh));
+  }
+
+  if (msg->has_name_en) {
+    strlcpy(nft_info.name_en, msg->name_en, sizeof(nft_info.name_en));
+  }
+
+  if (nft_add_info(&nft_info)) {
+    fsm_sendSuccess(_("Write success"));
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Write failed"));
+  }
+#else
+  fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
+#endif
+  return;
+}
+
+void fsm_msgNFTWriteData(const NFTWriteData *msg) {
+  (void)msg;
+#if ONEKEY_MINI
+
+  if (nft_add_data(msg->index, (uint8_t *)msg->data.bytes, msg->offset,
+                   msg->data.size)) {
+    fsm_sendSuccess(_("Write success"));
+  } else {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Write failed"));
   }
 #else
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));

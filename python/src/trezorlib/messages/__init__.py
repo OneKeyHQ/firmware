@@ -229,6 +229,8 @@ from .NEMSignTx import NEMSignTx
 from .NEMSignedTx import NEMSignedTx
 from .NEMTransactionCommon import NEMTransactionCommon
 from .NEMTransfer import NEMTransfer
+from .NFTWriteData import NFTWriteData
+from .NFTWriteInfo import NFTWriteInfo
 from .NextU2FCounter import NextU2FCounter
 from .OwnershipId import OwnershipId
 from .OwnershipProof import OwnershipProof

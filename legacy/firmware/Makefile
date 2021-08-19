@@ -9,6 +9,7 @@ ifeq ($(ONEKEY_MINI),1)
 OBJS += font_ex.o
 OBJS += device2.o
 OBJS += flash_enc.o
+OBJS += nft.o
 endif
 OBJS += usb.o
 OBJS += bl_check.o

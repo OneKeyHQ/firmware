@@ -696,3 +696,25 @@ message SESignMessage {
 message SEMessageSignature {
     required bytes signature = 1;   // signature of the message
 }
+
+/**
+ * Request: Write NFT picture information
+ * @end
+ */
+message NFTWriteInfo {
+    required uint32 index = 1;
+    required uint32 width = 2;
+    required uint32 height = 3;
+    optional string name_zh = 4;
+    optional string name_en = 5;
+}
+
+/**
+ * Request: Write NFT picture data
+ * @end
+ */
+message NFTWriteData {
+    required uint32 index = 1;
+    required bytes data = 2;
+    required uint32 offset = 3;
+}
