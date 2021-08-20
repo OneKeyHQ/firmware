@@ -16,9 +16,11 @@ void layoutBootDevParam(void) {
   char *serial;
   int y = 0;
   int index = 0;
-  char desc[24] = "";
+  char desc[33] = "";
   uint8_t jedec_id;
   uint8_t key = KEY_NULL;
+  char *cpu =NULL;
+  char *firmware = NULL;
 
 refresh_menu:
   y = 9;
@@ -41,10 +43,10 @@ refresh_menu:
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, PRODUCT_STRING, FONT_STANDARD);
 
-      memset(desc, 0, 24);
+      memset(desc, 0, 33);
       const image_header *hdr =
           (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
-      uint2str(hdr->version, desc);
+      uint2str(hdr->onekey_version, desc);
       y += FONT_HEIGHT + 1;
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, "FIRMWARE:", FONT_STANDARD);
@@ -63,10 +65,12 @@ refresh_menu:
     case 1:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
 
-      memset(desc, 0, 24);
-      strcat(desc, ST_NAME);
-      strcat(desc, "-");
-      strcat(desc, "1.0.0");  // get factory version
+      memset(desc, 0, 33);
+      if (device_get_cpu_firmware(&cpu, &firmware)) {
+        strcat(desc, cpu);
+        strcat(desc, "-");
+        strcat(desc, firmware); ;
+      }
       oledDrawString(0, y, "ST:", FONT_STANDARD);
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, desc, FONT_STANDARD);
@@ -76,7 +80,7 @@ refresh_menu:
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, "FLASH:", FONT_STANDARD);
       y += FONT_HEIGHT + 1;
-      memset(desc, 0, 24);
+      memset(desc, 0, 33);
       if (jedec_id == MF_ID_WB) {
         strcat(desc, "WB-");
       } else if (jedec_id == MF_ID_GD) {

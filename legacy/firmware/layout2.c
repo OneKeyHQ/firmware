@@ -2679,7 +2679,9 @@ void layoutDeviceParameters(int num) {
 #if ONEKEY_MINI
   char *serial;
   uint8_t jedec_id;
-  char desc[24] = "";
+  char desc[33] = "";
+  char *cpu =NULL;
+  char *firmware = NULL;
 #endif
 
 refresh_menu:
@@ -2753,10 +2755,12 @@ refresh_menu:
       y += font->pixel + 1;
       y += font->pixel + 1;
 
-      memset(desc, 0, 24);
-      strcat(desc, ST_NAME);
-      strcat(desc, "-");
-      strcat(desc, "1.0.0");  // get factory version
+      memset(desc, 0, 33);
+      if (device_get_cpu_firmware(&cpu, &firmware)) {
+        strcat(desc, cpu);
+        strcat(desc, "-");
+        strcat(desc, firmware); ;
+      }
       oledDrawString(0, y, "ST:", FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawString(0, y, desc, FONT_STANDARD);
@@ -2801,7 +2805,7 @@ refresh_menu:
       y += font->pixel + 1;
       oledDrawStringAdapter(0, y, _("FLASH:"), FONT_STANDARD);
       y += font->pixel + 1;
-      memset(desc, 0, 24);
+      memset(desc, 0, 33);
       if (jedec_id == MF_ID_WB) {
         strcat(desc, "WB-");
       } else if (jedec_id == MF_ID_GD) {

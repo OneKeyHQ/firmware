@@ -7,7 +7,6 @@
 
 #define PRODUCT_STRING "OneKey Mini"
 #define SE_NAME "ATECC608"
-#define ST_NAME "STM32F205RG"
 
 typedef struct __attribute__((packed)) {
   char product[2];
