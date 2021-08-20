@@ -20,6 +20,7 @@ typedef struct __attribute__((packed)) {
   char pre_firmware[16];
   char se_config[8];
   uint8_t st_id[12];
+  bool random_key_init;
   uint8_t random_key[32];
 } DeviceInfomation;
 

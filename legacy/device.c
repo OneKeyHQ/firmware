@@ -34,6 +34,7 @@ void device_init(void) {
     flash_otp_write(FLASH_OTP_RANDOM_KEY, 0, entropy, FLASH_OTP_BLOCK_SIZE);
     flash_otp_lock(FLASH_OTP_RANDOM_KEY);
   }
+  dev_info.random_key_init = true;
   flash_otp_read(FLASH_OTP_RANDOM_KEY, 0, dev_info.random_key,
                  FLASH_OTP_BLOCK_SIZE);
 
@@ -140,7 +141,7 @@ char *device_get_se_config_version(void) {
 }
 
 bool device_get_NFT_voucher(uint8_t voucher[32]) {
-  if (!flash_otp_is_locked(FLASH_OTP_RANDOM_KEY)) {
+  if (!dev_info.random_key_init) {
     return false;
   }
 
