@@ -138,8 +138,6 @@ void layoutBootHome(void) {
     oledClear();
     oledDrawStringCenter(63, 20, PRODUCT_STRING, FONT_STANDARD);
     oledDrawStringCenter(63, 45, buf, FONT_STANDARD);
-    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 20, "Dashboard",
-                         FONT_STANDARD);
     oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
     oledRefresh();
     oledBackligthCtl(true);
