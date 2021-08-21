@@ -47,6 +47,7 @@ char* menu_para_shutdown(void) {
 
 char* menu_para_autolock(void) { return format_time(config_getSleepDelayMs()); }
 
+#if ONEKEY_MINI
 char* menu_para_brightness(void) {
   uint32_t value = config_getBrightness();
   switch (value) {
@@ -60,6 +61,7 @@ char* menu_para_brightness(void) {
       return _("Medium");
   }
 }
+#endif
 
 void menu_para_set_ble(int index) {
   bool ble_state = index ? false : true;
@@ -84,7 +86,9 @@ void menu_para_set_sleep(int index) {
   config_setSleepDelayMs(ms[index]);
 }
 
+#if ONEKEY_MINI
 void menu_para_set_brightness(int index) {
   uint32_t value[3] = {brightnessHigh, brightnessMedium, brightnessLow};
   config_setBrightness(value[index]);
 }
+#endif
