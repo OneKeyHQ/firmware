@@ -2830,6 +2830,8 @@ refresh_menu:
       break;
     case 3:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+      setRgbBitmap(true);
+      oledDrawRgbBitmap(48, 16, &bmp_icon_egg);
       oledDrawStringCenterAdapter(
           OLED_WIDTH / 2, 5 * 10,
           _("To learn more about\nhow to get NFT Pet,\ngo to the"),
@@ -2847,6 +2849,10 @@ refresh_menu:
 #endif
   oledRefresh();
   key = protectWaitKey(0, 0);
+#if ONEKEY_MINI
+  if (isRgbBitmap())
+    setRgbBitmap(false);
+#endif
   switch (key) {
     case KEY_UP:
       if (index > 0) {
