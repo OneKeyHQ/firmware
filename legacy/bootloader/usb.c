@@ -554,14 +554,13 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         hash_check_ok = true;
       }
       layoutProgress("Programing ... Please wait", 1000);
-
+#if !ONEKEY_MINI
       // wipe storage if:
       // 1) old firmware was unsigned or not present
       // 2) signatures are not OK
       // 3) hashes are not OK
       if (SIG_OK != old_was_signed || SIG_OK != signatures_new_ok(hdr, NULL) ||
           SIG_OK != check_firmware_hashes(hdr)) {
-#if !ONEKEY_MINI
         // erase storage
         erase_storage();
         // check erasure
@@ -577,9 +576,10 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           show_halt("Error installing", "firmware.");
           return;
         }
-#endif
       }
+#endif
 #if ONEKEY_MINI
+      (void)old_was_signed;
       if (hash_check_ok) {
         w25qxx_write_buffer_unsafe((uint8_t *)FW_HEADER,
                                    SPI_FLASH_FIRMWARE_ADDR_START,

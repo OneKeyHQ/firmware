@@ -79,6 +79,9 @@ static const uint8_t * const pubkey_Bixin[PUBKEYS] = {
 #define FLASH_META_SIG3 (FLASH_META_START + 0x00C0)
 
 bool firmware_present_old(void) {
+#if ONEKEY_MINI
+  return false;
+#else
   if (memcmp(FLASH_PTR(FLASH_META_START), &FIRMWARE_MAGIC_OLD,
              4)) {  // magic does not match
     return false;
@@ -93,9 +96,13 @@ bool firmware_present_old(void) {
   }
 
   return true;
+#endif
 }
 
 int signatures_old_ok(void) {
+#if ONEKEY_MINI
+  return false;
+#else
   const uint32_t codelen = *((const uint32_t *)FLASH_META_CODELEN);
   const uint8_t sigindex1 = *((const uint8_t *)FLASH_META_SIGINDEX1);
   const uint8_t sigindex2 = *((const uint8_t *)FLASH_META_SIGINDEX2);
@@ -133,6 +140,7 @@ int signatures_old_ok(void) {
   }
 
   return SIG_OK;
+#endif
 }
 
 void compute_firmware_fingerprint(const image_header *hdr, uint8_t hash[32]) {
