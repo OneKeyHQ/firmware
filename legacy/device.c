@@ -10,6 +10,18 @@ static DeviceInfomation dev_info = {0};
 static bool serial_set = false;
 static bool factory_mode = false;
 
+static bool is_valid_ascii(const uint8_t *data, uint32_t size) {
+  for (uint32_t i = 0; i < size; i++) {
+    if (data[i] < ' ' || data[i] > '~') {
+      return false;
+    }
+    if (data[i] == 0) {
+      break;
+    }
+  }
+  return true;
+}
+
 void device_set_factory_mode(bool mode) { factory_mode = mode; }
 
 bool device_is_factory_mode(void) { return factory_mode; }
@@ -54,11 +66,16 @@ void device_init(void) {
     serial_set = false;
     return;
   }
+
   strlcpy(
       dev_info.serial,
       (char *)(FLASH_OTP_BASE + FLASH_OTP_DEVICE_SERIAL * FLASH_OTP_BLOCK_SIZE),
       sizeof(dev_info.serial));
-  serial_set = true;
+
+  if (is_valid_ascii((uint8_t *)dev_info.serial, FLASH_OTP_BLOCK_SIZE)) {
+    serial_set = true;
+  }
+
   return;
 }
 
@@ -70,6 +87,11 @@ bool device_set_serial(char *dev_serial) {
   if (serial_set) {
     return false;
   }
+
+  if (!is_valid_ascii((uint8_t *)dev_serial, FLASH_OTP_BLOCK_SIZE - 1)) {
+    return false;
+  }
+
   // check serial
   if (!flash_otp_is_locked(FLASH_OTP_DEVICE_SERIAL)) {
     if (check_all_ones(FLASH_PTR(FLASH_OTP_BASE + FLASH_OTP_DEVICE_SERIAL *
