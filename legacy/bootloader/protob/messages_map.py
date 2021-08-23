@@ -35,7 +35,7 @@ IFACE_DIR_PAIRS = {
 
 SPECIAL_DEBUG_MESSAGES = {"MessageType_LoadDevice"}
 
-ALLOWED_MESSAGES = {"MessageType_Features"}
+ALLOWED_MESSAGES = {""}
 
 
 def get_wire_extension(message):

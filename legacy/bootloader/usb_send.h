@@ -65,54 +65,133 @@ static void send_msg_failure(usbd_device *dev, uint8_t code) {
 }
 
 #if ONEKEY_MINI
+
 #include "device.h"
 #include "messages-management.pb.h"
 #include "messages.h"
 #include "messages.pb.h"
 #include "w25qxx.h"
 
+#define PROTOC_TYPE_VARINT 0
+#define PROTOC_TYPE_BYTES 2
+
+static uint8_t getprotobuftag(uint8_t *ptr, uint32_t value, uint8_t tag_type) {
+  uint8_t i = 0;
+
+  *ptr = (value & 0x0F) << 3;
+  *ptr |= (0x80 | tag_type);
+
+  i = 1;
+
+  value >>= 4;
+
+  while (value) {
+    ptr[i] = (uint8_t)((value & 0x7F) | 0x80);
+    value >>= 7;
+    i++;
+  }
+  ptr[i - 1] &= 0x7F; /* Unset top bit on last byte */
+  return i;
+}
+
 void send_msg_features(usbd_device *dev) {
   static uint8_t response[MSG_OUT_SIZE];
+  uint8_t *p = response;
+  uint32_t len = 0;
 
   Features *resp = (Features *)response;
   memzero(response, sizeof(response));
 
-  resp->has_vendor = true;
-  strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
-  resp->has_major_version = true;
-  resp->major_version = VERSION_MAJOR;
-  resp->has_minor_version = true;
-  resp->minor_version = VERSION_MINOR;
-  resp->has_patch_version = true;
-  resp->patch_version = VERSION_PATCH;
-  resp->has_bootloader_mode = true;
-  resp->bootloader_mode = true;
-  resp->has_firmware_present = true;
-  resp->firmware_present = firmware_present_new() ? true : false;
+  // header
+  memcpy(p, "?##", 3);
+  p += 3;
+
+  // msg_id
+  memcpy(p, "\x00\x11", 2);
+  p += 2;
+
+  // msg_size
+  p += 4;
+
+  // vendor
+  memcpy(p,
+         "\x0a"
+         "\x09"
+         "onekey.so",
+         11);
+  p += 11;
+
+  // version
+  memcpy(p,
+         "\x10" VERSION_MAJOR_CHAR "\x18" VERSION_MINOR_CHAR
+         "\x20" VERSION_PATCH_CHAR,
+         6);
+  p += 6;
+
+  // bootloader_mode
+  memcpy(p, "\x28\x01", 2);
+  p += 2;
+
+  // firmware_present
+  len = getprotobuftag(p, Features_firmware_present_tag, PROTOC_TYPE_VARINT);
+  p += len;
+
+  *p = firmware_present_new() ? true : false;
+  p++;
 
   char *serial;
   if (device_get_serial(&serial)) {
-    resp->has_serial_no = true;
-    strlcpy(resp->serial_no, serial, sizeof(resp->serial_no));
+    len = getprotobuftag(p, Features_serial_no_tag, PROTOC_TYPE_BYTES);
+    p += len;
+
+    strlcpy((char *)p + 1, serial, sizeof(resp->serial_no));
+    *p = strlen((char *)p + 1);
+    p += *p + 1;
   }
-  resp->has_spi_flash = true;
-  strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
-  resp->has_se_ver = true;
-  strlcpy(resp->se_ver, device_get_se_config_version(), sizeof(resp->se_ver));
+
+  char *spi_info = w25qxx_get_desc();
+  len = getprotobuftag(p, Features_spi_flash_tag, PROTOC_TYPE_BYTES);
+  p += len;
+  strlcpy((char *)p + 1, spi_info, sizeof(resp->spi_flash));
+  *p = strlen((char *)p + 1);
+  p += *p + 1;
+
+  char *se_info = device_get_se_config_version();
+  len = getprotobuftag(p, Features_se_ver_tag, PROTOC_TYPE_BYTES);
+  p += len;
+  strlcpy((char *)p + 1, se_info, sizeof(resp->se_ver));
+  *p = strlen((char *)p + 1);
+  p += *p + 1;
 
   char *cpu, *firmware;
   if (device_get_cpu_firmware(&cpu, &firmware)) {
-    resp->has_cpu_info = true;
-    resp->has_pre_firmware = true;
-    strlcpy(resp->cpu_info, cpu, sizeof(resp->cpu_info));
-    strlcpy(resp->pre_firmware, firmware, sizeof(resp->pre_firmware));
+    len = getprotobuftag(p, Features_cpu_info_tag, PROTOC_TYPE_BYTES);
+    p += len;
+    strlcpy((char *)p + 1, cpu, sizeof(resp->cpu_info));
+    *p = strlen((char *)p + 1);
+    p += *p + 1;
+
+    len = getprotobuftag(p, Features_pre_firmware_tag, PROTOC_TYPE_BYTES);
+    p += len;
+    strlcpy((char *)p + 1, firmware, sizeof(resp->pre_firmware));
+    *p = strlen((char *)p + 1);
+    p += *p + 1;
   }
 
-  msg_write(MessageType_MessageType_Features, resp);
+  len = p - response;
 
-  const uint8_t *data;
-  while ((data = msg_out_data())) {
+  response[5] = ((len - 9) >> 24) & 0xFF;
+  response[6] = ((len - 9) >> 16) & 0xFF;
+  response[7] = ((len - 9) >> 8) & 0xFF;
+  response[8] = (len - 9) & 0xFF;
+
+  len = ((len + 63) / 64) * 64;
+
+  const uint8_t *data = response;
+  while (len) {
     send_response(dev, (uint8_t *)data);
+    len -= 64;
+    data += 64;
   }
 }
 #else
