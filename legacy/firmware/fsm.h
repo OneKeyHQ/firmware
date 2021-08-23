@@ -23,6 +23,13 @@
 #include "messages-bitcoin.pb.h"
 #include "messages-crypto.pb.h"
 #include "messages-debug.pb.h"
+
+#if ONEKEY_MINI
+#include "messages-debuglinkstate-mini.pb.h"
+#else
+#include "messages-debuglinkstate.pb.h"
+#endif
+
 #include "messages-ethereum.pb.h"
 #include "messages-lisk.pb.h"
 #include "messages-management.pb.h"
