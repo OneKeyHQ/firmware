@@ -1242,7 +1242,6 @@ void fsm_msgSESignMessage(const SESignMessage *msg) {
 void fsm_msgNFTWriteInfo(const NFTWriteInfo *msg) {
   (void)msg;
 #if ONEKEY_MINI
-
   NFTInformation nft_info;
 
   memzero(&nft_info, sizeof(nft_info));
@@ -1273,7 +1272,6 @@ void fsm_msgNFTWriteInfo(const NFTWriteInfo *msg) {
 void fsm_msgNFTWriteData(const NFTWriteData *msg) {
   (void)msg;
 #if ONEKEY_MINI
-
   if (nft_add_data(msg->index, (uint8_t *)msg->data.bytes, msg->offset,
                    msg->data.size)) {
     fsm_sendSuccess(_("Write success"));
