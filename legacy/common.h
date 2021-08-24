@@ -56,6 +56,11 @@ error_shutdown(const char *line1, const char *line2, const char *line3,
        ? (void)0          \
        : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
 
+#define ensure_ex(expr, result, msg) \
+  (((expr) == result)                \
+       ? (void)0                     \
+       : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
+
 void hal_delay(uint32_t ms);
 
 void wait_random(void);

@@ -20,6 +20,8 @@
 #include "otp.h"
 #include <libopencm3/stm32/flash.h>
 
+#include <string.h>
+
 bool flash_otp_is_locked(uint8_t block) {
   return 0x00 == *(volatile uint8_t *)(FLASH_OTP_LOCK_BASE + block);
 }
@@ -61,4 +63,16 @@ bool flash_otp_write(uint8_t block, uint8_t offset, const uint8_t *data,
   }
   flash_lock();
   return true;
+}
+
+bool flash_otp_write_safe(uint8_t block, uint8_t offset, const uint8_t *data,
+                          uint8_t datalen) {
+  uint8_t buffer[FLASH_OTP_BLOCK_SIZE] = {0};
+  if (flash_otp_write(block, offset, data, datalen)) {
+    flash_otp_read(block, offset, buffer, datalen);
+    if (memcmp(buffer, data, datalen) == 0) {
+      return true;
+    }
+  }
+  return false;
 }

@@ -130,8 +130,9 @@ static void collect_hw_entropy(bool privileged) {
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_RANDOMNESS)) {
       uint8_t entropy[FLASH_OTP_BLOCK_SIZE] = {0};
       random_buffer(entropy, FLASH_OTP_BLOCK_SIZE);
-      flash_otp_write(FLASH_OTP_BLOCK_RANDOMNESS, 0, entropy,
-                      FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_BLOCK_RANDOMNESS, 0, entropy,
+                                     FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_BLOCK_RANDOMNESS);
     }
     // collect entropy from OTP randomness block

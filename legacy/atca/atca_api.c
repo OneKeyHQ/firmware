@@ -136,8 +136,9 @@ void atca_config_init(void) {
   // new st
   if (check_all_ones(pair_info->serial, sizeof(pair_info->serial))) {
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_SERIAL)) {
-      flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, serial_no,
-                      FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_BLOCK_608_SERIAL, 0, serial_no,
+                                     FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_BLOCK_608_SERIAL);
     } else {
       atca_assert(ATCA_BAD_PARAM, "OTP data err");
@@ -151,8 +152,9 @@ void atca_config_init(void) {
   if (check_all_ones(pair_info->protect_key, sizeof(pair_info->protect_key))) {
     atca_assert(atca_random(rand_buffer), "get random");
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_PROTECT_KEY)) {
-      flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, rand_buffer,
-                      FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0,
+                                     rand_buffer, FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_BLOCK_608_PROTECT_KEY);
     } else {
       atca_assert(ATCA_BAD_PARAM, "OTP data err");
@@ -162,8 +164,9 @@ void atca_config_init(void) {
   if (check_all_ones(pair_info->init_pin, sizeof(pair_info->init_pin))) {
     atca_assert(atca_random(rand_buffer), "get random");
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_INIT_PIN)) {
-      flash_otp_write(FLASH_OTP_BLOCK_608_INIT_PIN, 0, rand_buffer,
-                      FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_BLOCK_608_INIT_PIN, 0,
+                                     rand_buffer, FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_BLOCK_608_INIT_PIN);
     } else {
       atca_assert(ATCA_BAD_PARAM, "OTP data err");
@@ -173,8 +176,9 @@ void atca_config_init(void) {
   if (check_all_ones(pair_info->hash_mix, sizeof(pair_info->hash_mix))) {
     atca_assert(atca_random(rand_buffer), "get random");
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_MIX_PIN)) {
-      flash_otp_write(FLASH_OTP_BLOCK_608_MIX_PIN, 0, rand_buffer,
-                      FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_BLOCK_608_MIX_PIN, 0,
+                                     rand_buffer, FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_BLOCK_608_MIX_PIN);
     } else {
       atca_assert(ATCA_BAD_PARAM, "OTP data err");

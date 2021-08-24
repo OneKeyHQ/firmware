@@ -1,5 +1,6 @@
 #include "device.h"
 #include <libopencm3/stm32/desig.h>
+#include "common.h"
 #include "memory.h"
 #include "otp.h"
 #include "rng.h"
@@ -12,11 +13,11 @@ static bool factory_mode = false;
 
 static bool is_valid_ascii(const uint8_t *data, uint32_t size) {
   for (uint32_t i = 0; i < size; i++) {
-    if (data[i] < ' ' || data[i] > '~') {
-      return false;
-    }
     if (data[i] == 0) {
       break;
+    }
+    if (data[i] < ' ' || data[i] > '~') {
+      return false;
     }
   }
   return true;
@@ -43,7 +44,9 @@ void device_init(void) {
       r = random32();
       memcpy(entropy + i, (uint8_t *)&r, 4);
     }
-    flash_otp_write(FLASH_OTP_RANDOM_KEY, 0, entropy, FLASH_OTP_BLOCK_SIZE);
+    ensure_ex(flash_otp_write_safe(FLASH_OTP_RANDOM_KEY, 0, entropy,
+                                   FLASH_OTP_BLOCK_SIZE),
+              true, NULL);
     flash_otp_lock(FLASH_OTP_RANDOM_KEY);
   }
   dev_info.random_key_init = true;
@@ -98,7 +101,9 @@ bool device_set_serial(char *dev_serial) {
                                                       FLASH_OTP_BLOCK_SIZE),
                        FLASH_OTP_BLOCK_SIZE)) {
       strlcpy((char *)buffer, dev_serial, sizeof(buffer));
-      flash_otp_write(FLASH_OTP_DEVICE_SERIAL, 0, buffer, FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_DEVICE_SERIAL, 0, buffer,
+                                     FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_DEVICE_SERIAL);
       device_init();
       return true;
@@ -136,8 +141,9 @@ bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver) {
       strlcpy((char *)buffer, cpu_info, sizeof(buffer) / 2);
       strlcpy((char *)buffer + FLASH_OTP_BLOCK_SIZE / 2, firmware_ver,
               sizeof(buffer) / 2);
-      flash_otp_write(FLASH_OTP_CPU_FIRMWARE_INFO, 0, buffer,
-                      FLASH_OTP_BLOCK_SIZE);
+      ensure_ex(flash_otp_write_safe(FLASH_OTP_CPU_FIRMWARE_INFO, 0, buffer,
+                                     FLASH_OTP_BLOCK_SIZE),
+                true, NULL);
       flash_otp_lock(FLASH_OTP_CPU_FIRMWARE_INFO);
       device_init();
       return true;

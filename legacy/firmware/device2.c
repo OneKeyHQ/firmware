@@ -2,6 +2,7 @@
 #include "atca_api.h"
 #include "buttons.h"
 #include "chinese.h"
+#include "common.h"
 #include "layout2.h"
 #include "otp.h"
 #include "util.h"
@@ -86,8 +87,9 @@ void device_test(void) {
   // save ATECC608 configuration version
   char atca_version[8] = {0};
   strlcpy(atca_version, ATCA_CONFIG_VERSION, sizeof(atca_version));
-  flash_otp_write(FLASH_OTP_FACTORY_TEST, 0, (uint8_t *)atca_version,
-                  sizeof(atca_version));
+  ensure_ex(flash_otp_write_safe(FLASH_OTP_FACTORY_TEST, 0,
+                                 (uint8_t *)atca_version, sizeof(atca_version)),
+            true, NULL);
 
   flash_otp_lock(FLASH_OTP_FACTORY_TEST);
 }
