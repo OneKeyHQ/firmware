@@ -1,5 +1,13 @@
 DebugLinkDecision.input                 max_size:33
 
+DebugLinkState.layout                   max_size:1024
+DebugLinkState.pin                      max_size:10
+DebugLinkState.matrix                   max_size:10
+DebugLinkState.mnemonic_secret          max_size:240
+DebugLinkState.reset_word               max_size:12
+DebugLinkState.reset_entropy            max_size:128
+DebugLinkState.recovery_fake_word       max_size:12
+
 DebugLinkLog.bucket                     max_size:33
 DebugLinkLog.text                       max_size:256
 
@@ -7,6 +15,7 @@ DebugLinkMemory.memory                  max_size:1024
 DebugLinkMemoryWrite.memory             max_size:1024
 
 # unused fields
+DebugLinkState.layout_lines             max_count:10 max_size:30
 DebugLinkLayout.lines                   max_count:10 max_size:30
 DebugLinkRecordScreen.target_directory  max_size:1
 DebugLinkShowText.header_text           max_size:1

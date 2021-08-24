@@ -115,11 +115,6 @@ OBJS += protob/messages-bitcoin.pb.o
 OBJS += protob/messages-common.pb.o
 OBJS += protob/messages-crypto.pb.o
 OBJS += protob/messages-debug.pb.o
-ifeq ($(ONEKEY_MINI), 1)
-OBJS += protob/messages-debuglinkstate-mini.pb.o
-else
-OBJS += protob/messages-debuglinkstate.pb.o
-endif
 OBJS += protob/messages-management.pb.o
 ifneq ($(BITCOIN_ONLY),1)
 OBJS += protob/messages-ethereum.pb.o

@@ -12,14 +12,7 @@ ifeq ($(BITCOIN_ONLY), 1)
 SKIPPED_MESSAGES += Ethereum Lisk NEM Stellar
 endif
 
-MESSAGES_HEADERS := messages_map.h messages_map_limits.h messages-bitcoin.pb.h messages-common.pb.h messages-crypto.pb.h messages-debug.pb.h messages-ethereum.pb.h messages-management.pb.h messages-nem.pb.h messages.pb.h messages-stellar.pb.h messages-lisk.pb.h messages_nem_pb2.py
-ifeq ($(ONEKEY_MINI), 1)
-MESSAGES_HEADERS += messages-debuglinkstate-mini.pb.h
-else
-MESSAGES_HEADERS += messages-debuglinkstate.pb.h
-endif
-
-all : ${MESSAGES_HEADERS}
+all: messages_map.h messages_map_limits.h messages-bitcoin.pb.h messages-common.pb.h messages-crypto.pb.h messages-debug.pb.h messages-ethereum.pb.h messages-management.pb.h messages-nem.pb.h messages.pb.h messages-stellar.pb.h messages-lisk.pb.h messages_nem_pb2.py
 
 PYTHON ?= python
 
