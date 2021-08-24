@@ -102,6 +102,7 @@ const char *languages[][2] = {
     {"Button expected", ""},  // msg
     // recovery.c reset.c
     {"By continuing you", " "},
+    {"CONFIRM", "确认"},
     // fsm_msg_common.h
     {"Can't change se setting after device initialized", ""},  // msg
     // fsm_msg_coin.h
@@ -240,6 +241,7 @@ const char *languages[][2] = {
     // recovery.c
     {"Device recovered", ""},  // msg
     //
+    {"Device reset in\nprogress", "设备重置中"},
     {"Device reset in progress", "设备重置中"},
     // reset.c reset.c reset.c fsm_msg_common.h
     {"Device successfully initialized", ""},  // msg

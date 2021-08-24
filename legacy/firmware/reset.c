@@ -269,6 +269,9 @@ bool verify_mnemonic(const char *mnemonic) {
   uint32_t i = 0, word_count = 0;
   uint32_t index = 0, selected = 0;
   uint32_t rand_list[3] = {0};
+#if ONEKEY_MINI
+  char *data[3];
+#endif
 
   memzero(words, sizeof(words));
 
@@ -329,19 +332,16 @@ refresh_menu:
   strcat(desc, _("mnemonic"));
 #endif
 
-#if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
-                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
-                                 NULL, desc, NULL, NULL, NULL);
-#else
+#if !ONEKEY_MINI
   layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
                                  &bmp_btn_confirm, _("Confirm"), NULL, NULL,
                                  NULL, desc, NULL, NULL, NULL);
-#endif
+
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
   }
+#endif
   selected = mnemonic_find_word(words[rand_list[index]]);
   words_order[0] = selected;
   do {
@@ -356,11 +356,13 @@ refresh_menu:
 
 select_word:
 #if ONEKEY_MINI
-  layoutItemsSelectAdapter(
-      &bmp_btn_up, &bmp_btn_down, NULL, &bmp_button_forward, NULL, _("OK"),
-      i + 1, 3, NULL, NULL, mnemonic_get_word(words_order[i]),
-      i > 0 ? mnemonic_get_word(words_order[i - 1]) : NULL,
-      i < 2 ? mnemonic_get_word(words_order[i + 1]) : NULL);
+  data[0] = (char *)mnemonic_get_word(words_order[0]);
+  data[1] = (char *)mnemonic_get_word(words_order[1]);
+  data[2] = (char *)mnemonic_get_word(words_order[2]);
+
+  layoutItemsSelectAdapterAlign(
+      NULL, NULL, NULL, &bmp_button_forward, NULL, _("OK"),
+      i + 1, 3, false, NULL, desc, NULL, data);
 #else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),

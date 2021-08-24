@@ -1006,12 +1006,10 @@ retry:
 
 bool protectSelectMnemonicNumber(uint32_t *number) {
   uint8_t key = KEY_NULL;
+  uint32_t index = 0;
 #if ONEKEY_MINI
   char desc[64] = "";
-  uint32_t index = 1;
   strcat(desc, _("Select the number of\nrecovery phrase word"));
-#else
-  uint32_t index = 0;
 #endif
 
   uint32_t num_s[3] = {12, 18, 24};
@@ -1030,10 +1028,9 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
 
 refresh_menu:
 #if ONEKEY_MINI
-  layoutItemsSelectAdapterLeft(
-      &bmp_btn_up, &bmp_btn_down, NULL, NULL, NULL, NULL, index + 1, 3, NULL,
-      desc, NULL, numbers[index], index > 0 ? numbers[index - 1] : NULL,
-      index < 2 ? numbers[index + 1] : NULL);
+  layoutItemsSelectAdapterAlign(
+      &bmp_btn_up, &bmp_btn_down, NULL, NULL, NULL, NULL, index + 1, 3, true, NULL,
+      desc, NULL, numbers);
 #else
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, _("Okay"), index + 1, 3, NULL, NULL,
@@ -1136,8 +1133,13 @@ bool protectPinCheck(bool retry) {
 #endif
 
   } else {
+  #if ONEKEY_MINI
+    layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                                  _("Device reset in\nprogress"), NULL, NULL, NULL);
+  #else
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
+  #endif
     protectWaitKey(timer1s * 1, 0);
 
     uint8_t ui_language_bak = ui_language;
