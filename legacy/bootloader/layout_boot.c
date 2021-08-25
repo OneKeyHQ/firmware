@@ -34,7 +34,7 @@ void layoutBootDevParam(uint8_t index) {
       y += FONT_HEIGHT + 1;
       y += FONT_HEIGHT + 1;
       y += FONT_HEIGHT + 1;
-      oledDrawString(0, y, "MODAL NAME:", FONT_STANDARD);
+      oledDrawString(0, y, "MODEL NAME:", FONT_STANDARD);
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, PRODUCT_STRING, FONT_STANDARD);
 

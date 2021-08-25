@@ -1893,7 +1893,7 @@ void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
     icon_width = icon->width;
   }
 #if ONEKEY_MINI
-  oledDrawStringRightAdapter(OLED_WIDTH - icon_width - 3 - 2,
+  oledDrawStringRightAdapter(OLED_WIDTH - icon_width - 3 - 4,
                              OLED_HEIGHT - (font->pixel + 1), btnYes,
                              FONT_STANDARD);
 #else
@@ -2734,7 +2734,7 @@ refresh_menu:
       y += font->pixel + 1;
       y += font->pixel + 1;
 
-      oledDrawStringAdapter(0, y, _("MODAL NAME:"), FONT_STANDARD);
+      oledDrawStringAdapter(0, y, _("MODEL NAME:"), FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawString(0, y, "OneKey Mini", FONT_STANDARD);
 

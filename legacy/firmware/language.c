@@ -424,7 +424,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Login to:", "登录到"},
     {"Low", "低"},
-    {"MODAL NAME:", "设备名称:"},
+    {"MODEL NAME:", "设备名称:"},
     //
     {"Make sure you still have", "请确保您仍掌握"},
     // ethereum.c
