@@ -163,20 +163,17 @@ void send_msg_features(usbd_device *dev) {
   *p = strlen((char *)p + 1);
   p += *p + 1;
 
-  char *cpu, *firmware;
-  if (device_get_cpu_firmware(&cpu, &firmware)) {
-    len = getprotobuftag(p, Features_cpu_info_tag, PROTOC_TYPE_BYTES);
-    p += len;
-    strlcpy((char *)p + 1, cpu, sizeof(resp->cpu_info));
-    *p = strlen((char *)p + 1);
-    p += *p + 1;
+  len = getprotobuftag(p, Features_cpu_info_tag, PROTOC_TYPE_BYTES);
+  p += len;
+  strlcpy((char *)p + 1, CHIP_INFO, sizeof(resp->cpu_info));
+  *p = strlen((char *)p + 1);
+  p += *p + 1;
 
-    len = getprotobuftag(p, Features_pre_firmware_tag, PROTOC_TYPE_BYTES);
-    p += len;
-    strlcpy((char *)p + 1, firmware, sizeof(resp->pre_firmware));
-    *p = strlen((char *)p + 1);
-    p += *p + 1;
-  }
+  len = getprotobuftag(p, Features_pre_firmware_tag, PROTOC_TYPE_BYTES);
+  p += len;
+  strlcpy((char *)p + 1, ONEKEY_VERSION, sizeof(resp->pre_firmware));
+  *p = strlen((char *)p + 1);
+  p += *p + 1;
 
   len = p - response;
 
@@ -185,13 +182,24 @@ void send_msg_features(usbd_device *dev) {
   response[7] = ((len - 9) >> 8) & 0xFF;
   response[8] = (len - 9) & 0xFF;
 
-  len = ((len + 63) / 64) * 64;
-
   const uint8_t *data = response;
+  uint8_t packet_num = 0;
+  uint8_t packet_len = 0;
   while (len) {
-    send_response(dev, (uint8_t *)data);
-    len -= 64;
-    data += 64;
+    if (packet_num == 0) {
+      send_response(dev, (uint8_t *)data);
+      len -= 64;
+      data += 64;
+    } else {
+      memzero(packet_buf, sizeof(packet_buf));
+      packet_buf[0] = '?';
+      packet_len = len > 63 ? 63 : len;
+      memcpy(packet_buf + 1, data, packet_len);
+      data += packet_len;
+      len -= packet_len;
+      send_response(dev, packet_buf);
+    }
+    packet_num++;
   }
 }
 #else
