@@ -743,10 +743,14 @@ bool atca_write_certificate(const uint8_t *cert, uint32_t cert_len) {
       }
       status =
           atca_write_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 4, cert, len);
-      status |= atca_write_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 4 + len,
-                                      buffer, ATCA_WORD_SIZE);
-      status |= atca_lock_data_slot(SLOT_DEVICE_CERT);
-      atca_get_config(&atca_configuration);
+      if (res_len) {
+        status |= atca_write_bytes_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT,
+                                        4 + len, buffer, ATCA_WORD_SIZE);
+      }
+      if (status == ATCA_SUCCESS) {
+        status |= atca_lock_data_slot(SLOT_DEVICE_CERT);
+        atca_get_config(&atca_configuration);
+      }
     }
   }
   return (status == ATCA_SUCCESS);
