@@ -12,17 +12,12 @@
 
 #define FONT_HEIGHT 8
 
-void layoutBootDevParam(void) {
+void layoutBootDevParam(uint8_t index) {
   char *serial;
   int y = 0;
-  int index = 0;
   char desc[33] = "";
   uint8_t jedec_id;
-  uint8_t key = KEY_NULL;
-  char *cpu =NULL;
-  char *firmware = NULL;
 
-refresh_menu:
   y = 9;
   oledClear();
 
@@ -107,30 +102,12 @@ refresh_menu:
   }
 
   oledRefresh();
-  key = waitKey(0, 0);
-  switch (key) {
-    case KEY_UP:
-      if (index > 0) {
-        index--;
-      } else {
-        break;
-      }
-      goto refresh_menu;
-    case KEY_DOWN:
-      if (index < 1) {
-        index++;
-      }
-      goto refresh_menu;
-    case KEY_CONFIRM:
-    case KEY_CANCEL:
-      goto refresh_menu;
-    default:
-      return;
-  }
 }
 
 void layoutBootHome(void) {
   uint8_t key = KEY_NULL;
+  static uint8_t index = 0;
+  static bool menu = false;
   char buf[64] = "";
 
   if (layoutNeedRefresh()) {
@@ -138,28 +115,39 @@ void layoutBootHome(void) {
     strcat(buf, VERSTR(VERSION_MAJOR) "." VERSTR(VERSION_MINOR) "." VERSTR(
                     VERSION_PATCH));
 
-  refresh:
     oledClear();
     oledDrawStringCenter(63, 20, PRODUCT_STRING, FONT_STANDARD);
     oledDrawStringCenter(63, 45, buf, FONT_STANDARD);
     oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
     oledRefresh();
     oledBackligthCtl(true);
-
-    key = waitKey(0, 0);
-    switch (key) {
-      case KEY_DOWN:
-        layoutBootDevParam();
-        break;
-      case KEY_UP:
-      case KEY_CONFIRM:
-      case KEY_CANCEL:
-        break;
-      default:
-        return;
+    index = 0;
+    menu = false;
+  }
+  key = keyScan();
+  if (!menu) {
+    if (key == KEY_DOWN) {
+      layoutBootDevParam(index);
+      menu = true;
     }
-
-    goto refresh;
+  } else {
+    if (key == KEY_UP || key == KEY_CONFIRM) {
+      if (index > 0) {
+        index--;
+        layoutBootDevParam(index);
+      } else {
+        layoutRefreshSet(true);
+      }
+    } else if (key == KEY_DOWN) {
+      if (index < 1) {
+        index++;
+        layoutBootDevParam(index);
+      } else {
+        layoutRefreshSet(true);
+      }
+    } else if (key == KEY_CANCEL) {
+      layoutRefreshSet(true);
+    }
   }
 }
 #else
