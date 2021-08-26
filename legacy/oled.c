@@ -610,11 +610,17 @@ void oledDrawString(int x, int y, const char *text, uint8_t font) {
   for (; *text; text++) {
     uint8_t c = convert_char(*text);
     if (c) {
-      l = fontCharWidth(font & 0x7f, c) + space;
 #if ONEKEY_MINI
-      if (x + l > OLED_WIDTH - MINI_ADJUST) {
+      if (*text == '\n') {
+        l = 0;
+      } else {
+        l = fontCharWidth(font & 0x7f, c) + space;
+      }
+
+      if ((x + l > OLED_WIDTH - MINI_ADJUST) || (*text == '\n')) {
         x = MINI_ADJUST;
 #else
+      l = fontCharWidth(font & 0x7f, c) + space;
       if (x + l > OLED_WIDTH) {
         x = 0;
 #endif
@@ -622,7 +628,10 @@ void oledDrawString(int x, int y, const char *text, uint8_t font) {
         y += 9;
       }
       if (y > OLED_HEIGHT) y = 0;
-      oledDrawChar(x, y, c, font);
+#if ONEKEY_MINI
+      if (*text != '\n')
+#endif
+        oledDrawChar(x, y, c, font);
       x += l;
     }
   }
@@ -630,6 +639,11 @@ void oledDrawString(int x, int y, const char *text, uint8_t font) {
 
 void oledDrawStringCenter(int x, int y, const char *text, uint8_t font) {
   x = x - oledStringWidth(text, font) / 2;
+#if ONEKEY_MINI
+  if (x < 0) {
+    x = 0;
+  }
+#endif
   oledDrawString(x, y, text, font);
 }
 

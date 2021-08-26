@@ -94,7 +94,7 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
 #if ONEKEY_MINI
-      strcat(desc, "      ");
+      strcat(desc, "    ");
 #else
       strcat(desc, "        ");
 #endif
@@ -102,7 +102,7 @@ refresh_menu:
       // English
       if (desc[0] == 'P')
 #if ONEKEY_MINI
-        offset = 2;
+        offset = 0;
 #else
         offset = 10;
 #endif
@@ -119,7 +119,7 @@ refresh_menu:
 
       strcat(desc, _("Press"));
 #if ONEKEY_MINI
-      strcat(desc, "      ");
+      strcat(desc, "    ");
 #else
       strcat(desc, "        ");
 #endif
@@ -134,7 +134,7 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
 #if ONEKEY_MINI
-      strcat(desc, "      ");
+      strcat(desc, "    ");
 #else
       strcat(desc, "        ");
 #endif
@@ -145,7 +145,7 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
 #if ONEKEY_MINI
-      strcat(desc, "      ");
+      strcat(desc, "    ");
 #else
       strcat(desc, "        ");
 #endif
@@ -153,7 +153,7 @@ refresh_menu:
       // English
       if (desc[0] == 'P')
 #if ONEKEY_MINI
-        offset = 2;
+        offset = 0;
 #else
         offset = 10;
 #endif
@@ -198,8 +198,8 @@ refresh_menu:
 #endif
       oledDrawBitmap(60, 0, &bmp_btn_up);
 #if ONEKEY_MINI
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,
-                                  _("Download Onekey Apps"), FONT_STANDARD);
+      oledDrawStringCenterAdapter(0, 3 * 10, _("Download Onekey Apps"),
+                                  FONT_STANDARD);
       oledDrawStringAdapter(11, 6 * 10, "onekey.so/download", FONT_STANDARD);
       oledBox(15, 70, 117, 70, true);
 #else
@@ -332,9 +332,9 @@ void menu_erase_device(int index) {
 #if ONEKEY_MINI
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapterEx(&bmp_icon_success, NULL, NULL,
-                                   &bmp_btn_confirm, _("OK"), NULL, true, NULL,
-                                   NULL, NULL, NULL, NULL, NULL,
-                                   _("Reset successfully,\restart the device"),
+                                   &bmp_button_forward, _("OK"), NULL, true,
+                                   NULL, NULL, NULL, NULL, NULL, NULL,
+                                   _("Reset successfully,\nrestart the device"),
                                    NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(

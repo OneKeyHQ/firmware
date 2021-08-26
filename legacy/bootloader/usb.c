@@ -476,7 +476,11 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     timer_out_set(timer_out_oper, timer1s * 5);
     static uint8_t flash_anim = 0;
     if (flash_anim % 32 == 4) {
+#if ONEKEY_MINI
+      layoutProgress("INSTALLING ... Please\nwait",
+#else
       layoutProgress("INSTALLING ... Please wait",
+#endif
                      1000 * flash_pos / flash_len);
     }
     flash_anim++;
@@ -553,7 +557,11 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       } else {
         hash_check_ok = true;
       }
+#if ONEKEY_MINI
+      layoutProgress("Programing ... Please\nwait", 1000);
+#else
       layoutProgress("Programing ... Please wait", 1000);
+#endif
 #if !ONEKEY_MINI
       // wipe storage if:
       // 1) old firmware was unsigned or not present
@@ -584,7 +592,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         w25qxx_write_buffer_unsafe((uint8_t *)FW_HEADER,
                                    SPI_FLASH_FIRMWARE_ADDR_START,
                                    FLASH_FWHEADER_LEN);
-        layoutProgress("Verifing ... Please wait", 500);
+        layoutProgress("Verifing ... Please\nwait", 500);
         update_from_spi_flash(true);
       }
 #else
@@ -798,7 +806,7 @@ void update_from_spi_flash(bool force) {
   flash_enter();
 
   while (total_len) {
-    layoutProgress("Programing ... Please wait",
+    layoutProgress("Programing ... Please\nwait",
                    1000 * offset / (FLASH_FWHEADER_LEN + hdr.codelen));
     packet_len = total_len > FW_CHUNK_SIZE ? FW_CHUNK_SIZE : total_len;
     w25qxx_read_bytes((uint8_t *)FW_CHUNK,

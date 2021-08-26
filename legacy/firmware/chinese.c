@@ -49,8 +49,10 @@ int oledStringWidthEx(const char *text, uint8_t font) {
   int l = 0;
   while (*text) {
     if ((uint8_t)*text < 0x80) {
-      l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
-           ((font & FONT_DOUBLE) ? 2 : 1);
+      if (*text != '\n') {
+        l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
+             ((font & FONT_DOUBLE) ? 2 : 1);
+      }
       text++;
     } else {
       steps = utf8_get_size(*text);
@@ -73,13 +75,19 @@ void oledDrawStringEx(int x, int y, const char *text, uint8_t font) {
 
   while (*text) {
     if ((uint8_t)*text < 0x80) {
-      l = fontCharWidth(font & 0x7f, *text) + ((font & FONT_DOUBLE) ? 2 : 1);
+      if (*text == '\n') {
+        l = 0;
+      } else {
+        l = fontCharWidth(font & 0x7f, *text) + ((font & FONT_DOUBLE) ? 2 : 1);
+      }
       if (x + l > (OLED_WIDTH - MINI_ADJUST) || (*text == '\n')) {
         x = MINI_ADJUST;
         y += height + 1;
       }
       if (y > OLED_HEIGHT) y = 0;
-      oledDrawChar(x, y, *text, font);
+      if (*text != '\n') {
+        oledDrawChar(x, y, *text, font);
+      }
       x += l;
       text++;
     } else {
@@ -143,8 +151,10 @@ int oledStringWidthAdapter(const char *text, uint8_t font) {
     int l = 0;
     while (*text) {
       if ((uint8_t)*text < 0x80) {
-        l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
-             ((font & FONT_DOUBLE) ? 2 : 1);
+        if (*text != '\n') {
+          l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
+               ((font & FONT_DOUBLE) ? 2 : 1);
+        }
         text++;
       } else {
         if (font_dese->idx == DEFAULT_IDX) {

@@ -22,7 +22,11 @@ void menu_display(struct menu *menu) {
     strcat(desc, _(menu->items[menu->current].name2));
   }
   if (menu->items[menu->current].para != NULL) {
+#if ONEKEY_MINI
+    strcat(desc, "    ");
+#else
     strcat(desc, "      ");
+#endif
     strcat(desc, menu->items[menu->current].para());
   }
 

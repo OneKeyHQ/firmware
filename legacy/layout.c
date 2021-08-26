@@ -45,7 +45,12 @@ void layoutButtonNo(const char *btnNo, const BITMAP *icon) {
     oledDrawBitmap(1, OLED_HEIGHT - 8, icon);
     icon_width = icon->width;
   }
+#if ONEKEY_MINI
+  oledDrawString(3 + icon_width - MINI_ADJUST, OLED_HEIGHT - 8, btnNo,
+                 FONT_STANDARD);
+#else
   oledDrawString(3 + icon_width, OLED_HEIGHT - 8, btnNo, FONT_STANDARD);
+#endif
   oledInvert(0, OLED_HEIGHT - 9,
              icon_width + oledStringWidth(btnNo, FONT_STANDARD) + 4,
              OLED_HEIGHT - 1);
@@ -57,13 +62,54 @@ void layoutButtonYes(const char *btnYes, const BITMAP *icon) {
     oledDrawBitmap(OLED_WIDTH - 8 - 1, OLED_HEIGHT - 8, icon);
     icon_width = icon->width;
   }
+#if ONEKEY_MINI
+  oledDrawStringRight(OLED_WIDTH - icon_width - 3 - MINI_ADJUST,
+                      OLED_HEIGHT - 8, btnYes, FONT_STANDARD);
+#else
   oledDrawStringRight(OLED_WIDTH - icon_width - 3, OLED_HEIGHT - 8, btnYes,
                       FONT_STANDARD);
+#endif
   oledInvert(
       OLED_WIDTH - oledStringWidth(btnYes, FONT_STANDARD) - icon_width - 4,
       OLED_HEIGHT - 9, OLED_WIDTH - 1, OLED_HEIGHT - 1);
 }
 
+#if ONEKEY_MINI
+void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
+                  const char *desc, const char *line1, const char *line2,
+                  const char *line3, const char *line4, const char *line5,
+                  const char *line6) {
+  int left = 0;
+  oledClear();
+  if (icon) {
+    oledDrawBitmap((OLED_WIDTH - icon->width) / 2, 9, icon);
+  }
+  if (line1) oledDrawString(left, 4 * 9, line1, FONT_STANDARD);
+  if (line2) oledDrawString(left, 5 * 9, line2, FONT_STANDARD);
+  if (line3) oledDrawString(left, 6 * 9, line3, FONT_STANDARD);
+  if (line4) oledDrawString(left, 7 * 9, line4, FONT_STANDARD);
+  if (desc) {
+    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 9 - 1, desc,
+                         FONT_STANDARD);
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - 21);
+    }
+  } else {
+    if (line5) oledDrawString(left, 8 * 9, line5, FONT_STANDARD);
+    if (line6) oledDrawString(left, 9 * 9, line6, FONT_STANDARD);
+    if (btnYes || btnNo) {
+      oledHLine(OLED_HEIGHT - 13);
+    }
+  }
+  if (btnNo) {
+    layoutButtonNo(btnNo, &bmp_btn_cancel);
+  }
+  if (btnYes) {
+    layoutButtonYes(btnYes, &bmp_btn_confirm);
+  }
+  oledRefresh();
+}
+#else
 void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
                   const char *desc, const char *line1, const char *line2,
                   const char *line3, const char *line4, const char *line5,
@@ -99,6 +145,7 @@ void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
   }
   oledRefresh();
 }
+#endif
 
 void layoutinfoCenter(const char *line1, const char *line2, const char *line3,
                       const char *line4, const char *line5, const char *line6) {
@@ -171,7 +218,11 @@ void layoutProgress(const char *desc, int permil) {
   // text
   oledBox(0, OLED_HEIGHT - 16, OLED_WIDTH - 1, OLED_HEIGHT - 16 + 7, 0);
   if (desc) {
+#if ONEKEY_MINI
+    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 34, desc, FONT_STANDARD);
+#else
     oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 16, desc, FONT_STANDARD);
+#endif
   }
   oledRefresh();
 }

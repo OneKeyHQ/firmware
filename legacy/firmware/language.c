@@ -86,7 +86,7 @@ const char *languages[][2] = {
     // menu_list.c
     {"Before you reset the\ndevice, please ensure\nyou've backed up "
      "your\nrecovery phrase",
-     "在重置设备前,请确\n保您仍掌握该助记词\n的物理备份."},
+     "在重置设备前,请确保您\n仍掌握该助记词的物理备\n份"},
     //
     {"Before your start", "继续操作前"},
     // layout2.c layout2.c

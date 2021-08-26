@@ -59,7 +59,7 @@
 #define OLED_X_OFFSET 2
 #define OLED_Y_OFFSET 3
 
-#define MINI_ADJUST 4
+#define MINI_ADJUST 2
 
 #define COLOR_BLACK 0x0000
 #define COLOR_WHITE 0xffff
