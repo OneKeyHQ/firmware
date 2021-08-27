@@ -625,10 +625,9 @@ static void select_complete_word(char *title, int start, int len) {
   uint8_t key = KEY_NULL;
   int index = 0;
 #if ONEKEY_MINI
-  char * data[CANDIDATE_MAX_LEN];
+  char *data[CANDIDATE_MAX_LEN];
 
-  if (len > CANDIDATE_MAX_LEN)
-    return;
+  if (len > CANDIDATE_MAX_LEN) return;
 
   for (int i = 0; i < len; i++) {
     data[i] = (char *)mnemonic_get_word(start + i);
@@ -638,9 +637,9 @@ static void select_complete_word(char *title, int start, int len) {
 
 refresh_menu:
 #if ONEKEY_MINI
-  layoutItemsSelectAdapterAlign(
-      NULL, NULL, &bmp_button_back, &bmp_button_forward, _("PREV"),
-      _("OK"), index + 1, len, false, title, NULL, NULL, data);
+  layoutItemsSelectAdapterAlign(NULL, NULL, &bmp_button_back,
+                                &bmp_button_forward, _("PREV"), _("OK"),
+                                index + 1, len, false, title, NULL, NULL, data);
 #else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, &bmp_btn_back, &bmp_btn_forward, _("Cancel"),

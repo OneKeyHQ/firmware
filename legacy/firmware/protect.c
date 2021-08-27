@@ -1028,9 +1028,9 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
 
 refresh_menu:
 #if ONEKEY_MINI
-  layoutItemsSelectAdapterAlign(
-      &bmp_btn_up, &bmp_btn_down, NULL, NULL, NULL, NULL, index + 1, 3, true, NULL,
-      desc, NULL, numbers);
+  layoutItemsSelectAdapterAlign(&bmp_btn_up, &bmp_btn_down, NULL, NULL, NULL,
+                                NULL, index + 1, 3, true, NULL, desc, NULL,
+                                numbers);
 #else
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, _("Okay"), index + 1, 3, NULL, NULL,
@@ -1133,13 +1133,13 @@ bool protectPinCheck(bool retry) {
 #endif
 
   } else {
-  #if ONEKEY_MINI
+#if ONEKEY_MINI
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                  _("Device reset in\nprogress"), NULL, NULL, NULL);
-  #else
+                              _("Device reset in\nprogress"), NULL, NULL, NULL);
+#else
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
-  #endif
+#endif
     protectWaitKey(timer1s * 1, 0);
 
     uint8_t ui_language_bak = ui_language;

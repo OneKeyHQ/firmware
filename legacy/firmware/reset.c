@@ -360,9 +360,9 @@ select_word:
   data[1] = (char *)mnemonic_get_word(words_order[1]);
   data[2] = (char *)mnemonic_get_word(words_order[2]);
 
-  layoutItemsSelectAdapterAlign(
-      NULL, NULL, NULL, &bmp_button_forward, NULL, _("OK"),
-      i + 1, 3, false, NULL, desc, NULL, data);
+  layoutItemsSelectAdapterAlign(NULL, NULL, NULL, &bmp_button_forward, NULL,
+                                _("OK"), i + 1, 3, false, NULL, desc, NULL,
+                                data);
 #else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),

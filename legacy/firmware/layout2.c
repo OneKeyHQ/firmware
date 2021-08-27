@@ -527,7 +527,7 @@ void layout_language_set(uint8_t key) {
   const char *lang[2] = {"en-US", "zh-CN"};
 #if ONEKEY_MINI
   char desc[64] = "";
-  char *lang_array[2] ={"English", "简体中文"};
+  char *lang_array[2] = {"English", "简体中文"};
 #endif
   layoutLast = layout_language_set;
   static int index = 0;
@@ -549,9 +549,10 @@ void layout_language_set(uint8_t key) {
 
 #if ONEKEY_MINI
   strcat(desc, "SELECT LANGUAGE");
-  layoutItemsSelectAdapterAlign(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_button_forward,
-                           NULL, index == 0 ? "CONFIRM" : "确认", index + 1, 2, false,
-                           NULL, desc, NULL, lang_array);
+  layoutItemsSelectAdapterAlign(&bmp_btn_up, &bmp_btn_down, NULL,
+                                &bmp_button_forward, NULL,
+                                index == 0 ? "CONFIRM" : "确认", index + 1, 2,
+                                false, NULL, desc, NULL, lang_array);
 #else
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, index == 0 ? "Okay" : "确认", index + 1, 2,
@@ -615,7 +616,7 @@ static void _layout_home(bool update_menu) {
 #else
       else {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, "OneKey Mini",
-                                  FONT_STANDARD);
+                                    FONT_STANDARD);
       }
 #endif
       if (!config_isInitialized()) {
@@ -2589,11 +2590,12 @@ void layoutItemsSelectAdapterEx(const BITMAP *bmp_up, const BITMAP *bmp_down,
 }
 
 void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
-                                  const BITMAP *bmp_no, const BITMAP *bmp_yes,
-                                  const char *btnNo, const char *btnYes,
-                                  uint32_t index, uint32_t count, bool left_align,
-                                  const char *title, const char *desc,
-                                  const char *prefex, char *data[]) {
+                                   const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                                   const char *btnNo, const char *btnYes,
+                                   uint32_t index, uint32_t count,
+                                   bool left_align, const char *title,
+                                   const char *desc, const char *prefex,
+                                   char *data[]) {
   uint32_t i, y = 0, y1, pos;
   int step = 3;
   char index_str[16] = "";
@@ -2603,8 +2605,7 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
   (void)bmp_down;
   (void)prefex;
 
-  if ((data == NULL) || (count > 8))
-    return;
+  if ((data == NULL) || (count > 8)) return;
 
   oledClear_ex();
 
@@ -2665,9 +2666,12 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
       } else {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, data[i], FONT_STANDARD);
         if ((index - 1) == i) {
-          oledInvert(OLED_WIDTH / 2 - oledStringWidthAdapter(data[i], FONT_STANDARD) / 2 + 2,
-              y1 - 1, OLED_WIDTH / 2 + oledStringWidthAdapter(data[i], FONT_STANDARD) / 2 + 4,
-              y1 + cur_font->pixel);
+          oledInvert(OLED_WIDTH / 2 -
+                         oledStringWidthAdapter(data[i], FONT_STANDARD) / 2 + 2,
+                     y1 - 1,
+                     OLED_WIDTH / 2 +
+                         oledStringWidthAdapter(data[i], FONT_STANDARD) / 2 + 4,
+                     y1 + cur_font->pixel);
         }
       }
 
@@ -2720,7 +2724,7 @@ void layoutDeviceParameters(int num) {
   char *serial;
   uint8_t jedec_id;
   char desc[33] = "";
-  char *cpu =NULL;
+  char *cpu = NULL;
   char *firmware = NULL;
 #endif
 
@@ -2801,7 +2805,8 @@ refresh_menu:
       if (device_get_cpu_firmware(&cpu, &firmware)) {
         strcat(desc, cpu);
         strcat(desc, "-");
-        strcat(desc, firmware); ;
+        strcat(desc, firmware);
+        ;
       }
       oledDrawString(0, y, "ST:", FONT_STANDARD);
       y += font->pixel + 1;
@@ -2892,8 +2897,7 @@ refresh_menu:
   oledRefresh();
   key = protectWaitKey(0, 0);
 #if ONEKEY_MINI
-  if (isRgbBitmap())
-    setRgbBitmap(false);
+  if (isRgbBitmap()) setRgbBitmap(false);
 #endif
   switch (key) {
     case KEY_UP:
