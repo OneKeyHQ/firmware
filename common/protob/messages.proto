@@ -303,7 +303,7 @@ enum MessageType {
     MessageType_BixinBackupDeviceAck = 915 [(wire_out) = true];
 
     MessageType_BixinPinInputOnDevice = 10000 [(wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
-    //onekey 
+    //onekey
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
     MessageType_DeviceInfo = 10003 [(wire_out) = true];
