@@ -425,6 +425,7 @@ static struct menu autolock_set_menu = {
     .previous = &settings_menu,
 };
 
+#if !ONEKEY_MINI
 static struct menu_item shutdown_set_menu_items[] = {
     {"10", "minute", true, menu_para_set_shutdown, NULL},
     {"30", "minutes", true, menu_para_set_shutdown, NULL},
@@ -440,6 +441,7 @@ static struct menu shutdown_set_menu = {
     .items = shutdown_set_menu_items,
     .previous = &settings_menu,
 };
+#endif
 
 #if ONEKEY_MINI
 static struct menu_item brightness_set_menu_items[] = {
@@ -465,8 +467,10 @@ static struct menu_item settings_menu_items[] = {
      menu_para_language},
     {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
      menu_para_autolock},
+#if !ONEKEY_MINI
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
      menu_para_shutdown},
+#endif
 #if ONEKEY_MINI
     {"Brightness", NULL, false, .sub_menu = &brightness_set_menu,
      menu_para_brightness}
