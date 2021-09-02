@@ -546,9 +546,8 @@ void session_clearCache(Session *session) {
 void config_lockDevice(void) {
   if (g_bSelectSEFlag) {
     se_unlocked = secfalse;
-  } else {
-    storage_lock();
   }
+  storage_lock();
 }
 
 static void get_u2froot_callback(uint32_t iter, uint32_t total) {
@@ -1052,6 +1051,10 @@ bool config_unlock(const char *pin) {
     if (se_verifyPin((pin_to_int(pin))))
 #endif
     {
+      if (!storage_is_unlocked()) {
+        storage_unlock(PIN_EMPTY, NULL);
+      }
+
       se_unlocked = sectrue;
       return true;
     } else {
@@ -1215,7 +1218,7 @@ bool session_isUnlocked(void) {
     if (se_hasPin()) {
       return sectrue == se_unlocked;
     } else {
-      return true;
+      return sectrue == storage_is_unlocked();
     }
 
   } else
