@@ -694,11 +694,17 @@ static void _layout_home(bool update_menu) {
 }
 
 void layoutHome(void) {
-#if !EMULATOR && !ONEKEY_MINI
+#if !EMULATOR
+#if ONEKEY_MINI
+  if (!config_isLanguageSet() && !config_isInitialized()) {
+    layout_language_set(KEY_UP);
+  } else
+#else
   if (!config_isLanguageSet() && !config_isInitialized() &&
       !se_isFactoryMode()) {
     layout_language_set(KEY_UP);
   } else
+#endif
 #endif
   {
     _layout_home(true);
