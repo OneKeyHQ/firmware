@@ -591,9 +591,55 @@ static void _layout_home(bool update_menu) {
     b.height = 64;
     b.data = homescreen;
     oledDrawBitmap(0, 0, &b);
+
+#if ONEKEY_MINI
+    if (backup_only) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 45,
+                                  _("Backup Mode"),
+                                  FONT_STANDARD | FONT_DOUBLE);
+    } else {
+      char desc[64] = "";
+      char label[MAX_LABEL_LEN + 1] = "";
+      config_getLabel(label, sizeof(label));
+      if (strlen(label)) {
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 72, label, FONT_STANDARD);
+      } else {
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 72, "OneKey Mini",
+                                    FONT_STANDARD);
+      }
+
+      if (!config_isInitialized()) {
+        strcat(desc, _("Not Actived"));
+      } else {
+        if (no_backup) {
+          oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
+                                      _("SEEDLESS"), FONT_STANDARD);
+        } else if (unfinished_backup) {
+          oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 45,
+                                      _("BACKUP FAILED!"), FONT_STANDARD);
+        } else if (needs_backup) {
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 45,
+                                      _("Need Backup"), FONT_STANDARD);
+        }
+      }
+
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 106, desc, FONT_STANDARD);
+      if (session_isUnlocked() || !config_hasPin()) {
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 20,
+                                    _("Dashboard"), FONT_STANDARD);
+        oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
+      } else {
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 20,
+                                    _("Click to Unlock"), FONT_STANDARD);
+      }
+    }
+#endif
   } else {
     if (backup_only) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, _("Backup Mode"),
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 45,
+                                  _("Backup Mode"),
                                   FONT_STANDARD | FONT_DOUBLE);
 #if !ONEKEY_MINI
       layoutFillBleName(5);
