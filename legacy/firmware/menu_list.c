@@ -109,7 +109,7 @@ refresh_menu:
       else
         offset = 20;
 #if ONEKEY_MINI
-      oledDrawBitmap(offset + len + 6, 20, &bmp_button_up);
+      oledDrawBitmap(offset + len + 4, 20, &bmp_button_up);
 #else
       oledDrawBitmap(offset + len + 2, 16, &bmp_icon_up);
 #endif
@@ -125,7 +125,7 @@ refresh_menu:
 #endif
       strcat(desc, _("Next Page"));
 #if ONEKEY_MINI
-      oledDrawBitmap(offset + len + 6, 34, &bmp_button_down);
+      oledDrawBitmap(offset + len + 4, 34, &bmp_button_down);
 #else
       oledDrawBitmap(offset + len + 2, 30, &bmp_icon_down);
 #endif
@@ -133,33 +133,21 @@ refresh_menu:
 #if ONEKEY_MINI
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
-#if ONEKEY_MINI
       strcat(desc, "    ");
-#else
-      strcat(desc, "        ");
-#endif
       strcat(desc, _("OK or Next"));
-      oledDrawBitmap(offset + len + 6, 48, &bmp_button_forward);
+      oledDrawBitmap(offset + len + 4, 48, &bmp_button_forward);
       oledDrawStringAdapter(offset, 48, desc, FONT_STANDARD);
 
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
-#if ONEKEY_MINI
       strcat(desc, "    ");
-#else
-      strcat(desc, "        ");
-#endif
       strcat(desc, _("Cancel or Next"));
       // English
       if (desc[0] == 'P')
-#if ONEKEY_MINI
         offset = 0;
-#else
-        offset = 10;
-#endif
       else
         offset = 20;
-      oledDrawBitmap(offset + len + 6, 62, &bmp_button_back);
+      oledDrawBitmap(offset + len + 4, 62, &bmp_button_back);
       oledDrawStringAdapter(offset, 62, desc, FONT_STANDARD);
 #endif
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
@@ -201,7 +189,7 @@ refresh_menu:
       oledDrawStringCenterAdapter(0, 3 * 10, _("Download Onekey Apps"),
                                   FONT_STANDARD);
       oledDrawStringAdapter(11, 6 * 10, "onekey.so/download", FONT_STANDARD);
-      oledBox(15, 70, 117, 70, true);
+      oledBox(13, 70, 117, 70, true);
 #else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download Onekey"),
                                   FONT_STANDARD);
@@ -219,7 +207,7 @@ refresh_menu:
           _("To learn more about\nhow to use, go to the\nHelp Center"),
           FONT_STANDARD);
       oledDrawStringAdapter(20, 7 * 10, "help.onekey.so", FONT_STANDARD);
-      oledBox(24, 80, 102, 80, true);
+      oledBox(22, 80, 100, 80, true);
       layoutButtonYesAdapter(_("OK"), &bmp_button_forward);
 #else
     case 3:
