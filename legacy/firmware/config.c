@@ -862,7 +862,9 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
       return false;
     }
     se_setSeedStrength(strength);
-    return se_importSeed(seed);
+    if (!se_importSeed(seed)) {
+      return false;
+    }
 #else
     se_setNeedsBackup(false);
     if (import) {
