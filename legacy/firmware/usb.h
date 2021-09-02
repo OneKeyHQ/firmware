@@ -27,4 +27,8 @@ void usbReconnect(void);
 char usbTiny(char set);
 void usbSleep(uint32_t millis);
 
+#if U2F_ENABLED
+void usb_u2f_response(void);
+#endif
+
 #endif

@@ -333,6 +333,8 @@ void queue_u2f_pkt(const U2FHID_FRAME *u2f_pkt) {
   }
   memcpy(u2f_out_packets[u2f_out_end], u2f_pkt, HID_RPT_SIZE);
   u2f_out_end = next;
+
+  usb_u2f_response();
 }
 
 uint8_t *u2f_out_data(void) {

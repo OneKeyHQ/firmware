@@ -466,15 +466,6 @@ void usbPoll(void) {
     }
   }
 
-#if U2F_ENABLED
-  data = u2f_out_data();
-  if (data) {
-    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_U2F_IN, data, 64) !=
-           64) {
-    }
-  }
-#endif
-
 #if DEBUG_LINK
   // write pending debug data
   data = msg_debug_out_data();
@@ -505,15 +496,6 @@ void usbPollFactory(void) {
       break;
     }
   }
-
-#if U2F_ENABLED
-  data = u2f_out_data();
-  if (data) {
-    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_U2F_IN, data, 64) !=
-           64) {
-    }
-  }
-#endif
 
 #if DEBUG_LINK
   // write pending debug data
@@ -552,3 +534,17 @@ void usbSleep(uint32_t millis) {
 #endif
   }
 }
+
+#if U2F_ENABLED
+void usb_u2f_response(void) {
+  static const uint8_t *data;
+
+  data = u2f_out_data();
+  if (data) {
+    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_U2F_IN, data, 64) !=
+           64) {
+    }
+  }
+}
+
+#endif
