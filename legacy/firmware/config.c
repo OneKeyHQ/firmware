@@ -859,6 +859,9 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
     uint8_t seed[64] = {0};
     uint32_t strength = 0;
     strength = (mnemonic_to_bits(mnemonic, seed) / 11) * 8 * 4 / 3;
+    if (strength == 0) {
+      return false;
+    }
     se_setSeedStrength(strength);
     return se_importSeed(seed);
 #else
@@ -869,6 +872,9 @@ bool config_setMnemonic(const char *mnemonic, bool import) {
       (void)strength;
       random_buffer(seed, sizeof(seed));
       strength = (mnemonic_to_bits(mnemonic, seed) / 11) * 8 * 4 / 3;
+      if (strength == 0) {
+        return false;
+      }
       se_setSeedStrength(strength);
       if (!se_importSeed(seed)) {
         return false;
@@ -942,7 +948,23 @@ bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
 
 bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size) {
-  return sectrue == config_get_bytes(KEY_MNEMONIC, dest, dest_size, real_size);
+  if (g_bSelectSEFlag) {
+    uint8_t seed[64];
+    uint32_t strength = 0;
+
+    if (!se_isInitialized()) {
+      return false;
+    }
+    if (!se_getSeedStrength(&strength)) return false;
+    if (!se_export_seed(seed)) return false;
+    const char *mnemonic = mnemonic_from_data(seed, strength / 8);
+    strlcpy((char *)dest, mnemonic, dest_size);
+    *real_size = strlen((char *)dest);
+    return true;
+  } else {
+    return sectrue ==
+           config_get_bytes(KEY_MNEMONIC, dest, dest_size, real_size);
+  }
 }
 
 bool config_getMnemonic(char *dest, uint16_t dest_size) {
