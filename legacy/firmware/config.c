@@ -1066,18 +1066,27 @@ bool config_changePin(const char *old_pin, const char *new_pin) {
 
 #if !EMULATOR
   if (g_bSelectSEFlag) {
+    bool ret = false;
 #if ONEKEY_MINI
-    if (se_changePin(old_pin, new_pin))
+    ret = se_changePin(old_pin, new_pin);
 #else
-    if (se_changePin(pin_to_int(old_pin), new_pin_int))
+    ret = se_changePin(pin_to_int(old_pin), new_pin_int);
 #endif
-    {
+    if (ret) {
       se_unlocked = sectrue;
-      return true;
     } else {
       se_unlocked = secfalse;
-      return false;
     }
+#if DEBUG_LINK
+    if (ret) {
+      if (new_pin_int != PIN_EMPTY) {
+        storage_set(KEY_DEBUG_LINK_PIN, new_pin, strnlen(new_pin, MAX_PIN_LEN));
+      } else {
+        storage_delete(KEY_DEBUG_LINK_PIN);
+      }
+    }
+#endif
+    return ret;
   } else
 #endif
   {

@@ -54,7 +54,7 @@ bool se_get_sn(char **serial) {
 
 bool se_setSeedStrength(uint32_t strength) {
   if (strength != 128 && strength != 192 && strength != 256) return false;
-  ATCAUserState state;
+  ATCAUserState state = {0};
 
   atca_pair_unlock();
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
@@ -69,7 +69,7 @@ bool se_setSeedStrength(uint32_t strength) {
 }
 
 bool se_getSeedStrength(uint32_t *strength) {
-  ATCAUserState state;
+  ATCAUserState state = {0};
 
   atca_pair_unlock();
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
@@ -115,44 +115,65 @@ bool se_verifyPin(const char *pin) {
   }
 }
 
-bool se_setPin(const char *pin) {
-  uint8_t hash_pin[32] = {0};
-  ATCAUserState state;
+bool se_reset_pin(void) {
+  ATCAUserState state = {0};
 
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
-  pin_hash(pin, strlen(pin), hash_pin);
-  atca_pair_unlock();
-  if (ATCA_SUCCESS == atca_write_enc(SLOT_USER_PIN, 0, hash_pin,
-                                     pair_info->protect_key,
-                                     SLOT_IO_PROTECT_KEY)) {
-    pin_cacheSave(hash_pin);
-    pin_updateCounter();
-    if (!state.pin_set) {
-      state.pin_set = true;
-      atca_pair_unlock();
-      if (ATCA_SUCCESS == atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&state,
-                                         pair_info->protect_key,
-                                         SLOT_IO_PROTECT_KEY)) {
-        se_has_pin = true;
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool se_reset_pin(void) {
   atca_pair_unlock();
   if (ATCA_SUCCESS == atca_write_enc(SLOT_USER_PIN, 0, pair_info->init_pin,
                                      pair_info->protect_key,
                                      SLOT_IO_PROTECT_KEY)) {
     pin_cacheSave(pair_info->init_pin);
     pin_updateCounter();
-    se_has_pin = false;
-    return true;
-  } else {
-    return false;
+    if (state.pin_set) {
+      state.pin_set = false;
+      atca_pair_unlock();
+      if (ATCA_SUCCESS == atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&state,
+                                         pair_info->protect_key,
+                                         SLOT_IO_PROTECT_KEY)) {
+        se_has_pin = false;
+        return true;
+      }
+    } else {
+      se_has_pin = false;
+      return true;
+    }
   }
+  return false;
+}
+
+bool se_setPin(const char *pin) {
+  uint8_t hash_pin[32] = {0};
+  ATCAUserState state = {0};
+
+  atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
+  if (strlen(pin) == 0) {
+    return se_reset_pin();
+
+  } else {
+    pin_hash(pin, strlen(pin), hash_pin);
+    atca_pair_unlock();
+    if (ATCA_SUCCESS == atca_write_enc(SLOT_USER_PIN, 0, hash_pin,
+                                       pair_info->protect_key,
+                                       SLOT_IO_PROTECT_KEY)) {
+      pin_cacheSave(hash_pin);
+      pin_updateCounter();
+      if (!state.pin_set) {
+        state.pin_set = true;
+        atca_pair_unlock();
+        if (ATCA_SUCCESS ==
+            atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&state,
+                           pair_info->protect_key, SLOT_IO_PROTECT_KEY)) {
+          se_has_pin = true;
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 bool se_changePin(const char *old_pin, const char *new_pin) {
@@ -174,7 +195,7 @@ bool se_isInitialized(void) {
 
 bool se_importSeed(uint8_t *seed) {
   uint8_t pin[32] = {0};
-  ATCAUserState state;
+  ATCAUserState state = {0};
 
   atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
   pin_cacheGet(pin);
