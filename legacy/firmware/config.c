@@ -950,7 +950,7 @@ bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
 bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size) {
   if (g_bSelectSEFlag) {
-    uint8_t seed[64];
+    uint8_t seed[64] = {0};
     uint32_t strength = 0;
 
     if (!se_isInitialized()) {
