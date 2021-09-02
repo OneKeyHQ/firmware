@@ -138,10 +138,16 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
   awaiting_entropy = false;
 
   if (g_bSelectSEFlag) {
-    uint8_t seed[64];
 #if ONEKEY_MINI
-    random_buffer(seed, 64);
+    SHA256_CTX ctx = {0};
+
+    sha256_Init(&ctx);
+    sha256_Update(&ctx, int_entropy, 32);
+    sha256_Update(&ctx, ext_entropy, len);
+    sha256_Final(&ctx, int_entropy);
+
 #else
+    uint8_t seed[64];
     if (!se_device_init(ExportType_MnemonicPlainExportType_YES, NULL)) {
       fsm_sendFailure(FailureType_Failure_ProcessError,
                       _("Device failed initialized"));
@@ -155,12 +161,16 @@ void reset_entropy(const uint8_t *ext_entropy, uint32_t len) {
       return;
     }
     se_setNeedsBackup(true);
+
+    memcpy(int_entropy, seed, 32);
 #endif
 
 #if !EMULATOR
-    se_setSeedStrength(strength);
+    if (g_bSelectSEFlag) {
+      se_setSeedStrength(strength);
+    }
 #endif
-    memcpy(int_entropy, seed, 32);
+
   } else {
     SHA256_CTX ctx = {0};
     sha256_Init(&ctx);
