@@ -213,16 +213,24 @@ static bool recovery_done(void) {
           (config_isInitialized() && config_containsMnemonic(new_mnemonic));
       memzero(new_mnemonic, sizeof(new_mnemonic));
       if (match) {
+#if ONEKEY_MINI
+        layoutDialogAdapterEx(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+#else
         layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
-                            _("The seed is valid"), _("and MATCHES"),
-                            _("the one in the device."), NULL, NULL, NULL);
+#endif
+                              _("The seed is valid"), _("and MATCHES"),
+                              _("the one in the device."), NULL, NULL, NULL);
         protectButton(ButtonRequestType_ButtonRequest_Other, true);
         fsm_sendSuccess(
             _("The seed is valid and matches the one in the device"));
       } else {
+#if ONEKEY_MINI
+        layoutDialogAdapterEx(&bmp_icon_error, NULL, _("Confirm"), NULL,
+#else
         layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                            _("The seed is valid"), _("but does NOT MATCH"),
-                            _("the one in the device."), NULL, NULL, NULL);
+#endif
+                              _("The seed is valid"), _("but does NOT MATCH"),
+                              _("the one in the device."), NULL, NULL, NULL);
         protectButton(ButtonRequestType_ButtonRequest_Other, true);
         fsm_sendFailure(
             FailureType_Failure_DataError,
@@ -235,9 +243,15 @@ static bool recovery_done(void) {
     if (!dry_run) {
       session_clear(true);
     } else {
+#if ONEKEY_MINI
+      layoutDialogAdapterEx(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                            _("The seed is INVALID!"), NULL, NULL, NULL, NULL,
+                            NULL);
+#else
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                           _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
                           NULL);
+#endif
       protectButton(ButtonRequestType_ButtonRequest_Other, true);
     }
     fsm_sendFailure(FailureType_Failure_DataError,
@@ -314,11 +328,19 @@ static void display_choices(bool twoColumn, char choices[9][12], int num) {
     layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter the"),
                       desc, _("of your mnemonic"), NULL, NULL, NULL);
   } else {
+#if ONEKEY_MINI
+    oledBox(0, 91, 127, 127, false);
+#else
     oledBox(0, 27, 127, 63, false);
+#endif
   }
 
   for (int row = 0; row < 3; row++) {
+#if ONEKEY_MINI
+    int y = 119 - row * 11;
+#else
     int y = 55 - row * 11;
+#endif
     for (int col = 0; col < nColumns; col++) {
       int x = twoColumn ? 64 * col + 32 : 42 * col + 22;
       int choice = word_matrix[nColumns * row + col];
@@ -443,7 +465,12 @@ static void recovery_digit(const char digit) {
     /* received final word */
 
     /* Mark the chosen word for 250 ms */
+#if ONEKEY_MINI
+    int y = 118 - ((digit - '1') / 3) * 11;
+#else
     int y = 54 - ((digit - '1') / 3) * 11;
+#endif
+
     int x = 64 * (((digit - '1') % 3) > 0);
     oledInvert(x + 1, y, x + 62, y + 9);
     oledRefresh();

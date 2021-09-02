@@ -723,6 +723,7 @@ const char *languages[][2] = {
     // recovery.c
     {"The seed is", "种子"},
     // recovery.c recovery.c
+    {"The seed is INVALID!", "种子不可用"},
     {"The seed is valid", ""},
     // recovery.c
     {"The seed is valid and matches the one in the device", ""},
