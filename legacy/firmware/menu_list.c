@@ -341,22 +341,19 @@ void menu_erase_device(int index) {
 
 void menu_changePin(int index) {
   (void)index;
+#if !ONEKEY_MINI
   uint8_t key = KEY_NULL;
 
-#if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      NULL, NULL, _("Before your start"), _("Check PIN Code"), NULL, NULL);
-#else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_confirm, _("Next"), NULL, NULL,
       NULL, _("Before your start"), _("Check PIN Code"), NULL, NULL);
-#endif
 
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
   }
+#endif
+
   protectChangePinOnDevice(true, false);
 }
 
