@@ -182,3 +182,38 @@ void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg) {
 
   layoutHome();
 }
+
+void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
+  RESP_INIT(EthereumMessageSignature);
+
+  CHECK_INITIALIZED
+
+  if (msg->domain_hash.size != 32 || msg->message_hash.size != 32) {
+    return;
+  }
+
+  layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
+                       msg->domain_hash.size);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
+                       msg->message_hash.size);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  CHECK_PIN
+
+  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
+                                          msg->address_n_count, NULL);
+  if (!node) return;
+
+  ethereum_message_sign_eip712(msg, node, resp);
+  layoutHome();
+}

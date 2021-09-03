@@ -286,15 +286,15 @@ enum MessageType {
     MessageType_SolanaSignedTx = 10103 [(wire_out) = true];
 
     // Starcoin
-    MessageType_StarcoinGetAddress = 10200 [(wire_in) = true];
-    MessageType_StarcoinAddress = 10201 [(wire_out) = true];
-    MessageType_StarcoinGetPublicKey = 10202 [(wire_in) = true];
-    MessageType_StarcoinPublicKey = 10203 [(wire_out) = true];
-    MessageType_StarcoinSignTx = 10204 [(wire_in) = true];
-    MessageType_StarcoinSignedTx = 10205 [(wire_out) = true];
-    MessageType_StarcoinSignMessage = 10206 [(wire_in) = true];
-    MessageType_StarcoinMessageSignature = 10207 [(wire_out) = true];
-    MessageType_StarcoinVerifyMessage = 10208[(wire_in) = true];
+    MessageType_StarcoinGetAddress = 10300 [(wire_in) = true];
+    MessageType_StarcoinAddress = 10301 [(wire_out) = true];
+    MessageType_StarcoinGetPublicKey = 10302 [(wire_in) = true];
+    MessageType_StarcoinPublicKey = 10303 [(wire_out) = true];
+    MessageType_StarcoinSignTx = 10304 [(wire_in) = true];
+    MessageType_StarcoinSignedTx = 10305 [(wire_out) = true];
+    MessageType_StarcoinSignMessage = 10306 [(wire_in) = true];
+    MessageType_StarcoinMessageSignature = 10307 [(wire_out) = true];
+    MessageType_StarcoinVerifyMessage = 10308[(wire_in) = true];
 
     // WebAuthn
     MessageType_WebAuthnListResidentCredentials = 800 [(wire_in) = true];
@@ -336,4 +336,7 @@ enum MessageType {
     MessageType_SEMessageSignature = 10013 [(wire_out) = true];
     MessageType_NFTWriteInfo = 10014 [(wire_in) = true];
     MessageType_NFTWriteData = 10015 [(wire_in) = true];
+
+    MessageType_EthereumSignMessageEIP712 = 10200 [(wire_in) = true];
+
 }

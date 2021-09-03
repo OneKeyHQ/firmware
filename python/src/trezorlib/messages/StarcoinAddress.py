@@ -11,7 +11,7 @@ if __debug__:
 
 
 class StarcoinAddress(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10201
+    MESSAGE_WIRE_TYPE = 10301
 
     def __init__(
         self,
