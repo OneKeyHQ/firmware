@@ -122,6 +122,7 @@ from .EthereumGetPublicKey import EthereumGetPublicKey
 from .EthereumMessageSignature import EthereumMessageSignature
 from .EthereumPublicKey import EthereumPublicKey
 from .EthereumSignMessage import EthereumSignMessage
+from .EthereumSignMessageEIP712 import EthereumSignMessageEIP712
 from .EthereumSignTx import EthereumSignTx
 from .EthereumTxAck import EthereumTxAck
 from .EthereumTxRequest import EthereumTxRequest

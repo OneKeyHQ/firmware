@@ -221,3 +221,4 @@ BixinLoadDevice: Literal[913] = 913
 BixinBackupDevice: Literal[914] = 914
 BixinBackupDeviceAck: Literal[915] = 915
 BixinPinInputOnDevice: Literal[10000] = 10000
+EthereumSignMessageEIP712: Literal[10100] = 10100

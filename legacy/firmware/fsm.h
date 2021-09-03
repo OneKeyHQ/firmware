@@ -106,6 +106,7 @@ void fsm_msgEthereumSignTx(
 void fsm_msgEthereumTxAck(const EthereumTxAck *msg);
 void fsm_msgEthereumSignMessage(const EthereumSignMessage *msg);
 void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg);
+void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg);
 
 // lisk
 void fsm_msgLiskGetAddress(const LiskGetAddress *msg);
