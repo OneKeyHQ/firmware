@@ -11,7 +11,7 @@ if __debug__:
 
 
 class StarcoinGetPublicKey(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10202
+    MESSAGE_WIRE_TYPE = 10302
 
     def __init__(
         self,

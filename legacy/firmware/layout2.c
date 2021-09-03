@@ -1033,6 +1033,19 @@ void layoutSignMessage(const uint8_t *msg, uint32_t len) {
   }
 }
 
+void layoutSignMessage_ex(const char *text, const uint8_t *msg, uint32_t len) {
+  const char **str = NULL;
+  if (!is_valid_ascii(msg, len)) {
+    str = split_message_hex(msg, len);
+    layoutDialogSwipe(NULL, _("Cancel"), _("Confirm"), text, str[0], str[1],
+                      str[2], str[3], NULL, NULL);
+  } else {
+    str = split_message(msg, len, 18);
+    layoutDialogSwipe(NULL, _("Cancel"), _("Confirm"), text, str[0], str[1],
+                      str[2], str[3], NULL, NULL);
+  }
+}
+
 void layoutVerifyMessage(const uint8_t *msg, uint32_t len) {
   const char **str = NULL;
   if (!is_valid_ascii(msg, len)) {

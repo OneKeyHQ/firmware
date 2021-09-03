@@ -10,21 +10,24 @@ if __debug__:
         pass
 
 
-class StarcoinSignTx(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10304
+class EthereumSignMessageEIP712(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10200
 
     def __init__(
         self,
         *,
         address_n: List[int] = None,
-        raw_tx: bytes = None,
+        domain_hash: bytes = None,
+        message_hash: bytes = None,
     ) -> None:
         self.address_n = address_n if address_n is not None else []
-        self.raw_tx = raw_tx
+        self.domain_hash = domain_hash
+        self.message_hash = message_hash
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('address_n', p.UVarintType, p.FLAG_REPEATED),
-            2: ('raw_tx', p.BytesType, None),
+            2: ('domain_hash', p.BytesType, None),
+            3: ('message_hash', p.BytesType, None),
         }

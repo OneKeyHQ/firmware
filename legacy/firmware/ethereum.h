@@ -33,5 +33,8 @@ void ethereum_message_sign(const EthereumSignMessage *msg, const HDNode *node,
                            EthereumMessageSignature *resp);
 int ethereum_message_verify(const EthereumVerifyMessage *msg);
 bool ethereum_parse(const char *address, uint8_t pubkeyhash[20]);
+void ethereum_message_sign_eip712(const EthereumSignMessageEIP712 *msg,
+                                  const HDNode *node,
+                                  EthereumMessageSignature *resp);
 
 #endif
