@@ -1470,8 +1470,12 @@ void layoutDecryptIdentity(const IdentityType *identity) {
 #if U2F_ENABLED
 
 void layoutU2FDialog(const char *verb, const char *appname) {
+#if ONEKEY_MINI
+  layoutDialogAdapterEx(&bmp_webauthn, NULL, verb, NULL, verb,
+#else
   layoutDialogAdapter(&bmp_webauthn, NULL, verb, NULL, verb,
-                      _("U2F security key?"), NULL, appname, NULL, NULL);
+#endif
+                        _("U2F security key?"), NULL, appname, NULL, NULL);
 }
 
 #endif
