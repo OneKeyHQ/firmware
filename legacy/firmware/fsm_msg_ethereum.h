@@ -189,6 +189,13 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
   CHECK_INITIALIZED
 
   if (msg->domain_hash.size != 32 || msg->message_hash.size != 32) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, "data length error");
+    return;
+  }
+
+  if (!config_getCoinSwitch(COIN_SWITCH_ETH_EIP712)) {
+    fsm_sendFailure(FailureType_Failure_UnexpectedMessage,
+                    _("Unknown message"));
     return;
   }
 
