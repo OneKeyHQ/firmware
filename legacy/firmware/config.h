@@ -77,6 +77,10 @@ typedef struct _Storage {
   STORAGE_BOOL(no_backup)
 } Storage;
 
+typedef enum {
+  COIN_SWITCH_ETH_EIP712 = 0x01,
+} CoinSwitch;
+
 extern Storage configUpdate;
 
 #define MIN_PIN_LEN 1
@@ -210,6 +214,9 @@ bool config_STSeedBackUp(void *plain_data, uint16_t plain_len,
 bool config_STSeedRestore(void *cipher_data, uint16_t cipher_len,
                           void *plain_data, uint16_t *plain_len);
 uint32_t config_getPinFails(void);
+
+bool config_getCoinSwitch(CoinSwitch loc);
+void config_setCoinSwitch(CoinSwitch loc, bool flag);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

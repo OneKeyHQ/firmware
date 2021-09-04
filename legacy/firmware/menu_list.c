@@ -13,7 +13,7 @@
 
 extern uint8_t ui_language;
 
-static struct menu settings_menu, main_menu;
+static struct menu settings_menu, main_menu, security_set_menu;
 
 void menu_recovery_device(int index) {
   (void)index;
@@ -299,9 +299,24 @@ static struct menu settings_menu = {
     .previous = &main_menu,
 };
 
+static struct menu_item eth_eip_set_menu_items[] = {
+    {"On", NULL, true, menu_para_set_eth_eip, NULL},
+    {"Off", NULL, true, menu_para_set_eth_eip, NULL}};
+
+static struct menu eth_eip_switch_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(eth_eip_set_menu_items),
+    .title = NULL,
+    .items = eth_eip_set_menu_items,
+    .previous = &security_set_menu,
+};
+
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL},
     {"Reset", NULL, true, menu_erase_device, NULL},
+    {"ETH EIP712", NULL, false, .sub_menu = &eth_eip_switch_menu,
+     menu_para_eth_eip_switch},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 

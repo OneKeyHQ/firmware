@@ -1435,3 +1435,24 @@ uint32_t config_getPinFails(void) {
 
   return count;
 }
+
+bool config_getCoinSwitch(CoinSwitch loc) {
+  uint32_t coin_switch = 0;
+  if (sectrue == config_get_uint32(KEY_COIN_FUNCTION_SWITCH, &coin_switch)) {
+    if (coin_switch & loc) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void config_setCoinSwitch(CoinSwitch loc, bool flag) {
+  uint32_t coin_switch = 0;
+  config_get_uint32(KEY_COIN_FUNCTION_SWITCH, &coin_switch);
+  if (flag) {
+    coin_switch |= loc;
+  } else {
+    coin_switch &= ~loc;
+  }
+  storage_set(KEY_COIN_FUNCTION_SWITCH, &coin_switch, sizeof(coin_switch));
+}

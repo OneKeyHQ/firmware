@@ -47,6 +47,10 @@ char* menu_para_shutdown(void) {
 
 char* menu_para_autolock(void) { return format_time(config_getSleepDelayMs()); }
 
+char* menu_para_eth_eip_switch(void) {
+  return config_getCoinSwitch(COIN_SWITCH_ETH_EIP712) ? _(" On") : _(" Off");
+};
+
 void menu_para_set_ble(int index) {
   bool ble_state = index ? false : true;
   if (ble_state != ble_get_switch()) {
@@ -68,4 +72,9 @@ void menu_para_set_shutdown(int index) {
 void menu_para_set_sleep(int index) {
   uint32_t ms[5] = {60 * 1000, 2 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000, 0};
   config_setSleepDelayMs(ms[index]);
+}
+
+void menu_para_set_eth_eip(int index) {
+  bool state = index ? false : true;
+  config_setCoinSwitch(COIN_SWITCH_ETH_EIP712, state);
 }
