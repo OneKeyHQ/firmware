@@ -8,6 +8,7 @@ char* menu_para_autolock(void);
 #if ONEKEY_MINI
 char* menu_para_brightness(void);
 #endif
+char* menu_para_eth_eip_switch(void);
 
 void menu_para_set_ble(int index);
 void menu_para_set_language(int index);
@@ -16,5 +17,6 @@ void menu_para_set_sleep(int index);
 #if ONEKEY_MINI
 void menu_para_set_brightness(int index);
 #endif
+void menu_para_set_eth_eip(int index);
 
 #endif
