@@ -364,8 +364,13 @@ bool protectPin(bool use_cached) {
 
   const char *pin = "";
   if (config_hasPin()) {
+#if ONEKEY_MINI
+    pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
+                     _("Verify PIN"), &newpin);
+#else
     pin = requestPin(PinMatrixRequestType_PinMatrixRequestType_Current,
                      _("Please enter current PIN"), &newpin);
+#endif
     if (!pin) {
       fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
       return false;
@@ -749,6 +754,10 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   if (protectAbortedByInitialize) {
     if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+#if ONEKEY_MINI
+    // open back light
+    timer_enable_oc_output(TIM3, TIM_OC2);
+#endif
     layoutHome();
   }
 
