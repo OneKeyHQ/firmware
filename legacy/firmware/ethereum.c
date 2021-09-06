@@ -701,8 +701,8 @@ void ethereum_message_sign(const EthereumSignMessage *msg, const HDNode *node,
   resp->has_address = true;
   resp->address[0] = '0';
   resp->address[1] = 'x';
-  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
   // ethereum_address_checksum adds trailing zero
+  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
 
   uint8_t hash[32] = {0};
   ethereum_message_hash(msg->message.bytes, msg->message.size, hash);
@@ -731,14 +731,14 @@ void ethereum_message_sign_eip712(const EthereumSignMessageEIP712 *msg,
   resp->has_address = true;
   resp->address[0] = '0';
   resp->address[1] = 'x';
-  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
   // ethereum_address_checksum adds trailing zero
+  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
 
   uint8_t hash[32] = {0};
   struct SHA3_CTX ctx = {0};
 
   sha3_256_Init(&ctx);
-  sha3_Update(&ctx, (const uint8_t *)"\x19\x01", 2);
+  sha3_Update(&ctx, (const uint8_t *)"\x19\x01", 2);  // EIP712 magic
   sha3_Update(&ctx, msg->domain_hash.bytes, msg->domain_hash.size);
   sha3_Update(&ctx, msg->message_hash.bytes, msg->message_hash.size);
   keccak_Final(&ctx, hash);

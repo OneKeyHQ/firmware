@@ -219,7 +219,10 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
 
   const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
-  if (!node) return;
+  if (!node) {
+    fsm_sendFailure(FailureType_Failure_DataError, NULL);
+    return;
+  }
 
   ethereum_message_sign_eip712(msg, node, resp);
   layoutHome();
