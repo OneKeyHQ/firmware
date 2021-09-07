@@ -2416,10 +2416,11 @@ void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
   }
 #if ONEKEY_MINI
   oledDrawBitmap(x - MINI_ADJUST, y + 10 + y0, &bmp_btn_down);
+  oledRefreshRegion(0, 0, OLED_WIDTH, OLED_HEIGHT - 11);
 #else
   oledDrawBitmap(x - 4, y + 10 + y0, &bmp_btn_down);
-#endif
   oledRefresh();
+#endif
 }
 
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {

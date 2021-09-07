@@ -460,6 +460,29 @@ void oledRefresh() {
 
   gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
 }
+
+void oledRefreshRegion(int x1, int y1, int x2, int y2) {
+  gpio_clear(OLED_CS_PORT, OLED_CS_PIN);  // SPI select
+
+  oledSetAddress(x1, y1, x2, y2);
+  for (int y = y1; y < y2; y++) {
+    for (int x = x1; x < x2; x++) {
+      if (_oledbuffer[OLED_OFFSET(x, y)] & OLED_MASK(x, y)) {
+        SPISendData(COLOR_FONT >> 8);
+        SPISendData(COLOR_FONT & 0xff);
+      } else {
+        SPISendData(COLOR_BACKGROUND >> 8);
+        SPISendData(COLOR_BACKGROUND & 0xff);
+      }
+    }
+  }
+
+  if (_bitmap.valid) {
+    oledRgbRefresh(_bitmap.x, _bitmap.y, (BITMAP *)&_bitmap.bitmap);
+  }
+
+  gpio_set(OLED_CS_PORT, OLED_CS_PIN);  // SPI deselect
+}
 #else
 void oledRefresh() {
   static const uint8_t s[3] = {OLED_SETLOWCOLUMN | 0x00,

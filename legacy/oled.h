@@ -89,6 +89,7 @@ void oledSetAddress(uint16_t xs, uint16_t ys, uint16_t xe, uint16_t ye);
 void oledDrawRgbBitmap(int x, int y, const BITMAP *bmp);
 void setRgbBitmap(bool valid);
 bool isRgbBitmap(void);
+void oledRefreshRegion(int x1, int y1, int x2, int y2);
 #endif
 
 void oledInit(void);
