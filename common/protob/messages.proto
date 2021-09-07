@@ -298,6 +298,6 @@ enum MessageType {
     MessageType_BixinBackupDeviceAck = 915 [(wire_out) = true];
 
     MessageType_BixinPinInputOnDevice = 10000 [(wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
-    MessageType_EthereumSignMessageEIP712 = 10100 [(wire_in) = true];
+    MessageType_EthereumSignMessageEIP712 = 10200 [(wire_in) = true];
 
 }

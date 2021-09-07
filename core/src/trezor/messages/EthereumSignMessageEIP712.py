@@ -11,7 +11,7 @@ if __debug__:
 
 
 class EthereumSignMessageEIP712(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10100
+    MESSAGE_WIRE_TYPE = 10200
 
     def __init__(
         self,
