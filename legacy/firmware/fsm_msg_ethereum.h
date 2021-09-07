@@ -194,8 +194,8 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
   }
 
   if (!config_getCoinSwitch(COIN_SWITCH_ETH_EIP712)) {
-    fsm_sendFailure(FailureType_Failure_UnexpectedMessage,
-                    _("Unknown message"));
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("EIP712 blind sign is disabled"));
     return;
   }
 
