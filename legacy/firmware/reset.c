@@ -302,12 +302,12 @@ bool verify_mnemonic(const char *mnemonic) {
   }
 
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
-                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
-                                 NULL, NULL, NULL,
-                                 _("Choose the correct\nwords based on "
-                                   "the\nrecovery phrase\nyou've put down."),
-                                 NULL);
+  layoutDialogSwipeCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
+                                   &bmp_button_forward, _("NEXT"), NULL, true,
+                                   NULL, NULL, NULL, NULL,
+                                   _("Choose the correct\nwords based on "
+                                     "the\nrecovery phrase\nyou've put down."),
+                                   NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
@@ -636,13 +636,13 @@ bool writedown_mnemonic(const char *mnemonic) {
 write_mnemonic:
 #if ONEKEY_MINI
   if (scroll_mnemonic(_("Word"), mnemonic, 0)) {
-    layoutDialogSwipeCenterAdapter(
+    layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-        NULL, NULL, NULL,
+        true, NULL, NULL,
         _("Check the recovery\nphrase once more and\ncompare it to the\nbackup "
-          "copy "
-          "in your\nhand. Make sure the\nspelling and order\nare identical."),
-        NULL, NULL);
+          "copy in your\nhand. Make sure the\nspelling and order\nare "
+          "identical."),
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
     layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
@@ -688,10 +688,11 @@ bool reset_on_device(void) {
 
 prompt_creat:
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
-                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
-                                 NULL, NULL, NULL, NULL,
-                                 _("Follow the guide to\ncreate a new wallet"));
+  layoutDialogSwipeCenterAdapterEx(
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      true, NULL, NULL, NULL, NULL, NULL,
+      _("Follow the guide to\ncreate a new wallet"), NULL, NULL, NULL, NULL,
+      NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
@@ -732,9 +733,10 @@ select_mnemonic_count:
   else
     strcat(desc, _("Please copy the\nfollowing 24 words in\norder"));
 
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
-                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
-                                 NULL, NULL, NULL, desc, NULL);
+  layoutDialogSwipeCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
+                                   &bmp_button_forward, _("NEXT"), NULL, true,
+                                   NULL, NULL, NULL, NULL, desc, NULL, NULL,
+                                   NULL, NULL, NULL, NULL, NULL);
 #else
   strcat(desc, _("Write down your "));
   uint2str(words_count, desc + strlen(desc));

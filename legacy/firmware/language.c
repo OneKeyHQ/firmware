@@ -33,7 +33,6 @@ const char *languages[][2] = {
     {"Abort", "取消"},
     // menu.c
     {"About", "关于本机"},
-    {"About Device", "关于本机"},
     // layout2.c
     {"Absolute Levy", ""},
     //
@@ -49,7 +48,7 @@ const char *languages[][2] = {
     // menu_list.c
     {"All data on the device\nwill be erased if the\ndevice is reset, "
      "and\nthis operation cannot\nbe reversed.",
-     "重置设备将抹除本机全部\n数据,本操作不可撤销"},
+     "重置设备将抹除本机全部数\n据,本操作不可撤销"},
 
     // fsm_msg_common.h
     {"All data will be lost.", "所有数据将丢失"},
@@ -86,7 +85,7 @@ const char *languages[][2] = {
     // menu_list.c
     {"Before you reset the\ndevice, please ensure\nyou've backed up "
      "your\nrecovery phrase",
-     "在重置设备前,请确保您\n仍掌握该助记词的物理备\n份"},
+     "在重置设备前,请确保您仍\n掌握该助记词的物理备份"},
     //
     {"Before your start", "继续操作前"},
     // layout2.c layout2.c
@@ -139,14 +138,14 @@ const char *languages[][2] = {
     {"Check PIN Code", "请先校验设备原PIN码"},
     {"Check Recovery Phrase", "助记词核对"},
     {"Check the 12 words\nyou entered are the\ncorrect recovery\nphrase",
-     "重新检查已输入的12\n个单词,确保它是正确\n的助记词"},
+     "重新检查已输入的12位单\n词,确保它是正确的助记词"},
     {"Check the 18 words\nyou entered are the\ncorrect recovery\nphrase",
-     "重新检查已输入的18\n个单词,确保它是正确\n的助记词"},
+     "重新检查已输入的18位单\n词,确保它是正确的助记词"},
     {"Check the 24 words\nyou entered are the\ncorrect recovery\nphrase",
-     "重新检查已输入的24\n个单词,确保它是正确\n的助记词"},
+     "重新检查已输入的24位单\n词,确保它是正确的助记词"},
     {"Check the recovery\nphrase once more and\ncompare it to the\nbackup copy "
-     "in your\nhand. Make sure the\nspelling and order\nareidentical.",
-     "再次查看助记词,并与手中的备份进行核对,确保二者完全一致"},
+     "in your\nhand. Make sure the\nspelling and order\nare identical.",
+     "再次查看助记词,并与手\n中的备份进行核对,确保\n二者完全一致."},
     //
     {"Check the entered", "请检查输入的"},
     //
@@ -155,7 +154,7 @@ const char *languages[][2] = {
     {"Check the written", "请检查写下的"},
     {"Choose the correct\nwords based on the\nrecovery phrase\nyou've put "
      "down.",
-     "接下来,请根据已写下的助记词,选择正确的单词"},
+     "接下来,请根据已写下的助\n记词选择正确的单词"},
     {"Click to Unlock", "按任意键解锁"},
     // layout2.c
     {"CoSi commit index #?", ""},
@@ -551,12 +550,9 @@ const char *languages[][2] = {
     {"Percentile Levy", ""},
     // protect.c protect.c
     {"Please confirm PIN", "请确认PIN码"},
-    {"Please copy the\nfollowing 12 words in\norder",
-     "请按顺序抄写以下12位助记词"},
-    {"Please copy the\nfollowing 18 words in\norder",
-     "请按顺序抄写以下18位助记词"},
-    {"Please copy the\nfollowing 24 words in\norder",
-     "请按顺序抄写以下24位助记词"},
+    {"Please copy the\nfollowing 12 words in\norder", "请依次抄写12位助记词"},
+    {"Please copy the\nfollowing 18 words in\norder", "请依次抄写18位助记词"},
+    {"Please copy the\nfollowing 24 words in\norder", "请依次抄写24位助记词"},
     // protect.c
     {"Please enter current PIN", "请输入当前PIN码"},
     // recovery.c
@@ -746,7 +742,7 @@ const char *languages[][2] = {
     {"To learn more about\nhow to get NFT Pet,\ngo to the",
      "了解如何获取NFT Pet\n请前往众筹首页"},
     {"To learn more about\nhow to use, go to the\nHelp Center",
-     "了解如何使用,请前往帮助中心"},
+     "了解如何使用\n请前往帮助中心"},
     // ethereum.c
     {"Too much data", ""},
     // ethereum.c

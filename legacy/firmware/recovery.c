@@ -929,11 +929,11 @@ bool recovery_on_device(void) {
 
 prompt_recovery:
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
+  layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      NULL, NULL, NULL, NULL,
+      true, NULL, NULL, NULL, NULL,
       _("Follow the guide and\nenter recovery phrase\nto restore wallet."),
-      NULL);
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
@@ -969,9 +969,10 @@ select_mnemonic_count:
       break;
   }
 
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_button_back, _("BACK"),
-                                 &bmp_button_forward, _("NEXT"), NULL, NULL,
-                                 NULL, NULL, NULL, desc, NULL);
+  layoutDialogSwipeCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
+                                   &bmp_button_forward, _("NEXT"), NULL, true,
+                                   NULL, NULL, NULL, NULL, desc, NULL, NULL,
+                                   NULL, NULL, NULL, NULL, NULL);
 #else
   strcat(desc, _("Please enter your"));
   uint2str(word_count, desc + strlen(desc));
@@ -1014,8 +1015,8 @@ input_word:
   }
 
   layoutDialogCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
-                              &bmp_button_forward, _("NEXT"), NULL, NULL, NULL,
-                              false, desc, NULL, NULL, NULL, NULL, NULL, NULL,
+                              &bmp_button_forward, _("NEXT"), NULL, true, NULL,
+                              NULL, NULL, NULL, desc, NULL, NULL, NULL, NULL,
                               NULL, NULL, NULL);
 #else
   strcat(desc, _("Check the entered "));

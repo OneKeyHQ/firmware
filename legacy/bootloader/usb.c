@@ -268,9 +268,15 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     if (msg_id == 0x0006) {  // FirmwareErase message (id 6)
       bool proceed = false;
       if (firmware_present_new()) {
+#if ONEKEY_MINI
+        layoutDialog(&bmp_icon_warning, "CANCEL", "OK", NULL,
+                     "Install firmware?", NULL, "Please ensure you've",
+                     "backed up the", "recovery phrase", NULL);
+#else
         layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL,
                      "Install new", "firmware?", NULL, "Never do this without",
                      "your recovery card!", NULL);
+#endif
         proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       } else {
         proceed = true;

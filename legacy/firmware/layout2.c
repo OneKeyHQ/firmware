@@ -3019,12 +3019,13 @@ refresh_menu:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       setRgbBitmap(true);
       oledDrawRgbBitmap(48, 16, &bmp_icon_egg);
-      oledDrawStringCenterAdapter(
+      oledDrawStringCenterAdapterEx(
           OLED_WIDTH / 2, 5 * 10,
           _("To learn more about\nhow to get NFT Pet,\ngo to the"),
           FONT_STANDARD);
-      oledDrawStringAdapter(4, 9 * 10, CROWDFUND_URL, FONT_STANDARD);
-      oledBox(8, 100, 116, 100, true);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * 10, CROWDFUND_URL,
+                                  FONT_STANDARD);
+      oledBox(11, 100, 119, 100, true);
       break;
 #endif
     default:

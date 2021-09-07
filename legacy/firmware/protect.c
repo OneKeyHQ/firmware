@@ -907,7 +907,7 @@ pin_set:
 #if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-        false, NULL, NULL, NULL,
+        true, NULL, NULL, NULL,
         _("Please set your PIN.\nPIN is used to unlock\nyour device. "
           "Please\nkeep it safe."),
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);

@@ -138,20 +138,21 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
       strcat(desc, "    ");
-      strcat(desc, _("OK or Next"));
-      oledDrawBitmap(offset + len + 4, 48, &bmp_button_forward);
+      strcat(desc, _("Cancel or Back"));
+      oledDrawBitmap(offset + len + 4, 48, &bmp_button_back);
       oledDrawStringAdapter(offset, 48, desc, FONT_STANDARD);
 
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
       strcat(desc, "    ");
-      strcat(desc, _("Cancel or Back"));
+      strcat(desc, _("OK or Next"));
+
       // English
       if (desc[0] == 'P')
         offset = 0;
       else
         offset = 20;
-      oledDrawBitmap(offset + len + 4, 62, &bmp_button_back);
+      oledDrawBitmap(offset + len + 4, 62, &bmp_button_forward);
       oledDrawStringAdapter(offset, 62, desc, FONT_STANDARD);
 #endif
       oledDrawBitmap(60, OLED_HEIGHT - 8, &bmp_btn_down);
@@ -190,9 +191,10 @@ refresh_menu:
 #endif
       oledDrawBitmap(60, 0, &bmp_btn_up);
 #if ONEKEY_MINI
-      oledDrawStringCenterAdapter(0, 3 * 10, _("Download Onekey Apps"),
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,
+                                  _("Download Onekey Apps"), FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "onekey.so/download",
                                   FONT_STANDARD);
-      oledDrawStringAdapter(11, 6 * 10, "onekey.so/download", FONT_STANDARD);
       oledBox(13, 70, 117, 70, true);
 #else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download Onekey"),
@@ -206,12 +208,13 @@ refresh_menu:
 #if ONEKEY_MINI
     case 2:
       oledDrawBitmap(60, 0, &bmp_btn_up);
-      oledDrawStringCenterAdapter(
+      oledDrawStringCenterAdapterEx(
           OLED_WIDTH / 2, 3 * 10,
           _("To learn more about\nhow to use, go to the\nHelp Center"),
           FONT_STANDARD);
-      oledDrawStringAdapter(20, 7 * 10, "help.onekey.so", FONT_STANDARD);
-      oledBox(22, 80, 100, 80, true);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 7 * 10, "help.onekey.so",
+                                  FONT_STANDARD);
+      oledBox(26, 80, 104, 80, true);
       layoutButtonYesAdapter(_("OK"), &bmp_button_forward);
 #else
     case 3:
@@ -261,12 +264,12 @@ void menu_erase_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
+  layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      NULL, NULL, NULL, NULL,
+      true, NULL, NULL, NULL, NULL,
       _("Before you reset the\ndevice, please ensure\nyou've backed up "
         "your\nrecovery phrase"),
-      NULL);
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
@@ -281,12 +284,12 @@ void menu_erase_device(int index) {
     return;
   }
 #if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapter(
+  layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      NULL, NULL,
+      true, NULL, NULL,
       _("All data on the device\nwill be erased if the\ndevice is reset, "
         "and\nthis operation cannot\nbe reversed."),
-      NULL, NULL, NULL);
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
@@ -497,12 +500,7 @@ static struct menu_item main_menu_items[] = {
     {"Settings", NULL, false, .sub_menu = &settings_menu, NULL},
 #endif
     {"Security", NULL, false, .sub_menu = &security_set_menu, NULL},
-#if ONEKEY_MINI
-    {"About Device", NULL, true, layoutDeviceParameters, NULL}
-#else
-    {"About", NULL, true, layoutDeviceParameters, NULL}
-#endif
-};
+    {"About", NULL, true, layoutDeviceParameters, NULL}};
 
 static struct menu main_menu = {
     .start = 0,
@@ -519,7 +517,7 @@ static struct menu_item main_uninitialized_menu_items[] = {
 #if ONEKEY_MINI
     {"Create New Wallet", NULL, true, menu_reset_device, NULL},
     {"Restore Wallet", NULL, true, menu_recovery_device, NULL},
-    {"About Device", NULL, true, layoutDeviceParameters, NULL},
+    {"About", NULL, true, layoutDeviceParameters, NULL},
 #else
     {"Create", NULL, true, menu_reset_device, NULL},
     {"Restore", NULL, true, menu_recovery_device, NULL},
