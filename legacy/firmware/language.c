@@ -126,7 +126,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h
     {"Cancel", "取消"},
-    {"Cancel or Next", "取消或返回"},
+    {"Cancel or Back", "取消或返回"},
     // ethereum.c
     {"Chain Id out of bounds", ""},  // msg
     //

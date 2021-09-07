@@ -141,7 +141,7 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
       strcat(desc, "    ");
-      strcat(desc, _("Cancel or Next"));
+      strcat(desc, _("Cancel or Back"));
       // English
       if (desc[0] == 'P')
         offset = 0;
