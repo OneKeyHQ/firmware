@@ -124,6 +124,11 @@ bool get_features(Features *resp) {
   resp->has_bootloader_version = true;
   strlcpy(resp->bootloader_version, bootloader_version,
           sizeof(resp->bootloader_version));
+
+  resp->has_coin_switch = true;
+  resp->coin_switch |=
+      config_getCoinSwitch(COIN_SWITCH_ETH_EIP712) ? COIN_SWITCH_ETH_EIP712 : 0;
+
   return resp;
 }
 
@@ -881,9 +886,9 @@ void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg) {
     if (false ==
         se_restore((uint8_t *)(msg->data.bytes + 4), msg->data.size - 4)) {
       fsm_sendFailure(FailureType_Failure_DataError,
-                      "Restor seed in se failure");
+                      "Restore seed in se failure");
     } else {
-      fsm_sendSuccess(_("device initialied success"));
+      fsm_sendSuccess(_("device initialized success"));
     }
 
   } else if (msg->data.bytes[0] == 0x01) {

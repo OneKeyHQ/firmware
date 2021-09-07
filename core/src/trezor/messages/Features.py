@@ -67,6 +67,7 @@ class Features(p.MessageType):
         onekey_version: str = None,
         onekey_serial: str = None,
         bootloader_version: str = None,
+        coin_switch: int = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -116,6 +117,7 @@ class Features(p.MessageType):
         self.onekey_version = onekey_version
         self.onekey_serial = onekey_serial
         self.bootloader_version = bootloader_version
+        self.coin_switch = coin_switch
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -168,4 +170,5 @@ class Features(p.MessageType):
             508: ('onekey_version', p.UnicodeType, None),
             509: ('onekey_serial', p.UnicodeType, None),
             510: ('bootloader_version', p.UnicodeType, None),
+            517: ('coin_switch', p.UVarintType, None),
         }
