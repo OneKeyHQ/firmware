@@ -73,6 +73,7 @@ class Features(p.MessageType):
         NFT_voucher: bytes = None,
         cpu_info: str = None,
         pre_firmware: str = None,
+        coin_switch: int = None,
     ) -> None:
         self.capabilities = capabilities if capabilities is not None else []
         self.vendor = vendor
@@ -128,6 +129,7 @@ class Features(p.MessageType):
         self.NFT_voucher = NFT_voucher
         self.cpu_info = cpu_info
         self.pre_firmware = pre_firmware
+        self.coin_switch = coin_switch
 
     @classmethod
     def get_fields(cls) -> Dict:
@@ -186,4 +188,5 @@ class Features(p.MessageType):
             514: ('NFT_voucher', p.BytesType, None),
             515: ('cpu_info', p.UnicodeType, None),
             516: ('pre_firmware', p.UnicodeType, None),
+            517: ('coin_switch', p.UVarintType, None),
         }

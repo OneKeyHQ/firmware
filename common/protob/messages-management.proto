@@ -121,6 +121,8 @@ message Features {
     optional bytes NFT_voucher = 514;
     optional string cpu_info = 515;
     optional string pre_firmware = 516;
+
+    optional uint32 coin_switch = 517;
 }
 
 /**
