@@ -2567,7 +2567,12 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
     uint2str(index, index_str);
     strcat(index_str + strlen(index_str), "/");
     uint2str(count, index_str + strlen(index_str));
+#if ONEKEY_MINI
+    oledDrawStringAdapter(0, HIGH_OFFSET, index_str,
+                          FONT_STANDARD | FONT_FIXED);
+#else
     oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD | FONT_FIXED);
+#endif
   }
   if (previous) {
     oledDrawBitmap(60, y, bmp_up);
@@ -2641,7 +2646,12 @@ void layoutItemsSelectAdapterEx(const BITMAP *bmp_up, const BITMAP *bmp_down,
     uint2str(index, index_str);
     strcat(index_str + strlen(index_str), "/");
     uint2str(count, index_str + strlen(index_str));
+#if ONEKEY_MINI
+    oledDrawStringAdapter(0, HIGH_OFFSET, index_str,
+                          FONT_STANDARD | FONT_FIXED);
+#else
     oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD | FONT_FIXED);
+#endif
   }
 
   if (title) {
@@ -2748,7 +2758,12 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
     uint2str(index, index_str);
     strcat(index_str + strlen(index_str), "/");
     uint2str(count, index_str + strlen(index_str));
+#if ONEKEY_MINI
+    oledDrawStringAdapter(0, HIGH_OFFSET, index_str,
+                          FONT_STANDARD | FONT_FIXED);
+#else
     oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD | FONT_FIXED);
+#endif
   }
 
   if (desc) {

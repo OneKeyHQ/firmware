@@ -37,6 +37,7 @@
 
 #if ONEKEY_MINI
 #define WORD_PER_PAGE 10
+#define HIGH_OFFSET 1
 #endif
 
 extern void *layoutLast;

@@ -86,7 +86,11 @@ refresh_menu:
   index_str[0] = page + '1';
 
   oledClear_ex();
+#if ONEKEY_MINI
+  oledDrawStringAdapter(0, HIGH_OFFSET, index_str, FONT_STANDARD | FONT_FIXED);
+#else
   oledDrawStringAdapter(0, 0, index_str, FONT_STANDARD | FONT_FIXED);
+#endif
 
   switch (page) {
     case 0:
