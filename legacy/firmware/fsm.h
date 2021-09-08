@@ -27,6 +27,7 @@
 #include "messages-lisk.pb.h"
 #include "messages-management.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-solana.pb.h"
 #include "messages-stellar.pb.h"
 
 // message functions
@@ -138,6 +139,10 @@ void fsm_msgStellarAllowTrustOp(const StellarAllowTrustOp *msg);
 void fsm_msgStellarAccountMergeOp(const StellarAccountMergeOp *msg);
 void fsm_msgStellarManageDataOp(const StellarManageDataOp *msg);
 void fsm_msgStellarBumpSequenceOp(const StellarBumpSequenceOp *msg);
+
+// solana
+void fsm_msgSolanaGetAddress(const SolanaGetAddress *msg);
+void fsm_msgSolanaSignTx(const SolanaSignTx *msg);
 
 void fsm_msgBixinReboot(const BixinReboot *msg);
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg);
