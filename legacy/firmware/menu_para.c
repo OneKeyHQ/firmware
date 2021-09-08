@@ -2,6 +2,7 @@
 #include "ble.h"
 #include "config.h"
 #include "gettext.h"
+#include "protect.h"
 #include "util.h"
 
 extern uint8_t ui_language;
@@ -99,5 +100,11 @@ void menu_para_set_brightness(int index) {
 
 void menu_para_set_eth_eip(int index) {
   bool state = index ? false : true;
+  if (config_hasPin()) {
+    if (!protectPinOnDevice(false, true)) {
+      return;
+    }
+  }
+
   config_setCoinSwitch(COIN_SWITCH_ETH_EIP712, state);
 }

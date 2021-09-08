@@ -43,6 +43,8 @@ const char *languages[][2] = {
     {"Action cancelled by user", ""},  // msg
     // fsm_msg_coin.h fsm_msg_lisk.h
     {"Address:", "地址"},
+    //
+    {"Advance ETH sign", "ETH高级签名"},
     // layout2.c
     {"Again", "再次"},
     // menu_list.c
@@ -88,6 +90,12 @@ const char *languages[][2] = {
      "在重置设备前,请确保您仍\n掌握该助记词的物理备份"},
     //
     {"Before your start", "继续操作前"},
+    //
+    {"Blind Sign", "盲签"},
+    //
+    {"Blind Sign means \nthat the hardware supports sign transaction,but does "
+     "not support hash resolution of the transaction",
+     "\n盲签值硬件支持对交易进行签名,但暂不支持对交易进行哈希解析"},
     // layout2.c layout2.c
     {"Bluetooth", "蓝牙"},
     // signing.c
@@ -837,6 +845,10 @@ const char *languages[][2] = {
     {"Version group ID must be set.", ""},
     // signing.c signing.c
     {"Version group ID not enabled on this coin.", ""},
+    //
+    {"Visiting Help Center and search \"Blind Sign\" to "
+     "learn morn\n help.onekey.so",
+     "访问help.onekey.so搜索盲签了解更多"},
     {"WARNING: The device\nwill be reset after\n10 wrong attempts",
      "注意: 若累计输错10次\n设备将自动重置"},
     // config.c
