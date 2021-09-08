@@ -1,0 +1,42 @@
+syntax = "proto2";
+package hw.trezor.messages.solana;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageSolana";
+
+/**
+ * Request: Address at the specified index
+ * @start
+ * @next SolanaAddress
+ */
+message SolanaGetAddress {
+    repeated uint32 address_n = 1;              // BIP-32 path to derive the key from master node
+    optional bool show_display = 2;             // optionally show on display before sending the result
+}
+
+/**
+ * Response: Address for the given index
+ * @end
+ */
+message SolanaAddress {
+    optional string address = 1;                // Address in Solana format (base58 of a pubkey)
+}
+
+/**
+ * Request: ask device to sign Solana transaction
+ * @start
+ * @next SolanaSignedTx
+ */
+message SolanaSignTx {
+    repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
+    optional bytes raw_tx = 2;              // serialized raw transaction
+}
+
+/**
+ * Response: signature for transaction
+ * @end
+ */
+message SolanaSignedTx {
+    optional bytes signature = 1;           // the signature of the raw transaction
+}

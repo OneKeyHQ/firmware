@@ -204,6 +204,10 @@ if not utils.BITCOIN_ONLY:
     BinanceOrderMsg: Literal[707] = 707
     BinanceCancelMsg: Literal[708] = 708
     BinanceSignedTx: Literal[709] = 709
+    SolanaGetAddress: Literal[10100] = 10100
+    SolanaAddress: Literal[10101] = 10101
+    SolanaSignTx: Literal[10102] = 10102
+    SolanaSignedTx: Literal[10103] = 10103
     WebAuthnListResidentCredentials: Literal[800] = 800
     WebAuthnCredentials: Literal[801] = 801
     WebAuthnAddResidentCredential: Literal[802] = 802
