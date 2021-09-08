@@ -13,7 +13,7 @@
 
 extern uint8_t ui_language;
 
-static struct menu settings_menu, main_menu, security_set_menu;
+static struct menu settings_menu, main_menu, security_set_menu, blind_sign_menu;
 
 void menu_recovery_device(int index) {
   (void)index;
@@ -381,6 +381,45 @@ void menu_showMnemonic(int index) {
   }
 }
 
+void menu_blindSign(int index) {
+  (void)index;
+
+  uint8_t key = KEY_NULL;
+
+  layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
+                         _("Next"), NULL,
+                         _("Blind Sign means \nthat the hardware supports sign "
+                           "transaction,but does "
+                           "not support hash resolution of the transaction"),
+                         NULL, NULL, NULL, NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+
+  layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
+                         _("Next"), NULL, NULL,
+                         _("Visiting Help Center and search \"Blind Sign\" to "
+                           "learn morn\n help.onekey.so"),
+                         NULL, NULL, NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+
+  menu_init(&blind_sign_menu);
+  menu_display(&blind_sign_menu);
+
+  while (1) {
+    key = keyScan();
+    if (key == KEY_CANCEL) {
+      menu_init(&security_set_menu);
+      return;
+    }
+    menu_run(key, 0);
+  }
+}
+
 #if !ONEKEY_MINI
 static struct menu_item ble_set_menu_items[] = {
     {"On", NULL, true, menu_para_set_ble, NULL},
@@ -561,27 +600,13 @@ static struct menu check_word_menu = {
 };
 #endif
 
-static struct menu_item eth_eip_set_menu_items[] = {
-    {"On", NULL, true, menu_para_set_eth_eip, NULL},
-    {"Off", NULL, true, menu_para_set_eth_eip, NULL}};
-
-static struct menu eth_eip_switch_menu = {
-    .start = 0,
-    .current = 0,
-    .counts = COUNT_OF(eth_eip_set_menu_items),
-    .title = NULL,
-    .items = eth_eip_set_menu_items,
-    .previous = &security_set_menu,
-};
-
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL},
     {"Reset", NULL, true, menu_erase_device, NULL},
 #if ONEKEY_MINI
     {"Recovery Phrase ", NULL, false, .sub_menu = &check_word_menu, NULL},
 #endif
-    {"ETH EIP712", NULL, false, .sub_menu = &eth_eip_switch_menu,
-     menu_para_eth_eip_switch},
+    {"Blind Sign", NULL, true, menu_blindSign, NULL},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 
@@ -637,6 +662,33 @@ static struct menu main_uninitilized_menu = {
     .counts = COUNT_OF(main_uninitialized_menu_items),
     .title = NULL,
     .items = main_uninitialized_menu_items,
+    .previous = NULL,
+    .button_type = BTN_TYPE_NEXT,
+};
+
+static struct menu_item eth_eip_set_menu_items[] = {
+    {"On", NULL, true, menu_para_set_eth_eip, NULL},
+    {"Off", NULL, true, menu_para_set_eth_eip, NULL}};
+
+static struct menu eth_eip_switch_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(eth_eip_set_menu_items),
+    .title = NULL,
+    .items = eth_eip_set_menu_items,
+    .previous = &security_set_menu,
+};
+
+static struct menu_item blind_sign_menu_items[] = {
+    {"Advance ETH sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
+     menu_para_eth_eip_switch}};
+
+static struct menu blind_sign_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(blind_sign_menu_items),
+    .title = NULL,
+    .items = blind_sign_menu_items,
     .previous = NULL,
     .button_type = BTN_TYPE_NEXT,
 };

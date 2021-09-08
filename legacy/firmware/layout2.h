@@ -128,6 +128,12 @@ void layoutDialogAdapterEx(const BITMAP *icon, const char *btnNo,
                            const char *line3, const char *line4,
                            const char *line5, const char *line6);
 #endif
+void layoutDialogAdapter_ex(const BITMAP *icon, const BITMAP *bmp_no,
+                            const char *btnNo, const BITMAP *bmp_yes,
+                            const char *btnYes, const char *desc,
+                            const char *line1, const char *line2,
+                            const char *line3, const char *line4,
+                            const char *line5, const char *line6);
 void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
                                const char *btnNo, const BITMAP *bmp_yes,
                                const char *btnYes, const char *desc,
