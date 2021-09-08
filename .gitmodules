@@ -27,3 +27,6 @@
 [submodule "common/defs/ethereum/chains"]
 	path = common/defs/ethereum/chains
 	url = https://github.com/ethereum-lists/chains
+[submodule "vendor/libsol"]
+	path = vendor/libsol
+	url = https://github.com/OneKeyHQ/libsol.git

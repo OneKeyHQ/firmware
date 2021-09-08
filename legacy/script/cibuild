@@ -12,6 +12,7 @@ if [ "$EMULATOR" = 1 ]; then
 else
     make -C vendor/libopencm3 lib/stm32/f2
 fi
+make -C vendor/libsol
 
 make
 
@@ -24,7 +25,6 @@ fi
 # invoking nanopb_generator to make sure its proto files are generated
 nanopb_generator >/dev/null || true
 make -C firmware/protob
-
 make -C firmware
 
 if [ "$EMULATOR" != 1 ]; then

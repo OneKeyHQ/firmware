@@ -279,6 +279,12 @@ enum MessageType {
     MessageType_BinanceCancelMsg = 708 [(wire_in) = true];
     MessageType_BinanceSignedTx = 709 [(wire_out) = true];
 
+    // Solana
+    MessageType_SolanaGetAddress = 10100 [(wire_in) = true];
+    MessageType_SolanaAddress = 10101 [(wire_out) = true];
+    MessageType_SolanaSignTx = 10102 [(wire_in) = true];
+    MessageType_SolanaSignedTx = 10103 [(wire_out) = true];
+
     // WebAuthn
     MessageType_WebAuthnListResidentCredentials = 800 [(wire_in) = true];
     MessageType_WebAuthnCredentials = 801 [(wire_out) = true];

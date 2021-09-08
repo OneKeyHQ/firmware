@@ -264,6 +264,10 @@ from .SignIdentity import SignIdentity
 from .SignMessage import SignMessage
 from .SignTx import SignTx
 from .SignedIdentity import SignedIdentity
+from .SolanaAddress import SolanaAddress
+from .SolanaGetAddress import SolanaGetAddress
+from .SolanaSignTx import SolanaSignTx
+from .SolanaSignedTx import SolanaSignedTx
 from .SpiFlashData import SpiFlashData
 from .SpiFlashRead import SpiFlashRead
 from .SpiFlashWrite import SpiFlashWrite

@@ -36,6 +36,12 @@ CPUFLAGS ?= -mcpu=cortex-m3 -mthumb
 FPUFLAGS ?= -msoft-float
 endif
 
+ifeq ($(MAC_OS), 1)
+CONFIDENTIAL := '__attribute__((used)) __attribute__((section("__CONFIDENTIAL,__confidential")))'
+else
+CONFIDENTIAL := '__attribute__((section("confidential")))'
+endif
+
 CFLAGS   += $(OPTFLAGS) \
             $(DBGFLAGS) \
             -std=gnu11 \
@@ -66,7 +72,7 @@ CFLAGS   += $(OPTFLAGS) \
             $(CPUFLAGS) \
             $(FPUFLAGS) \
             -DSTM32F2 \
-            -DCONFIDENTIAL='__attribute__((section("confidential")))' \
+            -DCONFIDENTIAL=$(CONFIDENTIAL) \
             -DRAND_PLATFORM_INDEPENDENT=1 \
             -I$(TOOLCHAIN_DIR)/include \
             -I$(TOP_DIR) \
@@ -76,11 +82,15 @@ CFLAGS   += $(OPTFLAGS) \
             -I$(TOP_DIR)vendor/QR-Code-generator/c \
             -I$(TOP_DIR)vendor/trezor-storage \
             -I$(TOP_DIR)atca \
+            -I$(TOP_DIR)vendor/libsol/include \
 
 LDFLAGS  += -L$(TOP_DIR) \
             $(DBGFLAGS) \
             $(CPUFLAGS) \
-            $(FPUFLAGS)
+            $(FPUFLAGS) \
+
+LDFLAGS  += -L$(TOP_DIR)vendor/libsol
+LDLIBS   += -lsol
 
 ifeq ($(EMULATOR),1)
 CFLAGS   += -DEMULATOR=1
