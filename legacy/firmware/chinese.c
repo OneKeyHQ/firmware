@@ -64,6 +64,12 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
   int l = 0;
   while (*text) {
     if ((uint8_t)*text < 0x80) {
+      if (*text == '\n') {
+        x = 0;
+        y += font_desc->pixel + 1;
+        text++;
+        continue;
+      }
       l = fontCharWidth(font & 0x7f, *text) + space;
       if (x + l > OLED_WIDTH) {
         x = 0;
@@ -77,7 +83,7 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
       if (font_desc_bak->idx == DEFAULT_IDX) {
         font_desc_bak = find_font("dingmao_9x9");
       }
-      if (x + HZ_CODE_LEN > OLED_WIDTH) {
+      if (x + font_desc_bak->width > OLED_WIDTH) {
         x = 0;
         y += font_desc_bak->pixel + 1;
       }

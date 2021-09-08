@@ -1766,11 +1766,12 @@ void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
              OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH, OLED_HEIGHT);
 }
 
-void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
-                         const char *btnYes, const char *desc,
-                         const char *line1, const char *line2,
-                         const char *line3, const char *line4,
-                         const char *line5, const char *line6) {
+static void _layoutDialogAdapter(const BITMAP *icon, const BITMAP *bmp_no,
+                                 const char *btnNo, const BITMAP *bmp_yes,
+                                 const char *btnYes, const char *desc,
+                                 const char *line1, const char *line2,
+                                 const char *line3, const char *line4,
+                                 const char *line5, const char *line6) {
   int left = 0;
   const struct font_desc *font = find_cur_font();
 
@@ -1811,12 +1812,31 @@ void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
     }
   }
   if (btnNo) {
-    layoutButtonNoAdapter(btnNo, &bmp_btn_cancel);
+    layoutButtonNoAdapter(btnNo, bmp_no);
   }
   if (btnYes) {
-    layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
+    layoutButtonYesAdapter(btnYes, bmp_yes);
   }
   oledRefresh();
+}
+
+void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
+                         const char *btnYes, const char *desc,
+                         const char *line1, const char *line2,
+                         const char *line3, const char *line4,
+                         const char *line5, const char *line6) {
+  _layoutDialogAdapter(icon, &bmp_btn_cancel, btnNo, &bmp_btn_confirm, btnYes,
+                       desc, line1, line2, line3, line4, line5, line6);
+}
+
+void layoutDialogAdapter_ex(const BITMAP *icon, const BITMAP *bmp_no,
+                            const char *btnNo, const BITMAP *bmp_yes,
+                            const char *btnYes, const char *desc,
+                            const char *line1, const char *line2,
+                            const char *line3, const char *line4,
+                            const char *line5, const char *line6) {
+  _layoutDialogAdapter(icon, bmp_no, btnNo, bmp_yes, btnYes, desc, line1, line2,
+                       line3, line4, line5, line6);
 }
 
 void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
