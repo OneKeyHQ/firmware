@@ -16,6 +16,7 @@ void layoutBootDevParam(uint8_t index) {
   char *serial;
   int y = 0;
   char desc[33] = "";
+  char version[8] = "";
   uint8_t jedec_id;
 
   y = 9;
@@ -39,15 +40,20 @@ void layoutBootDevParam(uint8_t index) {
       oledDrawString(0, y, PRODUCT_STRING, FONT_STANDARD);
 
       memset(desc, 0, 33);
+      memset(version, 0, 8);
       const image_header *hdr =
           (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
       data2hex(&hdr->onekey_version, 2, desc);
+      strncat(version, &desc[0], 1);
+      strcat(version, ".");
+      strncat(version, &desc[1], 1);
+      strcat(version, ".");
+      strncat(version, &desc[3], 1);
       y += FONT_HEIGHT + 1;
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, "FIRMWARE:", FONT_STANDARD);
       y += FONT_HEIGHT + 1;
-
-      oledDrawString(0, y, desc, FONT_STANDARD);
+      oledDrawString(0, y, version, FONT_STANDARD);
 
       y += FONT_HEIGHT + 1;
       y += FONT_HEIGHT + 1;
