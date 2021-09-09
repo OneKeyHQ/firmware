@@ -121,9 +121,11 @@ bool get_features(Features *resp) {
     strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
   }
 
+#if !EMULATOR
   resp->has_bootloader_version = true;
   strlcpy(resp->bootloader_version, bootloader_version,
           sizeof(resp->bootloader_version));
+#endif
 
   resp->has_coin_switch = true;
   resp->coin_switch |=
