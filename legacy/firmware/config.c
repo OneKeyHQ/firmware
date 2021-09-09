@@ -488,6 +488,12 @@ void config_init(void) {
 
   config_getLanguage(config_language, sizeof(config_language));
 
+#if ONEKEY_MINI
+  if (se_is_wiping()) {
+    config_wipe();
+  }
+#endif
+
   // imported xprv is not supported anymore so we set initialized to false
   // if no mnemonic is present
   if (config_isInitialized() && !config_hasMnemonic()) {
@@ -1389,6 +1395,9 @@ void config_wipe(void) {
 
 #if !EMULATOR
   if (g_bSelectSEFlag) {
+#if ONEKEY_MINI
+    se_set_wiping(true);
+#endif
     se_reset_storage();
     config_getSeSessionKey(session_key, sizeof(session_key));
     se_unlocked = secfalse;
@@ -1405,6 +1414,10 @@ void config_wipe(void) {
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   config_setSeSessionKey(session_key, 16);
   config_getLanguage(config_language, sizeof(config_language));
+
+#if ONEKEY_MINI
+  se_reset_state();
+#endif
 }
 
 void config_setFastPayPinFlag(bool flag) {

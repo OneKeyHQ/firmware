@@ -25,6 +25,7 @@
 #include "secbool.h"
 
 #define MAX_PASSPHRASE_LEN 50
+#define MAX_PIN_TRIES 10
 
 #define PIN_CANCELED_BY_BUTTON (void*)1
 

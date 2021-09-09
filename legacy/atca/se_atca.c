@@ -232,6 +232,30 @@ bool se_export_seed(uint8_t *seed) {
   }
   return false;
 }
+
+bool se_is_wiping(void) {
+  ATCAUserState state = {0};
+
+  atca_pair_unlock();
+
+  atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
+
+  return state.wiping;
+}
+
+void se_set_wiping(bool flag) {
+  ATCAUserState state = {0};
+
+  atca_pair_unlock();
+  atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
+  if (flag != state.wiping) {
+    state.wiping = flag;
+    atca_pair_unlock();
+    atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&state,
+                   pair_info->protect_key, SLOT_IO_PROTECT_KEY);
+  }
+}
+
 void se_reset_state(void) {
   uint8_t zeros[32] = {0};
 
@@ -245,7 +269,6 @@ void se_reset_storage(void) {
 
   se_reset_pin();
   se_importSeed(zeros);
-  se_reset_state();
 }
 
 uint32_t se_pinFailedCounter(void) { return atca_get_failed_counter(); }

@@ -1089,7 +1089,7 @@ bool protectPinCheck(bool retry) {
         _("PIN invalid"), _("You still have 9 times"), _("to try"));
 #endif
 
-  } else if (fails > 1 && fails < 10) {
+  } else if (fails > 1 && fails < MAX_PIN_TRIES) {
 #if ONEKEY_MINI
     (void)desc2;
     memzero(desc1, sizeof(desc1));
@@ -1149,7 +1149,6 @@ bool protectPinCheck(bool retry) {
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
 #endif
-    protectWaitKey(timer1s * 1, 0);
 
     uint8_t ui_language_bak = ui_language;
 

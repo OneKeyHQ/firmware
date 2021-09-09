@@ -10,7 +10,8 @@ typedef struct __attribute__((packed)) {
   bool pin_set;
   bool initialized;
   uint32_t strength;
-  uint8_t rfu[26];
+  bool wiping;
+  uint8_t rfu[25];
 } ATCAUserState;
 
 typedef struct __attribute__((packed)) {
