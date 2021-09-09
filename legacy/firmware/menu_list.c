@@ -230,9 +230,9 @@ void menu_blindSign(int index) {
 
   layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
                          _("Next"), NULL,
-                         _("Blind Sign means \nthat the hardware supports sign "
-                           "transaction,but does "
-                           "not support hash resolution of the transaction"),
+                         _("After enabling \n\"Blind Signing\",your device "
+                           " will support signing for messages and "
+                           "transactions, but it can't decode the metadata."),
                          NULL, NULL, NULL, NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
@@ -242,7 +242,7 @@ void menu_blindSign(int index) {
   layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
                          _("Next"), NULL, NULL,
                          _("Visiting Help Center and search \"Blind Sign\" to "
-                           "learn morn\n help.onekey.so"),
+                           "learn more\n help.onekey.so"),
                          NULL, NULL, NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
@@ -341,7 +341,7 @@ static struct menu settings_menu = {
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL},
     {"Reset", NULL, true, menu_erase_device, NULL},
-    {"Blind Sign", NULL, true, menu_blindSign, NULL},
+    {"Blind Signing", NULL, true, menu_blindSign, NULL},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 

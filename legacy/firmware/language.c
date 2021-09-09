@@ -29,6 +29,10 @@ const char *languages[][2] = {
     {"Address:", "地址"},
     //
     {"Advance ETH sign", "ETH高级签名"},
+    //
+    {"After enabling \n\"Blind Signing\",your device  will support signing for "
+     "messages and transactions, but it can't decode the metadata.",
+     "\n开启盲签后,设备将支持对消息或交易进行签名,但不会解析元数据"},
     // layout2.c
     {"Again", "再次"},
     // fsm_msg_common.h
@@ -64,11 +68,7 @@ const char *languages[][2] = {
     //
     {"Before your start", "继续操作前"},
     //
-    {"Blind Sign", "盲签"},
-    //
-    {"Blind Sign means \nthat the hardware supports sign transaction,but does "
-     "not support hash resolution of the transaction",
-     "\n盲签值硬件支持对交易进行签名,但暂不支持对交易进行哈希解析"},
+    {"Blind Signing", "盲签"},
     // layout2.c layout2.c
     {"Bluetooth", "蓝牙"},
     // signing.c
@@ -706,7 +706,7 @@ const char *languages[][2] = {
     {"Version group ID not enabled on this coin.", ""},
     //
     {"Visiting Help Center and search \"Blind Sign\" to "
-     "learn morn\n help.onekey.so",
+     "learn more\n help.onekey.so",
      "访问help.onekey.so搜索盲签了解更多"},
     // config.c
     {"Waking up", "唤醒"},
