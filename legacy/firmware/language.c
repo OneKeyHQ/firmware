@@ -1,6 +1,18 @@
 #include "language.h"
 
 const char *languages[][2] = {
+    //
+    {" Off", "已关闭"},
+    //
+    {" On", "已开启"},
+    // layout2.c
+    {" decrypt for:", "解密"},
+    // layout2.c
+    {" login to:", "登录到"},
+    //
+    {" to", "到"},
+    // recovery.c
+    {"##th", "第##个"},
     {"2 wrong attemps,\nyou have 8 more\nchance",
      "已累计输错2次,还有8\n次输入机会"},
     {"3 wrong attemps,\nyou have 7 more\nchance",
@@ -17,18 +29,6 @@ const char *languages[][2] = {
      "已累计输错8次,还有2\n次输入机会"},
     {"9 wrong attemps,\nyou have 1 more\nchance",
      "已累计输错9次,还有1\n次输入机会"},
-    //
-    {" Off", "已关闭"},
-    //
-    {" On", "已开启"},
-    // layout2.c
-    {" decrypt for:", "解密"},
-    // layout2.c
-    {" login to:", "登录到"},
-    //
-    {" to", "到"},
-    // recovery.c
-    {"##th", "第##个"},
     // fsm_msg_coin.h
     {"Abort", "取消"},
     // menu.c
@@ -45,10 +45,17 @@ const char *languages[][2] = {
     {"Address:", "地址"},
     //
     {"Advance ETH Sign", "ETH高级签名"},
-    //
+//
+#if ONEKEY_MINI
+    {"After enabling\"Blind Signing\",\nyour device will support\n signing "
+     "for messages and \ntransactions, but it \ncan't decode the metadata.",
+     "开启盲签后,设备将支持\n对消息或交易进行签名,\n但不会解析元数据"},
+#else
     {"After enabling \n\"Blind Signing\",your device  will support signing for "
      "messages and transactions, but it can't decode the metadata.",
      "\n开启盲签后,设备将支持对消息或交易进行签名,但不会解析元数据"},
+#endif
+
     // layout2.c
     {"Again", "再次"},
     // menu_list.c
@@ -95,11 +102,7 @@ const char *languages[][2] = {
     //
     {"Before your start", "继续操作前"},
     //
-    {"Blind Sign", "盲签"},
-    //
-    {"Blind Sign means \nthat the hardware supports sign transaction,but does "
-     "not support hash resolution of the transaction",
-     "\n盲签值硬件支持对交易进行签名,但暂不支持对交易进行哈希解析"},
+    {"Blind Signing", "盲签"},
     // layout2.c layout2.c
     {"Bluetooth", "蓝牙"},
     // signing.c
@@ -851,10 +854,17 @@ const char *languages[][2] = {
     {"Version group ID must be set.", ""},
     // signing.c signing.c
     {"Version group ID not enabled on this coin.", ""},
-    //
+//
+#if ONEKEY_MINI
+
+    {"Visiting Help Center and \nsearch \"Blind Signing\" to \n learn more\n"
+     " \nhelp.onekey.so",
+     "访问帮助中心搜索盲签\n了解更多\n \nhelp.onekey.so"},
+#else
     {"Visiting Help Center and search \"Blind Signing\" to "
      "learn more\n help.onekey.so",
      "访问help.onekey.so搜索盲签了解更多"},
+#endif
     {"WARNING: The device\nwill be reset after\n10 wrong attempts",
      "注意: 若累计输错10次\n设备将自动重置"},
     // config.c
