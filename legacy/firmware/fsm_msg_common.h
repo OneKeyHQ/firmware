@@ -173,9 +173,11 @@ bool get_features(Features *resp) {
     strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
 #endif
   }
+#if !EMULATOR
   resp->has_bootloader_version = true;
   strlcpy(resp->bootloader_version, bootloader_version,
           sizeof(resp->bootloader_version));
+#endif
 
   resp->has_coin_switch = true;
   resp->coin_switch |=
