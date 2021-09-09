@@ -67,8 +67,8 @@ void reset_init(bool display_random, uint32_t _strength,
   }
 
   if (!g_bIsBixinAPP) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      NULL, _("Do you really want to"), _("create a new wallet?"),
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
+                      _("Do you really want to"), _("create a new wallet?"),
                       NULL, NULL, NULL);
 
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
