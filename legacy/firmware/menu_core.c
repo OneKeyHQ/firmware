@@ -15,6 +15,9 @@ void menu_display(struct menu *menu) {
   char desc[64] = "";
   const BITMAP *bmp_yes = NULL;
   char *text_yes = NULL;
+#if ONEKEY_MINI
+  char *text_no = NULL;
+#endif
 
   strcat(desc, _(menu->items[menu->current].name));
   if (menu->items[menu->current].name2) {
@@ -45,6 +48,7 @@ void menu_display(struct menu *menu) {
 #if ONEKEY_MINI
       bmp_yes = &bmp_button_forward;
       text_yes = _("OK");
+      text_no = _("BACK");
 #else
       bmp_yes = &bmp_btn_confirm;
       text_yes = _("Okay");
@@ -53,7 +57,7 @@ void menu_display(struct menu *menu) {
   }
 
 #if ONEKEY_MINI
-  layoutMenuItemsEx(text_yes, bmp_yes, menu->current + 1, menu->counts,
+  layoutMenuItemsEx(text_yes, text_no, bmp_yes, menu->current + 1, menu->counts,
                     menu->title ? _(menu->title) : NULL, desc,
                     0 < menu->counts ? _(menu->items[0].name) : NULL,
                     1 < menu->counts ? _(menu->items[1].name) : NULL,

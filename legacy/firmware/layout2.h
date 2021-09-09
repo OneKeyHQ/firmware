@@ -204,10 +204,10 @@ void layoutItemsSelectAdapterEx(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                 const char *line3, const char *line4,
                                 const char *line5, const char *line6);
 
-#define layoutMenuItemsEx(btn_yes, bmp_yes, index, count, title, desc, line1, \
-                          line2, line3, line4, line5, line6)                  \
-  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_button_back,    \
-                             bmp_yes, NULL, btn_yes, index, count, title,     \
+#define layoutMenuItemsEx(btn_yes, btn_no, bmp_yes, index, count, title, desc, \
+                          line1, line2, line3, line4, line5, line6)            \
+  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_button_back,     \
+                             bmp_yes, btn_no, btn_yes, index, count, title,    \
                              desc, line1, line2, line3, line4, line5, line6)
 
 void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,

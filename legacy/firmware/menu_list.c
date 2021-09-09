@@ -474,6 +474,9 @@ static struct menu settings_menu = {
     .current = 0,
     .counts = COUNT_OF(settings_menu_items),
     .title = NULL,
+#if ONEKEY_MINI
+    .button_type = BTN_TYPE_NEXT,
+#endif
     .items = settings_menu_items,
     .previous = &main_menu,
 };
@@ -489,6 +492,9 @@ static struct menu security_set_menu = {
     .current = 0,
     .counts = COUNT_OF(security_set_menu_items),
     .title = NULL,
+#if ONEKEY_MINI
+    .button_type = BTN_TYPE_NEXT,
+#endif
     .items = security_set_menu_items,
     .previous = &main_menu,
 };
