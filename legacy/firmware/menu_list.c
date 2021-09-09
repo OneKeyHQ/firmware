@@ -408,12 +408,33 @@ void menu_blindSign(int index) {
   uint8_t key = KEY_NULL;
 
 step1:
+#if ONEKEY_MINI
+  layoutDialogSwipeCenterAdapterEx(
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      true, NULL, NULL, NULL, NULL,
+      _("After enabling\"Blind Signing\",\nyour device will support\n signing "
+        "for messages and \ntransactions, but it \ncan't decode the metadata."),
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+
+  layoutDialogSwipeCenterAdapterEx(
+      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
+      true, NULL, NULL, NULL, NULL,
+      _("Visiting Help Center and \nsearch \"Blind Signing\" to \n learn "
+        "more\n \nhelp.onekey.so"),
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+#else
   layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
                          _("Next"), NULL,
-                         _("Blind Sign means \nthat the hardware supports sign "
-                           "transaction,but does "
-                           "not support hash resolution of the transaction"),
+                         _("After enabling \n\"Blind Signing\",your device "
+                           " will support signing for messages and "
+                           "transactions, but it can't decode the metadata."),
                          NULL, NULL, NULL, NULL, NULL);
+
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;
@@ -424,6 +445,8 @@ step1:
       _("Visiting Help Center and search \"Blind Signing\" to "
         "learn more\n help.onekey.so"),
       NULL, NULL, NULL, NULL);
+#endif
+
   key = protectWaitKey(0, 1);
   if (key == KEY_CANCEL) {
     goto step1;
@@ -441,6 +464,9 @@ step1:
       return;
     }
     menu_run(key, 0);
+    if (layoutLast == layoutHome) {
+      return;
+    }
   }
 }
 
@@ -633,7 +659,7 @@ static struct menu_item security_set_menu_items[] = {
     {"Recovery Phrase ", NULL, false, .sub_menu = &check_word_menu, NULL,
      false},
 #endif
-    {"Blind Sign", NULL, true, menu_blindSign, NULL, false},
+    {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 
