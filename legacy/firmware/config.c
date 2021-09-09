@@ -1005,7 +1005,6 @@ bool config_containsMnemonic(const char *mnemonic) {
   uint16_t len = 0;
   uint8_t stored_mnemonic[MAX_MNEMONIC_LEN] = {0};
 
-#if !EMULATOR
   if (g_bSelectSEFlag) {
     uint8_t seed[64];
     uint32_t strength = 0;
@@ -1027,7 +1026,6 @@ bool config_containsMnemonic(const char *mnemonic) {
       return false;
     }
   }
-#endif
 
   // Compare the digests to mitigate side-channel attacks.
   uint8_t digest_stored[SHA256_DIGEST_LENGTH] = {0};
