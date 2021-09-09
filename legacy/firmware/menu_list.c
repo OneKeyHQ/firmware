@@ -481,9 +481,86 @@ static struct menu settings_menu = {
     .previous = &main_menu,
 };
 
+#if ONEKEY_MINI
+void menu_check_all_words(int index) {
+  (void)index;
+  char desc[64] = "";
+  uint8_t key = KEY_NULL;
+  uint32_t word_count = 0;
+
+  if (protectPinOnDevice(false, true)) {
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+    memset(desc, 0, sizeof(desc));
+    config_getMnemonic(mnemonic, sizeof(mnemonic));
+
+    word_count = get_mnemonic_number(mnemonic);
+    if (word_count == 12)
+      strcat(
+          desc,
+          _("Please enter 12 words\nin order to verify\nyour recovery phrase"));
+    else if (word_count == 18)
+      strcat(
+          desc,
+          _("Please enter 18 words\nin order to verify\nyour recovery phrase"));
+    else if (word_count == 24)
+      strcat(
+          desc,
+          _("Please enter 24 words\nin order to verify\nyour recovery phrase"));
+    else
+      return;
+
+    layoutDialogSwipeCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
+                                     &bmp_button_forward, _("NEXT"), NULL, true,
+                                     NULL, NULL, NULL, NULL, desc, NULL, NULL,
+                                     NULL, NULL, NULL, NULL, NULL);
+    key = protectWaitKey(0, 1);
+    if (key != KEY_CONFIRM) {
+      return;
+    }
+
+    if (!verify_words(mnemonic, word_count, 0)) {
+      return;
+    }
+  }
+}
+
+void menu_check_specified_word(int index) {
+  (void)index;
+  uint32_t word_count = 0;
+
+  if (protectPinOnDevice(false, true)) {
+    char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
+    config_getMnemonic(mnemonic, sizeof(mnemonic));
+    word_count = get_mnemonic_number(mnemonic);
+
+    if (!verify_words(mnemonic, word_count, 1)) {
+      return;
+    }
+  }
+}
+
+static struct menu_item check_word_menu_items[] = {
+    {"Verify All Words", NULL, true, menu_check_all_words, NULL},
+    {"Verify Specified Word", NULL, true, menu_check_specified_word, NULL}};
+
+static struct menu security_set_menu;
+
+static struct menu check_word_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(check_word_menu_items),
+    .title = NULL,
+    .items = check_word_menu_items,
+    .previous = &security_set_menu,
+};
+#endif
+
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL},
     {"Reset", NULL, true, menu_erase_device, NULL},
+#if ONEKEY_MINI
+    {"Recovery Phrase ", NULL, false, .sub_menu = &check_word_menu, NULL},
+#endif
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 

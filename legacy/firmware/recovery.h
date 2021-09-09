@@ -33,5 +33,10 @@ void recovery_abort(void);
 const char *recovery_get_fake_word(void);
 uint32_t recovery_get_word_pos(void);
 bool recovery_on_device(void);
+#if ONEKEY_MINI
+uint32_t get_mnemonic_number(char *mnemonic);
+uint32_t select_mnemonic_number(uint32_t count);
+bool verify_words(char *mnemonic, uint32_t count, uint32_t mode);
+#endif
 
 #endif

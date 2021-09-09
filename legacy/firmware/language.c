@@ -135,8 +135,10 @@ const char *languages[][2] = {
     //
     {"Check Mnemonic", "查看助记词"},
     //
+    {"Check Passed", "核对通过"},
     {"Check PIN Code", "请先校验设备原PIN码"},
     {"Check Recovery Phrase", "助记词核对"},
+    {"Check failed, Quit\nand try again", "核对失败,请退出重试"},
     {"Check the 12 words\nyou entered are the\ncorrect recovery\nphrase",
      "重新检查已输入的12位单\n词,确保它是正确的助记词"},
     {"Check the 18 words\nyou entered are the\ncorrect recovery\nphrase",
@@ -378,6 +380,7 @@ const char *languages[][2] = {
     // recovery.c
     {"Incorrect recovery\nphrase, try again.", "助记词错误,请重试"},
     {"Incorrect recovery phrase. Try again.", "助记词不正确,请重试"},
+    {"Incorrect word. Try\nagain", "助记词错误,请重试"},
     // fsm_msg_ethereum.h
     {"Invalid address", ""},  // msg
     // signing.c
@@ -606,6 +609,7 @@ const char *languages[][2] = {
     {"Pubkey not found in multisig script", ""},
     // lisk.c
     {"Public Key:", "公钥"},
+    {"QUIT", "退出"},
     // layout2.c
     {"QR Code", "二维码"},
     // layout2.c
@@ -625,6 +629,7 @@ const char *languages[][2] = {
     {"Recovery Phrase\nverified", "助记词校验通过"},
     {"Recovery Phrase\nverified pass", "助记词校验通过"},
     {"Recovery Phrase\nimported.", "助记词导入成功"},
+    {"Recovery Phrase ", "助记词核对"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
@@ -664,6 +669,8 @@ const char *languages[][2] = {
     {"Segwit not enabled on this coin", ""},
     {"Select correct word below", "按提示选择正确的单词"},
     {"Select the number of\nrecovery phrase word", "选择助记词位数"},
+    {"Select the sequence\nnumber of word to be\nchecked",
+     "选择要核对的助记词序号"},
     {"Select word", "选择助记词"},
     //
     {"Select your", "选择你的"},
@@ -802,7 +809,9 @@ const char *languages[][2] = {
     {"Verified binary message", ""},
     // layout2.c
     {"Verified message", ""},
+    {"Verify All Words", "依次核对"},
     {"Verify PIN", "请输入原PIN码"},
+    {"Verify Specified Word", "自由核对"},
     // fsm_msg_coin.h
     {"Verifying", ""},
     // storage.c

@@ -217,6 +217,14 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                    bool left_align, const char *title,
                                    const char *desc, const char *prefex,
                                    char *data[]);
+
+void layoutItemsSelectAdapterImp(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                                 const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                                 const char *btnNo, const char *btnYes,
+                                 uint32_t index, uint32_t count,
+                                 bool left_align, const char *title,
+                                 const char *desc, const char *prefex,
+                                 char *data[]);
 #endif
 
 uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);

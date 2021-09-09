@@ -2845,6 +2845,84 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
 
   oledRefresh();
 }
+
+void layoutItemsSelectAdapterImp(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                                 const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                                 const char *btnNo, const char *btnYes,
+                                 uint32_t index, uint32_t count,
+                                 bool left_align, const char *title,
+                                 const char *desc, const char *prefex,
+                                 char *data[]) {
+  uint32_t i, j, y1;
+  int step = 3;
+  char str[8] = "";
+  char index_str[16] = "";
+  const struct font_desc *cur_font = find_cur_font();
+
+  (void)title;
+  (void)desc;
+  (void)left_align;
+  (void)prefex;
+
+  if (data == NULL) return;
+
+  oledClear_ex();
+
+  if (bmp_up && index > 6) {
+    oledDrawBitmap(62, 2, bmp_up);
+  }
+
+  y1 = 26;
+
+  if (index > 0) {
+    uint2str(index, index_str);
+    strcat(index_str + strlen(index_str), "/");
+    uint2str(count, index_str + strlen(index_str));
+    oledDrawStringAdapter(0, 1, index_str, FONT_STANDARD | FONT_FIXED);
+  }
+
+  for (i = 0; i < 6; i++) {
+    if (index <= 6)
+      j = i;
+    else if (index <= 12)
+      j = i + 6;
+    else if (index <= 18)
+      j = i + 12;
+    else
+      j = i + 18;
+
+    if (data[j] != NULL) {
+      memzero(str, sizeof(str));
+      strcat(str, _("#"));
+      strcat(str, data[j]);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, str, FONT_STANDARD);
+      if ((index - 1) == j) {
+        oledInvert(
+            OLED_WIDTH / 2 - oledStringWidthAdapter(str, FONT_STANDARD) / 2,
+            y1 - 1,
+            OLED_WIDTH / 2 + oledStringWidthAdapter(str, FONT_STANDARD) / 2 +
+                MINI_ADJUST,
+            y1 + cur_font->pixel);
+      }
+
+      y1 += cur_font->pixel + step;
+    }
+  }
+
+  if (bmp_down && index <= count - 6) {
+    oledDrawBitmap(62, OLED_HEIGHT - 8, bmp_down);
+  }
+
+  if (btnNo) {
+    layoutButtonNoAdapter(btnNo, bmp_no);
+  }
+
+  if (btnYes) {
+    layoutButtonYesAdapter(btnYes, bmp_yes);
+  }
+
+  oledRefresh();
+}
 #endif
 
 #if ONEKEY_MINI

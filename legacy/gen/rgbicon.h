@@ -13,6 +13,7 @@ typedef struct {
 extern const BITMAP bmp_icon_forbid;
 extern const BITMAP bmp_icon_success;
 extern const BITMAP bmp_icon_warn;
+extern const BITMAP bmp_icon_err;
 extern const BITMAP bmp_icon_egg;
 
 #endif

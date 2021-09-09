@@ -638,11 +638,11 @@ write_mnemonic:
   if (scroll_mnemonic(_("Word"), mnemonic, 0)) {
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-        true, NULL, NULL,
+        true, NULL, NULL, NULL, NULL,
         _("Check the recovery\nphrase once more and\ncompare it to the\nbackup "
           "copy in your\nhand. Make sure the\nspelling and order\nare "
           "identical."),
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
     layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
