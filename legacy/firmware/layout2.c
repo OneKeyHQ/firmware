@@ -1834,7 +1834,11 @@ void layoutHomeInfo(void) {
 #if !EMULATOR && !ONEKEY_MINI
       refreshUsbConnectTips();
 #endif
+#if ONEKEY_MINI
+      if (key != KEY_NULL) {
+#else
       if (key == KEY_UP || key == KEY_DOWN || key == KEY_CONFIRM) {
+#endif
         if (protectPinOnDevice(true, true)) {
           menu_run(KEY_NULL, 0);
         } else {
