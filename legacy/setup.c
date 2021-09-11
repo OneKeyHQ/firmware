@@ -134,6 +134,9 @@ void setup(void) {
   gpio_mode_setup(OLED_RST_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE,
                   OLED_RST_PIN);
 #if ONEKEY_MINI
+  // default close back light
+  oledBackligthCtl(false);
+
   // enable SPI 1 for OLED display
   gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO5);
   gpio_set_af(GPIOA, GPIO_AF5, GPIO5);
