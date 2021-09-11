@@ -1024,7 +1024,17 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
   uint32_t num_s[3] = {12, 18, 24};
   char *numbers[3] = {"12", "18", "24"};
 
-#if !ONEKEY_MINI
+#if ONEKEY_MINI
+  if (*number == 12) {
+    index = 0;
+  } else if (*number == 18) {
+    index = 1;
+  } else if (*number == 24) {
+    index = 2;
+  } else {
+    index = 0;
+  }
+#else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
       NULL, _("Please select the"), _("number of Mnemonic"), NULL, NULL);

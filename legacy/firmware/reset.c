@@ -704,8 +704,9 @@ prompt_creat:
     return false;
   }
 
-select_mnemonic_count:
   words_count = 0;
+
+select_mnemonic_count:
   if (!protectSelectMnemonicNumber(&words_count)) {
     goto_check(prompt_creat);
   }
