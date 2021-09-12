@@ -2041,7 +2041,6 @@ void layoutDialogAdapterEx(const BITMAP *icon, const char *btnNo,
                            const char *line1, const char *line2,
                            const char *line3, const char *line4,
                            const char *line5, const char *line6) {
-  int left = 0;
   const struct font_desc *font = find_cur_font();
 
   oledClear_ex();
@@ -2049,16 +2048,20 @@ void layoutDialogAdapterEx(const BITMAP *icon, const char *btnNo,
     oledDrawBitmap((OLED_WIDTH - icon->width) / 2, 9, icon);
   }
   if (line1) {
-    oledDrawStringAdapter(left, 4 * (font->pixel + 1), line1, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1), line1,
+                                FONT_STANDARD);
   }
   if (line2) {
-    oledDrawStringAdapter(left, 5 * (font->pixel + 1), line2, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1), line2,
+                                FONT_STANDARD);
   }
   if (line3) {
-    oledDrawStringAdapter(0, 6 * (font->pixel + 1), line3, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * (font->pixel + 1), line3,
+                                FONT_STANDARD);
   }
   if (line4) {
-    oledDrawStringAdapter(0, 7 * (font->pixel + 1), line4, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 7 * (font->pixel + 1), line4,
+                                FONT_STANDARD);
   }
 
   if (desc) {
@@ -2070,10 +2073,12 @@ void layoutDialogAdapterEx(const BITMAP *icon, const char *btnNo,
     }
   } else {
     if (line5) {
-      oledDrawStringAdapter(0, 8 * (font->pixel + 1), line5, FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 8 * (font->pixel + 1), line5,
+                                  FONT_STANDARD);
     }
     if (line6) {
-      oledDrawStringAdapter(0, 9 * (font->pixel + 1), line6, FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * (font->pixel + 1), line6,
+                                  FONT_STANDARD);
     }
     if (btnYes || btnNo) {
       oledHLine(OLED_HEIGHT - (font->pixel + 4));
