@@ -1144,7 +1144,11 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
   // 30 is the maximum pixels used for a pixel row in the BIP39 word "abstract"
   oledSCA(4 * 9 - 3 - 2, 4 * 9 - 3 + 15 + 2, 30);
   oledInvert(0, 4 * 9 - 3 - 2, OLED_WIDTH - 1, 4 * 9 - 3 + 15 + 2);
+#if ONEKEY_MINI
+  layoutButtonYesAdapter(btnYes, &bmp_button_forward);
+#else
   layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
+#endif
   oledRefresh();
 }
 

@@ -286,10 +286,10 @@ void menu_erase_device(int index) {
 #if ONEKEY_MINI
   layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      true, NULL, NULL,
+      true, NULL, NULL, NULL, NULL,
       _("All data on the device\nwill be erased if the\ndevice is reset, "
         "and\nthis operation cannot\nbe reversed."),
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
