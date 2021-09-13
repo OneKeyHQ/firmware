@@ -130,6 +130,12 @@ int main(void) {
 #ifndef APPVER
     oledInit();
 #if ONEKEY_MINI
+    oledClear();
+    oledRefresh();
+    // fix starting flower screen
+    oledBackligthCtl(true);
+#endif
+#if ONEKEY_MINI
     device_init();
     w25qxx_init();
     atca_init();
@@ -181,10 +187,7 @@ int main(void) {
         show_halt("Broken firmware", "detected.");
       }
       mpu_config_off();
-#if ONEKEY_MINI
-      // fix starting flower screen
-      oledBackligthCtl(true);
-#endif
+
       load_app(signed_firmware);
     }
 #endif
