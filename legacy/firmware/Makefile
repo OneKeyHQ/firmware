@@ -1,6 +1,6 @@
 APPVER = 1.8.0
 
-NAME  = bixin
+NAME = onekey
 
 ifeq ($(EMULATOR),1)
 OBJS += udp.o

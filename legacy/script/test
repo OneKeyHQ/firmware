@@ -2,7 +2,7 @@
 
 # script/test: Run test suite for application.
 
-EMULATOR_BINARY="${EMULATOR_BINARY:-firmware/bixin.elf}"
+EMULATOR_BINARY="${EMULATOR_BINARY:-firmware/onekey.elf}"
 
 set -e
 
