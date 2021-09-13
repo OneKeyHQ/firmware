@@ -16,6 +16,8 @@ void menu_display(struct menu *menu) {
   const BITMAP *bmp_yes = NULL;
   char *text_yes = NULL;
 #if ONEKEY_MINI
+  int cnt = 0;
+  bool align = false;
   char *text_no = NULL;
 #endif
 
@@ -57,8 +59,17 @@ void menu_display(struct menu *menu) {
   }
 
 #if ONEKEY_MINI
+  for (int i = 0; i < menu->counts; i++) {
+    cnt += menu->items[i].is_function ? 1 : 0;
+  }
+
+  if (cnt < menu->counts)
+    align = false;
+  else
+    align = true;
+
   layoutMenuItemsEx(text_yes, text_no, bmp_yes, menu->current + 1, menu->counts,
-                    menu->title ? _(menu->title) : NULL, desc,
+                    align, menu->title ? _(menu->title) : NULL, desc,
                     0 < menu->counts ? _(menu->items[0].name) : NULL,
                     1 < menu->counts ? _(menu->items[1].name) : NULL,
                     2 < menu->counts ? _(menu->items[2].name) : NULL,

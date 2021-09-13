@@ -195,20 +195,20 @@ void layoutEnterSleep(void);
                            current, previous, next)
 
 #if ONEKEY_MINI
-void layoutItemsSelectAdapterEx(const BITMAP *bmp_up, const BITMAP *bmp_down,
-                                const BITMAP *bmp_no, const BITMAP *bmp_yes,
-                                const char *btnNo, const char *btnYes,
-                                uint32_t index, uint32_t count,
-                                const char *title, const char *desc,
-                                const char *line1, const char *line2,
-                                const char *line3, const char *line4,
-                                const char *line5, const char *line6);
+void layoutItemsSelectAdapterEx(
+    const BITMAP *bmp_up, const BITMAP *bmp_down, const BITMAP *bmp_no,
+    const BITMAP *bmp_yes, const char *btnNo, const char *btnYes,
+    uint32_t index, uint32_t count, bool center_align, const char *title,
+    const char *desc, const char *line1, const char *line2, const char *line3,
+    const char *line4, const char *line5, const char *line6);
 
-#define layoutMenuItemsEx(btn_yes, btn_no, bmp_yes, index, count, title, desc, \
-                          line1, line2, line3, line4, line5, line6)            \
-  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_button_back,     \
-                             bmp_yes, btn_no, btn_yes, index, count, title,    \
-                             desc, line1, line2, line3, line4, line5, line6)
+#define layoutMenuItemsEx(btn_yes, btn_no, bmp_yes, index, count,            \
+                          center_align, title, desc, line1, line2, line3,    \
+                          line4, line5, line6)                               \
+  layoutItemsSelectAdapterEx(&bmp_btn_up, &bmp_btn_down, &bmp_button_back,   \
+                             bmp_yes, btn_no, btn_yes, index, count,         \
+                             center_align, title, desc, line1, line2, line3, \
+                             line4, line5, line6)
 
 void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                    const BITMAP *bmp_no, const BITMAP *bmp_yes,
