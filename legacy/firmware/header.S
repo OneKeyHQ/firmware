@@ -26,6 +26,8 @@ g_header:
     .byte 0                          // fix_vbuild
     .byte ONEKEY_VERSION_HEX>>8
     .byte ONEKEY_VERSION_HEX
+    .byte 0
+    .byte 0
     . = . + 4                        // reserved
     . = . + 512                      // hash1 ... hash16
 #if ONEKEY_MINI

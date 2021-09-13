@@ -786,7 +786,7 @@ void update_from_spi_flash(bool force) {
 
   if (firmware_present_new() && !force) {
     p_hdr = (image_header *)FLASH_PTR(FLASH_FWHEADER_START);
-    if (p_hdr->onekey_version >= hdr.onekey_version) {
+    if (memcmp(&(p_hdr->onekey_version), &(hdr.onekey_version), 4) >= 0) {
       return;
     }
   }
