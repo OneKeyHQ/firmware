@@ -558,6 +558,12 @@ const char *languages[][2] = {
     {"Please copy the\nfollowing 24 words in\norder", "请依次抄写24位助记词"},
     // protect.c
     {"Please enter current PIN", "请输入当前PIN码"},
+    // protect.c
+    {"Please enter new PIN", "请输入新PIN码"},
+    // recovery.c
+    {"Please enter the", "请输入"},
+    // protect.c
+    {"Please enter your", "请输入你的"},
     // recovery.c
     {"Please enter your 12-\nwords recovery phrase\nin order.",
      "请依次输入12位助记词"},
@@ -565,12 +571,6 @@ const char *languages[][2] = {
      "请依次输入18位助记词"},
     {"Please enter your 24-\nwords recovery phrase\nin order.",
      "请依次输入24位助记词"},
-    // protect.c
-    {"Please enter new PIN", "请输入新PIN码"},
-    // recovery.c
-    {"Please enter the", "请输入"},
-    // protect.c
-    {"Please enter your", "请输入你的"},
     // protect.c
     {"Please enter your PIN:", "请输入PIN码"},
     // layout2.c
