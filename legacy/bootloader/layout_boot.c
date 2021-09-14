@@ -157,7 +157,7 @@ void layoutBootHome(void) {
   }
 }
 #else
-#define PRODUCT_STRING "Onekey"
+#define PRODUCT_STRING "OneKey"
 
 void layoutBootHome(void) {
   if (layoutNeedRefresh()) {

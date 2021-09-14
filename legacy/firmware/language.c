@@ -265,9 +265,9 @@ const char *languages[][2] = {
     {"Do you want to sign in?", "请确认登录"},
     //
     {"Done", "完成"},
-    {"Download Onekey", "下载Onekey"},
+    {"Download OneKey", "下载OneKey"},
     // menu_list.c
-    {"Download Onekey Apps", "官网下载Onekey客户端"},
+    {"Download OneKey Apps", "官网下载OneKey客户端"},
     // ethereum.c
     {"Empty data chunk received", ""},  // msg
     // signing.c signing.c

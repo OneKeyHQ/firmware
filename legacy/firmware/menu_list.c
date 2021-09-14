@@ -200,12 +200,12 @@ refresh_menu:
       oledDrawBitmap(60, 0, &bmp_btn_up);
 #if ONEKEY_MINI
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10,
-                                  _("Download Onekey Apps"), FONT_STANDARD);
+                                  _("Download OneKey Apps"), FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "onekey.so/download",
                                   FONT_STANDARD);
       oledBox(13, 70, 117, 70, true);
 #else
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download Onekey"),
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download OneKey"),
                                   FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * 10, "onekey.so/download",
                                   FONT_STANDARD);

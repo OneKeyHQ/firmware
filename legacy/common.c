@@ -76,7 +76,7 @@ __fatal_error(const char *expr, const char *msg, const char *file, int line_num,
   oledDrawString(0, 2 * y, func, FONT_STANDARD);
   y += FONT_HEIGHT + 1;
 
-  oledDrawString(0, 2 * y, "Contact Onekey support.", FONT_STANDARD);
+  oledDrawString(0, 2 * y, "Contact OneKey support.", FONT_STANDARD);
   oledRefresh();
   delay_ms(2000);
   shutdown();
@@ -113,7 +113,7 @@ __fatal_error(const char *expr, const char *msg, const char *file, int line_num,
   oledDrawString(0, y, line, FONT_STANDARD);
   y += FONT_HEIGHT + 1;
 
-  oledDrawString(0, y, "Contact Onekey support.", FONT_STANDARD);
+  oledDrawString(0, y, "Contact OneKey support.", FONT_STANDARD);
   oledRefresh();
   delay_ms(2000);
   shutdown();
