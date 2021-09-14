@@ -302,6 +302,7 @@ bool verify_mnemonic(const char *mnemonic) {
   }
 
 #if ONEKEY_MINI
+choose_word:
   layoutDialogSwipeCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
                                    &bmp_button_forward, _("NEXT"), NULL, true,
                                    NULL, NULL, NULL, NULL,
@@ -370,9 +371,9 @@ select_word:
   data[1] = (char *)mnemonic_get_word(words_order[1]);
   data[2] = (char *)mnemonic_get_word(words_order[2]);
 
-  layoutItemsSelectAdapterAlign(NULL, NULL, NULL, &bmp_button_forward, NULL,
-                                _("OK"), i + 1, 3, false, NULL, desc, NULL,
-                                data);
+  layoutItemsSelectAdapterAlign(NULL, NULL, &bmp_button_back,
+                                &bmp_button_forward, _("BACK"), _("OK"), i + 1,
+                                3, false, NULL, desc, NULL, data);
 #else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),
@@ -387,13 +388,23 @@ select_word:
       if (i > 0) i--;
       goto select_word;
     case KEY_CANCEL:
-      goto select_word;
+#if ONEKEY_MINI
+      if (index > 0) {
+        index--;
+        goto refresh_menu;
+      } else {
+        goto choose_word;
+      }
+#else
+      goto refresh_menu;
+#endif
     case KEY_DOWN:
       if (i < 2) i++;
       goto select_word;
     case KEY_CONFIRM:
       if (words_order[i] != selected) {
 #if ONEKEY_MINI
+      error_refresh:
         setRgbBitmap(true);
         layoutDialogSwipeCenterAdapterEx(
             &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL,
@@ -409,11 +420,17 @@ select_word:
         key = protectWaitKey(0, 1);
 #if ONEKEY_MINI
         setRgbBitmap(false);
-#endif
+        if (key == KEY_CONFIRM) {
+          goto refresh_menu;
+        } else {
+          goto error_refresh;
+        }
+#else
         if (key != KEY_CONFIRM) {
           return false;
         }
         goto refresh_menu;
+#endif
       } else {
         index++;
         if (index == 3)
@@ -426,6 +443,7 @@ select_word:
   }
 
 #if ONEKEY_MINI
+ok_refresh:
   setRgbBitmap(true);
   layoutDialogSwipeCenterAdapterEx(
       &bmp_icon_success, &bmp_button_back, NULL, &bmp_button_forward, _("NEXT"),
@@ -440,10 +458,14 @@ select_word:
   key = protectWaitKey(0, 1);
 #if ONEKEY_MINI
   setRgbBitmap(false);
-#endif
+  if (key != KEY_CONFIRM) {
+    goto ok_refresh;
+  }
+#else
   if (key != KEY_CONFIRM) {
     return false;
   }
+#endif
 
   memzero(words, sizeof(words));
   return true;
@@ -530,9 +552,19 @@ refresh_menu:
       if (i < pages - 1) i++;
       goto refresh_menu;
     case KEY_CANCEL:
-      return false;
+      if (i > 0) {
+        i--;
+        goto refresh_menu;
+      } else {
+        return false;
+      }
     case KEY_CONFIRM:
-      if (i == pages - 1) break;
+      if (i == pages - 1) {
+        break;
+      } else {
+        if (i < pages - 1) i++;
+        goto refresh_menu;
+      }
     default:
       break;
   }
@@ -633,9 +665,9 @@ bool writedown_mnemonic(const char *mnemonic) {
   uint2str(words_count, desc + strlen(desc));
 #endif
 
-write_mnemonic:
 #if ONEKEY_MINI
   if (scroll_mnemonic(_("Word"), mnemonic, 0)) {
+  write_mnemonic:
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
         true, NULL, NULL, NULL, NULL,
@@ -658,6 +690,9 @@ write_mnemonic:
       goto_check(write_mnemonic);
     }
 
+#if ONEKEY_MINI
+  verify_mnemonic:
+#endif
     if (!verify_mnemonic(mnemonic)) {
       goto_check(check_mnemonic);
     }
@@ -674,7 +709,11 @@ write_mnemonic:
 #endif
 
     if (!protectChangePinOnDevice(false, true)) {
+#if ONEKEY_MINI
+      goto verify_mnemonic;
+#else
       goto_check(check_mnemonic);
+#endif
     }
     config_setMnemonic(mnemonic, false);
     return true;

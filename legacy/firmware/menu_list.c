@@ -23,6 +23,7 @@ void menu_recovery_device(int index) {
   recovery_on_device();
   if (config_isInitialized()) {
 #if ONEKEY_MINI
+  refresh:
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
         &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("Done"), NULL,
@@ -34,9 +35,12 @@ void menu_recovery_device(int index) {
                                    _("Wallet Recovery Success"), NULL, NULL);
 #endif
 
-    protectWaitKey(0, 1);
 #if ONEKEY_MINI
+    uint8_t key = protectWaitKey(0, 1);
     setRgbBitmap(false);
+    if (key != KEY_CONFIRM) goto refresh;
+#else
+    protectWaitKey(0, 1);
 #endif
     layoutHome();
   }
@@ -50,6 +54,7 @@ void menu_reset_device(int index) {
   reset_on_device();
   if (config_isInitialized()) {
 #if ONEKEY_MINI
+  refresh:
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
         &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("Done"), NULL,
@@ -61,9 +66,12 @@ void menu_reset_device(int index) {
                                    _("Wallet created success"), NULL, NULL);
 #endif
 
-    protectWaitKey(0, 1);
 #if ONEKEY_MINI
+    uint8_t key = protectWaitKey(0, 1);
     setRgbBitmap(false);
+    if (key != KEY_CONFIRM) goto refresh;
+#else
+    protectWaitKey(0, 1);
 #endif
     layoutHome();
   }
@@ -601,12 +609,14 @@ static struct menu_item main_uninitialized_menu_items[] = {
     {"Create New Wallet", NULL, true, menu_reset_device, NULL},
     {"Restore Wallet", NULL, true, menu_recovery_device, NULL},
     {"About", NULL, true, layoutDeviceParameters, NULL},
+    {"Settings ", NULL, false, .sub_menu = &settings_menu, NULL}
 #else
     {"Create", NULL, true, menu_reset_device, NULL},
     {"Restore", NULL, true, menu_recovery_device, NULL},
     {"About", NULL, true, layoutDeviceParameters, NULL},
+    {"Settings", NULL, false, .sub_menu = &settings_menu, NULL}
 #endif
-    {"Settings", NULL, false, .sub_menu = &settings_menu, NULL}};
+};
 
 static struct menu main_uninitilized_menu = {
     .start = 0,
