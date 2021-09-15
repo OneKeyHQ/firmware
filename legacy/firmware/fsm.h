@@ -153,10 +153,7 @@ void fsm_msgStellarManageDataOp(const StellarManageDataOp *msg);
 void fsm_msgStellarBumpSequenceOp(const StellarBumpSequenceOp *msg);
 
 void fsm_msgBixinReboot(const BixinReboot *msg);
-void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg);
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg);
-void fsm_msgBixinBackupRequest(const BixinBackupRequest *msg);
-void fsm_msgBixinRestoreRequest(const BixinRestoreRequest *msg);
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg);
 void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
 void fsm_msgBixinBackupDevice(void);
