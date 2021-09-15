@@ -17,6 +17,5 @@ void menu_para_set_sleep(int index);
 #if ONEKEY_MINI
 void menu_para_set_brightness(int index);
 #endif
-void menu_para_set_eth_eip(int index);
 
 #endif
