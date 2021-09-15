@@ -1070,7 +1070,11 @@ refresh_menu:
       *number = num_s[index];
       return true;
     case KEY_CANCEL:
+#if ONEKEY_MINI
+      return false;
+#else
       goto refresh_menu;
+#endif
     default:
       return false;
   }
