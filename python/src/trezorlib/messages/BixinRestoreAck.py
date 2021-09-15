@@ -11,7 +11,6 @@ if __debug__:
 
 
 class BixinRestoreAck(p.MessageType):
-    MESSAGE_WIRE_TYPE = 908
 
     def __init__(
         self,

@@ -11,7 +11,6 @@ if __debug__:
 
 
 class BixinBackupAck(p.MessageType):
-    MESSAGE_WIRE_TYPE = 906
 
     def __init__(
         self,
