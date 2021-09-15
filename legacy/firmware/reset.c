@@ -676,6 +676,7 @@ bool writedown_mnemonic(const char *mnemonic) {
           "identical."),
         NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
+write_mnemonic:
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
     layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                    &bmp_btn_forward, _("Next"), NULL, NULL,
