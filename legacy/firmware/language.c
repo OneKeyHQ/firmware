@@ -44,7 +44,11 @@ const char *languages[][2] = {
     // fsm_msg_coin.h fsm_msg_lisk.h
     {"Address:", "地址"},
     //
-    {"Advance ETH sign", "ETH高级签名"},
+    {"Advance ETH Sign", "ETH高级签名"},
+    //
+    {"After enabling \n\"Blind Signing\",your device  will support signing for "
+     "messages and transactions, but it can't decode the metadata.",
+     "\n开启盲签后,设备将支持对消息或交易进行签名,但不会解析元数据"},
     // layout2.c
     {"Again", "再次"},
     // menu_list.c
@@ -277,6 +281,8 @@ const char *languages[][2] = {
     {"Download OneKey", "下载OneKey"},
     // menu_list.c
     {"Download OneKey Apps", "官网下载OneKey客户端"},
+    //
+    {"ETH advance signing turn", "ETH高级签名"},
     // ethereum.c
     {"Empty data chunk received", ""},  // msg
     // signing.c signing.c
@@ -846,8 +852,8 @@ const char *languages[][2] = {
     // signing.c signing.c
     {"Version group ID not enabled on this coin.", ""},
     //
-    {"Visiting Help Center and search \"Blind Sign\" to "
-     "learn morn\n help.onekey.so",
+    {"Visiting Help Center and search \"Blind Signing\" to "
+     "learn more\n help.onekey.so",
      "访问help.onekey.so搜索盲签了解更多"},
     {"WARNING: The device\nwill be reset after\n10 wrong attempts",
      "注意: 若累计输错10次\n设备将自动重置"},
