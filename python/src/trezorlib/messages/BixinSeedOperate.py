@@ -12,7 +12,6 @@ if __debug__:
 
 
 class BixinSeedOperate(p.MessageType):
-    MESSAGE_WIRE_TYPE = 901
 
     def __init__(
         self,

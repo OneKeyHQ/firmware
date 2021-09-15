@@ -11,7 +11,6 @@ if __debug__:
 
 
 class BixinWhiteListAck(p.MessageType):
-    MESSAGE_WIRE_TYPE = 912
 
     def __init__(
         self,
