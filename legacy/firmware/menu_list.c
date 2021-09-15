@@ -223,11 +223,33 @@ void menu_showMnemonic(int index) {
   }
 }
 
+void menu_set_eth_eip(int index) {
+  char desc[64] = {0};
+
+  bool state = index ? false : true;
+  if (config_hasPin()) {
+    if (!protectPinOnDevice(false, true)) {
+      return;
+    }
+  }
+
+  config_setCoinSwitch(COIN_SWITCH_ETH_EIP712, state);
+
+  strcat(desc, _("ETH advance signing turn"));
+  strcat(desc, state ? _(" On") : _(" Off"));
+  layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
+                                 _("Done"), NULL, NULL, NULL, NULL, desc, NULL,
+                                 NULL);
+  protectWaitKey(0, 1);
+  layoutHome();
+}
+
 void menu_blindSign(int index) {
   (void)index;
 
   uint8_t key = KEY_NULL;
 
+step1:
   layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
                          _("Next"), NULL,
                          _("After enabling \n\"Blind Signing\",your device "
@@ -239,13 +261,15 @@ void menu_blindSign(int index) {
     return;
   }
 
-  layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
-                         _("Next"), NULL, NULL,
-                         _("Visiting Help Center and search \"Blind Sign\" to "
-                           "learn more\n help.onekey.so"),
-                         NULL, NULL, NULL, NULL);
+  layoutDialogAdapter_ex(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      _("Visiting Help Center and search \"Blind Signing\" to "
+        "learn more\n help.onekey.so"),
+      NULL, NULL, NULL, NULL);
   key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
+  if (key == KEY_CANCEL) {
+    goto step1;
+  } else if (key != KEY_CONFIRM) {
     return;
   }
 
@@ -255,7 +279,6 @@ void menu_blindSign(int index) {
   while (1) {
     key = keyScan();
     if (key == KEY_CANCEL) {
-      menu_init(&security_set_menu);
       return;
     }
     menu_run(key, 0);
@@ -387,8 +410,8 @@ static struct menu main_uninitilized_menu = {
 };
 
 static struct menu_item eth_eip_set_menu_items[] = {
-    {"On", NULL, true, menu_para_set_eth_eip, NULL},
-    {"Off", NULL, true, menu_para_set_eth_eip, NULL}};
+    {"On", NULL, true, menu_set_eth_eip, NULL},
+    {"Off", NULL, true, menu_set_eth_eip, NULL}};
 
 static struct menu eth_eip_switch_menu = {
     .start = 0,
@@ -396,11 +419,11 @@ static struct menu eth_eip_switch_menu = {
     .counts = COUNT_OF(eth_eip_set_menu_items),
     .title = NULL,
     .items = eth_eip_set_menu_items,
-    .previous = &security_set_menu,
+    .previous = &blind_sign_menu,
 };
 
 static struct menu_item blind_sign_menu_items[] = {
-    {"Advance ETH sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
+    {"Advance ETH Sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
      menu_para_eth_eip_switch}};
 
 static struct menu blind_sign_menu = {

@@ -28,7 +28,7 @@ const char *languages[][2] = {
     // fsm_msg_coin.h fsm_msg_lisk.h
     {"Address:", "地址"},
     //
-    {"Advance ETH sign", "ETH高级签名"},
+    {"Advance ETH Sign", "ETH高级签名"},
     //
     {"After enabling \n\"Blind Signing\",your device  will support signing for "
      "messages and transactions, but it can't decode the metadata.",
@@ -226,6 +226,8 @@ const char *languages[][2] = {
     {"Done", "完成"},
     //
     {"Download Onekey", "下载Onekey"},
+    //
+    {"ETH advance signing turn", "ETH高级签名"},
     // ethereum.c
     {"Empty data chunk received", ""},  // msg
     // signing.c signing.c
@@ -705,7 +707,7 @@ const char *languages[][2] = {
     // signing.c signing.c
     {"Version group ID not enabled on this coin.", ""},
     //
-    {"Visiting Help Center and search \"Blind Sign\" to "
+    {"Visiting Help Center and search \"Blind Signing\" to "
      "learn more\n help.onekey.so",
      "访问help.onekey.so搜索盲签了解更多"},
     // config.c

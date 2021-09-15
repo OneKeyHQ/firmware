@@ -11,6 +11,5 @@ void menu_para_set_ble(int index);
 void menu_para_set_language(int index);
 void menu_para_set_shutdown(int index);
 void menu_para_set_sleep(int index);
-void menu_para_set_eth_eip(int index);
 
 #endif
