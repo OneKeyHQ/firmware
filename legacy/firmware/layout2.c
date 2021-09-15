@@ -2833,6 +2833,7 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
       if (left_align) {
         oledDrawStringAdapter(0, y1, data[i], FONT_STANDARD);
         if ((index - 1) == i) {
+          oledDrawBitmap(OLED_WIDTH - 8, y1, &bmp_button_forward);
           oledInvert(0, y1 - 1, OLED_WIDTH, y1 + cur_font->pixel);
         }
       } else {
