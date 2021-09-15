@@ -556,6 +556,12 @@ const char *languages[][2] = {
     {"Please copy the\nfollowing 12 words in\norder", "请依次抄写12位助记词"},
     {"Please copy the\nfollowing 18 words in\norder", "请依次抄写18位助记词"},
     {"Please copy the\nfollowing 24 words in\norder", "请依次抄写24位助记词"},
+    {"Please enter 12 words\nin order to verify\nyour recovery phrase",
+     "请依次输入12位助记词进\n行核对"},
+    {"Please enter 18 words\nin order to verify\nyour recovery phrase",
+     "请依次输入18位助记词进\n行核对"},
+    {"Please enter 24 words\nin order to verify\nyour recovery phrase",
+     "请依次输入24位助记词进\n行核对"},
     // protect.c
     {"Please enter current PIN", "请输入当前PIN码"},
     // protect.c
