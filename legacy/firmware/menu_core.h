@@ -13,6 +13,7 @@ struct menu_item {
     struct menu *sub_menu;
   };
   char *((*para)(void));
+  bool go_prev;
 };
 
 enum {

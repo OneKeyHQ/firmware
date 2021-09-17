@@ -106,6 +106,10 @@ void menu_enter(void) {
   } else if (currentMenu->items[currentMenu->current].func != NULL) {
     currentMenu->items[currentMenu->current].func(currentMenu->current);
     if (layoutLast != layoutHome) layoutLast = menu_run;
+    if (currentMenu->previous &&
+        currentMenu->items[currentMenu->current].go_prev) {
+      currentMenu = currentMenu->previous;
+    }
   }
 }
 
