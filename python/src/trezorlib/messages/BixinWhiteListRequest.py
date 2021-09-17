@@ -12,6 +12,7 @@ if __debug__:
 
 
 class BixinWhiteListRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 911
 
     def __init__(
         self,

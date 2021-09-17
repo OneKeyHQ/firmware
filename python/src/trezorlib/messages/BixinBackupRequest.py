@@ -11,4 +11,4 @@ if __debug__:
 
 
 class BixinBackupRequest(p.MessageType):
-    pass
+    MESSAGE_WIRE_TYPE = 905

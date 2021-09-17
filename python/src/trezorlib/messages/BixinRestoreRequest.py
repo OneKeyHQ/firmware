@@ -11,6 +11,7 @@ if __debug__:
 
 
 class BixinRestoreRequest(p.MessageType):
+    MESSAGE_WIRE_TYPE = 907
 
     def __init__(
         self,
