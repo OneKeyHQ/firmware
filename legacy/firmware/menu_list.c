@@ -279,6 +279,7 @@ step1:
   while (1) {
     key = keyScan();
     if (key == KEY_CANCEL) {
+      menu_init(&security_set_menu);
       return;
     }
     menu_run(key, 0);
