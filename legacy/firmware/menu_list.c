@@ -286,8 +286,8 @@ step1:
 }
 
 static struct menu_item ble_set_menu_items[] = {
-    {"On", NULL, true, menu_para_set_ble, NULL},
-    {"Off", NULL, true, menu_para_set_ble, NULL}};
+    {"On", NULL, true, menu_para_set_ble, NULL, true},
+    {"Off", NULL, true, menu_para_set_ble, NULL, true}};
 
 static struct menu ble_set_menu = {
     .start = 0,
@@ -299,8 +299,8 @@ static struct menu ble_set_menu = {
 };
 
 static struct menu_item language_set_menu_items[] = {
-    {"English ", NULL, true, menu_para_set_language, NULL},
-    {"简体中文", NULL, true, menu_para_set_language, NULL}};
+    {"English ", NULL, true, menu_para_set_language, NULL, true},
+    {"简体中文", NULL, true, menu_para_set_language, NULL, true}};
 
 static struct menu language_set_menu = {
     .start = 0,
@@ -312,11 +312,11 @@ static struct menu language_set_menu = {
 };
 
 static struct menu_item autolock_set_menu_items[] = {
-    {"1", "minute", true, menu_para_set_sleep, NULL},
-    {"2", "minutes", true, menu_para_set_sleep, NULL},
-    {"5", "minutes", true, menu_para_set_sleep, NULL},
-    {"10", "minutes", true, menu_para_set_sleep, NULL},
-    {"Never", NULL, true, menu_para_set_sleep, NULL}};
+    {"1", "minute", true, menu_para_set_sleep, NULL, true},
+    {"2", "minutes", true, menu_para_set_sleep, NULL, true},
+    {"5", "minutes", true, menu_para_set_sleep, NULL, true},
+    {"10", "minutes", true, menu_para_set_sleep, NULL, true},
+    {"Never", NULL, true, menu_para_set_sleep, NULL, true}};
 
 static struct menu autolock_set_menu = {
     .start = 0,
@@ -328,11 +328,11 @@ static struct menu autolock_set_menu = {
 };
 
 static struct menu_item shutdown_set_menu_items[] = {
-    {"10", "minute", true, menu_para_set_shutdown, NULL},
-    {"30", "minutes", true, menu_para_set_shutdown, NULL},
-    {"1", "hour", true, menu_para_set_shutdown, NULL},
-    {"2", "hours", true, menu_para_set_shutdown, NULL},
-    {"Never", NULL, true, menu_para_set_shutdown, NULL}};
+    {"10", "minute", true, menu_para_set_shutdown, NULL, true},
+    {"30", "minutes", true, menu_para_set_shutdown, NULL, true},
+    {"1", "hour", true, menu_para_set_shutdown, NULL, true},
+    {"2", "hours", true, menu_para_set_shutdown, NULL, true},
+    {"Never", NULL, true, menu_para_set_shutdown, NULL, true}};
 
 static struct menu shutdown_set_menu = {
     .start = 0,
@@ -344,13 +344,14 @@ static struct menu shutdown_set_menu = {
 };
 
 static struct menu_item settings_menu_items[] = {
-    {"Bluetooth", NULL, false, .sub_menu = &ble_set_menu, menu_para_ble_state},
+    {"Bluetooth", NULL, false, .sub_menu = &ble_set_menu, menu_para_ble_state,
+     false},
     {"Language", NULL, false, .sub_menu = &language_set_menu,
-     menu_para_language},
+     menu_para_language, false},
     {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
-     menu_para_autolock},
+     menu_para_autolock, false},
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
-     menu_para_shutdown}};
+     menu_para_shutdown, false}};
 
 static struct menu settings_menu = {
     .start = 0,
@@ -362,9 +363,9 @@ static struct menu settings_menu = {
 };
 
 static struct menu_item security_set_menu_items[] = {
-    {"Change PIN", NULL, true, menu_changePin, NULL},
-    {"Reset", NULL, true, menu_erase_device, NULL},
-    {"Blind Signing", NULL, true, menu_blindSign, NULL},
+    {"Change PIN", NULL, true, menu_changePin, NULL, false},
+    {"Reset", NULL, true, menu_erase_device, NULL, false},
+    {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 
@@ -378,9 +379,9 @@ static struct menu security_set_menu = {
 };
 
 static struct menu_item main_menu_items[] = {
-    {"Settings", NULL, false, .sub_menu = &settings_menu, NULL},
-    {"Security", NULL, false, .sub_menu = &security_set_menu, NULL},
-    {"About", NULL, true, layoutDeviceParameters, NULL}};
+    {"Settings", NULL, false, .sub_menu = &settings_menu, NULL, false},
+    {"Security", NULL, false, .sub_menu = &security_set_menu, NULL, false},
+    {"About", NULL, true, layoutDeviceParameters, NULL, false}};
 
 static struct menu main_menu = {
     .start = 0,
@@ -393,11 +394,11 @@ static struct menu main_menu = {
 };
 
 static struct menu_item main_uninitialized_menu_items[] = {
-    {"Guide", NULL, true, menu_manual, NULL},
-    {"Create", NULL, true, menu_reset_device, NULL},
-    {"Restore", NULL, true, menu_recovery_device, NULL},
-    {"About", NULL, true, layoutDeviceParameters, NULL},
-    {"Settings", NULL, false, .sub_menu = &settings_menu, NULL}};
+    {"Guide", NULL, true, menu_manual, NULL, false},
+    {"Create", NULL, true, menu_reset_device, NULL, false},
+    {"Restore", NULL, true, menu_recovery_device, NULL, false},
+    {"About", NULL, true, layoutDeviceParameters, NULL, false},
+    {"Settings", NULL, false, .sub_menu = &settings_menu, NULL, false}};
 
 static struct menu main_uninitilized_menu = {
     .start = 0,
@@ -410,8 +411,8 @@ static struct menu main_uninitilized_menu = {
 };
 
 static struct menu_item eth_eip_set_menu_items[] = {
-    {"On", NULL, true, menu_set_eth_eip, NULL},
-    {"Off", NULL, true, menu_set_eth_eip, NULL}};
+    {"On", NULL, true, menu_set_eth_eip, NULL, false},
+    {"Off", NULL, true, menu_set_eth_eip, NULL, false}};
 
 static struct menu eth_eip_switch_menu = {
     .start = 0,
@@ -424,7 +425,7 @@ static struct menu eth_eip_switch_menu = {
 
 static struct menu_item blind_sign_menu_items[] = {
     {"Advance ETH Sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
-     menu_para_eth_eip_switch}};
+     menu_para_eth_eip_switch, false}};
 
 static struct menu blind_sign_menu = {
     .start = 0,
