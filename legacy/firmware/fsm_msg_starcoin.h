@@ -24,13 +24,14 @@ void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg) {
 
   RESP_INIT(StarcoinAddress);
 
-  const HDNode *node = starcoin_deriveNode(msg->address_n, msg->address_n_count);
+  const HDNode *node =
+      starcoin_deriveNode(msg->address_n, msg->address_n_count);
 
   if (!node) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Failed to derive private key"));
     return;
-  } 
+  }
 
   resp->has_address = true;
   resp->address[0] = '0';
@@ -56,7 +57,8 @@ void fsm_msgStarcoinSignTx(const StarcoinSignTx *msg) {
 
   RESP_INIT(StarcoinSignedTx);
 
-  const HDNode *node = starcoin_deriveNode(msg->address_n, msg->address_n_count);
+  const HDNode *node =
+      starcoin_deriveNode(msg->address_n, msg->address_n_count);
   if (!node) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Failed to derive private key"));
@@ -65,9 +67,9 @@ void fsm_msgStarcoinSignTx(const StarcoinSignTx *msg) {
 
   starcoin_sign_tx(msg, node, resp);
   if (!resp->has_signature) {
-      fsm_sendFailure(FailureType_Failure_DataError, _("Signing failed"));
-      layoutHome();
-      return;
+    fsm_sendFailure(FailureType_Failure_DataError, _("Signing failed"));
+    layoutHome();
+    return;
   }
   msg_write(MessageType_MessageType_StarcoinSignedTx, resp);
   layoutHome();
@@ -80,7 +82,8 @@ void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg) {
 
   RESP_INIT(StarcoinMessageSignature);
 
-  const HDNode *node = starcoin_deriveNode(msg->address_n, msg->address_n_count);
+  const HDNode *node =
+      starcoin_deriveNode(msg->address_n, msg->address_n_count);
   if (!node) return;
 
   starcoin_sign_message(node, msg, resp);

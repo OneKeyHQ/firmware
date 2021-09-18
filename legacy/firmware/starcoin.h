@@ -26,18 +26,17 @@
 
 #define MAX_STARCOIN_ADDRESS_SIZE 33
 
-
-const HDNode *starcoin_deriveNode(const uint32_t *address_n, 
-                                size_t address_n_count);
+const HDNode *starcoin_deriveNode(const uint32_t *address_n,
+                                  size_t address_n_count);
 void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
-                    StarcoinSignedTx *resp);
+                      StarcoinSignedTx *resp);
 void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
-                       StarcoinMessageSignature *resp);
+                           StarcoinMessageSignature *resp);
 bool starcoin_verify_message(const StarcoinVerifyMessage *msg);
 
 // Helpers
 void starcoin_get_address_from_public_key(const uint8_t *public_key,
-                                      char *address);
+                                          char *address);
 
 // Layout
 void layoutRequireConfirmSignTx(char *address);
