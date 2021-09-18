@@ -14,24 +14,22 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-import struct
-import xdrlib
 
 from . import exceptions, messages
 from .tools import expect
 
-
 DEFAULT_BIP32_PATH = "m/44h/101010h/0h/0h/0h"
 
 
-
 # ====== Client functions ====== #
+
 
 @expect(messages.StarcoinAddress, field="address")
 def get_address(client, address_n, show_display=False):
     return client.call(
         messages.StarcoinGetAddress(address_n=address_n, show_display=show_display)
     )
+
 
 @expect(messages.StarcoinSignedTx)
 def sign_tx(client, address_n, rawtx):

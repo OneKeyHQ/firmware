@@ -14,7 +14,6 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-import base64
 
 import click
 
@@ -50,8 +49,7 @@ def get_address(client, address, show_display):
 @click.argument("message")
 @with_client
 def sign_raw_transaction(client, address, message):
-    """Sign a hex-encoded transaction .
-    """
+    """Sign a hex-encoded transaction ."""
     address_n = tools.parse_path(address)
     ret = starcoin.sign_tx(client, address_n, bytes.fromhex(message))
     output = {
@@ -68,7 +66,7 @@ def sign_raw_transaction(client, address, message):
 def sign_message(client, address, message):
     """Sign message with Starcoin address."""
     address_n = tools.parse_path(address)
-    res = starcoin.sign_message(client, address_n, bytes(message, encoding = "utf8"))
+    res = starcoin.sign_message(client, address_n, bytes(message, encoding="utf8"))
     output = {
         "message": message,
         "public_key": res.public_key.hex(),
@@ -86,4 +84,6 @@ def verify_message(client, pubkey, signature, message):
     """Verify message signed with Starcoin address."""
     signature = bytes.fromhex(signature)
     pubkey = bytes.fromhex(pubkey)
-    return starcoin.verify_message(client, pubkey, signature, bytes(message, encoding = "utf8"))
+    return starcoin.verify_message(
+        client, pubkey, signature, bytes(message, encoding="utf8")
+    )
