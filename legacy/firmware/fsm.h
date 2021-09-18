@@ -28,6 +28,7 @@
 #include "messages-management.pb.h"
 #include "messages-nem.pb.h"
 #include "messages-solana.pb.h"
+#include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
 
 // message functions
@@ -124,6 +125,16 @@ void fsm_msgNEMSignTx(
 void fsm_msgNEMDecryptMessage(
     NEMDecryptMessage *msg);  // not const because we mutate msg->payload
 
+// solana
+void fsm_msgSolanaGetAddress(const SolanaGetAddress *msg);
+void fsm_msgSolanaSignTx(const SolanaSignTx *msg);
+
+// starcoin
+void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg);
+void fsm_msgStarcoinSignTx(const StarcoinSignTx *msg);
+void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg);
+void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg);
+
 // stellar
 void fsm_msgStellarGetAddress(const StellarGetAddress *msg);
 void fsm_msgStellarSignTx(const StellarSignTx *msg);
@@ -138,10 +149,6 @@ void fsm_msgStellarAllowTrustOp(const StellarAllowTrustOp *msg);
 void fsm_msgStellarAccountMergeOp(const StellarAccountMergeOp *msg);
 void fsm_msgStellarManageDataOp(const StellarManageDataOp *msg);
 void fsm_msgStellarBumpSequenceOp(const StellarBumpSequenceOp *msg);
-
-// solana
-void fsm_msgSolanaGetAddress(const SolanaGetAddress *msg);
-void fsm_msgSolanaSignTx(const SolanaSignTx *msg);
 
 void fsm_msgBixinReboot(const BixinReboot *msg);
 void fsm_msgBixinSeedOperate(const BixinSeedOperate *msg);

@@ -208,6 +208,13 @@ if not utils.BITCOIN_ONLY:
     SolanaAddress: Literal[10101] = 10101
     SolanaSignTx: Literal[10102] = 10102
     SolanaSignedTx: Literal[10103] = 10103
+    StarcoinGetAddress: Literal[10200] = 10200
+    StarcoinAddress: Literal[10201] = 10201
+    StarcoinSignTx: Literal[10202] = 10202
+    StarcoinSignedTx: Literal[10203] = 10203
+    StarcoinSignMessage: Literal[10204] = 10204
+    StarcoinMessageSignature: Literal[10205] = 10205
+    StarcoinVerifyMessage: Literal[10206] = 10206
     WebAuthnListResidentCredentials: Literal[800] = 800
     WebAuthnCredentials: Literal[801] = 801
     WebAuthnAddResidentCredential: Literal[802] = 802

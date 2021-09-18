@@ -45,8 +45,9 @@ OBJS += ethereum_tokens.o
 OBJS += lisk.o
 OBJS += nem2.o
 OBJS += nem_mosaics.o
-OBJS += stellar.o
 OBJS += solana.o
+OBJS += starcoin.o
+OBJS += stellar.o
 endif
 
 OBJS += debug.o
@@ -121,8 +122,9 @@ ifneq ($(BITCOIN_ONLY),1)
 OBJS += protob/messages-ethereum.pb.o
 OBJS += protob/messages-lisk.pb.o
 OBJS += protob/messages-nem.pb.o
-OBJS += protob/messages-stellar.pb.o
 OBJS += protob/messages-solana.pb.o
+OBJS += protob/messages-starcoin.pb.o
+OBJS += protob/messages-stellar.pb.o
 endif
 
 OPTFLAGS ?= -Os
