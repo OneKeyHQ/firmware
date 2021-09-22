@@ -23,6 +23,7 @@
 #include "layout2.h"
 #include "messages.h"
 #include "messages.pb.h"
+#include "protect.h"
 #include "sol/message.h"
 #include "sol/parser.h"
 #include "sol/printer.h"
@@ -40,7 +41,6 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   if (parse_message_header(&parser, &header)) {
     // This is not a valid Solana message
     fsm_sendFailure(FailureType_Failure_DataError, _("Invalid message"));
-    layoutHome();
     return;
   } else {
     uint8_t signer_pubkey[SIZE_PUBKEY];
@@ -55,7 +55,6 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
     }
     if (i >= signer_count) {
       fsm_sendFailure(FailureType_Failure_DataError, _("Invalid params"));
-      layoutHome();
       return;
     }
   }
@@ -76,7 +75,6 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
     } else {
       fsm_sendFailure(FailureType_Failure_DataError,
                       _("Please confirm the BlindSign enabled"));
-      layoutHome();
       return;
     }
   }
@@ -89,14 +87,20 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   if (transaction_summary_finalize(summary_step_kinds, &num_summary_steps) ==
       0) {
     for (size_t i = 0; i < num_summary_steps; i++) {
-      if (transaction_summary_display_item(i, DisplayFlagNone)) {
+      if (transaction_summary_display_item(i, DisplayFlagAll)) {
         fsm_sendFailure(FailureType_Failure_DataError, _("Parse error"));
         layoutHome();
         return;
       } else {
-        //        char *title = G_transaction_summary_text;
-        //        char *text = G_transaction_summary_title;
-        // TODO: display details here
+        char *title = G_transaction_summary_title;
+        char *text = G_transaction_summary_text;
+        layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), title, NULL, text,
+                            NULL, NULL, NULL, NULL);
+        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
+                           false)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          return;
+        }
       }
     }
     ed25519_sign(msg->raw_tx.bytes, msg->raw_tx.size, node->private_key,
@@ -105,7 +109,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
     resp->signature.size = 64;
   } else {
     fsm_sendFailure(FailureType_Failure_DataError, _("Parse error"));
-    layoutHome();
     return;
   }
+  msg_write(MessageType_MessageType_SolanaSignedTx, resp);
 }
