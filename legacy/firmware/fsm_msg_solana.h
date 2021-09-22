@@ -59,7 +59,5 @@ void fsm_msgSolanaSignTx(const SolanaSignTx *msg) {
 
   solana_sign_tx(msg, node, resp);
 
-  msg_write(MessageType_MessageType_SolanaSignedTx, resp);
-
   layoutHome();
 }
