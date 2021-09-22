@@ -40,32 +40,6 @@ const uint8_t STC_MSG_SIGN_PREFIX_HASH[32] = {
     30, 53, 10, 143, 14,  70,  31, 15,  109, 137, 190, 170, 191, 80,  23,  17,
     88, 59, 64, 222, 174, 176, 69, 176, 204, 180, 77,  209, 224, 113, 115, 62};
 
-/*
- * Derives the HDNode at the given index
- * Standard Starcoin prefix is m/44'/101010'/0'/0'/ and the default account is
- * m/44'/101010'/0'/0'/0'
- *
- * All paths must be hardened
- */
-const HDNode *starcoin_deriveNode(const uint32_t *address_n,
-                                  size_t address_n_count) {
-  static CONFIDENTIAL HDNode node;
-  const char *curve = "ed25519";
-
-  // Device not initialized, passphrase request cancelled, or unsupported curve
-  if (!config_getRootNode(&node, curve)) {
-    return NULL;
-  }
-  // Failed to derive private key
-  if (hdnode_private_ckd_cached(&node, address_n, address_n_count, NULL) == 0) {
-    return NULL;
-  }
-
-  hdnode_fill_public_key(&node);
-
-  return &node;
-}
-
 void starcoin_get_address_from_public_key(const uint8_t *public_key,
                                           char *address) {
   uint8_t buf[32] = {0};

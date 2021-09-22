@@ -24,15 +24,11 @@ void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg) {
 
   RESP_INIT(StarcoinAddress);
 
-  const HDNode *node =
-      starcoin_deriveNode(msg->address_n, msg->address_n_count);
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
 
-  if (!node) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
-    return;
-  }
-
+  hdnode_fill_public_key(node);
   resp->has_address = true;
   resp->address[0] = '0';
   resp->address[1] = 'x';
@@ -57,14 +53,11 @@ void fsm_msgStarcoinGetPublicKey(const StarcoinGetPublicKey *msg) {
 
   RESP_INIT(StarcoinPublicKey);
 
-  const HDNode *node =
-      starcoin_deriveNode(msg->address_n, msg->address_n_count);
-  if (!node) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
-    return;
-  }
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
 
+  hdnode_fill_public_key(node);
   resp->has_public_key = true;
   resp->public_key.size = 32;
 
@@ -90,14 +83,11 @@ void fsm_msgStarcoinSignTx(const StarcoinSignTx *msg) {
 
   RESP_INIT(StarcoinSignedTx);
 
-  const HDNode *node =
-      starcoin_deriveNode(msg->address_n, msg->address_n_count);
-  if (!node) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
-    return;
-  }
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
 
+  hdnode_fill_public_key(node);
   starcoin_sign_tx(msg, node, resp);
   if (!resp->has_signature) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Signing failed"));
@@ -115,10 +105,11 @@ void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg) {
 
   RESP_INIT(StarcoinMessageSignature);
 
-  const HDNode *node =
-      starcoin_deriveNode(msg->address_n, msg->address_n_count);
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
   if (!node) return;
 
+  hdnode_fill_public_key(node);
   starcoin_sign_message(node, msg, resp);
 
   msg_write(MessageType_MessageType_StarcoinMessageSignature, resp);
