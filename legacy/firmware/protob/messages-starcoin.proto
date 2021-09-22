@@ -24,6 +24,24 @@ message StarcoinAddress {
 }
 
 /**
+ * Request: Ask device for Starcoin public key corresponding to address_n path
+ * @start
+ * @next StarcoinPublicKey
+ */
+ message StarcoinGetPublicKey {
+    repeated uint32 address_n = 1;  // BIP-32 path to derive the key from master node
+    optional bool show_display = 2; // Optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains Starcoin public key derived from device private seed
+ * @end
+ */
+message StarcoinPublicKey {
+    optional bytes public_key = 1;  // Starcoin public key
+}
+
+/**
  * Request: ask device to sign Starcoin transaction
  * @start
  * @next StarcoinSignedTx

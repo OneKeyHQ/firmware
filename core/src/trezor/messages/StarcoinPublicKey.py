@@ -10,21 +10,18 @@ if __debug__:
         pass
 
 
-class StarcoinMessageSignature(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10207
+class StarcoinPublicKey(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10203
 
     def __init__(
         self,
         *,
         public_key: bytes = None,
-        signature: bytes = None,
     ) -> None:
         self.public_key = public_key
-        self.signature = signature
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('public_key', p.BytesType, None),
-            2: ('signature', p.BytesType, None),
         }

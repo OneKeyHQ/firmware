@@ -10,21 +10,21 @@ if __debug__:
         pass
 
 
-class StarcoinSignedTx(p.MessageType):
-    MESSAGE_WIRE_TYPE = 10205
+class StarcoinGetPublicKey(p.MessageType):
+    MESSAGE_WIRE_TYPE = 10202
 
     def __init__(
         self,
         *,
-        public_key: bytes = None,
-        signature: bytes = None,
+        address_n: List[int] = None,
+        show_display: bool = None,
     ) -> None:
-        self.public_key = public_key
-        self.signature = signature
+        self.address_n = address_n if address_n is not None else []
+        self.show_display = show_display
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('public_key', p.BytesType, None),
-            2: ('signature', p.BytesType, None),
+            1: ('address_n', p.UVarintType, p.FLAG_REPEATED),
+            2: ('show_display', p.BoolType, None),
         }

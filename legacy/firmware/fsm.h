@@ -131,6 +131,7 @@ void fsm_msgSolanaSignTx(const SolanaSignTx *msg);
 
 // starcoin
 void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg);
+void fsm_msgStarcoinGetPublicKey(const StarcoinGetPublicKey *msg);
 void fsm_msgStarcoinSignTx(const StarcoinSignTx *msg);
 void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg);
 void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg);

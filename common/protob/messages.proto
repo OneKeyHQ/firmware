@@ -288,11 +288,13 @@ enum MessageType {
     // Starcoin
     MessageType_StarcoinGetAddress = 10200 [(wire_in) = true];
     MessageType_StarcoinAddress = 10201 [(wire_out) = true];
-    MessageType_StarcoinSignTx = 10202 [(wire_in) = true];
-    MessageType_StarcoinSignedTx = 10203 [(wire_out) = true];
-    MessageType_StarcoinSignMessage = 10204 [(wire_in) = true];
-    MessageType_StarcoinMessageSignature = 10205 [(wire_out) = true];
-    MessageType_StarcoinVerifyMessage = 10206[(wire_in) = true];
+    MessageType_StarcoinGetPublicKey = 10202 [(wire_in) = true];
+    MessageType_StarcoinPublicKey = 10203 [(wire_out) = true];
+    MessageType_StarcoinSignTx = 10204 [(wire_in) = true];
+    MessageType_StarcoinSignedTx = 10205 [(wire_out) = true];
+    MessageType_StarcoinSignMessage = 10206 [(wire_in) = true];
+    MessageType_StarcoinMessageSignature = 10207 [(wire_out) = true];
+    MessageType_StarcoinVerifyMessage = 10208[(wire_in) = true];
 
     // WebAuthn
     MessageType_WebAuthnListResidentCredentials = 800 [(wire_in) = true];

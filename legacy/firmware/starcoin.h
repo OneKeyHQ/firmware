@@ -24,7 +24,7 @@
 #include "bip32.h"
 #include "messages-starcoin.pb.h"
 
-#define MAX_STARCOIN_ADDRESS_SIZE 33
+#define MAX_STARCOIN_ADDRESS_SIZE 34
 
 const HDNode *starcoin_deriveNode(const uint32_t *address_n,
                                   size_t address_n_count);
@@ -40,5 +40,4 @@ void starcoin_get_address_from_public_key(const uint8_t *public_key,
 
 // Layout
 void layoutRequireConfirmSignTx(char *address);
-void layoutStarcoinVerifyAddress(const char *address);
 #endif  // __STARCOIN_H__

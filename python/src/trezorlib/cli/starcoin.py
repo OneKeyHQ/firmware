@@ -44,6 +44,16 @@ def get_address(client, address, show_display):
     address_n = tools.parse_path(address)
     return starcoin.get_address(client, address_n, show_display)
 
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.option("-d", "--show-display", is_flag=True)
+@with_client
+def get_public_key(client, address, show_display):
+    """Get starcoin public key for specified path."""
+    address_n = tools.parse_path(address)
+    res = starcoin.get_public_key(client, address_n, show_display)
+    output = {"public_key": res.public_key.hex()}
+    return output
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)

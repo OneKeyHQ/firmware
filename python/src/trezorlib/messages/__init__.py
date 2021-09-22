@@ -273,7 +273,9 @@ from .SpiFlashRead import SpiFlashRead
 from .SpiFlashWrite import SpiFlashWrite
 from .StarcoinAddress import StarcoinAddress
 from .StarcoinGetAddress import StarcoinGetAddress
+from .StarcoinGetPublicKey import StarcoinGetPublicKey
 from .StarcoinMessageSignature import StarcoinMessageSignature
+from .StarcoinPublicKey import StarcoinPublicKey
 from .StarcoinSignMessage import StarcoinSignMessage
 from .StarcoinSignTx import StarcoinSignTx
 from .StarcoinSignedTx import StarcoinSignedTx

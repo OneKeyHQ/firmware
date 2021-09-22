@@ -85,7 +85,7 @@ void starcoin_get_address_from_public_key(const uint8_t *public_key,
 
 void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
                       StarcoinSignedTx *resp) {
-  char address[34] = {'0', 'x'};
+  char address[MAX_STARCOIN_ADDRESS_SIZE] = {'0', 'x'};
   starcoin_get_address_from_public_key(node->public_key + 1, address + 2);
   layoutRequireConfirmSignTx(address);
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
@@ -132,10 +132,10 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
 
   layoutProgressSwipe(_("Signing"), 0);
 
+  uint8_t buf[StarcoinSignMessage_size + 32] = {0};
   uint8_t msg_length_data[8] = {0};
   unsigned_int_to_leb128(msg->message.size, msg_length_data);
   uint8_t msg_header_size = strlen((const char *)msg_length_data);
-  uint8_t buf[32 + msg_header_size + msg->message.size] = {0};
 
   memcpy(buf, STC_MSG_SIGN_PREFIX_HASH, 32);
   memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_header_size);
@@ -151,10 +151,10 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
 }
 
 bool starcoin_verify_message(const StarcoinVerifyMessage *msg) {
+  uint8_t buf[StarcoinSignMessage_size + 32] = {0};
   uint8_t msg_length_data[8] = {0};
   unsigned_int_to_leb128(msg->message.size, msg_length_data);
   uint8_t msg_header_size = strlen((const char *)msg_length_data);
-  uint8_t buf[32 + msg_header_size + msg->message.size] = {0};
 
   memcpy(buf, STC_MSG_SIGN_PREFIX_HASH, 32);
   memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_header_size);
@@ -170,12 +170,4 @@ void layoutRequireConfirmSignTx(char *address) {
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Confirm signning"), NULL, _("from:"), str[0], str[1],
                     NULL);
-}
-
-void layoutStarcoinVerifyAddress(const char *address) {
-  const char **str =
-      split_message((const uint8_t *)address, strlen(address), 16);
-  layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Confirm"),
-                    _("Confirm address?"), _("Message signed by:"), str[0],
-                    str[1], NULL, NULL, NULL);
 }
