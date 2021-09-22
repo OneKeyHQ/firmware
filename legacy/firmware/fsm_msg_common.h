@@ -130,6 +130,8 @@ bool get_features(Features *resp) {
   resp->has_coin_switch = true;
   resp->coin_switch |=
       config_getCoinSwitch(COIN_SWITCH_ETH_EIP712) ? COIN_SWITCH_ETH_EIP712 : 0;
+  resp->coin_switch |=
+      config_getCoinSwitch(COIN_SWITCH_SOLANA) ? COIN_SWITCH_SOLANA : 0;
 
   return resp;
 }
