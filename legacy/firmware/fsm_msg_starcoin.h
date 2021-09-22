@@ -95,7 +95,7 @@ void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg) {
 
 void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg) {
   if (starcoin_verify_message(msg)) {
-    char address[MAX_STARCOIN_ADDRESS_SIZE];
+    char address[MAX_STARCOIN_ADDRESS_SIZE] = {0};
     starcoin_get_address_from_public_key((const uint8_t *)&msg->public_key,
                                          address);
 
