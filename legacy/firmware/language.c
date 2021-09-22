@@ -45,6 +45,9 @@ const char *languages[][2] = {
     {"Address:", "地址"},
     //
     {"Advance ETH Sign", "ETH高级签名"},
+    //
+    {"Advance SOL Sign", "SOL高级签名"},
+    //
 //
 #if ONEKEY_MINI
     {"After enabling\"Blind Signing\",\nyour device will support\n signing "
@@ -679,6 +682,8 @@ const char *languages[][2] = {
     // layout2.c
     {"SEEDLESS", ""},
     {"SERIAL:", "序列号:"},
+    //
+    {"SOL advance signing turn", "SOL高级签名"},
     // ethereum.c
     {"Safety check failed", ""},
     //

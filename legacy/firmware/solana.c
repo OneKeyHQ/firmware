@@ -18,6 +18,7 @@
  */
 
 #include "solana.h"
+#include "config.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -60,8 +61,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   }
   transaction_summary_reset();
   if (process_message_body(parser.buffer, parser.buffer_length, &header)) {
-    static bool is_blind_sign_enabled = true;  // fixme: 读取盲签配置
-    if (is_blind_sign_enabled) {
+    if (config_getCoinSwitch(COIN_SWITCH_SOLANA)) {
       SummaryItem *item = transaction_summary_primary_item();
       summary_item_set_string(item, "Unrecognized", "format");
       struct SHA3_CTX ctx = {0};
