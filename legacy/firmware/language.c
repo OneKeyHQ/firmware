@@ -30,6 +30,8 @@ const char *languages[][2] = {
     //
     {"Advance ETH Sign", "ETH高级签名"},
     //
+    {"Advance SOL Sign", "SOL高级签名"},
+    //
     {"After enabling \n\"Blind Signing\",your device  will support signing for "
      "messages and transactions, but it can't decode the metadata.",
      "\n开启盲签后,设备将支持对消息或交易进行签名,但不会解析元数据"},
@@ -550,6 +552,8 @@ const char *languages[][2] = {
     {"SE version:", "SE版本:"},
     // layout2.c
     {"SEEDLESS", ""},
+    //
+    {"SOL advance signing turn", "SOL高级签名"},
     // ethereum.c
     {"Safety check failed", ""},
     //
