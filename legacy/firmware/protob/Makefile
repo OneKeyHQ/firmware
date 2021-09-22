@@ -9,7 +9,7 @@ SKIPPED_MESSAGES := Binance Cardano DebugMonero Eos Monero Ontology Ripple SdPro
 	TxAckInput TxAckOutput TxAckPrev
 
 ifeq ($(BITCOIN_ONLY), 1)
-SKIPPED_MESSAGES += Ethereum Lisk NEM Solana Starcoin Stellar
+SKIPPED_MESSAGES += Ethereum Lisk NEM Stellar Solana Starcoin
 endif
 
 all: messages_map.h messages_map_limits.h messages-bitcoin.pb.h messages-common.pb.h messages-crypto.pb.h messages-debug.pb.h messages-ethereum.pb.h messages-management.pb.h messages-nem.pb.h messages.pb.h messages-stellar.pb.h messages-lisk.pb.h messages-solana.pb.h messages-starcoin.pb.h messages_nem_pb2.py
