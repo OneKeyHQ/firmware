@@ -54,11 +54,11 @@ const HDNode *starcoin_deriveNode(const uint32_t *address_n,
 
   // Device not initialized, passphrase request cancelled, or unsupported curve
   if (!config_getRootNode(&node, curve)) {
-    return 0;
+    return NULL;
   }
   // Failed to derive private key
   if (hdnode_private_ckd_cached(&node, address_n, address_n_count, NULL) == 0) {
-    return 0;
+    return NULL;
   }
 
   hdnode_fill_public_key(&node);
@@ -132,16 +132,15 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
 
   layoutProgressSwipe(_("Signing"), 0);
 
-  uint8_t buf[StarcoinSignMessage_size + 32] = {0};
-
   uint8_t msg_length_data[8] = {0};
   unsigned_int_to_leb128(msg->message.size, msg_length_data);
-  uint8_t msg_size = strlen((const char *)msg_length_data);
+  uint8_t msg_header_size = strlen((const char *)msg_length_data);
+  uint8_t buf[32 + msg_header_size + msg->message.size] = {0};
 
   memcpy(buf, STC_MSG_SIGN_PREFIX_HASH, 32);
-  memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_size);
-  memcpy(buf + 32 + msg_size, msg->message.bytes, msg->message.size);
-  ed25519_sign(buf, msg->message.size + 32 + msg_size, node->private_key,
+  memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_header_size);
+  memcpy(buf + 32 + msg_header_size, msg->message.bytes, msg->message.size);
+  ed25519_sign(buf, 32 + msg_header_size + msg->message.size, node->private_key,
                &node->public_key[1], resp->signature.bytes);
 
   memcpy(resp->public_key.bytes, &node->public_key[1], 32);
@@ -152,16 +151,15 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
 }
 
 bool starcoin_verify_message(const StarcoinVerifyMessage *msg) {
-  uint8_t buf[StarcoinSignMessage_size + 32] = {0};
-
   uint8_t msg_length_data[8] = {0};
   unsigned_int_to_leb128(msg->message.size, msg_length_data);
-  uint8_t msg_size = strlen((const char *)msg_length_data);
+  uint8_t msg_header_size = strlen((const char *)msg_length_data);
+  uint8_t buf[32 + msg_header_size + msg->message.size] = {0};
 
   memcpy(buf, STC_MSG_SIGN_PREFIX_HASH, 32);
-  memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_size);
-  memcpy(buf + 32 + msg_size, msg->message.bytes, msg->message.size);
-  return 0 == ed25519_sign_open(buf, msg->message.size + 32 + msg_size,
+  memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_header_size);
+  memcpy(buf + 32 + msg_header_size, msg->message.bytes, msg->message.size);
+  return 0 == ed25519_sign_open(buf, 32 + msg_header_size + msg->message.size,
                                 msg->public_key.bytes, msg->signature.bytes);
 }
 
