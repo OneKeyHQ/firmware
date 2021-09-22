@@ -541,7 +541,7 @@ const char *languages[][2] = {
     {"PIN removed", ""},
     {"PIN set", "PIN设置成功"},
     // protect.c
-    {"PINs do not match,\ntry again", "PIN码前后不一致,请\n重新输入."},
+    {"PIN do not match,\ntry again", "PIN码前后不一致,请\n重新输入."},
     {"PREV", "后退"},
     //
     {"Page down", "下一页"},
