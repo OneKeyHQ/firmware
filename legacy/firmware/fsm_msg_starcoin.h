@@ -66,7 +66,7 @@ void fsm_msgStarcoinGetPublicKey(const StarcoinGetPublicKey *msg) {
   }
 
   resp->has_public_key = true;
-  resp->public_key.size = 32; 
+  resp->public_key.size = 32;
 
   if (msg->has_show_display && msg->show_display) {
     layoutPublicKey(&node->public_key[1]);
@@ -77,10 +77,9 @@ void fsm_msgStarcoinGetPublicKey(const StarcoinGetPublicKey *msg) {
     }
   }
 
-  memcpy(&resp->public_key.bytes, &node->public_key[1], 
-         resp->public_key.size);
+  memcpy(&resp->public_key.bytes, &node->public_key[1], resp->public_key.size);
 
-  msg_write(MessageType_MessageType_StarcoinPublicKey, resp); 
+  msg_write(MessageType_MessageType_StarcoinPublicKey, resp);
   layoutHome();
 }
 
@@ -130,7 +129,7 @@ void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg) {
 void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg) {
   if (starcoin_verify_message(msg)) {
     char address[MAX_STARCOIN_ADDRESS_SIZE] = {'0', 'x'};
-    starcoin_get_address_from_public_key(msg->public_key.bytes, address+2);
+    starcoin_get_address_from_public_key(msg->public_key.bytes, address + 2);
     layoutVerifyAddress(NULL, address);
 
     if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {

@@ -31,11 +31,13 @@ def get_address(client, address_n, show_display=False):
         messages.StarcoinGetAddress(address_n=address_n, show_display=show_display)
     )
 
+
 @expect(messages.StarcoinPublicKey)
 def get_public_key(client, n, show_display=False):
     return client.call(
         messages.StarcoinGetPublicKey(address_n=n, show_display=show_display)
     )
+
 
 @expect(messages.StarcoinSignedTx)
 def sign_tx(client, address_n, rawtx):
