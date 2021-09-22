@@ -402,6 +402,27 @@ void menu_set_eth_eip(int index) {
   layoutHome();
 }
 
+void menu_set_sol_blind_sign(int index) {
+  char desc[64] = {0};
+
+  bool state = index ? false : true;
+  if (config_hasPin()) {
+    if (!protectPinOnDevice(false, true)) {
+      return;
+    }
+  }
+
+  config_setCoinSwitch(COIN_SWITCH_SOLANA, state);
+
+  strcat(desc, _("SOL advance signing turn"));
+  strcat(desc, state ? _(" On") : _(" Off"));
+  layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
+                                 _("Done"), NULL, NULL, NULL, NULL, desc, NULL,
+                                 NULL);
+  protectWaitKey(0, 1);
+  layoutHome();
+}
+
 void menu_blindSign(int index) {
   (void)index;
 
@@ -732,9 +753,24 @@ static struct menu eth_eip_switch_menu = {
     .previous = &blind_sign_menu,
 };
 
+static struct menu_item sol_set_menu_items[] = {
+    {"On", NULL, true, menu_set_sol_blind_sign, NULL, false},
+    {"Off", NULL, true, menu_set_sol_blind_sign, NULL, false}};
+
+static struct menu sol_switch_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(sol_set_menu_items),
+    .title = NULL,
+    .items = sol_set_menu_items,
+    .previous = &blind_sign_menu,
+};
+
 static struct menu_item blind_sign_menu_items[] = {
     {"Advance ETH Sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
-     menu_para_eth_eip_switch, false}};
+     menu_para_eth_eip_switch, false},
+    {"Advance SOL Sign", NULL, false, .sub_menu = &sol_switch_menu,
+     menu_para_sol_switch, false}};
 
 static struct menu blind_sign_menu = {
     .start = 0,
