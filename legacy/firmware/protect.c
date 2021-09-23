@@ -962,7 +962,7 @@ retry:
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
         &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL, true,
-        NULL, NULL, NULL, NULL, NULL, NULL, _("PIN do not match,\ntry again"),
+        NULL, NULL, NULL, NULL, NULL, NULL, _("PIN does not match,\ntry again"),
         NULL, NULL, NULL, NULL, NULL);
 #else
     layoutDialogSwipeCenterAdapter(
