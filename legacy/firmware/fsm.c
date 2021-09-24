@@ -65,6 +65,7 @@
 #include "nem.h"
 #include "nem2.h"
 #include "solana.h"
+#include "starcoin.h"
 #include "stellar.h"
 #endif
 
@@ -335,6 +336,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
 #include "fsm_msg_lisk.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_solana.h"
+#include "fsm_msg_starcoin.h"
 #include "fsm_msg_stellar.h"
 
 #endif
