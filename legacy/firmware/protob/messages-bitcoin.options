@@ -91,3 +91,10 @@ PrevInput.script_sig                                        max_size:1650
 PrevOutput.script_pubkey                                    max_size:520
 
 TxAckPrevExtraDataWrapper.extra_data_chunk                  max_size:1024
+
+BIP32Address.address_n                                      max_count:8
+GetPublicKeyMultiple.addresses                              max_count:20
+GetPublicKeyMultiple.ecdsa_curve_name                       max_size:32
+GetPublicKeyMultiple.coin_name                              max_size:21
+
+PublicKeyMultiple.xpubs                                     max_count:20 max_size:113

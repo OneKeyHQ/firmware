@@ -289,3 +289,78 @@ void fsm_msgVerifyMessage(const VerifyMessage *msg) {
   }
   layoutHome();
 }
+
+void fsm_msgGetPublicKeyMultiple(const GetPublicKeyMultiple *msg) {
+  RESP_INIT(PublicKeyMultiple);
+
+  CHECK_INITIALIZED
+
+  CHECK_PIN
+
+  InputScriptType script_type =
+      msg->has_script_type ? msg->script_type : InputScriptType_SPENDADDRESS;
+
+  const CoinInfo *coin = fsm_getCoin(msg->has_coin_name, msg->coin_name);
+  if (!coin) return;
+
+  const char *curve = coin->curve_name;
+  if (msg->has_ecdsa_curve_name) {
+    curve = msg->ecdsa_curve_name;
+  }
+
+  for (int i = 0; i < msg->addresses_count; i++) {
+    uint32_t fingerprint = 0;
+    HDNode *node =
+        fsm_getDerivedNode(curve, msg->addresses->address_n,
+                           msg->addresses->address_n_count, &fingerprint);
+    if (!node) return;
+    hdnode_fill_public_key(node);
+
+    if (coin->xpub_magic && (script_type == InputScriptType_SPENDADDRESS ||
+                             script_type == InputScriptType_SPENDMULTISIG)) {
+      hdnode_serialize_public(node, fingerprint, coin->xpub_magic,
+                              resp->xpubs[i], sizeof(resp->xpubs[i]));
+    } else if (coin->has_segwit &&
+               script_type == InputScriptType_SPENDP2SHWITNESS &&
+               !msg->ignore_xpub_magic && coin->xpub_magic_segwit_p2sh) {
+      hdnode_serialize_public(node, fingerprint, coin->xpub_magic_segwit_p2sh,
+                              resp->xpubs[i], sizeof(resp->xpubs[i]));
+    } else if (coin->has_segwit &&
+               script_type == InputScriptType_SPENDP2SHWITNESS &&
+               msg->ignore_xpub_magic && coin->xpub_magic) {
+      hdnode_serialize_public(node, fingerprint, coin->xpub_magic,
+                              resp->xpubs[i], sizeof(resp->xpubs[i]));
+    } else if (coin->has_segwit &&
+               script_type == InputScriptType_SPENDWITNESS &&
+               !msg->ignore_xpub_magic && coin->xpub_magic_segwit_native) {
+      hdnode_serialize_public(node, fingerprint, coin->xpub_magic_segwit_native,
+                              resp->xpubs[i], sizeof(resp->xpubs[i]));
+    } else if (coin->has_segwit &&
+               script_type == InputScriptType_SPENDWITNESS &&
+               msg->ignore_xpub_magic && coin->xpub_magic) {
+      hdnode_serialize_public(node, fingerprint, coin->xpub_magic,
+                              resp->xpubs[i], sizeof(resp->xpubs[i]));
+    } else {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Invalid combination of coin and script_type"));
+      layoutHome();
+      return;
+    }
+
+    if (msg->has_show_display && msg->show_display) {
+      for (int page = 0; page < 2; page++) {
+        layoutXPUB(resp->xpubs[i], page);
+        if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
+          memzero(resp, sizeof(PublicKey));
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          layoutHome();
+          return;
+        }
+      }
+    }
+  }
+  resp->xpubs_count = msg->addresses_count;
+
+  msg_write(MessageType_MessageType_PublicKeyMultiple, resp);
+  layoutHome();
+}
