@@ -68,7 +68,7 @@ void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
     return;
   }
 
-  uint8_t buf[StarcoinSignTx_size + 32] = {0};
+  uint8_t buf[sizeof(StarcoinSignTx_raw_tx_t) + 32] = {0};
 
   memcpy(buf, STC_RAW_USER_TX_PREFIX_HASH, 32);
   memcpy(buf + 32, msg->raw_tx.bytes, msg->raw_tx.size);
@@ -106,7 +106,7 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
 
   layoutProgressSwipe(_("Signing"), 0);
 
-  uint8_t buf[StarcoinSignMessage_size + 32] = {0};
+  uint8_t buf[sizeof(StarcoinSignMessage_message_t) + 32 + 2] = {0};
   uint8_t msg_length_data[8] = {0};
   unsigned_int_to_leb128(msg->message.size, msg_length_data);
   uint8_t msg_header_size = strlen((const char *)msg_length_data);
@@ -125,7 +125,7 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
 }
 
 bool starcoin_verify_message(const StarcoinVerifyMessage *msg) {
-  uint8_t buf[StarcoinSignMessage_size + 32] = {0};
+  uint8_t buf[sizeof(StarcoinVerifyMessage_message_t) + 32 + 2] = {0};
   uint8_t msg_length_data[8] = {0};
   unsigned_int_to_leb128(msg->message.size, msg_length_data);
   uint8_t msg_header_size = strlen((const char *)msg_length_data);
