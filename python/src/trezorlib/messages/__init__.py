@@ -5,6 +5,7 @@ from .Address import Address
 from .ApplyFlags import ApplyFlags
 from .ApplySettings import ApplySettings
 from .AuthorizeCoinJoin import AuthorizeCoinJoin
+from .BIP32Address import BIP32Address
 from .BackupDevice import BackupDevice
 from .BinanceAddress import BinanceAddress
 from .BinanceCancelMsg import BinanceCancelMsg
@@ -141,6 +142,7 @@ from .GetNextU2FCounter import GetNextU2FCounter
 from .GetOwnershipId import GetOwnershipId
 from .GetOwnershipProof import GetOwnershipProof
 from .GetPublicKey import GetPublicKey
+from .GetPublicKeyMultiple import GetPublicKeyMultiple
 from .HDNodePathType import HDNodePathType
 from .HDNodeType import HDNodeType
 from .IdentityType import IdentityType
@@ -240,6 +242,7 @@ from .PrevInput import PrevInput
 from .PrevOutput import PrevOutput
 from .PrevTx import PrevTx
 from .PublicKey import PublicKey
+from .PublicKeyMultiple import PublicKeyMultiple
 from .RecoveryDevice import RecoveryDevice
 from .ResetDevice import ResetDevice
 from .RippleAddress import RippleAddress

@@ -150,4 +150,6 @@ void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg);
 void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
 void fsm_msgBixinBackupDevice(void);
 
+void fsm_msgGetPublicKeyMultiple(const GetPublicKeyMultiple *msg);
+
 #endif

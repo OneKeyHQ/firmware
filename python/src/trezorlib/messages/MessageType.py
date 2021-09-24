@@ -226,3 +226,5 @@ BixinBackupDevice: Literal[914] = 914
 BixinBackupDeviceAck: Literal[915] = 915
 BixinPinInputOnDevice: Literal[10000] = 10000
 EthereumSignMessageEIP712: Literal[10200] = 10200
+GetPublicKeyMultiple: Literal[10210] = 10210
+PublicKeyMultiple: Literal[10211] = 10211
