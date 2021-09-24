@@ -1,0 +1,20 @@
+StarcoinGetAddress.address_n                                   max_count:8
+StarcoinAddress.address                                        max_size:35
+
+StarcoinGetPublicKey.address_n                                 max_count:8
+StarcoinPublicKey.public_key                                   max_size:32
+
+StarcoinSignTx.address_n                                       max_count:8
+StarcoinSignTx.raw_tx                                          max_size:1024
+
+StarcoinSignedTx.public_key                                    max_size:32
+StarcoinSignedTx.signature                                     max_size:64
+
+StarcoinSignMessage.address_n                                  max_count:8
+StarcoinSignMessage.message                                    max_size:1024
+StarcoinMessageSignature.public_key                            max_size:32
+StarcoinMessageSignature.signature                             max_size:64
+
+StarcoinVerifyMessage.public_key                               max_size:33
+StarcoinVerifyMessage.message                                  max_size:1024
+StarcoinVerifyMessage.signature                                max_size:65
