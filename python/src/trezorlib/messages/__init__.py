@@ -261,6 +261,15 @@ from .SolanaAddress import SolanaAddress
 from .SolanaGetAddress import SolanaGetAddress
 from .SolanaSignTx import SolanaSignTx
 from .SolanaSignedTx import SolanaSignedTx
+from .StarcoinAddress import StarcoinAddress
+from .StarcoinGetAddress import StarcoinGetAddress
+from .StarcoinGetPublicKey import StarcoinGetPublicKey
+from .StarcoinMessageSignature import StarcoinMessageSignature
+from .StarcoinPublicKey import StarcoinPublicKey
+from .StarcoinSignMessage import StarcoinSignMessage
+from .StarcoinSignTx import StarcoinSignTx
+from .StarcoinSignedTx import StarcoinSignedTx
+from .StarcoinVerifyMessage import StarcoinVerifyMessage
 from .StellarAccountMergeOp import StellarAccountMergeOp
 from .StellarAddress import StellarAddress
 from .StellarAllowTrustOp import StellarAllowTrustOp
