@@ -203,7 +203,7 @@ refresh_menu:
                                   _("Download OneKey Apps"), FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * 10, "onekey.so/download",
                                   FONT_STANDARD);
-      oledBox(13, 70, 117, 70, true);
+      oledBox(23, 70, 108, 70, true);
 #else
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * 10, _("Download OneKey"),
                                   FONT_STANDARD);
@@ -222,7 +222,7 @@ refresh_menu:
           FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 7 * 10, "help.onekey.so",
                                   FONT_STANDARD);
-      oledBox(26, 80, 104, 80, true);
+      oledBox(36, 80, 95, 80, true);
       layoutButtonYesAdapter(_("OK"), &bmp_button_forward);
 #else
     case 3:

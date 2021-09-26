@@ -48,7 +48,7 @@ int oledStringWidthEx(const char *text, uint8_t font) {
   int steps = 0;
   int l = 0;
   while (*text) {
-    if ((uint8_t)*text < 0x80) {
+    if (((uint8_t)*text < 0x80) && ((font & FONT_MASK) == FONT_FIXED)) {
       if (*text != '\n') {
         l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
              ((font & FONT_DOUBLE) ? 2 : 1);
@@ -74,7 +74,7 @@ void oledDrawStringEx(int x, int y, const char *text, uint8_t font) {
   }
 
   while (*text) {
-    if ((uint8_t)*text < 0x80) {
+    if (((uint8_t)*text < 0x80) && ((font & FONT_MASK) == FONT_FIXED)) {
       if (*text == '\n') {
         l = 0;
       } else {

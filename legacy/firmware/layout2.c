@@ -554,10 +554,10 @@ void layout_language_set(uint8_t key) {
 
 #if ONEKEY_MINI
   strcat(desc, "SELECT LANGUAGE");
-  layoutItemsSelectAdapterAlign(&bmp_btn_up, &bmp_btn_down, NULL,
-                                &bmp_button_forward, NULL,
-                                index == 0 ? "CONFIRM" : "确认", index + 1, 2,
-                                false, NULL, desc, NULL, lang_array);
+  layoutItemsSelectAdapterAlign(
+      &bmp_btn_up, &bmp_btn_down, NULL, &bmp_button_forward, NULL,
+      index == 0 ? "CONFIRM" : "确认", index + 1, 2, false, NULL, desc, NULL,
+      lang_array, FONT_STANDARD);
 #else
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, index == 0 ? "Okay" : "确认", index + 1, 2,
@@ -2470,12 +2470,21 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
 
   for (uint32_t i = 0; i < sizeof(pin_show); i++) {
     buf[0] = pin_show[i];
+#if ONEKEY_MINI
+    l = oledStringWidth(buf, FONT_FIXED);
+    oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_FIXED);
+#else
     l = oledStringWidth(buf, FONT_STANDARD);
     oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+#endif
   }
 
   if (index > 0 && index < 10) {
+#if ONEKEY_MINI
+    layoutItemsSelect(x + 13 * pos + 7, y, table[index], FONT_FIXED);
+#else
     layoutItemsSelect(x + 13 * pos + 7, y, table[index], FONT_STANDARD);
+#endif
   } else {
     layoutBmpSelect(x + 13 * pos + 7, y, &bmp_btn_confirm);
   }
@@ -2532,11 +2541,12 @@ void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
     oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
   }
 
-  layoutItemsSelect(x + 13 * prefix_len + 7, y, letter, FONT_STANDARD);
 #if ONEKEY_MINI
+  layoutItemsSelect(x + 13 * prefix_len + 7, y, letter, FONT_FIXED);
   layoutButtonNoAdapter(_("PREV"), &bmp_button_back);
   layoutButtonYesAdapter(_("OK"), &bmp_button_forward);
 #else
+  layoutItemsSelect(x + 13 * prefix_len + 7, y, letter, FONT_STANDARD);
   layoutButtonNoAdapter(_("Prev"), &bmp_btn_back);
   layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
 #endif
@@ -2731,7 +2741,7 @@ void layoutItemsSelectAdapterEx(
 
   if (!center_align) {
     // Invert from third line from top
-    oledInvert(0, (index + 2 - 1) * step, OLED_WIDTH, (index + 2) * step - 1);
+    oledInvert(0, (index + 2 - 1) * step + 2, OLED_WIDTH, (index + 2) * step);
   } else {
     if (y == desc_pos)
       str = line1;
@@ -2739,10 +2749,10 @@ void layoutItemsSelectAdapterEx(
       str = desc;
 
     oledInvert(OLED_WIDTH / 2 - oledStringWidthAdapter(str, FONT_STANDARD) / 2,
-               (index + 2 - 1) * step + 1,
+               (index + 2 - 1) * step + 2,
                OLED_WIDTH / 2 + oledStringWidthAdapter(str, FONT_STANDARD) / 2 +
                    MINI_ADJUST + 1,
-               (index + 2 - 1) * step + cur_font->pixel + 4);
+               (index + 2 - 1) * step + cur_font->pixel + 6);
   }
 
   if (btnNo) {
@@ -2762,7 +2772,7 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                    uint32_t index, uint32_t count,
                                    bool left_align, const char *title,
                                    const char *desc, const char *prefex,
-                                   char *data[]) {
+                                   char *data[], uint8_t font) {
   uint32_t i, y = 0, y1, pos;
   int step = 3;
   char index_str[16] = "";
@@ -2797,7 +2807,7 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
   }
 
   if (desc) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, desc, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, desc, font);
     if (left_align) {
       y1 += 3 * (cur_font->pixel + step);
     }
@@ -2831,21 +2841,20 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
   for (i = 0; i < count; i++) {
     if (data[i] != NULL) {
       if (left_align) {
-        oledDrawStringAdapter(0, y1, data[i], FONT_STANDARD);
+        oledDrawStringAdapter(0, y1, data[i], font);
         if ((index - 1) == i) {
           oledDrawBitmap(OLED_WIDTH - 8, y1, &bmp_button_forward);
           oledInvert(0, y1 - 1, OLED_WIDTH, y1 + cur_font->pixel);
         }
       } else {
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, data[i], FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, data[i], font);
         if ((index - 1) == i) {
-          oledInvert(OLED_WIDTH / 2 -
-                         oledStringWidthAdapter(data[i], FONT_STANDARD) / 2,
+          oledInvert(OLED_WIDTH / 2 - oledStringWidthAdapter(data[i], font) / 2,
                      y1 - 1,
                      OLED_WIDTH / 2 +
-                         oledStringWidthAdapter(data[i], FONT_STANDARD) / 2 +
+                         oledStringWidthAdapter(data[i], font) / 2 +
                          MINI_ADJUST,
-                     y1 + cur_font->pixel);
+                     y1 + cur_font->pixel + 1);
         }
       }
 
@@ -3133,7 +3142,7 @@ refresh_menu:
           _("To learn more about\nhow to get NFT Pet,\ngo to the"),
           FONT_STANDARD);
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * 10, CROWDFUND_URL,
-                                  FONT_STANDARD);
+                                  FONT_FIXED);
       oledBox(11, 100, 119, 100, true);
       break;
 #endif

@@ -373,7 +373,7 @@ select_word:
 
   layoutItemsSelectAdapterAlign(NULL, NULL, &bmp_button_back,
                                 &bmp_button_forward, _("BACK"), _("OK"), i + 1,
-                                3, false, NULL, desc, NULL, data);
+                                3, false, NULL, desc, NULL, data, FONT_FIXED);
 #else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),
@@ -494,11 +494,10 @@ refresh_menu:
         strcat(desc, words[j]);
         if ((j + 1) > 9) {
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc,
-                                FONT_STANDARD);
+                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         } else {
           oledDrawStringAdapter(OLED_WIDTH / 4, (j + 2) * (font->pixel + 1),
-                                desc, FONT_STANDARD);
+                                desc, FONT_FIXED);
         }
       }
       oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
@@ -512,14 +511,13 @@ refresh_menu:
           strcat(desc, ". ");
           strcat(desc, words[j + WORD_PER_PAGE]);
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc,
-                                FONT_STANDARD);
+                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         }
       }
       if (pages > 2) {
         oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
       } else {
-        layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
+        layoutButtonYesAdapter(_("Next"), &bmp_button_forward);
       }
       break;
     case 2:
@@ -531,11 +529,10 @@ refresh_menu:
           strcat(desc, ". ");
           strcat(desc, words[j + WORD_PER_PAGE * 2]);
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc,
-                                FONT_STANDARD);
+                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         }
       }
-      layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
+      layoutButtonYesAdapter(_("Next"), &bmp_button_forward);
       break;
     default:
       break;
@@ -606,7 +603,7 @@ refresh_menu:
 #if ONEKEY_MINI
     layoutDialogSwipeCenterAdapterFont(
         NULL, &bmp_btn_back, NULL, &bmp_btn_confirm, NULL, NULL,
-        FONT_STANDARD | FONT_DOUBLE, NULL, NULL, desc, NULL, NULL, words[i]);
+        FONT_FIXED | FONT_DOUBLE, NULL, NULL, desc, NULL, NULL, words[i]);
 #else
     layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Prev"),
                                    &bmp_btn_confirm, _("Confirm"), NULL, NULL,
@@ -670,11 +667,11 @@ bool writedown_mnemonic(const char *mnemonic) {
   write_mnemonic:
     layoutDialogSwipeCenterAdapterEx(
         NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-        true, NULL, NULL, NULL, NULL,
+        true, NULL, NULL, NULL,
         _("Check the recovery\nphrase once more and\ncompare it to the\nbackup "
           "copy in your\nhand. Make sure the\nspelling and order\nare "
           "identical."),
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else
 write_mnemonic:
   if (scroll_mnemonic(_("Seed Phrase"), mnemonic, 0)) {
