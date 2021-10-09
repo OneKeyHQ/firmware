@@ -216,7 +216,7 @@ bool waitButtonResponse(uint16_t btn, uint32_t time_out) {
 void buttonUpdate() {
 #if ONEKEY_MINI
   static uint16_t last_state =
-      (BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN) | (BTN_PIN_NO);
+      (BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN) | (BTN_PIN_NO) | BTN_PIN_FUNC;
 #else
   static uint16_t last_state =
       (BTN_PIN_YES | BTN_PIN_UP | BTN_PIN_DOWN) & (~BTN_PIN_NO);
@@ -317,10 +317,37 @@ void buttonUpdate() {
       button.DownUp = false;
     }
   }
+#if ONEKEY_MINI
+  if ((state & BTN_PIN_FUNC)) {         // Top button is down
+    if ((last_state & BTN_PIN_FUNC)) {  // last Top was down
+      if (button.TopDown < 2000000000) button.TopDown++;
+      button.TopUp = false;
+    } else {  // last Top was up
+      button.TopDown = 0;
+      button.TopUp = false;
+    }
+  } else {                              // Top button is up
+    if ((last_state & BTN_PIN_FUNC)) {  // last Top was down
+      button.TopDown = 0;
+      button.TopUp = true;
+    } else {  // last Top was up
+      button.TopDown = 0;
+      button.TopUp = false;
+    }
+  }
+#endif
 #if !EMULATOR
+
+#if ONEKEY_MINI
+  if (button.YesUp || button.NoUp || button.UpUp || button.DownUp ||
+      button.TopUp) {
+    timer_sleep_start_reset();
+  }
+#else
   if (button.YesUp || button.NoUp || button.UpUp || button.DownUp) {
     timer_sleep_start_reset();
   }
+#endif
 #endif
   last_state = state;
 }
@@ -344,6 +371,8 @@ uint8_t keyScan(void) {
     return KEY_UP;
   else if (button.DownUp)
     return KEY_DOWN;
+  else if (button.TopUp)
+    return KEY_TOP;
 
   return KEY_NULL;
 }
