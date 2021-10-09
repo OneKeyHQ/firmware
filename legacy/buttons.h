@@ -35,6 +35,8 @@ struct buttonState {
   volatile int UpDown;
   volatile bool DownUp;
   volatile int DownDown;
+  volatile bool TopUp;
+  volatile int TopDown;
 };
 #if !EMULATOR
 extern uint8_t change_ble_sta_flag;
@@ -56,6 +58,7 @@ uint8_t waitKey(uint32_t time_out, uint8_t mode);
 #define KEY_DOWN 'D'
 #define KEY_CONFIRM 'O'
 #define KEY_CANCEL 'C'
+#define KEY_TOP 'T'
 
 #ifndef BTN_PORT
 #define BTN_PORT GPIOC
