@@ -11,7 +11,6 @@
 void device_test(void) {
   uint8_t key = KEY_NULL;
   uint8_t key_flag = 0x00;
-  char key_value[] = {"上 下 左 右"};
   ATCAConfiguration atca_config = {0};
 
   if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
@@ -21,6 +20,8 @@ void device_test(void) {
   // LCD TEST
   layoutDialogCenterAdapter(NULL, NULL, "否", NULL, "是", NULL, NULL, NULL,
                             "确认屏幕显示正常", NULL, NULL, NULL);
+  oledFrame(0, 0, OLED_WIDTH - 1, OLED_HEIGHT - 1);
+  oledRefresh();
 
   key = waitKey(0, 0);
   if (key != KEY_CONFIRM) {
@@ -31,35 +32,45 @@ void device_test(void) {
   }
 
   // BUTTON TEST
-  layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                            "按下所有按键", key_value, NULL, NULL);
+  oledClear();
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 60, "按键测试", FONT_STANDARD);
+  oledDrawBitmap(60, 9, &bmp_button_up);
+  oledDrawBitmap(60, 110, &bmp_button_down);
+  oledDrawBitmap(9, 60, &bmp_button_back);
+  oledDrawBitmap(110, 60, &bmp_button_forward);
+  oledDrawBitmap(110, 0, &bmp_arrow_up);
+  oledRefresh();
+
   while (1) {
     key = waitKey(0, 0);
     switch (key) {
       case KEY_CONFIRM:
         key_flag |= 0X01;
-        memset(key_value + 4 * 3, 0x20, 3);
+        oledClearBitmap(110, 60, &bmp_button_forward);
         break;
       case KEY_CANCEL:
         key_flag |= 0X02;
-        memset(key_value + 4 * 2, 0x20, 3);
+        oledClearBitmap(9, 60, &bmp_button_back);
         break;
       case KEY_DOWN:
         key_flag |= 0X04;
-        memset(key_value + 4 * 1, 0x20, 3);
+        oledClearBitmap(60, 110, &bmp_button_down);
         break;
       case KEY_UP:
         key_flag |= 0X08;
-        memset(key_value, 0x20, 3);
+        oledClearBitmap(60, 9, &bmp_button_up);
+        break;
+      case KEY_TOP:
+        key_flag |= 0X10;
+        oledClearBitmap(110, 0, &bmp_arrow_up);
         break;
       default:
         break;
     }
     if (key != KEY_NULL) {
-      layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                "按下所有按键", key_value, NULL, NULL);
+      oledRefresh();
     }
-    if (key_flag == 0x0f) {
+    if (key_flag == 0x1f) {
       break;
     }
   }
