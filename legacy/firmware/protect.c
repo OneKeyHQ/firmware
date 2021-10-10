@@ -801,13 +801,13 @@ refresh_menu:
   layoutInputPin(counter, text, index, cancel_allowed);
   key = protectWaitKey(0, 0);
   switch (key) {
-    case KEY_UP:
+    case KEY_DOWN:
       if (index > 1)
         index--;
       else
         index = max_index;
       goto refresh_menu;
-    case KEY_DOWN:
+    case KEY_UP:
       if (index < max_index)
         index++;
       else

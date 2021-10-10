@@ -873,13 +873,13 @@ refresh_menu:
   layoutInputWord(desc, prefix_len, words[word_index], letter_list + 2 * index);
   key = protectWaitKey(0, 0);
   switch (key) {
-    case KEY_DOWN:
+    case KEY_UP:
       if (index < letter_count - 1)
         index++;
       else
         index = 0;
       goto refresh_menu;
-    case KEY_UP:
+    case KEY_DOWN:
       if (index > 0)
         index--;
       else
@@ -1186,13 +1186,13 @@ refresh_menu:
   layoutInputWord(desc, prefix_len, words[word_index], letter_list + 2 * index);
   key = protectWaitKey(0, 0);
   switch (key) {
-    case KEY_DOWN:
+    case KEY_UP:
       if (index < letter_count - 1)
         index++;
       else
         index = 0;
       goto refresh_menu;
-    case KEY_UP:
+    case KEY_DOWN:
       if (index > 0)
         index--;
       else
