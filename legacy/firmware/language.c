@@ -284,6 +284,9 @@ const char *languages[][2] = {
     {"Encrypted message", "加密信息"},
     // layout2.c layout2.c
     {"English", "简体中文"},
+    //
+    {"Enter PIN again", "再次输入PIN码"},
+    //
     {"Enter PIN code", "请输入PIN码"},
     //
     {"Enter PIN to unlock", "输入PIN码解锁"},
