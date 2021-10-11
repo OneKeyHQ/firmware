@@ -302,7 +302,7 @@ static struct menu settings_menu = {
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL},
     {"Reset", NULL, true, menu_erase_device, NULL},
-    //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
+    {"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 
 static struct menu security_set_menu = {
