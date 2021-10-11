@@ -663,9 +663,9 @@ static bool select_complete_word(char *title, int start, int len) {
 
 refresh_menu:
 #if ONEKEY_MINI
-  layoutItemsSelectAdapterAlign(NULL, NULL, &bmp_button_back,
-                                &bmp_button_forward, _("PREV"), _("OK"),
-                                index + 1, len, false, title, NULL, NULL, data);
+  layoutItemsSelectAdapterAlign(
+      NULL, NULL, &bmp_button_back, &bmp_button_forward, _("PREV"), _("OK"),
+      index + 1, len, false, title, NULL, NULL, data, FONT_FIXED);
 #else
   layoutItemsSelectAdapter(
       &bmp_btn_up, &bmp_btn_down, &bmp_btn_back, &bmp_btn_forward, _("Cancel"),

@@ -216,7 +216,7 @@ void layoutItemsSelectAdapterAlign(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                    uint32_t index, uint32_t count,
                                    bool left_align, const char *title,
                                    const char *desc, const char *prefex,
-                                   char *data[]);
+                                   char *data[], uint8_t font);
 
 void layoutItemsSelectAdapterImp(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                  const BITMAP *bmp_no, const BITMAP *bmp_yes,

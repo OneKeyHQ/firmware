@@ -7,7 +7,7 @@
 #define FONT_STANDARD 0
 
 #if ONEKEY_MINI
-#define FONT_FIXED FONT_STANDARD
+#define FONT_FIXED 1
 #define FONTS 1
 #else
 #ifndef FONT_SKIP_FIXED
@@ -18,6 +18,7 @@
 #endif
 #endif
 
+#define FONT_MASK 0x0F
 #define FONT_DOUBLE 0x80
 
 extern const uint8_t *const font_data[FONTS][128 - 32];

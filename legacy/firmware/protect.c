@@ -1049,7 +1049,7 @@ refresh_menu:
 #if ONEKEY_MINI
   layoutItemsSelectAdapterAlign(&bmp_btn_up, &bmp_btn_down, NULL, NULL, NULL,
                                 NULL, index + 1, 3, true, NULL, desc, NULL,
-                                numbers);
+                                numbers, FONT_STANDARD);
 #else
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, _("Okay"), index + 1, 3, NULL, NULL,
