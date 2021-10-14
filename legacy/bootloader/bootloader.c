@@ -131,8 +131,9 @@ int main(void) {
     oledInit();
 #if ONEKEY_MINI
     oledClear();
-    oledRefresh();
     // fix starting flower screen
+    oledDrawBitmap(52, 52, &bmp_boot_icon);
+    oledRefresh();
     oledBackligthCtl(true);
 #endif
 #if ONEKEY_MINI

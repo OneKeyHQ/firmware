@@ -806,8 +806,8 @@ void update_from_spi_flash(bool force) {
   }
   erase_code_progress();
 
-  uint32_t total_len = FLASH_FWHEADER_LEN + hdr.codelen;
-  uint32_t offset = 0, packet_len = 0;
+  uint32_t total_len = hdr.codelen;
+  uint32_t offset = FLASH_FWHEADER_LEN, packet_len = 0;
 
   flash_enter();
 
@@ -822,6 +822,10 @@ void update_from_spi_flash(bool force) {
     total_len -= packet_len;
     offset += packet_len;
   }
+
+  w25qxx_read_bytes((uint8_t *)FW_CHUNK, SPI_FLASH_FIRMWARE_ADDR_START,
+                    FLASH_FWHEADER_LEN);
+  flash_program(FLASH_FWHEADER_START, (uint8_t *)FW_CHUNK, FLASH_FWHEADER_LEN);
 
   flash_exit();
 }
