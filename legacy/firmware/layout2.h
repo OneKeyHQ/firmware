@@ -36,8 +36,9 @@
 #define DISP_PAGESIZE (96)
 
 #if ONEKEY_MINI
-#define WORD_PER_PAGE 10
+#define WORD_PER_PAGE 8
 #define HIGH_OFFSET 1
+#define ROW_SPACING 15
 #endif
 
 extern void *layoutLast;
@@ -225,6 +226,12 @@ void layoutItemsSelectAdapterImp(const BITMAP *bmp_up, const BITMAP *bmp_down,
                                  bool left_align, const char *title,
                                  const char *desc, const char *prefex,
                                  char *data[]);
+void layoutTransInformation(const BITMAP *bmp_up, const BITMAP *bmp_down,
+                            const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                            const char *btnNo, const char *btnYes,
+                            const char *title, const char *title_sub,
+                            const char *desc, bool center_align, bool qr_code,
+                            const char *data);
 #endif
 
 uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh);

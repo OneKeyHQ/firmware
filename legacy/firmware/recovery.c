@@ -721,11 +721,10 @@ refresh_menu:
         strcat(desc, words[j]);
         if ((j + 1) > 9) {
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc,
-                                FONT_STANDARD);
+                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         } else {
           oledDrawStringAdapter(OLED_WIDTH / 4, (j + 2) * (font->pixel + 1),
-                                desc, FONT_STANDARD);
+                                desc, FONT_FIXED);
         }
       }
       oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
@@ -739,8 +738,7 @@ refresh_menu:
           strcat(desc, ". ");
           strcat(desc, words[j + WORD_PER_PAGE]);
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc,
-                                FONT_STANDARD);
+                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         }
       }
       if (pages > 2) {
@@ -758,8 +756,7 @@ refresh_menu:
           strcat(desc, ". ");
           strcat(desc, words[j + WORD_PER_PAGE * 2]);
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc,
-                                FONT_STANDARD);
+                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         }
       }
       layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
@@ -1228,6 +1225,14 @@ refresh_menu:
             setRgbBitmap(false);
             counter = 0;
             return false;
+          } else {
+            setRgbBitmap(true);
+            layoutDialogSwipeCenterAdapterEx(
+                &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("DONE"),
+                NULL, true, NULL, NULL, NULL, NULL, NULL, NULL,
+                _("Check Passed"), NULL, NULL, NULL, NULL, NULL);
+            protectWaitKey(0, 1);
+            setRgbBitmap(false);
           }
           return true;
         } else {  // next word
