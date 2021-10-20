@@ -135,8 +135,8 @@ const char *languages[][2] = {
     //
     {"Check Mnemonic", "查看助记词"},
     //
-    {"Check Passed", "核对通过"},
     {"Check PIN Code", "请先校验设备原PIN码"},
+    {"Check Passed", "核对通过"},
     {"Check Recovery Phrase", "助记词核对"},
     {"Check failed, Quit\nand try again", "核对失败,请退出重试"},
     {"Check the 12 words\nyou entered are the\ncorrect recovery\nphrase",
@@ -208,6 +208,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Create", "创建新钱包"},
     {"Create New Wallet", "创建新钱包"},
+    {"DONE", "完成"},
     {"Dashboard", "控制中心"},
     // fsm.c
     {"Data error", "数据错误"},
@@ -355,7 +356,7 @@ const char *languages[][2] = {
     {"Flags applied", ""},  // msg
     // recovery.c
     {"Follow the guide and\nenter recovery phrase\nto restore wallet.",
-     "请跟随引导,依次输入助记\n恢复钱包"},
+     "跟随引导,依次输入助记词\n恢复钱包"},
     //
     // reset.c
     {"Follow the guide to\ncreate a new wallet", "请跟随引导创建新钱包"},
@@ -532,6 +533,8 @@ const char *languages[][2] = {
     {"PIN code change", "PIN码修改"},
     //
     {"PIN code set", "PIN设置"},
+    // protect.c
+    {"PIN does not match,\ntry again", "PIN码前后不一致,请\n重新输入."},
     // fsm.c
     {"PIN expected", ""},
     // fsm.c
@@ -543,8 +546,6 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h
     {"PIN removed", ""},
     {"PIN set", "PIN设置成功"},
-    // protect.c
-    {"PIN does not match,\ntry again", "PIN码前后不一致,请\n重新输入."},
     {"PREV", "后退"},
     //
     {"Page down", "下一页"},
@@ -559,6 +560,7 @@ const char *languages[][2] = {
     {"Please copy the\nfollowing 12 words in\norder", "请依次抄写12位助记词"},
     {"Please copy the\nfollowing 18 words in\norder", "请依次抄写18位助记词"},
     {"Please copy the\nfollowing 24 words in\norder", "请依次抄写24位助记词"},
+    {"Please enter", "请输入"},
     {"Please enter 12 words\nin order to verify\nyour recovery phrase",
      "请依次输入12位助记词进\n行核对"},
     {"Please enter 18 words\nin order to verify\nyour recovery phrase",
@@ -618,9 +620,9 @@ const char *languages[][2] = {
     {"Pubkey not found in multisig script", ""},
     // lisk.c
     {"Public Key:", "公钥"},
-    {"QUIT", "退出"},
     // layout2.c
     {"QR Code", "二维码"},
+    {"QUIT", "退出"},
     // layout2.c
     {"Quota:", "单次限额"},
     // layout2.c
@@ -632,12 +634,12 @@ const char *languages[][2] = {
     // protect.c
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
-    {"Really send", ""},
+    {"Really send", "确认发送"},
     // reset.c
     {"Recovery Phrase", "助记词"},
+    {"Recovery Phrase\nimported.", "助记词导入成功"},
     {"Recovery Phrase\nverified", "助记词校验通过"},
     {"Recovery Phrase\nverified pass", "助记词校验通过"},
-    {"Recovery Phrase\nimported.", "助记词导入成功"},
     {"Recovery Phrase ", "助记词核对"},
     // u2f.c
     {"Register", "注册"},
@@ -736,11 +738,13 @@ const char *languages[][2] = {
     {"The seed is", "种子"},
     // recovery.c recovery.c
     {"The seed is INVALID!", "种子不可用"},
-    {"The seed is valid", ""},
+    {"The seed is valid", "种子可用"},
     // recovery.c
-    {"The seed is valid and matches the one in the device", ""},
+    {"The seed is valid and matches the one in the device",
+     "种子可用并且与设备内的相同"},
     // recovery.c
-    {"The seed is valid but does not match the one in the device", ""},
+    {"The seed is valid but does not match the one in the device",
+     "种子可用但是与设备内的不相同"},
     //
     {"The seed phrases are the", " "},
     // protect.c
@@ -774,7 +778,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"U2F counter set", ""},
     // layout2.c
-    {"U2F security key?", ""},
+    {"U2F security key?", "U2F安全密钥?"},
     // layout2.c
     {"Unencrypted hex data", ""},
     // layout2.c
@@ -814,10 +818,12 @@ const char *languages[][2] = {
     // signing.c signing.c signing.c signing.c signing.c
     // signing.c fsm_msg_coin.h
     {"Value overflow", ""},
+
     // layout2.c
     {"Verified binary message", ""},
     // layout2.c
     {"Verified message", ""},
+    {"Verify Address", "校验地址"},
     {"Verify All Words", "依次核对"},
     {"Verify PIN", "请输入原PIN码"},
     {"Verify Specified Word", "自由核对"},
@@ -875,6 +881,8 @@ const char *languages[][2] = {
     {"You still have 9 times", "连续输入10次将重置设备"},
     // recovery.c
     {"Your wallet has\nsuccessfully restored", "钱包恢复成功"},
+    {"[Address]", "[地址]"},
+    {"[QR Code]", "[二维码]"},
     // layout2.c
     {"active device", "激活设备"},
     // fsm_msg_common.h
