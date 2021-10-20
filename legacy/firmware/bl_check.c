@@ -26,7 +26,7 @@
 #include "memory.h"
 #include "util.h"
 
-char bootloader_version[8] = {0};
+char bootloader_version[8] = "1.8.9";
 
 #if MEMORY_PROTECT
 #if 0
@@ -132,6 +132,29 @@ static int known_bootloader(int r, const uint8_t *hash) {
 }
 #endif
 
+#if ONEKEY_MINI
+static int onekey_known_bootloader(int r, const uint8_t *hash) {
+  if (r != 32) return 0;
+  if (0 ==
+      memcmp(hash,
+             "\xc6\xbf\x87\x35\x34\x4d\x85\xdc\x58\xf5\xb9\x82\x4f\xe6\x28\xb4"
+             "\xb2\xe0\xca\x30\x8a\xfb\xd0\x8d\x79\x61\xb6\x7b\x16\x73\x86\x08",
+             32)) {
+    memcpy(bootloader_version, "1.8.9", strlen("1.8.9"));
+    return 1;  // 1.8.9 mini_boot_1010
+  }
+  if (0 ==
+      memcmp(hash,
+             "\x76\xee\xcb\x0a\xba\x6d\xa2\xb3\x93\x87\x38\xe1\x90\x7f\x86\x87"
+             "\x66\x95\xa9\xb6\x75\x79\xae\x18\x94\x93\x57\x01\x9c\x93\xa7\xbd",
+             32)) {
+    memcpy(bootloader_version, "1.9.0", strlen("1.9.0"));
+    return 1;  // 1.9.0
+  }
+
+  return 1;
+}
+#else
 static int onekey_known_bootloader(int r, const uint8_t *hash) {
   if (r != 32) return 0;
   if (0 ==
@@ -186,6 +209,7 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
 
   return 0;
 }
+#endif
 #endif
 
 /**
