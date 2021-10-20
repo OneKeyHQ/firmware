@@ -304,6 +304,9 @@ step1:
       return;
     }
     menu_run(key, 0);
+    if (layoutLast == layoutHome) {
+      return;
+    }
   }
 }
 
