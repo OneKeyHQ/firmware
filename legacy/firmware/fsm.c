@@ -25,6 +25,7 @@
 #include "bip32.h"
 #include "bip39.h"
 #include "ble.h"
+#include "buttons.h"
 #include "coins.h"
 #include "common.h"
 #include "config.h"
@@ -307,6 +308,32 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
         break;
       }
     }
+#if ONEKEY_MINI
+    uint8_t key = protectButtonValue(ButtonRequestType_ButtonRequest_Address,
+                                     false, button_request, 0);
+    if (key == KEY_CONFIRM) {
+      return true;
+    }
+    if (g_bIsBixinAPP) button_request = false;
+    if (protectAbortedByCancel || protectAbortedByInitialize) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return false;
+    } else if (protectAbortedByTimeout) {
+      layoutHome();
+      return false;
+    }
+    if (screen % 2) {
+      if (key == KEY_UP) {
+        screen = (screen + 1) % screens;
+      }
+    } else {
+      if (key == KEY_DOWN) {
+        screen = (screen + 1) % screens;
+      }
+    }
+
+#else
     if (protectButton_ex(ButtonRequestType_ButtonRequest_Address, false,
                          button_request, 0)) {
       return true;
@@ -321,6 +348,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       return false;
     }
     screen = (screen + 1) % screens;
+#endif
   }
 }
 
