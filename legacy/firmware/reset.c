@@ -496,7 +496,7 @@ refresh_menu:
           oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
                                 (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         } else {
-          oledDrawStringAdapter(OLED_WIDTH / 4, (j + 2) * (font->pixel + 1),
+          oledDrawStringAdapter(OLED_WIDTH / 4, (j + 3) * (font->pixel + 1),
                                 desc, FONT_FIXED);
         }
       }
@@ -510,8 +510,8 @@ refresh_menu:
           uint2str(j + WORD_PER_PAGE + 1, desc);
           strcat(desc, ". ");
           strcat(desc, words[j + WORD_PER_PAGE]);
-          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
+          oledDrawStringAdapter(OLED_WIDTH / 4, (j + 3) * (font->pixel + 1),
+                                desc, FONT_FIXED);
         }
       }
       if (pages > 2) {
@@ -528,8 +528,8 @@ refresh_menu:
           uint2str(j + WORD_PER_PAGE * 2 + 1, desc);
           strcat(desc, ". ");
           strcat(desc, words[j + WORD_PER_PAGE * 2]);
-          oledDrawStringAdapter(OLED_WIDTH / 4 - font->width,
-                                (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
+          oledDrawStringAdapter(OLED_WIDTH / 4, (j + 3) * (font->pixel + 1),
+                                desc, FONT_FIXED);
         }
       }
       layoutButtonYesAdapter(_("Next"), &bmp_button_forward);

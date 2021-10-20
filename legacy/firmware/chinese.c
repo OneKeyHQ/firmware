@@ -196,7 +196,7 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
           y += font_desc->pixel + 1;
         }
         if (y > OLED_HEIGHT) y = 0;
-        oledDrawChar(x, y + font_desc->pixel - 8, *text, font);
+        oledDrawChar(x, y, *text, font);
         x += l;
         text++;
       } else {
