@@ -185,7 +185,7 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
         timeout_flag = false;
         break;
       }
-      if (!confirm_only && key != KEY_NULL) {
+      if (!confirm_only && key != KEY_NULL && key != KEY_TOP) {
         timeout_flag = false;
         break;
       }
@@ -847,7 +847,14 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     if (key != KEY_NULL) {
       if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_BUTTON;
       if (mode == 0) {
+#if ONEKEY_MINI
+        if (key != KEY_TOP) {
+          break;
+        }
+#else
         break;
+#endif
+
       } else {
         if (key == KEY_CONFIRM || key == KEY_CANCEL) break;
       }
