@@ -1235,9 +1235,6 @@ static bool signing_check_output(TxOutputType *txoutput) {
   // in replacement transactions.
   bool skip_confirm = is_change || is_replacement;
   int co = compile_output(coin, &root, txoutput, &bin_output, !skip_confirm);
-  if (!skip_confirm) {
-    layoutProgressAdapter(_("Signing transaction"), progress);
-  }
   if (co < 0) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     signing_abort();
@@ -1247,6 +1244,9 @@ static bool signing_check_output(TxOutputType *txoutput) {
                     _("Failed to compile output"));
     signing_abort();
     return false;
+  }
+  if (!skip_confirm) {
+    layoutProgressAdapter(_("Signing transaction"), progress);
   }
 #if !BITCOIN_ONLY
   if (coin->decred) {
