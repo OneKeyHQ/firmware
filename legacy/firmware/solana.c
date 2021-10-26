@@ -94,8 +94,18 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       } else {
         char *title = G_transaction_summary_title;
         char *text = G_transaction_summary_text;
-        layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), title, NULL, text,
-                            NULL, NULL, NULL, NULL);
+#if ONEKEY_MINI
+        layoutTransInformation(
+            i > 0 ? &bmp_button_up : NULL,
+            i < num_summary_steps - 1 ? &bmp_button_down : NULL,
+            &bmp_btn_cancel,
+            i < num_summary_steps - 1 ? &bmp_button_forward : &bmp_btn_confirm,
+            _("REJECT"), i < num_summary_steps - 1 ? _("NEXT") : _("APPROVE"),
+            _("Send SOL"), _(title), NULL, true, false, _(text));
+#else
+        layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), _(title), NULL,
+                            text, NULL, NULL, NULL, NULL);
+#endif
         if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
                            false)) {
           fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
