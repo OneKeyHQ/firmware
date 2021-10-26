@@ -29,6 +29,7 @@ const char *languages[][2] = {
      "已累计输错8次,还有2\n次输入机会"},
     {"9 wrong attemps,\nyou have 1 more\nchance",
      "已累计输错9次,还有1\n次输入机会"},
+    {"APPROVE", "授权"},
     // fsm_msg_coin.h
     {"Abort", "取消"},
     // menu.c
@@ -47,7 +48,7 @@ const char *languages[][2] = {
     {"Advance ETH Sign", "ETH高级签名"},
     //
     {"Advance SOL Sign", "SOL高级签名"},
-    //
+//
 //
 #if ONEKEY_MINI
     {"After enabling\"Blind Signing\",\nyour device will support\n signing "
@@ -79,6 +80,7 @@ const char *languages[][2] = {
     {"Are you sure you want\nto reset your device?", "确定要重置吗?"},
     // u2f.c
     {"Authenticate", "认证"},
+    {"Authorized by", "授权方"},
     // fsm_msg_common.h
     {"Auto-lock delay too long", ""},  // msg
     // fsm_msg_common.h
@@ -115,6 +117,7 @@ const char *languages[][2] = {
     // signing.c signing.c
     {"Branch ID not enabled on this coin.", ""},  // msg
     {"Brightness", "亮度"},
+    {"Burn tokens", "销毁代币"},
     // fsm.c
     {"Button expected", ""},  // msg
     // recovery.c reset.c
@@ -226,6 +229,8 @@ const char *languages[][2] = {
     // layout2.c
     {"Create", "创建新钱包"},
     {"Create New Wallet", "创建新钱包"},
+    {"Create account", "创建账户"},
+    {"Create multisig", "创建多重签名"},
     {"DONE", "完成"},
     {"Dashboard", "控制中心"},
     // fsm.c
@@ -366,6 +371,7 @@ const char *languages[][2] = {
     {"Fee", "手续费"},
     // layout2.c
     {"Fee included:", "已包含手续费"},
+    {"Fee payer", "手续费支付方"},
     // layout2.c
     {"Finish", "完成"},
     // fsm.c
@@ -458,6 +464,7 @@ const char *languages[][2] = {
     // ethereum.c
     {"Malformed signature", ""},
     {"Medium", "中"},
+    {"Message Hash", "消息哈希值"},
     // layout2.c lisk.c
     {"Message signed by:", ""},
     // messages.c
@@ -645,6 +652,7 @@ const char *languages[][2] = {
     {"QUIT", "退出"},
     // layout2.c
     {"Quota:", "单次限额"},
+    {"REJECT", "拒绝"},
     // layout2.c
     {"Raw levy value is", ""},
     // protect.c
@@ -655,6 +663,7 @@ const char *languages[][2] = {
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
     {"Really send", "确认发送"},
+    {"Recipient", "接收方"},
     // reset.c
     {"Recovery Phrase", "助记词"},
     {"Recovery Phrase\nimported.", "助记词导入成功"},
@@ -709,8 +718,10 @@ const char *languages[][2] = {
     {"Select your", "选择你的"},
     // ethereum.c
     {"Send", ""},
+    {"Send SOL", "发送 SOL"},
     // layout2.c
     {"Send anyway?", ""},
+    {"Sender", "发送方"},
     // layout2.c
     {"Serial:", "序列号:"},
     // fsm_msg_common.h
@@ -795,6 +806,7 @@ const char *languages[][2] = {
     {"Transaction must have at least one input", ""},
     // fsm_msg_coin.h
     {"Transaction must have at least one output", ""},
+    {"Transfer", "发送"},
     // ethereum.c
     {"Txtype out of bounds", ""},
     // fsm_msg_common.h
@@ -819,6 +831,7 @@ const char *languages[][2] = {
     {"Unknown transaction", ""},
     // bl_check.c bl_check.c
     {"Unplug your Trezor", ""},
+    {"Unrecognized", "未被识别"},
     // config.c
     {"Unsupported curve", ""},
     // signing.c
@@ -996,6 +1009,7 @@ const char *languages[][2] = {
     {"for gas?", ""},
     // fsm_msg_coin.h
     {"for selected coin.", ""},
+    {"format", "格式"},
     // layout2.c
     {"from your wallet?", "从钱包中"},
     // layout2.c
@@ -1077,6 +1091,7 @@ const char *languages[][2] = {
     {"segwit input amount", ""},
     // fsm_msg_common.h
     {"send entropy?", "发送熵值"},
+    {"sender", "发送方"},
     // fsm_msg_common.h
     {"set a new wipe code?", ""},
     // fsm_msg_common.h
