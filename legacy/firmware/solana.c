@@ -18,6 +18,7 @@
  */
 
 #include "solana.h"
+#include "buttons.h"
 #include "config.h"
 #include "fsm.h"
 #include "gettext.h"
@@ -84,6 +85,8 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
 
   enum SummaryItemKind summary_step_kinds[MAX_TRANSACTION_SUMMARY_ITEMS];
   size_t num_summary_steps = 0;
+  size_t steps = 0;
+  uint8_t steps_list[MAX_TRANSACTION_SUMMARY_ITEMS];
   if (transaction_summary_finalize(summary_step_kinds, &num_summary_steps) ==
       0) {
     for (size_t i = 0; i < num_summary_steps; i++) {
@@ -94,6 +97,33 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       } else {
         char *title = G_transaction_summary_title;
         char *text = G_transaction_summary_text;
+
+        if (strcmp(title, "Create token acct") == 0) {
+          continue;
+        } else if (strcmp(title, "From mint") == 0) {
+          continue;
+        } else if (strcmp(title, "From") == 0) {
+          continue;
+        } else if (strcmp(title, "To") == 0) {
+          continue;
+        } else if (strcmp(title, "Funded by") == 0) {
+          continue;
+        } else if (strcmp(title, "Owner") == 0) {
+          title = "From";
+        } else if (strcmp(title, "Owned by") == 0) {
+          title = "To";
+        } else if (strcmp(title, "Transfer tokens") == 0 ||
+                   strcmp(title, "Transfer") == 0) {
+          title = "Amount";
+        }
+
+        char desc[64];
+        memset(desc, 0, sizeof(desc));
+        strcat(desc, _(title));
+        strcat(desc, ":");
+
+        steps_list[steps++] = i;
+
 #if ONEKEY_MINI
         layoutTransInformation(
             i > 0 ? &bmp_button_up : NULL,
@@ -106,10 +136,24 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
         layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), _(title), NULL,
                             text, NULL, NULL, NULL, NULL);
 #endif
-        if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall,
-                           false)) {
+        uint8_t key;
+      button_scan:
+        key = protectButtonValue(ButtonRequestType_ButtonRequest_ProtectCall,
+                                 false, true, 0);
+        if (key == KEY_CANCEL) {
           fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
           return;
+        } else if (key == KEY_UP) {
+          if (steps == 1) {
+            goto button_scan;
+          } else {
+            i = steps_list[steps - 2] - 1;
+            steps -= 2;
+          }
+        } else if (key == KEY_DOWN) {
+          if (i == num_summary_steps - 1) {
+            goto button_scan;
+          }
         }
       }
     }
