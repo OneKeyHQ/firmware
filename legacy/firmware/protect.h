@@ -54,6 +54,9 @@ bool protectChangePinOnDevice(bool is_prompt, bool set);
 bool protectSelectMnemonicNumber(uint32_t* number);
 bool protectPinCheck(bool retry);
 
+uint8_t protectButtonValue(ButtonRequestType type, bool confirm_only,
+                           bool requset, uint32_t timeout_s);
+
 #if !EMULATOR
 void enter_sleep(void);
 #endif

@@ -136,12 +136,12 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   return result;
 }
 
-bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
-                      uint32_t timeout_s) {
+static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
+                                 bool requset, uint32_t timeout_s) {
   ButtonRequest resp = {0};
-  bool result = false;
   bool acked = false;
   bool timeout_flag = true;
+  uint8_t key = KEY_NULL;
 #if DEBUG_LINK
   bool debug_decided = false;
 #endif
@@ -152,7 +152,7 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
   resp.has_code = true;
   resp.code = type;
   usbTiny(1);
-  buttonUpdate();  // Clear button state
+
   if (requset) {
     msg_write(MessageType_MessageType_ButtonRequest, &resp);
   }
@@ -176,16 +176,13 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
 
     // button acked - check buttons
     if (acked) {
-      usbSleep(5);
-      buttonUpdate();
-      if (button.YesUp) {
-        result = true;
+      key = keyScan();
+      if (key == KEY_CONFIRM) {
         timeout_flag = false;
         break;
       }
-      if (!confirm_only && button.NoUp) {
+      if (!confirm_only && key != KEY_NULL) {
         timeout_flag = false;
-        result = false;
         break;
       }
     }
@@ -197,7 +194,6 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       msg_tiny_id = 0xFFFF;
       timeout_flag = false;
-      result = false;
       break;
     }
 
@@ -224,7 +220,23 @@ bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
   usbTiny(0);
   if (timeout_flag) protectAbortedByTimeout = true;
 
-  return result;
+  return key;
+}
+
+bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
+                      uint32_t timeout_s) {
+  uint8_t key = KEY_NULL;
+  key = _protectButton_ex(type, confirm_only, requset, timeout_s);
+  if (key == KEY_CONFIRM) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+uint8_t protectButtonValue(ButtonRequestType type, bool confirm_only,
+                           bool requset, uint32_t timeout_s) {
+  return _protectButton_ex(type, confirm_only, requset, timeout_s);
 }
 
 const char *requestPin(PinMatrixRequestType type, const char *text,
