@@ -42,6 +42,7 @@ const char *languages[][2] = {
     {"All data will be lost.", "所有数据将丢失"},
     // u2f.c
     {"Already registered.", "已注册"},
+    {"Amount", "金额"},
     // u2f.c
     {"Another U2F device", "另外的U2F设备"},
     //
@@ -322,6 +323,7 @@ const char *languages[][2] = {
     {"For more information", "了解更多"},
     // fsm_msg_common.h
     {"Forbidden field set in dry-run", ""},  // msg
+    {"From", "发送方"},
     // layout2.c
     {"GPG sign for:", ""},
     // layout2.c
@@ -654,6 +656,7 @@ const char *languages[][2] = {
     {"Timestamp must be set.", ""},
     // signing.c fsm_msg_coin.h
     {"Timestamp not enabled on this coin.", ""},
+    {"To", "接收方"},
     // ethereum.c
     {"Too much data", ""},
     // ethereum.c
