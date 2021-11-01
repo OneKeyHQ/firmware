@@ -389,8 +389,8 @@ static struct menu settings_menu = {
 
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
-    {"Reset", NULL, true, menu_erase_device, NULL, false},
     {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
+    {"Reset", NULL, true, menu_erase_device, NULL, false},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 
