@@ -793,6 +793,9 @@ refresh_menu:
         } else {
           return true;
         }
+      } else {
+        index++;
+        goto refresh_menu;
       }
       return false;
     default:
