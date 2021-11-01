@@ -585,6 +585,11 @@ static void _layout_home(bool update_menu) {
   backup_only = config_getMnemonicsImported();
 
   uint8_t homescreen[HOMESCREEN_SIZE] = {0};
+
+#if ONEKEY_MINI
+  setRgbBitmap(false);
+#endif
+
   if (config_getHomescreen(homescreen, sizeof(homescreen))) {
     BITMAP b = {0};
     b.width = 128;
