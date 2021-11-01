@@ -328,6 +328,11 @@ void menu_erase_device(int index) {
   }
   uint8_t ui_language_bak = ui_language;
 
+#if ONEKEY_MINI
+  layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                            _("Device reset in\nprogress"), NULL, NULL, NULL);
+#endif
+
   config_wipe();
   if (ui_language_bak) {
     ui_language = ui_language_bak;
@@ -675,12 +680,12 @@ static struct menu check_word_menu = {
 
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
-    {"Reset", NULL, true, menu_erase_device, NULL, false},
 #if ONEKEY_MINI
     {"Recovery Phrase ", NULL, false, .sub_menu = &check_word_menu, NULL,
      false},
 #endif
     {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
+    {"Reset", NULL, true, menu_erase_device, NULL, false},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
 
