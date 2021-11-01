@@ -171,6 +171,11 @@ bool get_features(Features *resp) {
     }
     resp->has_spi_flash = true;
     strlcpy(resp->spi_flash, w25qxx_get_desc(), sizeof(resp->spi_flash));
+
+    if (device_get_NFT_voucher(resp->NFT_voucher.bytes)) {
+      resp->has_NFT_voucher = true;
+      resp->NFT_voucher.size = 32;
+    }
 #endif
   }
 #if !EMULATOR
