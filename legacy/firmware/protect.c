@@ -139,7 +139,6 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   return result;
 }
 
-#if ONEKEY_MINI
 static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
                                  bool requset, uint32_t timeout_s) {
   ButtonRequest resp = {0};
@@ -242,99 +241,6 @@ uint8_t protectButtonValue(ButtonRequestType type, bool confirm_only,
                            bool requset, uint32_t timeout_s) {
   return _protectButton_ex(type, confirm_only, requset, timeout_s);
 }
-
-#else
-bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
-                      uint32_t timeout_s) {
-  ButtonRequest resp = {0};
-  bool result = false;
-  bool acked = false;
-  bool timeout_flag = true;
-#if DEBUG_LINK
-  bool debug_decided = false;
-#endif
-
-  protectAbortedByTimeout = false;
-
-  memzero(&resp, sizeof(ButtonRequest));
-  resp.has_code = true;
-  resp.code = type;
-  usbTiny(1);
-  buttonUpdate();  // Clear button state
-  if (requset) {
-    msg_write(MessageType_MessageType_ButtonRequest, &resp);
-  }
-  if (timeout_s) {
-    timer_out_set(timer_out_oper, timeout_s);
-  }
-  if (g_bIsBixinAPP) acked = true;
-  acked = true;
-
-  while (1) {
-    if (timeout_s) {
-      if (timer_out_get(timer_out_oper) == 0) break;
-    }
-    usbPoll();
-
-    // check for ButtonAck
-    if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
-      msg_tiny_id = 0xFFFF;
-      acked = true;
-    }
-
-    // button acked - check buttons
-    if (acked) {
-      usbSleep(5);
-      buttonUpdate();
-      if (button.YesUp) {
-        result = true;
-        timeout_flag = false;
-        break;
-      }
-      if (!confirm_only && button.NoUp) {
-        timeout_flag = false;
-        result = false;
-        break;
-      }
-    }
-
-    // check for Cancel / Initialize
-    protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
-    protectAbortedByInitialize =
-        (msg_tiny_id == MessageType_MessageType_Initialize);
-    if (protectAbortedByCancel || protectAbortedByInitialize) {
-      msg_tiny_id = 0xFFFF;
-      timeout_flag = false;
-      result = false;
-      break;
-    }
-
-#if DEBUG_LINK
-    // check DebugLink
-    if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
-      msg_tiny_id = 0xFFFF;
-      DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
-      result = dld->yes_no;
-      debug_decided = true;
-    }
-
-    if (acked && debug_decided) {
-      break;
-    }
-
-    if (msg_tiny_id == MessageType_MessageType_DebugLinkGetState) {
-      msg_tiny_id = 0xFFFF;
-      fsm_msgDebugLinkGetState((DebugLinkGetState *)msg_tiny);
-    }
-#endif
-  }
-  timer_out_set(timer_out_oper, 0);
-  usbTiny(0);
-  if (timeout_flag) protectAbortedByTimeout = true;
-
-  return result;
-}
-#endif
 
 const char *requestPin(PinMatrixRequestType type, const char *text,
                        const char **new_pin) {
