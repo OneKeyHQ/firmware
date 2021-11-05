@@ -202,7 +202,9 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
     if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
       msg_tiny_id = 0xFFFF;
       DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
-      result = dld->yes_no;
+      if (dld->yes_no) {
+        key = KEY_CONFIRM;
+      }
       debug_decided = true;
     }
 
