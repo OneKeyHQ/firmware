@@ -237,6 +237,7 @@ if not utils.BITCOIN_ONLY:
     BixinBackupDevice: Literal[914] = 914
     BixinBackupDeviceAck: Literal[915] = 915
     BixinPinInputOnDevice: Literal[10000] = 10000
+    EthereumSignMessageEIP712: Literal[10200] = 10200
 DeviceInfoSettings: Literal[10001] = 10001
 GetDeviceInfo: Literal[10002] = 10002
 DeviceInfo: Literal[10003] = 10003
@@ -252,4 +253,3 @@ SESignMessage: Literal[10012] = 10012
 SEMessageSignature: Literal[10013] = 10013
 NFTWriteInfo: Literal[10014] = 10014
 NFTWriteData: Literal[10015] = 10015
-    EthereumSignMessageEIP712: Literal[10200] = 10200
