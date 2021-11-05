@@ -329,8 +329,9 @@ void menu_erase_device(int index) {
   uint8_t ui_language_bak = ui_language;
 
 #if ONEKEY_MINI
-  layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                            _("Device reset in\nprogress"), NULL, NULL, NULL);
+  layoutDialogCenterAdapterEx(NULL, NULL, NULL, NULL, NULL, NULL, true, NULL,
+                              NULL, _("Device reset in\nprogress"), NULL, NULL,
+                              NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
 
   config_wipe();

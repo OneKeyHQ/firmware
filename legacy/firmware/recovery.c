@@ -214,23 +214,31 @@ static bool recovery_done(void) {
       memzero(new_mnemonic, sizeof(new_mnemonic));
       if (match) {
 #if ONEKEY_MINI
-        layoutDialogAdapterEx(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+        layoutDialogAdapterEx(
+            &bmp_icon_ok, NULL, _("Confirm"), NULL, NULL,
+            _("The seed is valid and matches the one in the device"), NULL,
+            NULL, NULL, NULL);
 #else
         layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+                            _("The seed is valid"), _("and MATCHES"),
+                            _("the one in the device."), NULL, NULL, NULL);
 #endif
-                              _("The seed is valid"), _("and MATCHES"),
-                              _("the one in the device."), NULL, NULL, NULL);
+
         protectButton(ButtonRequestType_ButtonRequest_Other, true);
         fsm_sendSuccess(
             _("The seed is valid and matches the one in the device"));
       } else {
 #if ONEKEY_MINI
-        layoutDialogAdapterEx(&bmp_icon_error, NULL, _("Confirm"), NULL,
+        layoutDialogAdapterEx(
+            &bmp_icon_error, NULL, _("Confirm"), NULL, NULL,
+            _("The seed is valid but does not match the one in the device"),
+            NULL, NULL, NULL, NULL);
 #else
         layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                            _("The seed is valid"), _("but does NOT MATCH"),
+                            _("the one in the device."), NULL, NULL, NULL);
 #endif
-                              _("The seed is valid"), _("but does NOT MATCH"),
-                              _("the one in the device."), NULL, NULL, NULL);
+
         protectButton(ButtonRequestType_ButtonRequest_Other, true);
         fsm_sendFailure(
             FailureType_Failure_DataError,
