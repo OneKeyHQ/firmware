@@ -428,7 +428,7 @@ void menu_set_sol_blind_sign(int index) {
   layoutHome();
 }
 
-void menu_blindSign(int index) {
+void menu_blind_sign(int index) {
   (void)index;
 
   uint8_t key = KEY_NULL;
@@ -684,7 +684,7 @@ static struct menu_item security_set_menu_items[] = {
     {"Recovery Phrase ", NULL, false, .sub_menu = &check_word_menu, NULL,
      false},
 #endif
-    {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
+    {"Blind Signing", NULL, true, menu_blind_sign, NULL, false},
     {"Reset", NULL, true, menu_erase_device, NULL, false},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };
