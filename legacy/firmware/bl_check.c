@@ -151,6 +151,14 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
     memcpy(bootloader_version, "1.9.0", strlen("1.9.0"));
     return 1;  // 1.9.0
   }
+  if (0 ==
+      memcmp(hash,
+             "\x1b\x5e\x73\xfa\x8a\xb6\x71\xc4\x2d\xb6\x91\xe7\x46\xe2\x13\xe7"
+             "\x46\x68\x79\x91\x51\xbe\x6a\x52\xc5\x3e\xbc\x3c\xf8\x09\x72\x69",
+             32)) {
+    memcpy(bootloader_version, "1.9.1", strlen("1.9.1"));
+    return 1;  // 1.9.0
+  }
 
   return 1;
 }
