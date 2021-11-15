@@ -321,7 +321,7 @@ enum MessageType {
 
     MessageType_BixinPinInputOnDevice = 10000 [(wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
     MessageType_EthereumSignMessageEIP712 = 10200 [(wire_in) = true];
-    
+
     //onekey
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
