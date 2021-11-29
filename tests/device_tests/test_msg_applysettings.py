@@ -21,8 +21,8 @@ from trezorlib.tools import parse_path
 
 EXPECTED_RESPONSES_NOPIN = [
     messages.ButtonRequest(),
-    messages.Success(),
-    messages.Features(),
+    messages.Success,
+    messages.Features,
 ]
 EXPECTED_RESPONSES_PIN_T1 = [messages.PinMatrixRequest()] + EXPECTED_RESPONSES_NOPIN
 EXPECTED_RESPONSES_PIN_TT = [messages.ButtonRequest()] + EXPECTED_RESPONSES_NOPIN
@@ -71,8 +71,6 @@ class TestMsgApplysettings:
 
     @pytest.mark.setup_client(pin=PIN4, passphrase=False)
     def test_apply_settings_passphrase(self, client):
-        assert client.features.passphrase_protection is False
-
         with client:
             _set_expected_responses(client)
             device.apply_settings(client, use_passphrase=True)
@@ -151,7 +149,6 @@ class TestMsgApplysettings:
             b"TOIf\x80\x00\x80\x00~\x00\x00\x00\xed\xd2\xcb\r\x83@\x10D\xc1^.\xde#!\xac31\x99\x10\x8aC%\x14~\x16\x92Y9\x02WI3\x01<\xf5cI2d\x1es(\xe1[\xdbn\xba\xca\xe8s7\xa4\xd5\xd4\xb3\x13\xbdw\xf6:\xf3\xd1\xe7%\xc7]\xdd_\xb3\x9e\x9f\x9e\x9fN\xed\xaaE\xef\xdc\xcf$D\xa7\xa4X\r\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0OV",
         ],
     )
-    @pytest.mark.skip_ui
     @pytest.mark.skip_t1
     def test_apply_homescreen_toif_fail(self, client, toif_data):
         with pytest.raises(exceptions.TrezorFailure), client:
@@ -166,11 +163,10 @@ class TestMsgApplysettings:
             _set_expected_responses(client)
             device.apply_settings(client, homescreen=img)
 
-    @pytest.mark.skip_t1
     @pytest.mark.setup_client(pin=None)
     def test_safety_checks(self, client):
         def get_bad_address():
-            btc.get_address(client, "Bitcoin", parse_path("m/0"))
+            btc.get_address(client, "Bitcoin", parse_path("m/44'"), show_display=True)
 
         assert client.features.safety_checks == messages.SafetyCheckLevel.Strict
 
@@ -180,17 +176,22 @@ class TestMsgApplysettings:
             client.set_expected_responses([messages.Failure])
             get_bad_address()
 
-        with client:
-            client.set_expected_responses(EXPECTED_RESPONSES_NOPIN)
-            device.apply_settings(
-                client, safety_checks=messages.SafetyCheckLevel.PromptAlways
+        if client.features.model != "1":
+            with client:
+                client.set_expected_responses(EXPECTED_RESPONSES_NOPIN)
+                device.apply_settings(
+                    client, safety_checks=messages.SafetyCheckLevel.PromptAlways
+                )
+
+            assert (
+                client.features.safety_checks == messages.SafetyCheckLevel.PromptAlways
             )
 
-        assert client.features.safety_checks == messages.SafetyCheckLevel.PromptAlways
-
-        with client:
-            client.set_expected_responses([messages.Address])
-            get_bad_address()
+            with client:
+                client.set_expected_responses(
+                    [messages.ButtonRequest, messages.ButtonRequest, messages.Address]
+                )
+                get_bad_address()
 
         with client:
             client.set_expected_responses(EXPECTED_RESPONSES_NOPIN)
@@ -217,7 +218,9 @@ class TestMsgApplysettings:
         )
 
         with client:
-            client.set_expected_responses([messages.Address])
+            client.set_expected_responses(
+                [messages.ButtonRequest, messages.ButtonRequest, messages.Address]
+            )
             get_bad_address()
 
     @pytest.mark.skip_t1
@@ -248,6 +251,21 @@ class TestMsgApplysettings:
             )
             experimental_call()
 
+        # relock and try again
+        client.lock()
+        with client:
+            client.use_pin_sequence([PIN4])
+            client.set_expected_responses(
+                [
+                    messages.ButtonRequest,
+                    messages.ButtonRequest,
+                    messages.ButtonRequest,
+                    messages.Success,
+                ]
+            )
+            experimental_call()
+
+        # unset experimental features
         with client:
             client.set_expected_responses([messages.Success, messages.Features])
             device.apply_settings(client, experimental_features=False)

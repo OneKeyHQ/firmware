@@ -17,12 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "py/objstr.h"
 #include "py/runtime.h"
 
 #include "version.h"
 
 #if MICROPY_PY_TREZORUTILS
 
+#include "embed/extmod/modtrezorutils/modtrezorutils-meminfo.h"
 #include "embed/extmod/trezorobj.h"
 
 #include <string.h>
@@ -58,11 +60,11 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorutils_consteq_obj,
                                  mod_trezorutils_consteq);
 
 /// def memcpy(
-///     dst: Union[bytearray, memoryview],
+///     dst: bytearray | memoryview,
 ///     dst_ofs: int,
 ///     src: bytes,
 ///     src_ofs: int,
-///     n: int = None,
+///     n: int | None = None,
 /// ) -> int:
 ///     """
 ///     Copies at most `n` bytes from `src` at offset `src_ofs` to
@@ -99,7 +101,7 @@ STATIC mp_obj_t mod_trezorutils_memcpy(size_t n_args, const mp_obj_t *args) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorutils_memcpy_obj, 4, 5,
                                            mod_trezorutils_memcpy);
 
-/// def halt(msg: str = None) -> None:
+/// def halt(msg: str | None = None) -> None:
 ///     """
 ///     Halts execution.
 ///     """
@@ -115,10 +117,13 @@ STATIC mp_obj_t mod_trezorutils_halt(size_t n_args, const mp_obj_t *args) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorutils_halt_obj, 0, 1,
                                            mod_trezorutils_halt);
 
+STATIC mp_obj_str_t mod_trezorutils_revision_obj = {
+    {&mp_type_bytes}, 0, sizeof(SCM_REVISION) - 1, (const byte *)SCM_REVISION};
+
 #define PASTER(s) MP_QSTR_##s
 #define MP_QSTR(s) PASTER(s)
 
-/// GITREV: str
+/// SCM_REVISION: bytes
 /// VERSION_MAJOR: int
 /// VERSION_MINOR: int
 /// VERSION_PATCH: int
@@ -132,13 +137,15 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_memcpy), MP_ROM_PTR(&mod_trezorutils_memcpy_obj)},
     {MP_ROM_QSTR(MP_QSTR_halt), MP_ROM_PTR(&mod_trezorutils_halt_obj)},
     // various built-in constants
-    {MP_ROM_QSTR(MP_QSTR_GITREV), MP_ROM_QSTR(MP_QSTR(GITREV))},
+    {MP_ROM_QSTR(MP_QSTR_SCM_REVISION),
+     MP_ROM_PTR(&mod_trezorutils_revision_obj)},
     {MP_ROM_QSTR(MP_QSTR_VERSION_MAJOR), MP_ROM_INT(VERSION_MAJOR)},
     {MP_ROM_QSTR(MP_QSTR_VERSION_MINOR), MP_ROM_INT(VERSION_MINOR)},
     {MP_ROM_QSTR(MP_QSTR_VERSION_PATCH), MP_ROM_INT(VERSION_PATCH)},
     {MP_ROM_QSTR(MP_QSTR_MODEL), MP_ROM_QSTR(MP_QSTR(TREZOR_MODEL))},
 #ifdef TREZOR_EMULATOR
     {MP_ROM_QSTR(MP_QSTR_EMULATOR), mp_const_true},
+    MEMINFO_DICT_ENTRIES
 #else
     {MP_ROM_QSTR(MP_QSTR_EMULATOR), mp_const_false},
 #endif

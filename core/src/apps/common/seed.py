@@ -1,5 +1,5 @@
 from storage import cache, device
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto import bip32, hmac
 
 from . import mnemonic
@@ -10,7 +10,12 @@ if False:
 
 
 class Slip21Node:
-    def __init__(self, seed: bytes = None, data: bytes = None) -> None:
+    """
+    This class implements the SLIP-0021 hierarchical derivation of symmetric keys, see
+    https://github.com/satoshilabs/slips/blob/master/slip-0021.md.
+    """
+
+    def __init__(self, seed: bytes | None = None, data: bytes | None = None) -> None:
         assert seed is None or data is None, "Specify exactly one of: seed, data"
         if data is not None:
             self.data = data
@@ -35,12 +40,50 @@ class Slip21Node:
         return Slip21Node(data=self.data)
 
 
-@cache.stored_async(cache.APP_COMMON_SEED)
-async def get_seed(ctx: wire.Context) -> bytes:
-    if not device.is_initialized():
-        raise wire.NotInitialized("Device is not initialized")
-    passphrase = await get_passphrase(ctx)
-    return mnemonic.get_seed(passphrase)
+if not utils.BITCOIN_ONLY:
+    # === Cardano variant ===
+    # We want to derive both the normal seed and the Cardano seed together, AND
+    # expose a method for Cardano to do the same
+
+    async def derive_and_store_roots(ctx: wire.Context) -> None:
+        if not device.is_initialized():
+            raise wire.NotInitialized("Device is not initialized")
+
+        need_seed = not cache.is_set(cache.APP_COMMON_SEED)
+        need_cardano_secret = cache.get(
+            cache.APP_COMMON_DERIVE_CARDANO
+        ) and not cache.is_set(cache.APP_CARDANO_ICARUS_SECRET)
+
+        if not need_seed and not need_cardano_secret:
+            return
+
+        passphrase = await get_passphrase(ctx)
+
+        if need_seed:
+            common_seed = mnemonic.get_seed(passphrase)
+            cache.set(cache.APP_COMMON_SEED, common_seed)
+
+        if need_cardano_secret:
+            from apps.cardano.seed import derive_and_store_secrets
+
+            derive_and_store_secrets(passphrase)
+
+    @cache.stored_async(cache.APP_COMMON_SEED)
+    async def get_seed(ctx: wire.Context) -> bytes:
+        await derive_and_store_roots(ctx)
+        common_seed = cache.get(cache.APP_COMMON_SEED)
+        assert common_seed is not None
+        return common_seed
+
+
+else:
+    # === Bitcoin-only variant ===
+    # We use the simple version of `get_seed` that never needs to derive anything else.
+
+    @cache.stored_async(cache.APP_COMMON_SEED)
+    async def get_seed(ctx: wire.Context) -> bytes:
+        passphrase = await get_passphrase(ctx)
+        return mnemonic.get_seed(passphrase)
 
 
 @cache.stored(cache.APP_COMMON_SEED_WITHOUT_PASSPHRASE)

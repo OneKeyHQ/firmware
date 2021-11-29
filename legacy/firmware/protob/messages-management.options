@@ -25,7 +25,7 @@ ApplySettings.homescreen                max_size:1024
 Ping.message                            max_size:256
 
 LoadDevice.mnemonics                    max_count:16 max_size:241
-LoadDevice.pin                          max_size:10
+LoadDevice.pin                          max_size:51
 LoadDevice.language                     max_size:17
 LoadDevice.label                        max_size:33
 
@@ -43,8 +43,8 @@ WordAck.word                            max_size:12
 
 BixinSeedOperate.seed_importData        max_size:512
 
-BixinMessageSE.inputmessage             max_size:1024
-BixinOutMessageSE.outmessage            max_size:1024
+BixinMessageSE.inputmessage             max_size:1025
+BixinOutMessageSE.outmessage            max_size:1025
 
 BixinBackupAck.data                     max_size:512
 BixinRestoreRequest.data                max_size:512

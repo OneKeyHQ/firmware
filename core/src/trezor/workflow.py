@@ -1,14 +1,15 @@
 import utime
 
+import storage.cache
 from trezor import log, loop
 
 if False:
-    from typing import Callable, Dict, Optional, Set
+    from typing import Callable
 
     IdleCallback = Callable[[], None]
 
 if __debug__:
-    # Used in `on_close` bellow for memory statistics.
+    # Used in `on_close` below for memory statistics.
 
     import micropython
 
@@ -16,14 +17,14 @@ if __debug__:
 
 
 # Set of workflow tasks.  Multiple workflows can be running at the same time.
-tasks: Set[loop.spawn] = set()
+tasks: set[loop.spawn] = set()
 
 # Default workflow task, if a default workflow is running.  Default workflow
 # is not contained in the `tasks` set above.
-default_task: Optional[loop.spawn] = None
+default_task: loop.spawn | None = None
 
 # Constructor for the default workflow.  Returns a workflow task.
-default_constructor: Optional[Callable[[], loop.Task]] = None
+default_constructor: Callable[[], loop.Task] | None = None
 
 
 def _on_start(workflow: loop.spawn) -> None:
@@ -128,6 +129,8 @@ def close_others() -> None:
         if not task.is_running():
             task.close()
 
+    storage.cache.homescreen_shown = None
+
     # if tasks were running, closing the last of them will run start_default
 
 
@@ -159,8 +162,8 @@ class IdleTimer:
     """
 
     def __init__(self) -> None:
-        self.timeouts: Dict[IdleCallback, int] = {}
-        self.tasks: Dict[IdleCallback, loop.Task] = {}
+        self.timeouts: dict[IdleCallback, int] = {}
+        self.tasks: dict[IdleCallback, loop.Task] = {}
 
     async def _timeout_task(self, callback: IdleCallback) -> None:
         # This function is async, so the result of self._timeout_task() is an awaitable,
@@ -219,5 +222,5 @@ class IdleTimer:
             loop.close(task)
 
 
-"""Global idle timer."""
 idle_timer = IdleTimer()
+"""Global idle timer."""

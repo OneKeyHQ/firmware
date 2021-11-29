@@ -1,13 +1,11 @@
 from micropython import const
 from ubinascii import hexlify
 
+import storage.cache
 from storage import common
-from trezor.crypto import random
-from trezor.messages import BackupType
 
 if False:
-    from trezor.messages.ResetDevice import EnumTypeBackupType
-    from typing import Optional
+    from trezor.enums import BackupType
     from typing_extensions import Literal
 
 # Namespace:
@@ -38,8 +36,6 @@ INITIALIZED                = const(0x13)  # bool (0x01 or empty)
 _SAFETY_CHECK_LEVEL        = const(0x14)  # int
 _EXPERIMENTAL_FEATURES     = const(0x15)  # bool (0x01 or empty)
 
-_DEFAULT_BACKUP_TYPE       = BackupType.Bip39
-
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
 _DEFAULT_SAFETY_CHECK_LEVEL = SAFETY_CHECK_LEVEL_STRICT
@@ -67,7 +63,7 @@ def is_version_stored() -> bool:
     return bool(common.get(_NAMESPACE, _VERSION))
 
 
-def get_version() -> Optional[bytes]:
+def get_version() -> bytes | None:
     return common.get(_NAMESPACE, _VERSION)
 
 
@@ -80,6 +76,8 @@ def is_initialized() -> bool:
 
 
 def _new_device_id() -> str:
+    from trezorcrypto import random  # avoid pulling in trezor.crypto
+
     return hexlify(random.bytes(12)).decode().upper()
 
 
@@ -104,7 +102,7 @@ def set_rotation(value: int) -> None:
     common.set(_NAMESPACE, _ROTATION, value.to_bytes(2, "big"), True)  # public
 
 
-def get_label() -> Optional[str]:
+def get_label() -> str | None:
     label = common.get(_NAMESPACE, _LABEL, True)  # public
     if label is None:
         return None
@@ -117,14 +115,16 @@ def set_label(label: str) -> None:
     common.set(_NAMESPACE, _LABEL, label.encode(), True)  # public
 
 
-def get_mnemonic_secret() -> Optional[bytes]:
+def get_mnemonic_secret() -> bytes | None:
     return common.get(_NAMESPACE, _MNEMONIC_SECRET)
 
 
-def get_backup_type() -> EnumTypeBackupType:
+def get_backup_type() -> BackupType:
+    from trezor.enums import BackupType
+
     backup_type = common.get_uint8(_NAMESPACE, _BACKUP_TYPE)
     if backup_type is None:
-        backup_type = _DEFAULT_BACKUP_TYPE
+        backup_type = BackupType.Bip39
 
     if backup_type not in (
         BackupType.Bip39,
@@ -146,7 +146,7 @@ def set_passphrase_enabled(enable: bool) -> None:
         set_passphrase_always_on_device(False)
 
 
-def get_homescreen() -> Optional[bytes]:
+def get_homescreen() -> bytes | None:
     return common.get(_NAMESPACE, _HOMESCREEN, public=True)
 
 
@@ -158,7 +158,7 @@ def set_homescreen(homescreen: bytes) -> None:
 
 def store_mnemonic_secret(
     secret: bytes,
-    backup_type: EnumTypeBackupType,
+    backup_type: BackupType,
     needs_backup: bool = False,
     no_backup: bool = False,
 ) -> None:
@@ -243,12 +243,12 @@ def set_autolock_delay_ms(delay_ms: int) -> None:
     common.set(_NAMESPACE, _AUTOLOCK_DELAY_MS, delay_ms.to_bytes(4, "big"))
 
 
-def next_u2f_counter() -> Optional[int]:
-    return common.next_counter(_NAMESPACE, U2F_COUNTER, True)  # writable when locked
+def next_u2f_counter() -> int:
+    return common.next_counter(_NAMESPACE, U2F_COUNTER, writable_locked=True)
 
 
 def set_u2f_counter(count: int) -> None:
-    common.set_counter(_NAMESPACE, U2F_COUNTER, count, True)  # writable when locked
+    common.set_counter(_NAMESPACE, U2F_COUNTER, count, writable_locked=True)
 
 
 def set_slip39_identifier(identifier: int) -> None:
@@ -260,7 +260,7 @@ def set_slip39_identifier(identifier: int) -> None:
     common.set_uint16(_NAMESPACE, _SLIP39_IDENTIFIER, identifier)
 
 
-def get_slip39_identifier() -> Optional[int]:
+def get_slip39_identifier() -> int | None:
     """The device's actual SLIP-39 identifier used in passphrase derivation."""
     return common.get_uint16(_NAMESPACE, _SLIP39_IDENTIFIER)
 
@@ -274,14 +274,14 @@ def set_slip39_iteration_exponent(exponent: int) -> None:
     common.set_uint8(_NAMESPACE, _SLIP39_ITERATION_EXPONENT, exponent)
 
 
-def get_slip39_iteration_exponent() -> Optional[int]:
+def get_slip39_iteration_exponent() -> int | None:
     """
     The device's actual SLIP-39 iteration exponent used in passphrase derivation.
     """
     return common.get_uint8(_NAMESPACE, _SLIP39_ITERATION_EXPONENT)
 
 
-def get_sd_salt_auth_key() -> Optional[bytes]:
+def get_sd_salt_auth_key() -> bytes | None:
     """
     The key used to check the authenticity of the SD card salt.
     """
@@ -291,7 +291,7 @@ def get_sd_salt_auth_key() -> Optional[bytes]:
     return auth_key
 
 
-def set_sd_salt_auth_key(auth_key: Optional[bytes]) -> None:
+def set_sd_salt_auth_key(auth_key: bytes | None) -> None:
     """
     The key used to check the authenticity of the SD card salt.
     """
@@ -319,9 +319,19 @@ def set_safety_check_level(level: StorageSafetyCheckLevel) -> None:
     common.set_uint8(_NAMESPACE, _SAFETY_CHECK_LEVEL, level)
 
 
+@storage.cache.stored(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES)
+def _get_experimental_features() -> bytes:
+    if common.get_bool(_NAMESPACE, _EXPERIMENTAL_FEATURES):
+        return b"\x01"
+    else:
+        return b""
+
+
 def get_experimental_features() -> bool:
-    return common.get_bool(_NAMESPACE, _EXPERIMENTAL_FEATURES)
+    return bool(_get_experimental_features())
 
 
 def set_experimental_features(enabled: bool) -> None:
+    cached_bytes = b"\x01" if enabled else b""
+    storage.cache.set(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES, cached_bytes)
     common.set_true_or_delete(_NAMESPACE, _EXPERIMENTAL_FEATURES, enabled)

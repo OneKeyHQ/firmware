@@ -26,9 +26,9 @@
 
 #define MAX_STARCOIN_ADDRESS_SIZE 34
 
-void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
+bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
                       StarcoinSignedTx *resp);
-void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
+bool starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
                            StarcoinMessageSignature *resp);
 bool starcoin_verify_message(const StarcoinVerifyMessage *msg);
 

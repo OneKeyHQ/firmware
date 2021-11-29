@@ -1,13 +1,23 @@
-from trezor.messages.EthereumPublicKey import EthereumPublicKey
-from trezor.messages.HDNodeType import HDNodeType
+from ubinascii import hexlify
 
-from apps.common import coins, layout, paths
+from trezor.messages import EthereumPublicKey, HDNodeType
+from trezor.ui.layouts import show_pubkey
+
+from apps.common import coins, paths
 
 from .keychain import with_keychain_from_path
 
+if False:
+    from trezor.messages import EthereumGetPublicKey
+    from trezor.wire import Context
+
+    from apps.common.keychain import Keychain
+
 
 @with_keychain_from_path(paths.PATTERN_BIP44_PUBKEY)
-async def get_public_key(ctx, msg, keychain):
+async def get_public_key(
+    ctx: Context, msg: EthereumGetPublicKey, keychain: Keychain
+) -> EthereumPublicKey:
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(msg.address_n)
 
@@ -27,6 +37,6 @@ async def get_public_key(ctx, msg, keychain):
     )
 
     if msg.show_display:
-        await layout.show_pubkey(ctx, pubkey)
+        await show_pubkey(ctx, hexlify(pubkey).decode())
 
     return EthereumPublicKey(node=node_type, xpub=node_xpub)

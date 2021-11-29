@@ -14,19 +14,14 @@ import gc
 
 from trezor import utils
 
-from apps.monero.layout import confirms
+from apps.monero import layout
 from apps.monero.xmr import crypto
 
 from .state import State
 
 if False:
-    from typing import List
-    from trezor.messages.MoneroTransactionSourceEntry import (
-        MoneroTransactionSourceEntry,
-    )
-    from trezor.messages.MoneroTransactionSignInputAck import (
-        MoneroTransactionSignInputAck,
-    )
+    from trezor.messages import MoneroTransactionSourceEntry
+    from trezor.messages import MoneroTransactionSignInputAck
 
 
 async def sign_input(
@@ -53,9 +48,7 @@ async def sign_input(
     :param orig_idx: original index of the src_entr before sorting (HMAC check)
     :return: Generated signature MGs[i]
     """
-    await confirms.transaction_step(
-        state, state.STEP_SIGN, state.current_input_index + 1
-    )
+    await layout.transaction_step(state, state.STEP_SIGN, state.current_input_index + 1)
 
     state.current_input_index += 1
     if state.last_step not in (state.STEP_ALL_OUT, state.STEP_SIGN):
@@ -208,9 +201,7 @@ async def sign_input(
     del (CtKey, input_secret_key, pseudo_out_alpha, mlsag, ring_pubkeys)
     state.mem_trace(6, True)
 
-    from trezor.messages.MoneroTransactionSignInputAck import (
-        MoneroTransactionSignInputAck,
-    )
+    from trezor.messages import MoneroTransactionSignInputAck
 
     # Encrypt signature, reveal once protocol finishes OK
     if state.client_version >= 3:
@@ -225,7 +216,7 @@ async def sign_input(
     )
 
 
-def _protect_signature(state: State, mg_buffer: List[bytes]) -> List[bytes]:
+def _protect_signature(state: State, mg_buffer: list[bytes]) -> list[bytes]:
     """
     Encrypts the signature with keys derived from state.opening_key.
     After protocol finishes without error, opening_key is sent to the
@@ -248,11 +239,9 @@ def _protect_signature(state: State, mg_buffer: List[bytes]) -> List[bytes]:
 
     cipher = chacha20poly1305(key, nonce)
 
-    """
-    cipher.update() input has to be 512 bit long (besides the last block).
-    Thus we go over mg_buffer and buffer 512 bit input blocks before
-    calling cipher.update().
-    """
+    # cipher.update() input has to be 512 bit long (besides the last block).
+    # Thus we go over mg_buffer and buffer 512 bit input blocks before
+    # calling cipher.update().
     CHACHA_BLOCK = 64  # 512 bit chacha key-stream block size
     buff = bytearray(CHACHA_BLOCK)
     buff_len = 0  # valid bytes in the block buffer

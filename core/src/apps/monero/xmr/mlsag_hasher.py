@@ -2,7 +2,6 @@ from apps.monero.xmr import crypto
 from apps.monero.xmr.keccak_hasher import KeccakXmrArchive
 
 if False:
-    from typing import List, Union
     from apps.monero.xmr.serialize_messages.tx_rsig_bulletproof import Bulletproof
 
 
@@ -34,13 +33,13 @@ class PreMlsagHasher:
         self.rtcsig_hasher.uvarint(fee)  # UVarintType
 
     def set_ecdh(self, ecdh: bytes):
-        if self.state != 2 and self.state != 3 and self.state != 4:
+        if self.state not in (2, 3, 4):
             raise ValueError("State error")
         self.state = 4
         self.rtcsig_hasher.buffer(ecdh)
 
     def set_out_pk_commitment(self, out_pk_commitment: bytes):
-        if self.state != 4 and self.state != 5:
+        if self.state not in (4, 5):
             raise ValueError("State error")
         self.state = 5
         self.rtcsig_hasher.buffer(out_pk_commitment)  # ECKey
@@ -54,7 +53,7 @@ class PreMlsagHasher:
         self.kc_master.update(c_hash)
         self.rtcsig_hasher = None
 
-    def rsig_val(self, p: Union[bytes, List[bytes], Bulletproof], raw: bool = False):
+    def rsig_val(self, p: bytes | list[bytes] | Bulletproof, raw: bool = False):
         if self.state == 8:
             raise ValueError("State error")
 

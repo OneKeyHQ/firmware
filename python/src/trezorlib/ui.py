@@ -15,20 +15,25 @@
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import os
+from typing import Any, Callable, Optional, Union
 
 import click
 from mnemonic import Mnemonic
+from typing_extensions import Protocol
 
-from . import device
-from .client import PASSPHRASE_ON_DEVICE
+from . import device, messages
+from .client import MAX_PIN_LENGTH, PASSPHRASE_ON_DEVICE
 from .exceptions import Cancelled
 from .messages import PinMatrixRequestType, WordRequestType
 
 PIN_MATRIX_DESCRIPTION = """
-Use the numeric keypad to describe number positions. The layout is:
-    7 8 9
-    4 5 6
-    1 2 3
+Use the numeric keypad or lowercase letters to describe number positions.
+
+The layout is:
+
+    7 8 9        e r t
+    4 5 6  -or-  d f g
+    1 2 3        c v b
 """.strip()
 
 RECOVERY_MATRIX_DESCRIPTION = """
@@ -50,28 +55,41 @@ WIPE_CODE_NEW = PinMatrixRequestType.WipeCodeFirst
 WIPE_CODE_CONFIRM = PinMatrixRequestType.WipeCodeSecond
 
 
-def echo(*args, **kwargs):
+class TrezorClientUI(Protocol):
+    def button_request(self, br: messages.ButtonRequest) -> None:
+        ...
+
+    def get_pin(self, code: Optional[PinMatrixRequestType]) -> str:
+        ...
+
+    def get_passphrase(self, available_on_device: bool) -> Union[str, object]:
+        ...
+
+
+def echo(*args: Any, **kwargs: Any) -> None:
     return click.echo(*args, err=True, **kwargs)
 
 
-def prompt(*args, **kwargs):
+def prompt(*args: Any, **kwargs: Any) -> Any:
     return click.prompt(*args, err=True, **kwargs)
 
 
 class ClickUI:
-    def __init__(self, always_prompt=False, passphrase_on_host=False):
+    def __init__(
+        self, always_prompt: bool = False, passphrase_on_host: bool = False
+    ) -> None:
         self.pinmatrix_shown = False
         self.prompt_shown = False
         self.always_prompt = always_prompt
         self.passphrase_on_host = passphrase_on_host
 
-    def button_request(self, code):
+    def button_request(self, _br: messages.ButtonRequest) -> None:
         if not self.prompt_shown:
             echo("Please confirm action on your Trezor device.")
         if not self.always_prompt:
             self.prompt_shown = True
 
-    def get_pin(self, code=None):
+    def get_pin(self, code: Optional[PinMatrixRequestType] = None) -> str:
         if code == PIN_CURRENT:
             desc = "current PIN"
         elif code == PIN_NEW:
@@ -92,23 +110,31 @@ class ClickUI:
 
         while True:
             try:
-                pin = prompt("Please enter {}".format(desc), hide_input=True)
+                pin = prompt(f"Please enter {desc}", hide_input=True)
             except click.Abort:
                 raise Cancelled from None
+
+            # translate letters to numbers if letters were used
+            if all(d in "cvbdfgert" for d in pin):
+                pin = pin.translate(str.maketrans("cvbdfgert", "123456789"))
+
             if any(d not in "123456789" for d in pin):
-                echo("The value may only consist of digits 1 to 9.")
-            elif len(pin) > 9:
-                echo("The value must be at most 9 digits in length.")
+                echo(
+                    "The value may only consist of digits 1 to 9 or letters cvbdfgert."
+                )
+            elif len(pin) > MAX_PIN_LENGTH:
+                echo(f"The value must be at most {MAX_PIN_LENGTH} digits in length.")
             else:
                 return pin
 
-    def get_passphrase(self, available_on_device):
+    def get_passphrase(self, available_on_device: bool) -> Union[str, object]:
         if available_on_device and not self.passphrase_on_host:
             return PASSPHRASE_ON_DEVICE
 
-        if os.getenv("PASSPHRASE") is not None:
+        env_passphrase = os.getenv("PASSPHRASE")
+        if env_passphrase is not None:
             echo("Passphrase required. Using PASSPHRASE environment variable.")
-            return os.getenv("PASSPHRASE")
+            return env_passphrase
 
         while True:
             try:
@@ -132,13 +158,15 @@ class ClickUI:
                 raise Cancelled from None
 
 
-def mnemonic_words(expand=False, language="english"):
+def mnemonic_words(
+    expand: bool = False, language: str = "english"
+) -> Callable[[WordRequestType], str]:
     if expand:
         wordlist = Mnemonic(language).wordlist
     else:
-        wordlist = set()
+        wordlist = []
 
-    def expand_word(word):
+    def expand_word(word: str) -> str:
         if not expand:
             return word
         if word in wordlist:
@@ -149,7 +177,7 @@ def mnemonic_words(expand=False, language="english"):
         echo("Choose one of: " + ", ".join(matches))
         raise KeyError(word)
 
-    def get_word(type):
+    def get_word(type: WordRequestType) -> str:
         assert type == WordRequestType.Plain
         while True:
             try:
@@ -163,7 +191,7 @@ def mnemonic_words(expand=False, language="english"):
     return get_word
 
 
-def matrix_words(type):
+def matrix_words(type: WordRequestType) -> str:
     while True:
         try:
             ch = click.getchar()

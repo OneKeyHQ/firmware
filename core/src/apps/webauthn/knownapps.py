@@ -3,17 +3,13 @@
 # flake8: noqa
 
 
-if False:
-    from typing import Optional
-
-
 class FIDOApp:
     def __init__(
         self,
         label: str,
-        icon: Optional[str],
-        use_sign_count: Optional[bool],
-        use_self_attestation: Optional[bool],
+        icon: str | None,
+        use_sign_count: bool | None,
+        use_self_attestation: bool | None,
     ) -> None:
         self.label = label
         self.icon = icon
@@ -22,7 +18,7 @@ class FIDOApp:
 
 
 # fmt: off
-def by_rp_id_hash(rp_id_hash: bytes) -> Optional[FIDOApp]:
+def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
     if False:
         raise RuntimeError  # if false
     elif rp_id_hash == b"\x96\x89\x78\xa2\x99\x53\xde\x52\xd3\xef\x0f\x0c\x71\xb7\xb7\xb6\xb1\xaf\x9f\x08\xe2\x57\x89\x6a\x8d\x81\x26\x91\x85\x30\x29\x3b":
@@ -37,6 +33,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> Optional[FIDOApp]:
         # WebAuthn key for Binance
         return FIDOApp(
             label="www.binance.com",
+            icon="apps/webauthn/res/icon_binance.toif",
+            use_sign_count=False,
+            use_self_attestation=True,
+        )
+    elif rp_id_hash == b"\x20\xf6\x61\xb1\x94\x0c\x34\x70\xac\x54\xfa\x2e\xb4\x99\x90\xfd\x33\xb5\x6d\xe8\xde\x60\x18\x70\xff\x02\xa8\x06\x0f\x3b\x7c\x58":
+        # WebAuthn key for Binance
+        return FIDOApp(
+            label="binance.com",
             icon="apps/webauthn/res/icon_binance.toif",
             use_sign_count=False,
             use_self_attestation=True,
@@ -62,6 +66,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> Optional[FIDOApp]:
         return FIDOApp(
             label="vault.bitwarden.com",
             icon="apps/webauthn/res/icon_bitwarden.toif",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
+    elif rp_id_hash == b"\xe2\x7d\x61\xb4\xe9\x9d\xe0\xed\x98\x16\x3c\xb3\x8b\x7a\xf9\x33\xc6\x66\x5e\x55\x09\xe8\x49\x08\x37\x05\x58\x13\x77\x8e\x23\x6a":
+        # WebAuthn key for Coinbase
+        return FIDOApp(
+            label="coinbase.com",
+            icon="apps/webauthn/res/icon_coinbase.toif",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -136,6 +148,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> Optional[FIDOApp]:
             icon="apps/webauthn/res/icon_gandi.toif",
             use_sign_count=False,
             use_self_attestation=None,
+        )
+    elif rp_id_hash == b"\x86\x06\xc1\x68\xe5\x1f\xc1\x31\xe5\x46\xad\x57\xa1\x9f\x32\x97\xb1\x1e\x0e\x5c\xe8\x3e\x8e\x89\x31\xb2\x85\x08\x11\xcf\xa8\x81":
+        # WebAuthn key for Gemini
+        return FIDOApp(
+            label="gemini.com",
+            icon="apps/webauthn/res/icon_gemini.toif",
+            use_sign_count=False,
+            use_self_attestation=True,
         )
     elif rp_id_hash == b"\x70\x61\x7d\xfe\xd0\x65\x86\x3a\xf4\x7c\x15\x55\x6c\x91\x79\x88\x80\x82\x8c\xc4\x07\xfd\xf7\x0a\xe8\x50\x11\x56\x94\x65\xa0\x75":
         # U2F key for GitHub
@@ -214,6 +234,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> Optional[FIDOApp]:
         return FIDOApp(
             label="mojeid.cz",
             icon="apps/webauthn/res/icon_mojeid.toif",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
+    elif rp_id_hash == b"\x85\x71\x01\x36\x1b\x20\xa9\x54\x4c\xdb\x9b\xef\x65\x85\x8b\x6b\xac\x70\x13\x55\x0d\x8f\x84\xf7\xef\xee\x25\x2b\x96\xfa\x7c\x1e":
+        # WebAuthn key for Namecheap
+        return FIDOApp(
+            label="www.namecheap.com",
+            icon="apps/webauthn/res/icon_namecheap.toif",
             use_sign_count=None,
             use_self_attestation=None,
         )

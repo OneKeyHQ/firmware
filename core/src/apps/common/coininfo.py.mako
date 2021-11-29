@@ -2,10 +2,10 @@
 # do not edit manually!
 from trezor import utils
 from trezor.crypto.base58 import blake256d_32, groestl512d_32, keccak_32, sha256d_32
-from trezor.crypto.scripts import blake256_ripemd160_digest, sha256_ripemd160_digest
+from trezor.crypto.scripts import blake256_ripemd160, sha256_ripemd160
 
 if False:
-    from typing import Any, Dict, Optional
+    from typing import Any, Type
 
 # flake8: noqa
 
@@ -21,13 +21,16 @@ class CoinInfo:
         maxfee_kb: int,
         signed_message_header: str,
         xpub_magic: int,
-        xpub_magic_segwit_p2sh: Optional[int],
-        xpub_magic_segwit_native: Optional[int],
-        bech32_prefix: Optional[str],
-        cashaddr_prefix: Optional[str],
+        xpub_magic_segwit_p2sh: int | None,
+        xpub_magic_segwit_native: int | None,
+        xpub_magic_multisig_segwit_p2sh: int | None,
+        xpub_magic_multisig_segwit_native: int | None,
+        bech32_prefix: str | None,
+        cashaddr_prefix: str | None,
         slip44: int,
         segwit: bool,
-        fork_id: Optional[int],
+        taproot: bool,
+        fork_id: int | None,
         force_bip143: bool,
         decred: bool,
         negative_fee: bool,
@@ -35,7 +38,7 @@ class CoinInfo:
         extra_data: bool,
         timestamp: bool,
         overwintered: bool,
-        confidential_assets: Optional[Dict[str, Any]],
+        confidential_assets: dict[str, Any] | None,
     ) -> None:
         self.coin_name = coin_name
         self.coin_shortcut = coin_shortcut
@@ -47,10 +50,13 @@ class CoinInfo:
         self.xpub_magic = xpub_magic
         self.xpub_magic_segwit_p2sh = xpub_magic_segwit_p2sh
         self.xpub_magic_segwit_native = xpub_magic_segwit_native
+        self.xpub_magic_multisig_segwit_p2sh = xpub_magic_multisig_segwit_p2sh
+        self.xpub_magic_multisig_segwit_native = xpub_magic_multisig_segwit_native
         self.bech32_prefix = bech32_prefix
         self.cashaddr_prefix = cashaddr_prefix
         self.slip44 = slip44
         self.segwit = segwit
+        self.taproot = taproot
         self.fork_id = fork_id
         self.force_bip143 = force_bip143
         self.decred = decred
@@ -63,19 +69,19 @@ class CoinInfo:
         if curve_name == "secp256k1-groestl":
             self.b58_hash = groestl512d_32
             self.sign_hash_double = False
-            self.script_hash = sha256_ripemd160_digest
+            self.script_hash: Type[utils.HashContext] = sha256_ripemd160
         elif curve_name == "secp256k1-decred":
             self.b58_hash = blake256d_32
             self.sign_hash_double = False
-            self.script_hash = blake256_ripemd160_digest
+            self.script_hash = blake256_ripemd160
         elif curve_name == "secp256k1-smart":
             self.b58_hash = keccak_32
             self.sign_hash_double = False
-            self.script_hash = sha256_ripemd160_digest
+            self.script_hash = sha256_ripemd160
         else:
             self.b58_hash = sha256d_32
             self.sign_hash_double = True
-            self.script_hash = sha256_ripemd160_digest
+            self.script_hash = sha256_ripemd160
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, CoinInfo):
@@ -107,10 +113,13 @@ ATTRIBUTES = (
     ("xpub_magic", hexfmt),
     ("xpub_magic_segwit_p2sh", hexfmt),
     ("xpub_magic_segwit_native", hexfmt),
+    ("xpub_magic_multisig_segwit_p2sh", hexfmt),
+    ("xpub_magic_multisig_segwit_native", hexfmt),
     ("bech32_prefix", black_repr),
     ("cashaddr_prefix", black_repr),
     ("slip44", int),
     ("segwit", bool),
+    ("taproot", bool),
     ("fork_id", black_repr),
     ("force_bip143", bool),
     ("decred", bool),
@@ -153,4 +162,4 @@ def by_name(name: str) -> CoinInfo:
                 % endfor
             )
 % endfor
-    raise ValueError('Unknown coin name "%s"' % name)
+    raise ValueError  # Unknown coin name

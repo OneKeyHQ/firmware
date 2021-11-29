@@ -1,11 +1,7 @@
 import storage.recovery
-from trezor.messages import BackupType
+from trezor.enums import BackupType
 
 from . import recover
-
-if False:
-    from typing import List, Optional
-    from trezor.messages.ResetDevice import EnumTypeBackupType
 
 
 class WordValidityResult(Exception):
@@ -24,9 +20,7 @@ class ThresholdReached(WordValidityResult):
     pass
 
 
-def check(
-    backup_type: Optional[EnumTypeBackupType], partial_mnemonic: List[str]
-) -> None:
+def check(backup_type: BackupType | None, partial_mnemonic: list[str]) -> None:
     # we can't perform any checks if the backup type was not yet decided
     if backup_type is None:
         return
@@ -49,7 +43,7 @@ def check(
 
 
 def check_slip39_basic(
-    partial_mnemonic: List[str], previous_mnemonics: List[List[str]]
+    partial_mnemonic: list[str], previous_mnemonics: list[list[str]]
 ) -> None:
     # check if first 3 words of mnemonic match
     # we can check against the first one, others were checked already
@@ -68,7 +62,7 @@ def check_slip39_basic(
 
 
 def check_slip39_advanced(
-    partial_mnemonic: List[str], previous_mnemonics: List[List[str]]
+    partial_mnemonic: list[str], previous_mnemonics: list[list[str]]
 ) -> None:
     current_index = len(partial_mnemonic) - 1
     current_word = partial_mnemonic[-1]

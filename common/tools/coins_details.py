@@ -14,19 +14,15 @@ import marketcap
 LOG = logging.getLogger(__name__)
 
 OPTIONAL_KEYS = ("links", "notes", "wallet")
-ALLOWED_SUPPORT_STATUS = ("yes", "no", "planned", "soon")
+ALLOWED_SUPPORT_STATUS = ("yes", "no")
 
 WALLETS = coin_info.load_json("wallets.json")
 OVERRIDES = coin_info.load_json("coins_details.override.json")
 VERSIONS = coin_info.latest_releases()
 
 # automatic wallet entries
-WALLET_TREZOR = {"Trezor Wallet": "https://wallet.trezor.io"}
-WALLET_ETH_TREZOR = {"Trezor Suite": "https://suite.trezor.io"}
-WALLET_NEM = {
-    "Nano Wallet": "https://nem.io/downloads/",
-    "Magnum": "https://magnumwallet.co",
-}
+WALLET_SUITE = {"Trezor Suite": "https://suite.trezor.io"}
+WALLET_NEM = {"Nano Wallet": "https://nem.io/downloads/"}
 WALLETS_ETH_3RDPARTY = {
     "MyEtherWallet": "https://www.myetherwallet.com",
     "MyCrypto": "https://mycrypto.com",
@@ -68,6 +64,7 @@ def summary(coins, api_key):
     except Exception:
         pass
 
+    marketcap_percent = 100 * supported_marketcap / total_marketcap
     return dict(
         updated_at=int(time.time()),
         updated_at_readable=time.asctime(),
@@ -75,35 +72,24 @@ def summary(coins, api_key):
         t2_coins=t2_coins,
         marketcap_usd=supported_marketcap,
         total_marketcap_usd=total_marketcap,
-        marketcap_supported="{:.02f} %".format(
-            100 * supported_marketcap / total_marketcap
-        ),
+        marketcap_supported=f"{marketcap_percent:.02f} %",
     )
 
 
 def _is_supported(support, trezor_version):
-    version = VERSIONS[trezor_version]
-    nominal = support.get(trezor_version)
-    if nominal is None:
-        return "no"
-    elif isinstance(nominal, bool):
-        return "yes" if nominal else "no"
-
-    try:
-        nominal_version = tuple(map(int, nominal.split(".")))
-        return "yes" if nominal_version <= version else "soon"
-    except ValueError:
-        return nominal
+    # True or version string means YES
+    # False or None means NO
+    return "yes" if support.get(trezor_version) else "no"
 
 
-def _webwallet_support(coin, support):
-    """Check the "webwallet" support property.
+def _suite_support(coin, support):
+    """Check the "suite" support property.
     If set, check that at least one of the backends run on trezor.io.
     If yes, assume we support the coin in our wallet.
     Otherwise it's probably working with a custom backend, which means don't
     link to our wallet.
     """
-    if not support.get("webwallet"):
+    if not support.get("suite"):
         return False
     return any(".trezor.io" in url for url in coin["blockbook"])
 
@@ -150,7 +136,7 @@ def update_bitcoin(coins, support_info):
         details = dict(
             name=coin["coin_label"],
             links=dict(Homepage=coin["website"], Github=coin["github"]),
-            wallet=WALLET_TREZOR if _webwallet_support(coin, support) else {},
+            wallet=WALLET_SUITE if _suite_support(coin, support) else {},
         )
         dict_merge(res[key], details)
 
@@ -172,8 +158,8 @@ def update_erc20(coins, networks, support_info):
         if "deprecation" in coin:
             hidden = True
 
-        if network_support.get(chain, {}).get("webwallet"):
-            wallets = WALLET_ETH_TREZOR
+        if network_support.get(chain, {}).get("suite"):
+            wallets = WALLET_SUITE
         else:
             wallets = WALLETS_ETH_3RDPARTY
 
@@ -200,8 +186,8 @@ def update_ethereum_networks(coins, support_info):
     res = update_simple(coins, support_info, "coin")
     for coin in coins:
         key = coin["key"]
-        if support_info[key].get("webwallet"):
-            wallets = WALLET_ETH_TREZOR
+        if support_info[key].get("suite"):
+            wallets = WALLET_SUITE
         else:
             wallets = WALLETS_ETH_3RDPARTY
         details = dict(links=dict(Homepage=coin.get("url")), wallet=wallets)
@@ -231,10 +217,10 @@ def check_missing_data(coins):
             LOG.log(level, f"{k}: Missing homepage")
             hide = True
         if coin["t1_enabled"] not in ALLOWED_SUPPORT_STATUS:
-            LOG.warning(f"{k}: Unknown t1_enabled")
+            LOG.error(f"{k}: Unknown t1_enabled: {coin['t1_enabled']}")
             hide = True
         if coin["t2_enabled"] not in ALLOWED_SUPPORT_STATUS:
-            LOG.warning(f"{k}: Unknown t2_enabled")
+            LOG.error(f"{k}: Unknown t2_enabled: {coin['t2_enabled']}")
             hide = True
 
         # check wallets
@@ -263,13 +249,15 @@ def check_missing_data(coins):
             LOG.info(f"{k}: Details are OK, but coin is still hidden")
 
         if hide:
+            data = marketcap.get_coin(coin)
+            if data and data["cmc_rank"] < 150 and not coin.get("ignore_cmc_rank"):
+                LOG.warning(f"{k}: Hiding coin ranked {data['cmc_rank']} on CMC")
             coin["hidden"] = 1
 
     # summary of hidden coins
     hidden_coins = [k for k, coin in coins.items() if coin.get("hidden")]
     for key in hidden_coins:
         del coins[key]
-        LOG.debug(f"{key}: Coin is hidden")
 
 
 def apply_overrides(coins):
@@ -314,7 +302,7 @@ def main(refresh, api_key, verbose):
 
     marketcap.init(api_key, refresh=refresh)
 
-    defs = coin_info.coin_info()
+    defs, _ = coin_info.coin_info_with_duplicates()
     support_info = coin_info.support_info(defs)
 
     coins = {}

@@ -1,29 +1,41 @@
 image: registry.gitlab.com/satoshilabs/trezor/trezor-firmware/trezor-firmware-env.nix
 
+# Caching
+.gitlab_caching: &gitlab_caching
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .venv/
+
 style prebuild:
   stage: prebuild
   variables:
     GIT_SUBMODULE_STRATEGY: "none"
+  <<: *gitlab_caching
   script:
     - nix-shell --run "poetry run make style_check"
 
 common prebuild:
   stage: prebuild
+  <<: *gitlab_caching
   script:
     - nix-shell --run "poetry run make defs_check"
 
 gen prebuild:
   stage: prebuild
+  <<: *gitlab_caching
   script:
     - nix-shell --run "poetry run make gen_check"
 
 editor prebuild:
   stage: prebuild
+  <<: *gitlab_caching
   script:
     - nix-shell --run "make editor_check"
 
 yaml prebuild:
   stage: prebuild
+  <<: *gitlab_caching
   script:
     - nix-shell --run "poetry run make yaml_check"
 
@@ -41,3 +53,14 @@ release commit messages prebuild:
       - $CI_PROJECT_PATH_SLUG == 'satoshilabs-trezor-trezor-firmware'
   script:
     - nix-shell --run "ci/check_release_commit_messages.sh"
+
+changelog prebuild:
+  stage: prebuild
+  except:
+    - master
+  before_script: []  # nothing needed
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
+    GIT_STRATEGY: clone
+  script:
+    - nix-shell --run "ci/check_changelog.sh"

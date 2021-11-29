@@ -14,11 +14,15 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+from typing import TYPE_CHECKING
 
 import click
 
 from .. import debuglink, device
 from . import with_client
+
+if TYPE_CHECKING:
+    from ..client import TrezorClient
 
 
 @click.group(name="bixin")
@@ -28,14 +32,14 @@ def cli():
 
 @cli.command()
 @with_client
-def self_test(client):
+def self_test(client: "TrezorClient"):
     """Perform a self-test."""
     return debuglink.self_test(client)
 
 
 @cli.command()
 @with_client
-def backup(client):
+def backup(client: "TrezorClient"):
     """Perform device seed backup."""
     ret = device.se_backup(client)
     return "data: {}".format(ret.hex())
@@ -48,7 +52,11 @@ def backup(client):
 @click.argument("passphrase_protection")
 @with_client
 def restore(
-    client, hex_data, language="en-US", label="BiXin Key", passphrase_protection=True
+    client: "TrezorClient",
+    hex_data: str,
+    language: str = "en-US",
+    label: str = "BiXin Key",
+    passphrase_protection: bool = True,
 ):
     """Perform device seed restore."""
     return device.se_restore(
@@ -63,7 +71,7 @@ def restore(
 @cli.command()
 @click.argument("data")
 @with_client
-def verify(client, data):
+def verify(client: "TrezorClient", data: str):
     """Perform device verify."""
     from hashlib import sha256
 
@@ -78,7 +86,13 @@ def verify(client, data):
 @click.option("-l", "--pay-limit", type=int)
 @click.option("-t", "--pay-times", type=int, default=10, help="pay times")
 @with_client
-def free(client, no_pin, no_confirm, pay_limit, pay_times):
+def free(
+    client: "TrezorClient",
+    no_pin: bool,
+    no_confirm: bool,
+    pay_limit: int,
+    pay_times: int,
+):
     """set pay no pin or no confirm"""
     return device.apply_settings(
         client,

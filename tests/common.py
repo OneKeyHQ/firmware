@@ -61,6 +61,12 @@ def parametrize_using_common_fixtures(*paths):
     tests = []
     for fixture in fixtures:
         for test in fixture["tests"]:
+            test_id = test.get("name")
+            if not test_id:
+                test_id = test.get("description")
+                if test_id is not None:
+                    test_id = test_id.lower().replace(" ", "_")
+
             tests.append(
                 pytest.param(
                     test["parameters"],
@@ -69,6 +75,7 @@ def parametrize_using_common_fixtures(*paths):
                         passphrase=fixture["setup"]["passphrase"],
                         mnemonic=fixture["setup"]["mnemonic"],
                     ),
+                    id=test_id,
                 )
             )
 
@@ -123,16 +130,16 @@ def recovery_enter_shares(debug, shares, groups=False):
     yield
     debug.press_yes()
     # Input word number
-    code = yield
-    assert code == B.MnemonicWordCount
+    br = yield
+    assert br.code == B.MnemonicWordCount
     debug.input(str(word_count))
     # Homescreen - proceed to share entry
     yield
     debug.press_yes()
     # Enter shares
-    for index, share in enumerate(shares):
-        code = yield
-        assert code == B.MnemonicInput
+    for share in shares:
+        br = yield
+        assert br.code == B.MnemonicInput
         # Enter mnemonic words
         for word in share.split(" "):
             debug.input(word)
@@ -164,11 +171,11 @@ def click_through(debug, screens, code=None):
     for _ in range(screens):
         received = yield
         if code is not None:
-            assert received == code
+            assert received.code == code
         debug.press_yes()
 
 
-def read_and_confirm_mnemonic(debug, words):
+def read_and_confirm_mnemonic(debug, choose_wrong=False):
     """Read a given number of mnemonic words from Trezor T screen and correctly
     answer confirmation questions. Return the full mnemonic.
 
@@ -178,23 +185,26 @@ def read_and_confirm_mnemonic(debug, words):
     def input_flow():
         yield from click_through(client.debug, screens=3)
 
-        yield  # confirm mnemonic entry
-        mnemonic = read_and_confirm_mnemonic(client.debug, words=20)
+        mnemonic = yield from read_and_confirm_mnemonic(client.debug)
     """
     mnemonic = []
-    while True:
+    br = yield
+    for _ in range(br.pages - 1):
         mnemonic.extend(debug.read_reset_word().split())
-        if len(mnemonic) < words:
-            debug.swipe_up()
-        else:
-            # last page is confirmation
-            debug.press_yes()
-            break
+        debug.swipe_up(wait=True)
+
+    # last page is confirmation
+    mnemonic.extend(debug.read_reset_word().split())
+    debug.press_yes()
 
     # check share
     for _ in range(3):
         index = debug.read_reset_word_pos()
-        debug.input(mnemonic[index])
+        if choose_wrong:
+            debug.input(mnemonic[(index + 1) % len(mnemonic)])
+            return None
+        else:
+            debug.input(mnemonic[index])
 
     return " ".join(mnemonic)
 

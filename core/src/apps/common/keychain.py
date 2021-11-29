@@ -11,17 +11,12 @@ if False:
         Any,
         Awaitable,
         Callable,
-        Dict,
         Iterable,
-        List,
-        Optional,
-        Tuple,
         TypeVar,
-        Union,
     )
     from typing_extensions import Protocol
 
-    from protobuf import MessageType
+    from trezor.protobuf import MessageType
 
     T = TypeVar("T")
 
@@ -54,8 +49,8 @@ FORBIDDEN_KEY_PATH = wire.DataError("Forbidden key path")
 class LRUCache:
     def __init__(self, size: int) -> None:
         self.size = size
-        self.cache_keys: List[Any] = []
-        self.cache: Dict[Any, Deletable] = {}
+        self.cache_keys: list[Any] = []
+        self.cache: dict[Any, Deletable] = {}
 
     def insert(self, key: Any, value: Deletable) -> None:
         if key in self.cache_keys:
@@ -98,7 +93,7 @@ class Keychain:
         self.slip21_namespaces = tuple(slip21_namespaces)
 
         self._cache = LRUCache(10)
-        self._root_fingerprint: Optional[int] = None
+        self._root_fingerprint: int | None = None
 
     def __del__(self) -> None:
         self._cache.__del__()
@@ -127,7 +122,7 @@ class Keychain:
         new_root: Callable[[], NodeType],
     ) -> NodeType:
         cached_prefix = tuple(path[:prefix_len])
-        cached_root: Optional[NodeType] = self._cache.get(cached_prefix)
+        cached_root: NodeType | None = self._cache.get(cached_prefix)
         if cached_root is None:
             cached_root = new_root()
             cached_root.derive_path(cached_prefix)
@@ -196,13 +191,14 @@ def with_slip44_keychain(
         raise ValueError  # specify a pattern
 
     if allow_testnet:
-        slip44_ids: Union[int, Tuple[int, int]] = (slip44_id, 1)
+        slip44_ids: int | tuple[int, int] = (slip44_id, 1)
     else:
         slip44_ids = slip44_id
 
     schemas = []
     for pattern in patterns:
-        schemas.append(paths.PathSchema(pattern=pattern, slip44_id=slip44_ids))
+        schemas.append(paths.PathSchema.parse(pattern=pattern, slip44_id=slip44_ids))
+    schemas = [s.copy() for s in schemas]
 
     def decorator(func: HandlerWithKeychain[MsgIn, MsgOut]) -> Handler[MsgIn, MsgOut]:
         async def wrapper(ctx: wire.Context, msg: MsgIn) -> MsgOut:

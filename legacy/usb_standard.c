@@ -38,7 +38,7 @@ LGPL License Terms @ref lgpl_license
 
 #include <string.h>
 #include <libopencm3/usb/usbd.h>
-#include "common.h"
+#include "random_delays.h"
 #include "usb_private.h"
 #include "util.h"
 
@@ -202,7 +202,7 @@ usb_standard_get_descriptor(usbd_device *usbd_dev,
 				return USBD_REQ_NOTSUPP;
 			}
 
-			/* Strings with Language ID differnet from
+			/* Strings with Language ID different from
 			 * USB_LANGID_ENGLISH_US are not supported */
 			if (req->wIndex != USB_LANGID_ENGLISH_US) {
 				return USBD_REQ_NOTSUPP;
