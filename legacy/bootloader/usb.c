@@ -63,6 +63,8 @@ enum {
   STATE_END,
 };
 
+#define NORDIC_BLE_UPDATE 0
+
 #define UPDATE_BLE 0x5A
 #define UPDATE_ST 0x55
 uint32_t flash_pos = 0, flash_len = 0;
@@ -565,10 +567,15 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
 #else
       uint8_t *p_init = (uint8_t *)FLASH_INIT_DATA_START;
       uint32_t init_data_len = p_init[0] + (p_init[1] << 8);
-
+#if NORDIC_BLE_UPDATE
       update_status = updateBle(p_init + 4, init_data_len,
                                 (uint8_t *)FLASH_BLE_FIRMWARE_START,
                                 fw_len - FLASH_INIT_DATA_LEN);
+#else
+      (void)fw_len;
+      (void)init_data_len;
+      update_status = false;
+#endif
 #endif
       if (update_status == false) {
         layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "ble installation",
