@@ -8,6 +8,7 @@ CORE_PROTOBUF_SOURCES="\
     $PROTOB/messages-binance.proto \
     $PROTOB/messages-bitcoin.proto \
     $PROTOB/messages-cardano.proto \
+    $PROTOB/messages-conflux.proto \
     $PROTOB/messages-common.proto \
     $PROTOB/messages-crypto.proto \
     $PROTOB/messages-debug.proto \

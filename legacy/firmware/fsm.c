@@ -60,6 +60,7 @@
 #include "rtt_log.h"
 
 #if !BITCOIN_ONLY
+#include "conflux.h"
 #include "ethereum.h"
 #include "lisk.h"
 #include "nem.h"
@@ -330,7 +331,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
 #include "fsm_msg_debug.h"
 
 #if !BITCOIN_ONLY
-
+#include "fsm_msg_conflux.h"
 #include "fsm_msg_ethereum.h"
 
 #include "fsm_msg_lisk.h"

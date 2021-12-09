@@ -100,7 +100,7 @@ CFLAGS   += -include stdio.h
 LDFLAGS  += -L$(TOP_DIR)emulator
 
 LDLIBS   += -ltrezor -lemulator
-LIBDEPS  += $(TOP_DIR)/libtrezor.a $(TOP_DIR)emulator/libemulator.a
+LIBDEPS  += $(TOP_DIR)libtrezor.a $(TOP_DIR)emulator/libemulator.a
 
 CFLAGS   += $(shell pkg-config --cflags sdl2 SDL2_image)
 LDLIBS   += $(shell pkg-config --libs sdl2 SDL2_image)
@@ -112,9 +112,9 @@ endif
 else
 ifdef APPVER
 CFLAGS   += -DAPPVER=$(APPVER)
-LDSCRIPT  = $(TOP_DIR)/memory_app_$(APPVER).ld
+LDSCRIPT  = $(TOP_DIR)memory_app_$(APPVER).ld
 else
-LDSCRIPT  = $(TOP_DIR)/memory.ld
+LDSCRIPT  = $(TOP_DIR)memory.ld
 endif
 
 CFLAGS   += -DEMULATOR=0
@@ -132,7 +132,7 @@ LDFLAGS  += --static \
             -Wl,-Map=$(NAME).map
 
 LDLIBS   += -ltrezor
-LIBDEPS  += $(TOP_DIR)/libtrezor.a
+LIBDEPS  += $(TOP_DIR)libtrezor.a
 
 LDLIBS   += -lopencm3_stm32f2
 LIBDEPS  += $(TOOLCHAIN_DIR)/lib/libopencm3_stm32f2.a

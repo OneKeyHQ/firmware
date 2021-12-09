@@ -37,6 +37,7 @@ OBJS += crypto.o
 
 ifneq ($(BITCOIN_ONLY),1)
 OBJS += u2f.o
+OBJS += conflux.o
 OBJS += ethereum.o
 OBJS += ethereum_tokens.o
 OBJS += lisk.o
@@ -116,6 +117,7 @@ OBJS += protob/messages-crypto.pb.o
 OBJS += protob/messages-debug.pb.o
 OBJS += protob/messages-management.pb.o
 ifneq ($(BITCOIN_ONLY),1)
+OBJS += protob/messages-conflux.pb.o
 OBJS += protob/messages-ethereum.pb.o
 OBJS += protob/messages-lisk.pb.o
 OBJS += protob/messages-nem.pb.o
