@@ -59,6 +59,14 @@ from .ChangePin import ChangePin
 from .ChangeWipeCode import ChangeWipeCode
 from .CipherKeyValue import CipherKeyValue
 from .CipheredKeyValue import CipheredKeyValue
+from .ConfluxAddress import ConfluxAddress
+from .ConfluxGetAddress import ConfluxGetAddress
+from .ConfluxMessageSignature import ConfluxMessageSignature
+from .ConfluxSignMessage import ConfluxSignMessage
+from .ConfluxSignMessageCIP23 import ConfluxSignMessageCIP23
+from .ConfluxSignTx import ConfluxSignTx
+from .ConfluxTxAck import ConfluxTxAck
+from .ConfluxTxRequest import ConfluxTxRequest
 from .CosiCommit import CosiCommit
 from .CosiCommitment import CosiCommitment
 from .CosiSign import CosiSign

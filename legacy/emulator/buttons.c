@@ -31,6 +31,12 @@ uint16_t buttonRead(void) {
   if (scancodes[SDL_SCANCODE_RIGHT]) {
     state |= BTN_PIN_YES;
   }
+  if (scancodes[SDL_SCANCODE_UP]) {
+    state |= BTN_PIN_UP;
+  }
+  if (scancodes[SDL_SCANCODE_DOWN]) {
+    state |= BTN_PIN_DOWN;
+  }
 
   return ~state;
 }

@@ -111,6 +111,16 @@ enum MessageType {
     MessageType_OwnershipProof = 50 [(wire_out) = true];
     MessageType_AuthorizeCoinJoin = 51 [(wire_in) = true];
 
+    // Conflux
+    MessageType_ConfluxGetAddress = 10112 [(wire_in) = true];
+    MessageType_ConfluxAddress = 10113 [(wire_out) = true];
+    MessageType_ConfluxSignTx = 10114 [(wire_in) = true];
+    MessageType_ConfluxTxRequest = 10115 [(wire_out) = true];
+    MessageType_ConfluxTxAck = 10116 [(wire_in) = true];
+    MessageType_ConfluxSignMessage = 10117 [(wire_in) = true];
+    MessageType_ConfluxSignMessageCIP23 = 10118 [(wire_in) = true];
+    MessageType_ConfluxMessageSignature = 10119 [(wire_out) = true];
+
     // Crypto
     MessageType_CipherKeyValue = 23 [(wire_in) = true];
     MessageType_CipheredKeyValue = 48 [(wire_out) = true];

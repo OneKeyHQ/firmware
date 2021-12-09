@@ -7,6 +7,7 @@ char* menu_para_shutdown(void);
 char* menu_para_autolock(void);
 char* menu_para_eth_eip_switch(void);
 char* menu_para_sol_switch(void);
+char* menu_para_cfx_cip_switch(void);
 
 void menu_para_set_ble(int index);
 void menu_para_set_language(int index);
