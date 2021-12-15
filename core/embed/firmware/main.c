@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "lib/utils/pyexec.h"
 #include "py/compile.h"
 #include "py/gc.h"
 #include "py/mperrno.h"
@@ -31,26 +30,36 @@
 #include "py/repl.h"
 #include "py/runtime.h"
 #include "py/stackctrl.h"
+#include "shared/runtime/pyexec.h"
 
 #include "ports/stm32/gccollect.h"
 #include "ports/stm32/pendsv.h"
 
 #include "bl_check.h"
+#include "button.h"
 #include "common.h"
+#include "compiler_traits.h"
 #include "display.h"
 #include "flash.h"
 #include "mpu.h"
-#ifdef RDI
-#include "rdi.h"
+#include "random_delays.h"
+#ifdef SYSTEM_VIEW
+#include "systemview.h"
 #endif
 #include "rng.h"
 #include "sdcard.h"
 #include "supervise.h"
 #include "touch.h"
+#ifdef USE_SECP256K1_ZKP
+#include "zkp_context.h"
+#endif
+
+// from util.s
+extern void shutdown_privileged(void);
 
 int main(void) {
-  // initialize pseudo-random number generator
-  drbg_init();
+  random_delays_init();
+
 #ifdef RDI
   rdi_start();
 #endif
@@ -61,6 +70,10 @@ int main(void) {
 #endif
 
   collect_hw_entropy();
+
+#ifdef SYSTEM_VIEW
+  enable_systemview();
+#endif
 
 #if TREZOR_MODEL == T
 #if PRODUCTION
@@ -75,10 +88,11 @@ int main(void) {
 
 #if TREZOR_MODEL == 1
   display_init();
-  touch_init();
+  button_init();
 #endif
 
 #if TREZOR_MODEL == T
+  // display_init_seq();
   sdcard_init();
   touch_init();
   touch_power_on();
@@ -89,6 +103,10 @@ int main(void) {
   __asm__ volatile("isb");
 
   display_clear();
+#endif
+
+#ifdef USE_SECP256K1_ZKP
+  ensure(sectrue * (zkp_context_init() == 0), NULL);
 #endif
 
   printf("CORE: Preparing stack\n");
@@ -168,6 +186,16 @@ void SVC_C_Handler(uint32_t *stack) {
       break;
     case SVC_SET_PRIORITY:
       NVIC_SetPriority(stack[0], stack[1]);
+      break;
+#ifdef SYSTEM_VIEW
+    case SVC_GET_DWT_CYCCNT:
+      cyccnt_cycles = *DWT_CYCCNT_ADDR;
+      break;
+#endif
+    case SVC_SHUTDOWN:
+      shutdown_privileged();
+      for (;;)
+        ;
       break;
     default:
       stack[0] = 0xffffffff;

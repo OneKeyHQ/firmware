@@ -27,26 +27,6 @@ Also please have a look at the docs, either in the `docs` folder or at [docs.one
 
 Please report suspected security vulnerabilities in private to [hi@onekey.so](mailto:hi@onekey.so), Please do NOT create publicly viewable issues for suspected security vulnerabilities.
 
-## Issue Labels
-
-### Priority
-
-Label     | Meaning (SLA)
-----------|--------------
-P0 Urgent | The current release + potentially immediate hotfix (7 days)
-P1 High   | The next release (30 days)
-P2 Medium | Within the next 3 releases (45 days)
-P3 Low    | Anything outside the next 3 releases (60 days)
-
-#### Severity
-
-Label       | Impact
-------------|-------
-S1 Blocker  | Outage, broken feature with no workaround
-S2 Critical | Broken feature, workaround too complex & unacceptable
-S3 Major    | Broken feature, workaround acceptable
-S4 Low      | Functionality inconvenience or cosmetic issue
-
 ## Documentation
 
 See the `docs` folder or visit [docs.onekey.so](https://docs.onekey.so/) .

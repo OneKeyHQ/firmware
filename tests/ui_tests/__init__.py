@@ -6,10 +6,13 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+from _pytest.outcomes import Failed
+from PIL import Image
 
 from .reporting import testreport
 
 UI_TESTS_DIR = Path(__file__).parent.resolve()
+SCREENS_DIR = UI_TESTS_DIR / "screens"
 HASH_FILE = UI_TESTS_DIR / "fixtures.json"
 SUGGESTION_FILE = UI_TESTS_DIR / "fixtures.suggestion.json"
 FILE_HASHES = {}
@@ -26,7 +29,9 @@ def get_test_name(node_id):
     # remove ::TestClass:: if present because it is usually the same as the test file name
     new_name = re.sub(r"::.*?::", "-", new_name)
     new_name = new_name.replace("/", "-")  # in case there is "/"
-    return new_name[:100]
+    if len(new_name) <= 100:
+        return new_name
+    return new_name[:91] + "-" + hashlib.sha256(new_name.encode()).hexdigest()[:8]
 
 
 def _process_recorded(screen_path, test_name):
@@ -42,19 +47,25 @@ def _rename_records(screen_path):
         record.replace(screen_path / f"{index:08}.png")
 
 
-def _hash_files(path):
+def _hash_files(path: Path) -> str:
     files = path.iterdir()
     hasher = hashlib.sha256()
     for file in sorted(files):
-        hasher.update(file.read_bytes())
+        hasher.update(_get_bytes_from_png(str(file)))
 
     return hasher.digest().hex()
 
 
+def _get_bytes_from_png(png_file: str) -> bytes:
+    """Decode a PNG file into bytes representing all the pixels.
+
+    Is necessary because Linux and Mac are using different PNG encoding libraries,
+    and we need the file hashes to be the same on both platforms.
+    """
+    return Image.open(png_file).tobytes()
+
+
 def _process_tested(fixture_test_path, test_name):
-    expected_hash = FILE_HASHES.get(test_name)
-    if expected_hash is None:
-        raise ValueError("Hash for '%s' not found in fixtures.json" % test_name)
     PROCESSED.add(test_name)
 
     actual_path = fixture_test_path / "actual"
@@ -63,15 +74,20 @@ def _process_tested(fixture_test_path, test_name):
 
     _rename_records(actual_path)
 
+    expected_hash = FILE_HASHES.get(test_name)
+    if expected_hash is None:
+        pytest.fail(f"Hash of {test_name} not found in fixtures.json")
+
     if actual_hash != expected_hash:
         file_path = testreport.failed(
             fixture_test_path, test_name, actual_hash, expected_hash
         )
 
         pytest.fail(
-            "Hash of {} differs.\nExpected:  {}\nActual:    {}\nDiff file: {}".format(
-                test_name, expected_hash, actual_hash, file_path
-            )
+            f"Hash of {test_name} differs.\n"
+            f"Expected:  {expected_hash}\n"
+            f"Actual:    {actual_hash}\n"
+            f"Diff file: {file_path}"
         )
     else:
         testreport.passed(fixture_test_path, test_name, actual_hash)
@@ -81,7 +97,7 @@ def _process_tested(fixture_test_path, test_name):
 def screen_recording(client, request):
     test_ui = request.config.getoption("ui")
     test_name = get_test_name(request.node.nodeid)
-    screens_test_path = UI_TESTS_DIR / "screens" / test_name
+    screens_test_path = SCREENS_DIR / test_name
 
     if test_ui == "record":
         screen_path = screens_test_path / "recorded"
@@ -97,12 +113,17 @@ def screen_recording(client, request):
     try:
         client.debug.start_recording(str(screen_path))
         yield
-        if test_ui == "record":
-            _process_recorded(screen_path, test_name)
-        else:
-            _process_tested(screens_test_path, test_name)
     finally:
+        # Wait for response to Initialize, which gives the emulator time to catch up
+        # and redraw the homescreen. Otherwise there's a race condition between that
+        # and stopping recording.
+        client.init_device()
         client.debug.stop_recording()
+
+    if test_ui == "record":
+        _process_recorded(screen_path, test_name)
+    else:
+        _process_tested(screens_test_path, test_name)
 
 
 def list_missing():
@@ -131,3 +152,18 @@ def _get_fixtures_content(fixtures: dict, remove_missing: bool):
         fixtures = fixtures
 
     return json.dumps(fixtures, indent="", sort_keys=True) + "\n"
+
+
+def main():
+    read_fixtures()
+    for record in SCREENS_DIR.iterdir():
+        if not (record / "actual").exists():
+            continue
+
+        try:
+            _process_tested(record, record.name)
+            print("PASSED:", record.name)
+        except Failed:
+            print("FAILED:", record.name)
+
+    testreport.index()

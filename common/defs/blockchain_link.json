@@ -249,7 +249,7 @@
       "https://eth2.trezor.io"
     ]
   },
-  "eth:ROP": {
+  "eth:tROP": {
     "type": "blockbook",
     "url": [
       "https://ropsten1.trezor.io",
@@ -268,6 +268,18 @@
     "type": "ripple",
     "url": [
       "wss://s.altnet.rippletest.net"
+    ]
+  },
+  "misc:ADA": {
+    "type": "blockfrost",
+    "url": [
+      "wss://trezor-cardano-mainnet.blockfrost.io"
+    ]
+  },
+  "misc:tADA": {
+    "type": "blockfrost",
+    "url": [
+      "wss://trezor-cardano-testnet.blockfrost.io"
     ]
   }
 }

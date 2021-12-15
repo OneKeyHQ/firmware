@@ -15,6 +15,7 @@
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import itertools
+from unittest import mock
 
 import pytest
 
@@ -24,10 +25,13 @@ from trezorlib.tools import parse_path
 
 from ..common import click_through, read_and_confirm_mnemonic, recovery_enter_shares
 
+EXTERNAL_ENTROPY = b"zlutoucky kun upel divoke ody" * 2
+MOCK_OS_URANDOM = mock.Mock(return_value=EXTERNAL_ENTROPY)
+
 
 @pytest.mark.skip_t1
-@pytest.mark.skip_ui
 @pytest.mark.setup_client(uninitialized=True)
+@mock.patch("os.urandom", MOCK_OS_URANDOM)
 def test_reset_recovery(client):
     mnemonics = reset(client)
     address_before = btc.get_address(client, "Bitcoin", parse_path("44'/0'/0'/0/0"))
@@ -42,9 +46,6 @@ def test_reset_recovery(client):
 
 def reset(client, strength=128):
     all_mnemonics = []
-    # per SLIP-39: strength in bits, rounded up to nearest multiple of 10, plus 70 bits
-    # of metadata, split into 10-bit words
-    word_count = ((strength + 9) // 10) + 7
 
     def input_flow():
         # 1. Confirm Reset
@@ -58,21 +59,19 @@ def reset(client, strength=128):
         yield from click_through(client.debug, screens=8, code=B.ResetDevice)
 
         # show & confirm shares
-        for h in range(5):
+        for _ in range(5):
             # mnemonic phrases
-            btn_code = yield
-            assert btn_code == B.ResetDevice
-            mnemonic = read_and_confirm_mnemonic(client.debug, words=word_count)
+            mnemonic = yield from read_and_confirm_mnemonic(client.debug)
             all_mnemonics.append(mnemonic)
 
             # Confirm continue to next share
-            btn_code = yield
-            assert btn_code == B.Success
+            br = yield
+            assert br.code == B.Success
             client.debug.press_yes()
 
         # safety warning
-        btn_code = yield
-        assert btn_code == B.Success
+        br = yield
+        assert br.code == B.Success
         client.debug.press_yes()
 
     with client:
@@ -87,19 +86,17 @@ def reset(client, strength=128):
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+            ]
+            + [
+                # individual mnemonic
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.Success),
-                messages.ButtonRequest(code=B.ResetDevice),
+            ]
+            * 5  # number of shares
+            + [
                 messages.ButtonRequest(code=B.Success),
-                messages.ButtonRequest(code=B.ResetDevice),
-                messages.ButtonRequest(code=B.Success),
-                messages.ButtonRequest(code=B.ResetDevice),
-                messages.ButtonRequest(code=B.Success),
-                messages.ButtonRequest(code=B.ResetDevice),
-                messages.ButtonRequest(code=B.Success),
-                messages.ButtonRequest(code=B.Success),
-                messages.Success(),
-                messages.Features(),
+                messages.Success,
+                messages.Features,
             ]
         )
         client.set_input_flow(input_flow)

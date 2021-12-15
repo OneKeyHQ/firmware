@@ -2,57 +2,79 @@ from micropython import const
 
 from trezor import wire
 from trezor.crypto.hashlib import blake256
-from trezor.messages import InputScriptType
-from trezor.messages.PrevOutput import PrevOutput
+from trezor.enums import DecredStakingSpendType, InputScriptType
+from trezor.messages import PrevOutput
 from trezor.utils import HashWriter, ensure
 
 from apps.common.writers import write_bitcoin_varint
 
-from .. import multisig, scripts, writers
-from ..common import ecdsa_hash_pubkey, ecdsa_sign
+from .. import multisig, scripts_decred, writers
+from ..common import SigHashType, ecdsa_hash_pubkey, ecdsa_sign
 from . import approvers, helpers, progress
+from .approvers import BasicApprover
 from .bitcoin import Bitcoin
 
 DECRED_SERIALIZE_FULL = const(0 << 16)
 DECRED_SERIALIZE_NO_WITNESS = const(1 << 16)
 DECRED_SERIALIZE_WITNESS_SIGNING = const(3 << 16)
 DECRED_SCRIPT_VERSION = const(0)
-
-DECRED_SIGHASH_ALL = const(1)
+OUTPUT_SCRIPT_NULL_SSTXCHANGE = (
+    b"\xBD\x76\xA9\x14\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x88\xAC"
+)
 
 if False:
-    from typing import Optional, Union, List
+    from typing import Sequence
 
-    from trezor.messages.SignTx import SignTx
-    from trezor.messages.TxInput import TxInput
-    from trezor.messages.TxOutput import TxOutput
-    from trezor.messages.PrevTx import PrevTx
-    from trezor.messages.PrevInput import PrevInput
+    from trezor.messages import (
+        SignTx,
+        TxInput,
+        TxOutput,
+        PrevTx,
+        PrevInput,
+    )
 
     from apps.common.coininfo import CoinInfo
     from apps.common.keychain import Keychain
 
-    from .hash143 import Hash143
+    from .sig_hasher import SigHasher
 
 
-class DecredHash:
+class DecredApprover(BasicApprover):
+    async def add_decred_sstx_submission(
+        self, txo: TxOutput, script_pubkey: bytes
+    ) -> None:
+        # NOTE: The following calls Approver.add_external_output(), not BasicApprover.add_external_output().
+        # This is needed to skip calling helpers.confirm_output(), which is what BasicApprover would do.
+        await super(BasicApprover, self).add_external_output(txo, script_pubkey, None)
+        await helpers.confirm_decred_sstx_submission(txo, self.coin, self.amount_unit)
+
+
+class DecredSigHasher:
     def __init__(self, h_prefix: HashWriter) -> None:
         self.h_prefix = h_prefix
 
-    def add_input(self, txi: TxInput) -> None:
+    def add_input(self, txi: TxInput, script_pubkey: bytes) -> None:
         Decred.write_tx_input(self.h_prefix, txi, bytes())
 
     def add_output(self, txo: TxOutput, script_pubkey: bytes) -> None:
         Decred.write_tx_output(self.h_prefix, txo, script_pubkey)
 
-    def preimage_hash(
+    def hash143(
         self,
         txi: TxInput,
-        public_keys: List[bytes],
+        public_keys: Sequence[bytes | memoryview],
         threshold: int,
-        tx: Union[SignTx, PrevTx],
+        tx: SignTx | PrevTx,
         coin: CoinInfo,
-        sighash_type: int,
+        hash_type: int,
+    ) -> bytes:
+        raise NotImplementedError
+
+    def hash341(
+        self,
+        i: int,
+        tx: SignTx | PrevTx,
+        sighash_type: SigHashType,
     ) -> bytes:
         raise NotImplementedError
 
@@ -63,11 +85,13 @@ class Decred(Bitcoin):
         tx: SignTx,
         keychain: Keychain,
         coin: CoinInfo,
-        approver: approvers.Approver,
+        approver: approvers.Approver | None,
     ) -> None:
         ensure(coin.decred)
         self.h_prefix = HashWriter(blake256())
 
+        ensure(approver is None)
+        approver = DecredApprover(tx, coin)
         super().__init__(tx, keychain, coin, approver)
 
         self.write_tx_header(self.serialized_tx, self.tx_info.tx, witness_marker=True)
@@ -81,13 +105,18 @@ class Decred(Bitcoin):
     def create_hash_writer(self) -> HashWriter:
         return HashWriter(blake256())
 
-    def create_hash143(self) -> Hash143:
-        return DecredHash(self.h_prefix)
+    def create_sig_hasher(self) -> SigHasher:
+        return DecredSigHasher(self.h_prefix)
 
     async def step2_approve_outputs(self) -> None:
         write_bitcoin_varint(self.serialized_tx, self.tx_info.tx.outputs_count)
         write_bitcoin_varint(self.h_prefix, self.tx_info.tx.outputs_count)
-        await super().step2_approve_outputs()
+
+        if self.tx_info.tx.decred_staking_ticket:
+            await self.approve_staking_ticket()
+        else:
+            await super().step2_approve_outputs()
+
         self.write_tx_footer(self.serialized_tx, self.tx_info.tx)
         self.write_tx_footer(self.h_prefix, self.tx_info.tx)
 
@@ -100,14 +129,14 @@ class Decred(Bitcoin):
     async def process_external_input(self, txi: TxInput) -> None:
         raise wire.DataError("External inputs not supported")
 
-    async def process_original_input(self, txi: TxInput) -> None:
+    async def process_original_input(self, txi: TxInput, script_pubkey: bytes) -> None:
         raise wire.DataError("Replacement transactions not supported")
 
     async def approve_output(
         self,
         txo: TxOutput,
         script_pubkey: bytes,
-        orig_txo: Optional[TxOutput],
+        orig_txo: TxOutput | None,
     ) -> None:
         await super().approve_output(txo, script_pubkey, orig_txo)
         self.write_tx_output(self.serialized_tx, txo, script_pubkey)
@@ -127,19 +156,6 @@ class Decred(Bitcoin):
             key_sign = self.keychain.derive(txi_sign.address_n)
             key_sign_pub = key_sign.public_key()
 
-            if txi_sign.script_type == InputScriptType.SPENDMULTISIG:
-                assert txi_sign.multisig is not None
-                prev_pkscript = scripts.output_script_multisig(
-                    multisig.multisig_get_pubkeys(txi_sign.multisig),
-                    txi_sign.multisig.m,
-                )
-            elif txi_sign.script_type == InputScriptType.SPENDADDRESS:
-                prev_pkscript = scripts.output_script_p2pkh(
-                    ecdsa_hash_pubkey(key_sign_pub, self.coin)
-                )
-            else:
-                raise wire.DataError("Unsupported input script type")
-
             h_witness = self.create_hash_writer()
             writers.write_uint32(
                 h_witness, self.tx_info.tx.version | DECRED_SERIALIZE_WITNESS_SIGNING
@@ -148,7 +164,30 @@ class Decred(Bitcoin):
 
             for ii in range(self.tx_info.tx.inputs_count):
                 if ii == i_sign:
-                    writers.write_bytes_prefixed(h_witness, prev_pkscript)
+                    if txi_sign.decred_staking_spend == DecredStakingSpendType.SSRTX:
+                        scripts_decred.write_output_script_ssrtx_prefixed(
+                            h_witness, ecdsa_hash_pubkey(key_sign_pub, self.coin)
+                        )
+                    elif txi_sign.decred_staking_spend == DecredStakingSpendType.SSGen:
+                        scripts_decred.write_output_script_ssgen_prefixed(
+                            h_witness, ecdsa_hash_pubkey(key_sign_pub, self.coin)
+                        )
+                    elif txi_sign.script_type == InputScriptType.SPENDMULTISIG:
+                        assert txi_sign.multisig is not None
+                        scripts_decred.write_output_script_multisig(
+                            h_witness,
+                            multisig.multisig_get_pubkeys(txi_sign.multisig),
+                            txi_sign.multisig.m,
+                            prefixed=True,
+                        )
+                    elif txi_sign.script_type == InputScriptType.SPENDADDRESS:
+                        scripts_decred.write_output_script_p2pkh(
+                            h_witness,
+                            ecdsa_hash_pubkey(key_sign_pub, self.coin),
+                            prefixed=True,
+                        )
+                    else:
+                        raise wire.DataError("Unsupported input script type")
                 else:
                     write_bitcoin_varint(h_witness, 0)
 
@@ -157,7 +196,7 @@ class Decred(Bitcoin):
             )
 
             h_sign = self.create_hash_writer()
-            writers.write_uint32(h_sign, DECRED_SIGHASH_ALL)
+            writers.write_uint32(h_sign, SigHashType.SIGHASH_ALL)
             writers.write_bytes_fixed(h_sign, prefix_hash, writers.TX_HASH_SIZE)
             writers.write_bytes_fixed(h_sign, witness_hash, writers.TX_HASH_SIZE)
 
@@ -165,8 +204,9 @@ class Decred(Bitcoin):
             signature = ecdsa_sign(key_sign, sig_hash)
 
             # serialize input with correct signature
-            script_sig = self.input_derive_script(txi_sign, key_sign_pub, signature)
-            self.write_tx_input_witness(self.serialized_tx, txi_sign, script_sig)
+            self.write_tx_input_witness(
+                self.serialized_tx, txi_sign, key_sign_pub, signature
+            )
             self.set_serialized_signature(i_sign, signature)
 
     async def step5_serialize_outputs(self) -> None:
@@ -185,7 +225,7 @@ class Decred(Bitcoin):
     @staticmethod
     def write_tx_input(
         w: writers.Writer,
-        txi: Union[TxInput, PrevInput],
+        txi: TxInput | PrevInput,
         script: bytes,
     ) -> None:
         writers.write_bytes_reversed(w, txi.prev_hash, writers.TX_HASH_SIZE)
@@ -196,11 +236,11 @@ class Decred(Bitcoin):
     @staticmethod
     def write_tx_output(
         w: writers.Writer,
-        txo: Union[TxOutput, PrevOutput],
+        txo: TxOutput | PrevOutput,
         script_pubkey: bytes,
     ) -> None:
         writers.write_uint64(w, txo.amount)
-        if isinstance(txo, PrevOutput):
+        if PrevOutput.is_type_of(txo):
             if txo.decred_script_version is None:
                 raise wire.DataError("Script version must be provided")
             writers.write_uint16(w, txo.decred_script_version)
@@ -208,10 +248,59 @@ class Decred(Bitcoin):
             writers.write_uint16(w, DECRED_SCRIPT_VERSION)
         writers.write_bytes_prefixed(w, script_pubkey)
 
+    def process_sstx_commitment_owned(self, txo: TxOutput) -> bytearray:
+        if not self.tx_info.output_is_change(txo):
+            raise wire.DataError("Invalid sstxcommitment path.")
+        node = self.keychain.derive(txo.address_n)
+        pkh = ecdsa_hash_pubkey(node.public_key(), self.coin)
+        op_return_data = scripts_decred.sstxcommitment_pkh(pkh, txo.amount)
+        txo.amount = 0  # Clear the amount, since this is an OP_RETURN.
+        return scripts_decred.output_script_paytoopreturn(op_return_data)
+
+    async def approve_staking_ticket(self) -> None:
+        assert isinstance(self.approver, DecredApprover)
+
+        if self.tx_info.tx.outputs_count != 3:
+            raise wire.DataError("Ticket has wrong number of outputs.")
+
+        # SSTX submission
+        txo = await helpers.request_tx_output(self.tx_req, 0, self.coin)
+        if txo.address is None:
+            raise wire.DataError("Missing address.")
+        script_pubkey = scripts_decred.output_script_sstxsubmissionpkh(txo.address)
+        await self.approver.add_decred_sstx_submission(txo, script_pubkey)
+        self.tx_info.add_output(txo, script_pubkey)
+        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+
+        # SSTX commitment
+        txo = await helpers.request_tx_output(self.tx_req, 1, self.coin)
+        if txo.amount != self.approver.total_in:
+            raise wire.DataError("Wrong sstxcommitment amount.")
+        script_pubkey = self.process_sstx_commitment_owned(txo)
+        self.approver.add_change_output(txo, script_pubkey)
+        self.tx_info.add_output(txo, script_pubkey)
+        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+
+        # SSTX change
+        txo = await helpers.request_tx_output(self.tx_req, 2, self.coin)
+        if txo.address is None:
+            raise wire.DataError("Missing address.")
+        script_pubkey = scripts_decred.output_script_sstxchange(txo.address)
+        # Using change addresses is no longer common practice. Inputs are split
+        # beforehand and should be exact. SSTX change should pay zero amount to
+        # a zeroed hash.
+        if txo.amount != 0:
+            raise wire.DataError("Only value of 0 allowed for sstx change.")
+        if script_pubkey != OUTPUT_SCRIPT_NULL_SSTXCHANGE:
+            raise wire.DataError("Only zeroed addresses accepted for sstx change.")
+        self.approver.add_change_output(txo, script_pubkey)
+        self.tx_info.add_output(txo, script_pubkey)
+        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+
     def write_tx_header(
         self,
         w: writers.Writer,
-        tx: Union[SignTx, PrevTx],
+        tx: SignTx | PrevTx,
         witness_marker: bool,
     ) -> None:
         # The upper 16 bits of the transaction version specify the serialization
@@ -223,15 +312,23 @@ class Decred(Bitcoin):
 
         writers.write_uint32(w, version)
 
-    def write_tx_footer(self, w: writers.Writer, tx: Union[SignTx, PrevTx]) -> None:
+    def write_tx_footer(self, w: writers.Writer, tx: SignTx | PrevTx) -> None:
         assert tx.expiry is not None  # checked in sanitize_*
         writers.write_uint32(w, tx.lock_time)
         writers.write_uint32(w, tx.expiry)
 
     def write_tx_input_witness(
-        self, w: writers.Writer, i: TxInput, script_sig: bytes
+        self, w: writers.Writer, txi: TxInput, pubkey: bytes, signature: bytes
     ) -> None:
-        writers.write_uint64(w, i.amount)
+        writers.write_uint64(w, txi.amount)
         writers.write_uint32(w, 0)  # block height fraud proof
         writers.write_uint32(w, 0xFFFF_FFFF)  # block index fraud proof
-        writers.write_bytes_prefixed(w, script_sig)
+        scripts_decred.write_input_script_prefixed(
+            w,
+            txi.script_type,
+            txi.multisig,
+            self.coin,
+            self.get_sighash_type(txi),
+            pubkey,
+            signature,
+        )

@@ -1,16 +1,15 @@
 import storage.device
-from trezor import ui, wire, workflow
-from trezor.messages import ButtonRequestType, SafetyCheckLevel
-from trezor.messages.Success import Success
+from trezor import ui, wire
+from trezor.enums import ButtonRequestType, SafetyCheckLevel
+from trezor.messages import Success
 from trezor.strings import format_duration_ms
-from trezor.ui.text import Text
+from trezor.ui.layouts import confirm_action
 
-from apps.base import lock_device
+from apps.base import reload_settings_from_storage
 from apps.common import safety_checks
-from apps.common.confirm import require_confirm, require_hold_to_confirm
 
 if False:
-    from trezor.messages.ApplySettings import ApplySettings, EnumTypeSafetyCheckLevel
+    from trezor.messages import ApplySettings
 
 
 def validate_homescreen(homescreen: bytes) -> None:
@@ -19,9 +18,7 @@ def validate_homescreen(homescreen: bytes) -> None:
 
     if len(homescreen) > storage.device.HOMESCREEN_MAXSIZE:
         raise wire.DataError(
-            "Homescreen is too large, maximum size is {} bytes".format(
-                storage.device.HOMESCREEN_MAXSIZE
-            )
+            f"Homescreen is too large, maximum size is {storage.device.HOMESCREEN_MAXSIZE} bytes"
         )
 
     try:
@@ -34,7 +31,7 @@ def validate_homescreen(homescreen: bytes) -> None:
         raise wire.DataError("Homescreen must be full-color TOIF image")
 
 
-async def apply_settings(ctx: wire.Context, msg: ApplySettings):
+async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
     if not storage.device.is_initialized():
         raise wire.NotInitialized("Device is not initialized")
     if (
@@ -100,47 +97,62 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings):
     return Success(message="Settings applied")
 
 
-def reload_settings_from_storage() -> None:
-    workflow.idle_timer.set(storage.device.get_autolock_delay_ms(), lock_device)
-    ui.display.orientation(storage.device.get_rotation())
-    wire.experimental_enabled = storage.device.get_experimental_features()
+async def require_confirm_change_homescreen(ctx: wire.GenericContext) -> None:
+    await confirm_action(
+        ctx,
+        "set_homescreen",
+        "Set homescreen",
+        description="Do you really want to change the homescreen image?",
+        br_code=ButtonRequestType.ProtectCall,
+    )
 
 
-async def require_confirm_change_homescreen(ctx):
-    text = Text("Set homescreen", ui.ICON_CONFIG)
-    text.normal("Do you really want to", "change the homescreen", "image?")
-    await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
+async def require_confirm_change_label(ctx: wire.GenericContext, label: str) -> None:
+    await confirm_action(
+        ctx,
+        "set_label",
+        "Change label",
+        description="Do you really want to change the label to {}?",
+        description_param=label,
+        br_code=ButtonRequestType.ProtectCall,
+    )
 
 
-async def require_confirm_change_label(ctx, label):
-    text = Text("Change label", ui.ICON_CONFIG)
-    text.normal("Do you really want to", "change the label to")
-    text.bold("%s?" % label)
-    await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
-
-
-async def require_confirm_change_passphrase(ctx, use):
-    text = Text("Enable passphrase" if use else "Disable passphrase", ui.ICON_CONFIG)
-    text.normal("Do you really want to")
-    text.normal("enable passphrase" if use else "disable passphrase")
-    text.normal("encryption?")
-    await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
+async def require_confirm_change_passphrase(
+    ctx: wire.GenericContext, use: bool
+) -> None:
+    if use:
+        description = "Do you really want to enable passphrase encryption?"
+    else:
+        description = "Do you really want to disable passphrase encryption?"
+    await confirm_action(
+        ctx,
+        "set_passphrase",
+        "Enable passphrase" if use else "Disable passphrase",
+        description=description,
+        br_code=ButtonRequestType.ProtectCall,
+    )
 
 
 async def require_confirm_change_passphrase_source(
-    ctx, passphrase_always_on_device: bool
-):
-    text = Text("Passphrase source", ui.ICON_CONFIG)
+    ctx: wire.GenericContext, passphrase_always_on_device: bool
+) -> None:
     if passphrase_always_on_device:
-        text.normal(
-            "Do you really want to", "enter passphrase always", "on the device?"
-        )
+        description = "Do you really want to enter passphrase always on the device?"
     else:
-        text.normal("Do you want to revoke", "the passphrase on device", "setting?")
-    await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
+        description = "Do you want to revoke the passphrase on device setting?"
+    await confirm_action(
+        ctx,
+        "set_passphrase_source",
+        "Passphrase source",
+        description=description,
+        br_code=ButtonRequestType.ProtectCall,
+    )
 
 
-async def require_confirm_change_display_rotation(ctx, rotation):
+async def require_confirm_change_display_rotation(
+    ctx: wire.GenericContext, rotation: int
+) -> None:
     if rotation == 0:
         label = "north"
     elif rotation == 90:
@@ -151,55 +163,79 @@ async def require_confirm_change_display_rotation(ctx, rotation):
         label = "west"
     else:
         raise wire.DataError("Unsupported display rotation")
-    text = Text("Change rotation", ui.ICON_CONFIG, new_lines=False)
-    text.normal("Do you really want to", "change display rotation")
-    text.normal("to")
-    text.bold("%s?" % label)
-    await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
+    await confirm_action(
+        ctx,
+        "set_rotation",
+        "Change rotation",
+        description="Do you really want to change display rotation to {}?",
+        description_param=label,
+        br_code=ButtonRequestType.ProtectCall,
+    )
 
 
-async def require_confirm_change_autolock_delay(ctx, delay_ms):
-    text = Text("Auto-lock delay", ui.ICON_CONFIG, new_lines=False)
-    text.normal("Do you really want to", "auto-lock your device", "after")
-    text.bold("{}?".format(format_duration_ms(delay_ms)))
-    await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
+async def require_confirm_change_autolock_delay(
+    ctx: wire.GenericContext, delay_ms: int
+) -> None:
+    await confirm_action(
+        ctx,
+        "set_autolock_delay",
+        "Auto-lock delay",
+        description="Do you really want to auto-lock your device after {}?",
+        description_param=format_duration_ms(delay_ms),
+        br_code=ButtonRequestType.ProtectCall,
+    )
 
 
-async def require_confirm_safety_checks(ctx, level: EnumTypeSafetyCheckLevel) -> None:
+async def require_confirm_safety_checks(
+    ctx: wire.GenericContext, level: SafetyCheckLevel
+) -> None:
     if level == SafetyCheckLevel.PromptAlways:
-        text = Text("Safety override", ui.ICON_CONFIG)
-        text.normal(
-            "Trezor will allow you to",
-            "approve some actions",
-            "which might be unsafe.",
+        await confirm_action(
+            ctx,
+            "set_safety_checks",
+            "Safety override",
+            hold=True,
+            verb="Hold to confirm",
+            description="Trezor will allow you to approve some actions which might be unsafe.",
+            action="Are you sure?",
+            reverse=True,
+            larger_vspace=True,
+            br_code=ButtonRequestType.ProtectCall,
         )
-        text.br_half()
-        text.bold("Are you sure?")
-        await require_hold_to_confirm(ctx, text, ButtonRequestType.ProtectCall)
     elif level == SafetyCheckLevel.PromptTemporarily:
-        text = Text("Safety override", ui.ICON_CONFIG)
-        text.normal(
-            "Trezor will temporarily",
-            "allow you to approve",
-            "some actions which",
-            "might be unsafe.",
+        await confirm_action(
+            ctx,
+            "set_safety_checks",
+            "Safety override",
+            hold=True,
+            verb="Hold to confirm",
+            description="Trezor will temporarily allow you to approve some actions which might be unsafe.",
+            action="Are you sure?",
+            reverse=True,
+            br_code=ButtonRequestType.ProtectCall,
         )
-        text.bold("Are you sure?")
-        await require_hold_to_confirm(ctx, text, ButtonRequestType.ProtectCall)
     elif level == SafetyCheckLevel.Strict:
-        text = Text("Safety checks", ui.ICON_CONFIG)
-        text.normal(
-            "Do you really want to", "enforce strict safety", "checks (recommended)?"
+        await confirm_action(
+            ctx,
+            "set_safety_checks",
+            "Safety checks",
+            description="Do you really want to enforce strict safety checks (recommended)?",
+            br_code=ButtonRequestType.ProtectCall,
         )
-        await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
     else:
         raise ValueError  # enum value out of range
 
 
-async def require_confirm_experimental_features(ctx, enable: bool) -> None:
+async def require_confirm_experimental_features(
+    ctx: wire.GenericContext, enable: bool
+) -> None:
     if enable:
-        text = Text("Experimental mode", ui.ICON_CONFIG)
-        text.normal("Enable experimental", "features?")
-        text.br_half()
-        text.bold("Only for development", "and beta testing!")
-        await require_confirm(ctx, text, ButtonRequestType.ProtectCall)
+        await confirm_action(
+            ctx,
+            "set_experimental_features",
+            "Experimental mode",
+            description="Enable experimental features?",
+            action="Only for development and beta testing!",
+            reverse=True,
+            br_code=ButtonRequestType.ProtectCall,
+        )

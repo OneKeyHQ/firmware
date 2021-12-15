@@ -56,7 +56,6 @@ TXHASH_v4 = bytes.fromhex(
 @pytest.mark.altcoin
 @pytest.mark.zcash
 class TestMsgSigntxZcash:
-    @pytest.mark.skip_ui
     def test_v3_not_supported(self, client):
         # prevout: aaf51e4606c264e47e5c42c958fe4cf1539c5172684721e38e69f4ef634d75dc:1
         # input 1: 3.0 TAZ
@@ -142,7 +141,6 @@ class TestMsgSigntxZcash:
             == "0400008085202f890168039326c180fa7b1e999392e25a3ec6a8aec83c11b787ddb1746922020682e3000000006b483045022100f28298891f48706697a6f898ac18e39ce2c7cebe547b585d51cc22d80b1b21a602201a807b8a18544832d95d1e3ada82c0617bc6d97d3f24d1fb4801ac396647aa880121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0ffffffff016c9be111000000001976a9145b157a678a10021243307e4bb58f36375aa80e1088ac00000000000000000000000000000000000000"
         )
 
-    @pytest.mark.skip_ui
     def test_version_group_id_missing(self, client):
         inp1 = proto.TxInputType(
             # tmQoJ3PTXgQLaRRZZYT6xk8XtjRbr2kCqwu
@@ -240,6 +238,9 @@ class TestMsgSigntxZcash:
             prev_hash=TXHASH_aaf51e,
             prev_index=1,
             script_type=proto.InputScriptType.EXTERNAL,
+            script_pubkey=bytes.fromhex(
+                "76a914a579388225827d9f2fe9014add644487808c695d88ac"
+            ),
             script_sig=bytes.fromhex(
                 "47304402202495a38e5b368569a1a0c9fc95aa7e57a0dd5ae43f51300d7222dc139015233d022047833eaa571578f72c8468c8b537b36410388b7eb5001d75d1f4b954e1997d590121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0"
             ),

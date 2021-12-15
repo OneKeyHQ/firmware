@@ -32,6 +32,12 @@
 #include "messages-bitcoin.pb.h"
 #include "messages-crypto.pb.h"
 
+typedef enum _CoinPathCheckLevel {
+  CoinPathCheckLevel_BASIC = 0,
+  CoinPathCheckLevel_KNOWN = 1,
+  CoinPathCheckLevel_SCRIPT_TYPE = 2,
+} CoinPathCheckLevel;
+
 #define ser_length_size(len) ((len) < 253 ? 1 : (len) < 0x10000 ? 3 : 5)
 
 uint32_t ser_length(uint32_t len, uint8_t *out);
@@ -48,24 +54,13 @@ int signifyMessageSign(HDNode *node, const uint8_t *message, size_t message_len,
                        uint8_t *signature);
 
 int cryptoMessageSign(const CoinInfo *coin, HDNode *node,
-                      InputScriptType script_type, const uint8_t *message,
-                      size_t message_len, uint8_t *signature);
+                      InputScriptType script_type, bool no_script_type,
+                      const uint8_t *message, size_t message_len,
+                      uint8_t *signature);
 
 int cryptoMessageVerify(const CoinInfo *coin, const uint8_t *message,
                         size_t message_len, const char *address,
                         const uint8_t *signature);
-
-/* ECIES disabled
-int cryptoMessageEncrypt(curve_point *pubkey, const uint8_t *msg, size_t
-msg_size, bool display_only, uint8_t *nonce, size_t *nonce_len, uint8_t
-*payload, size_t *payload_len, uint8_t *hmac, size_t *hmac_len, const uint8_t
-*privkey, const uint8_t *address_raw);
-
-int cryptoMessageDecrypt(curve_point *nonce, uint8_t *payload, size_t
-payload_len, const uint8_t *hmac, size_t hmac_len, const uint8_t *privkey,
-uint8_t *msg, size_t *msg_len, bool *display_only, bool *signing, uint8_t
-*address_raw);
-*/
 
 const HDNode *cryptoMultisigPubkey(const CoinInfo *coin,
                                    const MultisigRedeemScriptType *multisig,
@@ -82,8 +77,8 @@ int cryptoMultisigFingerprint(const MultisigRedeemScriptType *multisig,
 
 int cryptoIdentityFingerprint(const IdentityType *identity, uint8_t *hash);
 
-bool coin_known_path_check(const CoinInfo *coin, InputScriptType script_type,
-                           uint32_t address_n_count, const uint32_t *address_n,
-                           bool full);
+bool coin_path_check(const CoinInfo *coin, InputScriptType script_type,
+                     uint32_t address_n_count, const uint32_t *address_n,
+                     bool has_multisig, CoinPathCheckLevel level);
 
 #endif

@@ -6,8 +6,8 @@ from trezor.errors import MnemonicError
 from .. import backup_types
 
 if False:
-    from trezor.messages.ResetDevice import EnumTypeBackupType
-    from typing import Optional, Tuple, List, Union
+    from trezor.enums import BackupType
+    from typing import Union
 
 
 class RecoveryAborted(Exception):
@@ -24,7 +24,7 @@ def process_bip39(words: str) -> bytes:
     return words.encode()
 
 
-def process_slip39(words: str) -> Tuple[Optional[bytes], slip39.Share]:
+def process_slip39(words: str) -> tuple[bytes | None, slip39.Share]:
     """
     Processes a single mnemonic share. Returns the encrypted master secret
     (or None if more shares are needed) and the share's group index and member index.
@@ -46,7 +46,7 @@ def process_slip39(words: str) -> Tuple[Optional[bytes], slip39.Share]:
         # if share threshold and group threshold are 1
         # we can calculate the secret right away
         if share.threshold == 1 and share.group_threshold == 1:
-            identifier, iteration_exponent, secret = slip39.recover_ems([words])
+            _, _, secret = slip39.recover_ems([words])
             return secret, share
         else:
             # we need more shares
@@ -87,12 +87,12 @@ def process_slip39(words: str) -> Tuple[Optional[bytes], slip39.Share]:
         # in case of slip39 basic we only need the first and only group
         mnemonics = storage.recovery_shares.fetch_group(0)
 
-    identifier, iteration_exponent, secret = slip39.recover_ems(mnemonics)
+    _, _, secret = slip39.recover_ems(mnemonics)
     return secret, share
 
 
 if False:
-    Slip39State = Union[Tuple[int, EnumTypeBackupType], Tuple[None, None]]
+    Slip39State = Union[tuple[int, BackupType], tuple[None, None]]
 
 
 def load_slip39_state() -> Slip39State:
@@ -106,7 +106,7 @@ def load_slip39_state() -> Slip39State:
     return word_count, backup_types.infer_backup_type(True, share)
 
 
-def fetch_previous_mnemonics() -> Optional[List[List[str]]]:
+def fetch_previous_mnemonics() -> list[list[str]] | None:
     mnemonics = []
     if not storage.recovery.get_slip39_group_count():
         return None

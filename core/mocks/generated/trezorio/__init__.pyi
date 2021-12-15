@@ -42,6 +42,7 @@ class HID:
         iface_num: int,
         ep_in: int,
         ep_out: int,
+        emu_port: int,
         report_desc: bytes,
         subclass: int = 0,
         protocol: int = 0,
@@ -68,13 +69,15 @@ class HID:
 
 
 # extmod/modtrezorio/modtrezorio-poll.h
-def poll(ifaces: Iterable[int], list_ref: List, timeout_ms: int) -> bool:
+def poll(ifaces: Iterable[int], list_ref: list, timeout_ms: int) -> bool:
     """
     Wait until one of `ifaces` is ready to read or write (using masks
     `list_ref`:
     `list_ref[0]` - the interface number, including the mask
     `list_ref[1]` - for touch event, tuple of:
                     (event_type, x_position, y_position)
+                  - for button event (T1), tuple of:
+                    (event type, button number)
                   - for USB read event, received bytes
     If timeout occurs, False is returned, True otherwise.
     """
@@ -111,7 +114,6 @@ class USB:
         device_protocol: int = 0,
         manufacturer: str = "",
         product: str = "",
-        serial_number: str = "",
         interface: str = "",
         usb21_enabled: bool = True,
         usb21_landing: bool = True,
@@ -119,12 +121,12 @@ class USB:
         """
         """
 
-    def add(self, iface: Union[HID, VCP, WebUSB]) -> None:
+    def add(self, iface: HID | VCP | WebUSB) -> None:
         """
         Registers passed interface into the USB stack.
         """
 
-    def open(self) -> None:
+    def open(self, serial_number: str) -> None:
         """
         Initializes the USB stack.
         """
@@ -148,6 +150,7 @@ class VCP:
         ep_in: int,
         ep_out: int,
         ep_cmd: int,
+        emu_port: int,
     ) -> None:
         """
         """
@@ -169,6 +172,7 @@ class WebUSB:
         iface_num: int,
         ep_in: int,
         ep_out: int,
+        emu_port: int,
         subclass: int = 0,
         protocol: int = 0,
         polling_interval: int = 1,
@@ -192,6 +196,11 @@ TOUCH: int  # interface id of the touch events
 TOUCH_START: int  # event id of touch start event
 TOUCH_MOVE: int  # event id of touch move event
 TOUCH_END: int  # event id of touch end event
+BUTTON: int  # interface id of button events
+BUTTON_PRESSED: int  # button down event
+BUTTON_RELEASED: int  # button up event
+BUTTON_LEFT: int  # button number of left button
+BUTTON_RIGHT: int  # button number of right button
 WireInterface = Union[HID, WebUSB]
 if False:
     from . import fatfs, sdcard

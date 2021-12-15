@@ -30,6 +30,7 @@
 
 #include "messages-bitcoin.pb.h"
 #include "messages-crypto.pb.h"
+#include "messages-management.pb.h"
 #include "messages-nem.pb.h"
 
 #define DISP_BUFSIZE (2048)
@@ -41,27 +42,35 @@ void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
                        const char *line2, const char *line3, const char *line4,
                        const char *line5, const char *line6);
+void layoutDialogSwipeEx(const BITMAP *icon, const char *btnNo,
+                         const char *btnYes, const char *desc,
+                         const char *line1, const char *line2,
+                         const char *line3, const char *line4,
+                         const char *line5, const char *line6, uint8_t font);
 void layoutProgressSwipe(const char *desc, int permil);
 
 void layoutScreensaver(void);
 void layoutHome(void);
 void layoutHomeEx(void);
-void layoutConfirmOutput(const CoinInfo *coin, const TxOutputType *out);
+void layoutConfirmOutput(const CoinInfo *coin, AmountUnit amount_unit,
+                         const TxOutputType *out);
 void layoutConfirmOmni(const uint8_t *data, uint32_t size);
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size);
-void layoutConfirmTx(const CoinInfo *coin, uint64_t total_in,
-                     uint64_t total_out, uint64_t change_out);
+void layoutConfirmTx(const CoinInfo *coin, AmountUnit amount_unit,
+                     uint64_t total_in, uint64_t total_out,
+                     uint64_t change_out);
 void layoutConfirmReplacement(const char *description, uint8_t txid[32]);
-void layoutConfirmModifyFee(const CoinInfo *coin, uint64_t fee_old,
-                            uint64_t fee_new);
-void layoutFeeOverThreshold(const CoinInfo *coin, uint64_t fee);
+void layoutConfirmModifyOutput(const CoinInfo *coin, AmountUnit amount_unit,
+                               TxOutputType *out, TxOutputType *orig_out,
+                               int page);
+void layoutConfirmModifyFee(const CoinInfo *coin, AmountUnit amount_unit,
+                            uint64_t fee_old, uint64_t fee_new);
+void layoutFeeOverThreshold(const CoinInfo *coin, AmountUnit amount_unit,
+                            uint64_t fee);
 void layoutChangeCountOverThreshold(uint32_t change_count);
 void layoutConfirmNondefaultLockTime(uint32_t lock_time,
                                      bool lock_time_disabled);
-void layoutSignMessage(const uint8_t *msg, uint32_t len);
-void layoutSignMessage_ex(const char *text, const uint8_t *msg, uint32_t len);
 void layoutVerifyAddress(const CoinInfo *coin, const char *address);
-void layoutVerifyMessage(const uint8_t *msg, uint32_t len);
 void layoutCipherKeyValue(bool encrypt, const char *key);
 void layoutEncryptMessage(const uint8_t *msg, uint32_t len, bool signing);
 void layoutDecryptMessage(const uint8_t *msg, uint32_t len,
@@ -99,9 +108,12 @@ void layoutCosiCommitSign(const uint32_t *address_n, size_t address_n_count,
                           const uint8_t *data, uint32_t len, bool final_sign);
 
 void layoutConfirmAutoLockDelay(uint32_t delay_ms);
+void layoutConfirmSafetyChecks(SafetyCheckLevel safety_checks_level);
 
 const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen);
 const char **split_message_hex(const uint8_t *msg, uint32_t len);
+
+bool is_valid_ascii(const uint8_t *data, uint32_t size);
 
 void layoutQRCode(const char *index, const BITMAP *bmp_up,
                   const BITMAP *bmp_down, const char *title, const char *text);

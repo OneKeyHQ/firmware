@@ -1,19 +1,12 @@
 import storage.device
 import storage.resident_credentials
 from trezor import wire
-from trezor.messages.Success import Success
-from trezor.messages.WebAuthnRemoveResidentCredential import (
-    WebAuthnRemoveResidentCredential,
-)
+from trezor.messages import Success, WebAuthnRemoveResidentCredential
+from trezor.ui.components.common.webauthn import ConfirmInfo
+from trezor.ui.layouts.tt.webauthn import confirm_webauthn
 
-from apps.common.confirm import require_confirm
-
-from .confirm import ConfirmContent, ConfirmInfo
 from .credential import Fido2Credential
 from .resident_credentials import get_resident_credential
-
-if False:
-    from typing import Optional
 
 
 class ConfirmRemoveCredential(ConfirmInfo):
@@ -28,7 +21,7 @@ class ConfirmRemoveCredential(ConfirmInfo):
     def app_name(self) -> str:
         return self._cred.app_name()
 
-    def account_name(self) -> Optional[str]:
+    def account_name(self) -> str | None:
         return self._cred.account_name()
 
 
@@ -44,8 +37,8 @@ async def remove_resident_credential(
     if cred is None:
         raise wire.ProcessError("Invalid credential index.")
 
-    content = ConfirmContent(ConfirmRemoveCredential(cred))
-    await require_confirm(ctx, content)
+    if not await confirm_webauthn(ctx, ConfirmRemoveCredential(cred)):
+        raise wire.ActionCancelled
 
     assert cred.index is not None
     storage.resident_credentials.delete(cred.index)

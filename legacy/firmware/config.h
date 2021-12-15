@@ -185,6 +185,9 @@ void config_setAutoLockDelayMs(uint32_t auto_lock_delay_ms);
 uint32_t config_getSleepDelayMs(void);
 void config_setSleepDelayMs(uint32_t auto_sleep_ms);
 
+SafetyCheckLevel config_getSafetyCheckLevel(void);
+void config_setSafetyCheckLevel(SafetyCheckLevel safety_check_level);
+
 void config_wipe(void);
 void config_setFastPayPinFlag(bool flag);
 bool config_getFastPayPinFlag(void);

@@ -1,33 +1,37 @@
-import os
+import serial
 
 from .device import Device
 
 
 class TrezorOne(Device):
+    def __init__(self, uhub_location, arduino_serial, device_port):
+        super().__init__(uhub_location, device_port)
+        self.serial = serial.Serial(arduino_serial, 9600)
+
     def touch(self, location, action):
         self.now()
-        print(
-            "[hardware/trezor] Touching the {} button by {}...".format(location, action)
-        )
-        self.serial.write(("{} {}\n".format(location, action)).encode())
+        self.log(f"[hardware/trezor] Touching the {location} button by {action}...")
+        self.serial.write(f"{location} {action}\n".encode())
 
     def update_firmware(self, file=None):
         if file:
             unofficial = True
-            trezorctlcmd = "trezorctl firmware-update -s -f {} &".format(file)
-            print("[software/trezorctl] Updating the firmware to {}...".format(file))
+            trezorctlcmd = f"firmware-update -s -f {file} &"
+            self.log(f"[software] Updating the firmware to {file}")
         else:
             unofficial = False
-            trezorctlcmd = "trezorctl firmware-update &"
-            print("[software/trezorctl] Updating the firmware to latest...")
+            trezorctlcmd = "firmware-update &"
+            self.log("[software] Updating the firmware to latest")
         self.wait(3)
         self._enter_bootloader()
 
         self.wait(3)
-        os.system(trezorctlcmd)
+        self.check_model("Trezor 1 bootloader")
+
+        self.run_trezorctl(trezorctlcmd)
         self.wait(3)
         self.touch("right", "click")
-        self.wait(20)
+        self.wait(25)
         if unofficial:
             self.touch("right", "click")
         self.wait(10)
@@ -37,8 +41,8 @@ class TrezorOne(Device):
             self.touch("right", "click")
             self.wait(5)
             self.touch("right", "click")
-        self.wait(5)
-        os.system("trezorctl get-features|grep version")
+        self.wait(10)
+        return self.check_model("Trezor 1")
 
     def _enter_bootloader(self):
         self.power_off()

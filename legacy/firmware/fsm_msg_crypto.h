@@ -20,8 +20,6 @@
 void fsm_msgCipherKeyValue(const CipherKeyValue *msg) {
   CHECK_INITIALIZED
 
-  CHECK_PARAM(msg->has_key, _("No key provided"));
-  CHECK_PARAM(msg->has_value, _("No value provided"));
   CHECK_PARAM(msg->value.size % 16 == 0,
               _("Value length must be a multiple of 16"));
 
@@ -67,7 +65,6 @@ void fsm_msgCipherKeyValue(const CipherKeyValue *msg) {
     aes_cbc_decrypt(msg->value.bytes, resp->value.bytes, msg->value.size,
                     data + 32, &ctx);
   }
-  resp->has_value = true;
   resp->value.size = msg->value.size;
   msg_write(MessageType_MessageType_CipheredKeyValue, resp);
   layoutHome();
@@ -89,8 +86,7 @@ void fsm_msgSignIdentity(const SignIdentity *msg) {
   CHECK_PIN
 
   uint8_t hash[32];
-  if (!msg->has_identity ||
-      cryptoIdentityFingerprint(&(msg->identity), hash) == 0) {
+  if (cryptoIdentityFingerprint(&(msg->identity), hash) == 0) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Invalid identity"));
     layoutHome();
     return;
@@ -139,27 +135,36 @@ void fsm_msgSignIdentity(const SignIdentity *msg) {
     sha256_Raw((const uint8_t *)msg->challenge_visual,
                strlen(msg->challenge_visual), digest + 32);
     result = cryptoMessageSign(&(coins[0]), node, InputScriptType_SPENDADDRESS,
-                               digest, 64, resp->signature.bytes);
+                               false, digest, 64, resp->signature.bytes);
   }
 
   if (result == 0) {
-    hdnode_fill_public_key(node);
+    if (hdnode_fill_public_key(node) != 0) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Failed to derive public key"));
+      layoutHome();
+      return;
+    }
+
     if (strcmp(curve, SECP256K1_NAME) != 0) {
       resp->has_address = false;
     } else {
       resp->has_address = true;
-      hdnode_get_address(
-          node, 0x00, resp->address,
-          sizeof(resp->address));  // hardcoded Bitcoin address type
+      // hardcoded Bitcoin address type
+      if (hdnode_get_address(node, 0x00, resp->address,
+                             sizeof(resp->address)) != 0) {
+        fsm_sendFailure(FailureType_Failure_ProcessError,
+                        _("Failed to get address"));
+        layoutHome();
+        return;
+      }
     }
-    resp->has_public_key = true;
     resp->public_key.size = 33;
     memcpy(resp->public_key.bytes, node->public_key, 33);
     if (node->public_key[0] == 1) {
       /* ed25519 public key */
       resp->public_key.bytes[0] = 0;
     }
-    resp->has_signature = true;
     resp->signature.size = 65;
     msg_write(MessageType_MessageType_SignedIdentity, resp);
   } else {
@@ -184,8 +189,7 @@ void fsm_msgGetECDHSessionKey(const GetECDHSessionKey *msg) {
   CHECK_PIN
 
   uint8_t hash[32];
-  if (!msg->has_identity ||
-      cryptoIdentityFingerprint(&(msg->identity), hash) == 0) {
+  if (cryptoIdentityFingerprint(&(msg->identity), hash) == 0) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Invalid identity"));
     layoutHome();
     return;
@@ -207,14 +211,22 @@ void fsm_msgGetECDHSessionKey(const GetECDHSessionKey *msg) {
     curve = msg->ecdsa_curve_name;
   }
 
-  const HDNode *node = fsm_getDerivedNode(curve, address_n, 5, NULL);
+  HDNode *node = fsm_getDerivedNode(curve, address_n, 5, NULL);
   if (!node) return;
 
   int result_size = 0;
   if (hdnode_get_shared_key(node, msg->peer_public_key.bytes,
                             resp->session_key.bytes, &result_size) == 0) {
-    resp->has_session_key = true;
     resp->session_key.size = result_size;
+    if (hdnode_fill_public_key(node) != 0) {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Failed to derive public key"));
+      layoutHome();
+      return;
+    }
+    memcpy(resp->public_key.bytes, node->public_key, 33);
+    resp->public_key.size = 33;
+    resp->has_public_key = true;
     msg_write(MessageType_MessageType_ECDHSessionKey, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError,
@@ -293,7 +305,6 @@ void fsm_msgCosiSign(const CosiSign *msg) {
   init_rfc6979(node->private_key, nonce, &rng);
   generate_rfc6979(nonce, &rng);
 
-  resp->has_signature = true;
   resp->signature.size = 32;
 
   ed25519_cosi_sign(msg->data.bytes, msg->data.size, node->private_key, nonce,

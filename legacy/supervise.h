@@ -29,6 +29,10 @@
 #define SVC_FLASH_PROGRAM 2
 #define SVC_FLASH_LOCK 3
 #define SVC_TIMER_MS 4
+#define SVC_REBOOT_TO_BOOTLOADER 5
+
+#define STAY_IN_BOOTLOADER_FLAG_ADDR ((uint32_t *)0x20010000)
+#define STAY_IN_BOOTLOADER_FLAG 0x0FC35A96
 
 #define SVC_SYS_RESET 10
 #define SVC_SYS_SLEEP 11
@@ -85,6 +89,14 @@ inline void svc_system_sleep(void) {
 
 inline void svc_system_privileged(void) {
   __asm__ __volatile__("svc %0" ::"i"(SVC_SYS_PRIVILEGED) : "memory");
+}
+
+/* Reboot to bootloader.
+ * Sets a flag in memory and reboots. When bootloader runs, it will recognize
+ * flag and won't run firmware, but enter bootloader mode.
+ */
+inline void svc_reboot_to_bootloader(void) {
+  __asm__ __volatile__("svc %0" ::"i"(SVC_REBOOT_TO_BOOTLOADER) : "memory");
 }
 
 #else

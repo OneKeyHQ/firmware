@@ -1,11 +1,6 @@
 from micropython import const
 
-from trezor import ui
-from trezor.messages import ButtonRequestType
-from trezor.ui.text import Text
-
-from . import HARDENED
-from .confirm import require_confirm
+HARDENED = const(0x8000_0000)
 
 if False:
     from typing import (
@@ -14,16 +9,11 @@ if False:
         Collection,
         Container,
         Iterable,
-        List,
         Sequence,
         TypeVar,
-        Union,
     )
     from typing_extensions import Protocol
     from trezor import wire
-
-    # XXX this is a circular import, but it's only for typing
-    from .keychain import Keychain
 
     Bip32Path = Sequence[int]
     Slip21Path = Sequence[bytes]
@@ -31,6 +21,13 @@ if False:
 
     class PathSchemaType(Protocol):
         def match(self, path: Bip32Path) -> bool:
+            ...
+
+    class KeychainValidatorType(Protocol):
+        def is_in_keychain(self, path: Bip32Path) -> bool:
+            ...
+
+        def verify_path(self, path: Bip32Path) -> None:
             ...
 
 
@@ -105,7 +102,65 @@ class PathSchema:
         "**": Interval(0, 0xFFFF_FFFF),
     }
 
-    def __init__(self, pattern: str, slip44_id: Union[int, Iterable[int]]) -> None:
+    _EMPTY_TUPLE = ()
+
+    @staticmethod
+    def _parse_hardened(s: str) -> int:
+        return int(s) | HARDENED
+
+    @staticmethod
+    def _copy_container(container: Container[int]) -> Container[int]:
+        # On hardware, hardened indices do not fit into smallint.
+        # The n+0 operation ensures that a new instance of a longint is created.
+        if isinstance(container, Interval):
+            return Interval(container.min + 0, container.max + 0)
+        if isinstance(container, set):
+            return set(i + 0 for i in container)
+        if isinstance(container, tuple):
+            return tuple(i + 0 for i in container)
+        raise RuntimeError("Unsupported container for copy")
+
+    def __init__(
+        self,
+        schema: list[Container[int]],
+        trailing_components: Container[int] = (),
+        compact: bool = False,
+    ) -> None:
+        """Create a new PathSchema from a list of containers and trailing components.
+
+        Mainly for internal use in `PathSchema.parse`, which is the method you should
+        be using.
+
+        Can be used to create a schema manually without parsing a path string:
+
+        >>> SCHEMA_MINE = PathSchema([
+        >>>         (44 | HARDENED,),
+        >>>         (0 | HARDENED,),
+        >>>         Interval(0 | HARDENED, 10 | HARDENED),
+        >>>     ],
+        >>>     trailing_components=Interval(0, 0xFFFF_FFFF),
+        >>> )
+
+        Setting `compact=True` creates a compact copy of the provided components, so
+        as to prevent memory fragmentation.
+        """
+        if compact:
+            self.schema: list[Container[int]] = [self._EMPTY_TUPLE] * len(schema)
+            for i in range(len(schema)):
+                self.schema[i] = self._copy_container(schema[i])
+            self.trailing_components = self._copy_container(trailing_components)
+
+        else:
+            self.schema = schema
+            self.trailing_components = trailing_components
+
+    @classmethod
+    def parse(cls, pattern: str, slip44_id: int | Iterable[int]) -> "PathSchema":
+        """Parse a path schema string into a PathSchema instance.
+
+        The parsing process trashes the memory layout, so at the end a compact-allocated
+        copy of the resulting structures is returned.
+        """
         if not pattern.startswith("m/"):
             raise ValueError  # unsupported path template
         components = pattern[2:].split("/")
@@ -113,24 +168,24 @@ class PathSchema:
         if isinstance(slip44_id, int):
             slip44_id = (slip44_id,)
 
-        self.schema: List[Container[int]] = []
-        self.trailing_components: Container[int] = ()
+        schema: list[Container[int]] = []
+        trailing_components: Container[int] = ()
 
         for component in components:
-            if component in self.WILDCARD_RANGES:
-                if len(self.schema) != len(components) - 1:
-                    # every component should have resulted in extending self.schema
-                    # so if self.schema does not have the appropriate length (yet),
+            if component in cls.WILDCARD_RANGES:
+                if len(schema) != len(components) - 1:
+                    # every component should have resulted in extending schema
+                    # so if schema does not have the appropriate length (yet),
                     # the asterisk is not the last item
                     raise ValueError  # asterisk is not last item of pattern
 
-                self.trailing_components = self.WILDCARD_RANGES[component]
+                trailing_components = cls.WILDCARD_RANGES[component]
                 break
 
             # figure out if the component is hardened
             if component[-1] == "'":
                 component = component[:-1]
-                parse: Callable[[Any], int] = lambda s: int(s) | HARDENED  # noqa: E731
+                parse: Callable[[Any], int] = cls._parse_hardened
             else:
                 parse = int
 
@@ -139,24 +194,37 @@ class PathSchema:
                 component = component[1:-1]
 
             # optionally replace a keyword
-            component = self.REPLACEMENTS.get(component, component)
+            component = cls.REPLACEMENTS.get(component, component)
 
             if "-" in component:
                 # parse as a range
                 a, b = [parse(s) for s in component.split("-", 1)]
-                self.schema.append(Interval(a, b))
+                schema.append(Interval(a, b))
 
             elif "," in component:
                 # parse as a list of values
-                self.schema.append(set(parse(s) for s in component.split(",")))
+                schema.append(set(parse(s) for s in component.split(",")))
 
             elif component == "coin_type":
                 # substitute SLIP-44 ids
-                self.schema.append(set(parse(s) for s in slip44_id))
+                schema.append(set(parse(s) for s in slip44_id))
 
             else:
                 # plain constant
-                self.schema.append((parse(component),))
+                schema.append((parse(component),))
+
+        return cls(schema, trailing_components, compact=True)
+
+    def copy(self) -> "PathSchema":
+        """Create a compact copy of the schema.
+
+        Useful when creating multiple schemas in a row. The following code ensures
+        that the set of schemas is allocated in a contiguous block of memory:
+
+        >>> some_schemas = make_multiple_schemas()
+        >>> some_schemas = [s.copy() for s in some_schemas]
+        """
+        return PathSchema(self.schema, self.trailing_components, compact=True)
 
     def match(self, path: Bip32Path) -> bool:
         # The path must not be _shorter_ than schema. It may be longer.
@@ -188,11 +256,8 @@ class PathSchema:
             for component in self.schema:
                 if isinstance(component, Interval):
                     a, b = component.min, component.max
-                    components.append(
-                        "[{}-{}]{}".format(
-                            unharden(a), unharden(b), "'" if a & HARDENED else ""
-                        )
-                    )
+                    prime = "'" if a & HARDENED else ""
+                    components.append(f"[{unharden(a)}-{unharden(b)}]{prime}")
                 else:
                     # mypy thinks component is a Contanier but we're using it as a Collection.
                     # Which in practice it is, the only non-Collection is Interval.
@@ -247,7 +312,10 @@ PATTERN_SEP5 = "m/44'/coin_type'/account'"
 
 
 async def validate_path(
-    ctx: wire.Context, keychain: Keychain, path: Bip32Path, *additional_checks: bool
+    ctx: wire.Context,
+    keychain: KeychainValidatorType,
+    path: Bip32Path,
+    *additional_checks: bool,
 ) -> None:
     keychain.verify_path(path)
     if not keychain.is_in_keychain(path) or not all(additional_checks):
@@ -255,12 +323,9 @@ async def validate_path(
 
 
 async def show_path_warning(ctx: wire.Context, path: Bip32Path) -> None:
-    text = Text("Confirm path", ui.ICON_WRONG, ui.RED)
-    text.normal("Path")
-    text.mono(*break_address_n_to_lines(path))
-    text.normal("is unknown.")
-    text.normal("Are you sure?")
-    await require_confirm(ctx, text, ButtonRequestType.UnknownDerivationPath)
+    from trezor.ui.layouts import confirm_path_warning
+
+    await confirm_path_warning(ctx, address_n_to_str(path))
 
 
 def is_hardened(i: int) -> bool:
@@ -271,25 +336,14 @@ def path_is_hardened(address_n: Bip32Path) -> bool:
     return all(is_hardened(n) for n in address_n)
 
 
-def address_n_to_str(address_n: Bip32Path) -> str:
+def address_n_to_str(address_n: Iterable[int]) -> str:
     def path_item(i: int) -> str:
         if i & HARDENED:
             return str(i ^ HARDENED) + "'"
         else:
             return str(i)
 
-    return "m/" + "/".join([path_item(i) for i in address_n])
+    if not address_n:
+        return "m"
 
-
-def break_address_n_to_lines(address_n: Bip32Path) -> List[str]:
-    lines = []
-    path_str = address_n_to_str(address_n)
-
-    per_line = const(17)
-    while len(path_str) > per_line:
-        i = path_str[:per_line].rfind("/")
-        lines.append(path_str[:i])
-        path_str = path_str[i:]
-    lines.append(path_str)
-
-    return lines
+    return "m/" + "/".join(path_item(i) for i in address_n)

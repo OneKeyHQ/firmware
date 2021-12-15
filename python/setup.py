@@ -7,14 +7,13 @@ from setuptools import find_packages, setup
 install_requires = [
     "setuptools>=19.0",
     "ecdsa>=0.9",
-    "mnemonic>=0.17",
+    "mnemonic>=0.20",
     "requests>=2.4.0",
-    "click>=7,<8",
+    "click>=7,<9",
     "libusb1>=1.6.4",
     "construct>=2.9",
     "typing_extensions>=3.7.4",
-    "pyblake2>=0.9.3 ; python_version<'3.6'",
-    "attrs",
+    "dataclasses ; python_version<'3.7'",
 ]
 
 extras_require = {
@@ -22,6 +21,7 @@ extras_require = {
     "ethereum": ["rlp>=1.1.0", "web3>=4.8"],
     "qt-widgets": ["PyQt5"],
     "extra": ["Pillow"],
+    "stellar": ["stellar-sdk>=4.0.0,<6.0.0"],
 }
 
 extras_require["full"] = sum(extras_require.values(), [])
@@ -51,7 +51,7 @@ setup(
     author_email="info@trezor.io",
     license="LGPLv3",
     description="Python library for communicating with Trezor Hardware Wallet",
-    long_description="{}\n\n{}".format(read("README.md"), read("CHANGELOG.md")),
+    long_description=read("README.md") + "\n\n" + read("CHANGELOG.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/trezor/trezor-firmware/tree/master/python",
     packages=find_packages("src"),

@@ -16,8 +16,15 @@
 # along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 
+from typing import TYPE_CHECKING
+
 from . import exceptions, messages
 from .tools import expect
+
+if TYPE_CHECKING:
+    from .client import TrezorClient
+    from .tools import Address
+    from .protobuf import MessageType
 
 DEFAULT_BIP32_PATH = "m/44h/101010h/0h/0h/0h"
 
@@ -25,31 +32,37 @@ DEFAULT_BIP32_PATH = "m/44h/101010h/0h/0h/0h"
 # ====== Client functions ====== #
 
 
-@expect(messages.StarcoinAddress, field="address")
-def get_address(client, address_n, show_display=False):
+@expect(messages.StarcoinAddress, field="address", ret_type=str)
+def get_address(
+    client: "TrezorClient", address_n: "Address", show_display: bool = False
+) -> "MessageType":
     return client.call(
         messages.StarcoinGetAddress(address_n=address_n, show_display=show_display)
     )
 
 
 @expect(messages.StarcoinPublicKey)
-def get_public_key(client, n, show_display=False):
+def get_public_key(
+    client: "TrezorClient", n: "Address", show_display: bool = False
+) -> "MessageType":
     return client.call(
         messages.StarcoinGetPublicKey(address_n=n, show_display=show_display)
     )
 
 
 @expect(messages.StarcoinSignedTx)
-def sign_tx(client, address_n, rawtx):
+def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
     return client.call(messages.StarcoinSignTx(address_n=address_n, raw_tx=rawtx))
 
 
 @expect(messages.StarcoinMessageSignature)
-def sign_message(client, n, message):
+def sign_message(client: "TrezorClient", n: "Address", message: bytes):
     return client.call(messages.StarcoinSignMessage(address_n=n, message=message))
 
 
-def verify_message(client, pubkey, signature, message):
+def verify_message(
+    client: "TrezorClient", pubkey: bytes, signature: bytes, message: bytes
+):
     try:
         resp = client.call(
             messages.StarcoinVerifyMessage(

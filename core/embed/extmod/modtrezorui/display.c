@@ -128,6 +128,8 @@ void display_clear(void) {
   display_set_window(0, 0, DISPLAY_RESX - 1, DISPLAY_RESY - 1);
   // if valid, go back to the saved orientation
   display_orientation(saved_orientation);
+  // flag display for refresh
+  PIXELDATA_DIRTY();
 }
 
 void display_bar(int x, int y, int w, int h, uint16_t c) {
@@ -139,6 +141,7 @@ void display_bar(int x, int y, int w, int h, uint16_t c) {
   for (int i = 0; i < (x1 - x0 + 1) * (y1 - y0 + 1); i++) {
     PIXELDATA(c);
   }
+  PIXELDATA_DIRTY();
 }
 
 #define CORNER_RADIUS 16
@@ -196,6 +199,7 @@ void display_bar_radius(int x, int y, int w, int h, uint16_t c, uint16_t b,
       }
     }
   }
+  PIXELDATA_DIRTY();
 }
 
 #define UZLIB_WINDOW_SIZE (1 << 10)
@@ -234,6 +238,7 @@ void display_image(int x, int y, int w, int h, const void *data,
   uzlib_prepare(&decomp, decomp_window, data, datalen, decomp_out,
                 sizeof(decomp_out));
 
+  PIXELDATA_DIRTY();
   for (uint32_t pos = 0; pos < w * h; pos++) {
     int st = uzlib_uncompress(&decomp);
     if (st == TINF_DONE) break;  // all OK
@@ -283,15 +288,14 @@ void display_avatar(int x, int y, const void *data, uint32_t datalen,
     if (px >= x0 && px <= x1 && py >= y0 && py <= y1) {
       int d = (px - AVATAR_IMAGE_SIZE / 2) * (px - AVATAR_IMAGE_SIZE / 2) +
               (py - AVATAR_IMAGE_SIZE / 2) * (py - AVATAR_IMAGE_SIZE / 2);
-      // inside border area
       if (d < AVATAR_BORDER_LOW) {
+        // inside border area
         PIXELDATA((decomp_out[0] << 8) | decomp_out[1]);
-      } else
-          // outside border area
-          if (d > AVATAR_BORDER_HIGH) {
+      } else if (d > AVATAR_BORDER_HIGH) {
+        // outside border area
         PIXELDATA(bgcolor);
-        // border area
       } else {
+        // border area
 #if AVATAR_ANTIALIAS
         d = 31 * (d - AVATAR_BORDER_LOW) /
             (AVATAR_BORDER_HIGH - AVATAR_BORDER_LOW);
@@ -310,6 +314,7 @@ void display_avatar(int x, int y, const void *data, uint32_t datalen,
     }
     decomp.dest = (uint8_t *)&decomp_out;
   }
+  PIXELDATA_DIRTY();
 #endif
 }
 
@@ -347,9 +352,10 @@ void display_icon(int x, int y, int w, int h, const void *data,
     }
     decomp.dest = (uint8_t *)&decomp_out;
   }
+  PIXELDATA_DIRTY();
 }
 
-// see docs/misc/toif.md for defintion of the TOIF format
+// see docs/misc/toif.md for definition of the TOIF format
 bool display_toif_info(const uint8_t *data, uint32_t len, uint16_t *out_w,
                        uint16_t *out_h, bool *out_grayscale) {
   if (len < 12 || memcmp(data, "TOI", 3) != 0) {
@@ -471,6 +477,7 @@ void display_loader(uint16_t progress, bool indeterminate, int yoffset,
       }
     }
   }
+  PIXELDATA_DIRTY();
 #endif
 }
 
@@ -553,6 +560,7 @@ void display_print(const char *text, int textlen) {
       PIXELDATA(display_print_bgcolor);
     }
   }
+  PIXELDATA_DIRTY();
   display_refresh();
 }
 
@@ -704,6 +712,7 @@ static void display_text_render(int x, int y, const char *text, int textlen,
     }
     x += adv;
   }
+  PIXELDATA_DIRTY();
 }
 
 void display_text(int x, int y, const char *text, int textlen, int font,
@@ -822,6 +831,7 @@ void display_qrcode(int x, int y, const char *data, uint32_t datalen,
       }
     }
   }
+  PIXELDATA_DIRTY();
 }
 
 void display_offset(int set_xy[2], int *get_x, int *get_y) {
