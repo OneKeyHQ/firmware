@@ -286,9 +286,10 @@ void layoutDialogSwipeEx(const BITMAP *icon, const char *btnNo,
                          const char *line3, const char *line4,
                          const char *line5, const char *line6, uint8_t font) {
   layoutLast = layoutDialogSwipe;
+  (void)font;
   layoutSwipe();
-  layoutDialogEx(icon, btnNo, btnYes, desc, line1, line2, line3, line4, line5,
-                 line6, font);
+  layoutDialogAdapter(icon, btnNo, btnYes, desc, line1, line2, line3, line4,
+                      line5, line6);
 }
 
 void layoutProgressSwipe(const char *desc, int permil) {

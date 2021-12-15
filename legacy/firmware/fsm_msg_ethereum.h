@@ -229,17 +229,15 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
     return;
   }
 
-  fsm_layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
-                           msg->domain_hash.size);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+  if (!fsm_layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
+                                msg->domain_hash.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
   }
 
-  fsm_layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
-                           msg->message_hash.size);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+  if (!fsm_layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
+                                msg->message_hash.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;

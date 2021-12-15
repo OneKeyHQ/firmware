@@ -190,6 +190,7 @@ bool compute_address(const CoinInfo *coin, InputScriptType script_type,
       return 0;
     }
   } else if (script_type == InputScriptType_SPENDTAPROOT) {
+#ifdef SECP256K1_ZKP
     // taproot
     if (!coin->has_taproot || !coin->has_segwit || !coin->bech32_prefix) {
       return 0;
@@ -200,6 +201,9 @@ bool compute_address(const CoinInfo *coin, InputScriptType script_type,
                             tweaked_pubkey, 32)) {
       return 0;
     }
+#else
+    return 0;
+#endif
   } else if (script_type == InputScriptType_SPENDP2SHWITNESS) {
     // segwit p2wpkh embedded in p2sh
     if (!coin->has_segwit) {

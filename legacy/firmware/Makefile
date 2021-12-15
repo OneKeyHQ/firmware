@@ -2,7 +2,7 @@ APPVER = 1.8.0
 
 NAME  = bixin
 
-SECP256K1_ZKP ?= 1
+SECP256K1_ZKP ?= 0
 
 
 ifeq ($(SECP256K1_ZKP),1)

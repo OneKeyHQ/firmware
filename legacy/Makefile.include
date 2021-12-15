@@ -127,7 +127,7 @@ CFLAGS   += -DEMULATOR=0
 
 LDFLAGS  += --static \
             -Wl,--start-group \
-            -lc \
+            -lc_nano \
             -lgcc \
             -lnosys \
             -Wl,--end-group \

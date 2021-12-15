@@ -1995,12 +1995,14 @@ static bool signing_check_orig_tx(void) {
   uint32_t hash_type = signing_hash_type(&orig_verif_input);
   bool valid = false;
   if (orig_verif_input.script_type == InputScriptType_SPENDTAPROOT) {
+#ifdef SECP256K1_ZKP
     signing_hash_bip341(&orig_info, orig_verif_input_idx, hash_type & 0xff,
                         hash);
     uint8_t output_public_key[32] = {0};
     valid = (zkp_bip340_tweak_public_key(node.public_key + 1, NULL,
                                          output_public_key) == 0) &&
             (zkp_bip340_verify_digest(output_public_key, sig, hash) == 0);
+#endif
   } else {
 #if !BITCOIN_ONLY
     if (coin->overwintered) {
@@ -2207,6 +2209,7 @@ static bool signing_sign_bip340(const uint8_t *private_key,
   resp.serialized.has_serialized_tx = true;
   resp.serialized.signature.size = 64;
 
+#ifdef SECP256K1_ZKP
   uint8_t output_private_key[32] = {0};
   bool ret = (zkp_bip340_tweak_private_key(private_key, NULL,
                                            output_private_key) == 0);
@@ -2214,7 +2217,11 @@ static bool signing_sign_bip340(const uint8_t *private_key,
         (zkp_bip340_sign_digest(output_private_key, hash,
                                 resp.serialized.signature.bytes, NULL) == 0);
   memzero(output_private_key, sizeof(output_private_key));
-
+#else
+  bool ret = false;
+  (void)private_key;
+  (void)hash;
+#endif
   if (!ret) {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));
     signing_abort();
