@@ -2,12 +2,10 @@ import storage
 import storage.device
 import storage.recovery
 from trezor import config, ui, wire, workflow
-from trezor.messages import ButtonRequestType
-from trezor.messages.Success import Success
-from trezor.pin import pin_to_int
-from trezor.ui.text import Text
+from trezor.enums import ButtonRequestType
+from trezor.messages import Success
+from trezor.ui.layouts import confirm_action, confirm_reset_device
 
-from apps.common.confirm import require_confirm
 from apps.common.request_pin import (
     error_pin_invalid,
     request_pin_and_sd_salt,
@@ -17,7 +15,7 @@ from apps.common.request_pin import (
 from .homescreen import recovery_homescreen, recovery_process
 
 if False:
-    from trezor.messages.RecoveryDevice import RecoveryDevice
+    from trezor.messages import RecoveryDevice
 
 
 # List of RecoveryDevice fields that can be set when doing dry-run recovery.
@@ -29,7 +27,7 @@ DRY_RUN_ALLOWED_FIELDS = ("dry_run", "word_count", "enforce_wordlist", "type")
 async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     """
     Recover BIP39/SLIP39 seed into empty device.
-    Recovery is also possible with replugged Trezor. We call this process Persistance.
+    Recovery is also possible with replugged Trezor. We call this process Persistence.
     User starts the process here using the RecoveryDevice msg and then they can unplug
     the device anytime and continue without a computer.
     """
@@ -47,14 +45,14 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     # for dry run pin needs to be entered
     if msg.dry_run:
         curpin, salt = await request_pin_and_sd_salt(ctx, "Enter PIN")
-        if not config.check_pin(pin_to_int(curpin), salt):
+        if not config.check_pin(curpin, salt):
             await error_pin_invalid(ctx)
 
     if not msg.dry_run:
         # set up pin if requested
         if msg.pin_protection:
             newpin = await request_pin_confirm(ctx, allow_cancel=False)
-            config.change_pin(pin_to_int(""), pin_to_int(newpin), None, None)
+            config.change_pin("", newpin, None, None)
 
         storage.device.set_passphrase_enabled(bool(msg.passphrase_protection))
         if msg.u2f_counter is not None:
@@ -84,25 +82,20 @@ def _validate(msg: RecoveryDevice) -> None:
         # check that only allowed fields are set
         for key, value in msg.__dict__.items():
             if key not in DRY_RUN_ALLOWED_FIELDS and value is not None:
-                raise wire.ProcessError(
-                    "Forbidden field set in dry-run: {}".format(key)
-                )
+                raise wire.ProcessError(f"Forbidden field set in dry-run: {key}")
 
 
 async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
     if not msg.dry_run:
-        text = Text("Recovery mode", ui.ICON_RECOVERY, new_lines=False)
-        text.bold("Do you really want to")
-        text.br()
-        text.bold("recover a wallet?")
-
-        text.br()
-        text.br_half()
-        text.normal("By continuing you agree")
-        text.br()
-        text.normal("to")
-        text.bold("https://trezor.io/tos")
+        await confirm_reset_device(
+            ctx, "Do you really want to\nrecover a wallet?", recovery=True
+        )
     else:
-        text = Text("Seed check", ui.ICON_RECOVERY, new_lines=False)
-        text.normal("Do you really want to", "check the recovery", "seed?")
-    await require_confirm(ctx, text, code=ButtonRequestType.ProtectCall)
+        await confirm_action(
+            ctx,
+            "confirm_seedcheck",
+            title="Seed check",
+            description="Do you really want to check the recovery seed?",
+            icon=ui.ICON_RECOVERY,
+            br_code=ButtonRequestType.ProtectCall,
+        )

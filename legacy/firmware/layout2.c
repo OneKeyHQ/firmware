@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "bignum.h"
 #include "bitmaps.h"
@@ -122,32 +123,38 @@ static const char *address_n_str(const uint32_t *address_n,
     return _("Path: m");
   }
 
-  // known BIP44/49 path
+  // known BIP44/49/84/86 path
   static char path[100];
   if (address_n_count == 5 &&
       (address_n[0] == (0x80000000 + 44) || address_n[0] == (0x80000000 + 49) ||
-       address_n[0] == (0x80000000 + 84)) &&
+       address_n[0] == (0x80000000 + 84) ||
+       address_n[0] == (0x80000000 + 86)) &&
       (address_n[1] & 0x80000000) && (address_n[2] & 0x80000000) &&
       (address_n[3] <= 1) && (address_n[4] <= BIP32_MAX_LAST_ELEMENT)) {
+    bool taproot = (address_n[0] == (0x80000000 + 86));
     bool native_segwit = (address_n[0] == (0x80000000 + 84));
     bool p2sh_segwit = (address_n[0] == (0x80000000 + 49));
     bool legacy = false;
     const CoinInfo *coin = coinBySlip44(address_n[1]);
     const char *abbr = 0;
-    if (native_segwit) {
+    if (taproot) {
+      if (coin && coin->has_taproot && coin->bech32_prefix) {
+        abbr = coin->coin_shortcut;
+      }
+    } else if (native_segwit) {
       if (coin && coin->has_segwit && coin->bech32_prefix) {
-        abbr = coin->coin_shortcut + 1;
+        abbr = coin->coin_shortcut;
       }
     } else if (p2sh_segwit) {
       if (coin && coin->has_segwit) {
-        abbr = coin->coin_shortcut + 1;
+        abbr = coin->coin_shortcut;
       }
     } else {
       if (coin) {
         if (coin->has_segwit) {
           legacy = true;
         }
-        abbr = coin->coin_shortcut + 1;
+        abbr = coin->coin_shortcut;
 #if !BITCOIN_ONLY
       } else {
         abbr = slip44_extras(address_n[1]);
@@ -160,14 +167,19 @@ static const char *address_n_str(const uint32_t *address_n,
     if (abbr && accnum < 100) {
       memzero(path, sizeof(path));
       strlcpy(path, abbr, sizeof(path));
-      // TODO: how to name accounts?
-      // currently we have "legacy account", "account" and "segwit account"
-      // for BIP44/P2PKH, BIP49/P2SH-P2WPKH and BIP84/P2WPKH respectivelly
+      // account naming:
+      // "Legacy", "Legacy SegWit", "SegWit" and "Taproot"
+      // for BIP44/P2PKH, BIP49/P2SH-P2WPKH, BIP84/P2WPKH and BIP86/P2TR
+      // respectively.
+      // For non-segwit coins we use only BIP44 with no special naming.
       if (legacy) {
-        strlcat(path, " legacy", sizeof(path));
-      }
-      if (native_segwit) {
-        strlcat(path, " segwit", sizeof(path));
+        strlcat(path, " Legacy", sizeof(path));
+      } else if (p2sh_segwit) {
+        strlcat(path, " L.SegWit", sizeof(path));
+      } else if (native_segwit) {
+        strlcat(path, " SegWit", sizeof(path));
+      } else if (taproot) {
+        strlcat(path, " Taproot", sizeof(path));
       }
       if (address_is_account) {
         strlcat(path, " address #", sizeof(path));
@@ -226,33 +238,23 @@ static const char *address_n_str(const uint32_t *address_n,
   return c;
 }
 
-static bool is_valid_ascii(const uint8_t *data, uint32_t size) {
-  for (uint32_t i = 0; i < size; i++) {
-    if (data[i] < ' ' || data[i] > '~') {
-      return false;
-    }
-  }
-  return true;
-}
-
 // split longer string into 4 rows, rowlen chars each
 const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen) {
   static char str[4][32 + 1];
   if (rowlen > 32) {
     rowlen = 32;
   }
+
   memzero(str, sizeof(str));
-  strlcpy(str[0], (char *)msg, rowlen + 1);
-  if (len > rowlen) {
-    strlcpy(str[1], (char *)msg + rowlen, rowlen + 1);
+  for (int i = 0; i < 4; ++i) {
+    size_t show_len = strnlen((char *)msg, MIN(rowlen, len));
+    memcpy(str[i], (char *)msg, show_len);
+    str[i][show_len] = '\0';
+    msg += show_len;
+    len -= show_len;
   }
-  if (len > rowlen * 2) {
-    strlcpy(str[2], (char *)msg + rowlen * 2, rowlen + 1);
-  }
-  if (len > rowlen * 3) {
-    strlcpy(str[3], (char *)msg + rowlen * 3, rowlen + 1);
-  }
-  if (len > rowlen * 4) {
+
+  if (len > 0) {
     str[3][rowlen - 1] = '.';
     str[3][rowlen - 2] = '.';
     str[3][rowlen - 3] = '.';
@@ -282,11 +284,20 @@ void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,
                        const char *btnYes, const char *desc, const char *line1,
                        const char *line2, const char *line3, const char *line4,
                        const char *line5, const char *line6) {
+  layoutDialogSwipeEx(icon, btnNo, btnYes, desc, line1, line2, line3, line4,
+                      line5, line6, FONT_STANDARD);
+}
+
+void layoutDialogSwipeEx(const BITMAP *icon, const char *btnNo,
+                         const char *btnYes, const char *desc,
+                         const char *line1, const char *line2,
+                         const char *line3, const char *line4,
+                         const char *line5, const char *line6, uint8_t font) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
 #if ONEKEY_MINI
   layoutDialogAdapterEx(icon, btnNo, btnYes, desc, line1, line2, line3, line4,
-                        line5, line6);
+                        line5, line6, font);
 #else
   layoutDialogAdapter(icon, btnNo, btnYes, desc, line1, line2, line3, line4,
                       line5, line6);
@@ -825,6 +836,11 @@ static void render_address_dialog(const CoinInfo *coin, const char *address,
       address += prefix_len + 1;
     }
   }
+#if ONEKEY_MINI
+  layoutTransInformation(NULL, NULL, &bmp_btn_cancel, &bmp_btn_confirm,
+                         _("Cancel"), _("Confirm"), line1, line2, extra_line,
+                         false, false, address);
+#else
   int addrlen = strlen(address);
   int numlines = addrlen <= 42 ? 2 : 3;
   int linelen = (addrlen - 1) / numlines + 1;
@@ -853,17 +869,55 @@ static void render_address_dialog(const CoinInfo *coin, const char *address,
   layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
   layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
   oledRefresh();
+#endif
 }
 
-void layoutConfirmOutput(const CoinInfo *coin, const TxOutputType *out) {
-  char str_out[32 + 3] = {0};
-  bn_format_uint64(out->amount, NULL, coin->coin_shortcut, coin->decimals, 0,
-                   false, str_out, sizeof(str_out) - 3);
-  if (ui_language) {
-  } else {
-    strlcat(str_out, _(" to"), sizeof(str_out));
+static size_t format_coin_amount(uint64_t amount, const char *prefix,
+                                 const CoinInfo *coin, AmountUnit amount_unit,
+                                 char *output, size_t output_len) {
+  // " " + (optional "m"/u") + shortcut + ending zero -> 16 should suffice
+  char suffix[16];
+  memzero(suffix, sizeof(suffix));
+  suffix[0] = ' ';
+  uint32_t decimals = coin->decimals;
+  switch (amount_unit) {
+    case AmountUnit_SATOSHI:
+      decimals = 0;
+      strlcpy(suffix + 1, "sat ", sizeof(suffix) - 1);
+      strlcpy(suffix + 5, coin->coin_shortcut, sizeof(suffix) - 5);
+      break;
+    case AmountUnit_MILLIBITCOIN:
+      if (decimals >= 6) {
+        decimals -= 6;
+        suffix[1] = 'u';
+        strlcpy(suffix + 2, coin->coin_shortcut, sizeof(suffix) - 2);
+      } else {
+        strlcpy(suffix + 1, coin->coin_shortcut, sizeof(suffix) - 1);
+      }
+      break;
+    case AmountUnit_MICROBITCOIN:
+      if (decimals >= 3) {
+        decimals -= 3;
+        suffix[1] = 'm';
+        strlcpy(suffix + 2, coin->coin_shortcut, sizeof(suffix) - 2);
+      } else {
+        strlcpy(suffix + 1, coin->coin_shortcut, sizeof(suffix) - 1);
+      }
+      break;
+    default:  // AmountUnit_BITCOIN
+      strlcpy(suffix + 1, coin->coin_shortcut, sizeof(suffix) - 1);
+      break;
   }
+  return bn_format_uint64(amount, prefix, suffix, decimals, 0, false, output,
+                          output_len);
+}
 
+void layoutConfirmOutput(const CoinInfo *coin, AmountUnit amount_unit,
+                         const TxOutputType *out) {
+  char str_out[32 + 3] = {0};
+  format_coin_amount(out->amount, NULL, coin, amount_unit, str_out,
+                     sizeof(str_out) - 3);
+  strlcat(str_out, " to", sizeof(str_out));
   const char *address = out->address;
   const char *extra_line =
       (out->address_n_count > 0)
@@ -915,6 +969,15 @@ void layoutConfirmOmni(const uint8_t *data, uint32_t size) {
                     NULL);
 }
 
+bool is_valid_ascii(const uint8_t *data, uint32_t size) {
+  for (uint32_t i = 0; i < size; i++) {
+    if (data[i] < ' ' || data[i] > '~') {
+      return false;
+    }
+  }
+  return true;
+}
+
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
   const char **str = NULL;
   if (!is_valid_ascii(data, size)) {
@@ -927,9 +990,9 @@ void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
                     NULL);
 }
 
-static bool formatAmountDifference(const CoinInfo *coin, uint64_t amount1,
-                                   uint64_t amount2, char *output,
-                                   size_t output_length) {
+static bool formatAmountDifference(const CoinInfo *coin, AmountUnit amount_unit,
+                                   uint64_t amount1, uint64_t amount2,
+                                   char *output, size_t output_length) {
   uint64_t abs_diff = 0;
   const char *sign = NULL;
   if (amount1 >= amount2) {
@@ -939,17 +1002,20 @@ static bool formatAmountDifference(const CoinInfo *coin, uint64_t amount1,
     sign = "-";
   }
 
-  return bn_format_uint64(abs_diff, sign, coin->coin_shortcut, coin->decimals,
-                          0, false, output, output_length) != 0;
+  return format_coin_amount(abs_diff, sign, coin, amount_unit, output,
+                            output_length) != 0;
 }
 
-void layoutConfirmTx(const CoinInfo *coin, uint64_t total_in,
-                     uint64_t total_out, uint64_t change_out) {
+void layoutConfirmTx(const CoinInfo *coin, AmountUnit amount_unit,
+                     uint64_t total_in, uint64_t total_out,
+                     uint64_t change_out) {
   char str_out[32] = {0};
-  formatAmountDifference(coin, total_in, change_out, str_out, sizeof(str_out));
+  formatAmountDifference(coin, amount_unit, total_in, change_out, str_out,
+                         sizeof(str_out));
 
   char str_fee[32] = {0};
-  formatAmountDifference(coin, total_in, total_out, str_fee, sizeof(str_fee));
+  formatAmountDifference(coin, amount_unit, total_in, total_out, str_fee,
+                         sizeof(str_fee));
 
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Really send"), str_out, _("from your wallet?"),
@@ -962,8 +1028,39 @@ void layoutConfirmReplacement(const char *description, uint8_t txid[32]) {
                     description, str[0], str[1], str[2], str[3], NULL);
 }
 
-void layoutConfirmModifyFee(const CoinInfo *coin, uint64_t fee_old,
-                            uint64_t fee_new) {
+void layoutConfirmModifyOutput(const CoinInfo *coin, AmountUnit amount_unit,
+                               TxOutputType *out, TxOutputType *orig_out,
+                               int page) {
+  if (page == 0) {
+    render_address_dialog(coin, out->address, _("Modify amount for"),
+                          _("address:"), NULL);
+  } else {
+    char *question = NULL;
+    uint64_t amount_change = 0;
+    if (orig_out->amount < out->amount) {
+      question = _("Increase amount by:");
+      amount_change = out->amount - orig_out->amount;
+    } else {
+      question = _("Decrease amount by:");
+      amount_change = orig_out->amount - out->amount;
+    }
+
+    char str_amount_change[32] = {0};
+    format_coin_amount(amount_change, NULL, coin, amount_unit,
+                       str_amount_change, sizeof(str_amount_change));
+
+    char str_amount_new[32] = {0};
+    format_coin_amount(out->amount, NULL, coin, amount_unit, str_amount_new,
+                       sizeof(str_amount_new));
+
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      question, str_amount_change, NULL, _("New amount:"),
+                      str_amount_new, NULL);
+  }
+}
+
+void layoutConfirmModifyFee(const CoinInfo *coin, AmountUnit amount_unit,
+                            uint64_t fee_old, uint64_t fee_new) {
   char str_fee_change[32] = {0};
   char str_fee_new[32] = {0};
   char *question = NULL;
@@ -976,21 +1073,21 @@ void layoutConfirmModifyFee(const CoinInfo *coin, uint64_t fee_old,
     question = _("Decrease your fee by:");
     fee_change = fee_old - fee_new;
   }
-  bn_format_uint64(fee_change, NULL, coin->coin_shortcut, coin->decimals, 0,
-                   false, str_fee_change, sizeof(str_fee_change));
+  format_coin_amount(fee_change, NULL, coin, amount_unit, str_fee_change,
+                     sizeof(str_fee_change));
 
-  bn_format_uint64(fee_new, NULL, coin->coin_shortcut, coin->decimals, 0, false,
-                   str_fee_new, sizeof(str_fee_new));
+  format_coin_amount(fee_new, NULL, coin, amount_unit, str_fee_new,
+                     sizeof(str_fee_new));
 
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     question, str_fee_change, NULL, _("Transaction fee:"),
                     str_fee_new, NULL);
 }
 
-void layoutFeeOverThreshold(const CoinInfo *coin, uint64_t fee) {
+void layoutFeeOverThreshold(const CoinInfo *coin, AmountUnit amount_unit,
+                            uint64_t fee) {
   char str_fee[32] = {0};
-  bn_format_uint64(fee, NULL, coin->coin_shortcut, coin->decimals, 0, false,
-                   str_fee, sizeof(str_fee));
+  format_coin_amount(fee, NULL, coin, amount_unit, str_fee, sizeof(str_fee));
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Fee"), str_fee, _("is unexpectedly high."), NULL,
                     _("Send anyway?"), NULL);
@@ -1012,58 +1109,21 @@ void layoutConfirmNondefaultLockTime(uint32_t lock_time,
                       _("will have no effect."), NULL, _("Continue?"), NULL);
 
   } else {
-    char str_locktime[11] = {0};
-    snprintf(str_locktime, sizeof(str_locktime), "%" PRIu32, lock_time);
-    char *str_type = (lock_time < LOCKTIME_TIMESTAMP_MIN_VALUE) ? "blockheight:"
-                                                                : "timestamp:";
+    char str_locktime[20] = {0};
+    char *str_type = NULL;
+    if (lock_time < LOCKTIME_TIMESTAMP_MIN_VALUE) {
+      str_type = "blockheight:";
+      snprintf(str_locktime, sizeof(str_locktime), "%" PRIu32, lock_time);
+    } else {
+      str_type = "timestamp (UTC):";
+      time_t time = lock_time;
+      const struct tm *tm = gmtime(&time);
+      strftime(str_locktime, sizeof(str_locktime), "%F %T", tm);
+    }
 
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Locktime for this"), _("transaction is set to"),
                       _(str_type), str_locktime, _("Continue?"), NULL);
-  }
-}
-
-void layoutSignMessage(const uint8_t *msg, uint32_t len) {
-  const char **str = NULL;
-  if (!is_valid_ascii(msg, len)) {
-    str = split_message_hex(msg, len);
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
-                      _("Sign binary message?"), str[0], str[1], str[2], str[3],
-                      NULL, NULL);
-  } else {
-    str = split_message(msg, len, 18);
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"),
-                      _("Sign message?"), str[0], str[1], str[2], str[3], NULL,
-                      NULL);
-  }
-}
-
-void layoutSignMessage_ex(const char *text, const uint8_t *msg, uint32_t len) {
-  const char **str = NULL;
-  if (!is_valid_ascii(msg, len)) {
-    str = split_message_hex(msg, len);
-    layoutDialogSwipe(NULL, _("Cancel"), _("Confirm"), text, str[0], str[1],
-                      str[2], str[3], NULL, NULL);
-  } else {
-    str = split_message(msg, len, 18);
-    layoutDialogSwipe(NULL, _("Cancel"), _("Confirm"), text, str[0], str[1],
-                      str[2], str[3], NULL, NULL);
-  }
-}
-
-void layoutVerifyMessage(const uint8_t *msg, uint32_t len) {
-  const char **str = NULL;
-  if (!is_valid_ascii(msg, len)) {
-    str = split_message_hex(msg, len);
-    layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Confirm"),
-                      _("Verified binary message"), str[0], str[1], str[2],
-                      str[3], NULL, NULL);
-  } else {
-    str = split_message(msg, len, 20);
-
-    layoutDialogSwipe(&bmp_icon_info, _("Cancel"), _("Confirm"),
-                      _("Verified message"), str[0], str[1], str[2], str[3],
-                      NULL, NULL);
   }
 }
 
@@ -1246,10 +1306,14 @@ void layoutAddress(const char *address, const char *desc, bool qrcode,
       oledDrawStringAdapter(0, 0 * 9, desc, FONT_STANDARD);
     }
     if (addrlen > 10) {  // don't split short addresses
-      uint32_t rowlen = (addrlen - 1) / (addrlen <= 42   ? 2
-                                         : addrlen <= 63 ? 3
-                                                         : 4) +
-                        1;
+      uint32_t rowcount = 4;
+      if (addrlen <= 42) {
+        rowcount = 2;
+      } else if (addrlen <= 63) {
+        rowcount = 3;
+      }
+
+      uint32_t rowlen = (addrlen - 1) / rowcount + 1;
       const char **str =
           split_message((const uint8_t *)address, addrlen, rowlen);
 
@@ -1371,7 +1435,7 @@ void layoutXPUBMultisig(const char *xpub, int index, int page, bool ours) {
     oledClear();
   }
   layoutLast = layoutXPUBMultisig;
-  char desc[] = "XPUB #__ _/2 (______)";
+  char desc[] = "XPUB #__ _/2 (________)";
   if (index + 1 >= 10) {
     desc[6] = '0' + (((index + 1) / 10) % 10);
     desc[7] = '0' + ((index + 1) % 10);
@@ -1389,12 +1453,14 @@ void layoutXPUBMultisig(const char *xpub, int index, int page, bool ours) {
     desc[19] = ')';
     desc[20] = 0;
   } else {
-    desc[14] = 'o';
-    desc[15] = 't';
-    desc[16] = 'h';
-    desc[17] = 'e';
-    desc[18] = 'r';
-    desc[19] = 's';
+    desc[14] = 'c';
+    desc[15] = 'o';
+    desc[16] = 's';
+    desc[17] = 'i';
+    desc[18] = 'g';
+    desc[19] = 'n';
+    desc[20] = 'e';
+    desc[21] = 'r';
   }
   _layout_xpub(xpub, desc, page);
   layoutButtonNoAdapter(_("Next"), NULL);
@@ -1512,10 +1578,12 @@ void layoutDecryptIdentity(const IdentityType *identity) {
 void layoutU2FDialog(const char *verb, const char *appname) {
 #if ONEKEY_MINI
   layoutDialogAdapterEx(&bmp_webauthn, NULL, verb, NULL, verb,
+                        _("U2F security key?"), NULL, appname, NULL, NULL,
+                        FONT_STANDARD);
 #else
   layoutDialogAdapter(&bmp_webauthn, NULL, verb, NULL, verb,
+                      _("U2F security key?"), NULL, appname, NULL, NULL);
 #endif
-                        _("U2F security key?"), NULL, appname, NULL, NULL);
 }
 
 #endif
@@ -1973,6 +2041,21 @@ void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
                     line, NULL, NULL, NULL);
 }
 
+void layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
+  if (safety_ckeck_level == SafetyCheckLevel_Strict) {
+    // Disallow unsafe actions. This is the default.
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("enforce strict safety"),
+                      _("checks?"), _("(Recommended.)"), NULL, NULL);
+  } else if (safety_ckeck_level == SafetyCheckLevel_PromptTemporarily) {
+    // Ask user before unsafe action. Reverts to Strict after reboot.
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                      _("Do you really want to"), _("be temporarily able"),
+                      _("to approve some"), _("actions which might"),
+                      _("be unsafe?"), NULL);
+  }
+}
+
 // layout chinese
 void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon) {
   if (!btnNo && !icon) {
@@ -2092,48 +2175,47 @@ void layoutDialogAdapterEx(const BITMAP *icon, const char *btnNo,
                            const char *btnYes, const char *desc,
                            const char *line1, const char *line2,
                            const char *line3, const char *line4,
-                           const char *line5, const char *line6) {
-  const struct font_desc *font = find_cur_font();
+                           const char *line5, const char *line6, uint8_t font) {
+  const struct font_desc *font_dc = find_cur_font();
 
   oledClear_ex();
   if (icon) {
     oledDrawBitmap((OLED_WIDTH - icon->width) / 2, 9, icon);
   }
   if (line1) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1), line1,
-                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font_dc->pixel + 1), line1,
+                                font);
   }
   if (line2) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1), line2,
-                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font_dc->pixel + 1), line2,
+                                font);
   }
   if (line3) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * (font->pixel + 1), line3,
-                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 6 * (font_dc->pixel + 1), line3,
+                                font);
   }
   if (line4) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 7 * (font->pixel + 1), line4,
-                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 7 * (font_dc->pixel + 1), line4,
+                                font);
   }
 
   if (desc) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2,
-                                OLED_HEIGHT - 2 * (font->pixel + 1) - 1, desc,
-                                FONT_STANDARD);
+    oledDrawStringCenterAdapter(
+        OLED_WIDTH / 2, OLED_HEIGHT - 2 * (font_dc->pixel + 1) - 1, desc, font);
     if (btnYes || btnNo) {
-      oledHLine(OLED_HEIGHT - 2 * (font->pixel + 1) - 3);
+      oledHLine(OLED_HEIGHT - 2 * (font_dc->pixel + 1) - 3);
     }
   } else {
     if (line5) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 8 * (font->pixel + 1), line5,
-                                  FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 8 * (font_dc->pixel + 1),
+                                  line5, font);
     }
     if (line6) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * (font->pixel + 1), line6,
-                                  FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * (font_dc->pixel + 1),
+                                  line6, font);
     }
     if (btnYes || btnNo) {
-      oledHLine(OLED_HEIGHT - (font->pixel + 4));
+      oledHLine(OLED_HEIGHT - (font_dc->pixel + 4));
     }
   }
   if (btnNo) {

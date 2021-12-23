@@ -6,15 +6,17 @@ Q := @
 endif
 
 PYTHON ?= python
+CC_FOR_BUILD ?= gcc
 
 ifeq ($(EMULATOR),1)
 CC       ?= gcc
 LD       := $(CC)
-OBJCOPY  := objcopy
-OBJDUMP  := objdump
+OBJCOPY  := true
+OBJDUMP  := true
 AR       := ar
 AS       := as
 
+CONFFLAG ?= -DCONFIDENTIAL=''
 OPTFLAGS ?= -O3
 DBGFLAGS ?= -g3 -ggdb3
 CPUFLAGS ?=
@@ -27,19 +29,21 @@ OBJCOPY  := $(PREFIX)objcopy
 OBJDUMP  := $(PREFIX)objdump
 AR       := $(PREFIX)ar
 AS       := $(PREFIX)as
-OPENOCD  := openocd -f interface/stlink-v2.cfg -c "transport select hla_swd" -f target/stm32f2x.cfg
+OPENOCD  := openocd -f interface/stlink.cfg -c "transport select hla_swd" -f target/stm32f2x.cfg
+
 GDB      := $(PREFIX)gdb --nx -ex 'set remotetimeout unlimited' -ex 'set confirm off' -ex 'target remote 127.0.0.1:3333' -ex 'monitor reset halt'
 
 OPTFLAGS ?= -Os
 DBGFLAGS ?= -g -DNDEBUG
 CPUFLAGS ?= -mcpu=cortex-m3 -mthumb
 FPUFLAGS ?= -msoft-float
-endif
 
 ifeq ($(MAC_OS), 1)
-CONFIDENTIAL := '__attribute__((used)) __attribute__((section("__CONFIDENTIAL,__confidential")))'
+CONFFLAG ?= -DCONFIDENTIAL='__attribute__((used)) __attribute__((section("__CONFIDENTIAL,__confidential")))'
 else
-CONFIDENTIAL := '__attribute__((section("confidential")))'
+CONFFLAG ?= -DCONFIDENTIAL='__attribute__((section("confidential")))'
+endif
+
 endif
 
 CFLAGS   += $(OPTFLAGS) \
@@ -71,8 +75,8 @@ CFLAGS   += $(OPTFLAGS) \
             -fdata-sections \
             $(CPUFLAGS) \
             $(FPUFLAGS) \
+            $(CONFFLAG) \
             -DSTM32F2 \
-            -DCONFIDENTIAL=$(CONFIDENTIAL) \
             -DRAND_PLATFORM_INDEPENDENT=1 \
             -I$(TOOLCHAIN_DIR)/include \
             -I$(TOP_DIR) \
@@ -91,6 +95,8 @@ LDFLAGS  += -L$(TOP_DIR) \
 
 LDFLAGS  += -L$(TOP_DIR)vendor/libsol
 LDLIBS   += -lsol
+
+ZKP_PATH = $(TOP_DIR)vendor/secp256k1-zkp
 
 ifeq ($(EMULATOR),1)
 CFLAGS   += -DEMULATOR=1
@@ -122,7 +128,7 @@ CFLAGS   += -DEMULATOR=0
 
 LDFLAGS  += --static \
             -Wl,--start-group \
-            -lc \
+            -lc_nano \
             -lgcc \
             -lnosys \
             -Wl,--end-group \
@@ -232,6 +238,19 @@ $(NAME).list: $(NAME).elf
 $(NAME).elf: $(OBJS) $(LDSCRIPT) $(LIBDEPS)
 	@printf "  LD      $@\n"
 	$(Q)$(LD) -o $(NAME).elf $(OBJS) $(LDLIBS) $(LDFLAGS)
+
+$(ZKP_PATH)/src/ecmult_static_context.h: $(ZKP_PATH)/src/gen_context.c
+	@printf "  GEN     $@\n"
+	$(Q)$(CC_FOR_BUILD) $(ZKP_CFLAGS) $(ZKP_PATH)/src/gen_context.c -o $(ZKP_PATH)/gen_context
+	$(Q)cd $(ZKP_PATH) && ./gen_context
+
+secp256k1-zkp.o: $(ZKP_PATH)/src/ecmult_static_context.h
+	@printf "  CC      $@\n"
+	$(Q)$(CC) $(CFLAGS) -Wno-unused-function $(ZKP_CFLAGS) -I$(ZKP_PATH) -I$(ZKP_PATH)/src -c $(ZKP_PATH)/src/secp256k1.c -o secp256k1-zkp.o
+
+field_10x26_arm.o:
+	@printf "  AS      $@\n"
+	$(Q)$(CC) $(CFLAGS) $(ZKP_CFLAGS) -c $(ZKP_PATH)/src/asm/field_10x26_arm.s -o field_10x26_arm.o
 
 %.o: %.S Makefile
 	@printf "  AS      $@\n"

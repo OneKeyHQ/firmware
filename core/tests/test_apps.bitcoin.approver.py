@@ -1,11 +1,12 @@
 from common import unittest, await_result, H_
 
+import storage.cache
 from trezor import wire
-from trezor.messages.AuthorizeCoinJoin import AuthorizeCoinJoin
-from trezor.messages.TxInput import TxInput
-from trezor.messages.TxOutput import TxOutput
-from trezor.messages.SignTx import SignTx
-from trezor.messages import InputScriptType, OutputScriptType
+from trezor.messages import AuthorizeCoinJoin
+from trezor.messages import TxInput
+from trezor.messages import TxOutput
+from trezor.messages import SignTx
+from trezor.enums import InputScriptType, OutputScriptType
 
 from apps.common import coins
 from apps.bitcoin.authorization import CoinJoinAuthorization
@@ -23,11 +24,12 @@ class TestApprover(unittest.TestCase):
         self.msg_auth = AuthorizeCoinJoin(
             coordinator="www.example.com",
             max_total_fee=40000,
-            fee_per_anonymity=self.fee_per_anonymity_percent * 10**9,
+            fee_per_anonymity=int(self.fee_per_anonymity_percent * 10**9),
             address_n=[H_(84), H_(0), H_(0)],
             coin_name=self.coin.coin_name,
             script_type=InputScriptType.SPENDWITNESS,
         )
+        storage.cache.start_session()
 
     def test_coinjoin_lots_of_inputs(self):
         denomination = 10000000
@@ -38,6 +40,7 @@ class TestApprover(unittest.TestCase):
                 prev_hash=b"",
                 prev_index=0,
                 amount=denomination + 1000000 * (i + 1),
+                script_pubkey=bytes(22),
                 script_type=InputScriptType.EXTERNAL,
                 sequence=0xffffffff,
             ) for i in range(99)
@@ -74,7 +77,7 @@ class TestApprover(unittest.TestCase):
             )
         )
 
-        coordinator_fee = self.fee_per_anonymity_percent / 100 * len(outputs) * denomination
+        coordinator_fee = int(self.fee_per_anonymity_percent / 100 * len(outputs) * denomination)
         fees = coordinator_fee + 10000
         total_coordinator_fee = coordinator_fee * len(outputs)
 
@@ -103,7 +106,7 @@ class TestApprover(unittest.TestCase):
             )
         )
 
-        authorization = CoinJoinAuthorization(self.msg_auth, None, self.coin)
+        authorization = CoinJoinAuthorization(self.msg_auth)
         tx = SignTx(outputs_count=len(outputs), inputs_count=len(inputs), coin_name=self.coin.coin_name, lock_time=0)
         approver = CoinJoinApprover(tx, self.coin, authorization)
         signer = Bitcoin(tx, None, self.coin, approver)
@@ -123,7 +126,7 @@ class TestApprover(unittest.TestCase):
         await_result(approver.approve_tx(TxInfo(signer, tx), []))
 
     def test_coinjoin_input_account_depth_mismatch(self):
-        authorization = CoinJoinAuthorization(self.msg_auth, None, self.coin)
+        authorization = CoinJoinAuthorization(self.msg_auth)
         tx = SignTx(outputs_count=201, inputs_count=100, coin_name=self.coin.coin_name, lock_time=0)
         approver = CoinJoinApprover(tx, self.coin, authorization)
 
@@ -139,7 +142,7 @@ class TestApprover(unittest.TestCase):
             await_result(approver.add_internal_input(txi))
 
     def test_coinjoin_input_account_path_mismatch(self):
-        authorization = CoinJoinAuthorization(self.msg_auth, None, self.coin)
+        authorization = CoinJoinAuthorization(self.msg_auth)
         tx = SignTx(outputs_count=201, inputs_count=100, coin_name=self.coin.coin_name, lock_time=0)
         approver = CoinJoinApprover(tx, self.coin, authorization)
 

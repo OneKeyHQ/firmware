@@ -1,4 +1,5 @@
-from trezor import res, ui, wire
+import storage.cache
+from trezor import loop, res, ui, wire
 
 from . import HomescreenBase
 
@@ -21,6 +22,8 @@ async def lockscreen() -> None:
 
 class Lockscreen(HomescreenBase):
     BACKLIGHT_LEVEL = ui.BACKLIGHT_LOW
+    RENDER_SLEEP = loop.SLEEP_FOREVER
+    RENDER_INDICATOR = storage.cache.LOCKSCREEN_ON
 
     def __init__(self, bootscreen: bool = False) -> None:
         if bootscreen:
@@ -33,12 +36,12 @@ class Lockscreen(HomescreenBase):
 
         super().__init__()
 
-    def on_render(self) -> None:
+    def do_render(self) -> None:
         # homescreen with label text on top
         ui.display.text_center(
             ui.WIDTH // 2, 35, self.label, ui.BOLD, ui.TITLE_GREY, ui.BG
         )
-        ui.display.avatar(48, 48, self.image, ui.WHITE, ui.BLACK)
+        ui.display.avatar(48, 48, self.get_image(), ui.WHITE, ui.BLACK)
 
         # lock bar
         ui.display.bar_radius(40, 100, 160, 40, ui.TITLE_GREY, ui.BG, 4)
@@ -53,5 +56,5 @@ class Lockscreen(HomescreenBase):
         )
         ui.display.icon(45, 202, res.load(ui.ICON_CLICK), ui.TITLE_GREY, ui.BG)
 
-    def on_tap(self) -> None:
+    def on_touch_end(self, _x: int, _y: int) -> None:
         raise ui.Result(None)

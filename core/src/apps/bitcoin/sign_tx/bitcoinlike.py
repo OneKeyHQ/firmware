@@ -1,39 +1,32 @@
-from micropython import const
-
 from trezor import wire
-from trezor.messages.PrevTx import PrevTx
-from trezor.messages.SignTx import SignTx
-from trezor.messages.TxInput import TxInput
+from trezor.messages import PrevTx, SignTx, TxInput
 
 from apps.common.writers import write_bitcoin_varint
 
 from .. import multisig, writers
-from ..common import input_is_nonsegwit
+from ..common import NONSEGWIT_INPUT_SCRIPT_TYPES, SigHashType
 from . import helpers
 from .bitcoin import Bitcoin
 
 if False:
-    from typing import List, Optional, Union
+    from typing import Sequence
     from .tx_info import OriginalTxInfo, TxInfo
-
-_SIGHASH_FORKID = const(0x40)
 
 
 class Bitcoinlike(Bitcoin):
     async def sign_nonsegwit_bip143_input(self, i_sign: int) -> None:
         txi = await helpers.request_tx_input(self.tx_req, i_sign, self.coin)
 
-        if not input_is_nonsegwit(txi):
+        if txi.script_type not in NONSEGWIT_INPUT_SCRIPT_TYPES:
             raise wire.ProcessError("Transaction has changed during signing")
-        public_key, signature = self.sign_bip143_input(txi)
+        public_key, signature = self.sign_bip143_input(i_sign, txi)
 
         # if multisig, do a sanity check to ensure we are signing with a key that is included in the multisig
         if txi.multisig:
             multisig.multisig_pubkey_index(txi.multisig, public_key)
 
         # serialize input with correct signature
-        script_sig = self.input_derive_script(txi, public_key, signature)
-        self.write_tx_input(self.serialized_tx, txi, script_sig)
+        self.write_tx_input_derived(self.serialized_tx, txi, public_key, signature)
         self.set_serialized_signature(i_sign, signature)
 
     async def sign_nonsegwit_input(self, i_sign: int) -> None:
@@ -46,36 +39,35 @@ class Bitcoinlike(Bitcoin):
         self,
         i: int,
         txi: TxInput,
-        tx_info: Union[TxInfo, OriginalTxInfo],
-        public_keys: List[bytes],
+        tx_info: TxInfo | OriginalTxInfo,
+        public_keys: Sequence[bytes | memoryview],
         threshold: int,
         script_pubkey: bytes,
-        tx_hash: Optional[bytes] = None,
     ) -> bytes:
         if self.coin.force_bip143:
-            return tx_info.hash143.preimage_hash(
+            return tx_info.sig_hasher.hash143(
                 txi,
                 public_keys,
                 threshold,
                 tx_info.tx,
                 self.coin,
-                self.get_sighash_type(txi),
+                self.get_hash_type(txi),
             )
         else:
             return await super().get_tx_digest(
                 i, txi, tx_info, public_keys, threshold, script_pubkey
             )
 
-    def get_sighash_type(self, txi: TxInput) -> int:
-        hashtype = super().get_sighash_type(txi)
+    def get_hash_type(self, txi: TxInput) -> int:
+        hashtype = super().get_hash_type(txi)
         if self.coin.fork_id is not None:
-            hashtype |= (self.coin.fork_id << 8) | _SIGHASH_FORKID
+            hashtype |= (self.coin.fork_id << 8) | SigHashType.SIGHASH_FORKID
         return hashtype
 
     def write_tx_header(
         self,
         w: writers.Writer,
-        tx: Union[SignTx, PrevTx],
+        tx: SignTx | PrevTx,
         witness_marker: bool,
     ) -> None:
         writers.write_uint32(w, tx.version)  # nVersion

@@ -25,6 +25,7 @@
 
 #include "bootloader.h"
 #include "buttons.h"
+#include "compiler_traits.h"
 #include "layout.h"
 #include "layout_boot.h"
 #include "memory.h"
@@ -32,6 +33,7 @@
 #include "rng.h"
 #include "setup.h"
 #include "signatures.h"
+#include "supervise.h"
 #include "sys.h"
 #include "usb.h"
 #include "util.h"

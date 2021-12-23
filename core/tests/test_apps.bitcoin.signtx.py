@@ -2,32 +2,32 @@ from common import *
 
 from trezor.utils import chunks
 from trezor.crypto import bip32, bip39
-from trezor.messages.SignTx import SignTx
-from trezor.messages.TxAckInput import TxAckInput
-from trezor.messages.TxAckInputWrapper import TxAckInputWrapper
-from trezor.messages.TxInput import TxInput
-from trezor.messages.TxAckOutput import TxAckOutput
-from trezor.messages.TxAckOutputWrapper import TxAckOutputWrapper
-from trezor.messages.TxOutput import TxOutput
-from trezor.messages.TxAckPrevMeta import TxAckPrevMeta
-from trezor.messages.PrevTx import PrevTx
-from trezor.messages.TxAckPrevInput import TxAckPrevInput
-from trezor.messages.TxAckPrevInputWrapper import TxAckPrevInputWrapper
-from trezor.messages.PrevInput import PrevInput
-from trezor.messages.TxAckPrevOutput import TxAckPrevOutput
-from trezor.messages.TxAckPrevOutputWrapper import TxAckPrevOutputWrapper
-from trezor.messages.PrevOutput import PrevOutput
-from trezor.messages.TxRequest import TxRequest
-from trezor.messages.RequestType import TXINPUT, TXOUTPUT, TXMETA, TXFINISHED
-from trezor.messages.TxRequestDetailsType import TxRequestDetailsType
-from trezor.messages.TxRequestSerializedType import TxRequestSerializedType
-from trezor.messages import OutputScriptType
+from trezor.messages import SignTx
+from trezor.messages import TxAckInput
+from trezor.messages import TxAckInputWrapper
+from trezor.messages import TxInput
+from trezor.messages import TxAckOutput
+from trezor.messages import TxAckOutputWrapper
+from trezor.messages import TxOutput
+from trezor.messages import TxAckPrevMeta
+from trezor.messages import PrevTx
+from trezor.messages import TxAckPrevInput
+from trezor.messages import TxAckPrevInputWrapper
+from trezor.messages import PrevInput
+from trezor.messages import TxAckPrevOutput
+from trezor.messages import TxAckPrevOutputWrapper
+from trezor.messages import PrevOutput
+from trezor.messages import TxRequest
+from trezor.enums.RequestType import TXINPUT, TXOUTPUT, TXMETA, TXFINISHED
+from trezor.messages import TxRequestDetailsType
+from trezor.messages import TxRequestSerializedType
+from trezor.enums import AmountUnit
+from trezor.enums import OutputScriptType
 
 from apps.common import coins
 from apps.common.keychain import Keychain
 from apps.bitcoin.keychain import get_schemas_for_coin
 from apps.bitcoin.sign_tx import bitcoin, helpers
-from apps.bitcoin.sign_tx.approvers import BasicApprover
 
 
 EMPTY_SERIALIZED = TxRequestSerializedType(serialized_tx=bytearray())
@@ -74,9 +74,9 @@ class TestSignTx(unittest.TestCase):
             TxAckInput(tx=TxAckInputWrapper(input=inp1)),
             TxRequest(request_type=TXOUTPUT, details=TxRequestDetailsType(request_index=0, tx_hash=None), serialized=EMPTY_SERIALIZED),
             TxAckOutput(tx=TxAckOutputWrapper(output=out1)),
-            helpers.UiConfirmOutput(out1, coin_bitcoin),
+            helpers.UiConfirmOutput(out1, coin_bitcoin, AmountUnit.BITCOIN),
             True,
-            helpers.UiConfirmTotal(380000 + 10000, 10000, coin_bitcoin),
+            helpers.UiConfirmTotal(380000 + 10000, 10000, coin_bitcoin, AmountUnit.BITCOIN),
             True,
             # ButtonRequest(code=ButtonRequest_ConfirmOutput),
             # ButtonRequest(code=ButtonRequest_SignTx),
@@ -109,8 +109,7 @@ class TestSignTx(unittest.TestCase):
         seed = bip39.seed('alcohol woman abuse must during monitor noble actual mixed trade anger aisle', '')
         ns = get_schemas_for_coin(coin_bitcoin)
         keychain = Keychain(seed, coin_bitcoin.curve_name, ns)
-        approver = BasicApprover(tx, coin_bitcoin)
-        signer = bitcoin.Bitcoin(tx, keychain, coin_bitcoin, approver).signer()
+        signer = bitcoin.Bitcoin(tx, keychain, coin_bitcoin, None).signer()
 
         for request, response in chunks(messages, 2):
             res = signer.send(request)

@@ -1,0 +1,62 @@
+image: registry.gitlab.com/satoshilabs/trezor/trezor-firmware/trezor-firmware-env.nix
+
+# Caching
+.gitlab_caching: &gitlab_caching
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .venv/
+
+# Hardware
+
+# Currently it's not possible to run all regular TT tests without getting into
+# a state where the micropython heap is too fragmented and allocations fail
+# (often manifesting as a stuck test case). For that reason some tests are
+# skipped.
+# See also: https://github.com/trezor/trezor-firmware/issues/1371
+hardware legacy regular device test:
+  stage: test
+  only:
+    - schedules  # nightly build
+    - /^legacy\//
+    - /^release\//
+    - /^secfix\//
+    - /^hw\//
+  tags:
+    - tpmb
+  needs:
+    - legacy fw regular debug build
+  script:
+    - cd ci/hardware_tests
+    - nix-shell --run "./t1_hw_test.sh | ts -s"
+  timeout: 1h10m
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ci/hardware_tests/*.mp4
+    expire_in: 2 days
+    when: always
+
+hardware legacy btconly device test:
+  stage: test
+  variables:
+    TREZOR_PYTEST_SKIP_ALTCOINS: 1
+  only:
+    - schedules  # nightly build
+    - /^legacy\//
+    - /^release\//
+    - /^secfix\//
+    - /^hw\//
+  tags:
+    - tpmb
+  needs:
+    - legacy fw btconly debug build
+  script:
+    - cd ci/hardware_tests
+    - nix-shell --run "./t1_hw_test.sh | ts -s"
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - ci/hardware_tests/*.mp4
+    expire_in: 2 days
+    when: always

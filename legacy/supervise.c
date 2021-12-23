@@ -22,6 +22,9 @@
 #include <libopencm3/cm3/systick.h>
 #include <libopencm3/stm32/flash.h>
 #include <stdint.h>
+#if !EMULATOR
+#include <vendor/libopencm3/include/libopencmsis/core_cm3.h>
+#endif
 #include "memory.h"
 #include "util.h"
 
@@ -87,6 +90,11 @@ static void svhandler_irq_control(uint8_t state) {
   }
 }
 
+static void __attribute__((noreturn)) svhandler_reboot_to_bootloader(void) {
+  *STAY_IN_BOOTLOADER_FLAG_ADDR = STAY_IN_BOOTLOADER_FLAG;
+  scb_reset_system();
+}
+
 extern volatile uint32_t system_millis;
 
 void svc_handler_main(uint32_t *stack) {
@@ -119,6 +127,10 @@ void svc_handler_main(uint32_t *stack) {
     case SVC_SYS_IRQ_CONTROL:
       svhandler_irq_control(stack[0]);
       break;
+    case SVC_REBOOT_TO_BOOTLOADER:
+      svhandler_reboot_to_bootloader();
+      break;
+
     default:
       stack[0] = 0xffffffff;
       break;

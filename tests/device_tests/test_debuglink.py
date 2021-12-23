@@ -34,7 +34,7 @@ class TestDebuglink:
         mnemonic = client.debug.state().mnemonic_secret
         assert mnemonic == MNEMONIC12.encode()
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12, pin="1234", passphrase=True)
+    @pytest.mark.setup_client(mnemonic=MNEMONIC12, pin="1234", passphrase="")
     def test_pin(self, client):
         resp = client.call_raw(messages.GetAddress())
         assert isinstance(resp, messages.PinMatrixRequest)
@@ -51,7 +51,6 @@ class TestDebuglink:
         assert isinstance(resp, messages.Address)
 
 
-@pytest.mark.skip_ui
 @pytest.mark.skip_t1
 def test_softlock_instability(client):
     def load_device():

@@ -26,10 +26,11 @@ const CoinInfo coins[COINS_COUNT] = {
 % for c in supported_on("trezor1", bitcoin):
 {
 	.coin_name = ${c_str(c.coin_name)},
-	.coin_shortcut = ${c_str(" " + c.coin_shortcut)},
+	.coin_shortcut = ${c_str(c.coin_shortcut)},
 	.maxfee_kb = ${c_int(c.maxfee_kb)},
 	.signed_message_header = ${signed_message_header(c.signed_message_header)},
 	.has_segwit = ${c_bool(c.segwit)},
+	.has_taproot = ${c_bool(c.taproot)},
 	.has_fork_id = ${defined(c.fork_id)},
 	.force_bip143 = ${c_bool(c.force_bip143)},
 	.decred = ${c_bool(c.decred)},
@@ -39,6 +40,8 @@ const CoinInfo coins[COINS_COUNT] = {
 	.xpub_magic = ${hex(c.xpub_magic)},
 	.xpub_magic_segwit_p2sh = ${hex(c.xpub_magic_segwit_p2sh)},
 	.xpub_magic_segwit_native = ${hex(c.xpub_magic_segwit_native)},
+	.xpub_magic_multisig_segwit_p2sh = ${hex(c.xpub_magic_multisig_segwit_p2sh)},
+	.xpub_magic_multisig_segwit_native = ${hex(c.xpub_magic_multisig_segwit_native)},
 	.fork_id = ${c_int(c.fork_id)},
 	.bech32_prefix = ${c_str(c.bech32_prefix)},
 	.cashaddr_prefix = ${c_str(c.cashaddr_prefix)},

@@ -25,7 +25,7 @@
 
 /// package: trezorcrypto.bip39
 
-/// def complete_word(prefix: str) -> Optional[str]:
+/// def complete_word(prefix: str) -> str | None:
 ///     """
 ///     Return the first word from the wordlist starting with prefix.
 ///     """
@@ -113,19 +113,10 @@ STATIC mp_obj_t mod_trezorcrypto_bip39_check(mp_obj_t mnemonic) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_bip39_check_obj,
                                  mod_trezorcrypto_bip39_check);
 
-STATIC mp_obj_t ui_wait_callback = mp_const_none;
-
-STATIC void wrapped_ui_wait_callback(uint32_t current, uint32_t total) {
-  if (mp_obj_is_callable(ui_wait_callback)) {
-    mp_call_function_2_protected(ui_wait_callback, mp_obj_new_int(current),
-                                 mp_obj_new_int(total));
-  }
-}
-
 /// def seed(
 ///     mnemonic: str,
 ///     passphrase: str,
-///     callback: Callable[[int, int], None] = None,
+///     callback: Callable[[int, int], None] | None = None,
 /// ) -> bytes:
 ///     """
 ///     Generate seed from mnemonic and passphrase.

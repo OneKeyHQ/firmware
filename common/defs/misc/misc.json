@@ -54,8 +54,7 @@
         },
         "wallet": {
             "Trezor Suite": "https://suite.trezor.io",
-            "Exodus": "https://www.exodus.io",
-            "Magnum": "https://magnumwallet.co"
+            "Exodus": "https://www.exodus.io"
         }
     },
     {
@@ -84,7 +83,8 @@
         },
         "wallet": {
             "AdaLite": "https://adalite.io/app",
-            "Yoroi": "https://yoroi-wallet.com"
+            "Yoroi": "https://yoroi-wallet.com",
+            "Daedalus": "https://daedaluswallet.io"
         }
     },
     {
@@ -98,34 +98,7 @@
             "Github": "https://github.com/tezos/tezos"
         },
         "wallet": {
-            "SimpleStaking": "https://simplestaking.com",
-            "Magnum": "https://magnumwallet.co"
-        }
-    },
-    {
-        "name": "Ontology",
-        "shortcut": "ONT",
-        "slip44": 1024,
-        "curve": "nist256p1",
-        "decimals": 8,
-        "links": {
-            "Homepage": "https://ont.io",
-            "Github": "https://github.com/ontio/ontology"
-        },
-        "wallet": {}
-    },
-    {
-        "name": "Wanchain",
-        "shortcut": "WAN",
-        "slip44": 5718350,
-        "curve": "secp256k1",
-        "decimals": 18,
-        "links": {
-            "Homepage": "https://wanchain.org",
-            "Github": "https://github.com/wanchain/go-wanchain"
-        },
-        "wallet": {
-            "Wanchain Wallet": "https://www.wanchain.org/getstarted/"
+            "SimpleStaking": "https://simplestaking.com"
         }
     },
     {

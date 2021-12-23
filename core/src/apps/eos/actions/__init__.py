@@ -1,6 +1,5 @@
 from trezor.crypto.hashlib import sha256
-from trezor.messages.EosTxActionAck import EosTxActionAck
-from trezor.messages.EosTxActionRequest import EosTxActionRequest
+from trezor.messages import EosTxActionAck, EosTxActionRequest
 from trezor.utils import HashWriter
 
 from .. import helpers, writers
@@ -67,15 +66,14 @@ async def process_action(
         await process_unknown_action(ctx, w, action)
 
     writers.write_action_common(sha, action.common)
-    writers.write_variant32(sha, len(w))
-    writers.write_bytes_unchecked(sha, w)
+    writers.write_bytes_prefixed(sha, w)
 
 
 async def process_unknown_action(
     ctx: wire.Context, w: Writer, action: EosTxActionAck
 ) -> None:
     checksum = HashWriter(sha256())
-    writers.write_variant32(checksum, action.unknown.data_size)
+    writers.write_uvarint(checksum, action.unknown.data_size)
     checksum.extend(action.unknown.data_chunk)
 
     writers.write_bytes_unchecked(w, action.unknown.data_chunk)
@@ -101,7 +99,7 @@ async def process_unknown_action(
 
 def check_action(action: EosTxActionAck, name: str, account: str) -> bool:
     if account == "eosio":
-        if (
+        return (
             (name == "buyram" and action.buy_ram is not None)
             or (name == "buyrambytes" and action.buy_ram_bytes is not None)
             or (name == "sellram" and action.sell_ram is not None)
@@ -114,10 +112,7 @@ def check_action(action: EosTxActionAck, name: str, account: str) -> bool:
             or (name == "linkauth" and action.link_auth is not None)
             or (name == "unlinkauth" and action.unlink_auth is not None)
             or (name == "newaccount" and action.new_account is not None)
-        ):
-            return True
-        else:
-            return False
+        )
 
     elif name == "transfer":
         return action.transfer is not None

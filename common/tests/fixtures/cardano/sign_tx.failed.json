@@ -13,7 +13,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/44'/1815'/0'/0/1",
@@ -23,10 +23,13 @@
         ],
         "outputs": [
           {
-              "address": "jsK75PTH2esX8k4Wvxenyz83LJJWToBbVmGrWUer2CHFHanLseh7r3sW5X5q",
-              "amount": "3003112"
+            "address": "jsK75PTH2esX8k4Wvxenyz83LJJWToBbVmGrWUer2CHFHanLseh7r3sW5X5q",
+            "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -41,7 +44,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/44'/1815'/0'/0/1",
@@ -54,7 +57,10 @@
             "address": "5dnY6xgRcNUSLGa4gfqef2jGAMHb7koQs9EXErXLNC1LiMPUnhn8joXhvEJpWQtN3F4ysATcBvCn5tABgL3e4hPWapPHmcK5GJMSEaET5JafgAGwSrznzL1Mqa",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -69,7 +75,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/44'/1815'/0'/0/1",
@@ -82,7 +88,10 @@
             "address": "Ae2tdPwUPEZ5YUb8sM3eS8JqKgrRLzhiu71crfuH2MFtqaYr5ACNRZR3Mbm",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -97,20 +106,23 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
-              "path": "m/44'/1815'/0'/0/1",
-              "prev_hash": "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
-              "prev_index": 0
+            "path": "m/44'/1815'/0'/0/1",
+            "prev_hash": "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
+            "prev_index": 0
           }
         ],
         "outputs": [
           {
-              "address": "addr1q89s8py7y68e3x66sscs0wkhlg5ssfrfs65084jry45scvehcr",
-              "amount": "3003112"
+            "address": "addr1q89s8py7y68e3x66sscs0wkhlg5ssfrfs65084jry45scvehcr",
+            "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -125,20 +137,23 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
-              "path": "m/1852'/1815'/0'/0/0",
-              "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
-              "prev_index": 0
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
           }
         ],
         "outputs": [
           {
-              "address": "addr1q89s8py7y68e3x66sscs0wkhlg5ssfrfs65084jrlrqcfqqj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfm5z3vcwsfrvkr5zglq4rxu",
-              "amount": "3003112"
+            "address": "addr1q89s8py7y68e3x66sscs0wkhlg5ssfrfs65084jrlrqcfqqj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfm5z3vcwsfrvkr5zglq4rxu",
+            "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -153,12 +168,12 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
-              "path": "m/1852'/1815'/0'/0/0",
-              "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
-              "prev_index": 0
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
           }
         ],
         "outputs": [
@@ -166,7 +181,10 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Fee is out of range"
@@ -181,7 +199,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/44'/1815'/0'/0/1",
@@ -199,7 +217,10 @@
             "path": "m/44'/1815'/0'/0/1",
             "amount": "1000000"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Total transaction amount is out of range!"
@@ -214,7 +235,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -227,10 +248,13 @@
             "address": "2657WMsDfac7BteXkJq5Jzdog4h47fPbkwUM49isuWbYAr2cFRHa3rURP236h9PBe",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
-        "error_message": "Output address network mismatch!"
+        "error_message": "Output address network mismatch"
       }
     },
     {
@@ -242,7 +266,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/44'/1815'/0'/0/1",
@@ -255,10 +279,13 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
-        "error_message": "Output address network mismatch!"
+        "error_message": "Output address network mismatch"
       }
     },
     {
@@ -270,7 +297,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -283,7 +310,10 @@
             "address": "addr_test1vr9s8py7y68e3x66sscs0wkhlg5ssfrfs65084jrlrqcfqqtmut0e",
             "amount": "1"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -298,7 +328,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -311,7 +341,10 @@
             "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
             "amount": "1"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
@@ -326,7 +359,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -339,7 +372,10 @@
             "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
             "amount": "1"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid network id/protocol magic combination!"
@@ -354,7 +390,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -367,7 +403,10 @@
             "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
             "amount": "1"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid network id/protocol magic combination!"
@@ -382,7 +421,7 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -395,10 +434,47 @@
             "address": "addr1590z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304r2dcrtx0sf3dluyu4erzr3xtmdnzvcyfzekkuteu2xagx0qt7gvvj",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid address"
+      }
+    },
+    {
+      "description": "Output has both address and address parameters set",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr_test1vr9s8py7y68e3x66sscs0wkhlg5ssfrfs65084jrlrqcfqqtmut0e",
+            "addressType": 0,
+            "path": "m/1852'/1815'/0'/0/0",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid output"
       }
     },
     {
@@ -409,10 +485,13 @@
         "fee": 42,
         "ttl": 10,
         "certificates": [
-          {"type": 0, "path": "m/1852'/1815'/0'/0/0"}
+          {
+            "type": 0,
+            "path": "m/1852'/1815'/0'/0/0"
+          }
         ],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -425,7 +504,119 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid certificate"
+      }
+    },
+    {
+      "description": "Certificate has multisig path",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 0,
+            "path": "m/1854'/1815'/0'/0/0"
+          }
+        ],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid certificate"
+      }
+    },
+    {
+      "description": "Certificate has script hash",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 0,
+            "script_hash": "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd"
+          }
+        ],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid certificate"
+      }
+    },
+    {
+      "description": "Certificate has both path and script_hash",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 0,
+            "path": "m/1852'/1815'/0'/0/0",
+            "script_hash": "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd"
+          }
+        ],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid certificate"
@@ -446,7 +637,7 @@
           }
         ],
         "withdrawals": [],
-        "metadata": "",
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -459,7 +650,10 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid certificate"
@@ -473,8 +667,13 @@
         "fee": 42,
         "ttl": 10,
         "certificates": [],
-        "withdrawals": [{"path": "m/1852'/1815'/0'/0/0", "amount": "1000"}],
-        "metadata": "",
+        "withdrawals": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "amount": "1000"
+          }
+        ],
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -487,7 +686,82 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid withdrawal"
+      }
+    },
+    {
+      "description": "Withdrawal has multisig path",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [
+          {
+            "path": "m/1854'/1815'/0'/0/0",
+            "amount": "1000"
+          }
+        ],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid withdrawal"
+      }
+    },
+    {
+      "description": "Withdrawal has script hash",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [
+          {
+            "script_hash": "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+            "amount": "1000"
+          }
+        ],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid withdrawal"
@@ -501,11 +775,13 @@
         "fee": 42,
         "ttl": 10,
         "certificates": [],
-        "withdrawals": [{
+        "withdrawals": [
+          {
             "path": "m/1852'/1815'/0'/2/0",
             "amount": "449999999199999999"
-        }],
-        "metadata": "",
+          }
+        ],
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -518,22 +794,31 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
         "error_message": "Invalid withdrawal"
       }
     },
     {
-      "description": "Metadata too large",
+      "description": "Withdrawal contains both path and script_hash",
       "parameters": {
         "protocol_magic": 764824073,
         "network_id": 1,
         "fee": 42,
         "ttl": 10,
         "certificates": [],
-        "withdrawals": [],
-        "metadata": "a200a11864a118c843aa00ff01a119012c590202aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "withdrawals": [
+          {
+            "path": "m/1852'/1815'/0'/2/0",
+            "amount": "1000",
+            "script_hash": "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd"
+          }
+        ],
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -546,22 +831,34 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
-        "error_message": "Invalid metadata"
+        "error_message": "Invalid withdrawal"
       }
     },
     {
-      "description": "Metadata is a list",
+      "description": "Duplicate withdrawal",
       "parameters": {
         "protocol_magic": 764824073,
         "network_id": 1,
         "fee": 42,
         "ttl": 10,
         "certificates": [],
-        "withdrawals": [],
-        "metadata": "82a200a11864a118c843aa00ff01a119012c590100aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0A",
+        "withdrawals": [
+          {
+            "path": "m/1852'/1815'/0'/2/0",
+            "amount": "1000"
+          },
+          {
+            "path": "m/1852'/1815'/0'/2/0",
+            "amount": "2000"
+          }
+        ],
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -574,14 +871,17 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
-        "error_message": "Invalid metadata"
+        "error_message": "Duplicate withdrawals"
       }
     },
     {
-      "description": "Metadata is incomplete",
+      "description": "Auxiliary data hash has incorrect length",
       "parameters": {
         "protocol_magic": 764824073,
         "network_id": 1,
@@ -589,7 +889,9 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "a200a11864a118c843aa00ff01",
+        "auxiliary_data": {
+          "hash": "a200a11864a118c843aa00ff01"
+        },
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -602,14 +904,17 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
-        ]
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
       },
       "result": {
-        "error_message": "Invalid metadata"
+        "error_message": "Invalid auxiliary data"
       }
     },
     {
-      "description": "Metadata has leftover data",
+      "description": "transaction with catalyst registration containing byron reward address",
       "parameters": {
         "protocol_magic": 764824073,
         "network_id": 1,
@@ -617,7 +922,366 @@
         "ttl": 10,
         "certificates": [],
         "withdrawals": [],
-        "metadata": "a200a11864a118c843aa00ff01a119012c590100aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa000000",
+        "auxiliary_data": {
+          "catalyst_registration_parameters": {
+            "voting_public_key": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "staking_path": "m/1852'/1815'/0'/2/0",
+            "nonce": 22634813,
+            "reward_address_parameters": {
+              "addressType": 8,
+              "path": "m/44'/1815'/0'/0/0"
+            }
+          }
+        },
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid auxiliary data"
+      }
+    },
+    {
+      "description": "transaction with both auxiliary data blob and catalyst registration",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": {
+          "hash": "ea4c91860dd5ec5449f8f985d227946ff39086b17f10b5afb93d12ee87050b6a",
+          "catalyst_registration_parameters": {
+            "voting_public_key": "38DA0B509D45BF6C87BD55594B92F97081D3923B8C1334B9B8D0BF13FC1C12D0",
+            "staking_path": "m/1852'/1815'/0'/2/0",
+            "reward_address_parameters": {
+              "addressType": 0,
+              "path": "m/1852'/1815'/0'/0/0",
+              "stakingPath": "m/1852'/1815'/0'/2/0"
+            },
+            "nonce": 140
+          }
+        },
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid auxiliary data"
+      }
+    },
+    {
+      "description": "Change output path larger than 100",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/190'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          },
+          {
+            "addressType": 0,
+            "path": "m/1852'/1815'/190'/0/0",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid change output path"
+      }
+    },
+    {
+      "description": "Change output staking path larger than 100",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          },
+          {
+            "addressType": 0,
+            "path": "m/1852'/1815'/0'/0/0",
+            "stakingPath": "m/1852'/1815'/190'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid change output staking path"
+      }
+    },
+    {
+      "description": "Change output with script in payment part",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          },
+          {
+            "addressType": 1,
+            "scriptPaymentHash": "0d5acbf6a1dfb0c8724e60df314987315ccbf78bb6c0f9b6f3d568fe",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid address parameters"
+      }
+    },
+    {
+      "description": "Output with reward address",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "stake1uyfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacalmqha",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid address"
+      }
+    },
+    {
+      "description": "Stake deregistration account larger than 100",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 1,
+            "path": "m/1852'/1815'/190'/2/0"
+          }
+        ],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/190'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid certificate path"
+      }
+    },
+    {
+      "description": "Repeated asset name in multiasset token group",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112",
+            "token_bundle": [
+              {
+                "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "7878754"
+                  },
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "1234"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid token bundle in output"
+      }
+    },
+    {
+      "description": "Repeated policyId in multiasset output",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112",
+            "token_bundle": [
+              {
+                "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "7878754"
+                  }
+                ]
+              },
+              {
+                "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696f",
+                    "amount": "7878754"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid token bundle in output"
+      }
+    },
+    {
+      "description": "Additional witness requests in ORDINARY_TRANSACTION",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
         "inputs": [
           {
             "path": "m/1852'/1815'/0'/0/0",
@@ -630,10 +1294,592 @@
             "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
             "amount": "3003112"
           }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": [
+          {
+            "path": "m/1854'/1815'/0'/0/0"
+          }
         ]
       },
       "result": {
-        "error_message": "Invalid metadata"
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "1854 input path in ORDINARY_TRANSACTION",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1854'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2",
+            "amount": "3003112"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": [
+          {
+            "path": "m/1854'/1815'/0'/0/0"
+          }
+        ]
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "1854 change output path in ORDINARY_TRANSACTION",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "addressType": 0,
+            "path": "m/1854'/1815'/0'/0/0",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid address parameters"
+      }
+    },
+    {
+      "description": "Ordinary transaction with token minting with 1854 path",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "validity_interval_start": 47,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1234",
+            "token_bundle": [
+              {
+                "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "100"
+                  }
+                ]
+              },
+              {
+                "policy_id": "a5a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "100"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mint": [
+          {
+            "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+            "tokens": [
+              {
+                "asset_name_bytes": "74652474436f696e",
+                "mint_amount": "100"
+              },
+              {
+                "asset_name_bytes": "75652474436f696e",
+                "mint_amount": "-100"
+              }
+            ]
+          },
+          {
+            "policy_id": "a5a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+            "tokens": [
+              {
+                "asset_name_bytes": "74652474436f696e",
+                "mint_amount": "100"
+              },
+              {
+                "asset_name_bytes": "75652474436f696e",
+                "mint_amount": "-100"
+              }
+            ]
+          }
+        ],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": [
+          {
+            "path": "m/1854'/1815'/0'/0/0"
+          }
+        ]
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Ordinary transaction without token minting but with a 1855 additional witness request",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "validity_interval_start": 47,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1234"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": [
+          {
+            "path": "m/1855'/1815'/0'"
+          }
+        ]
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Ordinary transaction with long token minting path",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "validity_interval_start": 47,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "2000000",
+            "token_bundle": [
+              {
+                "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "7878754"
+                  }
+                ]
+              },
+              {
+                "policy_id": "96a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                "tokens": [
+                  {
+                    "asset_name_bytes": "74652474436f696e",
+                    "amount": "7878754"
+                  },
+                  {
+                    "asset_name_bytes": "75652474436f696e",
+                    "amount": "1234"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mint": [
+          {
+            "policy_id": "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+            "tokens": [
+              {
+                "asset_name_bytes": "74652474436f696e",
+                "mint_amount": "7878754"
+              },
+              {
+                "asset_name_bytes": "75652474436f696e",
+                "mint_amount": "-7878754"
+              }
+            ]
+          },
+          {
+            "policy_id": "96a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+            "tokens": [
+              {
+                "asset_name_bytes": "74652474436f696e",
+                "mint_amount": "7878754"
+              },
+              {
+                "asset_name_bytes": "75652474436f696e",
+                "mint_amount": "-1234"
+              }
+            ]
+          }
+        ],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": [
+          {
+            "path": "m/1855'/1815'/0'/0/0"
+          }
+        ]
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Input and change output account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          },
+          {
+            "addressType": 0,
+            "path": "m/1852'/1815'/1'/0/0",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Input and stake deregistration certificate account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 1,
+            "path": "m/1852'/1815'/1'/2/0"
+          }
+        ],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Input and withdrawal account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [
+          {
+            "path": "m/1852'/1815'/1'/2/0",
+            "amount": "1000"
+          }
+        ],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Change output and stake deregistration account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 1,
+            "path": "m/1852'/1815'/1'/2/0"
+          }
+        ],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          },
+          {
+            "addressType": 0,
+            "path": "m/1852'/1815'/0'/0/0",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid certificate"
+      }
+    },
+    {
+      "description": "Change output and withdrawal account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [],
+        "withdrawals": [
+          {
+            "path": "m/1852'/1815'/1'/2/0",
+            "amount": "1000"
+          }
+        ],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          },
+          {
+            "addressType": 0,
+            "path": "m/1852'/1815'/0'/0/0",
+            "stakingPath": "m/1852'/1815'/0'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid withdrawal"
+      }
+    },
+    {
+      "description": "Stake deregistration certificate and withdrawal account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "ttl": 10,
+        "certificates": [
+          {
+            "type": 1,
+            "path": "m/1852'/1815'/0'/2/0"
+          }
+        ],
+        "withdrawals": [
+          {
+            "path": "m/1852'/1815'/1'/2/0",
+            "amount": "1000"
+          }
+        ],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/1852'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid withdrawal"
+      }
+    },
+    {
+      "description": "Byron to Shelley transfer input account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/44'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          },
+          {
+            "path": "m/1852'/1815'/1'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 1
+          }
+        ],
+        "outputs": [
+          {
+            "address": "addr1z90z7zqwhya6mpk5q929ur897g3pp9kkgalpreny8y304r2dcrtx0sf3dluyu4erzr3xtmdnzvcyfzekkuteu2xagx0qeva0pr",
+            "amount": "1"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid witness request"
+      }
+    },
+    {
+      "description": "Byron to Shelley transfer output account mismatch",
+      "parameters": {
+        "protocol_magic": 764824073,
+        "network_id": 1,
+        "fee": 42,
+        "certificates": [],
+        "withdrawals": [],
+        "auxiliary_data": null,
+        "inputs": [
+          {
+            "path": "m/44'/1815'/0'/0/0",
+            "prev_hash": "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            "prev_index": 0
+          }
+        ],
+        "outputs": [
+          {
+            "addressType": 0,
+            "path": "m/1852'/1815'/1'/0/0",
+            "stakingPath": "m/1852'/1815'/1'/2/0",
+            "amount": "7120787"
+          }
+        ],
+        "mint": [],
+        "signing_mode": "ORDINARY_TRANSACTION",
+        "additional_witness_requests": []
+      },
+      "result": {
+        "error_message": "Invalid witness request"
       }
     }
   ]

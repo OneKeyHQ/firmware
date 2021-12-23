@@ -43,7 +43,7 @@ void layoutBootDevParam(uint8_t index) {
       memset(version, 0, 8);
       const image_header *hdr =
           (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
-      data2hex(&hdr->onekey_version, 2, desc);
+      data2hex((uint8_t *)&hdr->onekey_version, 2, desc);
       strncat(version, &desc[0], 1);
       strcat(version, ".");
       strncat(version, &desc[1], 1);

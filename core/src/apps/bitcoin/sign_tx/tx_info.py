@@ -9,14 +9,14 @@ from ..common import BIP32_WALLET_DEPTH, input_is_external
 from .matchcheck import MultisigFingerprintChecker, WalletPathChecker
 
 if False:
-    from typing import Optional, Protocol, Union
-    from trezor.messages.SignTx import SignTx
-    from trezor.messages.PrevTx import PrevTx
-    from trezor.messages.TxInput import TxInput
-    from trezor.messages.TxOutput import TxOutput
-    from trezor.messages.PrevInput import PrevInput
-    from trezor.messages.PrevOutput import PrevOutput
-    from .hash143 import Hash143
+    from typing import Protocol
+    from trezor.messages import (
+        PrevTx,
+        SignTx,
+        TxInput,
+        TxOutput,
+    )
+    from .sig_hasher import SigHasher
 
     from apps.common.coininfo import CoinInfo
 
@@ -26,30 +26,14 @@ if False:
         def create_hash_writer(self) -> HashWriter:
             ...
 
-        def create_hash143(self) -> Hash143:
+        def create_sig_hasher(self) -> SigHasher:
             ...
 
         def write_tx_header(
             self,
             w: writers.Writer,
-            tx: Union[SignTx, PrevTx],
+            tx: SignTx | PrevTx,
             witness_marker: bool,
-        ) -> None:
-            ...
-
-        @staticmethod
-        def write_tx_input(
-            w: writers.Writer,
-            txi: Union[TxInput, PrevInput],
-            script: bytes,
-        ) -> None:
-            ...
-
-        @staticmethod
-        def write_tx_output(
-            w: writers.Writer,
-            txo: Union[TxOutput, PrevOutput],
-            script_pubkey: bytes,
         ) -> None:
             ...
 
@@ -88,13 +72,14 @@ class TxInfoBase:
         self.h_tx_check = HashWriter(sha256())  # not a real tx hash
 
         # BIP-0143 transaction hashing.
-        self.hash143 = signer.create_hash143()
+        self.sig_hasher = signer.create_sig_hasher()
 
         # The minimum nSequence of all inputs.
         self.min_sequence = _SEQUENCE_FINAL
 
-    def add_input(self, txi: TxInput) -> None:
-        self.hash143.add_input(txi)  # all inputs are included (non-segwit as well)
+    def add_input(self, txi: TxInput, script_pubkey: bytes) -> None:
+        # all inputs are included (non-segwit as well)
+        self.sig_hasher.add_input(txi, script_pubkey)
         writers.write_tx_input_check(self.h_tx_check, txi)
         self.min_sequence = min(self.min_sequence, txi.sequence)
 
@@ -103,7 +88,7 @@ class TxInfoBase:
             self.multisig_fingerprint.add_input(txi)
 
     def add_output(self, txo: TxOutput, script_pubkey: bytes) -> None:
-        self.hash143.add_output(txo, script_pubkey)
+        self.sig_hasher.add_output(txo, script_pubkey)
         writers.write_tx_output(self.h_tx_check, txo, script_pubkey)
 
     def check_input(self, txi: TxInput) -> None:
@@ -160,12 +145,12 @@ class OriginalTxInfo(TxInfoBase):
         writers.write_bitcoin_varint(self.h_tx, tx.inputs_count)
 
         # The input which will be used for verification and its index in the original transaction.
-        self.verification_input = None  # type: Optional[TxInput]
-        self.verification_index = None  # type: Optional[int]
+        self.verification_input: TxInput | None = None
+        self.verification_index: int | None = None
 
-    def add_input(self, txi: TxInput) -> None:
-        super().add_input(txi)
-        self.signer.write_tx_input(self.h_tx, txi, txi.script_sig or bytes())
+    def add_input(self, txi: TxInput, script_pubkey: bytes) -> None:
+        super().add_input(txi, script_pubkey)
+        writers.write_tx_input(self.h_tx, txi, txi.script_sig or bytes())
 
         # For verification use the first original input that specifies address_n.
         if not self.verification_input and txi.address_n:
@@ -178,7 +163,7 @@ class OriginalTxInfo(TxInfoBase):
         if self.index == 0:
             writers.write_bitcoin_varint(self.h_tx, self.tx.outputs_count)
 
-        self.signer.write_tx_output(self.h_tx, txo, script_pubkey)
+        writers.write_tx_output(self.h_tx, txo, script_pubkey)
 
     async def finalize_tx_hash(self) -> None:
         await self.signer.write_prev_tx_footer(self.h_tx, self.tx, self.orig_hash)

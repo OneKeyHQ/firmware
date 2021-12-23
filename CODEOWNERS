@@ -1,8 +1,6 @@
-/ci @tsusanka
+/common/defs @matejcik
 
-/common/defs @prusnak @matejcik
-
-/common/protob @tsusanka @matejcik
+/common/protob @matejcik
 
 /core/embed @prusnak
 
@@ -12,13 +10,13 @@
 
 /core/src/storage @andrewkozlik
 
-/core/src/trezor @tsusanka @matejcik
+/core/src/trezor @matejcik
 
-/core/tests @tsusanka
+/core/tests @matejcik
 
 /core/tools @matejcik
 
-/crypto @andrewkozlik @onvej-sl @prusnak
+/crypto @andrewkozlik @onvej-sl
 
 /crypto/gui @prusnak
 
@@ -26,14 +24,12 @@
 
 /crypto/tools @prusnak
 
-/docs @tsusanka
-
 /legacy @prusnak
 
 /python @matejcik
 
 /storage @andrewkozlik
 
-/tests @tsusanka @matejcik
+/tests @matejcik
 
 /vendor @prusnak

@@ -57,7 +57,7 @@ void starcoin_get_address_from_public_key(const uint8_t *public_key,
   }
 }
 
-void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
+bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
                       StarcoinSignedTx *resp) {
   char address[MAX_STARCOIN_ADDRESS_SIZE] = {'0', 'x'};
   starcoin_get_address_from_public_key(node->public_key + 1, address + 2);
@@ -65,7 +65,7 @@ void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
-    return;
+    return false;
   }
 
   uint8_t buf[sizeof(StarcoinSignTx_raw_tx_t) + 32] = {0};
@@ -77,10 +77,9 @@ void starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
                &node->public_key[1], resp->signature.bytes);
 
   memcpy(resp->public_key.bytes, &node->public_key[1], 32);
-  resp->has_signature = true;
   resp->signature.size = 64;
-  resp->has_public_key = true;
   resp->public_key.size = 32;
+  return true;
 }
 
 static void unsigned_int_to_leb128(uint32_t val, uint8_t *s) {
@@ -95,13 +94,13 @@ static void unsigned_int_to_leb128(uint32_t val, uint8_t *s) {
   } while (more);
 }
 
-void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
+bool starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
                            StarcoinMessageSignature *resp) {
-  layoutSignMessage(msg->message.bytes, msg->message.size);
+  fsm_layoutSignMessage(msg->message.bytes, msg->message.size);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
-    return;
+    return false;
   }
 
   layoutProgressSwipe(_("Signing"), 0);
@@ -118,10 +117,10 @@ void starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
                &node->public_key[1], resp->signature.bytes);
 
   memcpy(resp->public_key.bytes, &node->public_key[1], 32);
-  resp->has_signature = true;
+
   resp->signature.size = 64;
-  resp->has_public_key = true;
   resp->public_key.size = 32;
+  return true;
 }
 
 bool starcoin_verify_message(const StarcoinVerifyMessage *msg) {

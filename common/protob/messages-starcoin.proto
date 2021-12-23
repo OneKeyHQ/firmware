@@ -38,7 +38,7 @@ message StarcoinAddress {
  * @end
  */
 message StarcoinPublicKey {
-    optional bytes public_key = 1;  // Starcoin public key
+    required bytes public_key = 1;  // Starcoin public key
 }
 
 /**
@@ -56,8 +56,8 @@ message StarcoinSignTx {
  * @end
  */
 message StarcoinSignedTx {
-    optional bytes public_key = 1;  // public key for the private key used to sign data
-    optional bytes signature = 2;           // the signature of the raw transaction
+    required bytes public_key = 1;  // public key for the private key used to sign data
+    required bytes signature = 2;           // the signature of the raw transaction
 }
 
 /**
@@ -76,8 +76,8 @@ message StarcoinSignedTx {
  * @end
  */
 message StarcoinMessageSignature {
-    optional bytes public_key = 1;
-    optional bytes signature = 2;
+    required bytes public_key = 1;
+    required bytes signature = 2;
 }
 
 /**

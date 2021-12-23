@@ -14,68 +14,28 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+from typing import TYPE_CHECKING
+
 import click
 
-from .. import debuglink, mapping, messages, protobuf
-from ..messages import DebugLinkShowTextStyle as S
-from . import with_client
+from .. import mapping, messages, protobuf
+
+if TYPE_CHECKING:
+    from . import TrezorConnection
 
 
 @click.group(name="debug")
-def cli():
+def cli() -> None:
     """Miscellaneous debug features."""
-
-
-STYLES = {
-    "@@NORMAL": S.NORMAL,
-    "@@BOLD": S.BOLD,
-    "@@MONO": S.MONO,
-    "@@BR": S.BR,
-    "@@BR_HALF": S.BR_HALF,
-}
-
-
-@cli.command()
-@click.option("-i", "--icon", help="Header icon name")
-@click.option("-c", "--color", help="Header icon color")
-@click.option("-h", "--header", help="Header text", default="Showing text")
-@click.argument("body")
-@with_client
-def show_text(client, icon, color, header, body):
-    """Show text on Trezor display.
-
-    For usage instructions, see:
-    https://github.com/trezor/trezor-firmware/blob/master/docs/python/show-text.md
-    """
-    body = body.split()
-    body_text = []
-    words = []
-
-    def _flush():
-        if words:
-            body_text.append((None, " ".join(words)))
-        words.clear()
-
-    for word in body:
-        if word in STYLES:
-            _flush()
-            body_text.append((STYLES[word], None))
-        elif word.startswith("%%"):
-            _flush()
-            body_text.append((S.SET_COLOR, word[2:]))
-        else:
-            words.append(word)
-
-    _flush()
-
-    return debuglink.show_text(client, header, body_text, icon=icon, icon_color=color)
 
 
 @cli.command()
 @click.argument("message_name_or_type")
 @click.argument("hex_data")
 @click.pass_obj
-def send_bytes(obj, message_name_or_type, hex_data):
+def send_bytes(
+    obj: "TrezorConnection", message_name_or_type: str, hex_data: str
+) -> None:
     """Send raw bytes to Trezor.
 
     Message type and message data must be specified separately, due to how message
@@ -105,12 +65,12 @@ def send_bytes(obj, message_name_or_type, hex_data):
     response_type, response_data = transport.read()
     transport.end_session()
 
-    click.echo("Response type: {}".format(response_type))
-    click.echo("Response data: {}".format(response_data.hex()))
+    click.echo(f"Response type: {response_type}")
+    click.echo(f"Response data: {response_data.hex()}")
 
     try:
         msg = mapping.decode(response_type, response_data)
         click.echo("Parsed message:")
         click.echo(protobuf.format_message(msg))
     except Exception as e:
-        click.echo("Could not parse response: {}".format(e))
+        click.echo(f"Could not parse response: {e}")
