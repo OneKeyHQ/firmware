@@ -94,6 +94,8 @@ static uint8_t getprotobuftag(uint8_t *ptr, uint32_t value, uint8_t tag_type) {
   return i;
 }
 
+extern const char *cpu_info;
+
 void send_msg_features(usbd_device *dev) {
   static uint8_t response[MSG_OUT_SIZE];
   uint8_t *p = response;
@@ -165,7 +167,7 @@ void send_msg_features(usbd_device *dev) {
 
   len = getprotobuftag(p, Features_cpu_info_tag, PROTOC_TYPE_BYTES);
   p += len;
-  strlcpy((char *)p + 1, CHIP_INFO, sizeof(resp->cpu_info));
+  strlcpy((char *)p + 1, cpu_info, sizeof(resp->cpu_info));
   *p = strlen((char *)p + 1);
   p += *p + 1;
 

@@ -12,6 +12,8 @@
 
 #define FONT_HEIGHT 8
 
+extern const char *cpu_info;
+
 void layoutBootDevParam(uint8_t index) {
   char *serial;
   int y = 0;
@@ -48,7 +50,11 @@ void layoutBootDevParam(uint8_t index) {
       strcat(version, ".");
       strncat(version, &desc[1], 1);
       strcat(version, ".");
-      strncat(version, &desc[3], 1);
+      if (desc[2] == '0') {
+        strncat(version, &desc[3], 1);
+      } else {
+        strncat(version, &desc[2], 2);
+      }
       y += FONT_HEIGHT + 1;
       y += FONT_HEIGHT + 1;
       oledDrawString(0, y, "FIRMWARE:", FONT_STANDARD);
@@ -68,7 +74,7 @@ void layoutBootDevParam(uint8_t index) {
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
 
       memset(desc, 0, 33);
-      strcat(desc, CHIP_INFO);
+      strcat(desc, cpu_info);
       strcat(desc, "-");
       strcat(desc, ONEKEY_VERSION);
 

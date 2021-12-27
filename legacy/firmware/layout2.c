@@ -3190,6 +3190,8 @@ void layoutTransInformation(const BITMAP *bmp_up, const BITMAP *bmp_down,
 #define DEVICE_INFO_PAGE_NUM 2
 #endif
 
+extern const char *cpu_info;
+
 void layouKeyValue(int y, const char *desc, const char *value) {
   oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
   oledDrawStringRightAdapter(OLED_WIDTH - 1, y, value, FONT_STANDARD);
@@ -3295,7 +3297,7 @@ refresh_menu:
       y += font->pixel + 1;
 
       memset(desc, 0, 33);
-      strcat(desc, CHIP_INFO);
+      strcat(desc, cpu_info);
       strcat(desc, "-");
       strcat(desc, ONEKEY_VERSION);
       oledDrawString(0, y, "ST:", FONT_STANDARD);

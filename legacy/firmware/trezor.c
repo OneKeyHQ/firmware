@@ -183,6 +183,9 @@ void pwm_config(void) {
 }
 #endif
 
+#define DBGMCU_IDCODE 0xE0042000U
+const char *cpu_info;
+
 int main(void) {
 #ifndef APPVER
   setup();
@@ -203,6 +206,15 @@ int main(void) {
   flash_enc_init();
   font_init();
   se_init();
+
+  uint32_t idcode = *(uint32_t *)DBGMCU_IDCODE & 0xFFF;
+  if (idcode == 0x411) {
+    cpu_info = "STM32F2XX";
+  } else if (idcode == 0x413) {
+    cpu_info = "STM32F4XX";
+  } else {
+    cpu_info = "unkown-";
+  }
 
   do {
     if (!serial_set) {

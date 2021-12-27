@@ -8,4 +8,3 @@
 
 // Keep same as firmware/version.h define
 #define ONEKEY_VERSION "2.1.10"
-#define CHIP_INFO "STM32F205RG"
