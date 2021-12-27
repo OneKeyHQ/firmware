@@ -360,6 +360,8 @@ static bool fsm_layoutPaginated(const char *description, const uint8_t *msg,
                                 uint32_t len, bool is_ascii) {
   const char **str = NULL;
   const uint32_t row_len = is_ascii ? 18 : 8;
+  uint32_t offset = 0;
+  uint8_t key;
   do {
     const uint32_t show_len = MIN(len, row_len * 4);
     if (is_ascii) {
@@ -370,14 +372,46 @@ static bool fsm_layoutPaginated(const char *description, const uint8_t *msg,
 
     msg += show_len;
     len -= show_len;
+    offset += show_len;
 
-    const char *label = len > 0 ? _("Next") : _("Confirm");
-    layoutDialogSwipeEx(&bmp_icon_question, _("Cancel"), label, description,
-                        str[0], str[1], str[2], str[3], NULL, NULL, FONT_FIXED);
+    layoutDialogSwipeEx(&bmp_icon_question, _("Cancel"), _("Confirm"),
+                        description, str[0], str[1], str[2], str[3], NULL, NULL,
+                        FONT_FIXED);
+    if (offset > row_len * 4) {
+      oledDrawBitmap(62, 30, &bmp_button_up);
+    }
 
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+    if (len > 0) {
+      oledDrawBitmap(62, 80, &bmp_button_down);
+    }
+    oledRefresh();
+  button_scan:
+    key = protectButtonValue(ButtonRequestType_ButtonRequest_Other, false, true,
+                             0);
+    if (key == KEY_CANCEL) {
+      return false;
+    } else if (key == KEY_CONFIRM) {
+      break;
+    } else if (key == KEY_UP) {
+      if (offset <= row_len * 4) {
+        offset = 0;
+        msg -= show_len;
+        len += show_len;
+      } else {
+        offset -= row_len * 4 + show_len;
+        msg -= row_len * 4 + show_len;
+        len += row_len * 4 + show_len;
+      }
+    } else if (key == KEY_DOWN) {
+      if (len == 0) {
+        goto button_scan;
+      }
+    } else if (key == KEY_TOP) {
+      goto button_scan;
+    } else {
       return false;
     }
+
   } while (len > 0);
 
   return true;

@@ -299,6 +299,7 @@ void layoutDialogSwipeEx(const BITMAP *icon, const char *btnNo,
   layoutDialogAdapterEx(icon, btnNo, btnYes, desc, line1, line2, line3, line4,
                         line5, line6, font);
 #else
+  (void)font;
   layoutDialogAdapter(icon, btnNo, btnYes, desc, line1, line2, line3, line4,
                       line5, line6);
 #endif
