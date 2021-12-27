@@ -77,9 +77,9 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // note to those verifying these values: bootloader versions above this
   // comment are aligned/padded to 32KiB with trailing 0xFF bytes and versions
   // below are padded with 0x00.
-  //                                       for more info, refer to "make -C
-  //                                       bootloader align" and
-  //                                       "firmware/bl_data.py".
+  //
+  // for more info, refer to "make -C bootloader align" and
+  // "firmware/bl_data.py".
   if (0 ==
       memcmp(hash,
              "\x8c\xe8\xd7\x9e\xdf\x43\x0c\x03\x42\x64\x68\x6c\xa9\xb1\xd7\x8d"
@@ -128,6 +128,12 @@ static int known_bootloader(int r, const uint8_t *hash) {
              "\x07\x6b\xcd\xad\x72\xd7\x0d\xa2\x2a\x63\xd8\x89\x6b\x63\x91\xd8",
              32))
     return 1;  // 1.8.0 shipped with fw 1.8.0 and 1.8.1
+  if (0 ==
+      memcmp(hash,
+             "\x74\x47\xa4\x17\x17\x02\x2e\x3e\xb3\x20\x11\xb0\x0b\x2a\x68\xeb"
+             "\xb9\xc7\xf6\x03\xcd\xc7\x30\xe7\x30\x78\x50\xa3\xf4\xd6\x2a\x5c",
+             32))
+    return 1;  // 1.10.0 shipped with fw 1.10.0
   return 0;
 }
 #endif
@@ -158,6 +164,14 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
              32)) {
     memcpy(bootloader_version, "1.9.1", strlen("1.9.1"));
     return 1;  // 1.9.0
+  }
+  if (0 ==
+      memcmp(hash,
+             "\x48\x35\xf1\x44\xbd\x04\x44\x91\xbe\xc6\xbd\xb7\x16\xfc\x0b\xcd"
+             "\x2f\xc4\xd0\x43\x8f\x29\x29\xae\x9b\xf4\x10\xc4\xb5\x73\xe9\xcd",
+             32)) {
+    memcpy(bootloader_version, "1.9.2", strlen("1.9.2"));
+    return 1;  // 1.9.2
   }
 
   return 1;
@@ -224,9 +238,9 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
  * If bootloader is older and known, replace with newer bootloader.
  * If bootloader is unknown, halt with error message.
  *
- * @param shutdown_on_success: if true, shuts down device instead of return
+ * @param shutdown_on_replace: if true, shuts down device instead of return
  */
-void check_bootloader(bool shutdown_on_success) {
+void check_and_replace_bootloader(bool shutdown_on_replace) {
 #if MEMORY_PROTECT
   uint8_t hash[32] = {0};
   int r = memory_bootloader_hash(hash);
@@ -276,7 +290,7 @@ void check_bootloader(bool shutdown_on_success) {
     // check whether the write was OK
     r = memory_bootloader_hash(hash);
     if (r == 32 && 0 == memcmp(hash, bl_hash, 32)) {
-      if (shutdown_on_success) {
+      if (shutdown_on_replace) {
         // OK -> show info and halt
         layoutDialog(&bmp_icon_info, NULL, NULL, NULL, _("Update finished"),
                      _("successfully."), NULL, _("Please reconnect"),
@@ -294,5 +308,5 @@ void check_bootloader(bool shutdown_on_success) {
 #endif
 #endif
   // prevent compiler warning when MEMORY_PROTECT==0
-  (void)shutdown_on_success;
+  (void)shutdown_on_replace;
 }

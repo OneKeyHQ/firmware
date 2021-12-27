@@ -168,10 +168,13 @@ static void format_number(char *dest, int number) {
 static void recovery_request(void) {
   WordRequest resp = {0};
   memzero(&resp, sizeof(WordRequest));
-  resp.has_type = true;
-  resp.type = awaiting_word == 1      ? WordRequestType_WordRequestType_Plain
-              : (word_index % 4 == 3) ? WordRequestType_WordRequestType_Matrix6
-                                      : WordRequestType_WordRequestType_Matrix9;
+  if (awaiting_word == 1) {
+    resp.type = WordRequestType_WordRequestType_Plain;
+  } else if (word_index % 4 == 3) {
+    resp.type = WordRequestType_WordRequestType_Matrix6;
+  } else {
+    resp.type = WordRequestType_WordRequestType_Matrix9;
+  }
   msg_write(MessageType_MessageType_WordRequest, &resp);
 }
 
@@ -217,7 +220,7 @@ static bool recovery_done(void) {
         layoutDialogAdapterEx(
             &bmp_icon_ok, NULL, _("Confirm"), NULL, NULL,
             _("The seed is valid and matches the one in the device"), NULL,
-            NULL, NULL, NULL);
+            NULL, NULL, NULL, FONT_STANDARD);
 #else
         layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
                             _("The seed is valid"), _("and MATCHES"),
@@ -232,7 +235,7 @@ static bool recovery_done(void) {
         layoutDialogAdapterEx(
             &bmp_icon_error, NULL, _("Confirm"), NULL, NULL,
             _("The seed is valid but does not match the one in the device"),
-            NULL, NULL, NULL, NULL);
+            NULL, NULL, NULL, NULL, FONT_STANDARD);
 #else
         layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                             _("The seed is valid"), _("but does NOT MATCH"),
@@ -254,7 +257,7 @@ static bool recovery_done(void) {
 #if ONEKEY_MINI
       layoutDialogAdapterEx(&bmp_icon_error, NULL, _("Confirm"), NULL,
                             _("The seed is INVALID!"), NULL, NULL, NULL, NULL,
-                            NULL);
+                            NULL, FONT_STANDARD);
 #else
       layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
                           _("The seed is"), _("INVALID!"), NULL, NULL, NULL,

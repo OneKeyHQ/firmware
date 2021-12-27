@@ -62,7 +62,6 @@
 
 #if !BITCOIN_ONLY
 #include "ethereum.h"
-#include "lisk.h"
 #include "nem.h"
 #include "nem2.h"
 #include "solana.h"
@@ -70,9 +69,13 @@
 #include "stellar.h"
 #endif
 
+#if EMULATOR
+#include <stdio.h>
+#endif
+
 // message methods
 
-static uint8_t msg_resp[MSG_OUT_SIZE] __attribute__((aligned));
+static uint8_t msg_resp[MSG_OUT_DECODED_SIZE] __attribute__((aligned));
 
 #define RESP_INIT(TYPE)                                                    \
   TYPE *resp = (TYPE *)(void *)msg_resp;                                   \
@@ -256,7 +259,8 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
                               const uint32_t *address_n, size_t address_n_count,
                               bool address_is_account,
                               const MultisigRedeemScriptType *multisig,
-                              int multisig_index, const CoinInfo *coin) {
+                              int multisig_index, uint32_t multisig_xpub_magic,
+                              const CoinInfo *coin) {
   bool button_request = true;
   int screen = 0, screens = 2;
   if (multisig) {
@@ -301,7 +305,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
             strlcat(xpub, "ERROR", sizeof(xpub));
           } else {
             hdnode_serialize_public(&node, node_ptr->fingerprint,
-                                    coin->xpub_magic, xpub, sizeof(xpub));
+                                    multisig_xpub_magic, xpub, sizeof(xpub));
           }
         }
         layoutXPUBMultisig(xpub, index, page, multisig_index == index);
@@ -352,6 +356,114 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
   }
 }
 
+static bool fsm_layoutPaginated(const char *description, const uint8_t *msg,
+                                uint32_t len, bool is_ascii) {
+  const char **str = NULL;
+  const uint32_t row_len = is_ascii ? 18 : 8;
+  uint32_t offset = 0;
+  uint8_t key;
+  do {
+    const uint32_t show_len = MIN(len, row_len * 4);
+    if (is_ascii) {
+      str = split_message(msg, show_len, row_len);
+    } else {
+      str = split_message_hex(msg, show_len);
+    }
+
+    msg += show_len;
+    len -= show_len;
+    offset += show_len;
+
+    layoutDialogSwipeEx(&bmp_icon_question, _("Cancel"), _("Confirm"),
+                        description, str[0], str[1], str[2], str[3], NULL, NULL,
+                        FONT_FIXED);
+    if (offset > row_len * 4) {
+      oledDrawBitmap(62, 30, &bmp_button_up);
+    }
+
+    if (len > 0) {
+      oledDrawBitmap(62, 80, &bmp_button_down);
+    }
+    oledRefresh();
+  button_scan:
+    key = protectButtonValue(ButtonRequestType_ButtonRequest_Other, false, true,
+                             0);
+    if (key == KEY_CANCEL) {
+      return false;
+    } else if (key == KEY_CONFIRM) {
+      break;
+    } else if (key == KEY_UP) {
+      if (offset <= row_len * 4) {
+        offset = 0;
+        msg -= show_len;
+        len += show_len;
+      } else {
+        offset -= row_len * 4 + show_len;
+        msg -= row_len * 4 + show_len;
+        len += row_len * 4 + show_len;
+      }
+    } else if (key == KEY_DOWN) {
+      if (len == 0) {
+        goto button_scan;
+      }
+    } else if (key == KEY_TOP) {
+      goto button_scan;
+    } else {
+      return false;
+    }
+
+  } while (len > 0);
+
+  return true;
+}
+
+bool fsm_layoutSignMessage(const uint8_t *msg, uint32_t len) {
+  if (is_valid_ascii(msg, len)) {
+    return fsm_layoutPaginated(_("Sign message?"), msg, len, true);
+  } else {
+    return fsm_layoutPaginated(_("Sign binary message?"), msg, len, false);
+  }
+}
+
+bool fsm_layoutSignMessage_ex(const char *description, const uint8_t *msg,
+                              uint32_t len) {
+  if (is_valid_ascii(msg, len)) {
+    return fsm_layoutPaginated(description, msg, len, true);
+  } else {
+    return fsm_layoutPaginated(description, msg, len, false);
+  }
+}
+
+bool fsm_layoutVerifyMessage(const uint8_t *msg, uint32_t len) {
+  if (is_valid_ascii(msg, len)) {
+    return fsm_layoutPaginated(_("Verified message?"), msg, len, true);
+  } else {
+    return fsm_layoutPaginated(_("Verified binary message?"), msg, len, false);
+  }
+}
+
+void fsm_msgRebootToBootloader(void) {
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    _("Do you want to"), _("restart device in"),
+                    _("bootloader mode?"), NULL, NULL, NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+  oledClear();
+  oledRefresh();
+  fsm_sendSuccess(_("Rebooting"));
+  // make sure the outgoing message is sent
+  usbPoll();
+  usbSleep(500);
+#if !EMULATOR
+  svc_reboot_to_bootloader();
+#else
+  printf("Reboot!\n");
+#endif
+}
+
 #include "fsm_msg_coin.h"
 #include "fsm_msg_common.h"
 #include "fsm_msg_crypto.h"
@@ -360,8 +472,6 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
 #if !BITCOIN_ONLY
 
 #include "fsm_msg_ethereum.h"
-
-#include "fsm_msg_lisk.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"

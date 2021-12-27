@@ -11,4 +11,4 @@ __pycache__/
 proto.gv*
 *.map
 .DS_Store
-.*.swp
+crypto/tests/libtrezor-crypto.so.dSYM/

@@ -22,6 +22,7 @@
 #include "bl_check.h"
 #include "buttons.h"
 #include "common.h"
+#include "compiler_traits.h"
 #include "config.h"
 #include "gettext.h"
 #include "layout.h"
@@ -49,6 +50,23 @@
 #include "ble.h"
 #include "otp.h"
 #include "sys.h"
+#endif
+#ifdef USE_SECP256K1_ZKP
+#include "zkp_context.h"
+#endif
+
+#ifdef USE_SECP256K1_ZKP
+void secp256k1_default_illegal_callback_fn(const char *str, void *data) {
+  (void)data;
+  __fatal_error(NULL, str, __FILE__, __LINE__, __func__);
+  return;
+}
+
+void secp256k1_default_error_callback_fn(const char *str, void *data) {
+  (void)data;
+  __fatal_error(NULL, str, __FILE__, __LINE__, __func__);
+  return;
+}
 #endif
 
 /* Screen timeout */
@@ -165,6 +183,9 @@ void pwm_config(void) {
 }
 #endif
 
+#define DBGMCU_IDCODE 0xE0042000U
+const char *cpu_info;
+
 int main(void) {
 #ifndef APPVER
   setup();
@@ -172,7 +193,7 @@ int main(void) {
                                    // unpredictable stack protection checks
   oledInit();
 #else
-  check_bootloader(true);
+  check_and_replace_bootloader(true);
   setupApp();
 #if ONEKEY_MINI
   bool serial_set = false, font_set = false, cert_set = false;
@@ -185,6 +206,15 @@ int main(void) {
   flash_enc_init();
   font_init();
   se_init();
+
+  uint32_t idcode = *(uint32_t *)DBGMCU_IDCODE & 0xFFF;
+  if (idcode == 0x411) {
+    cpu_info = "STM32F2XX";
+  } else if (idcode == 0x413) {
+    cpu_info = "STM32F4XX";
+  } else {
+    cpu_info = "unkown-";
+  }
 
   do {
     if (!serial_set) {
@@ -237,6 +267,10 @@ int main(void) {
     collect_hw_entropy(false);
   }
 
+#ifdef USE_SECP256K1_ZKP
+  ensure(sectrue * (zkp_context_init() == 0), NULL);
+#endif
+
 #if DEBUG_LINK
   oledSetDebugLink(1);
 #if !EMULATOR
@@ -252,8 +286,12 @@ int main(void) {
   usbInit();
 
   for (;;) {
+#if EMULATOR
+    usbSleep(10);
+#else
     usbPoll();
     layoutHomeInfo();
+#endif
   }
   return 0;
 }

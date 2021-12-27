@@ -34,12 +34,12 @@ CONNECTION = requests.Session()
 CONNECTION.headers.update(TREZORD_ORIGIN_HEADER)
 
 
-def call_bridge(uri: str, data=None) -> requests.Response:
+def call_bridge(uri: str, data: Optional[str] = None) -> requests.Response:
     url = TREZORD_HOST + "/" + uri
     r = CONNECTION.post(url, data=data)
     if r.status_code != 200:
-        error_str = "trezord: {} failed with code {}: {}".format(
-            uri, r.status_code, r.json()["error"]
+        error_str = (
+            f"trezord: {uri} failed with code {r.status_code}: {r.json()['error']}"
         )
         raise TransportException(error_str)
     return r
@@ -64,12 +64,12 @@ class BridgeHandle:
 
 class BridgeHandleModern(BridgeHandle):
     def write_buf(self, buf: bytes) -> None:
-        LOG.log(DUMP_PACKETS, "sending message: {}".format(buf.hex()))
+        LOG.log(DUMP_PACKETS, f"sending message: {buf.hex()}")
         self.transport._call("post", data=buf.hex())
 
     def read_buf(self) -> bytes:
         data = self.transport._call("read")
-        LOG.log(DUMP_PACKETS, "received message: {}".format(data.text))
+        LOG.log(DUMP_PACKETS, f"received message: {data.text}")
         return bytes.fromhex(data.text)
 
 
@@ -87,9 +87,9 @@ class BridgeHandleLegacy(BridgeHandle):
         if self.request is None:
             raise TransportException("Can't read without write on legacy Bridge")
         try:
-            LOG.log(DUMP_PACKETS, "calling with message: {}".format(self.request))
+            LOG.log(DUMP_PACKETS, f"calling with message: {self.request}")
             data = self.transport._call("call", data=self.request)
-            LOG.log(DUMP_PACKETS, "received response: {}".format(data.text))
+            LOG.log(DUMP_PACKETS, f"received response: {data.text}")
             return bytes.fromhex(data.text)
         finally:
             self.request = None
@@ -120,14 +120,14 @@ class BridgeTransport(Transport):
             self.handle = BridgeHandleModern(self)
 
     def get_path(self) -> str:
-        return "%s:%s" % (self.PATH_PREFIX, self.device["path"])
+        return f"{self.PATH_PREFIX}:{self.device['path']}"
 
     def find_debug(self) -> "BridgeTransport":
         if not self.device.get("debug"):
             raise TransportException("Debug device not available")
         return BridgeTransport(self.device, self.legacy, debug=True)
 
-    def _call(self, action: str, data: str = None) -> requests.Response:
+    def _call(self, action: str, data: Optional[str] = None) -> requests.Response:
         session = self.session or "null"
         uri = action + "/" + str(session)
         if self.debug:

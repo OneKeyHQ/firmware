@@ -35,10 +35,11 @@ TxInputType.witness                                         max_size:109
 TxInputType.ownership_proof                                 max_size:171
 TxInputType.commitment_data                                 max_size:32
 TxInputType.orig_hash                                       max_size:32
+TxInputType.script_pubkey                                   max_size:520
 
 TxOutputType.address                                        max_size:130
 TxOutputType.address_n                                      max_count:8
-TxOutputType.op_return_data                                 max_size:80
+TxOutputType.op_return_data                                 max_size:150
 TxOutputType.orig_hash                                      max_size:32
 
 TxOutputBinType.script_pubkey                               max_size:520
@@ -55,23 +56,6 @@ MultisigRedeemScriptType.address_n                          max_count:8
 
 HDNodePathType.address_n                                    max_count:8
 
-GetOwnershipProof.address_n                                 max_count:8
-GetOwnershipProof.coin_name                                 max_size:21
-GetOwnershipProof.ownership_ids                             max_count:15 max_size:32
-GetOwnershipProof.commitment_data                           max_size:32
-
-OwnershipProof.ownership_proof                              max_size:171
-OwnershipProof.signature                                    max_size:65
-
-GetOwnershipId.address_n                                    max_count:8
-GetOwnershipId.coin_name                                    max_size:21
-
-OwnershipId.ownership_id                                    max_size:32
-
-AuthorizeCoinJoin.coordinator                               max_size:18
-AuthorizeCoinJoin.address_n                                 max_count:8
-AuthorizeCoinJoin.coin_name                                 max_size:21
-
 TxInput.address_n                                           max_count:8
 TxInput.prev_hash                                           max_size:32
 TxInput.script_sig                                          max_size:1650
@@ -79,10 +63,11 @@ TxInput.witness                                             max_size:109
 TxInput.ownership_proof                                     max_size:171
 TxInput.commitment_data                                     max_size:32
 TxInput.orig_hash                                           max_size:32
+TxInput.script_pubkey                                       max_size:520
 
 TxOutput.address                                            max_size:130
 TxOutput.address_n                                          max_count:8
-TxOutput.op_return_data                                     max_size:80
+TxOutput.op_return_data                                     max_size:150
 TxOutput.orig_hash                                          max_size:32
 
 PrevInput.prev_hash                                         max_size:32
@@ -90,4 +75,20 @@ PrevInput.script_sig                                        max_size:1650
 
 PrevOutput.script_pubkey                                    max_size:520
 
+TxAckPrevExtraDataWrapper.extra_data_chunk                  type:FT_IGNORE
+
+# Unused messages.
+AuthorizeCoinJoin                                           skip_message:true
+GetOwnershipId                                              skip_message:true
+OwnershipId                                                 skip_message:true
+GetOwnershipProof                                           skip_message:true
+OwnershipProof                                              skip_message:true
+
 TxAckPrevExtraDataWrapper.extra_data_chunk                  max_size:1024
+
+BIP32Address.address_n                                      max_count:8
+GetPublicKeyMultiple.addresses                              max_count:20
+GetPublicKeyMultiple.ecdsa_curve_name                       max_size:32
+GetPublicKeyMultiple.coin_name                              max_size:21
+
+PublicKeyMultiple.xpubs                                     max_count:20 max_size:113

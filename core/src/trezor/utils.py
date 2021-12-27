@@ -3,8 +3,8 @@ import sys
 from trezorutils import (  # noqa: F401
     BITCOIN_ONLY,
     EMULATOR,
-    GITREV,
     MODEL,
+    SCM_REVISION,
     VERSION_MAJOR,
     VERSION_MINOR,
     VERSION_PATCH,
@@ -27,22 +27,28 @@ if __debug__:
 if False:
     from typing import (
         Any,
-        Iterable,
         Iterator,
-        Optional,
         Protocol,
         Union,
         TypeVar,
         Sequence,
+        Set,
     )
 
+    from trezor.protobuf import MessageType
 
-def unimport_begin() -> Iterable[str]:
+
+def unimport_begin() -> Set[str]:
     return set(sys.modules)
 
 
-def unimport_end(mods: Iterable[str]) -> None:
-    for mod in sys.modules:
+def unimport_end(mods: Set[str], collect: bool = True) -> None:
+    # static check that the size of sys.modules never grows above value of
+    # MICROPY_LOADED_MODULES_DICT_SIZE, so that the sys.modules dict is never
+    # reallocated at run-time
+    assert len(sys.modules) <= 160, "Please bump preallocated size in mpconfigport.h"
+
+    for mod in sys.modules:  # pylint: disable=consider-using-dict-items
         if mod not in mods:
             # remove reference from sys.modules
             del sys.modules[mod]
@@ -59,10 +65,58 @@ def unimport_end(mods: Iterable[str]) -> None:
                 # referenced from the parent package. both is fine.
                 pass
     # collect removed modules
-    gc.collect()
+    if collect:
+        gc.collect()
 
 
-def ensure(cond: bool, msg: str = None) -> None:
+class unimport:
+    def __init__(self) -> None:
+        self.mods: Set[str] | None = None
+
+    def __enter__(self) -> None:
+        self.mods = unimport_begin()
+
+    def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:
+        assert self.mods is not None
+        unimport_end(self.mods, collect=False)
+        self.mods.clear()
+        self.mods = None
+        gc.collect()
+
+
+def presize_module(modname: str, size: int) -> None:
+    """Ensure the module's dict is preallocated to an expected size.
+
+    This is used in modules like `trezor`, whose dict size depends not only on the
+    symbols defined in the file itself, but also on the number of submodules that will
+    be inserted into the module's namespace.
+    """
+    module = sys.modules[modname]
+    for i in range(size):
+        setattr(module, f"___PRESIZE_MODULE_{i}", None)
+    for i in range(size):
+        delattr(module, f"___PRESIZE_MODULE_{i}")
+
+
+if __debug__:
+
+    def mem_dump(filename: str) -> None:
+        from micropython import mem_info
+
+        print(f"### sysmodules ({len(sys.modules)}):")
+        for mod in sys.modules:
+            print("*", mod)
+        if EMULATOR:
+            from trezorutils import meminfo
+
+            print("### dumping to", filename)
+            meminfo(filename)
+            mem_info()
+        else:
+            mem_info(True)
+
+
+def ensure(cond: bool, msg: str | None = None) -> None:
     if not cond:
         if msg is None:
             raise AssertionError
@@ -79,9 +133,26 @@ def chunks(items: Chunkable, size: int) -> Iterator[Chunkable]:
         yield items[i : i + size]
 
 
+def chunks_intersperse(
+    items: Chunkable, size: int, sep: str = "\n"
+) -> Iterator[Chunkable]:
+    first = True
+    for i in range(0, len(items), size):
+        if not first:
+            yield sep
+        else:
+            first = False
+        yield items[i : i + size]
+
+
 if False:
 
     class HashContext(Protocol):
+        def __init__(  # pylint: disable=super-init-not-called
+            self, data: bytes = None
+        ) -> None:
+            ...
+
         def update(self, buf: bytes) -> None:
             ...
 
@@ -110,10 +181,6 @@ class HashWriter:
 
     def write(self, buf: bytes) -> None:  # alias for extend()
         self.ctx.update(buf)
-
-    async def awrite(self, buf: bytes) -> int:  # AsyncWriter interface
-        self.ctx.update(buf)
-        return len(buf)
 
     def get_digest(self) -> bytes:
         return self.ctx.digest()
@@ -156,8 +223,11 @@ class BufferWriter:
 class BufferReader:
     """Seekable and readable view into a buffer."""
 
-    def __init__(self, buffer: bytes) -> None:
-        self.buffer = buffer
+    def __init__(self, buffer: Union[bytes, memoryview]) -> None:
+        if isinstance(buffer, memoryview):
+            self.buffer = buffer
+        else:
+            self.buffer = memoryview(buffer)
         self.offset = 0
 
     def seek(self, offset: int) -> None:
@@ -182,13 +252,21 @@ class BufferReader:
         self.offset += nread
         return nread
 
-    def read(self, length: Optional[int] = None) -> bytes:
+    def read(self, length: int | None = None) -> bytes:
         """Read and return exactly `length` bytes, or raise EOFError.
 
         If `length` is unspecified, reads all remaining data.
 
         Note that this method makes a copy of the data. To avoid allocation, use
-        `readinto()`.
+        `readinto()`. To avoid copying use `read_memoryview()`.
+        """
+        return bytes(self.read_memoryview(length))
+
+    def read_memoryview(self, length: int | None = None) -> memoryview:
+        """Read and return a memoryview of exactly `length` bytes, or raise
+        EOFError.
+
+        If `length` is unspecified, reads all remaining data.
         """
         if length is None:
             ret = self.buffer[self.offset :]
@@ -245,7 +323,7 @@ def obj_repr(o: object) -> str:
         d = {attr: getattr(o, attr, None) for attr in o.__slots__}
     else:
         d = o.__dict__
-    return "<%s: %s>" % (o.__class__.__name__, d)
+    return f"<{o.__class__.__name__}: {d}>"
 
 
 def truncate_utf8(string: str, max_bytes: int) -> str:
@@ -269,3 +347,44 @@ def is_empty_iterator(i: Iterator) -> bool:
         return True
     else:
         return False
+
+
+def empty_bytearray(preallocate: int) -> bytearray:
+    """
+    Returns bytearray that won't allocate for at least `preallocate` bytes.
+    Useful in case you want to avoid allocating too often.
+    """
+    b = bytearray(preallocate)
+    b[:] = bytes()
+    return b
+
+
+if __debug__:
+
+    def dump_protobuf_lines(msg: MessageType, line_start: str = "") -> Iterator[str]:
+        msg_dict = msg.__dict__
+        if not msg_dict:
+            yield line_start + msg.MESSAGE_NAME + " {}"
+            return
+
+        yield line_start + msg.MESSAGE_NAME + " {"
+        for key, val in msg_dict.items():
+            if type(val) == type(msg):
+                sublines = dump_protobuf_lines(val, line_start=key + ": ")
+                for subline in sublines:
+                    yield "    " + subline
+            elif val and isinstance(val, list) and type(val[0]) == type(msg):
+                # non-empty list of protobuf messages
+                yield f"    {key}: ["
+                for subval in val:
+                    sublines = dump_protobuf_lines(subval)
+                    for subline in sublines:
+                        yield "        " + subline
+                yield "    ]"
+            else:
+                yield f"    {key}: {repr(val)}"
+
+        yield "}"
+
+    def dump_protobuf(msg: MessageType) -> str:
+        return "\n".join(dump_protobuf_lines(msg))

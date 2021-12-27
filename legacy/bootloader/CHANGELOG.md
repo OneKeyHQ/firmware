@@ -37,17 +37,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## 1.8.1 [Unreleased]
 
 ### Added
+- "Stay in bootloader" flag.  [#1461]
+- Soft-reset (reboots itself after firmware installation).
 
 ### Changed
 - Use Trezor instead of TREZOR.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## 1.8.0 [February 2019]
 
@@ -121,7 +115,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 - Clean USB descriptor.
 - Return firmware_present in Features response.
-- Don't halt on broken firware, stay in bootloader.
+- Don't halt on broken firmware, stay in bootloader.
 
 ## 1.2.8 [September 2016]
 
@@ -146,3 +140,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - Initial import of code.
+
+[#1461]: https://github.com/trezor/trezor-firmware/pull/1461

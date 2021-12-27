@@ -14,6 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+from datetime import datetime, timezone
+
 import pytest
 
 from trezorlib import btc, device, messages
@@ -430,7 +432,6 @@ class TestMsgSigntx:
             == "6f9775545830731a316a4c2a39515b1890e9c8ab0f9e21e7c6a6ca2c1499116d"
         )
 
-    @pytest.mark.skip_ui
     @pytest.mark.slow
     def test_lots_of_inputs(self, client):
         # Tests if device implements serialization of len(inputs) correctly
@@ -458,7 +459,6 @@ class TestMsgSigntx:
             == "f90cdc2224366312be28166e2afe198ece7a60e86e25f5a50f5b14d811713da8"
         )
 
-    @pytest.mark.skip_ui
     @pytest.mark.slow
     def test_lots_of_outputs(self, client):
         # Tests if device implements serialization of len(outputs) correctly
@@ -664,7 +664,7 @@ class TestMsgSigntx:
                 nonlocal finished
                 for expected in (B.ConfirmOutput, B.FeeOverThreshold, B.SignTx):
                     br = yield
-                    assert br == expected
+                    assert br.code == expected
                     client.debug.press_yes()
                 finished = True
 
@@ -828,12 +828,12 @@ class TestMsgSigntx:
 
             return msg
 
-        # Set up attack processors
-        client.set_filter(messages.TxAck, attack_processor)
-
-        with pytest.raises(
+        with client, pytest.raises(
             TrezorFailure, match="Transaction has changed during signing"
         ):
+            # Set up attack processors
+            client.set_filter(messages.TxAck, attack_processor)
+
             btc.sign_tx(
                 client,
                 "Bitcoin",
@@ -881,12 +881,12 @@ class TestMsgSigntx:
 
             return msg
 
-        # Set up attack processors
-        client.set_filter(messages.TxAck, attack_processor)
-
-        with pytest.raises(
+        with client, pytest.raises(
             TrezorFailure, match="Transaction has changed during signing"
         ):
+            # Set up attack processors
+            client.set_filter(messages.TxAck, attack_processor)
+
             btc.sign_tx(
                 client, "Testnet", [inp1], [out1, out2], prev_txes=TX_CACHE_TESTNET
             )
@@ -935,9 +935,9 @@ class TestMsgSigntx:
 
             return msg
 
-        client.set_filter(messages.TxAck, attack_processor)
         # Now run the attack, must trigger the exception
         with client:
+            client.set_filter(messages.TxAck, attack_processor)
             client.set_expected_responses(
                 [
                     request_input(0),
@@ -965,12 +965,7 @@ class TestMsgSigntx:
                 )
 
             assert exc.value.code == messages.FailureType.ProcessError
-            if client.features.model == "1":
-                assert exc.value.message.endswith("Failed to compile input")
-            else:
-                assert exc.value.message.endswith(
-                    "Transaction has changed during signing"
-                )
+            assert exc.value.message.endswith("Transaction has changed during signing")
 
     def test_spend_coinbase(self, client):
         inp1 = messages.TxInputType(
@@ -1131,7 +1126,6 @@ class TestMsgSigntx:
                 prev_txes=TX_CACHE_TESTNET,
             )
 
-    @pytest.mark.skip_ui
     def test_not_enough_vouts(self, client):
         prev_tx = TX_CACHE_MAINNET[TXHASH_157041]
 
@@ -1187,7 +1181,6 @@ class TestMsgSigntx:
             ("branch_id", 13),
         ),
     )
-    @pytest.mark.skip_ui
     def test_prevtx_forbidden_fields(self, client, field, value):
         inp0 = messages.TxInputType(
             address_n=parse_path("44h/0h/0h/0/0"),
@@ -1205,7 +1198,7 @@ class TestMsgSigntx:
         setattr(prev_tx, field, value)
         name = field.replace("_", " ")
         with pytest.raises(
-            TrezorFailure, match=r"(?i){} not enabled on this coin".format(name)
+            TrezorFailure, match=rf"(?i){name} not enabled on this coin"
         ):
             btc.sign_tx(
                 client, "Bitcoin", [inp0], [out1], prev_txes={TXHASH_157041: prev_tx}
@@ -1215,7 +1208,6 @@ class TestMsgSigntx:
         "field, value",
         (("expiry", 9), ("timestamp", 42), ("version_group_id", 69), ("branch_id", 13)),
     )
-    @pytest.mark.skip_ui
     def test_signtx_forbidden_fields(self, client, field, value):
         inp0 = messages.TxInputType(
             address_n=parse_path("44h/0h/0h/0/0"),
@@ -1232,7 +1224,7 @@ class TestMsgSigntx:
         kwargs = {field: value}
         name = field.replace("_", " ")
         with pytest.raises(
-            TrezorFailure, match=r"(?i){} not enabled on this coin".format(name)
+            TrezorFailure, match=rf"(?i){name} not enabled on this coin"
         ):
             btc.sign_tx(
                 client, "Bitcoin", [inp0], [out1], prev_txes=TX_CACHE_MAINNET, **kwargs
@@ -1242,7 +1234,6 @@ class TestMsgSigntx:
         "script_type",
         (messages.InputScriptType.SPENDADDRESS, messages.InputScriptType.EXTERNAL),
     )
-    @pytest.mark.skip_ui
     def test_incorrect_input_script_type(self, client, script_type):
         address_n = parse_path("44'/1'/0'/0/0")
         attacker_multisig_public_key = bytes.fromhex(
@@ -1298,7 +1289,6 @@ class TestMsgSigntx:
             messages.OutputScriptType.PAYTOSCRIPTHASH,
         ),
     )
-    @pytest.mark.skip_ui
     def test_incorrect_output_script_type(self, client, script_type):
         address_n = parse_path("44'/1'/0'/0/0")
         attacker_multisig_public_key = bytes.fromhex(
@@ -1394,5 +1384,104 @@ class TestMsgSigntx:
                 [inp1],
                 [out1],
                 lock_time=lock_time,
+                prev_txes=TX_CACHE_MAINNET,
+            )
+
+    @pytest.mark.skip_t1(reason="Cannot test layouts on T1")
+    def test_lock_time_blockheight(self, client):
+        # tx: d5f65ee80147b4bcc70b75e4bbf2d7382021b871bd8867ef8fa525ef50864882
+        # input 0: 0.0039 BTC
+
+        inp1 = messages.TxInputType(
+            address_n=parse_path("44h/0h/0h/0/0"),
+            amount=390000,
+            prev_hash=TXHASH_d5f65e,
+            prev_index=0,
+            sequence=0xFFFF_FFFE,
+        )
+
+        out1 = messages.TxOutputType(
+            address="1MJ2tj2ThBE62zXbBYA5ZaN3fdve5CPAz1",
+            amount=390000 - 10000,
+            script_type=messages.OutputScriptType.PAYTOADDRESS,
+        )
+
+        def input_flow():
+            yield  # confirm output
+            client.debug.wait_layout()
+            client.debug.press_yes()
+
+            yield  # confirm locktime
+            layout = client.debug.wait_layout()
+            assert "blockheight" in layout.text
+            assert "499999999" in layout.text
+            client.debug.press_yes()
+
+            yield  # confirm transaction
+            client.debug.press_yes()
+
+        with client:
+            client.set_input_flow(input_flow)
+            client.watch_layout(True)
+
+            btc.sign_tx(
+                client,
+                "Bitcoin",
+                [inp1],
+                [out1],
+                lock_time=499999999,
+                prev_txes=TX_CACHE_MAINNET,
+            )
+
+    @pytest.mark.skip_t1(reason="Cannot test layouts on T1")
+    @pytest.mark.parametrize(
+        "lock_time_str", ("1985-11-05 00:53:20", "2048-08-16 22:14:00")
+    )
+    def test_lock_time_datetime(self, client, lock_time_str):
+        # tx: d5f65ee80147b4bcc70b75e4bbf2d7382021b871bd8867ef8fa525ef50864882
+        # input 0: 0.0039 BTC
+
+        inp1 = messages.TxInputType(
+            address_n=parse_path("44h/0h/0h/0/0"),
+            amount=390000,
+            prev_hash=TXHASH_d5f65e,
+            prev_index=0,
+            sequence=0xFFFF_FFFE,
+        )
+
+        out1 = messages.TxOutputType(
+            address="1MJ2tj2ThBE62zXbBYA5ZaN3fdve5CPAz1",
+            amount=390000 - 10000,
+            script_type=messages.OutputScriptType.PAYTOADDRESS,
+        )
+
+        def input_flow():
+            yield  # confirm output
+            client.debug.wait_layout()
+            client.debug.press_yes()
+
+            yield  # confirm locktime
+            layout = client.debug.wait_layout()
+            assert lock_time_str in layout.text
+
+            client.debug.press_yes()
+
+            yield  # confirm transaction
+            client.debug.press_yes()
+
+        lock_time_naive = datetime.strptime(lock_time_str, "%Y-%m-%d %H:%M:%S")
+        lock_time_utc = lock_time_naive.replace(tzinfo=timezone.utc)
+        lock_time_timestamp = int(lock_time_utc.timestamp())
+
+        with client:
+            client.set_input_flow(input_flow)
+            client.watch_layout(True)
+
+            btc.sign_tx(
+                client,
+                "Bitcoin",
+                [inp1],
+                [out1],
+                lock_time=lock_time_timestamp,
                 prev_txes=TX_CACHE_MAINNET,
             )

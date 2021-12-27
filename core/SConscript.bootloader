@@ -22,13 +22,14 @@ CPPDEFINES_MOD += [
 ]
 SOURCE_MOD += [
     'vendor/trezor-crypto/blake2s.c',
+    'vendor/trezor-crypto/chacha_drbg.c',
+    'vendor/trezor-crypto/chacha20poly1305/chacha_merged.c',
     'vendor/trezor-crypto/ed25519-donna/curve25519-donna-32bit.c',
     'vendor/trezor-crypto/ed25519-donna/curve25519-donna-helpers.c',
     'vendor/trezor-crypto/ed25519-donna/ed25519.c',
     'vendor/trezor-crypto/ed25519-donna/ed25519-donna-32bit-tables.c',
     'vendor/trezor-crypto/ed25519-donna/ed25519-donna-impl-base.c',
     'vendor/trezor-crypto/ed25519-donna/modm-donna-32bit.c',
-    'vendor/trezor-crypto/hmac_drbg.c',
     'vendor/trezor-crypto/memzero.c',
     'vendor/trezor-crypto/rand.c',
     'vendor/trezor-crypto/sha2.c',
@@ -36,7 +37,7 @@ SOURCE_MOD += [
 
 # modtrezorui
 CPPPATH_MOD += [
-        'vendor/micropython/extmod/uzlib',
+        'vendor/micropython/lib/uzlib',
 ]
 CPPDEFINES_MOD += [
     'TREZOR_FONT_NORMAL_ENABLE',
@@ -47,10 +48,9 @@ SOURCE_MOD += [
     'embed/extmod/modtrezorui/font_bitmap.c',
     'embed/extmod/modtrezorui/font_roboto_regular_20.c',
     'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
-    'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
-    'vendor/micropython/extmod/uzlib/adler32.c',
-    'vendor/micropython/extmod/uzlib/crc32.c',
-    'vendor/micropython/extmod/uzlib/tinflate.c',
+    'vendor/micropython/lib/uzlib/adler32.c',
+    'vendor/micropython/lib/uzlib/crc32.c',
+    'vendor/micropython/lib/uzlib/tinflate.c',
 ]
 
 SOURCE_STMHAL = [
@@ -95,6 +95,7 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/flash.c',
     'embed/trezorhal/mini_printf.c',
     'embed/trezorhal/mpu.c',
+    'embed/trezorhal/random_delays.c',
     'embed/trezorhal/rng.c',
     'embed/trezorhal/stm32.c',
     'embed/trezorhal/systick.c',

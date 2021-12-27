@@ -37,7 +37,7 @@ void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg) {
   if (msg->has_show_display && msg->show_display) {
     if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
                            msg->address_n, msg->address_n_count, true, NULL, 0,
-                           NULL)) {
+                           0, NULL)) {
       return;
     }
   }
@@ -58,7 +58,6 @@ void fsm_msgStarcoinGetPublicKey(const StarcoinGetPublicKey *msg) {
   if (!node) return;
 
   hdnode_fill_public_key(node);
-  resp->has_public_key = true;
   resp->public_key.size = 32;
 
   if (msg->has_show_display && msg->show_display) {
@@ -88,8 +87,7 @@ void fsm_msgStarcoinSignTx(const StarcoinSignTx *msg) {
   if (!node) return;
 
   hdnode_fill_public_key(node);
-  starcoin_sign_tx(msg, node, resp);
-  if (!resp->has_signature) {
+  if (!starcoin_sign_tx(msg, node, resp)) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Signing failed"));
     layoutHome();
     return;
@@ -128,7 +126,7 @@ void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg) {
       layoutHome();
       return;
     }
-    layoutVerifyMessage(msg->message.bytes, msg->message.size);
+    fsm_layoutVerifyMessage(msg->message.bytes, msg->message.size);
 
     if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);

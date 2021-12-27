@@ -3,12 +3,9 @@ from trezor.crypto import monero as tcry
 from apps.monero.xmr.networks import NetworkTypes, net_version
 
 if False:
-    from typing import List, Tuple, Optional
     from apps.monero.xmr.types import Ge25519
-    from trezor.messages.MoneroAccountPublicAddress import MoneroAccountPublicAddress
-    from trezor.messages.MoneroTransactionDestinationEntry import (
-        MoneroTransactionDestinationEntry,
-    )
+    from trezor.messages import MoneroAccountPublicAddress
+    from trezor.messages import MoneroTransactionDestinationEntry
 
 
 def addr_to_hash(addr: MoneroAccountPublicAddress) -> bytes:
@@ -19,7 +16,7 @@ def addr_to_hash(addr: MoneroAccountPublicAddress) -> bytes:
 
 
 def encode_addr(
-    version, spend_pub: Ge25519, view_pub: Ge25519, payment_id: Optional[bytes] = None
+    version, spend_pub: Ge25519, view_pub: Ge25519, payment_id: bytes | None = None
 ) -> str:
     """
     Builds Monero address from public keys
@@ -30,7 +27,7 @@ def encode_addr(
     return tcry.xmr_base58_addr_encode_check(ord(version), bytes(buf))
 
 
-def decode_addr(addr: bytes) -> Tuple[int, bytes, bytes]:
+def decode_addr(addr: bytes) -> tuple[int, bytes, bytes]:
     """
     Given address, get version and public spend and view keys.
     """
@@ -51,9 +48,9 @@ def public_addr_encode(
 
 
 def classify_subaddresses(
-    tx_dests: List[MoneroTransactionDestinationEntry],
+    tx_dests: list[MoneroTransactionDestinationEntry],
     change_addr: MoneroAccountPublicAddress,
-) -> Tuple[int, int, int]:
+) -> tuple[int, int, int]:
     """
     Classify destination subaddresses
     """
@@ -84,7 +81,7 @@ def addr_eq(a: MoneroAccountPublicAddress, b: MoneroAccountPublicAddress):
 
 
 def get_change_addr_idx(
-    outputs: List[MoneroTransactionDestinationEntry],
+    outputs: list[MoneroTransactionDestinationEntry],
     change_dts: MoneroTransactionDestinationEntry,
 ) -> int:
     """

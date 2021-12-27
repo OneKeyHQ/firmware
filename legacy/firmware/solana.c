@@ -124,18 +124,11 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
 
         steps_list[steps++] = i;
 
-#if ONEKEY_MINI
-        layoutTransInformation(
-            i > 0 ? &bmp_button_up : NULL,
-            i < num_summary_steps - 1 ? &bmp_button_down : NULL,
-            &bmp_btn_cancel,
+        layoutDialogAdapter_ex(
+            NULL, &bmp_btn_cancel, _("REJECT"),
             i < num_summary_steps - 1 ? &bmp_button_forward : &bmp_btn_confirm,
-            _("REJECT"), i < num_summary_steps - 1 ? _("NEXT") : _("APPROVE"),
-            _("Send SOL"), _(title), NULL, true, false, _(text));
-#else
-        layoutDialogAdapter(NULL, _("Cancel"), _("Confirm"), _(title), NULL,
-                            text, NULL, NULL, NULL, NULL);
-#endif
+            i < num_summary_steps - 1 ? _("NEXT") : _("APPROVE"), NULL, NULL,
+            desc, _(text), NULL, NULL, NULL);
         uint8_t key;
       button_scan:
         key = protectButtonValue(ButtonRequestType_ButtonRequest_ProtectCall,

@@ -46,10 +46,9 @@ on one page here.
     eos                EOS commands.
     ethereum           Ethereum commands.
     fido               FIDO2, U2F and WebAuthN management commands.
-    firmware-update    Upload new firmware to device.
+    firmware           Firmware commands.
     get-features       Retrieve device features and settings.
     get-session        Get a session ID for subsequent commands.
-    lisk               Lisk commands.
     list               List connected Trezor devices.
     monero             Monero commands.
     nem                NEM commands.
@@ -101,6 +100,7 @@ Bitcoin and Bitcoin-like coins commands.
 
   Commands:
     get-address      Get address for specified path.
+    get-descriptor   Get descriptor of given account.
     get-public-node  Get public node of given path.
     sign-message     Sign message using address of given path.
     sign-tx          Sign transaction.
@@ -123,9 +123,10 @@ Cardano commands.
     --help  Show this message and exit.
 
   Commands:
-    get-address     Get Cardano address.
-    get-public-key  Get Cardano public key.
-    sign-tx         Sign Cardano transaction.
+    get-address             Get Cardano address.
+    get-native-script-hash  Get Cardano native script hash.
+    get-public-key          Get Cardano public key.
+    sign-tx                 Sign Cardano transaction.
 
 CoSi (Cothority / collective signing) commands.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,7 +187,6 @@ Miscellaneous debug features.
 
   Commands:
     send-bytes  Send raw bytes to Trezor.
-    show-text   Show text on Trezor display.
 
 Device management commands - setup, recover seed, wipe, etc.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -205,13 +205,14 @@ Device management commands - setup, recover seed, wipe, etc.
     --help  Show this message and exit.
 
   Commands:
-    backup      Perform device seed backup.
-    load        Upload seed and custom configuration to the device.
-    recover     Start safe recovery workflow.
-    sd-protect  Secure the device with SD card protection.
-    self-test   Perform a self-test.
-    setup       Perform device setup and generate new seed.
-    wipe        Reset device to factory defaults and remove all private data.
+    backup                Perform device seed backup.
+    load                  Upload seed and custom configuration to the device.
+    reboot-to-bootloader  Reboot device into bootloader mode.
+    recover               Start safe recovery workflow.
+    sd-protect            Secure the device with SD card protection.
+    self-test             Perform a self-test.
+    setup                 Perform device setup and generate new seed.
+    wipe                  Reset device to factory defaults and remove all private data.
 
 EOS commands.
 ~~~~~~~~~~~~~
@@ -253,6 +254,7 @@ Ethereum commands.
     get-address      Get Ethereum address in hex encoding.
     get-public-node  Get Ethereum public node of given path.
     sign-message     Sign message with Ethereum address.
+    sign-typed-data  Sign typed data (EIP-712) with Ethereum address.
     sign-tx          Sign (and optionally publish) Ethereum transaction.
     verify-message   Verify message signed with Ethereum address.
 
@@ -276,28 +278,26 @@ FIDO2, U2F and WebAuthN management commands.
     counter      Get or set the FIDO/U2F counter value.
     credentials  Manage FIDO2 resident credentials.
 
-Lisk commands.
-~~~~~~~~~~~~~~
+Firmware commands.
+~~~~~~~~~~~~~~~~~~
 
 .. code::
 
-  trezorctl lisk --help
+  trezorctl firmware --help
 
 .. code::
 
-  Usage: trezorctl lisk [OPTIONS] COMMAND [ARGS]...
+  Usage: trezorctl firmware [OPTIONS] COMMAND [ARGS]...
 
-    Lisk commands.
+    Firmware commands.
 
   Options:
     --help  Show this message and exit.
 
   Commands:
-    get-address     Get Lisk address for specified path.
-    get-public-key  Get Lisk public key for specified path.
-    sign-message    Sign message with Lisk address.
-    sign-tx         Sign Lisk transaction.
-    verify-message  Verify message signed with Lisk address.
+    download  Download and save the firmware image.
+    update    Upload new firmware to device.
+    verify    Verify the integrity of the firmware data stored in a file.
 
 Monero commands.
 ~~~~~~~~~~~~~~~~
@@ -376,15 +376,16 @@ Device settings.
     --help  Show this message and exit.
 
   Commands:
-    auto-lock-delay   Set auto-lock delay (in seconds).
-    display-rotation  Set display rotation.
-    flags             Set device flags.
-    homescreen        Set new homescreen.
-    label             Set new device label.
-    passphrase        Enable, disable or configure passphrase protection.
-    pin               Set, change or remove PIN.
-    safety-checks     Set safety check level.
-    wipe-code         Set or remove the wipe code.
+    auto-lock-delay        Set auto-lock delay (in seconds).
+    display-rotation       Set display rotation.
+    experimental-features  Enable or disable experimental message types.
+    flags                  Set device flags.
+    homescreen             Set new homescreen.
+    label                  Set new device label.
+    passphrase             Enable, disable or configure passphrase protection.
+    pin                    Set, change or remove PIN.
+    safety-checks          Set safety check level.
+    wipe-code              Set or remove the wipe code.
 
 Stellar commands.
 ~~~~~~~~~~~~~~~~~

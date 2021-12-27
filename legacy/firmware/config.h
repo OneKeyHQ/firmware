@@ -195,6 +195,10 @@ void config_setSleepDelayMs(uint32_t auto_sleep_ms);
 uint32_t config_getBrightness(void);
 void config_setBrightness(uint32_t value);
 #endif
+
+SafetyCheckLevel config_getSafetyCheckLevel(void);
+void config_setSafetyCheckLevel(SafetyCheckLevel safety_check_level);
+
 void config_wipe(void);
 void config_setFastPayPinFlag(bool flag);
 bool config_getFastPayPinFlag(void);

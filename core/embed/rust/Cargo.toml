@@ -1,0 +1,62 @@
+[package]
+name = "trezor_lib"
+version = "0.1.0"
+authors = ["SatoshiLabs <info@satoshilabs.com>"]
+edition = "2018"
+resolver = "2"
+build = "build.rs"
+
+[features]
+default = ["model_tt"]
+bitcoin_only = []
+model_tt = []
+model_t1 = []
+ui = []
+ui_debug = []
+test = ["cc", "glob"]
+
+[lib]
+crate-type = ["staticlib"]
+
+[profile.dev]
+panic = "abort"
+split-debuginfo = "unpacked"
+
+[profile.release]
+panic = "abort"
+opt-level = "z"
+lto = true
+codegen-units = 1
+
+[profile.test]
+split-debuginfo = "unpacked"
+
+# Runtime dependencies
+
+[dependencies.cty]
+version = "0.2.1"
+
+[dependencies.heapless]
+version = "0.7.3"
+default_features = false
+
+[dependencies.cstr_core]
+version = "0.2.4"
+default_features = false
+
+# Build dependencies
+
+[build-dependencies.bindgen]
+version = "0.59.1"
+default_features = false
+features = ["runtime"]
+
+# Build dependencies used for linking the test binary
+
+[build-dependencies.cc]
+optional = true
+version = "1.0.69"
+
+[build-dependencies.glob]
+optional = true
+version = "0.3.0"

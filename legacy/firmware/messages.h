@@ -24,10 +24,29 @@
 #include <stdint.h>
 #include "common.h"
 #include "trezor.h"
+#include "usb.h"
 
 #define MSG_IN_SIZE MSG_IN_BUFFER_SIZE
+// The size of the message header "?##<2 bytes msg_id><4 bytes msg_size>".
+#define MSG_HEADER_SIZE 9
 
-#define MSG_OUT_SIZE (3 * 1024)
+// Maximum size of an incoming protobuf-encoded message without headers.
+#define MSG_IN_ENCODED_SIZE (16 * 1024)
+
+// Maximum size of a C struct containing a decoded incoming message.
+#define MSG_IN_DECODED_SIZE (16 * 1024)
+
+// Buffer size for outgoing USB packets with headers.
+#define MSG_OUT_BUFFER_SIZE (3 * 1024)
+
+// Maximum size of an outgoing protobuf-encoded message without headers.
+// (Continuation packets have a one byte "?" header.)
+#define MSG_OUT_ENCODED_SIZE               \
+  (MSG_OUT_BUFFER_SIZE - MSG_HEADER_SIZE - \
+   ((MSG_OUT_BUFFER_SIZE / USB_PACKET_SIZE) - 1))
+
+// Maximum size of a C struct containing a decoded outgoing message.
+#define MSG_OUT_DECODED_SIZE (3 * 1024)
 
 #define msg_read(buf, len) msg_read_common('n', (buf), (len))
 #define msg_write(id, ptr) msg_write_common('n', (id), (ptr))
@@ -35,7 +54,14 @@ const uint8_t *msg_out_data(void);
 
 #if DEBUG_LINK
 
-#define MSG_DEBUG_OUT_SIZE (3 * 1024)
+// Buffer size for outgoing debuglink USB packets with headers.
+#define MSG_DEBUG_OUT_BUFFER_SIZE (3 * 1024)
+
+// Maximum size of an outgoing protobuf-encoded debug message without headers.
+// (Continuation packets have a one byte "?" header.)
+#define MSG_DEBUG_OUT_ENCODED_SIZE               \
+  (MSG_DEBUG_OUT_BUFFER_SIZE - MSG_HEADER_SIZE - \
+   ((MSG_DEBUG_OUT_BUFFER_SIZE / USB_PACKET_SIZE) - 1))
 
 #define msg_debug_read(buf, len) msg_read_common('d', (buf), (len))
 #define msg_debug_write(id, ptr) msg_write_common('d', (id), (ptr))
@@ -44,7 +70,7 @@ const uint8_t *msg_debug_out_data(void);
 #endif
 
 extern uint32_t msg_out_end;
-extern uint8_t msg_out[MSG_OUT_SIZE];
+extern uint8_t msg_out[MSG_OUT_BUFFER_SIZE];
 
 void msg_read_common(char type, const uint8_t *buf, uint32_t len);
 bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr);

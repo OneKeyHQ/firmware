@@ -18,7 +18,6 @@ dist: doc clean
 	$(SETUP) bdist_wheel
 
 doc:
-	make -C .. changelog
 	$(PYTHON) helper-scripts/make-options-rst.py
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
@@ -50,10 +49,24 @@ style:
 	isort --apply --recursive $(STYLE_TARGETS) --skip-glob "$(EXCLUDE_TARGETS)/*"
 	autoflake -i --remove-all-unused-imports -r $(STYLE_TARGETS) --exclude "$(EXCLUDE_TARGETS)"
 	flake8
+	pyright
 
 style_check:
 	black --check $(STYLE_TARGETS)
 	isort --check-only --recursive $(STYLE_TARGETS) --skip-glob "$(EXCLUDE_TARGETS)/*"
 	flake8
+	pyright
 
 .PHONY: all build install clean style style_check git-clean clean-build clean-pyc clean-test
+
+test:
+	pytest tests
+
+mypy:
+	mypy --config-file ./setup.cfg ./src/trezorlib/
+
+mypy_report:
+	mypy --config-file ./setup.cfg ./src/trezorlib/ --html-report mypy_report
+
+pyright:
+	pyright -p pyrightconfig.json

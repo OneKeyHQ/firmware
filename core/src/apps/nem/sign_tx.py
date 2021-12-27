@@ -1,7 +1,6 @@
 from trezor import wire
 from trezor.crypto.curve import ed25519
-from trezor.messages.NEMSignedTx import NEMSignedTx
-from trezor.messages.NEMSignTx import NEMSignTx
+from trezor.messages import NEMSignedTx, NEMSignTx
 
 from apps.common import seed
 from apps.common.keychain import with_slip44_keychain
@@ -72,7 +71,7 @@ async def sign_tx(ctx, msg: NEMSignTx, keychain):
 
     signature = ed25519.sign(node.private_key(), tx, NEM_HASH_ALG)
 
-    resp = NEMSignedTx()
-    resp.data = tx
-    resp.signature = signature
-    return resp
+    return NEMSignedTx(
+        data=tx,
+        signature=signature,
+    )

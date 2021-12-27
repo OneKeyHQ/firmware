@@ -18,6 +18,7 @@
 #include "ed25519.h"
 
 #include "ed25519-hash-custom.h"
+#include "memzero.h"
 
 /*
 	Generates a (extsk[0..31]) and aExt (extsk[32..63])
@@ -31,10 +32,10 @@ ed25519_extsk(hash_512bits extsk, const ed25519_secret_key sk) {
 }
 
 static void
-ed25519_hram(hash_512bits hram, const ed25519_signature RS, const ed25519_public_key pk, const unsigned char *m, size_t mlen) {
+ed25519_hram(hash_512bits hram, const ed25519_public_key R, const ed25519_public_key pk, const unsigned char *m, size_t mlen) {
 	ed25519_hash_context ctx;
 	ed25519_hash_init(&ctx);
-	ed25519_hash_update(&ctx, RS, 32);
+	ed25519_hash_update(&ctx, R, 32);
 	ed25519_hash_update(&ctx, pk, 32);
 	ed25519_hash_update(&ctx, m, mlen);
 	ed25519_hash_final(&ctx, hram);
@@ -46,12 +47,14 @@ ED25519_FN(ed25519_publickey) (const ed25519_secret_key sk, ed25519_public_key p
     ge25519 ALIGN(16) A;
     hash_512bits extsk = {0};
 
-    /* A = aB */
-    ed25519_extsk(extsk, sk);
+	ed25519_extsk(extsk, sk);
+	expand256_modm(a, extsk, 32);
+	memzero(&extsk, sizeof(extsk));
 
-    expand256_modm(a, extsk, 32);
-    ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
-    ge25519_pack(pk, &A);
+	/* A = aB */
+	ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
+	memzero(&a, sizeof(a));
+	ge25519_pack(pk, &A);
 }
 
 #if USE_CARDANO
@@ -66,7 +69,9 @@ ED25519_FN(ed25519_publickey_ext) (const ed25519_secret_key sk, const ed25519_se
 	memcpy(extsk, sk, 32);
 	memcpy(extsk+32, skext, 32);
 	expand256_modm(a, extsk, 32);
+	memzero(&extsk, sizeof(extsk));
 	ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
+	memzero(&a, sizeof(a));
 	ge25519_pack(pk, &A);
 }
 #endif
@@ -81,6 +86,7 @@ ED25519_FN(ed25519_cosi_sign) (const unsigned char *m, size_t mlen, const ed2551
 
 	/* r = nonce */
 	expand256_modm(r, extnonce, 32);
+	memzero(&extnonce, sizeof(extnonce));
 
 	/* S = H(R,A,m).. */
 	ed25519_hram(hram, R, pk, m, mlen);
@@ -88,10 +94,13 @@ ED25519_FN(ed25519_cosi_sign) (const unsigned char *m, size_t mlen, const ed2551
 
 	/* S = H(R,A,m)a */
 	expand256_modm(a, extsk, 32);
+	memzero(&extsk, sizeof(extsk));
 	mul256_modm(S, S, a);
+	memzero(&a, sizeof(a));
 
 	/* S = (r + H(R,A,m)a) */
 	add256_modm(S, S, r);
+	memzero(&r, sizeof(r));
 
 	/* S = (r + H(R,A,m)a) mod L */
 	contract256_modm(sig, S);
@@ -113,6 +122,7 @@ ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_sec
 	ed25519_hash_update(&ctx, m, mlen);
 	ed25519_hash_final(&ctx, hashr);
 	expand256_modm(r, hashr, 64);
+	memzero(&hashr, sizeof(hashr));
 
 	/* R = rB */
 	ge25519_scalarmult_base_niels(&R, ge25519_niels_base_multiples, r);
@@ -124,10 +134,13 @@ ED25519_FN(ed25519_sign) (const unsigned char *m, size_t mlen, const ed25519_sec
 
 	/* S = H(R,A,m)a */
 	expand256_modm(a, extsk, 32);
+	memzero(&extsk, sizeof(extsk));
 	mul256_modm(S, S, a);
+	memzero(&a, sizeof(a));
 
 	/* S = (r + H(R,A,m)a) */
 	add256_modm(S, S, r);
+	memzero(&r, sizeof(r));
 
   /* S = (r + H(R,A,m)a) mod L */
   contract256_modm(RS + 32, S);
@@ -154,6 +167,7 @@ ED25519_FN(ed25519_sign_ext) (const unsigned char *m, size_t mlen, const ed25519
 	ed25519_hash_update(&ctx, m, mlen);
 	ed25519_hash_final(&ctx, hashr);
 	expand256_modm(r, hashr, 64);
+	memzero(&hashr, sizeof(hashr));
 
 	/* R = rB */
 	ge25519_scalarmult_base_niels(&R, ge25519_niels_base_multiples, r);
@@ -165,10 +179,13 @@ ED25519_FN(ed25519_sign_ext) (const unsigned char *m, size_t mlen, const ed25519
 
 	/* S = H(R,A,m)a */
 	expand256_modm(a, extsk, 32);
+	memzero(&extsk, sizeof(extsk));
 	mul256_modm(S, S, a);
+	memzero(&a, sizeof(a));
 
 	/* S = (r + H(R,A,m)a) */
 	add256_modm(S, S, r);
+	memzero(&r, sizeof(r));
 
 	/* S = (r + H(R,A,m)a) mod L */
 	contract256_modm(RS + 32, S);
@@ -210,12 +227,14 @@ ED25519_FN(ed25519_scalarmult) (ed25519_public_key res, const ed25519_secret_key
 
 	ed25519_extsk(extsk, sk);
 	expand256_modm(a, extsk, 32);
+	memzero(&extsk, sizeof(extsk));
 
 	if (!ge25519_unpack_negative_vartime(&P, pk)) {
 		return -1;
 	}
 
 	ge25519_scalarmult(&A, &P, a);
+	memzero(&a, sizeof(a));
 	curve25519_neg(A.x, A.x);
 	ge25519_pack(res, &A);
 	return 0;
@@ -289,9 +308,11 @@ curve25519_scalarmult_basepoint(curve25519_key pk, const curve25519_key e) {
 	ec[31] |= 64;
 
 	expand_raw256_modm(s, ec);
+	memzero(&ec, sizeof(ec));
 
 	/* scalar * basepoint */
 	ge25519_scalarmult_base_niels(&p, ge25519_niels_base_multiples, s);
+	memzero(&s, sizeof(s));
 
 	/* u = (y + z) / (z - y) */
 	curve25519_add(yplusz, p.y, p.z);
@@ -311,6 +332,7 @@ curve25519_scalarmult(curve25519_key mypublic, const curve25519_key secret, cons
 	e[31] &= 0x7f;
 	e[31] |= 0x40;
 	curve25519_scalarmult_donna(mypublic, e, basepoint);
+	memzero(&e, sizeof(e));
 }
 
 #endif // ED25519_SUFFIX

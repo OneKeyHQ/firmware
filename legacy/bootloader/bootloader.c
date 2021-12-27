@@ -25,6 +25,7 @@
 
 #include "bootloader.h"
 #include "buttons.h"
+#include "compiler_traits.h"
 #include "layout.h"
 #include "layout_boot.h"
 #include "memory.h"
@@ -32,6 +33,7 @@
 #include "rng.h"
 #include "setup.h"
 #include "signatures.h"
+#include "supervise.h"
 #include "sys.h"
 #include "usb.h"
 #include "util.h"
@@ -105,6 +107,9 @@ static void __attribute__((noreturn)) load_app(int signed_firmware) {
 
 static void bootloader_loop(void) { usbLoop(); }
 
+#define DBGMCU_IDCODE 0xE0042000U
+const char *cpu_info;
+
 int main(void) {
   static bool force_boot = false;
   if (memcmp((uint8_t *)(ST_RAM_END - 4), "boot", 4) == 0) {
@@ -148,6 +153,15 @@ int main(void) {
 #endif
 
     memory_protect();
+
+    uint32_t idcode = *(uint32_t *)DBGMCU_IDCODE & 0xFFF;
+    if (idcode == 0x411) {
+      cpu_info = "STM32F2XX";
+    } else if (idcode == 0x413) {
+      cpu_info = "STM32F4XX";
+    } else {
+      cpu_info = "unkown-";
+    }
 
 #endif
     mpu_config_bootloader();

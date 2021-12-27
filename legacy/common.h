@@ -40,7 +40,7 @@ extern uint32_t g_uiFastPayFlag;
 extern uint8_t g_uchash_mode;
 extern uint8_t g_ucSignU2F;
 
-#define MSG_IN_BUFFER_SIZE 15 * 1024
+#define MSG_IN_BUFFER_SIZE 16 * 1024
 
 extern uint8_t msg_in_buffer[MSG_IN_BUFFER_SIZE];
 
@@ -62,8 +62,6 @@ error_shutdown(const char *line1, const char *line2, const char *line3,
        : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
 
 void hal_delay(uint32_t ms);
-
-void wait_random(void);
 
 void drbg_init(void);
 void drbg_reseed(const uint8_t *entropy, size_t len);

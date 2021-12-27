@@ -43,7 +43,7 @@ void fsm_msgNEMGetAddress(NEMGetAddress *msg) {
     strlcat(desc, ":", sizeof(desc));
 
     if (!fsm_layoutAddress(resp->address, desc, true, 0, msg->address_n,
-                           msg->address_n_count, false, NULL, 0, NULL)) {
+                           msg->address_n_count, false, NULL, 0, 0, NULL)) {
       return;
     }
   }
@@ -123,7 +123,12 @@ void fsm_msgNEMSignTx(NEMSignTx *msg) {
                          msg->transaction.address_n_count, NULL);
   if (!node) return;
 
-  hdnode_fill_public_key(node);
+  if (hdnode_fill_public_key(node) != 0) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Failed to derive public key"));
+    layoutHome();
+    return;
+  }
 
   const NEMTransactionCommon *common =
       msg->has_multisig ? &msg->multisig : &msg->transaction;
@@ -280,11 +285,9 @@ void fsm_msgNEMSignTx(NEMSignTx *msg) {
     }
   }
 
-  resp->has_data = true;
   resp->data.size =
       nem_transaction_end(&context, node->private_key, resp->signature.bytes);
 
-  resp->has_signature = true;
   resp->signature.size = sizeof(ed25519_signature);
 
   msg_write(MessageType_MessageType_NEMSignedTx, resp);
@@ -336,7 +339,6 @@ void fsm_msgNEMDecryptMessage(NEMDecryptMessage *msg) {
     return;
   }
 
-  resp->has_payload = true;
   resp->payload.size = NEM_DECRYPTED_SIZE(resp->payload.bytes, size);
 
   layoutNEMTransferPayload(resp->payload.bytes, resp->payload.size, true);

@@ -16,36 +16,41 @@
 
 import os
 import time
+from typing import TYPE_CHECKING, Callable, Optional
 
 from . import messages
 from .exceptions import Cancelled
 from .tools import expect, session
 
+if TYPE_CHECKING:
+    from .client import TrezorClient
+    from .protobuf import MessageType
+
+
 RECOVERY_BACK = "\x08"  # backspace character, sent literally
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
 def apply_settings(
-    client,
-    label=None,
-    language=None,
-    use_passphrase=None,
-    homescreen=None,
-    auto_lock_delay_ms=None,
-    display_rotation=None,
-    passphrase_always_on_device: bool = None,
-    fastpay_pin: bool = None,
-    use_ble: bool = None,
-    use_se: bool = None,
-    is_bixinapp: bool = None,
-    fastpay_confirm: bool = None,
-    fastpay_money_limit: int = None,
-    fastpay_times: int = None,
-    safety_checks=None,
-    experimental_features=None,
-):
-
+    client: "TrezorClient",
+    label: Optional[str] = None,
+    language: Optional[str] = None,
+    use_passphrase: Optional[bool] = None,
+    homescreen: Optional[bytes] = None,
+    passphrase_always_on_device: Optional[bool] = None,
+    auto_lock_delay_ms: Optional[int] = None,
+    display_rotation: Optional[int] = None,
+    safety_checks: Optional[messages.SafetyCheckLevel] = None,
+    use_ble: Optional[bool] = None,
+    use_se: Optional[bool] = None,
+    is_bixinapp: Optional[bool] = None,
+    fastpay_pin: Optional[bool] = None,
+    fastpay_confirm: Optional[bool] = None,
+    fastpay_money_limit: Optional[int] = None,
+    fastpay_times: Optional[int] = None,
+    experimental_features: Optional[bool] = None,
+) -> "MessageType":
     settings = messages.ApplySettings(
         label=label,
         language=language,
@@ -70,41 +75,43 @@ def apply_settings(
     return out
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
-def apply_flags(client, flags):
+def apply_flags(client: "TrezorClient", flags: int) -> "MessageType":
     out = client.call(messages.ApplyFlags(flags=flags))
     client.refresh_features()
     return out
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
-def change_pin(client, remove=False):
+def change_pin(client: "TrezorClient", remove: bool = False) -> "MessageType":
     ret = client.call(messages.ChangePin(remove=remove))
     client.refresh_features()
     return ret
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
-def change_wipe_code(client, remove=False):
+def change_wipe_code(client: "TrezorClient", remove: bool = False) -> "MessageType":
     ret = client.call(messages.ChangeWipeCode(remove=remove))
     client.refresh_features()
     return ret
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
-def sd_protect(client, operation):
+def sd_protect(
+    client: "TrezorClient", operation: messages.SdProtectOperationType
+) -> "MessageType":
     ret = client.call(messages.SdProtect(operation=operation))
     client.refresh_features()
     return ret
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
-def wipe(client):
+def wipe(client: "TrezorClient") -> "MessageType":
     ret = client.call(messages.WipeDevice())
     client.init_device()
     return ret
@@ -112,17 +119,17 @@ def wipe(client):
 
 @session
 def recover(
-    client,
-    word_count=24,
-    passphrase_protection=False,
-    pin_protection=True,
-    label=None,
-    language="en-US",
-    input_callback=None,
-    type=messages.RecoveryDeviceType.ScrambledWords,
-    dry_run=False,
-    u2f_counter=None,
-):
+    client: "TrezorClient",
+    word_count: int = 24,
+    passphrase_protection: bool = False,
+    pin_protection: bool = True,
+    label: Optional[str] = None,
+    language: str = "en-US",
+    input_callback: Optional[Callable] = None,
+    type: messages.RecoveryDeviceType = messages.RecoveryDeviceType.ScrambledWords,
+    dry_run: bool = False,
+    u2f_counter: Optional[int] = None,
+) -> "MessageType":
     if client.features.model == "1" and input_callback is None:
         raise RuntimeError("Input callback required for Trezor One")
 
@@ -153,6 +160,7 @@ def recover(
 
     while isinstance(res, messages.WordRequest):
         try:
+            assert input_callback is not None
             inp = input_callback(res.type)
             res = client.call(messages.WordAck(word=inp))
         except Cancelled:
@@ -162,21 +170,21 @@ def recover(
     return res
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
 def reset(
-    client,
-    display_random=False,
-    strength=None,
-    passphrase_protection=False,
-    pin_protection=True,
-    label=None,
-    language="en-US",
-    u2f_counter=0,
-    skip_backup=False,
-    no_backup=False,
-    backup_type=messages.BackupType.Bip39,
-):
+    client: "TrezorClient",
+    display_random: bool = False,
+    strength: Optional[int] = None,
+    passphrase_protection: bool = False,
+    pin_protection: bool = True,
+    label: Optional[str] = None,
+    language: str = "en-US",
+    u2f_counter: int = 0,
+    skip_backup: bool = False,
+    no_backup: bool = False,
+    backup_type: messages.BackupType = messages.BackupType.Bip39,
+) -> "MessageType":
     if client.features.initialized:
         raise RuntimeError(
             "Device is initialized already. Call wipe_device() and try again."
@@ -213,29 +221,33 @@ def reset(
     return ret
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 @session
-def backup(client):
+def backup(client: "TrezorClient") -> "MessageType":
     ret = client.call(messages.BackupDevice())
     client.refresh_features()
     return ret
 
 
-@expect(messages.Success, field="message")
-def cancel_authorization(client):
+@expect(messages.Success, field="message", ret_type=str)
+def cancel_authorization(client: "TrezorClient") -> "MessageType":
     return client.call(messages.CancelAuthorization())
 
 
-@expect(messages.BixinBackupAck, field="data")
-def se_backup(client):
+@expect(messages.BixinBackupAck, field="data", ret_type=bytes)
+def se_backup(client: "TrezorClient") -> "MessageType":
     ret = client.call(messages.BixinBackupRequest())
     return ret
 
 
-@expect(messages.Success, field="message")
+@expect(messages.Success, field="message", ret_type=str)
 def se_restore(
-    client, data, language="en-US", label="BiXin Key", passphrase_protection=True
-):
+    client: "TrezorClient",
+    data: str,
+    language: str = "en-US",
+    label: str = "BiXin Key",
+    passphrase_protection: bool = True,
+) -> "MessageType":
     ret = client.call(
         messages.BixinRestoreRequest(
             data=bytes.fromhex(data),
@@ -248,12 +260,18 @@ def se_restore(
 
 
 @expect(messages.BixinVerifyDeviceAck)
-def se_verify(client, data):
+def se_verify(client: "TrezorClient", data: bytes) -> "MessageType":
     ret = client.call(messages.BixinVerifyDeviceRequest(data=data))
     return ret
 
 
-@expect(messages.Success, field="message")
-def reboot(client):
+@expect(messages.Success, field="message", ret_type=str)
+def reboot(client: "TrezorClient"):
     ret = client.call(messages.BixinReboot())
     return ret
+
+
+@session
+@expect(messages.Success, field="message", ret_type=str)
+def reboot_to_bootloader(client: "TrezorClient") -> "MessageType":
+    return client.call(messages.RebootToBootloader())

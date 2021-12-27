@@ -8,21 +8,19 @@ import gc
 
 from trezor import utils
 
-from apps.monero.layout import confirms
+from apps.monero import layout
 from apps.monero.xmr import crypto
 
 from .state import State
 
 if False:
-    from trezor.messages.MoneroTransactionAllOutSetAck import (
-        MoneroTransactionAllOutSetAck,
-    )
+    from trezor.messages import MoneroTransactionAllOutSetAck
 
 
 async def all_outputs_set(state: State) -> MoneroTransactionAllOutSetAck:
     state.mem_trace(0)
 
-    await confirms.transaction_step(state, state.STEP_ALL_OUT)
+    await layout.transaction_step(state, state.STEP_ALL_OUT)
     state.mem_trace(1)
 
     _validate(state)
@@ -48,10 +46,8 @@ async def all_outputs_set(state: State) -> MoneroTransactionAllOutSetAck:
     # transaction prefix matches expected transaction prefix sent in the
     # init step.
 
-    from trezor.messages.MoneroRingCtSig import MoneroRingCtSig
-    from trezor.messages.MoneroTransactionAllOutSetAck import (
-        MoneroTransactionAllOutSetAck,
-    )
+    from trezor.messages import MoneroRingCtSig
+    from trezor.messages import MoneroTransactionAllOutSetAck
 
     # Initializes RCTsig structure (fee, tx prefix hash, type)
     rv_pb = MoneroRingCtSig(
@@ -91,18 +87,12 @@ def _validate(state: State):
     # Fee test
     if state.fee != (state.summary_inputs_money - state.summary_outs_money):
         raise ValueError(
-            "Fee invalid %s vs %s, out: %s"
-            % (
-                state.fee,
-                state.summary_inputs_money - state.summary_outs_money,
-                state.summary_outs_money,
-            )
+            f"Fee invalid {state.fee} vs {state.summary_inputs_money - state.summary_outs_money}, out: {state.summary_outs_money}"
         )
 
     if state.summary_outs_money > state.summary_inputs_money:
         raise ValueError(
-            "Transaction inputs money (%s) less than outputs money (%s)"
-            % (state.summary_inputs_money, state.summary_outs_money)
+            f"Transaction inputs money ({state.summary_inputs_money}) less than outputs money ({state.summary_outs_money})"
         )
 
 

@@ -1,7 +1,6 @@
 from micropython import const
 
-from storage import common, recovery_shares
-from trezor.crypto import slip39
+from storage import common
 
 # Namespace:
 _NAMESPACE = common.APP_RECOVERY
@@ -22,10 +21,6 @@ _SLIP39_GROUP_COUNT        = const(0x07)  # int
 
 # Default values:
 _DEFAULT_SLIP39_GROUP_COUNT = const(1)
-
-
-if False:
-    from typing import List, Optional
 
 
 def _require_progress() -> None:
@@ -56,7 +51,7 @@ def set_slip39_identifier(identifier: int) -> None:
     common.set_uint16(_NAMESPACE, _SLIP39_IDENTIFIER, identifier)
 
 
-def get_slip39_identifier() -> Optional[int]:
+def get_slip39_identifier() -> int | None:
     _require_progress()
     return common.get_uint16(_NAMESPACE, _SLIP39_IDENTIFIER)
 
@@ -66,7 +61,7 @@ def set_slip39_iteration_exponent(exponent: int) -> None:
     common.set_uint8(_NAMESPACE, _SLIP39_ITERATION_EXPONENT, exponent)
 
 
-def get_slip39_iteration_exponent() -> Optional[int]:
+def get_slip39_iteration_exponent() -> int | None:
     _require_progress()
     return common.get_uint8(_NAMESPACE, _SLIP39_ITERATION_EXPONENT)
 
@@ -90,28 +85,32 @@ def set_slip39_remaining_shares(shares_remaining: int, group_index: int) -> None
     0x10 (16) was chosen as the default value because it's the max
     share count for a group.
     """
+    from trezor.crypto.slip39 import MAX_SHARE_COUNT
+
     _require_progress()
     remaining = common.get(_NAMESPACE, _REMAINING)
     group_count = get_slip39_group_count()
     if not group_count:
         raise RuntimeError
     if remaining is None:
-        remaining = bytearray([slip39.MAX_SHARE_COUNT] * group_count)
+        remaining = bytearray([MAX_SHARE_COUNT] * group_count)
     remaining = bytearray(remaining)
     remaining[group_index] = shares_remaining
     common.set(_NAMESPACE, _REMAINING, remaining)
 
 
-def get_slip39_remaining_shares(group_index: int) -> Optional[int]:
+def get_slip39_remaining_shares(group_index: int) -> int | None:
+    from trezor.crypto.slip39 import MAX_SHARE_COUNT
+
     _require_progress()
     remaining = common.get(_NAMESPACE, _REMAINING)
-    if remaining is None or remaining[group_index] == slip39.MAX_SHARE_COUNT:
+    if remaining is None or remaining[group_index] == MAX_SHARE_COUNT:
         return None
     else:
         return remaining[group_index]
 
 
-def fetch_slip39_remaining_shares() -> Optional[List[int]]:
+def fetch_slip39_remaining_shares() -> list[int] | None:
     _require_progress()
     remaining = common.get(_NAMESPACE, _REMAINING)
     if not remaining:
@@ -124,6 +123,8 @@ def fetch_slip39_remaining_shares() -> Optional[List[int]]:
 
 
 def end_progress() -> None:
+    from . import recovery_shares
+
     _require_progress()
     common.delete(_NAMESPACE, _IN_PROGRESS)
     common.delete(_NAMESPACE, _DRY_RUN)
