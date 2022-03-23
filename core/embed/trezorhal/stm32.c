@@ -29,14 +29,18 @@ const uint8_t APBPrescTable[8] = {0, 0, 0, 0, 1, 2, 3, 4};
 #define CORE_CLOCK_MHZ 168U
 #elif STM32F405xx
 #define CORE_CLOCK_MHZ 120U
+#elif STM32H747xx
+#define CORE_CLOCK_MHZ 400U
 #else
 #error Unsupported MCU
 #endif
 
-uint32_t SystemCoreClock = CORE_CLOCK_MHZ * 1000000U;
-
 #pragma GCC optimize( \
     "no-stack-protector")  // applies to all functions in this file
+
+#if defined(STM32F427xx) || defined(STM32F405xx)
+
+uint32_t SystemCoreClock = CORE_CLOCK_MHZ * 1000000U;
 
 void SystemInit(void) {
   // set flash wait states for an increasing HCLK frequency -- reference RM0090
@@ -93,3 +97,14 @@ void PVD_IRQHandler(void) {
   TIM1->CCR1 = 0;  // turn off display backlight
   shutdown_privileged();
 }
+#elif defined(STM32H747xx)
+
+// clang-format off
+
+void PVD_AVD_IRQHandler(void) {
+  TIM1->CCR1 = 0;  // turn off display backlight
+  HAL_PWR_PVD_IRQHandler();
+  // shutdown_privileged();
+}
+
+#endif

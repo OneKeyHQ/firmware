@@ -7,6 +7,7 @@ BITCOIN_ONLY = ARGUMENTS.get('BITCOIN_ONLY', '0')
 EVERYTHING = BITCOIN_ONLY != '1'
 TREZOR_MODEL = ARGUMENTS.get('TREZOR_MODEL', 'T')
 UI2 = ARGUMENTS.get('UI2', '0') == '1' or TREZOR_MODEL == '1'
+PRODUCTION_MODEL = ARGUMENTS.get('PRODUCTION_MODEL', 'H')
 
 FEATURE_FLAGS = {
     "RDI": True,
@@ -151,7 +152,7 @@ if FEATURE_FLAGS["SECP256K1_ZKP"]:
 SOURCE_MOD += [
     'embed/extmod/modtrezorio/modtrezorio.c',
 ]
-if TREZOR_MODEL == "T":
+if TREZOR_MODEL == 'T':
     SOURCE_MOD += [
         'embed/extmod/modtrezorio/ff.c',
         'embed/extmod/modtrezorio/ffunicode.c',
@@ -167,6 +168,9 @@ CPPDEFINES_MOD += [
     'TREZOR_FONT_MONO_ENABLE',
 ]
 SOURCE_MOD += [
+    'embed/lvgl/ui_font_siyuan32.c',
+    'embed/lvgl/modlvgldrv.c',
+    'embed/extmod/modtrezorui/mipi_lcd.c',
     'embed/extmod/modtrezorui/display.c',
     'embed/extmod/modtrezorui/font_bitmap.c',
     'embed/extmod/modtrezorui/font_roboto_bold_20.c',
@@ -176,7 +180,7 @@ SOURCE_MOD += [
     'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
     'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
     'embed/extmod/modtrezorui/modtrezorui.c',
-    'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+    #'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
     'vendor/micropython/lib/uzlib/adler32.c',
     'vendor/micropython/lib/uzlib/crc32.c',
     'vendor/micropython/lib/uzlib/tinflate.c',
@@ -323,62 +327,159 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/py/warning.c',
 ]
 
+SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
+SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
+SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c'))
+SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
+
+LVGL_BINDING_DIR = 'vendor/lvgl_mp'
+LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
+LVGL_BUILD = 'build/firmware'
+INC = f'-I{LVGL_BINDING_DIR}'
+INC += f' -Iembed/lvgl'
+LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
+LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
+LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
+LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -DLV_CONF_INCLUDE_SIMPLE -x c'
+
+LV_INC = [
+    f'{LVGL_DIR}/lvgl.h',
+    'embed/lvgl/lv_conf.h',
+]
+
+env1 = Environment(ENV=os.environ)
+
+env1.Command(
+    target='lv_mpy.c',
+    source=LV_INC,
+    action=[
+        f'rm {LVGL_BINDING_DIR}/lv_conf.h | true',
+        f'arm-none-eabi-gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
+        f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
+        f'rm ./lextab.py ./yacctab.py',
+    ],
+)
+
+# LVGL
+SOURCE_MOD += [
+    'lv_mpy.c',
+]
+
 SOURCE_MICROPYTHON_SPEED = [
     'vendor/micropython/py/gc.c',
     'vendor/micropython/py/pystack.c',
     'vendor/micropython/py/vm.c',
 ]
 
-SOURCE_STMHAL = [
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sram.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_fmc.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c',
-]
+if PRODUCTION_MODEL == 'H':
+    SOURCE_STMHAL = [
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sram.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma2d.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
+    ]
 
-SOURCE_FIRMWARE = [
-    'embed/firmware/bl_check.c',
-    'embed/firmware/delay.c',
-    'embed/firmware/header.S',
-    'embed/firmware/main.c',
-    'embed/firmware/mphalport.c',
-    'embed/firmware/nlrthumb.c',
-    'embed/firmware/startup.S',
-]
+    SOURCE_FIRMWARE = [
+        'embed/firmware/bl_check.c',
+        'embed/firmware/delay.c',
+        'embed/firmware/header.S',
+        'embed/firmware/main.c',
+        'embed/firmware/mphalport.c',
+        'embed/firmware/nlrthumb.c',
+        'embed/firmware/startup_stm32h747xx.s',        
 
-SOURCE_TREZORHAL = [
-    'embed/trezorhal/common.c',
-    'embed/trezorhal/dma.c',
-    'embed/trezorhal/flash.c',
-    'embed/trezorhal/mini_printf.c',
-    'embed/trezorhal/mpu.c',
-    'embed/trezorhal/random_delays.c',
-    'embed/trezorhal/rng.c',
-    'embed/trezorhal/stm32.c',
-    'embed/trezorhal/systick.c',
-    'embed/trezorhal/usb.c',
-    'embed/trezorhal/usbd_conf.c',
-    'embed/trezorhal/usbd_core.c',
-    'embed/trezorhal/usbd_ctlreq.c',
-    'embed/trezorhal/usbd_ioreq.c',
-    'embed/trezorhal/util.s',
-    'embed/trezorhal/vectortable.s',
-]
+    ]
+    SOURCE_TREZORHAL = [
+        'embed/trezorhal/system_stm32h7xx.c',
+        'embed/trezorhal/common.c',
+        #'embed/trezorhal/dma.c',
+        'embed/trezorhal/flash.c',
+        'embed/trezorhal/qspi_flash.c',
+        'embed/trezorhal/mini_printf.c',
+        'embed/trezorhal/mpu.c',
+        'embed/trezorhal/random_delays.c',
+        'embed/trezorhal/rng.c',
+        'embed/trezorhal/stm32.c',
+        'embed/trezorhal/systick.c',
+        #'embed/trezorhal/timer.c',
+        'embed/trezorhal/usb.c',
+        'embed/trezorhal/usbd_conf.c',
+        'embed/trezorhal/usbd_core.c',
+        'embed/trezorhal/usbd_ctlreq.c',
+        'embed/trezorhal/usbd_ioreq.c',
+        'embed/trezorhal/util.s',
+        'embed/trezorhal/vectortable.s',
+    ]
+else:
+    SOURCE_STMHAL = [
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sram.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_fmc.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c',
+    ]
+
+    SOURCE_FIRMWARE = [
+        'embed/firmware/bl_check.c',
+        'embed/firmware/delay.c',
+        'embed/firmware/header.S',
+        'embed/firmware/main.c',
+        'embed/firmware/mphalport.c',
+        'embed/firmware/nlrthumb.c',
+        'embed/firmware/startup.S',
+    ]
+
+    SOURCE_TREZORHAL = [
+        'embed/trezorhal/common.c',
+        'embed/trezorhal/dma.c',
+        'embed/trezorhal/flash.c',
+        'embed/trezorhal/mini_printf.c',
+        'embed/trezorhal/mpu.c',
+        'embed/trezorhal/random_delays.c',
+        'embed/trezorhal/rng.c',
+        'embed/trezorhal/stm32.c',
+        'embed/trezorhal/systick.c',
+        'embed/trezorhal/usb.c',
+        'embed/trezorhal/usbd_conf.c',
+        'embed/trezorhal/usbd_core.c',
+        'embed/trezorhal/usbd_ctlreq.c',
+        'embed/trezorhal/usbd_ioreq.c',
+        'embed/trezorhal/util.s',
+        'embed/trezorhal/vectortable.s',
+    ]
 if TREZOR_MODEL == 'T':
     SOURCE_TREZORHAL += [
         'embed/trezorhal/sbu.c',
@@ -411,7 +512,7 @@ if FEATURE_FLAGS["SYSTEM_VIEW"]:
     CPPDEFINES_MOD += ['SYSTEM_VIEW']
     CCFLAGS_MOD += '-DSYSTEM_VIEW '
 
-SOURCE_QSTR = SOURCE_MOD + SOURCE_MICROPYTHON + SOURCE_MICROPYTHON_SPEED
+SOURCE_QSTR = SOURCE_MOD + SOURCE_MICROPYTHON + SOURCE_MICROPYTHON_SPEED + SOURCE_LVGL
 
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s -DPYOPT=%s -DBITCOIN_ONLY=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0'), PYOPT, BITCOIN_ONLY))
 
@@ -430,9 +531,17 @@ env.Replace(
     OBJCOPY='arm-none-eabi-objcopy', )
 
 env.Replace(
-    TREZOR_MODEL=TREZOR_MODEL, )
+    TREZOR_MODEL=TREZOR_MODEL,
+    PRODUCTION_MODEL=ord(PRODUCTION_MODEL), )
 
-if TREZOR_MODEL == 'T':
+if PRODUCTION_MODEL == 'H':
+    CPU_ASFLAGS = '-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16 '
+    CPU_CCFLAGS = '-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16 -mtune=cortex-m7 --specs=nano.specs '
+    CPU_MODEL   = 'STM32H747xx'
+    CORE_MODEL = 'CORE_CM7'
+    LD_VARIANT  = ''
+    RUST_TARGET = 'thumbv7em-none-eabihf'
+elif TREZOR_MODEL == 'T':
     CPU_ASFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16'
     CPU_CCFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mtune=cortex-m4 '
     CPU_MODEL   = 'STM32F427xx'
@@ -447,37 +556,75 @@ elif TREZOR_MODEL == '1':
 else:
     raise ValueError('Unknown Trezor model')
 
-env.Replace(
-    COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
-    CCFLAGS='$COPT '
-    '-g3 '
-    '-nostdlib '
-    '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
-    '-fsingle-precision-constant -fdata-sections -ffunction-sections '
-    '-ffreestanding '
-    '-fstack-protector-all '
-    + CPU_CCFLAGS + CCFLAGS_MOD,
-    CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
-    LINKFLAGS='-T embed/firmware/memory_${TREZOR_MODEL}%s.ld -Wl,--gc-sections -Wl,-Map=build/firmware/firmware.map -Wl,--warn-common' % LD_VARIANT,
-    CPPPATH=[
-        '.',
-        'embed/rust',
-        'embed/firmware',
-        'embed/trezorhal',
-        'embed/extmod/modtrezorui',
-        'vendor/micropython',
-        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Inc',
-        'vendor/micropython/lib/stm32lib/CMSIS/STM32F4xx/Include',
-        'vendor/micropython/lib/cmsis/inc',
-    ] + CPPPATH_MOD,
-    CPPDEFINES=[
-        ('TREZOR_MODEL', '$TREZOR_MODEL'),
-        CPU_MODEL,
-        'USE_HAL_DRIVER',
-        ('STM32_HAL_H', '"<stm32f4xx.h>"'),
-    ] + CPPDEFINES_MOD,
-    ASFLAGS=CPU_ASFLAGS,
-    ASPPFLAGS='$CFLAGS $CCFLAGS', )
+if PRODUCTION_MODEL == 'H':
+    env.Replace(
+        COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
+        CCFLAGS='$COPT '
+        '-g3 '
+        '-nostdlib '
+        '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
+        '-fsingle-precision-constant -fdata-sections -ffunction-sections '
+        '-ffreestanding '
+        '-fstack-protector-all '
+        + CPU_CCFLAGS + CCFLAGS_MOD,
+        CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
+        LINKFLAGS='-T embed/firmware/memory_H%s.ld -Wl,--gc-sections -Wl,-Map=build/firmware/firmware.map -Wl,--warn-common' % LD_VARIANT,
+        CPPPATH=[
+            '.',
+            'embed/rust',
+            'embed/firmware',
+            'embed/trezorhal',
+            'embed/extmod/modtrezorui',
+            'vendor/micropython',
+            'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc',
+            'vendor/micropython/lib/stm32lib/CMSIS/STM32H7xx/Include',
+            'vendor/micropython/lib/cmsis/inc',
+            'embed/lvgl',
+            'vendor/lvgl_mp/lvgl',
+        ] + CPPPATH_MOD,
+        CPPDEFINES=[
+            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
+            CPU_MODEL,
+            CORE_MODEL,
+            'USE_HAL_DRIVER',
+            'LV_CONF_INCLUDE_SIMPLE',
+            ('STM32_HAL_H', '"<stm32h7xx.h>"'),
+        ] + CPPDEFINES_MOD,
+        ASFLAGS=CPU_ASFLAGS,
+        ASPPFLAGS='$CFLAGS $CCFLAGS', )
+else:
+    env.Replace(
+        COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
+        CCFLAGS='$COPT '
+        '-g3 '
+        '-nostdlib '
+        '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
+        '-fsingle-precision-constant -fdata-sections -ffunction-sections '
+        '-ffreestanding '
+        '-fstack-protector-all '
+        + CPU_CCFLAGS + CCFLAGS_MOD,
+        CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
+        LINKFLAGS='-T embed/firmware/memory_${TREZOR_MODEL}%s.ld -Wl,--gc-sections -Wl,-Map=build/firmware/firmware.map -Wl,--warn-common' % LD_VARIANT,
+        CPPPATH=[
+            '.',
+            'embed/rust',
+            'embed/firmware',
+            'embed/trezorhal',
+            'embed/extmod/modtrezorui',
+            'vendor/micropython',
+            'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Inc',
+            'vendor/micropython/lib/stm32lib/CMSIS/STM32F4xx/Include',
+            'vendor/micropython/lib/cmsis/inc',
+        ] + CPPPATH_MOD,
+        CPPDEFINES=[
+            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            CPU_MODEL,
+            'USE_HAL_DRIVER',
+            ('STM32_HAL_H', '"<stm32f4xx.h>"'),
+        ] + CPPDEFINES_MOD,
+        ASFLAGS=CPU_ASFLAGS,
+        ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
 env.Replace(
     HEADERTOOL='tools/headertool.py',
@@ -579,6 +726,8 @@ if FROZEN:
     else:
         raise ValueError('Unknown Trezor model')
 
+    SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'lvglui/*.py'))
+    
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/wire/*.py'))
 
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'storage/*.py'))
@@ -752,6 +901,7 @@ obj_program.extend(env.Object(source=SOURCE_FIRMWARE))
 obj_program.extend(env.Object(source=SOURCE_MICROPYTHON))
 obj_program.extend(env.Object(source=SOURCE_MICROPYTHON_SPEED, COPT='-O3'))
 obj_program.extend(env.Object(source=SOURCE_STMHAL))
+obj_program.extend(env.Object(source=SOURCE_LVGL))
 obj_program.extend(env.Object(source=SOURCE_TREZORHAL))
 if FROZEN:
     obj_program.extend(env.Object(source=source_mpyc))
@@ -782,12 +932,21 @@ program_elf = env.Command(
     target='firmware.elf',
     source=obj_program,
     action=
-    '$LINK -o $TARGET $CCFLAGS $CFLAGS $SOURCES $LINKFLAGS -lc_nano -lm -lgcc',
+    '$LINK -o $TARGET $CCFLAGS $CFLAGS $SOURCES $LINKFLAGS -lc_nano -lnosys -lm -lgcc',
 )
 
 env.Depends(program_elf, rust)
 
-if TREZOR_MODEL == 'T':
+if PRODUCTION_MODEL == 'H':
+    action_bin=[
+        '$OBJCOPY -O binary -j .vendorheader -j .header -j .flash -j .data --pad-to 0x081E0000 $SOURCE ${TARGET}.p1',
+        '$OBJCOPY -O binary -j .flash2 $SOURCE ${TARGET}.p2',
+        '$CAT ${TARGET}.p1 ${TARGET}.p2 > $TARGET',
+        '$HEADERTOOL -h $TARGET ' + ('-D' if ARGUMENTS.get('PRODUCTION', '0') == '0' else ''),
+        '$DD if=$TARGET of=${TARGET}.p1 skip=0 bs=128k count=13',
+    ]
+
+elif TREZOR_MODEL == 'T':
     action_bin=[
         '$OBJCOPY -O binary -j .vendorheader -j .header -j .flash -j .data --pad-to 0x08100000 $SOURCE ${TARGET}.p1',
         '$OBJCOPY -O binary -j .flash2 $SOURCE ${TARGET}.p2',

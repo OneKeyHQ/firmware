@@ -23,9 +23,16 @@
 #include <stdint.h>
 #include "secbool.h"
 
+#if PRODUCTION_MODEL== 'H'
+#define BOARDLOADER_START 0x08000000
+#define BOOTLOADER_START 0x08020000
+// #define BOOTLOADER_START 0x90000000
+#define FIRMWARE_START 0x08040000
+#else
 #define BOARDLOADER_START 0x08000000
 #define BOOTLOADER_START 0x08020000
 #define FIRMWARE_START 0x08040000
+#endif
 
 #define IMAGE_HEADER_SIZE 0x400  // size of the bootloader or firmware header
 #define IMAGE_SIG_SIZE 65

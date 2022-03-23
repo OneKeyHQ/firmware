@@ -9,6 +9,8 @@ from trezor.messages import EntropyAck, EntropyRequest, Success
 from trezor.ui.layouts import confirm_backup, confirm_reset_device
 from trezor.ui.loader import LoadingAnimation
 
+from lvglui.lv_layouts import lv_confirm_backup, lv_confirm_reset_device
+
 from .. import backup_types
 from ..change_pin import request_pin_confirm
 from . import layout
@@ -33,7 +35,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         prompt = "Create a new wallet\nwith Super Shamir?"
     else:
         prompt = "Do you want to create\na new wallet?"
-    await confirm_reset_device(ctx, prompt)
+	#await confirm_reset_device(ctx, prompt)
+    await lv_confirm_reset_device(ctx, prompt)
     await LoadingAnimation()
 
     # wipe storage to make sure the device is in a clear state
@@ -76,7 +79,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
 
     # If doing backup, ask the user to confirm.
     if perform_backup:
-        perform_backup = await confirm_backup(ctx)
+        # perform_backup = await confirm_backup(ctx)
+        perform_backup = await lv_confirm_backup(ctx)
 
     # generate and display backup information for the master secret
     if perform_backup:

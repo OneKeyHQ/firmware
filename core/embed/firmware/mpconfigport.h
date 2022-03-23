@@ -166,14 +166,23 @@
 // uncomment DEST_RTT and comment DEST_SYSTEMVIEW
 // if you want to print to RTT instead of SystemView
 // OpenOCD supports only the RTT output method
-// #define SYSTEMVIEW_DEST_RTT         (1)
-#define SYSTEMVIEW_DEST_SYSTEMVIEW  (1)
+#define SYSTEMVIEW_DEST_RTT         (1)
+// #define SYSTEMVIEW_DEST_SYSTEMVIEW  (1)
 #endif
 
 #define MP_STATE_PORT MP_STATE_VM
 
 // ============= this ends common config section ===================
 
+#define DISP_DRV_ROOTS void* disp_drv_fb[2];
+
+#ifndef MICROPY_INCLUDED_PY_MPSTATE_H
+#define MICROPY_INCLUDED_PY_MPSTATE_H
+#include "src/misc/lv_gc.h"
+#undef MICROPY_INCLUDED_PY_MPSTATE_H
+#else
+#include "src/misc/lv_gc.h"
+#endif
 
 // type definitions for the specific machine
 
@@ -199,8 +208,8 @@ typedef long mp_off_t;
     } while (0);
 
 #define MICROPY_HW_BOARD_NAME "TREZORv2"
-#define MICROPY_HW_MCU_NAME "STM32F427xx"
-#define MICROPY_HW_HAS_SDCARD 1
+#define MICROPY_HW_MCU_NAME "STM3h747xx"
+#define MICROPY_HW_HAS_SDCARD 0
 
 // There is no classical C heap in bare-metal ports, only Python
 // garbage-collected heap. For completeness, emulate C heap via
@@ -211,8 +220,18 @@ typedef long mp_off_t;
 #define realloc(p, n) m_realloc(p, n)
 
 #define MICROPY_PORT_ROOT_POINTERS \
+    LV_ROOTS; \
+    DISP_DRV_ROOTS; \
+    void *mp_lv_user_data; \
     mp_obj_t trezorconfig_ui_wait_callback; \
 
+extern const struct _mp_obj_module_t mp_module_lvgl;
+extern const struct _mp_obj_module_t mp_module_lvgldrv;
+
+#define MICROPY_PORT_BUILTIN_MODULES \
+   { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), (mp_obj_t)&mp_module_lvgl }, \
+   { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldrv },
+   
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>
 

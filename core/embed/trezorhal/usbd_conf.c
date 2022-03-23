@@ -85,15 +85,20 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
 
   if(hpcd->Instance == USB_OTG_FS)
   {
+#if defined(STM32H747xx)
+    uint32_t pin_alternate = GPIO_AF10_OTG2_FS;
+#else
+    uint32_t pin_alternate = GPIO_AF10_OTG_FS;
+#endif
     /* Configure USB FS GPIOs */
     __HAL_RCC_GPIOA_CLK_ENABLE();
-
+ 
     /* Configure DM DP Pins */
     GPIO_InitStruct.Pin = (GPIO_PIN_11 | GPIO_PIN_12);
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_FS;
+    GPIO_InitStruct.Alternate = pin_alternate;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 	/* Configure VBUS Pin */
@@ -111,7 +116,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     GPIO_InitStruct.Pin = GPIO_PIN_10;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_FS;
+    GPIO_InitStruct.Alternate = pin_alternate;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 #endif
 
@@ -127,6 +132,12 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
 #if defined(USE_USB_HS)
   else if(hpcd->Instance == USB_OTG_HS)
   {
+#if defined(STM32H747xx)
+    uint32_t pin_alternate = GPIO_AF12_OTG1_FS;
+#else
+    uint32_t pin_alternate = GPIO_AF12_OTG_HS_FS;
+#endif
+
 #if defined(USE_USB_HS_IN_FS)
 
     /* Configure USB FS GPIOs */
@@ -137,7 +148,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF12_OTG_HS_FS;
+    GPIO_InitStruct.Alternate = pin_alternate;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 #if defined(MICROPY_HW_USB_VBUS_DETECT_PIN)
@@ -146,7 +157,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF12_OTG_HS_FS;
+    GPIO_InitStruct.Alternate = pin_alternate;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 #endif
 
@@ -156,7 +167,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF12_OTG_HS_FS;
+    GPIO_InitStruct.Alternate = pin_alternate;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 #endif
     /*
@@ -728,9 +739,11 @@ static void OTG_CMD_WKUP_Handler(PCD_HandleTypeDef *pcd_handle) {
 
     /* Select PLL as SYSCLK */
     MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, RCC_SYSCLKSOURCE_PLLCLK);
-
-    while (__HAL_RCC_GET_SYSCLK_SOURCE() != RCC_CFGR_SWS_PLL) {}
-
+#if defined(STM32H747xx)
+    while (__HAL_RCC_GET_SYSCLK_SOURCE() != RCC_CFGR_SWS_PLL1) {}
+#else
+     while (__HAL_RCC_GET_SYSCLK_SOURCE() != RCC_CFGR_SWS_PLL) {}
+#endif
     /* ungate PHY clock */
     __HAL_PCD_UNGATE_PHYCLOCK(pcd_handle);
 }
@@ -749,6 +762,7 @@ void OTG_FS_WKUP_IRQHandler(void) {
     }
     /* Clear EXTI pending Bit*/
     __HAL_USB_OTG_FS_WAKEUP_EXTI_CLEAR_FLAG();
+
     IRQ_EXIT(OTG_FS_WKUP_IRQn);
 }
 #endif
@@ -759,7 +773,11 @@ void OTG_HS_WKUP_IRQHandler(void) {
         OTG_CMD_WKUP_Handler(&pcd_hs_handle);
     }
     /* Clear EXTI pending Bit*/
+#if defined(STM32H747xx)
+    EXTI->PR1 = (USB_OTG_HS_WAKEUP_EXTI_LINE)
+#else
     __HAL_USB_HS_EXTI_CLEAR_FLAG();
+#endif
     IRQ_EXIT(OTG_HS_WKUP_IRQn);
 }
 #endif

@@ -26,7 +26,10 @@
 #include "flash.h"
 #include "image.h"
 #include "mini_printf.h"
+#include "mipi_lcd.h"
 #include "mpu.h"
+#include "nand_flash.h"
+#include "qspi_flash.h"
 #include "random_delays.h"
 #include "secbool.h"
 #include "touch.h"
@@ -36,6 +39,10 @@
 #include "bootui.h"
 #include "messages.h"
 // #include "mpu.h"
+
+#if defined(STM32H747xx)
+#include "stm32h7xx_hal.h"
+#endif
 
 const uint8_t BOOTLOADER_KEY_M = 2;
 const uint8_t BOOTLOADER_KEY_N = 3;
@@ -237,12 +244,19 @@ static void check_bootloader_version(void) {
 #endif
 
 int main(void) {
+  SystemCoreClockUpdate();
+
+  // nand_flash_init();
+  qspi_flash_init();
+  qspi_flash_config();
+  qspi_flash_memory_mapped();
+
+  lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   random_delays_init();
   // display_init_seq();
   touch_init();
   touch_power_on();
-
-  mpu_config_bootloader();
+  // mpu_config_bootloader();
 
 #if PRODUCTION
   check_bootloader_version();
@@ -252,14 +266,13 @@ int main(void) {
 
   // delay to detect touch
   uint32_t touched = 0;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 1000; i++) {
     touched = touch_is_detected() | touch_read();
     if (touched) {
       break;
     }
     hal_delay(1);
   }
-
   vendor_header vhdr;
   image_header hdr;
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
@@ -271,11 +284,13 @@ int main(void) {
   if (sectrue == firmware_present) {
     firmware_present = check_vendor_header_lock(&vhdr);
   }
+
   if (sectrue == firmware_present) {
     firmware_present = load_image_header(
         (const uint8_t *)(FIRMWARE_START + vhdr.hdrlen), FIRMWARE_IMAGE_MAGIC,
         FIRMWARE_IMAGE_MAXSIZE, vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr);
   }
+
   if (sectrue == firmware_present) {
     firmware_present =
         check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
@@ -305,7 +320,9 @@ int main(void) {
     // erase storage
     ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
            NULL);
-
+    // usb_msc_init();
+    // while (1)
+    //   ;
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
       return 1;
@@ -368,7 +385,8 @@ int main(void) {
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 
-  mpu_config_off();
+  // mpu_config_off();
+  display_printf("jump to firmeware\n");
   jump_to(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 
   return 0;

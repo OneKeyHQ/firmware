@@ -108,6 +108,8 @@ these should not be used because the GC is reset on a soft reset but the usb is 
 #define USBD_DbgLog(...)
 #endif
 
+#define USBD_MAX_STR_DESC_SIZ                 64
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif /* __USBD_CONF_H */

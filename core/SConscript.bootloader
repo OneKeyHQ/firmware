@@ -3,6 +3,7 @@
 import os
 
 TREZOR_MODEL = ARGUMENTS.get('TREZOR_MODEL', 'T')
+PRODUCTION_MODEL = ARGUMENTS.get('PRODUCTION_MODEL', 'H')
 
 CCFLAGS_MOD = ''
 CPPPATH_MOD = []
@@ -43,36 +44,97 @@ CPPDEFINES_MOD += [
     'TREZOR_FONT_NORMAL_ENABLE',
     'TREZOR_FONT_MONO_ENABLE',
 ]
-SOURCE_MOD += [
-    'embed/extmod/modtrezorui/display.c',
-    'embed/extmod/modtrezorui/font_bitmap.c',
-    'embed/extmod/modtrezorui/font_roboto_regular_20.c',
-    'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
-    'vendor/micropython/lib/uzlib/adler32.c',
-    'vendor/micropython/lib/uzlib/crc32.c',
-    'vendor/micropython/lib/uzlib/tinflate.c',
-]
 
-SOURCE_STMHAL = [
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sram.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_fmc.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c',
-    'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c',
-]
+if PRODUCTION_MODEL == 'H':
+    SOURCE_MOD += [
+        'embed/extmod/modtrezorui/mipi_lcd.c',
+        'embed/extmod/modtrezorui/display.c',
+        'embed/extmod/modtrezorui/font_bitmap.c',
+        'embed/extmod/modtrezorui/font_roboto_regular_20.c',
+        'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
+        'vendor/micropython/lib/uzlib/adler32.c',
+        'vendor/micropython/lib/uzlib/crc32.c',
+        'vendor/micropython/lib/uzlib/tinflate.c',
+    ]
+    SOURCE_STMHAL = [
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_nand.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sram.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sdram.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dsi.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma2d.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
+    ]
+
+    SOURCE_BOOTLOADER = [
+        'embed/bootloader/startup_stm32h747xx.s',
+        'embed/bootloader/header.S',
+        'embed/bootloader/bootui.c',
+        'embed/bootloader/main.c',
+        'embed/bootloader/messages.c',
+        'embed/bootloader/protob/messages.pb.c',
+    ]
+else:
+    SOURCE_MOD += [
+        'embed/extmod/modtrezorui/display.c',
+        'embed/extmod/modtrezorui/font_bitmap.c',
+        'embed/extmod/modtrezorui/font_roboto_regular_20.c',
+        'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
+        'vendor/micropython/lib/uzlib/adler32.c',
+        'vendor/micropython/lib/uzlib/crc32.c',
+        'vendor/micropython/lib/uzlib/tinflate.c',
+    ]
+    SOURCE_STMHAL = [
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sd.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_sram.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_fmc.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_sdmmc.c',
+        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c',
+    ]
+
+    SOURCE_BOOTLOADER = [
+        'embed/bootloader/startup.s',
+        'embed/bootloader/header.S',
+        'embed/bootloader/bootui.c',
+        'embed/bootloader/main.c',
+        'embed/bootloader/messages.c',
+        'embed/bootloader/protob/messages.pb.c',
+    ]
 
 SOURCE_NANOPB = [
     'vendor/nanopb/pb_common.c',
@@ -80,21 +142,16 @@ SOURCE_NANOPB = [
     'vendor/nanopb/pb_encode.c',
 ]
 
-SOURCE_BOOTLOADER = [
-    'embed/bootloader/startup.s',
-    'embed/bootloader/header.S',
-    'embed/bootloader/bootui.c',
-    'embed/bootloader/main.c',
-    'embed/bootloader/messages.c',
-    'embed/bootloader/protob/messages.pb.c',
-]
 
 SOURCE_TREZORHAL = [
+    'embed/trezorhal/system_stm32h7xx.c',
     'embed/trezorhal/common.c',
     'embed/trezorhal/image.c',
     'embed/trezorhal/flash.c',
     'embed/trezorhal/mini_printf.c',
     'embed/trezorhal/mpu.c',
+    'embed/trezorhal/qspi_flash.c',
+    'embed/trezorhal/nand_flash.c',
     'embed/trezorhal/random_delays.c',
     'embed/trezorhal/rng.c',
     'embed/trezorhal/stm32.c',
@@ -105,6 +162,12 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/usbd_core.c',
     'embed/trezorhal/usbd_ctlreq.c',
     'embed/trezorhal/usbd_ioreq.c',
+    'embed/trezorhal/usbd_msc.c',
+    'embed/trezorhal/usbd_msc_bot.c',
+    'embed/trezorhal/usbd_msc_data.c',
+    'embed/trezorhal/usbd_msc_scsi.c',
+    'embed/trezorhal/usbd_msc_storage.c',
+    'embed/trezorhal/usbd_desc.c',
     'embed/trezorhal/util.s',
     'embed/trezorhal/vectortable.s',
 ]
@@ -121,9 +184,15 @@ env.Replace(
     OBJCOPY='arm-none-eabi-objcopy', )
 
 env.Replace(
-    TREZOR_MODEL=TREZOR_MODEL, )
+    TREZOR_MODEL=TREZOR_MODEL,
+    PRODUCTION_MODEL=ord(PRODUCTION_MODEL), )
 
-if TREZOR_MODEL == 'T':
+if PRODUCTION_MODEL == 'H':
+    CPU_ASFLAGS = '-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16 '
+    CPU_CCFLAGS = '-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16 -mtune=cortex-m7 --specs=nano.specs '
+    CPU_MODEL   = 'STM32H747xx'
+    CORE_MODEL = 'CORE_CM7'
+elif TREZOR_MODEL == 'T':
     CPU_ASFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16'
     CPU_CCFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mtune=cortex-m4 '
     CPU_MODEL   = 'STM32F427xx'
@@ -134,40 +203,78 @@ elif TREZOR_MODEL == '1':
 else:
     raise ValueError('Unknown Trezor model')
 
-env.Replace(
-    COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
-    CCFLAGS='$COPT '
-    '-g3 '
-    '-nostdlib '
-    '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
-    '-fsingle-precision-constant -fdata-sections -ffunction-sections '
-    '-ffreestanding '
-    '-fstack-protector-all '
-    + CPU_CCFLAGS + CCFLAGS_MOD,
-    CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
-    LINKFLAGS='-T embed/bootloader/memory.ld -Wl,--gc-sections -Wl,-Map=build/bootloader/bootloader.map -Wl,--warn-common',
-    CPPPATH=[
-        'embed/bootloader',
-        'embed/bootloader/nanopb',
-        'embed/bootloader/protob',
-        'embed/trezorhal',
-        'embed/extmod/modtrezorui',
-        'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Inc',
-        'vendor/micropython/lib/stm32lib/CMSIS/STM32F4xx/Include',
-        'vendor/micropython/lib/cmsis/inc',
-        'vendor/nanopb',
-    ] + CPPPATH_MOD,
-    CPPDEFINES=[
-        ('TREZOR_MODEL', '$TREZOR_MODEL'),
-        CPU_MODEL,
-        'USE_HAL_DRIVER',
-        ('STM32_HAL_H', '"<stm32f4xx.h>"'),
-        'PB_FIELD_16BIT',
-        'PB_ENCODE_ARRAYS_UNPACKED',
-        'PB_VALIDATE_UTF8',
-    ] + CPPDEFINES_MOD,
-    ASFLAGS=CPU_ASFLAGS,
-    ASPPFLAGS='$CFLAGS $CCFLAGS', )
+if PRODUCTION_MODEL == 'H':
+    env.Replace(
+        COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
+        CCFLAGS='$COPT '
+        '-g3 '
+        '-nostdlib '
+        '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
+        '-fsingle-precision-constant -fdata-sections -ffunction-sections '
+        '-ffreestanding '
+        '-fstack-protector-all '
+        + CPU_CCFLAGS + CCFLAGS_MOD,
+        CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
+        LINKFLAGS='-T embed/bootloader/stm32h747xx_flash_CM7.ld -Wl,--gc-sections -Wl,-Map=build/bootloader/bootloader.map -Wl,--warn-common',
+        CPPPATH=[
+            'embed/bootloader',
+            'embed/bootloader/nanopb',
+            'embed/bootloader/protob',
+            'embed/trezorhal',
+            'embed/extmod/modtrezorui',
+            'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc',
+            'vendor/micropython/lib/stm32lib/CMSIS/STM32H7xx/Include',
+            'vendor/micropython/lib/cmsis/inc',
+            'vendor/nanopb',
+        ] + CPPPATH_MOD,
+        CPPDEFINES=[
+            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
+            CPU_MODEL,
+            CORE_MODEL,
+            'USE_HAL_DRIVER',
+            ('STM32_HAL_H', '"<stm32h7xx.h>"'),
+            'PB_FIELD_16BIT',
+            'PB_ENCODE_ARRAYS_UNPACKED',
+            'PB_VALIDATE_UTF8',
+        ] + CPPDEFINES_MOD,
+        ASFLAGS=CPU_ASFLAGS,
+        ASPPFLAGS='$CFLAGS $CCFLAGS', )
+else:
+    env.Replace(
+        COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
+        CCFLAGS='$COPT '
+        '-g3 '
+        '-nostdlib '
+        '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
+        '-fsingle-precision-constant -fdata-sections -ffunction-sections '
+        '-ffreestanding '
+        '-fstack-protector-all '
+        + CPU_CCFLAGS + CCFLAGS_MOD,
+        CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
+        LINKFLAGS='-T embed/bootloader/memory.ld -Wl,--gc-sections -Wl,-Map=build/bootloader/bootloader.map -Wl,--warn-common',
+        CPPPATH=[
+            'embed/bootloader',
+            'embed/bootloader/nanopb',
+            'embed/bootloader/protob',
+            'embed/trezorhal',
+            'embed/extmod/modtrezorui',
+            'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Inc',
+            'vendor/micropython/lib/stm32lib/CMSIS/STM32F4xx/Include',
+            'vendor/micropython/lib/cmsis/inc',
+            'vendor/nanopb',
+        ] + CPPPATH_MOD,
+        CPPDEFINES=[
+            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            CPU_MODEL,
+            'USE_HAL_DRIVER',
+            ('STM32_HAL_H', '"<stm32f4xx.h>"'),
+            'PB_FIELD_16BIT',
+            'PB_ENCODE_ARRAYS_UNPACKED',
+            'PB_VALIDATE_UTF8',
+        ] + CPPDEFINES_MOD,
+        ASFLAGS=CPU_ASFLAGS,
+        ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
 env.Replace(
     HEADERTOOL='tools/headertool.py',
@@ -188,7 +295,7 @@ program_elf = env.Command(
     target='bootloader.elf',
     source=obj_program,
     action=
-    '$LINK -o $TARGET $CCFLAGS $CFLAGS $LINKFLAGS $SOURCES -lc_nano -lgcc',
+    '$LINK -o $TARGET $CCFLAGS $CFLAGS $LINKFLAGS $SOURCES -Wl,--start-group -lc_nano -lnosys -lgcc -Wl,--end-group',
 )
 
 program_bin = env.Command(

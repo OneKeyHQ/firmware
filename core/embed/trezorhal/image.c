@@ -176,6 +176,71 @@ secbool check_single_hash(const uint8_t *const hash, const uint8_t *const data,
   return sectrue * (0 == memcmp(h, hash, BLAKE2S_DIGEST_LENGTH));
 }
 
+#if defined(STM32H747xx)
+secbool check_image_contents(const image_header *const hdr, uint32_t firstskip,
+                             const uint8_t *sectors, int blocks) {
+  if (0 == sectors || blocks < 1) {
+    return secfalse;
+  }
+  BLAKE2S_CTX ctx;
+  uint8_t hash[BLAKE2S_DIGEST_LENGTH];
+  blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
+
+  const void *data =
+      flash_get_address(sectors[0], firstskip, IMAGE_CHUNK_SIZE - firstskip);
+  if (!data) {
+    return secfalse;
+  }
+  int remaining = hdr->codelen;
+
+  blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE - firstskip));
+  int block = 1;
+  int update_flag = 0;
+  remaining -= IMAGE_CHUNK_SIZE - firstskip;
+  while (remaining > 0) {
+    if (block >= blocks) {
+      return secfalse;
+    }
+    data = flash_get_address(sectors[block], 0, IMAGE_CHUNK_SIZE);
+    if (!data) {
+      return secfalse;
+    }
+    if (remaining - IMAGE_CHUNK_SIZE > 0) {
+      if (block % 2) {
+        update_flag = 0;
+        blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE));
+        blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
+        if (0 != memcmp(hdr->hashes + (block / 2) * 32, hash,
+                        BLAKE2S_DIGEST_LENGTH)) {
+          return secfalse;
+        }
+      } else {
+        blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
+        blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE));
+        update_flag = 1;
+      }
+    } else {
+      if (update_flag) {
+        blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE));
+        blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
+        if (0 != memcmp(hdr->hashes + (block / 2) * 32, hash,
+                        BLAKE2S_DIGEST_LENGTH)) {
+          return secfalse;
+        }
+      } else {
+        if (sectrue != check_single_hash(hdr->hashes + (block / 2) * 32, data,
+                                         MIN(remaining, IMAGE_CHUNK_SIZE))) {
+          return secfalse;
+        }
+      }
+    }
+
+    block++;
+    remaining -= IMAGE_CHUNK_SIZE;
+  }
+  return sectrue;
+}
+#else
 secbool check_image_contents(const image_header *const hdr, uint32_t firstskip,
                              const uint8_t *sectors, int blocks) {
   if (0 == sectors || blocks < 1) {
@@ -211,3 +276,4 @@ secbool check_image_contents(const image_header *const hdr, uint32_t firstskip,
   }
   return sectrue;
 }
+#endif

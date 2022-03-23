@@ -1,5 +1,16 @@
+#if defined(STM32H747xx)
+#include "stm32h7xx_ll_sdmmc.h"
+#else
 #include "stm32f4xx_ll_sdmmc.h"
+#endif
 
+#if defined(STM32H747xx)
+uint32_t SDMMC_CmdSetClrCardDetect(SDMMC_TypeDef *SDIOx, uint32_t Argument) {
+  uint32_t errorstate = SDMMC_ERROR_NONE;
+
+  return errorstate;
+}
+#else
 // this function is adapted from stm32f4xx_ll_sdmmc.c
 
 static uint32_t SDMMC_GetCmdResp1(SDIO_TypeDef *SDIOx, uint8_t SD_CMD,
@@ -59,3 +70,4 @@ uint32_t SDMMC_CmdSetClrCardDetect(SDIO_TypeDef *SDIOx, uint32_t Argument) {
 
   return errorstate;
 }
+#endif

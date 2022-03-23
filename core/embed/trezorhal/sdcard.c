@@ -53,6 +53,27 @@
 #include "sdcard.h"
 #include "supervise.h"
 
+#if defined(STM32H747xx)
+void sdcard_init(void) {}
+
+secbool sdcard_power_on(void) { return secfalse; }
+
+void sdcard_power_off(void) {}
+
+secbool sdcard_is_present(void) { return secfalse; }
+
+secbool sdcard_read_blocks(uint32_t *dest, uint32_t block_num,
+                           uint32_t num_blocks) {
+  return secfalse;
+}
+uint64_t sdcard_get_capacity_in_bytes(void) { return 0; }
+
+secbool sdcard_write_blocks(const uint32_t *src, uint32_t block_num,
+                            uint32_t num_blocks) {
+  return secfalse;
+}
+#else
+
 #define SDMMC_CLK_ENABLE() __HAL_RCC_SDMMC1_CLK_ENABLE()
 #define SDMMC_CLK_DISABLE() __HAL_RCC_SDMMC1_CLK_DISABLE()
 #define SDMMC_IRQn SDMMC1_IRQn
@@ -353,3 +374,5 @@ secbool sdcard_write_blocks(const uint32_t *src, uint32_t block_num,
 
   return sectrue * (err == HAL_OK);
 }
+
+#endif

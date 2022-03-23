@@ -27,7 +27,11 @@
 #include "rand.h"
 #include "supervise.h"
 
+#if defined(STM32F427xx) || defined(STM32F405xx)
 #include "stm32f4xx_ll_utils.h"
+#elif defined(STM32H747xx)
+#include "stm32h7xx_ll_utils.h"
+#endif
 
 #define COLOR_FATAL_ERROR RGB16(0x7F, 0x00, 0x00)
 
@@ -117,7 +121,7 @@ error_shutdown(const char *line1, const char *line2, const char *line3,
   display_printf("\nPlease unplug the device.\n");
 #endif
   display_backlight(255);
-  shutdown();
+  // shutdown();
   for (;;)
     ;
 }
@@ -164,7 +168,7 @@ void collect_hw_entropy(void) {
   memcpy(HW_ENTROPY_DATA + 4, &w, 4);
   w = LL_GetUID_Word2();
   memcpy(HW_ENTROPY_DATA + 8, &w, 4);
-
+#if defined(STM32F427xx) || defined(STM32F405xx)
   // set entropy in the OTP randomness block
   if (secfalse == flash_otp_is_locked(FLASH_OTP_BLOCK_RANDOMNESS)) {
     uint8_t entropy[FLASH_OTP_BLOCK_SIZE];
@@ -178,4 +182,7 @@ void collect_hw_entropy(void) {
   ensure(flash_otp_read(FLASH_OTP_BLOCK_RANDOMNESS, 0, HW_ENTROPY_DATA + 12,
                         FLASH_OTP_BLOCK_SIZE),
          NULL);
+#elif defined(STM32H747xx)
+
+#endif
 }

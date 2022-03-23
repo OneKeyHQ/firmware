@@ -47,8 +47,11 @@
 #include "systemview.h"
 #endif
 #include "rng.h"
-#include "sdcard.h"
+// #include "sdcard.h"
+#include "mipi_lcd.h"
+#include "qspi_flash.h"
 #include "supervise.h"
+#include "timer.h"
 #include "touch.h"
 #ifdef USE_SECP256K1_ZKP
 #include "zkp_context.h"
@@ -58,6 +61,8 @@
 extern void shutdown_privileged(void);
 
 int main(void) {
+  SystemCoreClockUpdate();
+  lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   random_delays_init();
 
 #ifdef RDI
@@ -80,7 +85,7 @@ int main(void) {
   check_and_replace_bootloader();
 #endif
   // Enable MPU
-  mpu_config_firmware();
+  // mpu_config_firmware();
 #endif
 
   // Init peripherals
@@ -90,25 +95,30 @@ int main(void) {
   display_init();
   button_init();
 #endif
+  display_clear();
 
 #if TREZOR_MODEL == T
   // display_init_seq();
-  sdcard_init();
+  // sdcard_init();
   touch_init();
   touch_power_on();
 
+  qspi_flash_init();
+  qspi_flash_config();
+  qspi_flash_memory_mapped();
+
+  // timer_init();
+
   // jump to unprivileged mode
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
-  __asm__ volatile("msr control, %0" ::"r"(0x1));
-  __asm__ volatile("isb");
+  // __asm__ volatile("msr control, %0" ::"r"(0x1));
+  // __asm__ volatile("isb");
 
-  display_clear();
 #endif
 
 #ifdef USE_SECP256K1_ZKP
   ensure(sectrue * (zkp_context_init() == 0), NULL);
 #endif
-
   printf("CORE: Preparing stack\n");
   // Stack limit should be less than real stack size, so we have a chance
   // to recover from limit hit.
@@ -136,7 +146,6 @@ int main(void) {
   // Execute the main script
   printf("CORE: Executing main script\n");
   pyexec_frozen_module("main.py");
-
   // Clean up
   printf("CORE: Main script finished, cleaning up\n");
   mp_deinit();
@@ -154,14 +163,49 @@ void __attribute__((noreturn)) nlr_jump_fail(void *val) {
 
 void NMI_Handler(void) {
   // Clock Security System triggered NMI
-  if ((RCC->CIR & RCC_CIR_CSSF) != 0) {
-    error_shutdown("Internal error", "(CS)", NULL, NULL);
-  }
+  // if ((RCC->CIR & RCC_CIR_CSSF) != 0)
+  { error_shutdown("Internal error", "(CS)", NULL, NULL); }
 }
 
-void HardFault_Handler(void) {
-  error_shutdown("Internal error", "(HF)", NULL, NULL);
+void hard_fault_handler(unsigned int *hardfault_args) {
+  unsigned int stacked_r0;
+  unsigned int stacked_r1;
+  unsigned int stacked_r2;
+  unsigned int stacked_r3;
+  unsigned int stacked_r12;
+  unsigned int stacked_lr;
+  unsigned int stacked_pc;
+  unsigned int stacked_psr;
+
+  stacked_r0 = ((unsigned long)hardfault_args[0]);
+  stacked_r1 = ((unsigned long)hardfault_args[1]);
+  stacked_r2 = ((unsigned long)hardfault_args[2]);
+  stacked_r3 = ((unsigned long)hardfault_args[3]);
+  stacked_r12 = ((unsigned long)hardfault_args[4]);
+  stacked_lr = ((unsigned long)hardfault_args[5]);
+  stacked_pc = ((unsigned long)hardfault_args[6]);
+  stacked_psr = ((unsigned long)hardfault_args[7]);
+  display_printf("[Hard fault handler]\n");
+  display_printf("R0 = %x\n", stacked_r0);
+  display_printf("R1 = %x\n", stacked_r1);
+  display_printf("R2 = %x\n", stacked_r2);
+  display_printf("R3 = %x\n", stacked_r3);
+  display_printf("R12 = %x\n", stacked_r12);
+  display_printf("LR = %x\n", stacked_lr);
+  display_printf("PC = %x\n", stacked_pc);
+  display_printf("PSR = %x\n", stacked_psr);
+  display_printf("BFAR = %x\n", (*((volatile unsigned int *)(0xE000ED38))));
+  display_printf("CFSR = %x\n", (*((volatile unsigned int *)(0xE000ED28))));
+  display_printf("HFSR = %x\n", (*((volatile unsigned int *)(0xE000ED2C))));
+  display_printf("DFSR = %x\n", (*((volatile unsigned int *)(0xE000ED30))));
+  display_printf("AFSR = %x\n", (*((volatile unsigned int *)(0xE000ED3C))));
+  exit(0);
+  return;
 }
+
+// void HardFault_Handler(void) {
+//   error_shutdown("Internal error", "(HF)", NULL, NULL);
+// }
 
 void MemManage_Handler(void) {
   error_shutdown("Internal error", "(MM)", NULL, NULL);

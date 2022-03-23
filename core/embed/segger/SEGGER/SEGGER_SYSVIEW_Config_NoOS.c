@@ -68,7 +68,7 @@ extern unsigned int SystemCoreClock;
 #define SYSVIEW_APP_NAME        "Trezor Core"
 
 // The target device name
-#define SYSVIEW_DEVICE_NAME     "STM32F427VI"
+#define SYSVIEW_DEVICE_NAME     "STM32H7XX"
 
 // Frequency of the timestamp. Must match SEGGER_SYSVIEW_Conf.h
 #define SYSVIEW_TIMESTAMP_FREQ  (SystemCoreClock)

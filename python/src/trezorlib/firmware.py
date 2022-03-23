@@ -70,7 +70,7 @@ V2_BOOTLOADER_KEYS = [
 V2_SIGS_REQUIRED = 2
 
 ONEV2_CHUNK_SIZE = 1024 * 64
-V2_CHUNK_SIZE = 1024 * 128
+V2_CHUNK_SIZE = 1024 * 256
 
 
 def _transform_vendor_trust(data: bytes) -> bytes:
