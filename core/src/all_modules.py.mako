@@ -15,6 +15,7 @@ PATTERNS = (
     "storage/**/*.py",
     "trezor/**/*.py",
     "apps/**/*.py",
+    "lvglui/**/*.py",
 )
 
 ALTCOINS = (

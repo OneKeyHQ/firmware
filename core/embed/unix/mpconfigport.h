@@ -42,8 +42,8 @@
 
 // memory allocation policies
 #define MICROPY_ALLOC_PATH_MAX      (PATH_MAX)
-#define MICROPY_MALLOC_USES_ALLOCATED_SIZE (1)
-#define MICROPY_MEM_STATS           (1)
+#define MICROPY_MALLOC_USES_ALLOCATED_SIZE (0)
+#define MICROPY_MEM_STATS           (0)
 #define MICROPY_ENABLE_PYSTACK      (1)
 #define MICROPY_LOADED_MODULES_DICT_SIZE (160)
 
@@ -208,12 +208,25 @@ extern const struct _mp_print_t mp_stderr_print;
 
 // ============= this ends common config section ===================
 
+#define DISP_DRV_ROOTS void* disp_drv_fb[2];
+
+#ifndef MICROPY_INCLUDED_PY_MPSTATE_H
+#define MICROPY_INCLUDED_PY_MPSTATE_H
+#include "src/misc/lv_gc.h"
+#undef MICROPY_INCLUDED_PY_MPSTATE_H
+#else
+#include "src/misc/lv_gc.h"
+#endif
+
 // extra built in modules to add to the list of known ones
 extern const struct _mp_obj_module_t mp_module_os;
+extern const struct _mp_obj_module_t mp_module_lvgl;
+extern const struct _mp_obj_module_t mp_module_lvgldispdrv;
 
 #define MICROPY_PORT_BUILTIN_MODULES \
-    { MP_ROM_QSTR(MP_QSTR_uos), MP_ROM_PTR(&mp_module_os) },
-
+    { MP_ROM_QSTR(MP_QSTR_uos), MP_ROM_PTR(&mp_module_os) },\
+    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), (mp_obj_t)&mp_module_lvgl },\
+    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldispdrv },
 
 // For size_t and ssize_t
 #include <unistd.h>
@@ -265,7 +278,11 @@ void mp_unix_mark_exec(void);
 // with EINTR, updates remaining timeout value.
 #define MICROPY_SELECT_REMAINING_TIME (1)
 
+//LV_ROOTS  void *mp_lv_user_data; 
 #define MICROPY_PORT_ROOT_POINTERS \
+    LV_ROOTS; \
+    DISP_DRV_ROOTS; \
+    void *mp_lv_user_data; \
     const char *readline_hist[50]; \
     void *mmap_region_head; \
     mp_obj_t trezorconfig_ui_wait_callback; \

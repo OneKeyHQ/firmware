@@ -45,6 +45,8 @@ https://link.springer.com/content/pdf/10.1007%2F978-3-540-72354-7_3.pdf
 #include "memzero.h"
 #include "rand.h"
 
+#include "display.h"
+
 // from util.s
 extern void shutdown_privileged(void);
 

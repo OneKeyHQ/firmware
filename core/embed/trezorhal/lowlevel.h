@@ -32,4 +32,19 @@ void periph_init(void);
 secbool reset_flags_check(void);
 void reset_flags_reset(void);
 
+#if defined(STM32H747xx)
+
+#define SDRAM_DEVICE_ADDR 0xD0000000U
+#define SDRAM_DEVICE_SIZE 0x2000000U
+
+void cpu_cache_enable(void);
+void mpu_config(void);
+void system_clock_config(void);
+void flash_option_bytes_init(void);
+
+void led_init(void);
+void led_on(void);
+void led_off(void);
+#endif
+
 #endif  // __TREZORHAL_LOWLEVEL_H__

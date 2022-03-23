@@ -23,13 +23,21 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#if TREZOR_MODEL == T
+#if PRODUCTION_MODEL == 'H'
+
+#define MAX_DISPLAY_RESX 480
+#define MAX_DISPLAY_RESY 800
+#define DISPLAY_RESX 480
+#define DISPLAY_RESY (800)
+#define TREZOR_FONT_BPP 4
+
+#elif TREZOR_MODEL == T
 
 // ILI9341V, GC9307 and ST7789V drivers support 240px x 320px display resolution
-#define MAX_DISPLAY_RESX 240
-#define MAX_DISPLAY_RESY 320
-#define DISPLAY_RESX 240
-#define DISPLAY_RESY 240
+#define MAX_DISPLAY_RESX 480
+#define MAX_DISPLAY_RESY 800
+#define DISPLAY_RESX 480
+#define DISPLAY_RESY 800
 #define TREZOR_FONT_BPP 4
 
 #elif TREZOR_MODEL == 1
@@ -75,7 +83,8 @@ void display_clear_save(void);
 // provided by common
 
 void display_clear(void);
-
+void display_buffer(int x, int y, int w, int h, uint16_t *c);
+void display_init_ex(void);
 void display_bar(int x, int y, int w, int h, uint16_t c);
 void display_bar_radius(int x, int y, int w, int h, uint16_t c, uint16_t b,
                         uint8_t r);

@@ -138,6 +138,9 @@
 #define USBD_EP_TYPE_BULK                                 2
 #define USBD_EP_TYPE_INTR                                 3
 
+#ifndef USBD_MAX_POWER
+#define USBD_MAX_POWER                                  0x32U /* 100 mA */
+#endif /* USBD_MAX_POWER */
 
 /**
   * @}
@@ -222,6 +225,7 @@ typedef struct
   uint32_t                total_length;
   uint32_t                rem_length;
   uint32_t                maxpacket;
+  uint16_t                is_used;
 } USBD_EndpointTypeDef;
 
 /* USB Device handle structure */

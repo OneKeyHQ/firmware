@@ -27,3 +27,6 @@
 [submodule "common/defs/ethereum/chains"]
 	path = common/defs/ethereum/chains
 	url = https://github.com/ethereum-lists/chains
+[submodule "vendor/lvgl_mp"]
+	path = vendor/lvgl_mp
+	url = https://github.com/lvgl/lv_binding_micropython

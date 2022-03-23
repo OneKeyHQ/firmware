@@ -22,9 +22,34 @@
 
 #include <stdint.h>
 
+#if PRODUCTION_MODEL== 'H'
+#define TS_I2C_PORT GPIOB
+#define TS_I2C_SCL_PIN GPIO_PIN_10
+#define TS_I2C_SDA_PIN GPIO_PIN_11
+
+#define TS_RESET_PORT GPIOC
+#define TS_RESET_PIN GPIO_PIN_1
+
+#define TS_INIT_PORT GPIOC
+#define TS_INIT_PIN GPIO_PIN_0
+
+#else
+#define TS_I2C_PORT GPIOB
+#define TS_I2C_SCL_PIN GPIO_PIN_6
+#define TS_I2C_SDA_PIN GPIO_PIN_7
+
+#define TS_RESET_PORT GPIOC
+#define TS_RESET_PIN GPIO_PIN_5
+
+#define TS_INIT_PORT GPIOC
+#define TS_INIT_PIN GPIO_PIN_4
+#endif
+
 #define TOUCH_START (1U << 24)
 #define TOUCH_MOVE (1U << 25)
 #define TOUCH_END (1U << 26)
+
+void touch_test(void);
 
 void touch_init(void);
 void touch_power_on(void);

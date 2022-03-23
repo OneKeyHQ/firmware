@@ -25,8 +25,15 @@
 #include "secbool.h"
 
 // see docs/memory.md for more information
-
-#if TREZOR_MODEL == T
+#if PRODUCTION_MODEL == 'H'
+#define USE_EXTERN_FLASH 1
+#if USE_EXTERN_FLASH
+// 16 internal + 8 external code(2x64K) + 2 external storage(64K)
+#define FLASH_SECTOR_COUNT (26)
+#else
+#define FLASH_SECTOR_COUNT 16
+#endif
+#elif TREZOR_MODEL == T
 #define FLASH_SECTOR_COUNT 24
 #elif TREZOR_MODEL == 1
 #define FLASH_SECTOR_COUNT 12
@@ -34,13 +41,27 @@
 #error Unknown Trezor model
 #endif
 
+#if PRODUCTION_MODEL == 'H'
+#define FLASH_SECTOR_BOARDLOADER_START 0
+#define FLASH_SECTOR_BOARDLOADER_END 0
+#else
 #define FLASH_SECTOR_BOARDLOADER_START 0
 //                                           1
 #define FLASH_SECTOR_BOARDLOADER_END 2
 
 //                                           3
+#endif
 
-#if TREZOR_MODEL == T
+#if PRODUCTION_MODEL == 'H'
+#if USE_EXTERN_FLASH
+#define FLASH_SECTOR_STORAG_OFFSET (7 * 1024 * 1024)
+#define FLASH_SECTOR_STORAGE_1 25
+#define FLASH_SECTOR_STORAGE_2 26
+#else
+#define FLASH_SECTOR_STORAGE_1 2
+#define FLASH_SECTOR_STORAGE_2 3
+#endif
+#elif TREZOR_MODEL == T
 #define FLASH_SECTOR_STORAGE_1 4
 #define FLASH_SECTOR_STORAGE_2 16
 #elif TREZOR_MODEL == 1
@@ -50,6 +71,27 @@
 #error Unknown Trezor model
 #endif
 
+#if PRODUCTION_MODEL == 'H'
+#define FLASH_SECTOR_BOOTLOADER 1
+
+#if USE_EXTERN_FLASH
+#define FLASH_SECTOR_FIRMWARE_START 2
+#define FLASH_SECTOR_FIRMWARE_END 14
+#else
+#define FLASH_SECTOR_FIRMWARE_START 4
+#define FLASH_SECTOR_FIRMWARE_END 14
+#endif
+
+#define FLASH_SECTOR_UNUSED_START 15
+#define FLASH_SECTOR_UNUSED_END 15
+
+#define FLASH_SECTOR_FIRMWARE_EXTRA_START 17
+#define FLASH_SECTOR_FIRMWARE_EXTRA_END 24
+
+#define BOOTLOADER_SECTORS_COUNT (1)
+#define STORAGE_SECTORS_COUNT (2)
+#define FIRMWARE_SECTORS_COUNT (13 + 8)
+#else
 #define FLASH_SECTOR_BOOTLOADER 5
 
 #define FLASH_SECTOR_FIRMWARE_START 6
@@ -75,6 +117,7 @@
 #define BOOTLOADER_SECTORS_COUNT (1)
 #define STORAGE_SECTORS_COUNT (2)
 #define FIRMWARE_SECTORS_COUNT (6 + 7)
+#endif
 
 extern const uint8_t STORAGE_SECTORS[STORAGE_SECTORS_COUNT];
 extern const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT];
@@ -103,6 +146,8 @@ static inline secbool flash_erase(uint8_t sector) {
 }
 secbool __wur flash_write_byte(uint8_t sector, uint32_t offset, uint8_t data);
 secbool __wur flash_write_word(uint8_t sector, uint32_t offset, uint32_t data);
+secbool __wur flash_write_words(uint8_t sector, uint32_t offset,
+                                uint32_t data[8]);
 
 #define FLASH_OTP_NUM_BLOCKS 16
 #define FLASH_OTP_BLOCK_SIZE 32
@@ -119,5 +164,7 @@ secbool __wur flash_otp_write(uint8_t block, uint8_t offset,
                               const uint8_t *data, uint8_t datalen);
 secbool __wur flash_otp_lock(uint8_t block);
 secbool __wur flash_otp_is_locked(uint8_t block);
+
+void flash_test(void);
 
 #endif  // TREZORHAL_FLASH_H

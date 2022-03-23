@@ -143,5 +143,6 @@ void usb_init(const usb_dev_info_t *dev_info);
 void usb_deinit(void);
 void usb_start(void);
 void usb_stop(void);
+void usb_msc_init(void);
 
 #endif

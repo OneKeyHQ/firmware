@@ -24,6 +24,7 @@
 #include <pb_encode.h>
 #include "messages.pb.h"
 
+#include "blake2s.h"
 #include "common.h"
 #include "flash.h"
 #include "image.h"
@@ -358,8 +359,14 @@ void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
 }
 
 static uint32_t chunk_size = 0;
+
+#if defined(STM32H747xx)
+// SRAM is unused, so we can use it for chunk buffer
+uint8_t *const chunk_buffer = (uint8_t *const)0x24000000;
+#else
 // SRAM is unused, so we can use it for chunk buffer
 uint8_t *const chunk_buffer = (uint8_t *const)0x20000000;
+#endif
 
 /* we don't use secbool/sectrue/secfalse here as it is a nanopb api */
 static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
@@ -572,35 +579,105 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
     MSG_SEND(Failure);
     return -5;
   }
+  static BLAKE2S_CTX ctx;
+  static bool packet_flag = false;
 
-  if (sectrue != check_single_hash(hdr.hashes + firmware_block * 32,
-                                   chunk_buffer + headers_offset,
-                                   chunk_size - headers_offset)) {
-    if (firmware_upload_chunk_retry > 0) {
-      --firmware_upload_chunk_retry;
-      MSG_SEND_INIT(FirmwareRequest);
-      MSG_SEND_ASSIGN_VALUE(offset, firmware_block * IMAGE_CHUNK_SIZE);
-      MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
-      MSG_SEND(FirmwareRequest);
-      return (int)firmware_remaining;
+  if ((firmware_remaining - chunk_requested) == 0) {
+    if (packet_flag) {
+      uint8_t hash[BLAKE2S_DIGEST_LENGTH];
+      blake2s_Update(&ctx, chunk_buffer + headers_offset,
+                     chunk_size - headers_offset);
+      blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
+      if (memcmp(hdr.hashes + (firmware_block / 2) * 32, hash,
+                 BLAKE2S_DIGEST_LENGTH) != 0) {
+        if (firmware_upload_chunk_retry > 0) {
+          --firmware_upload_chunk_retry;
+          MSG_SEND_INIT(FirmwareRequest);
+          MSG_SEND_ASSIGN_VALUE(offset, firmware_block * IMAGE_CHUNK_SIZE);
+          MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
+          MSG_SEND(FirmwareRequest);
+          return (int)firmware_remaining;
+        }
+
+        MSG_SEND_INIT(Failure);
+        MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_ProcessError);
+        MSG_SEND_ASSIGN_STRING(message, "Invalid chunk hash");
+        MSG_SEND(Failure);
+        return -6;
+      }
+      packet_flag = false;
+    } else {
+      if (sectrue != check_single_hash(hdr.hashes + firmware_block * 32,
+                                       chunk_buffer + headers_offset,
+                                       chunk_size - headers_offset)) {
+        if (firmware_upload_chunk_retry > 0) {
+          --firmware_upload_chunk_retry;
+          MSG_SEND_INIT(FirmwareRequest);
+          MSG_SEND_ASSIGN_VALUE(offset, firmware_block * IMAGE_CHUNK_SIZE);
+          MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
+          MSG_SEND(FirmwareRequest);
+          return (int)firmware_remaining;
+        }
+
+        MSG_SEND_INIT(Failure);
+        MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_ProcessError);
+        MSG_SEND_ASSIGN_STRING(message, "Invalid chunk hash");
+        MSG_SEND(Failure);
+        return -6;
+      }
     }
+  } else {
+    if ((firmware_block % 2) == 0) {
+      packet_flag = true;
+      blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
+      blake2s_Update(&ctx, chunk_buffer + headers_offset,
+                     chunk_size - headers_offset);
 
-    MSG_SEND_INIT(Failure);
-    MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_ProcessError);
-    MSG_SEND_ASSIGN_STRING(message, "Invalid chunk hash");
-    MSG_SEND(Failure);
-    return -6;
+    } else {
+      packet_flag = false;
+      uint8_t hash[BLAKE2S_DIGEST_LENGTH];
+      blake2s_Update(&ctx, chunk_buffer + headers_offset,
+                     chunk_size - headers_offset);
+      blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
+      if (memcmp(hdr.hashes + (firmware_block / 2) * 32, hash,
+                 BLAKE2S_DIGEST_LENGTH) != 0) {
+        if (firmware_upload_chunk_retry > 0) {
+          --firmware_upload_chunk_retry;
+          MSG_SEND_INIT(FirmwareRequest);
+          MSG_SEND_ASSIGN_VALUE(offset, firmware_block * IMAGE_CHUNK_SIZE);
+          MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
+          MSG_SEND(FirmwareRequest);
+          return (int)firmware_remaining;
+        }
+
+        MSG_SEND_INIT(Failure);
+        MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_ProcessError);
+        MSG_SEND_ASSIGN_STRING(message, "Invalid chunk hash");
+        MSG_SEND(Failure);
+        return -6;
+      }
+    }
   }
 
   ensure(flash_unlock_write(), NULL);
 
+#if defined(STM32H747xx)
+  const uint32_t *const src = (const uint32_t *const)chunk_buffer;
+  for (int i = 0; i < chunk_size / (sizeof(uint32_t) * 8); i++) {
+    ensure(
+        flash_write_words(FIRMWARE_SECTORS[firmware_block],
+                          i * (sizeof(uint32_t) * 8), (uint32_t *)&src[8 * i]),
+        NULL);
+  }
+
+#else
   const uint32_t *const src = (const uint32_t *const)chunk_buffer;
   for (int i = 0; i < chunk_size / sizeof(uint32_t); i++) {
     ensure(flash_write_word(FIRMWARE_SECTORS[firmware_block],
                             i * sizeof(uint32_t), src[i]),
            NULL);
   }
-
+#endif
   ensure(flash_lock_write(), NULL);
 
   headers_offset = 0;
@@ -624,6 +701,10 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 }
 
 int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
+  // TODO:
+#if PRODUCTION_MODEL == 'H'
+  static const uint8_t sectors[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+#else
   static const uint8_t sectors[] = {
       FLASH_SECTOR_STORAGE_1,
       FLASH_SECTOR_STORAGE_2,
@@ -646,6 +727,7 @@ int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
       22,
       FLASH_SECTOR_FIRMWARE_EXTRA_END,
   };
+#endif
   if (sectrue !=
       flash_erase_sectors(sectors, sizeof(sectors), ui_screen_wipe_progress)) {
     MSG_SEND_INIT(Failure);

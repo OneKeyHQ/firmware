@@ -3,6 +3,15 @@ from trezor import log, loop, utils, wire, workflow
 import apps.base
 import usb
 
+import lvgl as lv
+from lvglui import lv_ui
+
+async def lvgl_tick():
+    while True:
+        lv.tick_inc(10)        
+        await loop.sleep(10)
+        lv.timer_handler()
+
 apps.base.boot()
 
 if not utils.BITCOIN_ONLY and usb.ENABLE_IFACE_WEBAUTHN:
@@ -15,9 +24,12 @@ if __debug__:
 
     apps.debug.boot()
 
+apps.base.set_homescreen_lvgl()
+loop.schedule(lvgl_tick())
+
 # run main event loop and specify which screen is the default
-apps.base.set_homescreen()
-workflow.start_default()
+# apps.base.set_homescreen()
+# workflow.start_default()
 
 # initialize the wire codec
 wire.setup(usb.iface_wire)

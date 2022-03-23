@@ -18,8 +18,11 @@
  */
 
 #include STM32_HAL_H
+#if defined(STM32H747xx)
+#include "stm32h7xx_ll_cortex.h"
+#else
 #include "stm32f4xx_ll_cortex.h"
-
+#endif
 // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/BABDJJGF.html
 #define MPU_RASR_ATTR_FLASH (MPU_RASR_C_Msk)
 #define MPU_RASR_ATTR_SRAM (MPU_RASR_C_Msk | MPU_RASR_S_Msk)
@@ -33,9 +36,11 @@ void mpu_config_off(void) {
 }
 
 void mpu_config_bootloader(void) {
+#if defined(STM32H747xx)
+  return;
+#else
   // Disable MPU
   HAL_MPU_Disable();
-
   // Note: later entries overwrite previous ones
 
   // Everything (0x00000000 - 0xFFFFFFFF, 4 GiB, read-write)
@@ -85,14 +90,17 @@ void mpu_config_bootloader(void) {
 #error Unsupported MCU
 #endif
 
+#endif
   // Enable MPU
   HAL_MPU_Enable(LL_MPU_CTRL_HARDFAULT_NMI);
 }
 
 void mpu_config_firmware(void) {
+#if defined(STM32H747xx)
+
+#else
   // Disable MPU
   HAL_MPU_Disable();
-
   // Note: later entries overwrite previous ones
 
   /*
@@ -166,6 +174,7 @@ void mpu_config_firmware(void) {
 #error Unsupported MCU
 #endif
 
+#endif
   // Enable MPU
   HAL_MPU_Enable(LL_MPU_CTRL_HARDFAULT_NMI);
 

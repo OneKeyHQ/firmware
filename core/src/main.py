@@ -10,6 +10,7 @@
 import trezor
 # trezor.utils import only C modules
 from trezor import utils
+from trezor import log
 # we need space for 30 items in the trezor module
 utils.presize_module("trezor", 30)
 
@@ -36,6 +37,28 @@ import trezor.pin  # noqa: F401
 # usb imports trezor.utils and trezor.io which is a C module
 import usb
 
+import lvgl as lv
+import lvgldrv as lcd
+lv.init()
+
+disp_buf1 = lv.disp_draw_buf_t()
+buf1_1 = lcd.framebuffer(1)
+# buf1_2 = lcd.framebuffer(2)
+disp_buf1.init(buf1_1, None, len(buf1_1) // lv.color_t.__SIZE__)
+disp_drv = lv.disp_drv_t()
+disp_drv.init()
+disp_drv.draw_buf = disp_buf1
+disp_drv.flush_cb = lcd.flush
+disp_drv.hor_res = 480
+disp_drv.ver_res = 800
+disp_drv.register()
+
+indev_drv = lv.indev_drv_t()
+indev_drv.init()
+indev_drv.type = lv.INDEV_TYPE.POINTER
+indev_drv.read_cb = lcd.ts_read
+indev_drv.register()
+
 # create an unimport manager that will be reused in the main loop
 unimport_manager = utils.unimport()
 
@@ -49,8 +72,20 @@ import storage.device
 
 usb.bus.open(storage.device.get_device_id())
 
+import micropython
+from lvglui import globalvar as gl
+gl._init()
+
 # run the endless loop
 while True:
-    with unimport_manager:
+    print('++++++++++++++++++++++++')
+    micropython.mem_info()
+    with unimport_manager:        
         import session  # noqa: F401
+        lv_ui = gl.get_dictionary()
+        for key, value in lv_ui.items():
+            lv.obj.delete(value.screen)
+        gl.del_all() 
         del session
+        print('-------------------------') 
+        micropython.mem_info()

@@ -214,6 +214,8 @@ trezor.ui.qr
 import trezor.ui.qr
 trezor.ui.style
 import trezor.ui.style
+trezor.ui.ui
+import trezor.ui.ui
 trezor.utils
 import trezor.utils
 trezor.wire
@@ -386,6 +388,16 @@ apps.misc.sign_identity
 import apps.misc.sign_identity
 apps.workflow_handlers
 import apps.workflow_handlers
+lvglui
+import lvglui
+lvglui.common
+import lvglui.common
+lvglui.globalvar
+import lvglui.globalvar
+lvglui.lv_layouts
+import lvglui.lv_layouts
+lvglui.lv_ui
+import lvglui.lv_ui
 
 if not utils.BITCOIN_ONLY:
     trezor.enums.BinanceOrderSide
