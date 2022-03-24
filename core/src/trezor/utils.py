@@ -4,6 +4,7 @@ from trezorutils import (  # noqa: F401
     BITCOIN_ONLY,
     EMULATOR,
     MODEL,
+    LVGL_UI,
     SCM_REVISION,
     VERSION_MAJOR,
     VERSION_MINOR,

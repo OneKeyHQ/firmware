@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import storage
 import storage.device
-from trezor import config, wire
+from trezor import config, wire, utils
 from trezor.crypto import bip39, hashlib, random, slip39
 from trezor.enums import BackupType
 from trezor.messages import EntropyAck, EntropyRequest, Success
@@ -35,9 +35,12 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         prompt = "Create a new wallet\nwith Super Shamir?"
     else:
         prompt = "Do you want to create\na new wallet?"
-	#await confirm_reset_device(ctx, prompt)
-    await lv_confirm_reset_device(ctx, prompt)
-    await LoadingAnimation()
+    
+    if utils.LVGL_UI:
+        await lv_confirm_reset_device(ctx, prompt)    
+    else:
+        await confirm_reset_device(ctx, prompt)
+        await LoadingAnimation()
 
     # wipe storage to make sure the device is in a clear state
     storage.reset()
@@ -79,8 +82,10 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
 
     # If doing backup, ask the user to confirm.
     if perform_backup:
-        # perform_backup = await confirm_backup(ctx)
-        perform_backup = await lv_confirm_backup(ctx)
+        if utils.LVGL_UI:
+            perform_backup = await lv_confirm_backup(ctx)
+        else:
+            perform_backup = await confirm_backup(ctx)       
 
     # generate and display backup information for the master secret
     if perform_backup:
