@@ -8,6 +8,7 @@ EVERYTHING = BITCOIN_ONLY != '1'
 TREZOR_MODEL = ARGUMENTS.get('TREZOR_MODEL', 'T')
 UI2 = ARGUMENTS.get('UI2', '0') == '1' or TREZOR_MODEL == '1'
 PRODUCTION_MODEL = ARGUMENTS.get('PRODUCTION_MODEL', 'H')
+LVGL_UI = '1'
 
 FEATURE_FLAGS = {
     "RDI": True,
@@ -532,6 +533,7 @@ env.Replace(
 
 env.Replace(
     TREZOR_MODEL=TREZOR_MODEL,
+    LVGL_UI=LVGL_UI,
     PRODUCTION_MODEL=ord(PRODUCTION_MODEL), )
 
 if PRODUCTION_MODEL == 'H':
@@ -584,6 +586,7 @@ if PRODUCTION_MODEL == 'H':
         ] + CPPPATH_MOD,
         CPPDEFINES=[
             ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            ('LVGL_UI', '$LVGL_UI'),
             ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
             CPU_MODEL,
             CORE_MODEL,

@@ -3,6 +3,7 @@ from typing import Sequence
 from trezor import ui, utils, wire
 from trezor.enums import ButtonRequestType
 from trezor.ui.layouts import confirm_action, confirm_blob, show_success, show_warning
+from lvglui.lv_layouts import lv_show_backup_warning, lv_show_share_words
 from trezor.ui.layouts.tt.reset import (  # noqa: F401
     confirm_word,
     show_share_words,
@@ -122,13 +123,18 @@ async def bip39_show_and_confirm_mnemonic(
     ctx: wire.GenericContext, mnemonic: str
 ) -> None:
     # warn user about mnemonic safety
-    await show_backup_warning(ctx)
-
+    if utils.LVGL_UI:
+        await lv_show_backup_warning(ctx)
+    else:
+        await show_backup_warning(ctx)
     words = mnemonic.split()
 
     while True:
         # display paginated mnemonic on the screen
-        await show_share_words(ctx, share_words=words)
+        if utils.LVGL_UI:
+            await lv_show_share_words(ctx, share_words=words)
+        else:
+            await show_share_words(ctx, share_words=words)
 
         # make the user confirm some words from the mnemonic
         if await _confirm_share_words(ctx, None, words):

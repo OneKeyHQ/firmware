@@ -62,6 +62,9 @@ indev_drv.register()
 # create an unimport manager that will be reused in the main loop
 unimport_manager = utils.unimport()
 
+from lvglui import globalvar as gl
+gl._init()
+
 # unlock the device, unload the boot module afterwards
 with unimport_manager:
     import boot
@@ -73,8 +76,6 @@ import storage.device
 usb.bus.open(storage.device.get_device_id())
 
 import micropython
-from lvglui import globalvar as gl
-gl._init()
 
 # run the endless loop
 while True:
@@ -84,7 +85,7 @@ while True:
         import session  # noqa: F401
         lv_ui = gl.get_dictionary()
         for key, value in lv_ui.items():
-            lv.obj.delete(value.screen)
+            value.delete()
         gl.del_all() 
         del session
         print('-------------------------') 

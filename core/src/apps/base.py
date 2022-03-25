@@ -236,7 +236,7 @@ def set_homescreen_lvgl() -> None:
 
     # ui_home = gl.get_value('ui_home')
     # if ui_home is None:
-    ui_home = lv_ui.UiHomescreen(dev_state)
+    ui_home = lv_ui.Screen_Home(dev_state)
     gl.set_value('ui_home',ui_home)
 
 
