@@ -15,6 +15,7 @@ from trezorutils import (  # noqa: F401
 )
 from typing import TYPE_CHECKING
 
+
 DISABLE_ANIMATION = 0
 
 if __debug__:
@@ -37,6 +38,15 @@ if TYPE_CHECKING:
 
     from trezor.protobuf import MessageType
 
+SCREENS = []
+
+def clear_screens() -> None:
+    for scr in SCREENS:
+        try:
+            scr.delete()
+        except:
+            pass
+    SCREENS.clear()
 
 def unimport_begin() -> set[str]:
     return set(sys.modules)
@@ -47,7 +57,7 @@ def unimport_end(mods: set[str], collect: bool = True) -> None:
     # MICROPY_LOADED_MODULES_DICT_SIZE, so that the sys.modules dict is never
     # reallocated at run-time
     assert len(sys.modules) <= 160, "Please bump preallocated size in mpconfigport.h"
-
+    clear_screens()
     for mod in sys.modules:  # pylint: disable=consider-using-dict-items
         if mod not in mods:
             # remove reference from sys.modules
@@ -64,6 +74,7 @@ def unimport_end(mods: set[str], collect: bool = True) -> None:
                 # either path is not present in sys.modules, or module is not
                 # referenced from the parent package. both is fine.
                 pass
+
     # collect removed modules
     if collect:
         gc.collect()

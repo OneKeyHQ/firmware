@@ -1,5 +1,5 @@
 import lvgl as lv
-from trezor import log, loop, utils
+from trezor import loop, utils
 
 if utils.EMULATOR:
     font_siyuan32 = lv.font_load("A:/res/ui_font_siyuan32.bin")
@@ -26,15 +26,15 @@ class Screen(lv.obj):
         if event == lv.EVENT.CLICKED:
             self.cancel = True
             self.lv_chan.publish('cancel')
-    
+
     def btn_confirm_eventhandler(self,evt):
         event = evt.code
         if event == lv.EVENT.CLICKED:
             self.confirm = True
             self.lv_chan.publish('confirm')
-            
 
-class Screen_Generic(Screen):
+
+class ScreenGeneric(Screen):
 
     def __init__(
         self,
@@ -45,7 +45,7 @@ class Screen_Generic(Screen):
         confirm_text: str = None,
     ):
         super().__init__()
-        
+
         self.label_title = lv.label(self)
         self.label_title.set_long_mode(lv.label.LONG.WRAP)
         self.label_title.set_text(title)
@@ -82,7 +82,7 @@ class Screen_Generic(Screen):
             self.img_cancel.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)	# 1
             self.img_cancel.set_pos(0, 0)
             self.img_cancel.set_align( lv.ALIGN.CENTER)
-        
+
         self.btn_confirm = lv.btn(self)
 
         if cancel_btn:
@@ -95,7 +95,7 @@ class Screen_Generic(Screen):
             self.btn_confirm.set_align( lv.ALIGN.BOTTOM_RIGHT)
         else:
             self.btn_confirm.set_pos(0,-64)
-            self.btn_confirm.set_align( lv.ALIGN.BOTTOM_MID)  
+            self.btn_confirm.set_align( lv.ALIGN.BOTTOM_MID)
 
         self.btn_confirm.add_event_cb(self.btn_confirm_eventhandler, lv.EVENT.ALL, None)
         self.btn_confirm.set_style_radius( 30, lv.PART.MAIN | lv.STATE.DEFAULT )
@@ -106,33 +106,32 @@ class Screen_Generic(Screen):
         self.label_confirm.set_text(confirm_text)
         self.label_confirm.set_size(lv.SIZE.CONTENT,lv.SIZE.CONTENT)	# 1
         self.label_confirm.set_pos(0,0)
-        self.label_confirm.set_align( lv.ALIGN.CENTER)     
+        self.label_confirm.set_align( lv.ALIGN.CENTER)
         self.label_confirm.set_style_text_color( lv.color_hex(0x020202), lv.PART.MAIN | lv.STATE.DEFAULT )
-        self.label_confirm.set_style_text_font( lv.font_montserrat_32, lv.PART.MAIN | lv.STATE.DEFAULT )        
+        self.label_confirm.set_style_text_font( lv.font_montserrat_32, lv.PART.MAIN | lv.STATE.DEFAULT )
 
         lv.scr_load(self)
 
-class WordsGrid():
+class WordsGrid(lv.obj):
     def __init__(self,parent,words):
         col_dsc = [120, 120, lv.GRID_TEMPLATE.LAST]
         row_dsc = [32, 32, 32, 32, 32, 32, lv.GRID_TEMPLATE.LAST]
-
+        super().__init__(parent)
         # Create a container with grid
-        self.cont = lv.obj(parent)
-        self.cont.set_style_grid_column_dsc_array(col_dsc, 0)
-        self.cont.set_style_grid_row_dsc_array(row_dsc, 0)
-        self.cont.set_size(368, 280)
-        self.cont.set_align( lv.ALIGN.TOP_LEFT)
-        self.cont.set_pos(56, 258)
-        self.cont.set_layout(lv.LAYOUT_GRID.value)
-        self.cont.set_style_border_width( 0, lv.PART.MAIN | lv.STATE.DEFAULT )
-        self.cont.set_style_bg_color( lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT )
+        self.set_style_grid_column_dsc_array(col_dsc, 0)
+        self.set_style_grid_row_dsc_array(row_dsc, 0)
+        self.set_size(368, 280)
+        self.set_align( lv.ALIGN.TOP_LEFT)
+        self.set_pos(56, 258)
+        self.set_layout(lv.LAYOUT_GRID.value)
+        self.set_style_border_width( 0, lv.PART.MAIN | lv.STATE.DEFAULT )
+        self.set_style_bg_color( lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT )
 
         for i in range(12):
             col = i % 2
             row = i // 2
-            
-            label = lv.label(self.cont)
+
+            label = lv.label(self)
             # Stretch the cell horizontally and vertically too
             # Set span to 1 to make the cell 1 column/row sized
             label.set_grid_cell(lv.GRID_ALIGN.STRETCH, col, 1,
@@ -168,13 +167,13 @@ class CandidateWordList():
             label.center()
             label.set_style_text_font( lv.font_montserrat_16, lv.PART.MAIN | lv.STATE.DEFAULT )
             label.set_style_text_color( lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT )
-    
+
     def btn_event_handler(self,evt):
         event = evt.code
         btn = evt.get_target()
         if event == lv.EVENT.CLICKED:
-            self.current_btn = btn 
-        
+            self.current_btn = btn
+
         parent = btn.get_parent()
         for i in range( parent.get_child_cnt()):
             child = parent.get_child(i)
@@ -184,27 +183,27 @@ class CandidateWordList():
                 child.set_style_bg_color( lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT )
 
 
-class Screen_ShowWords(Screen_Generic):
+class ScreenShowWords(ScreenGeneric):
     def __init__(
         self,
         share_words,
         title: str = None,
         description: str = None,
-        confirm_text: str = None,        
+        confirm_text: str = None,
     ):
         super().__init__(False,False,title,description,confirm_text)
-        
+
         self.grid = WordsGrid(self,share_words)
         lv.scr_load(self)
 
 
-class Screen_CandidateWords(Screen_Generic):
+class ScreenCandidateWords(ScreenGeneric):
     def __init__(
         self,
         share_words,
         title: str = None,
         description: str = None,
-        confirm_text: str = None,        
+        confirm_text: str = None,
     ):
         super().__init__(False,False,title,description,confirm_text)
         self.current_btn =None
@@ -228,15 +227,15 @@ class Screen_CandidateWords(Screen_Generic):
             label.center()
             label.set_style_text_font( lv.font_montserrat_16, lv.PART.MAIN | lv.STATE.DEFAULT )
             label.set_style_text_color( lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT )
-        
+
         lv.scr_load(self)
-    
+
     def btn_event_handler(self,evt):
         event = evt.code
         btn = evt.get_target()
         if event == lv.EVENT.CLICKED:
-            self.current_btn = btn 
-        
+            self.current_btn = btn
+
         parent = btn.get_parent()
         for i in range( parent.get_child_cnt()):
             child = parent.get_child(i)
@@ -256,7 +255,7 @@ class Screen_CandidateWords(Screen_Generic):
         return await self.lv_chan.take()
 
 
-class Screen_Home(Screen):
+class ScreenHome(Screen):
     def __init__(self, title:str=None, description:str= None):
         super().__init__()
 
@@ -285,24 +284,24 @@ class Screen_Home(Screen):
             lable_description.set_text(description)
             lable_description.set_size(lv.SIZE.CONTENT,lv.SIZE.CONTENT)	# 1
             lable_description.set_pos(lv.pct(0),lv.pct(15))
-            lable_description.set_align( lv.ALIGN.CENTER)  
-            lable_description.set_style_text_color( lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT )           
+            lable_description.set_align( lv.ALIGN.CENTER)
+            lable_description.set_style_text_color( lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT )
 
-        lv.scr_load(self) 
-    
+        lv.scr_load(self)
+
     async def screen_response(self)-> None:
         await self.lv_chan.take()
 
-    def screen_eventhandler(self,evt):   
+    def screen_eventhandler(self,evt):
         event = evt.code
         if event == lv.EVENT.CLICKED:
             self.lv_chan.publish('clicked')
 
 
-class Screen_InputPIN(Screen):
+class ScreenInputPIN(Screen):
     def __init__(self, title: str=None, description: str=None):
         super().__init__()
-        
+
         self.label_title = lv.label(self)
 
         self.label_title.set_long_mode(lv.label.LONG.WRAP)
@@ -368,7 +367,7 @@ class Screen_InputPIN(Screen):
         self.btnm.clear_flag(lv.obj.FLAG.CLICK_FOCUSABLE)    # To keep the text area focused on button clicks
         self.btnm.set_map(btnm_map)
 
-        lv.scr_load(self) 
+        lv.scr_load(self)
 
     async def input_pin_response(self)-> None:
         return await self.lv_chan.take()
@@ -383,7 +382,7 @@ class Screen_InputPIN(Screen):
         elif txt:
             self.textarea_pin.add_text(txt)
 
-    def textarea_pin_eventhandler(self,evt):   
+    def textarea_pin_eventhandler(self,evt):
         event = evt.code
         text_area = evt.get_target()
         if event == lv.EVENT.CLICKED:

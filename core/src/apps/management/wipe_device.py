@@ -5,7 +5,7 @@ from trezor import ui, utils
 from trezor.enums import ButtonRequestType
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action
-from lvglui.lv_layouts import lv_confirm_wipe_device
+from trezor.lvglui.lv_layouts import lv_confirm_wipe_device
 
 from .apply_settings import reload_settings_from_storage
 
@@ -32,7 +32,7 @@ async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
             icon_color=ui.RED,
             br_code=ButtonRequestType.WipeDevice,
         )
-    
+
     storage.wipe()
     reload_settings_from_storage()
 
