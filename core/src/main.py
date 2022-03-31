@@ -62,9 +62,6 @@ indev_drv.register()
 # create an unimport manager that will be reused in the main loop
 unimport_manager = utils.unimport()
 
-from lvglui import globalvar as gl
-gl._init()
-
 # unlock the device, unload the boot module afterwards
 with unimport_manager:
     import boot
@@ -82,11 +79,7 @@ while True:
     print('++++++++++++++++++++++++')
     micropython.mem_info()
     with unimport_manager:        
-        import session  # noqa: F401
-        lv_ui = gl.get_dictionary()
-        for key, value in lv_ui.items():
-            value.delete()
-        gl.del_all() 
+        import session  # noqa: F401         
         del session
         print('-------------------------') 
         micropython.mem_info()

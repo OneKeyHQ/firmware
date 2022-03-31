@@ -121,7 +121,7 @@
     * The circumference of 1/4 circle are saved for anti-aliasing
     * radius * 4 bytes are used per circle (the most often used radiuses are saved)
     * 0: to disable caching */
-    #define LV_CIRCLE_CACHE_SIZE 4
+    #define LV_CIRCLE_CACHE_SIZE 0
 #endif /*LV_DRAW_COMPLEX*/
 
 /*Default image cache size. Image caching keeps the images opened.
@@ -129,7 +129,7 @@
  *With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
  *However the opened images might consume additional RAM.
  *0: to disable caching*/
-#define LV_IMG_CACHE_DEF_SIZE   1
+#define LV_IMG_CACHE_DEF_SIZE   0
 
 /*Number of stops allowed per gradient. Increase this to allow more stops.
  *This adds (sizeof(lv_color_t) + 1) bytes per additional stop*/
@@ -337,7 +337,7 @@
 #define LV_FONT_MONTSERRAT_14 0
 #define LV_FONT_MONTSERRAT_16 1
 #define LV_FONT_MONTSERRAT_18 0
-#define LV_FONT_MONTSERRAT_20 0
+#define LV_FONT_MONTSERRAT_20 1
 #define LV_FONT_MONTSERRAT_22 0
 #define LV_FONT_MONTSERRAT_24 0
 #define LV_FONT_MONTSERRAT_26 0
@@ -369,7 +369,7 @@
 #define LV_FONT_CUSTOM_DECLARE
 
 /*Always set a default font*/
-#define LV_FONT_DEFAULT &lv_font_montserrat_16
+#define LV_FONT_DEFAULT &lv_font_montserrat_20
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
@@ -587,7 +587,7 @@
 #define LV_USE_FS_POSIX 1
 #if LV_USE_FS_POSIX
     #define LV_FS_POSIX_LETTER 'A'     /*Set an upper cased letter on which the drive will accessible (e.g. 'A')*/
-    #define LV_FS_POSIX_PATH "/home/dahuanzi/trezor/onekey-firmware/core/src/lvglui/"         /*Set the working directory. File/directory paths will be appended to it.*/
+    #define LV_FS_POSIX_PATH "/home/dahuanzi/trezor/onekey-firmware/core/src/trezor/ui/layouts/lvglui"         /*Set the working directory. File/directory paths will be appended to it.*/
     #define LV_FS_POSIX_CACHE_SIZE  512   /*>0 to cache this number of bytes in lv_fs_read()*/
 #endif
 

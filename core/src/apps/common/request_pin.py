@@ -3,7 +3,7 @@ from typing import Any, NoReturn
 
 import storage.cache
 import storage.sd_salt
-from trezor import config, wire, utils
+from trezor import config, wire
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -87,18 +87,10 @@ async def verify_user_pin(
 
     if config.has_pin():
         from trezor.ui.layouts import request_pin_on_device
-        from lvglui.lv_layouts import lv_request_pin_on_device
 
-        
-        if utils.LVGL_UI:
-            pin = await lv_request_pin_on_device(
-                ctx, prompt, config.get_pin_rem(), allow_cancel
-            )
-        else:
-            pin = await request_pin_on_device(
-                ctx, prompt, config.get_pin_rem(), allow_cancel
-            )
-
+        pin = await request_pin_on_device(
+            ctx, prompt, config.get_pin_rem(), allow_cancel
+        )
         config.ensure_not_wipe_code(pin)
     else:
         pin = ""
@@ -114,7 +106,7 @@ async def verify_user_pin(
         raise RuntimeError
 
     while retry:
-        pin = await lv_request_pin_on_device(  # type: ignore ["request_pin_on_device" is possibly unbound]
+        pin = await request_pin_on_device(  # type: ignore ["request_pin_on_device" is possibly unbound]
             ctx, "Wrong PIN, enter again", config.get_pin_rem(), allow_cancel
         )
         if config.unlock(pin, salt):

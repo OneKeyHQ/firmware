@@ -219,8 +219,7 @@ def set_homescreen() -> None:
 
 
 def set_homescreen_lvgl() -> None:
-    from lvglui import lv_ui
-    from lvglui import globalvar as gl
+    from trezor.ui.layouts.lvglui import lv_ui
     if storage.device.is_initialized() and storage.device.no_backup():
         dev_state = "SEEDLESS"        
     elif storage.device.is_initialized() and storage.device.unfinished_backup():
@@ -234,10 +233,7 @@ def set_homescreen_lvgl() -> None:
     else:
         dev_state = None
 
-    # ui_home = gl.get_value('ui_home')
-    # if ui_home is None:
     ui_home = lv_ui.Screen_Home(dev_state)
-    gl.set_value('ui_home',ui_home)
 
 
 def lock_device() -> None:

@@ -3,12 +3,14 @@ from trezor.enums import ButtonRequestType
 from trezor.messages import ButtonAck, ButtonRequest
 
 def is_confirmed(x: Any) -> bool:
-    return x
-
+    if x == "cancel":
+        return False
+    elif x == "confirm":
+        return True
 
 async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -> T:
     result = await a
-    if result is False:
+    if result is "cancel":
         raise exc
     return result
 
@@ -30,4 +32,4 @@ async def interact(
     br_code: ButtonRequestType = ButtonRequestType.Other,
 ) -> Any:
     await button_request(ctx, br_type, br_code)
-    return await ctx.wait(screen.lv_btn_response())        
+    return await ctx.wait(screen.response())        

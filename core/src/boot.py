@@ -7,8 +7,7 @@ from apps.common.request_pin import can_lock_device, verify_user_pin
 from apps.homescreen.lockscreen import Lockscreen
 
 import lvgl as lv
-from lvglui import lv_ui
-from lvglui import globalvar as gl
+from trezor.ui.layouts.lvglui import lv_ui
 
 async def lvgl_tick():
     while True:
@@ -18,13 +17,12 @@ async def lvgl_tick():
 
 async def bootscreen() -> None:
     # lockscreen = Lockscreen(bootscreen=True)     
-    # ui.display.orientation(storage.device.get_rotation())
-    ui_boot = lv_ui.Screen_Home("Not connected","Tap to connect")
-    gl.set_value('ui_boot',ui_boot)
+    # ui.display.orientation(storage.device.get_rotation())    
     while True:
+        ui_boot = lv_ui.Screen_Home("Not connected","Tap to connect")
         try:
             if can_lock_device():
-                await ui_boot.screen_response()
+                await ui_boot.response()
             await verify_user_pin()
             storage.init_unlocked()
             loop.close(lvgl_task)
@@ -53,8 +51,3 @@ lvgl_task = lvgl_tick()
 loop.schedule(lvgl_task)
 
 loop.run()
-
-lv_ui = gl.get_dictionary()
-for key, value in lv_ui.items():
-    value.delete()
-gl.del_all()

@@ -39,7 +39,6 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
         return await recovery_process(ctx)
 
     await _continue_dialog(ctx, msg)
-
     if not msg.dry_run:
         # wipe storage to make sure the device is in a clear state
         storage.reset()
@@ -64,7 +63,6 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
 
     storage.recovery.set_in_progress(True)
     storage.recovery.set_dry_run(bool(msg.dry_run))
-
     workflow.set_default(recovery_homescreen)
     return await recovery_process(ctx)
 

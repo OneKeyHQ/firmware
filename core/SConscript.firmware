@@ -13,7 +13,7 @@ LVGL_UI = '1'
 FEATURE_FLAGS = {
     "RDI": True,
     "SECP256K1_ZKP": True,  # required for trezor.crypto.curve.bip340 (BIP340/Taproot)
-    "SYSTEM_VIEW": False,
+    "SYSTEM_VIEW": True,
 }
 
 CCFLAGS_MOD = ''
@@ -729,7 +729,8 @@ if FROZEN:
     else:
         raise ValueError('Unknown Trezor model')
 
-    SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'lvglui/*.py'))
+    if LVGL_UI == '1':
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/lvglui/*.py'))
     
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/wire/*.py'))
 

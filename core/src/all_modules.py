@@ -194,6 +194,20 @@ trezor.ui.layouts
 import trezor.ui.layouts
 trezor.ui.layouts.common
 import trezor.ui.layouts.common
+trezor.ui.layouts.lvglui
+import trezor.ui.layouts.lvglui
+trezor.ui.layouts.lvglui.globalvar
+import trezor.ui.layouts.lvglui.globalvar
+trezor.ui.layouts.lvglui.lv_common
+import trezor.ui.layouts.lvglui.lv_common
+trezor.ui.layouts.lvglui.lv_styles
+import trezor.ui.layouts.lvglui.lv_styles
+trezor.ui.layouts.lvglui.lv_ui
+import trezor.ui.layouts.lvglui.lv_ui
+trezor.ui.layouts.lvglui.recovery
+import trezor.ui.layouts.lvglui.recovery
+trezor.ui.layouts.lvglui.reset
+import trezor.ui.layouts.lvglui.reset
 trezor.ui.layouts.t1
 import trezor.ui.layouts.t1
 trezor.ui.layouts.tt
@@ -214,8 +228,6 @@ trezor.ui.qr
 import trezor.ui.qr
 trezor.ui.style
 import trezor.ui.style
-trezor.ui.ui
-import trezor.ui.ui
 trezor.utils
 import trezor.utils
 trezor.wire
@@ -388,16 +400,6 @@ apps.misc.sign_identity
 import apps.misc.sign_identity
 apps.workflow_handlers
 import apps.workflow_handlers
-lvglui
-import lvglui
-lvglui.common
-import lvglui.common
-lvglui.globalvar
-import lvglui.globalvar
-lvglui.lv_layouts
-import lvglui.lv_layouts
-lvglui.lv_ui
-import lvglui.lv_ui
 
 if not utils.BITCOIN_ONLY:
     trezor.enums.BinanceOrderSide

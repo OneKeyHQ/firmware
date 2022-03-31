@@ -4,7 +4,7 @@ import apps.base
 import usb
 
 import lvgl as lv
-from lvglui import lv_ui
+from trezor.ui.layouts.lvglui import lv_ui
 
 async def lvgl_tick():
     while True:
