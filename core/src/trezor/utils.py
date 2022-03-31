@@ -3,8 +3,8 @@ import sys
 from trezorutils import (  # noqa: F401
     BITCOIN_ONLY,
     EMULATOR,
-    MODEL,
     LVGL_UI,
+    MODEL,
     SCM_REVISION,
     VERSION_MAJOR,
     VERSION_MINOR,
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
 SCREENS = []
 
+
 def clear_screens() -> None:
     for scr in SCREENS:
         try:
@@ -46,6 +47,7 @@ def clear_screens() -> None:
         except:
             pass
     SCREENS.clear()
+
 
 def unimport_begin() -> set[str]:
     return set(sys.modules)

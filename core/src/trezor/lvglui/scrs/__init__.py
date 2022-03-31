@@ -1,8 +1,11 @@
-import lvgl as lv
 from trezor import log
+
+import lvgl as lv
+
 
 def init():
     import lvgldrv as lcd
+
     lv.init()
     disp_buf1 = lv.disp_draw_buf_t()
     buf1_1 = lcd.framebuffer(1)
@@ -20,14 +23,22 @@ def init():
     indev_drv.type = lv.INDEV_TYPE.POINTER
     indev_drv.read_cb = lcd.ts_read
     indev_drv.register()
-    log.info('init', 'initialized successfully')
+    log.info("init", "initialized successfully")
+
+
 try:
     init()
 except:
-    log.error('init', 'failed to initialize emulator')
+    log.error("init", "failed to initialize emulator")
 
 dispp = lv.disp_get_default()
-theme = lv.theme_default_init(dispp, lv.palette_main(lv.PALETTE.BLUE), lv.palette_main(lv.PALETTE.RED), True, lv.font_default())
+theme = lv.theme_default_init(
+    dispp,
+    lv.palette_main(lv.PALETTE.BLUE),
+    lv.palette_main(lv.PALETTE.RED),
+    True,
+    lv.font_default(),
+)
 dispp.set_theme(theme)
 font_PJSBOLD36 = lv.font_load("A:/res/ui_font_PJSBOLD36.bin")
 font_PJSBOLD24 = lv.font_load("A:/res/ui_font_PJSBOLD24.bin")
@@ -40,6 +51,7 @@ font_MONO24 = lv.font_load("A:/res/ui_font_MONO24.bin")
 
 class StatusBar:
     _instance = None
+
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
@@ -50,7 +62,7 @@ class StatusBar:
         ble = lv.img(lv.layer_top())
         ble.set_src("A:/res/Bluetooth.png")
         ble.set_width(lv.SIZE.CONTENT)  # 0
-        ble.set_height(lv.SIZE.CONTENT)   # 0
+        ble.set_height(lv.SIZE.CONTENT)  # 0
         ble.set_x(-30)
         ble.set_y(5)
         ble.set_align(lv.ALIGN.TOP_RIGHT)
@@ -60,7 +72,7 @@ class StatusBar:
         battery = lv.img(lv.layer_top())
         battery.set_src("A:/res/Status=50%.png")
         battery.set_width(lv.SIZE.CONTENT)  # 96
-        battery.set_height(lv.SIZE.CONTENT)   # 96
+        battery.set_height(lv.SIZE.CONTENT)  # 96
         battery.set_x(-5)
         battery.set_y(5)
         battery.set_align(lv.ALIGN.TOP_RIGHT)

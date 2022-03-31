@@ -10,7 +10,7 @@ except ImportError:
 
 # NOTE: using any import magic probably causes mypy not to check equivalence of
 #       layout type signatures across models
-if utils.LVGL_UI == '1':
+if utils.LVGL_UI == "1":
     from .lvglui import *  # noqa: F401,F403
 else:
     if utils.MODEL == "1":

@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include "secbool.h"
 
-#if PRODUCTION_MODEL== 'H'
+#if PRODUCTION_MODEL == 'H'
 #define BOARDLOADER_START 0x08000000
 #define BOOTLOADER_START 0x08020000
 // #define BOOTLOADER_START 0x90000000

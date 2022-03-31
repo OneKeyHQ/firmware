@@ -1,5 +1,7 @@
-import lvgl as lv
 from trezor import loop
+
+import lvgl as lv
+
 
 async def lvgl_tick():
     while True:

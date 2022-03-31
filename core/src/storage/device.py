@@ -115,16 +115,19 @@ def set_label(label: str) -> None:
         raise ValueError  # label too long
     common.set(_NAMESPACE, _LABEL, label.encode(), True)  # public
 
+
 def get_language() -> str | None:
     language = common.get(_NAMESPACE, _LANGUAGE, True)  # public
     if language is None:
         return "English"
     return language.decode()
 
+
 def set_language(language: str) -> None:
     if language not in ["English", "Chinese"]:
         raise ValueError
     common.set(_NAMESPACE, _LANGUAGE, language.encode(), True)  # public
+
 
 def get_mnemonic_secret() -> bytes | None:
     return common.get(_NAMESPACE, _MNEMONIC_SECRET)

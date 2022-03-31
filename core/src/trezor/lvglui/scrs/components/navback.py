@@ -1,5 +1,6 @@
 import lvgl as lv
 
+
 class NavBack(lv.imgbtn):
     def __init__(self, parent):
         super().__init__(parent)

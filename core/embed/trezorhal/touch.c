@@ -131,7 +131,6 @@ void touch_init(void) {
   _i2c_init();
   if (HAL_I2C_Mem_Read(&i2c_handle, TOUCH_ADDRESS, 0xa8, 1, &id, 1, 1000) ==
       HAL_OK) {
-        
   }
 }
 
