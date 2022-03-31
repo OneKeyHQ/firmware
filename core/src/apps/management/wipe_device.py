@@ -40,7 +40,7 @@ async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
             icon_color=ui.RED,
             br_code=ButtonRequestType.WipeDevice,
         )
-    
+
     storage.wipe()
     reload_settings_from_storage()
 

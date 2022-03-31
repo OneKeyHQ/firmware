@@ -9,15 +9,17 @@ TREZOR_MODEL = ARGUMENTS.get('TREZOR_MODEL', 'T')
 UI2 = ARGUMENTS.get('UI2', '0') == '1' or TREZOR_MODEL == '1'
 PRODUCTION_MODEL = ARGUMENTS.get('PRODUCTION_MODEL', 'H')
 LVGL_UI = '1'
+UNAME_S = ARGUMENTS.get('UNAME_S', 'Linux')
 
 FEATURE_FLAGS = {
-    "SECP256K1_ZKP": True,  # required for trezor.crypto.curve.bip340 (BIP340/Taproot)
+    "SECP256K1_ZKP": True,
+    "TREZOR_UI": True,
 }
-
+SOURCE_MOD = []
 CCFLAGS_MOD = ''
 CPPPATH_MOD = []
 CPPDEFINES_MOD = []
-SOURCE_MOD = [
+SOURCE_MOD += [
     'vendor/micropython/extmod/vfs_posix_file.c',
 ]
 
@@ -34,49 +36,49 @@ SOURCE_MOD += [
     'vendor/trezor-storage/norcow.c',
     'vendor/trezor-storage/storage.c',
 ]
+if LVGL_UI == '1':
+    SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c',
+        exclude=['vendor/lvgl_mp/lvgl/src/extra/libs/qrcode/*.c'])
+    )
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
 
-SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c',
-    exclude=['vendor/lvgl_mp/lvgl/src/extra/libs/qrcode/*.c'])
-)
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
+    LVGL_BINDING_DIR = 'vendor/lvgl_mp'
+    LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
+    LVGL_BUILD = 'build/unix'
+    INC = f'-I{LVGL_BINDING_DIR}'
+    INC += f' -Iembed/unix'
+    LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
+    LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
+    LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
+    LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -DLV_CONF_INCLUDE_SIMPLE -x c'
 
-LVGL_BINDING_DIR = 'vendor/lvgl_mp'
-LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
-LVGL_BUILD = 'build/unix'
-INC = f'-I{LVGL_BINDING_DIR}'
-INC += f' -Iembed/unix'
-LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
-LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
-LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
-LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -DLV_CONF_INCLUDE_SIMPLE -x c'
+    LV_INC = [
+        f'{LVGL_DIR}/lvgl.h',
+        'embed/unix/lv_conf.h',
+    ]
 
-LV_INC = [
-    f'{LVGL_DIR}/lvgl.h',
-    'embed/unix/lv_conf.h',
-]
+    env1 = Environment(ENV=os.environ)
 
-env1 = Environment(ENV=os.environ)
+    env1.Command(
+        target='lv_mpy.c',
+        source=LV_INC,
+        action=[
+            f'rm {LVGL_BINDING_DIR}/lv_conf.h | true',
+            f'gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
+            f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
+            f'rm ./lextab.py ./yacctab.py',
+        ],
+    )
 
-env1.Command(
-    target='lv_mpy.c',
-    source=LV_INC,
-    action=[
-        f'rm {LVGL_BINDING_DIR}/lv_conf.h | true',
-        f'gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
-        f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
-        f'rm ./lextab.py ./yacctab.py',
-    ],
-)
-
-# LVGL
-SOURCE_MOD += [
-    'lv_mpy.c',
-]
+    # LVGL
+    SOURCE_MOD += [
+        'lv_mpy.c',
+    ]
 
 # modtrezorcrypto
-CCFLAGS_MOD += '-Wno-sequence-point '
+CCFLAGS_MOD += ' -Wno-sequence-point '
 CPPPATH_MOD += [
     'vendor/trezor-crypto',
 ]
@@ -195,42 +197,43 @@ if TREZOR_MODEL == 'T':
     ]
 
 # modtrezorui
-CPPPATH_MOD += [
-        'vendor/micropython/lib/uzlib',
-]
-CPPDEFINES_MOD += [
-    'TREZOR_FONT_BOLD_ENABLE',
-    'TREZOR_FONT_NORMAL_ENABLE',
-    'TREZOR_FONT_MONO_ENABLE',
-]
-SOURCE_MOD += [
-#    'embed/unix/lv_port_disp.c',
-#    'embed/unix/lv_port_indev.c',
-    'embed/unix/modlvgldrv.c',
-    'embed/extmod/modtrezorui/display.c',
-    'embed/extmod/modtrezorui/font_bitmap.c',
-    'embed/extmod/modtrezorui/font_roboto_bold_20.c',
-    'embed/extmod/modtrezorui/font_roboto_regular_20.c',
-    'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
-    'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
-    'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
-    'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
-    'embed/extmod/modtrezorui/modtrezorui.c',
-    'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
-    'vendor/micropython/lib/uzlib/adler32.c',
-    'vendor/micropython/lib/uzlib/crc32.c',
-    'vendor/micropython/lib/uzlib/tinflate.c',
-]
-if UI2:
+if FEATURE_FLAGS["TREZOR_UI"]:
+    CPPPATH_MOD += [
+            'vendor/micropython/lib/uzlib',
+    ]
     CPPDEFINES_MOD += [
-        'TREZOR_FONT_MEDIUM_ENABLE',
-        'TREZOR_UI2',
+        'TREZOR_FONT_BOLD_ENABLE',
+        'TREZOR_FONT_NORMAL_ENABLE',
+        'TREZOR_FONT_MONO_ENABLE',
     ]
     SOURCE_MOD += [
-        'embed/extmod/modtrezorui/font_tthoves_bold_16.c',
-        'embed/extmod/modtrezorui/font_tthoves_medium_20.c',
-        'embed/extmod/modtrezorui/font_tthoves_regular_18.c',
+        'embed/extmod/modtrezorui/display.c',
+        'embed/extmod/modtrezorui/font_bitmap.c',
+        'embed/extmod/modtrezorui/font_roboto_bold_20.c',
+        'embed/extmod/modtrezorui/font_roboto_regular_20.c',
+        'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
+        'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
+        'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
+        'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
+        'embed/extmod/modtrezorui/modtrezorui.c',
+        'vendor/micropython/lib/uzlib/adler32.c',
+        'vendor/micropython/lib/uzlib/crc32.c',
+        'vendor/micropython/lib/uzlib/tinflate.c',
     ]
+    if FEATURE_FLAGS["TREZOR_UI"]:
+        SOURCE_MOD += [
+            'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+        ]
+    if UI2:
+        CPPDEFINES_MOD += [
+            'TREZOR_FONT_MEDIUM_ENABLE',
+            'TREZOR_UI2',
+        ]
+        SOURCE_MOD += [
+            'embed/extmod/modtrezorui/font_tthoves_bold_16.c',
+            'embed/extmod/modtrezorui/font_tthoves_medium_20.c',
+            'embed/extmod/modtrezorui/font_tthoves_regular_18.c',
+        ]
 if FROZEN:
     CPPDEFINES_MOD += ['TREZOR_EMULATOR_FROZEN']
 
@@ -243,7 +246,7 @@ SOURCE_MOD += [
 SOURCE_MOD += [
     'embed/extmod/rustmods/modtrezorproto.c',
 ]
-if UI2:
+if UI2 and FEATURE_FLAGS['TREZOR_UI']:
     SOURCE_MOD += [
         'embed/extmod/rustmods/modtrezorui2.c',
     ]
@@ -380,6 +383,7 @@ SOURCE_MICROPYTHON = [
 ]
 
 SOURCE_UNIX = [
+    'embed/unix/modlvgldrv.c',
     'embed/unix/common.c',
     'embed/unix/flash.c',
     'embed/unix/main.c',
@@ -402,13 +406,13 @@ if TREZOR_MODEL == 'T':
     ]
 
 SOURCE_QSTR = SOURCE_MOD + SOURCE_MICROPYTHON + SOURCE_UNIX + SOURCE_LVGL
+# remove because it's conflict with lvgl
+# if PYOPT == '0' or not FROZEN:
+#     STATIC="-DSTATIC=static"
+# else:
+#     STATIC=""
 
-if PYOPT == '0' or not FROZEN:
-    STATIC="-DSTATIC=static"
-else:
-    STATIC=""
-
-env = Environment(ENV=os.environ, CFLAGS='%s -DPYOPT=%s -DBITCOIN_ONLY=%s %s' % (ARGUMENTS.get('CFLAGS', ''), PYOPT, BITCOIN_ONLY, STATIC))
+env = Environment(ENV=os.environ, CFLAGS='%s -DPYOPT=%s -DBITCOIN_ONLY=%s' % (ARGUMENTS.get('CFLAGS', ''), PYOPT, BITCOIN_ONLY))
 
 env.Tool('micropython')
 
@@ -456,7 +460,7 @@ if ARGUMENTS.get('TREZOR_MEMPERF', '0') == '1':
     ]
 
 env.Replace(
-    TREZOR_MODEL=TREZOR_MODEL, 
+    TREZOR_MODEL=TREZOR_MODEL,
     LVGL_UI=LVGL_UI,)
 
 env.Replace(
@@ -465,12 +469,12 @@ env.Replace(
     '-std=gnu99 -Wall -Werror -Wuninitialized -Wno-missing-braces '
     '-fdata-sections -ffunction-sections -fPIE ' + CCFLAGS_MOD,
     CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
-    LIBS=['m'],
+    LIBS=['m', 'pthread'],
     CPPPATH=[
         '.',
         'embed/rust',
         'embed/unix',
-        'embed/extmod/modtrezorui',
+        'embed/extmod/modtrezorui' if FEATURE_FLAGS['TREZOR_UI'] else '',
         'vendor/micropython',
         'vendor/micropython/ports/unix',
         'vendor/micropython/lib/mp-readline',
@@ -485,7 +489,7 @@ env.Replace(
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
 try:
-    env.ParseConfig('pkg-config --cflags --libs sdl2 SDL2_image')
+    env.ParseConfig('pkg-config --cflags --libs sdl2 SDL2_image ')
 except OSError:
     print("SDL2 not installed, Emulator build is not possible")
 

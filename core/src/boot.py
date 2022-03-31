@@ -1,28 +1,28 @@
+from trezor.lvglui.scrs import *
 import storage
 import storage.device
 from trezor import config, log, loop, ui, utils, wire
 from trezor.pin import show_pin_timeout
 
 from apps.common.request_pin import can_lock_device, verify_user_pin
-from apps.homescreen.lockscreen import Lockscreen
 
-import lvgl as lv
-from trezor.ui.layouts.lvglui import lv_ui
+from trezor.lvglui import lvgl_tick
+from trezor.lvglui.scrs.lockscreen import LockScreen
+from trezor.lvglui.scrs.bootscreen import BootScreen
 
-async def lvgl_tick():
-    while True:
-        lv.tick_inc(10)        
-        await loop.sleep(10)
-        lv.timer_handler()
+lvgl_task = lvgl_tick()
+
 
 async def bootscreen() -> None:
-    # lockscreen = Lockscreen(bootscreen=True)     
-    # ui.display.orientation(storage.device.get_rotation())    
+    bootscreen = BootScreen()
+    # wait for bootscreen animation to finish
+    await loop.sleep(1500)
+    # await bootscreen.request()
+    lockscreen = LockScreen()
     while True:
-        ui_boot = lv_ui.Screen_Home("Not connected","Tap to connect")
         try:
             if can_lock_device():
-                await ui_boot.response()
+                await lockscreen.request()
             await verify_user_pin()
             storage.init_unlocked()
             loop.close(lvgl_task)
@@ -46,8 +46,9 @@ config.init(show_pin_timeout)
 if __debug__ and not utils.EMULATOR:
     config.wipe()
 
+
 loop.schedule(bootscreen())
-lvgl_task = lvgl_tick()
+
 loop.schedule(lvgl_task)
 
 loop.run()

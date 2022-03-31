@@ -98,14 +98,14 @@ async def _show_confirmation_failure(
     else:
         header = f"Recovery share #{share_index + 1}"
     await show_warning(
-            ctx,
-            "warning_backup_check",
-            header=header,
-            subheader="That is the wrong word.",
-            content="Please check again.",
-            button="Check again",
-            br_code=ButtonRequestType.ResetDevice,
-        )
+        ctx,
+        "warning_backup_check",
+        header=header,
+        subheader="That is the wrong word.",
+        content="Please check again.",
+        button="Check again",
+        br_code=ButtonRequestType.ResetDevice,
+    )
 
 
 async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) -> None:

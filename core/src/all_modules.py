@@ -128,6 +128,46 @@ trezor.log
 import trezor.log
 trezor.loop
 import trezor.loop
+trezor.lvglui
+import trezor.lvglui
+trezor.lvglui.common
+import trezor.lvglui.common
+trezor.lvglui.lv_colors
+import trezor.lvglui.lv_colors
+trezor.lvglui.scrs
+import trezor.lvglui.scrs
+trezor.lvglui.scrs.bootscreen
+import trezor.lvglui.scrs.bootscreen
+trezor.lvglui.scrs.common
+import trezor.lvglui.scrs.common
+trezor.lvglui.scrs.components
+import trezor.lvglui.scrs.components
+trezor.lvglui.scrs.components.button
+import trezor.lvglui.scrs.components.button
+trezor.lvglui.scrs.components.container
+import trezor.lvglui.scrs.components.container
+trezor.lvglui.scrs.components.imgbtn
+import trezor.lvglui.scrs.components.imgbtn
+trezor.lvglui.scrs.components.keyboard
+import trezor.lvglui.scrs.components.keyboard
+trezor.lvglui.scrs.components.list
+import trezor.lvglui.scrs.components.list
+trezor.lvglui.scrs.components.navback
+import trezor.lvglui.scrs.components.navback
+trezor.lvglui.scrs.components.roller
+import trezor.lvglui.scrs.components.roller
+trezor.lvglui.scrs.components.style
+import trezor.lvglui.scrs.components.style
+trezor.lvglui.scrs.components.theme
+import trezor.lvglui.scrs.components.theme
+trezor.lvglui.scrs.homescreen
+import trezor.lvglui.scrs.homescreen
+trezor.lvglui.scrs.initscreen
+import trezor.lvglui.scrs.initscreen
+trezor.lvglui.scrs.lockscreen
+import trezor.lvglui.scrs.lockscreen
+trezor.lvglui.scrs.pinscreen
+import trezor.lvglui.scrs.pinscreen
 trezor.messages
 import trezor.messages
 trezor.pin

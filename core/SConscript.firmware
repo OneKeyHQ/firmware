@@ -13,7 +13,7 @@ LVGL_UI = '1'
 FEATURE_FLAGS = {
     "RDI": True,
     "SECP256K1_ZKP": True,  # required for trezor.crypto.curve.bip340 (BIP340/Taproot)
-    "SYSTEM_VIEW": True,
+    "SYSTEM_VIEW": False,
 }
 
 CCFLAGS_MOD = ''
@@ -328,43 +328,44 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/py/warning.c',
 ]
 
-SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c'))
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
+if LVGL_UI == '1':
+    SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c'))
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
 
-LVGL_BINDING_DIR = 'vendor/lvgl_mp'
-LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
-LVGL_BUILD = 'build/firmware'
-INC = f'-I{LVGL_BINDING_DIR}'
-INC += f' -Iembed/lvgl'
-LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
-LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
-LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
-LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -DLV_CONF_INCLUDE_SIMPLE -x c'
+    LVGL_BINDING_DIR = 'vendor/lvgl_mp'
+    LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
+    LVGL_BUILD = 'build/firmware'
+    INC = f'-I{LVGL_BINDING_DIR}'
+    INC += f' -Iembed/lvgl'
+    LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
+    LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
+    LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
+    LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -DLV_CONF_INCLUDE_SIMPLE -x c'
 
-LV_INC = [
-    f'{LVGL_DIR}/lvgl.h',
-    'embed/lvgl/lv_conf.h',
-]
+    LV_INC = [
+        f'{LVGL_DIR}/lvgl.h',
+        'embed/lvgl/lv_conf.h',
+    ]
 
-env1 = Environment(ENV=os.environ)
+    env1 = Environment(ENV=os.environ)
 
-env1.Command(
-    target='lv_mpy.c',
-    source=LV_INC,
-    action=[
-        f'rm {LVGL_BINDING_DIR}/lv_conf.h | true',
-        f'arm-none-eabi-gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
-        f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
-        f'rm ./lextab.py ./yacctab.py',
-    ],
-)
+    env1.Command(
+        target='lv_mpy.c',
+        source=LV_INC,
+        action=[
+            f'rm {LVGL_BINDING_DIR}/lv_conf.h | true',
+            f'arm-none-eabi-gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
+            f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
+            f'rm ./lextab.py ./yacctab.py',
+        ],
+    )
 
-# LVGL
-SOURCE_MOD += [
-    'lv_mpy.c',
-]
+    # LVGL
+    SOURCE_MOD += [
+        'lv_mpy.c',
+    ]
 
 SOURCE_MICROPYTHON_SPEED = [
     'vendor/micropython/py/gc.c',

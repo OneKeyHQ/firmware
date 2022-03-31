@@ -39,7 +39,7 @@ async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None
             "abort_recovery",
             "Abort seed check",
             description="Do you really want to abort the seed check?",
-            icon="A:/res/warning.png",
+            icon=ui.ICON_WIPE,
             br_code=ButtonRequestType.ProtectCall,
         )
     else:
