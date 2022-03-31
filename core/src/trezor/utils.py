@@ -15,7 +15,6 @@ from trezorutils import (  # noqa: F401
 )
 from typing import TYPE_CHECKING
 
-
 DISABLE_ANIMATION = 0
 
 if __debug__:
@@ -74,7 +73,6 @@ def unimport_end(mods: set[str], collect: bool = True) -> None:
                 # either path is not present in sys.modules, or module is not
                 # referenced from the parent package. both is fine.
                 pass
-
     # collect removed modules
     if collect:
         gc.collect()

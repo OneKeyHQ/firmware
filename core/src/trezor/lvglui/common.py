@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 def is_confirmed(x: Any) -> bool:
     return x
 
-
 async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -> T:
     result = await a
     if result is False:

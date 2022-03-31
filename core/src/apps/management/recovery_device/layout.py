@@ -1,17 +1,27 @@
 from typing import TYPE_CHECKING
 
 import storage.recovery
-from trezor import ui, wire
+from trezor import ui, wire, utils
 from trezor.enums import ButtonRequestType
 from trezor.ui.layouts import confirm_action, show_success, show_warning
-from trezor.ui.layouts.common import button_request
-from trezor.ui.layouts.tt.recovery import (  # noqa: F401
-    continue_recovery,
-    request_word,
-    request_word_count,
-    show_group_share_success,
-    show_remaining_shares,
-)
+if utils.LVGL_UI == "1":
+    from trezor.ui.layouts.lvglui.lv_common import button_request
+    from trezor.ui.layouts.lvglui.recovery import (  # noqa: F401
+        continue_recovery,
+        request_word,
+        request_word_count,
+        show_group_share_success,
+        show_remaining_shares,
+    )
+else:
+    from trezor.ui.layouts.common import button_request
+    from trezor.ui.layouts.tt.recovery import (  # noqa: F401
+        continue_recovery,
+        request_word,
+        request_word_count,
+        show_group_share_success,
+        show_remaining_shares,
+    )
 
 from .. import backup_types
 from . import word_validity
