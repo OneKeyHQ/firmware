@@ -5,7 +5,6 @@ import storage.device
 from trezor import config, utils, wire, workflow
 from trezor.enums import MessageType
 from trezor.messages import Success
-
 from . import workflow_handlers
 
 if TYPE_CHECKING:
@@ -198,46 +197,49 @@ ALLOW_WHILE_LOCKED = (
     MessageType.WipeDevice,
 )
 
+if not utils.LVGL_UI:
+    def set_homescreen() -> None:
+        import storage.recovery
 
-def set_homescreen() -> None:
-    import storage.recovery
+        if not config.is_unlocked():
+            from apps.homescreen.lockscreen import lockscreen
 
-    if not config.is_unlocked():
-        from apps.homescreen.lockscreen import lockscreen
+            workflow.set_default(lockscreen)
 
-        workflow.set_default(lockscreen)
+        elif storage.recovery.is_in_progress():
+            from apps.management.recovery_device.homescreen import recovery_homescreen
 
-    elif storage.recovery.is_in_progress():
-        from apps.management.recovery_device.homescreen import recovery_homescreen
+            workflow.set_default(recovery_homescreen)
 
-        workflow.set_default(recovery_homescreen)
+        else:
+            from apps.homescreen.homescreen import homescreen
 
-    else:
-        from apps.homescreen.homescreen import homescreen
+            workflow.set_default(homescreen)
 
-        workflow.set_default(homescreen)
-
-
-def set_homescreen_lvgl() -> None:
-    from lvglui import lv_ui
-    from lvglui import globalvar as gl
-    if storage.device.is_initialized() and storage.device.no_backup():
-        dev_state = "SEEDLESS"        
-    elif storage.device.is_initialized() and storage.device.unfinished_backup():
-        dev_state = "BACKUP FAILED!"
-    elif storage.device.is_initialized() and storage.device.needs_backup():
-        dev_state = "NEEDS BACKUP!"
-    elif storage.device.is_initialized() and not config.has_pin():
-        dev_state = "PIN NOT SET!"
-    elif storage.device.get_experimental_features():
-        dev_state = "EXPERIMENTAL MODE!"
-    else:
-        dev_state = None
-
-    # ui_home = gl.get_value('ui_home')
-    # if ui_home is None:
-    ui_home = lv_ui.Screen_Home(dev_state)
-    gl.set_value('ui_home',ui_home)
+else:
+    def set_homescreen() -> None:
+        if storage.device.is_initialized():
+            if storage.device.no_backup():
+                dev_state = "SEEDLESS"
+            elif storage.device.unfinished_backup():
+                dev_state = "BACKUP FAILED!"
+            elif storage.device.needs_backup():
+                dev_state = "NEEDS BACKUP!"
+            elif not config.has_pin():
+                dev_state = "PIN NOT SET!"
+            elif storage.device.get_experimental_features():
+                dev_state = "EXPERIMENTAL MODE!"
+            if not config.is_unlocked():
+                print("Device is locked")
+                from trezor.lvglui.scrs.lockscreen import LockScreen
+                LockScreen()
+            else:
+                print("Device is unlocked")
+                from trezor.lvglui.scrs.homescreen import MainScreen
+                MainScreen()
+        else:
+            from trezor.lvglui.scrs.initscreen import InitScreen
+            InitScreen()
 
 
 def lock_device() -> None:

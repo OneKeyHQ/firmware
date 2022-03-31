@@ -21,14 +21,15 @@ def show_pin_timeout(seconds: int, progress: int, message: str) -> bool:
             # avoid overdraw in case of repeated progress calls
             ui.display.clear()
             _previous_seconds = None
-        ui.display.text_center(ui.WIDTH // 2, 37, message, ui.BOLD, ui.FG, ui.BG)
+        # ui.display.text_center(ui.WIDTH // 2, 37, message, ui.BOLD, ui.FG, ui.BG)
 
     if not utils.DISABLE_ANIMATION:
         ui.display.loader(progress, False, 0, ui.FG, ui.BG)
 
     if seconds != _previous_seconds:
         if seconds == 0:
-            remaining = "Done"
+            remaining = ""
+            ui.display.clear()
         elif seconds == 1:
             remaining = "1 second left"
         else:

@@ -38,6 +38,12 @@
 #define MICROPY_MODULE_FROZEN_MPY   (1)
 #define MICROPY_QSTR_EXTRA_POOL     (mp_qstr_frozen_const_pool)
 #define MPZ_DIG_SIZE                (16)
+// #if !defined(MICROPY_EMIT_X64) && defined(__x86_64__)
+//     #define MICROPY_EMIT_X64        (1)
+// #endif
+// #if !defined(MICROPY_EMIT_X86) && defined(__i386__)
+//     #define MICROPY_EMIT_X86        (1)
+// #endif
 #endif
 
 // memory allocation policies
@@ -85,7 +91,7 @@
 #define MICROPY_CAN_OVERRIDE_BUILTINS (0)
 #define MICROPY_VFS_POSIX_FILE      (1)
 #define MICROPY_USE_INTERNAL_ERRNO  (0)
-#define MICROPY_ENABLE_SCHEDULER    (0)
+#define MICROPY_ENABLE_SCHEDULER    (1)
 #define MICROPY_SCHEDULER_DEPTH     (0)
 #define MICROPY_VFS                 (0)
 
@@ -128,10 +134,27 @@
 #define MICROPY_PY_SYS_EXIT         (0)
 #define MICROPY_PY_SYS_STDFILES     (0)
 #define MICROPY_PY_SYS_STDIO_BUFFER (0)
-#define MICROPY_PY_SYS_PLATFORM     "trezor-emulator"
+#ifndef MICROPY_PY_SYS_PLATFORM
+#define MICROPY_PY_SYS_PLATFORM  "trezor-emulator"
+#if defined(__APPLE__) && defined(__MACH__)
+    #define LINUX_FRAME_BUFFER 0
+#else
+    #define LINUX_FRAME_BUFFER 1
+#endif
+#endif
 #define MICROPY_PY_UERRNO           (0)
 #define MICROPY_PY_THREAD           (0)
 #define MICROPY_PY_FSTRINGS         (1)
+
+#define MICROPY_PY_LVGL             (1)
+#define MICROPY_PY_LVGL_SDL         (0)
+#define MICROPY_PY_LVGL_DISPDRV     (1)
+#define MICROPY_PY_LVGL_LODEPNG     (0)
+#if LINUX_FRAME_BUFFER
+    #define MICROPY_PY_LVGL_FB      (1)
+#else
+    #define MICROPY_PY_LVGL_FB      (0)
+#endif
 
 // extended modules
 #define MICROPY_PY_UCTYPES          (1)
@@ -163,6 +186,7 @@
 
 // Debugging and interactive functionality.
 #define MICROPY_DEBUG_PRINTERS      (1)
+#define MICROPY_MODULE_BUILTIN_INIT (1)
 // Printing debug to stderr may give tests which
 // check stdout a chance to pass, etc.
 #define MICROPY_DEBUG_PRINTER       (&mp_stderr_print)
@@ -212,21 +236,63 @@ extern const struct _mp_print_t mp_stderr_print;
 
 #ifndef MICROPY_INCLUDED_PY_MPSTATE_H
 #define MICROPY_INCLUDED_PY_MPSTATE_H
-#include "src/misc/lv_gc.h"
+#include "lvgl/src/misc/lv_gc.h"
 #undef MICROPY_INCLUDED_PY_MPSTATE_H
 #else
-#include "src/misc/lv_gc.h"
+#include "lvgl/src/misc/lv_gc.h"
 #endif
 
 // extra built in modules to add to the list of known ones
 extern const struct _mp_obj_module_t mp_module_os;
 extern const struct _mp_obj_module_t mp_module_lvgl;
 extern const struct _mp_obj_module_t mp_module_lvgldispdrv;
+extern const struct _mp_obj_module_t mp_module_lvindev;
+extern const struct _mp_obj_module_t mp_module_SDL;
+extern const struct _mp_obj_module_t mp_module_fb;
+extern const struct _mp_obj_module_t mp_module_lodepng;
+
+#if MICROPY_PY_LVGL
+#ifndef MICROPY_INCLUDED_PY_MPSTATE_H
+#define MICROPY_INCLUDED_PY_MPSTATE_H
+#include  "lvgl/src/misc/lv_gc.h"
+#undef MICROPY_INCLUDED_PY_MPSTATE_H
+#else
+#include  "lvgl/src/misc/lv_gc.h"
+#endif
+#define MICROPY_PY_LVGL_DEF { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), (mp_obj_t)&mp_module_lvgl },
+    #if MICROPY_PY_LVGL_SDL
+    #define MICROPY_PY_LVGL_SDL_DEF { MP_OBJ_NEW_QSTR(MP_QSTR_SDL), (mp_obj_t)&mp_module_SDL },
+    #else
+    #define MICROPY_PY_LVGL_SDL_DEF
+    #endif
+    #if MICROPY_PY_LVGL_FB
+    #define MICROPY_PY_LVGL_FB_DEF { MP_OBJ_NEW_QSTR(MP_QSTR_fb), (mp_obj_t)&mp_module_fb },
+    #else
+    #define MICROPY_PY_LVGL_FB_DEF
+    #endif
+    #if MICROPY_PY_LVGL_LODEPNG
+    #define MICROPY_PY_LVGL_LODEPNG_DEF { MP_OBJ_NEW_QSTR(MP_QSTR_lodepng), (mp_obj_t)&mp_module_lodepng },
+    #else
+    #define MICROPY_PY_LVGL_LODEPNG_DEF
+    #endif
+    #if MICROPY_PY_LVGL_DISPDRV
+    #define MICROPY_PY_LVGL_DISPDRV_DEF { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldispdrv },
+    #else
+    #define MICROPY_PY_LVGL_DISPDRV_DEF
+    #endif
+#else
+    #define LV_ROOTS
+    #define MICROPY_PY_LVGL_DEF
+#endif
 
 #define MICROPY_PORT_BUILTIN_MODULES \
-    { MP_ROM_QSTR(MP_QSTR_uos), MP_ROM_PTR(&mp_module_os) },\
-    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), (mp_obj_t)&mp_module_lvgl },\
-    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldispdrv },
+    { MP_ROM_QSTR(MP_QSTR_uos), MP_ROM_PTR(&mp_module_os) }, \
+    MICROPY_PY_LVGL_DEF \
+    MICROPY_PY_LVGL_SDL_DEF \
+    MICROPY_PY_LVGL_FB_DEF \
+    MICROPY_PY_LVGL_LODEPNG_DEF \
+    MICROPY_PY_LVGL_DISPDRV_DEF
+
 
 // For size_t and ssize_t
 #include <unistd.h>
@@ -278,7 +344,7 @@ void mp_unix_mark_exec(void);
 // with EINTR, updates remaining timeout value.
 #define MICROPY_SELECT_REMAINING_TIME (1)
 
-//LV_ROOTS  void *mp_lv_user_data; 
+//LV_ROOTS  void *mp_lv_user_data;
 #define MICROPY_PORT_ROOT_POINTERS \
     LV_ROOTS; \
     DISP_DRV_ROOTS; \
