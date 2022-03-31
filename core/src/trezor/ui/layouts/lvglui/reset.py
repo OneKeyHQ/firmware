@@ -12,10 +12,8 @@ from ...components.tt.info import InfoConfirm
 from ...components.tt.reset import Slip39NumInput
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
+from . import lv_ui, mnemonic_word_select
 from .lv_common import interact
-
-from . import lv_ui
-from . import mnemonic_word_select  
 
 if TYPE_CHECKING:
     from typing import Sequence
@@ -32,7 +30,7 @@ async def show_share_words(
     share_index: int | None = None,
     group_index: int | None = None,
 ) -> None:
-        
+
     first, middle, last = _split_share_into_pages(share_words)
 
     if share_index is None:
@@ -41,61 +39,62 @@ async def show_share_words(
         header_title = f"Recovery share #{share_index + 1}"
     else:
         header_title = f"Group {group_index + 1} - Share {share_index + 1}"
-    
+
     shares_words_check = []  # check we display correct data
 
     # first page
     ui_show_words = lv_ui.Screen_ShowWords(
         title=header_title,
-        description= "Write down these " + f"{len(share_words)} words:",
+        description="Write down these " + f"{len(share_words)} words:",
         confirm_text="Confirm",
         share_words=first,
-        )
+    )
 
     # confirm the share
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_show_words,
             "backup_words",
             ButtonRequestType.ResetDevice,
-            )
+        )
     )
     if len(middle) > 0:
         # middle pages
         ui_show_words = lv_ui.Screen_ShowWords(
             title=header_title,
-            description= "Write down these " + f"{len(share_words)} words:",
+            description="Write down these " + f"{len(share_words)} words:",
             confirm_text="Confirm",
             share_words=middle,
-            )
+        )
 
         await raise_if_cancelled(
             interact(
-                ctx, 
+                ctx,
                 ui_show_words,
                 "backup_words",
                 ButtonRequestType.ResetDevice,
-                )
+            )
         )
-    
+
     if len(last) > 0:
         # last page
         ui_show_words = lv_ui.Screen_ShowWords(
             title=header_title,
-            description= "Write down these " + f"{len(share_words)} words:",
+            description="Write down these " + f"{len(share_words)} words:",
             confirm_text="Confirm",
             share_words=middle,
-            )
+        )
 
         await raise_if_cancelled(
             interact(
-                ctx, 
+                ctx,
                 ui_show_words,
                 "backup_words",
                 ButtonRequestType.ResetDevice,
-                )
+            )
         )
+
 
 async def confirm_word(
     ctx: wire.GenericContext,
@@ -110,7 +109,7 @@ async def confirm_word(
     # shuffle list
     random.shuffle(non_duplicates)
     # take top NUM_OF_CHOICES words
-    choices = non_duplicates[: 3]
+    choices = non_duplicates[:3]
     # select first of them
     checked_word = choices[0]
     # find its index
@@ -121,8 +120,10 @@ async def confirm_word(
     if __debug__:
         debug.reset_word_index.publish(checked_index)
 
-    # let the user pick a word          
-    selected_word = await mnemonic_word_select(ctx, choices, share_index, checked_index, count, group_index)
+    # let the user pick a word
+    selected_word = await mnemonic_word_select(
+        ctx, choices, share_index, checked_index, count, group_index
+    )
     # confirm it is the correct one
     return selected_word == checked_word
 

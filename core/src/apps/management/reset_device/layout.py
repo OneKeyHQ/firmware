@@ -14,7 +14,7 @@ if utils.LVGL_UI == "1":
         slip39_prompt_threshold,
         slip39_show_checklist,
     )
-else:    
+else:
     from trezor.ui.layouts.tt.reset import (  # noqa: F401
         confirm_word,
         show_share_words,
@@ -127,10 +127,17 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
 
 async def show_backup_success(ctx: wire.GenericContext) -> None:
     if utils.LVGL_UI == "1":
-        await show_success(ctx, "success_backup", "Your Backup is Done", subheader="Use your backup when you need to recover you wallet.")
+        await show_success(
+            ctx,
+            "success_backup",
+            "Your Backup is Done",
+            subheader="Use your backup when you need to recover you wallet.",
+        )
     else:
         text = "Use your backup\nwhen you need to\nrecover your wallet."
-        await show_success(ctx, "success_backup", text, subheader="Your backup is done.")
+        await show_success(
+            ctx, "success_backup", text, subheader="Your backup is done."
+        )
 
 
 # BIP39

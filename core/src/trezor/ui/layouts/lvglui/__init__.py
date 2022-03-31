@@ -1,22 +1,16 @@
-from . import lv_ui
-from trezor import wire, log, ui
+from typing import TYPE_CHECKING
+
+from trezor import log, ui, wire
 from trezor.enums import ButtonRequestType
 
 from ...constants.tt import MONO_ADDR_PER_LINE
-
-from typing import TYPE_CHECKING
+from . import lv_ui
+from .lv_common import button_request, interact, is_confirmed, raise_if_cancelled
 
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Iterable, NoReturn, Sequence
 
     from ..common import PropertyType, ExceptionType
-
-from .lv_common import (
-    is_confirmed,
-    raise_if_cancelled,
-    button_request,
-    interact,
-)
 
 
 async def mnemonic_word_select(
@@ -28,7 +22,9 @@ async def mnemonic_word_select(
     group_index: int | None = None,
 ):
 
-    ui_candidate = lv_ui.Screen_CandidateWords(words, f"Check word {word_index + 1}","Choose the correct word.","Next")
+    ui_candidate = lv_ui.Screen_CandidateWords(
+        words, f"Check word {word_index + 1}", "Choose the correct word.", "Next"
+    )
     return await ctx.wait(ui_candidate.response())
 
 
@@ -40,8 +36,8 @@ async def confirm_action(
     description: str | None = None,
     description_param: str | None = None,
     description_param_font: int = ui.BOLD,
-    verb: str | bytes | None = "CONFIRM",
-    verb_cancel: str | bytes | None = None,
+    verb: str | None = "CONFIRM",
+    verb_cancel: str | None = None,
     hold: bool = False,
     hold_danger: bool = False,
     icon: str | None = None,
@@ -50,21 +46,21 @@ async def confirm_action(
     larger_vspace: bool = False,
     exc: ExceptionType = wire.ActionCancelled,
     br_code: ButtonRequestType = ButtonRequestType.Other,
-) -> None:    
-    if action:
+) -> None:
+    if action and description:
         desc = description + action
     else:
         desc = description
     ui_confirm = lv_ui.Screen_Generic(
-        cancel_btn= reverse,
-        icon= icon,
-        title= title,
-        description= desc,
-        confirm_text= verb,
-        cancel_text= verb_cancel,
+        cancel_btn=reverse,
+        icon=icon,
+        title=title,
+        description=desc,
+        confirm_text=verb,
+        cancel_text=verb_cancel,
     )
 
-    result =  is_confirmed(
+    result = is_confirmed(
         await interact(
             ctx,
             ui_confirm,
@@ -79,40 +75,40 @@ async def confirm_action(
 async def confirm_reset_device(
     ctx: wire.GenericContext, prompt: str, recovery: bool = False
 ) -> None:
-    if recovery:        
+    if recovery:
         ui_reset = lv_ui.Screen_Generic(
-            cancel_btn= True,
-            title= "Recovery mode",
-            description= prompt,
-            confirm_text= "Confirm",
-            cancel_text= "Cancel",
+            cancel_btn=True,
+            title="Recovery mode",
+            description=prompt,
+            confirm_text="Confirm",
+            cancel_text="Cancel",
         )
     else:
         ui_reset = lv_ui.Screen_Generic(
-            cancel_btn= True,
-            title= "Create new wallet",
-            description= prompt,
-            confirm_text= "Confirm",
+            cancel_btn=True,
+            title="Create new wallet",
+            description=prompt,
+            confirm_text="Confirm",
         )
-    
+
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_reset,
             "recover_device" if recovery else "setup_device",
             ButtonRequestType.ProtectCall
             if recovery
             else ButtonRequestType.ResetDevice,
-            )
-    )   
+        )
+    )
 
 
 async def confirm_backup(ctx: wire.GenericContext) -> bool:
     ui_backup = lv_ui.Screen_Generic(
-        cancel_btn= True,
-        title= "New wallet created successfully!",
-        description= "You should back up your new wallet right now.",
-        confirm_text= "Confirm",
+        cancel_btn=True,
+        title="New wallet created successfully!",
+        description="You should back up your new wallet right now.",
+        confirm_text="Confirm",
     )
 
     if is_confirmed(
@@ -126,10 +122,10 @@ async def confirm_backup(ctx: wire.GenericContext) -> bool:
         return True
     ui_backup.delete()
     ui_backup = lv_ui.Screen_Generic(
-        cancel_btn= True,
-        title= "Are you sure you want to skip the backup?",
-        description= "You should back up your new wallet right now.",
-        confirm_text= "Confirm",
+        cancel_btn=True,
+        title="Are you sure you want to skip the backup?",
+        description="You should back up your new wallet right now.",
+        confirm_text="Confirm",
     )
 
     confirmed = is_confirmed(
@@ -242,20 +238,20 @@ async def show_warning(
     else:
         desc = content
     ui_warning = lv_ui.Screen_Generic(
-        cancel_btn= False,
-        icon= icon,
-        title= header,
-        description= desc,
-        confirm_text= button,
-        )    
+        cancel_btn=False,
+        icon=icon,
+        title=header,
+        description=desc,
+        confirm_text=button,
+    )
 
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_warning,
             br_type,
             br_code,
-            )
+        )
     )
 
 
@@ -265,23 +261,23 @@ async def show_success(
     content: str,
     subheader: str | None = None,
     button: str = "Continue",
-) :
+):
 
     ui_success = lv_ui.Screen_Generic(
-        cancel_btn= False,
-        icon= "A:/res/success_icon.png",
-        title= content,
-        description= subheader,
-        confirm_text= button,
-        )    
+        cancel_btn=False,
+        icon="A:/res/success_icon.png",
+        title=content,
+        description=subheader,
+        confirm_text=button,
+    )
 
     await raise_if_cancelled(
         interact(
-            ctx, 
+            ctx,
             ui_success,
             br_type,
             ButtonRequestType.Success,
-            )
+        )
     )
 
 
@@ -497,8 +493,8 @@ async def request_pin_on_device(
     else:
         subprompt = f"{attempts_remaining} attempts remaining"
 
-    ui_input_pin = lv_ui.Screen_InputPIN(prompt,subprompt,allow_cancel)
-    
+    ui_input_pin = lv_ui.Screen_InputPIN(prompt, subprompt, allow_cancel)
+
     result = await ctx.wait(ui_input_pin.response())
     if result == "cancel":
         raise wire.PinCancelled

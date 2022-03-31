@@ -4,10 +4,6 @@ from trezor import strings, ui, wire
 from trezor.crypto.slip39 import MAX_SHARE_COUNT
 from trezor.enums import ButtonRequestType
 
-from .lv_common import (
-    is_confirmed,
-    raise_if_cancelled,
-)
 from ...components.tt.confirm import Confirm, InfoConfirm
 from ...components.tt.keyboard_bip39 import Bip39Keyboard
 from ...components.tt.keyboard_slip39 import Slip39Keyboard
@@ -15,13 +11,12 @@ from ...components.tt.recovery import RecoveryHomescreen
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
 from ...components.tt.word_select import WordSelector
-
-from .lv_common import button_request, interact
-
 from . import lv_ui
+from .lv_common import button_request, interact, is_confirmed, raise_if_cancelled
+
 
 async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
-    
+
     await button_request(ctx, "word_count", code=ButtonRequestType.MnemonicWordCount)
 
     if dry_run:
@@ -117,14 +112,14 @@ async def continue_recovery(
     info_func: Callable | None,
 ) -> bool:
     ui_recovery = lv_ui.Screen_Generic(
-        cancel_btn= True,
-        title= text,
-        description= "It is safe to eject Trezor and continue later.",
-        confirm_text= button_label,
-        cancel_text= "Cancel",
+        cancel_btn=True,
+        title=text,
+        description="It is safe to eject Trezor and continue later.",
+        confirm_text=button_label,
+        cancel_text="Cancel",
     )
 
-    result =  is_confirmed(
+    result = is_confirmed(
         await interact(
             ctx,
             ui_recovery,
@@ -133,4 +128,3 @@ async def continue_recovery(
         )
     )
     return result
-    

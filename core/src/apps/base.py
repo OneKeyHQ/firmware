@@ -5,6 +5,7 @@ import storage.device
 from trezor import config, utils, wire, workflow
 from trezor.enums import MessageType
 from trezor.messages import Success
+
 from . import workflow_handlers
 
 if TYPE_CHECKING:
@@ -198,6 +199,7 @@ ALLOW_WHILE_LOCKED = (
 )
 
 if not utils.LVGL_UI:
+
     def set_homescreen() -> None:
         import storage.recovery
 
@@ -217,6 +219,7 @@ if not utils.LVGL_UI:
             workflow.set_default(homescreen)
 
 else:
+
     def set_homescreen() -> None:
         if storage.device.is_initialized():
             if storage.device.no_backup():
@@ -232,13 +235,16 @@ else:
             if not config.is_unlocked():
                 print("Device is locked")
                 from trezor.lvglui.scrs.lockscreen import LockScreen
+
                 LockScreen()
             else:
                 print("Device is unlocked")
                 from trezor.lvglui.scrs.homescreen import MainScreen
+
                 MainScreen()
         else:
             from trezor.lvglui.scrs.initscreen import InitScreen
+
             InitScreen()
 
 

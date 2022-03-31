@@ -1,18 +1,30 @@
+from typing import TYPE_CHECKING
+
 from trezor import log, wire, workflow
 from trezor.enums import ButtonRequestType
 from trezor.messages import ButtonAck, ButtonRequest
 
+from .lv_ui import Screen
+
+if TYPE_CHECKING:
+    from typing import Callable, Any, Awaitable, TypeVar
+
+    T = TypeVar("T")
+
+
 def is_confirmed(x: Any) -> bool:
-    if x == "cancel":
-        return False
-    elif x == "confirm":
+    if x == "confirm":
         return True
+    else:
+        return False
+
 
 async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -> T:
     result = await a
     if result is "cancel":
         raise exc
     return result
+
 
 async def button_request(
     ctx: wire.GenericContext,
@@ -27,9 +39,9 @@ async def button_request(
 
 async def interact(
     ctx: wire.GenericContext,
-    screen:lv_ui.Screen,
+    screen: Screen,
     br_type: str,
     br_code: ButtonRequestType = ButtonRequestType.Other,
 ) -> Any:
     await button_request(ctx, br_type, br_code)
-    return await ctx.wait(screen.response())        
+    return await ctx.wait(screen.response())
