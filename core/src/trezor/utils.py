@@ -3,8 +3,8 @@ import sys
 from trezorutils import (  # noqa: F401
     BITCOIN_ONLY,
     EMULATOR,
-    MODEL,
     LVGL_UI,
+    MODEL,
     SCM_REVISION,
     VERSION_MAJOR,
     VERSION_MINOR,
@@ -14,7 +14,6 @@ from trezorutils import (  # noqa: F401
     memcpy,
 )
 from typing import TYPE_CHECKING
-
 
 DISABLE_ANIMATION = 0
 
@@ -40,6 +39,7 @@ if TYPE_CHECKING:
 
 SCREENS = []
 
+
 def clear_screens() -> None:
     for scr in SCREENS:
         try:
@@ -47,6 +47,7 @@ def clear_screens() -> None:
         except:
             pass
     SCREENS.clear()
+
 
 def unimport_begin() -> set[str]:
     return set(sys.modules)
@@ -74,7 +75,6 @@ def unimport_end(mods: set[str], collect: bool = True) -> None:
                 # either path is not present in sys.modules, or module is not
                 # referenced from the parent package. both is fine.
                 pass
-
     # collect removed modules
     if collect:
         gc.collect()

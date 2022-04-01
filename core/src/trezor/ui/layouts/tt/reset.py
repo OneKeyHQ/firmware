@@ -124,13 +124,9 @@ async def confirm_word(
     if __debug__:
         debug.reset_word_index.publish(checked_index)
 
-    # let the user pick a word    
-    if utils.LVGL_UI:
-        from lvglui.lv_layouts import lv_mnemonic_word_select
-        selected_word = await lv_mnemonic_word_select(ctx, choices, share_index, checked_index, count, group_index)
-    else:
-        select = MnemonicWordSelect(choices, share_index, checked_index, count, group_index)
-        selected_word: str = await ctx.wait(select)
+    # let the user pick a word
+    select = MnemonicWordSelect(choices, share_index, checked_index, count, group_index)
+    selected_word: str = await ctx.wait(select)
     # confirm it is the correct one
     return selected_word == checked_word
 

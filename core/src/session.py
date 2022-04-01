@@ -1,10 +1,8 @@
 from trezor import log, loop, utils, wire, workflow
+from trezor.lvglui import lvgl_tick
 
 import apps.base
 import usb
-
-from trezor.lvglui import lvgl_tick
-
 
 apps.base.boot()
 

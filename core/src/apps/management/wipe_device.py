@@ -5,7 +5,6 @@ from trezor import ui, utils
 from trezor.enums import ButtonRequestType
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action
-from trezor.lvglui.lv_layouts import lv_confirm_wipe_device
 
 from .apply_settings import reload_settings_from_storage
 
@@ -15,8 +14,17 @@ if TYPE_CHECKING:
 
 
 async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
-    if utils.LVGL_UI:
-        await lv_confirm_wipe_device(ctx)
+    if utils.LVGL_UI == "1":
+        await confirm_action(
+            ctx,
+            "confirm_wipe",
+            title="Wipe device",
+            description="To remove all data from your device, you can reset your device to factory default.",
+            action=None,
+            reverse=True,
+            verb="Continue",
+            br_code=ButtonRequestType.WipeDevice,
+        )
     else:
         await confirm_action(
             ctx,
