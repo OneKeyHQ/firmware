@@ -1,4 +1,4 @@
-from trezor import log, loop
+from trezor import loop
 
 import lvgl as lv
 

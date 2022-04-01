@@ -11,7 +11,10 @@ from ...components.tt.checklist import Checklist
 from ...components.tt.confirm import Confirm
 from ...components.tt.info import InfoConfirm
 from ...components.tt.reset import Slip39NumInput
-from .common import interact, raise_if_cancelled
+from ...components.tt.scroll import Paginated
+from ...components.tt.text import Text
+from . import lv_ui, mnemonic_word_select
+from .lv_common import interact
 
 if TYPE_CHECKING:
     from typing import Sequence
@@ -29,28 +32,69 @@ async def show_share_words(
     group_index: int | None = None,
 ) -> None:
 
+    first, middle, last = _split_share_into_pages(share_words)
+
     if share_index is None:
         header_title = "Recovery Phrase"
     elif group_index is None:
         header_title = f"Recovery share #{share_index + 1}"
     else:
         header_title = f"Group {group_index + 1} - Share {share_index + 1}"
-    # shares_words_check = []  # check we display correct data
-    from trezor.lvglui.scrs.reset_device import MnemonicDisplay
 
-    screen = MnemonicDisplay(header_title, share_words)
-    # make sure we display correct data
-    # utils.ensure(share_words == shares_words_check)
+    shares_words_check = []  # check we display correct data
+
+    # first page
+    ui_show_words = lv_ui.Screen_ShowWords(
+        title=header_title,
+        description="Write down these " + f"{len(share_words)} words:",
+        confirm_text="Confirm",
+        share_words=first,
+    )
 
     # confirm the share
     await raise_if_cancelled(
         interact(
             ctx,
-            screen,
+            ui_show_words,
             "backup_words",
             ButtonRequestType.ResetDevice,
         )
     )
+    if len(middle) > 0:
+        # middle pages
+        ui_show_words = lv_ui.Screen_ShowWords(
+            title=header_title,
+            description="Write down these " + f"{len(share_words)} words:",
+            confirm_text="Confirm",
+            share_words=middle,
+        )
+
+        await raise_if_cancelled(
+            interact(
+                ctx,
+                ui_show_words,
+                "backup_words",
+                ButtonRequestType.ResetDevice,
+            )
+        )
+
+    if len(last) > 0:
+        # last page
+        ui_show_words = lv_ui.Screen_ShowWords(
+            title=header_title,
+            description="Write down these " + f"{len(share_words)} words:",
+            confirm_text="Confirm",
+            share_words=middle,
+        )
+
+        await raise_if_cancelled(
+            interact(
+                ctx,
+                ui_show_words,
+                "backup_words",
+                ButtonRequestType.ResetDevice,
+            )
+        )
 
 
 async def confirm_word(
@@ -67,39 +111,47 @@ async def confirm_word(
     non_duplicates.remove(share_words[offset])
     # shuffle list
     random.shuffle(non_duplicates)
-    # take 3 words as choices
-    choices = [non_duplicates[-1], non_duplicates[0], share_words[offset]]
+    # take top NUM_OF_CHOICES words
+    choices = non_duplicates[:3]
+    # select first of them
+    checked_word = choices[0]
+    # find its index
+    checked_index = share_words.index(checked_word) + offset
     # shuffle again so the confirmed word is not always the first choice
     random.shuffle(choices)
 
+    if __debug__:
+        debug.reset_word_index.publish(checked_index)
+
     # let the user pick a word
-    title = f"Check Word #{offset + 1} of {count}"
-    subtitle = "Choose the correct word."
-    options = f"{choices[0]}\n{choices[1]}\n{choices[2]}"
-    selector = FullSizeWindow(title, subtitle, "Next", options=options)
-    selected_word: str = await ctx.wait(selector.request())
+    selected_word = await mnemonic_word_select(
+        ctx, choices, share_index, checked_index, count, group_index
+    )
     # confirm it is the correct one
     return selected_word == share_words[offset]
 
 
 def _split_share_into_pages(
     share_words: Sequence[str],
-) -> tuple[NumberedWords, list[NumberedWords], NumberedWords]:
+) -> tuple[NumberedWords, NumberedWords, NumberedWords]:
     share = list(enumerate(share_words))  # we need to keep track of the word indices
-    first = share[:2]  # two words on the first page
+    first = share[:12]  # two words on the first page
     length = len(share_words)
-    if length in (12, 20, 24):
-        middle = share[2:-2]
-        last = share[-2:]  # two words on the last page
+    if length == 12:
+        middle = []
+        last = []  # two words on the last page
+    elif length in (20, 24):
+        middle = share[12:]
+        last = []  # two words on the last page
     elif length in (18, 33):
-        middle = share[2:]
-        last = []  # no words at the last page, because it does not add up
+        middle = share[12:23]
+        last = share[24:]  # no words at the last page, because it does not add up
     else:
         # Invalid number of shares. SLIP-39 allows 20 or 33 words, BIP-39 12 or 24
         raise RuntimeError
 
-    chunks = utils.chunks(middle, 4)  # 4 words on the middle pages
-    return first, list(chunks), last
+    # chunks = utils.chunks(middle, 12)  # 4 words on the middle pages
+    return first, middle, last
 
 
 async def slip39_show_checklist(

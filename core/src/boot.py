@@ -2,6 +2,7 @@ import storage
 import storage.device
 from trezor import config, log, loop, ui, utils, wire
 from trezor.lvglui import lvgl_tick
+from trezor.lvglui.scrs import *
 from trezor.lvglui.scrs.bootscreen import BootScreen
 from trezor.lvglui.scrs.lockscreen import LockScreen
 from trezor.pin import show_pin_timeout

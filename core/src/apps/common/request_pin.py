@@ -3,7 +3,7 @@ from typing import Any, NoReturn
 
 import storage.cache
 import storage.sd_salt
-from trezor import config, utils, wire
+from trezor import config, wire
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -96,7 +96,6 @@ async def verify_user_pin(
         pin = await request_pin_on_device(
             ctx, prompt, config.get_pin_rem(), allow_cancel
         )
-
         config.ensure_not_wipe_code(pin)
     else:
         pin = ""

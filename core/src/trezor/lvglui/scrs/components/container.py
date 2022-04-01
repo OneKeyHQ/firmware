@@ -3,7 +3,12 @@ from ..common import *
 
 class ContainerFlexCol(lv.obj):
     def __init__(
-        self, parent, align_base, align=lv.ALIGN.OUT_BOTTOM_MID, pos: tuple = (0, 30)
+        self,
+        parent,
+        align_base,
+        size: tuple = (lv.pct(100), 600),
+        align=lv.ALIGN.OUT_BOTTOM_MID,
+        pos: tuple = (0, 30),
     ) -> None:
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
@@ -19,6 +24,7 @@ class ContanierGrid(lv.obj):
         self,
         parent,
         align_base,
+        size: tuple = (lv.pct(100), 600),
         align=lv.ALIGN.OUT_BOTTOM_MID,
         pos: tuple = (0, 30),
         cell_size: tuple = (213, 192),

@@ -6,27 +6,29 @@ from trezor.enums import ButtonRequestType
 from trezor.lvglui.scrs.common import FullSizeWindow
 from trezor.lvglui.scrs.request_word import WordEnter
 
-from ...components.common.confirm import (
-    raise_if_cancelled,
-)
-from ...components.tt.confirm import Confirm
+from ...components.tt.confirm import Confirm, InfoConfirm
+from ...components.tt.keyboard_bip39 import Bip39Keyboard
+from ...components.tt.keyboard_slip39 import Slip39Keyboard
+from ...components.tt.recovery import RecoveryHomescreen
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
-from .common import button_request, interact
+from ...components.tt.word_select import WordSelector
+from . import lv_ui
+from .lv_common import button_request, interact, is_confirmed, raise_if_cancelled
 
 
 async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
+
     await button_request(ctx, "word_count", code=ButtonRequestType.MnemonicWordCount)
 
     if dry_run:
-        title = "Check Recovery Phrase"
+        title = "Seed check"
     else:
-        title = "Import Wallet"
-    subtitle = "Number of words?"
-    screen = FullSizeWindow(
-        title, subtitle, confirm_text="Continue", options="12\n18\n24"
-    )
-    count = await ctx.wait(screen.request())
+        title = "Recovery mode"
+
+    ui_word_count = lv_ui.Screen_WordCount(title=title)
+
+    count = await ctx.wait(ui_word_count.response())
     # WordSelector can return int, or string if the value came from debuglink
     # ctx.wait has a return type Any
     # Hence, it is easier to convert the returned value to int explicitly
@@ -37,15 +39,13 @@ async def request_word(
     ctx: wire.GenericContext, word_index: int, word_count: int, is_slip39: bool
 ) -> str:
     if is_slip39:
-        # keyboard: Slip39Keyboard | Bip39Keyboard = Slip39Keyboard(
-        #     f"Type word {word_index + 1} of {word_count}:"
-        # )
-        pass
-
+        title = f"Type word {word_index + 1} of {word_count}:"
     else:
-        title = f"Enter word #{word_index + 1} of {word_count}"
-        screen = WordEnter(title)
-    word: str = await ctx.wait(screen.request())
+        title = f"Type word {word_index + 1} of {word_count}:"
+
+    ui_word_input = lv_ui.Screen_WordInput(title=title)
+
+    word: str = await ctx.wait(ui_word_input.response())
     return word
 
 
@@ -113,15 +113,20 @@ async def continue_recovery(
     subtext: str | None,
     info_func: Callable | None,
 ) -> bool:
-    screen = FullSizeWindow(
-        text,
-        "it is safe to eject Trezor and continue later.",
+    ui_recovery = lv_ui.Screen_Generic(
+        cancel_btn=True,
+        title=text,
+        description="It is safe to eject Trezor and continue later.",
         confirm_text=button_label,
         cancel_text="Cancel",
     )
-    return await interact(
-        ctx,
-        screen,
-        "recovery",
-        ButtonRequestType.RecoveryHomepage,
+
+    result = is_confirmed(
+        await interact(
+            ctx,
+            ui_recovery,
+            "recovery",
+            ButtonRequestType.RecoveryHomepage,
+        )
     )
+    return result

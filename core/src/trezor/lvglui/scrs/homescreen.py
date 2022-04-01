@@ -1,5 +1,9 @@
 from storage import device
 from trezor import workflow
+from trezor.messages import ChangePin
+from trezor.wire import DUMMY_CONTEXT
+
+from apps.management.change_pin import change_pin
 
 from .common import *
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
@@ -22,24 +26,9 @@ class MainScreen(Screen):
                 load_scr_with_animation(self)
             return
         super().__init__()
-        if dev_state:
-            self.dev_state = lv.btn(self)
-            self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
-            self.dev_state.set_style_bg_color(
-                lv.color_hex(0xDCA312), lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state.set_style_radius(8, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
-            self.dev_state_text = lv.label(self.dev_state)
-            self.dev_state_text.set_text(dev_state)
-            self.dev_state_text.set_style_text_color(
-                lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state_text.set_style_text_font(
-                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state_text.center()
-        self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_img_src(
+            "A:/res/wallpaper_light.png", lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         self.btn_settings = lv.btn(self)
@@ -72,11 +61,9 @@ class MainScreen(Screen):
             if target == self.btn_settings:
                 self.load_screen(SettingsScreen(self))
             elif target == self.btn_info:
-                if __debug__:
-                    print("Info")
+                print("Info")
             else:
-                if __debug__:
-                    print("Unknown")
+                print("Unknown")
 
 
 class SettingsScreen(Screen):
@@ -130,14 +117,13 @@ class SettingsScreen(Screen):
             elif target == self.security:
                 self.load_screen(SecurityScreen(self))
             elif target == self.crypto:
-                self.load_screen(CryptoScreen(self))
+                print("Crypto")
             elif target == self.about:
                 self.load_screen(AboutSetting(self))
             elif target == self.power:
-                pass
+                print("PowerOff")
             else:
-                if __debug__:
-                    print("Unknown")
+                print("Unknown")
 
 
 class GeneralScreen(Screen):
@@ -279,17 +265,20 @@ class ConnectSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.VALUE_CHANGED:
-            if __debug__:
-                if target == self.ble.switch:
-                    if target.has_state(lv.STATE.CHECKED):
-                        print("Bluetooth is on")
-                    else:
-                        print("Bluetooth is off")
+            if target == self.ble.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    print("Bluetooth is on")
+                else:
+                    print("Bluetooth is off")
+            else:
+                if target.has_state(lv.STATE.CHECKED):
+                    print("USB is on")
                 else:
                     if target.has_state(lv.STATE.CHECKED):
                         print("USB is on")
                     else:
                         print("USB is off")
+
 
 
 class AboutSetting(Screen):
@@ -304,7 +293,7 @@ class AboutSetting(Screen):
         # ble_mac = device.get_ble_mac()
         # storage = device.get_storage()
         super().__init__(prev_scr=prev_scr, title="About Device", nav_back=True)
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, size=(lv.pct(100), 300))
         self.model = ListItemBtn(
             self.container, "Model", right_text="OneKey Touch", has_next=False
         )
@@ -333,21 +322,15 @@ class HomeScreenSetting(Screen):
             return
         cur = device.get_homescreen() or self.LIGHT_WALLPAPER
         super().__init__(prev_scr=prev_scr, title="Home Screen", nav_back=True)
-        self.container = ContanierGrid(self, self.title)
+        self.container = ContanierGrid(self, self.title, size=(lv.pct(100), 400))
         self.light = ImgBottonGridItem(
             self.container, 0, 0, "A:/res/wallpaper_light_thumnail.png"
         )
+        self.light.set_checked(True)
         self.dark = ImgBottonGridItem(
             self.container, 1, 0, "A:/res/wallpaper_dark_thumnail.png"
         )
-        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-
-        if cur == self.DARK_WALLPAPER:
-            self.dark.set_checked(True)
-            self.light.set_checked(False)
-        else:
-            self.light.set_checked(True)
-            self.dark.set_checked(False)
+        self.dark.set_checked(False)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -364,6 +347,7 @@ class HomeScreenSetting(Screen):
                 device.set_homescreen(self.DARK_WALLPAPER)
 
 
+
 class SecurityScreen(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -374,7 +358,9 @@ class SecurityScreen(Screen):
         self.container = ContainerFlexCol(self, self.title)
         self.rest_pin = ListItemBtn(self.container, "Reset PIN")
         self.recovery_check = ListItemBtn(self.container, "Check Recovery Phrase")
-        self.passphrase = ListItemBtn(self.container, "Passphrase")
+        self.passphrase = ListItemBtn(
+            self.container, "Passphrase", right_text="Coming Soon", has_next=False
+        )
         self.rest_device = ListItemBtn(self.container, "Reset Device", has_next=False)
         self.rest_device.label_left.set_style_text_color(
             lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT

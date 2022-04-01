@@ -1,7 +1,7 @@
-from trezor.crypto import bip39, random
+from trezor.crypto import random
 
+from ...lv_colors import lv_colors
 from ..common import *  # noqa: F401,F403
-
 
 def compute_mask(text: str) -> int:
     mask = 0
@@ -28,14 +28,12 @@ class BIP39Keyboard(lv.keyboard):
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_max_length(11)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("abcdefghijklmnopqrstuvwxyz")
-        self.btnm_map = [
+        btnm_map = [
             "q",
             "w",
             "e",
@@ -70,38 +68,6 @@ class BIP39Keyboard(lv.keyboard):
             lv.SYMBOL.OK,
             "",
         ]
-        self.keys = [
-            "q",
-            "w",
-            "e",
-            "r",
-            "t",
-            "y",
-            "u",
-            "i",
-            "o",
-            "p",
-            "",  # ignore placeholder
-            "a",
-            "s",
-            "d",
-            "f",
-            "g",
-            "h",
-            "j",
-            "k",
-            "l",
-            "",  # ignore placeholder
-            "",  # ignore backspace
-            "z",
-            "x",
-            "c",
-            "v",
-            "b",
-            "n",
-            "m",
-            "READY",
-        ]
         ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 10
         ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
         ctrl_map.extend(
@@ -120,7 +86,7 @@ class BIP39Keyboard(lv.keyboard):
         self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, ctrl_map)
         self.set_mode(lv.keyboard.MODE.TEXT_LOWER)
         self.set_width(lv.pct(100))
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
             lv.color_hex(0x323232), lv.PART.ITEMS | lv.STATE.DEFAULT
         )
@@ -166,7 +132,7 @@ class BIP39Keyboard(lv.keyboard):
             if len(txt_input) > 0:
                 if dsc.id == 21:
                     dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 29:
+                elif dsc.id == 30:
                     dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
             else:
                 if dsc.id == 21:
@@ -212,7 +178,6 @@ class BIP39Keyboard(lv.keyboard):
             else:
                 self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.ctrl_map)
 
-
 class NumberKeyboard(lv.keyboard):
     """number keyboard with textarea."""
 
@@ -228,9 +193,7 @@ class NumberKeyboard(lv.keyboard):
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("0123456789")
@@ -260,7 +223,7 @@ class NumberKeyboard(lv.keyboard):
         self.set_map(lv.keyboard.MODE.NUMBER, btnm_map, ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
         self.set_width(lv.pct(82))
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
             lv.color_hex(0x323232), lv.PART.ITEMS | lv.STATE.DEFAULT
         )

@@ -15,29 +15,6 @@ if TYPE_CHECKING:
 
 
 async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
-    if utils.LVGL_UI:
-        from trezor.ui.layouts.lvgl import (
-            confirm_wipe_device,
-            confirm_wipe_device_tips,
-            confirm_wipe_device_success,
-        )
-
-        await confirm_wipe_device(ctx)
-        # verify user pin
-        await verify_user_pin(ctx)
-        # show tips
-        await confirm_wipe_device_tips(ctx)
-        storage.wipe()
-        reload_settings_from_storage()
-        await confirm_wipe_device_success(ctx)
-        return Success(message="Device wiped")
-    else:
-        await confirm_action(
-            ctx,
-            "confirm_wipe",
-            title="Wipe device",
-            description="Do you really want to\nwipe the device?\n",
-            action="All data will be lost.",
             reverse=True,
             verb="Hold to confirm",
             hold=True,
@@ -49,5 +26,4 @@ async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
 
     storage.wipe()
     reload_settings_from_storage()
-
     return Success(message="Device wiped")

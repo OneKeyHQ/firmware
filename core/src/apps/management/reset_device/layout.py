@@ -4,8 +4,8 @@ from trezor import ui, utils, wire
 from trezor.enums import ButtonRequestType
 from trezor.ui.layouts import confirm_action, confirm_blob, show_success, show_warning
 
-if not utils.LVGL_UI:
-    from trezor.ui.layouts.tt.reset import (  # noqa: F401
+if utils.LVGL_UI == "1":
+    from trezor.ui.layouts.lvglui.reset import (
         confirm_word,
         show_share_words,
         slip39_advanced_prompt_group_threshold,
@@ -15,7 +15,7 @@ if not utils.LVGL_UI:
         slip39_show_checklist,
     )
 else:
-    from trezor.ui.layouts.lvgl.reset import (  # noqa: F401
+    from trezor.ui.layouts.tt.reset import (  # noqa: F401
         confirm_word,
         show_share_words,
         slip39_advanced_prompt_group_threshold,
@@ -65,8 +65,12 @@ async def _show_confirmation_success(
     group_index: int | None = None,
 ) -> None:
     if share_index is None or num_of_shares is None:  # it is a BIP39 backup
-        subheader = "You have finished verifying your recovery seed."
-        text = ""
+        if utils.LVGL_UI == "1":
+            subheader = "You have finished verifying your recovery phrase."
+            text = "Success"
+        else:
+            subheader = "You have finished\nverifying your\nrecovery seed."
+            text = ""
 
     elif share_index == num_of_shares - 1:
         if group_index is None:
@@ -105,7 +109,7 @@ async def _show_confirmation_failure(
 
 
 async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) -> None:
-    if slip39:
+    if slip39 or utils.LVGL_UI == "1":
         description = "Never make a digital copy of your recovery shares and never upload them online!"
     else:
         description = "Never make a digital copy of your recovery seed and never upload\nit online!"
@@ -127,8 +131,18 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
 
 
 async def show_backup_success(ctx: wire.GenericContext) -> None:
-    text = "Use your backup when you need to recover your wallet."
-    await show_success(ctx, "success_backup", text, subheader="Your backup is done.")
+    if utils.LVGL_UI == "1":
+        await show_success(
+            ctx,
+            "success_backup",
+            "Your Backup is Done",
+            subheader="Use your backup when you need to recover you wallet.",
+        )
+    else:
+        text = "Use your backup\nwhen you need to\nrecover your wallet."
+        await show_success(
+            ctx, "success_backup", text, subheader="Your backup is done."
+        )
 
 
 # BIP39

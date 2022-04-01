@@ -1,42 +1,14 @@
 from ..common import *  # noqa: F401,F403
 
-# class NormalButton(lv.btn):
-#     def __init__(self, parent, text="Next", pos=(-6, 300), enable=True) -> None:
-#         super().__init__(parent)
-#         self.set_size(320, 62)
-#         self.set_pos(pos[0], pos[1])
-#         self.set_align(lv.ALIGN.CENTER)
-#         self.set_style_radius(32, lv.PART.MAIN | lv.STATE.DEFAULT)
-#         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-#         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-#         self.set_style_text_color(
-#             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-#         )
-#         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
-#         if enable:
-#             self.enable()
-#         else:
-#             self.disable()
-#         # the next btn label
-#         self.label = lv.label(self)
-#         self.label.set_long_mode(lv.label.LONG.WRAP)
-#         self.label.set_text(text)
-#         self.label.set_align(lv.ALIGN.CENTER)
-
-#     def disable(self) -> None:
-#         self.set_style_bg_color(lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT)
-#         self.clear_flag(lv.btn.FLAG.CLICKABLE)
-
-#     def enable(self) -> None:
-#         self.set_style_bg_color(lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT)
-#         self.add_flag(lv.btn.FLAG.CLICKABLE)
-
 
 class NormalButton(lv.btn):
-    def __init__(self, parent, text="Next", enable=True) -> None:
+    def __init__(self, parent, text="Next", pos=(-6, 300), enable=True) -> None:
         super().__init__(parent)
-        self.set_size(320, 62)
-        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -64)
+        self.set_width(320)
+        self.set_height(62)
+        self.set_x(pos[0])
+        self.set_y(pos[1])
+        self.set_align(lv.ALIGN.CENTER)
         self.set_style_radius(32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -52,21 +24,16 @@ class NormalButton(lv.btn):
         self.label = lv.label(self)
         self.label.set_long_mode(lv.label.LONG.WRAP)
         self.label.set_text(text)
+        self.label.set_width(lv.SIZE.CONTENT)  # 1
+        self.label.set_height(lv.SIZE.CONTENT)  # 1
         self.label.set_align(lv.ALIGN.CENTER)
-        self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
-    def disable(
-        self, bg_color=lv.color_hex(0x323232), text_color=lv.color_hex(0x000000)
-    ) -> None:
-        self.set_style_bg_color(bg_color, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_color(text_color, lv.PART.MAIN | lv.STATE.DEFAULT)
+    def disable(self) -> None:
+        self.set_style_bg_color(lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.clear_flag(lv.btn.FLAG.CLICKABLE)
 
-    def enable(
-        self, bg_color=lv.color_hex(0xFFFFFF), text_color=lv.color_hex(0x000000)
-    ) -> None:
-        self.set_style_bg_color(bg_color, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_color(text_color, lv.PART.MAIN | lv.STATE.DEFAULT)
+    def enable(self) -> None:
+        self.set_style_bg_color(lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.add_flag(lv.btn.FLAG.CLICKABLE)
 
 
@@ -163,7 +130,4 @@ class ListItemBtnWithSwitch(lv.btn):
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
     def clear_state(self) -> None:
-        self.switch.clear_state(lv.STATE.CHECKED)
-
-    def add_state(self) -> None:
-        self.switch.add_state(lv.STATE.CHECKED)
+        self.switch.clear_state()

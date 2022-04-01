@@ -238,14 +238,13 @@ else:
                     print("Device is locked")
                 from trezor.lvglui.scrs.lockscreen import LockScreen
 
-                device_name = storage.device.get_label()
-                LockScreen(device_name, dev_state)
+                LockScreen()
             else:
                 if __debug__:
                     print("Device is unlocked")
                 from trezor.lvglui.scrs.homescreen import MainScreen
 
-                MainScreen(dev_state)
+                MainScreen()
         else:
             from trezor.lvglui.scrs.initscreen import InitScreen
 

@@ -4,11 +4,26 @@ from trezor import log, wire, workflow
 from trezor.enums import ButtonRequestType
 from trezor.messages import ButtonAck, ButtonRequest
 
-if TYPE_CHECKING:
-    from typing import Any, Awaitable, TypeVar
+from .scrs.common import Screen
 
+if TYPE_CHECKING:
+    from typing import (
+        Any,
+        Awaitable,
+        TypeVar,
+    )
     T = TypeVar("T")
-    from ....lvglui.scrs.common import Screen
+
+
+def is_confirmed(x: Any) -> bool:
+    return x
+
+
+async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -> T:
+    result = await a
+    if result is False:
+        raise exc
+    return result
 
 
 async def button_request(
@@ -20,13 +35,6 @@ async def button_request(
         log.debug(__name__, "ButtonRequest.type=%s", br_type)
     workflow.close_others()
     await ctx.call(ButtonRequest(code=code), ButtonAck)
-
-
-async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -> T:
-    result = await a
-    if not result:
-        raise exc
-    return result
 
 
 async def interact(
