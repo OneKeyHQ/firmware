@@ -151,5 +151,6 @@ void fsm_msgBixinBackupDevice(void);
 
 void fsm_msgSignDigest(const SignDigest *msg);
 void fsm_msgSignData(const SignData *msg);
+void fsm_msgExportEd25519PublicKey(const ExportEd25519PublicKey *msg);
 
 #endif

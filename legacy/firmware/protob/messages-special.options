@@ -12,3 +12,7 @@ SignData.coin_name                                             max_size:21
 DataSignature.pubkey                                           max_size:65
 DataSignature.digest                                           max_size:32
 DataSignature.signature                                        max_size:64
+
+ExportEd25519PublicKey.address_n                               max_count:8
+
+Ed25519PublicKey.pubkey                                        max_size:65

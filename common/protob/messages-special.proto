@@ -26,6 +26,7 @@ message DigestSignature {
     optional bytes signature = 2;   // signature of the hex digest
 }
 
+
 /**
  * Request: Ask device to sign raw data, using sha256 as the hash function
  * @start
@@ -46,4 +47,23 @@ message DataSignature {
     required bytes pubkey = 1;      // public key used for signing
     optional bytes digest = 2;      // digest of the raw data, using sha256 as the hash function
     optional bytes signature = 3;   // signature of the raw data
+}
+
+
+/**
+ * Request: Ask device to export an ed25519 public key
+ * @start
+ * @next Ed25519PublicKey
+ * @next Failure
+ */
+message ExportEd25519PublicKey {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+}
+
+/**
+ * Response: The ed25519 public key
+ * @end
+ */
+message Ed25519PublicKey {
+    required bytes pubkey = 1;      // public key for signing
 }
