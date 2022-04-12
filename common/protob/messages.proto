@@ -304,5 +304,7 @@ enum MessageType {
     MessageType_DigestSignature = 1002 [(wire_out) = true];
     MessageType_SignData = 1003 [(wire_in) = true];
     MessageType_DataSignature = 1004 [(wire_out) = true];
+    MessageType_ExportEd25519PublicKey = 1005 [(wire_in) = true];
+    MessageType_Ed25519PublicKey = 1006 [(wire_out) = true];
 
 }
