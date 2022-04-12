@@ -34,3 +34,13 @@ def sign_data(
             data=data
         )
     )
+
+@expect(messages.Ed25519PublicKey)
+def export_ed25519_pubkey(
+    client, n
+):
+    return client.call(
+        messages.ExportEd25519PublicKey(
+            address_n=n
+        )
+    )

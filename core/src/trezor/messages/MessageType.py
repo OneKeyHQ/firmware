@@ -225,3 +225,5 @@ SignDigest: Literal[1001] = 1001
 DigestSignature: Literal[1002] = 1002
 SignData: Literal[1003] = 1003
 DataSignature: Literal[1004] = 1004
+ExportEd25519PublicKey: Literal[1005] = 1005
+Ed25519PublicKey: Literal[1006] = 1006

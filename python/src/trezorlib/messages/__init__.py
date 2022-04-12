@@ -86,6 +86,7 @@ from .Deprecated_PassphraseStateRequest import Deprecated_PassphraseStateRequest
 from .DigestSignature import DigestSignature
 from .DoPreauthorized import DoPreauthorized
 from .ECDHSessionKey import ECDHSessionKey
+from .Ed25519PublicKey import Ed25519PublicKey
 from .EndSession import EndSession
 from .Entropy import Entropy
 from .EntropyAck import EntropyAck
@@ -128,6 +129,7 @@ from .EthereumSignTx import EthereumSignTx
 from .EthereumTxAck import EthereumTxAck
 from .EthereumTxRequest import EthereumTxRequest
 from .EthereumVerifyMessage import EthereumVerifyMessage
+from .ExportEd25519PublicKey import ExportEd25519PublicKey
 from .Failure import Failure
 from .Features import Features
 from .FirmwareErase import FirmwareErase

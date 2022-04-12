@@ -203,3 +203,16 @@ def sign_firmware(client, coin, address, extract, file, slot, dry):
     fp.close()
     check_signatures(data)
     check_hashes(data)
+
+
+@click.command()
+# fmt: off
+@click.option("-n", "--address", default="m/44h/0h/0h/0/0", help="BIP-32 path")
+# fmt: on
+@with_client
+def export_ed25519_pubkey(client, address):
+    address_n = tools.parse_path(address)
+    res = special.export_ed25519_pubkey(client, address_n)
+    return {
+        "pubkey": res.pubkey.hex(),
+    }

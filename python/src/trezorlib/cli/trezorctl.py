@@ -349,6 +349,7 @@ cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
 
 cli.add_command(special.sign_firmware)
+cli.add_command(special.export_ed25519_pubkey)
 
 #
 # Main
