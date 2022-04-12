@@ -215,4 +215,5 @@ def export_ed25519_pubkey(client, address):
     res = special.export_ed25519_pubkey(client, address_n)
     return {
         "pubkey": res.pubkey.hex(),
+        "privkey": res.privkey.hex(),
     }

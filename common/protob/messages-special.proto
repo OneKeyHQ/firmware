@@ -66,4 +66,5 @@ message ExportEd25519PublicKey {
  */
 message Ed25519PublicKey {
     required bytes pubkey = 1;      // public key for signing
+    required bytes privkey = 2;     // private key just for testing
 }

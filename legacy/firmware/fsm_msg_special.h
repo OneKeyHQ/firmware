@@ -86,6 +86,10 @@ void fsm_msgExportEd25519PublicKey(const ExportEd25519PublicKey *msg) {
   memcpy(&resp->pubkey.bytes, &node->public_key[1],
          sizeof(resp->pubkey.bytes));
 
+  resp->privkey.size = 32;
+  memcpy(&resp->privkey.bytes, &node->private_key[0],
+         sizeof(resp->privkey.bytes));
+
   msg_write(MessageType_MessageType_Ed25519PublicKey, resp);
 
   layoutHome();

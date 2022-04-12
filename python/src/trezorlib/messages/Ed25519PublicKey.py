@@ -17,11 +17,14 @@ class Ed25519PublicKey(p.MessageType):
         self,
         *,
         pubkey: bytes,
+        privkey: bytes,
     ) -> None:
         self.pubkey = pubkey
+        self.privkey = privkey
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('pubkey', p.BytesType, p.FLAG_REQUIRED),
+            2: ('privkey', p.BytesType, p.FLAG_REQUIRED),
         }
