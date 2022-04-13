@@ -62,6 +62,7 @@ from .CosiCommit import CosiCommit
 from .CosiCommitment import CosiCommitment
 from .CosiSign import CosiSign
 from .CosiSignature import CosiSignature
+from .CosignEd25519 import CosignEd25519
 from .DataSignature import DataSignature
 from .DebugLinkDecision import DebugLinkDecision
 from .DebugLinkEraseSdCard import DebugLinkEraseSdCard
@@ -88,6 +89,7 @@ from .DoPreauthorized import DoPreauthorized
 from .ECDHSessionKey import ECDHSessionKey
 from .Ed25519Nonce import Ed25519Nonce
 from .Ed25519PublicKey import Ed25519PublicKey
+from .Ed25519Signature import Ed25519Signature
 from .EndSession import EndSession
 from .Entropy import Entropy
 from .EntropyAck import EntropyAck

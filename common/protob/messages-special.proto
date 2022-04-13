@@ -91,3 +91,28 @@ message Ed25519Nonce {
     required bytes r = 2;      // r of the nonce, only for test, DO NOT use in production
     required bytes r_src = 3;      // the source of r, r = H(r_src), only for test, DO NOT use in production
 }
+
+
+/**
+ * Request: Sign a digest by using ed25519 cosign approach
+ * @start
+ * @next Ed25519Signature
+ * @next Failure
+ */
+message CosignEd25519 {
+    repeated uint32 address_n = 1;      // BIP-32 path to derive the key from master node
+    required bytes digest = 2;          // data to be get involved in the nonce
+    required uint32 ctr = 3;            // the sequence number of the key to get the r value of nonce
+    required bytes global_pubkey = 4;   // global public combined from the participants' public keys
+    required bytes global_commit = 5;   // global commitment combined from the participants' R value of nonce
+}
+
+/**
+ * Response: The signature of ed25519
+ * @end
+ */
+message Ed25519Signature {
+    required bytes sig = 1;      // signature
+    required bytes r = 2;
+    required bytes s1 = 3;
+}

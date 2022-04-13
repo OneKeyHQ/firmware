@@ -24,3 +24,13 @@ GetEd25519Nonce.data                                           max_size:64
 Ed25519Nonce.R                                                 max_size:64
 Ed25519Nonce.r                                                 max_size:64
 Ed25519Nonce.r_src                                             max_size:256
+
+CosignEd25519.address_n                                        max_count:8
+CosignEd25519.digest                                           max_size:64
+CosignEd25519.global_pubkey                                    max_size:64
+CosignEd25519.nonce                                            max_size:64 
+CosignEd25519.global_commit                                    max_size:64
+
+Ed25519Signature.sig                                           max_size:64
+Ed25519Signature.r                                             max_size:64
+Ed25519Signature.s1                                            max_size:32

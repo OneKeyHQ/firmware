@@ -211,19 +211,74 @@ def sign_firmware(client, coin, address, extract, file, slot, dry):
 # fmt: on
 @with_client
 def export_ed25519_pubkey(client, address):
-    address_n = tools.parse_path(address)
-    pubkey_res = special.export_ed25519_pubkey(client, address_n)
-
+    from trezorlib import cosi, _ed25519
     data = bytes.fromhex("00" * 32)
     ctr = 1
+    address_n = tools.parse_path(address)
+    pubkey_res = special.export_ed25519_pubkey(client, address_n)
+    global_pubkey = bytes.fromhex("f5e4c7723cc4bdc7cf5ba4f4586307cb94a73d15039fbf01db58d88c3404facd")
+    global_commit = bytes.fromhex("881e8b21c0f702d0358a81d95cd36b8579e5895ce330f0b6b8828f2a6da257aa")
 
-    from trezorlib import cosi
-    r, R = cosi.get_nonce(cosi.Ed25519PrivateKey(pubkey_res.privkey), data, ctr)
-    print("cosi R:", R.hex())
+    #print(pubkey_res.privkey, len(pubkey_res.privkey))
+    r, R = cosi.get_nonce_alt(cosi.Ed25519PrivateKey(pubkey_res.privkey), data, ctr)
+    cosi.sign_with_privkey(data, pubkey_res.privkey, global_pubkey, r, global_commit)
+    print("#" * 20)
 
     nonce_res = special.get_ed25519_nonce(client, address_n, data, ctr)
+    nonce = _ed25519.decodeint(nonce_res.r)
+    print("special.get_ed25519_nonce")
+    print("nonce from get_ed25519_nonce hex:", nonce_res.r.hex())
+    print("nonce from get_ed25519_nonce int:", nonce)
+    #print("nonce R from get_ed25519_nonce:", nonce_res.R.hex())
+    print("#" * 20)
+
+    cosi_res = special.cosign_ed25519(client, address_n, data, ctr, global_pubkey, global_commit)
+    #print("sig from cosign_ed25510:", cosi_res.sig.hex())
+    print("special.cosign_ed25519")
+    print("mod r hex from cosign_ed25519:", cosi_res.r.hex())
+    print("mod r int from cosign_ed25519:", _ed25519.decodeint(cosi_res.r))
+    print("s1 hex from cosign_ed25519:", cosi_res.s1.hex())
+    print("s1 int from cosign_ed25519:", _ed25519.decodeint(cosi_res.s1))
+    #res = cosi.sign_with_privkey(data, pubkey_res.privkey,
+    #    global_pubkey, nonce, global_commit)
+    #print(res.hex())
     return {
-        "R": nonce_res.R.hex(),
-        "r": nonce_res.r.hex(),
+        #"R": nonce_res.R.hex(),
+        #"r": nonce_res.r.hex(),
         #"r_src": nonce_res.r_src.hex(),
     }
+
+
+@click.command()
+@with_client
+def ed25519_test(client):
+    from trezorlib import cosi
+    data = bytes.fromhex("00" * 32)
+    address_n_1 = tools.parse_path("m/44h/0h/0h/0h/1h")
+    address_n_2 = tools.parse_path("m/44h/0h/0h/0h/2h")
+    address_n_3 = tools.parse_path("m/44h/0h/0h/0h/3h")
+
+    key_res1 = special.export_ed25519_pubkey(client, address_n_1)
+    key_res2 = special.export_ed25519_pubkey(client, address_n_2)
+    key_res3 = special.export_ed25519_pubkey(client, address_n_3)
+    pk1, sk1 = key_res1.pubkey, key_res1.privkey
+    pk2, sk2 = key_res2.pubkey, key_res2.privkey
+    pk3, sk3 = key_res3.pubkey, key_res3.privkey
+    global_pk = cosi.combine_keys([pk1, pk2, pk3])
+
+    nonce_res1 = special.get_ed25519_nonce(client, address_n_1, data, 0)
+    nonce_res2 = special.get_ed25519_nonce(client, address_n_2, data, 1)
+    nonce_res3 = special.get_ed25519_nonce(client, address_n_3, data, 2)
+    r1, R1 = nonce_res1.r, nonce_res1.R
+    r2, R2 = nonce_res2.r, nonce_res2.R
+    r3, R3 = nonce_res3.r, nonce_res3.R
+    global_R = cosi.combine_keys([R1, R2, R3])
+
+    sig_res1 = special.cosign_ed25519(client, address_n_1, data, 0, global_pk, global_R)
+    sig_res2 = special.cosign_ed25519(client, address_n_2, data, 1, global_pk, global_R)
+    sig_res3 = special.cosign_ed25519(client, address_n_3, data, 2, global_pk, global_R)
+    sigs = [sig_res1.sig, sig_res2.sig, sig_res3.sig]
+    sig = cosi.combine_sig(global_R, sigs)
+
+    cosi.verify_combined(sig, data, global_pk)
+    print("pass")

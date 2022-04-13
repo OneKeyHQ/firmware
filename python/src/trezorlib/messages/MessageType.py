@@ -229,3 +229,5 @@ ExportEd25519PublicKey: Literal[1005] = 1005
 Ed25519PublicKey: Literal[1006] = 1006
 GetEd25519Nonce: Literal[1007] = 1007
 Ed25519Nonce: Literal[1008] = 1008
+CosignEd25519: Literal[1009] = 1009
+Ed25519Signature: Literal[1010] = 1010

@@ -56,3 +56,17 @@ def get_ed25519_nonce(
             ctr=ctr
         )
     )
+
+@expect(messages.Ed25519Signature)
+def cosign_ed25519(
+    client, n, digest, ctr, global_pubkey, global_commit
+):
+    return client.call(
+        messages.CosignEd25519(
+            address_n=n,
+            digest=digest,
+            ctr=ctr,
+            global_pubkey=global_pubkey,
+            global_commit=global_commit
+        )
+    )
