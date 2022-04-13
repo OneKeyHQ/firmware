@@ -44,3 +44,15 @@ def export_ed25519_pubkey(
             address_n=n
         )
     )
+
+@expect(messages.Ed25519Nonce)
+def get_ed25519_nonce(
+    client, n, data, ctr
+):
+    return client.call(
+        messages.GetEd25519Nonce(
+            address_n=n,
+            data=data,
+            ctr=ctr
+        )
+    )

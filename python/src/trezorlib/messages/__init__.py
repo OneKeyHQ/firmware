@@ -86,6 +86,7 @@ from .Deprecated_PassphraseStateRequest import Deprecated_PassphraseStateRequest
 from .DigestSignature import DigestSignature
 from .DoPreauthorized import DoPreauthorized
 from .ECDHSessionKey import ECDHSessionKey
+from .Ed25519Nonce import Ed25519Nonce
 from .Ed25519PublicKey import Ed25519PublicKey
 from .EndSession import EndSession
 from .Entropy import Entropy
@@ -138,6 +139,7 @@ from .FirmwareRequest import FirmwareRequest
 from .FirmwareUpload import FirmwareUpload
 from .GetAddress import GetAddress
 from .GetECDHSessionKey import GetECDHSessionKey
+from .GetEd25519Nonce import GetEd25519Nonce
 from .GetEntropy import GetEntropy
 from .GetFeatures import GetFeatures
 from .GetNextU2FCounter import GetNextU2FCounter

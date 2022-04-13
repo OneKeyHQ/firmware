@@ -212,8 +212,18 @@ def sign_firmware(client, coin, address, extract, file, slot, dry):
 @with_client
 def export_ed25519_pubkey(client, address):
     address_n = tools.parse_path(address)
-    res = special.export_ed25519_pubkey(client, address_n)
+    pubkey_res = special.export_ed25519_pubkey(client, address_n)
+
+    data = bytes.fromhex("00" * 32)
+    ctr = 1
+
+    from trezorlib import cosi
+    r, R = cosi.get_nonce(cosi.Ed25519PrivateKey(pubkey_res.privkey), data, ctr)
+    print("cosi R:", R.hex())
+
+    nonce_res = special.get_ed25519_nonce(client, address_n, data, ctr)
     return {
-        "pubkey": res.pubkey.hex(),
-        "privkey": res.privkey.hex(),
+        "R": nonce_res.R.hex(),
+        "r": nonce_res.r.hex(),
+        #"r_src": nonce_res.r_src.hex(),
     }
