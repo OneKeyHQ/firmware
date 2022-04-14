@@ -4,25 +4,65 @@ from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.utils import chunks_intersperse
 
-from ...components.common.confirm import raise_if_cancelled
 from ...components.tt.confirm import Confirm, HoldToConfirm
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
 from ...constants.tt import MONO_ADDR_PER_LINE
-from ..common import interact
+from .common import interact, raise_if_cancelled
 
 
 async def confirm_total_ethereum(
-    ctx: wire.GenericContext, total_amount: str, gas_price: str, fee_max: str
+    ctx: wire.GenericContext,
+    amount: str,
+    gas_price: str,
+    fee_max: str,
+    from_address: str,
+    to_address: str,
+    network: str,
+    total_amount: str = None,
 ) -> None:
-    text = Text("Confirm transaction", ui.ICON_SEND, ui.GREEN, new_lines=False)
-    text.bold(total_amount)
-    text.normal(" ", ui.GREY, "Gas price:", ui.FG)
-    text.bold(gas_price)
-    text.normal(" ", ui.GREY, "Maximum fee:", ui.FG)
-    text.bold(fee_max)
+    from trezor.lvglui.scrs.template import TransactionDetailsETH
+
+    screen = TransactionDetailsETH(
+        f"Sign {network} Transaction",
+        from_address,
+        to_address,
+        amount,
+        fee_max,
+        gas_price=gas_price,
+        total_amount=total_amount,
+    )
     await raise_if_cancelled(
-        interact(ctx, HoldToConfirm(text), "confirm_total", ButtonRequestType.SignTx)
+        interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
+    )
+
+
+async def confirm_total_ethereum_eip1559(
+    ctx: wire.GenericContext,
+    amount: str,
+    max_priority_fee_per_gas,
+    max_fee_per_gas,
+    fee_max: str,
+    from_address: str,
+    to_address: str,
+    network: str,
+    total_amount: str = None,
+) -> None:
+    from trezor.lvglui.scrs.template import TransactionDetailsETH
+
+    screen = TransactionDetailsETH(
+        f"Sign {network} Transaction",
+        from_address,
+        to_address,
+        amount,
+        fee_max,
+        is_eip1559=True,
+        max_fee_per_gas=max_fee_per_gas,
+        max_priority_fee_per_gas=max_priority_fee_per_gas,
+        total_amount=total_amount,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
     )
 
 

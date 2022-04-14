@@ -30,5 +30,9 @@ async def get_public_key(
     node = keychain.derive(msg.address_n)
     wif, public_key = _get_public_key(node)
     if msg.show_display:
-        await require_get_public_key(ctx, wif)
+        # await require_get_public_key(ctx, wif)
+        from trezor.ui.layouts import show_pubkey
+
+        path = paths.address_n_to_str(msg.address_n)
+        await show_pubkey(ctx, wif, path=path, network="EOS")
     return EosPublicKey(wif_public_key=wif, raw_public_key=public_key)

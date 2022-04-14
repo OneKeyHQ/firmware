@@ -3,16 +3,15 @@ from typing import TYPE_CHECKING
 from trezor import ui, utils, wire
 from trezor.crypto import random
 from trezor.enums import BackupType, ButtonRequestType
+from trezor.lvglui.scrs.common import FullSizeWindow
 
-from ...components.common.confirm import is_confirmed, raise_if_cancelled
+from ...components.common.confirm import is_confirmed
 from ...components.tt.button import ButtonDefault
 from ...components.tt.checklist import Checklist
-from ...components.tt.confirm import Confirm, HoldToConfirm
+from ...components.tt.confirm import Confirm
 from ...components.tt.info import InfoConfirm
-from ...components.tt.reset import MnemonicWordSelect, Slip39NumInput
-from ...components.tt.scroll import Paginated
-from ...components.tt.text import Text
-from ..common import interact
+from ...components.tt.reset import Slip39NumInput
+from .common import interact, raise_if_cancelled
 
 if TYPE_CHECKING:
     from typing import Sequence
@@ -29,71 +28,25 @@ async def show_share_words(
     share_index: int | None = None,
     group_index: int | None = None,
 ) -> None:
-    first, chunks, last = _split_share_into_pages(share_words)
 
     if share_index is None:
-        header_title = "Recovery seed"
+        header_title = "Recovery Phrase"
     elif group_index is None:
         header_title = f"Recovery share #{share_index + 1}"
     else:
         header_title = f"Group {group_index + 1} - Share {share_index + 1}"
-    header_icon = ui.ICON_RESET
-    pages: list[ui.Component] = []  # ui page components
-    shares_words_check = []  # check we display correct data
+    # shares_words_check = []  # check we display correct data
+    from trezor.lvglui.scrs.reset_device import MnemonicDisplay
 
-    # first page
-    text = Text(header_title, header_icon)
-    text.bold("Write down these")
-    text.bold(f"{len(share_words)} words:")
-    text.br_half()
-    for index, word in first:
-        text.mono(f"{index + 1}. {word}")
-        shares_words_check.append(word)
-    pages.append(text)
-
-    # middle pages
-    for chunk in chunks:
-        text = Text(header_title, header_icon)
-        for index, word in chunk:
-            text.mono(f"{index + 1}. {word}")
-            shares_words_check.append(word)
-        pages.append(text)
-
-    # last page
-    text = Text(header_title, header_icon)
-    for index, word in last:
-        text.mono(f"{index + 1}. {word}")
-        shares_words_check.append(word)
-    text.br_half()
-    text.bold(f"I wrote down all {len(share_words)}")
-    text.bold("words in order.")
-    pages.append(text)
-
-    pages[-1] = HoldToConfirm(pages[-1], cancel=False)
-
-    # pagination
-    paginated = Paginated(pages)
-
-    if __debug__:
-
-        word_pages = [first] + chunks + [last]
-
-        def export_displayed_words() -> None:
-            # export currently displayed mnemonic words into debuglink
-            words = [w for _, w in word_pages[paginated.page]]
-            debug.reset_current_words.publish(words)
-
-        paginated.on_change = export_displayed_words
-        export_displayed_words()
-
+    screen = MnemonicDisplay(header_title, share_words)
     # make sure we display correct data
-    utils.ensure(share_words == shares_words_check)
+    # utils.ensure(share_words == shares_words_check)
 
     # confirm the share
     await raise_if_cancelled(
         interact(
             ctx,
-            paginated,
+            screen,
             "backup_words",
             ButtonRequestType.ResetDevice,
         )
@@ -110,29 +63,23 @@ async def confirm_word(
 ) -> bool:
     # remove duplicates
     non_duplicates = list(set(share_words))
+    # remove current checked words
+    non_duplicates.remove(share_words[offset])
     # shuffle list
     random.shuffle(non_duplicates)
-    # take top NUM_OF_CHOICES words
-    choices = non_duplicates[: MnemonicWordSelect.NUM_OF_CHOICES]
-    # select first of them
-    checked_word = choices[0]
-    # find its index
-    checked_index = share_words.index(checked_word) + offset
+    # take 3 words as choices
+    choices = [non_duplicates[-1], non_duplicates[0], share_words[offset]]
     # shuffle again so the confirmed word is not always the first choice
     random.shuffle(choices)
 
-    if __debug__:
-        debug.reset_word_index.publish(checked_index)
-
-    # let the user pick a word    
-    if utils.LVGL_UI:
-        from lvglui.lv_layouts import lv_mnemonic_word_select
-        selected_word = await lv_mnemonic_word_select(ctx, choices, share_index, checked_index, count, group_index)
-    else:
-        select = MnemonicWordSelect(choices, share_index, checked_index, count, group_index)
-        selected_word: str = await ctx.wait(select)
+    # let the user pick a word
+    title = f"Check Word #{offset + 1} of {count}"
+    subtitle = "Choose the correct word."
+    options = f"{choices[0]}\n{choices[1]}\n{choices[2]}"
+    selector = FullSizeWindow(title, subtitle, "Next", options=options)
+    selected_word: str = await ctx.wait(selector.request())
     # confirm it is the correct one
-    return selected_word == checked_word
+    return selected_word == share_words[offset]
 
 
 def _split_share_into_pages(

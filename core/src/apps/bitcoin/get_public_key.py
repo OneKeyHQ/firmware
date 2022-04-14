@@ -66,7 +66,8 @@ async def get_public_key(ctx: wire.Context, msg: GetPublicKey) -> PublicKey:
     if msg.show_display:
         from trezor.ui.layouts import show_xpub
 
-        await show_xpub(ctx, node_xpub, "XPUB", "Cancel")
+        path = paths.address_n_to_str(msg.address_n)
+        await show_xpub(ctx, node_xpub, path=path)
 
     return PublicKey(
         node=node_type,

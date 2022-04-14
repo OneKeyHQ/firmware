@@ -5,8 +5,8 @@ from trezor import ui, utils
 from trezor.enums import ButtonRequestType
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action
-from trezor.lvglui.lv_layouts import lv_confirm_wipe_device
 
+from ..common.request_pin import verify_user_pin
 from .apply_settings import reload_settings_from_storage
 
 if TYPE_CHECKING:
@@ -16,7 +16,21 @@ if TYPE_CHECKING:
 
 async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
     if utils.LVGL_UI:
-        await lv_confirm_wipe_device(ctx)
+        from trezor.ui.layouts.lvgl import (
+            confirm_wipe_device,
+            confirm_wipe_device_tips,
+            confirm_wipe_device_success,
+        )
+
+        await confirm_wipe_device(ctx)
+        # verify user pin
+        await verify_user_pin(ctx)
+        # show tips
+        await confirm_wipe_device_tips(ctx)
+        storage.wipe()
+        reload_settings_from_storage()
+        await confirm_wipe_device_success(ctx)
+        return Success(message="Device wiped")
     else:
         await confirm_action(
             ctx,
@@ -28,7 +42,7 @@ async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
             verb="Hold to confirm",
             hold=True,
             hold_danger=True,
-            icon=ui.ICON_WIPE,
+            icon="A:/res/trash.png",
             icon_color=ui.RED,
             br_code=ButtonRequestType.WipeDevice,
         )

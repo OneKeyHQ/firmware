@@ -824,9 +824,9 @@ async def show_cardano_address(
     if not protocol_magics.is_mainnet(protocol_magic):
         network_name = protocol_magics.to_ui_string(protocol_magic)
 
-    title = f"{ADDRESS_TYPE_NAMES[address_parameters.address_type]} address"
+    # title = f"{ADDRESS_TYPE_NAMES[address_parameters.address_type]} address"
     address_extra = None
-    title_qr = title
+    # title_qr = title
     if address_parameters.address_type in (
         CardanoAddressType.BYRON,
         CardanoAddressType.BASE,
@@ -837,16 +837,14 @@ async def show_cardano_address(
     ):
         if address_parameters.address_n:
             address_extra = address_n_to_str(address_parameters.address_n)
-            title_qr = address_n_to_str(address_parameters.address_n)
+            # title_qr = address_n_to_str(address_parameters.address_n)
         elif address_parameters.address_n_staking:
             address_extra = address_n_to_str(address_parameters.address_n_staking)
-            title_qr = address_n_to_str(address_parameters.address_n_staking)
+            # title_qr = address_n_to_str(address_parameters.address_n_staking)
 
     await show_address(
         ctx,
         address=address,
-        title=title,
-        network=network_name,
-        address_extra=address_extra,
-        title_qr=title_qr,
+        network=f"ADA {network_name or ''}",
+        address_n=address_extra,
     )

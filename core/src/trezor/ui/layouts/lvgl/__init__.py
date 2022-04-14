@@ -4,22 +4,14 @@ from ubinascii import hexlify
 
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
-from trezor.ui.container import Container
-from trezor.ui.loader import LoaderDanger
-from trezor.ui.popup import Popup
-from trezor.ui.qr import Qr
 from trezor.utils import chunks, chunks_intersperse
 
-from ...components.common import break_path_to_lines
 from ...components.common.confirm import (
     CONFIRMED,
     GO_BACK,
     SHOW_PAGINATED,
-    is_confirmed,
-    raise_if_cancelled,
 )
-from ...components.tt import passphrase, pin
-from ...components.tt.button import ButtonCancel, ButtonDefault
+from ...components.tt.button import ButtonDefault
 from ...components.tt.confirm import Confirm, HoldToConfirm, InfoConfirm
 from ...components.tt.scroll import (
     PAGEBREAK,
@@ -28,19 +20,13 @@ from ...components.tt.scroll import (
     paginate_paragraphs,
 )
 from ...components.tt.text import LINE_WIDTH_PAGINATED, Span, Text
-from ...constants.tt import (
-    MONO_ADDR_PER_LINE,
-    MONO_HEX_PER_LINE,
-    QR_X,
-    QR_Y,
-    TEXT_MAX_LINES,
-)
-from ..common import button_request, interact
+from ...constants.tt import MONO_ADDR_PER_LINE, MONO_HEX_PER_LINE, TEXT_MAX_LINES
+from .common import button_request, interact, raise_if_cancelled
+
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Iterable, Iterator, NoReturn, Sequence
 
     from ..common import PropertyType, ExceptionType
-    from ...components.tt.button import ButtonContent
 
 
 __all__ = (
@@ -86,21 +72,30 @@ async def confirm_action(
     description: str | None = None,
     description_param: str | None = None,
     description_param_font: int = ui.BOLD,
-    verb: ButtonContent = Confirm.DEFAULT_CONFIRM,
-    verb_cancel: ButtonContent | None = Confirm.DEFAULT_CANCEL,
+    verb: str = "Confirm",
+    verb_cancel: str = "Cancel",
     hold: bool = False,
     hold_danger: bool = False,
-    icon: str | None = None,  # TODO cleanup @ redesign
+    icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
     icon_color: int | None = None,  # TODO cleanup @ redesign
     reverse: bool = False,  # TODO cleanup @ redesign
     larger_vspace: bool = False,  # TODO cleanup @ redesign
     exc: ExceptionType = wire.ActionCancelled,
     br_code: ButtonRequestType = ButtonRequestType.Other,
 ) -> None:
-    from ....lvglui.scrs.common import ScreenGeneric
-    layout = ScreenGeneric(title, description, "Confirm", cancel_btn=True, icon_path="A:/res/shriek.png")
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    if description and description_param:
+        description = description.format(description_param)
+    confirm_screen = FullSizeWindow(
+        title,
+        f"{description}{' ' + (action or '')}",
+        verb,
+        cancel_text=verb_cancel,
+        icon_path=icon,
+    )
     await raise_if_cancelled(
-        interact(ctx, layout, br_type, br_code),
+        interact(ctx, confirm_screen, br_type, br_code),
         exc,
     )
 
@@ -108,95 +103,111 @@ async def confirm_action(
 async def confirm_reset_device(
     ctx: wire.GenericContext, prompt: str, recovery: bool = False
 ) -> None:
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
     if recovery:
-        restscreen = lv_ui.Screen_Generic(
-            cancel_btn= True,
-            title= "Recovery mode",
-            description= prompt,
-            confirm_text= "Confirm",
-        )
+        title = "Recovery mode"
+        icon = "A:/res/recovery.png"
     else:
-        restscreen = lv_ui.Screen_Generic(
-            cancel_btn= True,
-            title= "Create new wallet",
-            description= prompt,
-            confirm_text= "Confirm",
-        )
-
-    gl.set_value('ui_reset',ui_reset)
-
+        title = "Create new wallet"
+        icon = "A:/res/add.png"
+    description = prompt
+    confirm_text = "Confirm"
+    restscreen = FullSizeWindow(title, description, confirm_text, icon_path=icon)
     await raise_if_cancelled(
         interact(
             ctx,
-            ui_reset,
+            restscreen,
             "recover_device" if recovery else "setup_device",
             ButtonRequestType.ProtectCall
             if recovery
             else ButtonRequestType.ResetDevice,
-            )
+        )
+    )
+
+
+async def confirm_wipe_device(ctx: wire.GenericContext):
+    from trezor.lvglui.scrs.wipe_device import WipeDevice
+
+    confirm_screen = WipeDevice()
+    await raise_if_cancelled(
+        interact(ctx, confirm_screen, "wipe_device", ButtonRequestType.WipeDevice)
+    )
+
+
+async def confirm_wipe_device_tips(ctx: wire.GenericContext):
+    from trezor.lvglui.scrs.wipe_device import WipeDeviceTips
+
+    confirm_screen = WipeDeviceTips()
+    await raise_if_cancelled(
+        interact(ctx, confirm_screen, "wipe_device", ButtonRequestType.WipeDevice)
+    )
+
+
+async def confirm_wipe_device_success(ctx: wire.GenericContext):
+    from trezor.lvglui.scrs.wipe_device import WipeDeviceSuccess
+
+    confirm_screen = WipeDeviceSuccess()
+    return await interact(
+        ctx, confirm_screen, "wipe_device", ButtonRequestType.WipeDevice
     )
 
 
 # TODO cleanup @ redesign
 async def confirm_backup(ctx: wire.GenericContext) -> bool:
-    text1 = Text("Success", ui.ICON_CONFIRM, ui.GREEN, new_lines=False)
-    text1.bold("New wallet created successfully!\n")
-    text1.br_half()
-    text1.normal("You should back up your new wallet right now.")
+    from trezor.lvglui.scrs.common import FullSizeWindow
 
-    text2 = Text("Warning", ui.ICON_WRONG, ui.RED, new_lines=False)
-    text2.bold("Are you sure you want to skip the backup?\n")
-    text2.br_half()
-    text2.normal("You can back up your Trezor once, at any time.")
+    title = "Success"
+    subtitle = (
+        "New wallet created successfully! You should back up your new wallet right now."
+    )
+    icon = "A:/res/success_icon.png"
 
-    if is_confirmed(
-        await interact(
-            ctx,
-            Confirm(text1, cancel="Skip", confirm="Back up", major_confirm=True),
-            "backup_device",
-            ButtonRequestType.ResetDevice,
-        )
-    ):
+    screen = FullSizeWindow(title, subtitle, "Backup", "Skip", icon_path=icon)
+    confirmed = await interact(
+        ctx,
+        screen,
+        "backup_device",
+        ButtonRequestType.ResetDevice,
+    )
+    if confirmed:
+        from trezor.lvglui.scrs.reset_device import BackupTips
+
+        await BackupTips().request()
         return True
 
-    confirmed = is_confirmed(
-        await interact(
-            ctx,
-            Confirm(text2, cancel="Skip", confirm="Back up", major_confirm=True),
-            "backup_device",
-            ButtonRequestType.ResetDevice,
-        )
+    title = "Warning"
+    subtitle = "Are you sure you want to skip the backup? You can back up your OneKey once, at any time."
+    icon = "A:/res/shriek.png"
+    screen = FullSizeWindow(title, subtitle, "Backup", "Skip", icon_path=icon)
+    confirmed = await interact(
+        ctx,
+        screen,
+        "backup_device",
+        ButtonRequestType.ResetDevice,
     )
-    return confirmed
+    return bool(confirmed)
 
 
 async def confirm_path_warning(
     ctx: wire.GenericContext, path: str, path_type: str = "Path"
 ) -> None:
-    text = Text("Confirm path", ui.ICON_WRONG, ui.RED)
-    text.normal(path_type)
-    text.mono(*break_path_to_lines(path, MONO_ADDR_PER_LINE))
-    text.normal("is unknown.", "Are you sure?")
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
     await raise_if_cancelled(
         interact(
             ctx,
-            Confirm(text),
+            FullSizeWindow(
+                "Confirm path",
+                f"{path_type}: {path} is unknown, Are you sure?",
+                "Confirm",
+                "Cancel",
+                icon_path="A:/res/warning.png",
+            ),
             "path_warning",
             ButtonRequestType.UnknownDerivationPath,
         )
     )
-
-
-def _show_qr(
-    address: str,
-    case_sensitive: bool,
-    title: str,
-    cancel: str = "Address",
-) -> Confirm:
-    qr = Qr(address, case_sensitive, QR_X, QR_Y)
-    text = Text(title, ui.ICON_RECEIVE, ui.GREEN)
-
-    return Confirm(Container(qr, text), cancel=cancel, cancel_style=ButtonDefault)
 
 
 def _truncate_hex(
@@ -219,29 +230,6 @@ def _truncate_hex(
     return chunks_intersperse(hex_data, width)
 
 
-def _show_address(
-    address: str,
-    title: str,
-    network: str | None = None,
-    extra: str | None = None,
-) -> ui.Layout:
-    para = [(ui.NORMAL, f"{network} network")] if network is not None else []
-    if extra is not None:
-        para.append((ui.BOLD, extra))
-    para.extend(
-        (ui.MONO, address_line) for address_line in chunks(address, MONO_ADDR_PER_LINE)
-    )
-    return paginate_paragraphs(
-        para,
-        header=title,
-        header_icon=ui.ICON_RECEIVE,
-        icon_color=ui.GREEN,
-        confirm=lambda content: Confirm(
-            content, cancel="QR", cancel_style=ButtonDefault
-        ),
-    )
-
-
 def _show_xpub(xpub: str, title: str, cancel: str) -> Paginated:
     pages: list[ui.Component] = []
     for lines in chunks(list(chunks_intersperse(xpub, 16)), TEXT_MAX_LINES * 2):
@@ -261,13 +249,20 @@ def _show_xpub(xpub: str, title: str, cancel: str) -> Paginated:
 
 
 async def show_xpub(
-    ctx: wire.GenericContext, xpub: str, title: str, cancel: str
+    ctx: wire.GenericContext,
+    xpub: str,
+    title: str = "",
+    cancel: str = "",
+    path: str = "",
+    network: str = "BTC",
 ) -> None:
+    from trezor.lvglui.scrs.template import XpubOrPub
+
     await raise_if_cancelled(
         interact(
             ctx,
-            _show_xpub(xpub, title, cancel),
-            "show_xpub",
+            XpubOrPub(f"{network} Public Key", path=path, xpub=xpub),
+            "show_pubkey",
             ButtonRequestType.PublicKey,
         )
     )
@@ -279,70 +274,56 @@ async def show_address(
     *,
     address_qr: str | None = None,
     case_sensitive: bool = True,
-    title: str = "Confirm address",
+    address_n: str = "Confirm address",
     network: str | None = None,
     multisig_index: int | None = None,
     xpubs: Sequence[str] = (),
     address_extra: str | None = None,
     title_qr: str | None = None,
+    title: str = "",
 ) -> None:
     is_multisig = len(xpubs) > 0
+    from trezor.lvglui.scrs.template import Address
+
     while True:
-        if is_confirmed(
-            await interact(
-                ctx,
-                _show_address(
-                    address,
-                    title,
-                    network,
-                    extra=address_extra,
-                ),
-                "show_address",
-                ButtonRequestType.Address,
-            )
+        if await interact(
+            ctx,
+            Address(f"{network.upper()} Address", address_n, address),
+            "show_address",
+            ButtonRequestType.Address,
         ):
             break
-        if is_confirmed(
-            await interact(
-                ctx,
-                _show_qr(
-                    address if address_qr is None else address_qr,
-                    case_sensitive,
-                    title if title_qr is None else title_qr,
-                    cancel="XPUBs" if is_multisig else "Address",
-                ),
-                "show_qr",
-                ButtonRequestType.Address,
-            )
-        ):
-            break
-
+        # TODO: MULTISIG @ redesign
         if is_multisig:
-            for i, xpub in enumerate(xpubs):
-                cancel = "Next" if i < len(xpubs) - 1 else "Address"
-                title_xpub = f"XPUB #{i + 1}"
-                title_xpub += " (yours)" if i == multisig_index else " (cosigner)"
-                if is_confirmed(
-                    await interact(
-                        ctx,
-                        _show_xpub(xpub, title=title_xpub, cancel=cancel),
-                        "show_xpub",
-                        ButtonRequestType.PublicKey,
-                    )
-                ):
-                    return
+            await interact(
+                ctx,
+                Address(
+                    f"{network.upper()} MultisigAddress {title}",
+                    address_n,
+                    address,
+                    xpubs,
+                    multisig_index,
+                ),
+                ButtonRequestType.Address,
+            )
 
 
-def show_pubkey(
-    ctx: wire.Context, pubkey: str, title: str = "Confirm public key"
-) -> Awaitable[None]:
-    return confirm_blob(
-        ctx,
-        br_type="show_pubkey",
-        title="Confirm public key",
-        data=pubkey,
-        br_code=ButtonRequestType.PublicKey,
-        icon=ui.ICON_RECEIVE,
+async def show_pubkey(
+    ctx: wire.Context,
+    pubkey: str,
+    title: str = "Confirm public key",
+    network: str = "ETH",
+    path: str = "",
+) -> None:
+    from trezor.lvglui.scrs.template import XpubOrPub
+
+    await raise_if_cancelled(
+        interact(
+            ctx,
+            XpubOrPub(f"{network} Public Key", path=path, pubkey=pubkey),
+            "show_pubkey",
+            ButtonRequestType.PublicKey,
+        )
     )
 
 
@@ -359,16 +340,19 @@ async def _show_modal(
     icon_color: int,
     exc: ExceptionType = wire.ActionCancelled,
 ) -> None:
-    text = Text(header, icon, icon_color, new_lines=False)
-    if subheader:
-        text.bold(subheader)
-        text.br()
-        text.br_half()
-    text.normal(content)
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    screen = FullSizeWindow(
+        header,
+        content,
+        confirm_text=button_confirm,
+        cancel_text=button_cancel,
+        icon_path=icon,
+    )
     await raise_if_cancelled(
         interact(
             ctx,
-            Confirm(text, confirm=button_confirm, cancel=button_cancel),
+            screen,
             br_type,
             br_code,
         ),
@@ -395,7 +379,7 @@ async def show_error_and_raise(
         content=content,
         button_confirm=None,
         button_cancel=button,
-        icon=ui.ICON_WRONG,
+        icon="A:/res/danger.png",
         icon_color=ui.RED if red else ui.ORANGE_ICON,
         exc=exc,
     )
@@ -410,7 +394,7 @@ def show_warning(
     subheader: str | None = None,
     button: str = "Try again",
     br_code: ButtonRequestType = ButtonRequestType.Warning,
-    icon: str = ui.ICON_WRONG,
+    icon: str = "A:/res/warning.png",
     icon_color: int = ui.RED,
 ) -> Awaitable[None]:
     return _show_modal(
@@ -432,7 +416,7 @@ def show_success(
     br_type: str,
     content: str,
     subheader: str | None = None,
-    button: str = "Continue",
+    button: str = "Done",
 ) -> Awaitable[None]:
     return _show_modal(
         ctx,
@@ -443,7 +427,7 @@ def show_success(
         content=content,
         button_confirm=button,
         button_cancel=None,
-        icon=ui.ICON_CONFIRM,
+        icon="A:/res/success_icon.png",
         icon_color=ui.GREEN,
     )
 
@@ -453,7 +437,7 @@ async def confirm_output(
     address: str,
     amount: str,
     font_amount: int = ui.NORMAL,  # TODO cleanup @ redesign
-    title: str = "Confirm sending",
+    title: str = "Overview Transaction",
     subtitle: str | None = None,  # TODO cleanup @ redesign
     color_to: int = ui.FG,  # TODO cleanup @ redesign
     to_str: str = " to\n",  # TODO cleanup @ redesign
@@ -463,25 +447,13 @@ async def confirm_output(
     br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
     icon: str = ui.ICON_SEND,
 ) -> None:
-    header_lines = to_str.count("\n") + int(subtitle is not None)
-    if len(address) > (TEXT_MAX_LINES - header_lines) * width:
-        para = []
-        if subtitle is not None:
-            para.append((ui.NORMAL, subtitle))
-        para.append((font_amount, amount))
-        if to_paginated:
-            para.append((ui.NORMAL, "to"))
-        para.extend((ui.MONO, line) for line in chunks(address, width_paginated))
-        content: ui.Layout = paginate_paragraphs(para, title, icon, ui.GREEN)
-    else:
-        text = Text(title, icon, ui.GREEN, new_lines=False)
-        if subtitle is not None:
-            text.normal(subtitle, "\n")
-        text.content = [font_amount, amount, ui.NORMAL, color_to, to_str, ui.FG]
-        text.mono(*chunks_intersperse(address, width))
-        content = Confirm(text)
+    from trezor.lvglui.scrs.template import TransactionOverview
 
-    await raise_if_cancelled(interact(ctx, content, "confirm_output", br_code))
+    await raise_if_cancelled(
+        interact(
+            ctx, TransactionOverview(title, amount, address), "confirm_output", br_code
+        )
+    )
 
 
 async def confirm_payment_request(
@@ -598,63 +570,35 @@ async def confirm_blob(
     Displays in monospace font. Paginates automatically.
     If data is provided as bytes or bytearray, it is converted to hex.
     """
+    from trezor.lvglui.scrs.template import BlobDisPlay
+
     if isinstance(data, (bytes, bytearray)):
         data_str = hexlify(data).decode()
     else:
         data_str = data
+    blob = BlobDisPlay(title, description, data_str)
+    return await raise_if_cancelled(interact(ctx, blob, br_type, br_code))
 
-    span = Span()
-    lines = 0
-    if description is not None:
-        span.reset(description, 0, ui.NORMAL)
-        lines += span.count_lines()
-    data_lines = (len(data_str) + MONO_HEX_PER_LINE - 1) // MONO_HEX_PER_LINE
-    lines += data_lines
 
-    if lines <= TEXT_MAX_LINES:
-        text = Text(title, icon, icon_color, new_lines=False)
-        if description is not None:
-            text.normal(description)
-            text.br()
+async def confirm_data(
+    ctx: wire.GenericContext,
+    br_type: str,
+    title: str,
+    data: bytes | str,
+    description: str | None = None,
+    br_code: ButtonRequestType = ButtonRequestType.Other,
+) -> None:
+    from trezor.lvglui.scrs.template import ContractDataOverview
 
-        # special case:
-        if len(data_str) % 16 == 0:
-            # sanity checks:
-            # (a) we must not exceed MONO_HEX_PER_LINE
-            assert MONO_HEX_PER_LINE > 16
-            # (b) we must not increase number of lines
-            assert (len(data_str) // 16) <= data_lines
-            # the above holds true for MONO_HEX_PER_LINE == 18 and TEXT_MAX_LINES == 5
-            per_line = 16
-
-        else:
-            per_line = MONO_HEX_PER_LINE
-        text.mono(ui.FG, *chunks_intersperse(data_str, per_line))
-        content: ui.Layout = HoldToConfirm(text) if hold else Confirm(text)
-        return await raise_if_cancelled(interact(ctx, content, br_type, br_code))
-
-    elif ask_pagination:
-        para = [(ui.MONO, line) for line in chunks(data_str, MONO_HEX_PER_LINE - 2)]
-
-        para_truncated = []
-        if description is not None:
-            para_truncated.append((ui.NORMAL, description))
-        para_truncated.extend(para[:TEXT_MAX_LINES])
-
-        return await _confirm_ask_pagination(
-            ctx, br_type, title, para, para_truncated, br_code, icon, icon_color
-        )
-
+    if isinstance(data, (bytes, bytearray)):
+        data_str = "0x" + hexlify(data).decode()
     else:
-        para = []
-        if description is not None:
-            para.append((ui.NORMAL, description))
-        para.extend((ui.MONO, line) for line in chunks(data_str, MONO_HEX_PER_LINE - 2))
-
-        paginated = paginate_paragraphs(
-            para, title, icon, icon_color, confirm=HoldToConfirm if hold else Confirm
+        data_str = data
+    return await raise_if_cancelled(
+        interact(
+            ctx, ContractDataOverview(title, description, data_str), br_type, br_code
         )
-        return await raise_if_cancelled(interact(ctx, paginated, br_type, br_code))
+    )
 
 
 def confirm_address(
@@ -989,17 +933,13 @@ async def confirm_signverify(
     else:
         header = f"Sign {coin} message"
         br_type = "sign_message"
+    from trezor.lvglui.scrs.template import Message
 
-    text = Text(header, new_lines=False)
-    text.bold("Confirm address:\n")
-    text.mono(*chunks_intersperse(address, MONO_ADDR_PER_LINE))
     await raise_if_cancelled(
-        interact(ctx, Confirm(text), br_type, ButtonRequestType.Other)
+        interact(
+            ctx, Message(header, address, message), br_type, ButtonRequestType.Other
+        )
     )
-
-    para = [(ui.BOLD, "Confirm message:"), (ui.MONO, message)]
-    content = paginate_paragraphs(para, header)
-    await raise_if_cancelled(interact(ctx, content, br_type, ButtonRequestType.Other))
 
 
 async def show_popup(
@@ -1009,28 +949,29 @@ async def show_popup(
     description_param: str = "",
     timeout_ms: int = 3000,
 ) -> None:
-    text = Text(title, ui.ICON_WRONG, ui.RED)
-    if subtitle is not None:
-        text.bold(subtitle)
-        text.br_half()
-    text.format_parametrized(description, description_param)
-    await Popup(text, timeout_ms)
+    from trezor.lvglui.scrs.components.popup import PopupSample
+
+    if description and description_param:
+        description = description.format(description_param)
+    subtitle = f"{subtitle or ''} {description or ''}"
+    PopupSample(title, subtitle, "A:/res/warning.png", timeout_ms)
 
 
 def draw_simple_text(title: str, description: str = "") -> None:
-    text = Text(title, ui.ICON_CONFIG, new_lines=False)
-    text.normal(description)
-    ui.draw_simple(text)
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    FullSizeWindow(title, description, icon_path="A:/res/shriek.png")
 
 
 async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -> str:
     await button_request(
         ctx, "passphrase_device", code=ButtonRequestType.PassphraseEntry
     )
+    from trezor.lvglui.scrs.passphrase import PassphraseRequest
 
-    keyboard = passphrase.PassphraseKeyboard("Enter passphrase", max_len)
-    result = await ctx.wait(keyboard)
-    if result is passphrase.CANCELLED:
+    screen = PassphraseRequest()
+    result = await ctx.wait(screen.request())
+    if not result:
         raise wire.ActionCancelled("Passphrase entry cancelled")
 
     assert isinstance(result, str)
@@ -1045,18 +986,23 @@ async def request_pin_on_device(
 ) -> str:
     await button_request(ctx, "pin_device", code=ButtonRequestType.PinEntry)
     if attempts_remaining is None:
-        subprompt = None
+        subprompt = ""
     elif attempts_remaining == 1:
         subprompt = "This is your last attempt"
     else:
         subprompt = f"{attempts_remaining} attempts remaining"
-    from ....lvglui.scrs.pinscreen import InputPin
+    from trezor.lvglui.scrs.pinscreen import InputPin
+
     pinscreen = InputPin(title=prompt, subtitle=subprompt)
+    result = await ctx.wait(pinscreen.request())
+    if not result:
+        raise wire.PinCancelled
+    assert isinstance(result, str)
+    return result
 
-    while True:
-        result = await ctx.wait(pinscreen.request())
 
-        if not result:
-            raise wire.PinCancelled
-        assert isinstance(result, str)
-        return result
+async def request_pin_tips(ctx: wire.GenericContext) -> None:
+    from trezor.lvglui.scrs.pinscreen import PinTip, FullSizeWindow
+
+    tipscreen = PinTip()
+    await ctx.wait(tipscreen.request())

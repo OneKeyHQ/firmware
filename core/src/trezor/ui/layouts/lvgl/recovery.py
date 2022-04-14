@@ -3,32 +3,30 @@ from typing import Callable, Iterable
 from trezor import strings, ui, wire
 from trezor.crypto.slip39 import MAX_SHARE_COUNT
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.scrs.common import FullSizeWindow
+from trezor.lvglui.scrs.request_word import WordEnter
 
 from ...components.common.confirm import (
-    is_confirmed,
-    is_confirmed_info,
     raise_if_cancelled,
 )
-from ...components.tt.confirm import Confirm, InfoConfirm
-from ...components.tt.keyboard_bip39 import Bip39Keyboard
-from ...components.tt.keyboard_slip39 import Slip39Keyboard
-from ...components.tt.recovery import RecoveryHomescreen
+from ...components.tt.confirm import Confirm
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
-from ...components.tt.word_select import WordSelector
-from ..common import button_request, interact
+from .common import button_request, interact
 
 
 async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
     await button_request(ctx, "word_count", code=ButtonRequestType.MnemonicWordCount)
 
     if dry_run:
-        text = Text("Seed check", ui.ICON_RECOVERY)
+        title = "Check Recovery Phrase"
     else:
-        text = Text("Recovery mode", ui.ICON_RECOVERY)
-    text.normal("Number of words?")
-
-    count = await ctx.wait(WordSelector(text))
+        title = "Import Wallet"
+    subtitle = "Number of words?"
+    screen = FullSizeWindow(
+        title, subtitle, confirm_text="Continue", options="12\n18\n24"
+    )
+    count = await ctx.wait(screen.request())
     # WordSelector can return int, or string if the value came from debuglink
     # ctx.wait has a return type Any
     # Hence, it is easier to convert the returned value to int explicitly
@@ -39,13 +37,15 @@ async def request_word(
     ctx: wire.GenericContext, word_index: int, word_count: int, is_slip39: bool
 ) -> str:
     if is_slip39:
-        keyboard: Slip39Keyboard | Bip39Keyboard = Slip39Keyboard(
-            f"Type word {word_index + 1} of {word_count}:"
-        )
-    else:
-        keyboard = Bip39Keyboard(f"Type word {word_index + 1} of {word_count}:")
+        # keyboard: Slip39Keyboard | Bip39Keyboard = Slip39Keyboard(
+        #     f"Type word {word_index + 1} of {word_count}:"
+        # )
+        pass
 
-    word: str = await ctx.wait(keyboard)
+    else:
+        title = f"Enter word #{word_index + 1} of {word_count}"
+        screen = WordEnter(title)
+    word: str = await ctx.wait(screen.request())
     return word
 
 
@@ -113,22 +113,15 @@ async def continue_recovery(
     subtext: str | None,
     info_func: Callable | None,
 ) -> bool:
-    homepage = RecoveryHomescreen(text, subtext)
-    if info_func is not None:
-        content = InfoConfirm(
-            homepage,
-            confirm=button_label,
-            info="Info",
-            cancel="Abort",
-        )
-        await button_request(ctx, "recovery", ButtonRequestType.RecoveryHomepage)
-        return await is_confirmed_info(ctx, content, info_func)
-    else:
-        return is_confirmed(
-            await interact(
-                ctx,
-                Confirm(homepage, confirm=button_label, major_confirm=True),
-                "recovery",
-                ButtonRequestType.RecoveryHomepage,
-            )
-        )
+    screen = FullSizeWindow(
+        text,
+        "it is safe to eject Trezor and continue later.",
+        confirm_text=button_label,
+        cancel_text="Cancel",
+    )
+    return await interact(
+        ctx,
+        screen,
+        "recovery",
+        ButtonRequestType.RecoveryHomepage,
+    )

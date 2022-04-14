@@ -115,16 +115,19 @@ def set_label(label: str) -> None:
         raise ValueError  # label too long
     common.set(_NAMESPACE, _LABEL, label.encode(), True)  # public
 
+
 def get_language() -> str | None:
     language = common.get(_NAMESPACE, _LANGUAGE, True)  # public
     if language is None:
         return "English"
     return language.decode()
 
+
 def set_language(language: str) -> None:
     if language not in ["English", "Chinese"]:
         raise ValueError
     common.set(_NAMESPACE, _LANGUAGE, language.encode(), True)  # public
+
 
 def get_mnemonic_secret() -> bytes | None:
     return common.get(_NAMESPACE, _MNEMONIC_SECRET)
@@ -157,14 +160,15 @@ def set_passphrase_enabled(enable: bool) -> None:
         set_passphrase_always_on_device(False)
 
 
-def get_homescreen() -> bytes | None:
-    return common.get(_NAMESPACE, _HOMESCREEN, public=True)
+def get_homescreen() -> str | None:
+    homescreen = common.get(_NAMESPACE, _HOMESCREEN, public=True)
+    return homescreen.decode() if homescreen else None
 
 
-def set_homescreen(homescreen: bytes) -> None:
-    if len(homescreen) > HOMESCREEN_MAXSIZE:
-        raise ValueError  # homescreen too large
-    common.set(_NAMESPACE, _HOMESCREEN, homescreen, public=True)
+def set_homescreen(homescreen: str) -> None:
+    # if len(homescreen) > HOMESCREEN_MAXSIZE:
+    #     raise ValueError  # homescreen too large
+    common.set(_NAMESPACE, _HOMESCREEN, homescreen.encode(), public=True)
 
 
 def store_mnemonic_secret(

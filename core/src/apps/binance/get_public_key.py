@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor.messages import BinanceGetPublicKey, BinancePublicKey
-from trezor.ui.layouts import show_pubkey
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
@@ -20,6 +19,9 @@ async def get_public_key(
     pubkey = node.public_key()
 
     if msg.show_display:
-        await show_pubkey(ctx, hexlify(pubkey).decode())
+        from trezor.ui.layouts import show_pubkey
+
+        path = paths.address_n_to_str(msg.address_n)
+        await show_pubkey(ctx, hexlify(pubkey).decode(), path=path, network="BNB")
 
     return BinancePublicKey(public_key=pubkey)

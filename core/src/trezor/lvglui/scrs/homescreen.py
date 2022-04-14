@@ -1,39 +1,69 @@
+from storage import device
 from trezor import workflow
+
 from .common import *
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
 from .components.container import ContainerFlexCol, ContanierGrid
 from .components.imgbtn import ImgBottonGridItem
-from apps.management.change_pin import change_pin
-from trezor.messages import ChangePin
-from trezor.wire import DUMMY_CONTEXT
-from storage import device
+
+
 class MainScreen(Screen):
-    def __init__(self):
+    def __init__(self, dev_state=None):
+        homescreen = device.get_homescreen() or "A:/res/wallpaper_light.png"
         if not hasattr(self, "_init"):
             self._init = True
         else:
+            if dev_state:
+                self.dev_state_text.set_text(dev_state)
+            elif hasattr(self, "dev_state") and dev_state is None:
+                self.dev_state.delete()
+            self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
             if not self.is_visible():
                 load_scr_with_animation(self)
             return
         super().__init__()
-        self.set_style_bg_img_src("A:/res/wallpaper_light.png", lv.PART.MAIN | lv.STATE.DEFAULT)
+        if dev_state:
+            self.dev_state = lv.btn(self)
+            self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
+            self.dev_state.set_style_bg_color(
+                lv.color_hex(0xDCA312), lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.dev_state.set_style_radius(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
+            self.dev_state_text = lv.label(self.dev_state)
+            self.dev_state_text.set_text(dev_state)
+            self.dev_state_text.set_style_text_color(
+                lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.dev_state_text.set_style_text_font(
+                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.dev_state_text.center()
+        self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         self.btn_settings = lv.btn(self)
         self.btn_settings.set_size(144, 88)
-        self.btn_settings.set_pos(64, 92)
+        self.btn_settings.set_pos(64, 112)
         self.btn_settings.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn_settings.set_style_bg_color(lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn_settings.set_style_bg_img_src("A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.btn_settings.set_style_bg_color(
+            lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.btn_settings.set_style_bg_img_src(
+            "A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.btn_settings.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-        self.btn_info= lv.btn(self)
+        self.btn_info = lv.btn(self)
         self.btn_info.set_size(144, 88)
         self.btn_info.align_to(self.btn_settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
         self.btn_info.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn_info.set_style_bg_color(lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn_info.set_style_bg_img_src("A:/res/book.png", lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.btn_info.set_style_bg_color(
+            lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.btn_info.set_style_bg_img_src(
+            "A:/res/book.png", lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.btn_info.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-        lv.scr_load(self)
 
     def on_click(self, event_obj):
         target = event_obj.get_target()
@@ -42,9 +72,12 @@ class MainScreen(Screen):
             if target == self.btn_settings:
                 self.load_screen(SettingsScreen(self))
             elif target == self.btn_info:
-                print('Info')
+                if __debug__:
+                    print("Info")
             else:
-                print('Unknown')
+                if __debug__:
+                    print("Unknown")
+
 
 class SettingsScreen(Screen):
     def __init__(self, prev_scr=None):
@@ -55,15 +88,35 @@ class SettingsScreen(Screen):
         kwargs = {"prev_scr": prev_scr, "title": "Settings", "nav_back": True}
         super().__init__(**kwargs)
         self.container = ContainerFlexCol(self, self.title)
-        self.general = ListItemBtn(self.container, "General", left_img_src="A:/res/general.png")
-        self.connect = ListItemBtn(self.container, "Connect", left_img_src="A:/res/connect.png")
-        self.home_scr = ListItemBtn(self.container, "Home Screen", left_img_src="A:/res/homescreen.png")
-        self.security = ListItemBtn(self.container, "Security", left_img_src="A:/res/security.png")
-        self.crypto = ListItemBtn(self.container, "Crypto", left_img_src="A:/res/crypto.png")
-        self.about = ListItemBtn(self.container, "About Device", left_img_src="A:/res/about.png")
-        self.power = ListItemBtn(self.container, "PowerOff", left_img_src="A:/res/poweroff.png", has_next=False)
-        self.power.label_left.set_style_text_color(lv.color_hex(0xff0000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.general = ListItemBtn(
+            self.container, "General", left_img_src="A:/res/general.png"
+        )
+        self.connect = ListItemBtn(
+            self.container, "Connect", left_img_src="A:/res/connect.png"
+        )
+        self.home_scr = ListItemBtn(
+            self.container, "Home Screen", left_img_src="A:/res/homescreen.png"
+        )
+        self.security = ListItemBtn(
+            self.container, "Security", left_img_src="A:/res/security.png"
+        )
+        self.crypto = ListItemBtn(
+            self.container, "Crypto", left_img_src="A:/res/crypto.png"
+        )
+        self.about = ListItemBtn(
+            self.container, "About Device", left_img_src="A:/res/about.png"
+        )
+        self.power = ListItemBtn(
+            self.container,
+            "PowerOff",
+            left_img_src="A:/res/poweroff.png",
+            has_next=False,
+        )
+        self.power.label_left.set_style_text_color(
+            lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
     def on_click(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
@@ -77,17 +130,20 @@ class SettingsScreen(Screen):
             elif target == self.security:
                 self.load_screen(SecurityScreen(self))
             elif target == self.crypto:
-                print('Crypto')
+                self.load_screen(CryptoScreen(self))
             elif target == self.about:
                 self.load_screen(AboutSetting(self))
             elif target == self.power:
-                print('PowerOff')
+                pass
             else:
-                print('Unknown')
+                if __debug__:
+                    print("Unknown")
+
 
 class GeneralScreen(Screen):
     cur_auto_lock = ""
     cur_language = ""
+
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
             self._init = True
@@ -104,7 +160,9 @@ class GeneralScreen(Screen):
         self.container = ContainerFlexCol(self, self.title)
         self.auto_lock = ListItemBtn(self.container, "Auto Lock", right_text)
         GeneralScreen.cur_language = device.get_language()
-        self.language = ListItemBtn(self.container, "Language", GeneralScreen.cur_language)
+        self.language = ListItemBtn(
+            self.container, "Language", GeneralScreen.cur_language
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -115,6 +173,7 @@ class GeneralScreen(Screen):
                 self.load_screen(AutoLockSetting(self))
             elif target == self.language:
                 self.load_screen(LanguageSetting(self))
+
 
 class AutoLockSetting(Screen):
     def __init__(self, prev_scr=None):
@@ -129,20 +188,22 @@ class AutoLockSetting(Screen):
         self.checked_index = 0
         self.btns = [None] * (len(self.setting_items) + 1)
         for index, item in enumerate(self.setting_items):
-                if not item == "Never": # last item
-                    item = f"{item} minutes"
-                self.btns[index] = ListItemBtn(self.container, item, has_next=False)
-                self.btns[index].add_check_img()
-                if item == GeneralScreen.cur_auto_lock:
-                    has_custom = False
-                    self.btns[index].set_checked()
-                    self.checked_index = index
+            if not item == "Never":  # last item
+                item = f"{item} minutes"
+            self.btns[index] = ListItemBtn(self.container, item, has_next=False)
+            self.btns[index].add_check_img()
+            if item == GeneralScreen.cur_auto_lock:
+                has_custom = False
+                self.btns[index].set_checked()
+                self.checked_index = index
 
         if has_custom:
-                self.btns[-1] = ListItemBtn(self.container, f"{GeneralScreen.cur_auto_lock}(Custom)", has_next=False)
-                self.btns[-1].add_check_img()
-                self.btns[-1].set_checked()
-                self.checked_index = -1
+            self.btns[-1] = ListItemBtn(
+                self.container, f"{GeneralScreen.cur_auto_lock}(Custom)", has_next=False
+            )
+            self.btns[-1].add_check_img()
+            self.btns[-1].set_checked()
+            self.checked_index = -1
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -164,6 +225,7 @@ class AutoLockSetting(Screen):
                             auto_lock_time = self.setting_items[index]
                         device.set_autolock_delay_ms(auto_lock_time * 60 * 1000)
                         return
+
 
 class LanguageSetting(Screen):
     def __init__(self, prev_scr=None):
@@ -200,6 +262,7 @@ class LanguageSetting(Screen):
                 device.set_language("Chinese")
                 self.check_index = 1
 
+
 class ConnectSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -207,7 +270,7 @@ class ConnectSetting(Screen):
         else:
             return
         super().__init__(prev_scr=prev_scr, title="Connect", nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, size=(lv.pct(100), 160))
+        self.container = ContainerFlexCol(self, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, "Bluetooth")
         self.usb = ListItemBtnWithSwitch(self.container, "USB")
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
@@ -216,16 +279,18 @@ class ConnectSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.VALUE_CHANGED:
-            if target == self.ble.switch:
-                if target.has_state(lv.STATE.CHECKED):
-                   print("Bluetooth is on")
+            if __debug__:
+                if target == self.ble.switch:
+                    if target.has_state(lv.STATE.CHECKED):
+                        print("Bluetooth is on")
+                    else:
+                        print("Bluetooth is off")
                 else:
-                    print("Bluetooth is off")
-            else:
-                if target.has_state(lv.STATE.CHECKED):
-                    print("USB is on")
-                else:
-                    print("USB is off")
+                    if target.has_state(lv.STATE.CHECKED):
+                        print("USB is on")
+                    else:
+                        print("USB is off")
+
 
 class AboutSetting(Screen):
     def __init__(self, prev_scr=None):
@@ -239,25 +304,50 @@ class AboutSetting(Screen):
         # ble_mac = device.get_ble_mac()
         # storage = device.get_storage()
         super().__init__(prev_scr=prev_scr, title="About Device", nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, size=(lv.pct(100), 300))
-        self.model = ListItemBtn(self.container, "Model", right_text="OneKey Touch", has_next=False)
-        self.version = ListItemBtn(self.container, "System Version", right_text="1.0.0", has_next=False)
-        self.serial = ListItemBtn(self.container, "Serial", right_text="FK1W2Y84JCDR", has_next=False)
-        self.ble_mac = ListItemBtn(self.container, "Bluetooth", right_text="B8:C3:16:DE:D8:46", has_next=False)
-        self.storage = ListItemBtn(self.container, "Storage", right_text="16 GB", has_next=False)
+        self.container = ContainerFlexCol(self, self.title)
+        self.model = ListItemBtn(
+            self.container, "Model", right_text="OneKey Touch", has_next=False
+        )
+        self.version = ListItemBtn(
+            self.container, "System Version", right_text="1.0.0", has_next=False
+        )
+        self.serial = ListItemBtn(
+            self.container, "Serial", right_text="FK1W2Y84JCDR", has_next=False
+        )
+        self.ble_mac = ListItemBtn(
+            self.container, "Bluetooth", right_text="B8:C3:16:DE:D8:46", has_next=False
+        )
+        self.storage = ListItemBtn(
+            self.container, "Storage", right_text="16 GB", has_next=False
+        )
+
 
 class HomeScreenSetting(Screen):
+    LIGHT_WALLPAPER = "A:/res/wallpaper_light.png"
+    DARK_WALLPAPER = "A:/res/wallpaper_dark.png"
+
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
             self._init = True
         else:
             return
+        cur = device.get_homescreen() or self.LIGHT_WALLPAPER
         super().__init__(prev_scr=prev_scr, title="Home Screen", nav_back=True)
-        self.container = ContanierGrid(self, self.title, size=(lv.pct(100), 400))
-        self.light = ImgBottonGridItem(self.container, 0, 0, "A:/res/wallpaper_light_thumnail.png")
-        self.light.set_checked(True)
-        self.dark = ImgBottonGridItem(self.container, 1, 0, "A:/res/wallpaper_dark_thumnail.png")
-        self.dark.set_checked(False)
+        self.container = ContanierGrid(self, self.title)
+        self.light = ImgBottonGridItem(
+            self.container, 0, 0, "A:/res/wallpaper_light_thumnail.png"
+        )
+        self.dark = ImgBottonGridItem(
+            self.container, 1, 0, "A:/res/wallpaper_dark_thumnail.png"
+        )
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+        if cur == self.DARK_WALLPAPER:
+            self.dark.set_checked(True)
+            self.light.set_checked(False)
+        else:
+            self.light.set_checked(True)
+            self.dark.set_checked(False)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -267,9 +357,12 @@ class HomeScreenSetting(Screen):
             if target == self.light:
                 self.light.set_checked(True)
                 self.dark.set_checked(False)
+                device.set_homescreen(self.LIGHT_WALLPAPER)
             elif target == self.dark:
                 self.dark.set_checked(True)
                 self.light.set_checked(False)
+                device.set_homescreen(self.DARK_WALLPAPER)
+
 
 class SecurityScreen(Screen):
     def __init__(self, prev_scr=None):
@@ -278,22 +371,154 @@ class SecurityScreen(Screen):
         else:
             return
         super().__init__(prev_scr, title="Security", nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, size=(lv.pct(100), 400))
+        self.container = ContainerFlexCol(self, self.title)
         self.rest_pin = ListItemBtn(self.container, "Reset PIN")
         self.recovery_check = ListItemBtn(self.container, "Check Recovery Phrase")
-        self.passphrase = ListItemBtn(self.container, "Passphrase", right_text="Coming Soon", has_next=False)
+        self.passphrase = ListItemBtn(self.container, "Passphrase")
         self.rest_device = ListItemBtn(self.container, "Reset Device", has_next=False)
-        self.rest_device.label_left.set_style_text_color(lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.rest_device.label_left.set_style_text_color(
+            lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
     def on_click(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            from trezor.wire import DUMMY_CONTEXT
+
             if target == self.rest_pin:
+                from apps.management.change_pin import change_pin
+                from trezor.messages import ChangePin
+
                 workflow.spawn(change_pin(DUMMY_CONTEXT, ChangePin(remove=False)))
             elif target == self.recovery_check:
-                print("Check Recovery Phrase")
+                from apps.management.recovery_device import recovery_device
+                from trezor.messages import RecoveryDevice
+
+                workflow.spawn(
+                    recovery_device(
+                        DUMMY_CONTEXT,
+                        RecoveryDevice(dry_run=True, enforce_wordlist=True),
+                    )
+                )
             elif target == self.passphrase:
-                print("Passphrase")
+                from apps.management.apply_settings import apply_settings
+                from trezor.messages import ApplySettings
+
+                passphrase_enable = not device.is_passphrase_enabled()
+                if passphrase_enable:
+                    on_device = True
+                else:
+                    on_device = None
+                workflow.spawn(
+                    apply_settings(
+                        DUMMY_CONTEXT,
+                        ApplySettings(
+                            use_passphrase=passphrase_enable,
+                            passphrase_always_on_device=on_device,
+                        ),
+                    )
+                )
             elif target == self.rest_device:
-                print("Reset Device")
+                from apps.management.wipe_device import wipe_device
+                from trezor.messages import WipeDevice
+
+                workflow.spawn(wipe_device(DUMMY_CONTEXT, WipeDevice()))
+
+
+class CryptoScreen(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(prev_scr, title="Crypto", nav_back=True)
+        self.container = ContainerFlexCol(self, self.title)
+        self.ethereum = ListItemBtn(self.container, "Ethereum")
+        self.solana = ListItemBtn(self.container, "Solana")
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.ethereum:
+                self.load_screen(EthereumSetting(self))
+            elif target == self.solana:
+                self.load_screen(SolanaSetting(self))
+
+
+class EthereumSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(prev_scr, title="Ethereum", nav_back=True)
+        self.container = ContainerFlexCol(self, self.title)
+        self.blind_sign = ListItemBtn(self.container, "Blind Signing", right_text="Off")
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.blind_sign:
+                self.load_screen(BlindSign(self, coin_type="Ethereum"))
+
+
+class SolanaSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(prev_scr, title="Solana", nav_back=True)
+        self.container = ContainerFlexCol(self, self.title)
+        self.blind_sign = ListItemBtn(self.container, "Blind Signing", right_text="Off")
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.blind_sign:
+                self.load_screen(BlindSign(self, coin_type="Solana"))
+
+
+class BlindSign(Screen):
+    def __init__(self, prev_scr=None, coin_type: str = "Ethereum"):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            self.coin_type = coin_type
+            return
+        super().__init__(prev_scr, title="Blind Signing", nav_back=True)
+        self.coin_type = coin_type
+        self.container = ContainerFlexCol(self, self.title)
+        self.blind_sign = ListItemBtnWithSwitch(
+            self.container, f"{coin_type} Blind Signing"
+        )
+        self.blind_sign.clear_state()
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+        self.popup = None
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.blind_sign.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    from .components.popup import Popup
+
+                    self.popup = Popup(
+                        self,
+                        f"Enable {self.coin_type} Blind Signing?",
+                        "Blind signing is only required for signing some specific smart contract transactions, which can't be recognized on device. Before enabling this feature, you need to know:",
+                        icon_path="A:/res/warning.png",
+                        btn_text="Enable",
+                    )
+                else:
+                    if __debug__:
+                        print("Bluetooth is off")

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import storage
 import storage.device
 import storage.recovery
-from trezor import config, ui, wire, workflow
+from trezor import config, ui, utils, wire, workflow
 from trezor.enums import ButtonRequestType
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action, confirm_reset_device
@@ -65,7 +65,7 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     storage.recovery.set_in_progress(True)
     storage.recovery.set_dry_run(bool(msg.dry_run))
 
-    workflow.set_default(recovery_homescreen)
+    # workflow.set_default(recovery_homescreen)
     return await recovery_process(ctx)
 
 
@@ -87,17 +87,37 @@ def _validate(msg: RecoveryDevice) -> None:
                 raise wire.ProcessError(f"Forbidden field set in dry-run: {key}")
 
 
-async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
-    if not msg.dry_run:
-        await confirm_reset_device(
-            ctx, "Do you really want to\nrecover a wallet?", recovery=True
-        )
-    else:
-        await confirm_action(
-            ctx,
-            "confirm_seedcheck",
-            title="Seed check",
-            description="Do you really want to check the recovery seed?",
-            icon=ui.ICON_RECOVERY,
-            br_code=ButtonRequestType.ProtectCall,
-        )
+if not utils.LVGL_UI:
+
+    async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
+        if not msg.dry_run:
+            await confirm_reset_device(
+                ctx, "Do you really want to\nrecover a wallet?", recovery=True
+            )
+        else:
+            await confirm_action(
+                ctx,
+                "confirm_seedcheck",
+                title="Seed check",
+                description="Do you really want to check the recovery seed?",
+                icon=ui.ICON_RECOVERY,
+                br_code=ButtonRequestType.ProtectCall,
+            )
+
+else:
+
+    async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
+        if not msg.dry_run:
+            await confirm_reset_device(
+                ctx, "Do you really want to\nrecover a wallet?", recovery=True
+            )
+        else:
+            await confirm_action(
+                ctx,
+                "confirm_seedcheck",
+                title="Check Recovery Phrase",
+                description="Do you really want to check the recovery seed?",
+                verb="Continue",
+                icon="A:/res/shield_search.png",
+                br_code=ButtonRequestType.ProtectCall,
+            )

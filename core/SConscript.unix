@@ -37,13 +37,12 @@ if FEATURE_FLAGS["LVGL"]:
     SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/draw/nxp_vglite/*.c'))
     SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/layouts/grid/lv_grid.c'))
     SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/layouts/flex/lv_flex.c'))
-    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/libs/**/*.c', exclude=[f'{LVGL_DIR}/src/extra/libs/qrcode/*.c']))
+    SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/libs/**/*.c'))
     SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/others/**/*.c'))
     SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/themes/**/*.c'))
     SOURCE_LVGL.extend(Glob(f'{LVGL_DIR}/src/extra/widgets/**/*.c'))
-    # SOURCE_LVGL.extend(Glob(f'{LVGL_BINDING_DIR}/driver/SDL/*.c'))
-    if UNAME_S == 'Linux':
-        SOURCE_LVGL.extend(Glob(f'{LVGL_BINDING_DIR}/driver/linux/modfb.c'))
+    # if UNAME_S == 'Linux':
+    #     SOURCE_LVGL.extend(Glob(f'{LVGL_BINDING_DIR}/driver/linux/modfb.c'))
     # Binding generate env
     binding_env = Environment(ENV=os.environ)
     binding_env.Replace(
@@ -230,10 +229,10 @@ if FEATURE_FLAGS["TREZOR_UI"]:
         'vendor/micropython/lib/uzlib/crc32.c',
         'vendor/micropython/lib/uzlib/tinflate.c',
     ]
-    if FEATURE_FLAGS["TREZOR_UI"]:
-        SOURCE_MOD += [
-            'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
-        ]
+    # if FEATURE_FLAGS["TREZOR_UI"]:
+    #     SOURCE_MOD += [
+    #         'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+    #     ]
     if UI2:
         CPPDEFINES_MOD += [
             'TREZOR_FONT_MEDIUM_ENABLE',
@@ -557,7 +556,7 @@ hdr_moduledefs = env.Command(
     source=SOURCE_QSTR,
     action='$MAKEMODULEDEFS --vpath="." $SOURCES > $TARGET', )
 
-Requires(hdr_moduledefs, lvgl)
+# Requires(hdr_moduledefs, lvgl)
 
 env.Ignore(hdr_moduledefs, hdr_moduledefs)
 env.Ignore(hdr_moduledefs, qstr_collected)
@@ -645,14 +644,6 @@ if FROZEN:
             SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash.py',
         ])
     )
-    # lvgl frozen
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/driver/linux/evdev.py'))
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/driver/linux/lv_timer.py'))
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/display_driver_utils.py'))
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/display_driver.py'))
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/imagetools.py'))
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/fs_driver.py'))
-    SOURCE_PY.extend(Glob(LVGL_BINDING_DIR + '/lib/lv_utils.py'))
 
     if EVERYTHING:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/binance/*.py'))

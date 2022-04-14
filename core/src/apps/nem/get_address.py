@@ -29,13 +29,12 @@ async def get_address(
     address = node.nem_address(msg.network)
 
     if msg.show_display:
-        title = address_n_to_str(msg.address_n)
+        path = address_n_to_str(msg.address_n)
         await show_address(
             ctx,
             address=address,
-            case_sensitive=False,
-            title=title,
-            network=get_network_str(msg.network),
+            address_n=path,
+            network="NEM",
         )
 
     return NEMAddress(address=address)

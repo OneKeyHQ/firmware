@@ -35,7 +35,7 @@ async def change_pin(ctx: wire.Context, msg: ChangePin) -> Success:
 
     # get new pin
     if not msg.remove:
-        newpin = await request_pin_confirm(ctx)
+        newpin = await request_pin_confirm(ctx, show_tip=(not bool(curpin)))
     else:
         newpin = ""
 
@@ -63,7 +63,6 @@ async def change_pin(ctx: wire.Context, msg: ChangePin) -> Success:
 
 def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[None]:
     has_pin = config.has_pin()
-
     if msg.remove and has_pin:  # removing pin
         return confirm_action(
             ctx,

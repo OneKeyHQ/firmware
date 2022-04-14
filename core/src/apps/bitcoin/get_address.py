@@ -89,6 +89,7 @@ async def get_address(
             mac = get_address_mac(address, coin.slip44, keychain)
 
     if msg.show_display:
+        path = address_n_to_str(msg.address_n)
         if msg.multisig:
             if msg.multisig.nodes:
                 pubnodes = msg.multisig.nodes
@@ -96,7 +97,7 @@ async def get_address(
                 pubnodes = [hd.node for hd in msg.multisig.pubkeys]
             multisig_index = multisig_pubkey_index(msg.multisig, node.public_key())
 
-            title = f"Multisig {msg.multisig.m} of {len(pubnodes)}"
+            title = f"{msg.multisig.m} of {len(pubnodes)}"
             await show_address(
                 ctx,
                 address=address_short,
@@ -104,15 +105,15 @@ async def get_address(
                 title=title,
                 multisig_index=multisig_index,
                 xpubs=_get_xpubs(coin, multisig_xpub_magic, pubnodes),
+                address_n=path,
+                network=coin.coin_shortcut,
             )
         else:
-            title = address_n_to_str(msg.address_n)
             await show_address(
                 ctx,
-                address=address_short,
-                address_qr=address,
-                case_sensitive=address_case_sensitive,
-                title=title,
+                address=address,
+                address_n=path,
+                network=coin.coin_shortcut,
             )
 
     return Address(address=address, mac=mac)

@@ -61,7 +61,7 @@ async def _request_on_host(ctx: wire.Context) -> str:
             ctx,
             "passphrase_host1",
             title="Hidden wallet",
-            description="Access hidden wallet?\n\nNext screen will show\nthe passphrase!",
+            description="Access hidden wallet? Next screen will show the passphrase!",
             icon=ui.ICON_CONFIG,
         )
 
@@ -69,7 +69,7 @@ async def _request_on_host(ctx: wire.Context) -> str:
             ctx,
             "passphrase_host2",
             title="Hidden wallet",
-            description="Use this passphrase?\n",
+            description="Use this passphrase?",
             data=ack.passphrase,
             icon=ui.ICON_CONFIG,
             icon_color=ui.ORANGE_ICON,
@@ -82,5 +82,5 @@ def _entry_dialog() -> None:
     from trezor.ui.layouts import draw_simple_text
 
     draw_simple_text(
-        "Passphrase entry", "Please type your\npassphrase on the\nconnected host."
+        "Passphrase entry", "Please type your passphrase on the connected host."
     )
