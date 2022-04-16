@@ -718,6 +718,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoCertificateType
     trezor.enums.CardanoDerivationType
     import trezor.enums.CardanoDerivationType
+    trezor.enums.CardanoGovernanceRegistrationFormat
+    import trezor.enums.CardanoGovernanceRegistrationFormat
     trezor.enums.CardanoNativeScriptHashDisplayFormat
     import trezor.enums.CardanoNativeScriptHashDisplayFormat
     trezor.enums.CardanoNativeScriptType
@@ -726,6 +728,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoPoolRelayType
     trezor.enums.CardanoTxAuxiliaryDataSupplementType
     import trezor.enums.CardanoTxAuxiliaryDataSupplementType
+    trezor.enums.CardanoTxOutputSerializationFormat
+    import trezor.enums.CardanoTxOutputSerializationFormat
     trezor.enums.CardanoTxSigningMode
     import trezor.enums.CardanoTxSigningMode
     trezor.enums.CardanoTxWitnessType
@@ -778,12 +782,12 @@ if not utils.BITCOIN_ONLY:
     import apps.bitcoin.sign_tx.zcash_v4
     apps.cardano
     import apps.cardano
-    apps.cardano.address
-    import apps.cardano.address
+    apps.cardano.addresses
+    import apps.cardano.addresses
     apps.cardano.auxiliary_data
     import apps.cardano.auxiliary_data
-    apps.cardano.byron_address
-    import apps.cardano.byron_address
+    apps.cardano.byron_addresses
+    import apps.cardano.byron_addresses
     apps.cardano.certificates
     import apps.cardano.certificates
     apps.cardano.get_address
@@ -816,8 +820,20 @@ if not utils.BITCOIN_ONLY:
     import apps.cardano.native_script
     apps.cardano.seed
     import apps.cardano.seed
+    apps.cardano.sign_message
+    import apps.cardano.sign_message
     apps.cardano.sign_tx
     import apps.cardano.sign_tx
+    apps.cardano.sign_tx.multisig_signer
+    import apps.cardano.sign_tx.multisig_signer
+    apps.cardano.sign_tx.ordinary_signer
+    import apps.cardano.sign_tx.ordinary_signer
+    apps.cardano.sign_tx.plutus_signer
+    import apps.cardano.sign_tx.plutus_signer
+    apps.cardano.sign_tx.pool_owner_signer
+    import apps.cardano.sign_tx.pool_owner_signer
+    apps.cardano.sign_tx.signer
+    import apps.cardano.sign_tx.signer
     apps.common.mnemonic
     import apps.common.mnemonic
     apps.eos

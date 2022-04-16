@@ -2,5 +2,5 @@
 # fmt: off
 # isort:skip_file
 
-NONE = 0
-GOVERNANCE_REGISTRATION_SIGNATURE = 1
+CIP15 = 0
+CIP36 = 1

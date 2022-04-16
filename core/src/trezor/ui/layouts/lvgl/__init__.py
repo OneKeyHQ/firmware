@@ -460,7 +460,7 @@ async def confirm_output(
     amount: str,
     font_amount: int = ui.NORMAL,  # TODO cleanup @ redesign
     title: str = "Confirm Transaction",
-    subtitle: str | None = None,  # TODO cleanup @ redesign
+    subtitle: str | None = None,
     color_to: int = ui.FG,  # TODO cleanup @ redesign
     to_str: str = " to\n",  # TODO cleanup @ redesign
     to_paginated: bool = False,  # TODO cleanup @ redesign
@@ -475,7 +475,9 @@ async def confirm_output(
         interact(
             ctx,
             TransactionOverview(
-                _(i18n_keys.TITLE__VIEW_TRANSACTION),
+                _(i18n_keys.TITLE__VIEW_TRANSACTION)
+                if subtitle is None
+                else _(i18n_keys.TITLE__STR_TRANSACTION).format(subtitle),
                 amount,
                 address,
                 primary_color=ctx.primary_color,
@@ -765,7 +767,15 @@ async def confirm_metadata(
 ) -> None:
     from trezor.lvglui.scrs.template import ConfirmMetaData
 
-    confirm = ConfirmMetaData(title, content, description, param, ctx.primary_color)
+    has_icon_path = hasattr(ctx, "icon_path")
+    confirm = ConfirmMetaData(
+        title,
+        content,
+        description,
+        param,
+        ctx.primary_color,
+        ctx.icon_path if has_icon_path is True else None,
+    )
     await raise_if_cancelled(interact(ctx, confirm, br_type, br_code))
 
 

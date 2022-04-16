@@ -171,14 +171,10 @@ class MessageType(IntEnum):
     StellarManageBuyOfferOp = 222
     StellarPathPaymentStrictSendOp = 223
     StellarSignedTx = 230
-    CardanoSignTx = 303
     CardanoGetPublicKey = 305
     CardanoPublicKey = 306
     CardanoGetAddress = 307
     CardanoAddress = 308
-    CardanoSignedTx = 310
-    CardanoSignedTxChunk = 311
-    CardanoSignedTxChunkAck = 312
     CardanoTxItemAck = 313
     CardanoTxAuxiliaryDataSupplement = 314
     CardanoTxWitnessRequest = 315
@@ -201,6 +197,11 @@ class MessageType(IntEnum):
     CardanoTxMint = 332
     CardanoTxCollateralInput = 333
     CardanoTxRequiredSigner = 334
+    CardanoTxInlineDatumChunk = 335
+    CardanoTxReferenceScriptChunk = 336
+    CardanoTxReferenceInput = 337
+    CardanoSignMessage = 350
+    CardanoMessageSignature = 351
     RippleGetAddress = 400
     RippleAddress = 401
     RippleSignTx = 402
@@ -463,6 +464,11 @@ class CardanoNativeScriptHashDisplayFormat(IntEnum):
     POLICY_ID = 2
 
 
+class CardanoTxOutputSerializationFormat(IntEnum):
+    ARRAY_LEGACY = 0
+    MAP_BABBAGE = 1
+
+
 class CardanoCertificateType(IntEnum):
     STAKE_REGISTRATION = 0
     STAKE_DEREGISTRATION = 1
@@ -478,7 +484,12 @@ class CardanoPoolRelayType(IntEnum):
 
 class CardanoTxAuxiliaryDataSupplementType(IntEnum):
     NONE = 0
-    CATALYST_REGISTRATION_SIGNATURE = 1
+    GOVERNANCE_REGISTRATION_SIGNATURE = 1
+
+
+class CardanoGovernanceRegistrationFormat(IntEnum):
+    CIP15 = 0
+    CIP36 = 1
 
 
 class CardanoTxSigningMode(IntEnum):
@@ -2537,6 +2548,9 @@ class CardanoSignTxInit(protobuf.MessageType):
         16: protobuf.Field("script_data_hash", "bytes", repeated=False, required=False),
         17: protobuf.Field("collateral_inputs_count", "uint32", repeated=False, required=True),
         18: protobuf.Field("required_signers_count", "uint32", repeated=False, required=True),
+        19: protobuf.Field("has_collateral_return", "bool", repeated=False, required=False),
+        20: protobuf.Field("total_collateral", "uint64", repeated=False, required=False),
+        21: protobuf.Field("reference_inputs_count", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -2560,6 +2574,9 @@ class CardanoSignTxInit(protobuf.MessageType):
         validity_interval_start: Optional["int"] = None,
         include_network_id: Optional["bool"] = False,
         script_data_hash: Optional["bytes"] = None,
+        has_collateral_return: Optional["bool"] = False,
+        total_collateral: Optional["int"] = None,
+        reference_inputs_count: Optional["int"] = 0,
     ) -> None:
         self.signing_mode = signing_mode
         self.protocol_magic = protocol_magic
@@ -2579,6 +2596,9 @@ class CardanoSignTxInit(protobuf.MessageType):
         self.validity_interval_start = validity_interval_start
         self.include_network_id = include_network_id
         self.script_data_hash = script_data_hash
+        self.has_collateral_return = has_collateral_return
+        self.total_collateral = total_collateral
+        self.reference_inputs_count = reference_inputs_count
 
 
 class CardanoTxInput(protobuf.MessageType):
@@ -2606,6 +2626,9 @@ class CardanoTxOutput(protobuf.MessageType):
         3: protobuf.Field("amount", "uint64", repeated=False, required=True),
         4: protobuf.Field("asset_groups_count", "uint32", repeated=False, required=True),
         5: protobuf.Field("datum_hash", "bytes", repeated=False, required=False),
+        6: protobuf.Field("format", "CardanoTxOutputSerializationFormat", repeated=False, required=False),
+        7: protobuf.Field("inline_datum_size", "uint32", repeated=False, required=False),
+        8: protobuf.Field("reference_script_size", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -2616,12 +2639,18 @@ class CardanoTxOutput(protobuf.MessageType):
         address: Optional["str"] = None,
         address_parameters: Optional["CardanoAddressParametersType"] = None,
         datum_hash: Optional["bytes"] = None,
+        format: Optional["CardanoTxOutputSerializationFormat"] = CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        inline_datum_size: Optional["int"] = 0,
+        reference_script_size: Optional["int"] = 0,
     ) -> None:
         self.amount = amount
         self.asset_groups_count = asset_groups_count
         self.address = address
         self.address_parameters = address_parameters
         self.datum_hash = datum_hash
+        self.format = format
+        self.inline_datum_size = inline_datum_size
+        self.reference_script_size = reference_script_size
 
 
 class CardanoAssetGroup(protobuf.MessageType):
@@ -2659,6 +2688,34 @@ class CardanoToken(protobuf.MessageType):
         self.asset_name_bytes = asset_name_bytes
         self.amount = amount
         self.mint_amount = mint_amount
+
+
+class CardanoTxInlineDatumChunk(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 335
+    FIELDS = {
+        1: protobuf.Field("data", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data: "bytes",
+    ) -> None:
+        self.data = data
+
+
+class CardanoTxReferenceScriptChunk(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 336
+    FIELDS = {
+        1: protobuf.Field("data", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data: "bytes",
+    ) -> None:
+        self.data = data
 
 
 class CardanoPoolOwner(protobuf.MessageType):
@@ -2731,8 +2788,6 @@ class CardanoPoolParametersType(protobuf.MessageType):
         5: protobuf.Field("margin_numerator", "uint64", repeated=False, required=True),
         6: protobuf.Field("margin_denominator", "uint64", repeated=False, required=True),
         7: protobuf.Field("reward_account", "string", repeated=False, required=True),
-        8: protobuf.Field("owners", "CardanoPoolOwner", repeated=True, required=False),
-        9: protobuf.Field("relays", "CardanoPoolRelayParameters", repeated=True, required=False),
         10: protobuf.Field("metadata", "CardanoPoolMetadataType", repeated=False, required=False),
         11: protobuf.Field("owners_count", "uint32", repeated=False, required=True),
         12: protobuf.Field("relays_count", "uint32", repeated=False, required=True),
@@ -2750,12 +2805,8 @@ class CardanoPoolParametersType(protobuf.MessageType):
         reward_account: "str",
         owners_count: "int",
         relays_count: "int",
-        owners: Optional[Sequence["CardanoPoolOwner"]] = None,
-        relays: Optional[Sequence["CardanoPoolRelayParameters"]] = None,
         metadata: Optional["CardanoPoolMetadataType"] = None,
     ) -> None:
-        self.owners: Sequence["CardanoPoolOwner"] = owners if owners is not None else []
-        self.relays: Sequence["CardanoPoolRelayParameters"] = relays if relays is not None else []
         self.pool_id = pool_id
         self.vrf_key_hash = vrf_key_hash
         self.pledge = pledge
@@ -2820,43 +2871,69 @@ class CardanoTxWithdrawal(protobuf.MessageType):
         self.key_hash = key_hash
 
 
-class CardanoCatalystRegistrationParametersType(protobuf.MessageType):
+class CardanoGovernanceRegistrationDelegation(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("voting_public_key", "bytes", repeated=False, required=True),
-        2: protobuf.Field("staking_path", "uint32", repeated=True, required=False),
-        3: protobuf.Field("reward_address_parameters", "CardanoAddressParametersType", repeated=False, required=True),
-        4: protobuf.Field("nonce", "uint64", repeated=False, required=True),
+        2: protobuf.Field("weight", "uint32", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
         voting_public_key: "bytes",
+        weight: "int",
+    ) -> None:
+        self.voting_public_key = voting_public_key
+        self.weight = weight
+
+
+class CardanoGovernanceRegistrationParametersType(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("voting_public_key", "bytes", repeated=False, required=False),
+        2: protobuf.Field("staking_path", "uint32", repeated=True, required=False),
+        3: protobuf.Field("reward_address_parameters", "CardanoAddressParametersType", repeated=False, required=True),
+        4: protobuf.Field("nonce", "uint64", repeated=False, required=True),
+        5: protobuf.Field("format", "CardanoGovernanceRegistrationFormat", repeated=False, required=False),
+        6: protobuf.Field("delegations", "CardanoGovernanceRegistrationDelegation", repeated=True, required=False),
+        7: protobuf.Field("voting_purpose", "uint64", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
         reward_address_parameters: "CardanoAddressParametersType",
         nonce: "int",
         staking_path: Optional[Sequence["int"]] = None,
+        delegations: Optional[Sequence["CardanoGovernanceRegistrationDelegation"]] = None,
+        voting_public_key: Optional["bytes"] = None,
+        format: Optional["CardanoGovernanceRegistrationFormat"] = CardanoGovernanceRegistrationFormat.CIP15,
+        voting_purpose: Optional["int"] = None,
     ) -> None:
         self.staking_path: Sequence["int"] = staking_path if staking_path is not None else []
-        self.voting_public_key = voting_public_key
+        self.delegations: Sequence["CardanoGovernanceRegistrationDelegation"] = delegations if delegations is not None else []
         self.reward_address_parameters = reward_address_parameters
         self.nonce = nonce
+        self.voting_public_key = voting_public_key
+        self.format = format
+        self.voting_purpose = voting_purpose
 
 
 class CardanoTxAuxiliaryData(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 327
     FIELDS = {
-        1: protobuf.Field("catalyst_registration_parameters", "CardanoCatalystRegistrationParametersType", repeated=False, required=False),
+        1: protobuf.Field("governance_registration_parameters", "CardanoGovernanceRegistrationParametersType", repeated=False, required=False),
         2: protobuf.Field("hash", "bytes", repeated=False, required=False),
     }
 
     def __init__(
         self,
         *,
-        catalyst_registration_parameters: Optional["CardanoCatalystRegistrationParametersType"] = None,
+        governance_registration_parameters: Optional["CardanoGovernanceRegistrationParametersType"] = None,
         hash: Optional["bytes"] = None,
     ) -> None:
-        self.catalyst_registration_parameters = catalyst_registration_parameters
+        self.governance_registration_parameters = governance_registration_parameters
         self.hash = hash
 
 
@@ -2908,6 +2985,23 @@ class CardanoTxRequiredSigner(protobuf.MessageType):
         self.key_hash = key_hash
 
 
+class CardanoTxReferenceInput(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 337
+    FIELDS = {
+        1: protobuf.Field("prev_hash", "bytes", repeated=False, required=True),
+        2: protobuf.Field("prev_index", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        prev_hash: "bytes",
+        prev_index: "int",
+    ) -> None:
+        self.prev_hash = prev_hash
+        self.prev_index = prev_index
+
+
 class CardanoTxItemAck(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 313
 
@@ -2917,7 +3011,7 @@ class CardanoTxAuxiliaryDataSupplement(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("type", "CardanoTxAuxiliaryDataSupplementType", repeated=False, required=True),
         2: protobuf.Field("auxiliary_data_hash", "bytes", repeated=False, required=False),
-        3: protobuf.Field("catalyst_signature", "bytes", repeated=False, required=False),
+        3: protobuf.Field("governance_signature", "bytes", repeated=False, required=False),
     }
 
     def __init__(
@@ -2925,11 +3019,11 @@ class CardanoTxAuxiliaryDataSupplement(protobuf.MessageType):
         *,
         type: "CardanoTxAuxiliaryDataSupplementType",
         auxiliary_data_hash: Optional["bytes"] = None,
-        catalyst_signature: Optional["bytes"] = None,
+        governance_signature: Optional["bytes"] = None,
     ) -> None:
         self.type = type
         self.auxiliary_data_hash = auxiliary_data_hash
-        self.catalyst_signature = catalyst_signature
+        self.governance_signature = governance_signature
 
 
 class CardanoTxWitnessRequest(protobuf.MessageType):
@@ -2991,257 +3085,44 @@ class CardanoSignTxFinished(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 319
 
 
-class CardanoSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 303
-    FIELDS = {
-        1: protobuf.Field("inputs", "CardanoTxInputType", repeated=True, required=False),
-        2: protobuf.Field("outputs", "CardanoTxOutputType", repeated=True, required=False),
-        5: protobuf.Field("protocol_magic", "uint32", repeated=False, required=True),
-        6: protobuf.Field("fee", "uint64", repeated=False, required=True),
-        7: protobuf.Field("ttl", "uint64", repeated=False, required=False),
-        8: protobuf.Field("network_id", "uint32", repeated=False, required=True),
-        9: protobuf.Field("certificates", "CardanoTxCertificateType", repeated=True, required=False),
-        10: protobuf.Field("withdrawals", "CardanoTxWithdrawalType", repeated=True, required=False),
-        12: protobuf.Field("validity_interval_start", "uint64", repeated=False, required=False),
-        13: protobuf.Field("auxiliary_data", "CardanoTxAuxiliaryDataType", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        protocol_magic: "int",
-        fee: "int",
-        network_id: "int",
-        inputs: Optional[Sequence["CardanoTxInputType"]] = None,
-        outputs: Optional[Sequence["CardanoTxOutputType"]] = None,
-        certificates: Optional[Sequence["CardanoTxCertificateType"]] = None,
-        withdrawals: Optional[Sequence["CardanoTxWithdrawalType"]] = None,
-        ttl: Optional["int"] = None,
-        validity_interval_start: Optional["int"] = None,
-        auxiliary_data: Optional["CardanoTxAuxiliaryDataType"] = None,
-    ) -> None:
-        self.inputs: Sequence["CardanoTxInputType"] = inputs if inputs is not None else []
-        self.outputs: Sequence["CardanoTxOutputType"] = outputs if outputs is not None else []
-        self.certificates: Sequence["CardanoTxCertificateType"] = certificates if certificates is not None else []
-        self.withdrawals: Sequence["CardanoTxWithdrawalType"] = withdrawals if withdrawals is not None else []
-        self.protocol_magic = protocol_magic
-        self.fee = fee
-        self.network_id = network_id
-        self.ttl = ttl
-        self.validity_interval_start = validity_interval_start
-        self.auxiliary_data = auxiliary_data
-
-
-class CardanoSignedTxChunk(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 311
-    FIELDS = {
-        1: protobuf.Field("signed_tx_chunk", "bytes", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        signed_tx_chunk: "bytes",
-    ) -> None:
-        self.signed_tx_chunk = signed_tx_chunk
-
-
-class CardanoSignedTxChunkAck(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 312
-
-
-class CardanoSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 310
-    FIELDS = {
-        1: protobuf.Field("tx_hash", "bytes", repeated=False, required=True),
-        2: protobuf.Field("serialized_tx", "bytes", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        tx_hash: "bytes",
-        serialized_tx: Optional["bytes"] = None,
-    ) -> None:
-        self.tx_hash = tx_hash
-        self.serialized_tx = serialized_tx
-
-
-class CardanoTxInputType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+class CardanoSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 350
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        2: protobuf.Field("prev_hash", "bytes", repeated=False, required=True),
-        3: protobuf.Field("prev_index", "uint32", repeated=False, required=True),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("derivation_type", "CardanoDerivationType", repeated=False, required=True),
+        4: protobuf.Field("network_id", "uint32", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
-        prev_hash: "bytes",
-        prev_index: "int",
+        message: "bytes",
+        derivation_type: "CardanoDerivationType",
+        network_id: "int",
         address_n: Optional[Sequence["int"]] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
-        self.prev_hash = prev_hash
-        self.prev_index = prev_index
+        self.message = message
+        self.derivation_type = derivation_type
+        self.network_id = network_id
 
 
-class CardanoTxOutputType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+class CardanoMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 351
     FIELDS = {
-        1: protobuf.Field("address", "string", repeated=False, required=False),
-        3: protobuf.Field("amount", "uint64", repeated=False, required=True),
-        4: protobuf.Field("address_parameters", "CardanoAddressParametersType", repeated=False, required=False),
-        5: protobuf.Field("token_bundle", "CardanoAssetGroupType", repeated=True, required=False),
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("key", "bytes", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
-        amount: "int",
-        token_bundle: Optional[Sequence["CardanoAssetGroupType"]] = None,
-        address: Optional["str"] = None,
-        address_parameters: Optional["CardanoAddressParametersType"] = None,
+        signature: "bytes",
+        key: "bytes",
     ) -> None:
-        self.token_bundle: Sequence["CardanoAssetGroupType"] = token_bundle if token_bundle is not None else []
-        self.amount = amount
-        self.address = address
-        self.address_parameters = address_parameters
-
-
-class CardanoAssetGroupType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("policy_id", "bytes", repeated=False, required=True),
-        2: protobuf.Field("tokens", "CardanoTokenType", repeated=True, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        policy_id: "bytes",
-        tokens: Optional[Sequence["CardanoTokenType"]] = None,
-    ) -> None:
-        self.tokens: Sequence["CardanoTokenType"] = tokens if tokens is not None else []
-        self.policy_id = policy_id
-
-
-class CardanoTokenType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("asset_name_bytes", "bytes", repeated=False, required=True),
-        2: protobuf.Field("amount", "uint64", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        asset_name_bytes: "bytes",
-        amount: "int",
-    ) -> None:
-        self.asset_name_bytes = asset_name_bytes
-        self.amount = amount
-
-
-class CardanoPoolOwnerType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("staking_key_path", "uint32", repeated=True, required=False),
-        2: protobuf.Field("staking_key_hash", "bytes", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        staking_key_path: Optional[Sequence["int"]] = None,
-        staking_key_hash: Optional["bytes"] = None,
-    ) -> None:
-        self.staking_key_path: Sequence["int"] = staking_key_path if staking_key_path is not None else []
-        self.staking_key_hash = staking_key_hash
-
-
-class CardanoPoolRelayParametersType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("type", "CardanoPoolRelayType", repeated=False, required=True),
-        2: protobuf.Field("ipv4_address", "bytes", repeated=False, required=False),
-        3: protobuf.Field("ipv6_address", "bytes", repeated=False, required=False),
-        4: protobuf.Field("host_name", "string", repeated=False, required=False),
-        5: protobuf.Field("port", "uint32", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        type: "CardanoPoolRelayType",
-        ipv4_address: Optional["bytes"] = None,
-        ipv6_address: Optional["bytes"] = None,
-        host_name: Optional["str"] = None,
-        port: Optional["int"] = None,
-    ) -> None:
-        self.type = type
-        self.ipv4_address = ipv4_address
-        self.ipv6_address = ipv6_address
-        self.host_name = host_name
-        self.port = port
-
-
-class CardanoTxCertificateType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("type", "CardanoCertificateType", repeated=False, required=True),
-        2: protobuf.Field("path", "uint32", repeated=True, required=False),
-        3: protobuf.Field("pool", "bytes", repeated=False, required=False),
-        4: protobuf.Field("pool_parameters", "CardanoPoolParametersType", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        type: "CardanoCertificateType",
-        path: Optional[Sequence["int"]] = None,
-        pool: Optional["bytes"] = None,
-        pool_parameters: Optional["CardanoPoolParametersType"] = None,
-    ) -> None:
-        self.path: Sequence["int"] = path if path is not None else []
-        self.type = type
-        self.pool = pool
-        self.pool_parameters = pool_parameters
-
-
-class CardanoTxWithdrawalType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("path", "uint32", repeated=True, required=False),
-        2: protobuf.Field("amount", "uint64", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        amount: "int",
-        path: Optional[Sequence["int"]] = None,
-    ) -> None:
-        self.path: Sequence["int"] = path if path is not None else []
-        self.amount = amount
-
-
-class CardanoTxAuxiliaryDataType(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("blob", "bytes", repeated=False, required=False),
-        2: protobuf.Field("catalyst_registration_parameters", "CardanoCatalystRegistrationParametersType", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        blob: Optional["bytes"] = None,
-        catalyst_registration_parameters: Optional["CardanoCatalystRegistrationParametersType"] = None,
-    ) -> None:
-        self.blob = blob
-        self.catalyst_registration_parameters = catalyst_registration_parameters
+        self.signature = signature
+        self.key = key
 
 
 class ConfluxGetAddress(protobuf.MessageType):

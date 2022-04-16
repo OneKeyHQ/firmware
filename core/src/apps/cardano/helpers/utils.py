@@ -1,20 +1,13 @@
 from typing import TYPE_CHECKING
 
 from trezor.crypto import hashlib
-from trezor.enums import CardanoTxSigningMode
 
-from apps.cardano.helpers.paths import (
-    ACCOUNT_PATH_INDEX,
-    SCHEMA_STAKING_ANY_ACCOUNT,
-    unharden,
-)
-from apps.common.seed import remove_ed25519_prefix
-
-from . import ADDRESS_KEY_HASH_SIZE, SCRIPT_HASH_SIZE, bech32
+from . import ADDRESS_KEY_HASH_SIZE, bech32
+from .paths import ACCOUNT_PATH_INDEX
 
 if TYPE_CHECKING:
-    from trezor import wire
     from .. import seed
+    from trezor.wire import ProcessError
 
 
 def variable_length_encode(number: int) -> bytes:
@@ -39,6 +32,8 @@ def to_account_path(path: list[int]) -> list[int]:
 
 
 def format_account_number(path: list[int]) -> str:
+    from .paths import unharden
+
     if len(path) <= ACCOUNT_PATH_INDEX:
         raise ValueError("Path is too short.")
 
@@ -75,6 +70,8 @@ def get_public_key_hash(keychain: seed.Keychain, path: list[int]) -> bytes:
 def derive_public_key(
     keychain: seed.Keychain, path: list[int], extended: bool = False
 ) -> bytes:
+    from apps.common.seed import remove_ed25519_prefix
+
     node = keychain.derive(path)
     public_key = remove_ed25519_prefix(node.public_key())
     return public_key if not extended else public_key + node.chain_code()
@@ -84,32 +81,33 @@ def validate_stake_credential(
     path: list[int],
     script_hash: bytes | None,
     key_hash: bytes | None,
-    signing_mode: CardanoTxSigningMode,
-    error: wire.ProcessError,
+    error: ProcessError,
 ) -> None:
+    from . import SCRIPT_HASH_SIZE
+    from .paths import SCHEMA_STAKING_ANY_ACCOUNT
+
     if sum(bool(k) for k in (path, script_hash, key_hash)) != 1:
         raise error
 
-    if path:
-        if signing_mode not in (
-            CardanoTxSigningMode.ORDINARY_TRANSACTION,
-            CardanoTxSigningMode.PLUTUS_TRANSACTION,
-        ):
-            raise error
-        if not SCHEMA_STAKING_ANY_ACCOUNT.match(path):
-            raise error
-    elif script_hash:
-        if signing_mode not in (
-            CardanoTxSigningMode.MULTISIG_TRANSACTION,
-            CardanoTxSigningMode.PLUTUS_TRANSACTION,
-        ):
-            raise error
-        if len(script_hash) != SCRIPT_HASH_SIZE:
-            raise error
-    elif key_hash:
-        if signing_mode != CardanoTxSigningMode.PLUTUS_TRANSACTION:
-            raise error
-        if len(key_hash) != ADDRESS_KEY_HASH_SIZE:
-            raise error
-    else:
+    if path and not SCHEMA_STAKING_ANY_ACCOUNT.match(path):
         raise error
+    if script_hash and len(script_hash) != SCRIPT_HASH_SIZE:
+        raise error
+    if key_hash and len(key_hash) != ADDRESS_KEY_HASH_SIZE:
+        raise error
+
+
+def validate_network_info(network_id: int, protocol_magic: int) -> None:
+    """
+    We are only concerned about checking that both network_id and protocol_magic
+    belong to the mainnet or that both belong to a testnet. We don't need to check for
+    consistency between various testnets (at least for now).
+    """
+    from trezor import wire
+    from . import network_ids, protocol_magics
+
+    is_mainnet_network_id = network_ids.is_mainnet(network_id)
+    is_mainnet_protocol_magic = protocol_magics.is_mainnet(protocol_magic)
+
+    if is_mainnet_network_id != is_mainnet_protocol_magic:
+        raise wire.ProcessError("Invalid network id/protocol magic combination!")
