@@ -20,6 +20,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "atca_api.h"
+#include "atca_hal.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
@@ -264,6 +266,9 @@ int main(void) {
 
   display_clear();
 
+  atca_init();
+  atca_config_init();
+
   // delay to detect touch
   uint32_t touched = 0;
   for (int i = 0; i < 1000; i++) {
@@ -273,6 +278,7 @@ int main(void) {
     }
     hal_delay(1);
   }
+
   vendor_header vhdr;
   image_header hdr;
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader

@@ -122,6 +122,11 @@
 extern const uint8_t STORAGE_SECTORS[STORAGE_SECTORS_COUNT];
 extern const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT];
 
+typedef struct __attribute__((packed)) {
+  uint8_t flag[32];
+  uint8_t flash_otp[16][32];
+} FlashLockedData;
+
 // note: FLASH_SR_RDERR is STM32F42xxx and STM32F43xxx specific (STM32F427)
 // (reference RM0090 section 3.7.5)
 #ifndef STM32F427xx
@@ -157,6 +162,11 @@ secbool __wur flash_write_words(uint8_t sector, uint32_t offset,
 #define FLASH_OTP_BLOCK_BOOTLOADER_VERSION 1
 #define FLASH_OTP_BLOCK_VENDOR_HEADER_LOCK 2
 #define FLASH_OTP_BLOCK_RANDOMNESS 3
+
+#define FLASH_OTP_BLOCK_608_SERIAL 8
+#define FLASH_OTP_BLOCK_608_PROTECT_KEY 9
+#define FLASH_OTP_BLOCK_608_INIT_PIN 10
+#define FLASH_OTP_BLOCK_608_MIX_PIN 11
 
 secbool __wur flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,
                              uint8_t datalen);
