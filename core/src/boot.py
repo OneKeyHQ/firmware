@@ -2,7 +2,6 @@ import storage
 import storage.device
 from trezor import config, log, loop, ui, utils, wire
 from trezor.lvglui import lvgl_tick
-from trezor.lvglui.scrs import *
 from trezor.lvglui.scrs.bootscreen import BootScreen
 from trezor.lvglui.scrs.lockscreen import LockScreen
 from trezor.pin import show_pin_timeout
@@ -16,8 +15,9 @@ async def bootscreen() -> None:
     bootscreen = BootScreen()
     # wait for bootscreen animation to finish
     await loop.sleep(1500)
+    bootscreen.del_delayed(100)
     # await bootscreen.request()
-    lockscreen = LockScreen()
+    lockscreen = LockScreen(storage.device.get_label())
     while True:
         try:
             if can_lock_device():

@@ -3,7 +3,7 @@ from typing import Any, NoReturn
 
 import storage.cache
 import storage.sd_salt
-from trezor import config, wire
+from trezor import config, utils, wire
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -18,6 +18,7 @@ async def request_pin(
     prompt: str = "Enter your PIN",
     attempts_remaining: int | None = None,
     allow_cancel: bool = True,
+    **kwargs: Any,
 ) -> str:
     from trezor.ui.layouts import request_pin_on_device
 
@@ -26,6 +27,10 @@ async def request_pin(
 
 async def request_pin_confirm(ctx: wire.Context, *args: Any, **kwargs: Any) -> str:
     while True:
+        if kwargs.get("show_tip", True):
+            from trezor.ui.layouts import request_pin_tips
+
+            await request_pin_tips(ctx)
         pin1 = await request_pin(ctx, "Enter new PIN", *args, **kwargs)
         pin2 = await request_pin(ctx, "Re-enter new PIN", *args, **kwargs)
         if pin1 == pin2:
@@ -87,6 +92,10 @@ async def verify_user_pin(
 
     if config.has_pin():
         from trezor.ui.layouts import request_pin_on_device
+
+        pin = await request_pin_on_device(
+            ctx, prompt, config.get_pin_rem(), allow_cancel
+        )
 
         pin = await request_pin_on_device(
             ctx, prompt, config.get_pin_rem(), allow_cancel

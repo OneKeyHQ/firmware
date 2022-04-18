@@ -68,9 +68,6 @@ def schedule(
 
     If `reschedule` is set, updates an existing entry.
     """
-    # log.debug(__name__, "schedule")
-    # log.debug(__name__, "schedule task %s",task)
-    # print(deadline)
     if reschedule:
         _queue.discard(task)
     if deadline is None:
@@ -145,8 +142,6 @@ def run() -> None:
             # message received, run tasks paused on the interface
             msg_tasks = _paused.pop(msg_entry[0], ())
             for task in msg_tasks:
-                # log.debug(__name__, "run task %s",task)
-                # log.debug(__name__, "msg_entry %s",msg_entry[1])
                 _step(task, msg_entry[1])
         else:
             # timeout occurred, run the first scheduled task
@@ -184,9 +179,6 @@ def _step(task: Task, value: Any) -> None:
     """
     global this_task
     this_task = task
-    # log.debug(__name__, "step")
-    # log.debug(__name__, "task %s",task)
-    # log.debug(__name__, "value %s",value)
     try:
         if isinstance(value, BaseException):
             result = task.throw(value)

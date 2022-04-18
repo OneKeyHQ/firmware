@@ -44,6 +44,10 @@ def clear_screens() -> None:
     for scr in SCREENS:
         try:
             scr.delete()
+            if hasattr(scr, "_init"):
+                del scr._init
+            if hasattr(scr, "_instance"):
+                del scr._instance
         except:
             pass
     SCREENS.clear()
@@ -75,6 +79,7 @@ def unimport_end(mods: set[str], collect: bool = True) -> None:
                 # either path is not present in sys.modules, or module is not
                 # referenced from the parent package. both is fine.
                 pass
+
     # collect removed modules
     if collect:
         gc.collect()

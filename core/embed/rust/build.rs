@@ -134,14 +134,13 @@ fn generate_micropython_bindings() {
             "-I../../vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc",
             "-I../../vendor/micropython/lib/stm32lib/CMSIS/STM32H7xx/Include",
             "-I../../vendor/micropython/lib/cmsis/inc",
-            "-I../../vendor/lvgl_mp/lvgl",
+            "-I../../vendor/lvgl_mp",
             "-I../../embed/lvgl",
             "-DTREZOR_MODEL=T",
             "-DCORE_CM7",
             "-DSTM32H747xx",
             "-DUSE_HAL_DRIVER",
             "-DSTM32_HAL_H=<stm32h7xx.h>",
-            "-DLV_CONF_INCLUDE_SIMPLE"
         ]);
         // Append gcc-arm-none-eabi's include paths.
         let cc_output = Command::new("arm-none-eabi-gcc")
@@ -169,7 +168,7 @@ fn generate_micropython_bindings() {
             "-I../../build/unix",
             "-I../../vendor/micropython",
             "-I../../vendor/micropython/ports/unix",
-            "-I../../vendor/lvgl_mp/lvgl",
+            "-I../../vendor/lvgl_mp",
         ]);
     }
 

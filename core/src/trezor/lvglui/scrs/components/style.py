@@ -1,5 +1,3 @@
-import lvgl as lv
-
 from ..common import *
 
 

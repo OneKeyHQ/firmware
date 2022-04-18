@@ -190,9 +190,13 @@ async def _request_share_first_screen(
                 ctx, "Enter share", "Enter any share", f"({word_count} words)"
             )
     else:  # BIP-39
-        await layout.homescreen_dialog(
-            ctx, "Enter seed", "Enter recovery seed", f"({word_count} words)"
-        )
+        if utils.LVGL_UI:
+            btn_text = "Enter"
+            title = "Enter Recovery Phrase"
+        else:
+            btn_text = "Enter seed"
+            title = "Enter recovery seed"
+        await layout.homescreen_dialog(ctx, btn_text, title, f"({word_count} words)")
 
 
 async def _request_share_next_screen(ctx: wire.GenericContext) -> None:

@@ -4,14 +4,14 @@ import storage.recovery
 from trezor import ui, utils, wire
 from trezor.enums import ButtonRequestType
 from trezor.ui.layouts import confirm_action, show_success, show_warning
+from trezor.ui.layouts.common import button_request
 
 from .. import backup_types
 from . import word_validity
 from .recover import RecoveryAborted
 
-if utils.LVGL_UI == "1":
-    from trezor.ui.layouts.lvglui.lv_common import button_request
-    from trezor.ui.layouts.lvglui.recovery import (  # noqa: F401
+if not utils.LVGL_UI:
+    from trezor.ui.layouts.tt.recovery import (  # noqa: F401
         continue_recovery,
         request_word,
         request_word_count,
@@ -19,8 +19,7 @@ if utils.LVGL_UI == "1":
         show_remaining_shares,
     )
 else:
-    from trezor.ui.layouts.common import button_request
-    from trezor.ui.layouts.tt.recovery import (  # noqa: F401
+    from trezor.ui.layouts.lvgl.recovery import (  # noqa: F401
         continue_recovery,
         request_word,
         request_word_count,
@@ -36,15 +35,28 @@ if TYPE_CHECKING:
 
 async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None:
     if dry_run:
+        if utils.LVGL_UI:
+            title = "Abort Check"
+            subtitle = "Do you really want to abort the recovery phrase check?"
+            icon = "A:/res/warning.png"
+        else:
+            title = "Abort seed check"
+            subtitle = "Do you really want to abort the seed check?"
+            icon = ui.ICON_WIPE
         await confirm_action(
             ctx,
             "abort_recovery",
-            "Abort seed check",
-            description="Do you really want to abort the seed check?",
-            icon=ui.ICON_WIPE,
+            title,
+            description=subtitle,
+            icon=icon,
             br_code=ButtonRequestType.ProtectCall,
         )
     else:
+        if utils.LVGL_UI:
+            icon = "A:/res/warning.png"
+        else:
+            icon = ui.ICON_WIPE
+
         await confirm_action(
             ctx,
             "abort_recovery",
@@ -52,7 +64,7 @@ async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None
             description="Do you really want to abort the recovery process?",
             action="All progress will be lost.",
             reverse=True,
-            icon=ui.ICON_WIPE,
+            icon=icon,
             br_code=ButtonRequestType.ProtectCall,
         )
 
@@ -84,21 +96,48 @@ async def request_mnemonic(
     return " ".join(words)
 
 
-async def show_dry_run_result(
-    ctx: wire.GenericContext, result: bool, is_slip39: bool
-) -> None:
-    if result:
-        if is_slip39:
-            text = "The entered recovery\nshares are valid and\nmatch what is currently\nin the device."
+if not utils.LVGL_UI:
+
+    async def show_dry_run_result(
+        ctx: wire.GenericContext, result: bool, is_slip39: bool
+    ) -> None:
+        if result:
+            if is_slip39:
+                text = "The entered recovery\nshares are valid and\nmatch what is currently\nin the device."
+            else:
+                text = "The entered recovery\nseed is valid and\nmatches the one\nin the device."
+            await show_success(ctx, "success_dry_recovery", text, button="Continue")
         else:
-            text = "The entered recovery\nseed is valid and\nmatches the one\nin the device."
-        await show_success(ctx, "success_dry_recovery", text, button="Continue")
-    else:
-        if is_slip39:
-            text = "The entered recovery\nshares are valid but\ndo not match what is\ncurrently in the device."
+            if is_slip39:
+                text = "The entered recovery\nshares are valid but\ndo not match what is\ncurrently in the device."
+            else:
+                text = "The entered recovery\nseed is valid but does\nnot match the one\nin the device."
+            await show_warning(ctx, "warning_dry_recovery", text, button="Continue")
+
+else:
+
+    async def show_dry_run_result(
+        ctx: wire.GenericContext, result: bool, is_slip39: bool
+    ) -> None:
+        if result:
+            if is_slip39:
+                # text = "The entered recovery\nshares are valid and\nmatch what is currently\nin the device."
+                raise
+            else:
+                text = "The entered recovery phrase is valid and matches the one in the device."
+            await show_success(ctx, "success_dry_recovery", text, button="Continue")
         else:
-            text = "The entered recovery\nseed is valid but does\nnot match the one\nin the device."
-        await show_warning(ctx, "warning_dry_recovery", text, button="Continue")
+            if is_slip39:
+                raise
+            else:
+                text = "The entered recovery phrase is valid but does not match the one in the device."
+            await show_warning(
+                ctx,
+                "warning_dry_recovery",
+                text,
+                button="Continue",
+                icon="A:/res/danger.png",
+            )
 
 
 async def show_dry_run_different_type(ctx: wire.GenericContext) -> None:
@@ -113,19 +152,35 @@ async def show_dry_run_different_type(ctx: wire.GenericContext) -> None:
     )
 
 
-async def show_invalid_mnemonic(ctx: wire.GenericContext, word_count: int) -> None:
-    if backup_types.is_slip39_word_count(word_count):
-        await show_warning(
-            ctx,
-            "warning_invalid_share",
-            "You have entered\nan invalid recovery\nshare.",
-        )
-    else:
-        await show_warning(
-            ctx,
-            "warning_invalid_seed",
-            "You have entered\nan invalid recovery\nseed.",
-        )
+if not utils.LVGL_UI:
+
+    async def show_invalid_mnemonic(ctx: wire.GenericContext, word_count: int) -> None:
+        if backup_types.is_slip39_word_count(word_count):
+            await show_warning(
+                ctx,
+                "warning_invalid_share",
+                "You have entered\nan invalid recovery\nshare.",
+            )
+        else:
+            await show_warning(
+                ctx,
+                "warning_invalid_seed",
+                "You have entered\nan invalid recovery\nseed.",
+            )
+
+else:
+
+    async def show_invalid_mnemonic(ctx: wire.GenericContext, word_count: int) -> None:
+        if backup_types.is_slip39_word_count(word_count):
+            pass
+        else:
+            await show_warning(
+                ctx,
+                "warning_invalid_seed",
+                "You have entered an invalid recovery phrase.",
+                header="Invalid",
+                icon="A:/res/danger.png",
+            )
 
 
 async def show_share_already_added(ctx: wire.GenericContext) -> None:

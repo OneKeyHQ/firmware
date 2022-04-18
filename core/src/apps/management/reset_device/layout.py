@@ -4,8 +4,8 @@ from trezor import ui, utils, wire
 from trezor.enums import ButtonRequestType
 from trezor.ui.layouts import confirm_action, confirm_blob, show_success, show_warning
 
-if utils.LVGL_UI == "1":
-    from trezor.ui.layouts.lvglui.reset import (
+if not utils.LVGL_UI:
+    from trezor.ui.layouts.tt.reset import (  # noqa: F401
         confirm_word,
         show_share_words,
         slip39_advanced_prompt_group_threshold,
@@ -15,7 +15,7 @@ if utils.LVGL_UI == "1":
         slip39_show_checklist,
     )
 else:
-    from trezor.ui.layouts.tt.reset import (  # noqa: F401
+    from trezor.ui.layouts.lvgl.reset import (  # noqa: F401
         confirm_word,
         show_share_words,
         slip39_advanced_prompt_group_threshold,
@@ -44,16 +44,16 @@ async def _confirm_share_words(
     share_words: Sequence[str],
     group_index: int | None = None,
 ) -> bool:
-    # divide list into thirds, rounding up, so that chunking by `third` always yields
-    # three parts (the last one might be shorter)
-    third = (len(share_words) + 2) // 3
+    # # divide list into thirds, rounding up, so that chunking by `third` always yields
+    # # three parts (the last one might be shorter)
+    # third = (len(share_words) + 2) // 3
 
-    offset = 0
     count = len(share_words)
-    for part in utils.chunks(share_words, third):
-        if not await confirm_word(ctx, share_index, part, offset, count, group_index):
+    for index in range(count):
+        if not await confirm_word(
+            ctx, share_index, share_words, index, count, group_index
+        ):
             return False
-        offset += len(part)
 
     return True
 
@@ -65,12 +65,8 @@ async def _show_confirmation_success(
     group_index: int | None = None,
 ) -> None:
     if share_index is None or num_of_shares is None:  # it is a BIP39 backup
-        if utils.LVGL_UI == "1":
-            subheader = "You have finished verifying your recovery phrase."
-            text = "Success"
-        else:
-            subheader = "You have finished\nverifying your\nrecovery seed."
-            text = ""
+        subheader = "You have finished verifying your recovery seed."
+        text = ""
 
     elif share_index == num_of_shares - 1:
         if group_index is None:
@@ -113,6 +109,11 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
         description = "Never make a digital copy of your recovery shares and never upload them online!"
     else:
         description = "Never make a digital copy of your recovery seed and never upload\nit online!"
+    if utils.LVGL_UI:
+        icon = "A:/res/shriek.png"
+        description = "Never make a digital copy of your recovery seed and never upload it online!"
+    else:
+        icon = ui.ICON_NOCOPY
     await confirm_action(
         ctx,
         "backup_warning",
@@ -120,24 +121,14 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
         description=description,
         verb="I understand",
         verb_cancel=None,
-        icon=ui.ICON_NOCOPY,
+        icon=icon,
         br_code=ButtonRequestType.ResetDevice,
     )
 
 
 async def show_backup_success(ctx: wire.GenericContext) -> None:
-    if utils.LVGL_UI == "1":
-        await show_success(
-            ctx,
-            "success_backup",
-            "Your Backup is Done",
-            subheader="Use your backup when you need to recover you wallet.",
-        )
-    else:
-        text = "Use your backup\nwhen you need to\nrecover your wallet."
-        await show_success(
-            ctx, "success_backup", text, subheader="Your backup is done."
-        )
+    text = "Use your backup when you need to recover your wallet."
+    await show_success(ctx, "success_backup", text, subheader="Your backup is done.")
 
 
 # BIP39

@@ -38,6 +38,7 @@ async def get_public_key(
     )
 
     if msg.show_display:
-        await show_pubkey(ctx, hexlify(pubkey).decode())
+        path = paths.address_n_to_str(msg.address_n)
+        await show_pubkey(ctx, hexlify(pubkey).decode(), path=path)
 
     return EthereumPublicKey(node=node_type, xpub=node_xpub)

@@ -24,7 +24,7 @@ async def get_address(
     address = helpers.address_from_public_key(pubkey)
 
     if msg.show_display:
-        title = paths.address_n_to_str(msg.address_n)
-        await show_address(ctx, address=address, case_sensitive=False, title=title)
+        path = paths.address_n_to_str(msg.address_n)
+        await show_address(ctx, address=address, address_n=path, network="XLM")
 
     return StellarAddress(address=address)

@@ -50,7 +50,7 @@ void bip39_cache_clear(void) {
 }
 
 #endif
-
+static char result[70] = {0};
 const char *mnemonic_generate(int strength) {
   if (strength % 32 || strength < 128 || strength > 256) {
     return 0;
@@ -258,13 +258,57 @@ int mnemonic_find_word(const char *word) {
   return -1;
 }
 
+int mnemonic_find_first_match_index(const char *prefix, int len) {
+  int lo = 0, hi = BIP39_WORDS - 1;
+  while (lo <= hi) {
+    int mid = lo + (hi - lo) / 2;
+    int cmp = strncmp(wordlist[mid], prefix, len);
+    // find match
+    if (cmp == 0) {
+      for(;;) {
+        // find the first match
+        if (mid == 0 || strncmp(wordlist[mid - 1], prefix, len) != 0) {
+          return mid;
+        }
+        mid--;
+      }
+    }
+    if (cmp < 0) {
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return -1;
+}
+
 const char *mnemonic_complete_word(const char *prefix, int len) {
   // we need to perform linear search,
   // because we want to return the first match
-  for (const char *const *w = wordlist; *w != 0; w++) {
+  memzero(result, sizeof(result));
+  // when len is less than 1 return directly
+  if (len <= 1) {
+    return NULL;
+  }
+  int offset = mnemonic_find_first_match_index(prefix, len);
+  if (offset < 0) {
+    return NULL;
+  }
+  for (const char *const *w = wordlist + offset; *w != 0; w++) {
     if (strncmp(*w, prefix, len) == 0) {
-      return *w;
+      if (strlen(result) + strlen(*w) < sizeof(result)-1) {
+        strcat(result, *w);
+        strcat(result, " ");
+      } else {
+        // to many matches, return NULL
+        return NULL;
+      }
+    } else {
+      break;
     }
+  }
+  if (strlen(result) > 0) {
+    return result;
   }
   return NULL;
 }

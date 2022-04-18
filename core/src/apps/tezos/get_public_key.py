@@ -24,6 +24,7 @@ async def get_public_key(
     pk_prefixed = helpers.base58_encode_check(pk, prefix=helpers.TEZOS_PUBLICKEY_PREFIX)
 
     if msg.show_display:
-        await show_pubkey(ctx, pk_prefixed)
+        path = paths.address_n_to_str(msg.address_n)
+        await show_pubkey(ctx, pk_prefixed, path=path, network="XTZ")
 
     return TezosPublicKey(public_key=pk_prefixed)

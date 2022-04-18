@@ -9,6 +9,8 @@ from trezor.messages import EntropyAck, EntropyRequest, Success
 from trezor.ui.layouts import confirm_backup, confirm_reset_device
 from trezor.ui.loader import LoadingAnimation
 
+from apps.base import set_homescreen
+
 from .. import backup_types
 from ..change_pin import request_pin_confirm
 from . import layout
@@ -28,15 +30,17 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
 
     # make sure user knows they're setting up a new wallet
     if msg.backup_type == BackupType.Slip39_Basic:
-        prompt = "Create a new wallet\nwith Shamir Backup?"
+        # prompt = "Create a new wallet\nwith Shamir Backup?"
+        raise wire.ProcessError("Shamir Backup not supported")
     elif msg.backup_type == BackupType.Slip39_Advanced:
-        prompt = "Create a new wallet\nwith Super Shamir?"
+        # prompt = "Create a new wallet\nwith Super Shamir?"
+        raise wire.ProcessError("Super Shamir not supported")
     else:
-        prompt = "Do you want to create\na new wallet?"
-    if utils.LVGL_UI == "1":
         prompt = "Do you want to create a new wallet?"
+
     await confirm_reset_device(ctx, prompt)
-    await LoadingAnimation()
+    if not utils.LVGL_UI:
+        await LoadingAnimation()
 
     # wipe storage to make sure the device is in a clear state
     storage.reset()
@@ -56,7 +60,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
 
     # request external entropy and compute the master secret
     entropy_ack = await ctx.call(EntropyRequest(), EntropyAck)
-    ext_entropy = entropy_ack.entropy
+    ext_entropy = entropy_ack.entropy if entropy_ack else b""
     # For SLIP-39 this is the Encrypted Master Secret
     secret = _compute_secret_from_entropy(int_entropy, ext_entropy, msg.strength)
 
@@ -98,7 +102,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # if we backed up the wallet, show success message
     if perform_backup:
         await layout.show_backup_success(ctx)
-
+    set_homescreen()
     return Success(message="Initialized")
 
 
@@ -209,8 +213,10 @@ async def backup_seed(
     ctx: wire.Context, backup_type: BackupType, mnemonic_secret: bytes
 ) -> None:
     if backup_type == BackupType.Slip39_Basic:
-        await backup_slip39_basic(ctx, mnemonic_secret)
+        # await backup_slip39_basic(ctx, mnemonic_secret)
+        raise wire.ProcessError("Shamir Backup not supported")
     elif backup_type == BackupType.Slip39_Advanced:
-        await backup_slip39_advanced(ctx, mnemonic_secret)
+        # await backup_slip39_advanced(ctx, mnemonic_secret)
+        raise wire.ProcessError("Super Shamir not supported")
     else:
         await layout.bip39_show_and_confirm_mnemonic(ctx, mnemonic_secret.decode())

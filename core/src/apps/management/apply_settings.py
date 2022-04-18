@@ -49,12 +49,13 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
         raise wire.ProcessError("No setting provided")
 
     if msg.homescreen is not None:
-        validate_homescreen(msg.homescreen)
-        await require_confirm_change_homescreen(ctx)
-        try:
-            storage.device.set_homescreen(msg.homescreen)
-        except ValueError:
-            raise wire.DataError("Invalid homescreen")
+        # validate_homescreen(msg.homescreen)
+        # await require_confirm_change_homescreen(ctx)
+        # try:
+        #     storage.device.set_homescreen(msg.homescreen)
+        # except ValueError:
+        #     raise wire.DataError("Invalid homescreen")
+        raise wire.ProcessError("Please set homescreen on the device")
 
     if msg.label is not None:
         if len(msg.label) > storage.device.LABEL_MAXLENGTH:

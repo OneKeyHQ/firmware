@@ -220,10 +220,10 @@ if FEATURE_FLAGS["TREZOR_UI"]:
         'vendor/micropython/lib/uzlib/crc32.c',
         'vendor/micropython/lib/uzlib/tinflate.c',
     ]
-    if FEATURE_FLAGS["TREZOR_UI"]:
-        SOURCE_MOD += [
-            'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
-        ]
+    # if FEATURE_FLAGS["TREZOR_UI"]:
+    #     SOURCE_MOD += [
+    #         'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
+    #     ]
     if UI2:
         CPPDEFINES_MOD += [
             'TREZOR_FONT_MEDIUM_ENABLE',

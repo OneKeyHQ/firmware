@@ -9,8 +9,8 @@ from trezor.utils import HashWriter
 
 from apps.common import paths
 
-from . import tokens
-from .helpers import bytes_from_address
+from . import networks, tokens
+from .helpers import address_from_bytes, bytes_from_address
 from .keychain import with_keychain_from_chain_id
 from .layout import (
     require_confirm_data,
@@ -47,6 +47,13 @@ async def sign_tx(
     if token is None and msg.data_length > 0:
         await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
 
+    node = keychain.derive(msg.address_n)
+    if len(msg.address_n) > 1:  # path has slip44 network identifier
+        network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+    else:
+        network = None
+    recipient_str = address_from_bytes(recipient, network)
+    from_str = address_from_bytes(node.ethereum_pubkeyhash(), network)
     await require_confirm_fee(
         ctx,
         value,
@@ -54,6 +61,9 @@ async def sign_tx(
         int.from_bytes(msg.gas_limit, "big"),
         msg.chain_id,
         token,
+        from_address=from_str,
+        to_address=recipient_str,
+        network=network.shortcut if network else "ETH",
     )
 
     data = bytearray()

@@ -9,17 +9,16 @@
 # trezor imports only C modules
 import trezor
 # trezor.utils import only C modules
-from trezor import utils, log
+from trezor import utils
 # we need space for 30 items in the trezor module
 utils.presize_module("trezor", 30)
-
 # storage imports storage.common, storage.cache and storage.device.
 # These import trezor, trezor.config (which is a C module), trezor.utils, and each other.
 import storage
 # we will need space for 12 items in the storage module
 utils.presize_module("storage", 12)
 # initialize drivers
-from trezor.lvglui.scrs import *
+from trezor.lvglui import StatusBar
 
 if not utils.BITCOIN_ONLY:
     # storage.fido2 only imports C modules
@@ -28,6 +27,7 @@ if not utils.BITCOIN_ONLY:
 if __debug__:
     # storage.debug only imports C modules
     import storage.debug
+    import micropython
 
 # trezor.pin imports trezor.utils
 # We need it as an always-active module because trezor.pin.show_pin_timeout is used
@@ -52,16 +52,20 @@ import storage.device
 
 usb.bus.open(storage.device.get_device_id())
 
-import micropython
+# initialize the status bar
+StatusBar.get_instance()
 
 # initialize the status bar
 StatusBar.get_instance()
 
 # run the endless loop
 while True:
-    micropython.mem_info()
     with unimport_manager:
         import session  # noqa: F401
         del session
-        print('-------------------------')
+        if __debug__:
+            print('---heap status before gc---')
+            micropython.mem_info()
+    if __debug__:
+        print('---heap status after gc----')
         micropython.mem_info()

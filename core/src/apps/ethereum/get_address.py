@@ -31,7 +31,12 @@ async def get_address(
     address = address_from_bytes(node.ethereum_pubkeyhash(), network)
 
     if msg.show_display:
-        title = paths.address_n_to_str(msg.address_n)
-        await show_address(ctx, address=address, title=title)
+        path = paths.address_n_to_str(msg.address_n)
+        await show_address(
+            ctx,
+            address=address,
+            address_n=path,
+            network=network.shortcut if network else "ETH",
+        )
 
     return EthereumAddress(address=address)

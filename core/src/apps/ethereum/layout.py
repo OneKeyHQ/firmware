@@ -15,7 +15,10 @@ from trezor.ui.layouts import (
     confirm_total,
     should_show_more,
 )
-from trezor.ui.layouts.tt.altcoin import confirm_total_ethereum
+from trezor.ui.layouts.lvgl.altcoin import (
+    confirm_total_ethereum,
+    confirm_total_ethereum_eip1559,
+)
 
 from . import networks, tokens
 from .helpers import address_from_bytes, decode_typed_data, get_type_name
@@ -54,12 +57,22 @@ def require_confirm_fee(
     gas_limit: int,
     chain_id: int,
     token: tokens.TokenInfo | None = None,
+    from_address: str | None = None,
+    to_address: str | None = None,
+    network: str | None = None,
 ) -> Awaitable[None]:
+    fee_max = gas_price * gas_limit
     return confirm_total_ethereum(
         ctx,
         format_ethereum_amount(spending, token, chain_id),
         format_ethereum_amount(gas_price, None, chain_id),
-        format_ethereum_amount(gas_price * gas_limit, None, chain_id),
+        format_ethereum_amount(fee_max, None, chain_id),
+        from_address,
+        to_address,
+        network,
+        format_ethereum_amount(spending + fee_max, None, chain_id)
+        if token is None
+        else None,
     )
 
 
@@ -71,25 +84,24 @@ async def require_confirm_eip1559_fee(
     gas_limit: int,
     chain_id: int,
     token: tokens.TokenInfo | None = None,
+    from_address: str = None,
+    to_address: str = None,
+    network: str = None,
 ) -> None:
-    await confirm_amount(
+
+    fee_max = max_gas_fee * gas_limit
+    await confirm_total_ethereum_eip1559(
         ctx,
-        title="Confirm fee",
-        description="Maximum fee per gas",
-        amount=format_ethereum_amount(max_gas_fee, None, chain_id),
-    )
-    await confirm_amount(
-        ctx,
-        title="Confirm fee",
-        description="Priority fee per gas",
-        amount=format_ethereum_amount(max_priority_fee, None, chain_id),
-    )
-    await confirm_total(
-        ctx,
-        total_amount=format_ethereum_amount(spending, token, chain_id),
-        fee_amount=format_ethereum_amount(max_gas_fee * gas_limit, None, chain_id),
-        total_label="Amount sent:\n",
-        fee_label="\nMaximum fee:\n",
+        format_ethereum_amount(spending, token, chain_id),
+        format_ethereum_amount(max_priority_fee, None, chain_id),
+        format_ethereum_amount(max_gas_fee, None, chain_id),
+        format_ethereum_amount(fee_max, None, chain_id),
+        from_address,
+        to_address,
+        network,
+        format_ethereum_amount(spending + fee_max, None, chain_id)
+        if token is None
+        else None,
     )
 
 
@@ -109,14 +121,15 @@ def require_confirm_unknown_token(
 
 
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    return confirm_blob(
+    from trezor.ui.layouts import confirm_data
+
+    return confirm_data(
         ctx,
         "confirm_data",
-        title="Confirm data",
-        description=f"Size: {data_total} bytes",
+        title="Overview Data",
+        description=f"{data_total} bytes",
         data=data,
         br_code=ButtonRequestType.SignTx,
-        ask_pagination=True,
     )
 
 

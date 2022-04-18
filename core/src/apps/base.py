@@ -221,6 +221,7 @@ if not utils.LVGL_UI:
 else:
 
     def set_homescreen() -> None:
+        dev_state = None
         if storage.device.is_initialized():
             if storage.device.no_backup():
                 dev_state = "SEEDLESS"
@@ -233,15 +234,18 @@ else:
             elif storage.device.get_experimental_features():
                 dev_state = "EXPERIMENTAL MODE!"
             if not config.is_unlocked():
-                print("Device is locked")
+                if __debug__:
+                    print("Device is locked")
                 from trezor.lvglui.scrs.lockscreen import LockScreen
 
-                LockScreen()
+                device_name = storage.device.get_label()
+                LockScreen(device_name, dev_state)
             else:
-                print("Device is unlocked")
+                if __debug__:
+                    print("Device is unlocked")
                 from trezor.lvglui.scrs.homescreen import MainScreen
 
-                MainScreen()
+                MainScreen(dev_state)
         else:
             from trezor.lvglui.scrs.initscreen import InitScreen
 
