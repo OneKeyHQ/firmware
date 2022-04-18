@@ -72,27 +72,20 @@ void fsm_msgSignData(const SignData *msg) {
 }
 
 void fsm_msgExportEd25519PublicKey(const ExportEd25519PublicKey *msg) {
+  RESP_INIT(Ed25519PublicKey);
+
   CHECK_INITIALIZED
 
   CHECK_PIN
 
-  RESP_INIT(Ed25519PublicKey);
-
   HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
                                     msg->address_n_count, NULL);
-
   if (!node) return;
-
   hdnode_fill_public_key(node);
 
   resp->pubkey.size = 32;
-
   memcpy(&resp->pubkey.bytes, &node->public_key[1],
          sizeof(resp->pubkey.bytes));
-
-  resp->privkey.size = 32;
-  memcpy(&resp->privkey.bytes, &node->private_key[0],
-         sizeof(resp->privkey.bytes));
 
   msg_write(MessageType_MessageType_Ed25519PublicKey, resp);
 

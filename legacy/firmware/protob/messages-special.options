@@ -15,8 +15,7 @@ DataSignature.signature                                        max_size:64
 
 ExportEd25519PublicKey.address_n                               max_count:8
 
-Ed25519PublicKey.pubkey                                        max_size:64
-Ed25519PublicKey.privkey                                       max_size:64
+Ed25519PublicKey.pubkey                                        max_size:32
 
 GetEd25519Nonce.address_n                                      max_count:8
 GetEd25519Nonce.data                                           max_size:64
