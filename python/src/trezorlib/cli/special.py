@@ -220,7 +220,6 @@ def export_ed25519_pubkey(client, address):
 @click.command()
 @with_client
 def ed25519_test(client):
-    from trezorlib import cosi
     data = bytes.fromhex("00" * 32)
     address_n_1 = tools.parse_path("m/44h/0h/0h/0h/1h")
     address_n_2 = tools.parse_path("m/44h/0h/0h/0h/2h")
@@ -231,12 +230,9 @@ def ed25519_test(client):
     pk3 = special.export_ed25519_pubkey(client, address_n_3).pubkey
     global_pk = cosi.combine_keys([pk1, pk2, pk3])
 
-    nonce_res1 = special.get_ed25519_nonce(client, address_n_1, data, 0)
-    nonce_res2 = special.get_ed25519_nonce(client, address_n_2, data, 1)
-    nonce_res3 = special.get_ed25519_nonce(client, address_n_3, data, 2)
-    r1, R1 = nonce_res1.r, nonce_res1.R
-    r2, R2 = nonce_res2.r, nonce_res2.R
-    r3, R3 = nonce_res3.r, nonce_res3.R
+    R1 = special.get_ed25519_nonce(client, address_n_1, data, 0).R
+    R2 = special.get_ed25519_nonce(client, address_n_2, data, 1).R
+    R3 = special.get_ed25519_nonce(client, address_n_3, data, 2).R
     global_R = cosi.combine_keys([R1, R2, R3])
 
     sig_res1 = special.cosign_ed25519(client, address_n_1, data, 0, global_pk, global_R)

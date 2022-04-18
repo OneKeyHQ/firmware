@@ -17,17 +17,11 @@ class Ed25519Nonce(p.MessageType):
         self,
         *,
         R: bytes,
-        r: bytes,
-        r_src: bytes,
     ) -> None:
         self.R = R
-        self.r = r
-        self.r_src = r_src
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('R', p.BytesType, p.FLAG_REQUIRED),
-            2: ('r', p.BytesType, p.FLAG_REQUIRED),
-            3: ('r_src', p.BytesType, p.FLAG_REQUIRED),
         }

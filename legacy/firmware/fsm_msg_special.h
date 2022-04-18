@@ -128,30 +128,22 @@ void get_nonce_R_from_r(const uint8_t * r, uint8_t * R) {
 }
 
 void fsm_msgGetEd25519Nonce(const GetEd25519Nonce *msg) {
+  RESP_INIT(Ed25519Nonce);
+
   CHECK_INITIALIZED
 
   CHECK_PIN
-
-  RESP_INIT(Ed25519Nonce);
 
   HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
                                     msg->address_n_count, NULL);
   if (!node) return;
 
-  uint8_t r[64];
-  uint8_t R[32];
-
+  uint8_t r[64], R[32];
   get_nonce_r(node->private_key, msg->data.bytes, msg->data.size, msg->ctr, r);
   get_nonce_R_from_r(r, R);
 
-  resp->r.size = sizeof(r);
-  memcpy(&resp->r.bytes, r, resp->r.size);
-
-  resp->R.size = sizeof(R);
+  resp->R.size = 32;
   memcpy(&resp->R.bytes, R, resp->R.size);
-
-  resp->r_src.size = sizeof(r)/2 + msg->data.size + sizeof(msg->ctr);
-  //memcpy(&resp->r_src.bytes, temp, resp->r_src.size);
 
   msg_write(MessageType_MessageType_Ed25519Nonce, resp);
 }

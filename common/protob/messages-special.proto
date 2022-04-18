@@ -87,8 +87,6 @@ message GetEd25519Nonce {
  */
 message Ed25519Nonce {
     required bytes R = 1;      // R of the nonce
-    required bytes r = 2;      // r of the nonce, only for test, DO NOT use in production
-    required bytes r_src = 3;      // the source of r, r = H(r_src), only for test, DO NOT use in production
 }
 
 

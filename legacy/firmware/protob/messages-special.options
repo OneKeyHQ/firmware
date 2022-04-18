@@ -20,9 +20,7 @@ Ed25519PublicKey.pubkey                                        max_size:32
 GetEd25519Nonce.address_n                                      max_count:8
 GetEd25519Nonce.data                                           max_size:64
 
-Ed25519Nonce.R                                                 max_size:64
-Ed25519Nonce.r                                                 max_size:64
-Ed25519Nonce.r_src                                             max_size:256
+Ed25519Nonce.R                                                 max_size:32
 
 CosignEd25519.address_n                                        max_count:8
 CosignEd25519.digest                                           max_size:64
