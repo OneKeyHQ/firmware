@@ -211,7 +211,7 @@ void fsm_msgCosignEd25519(const CosignEd25519 *msg) {
                                     msg->address_n_count, NULL);
   if (!node) return;
 
-  resp->sig.size = 64;
+  resp->sig.size = 32; // the length of cosi signature is 32, not 64
   ed25519_cosign(msg->digest.bytes, msg->digest.size,
     node->private_key, msg->ctr,
     msg->global_pubkey.bytes, msg->global_commit.bytes,

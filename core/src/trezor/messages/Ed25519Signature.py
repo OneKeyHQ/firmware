@@ -17,17 +17,11 @@ class Ed25519Signature(p.MessageType):
         self,
         *,
         sig: bytes,
-        r: bytes,
-        s1: bytes,
     ) -> None:
         self.sig = sig
-        self.r = r
-        self.s1 = s1
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
             1: ('sig', p.BytesType, p.FLAG_REQUIRED),
-            2: ('r', p.BytesType, p.FLAG_REQUIRED),
-            3: ('s1', p.BytesType, p.FLAG_REQUIRED),
         }

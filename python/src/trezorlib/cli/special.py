@@ -235,10 +235,10 @@ def ed25519_test(client):
     R3 = special.get_ed25519_nonce(client, address_n_3, data, 2).R
     global_R = cosi.combine_keys([R1, R2, R3])
 
-    sig_res1 = special.cosign_ed25519(client, address_n_1, data, 0, global_pk, global_R)
-    sig_res2 = special.cosign_ed25519(client, address_n_2, data, 1, global_pk, global_R)
-    sig_res3 = special.cosign_ed25519(client, address_n_3, data, 2, global_pk, global_R)
-    sigs = [sig_res1.sig, sig_res2.sig, sig_res3.sig]
+    sig1 = special.cosign_ed25519(client, address_n_1, data, 0, global_pk, global_R).sig
+    sig2 = special.cosign_ed25519(client, address_n_2, data, 1, global_pk, global_R).sig
+    sig3 = special.cosign_ed25519(client, address_n_3, data, 2, global_pk, global_R).sig
+    sigs = [sig1, sig2, sig3]
     sig = cosi.combine_sig(global_R, sigs)
 
     cosi.verify_combined(sig, data, global_pk)

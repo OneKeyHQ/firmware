@@ -105,13 +105,11 @@ message CosignEd25519 {
 }
 
 /**
- * Response: The signature of ed25519
+ * Response: The signature of ed25519 cosi
  * @end
  */
 message Ed25519Signature {
-    required bytes sig = 1;      // signature
-    required bytes r = 2;
-    required bytes s1 = 3;
+    required bytes sig = 1;      // signature of cosi
 }
 
 /**
