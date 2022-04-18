@@ -9,6 +9,7 @@ from .components.button import NormalButton
 
 if TYPE_CHECKING:
     from typing import Sequence
+    pass
 
 
 class MnemonicDisplay(FullSizeWindow):

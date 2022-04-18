@@ -134,7 +134,7 @@ fn generate_micropython_bindings() {
             "-I../../vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc",
             "-I../../vendor/micropython/lib/stm32lib/CMSIS/STM32H7xx/Include",
             "-I../../vendor/micropython/lib/cmsis/inc",
-            "-I../../vendor/lvgl_mp",
+            "-I../../vendor/lvgl_mp/lvgl",
             "-I../../embed/lvgl",
             "-DTREZOR_MODEL=T",
             "-DCORE_CM7",
