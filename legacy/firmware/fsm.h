@@ -154,5 +154,6 @@ void fsm_msgSignData(const SignData *msg);
 void fsm_msgExportEd25519PublicKey(const ExportEd25519PublicKey *msg);
 void fsm_msgGetEd25519Nonce(const GetEd25519Nonce *msg);
 void fsm_msgCosignEd25519(const CosignEd25519 *msg);
+void fsm_msgEd25519Verify(const Ed25519Verify *msg);
 
 #endif

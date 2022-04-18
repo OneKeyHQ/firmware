@@ -34,3 +34,7 @@ CosignEd25519.global_commit                                    max_size:64
 Ed25519Signature.sig                                           max_size:64
 Ed25519Signature.r                                             max_size:64
 Ed25519Signature.s1                                            max_size:32
+
+Ed25519Verify.digest                                           max_size:64
+Ed25519Verify.pubkey                                           max_size:64
+Ed25519Verify.sig                                              max_size:64

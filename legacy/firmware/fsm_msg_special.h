@@ -234,3 +234,13 @@ void fsm_msgCosignEd25519(const CosignEd25519 *msg) {
 
   msg_write(MessageType_MessageType_Ed25519Signature, resp);
 }
+
+void fsm_msgEd25519Verify(const Ed25519Verify *msg) {
+  if (0 == ed25519_sign_open(msg->digest.bytes, msg->digest.size,
+    msg->pubkey.bytes, msg->sig.bytes)) {
+      fsm_sendSuccess(_("Verification passed"));
+  } else {
+      fsm_sendFailure(FailureType_Failure_ProcessError,
+                      _("Verification failed"));
+  }
+}

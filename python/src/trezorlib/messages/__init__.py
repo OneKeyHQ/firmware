@@ -90,6 +90,7 @@ from .ECDHSessionKey import ECDHSessionKey
 from .Ed25519Nonce import Ed25519Nonce
 from .Ed25519PublicKey import Ed25519PublicKey
 from .Ed25519Signature import Ed25519Signature
+from .Ed25519Verify import Ed25519Verify
 from .EndSession import EndSession
 from .Entropy import Entropy
 from .EntropyAck import EntropyAck

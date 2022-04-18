@@ -231,3 +231,4 @@ GetEd25519Nonce: Literal[1007] = 1007
 Ed25519Nonce: Literal[1008] = 1008
 CosignEd25519: Literal[1009] = 1009
 Ed25519Signature: Literal[1010] = 1010
+Ed25519Verify: Literal[1011] = 1011

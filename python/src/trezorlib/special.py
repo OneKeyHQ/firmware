@@ -70,3 +70,15 @@ def cosign_ed25519(
             global_commit=global_commit
         )
     )
+
+@expect(messages.Success, field="message")
+def ed25519_verify(
+    client, digest, pubkey, sig
+):
+    return client.call(
+        messages.Ed25519Verify(
+            digest=digest,
+            pubkey=pubkey,
+            sig=sig
+        )
+    )

@@ -310,5 +310,6 @@ enum MessageType {
     MessageType_Ed25519Nonce = 1008 [(wire_out) = true];
     MessageType_CosignEd25519= 1009 [(wire_in) = true];
     MessageType_Ed25519Signature = 1010 [(wire_out) = true];
+    MessageType_Ed25519Verify = 1011 [(wire_in) = true];
 
 }

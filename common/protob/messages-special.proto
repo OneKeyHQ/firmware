@@ -116,3 +116,15 @@ message Ed25519Signature {
     required bytes r = 2;
     required bytes s1 = 3;
 }
+
+/**
+ * Request: Verify an ed25519 signature
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message Ed25519Verify {
+    required bytes digest = 1;
+    required bytes pubkey = 2;
+    required bytes sig = 3;
+}

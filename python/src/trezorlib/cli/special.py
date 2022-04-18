@@ -281,4 +281,6 @@ def ed25519_test(client):
     sig = cosi.combine_sig(global_R, sigs)
 
     cosi.verify_combined(sig, data, global_pk)
+    special.ed25519_verify(client, data, global_pk, sig)
+
     print("pass")
