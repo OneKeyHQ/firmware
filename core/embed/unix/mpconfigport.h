@@ -91,7 +91,7 @@
 #define MICROPY_CAN_OVERRIDE_BUILTINS (0)
 #define MICROPY_VFS_POSIX_FILE      (1)
 #define MICROPY_USE_INTERNAL_ERRNO  (0)
-#define MICROPY_ENABLE_SCHEDULER    (1)
+#define MICROPY_ENABLE_SCHEDULER    (0)
 #define MICROPY_SCHEDULER_DEPTH     (0)
 #define MICROPY_VFS                 (0)
 
@@ -134,14 +134,7 @@
 #define MICROPY_PY_SYS_EXIT         (0)
 #define MICROPY_PY_SYS_STDFILES     (0)
 #define MICROPY_PY_SYS_STDIO_BUFFER (0)
-#ifndef MICROPY_PY_SYS_PLATFORM
 #define MICROPY_PY_SYS_PLATFORM  "trezor-emulator"
-#if defined(__APPLE__) && defined(__MACH__)
-    #define LINUX_FRAME_BUFFER 0
-#else
-    #define LINUX_FRAME_BUFFER 1
-#endif
-#endif
 #define MICROPY_PY_UERRNO           (0)
 #define MICROPY_PY_THREAD           (0)
 #define MICROPY_PY_FSTRINGS         (1)
@@ -151,7 +144,7 @@
 #define MICROPY_PY_LVGL_DISPDRV     (1)
 #define MICROPY_PY_LVGL_LODEPNG     (0)
 #if LINUX_FRAME_BUFFER
-    #define MICROPY_PY_LVGL_FB      (1)
+    #define MICROPY_PY_LVGL_FB      (0)
 #else
     #define MICROPY_PY_LVGL_FB      (0)
 #endif
@@ -232,16 +225,6 @@ extern const struct _mp_print_t mp_stderr_print;
 
 // ============= this ends common config section ===================
 
-#define DISP_DRV_ROOTS void* disp_drv_fb[2];
-
-#ifndef MICROPY_INCLUDED_PY_MPSTATE_H
-#define MICROPY_INCLUDED_PY_MPSTATE_H
-#include "lvgl/src/misc/lv_gc.h"
-#undef MICROPY_INCLUDED_PY_MPSTATE_H
-#else
-#include "lvgl/src/misc/lv_gc.h"
-#endif
-
 // extra built in modules to add to the list of known ones
 extern const struct _mp_obj_module_t mp_module_os;
 extern const struct _mp_obj_module_t mp_module_lvgl;
@@ -252,6 +235,9 @@ extern const struct _mp_obj_module_t mp_module_fb;
 extern const struct _mp_obj_module_t mp_module_lodepng;
 
 #if MICROPY_PY_LVGL
+
+#define DISP_DRV_ROOTS void* disp_drv_fb[2];
+
 #ifndef MICROPY_INCLUDED_PY_MPSTATE_H
 #define MICROPY_INCLUDED_PY_MPSTATE_H
 #include  "lvgl/src/misc/lv_gc.h"
