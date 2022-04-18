@@ -265,7 +265,7 @@ int mnemonic_find_first_match_index(const char *prefix, int len) {
     int cmp = strncmp(wordlist[mid], prefix, len);
     // find match
     if (cmp == 0) {
-      for(;;) {
+      for (;;) {
         // find the first match
         if (mid == 0 || strncmp(wordlist[mid - 1], prefix, len) != 0) {
           return mid;
@@ -296,7 +296,7 @@ const char *mnemonic_complete_word(const char *prefix, int len) {
   }
   for (const char *const *w = wordlist + offset; *w != 0; w++) {
     if (strncmp(*w, prefix, len) == 0) {
-      if (strlen(result) + strlen(*w) < sizeof(result)-1) {
+      if (strlen(result) + strlen(*w) < sizeof(result) - 1) {
         strcat(result, *w);
         strcat(result, " ");
       } else {

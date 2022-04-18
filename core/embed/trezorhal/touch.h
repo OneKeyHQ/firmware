@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#if PRODUCTION_MODEL== 'H'
+#if PRODUCTION_MODEL == 'H'
 #define TS_I2C_PORT GPIOB
 #define TS_I2C_SCL_PIN GPIO_PIN_10
 #define TS_I2C_SDA_PIN GPIO_PIN_11

@@ -1,3 +1,5 @@
+// clang-format off
+
 /*
  * Defines for Mobile Industry Processor Interface (MIPI(R))
  * Display Working Group standards: DSI, DCS, DBI, DPI
