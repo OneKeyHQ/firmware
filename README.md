@@ -1,6 +1,11 @@
-# Trezor Firmware
+## OneKey
 
-![img](https://repository-images.githubusercontent.com/180590388/968e6880-6538-11e9-9da6-4aef78157e94)
+ **🔑 OneKey is the smartest way to secure, buy, exchange and grow your crypto assets.** Learn more [here](https://www.onekey.so/).
+
+----
+
+![make something people want](https://github.com/rayston92/graph_bed/blob/edc43bc1cd6ce6a19f3b6c30624a4b58f6870d1f/img/github_home_bg.png?raw=true)
+
 
 ## Repository Structure
 
@@ -29,7 +34,7 @@ Also please have a look at the docs, either in the `docs` folder or at  [docs.tr
 
 ## Security vulnerability disclosure
 
-Please report suspected security vulnerabilities in private to [security@satoshilabs.com](mailto:security@satoshilabs.com), also see [the disclosure section on the Trezor.io website](https://trezor.io/security/). Please do NOT create publicly viewable issues for suspected security vulnerabilities.
+Please report suspected security vulnerabilities in private to [dev@onekey.so](mailto:dev@onekey.so), Please do NOT create publicly viewable issues for suspected security vulnerabilities.
 
 ## Documentation
 
