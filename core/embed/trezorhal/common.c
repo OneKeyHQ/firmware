@@ -168,7 +168,6 @@ void collect_hw_entropy(void) {
   memcpy(HW_ENTROPY_DATA + 4, &w, 4);
   w = LL_GetUID_Word2();
   memcpy(HW_ENTROPY_DATA + 8, &w, 4);
-#if defined(STM32F427xx) || defined(STM32F405xx)
   // set entropy in the OTP randomness block
   if (secfalse == flash_otp_is_locked(FLASH_OTP_BLOCK_RANDOMNESS)) {
     uint8_t entropy[FLASH_OTP_BLOCK_SIZE];
@@ -182,7 +181,30 @@ void collect_hw_entropy(void) {
   ensure(flash_otp_read(FLASH_OTP_BLOCK_RANDOMNESS, 0, HW_ENTROPY_DATA + 12,
                         FLASH_OTP_BLOCK_SIZE),
          NULL);
-#elif defined(STM32H747xx)
+}
 
-#endif
+bool check_all_ones(const void *data, int len) {
+  if (!data) return false;
+  uint8_t result = 0xff;
+  const uint8_t *ptr = (const uint8_t *)data;
+
+  for (; len; len--, ptr++) {
+    result &= *ptr;
+    if (result != 0xff) break;
+  }
+
+  return (result == 0xff);
+}
+
+bool check_all_zeros(const void *data, int len) {
+  if (!data) return false;
+  uint8_t result = 0x0;
+  const uint8_t *ptr = (const uint8_t *)data;
+
+  for (; len; len--, ptr++) {
+    result |= *ptr;
+    if (result) break;
+  }
+
+  return (result == 0x00);
 }

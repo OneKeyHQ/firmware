@@ -20,6 +20,7 @@
 #ifndef __TREZORHAL_COMMON_H__
 #define __TREZORHAL_COMMON_H__
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "secbool.h"
@@ -78,5 +79,9 @@ extern uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 void memset_reg(volatile void *start, volatile void *stop, uint32_t val);
 void jump_to(uint32_t address);
 void jump_to_unprivileged(uint32_t address);
+
+bool check_all_ones(const void *data, int len);
+
+bool check_all_zeros(const void *data, int len);
 
 #endif

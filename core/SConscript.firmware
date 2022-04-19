@@ -169,8 +169,6 @@ CPPDEFINES_MOD += [
     'TREZOR_FONT_MONO_ENABLE',
 ]
 SOURCE_MOD += [
-    'embed/lvgl/ui_font_siyuan32.c',
-    'embed/lvgl/modlvgldrv.c',
     'embed/extmod/modtrezorui/mipi_lcd.c',
     'embed/extmod/modtrezorui/display.c',
     'embed/extmod/modtrezorui/font_bitmap.c',
@@ -328,43 +326,60 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/py/warning.c',
 ]
 
-SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c'))
-SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
+if LVGL_UI == '1':
+    SOURCE_LVGL = Glob('vendor/lvgl_mp/lvgl/src/*/*.c')
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*.c'))
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*.c'))
+    SOURCE_LVGL.extend(Glob('vendor/lvgl_mp/lvgl/src/*/*/*/*/*.c'))
 
-LVGL_BINDING_DIR = 'vendor/lvgl_mp'
-LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
-LVGL_BUILD = 'build/firmware'
-INC = f'-I{LVGL_BINDING_DIR}'
-INC += f' -Iembed/lvgl'
-LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
-LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
-LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
-LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -DLV_CONF_INCLUDE_SIMPLE -x c'
+    LVGL_BINDING_DIR = 'vendor/lvgl_mp'
+    LVGL_DIR = f'{LVGL_BINDING_DIR}/lvgl'
+    LVGL_BUILD = 'build/firmware'
+    INC = f' -Iembed/lvgl'
+    LVGL_PP = f'{LVGL_BUILD}/lvgl.pp.c'
+    LVGL_MPY = f'{LVGL_BUILD}/lv_mpy.c'
+    LVGL_MPY_METADATA =f'{LVGL_BUILD}/lv_mpy.json'
+    LV_CFLAGS = '-E -Wno-unused-function -DPYCPARSER -x c'
 
-LV_INC = [
-    f'{LVGL_DIR}/lvgl.h',
-    'embed/lvgl/lv_conf.h',
-]
+    LV_INC = [
+        f'{LVGL_DIR}/lvgl.h',
+    ]
 
-env1 = Environment(ENV=os.environ)
+    env1 = Environment(ENV=os.environ)
 
-env1.Command(
-    target='lv_mpy.c',
-    source=LV_INC,
-    action=[
-        f'rm {LVGL_BINDING_DIR}/lv_conf.h | true',
-        f'arm-none-eabi-gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
-        f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
-        f'rm ./lextab.py ./yacctab.py',
-    ],
-)
+    env1.Command(
+        target='lv_mpy.c',
+        source=LV_INC,
+        action=[
+            f'arm-none-eabi-gcc {LV_CFLAGS} {INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {LVGL_PP}',
+            f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M lvgl -MP lv -MD {LVGL_MPY_METADATA} -E {LVGL_PP} $SOURCES > $TARGET',
+        ],
+    )
 
-# LVGL
-SOURCE_MOD += [
-    'lv_mpy.c',
-]
+    # LVGL
+    SOURCE_MOD += [
+        'lv_mpy.c',        
+    ]
+    SOURCE_MOD.extend(Glob('embed/lvgl/*.c'))
+
+    ATCA_DIR = 'embed/trezorhal/atca'
+    ATCA_SOURCE = 'embed/trezorhal/atca/se_atca.h'
+    ATCA_INC = f'-I{ATCA_DIR}'
+    ATCA_PP = f'{LVGL_BUILD}/atca.pp.c'
+    ATCA_CFLAGS = '-E -Wno-deprecated-declarationsgcc -DPYCPARSER -x c'
+
+    env1.Command(
+        target='atca_mp.c',
+        source='embed/trezorhal/atca/se_atca.h',
+        action=[
+            f'arm-none-eabi-gcc {ATCA_CFLAGS} {ATCA_INC} -Ivendor/lvgl_mp/pycparser/utils/fake_libc_include $SOURCES > {ATCA_PP}',
+            f'python3 {LVGL_BINDING_DIR}/gen/gen_mpy.py -M atca -E {ATCA_PP} $SOURCES > $TARGET',
+        ],
+    )
+
+    SOURCE_MOD += [
+        'atca_mp.c',        
+    ]
 
 SOURCE_MICROPYTHON_SPEED = [
     'vendor/micropython/py/gc.c',
@@ -429,6 +444,10 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/usbd_ioreq.c',
         'embed/trezorhal/util.s',
         'embed/trezorhal/vectortable.s',
+        'embed/trezorhal/atca/atca_hal.c',
+        'embed/trezorhal/atca/atca_command.c',
+        'embed/trezorhal/atca/atca_api.c',
+        'embed/trezorhal/atca/se_atca.c',
     ]
 else:
     SOURCE_STMHAL = [
@@ -576,6 +595,7 @@ if PRODUCTION_MODEL == 'H':
             'embed/rust',
             'embed/firmware',
             'embed/trezorhal',
+            'embed/trezorhal/atca',
             'embed/extmod/modtrezorui',
             'vendor/micropython',
             'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc',
@@ -591,7 +611,7 @@ if PRODUCTION_MODEL == 'H':
             CPU_MODEL,
             CORE_MODEL,
             'USE_HAL_DRIVER',
-            'LV_CONF_INCLUDE_SIMPLE',
+            'LV_LVGL_H_INCLUDE_SIMPLE',
             ('STM32_HAL_H', '"<stm32h7xx.h>"'),
         ] + CPPDEFINES_MOD,
         ASFLAGS=CPU_ASFLAGS,
@@ -729,7 +749,11 @@ if FROZEN:
     else:
         raise ValueError('Unknown Trezor model')
 
-    SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'lvglui/*.py'))
+    if LVGL_UI == '1':
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/lvgl/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/components/*.py'))
     
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/wire/*.py'))
 

@@ -48,6 +48,8 @@
 #endif
 #include "rng.h"
 // #include "sdcard.h"
+#include "atca_api.h"
+#include "atca_hal.h"
 #include "mipi_lcd.h"
 #include "qspi_flash.h"
 #include "supervise.h"
@@ -106,6 +108,9 @@ int main(void) {
   qspi_flash_init();
   qspi_flash_config();
   qspi_flash_memory_mapped();
+
+  atca_init();
+  atca_config_init();
 
   // timer_init();
 

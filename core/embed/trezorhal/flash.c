@@ -418,6 +418,7 @@ secbool flash_write_word(uint8_t sector, uint32_t offset, uint32_t data) {
   }
   return sectrue;
 }
+
 #else
 secbool flash_write_byte(uint8_t sector, uint32_t offset, uint8_t data) {
   uint32_t address = (uint32_t)flash_get_address(sector, offset, 1);
@@ -460,19 +461,49 @@ secbool flash_write_word(uint8_t sector, uint32_t offset, uint32_t data) {
 #endif
 
 #if defined(STM32H747xx)
+static FlashLockedData *flash_otp_data =
+    (FlashLockedData *)FLASH_SECTOR_TABLE[15];
 secbool flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,
                        uint8_t datalen) {
+  if (block >= FLASH_OTP_NUM_BLOCKS ||
+      offset + datalen > FLASH_OTP_BLOCK_SIZE) {
+    return secfalse;
+  }
+  memcpy(data, flash_otp_data->flash_otp[block] + offset, datalen);
   return sectrue;
 }
 
 secbool flash_otp_write(uint8_t block, uint8_t offset, const uint8_t *data,
                         uint8_t datalen) {
+  if (block >= FLASH_OTP_NUM_BLOCKS || offset != 0 ||
+      datalen != FLASH_OTP_BLOCK_SIZE) {
+    return secfalse;
+  }
+  uint32_t address = (uint32_t)flash_otp_data->flash_otp[block];
+  uint32_t flash_word[8];
+  memcpy(flash_word, data, datalen);
+  ensure(flash_unlock_write(), NULL);
+  if (HAL_OK != HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, address,
+                                  (uint32_t)&flash_word)) {
+    ensure(flash_lock_write(), NULL);
+    return secfalse;
+  }
+  ensure(flash_lock_write(), NULL);
   return sectrue;
 }
 
 secbool flash_otp_lock(uint8_t block) { return sectrue; }
 
-secbool flash_otp_is_locked(uint8_t block) { return sectrue; }
+secbool flash_otp_is_locked(uint8_t block) {
+  if (0 ==
+      memcmp(flash_otp_data->flash_otp[block],
+             "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+             "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF",
+             FLASH_OTP_BLOCK_SIZE)) {
+    return secfalse;
+  }
+  return sectrue;
+}
 #else
 #define FLASH_OTP_LOCK_BASE 0x1FFF7A00U
 
@@ -524,14 +555,18 @@ secbool flash_otp_is_locked(uint8_t block) {
 #endif
 
 void flash_test(void) {
-  uint8_t sector = 2;
+  // static uint8_t data[32];
+  uint8_t sector = 15;
   ensure(flash_unlock_write(), NULL);
   ensure(flash_erase(sector), "erase failed");
-  ensure(flash_write_word(sector, 64, 0x12345678), NULL);
-  for (uint8_t i = 0; i < 64; i++) {
-    ensure(flash_write_byte(sector, i, i), NULL);
-  }
+  // ensure(flash_write_word(sector, 64, 0x12345678), NULL);
+  // for (uint8_t i = 0; i < 32; i++) {
+  //   data[i] = i;
+  // }
 
+  // ensure(flash_otp_write(0, 0, data, 32), NULL);
+  // memset(data, 0x00, 32);
+  // ensure(flash_otp_read(0, 0, data, 32), NULL);
   ensure(flash_lock_write(), NULL);
   while (1)
     ;
