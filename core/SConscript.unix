@@ -10,6 +10,7 @@ UI2 = ARGUMENTS.get('UI2', '0') == '1' or TREZOR_MODEL == '1'
 PRODUCTION_MODEL = ARGUMENTS.get('PRODUCTION_MODEL', 'H')
 LVGL_UI = '1'
 UNAME_S = ARGUMENTS.get('UNAME_S', 'Linux')
+CURRENT_DIR = ARGUMENTS.get('CURRENT_DIR', './')
 
 FEATURE_FLAGS = {
     "SECP256K1_ZKP": True,
@@ -470,7 +471,9 @@ if ARGUMENTS.get('TREZOR_MEMPERF', '0') == '1':
 
 env.Replace(
     TREZOR_MODEL=TREZOR_MODEL,
-    LVGL_UI=LVGL_UI,)
+    LVGL_UI=LVGL_UI,
+    CURRENT_DIR=CURRENT_DIR,
+    )
 
 env.Replace(
     CCFLAGS='$COPT '
@@ -494,6 +497,8 @@ env.Replace(
         ('TREZOR_MODEL', '$TREZOR_MODEL'),
         ('LVGL_UI', '$LVGL_UI'),
         ('MP_CONFIGFILE', '\\"embed/unix/mpconfigport.h\\"'),
+        ('CURRENT_DIR', '$CURRENT_DIR'),   
+        ('RES_DIR', '\\"/src/trezor/lvglui\\"'),       
     ] + CPPDEFINES_MOD,
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
 
