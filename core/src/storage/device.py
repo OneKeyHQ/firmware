@@ -189,7 +189,6 @@ def store_mnemonic_secret(
     needs_backup: bool = False,
     no_backup: bool = False,
 ) -> None:
-    print("-----------store mnemonic")
     set_version(common.STORAGE_VERSION_CURRENT)
     if utils.EMULATOR:
         common.set(_NAMESPACE, _MNEMONIC_SECRET, secret)
