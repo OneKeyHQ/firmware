@@ -448,6 +448,8 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/atca/atca_command.c',
         'embed/trezorhal/atca/atca_api.c',
         'embed/trezorhal/atca/se_atca.c',
+	'embed/trezorhal/trans_fifo.c',
+        'embed/trezorhal/spi.c',
     ]
 else:
     SOURCE_STMHAL = [

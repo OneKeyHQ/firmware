@@ -48,6 +48,8 @@
 #include "modtrezorio-fatfs.h"
 #include "modtrezorio-sbu.h"
 #include "modtrezorio-sdcard.h"
+#include "modtrezorio-spi.h"
+#include "spi.h"
 #endif
 
 /// package: trezorio.__init__

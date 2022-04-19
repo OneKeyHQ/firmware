@@ -41,6 +41,7 @@
 #include "bootui.h"
 #include "messages.h"
 // #include "mpu.h"
+#include "spi.h"
 
 #if defined(STM32H747xx)
 #include "stm32h7xx_hal.h"
@@ -103,12 +104,19 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
   usb_init_all((vhdr == NULL && hdr == NULL) ? sectrue : secfalse);
 
   uint8_t buf[USB_PACKET_SIZE];
+  int r;
 
   for (;;) {
-    int r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE,
-                                     USB_TIMEOUT);
+    r = spi_slave_poll(buf);
     if (r != USB_PACKET_SIZE) {
-      continue;
+      r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE,
+                                   USB_TIMEOUT);
+      if (r != USB_PACKET_SIZE) {
+        continue;
+      }
+      host_channel = CHANNEL_USB;
+    } else {
+      host_channel = CHANNEL_SLAVE;
     }
     uint16_t msg_id;
     uint32_t msg_size;
@@ -267,6 +275,7 @@ int main(void) {
   display_clear();
 
   atca_init();
+  spi_slave_init();
   atca_config_init();
 
   // delay to detect touch
