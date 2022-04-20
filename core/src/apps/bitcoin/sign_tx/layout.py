@@ -2,7 +2,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
-from trezor import ui, utils, wire
+from trezor import utils, wire
 from trezor.enums import AmountUnit, ButtonRequestType, OutputScriptType
 from trezor.strings import format_amount, format_timestamp
 from trezor.ui import layouts
@@ -246,5 +246,5 @@ async def confirm_nondefault_locktime(
         text,
         param,
         br_code=ButtonRequestType.SignTx,
-        description=description,
+        description=description,  # type: ignore["description" is possibly unbound]
     )

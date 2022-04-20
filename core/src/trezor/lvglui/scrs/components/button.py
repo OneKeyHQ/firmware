@@ -1,4 +1,4 @@
-from ..common import *  # noqa: F401,F403
+from .. import font_PJSBOLD24, lv
 
 # class NormalButton(lv.btn):
 #     def __init__(self, parent, text="Next", pos=(-6, 300), enable=True) -> None:
@@ -100,7 +100,7 @@ class ListItemBtn(lv.btn):
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
         if left_img_src:
-            self.label_left.align_to(img_left, lv.ALIGN.OUT_RIGHT_MID, 10, 0)
+            self.label_left.align_to(img_left, lv.ALIGN.OUT_RIGHT_MID, 10, 0)  # type: ignore["img_left" is possibly unbound]
         else:
             self.label_left.set_align(lv.ALIGN.LEFT_MID)
         if right_text:

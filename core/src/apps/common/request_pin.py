@@ -3,7 +3,7 @@ from typing import Any, NoReturn
 
 import storage.cache
 import storage.sd_salt
-from trezor import config, utils, wire
+from trezor import config, wire
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -28,7 +28,7 @@ async def request_pin(
 async def request_pin_confirm(ctx: wire.Context, *args: Any, **kwargs: Any) -> str:
     while True:
         if kwargs.get("show_tip", True):
-            from trezor.ui.layouts import request_pin_tips
+            from trezor.ui.layouts import request_pin_tips  # type: ignore["request_pin_tips" is unknown import symbol]
 
             await request_pin_tips(ctx)
         pin1 = await request_pin(ctx, "Enter new PIN", *args, **kwargs)
@@ -116,7 +116,7 @@ async def verify_user_pin(
         if pin_rem == 0:
             from apps.base import set_homescreen, reload_settings_from_storage
 
-            storage.wipe()
+            storage.wipe()  # type: ignore["wipe" is not a known member of module]
             reload_settings_from_storage()
             set_homescreen()
             return

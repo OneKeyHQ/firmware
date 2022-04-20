@@ -1,12 +1,13 @@
-from . import *
-from .common import FullSizeWindow
+from .common import FullSizeWindow, lv
 from .components.container import ContainerFlexCol
 from .components.listitem import DisplayItem
 from .components.qrcode import QRCode
 
 
 class Address(FullSizeWindow):
-    def __init__(self, title, path, address, xpubs=[], multisig_index=0):
+    def __init__(
+        self, title, path, address, xpubs=[], multisig_index=0
+    ):  # pylint: disable=W0102
         super().__init__(title, None, confirm_text="Done")
         self.qr = QRCode(self, address)
         self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)

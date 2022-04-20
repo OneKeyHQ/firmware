@@ -1,5 +1,5 @@
 from trezor import workflow
-from trezor.lvglui.scrs.common import *
+from trezor.lvglui.scrs.common import FullSizeWindow
 from trezor.wire import DUMMY_CONTEXT
 
 
@@ -13,6 +13,7 @@ async def initscreen() -> None:
     num = await SelectMnemonicNum().request()
     if __debug__:
         print("Number:", num)
+    # pyright: off
     if type_init in TYPE_NEW_WALLET:
         from ..management.reset_device import reset_device
         from trezor.messages import ResetDevice
@@ -34,6 +35,7 @@ async def initscreen() -> None:
                 DUMMY_CONTEXT, RecoveryDevice(enforce_wordlist=True, language=language)
             )
         )
+    # pyright: on
 
 
 word_cnt_strength_map = {

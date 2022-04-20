@@ -1,4 +1,4 @@
-from .. import *
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
 class QRCode(lv.qrcode):

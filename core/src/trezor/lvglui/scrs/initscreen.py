@@ -2,7 +2,7 @@
 # from trezor.crypto import bip39, hashlib, random
 # from trezor.enums import BackupType
 
-from .common import *
+from .common import FullSizeWindow, Screen, lv  # noqa: F401,F403,F405
 
 # from .components.button import NormalButton
 # from .components.keyboard import BIP39Keyboard
@@ -72,7 +72,7 @@ class QuickStart(FullSizeWindow):
                 from trezor import workflow
                 from trezor.wire import DUMMY_CONTEXT
 
-                print(f"Restore Wallet === {language}")
+                # pyright: off
                 workflow.spawn(
                     recovery_device(
                         DUMMY_CONTEXT,
@@ -83,6 +83,7 @@ class QuickStart(FullSizeWindow):
                         ),
                     )
                 )
+                # pyright: on
             self.destory()
 
 
@@ -111,6 +112,7 @@ class SelectMnemonicNum(FullSizeWindow):
             from apps.management.reset_device import reset_device
             from trezor.messages import ResetDevice
 
+            # pyright: off
             workflow.spawn(
                 reset_device(
                     DUMMY_CONTEXT,
@@ -121,6 +123,7 @@ class SelectMnemonicNum(FullSizeWindow):
                     ),
                 )
             )
+            # pyright: on
             self.destory()
 
 

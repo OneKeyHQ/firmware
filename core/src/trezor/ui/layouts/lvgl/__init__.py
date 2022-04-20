@@ -5,10 +5,10 @@ from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 
 from .common import button_request, interact, raise_if_cancelled
+from ...constants.tt import MONO_ADDR_PER_LINE
 
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Iterable, NoReturn, Sequence
-    from ...constants.tt import MONO_ADDR_PER_LINE
     from ..common import PropertyType, ExceptionType
 
 
@@ -219,7 +219,7 @@ async def show_address(
     *,
     address_qr: str | None = None,
     case_sensitive: bool = True,
-    address_n: str = "Confirm address",
+    address_n: str | None = "Confirm address",
     network: str | None = None,
     multisig_index: int | None = None,
     xpubs: Sequence[str] = (),

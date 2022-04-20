@@ -1,6 +1,6 @@
 from trezor import log, loop
 
-import lvgl as lv
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
 async def lvgl_tick():
@@ -11,7 +11,7 @@ async def lvgl_tick():
 
 
 def init():
-    import lvgldrv as lcd
+    import lvgldrv as lcd  # type: ignore[Import "lvgldrv" could not be resolved]
 
     lv.init()
     disp_buf1 = lv.disp_draw_buf_t()
@@ -37,7 +37,7 @@ try:
     init()
     if __debug__:
         log.info("init", "initialized successfully")
-except:
+except BaseException:
     if __debug__:
         log.error("init", "failed to initialize emulator")
 

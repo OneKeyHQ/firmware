@@ -4,7 +4,7 @@ from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.utils import chunks_intersperse
 
-from ...components.tt.confirm import Confirm, HoldToConfirm
+from ...components.tt.confirm import HoldToConfirm
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
 from ...constants.tt import MONO_ADDR_PER_LINE
@@ -16,10 +16,10 @@ async def confirm_total_ethereum(
     amount: str,
     gas_price: str,
     fee_max: str,
-    from_address: str,
-    to_address: str,
-    network: str,
-    total_amount: str = None,
+    from_address: str | None,
+    to_address: str | None,
+    network: str | None,
+    total_amount: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
@@ -43,10 +43,10 @@ async def confirm_total_ethereum_eip1559(
     max_priority_fee_per_gas,
     max_fee_per_gas,
     fee_max: str,
-    from_address: str,
-    to_address: str,
-    network: str,
-    total_amount: str = None,
+    from_address: str | None,
+    to_address: str | None,
+    network: str | None,
+    total_amount: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 

@@ -49,7 +49,7 @@ pystyle: ## apply code style on application sources and tests
 	@echo [PYLINT]
 	@pylint $(PY_FILES)
 	@echo [PYTHON]
-	make -C python style
+	# make -C python style
 
 changelog_check: ## check changelog format
 	./tools/generate-changelog.py --check core

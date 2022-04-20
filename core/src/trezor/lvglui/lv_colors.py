@@ -1,4 +1,4 @@
-import lvgl as lv
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
 def LV_COLOR_MAKE(r, g, b):

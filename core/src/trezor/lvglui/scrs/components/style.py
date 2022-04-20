@@ -1,4 +1,4 @@
-from ..common import *
+from .. import font_PJSMID20, lv
 
 
 class SubTitleStyle(lv.style_t):

@@ -1,4 +1,5 @@
-from .. import *
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
+
 from .button import NormalButton
 from .container import ContainerFlexCol
 from .label import SubTitle, Title
