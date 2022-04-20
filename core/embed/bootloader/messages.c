@@ -625,7 +625,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
       }
       packet_flag = false;
     } else {
-      if (sectrue != check_single_hash(hdr.hashes + firmware_block * 32,
+      if (sectrue != check_single_hash(hdr.hashes + (firmware_block / 2) * 32,
                                        chunk_buffer + headers_offset,
                                        chunk_size - headers_offset)) {
         if (firmware_upload_chunk_retry > 0) {
