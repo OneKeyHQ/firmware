@@ -37,6 +37,8 @@
 
 #include "memzero.h"
 
+#include "spi.h"
+
 #define MSG_HEADER1_LEN 9
 #define MSG_HEADER2_LEN 1
 
@@ -80,8 +82,13 @@ static bool _usb_write(pb_ostream_t *stream, const pb_byte_t *buf,
              USB_PACKET_SIZE - state->packet_pos);
       written += USB_PACKET_SIZE - state->packet_pos;
       // send packet
-      int r = usb_webusb_write_blocking(state->iface_num, state->buf,
-                                        USB_PACKET_SIZE, USB_TIMEOUT);
+      int r;
+      if (host_channel == CHANNEL_USB) {
+        r = usb_webusb_write_blocking(state->iface_num, state->buf,
+                                      USB_PACKET_SIZE, USB_TIMEOUT);
+      } else {
+        r = spi_slave_send(state->buf, USB_PACKET_SIZE, USB_TIMEOUT);
+      }
       ensure(sectrue * (r == USB_PACKET_SIZE), NULL);
       // prepare new packet
       state->packet_index++;
@@ -102,8 +109,13 @@ static void _usb_write_flush(usb_write_state *state) {
             USB_PACKET_SIZE - state->packet_pos);
   }
   // send packet
-  int r = usb_webusb_write_blocking(state->iface_num, state->buf,
-                                    USB_PACKET_SIZE, USB_TIMEOUT);
+  int r;
+  if (host_channel == CHANNEL_USB) {
+    r = usb_webusb_write_blocking(state->iface_num, state->buf, USB_PACKET_SIZE,
+                                  USB_TIMEOUT);
+  } else {
+    r = spi_slave_send(state->buf, USB_PACKET_SIZE, USB_TIMEOUT);
+  }
   ensure(sectrue * (r == USB_PACKET_SIZE), NULL);
 }
 
@@ -229,8 +241,14 @@ static bool _usb_read(pb_istream_t *stream, uint8_t *buf, size_t count) {
       memcpy(buf + read, state->buf + state->packet_pos,
              USB_PACKET_SIZE - state->packet_pos);
       read += USB_PACKET_SIZE - state->packet_pos;
-      // read next packet (with retry)
-      _usb_webusb_read_retry(state->iface_num, state->buf);
+      if (host_channel == CHANNEL_USB) {
+        // read next packet (with retry)
+        _usb_webusb_read_retry(state->iface_num, state->buf);
+      } else {
+        if (spi_slave_poll(state->buf) == 0) {
+          spi_read_retry(state->buf);
+        }
+      }
       // prepare next packet
       state->packet_index++;
       state->packet_pos = MSG_HEADER2_LEN;

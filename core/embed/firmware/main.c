@@ -52,6 +52,7 @@
 #include "atca_hal.h"
 #include "mipi_lcd.h"
 #include "qspi_flash.h"
+#include "spi.h"
 #include "supervise.h"
 #include "timer.h"
 #include "touch.h"
@@ -104,7 +105,7 @@ int main(void) {
   // sdcard_init();
   touch_init();
   touch_power_on();
-
+  spi_slave_init();
   qspi_flash_init();
   qspi_flash_config();
   qspi_flash_memory_mapped();
