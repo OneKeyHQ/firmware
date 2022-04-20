@@ -2,13 +2,13 @@ from micropython import const
 from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
+import storage.cache
+from storage import common
 from trezor import config, utils
 
 if not utils.EMULATOR:
     import atca
-    
-import storage.cache
-from storage import common
+
 
 if TYPE_CHECKING:
     from trezor.enums import BackupType
@@ -144,7 +144,6 @@ def get_mnemonic_secret() -> bytes | None:
         return config.se_export_mnemonic()
 
 
-
 def get_backup_type() -> BackupType:
     from trezor.enums import BackupType
 
@@ -194,9 +193,9 @@ def store_mnemonic_secret(
         common.set(_NAMESPACE, _MNEMONIC_SECRET, secret)
         common.set_bool(_NAMESPACE, INITIALIZED, True, public=True)
     else:
-        config.se_import_mnemonic(secret)    
+        config.se_import_mnemonic(secret)
     common.set_uint8(_NAMESPACE, _BACKUP_TYPE, backup_type)
-    common.set_true_or_delete(_NAMESPACE, _NO_BACKUP, no_backup)    
+    common.set_true_or_delete(_NAMESPACE, _NO_BACKUP, no_backup)
     if not no_backup:
         common.set_true_or_delete(_NAMESPACE, _NEEDS_BACKUP, needs_backup)
 

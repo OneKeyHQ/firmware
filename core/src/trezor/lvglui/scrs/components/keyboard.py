@@ -13,6 +13,25 @@ def compute_mask(text: str) -> int:
     return mask
 
 
+def change_key_bg_and_font(
+    dsc: lv.obj_draw_part_dsc_t, id1: int, id2: int, enabled: bool
+):
+    if enabled:
+        if dsc.id == id1:
+            dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
+            dsc.label_dsc.font = lv.font_default()
+        elif dsc.id == id2:
+            dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+            dsc.label_dsc.font = lv.font_default()
+    else:
+        if dsc.id == id1:
+            dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+            dsc.label_dsc.font = lv.font_default()
+        elif dsc.id == id2:
+            dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+            dsc.label_dsc.font = lv.font_default()
+
+
 class BIP39Keyboard(lv.keyboard):
     """character keyboard with textarea."""
 
@@ -126,6 +145,7 @@ class BIP39Keyboard(lv.keyboard):
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD24, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_height(168)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
@@ -164,15 +184,9 @@ class BIP39Keyboard(lv.keyboard):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                if dsc.id == 21:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 29:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+                change_key_bg_and_font(dsc, 21, 29, True)
             else:
-                if dsc.id == 21:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-                elif dsc.id == 29:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+                change_key_bg_and_font(dsc, 21, 29, False)
         elif event.code == lv.EVENT.VALUE_CHANGED:
             self.mnemonic_prompt.clean()
             txt_input = self.ta.get_text()
@@ -267,8 +281,9 @@ class NumberKeyboard(lv.keyboard):
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(30, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD32, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_height(292)
-        self.set_y(-48)
+        self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
         self.set_popovers(True)
         self.set_textarea(self.ta)
         self.add_event_cb(self.event_cb, lv.EVENT.ALL, None)
@@ -278,15 +293,9 @@ class NumberKeyboard(lv.keyboard):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                if dsc.id == 9:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 11:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+                change_key_bg_and_font(dsc, 9, 11, True)
             else:
-                if dsc.id == 9:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-                elif dsc.id == 11:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+                change_key_bg_and_font(dsc, 9, 11, False)
 
 
 class PassphraseKeyboard(lv.btnmatrix):
@@ -307,6 +316,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         )
         self.ta.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
+        # include NBSP
         self.ta.set_accepted_chars(
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_<>.:@/|\\!()+%&-[]?{},'`;\"~$^= "
         )
@@ -508,6 +518,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.set_style_pad_row(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_MONO24, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -519,15 +530,9 @@ class PassphraseKeyboard(lv.btnmatrix):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                if dsc.id == 31:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 34:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+                change_key_bg_and_font(dsc, 31, 34, True)
             else:
-                if dsc.id == 31:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-                elif dsc.id == 34:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+                change_key_bg_and_font(dsc, 31, 34, False)
             if dsc.id == 22 or dsc.id == 32:
                 dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
         elif code == lv.EVENT.VALUE_CHANGED:

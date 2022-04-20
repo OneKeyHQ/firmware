@@ -112,8 +112,16 @@ async def verify_user_pin(
         raise RuntimeError
 
     while retry:
+        pin_rem = config.get_pin_rem()
+        if pin_rem == 0:
+            from apps.base import set_homescreen, reload_settings_from_storage
+
+            storage.wipe()
+            reload_settings_from_storage()
+            set_homescreen()
+            return
         pin = await request_pin_on_device(  # type: ignore ["request_pin_on_device" is possibly unbound]
-            ctx, "Wrong PIN, enter again", config.get_pin_rem(), allow_cancel
+            ctx, "Wrong PIN, enter again", pin_rem, allow_cancel
         )
         if config.unlock(pin, salt):
             _set_last_unlock_time()

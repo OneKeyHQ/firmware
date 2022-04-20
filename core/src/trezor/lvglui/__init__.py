@@ -52,13 +52,13 @@ class StatusBar:
         return cls._instance
 
     def __init__(self):
-        ble = lv.img(lv.layer_top())
-        ble.set_src("A:/res/Bluetooth.png")
-        ble.align(lv.ALIGN.TOP_RIGHT, -30, 5)
+        self.ble = lv.img(lv.layer_top())
+        self.ble.set_src("A:/res/Bluetooth.png")
+        self.ble.align(lv.ALIGN.TOP_RIGHT, -30, 5)
         # ble.set_zoom(255)
-        battery = lv.img(lv.layer_top())
-        battery.set_src("A:/res/Status=50%.png")
-        battery.align(lv.ALIGN.TOP_RIGHT, -5, 5)
+        self.battery = lv.img(lv.layer_top())
+        self.battery.set_src("A:/res/Status=50%.png")
+        self.battery.align(lv.ALIGN.TOP_RIGHT, -5, 5)
         # battery.set_zoom(255)
 
     def set_ble_img(self, path):

@@ -1,31 +1,14 @@
-from micropython import const
 from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
-from trezor.utils import chunks, chunks_intersperse
 
-from ...components.common.confirm import (
-    CONFIRMED,
-    GO_BACK,
-    SHOW_PAGINATED,
-)
-from ...components.tt.button import ButtonDefault
-from ...components.tt.confirm import Confirm, HoldToConfirm, InfoConfirm
-from ...components.tt.scroll import (
-    PAGEBREAK,
-    AskPaginated,
-    Paginated,
-    paginate_paragraphs,
-)
-from ...components.tt.text import LINE_WIDTH_PAGINATED, Span, Text
-from ...constants.tt import MONO_ADDR_PER_LINE, MONO_HEX_PER_LINE, TEXT_MAX_LINES
 from .common import button_request, interact, raise_if_cancelled
 
 if TYPE_CHECKING:
-    from typing import Any, Awaitable, Iterable, Iterator, NoReturn, Sequence
-
+    from typing import Any, Awaitable, Iterable, NoReturn, Sequence
+    from ...constants.tt import MONO_ADDR_PER_LINE
     from ..common import PropertyType, ExceptionType
 
 
@@ -208,44 +191,6 @@ async def confirm_path_warning(
             ButtonRequestType.UnknownDerivationPath,
         )
     )
-
-
-def _truncate_hex(
-    hex_data: str,
-    lines: int = TEXT_MAX_LINES,
-    width: int = MONO_HEX_PER_LINE,
-    middle: bool = False,
-    ellipsis: str = "...",  # TODO: cleanup @ redesign
-) -> Iterator[str]:
-    ell_len = len(ellipsis)
-    if len(hex_data) > width * lines:
-        if middle:
-            hex_data = (
-                hex_data[: lines * width // 2 - (ell_len // 2)]
-                + ellipsis
-                + hex_data[-lines * width // 2 + (ell_len - ell_len // 2) :]
-            )
-        else:
-            hex_data = hex_data[: (width * lines - ell_len)] + ellipsis
-    return chunks_intersperse(hex_data, width)
-
-
-def _show_xpub(xpub: str, title: str, cancel: str) -> Paginated:
-    pages: list[ui.Component] = []
-    for lines in chunks(list(chunks_intersperse(xpub, 16)), TEXT_MAX_LINES * 2):
-        text = Text(title, ui.ICON_RECEIVE, ui.GREEN, new_lines=False)
-        text.mono(*lines)
-        pages.append(text)
-
-    content = Paginated(pages)
-
-    content.pages[-1] = Confirm(
-        content.pages[-1],
-        cancel=cancel,
-        cancel_style=ButtonDefault,
-    )
-
-    return content
 
 
 async def show_xpub(
@@ -461,19 +406,17 @@ async def confirm_payment_request(
     recipient_name: str,
     amount: str,
     memos: list[str],
+    coin_shortcut: str,
 ) -> Any:
-    para = [(ui.NORMAL, f"{amount} to\n{recipient_name}")]
-    para.extend((ui.NORMAL, memo) for memo in memos)
-    content = paginate_paragraphs(
-        para,
-        "Confirm sending",
-        ui.ICON_SEND,
-        ui.GREEN,
-        confirm=lambda text: InfoConfirm(text, info="Details"),
+    from trezor.lvglui.scrs.template import ConfirmPaymentRequest
+
+    subtitle = " ".join(memos)
+    screen = ConfirmPaymentRequest(
+        f"Confirm {coin_shortcut} Payment", subtitle, amount, recipient_name
     )
     return await raise_if_cancelled(
         interact(
-            ctx, content, "confirm_payment_request", ButtonRequestType.ConfirmOutput
+            ctx, screen, "confirm_payment_request", ButtonRequestType.ConfirmOutput
         )
     )
 
@@ -488,64 +431,8 @@ async def should_show_more(
     icon: str = ui.ICON_DEFAULT,
     icon_color: int = ui.ORANGE_ICON,
 ) -> bool:
-    """Return True if the user wants to show more (they click a special button)
-    and False when the user wants to continue without showing details.
-
-    Raises ActionCancelled if the user cancels.
-    """
-    page = Text(
-        title,
-        header_icon=icon,
-        icon_color=icon_color,
-        new_lines=False,
-        max_lines=TEXT_MAX_LINES - 2,
-    )
-    for font, text in para:
-        page.content.extend((font, text, "\n"))
-    ask_dialog = Confirm(AskPaginated(page, button_text))
-
-    result = await raise_if_cancelled(interact(ctx, ask_dialog, br_type, br_code))
-    assert result in (SHOW_PAGINATED, CONFIRMED)
-
-    return result is SHOW_PAGINATED
-
-
-async def _confirm_ask_pagination(
-    ctx: wire.GenericContext,
-    br_type: str,
-    title: str,
-    para: Iterable[tuple[int, str]],
-    para_truncated: Iterable[tuple[int, str]],
-    br_code: ButtonRequestType,
-    icon: str,
-    icon_color: int,
-) -> None:
-    paginated: ui.Layout | None = None
-    while True:
-        if not await should_show_more(
-            ctx,
-            title,
-            para=para_truncated,
-            br_type=br_type,
-            br_code=br_code,
-            icon=icon,
-            icon_color=icon_color,
-        ):
-            return
-
-        if paginated is None:
-            paginated = paginate_paragraphs(
-                para,
-                header=None,
-                back_button=True,
-                confirm=lambda content: Confirm(
-                    content, cancel=None, confirm="Close", confirm_style=ButtonDefault
-                ),
-            )
-        result = await interact(ctx, paginated, br_type, br_code)
-        assert result in (CONFIRMED, GO_BACK)
-
-    assert False
+    """Return True always because we have larger screen"""
+    return True
 
 
 async def confirm_blob(
@@ -643,29 +530,10 @@ async def confirm_text(
 
     Displays in bold font. Paginates automatically.
     """
-    span = Span()
-    lines = 0
-    if description is not None:
-        span.reset(description, 0, ui.NORMAL)
-        lines += span.count_lines()
-    span.reset(data, 0, ui.BOLD)
-    lines += span.count_lines()
+    from trezor.lvglui.scrs.template import BlobDisPlay
 
-    if lines <= TEXT_MAX_LINES:
-        text = Text(title, icon, icon_color, new_lines=False)
-        if description is not None:
-            text.normal(description)
-            text.br()
-        text.bold(data)
-        content: ui.Layout = Confirm(text)
-
-    else:
-        para = []
-        if description is not None:
-            para.append((ui.NORMAL, description))
-        para.append((ui.BOLD, data))
-        content = paginate_paragraphs(para, title, icon, icon_color)
-    await raise_if_cancelled(interact(ctx, content, br_type, br_code))
+    screen = BlobDisPlay(title, description, data)
+    await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
 
 def confirm_amount(
@@ -693,9 +561,6 @@ def confirm_amount(
     )
 
 
-_SCREEN_FULL_THRESHOLD = const(2)
-
-
 # TODO keep name and value on the same page if possible
 async def confirm_properties(
     ctx: wire.GenericContext,
@@ -707,59 +572,17 @@ async def confirm_properties(
     hold: bool = False,
     br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
 ) -> None:
-    span = Span()
     para = []
-    used_lines = 0
+    from trezor.lvglui.scrs.template import ConfirmProperties
+
     for key, val in props:
-        span.reset(key or "", 0, ui.NORMAL, line_width=LINE_WIDTH_PAGINATED)
-        key_lines = span.count_lines()
-
-        if isinstance(val, str):
-            span.reset(val, 0, ui.BOLD, line_width=LINE_WIDTH_PAGINATED)
-            val_lines = span.count_lines()
-        elif isinstance(val, bytes):
-            val_lines = (len(val) * 2 + MONO_HEX_PER_LINE - 1) // MONO_HEX_PER_LINE
-        else:
-            val_lines = 0
-
-        remaining_lines = TEXT_MAX_LINES - used_lines
-        used_lines = (used_lines + key_lines + val_lines) % TEXT_MAX_LINES
-
-        if key_lines + val_lines > remaining_lines:
-            if remaining_lines <= _SCREEN_FULL_THRESHOLD:
-                # there are only 2 remaining lines, don't try to fit and put everything
-                # on next page
-                para.append(PAGEBREAK)
-                used_lines = (key_lines + val_lines) % TEXT_MAX_LINES
-
-            elif val_lines > 0 and key_lines >= remaining_lines:
-                # more than 2 remaining lines so try to fit something -- but won't fit
-                # at least one line of value
-                para.append(PAGEBREAK)
-                used_lines = (key_lines + val_lines) % TEXT_MAX_LINES
-
-            elif key_lines + val_lines <= TEXT_MAX_LINES:
-                # Whole property won't fit to the page, but it will fit on a page
-                # by itself
-                para.append(PAGEBREAK)
-                used_lines = (key_lines + val_lines) % TEXT_MAX_LINES
-
-            # else:
-            # None of the above. Continue fitting on the same page.
-
-        if key:
-            para.append((ui.NORMAL, key))
-        if isinstance(val, bytes):
-            para.extend(
-                (ui.MONO, line)
-                for line in chunks(hexlify(val).decode(), MONO_HEX_PER_LINE - 2)
-            )
-        elif isinstance(val, str):
-            para.append((ui.BOLD, val))
-    content = paginate_paragraphs(
-        para, title, icon, icon_color, confirm=HoldToConfirm if hold else Confirm
-    )
-    await raise_if_cancelled(interact(ctx, content, br_type, br_code))
+        if key and val:
+            if isinstance(val, str):
+                para.append((key, val))
+            elif isinstance(val, bytes):
+                para.append((key, hexlify(val).decode()))
+    screen = ConfirmProperties(title, para)
+    await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
 
 async def confirm_total(
@@ -772,27 +595,30 @@ async def confirm_total(
     icon_color: int = ui.GREEN,
     br_type: str = "confirm_total",
     br_code: ButtonRequestType = ButtonRequestType.SignTx,
+    amount: str | None = None,
+    coin_shortcut: str = "BTC",
 ) -> None:
-    text = Text(title, ui.ICON_SEND, icon_color, new_lines=False)
-    text.normal(total_label)
-    text.bold(total_amount)
-    text.normal(fee_label)
-    text.bold(fee_amount)
-    await raise_if_cancelled(interact(ctx, HoldToConfirm(text), br_type, br_code))
+    from trezor.lvglui.scrs.template import TransactionDetailsBTC
+
+    screen = TransactionDetailsBTC(
+        f"Sign {coin_shortcut} Transaction", amount, fee_amount, total_amount
+    )
+    await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
 
 async def confirm_joint_total(
-    ctx: wire.GenericContext, spending_amount: str, total_amount: str
+    ctx: wire.GenericContext,
+    spending_amount: str,
+    total_amount: str,
+    coin_shortcut: str = "BTC",
 ) -> None:
-    text = Text("Joint transaction", ui.ICON_SEND, ui.GREEN, new_lines=False)
-    text.normal("You are contributing:\n")
-    text.bold(spending_amount)
-    text.normal("\nto the total amount:\n")
-    text.bold(total_amount)
+    from trezor.lvglui.scrs.template import JointTransactionDetailsBTC
+
+    screen = JointTransactionDetailsBTC(
+        f"Sign {coin_shortcut} Joint Transaction", spending_amount, total_amount
+    )
     await raise_if_cancelled(
-        interact(
-            ctx, HoldToConfirm(text), "confirm_joint_total", ButtonRequestType.SignTx
-        )
+        interact(ctx, screen, "confirm_joint_total", ButtonRequestType.SignTx)
     )
 
 
@@ -803,6 +629,7 @@ async def confirm_metadata(
     content: str,
     param: str | None = None,
     br_code: ButtonRequestType = ButtonRequestType.SignTx,
+    description: str | None = None,
     hide_continue: bool = False,
     hold: bool = False,
     param_font: int = ui.BOLD,
@@ -810,30 +637,20 @@ async def confirm_metadata(
     icon_color: int = ui.GREEN,  # TODO cleanup @ redesign
     larger_vspace: bool = False,  # TODO cleanup @ redesign
 ) -> None:
-    text = Text(title, icon, icon_color, new_lines=False)
-    text.format_parametrized(
-        content, param if param is not None else "", param_font=param_font
-    )
+    from trezor.lvglui.scrs.template import ConfirmMetaData
 
-    if not hide_continue:
-        text.br()
-        if larger_vspace:
-            text.br_half()
-        text.normal("Continue?")
-
-    cls = HoldToConfirm if hold else Confirm
-
-    await raise_if_cancelled(interact(ctx, cls(text), br_type, br_code))
+    confirm = ConfirmMetaData(title, content, description, param)
+    await raise_if_cancelled(interact(ctx, confirm, br_type, br_code))
 
 
 async def confirm_replacement(
     ctx: wire.GenericContext, description: str, txid: str
 ) -> None:
-    text = Text(description, ui.ICON_SEND, ui.GREEN, new_lines=False)
-    text.normal("Confirm transaction ID:\n")
-    text.mono(*_truncate_hex(txid, TEXT_MAX_LINES - 1))
+    from trezor.lvglui.scrs.template import ConfirmReplacement
+
+    screen = ConfirmReplacement(description, txid)
     await raise_if_cancelled(
-        interact(ctx, Confirm(text), "confirm_replacement", ButtonRequestType.SignTx)
+        interact(ctx, screen, "confirm_replacement", ButtonRequestType.SignTx)
     )
 
 
@@ -844,25 +661,17 @@ async def confirm_modify_output(
     amount_change: str,
     amount_new: str,
 ) -> None:
-    page1 = Text("Modify amount", ui.ICON_SEND, ui.GREEN, new_lines=False)
-    page1.normal("Address:\n")
-    page1.br_half()
-    page1.mono(*chunks_intersperse(address, MONO_ADDR_PER_LINE))
-
-    page2 = Text("Modify amount", ui.ICON_SEND, ui.GREEN, new_lines=False)
     if sign < 0:
-        page2.normal("Decrease amount by:\n")
+        description = "DECREASED BY:"
     else:
-        page2.normal("Increase amount by:\n")
-    page2.bold(amount_change)
-    page2.br_half()
-    page2.normal("\nNew amount:\n")
-    page2.bold(amount_new)
+        description = "INCREASED BY:"
+    from trezor.lvglui.scrs.template import ModifyOutput
 
+    screen = ModifyOutput(address, description, amount_change, amount_new)
     await raise_if_cancelled(
         interact(
             ctx,
-            Paginated([page1, Confirm(page2)]),
+            screen,
             "modify_output",
             ButtonRequestType.ConfirmOutput,
         )
@@ -875,38 +684,33 @@ async def confirm_modify_fee(
     user_fee_change: str,
     total_fee_new: str,
 ) -> None:
-    text = Text("Modify fee", ui.ICON_SEND, ui.GREEN, new_lines=False)
     if sign == 0:
-        text.normal("Your fee did not change.\n")
+        description = "NO CHANGE:"
     else:
         if sign < 0:
-            text.normal("Decrease your fee by:\n")
+            description = "DECREASED BY:"
         else:
-            text.normal("Increase your fee by:\n")
-        text.bold(user_fee_change)
-        text.br()
-    text.br_half()
-    text.normal("Transaction fee:\n")
-    text.bold(total_fee_new)
+            description = "INCREASED BY:"
+
+    from trezor.lvglui.scrs.template import ModifyFee
+
+    screen = ModifyFee(description, user_fee_change, total_fee_new)
     await raise_if_cancelled(
-        interact(ctx, HoldToConfirm(text), "modify_fee", ButtonRequestType.SignTx)
+        interact(ctx, screen, "modify_fee", ButtonRequestType.SignTx)
     )
 
 
 async def confirm_coinjoin(
     ctx: wire.GenericContext, coin_name: str, max_rounds: int, max_fee_per_vbyte: str
 ) -> None:
-    text = Text("Authorize CoinJoin", ui.ICON_RECOVERY, new_lines=False)
-    text.normal("Coin name: ")
-    text.bold(f"{coin_name}\n")
-    text.br_half()
-    text.normal("Maximum rounds: ")
-    text.bold(f"{max_rounds}\n")
-    text.br_half()
-    text.normal("Maximum mining fee:\n")
-    text.bold(f"{max_fee_per_vbyte} sats/vbyte")
+    title = "Authorize CoinJoin"
+    from trezor.lvglui.scrs.template import ConfirmCoinJoin
+
+    screen = ConfirmCoinJoin(
+        title, coin_name, str(max_rounds), f"{max_fee_per_vbyte} sats/vbyte"
+    )
     await raise_if_cancelled(
-        interact(ctx, HoldToConfirm(text), "coinjoin_final", ButtonRequestType.Other)
+        interact(ctx, screen, "coinjoin_final", ButtonRequestType.Other)
     )
 
 
@@ -914,13 +718,11 @@ async def confirm_coinjoin(
 async def confirm_sign_identity(
     ctx: wire.GenericContext, proto: str, identity: str, challenge_visual: str | None
 ) -> None:
-    text = Text(f"Sign {proto}", new_lines=False)
-    if challenge_visual:
-        text.normal(challenge_visual)
-        text.br()
-    text.mono(*chunks_intersperse(identity, 18))
+    from trezor.lvglui.scrs.template import ConfirmSignIdentity
+
+    screen = ConfirmSignIdentity(f"Sign {proto}", identity, subtitle=challenge_visual)
     await raise_if_cancelled(
-        interact(ctx, Confirm(text), "sign_identity", ButtonRequestType.Other)
+        interact(ctx, screen, "sign_identity", ButtonRequestType.Other)
     )
 
 
@@ -1002,7 +804,7 @@ async def request_pin_on_device(
 
 
 async def request_pin_tips(ctx: wire.GenericContext) -> None:
-    from trezor.lvglui.scrs.pinscreen import PinTip, FullSizeWindow
+    from trezor.lvglui.scrs.pinscreen import PinTip
 
     tipscreen = PinTip()
     await ctx.wait(tipscreen.request())

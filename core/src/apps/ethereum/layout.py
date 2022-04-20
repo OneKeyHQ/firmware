@@ -8,11 +8,9 @@ from trezor.strings import format_amount, format_plural
 from trezor.ui.layouts import (
     confirm_action,
     confirm_address,
-    confirm_amount,
     confirm_blob,
     confirm_output,
     confirm_text,
-    confirm_total,
     should_show_more,
 )
 from trezor.ui.layouts.lvgl.altcoin import (
