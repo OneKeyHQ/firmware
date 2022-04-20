@@ -1,4 +1,4 @@
-from .. import *
+from .. import font_PJSMID20, lv
 
 
 class ListItemWithLeadingCheckbox(lv.obj):

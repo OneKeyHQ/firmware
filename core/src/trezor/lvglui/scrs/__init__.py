@@ -1,6 +1,6 @@
 from trezor import utils
 
-import lvgl as lv
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 dispp = lv.disp_get_default()
 theme = lv.theme_default_init(

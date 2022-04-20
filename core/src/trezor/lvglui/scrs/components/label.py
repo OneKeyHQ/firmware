@@ -1,4 +1,4 @@
-from .. import *
+from .. import font_PJSBOLD36, font_PJSMID20, lv
 
 
 class Title(lv.label):

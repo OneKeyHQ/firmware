@@ -1,5 +1,4 @@
-from . import *
-from .common import FullSizeWindow
+from .common import FullSizeWindow, lv
 from .components.keyboard import PassphraseKeyboard
 
 

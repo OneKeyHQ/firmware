@@ -62,7 +62,7 @@ while True:
         del session
         if __debug__:
             print('---heap status before gc---')
-            micropython.mem_info()
+            micropython.mem_info()  # type: ignore["micropython" is possibly unbound]
     if __debug__:
         print('---heap status after gc----')
-        micropython.mem_info()
+        micropython.mem_info()  # type: ignore["micropython" is possibly unbound]

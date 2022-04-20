@@ -1,6 +1,6 @@
 from trezor.crypto import bip39, random
 
-from ..common import *  # noqa: F401,F403
+from .. import font_MONO20, font_MONO24, font_PJSBOLD24, font_PJSBOLD32, lv
 
 
 def compute_mask(text: str) -> int:
@@ -533,7 +533,7 @@ class PassphraseKeyboard(lv.btnmatrix):
                 change_key_bg_and_font(dsc, 31, 34, True)
             else:
                 change_key_bg_and_font(dsc, 31, 34, False)
-            if dsc.id == 22 or dsc.id == 32:
+            if dsc.id in (22, 32):
                 dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
         elif code == lv.EVENT.VALUE_CHANGED:
             target = event.get_target()

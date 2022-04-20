@@ -1,5 +1,7 @@
 import gc
 import sys
+
+# pyright: off
 from trezorutils import (  # noqa: F401
     BITCOIN_ONLY,
     EMULATOR,
@@ -13,6 +15,8 @@ from trezorutils import (  # noqa: F401
     halt,
     memcpy,
 )
+
+# pyright: on
 from typing import TYPE_CHECKING
 
 DISABLE_ANIMATION = 0
@@ -48,7 +52,7 @@ def clear_screens() -> None:
                 del scr._init
             if hasattr(scr, "_instance"):
                 del scr._instance
-        except:
+        except BaseException:
             pass
     SCREENS.clear()
 

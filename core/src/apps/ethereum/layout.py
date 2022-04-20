@@ -119,7 +119,7 @@ def require_confirm_unknown_token(
 
 
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    from trezor.ui.layouts import confirm_data
+    from trezor.ui.layouts import confirm_data  # type: ignore["confirm_data" is unknown import symbol]
 
     return confirm_data(
         ctx,

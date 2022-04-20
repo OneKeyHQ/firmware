@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     NumberedWords = Sequence[tuple[int, str]]
 
 if __debug__:
-    from apps import debug
+    pass
 
 
 async def show_share_words(

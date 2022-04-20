@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 
-from . import *
+from . import font_MONO20, lv
 from .common import FullSizeWindow
 from .components.button import NormalButton
 

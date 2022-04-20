@@ -13,11 +13,13 @@ class HomescreenBase(ui.Layout):
         self.label = storage.device.get_label() or "My Trezor"
         self.repaint = storage.cache.homescreen_shown is not self.RENDER_INDICATOR
 
+    # pyright: off
     def get_image(self) -> bytes:
         return storage.device.get_homescreen() or res.load(
             "apps/homescreen/res/bg.toif"
         )
 
+    # pyright: on
     async def __iter__(self) -> Any:
         # We need to catch the ui.Cancelled exception that kills us, because that means
         # that we will need to draw on screen again after restart.

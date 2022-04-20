@@ -1,5 +1,4 @@
-from . import *
-from .common import FullSizeWindow
+from .common import FullSizeWindow, lv
 from .components.button import NormalButton
 from .components.container import ContainerFlexCol
 from .components.listitem import ListItemWithLeadingCheckbox

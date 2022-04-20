@@ -1,7 +1,8 @@
 from storage import device
 from trezor import workflow
 
-from .common import *
+from . import font_PJSBOLD24
+from .common import Screen, load_scr_with_animation, lv  # noqa: F401, F403, F405
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
 from .components.container import ContainerFlexCol, ContanierGrid
 from .components.imgbtn import ImgBottonGridItem
@@ -175,6 +176,7 @@ class GeneralScreen(Screen):
                 self.load_screen(LanguageSetting(self))
 
 
+# pyright: off
 class AutoLockSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -201,8 +203,8 @@ class AutoLockSetting(Screen):
             self.btns[-1] = ListItemBtn(
                 self.container, f"{GeneralScreen.cur_auto_lock}(Custom)", has_next=False
             )
-            self.btns[-1].add_check_img()
-            self.btns[-1].set_checked()
+            self.btns[-1].add_check_img()  # type: ignore[Cannot access member "add_check_img" for type "None"]
+            self.btns[-1].set_checked()  # type: ignore[Cannot access member "set_checked" for type "None"]
             self.checked_index = -1
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -213,8 +215,8 @@ class AutoLockSetting(Screen):
             if target in self.btns:
                 for index, item in enumerate(self.btns):
                     if item == target and self.checked_index != index:
-                        item.set_checked()
-                        self.btns[self.checked_index].set_uncheck()
+                        item.set_checked()  # type: ignore[Cannot access member "set_checked" for type "None"]
+                        self.btns[self.checked_index].set_uncheck()  # type: ignore[Cannot access member "set_uncheck" for type "None"]
                         self.checked_index = index
                         if index == 5:
                             device.set_autolock_delay_ms(device.AUTOLOCK_DELAY_MAXIMUM)
@@ -227,6 +229,7 @@ class AutoLockSetting(Screen):
                         return
 
 
+# pyright: on
 class LanguageSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -384,6 +387,7 @@ class SecurityScreen(Screen):
     def on_click(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
+        # pyright: off
         if code == lv.EVENT.CLICKED:
             from trezor.wire import DUMMY_CONTEXT
 
@@ -425,6 +429,7 @@ class SecurityScreen(Screen):
                 from trezor.messages import WipeDevice
 
                 workflow.spawn(wipe_device(DUMMY_CONTEXT, WipeDevice()))
+        # pyright: on
 
 
 class CryptoScreen(Screen):
