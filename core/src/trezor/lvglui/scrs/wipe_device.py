@@ -100,3 +100,14 @@ class WipeDeviceSuccess(FullSizeWindow):
             title, subtitle, confirm_text=confirm_text, icon_path=icon_path
         )
         self.btn_yes.enable(lv.color_hex(0x323232), lv.color_hex(0xFFFFFF))
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_yes:
+                self.channel.publish(1)
+            self.destory()
+            from apps.base import set_homescreen
+
+            set_homescreen()

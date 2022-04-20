@@ -35,7 +35,7 @@ class XpubOrPub(FullSizeWindow):
 
 class Message(FullSizeWindow):
     def __init__(self, title, address, message):
-        super().__init__(title, None, "Sign", "Cancel")
+        super().__init__(title, None, "CONFIRM", "Cancel")
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(self.container, "ADDRESS:", address)
         self.item2 = DisplayItem(self.container, "MESSAGE:", message)
@@ -65,7 +65,7 @@ class TransactionDetailsETH(FullSizeWindow):
         max_fee_per_gas=None,
         total_amount=None,
     ):
-        super().__init__(title, None, "Continue", "Cancel")
+        super().__init__(title, None, "Sign", "Reject")
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(self.container, "AMOUNT:", amount)
         if not is_eip1559:
@@ -110,3 +110,105 @@ class BlobDisPlay(FullSizeWindow):
         self.item1 = DisplayItem(self.container, description, content)
         self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+
+
+class ConfirmMetaData(FullSizeWindow):
+    def __init__(self, title, subtitle, description, data):
+        super().__init__(title, subtitle, "Continue", "Cancel")
+        if description:
+            self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 48))
+            self.item1 = DisplayItem(self.container, description, data)
+            self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+
+
+class TransactionDetailsBTC(FullSizeWindow):
+    def __init__(self, title: str, amount: str, fee: str, total: str):
+        super().__init__(title, None, "Sign", "Reject")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "AMOUNT:", amount)
+        self.item2 = DisplayItem(self.container, "FEE:", fee)
+        self.item3 = DisplayItem(self.container, "TOTAL AMOUNT:", total)
+
+
+class JointTransactionDetailsBTC(FullSizeWindow):
+    def __init__(self, title: str, amount: str, total: str):
+        super().__init__(title, None, "Sign", "Reject")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "AMOUNT(YOU SPEND):", amount)
+        self.item3 = DisplayItem(self.container, "TOTAL AMOUNT:", total)
+
+
+class ModifyFee(FullSizeWindow):
+    def __init__(self, description: str, fee_change: str, fee_new: str):
+        super().__init__("Modify Fee", None, "Continue", "Cancel")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, description, fee_change)
+        self.item2 = DisplayItem(self.container, "NEW FEE:", fee_new)
+
+
+class ModifyOutput(FullSizeWindow):
+    def __init__(
+        self, address: str, description: str, amount_change: str, amount_new: str
+    ):
+        super().__init__("Modify Amount", None, "Continue", "Cancel")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "ADDRESS:", address)
+        self.item2 = DisplayItem(self.container, description, amount_change)
+        self.item3 = DisplayItem(self.container, "NEW AMOUNT:", amount_new)
+
+
+class ConfirmReplacement(FullSizeWindow):
+    def __init__(self, title: str, txid: str):
+        super().__init__(title, None, "Continue", "Cancel")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "TRANSACTION ID:", txid)
+        self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+
+
+class ConfirmPaymentRequest(FullSizeWindow):
+    def __init__(self, title: str, subtitle, amount: str, to_addr: str):
+        super().__init__(title, subtitle, "Sign", "Reject")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "TO:", to_addr)
+        self.item2 = DisplayItem(self.container, "AMOUNT:", amount)
+
+
+class ConfirmDecredSstxSubmission(FullSizeWindow):
+    def __init__(self, title: str, subtitle: str, amount: str, to_addr: str):
+        super().__init__(title, subtitle, "Continue", "Cancel")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "AMOUNT:", amount)
+        self.item2 = DisplayItem(self.container, "TO:", to_addr)
+
+
+class ConfirmCoinJoin(FullSizeWindow):
+    def __init__(
+        self, title: str, coin_name: str, max_rounds: str, max_fee_per_vbyte: str
+    ):
+        super().__init__(title, None, "Continue", "Cancel")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "COIN NAME:", coin_name)
+        self.item2 = DisplayItem(self.container, "MAXIMUM ROUNDS:", max_rounds)
+        self.item3 = DisplayItem(
+            self.container, "MAXIMUM MINING FEE:", max_fee_per_vbyte
+        )
+
+
+class ConfirmSignIdentity(FullSizeWindow):
+    def __init__(self, title: str, identity: str, subtitle: str | None):
+        super().__init__(title, subtitle, "Continue", "Cancel")
+        align_base = self.title if subtitle is None else self.subtitle
+        self.container = ContainerFlexCol(self, align_base, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "IDENTITY:", identity)
+
+
+class ConfirmProperties(FullSizeWindow):
+    def __init__(self, title: str, properties: list[tuple[str, str]]):
+        super().__init__(title, None, "Continue", "Cancel")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        for key, value in properties:
+            self.item = DisplayItem(self.container, f"{key.upper()}:", value)
+        self.container.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)

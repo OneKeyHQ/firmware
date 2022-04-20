@@ -107,14 +107,15 @@ async def confirm_decred_sstx_submission(
     address: str,
     amount: str,
 ) -> None:
-    text = Text("Purchase ticket", ui.ICON_SEND, ui.GREEN, new_lines=False)
-    text.normal(amount)
-    text.normal("\nwith voting rights to\n")
-    text.mono(*chunks_intersperse(address, MONO_ADDR_PER_LINE))
+    from trezor.lvglui.scrs.template import ConfirmDecredSstxSubmission
+
+    screen = ConfirmDecredSstxSubmission(
+        "Purchase ticket", "voting rights", amount, address
+    )
     await raise_if_cancelled(
         interact(
             ctx,
-            Confirm(text),
+            screen,
             "confirm_decred_sstx_submission",
             ButtonRequestType.ConfirmOutput,
         )

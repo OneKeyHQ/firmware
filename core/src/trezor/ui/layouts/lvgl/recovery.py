@@ -6,9 +6,7 @@ from trezor.enums import ButtonRequestType
 from trezor.lvglui.scrs.common import FullSizeWindow
 from trezor.lvglui.scrs.request_word import WordEnter
 
-from ...components.common.confirm import (
-    raise_if_cancelled,
-)
+from ...components.common.confirm import raise_if_cancelled
 from ...components.tt.confirm import Confirm
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
@@ -36,15 +34,9 @@ async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
 async def request_word(
     ctx: wire.GenericContext, word_index: int, word_count: int, is_slip39: bool
 ) -> str:
-    if is_slip39:
-        # keyboard: Slip39Keyboard | Bip39Keyboard = Slip39Keyboard(
-        #     f"Type word {word_index + 1} of {word_count}:"
-        # )
-        pass
-
-    else:
-        title = f"Enter word #{word_index + 1} of {word_count}"
-        screen = WordEnter(title)
+    assert is_slip39 is False
+    title = f"Enter word #{word_index + 1} of {word_count}"
+    screen = WordEnter(title)
     word: str = await ctx.wait(screen.request())
     return word
 

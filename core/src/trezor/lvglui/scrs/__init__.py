@@ -1,5 +1,6 @@
-import lvgl as lv
 from trezor import utils
+
+import lvgl as lv
 
 dispp = lv.disp_get_default()
 theme = lv.theme_default_init(
@@ -19,7 +20,7 @@ if utils.EMULATOR:
     font_PJSBOLD32 = lv.font_load("A:/res/ui_font_PJSBOLD32.bin")
     font_PJSBOLD16 = lv.font_load("A:/res/ui_font_PJSBOLD16.bin")
     font_MONO24 = lv.font_load("A:/res/ui_font_MONO24.bin")
-    
+
 else:
     font_PJSBOLD36 = lv.plusjakartasans_bold_36
     font_PJSBOLD32 = lv.plusjakartasans_bold_36
@@ -32,4 +33,3 @@ else:
     font_MONO36 = lv.jetbrainsmono_medium_36
     font_MONO24 = lv.jetbrainsmono_medium_24
     font_MONO20 = lv.jetbrainsmono_medium_24
-
