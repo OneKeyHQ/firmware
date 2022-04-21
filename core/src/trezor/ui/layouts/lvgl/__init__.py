@@ -4,8 +4,8 @@ from ubinascii import hexlify
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 
-from .common import button_request, interact, raise_if_cancelled
 from ...constants.tt import MONO_ADDR_PER_LINE
+from .common import button_request, interact, raise_if_cancelled
 
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Iterable, NoReturn, Sequence
@@ -229,6 +229,7 @@ async def show_address(
 ) -> None:
     is_multisig = len(xpubs) > 0
     from trezor.lvglui.scrs.template import Address
+
     if is_multisig:
         return await interact(
             ctx,

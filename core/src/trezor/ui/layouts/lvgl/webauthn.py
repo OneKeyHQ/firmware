@@ -1,12 +1,13 @@
-from trezor import ui, wire
+from typing import TYPE_CHECKING
+
+from trezor import wire
 from trezor.enums import ButtonRequestType
 
-from ...components.common.confirm import is_confirmed
 from ...components.common.webauthn import ConfirmInfo
-from ...components.tt.confirm import Confirm, ConfirmPageable, Pageable
-from ...components.tt.text import Text
-from ...components.tt.webauthn import ConfirmContent
-from ..common import interact
+from .common import interact
+
+if TYPE_CHECKING:
+    from ...components.tt.confirm import Pageable
 
 
 async def confirm_webauthn(
@@ -14,21 +15,31 @@ async def confirm_webauthn(
     info: ConfirmInfo,
     pageable: Pageable | None = None,
 ) -> bool:
-    if pageable is not None:
-        confirm: ui.Layout = ConfirmPageable(pageable, ConfirmContent(info))
-    else:
-        confirm = Confirm(ConfirmContent(info))
 
+    from trezor.lvglui.scrs.webauthn import ConfirmWebauthn
+
+    title = info.get_header()
+    icon_path = info.app_icon
+    app_name = info.app_name()
+    account_name = info.account_name()
+    if account_name is not None:
+        if app_name == account_name:
+            account_name = None
+    confirm = ConfirmWebauthn(title, icon_path, app_name, account_name)
     if ctx is None:
-        return is_confirmed(await confirm)
+        return await confirm.request()
     else:
-        return is_confirmed(
-            await interact(ctx, confirm, "confirm_webauthn", ButtonRequestType.Other)
-        )
+        return await interact(ctx, confirm, "confirm_webauthn", ButtonRequestType.Other)
 
 
 async def confirm_webauthn_reset() -> bool:
-    text = Text("FIDO2 Reset", ui.ICON_CONFIG)
-    text.normal("Do you really want to")
-    text.bold("erase all credentials?")
-    return is_confirmed(await Confirm(text))
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    screen = FullSizeWindow(
+        "FIDO2 Reset",
+        "Do you really want to erase all credentials?",
+        "Confirm",
+        "Cancel",
+        icon_path="A:/res/warning.png",
+    )
+    return await screen.request()
