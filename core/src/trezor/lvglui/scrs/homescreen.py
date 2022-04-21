@@ -1,5 +1,7 @@
 from storage import device
 from trezor import workflow
+from trezor.langs import langs
+from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 
 from . import font_PJSBOLD24
 from .common import Screen, load_scr_with_animation, lv  # noqa: F401, F403, F405
@@ -86,30 +88,44 @@ class SettingsScreen(Screen):
             self._init = True
         else:
             return
-        kwargs = {"prev_scr": prev_scr, "title": "Settings", "nav_back": True}
+        kwargs = {
+            "prev_scr": prev_scr,
+            "title": _(i18n_keys.TITLE__SETTING),
+            "nav_back": True,
+        }
         super().__init__(**kwargs)
         self.container = ContainerFlexCol(self, self.title)
         self.general = ListItemBtn(
-            self.container, "General", left_img_src="A:/res/general.png"
+            self.container,
+            _(i18n_keys.FORM__GENERAL),
+            left_img_src="A:/res/general.png",
         )
         self.connect = ListItemBtn(
-            self.container, "Connect", left_img_src="A:/res/connect.png"
+            self.container,
+            _(i18n_keys.FORM__CONNECT),
+            left_img_src="A:/res/connect.png",
         )
         self.home_scr = ListItemBtn(
-            self.container, "Home Screen", left_img_src="A:/res/homescreen.png"
+            self.container,
+            _(i18n_keys.FORM__HOME_SCREEN),
+            left_img_src="A:/res/homescreen.png",
         )
         self.security = ListItemBtn(
-            self.container, "Security", left_img_src="A:/res/security.png"
+            self.container,
+            _(i18n_keys.FORM__SECURITY),
+            left_img_src="A:/res/security.png",
         )
         self.crypto = ListItemBtn(
-            self.container, "Crypto", left_img_src="A:/res/crypto.png"
+            self.container, _(i18n_keys.FORM__CRYPTO), left_img_src="A:/res/crypto.png"
         )
         self.about = ListItemBtn(
-            self.container, "About Device", left_img_src="A:/res/about.png"
+            self.container,
+            _(i18n_keys.FORM__ABOUT_DEVICE),
+            left_img_src="A:/res/about.png",
         )
         self.power = ListItemBtn(
             self.container,
-            "PowerOff",
+            _(i18n_keys.ACTION__POWER_OFF),
             left_img_src="A:/res/poweroff.png",
             has_next=False,
         )
@@ -150,19 +166,26 @@ class GeneralScreen(Screen):
             self._init = True
         else:
             return
-        super().__init__(prev_scr=prev_scr, title="General", nav_back=True)
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__GENERAL), nav_back=True
+        )
 
         auto_lock_time = device.get_autolock_delay_ms() / 1000 // 60
         if auto_lock_time > 60:
+            # TODO: i18n missing
             right_text = f"{str(auto_lock_time // 60).split('.')[0]} hours"
         else:
-            right_text = f"{str(auto_lock_time).split('.')[0]} minutes"
+            right_text = _(i18n_keys.FORM__STATUS__STR_MINUTES).format(
+                int(auto_lock_time)
+            )
         GeneralScreen.cur_auto_lock = right_text
         self.container = ContainerFlexCol(self, self.title)
-        self.auto_lock = ListItemBtn(self.container, "Auto Lock", right_text)
-        GeneralScreen.cur_language = device.get_language()
+        self.auto_lock = ListItemBtn(
+            self.container, _(i18n_keys.FORM__AUTO_LOCK), right_text
+        )
+        GeneralScreen.cur_language = langs[device.get_language()][1]
         self.language = ListItemBtn(
-            self.container, "Language", GeneralScreen.cur_language
+            self.container, _(i18n_keys.FORM__LANGUAGE), GeneralScreen.cur_language
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -178,12 +201,15 @@ class GeneralScreen(Screen):
 
 # pyright: off
 class AutoLockSetting(Screen):
+    # TODO: i18n
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
             self._init = True
         else:
             return
-        super().__init__(prev_scr=prev_scr, title="Auto-Lock", nav_back=True)
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__AUTO_LOCK), nav_back=True
+        )
         self.container = ContainerFlexCol(self, self.title)
         self.setting_items = [1, 2, 5, 10, 30, "Never"]
         has_custom = True
@@ -236,34 +262,34 @@ class LanguageSetting(Screen):
             self._init = True
         else:
             return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__LANGUAGE), nav_back=True
+        )
         self.check_index = 0
-        super().__init__(prev_scr=prev_scr, title="Language", nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
-        self.lan_en = ListItemBtn(self.container, "English", has_next=False)
-        self.lan_en.add_check_img()
-        self.lan_ch = ListItemBtn(self.container, "Chinese", has_next=False)
-        self.lan_ch.add_check_img()
-        if GeneralScreen.cur_language == "English":
-            self.lan_en.set_checked()
-        else:
-            self.lan_ch.set_checked()
-            self.check_index = 1
+        self.lang_buttons = []
+        for idx, lang in enumerate(langs):
+            lang_button = ListItemBtn(self.container, lang[1], has_next=False)
+            lang_button.add_check_img()
+            self.lang_buttons.append(lang_button)
+            if GeneralScreen.cur_language == lang[1]:
+                lang_button.set_checked()
+                self.check_index = idx
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
-            if target == self.lan_en and self.check_index:
-                self.lan_en.set_checked()
-                self.lan_ch.set_uncheck()
-                device.set_language("English")
-                self.check_index = 0
-            elif target == self.lan_ch and not self.check_index:
-                self.lan_ch.set_checked()
-                self.lan_en.set_uncheck()
-                device.set_language("Chinese")
-                self.check_index = 1
+            last_checked = self.check_index
+            for idx, button in enumerate(self.lang_buttons):
+                if target != button and idx == last_checked:
+                    button.set_uncheck()
+                if target == button and idx != last_checked:
+                    device.set_language(idx)
+                    i18n_refresh()
+                    self.check_index = idx
+                    button.set_checked()
 
 
 class ConnectSetting(Screen):
@@ -272,10 +298,12 @@ class ConnectSetting(Screen):
             self._init = True
         else:
             return
-        super().__init__(prev_scr=prev_scr, title="Connect", nav_back=True)
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
+        )
         self.container = ContainerFlexCol(self, self.title)
-        self.ble = ListItemBtnWithSwitch(self.container, "Bluetooth")
-        self.usb = ListItemBtnWithSwitch(self.container, "USB")
+        self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.FORM__BLUETOOTH))
+        self.usb = ListItemBtnWithSwitch(self.container, _(i18n_keys.FORM__USB))
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
 
     def on_value_changed(self, event_obj):
@@ -306,8 +334,11 @@ class AboutSetting(Screen):
         # serial = device.get_serial()
         # ble_mac = device.get_ble_mac()
         # storage = device.get_storage()
-        super().__init__(prev_scr=prev_scr, title="About Device", nav_back=True)
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.FORM__ABOUT_DEVICE), nav_back=True
+        )
         self.container = ContainerFlexCol(self, self.title)
+        # TODO: i18n missing
         self.model = ListItemBtn(
             self.container, "Model", right_text="OneKey Touch", has_next=False
         )
@@ -318,7 +349,10 @@ class AboutSetting(Screen):
             self.container, "Serial", right_text="FK1W2Y84JCDR", has_next=False
         )
         self.ble_mac = ListItemBtn(
-            self.container, "Bluetooth", right_text="B8:C3:16:DE:D8:46", has_next=False
+            self.container,
+            _(i18n_keys.FORM__BLUETOOTH),
+            right_text="B8:C3:16:DE:D8:46",
+            has_next=False,
         )
         self.storage = ListItemBtn(
             self.container, "Storage", right_text="16 GB", has_next=False
@@ -335,7 +369,9 @@ class HomeScreenSetting(Screen):
         else:
             return
         cur = device.get_homescreen() or self.LIGHT_WALLPAPER
-        super().__init__(prev_scr=prev_scr, title="Home Screen", nav_back=True)
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOME_SCREEN), nav_back=True
+        )
         self.container = ContanierGrid(self, self.title)
         self.light = ImgBottonGridItem(
             self.container, 0, 0, "A:/res/wallpaper_light_thumnail.png"
@@ -373,12 +409,16 @@ class SecurityScreen(Screen):
             self._init = True
         else:
             return
-        super().__init__(prev_scr, title="Security", nav_back=True)
+        super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
-        self.rest_pin = ListItemBtn(self.container, "Reset PIN")
-        self.recovery_check = ListItemBtn(self.container, "Check Recovery Phrase")
-        self.passphrase = ListItemBtn(self.container, "Passphrase")
-        self.rest_device = ListItemBtn(self.container, "Reset Device", has_next=False)
+        self.rest_pin = ListItemBtn(self.container, _(i18n_keys.FORM__RESET_PIN))
+        self.recovery_check = ListItemBtn(
+            self.container, _(i18n_keys.FORM__CHECK_RECOVERY_PHRASE)
+        )
+        self.passphrase = ListItemBtn(self.container, _(i18n_keys.FORM__PASSPHRASE))
+        self.rest_device = ListItemBtn(
+            self.container, _(i18n_keys.ACTION__RESET_DEVICE), has_next=False
+        )
         self.rest_device.label_left.set_style_text_color(
             lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -438,10 +478,10 @@ class CryptoScreen(Screen):
             self._init = True
         else:
             return
-        super().__init__(prev_scr, title="Crypto", nav_back=True)
+        super().__init__(prev_scr, title=_(i18n_keys.TITLE__CRYPTO), nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
-        self.ethereum = ListItemBtn(self.container, "Ethereum")
-        self.solana = ListItemBtn(self.container, "Solana")
+        self.ethereum = ListItemBtn(self.container, _(i18n_keys.TITLE__ETHEREUM))
+        self.solana = ListItemBtn(self.container, _(i18n_keys.TITLE__SOLANA))
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -460,9 +500,13 @@ class EthereumSetting(Screen):
             self._init = True
         else:
             return
-        super().__init__(prev_scr, title="Ethereum", nav_back=True)
+        super().__init__(prev_scr, title=_(i18n_keys.TITLE__ETHEREUM), nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
-        self.blind_sign = ListItemBtn(self.container, "Blind Signing", right_text="Off")
+        self.blind_sign = ListItemBtn(
+            self.container,
+            _(i18n_keys.FORM__BLIND_SIGNING),
+            right_text=_(i18n_keys.FORM__STATUS__OFF),
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -470,7 +514,9 @@ class EthereumSetting(Screen):
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
             if target == self.blind_sign:
-                self.load_screen(BlindSign(self, coin_type="Ethereum"))
+                self.load_screen(
+                    BlindSign(self, coin_type=_(i18n_keys.TITLE__ETHEREUM))
+                )
 
 
 class SolanaSetting(Screen):
@@ -479,9 +525,13 @@ class SolanaSetting(Screen):
             self._init = True
         else:
             return
-        super().__init__(prev_scr, title="Solana", nav_back=True)
+        super().__init__(prev_scr, title=_(i18n_keys.TITLE__SOLANA), nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
-        self.blind_sign = ListItemBtn(self.container, "Blind Signing", right_text="Off")
+        self.blind_sign = ListItemBtn(
+            self.container,
+            _(i18n_keys.FORM__BLIND_SIGNING),
+            right_text=_(i18n_keys.FORM__STATUS__OFF),
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -489,17 +539,19 @@ class SolanaSetting(Screen):
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
             if target == self.blind_sign:
-                self.load_screen(BlindSign(self, coin_type="Solana"))
+                self.load_screen(BlindSign(self, coin_type=_(i18n_keys.TITLE__SOLANA)))
 
 
 class BlindSign(Screen):
-    def __init__(self, prev_scr=None, coin_type: str = "Ethereum"):
+    def __init__(self, prev_scr=None, coin_type: str = _(i18n_keys.TITLE__ETHEREUM)):
         if not hasattr(self, "_init"):
             self._init = True
         else:
             self.coin_type = coin_type
             return
-        super().__init__(prev_scr, title="Blind Signing", nav_back=True)
+        super().__init__(
+            prev_scr, title=_(i18n_keys.TITLE__BLIND_SIGNING), nav_back=True
+        )
         self.coin_type = coin_type
         self.container = ContainerFlexCol(self, self.title)
         self.blind_sign = ListItemBtnWithSwitch(
@@ -519,10 +571,12 @@ class BlindSign(Screen):
 
                     self.popup = Popup(
                         self,
-                        f"Enable {self.coin_type} Blind Signing?",
-                        "Blind signing is only required for signing some specific smart contract transactions, which can't be recognized on device. Before enabling this feature, you need to know:",
+                        _(i18n_keys.TITLE__ENABLE_STR_BLIND_SIGNING).format(
+                            self.coin_type
+                        ),
+                        _(i18n_keys.SUBTITLE_SETTING_CRYPTO_BLIND_SIGN_ENABLED),
                         icon_path="A:/res/warning.png",
-                        btn_text="Enable",
+                        btn_text=_(i18n_keys.ACTION__ENABLE),
                     )
                 else:
                     if __debug__:

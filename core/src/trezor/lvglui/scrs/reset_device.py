@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 
@@ -18,8 +19,8 @@ class MnemonicDisplay(FullSizeWindow):
         word_count = len(mnemonics)
         super().__init__(
             title,
-            f"Write down the following {word_count} words in order.",
-            "Hold to Confirm",
+            _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
+            _(i18n_keys.ACTION__HOLD_TO_CONFIRM),
         )
         self.panel = lv.obj(self)
         self.panel.set_size(440, lv.SIZE.CONTENT)
@@ -63,22 +64,24 @@ class MnemonicDisplay(FullSizeWindow):
 class BackupTips(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            "Back Up Recovery Phrase",
-            "Next, OneKey will display a list of words, which is called the recovery phrase of wallet. So you need to know:",
+            _(i18n_keys.TITLE__BACK_UP_RECOVERY_PHRASE),
+            _(i18n_keys.SUBTITLE__DEVICE_BACKUP_BACK_UP_RECOVERY_PHRASE),
         )
         self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10))
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
-            self.container, "If you lose recovery phrase, you will lose all your fund."
+            self.container,
+            _(i18n_keys.FORM__OPTION__DEVICE_BACK_UP_RECOVERY_PHRASE_1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
             self.container,
-            "Never take photo or make digital copys, and never upload it online.",
+            _(i18n_keys.FORM__OPTION__DEVICE_BACK_UP_RECOVERY_PHRASE_2),
         )
         self.item3 = ListItemWithLeadingCheckbox(
-            self.container, "Keeping your backup secured and never send it to anyone."
+            self.container,
+            _(i18n_keys.FORM__OPTION__DEVICE_BACK_UP_RECOVERY_PHRASE_3),
         )
-        self.btn = NormalButton(self, "Continue", False)
+        self.btn = NormalButton(self, _(i18n_keys.ACTION__CONTINUE), False)
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.cb_cnt = 0

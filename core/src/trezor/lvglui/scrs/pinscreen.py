@@ -1,3 +1,5 @@
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
 from .common import FullSizeWindow, lv  # noqa: F401,F403
 from .components.button import NormalButton
 from .components.container import ContainerFlexCol
@@ -8,20 +10,20 @@ from .components.listitem import ListItemWithLeadingCheckbox
 class PinTip(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            "Set a PIN",
-            "Set a PIN to protect you wallet. OneKey will ask for PIN eachtime when unlock your device. So you need to know:",
+            _(i18n_keys.TITLE__SET_A_PIN),
+            _(i18n_keys.SUBTITLE__SETUP_SET_A_PIN),
         )
         self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10))
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
-            "Using a strong PIN to protects your wallet from unauthorized physical access.",
+            _(i18n_keys.FORM__OPTION__SETUP_SET_A_PIN__1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
             self.container,
-            "Keeping your PIN secured, be sure to store it separate from recovery phrase.",
+            _(i18n_keys.FORM__OPTION__SETUP_SET_A_PIN__2),
         )
-        self.btn = NormalButton(self, "Continue", False)
+        self.btn = NormalButton(self, _(i18n_keys.ACTION__CONTINUE), False)
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.cb_cnt = 0
@@ -59,7 +61,8 @@ class PinTip(FullSizeWindow):
 class InputPin(FullSizeWindow):
     def __init__(self, **kwargs):
         super().__init__(
-            title=kwargs.get("title", "Enter PIN"), subtitle=kwargs.get("subtitle", "")
+            title=kwargs.get("title", _(i18n_keys.TITLE__ENTER_PIN)),
+            subtitle=kwargs.get("subtitle", ""),
         )
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)
@@ -73,6 +76,7 @@ class InputPin(FullSizeWindow):
             return
         input = self.keyboard.ta.get_text()
         if input == "" or len(input) < 5:
+            # TODO: missing i18n
             self.subtitle.set_text("Length must be 4 digits or more")
             self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
             return
@@ -83,9 +87,9 @@ class InputPin(FullSizeWindow):
 class SetupComplete(FullSizeWindow):
     def __init__(self, subtitle=""):
         super().__init__(
-            title="Setup Complete",
+            title=_(i18n_keys.TITLE__WALLET_IS_READY),
             subtitle=subtitle,
-            confirm_text="Done",
+            confirm_text=_(i18n_keys.ACTION__DONE),
             icon_path="A:/res/success_icon.png",
         )
         self.btn.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)

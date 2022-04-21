@@ -22,7 +22,7 @@ _NAMESPACE = common.APP_DEVICE
 DEVICE_ID                  = const(0x00)  # bytes
 _VERSION                   = const(0x01)  # int
 _MNEMONIC_SECRET           = const(0x02)  # bytes
-_LANGUAGE                  = const(0x03)  # str
+_LANGUAGE                  = const(0x03)  # int
 _LABEL                     = const(0x04)  # str
 _USE_PASSPHRASE            = const(0x05)  # bool (0x01 or empty)
 _HOMESCREEN                = const(0x06)  # bytes
@@ -124,17 +124,15 @@ def set_label(label: str) -> None:
     common.set(_NAMESPACE, _LABEL, label.encode(), True)  # public
 
 
-def get_language() -> str | None:
-    language = common.get(_NAMESPACE, _LANGUAGE, True)  # public
-    if language is None:
-        return "English"
-    return language.decode()
+def get_language() -> int:
+    code = common.get(_NAMESPACE, _LANGUAGE, True)  # public
+    if code is None:
+        return 0
+    return int.from_bytes(code, "big")
 
 
-def set_language(language: str) -> None:
-    if language not in ["English", "Chinese"]:
-        raise ValueError
-    common.set(_NAMESPACE, _LANGUAGE, language.encode(), True)  # public
+def set_language(code: int) -> None:
+    common.set(_NAMESPACE, _LANGUAGE, code.to_bytes(4, "big"), True)  # public
 
 
 def get_mnemonic_secret() -> bytes | None:

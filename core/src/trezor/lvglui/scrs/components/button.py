@@ -1,3 +1,5 @@
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
 from .. import font_PJSBOLD24, lv
 
 # class NormalButton(lv.btn):
@@ -33,7 +35,9 @@ from .. import font_PJSBOLD24, lv
 
 
 class NormalButton(lv.btn):
-    def __init__(self, parent, text="Next", enable=True) -> None:
+    def __init__(
+        self, parent, text=_(i18n_keys.ACTION__NEXT__QUANTIFIER), enable=True
+    ) -> None:
         super().__init__(parent)
         self.set_size(320, 62)
         self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -64)
