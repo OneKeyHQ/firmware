@@ -229,28 +229,25 @@ async def show_address(
 ) -> None:
     is_multisig = len(xpubs) > 0
     from trezor.lvglui.scrs.template import Address
-
-    while True:
-        if await interact(
+    if is_multisig:
+        return await interact(
             ctx,
-            Address(f"{network.upper()} Address", address_n, address),
+            Address(
+                f"{network.upper()} Multisig Address\n ({title})",
+                address_n,
+                address,
+                xpubs,
+                multisig_index,
+            ),
             "show_address",
             ButtonRequestType.Address,
-        ):
-            break
-        # TODO: MULTISIG @ redesign
-        if is_multisig:
-            await interact(
-                ctx,
-                Address(
-                    f"{network.upper()} MultisigAddress {title}",
-                    address_n,
-                    address,
-                    xpubs,
-                    multisig_index,
-                ),
-                ButtonRequestType.Address,
-            )
+        )
+    await interact(
+        ctx,
+        Address(f"{network.upper()} Address", address_n, address),
+        "show_address",
+        ButtonRequestType.Address,
+    )
 
 
 async def show_pubkey(
