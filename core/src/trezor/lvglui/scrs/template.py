@@ -14,13 +14,16 @@ class Address(FullSizeWindow):
         self.container = ContainerFlexCol(self, self.qr)
         self.item1 = DisplayItem(self.container, "PATH:", path)
         self.item2 = DisplayItem(self.container, "ADDRESS:", address)
+        if xpubs:
+            self.title.align(lv.ALIGN.TOP_MID, 0, 100)
+            self.btn_yes.align(lv.ALIGN.BOTTOM_MID, 0, -30)
         for i, xpub in enumerate(xpubs):
             self.item3 = DisplayItem(
                 self.container,
-                f"XPUB #{i+1}{'mine' if i == multisig_index else 'cosigner'}",
+                f"XPUB #{i+1}{' (mine)' if i == multisig_index else ' (cosigner)'}",
                 xpub,
             )
-        self.container.set_style_max_height(480, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_style_max_height(150, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
