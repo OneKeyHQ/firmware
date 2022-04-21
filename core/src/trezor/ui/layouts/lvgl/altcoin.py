@@ -1,13 +1,8 @@
 from typing import Sequence
 
-from trezor import ui, wire
+from trezor import wire
 from trezor.enums import ButtonRequestType
-from trezor.utils import chunks_intersperse
 
-from ...components.tt.confirm import HoldToConfirm
-from ...components.tt.scroll import Paginated
-from ...components.tt.text import Text
-from ...constants.tt import MONO_ADDR_PER_LINE
 from .common import interact, raise_if_cancelled
 
 
@@ -71,34 +66,19 @@ async def confirm_total_ripple(
     address: str,
     amount: str,
 ) -> None:
-    title = "Confirm sending"
-    text = Text(title, ui.ICON_SEND, ui.GREEN, new_lines=False)
-    text.bold(f"{amount} XRP\n")
-    text.normal("to\n")
-    text.mono(*chunks_intersperse(address, MONO_ADDR_PER_LINE))
+    from trezor.ui.layouts import confirm_output
 
-    await raise_if_cancelled(
-        interact(ctx, HoldToConfirm(text), "confirm_output", ButtonRequestType.SignTx)
-    )
+    await confirm_output(ctx, address, f"{amount} XRP")
 
 
 async def confirm_transfer_binance(
     ctx: wire.GenericContext, inputs_outputs: Sequence[tuple[str, str, str]]
 ) -> None:
-    pages: list[ui.Component] = []
-    for title, amount, address in inputs_outputs:
-        coin_page = Text(title, ui.ICON_SEND, icon_color=ui.GREEN, new_lines=False)
-        coin_page.bold(amount)
-        coin_page.normal("\nto\n")
-        coin_page.mono(*chunks_intersperse(address, MONO_ADDR_PER_LINE))
-        pages.append(coin_page)
+    from trezor.lvglui.scrs.template import ConfirmTransferBinance
 
-    pages[-1] = HoldToConfirm(pages[-1])
-
+    screen = ConfirmTransferBinance(inputs_outputs)
     await raise_if_cancelled(
-        interact(
-            ctx, Paginated(pages), "confirm_transfer", ButtonRequestType.ConfirmOutput
-        )
+        interact(ctx, screen, "confirm_transfer", ButtonRequestType.ConfirmOutput)
     )
 
 

@@ -216,3 +216,15 @@ class ConfirmProperties(FullSizeWindow):
             self.item = DisplayItem(self.container, f"{key.upper()}:", value)
         self.container.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+
+
+class ConfirmTransferBinance(FullSizeWindow):
+    def __init__(self, items: list[tuple[str, str, str]]):
+        super().__init__("Confirm Transfer", None, "Sign", "Reject")
+        self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
+        for key, value, address in items:
+            self.item1 = DisplayItem(self.container, key, "")
+            self.item2 = DisplayItem(self.container, "AMOUNT:", value)
+            self.item3 = DisplayItem(self.container, "TO:", address)
+        self.container.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
