@@ -24,7 +24,7 @@
 #include "embed/extmod/trezorobj.h"
 #include "spi.h"
 
-#define SPI_IFACE (252)
+#define SPI_IFACE (6)
 #define BUTTON_IFACE (254)
 #define TOUCH_IFACE (255)
 #define POLL_READ (0x0000)
@@ -133,8 +133,24 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
 #error Unknown Trezor model
 #endif
       else if (mode == POLL_READ) {
-#if PRODUCTION_MODEL == 'H'
-        if (iface == SPI_IFACE) {
+        if (sectrue == usb_hid_can_read(iface)) {
+          uint8_t buf[64] = {0};
+          int len = usb_hid_read(iface, buf, sizeof(buf));
+          if (len > 0) {
+            ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+            ret->items[1] = mp_obj_new_bytes(buf, len);
+            return mp_const_true;
+          }
+        } else if (sectrue == usb_webusb_can_read(iface)) {
+          uint8_t buf[64] = {0};
+          int len = usb_webusb_read(iface, buf, sizeof(buf));
+          if (len > 0) {
+            ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+            ret->items[1] = mp_obj_new_bytes(buf, len);
+            return mp_const_true;
+          }
+        }  // TODO:FIX IT
+        else if (iface == SPI_IFACE) {
           uint8_t buf[64] = {0};
           int len = spi_slave_poll(buf);
           if (len > 0) {
@@ -142,43 +158,19 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
             ret->items[1] = mp_obj_new_bytes(buf, len);
             return mp_const_true;
           }
-        } else
-#endif
-        {
-          if (sectrue == usb_hid_can_read(iface)) {
-            uint8_t buf[64] = {0};
-            int len = usb_hid_read(iface, buf, sizeof(buf));
-            if (len > 0) {
-              ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
-              ret->items[1] = mp_obj_new_bytes(buf, len);
-              return mp_const_true;
-            }
-          } else if (sectrue == usb_webusb_can_read(iface)) {
-            uint8_t buf[64] = {0};
-            int len = usb_webusb_read(iface, buf, sizeof(buf));
-            if (len > 0) {
-              ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
-              ret->items[1] = mp_obj_new_bytes(buf, len);
-              return mp_const_true;
-            }
-          }
         }
+
       } else if (mode == POLL_WRITE) {
-#if PRODUCTION_MODEL == 'H'
-        if (iface == SPI_IFACE) {
+        if (sectrue == usb_hid_can_write(iface)) {
+          ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+          ret->items[1] = mp_const_none;
+          return mp_const_true;
+        } else if (sectrue == usb_webusb_can_write(iface)) {
+          ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+          ret->items[1] = mp_const_none;
+          return mp_const_true;
+        } else if (iface == SPI_IFACE) {
           if (sectrue == spi_can_write()) {
-            ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
-            ret->items[1] = mp_const_none;
-            return mp_const_true;
-          }
-        }
-#endif
-        {
-          if (sectrue == usb_hid_can_write(iface)) {
-            ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
-            ret->items[1] = mp_const_none;
-            return mp_const_true;
-          } else if (sectrue == usb_webusb_can_write(iface)) {
             ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
             ret->items[1] = mp_const_none;
             return mp_const_true;
