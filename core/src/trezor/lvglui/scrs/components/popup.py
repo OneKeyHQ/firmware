@@ -39,6 +39,7 @@ class Popup(lv.obj):
             self.container, "It's recommended to disable this feature after use."
         )
         self.btn = NormalButton(self, btn_text, False)
+        self.btn.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.cb_cnt = 0

@@ -187,7 +187,7 @@ async def confirm_total(
         ctx,
         total_amount=format_coin_amount(spending, coin, amount_unit),
         fee_amount=format_coin_amount(fee, coin, amount_unit),
-        amount=format_coin_amount(spending + fee, coin, amount_unit),
+        amount=format_coin_amount(spending - fee, coin, amount_unit),
         coin_shortcut=coin.coin_shortcut,
     )
 
@@ -228,6 +228,7 @@ async def confirm_nondefault_locktime(
         title = "Warning"
         text = "Locktime is set but will have no effect."
         param: str | None = None
+        description = None
     elif lock_time < _LOCKTIME_TIMESTAMP_MIN_VALUE:
         title = "Confirm locktime"
         text = "Locktime for this transaction is set to blockheight"
@@ -246,5 +247,5 @@ async def confirm_nondefault_locktime(
         text,
         param,
         br_code=ButtonRequestType.SignTx,
-        description=description,  # type: ignore["description" is possibly unbound]
+        description=description,
     )

@@ -338,7 +338,7 @@
 #define LV_FONT_MONTSERRAT_14 0
 #define LV_FONT_MONTSERRAT_16 0
 #define LV_FONT_MONTSERRAT_18 0
-#define LV_FONT_MONTSERRAT_20 1
+#define LV_FONT_MONTSERRAT_20 0
 #define LV_FONT_MONTSERRAT_22 0
 #define LV_FONT_MONTSERRAT_24 0
 #define LV_FONT_MONTSERRAT_26 0
@@ -368,17 +368,20 @@
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
 #define LV_FONT_CUSTOM_DECLARE \
-    LV_FONT_DECLARE(jetbrainsmono_medium_24) \
-    LV_FONT_DECLARE(jetbrainsmono_medium_36) \
-    LV_FONT_DECLARE(plusjakartasans_bold_24) \
-    LV_FONT_DECLARE(plusjakartasans_bold_36) \
-    LV_FONT_DECLARE(plusjakartasans_medium_20) \
-    LV_FONT_DECLARE(plusjakartasans_medium_24) \
-    LV_FONT_DECLARE(plusjakartasans_medium_32) \
-    LV_FONT_DECLARE(plusjakartasans_medium_36) 
+    LV_FONT_DECLARE(lv_font_jbm_bold_32)) \
+    LV_FONT_DECLARE(lv_font_jbm_medium_24) \
+    LV_FONT_DECLARE(lv_font_jbm_medium_28) \
+    LV_FONT_DECLARE(lv_font_pljs_bold_20) \
+    LV_FONT_DECLARE(lv_font_pljs_bold_24) \
+    LV_FONT_DECLARE(lv_font_pljs_bold_32) \
+    LV_FONT_DECLARE(lv_font_pljs_bold_36) \
+    LV_FONT_DECLARE(lv_font_pljs_medium_20) \
+    LV_FONT_DECLARE(lv_font_pljs_medium_24) \
+    LV_FONT_DECLARE(lv_font_pljs_medium_28) \
+    LV_FONT_DECLARE(lv_font_pljs_regular_24) \
 
 /*Always set a default font*/
-#define LV_FONT_DEFAULT &lv_font_montserrat_20 // font_siyuan32
+#define LV_FONT_DEFAULT &lv_font_pljs_regular_24
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.

@@ -1,4 +1,4 @@
-from .. import font_PJSBOLD36, font_PJSMID20, lv
+from .. import font_PJSBOLD36, font_PJSREG24, lv
 
 
 class Title(lv.label):
@@ -34,5 +34,5 @@ class SubTitle(lv.label):
         self.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_align(lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT)

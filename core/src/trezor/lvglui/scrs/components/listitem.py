@@ -1,4 +1,4 @@
-from .. import font_PJSMID20, lv
+from .. import font_PJSBOLD20, font_PJSMID20, font_PJSMID28, lv
 
 
 class ListItemWithLeadingCheckbox(lv.obj):
@@ -27,10 +27,10 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.label.set_size(340, lv.SIZE.CONTENT)
         self.label.align_to(self.checkbox, lv.ALIGN.OUT_RIGHT_TOP, 0, 0)
         self.label.set_text(text)
-        self.label.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
+        self.set_style_text_color(
+            lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.label.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -47,9 +47,17 @@ class ListItemWithLeadingCheckbox(lv.obj):
             self.set_style_bg_color(
                 lv.color_hex(0x191919), lv.PART.MAIN | lv.STATE.DEFAULT
             )
+            self.set_style_text_font(font_PJSBOLD20, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_text_color(
+                lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
+            )
         else:
             self.set_style_bg_color(
                 lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_text_color(
+                lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
             )
 
 
@@ -75,6 +83,6 @@ class DisplayItem(lv.obj):
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.label.set_text(content)
-        self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 5)
-        self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 10)
+        self.set_style_text_font(font_PJSMID28, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_align(lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT)

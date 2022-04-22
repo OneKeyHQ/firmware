@@ -51,7 +51,9 @@ class TransactionOverview(FullSizeWindow):
     def __init__(self, title, amount, address):
         super().__init__(title, None, "Continue", "Cancel")
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
-        self.item1 = DisplayItem(self.container, f"SEND #ffffff {amount}# TO:", address)
+        self.item1 = DisplayItem(
+            self.container, f"SEND #ffffff {amount} # TO:", address
+        )
         self.item1.label_top.set_recolor(True)
 
 

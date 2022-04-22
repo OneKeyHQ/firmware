@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 
-from . import font_MONO20, lv
+from . import font_MONO24, lv
 from .common import FullSizeWindow
 from .components.button import NormalButton
 
@@ -22,8 +22,8 @@ class MnemonicDisplay(FullSizeWindow):
             "Hold to Confirm",
         )
         self.panel = lv.obj(self)
-        self.panel.align(lv.ALIGN.TOP_MID, 0, 240)
-        self.panel.set_size(400, lv.SIZE.CONTENT)
+        self.panel.set_size(440, lv.SIZE.CONTENT)
+        self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
         self.panel.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_bg_color(
             lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -33,7 +33,7 @@ class MnemonicDisplay(FullSizeWindow):
         self.word_col1 = lv.label(self.panel)
         self.word_col1.set_size(lv.pct(50), lv.SIZE.CONTENT)
         self.word_col1.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        self.word_col1.set_style_text_font(font_MONO20, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col1.set_style_text_font(font_MONO24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col1.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -42,7 +42,7 @@ class MnemonicDisplay(FullSizeWindow):
         self.word_col2 = lv.label(self.panel)
         self.word_col2.set_size(lv.pct(50), lv.SIZE.CONTENT)
         self.word_col2.align(lv.ALIGN.TOP_RIGHT, 0, 0)
-        self.word_col2.set_style_text_font(font_MONO20, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col2.set_style_text_font(font_MONO24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col2.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -57,6 +57,7 @@ class MnemonicDisplay(FullSizeWindow):
             text_col2 += f"{int(index+int(word_count/2)+1):>2}. {mnemonics[int(index+int(word_count/2))]}\n"
             self.word_col1.set_text(text_col.rstrip())
             self.word_col2.set_text(text_col2.rstrip())
+        self.btn_yes.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
 
 
 class BackupTips(FullSizeWindow):
