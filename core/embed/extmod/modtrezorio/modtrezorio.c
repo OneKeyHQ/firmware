@@ -49,7 +49,6 @@
 #include "modtrezorio-sbu.h"
 #include "modtrezorio-sdcard.h"
 #include "modtrezorio-spi.h"
-#include "spi.h"
 #endif
 
 /// package: trezorio.__init__
@@ -99,6 +98,7 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_HID), MP_ROM_PTR(&mod_trezorio_HID_type)},
     {MP_ROM_QSTR(MP_QSTR_VCP), MP_ROM_PTR(&mod_trezorio_VCP_type)},
     {MP_ROM_QSTR(MP_QSTR_WebUSB), MP_ROM_PTR(&mod_trezorio_WebUSB_type)},
+    {MP_ROM_QSTR(MP_QSTR_SPI), MP_ROM_PTR(&mod_trezorio_SPI_type)},
 
     {MP_ROM_QSTR(MP_QSTR_poll), MP_ROM_PTR(&mod_trezorio_poll_obj)},
     {MP_ROM_QSTR(MP_QSTR_POLL_READ), MP_ROM_INT(POLL_READ)},

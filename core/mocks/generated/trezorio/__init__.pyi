@@ -98,6 +98,21 @@ class SBU:
         """
 
 
+# extmod/modtrezorio/modtrezorio-spi.h
+class SPI:
+    """
+    """
+
+    def __init__(self) -> None:
+        """
+        """
+
+    def write(self, msg: bytes) -> int:
+        """
+        Sends message using SPI.
+        """
+
+
 # extmod/modtrezorio/modtrezorio-usb.h
 class USB:
     """
