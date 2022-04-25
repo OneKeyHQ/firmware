@@ -368,7 +368,7 @@
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
 #define LV_FONT_CUSTOM_DECLARE \
-    LV_FONT_DECLARE(lv_font_jbm_bold_32)) \
+    LV_FONT_DECLARE(lv_font_jbm_bold_32) \
     LV_FONT_DECLARE(lv_font_jbm_medium_24) \
     LV_FONT_DECLARE(lv_font_jbm_medium_28) \
     LV_FONT_DECLARE(lv_font_pljs_bold_20) \
@@ -378,7 +378,7 @@
     LV_FONT_DECLARE(lv_font_pljs_medium_20) \
     LV_FONT_DECLARE(lv_font_pljs_medium_24) \
     LV_FONT_DECLARE(lv_font_pljs_medium_28) \
-    LV_FONT_DECLARE(lv_font_pljs_regular_24) \
+    LV_FONT_DECLARE(lv_font_pljs_regular_24)
 
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &lv_font_pljs_regular_24
