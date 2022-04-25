@@ -1,7 +1,6 @@
+# pyright: off
 import gc
 import sys
-
-# pyright: off
 from trezorutils import (  # noqa: F401
     BITCOIN_ONLY,
     EMULATOR,
@@ -15,9 +14,10 @@ from trezorutils import (  # noqa: F401
     halt,
     memcpy,
 )
+from typing import TYPE_CHECKING
 
 # pyright: on
-from typing import TYPE_CHECKING
+
 
 DISABLE_ANIMATION = 0
 
@@ -31,15 +31,8 @@ if __debug__:
         LOG_MEMORY = 0
 
 if TYPE_CHECKING:
-    from typing import (
-        Any,
-        Iterator,
-        Protocol,
-        TypeVar,
-        Sequence,
-    )
-
     from trezor.protobuf import MessageType
+    from typing import Any, Iterator, Protocol, Sequence, TypeVar
 
 SCREENS = []
 

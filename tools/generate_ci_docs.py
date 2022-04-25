@@ -24,7 +24,7 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any
+from typing import Any, Sequence, Dict
 
 import yaml
 from mako.template import Template
@@ -88,7 +88,7 @@ class DocsGenerator:
                 print("    Please run this script or `make gen`")
                 sys.exit(1)
 
-    def get_all_ci_files(self) -> list[Path]:
+    def get_all_ci_files(self) -> Sequence[Path]:
         """Loading all the CI files which are used in Gitlab."""
         if not os.path.exists(self.GITLAB_CI_FILE):
             raise RuntimeError(
@@ -107,7 +107,7 @@ class DocsGenerator:
         return all_ci_files
 
     @staticmethod
-    def get_overall_description_from_file(file: Path) -> list[str]:
+    def get_overall_description_from_file(file: Path) -> Sequence[str]:
         """Looking for comments at the very beginning of the file."""
         description_lines: list[str] = []
         with open(file, "r") as f:
@@ -120,7 +120,7 @@ class DocsGenerator:
 
         return description_lines
 
-    def get_jobs_from_file(self, file: Path) -> dict[str, dict[str, Any]]:
+    def get_jobs_from_file(self, file: Path) -> Dict[str, Dict[str, Any]]:
         """Extract all jobs and their details from a certain file."""
         all_jobs: dict[str, dict[str, Any]] = OrderedDict()
 

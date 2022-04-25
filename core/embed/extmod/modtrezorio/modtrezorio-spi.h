@@ -30,7 +30,10 @@ typedef struct _mp_obj_SPI_t {
   mp_int_t iface_num;
 } mp_obj_SPI_t;
 
-/// def __init__(self) -> None:
+/// def __init__(
+///     self,
+///     iface_num: int,
+/// ) -> None:
 ///     """
 ///     """
 STATIC mp_obj_t mod_trezorio_SPI_make_new(const mp_obj_type_t *type,
@@ -47,7 +50,10 @@ STATIC mp_obj_t mod_trezorio_SPI_make_new(const mp_obj_type_t *type,
 
   return MP_OBJ_FROM_PTR(o);
 }
-
+/// def iface_num(self) -> int:
+///     """
+///     Returns the configured number of this interface.
+///     """
 STATIC mp_obj_t mod_trezorio_SPI_iface_num(mp_obj_t self) {
   mp_obj_SPI_t *o = MP_OBJ_TO_PTR(self);
   return MP_OBJ_NEW_SMALL_INT(o->iface_num);

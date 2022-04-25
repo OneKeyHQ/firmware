@@ -22,7 +22,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Amazon Web Services
         return FIDOApp(
             label="aws.amazon.com",
-            icon="apps/webauthn/res/icon_aws.toif",
+            icon="A:/res/icon_aws.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -30,7 +30,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Binance
         return FIDOApp(
             label="www.binance.com",
-            icon="apps/webauthn/res/icon_binance.toif",
+            icon="A:/res/icon_binance.png",
             use_sign_count=False,
             use_self_attestation=True,
         )
@@ -38,7 +38,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Binance
         return FIDOApp(
             label="binance.com",
-            icon="apps/webauthn/res/icon_binance.toif",
+            icon="A:/res/icon_binance.png",
             use_sign_count=False,
             use_self_attestation=True,
         )
@@ -46,7 +46,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Bitbucket
         return FIDOApp(
             label="bitbucket.org",
-            icon="apps/webauthn/res/icon_bitbucket.toif",
+            icon="A:/res/icon_bitbucket.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -54,7 +54,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Bitfinex
         return FIDOApp(
             label="www.bitfinex.com",
-            icon="apps/webauthn/res/icon_bitfinex.toif",
+            icon="A:/res/icon_bitfinex.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -62,7 +62,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Bitwarden
         return FIDOApp(
             label="vault.bitwarden.com",
-            icon="apps/webauthn/res/icon_bitwarden.toif",
+            icon="A:/res/icon_bitwarden.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -70,7 +70,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Coinbase
         return FIDOApp(
             label="coinbase.com",
-            icon="apps/webauthn/res/icon_coinbase.toif",
+            icon="A:/res/icon_coinbase.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -78,7 +78,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Dashlane
         return FIDOApp(
             label="www.dashlane.com",
-            icon="apps/webauthn/res/icon_dashlane.toif",
+            icon="A:/res/icon_dashlane.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -86,7 +86,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Dropbox
         return FIDOApp(
             label="www.dropbox.com",
-            icon="apps/webauthn/res/icon_dropbox.toif",
+            icon="A:/res/icon_dropbox.png",
             use_sign_count=False,
             use_self_attestation=None,
         )
@@ -94,7 +94,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Dropbox
         return FIDOApp(
             label="www.dropbox.com",
-            icon="apps/webauthn/res/icon_dropbox.toif",
+            icon="A:/res/icon_dropbox.png",
             use_sign_count=False,
             use_self_attestation=None,
         )
@@ -102,7 +102,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Duo
         return FIDOApp(
             label="duosecurity.com",
-            icon="apps/webauthn/res/icon_duo.toif",
+            icon="A:/res/icon_duo.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -110,7 +110,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Facebook
         return FIDOApp(
             label="facebook.com",
-            icon="apps/webauthn/res/icon_facebook.toif",
+            icon="A:/res/icon_facebook.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -118,7 +118,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for FastMail
         return FIDOApp(
             label="www.fastmail.com",
-            icon="apps/webauthn/res/icon_fastmail.toif",
+            icon="A:/res/icon_fastmail.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -126,7 +126,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Fedora
         return FIDOApp(
             label="fedoraproject.org",
-            icon="apps/webauthn/res/icon_fedora.toif",
+            icon="A:/res/icon_fedora.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -134,7 +134,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Gandi
         return FIDOApp(
             label="gandi.net",
-            icon="apps/webauthn/res/icon_gandi.toif",
+            icon="A:/res/icon_gandi.png",
             use_sign_count=False,
             use_self_attestation=None,
         )
@@ -142,7 +142,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Gandi
         return FIDOApp(
             label="gandi.net",
-            icon="apps/webauthn/res/icon_gandi.toif",
+            icon="A:/res/icon_gandi.png",
             use_sign_count=False,
             use_self_attestation=None,
         )
@@ -150,7 +150,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Gemini
         return FIDOApp(
             label="gemini.com",
-            icon="apps/webauthn/res/icon_gemini.toif",
+            icon="A:/res/icon_gemini.png",
             use_sign_count=False,
             use_self_attestation=True,
         )
@@ -158,7 +158,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for GitHub
         return FIDOApp(
             label="github.com",
-            icon="apps/webauthn/res/icon_github.toif",
+            icon="A:/res/icon_github.png",
             use_sign_count=True,
             use_self_attestation=None,
         )
@@ -166,7 +166,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for GitHub
         return FIDOApp(
             label="github.com",
-            icon="apps/webauthn/res/icon_github.toif",
+            icon="A:/res/icon_github.png",
             use_sign_count=True,
             use_self_attestation=None,
         )
@@ -174,7 +174,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for GitLab
         return FIDOApp(
             label="gitlab.com",
-            icon="apps/webauthn/res/icon_gitlab.toif",
+            icon="A:/res/icon_gitlab.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -182,7 +182,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Google
         return FIDOApp(
             label="google.com",
-            icon="apps/webauthn/res/icon_google.toif",
+            icon="A:/res/icon_google.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -190,7 +190,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Google
         return FIDOApp(
             label="google.com",
-            icon="apps/webauthn/res/icon_google.toif",
+            icon="A:/res/icon_google.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -198,7 +198,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Keeper
         return FIDOApp(
             label="keepersecurity.com",
-            icon="apps/webauthn/res/icon_keeper.toif",
+            icon="A:/res/icon_keeper.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -206,7 +206,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Keeper
         return FIDOApp(
             label="keepersecurity.eu",
-            icon="apps/webauthn/res/icon_keeper.toif",
+            icon="A:/res/icon_keeper.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -214,7 +214,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for login.gov
         return FIDOApp(
             label="secure.login.gov",
-            icon="apps/webauthn/res/icon_login.gov.toif",
+            icon="A:/res/icon_login.gov.png",
             use_sign_count=False,
             use_self_attestation=None,
         )
@@ -222,7 +222,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Microsoft
         return FIDOApp(
             label="login.microsoft.com",
-            icon="apps/webauthn/res/icon_microsoft.toif",
+            icon="A:/res/icon_microsoft.png",
             use_sign_count=False,
             use_self_attestation=False,
         )
@@ -230,7 +230,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for mojeID
         return FIDOApp(
             label="mojeid.cz",
-            icon="apps/webauthn/res/icon_mojeid.toif",
+            icon="A:/res/icon_mojeid.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -238,7 +238,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # WebAuthn key for Namecheap
         return FIDOApp(
             label="www.namecheap.com",
-            icon="apps/webauthn/res/icon_namecheap.toif",
+            icon="A:/res/icon_namecheap.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -246,7 +246,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Slush Pool
         return FIDOApp(
             label="slushpool.com",
-            icon="apps/webauthn/res/icon_slushpool.toif",
+            icon="A:/res/icon_slushpool.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -254,7 +254,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Slush Pool
         return FIDOApp(
             label="slushpool.com",
-            icon="apps/webauthn/res/icon_slushpool.toif",
+            icon="A:/res/icon_slushpool.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -262,7 +262,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Stripe
         return FIDOApp(
             label="stripe.com",
-            icon="apps/webauthn/res/icon_stripe.toif",
+            icon="A:/res/icon_stripe.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -270,7 +270,7 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for Tutanota
         return FIDOApp(
             label="tutanota.com",
-            icon="apps/webauthn/res/icon_tutanota.toif",
+            icon="A:/res/icon_tutanota.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
