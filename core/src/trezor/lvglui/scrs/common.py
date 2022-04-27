@@ -2,13 +2,15 @@ from typing import TYPE_CHECKING
 
 from trezor import loop, utils
 
-from . import *
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
+
 from .components.button import NormalButton
 from .components.label import SubTitle, Title
 from .components.roller import Roller
 
 if TYPE_CHECKING:
     from typing import Any
+
     pass
 
 
@@ -82,9 +84,6 @@ class Screen(lv.obj):
     async def request(self) -> Any:
         return await self.channel.take()
 
-    def set_subtitle(self, text: str):
-        self.subtitle.set_text(text)
-
     # NOTE:====================Functional Code Don't Edit========================
 
     def __new__(cls, pre_scr=None, *args, **kwargs):
@@ -106,7 +105,7 @@ class Screen(lv.obj):
         """Micropython doesn't support user defined __del__ now, so this not work at all."""
         try:
             self.delete()
-        except BaseException as e:
+        except BaseException:
             pass
 
     # NOTE:====================Functional Code Don't Edit========================
@@ -118,7 +117,7 @@ class FullSizeWindow(lv.obj):
     def __init__(
         self,
         title: str,
-        subtitle: str,
+        subtitle: str | None,
         confirm_text: str = "",
         cancel_text: str = "",
         icon_path: str | None = None,

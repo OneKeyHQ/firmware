@@ -8,7 +8,8 @@ if TYPE_CHECKING:
     from typing import Any, Awaitable, TypeVar
 
     T = TypeVar("T")
-    from ....lvglui.scrs.common import Screen
+    LayoutType = Awaitable[Any]
+    from ....lvglui.scrs.common import Screen, FullSizeWindow
 
 
 async def button_request(
@@ -31,7 +32,7 @@ async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -
 
 async def interact(
     ctx: wire.GenericContext,
-    screen: Screen,
+    screen: Screen | FullSizeWindow,
     br_type: str,
     br_code: ButtonRequestType = ButtonRequestType.Other,
 ) -> Any:

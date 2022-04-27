@@ -7,7 +7,7 @@ from apps.common.keychain import with_slip44_keychain
 from apps.common.paths import address_n_to_str, validate_path
 
 from . import CURVE, PATTERNS, SLIP44_ID
-from .helpers import check_path, get_network_str
+from .helpers import check_path
 from .validators import validate_network
 
 if TYPE_CHECKING:

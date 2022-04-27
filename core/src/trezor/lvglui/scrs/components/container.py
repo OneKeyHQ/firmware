@@ -1,4 +1,4 @@
-from ..common import *
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
 class ContainerFlexCol(lv.obj):

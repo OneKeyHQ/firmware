@@ -1,4 +1,5 @@
-from .common import *
+from . import font_PJSBOLD24
+from .common import Screen, load_scr_with_animation, lv
 
 
 class LockScreen(Screen):

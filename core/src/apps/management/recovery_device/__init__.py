@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import storage
 import storage.device
 import storage.recovery
-from trezor import config, ui, utils, wire, workflow
+from trezor import config, ui, utils, wire
 from trezor.enums import ButtonRequestType
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action, confirm_reset_device
@@ -14,7 +14,7 @@ from apps.common.request_pin import (
     request_pin_confirm,
 )
 
-from .homescreen import recovery_homescreen, recovery_process
+from .homescreen import recovery_process
 
 if TYPE_CHECKING:
     from trezor.messages import RecoveryDevice

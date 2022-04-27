@@ -27,7 +27,8 @@ for app in fido:
         rp_id_hash = sha256(origin.encode()).digest()
         fido_entries.append((origin, rp_id_hash, "WebAuthn", app))
     if app.icon is not None:
-        app.icon_res = f"apps/webauthn/res/icon_{app.key}.toif"
+        # app.icon_res = f"apps/webauthn/res/icon_{app.key}.toif"
+        app.icon_res = f"A:/res/icon_{app.key}.png"
     else:
         app.icon_res = None
 %>\

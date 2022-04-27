@@ -1,6 +1,6 @@
 from trezor.crypto import bip39, random
 
-from ..common import *  # noqa: F401,F403
+from .. import font_MONO28, font_PJSBOLD20, font_PJSBOLD32, lv
 
 
 def compute_mask(text: str) -> int:
@@ -11,6 +11,19 @@ def compute_mask(text: str) -> int:
             continue
         mask |= 1 << shift
     return mask
+
+
+def change_key_bg(dsc: lv.obj_draw_part_dsc_t, id1: int, id2: int, enabled: bool):
+    if enabled:
+        if dsc.id == id1:
+            dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
+        elif dsc.id == id2:
+            dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+    else:
+        if dsc.id == id1:
+            dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+        elif dsc.id == id2:
+            dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
 
 
 class BIP39Keyboard(lv.keyboard):
@@ -31,7 +44,7 @@ class BIP39Keyboard(lv.keyboard):
         self.ta.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_max_length(11)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("abcdefghijklmnopqrstuvwxyz")
@@ -126,6 +139,7 @@ class BIP39Keyboard(lv.keyboard):
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_MONO28, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_height(168)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
@@ -164,15 +178,9 @@ class BIP39Keyboard(lv.keyboard):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                if dsc.id == 21:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 29:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+                change_key_bg(dsc, 21, 29, True)
             else:
-                if dsc.id == 21:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-                elif dsc.id == 29:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+                change_key_bg(dsc, 21, 29, False)
         elif event.code == lv.EVENT.VALUE_CHANGED:
             self.mnemonic_prompt.clean()
             txt_input = self.ta.get_text()
@@ -191,7 +199,7 @@ class BIP39Keyboard(lv.keyboard):
                         lv.color_hex(0xCCCCCC), lv.PART.MAIN | lv.STATE.DEFAULT
                     )
                     label.set_style_text_font(
-                        font_MONO20, lv.PART.MAIN | lv.STATE.DEFAULT
+                        font_PJSBOLD20, lv.PART.MAIN | lv.STATE.DEFAULT
                     )
                     label.set_text(candidate)
                 for i, key in enumerate(self.keys):
@@ -231,7 +239,7 @@ class NumberKeyboard(lv.keyboard):
         self.ta.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("0123456789")
         self.ta.set_max_length(10)
@@ -267,8 +275,9 @@ class NumberKeyboard(lv.keyboard):
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(30, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD32, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_height(292)
-        self.set_y(-48)
+        self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
         self.set_popovers(True)
         self.set_textarea(self.ta)
         self.add_event_cb(self.event_cb, lv.EVENT.ALL, None)
@@ -278,15 +287,9 @@ class NumberKeyboard(lv.keyboard):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                if dsc.id == 9:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 11:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+                change_key_bg(dsc, 9, 11, True)
             else:
-                if dsc.id == 9:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-                elif dsc.id == 11:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+                change_key_bg(dsc, 9, 11, False)
 
 
 class PassphraseKeyboard(lv.btnmatrix):
@@ -305,10 +308,11 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.ta.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
+        # include NBSP
         self.ta.set_accepted_chars(
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_<>.:@/|\\!()+%&-[]?{},'`;\"~$^= "
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_<>.:@/|*\\!()+%&-[]?{},'`;\"~$^= "
         )
         self.ta.set_max_length(max_len)
         self.ta.set_password_mode(True)
@@ -492,10 +496,10 @@ class PassphraseKeyboard(lv.btnmatrix):
         )
         ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN])
         # line4
+        ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
         ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend([lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend([6 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT])
+        ctrl_map.extend([7 | lv.btnmatrix.CTRL.NO_REPEAT])
+        ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
         self.ctrl_map = ctrl_map
         self.set_map(self.btn_map_text_lower)
         self.set_ctrl_map(self.ctrl_map)
@@ -508,6 +512,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.set_style_pad_row(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_MONO28, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -519,16 +524,10 @@ class PassphraseKeyboard(lv.btnmatrix):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                if dsc.id == 31:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-                elif dsc.id == 34:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+                change_key_bg(dsc, 31, 34, True)
             else:
-                if dsc.id == 31:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-                elif dsc.id == 34:
-                    dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-            if dsc.id == 22 or dsc.id == 32:
+                change_key_bg(dsc, 31, 34, False)
+            if dsc.id in (22, 32):
                 dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
         elif code == lv.EVENT.VALUE_CHANGED:
             target = event.get_target()

@@ -1,3 +1,4 @@
+# pyright: off
 import gc
 import sys
 from trezorutils import (  # noqa: F401
@@ -15,6 +16,9 @@ from trezorutils import (  # noqa: F401
 )
 from typing import TYPE_CHECKING
 
+# pyright: on
+
+
 DISABLE_ANIMATION = 0
 
 if __debug__:
@@ -27,15 +31,8 @@ if __debug__:
         LOG_MEMORY = 0
 
 if TYPE_CHECKING:
-    from typing import (
-        Any,
-        Iterator,
-        Protocol,
-        TypeVar,
-        Sequence,
-    )
-
     from trezor.protobuf import MessageType
+    from typing import Any, Iterator, Protocol, Sequence, TypeVar
 
 SCREENS = []
 
@@ -48,7 +45,7 @@ def clear_screens() -> None:
                 del scr._init
             if hasattr(scr, "_instance"):
                 del scr._instance
-        except:
+        except BaseException:
             pass
     SCREENS.clear()
 

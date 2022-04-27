@@ -1,4 +1,4 @@
-import lvgl as lv
+import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
 class ImgButton(lv.imgbtn):

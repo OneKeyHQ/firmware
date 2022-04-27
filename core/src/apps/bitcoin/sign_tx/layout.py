@@ -2,7 +2,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
-from trezor import ui, utils, wire
+from trezor import utils, wire
 from trezor.enums import AmountUnit, ButtonRequestType, OutputScriptType
 from trezor.strings import format_amount, format_timestamp
 from trezor.ui import layouts
@@ -11,7 +11,10 @@ from .. import addresses
 from . import omni
 
 if not utils.BITCOIN_ONLY:
-    from trezor.ui.layouts.tt import altcoin
+    if not utils.LVGL_UI:
+        from trezor.ui.layouts.tt import altcoin
+    else:
+        from trezor.ui.layouts.lvgl import altcoin
 
 
 if TYPE_CHECKING:
@@ -67,19 +70,11 @@ async def confirm_output(
     else:
         assert output.address is not None
         address_short = addresses.address_short(coin, output.address)
-        if output.payment_req_index is not None:
-            title = "Confirm details"
-            icon = ui.ICON_CONFIRM
-        else:
-            title = "Confirm sending"
-            icon = ui.ICON_SEND
 
         layout = layouts.confirm_output(
             ctx,
             address_short,
             format_coin_amount(output.amount, coin, amount_unit),
-            title=title,
-            icon=icon,
         )
 
     await layout
@@ -105,11 +100,11 @@ async def confirm_payment_request(
     memo_texts = []
     for m in msg.memos:
         if m.text_memo is not None:
-            memo_texts.append(m.text_memo.text)
+            memo_texts.append(m.text_memo.text + " ")
         elif m.refund_memo is not None:
             pass
         elif m.coin_purchase_memo is not None:
-            memo_texts.append(f"Buying {m.coin_purchase_memo.amount}.")
+            memo_texts.append(f" Buying {m.coin_purchase_memo.amount}.")
         else:
             raise wire.DataError("Unrecognized memo type in payment request memo.")
 
@@ -120,6 +115,7 @@ async def confirm_payment_request(
         msg.recipient_name,
         format_coin_amount(msg.amount, coin, amount_unit),
         memo_texts,
+        coin_shortcut=coin.coin_shortcut,
     )
 
 
@@ -176,6 +172,7 @@ async def confirm_joint_total(
         ctx,
         spending_amount=format_coin_amount(spending, coin, amount_unit),
         total_amount=format_coin_amount(total, coin, amount_unit),
+        coin_shortcut=coin.coin_shortcut,
     )
 
 
@@ -190,6 +187,8 @@ async def confirm_total(
         ctx,
         total_amount=format_coin_amount(spending, coin, amount_unit),
         fee_amount=format_coin_amount(fee, coin, amount_unit),
+        amount=format_coin_amount(spending - fee, coin, amount_unit),
+        coin_shortcut=coin.coin_shortcut,
     )
 
 
@@ -201,9 +200,10 @@ async def confirm_feeoverthreshold(
         ctx,
         "fee_over_threshold",
         "High fee",
-        "The fee of\n{}is unexpectedly high.",
+        "The fee is unexpectedly high.",
         fee_amount,
         ButtonRequestType.FeeOverThreshold,
+        description="FEE:",
     )
 
 
@@ -214,9 +214,10 @@ async def confirm_change_count_over_threshold(
         ctx,
         "change_count_over_threshold",
         "Warning",
-        "There are {}\nchange-outputs.\n",
+        "There are too many change-outputs.\n",
         str(change_count),
         ButtonRequestType.SignTx,
+        description="CHANGE COUNT:",
     )
 
 
@@ -225,16 +226,19 @@ async def confirm_nondefault_locktime(
 ) -> None:
     if lock_time_disabled:
         title = "Warning"
-        text = "Locktime is set but will\nhave no effect.\n"
+        text = "Locktime is set but will have no effect."
         param: str | None = None
+        description = None
     elif lock_time < _LOCKTIME_TIMESTAMP_MIN_VALUE:
         title = "Confirm locktime"
-        text = "Locktime for this\ntransaction is set to\nblockheight:\n{}"
+        text = "Locktime for this transaction is set to blockheight"
         param = str(lock_time)
+        description = "BLOCK HEIGHT:"
     else:
         title = "Confirm locktime"
-        text = "Locktime for this\ntransaction is set to:\n{}"
+        text = "Locktime for this transaction is set to"
         param = format_timestamp(lock_time)
+        description = "TIME:"
 
     await layouts.confirm_metadata(
         ctx,
@@ -243,4 +247,5 @@ async def confirm_nondefault_locktime(
         text,
         param,
         br_code=ButtonRequestType.SignTx,
+        description=description,
     )

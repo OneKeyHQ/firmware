@@ -8,11 +8,9 @@ from trezor.strings import format_amount, format_plural
 from trezor.ui.layouts import (
     confirm_action,
     confirm_address,
-    confirm_amount,
     confirm_blob,
     confirm_output,
     confirm_text,
-    confirm_total,
     should_show_more,
 )
 from trezor.ui.layouts.lvgl.altcoin import (
@@ -121,7 +119,7 @@ def require_confirm_unknown_token(
 
 
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    from trezor.ui.layouts import confirm_data
+    from trezor.ui.layouts import confirm_data  # type: ignore["confirm_data" is unknown import symbol]
 
     return confirm_data(
         ctx,

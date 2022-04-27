@@ -9,7 +9,7 @@ from trezor.messages import (
 )
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_properties
-from trezor.ui.layouts.tt.altcoin import confirm_transfer_binance
+from trezor.ui.layouts.lvgl.altcoin import confirm_transfer_binance
 
 from . import helpers
 
@@ -30,11 +30,11 @@ async def require_confirm_transfer(ctx: Context, msg: BinanceTransferMsg) -> Non
                 )
             )
 
-    for txinput in msg.inputs:
-        make_input_output_pages(txinput, "Confirm input")
+    for index, txinput in enumerate(msg.inputs):
+        make_input_output_pages(txinput, f"INPUT #{index}")
 
-    for txoutput in msg.outputs:
-        make_input_output_pages(txoutput, "Confirm output")
+    for index, txoutput in enumerate(msg.outputs):
+        make_input_output_pages(txoutput, f"OUTPUT #{index}")
 
     await confirm_transfer_binance(ctx, items)
 

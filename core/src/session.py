@@ -1,4 +1,4 @@
-from trezor import log, loop, utils, wire, workflow
+from trezor import io, log, loop, utils, wire, workflow
 from trezor.lvglui import lvgl_tick
 
 import apps.base
@@ -27,14 +27,13 @@ else:
 wire.setup(usb.iface_wire)
 if __debug__:
     wire.setup(usb.iface_debug, is_debug_session=True)
-
 # interface used for trezor wire protocol
 SPI_IFACE_NUM = 6
-iface_wire = io.SPI(
-    SPI_IFACE_NUM,
+wire.setup(
+    io.SPI(
+        SPI_IFACE_NUM,
+    )
 )
-wire.setup(iface_wire)
-
 loop.run()
 
 if __debug__:

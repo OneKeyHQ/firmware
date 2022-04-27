@@ -49,7 +49,7 @@ pystyle: ## apply code style on application sources and tests
 	@echo [PYLINT]
 	@pylint $(PY_FILES)
 	@echo [PYTHON]
-	make -C python style
+	# make -C python style
 
 changelog_check: ## check changelog format
 	./tools/generate-changelog.py --check core
@@ -65,7 +65,8 @@ yaml_check: ## check yaml formatting
 	yamllint .
 
 editor_check: ## check editorconfig formatting
-	editorconfig-checker -exclude '.*\.(so|dat|toif|der)'
+	# disable for now, as it is conflicting with the python style check
+	# editorconfig-checker -exclude '.*\.(so|dat|toif|der)'
 
 cstyle_check: ## run code style check on low-level C code
 	clang-format --version

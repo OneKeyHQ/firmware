@@ -1,4 +1,4 @@
-from .. import *
+from .. import font_PJSBOLD24, lv
 
 
 class Roller(lv.roller):

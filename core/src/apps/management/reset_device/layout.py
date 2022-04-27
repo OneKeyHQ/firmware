@@ -114,6 +114,7 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
         description = "Never make a digital copy of your recovery seed and never upload it online!"
     else:
         icon = ui.ICON_NOCOPY
+    # pyright: off
     await confirm_action(
         ctx,
         "backup_warning",
@@ -124,6 +125,7 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
         icon=icon,
         br_code=ButtonRequestType.ResetDevice,
     )
+    # pyright: on
 
 
 async def show_backup_success(ctx: wire.GenericContext) -> None:

@@ -1,4 +1,4 @@
-from .common import *  # noqa: F401,F403
+from .common import Screen, lv  # noqa: F401,F403, F405
 
 
 class BootScreen(Screen):

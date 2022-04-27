@@ -103,8 +103,16 @@ class SPI:
     """
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        iface_num: int,
+    ) -> None:
         """
+        """
+
+    def iface_num(self) -> int:
+        """
+        Returns the configured number of this interface.
         """
 
     def write(self, msg: bytes) -> int:
@@ -217,4 +225,4 @@ BUTTON_PRESSED: int  # button down event
 BUTTON_RELEASED: int  # button up event
 BUTTON_LEFT: int  # button number of left button
 BUTTON_RIGHT: int  # button number of right button
-WireInterface = Union[HID, WebUSB]
+WireInterface = Union[HID, WebUSB, SPI]
