@@ -351,6 +351,7 @@ cli.add_command(bixin.cli)
 cli.add_command(special.sign_firmware)
 cli.add_command(special.export_ed25519_pubkey)
 cli.add_command(special.ed25519_test)
+cli.add_command(special.ed25519_commit)
 
 #
 # Main

@@ -5,7 +5,9 @@ from .. import special, tools
 from . import with_client
 from binascii import hexlify, unhexlify
 import ecdsa
+
 from trezorlib import cosi, _ed25519
+from trezorlib._internal import firmware_headers
 
 
 # Adapt OneKey Mini firmware header format
@@ -245,3 +247,46 @@ def ed25519_test(client):
     special.ed25519_verify(client, data, global_pk, sig)
 
     print("pass")
+
+
+TOUCHPRO_PUBKEYS = [
+    "154b8ab261cc8879483f689a2d41243ae7dbc4021672bbd25c338ae84d931154",
+    "a9e65e07fe6d39a8a84e11a996a0283f881e175cba602eb5ac442fb75b39e8e0",
+    "6c8805abb2df9d3679f1d28a40cd990399b99fc3ee4e0657d81d381ea1488a12",
+    "3ed79779064d56571b29bcaa734cbb6db61d2e626566628ecf4c89e1db45eaec",
+    "54a40633bfd9e60b8a391265b2e006374abe631d1e1107332bca56bf9f8c5c99",
+    "4b71134f18e00787c583d40742cc188e17fc85ade4cb472dae5ef8e069f0fec5",
+    "2ecf80c82b449848c000335092139551bfe47b3c7317b49950f65e1d82432024"
+]
+
+
+@click.command()
+@with_client
+@click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
+@click.argument("firmware_file", type=click.File("rb+"))
+def ed25519_commit(client, address, firmware_file):
+    address_n = tools.parse_path(address)
+    firmware_data = firmware_file.read()
+
+    try:
+        fw = firmware_headers.parse_image(firmware_data)
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        magic = firmware_data[:4]
+        raise click.ClickException(
+            "Could not parse file (magic bytes: {!r})".format(magic)
+        ) from e
+
+    digest = fw.digest()
+    pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
+    ctr = None
+    for i, key in enumerate(TOUCHPRO_PUBKEYS):
+        if pubkey.hex() == key:
+            ctr = i
+    if ctr is None:
+        raise click.ClickException("Not found in signer public keys")
+
+    R = special.get_ed25519_nonce(client, address_n, digest, ctr).R
+    click.echo(R.hex())
