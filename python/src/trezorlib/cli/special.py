@@ -223,25 +223,31 @@ def export_ed25519_pubkey(client, address):
 @with_client
 def ed25519_test(client):
     data = bytes.fromhex("00" * 32)
-    address_n_1 = tools.parse_path("m/44h/0h/0h/0h/1h")
-    address_n_2 = tools.parse_path("m/44h/0h/0h/0h/2h")
-    address_n_3 = tools.parse_path("m/44h/0h/0h/0h/3h")
+    address_n_1 = tools.parse_path("m/44h/0h/0h/0h/0h")
+    address_n_2 = tools.parse_path("m/44h/0h/0h/0h/1h")
+    address_n_3 = tools.parse_path("m/44h/0h/0h/0h/2h")
 
     pk1 = special.export_ed25519_pubkey(client, address_n_1).pubkey
     pk2 = special.export_ed25519_pubkey(client, address_n_2).pubkey
     pk3 = special.export_ed25519_pubkey(client, address_n_3).pubkey
     global_pk = cosi.combine_keys([pk1, pk2, pk3])
+    print("pubkeys %s:%s:%s" % (pk1.hex(), pk2.hex(), pk3.hex()))
+    print("global_pk", global_pk.hex())
 
     R1 = special.get_ed25519_nonce(client, address_n_1, data, 0).R
     R2 = special.get_ed25519_nonce(client, address_n_2, data, 1).R
     R3 = special.get_ed25519_nonce(client, address_n_3, data, 2).R
     global_R = cosi.combine_keys([R1, R2, R3])
+    print("Rs %s:%s:%s" % (R1.hex(), R2.hex(), R3.hex()))
+    print("global_R", global_R.hex())
 
     sig1 = special.cosign_ed25519(client, address_n_1, data, 0, global_pk, global_R).sig
     sig2 = special.cosign_ed25519(client, address_n_2, data, 1, global_pk, global_R).sig
     sig3 = special.cosign_ed25519(client, address_n_3, data, 2, global_pk, global_R).sig
     sigs = [sig1, sig2, sig3]
+    print("sigs %s:%s:%s" % (sig1.hex(), sig2.hex(), sig3.hex()))
     sig = cosi.combine_sig(global_R, sigs)
+    print("sig", sig.hex())
 
     cosi.verify_combined(sig, data, global_pk)
     special.ed25519_verify(client, data, global_pk, sig)
@@ -290,3 +296,57 @@ def ed25519_commit(client, address, firmware_file):
 
     R = special.get_ed25519_nonce(client, address_n, digest, ctr).R
     click.echo(R.hex())
+
+
+@click.command()
+@click.argument("keys")
+def ed25519_combine_keys(keys):
+    keys = [bytes.fromhex(k) for k in keys.split(":")]
+    key = cosi.combine_keys(keys)
+    click.echo(key.hex())
+
+
+@click.command()
+@click.option("-c", "--commitment", required=True, help="the global R of ed25519 cosi")
+@click.argument("sigs")
+def ed25519_combine_sigs(sigs, commitment):
+    sigs = [bytes.fromhex(k) for k in sigs.split(":")]
+    global_R = bytes.fromhex(commitment)
+    sig = cosi.combine_sig(global_R, sigs)
+    click.echo(sig.hex())
+
+
+@click.command()
+@with_client
+@click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
+@click.option("-c", "--commitment", required=True, help="the global R of ed25519 cosi")
+@click.option("-g", "--globalpubkey", required=True, help="the global public key of ed25519 cosi")
+@click.argument("firmware_file", type=click.File("rb+"))
+def ed25519_cosign(client, address, commitment, globalpubkey, firmware_file):
+    address_n = tools.parse_path(address)
+    global_R = bytes.fromhex(commitment)
+    global_pk = bytes.fromhex(globalpubkey)
+    firmware_data = firmware_file.read()
+
+    try:
+        fw = firmware_headers.parse_image(firmware_data)
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        magic = firmware_data[:4]
+        raise click.ClickException(
+            "Could not parse file (magic bytes: {!r})".format(magic)
+        ) from e
+
+    digest = fw.digest()
+    pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
+    ctr = None
+    for i, key in enumerate(TOUCHPRO_PUBKEYS):
+        if pubkey.hex() == key:
+            ctr = i
+    if ctr is None:
+        raise click.ClickException("Not found in signer public keys")
+
+    sig = special.cosign_ed25519(client, address_n, digest, ctr, global_pk, global_R).sig
+    click.echo(sig.hex())

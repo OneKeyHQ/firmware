@@ -352,6 +352,9 @@ cli.add_command(special.sign_firmware)
 cli.add_command(special.export_ed25519_pubkey)
 cli.add_command(special.ed25519_test)
 cli.add_command(special.ed25519_commit)
+cli.add_command(special.ed25519_combine_keys)
+cli.add_command(special.ed25519_combine_sigs)
+cli.add_command(special.ed25519_cosign)
 
 #
 # Main
