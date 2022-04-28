@@ -216,10 +216,12 @@ secbool flash_erase_sectors(const uint8_t *sectors, int len,
 
       if (sectors[i] < 8) {
         EraseInitStruct.Banks = FLASH_BANK_1;
+        EraseInitStruct.Sector = sectors[i];
       } else {
         EraseInitStruct.Banks = FLASH_BANK_2;
+        EraseInitStruct.Sector = sectors[i] - 8;
       }
-      EraseInitStruct.Sector = sectors[i];
+
       uint32_t SectorError;
       if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
         ensure(flash_lock_write(), NULL);
@@ -309,8 +311,8 @@ secbool flash_write_words(uint8_t sector, uint32_t offset, uint32_t data[8]) {
       return secfalse;
     }
   }
-  if (sector >= FLASH_SECTOR_FIRMWARE_START &&
-      sector <= FLASH_SECTOR_FIRMWARE_END) {
+  if (sector >= FLASH_SECTOR_BOOTLOADER &&
+      sector <= FLASH_SECTOR_OTP_EMULATOR) {
     if (HAL_OK != HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, address,
                                     (uint32_t)&flash_word)) {
       return secfalse;
