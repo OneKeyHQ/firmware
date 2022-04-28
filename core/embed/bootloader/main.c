@@ -266,7 +266,7 @@ int main(void) {
   // display_init_seq();
   touch_init();
   touch_power_on();
-  // mpu_config_bootloader();
+  mpu_config_bootloader();
 
 #if PRODUCTION
   check_bootloader_version();

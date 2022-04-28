@@ -75,9 +75,11 @@ int main(void) {
 
   system_clock_config();
 
+  rng_init();
+
   flash_option_bytes_init();
 
-  rng_init();
+  clear_otg_hs_memory();
 
   led_init();
 
@@ -85,8 +87,11 @@ int main(void) {
 
   sdram_init();
 
-  lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
 
+
+  mpu_config();
+
+  lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   display_clear();
 
   image_header hdr;

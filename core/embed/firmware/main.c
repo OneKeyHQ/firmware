@@ -88,7 +88,7 @@ int main(void) {
   check_and_replace_bootloader();
 #endif
   // Enable MPU
-  // mpu_config_firmware();
+  mpu_config_firmware();
 #endif
 
   // Init peripherals
