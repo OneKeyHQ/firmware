@@ -257,13 +257,13 @@ static void check_bootloader_version(void) {
 int main(void) {
   SystemCoreClockUpdate();
 
-  // nand_flash_init();
+  lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  random_delays_init();
+
   qspi_flash_init();
   qspi_flash_config();
   qspi_flash_memory_mapped();
 
-  lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
-  random_delays_init();
   // display_init_seq();
   touch_init();
   touch_power_on();
@@ -276,19 +276,25 @@ int main(void) {
   display_clear();
 
   atca_init();
-  spi_slave_init();
   atca_config_init();
 
   emmc_init();
+
+  spi_slave_init();
+
   // delay to detect touch
   uint32_t touched = 0;
   for (int i = 0; i < 1000; i++) {
-    touched = touch_is_detected() | touch_read();
+    touched = touch_read();
     if (touched) {
       break;
     }
     hal_delay(1);
   }
+
+  // usb_msc_init();
+  // while (1)
+  //   ;
 
   vendor_header vhdr;
   image_header hdr;
@@ -393,7 +399,8 @@ int main(void) {
 
     if ((vhdr.vtrust & VTRUST_CLICK) == 0) {
       ui_screen_boot_click();
-      touch_click();
+      while (touch_read() == 0)
+        ;
     }
 
     ui_fadeout();
@@ -402,8 +409,7 @@ int main(void) {
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 
-  // mpu_config_off();
-  display_printf("jump to firmeware\n");
+  mpu_config_off();
   jump_to(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 
   return 0;

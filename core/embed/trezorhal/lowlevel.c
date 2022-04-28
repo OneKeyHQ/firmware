@@ -305,8 +305,8 @@ void system_clock_config(void)
   HAL_StatusTypeDef ret = HAL_OK;
   
   /*!< Supply configuration update enable */
-  HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
-  // HAL_PWREx_ConfigSupply(PWR_DIRECT_SMPS_SUPPLY);
+  // HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
+  HAL_PWREx_ConfigSupply(PWR_DIRECT_SMPS_SUPPLY);
 
   /* The voltage scaling allows optimizing the power consumption when the device is 
      clocked below the maximum system frequency, to update the voltage scaling value 
@@ -417,7 +417,30 @@ void flash_option_bytes_init(void){
 
   HAL_FLASHEx_OBGetConfig(&ob_config);
 
-  if(ob_config.RDPLevel != OB_RDP_LEVEL_2)
+  if(ob_config.RDPLevel != OB_RDP_LEVEL_2){
+    if((ob_config.USERConfig&OB_BCM4_ENABLE) != OB_BCM4_DISABLE){
+
+        ob_config.OptionType |= OPTIONBYTE_USER;
+        ob_config.USERType |= OB_USER_BCM4;
+        ob_config.USERConfig &= ~OB_BCM4_ENABLE;
+
+        HAL_FLASH_Unlock();
+        HAL_FLASH_OB_Unlock();
+
+        if(HAL_FLASHEx_OBProgram(&ob_config)!= HAL_OK){
+          ensure(secfalse,"HAL_FLASHEx_OBProgram failed");
+        }
+
+        if(HAL_FLASH_OB_Launch()!= HAL_OK){
+          ensure(secfalse,"HAL_FLASH_OB_Launch failed");
+        }
+
+        HAL_FLASH_OB_Lock();
+        HAL_FLASH_Lock();
+    }
+  }
+
+  if(ob_config.RDPLevel != WANT_RDP_LEVEL)
   {
     ob_config.OptionType |= OPTIONBYTE_WRP|OPTIONBYTE_RDP|OPTIONBYTE_USER|OPTIONBYTE_BOR;
     ob_config.RDPLevel = WANT_RDP_LEVEL;//;
@@ -427,12 +450,12 @@ void flash_option_bytes_init(void){
                         OB_USER_NRST_STOP_D1|OB_USER_NRST_STOP_D2|
                         OB_USER_NRST_STDBY_D1|OB_USER_NRST_STDBY_D2|
                         OB_USER_IWDG_STOP|OB_USER_IWDG_STDBY|OB_USER_IOHSLV|OB_USER_SWAP_BANK|
-                        OB_USER_SECURITY;
+                        OB_USER_SECURITY|OB_USER_BCM4;
     ob_config.USERConfig = OB_IWDG1_SW|OB_IWDG2_SW|
                         OB_STOP_NO_RST_D1|OB_STOP_NO_RST_D2|
                         OB_STDBY_NO_RST_D1|OB_STDBY_NO_RST_D2|
                         OB_IWDG_STOP_FREEZE|OB_IWDG_STDBY_FREEZE|OB_IOHSLV_ENABLE|OB_SWAP_BANK_DISABLE|\
-                        OB_SECURITY_DISABLE;
+                        OB_SECURITY_DISABLE|OB_BCM4_DISABLE;
 
     HAL_FLASH_Unlock();
     HAL_FLASH_OB_Unlock();
@@ -453,22 +476,26 @@ void flash_option_bytes_init(void){
 
 }
 
-void led_init(void){
+void gpio_init(void){
     GPIO_InitTypeDef  GPIO_InitStruct;
 
   /* Enable the GPIO_LED clock */
-  __HAL_RCC_GPIOI_CLK_ENABLE();
+  // __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOJ_CLK_ENABLE();
+  __HAL_RCC_GPIOK_CLK_ENABLE();
 
   /* Configure the GPIO_LED pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_14;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 
-  HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOJ, &GPIO_InitStruct);
 
+  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
+  HAL_GPIO_Init(GPIOK, &GPIO_InitStruct);
   /* By default, turn off LED */
-  HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_SET);
+  // HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_SET);
 }
 
 void led_on(void){

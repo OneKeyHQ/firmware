@@ -53,7 +53,7 @@ void emmc_init(void) {
   hmmc1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   hmmc1.Init.BusWide = SDMMC_BUS_WIDE_8B;
   hmmc1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
-  hmmc1.Init.ClockDiv = 1;
+  hmmc1.Init.ClockDiv = 2;
   if (HAL_MMC_Init(&hmmc1) != HAL_OK) {
     while (1)
       ;

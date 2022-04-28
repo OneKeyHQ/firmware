@@ -42,7 +42,7 @@ void mpu_config(void);
 void system_clock_config(void);
 void flash_option_bytes_init(void);
 
-void led_init(void);
+void gpio_init(void);
 void led_on(void);
 void led_off(void);
 #endif

@@ -233,13 +233,6 @@ int main(void) {
   reset_flags_reset();
 
   periph_init();
-  /* System Init, System clock, voltage scaling and L1-Cache configuration are
-     done by CPU1 (Cortex-M7) in the meantime Domain D2 is put in STOP
-     mode(Cortex-M4 in deep-sleep)
-  */
-
-  /* Configure the MPU attributes as Write Through for SDRAM*/
-  mpu_config();
 
   /* Enable the CPU Cache */
   cpu_cache_enable();
@@ -254,7 +247,7 @@ int main(void) {
 
   flash_otp_init();
 
-  clear_otg_hs_memory();
+  gpio_init();
 
   sdram_init();
 
