@@ -140,7 +140,7 @@ void ui_screen_welcome_third(void) {
   display_icon((DISPLAY_RESX - 180) / 2, (DISPLAY_RESY - 30) / 2 - 5, 180, 30,
                toi_icon_welcome + 12, sizeof(toi_icon_welcome) - 12,
                COLOR_WELCOME_FG, COLOR_WELCOME_BG);
-  display_text_center(120, 220, "Go to trezor.io/start", -1, FONT_NORMAL,
+  display_text_center(120, 220, "Go to onekey.so", -1, FONT_NORMAL,
                       COLOR_WELCOME_FG, COLOR_WELCOME_BG);
 }
 
@@ -179,8 +179,8 @@ void ui_screen_firmware_info(const vendor_header *const vhdr,
     display_text(55, 70, "No Firmware", -1, FONT_NORMAL, COLOR_BL_GRAY,
                  COLOR_BL_BG);
   }
-  display_text_center(120, 220, "Go to trezor.io/start", -1, FONT_NORMAL,
-                      COLOR_BL_FG, COLOR_BL_BG);
+  display_text_center(120, 220, "Go to onekey.so", -1, FONT_NORMAL, COLOR_BL_FG,
+                      COLOR_BL_BG);
 }
 
 void ui_screen_firmware_fingerprint(const image_header *const hdr) {
