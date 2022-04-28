@@ -22,6 +22,7 @@
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
+#include "emmc.h"
 #include "flash.h"
 #include "image.h"
 #include "mipi_lcd.h"
@@ -94,6 +95,7 @@ int main(void) {
   lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   display_clear();
 
+  emmc_init();
   image_header hdr;
 
   ensure(load_image_header((const uint8_t *)BOOTLOADER_START,

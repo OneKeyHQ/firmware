@@ -25,6 +25,7 @@
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
+#include "emmc.h"
 #include "flash.h"
 #include "image.h"
 #include "mini_printf.h"
@@ -278,6 +279,7 @@ int main(void) {
   spi_slave_init();
   atca_config_init();
 
+  emmc_init();
   // delay to detect touch
   uint32_t touched = 0;
   for (int i = 0; i < 1000; i++) {

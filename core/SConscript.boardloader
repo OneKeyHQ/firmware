@@ -52,6 +52,7 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c',
@@ -82,6 +83,7 @@ if PRODUCTION_MODEL == 'H':
     SOURCE_TREZORHAL = [
         'embed/trezorhal/system_stm32h7xx.c',
         'embed/trezorhal/common.c',
+        'embed/trezorhal/emmc.c',
         'embed/trezorhal/sdram.c',
         'embed/trezorhal/nand_flash.c',
         'embed/trezorhal/qspi_flash.c',
@@ -94,6 +96,9 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/rng.c',
         'embed/trezorhal/util.s',
         'embed/trezorhal/vectortable.s',
+        'embed/trezorhal/fatfs/ff.c',
+        'embed/trezorhal/fatfs/ffunicode.c',
+        'embed/trezorhal/fatfs/diskio.c',
     ]
 else:
     SOURCE_MOD += [
@@ -190,6 +195,7 @@ if PRODUCTION_MODEL == 'H':
         CPPPATH=[
             'embed/boardloader',
             'embed/trezorhal',
+            'embed/trezorhal/fatfs',
             'embed/extmod/modtrezorui',
             'embed/extmod/modtrezorui/otm8009a',
             'vendor/micropython/stmhal',
