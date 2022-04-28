@@ -90,7 +90,7 @@ if PRODUCTION_MODEL == 'H':
     ]
 
     SOURCE_BOOTLOADER = [
-        'embed/bootloader/startup_stm32h747xx.s',
+        'embed/bootloader/startup.s',
         'embed/bootloader/header.S',
         'embed/bootloader/bootui.c',
         'embed/bootloader/main.c',
@@ -221,7 +221,7 @@ if PRODUCTION_MODEL == 'H':
         '-fstack-protector-all '
         + CPU_CCFLAGS + CCFLAGS_MOD,
         CCFLAGS_QSTR='-DNO_QSTR -DN_X64 -DN_X86 -DN_THUMB',
-        LINKFLAGS='-T embed/bootloader/stm32h747xx_flash_CM7.ld -Wl,--gc-sections -Wl,-Map=build/bootloader/bootloader.map -Wl,--warn-common',
+        LINKFLAGS='-T embed/bootloader/memory.ld -Wl,--gc-sections -Wl,-Map=build/bootloader/bootloader.map -Wl,--warn-common',
         CPPPATH=[
             'embed/bootloader',
             'embed/bootloader/nanopb',

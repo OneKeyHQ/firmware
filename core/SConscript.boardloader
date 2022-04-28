@@ -76,7 +76,7 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
     ]
     SOURCE_BOARDLOADER = [
-        'embed/boardloader/startup_stm32h747xx.s',
+        'embed/boardloader/startup.s',
         'embed/boardloader/main.c',
     ]
     SOURCE_TREZORHAL = [
@@ -93,6 +93,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/systick.c',
         'embed/trezorhal/rng.c',
         'embed/trezorhal/util.s',
+        'embed/trezorhal/vectortable.s',
     ]
 else:
     SOURCE_MOD += [
@@ -173,7 +174,7 @@ else:
     raise ValueError('Unknown Trezor model')
 
 if PRODUCTION_MODEL == 'H':
-    LD_FILE = '-T embed/boardloader/stm32h747xx_flash_CM7.ld '
+    LD_FILE = '-T embed/boardloader/memory.ld '
     env.Replace(
         COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
         CCFLAGS='$COPT '

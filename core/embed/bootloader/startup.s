@@ -6,8 +6,8 @@
   .type reset_handler, STT_FUNC
 reset_handler:
   // setup environment for subsequent stage of code
-  ldr r0, =ccmram_start // r0 - point to beginning of CCMRAM
-  ldr r1, =ccmram_end   // r1 - point to byte after the end of CCMRAM
+  ldr r0, =axiram_start // r0 - point to beginning of axiram
+  ldr r1, =axiram_end   // r1 - point to byte after the end of axiram
   ldr r2, =0            // r2 - the word-sized value to be written
   bl memset_reg
 

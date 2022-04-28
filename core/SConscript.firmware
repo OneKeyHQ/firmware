@@ -421,7 +421,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/firmware/main.c',
         'embed/firmware/mphalport.c',
         'embed/firmware/nlrthumb.c',
-        'embed/firmware/startup_stm32h747xx.s',        
+        'embed/firmware/startup.S',        
 
     ]
     SOURCE_TREZORHAL = [
