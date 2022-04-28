@@ -51,17 +51,25 @@ static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 2] = {
 #if USE_EXTERN_FLASH
     [16] = 0x08200000,               // last element - not a valid sector
     [17] = QSPI_FLASH_BASE_ADDRESS,  // 128 KiB
-    [18] = QSPI_FLASH_BASE_ADDRESS + 0x20000,   // 128 KiB
-    [19] = QSPI_FLASH_BASE_ADDRESS + 0x40000,   // 128 KiB
-    [20] = QSPI_FLASH_BASE_ADDRESS + 0x60000,   // 128 KiB
-    [21] = QSPI_FLASH_BASE_ADDRESS + 0x80000,   // 128 KiB
-    [22] = QSPI_FLASH_BASE_ADDRESS + 0xA0000,   // 128 KiB
-    [23] = QSPI_FLASH_BASE_ADDRESS + 0xC0000,   // 128 KiB
-    [24] = QSPI_FLASH_BASE_ADDRESS + 0xE0000,   // 128 KiB
-    [25] = QSPI_FLASH_BASE_ADDRESS + 0x100000,  // 64 KiB
-    [26] = QSPI_FLASH_BASE_ADDRESS + 0x100000 +
+    [18] = QSPI_FLASH_BASE_ADDRESS + 0x20000,                     // 128 KiB
+    [19] = QSPI_FLASH_BASE_ADDRESS + 0x40000,                     // 128 KiB
+    [20] = QSPI_FLASH_BASE_ADDRESS + 0x60000,                     // 128 KiB
+    [21] = QSPI_FLASH_BASE_ADDRESS + 0x80000,                     // 128 KiB
+    [22] = QSPI_FLASH_BASE_ADDRESS + 0xA0000,                     // 128 KiB
+    [23] = QSPI_FLASH_BASE_ADDRESS + 0xC0000,                     // 128 KiB
+    [24] = QSPI_FLASH_BASE_ADDRESS + 0xE0000,                     // 128 KiB
+    [25] = QSPI_FLASH_BASE_ADDRESS + 0x100000,                    // 128 KiB
+    [26] = QSPI_FLASH_BASE_ADDRESS + 0x120000,                    // 128 KiB
+    [27] = QSPI_FLASH_BASE_ADDRESS + 0x140000,                    // 128 KiB
+    [28] = QSPI_FLASH_BASE_ADDRESS + 0x160000,                    // 128 KiB
+    [29] = QSPI_FLASH_BASE_ADDRESS + 0x180000,                    // 128 KiB
+    [30] = QSPI_FLASH_BASE_ADDRESS + 0x1A0000,                    // 128 KiB
+    [31] = QSPI_FLASH_BASE_ADDRESS + 0x1E0000,                    // 128 KiB
+    [32] = QSPI_FLASH_BASE_ADDRESS + 0x200000,                    // 128 KiB
+    [33] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET,  // 64 KiB
+    [34] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET +
            64 * 1024,  //  64 KiB storage sector 2
-    [27] = QSPI_FLASH_BASE_ADDRESS + 0x100000 + 128 * 1024,
+    [35] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET + 128 * 1024,
 #else
     [16] = 0x08200000,  // last element - not a valid sector
 #endif
@@ -88,6 +96,14 @@ const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT] = {
     21,
     22,
     23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
     FLASH_SECTOR_FIRMWARE_EXTRA_END};
 #else
 static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 1] = {
