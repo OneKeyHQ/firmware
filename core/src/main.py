@@ -9,7 +9,7 @@
 # trezor imports only C modules
 import trezor
 # trezor.utils import only C modules
-from trezor import utils
+from trezor import io, utils
 # we need space for 30 items in the trezor module
 utils.presize_module("trezor", 30)
 # storage imports storage.common, storage.cache and storage.device.
@@ -42,6 +42,8 @@ import usb
 # create an unimport manager that will be reused in the main loop
 unimport_manager = utils.unimport()
 
+io.fatfs.mount()
+
 # unlock the device, unload the boot module afterwards
 with unimport_manager:
     import boot
@@ -60,9 +62,6 @@ while True:
     with unimport_manager:
         import session  # noqa: F401
         del session
-        if __debug__:
-            print('---heap status before gc---')
-            micropython.mem_info()  # type: ignore["micropython" is possibly unbound]
-    if __debug__:
-        print('---heap status after gc----')
-        micropython.mem_info()  # type: ignore["micropython" is possibly unbound]
+        print('---heap status before gc---')
+        micropython.mem_info()
+        

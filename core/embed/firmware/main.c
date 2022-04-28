@@ -40,6 +40,7 @@
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
+#include "emmc.h"
 #include "flash.h"
 #include "mpu.h"
 #include "random_delays.h"
@@ -113,7 +114,7 @@ int main(void) {
   atca_init();
   atca_config_init();
 
-  // timer_init();
+  emmc_init();
 
   // jump to unprivileged mode
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
