@@ -55,9 +55,9 @@ SECTIONS {
     . = ALIGN(4);
     *(.rodata*);
     . = ALIGN(4);
-    KEEP(*(.bootloader));
-    *(.bootloader*);
-    . = ALIGN(512);
+    /* KEEP(*(.bootloader)); */
+    /* *(.bootloader*); */
+    /*. = ALIGN(512); */
   } >FLASH AT>FLASH
 
   .data : ALIGN(4) {
