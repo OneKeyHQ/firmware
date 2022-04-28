@@ -481,6 +481,22 @@ secbool flash_write_word(uint8_t sector, uint32_t offset, uint32_t data) {
 #if defined(STM32H747xx)
 static FlashLockedData *flash_otp_data =
     (FlashLockedData *)FLASH_SECTOR_TABLE[15];
+
+void flash_otp_init(void) {
+  if (memcmp(flash_otp_data->flag, "erased", strlen("erased")) == 0) {
+    return;
+  }
+  uint8_t buf[32] = "erased";
+  uint8_t secotrs[1];
+  secotrs[0] = 15;
+
+  ensure(flash_erase_sectors(secotrs, 1, NULL), "erase data sector 15");
+  ensure(flash_unlock_write(), NULL);
+  ensure(flash_write_words(15, 0, (uint32_t *)buf), "write init flag");
+  ensure(flash_lock_write(), NULL);
+  return;
+}
+
 secbool flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,
                        uint8_t datalen) {
   if (block >= FLASH_OTP_NUM_BLOCKS ||

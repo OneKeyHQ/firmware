@@ -81,7 +81,7 @@ int main(void) {
 
   clear_otg_hs_memory();
 
-  led_init();
+  flash_otp_init();
 
   clear_otg_hs_memory();
 
