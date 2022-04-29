@@ -62,6 +62,9 @@ while True:
     with unimport_manager:
         import session  # noqa: F401
         del session
-        print('---heap status before gc---')
-        micropython.mem_info()
-        
+        if __debug__:
+            print('---heap status before gc---')
+            micropython.mem_info()  # type: ignore["micropython" is possibly unbound]
+    if __debug__:
+        print('---heap status after gc----')
+        micropython.mem_info()  # type: ignore["micropython" is possibly unbound]
