@@ -32,6 +32,7 @@
 #include "sdcard.h"
 #include "sdram.h"
 #include "touch.h"
+#include "usb.h"
 
 #include "lowlevel.h"
 #include "version.h"
@@ -260,7 +261,45 @@ int main(void) {
   lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   display_clear();
 
+  touch_init();
   emmc_init();
+
+  FRESULT res;
+  BYTE work[FF_MAX_SS];
+  MKFS_PARM mk_para = {
+      .fmt = FM_FAT32,
+  };
+
+  res = f_mount(&fs_instance, "", 1);
+  if (res != FR_OK) {
+    if (res == FR_NO_FILESYSTEM) {
+      res = f_mkfs("", &mk_para, work, sizeof(work));
+      if (res) {
+        display_printf("fatfs Format error");
+      }
+    } else {
+      display_printf("mount err %d\n", res);
+    }
+  }
+
+  uint32_t touched = 0;
+  for (int i = 0; i < 500; i++) {
+    if (touch_num_detected() > 1) {
+      touched = 1;
+      break;
+    }
+    hal_delay(1);
+  }
+
+  if (touched) {
+    display_printf("Onekey Boardloader\n");
+    display_printf("USB Mass Storage Mode\n");
+    display_printf("==================\n\n");
+    usb_msc_init();
+    while (1)
+      ;
+  }
+
   uint32_t code_len = 0;
   code_len = check_sdcard();
   if (code_len) {
