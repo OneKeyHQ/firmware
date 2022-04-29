@@ -1,3 +1,5 @@
+// clang-format off
+
 /*------------------------------------------------------------------------*/
 /* Sample Code of OS Dependent Functions for FatFs                        */
 /* (C)ChaN, 2018                                                          */
