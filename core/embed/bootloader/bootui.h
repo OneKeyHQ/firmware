@@ -22,6 +22,7 @@
 
 #include "image.h"
 #include "secbool.h"
+#include "stdbool.h"
 
 void ui_screen_boot(const vendor_header* const vhdr,
                     const image_header* const hdr);
@@ -61,8 +62,31 @@ void ui_fadeout(void);
 #define INPUT_CONFIRM 0x02       // Confirm button
 #define INPUT_LONG_CONFIRM 0x04  // Long Confirm button
 #define INPUT_INFO 0x08          // Info icon
+#define INPUT_NEXT 0x10          // Next icon
+#define INPUT_PREVIOUS 0x20      // Previous icon
+#define INPUT_RESTART 0x40       // Restart icon
+
+enum BAT_LEVEL {
+  BAT_LEVEL_0,
+  BAT_LEVEL_25,
+  BAT_LEVEL_50,
+  BAT_LEVEL_75,
+  BAT_LEVEL_100,
+  BAT_LEVEL_CHARGING
+};
+
 // clang-format on
 
+void ui_title_update(void);
 int ui_user_input(int zones);
+int ui_input_poll(int zones, bool poll);
+void ui_bootloader_first(const image_header* const hdr);
+void ui_bootloader_second(const image_header* const hdr);
+void ui_wipe_confirm(const image_header* const hdr);
+void ui_install_confirm(image_header* current_hdr,
+                        const image_header* const new_hdr);
+void ui_install_progress(image_header* current_hdr,
+                         const image_header* const new_hdr);
+void ui_bootloader_page_switch(const image_header* const hdr);
 
 #endif

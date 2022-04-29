@@ -58,6 +58,7 @@
 #define RGB16(R, G, B) ((R & 0xF8) << 8) | ((G & 0xFC) << 3) | ((B & 0xF8) >> 3)
 #define COLOR_WHITE 0xFFFF
 #define COLOR_BLACK 0x0000
+#define COLOR_GRAY RGB16(0x99, 0x99, 0x99)
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
 #define FONT_NORMAL (-1)
@@ -70,6 +71,9 @@
 #endif
 #ifdef TREZOR_FONT_MONO_ENABLE
 #define FONT_MONO (-3)
+#endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+#define FONT_BOLD36 (-4)
 #endif
 
 // provided by port
@@ -100,6 +104,7 @@ void display_icon(int x, int y, int w, int h, const void *data,
 void display_loader(uint16_t progress, bool indeterminate, int yoffset,
                     uint16_t fgcolor, uint16_t bgcolor, const uint8_t *icon,
                     uint32_t iconlen, uint16_t iconfgcolor);
+void display_progress(const char *desc, int permil);
 
 #ifndef TREZOR_PRINT_DISABLE
 void display_print_color(uint16_t fgcolor, uint16_t bgcolor);

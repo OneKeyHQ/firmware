@@ -244,7 +244,7 @@ uint32_t touch_read(void) {
 
   memset(touch_data, 0x00, sizeof(touch_data));
   if (HAL_I2C_Mem_Read(&i2c_handle, TOUCH_ADDRESS, 0xD000, 2, touch_data, 7,
-                       1000) != HAL_OK) {
+                       50) != HAL_OK) {
     return 0;
   }
   if (touch_data[6] != 0xAB) {
