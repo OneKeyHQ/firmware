@@ -198,15 +198,12 @@ void reset_flags_reset(void) {
 // BOR LEVEL 3: Reset level threshold is around 2.5 V
 #define WANT_BOR_LEVEL (OB_BOR_LEVEL3)
 
-// clang-format off
-
 /**
-* @brief  CPU L1-Cache enable.
-* @param  None
-* @retval None
-*/
-void cpu_cache_enable(void)
-{
+ * @brief  CPU L1-Cache enable.
+ * @param  None
+ * @retval None
+ */
+void cpu_cache_enable(void) {
   /* Enable I-Cache */
   SCB_EnableICache();
 
@@ -215,16 +212,15 @@ void cpu_cache_enable(void)
 }
 
 /**
-  * @brief  Configure the MPU attributes as Write Through for External SDRAM.
-  * @note   The Base Address is 0xD0000000 .
-  *         The Configured Region Size is 32MB because same as SDRAM size.
-  * @param  None
-  * @retval None
-  */
-void mpu_config(void)
-{
+ * @brief  Configure the MPU attributes as Write Through for External SDRAM.
+ * @note   The Base Address is 0xD0000000 .
+ *         The Configured Region Size is 32MB because same as SDRAM size.
+ * @param  None
+ * @retval None
+ */
+void mpu_config(void) {
   MPU_Region_InitTypeDef MPU_InitStruct;
-  
+
   /* Disable the MPU */
   HAL_MPU_Disable();
 
@@ -243,80 +239,80 @@ void mpu_config(void)
 
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-    //NAND FLASH
+  // NAND FLASH
   // MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
-	// MPU_InitStruct.BaseAddress      = 0x80000000;
-	// MPU_InitStruct.Size             = MPU_REGION_SIZE_512MB;	// MPU_REGION_SIZE_512MB;
-	// MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-	// MPU_InitStruct.IsBufferable     = MPU_ACCESS_BUFFERABLE;
-	// MPU_InitStruct.IsCacheable      = MPU_ACCESS_NOT_CACHEABLE;
-	// MPU_InitStruct.IsShareable      = MPU_ACCESS_NOT_SHAREABLE;
-	// MPU_InitStruct.Number           = MPU_REGION_NUMBER1;
-	// MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL0;
-	// MPU_InitStruct.SubRegionDisable = 0x00;
-	// MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
-	// HAL_MPU_ConfigRegion(&MPU_InitStruct);
+  // MPU_InitStruct.BaseAddress      = 0x80000000;
+  // MPU_InitStruct.Size             = MPU_REGION_SIZE_512MB;	//
+  // MPU_REGION_SIZE_512MB; MPU_InitStruct.AccessPermission =
+  // MPU_REGION_FULL_ACCESS; MPU_InitStruct.IsBufferable     =
+  // MPU_ACCESS_BUFFERABLE; MPU_InitStruct.IsCacheable      =
+  // MPU_ACCESS_NOT_CACHEABLE; MPU_InitStruct.IsShareable      =
+  // MPU_ACCESS_NOT_SHAREABLE; MPU_InitStruct.Number           =
+  // MPU_REGION_NUMBER1; MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL0;
+  // MPU_InitStruct.SubRegionDisable = 0x00;
+  // MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
+  // HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   // SPI FLASH
-  MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
-	MPU_InitStruct.BaseAddress      = 0x90000000;
-	MPU_InitStruct.Size             = MPU_REGION_SIZE_8MB;	// MPU_REGION_SIZE_512MB;
-	MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-	MPU_InitStruct.IsBufferable     = MPU_ACCESS_NOT_BUFFERABLE;
-	MPU_InitStruct.IsCacheable      = MPU_ACCESS_CACHEABLE;
-	MPU_InitStruct.IsShareable      = MPU_ACCESS_SHAREABLE;
-	MPU_InitStruct.Number           = MPU_REGION_NUMBER1;
-	MPU_InitStruct.TypeExtField     = MPU_TEX_LEVEL0;
-	MPU_InitStruct.SubRegionDisable = 0x00;
-	MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
-	HAL_MPU_ConfigRegion(&MPU_InitStruct);
+  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+  MPU_InitStruct.BaseAddress = 0x90000000;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_8MB;  // MPU_REGION_SIZE_512MB;
+  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+  MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
+  MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
+  MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+  MPU_InitStruct.SubRegionDisable = 0x00;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
   /* Enable the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 }
 
 /**
-  * @brief  System Clock Configuration
-  *         The system Clock is configured as follow : 
-  *            System Clock source            = PLL (HSE)
-  *            SYSCLK(Hz)                     = 400000000 (CM7 CPU Clock)
-  *            HCLK(Hz)                       = 200000000 (CM4 CPU, AXI and AHBs Clock)
-  *            AHB Prescaler                  = 2
-  *            D1 APB3 Prescaler              = 2 (APB3 Clock  100MHz)
-  *            D2 APB1 Prescaler              = 2 (APB1 Clock  100MHz)
-  *            D2 APB2 Prescaler              = 2 (APB2 Clock  100MHz)
-  *            D3 APB4 Prescaler              = 2 (APB4 Clock  100MHz)
-  *            HSE Frequency(Hz)              = 25000000
-  *            PLL_M                          = 5
-  *            PLL_N                          = 160
-  *            PLL_P                          = 2
-  *            PLL_Q                          = 4
-  *            PLL_R                          = 2
-  *            VDD(V)                         = 3.3
-  *            Flash Latency(WS)              = 4
-  * @param  None
-  * @retval None
-  */
-void system_clock_config(void)
-{
+ * @brief  System Clock Configuration
+ *         The system Clock is configured as follow :
+ *            System Clock source            = PLL (HSE)
+ *            SYSCLK(Hz)                     = 400000000 (CM7 CPU Clock)
+ *            HCLK(Hz)                       = 200000000 (CM4 CPU, AXI and AHBs
+ * Clock) AHB Prescaler                  = 2 D1 APB3 Prescaler              = 2
+ * (APB3 Clock  100MHz) D2 APB1 Prescaler              = 2 (APB1 Clock  100MHz)
+ *            D2 APB2 Prescaler              = 2 (APB2 Clock  100MHz)
+ *            D3 APB4 Prescaler              = 2 (APB4 Clock  100MHz)
+ *            HSE Frequency(Hz)              = 25000000
+ *            PLL_M                          = 5
+ *            PLL_N                          = 160
+ *            PLL_P                          = 2
+ *            PLL_Q                          = 4
+ *            PLL_R                          = 2
+ *            VDD(V)                         = 3.3
+ *            Flash Latency(WS)              = 4
+ * @param  None
+ * @retval None
+ */
+void system_clock_config(void) {
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
   HAL_StatusTypeDef ret = HAL_OK;
-  
+
   /*!< Supply configuration update enable */
   // HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
   HAL_PWREx_ConfigSupply(PWR_DIRECT_SMPS_SUPPLY);
 
-  /* The voltage scaling allows optimizing the power consumption when the device is 
-     clocked below the maximum system frequency, to update the voltage scaling value 
-     regarding system frequency refer to product datasheet.  */
+  /* The voltage scaling allows optimizing the power consumption when the device
+     is clocked below the maximum system frequency, to update the voltage
+     scaling value regarding system frequency refer to product datasheet.  */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
-  
+  while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {
+  }
+
   /* Enable HSE Oscillator and activate PLL with HSE as source */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType =
+      RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_OFF;
@@ -325,7 +321,7 @@ void system_clock_config(void)
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 
   RCC_OscInitStruct.PLL.PLLM = 5;
-  RCC_OscInitStruct.PLL.PLLN = 160;
+  RCC_OscInitStruct.PLL.PLLN = 80;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
@@ -334,54 +330,55 @@ void system_clock_config(void)
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
-  if(ret != HAL_OK)
-  {
-    ensure(secfalse,"HAL_RCC_OscConfig failed");
+  if (ret != HAL_OK) {
+    ensure(secfalse, "HAL_RCC_OscConfig failed");
   }
-  
-/* Select PLL as system clock source and configure  bus clocks dividers */
-  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_D1PCLK1 | RCC_CLOCKTYPE_PCLK1 | \
-                                 RCC_CLOCKTYPE_PCLK2  | RCC_CLOCKTYPE_D3PCLK1);
+
+  /* Select PLL as system clock source and configure  bus clocks dividers */
+  RCC_ClkInitStruct.ClockType =
+      (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_D1PCLK1 |
+       RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_D3PCLK1);
 
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;  
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2; 
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2; 
-  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2; 
+  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
+  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
   ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
-  if(ret != HAL_OK)
-  {
-    ensure(secfalse,"HAL_RCC_ClockConfig failed");
+  if (ret != HAL_OK) {
+    ensure(secfalse, "HAL_RCC_ClockConfig failed");
   }
 
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
-    ensure(secfalse,"HAL_RCCEx_PeriphCLKConfig failed");
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
+    ensure(secfalse, "HAL_RCCEx_PeriphCLKConfig failed");
   }
 
- /*
-  Note : The activation of the I/O Compensation Cell is recommended with communication  interfaces
-          (GPIO, SPI, FMC, QSPI ...)  when  operating at  high frequencies(please refer to product datasheet)       
-          The I/O Compensation Cell activation  procedure requires :
-        - The activation of the CSI clock
-        - The activation of the SYSCFG clock
-        - Enabling the I/O Compensation Cell : setting bit[0] of register SYSCFG_CCCSR
- */
- 
-  /*activate CSI clock mondatory for I/O Compensation Cell*/  
-  __HAL_RCC_CSI_ENABLE() ;
-    
-  /* Enable SYSCFG clock mondatory for I/O Compensation Cell */
-  __HAL_RCC_SYSCFG_CLK_ENABLE() ;
-  
-  /* Enables the I/O Compensation Cell */    
-  HAL_EnableCompensationCell();  
+  /*
+   Note : The activation of the I/O Compensation Cell is recommended with
+   communication  interfaces (GPIO, SPI, FMC, QSPI ...)  when  operating at high
+   frequencies(please refer to product datasheet) The I/O Compensation Cell
+   activation  procedure requires :
+         - The activation of the CSI clock
+         - The activation of the SYSCFG clock
+         - Enabling the I/O Compensation Cell : setting bit[0] of register
+   SYSCFG_CCCSR
+  */
 
-  SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2)); /* set CP10 and CP11 Full Access */
+  /*activate CSI clock mondatory for I/O Compensation Cell*/
+  __HAL_RCC_CSI_ENABLE();
+
+  /* Enable SYSCFG clock mondatory for I/O Compensation Cell */
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+
+  /* Enables the I/O Compensation Cell */
+  HAL_EnableCompensationCell();
+
+  SCB->CPACR |=
+      ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 and CP11 Full Access */
 
   SystemCoreClockUpdate();
 }
@@ -411,61 +408,59 @@ void reset_flags_reset(void) {
   RCC->RSR |= RCC_RSR_RMVF;  // clear the reset flags
 }
 
-void flash_option_bytes_init(void){
-
+void flash_option_bytes_init(void) {
   FLASH_OBProgramInitTypeDef ob_config;
 
   HAL_FLASHEx_OBGetConfig(&ob_config);
 
-  if(ob_config.RDPLevel != OB_RDP_LEVEL_2){
-    if((ob_config.USERConfig&OB_BCM4_ENABLE) != OB_BCM4_DISABLE){
+  if (ob_config.RDPLevel != OB_RDP_LEVEL_2) {
+    if ((ob_config.USERConfig & OB_BCM4_ENABLE) != OB_BCM4_DISABLE) {
+      ob_config.OptionType |= OPTIONBYTE_USER;
+      ob_config.USERType |= OB_USER_BCM4;
+      ob_config.USERConfig &= ~OB_BCM4_ENABLE;
 
-        ob_config.OptionType |= OPTIONBYTE_USER;
-        ob_config.USERType |= OB_USER_BCM4;
-        ob_config.USERConfig &= ~OB_BCM4_ENABLE;
+      HAL_FLASH_Unlock();
+      HAL_FLASH_OB_Unlock();
 
-        HAL_FLASH_Unlock();
-        HAL_FLASH_OB_Unlock();
+      if (HAL_FLASHEx_OBProgram(&ob_config) != HAL_OK) {
+        ensure(secfalse, "HAL_FLASHEx_OBProgram failed");
+      }
 
-        if(HAL_FLASHEx_OBProgram(&ob_config)!= HAL_OK){
-          ensure(secfalse,"HAL_FLASHEx_OBProgram failed");
-        }
+      if (HAL_FLASH_OB_Launch() != HAL_OK) {
+        ensure(secfalse, "HAL_FLASH_OB_Launch failed");
+      }
 
-        if(HAL_FLASH_OB_Launch()!= HAL_OK){
-          ensure(secfalse,"HAL_FLASH_OB_Launch failed");
-        }
-
-        HAL_FLASH_OB_Lock();
-        HAL_FLASH_Lock();
+      HAL_FLASH_OB_Lock();
+      HAL_FLASH_Lock();
     }
   }
 
-  if(ob_config.RDPLevel != WANT_RDP_LEVEL)
-  {
-    ob_config.OptionType |= OPTIONBYTE_WRP|OPTIONBYTE_RDP|OPTIONBYTE_USER|OPTIONBYTE_BOR;
-    ob_config.RDPLevel = WANT_RDP_LEVEL;//;
+  if (ob_config.RDPLevel != WANT_RDP_LEVEL) {
+    ob_config.OptionType |=
+        OPTIONBYTE_WRP | OPTIONBYTE_RDP | OPTIONBYTE_USER | OPTIONBYTE_BOR;
+    ob_config.RDPLevel = WANT_RDP_LEVEL;  //;
     ob_config.BORLevel = WANT_BOR_LEVEL;
     ob_config.WRPSector = WANT_WRP_SECTORS;
-    ob_config.USERType = OB_USER_IWDG1_SW|OB_USER_IWDG2_SW|
-                        OB_USER_NRST_STOP_D1|OB_USER_NRST_STOP_D2|
-                        OB_USER_NRST_STDBY_D1|OB_USER_NRST_STDBY_D2|
-                        OB_USER_IWDG_STOP|OB_USER_IWDG_STDBY|OB_USER_IOHSLV|OB_USER_SWAP_BANK|
-                        OB_USER_SECURITY|OB_USER_BCM4;
-    ob_config.USERConfig = OB_IWDG1_SW|OB_IWDG2_SW|
-                        OB_STOP_NO_RST_D1|OB_STOP_NO_RST_D2|
-                        OB_STDBY_NO_RST_D1|OB_STDBY_NO_RST_D2|
-                        OB_IWDG_STOP_FREEZE|OB_IWDG_STDBY_FREEZE|OB_IOHSLV_ENABLE|OB_SWAP_BANK_DISABLE|\
-                        OB_SECURITY_DISABLE|OB_BCM4_DISABLE;
+    ob_config.USERType =
+        OB_USER_IWDG1_SW | OB_USER_IWDG2_SW | OB_USER_NRST_STOP_D1 |
+        OB_USER_NRST_STOP_D2 | OB_USER_NRST_STDBY_D1 | OB_USER_NRST_STDBY_D2 |
+        OB_USER_IWDG_STOP | OB_USER_IWDG_STDBY | OB_USER_IOHSLV |
+        OB_USER_SWAP_BANK | OB_USER_SECURITY | OB_USER_BCM4;
+    ob_config.USERConfig =
+        OB_IWDG1_SW | OB_IWDG2_SW | OB_STOP_NO_RST_D1 | OB_STOP_NO_RST_D2 |
+        OB_STDBY_NO_RST_D1 | OB_STDBY_NO_RST_D2 | OB_IWDG_STOP_FREEZE |
+        OB_IWDG_STDBY_FREEZE | OB_IOHSLV_ENABLE | OB_SWAP_BANK_DISABLE |
+        OB_SECURITY_DISABLE | OB_BCM4_DISABLE;
 
     HAL_FLASH_Unlock();
     HAL_FLASH_OB_Unlock();
 
-    if(HAL_FLASHEx_OBProgram(&ob_config)!= HAL_OK){
-      ensure(secfalse,"HAL_FLASHEx_OBProgram failed");
+    if (HAL_FLASHEx_OBProgram(&ob_config) != HAL_OK) {
+      ensure(secfalse, "HAL_FLASHEx_OBProgram failed");
     }
 
-    if(HAL_FLASH_OB_Launch()!= HAL_OK){
-      ensure(secfalse,"HAL_FLASH_OB_Launch failed");
+    if (HAL_FLASH_OB_Launch() != HAL_OK) {
+      ensure(secfalse, "HAL_FLASH_OB_Launch failed");
     }
 
     HAL_FLASH_OB_Lock();
@@ -473,37 +468,27 @@ void flash_option_bytes_init(void){
 
     HAL_FLASHEx_OBGetConfig(&ob_config);
   }
-
 }
 
-void gpio_init(void){
-    GPIO_InitTypeDef  GPIO_InitStruct;
+void gpio_init(void) {
+  GPIO_InitTypeDef GPIO_InitStruct;
 
-  /* Enable the GPIO_LED clock */
-  // __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOJ_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
 
-  /* Configure the GPIO_LED pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13;
+  GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 
   HAL_GPIO_Init(GPIOJ, &GPIO_InitStruct);
 
-  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
+  GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_6;
   HAL_GPIO_Init(GPIOK, &GPIO_InitStruct);
-  /* By default, turn off LED */
-  // HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_SET);
 }
 
-void led_on(void){
-     HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_RESET);
-}
+void led_on(void) { HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_RESET); }
 
-void led_off(void){
-     HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_SET);
-}
+void led_off(void) { HAL_GPIO_WritePin(GPIOI, GPIO_PIN_14, GPIO_PIN_SET); }
 
 #endif
