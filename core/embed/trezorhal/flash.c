@@ -64,8 +64,8 @@ static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 2] = {
     [28] = QSPI_FLASH_BASE_ADDRESS + 0x160000,                    // 128 KiB
     [29] = QSPI_FLASH_BASE_ADDRESS + 0x180000,                    // 128 KiB
     [30] = QSPI_FLASH_BASE_ADDRESS + 0x1A0000,                    // 128 KiB
-    [31] = QSPI_FLASH_BASE_ADDRESS + 0x1E0000,                    // 128 KiB
-    [32] = QSPI_FLASH_BASE_ADDRESS + 0x200000,                    // 128 KiB
+    [31] = QSPI_FLASH_BASE_ADDRESS + 0x1C0000,                    // 128 KiB
+    [32] = QSPI_FLASH_BASE_ADDRESS + 0x1E0000,                    // 128 KiB
     [33] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET,  // 64 KiB
     [34] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET +
            64 * 1024,  //  64 KiB storage sector 2
