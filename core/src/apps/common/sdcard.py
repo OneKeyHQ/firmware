@@ -145,7 +145,7 @@ async def ensure_sdcard(
             with sdcard.filesystem(mounted=False):
                 io.fatfs.mkfs()
                 io.fatfs.mount()
-                io.fatfs.setlabel("TREZOR")
+                io.fatfs.setlabel("ONEKEY")
 
             # format and mount succeeded
             return

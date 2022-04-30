@@ -286,6 +286,44 @@ int qspi_flash_write_status(uint8_t status1_val, uint8_t status2_val) {
   return HAL_OK;
 }
 
+int qspi_flash_write_status2(uint8_t status2_val) {
+  QSPI_CommandTypeDef command = {0};
+  uint8_t buf[2];
+
+  TxCplt = 0;
+
+  qspi_flash_write_enable();
+
+  command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+  command.AddressSize = QSPI_ADDRESS_24_BITS;
+  command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  command.DdrMode = QSPI_DDR_MODE_DISABLE;
+  command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+  command.SIOOMode = QSPI_SIOO_INST_ONLY_FIRST_CMD;
+
+  command.Instruction = WRITE_STATUS2_REG_CMD;
+  command.DummyCycles = 0;
+  command.AddressMode = QSPI_ADDRESS_NONE;
+  command.DataMode = QSPI_DATA_1_LINE;
+  command.NbData = 1;
+  buf[0] = status2_val;
+
+  if (HAL_QSPI_Command(&hqspi, &command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) !=
+      HAL_OK) {
+    return HAL_ERROR;
+  }
+
+  if (HAL_QSPI_Transmit(&hqspi, buf, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) !=
+      HAL_OK) {
+    return HAL_ERROR;
+  }
+
+  if (qspi_flash_atuo_polling_mem_ready() != HAL_OK) {
+    return HAL_ERROR;
+  }
+  return HAL_OK;
+}
+
 uint32_t qspi_flash_read_id(void) {
   uint32_t id = 0;
   QSPI_CommandTypeDef command;
@@ -332,7 +370,8 @@ int qspi_flash_config(void) {
     // quad enable bit
     if ((status2 & 0x02) == 0) {
       qspi_flash_read_status1(&status1);
-      qspi_flash_write_status(status1, status2 | 0x02);
+      // qspi_flash_write_status(status1, status2 | 0x02);
+      qspi_flash_write_status2(status2 | 0x02);
     }
   }
   if ((id >> 16 & 0xFF) == 0xC8) {
@@ -446,7 +485,7 @@ int qspi_flash_erase_block_64k(uint32_t address) {
   command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
   command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
-  command.Instruction = SECTOR_32K_ERASE_CMD;
+  command.Instruction = SECTOR_64K_ERASE_CMD;
   command.AddressMode = QSPI_ADDRESS_1_LINE;
   command.Address = address;
   command.DataMode = QSPI_DATA_NONE;

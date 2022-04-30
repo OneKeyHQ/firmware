@@ -3,12 +3,12 @@
 ENTRY(reset_handler)
 
 MEMORY {
-  FLASH  (rx)  : ORIGIN = 0x08000000, LENGTH = 48K
-  CCMRAM (wal) : ORIGIN = 0x10000000, LENGTH = 64K
-  SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 192K
+  FLASH  (rx)  : ORIGIN = 0x08000000, LENGTH = 128K
+  SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
+  AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
 }
 
-main_stack_base = ORIGIN(CCMRAM) + LENGTH(CCMRAM); /* 8-byte aligned full descending stack */
+main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
 
 /* used by the startup code to populate variables used by the C code */
 data_lma = LOADADDR(.data);
@@ -16,8 +16,8 @@ data_vma = ADDR(.data);
 data_size = SIZEOF(.data);
 
 /* used by the startup code to wipe memory */
-ccmram_start = ORIGIN(CCMRAM);
-ccmram_end = ORIGIN(CCMRAM) + LENGTH(CCMRAM);
+axiram_start = ORIGIN(AXIRAM);
+axiram_end = ORIGIN(AXIRAM) + LENGTH(AXIRAM);
 
 /* used by the startup code to wipe memory */
 sram_start = ORIGIN(SRAM);
@@ -41,14 +41,14 @@ SECTIONS {
   .data : ALIGN(4) {
     *(.data*);
     . = ALIGN(4); /* make the section size a multiple of the word size */
-  } >CCMRAM AT>FLASH
+  } >SRAM AT>FLASH
 
   .bss : ALIGN(4) {
     *(.bss*);
     . = ALIGN(4); /* make the section size a multiple of the word size */
-  } >CCMRAM
+  } >SRAM
 
   .stack : ALIGN(8) {
     . = 4K; /* this acts as a build time assertion that at least this much memory is available for stack use */
-  } >CCMRAM
+  } >SRAM
 }

@@ -87,6 +87,7 @@ MP_DEFINE_EXCEPTION(NoFilesystem, FatFSError)
     }                                        \
   }
 
+#ifdef TREZOR_EMULATOR
 DSTATUS disk_initialize(BYTE pdrv) { return disk_status(pdrv); }
 
 DSTATUS disk_status(BYTE pdrv) {
@@ -129,6 +130,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff) {
       return RES_PARERR;
   }
 }
+#endif
 
 STATIC mp_obj_t filinfo_to_tuple(const FILINFO *info) {
   mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR(mp_obj_new_tuple(3, NULL));

@@ -158,7 +158,6 @@ void atca_config_init(void) {
 
   if (check_all_ones(pair_info->protect_key, sizeof(pair_info->protect_key))) {
     atca_assert(atca_random(rand_buffer), "get random");
-    random_buffer(rand_buffer, 32);
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_PROTECT_KEY)) {
       ensure(flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, rand_buffer,
                              FLASH_OTP_BLOCK_SIZE),
@@ -171,7 +170,6 @@ void atca_config_init(void) {
 
   if (check_all_ones(pair_info->init_pin, sizeof(pair_info->init_pin))) {
     atca_assert(atca_random(rand_buffer), "get random");
-    random_buffer(rand_buffer, 32);
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_INIT_PIN)) {
       ensure(flash_otp_write(FLASH_OTP_BLOCK_608_INIT_PIN, 0, rand_buffer,
                              FLASH_OTP_BLOCK_SIZE),
@@ -184,7 +182,6 @@ void atca_config_init(void) {
 
   if (check_all_ones(pair_info->hash_mix, sizeof(pair_info->hash_mix))) {
     atca_assert(atca_random(rand_buffer), "get random");
-    random_buffer(rand_buffer, 32);
     if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_MIX_PIN)) {
       ensure(flash_otp_write(FLASH_OTP_BLOCK_608_MIX_PIN, 0, rand_buffer,
                              FLASH_OTP_BLOCK_SIZE),

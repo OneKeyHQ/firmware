@@ -22,12 +22,17 @@
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
+#include "emmc.h"
+#include "ff.h"
 #include "flash.h"
 #include "image.h"
 #include "mipi_lcd.h"
+#include "qspi_flash.h"
 #include "rng.h"
 #include "sdcard.h"
 #include "sdram.h"
+#include "touch.h"
+#include "usb.h"
 
 #include "lowlevel.h"
 #include "version.h"
@@ -58,36 +63,248 @@ static const uint8_t * const BOARDLOADER_KEYS[] = {
 
 #include "stm32h7xx_hal.h"
 
+static FATFS fs_instance;
+uint32_t *sdcard_buf = (uint32_t *)0x24000000;
+
+static uint32_t check_sdcard(void) {
+  FRESULT res;
+  res = f_mount(&fs_instance, "", 1);
+  if (res != FR_OK) {
+    return 0;
+  }
+  uint64_t cap = emmc_get_capacity_in_bytes();
+  if (cap < 1024 * 1024) {
+    return 0;
+  }
+
+  memzero(sdcard_buf, IMAGE_HEADER_SIZE);
+
+  FIL fsrc;
+  UINT num_of_read = 0;
+
+  res = f_open(&fsrc, "/boot/bootloader.bin", FA_READ);
+  if (res != FR_OK) {
+    return 0;
+  }
+  res = f_read(&fsrc, sdcard_buf, IMAGE_HEADER_SIZE, &num_of_read);
+  if ((num_of_read != IMAGE_HEADER_SIZE) || (res != FR_OK)) {
+    f_close(&fsrc);
+    return 0;
+  }
+  f_close(&fsrc);
+
+  image_header hdr_old;
+  image_header hdr_new;
+  secbool new_present = secfalse, old_present = secfalse;
+
+  old_present = load_image_header(
+      (const uint8_t *)BOOTLOADER_START, BOOTLOADER_IMAGE_MAGIC,
+      BOOTLOADER_IMAGE_MAXSIZE, BOARDLOADER_KEY_M, BOARDLOADER_KEY_N,
+      BOARDLOADER_KEYS, &hdr_old);
+
+  new_present =
+      load_image_header((const uint8_t *)sdcard_buf, BOOTLOADER_IMAGE_MAGIC,
+                        BOOTLOADER_IMAGE_MAXSIZE, BOARDLOADER_KEY_M,
+                        BOARDLOADER_KEY_N, BOARDLOADER_KEYS, &hdr_new);
+  if (sectrue == new_present && secfalse == old_present) {
+    return hdr_new.codelen;
+  } else if (sectrue == new_present && sectrue == old_present) {
+    if (memcmp(&hdr_new.version, &hdr_old.version, 4) > 0) {
+      return hdr_new.codelen;
+    }
+  }
+  return 0;
+}
+
+static void progress_callback(int pos, int len) { display_printf("."); }
+
+static secbool copy_sdcard(uint32_t code_len) {
+  display_backlight(255);
+
+  display_printf("Onekey Boardloader\n");
+  display_printf("==================\n\n");
+
+  display_printf("new version bootloader found\n\n");
+  display_printf("applying bootloader in 10 seconds\n\n");
+  display_printf("touch screen if you want to abort\n\n");
+
+  uint32_t touched = 0;
+  for (int i = 10; i >= 0; i--) {
+    display_printf("%d ", i);
+    hal_delay(1000);
+
+    touched = touch_is_detected() | touch_read();
+    if (touched) {
+      display_printf("\n\ncanceled, aborting\n");
+      return secfalse;
+    }
+  }
+
+  display_printf("\n\nerasing flash:\n\n");
+
+  // erase all flash (except boardloader)
+  static const uint8_t sectors[] = {
+      FLASH_SECTOR_BOOTLOADER,
+      FLASH_SECTOR_FIRMWARE_START,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      FLASH_SECTOR_FIRMWARE_END,
+      FLASH_SECTOR_FIRMWARE_EXTRA_START,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      FLASH_SECTOR_FIRMWARE_EXTRA_END,
+      FLASH_SECTOR_STORAGE_1,
+      FLASH_SECTOR_STORAGE_2,
+  };
+
+  if (sectrue !=
+      flash_erase_sectors(sectors, sizeof(sectors), progress_callback)) {
+    display_printf(" failed\n");
+    return secfalse;
+  }
+  display_printf(" done\n\n");
+
+  ensure(flash_unlock_write(), NULL);
+
+  // copy bootloader from SD card to Flash
+  display_printf("copying new bootloader from SD card\n\n");
+
+  memzero(sdcard_buf, EMMC_BLOCK_SIZE);
+
+  FIL fsrc;
+  FRESULT res;
+  UINT num_of_read;
+  res = f_open(&fsrc, "/boot/bootloader.bin", FA_READ);
+  if (res != FR_OK) {
+    return secfalse;
+  }
+  int blocks = (IMAGE_HEADER_SIZE + code_len) / EMMC_BLOCK_SIZE;
+  int percent = 0, percent_bak = 0;
+  for (int i = 0; i < blocks; i++) {
+    percent = (i * 100) / blocks;
+    if (percent != percent_bak) {
+      percent_bak = percent;
+      display_printf("%d ", percent);
+    }
+
+    f_lseek(&fsrc, i * EMMC_BLOCK_SIZE);
+    res = f_read(&fsrc, sdcard_buf, EMMC_BLOCK_SIZE, &num_of_read);
+    if ((num_of_read != EMMC_BLOCK_SIZE) || (res != FR_OK)) {
+      f_close(&fsrc);
+      return secfalse;
+    }
+    for (int j = 0; j < EMMC_BLOCK_SIZE / (sizeof(uint32_t) * 8); j++) {
+      ensure(flash_write_words(FLASH_SECTOR_BOOTLOADER,
+                               i * EMMC_BLOCK_SIZE + j * (sizeof(uint32_t) * 8),
+                               (uint32_t *)&sdcard_buf[8 * j]),
+             NULL);
+    }
+  }
+  f_close(&fsrc);
+  ensure(flash_lock_write(), NULL);
+
+  display_printf("\ndone\n\n");
+  display_printf("Unplug the device and remove the SD card\n");
+
+  return sectrue;
+}
+
 int main(void) {
   reset_flags_reset();
 
   periph_init();
-  /* System Init, System clock, voltage scaling and L1-Cache configuration are
-     done by CPU1 (Cortex-M7) in the meantime Domain D2 is put in STOP
-     mode(Cortex-M4 in deep-sleep)
-  */
-
-  /* Configure the MPU attributes as Write Through for SDRAM*/
-  mpu_config();
 
   /* Enable the CPU Cache */
   cpu_cache_enable();
 
   system_clock_config();
 
-  flash_option_bytes_init();
-
   rng_init();
 
-  led_init();
+  flash_option_bytes_init();
 
   clear_otg_hs_memory();
 
+  flash_otp_init();
+
+  gpio_init();
+
   sdram_init();
 
-  lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  qspi_flash_init();
+  qspi_flash_config();
+  qspi_flash_memory_mapped();
 
+  mpu_config();
+
+  lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   display_clear();
+
+  touch_init();
+  emmc_init();
+
+  FRESULT res;
+  BYTE work[FF_MAX_SS];
+  MKFS_PARM mk_para = {
+      .fmt = FM_FAT32,
+  };
+
+  res = f_mount(&fs_instance, "", 1);
+  if (res != FR_OK) {
+    if (res == FR_NO_FILESYSTEM) {
+      res = f_mkfs("", &mk_para, work, sizeof(work));
+      if (res) {
+        display_printf("fatfs Format error");
+      }
+    } else {
+      display_printf("mount err %d\n", res);
+    }
+  }
+
+  uint32_t touched = 0;
+  for (int i = 0; i < 500; i++) {
+    if (touch_num_detected() > 1) {
+      touched = 1;
+      break;
+    }
+    hal_delay(1);
+  }
+
+  if (touched) {
+    display_printf("Onekey Boardloader\n");
+    display_printf("USB Mass Storage Mode\n");
+    display_printf("==================\n\n");
+    usb_msc_init();
+    while (1)
+      ;
+  }
+
+  uint32_t code_len = 0;
+  code_len = check_sdcard();
+  if (code_len) {
+    return copy_sdcard(code_len) == sectrue ? 0 : 3;
+  }
 
   image_header hdr;
 

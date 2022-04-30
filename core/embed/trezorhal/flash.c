@@ -51,17 +51,25 @@ static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 2] = {
 #if USE_EXTERN_FLASH
     [16] = 0x08200000,               // last element - not a valid sector
     [17] = QSPI_FLASH_BASE_ADDRESS,  // 128 KiB
-    [18] = QSPI_FLASH_BASE_ADDRESS + 0x20000,   // 128 KiB
-    [19] = QSPI_FLASH_BASE_ADDRESS + 0x40000,   // 128 KiB
-    [20] = QSPI_FLASH_BASE_ADDRESS + 0x60000,   // 128 KiB
-    [21] = QSPI_FLASH_BASE_ADDRESS + 0x80000,   // 128 KiB
-    [22] = QSPI_FLASH_BASE_ADDRESS + 0xA0000,   // 128 KiB
-    [23] = QSPI_FLASH_BASE_ADDRESS + 0xC0000,   // 128 KiB
-    [24] = QSPI_FLASH_BASE_ADDRESS + 0xE0000,   // 128 KiB
-    [25] = QSPI_FLASH_BASE_ADDRESS + 0x100000,  // 64 KiB
-    [26] = QSPI_FLASH_BASE_ADDRESS + 0x100000 +
+    [18] = QSPI_FLASH_BASE_ADDRESS + 0x20000,                     // 128 KiB
+    [19] = QSPI_FLASH_BASE_ADDRESS + 0x40000,                     // 128 KiB
+    [20] = QSPI_FLASH_BASE_ADDRESS + 0x60000,                     // 128 KiB
+    [21] = QSPI_FLASH_BASE_ADDRESS + 0x80000,                     // 128 KiB
+    [22] = QSPI_FLASH_BASE_ADDRESS + 0xA0000,                     // 128 KiB
+    [23] = QSPI_FLASH_BASE_ADDRESS + 0xC0000,                     // 128 KiB
+    [24] = QSPI_FLASH_BASE_ADDRESS + 0xE0000,                     // 128 KiB
+    [25] = QSPI_FLASH_BASE_ADDRESS + 0x100000,                    // 128 KiB
+    [26] = QSPI_FLASH_BASE_ADDRESS + 0x120000,                    // 128 KiB
+    [27] = QSPI_FLASH_BASE_ADDRESS + 0x140000,                    // 128 KiB
+    [28] = QSPI_FLASH_BASE_ADDRESS + 0x160000,                    // 128 KiB
+    [29] = QSPI_FLASH_BASE_ADDRESS + 0x180000,                    // 128 KiB
+    [30] = QSPI_FLASH_BASE_ADDRESS + 0x1A0000,                    // 128 KiB
+    [31] = QSPI_FLASH_BASE_ADDRESS + 0x1C0000,                    // 128 KiB
+    [32] = QSPI_FLASH_BASE_ADDRESS + 0x1E0000,                    // 128 KiB
+    [33] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET,  // 64 KiB
+    [34] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET +
            64 * 1024,  //  64 KiB storage sector 2
-    [27] = QSPI_FLASH_BASE_ADDRESS + 0x100000 + 128 * 1024,
+    [35] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET + 128 * 1024,
 #else
     [16] = 0x08200000,  // last element - not a valid sector
 #endif
@@ -88,6 +96,14 @@ const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT] = {
     21,
     22,
     23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
     FLASH_SECTOR_FIRMWARE_EXTRA_END};
 #else
 static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 1] = {
@@ -200,10 +216,12 @@ secbool flash_erase_sectors(const uint8_t *sectors, int len,
 
       if (sectors[i] < 8) {
         EraseInitStruct.Banks = FLASH_BANK_1;
+        EraseInitStruct.Sector = sectors[i];
       } else {
         EraseInitStruct.Banks = FLASH_BANK_2;
+        EraseInitStruct.Sector = sectors[i] - 8;
       }
-      EraseInitStruct.Sector = sectors[i];
+
       uint32_t SectorError;
       if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
         ensure(flash_lock_write(), NULL);
@@ -293,8 +311,8 @@ secbool flash_write_words(uint8_t sector, uint32_t offset, uint32_t data[8]) {
       return secfalse;
     }
   }
-  if (sector >= FLASH_SECTOR_FIRMWARE_START &&
-      sector <= FLASH_SECTOR_FIRMWARE_END) {
+  if (sector >= FLASH_SECTOR_BOOTLOADER &&
+      sector <= FLASH_SECTOR_OTP_EMULATOR) {
     if (HAL_OK != HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, address,
                                     (uint32_t)&flash_word)) {
       return secfalse;
@@ -463,6 +481,22 @@ secbool flash_write_word(uint8_t sector, uint32_t offset, uint32_t data) {
 #if defined(STM32H747xx)
 static FlashLockedData *flash_otp_data =
     (FlashLockedData *)FLASH_SECTOR_TABLE[15];
+
+void flash_otp_init(void) {
+  if (memcmp(flash_otp_data->flag, "erased", strlen("erased")) == 0) {
+    return;
+  }
+  uint8_t buf[32] = "erased";
+  uint8_t secotrs[1];
+  secotrs[0] = 15;
+
+  ensure(flash_erase_sectors(secotrs, 1, NULL), "erase data sector 15");
+  ensure(flash_unlock_write(), NULL);
+  ensure(flash_write_words(15, 0, (uint32_t *)buf), "write init flag");
+  ensure(flash_lock_write(), NULL);
+  return;
+}
+
 secbool flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,
                        uint8_t datalen) {
   if (block >= FLASH_OTP_NUM_BLOCKS ||

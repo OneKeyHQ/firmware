@@ -28,8 +28,8 @@
 #if PRODUCTION_MODEL == 'H'
 #define USE_EXTERN_FLASH 1
 #if USE_EXTERN_FLASH
-// 16 internal + 8 external code(2x64K) + 2 external storage(64K)
-#define FLASH_SECTOR_COUNT (26)
+// 16 internal + 16 external code(2x64K) + 2 external storage(64K)
+#define FLASH_SECTOR_COUNT (34)
 #else
 #define FLASH_SECTOR_COUNT 16
 #endif
@@ -55,8 +55,8 @@
 #if PRODUCTION_MODEL == 'H'
 #if USE_EXTERN_FLASH
 #define FLASH_SECTOR_STORAG_OFFSET (7 * 1024 * 1024)
-#define FLASH_SECTOR_STORAGE_1 25
-#define FLASH_SECTOR_STORAGE_2 26
+#define FLASH_SECTOR_STORAGE_1 33
+#define FLASH_SECTOR_STORAGE_2 34
 #else
 #define FLASH_SECTOR_STORAGE_1 2
 #define FLASH_SECTOR_STORAGE_2 3
@@ -84,13 +84,14 @@
 
 #define FLASH_SECTOR_UNUSED_START 15
 #define FLASH_SECTOR_UNUSED_END 15
+#define FLASH_SECTOR_OTP_EMULATOR 15
 
 #define FLASH_SECTOR_FIRMWARE_EXTRA_START 17
-#define FLASH_SECTOR_FIRMWARE_EXTRA_END 24
+#define FLASH_SECTOR_FIRMWARE_EXTRA_END 32
 
 #define BOOTLOADER_SECTORS_COUNT (1)
 #define STORAGE_SECTORS_COUNT (2)
-#define FIRMWARE_SECTORS_COUNT (13 + 8)
+#define FIRMWARE_SECTORS_COUNT (13 + 16)
 #else
 #define FLASH_SECTOR_BOOTLOADER 5
 
@@ -122,11 +123,6 @@
 extern const uint8_t STORAGE_SECTORS[STORAGE_SECTORS_COUNT];
 extern const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT];
 
-typedef struct __attribute__((packed)) {
-  uint8_t flag[32];
-  uint8_t flash_otp[16][32];
-} FlashLockedData;
-
 // note: FLASH_SR_RDERR is STM32F42xxx and STM32F43xxx specific (STM32F427)
 // (reference RM0090 section 3.7.5)
 #ifndef STM32F427xx
@@ -157,6 +153,11 @@ secbool __wur flash_write_words(uint8_t sector, uint32_t offset,
 #define FLASH_OTP_NUM_BLOCKS 16
 #define FLASH_OTP_BLOCK_SIZE 32
 
+typedef struct __attribute__((packed)) {
+  uint8_t flag[32];
+  uint8_t flash_otp[FLASH_OTP_NUM_BLOCKS][FLASH_OTP_BLOCK_SIZE];
+} FlashLockedData;
+
 // OTP blocks allocation
 #define FLASH_OTP_BLOCK_BATCH 0
 #define FLASH_OTP_BLOCK_BOOTLOADER_VERSION 1
@@ -168,6 +169,7 @@ secbool __wur flash_write_words(uint8_t sector, uint32_t offset,
 #define FLASH_OTP_BLOCK_608_INIT_PIN 10
 #define FLASH_OTP_BLOCK_608_MIX_PIN 11
 
+void flash_otp_init(void);
 secbool __wur flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,
                              uint8_t datalen);
 secbool __wur flash_otp_write(uint8_t block, uint8_t offset,

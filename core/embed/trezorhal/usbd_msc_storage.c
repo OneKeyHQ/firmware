@@ -28,7 +28,7 @@ EndBSPDependencies */
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_msc_storage.h"
 
-#include "nand_flash.h"
+#include "emmc.h"
 
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,9 +73,9 @@ int8_t  STORAGE_Inquirydata[] =  /* 36 */
   0x00,
   0x00,
   0x00,
-  'S', 'T', 'M', ' ', ' ', ' ', ' ', ' ', /* Manufacturer : 8 bytes */
-  'P', 'r', 'o', 'd', 'u', 'c', 't', ' ', /* Product      : 16 Bytes */
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  'O', 'N', 'E', 'K', 'E', 'Y', ' ', ' ', /* Manufacturer : 8 bytes */
+  'T', 'O', 'U', 'C', 'H', '-', 'B', 'O', /* Product      : 16 Bytes */
+  'O', 'T', ' ', ' ', ' ', ' ', ' ', ' ',
   '0', '.', '0', '1',                     /* Version      : 4 Bytes */
 };
 
@@ -91,6 +91,8 @@ USBD_StorageTypeDef USBD_DISK_fops =
   STORAGE_Inquirydata,
 
 };
+
+static EMMC_CardInfoTypeDef emmc_card_info={0};
 /*******************************************************************************
   * Function Name  : Read_Memory
   * Description    : Handle the Read operation from the microSD card.
@@ -100,6 +102,7 @@ USBD_StorageTypeDef USBD_DISK_fops =
   *******************************************************************************/
 int8_t STORAGE_Init(uint8_t lun)
 {
+  emmc_get_card_info(&emmc_card_info);
   return (0);
 }
 
@@ -112,8 +115,13 @@ int8_t STORAGE_Init(uint8_t lun)
   *******************************************************************************/
 int8_t STORAGE_GetCapacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 {
-  *block_num  = STORAGE_BLK_NBR;
-  *block_size = STORAGE_BLK_SIZ;
+  #ifdef APP_VER
+    *block_num = emmc_card_info.LogBlockNbr - BOOT_EMMC_BLOCKS - 1;
+    *block_size = emmc_card_info.LogBlockSize;
+  #else
+    *block_num = BOOT_EMMC_BLOCKS;
+    *block_size = emmc_card_info.LogBlockSize;
+  #endif
   return (0);
 }
 
@@ -151,7 +159,16 @@ int8_t  STORAGE_IsWriteProtected(uint8_t lun)
 int8_t STORAGE_Read(uint8_t lun, uint8_t *buf,
                     uint32_t blk_addr, uint16_t blk_len)
 {
-  nand_read_page(blk_addr, 0, buf, blk_len * 512);
+  #ifdef APP_VER
+    if(emmc_read_blocks(buf, blk_addr + BOOT_EMMC_BLOCKS, blk_len, EMMC_TIMEOUT) == MMC_OK){
+      return (0);
+    }
+  #else
+  if(emmc_read_blocks(buf, blk_addr, blk_len, EMMC_TIMEOUT) == MMC_OK){
+      return (0);
+    }
+  #endif
+  return (-1);
   return 0;
 }
 /*******************************************************************************
@@ -164,8 +181,16 @@ int8_t STORAGE_Read(uint8_t lun, uint8_t *buf,
 int8_t STORAGE_Write(uint8_t lun, uint8_t *buf,
                      uint32_t blk_addr, uint16_t blk_len)
 {
-  nand_write_page(blk_addr, 0, buf, blk_len * 512);
-  return (0);
+  #ifdef APP_VER
+    if(emmc_write_blocks(buf, blk_addr + BOOT_EMMC_BLOCKS, blk_len, EMMC_TIMEOUT) == MMC_OK){
+      return (0);
+    }
+  #else
+    if(emmc_write_blocks(buf, blk_addr, blk_len, EMMC_TIMEOUT) == MMC_OK){
+        return (0);
+    }
+  #endif
+  return (-1);
 }
 /*******************************************************************************
   * Function Name  : Write_Memory

@@ -30,10 +30,10 @@ jump_to:
   cpsid f
   // wipe memory at the end of the current stage of code
   bl clear_otg_hs_memory
-@   ldr r0, =ccmram_start // r0 - point to beginning of CCMRAM
-@   ldr r1, =ccmram_end   // r1 - point to byte after the end of CCMRAM
-@   ldr r2, =0            // r2 - the word-sized value to be written
-@   bl memset_reg
+  ldr r0, =axiram_start // r0 - point to beginning of AXIRAM
+  ldr r1, =axiram_end   // r1 - point to byte after the end of AXIRAM
+  ldr r2, =0            // r2 - the word-sized value to be written
+  bl memset_reg
   ldr r0, =sram_start   // r0 - point to beginning of SRAM
   ldr r1, =sram_end     // r1 - point to byte after the end of SRAM
   ldr r2, =0            // r2 - the word-sized value to be written
@@ -80,10 +80,10 @@ jump_to_unprivileged:
   cpsid f
   // wipe memory at the end of the current stage of code
   bl clear_otg_hs_memory
-@   ldr r0, =ccmram_start // r0 - point to beginning of CCMRAM
-@   ldr r1, =ccmram_end   // r1 - point to byte after the end of CCMRAM
-@   ldr r2, =0            // r2 - the word-sized value to be written
-@   bl memset_reg
+  ldr r0, =axiram_start // r0 - point to beginning of AXIRAM
+  ldr r1, =axiram_end   // r1 - point to byte after the end of AXIRAM
+  ldr r2, =0            // r2 - the word-sized value to be written
+  bl memset_reg
   ldr r0, =sram_start   // r0 - point to beginning of SRAM
   ldr r1, =sram_end     // r1 - point to byte after the end of SRAM
   ldr r2, =0            // r2 - the word-sized value to be written
@@ -142,10 +142,10 @@ shutdown_privileged:
   mov r11, r0
   mov r12, r0
   ldr lr, =0xffffffff
-@   ldr r0, =ccmram_start
-@   ldr r1, =ccmram_end
-@   // set to value in r2
-@   bl memset_reg
+  ldr r0, =axiram_start
+  ldr r1, =axiram_end
+  // set to value in r2
+  bl memset_reg
   ldr r0, =sram_start
   ldr r1, =sram_end
   // set to value in r2

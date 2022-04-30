@@ -1,4 +1,4 @@
-from trezor import log, loop
+from trezor import io, log, loop, utils
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
@@ -12,6 +12,9 @@ async def lvgl_tick():
 
 def init():
     import lvgldrv as lcd  # type: ignore[Import "lvgldrv" could not be resolved]
+
+    if not utils.EMULATOR:
+        io.fatfs.mount()
 
     lv.init()
     disp_buf1 = lv.disp_draw_buf_t()

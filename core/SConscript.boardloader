@@ -52,6 +52,8 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_flash_ex.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_gpio.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c',
@@ -76,12 +78,13 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
     ]
     SOURCE_BOARDLOADER = [
-        'embed/boardloader/startup_stm32h747xx.s',
+        'embed/boardloader/startup.s',
         'embed/boardloader/main.c',
     ]
     SOURCE_TREZORHAL = [
         'embed/trezorhal/system_stm32h7xx.c',
         'embed/trezorhal/common.c',
+        'embed/trezorhal/emmc.c',
         'embed/trezorhal/sdram.c',
         'embed/trezorhal/nand_flash.c',
         'embed/trezorhal/qspi_flash.c',
@@ -92,7 +95,23 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/stm32.c',
         'embed/trezorhal/systick.c',
         'embed/trezorhal/rng.c',
+        'embed/trezorhal/touch.c',
+        'embed/trezorhal/usb.c',
+        'embed/trezorhal/usbd_conf.c',
+        'embed/trezorhal/usbd_core.c',
+        'embed/trezorhal/usbd_ctlreq.c',
+        'embed/trezorhal/usbd_ioreq.c',
+        'embed/trezorhal/usbd_msc.c',
+        'embed/trezorhal/usbd_msc_bot.c',
+        'embed/trezorhal/usbd_msc_data.c',
+        'embed/trezorhal/usbd_msc_scsi.c',
+        'embed/trezorhal/usbd_msc_storage.c',
+        'embed/trezorhal/usbd_desc.c',
         'embed/trezorhal/util.s',
+        'embed/trezorhal/vectortable.s',
+        'embed/trezorhal/fatfs/ff.c',
+        'embed/trezorhal/fatfs/ffunicode.c',
+        'embed/trezorhal/fatfs/diskio.c',
     ]
 else:
     SOURCE_MOD += [
@@ -173,7 +192,7 @@ else:
     raise ValueError('Unknown Trezor model')
 
 if PRODUCTION_MODEL == 'H':
-    LD_FILE = '-T embed/boardloader/stm32h747xx_flash_CM7.ld '
+    LD_FILE = '-T embed/boardloader/memory.ld '
     env.Replace(
         COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
         CCFLAGS='$COPT '
@@ -189,6 +208,7 @@ if PRODUCTION_MODEL == 'H':
         CPPPATH=[
             'embed/boardloader',
             'embed/trezorhal',
+            'embed/trezorhal/fatfs',
             'embed/extmod/modtrezorui',
             'embed/extmod/modtrezorui/otm8009a',
             'vendor/micropython/stmhal',
