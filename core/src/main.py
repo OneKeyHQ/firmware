@@ -9,7 +9,7 @@
 # trezor imports only C modules
 import trezor
 # trezor.utils import only C modules
-from trezor import io, utils
+from trezor import utils
 # we need space for 30 items in the trezor module
 utils.presize_module("trezor", 30)
 # storage imports storage.common, storage.cache and storage.device.
@@ -41,8 +41,6 @@ import usb
 
 # create an unimport manager that will be reused in the main loop
 unimport_manager = utils.unimport()
-
-io.fatfs.mount()
 
 # unlock the device, unload the boot module afterwards
 with unimport_manager:
