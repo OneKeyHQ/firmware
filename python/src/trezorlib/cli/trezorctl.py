@@ -31,6 +31,7 @@ from ..transport.udp import UdpTransport
 from . import (
     TrezorConnection,
     binance,
+    conflux,
     btc,
     cardano,
     cosi,
@@ -71,6 +72,7 @@ COMMAND_ALIASES = {
     "decrypt-keyvalue": crypto.decrypt_keyvalue,
     # currency name aliases:
     "bnb": binance.cli,
+    "cfx": conflux.cli,
     "eth": ethereum.cli,
     "ada": cardano.cli,
     "xmr": monero.cli,
@@ -353,6 +355,7 @@ def wait_for_emulator(obj: TrezorConnection, timeout: float) -> None:
 #
 
 cli.add_command(binance.cli)
+cli.add_command(conflux.cli)
 cli.add_command(btc.cli)
 cli.add_command(cardano.cli)
 cli.add_command(cosi.cli)
