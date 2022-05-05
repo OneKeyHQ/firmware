@@ -124,12 +124,36 @@ trezor.enums
 import trezor.enums
 trezor.errors
 import trezor.errors
+trezor.langs
+import trezor.langs
 trezor.log
 import trezor.log
 trezor.loop
 import trezor.loop
 trezor.lvglui
 import trezor.lvglui
+trezor.lvglui.i18n
+import trezor.lvglui.i18n
+trezor.lvglui.i18n.keys
+import trezor.lvglui.i18n.keys
+trezor.lvglui.i18n.locales
+import trezor.lvglui.i18n.locales
+trezor.lvglui.i18n.locales.de
+import trezor.lvglui.i18n.locales.de
+trezor.lvglui.i18n.locales.en
+import trezor.lvglui.i18n.locales.en
+trezor.lvglui.i18n.locales.fr
+import trezor.lvglui.i18n.locales.fr
+trezor.lvglui.i18n.locales.it
+import trezor.lvglui.i18n.locales.it
+trezor.lvglui.i18n.locales.ja
+import trezor.lvglui.i18n.locales.ja
+trezor.lvglui.i18n.locales.ko
+import trezor.lvglui.i18n.locales.ko
+trezor.lvglui.i18n.locales.zh_cn
+import trezor.lvglui.i18n.locales.zh_cn
+trezor.lvglui.i18n.locales.zh_hk
+import trezor.lvglui.i18n.locales.zh_hk
 trezor.lvglui.lv_colors
 import trezor.lvglui.lv_colors
 trezor.lvglui.scrs

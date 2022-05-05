@@ -1,3 +1,5 @@
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 from .button import NormalButton
@@ -33,10 +35,12 @@ class Popup(lv.obj):
         self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10))
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
-            self.container, "Enabling blind signing will have certain security risks."
+            self.container,
+            _(i18n_keys.FORM__OPTION__CRYPTO_BLIND_SIGN_ENABLED_1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
-            self.container, "It's recommended to disable this feature after use."
+            self.container,
+            _(i18n_keys.FORM__OPTION__CRYPTO_BLIND_SIGN_ENABLED_2),
         )
         self.btn = NormalButton(self, btn_text, False)
         self.btn.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)

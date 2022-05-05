@@ -5,9 +5,7 @@ from .components.qrcode import QRCode
 
 
 class Address(FullSizeWindow):
-    def __init__(
-        self, title, path, address, xpubs=[], multisig_index=0
-    ):  # pylint: disable=W0102
+    def __init__(self, title, path, address, xpubs=None, multisig_index=0):
         super().__init__(title, None, confirm_text="Done")
         self.qr = QRCode(self, address)
         self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
@@ -17,7 +15,7 @@ class Address(FullSizeWindow):
         if xpubs:
             self.title.align(lv.ALIGN.TOP_MID, 0, 100)
             self.btn_yes.align(lv.ALIGN.BOTTOM_MID, 0, -30)
-        for i, xpub in enumerate(xpubs):
+        for i, xpub in enumerate(xpubs or []):
             self.item3 = DisplayItem(
                 self.container,
                 f"XPUB #{i+1}{' (mine)' if i == multisig_index else ' (cosigner)'}",

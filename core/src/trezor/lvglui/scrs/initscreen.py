@@ -2,6 +2,10 @@
 # from trezor.crypto import bip39, hashlib, random
 # from trezor.enums import BackupType
 
+from storage import device
+from trezor.langs import langs
+from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
+
 from .common import FullSizeWindow, Screen, lv  # noqa: F401,F403,F405
 
 # from .components.button import NormalButton
@@ -21,10 +25,10 @@ language = "English"
 class InitScreen(Screen):
     def __init__(self):
         super().__init__(
-            title="Select Language",
-            btn_text="Next",
+            title=_(i18n_keys.TITLE__SELECT_LANGUAGE),
+            btn_text=_(i18n_keys.ACTION__NEXT__QUANTIFIER),
             icon_path="A:/res/language.png",
-            options="English\nChinese",
+            options="\n".join(lang[1] for lang in langs),
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
         self.btn.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
@@ -40,16 +44,25 @@ class InitScreen(Screen):
         global language
         selected_str = " " * 11
         target.get_selected_str(selected_str, len(selected_str))
+        device.set_language(target.get_selected())
+        i18n_refresh()
+        self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
+        self.btn.label.set_text(_(i18n_keys.ACTION__NEXT__QUANTIFIER))
         language = selected_str.strip()[:-1]
 
 
 class QuickStart(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            "Quick Start",
-            "Create a new wallet, or restore wallet used before from a backup.",
-            "Start",
-            options="Create New Wallet\nRestore Wallet",
+            _(i18n_keys.TITLE__QUICK_START),
+            _(i18n_keys.SUBTITLE__SETUP_QUICK_START),
+            _(i18n_keys.ACTION__START),
+            options="\n".join(
+                [
+                    _(i18n_keys.FORM__OPTION__CREATE_NEW_WALLET),
+                    _(i18n_keys.FORM__OPTION__RESTORE_WALLET),
+                ]
+            ),
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
         self.add_event_cb(
@@ -90,7 +103,10 @@ class QuickStart(FullSizeWindow):
 class SelectMnemonicNum(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            "Create New", "Number of word?", "Continue", options="12\n18\n24"
+            _(i18n_keys.TITLE__CREATE_NEW_WALLET),
+            _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS),
+            _(i18n_keys.ACTION__CONTINUE),
+            options="12\n18\n24",
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
         self.add_event_cb(

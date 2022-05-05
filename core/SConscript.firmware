@@ -762,6 +762,8 @@ if FROZEN:
     if LVGL_UI == '1':
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/lvgl/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/i18n/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/i18n/locales/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/components/*.py'))
     
