@@ -298,24 +298,21 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
     layoutHome();
     return;
   }
-
-  layoutConfirmHash(&bmp_icon_warning, _("EIP-712 domain hash"),
-                    msg->domain_separator_hash.bytes, 32);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
+  if (!fsm_layoutSignMessage_ex("EIP-712 domain hash",
+      msg->domain_separator_hash.bytes, 32)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return;
   }
 
   // No message hash when setting primaryType="EIP712Domain"
   // https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
   if (msg->has_message_hash) {
-    layoutConfirmHash(&bmp_icon_warning, _("EIP-712 message hash"),
-                      msg->message_hash.bytes, 32);
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
+    if (!fsm_layoutSignMessage_ex("EIP-712 message hash",
+      msg->message_hash.bytes, 32)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return;
     }
   }
 

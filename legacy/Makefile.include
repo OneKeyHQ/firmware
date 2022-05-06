@@ -67,6 +67,7 @@ CFLAGS   += $(OPTFLAGS) \
             -Wuninitialized \
             -Wformat-security \
             -Wno-missing-braces \
+            -Wno-unused-variable \
             -Werror \
             -fno-common \
             -fno-exceptions \
