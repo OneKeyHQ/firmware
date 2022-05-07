@@ -5111,23 +5111,6 @@ class EthereumTypedDataValueAck(protobuf.MessageType):
         self.value = value
 
 
-class EthereumTypedDataSignature(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 469
-    FIELDS = {
-        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
-        2: protobuf.Field("address", "string", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        signature: "bytes",
-        address: "str",
-    ) -> None:
-        self.signature = signature
-        self.address = address
-
-
 class EthereumStructMember(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
@@ -5431,6 +5414,7 @@ class EthereumSignMessageEIP712(protobuf.MessageType):
         self.domain_hash = domain_hash
         self.message_hash = message_hash
 
+
 class EthereumSignTypedHash(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 470
     FIELDS = {
@@ -5466,6 +5450,7 @@ class EthereumTypedDataSignature(protobuf.MessageType):
     ) -> None:
         self.signature = signature
         self.address = address
+
 
 class EthereumAccessList(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
