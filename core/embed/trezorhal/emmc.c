@@ -2,7 +2,7 @@
 
 #include "emmc.h"
 #include <string.h>
-#include "display.h"
+#include "common.h"
 
 static MMC_HandleTypeDef hmmc1;
 
@@ -58,6 +58,14 @@ void emmc_init(void) {
     while (1)
       ;
   }
+
+  if (HAL_MMC_ConfigWideBusOperation(&hmmc1, SDMMC_BUS_WIDE_8B) != HAL_OK) {
+    ensure(0, "mmc wide set fail");
+  }
+
+  if (HAL_MMC_ConfigSpeedBusOperation(&hmmc1, SDMMC_SPEED_MODE_DDR) != HAL_OK) {
+    ensure(0, "mmc speed set fail");
+  }
 }
 
 uint8_t emmc_get_card_state(void) {
@@ -66,7 +74,7 @@ uint8_t emmc_get_card_state(void) {
               : MMC_TRANSFER_BUSY);
 }
 
-void emmc_get_card_info(EMMC_CardInfoTypeDef *card_info) {
+void emmc_get_card_info(EMMC_CardInfoTypeDef* card_info) {
   if (HAL_MMC_GetCardInfo(&hmmc1, card_info) == HAL_OK) {
     // display_printf("card CardType %X\n", (int)card_info->CardType);
     // display_printf("card RelCardAdd %X\n", (int)card_info->RelCardAdd);
@@ -78,7 +86,7 @@ void emmc_get_card_info(EMMC_CardInfoTypeDef *card_info) {
   }
 }
 
-uint8_t emmc_read_blocks(uint8_t *data, uint32_t address, uint32_t nums,
+uint8_t emmc_read_blocks(uint8_t* data, uint32_t address, uint32_t nums,
                          uint32_t timeout) {
   if (HAL_MMC_ReadBlocks(&hmmc1, data, address, nums, timeout) == HAL_OK) {
     // uint32_t tickstart = HAL_GetTick();
@@ -97,7 +105,7 @@ uint8_t emmc_read_blocks(uint8_t *data, uint32_t address, uint32_t nums,
   }
 }
 
-uint8_t emmc_write_blocks(uint8_t *data, uint32_t address, uint32_t nums,
+uint8_t emmc_write_blocks(uint8_t* data, uint32_t address, uint32_t nums,
                           uint32_t timeout) {
   if (HAL_MMC_WriteBlocks(&hmmc1, data, address, nums, timeout) == HAL_OK) {
     return MMC_OK;
@@ -106,7 +114,7 @@ uint8_t emmc_write_blocks(uint8_t *data, uint32_t address, uint32_t nums,
   }
 }
 
-uint8_t emmc_read_blocks_dma(uint8_t *data, uint32_t address, uint32_t nums,
+uint8_t emmc_read_blocks_dma(uint8_t* data, uint32_t address, uint32_t nums,
                              uint32_t timeout) {
   uint32_t tickstart = HAL_GetTick();
   if (HAL_MMC_ReadBlocks_DMA(&hmmc1, data, address, nums) == HAL_OK) {
@@ -124,7 +132,7 @@ uint8_t emmc_read_blocks_dma(uint8_t *data, uint32_t address, uint32_t nums,
   }
 }
 
-uint8_t emmc_write_blocks_dma(uint8_t *data, uint32_t address, uint32_t nums,
+uint8_t emmc_write_blocks_dma(uint8_t* data, uint32_t address, uint32_t nums,
                               uint32_t timeout) {
   if (HAL_MMC_WriteBlocks_DMA(&hmmc1, data, address, nums) == HAL_OK) {
     return MMC_OK;
@@ -152,6 +160,6 @@ void emmc_test(void) {
   memset(buf, 0x00, 512);
   emmc_read_blocks(buf, 0, 1, 500);
   for (int i = 0; i < 512; i++) {
-    display_printf(" %X\n", buf[i]);
+    // display_printf(" %X\n", buf[i]);
   }
 }
