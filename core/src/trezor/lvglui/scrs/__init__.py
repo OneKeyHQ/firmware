@@ -1,6 +1,5 @@
 from storage import device
 from trezor import utils
-from trezor.langs import langs
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
