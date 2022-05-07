@@ -3556,6 +3556,40 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumSignMessageEIP712"]:
             return isinstance(msg, cls)
 
+    class EthereumSignTypedHash(protobuf.MessageType):
+        address_n: "list[int]"
+        domain_separator_hash: "bytes"
+        message_hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            domain_separator_hash: "bytes",
+            address_n: "list[int] | None" = None,
+            message_hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumSignTypedHash"]:
+            return isinstance(msg, cls)
+
+    class EthereumTypedDataSignature(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumTypedDataSignature"]:
+            return isinstance(msg, cls)
+
     class EthereumAccessList(protobuf.MessageType):
         address: "str"
         storage_keys: "list[bytes]"
@@ -3644,22 +3678,6 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumTypedDataValueAck"]:
-            return isinstance(msg, cls)
-
-    class EthereumTypedDataSignature(protobuf.MessageType):
-        signature: "bytes"
-        address: "str"
-
-        def __init__(
-            self,
-            *,
-            signature: "bytes",
-            address: "str",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumTypedDataSignature"]:
             return isinstance(msg, cls)
 
     class EthereumStructMember(protobuf.MessageType):
