@@ -436,6 +436,7 @@ if PRODUCTION_MODEL == 'H':
         #'embed/trezorhal/dma.c',
         'embed/trezorhal/emmc.c',
         'embed/trezorhal/flash.c',
+        'embed/trezorhal/heap_4.c',
         'embed/trezorhal/qspi_flash.c',
         'embed/trezorhal/mini_printf.c',
         'embed/trezorhal/mpu.c',
