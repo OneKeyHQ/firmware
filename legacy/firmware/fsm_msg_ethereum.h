@@ -255,3 +255,67 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
   ethereum_message_sign_eip712(msg, node, resp);
   layoutHome();
 }
+
+void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
+  RESP_INIT(EthereumTypedDataSignature);
+
+  CHECK_INITIALIZED
+
+  CHECK_PIN
+
+  if (msg->domain_separator_hash.size != 32 ||
+      (msg->has_message_hash && msg->message_hash.size != 32)) {
+    fsm_sendFailure(FailureType_Failure_DataError, _("Invalid hash length"));
+    return;
+  }
+
+  layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
+                    _("Unable to show"), _("EIP-712 data."), NULL,
+                    _("Sign at your own risk."), NULL, NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
+                                          msg->address_n_count, NULL);
+  if (!node) return;
+
+  uint8_t pubkeyhash[20] = {0};
+  if (!hdnode_get_ethereum_pubkeyhash(node, pubkeyhash)) {
+    return;
+  }
+
+  resp->address[0] = '0';
+  resp->address[1] = 'x';
+  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
+  // ethereum_address_checksum adds trailing zero
+
+  layoutVerifyAddress(NULL, resp->address);
+  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+  if (!fsm_layoutSignMessage_ex("EIP-712 domain hash",
+                                msg->domain_separator_hash.bytes, 32)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  // No message hash when setting primaryType="EIP712Domain"
+  // https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
+  if (msg->has_message_hash) {
+    if (!fsm_layoutSignMessage_ex("EIP-712 message hash",
+                                  msg->message_hash.bytes, 32)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+  }
+
+  ethereum_typed_hash_sign(msg, node, resp);
+  layoutHome();
+}
