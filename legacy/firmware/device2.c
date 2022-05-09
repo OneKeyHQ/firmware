@@ -12,9 +12,18 @@ void device_test(void) {
   uint8_t key = KEY_NULL;
   uint8_t key_flag = 0x00;
   ATCAConfiguration atca_config = {0};
+  bool retest = false;
 
-  if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
-    return;
+  bool up_key = (buttonRead() & BTN_PIN_UP) == 0;
+  bool down_key = (buttonRead() & BTN_PIN_DOWN) == 0;
+
+  if (up_key && down_key) {
+    retest = true;
+  }
+  if (!retest) {
+    if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
+      return;
+    }
   }
 
   // LCD TEST
@@ -22,6 +31,15 @@ void device_test(void) {
                             "确认屏幕显示正常", NULL, NULL, NULL);
   oledFrame(0, 0, OLED_WIDTH - 1, OLED_HEIGHT - 1);
   oledRefresh();
+
+  //wait for release
+  if (retest) {
+    while (1) {
+      if((buttonRead() & BTN_PIN_UP)&&(buttonRead() & BTN_PIN_DOWN)){
+        break;
+      }
+    }
+  }
 
   key = waitKey(0, 0);
   if (key != KEY_CONFIRM) {
@@ -95,12 +113,15 @@ void device_test(void) {
     }
   }
 
-  // save ATECC608 configuration version
-  char atca_version[8] = {0};
-  strlcpy(atca_version, ATCA_CONFIG_VERSION, sizeof(atca_version));
-  ensure_ex(flash_otp_write_safe(FLASH_OTP_FACTORY_TEST, 0,
-                                 (uint8_t *)atca_version, sizeof(atca_version)),
-            true, NULL);
+  if (!retest) {
+    // save ATECC608 configuration version
+    char atca_version[8] = {0};
+    strlcpy(atca_version, ATCA_CONFIG_VERSION, sizeof(atca_version));
+    ensure_ex(
+        flash_otp_write_safe(FLASH_OTP_FACTORY_TEST, 0, (uint8_t *)atca_version,
+                             sizeof(atca_version)),
+        true, NULL);
 
-  flash_otp_lock(FLASH_OTP_FACTORY_TEST);
+    flash_otp_lock(FLASH_OTP_FACTORY_TEST);
+  }
 }

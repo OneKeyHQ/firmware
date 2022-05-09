@@ -129,6 +129,15 @@ void atca_config_init(void) {
   atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
               "get config");
 
+  if (atca_configuration.lock_config == ATCA_UNLOCKED) {
+    atca_assert(atca_write_config_zone((uint8_t *)&atca_init_config),
+                "set config");
+
+    atca_assert(atca_lock_config_zone(), "lock config");
+    atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
+                "get config");
+  }
+
   memcpy(serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
   memcpy(serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
          ATECC608_SN2_SIZE);
@@ -189,15 +198,6 @@ void atca_config_init(void) {
          FLASH_PTR(FLASH_OTP_BASE +
                    FLASH_OTP_BLOCK_608_SERIAL * FLASH_OTP_BLOCK_SIZE),
          sizeof(pair_info_obj));
-
-  if (atca_configuration.lock_config == ATCA_UNLOCKED) {
-    atca_assert(atca_write_config_zone((uint8_t *)&atca_init_config),
-                "set config");
-
-    atca_assert(atca_lock_config_zone(), "lock config");
-    atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
-                "get config");
-  }
 
   if (atca_configuration.lock_value == ATCA_LOCKED) {
     return;
