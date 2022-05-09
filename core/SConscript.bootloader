@@ -85,6 +85,8 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma2d.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
@@ -178,6 +180,8 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/atca/atca_api.c',
     'embed/trezorhal/trans_fifo.c',
     'embed/trezorhal/spi.c',
+    'embed/trezorhal/usart.c',
+    'embed/trezorhal/ble.c',
 ]
 
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0')))

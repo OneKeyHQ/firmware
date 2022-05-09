@@ -43,6 +43,7 @@
 #include "messages.h"
 // #include "mpu.h"
 #include "spi.h"
+#include "usart.h"
 
 #if defined(STM32H747xx)
 #include "stm32h7xx_hal.h"
@@ -119,12 +120,14 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
     } else {
       host_channel = CHANNEL_SLAVE;
     }
+
     uint16_t msg_id;
     uint32_t msg_size;
     if (sectrue != msg_parse_header(buf, &msg_id, &msg_size)) {
       // invalid header -> discard
       continue;
     }
+
     switch (msg_id) {
       case 0:  // Initialize
         process_msg_Initialize(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
@@ -292,6 +295,7 @@ int main(void) {
 
   emmc_init();
 
+  ble_usart_init();
   spi_slave_init();
 
   // delay to detect touch
@@ -403,7 +407,6 @@ int main(void) {
 
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
-
   mpu_config_off();
   jump_to(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 

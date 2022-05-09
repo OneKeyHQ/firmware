@@ -36,10 +36,12 @@
 #include "version.h"
 
 #if PRODUCTION_MODEL == 'H'
+#include "ble.h"
 #include "common.h"
 #include "flash.h"
 #include "icon_onekey.h"
 #include "image.h"
+#include "sys.h"
 extern secbool load_vendor_header_keys(const uint8_t *const data,
                                        vendor_header *const vhdr);
 #endif
@@ -567,47 +569,49 @@ int ui_input_poll(int zones, bool poll) {
 
 void ui_title_update(void) {
   bool usb_conn = true;  // todo
-  bool ble_conn = true;
-  enum BAT_LEVEL bat_level = BAT_LEVEL_75;
 
-  switch (bat_level) {
-    case BAT_LEVEL_0:
+  display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
+  switch (battery_cap) {
+    case 0:
       display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status0 + 12,
                     sizeof(toi_icon_status0) - 12);
       break;
-    case BAT_LEVEL_25:
+    case 1:
       display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status25 + 12,
                     sizeof(toi_icon_status25) - 12);
       break;
-    case BAT_LEVEL_50:
+    case 2:
       display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status50 + 12,
                     sizeof(toi_icon_status50) - 12);
       break;
-    case BAT_LEVEL_75:
+    case 3:
       display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status75 + 12,
                     sizeof(toi_icon_status75) - 12);
       break;
-    case BAT_LEVEL_100:
+    case 4:
       display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status100 + 12,
                     sizeof(toi_icon_status100) - 12);
       break;
-    case BAT_LEVEL_CHARGING:
+    case 5:
       display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_charging + 12,
                     sizeof(toi_icon_charging) - 12);
       break;
     default:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status75 + 12,
-                    sizeof(toi_icon_status75) - 12);
+      display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
   }
 
   if (usb_conn) {
     display_image(DISPLAY_RESX - 96 + 15, 0, 32, 32, toi_icon_usb + 12,
                   sizeof(toi_icon_usb) - 12);
+  } else {
+    display_bar(DISPLAY_RESX - 96 + 15, 0, 32, 32, COLOR_BLACK);
   }
 
-  if (ble_conn) {
+  if (ble_connect_state()) {
     display_image(DISPLAY_RESX - 64 + 15, 0, 17, 26, toi_icon_bluetooth + 12,
                   sizeof(toi_icon_bluetooth) - 12);
+  } else {
+    display_bar(DISPLAY_RESX - 64 + 15, 0, 17, 26, COLOR_BLACK);
   }
 }
 
