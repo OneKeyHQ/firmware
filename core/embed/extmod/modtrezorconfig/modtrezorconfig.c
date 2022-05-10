@@ -59,6 +59,14 @@ static secbool wrapped_ui_wait_callback(uint32_t wait, uint32_t progress,
 ///     called from this module!
 ///     """
 STATIC mp_obj_t mod_trezorconfig_init(size_t n_args, const mp_obj_t *args) {
+#ifndef TREZOR_EMULATOR
+  if (se_is_wiping()) {
+    se_reset_storage();
+    storage_wipe();
+    se_reset_state();
+  }
+#endif
+
   if (n_args > 0) {
     MP_STATE_VM(trezorconfig_ui_wait_callback) = args[0];
     storage_init(wrapped_ui_wait_callback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
@@ -93,8 +101,11 @@ STATIC mp_obj_t mod_trezorconfig_unlock(mp_obj_t pin, mp_obj_t ext_salt) {
     return mp_const_false;
   }
 #else
-  if (sectrue != storage_unlock(pin_b.buf, pin_b.len, ext_salt_b.buf) ||
-      !se_verifyPin(pin_b.buf)) {
+  secbool ret = secfalse;
+  bool ret_se = false;
+  ret = storage_unlock(pin_b.buf, pin_b.len, ext_salt_b.buf);
+  ret_se = se_verifyPin(pin_b.buf);
+  if (sectrue != ret || true != ret_se) {
     return mp_const_false;
   }
 #endif
@@ -168,7 +179,14 @@ STATIC mp_obj_t mod_trezorconfig_get_pin_rem(void) {
   return mp_obj_new_int_from_uint(storage_get_pin_rem());
 #else
   int remain = storage_get_pin_rem();
-  int remain_se = 10 - se_pinFailedCounter();
+  int fail_count = se_pinFailedCounter();
+  int remain_se = 0;
+  if (fail_count <= 10) {
+    remain_se = 10 - fail_count;
+  } else {
+    remain_se = 0;
+  }
+
   return mp_obj_new_int_from_uint(remain < remain_se ? remain : remain_se);
 #endif
 }
@@ -438,9 +456,12 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorconfig_next_counter_obj, 2,
 ///     Erases the whole config. Use with caution!
 ///     """
 STATIC mp_obj_t mod_trezorconfig_wipe(void) {
+#ifndef TREZOR_EMULATOR
+  se_set_wiping(true);
+  se_reset_storage();
+#endif
   storage_wipe();
 #ifndef TREZOR_EMULATOR
-  se_reset_storage();
   se_reset_state();
 #endif
   return mp_const_none;
