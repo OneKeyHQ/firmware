@@ -4,6 +4,7 @@
 #define SVC_DISABLE_IRQ 1
 #define SVC_SET_PRIORITY 2
 #define SVC_SHUTDOWN 4
+#define SVC_RESET_SYSTEM 5
 
 // from util.s
 extern void shutdown_privileged(void);
@@ -48,5 +49,15 @@ static inline void svc_shutdown(void) {
     __asm__ __volatile__("svc %0" ::"i"(SVC_SHUTDOWN) : "memory");
   } else {
     shutdown_privileged();
+  }
+}
+
+static inline void svc_reset_system(void) {
+  if (is_mode_unprivileged()) {
+    __asm__ __volatile__("svc %0" ::"i"(SVC_RESET_SYSTEM) : "memory");
+  } else {
+    HAL_NVIC_SystemReset();
+    while (1)
+      ;
   }
 }

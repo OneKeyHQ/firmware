@@ -7,7 +7,7 @@ MEMORY {
   FLASH2 (r)   : ORIGIN = 0x90000000, LENGTH = 2048K
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
-  EXRAM   (wal) : ORIGIN = 0xD0400000, LENGTH = 8092K
+  /*EXRAM   (wal) : ORIGIN = 0xD0400000, LENGTH = 8092K */
 }
 
 main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
@@ -76,7 +76,7 @@ SECTIONS {
   } >SRAM
 
   .heap : ALIGN(4) {
-    . = 8092K; /* this acts as a build time assertion that at least this much memory is available for heap use */
+    . = 512K; /* this acts as a build time assertion that at least this much memory is available for heap use */
     /*. = ABSOLUTE(sram_end - 16K);  this explicitly sets the end of the heap effectively giving the stack at most 16K */
-  } >EXRAM
+  } >AXIRAM
 }

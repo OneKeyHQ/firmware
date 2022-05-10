@@ -1033,6 +1033,7 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
     return secfalse;
   }
 
+#if 0
   // Sleep for 2^ctr - 1 seconds before checking the PIN.
   uint32_t wait = (1 << ctr) - 1;
   ui_total += wait;
@@ -1053,6 +1054,7 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
       hal_delay(100);
     }
   }
+#endif
 
   // Read the random salt from EDEK_PVC_KEY and use it to derive the KEK and
   // KEIV from the PIN.

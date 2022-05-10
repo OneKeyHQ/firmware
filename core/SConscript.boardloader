@@ -43,6 +43,9 @@ if PRODUCTION_MODEL == 'H':
         'embed/extmod/modtrezorui/mipi_lcd.c',
         'embed/extmod/modtrezorui/display.c',
         'embed/extmod/modtrezorui/font_bitmap.c',
+        'vendor/micropython/lib/uzlib/adler32.c',
+        'vendor/micropython/lib/uzlib/crc32.c',
+        'vendor/micropython/lib/uzlib/tinflate.c',
     ]
     SOURCE_STMHAL = [
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c',

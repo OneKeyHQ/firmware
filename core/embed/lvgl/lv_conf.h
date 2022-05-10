@@ -19,6 +19,13 @@
 
 #include <stdint.h>
 
+#include "../trezorhal/secure_heap.h"
+
+#define LODEPNG_NO_COMPILE_ALLOCATORS
+#define lodepng_malloc pvPortMalloc
+#define lodepng_realloc pvPortReMalloc
+#define lodepng_free vPortFree
+
 /*====================
    COLOR SETTINGS
  *====================*/
@@ -378,7 +385,16 @@
     LV_FONT_DECLARE(lv_font_pljs_medium_20) \
     LV_FONT_DECLARE(lv_font_pljs_medium_24) \
     LV_FONT_DECLARE(lv_font_pljs_medium_28) \
-    LV_FONT_DECLARE(lv_font_pljs_regular_24)
+    LV_FONT_DECLARE(lv_font_pljs_regular_24) \
+    LV_FONT_DECLARE(lv_font_scs_bold_20) \
+    LV_FONT_DECLARE(lv_font_scs_bold_24) \
+    LV_FONT_DECLARE(lv_font_scs_bold_32) \
+    LV_FONT_DECLARE(lv_font_scs_bold_36) \
+    LV_FONT_DECLARE(lv_font_scs_reg_20) \
+    LV_FONT_DECLARE(lv_font_scs_reg_24) \
+    LV_FONT_DECLARE(lv_font_scs_reg_28) 
+
+
 
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &lv_font_pljs_regular_24

@@ -261,7 +261,6 @@ uint32_t touch_read(void) {
 
   if (touch_data[0] == 0x06 && touch_data[5] == 0x01) {
     if (0 == memcmp(previous_touch_data, touch_data, TOUCH_PACKET_SIZE)) {
-      return 0;  // polled and got the same event again
     } else {
       memcpy(previous_touch_data, touch_data, TOUCH_PACKET_SIZE);
     }

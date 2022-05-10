@@ -17,7 +17,7 @@
 // |15-14 |13 |        12       | 11-8  |  7    |    6    |    5   | 4-2   |   1
 // |   0   |
 
-const ATCAConfiguration atca_init_config = {
+static const ATCAConfiguration atca_init_config = {
     .count_match = 0x01 | (SLOT_COUNTER_MATCH << 4),
     .chip_mode = 0x00,
     .slot_config =
