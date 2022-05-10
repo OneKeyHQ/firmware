@@ -25,9 +25,11 @@ if utils.EMULATOR:
     font_MONO32 = lv.font_load("A:/res/JetBrainsMono-Bold-32.bin")
     font_MONO28 = lv.font_load("A:/res/JetBrainsMono-Medium-28.bin")
     font_MONO24 = lv.font_load("A:/res/JetBrainsMono-Medium-24.bin")
+    font_LANG_MIX = lv.font_load("A:/res/LANG-MIX.bin")
+    font_LANG_MIX_TITLE = lv.font_load("A:/res/LANG-MIX-TITLE.bin")
 
 else:
-    if device.get_language() == 1:
+    if device.get_language() in ["zh-ch", "zh-tw"]:
         font_PJSBOLD36 = lv.font_scs_bold_36
         font_PJSBOLD32 = lv.font_scs_bold_32
         font_PJSBOLD24 = lv.font_scs_bold_24
@@ -49,3 +51,5 @@ else:
         font_PJSREG24 = lv.font_pljs_regular_24
         font_MONO28 = lv.font_jbm_medium_28
         font_MONO24 = lv.font_jbm_medium_24
+    font_LANG_MIX = lv.font_mix_bold_24
+    font_LANG_MIX_TITLE = lv.font_mix_title_bold_36
