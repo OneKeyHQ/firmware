@@ -182,6 +182,7 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/spi.c',
     'embed/trezorhal/usart.c',
     'embed/trezorhal/ble.c',
+    'embed/trezorhal/sys.c',
 ]
 
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0')))

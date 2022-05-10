@@ -363,7 +363,7 @@ if LVGL_UI == '1':
 
     # LVGL
     SOURCE_MOD += [
-        'lv_mpy.c',        
+        'lv_mpy.c',
     ]
     SOURCE_MOD.extend(Glob('embed/lvgl/*.c'))
 
@@ -383,7 +383,7 @@ if LVGL_UI == '1':
     )
 
     SOURCE_MOD += [
-        'atca_mp.c',        
+        'atca_mp.c',
     ]
 
 SOURCE_MICROPYTHON_SPEED = [
@@ -430,7 +430,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/firmware/main.c',
         'embed/firmware/mphalport.c',
         'embed/firmware/nlrthumb.c',
-        'embed/firmware/startup.S',        
+        'embed/firmware/startup.S',
 
     ]
     SOURCE_TREZORHAL = [
@@ -460,6 +460,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/atca/se_atca.c',
 	    'embed/trezorhal/trans_fifo.c',
         'embed/trezorhal/spi.c',
+        'embed/trezorhal/sys.c',
     ]
 else:
     SOURCE_STMHAL = [
@@ -767,7 +768,7 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/components/*.py'))
-    
+
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/wire/*.py'))
 
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'storage/*.py'))

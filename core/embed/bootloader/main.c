@@ -43,6 +43,7 @@
 #include "messages.h"
 // #include "mpu.h"
 #include "spi.h"
+#include "sys.h"
 #include "usart.h"
 
 #if defined(STM32H747xx)
@@ -295,6 +296,8 @@ int main(void) {
 
   emmc_init();
 
+  buzzer_init();
+  motor_init();
   ble_usart_init();
   spi_slave_init();
 
