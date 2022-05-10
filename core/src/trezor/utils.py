@@ -13,6 +13,7 @@ from trezorutils import (  # noqa: F401
     consteq,
     halt,
     memcpy,
+    reset,
 )
 from typing import TYPE_CHECKING
 

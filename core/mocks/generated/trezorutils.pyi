@@ -40,6 +40,13 @@ def halt(msg: str | None = None) -> None:
     """
     Halts execution.
     """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def reset() -> None:
+    """
+    Reset system.
+    """
 SCM_REVISION: bytes
 VERSION_MAJOR: int
 VERSION_MINOR: int
