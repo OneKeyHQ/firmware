@@ -115,6 +115,11 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
       r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);
       if (r != USB_PACKET_SIZE) {
         ui_bootloader_page_switch(hdr);
+        static uint32_t tickstart = 0;
+        if ((HAL_GetTick() - tickstart) >= 1000) {
+          ui_title_update();
+          tickstart = HAL_GetTick();
+        }
         continue;
       }
       host_channel = CHANNEL_USB;
