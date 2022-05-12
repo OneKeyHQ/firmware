@@ -42,7 +42,10 @@
 #include "bootui.h"
 #include "messages.h"
 // #include "mpu.h"
+#include "ble.h"
 #include "spi.h"
+#include "sys.h"
+#include "usart.h"
 
 #if defined(STM32H747xx)
 #include "stm32h7xx_hal.h"
@@ -108,23 +111,31 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
   int r;
 
   for (;;) {
+    ble_uart_poll();
     r = spi_slave_poll(buf);
     if (r != USB_PACKET_SIZE) {
-      r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE,
-                                   USB_TIMEOUT);
+      r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);
       if (r != USB_PACKET_SIZE) {
+        ui_bootloader_page_switch(hdr);
+        static uint32_t tickstart = 0;
+        if ((HAL_GetTick() - tickstart) >= 1000) {
+          ui_title_update();
+          tickstart = HAL_GetTick();
+        }
         continue;
       }
       host_channel = CHANNEL_USB;
     } else {
       host_channel = CHANNEL_SLAVE;
     }
+
     uint16_t msg_id;
     uint32_t msg_size;
     if (sectrue != msg_parse_header(buf, &msg_id, &msg_size)) {
       // invalid header -> discard
       continue;
     }
+
     switch (msg_id) {
       case 0:  // Initialize
         process_msg_Initialize(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
@@ -134,12 +145,24 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
         break;
       case 5:  // WipeDevice
         ui_fadeout();
+#if PRODUCTION_MODEL == 'H'
+        ui_wipe_confirm(hdr);
+#else
         ui_screen_wipe_confirm();
+#endif
         ui_fadein();
+#if PRODUCTION_MODEL == 'H'
+        int response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
+#else
         int response = ui_user_input(INPUT_CONFIRM | INPUT_CANCEL);
+#endif
         if (INPUT_CANCEL == response) {
           ui_fadeout();
+#if PRODUCTION_MODEL == 'H'
+          ui_bootloader_first(hdr);
+#else
           ui_screen_firmware_info(vhdr, hdr);
+#endif
           ui_fadein();
           send_user_abort(USB_IFACE_NUM, "Wipe cancelled");
           break;
@@ -280,6 +303,9 @@ int main(void) {
 
   emmc_init();
 
+  buzzer_init();
+  motor_init();
+  ble_usart_init();
   spi_slave_init();
 
   // delay to detect touch
@@ -322,24 +348,7 @@ int main(void) {
 
   // start the bootloader if no or broken firmware found ...
   if (firmware_present != sectrue) {
-    // show intro animation
-
-    // no ui_fadeout(); - we already start from black screen
-    ui_screen_welcome_first();
-    ui_fadein();
-
-    hal_delay(1000);
-
-    ui_fadeout();
-    ui_screen_welcome_second();
-    ui_fadein();
-
-    hal_delay(1000);
-
-    ui_fadeout();
-    ui_screen_welcome_third();
-    ui_fadein();
-
+    ui_bootloader_first(&hdr);
     // erase storage
     ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
            NULL);
@@ -408,7 +417,6 @@ int main(void) {
 
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
-
   mpu_config_off();
   jump_to(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 

@@ -537,21 +537,37 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
       } else if (sectrue == is_upgrade) {
         // firmware upgrade
         ui_fadeout();
+#if PRODUCTION_MODEL == 'H'
+        ui_install_confirm(&current_hdr, &hdr);
+#else
         ui_screen_install_confirm_upgrade(&vhdr, &hdr);
+#endif
         ui_fadein();
+#if PRODUCTION_MODEL == 'H'
+        response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
+#else
         response = ui_user_input(INPUT_CONFIRM | INPUT_CANCEL);
+#endif
       } else {
         // downgrade with wipe or new firmware vendor
         ui_fadeout();
         ui_screen_install_confirm_newvendor_or_downgrade_wipe(
             &vhdr, &hdr, is_downgrade_wipe);
         ui_fadein();
+#if PRODUCTION_MODEL == 'H'
+        response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
+#else
         response = ui_user_input(INPUT_CONFIRM | INPUT_CANCEL);
+#endif
       }
 
       if (INPUT_CANCEL == response) {
         ui_fadeout();
+#if PRODUCTION_MODEL == 'H'
+        ui_bootloader_first(&current_hdr);
+#else
         ui_screen_firmware_info(&current_vhdr, &current_hdr);
+#endif
         ui_fadein();
         send_user_abort(iface_num, "Firmware install cancelled");
         return -4;

@@ -181,6 +181,7 @@ SOURCE_MOD += [
     'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
     'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
     'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
+    'embed/extmod/modtrezorui/font_roboto_regular_24.c',
     'embed/extmod/modtrezorui/modtrezorui.c',
     #'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
     'vendor/micropython/lib/uzlib/adler32.c',
@@ -362,7 +363,7 @@ if LVGL_UI == '1':
 
     # LVGL
     SOURCE_MOD += [
-        'lv_mpy.c',        
+        'lv_mpy.c',
     ]
     SOURCE_MOD.extend(Glob('embed/lvgl/*.c'))
 
@@ -382,7 +383,7 @@ if LVGL_UI == '1':
     )
 
     SOURCE_MOD += [
-        'atca_mp.c',        
+        'atca_mp.c',
     ]
 
 SOURCE_MICROPYTHON_SPEED = [
@@ -415,6 +416,8 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma2d.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
@@ -427,7 +430,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/firmware/main.c',
         'embed/firmware/mphalport.c',
         'embed/firmware/nlrthumb.c',
-        'embed/firmware/startup.S',        
+        'embed/firmware/startup.S',
 
     ]
     SOURCE_TREZORHAL = [
@@ -458,6 +461,8 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/atca/se_atca.c',
 	    'embed/trezorhal/trans_fifo.c',
         'embed/trezorhal/spi.c',
+        'embed/trezorhal/usart.c',
+        'embed/trezorhal/sys.c',
     ]
 else:
     SOURCE_STMHAL = [
@@ -767,7 +772,7 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/i18n/locales/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/components/*.py'))
-    
+
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/wire/*.py'))
 
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'storage/*.py'))

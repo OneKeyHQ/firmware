@@ -58,9 +58,15 @@
 #else
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
+#if PRODUCTION_MODEL == 'H'
+#include "font_roboto_regular_24.h"
+#define FONT_NORMAL_DATA Font_Roboto_Regular_24
+#define FONT_NORMAL_HEIGHT 24
+#else
 #include "font_roboto_regular_20.h"
 #define FONT_NORMAL_DATA Font_Roboto_Regular_20
 #define FONT_NORMAL_HEIGHT 20
+#endif
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE
 #include "font_roboto_bold_20.h"
@@ -71,6 +77,11 @@
 #include "font_robotomono_regular_20.h"
 #define FONT_MONO_DATA Font_RobotoMono_Regular_20
 #define FONT_MONO_HEIGHT 20
+#endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+#include "font_roboto_bold_36.h"
+#define FONT_BOLD36_DATA Font_Roboto_Bold_36
+#define FONT_BOLD36_HEIGHT 36
 #endif
 
 #endif
@@ -413,6 +424,14 @@ bool display_toif_info(const uint8_t *data, uint32_t len, uint16_t *out_w,
   return true;
 }
 
+#if PRODUCTION_MODEL == 'H'
+void display_loader(uint16_t progress, bool indeterminate, int yoffset,
+                    uint16_t fgcolor, uint16_t bgcolor, const uint8_t *icon,
+                    uint32_t iconlen, uint16_t iconfgcolor) {
+  display_progress(NULL, progress);
+}
+#else
+
 #if TREZOR_MODEL == T
 #include "loader.h"
 #endif
@@ -509,6 +528,7 @@ void display_loader(uint16_t progress, bool indeterminate, int yoffset,
 
 #endif
 }
+#endif
 
 #ifndef TREZOR_PRINT_DISABLE
 
@@ -685,6 +705,10 @@ static const uint8_t *get_glyph(int font, uint8_t c) {
       case FONT_MONO:
         return FONT_MONO_DATA[c - ' '];
 #endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+      case FONT_BOLD36:
+        return FONT_BOLD36_DATA[c - ' '];
+#endif
     }
     return 0;
   }
@@ -705,6 +729,10 @@ static const uint8_t *get_glyph(int font, uint8_t c) {
 #ifdef TREZOR_FONT_MONO_ENABLE
     case FONT_MONO:
       return NONPRINTABLE_GLYPH(FONT_MONO_DATA);
+#endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+    case FONT_BOLD36:
+      return NONPRINTABLE_GLYPH(FONT_BOLD36_DATA);
 #endif
   }
   return 0;
@@ -954,6 +982,47 @@ void display_utf8_substr(const char *buf_start, size_t buf_len, int char_off,
 
   *out_start = buf_start + i_start;
   *out_len = i - i_start;
+}
+
+void display_progress_percent(int x, int y, int permil) {
+  char percent_asc[5] = {0};
+  int i = 0;
+  if (permil < 10) {
+    percent_asc[i++] = permil + 0x30;
+  } else if (permil < 100) {
+    percent_asc[i++] = permil / 10 + 0x30;
+    percent_asc[i++] = permil % 10 + 0x30;
+  } else {
+    permil = 100;
+    percent_asc[i++] = permil / 100 + 0x30;
+    percent_asc[i++] = permil % 100 / 10 + 0x30;
+    percent_asc[i++] = permil % 10 + 0x30;
+  }
+  percent_asc[i] = '%';
+  display_text_center(x, y, percent_asc, -1, -1, COLOR_WHITE, COLOR_BLACK);
+}
+
+void display_progress(const char *desc, int permil) {
+  if (desc) {
+    display_text_center(MAX_DISPLAY_RESX / 2, 588, desc, -1, -1, COLOR_WHITE,
+                        COLOR_BLACK);
+  }
+
+  display_bar(0, 657, MAX_DISPLAY_RESX, 20, COLOR_BLACK);
+  display_progress_percent(MAX_DISPLAY_RESX / 2, 675, permil / 10);
+
+  display_bar_radius(60, 631, MAX_DISPLAY_RESX - 120, 20, COLOR_GRAY,
+                     COLOR_BLACK, 8);
+
+  permil = permil * (MAX_DISPLAY_RESX - 120) / 1000;
+  if (permil < 4) {
+    permil = 4;
+  }
+  if (permil > MAX_DISPLAY_RESX - 120) {
+    permil = MAX_DISPLAY_RESX - 120;
+  }
+  display_bar_radius(60 + 4, 631 + 5, permil - 8, 10, COLOR_WHITE, COLOR_GRAY,
+                     4);
 }
 
 #else
@@ -1531,6 +1600,10 @@ static const uint8_t *get_glyph(int font, uint8_t c) {
       case FONT_MONO:
         return FONT_MONO_DATA[c - ' '];
 #endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+      case FONT_BOLD36:
+        return FONT_BOLD36_DATA[c - ' '];
+#endif
     }
     return 0;
   }
@@ -1555,6 +1628,10 @@ static const uint8_t *get_glyph(int font, uint8_t c) {
 #ifdef TREZOR_FONT_MONO_ENABLE
     case FONT_MONO:
       return NONPRINTABLE_GLYPH(FONT_MONO_DATA);
+#endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+    case FONT_BOLD36:
+      return NONPRINTABLE_GLYPH(FONT_BOLD36_DATA);
 #endif
   }
   return 0;
@@ -1705,6 +1782,10 @@ int display_text_height(int font) {
 #ifdef TREZOR_FONT_MONO_ENABLE
     case FONT_MONO:
       return FONT_MONO_HEIGHT;
+#endif
+#ifdef TREZOR_FONT_BOLD36_ENABLE
+    case FONT_BOLD36:
+      return FONT_BOLD36_HEIGHT;
 #endif
   }
   return 0;

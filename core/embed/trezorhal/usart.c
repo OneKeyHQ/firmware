@@ -1,0 +1,154 @@
+/*
+ * This file is part of the libopencm3 project.
+ *
+ * Copyright (C) 2009 Uwe Hermann <uwe@hermann-uwe.de>,
+ * Copyright (C) 2011 Piotr Esden-Tempski <piotr@esden.net>
+ *
+ * This library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "usart.h"
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include "ble.h"
+#include "common.h"
+#include "display.h"
+#include "stm32h7xx_hal.h"
+
+UART_HandleTypeDef uart;
+UART_HandleTypeDef *huart = &uart;
+
+uint8_t uart_data_in[UART_BUF_MAX_LEN];
+
+trans_fifo uart_fifo_in = {.p_buf = uart_data_in,
+                           .buf_size = UART_BUF_MAX_LEN,
+                           .over_pre = false,
+                           .read_pos = 0,
+                           .write_pos = 0,
+                           .lock_pos = 0};
+
+void ble_usart_init(void) {
+  GPIO_InitTypeDef gpio;
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  HAL_SYSCFG_AnalogSwitchConfig(SYSCFG_SWITCH_PA0, SYSCFG_SWITCH_PA0_CLOSE);
+  HAL_SYSCFG_AnalogSwitchConfig(SYSCFG_SWITCH_PA1, SYSCFG_SWITCH_PA1_CLOSE);
+
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_UART4;
+  PeriphClkInitStruct.Usart234578ClockSelection = RCC_UART4CLKSOURCE_D2PCLK1;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
+    display_printf("HAL_RCCEx_PeriphCLKConfig failed\n");
+    return;
+  }
+
+  __HAL_RCC_UART4_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  // UART4: PA0_C(TX), PA1_C(RX)
+  gpio.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+  gpio.Mode = GPIO_MODE_AF_PP;
+  gpio.Pull = GPIO_PULLUP;
+  gpio.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio.Alternate = GPIO_AF8_UART4;
+  HAL_GPIO_Init(GPIOA, &gpio);
+
+  huart->Instance = UART4;
+  huart->Init.BaudRate = 115200;
+  huart->Init.WordLength = UART_WORDLENGTH_8B;
+  huart->Init.StopBits = UART_STOPBITS_1;
+  huart->Init.Parity = UART_PARITY_NONE;
+  huart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart->Init.Mode = UART_MODE_TX_RX;
+  huart->Init.OverSampling = UART_OVERSAMPLING_16;
+  huart->Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart->Init.ClockPrescaler = UART_PRESCALER_DIV1;
+
+  if (HAL_UART_Init(huart) != HAL_OK) {
+    display_printf("HAL_UART_Init failed\n");
+    return;
+  }
+
+  HAL_NVIC_SetPriority(UART4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(UART4_IRQn);
+
+  ble_usart_irq_enable();
+}
+
+void ble_usart_enable(void) { __HAL_UART_ENABLE(huart); }
+
+void ble_usart_disable(void) { __HAL_UART_DISABLE(huart); }
+
+void ble_usart_irq_enable(void) { __HAL_UART_ENABLE_IT(huart, UART_IT_RXFNE); }
+
+void ble_usart_irq_disable(void) {
+  __HAL_UART_DISABLE_IT(huart, UART_IT_RXFNE);
+}
+
+void ble_usart_sendByte(uint8_t data) {
+  while (__HAL_UART_GET_FLAG(huart, UART_FLAG_TXE) == RESET)
+    ;
+  huart->Instance->TDR = data;
+}
+
+void ble_usart_send(uint8_t *buf, uint32_t len) {
+  for (uint32_t i = 0; i < len; i++) {
+    ble_usart_sendByte(buf[i]);
+  }
+}
+
+bool ble_read_byte(uint8_t *buf) {
+  if (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXFNE) != 0) {
+    buf[0] = (uint8_t)(huart->Instance->RDR);
+    return true;
+  }
+  return false;
+}
+
+secbool ble_usart_can_read(void) {
+  volatile uint32_t total_len;
+
+  total_len = fifo_lockdata_len(&uart_fifo_in);
+  if (total_len == 0) {
+    return secfalse;
+  } else {
+    return sectrue;
+  }
+}
+
+uint32_t ble_usart_read(uint8_t *buf, uint32_t lenth) {
+  volatile uint32_t total_len, len, ret;
+
+  if (buf == NULL) return 0;
+
+  total_len = fifo_lockdata_len(&uart_fifo_in);
+  if (total_len == 0) {
+    return 0;
+  }
+
+  len = lenth > total_len ? total_len : lenth;
+  ret = fifo_read_lock(&uart_fifo_in, buf, len);
+  return ret;
+}
+
+void UART4_IRQHandler(void) {
+  uint8_t data;
+
+  if (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXFNE) != 0) {
+    data = (uint8_t)(huart->Instance->RDR);
+    if (!fifo_write_no_overflow(&uart_fifo_in, &data, 1)) {
+      display_printf("UART buffer overflow\n");
+    }
+  }
+}

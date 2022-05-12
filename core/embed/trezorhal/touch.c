@@ -244,7 +244,7 @@ uint32_t touch_read(void) {
 
   memset(touch_data, 0x00, sizeof(touch_data));
   if (HAL_I2C_Mem_Read(&i2c_handle, TOUCH_ADDRESS, 0xD000, 2, touch_data, 7,
-                       1000) != HAL_OK) {
+                       50) != HAL_OK) {
     return 0;
   }
   if (touch_data[6] != 0xAB) {
@@ -280,7 +280,15 @@ uint32_t touch_read(void) {
   return 0;
 }
 #endif
-uint32_t touch_click(void) { return touch_read(); }
+uint32_t touch_click(void) {
+  uint32_t r = 0;
+  r = touch_read();
+  if (r) {
+    while (((r = touch_read()) & TOUCH_END) == 0) {
+    }
+  }
+  return r;
+}
 
 void touch_test(void) {
   int pos;
