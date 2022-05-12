@@ -1,6 +1,9 @@
 #ifndef _sys_H_
 #define _sys_H_
 
+#include <stdbool.h>
+#include <stdint.h>
+
 extern uint8_t battery_cap;
 
 #define PERIOD_VALUE (uint32_t)(1000 - 1)

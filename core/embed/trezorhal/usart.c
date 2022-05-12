@@ -30,6 +30,15 @@
 UART_HandleTypeDef uart;
 UART_HandleTypeDef *huart = &uart;
 
+uint8_t uart_data_in[UART_BUF_MAX_LEN];
+
+trans_fifo uart_fifo_in = {.p_buf = uart_data_in,
+                           .buf_size = UART_BUF_MAX_LEN,
+                           .over_pre = false,
+                           .read_pos = 0,
+                           .write_pos = 0,
+                           .lock_pos = 0};
+
 void ble_usart_init(void) {
   GPIO_InitTypeDef gpio;
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
@@ -107,8 +116,39 @@ bool ble_read_byte(uint8_t *buf) {
   return false;
 }
 
+secbool ble_usart_can_read(void) {
+  volatile uint32_t total_len;
+
+  total_len = fifo_lockdata_len(&uart_fifo_in);
+  if (total_len == 0) {
+    return secfalse;
+  } else {
+    return sectrue;
+  }
+}
+
+uint32_t ble_usart_read(uint8_t *buf, uint32_t lenth) {
+  volatile uint32_t total_len, len, ret;
+
+  if (buf == NULL) return 0;
+
+  total_len = fifo_lockdata_len(&uart_fifo_in);
+  if (total_len == 0) {
+    return 0;
+  }
+
+  len = lenth > total_len ? total_len : lenth;
+  ret = fifo_read_lock(&uart_fifo_in, buf, len);
+  return ret;
+}
+
 void UART4_IRQHandler(void) {
+  uint8_t data;
+
   if (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXFNE) != 0) {
-    ble_uart_poll();
+    data = (uint8_t)(huart->Instance->RDR);
+    if (!fifo_write_no_overflow(&uart_fifo_in, &data, 1)) {
+      display_printf("UART buffer overflow\n");
+    }
   }
 }

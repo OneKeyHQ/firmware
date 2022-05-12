@@ -42,6 +42,7 @@
 #include "bootui.h"
 #include "messages.h"
 // #include "mpu.h"
+#include "ble.h"
 #include "spi.h"
 #include "sys.h"
 #include "usart.h"
@@ -110,6 +111,7 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
   int r;
 
   for (;;) {
+    ble_uart_poll();
     r = spi_slave_poll(buf);
     if (r != USB_PACKET_SIZE) {
       r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);

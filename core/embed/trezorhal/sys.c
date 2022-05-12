@@ -1,8 +1,8 @@
+#include "sys.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include "stm32h7xx_hal.h"
-#include "sys.h"
 
 TIM_HandleTypeDef TIM8_Handle;
 

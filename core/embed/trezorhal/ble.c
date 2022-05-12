@@ -92,7 +92,7 @@ void ble_uart_poll(void) {
   volatile uint8_t xor ;
   static bool need_refresh = false;
 
-  if (ble_read_byte(buf + index) == false) {
+  if (ble_usart_read(buf + index, 1) != 1) {
     return;
   }
 

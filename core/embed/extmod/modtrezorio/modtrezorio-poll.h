@@ -23,6 +23,7 @@
 #include "display.h"
 #include "embed/extmod/trezorobj.h"
 #include "spi.h"
+#include "usart.h"
 
 #define SPI_IFACE (6)
 #define BUTTON_IFACE (254)
@@ -144,6 +145,14 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
         } else if (sectrue == usb_webusb_can_read(iface)) {
           uint8_t buf[64] = {0};
           int len = usb_webusb_read(iface, buf, sizeof(buf));
+          if (len > 0) {
+            ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+            ret->items[1] = mp_obj_new_bytes(buf, len);
+            return mp_const_true;
+          }
+        } else if (sectrue == ble_usart_can_read()) {
+          uint8_t buf[64] = {0};
+          int len = ble_usart_read(buf, sizeof(buf));
           if (len > 0) {
             ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
             ret->items[1] = mp_obj_new_bytes(buf, len);

@@ -1,10 +1,13 @@
 #ifndef _usart_H_
 #define _usart_H_
 
+#include <secbool.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "trans_fifo.h"
 
 #define BLE_UART USART4
+#define UART_BUF_MAX_LEN (256)
 
 typedef struct _usart_msg {
   uint16_t header;
@@ -38,5 +41,7 @@ void ble_usart_irq_disable(void);
 bool ble_read_byte(uint8_t *buf);
 void ble_usart_sendByte(uint8_t data);
 void ble_usart_send(uint8_t *buf, uint32_t len);
+secbool ble_usart_can_read(void);
+uint32_t ble_usart_read(uint8_t *buf, uint32_t lenth);
 
 #endif
