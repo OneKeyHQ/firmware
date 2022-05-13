@@ -211,3 +211,20 @@ void ble_uart_poll(void) {
     }
   }
 }
+
+void ble_get_dev_info(void) {
+  if (!ble_name_state()) {
+    ble_request_info(BLE_CMD_BT_NAME);
+    hal_delay(5);
+  }
+
+  if (!ble_ver_state()) {
+    ble_request_info(BLE_CMD_VER);
+    hal_delay(5);
+  }
+
+  if (!ble_battery_state()) {
+    ble_request_info(BLE_CMD_BATTERY);
+    hal_delay(5);
+  }
+}
