@@ -42,6 +42,7 @@ bool ble_switch_state(void);
 void ble_set_switch(bool flag);
 bool ble_get_switch(void);
 void change_ble_sta(uint8_t mode);
+void ble_get_dev_info(void);
 #else
 #define ble_name_state(...) false
 #define ble_ver_state(...) false

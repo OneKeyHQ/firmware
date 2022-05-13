@@ -571,6 +571,7 @@ int ui_input_poll(int zones, bool poll) {
 void ui_title_update(void) {
   bool usb_conn = is_usb_connected();
 
+  ble_get_dev_info();
   display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
   switch (battery_cap) {
     case 0:
