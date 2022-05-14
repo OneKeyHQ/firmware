@@ -573,7 +573,7 @@ void ui_title_update(void) {
   bool usb_conn = is_usb_connected();
 
   ble_get_dev_info();
-  display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
+  display_bar(DISPLAY_RESX - 32, 0, 32, 32, boot_background);
   switch (battery_cap) {
     case 0:
       display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status0 + 12,
@@ -605,21 +605,21 @@ void ui_title_update(void) {
                    boot_background);
       break;
     default:
-      display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
+      display_bar(DISPLAY_RESX - 32, 0, 32, 32, boot_background);
   }
 
   if (usb_conn) {
     display_icon(DISPLAY_RESX - 96 + 15, 0, 32, 32, toi_icon_usb + 12,
                  sizeof(toi_icon_usb) - 12, COLOR_BL_BG, boot_background);
   } else {
-    display_bar(DISPLAY_RESX - 96 + 15, 0, 32, 32, COLOR_BLACK);
+    display_bar(DISPLAY_RESX - 96 + 15, 0, 32, 32, boot_background);
   }
 
   if (ble_connect_state()) {
     display_icon(DISPLAY_RESX - 64 + 15, 0, 18, 32, toi_icon_bluetooth + 12,
                  sizeof(toi_icon_bluetooth) - 12, COLOR_BL_BG, boot_background);
   } else {
-    display_bar(DISPLAY_RESX - 64 + 15, 0, 18, 32, COLOR_BLACK);
+    display_bar(DISPLAY_RESX - 64 + 15, 0, 18, 32, boot_background);
   }
 }
 
