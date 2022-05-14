@@ -34,7 +34,19 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.label.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+        self.add_flag(lv.obj.FLAG.EVENT_BUBBLE | lv.obj.FLAG.CLICKABLE)
+        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+
+    def eventhandler(self, event):
+        code = event.code
+        target = event.get_target()
+        # if target == self.checkbox ignore instead. because value_change event is also triggered which needless to deal with
+        if code == lv.EVENT.CLICKED and target != self.checkbox:
+            if self.checkbox.get_state() & lv.STATE.CHECKED:
+                self.checkbox.clear_state(lv.STATE.CHECKED)
+            else:
+                self.checkbox.add_state(lv.STATE.CHECKED)
+            lv.event_send(self.checkbox, lv.EVENT.VALUE_CHANGED, None)
 
     def get_checkbox(self):
         return self.checkbox

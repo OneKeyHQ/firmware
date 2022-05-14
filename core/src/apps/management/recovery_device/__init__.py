@@ -5,6 +5,7 @@ import storage.device
 import storage.recovery
 from trezor import config, ui, utils, wire
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action, confirm_reset_device
 
@@ -34,7 +35,9 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     the device anytime and continue without a computer.
     """
     _validate(msg)
-
+    if msg.language is not None:
+        storage.device.set_language(msg.language)
+        i18n_refresh()
     if storage.recovery.is_in_progress():
         return await recovery_process(ctx)
 
@@ -46,7 +49,7 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
 
     # for dry run pin needs to be entered
     if msg.dry_run:
-        curpin, salt = await request_pin_and_sd_salt(ctx, "Enter PIN")
+        curpin, salt = await request_pin_and_sd_salt(ctx, _(i18n_keys.TITLE__ENTER_PIN))
         if not config.check_pin(curpin, salt):
             await error_pin_invalid(ctx)
 
@@ -109,15 +112,17 @@ else:
     async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
         if not msg.dry_run:
             await confirm_reset_device(
-                ctx, "Do you really want to\nrecover a wallet?", recovery=True
+                ctx, _(i18n_keys.SUBTITLE__DEVICE_RECOVER_RESTORE_WALLET), recovery=True
             )
         else:
             await confirm_action(
                 ctx,
                 "confirm_seedcheck",
-                title="Check Recovery Phrase",
-                description="Do you really want to check the recovery seed?",
-                verb="Continue",
+                title=_(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE),
+                description=_(
+                    i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_CHECK_RECOVERY_PHRASE
+                ),
+                verb=_(i18n_keys.BUTTON__CONTINUE),
                 icon="A:/res/shield_search.png",
                 br_code=ButtonRequestType.ProtectCall,
             )

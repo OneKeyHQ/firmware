@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING
 
 import storage
 import storage.device
-from trezor import config, utils, wire
+from trezor import config, wire
 from trezor.crypto import bip39, hashlib, random, slip39
 from trezor.enums import BackupType
+from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import EntropyAck, EntropyRequest, Success
-from trezor.ui.layouts import confirm_backup, confirm_reset_device
-from trezor.ui.loader import LoadingAnimation
+from trezor.ui.layouts import confirm_backup, confirm_reset_device, request_strength
 
 from apps.base import set_homescreen
 
@@ -27,7 +27,9 @@ _DEFAULT_BACKUP_TYPE = BackupType.Bip39
 async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # validate parameters and device state
     _validate_reset_device(msg)
-
+    if msg.language is not None:
+        storage.device.set_language(msg.language)
+        i18n_refresh()
     # make sure user knows they're setting up a new wallet
     if msg.backup_type == BackupType.Slip39_Basic:
         # prompt = "Create a new wallet\nwith Shamir Backup?"
@@ -36,11 +38,14 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # prompt = "Create a new wallet\nwith Super Shamir?"
         raise wire.ProcessError("Super Shamir not supported")
     else:
-        prompt = "Do you want to create a new wallet?"
+        prompt = _(i18n_keys.SUBTITLE__DEVICE_SETUP_CREATE_NEW_WALLET)
 
     await confirm_reset_device(ctx, prompt)
-    if not utils.LVGL_UI:
-        await LoadingAnimation()
+    # await LoadingAnimation()
+
+    # on device reset, we need to ask for a new strength to override the default  value 12
+    if isinstance(ctx, wire.DummyContext):
+        msg.strength = await request_strength()
 
     # wipe storage to make sure the device is in a clear state
     storage.reset()
@@ -91,6 +96,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # write settings and master secret into storage
     if msg.label is not None:
         storage.device.set_label(msg.label)
+
     storage.device.set_passphrase_enabled(bool(msg.passphrase_protection))
     storage.device.store_mnemonic_secret(
         secret,  # for SLIP-39, this is the EMS

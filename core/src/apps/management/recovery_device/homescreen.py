@@ -7,9 +7,11 @@ from trezor.crypto import slip39
 from trezor.crypto.hashlib import sha256
 from trezor.enums import BackupType, MessageType
 from trezor.errors import MnemonicError
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success
 from trezor.ui.layouts import show_success
 
+from apps.base import set_homescreen
 from apps.common import mnemonic
 from apps.homescreen.homescreen import homescreen
 
@@ -144,13 +146,19 @@ async def _finish_recovery(
     storage.recovery.end_progress()
 
     await show_success(
-        ctx, "success_recovery", "You have successfully recovered your wallet."
+        ctx,
+        "success_recovery",
+        _(i18n_keys.SUBTITLE__DEVICE_RECOVER_WALLET_IS_READY),
+        header=_(i18n_keys.TITLE__WALLET_IS_READY),
     )
+    set_homescreen()
     return Success(message="Device recovered")
 
 
 async def _request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
-    await layout.homescreen_dialog(ctx, "Select", "Select number of words")
+    await layout.homescreen_dialog(
+        ctx, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS)
+    )
 
     # ask for the number of words
     return await layout.request_word_count(ctx, dry_run)
@@ -190,12 +198,8 @@ async def _request_share_first_screen(
                 ctx, "Enter share", "Enter any share", f"({word_count} words)"
             )
     else:  # BIP-39
-        if utils.LVGL_UI:
-            btn_text = "Enter"
-            title = "Enter Recovery Phrase"
-        else:
-            btn_text = "Enter seed"
-            title = "Enter recovery seed"
+        btn_text = _(i18n_keys.BUTTON__ENTER)
+        title = _(i18n_keys.TITLE__ENTER_RECOVERY_PHRASE)
         await layout.homescreen_dialog(ctx, btn_text, title, f"({word_count} words)")
 
 

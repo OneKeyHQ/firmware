@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from trezor import ui, utils, wire
 from trezor.crypto import random
 from trezor.enums import BackupType, ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.common import FullSizeWindow
 
 from ...components.common.confirm import is_confirmed
@@ -30,7 +31,7 @@ async def show_share_words(
 ) -> None:
 
     if share_index is None:
-        header_title = "Recovery Phrase"
+        header_title = _(i18n_keys.TITLE__MANUAL_BACKUP)
     elif group_index is None:
         header_title = f"Recovery share #{share_index + 1}"
     else:
@@ -73,10 +74,12 @@ async def confirm_word(
     random.shuffle(choices)
 
     # let the user pick a word
-    title = f"Check Word #{offset + 1} of {count}"
-    subtitle = "Choose the correct word."
+    title = _(i18n_keys.TITLE__CHECK_WORD_STR).format(offset + 1)
+    subtitle = _(i18n_keys.SUBTITLE__DEVICE_BACKUP_CHECK_WORD)
     options = f"{choices[0]}\n{choices[1]}\n{choices[2]}"
-    selector = FullSizeWindow(title, subtitle, "Next", options=options)
+    selector = FullSizeWindow(
+        title, subtitle, _(i18n_keys.BUTTON__NEXT), options=options
+    )
     selected_word: str = await ctx.wait(selector.request())
     # confirm it is the correct one
     return selected_word == share_words[offset]

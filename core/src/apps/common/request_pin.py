@@ -4,6 +4,7 @@ from typing import Any, NoReturn
 import storage.cache
 import storage.sd_salt
 from trezor import config, wire
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -15,7 +16,7 @@ def can_lock_device() -> bool:
 
 async def request_pin(
     ctx: wire.GenericContext,
-    prompt: str = "Enter your PIN",
+    prompt: str = _(i18n_keys.TITLE__ENTER_PIN),
     attempts_remaining: int | None = None,
     allow_cancel: bool = True,
     **kwargs: Any,
@@ -31,24 +32,34 @@ async def request_pin_confirm(ctx: wire.Context, *args: Any, **kwargs: Any) -> s
             from trezor.ui.layouts import request_pin_tips  # type: ignore["request_pin_tips" is unknown import symbol]
 
             await request_pin_tips(ctx)
-        pin1 = await request_pin(ctx, "Enter new PIN", *args, **kwargs)
-        pin2 = await request_pin(ctx, "Re-enter new PIN", *args, **kwargs)
+        pin1 = await request_pin(
+            ctx, _(i18n_keys.TITLE__ENTER_NEW_PIN), *args, **kwargs
+        )
+        pin2 = await request_pin(
+            ctx, _(i18n_keys.TITLE__ENTER_PIN_AGAIN), *args, **kwargs
+        )
         if pin1 == pin2:
             return pin1
         await pin_mismatch()
+        from trezor import loop
+
+        await loop.sleep(2000)
 
 
 async def pin_mismatch() -> None:
     from trezor.ui.layouts import show_popup
 
     await show_popup(
-        title="PIN mismatch",
-        description="The PINs you entered\ndo not match.\n\nPlease try again.",
+        title=_(i18n_keys.TITLE__NOT_MATCH),
+        description=_(i18n_keys.SUBTITLE__SETUP_SET_PIN_PIN_NOT_MATCH),
+        icon="A:/res/danger.png",
     )
 
 
 async def request_pin_and_sd_salt(
-    ctx: wire.Context, prompt: str = "Enter your PIN", allow_cancel: bool = True
+    ctx: wire.Context,
+    prompt: str = _(i18n_keys.TITLE__ENTER_PIN),
+    allow_cancel: bool = True,
 ) -> tuple[str, bytearray | None]:
     if config.has_pin():
         pin = await request_pin(ctx, prompt, config.get_pin_rem(), allow_cancel)
@@ -76,7 +87,7 @@ def _get_last_unlock_time() -> int:
 
 async def verify_user_pin(
     ctx: wire.GenericContext = wire.DUMMY_CONTEXT,
-    prompt: str = "Enter your PIN",
+    prompt: str = _(i18n_keys.TITLE__ENTER_PIN),
     allow_cancel: bool = True,
     retry: bool = True,
     cache_time_ms: int = 0,
@@ -113,15 +124,8 @@ async def verify_user_pin(
 
     while retry:
         pin_rem = config.get_pin_rem()
-        if pin_rem == 0:
-            from apps.base import set_homescreen, reload_settings_from_storage
-
-            storage.wipe()  # type: ignore["wipe" is not a known member of module]
-            reload_settings_from_storage()
-            set_homescreen()
-            return
         pin = await request_pin_on_device(  # type: ignore ["request_pin_on_device" is possibly unbound]
-            ctx, "Wrong PIN, enter again", pin_rem, allow_cancel
+            ctx, _(i18n_keys.TITLE__ENTER_PIN), pin_rem, allow_cancel
         )
         if config.unlock(pin, salt):
             _set_last_unlock_time()
@@ -136,8 +140,8 @@ async def error_pin_invalid(ctx: wire.Context) -> NoReturn:
     await show_error_and_raise(
         ctx,
         "warning_wrong_pin",
-        header="Wrong PIN",
-        content="The PIN you entered is invalid.",
+        header=_(i18n_keys.TITLE__WRONG_PIN),
+        content=_(i18n_keys.SUBTITLE__SET_PIN_WRONG_PIN),
         red=True,
         exc=wire.PinInvalid,
     )

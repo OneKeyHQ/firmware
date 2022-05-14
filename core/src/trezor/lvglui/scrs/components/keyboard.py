@@ -227,7 +227,7 @@ class NumberKeyboard(lv.keyboard):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.ta = lv.textarea(parent)
-        self.ta.align(lv.ALIGN.TOP_MID, 0, 220)
+        self.ta.align(lv.ALIGN.TOP_MID, 0, 240)
         self.ta.set_size(200, lv.SIZE.CONTENT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
@@ -242,7 +242,7 @@ class NumberKeyboard(lv.keyboard):
         self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("0123456789")
-        self.ta.set_max_length(10)
+        self.ta.set_max_length(50)
         self.ta.set_password_mode(True)
         nums = [i for i in range(10)]
         random.shuffle(nums)

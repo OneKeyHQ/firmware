@@ -36,11 +36,11 @@ class Popup(lv.obj):
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__CRYPTO_BLIND_SIGN_ENABLED_1),
+            _(i18n_keys.CHECK__CRYPTO_BLIND_SIGN_ENABLED_1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__CRYPTO_BLIND_SIGN_ENABLED_2),
+            _(i18n_keys.CHECK__CRYPTO_BLIND_SIGN_ENABLED_2),
         )
         self.btn = NormalButton(self, btn_text, False)
         self.btn.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
@@ -84,14 +84,14 @@ class PopupSample(lv.obj):
         self, title: str, subtitle: str, icon_path: str, del_delay: int
     ) -> None:
         super().__init__(lv.scr_act())
-        self.set_size(lv.pct(100), 750)
-        self.set_pos(0, 50)
+        self.set_size(lv.pct(100), lv.pct(100))
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.icon = lv.img(self)
         self.icon.set_src(icon_path)
-        self.icon.align(lv.ALIGN.TOP_MID, 0, 20)
+        self.icon.align(lv.ALIGN.TOP_MID, 0, 132)
         self.title = Title(self, self.icon, 416, (0, 36), title)
         self.subtitle = SubTitle(self, self.title, 416, (0, 24), subtitle)
         self.del_delayed(del_delay)

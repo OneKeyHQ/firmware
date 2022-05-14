@@ -32,12 +32,24 @@ def init():
     indev_drv.init()
     indev_drv.type = lv.INDEV_TYPE.POINTER
     indev_drv.read_cb = lcd.ts_read
-    indev_drv.long_press_time = 2000
     indev_drv.register()
+
+
+def init_theme():
+    dispp = lv.disp_get_default()
+    theme = lv.theme_default_init(
+        dispp,
+        lv.palette_main(lv.PALETTE.BLUE),
+        lv.palette_main(lv.PALETTE.RED),
+        True,
+        lv.font_default(),
+    )
+    dispp.set_theme(theme)
 
 
 try:
     init()
+    init_theme()
     if __debug__:
         log.info("init", "initialized successfully")
 except BaseException:

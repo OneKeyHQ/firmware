@@ -1,29 +1,19 @@
 from typing import Sequence
 
-from trezor import ui, utils, wire
+from trezor import ui, wire
 from trezor.enums import ButtonRequestType
-from trezor.ui.layouts import confirm_action, confirm_blob, show_success, show_warning
-
-if not utils.LVGL_UI:
-    from trezor.ui.layouts.tt.reset import (  # noqa: F401
-        confirm_word,
-        show_share_words,
-        slip39_advanced_prompt_group_threshold,
-        slip39_advanced_prompt_number_of_groups,
-        slip39_prompt_number_of_shares,
-        slip39_prompt_threshold,
-        slip39_show_checklist,
-    )
-else:
-    from trezor.ui.layouts.lvgl.reset import (  # noqa: F401
-        confirm_word,
-        show_share_words,
-        slip39_advanced_prompt_group_threshold,
-        slip39_advanced_prompt_number_of_groups,
-        slip39_prompt_number_of_shares,
-        slip39_prompt_threshold,
-        slip39_show_checklist,
-    )
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.ui.layouts import confirm_blob, show_success, show_warning
+from trezor.ui.layouts.lvgl.common import interact
+from trezor.ui.layouts.lvgl.reset import (  # noqa: F401
+    confirm_word,
+    show_share_words,
+    slip39_advanced_prompt_group_threshold,
+    slip39_advanced_prompt_number_of_groups,
+    slip39_prompt_number_of_shares,
+    slip39_prompt_threshold,
+    slip39_show_checklist,
+)
 
 
 async def show_internal_entropy(ctx: wire.GenericContext, entropy: bytes) -> None:
@@ -65,8 +55,8 @@ async def _show_confirmation_success(
     group_index: int | None = None,
 ) -> None:
     if share_index is None or num_of_shares is None:  # it is a BIP39 backup
-        subheader = "You have finished verifying your recovery seed."
-        text = ""
+        subheader = _(i18n_keys.SUBTITLE__DEVICE_BACKUP_VERIFIED_SUCCESS)
+        text = _(i18n_keys.TITLE__VERIFIED)
 
     elif share_index == num_of_shares - 1:
         if group_index is None:
@@ -83,7 +73,13 @@ async def _show_confirmation_success(
             subheader = f"Group {group_index + 1} - Share {share_index + 1}\nchecked successfully."
             text = "Continue with the next\nshare."
 
-    return await show_success(ctx, "success_recovery", text, subheader=subheader)
+    return await show_success(
+        ctx,
+        "success_recovery",
+        subheader,
+        header=text,
+        button=_(i18n_keys.BUTTON__CONTINUE),
+    )
 
 
 async def _show_confirmation_failure(
@@ -105,32 +101,41 @@ async def _show_confirmation_failure(
 
 
 async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) -> None:
-    if slip39:
-        description = "Never make a digital copy of your recovery shares and never upload them online!"
-    else:
-        description = "Never make a digital copy of your recovery seed and never upload\nit online!"
-    if utils.LVGL_UI:
-        icon = "A:/res/shriek.png"
-        description = "Never make a digital copy of your recovery seed and never upload it online!"
-    else:
-        icon = ui.ICON_NOCOPY
-    # pyright: off
-    await confirm_action(
-        ctx,
-        "backup_warning",
-        "Caution",
-        description=description,
-        verb="I understand",
-        verb_cancel=None,
-        icon=icon,
-        br_code=ButtonRequestType.ResetDevice,
-    )
-    # pyright: on
+    # if slip39:
+    #     description = "Never make a digital copy of your recovery shares and never upload them online!"
+    # else:
+    #     description = "Never make a digital copy of your recovery seed and never upload\nit online!"
+    # if utils.LVGL_UI:
+    #     icon = "A:/res/shriek.png"
+    #     description = "Never make a digital copy of your recovery seed and never upload it online!"
+    # else:
+    #     icon = ui.ICON_NOCOPY
+    # await confirm_action(
+    #     ctx,
+    #     "backup_warning",
+    #     "Caution",
+    #     description=description,
+    #     verb="I understand",
+    #     verb_cancel=None,
+    #     icon=icon,
+    #     br_code=ButtonRequestType.ResetDevice,
+    # )
+    # TODO: support slip39
+    from trezor.lvglui.scrs.reset_device import BackupTips
+
+    screen = BackupTips()
+    await interact(ctx, screen, "backup_warning", ButtonRequestType.ResetDevice)
 
 
 async def show_backup_success(ctx: wire.GenericContext) -> None:
-    text = "Use your backup when you need to recover your wallet."
-    await show_success(ctx, "success_backup", text, subheader="Your backup is done.")
+    text = _(i18n_keys.SUBTITLE__DEVICE_BACKUP_BACK_UP_COMPLETE)
+    await show_success(
+        ctx,
+        "success_backup",
+        text,
+        header=_(i18n_keys.TITLE__BACK_UP_COMPLETE),
+        button=_(i18n_keys.BUTTON__CONTINUE),
+    )
 
 
 # BIP39

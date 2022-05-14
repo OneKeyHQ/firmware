@@ -22,7 +22,7 @@ _NAMESPACE = common.APP_DEVICE
 DEVICE_ID                  = const(0x00)  # bytes
 _VERSION                   = const(0x01)  # int
 _MNEMONIC_SECRET           = const(0x02)  # bytes
-_LANGUAGE                  = const(0x03)  # int
+_LANGUAGE                  = const(0x03)  # str
 _LABEL                     = const(0x04)  # str
 _USE_PASSPHRASE            = const(0x05)  # bool (0x01 or empty)
 _HOMESCREEN                = const(0x06)  # bytes
@@ -63,6 +63,8 @@ AUTOLOCK_DELAY_MAXIMUM = 0x2000_0000  # ~6 days
 # Length of SD salt auth tag.
 # Other SD-salt-related constants are in sd_salt.py
 SD_SALT_AUTH_KEY_LEN_BYTES = const(16)
+
+PIN_MAX_ATTEMPTS = 10
 
 
 def is_version_stored() -> bool:
@@ -124,15 +126,25 @@ def set_label(label: str) -> None:
     common.set(_NAMESPACE, _LABEL, label.encode(), True)  # public
 
 
-def get_language() -> int:
-    code = common.get(_NAMESPACE, _LANGUAGE, True)  # public
-    if code is None:
-        return 0
-    return int.from_bytes(code, "big")
+def get_language() -> str:
+    if not is_initialized():  # check if initialized
+        return "en"
+    lang = common.get(_NAMESPACE, _LANGUAGE, True)  # public
+    if lang is None:
+        return "en"
+    return lang.decode()
 
 
-def set_language(code: int) -> None:
-    common.set(_NAMESPACE, _LANGUAGE, code.to_bytes(4, "big"), True)  # public
+def set_language(lang: str) -> None:
+    from trezor.langs import langs_keys
+
+    if lang == "en-US":
+        lang = "en"
+    if lang not in langs_keys:
+        raise ValueError(
+            f"all support ISO_639-1 language keys include {' '.join(langs_keys)})"
+        )
+    common.set(_NAMESPACE, _LANGUAGE, lang.encode(), True)  # public
 
 
 def get_mnemonic_secret() -> bytes | None:

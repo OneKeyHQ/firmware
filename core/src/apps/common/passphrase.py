@@ -2,6 +2,7 @@ from micropython import const
 
 import storage.device
 from trezor import wire, workflow
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 _MAX_PASSPHRASE_LEN = const(50)
 
@@ -54,25 +55,21 @@ async def _request_on_host(ctx: wire.Context) -> str:
 
     # non-empty passphrase
     if ack.passphrase:
-        from trezor import ui
-        from trezor.ui.layouts import confirm_action, confirm_blob
+        from trezor.ui.layouts import confirm_action
 
         await confirm_action(
             ctx,
             "passphrase_host1",
-            title="Hidden wallet",
-            description="Access hidden wallet? Next screen will show the passphrase!",
-            icon=ui.ICON_CONFIG,
+            title=_(i18n_keys.TITLE__ACCESS_HIDDEN_WALLET),
+            description=_(i18n_keys.SUBTITLE__ENTER_PASSPHRASE_ACCESS_HIDDEN_WALLET),
         )
-
-        await confirm_blob(
+        # TODO: i18n missing
+        await confirm_action(
             ctx,
             "passphrase_host2",
-            title="Hidden wallet",
-            description="Use this passphrase?",
-            data=ack.passphrase,
-            icon=ui.ICON_CONFIG,
-            icon_color=ui.ORANGE_ICON,
+            title="Use This Passphrase?",
+            description=ack.passphrase,
+            icon=None,
         )
 
     return ack.passphrase
@@ -82,5 +79,6 @@ def _entry_dialog() -> None:
     from trezor.ui.layouts import draw_simple_text
 
     draw_simple_text(
-        "Passphrase entry", "Please type your passphrase on the connected host."
+        _(i18n_keys.TITLE__ENTER_PASSPHRASE),
+        _(i18n_keys.SUBTITLE__ENTER_PASSPHRASE_ON_SOFTWARE),
     )

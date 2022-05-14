@@ -1,7 +1,5 @@
 from typing import Any
 
-from trezor import utils
-
 _previous_progress: int | None = None
 _previous_seconds: int | None = None
 keepalive_callback: Any = None
@@ -23,8 +21,8 @@ def show_pin_timeout(seconds: int, progress: int, message: str) -> bool:
             _previous_seconds = None
         # ui.display.text_center(ui.WIDTH // 2, 37, message, ui.BOLD, ui.FG, ui.BG)
 
-    if not utils.DISABLE_ANIMATION:
-        ui.display.loader(progress, False, 0, ui.FG, ui.BG)
+    # if not utils.DISABLE_ANIMATION:
+    # ui.display.loader(progress, False, 0, ui.FG, ui.BG)
 
     if seconds != _previous_seconds:
         if seconds == 0:

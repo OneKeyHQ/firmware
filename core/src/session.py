@@ -1,4 +1,4 @@
-from trezor import io, log, loop, utils, wire, workflow
+from trezor import io, log, loop, utils, wire
 from trezor.lvglui import lvgl_tick
 
 import apps.base
@@ -18,10 +18,10 @@ if __debug__:
 
 # run main event loop and specify which screen is the default
 apps.base.set_homescreen()
-if not utils.LVGL_UI:
-    workflow.start_default()
-else:
-    loop.schedule(lvgl_tick())
+# if not utils.LVGL_UI:
+#     workflow.start_default()
+# else:
+loop.schedule(lvgl_tick())
 
 # initialize the wire codec
 wire.setup(usb.iface_wire)

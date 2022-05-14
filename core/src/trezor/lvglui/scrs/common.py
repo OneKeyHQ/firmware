@@ -48,7 +48,7 @@ class Screen(lv.obj):
         if kwargs.get("nav_back", False):
             self.nav_back = lv.imgbtn(self)
             self.nav_back.set_src(lv.imgbtn.STATE.RELEASED, None, None, None)
-            self.nav_back.set_size(48, 48)
+            self.nav_back.set_size(100, 100)
             self.nav_back.set_pos(lv.pct(1), lv.pct(7))
             self.nav_back.add_event_cb(
                 self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.PRESSED, None
@@ -93,13 +93,15 @@ class Screen(lv.obj):
         return cls._instance
 
     def load_screen(self, scr, destory_self: bool = False):
-        load_scr_with_animation(scr)
         if destory_self:
+            load_scr_with_animation(scr.__class__())
             utils.SCREENS.remove(self)
             self.del_delayed(1000)
-            del self.__class__._instance
             if hasattr(self, "_init"):
                 del self._init
+            del self.__class__._instance
+        else:
+            load_scr_with_animation(scr)
 
     def __del__(self):
         """Micropython doesn't support user defined __del__ now, so this not work at all."""
@@ -130,6 +132,7 @@ class FullSizeWindow(lv.obj):
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         if icon_path:
             self.icon = lv.img(self)
@@ -168,6 +171,8 @@ class FullSizeWindow(lv.obj):
                 self.channel.publish(0)
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
                 if not hasattr(self, "roller"):
+                    # delete the confirm button manually to fix a dispaly bug in reset process with desktop
+                    self.btn_yes.del_delayed(10)
                     self.channel.publish(1)
                 else:
                     self.channel.publish(self.select_option)

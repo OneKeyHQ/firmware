@@ -20,7 +20,7 @@ class MnemonicDisplay(FullSizeWindow):
         super().__init__(
             title,
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
-            _(i18n_keys.ACTION__HOLD_TO_CONFIRM),
+            _(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
         )
         self.panel = lv.obj(self)
         self.panel.set_size(440, lv.SIZE.CONTENT)
@@ -71,17 +71,17 @@ class BackupTips(FullSizeWindow):
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__DEVICE_BACK_UP_RECOVERY_PHRASE_1),
+            _(i18n_keys.CHECK__DEVICE_BACK_UP_RECOVERY_PHRASE_1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__DEVICE_BACK_UP_RECOVERY_PHRASE_2),
+            _(i18n_keys.CHECK__DEVICE_BACK_UP_RECOVERY_PHRASE_2),
         )
         self.item3 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__DEVICE_BACK_UP_RECOVERY_PHRASE_3),
+            _(i18n_keys.CHECK__DEVICE_BACK_UP_RECOVERY_PHRASE_3),
         )
-        self.btn = NormalButton(self, _(i18n_keys.ACTION__CONTINUE), False)
+        self.btn = NormalButton(self, _(i18n_keys.BUTTON__CONTINUE), False)
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.cb_cnt = 0

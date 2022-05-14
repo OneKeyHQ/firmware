@@ -25,6 +25,7 @@ def report_init() -> None:
 
 
 def report() -> None:
+    return
     if utils.DISABLE_ANIMATION:
         return
     p = 1000 * _progress // _steps

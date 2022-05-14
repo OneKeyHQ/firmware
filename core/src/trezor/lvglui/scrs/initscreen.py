@@ -27,12 +27,14 @@ class InitScreen(Screen):
     def __init__(self):
         super().__init__(
             title=_(i18n_keys.TITLE__SELECT_LANGUAGE),
-            btn_text=_(i18n_keys.ACTION__CONTINUE),
+            btn_text=_(i18n_keys.BUTTON__CONTINUE),
             icon_path="A:/res/language.png",
             options="\n".join(lang[1] for lang in langs),
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
-        self.title.set_style_text_font(font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.title.set_style_text_font(
+            font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.roller.set_style_text_font(font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.set_style_text_font(font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
@@ -49,8 +51,8 @@ class InitScreen(Screen):
         device.set_language(lang_key)
         i18n_refresh(lang_key)
         self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
-        self.btn.label.set_text(_(i18n_keys.ACTION__CONTINUE))
-        language = langs[target.get_selected()][1]
+        self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))
+        language = langs[target.get_selected()][0]
 
 
 class QuickStart(FullSizeWindow):
@@ -58,11 +60,11 @@ class QuickStart(FullSizeWindow):
         super().__init__(
             _(i18n_keys.TITLE__QUICK_START),
             _(i18n_keys.SUBTITLE__SETUP_QUICK_START),
-            _(i18n_keys.ACTION__START),
+            _(i18n_keys.BUTTON__START),
             options="\n".join(
                 [
-                    _(i18n_keys.FORM__OPTION__CREATE_NEW_WALLET),
-                    _(i18n_keys.FORM__OPTION__RESTORE_WALLET),
+                    _(i18n_keys.OPTION__CREATE_NEW_WALLET),
+                    _(i18n_keys.OPTION__RESTORE_WALLET),
                 ]
             ),
         )
@@ -119,9 +121,9 @@ class QuickStart(FullSizeWindow):
 class SelectMnemonicNum(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            _(i18n_keys.TITLE__CREATE_NEW_WALLET),
+            _(i18n_keys.TITLE__READY_TO_CREATE),
             _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS),
-            _(i18n_keys.ACTION__CONTINUE),
+            _(i18n_keys.BUTTON__CONTINUE),
             options="12\n18\n24",
         )
         self.roller.set_selected(0, lv.ANIM.OFF)

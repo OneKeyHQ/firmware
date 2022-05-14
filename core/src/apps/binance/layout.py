@@ -31,6 +31,7 @@ async def require_confirm_transfer(ctx: Context, msg: BinanceTransferMsg) -> Non
             )
 
     for index, txinput in enumerate(msg.inputs):
+        # TODO: i18n missing
         make_input_output_pages(txinput, f"INPUT #{index}")
 
     for index, txoutput in enumerate(msg.outputs):
@@ -40,6 +41,7 @@ async def require_confirm_transfer(ctx: Context, msg: BinanceTransferMsg) -> Non
 
 
 async def require_confirm_cancel(ctx: Context, msg: BinanceCancelMsg) -> None:
+    # TODO: i18n missing
     await confirm_properties(
         ctx,
         "confirm_cancel",
@@ -55,6 +57,7 @@ async def require_confirm_cancel(ctx: Context, msg: BinanceCancelMsg) -> None:
 
 
 async def require_confirm_order(ctx: Context, msg: BinanceOrderMsg) -> None:
+    # TODO: i18n missing
     if msg.side == BinanceOrderSide.BUY:
         side = "Buy"
     elif msg.side == BinanceOrderSide.SELL:

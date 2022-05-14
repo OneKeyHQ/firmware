@@ -68,7 +68,9 @@ def write_langfile(lang_map):
         content.append(f'    ("{lang.lower()}", "{lang_map[lang]}"),')
     content.append("]")
     with open(f"{BASE_PATH}/../../langs.py", "w") as f:
+        f.write("# according to ISO_639-1 and ISO-3166 country codes\n")
         f.write("\n".join(content) + "\n")
+        f.write("\nlangs_keys = [x[0] for x in langs]\n")
 
 
 def main():

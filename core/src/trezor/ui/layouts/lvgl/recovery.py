@@ -3,6 +3,7 @@ from typing import Callable, Iterable
 from trezor import strings, ui, wire
 from trezor.crypto.slip39 import MAX_SHARE_COUNT
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.common import FullSizeWindow
 from trezor.lvglui.scrs.request_word import WordEnter
 
@@ -107,9 +108,9 @@ async def continue_recovery(
 ) -> bool:
     screen = FullSizeWindow(
         text,
-        "it is safe to eject Trezor and continue later.",
+        _(i18n_keys.SUBTITLE__DEVICE_RECOVER_SELECT_NUMBER_OF_WORDS),
         confirm_text=button_label,
-        cancel_text="Cancel",
+        cancel_text=_(i18n_keys.BUTTON__CANCEL),
     )
     return await interact(
         ctx,
