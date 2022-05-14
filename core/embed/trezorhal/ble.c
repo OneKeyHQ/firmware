@@ -174,10 +174,10 @@ void ble_uart_poll(void) {
       case BLE_CMD_PASSKEY:
         if (ble_usart_msg.cmd_len == 0x06) {
           memcpy(passkey, ble_usart_msg.cmd_vale, 6);
-          display_text(55, 70, "Bluetooth passkey:", -1, FONT_NORMAL,
-                       COLOR_BLACK, COLOR_WHITE);
-          display_text(55, 95, (char *)passkey, -1, FONT_NORMAL, COLOR_BLACK,
-                       COLOR_WHITE);
+          display_text_center(DISPLAY_RESX / 2, 346, "Bluetooth passkey:", -1,
+                              FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+          display_text_center(DISPLAY_RESX / 2, 370, (char *)passkey, -1,
+                              FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
           need_refresh = true;
         }
         break;

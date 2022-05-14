@@ -365,7 +365,7 @@ int main(void) {
   // ... or we have stay_in_bootloader flag to force it
   if (touched || stay_in_bootloader == sectrue) {
     // no ui_fadeout(); - we already start from black screen
-    ui_screen_firmware_info(&vhdr, &hdr);
+    ui_bootloader_first(&hdr);
     ui_fadein();
 
     // and start the usb loop
