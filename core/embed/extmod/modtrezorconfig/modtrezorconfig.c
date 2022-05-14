@@ -61,9 +61,7 @@ static secbool wrapped_ui_wait_callback(uint32_t wait, uint32_t progress,
 STATIC mp_obj_t mod_trezorconfig_init(size_t n_args, const mp_obj_t *args) {
 #ifndef TREZOR_EMULATOR
   if (se_is_wiping()) {
-    se_reset_storage();
     storage_wipe();
-    se_reset_state();
   }
 #endif
 
@@ -102,11 +100,23 @@ STATIC mp_obj_t mod_trezorconfig_unlock(mp_obj_t pin, mp_obj_t ext_salt) {
   }
 #else
   secbool ret = secfalse;
-  bool ret_se = false;
-  ret = storage_unlock(pin_b.buf, pin_b.len, ext_salt_b.buf);
-  ret_se = se_verifyPin(pin_b.buf);
-  if (sectrue != ret || true != ret_se) {
+  // verify se pin first when not in emulator
+  bool verified = se_verifyPin(pin_b.buf);
+  if (!verified) {
     return mp_const_false;
+  }
+  // when se has pin and storage has not pin, we assume it is a dirty state
+  // and we attempt to reset the pin in sotrage
+  if (se_hasPin() && sectrue != storage_has_pin()) {
+    if (sectrue != storage_change_pin(PIN_EMPTY, PIN_EMPTY_LEN, pin_b.buf,
+                                      pin_b.len, NULL, ext_salt_b.buf)) {
+      return mp_const_false;
+    }
+  } else {
+    ret = storage_unlock(pin_b.buf, pin_b.len, ext_salt_b.buf);
+    if (sectrue != ret) {
+      return mp_const_false;
+    }
   }
 #endif
 
@@ -160,10 +170,9 @@ STATIC mp_obj_t mod_trezorconfig_has_pin(void) {
     return mp_const_false;
   }
 #else
-  if (sectrue != storage_has_pin()) {
+  if (!se_hasPin()) {
     return mp_const_false;
   }
-  se_hasPin();
 #endif
   return mp_const_true;
 }
@@ -181,12 +190,11 @@ STATIC mp_obj_t mod_trezorconfig_get_pin_rem(void) {
   int remain = storage_get_pin_rem();
   int fail_count = se_pinFailedCounter();
   int remain_se = 0;
-  if (fail_count <= 10) {
-    remain_se = 10 - fail_count;
+  if (fail_count < PIN_MAX_TRIES) {
+    remain_se = PIN_MAX_TRIES - fail_count;
   } else {
     remain_se = 0;
   }
-
   return mp_obj_new_int_from_uint(remain < remain_se ? remain : remain_se);
 #endif
 }
@@ -456,14 +464,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorconfig_next_counter_obj, 2,
 ///     Erases the whole config. Use with caution!
 ///     """
 STATIC mp_obj_t mod_trezorconfig_wipe(void) {
-#ifndef TREZOR_EMULATOR
-  se_set_wiping(true);
-  se_reset_storage();
-#endif
   storage_wipe();
-#ifndef TREZOR_EMULATOR
-  se_reset_state();
-#endif
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_wipe_obj,

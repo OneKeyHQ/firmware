@@ -39,13 +39,16 @@
     _a > _b ? _a : _b;  \
   })
 #endif
-
+void restart(void);
 void __attribute__((noreturn))
 __fatal_error(const char *expr, const char *msg, const char *file, int line,
               const char *func);
 void __attribute__((noreturn))
 error_shutdown(const char *line1, const char *line2, const char *line3,
                const char *line4);
+
+void error_reset(const char *line1, const char *line2, const char *line3,
+                 const char *line4);
 
 #define ensure(expr, msg) \
   (((expr) == sectrue)    \

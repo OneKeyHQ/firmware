@@ -41,6 +41,11 @@
 extern const uint8_t *PIN_EMPTY;
 #define PIN_EMPTY_LEN 0
 
+// Maximum number of failed unlock attempts.
+// NOTE: The PIN counter logic relies on this constant being less than or equal
+// to 10.
+#define PIN_MAX_TRIES 10
+
 typedef secbool (*PIN_UI_WAIT_CALLBACK)(uint32_t wait, uint32_t progress,
                                         const char *message);
 

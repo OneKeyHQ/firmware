@@ -47,6 +47,8 @@ void shutdown(void) {
 #endif
 }
 
+void restart(void) { svc_reset_system(); }
+
 void __attribute__((noreturn))
 __fatal_error(const char *expr, const char *msg, const char *file, int line,
               const char *func) {
@@ -124,6 +126,28 @@ error_shutdown(const char *line1, const char *line2, const char *line3,
   shutdown();
   for (;;)
     ;
+}
+
+void error_reset(const char *line1, const char *line2, const char *line3,
+                 const char *line4) {
+  display_orientation(0);
+  display_print_color(COLOR_WHITE, COLOR_FATAL_ERROR);
+  if (line1) {
+    display_printf("%s\n", line1);
+  }
+  if (line2) {
+    display_printf("%s\n", line2);
+  }
+  if (line3) {
+    display_printf("%s\n", line3);
+  }
+  if (line4) {
+    display_printf("%s\n", line4);
+  }
+  display_printf("\nIt will be restart 5s later.\n");
+  display_backlight(255);
+  hal_delay(5000);
+  restart();
 }
 
 #ifndef NDEBUG

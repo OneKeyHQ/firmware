@@ -30,6 +30,9 @@
 #include "random_delays.h"
 #include "sha2.h"
 #include "storage.h"
+#ifndef TREZOR_EMULATOR
+#include "se_atca.h"
+#endif
 
 #define LOW_MASK 0x55555555
 
@@ -77,11 +80,6 @@ const uint32_t V0_PIN_EMPTY = 1;
 // storage space proportional to the length, as opposed to the PIN, which takes
 // up constant storage space.
 #define MAX_WIPE_CODE_LEN 50
-
-// Maximum number of failed unlock attempts.
-// NOTE: The PIN counter logic relies on this constant being less than or equal
-// to 16.
-#define PIN_MAX_TRIES 16
 
 // The total number of iterations to use in PBKDF2.
 #define PIN_ITER_COUNT 20000
@@ -992,8 +990,8 @@ static secbool decrypt_dek(const uint8_t *kek, const uint8_t *keiv) {
 static void ensure_not_wipe_code(const uint8_t *pin, size_t pin_len) {
   if (sectrue != is_not_wipe_code(pin, pin_len)) {
     storage_wipe();
-    error_shutdown("You have entered the", "wipe code. All private",
-                   "data has been erased.", NULL);
+    error_reset("You have entered the", "wipe code. All private",
+                "data has been erased.", NULL);
   }
 }
 
@@ -1028,8 +1026,8 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
   wait_random();
   if (ctr >= PIN_MAX_TRIES) {
     storage_wipe();
-    error_shutdown("Too many wrong PIN", "attempts. Storage has", "been wiped.",
-                   NULL);
+    error_reset("Too many wrong PIN", "attempts. Storage has", "been wiped.",
+                NULL);
     return secfalse;
   }
 
@@ -1093,8 +1091,8 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
     wait_random();
     if (ctr + 1 >= PIN_MAX_TRIES) {
       storage_wipe();
-      error_shutdown("Too many wrong PIN", "attempts. Storage has",
-                     "been wiped.", NULL);
+      error_reset("Too many wrong PIN", "attempts. Storage has", "been wiped.",
+                  NULL);
     }
     return secfalse;
   }
@@ -1478,12 +1476,22 @@ secbool storage_change_wipe_code(const uint8_t *pin, size_t pin_len,
   return ret;
 }
 
-void storage_wipe(void) {
+static void _storage_wipe(void) {
   norcow_wipe();
   norcow_active_version = NORCOW_VERSION;
   memzero(authentication_sum, sizeof(authentication_sum));
   memzero(cached_keys, sizeof(cached_keys));
   init_wiped_storage();
+}
+void storage_wipe(void) {
+#ifdef TREZOR_EMULATOR
+  _storage_wipe();
+#else
+  se_set_wiping(true);
+  se_reset_storage();
+  _storage_wipe();
+  se_reset_state();
+#endif
 }
 
 static void __handle_fault(const char *msg, const char *file, int line,
