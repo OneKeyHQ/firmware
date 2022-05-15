@@ -133,12 +133,11 @@ void ui_screen_boot(const vendor_header *const vhdr,
 
 void ui_screen_boot_wait(int wait_seconds) {
   char wait_str[32];
-  mini_snprintf(wait_str, sizeof(wait_str), "starting in %d s", wait_seconds);
+  mini_snprintf(wait_str, sizeof(wait_str), "Starting in %d s", wait_seconds);
   display_bar(0, DISPLAY_RESY - 5 - 20, DISPLAY_RESX, 5 + 20, boot_background);
 #if PRODUCTION_MODEL == 'H'
   ui_title_update();
-  display_image(203, 143, 74, 74, toi_icon_onekey + 12,
-                sizeof(toi_icon_onekey) - 12);
+  display_bar(0, 600, DISPLAY_RESX, 100, boot_background);
   display_text_center(DISPLAY_RESX / 2, 655, wait_str, -1, FONT_NORMAL,
                       COLOR_BL_BG, boot_background);
 #else
@@ -151,9 +150,8 @@ void ui_screen_boot_click(void) {
   display_bar(0, DISPLAY_RESY - 5 - 20, DISPLAY_RESX, 5 + 20, boot_background);
 #if PRODUCTION_MODEL == 'H'
   ui_title_update();
-  display_image(203, 143, 74, 74, toi_icon_onekey + 12,
-                sizeof(toi_icon_onekey) - 12);
-  display_text_center(DISPLAY_RESX / 2, 655, "click to continue ...", -1,
+  display_bar(0, 600, DISPLAY_RESX, 100, boot_background);
+  display_text_center(DISPLAY_RESX / 2, 655, "Click to continue ...", -1,
                       FONT_NORMAL, COLOR_BL_BG, boot_background);
 #else
   display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 5,
