@@ -733,6 +733,7 @@ void ui_bootloader_page_switch(const image_header *const hdr) {
       display_clear();
       ui_bootloader_first(hdr);
     } else if (INPUT_RESTART == response) {
+      display_clear();
       jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
     }
   }
