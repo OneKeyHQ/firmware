@@ -42,6 +42,7 @@
 #include "icon_onekey.h"
 #include "image.h"
 #include "sys.h"
+#include "usb.h"
 extern secbool load_vendor_header_keys(const uint8_t *const data,
                                        vendor_header *const vhdr);
 #endif
@@ -86,6 +87,7 @@ static uint16_t boot_background;
 
 void ui_screen_boot(const vendor_header *const vhdr,
                     const image_header *const hdr) {
+  display_clear();
   const int show_string = ((vhdr->vtrust & VTRUST_STRING) == 0);
   if ((vhdr->vtrust & VTRUST_RED) == 0) {
     boot_background = RGB16(0xFF, 0x00, 0x00);  // red
@@ -113,7 +115,7 @@ void ui_screen_boot(const vendor_header *const vhdr,
 
   if (show_string) {
 #if PRODUCTION_MODEL == 'H'
-    display_text_center(DISPLAY_RESX / 2, 240, vhdr->vstr, vhdr->vstr_len,
+    display_text_center(DISPLAY_RESX / 2, 275, vhdr->vstr, vhdr->vstr_len,
                         FONT_NORMAL, COLOR_BL_BG, boot_background);
     const char *ver_str = format_ver("v%d.%d.%d", fw_version);
     display_text_center(DISPLAY_RESX / 2, 309, ver_str, -1, FONT_NORMAL,
@@ -568,50 +570,56 @@ int ui_input_poll(int zones, bool poll) {
 }
 
 void ui_title_update(void) {
-  bool usb_conn = true;  // todo
+  bool usb_conn = is_usb_connected();
 
-  display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
+  ble_get_dev_info();
+  display_bar(DISPLAY_RESX - 32, 0, 32, 32, boot_background);
   switch (battery_cap) {
     case 0:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status0 + 12,
-                    sizeof(toi_icon_status0) - 12);
+      display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status0 + 12,
+                   sizeof(toi_icon_status0) - 12, COLOR_BL_BG, boot_background);
       break;
     case 1:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status25 + 12,
-                    sizeof(toi_icon_status25) - 12);
+      display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status25 + 12,
+                   sizeof(toi_icon_status25) - 12, COLOR_BL_BG,
+                   boot_background);
       break;
     case 2:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status50 + 12,
-                    sizeof(toi_icon_status50) - 12);
+      display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status50 + 12,
+                   sizeof(toi_icon_status50) - 12, COLOR_BL_BG,
+                   boot_background);
       break;
     case 3:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status75 + 12,
-                    sizeof(toi_icon_status75) - 12);
+      display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status75 + 12,
+                   sizeof(toi_icon_status75) - 12, COLOR_BL_BG,
+                   boot_background);
       break;
     case 4:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status100 + 12,
-                    sizeof(toi_icon_status100) - 12);
+      display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status100 + 12,
+                   sizeof(toi_icon_status100) - 12, COLOR_BL_BG,
+                   boot_background);
       break;
     case 5:
-      display_image(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_charging + 12,
-                    sizeof(toi_icon_charging) - 12);
+      display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_charging + 12,
+                   sizeof(toi_icon_charging) - 12, COLOR_BL_BG,
+                   boot_background);
       break;
     default:
-      display_bar(DISPLAY_RESX - 32, 0, 32, 32, COLOR_BLACK);
+      display_bar(DISPLAY_RESX - 32, 0, 32, 32, boot_background);
   }
 
   if (usb_conn) {
-    display_image(DISPLAY_RESX - 96 + 15, 0, 32, 32, toi_icon_usb + 12,
-                  sizeof(toi_icon_usb) - 12);
+    display_icon(DISPLAY_RESX - 96 + 15, 0, 32, 32, toi_icon_usb + 12,
+                 sizeof(toi_icon_usb) - 12, COLOR_BL_BG, boot_background);
   } else {
-    display_bar(DISPLAY_RESX - 96 + 15, 0, 32, 32, COLOR_BLACK);
+    display_bar(DISPLAY_RESX - 96 + 15, 0, 32, 32, boot_background);
   }
 
   if (ble_connect_state()) {
-    display_image(DISPLAY_RESX - 64 + 15, 0, 17, 26, toi_icon_bluetooth + 12,
-                  sizeof(toi_icon_bluetooth) - 12);
+    display_icon(DISPLAY_RESX - 64 + 15, 0, 18, 32, toi_icon_bluetooth + 12,
+                 sizeof(toi_icon_bluetooth) - 12, COLOR_BL_BG, boot_background);
   } else {
-    display_bar(DISPLAY_RESX - 64 + 15, 0, 17, 26, COLOR_BLACK);
+    display_bar(DISPLAY_RESX - 64 + 15, 0, 18, 32, boot_background);
   }
 }
 

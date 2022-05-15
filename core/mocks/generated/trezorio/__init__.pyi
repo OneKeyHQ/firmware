@@ -1,6 +1,23 @@
 from typing import *
 
 
+# extmod/modtrezorio/modtrezorio-buz.h
+class BUZ:
+    """
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        """
+        """
+
+    def ctrl(self, msg: bytes) -> None:
+        """
+        Start or stop the buzzer.
+        """
+
+
 # extmod/modtrezorio/modtrezorio-flash.h
 class FlashOTP:
     """
@@ -65,6 +82,23 @@ class HID:
     def write_blocking(self, msg: bytes, timeout_ms: int) -> int:
         """
         Sends message using USB HID (device) or UDP (emulator).
+        """
+
+
+# extmod/modtrezorio/modtrezorio-moto.h
+class MOTO:
+    """
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        """
+        """
+
+    def ctrl(self, msg: bytes) -> None:
+        """
+        Control the motor.
         """
 
 
