@@ -35,8 +35,8 @@ def get_features() -> Features:
     from apps.common import mnemonic, safety_checks
 
     f = Features(
-        vendor="trezor.io",
-        language="en-US",
+        vendor="trezor.io",  # TODO: change to "onekey.so" if so need to modify trezorlib
+        language=storage.device.get_language(),
         major_version=utils.VERSION_MAJOR,
         minor_version=utils.VERSION_MINOR,
         patch_version=utils.VERSION_PATCH,
@@ -198,58 +198,65 @@ ALLOW_WHILE_LOCKED = (
     MessageType.WipeDevice,
 )
 
-if not utils.LVGL_UI:
+# if not utils.LVGL_UI:
 
-    def set_homescreen() -> None:
-        import storage.recovery
+#     def set_homescreen() -> None:
+#         import storage.recovery
 
+#         if not config.is_unlocked():
+#             from apps.homescreen.lockscreen import lockscreen
+
+#             workflow.set_default(lockscreen)
+
+#         elif storage.recovery.is_in_progress():
+#             from apps.management.recovery_device.homescreen import recovery_homescreen
+
+#             workflow.set_default(recovery_homescreen)
+
+#         else:
+#             from apps.homescreen.homescreen import homescreen
+
+#             workflow.set_default(homescreen)
+
+# else:
+
+
+def set_homescreen() -> None:
+    if storage.device.is_initialized():
+        dev_state = get_state()
         if not config.is_unlocked():
-            from apps.homescreen.lockscreen import lockscreen
+            if __debug__:
+                print("Device is locked")
+            from trezor.lvglui.scrs.lockscreen import LockScreen
 
-            workflow.set_default(lockscreen)
-
-        elif storage.recovery.is_in_progress():
-            from apps.management.recovery_device.homescreen import recovery_homescreen
-
-            workflow.set_default(recovery_homescreen)
-
+            device_name = storage.device.get_label()
+            LockScreen(device_name, dev_state)
         else:
-            from apps.homescreen.homescreen import homescreen
+            if __debug__:
+                print("Device is unlocked")
+            from trezor.lvglui.scrs.homescreen import MainScreen
 
-            workflow.set_default(homescreen)
+            MainScreen(dev_state)
+    else:
+        from trezor.lvglui.scrs.initscreen import InitScreen
 
-else:
+        InitScreen()
 
-    def set_homescreen() -> None:
+
+def get_state() -> str | None:
+    if storage.device.no_backup():
+        dev_state = "SEEDLESS"
+    elif storage.device.unfinished_backup():
+        dev_state = "BACKUP FAILED!"
+    elif storage.device.needs_backup():
+        dev_state = "NEEDS BACKUP!"
+    elif not config.has_pin():
+        dev_state = "PIN NOT SET!"
+    elif storage.device.get_experimental_features():
+        dev_state = "EXPERIMENTAL MODE!"
+    else:
         dev_state = None
-        if storage.device.is_initialized():
-            if storage.device.no_backup():
-                dev_state = "SEEDLESS"
-            elif storage.device.unfinished_backup():
-                dev_state = "BACKUP FAILED!"
-            elif storage.device.needs_backup():
-                dev_state = "NEEDS BACKUP!"
-            elif not config.has_pin():
-                dev_state = "PIN NOT SET!"
-            elif storage.device.get_experimental_features():
-                dev_state = "EXPERIMENTAL MODE!"
-            if not config.is_unlocked():
-                if __debug__:
-                    print("Device is locked")
-                from trezor.lvglui.scrs.lockscreen import LockScreen
-
-                device_name = storage.device.get_label()
-                LockScreen(device_name, dev_state)
-            else:
-                if __debug__:
-                    print("Device is unlocked")
-                from trezor.lvglui.scrs.homescreen import MainScreen
-
-                MainScreen(dev_state)
-        else:
-            from trezor.lvglui.scrs.initscreen import InitScreen
-
-            InitScreen()
+    return dev_state
 
 
 def lock_device() -> None:

@@ -29,9 +29,6 @@
 
 #include <string.h>
 #include "common.h"
-#ifndef TREZOR_EMULATOR
-#include "supervise.h"
-#endif
 
 /// def consteq(sec: bytes, pub: bytes) -> bool:
 ///     """
@@ -125,9 +122,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorutils_halt_obj, 0, 1,
 ///     Reset system.
 ///     """
 STATIC mp_obj_t mod_trezorutils_reset(void) {
-#ifndef TREZOR_EMULATOR
-  svc_reset_system();
-#endif
+  restart();
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_reset_obj,
@@ -152,9 +147,7 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_consteq), MP_ROM_PTR(&mod_trezorutils_consteq_obj)},
     {MP_ROM_QSTR(MP_QSTR_memcpy), MP_ROM_PTR(&mod_trezorutils_memcpy_obj)},
     {MP_ROM_QSTR(MP_QSTR_halt), MP_ROM_PTR(&mod_trezorutils_halt_obj)},
-#ifndef TREZOR_EMULATOR
     {MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&mod_trezorutils_reset_obj)},
-#endif
     // various built-in constants
     {MP_ROM_QSTR(MP_QSTR_SCM_REVISION),
      MP_ROM_PTR(&mod_trezorutils_revision_obj)},

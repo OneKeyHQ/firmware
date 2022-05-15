@@ -107,7 +107,29 @@ error_shutdown(const char *line1, const char *line2, const char *line3,
   hal_delay(5000);
   exit(4);
 }
+void restart(void) { __shutdown(); }
 
+void error_reset(const char *line1, const char *line2, const char *line3,
+                 const char *line4) {
+  display_orientation(0);
+  display_print_color(COLOR_WHITE, COLOR_FATAL_ERROR);
+  if (line1) {
+    display_printf("%s\n", line1);
+  }
+  if (line2) {
+    display_printf("%s\n", line2);
+  }
+  if (line3) {
+    display_printf("%s\n", line3);
+  }
+  if (line4) {
+    display_printf("%s\n", line4);
+  }
+  display_printf("\nIt will be shutdown 5s later.\n");
+  display_backlight(255);
+  hal_delay(5000);
+  __shutdown();
+}
 void hal_delay(uint32_t ms) { usleep(1000 * ms); }
 
 uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];

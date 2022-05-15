@@ -1,5 +1,4 @@
 import storage
-import storage.device
 from trezor import config, log, loop, ui, utils, wire
 from trezor.lvglui import lvgl_tick
 from trezor.lvglui.scrs.bootscreen import BootScreen
@@ -9,6 +8,12 @@ from trezor.pin import show_pin_timeout
 from apps.common.request_pin import can_lock_device, verify_user_pin
 
 lvgl_task = lvgl_tick()
+
+
+def clear() -> None:
+    """if device is not initialized, pin is needless, so clear it"""
+    if not storage.device.is_initialized() and config.has_pin():
+        storage.wipe()
 
 
 async def bootscreen() -> None:
@@ -41,6 +46,7 @@ async def bootscreen() -> None:
 ui.display.backlight(ui.BACKLIGHT_NONE)
 ui.backlight_fade(ui.BACKLIGHT_NORMAL)
 config.init(show_pin_timeout)
+clear()
 
 if __debug__ and not utils.EMULATOR:
     config.wipe()

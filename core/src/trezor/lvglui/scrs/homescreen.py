@@ -1,10 +1,15 @@
 from storage import device
 from trezor import workflow
-from trezor.langs import langs
+from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 
-from . import font_PJSBOLD24
-from .common import Screen, load_scr_with_animation, lv  # noqa: F401, F403, F405
+from . import font_LANG_MIX, font_LANG_MIX_TITLE, font_PJSBOLD24
+from .common import (  # noqa: F401, F403, F405
+    FullSizeWindow,
+    Screen,
+    load_scr_with_animation,
+    lv,
+)
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
 from .components.container import ContainerFlexCol, ContanierGrid
 from .components.imgbtn import ImgBottonGridItem
@@ -17,31 +22,41 @@ class MainScreen(Screen):
             self._init = True
         else:
             if dev_state:
+                self.dev_state.clear_flag(lv.obj.FLAG.HIDDEN)
                 self.dev_state_text.set_text(dev_state)
-            elif hasattr(self, "dev_state") and dev_state is None:
-                self.dev_state.delete()
+            else:
+                from apps.base import get_state
+
+                state = get_state()
+                if state:
+                    self.dev_state.clear_flag(lv.obj.FLAG.HIDDEN)
+                    self.dev_state_text.set_text(state)
+                else:
+                    self.dev_state.add_flag(lv.obj.FLAG.HIDDEN)
             self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
             if not self.is_visible():
                 load_scr_with_animation(self)
             return
         super().__init__()
+        self.dev_state = lv.btn(self)
+        self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
+        self.dev_state.set_style_bg_color(
+            lv.color_hex(0xDCA312), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.dev_state.set_style_radius(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
+        self.dev_state_text = lv.label(self.dev_state)
+        self.dev_state_text.set_style_text_color(
+            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.dev_state_text.set_style_text_font(
+            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.dev_state_text.center()
         if dev_state:
-            self.dev_state = lv.btn(self)
-            self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
-            self.dev_state.set_style_bg_color(
-                lv.color_hex(0xDCA312), lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state.set_style_radius(8, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
-            self.dev_state_text = lv.label(self.dev_state)
             self.dev_state_text.set_text(dev_state)
-            self.dev_state_text.set_style_text_color(
-                lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state_text.set_style_text_font(
-                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state_text.center()
+        else:
+            self.dev_state.add_flag(lv.obj.FLAG.HIDDEN)
         self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
 
@@ -97,35 +112,35 @@ class SettingsScreen(Screen):
         self.container = ContainerFlexCol(self, self.title)
         self.general = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__GENERAL),
+            _(i18n_keys.ITEM__GENERAL),
             left_img_src="A:/res/general.png",
         )
         self.connect = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__CONNECT),
+            _(i18n_keys.ITEM__CONNECT),
             left_img_src="A:/res/connect.png",
         )
         self.home_scr = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__HOME_SCREEN),
+            _(i18n_keys.ITEM__HOME_SCREEN),
             left_img_src="A:/res/homescreen.png",
         )
         self.security = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__SECURITY),
+            _(i18n_keys.ITEM__SECURITY),
             left_img_src="A:/res/security.png",
         )
-        self.crypto = ListItemBtn(
-            self.container, _(i18n_keys.FORM__CRYPTO), left_img_src="A:/res/crypto.png"
-        )
+        # self.crypto = ListItemBtn(
+        #     self.container, _(i18n_keys.FORM__CRYPTO), left_img_src="A:/res/crypto.png"
+        # )
         self.about = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__ABOUT_DEVICE),
+            _(i18n_keys.ITEM__ABOUT_DEVICE),
             left_img_src="A:/res/about.png",
         )
         self.power = ListItemBtn(
             self.container,
-            _(i18n_keys.ACTION__POWER_OFF),
+            _(i18n_keys.ITEM__POWER_OFF),
             left_img_src="A:/res/poweroff.png",
             has_next=False,
         )
@@ -146,12 +161,12 @@ class SettingsScreen(Screen):
                 self.load_screen(HomeScreenSetting(self))
             elif target == self.security:
                 self.load_screen(SecurityScreen(self))
-            elif target == self.crypto:
-                self.load_screen(CryptoScreen(self))
+            # elif target == self.crypto:
+            #     self.load_screen(CryptoScreen(self))
             elif target == self.about:
                 self.load_screen(AboutSetting(self))
             elif target == self.power:
-                pass
+                PowerOff()
             else:
                 if __debug__:
                     print("Unknown")
@@ -159,35 +174,47 @@ class SettingsScreen(Screen):
 
 class GeneralScreen(Screen):
     cur_auto_lock = ""
+    cur_auto_lock_ms = 0
     cur_language = ""
 
     def __init__(self, prev_scr=None):
+        GeneralScreen.cur_auto_lock_ms = device.get_autolock_delay_ms()
+        GeneralScreen.cur_auto_lock = self.get_str_from_lock_ms(
+            GeneralScreen.cur_auto_lock_ms
+        )
         if not hasattr(self, "_init"):
             self._init = True
         else:
+            if self.cur_auto_lock_ms:
+                self.auto_lock.label_right.set_text(GeneralScreen.cur_auto_lock)
+            if self.cur_language:
+                self.language.label_right.set_text(self.cur_language)
             return
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__GENERAL), nav_back=True
         )
-
-        auto_lock_time = device.get_autolock_delay_ms() / 1000 // 60
-        if auto_lock_time > 60:
-            # TODO: i18n missing
-            right_text = f"{str(auto_lock_time // 60).split('.')[0]} hours"
-        else:
-            right_text = _(i18n_keys.FORM__STATUS__STR_MINUTES).format(
-                int(auto_lock_time)
-            )
-        GeneralScreen.cur_auto_lock = right_text
         self.container = ContainerFlexCol(self, self.title)
         self.auto_lock = ListItemBtn(
-            self.container, _(i18n_keys.FORM__AUTO_LOCK), right_text
+            self.container, _(i18n_keys.ITEM__AUTO_LOCK), self.cur_auto_lock
         )
-        GeneralScreen.cur_language = langs[device.get_language()][1]
+        GeneralScreen.cur_language = langs[langs_keys.index(device.get_language())][1]
         self.language = ListItemBtn(
-            self.container, _(i18n_keys.FORM__LANGUAGE), GeneralScreen.cur_language
+            self.container, _(i18n_keys.ITEM__LANGUAGE), GeneralScreen.cur_language
+        )
+        self.language.label_right.set_style_text_font(
+            font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def get_str_from_lock_ms(self, time_ms) -> str:
+        if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
+            return "Never"
+        auto_lock_time = time_ms / 1000 // 60
+        if auto_lock_time > 60:
+            text = f"{str(auto_lock_time // 60).split('.')[0]} hours"
+        else:
+            text = f"{str(auto_lock_time).split('.')[0]} minutes"
+        return text
 
     def on_click(self, event_obj):
         code = event_obj.code
@@ -245,14 +272,16 @@ class AutoLockSetting(Screen):
                         self.btns[self.checked_index].set_uncheck()  # type: ignore[Cannot access member "set_uncheck" for type "None"]
                         self.checked_index = index
                         if index == 5:
-                            device.set_autolock_delay_ms(device.AUTOLOCK_DELAY_MAXIMUM)
-                            return
-                        if index == 6:
-                            auto_lock_time = int(GeneralScreen.cur_auto_lock)
+                            auto_lock_time = device.AUTOLOCK_DELAY_MAXIMUM
+                        elif index == 6:
+                            auto_lock_time = int(GeneralScreen.cur_auto_lock_ms)
                         else:
-                            auto_lock_time = self.setting_items[index]
-                        device.set_autolock_delay_ms(auto_lock_time * 60 * 1000)
-                        return
+                            auto_lock_time = self.setting_items[index] * 60 * 1000
+                        device.set_autolock_delay_ms(auto_lock_time)
+                        GeneralScreen.cur_auto_lock_ms = auto_lock_time
+                        from apps.base import reload_settings_from_storage
+
+                        reload_settings_from_storage()
 
 
 # pyright: on
@@ -266,10 +295,16 @@ class LanguageSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__LANGUAGE), nav_back=True
         )
         self.check_index = 0
+        self.title.set_style_text_font(
+            font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.container = ContainerFlexCol(self, self.title)
         self.lang_buttons = []
         for idx, lang in enumerate(langs):
             lang_button = ListItemBtn(self.container, lang[1], has_next=False)
+            lang_button.label_left.set_style_text_font(
+                font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
             lang_button.add_check_img()
             self.lang_buttons.append(lang_button)
             if GeneralScreen.cur_language == lang[1]:
@@ -286,8 +321,10 @@ class LanguageSetting(Screen):
                 if target != button and idx == last_checked:
                     button.set_uncheck()
                 if target == button and idx != last_checked:
-                    device.set_language(idx)
+                    device.set_language(langs_keys[idx])
+                    GeneralScreen.cur_language = langs[idx][1]
                     i18n_refresh()
+                    self.title.set_text(_(i18n_keys.TITLE__LANGUAGE))
                     self.check_index = idx
                     button.set_checked()
 
@@ -302,8 +339,8 @@ class ConnectSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
         )
         self.container = ContainerFlexCol(self, self.title)
-        self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.FORM__BLUETOOTH))
-        self.usb = ListItemBtnWithSwitch(self.container, _(i18n_keys.FORM__USB))
+        self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
+        # self.usb = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__USB))
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
 
     def on_value_changed(self, event_obj):
@@ -316,11 +353,11 @@ class ConnectSetting(Screen):
                         print("Bluetooth is on")
                     else:
                         print("Bluetooth is off")
-                else:
-                    if target.has_state(lv.STATE.CHECKED):
-                        print("USB is on")
-                    else:
-                        print("USB is off")
+                # else:
+                #     if target.has_state(lv.STATE.CHECKED):
+                #         print("USB is on")
+                #     else:
+                #         print("USB is off")
 
 
 class AboutSetting(Screen):
@@ -335,7 +372,7 @@ class AboutSetting(Screen):
         # ble_mac = device.get_ble_mac()
         # storage = device.get_storage()
         super().__init__(
-            prev_scr=prev_scr, title=_(i18n_keys.FORM__ABOUT_DEVICE), nav_back=True
+            prev_scr=prev_scr, title=_(i18n_keys.ITEM__ABOUT_DEVICE), nav_back=True
         )
         self.container = ContainerFlexCol(self, self.title)
         # TODO: i18n missing
@@ -350,13 +387,56 @@ class AboutSetting(Screen):
         )
         self.ble_mac = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__BLUETOOTH),
+            _(i18n_keys.ITEM__BLUETOOTH),
             right_text="B8:C3:16:DE:D8:46",
             has_next=False,
         )
         self.storage = ListItemBtn(
             self.container, "Storage", right_text="16 GB", has_next=False
         )
+
+
+class PowerOff(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            title=_(i18n_keys.TITLE__POWER_OFF),
+            subtitle=None,
+            confirm_text=_(i18n_keys.ITEM__POWER_OFF),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        )
+        self.btn_yes.enable(
+            bg_color=lv.color_hex(0xAF2B0E), text_color=lv.color_hex(0xFFFFFF)
+        )
+        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        from trezor import config
+
+        self.has_pin = config.has_pin()
+        if self.has_pin:
+            config.lock()
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_yes:
+                self.destory()
+                ShutingDown()
+            elif target == self.btn_no:
+                self.destory(500)
+                if self.has_pin:
+                    from apps.common.request_pin import verify_user_pin
+
+                    workflow.spawn(verify_user_pin())
+
+
+class ShutingDown(FullSizeWindow):
+    def __init__(self):
+        super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
+        from trezor import loop, utils
+
+        loop.sleep(5000)
+        self.destory()
+        utils.reset()
 
 
 class HomeScreenSetting(Screen):
@@ -411,13 +491,13 @@ class SecurityScreen(Screen):
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
-        self.rest_pin = ListItemBtn(self.container, _(i18n_keys.FORM__RESET_PIN))
+        self.rest_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__RESET_PIN))
         self.recovery_check = ListItemBtn(
-            self.container, _(i18n_keys.FORM__CHECK_RECOVERY_PHRASE)
+            self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
         )
-        self.passphrase = ListItemBtn(self.container, _(i18n_keys.FORM__PASSPHRASE))
+        self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
         self.rest_device = ListItemBtn(
-            self.container, _(i18n_keys.ACTION__RESET_DEVICE), has_next=False
+            self.container, _(i18n_keys.ITEM__RESET_DEVICE), has_next=False
         )
         self.rest_device.label_left.set_style_text_color(
             lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -504,8 +584,8 @@ class EthereumSetting(Screen):
         self.container = ContainerFlexCol(self, self.title)
         self.blind_sign = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__BLIND_SIGNING),
-            right_text=_(i18n_keys.FORM__STATUS__OFF),
+            _(i18n_keys.ITEM__BLIND_SIGNING),
+            right_text=_(i18n_keys.ITEM__STATUS__OFF),
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -529,8 +609,8 @@ class SolanaSetting(Screen):
         self.container = ContainerFlexCol(self, self.title)
         self.blind_sign = ListItemBtn(
             self.container,
-            _(i18n_keys.FORM__BLIND_SIGNING),
-            right_text=_(i18n_keys.FORM__STATUS__OFF),
+            _(i18n_keys.ITEM__BLIND_SIGNING),
+            right_text=_(i18n_keys.ITEM__STATUS__OFF),
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -576,7 +656,7 @@ class BlindSign(Screen):
                         ),
                         _(i18n_keys.SUBTITLE_SETTING_CRYPTO_BLIND_SIGN_ENABLED),
                         icon_path="A:/res/warning.png",
-                        btn_text=_(i18n_keys.ACTION__ENABLE),
+                        btn_text=_(i18n_keys.BUTTON__ENABLE),
                     )
                 else:
                     if __debug__:

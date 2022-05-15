@@ -35,9 +35,7 @@ from .. import font_PJSBOLD24, lv
 
 
 class NormalButton(lv.btn):
-    def __init__(
-        self, parent, text=_(i18n_keys.ACTION__NEXT__QUANTIFIER), enable=True
-    ) -> None:
+    def __init__(self, parent, text=_(i18n_keys.BUTTON__NEXT), enable=True) -> None:
         super().__init__(parent)
         self.set_size(320, 62)
         self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -64)
@@ -110,6 +108,10 @@ class ListItemBtn(lv.btn):
         if right_text:
             self.label_right = lv.label(self)
             self.label_right.set_text(right_text)
+            self.label_right.set_width(200)
+            self.label_right.set_style_text_align(
+                lv.TEXT_ALIGN.RIGHT, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
             self.label_right.set_style_text_font(
                 font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
             )

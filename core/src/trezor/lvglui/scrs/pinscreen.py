@@ -1,5 +1,4 @@
-from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-
+from ..i18n import gettext as _, keys as i18n_keys
 from .common import FullSizeWindow, lv  # noqa: F401,F403
 from .components.button import NormalButton
 from .components.container import ContainerFlexCol
@@ -17,13 +16,13 @@ class PinTip(FullSizeWindow):
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__SETUP_SET_A_PIN__1),
+            _(i18n_keys.CHECK__SETUP_SET_A_PIN__1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__SETUP_SET_A_PIN__2),
+            _(i18n_keys.CHECK__SETUP_SET_A_PIN__2),
         )
-        self.btn = NormalButton(self, _(i18n_keys.ACTION__CONTINUE), False)
+        self.btn = NormalButton(self, _(i18n_keys.BUTTON__CONTINUE), False)
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.cb_cnt = 0
@@ -64,6 +63,7 @@ class InputPin(FullSizeWindow):
             title=kwargs.get("title", _(i18n_keys.TITLE__ENTER_PIN)),
             subtitle=kwargs.get("subtitle", ""),
         )
+        self.subtitle.set_recolor(True)
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)
         self.keyboard.ta.add_event_cb(self.on_event, lv.EVENT.VALUE_CHANGED, None)
@@ -75,7 +75,7 @@ class InputPin(FullSizeWindow):
                 self.subtitle.set_text("")
             return
         input = self.keyboard.ta.get_text()
-        if input == "" or len(input) < 5:
+        if len(input) < 4:
             # TODO: missing i18n
             self.subtitle.set_text("Length must be 4 digits or more")
             self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
@@ -89,7 +89,7 @@ class SetupComplete(FullSizeWindow):
         super().__init__(
             title=_(i18n_keys.TITLE__WALLET_IS_READY),
             subtitle=subtitle,
-            confirm_text=_(i18n_keys.ACTION__DONE),
+            confirm_text=_(i18n_keys.BUTTON__CONTINUE),
             icon_path="A:/res/success_icon.png",
         )
         self.btn.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)

@@ -392,9 +392,9 @@
     LV_FONT_DECLARE(lv_font_scs_bold_36) \
     LV_FONT_DECLARE(lv_font_scs_reg_20) \
     LV_FONT_DECLARE(lv_font_scs_reg_24) \
-    LV_FONT_DECLARE(lv_font_scs_reg_28) 
-
-
+    LV_FONT_DECLARE(lv_font_scs_reg_28) \
+    LV_FONT_DECLARE(lv_font_mix_bold_24) \
+    LV_FONT_DECLARE(lv_font_mix_title_bold_36)
 
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &lv_font_pljs_regular_24

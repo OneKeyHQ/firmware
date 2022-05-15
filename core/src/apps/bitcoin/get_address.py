@@ -96,8 +96,11 @@ async def get_address(
             else:
                 pubnodes = [hd.node for hd in msg.multisig.pubkeys]
             multisig_index = multisig_pubkey_index(msg.multisig, node.public_key())
+            from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
-            title = f"{msg.multisig.m} of {len(pubnodes)}"
+            title = _(i18n_keys.TITLE__STR_MULTISIG_ADDRESS_STR_OF_STR).format(
+                coin.coin_shortcut.upper(), msg.multisig.m, len(pubnodes)
+            )
             await show_address(
                 ctx,
                 address=address_short,

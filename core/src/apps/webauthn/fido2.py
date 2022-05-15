@@ -644,14 +644,14 @@ class U2fConfirmRegister(U2fState):
                 await show_popup(
                     title="U2F",
                     subtitle="Already registered.",
-                    description="This device is already\nregistered with this\napplication.",
+                    description="This device is already registered with this application.",
                     timeout_ms=_POPUP_TIMEOUT_MS,
                 )
             else:
                 await show_popup(
                     title="U2F",
                     subtitle="Not registered.",
-                    description="This device is not\nregistered with this\napplication.",
+                    description="This device is not registered with this application.",
                     timeout_ms=_POPUP_TIMEOUT_MS,
                 )
             return False
@@ -831,7 +831,7 @@ class Fido2ConfirmExcluded(Fido2ConfirmMakeCredential):
         await show_popup(
             title="FIDO2 Register",
             subtitle="Already registered.",
-            description="This device is already\nregistered with {}.",
+            description="This device is already registered with {}.",
             description_param=self._cred.rp_id,
             timeout_ms=_POPUP_TIMEOUT_MS,
         )
@@ -919,7 +919,7 @@ class Fido2ConfirmNoPin(State):
         await show_popup(
             title="FIDO2 Verify User",
             subtitle="Unable to verify user.",
-            description="Please enable PIN\nprotection.",
+            description="Please enable PIN protection.",
             timeout_ms=_POPUP_TIMEOUT_MS,
         )
         return False
@@ -941,7 +941,7 @@ class Fido2ConfirmNoCredentials(Fido2ConfirmGetAssertion):
         await show_popup(
             title="FIDO2 Authenticate",
             subtitle="Not registered.",
-            description="This device is not\nregistered with\n{}.",
+            description="This device is not registered with {}.",
             description_param=self._creds[0].app_name(),
             timeout_ms=_POPUP_TIMEOUT_MS,
         )

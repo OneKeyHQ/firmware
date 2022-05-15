@@ -1,7 +1,5 @@
 from storage import device
-from trezor.langs import langs
 
-LANGUAGE = 0
 TRANSLATIONS = []
 
 
@@ -9,7 +7,7 @@ def load_translations(lang):
     global TRANSLATIONS
     try:
         TRANSLATIONS = __import__(
-            f"trezor.lvglui.i18n.locales.{langs[lang][0]}", None, None, [""]
+            f"trezor.lvglui.i18n.locales.{lang}", None, None, [""]
         ).translations
     except Exception:
         TRANSLATIONS = __import__(
@@ -17,13 +15,14 @@ def load_translations(lang):
         ).translations
 
 
-def i18n_refresh():
-    global LANGUAGE
+def i18n_refresh(lang: str = None):
     try:
-        LANGUAGE = device.get_language()
-        load_translations(LANGUAGE)
+        if lang is None:
+            lang = device.get_language()
+        load_translations(lang)
     except Exception as e:
-        print(e)
+        if __debug__:
+            print(e)
 
 
 i18n_refresh()

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from storage.device import is_initialized
 from trezor import config, wire
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action, show_success
 
@@ -26,7 +27,7 @@ async def change_pin(ctx: wire.Context, msg: ChangePin) -> Success:
     await require_confirm_change_pin(ctx, msg)
 
     # get old pin
-    curpin, salt = await request_pin_and_sd_salt(ctx, "Enter old PIN")
+    curpin, salt = await request_pin_and_sd_salt(ctx, _(i18n_keys.TITLE__ENTER_OLD_PIN))
 
     # if changing pin, pre-check the entered pin before getting new pin
     if curpin and not msg.remove:
@@ -48,16 +49,16 @@ async def change_pin(ctx: wire.Context, msg: ChangePin) -> Success:
 
     if newpin:
         if curpin:
-            msg_screen = "You have successfully changed your PIN."
-            msg_wire = "PIN changed"
+            msg_screen = _(i18n_keys.SUBTITLE__SET_PIN_PIN_CHANGED)
+            msg_wire = _(i18n_keys.TITLE__PIN_CHANGED)
         else:
-            msg_screen = "You have successfully enabled PIN protection."
-            msg_wire = "PIN enabled"
+            msg_screen = _(i18n_keys.SUBTITLE__SETUP_SET_PIN_PIN_ENABLED)
+            msg_wire = _(i18n_keys.TITLE__PIN_ENABLED)
     else:
-        msg_screen = "You have successfully disabled PIN protection."
-        msg_wire = "PIN removed"
+        msg_screen = _(i18n_keys.SUBTITLE__SET_PIN_PIN_DISABLED)
+        msg_wire = _(i18n_keys.TITLE__PIN_DISABLED)
 
-    await show_success(ctx, "success_pin", msg_screen)
+    await show_success(ctx, "success_pin", msg_screen, header=msg_wire)
     return Success(message=msg_wire)
 
 

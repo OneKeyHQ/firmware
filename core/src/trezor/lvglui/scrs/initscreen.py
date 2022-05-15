@@ -3,8 +3,9 @@
 # from trezor.enums import BackupType
 
 from storage import device
-from trezor.langs import langs
+from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
+from trezor.lvglui.scrs import font_LANG_MIX, font_LANG_MIX_TITLE
 
 from .common import FullSizeWindow, Screen, lv  # noqa: F401,F403,F405
 
@@ -19,20 +20,24 @@ word_cnt_strength_map = {
     24: 256,
 }
 
-language = "English"
+language = "en"
 
 
 class InitScreen(Screen):
     def __init__(self):
         super().__init__(
             title=_(i18n_keys.TITLE__SELECT_LANGUAGE),
-            btn_text=_(i18n_keys.ACTION__NEXT__QUANTIFIER),
+            btn_text=_(i18n_keys.BUTTON__CONTINUE),
             icon_path="A:/res/language.png",
             options="\n".join(lang[1] for lang in langs),
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
+        self.title.set_style_text_font(
+            font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.roller.set_style_text_font(font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.btn.set_style_text_font(font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
-        # self.select_option = options.split()[0]
         self.add_event_cb(
             self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None
         )
@@ -42,13 +47,12 @@ class InitScreen(Screen):
 
     def on_value_changed(self, target):
         global language
-        selected_str = " " * 11
-        target.get_selected_str(selected_str, len(selected_str))
-        device.set_language(target.get_selected())
-        i18n_refresh()
+        lang_key = langs_keys[target.get_selected()]
+        device.set_language(lang_key)
+        i18n_refresh(lang_key)
         self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
-        self.btn.label.set_text(_(i18n_keys.ACTION__NEXT__QUANTIFIER))
-        language = selected_str.strip()[:-1]
+        self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))
+        language = langs[target.get_selected()][0]
 
 
 class QuickStart(FullSizeWindow):
@@ -56,11 +60,11 @@ class QuickStart(FullSizeWindow):
         super().__init__(
             _(i18n_keys.TITLE__QUICK_START),
             _(i18n_keys.SUBTITLE__SETUP_QUICK_START),
-            _(i18n_keys.ACTION__START),
+            _(i18n_keys.BUTTON__START),
             options="\n".join(
                 [
-                    _(i18n_keys.FORM__OPTION__CREATE_NEW_WALLET),
-                    _(i18n_keys.FORM__OPTION__RESTORE_WALLET),
+                    _(i18n_keys.OPTION__CREATE_NEW_WALLET),
+                    _(i18n_keys.OPTION__RESTORE_WALLET),
                 ]
             ),
         )
@@ -78,14 +82,28 @@ class QuickStart(FullSizeWindow):
                 self.select_index = target.get_selected()
         elif code == lv.EVENT.CLICKED:
             if self.select_index == 0:
-                SelectMnemonicNum()
+                from trezor import workflow
+                from trezor.wire import DUMMY_CONTEXT
+                from apps.management.reset_device import reset_device
+                from trezor.messages import ResetDevice
+
+                # pyright: off
+                workflow.spawn(
+                    reset_device(
+                        DUMMY_CONTEXT,
+                        ResetDevice(
+                            strength=128,
+                            language=language,
+                            pin_protection=True,
+                        ),
+                    )
+                )
             elif self.select_index == 1:
                 from apps.management.recovery_device import recovery_device
                 from trezor.messages import RecoveryDevice
                 from trezor import workflow
                 from trezor.wire import DUMMY_CONTEXT
 
-                # pyright: off
                 workflow.spawn(
                     recovery_device(
                         DUMMY_CONTEXT,
@@ -103,9 +121,9 @@ class QuickStart(FullSizeWindow):
 class SelectMnemonicNum(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            _(i18n_keys.TITLE__CREATE_NEW_WALLET),
+            _(i18n_keys.TITLE__READY_TO_CREATE),
             _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS),
-            _(i18n_keys.ACTION__CONTINUE),
+            _(i18n_keys.BUTTON__CONTINUE),
             options="12\n18\n24",
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
@@ -121,25 +139,9 @@ class SelectMnemonicNum(FullSizeWindow):
             if target == self.roller:
                 selected_str = " " * 11
                 target.get_selected_str(selected_str, len(selected_str))
-                self.num = selected_str.strip()[:-1]
+                self.num = int(selected_str.strip()[:-1])
         elif code == lv.EVENT.CLICKED:
-            from trezor import workflow
-            from trezor.wire import DUMMY_CONTEXT
-            from apps.management.reset_device import reset_device
-            from trezor.messages import ResetDevice
-
-            # pyright: off
-            workflow.spawn(
-                reset_device(
-                    DUMMY_CONTEXT,
-                    ResetDevice(
-                        strength=word_cnt_strength_map[int(self.num)],
-                        language=language,
-                        pin_protection=True,
-                    ),
-                )
-            )
-            # pyright: on
+            self.channel.publish(word_cnt_strength_map[self.num])
             self.destory()
 
 

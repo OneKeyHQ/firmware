@@ -3,6 +3,7 @@ from ubinascii import hexlify
 
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from ...constants.tt import MONO_ADDR_PER_LINE
 from .common import button_request, interact, raise_if_cancelled
@@ -44,6 +45,7 @@ __all__ = (
     "request_passphrase_on_device",
     "request_pin_on_device",
     "should_show_more",
+    "request_strength",
 )
 
 
@@ -55,8 +57,8 @@ async def confirm_action(
     description: str | None = None,
     description_param: str | None = None,
     description_param_font: int = ui.BOLD,
-    verb: str = "Confirm",
-    verb_cancel: str = "Cancel",
+    verb: str = _(i18n_keys.BUTTON__CONFIRM),
+    verb_cancel: str = _(i18n_keys.BUTTON__CANCEL),
     hold: bool = False,
     hold_danger: bool = False,
     icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
@@ -72,7 +74,7 @@ async def confirm_action(
         description = description.format(description_param)
     confirm_screen = FullSizeWindow(
         title,
-        f"{description}{' ' + (action or '')}",
+        f"{description or ''}{' ' + (action or '')}",
         verb,
         cancel_text=verb_cancel,
         icon_path=icon,
@@ -89,14 +91,16 @@ async def confirm_reset_device(
     from trezor.lvglui.scrs.common import FullSizeWindow
 
     if recovery:
-        title = "Recovery mode"
+        title = _(i18n_keys.TITLE__RESTORE_WALLET)
         icon = "A:/res/recovery.png"
     else:
-        title = "Create new wallet"
+        title = _(i18n_keys.TITLE__CREATE_NEW_WALLET)
         icon = "A:/res/add.png"
-    description = prompt
-    confirm_text = "Confirm"
-    restscreen = FullSizeWindow(title, description, confirm_text, icon_path=icon)
+    confirm_text = _(i18n_keys.BUTTON__CONFIRM)
+    cancel_text = _(i18n_keys.BUTTON__CANCEL)
+    restscreen = FullSizeWindow(
+        title, prompt, confirm_text, cancel_text, icon_path=icon
+    )
     await raise_if_cancelled(
         interact(
             ctx,
@@ -107,6 +111,13 @@ async def confirm_reset_device(
             else ButtonRequestType.ResetDevice,
         )
     )
+
+
+async def request_strength() -> int:
+    from trezor.lvglui.scrs.initscreen import SelectMnemonicNum
+
+    screen = SelectMnemonicNum()
+    return await screen.request()
 
 
 async def confirm_wipe_device(ctx: wire.GenericContext):
@@ -140,13 +151,14 @@ async def confirm_wipe_device_success(ctx: wire.GenericContext):
 async def confirm_backup(ctx: wire.GenericContext) -> bool:
     from trezor.lvglui.scrs.common import FullSizeWindow
 
-    title = "Success"
-    subtitle = (
-        "New wallet created successfully! You should back up your new wallet right now."
-    )
+    title = _(i18n_keys.TITLE__WALLET_IS_READY)
+    subtitle = _(i18n_keys.SUBTITLE__DEVICE_SETUP_WALLET_IS_READY)
+    confirm_text = _(i18n_keys.BUTTON__BACK_UP)
+    cancel_text = _(i18n_keys.BUTTON__SKIP)
     icon = "A:/res/success_icon.png"
-
-    screen = FullSizeWindow(title, subtitle, "Backup", "Skip", icon_path=icon)
+    if ctx == wire.DUMMY_CONTEXT:
+        cancel_text = ""
+    screen = FullSizeWindow(title, subtitle, confirm_text, cancel_text, icon_path=icon)
     confirmed = await interact(
         ctx,
         screen,
@@ -154,15 +166,12 @@ async def confirm_backup(ctx: wire.GenericContext) -> bool:
         ButtonRequestType.ResetDevice,
     )
     if confirmed:
-        from trezor.lvglui.scrs.reset_device import BackupTips
-
-        await BackupTips().request()
         return True
 
-    title = "Warning"
-    subtitle = "Are you sure you want to skip the backup? You can back up your OneKey once, at any time."
+    title = _(i18n_keys.TITLE__WARNING)
+    subtitle = _(i18n_keys.SUBTITLE__DEVICE_SETUP_SKIP_BACK_UP_WARNING)
     icon = "A:/res/shriek.png"
-    screen = FullSizeWindow(title, subtitle, "Backup", "Skip", icon_path=icon)
+    screen = FullSizeWindow(title, subtitle, confirm_text, cancel_text, icon_path=icon)
     confirmed = await interact(
         ctx,
         screen,
@@ -181,10 +190,11 @@ async def confirm_path_warning(
         interact(
             ctx,
             FullSizeWindow(
-                "Confirm path",
+                _(i18n_keys.TITLE__UNKNOWN_PATH),
+                # TODO: i18n missing
                 f"{path_type}: {path} is unknown, Are you sure?",
-                "Confirm",
-                "Cancel",
+                _(i18n_keys.BUTTON__CONFIRM),
+                _(i18n_keys.BUTTON__CANCEL),
                 icon_path="A:/res/warning.png",
             ),
             "path_warning",
@@ -206,7 +216,9 @@ async def show_xpub(
     await raise_if_cancelled(
         interact(
             ctx,
-            XpubOrPub(f"{network} Public Key", path=path, xpub=xpub),
+            XpubOrPub(
+                _(i18n_keys.TITLE__STR_PUBLIC_KEY).format(network), path=path, xpub=xpub
+            ),
             "show_pubkey",
             ButtonRequestType.PublicKey,
         )
@@ -219,7 +231,7 @@ async def show_address(
     *,
     address_qr: str | None = None,
     case_sensitive: bool = True,
-    address_n: str | None = "Confirm address",
+    address_n: str | None,
     network: str | None = None,
     multisig_index: int | None = None,
     xpubs: Sequence[str] = (),
@@ -234,7 +246,7 @@ async def show_address(
         return await interact(
             ctx,
             Address(
-                f"{network.upper()} Multisig Address\n ({title})",
+                title,
                 address_n,
                 address,
                 xpubs,
@@ -245,7 +257,9 @@ async def show_address(
         )
     await interact(
         ctx,
-        Address(f"{network.upper()} Address", address_n, address),
+        Address(
+            _(i18n_keys.TITLE__STR_ADDRESS).format(network.upper()), address_n, address
+        ),
         "show_address",
         ButtonRequestType.Address,
     )
@@ -263,7 +277,11 @@ async def show_pubkey(
     await raise_if_cancelled(
         interact(
             ctx,
-            XpubOrPub(f"{network} Public Key", path=path, pubkey=pubkey),
+            XpubOrPub(
+                _(i18n_keys.TITLE__STR_PUBLIC_KEY).format(network),
+                path=path,
+                pubkey=pubkey,
+            ),
             "show_pubkey",
             ButtonRequestType.PublicKey,
         )
@@ -309,7 +327,7 @@ async def show_error_and_raise(
     content: str,
     header: str = "Error",
     subheader: str | None = None,
-    button: str = "Close",
+    button: str = _(i18n_keys.BUTTON__CLOSE),
     red: bool = False,
     exc: ExceptionType = wire.ActionCancelled,
 ) -> NoReturn:
@@ -333,9 +351,9 @@ def show_warning(
     ctx: wire.GenericContext,
     br_type: str,
     content: str,
-    header: str = "Warning",
+    header: str = _(i18n_keys.TITLE__WARNING),
     subheader: str | None = None,
-    button: str = "Try again",
+    button: str = _(i18n_keys.BUTTON__TRY_AGAIN),
     br_code: ButtonRequestType = ButtonRequestType.Warning,
     icon: str = "A:/res/warning.png",
     icon_color: int = ui.RED,
@@ -358,14 +376,15 @@ def show_success(
     ctx: wire.GenericContext,
     br_type: str,
     content: str,
+    header: str = "Success",
     subheader: str | None = None,
-    button: str = "Done",
+    button: str = _(i18n_keys.BUTTON__DONE),
 ) -> Awaitable[None]:
     return _show_modal(
         ctx,
         br_type=br_type,
         br_code=ButtonRequestType.Success,
-        header="Success",
+        header=header,
         subheader=subheader,
         content=content,
         button_confirm=button,
@@ -380,7 +399,7 @@ async def confirm_output(
     address: str,
     amount: str,
     font_amount: int = ui.NORMAL,  # TODO cleanup @ redesign
-    title: str = "Overview Transaction",
+    title: str = _(i18n_keys.TITLE__VIEW_TRANSACTION),
     subtitle: str | None = None,  # TODO cleanup @ redesign
     color_to: int = ui.FG,  # TODO cleanup @ redesign
     to_str: str = " to\n",  # TODO cleanup @ redesign
@@ -409,6 +428,7 @@ async def confirm_payment_request(
     from trezor.lvglui.scrs.template import ConfirmPaymentRequest
 
     subtitle = " ".join(memos)
+    # TODO: i18n missing
     screen = ConfirmPaymentRequest(
         f"Confirm {coin_shortcut} Payment", subtitle, amount, recipient_name
     )
@@ -490,7 +510,7 @@ def confirm_address(
     ctx: wire.GenericContext,
     title: str,
     address: str,
-    description: str | None = "Address:",
+    description: str | None = _(i18n_keys.LIST_KEY__ADDRESS__COLON),
     br_type: str = "confirm_address",
     br_code: ButtonRequestType = ButtonRequestType.Other,
     icon: str = ui.ICON_SEND,  # TODO cleanup @ redesign
@@ -538,7 +558,7 @@ def confirm_amount(
     ctx: wire.GenericContext,
     title: str,
     amount: str,
-    description: str = "Amount:",
+    description: str = _(i18n_keys.LIST_KEY__AMOUNT__COLON),
     br_type: str = "confirm_amount",
     br_code: ButtonRequestType = ButtonRequestType.Other,
     icon: str = ui.ICON_SEND,  # TODO cleanup @ redesign
@@ -599,7 +619,10 @@ async def confirm_total(
     from trezor.lvglui.scrs.template import TransactionDetailsBTC
 
     screen = TransactionDetailsBTC(
-        f"Sign {coin_shortcut} Transaction", amount, fee_amount, total_amount
+        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(coin_shortcut),
+        amount,
+        fee_amount,
+        total_amount,
     )
     await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
@@ -612,6 +635,7 @@ async def confirm_joint_total(
 ) -> None:
     from trezor.lvglui.scrs.template import JointTransactionDetailsBTC
 
+    # TODO: i18n missing
     screen = JointTransactionDetailsBTC(
         f"Sign {coin_shortcut} Joint Transaction", spending_amount, total_amount
     )
@@ -659,6 +683,7 @@ async def confirm_modify_output(
     amount_change: str,
     amount_new: str,
 ) -> None:
+    # TODO: i18n missing
     if sign < 0:
         description = "DECREASED BY:"
     else:
@@ -682,6 +707,7 @@ async def confirm_modify_fee(
     user_fee_change: str,
     total_fee_new: str,
 ) -> None:
+    # TODO: i18n missing
     if sign == 0:
         description = "NO CHANGE:"
     else:
@@ -701,6 +727,7 @@ async def confirm_modify_fee(
 async def confirm_coinjoin(
     ctx: wire.GenericContext, coin_name: str, max_rounds: int, max_fee_per_vbyte: str
 ) -> None:
+    # TODO: i18n missing
     title = "Authorize CoinJoin"
     from trezor.lvglui.scrs.template import ConfirmCoinJoin
 
@@ -728,10 +755,11 @@ async def confirm_signverify(
     ctx: wire.GenericContext, coin: str, message: str, address: str, verify: bool
 ) -> None:
     if verify:
+        # TODO: i18n missing
         header = f"Verify {coin} message"
         br_type = "verify_message"
     else:
-        header = f"Sign {coin} message"
+        header = _(i18n_keys.TITLE__SIGN_STR_MESSAGE).format(coin)
         br_type = "sign_message"
     from trezor.lvglui.scrs.template import Message
 
@@ -748,13 +776,14 @@ async def show_popup(
     subtitle: str | None = None,
     description_param: str = "",
     timeout_ms: int = 3000,
+    icon: str = "A:/res/warning.png",
 ) -> None:
     from trezor.lvglui.scrs.components.popup import PopupSample
 
     if description and description_param:
         description = description.format(description_param)
     subtitle = f"{subtitle or ''} {description or ''}"
-    PopupSample(title, subtitle, "A:/res/warning.png", timeout_ms)
+    PopupSample(title, subtitle, icon, timeout_ms)
 
 
 def draw_simple_text(title: str, description: str = "") -> None:
@@ -785,12 +814,15 @@ async def request_pin_on_device(
     allow_cancel: bool,
 ) -> str:
     await button_request(ctx, "pin_device", code=ButtonRequestType.PinEntry)
-    if attempts_remaining is None:
+    from storage import device
+
+    if attempts_remaining is None or attempts_remaining == device.PIN_MAX_ATTEMPTS:
         subprompt = ""
     elif attempts_remaining == 1:
-        subprompt = "This is your last attempt"
+        # TODO: i18n missing
+        subprompt = "#af2b0e This is your last attempt #"
     else:
-        subprompt = f"{attempts_remaining} attempts remaining"
+        subprompt = f"#af2b0e {_(i18n_keys.MSG__INCORRECT_PIN_STR_ATTEMPTS_LEFT).format(attempts_remaining)} #"
     from trezor.lvglui.scrs.pinscreen import InputPin
 
     pinscreen = InputPin(title=prompt, subtitle=subprompt)

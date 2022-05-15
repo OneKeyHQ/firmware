@@ -41,7 +41,7 @@ class LockScreen(Screen):
 
         self.tap_tip = lv.label(self)
         self.tap_tip.set_long_mode(lv.label.LONG.WRAP)
-        self.tap_tip.set_text(_(i18n_keys.ACTION__TAP_TO_UNLOCK))
+        self.tap_tip.set_text(_(i18n_keys.LOCKED_TEXT__TAP_TO_UNLOCK))
         self.tap_tip.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)  # 1
         self.tap_tip.align(lv.ALIGN.BOTTOM_MID, 0, -100)
         self.tap_tip.set_style_text_font(

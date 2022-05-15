@@ -10,8 +10,8 @@ class WipeDevice(FullSizeWindow):
     def __init__(self):
         title = _(i18n_keys.TITLE__WIPE_DEVICE)
         subtitle = _(i18n_keys.SUBTITLE_WIPE_DEVICE_WIPE_DEVICE)
-        confirm_text = _(i18n_keys.ACTION__VERIFY_PIN)
-        cancel_text = _(i18n_keys.ACTION__CANCEL)
+        confirm_text = _(i18n_keys.BUTTON__VERIFY_PIN)
+        cancel_text = _(i18n_keys.BUTTON__CANCEL)
         icon_path = "A:/res/warning.png"
         super().__init__(title, subtitle, confirm_text, cancel_text, icon_path, None)
         self.btn_yes.set_style_bg_color(
@@ -28,17 +28,17 @@ class WipeDeviceTips(FullSizeWindow):
         self.container = ContainerFlexCol(self, self.subtitle)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__DEVICE_WIPE_DEVICE_FACTORY_RESET_1),
+            _(i18n_keys.CHECK__DEVICE_WIPE_DEVICE_FACTORY_RESET_1),
         )
         self.item2 = ListItemWithLeadingCheckbox(
             self.container,
-            _(i18n_keys.FORM__OPTION__DEVICE_WIPE_DEVICE_FACTORY_RESET_2),
+            _(i18n_keys.CHECK__DEVICE_WIPE_DEVICE_FACTORY_RESET_2),
         )
         self.btn_yes = NormalButton(
-            self, _(i18n_keys.ACTION__HOLD_TO_RESET), enable=False
+            self, _(i18n_keys.BUTTON__HOLD_TO_RESET), enable=False
         )
         self.btn_yes.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 54)
-        self.btn_no = NormalButton(self, _(i18n_keys.ACTION__CANCEL), enable=True)
+        self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL), enable=True)
         self.btn_no.align_to(self.btn_yes, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
         self.btn_no.label.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -98,7 +98,7 @@ class WipeDeviceSuccess(FullSizeWindow):
         title = _(i18n_keys.TITLE__RESET_COMPLETE)
         subtitle = _(i18n_keys.SUBTITLE__DEVICE_WIPE_DEVICE_RESET_COMPLETE)
         icon_path = "A:/res/success_icon.png"
-        confirm_text = _(i18n_keys.ACTION__DONE)
+        confirm_text = _(i18n_keys.BUTTON__DONE)
         super().__init__(
             title, subtitle, confirm_text=confirm_text, icon_path=icon_path
         )
