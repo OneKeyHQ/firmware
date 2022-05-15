@@ -988,7 +988,7 @@ if PRODUCTION_MODEL == 'H':
         '$OBJCOPY -O binary -j .flash2 $SOURCE ${TARGET}.p2',
         '$CAT ${TARGET}.p1 ${TARGET}.p2 > $TARGET',
         '$HEADERTOOL -h $TARGET ' + ('-D' if ARGUMENTS.get('PRODUCTION', '0') == '0' else ''),
-        '$DD if=$TARGET of=${TARGET}.p1 skip=0 bs=128k count=13',
+        '$DD if=$TARGET of=${TARGET}.p1 skip=0 bs=128k count=12',
     ]
 
 elif TREZOR_MODEL == 'T':

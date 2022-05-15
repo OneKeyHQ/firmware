@@ -2,10 +2,10 @@
 #define TREZORHAL_QSPI_FLASH_
 
 #define QSPI_FLASH_SIZE 23
-#define QSPI_SECTOR_SIZE (4 * 1024)
+#define QSPI_SECTOR_SIZE (64 * 1024)
 #define QSPI_PAGE_SIZE 256
 #define QSPI_END_ADDR (1 << QSPI_FLASH_SIZE)
-#define QSPI_FLASH_SIZES 8 * 1024 * 1024
+#define QSPI_FLASH_SIZES (8 * 1024 * 1024)
 
 #define WRITE_ENABLE_CMD 0x06
 #define READ_ID_CMD2 0x9F
@@ -20,6 +20,7 @@
 #define QUAD_INOUT_FAST_READ_4_BYTE_ADDR_CMD 0xEB
 
 #define QSPI_FLASH_BASE_ADDRESS (0x90000000)
+#define QSPI_FLASH_STORAG_OFFSET (7 * 1024 * 1024)
 
 typedef struct {
   uint8_t uniq_id[8];

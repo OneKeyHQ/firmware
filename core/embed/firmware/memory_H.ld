@@ -3,7 +3,7 @@
 ENTRY(reset_handler)
 
 MEMORY {
-  FLASH  (rx)  : ORIGIN = 0x08040000, LENGTH = 1664K
+  FLASH  (rx)  : ORIGIN = 0x08060000, LENGTH = 1536K
   FLASH2 (r)   : ORIGIN = 0x90000000, LENGTH = 2048K
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
@@ -44,6 +44,7 @@ SECTIONS {
   } >FLASH AT>FLASH
 
   .flash2 : ALIGN(512) {
+    build/firmware/embed/lvgl/*.o(.rodata*)
     build/firmware/frozen_mpy.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);

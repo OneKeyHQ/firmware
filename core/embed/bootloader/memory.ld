@@ -3,7 +3,7 @@
 ENTRY(reset_handler)
 
 MEMORY {
-  FLASH  (rx)  : ORIGIN = 0x08020000, LENGTH = 128K
+  FLASH  (rx)  : ORIGIN = 0x08020000, LENGTH = 256K
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
 }
@@ -36,6 +36,8 @@ SECTIONS {
     *(.text*);
     . = ALIGN(4);
     *(.rodata*);
+    . = ALIGN(4);
+    *(.ARM.exidx*);
     . = ALIGN(512);
   } >FLASH AT>FLASH
 
