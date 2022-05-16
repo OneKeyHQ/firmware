@@ -39,6 +39,36 @@ PB_BIND(FirmwareRequest, FirmwareRequest, AUTO)
 PB_BIND(FirmwareUpload, FirmwareUpload, AUTO)
 
 
+PB_BIND(DeviceInfoSettings, DeviceInfoSettings, AUTO)
+
+
+PB_BIND(GetDeviceInfo, GetDeviceInfo, AUTO)
+
+
+PB_BIND(DeviceInfo, DeviceInfo, AUTO)
+
+
+PB_BIND(ReadSEPublicKey, ReadSEPublicKey, AUTO)
+
+
+PB_BIND(SEPublicKey, SEPublicKey, AUTO)
+
+
+PB_BIND(WriteSEPublicCert, WriteSEPublicCert, 2)
+
+
+PB_BIND(ReadSEPublicCert, ReadSEPublicCert, AUTO)
+
+
+PB_BIND(SEPublicCert, SEPublicCert, 2)
+
+
+PB_BIND(SESignMessage, SESignMessage, 2)
+
+
+PB_BIND(SEMessageSignature, SEMessageSignature, AUTO)
+
+
 
 
 

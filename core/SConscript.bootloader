@@ -178,11 +178,13 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/atca/atca_hal.c',
     'embed/trezorhal/atca/atca_command.c',
     'embed/trezorhal/atca/atca_api.c',
+    'embed/trezorhal/atca/se_atca.c',
     'embed/trezorhal/trans_fifo.c',
     'embed/trezorhal/spi.c',
     'embed/trezorhal/usart.c',
     'embed/trezorhal/ble.c',
     'embed/trezorhal/sys.c',
+    'embed/trezorhal/device.c',
 ]
 
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0')))

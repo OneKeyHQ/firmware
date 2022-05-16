@@ -16,6 +16,16 @@ enum MessageType {
     MessageType_ButtonRequest = 26;
     MessageType_ButtonAck = 27;
     MessageType_GetFeatures = 55;
+    MessageType_DeviceInfoSettings = 10001;
+    MessageType_GetDeviceInfo = 10002;
+    MessageType_DeviceInfo = 10003;
+    MessageType_ReadSEPublicKey = 10004;
+    MessageType_SEPublicKey = 10005;
+    MessageType_WriteSEPublicCert = 10006;
+    MessageType_ReadSEPublicCert = 10007;
+    MessageType_SEPublicCert = 10008;
+    MessageType_SESignMessage = 10012;
+    MessageType_SEMessageSignature = 10013;
 }
 
 /**
@@ -139,4 +149,92 @@ message FirmwareRequest {
 message FirmwareUpload {
     required bytes payload = 1; // firmware to be loaded into device
     optional bytes hash = 2;    // hash of the payload
+}
+
+
+/**
+ * Request: device information settings
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message DeviceInfoSettings {
+    optional string serial_no = 1;
+    optional string cpu_info = 2;
+    optional string pre_firmware = 3;
+}
+
+/**
+ * Request: Ask for device details (no device reset)
+ * @start
+ * @next Features
+ */
+message GetDeviceInfo {
+}
+
+/**
+ * Response: Reports various information about the device
+ * @end
+ */
+message DeviceInfo {
+    optional string serial_no = 1;
+    optional string spiFlash_info = 2;
+    optional string SE_info = 3;
+    optional bytes NFT_voucher = 4;
+    optional string cpu_info = 5;
+    optional string pre_firmware = 6;
+}
+
+/**
+ * Request: Read SE public key
+ * @end
+ */
+message ReadSEPublicKey {
+}
+
+/**
+ * Response: SE public key
+ * @end
+ */
+message SEPublicKey {
+    required bytes public_key = 1;
+}
+
+/**
+ * Request: Write SE public certificate
+ * @end
+ */
+message WriteSEPublicCert {
+    required bytes public_cert = 1;
+}
+
+/**
+ * Request: Read SE public certificate
+ * @end
+ */
+message ReadSEPublicCert {
+}
+
+/**
+ * Response: SE public certificate
+ * @end
+ */
+message SEPublicCert {
+    required bytes public_cert = 1;
+}
+
+/**
+ * Request:SE sign message
+ * @end
+ */
+message SESignMessage {
+    required bytes message = 1;     // message to be signed
+}
+
+/**
+ * Response: Signed message
+ * @end
+ */
+message SEMessageSignature {
+    required bytes signature = 1;   // signature of the message
 }

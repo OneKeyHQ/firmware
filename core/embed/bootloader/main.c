@@ -73,10 +73,10 @@ static void usb_init_all(secbool usb21_landing) {
       .vendor_id = 0x1209,
       .product_id = 0x53C0,
       .release_num = 0x0200,
-      .manufacturer = "SatoshiLabs",
-      .product = "TREZOR",
+      .manufacturer = "OneKey",
+      .product = "ONEKEY",
       .serial_number = "000000000000000000000000",
-      .interface = "TREZOR Interface",
+      .interface = "ONEKEY Interface",
       .usb21_enabled = sectrue,
       .usb21_landing = usb21_landing,
   };
@@ -219,6 +219,24 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
       case 55:  // GetFeatures
         process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;
+      case 10001:  // DeviceInfoSettings
+        process_msg_DeviceInfoSettings(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 10002:  // GetDeviceInfo
+        process_msg_GetDeviceInfo(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 10004:  // ReadSEPublicKey
+        process_msg_ReadSEPublicKey(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 10006:  // WriteSEPublicCert
+        process_msg_WriteSEPublicCert(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 10007:  // ReadSEPublicCert
+        process_msg_ReadSEPublicCert(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 10012:  // SESignMessage
+        process_msg_SESignMessage(USB_IFACE_NUM, msg_size, buf);
+        break;
       default:
         process_msg_unknown(USB_IFACE_NUM, msg_size, buf);
         break;
@@ -283,13 +301,13 @@ int main(void) {
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   random_delays_init();
 
+  touch_init();
+  touch_power_on();
+
   qspi_flash_init();
   qspi_flash_config();
   qspi_flash_memory_mapped();
 
-  // display_init_seq();
-  touch_init();
-  touch_power_on();
   mpu_config_bootloader();
 
 #if PRODUCTION
@@ -317,10 +335,6 @@ int main(void) {
     }
     hal_delay(1);
   }
-
-  // usb_msc_init();
-  // while (1)
-  //   ;
 
   vendor_header vhdr;
   image_header hdr;
@@ -350,11 +364,9 @@ int main(void) {
   if (firmware_present != sectrue) {
     ui_bootloader_first(&hdr);
     // erase storage
-    ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
-           NULL);
-    // usb_msc_init();
-    // while (1)
-    //   ;
+    // ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
+    //        NULL);
+
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
       return 1;

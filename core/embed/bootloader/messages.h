@@ -48,4 +48,17 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
 void process_msg_unknown(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
 
+void process_msg_DeviceInfoSettings(uint8_t iface_num, uint32_t msg_size,
+                                    uint8_t *buf);
+void process_msg_GetDeviceInfo(uint8_t iface_num, uint32_t msg_size,
+                               uint8_t *buf);
+void process_msg_ReadSEPublicKey(uint8_t iface_num, uint32_t msg_size,
+                                 uint8_t *buf);
+void process_msg_WriteSEPublicCert(uint8_t iface_num, uint32_t msg_size,
+                                   uint8_t *buf);
+void process_msg_ReadSEPublicCert(uint8_t iface_num, uint32_t msg_size,
+                                  uint8_t *buf);
+void process_msg_SESignMessage(uint8_t iface_num, uint32_t msg_size,
+                               uint8_t *buf);
+
 #endif

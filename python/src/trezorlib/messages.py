@@ -255,6 +255,21 @@ class MessageType(IntEnum):
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
+    DeviceInfoSettings = 10001
+    GetDeviceInfo = 10002
+    DeviceInfo = 10003
+    ReadSEPublicKey = 10004
+    SEPublicKey = 10005
+    WriteSEPublicCert = 10006
+    ReadSEPublicCert = 10007
+    SEPublicCert = 10008
+    SpiFlashWrite = 10009
+    SpiFlashRead = 10010
+    SpiFlashData = 10011
+    SESignMessage = 10012
+    SEMessageSignature = 10013
+    NFTWriteInfo = 10014
+    NFTWriteData = 10015
 
 
 class FailureType(IntEnum):
@@ -3722,6 +3737,137 @@ class Nonce(protobuf.MessageType):
         nonce: "bytes",
     ) -> None:
         self.nonce = nonce
+
+
+class DeviceInfoSettings(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10001
+    FIELDS = {
+        1: protobuf.Field("serial_no", "string", repeated=False, required=False),
+        2: protobuf.Field("cpu_info", "string", repeated=False, required=False),
+        3: protobuf.Field("pre_firmware", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        serial_no: Optional["str"] = None,
+        cpu_info: Optional["str"] = None,
+        pre_firmware: Optional["str"] = None,
+    ) -> None:
+        self.serial_no = serial_no
+        self.cpu_info = cpu_info
+        self.pre_firmware = pre_firmware
+
+
+class GetDeviceInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10002
+
+
+class DeviceInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10003
+    FIELDS = {
+        1: protobuf.Field("serial_no", "string", repeated=False, required=False),
+        2: protobuf.Field("spiFlash_info", "string", repeated=False, required=False),
+        3: protobuf.Field("SE_info", "string", repeated=False, required=False),
+        4: protobuf.Field("NFT_voucher", "bytes", repeated=False, required=False),
+        5: protobuf.Field("cpu_info", "string", repeated=False, required=False),
+        6: protobuf.Field("pre_firmware", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        serial_no: Optional["str"] = None,
+        spiFlash_info: Optional["str"] = None,
+        SE_info: Optional["str"] = None,
+        NFT_voucher: Optional["bytes"] = None,
+        cpu_info: Optional["str"] = None,
+        pre_firmware: Optional["str"] = None,
+    ) -> None:
+        self.serial_no = serial_no
+        self.spiFlash_info = spiFlash_info
+        self.SE_info = SE_info
+        self.NFT_voucher = NFT_voucher
+        self.cpu_info = cpu_info
+        self.pre_firmware = pre_firmware
+
+
+class ReadSEPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10004
+
+
+class SEPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10005
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: "bytes",
+    ) -> None:
+        self.public_key = public_key
+
+
+class WriteSEPublicCert(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10006
+    FIELDS = {
+        1: protobuf.Field("public_cert", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_cert: "bytes",
+    ) -> None:
+        self.public_cert = public_cert
+
+
+class ReadSEPublicCert(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10007
+
+
+class SEPublicCert(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10008
+    FIELDS = {
+        1: protobuf.Field("public_cert", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_cert: "bytes",
+    ) -> None:
+        self.public_cert = public_cert
+
+
+class SESignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10012
+    FIELDS = {
+        1: protobuf.Field("message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+    ) -> None:
+        self.message = message
+
+
+class SEMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10013
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class DebugLinkDecision(protobuf.MessageType):

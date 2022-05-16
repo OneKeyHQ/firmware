@@ -2420,6 +2420,136 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["Nonce"]:
             return isinstance(msg, cls)
 
+    class DeviceInfoSettings(protobuf.MessageType):
+        serial_no: "str | None"
+        cpu_info: "str | None"
+        pre_firmware: "str | None"
+
+        def __init__(
+            self,
+            *,
+            serial_no: "str | None" = None,
+            cpu_info: "str | None" = None,
+            pre_firmware: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceInfoSettings"]:
+            return isinstance(msg, cls)
+
+    class GetDeviceInfo(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["GetDeviceInfo"]:
+            return isinstance(msg, cls)
+
+    class DeviceInfo(protobuf.MessageType):
+        serial_no: "str | None"
+        spiFlash_info: "str | None"
+        SE_info: "str | None"
+        NFT_voucher: "bytes | None"
+        cpu_info: "str | None"
+        pre_firmware: "str | None"
+
+        def __init__(
+            self,
+            *,
+            serial_no: "str | None" = None,
+            spiFlash_info: "str | None" = None,
+            SE_info: "str | None" = None,
+            NFT_voucher: "bytes | None" = None,
+            cpu_info: "str | None" = None,
+            pre_firmware: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceInfo"]:
+            return isinstance(msg, cls)
+
+    class ReadSEPublicKey(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ReadSEPublicKey"]:
+            return isinstance(msg, cls)
+
+    class SEPublicKey(protobuf.MessageType):
+        public_key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SEPublicKey"]:
+            return isinstance(msg, cls)
+
+    class WriteSEPublicCert(protobuf.MessageType):
+        public_cert: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_cert: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["WriteSEPublicCert"]:
+            return isinstance(msg, cls)
+
+    class ReadSEPublicCert(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ReadSEPublicCert"]:
+            return isinstance(msg, cls)
+
+    class SEPublicCert(protobuf.MessageType):
+        public_cert: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_cert: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SEPublicCert"]:
+            return isinstance(msg, cls)
+
+    class SESignMessage(protobuf.MessageType):
+        message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SESignMessage"]:
+            return isinstance(msg, cls)
+
+    class SEMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SEMessageSignature"]:
+            return isinstance(msg, cls)
+
     class DebugLinkDecision(protobuf.MessageType):
         button: "DebugButton | None"
         swipe: "DebugSwipeDirection | None"
