@@ -1,4 +1,5 @@
 #include "ff.h"
+#include "lv_font_ex.h"
 #include "lvgl.h"
 
 typedef struct {
@@ -27,7 +28,8 @@ static x_header_t __g_xbf_hd = {
     .bpp = 4,
 };
 
-static uint8_t __g_font_buf[1024] = {0};
+static SRAM1 uint8_t __g_font_buf[1024] = {0};
+static SRAM1 DWORD clmt[SZ_TBL];
 static FIL font_f;
 static FRESULT res;
 static UINT nums = 0;
@@ -37,6 +39,10 @@ static uint8_t *__user_font_getdata(int offset, int size) {
   if (!is_opend) {
     res = f_open(&font_f, "/res/lv_font_scs_bold_32.bin", FA_READ);
     if (FR_OK == res) {
+      font_f.cltbl = clmt; /* Enable fast seek mode (cltbl != NULL) */
+      clmt[0] = SZ_TBL;    /* Set table size */
+      res = f_lseek(&font_f, CREATE_LINKMAP); /* Create CLMT */
+      printf("%s create linkmap ret =%d\n", __FILE__, res);
       is_opend = true;
     } else {
       return NULL;
@@ -75,6 +81,7 @@ static bool __user_font_get_glyph_dsc(const lv_font_t *font,
                                       lv_font_glyph_dsc_t *dsc_out,
                                       uint32_t unicode_letter,
                                       uint32_t unicode_letter_next) {
+  printf("get glyph_dsc\n");
   if (unicode_letter > __g_xbf_hd.max || unicode_letter < __g_xbf_hd.min) {
     return NULL;
   }
