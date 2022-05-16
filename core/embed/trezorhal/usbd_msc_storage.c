@@ -75,7 +75,7 @@ int8_t  STORAGE_Inquirydata[] =  /* 36 */
   0x00,
   'O', 'N', 'E', 'K', 'E', 'Y', ' ', ' ', /* Manufacturer : 8 bytes */
   'T', 'O', 'U', 'C', 'H', '-', 'B', 'O', /* Product      : 16 Bytes */
-  'O', 'T', ' ', ' ', ' ', ' ', ' ', ' ',
+  'A', 'R', 'D', ' ', ' ', ' ', ' ', ' ',
   '0', '.', '0', '1',                     /* Version      : 4 Bytes */
 };
 
@@ -119,7 +119,7 @@ int8_t STORAGE_GetCapacity(uint8_t lun, uint32_t *block_num, uint16_t *block_siz
     *block_num = emmc_card_info.LogBlockNbr - BOOT_EMMC_BLOCKS - 1;
     *block_size = emmc_card_info.LogBlockSize;
   #else
-    *block_num = BOOT_EMMC_BLOCKS;
+    *block_num = emmc_card_info.LogBlockNbr - 1;
     *block_size = emmc_card_info.LogBlockSize;
   #endif
   return (0);

@@ -14,7 +14,7 @@
 #define EMMC_TIMEOUT 500
 #define EMMC_BLOCK_SIZE 512
 
-#define BOOT_EMMC_BLOCKS (1024 * 1024)  // 512MB
+#define BOOT_EMMC_BLOCKS (2 * 1024 * 1024)  // 1GB
 
 void emmc_init();
 uint8_t emmc_get_card_state(void);
