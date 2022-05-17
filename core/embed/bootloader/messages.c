@@ -87,6 +87,7 @@ static bool _usb_write(pb_ostream_t *stream, const pb_byte_t *buf,
         r = usb_webusb_write_blocking(state->iface_num, state->buf,
                                       USB_PACKET_SIZE, USB_TIMEOUT);
       } else {
+        hal_delay(5);
         r = spi_slave_send(state->buf, USB_PACKET_SIZE, USB_TIMEOUT);
       }
       ensure(sectrue * (r == USB_PACKET_SIZE), NULL);
@@ -114,6 +115,7 @@ static void _usb_write_flush(usb_write_state *state) {
     r = usb_webusb_write_blocking(state->iface_num, state->buf, USB_PACKET_SIZE,
                                   USB_TIMEOUT);
   } else {
+    hal_delay(5);
     r = spi_slave_send(state->buf, USB_PACKET_SIZE, USB_TIMEOUT);
   }
   ensure(sectrue * (r == USB_PACKET_SIZE), NULL);
