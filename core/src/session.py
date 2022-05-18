@@ -4,6 +4,14 @@ from trezor.lvglui import lvgl_tick
 import apps.base
 import usb
 
+
+async def hadler_uart():
+    uart = loop.wait(io.UART | io.POLL_READ)
+    while True:
+        data = await uart
+        print(data)
+
+
 apps.base.boot()
 
 if not utils.BITCOIN_ONLY and usb.ENABLE_IFACE_WEBAUTHN:
@@ -22,6 +30,7 @@ apps.base.set_homescreen()
 #     workflow.start_default()
 # else:
 loop.schedule(lvgl_tick())
+loop.schedule(hadler_uart())
 
 # initialize the wire codec
 wire.setup(usb.iface_wire)

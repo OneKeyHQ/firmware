@@ -30,6 +30,7 @@
 #define TOUCH_IFACE (255)
 #define POLL_READ (0x0000)
 #define POLL_WRITE (0x0100)
+#define UART_IFACE (127)
 
 /// package: trezorio.__init__
 
@@ -150,13 +151,15 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
             ret->items[1] = mp_obj_new_bytes(buf, len);
             return mp_const_true;
           }
-        } else if (sectrue == ble_usart_can_read()) {
-          uint8_t buf[64] = {0};
-          int len = ble_usart_read(buf, sizeof(buf));
-          if (len > 0) {
-            ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
-            ret->items[1] = mp_obj_new_bytes(buf, len);
-            return mp_const_true;
+        } else if (iface == UART_IFACE) {
+          if (sectrue == ble_usart_can_read()) {
+            uint8_t buf[64] = {0};
+            int len = ble_usart_read(buf, sizeof(buf));
+            if (len > 0) {
+              ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+              ret->items[1] = mp_obj_new_bytes(buf, len);
+              return mp_const_true;
+            }
           }
         }  // TODO:FIX IT
         else if (iface == SPI_IFACE) {

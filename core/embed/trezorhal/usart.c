@@ -72,10 +72,7 @@ void ble_usart_send(uint8_t *buf, uint32_t len) {
 }
 
 secbool ble_usart_can_read(void) {
-  volatile uint32_t total_len;
-
-  total_len = fifo_lockdata_len(&uart_fifo_in);
-  if (total_len == 0) {
+  if (usart_fifo_len == 0) {
     return secfalse;
   } else {
     return sectrue;
@@ -83,18 +80,12 @@ secbool ble_usart_can_read(void) {
 }
 
 uint32_t ble_usart_read(uint8_t *buf, uint32_t lenth) {
-  volatile uint32_t total_len, len, ret;
+  uint32_t len = 0;
+  len = usart_fifo_len < lenth ? usart_fifo_len : 0;
+  usart_fifo_len = 0;
 
-  if (buf == NULL) return 0;
-
-  total_len = fifo_lockdata_len(&uart_fifo_in);
-  if (total_len == 0) {
-    return 0;
-  }
-
-  len = lenth > total_len ? total_len : lenth;
-  ret = fifo_read_lock(&uart_fifo_in, buf, len);
-  return ret;
+  memcpy(buf, usart_fifo, len);
+  return len;
 }
 
 static uint8_t calXor(uint8_t *buf, uint32_t len) {
@@ -155,9 +146,11 @@ static int usart_rev_package(uint8_t *buf) {
 
 void UART4_IRQHandler(void) {
   if (__HAL_UART_GET_FLAG(huart, UART_FLAG_ORE) != 0) {
+    usart_fifo_len = 0;
     __HAL_UART_CLEAR_FLAG(huart, UART_CLEAR_OREF);
   }
   if (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXFNE) != 0) {
+    usart_fifo_len = 0;
     memset(usart_fifo, 0x00, sizeof(usart_fifo));
     usart_fifo_len = usart_rev_package(usart_fifo);
   }
