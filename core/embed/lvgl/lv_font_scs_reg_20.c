@@ -42,7 +42,6 @@ static uint8_t *__user_font_getdata(int offset, int size) {
       font_f.cltbl = clmt; /* Enable fast seek mode (cltbl != NULL) */
       clmt[0] = SZ_TBL;    /* Set table size */
       res = f_lseek(&font_f, CREATE_LINKMAP); /* Create CLMT */
-      printf("%s create linkmap ret =%d\n", __FILE__, res);
       is_opend = true;
     } else {
       return NULL;

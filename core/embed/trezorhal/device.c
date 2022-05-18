@@ -259,7 +259,7 @@ void device_test(void) {
   }
   char count_str[24] = {0};
   for (int i = 3; i >= 0; i--) {
-    display_bar(0, 80, DISPLAY_RESX, 110, COLOR_BLACK);
+    display_bar(0, 50, DISPLAY_RESX, 80, COLOR_BLACK);
     mini_snprintf(count_str, sizeof(count_str), "Done! Restarting in %d s", i);
     display_text(0, 80, count_str, -1, FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
     hal_delay(1000);

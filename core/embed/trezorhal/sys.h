@@ -1,5 +1,5 @@
-#ifndef _sys_H_
-#define _sys_H_
+#ifndef _SYS_H_
+#define _SYS_H_
 
 #include <stdbool.h>
 #include <stdint.h>

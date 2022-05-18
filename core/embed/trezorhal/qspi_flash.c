@@ -1,5 +1,6 @@
 #include STM32_HAL_H
 #include "qspi_flash.h"
+#include "irq.h"
 
 #include "display.h"
 
@@ -65,7 +66,7 @@ int qspi_flash_init(void) {
     return HAL_ERROR;
   }
 
-  HAL_NVIC_SetPriority(QUADSPI_IRQn, 0x0F, 0);
+  NVIC_SetPriority(QUADSPI_IRQn, IRQ_PRI_QSPI);
   HAL_NVIC_EnableIRQ(QUADSPI_IRQn);
 
   hmdma.Init.Request = MDMA_REQUEST_QUADSPI_FIFO_TH;
@@ -93,7 +94,7 @@ int qspi_flash_init(void) {
 
   HAL_MDMA_Init(&hmdma);
 
-  HAL_NVIC_SetPriority(MDMA_IRQn, 0x0F, 0);
+  NVIC_SetPriority(MDMA_IRQn, IRQ_PRI_DMA);
   HAL_NVIC_EnableIRQ(MDMA_IRQn);
 
   return HAL_OK;

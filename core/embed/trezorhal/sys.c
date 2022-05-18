@@ -1,8 +1,10 @@
-#include "sys.h"
+#include STM32_HAL_H
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include "stm32h7xx_hal.h"
+
+#include "sys.h"
 
 TIM_HandleTypeDef TIM8_Handle;
 

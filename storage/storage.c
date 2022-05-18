@@ -1478,7 +1478,6 @@ secbool storage_change_wipe_code(const uint8_t *pin, size_t pin_len,
 }
 
 void _storage_wipe(void) {
-  printf("storage wipe\n");
   norcow_wipe();
   norcow_active_version = NORCOW_VERSION;
   memzero(authentication_sum, sizeof(authentication_sum));

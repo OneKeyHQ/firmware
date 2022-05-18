@@ -41,6 +41,7 @@
 #include "compiler_traits.h"
 #include "display.h"
 #include "emmc.h"
+#include "ff.h"
 #include "flash.h"
 #include "mpu.h"
 #include "random_delays.h"
@@ -63,6 +64,11 @@
 
 // from util.s
 extern void shutdown_privileged(void);
+
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},
+    {0, 2},
+};
 
 int main(void) {
   SystemCoreClockUpdate();
@@ -246,6 +252,11 @@ void SVC_C_Handler(uint32_t *stack) {
     case SVC_SHUTDOWN:
       shutdown_privileged();
       for (;;)
+        ;
+      break;
+    case SVC_RESET_SYSTEM:
+      HAL_NVIC_SystemReset();
+      while (1)
         ;
       break;
     default:

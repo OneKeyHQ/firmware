@@ -1,9 +1,11 @@
-#include "spi.h"
+#include STM32_HAL_H
+
 #include <stdio.h>
 #include <string.h>
+
 #include "common.h"
-#include "display.h"
-#include "stm32h7xx_hal.h"
+#include "irq.h"
+#include "spi.h"
 #include "timer.h"
 
 SPI_HandleTypeDef spi;
@@ -53,7 +55,6 @@ int32_t wait_spi_tx_event(int32_t timeout) {
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
   if (!fifo_write_no_overflow(&spi_fifo_in, recv_buf, hspi->RxXferSize)) {
-    display_printf("buffer overflow\n");
   }
 
   if (spi_rx_event) {
@@ -127,11 +128,10 @@ int32_t spi_slave_init() {
   spi.Init.Mode = SPI_MODE_SLAVE;
 
   if (HAL_OK != HAL_SPI_Init(&spi)) {
-    display_printf("spi_slave_init failed\n");
     return -1;
   }
 
-  HAL_NVIC_SetPriority(SPI2_IRQn, 0, 0);
+  NVIC_SetPriority(SPI2_IRQn, IRQ_PRI_SPI);
   HAL_NVIC_EnableIRQ(SPI2_IRQn);
 
   memset(recv_buf, 0, SPI_PKG_SIZE);
@@ -139,7 +139,6 @@ int32_t spi_slave_init() {
 
   /* start SPI receive */
   if (HAL_SPI_Receive_IT(&spi, recv_buf, SPI_PKG_SIZE) != HAL_OK) {
-    display_printf("HAL_SPI_Receive_IT failed\n");
     return -1;
   }
 
@@ -154,20 +153,17 @@ int32_t spi_slave_send(uint8_t *buf, uint32_t size, int32_t timeout) {
   SET_COMBUS_LOW();
 
   if (HAL_SPI_Abort_IT(&spi) != HAL_OK) {
-    display_printf("TX: abort failed\n");
     SET_COMBUS_HIGH();
     return -1;
   }
 
   spi_tx_event = 1;
   if (HAL_SPI_Transmit_IT(&spi, buf, msg_size) != HAL_OK) {
-    display_printf("TX: send %d failed\n", (int)msg_size);
     SET_COMBUS_HIGH();
     return -1;
   }
 
   if (wait_spi_tx_event(timeout) != 0) {
-    display_printf("TX: timeout\n");
     SET_COMBUS_HIGH();
     return -1;
   }
@@ -202,7 +198,6 @@ uint32_t spi_read_retry(uint8_t *buf) {
         // only timeout => let's try again
       } else {
         // error
-        hal_delay(2000);
         error_shutdown("Error reading", "from SPI.", "Try to", "reset.");
       }
     }

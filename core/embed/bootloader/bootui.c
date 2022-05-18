@@ -17,9 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include STM32_HAL_H
+
 #include <string.h>
 
 #include "bootui.h"
+#include "device.h"
 #include "display.h"
 #include "icon_cancel.h"
 #include "icon_confirm.h"
@@ -465,6 +468,7 @@ void ui_screen_done(int restart_seconds, secbool full_redraw) {
 #endif
   }
 #if PRODUCTION_MODEL == 'H'
+  display_bar(0, 560, DISPLAY_RESX, 588, COLOR_BL_FG);
   display_text_center(DISPLAY_RESX / 2, 588, str, -1, FONT_NORMAL, COLOR_BL_BG,
                       COLOR_BL_FG);
 #else
@@ -704,8 +708,14 @@ void ui_bootloader_second(const image_header *const hdr) {
   display_text(offset, 352, "SERIAL:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
   // todo
-  display_text(offset, 386, "M101WTL202", -1, FONT_NORMAL, COLOR_BL_BG,
-               COLOR_BL_FG);
+  char *dev_serial;
+  if (device_get_serial(&dev_serial)) {
+    display_text(offset, 386, dev_serial, -1, FONT_NORMAL, COLOR_BL_BG,
+                 COLOR_BL_FG);
+  } else {
+    display_text(offset, 386, "", -1, FONT_NORMAL, COLOR_BL_BG, COLOR_BL_FG);
+  }
+
   display_text(offset, 448, "SE:", -1, FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);
   display_text(offset, 482, "ATECC608A", -1, FONT_NORMAL, COLOR_BL_BG,
                COLOR_BL_FG);
@@ -733,8 +743,7 @@ void ui_bootloader_page_switch(const image_header *const hdr) {
       display_clear();
       ui_bootloader_first(hdr);
     } else if (INPUT_RESTART == response) {
-      display_clear();
-      jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
+      HAL_NVIC_SystemReset();
     }
   }
 }
