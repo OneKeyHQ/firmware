@@ -102,22 +102,26 @@ STATIC mp_obj_t mod_trezorconfig_unlock(mp_obj_t pin, mp_obj_t ext_salt) {
   secbool ret = secfalse;
   // verify se pin first when not in emulator
   bool verified = se_verifyPin(pin_b.buf);
+  ret = storage_unlock(pin_b.buf, pin_b.len, ext_salt_b.buf);
   if (!verified) {
     return mp_const_false;
-  }
-  // when se has pin and storage has not pin, we assume it is a dirty state
-  // and we attempt to reset the pin in sotrage
-  if (se_hasPin() && sectrue != storage_has_pin()) {
-    if (sectrue != storage_change_pin(PIN_EMPTY, PIN_EMPTY_LEN, pin_b.buf,
-                                      pin_b.len, NULL, ext_salt_b.buf)) {
-      return mp_const_false;
-    }
   } else {
-    ret = storage_unlock(pin_b.buf, pin_b.len, ext_salt_b.buf);
-    if (sectrue != ret) {
-      return mp_const_false;
+    // se pin and storage pin not match,update se pin to storage pin
+    if (ret != sectrue) {
+      // when se has pin and storage has not pin, we assume it is a dirty state
+      // and we attempt to reset the pin in sotrage
+      if (sectrue == storage_has_pin()) {
+        _storage_wipe();
+      }
+      if (se_hasPin()) {
+        if (sectrue != storage_change_pin(PIN_EMPTY, PIN_EMPTY_LEN, pin_b.buf,
+                                          pin_b.len, NULL, ext_salt_b.buf)) {
+          return mp_const_false;
+        }
+      }
     }
   }
+
 #endif
 
   return mp_const_true;
@@ -239,11 +243,11 @@ STATIC mp_obj_t mod_trezorconfig_change_pin(size_t n_args,
     return mp_const_false;
   }
 #else
-  if (sectrue != storage_change_pin(oldpin.buf, oldpin.len, newpin.buf,
-                                    newpin.len, old_ext_salt, new_ext_salt)) {
+  if (!se_changePin(oldpin.buf, newpin.buf)) {
     return mp_const_false;
   }
-  if (!se_changePin(oldpin.buf, newpin.buf)) {
+  if (sectrue != storage_change_pin(oldpin.buf, oldpin.len, newpin.buf,
+                                    newpin.len, old_ext_salt, new_ext_salt)) {
     return mp_const_false;
   }
 #endif
