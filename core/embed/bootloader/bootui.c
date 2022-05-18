@@ -459,7 +459,7 @@ void ui_screen_done(int restart_seconds, secbool full_redraw) {
                  sizeof(toi_icon_done), COLOR_BL_FG);
   if (secfalse == full_redraw) {
 #if PRODUCTION_MODEL == 'H'
-    display_bar(0, DISPLAY_RESY - 24 - 18, 240, 23, COLOR_BL_FG);
+    display_bar(0, 560, DISPLAY_RESX, 40, COLOR_BL_FG);
 #else
     display_bar(0, DISPLAY_RESY - 24 - 18, 240, 23, COLOR_BL_BG);
 #endif
