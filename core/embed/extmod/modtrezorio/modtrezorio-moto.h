@@ -51,6 +51,7 @@ STATIC mp_obj_t mod_trezorio_MOTO_make_new(const mp_obj_type_t *type,
 ///     """
 STATIC mp_obj_t mod_trezorio_MOTO_ctrl(mp_obj_t self, mp_obj_t start) {
   uint8_t b = trezor_obj_get_uint8(start);
+  (void)b;
   motor_ctrl(b);
   return mp_const_none;
 }

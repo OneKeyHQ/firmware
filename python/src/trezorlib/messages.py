@@ -263,13 +263,8 @@ class MessageType(IntEnum):
     WriteSEPublicCert = 10006
     ReadSEPublicCert = 10007
     SEPublicCert = 10008
-    SpiFlashWrite = 10009
-    SpiFlashRead = 10010
-    SpiFlashData = 10011
     SESignMessage = 10012
     SEMessageSignature = 10013
-    NFTWriteInfo = 10014
-    NFTWriteData = 10015
 
 
 class FailureType(IntEnum):

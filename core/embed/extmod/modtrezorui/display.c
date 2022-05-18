@@ -58,7 +58,7 @@
 #else
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#ifdef APP_VER
+#if defined APP_VER || defined TREZOR_EMULATOR
 #include "font_roboto_regular_20.h"
 #define FONT_NORMAL_DATA Font_Roboto_Regular_20
 #define FONT_NORMAL_HEIGHT 20

@@ -45,6 +45,7 @@
 #include "flash.h"
 #include "mpu.h"
 #include "random_delays.h"
+#include "usart.h"
 #ifdef SYSTEM_VIEW
 #include "systemview.h"
 #endif
@@ -89,6 +90,8 @@ int main(void) {
 #ifdef SYSTEM_VIEW
   enable_systemview();
 #endif
+
+  ble_usart_init();
 
 #if TREZOR_MODEL == T
 #if PRODUCTION
