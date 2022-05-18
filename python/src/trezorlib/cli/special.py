@@ -350,3 +350,41 @@ def ed25519_cosign(client, address, commitment, globalpubkey, firmware_file):
 
     sig = special.cosign_ed25519(client, address_n, digest, ctr, global_pk, global_R).sig
     click.echo(sig.hex())
+
+
+@click.command()
+@with_client
+@click.option("-s", "--signature", required=True, help="the combined cosi signature")
+@click.option("-p", "--pubkeys", required=True, help="the pubkeys participate the cosigning")
+@click.argument("firmware_file", type=click.File("rb+"))
+def ed25519_insert_sig(client, signature, pubkeys, firmware_file):
+    pubkeys = pubkeys.split(':')
+    signature = bytes.fromhex(signature)
+    firmware_data = firmware_file.read()
+
+    try:
+        fw = firmware_headers.parse_image(firmware_data)
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        magic = firmware_data[:4]
+        raise click.ClickException(
+            "Could not parse file (magic bytes: {!r})".format(magic)
+        ) from e
+    click.echo(fw.format(True))
+
+    sigmask = 0
+    for pk in pubkeys:
+        idx = TOUCHPRO_PUBKEYS.index(pk)
+        sigmask |= 1 << idx
+
+    fw.rehash()
+    fw.insert_signature(signature, sigmask)
+    cosi.verify(signature, fw.digest(), 4, [bytes.fromhex(k) for k in TOUCHPRO_PUBKEYS], sigmask)
+    click.echo(fw.format(True))
+
+    updated_data = fw.dump()
+    firmware_file.seek(0)
+    firmware_file.truncate(0)
+    firmware_file.write(updated_data)

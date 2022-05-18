@@ -355,6 +355,7 @@ cli.add_command(special.ed25519_commit)
 cli.add_command(special.ed25519_combine_keys)
 cli.add_command(special.ed25519_combine_sigs)
 cli.add_command(special.ed25519_cosign)
+cli.add_command(special.ed25519_insert_sig)
 
 #
 # Main
