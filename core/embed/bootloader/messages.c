@@ -747,9 +747,39 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 }
 
 int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
-  // TODO:
 #if PRODUCTION_MODEL == 'H'
-  static const uint8_t sectors[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+  static const uint8_t sectors[] = {
+      FLASH_SECTOR_STORAGE_1,
+      FLASH_SECTOR_STORAGE_2,
+      FLASH_SECTOR_FIRMWARE_START,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      FLASH_SECTOR_FIRMWARE_END,
+      FLASH_SECTOR_FIRMWARE_EXTRA_START,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      FLASH_SECTOR_FIRMWARE_EXTRA_END,
+  };
 #else
   static const uint8_t sectors[] = {
       FLASH_SECTOR_STORAGE_1,
@@ -773,6 +803,11 @@ int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
       22,
       FLASH_SECTOR_FIRMWARE_EXTRA_END,
   };
+#endif
+#if PRODUCTION_MODEL == 'H'
+  se_set_wiping(true);
+  se_reset_storage();
+  se_reset_state();
 #endif
   if (sectrue !=
       flash_erase_sectors(sectors, sizeof(sectors), ui_screen_wipe_progress)) {
