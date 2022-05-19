@@ -182,9 +182,6 @@ secbool check_image_contents(const image_header *const hdr, uint32_t firstskip,
   if (0 == sectors || blocks < 1) {
     return secfalse;
   }
-  BLAKE2S_CTX ctx;
-  uint8_t hash[BLAKE2S_DIGEST_LENGTH];
-  blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
 
   const void *data =
       flash_get_address(sectors[0], firstskip, IMAGE_CHUNK_SIZE - firstskip);
@@ -192,10 +189,22 @@ secbool check_image_contents(const image_header *const hdr, uint32_t firstskip,
     return secfalse;
   }
   int remaining = hdr->codelen;
+  if (remaining <= IMAGE_CHUNK_SIZE - firstskip) {
+    if (sectrue != check_single_hash(hdr->hashes, data,
+                                     MIN(remaining, IMAGE_CHUNK_SIZE))) {
+      return secfalse;
+    } else {
+      return sectrue;
+    }
+  }
+
+  BLAKE2S_CTX ctx;
+  uint8_t hash[BLAKE2S_DIGEST_LENGTH];
+  blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
 
   blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE - firstskip));
   int block = 1;
-  int update_flag = 0;
+  int update_flag = 1;
   remaining -= IMAGE_CHUNK_SIZE - firstskip;
   while (remaining > 0) {
     if (block >= blocks) {

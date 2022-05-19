@@ -3,11 +3,12 @@
 ENTRY(reset_handler)
 
 MEMORY {
-  FLASH  (rx)  : ORIGIN = 0x08040000, LENGTH = 1664K
+  FLASH  (rx)  : ORIGIN = 0x08060000, LENGTH = 1536K
   FLASH2 (r)   : ORIGIN = 0x90000000, LENGTH = 2048K
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
-  /*EXRAM   (wal) : ORIGIN = 0xD0400000, LENGTH = 8092K */
+  SRAM1   (wal) : ORIGIN = 0x30000000, LENGTH = 256K
+  /* EXRAM   (wal) : ORIGIN = 0xD0400000, LENGTH = 8092K */
 }
 
 main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
@@ -44,6 +45,7 @@ SECTIONS {
   } >FLASH AT>FLASH
 
   .flash2 : ALIGN(512) {
+    build/firmware/embed/lvgl/*.o(.rodata*)
     build/firmware/frozen_mpy.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);
@@ -66,6 +68,10 @@ SECTIONS {
     . = ALIGN(512);
   } >SRAM AT>FLASH
 
+  .sram1 : {
+		*(sram1)
+	} >SRAM1
+
   .bss : ALIGN(4) {
     *(.bss*);
     . = ALIGN(4);
@@ -76,6 +82,8 @@ SECTIONS {
   } >SRAM
 
   .heap : ALIGN(4) {
+    PROVIDE ( end = . );
+    PROVIDE ( _end = . );
     . = 512K; /* this acts as a build time assertion that at least this much memory is available for heap use */
     /*. = ABSOLUTE(sram_end - 16K);  this explicitly sets the end of the heap effectively giving the stack at most 16K */
   } >AXIRAM

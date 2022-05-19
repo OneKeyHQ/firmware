@@ -64,6 +64,8 @@
 /// TOUCH_MOVE: int  # event id of touch move event
 /// TOUCH_END: int  # event id of touch end event
 
+/// UART: int  # interface id of the uart events
+
 /// BUTTON: int  # interface id of button events
 /// BUTTON_PRESSED: int  # button down event
 /// BUTTON_RELEASED: int  # button up event
@@ -84,6 +86,8 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_TOUCH_START), MP_ROM_INT((TOUCH_START >> 24) & 0xFFU)},
     {MP_ROM_QSTR(MP_QSTR_TOUCH_MOVE), MP_ROM_INT((TOUCH_MOVE >> 24) & 0xFFU)},
     {MP_ROM_QSTR(MP_QSTR_TOUCH_END), MP_ROM_INT((TOUCH_END >> 24) & 0xFFU)},
+
+    {MP_ROM_QSTR(MP_QSTR_UART), MP_ROM_INT(UART_IFACE)},
 #elif TREZOR_MODEL == 1
     {MP_ROM_QSTR(MP_QSTR_BUTTON), MP_ROM_INT(BUTTON_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_BUTTON_PRESSED),

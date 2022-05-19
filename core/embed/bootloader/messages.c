@@ -26,8 +26,10 @@
 
 #include "blake2s.h"
 #include "common.h"
+#include "device.h"
 #include "flash.h"
 #include "image.h"
+#include "se_atca.h"
 #include "secbool.h"
 #include "usb.h"
 #include "version.h"
@@ -190,6 +192,14 @@ static secbool _send_msg(uint8_t iface_num, uint16_t msg_id,
 #define MSG_SEND_ASSIGN_BYTES(FIELD, VALUE, LEN)                  \
   {                                                               \
     msg_send.has_##FIELD = true;                                  \
+    memzero(msg_send.FIELD.bytes, sizeof(msg_send.FIELD.bytes));  \
+    memcpy(msg_send.FIELD.bytes, VALUE,                           \
+           MIN(LEN, sizeof(msg_send.FIELD.bytes)));               \
+    msg_send.FIELD.size = MIN(LEN, sizeof(msg_send.FIELD.bytes)); \
+  }
+
+#define MSG_SEND_ASSIGN_REQUIRED_BYTES(FIELD, VALUE, LEN)         \
+  {                                                               \
     memzero(msg_send.FIELD.bytes, sizeof(msg_send.FIELD.bytes));  \
     memcpy(msg_send.FIELD.bytes, VALUE,                           \
            MIN(LEN, sizeof(msg_send.FIELD.bytes)));               \
@@ -501,8 +511,8 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
   }
 
   static image_header hdr;
-  secbool is_upgrade = secfalse;
-  secbool is_downgrade_wipe = secfalse;
+  static secbool is_upgrade = secfalse;
+  static secbool is_downgrade_wipe = secfalse;
 
   if (firmware_block == 0) {
     if (headers_offset == 0) {
@@ -737,9 +747,39 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 }
 
 int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
-  // TODO:
 #if PRODUCTION_MODEL == 'H'
-  static const uint8_t sectors[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+  static const uint8_t sectors[] = {
+      FLASH_SECTOR_STORAGE_1,
+      FLASH_SECTOR_STORAGE_2,
+      FLASH_SECTOR_FIRMWARE_START,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      FLASH_SECTOR_FIRMWARE_END,
+      FLASH_SECTOR_FIRMWARE_EXTRA_START,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      FLASH_SECTOR_FIRMWARE_EXTRA_END,
+  };
 #else
   static const uint8_t sectors[] = {
       FLASH_SECTOR_STORAGE_1,
@@ -763,6 +803,11 @@ int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
       22,
       FLASH_SECTOR_FIRMWARE_EXTRA_END,
   };
+#endif
+#if PRODUCTION_MODEL == 'H'
+  se_set_wiping(true);
+  se_reset_storage();
+  se_reset_state();
 #endif
   if (sectrue !=
       flash_erase_sectors(sectors, sizeof(sectors), ui_screen_wipe_progress)) {
@@ -799,4 +844,117 @@ void process_msg_unknown(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
   MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_UnexpectedMessage);
   MSG_SEND_ASSIGN_STRING(message, "Unexpected message");
   MSG_SEND(Failure);
+}
+
+static void send_failure(uint8_t iface_num, FailureType type,
+                         const char *text) {
+  MSG_SEND_INIT(Failure);
+  MSG_SEND_ASSIGN_VALUE(code, type);
+  MSG_SEND_ASSIGN_STRING(message, text);
+  MSG_SEND(Failure);
+}
+
+static void send_success(uint8_t iface_num, const char *text) {
+  MSG_SEND_INIT(Success);
+  MSG_SEND_ASSIGN_STRING(message, text);
+  MSG_SEND(Success);
+}
+
+void process_msg_DeviceInfoSettings(uint8_t iface_num, uint32_t msg_size,
+                                    uint8_t *buf) {
+  MSG_RECV_INIT(DeviceInfoSettings);
+  MSG_RECV(DeviceInfoSettings);
+
+  if (msg_recv.has_serial_no) {
+    if (!device_set_serial((char *)msg_recv.serial_no)) {
+      send_failure(iface_num, FailureType_Failure_ProcessError,
+                   "Set serial failed");
+    } else {
+      send_success(iface_num, "Set applied");
+    }
+  } else {
+    send_failure(iface_num, FailureType_Failure_ProcessError, "serial null");
+  }
+}
+
+void process_msg_GetDeviceInfo(uint8_t iface_num, uint32_t msg_size,
+                               uint8_t *buf) {
+  MSG_RECV_INIT(GetDeviceInfo);
+  MSG_RECV(GetDeviceInfo);
+
+  MSG_SEND_INIT(DeviceInfo);
+
+  char *serial;
+  if (device_get_serial(&serial)) {
+    MSG_SEND_ASSIGN_STRING(serial_no, serial);
+  }
+  MSG_SEND(DeviceInfo);
+}
+
+void process_msg_ReadSEPublicKey(uint8_t iface_num, uint32_t msg_size,
+                                 uint8_t *buf) {
+  uint8_t pubkey[64] = {0};
+  MSG_RECV_INIT(ReadSEPublicKey);
+  MSG_RECV(ReadSEPublicKey);
+
+  MSG_SEND_INIT(SEPublicKey);
+  if (se_get_pubkey(pubkey)) {
+    MSG_SEND_ASSIGN_REQUIRED_BYTES(public_key, pubkey, 64);
+  } else {
+    send_failure(iface_num, FailureType_Failure_ProcessError,
+                 "Get SE pubkey Failed");
+  }
+  MSG_SEND(SEPublicKey);
+}
+
+void process_msg_WriteSEPublicCert(uint8_t iface_num, uint32_t msg_size,
+                                   uint8_t *buf) {
+  MSG_RECV_INIT(WriteSEPublicCert);
+  MSG_RECV(WriteSEPublicCert);
+
+  if (se_write_certificate(msg_recv.public_cert.bytes,
+                           msg_recv.public_cert.size)) {
+    send_success(iface_num, "Write certificate success");
+  } else {
+    send_failure(iface_num, FailureType_Failure_ProcessError,
+                 "Write certificate Failed");
+  }
+}
+
+void process_msg_ReadSEPublicCert(uint8_t iface_num, uint32_t msg_size,
+                                  uint8_t *buf) {
+  MSG_RECV_INIT(ReadSEPublicCert);
+  MSG_RECV(ReadSEPublicCert);
+
+  uint32_t cert_len = 0;
+  uint8_t cert[416] = {0};
+
+  MSG_SEND_INIT(SEPublicCert);
+  if (se_read_certificate(cert, &cert_len)) {
+    MSG_SEND_ASSIGN_REQUIRED_BYTES(public_cert, cert, cert_len);
+  } else {
+    send_failure(iface_num, FailureType_Failure_ProcessError,
+                 "Get certificate failed");
+  }
+
+  MSG_SEND(SEPublicCert);
+}
+
+void process_msg_SESignMessage(uint8_t iface_num, uint32_t msg_size,
+                               uint8_t *buf) {
+  MSG_RECV_INIT(SESignMessage);
+  MSG_RECV(SESignMessage);
+
+  uint8_t sign[64] = {0};
+
+  MSG_SEND_INIT(SEMessageSignature);
+
+  if (se_sign_message((uint8_t *)msg_recv.message.bytes, msg_recv.message.size,
+                      sign)) {
+    MSG_SEND_ASSIGN_REQUIRED_BYTES(signature, sign, 64);
+  } else {
+    send_failure(iface_num, FailureType_Failure_ProcessError, "SE sign failed");
+  }
+
+  MSG_SEND(SEMessageSignature);
 }

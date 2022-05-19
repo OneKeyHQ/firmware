@@ -229,3 +229,13 @@ if not utils.BITCOIN_ONLY:
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
+    DeviceInfoSettings = 10001
+    GetDeviceInfo = 10002
+    DeviceInfo = 10003
+    ReadSEPublicKey = 10004
+    SEPublicKey = 10005
+    WriteSEPublicCert = 10006
+    ReadSEPublicCert = 10007
+    SEPublicCert = 10008
+    SESignMessage = 10012
+    SEMessageSignature = 10013

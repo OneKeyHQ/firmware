@@ -352,4 +352,21 @@ enum MessageType {
     MessageType_WebAuthnCredentials = 801 [(wire_out) = true];
     MessageType_WebAuthnAddResidentCredential = 802 [(wire_in) = true];
     MessageType_WebAuthnRemoveResidentCredential = 803 [(wire_in) = true];
+
+    //onekey
+    MessageType_DeviceInfoSettings = 10001 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_GetDeviceInfo = 10002 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_DeviceInfo = 10003 [(wire_out) = true, (wire_bootloader) = true];
+    MessageType_ReadSEPublicKey = 10004 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_SEPublicKey = 10005 [(wire_out) = true, (wire_bootloader) = true];
+    MessageType_WriteSEPublicCert = 10006 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_ReadSEPublicCert = 10007 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_SEPublicCert = 10008 [(wire_out) = true, (wire_bootloader) = true];
+    // MessageType_SpiFlashWrite = 10009 [deprecated = true];
+    // MessageType_SpiFlashRead = 10010 [deprecated = true];
+    // MessageType_SpiFlashData = 10011 [deprecated = true];
+    MessageType_SESignMessage = 10012 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_SEMessageSignature = 10013 [(wire_out) = true, (wire_bootloader) = true];
+    // MessageType_NFTWriteInfo = 10014 [deprecated = true];
+    // MessageType_NFTWriteData = 10015 [deprecated = true];
 }

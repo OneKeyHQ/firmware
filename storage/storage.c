@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "chacha20poly1305/rfc7539.h"
@@ -1476,7 +1477,7 @@ secbool storage_change_wipe_code(const uint8_t *pin, size_t pin_len,
   return ret;
 }
 
-static void _storage_wipe(void) {
+void _storage_wipe(void) {
   norcow_wipe();
   norcow_active_version = NORCOW_VERSION;
   memzero(authentication_sum, sizeof(authentication_sum));

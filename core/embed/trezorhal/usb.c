@@ -348,24 +348,18 @@ static uint8_t usb_class_setup(USBD_HandleTypeDef *dev,
         if (req->wIndex == USB_WEBUSB_REQ_GET_URL &&
             req->wValue == USB_WEBUSB_LANDING_PAGE) {
           static const char webusb_url[] = {
-              3 + 15,                          // uint8_t bLength
+              3 + 9,                           // uint8_t bLength
               USB_WEBUSB_DESCRIPTOR_TYPE_URL,  // uint8_t bDescriptorType
               USB_WEBUSB_URL_SCHEME_HTTPS,     // uint8_t bScheme
-              't',
-              'r',
+              'o',
+              'n',
               'e',
-              'z',
-              'o',
-              'r',
+              'k',
+              'e',
+              'y',
               '.',
-              'i',
-              'o',
-              '/',
               's',
-              't',
-              'a',
-              'r',
-              't',  // char URL[]
+              'o',  // char URL[]
           };
           wait_random();
           USBD_CtlSendData(dev, UNCONST(webusb_url),

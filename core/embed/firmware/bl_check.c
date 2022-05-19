@@ -23,6 +23,8 @@
 #include "common.h"
 #include "flash.h"
 
+#if PRODUCTION_MODEL == 'H'
+#else
 // symbols from bootloader.bin => bootloader.o
 extern const uint32_t _binary_embed_firmware_bootloader_bin_start;
 extern const uint32_t _binary_embed_firmware_bootloader_bin_size;
@@ -111,3 +113,4 @@ void check_and_replace_bootloader(void) {
   }
   ensure(flash_lock_write(), NULL);
 }
+#endif

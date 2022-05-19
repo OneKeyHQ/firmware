@@ -31,6 +31,9 @@
 
 #define FLASH_TYPEPROGRAM_WORD FLASH_TYPEPROGRAM_FLASHWORD
 
+FlashLockedData *flash_otp_data = (FlashLockedData *)0x081E0000;
+
+#if 0
 static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 2] = {
     [0] = 0x08000000,   // - 0x0801FFFF | 128 KiB
     [1] = 0x08020000,   // - 0x08007FFF | 128 KiB
@@ -51,33 +54,34 @@ static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 2] = {
 #if USE_EXTERN_FLASH
     [16] = 0x08200000,               // last element - not a valid sector
     [17] = QSPI_FLASH_BASE_ADDRESS,  // 128 KiB
-    [18] = QSPI_FLASH_BASE_ADDRESS + 0x20000,                     // 128 KiB
-    [19] = QSPI_FLASH_BASE_ADDRESS + 0x40000,                     // 128 KiB
-    [20] = QSPI_FLASH_BASE_ADDRESS + 0x60000,                     // 128 KiB
-    [21] = QSPI_FLASH_BASE_ADDRESS + 0x80000,                     // 128 KiB
-    [22] = QSPI_FLASH_BASE_ADDRESS + 0xA0000,                     // 128 KiB
-    [23] = QSPI_FLASH_BASE_ADDRESS + 0xC0000,                     // 128 KiB
-    [24] = QSPI_FLASH_BASE_ADDRESS + 0xE0000,                     // 128 KiB
-    [25] = QSPI_FLASH_BASE_ADDRESS + 0x100000,                    // 128 KiB
-    [26] = QSPI_FLASH_BASE_ADDRESS + 0x120000,                    // 128 KiB
-    [27] = QSPI_FLASH_BASE_ADDRESS + 0x140000,                    // 128 KiB
-    [28] = QSPI_FLASH_BASE_ADDRESS + 0x160000,                    // 128 KiB
-    [29] = QSPI_FLASH_BASE_ADDRESS + 0x180000,                    // 128 KiB
-    [30] = QSPI_FLASH_BASE_ADDRESS + 0x1A0000,                    // 128 KiB
-    [31] = QSPI_FLASH_BASE_ADDRESS + 0x1C0000,                    // 128 KiB
-    [32] = QSPI_FLASH_BASE_ADDRESS + 0x1E0000,                    // 128 KiB
-    [33] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET,  // 64 KiB
-    [34] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET +
+    [18] = QSPI_FLASH_BASE_ADDRESS + 0x20000,                   // 128 KiB
+    [19] = QSPI_FLASH_BASE_ADDRESS + 0x40000,                   // 128 KiB
+    [20] = QSPI_FLASH_BASE_ADDRESS + 0x60000,                   // 128 KiB
+    [21] = QSPI_FLASH_BASE_ADDRESS + 0x80000,                   // 128 KiB
+    [22] = QSPI_FLASH_BASE_ADDRESS + 0xA0000,                   // 128 KiB
+    [23] = QSPI_FLASH_BASE_ADDRESS + 0xC0000,                   // 128 KiB
+    [24] = QSPI_FLASH_BASE_ADDRESS + 0xE0000,                   // 128 KiB
+    [25] = QSPI_FLASH_BASE_ADDRESS + 0x100000,                  // 128 KiB
+    [26] = QSPI_FLASH_BASE_ADDRESS + 0x120000,                  // 128 KiB
+    [27] = QSPI_FLASH_BASE_ADDRESS + 0x140000,                  // 128 KiB
+    [28] = QSPI_FLASH_BASE_ADDRESS + 0x160000,                  // 128 KiB
+    [29] = QSPI_FLASH_BASE_ADDRESS + 0x180000,                  // 128 KiB
+    [30] = QSPI_FLASH_BASE_ADDRESS + 0x1A0000,                  // 128 KiB
+    [31] = QSPI_FLASH_BASE_ADDRESS + 0x1C0000,                  // 128 KiB
+    [32] = QSPI_FLASH_BASE_ADDRESS + 0x1E0000,                  // 128 KiB
+    [33] = QSPI_FLASH_BASE_ADDRESS + QSPI_FLASH_STORAG_OFFSET,  // 64 KiB
+    [34] = QSPI_FLASH_BASE_ADDRESS + QSPI_FLASH_STORAG_OFFSET +
            64 * 1024,  //  64 KiB storage sector 2
-    [35] = QSPI_FLASH_BASE_ADDRESS + FLASH_SECTOR_STORAG_OFFSET + 128 * 1024,
+    [35] = QSPI_FLASH_BASE_ADDRESS + QSPI_FLASH_STORAG_OFFSET + 128 * 1024,
 #else
     [16] = 0x08200000,  // last element - not a valid sector
 #endif
 
 };
+#endif
+
 const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT] = {
     FLASH_SECTOR_FIRMWARE_START,
-    3,
     4,
     5,
     6,
@@ -90,6 +94,7 @@ const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT] = {
     13,
     FLASH_SECTOR_FIRMWARE_END,
     FLASH_SECTOR_FIRMWARE_EXTRA_START,
+    17,
     18,
     19,
     20,
@@ -103,7 +108,6 @@ const uint8_t FIRMWARE_SECTORS[FIRMWARE_SECTORS_COUNT] = {
     28,
     29,
     30,
-    31,
     FLASH_SECTOR_FIRMWARE_EXTRA_END};
 #else
 static const uint32_t FLASH_SECTOR_TABLE[FLASH_SECTOR_COUNT + 1] = {
@@ -183,12 +187,32 @@ const void *flash_get_address(uint8_t sector, uint32_t offset, uint32_t size) {
   if (sector >= FLASH_SECTOR_COUNT) {
     return NULL;
   }
-  const uint32_t addr = FLASH_SECTOR_TABLE[sector] + offset;
-  const uint32_t next = FLASH_SECTOR_TABLE[sector + 1];
-  if (addr + size > next) {
-    return NULL;
+  if (sector < FLASH_INNER_COUNT) {
+    if (offset + size > FLASH_FIRMWARE_SECTOR_SIZE) {
+      return NULL;
+    }
+    return (const void *)(0x08000000 + sector * FLASH_FIRMWARE_SECTOR_SIZE +
+                          offset);
+  } else if (sector >= FLASH_SECTOR_FIRMWARE_EXTRA_START &&
+             sector <= FLASH_SECTOR_FIRMWARE_EXTRA_END) {
+    if (offset + size > FLASH_FIRMWARE_SECTOR_SIZE) {
+      return NULL;
+    }
+    return (const void *)(QSPI_FLASH_BASE_ADDRESS +
+                          (sector - FLASH_SECTOR_FIRMWARE_EXTRA_START) *
+                              FLASH_FIRMWARE_SECTOR_SIZE +
+                          offset);
+  } else if (sector >= FLASH_SECTOR_STORAGE_1 &&
+             sector <= FLASH_SECTOR_STORAGE_2) {
+    if (offset + size > FLASH_STORAGE_SECTOR_SIZE) {
+      return NULL;
+    }
+    return (const void *)(QSPI_FLASH_BASE_ADDRESS + QSPI_FLASH_STORAG_OFFSET +
+                          (sector - FLASH_SECTOR_STORAGE_1) *
+                              FLASH_STORAGE_SECTOR_SIZE +
+                          offset);
   }
-  return (const void *)addr;
+  return NULL;
 }
 
 secbool flash_erase_sectors(const uint8_t *sectors, int len,
@@ -199,14 +223,18 @@ secbool flash_erase_sectors(const uint8_t *sectors, int len,
   for (int i = 0; i < len; i++) {
     if (sectors[i] >= FLASH_SECTOR_FIRMWARE_EXTRA_START &&
         sectors[i] <= FLASH_SECTOR_FIRMWARE_EXTRA_END) {
-      qspi_flash_erase_block_64k(FLASH_SECTOR_TABLE[sectors[i]] -
-                                 QSPI_FLASH_BASE_ADDRESS);
-      qspi_flash_erase_block_64k(FLASH_SECTOR_TABLE[sectors[i]] -
-                                 QSPI_FLASH_BASE_ADDRESS + 0x10000);
+      qspi_flash_erase_block_64k(
+          (sectors[i] - FLASH_SECTOR_FIRMWARE_EXTRA_START) * 2 *
+          QSPI_SECTOR_SIZE);
+      qspi_flash_erase_block_64k(
+          (sectors[i] - FLASH_SECTOR_FIRMWARE_EXTRA_START) * 2 *
+              QSPI_SECTOR_SIZE +
+          QSPI_SECTOR_SIZE);
     } else if (sectors[i] >= FLASH_SECTOR_STORAGE_1 &&
                sectors[i] <= FLASH_SECTOR_STORAGE_2) {
-      qspi_flash_erase_block_64k(FLASH_SECTOR_TABLE[sectors[i]] -
-                                 QSPI_FLASH_BASE_ADDRESS);
+      qspi_flash_erase_block_64k((sectors[i] - FLASH_SECTOR_STORAGE_1) *
+                                     QSPI_SECTOR_SIZE +
+                                 QSPI_FLASH_STORAG_OFFSET);
     } else {
       ensure(flash_unlock_write(), NULL);
       FLASH_EraseInitTypeDef EraseInitStruct;
@@ -231,8 +259,13 @@ secbool flash_erase_sectors(const uint8_t *sectors, int len,
     }
 
     // check whether the sector was really deleted (contains only 0xFF)
-    const uint32_t addr_start = FLASH_SECTOR_TABLE[sectors[i]],
-                   addr_end = FLASH_SECTOR_TABLE[sectors[i] + 1];
+    const uint32_t addr_start = (uint32_t)flash_get_address(sectors[i], 0, 0);
+    uint32_t addr_end;
+    if (sectors[i] < FLASH_SECTOR_STORAGE_1) {
+      addr_end = addr_start + FLASH_FIRMWARE_SECTOR_SIZE;
+    } else {
+      addr_end = addr_start + FLASH_STORAGE_SECTOR_SIZE;
+    }
     for (uint32_t addr = addr_start; addr < addr_end; addr += 4) {
       if (*((const uint32_t *)addr) != 0xFFFFFFFF) {
         return secfalse;
@@ -311,7 +344,7 @@ secbool flash_write_words(uint8_t sector, uint32_t offset, uint32_t data[8]) {
       return secfalse;
     }
   }
-  if (sector >= FLASH_SECTOR_BOOTLOADER &&
+  if (sector >= FLASH_SECTOR_BOOTLOADER_1 &&
       sector <= FLASH_SECTOR_OTP_EMULATOR) {
     if (HAL_OK != HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, address,
                                     (uint32_t)&flash_word)) {
@@ -479,8 +512,6 @@ secbool flash_write_word(uint8_t sector, uint32_t offset, uint32_t data) {
 #endif
 
 #if defined(STM32H747xx)
-static FlashLockedData *flash_otp_data =
-    (FlashLockedData *)FLASH_SECTOR_TABLE[15];
 
 void flash_otp_init(void) {
   if (memcmp(flash_otp_data->flag, "erased", strlen("erased")) == 0) {

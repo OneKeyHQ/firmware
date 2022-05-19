@@ -58,14 +58,14 @@
 #else
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#if PRODUCTION_MODEL == 'H'
-#include "font_roboto_regular_24.h"
-#define FONT_NORMAL_DATA Font_Roboto_Regular_24
-#define FONT_NORMAL_HEIGHT 24
-#else
+#if defined APP_VER || defined TREZOR_EMULATOR
 #include "font_roboto_regular_20.h"
 #define FONT_NORMAL_DATA Font_Roboto_Regular_20
 #define FONT_NORMAL_HEIGHT 20
+#else
+#include "font_roboto_regular_24.h"
+#define FONT_NORMAL_DATA Font_Roboto_Regular_24
+#define FONT_NORMAL_HEIGHT 24
 #endif
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE

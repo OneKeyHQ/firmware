@@ -181,7 +181,6 @@ SOURCE_MOD += [
     'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
     'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
     'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
-    'embed/extmod/modtrezorui/font_roboto_regular_24.c',
     'embed/extmod/modtrezorui/modtrezorui.c',
     #'embed/extmod/modtrezorui/qr-code-generator/qrcodegen.c',
     'vendor/micropython/lib/uzlib/adler32.c',
@@ -626,6 +625,7 @@ if PRODUCTION_MODEL == 'H':
             ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
             CPU_MODEL,
             CORE_MODEL,
+            'APP_VER',
             'USE_HAL_DRIVER',
             'LV_LVGL_H_INCLUDE_SIMPLE',
             ('STM32_HAL_H', '"<stm32h7xx.h>"'),
@@ -988,7 +988,7 @@ if PRODUCTION_MODEL == 'H':
         '$OBJCOPY -O binary -j .flash2 $SOURCE ${TARGET}.p2',
         '$CAT ${TARGET}.p1 ${TARGET}.p2 > $TARGET',
         '$HEADERTOOL -h $TARGET ' + ('-D' if ARGUMENTS.get('PRODUCTION', '0') == '0' else ''),
-        '$DD if=$TARGET of=${TARGET}.p1 skip=0 bs=128k count=13',
+        '$DD if=$TARGET of=${TARGET}.p1 skip=0 bs=128k count=12',
     ]
 
 elif TREZOR_MODEL == 'T':

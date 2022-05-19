@@ -10,123 +10,195 @@
 #endif
 
 /* Enum definitions */
-typedef enum _MessageType {
-    MessageType_MessageType_Initialize = 0,
-    MessageType_MessageType_Ping = 1,
-    MessageType_MessageType_Success = 2,
-    MessageType_MessageType_Failure = 3,
-    MessageType_MessageType_FirmwareErase = 6,
-    MessageType_MessageType_FirmwareUpload = 7,
-    MessageType_MessageType_FirmwareRequest = 8,
-    MessageType_MessageType_Features = 17,
-    MessageType_MessageType_ButtonRequest = 26,
-    MessageType_MessageType_ButtonAck = 27,
-    MessageType_MessageType_GetFeatures = 55
+typedef enum _MessageType { 
+    MessageType_MessageType_Initialize = 0, 
+    MessageType_MessageType_Ping = 1, 
+    MessageType_MessageType_Success = 2, 
+    MessageType_MessageType_Failure = 3, 
+    MessageType_MessageType_FirmwareErase = 6, 
+    MessageType_MessageType_FirmwareUpload = 7, 
+    MessageType_MessageType_FirmwareRequest = 8, 
+    MessageType_MessageType_Features = 17, 
+    MessageType_MessageType_ButtonRequest = 26, 
+    MessageType_MessageType_ButtonAck = 27, 
+    MessageType_MessageType_GetFeatures = 55, 
+    MessageType_MessageType_DeviceInfoSettings = 10001, 
+    MessageType_MessageType_GetDeviceInfo = 10002, 
+    MessageType_MessageType_DeviceInfo = 10003, 
+    MessageType_MessageType_ReadSEPublicKey = 10004, 
+    MessageType_MessageType_SEPublicKey = 10005, 
+    MessageType_MessageType_WriteSEPublicCert = 10006, 
+    MessageType_MessageType_ReadSEPublicCert = 10007, 
+    MessageType_MessageType_SEPublicCert = 10008, 
+    MessageType_MessageType_SESignMessage = 10012, 
+    MessageType_MessageType_SEMessageSignature = 10013 
 } MessageType;
 
-typedef enum _FailureType {
-    FailureType_Failure_UnexpectedMessage = 1,
-    FailureType_Failure_DataError = 3,
-    FailureType_Failure_ActionCancelled = 4,
-    FailureType_Failure_ProcessError = 9
+typedef enum _FailureType { 
+    FailureType_Failure_UnexpectedMessage = 1, 
+    FailureType_Failure_DataError = 3, 
+    FailureType_Failure_ActionCancelled = 4, 
+    FailureType_Failure_ProcessError = 9 
 } FailureType;
 
-typedef enum _ButtonRequestType {
-    ButtonRequestType_ButtonRequest_Other = 1
+typedef enum _ButtonRequestType { 
+    ButtonRequestType_ButtonRequest_Other = 1 
 } ButtonRequestType;
 
 /* Struct definitions */
-typedef struct _ButtonAck {
+typedef struct _ButtonAck { 
     char dummy_field;
 } ButtonAck;
 
-typedef struct _GetFeatures {
+typedef struct _GetDeviceInfo { 
+    char dummy_field;
+} GetDeviceInfo;
+
+typedef struct _GetFeatures { 
     char dummy_field;
 } GetFeatures;
 
-typedef struct _Initialize {
+typedef struct _Initialize { 
     char dummy_field;
 } Initialize;
 
-typedef struct _ButtonRequest {
+typedef struct _ReadSEPublicCert { 
+    char dummy_field;
+} ReadSEPublicCert;
+
+typedef struct _ReadSEPublicKey { 
+    char dummy_field;
+} ReadSEPublicKey;
+
+typedef struct _ButtonRequest { 
     bool has_code;
-    ButtonRequestType code;
+    ButtonRequestType code; 
 } ButtonRequest;
 
-typedef struct _Failure {
+typedef PB_BYTES_ARRAY_T(32) DeviceInfo_NFT_voucher_t;
+typedef struct _DeviceInfo { 
+    bool has_serial_no;
+    char serial_no[32]; 
+    bool has_spiFlash_info;
+    char spiFlash_info[16]; 
+    bool has_SE_info;
+    char SE_info[16]; 
+    bool has_NFT_voucher;
+    DeviceInfo_NFT_voucher_t NFT_voucher; 
+    bool has_cpu_info;
+    char cpu_info[16]; 
+    bool has_pre_firmware;
+    char pre_firmware[16]; 
+} DeviceInfo;
+
+typedef struct _DeviceInfoSettings { 
+    bool has_serial_no;
+    char serial_no[32]; 
+    bool has_cpu_info;
+    char cpu_info[16]; 
+    bool has_pre_firmware;
+    char pre_firmware[16]; 
+} DeviceInfoSettings;
+
+typedef struct _Failure { 
     bool has_code;
-    FailureType code;
+    FailureType code; 
     bool has_message;
-    char message[256];
+    char message[256]; 
 } Failure;
 
 typedef PB_BYTES_ARRAY_T(20) Features_revision_t;
-typedef struct _Features {
+typedef struct _Features { 
     bool has_vendor;
-    char vendor[33];
-    uint32_t major_version;
-    uint32_t minor_version;
-    uint32_t patch_version;
+    char vendor[33]; 
+    uint32_t major_version; 
+    uint32_t minor_version; 
+    uint32_t patch_version; 
     bool has_bootloader_mode;
-    bool bootloader_mode;
+    bool bootloader_mode; 
     bool has_device_id;
-    char device_id[25];
+    char device_id[25]; 
     bool has_language;
-    char language[17];
+    char language[17]; 
     bool has_label;
-    char label[33];
+    char label[33]; 
     bool has_initialized;
-    bool initialized;
+    bool initialized; 
     bool has_revision;
-    Features_revision_t revision;
+    Features_revision_t revision; 
     bool has_firmware_present;
-    bool firmware_present;
+    bool firmware_present; 
     bool has_model;
-    char model[17];
+    char model[17]; 
     bool has_fw_major;
-    uint32_t fw_major;
+    uint32_t fw_major; 
     bool has_fw_minor;
-    uint32_t fw_minor;
+    uint32_t fw_minor; 
     bool has_fw_patch;
-    uint32_t fw_patch;
+    uint32_t fw_patch; 
     bool has_fw_vendor;
-    char fw_vendor[256];
+    char fw_vendor[256]; 
 } Features;
 
-typedef struct _FirmwareErase {
+typedef struct _FirmwareErase { 
     bool has_length;
-    uint32_t length;
+    uint32_t length; 
 } FirmwareErase;
 
-typedef struct _FirmwareRequest {
+typedef struct _FirmwareRequest { 
     bool has_offset;
-    uint32_t offset;
+    uint32_t offset; 
     bool has_length;
-    uint32_t length;
+    uint32_t length; 
 } FirmwareRequest;
 
 typedef PB_BYTES_ARRAY_T(32) FirmwareUpload_hash_t;
-typedef struct _FirmwareUpload {
-    pb_callback_t payload;
+typedef struct _FirmwareUpload { 
+    pb_callback_t payload; 
     bool has_hash;
-    FirmwareUpload_hash_t hash;
+    FirmwareUpload_hash_t hash; 
 } FirmwareUpload;
 
-typedef struct _Ping {
+typedef struct _Ping { 
     bool has_message;
-    char message[256];
+    char message[256]; 
 } Ping;
 
-typedef struct _Success {
+typedef PB_BYTES_ARRAY_T(64) SEMessageSignature_signature_t;
+typedef struct _SEMessageSignature { 
+    SEMessageSignature_signature_t signature; 
+} SEMessageSignature;
+
+typedef PB_BYTES_ARRAY_T(416) SEPublicCert_public_cert_t;
+typedef struct _SEPublicCert { 
+    SEPublicCert_public_cert_t public_cert; 
+} SEPublicCert;
+
+typedef PB_BYTES_ARRAY_T(64) SEPublicKey_public_key_t;
+typedef struct _SEPublicKey { 
+    SEPublicKey_public_key_t public_key; 
+} SEPublicKey;
+
+typedef PB_BYTES_ARRAY_T(1024) SESignMessage_message_t;
+typedef struct _SESignMessage { 
+    SESignMessage_message_t message; 
+} SESignMessage;
+
+typedef struct _Success { 
     bool has_message;
-    char message[256];
+    char message[256]; 
 } Success;
+
+typedef PB_BYTES_ARRAY_T(416) WriteSEPublicCert_public_cert_t;
+typedef struct _WriteSEPublicCert { 
+    WriteSEPublicCert_public_cert_t public_cert; 
+} WriteSEPublicCert;
 
 
 /* Helper constants for enums */
 #define _MessageType_MIN MessageType_MessageType_Initialize
-#define _MessageType_MAX MessageType_MessageType_GetFeatures
-#define _MessageType_ARRAYSIZE ((MessageType)(MessageType_MessageType_GetFeatures+1))
+#define _MessageType_MAX MessageType_MessageType_SEMessageSignature
+#define _MessageType_ARRAYSIZE ((MessageType)(MessageType_MessageType_SEMessageSignature+1))
 
 #define _FailureType_MIN FailureType_Failure_UnexpectedMessage
 #define _FailureType_MAX FailureType_Failure_ProcessError
@@ -153,6 +225,16 @@ extern "C" {
 #define FirmwareErase_init_default               {false, 0}
 #define FirmwareRequest_init_default             {false, 0, false, 0}
 #define FirmwareUpload_init_default              {{{NULL}, NULL}, false, {0, {0}}}
+#define DeviceInfoSettings_init_default          {false, "", false, "", false, ""}
+#define GetDeviceInfo_init_default               {0}
+#define DeviceInfo_init_default                  {false, "", false, "", false, "", false, {0, {0}}, false, "", false, ""}
+#define ReadSEPublicKey_init_default             {0}
+#define SEPublicKey_init_default                 {{0, {0}}}
+#define WriteSEPublicCert_init_default           {{0, {0}}}
+#define ReadSEPublicCert_init_default            {0}
+#define SEPublicCert_init_default                {{0, {0}}}
+#define SESignMessage_init_default               {{0, {0}}}
+#define SEMessageSignature_init_default          {{0, {0}}}
 #define Initialize_init_zero                     {0}
 #define GetFeatures_init_zero                    {0}
 #define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, ""}
@@ -164,9 +246,28 @@ extern "C" {
 #define FirmwareErase_init_zero                  {false, 0}
 #define FirmwareRequest_init_zero                {false, 0, false, 0}
 #define FirmwareUpload_init_zero                 {{{NULL}, NULL}, false, {0, {0}}}
+#define DeviceInfoSettings_init_zero             {false, "", false, "", false, ""}
+#define GetDeviceInfo_init_zero                  {0}
+#define DeviceInfo_init_zero                     {false, "", false, "", false, "", false, {0, {0}}, false, "", false, ""}
+#define ReadSEPublicKey_init_zero                {0}
+#define SEPublicKey_init_zero                    {{0, {0}}}
+#define WriteSEPublicCert_init_zero              {{0, {0}}}
+#define ReadSEPublicCert_init_zero               {0}
+#define SEPublicCert_init_zero                   {{0, {0}}}
+#define SESignMessage_init_zero                  {{0, {0}}}
+#define SEMessageSignature_init_zero             {{0, {0}}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define ButtonRequest_code_tag                   1
+#define DeviceInfo_serial_no_tag                 1
+#define DeviceInfo_spiFlash_info_tag             2
+#define DeviceInfo_SE_info_tag                   3
+#define DeviceInfo_NFT_voucher_tag               4
+#define DeviceInfo_cpu_info_tag                  5
+#define DeviceInfo_pre_firmware_tag              6
+#define DeviceInfoSettings_serial_no_tag         1
+#define DeviceInfoSettings_cpu_info_tag          2
+#define DeviceInfoSettings_pre_firmware_tag      3
 #define Failure_code_tag                         1
 #define Failure_message_tag                      2
 #define Features_vendor_tag                      1
@@ -191,7 +292,12 @@ extern "C" {
 #define FirmwareUpload_payload_tag               1
 #define FirmwareUpload_hash_tag                  2
 #define Ping_message_tag                         1
+#define SEMessageSignature_signature_tag         1
+#define SEPublicCert_public_cert_tag             1
+#define SEPublicKey_public_key_tag               1
+#define SESignMessage_message_tag                1
 #define Success_message_tag                      1
+#define WriteSEPublicCert_public_cert_tag        1
 
 /* Struct field encoding specification for nanopb */
 #define Initialize_FIELDLIST(X, a) \
@@ -267,6 +373,63 @@ X(a, STATIC,   OPTIONAL, BYTES,    hash,              2)
 #define FirmwareUpload_CALLBACK pb_default_field_callback
 #define FirmwareUpload_DEFAULT NULL
 
+#define DeviceInfoSettings_FIELDLIST(X, a) \
+X(a, STATIC,   OPTIONAL, STRING,   serial_no,         1) \
+X(a, STATIC,   OPTIONAL, STRING,   cpu_info,          2) \
+X(a, STATIC,   OPTIONAL, STRING,   pre_firmware,      3)
+#define DeviceInfoSettings_CALLBACK NULL
+#define DeviceInfoSettings_DEFAULT NULL
+
+#define GetDeviceInfo_FIELDLIST(X, a) \
+
+#define GetDeviceInfo_CALLBACK NULL
+#define GetDeviceInfo_DEFAULT NULL
+
+#define DeviceInfo_FIELDLIST(X, a) \
+X(a, STATIC,   OPTIONAL, STRING,   serial_no,         1) \
+X(a, STATIC,   OPTIONAL, STRING,   spiFlash_info,     2) \
+X(a, STATIC,   OPTIONAL, STRING,   SE_info,           3) \
+X(a, STATIC,   OPTIONAL, BYTES,    NFT_voucher,       4) \
+X(a, STATIC,   OPTIONAL, STRING,   cpu_info,          5) \
+X(a, STATIC,   OPTIONAL, STRING,   pre_firmware,      6)
+#define DeviceInfo_CALLBACK NULL
+#define DeviceInfo_DEFAULT NULL
+
+#define ReadSEPublicKey_FIELDLIST(X, a) \
+
+#define ReadSEPublicKey_CALLBACK NULL
+#define ReadSEPublicKey_DEFAULT NULL
+
+#define SEPublicKey_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, BYTES,    public_key,        1)
+#define SEPublicKey_CALLBACK NULL
+#define SEPublicKey_DEFAULT NULL
+
+#define WriteSEPublicCert_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, BYTES,    public_cert,       1)
+#define WriteSEPublicCert_CALLBACK NULL
+#define WriteSEPublicCert_DEFAULT NULL
+
+#define ReadSEPublicCert_FIELDLIST(X, a) \
+
+#define ReadSEPublicCert_CALLBACK NULL
+#define ReadSEPublicCert_DEFAULT NULL
+
+#define SEPublicCert_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, BYTES,    public_cert,       1)
+#define SEPublicCert_CALLBACK NULL
+#define SEPublicCert_DEFAULT NULL
+
+#define SESignMessage_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, BYTES,    message,           1)
+#define SESignMessage_CALLBACK NULL
+#define SESignMessage_DEFAULT NULL
+
+#define SEMessageSignature_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, BYTES,    signature,         1)
+#define SEMessageSignature_CALLBACK NULL
+#define SEMessageSignature_DEFAULT NULL
+
 extern const pb_msgdesc_t Initialize_msg;
 extern const pb_msgdesc_t GetFeatures_msg;
 extern const pb_msgdesc_t Features_msg;
@@ -278,6 +441,16 @@ extern const pb_msgdesc_t ButtonAck_msg;
 extern const pb_msgdesc_t FirmwareErase_msg;
 extern const pb_msgdesc_t FirmwareRequest_msg;
 extern const pb_msgdesc_t FirmwareUpload_msg;
+extern const pb_msgdesc_t DeviceInfoSettings_msg;
+extern const pb_msgdesc_t GetDeviceInfo_msg;
+extern const pb_msgdesc_t DeviceInfo_msg;
+extern const pb_msgdesc_t ReadSEPublicKey_msg;
+extern const pb_msgdesc_t SEPublicKey_msg;
+extern const pb_msgdesc_t WriteSEPublicCert_msg;
+extern const pb_msgdesc_t ReadSEPublicCert_msg;
+extern const pb_msgdesc_t SEPublicCert_msg;
+extern const pb_msgdesc_t SESignMessage_msg;
+extern const pb_msgdesc_t SEMessageSignature_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define Initialize_fields &Initialize_msg
@@ -291,19 +464,39 @@ extern const pb_msgdesc_t FirmwareUpload_msg;
 #define FirmwareErase_fields &FirmwareErase_msg
 #define FirmwareRequest_fields &FirmwareRequest_msg
 #define FirmwareUpload_fields &FirmwareUpload_msg
+#define DeviceInfoSettings_fields &DeviceInfoSettings_msg
+#define GetDeviceInfo_fields &GetDeviceInfo_msg
+#define DeviceInfo_fields &DeviceInfo_msg
+#define ReadSEPublicKey_fields &ReadSEPublicKey_msg
+#define SEPublicKey_fields &SEPublicKey_msg
+#define WriteSEPublicCert_fields &WriteSEPublicCert_msg
+#define ReadSEPublicCert_fields &ReadSEPublicCert_msg
+#define SEPublicCert_fields &SEPublicCert_msg
+#define SESignMessage_fields &SESignMessage_msg
+#define SEMessageSignature_fields &SEMessageSignature_msg
 
 /* Maximum encoded size of messages (where known) */
 /* FirmwareUpload_size depends on runtime parameters */
 #define ButtonAck_size                           0
 #define ButtonRequest_size                       2
+#define DeviceInfoSettings_size                  67
+#define DeviceInfo_size                          135
 #define Failure_size                             260
 #define Features_size                            458
 #define FirmwareErase_size                       6
 #define FirmwareRequest_size                     12
+#define GetDeviceInfo_size                       0
 #define GetFeatures_size                         0
 #define Initialize_size                          0
 #define Ping_size                                258
+#define ReadSEPublicCert_size                    0
+#define ReadSEPublicKey_size                     0
+#define SEMessageSignature_size                  66
+#define SEPublicCert_size                        419
+#define SEPublicKey_size                         66
+#define SESignMessage_size                       1027
 #define Success_size                             258
+#define WriteSEPublicCert_size                   419
 
 #ifdef __cplusplus
 } /* extern "C" */

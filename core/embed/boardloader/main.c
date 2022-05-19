@@ -77,10 +77,62 @@ static const uint8_t toi_icon_onekey[] = {
 #include "stm32h7xx_hal.h"
 
 static FATFS fs_instance;
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},
+    {0, 2},
+};
 uint32_t *sdcard_buf = (uint32_t *)0x24000000;
+
+void fatfs_init(void) {
+  FRESULT res;
+  BYTE work[FF_MAX_SS];
+  MKFS_PARM mk_para = {
+      .fmt = FM_FAT32,
+  };
+
+  LBA_t plist[] = {
+      BOOT_EMMC_BLOCKS,
+      100};  // 1G sectors for 1st partition and left all for 2nd partition
+
+  res = f_mount(&fs_instance, "", 1);
+  if (res != FR_OK) {
+    if (res == FR_NO_FILESYSTEM) {
+      res = f_fdisk(0, plist, work); /* Divide physical drive 0 */
+      if (res) {
+        display_printf("f_fdisk error%d\n", res);
+      }
+      res = f_mkfs("0:", &mk_para, work, sizeof(work));
+      if (res) {
+        display_printf("f_mkfs 0 error%d\n", res);
+      }
+      res = f_mkfs("1:", &mk_para, work, sizeof(work));
+      if (res) {
+        display_printf("fatfs Format error");
+      }
+    } else {
+      display_printf("mount err %d\n", res);
+    }
+  }
+}
+
+int fatfs_check_res(void) {
+  FRESULT res;
+  DIR dir;
+  res = f_mount(&fs_instance, "", 1);
+  if (res != FR_OK) {
+    display_printf("fatfs mount error");
+    return 0;
+  }
+  res = f_opendir(&dir, "/res");
+  if (res == FR_OK) {
+    f_unmount("");
+  }
+  return res;
+}
 
 static uint32_t check_sdcard(void) {
   FRESULT res;
+
   res = f_mount(&fs_instance, "", 1);
   if (res != FR_OK) {
     return 0;
@@ -134,15 +186,15 @@ static void progress_callback(int pos, int len) { display_printf("."); }
 static secbool copy_sdcard(uint32_t code_len) {
   display_backlight(255);
 
-  display_printf("Onekey Boardloader\n");
+  display_printf("OneKey Boardloader\n");
   display_printf("==================\n\n");
 
   display_printf("new version bootloader found\n\n");
-  display_printf("applying bootloader in 10 seconds\n\n");
+  display_printf("applying bootloader in 5 seconds\n\n");
   display_printf("touch screen if you want to abort\n\n");
 
   uint32_t touched = 0;
-  for (int i = 10; i >= 0; i--) {
+  for (int i = 5; i >= 0; i--) {
     display_printf("%d ", i);
     hal_delay(1000);
 
@@ -157,38 +209,8 @@ static secbool copy_sdcard(uint32_t code_len) {
 
   // erase all flash (except boardloader)
   static const uint8_t sectors[] = {
-      FLASH_SECTOR_BOOTLOADER,
-      FLASH_SECTOR_FIRMWARE_START,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      FLASH_SECTOR_FIRMWARE_END,
-      FLASH_SECTOR_FIRMWARE_EXTRA_START,
-      18,
-      19,
-      20,
-      21,
-      22,
-      23,
-      24,
-      25,
-      26,
-      27,
-      28,
-      29,
-      30,
-      31,
-      FLASH_SECTOR_FIRMWARE_EXTRA_END,
-      FLASH_SECTOR_STORAGE_1,
-      FLASH_SECTOR_STORAGE_2,
+      FLASH_SECTOR_BOOTLOADER_1,
+      FLASH_SECTOR_BOOTLOADER_2,
   };
 
   if (sectrue !=
@@ -227,19 +249,37 @@ static secbool copy_sdcard(uint32_t code_len) {
       f_close(&fsrc);
       return secfalse;
     }
-    for (int j = 0; j < EMMC_BLOCK_SIZE / (sizeof(uint32_t) * 8); j++) {
-      ensure(flash_write_words(FLASH_SECTOR_BOOTLOADER,
-                               i * EMMC_BLOCK_SIZE + j * (sizeof(uint32_t) * 8),
-                               (uint32_t *)&sdcard_buf[8 * j]),
-             NULL);
+    if (i * EMMC_BLOCK_SIZE < FLASH_FIRMWARE_SECTOR_SIZE) {
+      for (int j = 0; j < EMMC_BLOCK_SIZE / (sizeof(uint32_t) * 8); j++) {
+        ensure(
+            flash_write_words(FLASH_SECTOR_BOOTLOADER_1,
+                              i * EMMC_BLOCK_SIZE + j * (sizeof(uint32_t) * 8),
+                              (uint32_t *)&sdcard_buf[8 * j]),
+            NULL);
+      }
+    } else {
+      for (int j = 0; j < EMMC_BLOCK_SIZE / (sizeof(uint32_t) * 8); j++) {
+        ensure(flash_write_words(
+                   FLASH_SECTOR_BOOTLOADER_2,
+                   (i - FLASH_FIRMWARE_SECTOR_SIZE / EMMC_BLOCK_SIZE) *
+                           EMMC_BLOCK_SIZE +
+                       j * (sizeof(uint32_t) * 8),
+                   (uint32_t *)&sdcard_buf[8 * j]),
+               NULL);
+      }
     }
   }
   f_close(&fsrc);
   ensure(flash_lock_write(), NULL);
 
   display_printf("\ndone\n\n");
-  display_printf("Unplug the device and remove the SD card\n");
+  display_printf("Device will be restart in 3 seconds\n");
 
+  for (int i = 3; i >= 0; i--) {
+    display_printf("%d ", i);
+    hal_delay(1000);
+  }
+  HAL_NVIC_SystemReset();
   return sectrue;
 }
 
@@ -278,38 +318,29 @@ int main(void) {
 
   touch_init();
   emmc_init();
+  fatfs_init();
 
-  FRESULT res;
-  BYTE work[FF_MAX_SS];
-  MKFS_PARM mk_para = {
-      .fmt = FM_FAT32,
-  };
-
-  res = f_mount(&fs_instance, "", 1);
-  if (res != FR_OK) {
-    if (res == FR_NO_FILESYSTEM) {
-      res = f_mkfs("", &mk_para, work, sizeof(work));
-      if (res) {
-        display_printf("fatfs Format error");
-      }
-    } else {
-      display_printf("mount err %d\n", res);
-    }
-  }
-
+  bool stay_in_msc = false;
   uint32_t touched = 0;
-  for (int i = 0; i < 500; i++) {
-    if (touch_num_detected() > 1) {
-      touched = 1;
-      break;
-    }
-    hal_delay(1);
+
+  if (fatfs_check_res() != 0) {
+    stay_in_msc = true;
   }
 
-  if (touched) {
-    display_printf("Onekey Boardloader\n");
+  if (!stay_in_msc) {
+    for (int i = 0; i < 1000; i++) {
+      if (touch_num_detected() > 1) {
+        touched = 1;
+        break;
+      }
+      hal_delay(1);
+    }
+  }
+
+  if (touched || stay_in_msc) {
+    display_printf("OneKey Boardloader\n");
     display_printf("USB Mass Storage Mode\n");
-    display_printf("==================\n\n");
+    display_printf("=====================\n\n");
     usb_msc_init();
     while (1)
       ;
@@ -330,10 +361,12 @@ int main(void) {
          "invalid bootloader header");
 
   const uint8_t sectors[] = {
-      FLASH_SECTOR_BOOTLOADER,
+      FLASH_SECTOR_BOOTLOADER_1,
+      FLASH_SECTOR_BOOTLOADER_2,
   };
-  ensure(check_image_contents(&hdr, IMAGE_HEADER_SIZE, sectors, 1),
-         "invalid bootloader hash");
+  ensure(
+      check_image_contents(&hdr, IMAGE_HEADER_SIZE, sectors, sizeof(sectors)),
+      "invalid bootloader hash");
 
   jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
 

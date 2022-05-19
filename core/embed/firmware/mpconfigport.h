@@ -120,7 +120,7 @@
 #define MICROPY_PY_SYS_EXIT         (0)
 #define MICROPY_PY_SYS_STDFILES     (0)
 #define MICROPY_PY_SYS_STDIO_BUFFER (0)
-#define MICROPY_PY_SYS_PLATFORM     "trezor"
+#define MICROPY_PY_SYS_PLATFORM     "OneKey"
 #define MICROPY_PY_UERRNO           (0)
 #define MICROPY_PY_THREAD           (0)
 #define MICROPY_PY_FSTRINGS         (1)
