@@ -24,8 +24,7 @@
 #define FMC_SDRAM_DEVICE_POWERDOWN_MODE_CMD 0x00000006U
 
 #define FMC_SDRAM_ADDRESS ((uint32_t)0xD0000000)
-#define FMC_SDRAM_ADDRESS_END \
-  ((uint32_t)0xD0000000 + (2 * 1024 * 1024 * 32 / 8))
+#define FMC_SDRAM_ADDRESS_END ((uint32_t)0xD0000000 + (32 * 1024 * 1024))
 
 int sdram_init(void);
 
