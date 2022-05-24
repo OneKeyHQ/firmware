@@ -23,7 +23,11 @@ g_header:
     .byte FIX_VERSION_MINOR          // fix_vminor
     .byte FIX_VERSION_PATCH          // fix_vpatch
     .byte FIX_VERSION_BUILD          // fix_vbuild
-    . = . + 8                        // reserved
+    .byte ONEKEY_VERSION_MAJOR       // onekey_major
+    .byte ONEKEY_VERSION_MINOR       // onekey_minor
+    .byte ONEKEY_VERSION_PATCH       // onekey_patch
+    .byte ONEKEY_VERSION_BUILD       // onekey_build
+    . = . + 4                        // reserved
     . = . + 512                      // hash1 ... hash16
 
 #if TREZOR_MODEL == T

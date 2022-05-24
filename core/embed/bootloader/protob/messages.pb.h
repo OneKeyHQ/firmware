@@ -138,6 +138,11 @@ typedef struct _Features {
     uint32_t fw_patch; 
     bool has_fw_vendor;
     char fw_vendor[256]; 
+    uint32_t onekey_major; 
+    uint32_t onekey_minor; 
+    uint32_t onekey_patch; 
+    bool has_ble_name;
+    char ble_name[5]; 
 } Features;
 
 typedef struct _FirmwareErase { 
@@ -216,7 +221,7 @@ extern "C" {
 /* Initializer values for message structs */
 #define Initialize_init_default                  {0}
 #define GetFeatures_init_default                 {0}
-#define Features_init_default                    {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, ""}
+#define Features_init_default                    {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", 0, 0, 0, false, ""}
 #define Ping_init_default                        {false, ""}
 #define Success_init_default                     {false, ""}
 #define Failure_init_default                     {false, _FailureType_MIN, false, ""}
@@ -237,7 +242,7 @@ extern "C" {
 #define SEMessageSignature_init_default          {{0, {0}}}
 #define Initialize_init_zero                     {0}
 #define GetFeatures_init_zero                    {0}
-#define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, ""}
+#define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", 0, 0, 0, false, ""}
 #define Ping_init_zero                           {false, ""}
 #define Success_init_zero                        {false, ""}
 #define Failure_init_zero                        {false, _FailureType_MIN, false, ""}
@@ -286,6 +291,10 @@ extern "C" {
 #define Features_fw_minor_tag                    23
 #define Features_fw_patch_tag                    24
 #define Features_fw_vendor_tag                   25
+#define Features_onekey_major_tag                27
+#define Features_onekey_minor_tag                28
+#define Features_onekey_patch_tag                29
+#define Features_ble_name_tag                    30
 #define FirmwareErase_length_tag                 1
 #define FirmwareRequest_offset_tag               1
 #define FirmwareRequest_length_tag               2
@@ -326,7 +335,11 @@ X(a, STATIC,   OPTIONAL, STRING,   model,            21) \
 X(a, STATIC,   OPTIONAL, UINT32,   fw_major,         22) \
 X(a, STATIC,   OPTIONAL, UINT32,   fw_minor,         23) \
 X(a, STATIC,   OPTIONAL, UINT32,   fw_patch,         24) \
-X(a, STATIC,   OPTIONAL, STRING,   fw_vendor,        25)
+X(a, STATIC,   OPTIONAL, STRING,   fw_vendor,        25) \
+X(a, STATIC,   REQUIRED, UINT32,   onekey_major,     27) \
+X(a, STATIC,   REQUIRED, UINT32,   onekey_minor,     28) \
+X(a, STATIC,   REQUIRED, UINT32,   onekey_patch,     29) \
+X(a, STATIC,   OPTIONAL, STRING,   ble_name,         30)
 #define Features_CALLBACK NULL
 #define Features_DEFAULT NULL
 
@@ -482,7 +495,7 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 #define DeviceInfoSettings_size                  67
 #define DeviceInfo_size                          135
 #define Failure_size                             260
-#define Features_size                            458
+#define Features_size                            486
 #define FirmwareErase_size                       6
 #define FirmwareRequest_size                     12
 #define GetDeviceInfo_size                       0
