@@ -673,8 +673,8 @@ void ui_bootloader_first(const image_header *const hdr) {
                 sizeof(toi_icon_onekey) - 12);
   display_text_center(DISPLAY_RESX / 2, 277, "Update Mode", -1, FONT_BOLD36,
                       COLOR_BL_BG, COLOR_BL_FG);
-  if (hdr && (hdr->version != 0)) {
-    const char *ver_str = format_ver("%d.%d.%d", (hdr->version));
+  if (hdr && (hdr->onekey_version != 0)) {
+    const char *ver_str = format_ver("%d.%d.%d", (hdr->onekey_version));
     display_text_center(DISPLAY_RESX / 2, 321, ver_str, -1, FONT_NORMAL,
                         COLOR_BL_GRAY, COLOR_BL_FG);
   }
@@ -697,8 +697,8 @@ void ui_bootloader_second(const image_header *const hdr) {
                COLOR_BL_FG);
   display_text(offset, 256, "FIRMWARE:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
-  if (hdr && hdr->version != 0) {
-    ver_str = format_ver("%d.%d.%d by", (hdr->version));
+  if (hdr && hdr->onekey_version != 0) {
+    ver_str = format_ver("%d.%d.%d", (hdr->onekey_version));
     display_text(offset, 290, ver_str, -1, FONT_NORMAL, COLOR_BL_BG,
                  COLOR_BL_FG);
   } else {

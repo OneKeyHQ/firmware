@@ -51,7 +51,8 @@ typedef struct {
   uint32_t codelen;
   uint32_t version;
   uint32_t fix_version;
-  // uint8_t reserved[8];
+  uint32_t onekey_version;
+  // uint8_t reserved[4];
   uint8_t hashes[512];
   // uint8_t reserved[415];
   uint8_t sigmask;

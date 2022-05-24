@@ -72,6 +72,7 @@ secbool load_image_header(const uint8_t *const data, const uint32_t magic,
 
   memcpy(&hdr->version, data + 16, 4);
   memcpy(&hdr->fix_version, data + 20, 4);
+  memcpy(&hdr->onekey_version, data + 24, 4);
 
   memcpy(hdr->hashes, data + 32, 512);
 
