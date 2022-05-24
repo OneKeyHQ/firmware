@@ -45,7 +45,7 @@ SECTIONS {
   } >FLASH AT>FLASH
 
   .flash2 : ALIGN(512) {
-    build/firmware/embed/lvgl/*.o(.rodata*)
+    /* build/firmware/embed/lvgl/*.o(.rodata*) */
     build/firmware/frozen_mpy.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);
