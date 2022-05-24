@@ -21,6 +21,7 @@ class MnemonicDisplay(FullSizeWindow):
             title,
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
             _(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
+            hold_confirm=True,
         )
         self.panel = lv.obj(self)
         self.panel.set_size(440, lv.SIZE.CONTENT)

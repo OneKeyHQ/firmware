@@ -79,6 +79,30 @@ def set_version(version: bytes) -> None:
     common.set(_NAMESPACE, _VERSION, version)
 
 
+def get_firmware_version() -> str | None:
+    return "0.1.0"
+
+
+def get_storage() -> str:
+    # TODO:
+    return "16 GB"
+
+
+def get_ble_mac() -> str:
+    # TODO:
+    return "T2170"
+
+
+def get_model() -> str:
+    # TODO:
+    return "OneKey Touch"
+
+
+def get_serial() -> str:
+    # TODO:
+    return "FK1W2Y84JCDR"
+
+
 def is_initialized() -> bool:
     if utils.EMULATOR:
         return common.get_bool(_NAMESPACE, INITIALIZED, public=True)
@@ -127,8 +151,6 @@ def set_label(label: str) -> None:
 
 
 def get_language() -> str:
-    if not is_initialized():  # check if initialized
-        return "en"
     lang = common.get(_NAMESPACE, _LANGUAGE, True)  # public
     if lang is None:
         return "en"

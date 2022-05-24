@@ -1,3 +1,4 @@
+from trezor import utils
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from .common import FullSizeWindow, lv
@@ -47,9 +48,8 @@ class WipeDeviceTips(FullSizeWindow):
             lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
-        self.add_event_cb(
-            self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.LONG_PRESSED, None
-        )
+        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        self.add_event_cb(self.eventhandler, lv.EVENT.LONG_PRESSED, None)
         self.cb_cnt = 0
 
     def btn_enable(self, enable: bool = True):
@@ -80,17 +80,19 @@ class WipeDeviceTips(FullSizeWindow):
                 self.btn_enable()
             elif self.cb_cnt < 2:
                 self.btn_enable(False)
+            return
         elif code == lv.EVENT.CLICKED:
             if target == self.btn_no:
                 self.channel.publish(0)
             elif target == self.btn_yes:
-                self.channel.publish(1)
-            self.destory()
+                if utils.EMULATOR:
+                    self.channel.publish(1)
+                else:
+                    return
         elif code == lv.EVENT.LONG_PRESSED:
-            if __debug__:
-                print("long pressed")
             if target == self.btn_yes:
                 self.channel.publish(1)
+        self.destory()
 
 
 class WipeDeviceSuccess(FullSizeWindow):

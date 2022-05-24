@@ -20,7 +20,6 @@ class ImgBottonGridItem(lv.imgbtn):
         self.set_grid_cell(
             lv.GRID_ALIGN.STRETCH, col_num, 1, lv.GRID_ALIGN.STRETCH, row_num, 1
         )
-        self.set_src(lv.imgbtn.STATE.RELEASED, None, None, None)
         self.set_style_bg_img_src(bg_img_path, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.check = lv.img(self)
         self.check.set_src(img_path_other)

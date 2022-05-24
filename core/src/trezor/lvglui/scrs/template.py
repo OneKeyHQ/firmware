@@ -95,7 +95,11 @@ class TransactionDetailsETH(FullSizeWindow):
         total_amount=None,
     ):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__HOLD_TO_SIGN), _(i18n_keys.BUTTON__REJECT)
+            title,
+            None,
+            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__REJECT),
+            hold_confirm=True,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(
@@ -130,7 +134,7 @@ class TransactionDetailsETH(FullSizeWindow):
         self.item6 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
-        self.container.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_style_max_height(350, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
@@ -140,8 +144,12 @@ class ContractDataOverview(FullSizeWindow):
             title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
-        self.item1 = DisplayItem(self.container, "SIZE:", description)
-        self.item2 = DisplayItem(self.container, "DATA:", data)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__SIZE__COLON), description
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__DATA__COLON), data
+        )
         self.item2.set_style_max_height(300, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.item2.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
@@ -174,7 +182,7 @@ class ConfirmMetaData(FullSizeWindow):
         )
         if description:
             self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 48))
-            self.item1 = DisplayItem(self.container, description, data)
+            self.item1 = DisplayItem(self.container, description + ":", data)
             self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
             self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
@@ -182,7 +190,11 @@ class ConfirmMetaData(FullSizeWindow):
 class TransactionDetailsBTC(FullSizeWindow):
     def __init__(self, title: str, amount: str, fee: str, total: str):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__HOLD_TO_SIGN), _(i18n_keys.BUTTON__REJECT)
+            title,
+            None,
+            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__REJECT),
+            hold_confirm=True,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(
@@ -192,43 +204,51 @@ class TransactionDetailsBTC(FullSizeWindow):
         self.item3 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total
         )
+        self.container.set_style_max_height(350, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
 class JointTransactionDetailsBTC(FullSizeWindow):
     def __init__(self, title: str, amount: str, total: str):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__HOLD_TO_SIGN), _(i18n_keys.BUTTON__REJECT)
+            title,
+            None,
+            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__REJECT),
+            hold_confirm=True,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
-        # TODO: i18n missing
-        self.item1 = DisplayItem(self.container, "AMOUNT(YOU SPEND):", amount)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT_YOU_SPEND__COLON), amount
+        )
         self.item3 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total
         )
+        self.container.set_style_max_height(350, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
 class ModifyFee(FullSizeWindow):
     def __init__(self, description: str, fee_change: str, fee_new: str):
-        # TODO: i18n missing
         super().__init__(
-            "Modify Fee",
+            _(i18n_keys.TITLE__MODIFY_FEE),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(self.container, description, fee_change)
-        # TODO: i18n missing
-        self.item2 = DisplayItem(self.container, "NEW FEE:", fee_new)
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__NEW_FEE__COLON), fee_new
+        )
 
 
 class ModifyOutput(FullSizeWindow):
     def __init__(
         self, address: str, description: str, amount_change: str, amount_new: str
     ):
-        # TODO: i18n missing
         super().__init__(
-            "Modify Amount",
+            _(i18n_keys.TITLE__MODIFY_AMOUNT),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
@@ -238,8 +258,9 @@ class ModifyOutput(FullSizeWindow):
             self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
         )
         self.item2 = DisplayItem(self.container, description, amount_change)
-        # TODO: i18n missing
-        self.item3 = DisplayItem(self.container, "NEW AMOUNT:", amount_new)
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__NEW_AMOUNT__COLON), amount_new
+        )
 
 
 class ConfirmReplacement(FullSizeWindow):
@@ -248,8 +269,9 @@ class ConfirmReplacement(FullSizeWindow):
             title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
-        # TODO: i18n missing
-        self.item1 = DisplayItem(self.container, "TRANSACTION ID:", txid)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TRANSACTION_ID__COLON), txid
+        )
         # self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         # self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
@@ -261,6 +283,7 @@ class ConfirmPaymentRequest(FullSizeWindow):
             subtitle,
             _(i18n_keys.BUTTON__HOLD_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
+            hold_confirm=True,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(
@@ -269,6 +292,8 @@ class ConfirmPaymentRequest(FullSizeWindow):
         self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
+        self.container.set_style_max_height(350, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
 class ConfirmDecredSstxSubmission(FullSizeWindow):
@@ -293,11 +318,16 @@ class ConfirmCoinJoin(FullSizeWindow):
             title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
-        # TODO: i18n missing
-        self.item1 = DisplayItem(self.container, "COIN NAME:", coin_name)
-        self.item2 = DisplayItem(self.container, "MAXIMUM ROUNDS:", max_rounds)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__COIN_NAME__COLON), coin_name
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_ROUNDS__COLON), max_rounds
+        )
         self.item3 = DisplayItem(
-            self.container, "MAXIMUM MINING FEE:", max_fee_per_vbyte
+            self.container,
+            _(i18n_keys.LIST_KEY__MAXIMUM_MINING_FEE__COLON),
+            max_fee_per_vbyte,
         )
 
 
@@ -308,8 +338,9 @@ class ConfirmSignIdentity(FullSizeWindow):
         )
         align_base = self.title if subtitle is None else self.subtitle
         self.container = ContainerFlexCol(self, align_base, pos=(0, 48))
-        # TODO: i18n missing
-        self.item1 = DisplayItem(self.container, "IDENTITY:", identity)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__IDENTITY__COLON), identity
+        )
 
 
 class ConfirmProperties(FullSizeWindow):
@@ -319,19 +350,19 @@ class ConfirmProperties(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         for key, value in properties:
-            self.item = DisplayItem(self.container, f"{key.upper()}:", value)
+            self.item = DisplayItem(self.container, f"{key.upper()}", value)
         self.container.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
 class ConfirmTransferBinance(FullSizeWindow):
     def __init__(self, items: list[tuple[str, str, str]]):
-        # TODO: i18n missing
         super().__init__(
-            "Confirm Transfer",
+            _(i18n_keys.TITLE__CONFIRM_TRANSFER),
             None,
             _(i18n_keys.BUTTON__HOLD_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
+            hold_confirm=True,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         for key, value, address in items:
@@ -342,5 +373,5 @@ class ConfirmTransferBinance(FullSizeWindow):
             self.item3 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__TO__COLON), address
             )
-        self.container.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_style_max_height(350, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
