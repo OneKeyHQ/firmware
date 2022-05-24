@@ -46,7 +46,9 @@ async def process_push() -> None:
     elif cmd == _CMD_BLE_PAIR_CODE:
         # show six bytes pair code as string
         global SCREEN
-        pair_codes = "".join(map(lambda c: str(c), ustruct.unpack(">BBBBBB", value)))
+        pair_codes = "".join(
+            list(map(lambda c: chr(c), ustruct.unpack(">BBBBBB", value)))
+        )
         from trezor.lvglui.scrs.ble import PairCodeDisplay
 
         SCREEN = PairCodeDisplay(pair_codes)

@@ -198,28 +198,6 @@ ALLOW_WHILE_LOCKED = (
     MessageType.WipeDevice,
 )
 
-# if not utils.LVGL_UI:
-
-#     def set_homescreen() -> None:
-#         import storage.recovery
-
-#         if not config.is_unlocked():
-#             from apps.homescreen.lockscreen import lockscreen
-
-#             workflow.set_default(lockscreen)
-
-#         elif storage.recovery.is_in_progress():
-#             from apps.management.recovery_device.homescreen import recovery_homescreen
-
-#             workflow.set_default(recovery_homescreen)
-
-#         else:
-#             from apps.homescreen.homescreen import homescreen
-
-#             workflow.set_default(homescreen)
-
-# else:
-
 
 def set_homescreen() -> None:
     if storage.device.is_initialized():
@@ -268,6 +246,17 @@ def lock_device() -> None:
 
 
 def lock_device_if_unlocked() -> None:
+    from trezor.lvglui import get_elapsed
+
+    auto_lock_time = storage.device.get_autolock_delay_ms()
+    elapsed = get_elapsed()
+    diff = auto_lock_time - elapsed
+    # when elapsed is very close to auto_lock_time (e.g. < 10ms), lock device directly
+    # else check again some time later
+    if elapsed < auto_lock_time and diff > 10 * 1000:
+        # check again after `diff` ms, here we plus 5s to avoid needless check(`elapsed` is not so accurate)
+        workflow.idle_timer.set(diff + 5 * 1000, lock_device_if_unlocked)
+        return
     if config.is_unlocked():
         lock_device()
 
@@ -283,7 +272,8 @@ async def unlock_device(ctx: wire.GenericContext = wire.DUMMY_CONTEXT) -> None:
     if not config.is_unlocked():
         # verify_user_pin will raise if the PIN was invalid
         await verify_user_pin(ctx)
-
+    # reset the idle_timer
+    reload_settings_from_storage()
     set_homescreen()
     wire.find_handler = workflow_handlers.find_registered_handler
 

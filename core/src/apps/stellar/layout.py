@@ -44,11 +44,12 @@ async def require_confirm_init(
             ctx,
             "confirm_init_network",
             title="Confirm network",
-            content="Transaction is on {}",
+            content="Transaction is on",
             param=network,
             icon=ui.ICON_CONFIRM,
             br_code=ButtonRequestType.ConfirmOutput,
             hide_continue=True,
+            description="NETWORK",
         )
 
 
@@ -108,10 +109,11 @@ async def require_confirm_final(ctx: Context, fee: int, num_operations: int) -> 
         ctx,
         "confirm_final",
         title="Final confirm",
-        content="Sign this transaction made up of " + op_str + " and pay {}\nfor fee?",
+        content="Sign this transaction made up of " + op_str,
         param=format_amount(fee),
         hide_continue=True,
         hold=True,
+        description="INCLUDE FEE",
     )
 
 

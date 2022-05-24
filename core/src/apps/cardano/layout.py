@@ -372,7 +372,7 @@ async def show_warning_tx_output_contains_tokens(ctx: wire.Context) -> None:
         ctx,
         "confirm_tokens",
         title="Confirm transaction",
-        content="The following\ntransaction output\ncontains tokens.",
+        content="The following transaction output contains tokens.",
         larger_vspace=True,
         br_code=ButtonRequestType.Other,
     )

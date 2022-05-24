@@ -67,7 +67,7 @@ async def _request_on_host(ctx: wire.Context) -> str:
         await confirm_action(
             ctx,
             "passphrase_host2",
-            title="Use This Passphrase?",
+            title=_(i18n_keys.TITLE__USE_THIS_PASSPHRASE),
             description=ack.passphrase,
             icon=None,
         )

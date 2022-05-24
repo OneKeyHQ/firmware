@@ -203,7 +203,7 @@ async def confirm_feeoverthreshold(
         "The fee is unexpectedly high.",
         fee_amount,
         ButtonRequestType.FeeOverThreshold,
-        description="FEE:",
+        description="FEE",
     )
 
 
@@ -214,10 +214,10 @@ async def confirm_change_count_over_threshold(
         ctx,
         "change_count_over_threshold",
         "Warning",
-        "There are too many change-outputs.\n",
+        "There are too many change-outputs.",
         str(change_count),
         ButtonRequestType.SignTx,
-        description="CHANGE COUNT:",
+        description="CHANGE COUNT",
     )
 
 
@@ -233,12 +233,12 @@ async def confirm_nondefault_locktime(
         title = "Confirm locktime"
         text = "Locktime for this transaction is set to blockheight"
         param = str(lock_time)
-        description = "BLOCK HEIGHT:"
+        description = "BLOCK HEIGHT"
     else:
         title = "Confirm locktime"
         text = "Locktime for this transaction is set to"
         param = format_timestamp(lock_time)
-        description = "TIME:"
+        description = "TIME"
 
     await layouts.confirm_metadata(
         ctx,
