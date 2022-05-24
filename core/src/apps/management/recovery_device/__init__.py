@@ -90,39 +90,20 @@ def _validate(msg: RecoveryDevice) -> None:
                 raise wire.ProcessError(f"Forbidden field set in dry-run: {key}")
 
 
-if not utils.LVGL_UI:
-
-    async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
-        if not msg.dry_run:
-            await confirm_reset_device(
-                ctx, "Do you really want to\nrecover a wallet?", recovery=True
-            )
-        else:
-            await confirm_action(
-                ctx,
-                "confirm_seedcheck",
-                title="Seed check",
-                description="Do you really want to check the recovery seed?",
-                icon=ui.ICON_RECOVERY,
-                br_code=ButtonRequestType.ProtectCall,
-            )
-
-else:
-
-    async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
-        if not msg.dry_run:
-            await confirm_reset_device(
-                ctx, _(i18n_keys.SUBTITLE__DEVICE_RECOVER_RESTORE_WALLET), recovery=True
-            )
-        else:
-            await confirm_action(
-                ctx,
-                "confirm_seedcheck",
-                title=_(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE),
-                description=_(
-                    i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_CHECK_RECOVERY_PHRASE
-                ),
-                verb=_(i18n_keys.BUTTON__CONTINUE),
-                icon="A:/res/shield_search.png",
-                br_code=ButtonRequestType.ProtectCall,
-            )
+async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
+    if not msg.dry_run:
+        await confirm_reset_device(
+            ctx, _(i18n_keys.SUBTITLE__DEVICE_RECOVER_RESTORE_WALLET), recovery=True
+        )
+    else:
+        await confirm_action(
+            ctx,
+            "confirm_seedcheck",
+            title=_(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE),
+            description=_(
+                i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_CHECK_RECOVERY_PHRASE
+            ),
+            verb=_(i18n_keys.BUTTON__CONTINUE),
+            icon="A:/res/shield_search.png",
+            br_code=ButtonRequestType.ProtectCall,
+        )

@@ -38,8 +38,7 @@ def require_confirm_tx(
     if to_bytes:
         to_str = address_from_bytes(to_bytes, networks.by_chain_id(chain_id))
     else:
-        # TODO: i18n missing
-        to_str = "new contract?"
+        to_str = _(i18n_keys.LIST_VALUE__NEW_CONTRACT)
     return confirm_output(
         ctx,
         address=to_str,
@@ -128,20 +127,19 @@ def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitabl
         ctx,
         "confirm_data",
         title=_(i18n_keys.TITLE__VIEW_DATA),
-        description=f"{data_total} bytes",
+        description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_total),
         data=data,
         br_code=ButtonRequestType.SignTx,
     )
 
 
 async def confirm_typed_data_final(ctx: Context) -> None:
-    # TODO: i18n missing
     await confirm_action(
         ctx,
         "confirm_typed_data_final",
-        title="Confirm typed data",
-        action="Really sign EIP-712 typed data?",
-        verb="Hold to confirm",
+        title=_(i18n_keys.TITLE__CONFIRM_TYPED_DATA),
+        action=_(i18n_keys.SUBTITLE__REALLY_SIGN_EIP_712_TYPED_DATA),
+        verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
         hold=True,
     )
 
@@ -150,9 +148,9 @@ def confirm_empty_typed_message(ctx: Context) -> Awaitable[None]:
     return confirm_text(
         ctx,
         "confirm_empty_typed_message",
-        title="Confirm message",
+        title=_(i18n_keys.TITLE__CONFIRM_MESSAGE),
         data="",
-        description="No message field",
+        description=_(i18n_keys.SUBTITLE__NO_MESSAGE_FIELD),
     )
 
 

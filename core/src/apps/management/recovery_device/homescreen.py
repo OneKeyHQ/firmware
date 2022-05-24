@@ -150,6 +150,7 @@ async def _finish_recovery(
         "success_recovery",
         _(i18n_keys.SUBTITLE__DEVICE_RECOVER_WALLET_IS_READY),
         header=_(i18n_keys.TITLE__WALLET_IS_READY),
+        button=_(i18n_keys.BUTTON__DONE),
     )
     set_homescreen()
     return Success(message="Device recovered")

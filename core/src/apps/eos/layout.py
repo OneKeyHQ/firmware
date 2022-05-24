@@ -9,6 +9,7 @@ async def require_get_public_key(ctx: wire.Context, public_key: str) -> None:
 
 
 async def require_sign_tx(ctx: wire.Context, num_actions: int) -> None:
+    # TODO: i18n missing
     await confirm_action(
         ctx,
         "confirm_tx",

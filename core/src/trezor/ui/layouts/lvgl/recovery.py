@@ -20,11 +20,12 @@ async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
     if dry_run:
         title = "Check Recovery Phrase"
     else:
-        title = "Import Wallet"
-    subtitle = "Number of words?"
+        title = _(i18n_keys.TITLE__READY_TO_RESTORE)
+    subtitle = _(i18n_keys.SUBTITLE__DEVICE_RECOVER_READY_TO_RESTORE)
     screen = FullSizeWindow(
-        title, subtitle, confirm_text="Continue", options="12\n18\n24"
+        title, subtitle, confirm_text=_(i18n_keys.BUTTON__CONTINUE), options="12\n18\n24"
     )
+    screen.roller.set_selected(0, 0)
     count = await ctx.wait(screen.request())
     # WordSelector can return int, or string if the value came from debuglink
     # ctx.wait has a return type Any
@@ -36,7 +37,7 @@ async def request_word(
     ctx: wire.GenericContext, word_index: int, word_count: int, is_slip39: bool
 ) -> str:
     assert is_slip39 is False
-    title = f"Enter word #{word_index + 1} of {word_count}"
+    title = _(i18n_keys.TITLE__ENTER_WORD_STR).format(word_index + 1)
     screen = WordEnter(title)
     word: str = await ctx.wait(screen.request())
     return word

@@ -1,3 +1,4 @@
+# fmt: off
 # Continue
 BUTTON__CONTINUE = 0
 # Select Language
@@ -263,11 +264,11 @@ LIST_KEY__PRIORITY_FEE_PER_GAS__COLON = 123
 LIST_KEY__CONTRACT__COLON = 124
 # Unknown Token
 TITLE__UNKNOWN_TOKEN = 125
-# {} Address (Taproot)
+# {} Address\n(Taproot)
 TITLE__STR_ADDRESS_TAPROOT = 126
-# {} Address (Legacy Segwit)
+# {} Address\n(Legacy Segwit)
 TITLE__STR_ADDRESS_LEGACY_SEGWIT = 127
-# {} Address (Segwit)
+# {} Address\n(Segwit)
 TITLE__STR_ADDRESS_SEGWIT = 128
 # Path "{}" is unknown. Are you sure?
 SUBTITLE__BTC_GET_ADDRESS_UNKNOWN_PATH = 129
@@ -462,9 +463,7 @@ TITLE__SAFETY_OVERRIDE = 215
 SUBTITLE__ONEKEY_WILL_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE = 216
 # OneKey will temporarily allow you to approve some actions which might be uns
 # afe.
-SUBTITLE__ONEKEY_WILL_TEMPORARILY_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE = (
-    217
-)
+SUBTITLE__ONEKEY_WILL_TEMPORARILY_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE = 217
 # Safety checks
 TITLE__SAFETY_CHECKS = 218
 # Do you really want to enforce strict safety checks (recommended)?
@@ -473,3 +472,48 @@ SUBTITLE__DO_YOU_REALLY_WANT_TO_ENFORCE_STRICT_SAFETY_CHECKS_RECOMMENDED = 219
 TITLE__EXPERIMENTAL_MODE = 220
 # Enable experimental features?
 SUBTITLE__ENABLE_EXPERIMENTAL_FEATURES = 221
+# Please Wait
+TITLE__PLEASE_WAIT = 222
+# new contract?
+LIST_VALUE__NEW_CONTRACT = 223
+# Confirm Fee
+TITLE__CONFIRM_FEE = 224
+# Confirm Data
+TITLE__CONFIRM_DATA = 225
+# {} bytes
+SUBTITLE__STR_BYTES = 226
+# Confirm Typed Data
+TITLE__CONFIRM_TYPED_DATA = 227
+# Really sign EIP-712 typed data?
+SUBTITLE__REALLY_SIGN_EIP_712_TYPED_DATA = 228
+# Confirm Message
+TITLE__CONFIRM_MESSAGE = 229
+# No message field
+SUBTITLE__NO_MESSAGE_FIELD = 230
+# Confirm Transaction
+TITLE__CONFIRM_TRANSACTION = 231
+# TRANSACTION FEE:
+LIST_KEY__TRANSACTION_FEE_COLON = 232
+# Confirm Locktime
+TITLE__CONFIRM_LOCKTIME = 233
+# Set locktime for this transaction
+SUBTITLE__SET_LOCKTIME_FOR_THIS_TRANSACTION = 234
+# TIME:
+LIST_KEY__TIME_COLON = 235
+# High fee
+TITLE__HIGH_FEE = 236
+# The fee is unexpectedly high.
+SUBTITLE__THE_FEE_IS_UNEXPECTEDLY_HIGH = 237
+# There are too many change-outputs.
+SUBTITLE__THERE_ARE_TOO_MANY_CHANGE_OUTPUTS = 238
+# Locktime is set but will have no effect.
+SUBTITLE__LOCKTIME_IS_SET_BUT_WILL_HAVE_NO_EFFECT = 239
+# Locktime for this transaction is set to blockheight
+SUBTITLE__LOCKTIME_FOR_THIS_TRANSACTION_IS_SET_TO_BLOCKHEIGHT = 240
+# BLOCK HEIGHT:
+LIST_KEY__BLOCK_HEIGHT_COLON = 241
+# Transaction fee
+SUBTITLE__TRANSACTION_FEE = 242
+# CHANGE COUNT:
+LIST_KEY__CHANGE_COUNT_COLON = 243
+# fmt: on

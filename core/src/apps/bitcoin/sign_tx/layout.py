@@ -6,7 +6,7 @@ from trezor import utils, wire
 from trezor.enums import AmountUnit, ButtonRequestType, OutputScriptType
 from trezor.strings import format_amount, format_timestamp
 from trezor.ui import layouts
-
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from .. import addresses
 from . import omni
 
@@ -199,11 +199,11 @@ async def confirm_feeoverthreshold(
     await layouts.confirm_metadata(
         ctx,
         "fee_over_threshold",
-        "High fee",
-        "The fee is unexpectedly high.",
+        _(i18n_keys.TITLE__HIGH_FEE),
+        _(i18n_keys.SUBTITLE__THE_FEE_IS_UNEXPECTEDLY_HIGH),
         fee_amount,
         ButtonRequestType.FeeOverThreshold,
-        description="FEE",
+        description=_(i18n_keys.LIST_KEY__FEE__COLON),
     )
 
 
@@ -213,11 +213,11 @@ async def confirm_change_count_over_threshold(
     await layouts.confirm_metadata(
         ctx,
         "change_count_over_threshold",
-        "Warning",
-        "There are too many change-outputs.",
+        _(i18n_keys.TITLE__WARNING),
+        _(i18n_keys.SUBTITLE__THERE_ARE_TOO_MANY_CHANGE_OUTPUTS),
         str(change_count),
         ButtonRequestType.SignTx,
-        description="CHANGE COUNT",
+        description=_(i18n_keys.LIST_KEY__CHANGE_COUNT_COLON),
     )
 
 
@@ -225,20 +225,19 @@ async def confirm_nondefault_locktime(
     ctx: wire.Context, lock_time: int, lock_time_disabled: bool
 ) -> None:
     if lock_time_disabled:
-        title = "Warning"
-        text = "Locktime is set but will have no effect."
+        title = _(i18n_keys.TITLE__WARNING)
+        text = _(i18n_keys.SUBTITLE__LOCKTIME_IS_SET_BUT_WILL_HAVE_NO_EFFECT)
         param: str | None = None
         description = None
-    elif lock_time < _LOCKTIME_TIMESTAMP_MIN_VALUE:
-        title = "Confirm locktime"
-        text = "Locktime for this transaction is set to blockheight"
-        param = str(lock_time)
-        description = "BLOCK HEIGHT"
     else:
-        title = "Confirm locktime"
-        text = "Locktime for this transaction is set to"
-        param = format_timestamp(lock_time)
-        description = "TIME"
+        title = _(i18n_keys.TITLE__CONFIRM_LOCKTIME)
+        text = _(i18n_keys.SUBTITLE__SET_LOCKTIME_FOR_THIS_TRANSACTION)
+        if lock_time < _LOCKTIME_TIMESTAMP_MIN_VALUE:
+            param = str(lock_time)
+            description = _(i18n_keys.LIST_KEY__BLOCK_HEIGHT_COLON)
+        else:
+            param = format_timestamp(lock_time)
+            description = _(i18n_keys.LIST_KEY__TIME_COLON)
 
     await layouts.confirm_metadata(
         ctx,
