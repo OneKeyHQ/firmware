@@ -330,22 +330,20 @@ def ed25519_global_combine(input_files):
         raise Exception("Image digest not matched")
     digest = digests[0]
 
-    pubkeys = list(set([i['pubkey'] for i in inputs]))
+    R_pairs = [(i['pubkey'], i['R']) for i in inputs]
+    pubkeys = list(set([p[0] for p in R_pairs]))
     if len(pubkeys) != 4:
         raise Exception("Need 4 different public keys for Global Key calculation")
-
-    commitments = list(set([i['R'] for i in inputs]))
-    if len(commitments) != 4:
-        raise Exception("Need 4 different commitments for combine Global R calculation")
+    Rs = list(set([p[1] for p in R_pairs]))
+    if len(Rs) != 4:
+        raise Exception("Need 4 different Rs for Global R calculation")
     
-    pubkeys = [bytes.fromhex(k) for k in pubkeys]
-    global_pubkey = cosi.combine_keys(pubkeys)
-
-    commitments = [bytes.fromhex(c) for c in commitments]
-    global_commitment = cosi.combine_keys(commitments)
+    global_pubkey = cosi.combine_keys([bytes.fromhex(k) for k in pubkeys])
+    global_commitment = cosi.combine_keys([bytes.fromhex(R) for R in Rs])
 
     output = json.dumps({"magic": magic,
             "digest": digest,
+            "R_pairs": R_pairs,
             "global_pubkey": global_pubkey.hex(),
             "global_commitment": global_commitment.hex()}, indent=4)
     click.echo(output)
@@ -369,15 +367,12 @@ def ed25519_combine_sigs(sigs, commitment):
 @click.command()
 @with_client
 @click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
-@click.option("-c", "--commitment", required=True, help="the global R of ed25519 cosi")
-@click.option("-g", "--globalpubkey", required=True, help="the global public key of ed25519 cosi")
+@click.option("-c", "--commitment_file", required=True, help="the global pubkey and commitment file")
 @click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_cosign(client, address, commitment, globalpubkey, firmware_file):
+def ed25519_cosign(client, address, commitment_file, firmware_file):
     address_n = tools.parse_path(address)
-    global_R = bytes.fromhex(commitment)
-    global_pk = bytes.fromhex(globalpubkey)
-    firmware_data = firmware_file.read()
 
+    firmware_data = firmware_file.read()
     try:
         fw = firmware_headers.parse_image(firmware_data)
     except Exception as e:
@@ -389,17 +384,40 @@ def ed25519_cosign(client, address, commitment, globalpubkey, firmware_file):
             "Could not parse file (magic bytes: {!r})".format(magic)
         ) from e
 
-    digest = fw.digest()
-    pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
-    ctr = None
-    for i, key in enumerate(TOUCHPRO_PUBKEYS):
-        if pubkey.hex() == key:
-            ctr = i
-    if ctr is None:
-        raise click.ClickException("Not found in signer public keys")
+    with open(commitment_file, 'r') as f:
+        commitment_data = json.loads(f.read())
 
-    sig = special.cosign_ed25519(client, address_n, digest, ctr, global_pk, global_R).sig
-    click.echo(sig.hex())
+    if firmware_data[:4].decode('utf-8') != commitment_data['magic']:
+        raise Exception("Image file magic number not matched")
+
+    digest = fw.digest()
+    if digest.hex() != commitment_data['digest']:
+        raise Exception("Image file digest not matched")
+
+    pubkeys = [p[0] for p in commitment_data['R_pairs']]
+    pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
+    if pubkey.hex() not in pubkeys:
+        raise Exception("Public key not found in commitment data")
+
+    try:
+        ctr = TOUCHPRO_PUBKEYS.index(pubkey.hex())
+    except ValueError:
+        raise click.ClickException("Public key not owned by any holder")
+
+    global_pubkey = bytes.fromhex(commitment_data['global_pubkey'])
+    global_commitment = bytes.fromhex(commitment_data['global_commitment'])
+    sig = special.cosign_ed25519(client, address_n, digest, ctr, global_pubkey, global_commitment).sig
+
+    commitment_data['signing_pubkey'] = pubkey.hex()
+    commitment_data['single_signature'] = sig.hex()
+    output = json.dumps(commitment_data, indent=4)
+    click.echo(output)
+
+    fname = "ed25519_cosign_output_%s_%s_%s.json" % (digest.hex()[:4],
+        global_commitment.hex()[:4], pubkey.hex()[:4])
+    with open(fname, "w") as f:
+        f.write(output)
+    click.echo("output saved to file %s" % fname)
 
 
 @click.command()
