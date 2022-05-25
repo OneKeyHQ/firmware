@@ -268,7 +268,8 @@ TOUCHPRO_PUBKEYS = [
 
 
 '''
-    Develop pubkeys for touch/pro cosigning
+    Testing pubkeys for touch/pro cosigning
+    WARNING: Only for development scaffold, DO NOT use as a wallet.
     Mnemonics:
         1.manage 2.vehicle 3.pipe 4.scan 5.carpet 6.inch
         7.tobacco 8.moment 9.minimum 10.robust 11.inner 12.march
@@ -283,21 +284,16 @@ TOUCHPRO_DEV_PUBKEYS = [
     "eba31865a3c05d083921e8fcce8e05d06e8c7a1d816ff97e3b0c7e93b69a7f97", # m/44h/0h/0h/0h/6h
 ]
 
-def PUBKEYS(devmode=False):
+
+def PUBKEYS(devmode):
     if devmode:
         return TOUCHPRO_DEV_PUBKEYS
     return TOUCHPRO_PUBKEYS
 
 
-@click.command()
-@with_client
-@click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
-@click.option("-d", "--devmode", is_flag=True, default=False)
-@click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_commit(client, address, firmware_file, devmode):
+def _ed25519_commit(client, address, firmware_data, devmode):
     address_n = tools.parse_path(address)
 
-    firmware_data = firmware_file.read()
     try:
         fw = firmware_headers.parse_image(firmware_data)
     except Exception as e:
@@ -322,17 +318,26 @@ def ed25519_commit(client, address, firmware_file, devmode):
             "digest": digest.hex(),
             "pubkey": pubkey.hex(),
             "R": R.hex()}, indent=4)
-    click.echo(output)
 
     fname = "ed25519_commit_output_%s_%s.json" % (digest.hex()[0:4], pubkey.hex()[0:4])
     with open(fname, "w") as f:
         f.write(output)
-    return fname
+    return fname, output
 
 
 @click.command()
-@click.option("--input_files", "-i", required=True, multiple=True, help="ed25519_commit output files")
-def ed25519_global_combine(input_files):
+@with_client
+@click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
+@click.option("-d", "--devmode", is_flag=True, default=False)
+@click.argument("firmware_file", type=click.File("rb+"))
+def ed25519_commit(client, address, firmware_file, devmode):
+    firmware_data = firmware_file.read()
+    fname, output = _ed25519_commit(client, address, firmware_data, devmode)
+    click.echo(output)
+    return fname
+
+
+def _ed25519_global_combine(input_files):
     if len(input_files) != 4:
         raise Exception("Need 4 input files for Global Key and Global R calculation")
 
@@ -367,34 +372,24 @@ def ed25519_global_combine(input_files):
             "R_pairs": R_pairs,
             "global_pubkey": global_pubkey.hex(),
             "global_commitment": global_commitment.hex()}, indent=4)
-    click.echo(output)
 
     fname = "ed25519_global_combine_output_%s.json" % digest[0:4]
     with open(fname, "w") as f:
         f.write(output)
+    return fname, output
+
+
+@click.command()
+@click.option("--input_files", "-i", required=True, multiple=True, help="ed25519_commit output files")
+def ed25519_global_combine(input_files):
+    fname, output = _ed25519_global_combine(input_files)
+    click.echo(output)
     return fname
 
 
-@click.command()
-@click.option("-c", "--commitment", required=True, help="the global R of ed25519 cosi")
-@click.argument("sigs")
-def ed25519_combine_sigs(sigs, commitment):
-    sigs = [bytes.fromhex(k) for k in sigs.split(":")]
-    global_R = bytes.fromhex(commitment)
-    sig = cosi.combine_sig(global_R, sigs)
-    click.echo(sig.hex())
-
-
-@click.command()
-@with_client
-@click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
-@click.option("-c", "--commitment_file", required=True, help="the global pubkey and commitment file")
-@click.option("-d", "--devmode", is_flag=True, default=False)
-@click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
+def _ed25519_cosign(client, address, commitment_file, firmware_data, devmode):
     address_n = tools.parse_path(address)
 
-    firmware_data = firmware_file.read()
     try:
         fw = firmware_headers.parse_image(firmware_data)
     except Exception as e:
@@ -402,7 +397,7 @@ def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
 
         traceback.print_exc()
         magic = firmware_data[:4]
-        raise click.ClickException(
+        raise Exception(
             "Could not parse file (magic bytes: {!r})".format(magic)
         ) from e
 
@@ -424,7 +419,7 @@ def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
     try:
         ctr = PUBKEYS(devmode).index(pubkey.hex())
     except ValueError:
-        raise click.ClickException("Public key not owned by any holder")
+        raise Exception("Public key not owned by any holder")
 
     global_pubkey = bytes.fromhex(commitment_data['global_pubkey'])
     global_commitment = bytes.fromhex(commitment_data['global_commitment'])
@@ -433,37 +428,79 @@ def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
     commitment_data['signing_pubkey'] = pubkey.hex()
     commitment_data['single_signature'] = sig.hex()
     output = json.dumps(commitment_data, indent=4)
-    click.echo(output)
 
     fname = "ed25519_cosign_output_%s_%s_%s.json" % (digest.hex()[:4],
         global_commitment.hex()[:4], pubkey.hex()[:4])
     with open(fname, "w") as f:
         f.write(output)
-    return fname
+    return fname, output
 
 
 @click.command()
 @with_client
-@click.option("-s", "--signature", required=True, help="the combined cosi signature")
-@click.option("-p", "--pubkeys", required=True, help="the pubkeys participate the cosigning")
+@click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
+@click.option("-c", "--commitment_file", required=True, help="the global pubkey and commitment file")
 @click.option("-d", "--devmode", is_flag=True, default=False)
 @click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_insert_sig(client, signature, pubkeys, firmware_file, devmode):
-    pubkeys = pubkeys.split(':')
-    signature = bytes.fromhex(signature)
+def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
     firmware_data = firmware_file.read()
+    fname, output = _ed25519_cosign(client, address, commitment_file, firmware_data, devmode)
+    click.echo(output)
+    return fname
+
+
+def _ed25519_combine_sigs(signature_files, firmware_data, devmode):
+    if len(signature_files) != 4:
+        raise Exception("Need 4 signature files for signature combination")
+
+    sig_data = []
+    for s in signature_files:
+        with open(s, "r") as f:
+            sig_data.append(json.loads(f.read()))
+
+    magics = list(set([s['magic'] for s in sig_data]))
+    if len(magics) != 1:
+        raise Exception("Image header magic number from signature files not matched")
+    magic = magics[0]
+
+    digests = list(set([s['digest'] for s in sig_data]))
+    if len(digests) != 1:
+        raise Exception("Image digest from signature files not matched")
+    digest = digests[0]
+
+    pubkeys = list(set([s['signing_pubkey'] for s in sig_data]))
+    if len(pubkeys) != 4:
+        raise Exception("Need 4 different signing public keys for verification")
+
+    sigs = list(set([s['single_signature'] for s in sig_data]))
+    if len(sigs) != 4:
+        raise Exception("Need 4 different signatures for signature combination")
+
+    global_commitments = list(set(s['global_commitment'] for s in sig_data))
+    if len(global_commitments) != 1:
+        raise Exception("Global commitments from signature files not matched")
+    global_commitment = global_commitments[0]
 
     try:
         fw = firmware_headers.parse_image(firmware_data)
     except Exception as e:
         import traceback
-
         traceback.print_exc()
         magic = firmware_data[:4]
-        raise click.ClickException(
+        raise Exception(
             "Could not parse file (magic bytes: {!r})".format(magic)
         ) from e
-    click.echo(fw.format(True))
+
+    if firmware_data[:4].decode('utf-8') != magic:
+        raise Exception("Image file magic number not matched")
+
+    if fw.digest().hex() != digest:
+        raise Exception("Image file digest not matched")
+
+
+    pubkeys = [s['signing_pubkey'] for s in sig_data]
+    sigs_in_bytes = [bytes.fromhex(k) for k in sigs]
+    sig = cosi.combine_sig(bytes.fromhex(global_commitment), sigs_in_bytes)
 
     sigmask = 0
     for pk in pubkeys:
@@ -471,11 +508,54 @@ def ed25519_insert_sig(client, signature, pubkeys, firmware_file, devmode):
         sigmask |= 1 << idx
 
     fw.rehash()
-    fw.insert_signature(signature, sigmask)
-    cosi.verify(signature, fw.digest(), 4, [bytes.fromhex(k) for k in PUBKEYS(devmode=False)], sigmask)
-    click.echo(fw.format(True))
+    fw.insert_signature(sig, sigmask)
+    cosi.verify(fw.header.signature, fw.digest(), 4, [bytes.fromhex(k) for k in PUBKEYS(devmode)], sigmask)
+    return fw
 
-    updated_data = fw.dump()
-    firmware_file.seek(0)
-    firmware_file.truncate(0)
-    firmware_file.write(updated_data)
+
+@click.command()
+@click.option("-s", "--signature_files", required=True, multiple=True, help="ed25519_cosign output files")
+@click.option("-d", "--devmode", is_flag=True, default=False)
+@click.option("-i", "--insert", is_flag=True, default=False, help="Insert signature into image")
+@click.argument("firmware_file", type=click.File("rb+"))
+def ed25519_combine_sigs(signature_files, firmware_file, insert, devmode):
+    firmware_data = firmware_file.read()
+    fw = _ed25519_combine_sigs(signature_files, firmware_data, devmode)
+    click.echo(fw.format(True))
+    if insert:
+        updated_data = fw.dump()
+        firmware_file.seek(0)
+        firmware_file.truncate(0)
+        firmware_file.write(updated_data)
+        click.echo("Image updated")
+    firmware_file.close()
+
+
+@click.command()
+@with_client
+@click.argument("firmware_file", type=click.File("rb+"))
+def ed25519_devmode_test(client, firmware_file):
+    firmware_data = firmware_file.read()
+    import random
+    addrs = random.sample([
+        "m/44h/0h/0h/0h/0h",
+        "m/44h/0h/0h/0h/1h",
+        "m/44h/0h/0h/0h/2h",
+        "m/44h/0h/0h/0h/3h",
+        "m/44h/0h/0h/0h/4h",
+        "m/44h/0h/0h/0h/5h",
+        "m/44h/0h/0h/0h/6h"], 4)
+
+    commit_output_fnames = []
+    for addr in addrs:
+        fname, _ = _ed25519_commit(client, addr, firmware_data, True)
+        commit_output_fnames.append(fname)
+
+    global_combine_output_fname, _ = _ed25519_global_combine(commit_output_fnames)
+
+    cosign_output_fnames = []
+    for addr in addrs:
+        fname, _ = _ed25519_cosign(client, addr, global_combine_output_fname, firmware_data, True)
+        cosign_output_fnames.append(fname)
+
+    _ed25519_combine_sigs(cosign_output_fnames, firmware_data, True)
