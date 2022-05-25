@@ -1,6 +1,23 @@
 from typing import *
 
 
+# extmod/modtrezorio/modtrezorio-ble.h
+class BLE:
+    """
+    """
+
+    def __init__(
+        self,
+    ) -> None:
+        """
+        """
+
+    def ctrl(self, cmd: byte, value: byte) -> None:
+        """
+        Send command to the BLE.
+        """
+
+
 # extmod/modtrezorio/modtrezorio-buz.h
 class BUZ:
     """
