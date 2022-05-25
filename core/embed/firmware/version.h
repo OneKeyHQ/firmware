@@ -12,3 +12,7 @@
 #define ONEKEY_VERSION_MINOR 0
 #define ONEKEY_VERSION_PATCH 0
 #define ONEKEY_VERSION_BUILD 0
+
+#define ONEKEY_VERSION                                           \
+  ((ONEKEY_VERSION_MAJOR << 24) | (ONEKEY_VERSION_MINOR << 16) | \
+   (ONEKEY_VERSION_PATCH << 8) | ONEKEY_VERSION_BUILD)

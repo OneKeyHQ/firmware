@@ -3259,6 +3259,8 @@ class Features(protobuf.MessageType):
         38: protobuf.Field("auto_lock_delay_ms", "uint32", repeated=False, required=False),
         39: protobuf.Field("display_rotation", "uint32", repeated=False, required=False),
         40: protobuf.Field("experimental_features", "bool", repeated=False, required=False),
+        501: protobuf.Field("ble_name", "string", repeated=False, required=False),
+        508: protobuf.Field("onekey_version", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -3302,6 +3304,8 @@ class Features(protobuf.MessageType):
         auto_lock_delay_ms: Optional["int"] = None,
         display_rotation: Optional["int"] = None,
         experimental_features: Optional["bool"] = None,
+        ble_name: Optional["str"] = None,
+        onekey_version: Optional["int"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3341,6 +3345,8 @@ class Features(protobuf.MessageType):
         self.auto_lock_delay_ms = auto_lock_delay_ms
         self.display_rotation = display_rotation
         self.experimental_features = experimental_features
+        self.ble_name = ble_name
+        self.onekey_version = onekey_version
 
 
 class LockDevice(protobuf.MessageType):
