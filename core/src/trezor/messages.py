@@ -1994,6 +1994,8 @@ if TYPE_CHECKING:
         auto_lock_delay_ms: "int | None"
         display_rotation: "int | None"
         experimental_features: "bool | None"
+        ble_name: "str | None"
+        onekey_version: "int | None"
 
         def __init__(
             self,
@@ -2035,6 +2037,8 @@ if TYPE_CHECKING:
             auto_lock_delay_ms: "int | None" = None,
             display_rotation: "int | None" = None,
             experimental_features: "bool | None" = None,
+            ble_name: "str | None" = None,
+            onekey_version: "int | None" = None,
         ) -> None:
             pass
 
