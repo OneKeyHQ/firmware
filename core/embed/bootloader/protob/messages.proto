@@ -66,10 +66,8 @@ message Features {
     optional uint32 fw_patch = 24;              // reported firmware version if in bootloader mode
     optional string fw_vendor = 25;             // reported firmware vendor if in bootloader mode
     // optional bytes fw_vendor_keys = 26;      // obsoleted, use fw_vendor
-    required uint32 onekey_major = 27;          // OneKey major version
-    required uint32 onekey_minor = 28;          // OneKey minor version
-    required uint32 onekey_patch = 29;          // OneKey patch version
-    optional string ble_name = 30;              // OneKey BLE name
+    optional string ble_name = 501;             // OneKey BLE name
+    optional uint32 onekey_version = 508;       // OneKey version
 }
 
 /**
