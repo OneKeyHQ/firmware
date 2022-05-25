@@ -151,10 +151,11 @@ async def _require_confirm_fee(ctx, fee):
         ctx,
         "confirm_final",
         title="Confirm fee",
-        content="{}",
+        content="",
         param=_format_amount(fee),
         hide_continue=True,
         hold=True,
+        description="FEE",
     )
 
 
@@ -163,9 +164,10 @@ async def _require_confirm_unlock_time(ctx, unlock_time):
         ctx,
         "confirm_locktime",
         "Confirm unlock time",
-        "Unlock time for this transaction is set to {}",
+        "Unlock time for this transaction is set to",
         str(unlock_time),
         br_code=ButtonRequestType.SignTx,
+        description="TIME",
     )
 
 

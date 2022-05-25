@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import storage.device
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType, SafetyCheckLevel
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success
 from trezor.strings import format_duration_ms
 from trezor.ui.layouts import confirm_action
@@ -114,8 +115,8 @@ async def require_confirm_change_label(ctx: wire.GenericContext, label: str) -> 
     await confirm_action(
         ctx,
         "set_label",
-        "Change label",
-        description="Do you really want to change the label to {}?",
+        _(i18n_keys.TITLE__CHANGE_LABEL),
+        description=_(i18n_keys.SUBTITLE__SET_LABEL_CHANGE_LABEL),
         description_param=label,
         br_code=ButtonRequestType.ProtectCall,
     )
@@ -125,13 +126,15 @@ async def require_confirm_change_passphrase(
     ctx: wire.GenericContext, use: bool
 ) -> None:
     if use:
-        description = "Do you really want to enable passphrase encryption?"
+        description = _(i18n_keys.SUBTITLE__SET_PASSPHRASE_ENABLED)
     else:
-        description = "Do you really want to disable passphrase encryption?"
+        description = _(i18n_keys.SUBTITLE__SET_PASSPHRASE_DISABLED)
     await confirm_action(
         ctx,
         "set_passphrase",
-        "Enable passphrase" if use else "Disable passphrase",
+        _(i18n_keys.TITLE__ENABLE_PASSPHRASE)
+        if use
+        else _(i18n_keys.TITLE__DISABLE_PASSPHRASE),
         description=description,
         br_code=ButtonRequestType.ProtectCall,
     )
@@ -141,13 +144,13 @@ async def require_confirm_change_passphrase_source(
     ctx: wire.GenericContext, passphrase_always_on_device: bool
 ) -> None:
     if passphrase_always_on_device:
-        description = "Do you really want to enter passphrase always on the device?"
+        description = _(i18n_keys.SUBTITLE__SET_PASSPHRASE_ENABLED_FORCE_ON_DEVICE)
     else:
-        description = "Do you want to revoke the passphrase on device setting?"
+        description = _(i18n_keys.SUBTITLE__SET_PASSPHRASE_ENABLED_NO_FORCE_ON_DEVICE)
     await confirm_action(
         ctx,
         "set_passphrase_source",
-        "Passphrase source",
+        _(i18n_keys.TITLE__PASSPHRASE_SOURCE),
         description=description,
         br_code=ButtonRequestType.ProtectCall,
     )
@@ -182,8 +185,10 @@ async def require_confirm_change_autolock_delay(
     await confirm_action(
         ctx,
         "set_autolock_delay",
-        "Auto-lock delay",
-        description="Do you really want to auto-lock your device after {}?",
+        _(i18n_keys.TITLE__AUTO_LOCK),
+        description=_(
+            i18n_keys.SUBTITLE__DO_YOU_REALLY_WANT_TO_AUTO_LOCK_YOUR_DEVICE_AFTER_STR
+        ),
         description_param=format_duration_ms(delay_ms),
         br_code=ButtonRequestType.ProtectCall,
     )
@@ -196,11 +201,13 @@ async def require_confirm_safety_checks(
         await confirm_action(
             ctx,
             "set_safety_checks",
-            "Safety override",
+            _(i18n_keys.TITLE__SAFETY_OVERRIDE),
             hold=True,
-            verb="Hold to confirm",
-            description="Trezor will allow you to approve some actions which might be unsafe.",
-            action="Are you sure?",
+            verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
+            description=_(
+                i18n_keys.SUBTITLE__ONEKEY_WILL_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE
+            ),
+            action="",
             reverse=True,
             larger_vspace=True,
             br_code=ButtonRequestType.ProtectCall,
@@ -209,11 +216,13 @@ async def require_confirm_safety_checks(
         await confirm_action(
             ctx,
             "set_safety_checks",
-            "Safety override",
+            _(i18n_keys.TITLE__SAFETY_OVERRIDE),
             hold=True,
-            verb="Hold to confirm",
-            description="Trezor will temporarily allow you to approve some actions which might be unsafe.",
-            action="Are you sure?",
+            verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
+            description=_(
+                i18n_keys.SUBTITLE__ONEKEY_WILL_TEMPORARILY_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE
+            ),
+            action="",
             reverse=True,
             br_code=ButtonRequestType.ProtectCall,
         )
@@ -221,8 +230,10 @@ async def require_confirm_safety_checks(
         await confirm_action(
             ctx,
             "set_safety_checks",
-            "Safety checks",
-            description="Do you really want to enforce strict safety checks (recommended)?",
+            _(i18n_keys.TITLE__SAFETY_CHECKS),
+            description=_(
+                i18n_keys.SUBTITLE__DO_YOU_REALLY_WANT_TO_ENFORCE_STRICT_SAFETY_CHECKS_RECOMMENDED
+            ),
             br_code=ButtonRequestType.ProtectCall,
         )
     else:
@@ -236,9 +247,9 @@ async def require_confirm_experimental_features(
         await confirm_action(
             ctx,
             "set_experimental_features",
-            "Experimental mode",
-            description="Enable experimental features?",
-            action="Only for development and beta testing!",
+            _(i18n_keys.TITLE__EXPERIMENTAL_MODE),
+            description=_(i18n_keys.SUBTITLE__ENABLE_EXPERIMENTAL_FEATURES),
+            action="",  # Only for development and beta testing!
             reverse=True,
             br_code=ButtonRequestType.ProtectCall,
         )

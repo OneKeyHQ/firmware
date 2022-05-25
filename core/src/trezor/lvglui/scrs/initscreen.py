@@ -43,12 +43,13 @@ class InitScreen(Screen):
         )
 
     def on_click(self, target):
+        device.set_language(langs_keys[self.roller.get_selected()])
+        i18n_refresh()
         QuickStart()
 
     def on_value_changed(self, target):
         global language
         lang_key = langs_keys[target.get_selected()]
-        device.set_language(lang_key)
         i18n_refresh(lang_key)
         self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
         self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))

@@ -1,16 +1,9 @@
 from trezor import io, log, loop, utils, wire
 from trezor.lvglui import lvgl_tick
+from trezor.uart_pull import handle_uart
 
 import apps.base
 import usb
-
-
-async def hadler_uart():
-    uart = loop.wait(io.UART | io.POLL_READ)
-    while True:
-        data = await uart
-        print(data)
-
 
 apps.base.boot()
 
@@ -26,11 +19,10 @@ if __debug__:
 
 # run main event loop and specify which screen is the default
 apps.base.set_homescreen()
-# if not utils.LVGL_UI:
-#     workflow.start_default()
-# else:
+
 loop.schedule(lvgl_tick())
-loop.schedule(hadler_uart())
+
+loop.schedule(handle_uart())
 
 # initialize the wire codec
 wire.setup(usb.iface_wire)

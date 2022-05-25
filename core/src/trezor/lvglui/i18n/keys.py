@@ -92,7 +92,7 @@ TITLE__ENABLED_PIN = 41
 SUBTITLE__SET_PIN_ENABLE_PIN = 42
 # Change Label
 TITLE__CHANGE_LABEL = 43
-# Do you really want to change the label to “{}”?
+# Do you really want to change the label to "{}"?
 SUBTITLE__SET_LABEL_CHANGE_LABEL = 44
 # Import recovery phrase to restore existing wallet.
 SUBTITLE__DEVICE_RECOVER_RESTORE_WALLET = 45
@@ -269,7 +269,7 @@ TITLE__STR_ADDRESS_TAPROOT = 126
 TITLE__STR_ADDRESS_LEGACY_SEGWIT = 127
 # {} Address (Segwit)
 TITLE__STR_ADDRESS_SEGWIT = 128
-# Path "{}" is unknown. Are you sure to export its address?
+# Path "{}" is unknown. Are you sure?
 SUBTITLE__BTC_GET_ADDRESS_UNKNOWN_PATH = 129
 # Unknown Path
 TITLE__UNKNOWN_PATH = 130
@@ -311,6 +311,7 @@ TITLE__SETTING = 145
 APP__SETTING = 145
 # About Device
 ITEM__ABOUT_DEVICE = 146
+TITLE__ABOUT_DEVICE = 146
 # Connect
 ITEM__CONNECT = 147
 TITLE__CONNECT = 147
@@ -379,3 +380,96 @@ TITLE__READY_TO_CREATE = 174
 SUBTITLE__ENTER_PASSPHRASE_ACCESS_HIDDEN_WALLET = 175
 # Access Hidden Wallet?
 TITLE__ACCESS_HIDDEN_WALLET = 176
+# This is the wrong word, check and enter again.
+SUBTITLE__DEVICE_BACKUP_INCORRECT_WORD = 177
+# Incorrect Word
+TITLE__INCORRECT_WORD = 178
+# Use This Passphrase?
+TITLE__USE_THIS_PASSPHRASE = 179
+# Model
+ITEM__MODEL = 180
+# Storage
+ITEM__STORAGE = 181
+# Serial
+ITEM__SERIAL = 182
+# System Version
+ITEM__SYSTEM_VERSION = 183
+# Incorrect PIN, this is your last attempt.
+MSG__INCORRECT_PIN_THIS_IS_YOUR_LAST_ATTEMPT = 184
+# Modify Fee
+TITLE__MODIFY_FEE = 185
+# AMOUNT (YOU SPEND):
+LIST_KEY__AMOUNT_YOU_SPEND__COLON = 186
+# NEW FEE:
+LIST_KEY__NEW_FEE__COLON = 187
+# Modify Amount
+TITLE__MODIFY_AMOUNT = 188
+# NEW AMOUNT:
+LIST_KEY__NEW_AMOUNT__COLON = 189
+# TRANSACTION ID:
+LIST_KEY__TRANSACTION_ID__COLON = 190
+# COIN NAME:
+LIST_KEY__COIN_NAME__COLON = 191
+# MAXIMUM ROUNDS:
+LIST_KEY__MAXIMUM_ROUNDS__COLON = 192
+# MAXIMUM MINING FEE:
+LIST_KEY__MAXIMUM_MINING_FEE__COLON = 193
+# IDENTITY:
+LIST_KEY__IDENTITY__COLON = 194
+# Confirm Transfer
+TITLE__CONFIRM_TRANSFER = 195
+# APP NAME:
+LIST_KEY__APP_NAME__COLON = 196
+# ACCOUNT NAME:
+LIST_KEY__ACCOUNT_NAME__COLON = 197
+# Confirm {} Payment
+TITLE__CONFIRM_PAYMENT = 198
+# Sign {} Joint Transaction
+TITLE__SIGN_STR_JOINT_TX = 199
+# DECREASED BY:
+LIST_KEY__DECREASED_BY__COLON = 200
+# INCREASED BY:
+LIST_KEY__INCREASED_BY__COLON = 201
+# NO CHANGE:
+LIST_KEY__NO_CHANGE__COLON = 202
+# Authorize CoinJoin
+TITLE__AUTHORIZE_COINJOIN = 203
+# Verify {} Message
+TITLE__VERIFY_STR_MESSAGE = 204
+# Enter pair code on your device.
+SUBTITLE__BLUETOOTH_PAIR = 205
+# Bluetooth Pair
+TITLE__BLUETOOTH_PAIR = 206
+# Incorrect pair code, try again.
+SUBTITLE__BLUETOOTH_PAIR_NOT_MATCH = 207
+# {} seconds
+OPTION__STR_SECONDS = 208
+# {} hours
+OPTION__STR_HOUR = 209
+# Custom
+OPTION__CUSTOM__INSERT = 210
+# View Data
+TITLE__VIEW_DATA = 211
+# SIZE:
+LIST_KEY__SIZE__COLON = 212
+# DATA:
+LIST_KEY__DATA__COLON = 213
+# Do you really want to auto-lock your device after {}?
+SUBTITLE__DO_YOU_REALLY_WANT_TO_AUTO_LOCK_YOUR_DEVICE_AFTER_STR = 214
+# Safety Override
+TITLE__SAFETY_OVERRIDE = 215
+# OneKey will allow you to approve some actions which might be unsafe.
+SUBTITLE__ONEKEY_WILL_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE = 216
+# OneKey will temporarily allow you to approve some actions which might be uns
+# afe.
+SUBTITLE__ONEKEY_WILL_TEMPORARILY_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE = (
+    217
+)
+# Safety checks
+TITLE__SAFETY_CHECKS = 218
+# Do you really want to enforce strict safety checks (recommended)?
+SUBTITLE__DO_YOU_REALLY_WANT_TO_ENFORCE_STRICT_SAFETY_CHECKS_RECOMMENDED = 219
+# Experimental mode
+TITLE__EXPERIMENTAL_MODE = 220
+# Enable experimental features?
+SUBTITLE__ENABLE_EXPERIMENTAL_FEATURES = 221

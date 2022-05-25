@@ -158,6 +158,8 @@ trezor.lvglui.lv_colors
 import trezor.lvglui.lv_colors
 trezor.lvglui.scrs
 import trezor.lvglui.scrs
+trezor.lvglui.scrs.ble
+import trezor.lvglui.scrs.ble
 trezor.lvglui.scrs.bootscreen
 import trezor.lvglui.scrs.bootscreen
 trezor.lvglui.scrs.common
@@ -222,6 +224,8 @@ trezor.sdcard
 import trezor.sdcard
 trezor.strings
 import trezor.strings
+trezor.uart_pull
+import trezor.uart_pull
 trezor.ui
 import trezor.ui
 trezor.ui.components

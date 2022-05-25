@@ -68,9 +68,9 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
         return confirm_action(
             ctx,
             "set_pin",
-            "Remove PIN",
-            description="Do you really want to",
-            action="disable PIN protection?",
+            _(i18n_keys.TITLE__PIN_DISABLED),
+            description=_(i18n_keys.SUBTITLE__SET_PIN_PIN_DISABLED),
+            action="",
             reverse=True,
         )
 
@@ -78,9 +78,9 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
         return confirm_action(
             ctx,
             "set_pin",
-            "Change PIN",
-            description="Do you really want to",
-            action="change your PIN?",
+            _(i18n_keys.TITLE__CHANGE_PIN),
+            description=_(i18n_keys.SUBTITLE__SET_PIN_CHANGE_PIN),
+            action="",
             reverse=True,
         )
 
@@ -88,9 +88,9 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
         return confirm_action(
             ctx,
             "set_pin",
-            "Enable PIN",
-            description="Do you really want to",
-            action="enable PIN protection?",
+            _(i18n_keys.TITLE__ENABLED_PIN),
+            description=_(i18n_keys.SUBTITLE__SET_PIN_ENABLE_PIN),
+            action="",
             reverse=True,
         )
 

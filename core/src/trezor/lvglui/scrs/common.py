@@ -47,15 +47,14 @@ class Screen(lv.obj):
         # nav_back
         if kwargs.get("nav_back", False):
             self.nav_back = lv.imgbtn(self)
-            self.nav_back.set_src(lv.imgbtn.STATE.RELEASED, None, None, None)
             self.nav_back.set_size(100, 100)
             self.nav_back.set_pos(lv.pct(1), lv.pct(7))
             self.nav_back.add_event_cb(
                 self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.PRESSED, None
             )
-            self.img_back = lv.img(self.nav_back)
-            self.img_back.set_src("A:/res/nav-arrow-left.png")
-            self.img_back.set_align(lv.ALIGN.CENTER)
+            self.nav_back.set_style_bg_img_src(
+                "A:/res/nav-arrow-left.png", lv.PART.MAIN | lv.STATE.DEFAULT
+            )
         self.load_screen(self)
 
     # event callback
@@ -124,6 +123,7 @@ class FullSizeWindow(lv.obj):
         cancel_text: str = "",
         icon_path: str | None = None,
         options: str | None = None,
+        hold_confirm: bool = False,
     ):
         super().__init__(lv.scr_act())
         self.channel = loop.chan()
@@ -133,7 +133,7 @@ class FullSizeWindow(lv.obj):
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-
+        self.hold_confirm = hold_confirm and not utils.EMULATOR
         if icon_path:
             self.icon = lv.img(self)
             self.icon.set_src(icon_path)
@@ -147,17 +147,25 @@ class FullSizeWindow(lv.obj):
         if cancel_text:
             self.btn_no = NormalButton(self, cancel_text)
             if confirm_text:
-                self.btn_no.set_size(192, 62)
-                self.btn_no.align_to(self, lv.ALIGN.BOTTOM_LEFT, 32, -64)
+                if not self.hold_confirm:
+                    self.btn_no.set_size(192, 62)
+                    self.btn_no.align_to(self, lv.ALIGN.BOTTOM_LEFT, 32, -64)
                 self.btn_no.enable(lv.color_hex(0x232323), lv.color_hex(0xFFFFFF))
             self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
             self.btn_yes = NormalButton(self, confirm_text)
             if cancel_text:
-                self.btn_yes.set_size(192, 62)
-                self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -64)
+                if self.hold_confirm:
+                    self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -16)
+                else:
+                    self.btn_yes.set_size(192, 62)
+                    self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -64)
             self.btn_yes.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
             self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+            if self.hold_confirm:
+                self.btn_yes.add_event_cb(
+                    self.eventhandler, lv.EVENT.LONG_PRESSED, None
+                )
         if options:
             self.roller = Roller(self, options)
             self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
@@ -166,26 +174,31 @@ class FullSizeWindow(lv.obj):
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.CLICKED:
-            if hasattr(self, "btn_no") and target == self.btn_no:
-                self.channel.publish(0)
-            elif hasattr(self, "btn_yes") and target == self.btn_yes:
-                if not hasattr(self, "roller"):
-                    # delete the confirm button manually to fix a dispaly bug in reset process with desktop
-                    self.btn_yes.del_delayed(10)
-                    self.channel.publish(1)
-                else:
-                    self.channel.publish(self.select_option)
-            else:
-                pass
-            self.destory()
-        elif code == lv.EVENT.VALUE_CHANGED:
+        if code == lv.EVENT.VALUE_CHANGED:
             if target == self.roller:
                 selected_str = " " * 11
                 target.get_selected_str(selected_str, len(selected_str))
                 self.select_option = selected_str.strip()[:-1]
             else:
                 pass
+            return
+        elif code == lv.EVENT.CLICKED:
+            if hasattr(self, "btn_no") and target == self.btn_no:
+                self.channel.publish(0)
+            elif hasattr(self, "btn_yes") and target == self.btn_yes:
+                if hasattr(self, "roller"):
+                    self.channel.publish(self.select_option)
+                else:
+                    if not self.hold_confirm:
+                        # delete the confirm button manually to fix a dispaly bug in reset process with desktop
+                        self.btn_yes.del_delayed(10)
+                        self.channel.publish(1)
+                    else:
+                        return
+        elif code == lv.EVENT.LONG_PRESSED and self.hold_confirm:
+            if target == self.btn_yes:
+                self.channel.publish(1)
+        self.destory()
 
     async def request(self) -> Any:
         return await self.channel.take()

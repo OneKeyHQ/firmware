@@ -82,12 +82,13 @@ async def require_confirm_set_delegate(ctx: Context, fee: int) -> None:
         ctx,
         "confirm_delegation_final",
         title="Confirm delegation",
-        content="Fee:\n{}",
+        content="Confirm Fee",
         param=format_tezos_amount(fee),
         hold=True,
         hide_continue=True,
         icon_color=ui.BLUE,
         br_code=ButtonRequestType.SignTx,
+        description="FEE",
     )
 
 
@@ -164,11 +165,12 @@ async def require_confirm_manager_remove_delegate(ctx: Context, fee: int) -> Non
         ctx,
         "confirm_undelegation_final",
         title="Remove delegation",
-        content="Fee:\n{}",
+        content="Confirm Fee",
         param=format_tezos_amount(fee),
         hold=True,
         hide_continue=True,
         icon=ui.ICON_RECEIVE,
         icon_color=ui.RED,
         br_code=ButtonRequestType.SignTx,
+        description="FEE",
     )

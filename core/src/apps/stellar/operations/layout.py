@@ -72,8 +72,9 @@ async def confirm_bump_sequence_op(ctx: Context, op: StellarBumpSequenceOp) -> N
         ctx,
         "op_bump",
         "Bump Sequence",
-        content="Set sequence to {}?",
+        content="Set sequence to ?",
         param=str(op.bump_to),
+        description="SEQUENCE",
     )
 
 
@@ -190,8 +191,9 @@ async def confirm_manage_data_op(ctx: Context, op: StellarManageDataOp) -> None:
             ctx,
             "op_data",
             "Clear data",
-            "Do you want to clear value key {}?",
+            "Do you want to clear value key?",
             param=op.key,
+            description="KEY",
         )
 
 

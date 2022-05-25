@@ -16,7 +16,10 @@ class ConfirmWebauthn(FullSizeWindow):
             icon_path=app_icon,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
-        # TODO: i18n missing
-        self.item1 = DisplayItem(self.container, "APP NAME:", app_name)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__APP_NAME__COLON), app_name
+        )
         if account_name is not None:
-            self.item2 = DisplayItem(self.container, "ACCOUNT NAME:", account_name)
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__ACCOUNT_NAME__COLON), account_name
+            )

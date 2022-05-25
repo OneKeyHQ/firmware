@@ -86,16 +86,16 @@ async def _show_confirmation_failure(
     ctx: wire.GenericContext, share_index: int | None
 ) -> None:
     if share_index is None:
-        header = "Recovery seed"
+        header = _(i18n_keys.TITLE__INCORRECT_WORD)
     else:
         header = f"Recovery share #{share_index + 1}"
     await show_warning(
         ctx,
         "warning_backup_check",
         header=header,
-        subheader="That is the wrong word.",
-        content="Please check again.",
-        button="Check again",
+        subheader="",
+        content=_(i18n_keys.SUBTITLE__DEVICE_BACKUP_INCORRECT_WORD),
+        button=_(i18n_keys.BUTTON__CONTINUE),
         br_code=ButtonRequestType.ResetDevice,
     )
 

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import AuthorizeCoinJoin, Success
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_action, confirm_coinjoin, confirm_metadata
@@ -50,7 +51,7 @@ async def authorize_coinjoin(
     await confirm_action(
         ctx,
         "coinjoin_coordinator",
-        title="Authorize CoinJoin",
+        title=_(i18n_keys.TITLE__AUTHORIZE_COINJOIN),
         description="Do you really want to take part in a CoinJoin transaction at:\n{}",
         description_param=msg.coordinator,
         description_param_font=ui.MONO,
@@ -75,9 +76,10 @@ async def authorize_coinjoin(
             ctx,
             "fee_over_threshold",
             "High mining fee",
-            "The mining fee of\n{} sats/vbyte\nis unexpectedly high.",
-            max_fee_per_vbyte,
+            "The mining fee is unexpectedly high.",
+            max_fee_per_vbyte + " sats/vbyte",
             ButtonRequestType.FeeOverThreshold,
+            description="MINING FEE",
         )
 
     authorization.set(msg)

@@ -40,6 +40,7 @@ __all__ = (
     "confirm_modify_output",
     "confirm_modify_fee",
     "confirm_coinjoin",
+    "show_pairing_error",
     "show_popup",
     "draw_simple_text",
     "request_passphrase_on_device",
@@ -78,6 +79,7 @@ async def confirm_action(
         verb,
         cancel_text=verb_cancel,
         icon_path=icon,
+        hold_confirm=hold,
     )
     await raise_if_cancelled(
         interact(ctx, confirm_screen, br_type, br_code),
@@ -428,9 +430,11 @@ async def confirm_payment_request(
     from trezor.lvglui.scrs.template import ConfirmPaymentRequest
 
     subtitle = " ".join(memos)
-    # TODO: i18n missing
     screen = ConfirmPaymentRequest(
-        f"Confirm {coin_shortcut} Payment", subtitle, amount, recipient_name
+        _(i18n_keys.TITLE__CONFIRM_PAYMENT).format(coin_shortcut),
+        subtitle,
+        amount,
+        recipient_name,
     )
     return await raise_if_cancelled(
         interact(
@@ -635,9 +639,10 @@ async def confirm_joint_total(
 ) -> None:
     from trezor.lvglui.scrs.template import JointTransactionDetailsBTC
 
-    # TODO: i18n missing
     screen = JointTransactionDetailsBTC(
-        f"Sign {coin_shortcut} Joint Transaction", spending_amount, total_amount
+        _(i18n_keys.TITLE__SIGN_STR_JOINT_TX).format(coin_shortcut),
+        spending_amount,
+        total_amount,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_joint_total", ButtonRequestType.SignTx)
@@ -683,11 +688,10 @@ async def confirm_modify_output(
     amount_change: str,
     amount_new: str,
 ) -> None:
-    # TODO: i18n missing
     if sign < 0:
-        description = "DECREASED BY:"
+        description = _(i18n_keys.LIST_KEY__INCREASED_BY__COLON)
     else:
-        description = "INCREASED BY:"
+        description = _(i18n_keys.LIST_KEY__DECREASED_BY__COLON)
     from trezor.lvglui.scrs.template import ModifyOutput
 
     screen = ModifyOutput(address, description, amount_change, amount_new)
@@ -707,14 +711,13 @@ async def confirm_modify_fee(
     user_fee_change: str,
     total_fee_new: str,
 ) -> None:
-    # TODO: i18n missing
     if sign == 0:
-        description = "NO CHANGE:"
+        description = _(i18n_keys.LIST_KEY__NO_CHANGE__COLON)
     else:
         if sign < 0:
-            description = "DECREASED BY:"
+            description = _(i18n_keys.LIST_KEY__DECREASED_BY__COLON)
         else:
-            description = "INCREASED BY:"
+            description = _(i18n_keys.LIST_KEY__INCREASED_BY__COLON)
 
     from trezor.lvglui.scrs.template import ModifyFee
 
@@ -727,8 +730,7 @@ async def confirm_modify_fee(
 async def confirm_coinjoin(
     ctx: wire.GenericContext, coin_name: str, max_rounds: int, max_fee_per_vbyte: str
 ) -> None:
-    # TODO: i18n missing
-    title = "Authorize CoinJoin"
+    title = _(i18n_keys.TITLE__AUTHORIZE_COINJOIN)
     from trezor.lvglui.scrs.template import ConfirmCoinJoin
 
     screen = ConfirmCoinJoin(
@@ -755,8 +757,7 @@ async def confirm_signverify(
     ctx: wire.GenericContext, coin: str, message: str, address: str, verify: bool
 ) -> None:
     if verify:
-        # TODO: i18n missing
-        header = f"Verify {coin} message"
+        header = _(i18n_keys.TITLE__VERIFY_STR_MESSAGE).format(coin)
         br_type = "verify_message"
     else:
         header = _(i18n_keys.TITLE__SIGN_STR_MESSAGE).format(coin)
@@ -819,8 +820,9 @@ async def request_pin_on_device(
     if attempts_remaining is None or attempts_remaining == device.PIN_MAX_ATTEMPTS:
         subprompt = ""
     elif attempts_remaining == 1:
-        # TODO: i18n missing
-        subprompt = "#af2b0e This is your last attempt #"
+        subprompt = (
+            f"#af2b0e {_(i18n_keys.MSG__INCORRECT_PIN_THIS_IS_YOUR_LAST_ATTEMPT)} #"
+        )
     else:
         subprompt = f"#af2b0e {_(i18n_keys.MSG__INCORRECT_PIN_STR_ATTEMPTS_LEFT).format(attempts_remaining)} #"
     from trezor.lvglui.scrs.pinscreen import InputPin
@@ -838,3 +840,13 @@ async def request_pin_tips(ctx: wire.GenericContext) -> None:
 
     tipscreen = PinTip()
     await ctx.wait(tipscreen.request())
+
+
+async def show_pairing_error() -> None:
+    await show_popup(
+        _(i18n_keys.TITLE__NOT_MATCH),
+        description=None,
+        subtitle=_(i18n_keys.SUBTITLE__BLUETOOTH_PAIR_NOT_MATCH),
+        timeout_ms=2000,
+        icon="A:/res/danger.png",
+    )

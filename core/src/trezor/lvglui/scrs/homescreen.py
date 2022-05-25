@@ -60,26 +60,16 @@ class MainScreen(Screen):
         self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
 
-        self.btn_settings = lv.btn(self)
-        self.btn_settings.set_size(144, 88)
-        self.btn_settings.set_pos(64, 112)
-        self.btn_settings.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn_settings.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.btn_settings = lv.imgbtn(self)
+        self.btn_settings.set_pos(64, 92)
         self.btn_settings.set_style_bg_img_src(
             "A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.btn_settings.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-        self.btn_info = lv.btn(self)
-        self.btn_info.set_size(144, 88)
-        self.btn_info.align_to(self.btn_settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
-        self.btn_info.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn_info.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.btn_info = lv.imgbtn(self)
+        self.btn_info.align_to(self.btn_settings, lv.ALIGN.OUT_RIGHT_MID, 96, 0)
         self.btn_info.set_style_bg_img_src(
-            "A:/res/book.png", lv.PART.MAIN | lv.STATE.DEFAULT
+            "A:/res/user_guide.png", lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.btn_info.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -208,12 +198,16 @@ class GeneralScreen(Screen):
 
     def get_str_from_lock_ms(self, time_ms) -> str:
         if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
-            return "Never"
+            return _(i18n_keys.ITEM__STATUS__NEVER)
         auto_lock_time = time_ms / 1000 // 60
         if auto_lock_time > 60:
-            text = f"{str(auto_lock_time // 60).split('.')[0]} hours"
+            text = _(i18n_keys.OPTION__STR_HOUR).format(
+                str(auto_lock_time // 60).split(".")[0]
+            )
         else:
-            text = f"{str(auto_lock_time).split('.')[0]} minutes"
+            text = _(i18n_keys.ITEM__STATUS__STR_MINUTES).format(
+                str(auto_lock_time).split(".")[0]
+            )
         return text
 
     def on_click(self, event_obj):
@@ -244,7 +238,9 @@ class AutoLockSetting(Screen):
         self.btns = [None] * (len(self.setting_items) + 1)
         for index, item in enumerate(self.setting_items):
             if not item == "Never":  # last item
-                item = f"{item} minutes"
+                item = _(i18n_keys.ITEM__STATUS__STR_MINUTES).format(item)
+            else:
+                item = _(i18n_keys.ITEM__STATUS__NEVER)
             self.btns[index] = ListItemBtn(self.container, item, has_next=False)
             self.btns[index].add_check_img()
             if item == GeneralScreen.cur_auto_lock:
@@ -254,7 +250,9 @@ class AutoLockSetting(Screen):
 
         if has_custom:
             self.btns[-1] = ListItemBtn(
-                self.container, f"{GeneralScreen.cur_auto_lock}(Custom)", has_next=False
+                self.container,
+                f"{GeneralScreen.cur_auto_lock}({_(i18n_keys.OPTION__CUSTOM__INSERT)})",
+                has_next=False,
             )
             self.btns[-1].add_check_img()  # type: ignore[Cannot access member "add_check_img" for type "None"]
             self.btns[-1].set_checked()  # type: ignore[Cannot access member "set_checked" for type "None"]
@@ -347,17 +345,18 @@ class ConnectSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.VALUE_CHANGED:
-            if __debug__:
-                if target == self.ble.switch:
-                    if target.has_state(lv.STATE.CHECKED):
+            if target == self.ble.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    if __debug__:
                         print("Bluetooth is on")
-                    else:
+                else:
+                    if __debug__:
                         print("Bluetooth is off")
-                # else:
-                #     if target.has_state(lv.STATE.CHECKED):
-                #         print("USB is on")
-                #     else:
-                #         print("USB is off")
+            # else:
+            #     if target.has_state(lv.STATE.CHECKED):
+            #         print("USB is on")
+            #     else:
+            #         print("USB is off")
 
 
 class AboutSetting(Screen):
@@ -366,33 +365,38 @@ class AboutSetting(Screen):
             self._init = True
         else:
             return
-        # model = device.get_model()
-        # version = device.get_version()
-        # serial = device.get_serial()
-        # ble_mac = device.get_ble_mac()
-        # storage = device.get_storage()
+        model = device.get_model()
+        version = device.get_firmware_version()
+        serial = device.get_serial()  # "FK1W2Y84JCDR"
+        ble_mac = device.get_ble_mac()
+        storage = device.get_storage()
         super().__init__(
-            prev_scr=prev_scr, title=_(i18n_keys.ITEM__ABOUT_DEVICE), nav_back=True
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
         self.container = ContainerFlexCol(self, self.title)
-        # TODO: i18n missing
         self.model = ListItemBtn(
-            self.container, "Model", right_text="OneKey Touch", has_next=False
+            self.container, _(i18n_keys.ITEM__MODEL), right_text=model, has_next=False
         )
         self.version = ListItemBtn(
-            self.container, "System Version", right_text="1.0.0", has_next=False
+            self.container,
+            _(i18n_keys.ITEM__SYSTEM_VERSION),
+            right_text=version,
+            has_next=False,
         )
         self.serial = ListItemBtn(
-            self.container, "Serial", right_text="FK1W2Y84JCDR", has_next=False
+            self.container, _(i18n_keys.ITEM__SERIAL), right_text=serial, has_next=False
         )
         self.ble_mac = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLUETOOTH),
-            right_text="B8:C3:16:DE:D8:46",
+            right_text=ble_mac,
             has_next=False,
         )
         self.storage = ListItemBtn(
-            self.container, "Storage", right_text="16 GB", has_next=False
+            self.container,
+            _(i18n_keys.ITEM__STORAGE),
+            right_text=storage,
+            has_next=False,
         )
 
 
@@ -432,11 +436,14 @@ class PowerOff(FullSizeWindow):
 class ShutingDown(FullSizeWindow):
     def __init__(self):
         super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
-        from trezor import loop, utils
+        from trezor import utils, loop
 
-        loop.sleep(5000)
-        self.destory()
-        utils.reset()
+        async def restart_delay():
+            await loop.sleep(3000)
+            utils.reset()
+
+        self.destory(3000)
+        workflow.spawn(restart_delay())
 
 
 class HomeScreenSetting(Screen):
@@ -495,7 +502,7 @@ class SecurityScreen(Screen):
         self.recovery_check = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
         )
-        self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
+        # self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
         self.rest_device = ListItemBtn(
             self.container, _(i18n_keys.ITEM__RESET_DEVICE), has_next=False
         )
@@ -526,24 +533,24 @@ class SecurityScreen(Screen):
                         RecoveryDevice(dry_run=True, enforce_wordlist=True),
                     )
                 )
-            elif target == self.passphrase:
-                from apps.management.apply_settings import apply_settings
-                from trezor.messages import ApplySettings
+            # elif target == self.passphrase:
+            #     from apps.management.apply_settings import apply_settings
+            #     from trezor.messages import ApplySettings
 
-                passphrase_enable = not device.is_passphrase_enabled()
-                if passphrase_enable:
-                    on_device = True
-                else:
-                    on_device = None
-                workflow.spawn(
-                    apply_settings(
-                        DUMMY_CONTEXT,
-                        ApplySettings(
-                            use_passphrase=passphrase_enable,
-                            passphrase_always_on_device=on_device,
-                        ),
-                    )
-                )
+            #     passphrase_enable = not device.is_passphrase_enabled()
+            #     if passphrase_enable:
+            #         on_device = True
+            #     else:
+            #         on_device = None
+            #     workflow.spawn(
+            #         apply_settings(
+            #             DUMMY_CONTEXT,
+            #             ApplySettings(
+            #                 use_passphrase=passphrase_enable,
+            #                 passphrase_always_on_device=on_device,
+            #             ),
+            #         )
+            #     )
             elif target == self.rest_device:
                 from apps.management.wipe_device import wipe_device
                 from trezor.messages import WipeDevice

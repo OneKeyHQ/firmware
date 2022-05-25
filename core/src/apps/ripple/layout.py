@@ -16,10 +16,11 @@ async def require_confirm_fee(ctx: Context, fee: int) -> None:
         ctx,
         "confirm_fee",
         title="Confirm fee",
-        content="Transaction fee:\n{}",
+        content="Transaction fee",
         param=format_amount(fee, helpers.DECIMALS) + " XRP",
         hide_continue=True,
         br_code=ButtonRequestType.ConfirmOutput,
+        description="FEE",
     )
 
 
@@ -28,10 +29,11 @@ async def require_confirm_destination_tag(ctx: Context, tag: int) -> None:
         ctx,
         "confirm_destination_tag",
         title="Confirm tag",
-        content="Destination tag:\n{}",
+        content="Destination tag",
         param=str(tag),
         hide_continue=True,
         br_code=ButtonRequestType.ConfirmOutput,
+        description="DESTINATION TAG",
     )
 
 

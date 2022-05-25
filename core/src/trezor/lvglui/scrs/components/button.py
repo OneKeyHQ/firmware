@@ -167,6 +167,17 @@ class ListItemBtnWithSwitch(lv.btn):
         self.switch.add_state(lv.STATE.CHECKED)
         self.switch.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+
+    def eventhandler(self, event) -> None:
+        code = event.code
+        target = event.get_target()
+        if code == lv.EVENT.CLICKED and target != self.switch:
+            if self.switch.get_state() == lv.STATE.CHECKED:
+                self.clear_state()
+            else:
+                self.add_state()
+            lv.event_send(self.switch, lv.EVENT.VALUE_CHANGED, None)
 
     def clear_state(self) -> None:
         self.switch.clear_state(lv.STATE.CHECKED)

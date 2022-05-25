@@ -3,6 +3,7 @@ from ubinascii import hexlify
 
 from trezor import ui
 from trezor.enums import ButtonRequestType, EthereumDataType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import EthereumFieldType, EthereumStructMember
 from trezor.strings import format_amount, format_plural
 from trezor.ui.layouts import (
@@ -37,6 +38,7 @@ def require_confirm_tx(
     if to_bytes:
         to_str = address_from_bytes(to_bytes, networks.by_chain_id(chain_id))
     else:
+        # TODO: i18n missing
         to_str = "new contract?"
     return confirm_output(
         ctx,
@@ -109,9 +111,9 @@ def require_confirm_unknown_token(
     contract_address_hex = "0x" + hexlify(address_bytes).decode()
     return confirm_address(
         ctx,
-        "Unknown token",
+        _(i18n_keys.TITLE__UNKNOWN_TOKEN),
         contract_address_hex,
-        description="Contract:",
+        description=_(i18n_keys.LIST_KEY__CONTRACT__COLON),
         br_type="unknown_token",
         icon="A:/res/shriek.png",
         icon_color=ui.ORANGE,
@@ -125,7 +127,7 @@ def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitabl
     return confirm_data(
         ctx,
         "confirm_data",
-        title="Overview Data",
+        title=_(i18n_keys.TITLE__VIEW_DATA),
         description=f"{data_total} bytes",
         data=data,
         br_code=ButtonRequestType.SignTx,
@@ -133,6 +135,7 @@ def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitabl
 
 
 async def confirm_typed_data_final(ctx: Context) -> None:
+    # TODO: i18n missing
     await confirm_action(
         ctx,
         "confirm_typed_data_final",
