@@ -267,6 +267,23 @@ TOUCHPRO_PUBKEYS = [
 ]
 
 
+'''
+    Develop pubkeys for touch/pro cosigning
+    Mnemonics:
+        1.manage 2.vehicle 3.pipe 4.scan 5.carpet 6.inch
+        7.tobacco 8.moment 9.minimum 10.robust 11.inner 12.march
+'''
+TOUCHPRO_DEV_PUBKEYS = [
+    "16ab2107d2c30467c1c803acdc89097d67024800f5f9036e534e7dd7c3950be7", # m/44h/0h/0h/0h/0h
+    "eddd3e60860caf1ae7fcd0413b14616aaf6577adaad07925ea01b4929a9a1dbd", # m/44h/0h/0h/0h/1h
+    "3846bc8eaf82cf507722115279feeb661414613c2b36b1dfabbbf12416469b13", # m/44h/0h/0h/0h/2h
+    "883f9bb6c737ee0b1d7322b116df6a6a718c4efe830d04f52230e7f8b15ad9e0", # m/44h/0h/0h/0h/3h
+    "fe0732ea66c07e370950d487b455ddcdc4f4aaf7dc65db3c4c618e2c5ecfc4e4", # m/44h/0h/0h/0h/4h
+    "44acf5acc845f4c11028fd6790b1d66e2c40a28ae382c0c93673f758583573dd", # m/44h/0h/0h/0h/5h
+    "eba31865a3c05d083921e8fcce8e05d06e8c7a1d816ff97e3b0c7e93b69a7f97", # m/44h/0h/0h/0h/6h
+]
+
+
 @click.command()
 @with_client
 @click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
