@@ -1,6 +1,7 @@
 import click
 import hashlib
 import struct
+import json
 from .. import special, tools
 from . import with_client
 from binascii import hexlify, unhexlify
@@ -272,8 +273,8 @@ TOUCHPRO_PUBKEYS = [
 @click.argument("firmware_file", type=click.File("rb+"))
 def ed25519_commit(client, address, firmware_file):
     address_n = tools.parse_path(address)
-    firmware_data = firmware_file.read()
 
+    firmware_data = firmware_file.read()
     try:
         fw = firmware_headers.parse_image(firmware_data)
     except Exception as e:
@@ -284,8 +285,8 @@ def ed25519_commit(client, address, firmware_file):
         raise click.ClickException(
             "Could not parse file (magic bytes: {!r})".format(magic)
         ) from e
-
     digest = fw.digest()
+
     pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
     ctr = None
     for i, key in enumerate(TOUCHPRO_PUBKEYS):
@@ -295,15 +296,64 @@ def ed25519_commit(client, address, firmware_file):
         raise click.ClickException("Not found in signer public keys")
 
     R = special.get_ed25519_nonce(client, address_n, digest, ctr).R
-    click.echo(R.hex())
+
+    output = json.dumps({"magic": firmware_data[:4].decode('utf-8'),
+            "digest": digest.hex(),
+            "pubkey": pubkey.hex(),
+            "R": R.hex()}, indent=4)
+    click.echo(output)
+
+    fname = "ed25519_commit_output_%s_%s.json" % (digest.hex()[0:4], pubkey.hex()[0:4])
+    with open(fname, "w") as f:
+        f.write(output)
+    click.echo("output saved to file %s" % fname) 
 
 
 @click.command()
-@click.argument("keys")
-def ed25519_combine_keys(keys):
-    keys = [bytes.fromhex(k) for k in keys.split(":")]
-    key = cosi.combine_keys(keys)
-    click.echo(key.hex())
+@click.option("--input_files", "-i", required=True, multiple=True, help="ed25519_commit output files")
+def ed25519_global_combine(input_files):
+    if len(input_files) != 4:
+        raise Exception("Need 4 input files for Global Key and Global R calculation")
+
+    inputs = []
+    for i in input_files:
+        with open(i, "r") as f:
+            inputs.append(json.loads(f.read()))
+
+    magics = list(set([i['magic'] for i in inputs]))
+    if len(magics) != 1:
+        raise Exception("Image header magic number not matched")
+    magic = magics[0]
+
+    digests = list(set([i['digest'] for i in inputs]))
+    if len(digests) != 1:
+        raise Exception("Image digest not matched")
+    digest = digests[0]
+
+    pubkeys = list(set([i['pubkey'] for i in inputs]))
+    if len(pubkeys) != 4:
+        raise Exception("Need 4 different public keys for Global Key calculation")
+
+    commitments = list(set([i['R'] for i in inputs]))
+    if len(commitments) != 4:
+        raise Exception("Need 4 different commitments for combine Global R calculation")
+    
+    pubkeys = [bytes.fromhex(k) for k in pubkeys]
+    global_pubkey = cosi.combine_keys(pubkeys)
+
+    commitments = [bytes.fromhex(c) for c in commitments]
+    global_commitment = cosi.combine_keys(commitments)
+
+    output = json.dumps({"magic": magic,
+            "digest": digest,
+            "global_pubkey": global_pubkey.hex(),
+            "global_commitment": global_commitment.hex()}, indent=4)
+    click.echo(output)
+
+    fname = "ed25519_global_combine_output_%s.json" % digest[0:4]
+    with open(fname, "w") as f:
+        f.write(output)
+    click.echo("output saved to file %s" % fname) 
 
 
 @click.command()
