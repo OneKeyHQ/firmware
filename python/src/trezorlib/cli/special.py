@@ -283,6 +283,11 @@ TOUCHPRO_DEV_PUBKEYS = [
     "eba31865a3c05d083921e8fcce8e05d06e8c7a1d816ff97e3b0c7e93b69a7f97", # m/44h/0h/0h/0h/6h
 ]
 
+def PUBKEYS(devmode=False):
+    if devmode:
+        return TOUCHPRO_DEV_PUBKEYS
+    return TOUCHPRO_PUBKEYS
+
 
 @click.command()
 @with_client
@@ -305,12 +310,10 @@ def ed25519_commit(client, address, firmware_file):
     digest = fw.digest()
 
     pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
-    ctr = None
-    for i, key in enumerate(TOUCHPRO_PUBKEYS):
-        if pubkey.hex() == key:
-            ctr = i
-    if ctr is None:
-        raise click.ClickException("Not found in signer public keys")
+    try:
+        ctr = PUBKEYS(devmode=False).index(pubkey.hex())
+    except ValueError:
+        raise click.ClickException("Public key not owned by any holder")
 
     R = special.get_ed25519_nonce(client, address_n, digest, ctr).R
 
@@ -417,7 +420,7 @@ def ed25519_cosign(client, address, commitment_file, firmware_file):
         raise Exception("Public key not found in commitment data")
 
     try:
-        ctr = TOUCHPRO_PUBKEYS.index(pubkey.hex())
+        ctr = PUBKEYS(devmode=False).index(pubkey.hex())
     except ValueError:
         raise click.ClickException("Public key not owned by any holder")
 
@@ -461,12 +464,12 @@ def ed25519_insert_sig(client, signature, pubkeys, firmware_file):
 
     sigmask = 0
     for pk in pubkeys:
-        idx = TOUCHPRO_PUBKEYS.index(pk)
+        idx = PUBKEYS(devmode=False).index(pk)
         sigmask |= 1 << idx
 
     fw.rehash()
     fw.insert_signature(signature, sigmask)
-    cosi.verify(signature, fw.digest(), 4, [bytes.fromhex(k) for k in TOUCHPRO_PUBKEYS], sigmask)
+    cosi.verify(signature, fw.digest(), 4, [bytes.fromhex(k) for k in PUBKEYS(devmode=False)], sigmask)
     click.echo(fw.format(True))
 
     updated_data = fw.dump()
