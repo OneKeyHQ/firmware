@@ -292,8 +292,9 @@ def PUBKEYS(devmode=False):
 @click.command()
 @with_client
 @click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
+@click.option("-d", "--devmode", is_flag=True, default=False)
 @click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_commit(client, address, firmware_file):
+def ed25519_commit(client, address, firmware_file, devmode):
     address_n = tools.parse_path(address)
 
     firmware_data = firmware_file.read()
@@ -311,7 +312,7 @@ def ed25519_commit(client, address, firmware_file):
 
     pubkey = special.export_ed25519_pubkey(client, address_n).pubkey
     try:
-        ctr = PUBKEYS(devmode=False).index(pubkey.hex())
+        ctr = PUBKEYS(devmode).index(pubkey.hex())
     except ValueError:
         raise click.ClickException("Public key not owned by any holder")
 
@@ -326,7 +327,7 @@ def ed25519_commit(client, address, firmware_file):
     fname = "ed25519_commit_output_%s_%s.json" % (digest.hex()[0:4], pubkey.hex()[0:4])
     with open(fname, "w") as f:
         f.write(output)
-    click.echo("output saved to file %s" % fname) 
+    return fname
 
 
 @click.command()
@@ -371,7 +372,7 @@ def ed25519_global_combine(input_files):
     fname = "ed25519_global_combine_output_%s.json" % digest[0:4]
     with open(fname, "w") as f:
         f.write(output)
-    click.echo("output saved to file %s" % fname) 
+    return fname
 
 
 @click.command()
@@ -388,8 +389,9 @@ def ed25519_combine_sigs(sigs, commitment):
 @with_client
 @click.option("-n", "--address", default="m/44h/0h/0h/0h/0h", help="BIP-32 path")
 @click.option("-c", "--commitment_file", required=True, help="the global pubkey and commitment file")
+@click.option("-d", "--devmode", is_flag=True, default=False)
 @click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_cosign(client, address, commitment_file, firmware_file):
+def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
     address_n = tools.parse_path(address)
 
     firmware_data = firmware_file.read()
@@ -420,7 +422,7 @@ def ed25519_cosign(client, address, commitment_file, firmware_file):
         raise Exception("Public key not found in commitment data")
 
     try:
-        ctr = PUBKEYS(devmode=False).index(pubkey.hex())
+        ctr = PUBKEYS(devmode).index(pubkey.hex())
     except ValueError:
         raise click.ClickException("Public key not owned by any holder")
 
@@ -437,15 +439,16 @@ def ed25519_cosign(client, address, commitment_file, firmware_file):
         global_commitment.hex()[:4], pubkey.hex()[:4])
     with open(fname, "w") as f:
         f.write(output)
-    click.echo("output saved to file %s" % fname)
+    return fname
 
 
 @click.command()
 @with_client
 @click.option("-s", "--signature", required=True, help="the combined cosi signature")
 @click.option("-p", "--pubkeys", required=True, help="the pubkeys participate the cosigning")
+@click.option("-d", "--devmode", is_flag=True, default=False)
 @click.argument("firmware_file", type=click.File("rb+"))
-def ed25519_insert_sig(client, signature, pubkeys, firmware_file):
+def ed25519_insert_sig(client, signature, pubkeys, firmware_file, devmode):
     pubkeys = pubkeys.split(':')
     signature = bytes.fromhex(signature)
     firmware_data = firmware_file.read()
@@ -464,7 +467,7 @@ def ed25519_insert_sig(client, signature, pubkeys, firmware_file):
 
     sigmask = 0
     for pk in pubkeys:
-        idx = PUBKEYS(devmode=False).index(pk)
+        idx = PUBKEYS(devmode).index(pk)
         sigmask |= 1 << idx
 
     fw.rehash()
