@@ -326,16 +326,12 @@ static void send_msg_features(uint8_t iface_num,
     MSG_SEND_ASSIGN_VALUE(fw_minor, ((hdr->version >> 8) & 0xFF));
     MSG_SEND_ASSIGN_VALUE(fw_patch, ((hdr->version >> 16) & 0xFF));
     MSG_SEND_ASSIGN_STRING_LEN(fw_vendor, vhdr->vstr, vhdr->vstr_len);
-    MSG_SEND_ASSIGN_REQUIRED_VALUE(onekey_major, (hdr->onekey_version & 0xFF));
-    MSG_SEND_ASSIGN_REQUIRED_VALUE(onekey_minor,
-                                   ((hdr->onekey_version >> 8) & 0xFF));
-    MSG_SEND_ASSIGN_REQUIRED_VALUE(onekey_patch,
-                                   ((hdr->onekey_version >> 16) & 0xFF));
+    MSG_SEND_ASSIGN_VALUE(onekey_version, hdr->onekey_version);
   } else {
     MSG_SEND_ASSIGN_VALUE(firmware_present, false);
   }
   if (ble_name_state()) {
-    //MSG_SEND_ASSIGN_STRING_LEN(ble_name, ble_get_name(), BLE_NAME_LEN);
+    MSG_SEND_ASSIGN_STRING_LEN(ble_name, ble_get_name(), BLE_NAME_LEN);
   }
   MSG_SEND(Features);
 }
