@@ -45,6 +45,7 @@
 #include "modtrezorio-usb.h"
 // clang-format on
 #if TREZOR_MODEL == T
+#include "modtrezorio-ble.h"
 #include "modtrezorio-buz.h"
 #include "modtrezorio-fatfs.h"
 #include "modtrezorio-moto.h"
