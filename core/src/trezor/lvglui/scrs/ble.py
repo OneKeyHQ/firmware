@@ -12,7 +12,7 @@ class PairCodeDisplay(FullSizeWindow):
             icon_path="a:/res/icon_ble.png",
         )
         self.pair_code = lv.label(self)
-        self.pair_code.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
+        self.pair_code.set_long_mode(lv.label.LONG.WRAP)
         self.pair_code.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -24,6 +24,7 @@ class PairCodeDisplay(FullSizeWindow):
         )
         self.pair_code.set_style_text_letter_space(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.pair_code.set_text(pair_code)
+        self.pair_code.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
         self.btn_yes.enable(lv.color_hex(0x323232), lv.color_hex(0xFFFFFF))
         self.destoried = False
 

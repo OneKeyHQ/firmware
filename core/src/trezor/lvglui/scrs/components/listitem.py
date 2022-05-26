@@ -83,6 +83,7 @@ class DisplayItem(lv.obj):
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label_top = lv.label(self)
         self.label_top.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.label_top.set_long_mode(lv.label.LONG.WRAP)
         self.label_top.set_style_text_color(
             lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -91,6 +92,7 @@ class DisplayItem(lv.obj):
 
         self.label = lv.label(self)
         self.label.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.label.set_long_mode(lv.label.LONG.WRAP)
         self.label.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )

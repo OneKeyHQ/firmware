@@ -27,6 +27,8 @@ _DEFAULT_BACKUP_TYPE = BackupType.Bip39
 async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # validate parameters and device state
     _validate_reset_device(msg)
+    # wipe storage to make sure the device is in a clear state
+    storage.reset()
     if msg.language is not None:
         storage.device.set_language(msg.language)
         i18n_refresh()
@@ -46,9 +48,6 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # on device reset, we need to ask for a new strength to override the default  value 12
     if isinstance(ctx, wire.DummyContext):
         msg.strength = await request_strength()
-
-    # wipe storage to make sure the device is in a clear state
-    storage.reset()
 
     # request and set new PIN
     if msg.pin_protection:

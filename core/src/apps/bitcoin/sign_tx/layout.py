@@ -4,9 +4,10 @@ from ubinascii import hexlify
 
 from trezor import utils, wire
 from trezor.enums import AmountUnit, ButtonRequestType, OutputScriptType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount, format_timestamp
 from trezor.ui import layouts
-from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
 from .. import addresses
 from . import omni
 

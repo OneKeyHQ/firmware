@@ -2,7 +2,6 @@
 # from trezor.crypto import bip39, hashlib, random
 # from trezor.enums import BackupType
 
-from storage import device
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.scrs import font_LANG_MIX, font_LANG_MIX_TITLE
@@ -43,8 +42,6 @@ class InitScreen(Screen):
         )
 
     def on_click(self, target):
-        device.set_language(langs_keys[self.roller.get_selected()])
-        i18n_refresh()
         QuickStart()
 
     def on_value_changed(self, target):
@@ -53,7 +50,7 @@ class InitScreen(Screen):
         i18n_refresh(lang_key)
         self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
         self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))
-        language = langs[target.get_selected()][0]
+        language = lang_key
 
 
 class QuickStart(FullSizeWindow):

@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
 
 import storage
-import storage.device
 import storage.recovery
-from trezor import config, ui, utils, wire
+from trezor import config, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import Success
@@ -35,6 +34,9 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     the device anytime and continue without a computer.
     """
     _validate(msg)
+    if not msg.dry_run:
+        # wipe storage to make sure the device is in a clear state
+        storage.reset()
     if msg.language is not None:
         storage.device.set_language(msg.language)
         i18n_refresh()
@@ -42,10 +44,6 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
         return await recovery_process(ctx)
 
     await _continue_dialog(ctx, msg)
-
-    if not msg.dry_run:
-        # wipe storage to make sure the device is in a clear state
-        storage.reset()
 
     # for dry run pin needs to be entered
     if msg.dry_run:

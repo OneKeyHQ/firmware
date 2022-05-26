@@ -28,7 +28,7 @@ class Address(FullSizeWindow):
                 else _(i18n_keys.LIST_KEY__XPUB_STR_COSIGNER__COLON).format(i + 1),
                 xpub,
             )
-        self.container.set_style_max_height(150, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.container.set_style_max_height(140, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
@@ -171,7 +171,7 @@ class BlobDisPlay(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(self.container, description, content)
-        self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.item1.set_style_max_height(280, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 
@@ -182,8 +182,8 @@ class ConfirmMetaData(FullSizeWindow):
         )
         if description:
             self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 48))
-            self.item1 = DisplayItem(self.container, description + ":", data)
-            self.item1.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.item1 = DisplayItem(self.container, description, data)
+            self.item1.set_style_max_height(350, lv.PART.MAIN | lv.STATE.DEFAULT)
             self.item1.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
 
 

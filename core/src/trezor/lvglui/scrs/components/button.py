@@ -38,7 +38,7 @@ class NormalButton(lv.btn):
     def __init__(self, parent, text=_(i18n_keys.BUTTON__NEXT), enable=True) -> None:
         super().__init__(parent)
         self.set_size(320, 62)
-        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -64)
+        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -24)
         self.set_style_radius(32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -94,6 +94,7 @@ class ListItemBtn(lv.btn):
             self.img_right.set_src("A:/res/arrow-right.png")
             self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.label_left = lv.label(self)
+        self.label_left.set_long_mode(lv.label.LONG.WRAP)
         self.label_left.set_text(text)
         self.label_left.set_style_text_font(
             font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -107,6 +108,7 @@ class ListItemBtn(lv.btn):
             self.label_left.set_align(lv.ALIGN.LEFT_MID)
         if right_text:
             self.label_right = lv.label(self)
+            self.label_right.set_long_mode(lv.label.LONG.WRAP)
             self.label_right.set_text(right_text)
             self.label_right.set_width(200)
             self.label_right.set_style_text_align(
@@ -147,6 +149,7 @@ class ListItemBtnWithSwitch(lv.btn):
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         label_left = lv.label(self)
         label_left.set_text(text)
+        label_left.set_long_mode(lv.label.LONG.WRAP)
         label_left.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         label_left.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT

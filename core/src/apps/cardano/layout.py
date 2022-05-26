@@ -9,6 +9,7 @@ from trezor.enums import (
     CardanoNativeScriptType,
     CardanoTxSigningMode,
 )
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import CardanoAddressParametersType
 from trezor.strings import format_amount
 from trezor.ui.layouts import (
@@ -20,7 +21,6 @@ from trezor.ui.layouts import (
     confirm_text,
     show_address,
 )
-from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from apps.common.paths import address_n_to_str
 
@@ -86,6 +86,7 @@ CERTIFICATE_TYPE_NAMES = {
 }
 
 TITLE = _(i18n_keys.TITLE__CONFIRM_TRANSACTION)
+
 
 def format_coin_amount(amount: int, network_id: int) -> str:
     currency = "ADA" if network_ids.is_mainnet(network_id) else "tADA"

@@ -21,7 +21,7 @@ def advance(i: int = 1) -> None:
 def report_init() -> None:
     workflow.close_others()
     ui.display.clear()
-    ui.header("Signing transaction")
+    # ui.header("Signing transaction")
 
 
 def report() -> None:

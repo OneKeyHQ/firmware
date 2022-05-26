@@ -193,8 +193,7 @@ async def confirm_path_warning(
             ctx,
             FullSizeWindow(
                 _(i18n_keys.TITLE__UNKNOWN_PATH),
-                # TODO: i18n missing
-                f"{path_type}: {path} is unknown, Are you sure?",
+                _(i18n_keys.SUBTITLE__BTC_GET_ADDRESS_UNKNOWN_PATH).format(path),
                 _(i18n_keys.BUTTON__CONFIRM),
                 _(i18n_keys.BUTTON__CANCEL),
                 icon_path="A:/res/warning.png",
@@ -260,7 +259,9 @@ async def show_address(
     await interact(
         ctx,
         Address(
-            _(i18n_keys.TITLE__STR_ADDRESS).format(network.upper()), address_n, address
+            title if title else _(i18n_keys.TITLE__STR_ADDRESS).format(network.upper()),
+            address_n,
+            address,
         ),
         "show_address",
         ButtonRequestType.Address,
@@ -820,11 +821,9 @@ async def request_pin_on_device(
     if attempts_remaining is None or attempts_remaining == device.PIN_MAX_ATTEMPTS:
         subprompt = ""
     elif attempts_remaining == 1:
-        subprompt = (
-            f"#af2b0e {_(i18n_keys.MSG__INCORRECT_PIN_THIS_IS_YOUR_LAST_ATTEMPT)} #"
-        )
+        subprompt = f"{_(i18n_keys.MSG__INCORRECT_PIN_THIS_IS_YOUR_LAST_ATTEMPT)}"
     else:
-        subprompt = f"#af2b0e {_(i18n_keys.MSG__INCORRECT_PIN_STR_ATTEMPTS_LEFT).format(attempts_remaining)} #"
+        subprompt = f"{_(i18n_keys.MSG__INCORRECT_PIN_STR_ATTEMPTS_LEFT).format(attempts_remaining)}"
     from trezor.lvglui.scrs.pinscreen import InputPin
 
     pinscreen = InputPin(title=prompt, subtitle=subprompt)

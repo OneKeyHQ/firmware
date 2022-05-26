@@ -1,11 +1,7 @@
 import storage
 from trezor import config, log, loop, ui, utils, wire
 from trezor.lvglui import lvgl_tick
-from trezor.lvglui.scrs.bootscreen import BootScreen
-from trezor.lvglui.scrs.lockscreen import LockScreen
 from trezor.pin import show_pin_timeout
-
-from apps.common.request_pin import can_lock_device, verify_user_pin
 
 lvgl_task = lvgl_tick()
 
@@ -17,6 +13,10 @@ def clear() -> None:
 
 
 async def bootscreen() -> None:
+    from trezor.lvglui.scrs.bootscreen import BootScreen
+    from trezor.lvglui.scrs.lockscreen import LockScreen
+    from apps.common.request_pin import can_lock_device, verify_user_pin
+
     bootscreen = BootScreen()
     # wait for bootscreen animation to finish
     await loop.sleep(1500)
