@@ -99,7 +99,11 @@ void ui_screen_boot(const vendor_header *const vhdr,
   }
 
   const uint8_t *vimg = vhdr->vimg;
+#if PRODUCTION_MODEL == 'H'
+  const uint32_t fw_version = hdr->onekey_version;
+#else
   const uint32_t fw_version = hdr->version;
+#endif
 
   display_bar(0, 0, DISPLAY_RESX, DISPLAY_RESY, boot_background);
 
@@ -214,7 +218,11 @@ void ui_screen_firmware_info(const vendor_header *const vhdr,
   display_icon(16, 54, 32, 32, toi_icon_info + 12, sizeof(toi_icon_info) - 12,
                COLOR_BL_GRAY, COLOR_BL_BG);
   if (vhdr && hdr) {
+#if PRODUCTION_MODEL == 'H'
+    ver_str = format_ver("Firmware %d.%d.%d by", (hdr->onekey_version));
+#else
     ver_str = format_ver("Firmware %d.%d.%d by", (hdr->version));
+#endif
     display_text(55, 70, ver_str, -1, FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_BG);
     display_vendor_string(vhdr->vstr, vhdr->vstr_len, COLOR_BL_GRAY);
   } else {
@@ -261,7 +269,11 @@ void ui_screen_install_confirm_upgrade(const vendor_header *const vhdr,
   display_text(55, 70, "Update firmware by", -1, FONT_NORMAL, COLOR_BL_FG,
                COLOR_BL_BG);
   int next_y = display_vendor_string(vhdr->vstr, vhdr->vstr_len, COLOR_BL_FG);
+#if PRODUCTION_MODEL == 'H'
+  const char *ver_str = format_ver("to version %d.%d.%d?", hdr->onekey_version);
+#else
   const char *ver_str = format_ver("to version %d.%d.%d?", hdr->version);
+#endif
   display_text(55, next_y, ver_str, -1, FONT_NORMAL, COLOR_BL_FG, COLOR_BL_BG);
   ui_confirm_cancel_buttons();
 }
@@ -280,7 +292,7 @@ void ui_screen_install_confirm_newvendor_or_downgrade_wipe(
                           FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
                           current_vhdr.vsig_m, current_vhdr.vsig_n,
                           current_vhdr.vpub, &current_hdr)) {
-      current_version = format_ver("v%d.%d.%d", current_hdr.version);
+      current_version = format_ver("v%d.%d.%d", current_hdr.onekey_version);
     }
   }
 
@@ -300,7 +312,7 @@ void ui_screen_install_confirm_newvendor_or_downgrade_wipe(
                       FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);
   display_text_center(DISPLAY_RESX / 2, 370, vhdr->vstr, vhdr->vstr_len,
                       FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);
-  const char *ver_str = format_ver("(%d.%d.%d)?", hdr->version);
+  const char *ver_str = format_ver("(%d.%d.%d)?", hdr->onekey_version);
   display_text_center(DISPLAY_RESX / 2, 400, ver_str, -1, FONT_NORMAL,
                       COLOR_BL_GRAY, COLOR_BL_FG);
   display_text_center(DISPLAY_RESX / 2, 588, "Unsafe firmware, do not install.",
@@ -629,8 +641,8 @@ void ui_wipe_confirm(const image_header *const hdr) {
   ui_title_update();
   display_image(203, 143, 74, 74, toi_icon_onekey + 12,
                 sizeof(toi_icon_onekey) - 12);
-  if (hdr && (hdr->version != 0)) {
-    const char *ver_str = format_ver("v%d.%d.%d", (hdr->version));
+  if (hdr && (hdr->onekey_version != 0)) {
+    const char *ver_str = format_ver("v%d.%d.%d", (hdr->onekey_version));
     display_text_center(DISPLAY_RESX / 2, 246, ver_str, -1, FONT_NORMAL,
                         COLOR_BL_GRAY, COLOR_BL_FG);
   }
@@ -652,13 +664,13 @@ void ui_install_confirm(image_header *current_hdr,
   ui_title_update();
   display_image(203, 143, 74, 74, toi_icon_onekey + 12,
                 sizeof(toi_icon_onekey) - 12);
-  const char *ver_str = format_ver("v%d.%d.%d", current_hdr->version);
+  const char *ver_str = format_ver("v%d.%d.%d", current_hdr->onekey_version);
   display_text_center(DISPLAY_RESX / 2, 246, ver_str, -1, FONT_NORMAL,
                       COLOR_BL_GRAY, COLOR_BL_FG);
   display_text_center(DISPLAY_RESX / 2, 277, "Firmware Update", -1, FONT_BOLD36,
                       COLOR_BL_BG, COLOR_BL_FG);
-  ver_str =
-      format_ver("Install system by OneKey(v%d.%d.%d)?", new_hdr->version);
+  ver_str = format_ver("Install system by OneKey(v%d.%d.%d)?",
+                       new_hdr->onekey_version);
   display_text_center(DISPLAY_RESX / 2, 346, ver_str, -1, FONT_NORMAL,
                       COLOR_BL_GRAY, COLOR_BL_FG);
   display_image(32, 674, 0xc0, 0x3e, toi_icon_cancel_new + 12,
