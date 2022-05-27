@@ -18,10 +18,11 @@ static bool ble_switch = false;
 static bool get_ble_switch = false;
 static char ble_name[BLE_NAME_LEN + 1] = {0};
 static char ble_ver[6] = {0};
-static char ble_proto_ver[6] = {0};
+static char ble_proto_ver[16 + 1] = {0};
 static char ble_boot_ver[6] = {0};
 static uint8_t dev_pwr_sta = 0;
 static uint8_t dev_press_sta = 0;
+static uint8_t dev_pwr = 0;
 
 static uint8_t calXor(uint8_t *buf, uint32_t len) {
   uint8_t tmp = 0;
@@ -118,7 +119,7 @@ void ble_uart_poll(void) {
       get_ble_ver = true;
       break;
     case BLE_CMD_PROTO_VER:
-      memcpy(ble_proto_ver, ble_usart_msg.cmd_vale, 5);
+      memcpy(ble_proto_ver, ble_usart_msg.cmd_vale, 16);
       get_ble_proto_ver = true;
       break;
     case BLE_CMD_BOOT_VER:
@@ -135,6 +136,9 @@ void ble_uart_poll(void) {
       break;
     case BLE_CMD_RPESS:
       dev_press_sta = ble_usart_msg.cmd_vale[0];
+      break;
+    case BLE_CMD_PWR:
+      dev_pwr = ble_usart_msg.cmd_vale[0];
       break;
     default:
       break;
