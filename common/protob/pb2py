@@ -96,7 +96,7 @@ PROTOC_PREFIX = Path(PROTOC).resolve().parent.parent
 ENUM_ENTRY = c.PrefixedArray(c.Byte, c.Int16ul)
 
 FIELD_STRUCT = c.Struct(
-    "tag" / c.Byte,
+    "tag" / c.Short,
     "flags_and_type"
     / c.BitStruct(
         "is_required" / c.Flag,
@@ -626,7 +626,7 @@ class RustBlobRenderer:
         return b"".join(MSG_ENTRY.build(entry) for entry in msg_entries)
 
     def encode_field_default(self, field):
-        if field.number > 0xFF:
+        if field.number > 0xFFFF:
             raise ValueError("Invalid field number")
 
         default = field.default_value
