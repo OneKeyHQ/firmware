@@ -124,8 +124,8 @@ class ToifMode(Enum):
 
 
 class HeaderType(Enum):
-    FIRMWARE = b"TRZF"
-    BOOTLOADER = b"TRZB"
+    FIRMWARE = b"OKTF"
+    BOOTLOADER = b"OKTB"
 
 
 class EnumAdapter(c.Adapter):
@@ -164,7 +164,7 @@ VendorTrust = c.Transformed(c.BitStruct(
 
 VendorHeader = c.Struct(
     "_start_offset" / c.Tell,
-    "magic" / c.Const(b"TRZV"),
+    "magic" / c.Const(b"OKTV"),
     "header_len" / c.Int32ul,
     "expiry" / c.Int32ul,
     "version" / c.Struct(
@@ -294,10 +294,10 @@ def parse(data: bytes) -> ParsedFirmware:
     if data[:4] == b"TRZR":
         version = FirmwareFormat.TREZOR_ONE
         cls = LegacyFirmware
-    elif data[:4] == b"TRZV":
+    elif data[:4] == b"OKTV":
         version = FirmwareFormat.TREZOR_T
         cls = VendorFirmware
-    elif data[:4] == b"TRZF":
+    elif data[:4] == b"OKTF":
         version = FirmwareFormat.TREZOR_ONE_V2
         cls = FirmwareImage
     else:
@@ -350,7 +350,7 @@ def header_digest(header: c.Container, hash_function: Callable = blake2s) -> byt
     stripped_header.signature = b"\0" * 64
     stripped_header.v1_key_indexes = [0, 0, 0]
     stripped_header.v1_signatures = [b"\0" * 64] * 3
-    if header.magic == b"TRZV":
+    if header.magic == b"OKTV":
         header_type = VendorHeader
     else:
         header_type = FirmwareHeader
