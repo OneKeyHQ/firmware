@@ -40,6 +40,7 @@
 #include "memzero.h"
 
 #include "ble.h"
+#include "bootui.h"
 #include "spi.h"
 
 #define MSG_HEADER1_LEN 9
@@ -326,7 +327,8 @@ static void send_msg_features(uint8_t iface_num,
     MSG_SEND_ASSIGN_VALUE(fw_minor, ((hdr->version >> 8) & 0xFF));
     MSG_SEND_ASSIGN_VALUE(fw_patch, ((hdr->version >> 16) & 0xFF));
     MSG_SEND_ASSIGN_STRING_LEN(fw_vendor, vhdr->vstr, vhdr->vstr_len);
-    MSG_SEND_ASSIGN_VALUE(onekey_version, hdr->onekey_version);
+    const char *ver_str = format_ver("%d.%d.%d", hdr->onekey_version);
+    MSG_SEND_ASSIGN_STRING_LEN(onekey_version, ver_str, 5);
   } else {
     MSG_SEND_ASSIGN_VALUE(firmware_present, false);
   }

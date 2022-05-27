@@ -112,7 +112,7 @@ message Features {
     optional uint32 display_rotation = 39;      // in degrees from North
     optional bool experimental_features = 40;   // are experimental message types enabled?
     optional string ble_name = 501;             // OneKey BLE name
-    optional uint32 onekey_version = 508;       // OneKey version
+    optional string onekey_version = 508;       // OneKey version
 }
 
 /**

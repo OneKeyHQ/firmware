@@ -1995,7 +1995,7 @@ if TYPE_CHECKING:
         display_rotation: "int | None"
         experimental_features: "bool | None"
         ble_name: "str | None"
-        onekey_version: "int | None"
+        onekey_version: "str | None"
 
         def __init__(
             self,
@@ -2038,7 +2038,7 @@ if TYPE_CHECKING:
             display_rotation: "int | None" = None,
             experimental_features: "bool | None" = None,
             ble_name: "str | None" = None,
-            onekey_version: "int | None" = None,
+            onekey_version: "str | None" = None,
         ) -> None:
             pass
 

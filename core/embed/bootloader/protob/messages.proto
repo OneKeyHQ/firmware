@@ -67,7 +67,7 @@ message Features {
     optional string fw_vendor = 25;             // reported firmware vendor if in bootloader mode
     // optional bytes fw_vendor_keys = 26;      // obsoleted, use fw_vendor
     optional string ble_name = 501;             // OneKey BLE name
-    optional uint32 onekey_version = 508;       // OneKey version
+    optional string onekey_version = 508;       // OneKey version
 }
 
 /**

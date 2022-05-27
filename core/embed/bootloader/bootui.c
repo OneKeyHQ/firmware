@@ -75,7 +75,7 @@ static void ui_confirm_cancel_buttons(void) {
                COLOR_BL_BG, COLOR_BL_DONE);
 }
 
-static const char *format_ver(const char *format, uint32_t version) {
+const char *format_ver(const char *format, uint32_t version) {
   static char ver_str[64];
   mini_snprintf(ver_str, sizeof(ver_str), format, (int)(version & 0xFF),
                 (int)((version >> 8) & 0xFF), (int)((version >> 16) & 0xFF)

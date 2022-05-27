@@ -6,6 +6,7 @@ Features.revision               max_size:20
 Features.model                  max_size:17
 Features.fw_vendor              max_size:256
 Features.ble_name               max_size:32
+Features.onekey_version         max_size:32
 
 Ping.message                    max_size:256
 
