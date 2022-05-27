@@ -333,7 +333,7 @@ def _ed25519_commit(client, address, firmware_data, devmode):
 def ed25519_commit(client, address, firmware_file, devmode):
     firmware_data = firmware_file.read()
     fname, output = _ed25519_commit(client, address, firmware_data, devmode)
-    click.echo(output)
+    click.echo("Output saved to file")
     return fname
 
 
@@ -383,7 +383,7 @@ def _ed25519_global_combine(input_files):
 @click.option("--input_files", "-i", required=True, multiple=True, help="ed25519_commit output files")
 def ed25519_global_combine(input_files):
     fname, output = _ed25519_global_combine(input_files)
-    click.echo(output)
+    click.echo("Output saved to file.")
     return fname
 
 
@@ -445,7 +445,7 @@ def _ed25519_cosign(client, address, commitment_file, firmware_data, devmode):
 def ed25519_cosign(client, address, commitment_file, firmware_file, devmode):
     firmware_data = firmware_file.read()
     fname, output = _ed25519_cosign(client, address, commitment_file, firmware_data, devmode)
-    click.echo(output)
+    click.echo("Output saved to file")
     return fname
 
 
