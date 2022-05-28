@@ -1994,8 +1994,16 @@ if TYPE_CHECKING:
         auto_lock_delay_ms: "int | None"
         display_rotation: "int | None"
         experimental_features: "bool | None"
+        offset: "int | None"
         ble_name: "str | None"
+        ble_ver: "str | None"
+        ble_enable: "bool | None"
+        se_enable: "bool | None"
+        se_ver: "str | None"
+        backup_only: "bool | None"
         onekey_version: "str | None"
+        onekey_serial: "str | None"
+        bootloader_version: "str | None"
 
         def __init__(
             self,
@@ -2037,8 +2045,16 @@ if TYPE_CHECKING:
             auto_lock_delay_ms: "int | None" = None,
             display_rotation: "int | None" = None,
             experimental_features: "bool | None" = None,
+            offset: "int | None" = None,
             ble_name: "str | None" = None,
+            ble_ver: "str | None" = None,
+            ble_enable: "bool | None" = None,
+            se_enable: "bool | None" = None,
+            se_ver: "str | None" = None,
+            backup_only: "bool | None" = None,
             onekey_version: "str | None" = None,
+            onekey_serial: "str | None" = None,
+            bootloader_version: "str | None" = None,
         ) -> None:
             pass
 

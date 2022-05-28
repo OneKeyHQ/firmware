@@ -138,10 +138,26 @@ typedef struct _Features {
     uint32_t fw_patch; 
     bool has_fw_vendor;
     char fw_vendor[256]; 
+    bool has_offset;
+    uint32_t offset; 
     bool has_ble_name;
     char ble_name[32]; 
+    bool has_ble_ver;
+    char ble_ver[16]; 
+    bool has_ble_enable;
+    bool ble_enable; 
+    bool has_se_enable;
+    bool se_enable; 
+    bool has_se_ver;
+    char se_ver[16]; 
+    bool has_backup_only;
+    bool backup_only; 
     bool has_onekey_version;
     char onekey_version[32]; 
+    bool has_onekey_serial;
+    char onekey_serial[32]; 
+    bool has_bootloader_version;
+    char bootloader_version[8]; 
 } Features;
 
 typedef struct _FirmwareErase { 
@@ -220,7 +236,7 @@ extern "C" {
 /* Initializer values for message structs */
 #define Initialize_init_default                  {0}
 #define GetFeatures_init_default                 {0}
-#define Features_init_default                    {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, "", false, ""}
+#define Features_init_default                    {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, 0, false, "", false, "", false, 0, false, 0, false, "", false, 0, false, "", false, "", false, ""}
 #define Ping_init_default                        {false, ""}
 #define Success_init_default                     {false, ""}
 #define Failure_init_default                     {false, _FailureType_MIN, false, ""}
@@ -241,7 +257,7 @@ extern "C" {
 #define SEMessageSignature_init_default          {{0, {0}}}
 #define Initialize_init_zero                     {0}
 #define GetFeatures_init_zero                    {0}
-#define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, "", false, ""}
+#define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, 0, false, "", false, "", false, 0, false, 0, false, "", false, 0, false, "", false, "", false, ""}
 #define Ping_init_zero                           {false, ""}
 #define Success_init_zero                        {false, ""}
 #define Failure_init_zero                        {false, _FailureType_MIN, false, ""}
@@ -290,8 +306,16 @@ extern "C" {
 #define Features_fw_minor_tag                    23
 #define Features_fw_patch_tag                    24
 #define Features_fw_vendor_tag                   25
+#define Features_offset_tag                      500
 #define Features_ble_name_tag                    501
+#define Features_ble_ver_tag                     502
+#define Features_ble_enable_tag                  503
+#define Features_se_enable_tag                   504
+#define Features_se_ver_tag                      506
+#define Features_backup_only_tag                 507
 #define Features_onekey_version_tag              508
+#define Features_onekey_serial_tag               509
+#define Features_bootloader_version_tag          510
 #define FirmwareErase_length_tag                 1
 #define FirmwareRequest_offset_tag               1
 #define FirmwareRequest_length_tag               2
@@ -333,8 +357,16 @@ X(a, STATIC,   OPTIONAL, UINT32,   fw_major,         22) \
 X(a, STATIC,   OPTIONAL, UINT32,   fw_minor,         23) \
 X(a, STATIC,   OPTIONAL, UINT32,   fw_patch,         24) \
 X(a, STATIC,   OPTIONAL, STRING,   fw_vendor,        25) \
+X(a, STATIC,   OPTIONAL, UINT32,   offset,          500) \
 X(a, STATIC,   OPTIONAL, STRING,   ble_name,        501) \
-X(a, STATIC,   OPTIONAL, STRING,   onekey_version,  508)
+X(a, STATIC,   OPTIONAL, STRING,   ble_ver,         502) \
+X(a, STATIC,   OPTIONAL, BOOL,     ble_enable,      503) \
+X(a, STATIC,   OPTIONAL, BOOL,     se_enable,       504) \
+X(a, STATIC,   OPTIONAL, STRING,   se_ver,          506) \
+X(a, STATIC,   OPTIONAL, BOOL,     backup_only,     507) \
+X(a, STATIC,   OPTIONAL, STRING,   onekey_version,  508) \
+X(a, STATIC,   OPTIONAL, STRING,   onekey_serial,   509) \
+X(a, STATIC,   OPTIONAL, STRING,   bootloader_version, 510)
 #define Features_CALLBACK NULL
 #define Features_DEFAULT NULL
 
@@ -490,7 +522,7 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 #define DeviceInfoSettings_size                  67
 #define DeviceInfo_size                          135
 #define Failure_size                             260
-#define Features_size                            526
+#define Features_size                            622
 #define FirmwareErase_size                       6
 #define FirmwareRequest_size                     12
 #define GetDeviceInfo_size                       0
