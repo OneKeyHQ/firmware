@@ -174,7 +174,8 @@ impl Decoder {
         //  - Protobuf-encoded default value.
         // We need to look to the field descriptor to know how to interpret the value
         // after the field tag.
-        while let Ok(field_tag) = stream.read_short() {
+        while let Ok(_field_tag) = stream.read_short() {
+            let field_tag = ((_field_tag >> 8) & 0xFF) | ((_field_tag << 8) & 0xFF00);
             let field = msg
                 .field(field_tag)
                 .ok_or_else(|| Error::KeyError(field_tag.into()))?;
