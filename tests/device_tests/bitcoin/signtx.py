@@ -2,11 +2,11 @@ import os
 from decimal import Decimal
 from typing import Sequence, Tuple
 
-import bitcoin
 import requests
+
+import bitcoin
 from bitcoin.core import COutPoint, CScript, CTransaction, CTxIn, CTxOut
 from bitcoin.wallet import CBitcoinAddress
-
 from trezorlib import messages
 
 T = messages.RequestType

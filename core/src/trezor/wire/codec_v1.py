@@ -35,6 +35,7 @@ if __debug__:
         def __exit__(self, exc_type: Any, value: Any, traceback: Any) -> None:
             self.in_use = False
 
+
 else:
 
     class BufferLock:
