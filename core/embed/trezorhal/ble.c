@@ -1,7 +1,6 @@
 #include "ble.h"
 #include "common.h"
 #include "display.h"
-#include "icon_install.h"
 #include "sys.h"
 #include "usart.h"
 
