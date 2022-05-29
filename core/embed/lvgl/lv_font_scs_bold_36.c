@@ -8,7 +8,6 @@ static x_header_t __g_xbf_hd = {
     .bpp = 4,
 };
 
-static SRAM1 uint8_t __g_font_buf[1024] = {0};
 static SRAM1 DWORD clmt[SZ_TBL];
 static FIL font_f;
 static FRESULT res;
@@ -16,7 +15,9 @@ static UINT nums = 0;
 static bool is_opend = false;
 static uint32_t glyph_location = 0;
 
-static uint8_t *__user_font_getdata(int offset, int size) {
+static font_data_cache font_cache = {0};
+
+static int __user_font_getdata(uint8_t *data_buf, int offset, int size) {
   if (!is_opend) {
     uint8_t buf[4] = {0};
     uint32_t len = 0;
@@ -28,29 +29,29 @@ static uint8_t *__user_font_getdata(int offset, int size) {
 
       res = f_lseek(&font_f, LOCA_OFFSET);
       if (FR_OK != res) {
-        return NULL;
+        return -1;
       }
       if (f_read(&font_f, &len, 4, &nums) != FR_OK ||
           f_read(&font_f, buf, 4, &nums) != FR_OK ||
           memcmp("loca", buf, 4) != 0) {
-        return NULL;
+        return -1;
       }
       glyph_location = len + LOCA_OFFSET;
 
       is_opend = true;
     } else {
-      return NULL;
+      return -1;
     }
   }
   res = f_lseek(&font_f, offset);
   if (FR_OK != res) {
-    return NULL;
+    return -1;
   }
-  res = f_read(&font_f, __g_font_buf, size, &nums);
+  res = f_read(&font_f, data_buf, size, &nums);
   if (FR_OK != res) {
-    return NULL;
+    return -1;
   }
-  return __g_font_buf;
+  return 0;
 }
 
 static const uint8_t *__user_font_get_bitmap(const lv_font_t *font,
@@ -58,19 +59,31 @@ static const uint8_t *__user_font_get_bitmap(const lv_font_t *font,
   if (unicode_letter > __g_xbf_hd.max || unicode_letter < __g_xbf_hd.min) {
     return NULL;
   }
-
-  uint32_t unicode_offset = (unicode_letter - __g_xbf_hd.min + 1) * 4;
-  uint32_t *p_pos = (uint32_t *)__user_font_getdata(
-      unicode_offset + LOCA_OFFSET + LOCA_VALUE_OFFSET, 4);
-
-  if (p_pos[0] != 0) {
-    uint32_t pos = p_pos[0] + glyph_location;
-    glyph_dsc_t *gdsc =
-        (glyph_dsc_t *)__user_font_getdata(pos, sizeof(glyph_dsc_t));
-
-    return __user_font_getdata(pos + sizeof(glyph_dsc_t),
-                               gdsc->box_w * gdsc->box_h * __g_xbf_hd.bpp / 8);
+  uint8_t *font_data = NULL;
+  uint32_t data_len = 0;
+  font_data = font_cache_get_letter(&font_cache, unicode_letter, &data_len);
+  if (font_data) {
+    return font_data + sizeof(glyph_dsc_t);
+  } else {
+    uint32_t unicode_offset = (unicode_letter - __g_xbf_hd.min + 1) * 4;
+    uint32_t len = 0;
+    uint8_t buf[8] = {0};
+    __user_font_getdata(buf, unicode_offset + LOCA_OFFSET + LOCA_VALUE_OFFSET,
+                        8);
+    uint32_t *p_pos = (uint32_t *)buf;
+    if (p_pos[0] != 0) {
+      len = p_pos[1] - p_pos[0];
+      font_data = font_malloc(len);
+      if (__user_font_getdata(font_data, glyph_location + p_pos[0], len) != 0) {
+        return NULL;
+      }
+      font_cache_add_letter(&font_cache, unicode_letter, font_data, len);
+      return font_data + sizeof(glyph_dsc_t);
+    } else {
+      return NULL;
+    }
   }
+
   return NULL;
 }
 
@@ -82,22 +95,36 @@ static bool __user_font_get_glyph_dsc(const lv_font_t *font,
     return NULL;
   }
 
-  uint32_t unicode_offset = (unicode_letter - __g_xbf_hd.min + 1) * 4;
-  uint32_t *p_pos = (uint32_t *)__user_font_getdata(
-      unicode_offset + LOCA_OFFSET + LOCA_VALUE_OFFSET, 4);
-  if (p_pos[0] != 0) {
-    glyph_dsc_t *gdsc = (glyph_dsc_t *)__user_font_getdata(
-        glyph_location + p_pos[0], sizeof(glyph_dsc_t));
-
-    dsc_out->adv_w = (gdsc->adv_w + (1 << 3)) >> 4;
-    dsc_out->box_h = gdsc->box_h;
-    dsc_out->box_w = gdsc->box_w;
-    dsc_out->ofs_x = gdsc->ofs_x;
-    dsc_out->ofs_y = gdsc->ofs_y;
-    dsc_out->bpp = __g_xbf_hd.bpp;
-    return true;
+  uint8_t *font_data = NULL;
+  uint32_t data_len = 0;
+  font_data = font_cache_get_letter(&font_cache, unicode_letter, &data_len);
+  if (font_data) {
+  } else {
+    uint32_t unicode_offset = (unicode_letter - __g_xbf_hd.min + 1) * 4;
+    uint32_t len = 0;
+    uint8_t buf[8] = {0};
+    __user_font_getdata(buf, unicode_offset + LOCA_OFFSET + LOCA_VALUE_OFFSET,
+                        8);
+    uint32_t *p_pos = (uint32_t *)buf;
+    if (p_pos[0] != 0) {
+      len = p_pos[1] - p_pos[0];
+      font_data = font_malloc(len);
+      if (__user_font_getdata(font_data, glyph_location + p_pos[0], len) != 0) {
+        return false;
+      }
+      font_cache_add_letter(&font_cache, unicode_letter, font_data, len);
+    } else {
+      return false;
+    }
   }
-  return false;
+  glyph_dsc_t *gdsc = (glyph_dsc_t *)font_data;
+  dsc_out->adv_w = (gdsc->adv_w + (1 << 3)) >> 4;
+  dsc_out->box_h = gdsc->box_h;
+  dsc_out->box_w = gdsc->box_w;
+  dsc_out->ofs_x = gdsc->ofs_x;
+  dsc_out->ofs_y = gdsc->ofs_y;
+  dsc_out->bpp = __g_xbf_hd.bpp;
+  return true;
 }
 
 // Source Han Sans,Bold,36
