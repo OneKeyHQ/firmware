@@ -296,6 +296,8 @@ static void check_bootloader_version(void) {
 #endif
 
 int main(void) {
+  volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
+
   SystemCoreClockUpdate();
 
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
@@ -326,12 +328,18 @@ int main(void) {
   ble_usart_init();
   spi_slave_init();
 
+  secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
+
+  if (stay_in_bootloader_flag == STAY_IN_BOOTLOADER_FLAG) {
+    *STAY_IN_FLAG_ADDR = 0;
+    stay_in_bootloader = sectrue;
+  }
+
   // delay to detect touch
   uint32_t touched = boot_touch_detect(1000);
 
   vendor_header vhdr;
   image_header hdr;
-  secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 
   // detect whether the devices contains a valid firmware
 

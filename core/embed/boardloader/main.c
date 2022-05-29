@@ -285,6 +285,8 @@ static secbool copy_sdcard(uint32_t code_len) {
 }
 
 int main(void) {
+  volatile uint32_t stay_in_boardloader_flag = *STAY_IN_FLAG_ADDR;
+
   reset_flags_reset();
 
   periph_init();
@@ -330,7 +332,10 @@ int main(void) {
   bool stay_in_msc = false;
   uint32_t touched = 0;
 
-  if (fatfs_check_res() != 0) {
+  if (stay_in_boardloader_flag == STAY_IN_BOARDLOADER_FLAG) {
+    stay_in_msc = true;
+    *STAY_IN_FLAG_ADDR = 0;
+  } else if (fatfs_check_res() != 0) {
     stay_in_msc = true;
   }
 
