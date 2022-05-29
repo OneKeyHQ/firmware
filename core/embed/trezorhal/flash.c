@@ -170,7 +170,9 @@ void flash_init(void) {}
 
 secbool flash_unlock_write(void) {
   HAL_FLASH_Unlock();
-#if PRODUCTION_MODEL != 'H'
+#if defined(STM32H747xx)
+  SCB_DisableDCache();
+#else
   FLASH->SR |= FLASH_STATUS_ALL_FLAGS;  // clear all status flags
 #endif
   return sectrue;
@@ -178,6 +180,9 @@ secbool flash_unlock_write(void) {
 
 secbool flash_lock_write(void) {
   HAL_FLASH_Lock();
+#if defined(STM32H747xx)
+  SCB_EnableDCache();
+#endif
   return sectrue;
 }
 
