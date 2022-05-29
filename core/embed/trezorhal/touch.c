@@ -298,8 +298,8 @@ uint32_t boot_touch_detect(uint32_t timeout) {
     data = touch_read();
     if (data != 0) {
       if (data & TOUCH_START) {
-        x_start = (data >> 12) & 0xFFF;
-        y_start = data & 0xFFF;
+        x_start = x_mov = (data >> 12) & 0xFFF;
+        y_start = y_mov = data & 0xFFF;
       }
 
       if (data & TOUCH_MOVE) {
@@ -307,7 +307,7 @@ uint32_t boot_touch_detect(uint32_t timeout) {
         y_mov = data & 0xFFF;
       }
 
-      if ((abs(x_start - x_mov) > 200) || (abs(y_start - y_mov) > 200)) {
+      if ((abs(x_start - x_mov) > 100) || (abs(y_start - y_mov) > 100)) {
         return 1;
       }
     }
