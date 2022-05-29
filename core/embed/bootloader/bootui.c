@@ -633,7 +633,7 @@ void ui_title_update(void) {
     display_icon(DISPLAY_RESX - 64 + 15, 0, 18, 32, toi_icon_bluetooth + 12,
                  sizeof(toi_icon_bluetooth) - 12, COLOR_BL_BG, boot_background);
   } else {
-    display_bar(DISPLAY_RESX - 64 + 15, 0, 18, 32, boot_background);
+    display_bar(DISPLAY_RESX - 64 + 14, 0, 18, 32, boot_background);
   }
 }
 
