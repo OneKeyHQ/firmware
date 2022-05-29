@@ -24,6 +24,7 @@
 #include "atca_hal.h"
 #include "common.h"
 #include "compiler_traits.h"
+#include "device.h"
 #include "display.h"
 #include "emmc.h"
 #include "flash.h"
@@ -305,6 +306,9 @@ int main(void) {
 
   touch_init();
   touch_power_on();
+
+  device_para_init();
+  // device_test();
 
   qspi_flash_init();
   qspi_flash_config();

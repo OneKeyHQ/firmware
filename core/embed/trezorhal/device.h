@@ -29,7 +29,7 @@ typedef struct __attribute__((packed)) {
 
 void device_set_factory_mode(bool mode);
 bool device_is_factory_mode(void);
-void device_init(void);
+void device_para_init(void);
 bool device_serial_set(void);
 bool device_set_serial(char *dev_serial);
 bool device_cpu_firmware_set(void);

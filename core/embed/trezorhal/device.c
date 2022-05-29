@@ -10,6 +10,7 @@
 #include "qspi_flash.h"
 #include "rand.h"
 #include "sha2.h"
+#include "sys.h"
 #include "touch.h"
 
 static DeviceInfomation dev_info = {0};
@@ -32,7 +33,7 @@ void device_set_factory_mode(bool mode) { factory_mode = mode; }
 
 bool device_is_factory_mode(void) { return factory_mode; }
 
-void device_init(void) {
+void device_para_init(void) {
   dev_info.st_id[0] = HAL_GetUIDw0();
   dev_info.st_id[1] = HAL_GetUIDw1();
   dev_info.st_id[2] = HAL_GetUIDw2();
@@ -46,11 +47,6 @@ void device_init(void) {
   if (!flash_otp_is_locked(FLASH_OTP_RANDOM_KEY)) {
     uint8_t entropy[FLASH_OTP_BLOCK_SIZE] = {0};
     random_buffer(entropy, FLASH_OTP_BLOCK_SIZE);
-    // uint32_t r;
-    // for (int i = 0; i < FLASH_OTP_BLOCK_SIZE; i += 4) {
-    //   r = random32();
-    //   memcpy(entropy + i, (uint8_t *)&r, 4);
-    // }
     ensure(
         flash_otp_write(FLASH_OTP_RANDOM_KEY, 0, entropy, FLASH_OTP_BLOCK_SIZE),
         NULL);
@@ -109,7 +105,7 @@ bool device_set_serial(char *dev_serial) {
                              FLASH_OTP_BLOCK_SIZE),
              NULL);
       ensure(flash_otp_lock(FLASH_OTP_DEVICE_SERIAL), NULL);
-      device_init();
+      device_para_init();
       return true;
     }
   }
@@ -148,7 +144,7 @@ bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver) {
                              FLASH_OTP_BLOCK_SIZE),
              NULL);
       ensure(flash_otp_lock(FLASH_OTP_CPU_FIRMWARE_INFO), NULL);
-      device_init();
+      device_para_init();
       return true;
     }
   }
@@ -219,6 +215,43 @@ void ui_test_input(void) {
   }
 }
 
+static void ui_generic_confirm_simple(const char *msg) {
+  if (msg == NULL) return;
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, msg, -1, FONT_BOLD36,
+                      COLOR_WHITE, COLOR_BLACK);
+
+  display_bar_radius(32, DISPLAY_RESY - 160, 128, 64, COLOR_RED, COLOR_BLACK,
+                     16);
+  display_bar_radius(DISPLAY_RESX - 32 - 128, DISPLAY_RESY - 160, 128, 64,
+                     COLOR_GREEN, COLOR_BLACK, 16);
+  display_text(70, DISPLAY_RESY - 115, "No", -1, FONT_BOLD36, COLOR_WHITE,
+               COLOR_RED);
+  display_text(DISPLAY_RESX - 128, DISPLAY_RESY - 115, "Yes", -1, FONT_BOLD36,
+               COLOR_WHITE, COLOR_GREEN);
+}
+
+static bool ui_response(void) {
+  for (;;) {
+    uint32_t evt = touch_click();
+    uint16_t x = touch_unpack_x(evt);
+    uint16_t y = touch_unpack_y(evt);
+
+    if (!evt) {
+      continue;
+    }
+    // clicked on Cancel button
+    if (x >= 32 && x < 32 + 128 && y > DISPLAY_RESY - 160 &&
+        y < DISPLAY_RESY - 160 + 64) {
+      return false;
+    }
+    // clicked on Confirm button
+    if (x >= DISPLAY_RESX - 32 - 128 && x < DISPLAY_RESX - 32 &&
+        y > DISPLAY_RESY - 160 && y < DISPLAY_RESY - 160 + 64) {
+      return true;
+    }
+  }
+}
+
 void device_test(void) {
   if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
     return;
@@ -230,7 +263,7 @@ void device_test(void) {
   while (!touch_click()) {
   }
 
-  // ui_test_input();
+  ui_test_input();
 
   display_clear();
 
@@ -257,11 +290,51 @@ void device_test(void) {
     display_text(0, 50, "SPI-FLASH test done", -1, FONT_NORMAL, COLOR_WHITE,
                  COLOR_BLACK);
   }
+
+  buzzer_init();
+
+  buzzer_ctrl(1);
+  hal_delay(1000);
+  buzzer_ctrl(0);
+  hal_delay(1000);
+  buzzer_ctrl(1);
+  hal_delay(1000);
+  buzzer_ctrl(0);
+
+  ui_generic_confirm_simple("beep test");
+  if (ui_response()) {
+    display_text(0, 80, "beep test done", -1, FONT_NORMAL, COLOR_WHITE,
+                 COLOR_BLACK);
+  } else {
+    display_text(0, 80, "beep test faild", -1, FONT_NORMAL, COLOR_RED,
+                 COLOR_BLACK);
+    while (1)
+      ;
+  }
+  display_bar(0, 100, DISPLAY_RESX, DISPLAY_RESY - 100, COLOR_BLACK);
+
+  motor_init();
+
+  motor_ctrl(MOTOR_COAST);
+  hal_delay(2000);
+  motor_ctrl(MOTOR_BRAKE);
+
+  ui_generic_confirm_simple("motor test");
+  if (ui_response()) {
+    display_text(0, 110, "motor test done", -1, FONT_NORMAL, COLOR_WHITE,
+                 COLOR_BLACK);
+  } else {
+    display_text(0, 110, "motor test faild", -1, FONT_NORMAL, COLOR_RED,
+                 COLOR_BLACK);
+    while (1)
+      ;
+  }
+
   char count_str[24] = {0};
   for (int i = 3; i >= 0; i--) {
-    display_bar(0, 50, DISPLAY_RESX, 80, COLOR_BLACK);
+    display_bar(0, 110, DISPLAY_RESX, 140, COLOR_BLACK);
     mini_snprintf(count_str, sizeof(count_str), "Done! Restarting in %d s", i);
-    display_text(0, 80, count_str, -1, FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+    display_text(0, 140, count_str, -1, FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
     hal_delay(1000);
   }
   HAL_NVIC_SystemReset();
