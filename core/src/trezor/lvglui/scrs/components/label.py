@@ -12,7 +12,7 @@ class Title(lv.label):
                 align_base, lv.ALIGN.OUT_BOTTOM_MID, relative_pos[0], relative_pos[1]
             )
         else:
-            self.align(lv.ALIGN.TOP_MID, 0, 132)
+            self.align(lv.ALIGN.TOP_MID, 0, 92)
         self.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )

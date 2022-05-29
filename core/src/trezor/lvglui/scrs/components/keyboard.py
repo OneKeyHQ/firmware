@@ -13,11 +13,17 @@ def compute_mask(text: str) -> int:
     return mask
 
 
-def change_key_bg(dsc: lv.obj_draw_part_dsc_t, id1: int, id2: int, enabled: bool):
+def change_key_bg(
+    dsc: lv.obj_draw_part_dsc_t,
+    id1: int,
+    id2: int,
+    enabled: bool,
+    all_enabled: bool = True,
+) -> None:
     if enabled:
         if dsc.id == id1:
             dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
-        elif dsc.id == id2:
+        elif dsc.id == id2 and all_enabled:
             dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
     else:
         if dsc.id == id1:
@@ -48,6 +54,7 @@ class BIP39Keyboard(lv.keyboard):
         self.ta.set_max_length(11)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("abcdefghijklmnopqrstuvwxyz")
+        self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btnm_map = [
             "q",
             "w",
@@ -227,7 +234,7 @@ class NumberKeyboard(lv.keyboard):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.ta = lv.textarea(parent)
-        self.ta.align(lv.ALIGN.TOP_MID, 0, 240)
+        self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
         self.ta.set_size(200, lv.SIZE.CONTENT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
@@ -244,6 +251,7 @@ class NumberKeyboard(lv.keyboard):
         self.ta.set_accepted_chars("0123456789")
         self.ta.set_max_length(50)
         self.ta.set_password_mode(True)
+        self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         nums = [i for i in range(10)]
         random.shuffle(nums)
         btnm_map = [
@@ -286,8 +294,10 @@ class NumberKeyboard(lv.keyboard):
         if event.code == lv.EVENT.DRAW_PART_BEGIN:
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
-            if len(txt_input) > 0:
+            if len(txt_input) > 3:
                 change_key_bg(dsc, 9, 11, True)
+            elif len(txt_input) > 0:
+                change_key_bg(dsc, 9, 11, True, False)
             else:
                 change_key_bg(dsc, 9, 11, False)
 
@@ -316,6 +326,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         )
         self.ta.set_max_length(max_len)
         self.ta.set_password_mode(True)
+        self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btn_map_text_lower = [
             "q",
             "w",

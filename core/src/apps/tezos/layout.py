@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor import ui
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
 from trezor.ui.layouts import (
     confirm_address,
@@ -88,7 +89,7 @@ async def require_confirm_set_delegate(ctx: Context, fee: int) -> None:
         hide_continue=True,
         icon_color=ui.BLUE,
         br_code=ButtonRequestType.SignTx,
-        description="FEE",
+        description=_(i18n_keys.LIST_KEY__FEE__COLON),
     )
 
 
@@ -172,5 +173,5 @@ async def require_confirm_manager_remove_delegate(ctx: Context, fee: int) -> Non
         icon=ui.ICON_RECEIVE,
         icon_color=ui.RED,
         br_code=ButtonRequestType.SignTx,
-        description="FEE",
+        description=_(i18n_keys.LIST_KEY__FEE__COLON),
     )

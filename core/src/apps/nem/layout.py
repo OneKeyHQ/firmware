@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_metadata, confirm_properties
 
@@ -30,7 +31,7 @@ async def require_confirm_fee(ctx: Context, action: str, fee: int) -> None:
         param=f"{format_amount(fee, NEM_MAX_DIVISIBILITY)} XEM",
         hide_continue=True,
         br_code=ButtonRequestType.ConfirmOutput,
-        description="FEE",
+        description=_(i18n_keys.LIST_KEY__FEE__COLON),
     )
 
 

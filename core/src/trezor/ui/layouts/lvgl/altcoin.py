@@ -2,6 +2,7 @@ from typing import Sequence
 
 from trezor import wire
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from .common import interact, raise_if_cancelled
 
@@ -19,7 +20,7 @@ async def confirm_total_ethereum(
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
     screen = TransactionDetailsETH(
-        f"Sign {network} Transaction",
+        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network),
         from_address,
         to_address,
         amount,
@@ -46,7 +47,7 @@ async def confirm_total_ethereum_eip1559(
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
     screen = TransactionDetailsETH(
-        f"Sign {network} Transaction",
+        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network),
         from_address,
         to_address,
         amount,

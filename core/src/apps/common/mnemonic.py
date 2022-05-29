@@ -85,11 +85,12 @@ if not utils.BITCOIN_ONLY:
 
 def _start_progress() -> None:
     from trezor.ui.layouts import draw_simple_text
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
     # Because we are drawing to the screen manually, without a layout, we
     # should make sure that no other layout is running.
     workflow.close_others()
-    draw_simple_text("Please wait")
+    draw_simple_text(_(i18n_keys.TITLE__PLEASE_WAIT))
 
 
 def _render_progress(progress: int, total: int) -> None:

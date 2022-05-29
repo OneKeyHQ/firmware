@@ -12,17 +12,20 @@ if TYPE_CHECKING:
 _PREFIX = const(42330)  # 0xA55A
 _FORMAT = ">HHB"
 _HEADER_LEN = const(5)
-_PRESS_SHORT = _USB_STATUS_PLUG_IN = _BLE_STATUS_CONNECTED = const(1)
 # fmt: off
-_PRESS_LONG = _USB_STATUS_PLUG_OUT = _BLE_STATUS_DISCONNECTED = _BLE_PAIR_SUCCESS = _CMD_BLE_STATUS = const(2)
+_CMD_BLE_NAME = _PRESS_SHORT = _USB_STATUS_PLUG_IN = _BLE_STATUS_CONNECTED = _BLE_PAIR_SUCCESS = const(1)
+_PRESS_LONG = _USB_STATUS_PLUG_OUT = _BLE_STATUS_DISCONNECTED = _BLE_PAIR_FAILED = _CMD_BLE_STATUS = const(2)
 # fmt: on
-_POWER_STATUS_CHARGING = _BLE_PAIR_FAILED = _CMD_BLE_PAIR_CODE = const(3)
+_POWER_STATUS_CHARGING = _CMD_BLE_PAIR_CODE = const(3)
 _CMD_BLE_PAIR_RES = const(4)
+_CMD_NRF_VERSION = const(5)
 _CMD_DEVICE_CHARGING_STATUS = const(8)
 _CMD_BATTEARY_STATUS = const(9)
 _CMD_SIDE_BUTTON_PRESS = const(10)
 CHARGING = False
 SCREEN: PairCodeDisplay | None = None
+BLE_NAME: str | None = None
+NRF_VERSION: str | None = None
 
 
 async def handle_uart():
@@ -45,17 +48,10 @@ async def process_push() -> None:
         deal_ble_status(value)
     elif cmd == _CMD_BLE_PAIR_CODE:
         # show six bytes pair code as string
-        global SCREEN
-        pair_codes = "".join(
-            list(map(lambda c: chr(c), ustruct.unpack(">BBBBBB", value)))
-        )
-        from trezor.lvglui.scrs.ble import PairCodeDisplay
-
-        SCREEN = PairCodeDisplay(pair_codes)
+        deal_ble_pair(value)
     elif cmd == _CMD_BLE_PAIR_RES:
-        # paring result 2 success 3 failed
+        # paring result 1 success 2 failed
         await deal_pair_res(value)
-
     elif cmd == _CMD_DEVICE_CHARGING_STATUS:
         # 1 usb plug in 2 usb plug out 3 charging
         deal_charging_state(value)
@@ -67,9 +63,24 @@ async def process_push() -> None:
     elif cmd == _CMD_SIDE_BUTTON_PRESS:
         # 1 short press 2 long press
         deal_button_press(value)
+    elif cmd == _CMD_BLE_NAME:
+        # retrieve ble name has format: ^T[0-9]{4}$
+        retrieve_ble_name(value)
+    elif cmd == _CMD_NRF_VERSION:
+        # retrieve nrf version
+        retrieve_nrf_version(value)
     else:
         if __debug__:
             print("unknown or not care command:", cmd)
+
+
+def deal_ble_pair(value):
+    global SCREEN
+    pair_codes = value.decode("utf-8")
+    # pair_codes = "".join(list(map(lambda c: chr(c), ustruct.unpack(">6B", value))))
+    from trezor.lvglui.scrs.ble import PairCodeDisplay
+
+    SCREEN = PairCodeDisplay(pair_codes)
 
 
 def deal_button_press(value: bytes) -> None:
@@ -97,11 +108,10 @@ def deal_charging_state(value: bytes) -> None:
 
 async def deal_pair_res(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
-    if res == _BLE_PAIR_SUCCESS:
-        pass
-    elif res == _BLE_PAIR_FAILED:
+    if res in [_BLE_PAIR_SUCCESS, _BLE_PAIR_FAILED]:
         if SCREEN is not None and not SCREEN.destoried:
             SCREEN.destory()
+    if res == _BLE_PAIR_FAILED:
         from trezor.ui.layouts import show_pairing_error
 
         await show_pairing_error()
@@ -119,3 +129,15 @@ def deal_ble_status(value: bytes) -> None:
         # ignore other status
         if __debug__:
             print("BLE status:", res)
+
+
+def retrieve_ble_name(value: bytes) -> None:
+    global BLE_NAME
+    if value != b"":
+        BLE_NAME = value.decode("utf-8")
+
+
+def retrieve_nrf_version(value: bytes) -> None:
+    global NRF_VERSION
+    if value != b"":
+        NRF_VERSION = value.decode("utf-8")

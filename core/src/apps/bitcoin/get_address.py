@@ -89,6 +89,8 @@ async def get_address(
             mac = get_address_mac(address, coin.slip44, keychain)
 
     if msg.show_display:
+        from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
         path = address_n_to_str(msg.address_n)
         if msg.multisig:
             if msg.multisig.nodes:
@@ -96,7 +98,6 @@ async def get_address(
             else:
                 pubnodes = [hd.node for hd in msg.multisig.pubkeys]
             multisig_index = multisig_pubkey_index(msg.multisig, node.public_key())
-            from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
             title = _(i18n_keys.TITLE__STR_MULTISIG_ADDRESS_STR_OF_STR).format(
                 coin.coin_shortcut.upper(), msg.multisig.m, len(pubnodes)
@@ -112,11 +113,27 @@ async def get_address(
                 network=coin.coin_shortcut,
             )
         else:
+            if msg.script_type == InputScriptType.SPENDWITNESS:
+                title = _(i18n_keys.TITLE__STR_ADDRESS_SEGWIT).format(
+                    coin.coin_shortcut.upper()
+                )
+            elif msg.script_type == InputScriptType.SPENDP2SHWITNESS:
+                title = _(i18n_keys.TITLE__STR_ADDRESS_LEGACY_SEGWIT).format(
+                    coin.coin_shortcut.upper()
+                )
+            elif msg.script_type == InputScriptType.SPENDTAPROOT:
+                title = _(i18n_keys.TITLE__STR_ADDRESS_TAPROOT).format(
+                    coin.coin_shortcut.upper()
+                )
+            else:
+                title = _(i18n_keys.TITLE__STR_ADDRESS).format(
+                    coin.coin_shortcut.upper()
+                )
             await show_address(
                 ctx,
                 address=address,
                 address_n=path,
-                network=coin.coin_shortcut,
+                title=title,
             )
 
     return Address(address=address, mac=mac)

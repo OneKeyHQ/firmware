@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_metadata
 from trezor.ui.layouts.lvgl.altcoin import confirm_total_ripple
@@ -15,12 +16,12 @@ async def require_confirm_fee(ctx: Context, fee: int) -> None:
     await confirm_metadata(
         ctx,
         "confirm_fee",
-        title="Confirm fee",
-        content="Transaction fee",
+        title=_(i18n_keys.TITLE__CONFIRM_FEE),
+        content=_(i18n_keys.SUBTITLE__TRANSACTION_FEE),
         param=format_amount(fee, helpers.DECIMALS) + " XRP",
         hide_continue=True,
         br_code=ButtonRequestType.ConfirmOutput,
-        description="FEE",
+        description=_(i18n_keys.LIST_KEY__FEE__COLON),
     )
 
 

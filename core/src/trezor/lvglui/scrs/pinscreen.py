@@ -63,7 +63,9 @@ class InputPin(FullSizeWindow):
             title=kwargs.get("title", _(i18n_keys.TITLE__ENTER_PIN)),
             subtitle=kwargs.get("subtitle", ""),
         )
-        self.subtitle.set_recolor(True)
+        self.subtitle.set_style_text_color(
+            lv.color_hex(0xAF2B0E), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)
         self.keyboard.ta.add_event_cb(self.on_event, lv.EVENT.VALUE_CHANGED, None)
@@ -76,10 +78,8 @@ class InputPin(FullSizeWindow):
             return
         input = self.keyboard.ta.get_text()
         if len(input) < 4:
-            # TODO: missing i18n
-            self.subtitle.set_text("Length must be 4 digits or more")
-            self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
             return
+        self.clean()
         self.destory()
         self.channel.publish(input)
 

@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
 
 import storage
-import storage.device
 import storage.recovery
-from trezor import config, ui, utils, wire
+from trezor import config, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import Success
@@ -35,6 +34,9 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     the device anytime and continue without a computer.
     """
     _validate(msg)
+    if not msg.dry_run:
+        # wipe storage to make sure the device is in a clear state
+        storage.reset()
     if msg.language is not None:
         storage.device.set_language(msg.language)
         i18n_refresh()
@@ -42,10 +44,6 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
         return await recovery_process(ctx)
 
     await _continue_dialog(ctx, msg)
-
-    if not msg.dry_run:
-        # wipe storage to make sure the device is in a clear state
-        storage.reset()
 
     # for dry run pin needs to be entered
     if msg.dry_run:
@@ -90,39 +88,20 @@ def _validate(msg: RecoveryDevice) -> None:
                 raise wire.ProcessError(f"Forbidden field set in dry-run: {key}")
 
 
-if not utils.LVGL_UI:
-
-    async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
-        if not msg.dry_run:
-            await confirm_reset_device(
-                ctx, "Do you really want to\nrecover a wallet?", recovery=True
-            )
-        else:
-            await confirm_action(
-                ctx,
-                "confirm_seedcheck",
-                title="Seed check",
-                description="Do you really want to check the recovery seed?",
-                icon=ui.ICON_RECOVERY,
-                br_code=ButtonRequestType.ProtectCall,
-            )
-
-else:
-
-    async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
-        if not msg.dry_run:
-            await confirm_reset_device(
-                ctx, _(i18n_keys.SUBTITLE__DEVICE_RECOVER_RESTORE_WALLET), recovery=True
-            )
-        else:
-            await confirm_action(
-                ctx,
-                "confirm_seedcheck",
-                title=_(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE),
-                description=_(
-                    i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_CHECK_RECOVERY_PHRASE
-                ),
-                verb=_(i18n_keys.BUTTON__CONTINUE),
-                icon="A:/res/shield_search.png",
-                br_code=ButtonRequestType.ProtectCall,
-            )
+async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
+    if not msg.dry_run:
+        await confirm_reset_device(
+            ctx, _(i18n_keys.SUBTITLE__DEVICE_RECOVER_RESTORE_WALLET), recovery=True
+        )
+    else:
+        await confirm_action(
+            ctx,
+            "confirm_seedcheck",
+            title=_(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE),
+            description=_(
+                i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_CHECK_RECOVERY_PHRASE
+            ),
+            verb=_(i18n_keys.BUTTON__CONTINUE),
+            icon="A:/res/shield_search.png",
+            br_code=ButtonRequestType.ProtectCall,
+        )

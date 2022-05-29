@@ -137,8 +137,8 @@ class FullSizeWindow(lv.obj):
         if icon_path:
             self.icon = lv.img(self)
             self.icon.set_src(icon_path)
-            self.icon.align(lv.ALIGN.TOP_MID, 0, 132)
-        self.title = Title(self, None, lv.SIZE.CONTENT, (), title)
+            self.icon.align(lv.ALIGN.TOP_MID, 0, 92)
+        self.title = Title(self, None, 416, (), title)
         if icon_path:
             self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
         if subtitle is not None:
@@ -149,7 +149,7 @@ class FullSizeWindow(lv.obj):
             if confirm_text:
                 if not self.hold_confirm:
                     self.btn_no.set_size(192, 62)
-                    self.btn_no.align_to(self, lv.ALIGN.BOTTOM_LEFT, 32, -64)
+                    self.btn_no.align_to(self, lv.ALIGN.BOTTOM_LEFT, 32, -24)
                 self.btn_no.enable(lv.color_hex(0x232323), lv.color_hex(0xFFFFFF))
             self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
@@ -159,7 +159,7 @@ class FullSizeWindow(lv.obj):
                     self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -16)
                 else:
                     self.btn_yes.set_size(192, 62)
-                    self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -64)
+                    self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -24)
             self.btn_yes.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
             self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
             if self.hold_confirm:

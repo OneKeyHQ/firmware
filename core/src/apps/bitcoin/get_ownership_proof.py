@@ -66,6 +66,7 @@ async def get_ownership_proof(
 
     # In order to set the "user confirmation" bit in the proof, the user must actually confirm.
     if msg.user_confirmation and not authorization:
+        # TODO: i18n missing
         await confirm_action(
             ctx,
             "confirm_ownership_proof",

@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor import strings, ui
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.ui.layouts import (
     confirm_action,
     confirm_blob,
@@ -155,7 +156,7 @@ async def _require_confirm_fee(ctx, fee):
         param=_format_amount(fee),
         hide_continue=True,
         hold=True,
-        description="FEE",
+        description=_(i18n_keys.LIST_KEY__FEE__COLON),
     )
 
 

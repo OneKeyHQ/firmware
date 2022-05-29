@@ -47,7 +47,9 @@ def write_keys(parsed):
         for key_name in key["key_names"]:
             content.append(f"{key_name.upper()} = {key['position']}")
     with open(f"{BASE_PATH}/keys.py", "w") as f:
+        f.write("# fmt: off\n")
         f.write("\n".join(content) + "\n")
+        f.write("# fmt: on\n")
 
 
 def write_lang(parsed, lang_iso):
@@ -59,7 +61,9 @@ def write_lang(parsed, lang_iso):
         content.append(text)
     content.append("]")
     with open(f"{BASE_PATH}/locales/{lang_iso.lower()}.py", "w") as f:
+        f.write("# fmt: off\n")
         f.write("\n".join(content) + "\n")
+        f.write("# fmt: on\n")
 
 
 def write_langfile(lang_map):
