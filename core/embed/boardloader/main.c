@@ -317,6 +317,12 @@ int main(void) {
   display_image((DISPLAY_RESX - 74) / 2, (DISPLAY_RESY - 74) / 2, 74, 74,
                 toi_icon_onekey + 12, sizeof(toi_icon_onekey) - 12);
 
+#if !PRODUCTION
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESX / 2, "TEST VERSION", -1,
+                      FONT_BOLD, COLOR_RED, COLOR_BLACK);
+  hal_delay(1000);
+#endif
+
   touch_init();
   emmc_init();
   fatfs_init();
