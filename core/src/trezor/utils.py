@@ -6,6 +6,7 @@ from trezorutils import (  # noqa: F401
     EMULATOR,
     LVGL_UI,
     MODEL,
+    ONEKEY_VERSION,
     SCM_REVISION,
     VERSION_MAJOR,
     VERSION_MINOR,

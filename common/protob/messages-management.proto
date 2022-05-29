@@ -111,6 +111,17 @@ message Features {
     optional uint32 auto_lock_delay_ms = 38;    // number of milliseconds after which the device locks itself
     optional uint32 display_rotation = 39;      // in degrees from North
     optional bool experimental_features = 40;   // are experimental message types enabled?
+
+    optional uint32 offset = 500;
+    optional string ble_name = 501;             // OneKey BLE name
+    optional string ble_ver = 502;
+    optional bool ble_enable = 503;
+    optional bool se_enable = 504;
+    optional string se_ver = 506;
+    optional bool backup_only = 507;
+    optional string onekey_version = 508;       // OneKey version
+    optional string onekey_serial = 509;
+    optional string bootloader_version = 510;
 }
 
 /**

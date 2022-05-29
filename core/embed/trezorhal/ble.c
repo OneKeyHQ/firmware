@@ -1,7 +1,6 @@
 #include "ble.h"
 #include "common.h"
 #include "display.h"
-#include "icon_install.h"
 #include "sys.h"
 #include "usart.h"
 
@@ -10,12 +9,19 @@ uint8_t battery_cap = 0xFF;
 static usart_msg ble_usart_msg;
 static bool get_ble_name = false;
 static bool get_ble_ver = false;
+static bool get_ble_proto_ver = false;
+static bool get_ble_boot_ver = false;
 static bool get_ble_battery = false;
 static bool ble_connect = false;
 static bool ble_switch = false;
 static bool get_ble_switch = false;
 static char ble_name[BLE_NAME_LEN + 1] = {0};
 static char ble_ver[6] = {0};
+static char ble_proto_ver[16 + 1] = {0};
+static char ble_boot_ver[6] = {0};
+static uint8_t dev_pwr_sta = 0;
+static uint8_t dev_press_sta = 0;
+static uint8_t dev_pwr = 0;
 
 static uint8_t calXor(uint8_t *buf, uint32_t len) {
   uint8_t tmp = 0;
@@ -37,31 +43,11 @@ static void ble_cmd_packet(uint8_t *value, uint8_t value_len) {
   ble_usart_send(cmd, value_len + 5);
 }
 
-void ble_request_info(uint8_t type) {
-  uint8_t cmd[64] = {0};
-  cmd[0] = type;
-  cmd[1] = 0x01;
-  cmd[2] = 0x01;
-  ble_cmd_packet(cmd, 3);
-}
-
-void ble_ctl_onoff(void) {
-  uint8_t cmd[64] = {0};
-  cmd[0] = BLE_CMD_ONOFF_BLE;
-  cmd[1] = 0x01;
-  cmd[2] = 0x03;
-  ble_cmd_packet(cmd, 0x03);
-}
-
-void change_ble_sta(uint8_t mode) {
-  uint8_t cmd[64] = {0};
-  cmd[0] = BLE_CMD_ONOFF_BLE;
-  cmd[1] = 0x01;
-  cmd[2] = mode;
-  if (ble_switch != mode) {
-    ble_cmd_packet(cmd, 0x03);
-    ble_switch = mode;
-  }
+void ble_cmd_req(uint8_t cmd, uint8_t value) {
+  uint8_t buf[64] = {0};
+  buf[0] = cmd;
+  buf[1] = value;
+  ble_cmd_packet(buf, 2);
 }
 
 bool ble_connect_state(void) { return ble_connect; }
@@ -82,8 +68,6 @@ void ble_set_switch(bool flag) { ble_switch = flag; }
 
 bool ble_get_switch(void) { return ble_switch; }
 
-void ble_reset(void) {}
-
 extern uint8_t usart_fifo[];
 extern uint8_t usart_fifo_len;
 
@@ -93,54 +77,67 @@ void ble_uart_poll(void) {
   if (usart_fifo_len == 0) {
     return;
   }
+
   usart_fifo_len = 0;
 
   ble_usart_msg.cmd = usart_fifo[4];
-  ble_usart_msg.cmd_len = usart_fifo[5];
-  ble_usart_msg.cmd_vale = usart_fifo + 6;
+  ble_usart_msg.cmd_vale = usart_fifo + 5;
 
   switch (ble_usart_msg.cmd) {
-    case BLE_CMD_CONNECT_STATE:
-    case BLE_CMD_PAIR_STATE:
+    case BLE_CMD_ADV:
+      memcpy(ble_name, ble_usart_msg.cmd_vale, BLE_NAME_LEN);
+      get_ble_name = true;
+      break;
+    case BLE_CMD_CON_STA:
+      if (ble_usart_msg.cmd_vale[0] == 0x01) {
+        ble_connect = true;
+      } else if (ble_usart_msg.cmd_vale[0] == 0x02) {
+        ble_connect = false;
+      } else if (ble_usart_msg.cmd_vale[0] == 0x03) {
+        ble_switch = true;
+      } else if (ble_usart_msg.cmd_vale[0] == 0x04) {
+        ble_switch = false;
+      }
+      break;
+    case BLE_CMD_PAIR_TX:
+      memcpy(passkey, ble_usart_msg.cmd_vale, 6);
+      display_text_center(DISPLAY_RESX / 2, 346, "Bluetooth passkey:", -1,
+                          FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+      display_text_center(DISPLAY_RESX / 2, 370, (char *)passkey, -1,
+                          FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+      break;
+    case BLE_CMD_PAIR_STA:
       if (ble_usart_msg.cmd_vale[0] == 0x01) {
         ble_connect = true;
       } else {
         ble_connect = false;
       }
       break;
-    case BLE_CMD_PASSKEY:
-      if (ble_usart_msg.cmd_len == 0x06) {
-        memcpy(passkey, ble_usart_msg.cmd_vale, 6);
-        display_text_center(DISPLAY_RESX / 2, 346, "Bluetooth passkey:", -1,
-                            FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
-        display_text_center(DISPLAY_RESX / 2, 370, (char *)passkey, -1,
-                            FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
-      }
+    case BLE_CMD_FM_VER:
+      memcpy(ble_ver, ble_usart_msg.cmd_vale, 5);
+      get_ble_ver = true;
       break;
-    case BLE_CMD_BT_NAME:
-      if (ble_usart_msg.cmd_len == BLE_NAME_LEN) {
-        memcpy(ble_name, ble_usart_msg.cmd_vale, BLE_NAME_LEN);
-        get_ble_name = true;
-      }
+    case BLE_CMD_PROTO_VER:
+      memcpy(ble_proto_ver, ble_usart_msg.cmd_vale, 16);
+      get_ble_proto_ver = true;
       break;
-    case BLE_CMD_BATTERY:
+    case BLE_CMD_BOOT_VER:
+      memcpy(ble_boot_ver, ble_usart_msg.cmd_vale, 5);
+      get_ble_boot_ver = true;
+      break;
+    case BLE_CMD_PLUG_STA:
+      dev_pwr_sta = ble_usart_msg.cmd_vale[0];
+      break;
+    case BLE_CMD_EQ:
       get_ble_battery = true;
       if (ble_usart_msg.cmd_vale[0] <= 5)
         battery_cap = ble_usart_msg.cmd_vale[0];
       break;
-    case BLE_CMD_VER:
-      if (ble_usart_msg.cmd_len == 5) {
-        memcpy(ble_ver, ble_usart_msg.cmd_vale, 5);
-        get_ble_ver = true;
-      }
+    case BLE_CMD_RPESS:
+      dev_press_sta = ble_usart_msg.cmd_vale[0];
       break;
-    case BLE_CMD_ONOFF_BLE:
-      get_ble_switch = true;
-      if (ble_usart_msg.cmd_vale[0] == 0) {
-        ble_switch = false;
-      } else {
-        ble_switch = true;
-      }
+    case BLE_CMD_PWR:
+      dev_pwr = ble_usart_msg.cmd_vale[0];
       break;
     default:
       break;
@@ -149,17 +146,17 @@ void ble_uart_poll(void) {
 
 void ble_get_dev_info(void) {
   if (!ble_name_state()) {
-    ble_request_info(BLE_CMD_BT_NAME);
+    ble_cmd_req(BLE_VER, BLE_VER_ADV);
     hal_delay(5);
   }
 
   if (!ble_ver_state()) {
-    ble_request_info(BLE_CMD_VER);
+    ble_cmd_req(BLE_VER, BLE_VER_FW);
     hal_delay(5);
   }
 
   if (!ble_battery_state()) {
-    ble_request_info(BLE_CMD_BATTERY);
+    ble_cmd_req(BLE_PWR, BLE_PWR_EQ);
     hal_delay(5);
   }
 }

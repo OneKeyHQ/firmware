@@ -40,6 +40,7 @@ def get_features() -> Features:
         major_version=utils.VERSION_MAJOR,
         minor_version=utils.VERSION_MINOR,
         patch_version=utils.VERSION_PATCH,
+        onekey_version=utils.ONEKEY_VERSION,
         revision=utils.SCM_REVISION,
         model=utils.MODEL,
         device_id=storage.device.get_device_id(),

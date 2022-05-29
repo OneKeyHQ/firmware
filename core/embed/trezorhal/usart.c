@@ -118,7 +118,7 @@ static int usart_rev_package(uint8_t *buf) {
   if (usart_rev_bytes(p_buf, 2, USART_TIMEOUT) != HAL_OK) {
     return 0;
   }
-  if (p_buf[0] != 0x5A || p_buf[1] != 0xA5) {
+  if (p_buf[0] != 0xA5 || p_buf[1] != 0x5A) {
     return 0;
   }
   p_buf += 2;

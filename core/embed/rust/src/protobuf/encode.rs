@@ -72,7 +72,8 @@ impl Encoder {
             let field_key = {
                 let prim_type = field.get_type().primitive_type();
                 let prim_type = prim_type as u64;
-                let field_tag = field.tag as u64;
+                let _field_tag = field.tag as u64;
+                let field_tag = ((_field_tag >> 8) & 0xFF) | ((_field_tag << 8) & 0xFF00);
                 field_tag << 3 | prim_type
             };
 

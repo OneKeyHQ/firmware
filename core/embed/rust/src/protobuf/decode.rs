@@ -116,8 +116,9 @@ impl Decoder {
         // Loop, trying to read the field key that contains the tag and primitive value
         // type. If we fail to read the key, we are at the end of the stream.
         while let Ok(field_key) = stream.read_uvarint() {
-            let field_tag = u8::try_from(field_key >> 3)?;
+            let _field_tag = u16::try_from(field_key >> 3)?;
             let prim_type = u8::try_from(field_key & 7)?;
+            let field_tag = _field_tag.to_be();
 
             match msg.field(field_tag) {
                 Some(field) => {
@@ -174,7 +175,8 @@ impl Decoder {
         //  - Protobuf-encoded default value.
         // We need to look to the field descriptor to know how to interpret the value
         // after the field tag.
-        while let Ok(field_tag) = stream.read_byte() {
+        while let Ok(_field_tag) = stream.read_short() {
+            let field_tag = ((_field_tag >> 8) & 0xFF) | ((_field_tag << 8) & 0xFF00);
             let field = msg
                 .field(field_tag)
                 .ok_or_else(|| Error::KeyError(field_tag.into()))?;
@@ -322,5 +324,19 @@ impl<'a> InputStream<'a> {
             }
         }
         Ok(uint)
+    }
+
+    pub fn read_short(&mut self) -> Result<u16, Error> {
+        let mut ushort = 0;
+        let mut shift = 0;
+        loop {
+            let byte = self.read_byte()?;
+            ushort += (byte as u16 & 0x7F) << shift;
+            shift += 7;
+            if byte & 0x80 == 0 {
+                break;
+            }
+        }
+        Ok(ushort)
     }
 }

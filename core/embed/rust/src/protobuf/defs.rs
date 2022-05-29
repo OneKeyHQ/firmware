@@ -25,14 +25,14 @@ impl MsgDef {
         })
     }
 
-    pub fn field(&self, tag: u8) -> Option<&FieldDef> {
+    pub fn field(&self, tag: u16) -> Option<&FieldDef> {
         self.fields.iter().find(|field| field.tag == tag)
     }
 }
 
 #[repr(C, packed)]
 pub struct FieldDef {
-    pub tag: u8,
+    pub tag: u16,
     flags_and_type: u8,
     enum_or_msg_offset: u16,
     pub name: u16,

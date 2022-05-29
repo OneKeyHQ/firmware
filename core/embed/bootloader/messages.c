@@ -39,6 +39,8 @@
 
 #include "memzero.h"
 
+#include "ble.h"
+#include "bootui.h"
 #include "spi.h"
 
 #define MSG_HEADER1_LEN 9
@@ -325,9 +327,31 @@ static void send_msg_features(uint8_t iface_num,
     MSG_SEND_ASSIGN_VALUE(fw_minor, ((hdr->version >> 8) & 0xFF));
     MSG_SEND_ASSIGN_VALUE(fw_patch, ((hdr->version >> 16) & 0xFF));
     MSG_SEND_ASSIGN_STRING_LEN(fw_vendor, vhdr->vstr, vhdr->vstr_len);
+    const char *ver_str = format_ver("%d.%d.%d", hdr->onekey_version);
+    MSG_SEND_ASSIGN_STRING_LEN(onekey_version, ver_str, 5);
   } else {
     MSG_SEND_ASSIGN_VALUE(firmware_present, false);
   }
+  if (ble_name_state()) {
+    MSG_SEND_ASSIGN_STRING_LEN(ble_name, ble_get_name(), BLE_NAME_LEN);
+  }
+  if (ble_ver_state()) {
+    MSG_SEND_ASSIGN_STRING_LEN(ble_ver, ble_get_ver(), 5);
+  }
+  if (ble_switch_state()) {
+    MSG_SEND_ASSIGN_VALUE(ble_enable, ble_get_switch());
+  }
+  MSG_SEND_ASSIGN_VALUE(se_enable, true);
+  char *se_version = se_get_version();
+  if (se_version) {
+    MSG_SEND_ASSIGN_STRING_LEN(se_ver, se_version, strlen(se_version));
+  }
+  char *serial = NULL;
+  if (se_get_sn(&serial)) {
+    MSG_SEND_ASSIGN_STRING_LEN(onekey_serial, serial, 5);
+  }
+  MSG_SEND_ASSIGN_STRING_LEN(bootloader_version, VERSION_STRING,
+                             strlen(VERSION_STRING));
   MSG_SEND(Features);
 }
 

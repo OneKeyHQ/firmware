@@ -13,7 +13,6 @@ typedef struct _usart_msg {
   uint16_t header;
   uint16_t len;
   uint8_t cmd;
-  uint8_t cmd_len;
   uint8_t *cmd_vale;
   uint8_t xor ;
 } usart_msg;

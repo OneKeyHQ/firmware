@@ -190,7 +190,8 @@ FirmwareHeader = c.Struct(
     ),
     "version" / VersionLong,
     "fix_version" / VersionLong,
-    "_reserved" / c.Padding(8),
+    "onekey_version" / VersionLong,
+    "_reserved" / c.Padding(4),
     "hashes" / c.Bytes(32)[16],
 
     "v1_signatures" / c.Bytes(64)[V1_SIGNATURE_SLOTS],

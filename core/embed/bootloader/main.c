@@ -327,14 +327,7 @@ int main(void) {
   spi_slave_init();
 
   // delay to detect touch
-  uint32_t touched = 0;
-  for (int i = 0; i < 1000; i++) {
-    touched = touch_is_detected();
-    if (touched) {
-      break;
-    }
-    hal_delay(1);
-  }
+  uint32_t touched = boot_touch_detect(1000);
 
   vendor_header vhdr;
   image_header hdr;
@@ -363,6 +356,11 @@ int main(void) {
   // start the bootloader if no or broken firmware found ...
   if (firmware_present != sectrue) {
     ui_bootloader_first(&hdr);
+    if (touched) {
+      // wait for the touch end event
+      while (touch_read() & TOUCH_END)
+        ;
+    }
     // erase storage
     // ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
     //        NULL);
@@ -379,7 +377,11 @@ int main(void) {
     // no ui_fadeout(); - we already start from black screen
     ui_bootloader_first(&hdr);
     ui_fadein();
-
+    if (touched) {
+      // wait for the touch end event
+      while (touch_read() & TOUCH_END)
+        ;
+    }
     // and start the usb loop
     if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
       return 1;

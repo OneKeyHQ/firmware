@@ -19,8 +19,8 @@
 
 #include STM32_HAL_H
 
+#include <stdlib.h>
 #include <string.h>
-
 #include "common.h"
 #include "secbool.h"
 
@@ -288,6 +288,33 @@ uint32_t touch_click(void) {
     }
   }
   return r;
+}
+
+uint32_t boot_touch_detect(uint32_t timeout) {
+  uint32_t data, x_start, y_start, x_mov, y_mov;
+  x_start = y_start = x_mov = y_mov = 0;
+
+  for (int i = 0; i < timeout; i++) {
+    data = touch_read();
+    if (data != 0) {
+      if (data & TOUCH_START) {
+        x_start = (data >> 12) & 0xFFF;
+        y_start = data & 0xFFF;
+      }
+
+      if (data & TOUCH_MOVE) {
+        x_mov = (data >> 12) & 0xFFF;
+        y_mov = data & 0xFFF;
+      }
+
+      if ((abs(x_start - x_mov) > 200) || (abs(y_start - y_mov) > 200)) {
+        return 1;
+      }
+    }
+    hal_delay(1);
+  }
+
+  return 0;
 }
 
 void touch_test(void) {

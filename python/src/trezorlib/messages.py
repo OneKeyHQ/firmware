@@ -3259,6 +3259,16 @@ class Features(protobuf.MessageType):
         38: protobuf.Field("auto_lock_delay_ms", "uint32", repeated=False, required=False),
         39: protobuf.Field("display_rotation", "uint32", repeated=False, required=False),
         40: protobuf.Field("experimental_features", "bool", repeated=False, required=False),
+        500: protobuf.Field("offset", "uint32", repeated=False, required=False),
+        501: protobuf.Field("ble_name", "string", repeated=False, required=False),
+        502: protobuf.Field("ble_ver", "string", repeated=False, required=False),
+        503: protobuf.Field("ble_enable", "bool", repeated=False, required=False),
+        504: protobuf.Field("se_enable", "bool", repeated=False, required=False),
+        506: protobuf.Field("se_ver", "string", repeated=False, required=False),
+        507: protobuf.Field("backup_only", "bool", repeated=False, required=False),
+        508: protobuf.Field("onekey_version", "string", repeated=False, required=False),
+        509: protobuf.Field("onekey_serial", "string", repeated=False, required=False),
+        510: protobuf.Field("bootloader_version", "string", repeated=False, required=False),
     }
 
     def __init__(
@@ -3302,6 +3312,16 @@ class Features(protobuf.MessageType):
         auto_lock_delay_ms: Optional["int"] = None,
         display_rotation: Optional["int"] = None,
         experimental_features: Optional["bool"] = None,
+        offset: Optional["int"] = None,
+        ble_name: Optional["str"] = None,
+        ble_ver: Optional["str"] = None,
+        ble_enable: Optional["bool"] = None,
+        se_enable: Optional["bool"] = None,
+        se_ver: Optional["str"] = None,
+        backup_only: Optional["bool"] = None,
+        onekey_version: Optional["str"] = None,
+        onekey_serial: Optional["str"] = None,
+        bootloader_version: Optional["str"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3341,6 +3361,16 @@ class Features(protobuf.MessageType):
         self.auto_lock_delay_ms = auto_lock_delay_ms
         self.display_rotation = display_rotation
         self.experimental_features = experimental_features
+        self.offset = offset
+        self.ble_name = ble_name
+        self.ble_ver = ble_ver
+        self.ble_enable = ble_enable
+        self.se_enable = se_enable
+        self.se_ver = se_ver
+        self.backup_only = backup_only
+        self.onekey_version = onekey_version
+        self.onekey_serial = onekey_serial
+        self.bootloader_version = bootloader_version
 
 
 class LockDevice(protobuf.MessageType):
