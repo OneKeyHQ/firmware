@@ -109,6 +109,7 @@ void fatfs_init(void) {
       if (res) {
         display_printf("fatfs Format error");
       }
+      f_setlabel("Onekey Data");
     } else {
       display_printf("mount err %d\n", res);
     }
