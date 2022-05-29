@@ -92,7 +92,11 @@ int32_t spi_slave_init() {
   HAL_GPIO_Init(GPIOJ, &gpio);
   HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
 
-  gpio.Pin = GPIO_PIN_5 | GPIO_PIN_6;
+  gpio.Pin = GPIO_PIN_6;
+  HAL_GPIO_Init(GPIOK, &gpio);
+  HAL_GPIO_WritePin(GPIOK, GPIO_PIN_6, GPIO_PIN_SET);
+
+  gpio.Pin = GPIO_PIN_5;
   gpio.Mode = GPIO_MODE_INPUT;
   gpio.Pull = GPIO_PULLUP;
   gpio.Speed = GPIO_SPEED_FREQ_LOW;
@@ -151,24 +155,29 @@ int32_t spi_slave_send(uint8_t *buf, uint32_t size, int32_t timeout) {
   msg_size = size < SPI_PKG_SIZE ? SPI_PKG_SIZE : size;
 
   SET_COMBUS_LOW();
+  SET_COMBUS_LOW1();
 
   if (HAL_SPI_Abort_IT(&spi) != HAL_OK) {
     SET_COMBUS_HIGH();
+    SET_COMBUS_HIGH1();
     return -1;
   }
 
   spi_tx_event = 1;
   if (HAL_SPI_Transmit_IT(&spi, buf, msg_size) != HAL_OK) {
     SET_COMBUS_HIGH();
+    SET_COMBUS_HIGH1();
     return -1;
   }
 
   if (wait_spi_tx_event(timeout) != 0) {
     SET_COMBUS_HIGH();
+    SET_COMBUS_HIGH1();
     return -1;
   }
 
   SET_COMBUS_HIGH();
+  SET_COMBUS_HIGH1();
 
   return msg_size;
 }
