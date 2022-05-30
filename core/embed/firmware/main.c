@@ -53,6 +53,7 @@
 // #include "sdcard.h"
 #include "atca_api.h"
 #include "atca_hal.h"
+#include "device.h"
 #include "mipi_lcd.h"
 #include "qspi_flash.h"
 #include "spi.h"
@@ -92,6 +93,8 @@ int main(void) {
 #endif
 
   ble_usart_init();
+
+  device_para_init();
 
 #if TREZOR_MODEL == T
 #if PRODUCTION

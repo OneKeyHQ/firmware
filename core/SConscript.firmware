@@ -463,6 +463,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/usart.c',
         'embed/trezorhal/sys.c',
         'embed/trezorhal/ble.c',
+        'embed/trezorhal/device.c',
     ]
 else:
     SOURCE_STMHAL = [
