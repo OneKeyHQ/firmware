@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "aes/aes.h"
 #include "chacha20poly1305/rfc7539.h"
 #include "common.h"
 #include "hmac.h"
@@ -183,6 +184,47 @@ static secbool storage_set_encrypted(const uint16_t key, const void *val,
                                      const uint16_t len);
 static secbool storage_get_encrypted(const uint16_t key, void *val_dest,
                                      const uint16_t max_len, uint16_t *len);
+
+#if PRODUCTION_MODEL == 'H'
+#include "device.h"
+static secbool storage_set_edek_pvc_key(uint8_t *key, uint16_t key_len) {
+  uint8_t enc_key[32];
+  uint8_t key_buf[64] = {0};
+  aes_encrypt_ctx ctxe;
+
+  device_get_enc_key(enc_key);
+
+  memcpy(key_buf, key, key_len);
+  aes_encrypt_key256(enc_key, &ctxe);
+
+  aes_ecb_encrypt(key_buf, key_buf, sizeof(key_buf), &ctxe);
+
+  return norcow_set(EDEK_PVC_KEY, key_buf, sizeof(key_buf));
+}
+static secbool storage_get_edek_pvc_key(const void **key, uint16_t *key_len) {
+  const void *val = NULL;
+  uint16_t len = 0;
+
+  if (secfalse == norcow_get(EDEK_PVC_KEY, &val, &len)) {
+    return secfalse;
+  }
+  if (len != 64) {
+    return secfalse;
+  }
+
+  uint8_t enc_key[32];
+  static uint8_t key_buf[64] = {0};
+  aes_decrypt_ctx ctxe;
+  device_get_enc_key(enc_key);
+  aes_decrypt_key256(enc_key, &ctxe);
+
+  aes_ecb_decrypt((uint8_t *)val, key_buf, sizeof(key_buf), &ctxe);
+
+  *key = key_buf;
+  *key_len = RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE;
+  return sectrue;
+}
+#endif
 
 static secbool secequal(const void *ptr1, const void *ptr2, size_t n) {
   const uint8_t *p1 = ptr1;
@@ -542,8 +584,13 @@ static secbool set_pin(const uint8_t *pin, size_t pin_len,
   chacha20poly1305_encrypt(&ctx, cached_keys, ekeys, KEYS_SIZE);
   rfc7539_finish(&ctx, 0, KEYS_SIZE, pvc);
   memzero(&ctx, sizeof(ctx));
+#if PRODUCTION_MODEL == 'H'
+  secbool ret =
+      storage_set_edek_pvc_key(buffer, RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE);
+#else
   secbool ret =
       norcow_set(EDEK_PVC_KEY, buffer, RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE);
+#endif
   memzero(buffer, sizeof(buffer));
 
   if (ret == sectrue) {
@@ -693,7 +740,12 @@ void storage_init(PIN_UI_WAIT_CALLBACK callback, const uint8_t *salt,
   // If there is no EDEK, then generate a random DEK and SAK and store them.
   const void *val = NULL;
   uint16_t len = 0;
-  if (secfalse == norcow_get(EDEK_PVC_KEY, &val, &len)) {
+#if PRODUCTION_MODEL == 'H'
+  if (secfalse == storage_get_edek_pvc_key(&val, &len))
+#else
+  if (secfalse == norcow_get(EDEK_PVC_KEY, &val, &len))
+#endif
+  {
     init_wiped_storage();
     storage_lock();
   }
@@ -953,8 +1005,13 @@ secbool check_storage_version(void) {
 static secbool decrypt_dek(const uint8_t *kek, const uint8_t *keiv) {
   const void *buffer = NULL;
   uint16_t len = 0;
-  if (sectrue != initialized ||
-      sectrue != norcow_get(EDEK_PVC_KEY, &buffer, &len) ||
+
+#if PRODUCTION_MODEL == 'H'
+  secbool ret = storage_get_edek_pvc_key(&buffer, &len);
+#else
+  secbool ret = norcow_get(EDEK_PVC_KEY, &buffer, &len);
+#endif
+  if (sectrue != initialized || sectrue != ret ||
       len != RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE) {
     handle_fault("no EDEK");
     return secfalse;
@@ -1059,8 +1116,12 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
   // KEIV from the PIN.
   const void *rand_salt = NULL;
   uint16_t len = 0;
-  if (sectrue != initialized ||
-      sectrue != norcow_get(EDEK_PVC_KEY, &rand_salt, &len) ||
+#if PRODUCTION_MODEL == 'H'
+  secbool ret = storage_get_edek_pvc_key(&rand_salt, &len);
+#else
+  secbool ret = norcow_get(EDEK_PVC_KEY, &rand_salt, &len);
+#endif
+  if (sectrue != initialized || sectrue != ret ||
       len != RANDOM_SALT_SIZE + KEYS_SIZE + PVC_SIZE) {
     memzero(&legacy_pin, sizeof(legacy_pin));
     handle_fault("no EDEK");

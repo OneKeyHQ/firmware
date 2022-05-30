@@ -29,7 +29,7 @@ typedef struct __attribute__((packed)) {
 
 void device_set_factory_mode(bool mode);
 bool device_is_factory_mode(void);
-void device_init(void);
+void device_para_init(void);
 bool device_serial_set(void);
 bool device_set_serial(char *dev_serial);
 bool device_cpu_firmware_set(void);
@@ -37,7 +37,7 @@ bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver);
 bool device_get_cpu_firmware(char **cpu_info, char **firmware_ver);
 bool device_get_serial(char **serial);
 char *device_get_se_config_version(void);
-bool device_get_NFT_voucher(uint8_t voucher[32]);
+void device_get_enc_key(uint8_t key[32]);
 
 void device_test(void);
 

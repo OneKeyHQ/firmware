@@ -719,13 +719,14 @@ void ui_bootloader_second(const image_header *const hdr) {
   }
   display_text(offset, 352, "SERIAL:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
-  // todo
+
   char *dev_serial;
   if (device_get_serial(&dev_serial)) {
     display_text(offset, 386, dev_serial, -1, FONT_NORMAL, COLOR_BL_BG,
                  COLOR_BL_FG);
   } else {
-    display_text(offset, 386, "", -1, FONT_NORMAL, COLOR_BL_BG, COLOR_BL_FG);
+    display_text(offset, 386, "NULL", -1, FONT_NORMAL, COLOR_BL_BG,
+                 COLOR_BL_FG);
   }
 
   display_text(offset, 448, "SE:", -1, FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);

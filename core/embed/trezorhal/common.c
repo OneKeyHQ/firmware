@@ -49,6 +49,18 @@ void shutdown(void) {
 
 void restart(void) { svc_reset_system(); }
 
+void reboot_to_board(void) {
+  *STAY_IN_FLAG_ADDR = STAY_IN_BOARDLOADER_FLAG;
+  SCB_CleanDCache();
+  svc_reset_system();
+}
+
+void reboot_to_boot(void) {
+  *STAY_IN_FLAG_ADDR = STAY_IN_BOOTLOADER_FLAG;
+  SCB_CleanDCache();
+  svc_reset_system();
+}
+
 void __attribute__((noreturn))
 __fatal_error(const char *expr, const char *msg, const char *file, int line,
               const char *func) {

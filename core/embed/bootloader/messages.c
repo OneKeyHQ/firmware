@@ -509,7 +509,8 @@ static void detect_installation(vendor_header *current_vhdr,
   if (0 != memcmp(hash1, hash2, 32)) {
     return;
   }
-  if (version_compare(new_hdr->version, current_hdr->fix_version) < 0) {
+  if (version_compare(new_hdr->onekey_version, current_hdr->onekey_version) <
+      0) {
     *is_downgrade_wipe = sectrue;
     return;
   }

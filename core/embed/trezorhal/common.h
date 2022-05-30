@@ -50,9 +50,17 @@
   })
 #endif
 
+#define STAY_IN_FLAG_ADDR ((uint32_t *)(0x30040000 - 4))
+#define STAY_IN_BOARDLOADER_FLAG 0x64616F62
+#define STAY_IN_BOOTLOADER_FLAG 0x746F6F62
+
 void shutdown(void);
 
 void restart(void);
+
+void reboot_to_board(void);
+
+void reboot_to_boot(void);
 
 void __attribute__((noreturn))
 __fatal_error(const char *expr, const char *msg, const char *file, int line,

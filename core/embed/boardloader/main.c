@@ -109,6 +109,7 @@ void fatfs_init(void) {
       if (res) {
         display_printf("fatfs Format error");
       }
+      f_setlabel("Onekey Data");
     } else {
       display_printf("mount err %d\n", res);
     }
@@ -284,6 +285,8 @@ static secbool copy_sdcard(uint32_t code_len) {
 }
 
 int main(void) {
+  volatile uint32_t stay_in_boardloader_flag = *STAY_IN_FLAG_ADDR;
+
   reset_flags_reset();
 
   periph_init();
@@ -316,6 +319,12 @@ int main(void) {
   display_image((DISPLAY_RESX - 74) / 2, (DISPLAY_RESY - 74) / 2, 74, 74,
                 toi_icon_onekey + 12, sizeof(toi_icon_onekey) - 12);
 
+#if !PRODUCTION
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESX / 2, "TEST VERSION", -1,
+                      FONT_BOLD, COLOR_RED, COLOR_BLACK);
+  hal_delay(1000);
+#endif
+
   touch_init();
   emmc_init();
   fatfs_init();
@@ -323,7 +332,10 @@ int main(void) {
   bool stay_in_msc = false;
   uint32_t touched = 0;
 
-  if (fatfs_check_res() != 0) {
+  if (stay_in_boardloader_flag == STAY_IN_BOARDLOADER_FLAG) {
+    stay_in_msc = true;
+    *STAY_IN_FLAG_ADDR = 0;
+  } else if (fatfs_check_res() != 0) {
     stay_in_msc = true;
   }
 
