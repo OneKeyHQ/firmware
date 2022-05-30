@@ -10,6 +10,8 @@ def clear() -> None:
     """if device is not initialized, pin is needless, so clear it"""
     if not storage.device.is_initialized() and config.has_pin():
         storage.wipe()
+    if config.has_pin() and config.get_pin_rem() == 0:
+        storage.wipe()
 
 
 async def bootscreen() -> None:
