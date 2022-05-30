@@ -37,7 +37,7 @@ def show_pin_timeout(seconds: int, progress: int, message: str) -> bool:
             ui.WIDTH // 2, ui.HEIGHT - 22, remaining, ui.BOLD, ui.FG, ui.BG
         )
         _previous_seconds = seconds
-    
+
     if progress == 1000:
         ui.display.clear()
 
