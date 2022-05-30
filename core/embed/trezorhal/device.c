@@ -167,18 +167,13 @@ char *device_get_se_config_version(void) {
   }
 }
 
-bool device_get_NFT_voucher(uint8_t voucher[32]) {
-  if (!dev_info.random_key_init) {
-    return false;
-  }
-
+void device_get_enc_key(uint8_t key[32]) {
   SHA256_CTX ctx = {0};
 
   sha256_Init(&ctx);
   sha256_Update(&ctx, (uint8_t *)dev_info.st_id, sizeof(dev_info.st_id));
   sha256_Update(&ctx, dev_info.random_key, sizeof(dev_info.random_key));
-  sha256_Final(&ctx, voucher);
-  return true;
+  sha256_Final(&ctx, key);
 }
 
 void ui_test_input(void) {
@@ -217,16 +212,16 @@ void ui_test_input(void) {
 
 static void ui_generic_confirm_simple(const char *msg) {
   if (msg == NULL) return;
-  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, msg, -1, FONT_BOLD36,
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, msg, -1, FONT_NORMAL,
                       COLOR_WHITE, COLOR_BLACK);
 
   display_bar_radius(32, DISPLAY_RESY - 160, 128, 64, COLOR_RED, COLOR_BLACK,
                      16);
   display_bar_radius(DISPLAY_RESX - 32 - 128, DISPLAY_RESY - 160, 128, 64,
                      COLOR_GREEN, COLOR_BLACK, 16);
-  display_text(70, DISPLAY_RESY - 115, "No", -1, FONT_BOLD36, COLOR_WHITE,
+  display_text(80, DISPLAY_RESY - 120, "No", -1, FONT_NORMAL, COLOR_WHITE,
                COLOR_RED);
-  display_text(DISPLAY_RESX - 128, DISPLAY_RESY - 115, "Yes", -1, FONT_BOLD36,
+  display_text(DISPLAY_RESX - 118, DISPLAY_RESY - 120, "Yes", -1, FONT_NORMAL,
                COLOR_WHITE, COLOR_GREEN);
 }
 
@@ -301,12 +296,12 @@ void device_test(void) {
   hal_delay(1000);
   buzzer_ctrl(0);
 
-  ui_generic_confirm_simple("beep test");
+  ui_generic_confirm_simple("BEEP test");
   if (ui_response()) {
-    display_text(0, 80, "beep test done", -1, FONT_NORMAL, COLOR_WHITE,
+    display_text(0, 80, "BEEP test done", -1, FONT_NORMAL, COLOR_WHITE,
                  COLOR_BLACK);
   } else {
-    display_text(0, 80, "beep test faild", -1, FONT_NORMAL, COLOR_RED,
+    display_text(0, 80, "BEEP test faild", -1, FONT_NORMAL, COLOR_RED,
                  COLOR_BLACK);
     while (1)
       ;
@@ -319,12 +314,12 @@ void device_test(void) {
   hal_delay(2000);
   motor_ctrl(MOTOR_BRAKE);
 
-  ui_generic_confirm_simple("motor test");
+  ui_generic_confirm_simple("MOTOR test");
   if (ui_response()) {
-    display_text(0, 110, "motor test done", -1, FONT_NORMAL, COLOR_WHITE,
+    display_text(0, 110, "MOTOR test done", -1, FONT_NORMAL, COLOR_WHITE,
                  COLOR_BLACK);
   } else {
-    display_text(0, 110, "motor test faild", -1, FONT_NORMAL, COLOR_RED,
+    display_text(0, 110, "MOTOR test faild", -1, FONT_NORMAL, COLOR_RED,
                  COLOR_BLACK);
     while (1)
       ;

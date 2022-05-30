@@ -37,7 +37,7 @@ bool device_set_cpu_firmware(char *cpu_info, char *firmware_ver);
 bool device_get_cpu_firmware(char **cpu_info, char **firmware_ver);
 bool device_get_serial(char **serial);
 char *device_get_se_config_version(void);
-bool device_get_NFT_voucher(uint8_t voucher[32]);
+void device_get_enc_key(uint8_t key[32]);
 
 void device_test(void);
 
