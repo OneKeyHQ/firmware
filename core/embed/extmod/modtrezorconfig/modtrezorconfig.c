@@ -33,6 +33,9 @@
 
 #ifndef TREZOR_EMULATOR
 #include "bip39.h"
+#include "device.h"
+#include "emmc.h"
+#include "mini_printf.h"
 #include "se_atca.h"
 #endif
 
@@ -519,6 +522,53 @@ STATIC mp_obj_t mod_trezorconfig_se_export_mnemonic(void) {
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_se_export_mnemonic_obj,
                                  mod_trezorconfig_se_export_mnemonic);
+
+/// def get_serial() -> str:
+///     """
+///     get device serial
+///     """
+STATIC mp_obj_t mod_trezorconfig_get_serial(void) {
+  mp_obj_t res;
+
+  char *dev_serial;
+  if (device_get_serial(&dev_serial)) {
+    res = mp_obj_new_str_copy(&mp_type_bytes, (const uint8_t *)dev_serial,
+                              strlen(dev_serial));
+  } else {
+    res = mp_obj_new_str_copy(&mp_type_bytes, (const uint8_t *)"NULL",
+                              strlen("NULL"));
+  }
+
+  return res;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_get_serial_obj,
+                                 mod_trezorconfig_get_serial);
+
+/// def get_capacity() -> str:
+///     """
+///     get emmc capacity
+///     """
+STATIC mp_obj_t mod_trezorconfig_get_capacity(void) {
+  char cap_info[32] = {0};
+  uint64_t cap = emmc_get_capacity_in_bytes();
+
+  if (cap > (1024 * 1024 * 1024)) {
+    mini_snprintf(cap_info, sizeof(cap_info), "%d GB",
+                  (unsigned int)(cap >> 30));
+  } else if (cap > (1024 * 1024)) {
+    mini_snprintf(cap_info, sizeof(cap_info), "%d MB",
+                  (unsigned int)(cap >> 20));
+  } else {
+    mini_snprintf(cap_info, sizeof(cap_info), "%d Bytes", (unsigned int)cap);
+  }
+  return mp_obj_new_str_copy(&mp_type_bytes, (const uint8_t *)cap_info,
+                             strlen(cap_info));
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_get_capacity_obj,
+                                 mod_trezorconfig_get_capacity);
+
 #endif
 STATIC const mp_rom_map_elem_t mp_module_trezorconfig_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_trezorconfig)},
@@ -553,6 +603,10 @@ STATIC const mp_rom_map_elem_t mp_module_trezorconfig_globals_table[] = {
      MP_ROM_PTR(&mod_trezorconfig_se_import_mnemonic_obj)},
     {MP_ROM_QSTR(MP_QSTR_se_export_mnemonic),
      MP_ROM_PTR(&mod_trezorconfig_se_export_mnemonic_obj)},
+    {MP_ROM_QSTR(MP_QSTR_get_serial),
+     MP_ROM_PTR(&mod_trezorconfig_get_serial_obj)},
+    {MP_ROM_QSTR(MP_QSTR_get_capacity),
+     MP_ROM_PTR(&mod_trezorconfig_get_capacity_obj)},
 #endif
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_trezorconfig_globals,

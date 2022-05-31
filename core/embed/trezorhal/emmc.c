@@ -1,8 +1,10 @@
 #include STM32_HAL_H
 
-#include "emmc.h"
+#include <stdio.h>
+
 #include <string.h>
 #include "common.h"
+#include "emmc.h"
 
 static MMC_HandleTypeDef hmmc1;
 
@@ -76,29 +78,12 @@ uint8_t emmc_get_card_state(void) {
 
 void emmc_get_card_info(EMMC_CardInfoTypeDef* card_info) {
   if (HAL_MMC_GetCardInfo(&hmmc1, card_info) == HAL_OK) {
-    // display_printf("card CardType %X\n", (int)card_info->CardType);
-    // display_printf("card RelCardAdd %X\n", (int)card_info->RelCardAdd);
-    // display_printf("card Class %X\n", (int)card_info->Class);
-    // display_printf("card BlockNbr %X\n", (int)card_info->BlockNbr);
-    // display_printf("card BlockSize %X\n", (int)card_info->BlockSize);
-    // display_printf("card LogBlockNbr %X\n", (int)card_info->LogBlockNbr);
-    // display_printf("card LogBlockSize %X\n", (int)card_info->LogBlockSize);
   }
 }
 
 uint8_t emmc_read_blocks(uint8_t* data, uint32_t address, uint32_t nums,
                          uint32_t timeout) {
   if (HAL_MMC_ReadBlocks(&hmmc1, data, address, nums, timeout) == HAL_OK) {
-    // uint32_t tickstart = HAL_GetTick();
-    // while (emmc_get_card_state() != MMC_TRANSFER_OK) {
-    //   /* Check for the Timeout */
-    //   if (timeout != HAL_MAX_DELAY) {
-    //     if (((HAL_GetTick() - tickstart) > timeout) || (timeout == 0U)) {
-    //       return MMC_ERROR;
-    //     }
-    //   }
-    // }
-
     return MMC_OK;
   } else {
     return MMC_ERROR;
@@ -148,7 +133,7 @@ uint8_t emmc_erase(uint32_t start_address, uint32_t end_address) {
 uint64_t emmc_get_capacity_in_bytes(void) {
   EMMC_CardInfoTypeDef card_info = {0};
   emmc_get_card_info(&card_info);
-  return card_info.LogBlockNbr * card_info.LogBlockSize;
+  return (uint64_t)card_info.LogBlockNbr * card_info.LogBlockSize;
 }
 
 void emmc_test(void) {

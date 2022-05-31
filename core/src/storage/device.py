@@ -84,8 +84,7 @@ def get_firmware_version() -> str | None:
 
 
 def get_storage() -> str:
-    # TODO:
-    return "16 GB"
+    return config.get_capacity()
 
 
 def get_ble_mac() -> str:
@@ -94,13 +93,11 @@ def get_ble_mac() -> str:
 
 
 def get_model() -> str:
-    # TODO:
     return "OneKey Touch"
 
 
 def get_serial() -> str:
-    # TODO:
-    return "FK1W2Y84JCDR"
+    return config.get_serial()
 
 
 def is_initialized() -> bool:

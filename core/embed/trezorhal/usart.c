@@ -72,20 +72,21 @@ void ble_usart_send(uint8_t *buf, uint32_t len) {
 }
 
 secbool ble_usart_can_read(void) {
-  if (usart_fifo_len == 0) {
-    return secfalse;
-  } else {
+  if (fifo_lockdata_len(&uart_fifo_in)) {
     return sectrue;
+  } else {
+    return secfalse;
   }
 }
 
 uint32_t ble_usart_read(uint8_t *buf, uint32_t lenth) {
   uint32_t len = 0;
-  len = usart_fifo_len < lenth ? usart_fifo_len : 0;
-  usart_fifo_len = 0;
+  fifo_read_peek(&uart_fifo_in, buf, 4);
 
-  memcpy(buf, usart_fifo, len);
-  return len;
+  len = (buf[2] << 8) + buf[3];
+
+  fifo_read_lock(&uart_fifo_in, buf, len + 3);
+  return len + 3;
 }
 
 static uint8_t calXor(uint8_t *buf, uint32_t len) {
@@ -112,47 +113,45 @@ static HAL_StatusTypeDef usart_rev_bytes(uint8_t *buf, uint32_t len,
   return HAL_OK;
 }
 
-static int usart_rev_package(uint8_t *buf) {
+static void usart_rev_package(uint8_t *buf) {
   uint8_t len = 0;
   uint8_t *p_buf = buf;
   if (usart_rev_bytes(p_buf, 2, USART_TIMEOUT) != HAL_OK) {
-    return 0;
+    return;
   }
   if (p_buf[0] != 0xA5 || p_buf[1] != 0x5A) {
-    return 0;
+    return;
   }
   p_buf += 2;
   if (usart_rev_bytes(p_buf, 2, USART_TIMEOUT) != HAL_OK) {
-    return 0;
+    return;
   }
   len = (p_buf[0] << 8) + p_buf[1];
   if (len > 32) {
-    return 0;
+    return;
   }
   p_buf += 2;
   if (usart_rev_bytes(p_buf, len - 1, USART_TIMEOUT) != HAL_OK) {
-    return 0;
+    return;
   }
   p_buf += len - 1;
   if (usart_rev_bytes(p_buf, 1, USART_TIMEOUT) != HAL_OK) {
-    return 0;
+    return;
   }
   uint8_t xor = calXor(buf, len + 3);
   if (xor != *p_buf) {
-    return 0;
+    return;
   }
-  return len += 3;
+  fifo_write_no_overflow(&uart_fifo_in, buf, len + 3);
 }
 
 void UART4_IRQHandler(void) {
   if (__HAL_UART_GET_FLAG(huart, UART_FLAG_ORE) != 0) {
-    usart_fifo_len = 0;
     __HAL_UART_CLEAR_FLAG(huart, UART_CLEAR_OREF);
   }
   if (__HAL_UART_GET_FLAG(huart, UART_FLAG_RXFNE) != 0) {
-    usart_fifo_len = 0;
     memset(usart_fifo, 0x00, sizeof(usart_fifo));
-    usart_fifo_len = usart_rev_package(usart_fifo);
+    usart_rev_package(usart_fifo);
   }
 }
 
