@@ -7,7 +7,7 @@
 #include "trans_fifo.h"
 
 #define BLE_UART USART4
-#define UART_BUF_MAX_LEN (256)
+#define UART_BUF_MAX_LEN (512)
 
 typedef struct _usart_msg {
   uint16_t header;

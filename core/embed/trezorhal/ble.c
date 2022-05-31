@@ -48,6 +48,7 @@ void ble_cmd_req(uint8_t cmd, uint8_t value) {
   buf[0] = cmd;
   buf[1] = value;
   ble_cmd_packet(buf, 2);
+  hal_delay(5);
 }
 
 bool ble_connect_state(void) { return ble_connect; }
@@ -68,20 +69,27 @@ void ble_set_switch(bool flag) { ble_switch = flag; }
 
 bool ble_get_switch(void) { return ble_switch; }
 
-extern uint8_t usart_fifo[];
-extern uint8_t usart_fifo_len;
+extern trans_fifo uart_fifo_in;
 
 void ble_uart_poll(void) {
-  uint8_t passkey[7] = {0};
+  uint32_t total_len, len;
 
-  if (usart_fifo_len == 0) {
+  uint8_t passkey[7] = {0};
+  uint8_t buf[64] = {0};
+
+  total_len = fifo_lockdata_len(&uart_fifo_in);
+  if (total_len < 5) {
     return;
   }
 
-  usart_fifo_len = 0;
+  fifo_read_peek(&uart_fifo_in, buf, 4);
 
-  ble_usart_msg.cmd = usart_fifo[4];
-  ble_usart_msg.cmd_vale = usart_fifo + 5;
+  len = (buf[2] << 8) + buf[3];
+
+  fifo_read_lock(&uart_fifo_in, buf, len + 3);
+
+  ble_usart_msg.cmd = buf[4];
+  ble_usart_msg.cmd_vale = buf + 5;
 
   switch (ble_usart_msg.cmd) {
     case BLE_CMD_ADV:
