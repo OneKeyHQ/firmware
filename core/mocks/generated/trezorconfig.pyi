@@ -141,3 +141,17 @@ def wipe() -> None:
     """
     Erases the whole config. Use with caution!
     """
+
+
+# extmod/modtrezorconfig/modtrezorconfig.c
+def get_serial() -> str:
+    """
+    get device serial
+    """
+
+
+# extmod/modtrezorconfig/modtrezorconfig.c
+def get_capacity() -> str:
+    """
+    get emmc capacity
+    """
