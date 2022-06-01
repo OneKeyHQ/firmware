@@ -38,6 +38,9 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
     await confirm_signverify(
         ctx, "ETH", decode_message(msg.message), address=address, verify=True
     )
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
-    await show_success(ctx, "verify_message", "The signature is valid.")
+    await show_success(
+        ctx, "verify_message", "The signature is valid.", _(i18n_keys.BUTTON__DONE)
+    )
     return Success(message="Message verified")

@@ -11,6 +11,7 @@ class ContainerFlexCol(lv.obj):
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_row(32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_flex_flow(lv.FLEX_FLOW.COLUMN)
 
 

@@ -1,6 +1,6 @@
 from trezor import io, log, loop, utils, wire
 from trezor.lvglui import lvgl_tick
-from trezor.uart_pull import handle_uart
+from trezor.uart import handle_uart
 
 import apps.base
 import usb

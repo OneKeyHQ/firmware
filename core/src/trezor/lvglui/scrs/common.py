@@ -29,7 +29,7 @@ class Screen(lv.obj):
             self.icon.align(lv.ALIGN.TOP_MID, 0, 140)
         # title
         if "title" in kwargs:
-            self.title = Title(self, None, 416, (), kwargs["title"])
+            self.title = Title(self, None, 452, (), kwargs["title"])
             if kwargs.get("icon_path"):
                 self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
         # roller
@@ -134,16 +134,34 @@ class FullSizeWindow(lv.obj):
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.hold_confirm = hold_confirm and not utils.EMULATOR
+        self.content_area = lv.obj(self)
+        self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
+        self.content_area.set_style_bg_color(
+            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.content_area.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
         if icon_path:
-            self.icon = lv.img(self)
+            self.icon = lv.img(self.content_area)
             self.icon.set_src(icon_path)
-            self.icon.align(lv.ALIGN.TOP_MID, 0, 92)
-        self.title = Title(self, None, 416, (), title)
+            self.icon.align(lv.ALIGN.TOP_MID, 0, 48)
+        self.title = Title(self.content_area, None, 452, (), title, pos_y=48)
         if icon_path:
             self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
         if subtitle is not None:
-            self.subtitle = SubTitle(self, self.title, 416, (0, 24), subtitle)
+            self.subtitle = SubTitle(
+                self.content_area, self.title, 452, (0, 24), subtitle
+            )
 
+        if options:
+            self.roller = Roller(self.content_area, options)
+            self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
+            self.select_option = options.split()[1]
+
+        self.content_area.set_style_max_height(656, lv.PART.MAIN | lv.STATE.DEFAULT)
         if cancel_text:
             self.btn_no = NormalButton(self, cancel_text)
             if confirm_text:
@@ -156,6 +174,9 @@ class FullSizeWindow(lv.obj):
             self.btn_yes = NormalButton(self, confirm_text)
             if cancel_text:
                 if self.hold_confirm:
+                    self.content_area.set_style_max_height(
+                        576, lv.PART.MAIN | lv.STATE.DEFAULT
+                    )
                     self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -16)
                 else:
                     self.btn_yes.set_size(192, 62)
@@ -166,10 +187,6 @@ class FullSizeWindow(lv.obj):
                 self.btn_yes.add_event_cb(
                     self.eventhandler, lv.EVENT.LONG_PRESSED, None
                 )
-        if options:
-            self.roller = Roller(self, options)
-            self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
-            self.select_option = options.split()[1]
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -198,12 +215,12 @@ class FullSizeWindow(lv.obj):
         elif code == lv.EVENT.LONG_PRESSED and self.hold_confirm:
             if target == self.btn_yes:
                 self.channel.publish(1)
-        self.destory()
+        self.destroy()
 
     async def request(self) -> Any:
         return await self.channel.take()
 
-    def destory(self, delay_ms=100):
+    def destroy(self, delay_ms=100):
         self.del_delayed(delay_ms)
 
 

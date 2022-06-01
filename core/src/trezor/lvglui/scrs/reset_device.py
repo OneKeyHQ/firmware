@@ -93,7 +93,7 @@ class BackupTips(FullSizeWindow):
         if code == lv.EVENT.CLICKED:
             if target == self.btn:
                 self.channel.publish(1)
-                self.destory()
+                self.destroy()
         elif code == lv.EVENT.VALUE_CHANGED:
             if target == self.item1.checkbox:
                 if target.get_state() & lv.STATE.CHECKED:

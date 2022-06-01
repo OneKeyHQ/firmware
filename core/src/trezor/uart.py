@@ -2,6 +2,7 @@ import ustruct
 from micropython import const
 from typing import TYPE_CHECKING
 
+from storage import device
 from trezor import io, loop
 from trezor.lvglui import StatusBar
 
@@ -16,19 +17,22 @@ _HEADER_LEN = const(5)
 _CMD_BLE_NAME = _PRESS_SHORT = _USB_STATUS_PLUG_IN = _BLE_STATUS_CONNECTED = _BLE_PAIR_SUCCESS = const(1)
 _PRESS_LONG = _USB_STATUS_PLUG_OUT = _BLE_STATUS_DISCONNECTED = _BLE_PAIR_FAILED = _CMD_BLE_STATUS = const(2)
 # fmt: on
-_POWER_STATUS_CHARGING = _CMD_BLE_PAIR_CODE = const(3)
-_CMD_BLE_PAIR_RES = const(4)
-_CMD_NRF_VERSION = const(5)
+_BLE_STATUS_OPENED = _POWER_STATUS_CHARGING = _CMD_BLE_PAIR_CODE = const(3)
+_BLE_STATUS_CLOSED = _CMD_BLE_PAIR_RES = _POWER_STATUS_CHARGING_FINISHED = const(4)
+_CMD_NRF_VERSION = const(5)  # ble firmware version
 _CMD_DEVICE_CHARGING_STATUS = const(8)
-_CMD_BATTEARY_STATUS = const(9)
+_CMD_BATTERY_STATUS = const(9)
 _CMD_SIDE_BUTTON_PRESS = const(10)
 CHARGING = False
 SCREEN: PairCodeDisplay | None = None
 BLE_NAME: str | None = None
+BLE_ENABLED: bool | None = None
 NRF_VERSION: str | None = None
+BLE_CTRL = io.BLE()
 
 
 async def handle_uart():
+    fetch_all()
     while True:
         await process_push()
 
@@ -45,36 +49,36 @@ async def process_push() -> None:
     value = response[_HEADER_LEN:][: length - 2]
     if cmd == _CMD_BLE_STATUS:
         # 1 connected 2 disconnected 3 opened 4 closed
-        deal_ble_status(value)
+        _deal_ble_status(value)
     elif cmd == _CMD_BLE_PAIR_CODE:
         # show six bytes pair code as string
-        deal_ble_pair(value)
+        _deal_ble_pair(value)
     elif cmd == _CMD_BLE_PAIR_RES:
         # paring result 1 success 2 failed
-        await deal_pair_res(value)
+        await _deal_pair_res(value)
     elif cmd == _CMD_DEVICE_CHARGING_STATUS:
         # 1 usb plug in 2 usb plug out 3 charging
-        deal_charging_state(value)
-    elif cmd == _CMD_BATTEARY_STATUS:
+        _deal_charging_state(value)
+    elif cmd == _CMD_BATTERY_STATUS:
         # current battery level, 0-100 only effective when not charging
         if not CHARGING:
             res = ustruct.unpack(">B", value)[0]
             StatusBar.get_instance().set_battery_img(res)
     elif cmd == _CMD_SIDE_BUTTON_PRESS:
         # 1 short press 2 long press
-        deal_button_press(value)
+        _deal_button_press(value)
     elif cmd == _CMD_BLE_NAME:
         # retrieve ble name has format: ^T[0-9]{4}$
-        retrieve_ble_name(value)
+        _retrieve_ble_name(value)
     elif cmd == _CMD_NRF_VERSION:
         # retrieve nrf version
-        retrieve_nrf_version(value)
+        _retrieve_nrf_version(value)
     else:
         if __debug__:
             print("unknown or not care command:", cmd)
 
 
-def deal_ble_pair(value):
+def _deal_ble_pair(value):
     global SCREEN
     pair_codes = value.decode("utf-8")
     # pair_codes = "".join(list(map(lambda c: chr(c), ustruct.unpack(">6B", value))))
@@ -83,7 +87,7 @@ def deal_ble_pair(value):
     SCREEN = PairCodeDisplay(pair_codes)
 
 
-def deal_button_press(value: bytes) -> None:
+def _deal_button_press(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _PRESS_SHORT:
         if __debug__:
@@ -91,9 +95,12 @@ def deal_button_press(value: bytes) -> None:
     elif res == _PRESS_LONG:
         if __debug__:
             print("long press")
+        from trezor.lvglui.scrs.homescreen import ShutingDown
+
+        ShutingDown()
 
 
-def deal_charging_state(value: bytes) -> None:
+def _deal_charging_state(value: bytes) -> None:
     global CHARGING
     res = ustruct.unpack(">B", value)[0]
     if res == _USB_STATUS_PLUG_IN:
@@ -104,20 +111,24 @@ def deal_charging_state(value: bytes) -> None:
     elif res == _POWER_STATUS_CHARGING:
         CHARGING = True
         StatusBar.get_instance().set_battery_img(101)
+    elif res == _POWER_STATUS_CHARGING_FINISHED:
+        # charging finished, show battery level
+        CHARGING = False
+        StatusBar.get_instance().set_battery_img(100)
 
 
-async def deal_pair_res(value: bytes) -> None:
+async def _deal_pair_res(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res in [_BLE_PAIR_SUCCESS, _BLE_PAIR_FAILED]:
-        if SCREEN is not None and not SCREEN.destoried:
-            SCREEN.destory()
+        if SCREEN is not None and not SCREEN.destroyed:
+            SCREEN.destroy()
     if res == _BLE_PAIR_FAILED:
         from trezor.ui.layouts import show_pairing_error
 
         await show_pairing_error()
 
 
-def deal_ble_status(value: bytes) -> None:
+def _deal_ble_status(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _BLE_STATUS_CONNECTED:
         # show icon in status bar
@@ -125,19 +136,70 @@ def deal_ble_status(value: bytes) -> None:
     elif res == _BLE_STATUS_DISCONNECTED:
         # hidden icon in status bar
         StatusBar.get_instance().show_ble(False)
-    else:
-        # ignore other status
-        if __debug__:
-            print("BLE status:", res)
+    elif res == _BLE_STATUS_OPENED:
+        global BLE_ENABLED
+        BLE_ENABLED = True
+        device.set_ble_status(enable=True)
+    elif res == _BLE_STATUS_CLOSED:
+        global BLE_ENABLED
+        BLE_ENABLED = False
+        device.set_ble_status(enable=False)
 
 
-def retrieve_ble_name(value: bytes) -> None:
+def _retrieve_ble_name(value: bytes) -> None:
     global BLE_NAME
     if value != b"":
         BLE_NAME = value.decode("utf-8")
+        device.set_ble_name(BLE_NAME)
 
 
-def retrieve_nrf_version(value: bytes) -> None:
+def _retrieve_nrf_version(value: bytes) -> None:
     global NRF_VERSION
     if value != b"":
         NRF_VERSION = value.decode("utf-8")
+        device.set_ble_version(NRF_VERSION)
+
+
+def _request_ble_name():
+    """Request ble name."""
+    if device.get_ble_name() is None:
+        BLE_CTRL.ctrl(0x83, 0x01)
+
+
+def _request_ble_version():
+    """Request ble version."""
+    BLE_CTRL.ctrl(0x83, 0x02)
+
+
+def _request_battery_level():
+    """Request battery level."""
+    if not CHARGING:
+        BLE_CTRL.ctrl(0x82, 0x04)
+
+
+def _request_ble_status():
+    """Request current ble status."""
+    BLE_CTRL.ctrl(0x81, 0x04)
+
+
+def fetch_all():
+    """Request some important data."""
+    _request_ble_name()
+    _request_ble_version()
+    _request_ble_status()
+    _request_battery_level()
+
+
+def ctrl_ble(enable: bool) -> None:
+    """Request to open or close ble.
+    @param enable: True to open, False to close
+    """
+    if not device.ble_enabled() and enable:
+        BLE_CTRL.ctrl(0x81, 0x01)
+    elif device.ble_enabled() and not enable:
+        BLE_CTRL.ctrl(0x81, 0x02)
+
+
+def ctrl_power_off() -> None:
+    """Request to power off the device."""
+    BLE_CTRL.ctrl(0x82, 0x01)

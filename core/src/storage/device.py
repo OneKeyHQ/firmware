@@ -42,6 +42,10 @@ INITIALIZED                = const(0x13)  # bool (0x01 or empty)
 _SAFETY_CHECK_LEVEL        = const(0x14)  # int
 _EXPERIMENTAL_FEATURES     = const(0x15)  # bool (0x01 or empty)
 
+_BLE_NAME = const(0x80)  # bytes
+_BLE_VERSION = const(0x81)  # bytes
+_BLE_ENABLED = const(0x82)  # bool (0x01 or empty)
+
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
 _DEFAULT_SAFETY_CHECK_LEVEL = SAFETY_CHECK_LEVEL_STRICT
@@ -79,17 +83,43 @@ def set_version(version: bytes) -> None:
     common.set(_NAMESPACE, _VERSION, version)
 
 
-def get_firmware_version() -> str | None:
-    return "0.1.0"
+def get_firmware_version() -> str:
+    return utils.ONEKEY_VERSION
 
 
 def get_storage() -> str:
     return config.get_capacity()
 
 
-def get_ble_mac() -> str:
-    # TODO:
-    return "T2170"
+def set_ble_name(name: str) -> None:
+    common.set(_NAMESPACE, _BLE_NAME, name.encode(), True)
+
+
+def get_ble_name() -> str:
+    ble_name = common.get(_NAMESPACE, _BLE_NAME, public=True)
+    if ble_name is None:
+        return ""
+    return ble_name.decode()
+
+
+def ble_enabled() -> bool:
+    return common.get_bool(_NAMESPACE, _BLE_ENABLED, public=True)
+
+
+def set_ble_status(enable: bool) -> None:
+    common.set_bool(_NAMESPACE, _BLE_ENABLED, enable, public=True)
+
+
+def set_ble_version(version: str) -> None:
+    """Set ble firmware version."""
+    common.set(_NAMESPACE, _BLE_VERSION, version.encode(), True)
+
+
+def get_ble_version() -> str:
+    ble_version = common.get(_NAMESPACE, _BLE_VERSION, public=True)
+    if ble_version is None:
+        return ""
+    return ble_version.decode()
 
 
 def get_model() -> str:

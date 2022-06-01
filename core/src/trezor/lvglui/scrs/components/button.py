@@ -85,6 +85,8 @@ class ListItemBtn(lv.btn):
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         if left_img_src:
             img_left = lv.img(self)
             img_left.set_src(left_img_src)
@@ -95,13 +97,11 @@ class ListItemBtn(lv.btn):
             self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.label_left = lv.label(self)
         self.label_left.set_long_mode(lv.label.LONG.WRAP)
-        self.label_left.set_text(text)
-        self.label_left.set_style_text_font(
-            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.label_left.set_style_text_color(
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
+        self.label_left.set_text(text)
+
         if left_img_src:
             self.label_left.align_to(img_left, lv.ALIGN.OUT_RIGHT_MID, 10, 0)  # type: ignore["img_left" is possibly unbound]
         else:
@@ -109,17 +109,14 @@ class ListItemBtn(lv.btn):
         if right_text:
             self.label_right = lv.label(self)
             self.label_right.set_long_mode(lv.label.LONG.WRAP)
-            self.label_right.set_text(right_text)
             self.label_right.set_width(200)
             self.label_right.set_style_text_align(
                 lv.TEXT_ALIGN.RIGHT, lv.PART.MAIN | lv.STATE.DEFAULT
             )
-            self.label_right.set_style_text_font(
-                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
             self.label_right.set_style_text_color(
                 lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
             )
+            self.label_right.set_text(right_text)
             if has_next:
                 self.label_right.align_to(self.img_right, lv.ALIGN.OUT_LEFT_MID, -10, 0)
             else:

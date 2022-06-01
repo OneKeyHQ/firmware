@@ -224,8 +224,8 @@ trezor.sdcard
 import trezor.sdcard
 trezor.strings
 import trezor.strings
-trezor.uart_pull
-import trezor.uart_pull
+trezor.uart
+import trezor.uart
 trezor.ui
 import trezor.ui
 trezor.ui.components

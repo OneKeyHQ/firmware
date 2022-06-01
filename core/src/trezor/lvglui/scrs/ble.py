@@ -26,8 +26,8 @@ class PairCodeDisplay(FullSizeWindow):
         self.pair_code.set_text(pair_code)
         self.pair_code.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
         self.btn_yes.enable(lv.color_hex(0x323232), lv.color_hex(0xFFFFFF))
-        self.destoried = False
+        self.destroyed = False
 
-    def destory(self, delay_ms=100):
-        super().destory(delay_ms)
-        self.destoried = True
+    def destroy(self, delay_ms=100):
+        super().destroy(delay_ms)
+        self.destroyed = True

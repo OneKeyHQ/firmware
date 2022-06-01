@@ -338,6 +338,10 @@ class ConnectSetting(Screen):
         )
         self.container = ContainerFlexCol(self, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
+        if device.ble_enabled():
+            self.ble.add_state()
+        else:
+            self.ble.clear_state()
         # self.usb = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__USB))
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
 
@@ -345,13 +349,13 @@ class ConnectSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.VALUE_CHANGED:
+            from trezor import uart
+
             if target == self.ble.switch:
                 if target.has_state(lv.STATE.CHECKED):
-                    if __debug__:
-                        print("Bluetooth is on")
+                    uart.ctrl_ble(enable=True)
                 else:
-                    if __debug__:
-                        print("Bluetooth is off")
+                    uart.ctrl_ble(enable=False)
             # else:
             #     if target.has_state(lv.STATE.CHECKED):
             #         print("USB is on")
@@ -368,7 +372,7 @@ class AboutSetting(Screen):
         model = device.get_model()
         version = device.get_firmware_version()
         serial = device.get_serial()  # "FK1W2Y84JCDR"
-        ble_mac = device.get_ble_mac()
+        ble_name = device.get_ble_name()
         storage = device.get_storage()
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
@@ -389,7 +393,7 @@ class AboutSetting(Screen):
         self.ble_mac = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLUETOOTH),
-            right_text=ble_mac,
+            right_text=ble_name,
             has_next=False,
         )
         self.storage = ListItemBtn(
@@ -423,10 +427,10 @@ class PowerOff(FullSizeWindow):
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
             if target == self.btn_yes:
-                self.destory()
+                self.destroy()
                 ShutingDown()
             elif target == self.btn_no:
-                self.destory(500)
+                self.destroy(500)
                 if self.has_pin:
                     from apps.common.request_pin import verify_user_pin
 
@@ -436,13 +440,13 @@ class PowerOff(FullSizeWindow):
 class ShutingDown(FullSizeWindow):
     def __init__(self):
         super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
-        from trezor import utils, loop
+        from trezor import loop, uart
 
         async def restart_delay():
             await loop.sleep(3000)
-            utils.reset()
+            uart.ctrl_power_off()
 
-        self.destory(3000)
+        self.destroy(3000)
         workflow.spawn(restart_delay())
 
 
@@ -495,7 +499,7 @@ class SecurityScreen(Screen):
         if not hasattr(self, "_init"):
             self._init = True
         else:
-            return
+            self.clean()
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.container = ContainerFlexCol(self, self.title)
         self.rest_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__RESET_PIN))
@@ -666,5 +670,4 @@ class BlindSign(Screen):
                         btn_text=_(i18n_keys.BUTTON__ENABLE),
                     )
                 else:
-                    if __debug__:
-                        print("Bluetooth is off")
+                    pass

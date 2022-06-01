@@ -113,7 +113,7 @@ class QuickStart(FullSizeWindow):
                     )
                 )
                 # pyright: on
-            self.destory()
+            self.destroy()
 
 
 class SelectMnemonicNum(FullSizeWindow):
@@ -140,7 +140,7 @@ class SelectMnemonicNum(FullSizeWindow):
                 self.num = int(selected_str.strip()[:-1])
         elif code == lv.EVENT.CLICKED:
             self.channel.publish(word_cnt_strength_map[self.num])
-            self.destory()
+            self.destroy()
 
 
 # class InitScreen(Screen):

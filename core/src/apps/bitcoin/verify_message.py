@@ -107,6 +107,12 @@ async def verify_message(ctx: wire.Context, msg: VerifyMessage) -> Success:
         address=address_short(coin, address),
         verify=True,
     )
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
-    await show_success(ctx, "verify_message", "The signature is valid.")
+    await show_success(
+        ctx,
+        "verify_message",
+        "The signature is valid.",
+        button=_(i18n_keys.BUTTON__DONE),
+    )
     return Success(message="Message verified")

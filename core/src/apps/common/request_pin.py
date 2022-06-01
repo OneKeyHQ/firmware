@@ -16,7 +16,7 @@ def can_lock_device() -> bool:
 
 async def request_pin(
     ctx: wire.GenericContext,
-    prompt: str = _(i18n_keys.TITLE__ENTER_PIN),
+    prompt: str = "",
     attempts_remaining: int | None = None,
     allow_cancel: bool = True,
     **kwargs: Any,

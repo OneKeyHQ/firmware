@@ -199,6 +199,28 @@ ALLOW_WHILE_LOCKED = (
     MessageType.WipeDevice,
 )
 
+# if not utils.LVGL_UI:
+
+#     def set_homescreen() -> None:
+#         import storage.recovery
+
+#         if not config.is_unlocked():
+#             from apps.homescreen.lockscreen import lockscreen
+
+#             workflow.set_default(lockscreen)
+
+#         elif storage.recovery.is_in_progress():
+#             from apps.management.recovery_device.homescreen import recovery_homescreen
+
+#             workflow.set_default(recovery_homescreen)
+
+#         else:
+#             from apps.homescreen.homescreen import homescreen
+
+#             workflow.set_default(homescreen)
+
+# else:
+
 
 def set_homescreen() -> None:
     if storage.device.is_initialized():

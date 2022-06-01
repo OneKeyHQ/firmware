@@ -92,7 +92,7 @@ class WipeDeviceTips(FullSizeWindow):
         elif code == lv.EVENT.LONG_PRESSED:
             if target == self.btn_yes:
                 self.channel.publish(1)
-        self.destory()
+        self.destroy()
 
 
 class WipeDeviceSuccess(FullSizeWindow):
@@ -112,7 +112,7 @@ class WipeDeviceSuccess(FullSizeWindow):
         if code == lv.EVENT.CLICKED:
             if target == self.btn_yes:
                 self.channel.publish(1)
-            self.destory()
+            self.destroy()
             from apps.base import set_homescreen
 
             set_homescreen()
