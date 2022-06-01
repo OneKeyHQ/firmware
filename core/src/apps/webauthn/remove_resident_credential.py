@@ -1,6 +1,7 @@
 import storage.device
 import storage.resident_credentials
 from trezor import wire
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success, WebAuthnRemoveResidentCredential
 from trezor.ui.components.common.webauthn import ConfirmInfo
 from trezor.ui.layouts.lvgl.webauthn import confirm_webauthn
@@ -16,7 +17,7 @@ class ConfirmRemoveCredential(ConfirmInfo):
         self.load_icon(cred.rp_id_hash)
 
     def get_header(self) -> str:
-        return "Remove credential"
+        return _(i18n_keys.TITLE__REMOVE_CREDENTIAL)
 
     def app_name(self) -> str:
         return self._cred.app_name()

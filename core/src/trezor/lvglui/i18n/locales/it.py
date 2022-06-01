@@ -244,5 +244,17 @@ translations = [
     "ALTEZZA DEL BLOCCO:",
     "Tassa di transazione",
     "CONTO DEI CAMBIAMENTI:",
+    "Ripristino FIDO2",
+    "Volete davvero cancellare tutte le credenziali?",
+    "Ottenere il prossimo contatore U2F",
+    "Si desidera aumentare e recuperare il contatore U2F?",
+    "Elenca credenziali",
+    "Si desidera esportare le informazioni sulle credenziali residenti memorizzate su questo dispositivo?",
+    "Impostare il contatore U2F",
+    "Si desidera impostare il contatore U2F su {}?",
+    "Rimuovere la credenziale",
+    "Visualizza il messaggio completo",
+    "Importazione di credenziali",
+    "La credenziale che stai tentando di importare non appartiene a questo autenticatore.",
 ]
 # fmt: on

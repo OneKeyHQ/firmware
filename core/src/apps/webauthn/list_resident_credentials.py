@@ -1,4 +1,5 @@
 from trezor import wire
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import (
     WebAuthnCredential,
     WebAuthnCredentials,
@@ -15,8 +16,8 @@ async def list_resident_credentials(
     await confirm_action(
         ctx,
         "credentials_list",
-        title="List credentials",
-        description="Do you want to export information about the resident credentials stored on this device?",
+        title=_(i18n_keys.TITLE__LIST_CREDENTIALS),
+        description=_(i18n_keys.SUBTITLE__LIST_CREDENTIALS),
     )
     creds = [
         WebAuthnCredential(

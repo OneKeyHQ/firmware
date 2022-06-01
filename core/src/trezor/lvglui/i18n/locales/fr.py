@@ -244,5 +244,17 @@ translations = [
     "HAUTEUR DU BLOC :",
     "Frais de transaction",
     "COMPTE DES CHANGEMENTS :",
+    "Réinitialisation FIDO2",
+    "Voulez-vous vraiment effacer toutes les informations d'identification ?",
+    "Obtenir le prochain compteur U2F",
+    "Voulez-vous augmenter et récupérer le compteur U2F ?",
+    "Liste des informations d'identification",
+    "Voulez-vous exporter des informations sur les informations d'identification des résidents stockées sur cet appareil ?",
+    "Définir le compteur U2F",
+    "Voulez-vous définir le compteur U2F sur {} ?",
+    "Supprimer le justificatif",
+    "Afficher le message complet",
+    "Informations d'identification d'importation",
+    "L'identifiant que vous essayez d'importer n'appartient pas à cet authentificateur.",
 ]
 # fmt: on

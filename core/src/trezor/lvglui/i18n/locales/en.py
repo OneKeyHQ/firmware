@@ -244,5 +244,17 @@ translations = [
     "BLOCK HEIGHT:",
     "Transaction fee",
     "CHANGE COUNT:",
+    "FIDO2 Reset",
+    "Do you really want to erase all credentials?",
+    "Get Next U2F Counter",
+    "Do you want to increase and retrieve the U2F counter?",
+    "List Credentials",
+    "Do you want to export information about the resident credentials stored on this device?",
+    "Set U2F Counter",
+    "Do you want to set the U2F counter to {}?",
+    "Remove Credential",
+    "View Full Message",
+    "Import Credential",
+    "The credential you are trying to import does not belong to this authenticator.",
 ]
 # fmt: on

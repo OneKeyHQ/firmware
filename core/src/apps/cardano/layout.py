@@ -85,8 +85,6 @@ CERTIFICATE_TYPE_NAMES = {
     CardanoCertificateType.STAKE_POOL_REGISTRATION: "Stakepool registration",
 }
 
-TITLE = _(i18n_keys.TITLE__CONFIRM_TRANSACTION)
-
 
 def format_coin_amount(amount: int, network_id: int) -> str:
     currency = "ADA" if network_ids.is_mainnet(network_id) else "tADA"
@@ -203,7 +201,7 @@ async def show_transaction_signing_mode(
         await confirm_metadata(
             ctx,
             "confirm_signing_mode",
-            title=TITLE,
+            title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
             content="Confirming a multisig transaction.",
             larger_vspace=True,
             br_code=ButtonRequestType.Other,
@@ -212,7 +210,7 @@ async def show_transaction_signing_mode(
         await confirm_metadata(
             ctx,
             "confirm_signing_mode",
-            title=TITLE,
+            title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
             content="Confirming a Plutus transaction - loss of collateral is possible. Check all items carefully.",
             br_code=ButtonRequestType.Other,
         )
@@ -222,7 +220,7 @@ async def confirm_input(ctx: wire.Context, input: CardanoTxInput) -> None:
     await confirm_properties(
         ctx,
         "confirm_input",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             ("Input ID:", input.prev_hash),
             ("Input index:", str(input.prev_index)),
@@ -243,7 +241,7 @@ async def confirm_sending(
         ctx,
         to,
         format_coin_amount(ada_amount, network_id),
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         subtitle=subtitle,
         font_amount=ui.BOLD,
         width_paginated=17,
@@ -261,7 +259,7 @@ async def confirm_sending_token(
     await confirm_properties(
         ctx,
         "confirm_token",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             (
                 "Asset fingerprint:",
@@ -315,7 +313,7 @@ async def _show_credential(
     is_output: bool,
 ) -> None:
     if is_output:
-        title = TITLE
+        title = _(i18n_keys.TITLE__CONFIRM_TRANSACTION)
     else:
         title = f"{ADDRESS_TYPE_NAMES[credential.address_type]} address"
 
@@ -374,7 +372,7 @@ async def show_warning_tx_output_contains_tokens(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_tokens",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         content="The following transaction output contains tokens.",
         larger_vspace=True,
         br_code=ButtonRequestType.Other,
@@ -385,7 +383,7 @@ async def show_warning_tx_contains_mint(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_tokens",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         content="The transaction contains minting or burning of tokens.",
         larger_vspace=True,
         br_code=ButtonRequestType.Other,
@@ -398,7 +396,7 @@ async def show_warning_tx_output_contains_datum_hash(
     await confirm_properties(
         ctx,
         "confirm_datum_hash",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             (
                 "The following transaction output contains datum hash:",
@@ -414,7 +412,7 @@ async def show_warning_tx_output_no_datum_hash(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_no_datum_hash",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         content="The following transaction output contains a script address, but does not contain a datum hash.",
         br_code=ButtonRequestType.Other,
     )
@@ -424,7 +422,7 @@ async def show_warning_no_script_data_hash(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_no_script_data_hash",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         content="The transaction contains no script data hash. Plutus script will not be able to run.",
         br_code=ButtonRequestType.Other,
     )
@@ -434,7 +432,7 @@ async def show_warning_no_collateral_inputs(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_no_collateral_inputs",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         content="The transaction contains no collateral inputs. Plutus script will not be able to run.",
         br_code=ButtonRequestType.Other,
     )
@@ -454,7 +452,7 @@ async def confirm_witness_request(
     await confirm_text(
         ctx,
         "confirm_total",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         data=address_n_to_str(witness_path),
         description=f"Sign transaction with {path_title}:",
         br_code=ButtonRequestType.Other,
@@ -487,7 +485,7 @@ async def confirm_transaction(
     await confirm_properties(
         ctx,
         "confirm_total",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=props,
         hold=True,
         br_code=ButtonRequestType.Other,
@@ -515,7 +513,7 @@ async def confirm_certificate(
     await confirm_properties(
         ctx,
         "confirm_certificate",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=props,
         br_code=ButtonRequestType.Other,
     )
@@ -531,7 +529,7 @@ async def confirm_stake_pool_parameters(
     await confirm_properties(
         ctx,
         "confirm_pool_registration",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             (
                 "Stake pool registration\nPool ID:",
@@ -593,7 +591,7 @@ async def confirm_stake_pool_owner(
     await confirm_properties(
         ctx,
         "confirm_pool_owners",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=props,
         br_code=ButtonRequestType.Other,
     )
@@ -607,7 +605,7 @@ async def confirm_stake_pool_metadata(
         await confirm_properties(
             ctx,
             "confirm_pool_metadata",
-            title=TITLE,
+            title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
             props=[("Pool has no metadata (anonymous pool)", None)],
             br_code=ButtonRequestType.Other,
         )
@@ -616,7 +614,7 @@ async def confirm_stake_pool_metadata(
     await confirm_properties(
         ctx,
         "confirm_pool_metadata",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             ("Pool metadata url:", metadata.url),
             ("Pool metadata hash:", metadata.hash),
@@ -634,7 +632,7 @@ async def confirm_stake_pool_registration_final(
     await confirm_properties(
         ctx,
         "confirm_pool_final",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             ("Confirm signing the stake pool registration as an owner.", None),
             ("Network:", protocol_magics.to_ui_string(protocol_magic)),
@@ -670,7 +668,7 @@ async def confirm_withdrawal(
     await confirm_properties(
         ctx,
         "confirm_withdrawal",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=props,
         br_code=ButtonRequestType.Other,
     )
@@ -703,7 +701,7 @@ async def confirm_catalyst_registration(
     await confirm_properties(
         ctx,
         "confirm_catalyst_registration",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             ("Catalyst voting key registration", None),
             ("Voting public key:", public_key),
@@ -724,7 +722,7 @@ async def show_auxiliary_data_hash(
     await confirm_properties(
         ctx,
         "confirm_auxiliary_data",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[("Auxiliary data hash:", auxiliary_data_hash)],
         br_code=ButtonRequestType.Other,
     )
@@ -737,7 +735,7 @@ async def confirm_token_minting(
     await confirm_properties(
         ctx,
         "confirm_mint",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             (
                 "Asset fingerprint:",
@@ -770,7 +768,7 @@ async def confirm_script_data_hash(ctx: wire.Context, script_data_hash: bytes) -
     await confirm_properties(
         ctx,
         "confirm_script_data_hash",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             (
                 "Script data hash:",
@@ -787,7 +785,7 @@ async def confirm_collateral_input(
     await confirm_properties(
         ctx,
         "confirm_collateral_input",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[
             ("Collateral input ID:", collateral_input.prev_hash),
             ("Collateral input index:", str(collateral_input.prev_index)),
@@ -811,7 +809,7 @@ async def confirm_required_signer(
     await confirm_properties(
         ctx,
         "confirm_required_signer",
-        title=TITLE,
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
         props=[("Required signer", formatted_signer)],
         br_code=ButtonRequestType.Other,
     )
