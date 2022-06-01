@@ -3491,6 +3491,13 @@ class Features(protobuf.MessageType):
         508: protobuf.Field("onekey_version", "string", repeated=False, required=False),
         509: protobuf.Field("onekey_serial", "string", repeated=False, required=False),
         510: protobuf.Field("bootloader_version", "string", repeated=False, required=False),
+        511: protobuf.Field("serial_no", "string", repeated=False, required=False),
+        512: protobuf.Field("spi_flash", "string", repeated=False, required=False),
+        513: protobuf.Field("initstates", "uint32", repeated=False, required=False),
+        514: protobuf.Field("NFT_voucher", "bytes", repeated=False, required=False),
+        515: protobuf.Field("cpu_info", "string", repeated=False, required=False),
+        516: protobuf.Field("pre_firmware", "string", repeated=False, required=False),
+        517: protobuf.Field("coin_switch", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -3544,6 +3551,13 @@ class Features(protobuf.MessageType):
         onekey_version: Optional["str"] = None,
         onekey_serial: Optional["str"] = None,
         bootloader_version: Optional["str"] = None,
+        serial_no: Optional["str"] = None,
+        spi_flash: Optional["str"] = None,
+        initstates: Optional["int"] = None,
+        NFT_voucher: Optional["bytes"] = None,
+        cpu_info: Optional["str"] = None,
+        pre_firmware: Optional["str"] = None,
+        coin_switch: Optional["int"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3593,6 +3607,13 @@ class Features(protobuf.MessageType):
         self.onekey_version = onekey_version
         self.onekey_serial = onekey_serial
         self.bootloader_version = bootloader_version
+        self.serial_no = serial_no
+        self.spi_flash = spi_flash
+        self.initstates = initstates
+        self.NFT_voucher = NFT_voucher
+        self.cpu_info = cpu_info
+        self.pre_firmware = pre_firmware
+        self.coin_switch = coin_switch
 
 
 class LockDevice(protobuf.MessageType):

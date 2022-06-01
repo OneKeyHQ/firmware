@@ -1,10 +1,12 @@
 #include STM32_HAL_H
 
 #include "device.h"
+#include "atca_api.h"
 #include "atca_command.h"
 #include "atca_hal.h"
 #include "common.h"
 #include "display.h"
+#include "emmc.h"
 #include "flash.h"
 #include "mini_printf.h"
 #include "qspi_flash.h"
@@ -286,8 +288,19 @@ void device_test(void) {
                  COLOR_BLACK);
   }
 
-  buzzer_init();
+  emmc_init();
 
+  if (emmc_get_capacity_in_bytes() == 0) {
+    display_text(0, 80, "EMMC test faild", -1, FONT_NORMAL, COLOR_RED,
+                 COLOR_BLACK);
+    while (1)
+      ;
+  } else {
+    display_text(0, 80, "EMMC test done", -1, FONT_NORMAL, COLOR_WHITE,
+                 COLOR_BLACK);
+  }
+
+  buzzer_init();
   buzzer_ctrl(1);
   hal_delay(1000);
   buzzer_ctrl(0);
@@ -298,15 +311,15 @@ void device_test(void) {
 
   ui_generic_confirm_simple("BEEP test");
   if (ui_response()) {
-    display_text(0, 80, "BEEP test done", -1, FONT_NORMAL, COLOR_WHITE,
+    display_text(0, 110, "BEEP test done", -1, FONT_NORMAL, COLOR_WHITE,
                  COLOR_BLACK);
   } else {
-    display_text(0, 80, "BEEP test faild", -1, FONT_NORMAL, COLOR_RED,
+    display_text(0, 110, "BEEP test faild", -1, FONT_NORMAL, COLOR_RED,
                  COLOR_BLACK);
     while (1)
       ;
   }
-  display_bar(0, 100, DISPLAY_RESX, DISPLAY_RESY - 100, COLOR_BLACK);
+  display_bar(0, 130, DISPLAY_RESX, DISPLAY_RESY - 100, COLOR_BLACK);
 
   motor_init();
 
@@ -316,20 +329,26 @@ void device_test(void) {
 
   ui_generic_confirm_simple("MOTOR test");
   if (ui_response()) {
-    display_text(0, 110, "MOTOR test done", -1, FONT_NORMAL, COLOR_WHITE,
+    display_text(0, 140, "MOTOR test done", -1, FONT_NORMAL, COLOR_WHITE,
                  COLOR_BLACK);
   } else {
-    display_text(0, 110, "MOTOR test faild", -1, FONT_NORMAL, COLOR_RED,
+    display_text(0, 140, "MOTOR test faild", -1, FONT_NORMAL, COLOR_RED,
                  COLOR_BLACK);
     while (1)
       ;
   }
 
+  uint8_t buf[FLASH_OTP_BLOCK_SIZE] = {0};
+  memcpy(buf, (uint8_t *)ATCA_CONFIG_VERSION, strlen(ATCA_CONFIG_VERSION));
+  ensure(flash_otp_write(FLASH_OTP_FACTORY_TEST, 0, buf, FLASH_OTP_BLOCK_SIZE),
+         NULL);
+  ensure(flash_otp_lock(FLASH_OTP_FACTORY_TEST), NULL);
+
   char count_str[24] = {0};
   for (int i = 3; i >= 0; i--) {
-    display_bar(0, 110, DISPLAY_RESX, 140, COLOR_BLACK);
+    display_bar(0, 140, DISPLAY_RESX, 140, COLOR_BLACK);
     mini_snprintf(count_str, sizeof(count_str), "Done! Restarting in %d s", i);
-    display_text(0, 140, count_str, -1, FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+    display_text(0, 170, count_str, -1, FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
     hal_delay(1000);
   }
   HAL_NVIC_SystemReset();

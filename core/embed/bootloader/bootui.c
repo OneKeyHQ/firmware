@@ -738,6 +738,13 @@ void ui_bootloader_second(const image_header *const hdr) {
   display_text(offset, 578, ver_str, -1, FONT_NORMAL, COLOR_BL_BG, COLOR_BL_FG);
 }
 
+void ui_bootloader_factory(void) {
+  display_image(203, 143, 74, 74, toi_icon_onekey + 12,
+                sizeof(toi_icon_onekey) - 12);
+  display_text_center(DISPLAY_RESX / 2, 277, "Factory Mode", -1, FONT_BOLD36,
+                      COLOR_BL_BG, COLOR_BL_FG);
+}
+
 void ui_bootloader_page_switch(const image_header *const hdr) {
   static int current = 0;
   int response;

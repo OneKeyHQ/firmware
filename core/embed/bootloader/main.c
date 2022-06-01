@@ -35,6 +35,7 @@
 #include "nand_flash.h"
 #include "qspi_flash.h"
 #include "random_delays.h"
+#include "se_atca.h"
 #include "secbool.h"
 #include "touch.h"
 #include "usb.h"
@@ -220,6 +221,46 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
       case 55:  // GetFeatures
         process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;
+      default:
+        process_msg_unknown(USB_IFACE_NUM, msg_size, buf);
+        break;
+    }
+  }
+}
+
+secbool bootloader_usb_loop_factory(const vendor_header *const vhdr,
+                                    const image_header *const hdr) {
+  // if both are NULL, we don't have a firmware installed
+  // let's show a webusb landing page in this case
+  usb_init_all((vhdr == NULL && hdr == NULL) ? sectrue : secfalse);
+
+  uint8_t buf[USB_PACKET_SIZE];
+  int r;
+
+  for (;;) {
+    r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);
+    if (r != USB_PACKET_SIZE) {
+      continue;
+    }
+    host_channel = CHANNEL_USB;
+
+    uint16_t msg_id;
+    uint32_t msg_size;
+    if (sectrue != msg_parse_header(buf, &msg_id, &msg_size)) {
+      // invalid header -> discard
+      continue;
+    }
+
+    switch (msg_id) {
+      case 0:  // Initialize
+        process_msg_Initialize(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
+        break;
+      case 1:  // Ping
+        process_msg_Ping(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 55:  // GetFeatures
+        process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
+        break;
       case 10001:  // DeviceInfoSettings
         process_msg_DeviceInfoSettings(USB_IFACE_NUM, msg_size, buf);
         break;
@@ -243,6 +284,7 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
         break;
     }
   }
+  return sectrue;
 }
 
 secbool load_vendor_header_keys(const uint8_t *const data,
@@ -298,6 +340,8 @@ static void check_bootloader_version(void) {
 
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
+  // bool serial_set = false, cert_set = false;
+  // uint32_t cert_len = 0;
 
   SystemCoreClockUpdate();
 
@@ -307,8 +351,27 @@ int main(void) {
   touch_init();
   touch_power_on();
 
+  atca_init();
+  atca_config_init();
+
   device_para_init();
-  // device_test();
+  device_test();
+
+  // if (!serial_set) {
+  //   serial_set = device_serial_set();
+  // }
+  // if (!cert_set) {
+  //   cert_set = se_get_certificate_len(&cert_len);
+  // }
+
+  // if (!serial_set || !cert_set) {
+  //   display_clear();
+  //   device_set_factory_mode(true);
+  //   ui_bootloader_factory();
+  //   if (bootloader_usb_loop_factory(NULL, NULL) != sectrue) {
+  //     return 1;
+  //   }
+  // }
 
   qspi_flash_init();
   qspi_flash_config();
@@ -320,17 +383,14 @@ int main(void) {
   check_bootloader_version();
 #endif
 
-  display_clear();
-
-  atca_init();
-  atca_config_init();
-
   emmc_init();
 
   buzzer_init();
   motor_init();
   ble_usart_init();
   spi_slave_init();
+
+  display_clear();
 
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 
@@ -341,6 +401,22 @@ int main(void) {
 
   // delay to detect touch
   uint32_t touched = boot_touch_detect(1000);
+
+  // ... or if user touched the screen on start
+  // ... or we have stay_in_bootloader flag to force it
+  if (touched || stay_in_bootloader == sectrue) {
+    // no ui_fadeout(); - we already start from black screen
+    ui_bootloader_first(NULL);
+    if (touched) {
+      // wait for the touch end event
+      while (touch_read() & TOUCH_END)
+        ;
+    }
+    // and start the usb loop
+    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+      return 1;
+    }
+  }
 
   vendor_header vhdr;
   image_header hdr;
@@ -366,6 +442,7 @@ int main(void) {
   }
 
   // start the bootloader if no or broken firmware found ...
+
   if (firmware_present != sectrue) {
     ui_bootloader_first(&hdr);
     if (touched) {
@@ -379,23 +456,6 @@ int main(void) {
 
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-      return 1;
-    }
-  }
-
-  // ... or if user touched the screen on start
-  // ... or we have stay_in_bootloader flag to force it
-  if (touched || stay_in_bootloader == sectrue) {
-    // no ui_fadeout(); - we already start from black screen
-    ui_bootloader_first(&hdr);
-    ui_fadein();
-    if (touched) {
-      // wait for the touch end event
-      while (touch_read() & TOUCH_END)
-        ;
-    }
-    // and start the usb loop
-    if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
       return 1;
     }
   }

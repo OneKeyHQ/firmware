@@ -158,6 +158,8 @@ typedef struct _Features {
     char onekey_serial[32]; 
     bool has_bootloader_version;
     char bootloader_version[8]; 
+    bool has_initstates;
+    uint32_t initstates; 
 } Features;
 
 typedef struct _FirmwareErase { 
@@ -236,7 +238,7 @@ extern "C" {
 /* Initializer values for message structs */
 #define Initialize_init_default                  {0}
 #define GetFeatures_init_default                 {0}
-#define Features_init_default                    {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, 0, false, "", false, "", false, 0, false, 0, false, "", false, 0, false, "", false, "", false, ""}
+#define Features_init_default                    {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, 0, false, "", false, "", false, 0, false, 0, false, "", false, 0, false, "", false, "", false, "", false, 0}
 #define Ping_init_default                        {false, ""}
 #define Success_init_default                     {false, ""}
 #define Failure_init_default                     {false, _FailureType_MIN, false, ""}
@@ -257,7 +259,7 @@ extern "C" {
 #define SEMessageSignature_init_default          {{0, {0}}}
 #define Initialize_init_zero                     {0}
 #define GetFeatures_init_zero                    {0}
-#define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, 0, false, "", false, "", false, 0, false, 0, false, "", false, 0, false, "", false, "", false, ""}
+#define Features_init_zero                       {false, "", 0, 0, 0, false, 0, false, "", false, "", false, "", false, 0, false, {0, {0}}, false, 0, false, "", false, 0, false, 0, false, 0, false, "", false, 0, false, "", false, "", false, 0, false, 0, false, "", false, 0, false, "", false, "", false, "", false, 0}
 #define Ping_init_zero                           {false, ""}
 #define Success_init_zero                        {false, ""}
 #define Failure_init_zero                        {false, _FailureType_MIN, false, ""}
@@ -316,6 +318,7 @@ extern "C" {
 #define Features_onekey_version_tag              508
 #define Features_onekey_serial_tag               509
 #define Features_bootloader_version_tag          510
+#define Features_initstates_tag                  513
 #define FirmwareErase_length_tag                 1
 #define FirmwareRequest_offset_tag               1
 #define FirmwareRequest_length_tag               2
@@ -366,7 +369,8 @@ X(a, STATIC,   OPTIONAL, STRING,   se_ver,          506) \
 X(a, STATIC,   OPTIONAL, BOOL,     backup_only,     507) \
 X(a, STATIC,   OPTIONAL, STRING,   onekey_version,  508) \
 X(a, STATIC,   OPTIONAL, STRING,   onekey_serial,   509) \
-X(a, STATIC,   OPTIONAL, STRING,   bootloader_version, 510)
+X(a, STATIC,   OPTIONAL, STRING,   bootloader_version, 510) \
+X(a, STATIC,   OPTIONAL, UINT32,   initstates,      513)
 #define Features_CALLBACK NULL
 #define Features_DEFAULT NULL
 
@@ -522,7 +526,7 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 #define DeviceInfoSettings_size                  67
 #define DeviceInfo_size                          135
 #define Failure_size                             260
-#define Features_size                            622
+#define Features_size                            629
 #define FirmwareErase_size                       6
 #define FirmwareRequest_size                     12
 #define GetDeviceInfo_size                       0
