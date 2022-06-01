@@ -99,7 +99,7 @@ class SettingsScreen(Screen):
             "nav_back": True,
         }
         super().__init__(**kwargs)
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.general = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__GENERAL),
@@ -183,7 +183,7 @@ class GeneralScreen(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__GENERAL), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.auto_lock = ListItemBtn(
             self.container, _(i18n_keys.ITEM__AUTO_LOCK), self.cur_auto_lock
         )
@@ -231,7 +231,7 @@ class AutoLockSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__AUTO_LOCK), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.setting_items = [1, 2, 5, 10, 30, "Never"]
         has_custom = True
         self.checked_index = 0
@@ -296,7 +296,7 @@ class LanguageSetting(Screen):
         self.title.set_style_text_font(
             font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.lang_buttons = []
         for idx, lang in enumerate(langs):
             lang_button = ListItemBtn(self.container, lang[1], has_next=False)
@@ -336,7 +336,7 @@ class ConnectSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
         if device.ble_enabled():
             self.ble.add_state()
@@ -377,7 +377,7 @@ class AboutSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.model = ListItemBtn(
             self.container, _(i18n_keys.ITEM__MODEL), right_text=model, has_next=False
         )
@@ -501,7 +501,7 @@ class SecurityScreen(Screen):
         else:
             self.clean()
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.rest_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__RESET_PIN))
         self.recovery_check = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
@@ -570,7 +570,7 @@ class CryptoScreen(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__CRYPTO), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.ethereum = ListItemBtn(self.container, _(i18n_keys.TITLE__ETHEREUM))
         self.solana = ListItemBtn(self.container, _(i18n_keys.TITLE__SOLANA))
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
@@ -592,7 +592,7 @@ class EthereumSetting(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__ETHEREUM), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.blind_sign = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLIND_SIGNING),
@@ -617,7 +617,7 @@ class SolanaSetting(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SOLANA), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.blind_sign = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLIND_SIGNING),
@@ -644,7 +644,7 @@ class BlindSign(Screen):
             prev_scr, title=_(i18n_keys.TITLE__BLIND_SIGNING), nav_back=True
         )
         self.coin_type = coin_type
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self, self.title, padding_row=10)
         self.blind_sign = ListItemBtnWithSwitch(
             self.container, f"{coin_type} Blind Signing"
         )

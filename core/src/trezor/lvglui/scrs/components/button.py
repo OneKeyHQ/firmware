@@ -85,7 +85,6 @@ class ListItemBtn(lv.btn):
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         if left_img_src:
             img_left = lv.img(self)

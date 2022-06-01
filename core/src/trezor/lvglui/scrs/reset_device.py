@@ -23,7 +23,7 @@ class MnemonicDisplay(FullSizeWindow):
             _(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
             hold_confirm=True,
         )
-        self.panel = lv.obj(self)
+        self.panel = lv.obj(self.content_area)
         self.panel.set_size(440, lv.SIZE.CONTENT)
         self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
         self.panel.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -59,8 +59,6 @@ class MnemonicDisplay(FullSizeWindow):
             text_col2 += f"{int(index+int(word_count/2)+1):>2}. {mnemonics[int(index+int(word_count/2))]}\n"
             self.word_col1.set_text(text_col.rstrip())
             self.word_col2.set_text(text_col2.rstrip())
-        self.btn_yes.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
-
 
 class BackupTips(FullSizeWindow):
     def __init__(self):
@@ -68,7 +66,7 @@ class BackupTips(FullSizeWindow):
             _(i18n_keys.TITLE__BACK_UP_RECOVERY_PHRASE),
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_BACK_UP_RECOVERY_PHRASE),
         )
-        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10))
+        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10), padding_row=10)
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,

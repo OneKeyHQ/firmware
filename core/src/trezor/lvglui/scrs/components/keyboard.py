@@ -39,7 +39,8 @@ class BIP39Keyboard(lv.keyboard):
         super().__init__(parent)
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 220)
-        self.ta.set_size(200, lv.SIZE.CONTENT)
+        self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -235,7 +236,8 @@ class NumberKeyboard(lv.keyboard):
         super().__init__(parent)
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
-        self.ta.set_size(200, lv.SIZE.CONTENT)
+        self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -307,7 +309,8 @@ class PassphraseKeyboard(lv.btnmatrix):
         super().__init__(parent)
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 200)
-        self.ta.set_size(200, lv.SIZE.CONTENT)
+        self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT

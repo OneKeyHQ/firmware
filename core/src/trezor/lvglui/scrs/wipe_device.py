@@ -26,7 +26,7 @@ class WipeDeviceTips(FullSizeWindow):
         subtitle = _(i18n_keys.SUBTITLE__DEVICE_WIPE_DEVICE_FACTORY_RESET)
         icon_path = "A:/res/danger.png"
         super().__init__(title, subtitle, icon_path=icon_path)
-        self.container = ContainerFlexCol(self, self.subtitle)
+        self.container = ContainerFlexCol(self, self.subtitle, padding_row=10)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
             _(i18n_keys.CHECK__DEVICE_WIPE_DEVICE_FACTORY_RESET_1),

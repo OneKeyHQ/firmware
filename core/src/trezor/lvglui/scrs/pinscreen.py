@@ -12,7 +12,7 @@ class PinTip(FullSizeWindow):
             _(i18n_keys.TITLE__SET_A_PIN),
             _(i18n_keys.SUBTITLE__SETUP_SET_A_PIN),
         )
-        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10))
+        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10), padding_row=10)
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,

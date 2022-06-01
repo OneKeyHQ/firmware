@@ -157,11 +157,12 @@ class FullSizeWindow(lv.obj):
             )
 
         if options:
-            self.roller = Roller(self.content_area, options)
+            self.roller = Roller(self, options)
             self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
             self.select_option = options.split()[1]
 
         self.content_area.set_style_max_height(656, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_min_height(300, lv.PART.MAIN | lv.STATE.DEFAULT)
         if cancel_text:
             self.btn_no = NormalButton(self, cancel_text)
             if confirm_text:
