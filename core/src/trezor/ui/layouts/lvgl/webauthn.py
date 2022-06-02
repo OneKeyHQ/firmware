@@ -33,13 +33,14 @@ async def confirm_webauthn(
 
 
 async def confirm_webauthn_reset() -> bool:
-    from trezor.lvglui.scrs.common import FullSizeWindow
+    from trezor.ui.layouts import FullSizeWindow
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
     screen = FullSizeWindow(
-        "FIDO2 Reset",
-        "Do you really want to erase all credentials?",
-        "Confirm",
-        "Cancel",
+        _(i18n_keys.TITLE__FIDO2_RESET),
+        _(i18n_keys.SUBTITLE__DO_YOU_REALLY_WANT_TO_ERASE_ALL_CREDENTIALS),
+        _(i18n_keys.BUTTON__CONFIRM),
+        _(i18n_keys.BUTTON__CANCEL),
         icon_path="A:/res/warning.png",
     )
     return await screen.request()

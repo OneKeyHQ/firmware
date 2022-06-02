@@ -1,6 +1,6 @@
 from trezor.crypto import bip39, random
 
-from .. import font_MONO28, font_PJSBOLD20, font_PJSBOLD32, lv
+from .. import font_MONO24, font_PJSBOLD20, font_PJSBOLD32, lv
 
 
 def compute_mask(text: str) -> int:
@@ -39,7 +39,8 @@ class BIP39Keyboard(lv.keyboard):
         super().__init__(parent)
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 220)
-        self.ta.set_size(200, lv.SIZE.CONTENT)
+        self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -146,7 +147,7 @@ class BIP39Keyboard(lv.keyboard):
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_font(font_MONO28, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_MONO24, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_height(168)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
@@ -235,7 +236,8 @@ class NumberKeyboard(lv.keyboard):
         super().__init__(parent)
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
-        self.ta.set_size(200, lv.SIZE.CONTENT)
+        self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -275,7 +277,7 @@ class NumberKeyboard(lv.keyboard):
         ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
         self.set_map(lv.keyboard.MODE.NUMBER, btnm_map, ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
-        self.set_width(lv.pct(82))
+        self.set_width(lv.pct(90))
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
             lv.color_hex(0x323232), lv.PART.ITEMS | lv.STATE.DEFAULT
@@ -307,7 +309,8 @@ class PassphraseKeyboard(lv.btnmatrix):
         super().__init__(parent)
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 200)
-        self.ta.set_size(200, lv.SIZE.CONTENT)
+        self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(
             lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
@@ -523,7 +526,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.set_style_pad_row(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
-        self.set_style_text_font(font_MONO28, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_MONO24, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)

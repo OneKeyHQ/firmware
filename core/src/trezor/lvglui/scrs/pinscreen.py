@@ -12,7 +12,9 @@ class PinTip(FullSizeWindow):
             _(i18n_keys.TITLE__SET_A_PIN),
             _(i18n_keys.SUBTITLE__SETUP_SET_A_PIN),
         )
-        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10))
+        self.container = ContainerFlexCol(
+            self, self.subtitle, pos=(0, 10), padding_row=10
+        )
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,
@@ -33,7 +35,7 @@ class PinTip(FullSizeWindow):
         if code == lv.EVENT.CLICKED:
             if target == self.btn:
                 self.channel.publish(1)
-                self.destory()
+                self.destroy()
         elif code == lv.EVENT.VALUE_CHANGED:
             if target == self.item1.checkbox:
                 if target.get_state() & lv.STATE.CHECKED:
@@ -60,7 +62,7 @@ class PinTip(FullSizeWindow):
 class InputPin(FullSizeWindow):
     def __init__(self, **kwargs):
         super().__init__(
-            title=kwargs.get("title", _(i18n_keys.TITLE__ENTER_PIN)),
+            title=kwargs.get("title") or _(i18n_keys.TITLE__ENTER_PIN),
             subtitle=kwargs.get("subtitle", ""),
         )
         self.subtitle.set_style_text_color(
@@ -80,7 +82,7 @@ class InputPin(FullSizeWindow):
         if len(input) < 4:
             return
         self.clean()
-        self.destory()
+        self.destroy()
         self.channel.publish(input)
 
 
@@ -96,7 +98,7 @@ class SetupComplete(FullSizeWindow):
 
     def eventhandler(self, event_obj: lv.event_t):
         self.channel.publish(1)
-        self.destory()
+        self.destroy()
         lv.scr_act().del_delayed(500)
         from apps.base import set_homescreen
 

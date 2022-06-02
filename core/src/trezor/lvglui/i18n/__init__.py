@@ -25,7 +25,7 @@ def i18n_refresh(lang: str = None):
             print(e)
 
 
-i18n_refresh()
+i18n_refresh("en" if not device.is_initialized() else None)
 
 
 def gettext(key):

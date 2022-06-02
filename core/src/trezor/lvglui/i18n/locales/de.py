@@ -244,5 +244,18 @@ translations = [
     "BLOCKHÖHE:",
     "Transaktionsgebühr",
     "ANZAHL DER ÄNDERUNGEN:",
+    "FIDO2 Rückstellung",
+    "Möchten Sie wirklich alle Zugangsdaten löschen?",
+    "Holen Sie sich den nächsten U2F-Zähler",
+    "Möchten Sie den U2F-Zähler erhöhen und abrufen?",
+    "Berechtigungsnachweise auflisten",
+    "Möchten Sie Informationen über die auf diesem Gerät gespeicherten Berechtigungsnachweise exportieren?",
+    "U2F-Zähler einstellen",
+    "Möchten Sie den U2F-Zähler auf {} setzen?",
+    "Berechtigungsnachweis entfernen",
+    "Vollständige Nachricht anzeigen",
+    "Berechtigungsnachweis importieren",
+    "Die Anmeldeinformationen, die Sie zu importieren versuchen, gehören nicht zu diesem Authentifikator.",
+    "Ich habe {} Wörter aufgeschrieben, dann führt Sie OneKey, um die Wörter einzeln zu überprüfen.",
 ]
 # fmt: on

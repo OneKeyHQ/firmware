@@ -58,8 +58,8 @@ async def confirm_action(
     description: str | None = None,
     description_param: str | None = None,
     description_param_font: int = ui.BOLD,
-    verb: str = _(i18n_keys.BUTTON__CONFIRM),
-    verb_cancel: str = _(i18n_keys.BUTTON__CANCEL),
+    verb: str = "Confirm",
+    verb_cancel: str = "Cancel",
     hold: bool = False,
     hold_danger: bool = False,
     icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
@@ -76,8 +76,8 @@ async def confirm_action(
     confirm_screen = FullSizeWindow(
         title,
         f"{description or ''}{' ' + (action or '')}",
-        verb,
-        cancel_text=verb_cancel,
+        verb if hold else _(i18n_keys.BUTTON__CONFIRM),
+        cancel_text=_(i18n_keys.BUTTON__CANCEL),
         icon_path=icon,
         hold_confirm=hold,
     )
@@ -330,7 +330,7 @@ async def show_error_and_raise(
     content: str,
     header: str = "Error",
     subheader: str | None = None,
-    button: str = _(i18n_keys.BUTTON__CLOSE),
+    button: str = "Close",
     red: bool = False,
     exc: ExceptionType = wire.ActionCancelled,
 ) -> NoReturn:
@@ -342,7 +342,7 @@ async def show_error_and_raise(
         subheader=subheader,
         content=content,
         button_confirm=None,
-        button_cancel=button,
+        button_cancel=_(i18n_keys.BUTTON__CLOSE),
         icon="A:/res/danger.png",
         icon_color=ui.RED if red else ui.ORANGE_ICON,
         exc=exc,
@@ -354,9 +354,9 @@ def show_warning(
     ctx: wire.GenericContext,
     br_type: str,
     content: str,
-    header: str = _(i18n_keys.TITLE__WARNING),
+    header: str = "Warning",
     subheader: str | None = None,
-    button: str = _(i18n_keys.BUTTON__TRY_AGAIN),
+    button: str = "Try again",
     br_code: ButtonRequestType = ButtonRequestType.Warning,
     icon: str = "A:/res/warning.png",
     icon_color: int = ui.RED,
@@ -365,10 +365,10 @@ def show_warning(
         ctx,
         br_type=br_type,
         br_code=br_code,
-        header=header,
+        header=_(i18n_keys.TITLE__WARNING),
         subheader=subheader,
         content=content,
-        button_confirm=button,
+        button_confirm=_(i18n_keys.BUTTON__TRY_AGAIN),
         button_cancel=None,
         icon=icon,
         icon_color=icon_color,
@@ -381,7 +381,7 @@ def show_success(
     content: str,
     header: str = "Success",
     subheader: str | None = None,
-    button: str = _(i18n_keys.BUTTON__DONE),
+    button: str = "Done",
 ) -> Awaitable[None]:
     return _show_modal(
         ctx,
@@ -402,7 +402,7 @@ async def confirm_output(
     address: str,
     amount: str,
     font_amount: int = ui.NORMAL,  # TODO cleanup @ redesign
-    title: str = _(i18n_keys.TITLE__VIEW_TRANSACTION),
+    title: str = "Confirm Transaction",
     subtitle: str | None = None,  # TODO cleanup @ redesign
     color_to: int = ui.FG,  # TODO cleanup @ redesign
     to_str: str = " to\n",  # TODO cleanup @ redesign
@@ -416,7 +416,10 @@ async def confirm_output(
 
     await raise_if_cancelled(
         interact(
-            ctx, TransactionOverview(title, amount, address), "confirm_output", br_code
+            ctx,
+            TransactionOverview(_(i18n_keys.TITLE__VIEW_TRANSACTION), amount, address),
+            "confirm_output",
+            br_code,
         )
     )
 
@@ -486,7 +489,7 @@ async def confirm_blob(
         data_str = hexlify(data).decode()
     else:
         data_str = data
-    blob = BlobDisPlay(title, description, data_str)
+    blob = BlobDisPlay(title, description if description is not None else "", data_str)
     return await raise_if_cancelled(interact(ctx, blob, br_type, br_code))
 
 
@@ -515,7 +518,7 @@ def confirm_address(
     ctx: wire.GenericContext,
     title: str,
     address: str,
-    description: str | None = _(i18n_keys.LIST_KEY__ADDRESS__COLON),
+    description: str | None = "Address:",
     br_type: str = "confirm_address",
     br_code: ButtonRequestType = ButtonRequestType.Other,
     icon: str = ui.ICON_SEND,  # TODO cleanup @ redesign
@@ -563,7 +566,7 @@ def confirm_amount(
     ctx: wire.GenericContext,
     title: str,
     amount: str,
-    description: str = _(i18n_keys.LIST_KEY__AMOUNT__COLON),
+    description: str = "Amount:",
     br_type: str = "confirm_amount",
     br_code: ButtonRequestType = ButtonRequestType.Other,
     icon: str = ui.ICON_SEND,  # TODO cleanup @ redesign
@@ -577,7 +580,7 @@ def confirm_amount(
         br_type=br_type,
         title=title,
         data=amount,
-        description=description,
+        description=_(i18n_keys.LIST_KEY__AMOUNT__COLON),
         br_code=br_code,
         icon=icon,
         icon_color=icon_color,

@@ -26,7 +26,7 @@ else:
     font_PJSMID24 = lv.font_scs_reg_24
     font_PJSMID20 = lv.font_scs_reg_24
     font_PJSREG24 = lv.font_scs_reg_24
-    font_MONO28 = lv.font_scs_reg_24
+    font_MONO28 = lv.font_mono_reg_28
     font_MONO24 = lv.font_scs_reg_24
     font_LANG_MIX = lv.font_mix_bold_24
     font_LANG_MIX_TITLE = lv.font_mix_title_bold_36

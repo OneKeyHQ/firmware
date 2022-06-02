@@ -1,4 +1,4 @@
-from .. import font_PJSBOLD20, font_PJSMID20, font_PJSMID28, lv
+from .. import font_PJSMID20, font_PJSMID28, lv
 
 
 class ListItemWithLeadingCheckbox(lv.obj):
@@ -9,6 +9,7 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.checkbox = lv.checkbox(self)
         self.checkbox.set_size(40, 40)
         self.checkbox.set_align(lv.ALIGN.TOP_LEFT)
@@ -30,7 +31,6 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.set_style_text_color(
             lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -59,7 +59,6 @@ class ListItemWithLeadingCheckbox(lv.obj):
             self.set_style_bg_color(
                 lv.color_hex(0x191919), lv.PART.MAIN | lv.STATE.DEFAULT
             )
-            self.set_style_text_font(font_PJSBOLD20, lv.PART.MAIN | lv.STATE.DEFAULT)
             self.set_style_text_color(
                 lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
             )
@@ -67,7 +66,6 @@ class ListItemWithLeadingCheckbox(lv.obj):
             self.set_style_bg_color(
                 lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
             )
-            self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
             self.set_style_text_color(
                 lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
             )
@@ -81,6 +79,8 @@ class DisplayItem(lv.obj):
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSMID28, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_align(lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label_top = lv.label(self)
         self.label_top.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.label_top.set_long_mode(lv.label.LONG.WRAP)
@@ -97,6 +97,4 @@ class DisplayItem(lv.obj):
             lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.label.set_text(content)
-        self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 10)
-        self.set_style_text_font(font_PJSMID28, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_align(lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 4)

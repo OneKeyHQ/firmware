@@ -14,6 +14,6 @@ class WordEnter(FullSizeWindow):
             return
         self.channel.publish(input)
         self.keyboard.ta.set_text("")
-        self.destory()
+        self.destroy()
         if __debug__:
             print(f"Enter word: == {input}")

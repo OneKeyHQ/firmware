@@ -1,5 +1,6 @@
 import storage.device
 from trezor import wire
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success, WebAuthnAddResidentCredential
 from trezor.ui.components.common.webauthn import ConfirmInfo
 from trezor.ui.layouts import show_error_and_raise
@@ -16,7 +17,7 @@ class ConfirmAddCredential(ConfirmInfo):
         self.load_icon(cred.rp_id_hash)
 
     def get_header(self) -> str:
-        return "Import credential"
+        return _(i18n_keys.TITLE__IMPORT_CREDENTIAL)
 
     def app_name(self) -> str:
         return self._cred.app_name()
@@ -39,9 +40,9 @@ async def add_resident_credential(
         await show_error_and_raise(
             ctx,
             "warning_credential",
-            header="Import credential",
-            button="Close",
-            content="The credential you are trying to import does\nnot belong to this authenticator.",
+            header=_(i18n_keys.TITLE__IMPORT_CREDENTIAL),
+            button=_(i18n_keys.BUTTON__CLOSE),
+            content=_(i18n_keys.SUBTITLE__IMPORT_CREDENTIAL),
             red=True,
         )
 

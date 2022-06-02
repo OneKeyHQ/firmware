@@ -58,7 +58,13 @@ async def change_pin(ctx: wire.Context, msg: ChangePin) -> Success:
         msg_screen = _(i18n_keys.SUBTITLE__SET_PIN_PIN_DISABLED)
         msg_wire = _(i18n_keys.TITLE__PIN_DISABLED)
 
-    await show_success(ctx, "success_pin", msg_screen, header=msg_wire)
+    await show_success(
+        ctx,
+        "success_pin",
+        msg_screen,
+        header=msg_wire,
+        button=_(i18n_keys.BUTTON__DONE),
+    )
     return Success(message=msg_wire)
 
 

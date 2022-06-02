@@ -516,4 +516,33 @@ LIST_KEY__BLOCK_HEIGHT_COLON = 241
 SUBTITLE__TRANSACTION_FEE = 242
 # CHANGE COUNT:
 LIST_KEY__CHANGE_COUNT_COLON = 243
+# FIDO2 Reset
+TITLE__FIDO2_RESET = 244
+# Do you really want to erase all credentials?
+SUBTITLE__DO_YOU_REALLY_WANT_TO_ERASE_ALL_CREDENTIALS = 245
+# Get Next U2F Counter
+TITLE__GET_NEXT_U2F_COUNTER = 246
+# Do you want to increase and retrieve the U2F counter?
+SUBTITLE__GET_NEXT_U2F_COUNTER = 247
+# List Credentials
+TITLE__LIST_CREDENTIALS = 248
+# Do you want to export information about the resident credentials stored on t
+# his device?
+SUBTITLE__LIST_CREDENTIALS = 249
+# Set U2F Counter
+TITLE__SET_U2F_COUNTER = 250
+# Do you want to set the U2F counter to {}?
+SUBTITLE__SET_U2F_COUNTER = 251
+# Remove Credential
+TITLE__REMOVE_CREDENTIAL = 252
+# View Full Message
+BUTTON__VIEW_FULL_MESSAGE = 253
+# Import Credential
+TITLE__IMPORT_CREDENTIAL = 254
+# The credential you are trying to import does not belong to this authenticato
+# r.
+SUBTITLE__IMPORT_CREDENTIAL = 255
+# I have write down {} words, then OneKey will guide you to check words one by
+# one.
+CHECK__I_HAVE_WRITE_DOWN__STR_WORDS = 256
 # fmt: on
