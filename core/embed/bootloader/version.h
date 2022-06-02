@@ -5,7 +5,6 @@
 #define VERSION_UINT32                                            \
   (VERSION_MAJOR | (VERSION_MINOR << 8) | (VERSION_PATCH << 16) | \
    (VERSION_BUILD << 24))
-#define VERSION_STRING "2.0.4.0"
 
 #define FIX_VERSION_MAJOR 2
 #define FIX_VERSION_MINOR 0
