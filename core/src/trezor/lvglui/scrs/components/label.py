@@ -36,7 +36,8 @@ class SubTitle(lv.label):
             align_base, lv.ALIGN.OUT_BOTTOM_MID, relative_pos[0], relative_pos[1]
         )
         self.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv.color_hex(0xCCCCCC), lv.PART.MAIN | lv.STATE.DEFAULT
         )
+        self.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_align(lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT)

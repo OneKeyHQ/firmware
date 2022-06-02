@@ -1,4 +1,4 @@
-from .. import font_PJSBOLD20, font_PJSMID20, font_PJSMID28, lv
+from .. import font_PJSMID20, font_PJSMID28, lv
 
 
 class ListItemWithLeadingCheckbox(lv.obj):
@@ -59,7 +59,6 @@ class ListItemWithLeadingCheckbox(lv.obj):
             self.set_style_bg_color(
                 lv.color_hex(0x191919), lv.PART.MAIN | lv.STATE.DEFAULT
             )
-            self.set_style_text_font(font_PJSBOLD20, lv.PART.MAIN | lv.STATE.DEFAULT)
             self.set_style_text_color(
                 lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
             )
@@ -67,7 +66,6 @@ class ListItemWithLeadingCheckbox(lv.obj):
             self.set_style_bg_color(
                 lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
             )
-            self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
             self.set_style_text_color(
                 lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
             )

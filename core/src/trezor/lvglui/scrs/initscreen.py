@@ -4,7 +4,7 @@
 
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
-from trezor.lvglui.scrs import font_LANG_MIX, font_LANG_MIX_TITLE
+from trezor.lvglui.scrs import font_PJSBOLD24, font_PJSBOLD36
 
 from .common import FullSizeWindow, Screen, lv  # noqa: F401,F403,F405
 
@@ -31,11 +31,9 @@ class InitScreen(Screen):
             options="\n".join(lang[1] for lang in langs),
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
-        self.title.set_style_text_font(
-            font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.roller.set_style_text_font(font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn.set_style_text_font(font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.roller.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.btn.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
         self.add_event_cb(
             self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None

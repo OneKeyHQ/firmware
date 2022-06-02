@@ -4,7 +4,7 @@ from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 
-from . import font_MONO24, lv
+from . import font_MONO28, lv
 from .common import FullSizeWindow
 from .components.button import NormalButton
 
@@ -20,11 +20,10 @@ class MnemonicDisplay(FullSizeWindow):
         super().__init__(
             title,
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
-            _(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
         )
         self.panel = lv.obj(self.content_area)
-        self.panel.set_size(440, lv.SIZE.CONTENT)
+        self.panel.set_size(460, lv.SIZE.CONTENT)
         self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
         self.panel.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_bg_color(
@@ -34,31 +33,58 @@ class MnemonicDisplay(FullSizeWindow):
         self.panel.set_style_radius(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col1 = lv.label(self.panel)
         self.word_col1.set_size(lv.pct(50), lv.SIZE.CONTENT)
+        self.word_col1.set_recolor(True)
         self.word_col1.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        self.word_col1.set_style_text_font(font_MONO24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col1.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col1.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.word_col1.set_style_pad_all(10, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.word_col1.set_style_text_line_space(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col1.set_style_pad_ver(10, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col1.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col1.set_style_text_line_space(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col2 = lv.label(self.panel)
         self.word_col2.set_size(lv.pct(50), lv.SIZE.CONTENT)
+        self.word_col2.set_recolor(True)
         self.word_col2.align(lv.ALIGN.TOP_RIGHT, 0, 0)
-        self.word_col2.set_style_text_font(font_MONO24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col2.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col2.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.word_col2.set_style_pad_all(10, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.word_col2.set_style_pad_left(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.word_col2.set_style_text_line_space(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col2.set_style_pad_ver(10, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col2.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col2.set_style_text_line_space(12, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         text_col = ""
         text_col2 = ""
         for index in range(0, int(word_count / 2)):
-            text_col += f"{index+1:>2}. {mnemonics[index]}\n"
-            text_col2 += f"{int(index+int(word_count/2)+1):>2}. {mnemonics[int(index+int(word_count/2))]}\n"
+            text_col += f"#666666 {index+1:>2}.# {mnemonics[index]}\n"
+            text_col2 += f"#666666 {int(index+int(word_count/2)+1):>2}.# {mnemonics[int(index+int(word_count/2))]}\n"
             self.word_col1.set_text(text_col.rstrip())
             self.word_col2.set_text(text_col2.rstrip())
+        self.item = ListItemWithLeadingCheckbox(
+            self.content_area,
+            _(i18n_keys.CHECK__I_HAVE_WRITE_DOWN__STR_WORDS).format(word_count),
+        )
+        self.item.set_size(460, lv.SIZE.CONTENT)
+        self.item.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 10)
+        self.btn_yes.disable()
+        self.content_area.add_event_cb(self.value_changed, lv.EVENT.VALUE_CHANGED, None)
+
+    def value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.item.checkbox:
+                if target.get_state() & lv.STATE.CHECKED:
+                    self.item.enable_bg_color()
+                    self.btn_yes.enable(
+                        bg_color=lv.color_hex(0x1B7735),
+                        text_color=lv.color_hex(0xFFFFFF),
+                    )
+                else:
+                    self.item.enable_bg_color(enable=False)
+                    self.btn_yes.disable()
+
 
 class BackupTips(FullSizeWindow):
     def __init__(self):
@@ -66,7 +92,9 @@ class BackupTips(FullSizeWindow):
             _(i18n_keys.TITLE__BACK_UP_RECOVERY_PHRASE),
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_BACK_UP_RECOVERY_PHRASE),
         )
-        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10), padding_row=10)
+        self.container = ContainerFlexCol(
+            self, self.subtitle, pos=(0, 10), padding_row=10
+        )
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,

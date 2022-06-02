@@ -256,5 +256,6 @@ translations = [
     "View Full Message",
     "Import Credential",
     "The credential you are trying to import does not belong to this authenticator.",
+    "I have write down {} words, then OneKey will guide you to check words one by one.",
 ]
 # fmt: on

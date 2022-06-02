@@ -32,7 +32,9 @@ class Popup(lv.obj):
         self.icon.align(lv.ALIGN.TOP_MID, 0, 20)
         self.title = Title(self, self.icon, 452, (0, 36), title)
         self.subtitle = SubTitle(self, self.title, 452, (0, 24), subtitle)
-        self.container = ContainerFlexCol(self, self.subtitle, pos=(0, 10), padding_row=10)
+        self.container = ContainerFlexCol(
+            self, self.subtitle, pos=(0, 10), padding_row=10
+        )
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
             self.container,

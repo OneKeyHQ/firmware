@@ -256,5 +256,6 @@ translations = [
     "Vollständige Nachricht anzeigen",
     "Berechtigungsnachweis importieren",
     "Die Anmeldeinformationen, die Sie zu importieren versuchen, gehören nicht zu diesem Authentifikator.",
+    "Ich habe {} Wörter aufgeschrieben, dann führt Sie OneKey, um die Wörter einzeln zu überprüfen.",
 ]
 # fmt: on

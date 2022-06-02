@@ -3,8 +3,12 @@ import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 class ContainerFlexCol(lv.obj):
     def __init__(
-        self, parent, align_base, align=lv.ALIGN.OUT_BOTTOM_MID, pos: tuple = (0, 30),
-        padding_row: int = 32
+        self,
+        parent,
+        align_base,
+        align=lv.ALIGN.OUT_BOTTOM_MID,
+        pos: tuple = (0, 30),
+        padding_row: int = 32,
     ) -> None:
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)

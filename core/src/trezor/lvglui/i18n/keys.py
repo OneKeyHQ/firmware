@@ -542,4 +542,7 @@ TITLE__IMPORT_CREDENTIAL = 254
 # The credential you are trying to import does not belong to this authenticato
 # r.
 SUBTITLE__IMPORT_CREDENTIAL = 255
+# I have write down {} words, then OneKey will guide you to check words one by
+# one.
+CHECK__I_HAVE_WRITE_DOWN__STR_WORDS = 256
 # fmt: on

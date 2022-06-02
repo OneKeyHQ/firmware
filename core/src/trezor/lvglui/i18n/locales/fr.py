@@ -256,5 +256,6 @@ translations = [
     "Afficher le message complet",
     "Informations d'identification d'importation",
     "L'identifiant que vous essayez d'importer n'appartient pas à cet authentificateur.",
+    "J'ai écrit {} mots, puis OneKey vous guidera pour vérifier les mots un par un.",
 ]
 # fmt: on

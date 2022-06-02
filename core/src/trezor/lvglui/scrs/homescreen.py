@@ -3,7 +3,7 @@ from trezor import workflow
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 
-from . import font_LANG_MIX, font_LANG_MIX_TITLE, font_PJSBOLD24
+from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36
 from .common import (  # noqa: F401, F403, F405
     FullSizeWindow,
     Screen,
@@ -92,6 +92,7 @@ class SettingsScreen(Screen):
         if not hasattr(self, "_init"):
             self._init = True
         else:
+            self.refresh_text()
             return
         kwargs = {
             "prev_scr": prev_scr,
@@ -139,6 +140,15 @@ class SettingsScreen(Screen):
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
+    def refresh_text(self):
+        self.title.set_text(_(i18n_keys.TITLE__SETTING))
+        self.general.label_left.set_text(_(i18n_keys.ITEM__GENERAL))
+        self.connect.label_left.set_text(_(i18n_keys.ITEM__CONNECT))
+        self.home_scr.label_left.set_text(_(i18n_keys.ITEM__HOME_SCREEN))
+        self.security.label_left.set_text(_(i18n_keys.ITEM__SECURITY))
+        self.about.label_left.set_text(_(i18n_keys.ITEM__ABOUT_DEVICE))
+        self.power.label_left.set_text(_(i18n_keys.ITEM__POWER_OFF))
+
     def on_click(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
@@ -179,6 +189,7 @@ class GeneralScreen(Screen):
                 self.auto_lock.label_right.set_text(GeneralScreen.cur_auto_lock)
             if self.cur_language:
                 self.language.label_right.set_text(self.cur_language)
+            self.refresh_text()
             return
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__GENERAL), nav_back=True
@@ -195,6 +206,11 @@ class GeneralScreen(Screen):
             font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def refresh_text(self):
+        self.title.set_text(_(i18n_keys.TITLE__GENERAL))
+        self.auto_lock.label_left.set_text(_(i18n_keys.ITEM__AUTO_LOCK))
+        self.language.label_left.set_text(_(i18n_keys.ITEM__LANGUAGE))
 
     def get_str_from_lock_ms(self, time_ms) -> str:
         if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
@@ -293,9 +309,7 @@ class LanguageSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__LANGUAGE), nav_back=True
         )
         self.check_index = 0
-        self.title.set_style_text_font(
-            font_LANG_MIX_TITLE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container = ContainerFlexCol(self, self.title, padding_row=20)
         self.lang_buttons = []
         for idx, lang in enumerate(langs):
