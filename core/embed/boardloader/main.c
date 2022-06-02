@@ -321,7 +321,7 @@ int main(void) {
 
 #if !PRODUCTION
   display_text_center(DISPLAY_RESX / 2, DISPLAY_RESX / 2, "TEST VERSION", -1,
-                      FONT_BOLD, COLOR_RED, COLOR_BLACK);
+                      FONT_NORMAL, COLOR_RED, COLOR_BLACK);
   hal_delay(1000);
 #endif
 
