@@ -422,6 +422,24 @@ apps.common.signverify
 import apps.common.signverify
 apps.common.writers
 import apps.common.writers
+apps.conflux
+import apps.conflux
+apps.conflux.get_address
+import apps.conflux.get_address
+apps.conflux.helpers
+import apps.conflux.helpers
+apps.conflux.layout
+import apps.conflux.layout
+apps.conflux.sign_message
+import apps.conflux.sign_message
+apps.conflux.sign_message_cip23
+import apps.conflux.sign_message_cip23
+apps.conflux.sign_tx
+import apps.conflux.sign_tx
+apps.conflux.verify_message
+import apps.conflux.verify_message
+apps.conflux.verify_message_cip23
+import apps.conflux.verify_message_cip23
 apps.debug
 import apps.debug
 apps.debug.load_device

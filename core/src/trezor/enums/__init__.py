@@ -243,6 +243,16 @@ if TYPE_CHECKING:
         BinanceOrderMsg = 707
         BinanceCancelMsg = 708
         BinanceSignedTx = 709
+        ConfluxGetAddress = 10401
+        ConfluxAddress = 10402
+        ConfluxSignTx = 10403
+        ConfluxTxRequest = 10404
+        ConfluxTxAck = 10405
+        ConfluxSignMessage = 10406
+        ConfluxSignMessageCIP23 = 10407
+        ConfluxMessageSignature = 10408
+        ConfluxVerifyMessage = 10409
+        ConfluxVerifyMessageCIP23 = 10410
         WebAuthnListResidentCredentials = 800
         WebAuthnCredentials = 801
         WebAuthnAddResidentCredential = 802

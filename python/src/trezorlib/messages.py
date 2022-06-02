@@ -251,6 +251,16 @@ class MessageType(IntEnum):
     BinanceOrderMsg = 707
     BinanceCancelMsg = 708
     BinanceSignedTx = 709
+    ConfluxGetAddress = 10401
+    ConfluxAddress = 10402
+    ConfluxSignTx = 10403
+    ConfluxTxRequest = 10404
+    ConfluxTxAck = 10405
+    ConfluxSignMessage = 10406
+    ConfluxSignMessageCIP23 = 10407
+    ConfluxMessageSignature = 10408
+    ConfluxVerifyMessage = 10409
+    ConfluxVerifyMessageCIP23 = 10410
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -2966,6 +2976,218 @@ class CardanoTxAuxiliaryDataType(protobuf.MessageType):
     ) -> None:
         self.blob = blob
         self.catalyst_registration_parameters = catalyst_registration_parameters
+
+
+class ConfluxGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10401
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        3: protobuf.Field("chain_id", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+        chain_id: Optional["int"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+        self.chain_id = chain_id
+
+
+class ConfluxAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10402
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class ConfluxSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10403
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("to", "string", repeated=False, required=True),
+        3: protobuf.Field("nonce", "bytes", repeated=False, required=True),
+        4: protobuf.Field("value", "bytes", repeated=False, required=True),
+        5: protobuf.Field("gas", "bytes", repeated=False, required=True),
+        6: protobuf.Field("gas_price", "bytes", repeated=False, required=True),
+        7: protobuf.Field("storage_limit", "bytes", repeated=False, required=True),
+        8: protobuf.Field("epoch_height", "bytes", repeated=False, required=True),
+        9: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=True),
+        10: protobuf.Field("data_length", "uint32", repeated=False, required=True),
+        11: protobuf.Field("chain_id", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        to: "str",
+        nonce: "bytes",
+        value: "bytes",
+        gas: "bytes",
+        gas_price: "bytes",
+        storage_limit: "bytes",
+        epoch_height: "bytes",
+        data_initial_chunk: "bytes",
+        data_length: "int",
+        chain_id: "int",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.to = to
+        self.nonce = nonce
+        self.value = value
+        self.gas = gas
+        self.gas_price = gas_price
+        self.storage_limit = storage_limit
+        self.epoch_height = epoch_height
+        self.data_initial_chunk = data_initial_chunk
+        self.data_length = data_length
+        self.chain_id = chain_id
+
+
+class ConfluxTxRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10404
+    FIELDS = {
+        1: protobuf.Field("data_length", "uint32", repeated=False, required=False),
+        2: protobuf.Field("signature_v", "uint32", repeated=False, required=False),
+        3: protobuf.Field("signature_r", "bytes", repeated=False, required=False),
+        4: protobuf.Field("signature_s", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: Optional["int"] = None,
+        signature_v: Optional["int"] = None,
+        signature_r: Optional["bytes"] = None,
+        signature_s: Optional["bytes"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.signature_v = signature_v
+        self.signature_r = signature_r
+        self.signature_s = signature_s
+
+
+class ConfluxTxAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10405
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: "bytes",
+    ) -> None:
+        self.data_chunk = data_chunk
+
+
+class ConfluxSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10406
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+
+
+class ConfluxMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10408
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        3: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class ConfluxSignMessageCIP23(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10407
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False),
+        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        domain_hash: Optional["bytes"] = None,
+        message_hash: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.domain_hash = domain_hash
+        self.message_hash = message_hash
+
+
+class ConfluxVerifyMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10409
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        3: protobuf.Field("message", "bytes", repeated=False, required=True),
+        4: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        message: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.message = message
+        self.address = address
+
+
+class ConfluxVerifyMessageCIP23(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10410
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        3: protobuf.Field("domain_hash", "bytes", repeated=False, required=True),
+        4: protobuf.Field("message_hash", "bytes", repeated=False, required=True),
+        5: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        domain_hash: "bytes",
+        message_hash: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.domain_hash = domain_hash
+        self.message_hash = message_hash
+        self.address = address
 
 
 class CipherKeyValue(protobuf.MessageType):
