@@ -118,14 +118,14 @@ void fatfs_init(void) {
 
 int fatfs_check_res(void) {
   FRESULT res;
-  DIR dir;
+  FIL fsrc;
   res = f_mount(&fs_instance, "", 1);
   if (res != FR_OK) {
     display_printf("fatfs mount error");
     return 0;
   }
-  res = f_opendir(&dir, "/res");
-  if (res == FR_OK) {
+  res = f_open(&fsrc, "/res/.ONEKEY_RESOURCE", FA_READ);
+  if (res != FR_OK) {
     f_unmount("");
   }
   return res;
