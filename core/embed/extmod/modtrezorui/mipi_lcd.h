@@ -75,6 +75,7 @@ void display_set_orientation(int degrees);
 void display_clear_save(void);
 const char *display_save(const char *prefix);
 void display_refresh(void);
+void lcd_pwm_init(void);
 
 #ifdef __cplusplus
 }
