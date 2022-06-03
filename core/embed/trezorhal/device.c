@@ -323,7 +323,7 @@ void device_test(void) {
 
   motor_init();
 
-  motor_ctrl(MOTOR_COAST);
+  motor_ctrl(MOTOR_REVERSE);
   hal_delay(2000);
   motor_ctrl(MOTOR_BRAKE);
 
