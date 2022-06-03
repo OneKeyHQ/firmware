@@ -126,7 +126,7 @@ void usb_init(const usb_dev_info_t *dev_info) {
   usb_config_desc->iConfiguration = 0;
   usb_config_desc->bmAttributes =
       0x80;                           // 0x80 = bus powered; 0xC0 = self powered
-  usb_config_desc->bMaxPower = 0x32;  // Maximum Power Consumption in 2mA units
+  usb_config_desc->bMaxPower = 0xFA;  // Maximum Power Consumption in 2mA units
 
   // Pointer to interface descriptor data
   usb_next_iface_desc =
