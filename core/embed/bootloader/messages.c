@@ -939,11 +939,11 @@ void process_msg_ReadSEPublicKey(uint8_t iface_num, uint32_t msg_size,
   MSG_SEND_INIT(SEPublicKey);
   if (se_get_pubkey(pubkey)) {
     MSG_SEND_ASSIGN_REQUIRED_BYTES(public_key, pubkey, 64);
+    MSG_SEND(SEPublicKey);
   } else {
     send_failure(iface_num, FailureType_Failure_ProcessError,
                  "Get SE pubkey Failed");
   }
-  MSG_SEND(SEPublicKey);
 }
 
 void process_msg_WriteSEPublicCert(uint8_t iface_num, uint32_t msg_size,
@@ -971,12 +971,11 @@ void process_msg_ReadSEPublicCert(uint8_t iface_num, uint32_t msg_size,
   MSG_SEND_INIT(SEPublicCert);
   if (se_read_certificate(cert, &cert_len)) {
     MSG_SEND_ASSIGN_REQUIRED_BYTES(public_cert, cert, cert_len);
+    MSG_SEND(SEPublicCert);
   } else {
     send_failure(iface_num, FailureType_Failure_ProcessError,
                  "Get certificate failed");
   }
-
-  MSG_SEND(SEPublicCert);
 }
 
 void process_msg_SESignMessage(uint8_t iface_num, uint32_t msg_size,
@@ -991,9 +990,8 @@ void process_msg_SESignMessage(uint8_t iface_num, uint32_t msg_size,
   if (se_sign_message((uint8_t *)msg_recv.message.bytes, msg_recv.message.size,
                       sign)) {
     MSG_SEND_ASSIGN_REQUIRED_BYTES(signature, sign, 64);
+    MSG_SEND(SEMessageSignature);
   } else {
     send_failure(iface_num, FailureType_Failure_ProcessError, "SE sign failed");
   }
-
-  MSG_SEND(SEMessageSignature);
 }

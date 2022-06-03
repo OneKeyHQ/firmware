@@ -41,10 +41,11 @@
 #include "usb.h"
 #include "version.h"
 
-#include "bootui.h"
-#include "messages.h"
-// #include "mpu.h"
 #include "ble.h"
+#include "bootui.h"
+#include "device.h"
+#include "messages.h"
+#include "mpu.h"
 #include "spi.h"
 #include "sys.h"
 #include "usart.h"
@@ -238,7 +239,8 @@ secbool bootloader_usb_loop_factory(const vendor_header *const vhdr,
   int r;
 
   for (;;) {
-    r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);
+    r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE,
+                                 USB_TIMEOUT);
     if (r != USB_PACKET_SIZE) {
       continue;
     }
@@ -340,8 +342,8 @@ static void check_bootloader_version(void) {
 
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
-  // bool serial_set = false, cert_set = false;
-  // uint32_t cert_len = 0;
+  bool serial_set = false, cert_set = false;
+  uint32_t cert_len = 0;
 
   SystemCoreClockUpdate();
 
@@ -357,21 +359,21 @@ int main(void) {
   device_para_init();
   device_test();
 
-  // if (!serial_set) {
-  //   serial_set = device_serial_set();
-  // }
-  // if (!cert_set) {
-  //   cert_set = se_get_certificate_len(&cert_len);
-  // }
+  if (!serial_set) {
+    serial_set = device_serial_set();
+  }
+  if (!cert_set) {
+    cert_set = se_get_certificate_len(&cert_len);
+  }
 
-  // if (!serial_set || !cert_set) {
-  //   display_clear();
-  //   device_set_factory_mode(true);
-  //   ui_bootloader_factory();
-  //   if (bootloader_usb_loop_factory(NULL, NULL) != sectrue) {
-  //     return 1;
-  //   }
-  // }
+  if (!serial_set || !cert_set) {
+    display_clear();
+    device_set_factory_mode(true);
+    ui_bootloader_factory();
+    if (bootloader_usb_loop_factory(NULL, NULL) != sectrue) {
+      return 1;
+    }
+  }
 
   qspi_flash_init();
   qspi_flash_config();
