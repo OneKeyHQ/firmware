@@ -8,7 +8,7 @@
     .size g_header, .-g_header
 
 g_header:
-    .byte 'T','R','Z','B'            // magic
+    .byte 'O','K','T','B'            // magic
     .word g_header_end - g_header    // hdrlen
     .word 0                          // expiry
     .word _codelen                   // codelen

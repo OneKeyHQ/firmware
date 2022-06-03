@@ -113,11 +113,13 @@ void ui_screen_boot(const vendor_header *const vhdr,
   int image_top = show_string ? 30 : (DISPLAY_RESY - 120) / 2;
 #endif
 
-  // check whether vendor image is 120x120
-  if (memcmp(vimg, "TOIf\x78\x00\x78\x00", 4) == 0) {
+  // check whether vendor image
+  if (memcmp(vimg, "TOIf", 4) == 0) {
+    uint16_t width = vimg[4] + (vimg[5] << 8);
+    uint16_t height = vimg[6] + (vimg[7] << 8);
     uint32_t datalen = *(uint32_t *)(vimg + 8);
-    display_image((DISPLAY_RESX - 120) / 2, image_top, 120, 120, vimg + 12,
-                  datalen);
+    display_image((DISPLAY_RESX - width) / 2, image_top, width, height,
+                  vimg + 12, datalen);
   }
 
   if (show_string) {
