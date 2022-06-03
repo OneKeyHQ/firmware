@@ -1,18 +1,16 @@
+import binascii
+from micropython import const
 from typing import TYPE_CHECKING
 from ubinascii import hexlify, unhexlify
-from micropython import const
-import binascii
 
 from trezor import wire
+from trezor.crypto import base32
 from trezor.enums import EthereumDataType
 from trezor.messages import EthereumFieldType
 
-from trezor.crypto import base32
-
-
-STANDARD_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='
-CUSTOM_ALPHABET = 'abcdefghjkmnprstuvwxyz0123456789='
-PADDING_LETTER = '='
+STANDARD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567="
+CUSTOM_ALPHABET = "abcdefghjkmnprstuvwxyz0123456789="
+PADDING_LETTER = "="
 
 DECIMALS = const(18)
 
@@ -57,13 +55,16 @@ def address_from_bytes(address_bytes: bytes, network: NetworkInfo | None = None)
 
     return "0x" + "".join(maybe_upper(i) for i in range(len(address_hex)))
 
+
 def eth_address_to_cfx(address: str):
     assert type(address) == str
-    return '0x1' + address.lower()[3:]
+    return "0x1" + address.lower()[3:]
+
 
 def hex_address_bytes(hex_address: str):
     assert type(hex_address) == str
-    return binascii.unhexlify(hex_address.lower().replace('0x', ""))
+    return binascii.unhexlify(hex_address.lower().replace("0x", ""))
+
 
 def decode_to_words(b32str):
     result = bytearray()
@@ -71,11 +72,13 @@ def decode_to_words(b32str):
         result.append(CUSTOM_ALPHABET.index(c))
     return result
 
+
 def _prefix_to_words(prefix):
     words = bytearray()
-    for v in bytes(prefix, 'ascii'):
-        words.append(v & 0x1f)
+    for v in bytes(prefix, "ascii"):
+        words.append(v & 0x1F)
     return words
+
 
 def _poly_mod(v):
     """
@@ -86,28 +89,30 @@ def _poly_mod(v):
     c = 1
     for d in v:
         c0 = c >> 35
-        c = ((c & 0x07ffffffff) << 5) ^ d
+        c = ((c & 0x07FFFFFFFF) << 5) ^ d
         if c0 & 0x01:
-            c ^= 0x98f2bc8e61
+            c ^= 0x98F2BC8E61
         if c0 & 0x02:
-            c ^= 0x79b76d99e2
+            c ^= 0x79B76D99E2
         if c0 & 0x04:
-            c ^= 0xf33e5fb3c4
+            c ^= 0xF33E5FB3C4
         if c0 & 0x08:
-            c ^= 0xae2eabe2a8
+            c ^= 0xAE2EABE2A8
         if c0 & 0x10:
-            c ^= 0x1e4f43e470
+            c ^= 0x1E4F43E470
 
     return c ^ 1
 
+
 def _checksum_to_bytes(data):
     result = bytearray(0)
-    result.append((data >> 32) & 0xff)
-    result.append((data >> 24) & 0xff)
-    result.append((data >> 16) & 0xff)
-    result.append((data >> 8) & 0xff)
-    result.append((data) & 0xff)
+    result.append((data >> 32) & 0xFF)
+    result.append((data >> 24) & 0xFF)
+    result.append((data >> 16) & 0xFF)
+    result.append((data >> 8) & 0xFF)
+    result.append((data) & 0xFF)
     return result
+
 
 def _create_checksum(prefix, payload):
     """
@@ -124,15 +129,17 @@ def _create_checksum(prefix, payload):
 
     return _encode(_checksum_to_bytes(mod))
 
+
 def _encode(buffer):
-    b32str = base32.encode(buffer).replace('=', "")
+    b32str = base32.encode(buffer).replace("=", "")
     payload = ""
     for c in b32str:
         index = STANDARD_ALPHABET.index(c)
         v = CUSTOM_ALPHABET[index]
-        payload = ''.join([payload, v])
+        payload = "".join([payload, v])
 
     return payload
+
 
 def address_from_hex(hex_address: str, chain_id: int) -> str:
     network_prefix = "cfx"
@@ -176,18 +183,21 @@ def decode_hex_address(base32_address):
     b32len = len(b32str)
     if b32len % 8 > 0:
         padded_len = b32len + (8 - b32len % 8)
-        b32str = ('{:' + '*' + '<' + str(padded_len) + '}').format(b32str).replace('*', '=')
+        b32str = (
+            ("{:" + "*" + "<" + str(padded_len) + "}").format(b32str).replace("*", "=")
+        )
 
     payload = ""
     for c in b32str:
         index = CUSTOM_ALPHABET.index(c)
         v = STANDARD_ALPHABET[index]
-        payload = ''.join([payload, v])
+        payload = "".join([payload, v])
 
     address_buf = base32.decode(payload)
 
     hex_buf = address_buf[1:21]
     return "0x" + hexlify(hex_buf).decode()
+
 
 def get_address_type(to: str):
     hex_addr = decode_hex_address(to)
@@ -200,4 +210,3 @@ def get_address_type(to: str):
         return CONFLUX_TYPE_CONTRACT
     else:
         return CONFLUX_TYPE_INVALID
-

@@ -8,7 +8,7 @@ from trezor.ui.layouts import confirm_signverify, show_success
 
 from apps.common.signverify import decode_message
 
-from .helpers import decode_hex_address, bytes_from_address
+from .helpers import bytes_from_address, decode_hex_address
 from .sign_message import message_digest
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ async def verify_message(ctx: Context, msg: ConfluxVerifyMessage) -> Success:
     digest = message_digest(msg.message)
     if len(msg.signature) != 65:
         raise wire.DataError("Invalid signature")
-    sig = bytearray([msg.signature[64]+27]) + msg.signature[:64]
+    sig = bytearray([msg.signature[64] + 27]) + msg.signature[:64]
 
     pubkey = secp256k1.verify_recover(sig, digest)
     hex_addr = decode_hex_address(msg.address)

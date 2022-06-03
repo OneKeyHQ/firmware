@@ -7,8 +7,8 @@ from trezor.ui.layouts import confirm_signverify
 from trezor.utils import HashWriter
 
 from apps.common import paths
-from apps.common.signverify import decode_message
 from apps.common.keychain import Keychain, auto_keychain
+from apps.common.signverify import decode_message
 
 from .helpers import address_from_bytes, address_from_hex
 
@@ -35,14 +35,14 @@ async def sign_message(
     await paths.validate_path(ctx, keychain, msg.address_n)
 
     node = keychain.derive(msg.address_n)
-    
+
     address = address_from_bytes(node.ethereum_pubkeyhash())
     await confirm_signverify(
         ctx, "CFX", decode_message(msg.message), address, verify=False
     )
 
     address = address_from_bytes(node.ethereum_pubkeyhash(), None)
-    cfx_address = address_from_hex(address,1029)
+    cfx_address = address_from_hex(address, 1029)
 
     digest = message_digest(msg.message)
     signature = secp256k1.sign(

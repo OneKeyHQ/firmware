@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor import ui
-from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.enums import ButtonRequestType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount, format_plural
 from trezor.ui.layouts import (
     confirm_action,
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
     from trezor.wire import Context
 
+
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
     from trezor.ui.layouts import confirm_data
 
@@ -34,6 +35,7 @@ def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitabl
         data=data,
         br_code=ButtonRequestType.SignTx,
     )
+
 
 def require_confirm_tx(
     ctx: Context,
@@ -55,11 +57,10 @@ def require_confirm_tx(
         br_code=ButtonRequestType.SignTx,
     )
 
-def format_conflux_amount(
-    value: int
-) -> str:
-    suffix = 'CFX'
-    decimals = helpers.DECIMALS 
+
+def format_conflux_amount(value: int) -> str:
+    suffix = "CFX"
+    decimals = helpers.DECIMALS
 
     # Don't want to display wei values for tokens with small decimal numbers
     if decimals > 9 and value < 10 ** (decimals - 9):
