@@ -35,15 +35,17 @@
 #include "nand_flash.h"
 #include "qspi_flash.h"
 #include "random_delays.h"
+#include "se_atca.h"
 #include "secbool.h"
 #include "touch.h"
 #include "usb.h"
 #include "version.h"
 
-#include "bootui.h"
-#include "messages.h"
-// #include "mpu.h"
 #include "ble.h"
+#include "bootui.h"
+#include "device.h"
+#include "messages.h"
+#include "mpu.h"
 #include "spi.h"
 #include "sys.h"
 #include "usart.h"
@@ -52,16 +54,20 @@
 #include "stm32h7xx_hal.h"
 #endif
 
-const uint8_t BOOTLOADER_KEY_M = 2;
-const uint8_t BOOTLOADER_KEY_N = 3;
+const uint8_t BOOTLOADER_KEY_M = 4;
+const uint8_t BOOTLOADER_KEY_N = 7;
 static const uint8_t * const BOOTLOADER_KEYS[] = {
-    (const uint8_t *)"\xc2\xc8\x7a\x49\xc5\xa3\x46\x09\x77\xfb\xb2\xec\x9d\xfe\x60\xf0\x6b\xd6\x94\xdb\x82\x44\xbd\x49\x81\xfe\x3b\x7a\x26\x30\x7f\x3f",
-    (const uint8_t *)"\x80\xd0\x36\xb0\x87\x39\xb8\x46\xf4\xcb\x77\x59\x30\x78\xde\xb2\x5d\xc9\x48\x7a\xed\xcf\x52\xe3\x0b\x4f\xb7\xcd\x70\x24\x17\x8a",
-    (const uint8_t *)"\xb8\x30\x7a\x71\xf5\x52\xc6\x0a\x4c\xbb\x31\x7f\xf4\x8b\x82\xcd\xbf\x6b\x6b\xb5\xf0\x4c\x92\x0f\xec\x7b\xad\xf0\x17\x88\x37\x51",
-// comment the lines above and uncomment the lines below to use a custom signed vendorheader
-//    (const uint8_t *)"\xd7\x59\x79\x3b\xbc\x13\xa2\x81\x9a\x82\x7c\x76\xad\xb6\xfb\xa8\xa4\x9a\xee\x00\x7f\x49\xf2\xd0\x99\x2d\x99\xb8\x25\xad\x2c\x48",
-//    (const uint8_t *)"\x63\x55\x69\x1c\x17\x8a\x8f\xf9\x10\x07\xa7\x47\x8a\xfb\x95\x5e\xf7\x35\x2c\x63\xe7\xb2\x57\x03\x98\x4c\xf7\x8b\x26\xe2\x1a\x56",
-//    (const uint8_t *)"\xee\x93\xa4\xf6\x6f\x8d\x16\xb8\x19\xbb\x9b\xeb\x9f\xfc\xcd\xfc\xdc\x14\x12\xe8\x7f\xee\x6a\x32\x4c\x2a\x99\xa1\xe0\xe6\x71\x48",
+    (const uint8_t *)"\x15\x4b\x8a\xb2\x61\xcc\x88\x79\x48\x3f\x68\x9a\x2d\x41\x24\x3a\xe7\xdb\xc4\x02\x16\x72\xbb\xd2\x5c\x33\x8a\xe8\x4d\x93\x11\x54",
+    (const uint8_t *)"\xa9\xe6\x5e\x07\xfe\x6d\x39\xa8\xa8\x4e\x11\xa9\x96\xa0\x28\x3f\x88\x1e\x17\x5c\xba\x60\x2e\xb5\xac\x44\x2f\xb7\x5b\x39\xe8\xe0",
+    (const uint8_t *)"\x6c\x88\x05\xab\xb2\xdf\x9d\x36\x79\xf1\xd2\x8a\x40\xcd\x99\x03\x99\xb9\x9f\xc3\xee\x4e\x06\x57\xd8\x1d\x38\x1e\xa1\x48\x8a\x12",
+    (const uint8_t *)"\x3e\xd7\x97\x79\x06\x4d\x56\x57\x1b\x29\xbc\xaa\x73\x4c\xbb\x6d\xb6\x1d\x2e\x62\x65\x66\x62\x8e\xcf\x4c\x89\xe1\xdb\x45\xea\xec",
+    (const uint8_t *)"\x54\xa4\x06\x33\xbf\xd9\xe6\x0b\x8a\x39\x12\x65\xb2\xe0\x06\x37\x4a\xbe\x63\x1d\x1e\x11\x07\x33\x2b\xca\x56\xbf\x9f\x8c\x5c\x99",
+    (const uint8_t *)"\x4b\x71\x13\x4f\x18\xe0\x07\x87\xc5\x83\xd4\x07\x42\xcc\x18\x8e\x17\xfc\x85\xad\xe4\xcb\x47\x2d\xae\x5e\xf8\xe0\x69\xf0\xfe\xc5",
+    (const uint8_t *)"\x2e\xcf\x80\xc8\x2b\x44\x98\x48\xc0\x00\x33\x50\x92\x13\x95\x51\xbf\xe4\x7b\x3c\x73\x17\xb4\x99\x50\xf6\x5e\x1d\x82\x43\x20\x24",
+// comment the lines above and uncomment the lines below to use a custom signed onekey vendorheader
+  //  (const uint8_t *)"\xEC\x3C\x75\x23\xE9\x1D\x55\x7D\xD2\xA5\x83\x05\xD6\xF9\x77\x64\xB2\xA2\x54\xC6\x19\x97\x7B\x25\x10\xD4\xE7\xE1\x8A\x83\x21\x14",
+  //  (const uint8_t *)"\xF4\x79\xA8\x44\x45\x22\xB3\xF5\x81\x49\xB3\x31\x85\xA5\x07\x68\xCD\xFF\xC0\x28\x5D\x54\x69\xF4\x0D\xB6\x55\x45\x8E\x86\xED\x60",
+  //  (const uint8_t *)"\x6D\xDA\xA3\x3C\x09\x1F\x0C\xB0\x20\x43\xF6\x9E\x2D\x2A\xF7\x93\x29\x6F\x65\x91\x3C\x2F\xBC\x65\xCD\xC5\x64\x67\xB1\x80\x30\xBA",
 };
 
 #define USB_IFACE_NUM 0
@@ -220,6 +226,47 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
       case 55:  // GetFeatures
         process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;
+      default:
+        process_msg_unknown(USB_IFACE_NUM, msg_size, buf);
+        break;
+    }
+  }
+}
+
+secbool bootloader_usb_loop_factory(const vendor_header *const vhdr,
+                                    const image_header *const hdr) {
+  // if both are NULL, we don't have a firmware installed
+  // let's show a webusb landing page in this case
+  usb_init_all((vhdr == NULL && hdr == NULL) ? sectrue : secfalse);
+
+  uint8_t buf[USB_PACKET_SIZE];
+  int r;
+
+  for (;;) {
+    r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE,
+                                 USB_TIMEOUT);
+    if (r != USB_PACKET_SIZE) {
+      continue;
+    }
+    host_channel = CHANNEL_USB;
+
+    uint16_t msg_id;
+    uint32_t msg_size;
+    if (sectrue != msg_parse_header(buf, &msg_id, &msg_size)) {
+      // invalid header -> discard
+      continue;
+    }
+
+    switch (msg_id) {
+      case 0:  // Initialize
+        process_msg_Initialize(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
+        break;
+      case 1:  // Ping
+        process_msg_Ping(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case 55:  // GetFeatures
+        process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
+        break;
       case 10001:  // DeviceInfoSettings
         process_msg_DeviceInfoSettings(USB_IFACE_NUM, msg_size, buf);
         break;
@@ -243,6 +290,7 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
         break;
     }
   }
+  return sectrue;
 }
 
 secbool load_vendor_header_keys(const uint8_t *const data,
@@ -298,6 +346,8 @@ static void check_bootloader_version(void) {
 
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
+  bool serial_set = false, cert_set = false;
+  uint32_t cert_len = 0;
 
   SystemCoreClockUpdate();
 
@@ -307,8 +357,27 @@ int main(void) {
   touch_init();
   touch_power_on();
 
+  atca_init();
+  atca_config_init();
+
   device_para_init();
-  // device_test();
+  device_test();
+
+  if (!serial_set) {
+    serial_set = device_serial_set();
+  }
+  if (!cert_set) {
+    cert_set = se_get_certificate_len(&cert_len);
+  }
+
+  if (!serial_set || !cert_set) {
+    display_clear();
+    device_set_factory_mode(true);
+    ui_bootloader_factory();
+    if (bootloader_usb_loop_factory(NULL, NULL) != sectrue) {
+      return 1;
+    }
+  }
 
   qspi_flash_init();
   qspi_flash_config();
@@ -320,17 +389,14 @@ int main(void) {
   check_bootloader_version();
 #endif
 
-  display_clear();
-
-  atca_init();
-  atca_config_init();
-
   emmc_init();
 
   buzzer_init();
   motor_init();
   ble_usart_init();
   spi_slave_init();
+
+  display_clear();
 
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 
@@ -341,6 +407,22 @@ int main(void) {
 
   // delay to detect touch
   uint32_t touched = boot_touch_detect(1000);
+
+  // ... or if user touched the screen on start
+  // ... or we have stay_in_bootloader flag to force it
+  if (touched || stay_in_bootloader == sectrue) {
+    // no ui_fadeout(); - we already start from black screen
+    ui_bootloader_first(NULL);
+    if (touched) {
+      // wait for the touch end event
+      while (touch_read() & TOUCH_END)
+        ;
+    }
+    // and start the usb loop
+    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+      return 1;
+    }
+  }
 
   vendor_header vhdr;
   image_header hdr;
@@ -366,6 +448,7 @@ int main(void) {
   }
 
   // start the bootloader if no or broken firmware found ...
+
   if (firmware_present != sectrue) {
     ui_bootloader_first(&hdr);
     if (touched) {
@@ -379,23 +462,6 @@ int main(void) {
 
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-      return 1;
-    }
-  }
-
-  // ... or if user touched the screen on start
-  // ... or we have stay_in_bootloader flag to force it
-  if (touched || stay_in_bootloader == sectrue) {
-    // no ui_fadeout(); - we already start from black screen
-    ui_bootloader_first(&hdr);
-    ui_fadein();
-    if (touched) {
-      // wait for the touch end event
-      while (touch_read() & TOUCH_END)
-        ;
-    }
-    // and start the usb loop
-    if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
       return 1;
     }
   }

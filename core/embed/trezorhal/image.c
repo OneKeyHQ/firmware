@@ -104,7 +104,7 @@ secbool load_vendor_header(const uint8_t *const data, uint8_t key_m,
                            uint8_t key_n, const uint8_t *const *keys,
                            vendor_header *const vhdr) {
   memcpy(&vhdr->magic, data, 4);
-  if (vhdr->magic != 0x565A5254) return secfalse;  // TRZV
+  if (vhdr->magic != 0x56544B4F) return secfalse;  // OKTV
 
   memcpy(&vhdr->hdrlen, data + 4, 4);
   if (vhdr->hdrlen > 64 * 1024) return secfalse;
@@ -166,7 +166,7 @@ void vendor_header_hash(const vendor_header *const vhdr, uint8_t *hash) {
   BLAKE2S_CTX ctx;
   blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
   blake2s_Update(&ctx, vhdr->vstr, vhdr->vstr_len);
-  blake2s_Update(&ctx, "Trezor Vendor Header", 20);
+  blake2s_Update(&ctx, "OneKey Vendor Header", 20);
   blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
 }
 

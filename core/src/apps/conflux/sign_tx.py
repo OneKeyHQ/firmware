@@ -2,23 +2,16 @@ from trezor import wire
 from trezor.crypto import rlp
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
-from trezor.utils import HashWriter
 from trezor.enums import MessageType
-from trezor.messages import (
-    ConfluxSignTx,
-    ConfluxTxRequest,
-    ConfluxTxAck,
-)
+from trezor.messages import ConfluxSignTx, ConfluxTxAck, ConfluxTxRequest
+from trezor.utils import HashWriter
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
 from .helpers import bytes_from_address, decode_hex_address
+from .layout import require_confirm_data, require_confirm_tx
 
-from .layout import (
-    require_confirm_tx,
-    require_confirm_data,
-)
 
 @auto_keychain(__name__)
 async def sign_tx(
@@ -64,7 +57,6 @@ async def sign_tx(
         data_left -= len(resp.data_chunk)
         sha.extend(resp.data_chunk)
 
-
     digest = sha.get_digest()
     signature = secp256k1.sign(
         node.private_key(), digest, False, secp256k1.CANONICAL_SIG_ETHEREUM
@@ -100,6 +92,7 @@ def get_total_length(msg: ConfluxSignTx, data_total: int) -> int:
 
     return length
 
+
 async def send_request_chunk(ctx: wire.Context, data_left: int) -> ConfluxTxAck:
     req = ConfluxTxRequest()
     if data_left <= 1024:
@@ -108,4 +101,3 @@ async def send_request_chunk(ctx: wire.Context, data_left: int) -> ConfluxTxAck:
         req.data_length = 1024
 
     return await ctx.call(req, ConfluxTxAck)
-

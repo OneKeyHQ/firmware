@@ -4,12 +4,13 @@ from trezor.messages import ConfluxAddress, ConfluxGetAddress
 from trezor.ui.layouts import show_address
 
 from apps.common import paths
+from apps.common.keychain import Keychain, auto_keychain
 
 from .helpers import address_from_bytes, address_from_hex
-from apps.common.keychain import Keychain, auto_keychain
 
 if TYPE_CHECKING:
     from trezor.wire import Context
+
 
 @auto_keychain(__name__)
 async def get_address(
@@ -20,8 +21,8 @@ async def get_address(
     node = keychain.derive(msg.address_n)
 
     address = address_from_bytes(node.ethereum_pubkeyhash(), None)
-    cfx_address = address_from_hex(address,msg.chain_id)
-    
+    cfx_address = address_from_hex(address, msg.chain_id)
+
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
         await show_address(

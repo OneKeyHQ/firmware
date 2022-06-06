@@ -122,6 +122,15 @@ message Features {
     optional string onekey_version = 508;       // OneKey version
     optional string onekey_serial = 509;
     optional string bootloader_version = 510;
+    
+    optional string serial_no= 511;
+    optional string spi_flash = 512;
+    optional uint32 initstates = 513;      // list of facotry state
+    optional bytes NFT_voucher = 514;
+    optional string cpu_info = 515;
+    optional string pre_firmware = 516;
+
+    optional uint32 coin_switch = 517;
 }
 
 /**

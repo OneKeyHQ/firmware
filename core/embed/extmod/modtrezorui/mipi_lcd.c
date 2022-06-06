@@ -410,7 +410,7 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
   gpio_init_structure.Pin = LCD_RESET_PIN;
   gpio_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
   gpio_init_structure.Pull = GPIO_PULLUP;
-  gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_init_structure.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LCD_RESET_GPIO_PORT, &gpio_init_structure);
 
   /* Activate XRES active low */
@@ -419,42 +419,6 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
   HAL_GPIO_WritePin(LCD_RESET_GPIO_PORT, LCD_RESET_PIN,
                     GPIO_PIN_SET); /* Deactivate XRES */
   HAL_Delay(10);
-
-  /* LCD_BL_CTRL GPIO configuration */
-  __HAL_RCC_GPIOK_CLK_ENABLE();
-  __HAL_RCC_TIM1_CLK_ENABLE();
-  // LCD_PWM/PA7 (backlight control)
-  gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-  gpio_init_structure.Pull = GPIO_NOPULL;
-  gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  gpio_init_structure.Alternate = GPIO_AF1_TIM1;
-  gpio_init_structure.Pin = LCD_BL_CTRL_PIN;
-  HAL_GPIO_Init(LCD_BL_CTRL_GPIO_PORT, &gpio_init_structure);
-
-  // enable PWM timer
-  TIM_HandleTypeDef TIM1_Handle;
-  TIM1_Handle.Instance = TIM1;
-  TIM1_Handle.Init.Period = LED_PWM_TIM_PERIOD - 1;
-  // TIM1/APB2 source frequency equals to SystemCoreClock in our configuration,
-  // we want 1 MHz
-  TIM1_Handle.Init.Prescaler = SystemCoreClock / 2 / 1000000 - 1;
-  TIM1_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  TIM1_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
-  TIM1_Handle.Init.RepetitionCounter = 0;
-  HAL_TIM_PWM_Init(&TIM1_Handle);
-
-  TIM_OC_InitTypeDef TIM_OC_InitStructure;
-  TIM_OC_InitStructure.Pulse = LED_PWM_TIM_PERIOD - 1;
-  TIM_OC_InitStructure.OCMode = TIM_OCMODE_PWM2;
-  TIM_OC_InitStructure.OCPolarity = TIM_OCPOLARITY_HIGH;
-  TIM_OC_InitStructure.OCFastMode = TIM_OCFAST_DISABLE;
-  TIM_OC_InitStructure.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  TIM_OC_InitStructure.OCIdleState = TIM_OCIDLESTATE_SET;
-  TIM_OC_InitStructure.OCNIdleState = TIM_OCNIDLESTATE_SET;
-  HAL_TIM_PWM_ConfigChannel(&TIM1_Handle, &TIM_OC_InitStructure, TIM_CHANNEL_1);
-
-  HAL_TIM_PWM_Start(&TIM1_Handle, TIM_CHANNEL_1);
-  HAL_TIMEx_PWMN_Start(&TIM1_Handle, TIM_CHANNEL_1);
 
   /* LCD_TE_CTRL GPIO configuration */
   __HAL_RCC_GPIOJ_CLK_ENABLE();
@@ -525,6 +489,45 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
 
   (void)ctrl_pixel_format;
   st7701_init_sequence();
+}
+
+void lcd_pwm_init(void) {
+  GPIO_InitTypeDef gpio_init_structure = {0};
+  /* LCD_BL_CTRL GPIO configuration */
+  __HAL_RCC_GPIOK_CLK_ENABLE();
+  __HAL_RCC_TIM1_CLK_ENABLE();
+  // LCD_PWM/PA7 (backlight control)
+  gpio_init_structure.Mode = GPIO_MODE_AF_PP;
+  gpio_init_structure.Pull = GPIO_NOPULL;
+  gpio_init_structure.Speed = GPIO_SPEED_FREQ_LOW;
+  gpio_init_structure.Alternate = GPIO_AF1_TIM1;
+  gpio_init_structure.Pin = LCD_BL_CTRL_PIN;
+  HAL_GPIO_Init(LCD_BL_CTRL_GPIO_PORT, &gpio_init_structure);
+
+  // enable PWM timer
+  TIM_HandleTypeDef TIM1_Handle;
+  TIM1_Handle.Instance = TIM1;
+  TIM1_Handle.Init.Period = LED_PWM_TIM_PERIOD - 1;
+  // TIM1/APB2 source frequency equals to SystemCoreClock in our configuration,
+  // we want 1 MHz
+  TIM1_Handle.Init.Prescaler = SystemCoreClock / 2 / 1000000 - 1;
+  TIM1_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  TIM1_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
+  TIM1_Handle.Init.RepetitionCounter = 0;
+  HAL_TIM_PWM_Init(&TIM1_Handle);
+
+  TIM_OC_InitTypeDef TIM_OC_InitStructure;
+  TIM_OC_InitStructure.Pulse = LED_PWM_TIM_PERIOD - 1;
+  TIM_OC_InitStructure.OCMode = TIM_OCMODE_PWM2;
+  TIM_OC_InitStructure.OCPolarity = TIM_OCPOLARITY_HIGH;
+  TIM_OC_InitStructure.OCFastMode = TIM_OCFAST_DISABLE;
+  TIM_OC_InitStructure.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  TIM_OC_InitStructure.OCIdleState = TIM_OCIDLESTATE_SET;
+  TIM_OC_InitStructure.OCNIdleState = TIM_OCNIDLESTATE_SET;
+  HAL_TIM_PWM_ConfigChannel(&TIM1_Handle, &TIM_OC_InitStructure, TIM_CHANNEL_1);
+
+  HAL_TIM_PWM_Start(&TIM1_Handle, TIM_CHANNEL_1);
+  HAL_TIMEx_PWMN_Start(&TIM1_Handle, TIM_CHANNEL_1);
 }
 
 void lcd_para_init(uint32_t lcd_width, uint32_t lcd_height,

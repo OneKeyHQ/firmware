@@ -535,8 +535,8 @@ void display_loader(uint16_t progress, bool indeterminate, int yoffset,
 #if PRODUCTION_MODEL == 'H'
 #define DISPLAY_FONT_SIZE 16
 #define DISPLAY_CHAR_X_RES 8
-#define DISPLAY_CHAR_WIDTH 8
-#define DISPLAY_CHAR_HIGHT 16
+#define DISPLAY_CHAR_WIDTH 16
+#define DISPLAY_CHAR_HIGHT 24
 #define DISPLAY_PRINT_COLS (DISPLAY_RESX / DISPLAY_CHAR_WIDTH)
 #define DISPLAY_PRINT_ROWS (DISPLAY_RESY / DISPLAY_CHAR_HIGHT)
 #else
@@ -561,6 +561,9 @@ void display_print_color(uint16_t fgcolor, uint16_t bgcolor) {
 // display text using bitmap font
 void display_print(const char *text, int textlen) {
   static uint8_t row = 0, col = 0;
+  if (row == 0) {
+    display_bar(0, 0, DISPLAY_RESX, DISPLAY_RESY, display_print_bgcolor);
+  }
 
   // determine text length if not provided
   if (textlen < 0) {
@@ -588,6 +591,7 @@ void display_print(const char *text, int textlen) {
     }
 
     if (row >= DISPLAY_PRINT_ROWS) {
+      display_bar(0, 0, DISPLAY_RESX, DISPLAY_RESY, display_print_bgcolor);
       for (int j = 0; j < DISPLAY_PRINT_ROWS - 1; j++) {
         memcpy(display_print_buf[j], display_print_buf[j + 1],
                DISPLAY_PRINT_COLS);
@@ -596,6 +600,36 @@ void display_print(const char *text, int textlen) {
       row = DISPLAY_PRINT_ROWS - 1;
     }
   }
+
+#if PRODUCTION_MODEL == 'H'
+
+  bool is_start = true;
+  int spilt = 0, offset = 0, line = 0;
+  for (int y = 0; y < DISPLAY_PRINT_ROWS; y++) {
+    line = 0;
+    for (int x = 0; x < DISPLAY_PRINT_COLS; x++) {
+      if (display_print_buf[y][x] != 0 && is_start) {
+        is_start = false;
+        do {
+          spilt = display_text_split(&display_print_buf[y][x] + offset, -1,
+                                     FONT_NORMAL, DISPLAY_RESX);
+          display_text(x * DISPLAY_CHAR_WIDTH,
+                       (y + line + 1) * DISPLAY_CHAR_HIGHT,
+                       &display_print_buf[y][x] + offset, spilt, FONT_NORMAL,
+                       display_print_fgcolor, display_print_bgcolor);
+          offset += spilt;
+          line++;
+        } while (spilt);
+
+      } else if (display_print_buf[y][x] == 0) {
+        is_start = true;
+        offset = 0;
+        line = 0;
+      }
+    }
+  }
+
+#else
 
   // render buffer to display
   display_set_window(0, 0, DISPLAY_RESX - 1, DISPLAY_RESY - 1);
@@ -617,16 +651,18 @@ void display_print(const char *text, int textlen) {
       c = ' ';
     }
 #if PRODUCTION_MODEL == 'H'
-    const uint8_t *g = Font_Bitmap_8x16 + (DISPLAY_FONT_SIZE * (c - ' '));
+    const uint8_t *g = Font_Bitmap_12x24 + (DISPLAY_FONT_SIZE * (c - ' '));
 #else
     const uint8_t *g = Font_Bitmap + (DISPLAY_FONT_WIDTH * (c - ' '));
 #endif
-    if (k < DISPLAY_CHAR_X_RES && ((g[k + 8 * (j / 8)]) & (1 << (j % 8)))) {
+    if (k < DISPLAY_CHAR_X_RES &&
+        ((g[k + DISPLAY_CHAR_X_RES * (j / 8)]) & (1 << (j % 8)))) {
       fb_write_pixel(i % DISPLAY_RESX, i / DISPLAY_RESX, display_print_fgcolor);
     } else {
       fb_write_pixel(i % DISPLAY_RESX, i / DISPLAY_RESX, display_print_bgcolor);
     }
   }
+#endif
 }
 
 #ifdef TREZOR_EMULATOR

@@ -1,0 +1,21 @@
+{
+    "header_len": 2560,
+    "text": "ONEKEY,FOR TEST ONLY",
+    "expiry": 0,
+    "version": {
+        "major": 0,
+        "minor": 0
+    },
+    "sig_m": 2,
+    "trust": {
+        "show_vendor_string": true,
+        "require_user_click": true,
+        "red_background": true,
+        "delay": 1
+    },
+    "pubkeys": [
+        "ec3c7523e91d557dd2a58305d6f97764b2a254c619977b2510d4e7e18a832114",
+        "f479a8444522b3f58149b33185a50768cdffc0285d5469f40db655458e86ed60",
+        "6ddaa33c091f0cb02043f69e2d2af793296f65913c2fbc65cdc56467b18030ba"
+    ]
+}

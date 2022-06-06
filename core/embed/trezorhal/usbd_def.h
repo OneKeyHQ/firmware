@@ -139,7 +139,7 @@
 #define USBD_EP_TYPE_INTR                                 3
 
 #ifndef USBD_MAX_POWER
-#define USBD_MAX_POWER                                  0x32U /* 100 mA */
+#define USBD_MAX_POWER                                  0xFAU /* 500 mA */
 #endif /* USBD_MAX_POWER */
 
 /**

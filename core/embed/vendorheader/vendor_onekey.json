@@ -1,0 +1,25 @@
+{
+    "header_len": 1536,
+    "text": "OneKey",
+    "expiry": 0,
+    "version": {
+        "major": 0,
+        "minor": 0
+    },
+    "sig_m": 4,
+    "trust": {
+        "show_vendor_string": false,
+        "require_user_click": false,
+        "red_background": false,
+        "delay": 0
+    },
+    "pubkeys": [
+        "154b8ab261cc8879483f689a2d41243ae7dbc4021672bbd25c338ae84d931154",
+        "a9e65e07fe6d39a8a84e11a996a0283f881e175cba602eb5ac442fb75b39e8e0",
+        "6c8805abb2df9d3679f1d28a40cd990399b99fc3ee4e0657d81d381ea1488a12",
+        "3ed79779064d56571b29bcaa734cbb6db61d2e626566628ecf4c89e1db45eaec",
+        "54a40633bfd9e60b8a391265b2e006374abe631d1e1107332bca56bf9f8c5c99",
+        "4b71134f18e00787c583d40742cc188e17fc85ade4cb472dae5ef8e069f0fec5",
+        "2ecf80c82b449848c000335092139551bfe47b3c7317b49950f65e1d82432024"
+    ]
+}

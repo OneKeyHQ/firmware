@@ -191,7 +191,6 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.ConfluxVerifyMessageCIP23:
             return "apps.conflux.verify_message_cip23"
 
-
     raise ValueError
 
 

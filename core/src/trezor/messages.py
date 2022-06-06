@@ -2192,6 +2192,13 @@ if TYPE_CHECKING:
         onekey_version: "str | None"
         onekey_serial: "str | None"
         bootloader_version: "str | None"
+        serial_no: "str | None"
+        spi_flash: "str | None"
+        initstates: "int | None"
+        NFT_voucher: "bytes | None"
+        cpu_info: "str | None"
+        pre_firmware: "str | None"
+        coin_switch: "int | None"
 
         def __init__(
             self,
@@ -2243,6 +2250,13 @@ if TYPE_CHECKING:
             onekey_version: "str | None" = None,
             onekey_serial: "str | None" = None,
             bootloader_version: "str | None" = None,
+            serial_no: "str | None" = None,
+            spi_flash: "str | None" = None,
+            initstates: "int | None" = None,
+            NFT_voucher: "bytes | None" = None,
+            cpu_info: "str | None" = None,
+            pre_firmware: "str | None" = None,
+            coin_switch: "int | None" = None,
         ) -> None:
             pass
 
