@@ -13,10 +13,8 @@ from apps.common.signverify import decode_message
 from .helpers import address_from_bytes, address_from_hex
 
 if TYPE_CHECKING:
-    from trezor.messages import ConfluxSignMessage
+    from trezor.messages import ConfluxSignMessageCIP23
     from trezor.wire import Context
-
-    from apps.common.keychain import Keychain
 
 
 def message_digest(domain_hash: bytes, message_hash: bytes) -> bytes:
@@ -29,7 +27,7 @@ def message_digest(domain_hash: bytes, message_hash: bytes) -> bytes:
 
 @auto_keychain(__name__)
 async def sign_message_cip23(
-    ctx: Context, msg: ConfluxSignMessage, keychain: Keychain
+    ctx: Context, msg: ConfluxSignMessageCIP23, keychain: Keychain
 ) -> ConfluxMessageSignature:
     await paths.validate_path(ctx, keychain, msg.address_n)
 

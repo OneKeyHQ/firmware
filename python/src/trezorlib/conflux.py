@@ -14,9 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, AnyStr, Tuple
 
-from . import messages
 from . import exceptions, messages
 from .tools import expect, prepare_message_bytes, session
 
@@ -24,6 +23,7 @@ if TYPE_CHECKING:
     from .client import TrezorClient
     from .tools import Address
     from .protobuf import MessageType
+
 
 def int_to_big_endian(value: int) -> bytes:
     return value.to_bytes((value.bit_length() + 7) // 8, "big")
@@ -38,21 +38,30 @@ def decode_hex(value: str) -> bytes:
 
 @expect(messages.ConfluxAddress, field="address", ret_type=str)
 def get_address(
-    client: "TrezorClient", address_n: "Address", chain_id: int, show_display: bool = False
+    client: "TrezorClient",
+    address_n: "Address",
+    chain_id: int,
+    show_display: bool = False,
 ) -> "MessageType":
     return client.call(
-        messages.ConfluxGetAddress(address_n=address_n, chain_id=chain_id, show_display=show_display)
+        messages.ConfluxGetAddress(
+            address_n=address_n, chain_id=chain_id, show_display=show_display
+        )
     )
+
 
 @session
 def sign_tx(
     client: "TrezorClient", address_n: "Address", tx_json: dict
 ) -> Tuple[int, bytes, bytes]:
     tx_msg = tx_json.copy()
-    
+
     data = b""
-    if 'data' in tx_msg.keys():
-        data = decode_hex(tx_msg['data'])
+    if "data" in tx_msg.keys():
+        data = decode_hex(tx_msg["data"])
+
+    data_length = len(data)
+    data, chunk = data[1024:], data[:1024]
 
     msg = messages.ConfluxSignTx(
         address_n=address_n,
@@ -64,12 +73,9 @@ def sign_tx(
         storage_limit=int_to_big_endian(tx_msg["storage_limit"]),
         epoch_height=int_to_big_endian(tx_msg["epoch_height"]),
         chain_id=tx_msg["chain_id"],
+        data_length=data_length,
+        data_initial_chunk=chunk,
     )
-
-    msg.data_length = len(data)
-    data, chunk = data[1024:], data[:1024]
-    msg.data_initial_chunk = chunk
-
 
     response = client.call(msg)
     assert isinstance(response, messages.ConfluxTxRequest)
@@ -86,15 +92,15 @@ def sign_tx(
 
     return response.signature_v, response.signature_r, response.signature_s
 
+
 @expect(messages.ConfluxMessageSignature)
 def sign_message(
     client: "TrezorClient", n: "Address", message: AnyStr
 ) -> "MessageType":
     return client.call(
-        messages.ConfluxSignMessage(
-            address_n=n, message=prepare_message_bytes(message)
-        )
+        messages.ConfluxSignMessage(address_n=n, message=prepare_message_bytes(message))
     )
+
 
 @expect(messages.ConfluxMessageSignature)
 def sign_message_cip23(
@@ -102,9 +108,12 @@ def sign_message_cip23(
 ) -> "MessageType":
     return client.call(
         messages.ConfluxSignMessageCIP23(
-            address_n=n, domain_hash=prepare_message_bytes(domain_hash), message_hash=prepare_message_bytes(message_hash)
+            address_n=n,
+            domain_hash=prepare_message_bytes(domain_hash),
+            message_hash=prepare_message_bytes(message_hash),
         )
     )
+
 
 def verify_message(
     client: "TrezorClient", address: str, signature: bytes, message: AnyStr
@@ -125,7 +134,11 @@ def verify_message(
 
 
 def verify_message_cip23(
-    client: "TrezorClient", address: str, signature: bytes, domain_hash: AnyStr, message_hash: AnyStr
+    client: "TrezorClient",
+    address: str,
+    signature: bytes,
+    domain_hash: AnyStr,
+    message_hash: AnyStr,
 ) -> bool:
     try:
         resp = client.call(

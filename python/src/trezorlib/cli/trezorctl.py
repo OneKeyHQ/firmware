@@ -31,9 +31,9 @@ from ..transport.udp import UdpTransport
 from . import (
     TrezorConnection,
     binance,
-    conflux,
     btc,
     cardano,
+    conflux,
     cosi,
     crypto,
     debug,

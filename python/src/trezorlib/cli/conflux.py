@@ -15,7 +15,7 @@
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, TextIO, Tuple
+from typing import TYPE_CHECKING, Dict, TextIO, Tuple
 
 import click
 
@@ -23,7 +23,6 @@ from .. import conflux, tools
 from . import with_client
 
 if TYPE_CHECKING:
-    from .. import messages
     from ..client import TrezorClient
 
 
@@ -37,12 +36,12 @@ def cli() -> None:
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
-@click.option(
-    "-c", "--chain-id", type=int, default=1029, help="Conflux chain id"
-)
+@click.option("-c", "--chain-id", type=int, default=1029, help="Conflux chain id")
 @click.option("-d", "--show-display", is_flag=True)
 @with_client
-def get_address(client: "TrezorClient", address: str, chain_id: int, show_display: bool) -> str:
+def get_address(
+    client: "TrezorClient", address: str, chain_id: int, show_display: bool
+) -> str:
     """Get Conflux address for specified path."""
     address_n = tools.parse_path(address)
     return conflux.get_address(client, address_n, chain_id, show_display)
@@ -55,13 +54,14 @@ def get_address(client: "TrezorClient", address: str, chain_id: int, show_displa
 @with_client
 def sign_tx(
     client: "TrezorClient", address: str, file: TextIO
-) -> "messages.ConfluxSignTx":
+) -> Tuple[int, bytes, bytes]:
     """Sign Conflux transaction.
 
     Transaction must be provided as a JSON file.
     """
     address_n = tools.parse_path(address)
     return conflux.sign_tx(client, address_n, json.load(file))
+
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
@@ -78,12 +78,15 @@ def sign_message(client: "TrezorClient", address: str, message: str) -> Dict[str
     }
     return output
 
+
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
 @click.argument("domain-hash")
 @click.argument("message-hash")
 @with_client
-def sign_message_cip23(client: "TrezorClient", address: str, domain_hash: str, message_hash: str) -> Dict[str, str]:
+def sign_message_cip23(
+    client: "TrezorClient", address: str, domain_hash: str, message_hash: str
+) -> Dict[str, str]:
     """Sign message with Conflux address."""
     address_n = tools.parse_path(address)
     ret = conflux.sign_message_cip23(client, address_n, domain_hash, message_hash)
@@ -94,7 +97,6 @@ def sign_message_cip23(client: "TrezorClient", address: str, domain_hash: str, m
         "signature": f"0x{ret.signature.hex()}",
     }
     return output
-
 
 
 @cli.command()
@@ -117,9 +119,14 @@ def verify_message(
 @click.argument("message-hash")
 @with_client
 def verify_message_cip23(
-    client: "TrezorClient", address: str, signature: str, domain_hash: str, message_hash: str
+    client: "TrezorClient",
+    address: str,
+    signature: str,
+    domain_hash: str,
+    message_hash: str,
 ) -> bool:
     """Verify message signed with Conflux address."""
     signature_bytes = conflux.decode_hex(signature)
-    return conflux.verify_message_cip23(client, address, signature_bytes, domain_hash, message_hash)
-
+    return conflux.verify_message_cip23(
+        client, address, signature_bytes, domain_hash, message_hash
+    )

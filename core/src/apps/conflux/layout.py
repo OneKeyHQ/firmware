@@ -1,31 +1,21 @@
 from typing import TYPE_CHECKING
-from ubinascii import hexlify
 
 from trezor import ui
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.strings import format_amount, format_plural
-from trezor.ui.layouts import (
-    confirm_action,
-    confirm_address,
-    confirm_amount,
-    confirm_blob,
-    confirm_output,
-    confirm_text,
-    confirm_total,
-    should_show_more,
-)
+from trezor.strings import format_amount
+from trezor.ui.layouts import confirm_output
 
 from . import helpers
 
 if TYPE_CHECKING:
-    from typing import Awaitable, Iterable
+    from typing import Awaitable
 
     from trezor.wire import Context
 
 
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    from trezor.ui.layouts import confirm_data
+    from trezor.ui.layouts import confirm_data  # type: ignore["confirm_data" is unknown import symbol]
 
     return confirm_data(
         ctx,

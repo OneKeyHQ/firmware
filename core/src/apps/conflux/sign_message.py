@@ -16,8 +16,6 @@ if TYPE_CHECKING:
     from trezor.messages import ConfluxSignMessage
     from trezor.wire import Context
 
-    from apps.common.keychain import Keychain
-
 
 def message_digest(message: bytes) -> bytes:
     h = HashWriter(sha3_256(keccak=True))

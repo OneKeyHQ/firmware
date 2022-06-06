@@ -1,12 +1,9 @@
 import binascii
 from micropython import const
-from typing import TYPE_CHECKING
 from ubinascii import hexlify, unhexlify
 
 from trezor import wire
 from trezor.crypto import base32
-from trezor.enums import EthereumDataType
-from trezor.messages import EthereumFieldType
 
 STANDARD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567="
 CUSTOM_ALPHABET = "abcdefghjkmnprstuvwxyz0123456789="
@@ -14,16 +11,16 @@ PADDING_LETTER = "="
 
 DECIMALS = const(18)
 
+CONFLUX_MAIN_NET_NETWORK_ID = 1029
+CONFLUX_TEST_NET_NETWORK_ID = 1
+
 CONFLUX_TYPE_BUILTIN = "builtin"
 CONFLUX_TYPE_USER = "user"
 CONFLUX_TYPE_CONTRACT = "contract"
 CONFLUX_TYPE_INVALID = "invalid"
 
-if TYPE_CHECKING:
-    from .networks import NetworkInfo
 
-
-def address_from_bytes(address_bytes: bytes, network: NetworkInfo | None = None) -> str:
+def address_from_bytes(address_bytes: bytes, network: None = None) -> str:
     """
     Converts address in bytes to a checksummed string as defined
     in https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
