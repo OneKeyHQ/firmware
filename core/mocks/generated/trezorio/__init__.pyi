@@ -210,6 +210,11 @@ class USB:
         Cleans up the USB stack.
         """
 
+    def state(self) -> bool:
+        """
+        Get USB state.
+        """
+
 
 # extmod/modtrezorio/modtrezorio-vcp.h
 class VCP:
