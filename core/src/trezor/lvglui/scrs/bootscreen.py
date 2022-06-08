@@ -25,8 +25,8 @@ class BootScreen(Screen):
             lv.color_hex(0xFFFFFF), lv.PART.INDICATOR | lv.STATE.DEFAULT
         )
         self.bar.set_style_bg_opa(255, lv.PART.INDICATOR | lv.STATE.DEFAULT)
-        self.bar.set_style_anim_time(500, lv.PART.MAIN)
-        self.bar.set_value(500, lv.ANIM.ON)
+        self.bar.set_style_anim_time(200, lv.PART.MAIN)
+        self.bar.set_value(100, lv.ANIM.ON)
         # self.add_event_cb(self.eventhandler, lv.EVENT.SCREEN_LOADED, None)
 
     # def eventhandler(self, event_obj):
