@@ -1866,15 +1866,15 @@ if TYPE_CHECKING:
 
     class ConfluxSignMessageCIP23(protobuf.MessageType):
         address_n: "list[int]"
-        domain_hash: "bytes | None"
-        message_hash: "bytes | None"
+        domain_hash: "bytes"
+        message_hash: "bytes"
 
         def __init__(
             self,
             *,
+            domain_hash: "bytes",
+            message_hash: "bytes",
             address_n: "list[int] | None" = None,
-            domain_hash: "bytes | None" = None,
-            message_hash: "bytes | None" = None,
         ) -> None:
             pass
 

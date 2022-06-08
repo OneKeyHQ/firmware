@@ -2,7 +2,6 @@ from trezor import wire
 from trezor.crypto import rlp
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
-from trezor.enums import MessageType
 from trezor.messages import ConfluxSignTx, ConfluxTxAck, ConfluxTxRequest
 from trezor.utils import HashWriter
 
