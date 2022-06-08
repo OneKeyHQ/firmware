@@ -225,6 +225,13 @@ static secbool copy_sdcard(uint32_t code_len) {
     touched = touch_is_detected() | touch_read();
     if (touched) {
       display_printf("\n\ncanceled, aborting\n");
+      display_printf("Device will be restart in 3 seconds\n");
+
+      for (int i = 3; i >= 0; i--) {
+        display_printf("%d ", i);
+        hal_delay(1000);
+      }
+      HAL_NVIC_SystemReset();
       return secfalse;
     }
   }
