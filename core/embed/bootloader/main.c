@@ -413,11 +413,7 @@ int main(void) {
   if (touched || stay_in_bootloader == sectrue) {
     // no ui_fadeout(); - we already start from black screen
     ui_bootloader_first(NULL);
-    if (touched) {
-      // wait for the touch end event
-      while (touch_read() & TOUCH_END)
-        ;
-    }
+
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
       return 1;
@@ -451,11 +447,7 @@ int main(void) {
 
   if (firmware_present != sectrue) {
     ui_bootloader_first(&hdr);
-    if (touched) {
-      // wait for the touch end event
-      while (touch_read() & TOUCH_END)
-        ;
-    }
+
     // erase storage
     // ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
     //        NULL);
