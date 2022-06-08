@@ -5,6 +5,7 @@
 #include "usart.h"
 
 uint8_t battery_cap = 0xFF;
+uint8_t dev_pwr_sta = 0;
 
 static usart_msg ble_usart_msg;
 static bool get_ble_name = false;
@@ -19,7 +20,6 @@ static char ble_name[BLE_NAME_LEN + 1] = {0};
 static char ble_ver[6] = {0};
 static char ble_proto_ver[16 + 1] = {0};
 static char ble_boot_ver[6] = {0};
-static uint8_t dev_pwr_sta = 0;
 static uint8_t dev_press_sta = 0;
 static uint8_t dev_pwr = 0;
 
@@ -48,7 +48,7 @@ void ble_cmd_req(uint8_t cmd, uint8_t value) {
   buf[0] = cmd;
   buf[1] = value;
   ble_cmd_packet(buf, 2);
-  hal_delay(5);
+  hal_delay(10);
 }
 
 bool ble_connect_state(void) { return ble_connect; }
@@ -138,8 +138,7 @@ void ble_uart_poll(void) {
       break;
     case BLE_CMD_EQ:
       get_ble_battery = true;
-      if (ble_usart_msg.cmd_vale[0] <= 5)
-        battery_cap = ble_usart_msg.cmd_vale[0];
+      battery_cap = ble_usart_msg.cmd_vale[0];
       break;
     case BLE_CMD_RPESS:
       dev_press_sta = ble_usart_msg.cmd_vale[0];

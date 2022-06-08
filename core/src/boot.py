@@ -45,6 +45,20 @@ async def bootscreen() -> None:
             utils.halt(e.__class__.__name__)
 
 
+async def boot_animation() -> None:
+    from trezor.lvglui.scrs.bootscreen import BootScreen
+    from apps.common.request_pin import can_lock_device, verify_user_pin
+
+    bootscreen = BootScreen()
+    # wait for bootscreen animation to finish
+    await loop.sleep(500)
+    bootscreen.del_delayed(100)
+    loop.close(lvgl_task)
+    if not can_lock_device():
+        await verify_user_pin()
+        storage.init_unlocked()
+
+
 ui.display.backlight(ui.BACKLIGHT_NONE)
 ui.backlight_fade(ui.BACKLIGHT_NORMAL)
 config.init(show_pin_timeout)
@@ -54,7 +68,7 @@ if __debug__ and not utils.EMULATOR:
     config.wipe()
 
 
-loop.schedule(bootscreen())
+loop.schedule(boot_animation())
 
 loop.schedule(lvgl_task)
 

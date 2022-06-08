@@ -1,4 +1,4 @@
-from storage import device
+from storage import cache, device
 from trezor import workflow
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
@@ -386,7 +386,7 @@ class AboutSetting(Screen):
         model = device.get_model()
         version = device.get_firmware_version()
         serial = device.get_serial()  # "FK1W2Y84JCDR"
-        ble_name = device.get_ble_name()
+        ble_name = cache.get(cache.APP_BLE_NAME)  # device.get_ble_name()
         storage = device.get_storage()
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True

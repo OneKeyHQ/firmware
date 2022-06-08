@@ -6,9 +6,9 @@ bus = io.USB(
     vendor_id=0x1209,
     product_id=0x53C1,
     release_num=0x0200,
-    manufacturer="SatoshiLabs",
-    product="TREZOR",
-    interface="TREZOR Interface",
+    manufacturer="OneKey",
+    product="OneKey",
+    interface="OneKey Interface",
     usb21_landing=False,
 )
 
@@ -21,7 +21,7 @@ VCP_PORT_OFFSET = const(3)
 if utils.EMULATOR:
     import uos
 
-    UDP_PORT = int(uos.getenv("TREZOR_UDP_PORT") or "21324")
+    UDP_PORT = int(uos.getenv("ONEKEY_UDP_PORT") or "21324")
 
 _iface_iter = iter(range(5))
 

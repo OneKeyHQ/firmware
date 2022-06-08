@@ -2,6 +2,7 @@ import ustruct
 from micropython import const
 from typing import TYPE_CHECKING
 
+import storage.cache
 from storage import device
 from trezor import io, loop
 from trezor.lvglui import StatusBar
@@ -139,30 +140,32 @@ def _deal_ble_status(value: bytes) -> None:
     elif res == _BLE_STATUS_OPENED:
         global BLE_ENABLED
         BLE_ENABLED = True
-        device.set_ble_status(enable=True)
+        # device.set_ble_status(enable=True)
     elif res == _BLE_STATUS_CLOSED:
         global BLE_ENABLED
         BLE_ENABLED = False
-        device.set_ble_status(enable=False)
+        # device.set_ble_status(enable=False)
 
 
 def _retrieve_ble_name(value: bytes) -> None:
     global BLE_NAME
     if value != b"":
         BLE_NAME = value.decode("utf-8")
-        device.set_ble_name(BLE_NAME)
+        storage.cache.set(storage.cache.APP_BLE_NAME, value)
+        # device.set_ble_name(BLE_NAME)
 
 
 def _retrieve_nrf_version(value: bytes) -> None:
     global NRF_VERSION
     if value != b"":
         NRF_VERSION = value.decode("utf-8")
-        device.set_ble_version(NRF_VERSION)
+        # device.set_ble_version(NRF_VERSION)
 
 
 def _request_ble_name():
     """Request ble name."""
-    if device.get_ble_name() is None:
+    # if device.get_ble_name() is None:
+    if storage.cache.get(storage.cache.APP_BLE_NAME) is None:
         BLE_CTRL.ctrl(0x83, 0x01)
 
 
