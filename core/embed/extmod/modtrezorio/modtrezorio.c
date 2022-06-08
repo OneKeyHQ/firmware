@@ -44,7 +44,7 @@
 #include "modtrezorio-webusb.h"
 #include "modtrezorio-usb.h"
 // clang-format on
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
 #include "modtrezorio-ble.h"
 #include "modtrezorio-buz.h"
 #include "modtrezorio-fatfs.h"
@@ -78,7 +78,7 @@
 STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_trezorio)},
 
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
     {MP_ROM_QSTR(MP_QSTR_fatfs), MP_ROM_PTR(&mod_trezorio_fatfs_module)},
     {MP_ROM_QSTR(MP_QSTR_SBU), MP_ROM_PTR(&mod_trezorio_SBU_type)},
     {MP_ROM_QSTR(MP_QSTR_sdcard), MP_ROM_PTR(&mod_trezorio_sdcard_module)},

@@ -14,7 +14,7 @@ pub struct Frame<T, U> {
 impl<T, U> Frame<T, U>
 where
     T: Component,
-    U: AsRef<[u8]>,
+    U: AsRef<str>,
 {
     pub fn new(title: U, content: T) -> Self {
         Self {
@@ -23,12 +23,16 @@ where
             content: Child::new(content),
         }
     }
+
+    pub fn inner(&self) -> &T {
+        self.content.inner()
+    }
 }
 
 impl<T, U> Component for Frame<T, U>
 where
     T: Component,
-    U: AsRef<[u8]>,
+    U: AsRef<str>,
 {
     type Msg = T::Msg;
 
@@ -64,7 +68,7 @@ where
 impl<T, U> crate::trace::Trace for Frame<T, U>
 where
     T: crate::trace::Trace,
-    U: crate::trace::Trace + AsRef<[u8]>,
+    U: crate::trace::Trace + AsRef<str>,
 {
     fn trace(&self, t: &mut dyn crate::trace::Tracer) {
         t.open("Frame");

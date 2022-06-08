@@ -1,6 +1,8 @@
+use core::ops::Deref;
+
 use crate::ui::{
     component::{Child, Component, Event, EventCtx, Label, Maybe},
-    geometry::{Grid, Rect},
+    geometry::{Alignment, Grid, Rect},
     model_tt::{
         component::{Button, ButtonMsg},
         theme,
@@ -13,36 +15,34 @@ pub enum MnemonicKeyboardMsg {
     Confirmed,
 }
 
-pub struct MnemonicKeyboard<T> {
+pub struct MnemonicKeyboard<T, U> {
     /// Initial prompt, displayed on empty input.
-    prompt: Child<Maybe<Label<&'static [u8]>>>,
+    prompt: Child<Maybe<Label<U>>>,
     /// Backspace button.
-    back: Child<Maybe<Button<&'static [u8]>>>,
+    back: Child<Maybe<Button<&'static str>>>,
     /// Input area, acting as the auto-complete and confirm button.
     input: Child<Maybe<T>>,
     /// Key buttons.
-    keys: [Child<Button<&'static [u8]>>; MNEMONIC_KEY_COUNT],
+    keys: [Child<Button<&'static str>>; MNEMONIC_KEY_COUNT],
 }
 
-impl<T> MnemonicKeyboard<T>
+impl<T, U> MnemonicKeyboard<T, U>
 where
     T: MnemonicInput,
+    U: Deref<Target = str>,
 {
-    pub fn new(input: T, prompt: &'static [u8]) -> Self {
+    pub fn new(input: T, prompt: U) -> Self {
         Self {
             prompt: Child::new(Maybe::visible(
                 theme::BG,
-                Label::left_aligned(prompt, theme::label_default()),
+                Label::centered(prompt, theme::label_keyboard()),
             )),
             back: Child::new(Maybe::hidden(
                 theme::BG,
                 Button::with_icon(theme::ICON_BACK).styled(theme::button_clear()),
             )),
             input: Child::new(Maybe::hidden(theme::BG, input)),
-            keys: T::keys()
-                .map(str::as_bytes)
-                .map(Button::with_text)
-                .map(Child::new),
+            keys: T::keys().map(Button::with_text).map(Child::new),
         }
     }
 
@@ -75,19 +75,29 @@ where
         self.back
             .mutate(ctx, |ctx, b| b.show_if(ctx, !prompt_visible));
     }
+
+    pub fn mnemonic(&self) -> Option<&'static str> {
+        self.input.inner().inner().mnemonic()
+    }
 }
 
-impl<T> Component for MnemonicKeyboard<T>
+impl<T, U> Component for MnemonicKeyboard<T, U>
 where
     T: MnemonicInput,
+    U: Deref<Target = str>,
 {
     type Msg = MnemonicKeyboardMsg;
 
     fn place(&mut self, bounds: Rect) -> Rect {
-        let grid = Grid::new(bounds, 3, 4);
+        let grid =
+            Grid::new(bounds.inset(theme::borders()), 4, 3).with_spacing(theme::KEYBOARD_SPACING);
         let back_area = grid.row_col(0, 0);
         let input_area = grid.row_col(0, 1).union(grid.row_col(0, 3));
-        let prompt_area = grid.row_col(0, 0).union(grid.row_col(0, 3));
+
+        let prompt_center = grid.row_col(0, 0).union(grid.row_col(0, 3)).center();
+        let prompt_size = self.prompt.inner().inner().size();
+        let prompt_top_left = prompt_size.snap(prompt_center, Alignment::Center, Alignment::Center);
+        let prompt_area = Rect::from_top_left_and_size(prompt_top_left, prompt_size);
 
         self.prompt.place(prompt_area);
         self.back.place(back_area);
@@ -136,6 +146,15 @@ where
             btn.paint();
         }
     }
+
+    fn bounds(&self, sink: &mut dyn FnMut(Rect)) {
+        self.prompt.bounds(sink);
+        self.input.bounds(sink);
+        self.back.bounds(sink);
+        for btn in &self.keys {
+            btn.bounds(sink)
+        }
+    }
 }
 
 pub trait MnemonicInput: Component<Msg = MnemonicInputMsg> {
@@ -144,10 +163,19 @@ pub trait MnemonicInput: Component<Msg = MnemonicInputMsg> {
     fn on_key_click(&mut self, ctx: &mut EventCtx, key: usize);
     fn on_backspace_click(&mut self, ctx: &mut EventCtx);
     fn is_empty(&self) -> bool;
+    fn mnemonic(&self) -> Option<&'static str>;
 }
 
 pub enum MnemonicInputMsg {
     Confirmed,
     Completed,
     TimedOut,
+}
+
+#[cfg(feature = "ui_debug")]
+impl<T, U> crate::trace::Trace for MnemonicKeyboard<T, U> {
+    fn trace(&self, t: &mut dyn crate::trace::Tracer) {
+        t.open("MnemonicKeyboard");
+        t.close();
+    }
 }

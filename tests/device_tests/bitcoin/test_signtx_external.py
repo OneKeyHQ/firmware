@@ -23,7 +23,13 @@ from trezorlib.messages import SafetyCheckLevel
 from trezorlib.tools import parse_path
 
 from ...tx_cache import TxCache
-from .signtx import request_finished, request_input, request_meta, request_output
+from .signtx import (
+    assert_tx_matches,
+    request_finished,
+    request_input,
+    request_meta,
+    request_output,
+)
 
 B = messages.ButtonRequestType
 
@@ -68,6 +74,9 @@ TXHASH_ec16dc = bytes.fromhex(
 )
 TXHASH_20912f = bytes.fromhex(
     "20912f98ea3ed849042efed0fdac8cb4fc301961c5988cba56902d8ffb61c337"
+)
+TXHASH_1010b2 = bytes.fromhex(
+    "1010b25957a30110377a33bd3b0bd39045b3cc488d0e534d1ea5ec238812c0fc"
 )
 
 
@@ -246,6 +255,7 @@ def test_p2wpkh_in_p2sh_presigned(client: Client):
             prev_txes=TX_CACHE_TESTNET,
         )
 
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
     assert (
         serialized_tx.hex()
         == "0100000000010237c361fb8f2d9056ba8c98c5611930fcb48cacfdd0fe2e0449d83eea982f91200000000017160014d16b8c0680c61fc6ed2e407455715055e41052f5ffffffff31223ed7300b8707bdf87dc789c294520bbb7dc371741a00605d9c535adc16ec0000000000ffffffff03e0aebb0000000000160014a579388225827d9f2fe9014add644487808c695d00cdb7020000000017a91491233e24a9bf8dbb19c1187ad876a9380c12e787874d4de803000000001976a914a579388225827d9f2fe9014add644487808c695d88ac024830450221009962940c7524c8dee6807d76e0ce1ba4a943604db0bce61357dabe5a4ce2d93a022014fa33769e33eb7e6051d9db28f06cff7ead6c7013839cc26c43f887736a9af1012103e7bfe10708f715e8538c92d46ca50db6f657bbc455b7494e6a0303ccdb868b7902473044022009b2654cd576227c781b14b775df4749d0bcc5661cc39a08b5c42b8ffbc33c5d02203893cc57c46811ec2fb2d27764f3a3b3406040a24d1373cc7f38f79d80dfef1f012103adc58245cf28406af0ef5cc24b8afba7f1be6c72f279b642d85c48798685f86200000000"
@@ -331,6 +341,7 @@ def test_p2wpkh_presigned(client: Client):
             prev_txes=TX_CACHE_TESTNET,
         )
 
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
     assert (
         serialized_tx.hex()
         == "010000000001029e506939e23ad82a559f2c5e812d13788644e1e0017afd5c40383ab01e87f9700000000000ffffffffd9375b60919f9d5e1db4d7c6aba3d61d4fa080fba195bdee09b2cfccda68b7650000000000ffffffff0250c30000000000001600149c02608d469160a92f40fdf8c6ccced02949308878e6000000000000160014cc8067093f6f843d6d3e22004a4290cd0c0f336b0247304402207be75627767e59046da2699328ca1c27b60cfb34bb257a9d90442e496b5f936202201f43e2b55e1b2acf5677d3e29b9c5a78e2a4ae03a01be5c50a17cf4b88a3b278012103adc58245cf28406af0ef5cc24b8afba7f1be6c72f279b642d85c48798685f862024730440220432ac60461de52713ad543cbb1484f7eca1a72c615d539b3f42f5668da4501d2022063786a6d6940a5c1ed9c2d2fd02cef90b6c01ddd84829c946561e15be6c0aae1012103dcf3bc936ecb2ec57b8f468050abce8c8756e75fd74273c9977744b1a0be7d0300000000"
@@ -417,6 +428,7 @@ def test_p2wsh_external_presigned(client: Client):
             prev_txes=TX_CACHE_TESTNET,
         )
 
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
     assert (
         serialized_tx.hex()
         == "0100000000010231223ed7300b8707bdf87dc789c294520bbb7dc371741a00605d9c535adc16ec0000000000ffffffffb5da4da56cabc57097abb376af10e843c3f2c8427c612acfc88baaa39d2d021c0200000000ffffffff01c8a901000000000017a9147a55d61848e77ca266e79a39bfc85c580a6426c9870247304402207ec2960e148af81ac1bf570e59a9e17566c9db539826fe6edec622e4378da203022051e4c877ef6ef67700cc9038b9969355f104b608f7b4ed4ee573f3608cc40b69012103adc58245cf28406af0ef5cc24b8afba7f1be6c72f279b642d85c48798685f86203004830450221009c74f5b89440665857f2c775f7c63eb208456aeda12ef9f4ba2c739474f3436202205a069c3bcb31a9fe751818920ae94db4087d432ebd2762741922281d205ac3620147512103505f0d82bbdd251511591b34f36ad5eea37d3220c2b81a1189084431ddb3aa3d2103adc58245cf28406af0ef5cc24b8afba7f1be6c72f279b642d85c48798685f86252ae00000000"
@@ -456,38 +468,37 @@ def test_p2wsh_external_presigned(client: Client):
 @pytest.mark.skip_t1
 def test_p2tr_external_presigned(client: Client):
     inp1 = messages.TxInputType(
-        # tb1pswrqtykue8r89t9u4rprjs0gt4qzkdfuursfnvqaa3f2yql07zmq8s8a5u
-        address_n=parse_path("m/86h/1h/0h/0/0"),
-        amount=6_800,
-        prev_hash=TXHASH_df862e,
-        prev_index=0,
+        # tb1p8tvmvsvhsee73rhym86wt435qrqm92psfsyhy6a3n5gw455znnpqm8wald
+        address_n=parse_path("m/86h/1h/0h/0/1"),
+        amount=13_000,
+        prev_hash=TXHASH_1010b2,
+        prev_index=1,
         script_type=messages.InputScriptType.SPENDTAPROOT,
     )
     inp2 = messages.TxInputType(
-        # tb1p8tvmvsvhsee73rhym86wt435qrqm92psfsyhy6a3n5gw455znnpqm8wald
-        # m/86'/1'/0'/0/1 for "all all ... all" seed.
-        amount=13_000,
-        prev_hash=TXHASH_3ac32e,
-        prev_index=1,
+        # tb1pswrqtykue8r89t9u4rprjs0gt4qzkdfuursfnvqaa3f2yql07zmq8s8a5u
+        # m/86h/1h/0h/0/0
+        amount=6_800,
+        prev_hash=TXHASH_1010b2,
+        prev_index=0,
         script_pubkey=bytes.fromhex(
-            "51203ad9b641978673e88ee4d9f4e5d63400c1b2a8304c09726bb19d10ead2829cc2"
+            "512083860592dcc9c672acbca8c23941e85d402b353ce0e099b01dec52a203eff0b6"
         ),
         script_type=messages.InputScriptType.EXTERNAL,
         witness=bytearray.fromhex(
-            "01409956e47403278bf76eecbbbc3af0c2731d8347763825248a2e0f39aca5a684a7d5054e7222a1033fb5864a886180f1a8c64adab12433c78298d1f83e4c8f46e1"
+            "0140e241b85650814f35a6a8fe277d8cd784e897b7f032b73cc2f5326dac5991e8f43d54861d624cc119f5409c7d0def65a613691dc17a3700bbc8639a1c8a3184f0"
         ),
     )
     out1 = messages.TxOutputType(
-        # 84'/1'/1'/0/0
-        address="tb1q7r9yvcdgcl6wmtta58yxf29a8kc96jkyxl7y88",
+        address="tb1qq0rurzt04d76hk7pjxhqggk7ad4zj7c9u369kt",
         amount=15_000,
         script_type=messages.OutputScriptType.PAYTOADDRESS,
     )
     out2 = messages.TxOutputType(
         # tb1pn2d0yjeedavnkd8z8lhm566p0f2utm3lgvxrsdehnl94y34txmts5s7t4c
         address_n=parse_path("m/86h/1h/0h/1/0"),
+        amount=4_600,
         script_type=messages.OutputScriptType.PAYTOTAPROOT,
-        amount=6_800 + 13_000 - 200 - 15_000,
     )
     with client:
         client.set_expected_responses(
@@ -512,9 +523,10 @@ def test_p2tr_external_presigned(client: Client):
             client, "Testnet", [inp1, inp2], [out1, out2], prev_txes=TX_CACHE_TESTNET
         )
 
-    assert (
-        serialized_tx.hex()
-        == "010000000001029f67664b8972ae01498e25ea98a37889f19aa86a2f39ddad84ff31da312e86df0000000000ffffffff9b117a776a9aaf70d4c3ffe89f009dcd23210a03d649ee5e38791d83902ec33a0100000000ffffffff02983a000000000000160014f0ca4661a8c7f4edad7da1c864a8bd3db05d4ac4f8110000000000002251209a9af24b396f593b34e23fefba6b417a55c5ee3f430c3837379fcb5246ab36d70140b51992353d2f99b7b620c0882cb06694996f1b6c7e62a3c1d3036e0f896fbf0b92f3d9aeab94f2454809a501715667345f702c8214693f469225de5f6636b86b01409956e47403278bf76eecbbbc3af0c2731d8347763825248a2e0f39aca5a684a7d5054e7222a1033fb5864a886180f1a8c64adab12433c78298d1f83e4c8f46e100000000"
+    assert_tx_matches(
+        serialized_tx,
+        hash_link="https://tbtc1.trezor.io/api/tx/22dee49480bd5a6ee49bdf2dd0c06b49187990bc9a90b2b5f2cdc3567b71690c",
+        tx_hex="01000000000102fcc0128823eca51e4d530e8d48ccb34590d30b3bbd337a371001a35759b210100100000000fffffffffcc0128823eca51e4d530e8d48ccb34590d30b3bbd337a371001a35759b210100000000000ffffffff02983a00000000000016001403c7c1896fab7dabdbc191ae0422deeb6a297b05f8110000000000002251209a9af24b396f593b34e23fefba6b417a55c5ee3f430c3837379fcb5246ab36d701405c014bd3cdc94fb1a2d4ead3509fbed1ad3065ad931ea1e998ed29f73212a2506f2ac39a526c237bbf22af75afec64bb9b484b040c72016e30b1337a6274a9ae0140e241b85650814f35a6a8fe277d8cd784e897b7f032b73cc2f5326dac5991e8f43d54861d624cc119f5409c7d0def65a613691dc17a3700bbc8639a1c8a3184f000000000",
     )
 
     # Test corrupted signature in witness.
@@ -624,6 +636,7 @@ def test_p2wpkh_with_proof(client: Client):
             prev_txes=TX_CACHE_TESTNET,
         )
 
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
     assert (
         serialized_tx.hex()
         == "010000000001028abbd1cf69e00fbf60fa3ba475dccdbdba4a859ffa6bfd1ee820a75b1be2b7e50000000000ffffffff31223ed7300b8707bdf87dc789c294520bbb7dc371741a00605d9c535adc16ec0000000000ffffffff0203d9000000000000160014a579388225827d9f2fe9014add644487808c695db5a90000000000001976a914a579388225827d9f2fe9014add644487808c695d88ac000247304402204ab2dfe9eb1268c1cea7d997ae10070c67a26d1c52eb8af06d2e8a4f8befeee30220445294f1568782879c84bf216c80c0f01dc332569c2afd1be5381b0d5a8d6d69012103adc58245cf28406af0ef5cc24b8afba7f1be6c72f279b642d85c48798685f86200000000"
@@ -697,9 +710,12 @@ def test_p2tr_with_proof(client: Client):
             client, "Testnet", [inp1, inp2], [out1], prev_txes=TX_CACHE_TESTNET
         )
 
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
+    # Transaction hex changed with fix #2085, all other details are the same as this tx:
+    # https://tbtc1.trezor.io/api/tx/48ec6dc7bb772ff18cbce0135fedda7c0e85212c7b2f85a5d0cc7a917d77c48a
     assert (
         serialized_tx.hex()
-        == "01000000000102ae4d6d8f642d1e5c8608e5b8430dd89432da2c7425081522e9482970412ddeaf0200000000ffffffffbf1cff9e0fc816acdc2753af9a45c1a6e92c04d0cff2b858372475b6abd912400000000000ffffffff0128a2010000000000225120e120bd124f345d412a91b50cb7e07650a448e90f48afd861b575a664b985b97f000140af196d0b64cfe8b5e7a2074b43ec1f11bfdea1df3ecb3b9d6c17e7542d7ca43b698237b5b9788cb49fa758f787311bc79bcbfa4e6046271c682927d7a9c2480900000000"
+        == "01000000000102ae4d6d8f642d1e5c8608e5b8430dd89432da2c7425081522e9482970412ddeaf0200000000ffffffffbf1cff9e0fc816acdc2753af9a45c1a6e92c04d0cff2b858372475b6abd912400000000000ffffffff0128a2010000000000225120e120bd124f345d412a91b50cb7e07650a448e90f48afd861b575a664b985b97f000140b524eaf406d413e19d7d32f7133273728f35b28509ac58dfd817f6dfbbac9901db21cd1ba4c2323c64bede38a7512647369d4767c645a915482bcf5167dcd77100000000"
     )
 
     # Test corrupted ownership proof.
@@ -816,9 +832,10 @@ def test_p2tr_external_unverified(client: Client):
     )
 
     # Second witness is missing from the serialized transaction.
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
     assert (
         serialized_tx.hex()
-        == "010000000001029f67664b8972ae01498e25ea98a37889f19aa86a2f39ddad84ff31da312e86df0000000000ffffffff9b117a776a9aaf70d4c3ffe89f009dcd23210a03d649ee5e38791d83902ec33a0100000000ffffffff02983a000000000000160014f0ca4661a8c7f4edad7da1c864a8bd3db05d4ac4f8110000000000002251209a9af24b396f593b34e23fefba6b417a55c5ee3f430c3837379fcb5246ab36d70140b51992353d2f99b7b620c0882cb06694996f1b6c7e62a3c1d3036e0f896fbf0b92f3d9aeab94f2454809a501715667345f702c8214693f469225de5f6636b86b0000000000"
+        == "010000000001029f67664b8972ae01498e25ea98a37889f19aa86a2f39ddad84ff31da312e86df0000000000ffffffff9b117a776a9aaf70d4c3ffe89f009dcd23210a03d649ee5e38791d83902ec33a0100000000ffffffff02983a000000000000160014f0ca4661a8c7f4edad7da1c864a8bd3db05d4ac4f8110000000000002251209a9af24b396f593b34e23fefba6b417a55c5ee3f430c3837379fcb5246ab36d70140496fddbbddff45c7006d56c96fc9f2d6b5c785d7ca8f09230b944e2d2f07452610191bdbc3d6f625d5a0a0b04e49d85427df8a5bb033b3156541abef66e66aba0000000000"
     )
 
 
@@ -867,6 +884,7 @@ def test_p2wpkh_external_unverified(client: Client):
     )
 
     # Second witness is missing from the serialized transaction.
+    # Transaction does not exist on the blockchain, not using assert_tx_matches()
     assert (
         serialized_tx.hex()
         == "010000000001029e506939e23ad82a559f2c5e812d13788644e1e0017afd5c40383ab01e87f9700000000000ffffffffd9375b60919f9d5e1db4d7c6aba3d61d4fa080fba195bdee09b2cfccda68b7650000000000ffffffff0250c30000000000001600149c02608d469160a92f40fdf8c6ccced02949308878e6000000000000160014cc8067093f6f843d6d3e22004a4290cd0c0f336b0247304402207be75627767e59046da2699328ca1c27b60cfb34bb257a9d90442e496b5f936202201f43e2b55e1b2acf5677d3e29b9c5a78e2a4ae03a01be5c50a17cf4b88a3b278012103adc58245cf28406af0ef5cc24b8afba7f1be6c72f279b642d85c48798685f8620000000000"

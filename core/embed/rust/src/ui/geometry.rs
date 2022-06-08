@@ -47,6 +47,22 @@ impl Offset {
     pub fn abs(self) -> Self {
         Self::new(self.x.abs(), self.y.abs())
     }
+
+    /// With `self` representing a rectangle size, returns top-left corner of
+    /// the rectangle such that it is aligned relative to the `point`.
+    pub fn snap(self, point: Point, x: Alignment, y: Alignment) -> Point {
+        let x_off = match x {
+            Alignment::Start => 0,
+            Alignment::Center => self.x / 2,
+            Alignment::End => self.x,
+        };
+        let y_off = match y {
+            Alignment::Start => 0,
+            Alignment::Center => self.y / 2,
+            Alignment::End => self.y,
+        };
+        point - Self::new(x_off, y_off)
+    }
 }
 
 impl Add<Offset> for Offset {
@@ -135,8 +151,13 @@ impl Rect {
         Self::new(Point::zero(), Point::zero())
     }
 
-    pub fn from_top_left_and_size(p0: Point, size: Offset) -> Self {
-        Self::new(p0, p0 + size)
+    pub const fn from_top_left_and_size(p0: Point, size: Offset) -> Self {
+        Self {
+            x0: p0.x,
+            y0: p0.y,
+            x1: p0.x + size.x,
+            y1: p0.y + size.y,
+        }
     }
 
     pub fn from_center_and_size(p: Point, size: Offset) -> Self {
@@ -213,7 +234,7 @@ impl Rect {
         }
     }
 
-    pub fn inset(&self, insets: Insets) -> Self {
+    pub const fn inset(&self, insets: Insets) -> Self {
         Self {
             x0: self.x0 + insets.left,
             y0: self.y0 + insets.top,
@@ -274,6 +295,15 @@ impl Rect {
 
     pub fn split_right(self, width: i32) -> (Self, Self) {
         self.split_left(self.width() - width)
+    }
+
+    pub fn translate(&self, offset: Offset) -> Self {
+        Self {
+            x0: self.x0 + offset.x,
+            y0: self.y0 + offset.y,
+            x1: self.x1 + offset.x,
+            y1: self.y1 + offset.y,
+        }
     }
 }
 
@@ -417,7 +447,7 @@ impl Grid {
     }
 
     pub fn cells(&self, cells: GridCellSpan) -> Rect {
-        let from = self.row_col(cells.from.0, cells.to.1);
+        let from = self.row_col(cells.from.0, cells.from.1);
         let to = self.row_col(cells.to.0, cells.to.1);
         from.union(to)
     }
@@ -431,9 +461,9 @@ pub struct GridCellSpan {
 
 #[derive(Copy, Clone)]
 pub struct LinearPlacement {
-    axis: Axis,
-    align: Alignment,
-    spacing: i32,
+    pub axis: Axis,
+    pub align: Alignment,
+    pub spacing: i32,
 }
 
 impl LinearPlacement {

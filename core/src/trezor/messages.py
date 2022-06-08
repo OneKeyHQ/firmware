@@ -2412,6 +2412,60 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["Entropy"]:
             return isinstance(msg, cls)
 
+    class GetFirmwareHash(protobuf.MessageType):
+        challenge: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            challenge: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["GetFirmwareHash"]:
+            return isinstance(msg, cls)
+
+    class FirmwareHash(protobuf.MessageType):
+        hash: "bytes"
+
+        def __init__(
+            self,
+            *,
+            hash: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FirmwareHash"]:
+            return isinstance(msg, cls)
+
+    class GetFirmware(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["GetFirmware"]:
+            return isinstance(msg, cls)
+
+    class FirmwareChunk(protobuf.MessageType):
+        chunk: "bytes"
+
+        def __init__(
+            self,
+            *,
+            chunk: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FirmwareChunk"]:
+            return isinstance(msg, cls)
+
+    class FirmwareChunkAck(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FirmwareChunkAck"]:
+            return isinstance(msg, cls)
+
     class WipeDevice(protobuf.MessageType):
 
         @classmethod

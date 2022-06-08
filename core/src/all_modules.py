@@ -276,6 +276,8 @@ trezor.ui.container
 import trezor.ui.container
 trezor.ui.layouts
 import trezor.ui.layouts
+trezor.ui.layouts.altcoin
+import trezor.ui.layouts.altcoin
 trezor.ui.layouts.common
 import trezor.ui.layouts.common
 trezor.ui.layouts.lvgl
@@ -288,6 +290,10 @@ trezor.ui.layouts.lvgl.recovery
 import trezor.ui.layouts.lvgl.recovery
 trezor.ui.layouts.lvgl.reset
 import trezor.ui.layouts.lvgl.reset
+trezor.ui.layouts.recovery
+import trezor.ui.layouts.recovery
+trezor.ui.layouts.reset
+import trezor.ui.layouts.reset
 trezor.ui.layouts.t1
 import trezor.ui.layouts.t1
 trezor.ui.layouts.tt
@@ -300,6 +306,12 @@ trezor.ui.layouts.tt.reset
 import trezor.ui.layouts.tt.reset
 trezor.ui.layouts.tt_v2
 import trezor.ui.layouts.tt_v2
+trezor.ui.layouts.tt_v2.altcoin
+import trezor.ui.layouts.tt_v2.altcoin
+trezor.ui.layouts.tt_v2.recovery
+import trezor.ui.layouts.tt_v2.recovery
+trezor.ui.layouts.tt_v2.reset
+import trezor.ui.layouts.tt_v2.reset
 trezor.ui.loader
 import trezor.ui.loader
 trezor.ui.popup
@@ -496,6 +508,10 @@ apps.misc.get_ecdh_session_key
 import apps.misc.get_ecdh_session_key
 apps.misc.get_entropy
 import apps.misc.get_entropy
+apps.misc.get_firmware
+import apps.misc.get_firmware
+apps.misc.get_firmware_hash
+import apps.misc.get_firmware_hash
 apps.misc.sign_identity
 import apps.misc.sign_identity
 apps.workflow_handlers
@@ -556,6 +572,10 @@ if not utils.BITCOIN_ONLY:
     import trezor.ui.layouts.lvgl.webauthn
     trezor.ui.layouts.tt.webauthn
     import trezor.ui.layouts.tt.webauthn
+    trezor.ui.layouts.tt_v2.webauthn
+    import trezor.ui.layouts.tt_v2.webauthn
+    trezor.ui.layouts.webauthn
+    import trezor.ui.layouts.webauthn
     apps.binance
     import apps.binance
     apps.binance.get_address
@@ -568,8 +588,8 @@ if not utils.BITCOIN_ONLY:
     import apps.binance.layout
     apps.binance.sign_tx
     import apps.binance.sign_tx
-    apps.bitcoin.sign_tx.zcash
-    import apps.bitcoin.sign_tx.zcash
+    apps.bitcoin.sign_tx.zcash_v4
+    import apps.bitcoin.sign_tx.zcash_v4
     apps.cardano
     import apps.cardano
     apps.cardano.address
@@ -852,6 +872,12 @@ if not utils.BITCOIN_ONLY:
     import apps.webauthn.remove_resident_credential
     apps.webauthn.resident_credentials
     import apps.webauthn.resident_credentials
+    apps.zcash
+    import apps.zcash
+    apps.zcash.hasher
+    import apps.zcash.hasher
+    apps.zcash.signer
+    import apps.zcash.signer
 
 # generate full alphabet
 a

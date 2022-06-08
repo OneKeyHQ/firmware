@@ -37,9 +37,9 @@
 #else
 #define FLASH_SECTOR_COUNT 16
 #endif
-#elif TREZOR_MODEL == T
+#elif defined TREZOR_MODEL_T
 #define FLASH_SECTOR_COUNT 24
-#elif TREZOR_MODEL == 1
+#elif defined TREZOR_MODEL_1
 #define FLASH_SECTOR_COUNT 12
 #else
 #error Unknown Trezor model
@@ -64,10 +64,10 @@
 #define FLASH_SECTOR_STORAGE_1 2
 #define FLASH_SECTOR_STORAGE_2 3
 #endif
-#elif TREZOR_MODEL == T
+#elif defined TREZOR_MODEL_T
 #define FLASH_SECTOR_STORAGE_1 4
 #define FLASH_SECTOR_STORAGE_2 16
-#elif TREZOR_MODEL == 1
+#elif defined TREZOR_MODEL_1
 #define FLASH_SECTOR_STORAGE_1 2
 #define FLASH_SECTOR_STORAGE_2 3
 #else
@@ -143,7 +143,7 @@ secbool __wur flash_unlock_write(void);
 secbool __wur flash_lock_write(void);
 
 const void *flash_get_address(uint8_t sector, uint32_t offset, uint32_t size);
-
+uint32_t flash_sector_size(uint8_t sector);
 secbool __wur flash_erase_sectors(const uint8_t *sectors, int len,
                                   void (*progress)(int pos, int len));
 static inline secbool flash_erase(uint8_t sector) {

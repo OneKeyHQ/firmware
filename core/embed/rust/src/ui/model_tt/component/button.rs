@@ -61,6 +61,13 @@ impl<T> Button<T> {
         }
     }
 
+    pub fn initially_enabled(mut self, enabled: bool) -> Self {
+        if !enabled {
+            self.state = State::Disabled;
+        }
+        self
+    }
+
     pub fn enable(&mut self, ctx: &mut EventCtx) {
         self.set(ctx, State::Initial)
     }
@@ -149,7 +156,7 @@ impl<T> Button<T> {
 
     pub fn paint_content(&self, style: &ButtonStyle)
     where
-        T: AsRef<[u8]>,
+        T: AsRef<str>,
     {
         match &self.content {
             ButtonContent::Empty => {}
@@ -182,7 +189,7 @@ impl<T> Button<T> {
 
 impl<T> Component for Button<T>
 where
-    T: AsRef<[u8]>,
+    T: AsRef<str>,
 {
     type Msg = ButtonMsg;
 
@@ -250,12 +257,16 @@ where
         self.paint_background(&style);
         self.paint_content(&style);
     }
+
+    fn bounds(&self, sink: &mut dyn FnMut(Rect)) {
+        sink(self.area);
+    }
 }
 
 #[cfg(feature = "ui_debug")]
 impl<T> crate::trace::Trace for Button<T>
 where
-    T: AsRef<[u8]> + crate::trace::Trace,
+    T: AsRef<str> + crate::trace::Trace,
 {
     fn trace(&self, t: &mut dyn crate::trace::Tracer) {
         t.open("Button");
@@ -311,7 +322,7 @@ impl<T> Button<T> {
     where
         F0: Fn(ButtonMsg) -> Option<R>,
         F1: Fn(ButtonMsg) -> Option<R>,
-        T: AsRef<[u8]>,
+        T: AsRef<str>,
     {
         const BUTTON_SPACING: i32 = 6;
         (

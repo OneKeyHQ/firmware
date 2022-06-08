@@ -106,13 +106,6 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         rskip60=False,
     )
     yield NetworkInfo(
-        chain_id=10,
-        slip44=60,
-        shortcut="OETH",
-        name="Optimistic Ethereum",
-        rskip60=False,
-    )
-    yield NetworkInfo(
         chain_id=11,
         slip44=916,
         shortcut="META",
@@ -404,13 +397,6 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         slip44=60,
         shortcut="GT",
         name="GateChain",
-        rskip60=False,
-    )
-    yield NetworkInfo(
-        chain_id=88,
-        slip44=889,
-        shortcut="TOMO",
-        name="TomoChain",
         rskip60=False,
     )
     yield NetworkInfo(
@@ -841,13 +827,6 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         rskip60=False,
     )
     yield NetworkInfo(
-        chain_id=1288,
-        slip44=60,
-        shortcut="MSHD",
-        name="Moonshadow",
-        rskip60=False,
-    )
-    yield NetworkInfo(
         chain_id=1618,
         slip44=60,
         shortcut="CATE",
@@ -1205,6 +1184,13 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         rskip60=False,
     )
     yield NetworkInfo(
+        chain_id=333999,
+        slip44=60,
+        shortcut="POLIS",
+        name="Polis",
+        rskip60=False,
+    )
+    yield NetworkInfo(
         chain_id=955305,
         slip44=1011,
         shortcut="ELV",
@@ -1300,13 +1286,6 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         slip44=60,
         shortcut="IPOS",
         name="IPOS Network",
-        rskip60=False,
-    )
-    yield NetworkInfo(
-        chain_id=1313161554,
-        slip44=60,
-        shortcut="aETH",
-        name="Aurora",
         rskip60=False,
     )
     yield NetworkInfo(
