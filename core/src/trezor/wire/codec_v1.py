@@ -129,6 +129,7 @@ async def write_message(iface: WireInterface, mtype: int, mdata: bytes) -> None:
                 n = iface.write(report)
                 if n == len(report):
                     break
+            report[1:] = b"\x00" * (_REP_LEN - 1)
 
             # if we have more data to write, use continuation reports for it
             if nwritten < msize:
