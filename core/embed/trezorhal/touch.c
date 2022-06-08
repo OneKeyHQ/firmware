@@ -247,11 +247,12 @@ uint32_t touch_read(void) {
                        50) != HAL_OK) {
     return 0;
   }
+
   if (touch_data[6] != 0xAB) {
     return 0;
   }
 
-  if (touch_data[0] == 0xAB) {
+  if (touch_data[0] != 0x06) {
     if (touching) {
       last_packet = 1;
     } else {
@@ -283,10 +284,13 @@ uint32_t touch_read(void) {
 uint32_t touch_click(void) {
   uint32_t r = 0;
   r = touch_read();
-  if (r) {
-    while (((r = touch_read()) & TOUCH_END) == 0) {
+  while (r) {
+    r = touch_read();
+    if ((r & TOUCH_END) == TOUCH_END) {
+      break;
     }
   }
+
   return r;
 }
 
