@@ -4,13 +4,14 @@
 #include <stdint.h>
 
 #include "mipi_display.h"
+#include "sdram.h"
 #include "st7701s.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DISPLAY_MEMORY_BASE 0xD0000000
+#define DISPLAY_MEMORY_BASE FMC_SDRAM_LTDC_BUFFER_ADDRESS
 
 /* LCD reset pin */
 #define LCD_RESET_PIN GPIO_PIN_3
