@@ -75,6 +75,7 @@ SOURCE_MOD += [
 
 PYOPT = ARGUMENTS.get('PYOPT', '1')
 FROZEN = ARGUMENTS.get('TREZOR_EMULATOR_FROZEN', 0)
+RASPI = os.getenv('TREZOR_EMULATOR_RASPI') == '1'
 
 # modtrezorconfig
 CPPPATH_MOD += [
@@ -246,6 +247,8 @@ if FEATURE_FLAGS["TREZOR_UI"]:
         ]
 if FROZEN:
     CPPDEFINES_MOD += ['TREZOR_EMULATOR_FROZEN']
+if RASPI:
+    CPPDEFINES_MOD += ['TREZOR_EMULATOR_RASPI']
 
 # modtrezorutils
 SOURCE_MOD += [
@@ -494,7 +497,7 @@ env.Replace(
     ] + CPPPATH_MOD,
     CPPDEFINES=[
         'TREZOR_EMULATOR',
-        ('TREZOR_MODEL', '$TREZOR_MODEL'),
+        'TREZOR_MODEL_'+TREZOR_MODEL,
         ('LVGL_UI', '$LVGL_UI'),
         ('MP_CONFIGFILE', '\\"embed/unix/mpconfigport.h\\"'),
         ('CURRENT_DIR', '$CURRENT_DIR'),   
@@ -585,13 +588,19 @@ if FROZEN:
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/constants/__init__.py'))
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/__init__.py'))
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/common.py'))
+    SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/reset.py'))
+    SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/recovery.py'))
+    if EVERYTHING:
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/altcoin.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/webauthn.py'))
     if TREZOR_MODEL == 'T' and UI2:
-        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/components/tt/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/constants/tt.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt_v2/__init__.py'))
-        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt/__init__.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt_v2/reset.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt_v2/recovery.py'))
         if EVERYTHING:
-            SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt/webauthn.py'))
+            SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt_v2/altcoin.py'))
+            SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/layouts/tt_v2/webauthn.py'))
     elif TREZOR_MODEL == 'T':
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/components/tt/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/ui/constants/tt.py'))
@@ -646,7 +655,7 @@ if FROZEN:
         exclude=[
             SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/decred.py',
             SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/bitcoinlike.py',
-            SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash.py',
+            SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash_v4.py',
         ])
     )
 
@@ -685,11 +694,13 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/tezos/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Tezos*.py'))
 
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/zcash/*.py'))
+
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/webauthn/*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/decred.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/bitcoinlike.py'))
-        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash_v4.py'))
 
     source_mpy = env.FrozenModule(source=SOURCE_PY, source_dir=SOURCE_PY_DIR, bitcoin_only=BITCOIN_ONLY)
 
@@ -704,7 +715,7 @@ if FROZEN:
 if FEATURE_FLAGS["SECP256K1_ZKP"]:
     host_env = Environment(ENV=os.environ)
     host_env.Replace(
-        CC=os.getenv('CC_FOR_BUILD') or 'gcc',
+        CC=os.getenv('CC_FOR_BUILD') or 'cc',
         COPT='-O2',
         CPPPATH='vendor/secp256k1-zkp',
         CPPDEFINES=[
@@ -737,9 +748,13 @@ protobuf_blobs = env.Command(
 )
 env.Depends(protobuf_blobs, qstr_generated)
 
-RUST_PROFILE = 'dev' if ARGUMENTS.get('TREZOR_EMULATOR_DEBUGGABLE', 0) == '1' else 'release'
+if ARGUMENTS.get('TREZOR_EMULATOR_DEBUGGABLE', '0') == '1':
+    RUST_PROFILE = 'dev'
+    RUST_LIBDIR = 'build/unix/rust/debug'
+else:
+    RUST_PROFILE = 'release'
+    RUST_LIBDIR = 'build/unix/rust/release'
 RUST_LIB = 'trezor_lib'
-RUST_LIBDIR = f'build/unix/rust/{RUST_PROFILE}'
 RUST_LIBPATH = f'{RUST_LIBDIR}/lib{RUST_LIB}.a'
 
 def cargo_build():

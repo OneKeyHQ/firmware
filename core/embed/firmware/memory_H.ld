@@ -8,7 +8,7 @@ MEMORY {
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
   SRAM1   (wal) : ORIGIN = 0x30000000, LENGTH = 256K
-  /* EXRAM   (wal) : ORIGIN = 0xD0400000, LENGTH = 8092K */
+  EXRAM   (wal) : ORIGIN = 0xD0800000, LENGTH = 2048K
 }
 
 main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
@@ -35,6 +35,10 @@ _flash_end = ORIGIN(FLASH) + LENGTH(FLASH);
 _heap_start = ADDR(.heap);
 _heap_end = ADDR(.heap) + SIZEOF(.heap);
 
+_flash2_load_addr = LOADADDR(.flash2);
+_flash2_start = ORIGIN(EXRAM);
+_flash2_end = _flash2_start + SIZEOF(.flash2);
+
 SECTIONS {
   .vendorheader : ALIGN(4) {
     KEEP(*(.vendorheader))
@@ -49,7 +53,7 @@ SECTIONS {
     build/firmware/frozen_mpy.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);
-  } >FLASH2 AT>FLASH2
+  } >EXRAM AT>FLASH2
 
   .flash : ALIGN(512) {
     KEEP(*(.vector_table));

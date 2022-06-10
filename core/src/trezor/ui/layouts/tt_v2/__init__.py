@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING
 from trezor import io, log, loop, ui, wire, workflow
 from trezor.enums import ButtonRequestType
 
-from trezorui2 import layout_new_confirm_action
+import trezorui2
 
 from ...constants.tt import MONO_ADDR_PER_LINE
-from ..common import interact
+from ..common import button_request, interact
 
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Iterable, NoReturn, Sequence
@@ -24,11 +24,47 @@ class _RustLayout(ui.Layout):
     def set_timer(self, token: int, deadline: int) -> None:
         self.timer.schedule(deadline, token)
 
-    def create_tasks(self) -> tuple[loop.Task, ...]:
-        return self.handle_input_and_rendering(), self.handle_timers()
+    if __debug__:
+
+        def create_tasks(self) -> tuple[loop.AwaitableTask, ...]:
+            from apps.debug import confirm_signal, input_signal
+
+            return (
+                self.handle_input_and_rendering(),
+                self.handle_timers(),
+                confirm_signal(),
+                input_signal(),
+            )
+
+        def read_content(self) -> list[str]:
+            result = []
+
+            def callback(*args):
+                for arg in args:
+                    result.append(str(arg))
+
+            self.layout.trace(callback)
+            result = " ".join(result).split("\n")
+            return result
+
+    else:
+
+        def create_tasks(self) -> tuple[loop.AwaitableTask, ...]:
+            return self.handle_input_and_rendering(), self.handle_timers()
+
+    def _before_render(self) -> None:
+        if __debug__ and self.should_notify_layout_change:
+            from apps.debug import notify_layout_change
+
+            # notify about change and do not notify again until next await.
+            # (handle_rendering might be called multiple times in a single await,
+            # because of the endless loop in __iter__)
+            self.should_notify_layout_change = False
+            notify_layout_change(self)
 
     def handle_input_and_rendering(self) -> loop.Task:  # type: ignore [awaitable-is-generator]
         touch = loop.wait(io.TOUCH)
+        self._before_render()
         ui.display.clear()
         self.layout.paint()
         # self.layout.bounds()
@@ -92,7 +128,7 @@ async def confirm_action(
     result = await interact(
         ctx,
         _RustLayout(
-            layout_new_confirm_action(
+            trezorui2.confirm_action(
                 title=title.upper(),
                 action=action,
                 description=description,
@@ -104,14 +140,19 @@ async def confirm_action(
         br_type,
         br_code,
     )
-    if result is not True:
+    if result is not trezorui2.CONFIRMED:
         raise exc
 
 
 async def confirm_reset_device(
     ctx: wire.GenericContext, prompt: str, recovery: bool = False
 ) -> None:
-    raise NotImplementedError
+    return await confirm_action(
+        ctx,
+        "recover_device" if recovery else "setup_device",
+        "not implemented",
+        action="not implemented",
+    )
 
 
 # TODO cleanup @ redesign
@@ -263,6 +304,15 @@ async def confirm_output(
     br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
     icon: str = ui.ICON_SEND,
 ) -> None:
+    raise NotImplementedError
+
+
+async def confirm_payment_request(
+    ctx: wire.GenericContext,
+    recipient_name: str,
+    amount: str,
+    memos: list[str],
+) -> Any:
     raise NotImplementedError
 
 
@@ -438,11 +488,23 @@ async def show_popup(
 
 
 def draw_simple_text(title: str, description: str = "") -> None:
-    raise NotImplementedError
+    log.error(__name__, "draw_simple_text not implemented")
 
 
 async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -> str:
-    raise NotImplementedError
+    await button_request(
+        ctx, "passphrase_device", code=ButtonRequestType.PassphraseEntry
+    )
+
+    keyboard = _RustLayout(
+        trezorui2.request_passphrase(prompt="Enter passphrase", max_len=max_len)
+    )
+    result = await ctx.wait(keyboard)
+    if result is trezorui2.CANCELLED:
+        raise wire.ActionCancelled("Passphrase entry cancelled")
+
+    assert isinstance(result, str)
+    return result
 
 
 async def request_pin_on_device(
@@ -451,4 +513,26 @@ async def request_pin_on_device(
     attempts_remaining: int | None,
     allow_cancel: bool,
 ) -> str:
-    raise NotImplementedError
+    await button_request(ctx, "pin_device", code=ButtonRequestType.PinEntry)
+
+    if attempts_remaining is None:
+        subprompt = ""
+    elif attempts_remaining == 1:
+        subprompt = "Last attempt"
+    else:
+        subprompt = f"{attempts_remaining} tries left"
+
+    dialog = _RustLayout(
+        trezorui2.request_pin(
+            prompt=prompt,
+            subprompt=subprompt,
+            allow_cancel=allow_cancel,
+            warning=None,
+        )
+    )
+    while True:
+        result = await ctx.wait(dialog)
+        if result is trezorui2.CANCELLED:
+            raise wire.PinCancelled
+        assert isinstance(result, str)
+        return result

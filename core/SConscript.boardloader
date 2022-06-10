@@ -223,7 +223,7 @@ if PRODUCTION_MODEL == 'H':
             'vendor/micropython/lib/cmsis/inc',
         ] + CPPPATH_MOD,
         CPPDEFINES=[
-            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            'TREZOR_MODEL_'+TREZOR_MODEL,
             ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
             CPU_MODEL,
             CORE_MODEL,
@@ -257,7 +257,7 @@ else:
             'vendor/micropython/lib/cmsis/inc',
         ] + CPPPATH_MOD,
         CPPDEFINES=[
-            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            'TREZOR_MODEL_'+TREZOR_MODEL,
             CPU_MODEL,
             'USE_HAL_DRIVER',
             ('STM32_HAL_H', '"<stm32f4xx.h>"'),

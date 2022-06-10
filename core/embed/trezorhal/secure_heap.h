@@ -33,8 +33,10 @@
 
 #include <stddef.h>
 
+#include "sdram.h"
+
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configTOTAL_HEAP_SIZE ((size_t)(4*1024*1024))
+#define configTOTAL_HEAP_SIZE ((size_t)FMC_SDRAM_USER_HEAP_LEN)
 #define portMAX_DELAY 0xffffffff
 
 #define PRIVILEGED_DATA

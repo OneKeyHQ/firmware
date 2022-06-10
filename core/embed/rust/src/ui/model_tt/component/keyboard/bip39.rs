@@ -7,7 +7,7 @@ use crate::{
         model_tt::{
             component::{
                 keyboard::{
-                    common::{MultiTapKeyboard, TextBox},
+                    common::{paint_pending_marker, MultiTapKeyboard, TextBox},
                     mnemonic::{MnemonicInput, MnemonicInputMsg, MNEMONIC_KEY_COUNT},
                 },
                 Button, ButtonContent, ButtonMsg,
@@ -20,7 +20,7 @@ use crate::{
 const MAX_LENGTH: usize = 8;
 
 pub struct Bip39Input {
-    button: Button<&'static [u8]>,
+    button: Button<&'static str>,
     textbox: TextBox<MAX_LENGTH>,
     multi_tap: MultiTapKeyboard,
     suggested_word: Option<&'static str>,
@@ -64,6 +64,10 @@ impl MnemonicInput for Bip39Input {
     fn is_empty(&self) -> bool {
         self.textbox.is_empty()
     }
+
+    fn mnemonic(&self) -> Option<&'static str> {
+        self.suggested_word
+    }
 }
 
 impl Component for Bip39Input {
@@ -91,7 +95,7 @@ impl Component for Bip39Input {
         self.button.paint_background(&style);
 
         // Paint the entered content (the prefix of the suggested word).
-        let text = self.textbox.content().as_bytes();
+        let text = self.textbox.content();
         let width = style.font.text_width(text);
         // Content starts in the left-center point, offset by 16px to the right and 8px
         // to the bottom.
@@ -109,7 +113,7 @@ impl Component for Bip39Input {
             let word_baseline = text_baseline + Offset::new(width, 0);
             display::text(
                 word_baseline,
-                word.as_bytes(),
+                word,
                 style.font,
                 theme::GREY_LIGHT,
                 style.button_color,
@@ -118,16 +122,7 @@ impl Component for Bip39Input {
 
         // Paint the pending marker.
         if self.multi_tap.pending_key().is_some() {
-            // Measure the width of the last character of input.
-            if let Some(last) = text.last().copied() {
-                let last_width = style.font.text_width(&[last]);
-                // Draw the marker 2px under the start of the baseline of the last character.
-                let marker_origin = text_baseline + Offset::new(width - last_width, 2);
-                // Draw the marker 1px longer than the last character, and 3px thick.
-                let marker_rect =
-                    Rect::from_top_left_and_size(marker_origin, Offset::new(last_width + 1, 3));
-                display::rect_fill(marker_rect, style.text_color);
-            }
+            paint_pending_marker(text_baseline, text, style.font, style.text_color);
         }
 
         // Paint the icon.
@@ -137,6 +132,10 @@ impl Component for Bip39Input {
             let icon_center = area.top_right().center(area.bottom_right()) - Offset::new(16 + 8, 0);
             display::icon(icon_center, icon, style.text_color, style.button_color);
         }
+    }
+
+    fn bounds(&self, sink: &mut dyn FnMut(Rect)) {
+        self.button.bounds(sink);
     }
 }
 
@@ -212,7 +211,7 @@ impl Bip39Input {
             // Disabled button.
             self.button.disable(ctx);
             self.button.set_stylesheet(ctx, theme::button_default());
-            self.button.set_content(ctx, ButtonContent::Text(b""));
+            self.button.set_content(ctx, ButtonContent::Text(""));
         }
     }
 }

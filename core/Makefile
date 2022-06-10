@@ -28,8 +28,10 @@ ADDRESS_SANITIZER ?= 0
 UI2 ?= 0
 PRODUCTION_MODEL = H
 
-OPENOCD_INTERFACE ?= stlink   # -or- ftdi/olimex-arm-usb-tiny-h
-OPENOCD_TRANSPORT ?= hla_swd  # -or- jtag
+# OpenOCD interface default. Alternative: ftdi/olimex-arm-usb-tiny-h
+OPENOCD_INTERFACE ?= stlink
+# OpenOCD transport default. Alternative: jtag
+OPENOCD_TRANSPORT ?= hla_swd
 OPENOCD = openocd -f interface/$(OPENOCD_INTERFACE).cfg -c "transport select $(OPENOCD_TRANSPORT)" -f target/stm32f4x.cfg
 OPENOCD_T1 = openocd -f interface/$(OPENOCD_INTERFACE).cfg -c "transport select $(OPENOCD_TRANSPORT)" -f target/stm32f2x.cfg
 
@@ -103,10 +105,10 @@ test_emu_click: ## run click tests
 	$(EMU_TEST) $(PYTEST) $(TESTPATH)/click_tests $(TESTOPTS)
 
 test_emu_ui: ## run ui integration tests
-	$(EMU_TEST) $(PYTEST) $(TESTPATH)/device_tests --ui=test --ui-check-missing $(TESTOPTS)
+	UI2="$(UI2)" $(EMU_TEST) $(PYTEST) $(TESTPATH)/device_tests --ui=test --ui-check-missing $(TESTOPTS)
 
 test_emu_ui_record: ## record and hash screens for ui integration tests
-	$(EMU_TEST) $(PYTEST) $(TESTPATH)/device_tests --ui=record --ui-check-missing $(TESTOPTS)
+	UI2="$(UI2)" $(EMU_TEST) $(PYTEST) $(TESTPATH)/device_tests --ui=record --ui-check-missing $(TESTOPTS)
 
 pylint: ## run pylint on application sources and tests
 	pylint -E $(shell find src tests -name *.py)
@@ -118,7 +120,7 @@ mypy: ## deprecated; use "make typecheck"
 typecheck: pyright
 
 pyright:
-	python ./../tools/pyright_tool.py --dir core
+	python ../tools/pyright_tool.py
 
 clippy:
 	cd embed/rust ; cargo clippy
@@ -233,18 +235,18 @@ flash_erase_storage: ## erase storage sectors from flash
 	$(OPENOCD) -c "init; flash erase_sector 0 4 4; flash erase_sector 0 16 16; exit"
 
 flash_bootloader_jlink: $(BOOTLOADER_BUILD_DIR)/bootloader.bin ## flash bootloader using JLink
-	JLinkExe -nogui -commanderscript embed/bootloader/bootloader_flash.jlink
+	JLinkExe -nogui 1 -commanderscript embed/bootloader/bootloader_flash.jlink
 
 flash_bootloader_ci_jlink: $(BOOTLOADER_CI_BUILD_DIR)/bootloader.bin ## flash CI bootloader using JLink
-	JLinkExe -nogui -commanderscript embed/bootloader_ci/bootloader_flash.jlink
+	JLinkExe -nogui 1 -commanderscript embed/bootloader_ci/bootloader_flash.jlink
 
 flash_firmware_jlink: $(FIRMWARE_BUILD_DIR)/firmware.bin ## flash firmware using JLink. file names must end in .bin for JLink
 	cp -f $<.p1 $<.p1.bin
 	cp -f $<.p2 $<.p2.bin
-	JLinkExe -nogui -commanderscript embed/firmware/firmware_flash.jlink
+	JLinkExe -nogui 1 -commanderscript embed/firmware/firmware_flash.jlink
 
 flash_firmware_t1_jlink: $(FIRMWARE_BUILD_DIR)/firmware.bin ## flash T1 core port via JLink
-	JLinkExe -nogui -commanderscript embed/firmware/firmware_flash_t1.jlink
+	JLinkExe -nogui 1 -commanderscript embed/firmware/firmware_flash_t1.jlink
 
 ## openocd debug commands:
 

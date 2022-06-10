@@ -7,6 +7,7 @@
 #include "py/runtime.h"
 
 #include "mipi_lcd.h"
+#include "sdram.h"
 #include "touch.h"
 
 lv_color_t *fb[2] = {NULL, NULL};
@@ -20,7 +21,7 @@ static mp_obj_t mp_disp_drv_framebuffer(mp_obj_t n_obj) {
 
   if (fb[n] == NULL) {
     static lv_color_t *lv_disp_buf =
-        (lv_color_t *)(DISPLAY_MEMORY_BASE + 2 * 0x400 * 0x400);
+        (lv_color_t *)(FMC_SDRAM_LVGL_BUFFER_ADDRESS);
     ;
     fb[n] = MP_STATE_PORT(disp_drv_fb[n]) = lv_disp_buf;
   }

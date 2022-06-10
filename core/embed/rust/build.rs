@@ -60,6 +60,7 @@ fn generate_micropython_bindings() {
         .allowlist_function("mp_obj_new_int_from_uint")
         .allowlist_function("mp_obj_new_bytes")
         .allowlist_function("mp_obj_new_str")
+        .allowlist_function("mp_obj_new_tuple")
         .allowlist_function("mp_obj_get_int_maybe")
         .allowlist_function("mp_obj_is_true")
         .allowlist_function("mp_call_function_n_kw")
@@ -71,6 +72,7 @@ fn generate_micropython_bindings() {
         .allowlist_var("MP_BUFFER_READ")
         .allowlist_var("MP_BUFFER_WRITE")
         .allowlist_var("MP_BUFFER_RW")
+        .allowlist_var("mp_type_str")
         // dict
         .allowlist_type("mp_obj_dict_t")
         .allowlist_function("mp_obj_new_dict")
@@ -115,7 +117,10 @@ fn generate_micropython_bindings() {
         .allowlist_function("mp_hal_ticks_ms")
         .allowlist_function("mp_hal_delay_ms")
         // typ
-        .allowlist_var("mp_type_type");
+        .allowlist_var("mp_type_type")
+        // module
+        .allowlist_type("mp_obj_module_t")
+        .allowlist_var("mp_type_module");
 
     // `ffi::mp_map_t` type is not allowed to be `Clone` or `Copy` because we tie it
     // to the data lifetimes with the `MapRef` type, see `src/micropython/map.rs`.

@@ -2,14 +2,13 @@ from trezor import utils
 
 if not utils.LVGL_UI:
     from .common import *  # noqa: F401,F403
-# else:
-#     from .lvgl.common import *  # noqa: F401, F403
 
-# try:
-#     ui2 = True
-#     import trezorui2  # noqa: F401
-# except ImportError:
-#     ui2 = False
+    try:
+        UI2 = True
+        import trezorui2  # noqa: F401
+    except ImportError:
+        UI2 = False
+
 
 # NOTE: using any import magic probably causes mypy not to check equivalence of
 #       layout type signatures across models

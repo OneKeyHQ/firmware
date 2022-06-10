@@ -245,7 +245,7 @@ if PRODUCTION_MODEL == 'H':
             'vendor/nanopb',
         ] + CPPPATH_MOD,
         CPPDEFINES=[
-            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            'TREZOR_MODEL_'+TREZOR_MODEL,
             ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
             'RAND_PLATFORM_INDEPENDENT',
             CPU_MODEL,
@@ -283,7 +283,7 @@ else:
             'vendor/nanopb',
         ] + CPPPATH_MOD,
         CPPDEFINES=[
-            ('TREZOR_MODEL', '$TREZOR_MODEL'),
+            'TREZOR_MODEL_'+TREZOR_MODEL,
             CPU_MODEL,
             'USE_HAL_DRIVER',
             ('STM32_HAL_H', '"<stm32f4xx.h>"'),

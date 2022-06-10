@@ -67,6 +67,17 @@
 // from util.s
 extern void shutdown_privileged(void);
 
+static void copyflash2sdram(void) {
+  extern int _flash2_load_addr, _flash2_start, _flash2_end;
+  volatile uint32_t *dst = (volatile uint32_t *)&_flash2_start;
+  volatile uint32_t *end = (volatile uint32_t *)&_flash2_end;
+  volatile uint32_t *src = (volatile uint32_t *)&_flash2_load_addr;
+
+  while (dst < end) {
+    *dst++ = *src++;
+  }
+}
+
 PARTITION VolToPart[FF_VOLUMES] = {
     {0, 1},
     {0, 2},
@@ -82,7 +93,7 @@ int main(void) {
 #endif
 
   // reinitialize HAL for Trezor One
-#if TREZOR_MODEL == 1
+#if defined TREZOR_MODEL_1
   HAL_Init();
 #endif
 
@@ -96,7 +107,7 @@ int main(void) {
 
   device_para_init();
 
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
 #if PRODUCTION
   check_and_replace_bootloader();
 #endif
@@ -107,13 +118,13 @@ int main(void) {
   // Init peripherals
   pendsv_init();
 
-#if TREZOR_MODEL == 1
+#if defined TREZOR_MODEL_1
   display_init();
   button_init();
 #endif
   display_clear();
 
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
   // display_init_seq();
   // sdcard_init();
   touch_init();
@@ -122,6 +133,8 @@ int main(void) {
   qspi_flash_init();
   qspi_flash_config();
   qspi_flash_memory_mapped();
+
+  copyflash2sdram();
 
   atca_init();
   atca_config_init();
