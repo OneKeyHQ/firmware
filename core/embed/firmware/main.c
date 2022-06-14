@@ -199,45 +199,44 @@ void NMI_Handler(void) {
   { error_shutdown("Internal error", "(CS)", NULL, NULL); }
 }
 
-void hard_fault_handler(unsigned int *hardfault_args) {
-  unsigned int stacked_r0;
-  unsigned int stacked_r1;
-  unsigned int stacked_r2;
-  unsigned int stacked_r3;
-  unsigned int stacked_r12;
-  unsigned int stacked_lr;
-  unsigned int stacked_pc;
-  unsigned int stacked_psr;
-
-  stacked_r0 = ((unsigned long)hardfault_args[0]);
-  stacked_r1 = ((unsigned long)hardfault_args[1]);
-  stacked_r2 = ((unsigned long)hardfault_args[2]);
-  stacked_r3 = ((unsigned long)hardfault_args[3]);
-  stacked_r12 = ((unsigned long)hardfault_args[4]);
-  stacked_lr = ((unsigned long)hardfault_args[5]);
-  stacked_pc = ((unsigned long)hardfault_args[6]);
-  stacked_psr = ((unsigned long)hardfault_args[7]);
-  display_printf("[Hard fault handler]\n");
-  display_printf("R0 = %x\n", stacked_r0);
-  display_printf("R1 = %x\n", stacked_r1);
-  display_printf("R2 = %x\n", stacked_r2);
-  display_printf("R3 = %x\n", stacked_r3);
-  display_printf("R12 = %x\n", stacked_r12);
-  display_printf("LR = %x\n", stacked_lr);
-  display_printf("PC = %x\n", stacked_pc);
-  display_printf("PSR = %x\n", stacked_psr);
-  display_printf("BFAR = %x\n", (*((volatile unsigned int *)(0xE000ED38))));
-  display_printf("CFSR = %x\n", (*((volatile unsigned int *)(0xE000ED28))));
-  display_printf("HFSR = %x\n", (*((volatile unsigned int *)(0xE000ED2C))));
-  display_printf("DFSR = %x\n", (*((volatile unsigned int *)(0xE000ED30))));
-  display_printf("AFSR = %x\n", (*((volatile unsigned int *)(0xE000ED3C))));
+// Hard fault handler
+#if defined SYSTEM_VIEW
+enum { r0, r1, r2, r3, r12, lr, pc, psr };
+void STACK_DUMP(unsigned int *stack) {
+  display_printf("[STACK DUMP]\n");
+  display_printf("R0 = 0x%08x\n", stack[r0]);
+  display_printf("R1 = 0x%08x\n", stack[r1]);
+  display_printf("R2 = 0x%08x\n", stack[r2]);
+  display_printf("R3 = 0x%08x\n", stack[r3]);
+  display_printf("R12 = 0x%08x\n", stack[r12]);
+  display_printf("LR = 0x%08x\n", stack[lr]);
+  display_printf("PC = 0x%08x\n", stack[pc]);
+  display_printf("PSR = 0x%08x\n", stack[psr]);
+  display_printf("BFAR = 0x%08x\n", (*((volatile unsigned int *)(0xE000ED38))));
+  display_printf("CFSR = 0x%08x\n", (*((volatile unsigned int *)(0xE000ED28))));
+  display_printf("HFSR = 0x%08x\n", (*((volatile unsigned int *)(0xE000ED2C))));
+  display_printf("DFSR = 0x%08x\n", (*((volatile unsigned int *)(0xE000ED30))));
+  display_printf("AFSR = 0x%08x\n", (*((volatile unsigned int *)(0xE000ED3C))));
   exit(0);
   return;
 }
 
-// void HardFault_Handler(void) {
-//   error_shutdown("Internal error", "(HF)", NULL, NULL);
-// }
+__attribute__((naked)) void HardFault_Handler(void) {
+  __asm volatile(
+      " tst lr, #4    \n"  // Test Bit 3 to see which stack pointer we should
+                           // use.
+      " ite eq        \n"  // Tell the assembler that the nest 2 instructions
+                           // are if-then-else
+      " mrseq r0, msp \n"  // Make R0 point to main stack pointer
+      " mrsne r0, psp \n"  // Make R0 point to process stack pointer
+      " b STACK_DUMP \n"   // Off to C land
+  );
+}
+#else
+void HardFault_Handler(void) {
+  error_shutdown("Internal error", "(HF)", NULL, NULL);
+}
+#endif
 
 void MemManage_Handler(void) {
   error_shutdown("Internal error", "(MM)", NULL, NULL);

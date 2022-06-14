@@ -31,11 +31,11 @@ def get_features() -> Features:
     from trezor import sdcard
     from trezor.enums import Capability
     from trezor.messages import Features
-
+    from trezor import uart
     from apps.common import mnemonic, safety_checks
 
     f = Features(
-        vendor="trezor.io",  # TODO: change to "onekey.so" if so need to modify trezorlib
+        vendor="onekey.so",
         language=storage.device.get_language(),
         major_version=utils.VERSION_MAJOR,
         minor_version=utils.VERSION_MINOR,
@@ -47,6 +47,10 @@ def get_features() -> Features:
         label=storage.device.get_label(),
         pin_protection=config.has_pin(),
         unlocked=config.is_unlocked(),
+        ble_name=uart.get_ble_name(),
+        ble_ver=uart.get_ble_version(),
+        ble_enable=storage.device.ble_enabled(),
+        serial_no=storage.device.get_serial(),
     )
 
     if utils.BITCOIN_ONLY:
@@ -245,16 +249,18 @@ def set_homescreen() -> None:
 
 
 def get_state() -> str | None:
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
     if storage.device.no_backup():
-        dev_state = "SEEDLESS"
+        dev_state = _(i18n_keys.MSG__SEEDLESS)
     elif storage.device.unfinished_backup():
-        dev_state = "BACKUP FAILED!"
+        dev_state = _(i18n_keys.MSG__BACKUP_FAILED)
     elif storage.device.needs_backup():
-        dev_state = "NEEDS BACKUP!"
+        dev_state = _(i18n_keys.MSG__NEEDS_BACKUP)
     elif not config.has_pin():
-        dev_state = "PIN NOT SET!"
+        dev_state = _(i18n_keys.MSG__PIN_NOT_SET)
     elif storage.device.get_experimental_features():
-        dev_state = "EXPERIMENTAL MODE!"
+        dev_state = _(i18n_keys.MSG__EXPERIMENTAL_MODE)
     else:
         dev_state = None
     return dev_state

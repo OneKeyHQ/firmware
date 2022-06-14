@@ -829,7 +829,9 @@ class Fido2ConfirmExcluded(Fido2ConfirmMakeCredential):
 
         await show_popup(
             title=_(i18n_keys.TITLE__FIDO2_ALREADY_REGISTERED),
-            description=_(i18n_keys.SUBTITLE__THIS_DEVICE_IS_AREADY_REGISTERED_WITH_STR),
+            description=_(
+                i18n_keys.SUBTITLE__THIS_DEVICE_IS_AREADY_REGISTERED_WITH_STR
+            ),
             description_param=self._cred.rp_id,
             timeout_ms=_POPUP_TIMEOUT_MS,
         )

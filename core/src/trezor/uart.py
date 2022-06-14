@@ -2,7 +2,6 @@ import ustruct
 from micropython import const
 from typing import TYPE_CHECKING
 
-import storage.cache
 from storage import device
 from trezor import io, loop
 from trezor.lvglui import StatusBar
@@ -35,7 +34,10 @@ BLE_CTRL = io.BLE()
 async def handle_uart():
     fetch_all()
     while True:
-        await process_push()
+        try:
+            await process_push()
+        except Exception:
+            pass
 
 
 async def process_push() -> None:
@@ -140,18 +142,23 @@ def _deal_ble_status(value: bytes) -> None:
     elif res == _BLE_STATUS_OPENED:
         global BLE_ENABLED
         BLE_ENABLED = True
-        # device.set_ble_status(enable=True)
+        from trezor import config
+
+        if config.is_unlocked():
+            device.set_ble_status(enable=True)
     elif res == _BLE_STATUS_CLOSED:
         global BLE_ENABLED
         BLE_ENABLED = False
-        # device.set_ble_status(enable=False)
+        from trezor import config
+
+        if config.is_unlocked():
+            device.set_ble_status(enable=False)
 
 
 def _retrieve_ble_name(value: bytes) -> None:
     global BLE_NAME
     if value != b"":
         BLE_NAME = value.decode("utf-8")
-        storage.cache.set(storage.cache.APP_BLE_NAME, value)
         # device.set_ble_name(BLE_NAME)
 
 
@@ -164,9 +171,7 @@ def _retrieve_nrf_version(value: bytes) -> None:
 
 def _request_ble_name():
     """Request ble name."""
-    # if device.get_ble_name() is None:
-    if storage.cache.get(storage.cache.APP_BLE_NAME) is None:
-        BLE_CTRL.ctrl(0x83, 0x01)
+    BLE_CTRL.ctrl(0x83, 0x01)
 
 
 def _request_ble_version():
@@ -176,8 +181,7 @@ def _request_ble_version():
 
 def _request_battery_level():
     """Request battery level."""
-    if not CHARGING:
-        BLE_CTRL.ctrl(0x82, 0x04)
+    BLE_CTRL.ctrl(0x82, 0x04)
 
 
 def _request_ble_status():
@@ -206,3 +210,13 @@ def ctrl_ble(enable: bool) -> None:
 def ctrl_power_off() -> None:
     """Request to power off the device."""
     BLE_CTRL.ctrl(0x82, 0x01)
+
+
+def get_ble_name() -> str:
+    """Get ble name."""
+    return BLE_NAME if BLE_NAME else ""
+
+
+def get_ble_version() -> str:
+    """Get ble version."""
+    return NRF_VERSION if NRF_VERSION else ""

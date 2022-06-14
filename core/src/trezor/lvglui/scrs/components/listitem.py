@@ -1,4 +1,4 @@
-from .. import font_PJSMID20, font_PJSBOLD24, font_PJSREG24, lv
+from .. import font_PJSBOLD24, font_PJSMID20, font_PJSREG24, lv
 
 
 class ListItemWithLeadingCheckbox(lv.obj):
@@ -77,7 +77,9 @@ class DisplayItem(lv.obj):
         self.set_style_text_align(lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label_top = lv.label(self)
         self.label_top.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.label_top.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.label_top.set_style_text_font(
+            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.label_top.set_long_mode(lv.label.LONG.WRAP)
         self.label_top.set_style_text_color(
             lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
