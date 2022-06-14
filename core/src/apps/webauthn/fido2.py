@@ -10,6 +10,7 @@ from storage.fido2 import KEY_AGREEMENT_PRIVKEY, KEY_AGREEMENT_PUBKEY
 from trezor import config, io, log, loop, ui, utils, workflow
 from trezor.crypto import aes, der, hashlib, hmac, random
 from trezor.crypto.curve import nist256p1
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.ui.components.common.confirm import Pageable
 from trezor.ui.components.common.webauthn import ConfirmInfo
 from trezor.ui.layouts import show_popup
@@ -642,16 +643,14 @@ class U2fConfirmRegister(U2fState):
         if self._cred.rp_id_hash in _BOGUS_APPIDS:
             if self.cid == _last_good_auth_check_cid:
                 await show_popup(
-                    title="U2F",
-                    subtitle="Already registered.",
-                    description="This device is already registered with this application.",
+                    title=_(i18n_keys.TITLE__U2F_ALREADY_REGISTERED),
+                    subtitle=_(i18n_keys.SUBTITLE__U2F_ALREADY_REGISTERED),
                     timeout_ms=_POPUP_TIMEOUT_MS,
                 )
             else:
                 await show_popup(
-                    title="U2F",
-                    subtitle="Not registered.",
-                    description="This device is not registered with this application.",
+                    title=_(i18n_keys.TITLE__U2F_NOT_REGISTERED),
+                    subtitle=_(i18n_keys.SUBTITLE__U2F_NOT_REGISTERED),
                     timeout_ms=_POPUP_TIMEOUT_MS,
                 )
             return False
@@ -659,7 +658,7 @@ class U2fConfirmRegister(U2fState):
             return await confirm_webauthn(None, self)
 
     def get_header(self) -> str:
-        return "U2F Register"
+        return _(i18n_keys.TITLE__U2F_REGISTER)
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -676,7 +675,7 @@ class U2fConfirmAuthenticate(U2fState):
         super().__init__(cid, iface, req_data, cred)
 
     def get_header(self) -> str:
-        return "U2F Authenticate"
+        return _(i18n_keys.TITLE__U2F_AUTHENTICATE)
 
     async def confirm_dialog(self) -> bool:
         return await confirm_webauthn(None, self)
@@ -786,7 +785,7 @@ class Fido2ConfirmMakeCredential(Fido2State, ConfirmInfo):
         self.load_icon(cred.rp_id_hash)
 
     def get_header(self) -> str:
-        return "FIDO2 Register"
+        return _(i18n_keys.TITLE__FIDO2_REGISTER)
 
     def app_name(self) -> str:
         return self._cred.app_name()
@@ -829,9 +828,8 @@ class Fido2ConfirmExcluded(Fido2ConfirmMakeCredential):
         self.finished = True
 
         await show_popup(
-            title="FIDO2 Register",
-            subtitle="Already registered.",
-            description="This device is already registered with {}.",
+            title=_(i18n_keys.TITLE__FIDO2_ALREADY_REGISTERED),
+            description=_(i18n_keys.SUBTITLE__THIS_DEVICE_IS_AREADY_REGISTERED_WITH_STR),
             description_param=self._cred.rp_id,
             timeout_ms=_POPUP_TIMEOUT_MS,
         )
@@ -859,7 +857,7 @@ class Fido2ConfirmGetAssertion(Fido2State, ConfirmInfo, Pageable):
         self.load_icon(self._creds[0].rp_id_hash)
 
     def get_header(self) -> str:
-        return "FIDO2 Authenticate"
+        return _(i18n_keys.TITLE__FIDO2_AUTHENTICATE)
 
     def app_name(self) -> str:
         return self._creds[self.page()].app_name()
@@ -917,9 +915,8 @@ class Fido2ConfirmNoPin(State):
         self.finished = True
 
         await show_popup(
-            title="FIDO2 Verify User",
-            subtitle="Unable to verify user.",
-            description="Please enable PIN protection.",
+            title=_(i18n_keys.TITLE__FIDO2_VERIFY_USER),
+            subtitle=_(i18n_keys.SUBTITLE__FIDO2_VERIFY_USER),
             timeout_ms=_POPUP_TIMEOUT_MS,
         )
         return False
@@ -939,9 +936,10 @@ class Fido2ConfirmNoCredentials(Fido2ConfirmGetAssertion):
         self.finished = True
 
         await show_popup(
-            title="FIDO2 Authenticate",
-            subtitle="Not registered.",
-            description="This device is not registered with {}.",
+            title=_(i18n_keys.TITLE__FIDO2_AUTHENTICATE_NOT_REGISTERED),
+            description=_(
+                i18n_keys.SUBTITLE__THIS_DEVICE_IS_AREADY_REGISTERED_WITH_STR
+            ),
             description_param=self._creds[0].app_name(),
             timeout_ms=_POPUP_TIMEOUT_MS,
         )

@@ -18,7 +18,7 @@ async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
     await button_request(ctx, "word_count", code=ButtonRequestType.MnemonicWordCount)
 
     if dry_run:
-        title = "Check Recovery Phrase"
+        title = _(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE)
     else:
         title = _(i18n_keys.TITLE__READY_TO_RESTORE)
     subtitle = _(i18n_keys.SUBTITLE__DEVICE_RECOVER_READY_TO_RESTORE)

@@ -35,6 +35,11 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     """
     _validate(msg)
     if not msg.dry_run:
+        from trezor.ui.layouts import show_popup
+
+        if msg.language is not None:
+            i18n_refresh(msg.language)
+        await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT), None, timeout_ms=1000)
         # wipe storage to make sure the device is in a clear state
         storage.reset()
     if msg.language is not None:
