@@ -59,13 +59,14 @@ async def boot_animation() -> None:
         storage.init_unlocked()
 
 
-ui.display.backlight(ui.BACKLIGHT_NONE)
+ui.display.backlight(ui.BACKLIGHT_NORMAL)
 ui.backlight_fade(ui.BACKLIGHT_NORMAL)
 config.init(show_pin_timeout)
 clear()
 
-if __debug__ and not utils.EMULATOR:
-    config.wipe()
+# stupid!, so we remove it
+# if __debug__ and not utils.EMULATOR:
+#     config.wipe()
 
 
 loop.schedule(boot_animation())

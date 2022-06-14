@@ -5,7 +5,7 @@ from . import mapping
 
 UsbId = Tuple[int, int]
 
-VENDORS = ("bitcointrezor.com", "trezor.io")
+VENDORS = ("bitcointrezor.com", "trezor.io", "onekey.so")
 
 
 @dataclass(eq=True, frozen=True)

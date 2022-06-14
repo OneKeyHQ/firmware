@@ -27,6 +27,11 @@ _DEFAULT_BACKUP_TYPE = BackupType.Bip39
 async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     # validate parameters and device state
     _validate_reset_device(msg)
+    from trezor.ui.layouts import show_popup
+
+    if msg.language is not None:
+        i18n_refresh(msg.language)
+    await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT), None, timeout_ms=1000)
     # wipe storage to make sure the device is in a clear state
     storage.reset()
     if msg.language is not None:

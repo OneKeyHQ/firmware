@@ -51,7 +51,7 @@ async def pin_mismatch() -> None:
 
     await show_popup(
         title=_(i18n_keys.TITLE__NOT_MATCH),
-        description=_(i18n_keys.SUBTITLE__SETUP_SET_PIN_PIN_NOT_MATCH),
+        subtitle=_(i18n_keys.SUBTITLE__SETUP_SET_PIN_PIN_NOT_MATCH),
         icon="A:/res/danger.png",
     )
 
@@ -87,7 +87,7 @@ def _get_last_unlock_time() -> int:
 
 async def verify_user_pin(
     ctx: wire.GenericContext = wire.DUMMY_CONTEXT,
-    prompt: str = _(i18n_keys.TITLE__ENTER_PIN),
+    prompt: str = "",
     allow_cancel: bool = True,
     retry: bool = True,
     cache_time_ms: int = 0,

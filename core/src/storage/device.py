@@ -103,11 +103,19 @@ def get_ble_name() -> str:
 
 
 def ble_enabled() -> bool:
-    return common.get_bool(_NAMESPACE, _BLE_ENABLED, public=True)
+    enabled = common.get(_NAMESPACE, _BLE_ENABLED, public=True)
+    if enabled == common._FALSE_BYTE:
+        return False
+    return True
 
 
 def set_ble_status(enable: bool) -> None:
-    common.set_bool(_NAMESPACE, _BLE_ENABLED, enable, public=True)
+    common.set(
+        _NAMESPACE,
+        _BLE_ENABLED,
+        common._TRUE_BYTE if enable else common._FALSE_BYTE,
+        public=True,
+    )
 
 
 def set_ble_version(version: str) -> None:
@@ -127,6 +135,8 @@ def get_model() -> str:
 
 
 def get_serial() -> str:
+    if utils.EMULATOR:
+        return ""
     return config.get_serial()
 
 

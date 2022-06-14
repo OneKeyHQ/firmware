@@ -4,6 +4,7 @@ from trezor import ui, utils, wire
 from trezor.crypto import random
 from trezor.enums import BackupType, ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.scrs import font_MONO28, lv
 from trezor.lvglui.scrs.common import FullSizeWindow
 
 from ...components.common.confirm import is_confirmed
@@ -80,6 +81,7 @@ async def confirm_word(
     selector = FullSizeWindow(
         title, subtitle, _(i18n_keys.BUTTON__NEXT), options=options
     )
+    selector.roller.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
     selected_word: str = await ctx.wait(selector.request())
     # confirm it is the correct one
     return selected_word == share_words[offset]

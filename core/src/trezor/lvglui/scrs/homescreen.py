@@ -1,4 +1,4 @@
-from storage import cache, device
+from storage import device
 from trezor import workflow
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
@@ -100,7 +100,7 @@ class SettingsScreen(Screen):
             "nav_back": True,
         }
         super().__init__(**kwargs)
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.general = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__GENERAL),
@@ -194,7 +194,7 @@ class GeneralScreen(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__GENERAL), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.auto_lock = ListItemBtn(
             self.container, _(i18n_keys.ITEM__AUTO_LOCK), self.cur_auto_lock
         )
@@ -247,7 +247,7 @@ class AutoLockSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__AUTO_LOCK), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.setting_items = [1, 2, 5, 10, 30, "Never"]
         has_custom = True
         self.checked_index = 0
@@ -310,7 +310,7 @@ class LanguageSetting(Screen):
         )
         self.check_index = 0
         self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.lang_buttons = []
         for idx, lang in enumerate(langs):
             lang_button = ListItemBtn(self.container, lang[1], has_next=False)
@@ -385,13 +385,15 @@ class AboutSetting(Screen):
             return
         model = device.get_model()
         version = device.get_firmware_version()
-        serial = device.get_serial()  # "FK1W2Y84JCDR"
-        ble_name = cache.get(cache.APP_BLE_NAME)  # device.get_ble_name()
+        serial = device.get_serial()
+        from trezor import uart
+
+        ble_name = uart.get_ble_name()
         storage = device.get_storage()
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.model = ListItemBtn(
             self.container, _(i18n_keys.ITEM__MODEL), right_text=model, has_next=False
         )
@@ -515,8 +517,8 @@ class SecurityScreen(Screen):
         else:
             self.clean()
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
-        self.rest_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__RESET_PIN))
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
         self.recovery_check = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
         )
@@ -536,7 +538,7 @@ class SecurityScreen(Screen):
         if code == lv.EVENT.CLICKED:
             from trezor.wire import DUMMY_CONTEXT
 
-            if target == self.rest_pin:
+            if target == self.change_pin:
                 from apps.management.change_pin import change_pin
                 from trezor.messages import ChangePin
 
@@ -584,7 +586,7 @@ class CryptoScreen(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__CRYPTO), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.ethereum = ListItemBtn(self.container, _(i18n_keys.TITLE__ETHEREUM))
         self.solana = ListItemBtn(self.container, _(i18n_keys.TITLE__SOLANA))
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
@@ -606,7 +608,7 @@ class EthereumSetting(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__ETHEREUM), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.blind_sign = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLIND_SIGNING),
@@ -631,7 +633,7 @@ class SolanaSetting(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SOLANA), nav_back=True)
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.blind_sign = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLIND_SIGNING),

@@ -37,14 +37,11 @@ from .. import font_PJSBOLD24, lv
 class NormalButton(lv.btn):
     def __init__(self, parent, text=_(i18n_keys.BUTTON__NEXT), enable=True) -> None:
         super().__init__(parent)
-        self.set_size(320, 62)
+        self.set_size(416, 62)
         self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -24)
         self.set_style_radius(32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         if enable:
             self.enable()
@@ -58,14 +55,14 @@ class NormalButton(lv.btn):
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
     def disable(
-        self, bg_color=lv.color_hex(0x323232), text_color=lv.color_hex(0x000000)
+        self, bg_color=lv.color_hex(0x323232), text_color=lv.color_hex(0x191919)
     ) -> None:
         self.set_style_bg_color(bg_color, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_color(text_color, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.clear_flag(lv.btn.FLAG.CLICKABLE)
 
     def enable(
-        self, bg_color=lv.color_hex(0xFFFFFF), text_color=lv.color_hex(0x000000)
+        self, bg_color=lv.color_hex(0x191919), text_color=lv.color_hex(0xFFFFFF)
     ) -> None:
         self.set_style_bg_color(bg_color, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_color(text_color, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -82,7 +79,8 @@ class ListItemBtn(lv.btn):
         has_next: bool = True,
     ) -> None:
         super().__init__(parent)
-        self.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.set_size(lv.pct(100), 78)
+        self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -102,7 +100,7 @@ class ListItemBtn(lv.btn):
         self.label_left.set_text(text)
 
         if left_img_src:
-            self.label_left.align_to(img_left, lv.ALIGN.OUT_RIGHT_MID, 10, 0)  # type: ignore["img_left" is possibly unbound]
+            self.label_left.align_to(img_left, lv.ALIGN.OUT_RIGHT_MID, 12, 0)  # type: ignore["img_left" is possibly unbound]
         else:
             self.label_left.set_align(lv.ALIGN.LEFT_MID)
         if right_text:
@@ -154,7 +152,7 @@ class ListItemBtnWithSwitch(lv.btn):
         self.switch = lv.switch(self)
         self.switch.set_size(48, 24)
         self.switch.set_style_bg_color(
-            lv.color_hex(0x191919), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv.color_hex(0x4C4C4C), lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.switch.set_style_bg_color(
             lv.color_hex(0x1BAC44), lv.PART.INDICATOR | lv.STATE.CHECKED

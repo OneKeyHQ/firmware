@@ -33,7 +33,7 @@ async def confirm_webauthn(
 
 
 async def confirm_webauthn_reset() -> bool:
-    from trezor.ui.layouts import FullSizeWindow
+    from trezor.lvglui.scrs.common import FullSizeWindow
     from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
     screen = FullSizeWindow(

@@ -157,7 +157,7 @@ async def confirm_backup(ctx: wire.GenericContext) -> bool:
     subtitle = _(i18n_keys.SUBTITLE__DEVICE_SETUP_WALLET_IS_READY)
     confirm_text = _(i18n_keys.BUTTON__BACK_UP)
     cancel_text = _(i18n_keys.BUTTON__SKIP)
-    icon = "A:/res/success_icon.png"
+    icon = "A:/res/success.png"
     if ctx == wire.DUMMY_CONTEXT:
         cancel_text = ""
     screen = FullSizeWindow(title, subtitle, confirm_text, cancel_text, icon_path=icon)
@@ -392,7 +392,7 @@ def show_success(
         content=content,
         button_confirm=button,
         button_cancel=None,
-        icon="A:/res/success_icon.png",
+        icon="A:/res/success.png",
         icon_color=ui.GREEN,
     )
 
@@ -777,18 +777,20 @@ async def confirm_signverify(
 
 async def show_popup(
     title: str,
-    description: str,
+    description: str | None = None,
     subtitle: str | None = None,
     description_param: str = "",
     timeout_ms: int = 3000,
     icon: str = "A:/res/warning.png",
 ) -> None:
     from trezor.lvglui.scrs.components.popup import PopupSample
+    from trezor import loop
 
     if description and description_param:
         description = description.format(description_param)
     subtitle = f"{subtitle or ''} {description or ''}"
     PopupSample(title, subtitle, icon, timeout_ms)
+    await loop.sleep(50)
 
 
 def draw_simple_text(title: str, description: str = "") -> None:
@@ -846,9 +848,9 @@ async def request_pin_tips(ctx: wire.GenericContext) -> None:
 
 async def show_pairing_error() -> None:
     await show_popup(
-        _(i18n_keys.TITLE__NOT_MATCH),
+        _(i18n_keys.TITLE__PAIR_FAILED),
         description=None,
-        subtitle=_(i18n_keys.SUBTITLE__BLUETOOTH_PAIR_NOT_MATCH),
+        subtitle=_(i18n_keys.SUBTITLE__BLUETOOTH_PAIR_PAIR_FAILED),
         timeout_ms=2000,
         icon="A:/res/danger.png",
     )

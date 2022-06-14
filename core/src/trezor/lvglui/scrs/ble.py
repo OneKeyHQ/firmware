@@ -9,7 +9,7 @@ class PairCodeDisplay(FullSizeWindow):
             _(i18n_keys.TITLE__BLUETOOTH_PAIR),
             _(i18n_keys.SUBTITLE__BLUETOOTH_PAIR),
             _(i18n_keys.BUTTON__DONE),
-            icon_path="a:/res/icon_ble.png",
+            icon_path="A:/res/ble.png",
         )
         self.pair_code = lv.label(self)
         self.pair_code.set_long_mode(lv.label.LONG.WRAP)
