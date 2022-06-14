@@ -53,7 +53,7 @@ class PinTip(FullSizeWindow):
                     self.cb_cnt -= 1
             if self.cb_cnt == 2:
                 self.btn.enable(
-                    bg_color=lv.color_hex(0x1B7735), text_color=lv.color_hex(0xFFFFFF)
+                    bg_color=lv.color_hex(0x1BAC44), text_color=lv.color_hex(0xFFFFFF)
                 )
             elif self.cb_cnt < 2:
                 self.btn.disable()
@@ -92,7 +92,7 @@ class SetupComplete(FullSizeWindow):
             title=_(i18n_keys.TITLE__WALLET_IS_READY),
             subtitle=subtitle,
             confirm_text=_(i18n_keys.BUTTON__CONTINUE),
-            icon_path="A:/res/success_icon.png",
+            icon_path="A:/res/success.png",
         )
         self.btn.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
 

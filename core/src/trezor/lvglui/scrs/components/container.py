@@ -8,7 +8,7 @@ class ContainerFlexCol(lv.obj):
         align_base,
         align=lv.ALIGN.OUT_BOTTOM_MID,
         pos: tuple = (0, 30),
-        padding_row: int = 32,
+        padding_row: int = 12,
     ) -> None:
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)

@@ -22,6 +22,9 @@ class MnemonicDisplay(FullSizeWindow):
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
             _(i18n_keys.BUTTON__CONTINUE),
         )
+        self.content_area.set_style_bg_color(
+            lv.color_hex(0xFFFFFF), lv.PART.SCROLLBAR | lv.STATE.DEFAULT
+        )
         self.panel = lv.obj(self.content_area)
         self.panel.set_size(460, lv.SIZE.CONTENT)
         self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
@@ -30,6 +33,8 @@ class MnemonicDisplay(FullSizeWindow):
             lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.panel.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.set_style_pad_ver(24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_radius(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col1 = lv.label(self.panel)
         self.word_col1.set_size(lv.pct(50), lv.SIZE.CONTENT)
@@ -39,9 +44,8 @@ class MnemonicDisplay(FullSizeWindow):
         self.word_col1.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.word_col1.set_style_pad_ver(10, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col1.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.word_col1.set_style_text_line_space(12, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col1.set_style_text_line_space(18, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col2 = lv.label(self.panel)
         self.word_col2.set_size(lv.pct(50), lv.SIZE.CONTENT)
         self.word_col2.set_recolor(True)
@@ -50,9 +54,8 @@ class MnemonicDisplay(FullSizeWindow):
         self.word_col2.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.word_col2.set_style_pad_ver(10, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col2.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.word_col2.set_style_text_line_space(12, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.word_col2.set_style_text_line_space(18, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         text_col = ""
         text_col2 = ""
@@ -63,7 +66,7 @@ class MnemonicDisplay(FullSizeWindow):
             self.word_col2.set_text(text_col2.rstrip())
         self.item = ListItemWithLeadingCheckbox(
             self.content_area,
-            _(i18n_keys.CHECK__I_HAVE_WRITE_DOWN__STR_WORDS).format(word_count),
+            _(i18n_keys.CHECK__I_HAVE_WRITE_DOWN_THE_WORDS),
         )
         self.item.set_size(460, lv.SIZE.CONTENT)
         self.item.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 10)
@@ -78,7 +81,7 @@ class MnemonicDisplay(FullSizeWindow):
                 if target.get_state() & lv.STATE.CHECKED:
                     self.item.enable_bg_color()
                     self.btn_yes.enable(
-                        bg_color=lv.color_hex(0x1B7735),
+                        bg_color=lv.color_hex(0x1BAC44),
                         text_color=lv.color_hex(0xFFFFFF),
                     )
                 else:
@@ -144,7 +147,7 @@ class BackupTips(FullSizeWindow):
                     self.cb_cnt -= 1
             if self.cb_cnt == 3:
                 self.btn.enable(
-                    bg_color=lv.color_hex(0x1B7735), text_color=lv.color_hex(0xFFFFFF)
+                    bg_color=lv.color_hex(0x1BAC44), text_color=lv.color_hex(0xFFFFFF)
                 )
             elif self.cb_cnt < 3:
                 self.btn.disable()

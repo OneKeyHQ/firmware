@@ -26,7 +26,7 @@ class Screen(lv.obj):
         if "icon_path" in kwargs:
             self.icon = lv.img(self)
             self.icon.set_src(kwargs["icon_path"])
-            self.icon.align(lv.ALIGN.TOP_MID, 0, 140)
+            self.icon.align(lv.ALIGN.TOP_MID, 0, 68)
         # title
         if "title" in kwargs:
             self.title = Title(self, None, 452, (), kwargs["title"])
@@ -40,7 +40,7 @@ class Screen(lv.obj):
         # btn
         if "btn_text" in kwargs:
             self.btn = NormalButton(self, kwargs["btn_text"])
-            self.btn.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
+            self.btn.enable(lv.color_hex(0x1BAC44), lv.color_hex(0xFFFFFF))
             self.btn.add_event_cb(
                 self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.PRESSED, None
             )
@@ -48,7 +48,7 @@ class Screen(lv.obj):
         if kwargs.get("nav_back", False):
             self.nav_back = lv.imgbtn(self)
             self.nav_back.set_size(100, 100)
-            self.nav_back.set_pos(lv.pct(1), lv.pct(7))
+            self.nav_back.set_pos(lv.pct(1), lv.pct(8))
             self.nav_back.add_event_cb(
                 self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.PRESSED, None
             )
@@ -147,7 +147,7 @@ class FullSizeWindow(lv.obj):
         if icon_path:
             self.icon = lv.img(self.content_area)
             self.icon.set_src(icon_path)
-            self.icon.align(lv.ALIGN.TOP_MID, 0, 48)
+            self.icon.align(lv.ALIGN.TOP_MID, 0, 24)
         self.title = Title(self.content_area, None, 452, (), title, pos_y=48)
         if icon_path:
             self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
@@ -169,7 +169,7 @@ class FullSizeWindow(lv.obj):
                 if not self.hold_confirm:
                     self.btn_no.set_size(192, 62)
                     self.btn_no.align_to(self, lv.ALIGN.BOTTOM_LEFT, 32, -24)
-                self.btn_no.enable(lv.color_hex(0x232323), lv.color_hex(0xFFFFFF))
+                self.btn_no.enable()
             self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
             self.btn_yes = NormalButton(self, confirm_text)
@@ -182,7 +182,7 @@ class FullSizeWindow(lv.obj):
                 else:
                     self.btn_yes.set_size(192, 62)
                     self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -24)
-            self.btn_yes.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
+            self.btn_yes.enable(lv.color_hex(0x1BAC44), lv.color_hex(0xFFFFFF))
             self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
             if self.hold_confirm:
                 self.btn_yes.add_event_cb(

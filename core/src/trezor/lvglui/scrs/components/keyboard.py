@@ -24,7 +24,7 @@ def change_key_bg(
         if dsc.id == id1:
             dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
         elif dsc.id == id2 and all_enabled:
-            dsc.rect_dsc.bg_color = lv.color_hex(0x1B7735)
+            dsc.rect_dsc.bg_color = lv.color_hex(0x1BAC44)
     else:
         if dsc.id == id1:
             dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
@@ -288,9 +288,8 @@ class NumberKeyboard(lv.keyboard):
         self.set_style_text_font(font_PJSBOLD32, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_height(292)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
-        self.set_popovers(True)
         self.set_textarea(self.ta)
-        self.add_event_cb(self.event_cb, lv.EVENT.ALL, None)
+        self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
 
     def event_cb(self, event):
         if event.code == lv.EVENT.DRAW_PART_BEGIN:

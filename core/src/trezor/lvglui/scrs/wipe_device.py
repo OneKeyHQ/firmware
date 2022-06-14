@@ -41,12 +41,6 @@ class WipeDeviceTips(FullSizeWindow):
         self.btn_yes.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 54)
         self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL), enable=True)
         self.btn_no.align_to(self.btn_yes, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
-        self.btn_no.label.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.btn_no.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.LONG_PRESSED, None)
@@ -99,12 +93,11 @@ class WipeDeviceSuccess(FullSizeWindow):
     def __init__(self):
         title = _(i18n_keys.TITLE__RESET_COMPLETE)
         subtitle = _(i18n_keys.SUBTITLE__DEVICE_WIPE_DEVICE_RESET_COMPLETE)
-        icon_path = "A:/res/success_icon.png"
-        confirm_text = _(i18n_keys.BUTTON__DONE)
+        icon_path = "A:/res/success.png"
+        confirm_text = _(i18n_keys.BUTTON__RESTART)
         super().__init__(
             title, subtitle, confirm_text=confirm_text, icon_path=icon_path
         )
-        self.btn_yes.enable(lv.color_hex(0x323232), lv.color_hex(0xFFFFFF))
 
     def eventhandler(self, event_obj):
         code = event_obj.code

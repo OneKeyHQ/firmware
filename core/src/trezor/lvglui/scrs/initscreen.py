@@ -34,7 +34,7 @@ class InitScreen(Screen):
         self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.roller.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn.enable(lv.color_hex(0x1B7735), lv.color_hex(0xFFFFFF))
+        self.btn.enable(lv.color_hex(0x1BAC44), lv.color_hex(0xFFFFFF))
         self.add_event_cb(
             self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None
         )
