@@ -85,6 +85,15 @@ PARTITION VolToPart[FF_VOLUMES] = {
 
 int main(void) {
   SystemCoreClockUpdate();
+
+  // Enable MPU
+  mpu_config_firmware();
+
+  qspi_flash_init();
+  qspi_flash_config();
+  qspi_flash_memory_mapped();
+
+  copyflash2sdram();
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   random_delays_init();
 
@@ -111,8 +120,6 @@ int main(void) {
 #if PRODUCTION
   check_and_replace_bootloader();
 #endif
-  // Enable MPU
-  mpu_config_firmware();
 #endif
 
   // Init peripherals
@@ -130,11 +137,6 @@ int main(void) {
   touch_init();
   touch_power_on();
   spi_slave_init();
-  qspi_flash_init();
-  qspi_flash_config();
-  qspi_flash_memory_mapped();
-
-  copyflash2sdram();
 
   atca_init();
   atca_config_init();
