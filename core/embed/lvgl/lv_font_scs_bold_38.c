@@ -21,7 +21,7 @@ static int __user_font_getdata(uint8_t *data_buf, int offset, int size) {
   if (!is_opend) {
     uint8_t buf[4] = {0};
     uint32_t len = 0;
-    res = f_open(&font_f, "/res/lv_font_scs_reg_24.bin", FA_READ);
+    res = f_open(&font_f, "/res/lv_font_scs_bold_38.bin", FA_READ);
     if (FR_OK == res) {
       font_f.cltbl = clmt; /* Enable fast seek mode (cltbl != NULL) */
       clmt[0] = SZ_TBL;    /* Set table size */
@@ -127,10 +127,10 @@ static bool __user_font_get_glyph_dsc(const lv_font_t *font,
   return true;
 }
 
-// Source Han Sans,Regular,24
-const lv_font_t lv_font_scs_reg_24 = {
+// Source Han Sans,Bold,36
+const lv_font_t lv_font_scs_bold_38 = {
     .get_glyph_bitmap = __user_font_get_bitmap,
     .get_glyph_dsc = __user_font_get_glyph_dsc,
-    .line_height = 24,
+    .line_height = 38,
     .base_line = 3,
 };

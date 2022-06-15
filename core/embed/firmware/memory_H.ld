@@ -8,7 +8,7 @@ MEMORY {
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
   SRAM1   (wal) : ORIGIN = 0x30000000, LENGTH = 256K
-  EXRAM   (wal) : ORIGIN = 0xD0800000, LENGTH = 2048K
+  EXRAM   (wal) : ORIGIN = 0xD1000000, LENGTH = 2048K
 }
 
 main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
@@ -49,8 +49,12 @@ SECTIONS {
   } >FLASH AT>FLASH
 
   .flash2 : ALIGN(512) {
-    /* build/firmware/embed/lvgl/*.o(.rodata*) */
-    build/firmware/frozen_mpy.o(.rodata*);
+    build/firmware/vendor/*.o(.rodata*);
+    build/firmware/vendor/lvgl_mp/lvgl/src/*.o(.text*);
+    build/firmware/embed/lvgl/*.o(.rodata*);
+    build/firmware/lv_mpy.o(.rodata*);
+    build/firmware/atca_mp.o(.rodata*);
+    build/firmware/embed/extmod/*.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);
   } >EXRAM AT>FLASH2

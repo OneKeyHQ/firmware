@@ -136,7 +136,7 @@
  *With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
  *However the opened images might consume additional RAM.
  *0: to disable caching*/
-#define LV_IMG_CACHE_DEF_SIZE   1
+#define LV_IMG_CACHE_DEF_SIZE   5
 
 /*Number of stops allowed per gradient. Increase this to allow more stops.
  *This adds (sizeof(lv_color_t) + 1) bytes per additional stop*/
@@ -169,7 +169,7 @@
  *-----------*/
 
 /*Use STM32's DMA2D (aka Chrom Art) GPU*/
-#define LV_USE_GPU_STM32_DMA2D 0
+#define LV_USE_GPU_STM32_DMA2D 1
 #if LV_USE_GPU_STM32_DMA2D
     /*Must be defined to include path of CMSIS header of target processor
     e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
@@ -378,9 +378,9 @@
     LV_FONT_DECLARE(lv_font_pljs_bold_24) \
     LV_FONT_DECLARE(lv_font_pljs_bold_36) \
     LV_FONT_DECLARE(lv_font_pljs_regular_24) \
-    LV_FONT_DECLARE(lv_font_scs_bold_24) \
-    LV_FONT_DECLARE(lv_font_scs_bold_36) \
-    LV_FONT_DECLARE(lv_font_scs_reg_24) \
+    LV_FONT_DECLARE(lv_font_scs_bold_26) \
+    LV_FONT_DECLARE(lv_font_scs_bold_38) \
+    LV_FONT_DECLARE(lv_font_scs_reg_26) \
     LV_FONT_DECLARE(lv_font_mix_bold_24) \
     LV_FONT_DECLARE(lv_font_mix_title_bold_36) \
     LV_FONT_DECLARE(lv_font_mono_reg_28)
