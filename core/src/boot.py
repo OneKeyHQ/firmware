@@ -59,8 +59,8 @@ async def boot_animation() -> None:
         storage.init_unlocked()
 
 
-ui.display.backlight(ui.BACKLIGHT_NORMAL)
-ui.backlight_fade(ui.BACKLIGHT_NORMAL)
+ui.display.backlight(ui.BACKLIGHT_NONE)
+ui.backlight_fade(ui.BACKLIGHT_MAX)
 config.init(show_pin_timeout)
 clear()
 
