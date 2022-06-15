@@ -47,7 +47,7 @@ SCREENS = []
 def clear_screens() -> None:
     for scr in SCREENS:
         try:
-            scr.delete()
+            scr.del_delayed(100)
             if hasattr(scr, "_init"):
                 del scr._init
             if hasattr(scr, "_instance"):
