@@ -1,0 +1,36 @@
+name: "Build firmware"
+
+on: [push]
+
+jobs:
+  build_firmware:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2.3.4
+
+      - name: "Build boardloader bootloader firmware"
+        run: |
+          sudo apt-get install wget make autoconf automake libtool curl make g++ unzip scons llvm-dev libclang-dev clang libsdl2-dev libsdl2-image-dev
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+          source $HOME/.poetry/env
+          wget -q https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          tar -jxf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          export PATH="$PWD/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
+          git clone https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git submodule update --init --recursive
+          sudo ./autogen.sh
+          sudo ./configure
+          sudo make
+          sudo make install
+          sudo ldconfig
+          cd ..
+          rustup target add thumbv7em-none-eabihf
+          git submodule update --init --recursive
+          poetry install
+          cd core
+          poetry run make build_boardloader
+          poetry run make build_bootloader
+          poetry run make build_firmware
