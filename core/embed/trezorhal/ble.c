@@ -13,6 +13,7 @@ static bool get_ble_ver = false;
 static bool get_ble_proto_ver = false;
 static bool get_ble_boot_ver = false;
 static bool get_ble_battery = false;
+static bool get_ble_charging = false;
 static bool ble_connect = false;
 static bool ble_switch = false;
 static bool get_ble_switch = false;
@@ -60,6 +61,8 @@ bool ble_ver_state(void) { return get_ble_ver; }
 bool ble_battery_state(void) { return get_ble_battery; }
 
 bool ble_switch_state(void) { return get_ble_switch; }
+
+bool ble_charging_state(void) { return get_ble_charging; }
 
 char *ble_get_name(void) { return ble_name; }
 
@@ -134,6 +137,7 @@ void ble_uart_poll(void) {
       get_ble_boot_ver = true;
       break;
     case BLE_CMD_PLUG_STA:
+      get_ble_charging = true;
       dev_pwr_sta = ble_usart_msg.cmd_vale[0];
       break;
     case BLE_CMD_EQ:
@@ -164,6 +168,11 @@ void ble_get_dev_info(void) {
 
   if (!ble_battery_state()) {
     ble_cmd_req(BLE_PWR, BLE_PWR_EQ);
+    hal_delay(5);
+  }
+
+  if (!ble_charging_state()) {
+    ble_cmd_req(BLE_PWR, BLE_PWR_CHARGING);
     hal_delay(5);
   }
 }

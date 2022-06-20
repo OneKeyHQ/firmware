@@ -31,6 +31,7 @@
 #define BLE_PWR_EMMC_OFF 0x02
 #define BLE_PWR_EMMC_ON 0x03
 #define BLE_PWR_EQ 0x04
+#define BLE_PWR_CHARGING 0x05
 #define BLE_VER 0x83
 #define BLE_VER_ADV 0x01
 #define BLE_VER_FW 0x02
@@ -48,6 +49,7 @@ bool ble_is_enable(void);
 bool ble_name_state(void);
 bool ble_ver_state(void);
 bool ble_battery_state(void);
+bool ble_charging_state(void);
 char *ble_get_name(void);
 char *ble_get_ver(void);
 bool ble_switch_state(void);

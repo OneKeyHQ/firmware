@@ -277,6 +277,7 @@ TOUCH_START: int  # event id of touch start event
 TOUCH_MOVE: int  # event id of touch move event
 TOUCH_END: int  # event id of touch end event
 UART: int  # interface id of the uart events
+USB_STATE: int  # interface id of the usb state events
 BUTTON: int  # interface id of button events
 BUTTON_PRESSED: int  # button down event
 BUTTON_RELEASED: int  # button up event

@@ -588,6 +588,8 @@ int ui_input_poll(int zones, bool poll) {
 void ui_title_update(void) {
   char battery_str[8] = {0};
   uint32_t len = 0;
+  uint32_t offset_x = 0;
+  uint16_t battery_color = COLOR_WHITE;
 
   bool usb_conn = is_usb_connected();
 
@@ -595,54 +597,46 @@ void ui_title_update(void) {
   display_bar(0, 0, DISPLAY_RESX, 32, boot_background);
 
   if (dev_pwr_sta == 1) {
-    display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_charging + 12,
+    offset_x += 24;
+    display_icon(DISPLAY_RESX - offset_x, 0, 24, 32, toi_icon_charging + 12,
                  sizeof(toi_icon_charging) - 12, COLOR_BL_BG, boot_background);
-  } else {
-    switch (battery_cap / 20) {
-      case 0:
-        display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status0 + 12,
-                     sizeof(toi_icon_status0) - 12, COLOR_BL_BG,
-                     boot_background);
-        break;
-      case 1:
-        display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status25 + 12,
-                     sizeof(toi_icon_status25) - 12, COLOR_BL_BG,
-                     boot_background);
-        break;
-      case 2:
-        display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status50 + 12,
-                     sizeof(toi_icon_status50) - 12, COLOR_BL_BG,
-                     boot_background);
-        break;
-      case 3:
-        display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status75 + 12,
-                     sizeof(toi_icon_status75) - 12, COLOR_BL_BG,
-                     boot_background);
-        break;
-      case 4:
-      case 5:
-        display_icon(DISPLAY_RESX - 32, 0, 32, 32, toi_icon_status100 + 12,
-                     sizeof(toi_icon_status100) - 12, COLOR_BL_BG,
-                     boot_background);
-        break;
-
-      default:
-        display_bar(DISPLAY_RESX - 32, 0, 32, 32, boot_background);
-    }
+    battery_color = RGB16(0x00, 0xCC, 0x36);
   }
-  if (battery_cap != 0xFF) {
+  if (battery_cap <= 100) {
+    offset_x += 32;
+    display_bar_radius(DISPLAY_RESX - offset_x, 8, 29, 18, COLOR_BL_BG,
+                       boot_background, 4);
+    display_bar(DISPLAY_RESX - offset_x + 30, 13, 2, 6, COLOR_BL_BG);
+
+    display_bar_radius(DISPLAY_RESX - offset_x + 2, 10, 25, 14, boot_background,
+                       boot_background, 2);
+    if (battery_cap < 20 && !dev_pwr_sta) {
+      display_bar(DISPLAY_RESX - offset_x + 3, 11, 4, 12,
+                  RGB16(0xDF, 0x32, 0x0C));
+    } else {
+      display_bar(DISPLAY_RESX - offset_x + 3, 11, 3 + battery_cap / 20 * 5, 12,
+                  battery_color);
+    }
+
+  } else {
+    display_bar(DISPLAY_RESX - 32, 0, 32, 32, boot_background);
+  }
+  if (battery_cap != 0xFF && dev_pwr_sta == 1) {
     mini_snprintf(battery_str, sizeof(battery_str), "%d%%", battery_cap);
     len = display_text_width(battery_str, -1, FONT_NORMAL);
-    display_text(DISPLAY_RESX - 30 - len, 24, battery_str, -1, FONT_NORMAL,
+    offset_x += len;
+    display_text(DISPLAY_RESX - offset_x, 24, battery_str, -1, FONT_NORMAL,
                  COLOR_BL_BG, boot_background);
   }
   if (ble_connect_state()) {
-    display_icon(DISPLAY_RESX - 52 - len, 0, 18, 32, toi_icon_bluetooth + 12,
+    offset_x += 18;
+    display_icon(DISPLAY_RESX - offset_x, 0, 18, 32, toi_icon_bluetooth + 12,
                  sizeof(toi_icon_bluetooth) - 12, COLOR_BL_BG, boot_background);
     len += 20;
   }
   if (usb_conn) {
-    display_icon(DISPLAY_RESX - 64 - len, 0, 32, 32, toi_icon_usb + 12,
+    offset_x += 32;
+    display_icon(DISPLAY_RESX - offset_x, 0, 32, 32, toi_icon_usb + 12,
                  sizeof(toi_icon_usb) - 12, COLOR_BL_BG, boot_background);
   }
 }

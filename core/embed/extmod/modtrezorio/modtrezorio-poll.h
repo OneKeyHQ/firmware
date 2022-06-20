@@ -31,7 +31,7 @@
 #define POLL_READ (0x0000)
 #define POLL_WRITE (0x0100)
 #define UART_IFACE (127)
-
+#define USB_STATE_IFACE (128)
 /// package: trezorio.__init__
 
 /// def poll(ifaces: Iterable[int], list_ref: list, timeout_ms: int) -> bool:
@@ -134,7 +134,20 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
 #else
 #error Unknown Trezor model
 #endif
-      else if (mode == POLL_READ) {
+      else if (iface == USB_STATE_IFACE) {
+        static bool usb_connect = false, usb_connect_bak = false;
+        if (is_usb_connected() == sectrue) {
+          usb_connect = true;
+        } else {
+          usb_connect = false;
+        }
+        if (usb_connect_bak != usb_connect) {
+          usb_connect_bak = usb_connect;
+          ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+          ret->items[1] = mp_obj_new_bool(usb_connect_bak);
+          return mp_const_true;
+        }
+      } else if (mode == POLL_READ) {
         if (sectrue == usb_hid_can_read(iface)) {
           uint8_t buf[64] = {0};
           int len = usb_hid_read(iface, buf, sizeof(buf));
