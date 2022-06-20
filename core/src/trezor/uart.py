@@ -3,8 +3,10 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage import device
-from trezor import io, loop
+from trezor import config, io, loop
 from trezor.lvglui import StatusBar
+
+import apps.base
 
 if TYPE_CHECKING:
     from trezor.lvglui.scrs.ble import PairCodeDisplay
@@ -29,6 +31,21 @@ BLE_NAME: str | None = None
 BLE_ENABLED: bool | None = None
 NRF_VERSION: str | None = None
 BLE_CTRL = io.BLE()
+
+
+async def handle_usb_state():
+    while True:
+        usb_state = loop.wait(io.USB_STATE)
+        state = await usb_state
+        if state:
+            cache.set(cache.APP_CHARGING_STATE, b"\x01")
+            StatusBar.get_instance().show_usb(True)
+        else:
+            StatusBar.get_instance().show_usb(False)
+            if config.is_unlocked() and device.is_initialized():
+                apps.base.lock_device()
+                loop.clear()
+                return
 
 
 async def handle_uart():

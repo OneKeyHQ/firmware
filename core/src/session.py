@@ -1,6 +1,6 @@
 from trezor import io, log, loop, utils, wire
 from trezor.lvglui import lvgl_tick
-from trezor.uart import handle_uart
+from trezor.uart import handle_uart, handle_usb_state
 
 import apps.base
 import usb
@@ -23,6 +23,8 @@ apps.base.set_homescreen()
 loop.schedule(lvgl_tick())
 
 loop.schedule(handle_uart())
+
+loop.schedule(handle_usb_state())
 
 # initialize the wire codec
 wire.setup(usb.iface_wire)

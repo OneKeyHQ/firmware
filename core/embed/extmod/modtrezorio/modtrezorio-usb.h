@@ -280,9 +280,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorio_USB___del___obj,
 ///     Get USB state.
 ///     """
 STATIC mp_obj_t mod_trezorio_USB_state(mp_obj_t self) {
-  mp_obj_USB_t *o = MP_OBJ_TO_PTR(self);
-
-  if (o->state == USB_OPENED) {
+  if (sectrue == is_usb_connected()) {
     return mp_const_true;
   } else {
     return mp_const_false;
