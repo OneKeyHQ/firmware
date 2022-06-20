@@ -2,7 +2,7 @@ import ustruct
 from micropython import const
 from typing import TYPE_CHECKING
 
-from storage import device
+from storage import cache, device
 from trezor import config, io, loop
 from trezor.lvglui import StatusBar
 
@@ -31,6 +31,7 @@ BLE_NAME: str | None = None
 BLE_ENABLED: bool | None = None
 NRF_VERSION: str | None = None
 BLE_CTRL = io.BLE()
+BATTERY_CAP = 255
 
 
 async def handle_usb_state():
@@ -58,6 +59,8 @@ async def handle_uart():
 
 
 async def process_push() -> None:
+    global BATTERY_CAP
+
     uart = loop.wait(io.UART | io.POLL_READ)
 
     response = await uart
@@ -81,8 +84,10 @@ async def process_push() -> None:
         _deal_charging_state(value)
     elif cmd == _CMD_BATTERY_STATUS:
         # current battery level, 0-100 only effective when not charging
-        if not CHARGING:
-            res = ustruct.unpack(">B", value)[0]
+        res = ustruct.unpack(">B", value)[0]
+        charging = cache.get(cache.APP_CHARGING_STATE)
+        BATTERY_CAP = res
+        if not charging:
             StatusBar.get_instance().set_battery_img(res)
     elif cmd == _CMD_SIDE_BUTTON_PRESS:
         # 1 short press 2 long press
@@ -121,19 +126,17 @@ def _deal_button_press(value: bytes) -> None:
 
 
 def _deal_charging_state(value: bytes) -> None:
-    global CHARGING
+    global BATTERY_CAP
     res = ustruct.unpack(">B", value)[0]
-    if res == _USB_STATUS_PLUG_IN:
-        StatusBar.get_instance().show_usb(True)
-    elif res == _USB_STATUS_PLUG_OUT:
-        CHARGING = False
-        StatusBar.get_instance().show_usb(False)
-    elif res == _POWER_STATUS_CHARGING:
-        CHARGING = True
+    if res in (_USB_STATUS_PLUG_IN, _POWER_STATUS_CHARGING):
+        cache.set(cache.APP_CHARGING_STATE, b"\x01")
         StatusBar.get_instance().set_battery_img(101)
+    elif res == _USB_STATUS_PLUG_OUT:
+        cache.set(cache.APP_CHARGING_STATE, b"\x00")
+        StatusBar.get_instance().set_battery_img(BATTERY_CAP)
     elif res == _POWER_STATUS_CHARGING_FINISHED:
         # charging finished, show battery level
-        CHARGING = False
+        cache.set(cache.APP_CHARGING_STATE, b"\x00")
         StatusBar.get_instance().set_battery_img(100)
 
 
@@ -159,14 +162,12 @@ def _deal_ble_status(value: bytes) -> None:
     elif res == _BLE_STATUS_OPENED:
         global BLE_ENABLED
         BLE_ENABLED = True
-        from trezor import config
 
         if config.is_unlocked():
             device.set_ble_status(enable=True)
     elif res == _BLE_STATUS_CLOSED:
         global BLE_ENABLED
         BLE_ENABLED = False
-        from trezor import config
 
         if config.is_unlocked():
             device.set_ble_status(enable=False)
@@ -206,12 +207,18 @@ def _request_ble_status():
     BLE_CTRL.ctrl(0x81, 0x04)
 
 
+def _request_charging_status():
+    """Request charging status."""
+    BLE_CTRL.ctrl(0x82, 0x05)
+
+
 def fetch_all():
     """Request some important data."""
     _request_ble_name()
     _request_ble_version()
     _request_ble_status()
     _request_battery_level()
+    _request_charging_status()
 
 
 def ctrl_ble(enable: bool) -> None:

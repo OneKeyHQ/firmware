@@ -32,6 +32,7 @@ STORAGE_DEVICE_EXPERIMENTAL_FEATURES = 2 | _SESSIONLESS_FLAG
 APP_COMMON_REQUEST_PIN_LAST_UNLOCK = 3 | _SESSIONLESS_FLAG
 
 APP_BLE_NAME = 4 | _SESSIONLESS_FLAG
+APP_CHARGING_STATE = 5 | _SESSIONLESS_FLAG
 
 
 # === Homescreen storage ===
@@ -135,6 +136,7 @@ class SessionlessCache(DataCache):
             1,  # STORAGE_DEVICE_EXPERIMENTAL_FEATURES
             4,  # APP_COMMON_REQUEST_PIN_LAST_UNLOCK
             8,  # APP_BLE_NAME
+            1,  # APP_CHARGING_STATE
         )
         super().__init__()
 
