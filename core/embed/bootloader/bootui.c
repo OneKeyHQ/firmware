@@ -158,7 +158,6 @@ void ui_screen_boot_wait(int wait_seconds) {
 void ui_screen_boot_click(void) {
   display_bar(0, DISPLAY_RESY - 5 - 20, DISPLAY_RESX, 5 + 20, boot_background);
 #if PRODUCTION_MODEL == 'H'
-  ui_title_update();
   display_bar(0, 600, DISPLAY_RESX, 100, boot_background);
   display_text_center(DISPLAY_RESX / 2, 655, "Click to continue ...", -1,
                       FONT_NORMAL, COLOR_BL_BG, boot_background);
@@ -610,12 +609,15 @@ void ui_title_update(void) {
 
     display_bar_radius(DISPLAY_RESX - offset_x + 2, 10, 25, 14, boot_background,
                        boot_background, 2);
-    if (battery_cap < 20 && !dev_pwr_sta) {
+    if (battery_cap < 5 && dev_pwr_sta != 1) {
+      display_bar(DISPLAY_RESX - offset_x + 3, 11, 1, 12,
+                  RGB16(0xDF, 0x32, 0x0C));
+    } else if (battery_cap < 20 && dev_pwr_sta != 1) {
       display_bar(DISPLAY_RESX - offset_x + 3, 11, 4, 12,
                   RGB16(0xDF, 0x32, 0x0C));
     } else {
-      display_bar(DISPLAY_RESX - offset_x + 3, 11, 3 + battery_cap / 20 * 5, 12,
-                  battery_color);
+      display_bar(DISPLAY_RESX - offset_x + 3, 11,
+                  3 + (battery_cap - 1) / 20 * 5, 12, battery_color);
     }
 
   } else {
@@ -629,11 +631,25 @@ void ui_title_update(void) {
                  COLOR_BL_BG, boot_background);
   }
   if (ble_connect_state()) {
-    offset_x += 18;
-    display_icon(DISPLAY_RESX - offset_x, 0, 18, 32, toi_icon_bluetooth + 12,
-                 sizeof(toi_icon_bluetooth) - 12, COLOR_BL_BG, boot_background);
-    len += 20;
+    offset_x += 32;
+    display_icon(DISPLAY_RESX - offset_x, 0, 32, 32,
+                 toi_icon_bluetooth_connected + 12,
+                 sizeof(toi_icon_bluetooth_connected) - 12, COLOR_BL_BG,
+                 boot_background);
+  } else if (ble_switch_state()) {
+    offset_x += 32;
+    if (!ble_get_switch()) {
+      display_icon(DISPLAY_RESX - offset_x, 0, 32, 32,
+                   toi_icon_bluetooth_closed + 12,
+                   sizeof(toi_icon_bluetooth_closed) - 12,
+                   RGB16(0xA6, 0xA6, 0xA6), boot_background);
+    } else {
+      display_icon(DISPLAY_RESX - offset_x, 0, 32, 32, toi_icon_bluetooth + 12,
+                   sizeof(toi_icon_bluetooth) - 12, COLOR_BL_BG,
+                   boot_background);
+    }
   }
+
   if (usb_conn) {
     offset_x += 32;
     display_icon(DISPLAY_RESX - offset_x, 0, 32, 32, toi_icon_usb + 12,
