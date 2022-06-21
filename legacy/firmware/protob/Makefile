@@ -16,7 +16,7 @@ endif
 
 PROTO_NAMES = messages messages-bitcoin messages-common messages-crypto messages-debug \
 	messages-ethereum messages-management messages-nem messages-stellar messages-solana \
-	messages-starcoin
+	messages-starcoin messages-tron tron
 
 PROTO_OPTIONS = $(PROTO_NAMES:=.options)
 PROTO_COMPILED = $(PROTO_NAMES:=.pb)
@@ -35,6 +35,7 @@ messages.pb.h: $(PROTO_COMPILED) $(PROTO_OPTIONS)
 		-s "mangle_names:M_FLATTEN"
 	@grep " CALLBACK, " $@ && echo "CALLBACK field found" && rm $@ && exit 1  || :
 
+
 %.pb: %.proto
 	@printf "  PROTOC  $@\n"
 	$(Q)protoc -I/usr/include -I. $< -o $@
@@ -45,6 +46,7 @@ messages.pb.h: $(PROTO_COMPILED) $(PROTO_OPTIONS)
 
 messages_map.h messages_map_limits.h: messages_map.py messages_pb2.py
 	$(Q)$(PYTHON) $< ${SKIPPED_MESSAGES}
+
 
 clean:
 	rm -f *.pb *.o *.d *.pb.c *.pb.h *_pb2.py messages_map.h messages_map_limits.h

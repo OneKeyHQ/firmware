@@ -29,6 +29,7 @@
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
+#include "messages-tron.pb.h"
 
 // message functions
 
@@ -162,5 +163,10 @@ void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
 void fsm_msgBixinBackupDevice(void);
 
 void fsm_msgGetPublicKeyMultiple(const GetPublicKeyMultiple *msg);
+
+// tron
+void fsm_msgTronSignMessage(TronSignMessage *msg);
+void fsm_msgTronGetAddress(TronGetAddress *msg);
+void fsm_msgTronSignRawTx(TronSignRawTx *msg);
 
 #endif

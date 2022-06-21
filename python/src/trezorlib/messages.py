@@ -283,6 +283,12 @@ class MessageType(IntEnum):
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
+    TronSignMessage = 10501
+    TronMessageSignature = 10502
+    TronGetAddress = 10503
+    TronAddress = 10504
+    TronSignRawTx = 10505
+    TronSignature = 10506
 
 
 class FailureType(IntEnum):
@@ -7677,6 +7683,102 @@ class TezosManagerTransfer(protobuf.MessageType):
     ) -> None:
         self.destination = destination
         self.amount = amount
+
+
+class TronSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10501
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+
+
+class TronMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10502
+    FIELDS = {
+        1: protobuf.Field("address", "bytes", repeated=False, required=False),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: Optional["bytes"] = None,
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class TronGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10503
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class TronAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10504
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "str",
+    ) -> None:
+        self.address = address
+
+
+class TronSignRawTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10505
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class TronSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10506
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class WebAuthnListResidentCredentials(protobuf.MessageType):
