@@ -100,6 +100,7 @@ void ble_uart_poll(void) {
       get_ble_name = true;
       break;
     case BLE_CMD_CON_STA:
+      get_ble_switch = true;
       if (ble_usart_msg.cmd_vale[0] == 0x01) {
         ble_connect = true;
       } else if (ble_usart_msg.cmd_vale[0] == 0x02) {
@@ -138,7 +139,11 @@ void ble_uart_poll(void) {
       break;
     case BLE_CMD_PLUG_STA:
       get_ble_charging = true;
-      dev_pwr_sta = ble_usart_msg.cmd_vale[0];
+      if (ble_usart_msg.cmd_vale[0] == 1 || ble_usart_msg.cmd_vale[0] == 3) {
+        dev_pwr_sta = 1;
+      } else {
+        dev_pwr_sta = 0;
+      }
       break;
     case BLE_CMD_EQ:
       get_ble_battery = true;
@@ -173,6 +178,11 @@ void ble_get_dev_info(void) {
 
   if (!ble_charging_state()) {
     ble_cmd_req(BLE_PWR, BLE_PWR_CHARGING);
+    hal_delay(5);
+  }
+
+  if (!ble_switch_state()) {
+    ble_cmd_req(BLE_BT, BLE_BT_STA);
     hal_delay(5);
   }
 }
