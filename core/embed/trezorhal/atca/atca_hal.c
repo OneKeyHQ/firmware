@@ -172,7 +172,7 @@ static TIM_HandleTypeDef TimHandle;
 #define ATCA_SWI_PORT GPIOD
 #define ATCA_SWI_PIN GPIO_PIN_13
 
-#define ATCA_SWI_START_PLUS_TIMEOUT 1000  //>2ms
+#define ATCA_SWI_START_PLUS_TIMEOUT 2000  //>2ms
 #define ATCA_SWI_ZERO_PLUS_TIMEOUT 50
 
 typedef enum { PIN_DIRECTION_OUT = 0, PIN_DIRECTION_IN } SWI_PIN_DIRECTION;
@@ -239,7 +239,7 @@ void atca_swi_init(void) {
 
 ATCA_STATUS atca_swi_send_bytes(uint8_t *buffer, uint8_t len) {
   atca_pin_direction(PIN_DIRECTION_OUT);
-  uint32_t state = disable_irq();
+  // uint32_t state = disable_irq();
 
   for (uint8_t i = 0; i < len; i++) {
     for (uint8_t one_bit = 1; one_bit > 0; one_bit <<= 1) {
@@ -264,7 +264,7 @@ ATCA_STATUS atca_swi_send_bytes(uint8_t *buffer, uint8_t len) {
       }
     }
   }
-  enable_irq(state);
+  // enable_irq(state);
   return ATCA_SUCCESS;
 }
 
@@ -276,7 +276,7 @@ ATCA_STATUS atac_swi_receive_bytes(uint8_t *buffer, uint8_t len) {
   uint8_t plus_count = 0;
 
   atca_pin_direction(PIN_DIRECTION_IN);
-  uint32_t state = disable_irq();
+  // uint32_t state = disable_irq();
   for (uint8_t i = 0; i < len; i++) {
     buffer[i] = 0;
     for (uint8_t one_bit = 1; one_bit > 0; one_bit <<= 1) {
@@ -344,7 +344,7 @@ ATCA_STATUS atac_swi_receive_bytes(uint8_t *buffer, uint8_t len) {
 
   atca_pin_direction(PIN_DIRECTION_OUT);
   atca_delay_us(93);  // tTURNGROUND
-  enable_irq(state);
+  // enable_irq(state);
   return status;
 }
 
