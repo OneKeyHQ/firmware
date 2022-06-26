@@ -8,7 +8,7 @@
 #include "irq.h"
 #include "usart.h"
 
-#define USART_TIMEOUT 5000
+#define USART_TIMEOUT 20000
 
 UART_HandleTypeDef uart;
 UART_HandleTypeDef *huart = &uart;
