@@ -600,7 +600,7 @@ if PRODUCTION_MODEL == 'H':
     env.Replace(
         COPT=env.get('ENV').get('OPTIMIZE', '-Os'),
         CCFLAGS='$COPT '
-        '-g3 '
+        '-g0 '
         '-nostdlib '
         '-std=gnu99 -Wall -Werror -Wdouble-promotion -Wpointer-arith -Wno-missing-braces -fno-common '
         '-fsingle-precision-constant -fdata-sections -ffunction-sections '
@@ -861,6 +861,8 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Tezos*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/zcash/*.py'))
+
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/conflux/*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/webauthn/*.py'))
 

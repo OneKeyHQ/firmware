@@ -7,7 +7,7 @@ from trezor.crypto import bip39, hashlib, random, slip39
 from trezor.enums import BackupType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import EntropyAck, EntropyRequest, Success
-from trezor.ui.layouts import confirm_backup, confirm_reset_device, request_strength
+from trezor.ui.layouts import confirm_backup, confirm_reset_device
 
 from apps.base import set_homescreen
 
@@ -50,9 +50,9 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     await confirm_reset_device(ctx, prompt)
     # await LoadingAnimation()
 
-    # on device reset, we need to ask for a new strength to override the default  value 12
-    if isinstance(ctx, wire.DummyContext):
-        msg.strength = await request_strength()
+    # # on device reset, we need to ask for a new strength to override the default  value 12
+    # if isinstance(ctx, wire.DummyContext):
+    #     msg.strength = await request_strength()
 
     # request and set new PIN
     if msg.pin_protection:

@@ -1,6 +1,6 @@
 from trezor.crypto import bip39, random
 
-from .. import font_MONO24, font_PJSBOLD20, font_PJSBOLD32, lv
+from .. import font_MONO24, font_PJSBOLD20, font_PJSBOLD32, lv, lv_colors
 
 
 def compute_mask(text: str) -> int:
@@ -22,14 +22,12 @@ def change_key_bg(
 ) -> None:
     if enabled:
         if dsc.id == id1:
-            dsc.rect_dsc.bg_color = lv.color_hex(0xAF2B0E)
+            dsc.rect_dsc.bg_color = lv_colors.ONEKEY_RED_1
         elif dsc.id == id2 and all_enabled:
-            dsc.rect_dsc.bg_color = lv.color_hex(0x1BAC44)
+            dsc.rect_dsc.bg_color = lv_colors.ONEKEY_GREEN
     else:
-        if dsc.id == id1:
-            dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
-        elif dsc.id == id2:
-            dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+        if dsc.id in (id1, id2):
+            dsc.rect_dsc.bg_color = lv_colors.ONEKEY_BLACK_1
 
 
 class BIP39Keyboard(lv.keyboard):
@@ -42,15 +40,11 @@ class BIP39Keyboard(lv.keyboard):
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
         self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.ta.set_style_bg_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_max_length(11)
         self.ta.set_one_line(True)
@@ -123,27 +117,32 @@ class BIP39Keyboard(lv.keyboard):
             "m",
             "READY",
         ]
-        ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 10
-        ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
-        ctrl_map.extend(
+        self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 10
+        self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
+        self.ctrl_map.extend(
             [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 9
         )
 
-        ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
-        ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend(
+        self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
+        self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
             [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 7
         )
-        ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
         self.dummy_ctl_map = []
-        self.dummy_ctl_map.extend(ctrl_map)
-        self.ctrl_map = ctrl_map
-        self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, ctrl_map)
+        self.dummy_ctl_map.extend(self.ctrl_map)
+        self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.TEXT_LOWER)
         self.set_width(lv.pct(100))
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.ITEMS | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_BLACK, lv.PART.ITEMS | lv.STATE.DEFAULT
+        )
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.ITEMS | lv.STATE.DISABLED
+        )
+        self.set_style_text_color(
+            lv_colors.ONEKEY_GRAY, lv.PART.ITEMS | lv.STATE.DISABLED
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -159,7 +158,10 @@ class BIP39Keyboard(lv.keyboard):
         self.mnemonic_prompt.align_to(self, lv.ALIGN.OUT_TOP_LEFT, 0, -40)
         self.mnemonic_prompt.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.mnemonic_prompt.set_style_bg_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.mnemonic_prompt.set_style_text_font(
+            font_MONO24, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.mnemonic_prompt.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.mnemonic_prompt.set_flex_flow(lv.FLEX_FLOW.ROW)
@@ -199,12 +201,18 @@ class BIP39Keyboard(lv.keyboard):
                 for candidate in candidates:
                     btn = lv.btn(self.mnemonic_prompt)
                     btn.set_style_bg_color(
-                        lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+                        lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+                    )
+                    btn.set_style_bg_color(
+                        lv_colors.ONEKEY_BLACK, lv.PART.MAIN | lv.STATE.CHECKED
                     )
                     btn.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
                     label = lv.label(btn)
                     label.set_style_text_color(
-                        lv.color_hex(0xCCCCCC), lv.PART.MAIN | lv.STATE.DEFAULT
+                        lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+                    )
+                    label.set_style_text_color(
+                        lv_colors.WHITE, lv.PART.MAIN | lv.STATE.CHECKED
                     )
                     label.set_style_text_font(
                         font_PJSBOLD20, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -239,48 +247,50 @@ class NumberKeyboard(lv.keyboard):
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
         self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.ta.set_style_bg_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("0123456789")
         self.ta.set_max_length(50)
         self.ta.set_password_mode(True)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
-        nums = [i for i in range(10)]
-        random.shuffle(nums)
-        btnm_map = [
-            str(nums[0]),
-            str(nums[1]),
-            str(nums[2]),
+        self.nums = [i for i in range(10)]
+        random.shuffle(self.nums)
+        self.btnm_map = [
+            str(self.nums[0]),
+            str(self.nums[1]),
+            str(self.nums[2]),
             "\n",
-            str(nums[3]),
-            str(nums[4]),
-            str(nums[5]),
+            str(self.nums[3]),
+            str(self.nums[4]),
+            str(self.nums[5]),
             "\n",
-            str(nums[6]),
-            str(nums[7]),
-            str(nums[8]),
+            str(self.nums[6]),
+            str(self.nums[7]),
+            str(self.nums[8]),
             "\n",
             lv.SYMBOL.BACKSPACE,
-            str(nums[9]),
+            str(self.nums[9]),
             lv.SYMBOL.OK,
             "",
         ]
-        ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
-        self.set_map(lv.keyboard.MODE.NUMBER, btnm_map, ctrl_map)
+        self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
+        self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
-        self.set_width(lv.pct(90))
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_width(lv.pct(96))
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.ITEMS | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_BLACK, lv.PART.ITEMS | lv.STATE.DEFAULT
+        )
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.ITEMS | lv.STATE.DISABLED
+        )
+        self.set_style_text_color(
+            lv_colors.ONEKEY_GRAY, lv.PART.ITEMS | lv.STATE.DISABLED
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(16, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -311,15 +321,11 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
         self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.ta.set_style_bg_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.ta.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         # include NBSP
@@ -494,33 +500,40 @@ class PassphraseKeyboard(lv.btnmatrix):
             "",
         ]
         # line1
-        ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 10
+        self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 10
         # line2
-        ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN])
-        ctrl_map.extend(
+        self.ctrl_map.extend(
+            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN]
+        )
+        self.ctrl_map.extend(
             [7 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 9
         )
-        ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN])
+        self.ctrl_map.extend(
+            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN]
+        )
         # line3
-        ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN])
-        ctrl_map.extend([6 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend(
+        self.ctrl_map.extend(
+            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN]
+        )
+        self.ctrl_map.extend([6 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
             [5 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 7
         )
-        ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN])
+        self.ctrl_map.extend(
+            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN]
+        )
         # line4
-        ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend([7 | lv.btnmatrix.CTRL.NO_REPEAT])
-        ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
-        self.ctrl_map = ctrl_map
+        self.ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend([7 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
         self.set_map(self.btn_map_text_lower)
         self.set_ctrl_map(self.ctrl_map)
 
         self.set_size(lv.pct(100), 230)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.ITEMS | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_BLACK, lv.PART.ITEMS | lv.STATE.DEFAULT
         )
         self.set_style_pad_row(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -540,8 +553,8 @@ class PassphraseKeyboard(lv.btnmatrix):
                 change_key_bg(dsc, 31, 34, True)
             else:
                 change_key_bg(dsc, 31, 34, False)
-            if dsc.id in (22, 32):
-                dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+            # if dsc.id in (22, 32):
+            #     dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
         elif code == lv.EVENT.VALUE_CHANGED:
             target = event.get_target()
             if isinstance(target, lv.btnmatrix):

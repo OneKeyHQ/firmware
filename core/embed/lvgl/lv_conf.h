@@ -387,7 +387,7 @@
     LV_FONT_DECLARE(lv_font_status_bar)
 
 /*Always set a default font*/
-#define LV_FONT_DEFAULT &lv_font_pljs_regular_24
+#define LV_FONT_DEFAULT &lv_font_scs_reg_26
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
@@ -417,7 +417,7 @@
 #define LV_TXT_ENC LV_TXT_ENC_UTF8
 
 /*Can break (wrap) texts on these chars*/
-#define LV_TXT_BREAK_CHARS " ,.;:-_"
+#define LV_TXT_BREAK_CHARS " ,.;-_"
 
 /*If a word is at least this long, will break wherever "prettiest"
  *To disable, set to a value <= 0*/

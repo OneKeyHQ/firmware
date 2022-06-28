@@ -4,7 +4,7 @@ from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 
-from . import font_MONO28, lv
+from . import font_MONO28, lv, lv_colors
 from .common import FullSizeWindow
 from .components.button import NormalButton
 
@@ -23,14 +23,14 @@ class MnemonicDisplay(FullSizeWindow):
             _(i18n_keys.BUTTON__CONTINUE),
         )
         self.content_area.set_style_bg_color(
-            lv.color_hex(0xFFFFFF), lv.PART.SCROLLBAR | lv.STATE.DEFAULT
+            lv_colors.BLACK, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
         )
         self.panel = lv.obj(self.content_area)
         self.panel.set_size(460, lv.SIZE.CONTENT)
         self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
         self.panel.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_bg_color(
-            lv.color_hex(0x323232), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.panel.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_pad_ver(24, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -60,8 +60,8 @@ class MnemonicDisplay(FullSizeWindow):
         text_col = ""
         text_col2 = ""
         for index in range(0, int(word_count / 2)):
-            text_col += f"#666666 {index+1:>2}.# {mnemonics[index]}\n"
-            text_col2 += f"#666666 {int(index+int(word_count/2)+1):>2}.# {mnemonics[int(index+int(word_count/2))]}\n"
+            text_col += f"#999999 {index+1:>2}.# {mnemonics[index]}\n"
+            text_col2 += f"#999999 {int(index+int(word_count/2)+1):>2}.# {mnemonics[int(index+int(word_count/2))]}\n"
             self.word_col1.set_text(text_col.rstrip())
             self.word_col2.set_text(text_col2.rstrip())
         self.item = ListItemWithLeadingCheckbox(
@@ -80,10 +80,7 @@ class MnemonicDisplay(FullSizeWindow):
             if target == self.item.checkbox:
                 if target.get_state() & lv.STATE.CHECKED:
                     self.item.enable_bg_color()
-                    self.btn_yes.enable(
-                        bg_color=lv.color_hex(0x1BAC44),
-                        text_color=lv.color_hex(0xFFFFFF),
-                    )
+                    self.btn_yes.enable(bg_color=lv_colors.ONEKEY_GREEN)
                 else:
                     self.item.enable_bg_color(enable=False)
                     self.btn_yes.disable()
@@ -96,7 +93,7 @@ class BackupTips(FullSizeWindow):
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_BACK_UP_RECOVERY_PHRASE),
         )
         self.container = ContainerFlexCol(
-            self, self.subtitle, pos=(0, 10), padding_row=10
+            self.content_area, self.subtitle, pos=(0, 10), padding_row=10
         )
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
@@ -146,8 +143,6 @@ class BackupTips(FullSizeWindow):
                     self.item3.enable_bg_color(False)
                     self.cb_cnt -= 1
             if self.cb_cnt == 3:
-                self.btn.enable(
-                    bg_color=lv.color_hex(0x1BAC44), text_color=lv.color_hex(0xFFFFFF)
-                )
+                self.btn.enable(bg_color=lv_colors.ONEKEY_GREEN)
             elif self.cb_cnt < 3:
                 self.btn.disable()

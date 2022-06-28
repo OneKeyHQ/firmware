@@ -2,6 +2,8 @@ from trezor import utils
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
+from ..lv_colors import lv_colors  # noqa: F401
+
 if utils.EMULATOR:
     font_PJSBOLD36 = lv.font_load("A:/res/PlusJakartaSans-Bold-36.bin")
     font_PJSBOLD32 = lv.font_load("A:/res/PlusJakartaSans-Bold-32.bin")

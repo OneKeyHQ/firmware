@@ -60,8 +60,8 @@ async def boot_animation() -> None:
 
 
 ui.display.backlight(ui.BACKLIGHT_NONE)
-ui.backlight_fade(ui.BACKLIGHT_MAX)
 config.init(show_pin_timeout)
+ui.backlight_fade(storage.device.get_brightness())
 clear()
 
 # stupid!, so we remove it

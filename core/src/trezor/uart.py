@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from storage import device
 from trezor import config, io, loop
 from trezor.lvglui import StatusBar
+from trezor.ui import display
 
 import apps.base
 
@@ -42,10 +43,9 @@ async def handle_usb_state():
             StatusBar.get_instance().show_usb(True)
         else:
             StatusBar.get_instance().show_usb(False)
-            if config.is_unlocked() and device.is_initialized():
-                apps.base.lock_device()
-                loop.clear()
-                return
+            apps.base.lock_device()
+            loop.clear()
+            return
 
 
 async def handle_uart():
@@ -58,7 +58,6 @@ async def handle_uart():
 
 
 async def process_push() -> None:
-    global BATTERY_CAP
 
     uart = loop.wait(io.UART | io.POLL_READ)
 
@@ -69,6 +68,8 @@ async def process_push() -> None:
         # unexpected prefix, ignore directly
         return
     value = response[_HEADER_LEN:][: length - 2]
+    if __debug__:
+        print(f"cmd == {cmd} with value {value} ")
     if cmd == _CMD_BLE_STATUS:
         # 1 connected 2 disconnected 3 opened 4 closed
         _deal_ble_status(value)
@@ -82,10 +83,11 @@ async def process_push() -> None:
         # 1 usb plug in 2 usb plug out 3 charging
         _deal_charging_state(value)
     elif cmd == _CMD_BATTERY_STATUS:
+        global BATTERY_CAP
         # current battery level, 0-100 only effective when not charging
         res = ustruct.unpack(">B", value)[0]
         BATTERY_CAP = res
-        StatusBar.get_instance().set_battery_img(res)
+        StatusBar.get_instance().set_battery_img(res, CHARGING)
 
     elif cmd == _CMD_SIDE_BUTTON_PRESS:
         # 1 short press 2 long press
@@ -113,29 +115,36 @@ def _deal_ble_pair(value):
 def _deal_button_press(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _PRESS_SHORT:
-        if __debug__:
-            print("short press")
+        if display.backlight():
+            apps.base.lock_device()
+            display.backlight(0)
+        else:
+            display.backlight(device.get_brightness())
     elif res == _PRESS_LONG:
-        if __debug__:
-            print("long press")
-        from trezor.lvglui.scrs.homescreen import ShutingDown
+        from trezor.lvglui.scrs.homescreen import PowerOff
 
-        ShutingDown()
+        PowerOff()
 
 
 def _deal_charging_state(value: bytes) -> None:
-    global BATTERY_CAP
+    global BATTERY_CAP, CHARGING
     res = ustruct.unpack(">B", value)[0]
     if res in (
         _USB_STATUS_PLUG_IN,
         _POWER_STATUS_CHARGING,
-        _POWER_STATUS_CHARGING_FINISHED,
     ):
+        CHARGING = True
         StatusBar.get_instance().show_charging(True)
-        StatusBar.get_instance().set_battery_img(BATTERY_CAP)
-    elif res == _USB_STATUS_PLUG_OUT:
+        StatusBar.get_instance().set_battery_img(BATTERY_CAP, CHARGING)
+        # StatusBar.get_instance().show_usb(show=True) # use sub enumerate to achieve this
+    elif res in (_USB_STATUS_PLUG_OUT, _POWER_STATUS_CHARGING_FINISHED):
+        CHARGING = False
         StatusBar.get_instance().show_charging(False)
-        StatusBar.get_instance().set_battery_img(BATTERY_CAP)
+        StatusBar.get_instance().set_battery_img(BATTERY_CAP, CHARGING)
+        # if res == _USB_STATUS_PLUG_OUT: # use sub enumerate to achieve this
+        #     StatusBar.get_instance().show_usb()
+    # if res in (_USB_STATUS_PLUG_IN, _USB_STATUS_PLUG_OUT):
+    #     apps.base.lock_device()
 
 
 async def _deal_pair_res(value: bytes) -> None:
@@ -153,20 +162,20 @@ def _deal_ble_status(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _BLE_STATUS_CONNECTED:
         # show icon in status bar
-        StatusBar.get_instance().show_ble(_BLE_STATUS_CONNECTED)
+        StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_CONNECTED)
     elif res == _BLE_STATUS_DISCONNECTED:
         # hidden icon in status bar
-        StatusBar.get_instance().show_ble(_BLE_STATUS_DISCONNECTED)
+        StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
     elif res == _BLE_STATUS_OPENED:
         global BLE_ENABLED
         BLE_ENABLED = True
-        StatusBar.get_instance().show_ble(_BLE_STATUS_OPENED)
+        StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
         if config.is_unlocked():
             device.set_ble_status(enable=True)
     elif res == _BLE_STATUS_CLOSED:
         global BLE_ENABLED
         BLE_ENABLED = False
-        StatusBar.get_instance().show_ble(_BLE_STATUS_CLOSED)
+        StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_DISABLED)
         if config.is_unlocked():
             device.set_ble_status(enable=False)
 

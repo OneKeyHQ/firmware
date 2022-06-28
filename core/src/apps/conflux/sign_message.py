@@ -7,6 +7,7 @@ from trezor.ui.layouts import confirm_signverify
 from trezor.utils import HashWriter
 
 from apps.common import paths
+from apps.common.helpers import validate_message
 from apps.common.keychain import Keychain, auto_keychain
 from apps.common.signverify import decode_message
 
@@ -30,6 +31,7 @@ def message_digest(message: bytes) -> bytes:
 async def sign_message(
     ctx: Context, msg: ConfluxSignMessage, keychain: Keychain
 ) -> ConfluxMessageSignature:
+    validate_message(msg.message)
     await paths.validate_path(ctx, keychain, msg.address_n)
 
     node = keychain.derive(msg.address_n)

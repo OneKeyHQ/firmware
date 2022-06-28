@@ -1,4 +1,5 @@
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
@@ -22,7 +23,7 @@ class Popup(lv.obj):
         self.set_pos(0, 50)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.close_img = lv.img(self)
         self.close_img.set_src("A:/res/close.png")
@@ -91,7 +92,7 @@ class PopupSample(lv.obj):
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.icon = lv.img(self)

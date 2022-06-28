@@ -1,7 +1,9 @@
+from storage import device
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.ui import display
 
 from . import font_PJSBOLD24
-from .common import Screen, load_scr_with_animation, lv
+from .common import Screen, load_scr_with_animation, lv, lv_colors
 
 
 class LockScreen(Screen):
@@ -28,7 +30,7 @@ class LockScreen(Screen):
             self.dev_state_text = lv.label(self.dev_state)
             self.dev_state_text.set_text(dev_state)
             self.dev_state_text.set_style_text_color(
-                lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+                lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
             )
             self.dev_state_text.set_style_text_font(
                 font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -55,6 +57,9 @@ class LockScreen(Screen):
             if self.channel.takers:
                 self.channel.publish("clicked")
             else:
+                if not display.backlight():
+                    display.backlight(device.get_brightness())
+                    return
                 from trezor import workflow
                 from apps.base import unlock_device
 

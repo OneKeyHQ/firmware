@@ -11,6 +11,10 @@ if TYPE_CHECKING:
     LayoutType = Awaitable[Any]
     from ....lvglui.scrs.common import Screen, FullSizeWindow
 
+CANCEL = 0
+CONFIRM = 1
+SHOW_MORE = 2
+
 
 async def button_request(
     ctx: wire.GenericContext,
