@@ -2,7 +2,8 @@ import ustruct
 from micropython import const
 from typing import TYPE_CHECKING
 
-from trezor import io, loop, utils
+from storage import device
+from trezor import io, loop, ui, utils
 
 if TYPE_CHECKING:
     from typing import Any
@@ -63,6 +64,10 @@ async def read_message(iface: WireInterface, buffer: utils.BufferType) -> Messag
 
     # wait for initial report
     report = await read
+    # if the screen is turn off then turn on it
+    if not ui.display.backlight():
+        ui.display.backlight(device.get_brightness())
+
     if report[0] != _REP_MARKER:
         raise CodecError("Invalid magic")
     _, magic1, magic2, mtype, msize = ustruct.unpack(_REP_INIT, report)

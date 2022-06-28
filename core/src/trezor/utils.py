@@ -47,11 +47,9 @@ SCREENS = []
 def clear_screens() -> None:
     for scr in SCREENS:
         try:
-            scr.del_delayed(100)
+            scr.delete()
             if hasattr(scr, "_init"):
                 del scr._init
-            if hasattr(scr, "_instance"):
-                del scr._instance
         except BaseException:
             pass
     SCREENS.clear()
@@ -66,7 +64,6 @@ def unimport_end(mods: set[str], collect: bool = True) -> None:
     # MICROPY_LOADED_MODULES_DICT_SIZE, so that the sys.modules dict is never
     # reallocated at run-time
     assert len(sys.modules) <= 160, "Please bump preallocated size in mpconfigport.h"
-    clear_screens()
     for mod in sys.modules:  # pylint: disable=consider-using-dict-items
         if mod not in mods:
             # remove reference from sys.modules
@@ -99,6 +96,7 @@ class unimport:
     def __exit__(self, _exc_type: Any, _exc_value: Any, _tb: Any) -> None:
         assert self.mods is not None
         unimport_end(self.mods, collect=False)
+        clear_screens()
         self.mods.clear()
         self.mods = None
         gc.collect()

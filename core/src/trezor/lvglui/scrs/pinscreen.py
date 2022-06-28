@@ -1,5 +1,5 @@
 from ..i18n import gettext as _, keys as i18n_keys
-from .common import FullSizeWindow, lv  # noqa: F401,F403
+from .common import FullSizeWindow, lv, lv_colors  # noqa: F401,F403
 from .components.button import NormalButton
 from .components.container import ContainerFlexCol
 from .components.keyboard import NumberKeyboard
@@ -52,9 +52,7 @@ class PinTip(FullSizeWindow):
                     self.item2.enable_bg_color(False)
                     self.cb_cnt -= 1
             if self.cb_cnt == 2:
-                self.btn.enable(
-                    bg_color=lv.color_hex(0x1BAC44), text_color=lv.color_hex(0xFFFFFF)
-                )
+                self.btn.enable(bg_color=lv_colors.ONEKEY_GREEN)
             elif self.cb_cnt < 2:
                 self.btn.disable()
 
@@ -66,7 +64,7 @@ class InputPin(FullSizeWindow):
             subtitle=kwargs.get("subtitle", ""),
         )
         self.subtitle.set_style_text_color(
-            lv.color_hex(0xAF2B0E), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)

@@ -458,7 +458,17 @@ async def should_show_more(
     icon_color: int = ui.ORANGE_ICON,
 ) -> bool:
     """Return True always because we have larger screen"""
-    return True
+    from trezor.lvglui.scrs.template import ShouldShowMore
+    from .common import CONFIRM, SHOW_MORE
+
+    contents = []
+    for _i, text in para:
+        contents.append(text)
+    show_more = ShouldShowMore(title, contents[0], "\n".join(contents[1:]), button_text)
+    result = await raise_if_cancelled(interact(ctx, show_more, br_type, br_code))
+    assert result in (CONFIRM, SHOW_MORE)
+
+    return result == SHOW_MORE
 
 
 async def confirm_blob(
@@ -469,7 +479,7 @@ async def confirm_blob(
     description: str | None = None,
     hold: bool = False,
     br_code: ButtonRequestType = ButtonRequestType.Other,
-    icon: str = ui.ICON_SEND,  # TODO cleanup @ redesign
+    icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
     icon_color: int = ui.GREEN,  # TODO cleanup @ redesign
     ask_pagination: bool = False,
 ) -> None:
@@ -489,7 +499,9 @@ async def confirm_blob(
         data_str = hexlify(data).decode()
     else:
         data_str = data
-    blob = BlobDisPlay(title, description if description is not None else "", data_str)
+    blob = BlobDisPlay(
+        title, description if description is not None else "", data_str, icon_path=icon
+    )
     return await raise_if_cancelled(interact(ctx, blob, br_type, br_code))
 
 
@@ -545,7 +557,7 @@ async def confirm_text(
     data: str,
     description: str | None = None,
     br_code: ButtonRequestType = ButtonRequestType.Other,
-    icon: str = ui.ICON_SEND,  # TODO cleanup @ redesign
+    icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
     icon_color: int = ui.GREEN,  # TODO cleanup @ redesign
 ) -> None:
     """Confirm textual data.
@@ -558,7 +570,7 @@ async def confirm_text(
     """
     from trezor.lvglui.scrs.template import BlobDisPlay
 
-    screen = BlobDisPlay(title, description, data)
+    screen = BlobDisPlay(title, description, data, icon_path=icon)
     await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
 
@@ -853,4 +865,13 @@ async def show_pairing_error() -> None:
         subtitle=_(i18n_keys.SUBTITLE__BLUETOOTH_PAIR_PAIR_FAILED),
         timeout_ms=2000,
         icon="A:/res/danger.png",
+    )
+
+
+async def confirm_domain(ctx: wire.GenericContext, **kwargs) -> None:
+    from trezor.lvglui.scrs.template import EIP712DOMAIN
+
+    screen = EIP712DOMAIN(_(i18n_keys.TITLE__CONFIRM_DOMAIN), **kwargs)
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_domain", ButtonRequestType.ProtectCall)
     )

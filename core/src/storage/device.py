@@ -45,6 +45,7 @@ _EXPERIMENTAL_FEATURES     = const(0x15)  # bool (0x01 or empty)
 _BLE_NAME = const(0x80)  # bytes
 _BLE_VERSION = const(0x81)  # bytes
 _BLE_ENABLED = const(0x82)  # bool (0x01 or empty)
+_BRIGHTNESS = const(0x83)   # int
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -88,6 +89,8 @@ def get_firmware_version() -> str:
 
 
 def get_storage() -> str:
+    if utils.EMULATOR:
+        return "14 GB"
     return config.get_capacity()
 
 
@@ -98,7 +101,7 @@ def set_ble_name(name: str) -> None:
 def get_ble_name() -> str:
     ble_name = common.get(_NAMESPACE, _BLE_NAME, public=True)
     if ble_name is None:
-        return ""
+        return "T1122"
     return ble_name.decode()
 
 
@@ -136,8 +139,21 @@ def get_model() -> str:
 
 def get_serial() -> str:
     if utils.EMULATOR:
-        return ""
+        return "OKT-20220101"
     return config.get_serial()
+
+
+def set_brightness(brightness: int) -> None:
+    # valid value range  0-255
+    common.set(_NAMESPACE, _BRIGHTNESS, brightness.to_bytes(2, "big"), public=True)
+
+
+def get_brightness() -> int:
+    brightness = common.get(_NAMESPACE, _BRIGHTNESS, public=True)
+    if not brightness:
+        # default brightness is 150
+        return 150
+    return int.from_bytes(brightness, "big")
 
 
 def is_initialized() -> bool:

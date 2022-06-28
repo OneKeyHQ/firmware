@@ -9,7 +9,7 @@ from trezor.enums import BackupType, MessageType
 from trezor.errors import MnemonicError
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success
-from trezor.ui.layouts import show_success
+from trezor.ui.layouts import show_popup, show_success
 
 from apps.base import set_homescreen
 from apps.common import mnemonic
@@ -38,7 +38,9 @@ async def recovery_process(ctx: wire.GenericContext) -> Success:
         if dry_run:
             storage.recovery.end_progress()
         else:
+            await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT))
             storage.wipe()
+            set_homescreen()
         raise wire.ActionCancelled
 
 
@@ -75,6 +77,7 @@ async def _continue_recovery_process(ctx: wire.GenericContext) -> Success:
             continue
 
         try:
+            await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT))
             secret, backup_type = await _process_words(ctx, words)
             # If _process_words succeeded, we now have both backup_type (from
             # its result) and word_count (from _request_word_count earlier), which means

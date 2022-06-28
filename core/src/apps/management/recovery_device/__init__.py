@@ -107,6 +107,6 @@ async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
                 i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_CHECK_RECOVERY_PHRASE
             ),
             verb=_(i18n_keys.BUTTON__CONTINUE),
-            icon="A:/res/shield_search.png",
+            icon="A:/res/check-seed.png",
             br_code=ButtonRequestType.ProtectCall,
         )

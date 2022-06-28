@@ -49,12 +49,7 @@ SECTIONS {
   } >FLASH AT>FLASH
 
   .flash2 : ALIGN(512) {
-    build/firmware/vendor/*.o(.rodata*);
-    build/firmware/vendor/lvgl_mp/lvgl/src/*.o(.text*);
-    build/firmware/embed/lvgl/*.o(.rodata*);
-    build/firmware/lv_mpy.o(.rodata*);
-    build/firmware/atca_mp.o(.rodata*);
-    build/firmware/embed/extmod/*.o(.rodata*);
+    build/firmware/frozen_mpy.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);
   } >EXRAM AT>FLASH2

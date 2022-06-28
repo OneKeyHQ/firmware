@@ -6,6 +6,7 @@ from trezor.enums import InputScriptType
 from trezor.messages import MessageSignature
 from trezor.ui.layouts import confirm_signverify
 
+from apps.common.helpers import validate_message
 from apps.common.paths import validate_path
 from apps.common.signverify import decode_message, message_digest
 
@@ -26,7 +27,7 @@ async def sign_message(
     message = msg.message
     address_n = msg.address_n
     script_type = msg.script_type or InputScriptType.SPENDADDRESS
-
+    validate_message(message)
     await validate_path(
         ctx, keychain, address_n, validate_path_against_script_type(coin, msg)
     )
