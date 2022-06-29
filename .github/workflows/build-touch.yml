@@ -1,4 +1,4 @@
-name: "Build firmware"
+name: "build-touch"
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_firmware:
+  build-touch:
     runs-on: ubuntu-latest
 
     steps:
