@@ -125,8 +125,13 @@ class FullSizeWindow(lv.obj):
         icon_path: str | None = None,
         options: str | None = None,
         hold_confirm: bool = False,
+        top_layer: bool = False,
     ):
-        super().__init__(lv.scr_act())
+        if top_layer:
+            super().__init__(lv.layer_top())
+        else:
+            super().__init__(lv.scr_act())
+
         self.channel = loop.chan()
         self.set_size(lv.pct(100), lv.pct(100))
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)

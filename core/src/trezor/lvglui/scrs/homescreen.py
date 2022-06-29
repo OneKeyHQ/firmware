@@ -481,6 +481,7 @@ class PowerOff(FullSizeWindow):
             subtitle=None,
             confirm_text=_(i18n_keys.ITEM__POWER_OFF),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            top_layer=True,
         )
         self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
@@ -507,7 +508,9 @@ class PowerOff(FullSizeWindow):
 
 class ShutingDown(FullSizeWindow):
     def __init__(self):
-        super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
+        super().__init__(
+            title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None, top_layer=True
+        )
         from trezor import loop, uart
 
         async def shutdown_delay():
