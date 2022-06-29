@@ -355,14 +355,14 @@ static void send_msg_features(uint8_t iface_num,
     if (ble_switch_state()) {
       MSG_SEND_ASSIGN_VALUE(ble_enable, ble_get_switch());
     }
-    MSG_SEND_ASSIGN_VALUE(se_enable, true);
     char *se_version = se_get_version();
     if (se_version) {
       MSG_SEND_ASSIGN_STRING_LEN(se_ver, se_version, strlen(se_version));
     }
+
     char *serial = NULL;
-    if (se_get_sn(&serial)) {
-      MSG_SEND_ASSIGN_STRING_LEN(onekey_serial, serial, 5);
+    if (device_get_serial(&serial)) {
+      MSG_SEND_ASSIGN_STRING_LEN(onekey_serial, serial, strlen(serial));
     }
   }
 
