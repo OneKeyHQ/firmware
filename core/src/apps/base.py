@@ -347,11 +347,18 @@ def get_pinlocked_handler(
 
 
 # this function is also called when handling ApplySettings
-def reload_settings_from_storage() -> None:
+def reload_settings_from_storage(auto_lock: bool = True) -> None:
+    if auto_lock:
+        workflow.idle_timer.set(
+            storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
+        )
+        print(f"auto lock time is {storage.device.get_autolock_delay_ms()}")
+    else:
+        from trezor.lvglui import get_elapsed
 
-    workflow.idle_timer.set(
-        storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
-    )
+        global LAST_TOUCH_ELAPSED
+        LAST_TOUCH_ELAPSED = get_elapsed()
+        workflow.idle_timer.set(10 * 1000, turn_off_screen_if_possible)
     wire.experimental_enabled = storage.device.get_experimental_features()
     ui.display.orientation(storage.device.get_rotation())
 

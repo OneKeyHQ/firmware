@@ -3,7 +3,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage import device
-from trezor import config, io, loop
+from trezor import config, io, loop, utils
 from trezor.lvglui import StatusBar
 from trezor.ui import display
 
@@ -32,20 +32,27 @@ BLE_NAME: str | None = None
 BLE_ENABLED: bool | None = None
 NRF_VERSION: str | None = None
 BLE_CTRL = io.BLE()
-BATTERY_CAP = 255
 
 
 async def handle_usb_state():
+    global CHARGING
     while True:
         usb_state = loop.wait(io.USB_STATE)
         state = await usb_state
         if state:
             StatusBar.get_instance().show_usb(True)
+            # deal with charging state
+            CHARGING = True
+            StatusBar.get_instance().show_charging(True)
+            StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
         else:
             StatusBar.get_instance().show_usb(False)
+            # deal with charging state
+            CHARGING = False
+            StatusBar.get_instance().show_charging()
+            StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+        if config.is_unlocked():
             apps.base.lock_device()
-            loop.clear()
-            return
 
 
 async def handle_uart():
@@ -83,10 +90,9 @@ async def process_push() -> None:
         # 1 usb plug in 2 usb plug out 3 charging
         _deal_charging_state(value)
     elif cmd == _CMD_BATTERY_STATUS:
-        global BATTERY_CAP
         # current battery level, 0-100 only effective when not charging
         res = ustruct.unpack(">B", value)[0]
-        BATTERY_CAP = res
+        utils.BATTERY_CAP = res
         StatusBar.get_instance().set_battery_img(res, CHARGING)
 
     elif cmd == _CMD_SIDE_BUTTON_PRESS:
@@ -103,10 +109,16 @@ async def process_push() -> None:
             print("unknown or not care command:", cmd)
 
 
+def turn_on_lcd_if_possible():
+    if not display.backlight():
+        display.backlight(device.get_brightness())
+
+
 def _deal_ble_pair(value):
     global SCREEN
     pair_codes = value.decode("utf-8")
     # pair_codes = "".join(list(map(lambda c: chr(c), ustruct.unpack(">6B", value))))
+    turn_on_lcd_if_possible()
     from trezor.lvglui.scrs.ble import PairCodeDisplay
 
     SCREEN = PairCodeDisplay(pair_codes)
@@ -116,31 +128,43 @@ def _deal_button_press(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _PRESS_SHORT:
         if display.backlight():
-            apps.base.lock_device()
+            if config.is_unlocked():
+                apps.base.lock_device()
             display.backlight(0)
         else:
             display.backlight(device.get_brightness())
     elif res == _PRESS_LONG:
+        if __debug__:
+            print("LONG PRESS=======")
         from trezor.lvglui.scrs.homescreen import PowerOff
 
-        PowerOff()
+        PowerOff(clear_loop=True)
 
 
 def _deal_charging_state(value: bytes) -> None:
-    global BATTERY_CAP, CHARGING
+    """THIS DOESN'T WORK CORRECT DUE TO THE PUSHED STATE, ONLY USED AS A FALLBACK WHEN
+    CHARGING WITH A CHARGER NOW.
+
+    """
+    global CHARGING
     res = ustruct.unpack(">B", value)[0]
+    turn_on_lcd_if_possible()
     if res in (
         _USB_STATUS_PLUG_IN,
         _POWER_STATUS_CHARGING,
     ):
+        if CHARGING:
+            return
         CHARGING = True
         StatusBar.get_instance().show_charging(True)
-        StatusBar.get_instance().set_battery_img(BATTERY_CAP, CHARGING)
+        StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
         # StatusBar.get_instance().show_usb(show=True) # use sub enumerate to achieve this
     elif res in (_USB_STATUS_PLUG_OUT, _POWER_STATUS_CHARGING_FINISHED):
+        if not CHARGING:
+            return
         CHARGING = False
-        StatusBar.get_instance().show_charging(False)
-        StatusBar.get_instance().set_battery_img(BATTERY_CAP, CHARGING)
+        StatusBar.get_instance().show_charging()
+        StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
         # if res == _USB_STATUS_PLUG_OUT: # use sub enumerate to achieve this
         #     StatusBar.get_instance().show_usb()
     # if res in (_USB_STATUS_PLUG_IN, _USB_STATUS_PLUG_OUT):
@@ -161,12 +185,16 @@ async def _deal_pair_res(value: bytes) -> None:
 def _deal_ble_status(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _BLE_STATUS_CONNECTED:
+        utils.BLE_CONNECTED = True
         # show icon in status bar
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_CONNECTED)
     elif res == _BLE_STATUS_DISCONNECTED:
+        utils.BLE_CONNECTED = False
         # hidden icon in status bar
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
     elif res == _BLE_STATUS_OPENED:
+        if utils.BLE_CONNECTED:
+            return
         global BLE_ENABLED
         BLE_ENABLED = True
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)

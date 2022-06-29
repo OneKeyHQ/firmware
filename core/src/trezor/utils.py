@@ -27,6 +27,9 @@ from typing import TYPE_CHECKING
 
 
 DISABLE_ANIMATION = 0
+BLE_CONNECTED: bool | None = None
+BATTERY_CAP : int = 100
+
 
 if __debug__:
     if EMULATOR:

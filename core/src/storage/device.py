@@ -63,7 +63,7 @@ else:
     AUTOLOCK_DELAY_MINIMUM = 60 * 1000  # 1 minute
 AUTOLOCK_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
 # autolock intervals larger than AUTOLOCK_DELAY_MAXIMUM cause issues in the scheduler
-AUTOLOCK_DELAY_MAXIMUM = 0x2000_0000  # ~6 days
+AUTOLOCK_DELAY_MAXIMUM = 0x1000_0000  # ~3 days
 
 # Length of SD salt auth tag.
 # Other SD-salt-related constants are in sd_salt.py
