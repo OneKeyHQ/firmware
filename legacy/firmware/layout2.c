@@ -1220,8 +1220,8 @@ void layoutXPUB(const char *xpub, int page) {
   char desc[] = "XPUB _/2";
   desc[5] = '1' + page;
   _layout_xpub(xpub, desc, page);
-  layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
-  layoutButtonYes(_("Confirm"), &bmp_btn_confirm);
+  layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
+  layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
   oledRefresh();
 }
 

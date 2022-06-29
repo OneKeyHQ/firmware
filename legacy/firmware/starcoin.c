@@ -68,6 +68,13 @@ bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
     return false;
   }
 
+  layoutRequireConfirmPayload();
+  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+    layoutHome();
+    return false;
+  }
+
   uint8_t buf[sizeof(StarcoinSignTx_raw_tx_t) + 32] = {0};
 
   memcpy(buf, STC_RAW_USER_TX_PREFIX_HASH, 32);
@@ -96,8 +103,7 @@ static void unsigned_int_to_leb128(uint32_t val, uint8_t *s) {
 
 bool starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
                            StarcoinMessageSignature *resp) {
-  fsm_layoutSignMessage(msg->message.bytes, msg->message.size);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+  if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return false;
@@ -143,4 +149,10 @@ void layoutRequireConfirmSignTx(char *address) {
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Confirm signning"), NULL, _("from:"), str[0], str[1],
                     NULL);
+}
+
+void layoutRequireConfirmPayload() {
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("APPROVE"), NULL,
+                    _("Confirm signning"), NULL, _("transaction:"),
+                    _("transaction cannot be decoded"), NULL, NULL);
 }

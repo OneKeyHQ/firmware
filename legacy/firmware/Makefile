@@ -79,6 +79,9 @@ OBJS += nem_mosaics.o
 OBJS += solana.o
 OBJS += starcoin.o
 OBJS += stellar.o
+OBJS += tron.o
+OBJS += tron_ui.o
+OBJS += tron_tokens.o
 endif
 
 OBJS += debug.o
@@ -155,6 +158,8 @@ OBJS += protob/messages-nem.pb.o
 OBJS += protob/messages-solana.pb.o
 OBJS += protob/messages-starcoin.pb.o
 OBJS += protob/messages-stellar.pb.o
+OBJS += protob/messages-tron.pb.o
+OBJS += protob/tron.pb.o
 endif
 
 OPTFLAGS ?= -Os
