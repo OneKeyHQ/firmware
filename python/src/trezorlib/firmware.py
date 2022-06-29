@@ -66,17 +66,6 @@ V2_BOARDLOADER_DEV_KEYS = [
 V2_BOOTLOADER_KEYS = [
     bytes.fromhex(key)
     for key in (
-        "c2c87a49c5a3460977fbb2ec9dfe60f06bd694db8244bd4981fe3b7a26307f3f",
-        "80d036b08739b846f4cb77593078deb25dc9487aedcf52e30b4fb7cd7024178a",
-        "b8307a71f552c60a4cbb317ff48b82cdbf6b6bb5f04c920fec7badf017883751",
-    )
-]
-
-V2_SIGS_REQUIRED = 2
-
-V2_BOOTLOADER_KEYS = [
-    bytes.fromhex(key)
-    for key in (
         "154b8ab261cc8879483f689a2d41243ae7dbc4021672bbd25c338ae84d931154",
         "a9e65e07fe6d39a8a84e11a996a0283f881e175cba602eb5ac442fb75b39e8e0",
         "6c8805abb2df9d3679f1d28a40cd990399b99fc3ee4e0657d81d381ea1488a12",
@@ -90,7 +79,7 @@ V2_BOOTLOADER_KEYS = [
 V2_SIGS_REQUIRED = 4
 
 ONEV2_CHUNK_SIZE = 1024 * 64
-V2_CHUNK_SIZE = 1024 * 128
+V2_CHUNK_SIZE = 1024 * 256
 
 
 def _transform_vendor_trust(data: bytes) -> bytes:
@@ -210,7 +199,8 @@ FirmwareHeader = c.Struct(
     ),
     "version" / VersionLong,
     "fix_version" / VersionLong,
-    "_reserved" / c.Padding(8),
+    "onekey_version" / VersionLong,
+    "_reserved" / c.Padding(4),
     "hashes" / c.Bytes(32)[16],
 
     "v1_signatures" / c.Bytes(64)[V1_SIGNATURE_SLOTS],
