@@ -646,9 +646,12 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 
       // if firmware is not upgrade, erase storage
       if (sectrue != is_upgrade) {
+        se_set_wiping(true);
+        se_reset_storage();
         ensure(
             flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
             NULL);
+        se_reset_state();
       }
       ensure(flash_erase_sectors(FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT,
                                  ui_screen_install_progress_erase),
