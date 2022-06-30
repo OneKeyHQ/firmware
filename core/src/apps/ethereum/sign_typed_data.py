@@ -196,7 +196,7 @@ class TypedDataEnvelope:
         for type_name in [primary_type] + sorted(deps):
             members = self.types[type_name].members
             fields = ",".join(f"{get_type_name(m.type)} {m.name}" for m in members)
-            result.append(f"{type_name} ({fields})")
+            result.append(f"{type_name}({fields})")
 
         return "".join(result).encode()
 

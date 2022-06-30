@@ -27,6 +27,9 @@ from typing import TYPE_CHECKING
 
 
 DISABLE_ANIMATION = 0
+BLE_CONNECTED: bool | None = None
+BATTERY_CAP: int = 100
+
 
 if __debug__:
     if EMULATOR:
@@ -53,6 +56,14 @@ def clear_screens() -> None:
         except BaseException:
             pass
     SCREENS.clear()
+
+
+def turn_on_lcd_if_possible():
+    from trezor.ui import display
+    from storage import device
+
+    if not display.backlight():
+        display.backlight(device.get_brightness())
 
 
 def unimport_begin() -> set[str]:
