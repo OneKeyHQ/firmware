@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 LOG = logging.getLogger(__name__)
 
-VENDORS = ("bitcointrezor.com", "trezor.io")
+VENDORS = ("bitcointrezor.com", "trezor.io", "onekey.so")
 MAX_PASSPHRASE_LENGTH = 50
 MAX_PIN_LENGTH = 9
 

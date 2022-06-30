@@ -16,9 +16,9 @@ message TronSignMessage {
 }
 
 /**
-* Response: Signed message
-* @prev TronSignMessage
-*/
+ * Response: Signed message
+ * @end
+ */
 message TronMessageSignature {
     optional bytes address = 1;                             // address used to sign the message
     required bytes signature = 2;                           // signature of the message
@@ -55,7 +55,7 @@ message TronSignRawTx {
 
 /**
  * Response: Tron Signature
- * @prev TronSignRawTx
+ * @end
  */
 message TronSignature {
     required bytes signature = 1;                           // signature of the message
