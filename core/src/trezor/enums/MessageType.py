@@ -250,6 +250,12 @@ if not utils.BITCOIN_ONLY:
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
+    TronSignMessage = 10501
+    TronMessageSignature = 10502
+    TronGetAddress = 10503
+    TronAddress = 10504
+    TronSignRawTx = 10505
+    TronSignature = 10506
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

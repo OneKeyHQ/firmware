@@ -38,4 +38,5 @@ void starcoin_get_address_from_public_key(const uint8_t *public_key,
 
 // Layout
 void layoutRequireConfirmSignTx(char *address);
+void layoutRequireConfirmPayload(void);
 #endif  // __STARCOIN_H__

@@ -32,10 +32,10 @@ void device_test(void) {
   oledFrame(0, 0, OLED_WIDTH - 1, OLED_HEIGHT - 1);
   oledRefresh();
 
-  //wait for release
+  // wait for release
   if (retest) {
     while (1) {
-      if((buttonRead() & BTN_PIN_UP)&&(buttonRead() & BTN_PIN_DOWN)){
+      if ((buttonRead() & BTN_PIN_UP) && (buttonRead() & BTN_PIN_DOWN)) {
         break;
       }
     }
