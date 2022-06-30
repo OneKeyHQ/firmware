@@ -475,17 +475,15 @@ class AboutSetting(Screen):
 
 
 class PowerOff(FullSizeWindow):
-    def __init__(self, clear_loop:bool=False):
+    def __init__(self, set_home: bool = False):
         super().__init__(
             title=_(i18n_keys.TITLE__POWER_OFF),
             subtitle=None,
             confirm_text=_(i18n_keys.ITEM__POWER_OFF),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
-            top_layer=True,
         )
-        self.clear_loop = clear_loop
+        self.set_home = set_home
         self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
-        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         from trezor import config
 
         self.has_pin = config.has_pin()
@@ -504,7 +502,7 @@ class PowerOff(FullSizeWindow):
                 if self.has_pin:
                     from apps.common.request_pin import verify_user_pin
 
-                    workflow.spawn(verify_user_pin(clear_loop=self.clear_loop))
+                    workflow.spawn(verify_user_pin(set_home=self.set_home))
 
 
 class ShutingDown(FullSizeWindow):

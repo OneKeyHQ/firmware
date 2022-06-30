@@ -266,26 +266,12 @@ def get_state() -> str | None:
     return dev_state
 
 
-def lock_device(auto: bool = False) -> None:
+def lock_device() -> None:
     if config.has_pin():
         config.lock()
         wire.find_handler = get_pinlocked_handler
         set_homescreen()
         workflow.close_others()
-        if auto:
-            ui.display.backlight(ui.style.BACKLIGHT_LOW)
-            workflow.idle_timer.set(3 * 1000, turn_off_screen_if_possible)
-
-
-def turn_off_screen_if_possible():
-    from trezor.lvglui import get_elapsed
-
-    global LAST_TOUCH_ELAPSED
-    if get_elapsed() > LAST_TOUCH_ELAPSED:
-        ui.display.backlight(0)
-
-
-LAST_TOUCH_ELAPSED = 0
 
 
 def lock_device_if_unlocked() -> None:
@@ -301,9 +287,7 @@ def lock_device_if_unlocked() -> None:
         workflow.idle_timer.set(diff + 5 * 1000, lock_device_if_unlocked)
         return
     if config.is_unlocked():
-        global LAST_TOUCH_ELAPSED
-        LAST_TOUCH_ELAPSED = get_elapsed()
-        lock_device(auto=True)
+        lock_device()
 
 
 async def unlock_device(ctx: wire.GenericContext = wire.DUMMY_CONTEXT) -> None:
@@ -347,18 +331,10 @@ def get_pinlocked_handler(
 
 
 # this function is also called when handling ApplySettings
-def reload_settings_from_storage(auto_lock: bool = True) -> None:
-    if auto_lock:
-        workflow.idle_timer.set(
-            storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
-        )
-        print(f"auto lock time is {storage.device.get_autolock_delay_ms()}")
-    else:
-        from trezor.lvglui import get_elapsed
-
-        global LAST_TOUCH_ELAPSED
-        LAST_TOUCH_ELAPSED = get_elapsed()
-        workflow.idle_timer.set(10 * 1000, turn_off_screen_if_possible)
+def reload_settings_from_storage() -> None:
+    workflow.idle_timer.set(
+        storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
+    )
     wire.experimental_enabled = storage.device.get_experimental_features()
     ui.display.orientation(storage.device.get_rotation())
 

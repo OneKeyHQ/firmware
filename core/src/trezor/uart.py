@@ -3,7 +3,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage import device
-from trezor import config, io, loop, utils
+from trezor import config, io, loop, utils, workflow
 from trezor.lvglui import StatusBar
 from trezor.ui import display
 
@@ -51,7 +51,7 @@ async def handle_usb_state():
             CHARGING = False
             StatusBar.get_instance().show_charging()
             StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-        if config.is_unlocked():
+        if config.is_unlocked() and device.is_initialized():
             apps.base.lock_device()
 
 
@@ -79,16 +79,16 @@ async def process_push() -> None:
         print(f"cmd == {cmd} with value {value} ")
     if cmd == _CMD_BLE_STATUS:
         # 1 connected 2 disconnected 3 opened 4 closed
-        _deal_ble_status(value)
+        await _deal_ble_status(value)
     elif cmd == _CMD_BLE_PAIR_CODE:
         # show six bytes pair code as string
-        _deal_ble_pair(value)
+        await _deal_ble_pair(value)
     elif cmd == _CMD_BLE_PAIR_RES:
         # paring result 1 success 2 failed
         await _deal_pair_res(value)
     elif cmd == _CMD_DEVICE_CHARGING_STATUS:
         # 1 usb plug in 2 usb plug out 3 charging
-        _deal_charging_state(value)
+        await _deal_charging_state(value)
     elif cmd == _CMD_BATTERY_STATUS:
         # current battery level, 0-100 only effective when not charging
         res = ustruct.unpack(">B", value)[0]
@@ -97,7 +97,7 @@ async def process_push() -> None:
 
     elif cmd == _CMD_SIDE_BUTTON_PRESS:
         # 1 short press 2 long press
-        _deal_button_press(value)
+        await _deal_button_press(value)
     elif cmd == _CMD_BLE_NAME:
         # retrieve ble name has format: ^T[0-9]{4}$
         _retrieve_ble_name(value)
@@ -109,27 +109,27 @@ async def process_push() -> None:
             print("unknown or not care command:", cmd)
 
 
-def turn_on_lcd_if_possible():
-    if not display.backlight():
-        display.backlight(device.get_brightness())
-
-
-def _deal_ble_pair(value):
+async def _deal_ble_pair(value):
     global SCREEN
     pair_codes = value.decode("utf-8")
     # pair_codes = "".join(list(map(lambda c: chr(c), ustruct.unpack(">6B", value))))
-    turn_on_lcd_if_possible()
+    utils.turn_on_lcd_if_possible()
     from trezor.lvglui.scrs.ble import PairCodeDisplay
 
     SCREEN = PairCodeDisplay(pair_codes)
 
 
-def _deal_button_press(value: bytes) -> None:
+async def restart():
+    loop.clear()
+
+
+async def _deal_button_press(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _PRESS_SHORT:
         if display.backlight():
-            if config.is_unlocked():
-                apps.base.lock_device()
+            if device.is_initialized() and config.has_pin():
+                config.lock()
+                workflow.spawn(restart())
             display.backlight(0)
         else:
             display.backlight(device.get_brightness())
@@ -138,21 +138,22 @@ def _deal_button_press(value: bytes) -> None:
             print("LONG PRESS=======")
         from trezor.lvglui.scrs.homescreen import PowerOff
 
-        PowerOff(clear_loop=True)
+        PowerOff(set_home=True)
 
 
-def _deal_charging_state(value: bytes) -> None:
+async def _deal_charging_state(value: bytes) -> None:
     """THIS DOESN'T WORK CORRECT DUE TO THE PUSHED STATE, ONLY USED AS A FALLBACK WHEN
     CHARGING WITH A CHARGER NOW.
 
     """
     global CHARGING
     res = ustruct.unpack(">B", value)[0]
-    turn_on_lcd_if_possible()
     if res in (
         _USB_STATUS_PLUG_IN,
         _POWER_STATUS_CHARGING,
     ):
+        if res != _POWER_STATUS_CHARGING:
+            utils.turn_on_lcd_if_possible()
         if CHARGING:
             return
         CHARGING = True
@@ -182,7 +183,7 @@ async def _deal_pair_res(value: bytes) -> None:
         await show_pairing_error()
 
 
-def _deal_ble_status(value: bytes) -> None:
+async def _deal_ble_status(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _BLE_STATUS_CONNECTED:
         utils.BLE_CONNECTED = True

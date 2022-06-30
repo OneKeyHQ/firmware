@@ -84,6 +84,8 @@ class WipeDeviceTips(FullSizeWindow):
                     self.channel.publish(1)
                 else:
                     return
+            else:
+                return
         elif code == lv.EVENT.LONG_PRESSED:
             if target == self.btn_yes:
                 self.channel.publish(1)

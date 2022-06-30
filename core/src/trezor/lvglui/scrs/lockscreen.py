@@ -62,7 +62,7 @@ class LockScreen(Screen):
 
                     display.backlight(device.get_brightness())
                     # reschedule auto_lock task to avoid never turn off lcd (turn the brightness of the lcd to zero)
-                    reload_settings_from_storage(auto_lock=False)
+                    reload_settings_from_storage()
                     return
                 from trezor import workflow
                 from apps.base import unlock_device
