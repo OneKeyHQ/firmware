@@ -30,6 +30,7 @@
 #include "common.h"
 #include "config.h"
 #include "crypto.h"
+#include "ctype.h"
 #include "curves.h"
 #include "debug.h"
 #include "ecdsa.h"
@@ -67,6 +68,7 @@
 #include "solana.h"
 #include "starcoin.h"
 #include "stellar.h"
+#include "tron.h"
 #endif
 
 #if EMULATOR
@@ -476,5 +478,6 @@ void fsm_msgRebootToBootloader(void) {
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"
 #include "fsm_msg_stellar.h"
+#include "fsm_msg_tron.h"
 
 #endif

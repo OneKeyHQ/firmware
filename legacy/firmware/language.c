@@ -215,6 +215,8 @@ const char *languages[][2] = {
     {"Confirm address?", "确认地址"},
     // layout2.c lisk.c
     {"Confirm sending", "确认发送"},
+    // starcoin.c
+    {"Confirm signning", "确认签名"},
     // lisk.c lisk.c lisk.c lisk.c
     {"Confirm transaction", "确认交易"},
     // layout2.c layout2.c layout2.c
@@ -719,7 +721,7 @@ const char *languages[][2] = {
     //
     {"Select your", "选择你的"},
     // ethereum.c
-    {"Send", ""},
+    {"Send", "发送"},
     {"Send SOL", "发送 SOL"},
     // layout2.c
     {"Send anyway?", ""},
@@ -1015,6 +1017,8 @@ const char *languages[][2] = {
     {"format", "格式"},
     // layout2.c
     {"from your wallet?", "从钱包中"},
+    // startcoin.c
+    {"from:", "从:"},
     // layout2.c
     {"hour", "小时"},
     //
@@ -1137,6 +1141,10 @@ const char *languages[][2] = {
     {"to:", ""},
     // ethereum.c
     {"token", "代币"},
+    //
+    // startcoin.c
+    {"transaction cannot be decoded", "交易无法解析"},
+    {"transaction:", "交易:"},
     //
     {"transaction is set to", "被设定为"},
     // layout2.c layout2.c
