@@ -218,6 +218,8 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
 
   CHECK_INITIALIZED
 
+  CHECK_PIN
+
   if (msg->domain_hash.size != 32 || msg->message_hash.size != 32) {
     fsm_sendFailure(FailureType_Failure_ProcessError, "data length error");
     return;
@@ -242,8 +244,6 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
     layoutHome();
     return;
   }
-
-  CHECK_PIN
 
   const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
