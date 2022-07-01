@@ -4,6 +4,7 @@ from trezor import loop, utils
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
+from ..lv_colors import lv_colors
 from .components.button import NormalButton
 from .components.label import SubTitle, Title
 from .components.roller import Roller
@@ -21,7 +22,7 @@ class Screen(lv.obj):
         super().__init__()
         self.prev_scr = prev_scr or lv.scr_act()
         self.channel = loop.chan()
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         if "icon_path" in kwargs:
             self.icon = lv.img(self)
@@ -40,7 +41,7 @@ class Screen(lv.obj):
         # btn
         if "btn_text" in kwargs:
             self.btn = NormalButton(self, kwargs["btn_text"])
-            self.btn.enable(lv.color_hex(0x1BAC44), lv.color_hex(0xFFFFFF))
+            self.btn.enable(lv_colors.ONEKEY_GREEN)
             self.btn.add_event_cb(
                 self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.PRESSED, None
             )
@@ -53,7 +54,7 @@ class Screen(lv.obj):
                 self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.PRESSED, None
             )
             self.nav_back.set_style_bg_img_src(
-                "A:/res/nav-arrow-left.png", lv.PART.MAIN | lv.STATE.DEFAULT
+                "A:/res/nav-back.png", lv.PART.MAIN | lv.STATE.DEFAULT
             )
         self.load_screen(self)
 
@@ -65,7 +66,7 @@ class Screen(lv.obj):
             if isinstance(target, lv.imgbtn):
                 if target == self.nav_back:
                     if self.prev_scr is not None:
-                        self.load_screen(self.prev_scr, destory_self=True)
+                        self.load_screen(self.prev_scr, destroy_self=True)
             else:
                 if target == self.btn:
                     self.on_click(target)
@@ -91,9 +92,9 @@ class Screen(lv.obj):
             utils.SCREENS.append(cls._instance)
         return cls._instance
 
-    def load_screen(self, scr, destory_self: bool = False):
-        if destory_self:
-            load_scr_with_animation(scr.__class__())
+    def load_screen(self, scr, destroy_self: bool = False):
+        if destroy_self:
+            load_scr_with_animation(scr.__class__(), back=True)
             utils.SCREENS.remove(self)
             self.del_delayed(1000)
             if hasattr(self, "_init"):
@@ -124,12 +125,17 @@ class FullSizeWindow(lv.obj):
         icon_path: str | None = None,
         options: str | None = None,
         hold_confirm: bool = False,
+        top_layer: bool = False,
     ):
-        super().__init__(lv.scr_act())
+        if top_layer:
+            super().__init__(lv.layer_top())
+        else:
+            super().__init__(lv.scr_act())
+
         self.channel = loop.chan()
         self.set_size(lv.pct(100), lv.pct(100))
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -138,7 +144,10 @@ class FullSizeWindow(lv.obj):
         self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
         self.content_area.set_style_bg_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.content_area.set_style_bg_color(
+            lv_colors.WHITE_3, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
         )
         self.content_area.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -182,7 +191,7 @@ class FullSizeWindow(lv.obj):
                 else:
                     self.btn_yes.set_size(192, 62)
                     self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -24)
-            self.btn_yes.enable(lv.color_hex(0x1BAC44), lv.color_hex(0xFFFFFF))
+            self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
             self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
             if self.hold_confirm:
                 self.btn_yes.add_event_cb(
@@ -209,7 +218,7 @@ class FullSizeWindow(lv.obj):
                 else:
                     if not self.hold_confirm:
                         # delete the confirm button manually to fix a dispaly bug in reset process with desktop
-                        self.btn_yes.del_delayed(10)
+                        # self.btn_yes.del_delayed(10)
                         self.channel.publish(1)
                     else:
                         return
@@ -221,12 +230,12 @@ class FullSizeWindow(lv.obj):
     async def request(self) -> Any:
         return await self.channel.take()
 
-    def destroy(self, delay_ms=100):
+    def destroy(self, delay_ms=1000):
         self.del_delayed(delay_ms)
 
 
-def load_scr_with_animation(scr: Screen) -> None:
+def load_scr_with_animation(scr: Screen, back: bool = False) -> None:
     """Load a screen with animation."""
     # TODO: FIX ANIMATION LOAD
-    # lv.scr_load_anim(scr, lv.SCR_LOAD_ANIM.OVER_LEFT, 100, 0, False)
+    # lv.scr_load_anim(scr, lv.SCR_LOAD_ANIM.OVER_LEFT if back else lv.SCR_LOAD_ANIM.OVER_RIGHT, 100, 0, False)
     lv.scr_load(scr)

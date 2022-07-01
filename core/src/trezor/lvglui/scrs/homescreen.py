@@ -2,6 +2,8 @@ from storage import device
 from trezor import workflow
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
+from trezor.ui import display
 
 from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36
 from .common import (  # noqa: F401, F403, F405
@@ -13,6 +15,10 @@ from .common import (  # noqa: F401, F403, F405
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
 from .components.container import ContainerFlexCol, ContanierGrid
 from .components.imgbtn import ImgBottonGridItem
+
+
+def brightness2_percent_str(brightness: int) -> str:
+    return f"{int(brightness / 255 * 100)}%"
 
 
 class MainScreen(Screen):
@@ -47,7 +53,7 @@ class MainScreen(Screen):
         self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
         self.dev_state_text = lv.label(self.dev_state)
         self.dev_state_text.set_style_text_color(
-            lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.dev_state_text.set_style_text_font(
             font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -96,7 +102,7 @@ class SettingsScreen(Screen):
             return
         kwargs = {
             "prev_scr": prev_scr,
-            "title": _(i18n_keys.TITLE__SETTING),
+            "title": _(i18n_keys.TITLE__SETTINGS),
             "nav_back": True,
         }
         super().__init__(**kwargs)
@@ -136,12 +142,12 @@ class SettingsScreen(Screen):
             has_next=False,
         )
         self.power.label_left.set_style_text_color(
-            lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def refresh_text(self):
-        self.title.set_text(_(i18n_keys.TITLE__SETTING))
+        self.title.set_text(_(i18n_keys.TITLE__SETTINGS))
         self.general.label_left.set_text(_(i18n_keys.ITEM__GENERAL))
         self.connect.label_left.set_text(_(i18n_keys.ITEM__CONNECT))
         self.home_scr.label_left.set_text(_(i18n_keys.ITEM__HOME_SCREEN))
@@ -189,6 +195,9 @@ class GeneralScreen(Screen):
                 self.auto_lock.label_right.set_text(GeneralScreen.cur_auto_lock)
             if self.cur_language:
                 self.language.label_right.set_text(self.cur_language)
+            self.backlight.label_right.set_text(
+                brightness2_percent_str(device.get_brightness())
+            )
             self.refresh_text()
             return
         super().__init__(
@@ -202,8 +211,10 @@ class GeneralScreen(Screen):
         self.language = ListItemBtn(
             self.container, _(i18n_keys.ITEM__LANGUAGE), GeneralScreen.cur_language
         )
-        self.language.label_right.set_style_text_font(
-            font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.backlight = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__BRIGHTNESS),
+            brightness2_percent_str(device.get_brightness()),
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -211,6 +222,7 @@ class GeneralScreen(Screen):
         self.title.set_text(_(i18n_keys.TITLE__GENERAL))
         self.auto_lock.label_left.set_text(_(i18n_keys.ITEM__AUTO_LOCK))
         self.language.label_left.set_text(_(i18n_keys.ITEM__LANGUAGE))
+        self.backlight.label_left.set_text(_(i18n_keys.ITEM__BRIGHTNESS))
 
     def get_str_from_lock_ms(self, time_ms) -> str:
         if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
@@ -234,6 +246,8 @@ class GeneralScreen(Screen):
                 self.load_screen(AutoLockSetting(self))
             elif target == self.language:
                 self.load_screen(LanguageSetting(self))
+            elif target == self.backlight:
+                self.load_screen(BacklightSetting(self))
 
 
 # pyright: off
@@ -341,6 +355,46 @@ class LanguageSetting(Screen):
                     button.set_checked()
 
 
+class BacklightSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__BRIGHTNESS), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.item1 = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__BRIGHTNESS),
+            brightness2_percent_str(device.get_brightness()),
+            has_next=False,
+        )
+        self.slider = lv.slider(self)
+        self.slider.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.slider.set_size(424, 8)
+        self.slider.set_range(20, 255)
+        self.slider.set_value(display.backlight(), lv.ANIM.OFF)
+        self.slider.align_to(self.container, lv.ALIGN.BOTTOM_MID, 0, 33)
+        self.slider.set_style_bg_color(
+            lv_colors.GRAY_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.slider.set_style_bg_color(lv_colors.WHITE, lv.PART.KNOB | lv.STATE.DEFAULT)
+        self.slider.set_style_bg_color(
+            lv_colors.WHITE, lv.PART.INDICATOR | lv.STATE.DEFAULT
+        )
+        self.slider.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+
+    def on_value_changed(self, event_obj):
+        target = event_obj.get_target()
+        if target == self.slider:
+            value = target.get_value()
+            display.backlight(value)
+            self.item1.label_right.set_text(brightness2_percent_str(value))
+            device.set_brightness(value)
+
+
 class ConnectSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -421,17 +475,15 @@ class AboutSetting(Screen):
 
 
 class PowerOff(FullSizeWindow):
-    def __init__(self):
+    def __init__(self, set_home: bool = False):
         super().__init__(
             title=_(i18n_keys.TITLE__POWER_OFF),
             subtitle=None,
             confirm_text=_(i18n_keys.ITEM__POWER_OFF),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
         )
-        self.btn_yes.enable(
-            bg_color=lv.color_hex(0xAF2B0E), text_color=lv.color_hex(0xFFFFFF)
-        )
-        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        self.set_home = set_home
+        self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
         from trezor import config
 
         self.has_pin = config.has_pin()
@@ -450,20 +502,22 @@ class PowerOff(FullSizeWindow):
                 if self.has_pin:
                     from apps.common.request_pin import verify_user_pin
 
-                    workflow.spawn(verify_user_pin())
+                    workflow.spawn(verify_user_pin(set_home=self.set_home))
 
 
 class ShutingDown(FullSizeWindow):
     def __init__(self):
-        super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
+        super().__init__(
+            title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None, top_layer=True
+        )
         from trezor import loop, uart
 
-        async def restart_delay():
+        async def shutdown_delay():
             await loop.sleep(3000)
             uart.ctrl_power_off()
 
         self.destroy(3000)
-        workflow.spawn(restart_delay())
+        workflow.spawn(shutdown_delay())
 
 
 class HomeScreenSetting(Screen):
@@ -527,7 +581,7 @@ class SecurityScreen(Screen):
             self.container, _(i18n_keys.ITEM__RESET_DEVICE), has_next=False
         )
         self.rest_device.label_left.set_style_text_color(
-            lv.color_hex(0xFF0000), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 

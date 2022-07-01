@@ -4,6 +4,7 @@ from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
 from trezor.enums import EthereumDataType
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import (
     EthereumFieldType,
     EthereumSignTypedData,
@@ -24,7 +25,6 @@ from .layout import (
     confirm_typed_data_final,
     confirm_typed_value,
     should_show_array,
-    should_show_domain,
     should_show_struct,
 )
 
@@ -74,12 +74,11 @@ async def generate_typed_data_hash(
     )
     await typed_data_envelope.collect_types()
 
-    name, version = await get_name_and_version_for_domain(ctx, typed_data_envelope)
-    show_domain = await should_show_domain(ctx, name, version)
+    await confirm_domain(ctx, typed_data_envelope)
     domain_separator = await typed_data_envelope.hash_struct(
         primary_type="EIP712Domain",
         member_path=[0],
-        show_data=show_domain,
+        show_data=False,
         parent_objects=["EIP712Domain"],
     )
 
@@ -94,8 +93,8 @@ async def generate_typed_data_hash(
             ctx,
             description=primary_type,
             data_members=typed_data_envelope.types[primary_type].members,
-            title="Confirm message",
-            button_text="Show full message",
+            title=_(i18n_keys.TITLE__CONFIRM_MESSAGE),
+            button_text=_(i18n_keys.BUTTON__VIEW_FULL_MESSAGE),
         )
         message_hash = await typed_data_envelope.hash_struct(
             primary_type=primary_type,
@@ -260,6 +259,7 @@ class TypedDataEnvelope:
                         description=struct_name,
                         data_members=self.types[struct_name].members,
                         title=".".join(current_parent_objects),
+                        button_text=_(i18n_keys.BUTTON__VIEW_FULL_STRUCT),
                     )
                 else:
                     show_struct = False
@@ -398,7 +398,7 @@ def write_leftpad32(w: HashWriter, value: bytes, signed: bool = False) -> None:
     else:
         pad_value = 0x00
 
-    for _ in range(32 - len(value)):
+    for _i in range(32 - len(value)):
         w.append(pad_value)
     w.extend(value)
 
@@ -407,7 +407,7 @@ def write_rightpad32(w: HashWriter, value: bytes) -> None:
     assert len(value) <= 32
 
     w.extend(value)
-    for _ in range(32 - len(value)):
+    for _i in range(32 - len(value)):
         w.append(0x00)
 
 
@@ -529,3 +529,16 @@ async def get_name_and_version_for_domain(
             domain_version = await get_value(ctx, member.type, member_value_path)
 
     return domain_name, domain_version
+
+
+async def confirm_domain(ctx: Context, typed_data_envelope: TypedDataEnvelope) -> None:
+    eip712_domain = {}
+    domain_members = typed_data_envelope.types["EIP712Domain"].members
+    member_value_path = [0, 0]
+    for member_index, member in enumerate(domain_members):
+        member_value_path[-1] = member_index
+        value = await get_value(ctx, member.type, member_value_path)
+        eip712_domain[member.name] = value
+    from .layout import confirm_domain
+
+    await confirm_domain(ctx, eip712_domain)

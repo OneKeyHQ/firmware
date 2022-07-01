@@ -182,6 +182,8 @@ trezor.lvglui.scrs.components.listitem
 import trezor.lvglui.scrs.components.listitem
 trezor.lvglui.scrs.components.navback
 import trezor.lvglui.scrs.components.navback
+trezor.lvglui.scrs.components.pageable
+import trezor.lvglui.scrs.components.pageable
 trezor.lvglui.scrs.components.popup
 import trezor.lvglui.scrs.components.popup
 trezor.lvglui.scrs.components.qrcode
@@ -414,6 +416,8 @@ apps.common.coininfo
 import apps.common.coininfo
 apps.common.coins
 import apps.common.coins
+apps.common.helpers
+import apps.common.helpers
 apps.common.keychain
 import apps.common.keychain
 apps.common.passphrase

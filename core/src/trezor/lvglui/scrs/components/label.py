@@ -1,4 +1,4 @@
-from .. import font_PJSBOLD36, font_PJSREG24, lv
+from .. import font_PJSBOLD36, font_PJSREG24, lv, lv_colors
 
 
 class Title(lv.label):
@@ -16,9 +16,7 @@ class Title(lv.label):
             )
         else:
             self.align(lv.ALIGN.TOP_MID, 0, pos_y)
-        self.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_align(lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT)
 
@@ -35,9 +33,7 @@ class SubTitle(lv.label):
         self.align_to(
             align_base, lv.ALIGN.OUT_BOTTOM_MID, relative_pos[0], relative_pos[1]
         )
-        self.set_style_text_color(
-            lv.color_hex(0xCCCCCC), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.set_style_text_color(lv_colors.LIGHT_GRAY, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_align(lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT)

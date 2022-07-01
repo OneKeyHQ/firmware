@@ -3,7 +3,7 @@ name: "Prebuild checks"
 on: [pull_request]
 
 jobs:
-  style_check:
+  style-check:
     name: Style check
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +15,7 @@ jobs:
       - run: nix-shell --run "poetry install"
       - run: nix-shell --run "poetry run make style_check"
 
-  defs_check:
+  defs-check:
     name: Defs check
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +30,7 @@ jobs:
       - run: nix-shell --run "poetry install"
       - run: nix-shell --run "poetry run make defs_check"
 
-  gen_check:
+  gen-check:
     name: Gen check
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +45,7 @@ jobs:
       - run: nix-shell --run "poetry install"
       - run: nix-shell --run "poetry run make gen_check"
 
-  changelog_check:
+  changelog-check:
     name: Changelog check
     runs-on: ubuntu-latest
     steps:

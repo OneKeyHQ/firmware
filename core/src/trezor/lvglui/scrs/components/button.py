@@ -1,6 +1,6 @@
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
-from .. import font_PJSBOLD24, lv
+from .. import font_PJSBOLD24, font_PJSMID24, lv, lv_colors
 
 # class NormalButton(lv.btn):
 #     def __init__(self, parent, text="Next", pos=(-6, 300), enable=True) -> None:
@@ -55,14 +55,14 @@ class NormalButton(lv.btn):
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
     def disable(
-        self, bg_color=lv.color_hex(0x323232), text_color=lv.color_hex(0x191919)
+        self, bg_color=lv_colors.ONEKEY_BLACK_1, text_color=lv_colors.ONEKEY_GRAY
     ) -> None:
         self.set_style_bg_color(bg_color, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_color(text_color, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.clear_flag(lv.btn.FLAG.CLICKABLE)
 
     def enable(
-        self, bg_color=lv.color_hex(0x191919), text_color=lv.color_hex(0xFFFFFF)
+        self, bg_color=lv_colors.ONEKEY_BLACK, text_color=lv_colors.WHITE
     ) -> None:
         self.set_style_bg_color(bg_color, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_color(text_color, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -81,9 +81,9 @@ class ListItemBtn(lv.btn):
         super().__init__(parent)
         self.set_size(lv.pct(100), 78)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_hor(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         if left_img_src:
             img_left = lv.img(self)
             img_left.set_src(left_img_src)
@@ -95,7 +95,10 @@ class ListItemBtn(lv.btn):
         self.label_left = lv.label(self)
         self.label_left.set_long_mode(lv.label.LONG.WRAP)
         self.label_left.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.label_left.set_style_text_font(
+            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.label_left.set_text(text)
 
@@ -111,55 +114,58 @@ class ListItemBtn(lv.btn):
                 lv.TEXT_ALIGN.RIGHT, lv.PART.MAIN | lv.STATE.DEFAULT
             )
             self.label_right.set_style_text_color(
-                lv.color_hex(0x666666), lv.PART.MAIN | lv.STATE.DEFAULT
+                lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.label_right.set_style_text_font(
+                font_PJSMID24, lv.PART.MAIN | lv.STATE.DEFAULT
             )
             self.label_right.set_text(right_text)
             if has_next:
                 self.label_right.align_to(self.img_right, lv.ALIGN.OUT_LEFT_MID, -10, 0)
             else:
-                self.label_right.set_align(lv.ALIGN.RIGHT_MID)
+                self.label_right.align(lv.ALIGN.RIGHT_MID, 0, 0)
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
     def add_check_img(self) -> None:
         self.img_right = lv.img(self)
-        self.img_right.set_src("A:/res/check.png")
+        self.img_right.set_src("A:/res/check-white.png")
         self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
 
     def set_checked(self) -> None:
         self.img_right.clear_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_color(lv.color_hex(0x191919), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
 
     def set_uncheck(self) -> None:
         self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
 
 
 class ListItemBtnWithSwitch(lv.btn):
     def __init__(self, parent, text: str) -> None:
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         label_left = lv.label(self)
         label_left.set_text(text)
         label_left.set_long_mode(lv.label.LONG.WRAP)
         label_left.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         label_left.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         label_left.set_align(lv.ALIGN.LEFT_MID)
         self.switch = lv.switch(self)
         self.switch.set_size(48, 24)
         self.switch.set_style_bg_color(
-            lv.color_hex(0x4C4C4C), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.GRAY_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.switch.set_style_bg_color(
-            lv.color_hex(0x1BAC44), lv.PART.INDICATOR | lv.STATE.CHECKED
+            lv_colors.ONEKEY_GREEN, lv.PART.INDICATOR | lv.STATE.CHECKED
         )
-        self.switch.set_style_bg_color(
-            lv.color_hex(0xFFFFFF), lv.PART.KNOB | lv.STATE.DEFAULT
-        )
+        self.switch.set_style_bg_color(lv_colors.WHITE, lv.PART.KNOB | lv.STATE.DEFAULT)
         self.switch.set_align(lv.ALIGN.RIGHT_MID)
         self.switch.add_state(lv.STATE.CHECKED)
         self.switch.add_flag(lv.obj.FLAG.EVENT_BUBBLE)

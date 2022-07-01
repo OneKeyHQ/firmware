@@ -6,7 +6,7 @@ from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.scrs import font_PJSBOLD24, font_PJSBOLD36
 
-from .common import FullSizeWindow, Screen, lv  # noqa: F401,F403,F405
+from .common import FullSizeWindow, Screen, lv, lv_colors  # noqa: F401,F403,F405
 
 # from .components.button import NormalButton
 # from .components.keyboard import BIP39Keyboard
@@ -34,7 +34,7 @@ class InitScreen(Screen):
         self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.roller.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn.enable(lv.color_hex(0x1BAC44), lv.color_hex(0xFFFFFF))
+        self.btn.enable(lv_colors.ONEKEY_GREEN)
         self.add_event_cb(
             self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None
         )

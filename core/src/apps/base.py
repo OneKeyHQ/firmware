@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import storage.cache
 import storage.device
-from trezor import config, utils, wire, workflow
+from trezor import config, ui, utils, wire, workflow
 from trezor.enums import MessageType
 from trezor.messages import Success
 
@@ -332,8 +332,6 @@ def get_pinlocked_handler(
 
 # this function is also called when handling ApplySettings
 def reload_settings_from_storage() -> None:
-    from trezor import ui
-
     workflow.idle_timer.set(
         storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
     )

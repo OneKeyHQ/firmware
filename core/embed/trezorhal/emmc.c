@@ -57,8 +57,7 @@ void emmc_init(void) {
   hmmc1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
   hmmc1.Init.ClockDiv = 2;
   if (HAL_MMC_Init(&hmmc1) != HAL_OK) {
-    while (1)
-      ;
+    ensure(0, "mmc init fail");
   }
 
   if (HAL_MMC_ConfigWideBusOperation(&hmmc1, SDMMC_BUS_WIDE_8B) != HAL_OK) {

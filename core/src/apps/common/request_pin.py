@@ -6,6 +6,8 @@ import storage.sd_salt
 from trezor import config, wire
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
+from apps.base import set_homescreen
+
 from .sdcard import SdCardUnavailable, request_sd_salt
 
 
@@ -91,6 +93,7 @@ async def verify_user_pin(
     allow_cancel: bool = True,
     retry: bool = True,
     cache_time_ms: int = 0,
+    set_home: bool = False,
 ) -> None:
     last_unlock = _get_last_unlock_time()
     if (
@@ -111,23 +114,25 @@ async def verify_user_pin(
         config.ensure_not_wipe_code(pin)
     else:
         pin = ""
-
     try:
         salt = await request_sd_salt(ctx)
     except SdCardUnavailable:
         raise wire.PinCancelled("SD salt is unavailable")
     if config.unlock(pin, salt):
+        if set_home:
+            set_homescreen()
         _set_last_unlock_time()
         return
     elif not config.has_pin():
         raise RuntimeError
-
     while retry:
         pin_rem = config.get_pin_rem()
         pin = await request_pin_on_device(  # type: ignore ["request_pin_on_device" is possibly unbound]
             ctx, _(i18n_keys.TITLE__ENTER_PIN), pin_rem, allow_cancel
         )
         if config.unlock(pin, salt):
+            if set_home:
+                set_homescreen()
             _set_last_unlock_time()
             return
 

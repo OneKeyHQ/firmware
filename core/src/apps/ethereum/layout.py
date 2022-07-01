@@ -5,7 +5,7 @@ from trezor import ui
 from trezor.enums import ButtonRequestType, EthereumDataType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import EthereumFieldType, EthereumStructMember
-from trezor.strings import format_amount, format_plural
+from trezor.strings import format_amount
 from trezor.ui.layouts import (
     confirm_action,
     confirm_address,
@@ -137,8 +137,8 @@ async def confirm_typed_data_final(ctx: Context) -> None:
     await confirm_action(
         ctx,
         "confirm_typed_data_final",
-        title=_(i18n_keys.TITLE__CONFIRM_TYPED_DATA),
-        action=_(i18n_keys.SUBTITLE__REALLY_SIGN_EIP_712_TYPED_DATA),
+        title=_(i18n_keys.TITLE__SIGN_712_TYPED_DATA),
+        action=_(i18n_keys.SUBTITLE__SIGN_712_TYPED_DATA),
         verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
         hold=True,
     )
@@ -151,6 +151,40 @@ def confirm_empty_typed_message(ctx: Context) -> Awaitable[None]:
         title=_(i18n_keys.TITLE__CONFIRM_MESSAGE),
         data="",
         description=_(i18n_keys.SUBTITLE__NO_MESSAGE_FIELD),
+    )
+
+
+async def confirm_domain(ctx: Context, domain: dict[str, bytes]) -> None:
+    domain_name = (
+        decode_typed_data(domain["name"], "string") if domain.get("name") else None
+    )
+    domain_version = (
+        decode_typed_data(domain["version"], "string")
+        if domain.get("version")
+        else None
+    )
+    chain_id = (
+        decode_typed_data(domain["chainId"], "uint256")
+        if domain.get("chainId")
+        else None
+    )
+    verifying_contract = (
+        decode_typed_data(domain["verifyingContract"], "address")
+        if domain.get("verifyingContract")
+        else None
+    )
+    salt = decode_typed_data(domain["salt"], "bytes32") if domain.get("salt") else None
+    from trezor.ui.layouts import confirm_domain  # type: ignore["confirm_domain" is unknown import symbol]
+
+    await confirm_domain(
+        ctx,
+        **{
+            "name": domain_name,
+            "version": domain_version,
+            "chainId": chain_id,
+            "verifyingContract": verifying_contract,
+            "salt": salt,
+        },
     )
 
 
@@ -183,7 +217,8 @@ async def should_show_struct(
         (ui.BOLD, description),
         (
             ui.NORMAL,
-            format_plural("Contains {count} {plural}", len(data_members), "key"),
+            _(i18n_keys.LIST_KEY__CONTAINS_STR_KEY).format(len(data_members))
+            # format_plural("Contains {count} {plural}", len(data_members), "key"),
         ),
         (ui.NORMAL, ", ".join(field.name for field in data_members)),
     )
@@ -202,12 +237,15 @@ async def should_show_array(
     data_type: str,
     size: int,
 ) -> bool:
-    para = ((ui.NORMAL, format_plural("Array of {count} {plural}", size, data_type)),)
+    para = (
+        (ui.NORMAL, _(i18n_keys.INSERT__ARRAY_OF_STR_STR).format(size, data_type)),
+        # format_plural("Array of {count} {plural}", size, data_type)),
+    )
     return await should_show_more(
         ctx,
         title=limit_str(".".join(parent_objects)),
         para=para,
-        button_text="Show full array",
+        button_text=_(i18n_keys.BUTTON__VIEW_FULL_ARRAY),
         br_type="should_show_array",
     )
 
@@ -224,10 +262,10 @@ async def confirm_typed_value(
 
     if array_index is not None:
         title = limit_str(".".join(parent_objects + [name]))
-        description = f"[{array_index}] ({type_name})"
+        description = f"[{array_index}] ({type_name}):"
     else:
         title = limit_str(".".join(parent_objects))
-        description = f"{name} ({type_name})"
+        description = f"{name} ({type_name}):"
 
     data = decode_typed_data(value, type_name)
 
@@ -239,6 +277,7 @@ async def confirm_typed_value(
             data=data,
             description=description,
             ask_pagination=True,
+            icon=None,
         )
     else:
         await confirm_text(
@@ -247,6 +286,7 @@ async def confirm_typed_value(
             title=title,
             data=data,
             description=description,
+            icon=None,
         )
 
 

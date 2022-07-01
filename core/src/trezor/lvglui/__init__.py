@@ -1,3 +1,4 @@
+from storage import device
 from trezor import io, log, loop, utils
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
@@ -68,8 +69,12 @@ except BaseException:
         log.error("init", "failed to initialize emulator")
 
 
-class StatusBar:
+class StatusBar(lv.obj):
     _instance = None
+
+    BLE_STATE_CONNECTED = 0
+    BLE_STATE_DISABLED = 1
+    BLE_STATE_ENABLED = 2
 
     @classmethod
     def get_instance(cls) -> "StatusBar":
@@ -78,25 +83,63 @@ class StatusBar:
         return cls._instance
 
     def __init__(self):
-        self.ble = lv.img(lv.layer_top())
-        self.ble.set_src("A:/res/Bluetooth.png")
-        self.ble.align(lv.ALIGN.TOP_RIGHT, -30, 5)
-        self.ble.add_flag(lv.obj.FLAG.HIDDEN)
-        self.battery = lv.img(lv.layer_top())
-        self.battery.set_src("A:/res/Status=50%.png")
-        self.battery.align(lv.ALIGN.TOP_RIGHT, -5, 5)
-        self.usb = lv.img(lv.layer_top())
+        super().__init__(lv.layer_top())
+        self.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.align(lv.ALIGN.TOP_LEFT, 0, 0)
+        self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_column(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_right(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_top(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_flex_flow(lv.FLEX_FLOW.ROW)
+        # align style of the items in the container
+        self.set_flex_align(
+            lv.FLEX_ALIGN.END, lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER
+        )
+        # usb status
+        self.usb = lv.img(self)
         self.usb.set_src("A:/res/usb.png")
         self.usb.add_flag(lv.obj.FLAG.HIDDEN)
-        self.usb.align(lv.ALIGN.TOP_RIGHT, -55, 5)
 
-    def show_ble(self, show: bool = False):
-        if show:
-            if self.ble.has_flag(lv.obj.FLAG.HIDDEN):
-                self.ble.clear_flag(lv.obj.FLAG.HIDDEN)
+        # ble status
+        ble_enabled = device.ble_enabled()
+        self.ble = lv.img(self)
+        self.ble.set_src(
+            "A:/res/ble-enabled.png" if ble_enabled else "A:/res/ble-disabled.png"
+        )
+
+        # battery capacity percent
+        self.percent = lv.label(self)
+        from trezor.lvglui.scrs import font_STATUS_BAR
+
+        self.percent.set_style_text_font(
+            font_STATUS_BAR, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.percent.set_style_text_color(
+            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.percent.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.percent.set_style_pad_ver(4, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.percent.add_flag(lv.obj.FLAG.HIDDEN)
+
+        # battery capacity icon
+        self.battery = lv.img(self)
+        self.battery.set_src("A:/res/battery-60-white.png")
+
+        # charging status
+        self.charging = lv.img(self)
+        self.charging.set_src("A:/res/charging.png")
+        self.charging.add_flag(lv.obj.FLAG.HIDDEN)
+
+    def show_ble(self, status: int):
+        if status == StatusBar.BLE_STATE_CONNECTED:
+            icon_path = "A:/res/ble-connected.png"
+        elif status == StatusBar.BLE_STATE_ENABLED:
+            icon_path = "A:/res/ble-enabled.png"
         else:
-            if not self.ble.has_flag(lv.obj.FLAG.HIDDEN):
-                self.ble.add_flag(lv.obj.FLAG.HIDDEN)
+            icon_path = "A:/res/ble-disabled.png"
+        self.ble.set_src(icon_path)
 
     def show_usb(self, show: bool = False):
         if show:
@@ -106,21 +149,50 @@ class StatusBar:
             if not self.usb.has_flag(lv.obj.FLAG.HIDDEN):
                 self.usb.add_flag(lv.obj.FLAG.HIDDEN)
 
-    def set_battery_img(self, value: int):
-        icon_path = retrieve_icon_path(value)
+    def show_charging(self, show: bool = False):
+        if show:
+            if self.charging.has_flag(lv.obj.FLAG.HIDDEN):
+                self.charging.clear_flag(lv.obj.FLAG.HIDDEN)
+        else:
+            if not self.charging.has_flag(lv.obj.FLAG.HIDDEN):
+                self.charging.add_flag(lv.obj.FLAG.HIDDEN)
+
+    def set_battery_img(self, value: int, charging: bool):
+        if charging:
+            self.percent.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.percent.set_text(f"{value}%")
+        else:
+            self.percent.add_flag(lv.obj.FLAG.HIDDEN)
+        icon_path = retrieve_icon_path(value, charging)
         self.battery.set_src(icon_path)
 
 
-def retrieve_icon_path(value: int) -> str:
-    if value == 101:
-        return "A:/res/Status=charging.png"
-    elif value >= 85:
-        return "A:/res/Status=100%.png"
-    elif value >= 75:
-        return "A:/res/Status=75%.png"
-    elif value >= 50:
-        return "A:/res/Status=50%.png"
-    elif value >= 25:
-        return "A:/res/Status=25%.png"
+def retrieve_icon_path(value: int, charging: bool) -> str:
+    # if value == 101:
+    #     return "A:/res/charging.png"
+    if value >= 80:
+        return (
+            "A:/res/battery-100-green.png"
+            if charging
+            else "A:/res/battery-100-white.png"
+        )
+    elif value >= 60:
+        return (
+            "A:/res/battery-80-green.png" if charging else "A:/res/battery-80-white.png"
+        )
+    elif value >= 40:
+        return (
+            "A:/res/battery-60-green.png" if charging else "A:/res/battery-60-white.png"
+        )
+    elif value >= 20:
+        return (
+            "A:/res/battery-40-green.png" if charging else "A:/res/battery-40-white.png"
+        )
+    elif value >= 5:
+        return (
+            "A:/res/battery-20-green.png" if charging else "A:/res/battery-20-white.png"
+        )
     else:
-        return "A:/res/Status=0%.png"
+        return (
+            "A:/res/battery-5-green.png" if charging else "A:/res/battery-5-white.png"
+        )

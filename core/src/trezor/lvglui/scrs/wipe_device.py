@@ -1,5 +1,6 @@
 from trezor import utils
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 
 from .common import FullSizeWindow, lv
 from .components.button import NormalButton
@@ -16,7 +17,7 @@ class WipeDevice(FullSizeWindow):
         icon_path = "A:/res/warning.png"
         super().__init__(title, subtitle, confirm_text, cancel_text, icon_path, None)
         self.btn_yes.set_style_bg_color(
-            lv.color_hex(0xAF2B0E), lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
 
 
@@ -48,7 +49,7 @@ class WipeDeviceTips(FullSizeWindow):
 
     def btn_enable(self, enable: bool = True):
         if enable:
-            self.btn_yes.enable(lv.color_hex(0xAF2B0E), lv.color_hex(0xFFFFFF))
+            self.btn_yes.enable(lv_colors.ONEKEY_RED_1)
         else:
             self.btn_yes.disable()
 
@@ -83,6 +84,8 @@ class WipeDeviceTips(FullSizeWindow):
                     self.channel.publish(1)
                 else:
                     return
+            else:
+                return
         elif code == lv.EVENT.LONG_PRESSED:
             if target == self.btn_yes:
                 self.channel.publish(1)

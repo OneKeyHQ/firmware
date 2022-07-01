@@ -2,6 +2,8 @@ from trezor import utils
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
+from ..lv_colors import lv_colors  # noqa: F401
+
 if utils.EMULATOR:
     font_PJSBOLD36 = lv.font_load("A:/res/PlusJakartaSans-Bold-36.bin")
     font_PJSBOLD32 = lv.font_load("A:/res/PlusJakartaSans-Bold-32.bin")
@@ -16,6 +18,7 @@ if utils.EMULATOR:
     font_MONO24 = lv.font_load("A:/res/JetBrainsMono-Medium-24.bin")
     font_LANG_MIX = lv.font_load("A:/res/LANG-MIX.bin")
     font_LANG_MIX_TITLE = lv.font_load("A:/res/LANG-MIX-TITLE.bin")
+    font_STATUS_BAR = font_PJSREG24
 
 else:
     font_PJSBOLD36 = lv.font_scs_bold_38
@@ -30,3 +33,4 @@ else:
     font_MONO24 = lv.font_scs_reg_26
     font_LANG_MIX = lv.font_mix_bold_24
     font_LANG_MIX_TITLE = lv.font_mix_title_bold_36
+    font_STATUS_BAR = lv.font_status_bar

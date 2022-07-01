@@ -9,9 +9,14 @@
 #include "timer.h"
 
 SPI_HandleTypeDef spi;
-static uint8_t recv_buf[SPI_PKG_SIZE];
+static DMA_HandleTypeDef hdma_tx;
+static DMA_HandleTypeDef hdma_rx;
+
+static uint8_t *recv_buf = (uint8_t *)0x30040000;
+static uint8_t *send_buf = (uint8_t *)0x30040040;
 static int32_t volatile spi_rx_event = 0;
 static int32_t volatile spi_tx_event = 0;
+static int32_t volatile spi_abort_event = 0;
 ChannelType host_channel = CHANNEL_NULL;
 
 uint8_t spi_data_in[SPI_BUF_MAX_IN_LEN];
@@ -55,14 +60,14 @@ int32_t wait_spi_tx_event(int32_t timeout) {
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
   if (!fifo_write_no_overflow(&spi_fifo_in, recv_buf, hspi->RxXferSize)) {
+    memset(recv_buf, 0, SPI_PKG_SIZE);
   }
 
   if (spi_rx_event) {
     spi_rx_event = 0;
   }
 
-  memset(recv_buf, 0, SPI_PKG_SIZE);
-  HAL_SPI_Receive_IT(&spi, recv_buf, SPI_PKG_SIZE);
+  HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE);
 }
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
@@ -70,20 +75,32 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
     spi_tx_event = 0;
   }
 
-  memset(recv_buf, 0, SPI_PKG_SIZE);
-  HAL_SPI_Receive_IT(&spi, recv_buf, SPI_PKG_SIZE);
+  HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE);
 }
+
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
+  ensure(secfalse, "spi ovr err");
+}
+
+void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi) { spi_abort_event = 0; }
 
 void SPI2_IRQHandler(void) { HAL_SPI_IRQHandler(&spi); }
 
 int32_t spi_slave_init() {
   GPIO_InitTypeDef gpio;
 
+  __HAL_RCC_DMA1_FORCE_RESET();
+  __HAL_RCC_DMA1_RELEASE_RESET();
+
+  __HAL_RCC_SPI2_FORCE_RESET();
+  __HAL_RCC_SPI2_RELEASE_RESET();
+
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOJ_CLK_ENABLE();
   __HAL_RCC_SPI2_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   gpio.Pin = GPIO_PIN_13;
   gpio.Mode = GPIO_MODE_OUTPUT_PP;
@@ -130,10 +147,62 @@ int32_t spi_slave_init() {
   spi.Init.NSS = SPI_NSS_HARD_INPUT;
   spi.Init.TIMode = SPI_TIMODE_DISABLE;
   spi.Init.Mode = SPI_MODE_SLAVE;
+  spi.Init.FifoThreshold = SPI_FIFO_THRESHOLD_16DATA;
 
   if (HAL_OK != HAL_SPI_Init(&spi)) {
     return -1;
   }
+
+  /*##-3- Configure the DMA ##################################################*/
+  /* Configure the DMA handler for Transmission process */
+  hdma_tx.Instance = SPIx_TX_DMA_STREAM;
+  hdma_tx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_tx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_tx.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_tx.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  hdma_tx.Init.Request = SPIx_TX_DMA_REQUEST;
+  hdma_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+  hdma_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_tx.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma_tx.Init.Mode = DMA_NORMAL;
+  hdma_tx.Init.Priority = DMA_PRIORITY_LOW;
+
+  HAL_DMA_Init(&hdma_tx);
+
+  /* Associate the initialized DMA handle to the the SPI handle */
+  __HAL_LINKDMA(&spi, hdmatx, hdma_tx);
+
+  /* Configure the DMA handler for Transmission process */
+  hdma_rx.Instance = SPIx_RX_DMA_STREAM;
+
+  hdma_rx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+  hdma_rx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+  hdma_rx.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_rx.Init.PeriphBurst = DMA_PBURST_SINGLE;
+  hdma_rx.Init.Request = SPIx_RX_DMA_REQUEST;
+  hdma_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+  hdma_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_rx.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+  hdma_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+  hdma_rx.Init.Mode = DMA_NORMAL;
+  hdma_rx.Init.Priority = DMA_PRIORITY_HIGH;
+
+  HAL_DMA_Init(&hdma_rx);
+
+  /* Associate the initialized DMA handle to the the SPI handle */
+  __HAL_LINKDMA(&spi, hdmarx, hdma_rx);
+
+  /*##-4- Configure the NVIC for DMA #########################################*/
+  /* NVIC configuration for DMA transfer complete interrupt (SPI1_TX) */
+  NVIC_SetPriority(SPIx_DMA_TX_IRQn, IRQ_PRI_DMA);
+  HAL_NVIC_EnableIRQ(SPIx_DMA_TX_IRQn);
+
+  /* NVIC configuration for DMA transfer complete interrupt (SPI1_RX) */
+  NVIC_SetPriority(SPIx_DMA_RX_IRQn, IRQ_PRI_DMA);
+  HAL_NVIC_EnableIRQ(SPIx_DMA_RX_IRQn);
 
   NVIC_SetPriority(SPI2_IRQn, IRQ_PRI_SPI);
   HAL_NVIC_EnableIRQ(SPI2_IRQn);
@@ -142,7 +211,7 @@ int32_t spi_slave_init() {
   spi_rx_event = 1;
 
   /* start SPI receive */
-  if (HAL_SPI_Receive_IT(&spi, recv_buf, SPI_PKG_SIZE) != HAL_OK) {
+  if (HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE) != HAL_OK) {
     return -1;
   }
 
@@ -153,18 +222,20 @@ int32_t spi_slave_send(uint8_t *buf, uint32_t size, int32_t timeout) {
   uint32_t msg_size;
 
   msg_size = size < SPI_PKG_SIZE ? SPI_PKG_SIZE : size;
+  memcpy(send_buf, buf, msg_size);
+
+  spi_abort_event = 1;
+  if (HAL_SPI_Abort_IT(&spi) != HAL_OK) {
+    return -1;
+  }
+  while (spi_abort_event)
+    ;
 
   SET_COMBUS_LOW();
   SET_COMBUS_LOW1();
 
-  if (HAL_SPI_Abort_IT(&spi) != HAL_OK) {
-    SET_COMBUS_HIGH();
-    SET_COMBUS_HIGH1();
-    return -1;
-  }
-
   spi_tx_event = 1;
-  if (HAL_SPI_Transmit_IT(&spi, buf, msg_size) != HAL_OK) {
+  if (HAL_SPI_Transmit_DMA(&spi, send_buf, msg_size) != HAL_OK) {
     SET_COMBUS_HIGH();
     SET_COMBUS_HIGH1();
     return -1;
@@ -216,3 +287,7 @@ uint32_t spi_read_retry(uint8_t *buf) {
     }
   }
 }
+
+void SPIx_DMA_RX_IRQHandler(void) { HAL_DMA_IRQHandler(spi.hdmarx); }
+
+void SPIx_DMA_TX_IRQHandler(void) { HAL_DMA_IRQHandler(spi.hdmatx); }

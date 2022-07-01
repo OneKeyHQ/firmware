@@ -118,7 +118,7 @@ int main(void) {
 
 #if defined TREZOR_MODEL_T
 #if PRODUCTION
-  check_and_replace_bootloader();
+  // check_and_replace_bootloader();
 #endif
 #endif
 

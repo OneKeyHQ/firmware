@@ -14,7 +14,7 @@ class ImgBottonGridItem(lv.imgbtn):
         col_num,
         row_num,
         bg_img_path: str,
-        img_path_other: str = "A:/res/checked_48.png",
+        img_path_other: str = "A:/res/checked-green.png",
     ):
         super().__init__(parent)
         self.set_grid_cell(
