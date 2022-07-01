@@ -3187,7 +3187,7 @@ void layoutTransInformation(const BITMAP *bmp_up, const BITMAP *bmp_down,
 #endif
 
 #if ONEKEY_MINI
-#define DEVICE_INFO_PAGE_NUM 4
+#define DEVICE_INFO_PAGE_NUM 5
 #else
 #define DEVICE_INFO_PAGE_NUM 2
 #endif
@@ -3338,7 +3338,6 @@ refresh_menu:
       oledDrawString(0, y, "BOOTLOADER:", FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawString(0, y, bootloader_version, FONT_FIXED);
-      y += font->pixel + 1;
 
 #if !EMULATOR
       jedec_id = (w25qxx_read_id() >> 16) & 0xff;
@@ -3370,6 +3369,19 @@ refresh_menu:
                      &bmp_btn_down);
       break;
     case 3:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+
+#ifdef BUILD_ID
+      oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, BUILD_ID, FONT_FIXED);
+      y += font->pixel + 1;
+#endif
+
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
+                     &bmp_btn_down);
+      break;
+    case 4:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       setRgbBitmap(true);
       oledDrawRgbBitmap(48, 16, &bmp_icon_egg);

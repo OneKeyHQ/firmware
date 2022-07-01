@@ -1,6 +1,7 @@
 #include "atca_command.h"
 #include "atca_hal.h"
 #include "atca_status.h"
+#include "supervise.h"
 
 void calculate_crc16(uint32_t length, const uint8_t *data, uint8_t *crc16) {
   uint32_t counter;
@@ -101,6 +102,7 @@ ATCA_STATUS atca_send_packet(ATCAPacket *packet) {
 ATCA_STATUS atca_exec_cmd(ATCAPacket *packet) {
   static ATCA_STATUS status = ATCA_SUCCESS;
   uint8_t rx_len;
+  svc_system_irq(0);
 
   do {
     if ((status = atca_wake()) != ATCA_SUCCESS) {
@@ -134,6 +136,7 @@ ATCA_STATUS atca_exec_cmd(ATCAPacket *packet) {
   } while (0);
 
   atca_idle();
+  svc_system_irq(1);
 
   return status;
 }

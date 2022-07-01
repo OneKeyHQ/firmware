@@ -682,7 +682,7 @@ static struct menu check_word_menu = {
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
 #if ONEKEY_MINI
-    {"Recovery Phrase ", NULL, false, .sub_menu = &check_word_menu, NULL,
+    {"Recovery Phrase verify", NULL, false, .sub_menu = &check_word_menu, NULL,
      false},
 #endif
     {"Blind Signing", NULL, true, menu_blind_sign, NULL, false},
