@@ -2162,7 +2162,7 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
   oledRefresh();
 }
 
-#define DEVICE_INFO_PAGE_NUM 2
+#define DEVICE_INFO_PAGE_NUM 3
 
 void layouKeyValue(int y, const char *desc, const char *value) {
   oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
@@ -2230,8 +2230,36 @@ refresh_menu:
 
       layouKeyValue(y, _("Font:"), "3type");
       y += font->pixel + 1;
+
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
+                     &bmp_btn_down);
       break;
 
+    case 2:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+#ifdef BUILD_ID
+      char *build_id = _("BUILD ID:");
+      oledDrawStringAdapter(0, y, build_id, FONT_STANDARD);
+      x = oledStringWidthAdapter(build_id, FONT_STANDARD) + 1;
+
+      // split build id
+      char build_id1[64] = {0};
+      char build_id2[64] = {0};
+
+      for (int i = 0; i < BUILD_ID_MAX_LEN; i++) {
+        build_id1[i] = BUILD_ID[i];
+        if (oledStringWidthAdapter(build_id1, FONT_STANDARD) > OLED_WIDTH - x) {
+          build_id1[i] = 0;
+          strcat(build_id2, BUILD_ID + i);
+          break;
+        }
+      }
+
+      oledDrawStringAdapter(x, y, build_id1, FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringRightAdapter(OLED_WIDTH - 1, y, build_id2, FONT_STANDARD);
+#endif
+      break;
     default:
       break;
   }

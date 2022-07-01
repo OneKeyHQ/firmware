@@ -119,6 +119,10 @@ bool get_features(Features *resp) {
     strlcpy(resp->onekey_serial, serial, sizeof(resp->onekey_serial));
   }
 
+#ifdef BUILD_ID
+  resp->has_build_id = true;
+  strlcpy(resp->build_id, BUILD_ID, sizeof(resp->build_id));
+#endif
 #if !EMULATOR
   resp->has_bootloader_version = true;
   strlcpy(resp->bootloader_version, bootloader_version,

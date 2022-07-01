@@ -125,6 +125,7 @@ message Features {
     optional string bootloader_version = 510;
 
     optional uint32 coin_switch = 517;
+    optional string build_id = 518;
 }
 
 /**

@@ -93,6 +93,7 @@ extern Storage configUpdate;
 #define HOMESCREEN_SIZE 1024
 #define UUID_SIZE 12
 #define SE_SESSION_KEY 16
+#define BUILD_ID_MAX_LEN 64
 
 #if DEBUG_LINK
 #define MIN_AUTOLOCK_DELAY_MS (10 * 1000U)  // 10 seconds

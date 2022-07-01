@@ -17,6 +17,7 @@ Features.se_ver                         max_size:16
 Features.onekey_version                 max_size:16
 Features.onekey_serial                  max_size:32
 Features.bootloader_version             max_size:8
+Features.build_id                       max_size:64
 
 ApplySettings.language                  max_size:17
 ApplySettings.label                     max_size:33
