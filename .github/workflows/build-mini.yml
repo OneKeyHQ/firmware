@@ -28,6 +28,7 @@ jobs:
           poetry install
           nix-shell
           cd legacy
+          export ONEKEY_MINI=1
           poetry run make vendor
           poetry run ./script/setup
           poetry run ./script/cibuild
@@ -38,7 +39,7 @@ jobs:
         with:
           name: firmware-${{ github.sha }}
           path: |
-            ./legacy/firmware/onekey.bin
+            ./legacy/firmware/mini*Stable*.bin
 
       - name: Set Env
         run: |
