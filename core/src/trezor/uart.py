@@ -3,7 +3,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage import device
-from trezor import config, io, loop, utils, workflow
+from trezor import config, io, log, loop, utils
 from trezor.lvglui import StatusBar
 from trezor.ui import display
 
@@ -39,6 +39,7 @@ async def handle_usb_state():
     while True:
         usb_state = loop.wait(io.USB_STATE)
         state = await usb_state
+        utils.lcd_resume()
         if state:
             StatusBar.get_instance().show_usb(True)
             # deal with charging state
@@ -60,8 +61,11 @@ async def handle_uart():
     while True:
         try:
             await process_push()
-        except Exception:
-            pass
+        except Exception as exec:
+            if __debug__:
+                log.exception(__name__, exec)
+            loop.clear()
+            return  # pylint: disable=lost-exception
 
 
 async def process_push() -> None:
@@ -119,20 +123,17 @@ async def _deal_ble_pair(value):
     SCREEN = PairCodeDisplay(pair_codes)
 
 
-async def restart():
-    loop.clear()
-
-
 async def _deal_button_press(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _PRESS_SHORT:
         if display.backlight():
+            display.backlight(0)
             if device.is_initialized() and config.has_pin():
                 config.lock()
-                workflow.spawn(restart())
-            display.backlight(0)
+                # single to restart the main loop
+                raise loop.TASK_CLOSED
         else:
-            display.backlight(device.get_brightness())
+            utils.turn_on_lcd_if_possible()
     elif res == _PRESS_LONG:
         if __debug__:
             print("LONG PRESS=======")

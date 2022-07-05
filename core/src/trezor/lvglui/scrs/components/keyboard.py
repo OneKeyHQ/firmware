@@ -23,8 +23,11 @@ def change_key_bg(
     if enabled:
         if dsc.id == id1:
             dsc.rect_dsc.bg_color = lv_colors.ONEKEY_RED_1
-        elif dsc.id == id2 and all_enabled:
-            dsc.rect_dsc.bg_color = lv_colors.ONEKEY_GREEN
+        elif dsc.id == id2:
+            if all_enabled:
+                dsc.rect_dsc.bg_color = lv_colors.ONEKEY_GREEN
+            else:
+                dsc.rect_dsc.bg_color = lv_colors.ONEKEY_BLACK_1
     else:
         if dsc.id in (id1, id2):
             dsc.rect_dsc.bg_color = lv_colors.ONEKEY_BLACK_1
@@ -181,6 +184,7 @@ class BIP39Keyboard(lv.keyboard):
             self.dummy_ctl_map[-1] &= (
                 self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
             )
+            self.completed = True
             self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.dummy_ctl_map)
 
     def event_cb(self, event):
@@ -188,7 +192,7 @@ class BIP39Keyboard(lv.keyboard):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                change_key_bg(dsc, 21, 29, True)
+                change_key_bg(dsc, 21, 29, True, self.completed)
             else:
                 change_key_bg(dsc, 21, 29, False)
         elif event.code == lv.EVENT.VALUE_CHANGED:
@@ -230,6 +234,9 @@ class BIP39Keyboard(lv.keyboard):
                     self.dummy_ctl_map[-1] &= (
                         self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
                     )
+                    self.completed = True
+                else:
+                    self.completed = False
                 self.set_map(
                     lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.dummy_ctl_map
                 )
@@ -278,8 +285,26 @@ class NumberKeyboard(lv.keyboard):
             lv.SYMBOL.OK,
             "",
         ]
+        self.dummy_btnm_map = [
+            str(self.nums[0]),
+            str(self.nums[1]),
+            str(self.nums[2]),
+            "\n",
+            str(self.nums[3]),
+            str(self.nums[4]),
+            str(self.nums[5]),
+            "\n",
+            str(self.nums[6]),
+            str(self.nums[7]),
+            str(self.nums[8]),
+            "\n",
+            lv.SYMBOL.CLOSE,
+            str(self.nums[9]),
+            lv.SYMBOL.OK,
+            "",
+        ]
         self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
-        self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.ctrl_map)
+        self.set_map(lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
         self.set_width(lv.pct(96))
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -294,23 +319,50 @@ class NumberKeyboard(lv.keyboard):
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_radius(30, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_radius(36, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD32, lv.PART.ITEMS | lv.STATE.DEFAULT)
-        self.set_height(292)
-        self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
+        self.set_height(324)
+        self.align(lv.ALIGN.BOTTOM_MID, 0, -20)
         self.set_textarea(self.ta)
         self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
+        self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
+
+    def toggle_number_input_keys(self, enable: bool):
+        if enable:
+            self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.ctrl_map)
+
+        else:
+            self.dummy_ctl_map = []
+            self.dummy_ctl_map.extend(self.ctrl_map)
+            for i in range(12):
+                if i not in (9, 11):
+                    self.dummy_ctl_map[i] |= lv.btnmatrix.CTRL.DISABLED
+            self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
 
     def event_cb(self, event):
-        if event.code == lv.EVENT.DRAW_PART_BEGIN:
-            txt_input = self.ta.get_text()
+        code = event.code
+        input_len = len(self.ta.get_text())
+        if code == lv.EVENT.DRAW_PART_BEGIN:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
-            if len(txt_input) > 3:
+            if input_len > 3:
                 change_key_bg(dsc, 9, 11, True)
-            elif len(txt_input) > 0:
+            elif input_len > 0:
                 change_key_bg(dsc, 9, 11, True, False)
             else:
                 change_key_bg(dsc, 9, 11, False)
+                if dsc.id == 9:
+                    dsc.rect_dsc.bg_img_src = "A:/res/keyboard-close.png"
+        elif code == lv.EVENT.VALUE_CHANGED:
+            if input_len >= 50:
+                # disable number keys
+                self.toggle_number_input_keys(False)
+            elif input_len > 0:
+                # enable number keys
+                self.toggle_number_input_keys(True)
+            else:
+                self.set_map(
+                    lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map
+                )
 
 
 class PassphraseKeyboard(lv.btnmatrix):

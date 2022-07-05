@@ -85,7 +85,7 @@ class Popup(lv.obj):
 
 class PopupSample(lv.obj):
     def __init__(
-        self, title: str, subtitle: str | None, icon_path: str, del_delay: int
+        self, title: str, subtitle: str | None, icon_path: str | None, del_delay: int
     ) -> None:
         super().__init__(lv.scr_act())
         self.set_size(lv.pct(100), lv.pct(100))
@@ -95,10 +95,13 @@ class PopupSample(lv.obj):
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.icon = lv.img(self)
-        self.icon.set_src(icon_path)
-        self.icon.align(lv.ALIGN.TOP_MID, 0, 68)
-        self.title = Title(self, self.icon, 452, (0, 32), title)
+        if icon_path:
+            self.icon = lv.img(self)
+            self.icon.set_src(icon_path)
+            self.icon.align(lv.ALIGN.TOP_MID, 0, 68)
+            self.title = Title(self, self.icon, 452, (0, 32), title)
+        else:
+            self.title = Title(self, None, 452, (0, 32), title)
         if subtitle:
             self.subtitle = SubTitle(self, self.title, 452, (0, 24), subtitle)
         self.del_delayed(del_delay)

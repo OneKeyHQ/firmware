@@ -1,3 +1,5 @@
+from trezor import utils
+
 from ..i18n import gettext as _, keys as i18n_keys
 from .common import FullSizeWindow, lv, lv_colors  # noqa: F401,F403
 from .components.button import NormalButton
@@ -26,13 +28,14 @@ class PinTip(FullSizeWindow):
         )
         self.btn = NormalButton(self, _(i18n_keys.BUTTON__CONTINUE), False)
         self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
-        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.cb_cnt = 0
 
     def eventhandler(self, event_obj: lv.event_t):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.btn:
                 self.channel.publish(1)
                 self.destroy()
@@ -68,6 +71,7 @@ class InputPin(FullSizeWindow):
         )
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)
+        self.keyboard.add_event_cb(self.on_event, lv.EVENT.CANCEL, None)
         self.keyboard.ta.add_event_cb(self.on_event, lv.EVENT.VALUE_CHANGED, None)
 
     def on_event(self, event_obj):
@@ -76,12 +80,16 @@ class InputPin(FullSizeWindow):
             if self.keyboard.ta.get_text() != "":
                 self.subtitle.set_text("")
             return
-        input = self.keyboard.ta.get_text()
-        if len(input) < 4:
-            return
+        elif code == lv.EVENT.READY:
+            input = self.keyboard.ta.get_text()
+            if len(input) < 4:
+                return
+            self.channel.publish(input)
+        elif code == lv.EVENT.CANCEL:
+            self.channel.publish(0)
+
         self.clean()
         self.destroy()
-        self.channel.publish(input)
 
 
 class SetupComplete(FullSizeWindow):
@@ -92,12 +100,15 @@ class SetupComplete(FullSizeWindow):
             confirm_text=_(i18n_keys.BUTTON__CONTINUE),
             icon_path="A:/res/success.png",
         )
-        self.btn.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
 
     def eventhandler(self, event_obj: lv.event_t):
-        self.channel.publish(1)
-        self.destroy()
-        lv.scr_act().del_delayed(500)
-        from apps.base import set_homescreen
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_yes:
+                self.channel.publish(1)
+                self.destroy()
+                lv.scr_act().del_delayed(500)
+                from apps.base import set_homescreen
 
-        set_homescreen()
+                set_homescreen()

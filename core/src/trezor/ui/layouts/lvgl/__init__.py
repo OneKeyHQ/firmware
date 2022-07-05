@@ -793,7 +793,7 @@ async def show_popup(
     subtitle: str | None = None,
     description_param: str = "",
     timeout_ms: int = 3000,
-    icon: str = "A:/res/warning.png",
+    icon: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.components.popup import PopupSample
     from trezor import loop
@@ -846,6 +846,10 @@ async def request_pin_on_device(
     pinscreen = InputPin(title=prompt, subtitle=subprompt)
     result = await ctx.wait(pinscreen.request())
     if not result:
+        if not allow_cancel:
+            from apps.base import set_homescreen
+
+            set_homescreen()
         raise wire.PinCancelled
     assert isinstance(result, str)
     return result

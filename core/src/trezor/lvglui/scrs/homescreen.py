@@ -1,5 +1,5 @@
 from storage import device
-from trezor import workflow
+from trezor import workflow, utils
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.lv_colors import lv_colors
@@ -159,6 +159,8 @@ class SettingsScreen(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.general:
                 self.load_screen(GeneralScreen(self))
             elif target == self.connect:
@@ -242,12 +244,16 @@ class GeneralScreen(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.auto_lock:
                 self.load_screen(AutoLockSetting(self))
             elif target == self.language:
                 self.load_screen(LanguageSetting(self))
             elif target == self.backlight:
                 self.load_screen(BacklightSetting(self))
+            else:
+                pass
 
 
 # pyright: off
@@ -293,6 +299,8 @@ class AutoLockSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target in self.btns:
                 for index, item in enumerate(self.btns):
                     if item == target and self.checked_index != index:
@@ -342,6 +350,8 @@ class LanguageSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             last_checked = self.check_index
             for idx, button in enumerate(self.lang_buttons):
                 if target != button and idx == last_checked:
@@ -365,17 +375,18 @@ class BacklightSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__BRIGHTNESS), nav_back=True
         )
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        current_brightness = device.get_brightness()
         self.item1 = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BRIGHTNESS),
-            brightness2_percent_str(device.get_brightness()),
+            brightness2_percent_str(current_brightness),
             has_next=False,
         )
         self.slider = lv.slider(self)
         self.slider.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.slider.set_size(424, 8)
         self.slider.set_range(20, 255)
-        self.slider.set_value(display.backlight(), lv.ANIM.OFF)
+        self.slider.set_value(current_brightness, lv.ANIM.OFF)
         self.slider.align_to(self.container, lv.ALIGN.BOTTOM_MID, 0, 33)
         self.slider.set_style_bg_color(
             lv_colors.GRAY_1, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -404,8 +415,9 @@ class ConnectSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
+        self.ble.set_size(lv.pct(100), 78)
         if device.ble_enabled():
             self.ble.add_state()
         else:
@@ -494,6 +506,8 @@ class PowerOff(FullSizeWindow):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.btn_yes:
                 self.destroy()
                 ShutingDown()
@@ -502,7 +516,9 @@ class PowerOff(FullSizeWindow):
                 if self.has_pin:
                     from apps.common.request_pin import verify_user_pin
 
-                    workflow.spawn(verify_user_pin(set_home=self.set_home))
+                    workflow.spawn(
+                        verify_user_pin(set_home=self.set_home, allow_cancel=False)
+                    )
 
 
 class ShutingDown(FullSizeWindow):
@@ -554,6 +570,8 @@ class HomeScreenSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.light:
                 self.light.set_checked(True)
                 self.dark.set_checked(False)
@@ -592,6 +610,8 @@ class SecurityScreen(Screen):
         if code == lv.EVENT.CLICKED:
             from trezor.wire import DUMMY_CONTEXT
 
+            if utils.lcd_resume():
+                return
             if target == self.change_pin:
                 from apps.management.change_pin import change_pin
                 from trezor.messages import ChangePin

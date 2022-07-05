@@ -7,7 +7,7 @@ class Roller(lv.roller):
         self.set_options(options, lv.roller.MODE.NORMAL)  # lv.roller.MODE.INFINITE
         self.set_size(448, 157)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -176)
-        self.set_style_text_color(lv_colors.GRAY_1, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_color(lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_letter_space(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_line_space(40, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -16,7 +16,7 @@ class Roller(lv.roller):
         # self.set_style_radius(24, lv.PART.SELECTED | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
-            lv.color_hex(0x191919), lv.PART.SELECTED | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_BLACK_1, lv.PART.SELECTED | lv.STATE.DEFAULT
         )
         self.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.SELECTED | lv.STATE.DEFAULT)

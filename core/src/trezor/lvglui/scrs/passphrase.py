@@ -7,9 +7,9 @@ class PassphraseRequest(FullSizeWindow):
     def __init__(self, max_len=50):
         super().__init__(_(i18n_keys.TITLE__ENTER_PASSPHRASE), None)
         self.keyboard = PassphraseKeyboard(self, max_len)
-        self.keyboard.add_event_cb(self.eventhandler, lv.EVENT.READY, None)
+        self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 
-    def eventhandler(self, event_obj):
+    def on_ready(self, event_obj):
         input = self.keyboard.ta.get_text()
         if input == "":
             return

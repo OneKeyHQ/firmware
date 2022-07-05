@@ -37,9 +37,9 @@ from .. import font_PJSBOLD24, font_PJSMID24, lv, lv_colors
 class NormalButton(lv.btn):
     def __init__(self, parent, text=_(i18n_keys.BUTTON__NEXT), enable=True) -> None:
         super().__init__(parent)
-        self.set_size(416, 62)
-        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -24)
-        self.set_style_radius(32, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_size(416, 76)
+        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -18)
+        self.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -128,7 +128,7 @@ class ListItemBtn(lv.btn):
 
     def add_check_img(self) -> None:
         self.img_right = lv.img(self)
-        self.img_right.set_src("A:/res/check-white.png")
+        self.img_right.set_src("A:/res/checked-white.png")
         self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
 

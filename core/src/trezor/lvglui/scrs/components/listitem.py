@@ -24,6 +24,9 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.checkbox.set_style_bg_color(
             lv_colors.ONEKEY_GREEN, lv.PART.INDICATOR | lv.STATE.CHECKED
         )
+        self.checkbox.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.INDICATOR | lv.STATE.DEFAULT
+        )
         self.checkbox.set_style_bg_opa(255, lv.PART.INDICATOR | lv.STATE.CHECKED)
         self.checkbox.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.label = lv.label(self)
@@ -89,7 +92,7 @@ class DisplayItem(lv.obj):
         self.label.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.label.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_long_mode(lv.label.LONG.DOT)
-        self.label.set_style_max_height(140, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.label.set_style_max_height(200, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )

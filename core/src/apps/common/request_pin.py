@@ -60,7 +60,7 @@ async def pin_mismatch() -> None:
 
 async def request_pin_and_sd_salt(
     ctx: wire.Context,
-    prompt: str = _(i18n_keys.TITLE__ENTER_PIN),
+    prompt: str = "",
     allow_cancel: bool = True,
 ) -> tuple[str, bytearray | None]:
     if config.has_pin():
