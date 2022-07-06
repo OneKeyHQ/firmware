@@ -38,7 +38,7 @@ jobs:
         with:
           name: firmware-${{ github.sha }}
           path: |
-            ./legacy/firmware/bixin.bin
+            ./legacy/firmware/classic*Stable*.bin
 
       - name: Set Env
         run: |
