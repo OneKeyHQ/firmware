@@ -97,6 +97,8 @@ const char *languages[][2] = {
     {"BLE enable:", "使用蓝牙:"},
     // layout2.c
     {"BLE version:", "蓝牙版本:"},
+    // layout2.c
+    {"BUILD ID:", "构建号:"},
     // recovery.c
     {"Back", "返回"},
     // layout2.c
@@ -673,7 +675,7 @@ const char *languages[][2] = {
     {"Recovery Phrase\nimported.", "助记词导入成功"},
     {"Recovery Phrase\nverified", "助记词校验通过"},
     {"Recovery Phrase\nverified pass", "助记词校验通过"},
-    {"Recovery Phrase ", "助记词核对"},
+    {"Recovery Phrase verify", "助记词核对"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
@@ -1079,7 +1081,7 @@ const char *languages[][2] = {
     // lisk.c
     {"register a delegate?", ""},
     // fsm_msg_common.h
-    {"remove current PIN?", ""},
+    {"remove current PIN?", "移除当前PIN码?"},
     // fsm_msg_common.h
     {"restore data err", ""},
     //

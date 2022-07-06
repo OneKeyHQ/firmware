@@ -22,6 +22,7 @@ Features.serial_no                      max_size:32
 Features.NFT_voucher                    max_size:32
 Features.cpu_info                       max_size:16
 Features.pre_firmware                   max_size:16
+Features.build_id                       max_size:64
 
 ApplySettings.language                  max_size:17
 ApplySettings.label                     max_size:33

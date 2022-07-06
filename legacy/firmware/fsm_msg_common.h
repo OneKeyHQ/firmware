@@ -104,14 +104,14 @@ bool get_features(Features *resp) {
     resp->capabilities[0] = Capability_Capability_Bitcoin;
     resp->capabilities[1] = Capability_Capability_Crypto;
 #else
-    resp->capabilities_count = 8;
+    resp->capabilities_count = 7;
     resp->capabilities[0] = Capability_Capability_Bitcoin;
     resp->capabilities[1] = Capability_Capability_Bitcoin_like;
     resp->capabilities[2] = Capability_Capability_Crypto;
     resp->capabilities[3] = Capability_Capability_Ethereum;
-    resp->capabilities[5] = Capability_Capability_NEM;
-    resp->capabilities[6] = Capability_Capability_Stellar;
-    resp->capabilities[7] = Capability_Capability_U2F;
+    resp->capabilities[4] = Capability_Capability_NEM;
+    resp->capabilities[5] = Capability_Capability_Stellar;
+    resp->capabilities[6] = Capability_Capability_U2F;
 #endif
 
 #if !ONEKEY_MINI
@@ -152,6 +152,10 @@ bool get_features(Features *resp) {
     resp->has_onekey_version = true;
     strlcpy(resp->onekey_version, ONEKEY_VERSION, sizeof(resp->onekey_version));
 
+#ifdef BUILD_ID
+    resp->has_build_id = true;
+    strlcpy(resp->build_id, BUILD_ID, sizeof(resp->build_id));
+#endif
 #if !EMULATOR
     resp->has_bootloader_version = true;
     strlcpy(resp->bootloader_version, bootloader_version,

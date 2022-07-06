@@ -1,6 +1,13 @@
 APPVER = 1.8.0
 
-NAME = onekey
+FIRMWARE_BUILD_VERSION=$(shell cat version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
+FIRMWARE_BUILD_DATE=$(shell date "+%m%d")
+ifndef BUILD_ID
+BUILD_COMMIT=$(shell git rev-parse HEAD | cut -c1-7)
+NAME=mini.$(FIRMWARE_BUILD_VERSION)-Stable-$(FIRMWARE_BUILD_DATE)-$(BUILD_COMMIT)
+else
+NAME=mini.$(FIRMWARE_BUILD_VERSION)-Alpha-$(FIRMWARE_BUILD_DATE)-$(BUILD_ID)
+endif
 
 ifeq ($(EMULATOR),1)
 SECP256K1_ZKP ?= 1
@@ -190,6 +197,7 @@ CFLAGS += -I../vendor/nanopb -Iprotob -DPB_FIELD_16BIT=1 -DPB_ENCODE_ARRAYS_UNPA
 CFLAGS += -DDEBUG_LINK=$(DEBUG_LINK)
 CFLAGS += -DDEBUG_LOG=$(DEBUG_LOG)
 CFLAGS += -DSCM_REVISION='"$(shell git rev-parse HEAD | sed 's:\(..\):\\x\1:g')"'
+CFLAGS += -DBUILD_ID='"$(NAME)"'
 CFLAGS += -DUSE_MONERO=0
 ifneq ($(BITCOIN_ONLY),1)
 CFLAGS += -DUSE_ETHEREUM=1
