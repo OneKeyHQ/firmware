@@ -120,7 +120,7 @@ class FullSizeWindow(lv.obj):
 
     def __init__(
         self,
-        title: str,
+        title: str | None,
         subtitle: str | None,
         confirm_text: str = "",
         cancel_text: str = "",
@@ -128,6 +128,7 @@ class FullSizeWindow(lv.obj):
         options: str | None = None,
         hold_confirm: bool = False,
         top_layer: bool = False,
+        auto_close: bool = False,
     ):
         if top_layer:
             super().__init__(lv.layer_top())
@@ -160,20 +161,23 @@ class FullSizeWindow(lv.obj):
             self.icon = lv.img(self.content_area)
             self.icon.set_src(icon_path)
             self.icon.align(lv.ALIGN.TOP_MID, 0, 24)
-        self.title = Title(self.content_area, None, 452, (), title, pos_y=48)
-        if icon_path:
-            self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
-        if subtitle is not None:
-            self.subtitle = SubTitle(
-                self.content_area, self.title, 452, (0, 24), subtitle
-            )
+        if title:
+            self.title = Title(self.content_area, None, 452, (), title, pos_y=48)
+            if icon_path:
+                self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+            if subtitle is not None:
+                self.subtitle = SubTitle(
+                    self.content_area, self.title, 452, (0, 24), subtitle
+                )
+        else:
+            self.icon.align(lv.ALIGN.TOP_MID, 0, 0)
 
         if options:
             self.roller = Roller(self, options)
             self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
             self.select_option = options.split()[1]
 
-        self.content_area.set_style_max_height(656, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_max_height(646, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_min_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         if cancel_text:
             self.btn_no = NormalButton(self, cancel_text)
@@ -188,7 +192,7 @@ class FullSizeWindow(lv.obj):
             if cancel_text:
                 if self.hold_confirm:
                     self.content_area.set_style_max_height(
-                        576, lv.PART.MAIN | lv.STATE.DEFAULT
+                        550, lv.PART.MAIN | lv.STATE.DEFAULT
                     )
                     self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -16)
                 else:
@@ -201,6 +205,8 @@ class FullSizeWindow(lv.obj):
                     self.eventhandler, lv.EVENT.LONG_PRESSED, None
                 )
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        if auto_close:
+            self.destroy(delay_ms=10 * 1000)
 
     def eventhandler(self, event_obj):
         code = event_obj.code

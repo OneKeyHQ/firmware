@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import storage
 import storage.recovery
-from trezor import config, wire
+from trezor import config, loop, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import Success
@@ -50,6 +50,11 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
 
     await _continue_dialog(ctx, msg)
 
+    if isinstance(ctx, wire.DummyContext):
+        from trezor import utils
+
+        utils.play_dead()
+
     # for dry run pin needs to be entered
     if msg.dry_run:
         curpin, salt = await request_pin_and_sd_salt(ctx, _(i18n_keys.TITLE__ENTER_PIN))
@@ -72,7 +77,15 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     storage.recovery.set_dry_run(bool(msg.dry_run))
 
     # workflow.set_default(recovery_homescreen)
-    return await recovery_process(ctx)
+    try:
+        result = await recovery_process(ctx)
+    except BaseException as e:
+        raise e
+    else:
+        return result
+    finally:
+        if isinstance(ctx, wire.DummyContext):
+            loop.clear()
 
 
 def _validate(msg: RecoveryDevice) -> None:

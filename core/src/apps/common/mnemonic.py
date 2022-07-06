@@ -90,7 +90,7 @@ def _start_progress() -> None:
     # Because we are drawing to the screen manually, without a layout, we
     # should make sure that no other layout is running.
     workflow.close_others()
-    draw_simple_text(_(i18n_keys.TITLE__PLEASE_WAIT))
+    draw_simple_text(_(i18n_keys.TITLE__PLEASE_WAIT), icon_path=None, auto_close=True)
 
 
 def _render_progress(progress: int, total: int) -> None:

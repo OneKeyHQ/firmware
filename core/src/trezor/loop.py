@@ -89,6 +89,34 @@ def pause(task: Task, iface: int) -> None:
     tasks.add(task)
 
 
+def pop_tasks_on_iface(iface: int) -> None:
+    tasks = _paused.get(iface, None)
+    if tasks is not None:
+        for task in tasks:
+            task.close()
+            finalize(task, GeneratorExit())
+        tasks.clear()
+
+
+# DUMMY_IO_TASKS: dict[int, set[Task]] = {}
+
+# def pop_tasks_on_iface(iface: int) -> None:
+#     tasks = _paused.get(iface, None)
+#     # global DUMMY_IO_TASKS
+#     if tasks is not None:
+#         # if DUMMY_IO_TASKS.get(iface, None) is None:
+#         #     DUMMY_IO_TASKS[iface] = set()
+#         for task in tasks:
+#             task.close()
+#             # DUMMY_IO_TASKS[iface].add(task)
+#         tasks.clear()
+
+# def readd_tasks_on_iface() -> None:
+#     if DUMMY_IO_TASKS:
+#         for iface, tasks in DUMMY_IO_TASKS.items():
+#             _paused[iface] = tasks
+
+
 def finalize(task: Task, value: Any) -> None:
     """Call and remove any finalization callbacks registered for given task."""
     fn = _finalizers.pop(id(task), None)

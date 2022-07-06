@@ -187,17 +187,20 @@ async def confirm_path_warning(
     ctx: wire.GenericContext, path: str, path_type: str = "Path"
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
+    from trezor.lvglui.lv_colors import lv_colors
 
+    screen = FullSizeWindow(
+        _(i18n_keys.TITLE__UNKNOWN_PATH),
+        _(i18n_keys.SUBTITLE__BTC_GET_ADDRESS_UNKNOWN_PATH).format(path),
+        _(i18n_keys.BUTTON__CONFIRM),
+        _(i18n_keys.BUTTON__CANCEL),
+        icon_path="A:/res/warning.png",
+    )
+    screen.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
     await raise_if_cancelled(
         interact(
             ctx,
-            FullSizeWindow(
-                _(i18n_keys.TITLE__UNKNOWN_PATH),
-                _(i18n_keys.SUBTITLE__BTC_GET_ADDRESS_UNKNOWN_PATH).format(path),
-                _(i18n_keys.BUTTON__CONFIRM),
-                _(i18n_keys.BUTTON__CANCEL),
-                icon_path="A:/res/warning.png",
-            ),
+            screen,
             "path_warning",
             ButtonRequestType.UnknownDerivationPath,
         )
@@ -805,10 +808,15 @@ async def show_popup(
     await loop.sleep(50)
 
 
-def draw_simple_text(title: str, description: str = "") -> None:
+def draw_simple_text(
+    title: str,
+    description: str = "",
+    icon_path: str | None = "A:/res/shriek.png",
+    auto_close: bool = False,
+) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
 
-    FullSizeWindow(title, description, icon_path="A:/res/shriek.png")
+    FullSizeWindow(title, description, icon_path=icon_path, auto_close=auto_close)
 
 
 async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -> str:

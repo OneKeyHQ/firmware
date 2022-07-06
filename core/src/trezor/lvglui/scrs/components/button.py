@@ -81,7 +81,7 @@ class ListItemBtn(lv.btn):
         super().__init__(parent)
         self.set_size(lv.pct(100), 78)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_hor(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_hor(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         if left_img_src:
@@ -93,6 +93,7 @@ class ListItemBtn(lv.btn):
             self.img_right.set_src("A:/res/arrow-right.png")
             self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.label_left = lv.label(self)
+        self.label_left.set_style_width(374, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label_left.set_long_mode(lv.label.LONG.WRAP)
         self.label_left.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -133,14 +134,16 @@ class ListItemBtn(lv.btn):
         self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
 
     def set_checked(self) -> None:
-        self.img_right.clear_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_color(
-            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        if self.img_right.has_flag(lv.obj.FLAG.HIDDEN):
+            self.img_right.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.set_style_bg_color(
+                lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
 
     def set_uncheck(self) -> None:
-        self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+        if not self.img_right.has_flag(lv.obj.FLAG.HIDDEN):
+            self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
+            self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
 
 
 class ListItemBtnWithSwitch(lv.btn):

@@ -18,7 +18,7 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.checkbox.set_text("")
         self.checkbox.set_style_radius(8, lv.PART.INDICATOR | lv.STATE.DEFAULT)
         self.checkbox.set_style_border_color(
-            lv_colors.ONEKEY_BLACK, lv.PART.INDICATOR | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_GRAY, lv.PART.INDICATOR | lv.STATE.DEFAULT
         )
         self.checkbox.set_style_border_opa(255, lv.PART.INDICATOR | lv.STATE.DEFAULT)
         self.checkbox.set_style_bg_color(
@@ -33,6 +33,7 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.label.set_size(340, lv.SIZE.CONTENT)
         self.label.align_to(self.checkbox, lv.ALIGN.OUT_RIGHT_TOP, 0, 0)
         self.label.set_text(text)
+        self.label.set_style_text_line_space(4, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_color(lv_colors.WHITE_1, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_style_text_align(
             lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -92,7 +93,7 @@ class DisplayItem(lv.obj):
         self.label.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.label.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_long_mode(lv.label.LONG.DOT)
-        self.label.set_style_max_height(200, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.label.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )

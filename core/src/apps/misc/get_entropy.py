@@ -11,12 +11,13 @@ if TYPE_CHECKING:
 
 
 async def get_entropy(ctx: Context, msg: GetEntropy) -> Entropy:
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
     await confirm_action(
         ctx,
         "get_entropy",
-        "Confirm entropy",
-        action="Do you really want\nto send entropy?",
-        description="Continue only if you\nknow what you are doing!",
+        _(i18n_keys.TITLE__CONFIRM_ENTROPY),
+        description=_(i18n_keys.SUBTITLE__CONFIRM_ENTROPY),
         br_code=ButtonRequestType.ProtectCall,
     )
 

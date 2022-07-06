@@ -1,3 +1,4 @@
+from storage import device
 from trezor.crypto import bip39, random
 
 from .. import font_MONO24, font_PJSBOLD20, font_PJSBOLD32, lv, lv_colors
@@ -52,6 +53,7 @@ class BIP39Keyboard(lv.keyboard):
         self.ta.set_max_length(11)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("abcdefghijklmnopqrstuvwxyz")
+        self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btnm_map = [
             "q",
@@ -127,13 +129,19 @@ class BIP39Keyboard(lv.keyboard):
         )
 
         self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
-        self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
+            [4 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED]
+        )
         self.ctrl_map.extend(
             [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 7
         )
-        self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
+            [4 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED]
+        )
         self.dummy_ctl_map = []
         self.dummy_ctl_map.extend(self.ctrl_map)
+        # delete button
+        self.dummy_ctl_map[21] &= self.dummy_ctl_map[21] ^ lv.btnmatrix.CTRL.DISABLED
         self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.TEXT_LOWER)
         self.set_width(lv.pct(100))
@@ -252,58 +260,62 @@ class NumberKeyboard(lv.keyboard):
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
-        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
+        self.ta.set_style_max_width(400, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
+        self.ta.set_style_text_letter_space(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("0123456789")
         self.ta.set_max_length(50)
         self.ta.set_password_mode(True)
+        self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.nums = [i for i in range(10)]
-        random.shuffle(self.nums)
+        if not device.is_order_pin_map():
+            random.shuffle(self.nums)
         self.btnm_map = [
-            str(self.nums[0]),
             str(self.nums[1]),
             str(self.nums[2]),
-            "\n",
             str(self.nums[3]),
+            "\n",
             str(self.nums[4]),
             str(self.nums[5]),
-            "\n",
             str(self.nums[6]),
+            "\n",
             str(self.nums[7]),
             str(self.nums[8]),
+            str(self.nums[9]),
             "\n",
             lv.SYMBOL.BACKSPACE,
-            str(self.nums[9]),
+            str(self.nums[0]),
             lv.SYMBOL.OK,
             "",
         ]
         self.dummy_btnm_map = [
-            str(self.nums[0]),
             str(self.nums[1]),
             str(self.nums[2]),
-            "\n",
             str(self.nums[3]),
+            "\n",
             str(self.nums[4]),
             str(self.nums[5]),
-            "\n",
             str(self.nums[6]),
+            "\n",
             str(self.nums[7]),
             str(self.nums[8]),
+            str(self.nums[9]),
             "\n",
             lv.SYMBOL.CLOSE,
-            str(self.nums[9]),
+            str(self.nums[0]),
             lv.SYMBOL.OK,
             "",
         ]
         self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
+        self.ctrl_map[-1] = lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED
         self.set_map(lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
         self.set_width(lv.pct(96))
@@ -329,7 +341,13 @@ class NumberKeyboard(lv.keyboard):
 
     def toggle_number_input_keys(self, enable: bool):
         if enable:
-            self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.ctrl_map)
+            self.dummy_ctl_map = []
+            self.dummy_ctl_map.extend(self.ctrl_map)
+            if self.input_len > 3:
+                self.dummy_ctl_map[-1] &= (
+                    self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
+                )
+            self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
 
         else:
             self.dummy_ctl_map = []
@@ -342,6 +360,7 @@ class NumberKeyboard(lv.keyboard):
     def event_cb(self, event):
         code = event.code
         input_len = len(self.ta.get_text())
+        self.input_len = input_len
         if code == lv.EVENT.DRAW_PART_BEGIN:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if input_len > 3:
@@ -386,6 +405,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         )
         self.ta.set_max_length(max_len)
         self.ta.set_password_mode(True)
+        self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btn_map_text_lower = [
             "q",

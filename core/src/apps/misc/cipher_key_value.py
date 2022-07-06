@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 async def cipher_key_value(ctx: wire.Context, msg: CipherKeyValue) -> CipheredKeyValue:
     keychain = await get_keychain(ctx, "secp256k1", [AlwaysMatchingSchema])
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
     if len(msg.value) % 16 > 0:
         raise wire.DataError("Value length must be a multiple of 16")
@@ -25,9 +26,9 @@ async def cipher_key_value(ctx: wire.Context, msg: CipherKeyValue) -> CipheredKe
     decrypt = not msg.encrypt
     if (encrypt and msg.ask_on_encrypt) or (decrypt and msg.ask_on_decrypt):
         if encrypt:
-            title = "Encrypt value"
+            title = _(i18n_keys.TITLE__ENCRYPT_VALUE)
         else:
-            title = "Decrypt value"
+            title = _(i18n_keys.TITLE__DECRYPT_VALUE)
         await confirm_action(ctx, "cipher_key_value", title, description=msg.key)
 
     node = keychain.derive(msg.address_n)
