@@ -67,6 +67,8 @@ const char *languages[][2] = {
     {"BLE enable:", "使用蓝牙:"},
     // layout2.c
     {"BLE version:", "蓝牙版本:"},
+    // layout2.c
+    {"BUILD ID:", "构建号:"},
     // recovery.c
     {"Back", "返回"},
     // layout2.c
