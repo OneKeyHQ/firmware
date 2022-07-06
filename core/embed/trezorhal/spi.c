@@ -59,15 +59,16 @@ int32_t wait_spi_tx_event(int32_t timeout) {
 }
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
+  SET_RX_BUS_BUSY();
+  if (spi_rx_event) {
+    spi_rx_event = 0;
+  }
   if (!fifo_write_no_overflow(&spi_fifo_in, recv_buf, hspi->RxXferSize)) {
     memset(recv_buf, 0, SPI_PKG_SIZE);
   }
 
-  if (spi_rx_event) {
-    spi_rx_event = 0;
-  }
-
   HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE);
+  SET_RX_BUS_IDEL();
 }
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
@@ -109,15 +110,10 @@ int32_t spi_slave_init() {
   HAL_GPIO_Init(GPIOJ, &gpio);
   HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
 
-  gpio.Pin = GPIO_PIN_6;
+  gpio.Pin = GPIO_PIN_5 | GPIO_PIN_6;
   HAL_GPIO_Init(GPIOK, &gpio);
+  HAL_GPIO_WritePin(GPIOK, GPIO_PIN_5, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOK, GPIO_PIN_6, GPIO_PIN_SET);
-
-  gpio.Pin = GPIO_PIN_5;
-  gpio.Mode = GPIO_MODE_INPUT;
-  gpio.Pull = GPIO_PULLUP;
-  gpio.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOK, &gpio);
 
   // SPI2: PB12(NSS),PB13(SCK)
   gpio.Mode = GPIO_MODE_AF_PP;
@@ -209,7 +205,7 @@ int32_t spi_slave_init() {
 
   memset(recv_buf, 0, SPI_PKG_SIZE);
   spi_rx_event = 1;
-
+  SET_RX_BUS_IDEL();
   /* start SPI receive */
   if (HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE) != HAL_OK) {
     return -1;
@@ -220,37 +216,39 @@ int32_t spi_slave_init() {
 
 int32_t spi_slave_send(uint8_t *buf, uint32_t size, int32_t timeout) {
   uint32_t msg_size;
-
+  int32_t ret = 0;
   msg_size = size < SPI_PKG_SIZE ? SPI_PKG_SIZE : size;
   memcpy(send_buf, buf, msg_size);
 
   spi_abort_event = 1;
   if (HAL_SPI_Abort_IT(&spi) != HAL_OK) {
-    return -1;
+    return 0;
   }
   while (spi_abort_event)
     ;
+
+  if (HAL_SPI_Transmit_DMA(&spi, send_buf, SPI_PKG_SIZE) != HAL_OK) {
+    goto END;
+  }
 
   SET_COMBUS_LOW();
   SET_COMBUS_LOW1();
 
   spi_tx_event = 1;
-  if (HAL_SPI_Transmit_DMA(&spi, send_buf, msg_size) != HAL_OK) {
-    SET_COMBUS_HIGH();
-    SET_COMBUS_HIGH1();
-    return -1;
-  }
 
   if (wait_spi_tx_event(timeout) != 0) {
-    SET_COMBUS_HIGH();
-    SET_COMBUS_HIGH1();
-    return -1;
+    goto END;
   }
-
+  ret = msg_size;
+END:
+  if (ret == 0) {
+    HAL_SPI_Abort(&spi);
+    HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE);
+  }
   SET_COMBUS_HIGH();
   SET_COMBUS_HIGH1();
 
-  return msg_size;
+  return ret;
 }
 
 uint32_t spi_slave_poll(uint8_t *buf) {
