@@ -244,6 +244,7 @@ if not utils.BITCOIN_ONLY:
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
+    DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

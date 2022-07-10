@@ -270,6 +270,7 @@ class MessageType(IntEnum):
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
+    DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
@@ -4060,6 +4061,10 @@ class Nonce(protobuf.MessageType):
         nonce: "bytes",
     ) -> None:
         self.nonce = nonce
+
+
+class DeviceBackToBoot(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 903
 
 
 class DeviceInfoSettings(protobuf.MessageType):
