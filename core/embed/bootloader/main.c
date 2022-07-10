@@ -166,7 +166,7 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
         if (INPUT_CANCEL == response) {
           ui_fadeout();
 #if PRODUCTION_MODEL == 'H'
-          ui_bootloader_first(hdr);
+          ui_bootloader_first();
 #else
           ui_screen_firmware_info(vhdr, hdr);
 #endif
@@ -408,18 +408,6 @@ int main(void) {
   // delay to detect touch
   uint32_t touched = boot_touch_detect(1000);
 
-  // ... or if user touched the screen on start
-  // ... or we have stay_in_bootloader flag to force it
-  if (touched || stay_in_bootloader == sectrue) {
-    // no ui_fadeout(); - we already start from black screen
-    ui_bootloader_first(NULL);
-
-    // and start the usb loop
-    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-      return 1;
-    }
-  }
-
   vendor_header vhdr;
   image_header hdr;
 
@@ -446,7 +434,7 @@ int main(void) {
   // start the bootloader if no or broken firmware found ...
 
   if (firmware_present != sectrue) {
-    ui_bootloader_first(&hdr);
+    ui_bootloader_first();
 
     // erase storage
     // ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
@@ -455,6 +443,24 @@ int main(void) {
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
       return 1;
+    }
+  }
+
+  // ... or if user touched the screen on start
+  // ... or we have stay_in_bootloader flag to force it
+  if (touched || stay_in_bootloader == sectrue) {
+    ui_bootloader_first();
+    // no ui_fadeout(); - we already start from black screen
+    if (firmware_present != sectrue) {
+      // and start the usb loop
+      if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+        return 1;
+      }
+    } else {
+      // and start the usb loop
+      if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
+        return 1;
+      }
     }
   }
 
