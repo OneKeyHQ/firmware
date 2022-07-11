@@ -87,6 +87,7 @@ const char *format_ver(const char *format, uint32_t version) {
 // boot UI
 
 static uint16_t boot_background;
+static bool ble_name_show = false;
 
 void ui_screen_boot(const vendor_header *const vhdr,
                     const image_header *const hdr) {
@@ -603,20 +604,21 @@ void ui_title_update(void) {
                  COLOR_BL_BG, boot_background);
     battery_color = RGB16(0x00, 0xCC, 0x36);
   }
+
   if (battery_cap <= 100) {
     offset_x += 32;
+    uint8_t bat_width =
+        (battery_cap * 23 / 100 > 0) ? (battery_cap * 23 / 100) : 1;
     display_icon(DISPLAY_RESX - offset_x, offset_y, 32, 32,
                  toi_icon_battery + 12, sizeof(toi_icon_battery) - 12,
                  COLOR_BL_BG, boot_background);
-    if (battery_cap < 5 && dev_pwr_sta != 1) {
-      display_bar(DISPLAY_RESX - offset_x + 3, 10 + offset_y, 1, 12,
-                  RGB16(0xDF, 0x32, 0x0C));
-    } else if (battery_cap < 20 && dev_pwr_sta != 1) {
-      display_bar(DISPLAY_RESX - offset_x + 3, 10 + offset_y, 4, 12,
+
+    if (battery_cap < 20 && dev_pwr_sta != 1) {
+      display_bar(DISPLAY_RESX - offset_x + 3, 10 + offset_y, bat_width, 12,
                   RGB16(0xDF, 0x32, 0x0C));
     } else {
-      display_bar(DISPLAY_RESX - offset_x + 3, 10 + offset_y,
-                  3 + (battery_cap - 1) / 20 * 5, 12, battery_color);
+      display_bar(DISPLAY_RESX - offset_x + 3, 10 + offset_y, bat_width, 12,
+                  battery_color);
     }
 
   } else {
@@ -689,7 +691,7 @@ void ui_install_confirm(image_header *current_hdr,
                       COLOR_BL_GRAY, COLOR_BL_FG);
   display_text_center(DISPLAY_RESX / 2, 277, "Firmware Update", -1, FONT_BOLD36,
                       COLOR_BL_BG, COLOR_BL_FG);
-  ver_str = format_ver("Install system by OneKey(v%d.%d.%d)?",
+  ver_str = format_ver("Install firmware by OneKey(v%d.%d.%d)?",
                        new_hdr->onekey_version);
   display_text_center(DISPLAY_RESX / 2, 346, ver_str, -1, FONT_NORMAL,
                       COLOR_BL_GRAY, COLOR_BL_FG);
@@ -699,16 +701,19 @@ void ui_install_confirm(image_header *current_hdr,
                 sizeof(toi_icon_install_green) - 12);
 }
 
-void ui_bootloader_first(const image_header *const hdr) {
+void ui_bootloader_first(void) {
   ui_title_update();
   display_image(203, 143, 74, 74, toi_icon_onekey + 12,
                 sizeof(toi_icon_onekey) - 12);
   display_text_center(DISPLAY_RESX / 2, 277, "Update Mode", -1, FONT_BOLD36,
                       COLOR_BL_BG, COLOR_BL_FG);
-  if (hdr && (hdr->onekey_version != 0)) {
-    const char *ver_str = format_ver("%d.%d.%d", (hdr->onekey_version));
-    display_text_center(DISPLAY_RESX / 2, 321, ver_str, -1, FONT_NORMAL,
+
+  if (ble_name_state()) {
+    char *ble_name;
+    ble_name = ble_get_name();
+    display_text_center(DISPLAY_RESX / 2, 321, ble_name, -1, FONT_NORMAL,
                         COLOR_BL_GRAY, COLOR_BL_FG);
+    ble_name_show = true;
   }
   display_image(180, 704, 120, 64, toi_icon_next + 12,
                 sizeof(toi_icon_next) - 12);
@@ -776,12 +781,15 @@ void ui_bootloader_page_switch(const image_header *const hdr) {
       display_clear();
       ui_bootloader_second(hdr);
     }
+    if (!ble_name_show && ble_name_state()) {
+      ui_bootloader_first();
+    }
   } else {
     response = ui_input_poll(INPUT_PREVIOUS | INPUT_RESTART, false);
     if (INPUT_PREVIOUS == response) {
       current = 0;
       display_clear();
-      ui_bootloader_first(hdr);
+      ui_bootloader_first();
     } else if (INPUT_RESTART == response) {
       HAL_NVIC_SystemReset();
     }

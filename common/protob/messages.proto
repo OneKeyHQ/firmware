@@ -372,6 +372,8 @@ enum MessageType {
     MessageType_WebAuthnRemoveResidentCredential = 803 [(wire_in) = true];
 
     //onekey
+    MessageType_DeviceBackToBoot = 903 [(wire_in) = true];
+
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true, (wire_bootloader) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true, (wire_bootloader) = true];
     MessageType_DeviceInfo = 10003 [(wire_out) = true, (wire_bootloader) = true];

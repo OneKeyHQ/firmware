@@ -2696,6 +2696,12 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["Nonce"]:
             return isinstance(msg, cls)
 
+    class DeviceBackToBoot(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceBackToBoot"]:
+            return isinstance(msg, cls)
+
     class DeviceInfoSettings(protobuf.MessageType):
         serial_no: "str | None"
         cpu_info: "str | None"
