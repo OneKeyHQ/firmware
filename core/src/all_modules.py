@@ -522,6 +522,22 @@ apps.misc.get_firmware_hash
 import apps.misc.get_firmware_hash
 apps.misc.sign_identity
 import apps.misc.sign_identity
+apps.tron
+import apps.tron
+apps.tron.address
+import apps.tron.address
+apps.tron.get_address
+import apps.tron.get_address
+apps.tron.layout
+import apps.tron.layout
+apps.tron.serialize
+import apps.tron.serialize
+apps.tron.sign_message
+import apps.tron.sign_message
+apps.tron.sign_tx
+import apps.tron.sign_tx
+apps.tron.tokens
+import apps.tron.tokens
 apps.workflow_handlers
 import apps.workflow_handlers
 

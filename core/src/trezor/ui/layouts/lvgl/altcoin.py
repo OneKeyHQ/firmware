@@ -101,3 +101,25 @@ async def confirm_decred_sstx_submission(
             ButtonRequestType.ConfirmOutput,
         )
     )
+
+
+async def confirm_total_tron(
+    ctx: wire.GenericContext,
+    from_address: str | None,
+    to_address: str | None,
+    amount: str,
+    fee_max: str,
+    network: str | None,
+) -> None:
+    from trezor.lvglui.scrs.template import TransactionDetailsTRON
+
+    screen = TransactionDetailsTRON(
+        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network),
+        from_address,
+        to_address,
+        amount,
+        fee_max,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
+    )
