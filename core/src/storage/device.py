@@ -46,6 +46,7 @@ _BLE_NAME = const(0x80)  # bytes
 _BLE_VERSION = const(0x81)  # bytes
 _BLE_ENABLED = const(0x82)  # bool (0x01 or empty)
 _BRIGHTNESS = const(0x83)   # int
+_PIN_MAP_TYPES = const(0x84)  # int
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -101,7 +102,7 @@ def set_ble_name(name: str) -> None:
 def get_ble_name() -> str:
     ble_name = common.get(_NAMESPACE, _BLE_NAME, public=True)
     if ble_name is None:
-        return "T1122"
+        return "T1122" if utils.EMULATOR else ""
     return ble_name.decode()
 
 
@@ -150,10 +151,25 @@ def set_brightness(brightness: int) -> None:
 
 def get_brightness() -> int:
     brightness = common.get(_NAMESPACE, _BRIGHTNESS, public=True)
-    if not brightness:
+    if brightness is None:
         # default brightness is 150
         return 150
     return int.from_bytes(brightness, "big")
+
+
+def set_pin_map_type(types: int):
+    """Set the keys order of number keyboard
+    0: random
+    1: order
+    """
+    common.set(_NAMESPACE, _PIN_MAP_TYPES, types.to_bytes(2, "big"), public=True)
+
+
+def is_order_pin_map() -> bool:
+    types = common.get(_NAMESPACE, _PIN_MAP_TYPES, public=True)
+    if types is None:
+        return False
+    return bool(int.from_bytes(types, "big"))
 
 
 def is_initialized() -> bool:

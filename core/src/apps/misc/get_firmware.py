@@ -16,18 +16,19 @@ PROGRESS_TOTAL = utils.FIRMWARE_SECTORS_COUNT * 128 * 1024
 
 
 async def get_firmware(ctx: Context, _msg: GetFirmware) -> Success:
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
     await confirm_action(
         ctx,
         "dump_firmware",
-        title="Extract firmware",
-        action="Do you want to extract device firmware?",
-        description="Your seed will not be revealed.",
+        title=_(i18n_keys.TITLE__EXTRACT_FIRMWARE),
+        description=_(i18n_keys.SUBTITLE__EXTRACT_FIRMWARE),
     )
     sector_buffer = bytearray(CHUNK_SIZE)
     packet = FirmwareChunk(chunk=sector_buffer)
 
     workflow.close_others()
-    draw_simple_text("Please wait")
+    draw_simple_text(_(i18n_keys.TITLE__PLEASE_WAIT))
 
     progress = 0
     _render_progress(progress, PROGRESS_TOTAL)

@@ -1,11 +1,11 @@
 from storage import device
-from trezor import workflow
+from trezor import utils, workflow
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.lv_colors import lv_colors
 from trezor.ui import display
 
-from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36
+from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36, font_PJSREG24
 from .common import (  # noqa: F401, F403, F405
     FullSizeWindow,
     Screen,
@@ -15,6 +15,7 @@ from .common import (  # noqa: F401, F403, F405
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
 from .components.container import ContainerFlexCol, ContanierGrid
 from .components.imgbtn import ImgBottonGridItem
+from .components.listitem import DisplayItem
 
 
 def brightness2_percent_str(brightness: int) -> str:
@@ -86,8 +87,7 @@ class MainScreen(Screen):
             if target == self.btn_settings:
                 self.load_screen(SettingsScreen(self))
             elif target == self.btn_info:
-                if __debug__:
-                    print("Info")
+                self.load_screen(UserGuide(self))
             else:
                 if __debug__:
                     print("Unknown")
@@ -159,6 +159,8 @@ class SettingsScreen(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.general:
                 self.load_screen(GeneralScreen(self))
             elif target == self.connect:
@@ -242,12 +244,16 @@ class GeneralScreen(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.auto_lock:
                 self.load_screen(AutoLockSetting(self))
             elif target == self.language:
                 self.load_screen(LanguageSetting(self))
             elif target == self.backlight:
                 self.load_screen(BacklightSetting(self))
+            else:
+                pass
 
 
 # pyright: off
@@ -293,6 +299,8 @@ class AutoLockSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target in self.btns:
                 for index, item in enumerate(self.btns):
                     if item == target and self.checked_index != index:
@@ -342,6 +350,8 @@ class LanguageSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             last_checked = self.check_index
             for idx, button in enumerate(self.lang_buttons):
                 if target != button and idx == last_checked:
@@ -365,17 +375,18 @@ class BacklightSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__BRIGHTNESS), nav_back=True
         )
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        current_brightness = device.get_brightness()
         self.item1 = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BRIGHTNESS),
-            brightness2_percent_str(device.get_brightness()),
+            brightness2_percent_str(current_brightness),
             has_next=False,
         )
         self.slider = lv.slider(self)
         self.slider.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.slider.set_size(424, 8)
         self.slider.set_range(20, 255)
-        self.slider.set_value(display.backlight(), lv.ANIM.OFF)
+        self.slider.set_value(current_brightness, lv.ANIM.OFF)
         self.slider.align_to(self.container, lv.ALIGN.BOTTOM_MID, 0, 33)
         self.slider.set_style_bg_color(
             lv_colors.GRAY_1, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -395,6 +406,51 @@ class BacklightSetting(Screen):
             device.set_brightness(value)
 
 
+class PinMapSetting(Screen):
+    RANDOM = 0
+    ORDER = 1
+
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__PIN_KEYBOARD), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.random = ListItemBtn(
+            self.container, _(i18n_keys.OPTION__RANDOMIZED), has_next=False
+        )
+        self.random.add_check_img()
+        self.order = ListItemBtn(
+            self.container, _(i18n_keys.OPTION__ORDERED), has_next=False
+        )
+        self.order.add_check_img()
+        if device.is_order_pin_map():
+            self.order.set_checked()
+        else:
+            self.random.set_checked()
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target == self.random:
+                self.random.set_checked()
+                self.order.set_uncheck()
+                if device.is_order_pin_map():
+                    device.set_pin_map_type(self.RANDOM)
+            elif target == self.order:
+                self.random.set_uncheck()
+                self.order.set_checked()
+                if not device.is_order_pin_map():
+                    device.set_pin_map_type(self.ORDER)
+
+
 class ConnectSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -404,9 +460,12 @@ class ConnectSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
         )
-        self.container = ContainerFlexCol(self, self.title, padding_row=20)
+        self.container = ContainerFlexCol(self, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
-        if device.ble_enabled():
+        self.ble.set_size(lv.pct(100), 78)
+        from trezor import uart
+
+        if uart.is_ble_opened():
             self.ble.add_state()
         else:
             self.ble.clear_state()
@@ -494,6 +553,8 @@ class PowerOff(FullSizeWindow):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.btn_yes:
                 self.destroy()
                 ShutingDown()
@@ -502,7 +563,9 @@ class PowerOff(FullSizeWindow):
                 if self.has_pin:
                     from apps.common.request_pin import verify_user_pin
 
-                    workflow.spawn(verify_user_pin(set_home=self.set_home))
+                    workflow.spawn(
+                        verify_user_pin(set_home=self.set_home, allow_cancel=False)
+                    )
 
 
 class ShutingDown(FullSizeWindow):
@@ -554,6 +617,8 @@ class HomeScreenSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
             if target == self.light:
                 self.light.set_checked(True)
                 self.dark.set_checked(False)
@@ -569,9 +634,10 @@ class SecurityScreen(Screen):
         if not hasattr(self, "_init"):
             self._init = True
         else:
-            self.clean()
+            return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
         self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
         self.recovery_check = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
@@ -592,6 +658,8 @@ class SecurityScreen(Screen):
         if code == lv.EVENT.CLICKED:
             from trezor.wire import DUMMY_CONTEXT
 
+            if utils.lcd_resume():
+                return
             if target == self.change_pin:
                 from apps.management.change_pin import change_pin
                 from trezor.messages import ChangePin
@@ -630,6 +698,11 @@ class SecurityScreen(Screen):
                 from trezor.messages import WipeDevice
 
                 workflow.spawn(wipe_device(DUMMY_CONTEXT, WipeDevice()))
+            elif target == self.pin_map_type:
+                self.load_screen(PinMapSetting(self))
+            else:
+                if __debug__:
+                    print("unknown")
         # pyright: on
 
 
@@ -741,3 +814,244 @@ class BlindSign(Screen):
                     )
                 else:
                     pass
+
+
+class UserGuide(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        kwargs = {
+            "prev_scr": prev_scr,
+            "title": _(i18n_keys.APP__USER_GUIDE),
+            "nav_back": True,
+        }
+        super().__init__(**kwargs)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.power_off = ListItemBtn(
+            self.container,
+            _(i18n_keys.TITLE__POWER_ON_OFF__GUIDE),
+        )
+        self.recovery_phrase = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__WHAT_IS_RECOVERY_PHRASE),
+        )
+        self.pin_protection = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__ENABLE_PIN_PROTECTION),
+        )
+        self.hardware_wallet = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__HOW_HARDWARE_WALLET_WORKS),
+        )
+        self.passphrase = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__PASSPHRASE_ACCESS_HIDDEN_WALLETS),
+        )
+        self.need_help = ListItemBtn(self.container, _(i18n_keys.ITEM__NEED_HELP))
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target == self.power_off:
+                PowerOnOffDetails()
+            elif target == self.recovery_phrase:
+                RecoveryPhraseDetails()
+            elif target == self.pin_protection:
+                PinProtectionDetails()
+            elif target == self.hardware_wallet:
+                HardwareWalletDetails()
+            elif target == self.passphrase:
+                PassphraseDetails()
+            elif target == self.need_help:
+                HelpDetails()
+            else:
+                if __debug__:
+                    print("Unknown")
+
+
+class PowerOnOffDetails(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            None,
+            None,
+            cancel_text=_(i18n_keys.BUTTON__CLOSE),
+            icon_path="A:/res/power-on-off.png",
+        )
+        self.container = ContainerFlexCol(self.content_area, self.icon, pos=(0, 24))
+        self.item = DisplayItem(
+            self.container,
+            _(i18n_keys.TITLE__POWER_ON_OFF__GUIDE),
+            _(i18n_keys.SUBTITLE__POWER_ON_OFF__GUIDE),
+        )
+        self.item.label_top.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_long_mode(lv.label.LONG.WRAP)
+
+    def destroy(self):
+        return self.delete()
+
+
+class RecoveryPhraseDetails(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            None,
+            None,
+            cancel_text=_(i18n_keys.BUTTON__CLOSE),
+            icon_path="A:/res/recovery-phrase.png",
+        )
+        self.container = ContainerFlexCol(self.content_area, self.icon, pos=(0, 24))
+        self.item = DisplayItem(
+            self.container,
+            _(i18n_keys.TITLE__WHAT_IS_RECOVERY_PHRASE__GUIDE),
+            _(i18n_keys.SUBTITLE__WHAT_IS_RECOVERY_PHRASE__GUIDE),
+        )
+        self.item.label_top.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.item.label.set_long_mode(lv.label.LONG.WRAP)
+
+    def destroy(self):
+        return self.delete()
+
+
+class PinProtectionDetails(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            None,
+            None,
+            cancel_text=_(i18n_keys.BUTTON__CLOSE),
+            icon_path="A:/res/pin-protection.png",
+        )
+        self.container = ContainerFlexCol(self.content_area, self.icon, pos=(0, 24))
+        self.item = DisplayItem(
+            self.container,
+            _(i18n_keys.TITLE__ENABLE_PIN_PROTECTION__GUIDE),
+            _(i18n_keys.SUBTITLE__ENABLE_PIN_PROTECTION__GUIDE),
+        )
+        self.item.label_top.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.item.label.set_long_mode(lv.label.LONG.WRAP)
+
+    def destroy(self):
+        return self.delete()
+
+
+class HardwareWalletDetails(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            None,
+            None,
+            cancel_text=_(i18n_keys.BUTTON__CLOSE),
+            icon_path="A:/res/hardware-wallet-works-way.png",
+        )
+        self.container = ContainerFlexCol(self.content_area, self.icon, pos=(0, 24))
+        self.item = DisplayItem(
+            self.container,
+            _(i18n_keys.TITLE__HOW_HARDWARE_WALLET_WORKS__GUIDE),
+            _(i18n_keys.SUBTITLE__HOW_HARDWARE_WALLET_WORKS__GUIDE),
+        )
+        self.item.label_top.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.item.label.set_long_mode(lv.label.LONG.WRAP)
+
+    def destroy(self):
+        return self.delete()
+
+
+class PassphraseDetails(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            None,
+            None,
+            cancel_text=_(i18n_keys.BUTTON__CLOSE),
+            icon_path="A:/res/hidden-wallet.png",
+        )
+        self.container = ContainerFlexCol(self.content_area, self.icon, pos=(0, 24))
+        self.item = DisplayItem(
+            self.container,
+            _(i18n_keys.TITLE__ACCESS_HIDDEN_WALLET),
+            _(i18n_keys.SUBTITLE__PASSPHRASE_ACCESS_HIDDEN_WALLETS__GUIDE),
+        )
+        self.item.label_top.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.item.label.set_long_mode(lv.label.LONG.WRAP)
+
+    def destroy(self):
+        return self.delete()
+
+
+class HelpDetails(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            None,
+            None,
+            cancel_text=_(i18n_keys.BUTTON__CLOSE),
+            icon_path="A:/res/onekey-help.png",
+        )
+        self.container = ContainerFlexCol(self.content_area, self.icon, pos=(0, 24))
+        self.item = DisplayItem(
+            self.container,
+            _(i18n_keys.TITLE__NEED_HELP__GUIDE),
+            _(i18n_keys.SUBTITLE__NEED_HELP__GUIDE),
+        )
+        self.item.label_top.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.item.label.set_long_mode(lv.label.LONG.WRAP)
+        self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+
+        self.website = lv.label(self.content_area)
+        self.website.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.website.set_style_text_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.website.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.website.set_text("help.onekey.so/hc")
+        self.website.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 40, 0)
+        self.underline = lv.line(self.content_area)
+        self.underline.set_points(
+            [
+                {"x": 0, "y": 2},
+                {"x": 232, "y": 2},
+            ],
+            2,
+        )
+        self.underline.set_style_line_color(
+            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.underline.align_to(self.website, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 0)
+
+    def destroy(self):
+        return self.delete()

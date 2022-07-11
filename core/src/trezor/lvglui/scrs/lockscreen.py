@@ -1,6 +1,5 @@
-from storage import device
+from trezor import utils
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.ui import display
 
 from . import font_PJSBOLD24
 from .common import Screen, load_scr_with_animation, lv, lv_colors
@@ -49,7 +48,6 @@ class LockScreen(Screen):
         self.tap_tip.set_style_text_font(
             font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
 
     def eventhandler(self, event_obj: lv.event_t):
         code = event_obj.code
@@ -57,12 +55,7 @@ class LockScreen(Screen):
             if self.channel.takers:
                 self.channel.publish("clicked")
             else:
-                if not display.backlight():
-                    from apps.base import reload_settings_from_storage
-
-                    display.backlight(device.get_brightness())
-                    # reschedule auto_lock task to avoid never turn off lcd (turn the brightness of the lcd to zero)
-                    reload_settings_from_storage()
+                if utils.turn_on_lcd_if_possible():
                     return
                 from trezor import workflow
                 from apps.base import unlock_device

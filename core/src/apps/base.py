@@ -203,28 +203,6 @@ ALLOW_WHILE_LOCKED = (
     MessageType.WipeDevice,
 )
 
-# if not utils.LVGL_UI:
-
-#     def set_homescreen() -> None:
-#         import storage.recovery
-
-#         if not config.is_unlocked():
-#             from apps.homescreen.lockscreen import lockscreen
-
-#             workflow.set_default(lockscreen)
-
-#         elif storage.recovery.is_in_progress():
-#             from apps.management.recovery_device.homescreen import recovery_homescreen
-
-#             workflow.set_default(recovery_homescreen)
-
-#         else:
-#             from apps.homescreen.homescreen import homescreen
-
-#             workflow.set_default(homescreen)
-
-# else:
-
 
 def set_homescreen() -> None:
     if storage.device.is_initialized():
@@ -274,20 +252,49 @@ def lock_device() -> None:
         workflow.close_others()
 
 
+LATER_TOUCH = 0
+
+
 def lock_device_if_unlocked() -> None:
+    from trezor.lvglui import get_elapsed
+
+    elapsed = get_elapsed()
+    if elapsed > LATER_TOUCH:
+        if config.is_unlocked():
+            lock_device()
+        utils.turn_off_lcd()
+    else:
+        ui.display.backlight(storage.device.get_brightness())
+        if utils.SHORT_AUTO_LOCK:
+            reload_settings_from_storage()
+
+
+def screen_off_if_possible() -> None:
+    if not ui.display.backlight():
+        return
     from trezor.lvglui import get_elapsed
 
     auto_lock_time = storage.device.get_autolock_delay_ms()
     elapsed = get_elapsed()
+    if utils.SHORT_AUTO_LOCK:
+        utils.SHORT_AUTO_LOCK = False
+        # In practice the value of `elapsed` is 9710, is less than 10 * 1000,
+        # so we should use a scaling factor 0.95 to adjust it.
+        if elapsed > int(utils.SHORT_AUTO_LOCK_TIME_MS * 0.95):
+            utils.turn_off_lcd()
+            return
     diff = auto_lock_time - elapsed
     # when elapsed is very close to auto_lock_time (e.g. < 10ms), lock device directly
     # else check again some time later
     if elapsed < auto_lock_time and diff > 10 * 1000:
         # check again after `diff` ms, here we plus 5s to avoid needless check(`elapsed` is not so accurate)
-        workflow.idle_timer.set(diff + 5 * 1000, lock_device_if_unlocked)
+        workflow.idle_timer.set(diff + 5 * 1000, screen_off_if_possible)
         return
-    if config.is_unlocked():
-        lock_device()
+    if ui.display.backlight():
+        global LATER_TOUCH
+        ui.display.backlight(ui.style.BACKLIGHT_LOW)
+        workflow.idle_timer.set(3 * 1000, lock_device_if_unlocked)
+        LATER_TOUCH = min(get_elapsed(), auto_lock_time)
 
 
 async def unlock_device(ctx: wire.GenericContext = wire.DUMMY_CONTEXT) -> None:
@@ -331,9 +338,16 @@ def get_pinlocked_handler(
 
 
 # this function is also called when handling ApplySettings
-def reload_settings_from_storage() -> None:
+def reload_settings_from_storage(timeout_ms: int | None = None) -> None:
+    if timeout_ms:
+        utils.SHORT_AUTO_LOCK = True
+    else:
+        utils.SHORT_AUTO_LOCK = False
     workflow.idle_timer.set(
-        storage.device.get_autolock_delay_ms(), lock_device_if_unlocked
+        timeout_ms
+        if timeout_ms is not None
+        else storage.device.get_autolock_delay_ms(),
+        screen_off_if_possible,
     )
     wire.experimental_enabled = storage.device.get_experimental_features()
     ui.display.orientation(storage.device.get_rotation())

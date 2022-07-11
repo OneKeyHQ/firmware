@@ -37,9 +37,9 @@ from .. import font_PJSBOLD24, font_PJSMID24, lv, lv_colors
 class NormalButton(lv.btn):
     def __init__(self, parent, text=_(i18n_keys.BUTTON__NEXT), enable=True) -> None:
         super().__init__(parent)
-        self.set_size(416, 62)
-        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -24)
-        self.set_style_radius(32, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_size(416, 76)
+        self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -18)
+        self.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -81,7 +81,7 @@ class ListItemBtn(lv.btn):
         super().__init__(parent)
         self.set_size(lv.pct(100), 78)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_hor(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_hor(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         if left_img_src:
@@ -93,6 +93,7 @@ class ListItemBtn(lv.btn):
             self.img_right.set_src("A:/res/arrow-right.png")
             self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.label_left = lv.label(self)
+        self.label_left.set_style_width(374, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label_left.set_long_mode(lv.label.LONG.WRAP)
         self.label_left.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -128,19 +129,21 @@ class ListItemBtn(lv.btn):
 
     def add_check_img(self) -> None:
         self.img_right = lv.img(self)
-        self.img_right.set_src("A:/res/check-white.png")
+        self.img_right.set_src("A:/res/checked-white.png")
         self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
 
     def set_checked(self) -> None:
-        self.img_right.clear_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_color(
-            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        if self.img_right.has_flag(lv.obj.FLAG.HIDDEN):
+            self.img_right.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.set_style_bg_color(
+                lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
 
     def set_uncheck(self) -> None:
-        self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+        if not self.img_right.has_flag(lv.obj.FLAG.HIDDEN):
+            self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
+            self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
 
 
 class ListItemBtnWithSwitch(lv.btn):

@@ -3,11 +3,9 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage import device
-from trezor import config, io, loop, utils, workflow
+from trezor import config, io, log, loop, utils
 from trezor.lvglui import StatusBar
 from trezor.ui import display
-
-import apps.base
 
 if TYPE_CHECKING:
     from trezor.lvglui.scrs.ble import PairCodeDisplay
@@ -37,22 +35,31 @@ BLE_CTRL = io.BLE()
 async def handle_usb_state():
     global CHARGING
     while True:
-        usb_state = loop.wait(io.USB_STATE)
-        state = await usb_state
-        if state:
-            StatusBar.get_instance().show_usb(True)
-            # deal with charging state
-            CHARGING = True
-            StatusBar.get_instance().show_charging(True)
-            StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-        else:
-            StatusBar.get_instance().show_usb(False)
-            # deal with charging state
-            CHARGING = False
-            StatusBar.get_instance().show_charging()
-            StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-        if config.is_unlocked() and device.is_initialized():
-            apps.base.lock_device()
+        try:
+            usb_state = loop.wait(io.USB_STATE)
+            state = await usb_state
+            utils.lcd_resume()
+            if state:
+                StatusBar.get_instance().show_usb(True)
+                # deal with charging state
+                CHARGING = True
+                StatusBar.get_instance().show_charging(True)
+                StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+            else:
+                StatusBar.get_instance().show_usb(False)
+                # deal with charging state
+                CHARGING = False
+                StatusBar.get_instance().show_charging()
+                StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+            if device.is_initialized() and config.has_pin():
+                config.lock()
+                # single to restart the main loop
+                raise loop.TASK_CLOSED
+        except Exception as exec:
+            if __debug__:
+                log.exception(__name__, exec)
+            loop.clear()
+            return  # pylint: disable=lost-exception
 
 
 async def handle_uart():
@@ -60,8 +67,11 @@ async def handle_uart():
     while True:
         try:
             await process_push()
-        except Exception:
-            pass
+        except Exception as exec:
+            if __debug__:
+                log.exception(__name__, exec)
+            loop.clear()
+            return  # pylint: disable=lost-exception
 
 
 async def process_push() -> None:
@@ -119,20 +129,17 @@ async def _deal_ble_pair(value):
     SCREEN = PairCodeDisplay(pair_codes)
 
 
-async def restart():
-    loop.clear()
-
-
 async def _deal_button_press(value: bytes) -> None:
     res = ustruct.unpack(">B", value)[0]
     if res == _PRESS_SHORT:
         if display.backlight():
+            display.backlight(0)
             if device.is_initialized() and config.has_pin():
                 config.lock()
-                workflow.spawn(restart())
-            display.backlight(0)
+                # single to restart the main loop
+                raise loop.TASK_CLOSED
         else:
-            display.backlight(device.get_brightness())
+            utils.turn_on_lcd_if_possible()
     elif res == _PRESS_LONG:
         if __debug__:
             print("LONG PRESS=======")
@@ -159,17 +166,12 @@ async def _deal_charging_state(value: bytes) -> None:
         CHARGING = True
         StatusBar.get_instance().show_charging(True)
         StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-        # StatusBar.get_instance().show_usb(show=True) # use sub enumerate to achieve this
     elif res in (_USB_STATUS_PLUG_OUT, _POWER_STATUS_CHARGING_FINISHED):
         if not CHARGING:
             return
         CHARGING = False
         StatusBar.get_instance().show_charging()
         StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-        # if res == _USB_STATUS_PLUG_OUT: # use sub enumerate to achieve this
-        #     StatusBar.get_instance().show_usb()
-    # if res in (_USB_STATUS_PLUG_IN, _USB_STATUS_PLUG_OUT):
-    #     apps.base.lock_device()
 
 
 async def _deal_pair_res(value: bytes) -> None:
@@ -184,6 +186,7 @@ async def _deal_pair_res(value: bytes) -> None:
 
 
 async def _deal_ble_status(value: bytes) -> None:
+    global BLE_ENABLED
     res = ustruct.unpack(">B", value)[0]
     if res == _BLE_STATUS_CONNECTED:
         utils.BLE_CONNECTED = True
@@ -191,18 +194,18 @@ async def _deal_ble_status(value: bytes) -> None:
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_CONNECTED)
     elif res == _BLE_STATUS_DISCONNECTED:
         utils.BLE_CONNECTED = False
-        # hidden icon in status bar
+        if not BLE_ENABLED:
+            return
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
+
     elif res == _BLE_STATUS_OPENED:
         if utils.BLE_CONNECTED:
             return
-        global BLE_ENABLED
         BLE_ENABLED = True
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
         if config.is_unlocked():
             device.set_ble_status(enable=True)
     elif res == _BLE_STATUS_CLOSED:
-        global BLE_ENABLED
         BLE_ENABLED = False
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_DISABLED)
         if config.is_unlocked():
@@ -213,14 +216,16 @@ def _retrieve_ble_name(value: bytes) -> None:
     global BLE_NAME
     if value != b"":
         BLE_NAME = value.decode("utf-8")
-        # device.set_ble_name(BLE_NAME)
+        # if config.is_unlocked():
+        #     device.set_ble_name(BLE_NAME)
 
 
 def _retrieve_nrf_version(value: bytes) -> None:
     global NRF_VERSION
     if value != b"":
         NRF_VERSION = value.decode("utf-8")
-        # device.set_ble_version(NRF_VERSION)
+        # if config.is_unlocked():
+        #     device.set_ble_version(NRF_VERSION)
 
 
 def _request_ble_name():
@@ -280,3 +285,7 @@ def get_ble_name() -> str:
 def get_ble_version() -> str:
     """Get ble version."""
     return NRF_VERSION if NRF_VERSION else ""
+
+
+def is_ble_opened() -> bool:
+    return BLE_ENABLED if BLE_ENABLED is not None else True

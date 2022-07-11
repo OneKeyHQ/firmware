@@ -6,7 +6,6 @@ from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 
 from . import font_MONO28, lv, lv_colors
 from .common import FullSizeWindow
-from .components.button import NormalButton
 
 if TYPE_CHECKING:
     from typing import Sequence
@@ -22,9 +21,9 @@ class MnemonicDisplay(FullSizeWindow):
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
             _(i18n_keys.BUTTON__CONTINUE),
         )
-        self.content_area.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
-        )
+        # self.content_area.set_style_bg_color(
+        #     lv_colors.WHITE_3, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
+        # )
         self.panel = lv.obj(self.content_area)
         self.panel.set_size(460, lv.SIZE.CONTENT)
         self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
@@ -91,6 +90,7 @@ class BackupTips(FullSizeWindow):
         super().__init__(
             _(i18n_keys.TITLE__BACK_UP_RECOVERY_PHRASE),
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_BACK_UP_RECOVERY_PHRASE),
+            _(i18n_keys.BUTTON__CONTINUE),
         )
         self.container = ContainerFlexCol(
             self.content_area, self.subtitle, pos=(0, 10), padding_row=10
@@ -108,19 +108,14 @@ class BackupTips(FullSizeWindow):
             self.container,
             _(i18n_keys.CHECK__DEVICE_BACK_UP_RECOVERY_PHRASE_3),
         )
-        self.btn = NormalButton(self, _(i18n_keys.BUTTON__CONTINUE), False)
-        self.container.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
-        self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        self.btn_yes.disable()
+        self.container.add_event_cb(self.on_event, lv.EVENT.VALUE_CHANGED, None)
         self.cb_cnt = 0
 
-    def eventhandler(self, event_obj: lv.event_t):
+    def on_event(self, event_obj: lv.event_t):
         code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.CLICKED:
-            if target == self.btn:
-                self.channel.publish(1)
-                self.destroy()
-        elif code == lv.EVENT.VALUE_CHANGED:
+        if code == lv.EVENT.VALUE_CHANGED:
             if target == self.item1.checkbox:
                 if target.get_state() & lv.STATE.CHECKED:
                     self.item1.enable_bg_color()
@@ -143,6 +138,6 @@ class BackupTips(FullSizeWindow):
                     self.item3.enable_bg_color(False)
                     self.cb_cnt -= 1
             if self.cb_cnt == 3:
-                self.btn.enable(bg_color=lv_colors.ONEKEY_GREEN)
+                self.btn_yes.enable(bg_color=lv_colors.ONEKEY_GREEN)
             elif self.cb_cnt < 3:
-                self.btn.disable()
+                self.btn_yes.disable()

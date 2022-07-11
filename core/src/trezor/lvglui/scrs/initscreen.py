@@ -2,6 +2,7 @@
 # from trezor.crypto import bip39, hashlib, random
 # from trezor.enums import BackupType
 
+from trezor import utils
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.scrs import font_PJSBOLD24, font_PJSBOLD36
@@ -35,11 +36,8 @@ class InitScreen(Screen):
         self.roller.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.enable(lv_colors.ONEKEY_GREEN)
-        self.add_event_cb(
-            self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None
-        )
 
-    def on_click(self, target):
+    def on_click(self, _target):
         QuickStart()
 
     def on_value_changed(self, target):
@@ -65,9 +63,6 @@ class QuickStart(FullSizeWindow):
             ),
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
-        self.add_event_cb(
-            self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None
-        )
         self.select_index = 0
 
     def eventhandler(self, event_obj):
@@ -77,40 +72,46 @@ class QuickStart(FullSizeWindow):
             if target == self.roller:
                 self.select_index = target.get_selected()
         elif code == lv.EVENT.CLICKED:
-            if self.select_index == 0:
-                from trezor import workflow
-                from trezor.wire import DUMMY_CONTEXT
-                from apps.management.reset_device import reset_device
-                from trezor.messages import ResetDevice
+            if utils.lcd_resume():
+                return
+            if target == self.btn_yes:
+                if self.select_index == 0:
+                    from trezor import workflow
+                    from trezor.wire import DUMMY_CONTEXT
+                    from apps.management.reset_device import reset_device
+                    from trezor.messages import ResetDevice
 
-                # pyright: off
-                workflow.spawn(
-                    reset_device(
-                        DUMMY_CONTEXT,
-                        ResetDevice(
-                            strength=128,
-                            language=language,
-                            pin_protection=True,
-                        ),
+                    # pyright: off
+                    workflow.spawn(
+                        reset_device(
+                            DUMMY_CONTEXT,
+                            ResetDevice(
+                                strength=128,
+                                language=language,
+                                pin_protection=True,
+                            ),
+                        )
                     )
-                )
-            elif self.select_index == 1:
-                from apps.management.recovery_device import recovery_device
-                from trezor.messages import RecoveryDevice
-                from trezor import workflow
-                from trezor.wire import DUMMY_CONTEXT
+                elif self.select_index == 1:
+                    from apps.management.recovery_device import recovery_device
+                    from trezor.messages import RecoveryDevice
+                    from trezor import workflow
+                    from trezor.wire import DUMMY_CONTEXT
 
-                workflow.spawn(
-                    recovery_device(
-                        DUMMY_CONTEXT,
-                        RecoveryDevice(
-                            enforce_wordlist=True,
-                            language=language,
-                            pin_protection=True,
-                        ),
-                    )
-                )
-                # pyright: on
+                    workflow.spawn(
+                        recovery_device(
+                            DUMMY_CONTEXT,
+                            RecoveryDevice(
+                                enforce_wordlist=True,
+                                language=language,
+                                pin_protection=True,
+                            ),
+                        )
+                    )  # pyright: on
+                else:
+                    return
+            else:
+                return
             self.destroy()
 
 
@@ -123,9 +124,6 @@ class SelectMnemonicNum(FullSizeWindow):
             options="12\n18\n24",
         )
         self.roller.set_selected(0, lv.ANIM.OFF)
-        self.add_event_cb(
-            self.eventhandler, lv.EVENT.CLICKED | lv.EVENT.VALUE_CHANGED, None
-        )
         self.num = 12
 
     def eventhandler(self, event_obj):
@@ -137,8 +135,11 @@ class SelectMnemonicNum(FullSizeWindow):
                 target.get_selected_str(selected_str, len(selected_str))
                 self.num = int(selected_str.strip()[:-1])
         elif code == lv.EVENT.CLICKED:
-            self.channel.publish(word_cnt_strength_map[self.num])
-            self.destroy()
+            if utils.lcd_resume():
+                return
+            if target == self.btn_yes:
+                self.channel.publish(word_cnt_strength_map[self.num])
+                self.destroy()
 
 
 # class InitScreen(Screen):

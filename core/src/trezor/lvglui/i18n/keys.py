@@ -608,4 +608,64 @@ LIST_KEY__CONTAINS_STR_KEY = 285
 INSERT__ARRAY_OF_STR_STR = 286
 # Confirm Domain
 TITLE__CONFIRM_DOMAIN = 287
+# PIN Keyboard
+ITEM__PIN_KEYBOARD = 288
+TITLE__PIN_KEYBOARD = 288
+# Randomized
+OPTION__RANDOMIZED = 289
+# Ordered
+OPTION__ORDERED = 290
+# Power On/Off
+TITLE__POWER_ON_OFF__GUIDE = 291
+ITEM__POWER_ON_OFF = 291
+# Press and hold the power button to power on and off.
+SUBTITLE__POWER_ON_OFF__GUIDE = 292
+# What is Recovery Phrase?
+TITLE__WHAT_IS_RECOVERY_PHRASE__GUIDE = 293
+# A human-readable "private key" to generate your wallet. A key to restore all
+# your crypto asset.
+SUBTITLE__WHAT_IS_RECOVERY_PHRASE__GUIDE = 294
+# Enable PIN Protection
+TITLE__ENABLE_PIN_PROTECTION__GUIDE = 295
+ITEM__ENABLE_PIN_PROTECTION = 295
+# System-level security protection mechanism, Set a strong PIN code to secure
+# your crypto assets.
+SUBTITLE__ENABLE_PIN_PROTECTION__GUIDE = 296
+# How Hardware Wallet Works
+TITLE__HOW_HARDWARE_WALLET_WORKS__GUIDE = 297
+ITEM__HOW_HARDWARE_WALLET_WORKS = 297
+# OneKey encrypted stores recovery phrase offline in security element, connect
+# ing and interacting with OneKey app via bluetooth or USB.
+SUBTITLE__HOW_HARDWARE_WALLET_WORKS__GUIDE = 298
+# Passphrase: Access Hidden Wallets
+TITLE__PASSPHRASE_ACCESS_HIDDEN_WALLETS__GUIDE = 299
+ITEM__PASSPHRASE_ACCESS_HIDDEN_WALLETS = 299
+# Passphrase can be thought as a second-factor to hardware wallet's "extra wor
+# d (mnemonic + 1). You can access different hidden wallets with different Pas
+# sphrase.
+SUBTITLE__PASSPHRASE_ACCESS_HIDDEN_WALLETS__GUIDE = 300
+# Need Help?
+TITLE__NEED_HELP__GUIDE = 301
+ITEM__NEED_HELP = 301
+# Have any questions? Go OneKey Support Center for help.
+SUBTITLE__NEED_HELP__GUIDE = 302
+# What is Recovery Phrase
+ITEM__WHAT_IS_RECOVERY_PHRASE = 303
+# Guide
+TITLE__GUIDE = 304
+# Encrypt Value
+TITLE__ENCRYPT_VALUE = 305
+# Decrypt Value
+TITLE__DECRYPT_VALUE = 306
+# Enable Labeling?
+SUBTITLE__ENABLE_LABELING = 307
+# Confirm Entropy
+TITLE__CONFIRM_ENTROPY = 308
+# Do you want to export entropy? Continue only id you know what you are doing!
+SUBTITLE__CONFIRM_ENTROPY = 309
+# Extract Firmware
+TITLE__EXTRACT_FIRMWARE = 310
+# Do you want to extract device firmware? Your recovery phrase will not be rev
+# ealed.
+SUBTITLE__EXTRACT_FIRMWARE = 311
 # fmt: on

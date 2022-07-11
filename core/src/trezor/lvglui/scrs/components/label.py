@@ -30,6 +30,7 @@ class SubTitle(lv.label):
         self.set_text(text)
         self.set_size(width, lv.SIZE.CONTENT)
         self.set_style_pad_hor(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_bottom(10, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.align_to(
             align_base, lv.ALIGN.OUT_BOTTOM_MID, relative_pos[0], relative_pos[1]
         )

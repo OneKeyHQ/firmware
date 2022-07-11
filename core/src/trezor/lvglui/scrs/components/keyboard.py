@@ -1,3 +1,4 @@
+from storage import device
 from trezor.crypto import bip39, random
 
 from .. import font_MONO24, font_PJSBOLD20, font_PJSBOLD32, lv, lv_colors
@@ -23,8 +24,11 @@ def change_key_bg(
     if enabled:
         if dsc.id == id1:
             dsc.rect_dsc.bg_color = lv_colors.ONEKEY_RED_1
-        elif dsc.id == id2 and all_enabled:
-            dsc.rect_dsc.bg_color = lv_colors.ONEKEY_GREEN
+        elif dsc.id == id2:
+            if all_enabled:
+                dsc.rect_dsc.bg_color = lv_colors.ONEKEY_GREEN
+            else:
+                dsc.rect_dsc.bg_color = lv_colors.ONEKEY_BLACK_1
     else:
         if dsc.id in (id1, id2):
             dsc.rect_dsc.bg_color = lv_colors.ONEKEY_BLACK_1
@@ -49,6 +53,7 @@ class BIP39Keyboard(lv.keyboard):
         self.ta.set_max_length(11)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("abcdefghijklmnopqrstuvwxyz")
+        self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btnm_map = [
             "q",
@@ -124,13 +129,19 @@ class BIP39Keyboard(lv.keyboard):
         )
 
         self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
-        self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
+            [4 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED]
+        )
         self.ctrl_map.extend(
             [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 7
         )
-        self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
+            [4 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED]
+        )
         self.dummy_ctl_map = []
         self.dummy_ctl_map.extend(self.ctrl_map)
+        # delete button
+        self.dummy_ctl_map[21] &= self.dummy_ctl_map[21] ^ lv.btnmatrix.CTRL.DISABLED
         self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.TEXT_LOWER)
         self.set_width(lv.pct(100))
@@ -181,6 +192,7 @@ class BIP39Keyboard(lv.keyboard):
             self.dummy_ctl_map[-1] &= (
                 self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
             )
+            self.completed = True
             self.set_map(lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.dummy_ctl_map)
 
     def event_cb(self, event):
@@ -188,7 +200,7 @@ class BIP39Keyboard(lv.keyboard):
             txt_input = self.ta.get_text()
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if len(txt_input) > 0:
-                change_key_bg(dsc, 21, 29, True)
+                change_key_bg(dsc, 21, 29, True, self.completed)
             else:
                 change_key_bg(dsc, 21, 29, False)
         elif event.code == lv.EVENT.VALUE_CHANGED:
@@ -230,6 +242,9 @@ class BIP39Keyboard(lv.keyboard):
                     self.dummy_ctl_map[-1] &= (
                         self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
                     )
+                    self.completed = True
+                else:
+                    self.completed = False
                 self.set_map(
                     lv.keyboard.MODE.TEXT_LOWER, self.btnm_map, self.dummy_ctl_map
                 )
@@ -245,41 +260,63 @@ class NumberKeyboard(lv.keyboard):
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
-        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
+        self.ta.set_style_max_width(400, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
+        self.ta.set_style_text_letter_space(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_font(font_PJSBOLD32, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_one_line(True)
         self.ta.set_accepted_chars("0123456789")
         self.ta.set_max_length(50)
         self.ta.set_password_mode(True)
+        self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.nums = [i for i in range(10)]
-        random.shuffle(self.nums)
+        if not device.is_order_pin_map():
+            random.shuffle(self.nums)
         self.btnm_map = [
-            str(self.nums[0]),
             str(self.nums[1]),
             str(self.nums[2]),
-            "\n",
             str(self.nums[3]),
+            "\n",
             str(self.nums[4]),
             str(self.nums[5]),
-            "\n",
             str(self.nums[6]),
+            "\n",
             str(self.nums[7]),
             str(self.nums[8]),
+            str(self.nums[9]),
             "\n",
             lv.SYMBOL.BACKSPACE,
+            str(self.nums[0]),
+            lv.SYMBOL.OK,
+            "",
+        ]
+        self.dummy_btnm_map = [
+            str(self.nums[1]),
+            str(self.nums[2]),
+            str(self.nums[3]),
+            "\n",
+            str(self.nums[4]),
+            str(self.nums[5]),
+            str(self.nums[6]),
+            "\n",
+            str(self.nums[7]),
+            str(self.nums[8]),
             str(self.nums[9]),
+            "\n",
+            lv.SYMBOL.CLOSE,
+            str(self.nums[0]),
             lv.SYMBOL.OK,
             "",
         ]
         self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
-        self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.ctrl_map)
+        self.ctrl_map[-1] = lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED
+        self.set_map(lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
         self.set_width(lv.pct(96))
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -294,23 +331,57 @@ class NumberKeyboard(lv.keyboard):
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_radius(30, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_radius(36, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD32, lv.PART.ITEMS | lv.STATE.DEFAULT)
-        self.set_height(292)
-        self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
+        self.set_height(324)
+        self.align(lv.ALIGN.BOTTOM_MID, 0, -20)
         self.set_textarea(self.ta)
         self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
+        self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
+
+    def toggle_number_input_keys(self, enable: bool):
+        if enable:
+            self.dummy_ctl_map = []
+            self.dummy_ctl_map.extend(self.ctrl_map)
+            if self.input_len > 3:
+                self.dummy_ctl_map[-1] &= (
+                    self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
+                )
+            self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
+
+        else:
+            self.dummy_ctl_map = []
+            self.dummy_ctl_map.extend(self.ctrl_map)
+            for i in range(12):
+                if i not in (9, 11):
+                    self.dummy_ctl_map[i] |= lv.btnmatrix.CTRL.DISABLED
+            self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
 
     def event_cb(self, event):
-        if event.code == lv.EVENT.DRAW_PART_BEGIN:
-            txt_input = self.ta.get_text()
+        code = event.code
+        input_len = len(self.ta.get_text())
+        self.input_len = input_len
+        if code == lv.EVENT.DRAW_PART_BEGIN:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
-            if len(txt_input) > 3:
+            if input_len > 3:
                 change_key_bg(dsc, 9, 11, True)
-            elif len(txt_input) > 0:
+            elif input_len > 0:
                 change_key_bg(dsc, 9, 11, True, False)
             else:
                 change_key_bg(dsc, 9, 11, False)
+                if dsc.id == 9:
+                    dsc.rect_dsc.bg_img_src = "A:/res/keyboard-close.png"
+        elif code == lv.EVENT.VALUE_CHANGED:
+            if input_len >= 50:
+                # disable number keys
+                self.toggle_number_input_keys(False)
+            elif input_len > 0:
+                # enable number keys
+                self.toggle_number_input_keys(True)
+            else:
+                self.set_map(
+                    lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map
+                )
 
 
 class PassphraseKeyboard(lv.btnmatrix):
@@ -334,6 +405,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         )
         self.ta.set_max_length(max_len)
         self.ta.set_password_mode(True)
+        self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btn_map_text_lower = [
             "q",

@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import storage
 import storage.device
-from trezor import config, wire
+from trezor import config, loop, wire
 from trezor.crypto import bip39, hashlib, random, slip39
 from trezor.enums import BackupType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
@@ -49,10 +49,13 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
 
     await confirm_reset_device(ctx, prompt)
     # await LoadingAnimation()
+    if isinstance(ctx, wire.DummyContext):
+        from trezor import utils
 
-    # # on device reset, we need to ask for a new strength to override the default  value 12
-    # if isinstance(ctx, wire.DummyContext):
-    #     msg.strength = await request_strength()
+        utils.play_dead()
+
+        # on device reset, we need to ask for a new strength to override the default  value 12
+        # msg.strength = await request_strength()
 
     # request and set new PIN
     if msg.pin_protection:
@@ -113,6 +116,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     if perform_backup:
         await layout.show_backup_success(ctx)
     set_homescreen()
+    if isinstance(ctx, wire.DummyContext):
+        loop.clear()
     return Success(message="Initialized")
 
 

@@ -28,7 +28,9 @@ from typing import TYPE_CHECKING
 
 DISABLE_ANIMATION = 0
 BLE_CONNECTED: bool | None = None
-BATTERY_CAP: int = 100
+BATTERY_CAP: int = 80
+SHORT_AUTO_LOCK: bool | None = None
+SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
 
 
 if __debug__:
@@ -58,12 +60,44 @@ def clear_screens() -> None:
     SCREENS.clear()
 
 
-def turn_on_lcd_if_possible():
+def turn_on_lcd_if_possible() -> bool:
     from trezor.ui import display
     from storage import device
+    from apps import base
 
     if not display.backlight():
         display.backlight(device.get_brightness())
+        base.reload_settings_from_storage(SHORT_AUTO_LOCK_TIME_MS)
+        return True
+    return False
+
+
+def lcd_resume() -> bool:
+    from trezor.ui import display
+    from storage import device
+
+    if display.backlight() != device.get_brightness():
+        display.backlight(device.get_brightness())
+        return True
+    return False
+
+
+def turn_off_lcd():
+    from trezor.ui import display
+    from trezor import loop
+
+    if display.backlight():
+        display.backlight(0)
+    loop.clear()
+
+
+def play_dead():
+    from trezor import loop
+    import usb
+    from session import SPI_IFACE_NUM
+
+    loop.pop_tasks_on_iface(usb.iface_wire.iface_num())
+    loop.pop_tasks_on_iface(SPI_IFACE_NUM)
 
 
 def unimport_begin() -> set[str]:

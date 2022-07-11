@@ -160,7 +160,7 @@ class StatusBar(lv.obj):
     def set_battery_img(self, value: int, charging: bool):
         if charging:
             self.percent.clear_flag(lv.obj.FLAG.HIDDEN)
-            self.percent.set_text(f"{value}%")
+            self.percent.set_text(f"{min(value, 100)}%")
         else:
             self.percent.add_flag(lv.obj.FLAG.HIDDEN)
         icon_path = retrieve_icon_path(value, charging)
@@ -168,31 +168,90 @@ class StatusBar(lv.obj):
 
 
 def retrieve_icon_path(value: int, charging: bool) -> str:
-    # if value == 101:
-    #     return "A:/res/charging.png"
-    if value >= 80:
+
+    if value >= 95:
         return (
             "A:/res/battery-100-green.png"
             if charging
             else "A:/res/battery-100-white.png"
         )
-    elif value >= 60:
+    elif value >= 90:
+        return (
+            "A:/res/battery-95-green.png" if charging else "A:/res/battery-95-white.png"
+        )
+    elif value >= 85:
+        return (
+            "A:/res/battery-90-green.png" if charging else "A:/res/battery-90-white.png"
+        )
+    elif value >= 80:
+        return (
+            "A:/res/battery-85-green.png" if charging else "A:/res/battery-85-white.png"
+        )
+    elif value >= 75:
         return (
             "A:/res/battery-80-green.png" if charging else "A:/res/battery-80-white.png"
         )
-    elif value >= 40:
+    elif value >= 70:
+        return (
+            "A:/res/battery-75-green.png" if charging else "A:/res/battery-75-white.png"
+        )
+    elif value >= 65:
+        return (
+            "A:/res/battery-70-green.png" if charging else "A:/res/battery-70-white.png"
+        )
+    elif value >= 60:
+        return (
+            "A:/res/battery-65-green.png" if charging else "A:/res/battery-65-white.png"
+        )
+    elif value >= 55:
         return (
             "A:/res/battery-60-green.png" if charging else "A:/res/battery-60-white.png"
         )
-    elif value >= 20:
+    elif value >= 50:
+        return (
+            "A:/res/battery-55-green.png" if charging else "A:/res/battery-55-white.png"
+        )
+    elif value >= 45:
+        return (
+            "A:/res/battery-50-green.png" if charging else "A:/res/battery-50-white.png"
+        )
+    elif value >= 40:
+        return (
+            "A:/res/battery-45-green.png" if charging else "A:/res/battery-45-white.png"
+        )
+    elif value >= 35:
         return (
             "A:/res/battery-40-green.png" if charging else "A:/res/battery-40-white.png"
         )
-    elif value >= 5:
+    elif value >= 30:
+        return (
+            "A:/res/battery-35-green.png" if charging else "A:/res/battery-35-white.png"
+        )
+    elif value >= 25:
+        return (
+            "A:/res/battery-30-green.png" if charging else "A:/res/battery-30-white.png"
+        )
+    elif value >= 20:
+        return (
+            "A:/res/battery-25-green.png" if charging else "A:/res/battery-25-white.png"
+        )
+    elif value >= 15:
         return (
             "A:/res/battery-20-green.png" if charging else "A:/res/battery-20-white.png"
         )
-    else:
+    elif value >= 10:
+        return (
+            "A:/res/battery-15-green.png" if charging else "A:/res/battery-15-white.png"
+        )
+    elif value >= 5:
+        return (
+            "A:/res/battery-10-green.png" if charging else "A:/res/battery-10-white.png"
+        )
+    elif value >= 0:
         return (
             "A:/res/battery-5-green.png" if charging else "A:/res/battery-5-white.png"
+        )
+    else:
+        return (
+            "A:/res/battery-80-green.png" if charging else "A:/res/battery-80-white.png"
         )

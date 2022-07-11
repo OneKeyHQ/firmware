@@ -10,8 +10,10 @@ if TYPE_CHECKING:
 
 
 async def get_firmware_hash(ctx: Context, msg: GetFirmwareHash) -> FirmwareHash:
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
     workflow.close_others()
-    draw_simple_text("Please wait")
+    draw_simple_text(_(i18n_keys.TITLE__PLEASE_WAIT))
 
     try:
         hash = firmware_hash(msg.challenge, _render_progress)
