@@ -55,9 +55,11 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
 
         utils.play_dead()
 
-    try:        # for dry run pin needs to be entered
+    try:  # for dry run pin needs to be entered
         if msg.dry_run:
-            curpin, salt = await request_pin_and_sd_salt(ctx, _(i18n_keys.TITLE__ENTER_PIN))
+            curpin, salt = await request_pin_and_sd_salt(
+                ctx, _(i18n_keys.TITLE__ENTER_PIN)
+            )
             if not config.check_pin(curpin, salt):
                 await error_pin_invalid(ctx)
 
@@ -75,7 +77,7 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
 
         storage.recovery.set_in_progress(True)
         storage.recovery.set_dry_run(bool(msg.dry_run))
-    # workflow.set_default(recovery_homescreen)
+        # workflow.set_default(recovery_homescreen)
         result = await recovery_process(ctx)
     except BaseException as e:
         raise e

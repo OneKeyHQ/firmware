@@ -17,7 +17,7 @@ class LockScreen(Screen):
             if not self.is_visible():
                 load_scr_with_animation(self)
             return
-        super().__init__(title=device_name or "My OneKey")
+        super().__init__(title=device_name)
         if dev_state:
             self.dev_state = lv.btn(self)
             self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)

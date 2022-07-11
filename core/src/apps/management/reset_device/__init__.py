@@ -83,7 +83,9 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         elif msg.backup_type in (BackupType.Slip39_Basic, BackupType.Slip39_Advanced):
             # generate and set SLIP39 parameters
             storage.device.set_slip39_identifier(slip39.generate_random_identifier())
-            storage.device.set_slip39_iteration_exponent(slip39.DEFAULT_ITERATION_EXPONENT)
+            storage.device.set_slip39_iteration_exponent(
+                slip39.DEFAULT_ITERATION_EXPONENT
+            )
         else:
             # Unknown backup type.
             raise RuntimeError
@@ -123,7 +125,6 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     finally:
         if isinstance(ctx, wire.DummyContext):
             loop.clear()
-
 
 
 async def backup_slip39_basic(

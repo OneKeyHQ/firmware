@@ -122,21 +122,45 @@ class BIP39Keyboard(lv.keyboard):
             "m",
             "READY",
         ]
-        self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 10
+        self.ctrl_map = [
+            lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG
+        ] * 10
         self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
         self.ctrl_map.extend(
-            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 9
+            [
+                2
+                | lv.btnmatrix.CTRL.NO_REPEAT
+                | lv.btnmatrix.CTRL.POPOVER
+                | lv.btnmatrix.CTRL.CLICK_TRIG
+            ]
+            * 9
         )
 
         self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
         self.ctrl_map.extend(
-            [4 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED]
+            [
+                4
+                | lv.btnmatrix.CTRL.NO_REPEAT
+                | lv.btnmatrix.CTRL.DISABLED
+                | lv.btnmatrix.CTRL.CLICK_TRIG
+            ]
         )
         self.ctrl_map.extend(
-            [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 7
+            [
+                3
+                | lv.btnmatrix.CTRL.NO_REPEAT
+                | lv.btnmatrix.CTRL.POPOVER
+                | lv.btnmatrix.CTRL.CLICK_TRIG
+            ]
+            * 7
         )
         self.ctrl_map.extend(
-            [4 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED]
+            [
+                4
+                | lv.btnmatrix.CTRL.NO_REPEAT
+                | lv.btnmatrix.CTRL.DISABLED
+                | lv.btnmatrix.CTRL.CLICK_TRIG
+            ]
         )
         self.dummy_ctl_map = []
         self.dummy_ctl_map.extend(self.ctrl_map)
@@ -314,7 +338,9 @@ class NumberKeyboard(lv.keyboard):
             lv.SYMBOL.OK,
             "",
         ]
-        self.ctrl_map = [lv.btnmatrix.CTRL.NO_REPEAT] * 12
+        self.ctrl_map = [
+            lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG
+        ] * 12
         self.ctrl_map[-1] = lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED
         self.set_map(lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
@@ -347,6 +373,7 @@ class NumberKeyboard(lv.keyboard):
                 self.dummy_ctl_map[-1] &= (
                     self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
                 )
+
             self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
 
         else:
@@ -355,6 +382,10 @@ class NumberKeyboard(lv.keyboard):
             for i in range(12):
                 if i not in (9, 11):
                     self.dummy_ctl_map[i] |= lv.btnmatrix.CTRL.DISABLED
+                elif i == 11:
+                    self.dummy_ctl_map[-1] &= (
+                        self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
+                    )
             self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
 
     def event_cb(self, event):

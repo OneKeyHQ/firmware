@@ -209,7 +209,7 @@ def set_rotation(value: int) -> None:
 def get_label() -> str | None:
     label = common.get(_NAMESPACE, _LABEL, True)  # public
     if label is None:
-        return None
+        return "OneKey Touch"
     return label.decode()
 
 
