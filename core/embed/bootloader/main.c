@@ -223,6 +223,9 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
           return sectrue;  // jump to firmware
         }
         break;
+      case 16:  // erase ble update buffer
+        process_msg_FirmwareEraseBLE(USB_IFACE_NUM, msg_size, buf);
+        break;
       case 55:  // GetFeatures
         process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;

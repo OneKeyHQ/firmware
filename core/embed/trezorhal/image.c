@@ -100,6 +100,39 @@ secbool load_image_header(const uint8_t *const data, const uint32_t magic,
                                  *(const ed25519_signature *)hdr->sig));
 }
 
+secbool load_ble_image_header(const uint8_t *const data, const uint32_t magic,
+                              const uint32_t maxsize, image_header *const hdr) {
+  memcpy(&hdr->magic, data, 4);
+  if (hdr->magic != magic) return secfalse;
+
+  memcpy(&hdr->hdrlen, data + 4, 4);
+  // if (hdr->hdrlen != IMAGE_HEADER_SIZE) return secfalse;
+
+  memcpy(&hdr->expiry, data + 8, 4);
+  // TODO: expiry mechanism needs to be ironed out before production or those
+  // devices won't accept expiring bootloaders (due to boardloader write
+  // protection).
+  if (hdr->expiry != 0) return secfalse;
+
+  memcpy(&hdr->codelen, data + 12, 4);
+  // if (hdr->codelen > (maxsize - hdr->hdrlen)) return secfalse;
+  // if ((hdr->hdrlen + hdr->codelen) < 4 * 1024) return secfalse;
+  // if ((hdr->hdrlen + hdr->codelen) % 512 != 0) return secfalse;
+
+  memcpy(&hdr->version, data + 16, 4);
+  memcpy(&hdr->fix_version, data + 20, 4);
+  memcpy(&hdr->onekey_version, data + 24, 4);
+
+  memcpy(hdr->hashes, data + 32, 512);
+
+  memcpy(&hdr->sigmask, data + IMAGE_HEADER_SIZE - IMAGE_SIG_SIZE, 1);
+
+  memcpy(hdr->sig, data + IMAGE_HEADER_SIZE - IMAGE_SIG_SIZE + 1,
+         IMAGE_SIG_SIZE - 1);
+
+  return sectrue;
+}
+
 secbool read_vendor_header(const uint8_t *const data,
                            vendor_header *const vhdr) {
   memcpy(&vhdr->magic, data, 4);

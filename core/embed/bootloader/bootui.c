@@ -701,6 +701,18 @@ void ui_install_confirm(image_header *current_hdr,
                 sizeof(toi_icon_install_green) - 12);
 }
 
+void ui_install_ble_confirm(void) {
+  ui_title_update();
+  display_image(203, 143, 74, 74, toi_icon_onekey + 12,
+                sizeof(toi_icon_onekey) - 12);
+  display_text_center(DISPLAY_RESX / 2, 346, "Install bluetooth firmware", -1,
+                      FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);
+  display_image(32, 674, 0xc0, 0x3e, toi_icon_cancel_new + 12,
+                sizeof(toi_icon_cancel_new) - 12);
+  display_image(256, 674, 0xc0, 0x3e, toi_icon_install_green + 12,
+                sizeof(toi_icon_install_green) - 12);
+}
+
 void ui_bootloader_first(void) {
   ui_title_update();
   display_image(203, 143, 74, 74, toi_icon_onekey + 12,

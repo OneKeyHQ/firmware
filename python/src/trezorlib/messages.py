@@ -79,6 +79,7 @@ class MessageType(IntEnum):
     FirmwareErase = 6
     FirmwareUpload = 7
     FirmwareRequest = 8
+    FirmwareErase_ex = 16
     SelfTest = 32
     GetPublicKey = 11
     PublicKey = 12
@@ -2001,6 +2002,20 @@ class TxAckPrevExtraDataWrapper(protobuf.MessageType):
 
 class FirmwareErase(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 6
+    FIELDS = {
+        1: protobuf.Field("length", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        length: Optional["int"] = None,
+    ) -> None:
+        self.length = length
+
+
+class FirmwareErase_ex(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 16
     FIELDS = {
         1: protobuf.Field("length", "uint32", repeated=False, required=False),
     }

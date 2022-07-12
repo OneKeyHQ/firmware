@@ -153,6 +153,15 @@ message FirmwareRequest {
 }
 
 /**
+ * Request: Ask device to erase its firmware (so it can be replaced via FirmwareUpload)
+ * @start
+ * @next FirmwareRequest
+ */
+message FirmwareErase_ex {
+    optional uint32 length = 1; // length of new firmware
+}
+
+/**
  * Request: Send firmware in binary form to the device
  * @next FirmwareRequest
  * @next Success

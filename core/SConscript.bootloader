@@ -186,6 +186,8 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/ble.c',
     'embed/trezorhal/sys.c',
     'embed/trezorhal/device.c',
+    'embed/trezorhal/nordic_dfu.c',
+
 ]
 
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0')))
