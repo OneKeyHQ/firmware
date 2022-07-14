@@ -41,13 +41,24 @@ void fsm_msgTronSignMessage(TronSignMessage *msg) {
   }
 
   if (is_valid_ascii(msg->message.bytes, msg->message.size)) {
-    fsm_layoutSignMessage(msg->message.bytes, msg->message.size);
+    if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
   } else {
     unsigned char buf[65];
     size_t len = msg->message.size >= 32 ? 32 : msg->message.size;
     data2hex(msg->message.bytes, len, (char *)buf);
-    fsm_layoutSignMessage(buf, len * 2);
+    if (!fsm_layoutSignMessage(buf, len * 2)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
   }
+
+  resp->address.size = strlen(signer_str);
+  memcpy(resp->address.bytes, signer_str, resp->address.size);
 
   tron_message_sign(msg, node, resp);
   layoutHome();
@@ -67,6 +78,7 @@ void fsm_msgTronGetAddress(TronGetAddress *msg) {
   uint8_t eth_address[20];
   if (!hdnode_get_ethereum_pubkeyhash(node, eth_address)) return;
   tron_eth_2_trx_address(eth_address, resp->address, sizeof(resp->address));
+  resp->has_address = 1;
 
   if (msg->has_show_display && msg->show_display) {
     char desc[16];
@@ -87,15 +99,10 @@ void fsm_msgTronGetAddress(TronGetAddress *msg) {
   layoutHome();
 }
 
-void fsm_msgTronSignRawTx(TronSignRawTx *msg) {
-  RESP_INIT(TronSignature);
+void fsm_msgTronSignTx(TronSignTx *msg) {
+  RESP_INIT(TronSignedTx);
 
   CHECK_INITIALIZED
-
-  if (!msg->raw_tx.size) {
-    fsm_sendFailure(FailureType_Failure_UnexpectedMessage,
-                    "empty raw_tx field");
-  }
 
   CHECK_PIN
 
@@ -103,8 +110,13 @@ void fsm_msgTronSignRawTx(TronSignRawTx *msg) {
                                           msg->address_n_count, NULL);
   if (!node) return;
 
-  if (tron_sign_raw_tx(msg->raw_tx.bytes, msg->raw_tx.size, node, resp)) {
-    msg_write(MessageType_MessageType_TronSignature, resp);
+  char signer_str[36];
+  uint8_t eth_address[20];
+  if (!hdnode_get_ethereum_pubkeyhash(node, eth_address)) return;
+  tron_eth_2_trx_address(eth_address, signer_str, sizeof(signer_str));
+
+  if (tron_sign_tx(msg, signer_str, node, resp)) {
+    msg_write(MessageType_MessageType_TronSignedTx, resp);
   }
 
   layoutHome();

@@ -828,6 +828,8 @@ const char *languages[][2] = {
     {"Unexpected message", ""},
     // layout2.c
     {"Unknown Mosaic", ""},
+    // tron_ui.c
+    {"Unknown Token", "未知代币"},
     // bl_check.c
     {"Unknown bootloader", ""},
     // layout2.c

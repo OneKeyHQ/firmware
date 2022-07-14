@@ -353,7 +353,7 @@ static void display_choices(bool twoColumn, char choices[9][12], int num) {
     int y = 55 - row * 11;
 #endif
     for (int col = 0; col < nColumns; col++) {
-      int x = twoColumn ? 64 * col + 32 : 42 * col + 22;
+      int x = twoColumn ? 64 * col + 32 : 42 * col + 19;
       int choice = word_matrix[nColumns * row + col];
       const char *text = choice < num ? choices[choice] : "-";
       oledDrawString(x - oledStringWidth(text, FONT_STANDARD) / 2, y, text,
@@ -361,7 +361,7 @@ static void display_choices(bool twoColumn, char choices[9][12], int num) {
       if (twoColumn) {
         oledInvert(x - 32 + 1, y - 1, x - 32 + 63 - 1, y + 8);
       } else {
-        oledInvert(x - 22 + 1, y - 1, x - 22 + 41 - 1, y + 8);
+        oledInvert(x - 19 + 1, y - 1, x - 19 + 41 - 1, y + 8);
       }
     }
   }
