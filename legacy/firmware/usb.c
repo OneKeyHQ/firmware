@@ -32,6 +32,7 @@
 #if U2F_ENABLED
 #include "u2f.h"
 #endif
+#include "ble.h"
 #include "layout2.h"
 #include "memory.h"
 #include "si2c.h"
@@ -432,6 +433,8 @@ void usbPoll(void) {
   bool reset = false;
 
   static bool usb_status_bak = false;
+
+  ble_update_poll();
 
   if (usb_connect_status && !usb_status_bak) {
     usb_status_bak = true;
