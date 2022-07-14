@@ -9,7 +9,7 @@ Features.ble_name               max_size:32
 Features.ble_ver                max_size:16
 Features.se_ver                 max_size:16
 Features.onekey_version         max_size:32
-Features.onekey_serial          max_size:32
+Features.serial_no              max_size:32
 Features.bootloader_version     max_size:8
 
 Ping.message                    max_size:256

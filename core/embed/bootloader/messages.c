@@ -370,7 +370,7 @@ static void send_msg_features(uint8_t iface_num,
 
     char *serial = NULL;
     if (device_get_serial(&serial)) {
-      MSG_SEND_ASSIGN_STRING_LEN(onekey_serial, serial, strlen(serial));
+      MSG_SEND_ASSIGN_STRING_LEN(serial_no, serial, strlen(serial));
     }
   }
 

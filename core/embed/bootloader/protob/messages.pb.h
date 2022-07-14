@@ -154,10 +154,10 @@ typedef struct _Features {
     bool backup_only; 
     bool has_onekey_version;
     char onekey_version[32]; 
-    bool has_onekey_serial;
-    char onekey_serial[32]; 
     bool has_bootloader_version;
     char bootloader_version[8]; 
+    bool has_serial_no;
+    char serial_no[32]; 
     bool has_initstates;
     uint32_t initstates; 
 } Features;
@@ -323,8 +323,8 @@ extern "C" {
 #define Features_se_ver_tag                      506
 #define Features_backup_only_tag                 507
 #define Features_onekey_version_tag              508
-#define Features_onekey_serial_tag               509
 #define Features_bootloader_version_tag          510
+#define Features_serial_no_tag                   511
 #define Features_initstates_tag                  513
 #define FirmwareErase_length_tag                 1
 #define FirmwareErase_ex_length_tag              1
@@ -376,8 +376,8 @@ X(a, STATIC,   OPTIONAL, BOOL,     se_enable,       504) \
 X(a, STATIC,   OPTIONAL, STRING,   se_ver,          506) \
 X(a, STATIC,   OPTIONAL, BOOL,     backup_only,     507) \
 X(a, STATIC,   OPTIONAL, STRING,   onekey_version,  508) \
-X(a, STATIC,   OPTIONAL, STRING,   onekey_serial,   509) \
 X(a, STATIC,   OPTIONAL, STRING,   bootloader_version, 510) \
+X(a, STATIC,   OPTIONAL, STRING,   serial_no,       511) \
 X(a, STATIC,   OPTIONAL, UINT32,   initstates,      513)
 #define Features_CALLBACK NULL
 #define Features_DEFAULT NULL

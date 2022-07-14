@@ -74,7 +74,7 @@ message Features {
     optional string se_ver = 506;
     optional bool backup_only = 507;
     optional string onekey_version = 508;       // OneKey version
-    optional string onekey_serial = 509;
+    optional string serial_no = 511;
     optional string bootloader_version = 510;
 
     optional uint32 initstates = 513;      // list of facotry state
