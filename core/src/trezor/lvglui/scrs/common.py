@@ -5,6 +5,7 @@ from trezor import loop, utils
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 from ..lv_colors import lv_colors
+from .components import slider
 from .components.button import NormalButton
 from .components.label import SubTitle, Title
 from .components.roller import Roller
@@ -24,6 +25,7 @@ class Screen(lv.obj):
         self.channel = loop.chan()
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        # icon
         if "icon_path" in kwargs:
             self.icon = lv.img(self)
             self.icon.set_src(kwargs["icon_path"])
@@ -33,6 +35,9 @@ class Screen(lv.obj):
             self.title = Title(self, None, 452, (), kwargs["title"])
             if kwargs.get("icon_path"):
                 self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+        # subtitle
+        if "subtitle" in kwargs:
+            self.subtitle = SubTitle(self, self.title, 452, (0, 32), kwargs["subtitle"])
         # roller
         if "options" in kwargs:
             self.roller = Roller(self, kwargs["options"])
@@ -48,8 +53,9 @@ class Screen(lv.obj):
         # nav_back
         if kwargs.get("nav_back", False):
             self.nav_back = lv.imgbtn(self)
-            self.nav_back.set_size(100, 100)
-            self.nav_back.set_pos(lv.pct(1), lv.pct(8))
+            self.nav_back.set_size(48, 48)
+            self.nav_back.set_pos(24, 92)
+            self.nav_back.set_ext_click_area(100)
             self.nav_back.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
             self.nav_back.set_style_bg_img_src(
                 "A:/res/nav-back.png", lv.PART.MAIN | lv.STATE.DEFAULT
@@ -142,7 +148,7 @@ class FullSizeWindow(lv.obj):
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.hold_confirm = hold_confirm and not utils.EMULATOR
+        self.hold_confirm = hold_confirm  # and not utils.EMULATOR
         self.content_area = lv.obj(self)
         self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
@@ -184,26 +190,30 @@ class FullSizeWindow(lv.obj):
             if confirm_text:
                 if not self.hold_confirm:
                     self.btn_no.set_size(192, 76)
-                    self.btn_no.align_to(self, lv.ALIGN.BOTTOM_LEFT, 32, -18)
+                    self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 32, -18)
+                else:
+                    self.btn_no.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+                    self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 32, -8)
                 self.btn_no.enable()
             self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
-            self.btn_yes = NormalButton(self, confirm_text)
             if cancel_text:
                 if self.hold_confirm:
                     self.content_area.set_style_max_height(
                         550, lv.PART.MAIN | lv.STATE.DEFAULT
                     )
-                    self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -16)
+                    self.slider = slider.Slider(self, confirm_text, relative_y=-88)
                 else:
+                    self.btn_yes = NormalButton(self, confirm_text)
                     self.btn_yes.set_size(192, 76)
                     self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -18)
-            self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
-            self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+            else:
+                self.btn_yes = NormalButton(self, confirm_text)
             if self.hold_confirm:
-                self.btn_yes.add_event_cb(
-                    self.eventhandler, lv.EVENT.LONG_PRESSED, None
-                )
+                self.slider.add_event_cb(self.eventhandler, lv.EVENT.READY, None)
+            else:
+                self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
+                self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if auto_close:
             self.destroy(delay_ms=10 * 1000)
@@ -234,8 +244,8 @@ class FullSizeWindow(lv.obj):
                         return
             else:
                 return
-        elif code == lv.EVENT.LONG_PRESSED and self.hold_confirm:
-            if target == self.btn_yes:
+        elif code == lv.EVENT.READY and self.hold_confirm:
+            if target == self.slider:
                 self.channel.publish(1)
             else:
                 return

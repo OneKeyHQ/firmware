@@ -110,7 +110,7 @@ class TransactionDetailsETH(FullSizeWindow):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
             hold_confirm=True,
         )
@@ -227,7 +227,7 @@ class TransactionDetailsBTC(FullSizeWindow):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
             hold_confirm=True,
         )
@@ -246,7 +246,7 @@ class JointTransactionDetailsBTC(FullSizeWindow):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
             hold_confirm=True,
         )
@@ -310,7 +310,7 @@ class ConfirmPaymentRequest(FullSizeWindow):
         super().__init__(
             title,
             subtitle,
-            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
             hold_confirm=True,
         )
@@ -385,7 +385,7 @@ class ConfirmTransferBinance(FullSizeWindow):
         super().__init__(
             _(i18n_keys.TITLE__CONFIRM_TRANSFER),
             None,
-            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
             _(i18n_keys.BUTTON__REJECT),
             hold_confirm=True,
         )
@@ -486,11 +486,14 @@ class TransactionDetailsTRON(FullSizeWindow):
             self.item5 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
             )
+
+
 class SecurityCheck(FullSizeWindow):
     def __init__(self):
-        super().__init__(title=_(i18n_keys.TITLE__SECURITY_CHECK),
-        subtitle=_(i18n_keys.SUBTITLE__SECURITY_CHECK),
-        confirm_text=_(i18n_keys.BUTTON__CANCEL),
-        cancel_text=_(i18n_keys.BUTTON__CONFIRM),
-        icon_path="A:/res/security-check.png"
+        super().__init__(
+            title=_(i18n_keys.TITLE__SECURITY_CHECK),
+            subtitle=_(i18n_keys.SUBTITLE__SECURITY_CHECK),
+            confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path="A:/res/security-check.png",
         )

@@ -139,7 +139,7 @@ async def confirm_typed_data_final(ctx: Context) -> None:
         "confirm_typed_data_final",
         title=_(i18n_keys.TITLE__SIGN_712_TYPED_DATA),
         action=_(i18n_keys.SUBTITLE__SIGN_712_TYPED_DATA),
-        verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
+        verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
         hold=True,
     )
 

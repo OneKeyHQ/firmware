@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
 
 from trezor import utils, wire
+from trezor.messages import SEMessageSignature
 
 if TYPE_CHECKING:
-    from trezor.messages import SEMessageSignature, SESignMessage
+    from trezor.messages import SESignMessage
 
 
 async def se_sign_message(ctx: wire.Context, msg: SESignMessage) -> SEMessageSignature:

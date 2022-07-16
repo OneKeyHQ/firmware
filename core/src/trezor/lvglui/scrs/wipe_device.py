@@ -27,7 +27,7 @@ class WipeDeviceTips(FullSizeWindow):
         super().__init__(
             title,
             subtitle,
-            _(i18n_keys.BUTTON__HOLD_TO_RESET),
+            _(i18n_keys.BUTTON__SLIDE_TO_RESET),
             _(i18n_keys.BUTTON__CANCEL),
             icon_path=icon_path,
             hold_confirm=True,
@@ -43,15 +43,18 @@ class WipeDeviceTips(FullSizeWindow):
             self.container,
             _(i18n_keys.CHECK__DEVICE_WIPE_DEVICE_FACTORY_RESET_2),
         )
-        self.btn_enable(False)
+        self.slider_enable(False)
+        self.btn_no.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
         self.cb_cnt = 0
 
-    def btn_enable(self, enable: bool = True):
+    def slider_enable(self, enable: bool = True):
         if enable:
-            self.btn_yes.enable(lv_colors.ONEKEY_RED_1)
+            self.slider.add_flag(lv.obj.FLAG.CLICKABLE)
+            self.slider.enable()
         else:
-            self.btn_yes.disable()
+            self.slider.clear_flag(lv.obj.FLAG.CLICKABLE)
+            self.slider.enable(False)
 
     def on_value_changed(self, event_obj):
         code = event_obj.code
@@ -72,24 +75,9 @@ class WipeDeviceTips(FullSizeWindow):
                     self.item2.enable_bg_color(False)
                     self.cb_cnt -= 1
             if self.cb_cnt == 2:
-                self.btn_enable()
+                self.slider_enable()
             elif self.cb_cnt < 2:
-                self.btn_enable(False)
-        #     return
-        # elif code == lv.EVENT.CLICKED:
-        #     if target == self.btn_no:
-        #         self.channel.publish(0)
-        #     elif target == self.btn_yes:
-        #         if utils.EMULATOR:
-        #             self.channel.publish(1)
-        #         else:
-        #             return
-        #     else:
-        #         return
-        # elif code == lv.EVENT.LONG_PRESSED:
-        #     if target == self.btn_yes:
-        #         self.channel.publish(1)
-        # self.destroy()
+                self.slider_enable(False)
 
 
 class WipeDeviceSuccess(FullSizeWindow):

@@ -1,3 +1,4 @@
+from storage import device
 from trezor import utils
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
@@ -6,7 +7,9 @@ from .common import Screen, load_scr_with_animation, lv, lv_colors
 
 
 class LockScreen(Screen):
-    def __init__(self, device_name, dev_state=None):
+    def __init__(self, device_name, ble_name="", dev_state=None):
+        cur_index = device.get_wp_index()
+        lockscreen = f"A:/res/wallpaper-{cur_index+1}.png"
         if not hasattr(self, "_init"):
             self._init = True
         else:
@@ -16,8 +19,17 @@ class LockScreen(Screen):
                 self.dev_state.delete()
             if not self.is_visible():
                 load_scr_with_animation(self)
+            if ble_name:
+                self.subtitle.set_text(ble_name)
             return
-        super().__init__(title=device_name)
+        super().__init__(
+            title=device_name, subtitle=ble_name, icon_path="A:/res/lock.png"
+        )
+        self.icon.align(lv.ALIGN.TOP_MID, 0, 92)
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
+        self.subtitle.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         if dev_state:
             self.dev_state = lv.btn(self)
             self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
@@ -35,9 +47,7 @@ class LockScreen(Screen):
                 font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
             )
             self.dev_state_text.center()
-        self.set_style_bg_img_src(
-            "A:/res/wallpaper_dark.png", lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.set_style_bg_img_src(lockscreen, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         self.tap_tip = lv.label(self)

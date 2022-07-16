@@ -26,7 +26,6 @@ _CMD_BATTERY_STATUS = const(9)
 _CMD_SIDE_BUTTON_PRESS = const(10)
 CHARGING = False
 SCREEN: PairCodeDisplay | None = None
-BLE_NAME: str | None = None
 BLE_ENABLED: bool | None = None
 NRF_VERSION: str | None = None
 BLE_CTRL = io.BLE()
@@ -44,14 +43,24 @@ async def handle_usb_state():
                 # deal with charging state
                 CHARGING = True
                 StatusBar.get_instance().show_charging(True)
-                StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+                if utils.BATTERY_CAP:
+                    StatusBar.get_instance().set_battery_img(
+                        utils.BATTERY_CAP, CHARGING
+                    )
             else:
                 StatusBar.get_instance().show_usb(False)
                 # deal with charging state
                 CHARGING = False
                 StatusBar.get_instance().show_charging()
-                StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-            if device.is_initialized() and config.has_pin():
+                if utils.BATTERY_CAP:
+                    StatusBar.get_instance().set_battery_img(
+                        utils.BATTERY_CAP, CHARGING
+                    )
+            if (
+                device.is_usb_lock_enabled()
+                and device.is_initialized()
+                and config.has_pin()
+            ):
                 config.lock()
                 # single to restart the main loop
                 raise loop.TASK_CLOSED
@@ -141,8 +150,6 @@ async def _deal_button_press(value: bytes) -> None:
         else:
             utils.turn_on_lcd_if_possible()
     elif res == _PRESS_LONG:
-        if __debug__:
-            print("LONG PRESS=======")
         from trezor.lvglui.scrs.homescreen import PowerOff
 
         PowerOff(set_home=True)
@@ -165,13 +172,15 @@ async def _deal_charging_state(value: bytes) -> None:
             return
         CHARGING = True
         StatusBar.get_instance().show_charging(True)
-        StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+        if utils.BATTERY_CAP:
+            StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
     elif res in (_USB_STATUS_PLUG_OUT, _POWER_STATUS_CHARGING_FINISHED):
         if not CHARGING:
             return
         CHARGING = False
         StatusBar.get_instance().show_charging()
-        StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+        if utils.BATTERY_CAP:
+            StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
 
 
 async def _deal_pair_res(value: bytes) -> None:
@@ -213,9 +222,8 @@ async def _deal_ble_status(value: bytes) -> None:
 
 
 def _retrieve_ble_name(value: bytes) -> None:
-    global BLE_NAME
     if value != b"":
-        BLE_NAME = value.decode("utf-8")
+        utils.BLE_NAME = value.decode("utf-8")
         # if config.is_unlocked():
         #     device.set_ble_name(BLE_NAME)
 
@@ -279,7 +287,7 @@ def ctrl_power_off() -> None:
 
 def get_ble_name() -> str:
     """Get ble name."""
-    return BLE_NAME if BLE_NAME else ""
+    return utils.BLE_NAME if utils.BLE_NAME else ""
 
 
 def get_ble_version() -> str:

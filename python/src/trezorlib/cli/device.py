@@ -283,3 +283,15 @@ def reboot_to_bootloader(obj: "TrezorConnection") -> str:
                 f"Warning: Rebooting into bootloader not supported on Trezor {client.features.model}"
             )
         return device.reboot_to_bootloader(client)
+
+
+@cli.command()
+@click.pass_obj
+def se_read_cert(obj: "TrezorConnection") -> bytes:
+    """Get device se cert.
+
+    Used in device verify.
+    """
+    with obj.client_context() as client:
+        cert_bytes = device.se_read_cert(client).public_cert
+        return cert_bytes

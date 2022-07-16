@@ -206,25 +206,37 @@ ALLOW_WHILE_LOCKED = (
 
 
 def set_homescreen() -> None:
+
+    ble_name = storage.device.get_ble_name()
     if storage.device.is_initialized():
         dev_state = get_state()
+        device_name = storage.device.get_label()
         if not config.is_unlocked():
             if __debug__:
                 print("Device is locked")
             from trezor.lvglui.scrs.lockscreen import LockScreen
 
-            device_name = storage.device.get_label()
-            LockScreen(device_name, dev_state)
+            LockScreen(device_name, ble_name, dev_state)
         else:
             if __debug__:
                 print("Device is unlocked")
             from trezor.lvglui.scrs.homescreen import MainScreen
 
-            MainScreen(dev_state)
+            store_ble_name(ble_name)
+            MainScreen(device_name, ble_name, dev_state)
     else:
         from trezor.lvglui.scrs.initscreen import InitScreen
 
+        store_ble_name(ble_name)
         InitScreen()
+
+
+def store_ble_name(ble_name):
+    from trezor import uart
+
+    temp_ble_name = uart.get_ble_name()
+    if not ble_name and temp_ble_name:
+        storage.device.set_ble_name(temp_ble_name)
 
 
 def get_state() -> str | None:

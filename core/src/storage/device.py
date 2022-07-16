@@ -25,7 +25,7 @@ _MNEMONIC_SECRET           = const(0x02)  # bytes
 _LANGUAGE                  = const(0x03)  # str
 _LABEL                     = const(0x04)  # str
 _USE_PASSPHRASE            = const(0x05)  # bool (0x01 or empty)
-_HOMESCREEN                = const(0x06)  # bytes
+_HOMESCREEN                = const(0x06)  # int
 _NEEDS_BACKUP              = const(0x07)  # bool (0x01 or empty)
 _FLAGS                     = const(0x08)  # int
 U2F_COUNTER                = const(0x09)  # int
@@ -46,7 +46,13 @@ _BLE_NAME = const(0x80)  # bytes
 _BLE_VERSION = const(0x81)  # bytes
 _BLE_ENABLED = const(0x82)  # bool (0x01 or empty)
 _BRIGHTNESS = const(0x83)   # int
+
+# deprecated
 _PIN_MAP_TYPES = const(0x84)  # int
+
+_WALLPAPER_INDEX = const(0x85)  # inT
+_USE_USB_PROTECT = const(0x86)  # bool (0x01 or empty)
+_USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -157,19 +163,20 @@ def get_brightness() -> int:
     return int.from_bytes(brightness, "big")
 
 
-def set_pin_map_type(types: int):
-    """Set the keys order of number keyboard
-    0: random
-    1: order
-    """
-    common.set(_NAMESPACE, _PIN_MAP_TYPES, types.to_bytes(2, "big"), public=True)
+def set_order_pin_map_enable(enable: bool):
+    common.set_bool(_NAMESPACE, _USE_RANDOM_PIN_MAP, enable, public=True)
 
 
-def is_order_pin_map() -> bool:
-    types = common.get(_NAMESPACE, _PIN_MAP_TYPES, public=True)
-    if types is None:
-        return False
-    return bool(int.from_bytes(types, "big"))
+def is_order_pin_map_enabled() -> bool:
+    return common.get_bool(_NAMESPACE, _USE_RANDOM_PIN_MAP, public=True)
+
+
+def is_usb_lock_enabled() -> bool:
+    return common.get_bool(_NAMESPACE, _USE_USB_PROTECT, public=True)
+
+
+def set_usb_lock_enabled(enable: bool) -> None:
+    common.set_bool(_NAMESPACE, _USE_USB_PROTECT, enable, public=True)
 
 
 def is_initialized() -> bool:
@@ -206,11 +213,16 @@ def set_rotation(value: int) -> None:
     common.set(_NAMESPACE, _ROTATION, value.to_bytes(2, "big"), True)  # public
 
 
-def get_label() -> str | None:
+def get_label() -> str:
+    """Get device label.
+
+    Returns:
+        str: if label == "", return default label "OneKey Touch" instead
+    """
     label = common.get(_NAMESPACE, _LABEL, True)  # public
     if label is None:
-        return "OneKey Touch"
-    return label.decode()
+        return utils.DEFAULT_LABEL
+    return label.decode() or utils.DEFAULT_LABEL
 
 
 def set_label(label: str) -> None:
@@ -281,6 +293,18 @@ def set_homescreen(homescreen: str) -> None:
     # if len(homescreen) > HOMESCREEN_MAXSIZE:
     #     raise ValueError  # homescreen too large
     common.set(_NAMESPACE, _HOMESCREEN, homescreen.encode(), public=True)
+
+
+def get_wp_index() -> int:
+    index = common.get(_NAMESPACE, _WALLPAPER_INDEX, public=True)
+    if not index:
+        return 0
+    return int.from_bytes(index, "big")
+
+
+def set_cur_wp_index(index: int) -> None:
+    """Set the index of the current wallpaper"""
+    common.set(_NAMESPACE, _WALLPAPER_INDEX, index.to_bytes(2, "big"), public=True)
 
 
 def store_mnemonic_secret(

@@ -203,7 +203,7 @@ async def require_confirm_safety_checks(
             "set_safety_checks",
             _(i18n_keys.TITLE__SAFETY_OVERRIDE),
             hold=True,
-            verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
+            verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
             description=_(
                 i18n_keys.SUBTITLE__ONEKEY_WILL_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE
             ),
@@ -218,7 +218,7 @@ async def require_confirm_safety_checks(
             "set_safety_checks",
             _(i18n_keys.TITLE__SAFETY_OVERRIDE),
             hold=True,
-            verb=_(i18n_keys.BUTTON__HOLD_TO_CONFIRM),
+            verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
             description=_(
                 i18n_keys.SUBTITLE__ONEKEY_WILL_TEMPORARILY_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE
             ),
