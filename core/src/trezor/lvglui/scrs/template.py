@@ -486,3 +486,11 @@ class TransactionDetailsTRON(FullSizeWindow):
             self.item5 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
             )
+class SecurityCheck(FullSizeWindow):
+    def __init__(self):
+        super().__init__(title=_(i18n_keys.TITLE__SECURITY_CHECK),
+        subtitle=_(i18n_keys.SUBTITLE__SECURITY_CHECK),
+        confirm_text=_(i18n_keys.BUTTON__CANCEL),
+        cancel_text=_(i18n_keys.BUTTON__CONFIRM),
+        icon_path="A:/res/security-check.png"
+        )

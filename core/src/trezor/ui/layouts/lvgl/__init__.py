@@ -887,3 +887,15 @@ async def confirm_domain(ctx: wire.GenericContext, **kwargs) -> None:
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_domain", ButtonRequestType.ProtectCall)
     )
+
+async def confirm_security_check(ctx: wire.GenericContext) -> None:
+    from trezor.lvglui.scrs.template import SecurityCheck
+    screen = SecurityCheck()
+    await raise_if_cancelled(
+        interact(
+            ctx,
+            screen,
+            "security_check",
+            ButtonRequestType.ProtectCall
+        )
+    )
