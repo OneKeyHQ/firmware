@@ -36,6 +36,9 @@ PB_BIND(FirmwareErase, FirmwareErase, AUTO)
 PB_BIND(FirmwareRequest, FirmwareRequest, AUTO)
 
 
+PB_BIND(FirmwareErase_ex, FirmwareErase_ex, AUTO)
+
+
 PB_BIND(FirmwareUpload, FirmwareUpload, AUTO)
 
 

@@ -502,6 +502,8 @@ apps.management.reset_device.layout
 import apps.management.reset_device.layout
 apps.management.sd_protect
 import apps.management.sd_protect
+apps.management.se_sign_message
+import apps.management.se_sign_message
 apps.management.set_u2f_counter
 import apps.management.set_u2f_counter
 apps.management.wipe_device

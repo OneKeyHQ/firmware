@@ -71,6 +71,7 @@ if TYPE_CHECKING:
         FirmwareErase = 6
         FirmwareUpload = 7
         FirmwareRequest = 8
+        FirmwareErase_ex = 16
         SelfTest = 32
         GetPublicKey = 11
         PublicKey = 12

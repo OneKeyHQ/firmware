@@ -67,8 +67,19 @@ void ble_usart_init(void) {
   __HAL_UART_ENABLE_IT(huart, UART_IT_RXFNE);
 }
 
+void ble_usart_send_byte(uint8_t data) {
+  HAL_UART_Transmit(huart, &data, 1, 0xFFFF);
+}
+
 void ble_usart_send(uint8_t *buf, uint32_t len) {
   HAL_UART_Transmit(huart, buf, len, 0xFFFF);
+}
+
+bool ble_read_byte(uint8_t *buf) {
+  if (HAL_UART_Receive(huart, buf, 1, 100) == HAL_OK) {
+    return true;
+  }
+  return false;
 }
 
 secbool ble_usart_can_read(void) {
@@ -78,6 +89,8 @@ secbool ble_usart_can_read(void) {
     return secfalse;
   }
 }
+
+void ble_usart_irq_disable(void) { HAL_NVIC_DisableIRQ(UART4_IRQn); }
 
 uint32_t ble_usart_read(uint8_t *buf, uint32_t lenth) {
   uint32_t len = 0;

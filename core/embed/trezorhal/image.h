@@ -44,6 +44,9 @@
 #define FIRMWARE_IMAGE_MAGIC 0x46544B4F  // OKTF
 #define FIRMWARE_IMAGE_MAXSIZE (FIRMWARE_SECTORS_COUNT * IMAGE_CHUNK_SIZE)
 
+#define FIRMWARE_IMAGE_MAGIC_BLE 0x33383235
+#define FIRMWARE_IMAGE_MAXSIZE_BLE (128 * 1024)
+
 typedef struct {
   uint32_t magic;
   uint32_t hdrlen;
@@ -89,6 +92,11 @@ secbool __wur load_image_header(const uint8_t *const data, const uint32_t magic,
                                 const uint32_t maxsize, uint8_t key_m,
                                 uint8_t key_n, const uint8_t *const *keys,
                                 image_header *const hdr);
+
+secbool __wur load_ble_image_header(const uint8_t *const data,
+                                    const uint32_t magic,
+                                    const uint32_t maxsize,
+                                    image_header *const hdr);
 
 secbool __wur load_vendor_header(const uint8_t *const data, uint8_t key_m,
                                  uint8_t key_n, const uint8_t *const *keys,

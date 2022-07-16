@@ -102,39 +102,52 @@ ATCA_STATUS atca_send_packet(ATCAPacket *packet) {
 ATCA_STATUS atca_exec_cmd(ATCAPacket *packet) {
   static ATCA_STATUS status = ATCA_SUCCESS;
   uint8_t rx_len;
-  uint32_t state = disable_irq();
-  do {
-    if ((status = atca_wake()) != ATCA_SUCCESS) {
-      break;
-    }
-    if ((status = atca_send_packet(packet)) != ATCA_SUCCESS) {
-      break;
-    }
 
-    rx_len = sizeof(packet->data);
-    memset(packet->data, 0, rx_len);
-    for (int reties = 0; reties < ATCA_MAX_TIME_MSEC / ATCA_FREQUENCY_TIME_MSEC;
-         reties++) {
-      rx_len = sizeof(packet->data);
-      if ((status = atca_receive(packet->data, &rx_len)) == ATCA_SUCCESS) {
+  ATCAPacket packet_bak = {0};
+
+  memcpy(&packet_bak, packet, sizeof(ATCAPacket));
+
+  uint32_t state = disable_irq();
+
+  for (int i = 0; i < 3; i++) {
+    do {
+      if ((status = atca_wake()) != ATCA_SUCCESS) {
         break;
       }
-    }
-    if (status != ATCA_SUCCESS) {
+      if ((status = atca_send_packet(&packet_bak)) != ATCA_SUCCESS) {
+        break;
+      }
+
+      rx_len = sizeof(packet->data);
+      memset(packet->data, 0, rx_len);
+      for (int reties = 0;
+           reties < ATCA_MAX_TIME_MSEC / ATCA_FREQUENCY_TIME_MSEC; reties++) {
+        rx_len = sizeof(packet->data);
+        if ((status = atca_receive(packet->data, &rx_len)) == ATCA_SUCCESS) {
+          break;
+        }
+      }
+      if (status != ATCA_SUCCESS) {
+        break;
+      }
+
+      if ((status = atca_check_crc(packet->data)) != ATCA_SUCCESS) {
+        break;
+      }
+
+      if ((status = atca_result_check(packet->data)) != ATCA_SUCCESS) {
+        break;
+      }
+
+    } while (0);
+
+    atca_idle();
+
+    if (status == ATCA_SUCCESS) {
       break;
     }
+  }
 
-    if ((status = atca_check_crc(packet->data)) != ATCA_SUCCESS) {
-      break;
-    }
-
-    if ((status = atca_result_check(packet->data)) != ATCA_SUCCESS) {
-      break;
-    }
-
-  } while (0);
-
-  atca_idle();
   enable_irq(state);
   return status;
 }

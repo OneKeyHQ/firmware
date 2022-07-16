@@ -98,17 +98,13 @@ int32_t spi_slave_init() {
 
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOJ_CLK_ENABLE();
   __HAL_RCC_SPI2_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
 
-  gpio.Pin = GPIO_PIN_13;
   gpio.Mode = GPIO_MODE_OUTPUT_PP;
   gpio.Pull = GPIO_PULLUP;
   gpio.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOJ, &gpio);
-  HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13, GPIO_PIN_SET);
 
   gpio.Pin = GPIO_PIN_5 | GPIO_PIN_6;
   HAL_GPIO_Init(GPIOK, &gpio);
@@ -232,7 +228,6 @@ int32_t spi_slave_send(uint8_t *buf, uint32_t size, int32_t timeout) {
   }
 
   SET_COMBUS_LOW();
-  SET_COMBUS_LOW1();
 
   spi_tx_event = 1;
 
@@ -246,7 +241,6 @@ END:
     HAL_SPI_Receive_DMA(&spi, recv_buf, SPI_PKG_SIZE);
   }
   SET_COMBUS_HIGH();
-  SET_COMBUS_HIGH1();
 
   return ret;
 }

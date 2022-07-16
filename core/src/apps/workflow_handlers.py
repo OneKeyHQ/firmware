@@ -49,6 +49,8 @@ def find_message_handler_module(msg_type: int) -> str:
         return "apps.management.change_wipe_code"
     elif msg_type == MessageType.GetNonce:
         return "apps.management.get_nonce"
+    elif msg_type == MessageType.SESignMessage:
+        return "apps.management.se_sign_message"
     elif msg_type == MessageType.RebootToBootloader:
         return "apps.management.reboot_to_bootloader"
     elif msg_type == MessageType.DeviceBackToBoot:

@@ -74,7 +74,7 @@ message Features {
     optional string se_ver = 506;
     optional bool backup_only = 507;
     optional string onekey_version = 508;       // OneKey version
-    optional string onekey_serial = 509;
+    optional string serial_no = 511;
     optional string bootloader_version = 510;
 
     optional uint32 initstates = 513;      // list of facotry state
@@ -150,6 +150,15 @@ message FirmwareErase {
 message FirmwareRequest {
     optional uint32 offset = 1; // offset of requested firmware chunk
     optional uint32 length = 2; // length of requested firmware chunk
+}
+
+/**
+ * Request: Ask device to erase its firmware (so it can be replaced via FirmwareUpload)
+ * @start
+ * @next FirmwareRequest
+ */
+message FirmwareErase_ex {
+    optional uint32 length = 1; // length of new firmware
 }
 
 /**

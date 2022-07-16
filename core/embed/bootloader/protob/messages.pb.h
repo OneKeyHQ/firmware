@@ -154,10 +154,10 @@ typedef struct _Features {
     bool backup_only; 
     bool has_onekey_version;
     char onekey_version[32]; 
-    bool has_onekey_serial;
-    char onekey_serial[32]; 
     bool has_bootloader_version;
     char bootloader_version[8]; 
+    bool has_serial_no;
+    char serial_no[32]; 
     bool has_initstates;
     uint32_t initstates; 
 } Features;
@@ -166,6 +166,11 @@ typedef struct _FirmwareErase {
     bool has_length;
     uint32_t length; 
 } FirmwareErase;
+
+typedef struct _FirmwareErase_ex { 
+    bool has_length;
+    uint32_t length; 
+} FirmwareErase_ex;
 
 typedef struct _FirmwareRequest { 
     bool has_offset;
@@ -246,6 +251,7 @@ extern "C" {
 #define ButtonAck_init_default                   {0}
 #define FirmwareErase_init_default               {false, 0}
 #define FirmwareRequest_init_default             {false, 0, false, 0}
+#define FirmwareErase_ex_init_default            {false, 0}
 #define FirmwareUpload_init_default              {{{NULL}, NULL}, false, {0, {0}}}
 #define DeviceInfoSettings_init_default          {false, "", false, "", false, ""}
 #define GetDeviceInfo_init_default               {0}
@@ -267,6 +273,7 @@ extern "C" {
 #define ButtonAck_init_zero                      {0}
 #define FirmwareErase_init_zero                  {false, 0}
 #define FirmwareRequest_init_zero                {false, 0, false, 0}
+#define FirmwareErase_ex_init_zero               {false, 0}
 #define FirmwareUpload_init_zero                 {{{NULL}, NULL}, false, {0, {0}}}
 #define DeviceInfoSettings_init_zero             {false, "", false, "", false, ""}
 #define GetDeviceInfo_init_zero                  {0}
@@ -316,10 +323,11 @@ extern "C" {
 #define Features_se_ver_tag                      506
 #define Features_backup_only_tag                 507
 #define Features_onekey_version_tag              508
-#define Features_onekey_serial_tag               509
 #define Features_bootloader_version_tag          510
+#define Features_serial_no_tag                   511
 #define Features_initstates_tag                  513
 #define FirmwareErase_length_tag                 1
+#define FirmwareErase_ex_length_tag              1
 #define FirmwareRequest_offset_tag               1
 #define FirmwareRequest_length_tag               2
 #define FirmwareUpload_payload_tag               1
@@ -368,8 +376,8 @@ X(a, STATIC,   OPTIONAL, BOOL,     se_enable,       504) \
 X(a, STATIC,   OPTIONAL, STRING,   se_ver,          506) \
 X(a, STATIC,   OPTIONAL, BOOL,     backup_only,     507) \
 X(a, STATIC,   OPTIONAL, STRING,   onekey_version,  508) \
-X(a, STATIC,   OPTIONAL, STRING,   onekey_serial,   509) \
 X(a, STATIC,   OPTIONAL, STRING,   bootloader_version, 510) \
+X(a, STATIC,   OPTIONAL, STRING,   serial_no,       511) \
 X(a, STATIC,   OPTIONAL, UINT32,   initstates,      513)
 #define Features_CALLBACK NULL
 #define Features_DEFAULT NULL
@@ -410,6 +418,11 @@ X(a, STATIC,   OPTIONAL, UINT32,   offset,            1) \
 X(a, STATIC,   OPTIONAL, UINT32,   length,            2)
 #define FirmwareRequest_CALLBACK NULL
 #define FirmwareRequest_DEFAULT NULL
+
+#define FirmwareErase_ex_FIELDLIST(X, a) \
+X(a, STATIC,   OPTIONAL, UINT32,   length,            1)
+#define FirmwareErase_ex_CALLBACK NULL
+#define FirmwareErase_ex_DEFAULT NULL
 
 #define FirmwareUpload_FIELDLIST(X, a) \
 X(a, CALLBACK, REQUIRED, BYTES,    payload,           1) \
@@ -484,6 +497,7 @@ extern const pb_msgdesc_t ButtonRequest_msg;
 extern const pb_msgdesc_t ButtonAck_msg;
 extern const pb_msgdesc_t FirmwareErase_msg;
 extern const pb_msgdesc_t FirmwareRequest_msg;
+extern const pb_msgdesc_t FirmwareErase_ex_msg;
 extern const pb_msgdesc_t FirmwareUpload_msg;
 extern const pb_msgdesc_t DeviceInfoSettings_msg;
 extern const pb_msgdesc_t GetDeviceInfo_msg;
@@ -507,6 +521,7 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 #define ButtonAck_fields &ButtonAck_msg
 #define FirmwareErase_fields &FirmwareErase_msg
 #define FirmwareRequest_fields &FirmwareRequest_msg
+#define FirmwareErase_ex_fields &FirmwareErase_ex_msg
 #define FirmwareUpload_fields &FirmwareUpload_msg
 #define DeviceInfoSettings_fields &DeviceInfoSettings_msg
 #define GetDeviceInfo_fields &GetDeviceInfo_msg
@@ -527,6 +542,7 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 #define DeviceInfo_size                          135
 #define Failure_size                             260
 #define Features_size                            629
+#define FirmwareErase_ex_size                    6
 #define FirmwareErase_size                       6
 #define FirmwareRequest_size                     12
 #define GetDeviceInfo_size                       0
