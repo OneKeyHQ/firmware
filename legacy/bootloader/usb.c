@@ -63,7 +63,7 @@ enum {
   STATE_END,
 };
 
-#define NORDIC_BLE_UPDATE 0
+#define NORDIC_BLE_UPDATE 1
 
 #define UPDATE_BLE 0x5A
 #define UPDATE_ST 0x55

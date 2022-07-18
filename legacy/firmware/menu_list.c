@@ -298,7 +298,7 @@ step1:
   menu_display(&blind_sign_menu);
 
   while (1) {
-    key = keyScan();
+    key = protectWaitKey(0, 1);
     if (key == KEY_CANCEL) {
       menu_init(&security_set_menu);
       return;

@@ -15,6 +15,15 @@ static bool get_ble_switch = false;
 static char ble_name[BLE_NAME_LEN + 1] = {0};
 static char ble_ver[6] = {0};
 
+static uint8_t ble_update_buffer[256] = {0};
+
+trans_fifo ble_update_fifo = {.p_buf = ble_update_buffer,
+                              .buf_size = sizeof(ble_update_buffer),
+                              .over_pre = false,
+                              .read_pos = 0,
+                              .write_pos = 0,
+                              .lock_pos = 0};
+
 static uint8_t calXor(uint8_t *buf, uint32_t len) {
   uint8_t tmp = 0;
   uint32_t i;
@@ -79,9 +88,35 @@ void ble_reset(void) {
   ble_power_on();
 }
 
+void ble_update_poll(void) {
+  uint32_t total_len;
+
+  uint8_t buf[2] = {0};
+
+  total_len = fifo_lockdata_len(&ble_update_fifo);
+  if (total_len == 0) {
+    return;
+  }
+  fifo_read_lock(&ble_update_fifo, buf, 2);
+
+  if (buf[0] == 0x0B && buf[1] <= 100) {
+    uint32_t percent = buf[1];
+    if (percent == 99) {
+      oledClear();
+      oledDrawStringCenter(60, 30, "BLE update success", FONT_STANDARD);
+      oledRefresh();
+      layoutRefreshSet(true);
+      delay_ms(500);
+    } else {
+      layoutProgress("Installing ble...", 10 * percent);
+    }
+    return;
+  }
+}
+
 void ble_uart_poll(void) {
   static uint8_t read_status = UARTSTATE_IDLE;
-  static uint8_t buf[128] = {0};
+  static uint8_t buf[32] = {0};
   uint8_t passkey[7] = {0};
   static uint8_t index = 0;
   volatile uint8_t xor ;
@@ -97,16 +132,10 @@ void ble_uart_poll(void) {
   }
   if (read_status == UARTSTATE_IDLE) {
     if (index == 2 && buf[0] == 0x0B && buf[1] <= 100) {
-      uint32_t percent = buf[1];
-      if (percent == 99) {
-        oledClear();
-        oledDrawStringCenter(60, 30, "BLE update success", FONT_STANDARD);
-        oledRefresh();
-        layoutRefreshSet(true);
-        delay_ms(500);
-      } else {
-        layoutProgress("Installing ble...", 10 * percent);
+      if (!fifo_write_no_overflow(&ble_update_fifo, buf, 2)) {
+        layoutError("buffer overflow", "uart receive");
       }
+      memset(buf, 0x00, sizeof(buf));
       index = 0;
       return;
     } else {
