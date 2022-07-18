@@ -166,7 +166,6 @@ OBJS += protob/messages-solana.pb.o
 OBJS += protob/messages-starcoin.pb.o
 OBJS += protob/messages-stellar.pb.o
 OBJS += protob/messages-tron.pb.o
-OBJS += protob/tron.pb.o
 endif
 
 OPTFLAGS ?= -Os

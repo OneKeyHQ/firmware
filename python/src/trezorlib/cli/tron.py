@@ -13,12 +13,12 @@
 #
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
-
-from typing import TYPE_CHECKING
+import json
+from typing import TYPE_CHECKING, TextIO
 
 import click
 
-from .. import tools, tron
+from .. import messages, protobuf, tools, tron
 from . import with_client
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ def cli() -> None:
 @click.option("-n", "--address", required=True, help=PATH_HELP)
 @click.option("-d", "--show-display", is_flag=True)
 @with_client
-def get_address(client: "TrezorClient", address: str, show_display: bool) -> str:
+def get_address(client: "TrezorClient", address: str, show_display: bool):
     """Get Tron address for specified path."""
     address_n = tools.parse_path(address)
     return tron.get_address(client, address_n, show_display)
@@ -65,16 +65,23 @@ def sign_message(
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
-@click.argument("message")
+@click.option(
+    "-f",
+    "--file",
+    type=click.File("r"),
+    default="-",
+    help="Transaction file in JSON format (byte fields should be hexlified)",
+)
 @with_client
-def sign_tx(client: "TrezorClient", address: str, message: str) -> dict:
+def sign_tx(
+    client: "TrezorClient",
+    address: str,
+    file: TextIO,
+):
     """Sign tron transaction.
-
     Transaction must be provided as a JSON file.
     """
     address_n = tools.parse_path(address)
-    ret = tron.sign_tx(client, address_n, message)
-    output = {
-        "signature": ret.signature.hex(),
-    }
-    return output
+    msg = json.load(file)
+    msg_proto = protobuf.dict_to_proto(messages.TronSignTx, msg)
+    return tron.sign_tx(client, address_n, msg_proto)

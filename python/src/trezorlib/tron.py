@@ -49,10 +49,9 @@ def sign_message(
 
 
 @session
-@expect(messages.TronSignature)
+@expect(messages.TronSignedTx)
 def sign_tx(
-    client: "TrezorClient", address_n: "Address", message: str
+    client: "TrezorClient", address_n: "Address", msg: messages.TronSignTx
 ) -> "MessageType":
-    return client.call(
-        messages.TronSignRawTx(address_n=address_n, raw_tx=bytes.fromhex(message))
-    )
+    msg.address_n = address_n
+    return client.call(msg)
