@@ -1,7 +1,7 @@
 # Bitcoin signing flow
 
-The Bitcoin signing process is one of the most complicated workflows in the Trezor
-codebase. This is because Trezor cannot store arbitrarily large transactions in memory,
+The Bitcoin signing process is one of the most complicated workflows in the Onekey
+codebase. This is because Onekey cannot store arbitrarily large transactions in memory,
 so both the input data and the results must be sent in chunks. The Protobuf messages
 cannot fully encode the data pertaining to a single transaction; instead, the data
 is spread out over multiple messages.
@@ -12,11 +12,11 @@ The signing flow is initiated by a `SignTx` command. The message contains the na
 the coin, number of inputs and outputs, and transaction metadata: version, lock time,
 and others that are required for some coins.
 
-In response, Trezor will send a number of `TxRequest` messages, asking for additional
+In response, Onekey will send a number of `TxRequest` messages, asking for additional
 data from the host. The host is supposed to respond with a `TxAck` providing the
 requested data.
 
-Trezor can request the following kinds of items:
+Onekey can request the following kinds of items:
 
 * input of the transaction being signed
 * output of the transaction being signed
@@ -27,10 +27,10 @@ Trezor can request the following kinds of items:
 * output of a previous or original transaction
 * additional trailing data of a previous transaction
 
-As part of each `TxRequest` message, Trezor can also send a chunk of the resulting
+As part of each `TxRequest` message, Onekey can also send a chunk of the resulting
 serialized transaction, and/or a signature of one of the inputs.
 
-The flow ends when Trezor sends a `TxRequest` with `request_type` of `TXFINISHED`.
+The flow ends when Onekey sends a `TxRequest` with `request_type` of `TXFINISHED`.
 
 ## Signing phases
 
@@ -42,22 +42,22 @@ numbering.
 
 ### Gathering info about current transaction
 
-Trezor will request all inputs and outputs of the transaction to be signed, and set up
+Onekey will request all inputs and outputs of the transaction to be signed, and set up
 data structures that allow it to verify that the same data is sent in the following
 phases.
 
-In this phase, Trezor will also ask the user to confirm destination addresses,
+In this phase, Onekey will also ask the user to confirm destination addresses,
 the transaction fee, metadata, and the total being sent. If the user confirms, we continue
 to the next phase.
 
 ### Validation of input data
 
-Trezor must verify that the host does not lie about input amounts, i.e., that the
+Onekey must verify that the host does not lie about input amounts, i.e., that the
 transaction total in the first phase was calculated correctly.
 
-For this reason, Trezor will ask the host to send each input again. It will then request
+For this reason, Onekey will ask the host to send each input again. It will then request
 data about the referenced previous transaction: metadata, all inputs, all outputs, and
-possible trailing data. This allows Trezor to reconstruct the previous transaction and
+possible trailing data. This allows Onekey to reconstruct the previous transaction and
 calculate its hash. If this hash matches the provided one, and the amount on selected
 UTXO matches the input amount, the given input is considered valid.
 
@@ -65,27 +65,27 @@ If all internal inputs are taproot, then the verification of the previous transa
 is skipped. This is possible because if the host provides invalid information about the
 UTXOs being spent, then the resulting taproot signatures will also be invalid.
 
-Trezor T also supports pre-signed inputs for multi-party signing. If an input has script
-type `EXTERNAL` and provides a signature, Trezor will validate the signature against the
+Onekey T also supports pre-signed inputs for multi-party signing. If an input has script
+type `EXTERNAL` and provides a signature, Onekey will validate the signature against the
 previous transaction in this step.
 
 ### Serialization and signing
 
-Trezor will ask once again about every input and begin outputting a serialization of the
+Onekey will ask once again about every input and begin outputting a serialization of the
 transaction. For every legacy (non-segwit) input, it is necessary to stream the full set
-of inputs and outputs again, so that Trezor can compute the transaction digest which it
+of inputs and outputs again, so that Onekey can compute the transaction digest which it
 then signs. For segwit inputs this is not necessary.
 
-When all inputs are serialized, Trezor will ask for every output, so that it can
+When all inputs are serialized, Onekey will ask for every output, so that it can
 serialize it, fill out change addresses, and return the full transaction.
 
-Finally Trezor asks again about segwit inputs to sign them and to serialize the
+Finally Onekey asks again about segwit inputs to sign them and to serialize the
 witnesses.
 
 ## Old versus new data structures
 
 Originally, the `TxAck` message contained one field of type `TransactionType`. This, in
-turn, contained all the possible fields that Trezor could request:
+turn, contained all the possible fields that Onekey could request:
 
 * `TransactionType` itself contains fields for all necessary metadata, plus a field
   `extra_data` for trailing data.
@@ -116,12 +116,12 @@ The `TxRequest` message always contains a `request_type` field, indicating which
 data it wants. In addition, `request_details` specify the particular piece of data
 requested.
 
-If `request_details.tx_hash` is set, Trezor is requesting data about a specified
-previous transaction. If it is unset, Trezor wants data about current transaction.
+If `request_details.tx_hash` is set, Onekey is requesting data about a specified
+previous transaction. If it is unset, Onekey wants data about current transaction.
 
 ### Transaction input
 
-Trezor sets `request_type` to `TXINPUT`, and `request_details.tx_hash` is unset.
+Onekey sets `request_type` to `TXINPUT`, and `request_details.tx_hash` is unset.
 
 `request_details.request_index` is the index of the input in the transaction: 0 is the
 first input, 1 is second, etc.
@@ -150,7 +150,7 @@ Full documentation for multisig is TBD.
 
 #### External inputs
 
-Trezor can include inputs that it will not sign, typically because they are
+Onekey can include inputs that it will not sign, typically because they are
 owned by another party. Such inputs are of type `EXTERNAL` and the host does
 not specify a derivation path for the key, but sets the `script_pubkey` field
 to the scriptPubKey of the previous output that is being spent by the external
@@ -159,23 +159,22 @@ supplied to the transaction by verified external inputs are subtracted from the
 transaction total that the user is asked to confirm, whereas unverified
 external inputs are not subtracted.
 
-Verified external inputs are only supported on the Trezor T. They must either
+Verified external inputs are only supported on the Onekey T. They must either
 already have a valid signature or they must come with an ownership proof. If
 the input already has a valid signature, then the host provides the
 `script_sig` and/or `witness` fields. If the other signing party hasn't signed
-their input yet (i.e., with two Trezors, one must sign first so that the other
+their input yet (i.e., with two Onekeys, one must sign first so that the other
 can include a pre-signed input), they can instead provide a
 [SLIP-19](https://github.com/satoshilabs/slips/blob/master/slip-0019.md)
 ownership proof in the `ownership_proof` field, with optional commitment data
 in `commitment_data`.
 
-Unverified external inputs are accepted by Trezor only if
-[safety checks](https://wiki.trezor.io/Using_trezorctl_commands_with_Trezor#Safety-checks)
-are disabled on the device.
+Unverified external inputs are accepted by Onekey only if
+safety checks are disabled on the device.
 
 ### Transaction output
 
-Trezor sets `request_type` to `OUTPUT`, and `request_details.tx_hash` is unset.
+Onekey sets `request_type` to `OUTPUT`, and `request_details.tx_hash` is unset.
 
 `request_details.request_index` is the index of the output in the transaction: 0 is the
 first input, 1 is second, etc.
@@ -209,7 +208,7 @@ Outputs of type `PAYTOOPRETURN` must not specify `address` nor `address_n`, and 
 
 ### Previous transaction metadata
 
-Trezor sets `request_type` to `TXMETA`. `request_details.tx_hash` is a transaction hash,
+Onekey sets `request_type` to `TXMETA`. `request_details.tx_hash` is a transaction hash,
 matching one of the current transaction inputs.
 
 **Old style:** Host must respond with a `TxAck` message. The structure `tx` must be
@@ -223,11 +222,11 @@ be set on `tx`.
 #### Extra data
 
 Some coins (e.g., Zcash) contain data at the end of transaction serialization that
-Trezor does not understand. The host must indicate the length of this extra data in the
+Onekey does not understand. The host must indicate the length of this extra data in the
 field `extra_data_len`.
 
 To figure out which is the extra data, the host must parse the serialized previous
-transaction up to the last field understood by Trezor. In case of Zcash, that is:
+transaction up to the last field understood by Onekey. In case of Zcash, that is:
 
 * version + version group ID
 * number of inputs, and every input
@@ -239,7 +238,7 @@ All data after the `expiry` field is considered "extra data".
 
 ### Previous transaction input
 
-Trezor sets `request_type` to `TXINPUT`. `request_details.tx_hash` is a transaction
+Onekey sets `request_type` to `TXINPUT`. `request_details.tx_hash` is a transaction
 hash, matching one of the current transaction inputs.
 
 **Old style:** Host must respond with a `TxAck` message. The field `tx.inputs` must be
@@ -251,7 +250,7 @@ be set on `tx.input`.
 
 ### Previous transaction output
 
-Trezor sets `request_type` to `TXOUTPUT`. `request_details.tx_hash` is a transaction
+Onekey sets `request_type` to `TXOUTPUT`. `request_details.tx_hash` is a transaction
 hash, matching one of the current transaction inputs.
 
 **Old style:** Host must respond with a `TxAck` message. The field `tx.bin_outputs` must
@@ -264,10 +263,10 @@ must be set on `tx.output`.
 ### Previous transaction trailing data
 
 On some coins, such as Zcash, the transaction serialization can contain data not
-understood by Trezor. This data is not relevant for validation, but it must be included
-so that Trezor can correctly compute the previous transaction hash.
+understood by Onekey. This data is not relevant for validation, but it must be included
+so that Onekey can correctly compute the previous transaction hash.
 
-Trezor sets `request_type` to `TXEXTRADATA`. `request_details.tx_hash` is a transaction
+Onekey sets `request_type` to `TXEXTRADATA`. `request_details.tx_hash` is a transaction
 hash, matching one of the current transaction inputs.
 
 `request_details.extra_data_offset` specifies the offset of the requested data from the
@@ -283,7 +282,7 @@ set to `tx.extra_data_chunk`.
 
 ### Original transaction input
 
-Trezor sets `request_type` to `TXORIGINPUT`. `request_details.tx_hash` is the
+Onekey sets `request_type` to `TXORIGINPUT`. `request_details.tx_hash` is the
 transaction hash of the original transaction.
 
 The host must respond with a `TxAckInput` message. All relevant data must be set in
@@ -293,7 +292,7 @@ transaction signature data in the `script_sig` and/or `witness` fields.
 
 ### Original transaction output
 
-Trezor sets `request_type` to `TXORIGOUTPUT`. `request_details.tx_hash` is the
+Onekey sets `request_type` to `TXORIGOUTPUT`. `request_details.tx_hash` is the
 transaction hash of the original transaction.
 
 Host must respond with a `TxAckOutput` message. All relevant data must be set in
@@ -302,7 +301,7 @@ change-outputs.
 
 ### Payment request
 
-Trezor sets `request_type` to `TXPAYMENTREQ`, and `request_details.tx_hash` is unset.
+Onekey sets `request_type` to `TXPAYMENTREQ`, and `request_details.tx_hash` is unset.
 `request_details.request_index` is the index of the payment request in the transaction:
 0 is the first payment request, 1 is second, etc.
 
@@ -315,7 +314,7 @@ transactions which have already been signed (the original transactions). Replace
 transactions can be used to securely bump the fee of an already signed transaction
 ([BIP-125](https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki)) or to
 participate as a sender in PayJoin
-([BIP-78](https://github.com/bitcoin/bips/blob/master/bip-0078.mediawiki)). Trezor only
+([BIP-78](https://github.com/bitcoin/bips/blob/master/bip-0078.mediawiki)). Onekey only
 supports signing of replacement transaction which do not increase the amount that the
 user is spending on external outputs. Thus when signing a replacement transaction the
 user only needs to confirm the fee modification and the original TXIDs without being
@@ -323,11 +322,11 @@ shown any outputs, since the original external outputs must have already been co
 by the user and any new external outputs can only be paid for by new external inputs.
 
 The host signals that a transaction is a replacement transaction by setting the
-`orig_hash` and `orig_index` fields for at least one `TxInput`. Trezor will then
+`orig_hash` and `orig_index` fields for at least one `TxInput`. Onekey will then
 automatically request metadata about the original transaction and verify the original
 signatures.
 
-A replacement transaction in Trezor must satisfy the following requirements:
+A replacement transaction in Onekey must satisfy the following requirements:
 
 * All inputs of the original transactions must be inputs of the replacement transation.
 * All _external_ outputs of the original transactions must be outputs of the replacement
@@ -356,7 +355,7 @@ So the replacement transaction is, for example, allowed to:
 
 ## Payment requests
 
-In Trezor T a set of transaction outputs can be accompanied by a payment request.
+In Onekey T a set of transaction outputs can be accompanied by a payment request.
 Multiple payment requests per transaction are also possible. A payment request is a
 message signed by a trusted party requesting payment of certain amounts to a set of
 outputs as specified in [SLIP-24](https://github.com/satoshilabs/slips/blob/master/slip-0024.md).
@@ -364,7 +363,7 @@ The user then does not have to verify the output addresses, but only confirms th
 payment of the requested amount to the recipient.
 
 The host signals that an output belongs to a payment request by setting the
-`payment_req_index` field in the `TxOutput` message. When Trezor encounters the first
+`payment_req_index` field in the `TxOutput` message. When Onekey encounters the first
 output that has this field set to a particular index, it will ask for the payment request
 that has the given index.
 
@@ -392,7 +391,7 @@ def sign_tx():
         )
     )
 
-    # wait for TxAck forever, until Trezor indicates we are finished
+    # wait for TxAck forever, until Onekey indicates we are finished
     while True:
         msg = receive_message()
 
@@ -404,10 +403,10 @@ def sign_tx():
             break
 
         if msg.details.tx_hash is not None:
-            # Trezor requires data about some previous transaction
+            # Onekey requires data about some previous transaction
             send_response_prev(msg.request_type, msg.details)
         else:
-            # Trezor requires data about this transaction
+            # Onekey requires data about this transaction
             send_response_current(msg.request_type, msg.details)
 
 def extract_streamed_data(ser: TxRequestSerializedType):
@@ -443,7 +442,7 @@ def send_response_current(request_type: RequestType, details: TxRequestDetailsTy
 
 The new definitions are structured so that the Protobuf binary encoded form can be
 decoded into both representations. This means that the host can encode data in the old
-representation, and Trezor will successfully and correctly decode it into the new one.
+representation, and Onekey will successfully and correctly decode it into the new one.
 
 This is done by reusing field IDs as appropriate, and taking advantage of the fact that
 Protobuf encodes arrays as a sequence of the same field repeated a number of times.

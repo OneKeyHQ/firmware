@@ -1,12 +1,12 @@
 # Passphrase
 
-As of 1.9.0 / 2.3.0 we have changed how [passphrase](https://wiki.trezor.io/Passphrase) is communicated between the host and the device. For migration information for existing Hosts communicating with Trezor please see this [document](passphrase-redesign-migration.md).
+As of 1.9.0 / 2.3.0 we have changed how passphrase is communicated between the host and the device. For migration information for existing Hosts communicating with Onekey please see this [document](passphrase-redesign-migration.md).
 
 Passphrase is very tightly coupled with _sessions_. The reader is encouraged to read on that topic first in the [sessions.md](sessions.md) section.
 
 ## Scheme
 
-As soon as Trezor needs the passphrase to do BIP-39/SLIP-39 derivations it prompts the user for passphrase.
+As soon as Onekey needs the passphrase to do BIP-39/SLIP-39 derivations it prompts the user for passphrase.
 
 ```
 GetAddress(...)
@@ -18,9 +18,9 @@ PassphraseAck
                        <---------
 ```
 
-In the default Trezor setting, the passphrase is obtained from the Host. Trezor sends a PassphraseRequest message and awaits PassphraseAck as a response. This message contains field `passphrase` to transmit it or it has `on_device` boolean flag to indicate that the user wishes to enter the passphrase on Trezor instead. Setting both `passphrase` and `on_device` to true is forbidden.
+In the default Onekey setting, the passphrase is obtained from the Host. Onekey sends a PassphraseRequest message and awaits PassphraseAck as a response. This message contains field `passphrase` to transmit it or it has `on_device` boolean flag to indicate that the user wishes to enter the passphrase on Onekey instead. Setting both `passphrase` and `on_device` to true is forbidden.
 
-Note that this has changed as of 2.3.0. In previous firmware versions the `on_device` flag was in the PassphraseRequest message, since this decision has been made on Trezor. We also had two additional messages PassphraseStateRequest and PassphraseStateAck which were removed.
+Note that this has changed as of 2.3.0. In previous firmware versions the `on_device` flag was in the PassphraseRequest message, since this decision has been made on Onekey. We also had two additional messages PassphraseStateRequest and PassphraseStateAck which were removed.
 
 ## Example
 
@@ -51,7 +51,7 @@ GetPublicKey(...)
                        <---------
 ```
 
-As long as the session_id in `Initialize` is the same as the one Trezor stores internally, Trezor guarantees the same passphrase is being used.
+As long as the session_id in `Initialize` is the same as the one Onekey stores internally, Onekey guarantees the same passphrase is being used.
 
 ----
 

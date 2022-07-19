@@ -1,6 +1,6 @@
-# Trezor One firmware format
+# Onekey One firmware format
 
-Historically Trezor One has been using 256-byte header (w/ `TRZR` magic string) followed by the
+Historically Onekey One has been using 256-byte header (w/ `TRZR` magic string) followed by the
 actual firmware. Since version 1.8.0, different 1024-byte header (w/ `TRZF` magic string) is in use,
 and building firmware from this repository produces firmware image containing such header followed
 by firmware code.

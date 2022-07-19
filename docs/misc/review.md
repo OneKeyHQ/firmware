@@ -2,7 +2,7 @@
 
 - File a Pull Request (PR) with a number of well-defined clearly described commits.
   Multiple commits per PR are allowed, but please do not include revert commits, etc. Use rebase.
-- Do not use merge (e.g. merge trezor/master into ...). Again, use rebase.
+- Do not use merge (e.g. merge onekey/master into ...). Again, use rebase.
 - The general review workflow goes as follows:
   1. The author creates a PR. They should make sure it passes lints and anything that can be run
      quickly on their computer. When creating the PR, the author should also add links to any resources

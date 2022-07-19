@@ -1,6 +1,6 @@
 [book]
-title = "Trezor Firmware"
-description = "Documentation of Trezor Firmware."
+title = "Onekey Firmware"
+description = "Documentation of Onekey Firmware."
 src = "."
 
 [build]

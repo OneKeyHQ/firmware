@@ -39,8 +39,8 @@ For other users:
 Install the appropriate target with [`rustup`](https://rustup.rs/):
 
 ```sh
-rustup target add thumbv7em-none-eabihf  # for TT
-rustup target add thumbv7m-none-eabi     # for T1
+rustup target add thumbv7em-none-eabihf  # for TT(Touch)
+rustup target add thumbv7m-none-eabi     # for T1(Mini/Classic)
 ```
 
 ## Building
@@ -51,7 +51,7 @@ make vendor build_boardloader build_bootloader build_firmware
 
 ## Uploading
 
-Use `make upload` to upload the firmware to a production device. Do not forget to [enter bootloader](https://wiki.trezor.io/User_manual:Updating_the_Trezor_device_firmware) on the device beforehand.
+Use `make upload` to upload the firmware to a production device. Do not forget to enter bootloader on the device beforehand.
 
 ## Flashing
 

@@ -1,6 +1,6 @@
-# Trezor Core Boot Stages
+# Onekey Core Boot Stages
 
-Trezor T initialization is split into two stages. See [Memory Layout](memory.md) for info about in which sectors each stage is stored.
+Onekey T initialization is split into two stages. See [Memory Layout](memory.md) for info about in which sectors each stage is stored.
 
 First stage (boardloader) is stored in write-protected area, which means it is non-upgradable.
 Only second stage (bootloader) update is allowed.
@@ -54,12 +54,12 @@ allowing a firmware update via USB.
 * Signature system is Ed25519 (allows combining signatures by multiple keys
   into one).
 * All multibyte integer values are little endian.
-* There is a tool called [headertool.py](https://github.com/trezor/trezor-firmware/blob/master/core/tools/headertool.py) which checks validity
+* There is a tool called [headertool.py](https://github.com/OneKeyHQ/firmware/blob/master/core/tools/headertool.py) which checks validity
   of the bootloader/firmware images including their headers.
 
 ## Bootloader Format
 
-Trezor Core (second stage) bootloader consists of 2 parts:
+Onekey Core (second stage) bootloader consists of 2 parts:
 
 1. bootloader header
 2. bootloader code
@@ -88,12 +88,12 @@ Total length of bootloader header is always 1024 bytes.
 | ...    | ...    | ... | ... |
 | 0x0200 | 32     | hash16 | hash of the last possible code chunk (128 KiB), zeroed if unused |
 | 0x0220 | 415    | reserved | not used yet (zeroed) |
-| 0x03BF | 1      | sigmask | SatoshiLabs signature indexes (bitmap) |
-| 0x03C0 | 64     | sig | SatoshiLabs aggregated signature of the bootloader header |
+| 0x03BF | 1      | sigmask | Onekey signature indexes (bitmap) |
+| 0x03C0 | 64     | sig | Onekey aggregated signature of the bootloader header |
 
 ## Firmware Format
 
-Trezor Core firmware consists of 3 parts:
+Onekey Core firmware consists of 3 parts:
 
 1. vendor header
 2. firmware header
@@ -125,8 +125,8 @@ of 512 bytes.
 | ?      | ?      | vstrpad | padding to a multiple of 4 bytes |
 | ?      | ?      | vimg | vendor image (120x120 pixels in [TOIf format](../../misc/toif.md)) |
 | ?      | ?      | reserved | padding to an address that is -65 modulo 512 (zeroed) |
-| ?      | 1      | sigmask | SatoshiLabs signature indexes (bitmap) |
-| ?      | 64     | sig | SatoshiLabs aggregated signature of the vendor header |
+| ?      | 1      | sigmask | Onekey signature indexes (bitmap) |
+| ?      | 64     | sig | Onekey aggregated signature of the vendor header |
 
 #### Vendor Trust
 

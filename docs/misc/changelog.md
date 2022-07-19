@@ -6,14 +6,14 @@ the [towncrier](https://github.com/twisted/towncrier) utility to generate them
 at the time a new version is released. There are currently 8 such changelogs
 for different components of the repository:
 
-* **[`core/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/core/CHANGELOG.md)** for Trezor T firmware
-* **[`core/embed/boardloader/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/core/embed/boardloader/CHANGELOG.md)** for Trezor T boardloader
-* **[`core/embed/bootloader/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/core/embed/bootloader/CHANGELOG.md)** for Trezor T bootloader
-* **[`core/embed/bootloader_ci/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/core/embed/bootloader_ci/CHANGELOG.md)** for Trezor T CI bootloader
-* **[`legacy/firmware/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/legacy/firmware/CHANGELOG.md)** for Trezor 1 firmware
-* **[`legacy/bootloader/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/legacy/bootloader/CHANGELOG.md)** for Trezor 1 bootloader
-* **[`legacy/intermediate_fw/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/legacy/intermediate_fw/CHANGELOG.md)** for Trezor 1 intermediate firmware
-* **[`python/CHANGELOG.md`](https://github.com/trezor/trezor-firmware/blob/master/python/CHANGELOG.md)** for Python client library
+* **[`core/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/core/CHANGELOG.md)** for Onekey T firmware
+* **[`core/embed/boardloader/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/core/embed/boardloader/CHANGELOG.md)** for Onekey T boardloader
+* **[`core/embed/bootloader/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/core/embed/bootloader/CHANGELOG.md)** for Onekey T bootloader
+* **[`core/embed/bootloader_ci/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/core/embed/bootloader_ci/CHANGELOG.md)** for Onekey T CI bootloader
+* **[`legacy/firmware/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/legacy/firmware/CHANGELOG.md)** for Onekey 1 firmware
+* **[`legacy/bootloader/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/legacy/bootloader/CHANGELOG.md)** for Onekey 1 bootloader
+* **[`legacy/intermediate_fw/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/legacy/intermediate_fw/CHANGELOG.md)** for Onekey 1 intermediate firmware
+* **[`python/CHANGELOG.md`](https://github.com/OneKeyHQ/firmware/blob/master/python/CHANGELOG.md)** for Python client library
 
 ## Adding changelog entry
 
@@ -40,7 +40,7 @@ Changelog](https://keepachangelog.com/en/1.0.0/) format:
 
 Entries are added by creating files in the `.changelog.d` directory where the
 file name is `<number>.<type>` and contains single line describing the change.
-As an example, an entry describing bug fix for issue 1234 in Trezor T firmware
+As an example, an entry describing bug fix for issue 1234 in Onekey T firmware
 is added by creating file `core/.changelog.d/1234.fixed`. The file can be
 formatted with markdown. If more entries are desired for single issue number and
 type you can add numeral suffix, e.g. `1234.fixed.1`, `1234.fixed.2`, etc.

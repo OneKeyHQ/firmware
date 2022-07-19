@@ -1,6 +1,6 @@
-# Trezor Storage
+# Onekey Storage
 
-The `storage` folder contains the implementation of Trezor's internal storage, which is common for both Legacy (Trezor One) and Core (Trezor T). This README also contains a detailed description of the cryptographic design.
+The `storage` folder contains the implementation of Onekey's internal storage, which is common for both Legacy (Onekey One) and Core (Onekey T). This README also contains a detailed description of the cryptographic design.
 
 All tests are located in the `tests` subdirectory, which also includes a Python implementation to run tests against this C production version and the Python one.
 

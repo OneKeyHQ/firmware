@@ -5,8 +5,8 @@
 Run the following to checkout the project:
 
 ```sh
-git clone --recurse-submodules https://github.com/trezor/trezor-firmware.git
-cd trezor-firmware
+git clone --recurse-submodules https://github.com/OneKeyHQ/onekey-firmware.git
+cd onekey-firmware
 poetry install
 cd core
 ```

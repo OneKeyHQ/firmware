@@ -3,7 +3,7 @@
 This document describes under which circumstances the device gets wiped during a firmware
 update.
 
-## Trezor 1
+## Onekey 1
 
 The device gets **wiped**:
 - If the firmware to be installed is unsigned.
@@ -14,19 +14,19 @@ _fix_version_ [1].
 The device gets **wiped on every reboot**:
 - If the firmware's debug mode is turned on.
 
-## Trezor T
+## Onekey T
 
-In Trezor T this works a bit differently, we have introduced so-called vendors headers.
-Each firmware has its vendor header and this vendor header is signed by SatoshiLabs. The
+In Onekey T this works a bit differently, we have introduced so-called vendors headers.
+Each firmware has its vendor header and this vendor header is signed by Onekey. The
 actual firmware is signed by the vendor header's key. That means that all firmwares are
-signed by _someone_ to be able to run on Trezor T.
+signed by _someone_ to be able to run on Onekey T.
 
 We currently have two vendors:
 
-1. SatoshiLabs
+1. Onekey
 2. UNSAFE DO NOT USE
 
-As the names suggest, the first one is the official SatoshiLabs vendor header and all
+As the names suggest, the first one is the official Onekey vendor header and all
 public firmwares are signed with that. The second one is meant for generic audience; if
 you build firmware this vendor header is automatically applied and the firmware is signed
 with it (see `tools/headertool.py`).
@@ -48,5 +48,5 @@ introduced Wipe Code, which introduced some changes to storage that the older fi
 (e.g. 2.1.8) would not understand. It can also be used to enforce security fixes.
 
 [2] The most common example is if you have a device with the official firmware
-(SatoshiLabs) and you install the unofficial (UNSIGNED) firmware -> the device gets
+(Onekey) and you install the unofficial (UNSIGNED) firmware -> the device gets
 wiped. Same thing vice versa.
