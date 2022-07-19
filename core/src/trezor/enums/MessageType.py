@@ -250,9 +250,9 @@ if not utils.BITCOIN_ONLY:
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
-    TronSignMessage = 10501
-    TronMessageSignature = 10502
-    TronGetAddress = 10503
-    TronAddress = 10504
-    TronSignRawTx = 10505
-    TronSignature = 10506
+    TronGetAddress = 10501
+    TronAddress = 10502
+    TronSignTx = 10503
+    TronSignedTx = 10504
+    TronSignMessage = 10505
+    TronMessageSignature = 10506

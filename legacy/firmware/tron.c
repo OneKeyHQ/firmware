@@ -30,23 +30,18 @@
 #include "protect.h"
 #include "secp256k1.h"
 #include "sha2.h"
-#include "storage.h"
 #include "transaction.h"
 #include "tron.h"
 #include "util.h"
 
 #include <pb_decode.h>
-#include "tron.pb.h"
-#include "tron_err.h"
 #include "tron_ui.h"
 
-extern int ethereum_is_canonic(uint8_t v, uint8_t signature[64]);
+// PROTOBUF3 types
+#define PROTO_TYPE_VARINT 0
+#define PROTO_TYPE_STRING 2
 
-typedef char MSG[128];
-int errmsg(MSG msg_buf, const int error_code, const char *err_msg) {
-  snprintf(msg_buf, sizeof(MSG), "%04x-%s", error_code, err_msg);
-  return error_code;
-}
+extern int ethereum_is_canonic(uint8_t v, uint8_t signature[64]);
 
 void tron_message_hash(const uint8_t *message, size_t message_len,
                        uint8_t hash[32]) {
@@ -61,12 +56,6 @@ void tron_message_sign(TronSignMessage *msg, const HDNode *node,
                        TronMessageSignature *resp) {
   uint8_t hash[32];
   uint8_t msg_hash[32];
-
-  if (!hdnode_get_ethereum_pubkeyhash(node, resp->address.bytes)) {
-    return;
-  }
-  resp->has_address = true;
-  resp->address.size = 20;
 
   // hash the message
   struct SHA3_CTX ctx = {0};
@@ -99,143 +88,286 @@ int tron_eth_2_trx_address(const uint8_t eth_address[20], char *str,
   return r;
 }
 
-int decode_transfer_contract(const Any_value_t *any, char *to_str,
-                             unsigned to_str_len, uint64_t *amount, MSG msg) {
-  TransferContract contract;
-  pb_istream_t stream = pb_istream_from_buffer(any->bytes, any->size);
-  if (!pb_decode(&stream, TransferContract_fields, &contract))
-    return errmsg(msg, E_TRON_DecodeTransferContract,
-                  _("Failed to decode TransferContract pb data"));
+int add_field(uint8_t *buf, int *index, uint8_t fnumber, uint8_t ftype) {
+  int ret = *index;
 
-  *amount = contract.amount;
-
-  if (contract.to_address.size != 21 && contract.to_address.bytes[0] != 0x41)
-    return errmsg(msg, E_TRON_DecodeTransferContract,
-                  _("Invalid to_address in TransferContract pb data"));
-
-  if (tron_eth_2_trx_address(&contract.to_address.bytes[1], to_str,
-                             to_str_len) < 34)
-    return errmsg(msg, E_TRON_EncodeTronAddress,
-                  _("Failed to encode to Tron address"));
-
-  return 0;
-}
-
-int decode_trc20_contract(const Any_value_t *any, char *to_str,
-                          unsigned to_str_len, uint8_t *value_bytes,
-                          ConstTronTokenPtr *p_token, MSG msg) {
-  TriggerSmartContract contract;
-  pb_istream_t stream = pb_istream_from_buffer(any->bytes, any->size);
-  if (!pb_decode(&stream, TriggerSmartContract_fields, &contract))
-    return errmsg(msg, E_TRON_DecodeTriggerSmartContract,
-                  _("Failed to decode TriggerSmartContract pb data"));
-
-  if (contract.contract_address.size != 21 &&
-      contract.contract_address.bytes[0] != 0x41)
-    return errmsg(msg, E_TRON_InvalidAddress, _("Invalid Tron address"));
-
-  if (contract.data.size < 4)
-    return errmsg(msg, E_TRON_InvalidCallData,
-                  _("Invalid Tron contract call data"));
-
-  *p_token = get_tron_token_by_address(&contract.contract_address.bytes[1]);
-  if (!*p_token)
-    return errmsg(msg, E_TRON_UnsupportedToken, _("Unsupported token"));
-
-  // parse chunk data as ERC20 transfer
-  static uint8_t TRANSFER_SIG[4] = {0xa9, 0x05, 0x9c, 0xbb};
-  // check method sig
-  if (memcmp(TRANSFER_SIG, contract.data.bytes, 4))
-    return errmsg(msg, E_TRON_InvalidMethodSignature,
-                  _("Not TRC20 transfer method signature"));
-
-  if (contract.data.size != 68)
-    return errmsg(msg, E_TRON_InvalidCallData,
-                  _("Invalid TRC20 transfer method arguments data size"));
-
-  if (tron_eth_2_trx_address(&contract.data.bytes[4 + 12], to_str, to_str_len) <
-      34)
-    return errmsg(msg, E_TRON_EncodeTronAddress,
-                  _("Failed to encode to Tron address"));
-
-  memcpy(value_bytes, &contract.data.bytes[4 + 32], 32);
-
-  return 0;
-}
-
-bool tron_sign_raw_tx(const uint8_t *raw_data, int raw_data_size,
-                      const HDNode *node, TronSignature *resp) {
-  // decode raw_tx
-  transactionRaw rawtx;
-  pb_istream_t stream = pb_istream_from_buffer(raw_data, raw_data_size);
-  if (!pb_decode(&stream, transactionRaw_fields, &rawtx)) {
-    fsm_sendFailure(FailureType_Failure_DataError, "failed to decode tx data");
-    return false;
+  if (fnumber > 15) {
+    buf[*index] = fnumber << 3 | ftype;
+    *index += 1;
+    buf[*index] = 0x1;
+    *index += 1;
+  } else {
+    buf[*index] = fnumber << 3 | ftype;
+    *index += 1;
   }
 
-  char to_str[36];
+  return *index - ret;
+}
+
+int write_varint(uint8_t *buf, int *index, uint64_t value) {
+  int ret = *index;
+  uint8_t byte = 0;
+  uint64_t v = value;
+
+  while (1) {
+    byte = v & 0x7F;
+    v = v >> 7;
+    if (v == 0) {
+      buf[*index] = byte;
+      *index += 1;
+      break;
+    }
+    buf[*index] = byte | 0x80;
+    *index += 1;
+  }
+
+  return *index - ret;
+}
+
+int write_bytes_with_length(uint8_t *buf, int *index, uint8_t *bytes, int len) {
+  int ret = *index;
+
+  write_varint(buf, index, len);
+  for (int i = 0; i < len; i++) {
+    buf[*index] = bytes[i];
+    *index += 1;
+  }
+
+  return *index - ret;
+}
+
+int write_bytes_without_length(uint8_t *buf, int *index, uint8_t *bytes,
+                               int len) {
+  int ret = *index;
+
+  for (int i = 0; i < len; i++) {
+    buf[*index] = bytes[i];
+    *index += 1;
+  }
+
+  return *index - ret;
+}
+
+int pack_contract(TronSignTx *msg, uint8_t *buf, int *index,
+                  const char *owner_address) {
+  // Pack Tron Proto3 Contract
+  // See: https://github.com/tronprotocol/protocol/blob/master/core/Tron.proto
+  // and
+  // https://github.com/tronprotocol/protocol/blob/master/core/contract/smart_contract.proto
+
+  int ret = *index, len = 0, cmessage_len = 0, cmessage_index = 0, capi_len = 0,
+      capi_index = 0;
+  uint8_t cmessage[512] = {0};
+  uint8_t capi[64] = {0};
+  uint8_t addr_raw[MAX_ADDR_RAW_SIZE] = {0};
+
+  add_field(buf, index, 1, PROTO_TYPE_VARINT);
+  if (msg->contract.has_transfer_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.TransferContract", 45);
+
+    write_varint(buf, index, 1);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_STRING);
+    len = base58_decode_check(msg->contract.transfer_contract.to_address,
+                              HASHER_SHA2D, addr_raw, MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+    cmessage_len += add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
+    cmessage_len += write_varint(cmessage, &cmessage_index,
+                                 msg->contract.transfer_contract.amount);
+  }
+
+  if (msg->contract.has_trigger_smart_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.TriggerSmartContract", 49);
+
+    write_varint(buf, index, 31);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_STRING);
+    len = base58_decode_check(
+        msg->contract.trigger_smart_contract.contract_address, HASHER_SHA2D,
+        addr_raw, MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    if (msg->contract.trigger_smart_contract.call_value) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.trigger_smart_contract.call_value);
+    }
+
+    // Contract data
+    cmessage_len += add_field(cmessage, &cmessage_index, 4, PROTO_TYPE_STRING);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index,
+                                msg->contract.trigger_smart_contract.data.bytes,
+                                msg->contract.trigger_smart_contract.data.size);
+    if (msg->contract.trigger_smart_contract.call_token_value) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 5, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.trigger_smart_contract.call_token_value);
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 6, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.trigger_smart_contract.asset_id);
+    }
+  }
+
+  uint8_t tmp[8] = {0};
+  int cmessage_varint_len = 0;
+  write_varint(tmp, &cmessage_varint_len, cmessage_len);
+
+  add_field(buf, index, 2, PROTO_TYPE_STRING);
+  write_varint(buf, index, capi_len + cmessage_len + 1 + cmessage_varint_len);
+  write_bytes_without_length(buf, index, capi, capi_len);
+  add_field(buf, index, 2, PROTO_TYPE_STRING);
+  write_varint(buf, index, cmessage_len);
+  write_bytes_without_length(buf, index, cmessage, cmessage_len);
+
+  return *index - ret;
+}
+
+void serialize(TronSignTx *msg, uint8_t *buf, int *index,
+               const char *owner_address) {
+  // transaction parameters
+  add_field(buf, index, 1, PROTO_TYPE_STRING);
+  write_bytes_with_length(buf, index, msg->ref_block_bytes.bytes,
+                          msg->ref_block_bytes.size);
+  add_field(buf, index, 4, PROTO_TYPE_STRING);
+  write_bytes_with_length(buf, index, msg->ref_block_hash.bytes,
+                          msg->ref_block_hash.size);
+  add_field(buf, index, 8, PROTO_TYPE_VARINT);
+  write_varint(buf, index, msg->expiration);
+  if (msg->has_data) {
+    add_field(buf, index, 10, PROTO_TYPE_STRING);
+    write_bytes_with_length(buf, index, (uint8_t *)msg->data,
+                            strlen(msg->data));
+  }
+
+  // add Contract
+  add_field(buf, index, 11, PROTO_TYPE_STRING);
+  int current_index = *index, contract_len = 0;
+  contract_len = pack_contract(msg, buf, index, owner_address);
+  *index = current_index;
+  write_varint(buf, index, contract_len);
+  pack_contract(msg, buf, index, owner_address);
+
+  // add timestamp
+  add_field(buf, index, 14, PROTO_TYPE_VARINT);
+  write_varint(buf, index, msg->timestamp);
+  // add fee_limit if any
+  if (msg->has_fee_limit) {
+    add_field(buf, index, 18, PROTO_TYPE_VARINT);
+    write_varint(buf, index, msg->fee_limit);
+  }
+}
+
+bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
+                  const HDNode *node, TronSignedTx *resp) {
   ConstTronTokenPtr token = NULL;
   uint64_t amount = 0;
   uint8_t value_bytes[32];
+  char to_str[36];
 
-  MSG msg;
-  switch (rawtx.contract.type) {
-    case ContractType_TransferContract:
-      if (strcmp(rawtx.contract.parameter.type_url,
-                 "type.googleapis.com/protocol.TransferContract")) {
-        fsm_sendFailure(FailureType_Failure_DataError,
-                        "contract type_url mismatch");
-        return false;
-      }
-      if (decode_transfer_contract(&rawtx.contract.parameter.value, to_str,
-                                   sizeof(to_str), &amount, msg)) {
-        fsm_sendFailure(FailureType_Failure_DataError, msg);
-        return false;
-      }
-      break;
-    case ContractType_TriggerSmartContract:
-      if (strcmp(rawtx.contract.parameter.type_url,
-                 "type.googleapis.com/protocol.TriggerSmartContract")) {
-        fsm_sendFailure(FailureType_Failure_DataError,
-                        "contract type_url mismatch");
-        return false;
-      }
-      if (decode_trc20_contract(&rawtx.contract.parameter.value, to_str,
-                                sizeof(to_str), value_bytes, &token, msg)) {
-        fsm_sendFailure(FailureType_Failure_DataError, msg);
-        return false;
-      }
-      break;
-    case ContractType_TransferAssetContract:
-    default:
+  int index = 0;
+  uint8_t *raw = resp->serialized_tx.bytes;
+
+  if (msg->contract.has_transfer_contract) {
+    if (msg->contract.transfer_contract.has_amount) {
+      amount = msg->contract.transfer_contract.amount;
+    }
+    if (msg->contract.transfer_contract.has_to_address) {
+      memcpy(to_str, msg->contract.transfer_contract.to_address,
+             strlen(msg->contract.transfer_contract.to_address));
+    }
+  } else if (msg->contract.has_trigger_smart_contract) {
+    if (!msg->contract.trigger_smart_contract.has_data) {
       fsm_sendFailure(FailureType_Failure_DataError,
-                      "unsupported contract type");
+                      _("Invalid Tron contract call data"));
       return false;
+    }
+    if (msg->contract.trigger_smart_contract.data.size < 4) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Invalid Tron contract call data"));
+      return false;
+    }
+
+    // parse chunk data as TRC20 transfer
+    static uint8_t TRANSFER_SIG[4] = {0xa9, 0x05, 0x9c, 0xbb};
+    // check method sig
+    if (memcmp(TRANSFER_SIG, msg->contract.trigger_smart_contract.data.bytes,
+               4)) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Invalid Tron contract call data"));
+      return false;
+    }
+    if (msg->contract.trigger_smart_contract.data.size != 68) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Invalid TRC20 transfer method arguments data size"));
+      return false;
+    }
+
+    token = get_tron_token_by_address(
+        msg->contract.trigger_smart_contract.contract_address);
+
+    if (tron_eth_2_trx_address(
+            &msg->contract.trigger_smart_contract.data.bytes[4 + 12], to_str,
+            sizeof(to_str)) < 34) {
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Failed to encode to Tron address"));
+      return false;
+    }
+
+    memcpy(value_bytes,
+           &msg->contract.trigger_smart_contract.data.bytes[4 + 32], 32);
+  } else {
+    fsm_sendFailure(FailureType_Failure_DataError, "unsupported contract type");
+    return false;
   }
 
-  // parse fee
-  uint64_t fee = rawtx.fee_limit;
+  serialize(msg, raw, &index, owner_address);
 
   // display tx info and ask user to confirm
   layoutTronConfirmTx(to_str, amount, value_bytes, token);
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    // TODO ethereum_signing_abort();
     return false;
   }
-
-  layoutTronFee(amount, value_bytes, token, fee);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    // TODO ethereum_signing_abort();
-    return false;
+  if (msg->has_fee_limit) {
+    layoutTronFee(amount, value_bytes, token, msg->fee_limit);
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
   }
 
   // hash the tx
   uint8_t hash[32];
   SHA256_CTX ctx;
   sha256_Init(&ctx);
-  sha256_Update(&ctx, raw_data, raw_data_size);
+  sha256_Update(&ctx, raw, index);
   sha256_Final(&ctx, hash);
 
   // sign tx hash
@@ -249,6 +381,8 @@ bool tron_sign_raw_tx(const uint8_t *raw_data, int raw_data_size,
   // fill response
   resp->signature.bytes[64] = 27 + v;
   resp->signature.size = 65;
+  resp->has_serialized_tx = 1;
+  resp->serialized_tx.size = index;
 
   return true;
 }

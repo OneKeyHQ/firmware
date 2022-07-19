@@ -9,7 +9,7 @@ void layoutTronConfirmTx(const char *to_str, const uint64_t value,
   char amount[60];
   if (token == NULL) {
     if (value == 0) {
-      strcpy(amount, _("message"));
+      strcpy(amount, _("Unknown Token"));
     } else {
       tron_format_amount(value, amount, sizeof(amount));
     }
@@ -19,7 +19,6 @@ void layoutTronConfirmTx(const char *to_str, const uint64_t value,
     tron_format_token_amount(&val, token, amount, sizeof(amount));
   }
 
-  // ex: TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR
   char _to1[] = "to   ________";
   char _to2[] = "_____________";
   char _to3[] = "_____________?";
@@ -47,7 +46,7 @@ void layoutTronFee(const uint64_t value, const uint8_t *value_bytes,
   char tx_value[60];
   if (token == NULL) {
     if (value == 0) {
-      strcpy(tx_value, _("message"));
+      strcpy(tx_value, _("Unknown Token"));
     } else {
       tron_format_amount(value, tx_value, sizeof(tx_value));
     }

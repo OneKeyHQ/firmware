@@ -23,13 +23,13 @@
 #include <stdint.h>
 
 typedef struct {
-  uint8_t address[20];  // according eth address
-  char ticker[10];      // token name
-  int decimals;         // token decimals
+  char address[36];  // tron address
+  char ticker[10];   // token name
+  int decimals;      // token decimals
 } TronTokenType;
 
 typedef const TronTokenType *ConstTronTokenPtr;
 
-ConstTronTokenPtr get_tron_token_by_address(const uint8_t *address);
+ConstTronTokenPtr get_tron_token_by_address(const char *address);
 
 #endif  // __TRON_TOKENS_H__

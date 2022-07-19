@@ -6,11 +6,79 @@ option java_package = "com.satoshilabs.trezor.lib.protobuf";
 option java_outer_classname = "TrezorMessageTron";
 
 /**
+ * Request: Ask device for Tron address corresponding to address_n path
+ * @start
+ * @next TronAddress
+ * @next Failure
+ */
+message TronGetAddress {
+    repeated uint32 address_n = 1; // BIP-32 path to derive the key from master node
+    optional bool show_display = 2; // Optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains Tron address derived from device private seed
+ * @end
+ */
+message TronAddress {
+    optional string address = 1; // Tron address (base58)
+}
+
+/**
+ * Request: Ask device to sign Tron transaction
+ * @start
+ * @next TronSignedTx
+ */
+message TronSignTx {
+    repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
+    // Common part of transaction
+    required bytes ref_block_bytes = 2;             // Reference block number
+    required bytes ref_block_hash = 3;              // Reference block hash
+    required uint64 expiration = 4;                 // Transaction expiration
+    optional string data = 5;                       // Extra transaction info
+    required TronContract contract = 6;             // Contract messages
+    required uint64 timestamp = 7;                  // UTC timestamp
+    optional uint64 fee_limit = 8;                  // Fee limit for smartcontracts
+
+    /***
+     * Tron Contracts Messages
+     *
+     */
+    message TronContract {
+        // Transfer TRX
+        message TronTransferContract {
+            optional string to_address = 2;         // To address - base 58
+            optional uint64 amount = 3;             // TRX amount in sun (10^-6)
+        }
+        // TronTriggerSmartContract
+        message TronTriggerSmartContract {
+            optional string contract_address = 2;   // Contract address - base58
+            optional uint64 call_value = 3;         // TRX amount if any
+            optional bytes data = 4;                // Contract data
+            optional uint64 call_token_value = 5;   // Asset ID if any
+            optional uint64 asset_id = 6;           // Asset signature
+        }
+
+        optional TronTransferContract transfer_contract = 2;
+        optional TronTriggerSmartContract trigger_smart_contract = 31;
+    }
+}
+
+/**
+ * Response: Contains Tron transaction signature
+ * @end
+ */
+message TronSignedTx {
+    required bytes signature = 1; // Transaction signature
+    optional bytes serialized_tx = 2; // Serialized transaction
+}
+
+/**
  * Request: Ask device to sign message
  * @next TronMessageSignature
  * @next Failure
  */
-message TronSignMessage {
+ message TronSignMessage {
     repeated uint32 address_n = 1;                          // BIP-32 path to derive the key from master node
     required bytes message = 2;                             // message to be signed
 }
@@ -20,44 +88,6 @@ message TronSignMessage {
  * @end
  */
 message TronMessageSignature {
-    optional bytes address = 1;                             // address used to sign the message
+    required bytes address = 1;                             // address used to sign the message
     required bytes signature = 2;                           // signature of the message
 }
-
-/**
- * Request: Ask device for Tron address corresponding to address_n path
- * @start
- * @next TronAddress
- * @next Failure
- */
- message TronGetAddress {
-    repeated uint32 address_n = 1;  // BIP-32 path to derive the key from master node
-    optional bool show_display = 2; // Optionally show on display before sending the result
-}
-
-/**
- * Response: Contains Tron address derived from device private seed
- * @end
- */
-message TronAddress {
-    required string address = 1;            // Coin address in Base58 encoding
-}
-
-/**
- * Request: Ask device to sign Tron transaction
- * @start
- * @next TronSignature
- */
-message TronSignRawTx {
-    repeated uint32 address_n = 1;                          // BIP-32 path to derive the key from master node
-    required bytes raw_tx = 2;                              // raw transaction to be signed (https://developers.tron.network/docs/parameter-and-return-value-encoding-and-decoding)
-}
-
-/**
- * Response: Tron Signature
- * @end
- */
-message TronSignature {
-    required bytes signature = 1;                           // signature of the message
-}
-

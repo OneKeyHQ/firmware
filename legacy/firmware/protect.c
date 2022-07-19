@@ -401,17 +401,15 @@ bool protectChangePin(bool removal) {
     } else if (pin == PIN_CANCELED_BY_BUTTON)
       return false;
 
-    // If removing, defer the check to config_changePin().
-    if (!removal) {
-      usbTiny(1);
-      bool ret = config_unlock(pin);
-      usbTiny(0);
-      if (ret == false) {
-        fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
-        protectPinCheck(false);
-        return false;
-      }
+    usbTiny(1);
+    bool ret = config_unlock(pin);
+    usbTiny(0);
+    if (ret == false) {
+      fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+      protectPinCheck(false);
+      return false;
     }
+
     strlcpy(old_pin, pin, sizeof(old_pin));
     if (g_bIsBixinAPP) {
       need_new_pin = false;
