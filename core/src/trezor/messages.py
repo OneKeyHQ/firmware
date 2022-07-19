@@ -6217,38 +6217,6 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["WebAuthnCredential"]:
             return isinstance(msg, cls)
 
-    class TronSignMessage(protobuf.MessageType):
-        address_n: "list[int]"
-        message: "bytes"
-
-        def __init__(
-            self,
-            *,
-            message: "bytes",
-            address_n: "list[int] | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronSignMessage"]:
-            return isinstance(msg, cls)
-
-    class TronMessageSignature(protobuf.MessageType):
-        address: "bytes | None"
-        signature: "bytes"
-
-        def __init__(
-            self,
-            *,
-            signature: "bytes",
-            address: "bytes | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronMessageSignature"]:
-            return isinstance(msg, cls)
-
     class TronGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
@@ -6266,12 +6234,12 @@ if TYPE_CHECKING:
             return isinstance(msg, cls)
 
     class TronAddress(protobuf.MessageType):
-        address: "str"
+        address: "str | None"
 
         def __init__(
             self,
             *,
-            address: "str",
+            address: "str | None" = None,
         ) -> None:
             pass
 
@@ -6279,32 +6247,132 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronAddress"]:
             return isinstance(msg, cls)
 
-    class TronSignRawTx(protobuf.MessageType):
+    class TronSignTx(protobuf.MessageType):
         address_n: "list[int]"
-        raw_tx: "bytes"
+        ref_block_bytes: "bytes"
+        ref_block_hash: "bytes"
+        expiration: "int"
+        data: "str | None"
+        contract: "TronContract"
+        timestamp: "int"
+        fee_limit: "int | None"
 
         def __init__(
             self,
             *,
-            raw_tx: "bytes",
+            ref_block_bytes: "bytes",
+            ref_block_hash: "bytes",
+            expiration: "int",
+            contract: "TronContract",
+            timestamp: "int",
             address_n: "list[int] | None" = None,
+            data: "str | None" = None,
+            fee_limit: "int | None" = None,
         ) -> None:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronSignRawTx"]:
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronSignTx"]:
             return isinstance(msg, cls)
 
-    class TronSignature(protobuf.MessageType):
+    class TronSignedTx(protobuf.MessageType):
         signature: "bytes"
+        serialized_tx: "bytes | None"
 
         def __init__(
             self,
             *,
             signature: "bytes",
+            serialized_tx: "bytes | None" = None,
         ) -> None:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronSignature"]:
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronSignedTx"]:
+            return isinstance(msg, cls)
+
+    class TronSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronSignMessage"]:
+            return isinstance(msg, cls)
+
+    class TronMessageSignature(protobuf.MessageType):
+        address: "bytes"
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            address: "bytes",
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronMessageSignature"]:
+            return isinstance(msg, cls)
+
+    class TronContract(protobuf.MessageType):
+        transfer_contract: "TronTransferContract | None"
+        trigger_smart_contract: "TronTriggerSmartContract | None"
+
+        def __init__(
+            self,
+            *,
+            transfer_contract: "TronTransferContract | None" = None,
+            trigger_smart_contract: "TronTriggerSmartContract | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronContract"]:
+            return isinstance(msg, cls)
+
+    class TronTransferContract(protobuf.MessageType):
+        to_address: "str | None"
+        amount: "int | None"
+
+        def __init__(
+            self,
+            *,
+            to_address: "str | None" = None,
+            amount: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronTransferContract"]:
+            return isinstance(msg, cls)
+
+    class TronTriggerSmartContract(protobuf.MessageType):
+        contract_address: "str | None"
+        call_value: "int | None"
+        data: "bytes | None"
+        call_token_value: "int | None"
+        asset_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            contract_address: "str | None" = None,
+            call_value: "int | None" = None,
+            data: "bytes | None" = None,
+            call_token_value: "int | None" = None,
+            asset_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronTriggerSmartContract"]:
             return isinstance(msg, cls)

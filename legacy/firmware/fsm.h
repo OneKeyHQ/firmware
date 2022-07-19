@@ -178,6 +178,6 @@ void fsm_msgGetPublicKeyMultiple(const GetPublicKeyMultiple *msg);
 // tron
 void fsm_msgTronSignMessage(TronSignMessage *msg);
 void fsm_msgTronGetAddress(TronGetAddress *msg);
-void fsm_msgTronSignRawTx(TronSignRawTx *msg);
+void fsm_msgTronSignTx(TronSignTx *msg);
 
 #endif
