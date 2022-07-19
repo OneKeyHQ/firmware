@@ -1,0 +1,142 @@
+[
+    {
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "type": "TRC20",
+        "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+        "decimals": 6,
+        "links": {
+          "Homepage": "https://tron.network/usdt"
+        }
+    },
+    {
+        "symbol": "WTRX",
+        "name": "Wrapped TRX",
+        "type": "TRC20",
+        "address": "TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR",
+        "decimals": 6,
+        "links": {
+          "Homepage": "https://just.network/"
+        }
+    },
+    {
+        "symbol": "WBTT",
+        "name": "Wrapped BitTorrent",
+        "type": "TRC20",
+        "address": "TKfjV9RNKJJCqPvBtK8L7Knykh7DNWvnYt",
+        "decimals": 6,
+        "links": {
+          "Homepage": "https://www.bittorrent.com/"
+        }
+    },
+    {
+        "symbol": "JST",
+        "name": "JUST GOV v1.0",
+        "type": "TRC20",
+        "address": "TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9",
+        "decimals": 18,
+        "links": {
+          "Homepage": "https://www.just.network/"
+        }
+    },
+    {
+        "symbol": "WIN",
+        "name": "WINK",
+        "type": "TRC20",
+        "address": "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7",
+        "decimals": 6,
+        "links": {
+          "Homepage": "https://winklink.org/"
+        }
+    },
+    {
+        "symbol": "SUN",
+        "name": "SUN TOKEN",
+        "type": "TRC20",
+        "address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
+        "decimals": 18,
+        "links": {
+          "Homepage": "https://sun.io/"
+        }
+    },
+    {
+        "symbol": "WBTC",
+        "name": "Wrapped BTC",
+        "type": "TRC20",
+        "address": "TXpw8XeWYeTUd4quDskoUqeQPowRh4jY65",
+        "decimals": 8,
+        "links": {
+          "Homepage": "https://wbtc.network/"
+        }
+    },
+    {
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "type": "TRC20",
+        "address": "THb4CqiFdwNHsWsQCs4JhzwjMWys4aqCbF",
+        "decimals": 18,
+        "links": {
+          "Homepage": "https://ethereum.org/en/"
+        }
+    },
+    {
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "type": "TRC20",
+        "address": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+        "decimals": 6,
+        "links": {
+          "Homepage": "https://www.centre.io/"
+        }
+    },
+    {
+        "symbol": "USDJ",
+        "name": "JUST Stablecoin v1.0",
+        "type": "TRC20",
+        "address": "TMwFHYXLJaRUPeW6421aqXL4ZEzPRFGkGT",
+        "decimals": 18,
+        "links": {
+          "Homepage": "https://www.just.network/"
+        }
+    },
+    {
+        "symbol": "TUSD",
+        "name": "TrueUSD",
+        "type": "TRC20",
+        "address": "TUpMhErZL2fhh4sVNULAbNKLokS4GjC1F4",
+        "decimals": 18,
+        "links": {
+          "Homepage": "https://trueusd.com/"
+        }
+    },
+    {
+        "symbol": "NFT",
+        "name": "APENFT",
+        "type": "TRC20",
+        "address": "TFczxzPhnThNSqr5by8tvxsdCFRRz6cPNq",
+        "decimals": 6,
+        "links": {
+          "Homepage": "https://apenft.io/"
+        }
+    },
+    {
+        "symbol": "HT",
+        "name": "HuobiToken",
+        "type": "TRC20",
+        "address": "TDyvndWuvX5xTBwHPYJi7J3Yq8pq8yh62h",
+        "decimals": 18,
+        "links": {
+          "Homepage": "https://www.huobi.com/"
+        }
+    },
+    {
+        "symbol": "DOGE",
+        "name": "Dogecoin",
+        "type": "TRC20",
+        "address": "THbVQp8kMjStKNnf2iCY6NEzThKMK5aBHg",
+        "decimals": 8,
+        "links": {
+          "Homepage": "https://dogecoin.com/"
+        }
+    }
+]

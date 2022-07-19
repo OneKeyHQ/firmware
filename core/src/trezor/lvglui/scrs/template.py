@@ -449,3 +449,40 @@ class EIP712DOMAIN(FullSizeWindow):
             self.item5 = DisplayItem(
                 self.container, "salt (bytes32):", kwargs.get("salt")
             )
+
+
+class TransactionDetailsTRON(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        address_from,
+        address_to,
+        amount,
+        fee_max,
+        total_amount=None,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__REJECT),
+            hold_confirm=True,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee_max
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
+        )
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
+        )
+        if total_amount is None:
+            total_amount = f"{amount}\n{fee_max}"
+            self.item5 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
+            )

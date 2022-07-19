@@ -259,6 +259,12 @@ if TYPE_CHECKING:
         ConfluxMessageSignature = 10408
         ConfluxVerifyMessage = 10409
         ConfluxVerifyMessageCIP23 = 10410
+        TronGetAddress = 10501
+        TronAddress = 10502
+        TronSignTx = 10503
+        TronSignedTx = 10504
+        TronSignMessage = 10505
+        TronMessageSignature = 10506
         WebAuthnListResidentCredentials = 800
         WebAuthnCredentials = 801
         WebAuthnAddResidentCredential = 802

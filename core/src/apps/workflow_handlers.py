@@ -201,6 +201,14 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.ConfluxVerifyMessageCIP23:
             return "apps.conflux.verify_message_cip23"
 
+        # tron
+        if msg_type == MessageType.TronGetAddress:
+            return "apps.tron.get_address"
+        if msg_type == MessageType.TronSignTx:
+            return "apps.tron.sign_tx"
+        if msg_type == MessageType.TronSignMessage:
+            return "apps.tron.sign_message"
+
     raise ValueError
 
 

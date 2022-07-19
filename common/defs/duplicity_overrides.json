@@ -29,5 +29,9 @@
     "eth:QKC:100007": false,
     "eth:QKC:100008": false,
     "eth:xDAI:100": false,
-    "eth:xDAI:200": false
+    "eth:xDAI:200": false,
+    "tron:TRC20:USDT": false,
+    "tron:TRC20:DOGE": false,
+    "tron:TRC20:ETH": false,
+    "tron:TRC20:HT": false
 }
