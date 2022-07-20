@@ -1,6 +1,6 @@
 # Memory fragmentation management
 
-Trezor-core memory is managed by a mark-and-sweep garbage collector. Throughout the
+Onekey-core memory is managed by a mark-and-sweep garbage collector. Throughout the
 run-time of the firmware, the memory space gets increasingly fragmented as the GC sweep
 is initiated at arbitrary points.
 

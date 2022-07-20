@@ -1,25 +1,25 @@
-# Hello world feature in TT
+# Hello world feature in TT(Touch)
 
-(How to develop on Trezor)
+(How to develop on Onekey)
 
 ## Overview
-This document shows the creation of a custom functionality (feature, application) on TT. It explains how to build both the Trezor (device, core) logic, as well as the client (computer, host, trezorlib) logic needed to speak with Trezor. For most new features, also the communication layer between Trezor and computer (protobuf) needs to be modified, to set up the messages they will exchange.
+This document shows the creation of a custom functionality (feature, application) on TT. It explains how to build both the Onekey (device, core) logic, as well as the client (computer, host, trezorlib) logic needed to speak with Onekey. For most new features, also the communication layer between Onekey and computer (protobuf) needs to be modified, to set up the messages they will exchange.
 
-Intermediate knowledge of `python` and `linux` environment is assumed here to easily follow along. For steps how to set up the Trezor dev environment, refer to other docs - [build](core/build/index.md) or [emulator](core/emulator/index.md). The most important part is being in the `poetry shell` of this project, so all dependencies are installed.
+Intermediate knowledge of `python` and `linux` environment is assumed here to easily follow along. For steps how to set up the Onekey dev environment, refer to other docs - [build](core/build/index.md) or [emulator](core/emulator/index.md). The most important part is being in the `poetry shell` of this project, so all dependencies are installed.
 
 ## Feature description
-We will implement a simple hello-world feature where Trezor gets some information from the host, will do something with it (optionally shows something on the screen), and returns some information back to the host, where we want to display them. (Note that there are no cryptographic operations involved in this example, it focuses only on basic communication between Trezor and host.)
+We will implement a simple hello-world feature where Onekey gets some information from the host, will do something with it (optionally shows something on the screen), and returns some information back to the host, where we want to display them. (Note that there are no cryptographic operations involved in this example, it focuses only on basic communication between Onekey and host.)
 
 ## Implementation
 
-As already mentioned, to get something useful from Trezor, writing device logic is not enough. We need to have a specific communication channel between the computer and Trezor, and also the computer needs to know how to speak to the device to trigger wanted action.
+As already mentioned, to get something useful from Onekey, writing device logic is not enough. We need to have a specific communication channel between the computer and Onekey, and also the computer needs to know how to speak to the device to trigger wanted action.
 
 ### TLDR: [implementation in a single commit](https://github.com/trezor/trezor-firmware/commit/8a855b38e69bea64ba79ca704876cf4862a9ff79)
 
 ### 1. Communication part (protobuf)
-Communication between Trezor and the computer is handled by a protocol called `protobuf`. It allows for the creation of specific messages (containing clearly defined data) that will be exchanged. More details about this can be seen in [docs](common/communication/index.md).
+Communication between Onekey and the computer is handled by a protocol called `protobuf`. It allows for the creation of specific messages (containing clearly defined data) that will be exchanged. More details about this can be seen in [docs](common/communication/index.md).
 
-Trezor on its own cannot send data to the computer, it can only react to a "request" message it recognizes and send a "response" message.
+Onekey on its own cannot send data to the computer, it can only react to a "request" message it recognizes and send a "response" message.
 Both of these messages will need to be specified, and both parts of communication will need to understand them.
 
 Protobuf messages are defined in `common/protob` directory in `.proto` files. When we are creating a brand-new feature (application), it is worth creating a new `.proto` file dedicated only for this feature. Let's call it `messages-hello.proto` and fill it with the content below.
@@ -54,9 +54,9 @@ message HelloWorldRequest {
     required string text = 1;
 }
 ```
-There are some officialities at the top, the most important things are the `message` declarations. We are defining a `HelloWorldRequest`, that will be sent from the computer to Trezor, and `HelloWorldResponse`, that will be sent back from Trezor. There are many features and data-types `protobuf` supports - see [Google docs](https://developers.google.com/protocol-buffers) or other `common/protob/messages-*.proto` files.
+There are some officialities at the top, the most important things are the `message` declarations. We are defining a `HelloWorldRequest`, that will be sent from the computer to Onekey, and `HelloWorldResponse`, that will be sent back from Onekey. There are many features and data-types `protobuf` supports - see [Google docs](https://developers.google.com/protocol-buffers) or other `common/protob/messages-*.proto` files.
 
-After defining the details of communication messages, we will also need to give these messages their unique IDs and specify the direction in which they are sent (into Trezor or from Trezor). That is done in `common/protob/messages.proto` file. We will append a new block at the end of the file:
+After defining the details of communication messages, we will also need to give these messages their unique IDs and specify the direction in which they are sent (into Onekey or from Onekey). That is done in `common/protob/messages.proto` file. We will append a new block at the end of the file:
 #### **`common/protob/messages.proto`**
 ```protobuf
 // Hello world
@@ -75,10 +75,10 @@ SKIPPED_MESSAGES := ... \
 	HelloWorldRequest HelloWorldResponse
 ```
 
-### 2. Trezor part (core)
-The second part deals with creating the "application code" on Trezor. Surprisingly, this part is probably the easiest one from all three parts here (as this is just hello-world example).
+### 2. Onekey part (core)
+The second part deals with creating the "application code" on Onekey. Surprisingly, this part is probably the easiest one from all three parts here (as this is just hello-world example).
 
-All the applications running on Trezor are situated under `core/src/apps` directory. We could create a new application, or reuse the existing one if the feature logically corresponds to it. We will choose to implement this feature under `misc` application, as it is really a miscellaneous one.
+All the applications running on Onekey are situated under `core/src/apps` directory. We could create a new application, or reuse the existing one if the feature logically corresponds to it. We will choose to implement this feature under `misc` application, as it is really a miscellaneous one.
 
 We can therefore create a file `core/src/apps/misc/hello_world.py` and fill it with the content below:
 
@@ -136,13 +136,13 @@ Lastly, running `make gen` in the root directory makes sure the new `misc/hello_
 These are all the necessary code changes in `core`. For this code to work, we will still need to build it, but that will be done in Part 4. Next, we will focus on the client implementation.
 
 ### 3. Host part (trezorlib)
-So far we have defined the messages going to the Trezor and back and the Trezor logic itself. What remains is the code sitting on the computer and sending these messages into Trezor and receiving them.
+So far we have defined the messages going to the Onekey and back and the Onekey logic itself. What remains is the code sitting on the computer and sending these messages into Onekey and receiving them.
 
-There are more ways how to achieve this, for example [Connect](https://github.com/trezor/connect) is a way of communicating with Trezor from a web browser. However, we will decide to implement this connection via `trezorlib`, our own python [library](https://pypi.org/project/trezor/), which lives under `python/src/trezorlib` and acts as a `CLI` (Command-line interface) to communicate with Trezor (via `trezorctl` command).
+There are more ways how to achieve this, for example [Connect](https://github.com/OneKeyHQ/connect) is a way of communicating with Onekey from a web browser. However, we will decide to implement this connection via `trezorlib`, our own python [library](https://pypi.org/project/trezor/), which lives under `python/src/trezorlib` and acts as a `CLI` (Command-line interface) to communicate with Onekey (via `trezorctl` command).
 
-This implementation will be split into two parts, as we will create the Trezor-communication logic in one file and the `CLI` logic taking arguments and calling this code in the second file. (It would be possible to define everything at once in the `CLI` file, but we want the possibility to call the Trezor-speaking function separately, for example when testing.)
+This implementation will be split into two parts, as we will create the Onekey-communication logic in one file and the `CLI` logic taking arguments and calling this code in the second file. (It would be possible to define everything at once in the `CLI` file, but we want the possibility to call the Onekey-speaking function separately, for example when testing.)
 
-We will create the `python/src/trezorlib/hello_world.py` file and fill it with code to speak with Trezor:
+We will create the `python/src/trezorlib/hello_world.py` file and fill it with code to speak with Onekey:
 
 #### **`python/src/trezorlib/hello_world.py`**
 ```python
@@ -172,7 +172,7 @@ def say_hello(
     )
 ```
 
-Code above is sending `HelloWorldRequest` into Trezor and is expecting to get `HelloWorldResponse` back (from which it extracts the `text` string as a response).
+Code above is sending `HelloWorldRequest` into Onekey and is expecting to get `HelloWorldResponse` back (from which it extracts the `text` string as a response).
 
 This function is then called from the `CLI` function, which we will define in `python/src/trezorlib/cli/hello_world.py`.
 
@@ -223,10 +223,10 @@ cli.add_command(hello_world.cli)
 
 If we are currently in `poetry shell`, the `trezorctl` command is being evaluated directly from the source code in `python/src/trezorlib`. That means it should be able to understand our example command `trezorctl helloworld say-hello George -a 3 -d`.
 
-The example command on its own will however not work without listening Trezor which understands the new messages. In the next and final part, we will build and spawn a Trezor on our computer with all the changes made in Part 1 and 2.
+The example command on its own will however not work without listening Onekey which understands the new messages. In the next and final part, we will build and spawn a Onekey on our computer with all the changes made in Part 1 and 2.
 
 ### 4. Putting it together
-Looks like all the code changes have been done, the final part is to build a Trezor image - `emulator` - so that we can actually run and test all the logic we created.
+Looks like all the code changes have been done, the final part is to build a Onekey image - `emulator` - so that we can actually run and test all the logic we created.
 
 Detailed information about the emulator can be found in its [docs](core/emulator/index.md), but we only need two most important commands, that will build and spawn the emulator:
 
@@ -240,16 +240,16 @@ After this, the emulator screen should be visible. Trying our example command sh
 
 ```sh
 $ trezorctl helloworld say-hello George -a 3 -d
-Please confirm action on your Trezor device.
+Please confirm action on your Onekey device.
 Hello George!
 Hello George!
 Hello George!
 ```
 
-For building the new feature into a physical Trezor, refer to [embedded](core/build/embedded.md).
+For building the new feature into a physical Onekey, refer to [embedded](core/build/embedded.md).
 
 ## Testing
-It is always good to include some tests exercising the created functionality, so when we break it later, it will be noticed. Trezor model T supports both `unit tests` and `integration tests` (which are called `device tests`).
+It is always good to include some tests exercising the created functionality, so when we break it later, it will be noticed. Onekey model T supports both `unit tests` and `integration tests` (which are called `device tests`).
 
 ### Unit tests
 [docs](core/tests/index.md)
@@ -285,11 +285,11 @@ Current code checks one usage of `_get_text_from_msg`, the only deterministic he
 ### Device tests
 [docs](tests/device-tests.md)
 
-Device tests (our name for integration tests) should test the whole workflow from sending the first request into Trezor to Trezor sending the final response.
+Device tests (our name for integration tests) should test the whole workflow from sending the first request into Onekey to Onekey sending the final response.
 
-`trezorlib` is used extensively in these tests as a way to request something from Trezor and then assert the expected response (it actually uses the code we created in Part 3).
+`trezorlib` is used extensively in these tests as a way to request something from Onekey and then assert the expected response (it actually uses the code we created in Part 3).
 
-They are closely connected with [ui tests](tests/ui-tests.md), which assert Trezor's screens have a known and expected content during the device tests.
+They are closely connected with [ui tests](tests/ui-tests.md), which assert Onekey's screens have a known and expected content during the device tests.
 
 Device tests are stored in `tests/device_tests` and they can be run by `make test_emu` in `core`. Running the specific file we will create can be done by `make test_emu TESTOPTS="-k test_hello_world.py"`.
 
@@ -341,4 +341,4 @@ If we want to be fully compatible with `CI`, we need to create expected `UI-test
 ## Conclusion
 All changes in one commit can be seen [here](https://github.com/trezor/trezor-firmware/commit/8a855b38e69bea64ba79ca704876cf4862a9ff79).
 
-Ideas for potentially useful Trezor features are welcome. Feel free to submit issues and open PRs, even if incomplete.
+Ideas for potentially useful Onekey features are welcome. Feel free to submit issues and open PRs, even if incomplete.

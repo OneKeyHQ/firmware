@@ -1,4 +1,4 @@
-# Trezor Core event loop
+# Onekey Core event loop
 
 The event loop is implemented in `src/trezor/loop.py` and forms the core of the
 processing. At boot time, default tasks are started and inserted into an event queue.
@@ -47,7 +47,7 @@ event.
 
 ### Implementation details
 
-Trezor Core runs coroutine-based cooperative multitasking, i.e., there is no preemption.
+Onekey Core runs coroutine-based cooperative multitasking, i.e., there is no preemption.
 
 Every _task_ is a coroutine, which means that it runs uninterrupted until it yields a
 value (or, in async terms, until it awaits something). In every processing step, the

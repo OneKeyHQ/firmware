@@ -46,8 +46,8 @@ Sub-repositories
 
 The monorepo has two subdirectories that can be exported to separate repos:
 
-* **common** exports to https://github.com/trezor/trezor-common
-* **crypto** exports to https://github.com/trezor/trezor-crypto
+* **common** exports to https://github.com/OneKeyHQ/trezor-common
+* **crypto** exports to https://github.com/OneKeyHQ/trezor-crypto
 
 These exports are managed with [git-subrepo] tool. To export all commits that touch
 one of these directories, run the following command:

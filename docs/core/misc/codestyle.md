@@ -1,4 +1,4 @@
-# Trezor Core coding style
+# Onekey Core coding style
 
 ## Python coding style
 
@@ -55,7 +55,7 @@ at top level. The style for doing that are as follows:
 Configurations of specific Python style tools (`isort`, `flake8`, `pylint`) can be found
 in root [`setup.cfg`].
 
-[`setup.cfg`]: https://github.com/trezor/trezor-firmware/blob/master/setup.cfg
+[`setup.cfg`]: https://github.com/OneKeyHQ/firmware/blob/master/setup.cfg
 
 #### Formatting
 

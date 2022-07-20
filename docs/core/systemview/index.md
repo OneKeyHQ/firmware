@@ -1,4 +1,4 @@
-# Debugging events with SystemView and Real-time Terminal (Trezor T only)
+# Debugging events with SystemView and Real-time Terminal (Onekey T only)
 
 Systemview is an utility to debug interrupts or other events, counters, logs
 which does not require any extra pin (except the SWD pins attached to CPU).

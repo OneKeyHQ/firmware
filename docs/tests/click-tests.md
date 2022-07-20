@@ -9,9 +9,9 @@ thread free to interact with the device from the user's perspective.
 
 ## Running the full test suite
 
-_Note: You need Poetry, as mentioned in the core's [documentation](https://docs.trezor.io/trezor-firmware/core/) section._
+_Note: You need Poetry, as mentioned in the core's [documentation](https://github.com/OneKeyHQ/firmware/tree/master/docs/core/) section._
 
-In the `trezor-firmware` checkout, in the root of the monorepo, install the environment:
+In the `onekey-firmware` checkout, in the root of the monorepo, install the environment:
 
 ```sh
 poetry install

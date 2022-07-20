@@ -15,10 +15,10 @@ Emulator significantly speeds up development and has several features to help yo
    - either enter `poetry shell` first, and then use `./emu.py`
    - or always use `poetry run ./emu.py`
 3. start the bridge:
-   - to initalise the [bridge](https://github.com/trezor/trezord-go) with emulator support, start it with `trezord-go -e 21324`
-   - alternatively, launch the [desktop suite](https://suite.trezor.io/) from the command line with the argument `--bridge-dev`
+   - install [OneKey Bridge](https://onekey.so/download/)
+   - alternatively, launch the [desktop suite](https://onekey.so/download/) from the command line with the argument `--bridge-dev`
 
-Now you can use the emulator the same way as you use the device, for example you can use [Trezor Suite](https://suite.trezor.io), use our Python CLI tool (`trezorctl`), etc. Simply click to emulate screen touches.
+Now you can use the emulator the same way as you use the device, for example you can use [Onekey Suite](https://onekey.so/download/), use our Python CLI tool (`trezorctl`), etc. Simply click to emulate screen touches.
 
 ## Features
 
@@ -29,7 +29,7 @@ sections below only list long option names and most notable features.
 
 By default the emulator runs in debug mode. Debuglink is available (on port 21325 by
 default), exceptions and log output goes to console. To indicate debug mode, there is a
-red square in the upper right corner of Trezor screen.
+red square in the upper right corner of Onekey screen.
 
 ![emulator](emulator-debug.png)
 
@@ -59,7 +59,7 @@ To use the "all all all" seed defined in [SLIP-14](https://github.com/satoshilab
 
 ### Storage and Profiles
 
-Internal Trezor's storage is emulated and stored in the `/var/tmp/trezor.flash` file by
+Internal Onekey's storage is emulated and stored in the `/var/tmp/trezor.flash` file by
 default. Deleting this file is similar to calling _wipe device_. You can also find
 `/var/tmp/trezor.sdcard` for SD card.
 

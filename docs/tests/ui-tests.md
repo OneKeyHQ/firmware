@@ -2,9 +2,9 @@
 
 ## 1. Running the full test suite
 
-_Note: You need Poetry, as mentioned in the core's [documentation](https://docs.trezor.io/trezor-firmware/core/) section._
+_Note: You need Poetry, as mentioned in the core's [documentation](https://github.com/OneKeyHQ/firmware/tree/master/docs/core/) section._
 
-In the `trezor-firmware` checkout, in the root of the monorepo, install the environment:
+In the `onekey-firmware` checkout, in the root of the monorepo, install the environment:
 
 ```sh
 poetry install
@@ -77,8 +77,6 @@ The index file is stored in `tests/ui_tests/reporting/reports/test/index.html`.
 The script `tests/show_results.py` starts a local HTTP server that serves this page --
 this is necessary for access to browser local storage, which enables a simple reviewer
 UI.
-
-On CI this report is published as an artifact. You can see the latest master report [here](https://gitlab.com/satoshilabs/trezor/trezor-firmware/-/jobs/artifacts/master/file/test_ui_report/index.html?job=core%20device%20ui%20test). The reviewer features work directly here.
 
 If needed, you can use `python3 -m tests.ui_tests` to regenerate the report from local
 recorded screens.

@@ -1,16 +1,16 @@
-# Displaying text screens on Trezor T
+# Displaying text screens on Onekey T
 
 ## Requirements
 
-For this feature, you will need a debug-enabled firmware for Trezor T. Usually that
+For this feature, you will need a debug-enabled firmware for Onekey T. Usually that
 will be the emulator.
 
 You will also need `trezorctl` 0.12 or later. Best bet is to run the version from github
 master.
 
-## Trezor T text capabilities
+## Onekey T text capabilities
 
-The Trezor T screen has a _header_, with an icon and text. Below it is _body_, which
+The Onekey T screen has a _header_, with an icon and text. Below it is _body_, which
 can fit up to 5 lines of text.
 
 Text can be in one of several colors, and in one of three styles: NORMAL, BOLD, MONO.

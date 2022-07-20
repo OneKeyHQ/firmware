@@ -1,7 +1,7 @@
 # Passphrase Redesign In 1.9.0 / 2.3.0
 
-On the T1, passphrase must be entered on the host PC and sent to Trezor. On the TT, the
-user can choose whether to enter the passphrase on host or on Trezor's touch screen.
+On the T1, passphrase must be entered on the host PC and sent to Onekey. On the TT, the
+user can choose whether to enter the passphrase on host or on Onekey's touch screen.
 
 In versions 1.9.0 and 2.3.0 we have redesigned how the passphrase is
 communicated between the Host and the Device. The new design is documented
@@ -64,7 +64,7 @@ should be an option to "enter passphrase on device". When the user selects this 
 the Host must send a `PassphraseAck(passphrase=null, on_device=true)`.
 
 The "enter passphrase on device" option should be displayed when `Features.capabilities`
-contain the `Capability_PassphraseEntry` value, regardless of reported Trezor version or
+contain the `Capability_PassphraseEntry` value, regardless of reported Onekey version or
 model. Firmwares older than 2.3.0 or 1.9.0 never set this value, so this ensures
 forwards and backwards compatibility.
 
