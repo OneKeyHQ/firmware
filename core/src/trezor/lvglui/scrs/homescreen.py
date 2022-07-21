@@ -531,6 +531,12 @@ class AboutSetting(Screen):
             right_text=storage,
             has_next=False,
         )
+        self.storage = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__BUILD_ID),
+            right_text=utils.BUILD_ID[-7:],
+            has_next=False,
+        )
 
 
 class PowerOff(FullSizeWindow):

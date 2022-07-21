@@ -39,7 +39,7 @@ jobs:
           poetry run make build_boardloader
           poetry run make build_bootloader
           poetry run make build_firmware
-          poetry run tools/headertool.py -h build/firmware/firmware.bin  -S 1:${{ secrets.SECRET_KEY_1 }} -S 2:${{ secrets.SECRET_KEY_2 }}
+          poetry run tools/headertool.py -h build/firmware/touch*Stable*.bin  -S 1:${{ secrets.SECRET_KEY_1 }} -S 2:${{ secrets.SECRET_KEY_2 }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
@@ -48,7 +48,7 @@ jobs:
           path: |
             ./core/build/boardloader/boardloader.bin
             ./core/build/bootloader/bootloader.bin
-            ./core/build/firmware/firmware.bin
+            ./core/build/firmware/touch*Stable*.bin
 
       - name: Set Env
         run: |

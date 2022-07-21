@@ -65,6 +65,11 @@ __fatal_error(const char *expr, const char *msg, const char *file, int line,
   printf("rev : %02x%02x%02x%02x%02x\n", rev[0], rev[1], rev[2], rev[3],
          rev[4]);
 #endif
+#ifdef BUILD_ID
+  const uint8_t *id = (const uint8_t *)BUILD_ID;
+  display_printf("build id: %s\n", id);
+  printf("build id: %s\n", id);
+#endif
   display_printf("\n\n\nHint:\nIsn't the emulator already running?\n");
   printf("Hint:\nIsn't the emulator already running?\n");
   hal_delay(3000);

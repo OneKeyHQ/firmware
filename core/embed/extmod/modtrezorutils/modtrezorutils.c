@@ -271,12 +271,16 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_reboot_to_bootloader_obj,
 STATIC mp_obj_str_t mod_trezorutils_revision_obj = {
     {&mp_type_bytes}, 0, sizeof(SCM_REVISION) - 1, (const byte *)SCM_REVISION};
 
+STATIC mp_obj_str_t mod_trezorutils_build_id_obj = {
+    {&mp_type_bytes}, 0, sizeof(BUILD_ID) - 1, (const byte *)BUILD_ID};
+
 #define PASTER(s) MP_QSTR_##s
 #define MP_QSTR(s) PASTER(s)
 
 MP_DEFINE_STR_OBJ(mp_ONEKEY_VERSION, ONEKEY_VERSION);
 
 /// SCM_REVISION: bytes
+/// BUILD_ID: bytes
 /// VERSION_MAJOR: int
 /// VERSION_MINOR: int
 /// VERSION_PATCH: int
@@ -307,6 +311,7 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
     // various built-in constants
     {MP_ROM_QSTR(MP_QSTR_SCM_REVISION),
      MP_ROM_PTR(&mod_trezorutils_revision_obj)},
+    {MP_ROM_QSTR(MP_QSTR_BUILD_ID), MP_ROM_PTR(&mod_trezorutils_build_id_obj)},
     {MP_ROM_QSTR(MP_QSTR_VERSION_MAJOR), MP_ROM_INT(VERSION_MAJOR)},
     {MP_ROM_QSTR(MP_QSTR_VERSION_MINOR), MP_ROM_INT(VERSION_MINOR)},
     {MP_ROM_QSTR(MP_QSTR_VERSION_PATCH), MP_ROM_INT(VERSION_PATCH)},

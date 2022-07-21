@@ -131,6 +131,7 @@ message Features {
     optional string pre_firmware = 516;
 
     optional uint32 coin_switch = 517;
+    optional bytes build_id = 518;
 }
 
 /**
