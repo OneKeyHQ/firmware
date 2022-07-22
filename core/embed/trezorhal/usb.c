@@ -587,7 +587,7 @@ void usb_msc_init(void) {
 }
 
 secbool is_usb_connected(void) {
-  if (usb_dev_handle.dev_state != USBD_STATE_CONFIGURED) {
+  if (!usb_connect_state) {
     return secfalse;  // Device is not configured
   }
   return sectrue;

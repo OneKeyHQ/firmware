@@ -59,6 +59,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -71,6 +72,8 @@
 #define USBD_SELF_POWERED                     0
 #define USBD_DEBUG_LEVEL                      0
 #define USBD_LPM_ENABLED                      1
+
+extern bool usb_connect_state;
 
 /* Exported macro ------------------------------------------------------------*/
 /* Memory management macros */
