@@ -44,7 +44,7 @@ translations = [
     "Activer le code PIN",
     "Voulez-vous activer la protection par code PIN ?",
     "Changer d'étiquette",
-    "Voulez-vous vraiment remplacer le libellé par \"{}\" ?",
+    "Voulez-vous vraiment remplacer le libellé par \"{}\"?",
     "Importez la phrase de récupération pour restaurer le portefeuille existant.",
     "Sélectionnez le nombre de mots",
     "il est sûr d'éjecter et de continuer plus tard.",

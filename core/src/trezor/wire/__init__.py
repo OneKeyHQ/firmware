@@ -392,6 +392,8 @@ async def handle_session(
     # Take a mark of modules that are imported at this point, so we can
     # roll back and un-import any others.
     modules = utils.unimport_begin()
+    from trezor.lvglui.scrs.homescreen import change_state
+
     while True:
         try:
             if next_msg is None:
@@ -399,6 +401,7 @@ async def handle_session(
                 # wait for a new one coming from the wire.
                 try:
                     msg = await ctx.read_from_wire()
+                    change_state(is_busy=True)
                 except codec_v1.CodecError as exc:
                     if __debug__:
                         log.exception(__name__, exc)
@@ -430,6 +433,7 @@ async def handle_session(
                     if next_msg is None and msg.type not in AVOID_RESTARTING_FOR:
                         # Shut down the loop if there is no next message waiting.
                         # Let the session be restarted from `main`.
+                        change_state()
                         loop.clear()
                         return  # pylint: disable=lost-exception
 

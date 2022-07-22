@@ -55,6 +55,8 @@ def find_message_handler_module(msg_type: int) -> str:
         return "apps.management.reboot_to_bootloader"
     elif msg_type == MessageType.DeviceBackToBoot:
         return "apps.management.reboot_to_bootloader"
+    elif msg_type == MessageType.ReadSEPublicCert:
+        return "apps.management.se_read_cert"
 
     if utils.MODEL == "T" and msg_type == MessageType.SdProtect:
         return "apps.management.sd_protect"

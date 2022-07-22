@@ -27,13 +27,13 @@ from typing import TYPE_CHECKING
 
 # pyright: on
 
-
+BLE_NAME: str | None = None
 DISABLE_ANIMATION = 0
 BLE_CONNECTED: bool | None = None
-BATTERY_CAP: int = 80
+BATTERY_CAP: int | None = None
 SHORT_AUTO_LOCK: bool | None = None
 SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
-
+DEFAULT_LABEL = "OneKey Touch"
 
 if __debug__:
     if EMULATOR:

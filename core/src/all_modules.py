@@ -166,6 +166,8 @@ trezor.lvglui.scrs.common
 import trezor.lvglui.scrs.common
 trezor.lvglui.scrs.components
 import trezor.lvglui.scrs.components
+trezor.lvglui.scrs.components.anim
+import trezor.lvglui.scrs.components.anim
 trezor.lvglui.scrs.components.button
 import trezor.lvglui.scrs.components.button
 trezor.lvglui.scrs.components.container
@@ -190,6 +192,8 @@ trezor.lvglui.scrs.components.qrcode
 import trezor.lvglui.scrs.components.qrcode
 trezor.lvglui.scrs.components.roller
 import trezor.lvglui.scrs.components.roller
+trezor.lvglui.scrs.components.slider
+import trezor.lvglui.scrs.components.slider
 trezor.lvglui.scrs.components.style
 import trezor.lvglui.scrs.components.style
 trezor.lvglui.scrs.components.theme
@@ -502,6 +506,8 @@ apps.management.reset_device.layout
 import apps.management.reset_device.layout
 apps.management.sd_protect
 import apps.management.sd_protect
+apps.management.se_read_cert
+import apps.management.se_read_cert
 apps.management.se_sign_message
 import apps.management.se_sign_message
 apps.management.set_u2f_counter

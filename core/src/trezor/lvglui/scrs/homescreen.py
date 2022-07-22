@@ -1,3 +1,5 @@
+import math
+
 from storage import device
 from trezor import utils, workflow
 from trezor.langs import langs, langs_keys
@@ -12,6 +14,7 @@ from .common import (  # noqa: F401, F403, F405
     load_scr_with_animation,
     lv,
 )
+from .components.anim import Anim
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
 from .components.container import ContainerFlexCol, ContanierGrid
 from .components.imgbtn import ImgBottonGridItem
@@ -22,9 +25,19 @@ def brightness2_percent_str(brightness: int) -> str:
     return f"{int(brightness / 255 * 100)}%"
 
 
+GRID_CELL_SIZE = 128
+
+
+def change_state(is_busy: bool = False):
+    if hasattr(MainScreen, "_instance"):
+        if MainScreen._instance.is_visible():
+            MainScreen._instance.change_state(is_busy)
+
+
 class MainScreen(Screen):
-    def __init__(self, dev_state=None):
-        homescreen = device.get_homescreen() or "A:/res/wallpaper_light.png"
+    def __init__(self, device_name=None, ble_name=None, dev_state=None):
+        cur_index = device.get_wp_index()
+        homescreen = f"A:/res/wallpaper-{cur_index+1}.png"
         if not hasattr(self, "_init"):
             self._init = True
         else:
@@ -41,10 +54,18 @@ class MainScreen(Screen):
                 else:
                     self.dev_state.add_flag(lv.obj.FLAG.HIDDEN)
             self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
+            if self.bottom_tips:
+                self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
+            if self.apps:
+                self.apps.tips_top.set_text(_(i18n_keys.BUTTON__CLOSE))
             if not self.is_visible():
                 load_scr_with_animation(self)
             return
-        super().__init__()
+        super().__init__(title=device_name, subtitle=ble_name)
+        self.title.align(lv.ALIGN.TOP_MID, 0, 92)
+        self.subtitle.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.dev_state = lv.btn(self)
         self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
         self.dev_state.set_style_bg_color(
@@ -66,31 +87,152 @@ class MainScreen(Screen):
             self.dev_state.add_flag(lv.obj.FLAG.HIDDEN)
         self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-
-        self.btn_settings = lv.imgbtn(self)
-        self.btn_settings.set_pos(64, 92)
-        self.btn_settings.set_style_bg_img_src(
-            "A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT
+        self.clear_flag(lv.obj.FLAG.SCROLLABLE)
+        self.bottom_bar = lv.btn(self)
+        self.bottom_bar.remove_style_all()
+        self.bottom_bar.set_size(lv.pct(100), 100)
+        self.bottom_bar.set_align(lv.ALIGN.BOTTOM_MID)
+        self.up_arrow = lv.img(self.bottom_bar)
+        self.up_arrow.set_src("A:/res/up-home.png")
+        self.up_arrow.set_align(lv.ALIGN.TOP_MID)
+        self.bottom_tips = lv.label(self.bottom_bar)
+        self.bottom_tips.align(lv.ALIGN.BOTTOM_MID, 0, -16)
+        self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
+        self.bottom_tips.set_style_text_font(
+            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.btn_settings.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-        self.btn_info = lv.imgbtn(self)
-        self.btn_info.align_to(self.btn_settings, lv.ALIGN.OUT_RIGHT_MID, 96, 0)
-        self.btn_info.set_style_bg_img_src(
-            "A:/res/user_guide.png", lv.PART.MAIN | lv.STATE.DEFAULT
+        self.bottom_tips.set_style_text_color(
+            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.btn_info.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.apps = None
+        self.add_event_cb(self.on_slide_up, lv.EVENT.GESTURE, None)
 
-    def on_click(self, event_obj):
-        target = event_obj.get_target()
+    def hidden_titles(self, hidden: bool = True):
+        if hidden:
+            self.subtitle.add_flag(lv.obj.FLAG.HIDDEN)
+            self.title.add_flag(lv.obj.FLAG.HIDDEN)
+        else:
+            self.subtitle.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.title.clear_flag(lv.obj.FLAG.HIDDEN)
+
+    def change_state(self, busy: bool):
+        if busy:
+            self.clear_flag(lv.obj.FLAG.CLICKABLE)
+            self.up_arrow.add_flag(lv.obj.FLAG.HIDDEN)
+            self.bottom_tips.set_text(_(i18n_keys.BUTTON__PROCESSING))
+        else:
+            self.add_flag(lv.obj.FLAG.CLICKABLE)
+            self.up_arrow.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
+
+    def on_slide_up(self, event_obj):
         code = event_obj.code
-        if code == lv.EVENT.CLICKED:
-            if target == self.btn_settings:
-                self.load_screen(SettingsScreen(self))
-            elif target == self.btn_info:
-                self.load_screen(UserGuide(self))
-            else:
-                if __debug__:
-                    print("Unknown")
+        if code == lv.EVENT.GESTURE:
+            _dir = lv.indev_get_act().get_gesture_dir()
+            if _dir == lv.DIR.TOP:
+                # child_cnt == 4 in common if in homepage
+                if self.get_child_cnt() > 4:
+                    return
+                if self.is_visible() and self.apps is None:
+                    self.hidden_titles()
+                    self.apps = self.AppDrawer(self)
+            elif _dir == lv.DIR.BOTTOM:
+                lv.event_send(self.apps, lv.EVENT.GESTURE, None)
+
+    class AppDrawer(lv.obj):
+        def __init__(self, parent) -> None:
+            super().__init__(parent)
+            self.parent = parent
+            self.remove_style_all()
+            self.set_pos(0, 148)
+            self.set_size(lv.pct(100), 652)
+            # header
+            self.header = lv.obj(self)
+            self.header.remove_style_all()
+            self.header.set_size(lv.pct(100), 100)
+            self.header.set_align(lv.ALIGN.TOP_MID)
+            self.header.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.tips_top = lv.label(self.header)
+            self.tips_top.set_style_text_font(
+                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.tips_top.set_style_text_color(
+                lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.tips_top.set_text(_(i18n_keys.BUTTON__CLOSE))
+            self.tips_top.align(lv.ALIGN.TOP_MID, 0, 16)
+            self.down_img = lv.img(self.header)
+            self.down_img.set_src("A:/res/down-home.png")
+            self.down_img.align_to(self.tips_top, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+            # content panel
+            self.panel = lv.obj(self)
+            self.panel.remove_style_all()
+            self.panel.set_size(lv.pct(100), 552)
+            self.panel.align_to(self.down_img, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+            self.panel.set_style_bg_color(
+                lv_colors.WHITE_3, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.panel.set_style_bg_opa(lv.OPA.COVER, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.panel.set_style_radius(30, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.panel.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            # mask
+            self.mask = lv.obj(self)
+            self.mask.remove_style_all()
+            self.mask.set_size(lv.pct(100), 40)
+            self.mask.set_style_bg_color(
+                lv_colors.WHITE_3, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.mask.set_style_bg_opa(lv.OPA.COVER, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.mask.set_align(lv.ALIGN.BOTTOM_MID)
+
+            # buttons
+            self.settings = lv.imgbtn(self.panel)
+            self.settings.set_pos(80, 48)
+            self.settings.set_style_bg_img_src(
+                "A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.settings.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.guide = lv.imgbtn(self.panel)
+            self.guide.align_to(self.settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
+            self.guide.set_style_bg_img_src(
+                "A:/res/guide.png", lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
+            self.show_anim = Anim(800, 148, self.set_pos, time=30)
+            self.show_anim.start()
+            self.dismiss_anim = Anim(
+                148, 800, self.set_pos, time=70, path_cb=lv.anim_t.path_ease_out
+            )
+            self.slide = False
+
+        def clear(self):
+            if self.is_visible():
+                self.del_delayed(200)
+                self.parent.apps = None
+                self.parent.hidden_titles(False)
+                self.header.add_flag(lv.obj.FLAG.HIDDEN)
+                self.dismiss_anim.start()
+
+        def on_click(self, event_obj):
+            code = event_obj.code
+            target = event_obj.get_target()
+            if code == lv.EVENT.CLICKED and not self.slide:
+                if target == self.settings:
+                    SettingsScreen(self.parent)
+                elif target == self.guide:
+                    UserGuide(self.parent)
+                elif target == self.header:
+                    self.clear()
+
+        def on_slide_down(self, event_obj):
+            code = event_obj.code
+            if code == lv.EVENT.GESTURE:
+                _dir = lv.indev_get_act().get_gesture_dir()
+                if _dir == lv.DIR.BOTTOM:
+                    self.slide = True
+                    self.clear()
 
 
 class SettingsScreen(Screen):
@@ -99,6 +241,8 @@ class SettingsScreen(Screen):
             self._init = True
         else:
             self.refresh_text()
+            if not self.is_visible():
+                load_scr_with_animation(self)
             return
         kwargs = {
             "prev_scr": prev_scr,
@@ -162,17 +306,17 @@ class SettingsScreen(Screen):
             if utils.lcd_resume():
                 return
             if target == self.general:
-                self.load_screen(GeneralScreen(self))
+                GeneralScreen(self)
             elif target == self.connect:
-                self.load_screen(ConnectSetting(self))
+                ConnectSetting(self)
             elif target == self.home_scr:
-                self.load_screen(HomeScreenSetting(self))
+                HomeScreenSetting(self)
             elif target == self.security:
-                self.load_screen(SecurityScreen(self))
+                SecurityScreen(self)
             # elif target == self.crypto:
-            #     self.load_screen(CryptoScreen(self))
+            #     CryptoScreen(self)
             elif target == self.about:
-                self.load_screen(AboutSetting(self))
+                AboutSetting(self)
             elif target == self.power:
                 PowerOff()
             else:
@@ -247,11 +391,11 @@ class GeneralScreen(Screen):
             if utils.lcd_resume():
                 return
             if target == self.auto_lock:
-                self.load_screen(AutoLockSetting(self))
+                AutoLockSetting(self)
             elif target == self.language:
-                self.load_screen(LanguageSetting(self))
+                LanguageSetting(self)
             elif target == self.backlight:
-                self.load_screen(BacklightSetting(self))
+                BacklightSetting(self)
             else:
                 pass
 
@@ -385,6 +529,7 @@ class BacklightSetting(Screen):
         self.slider = lv.slider(self)
         self.slider.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.slider.set_size(424, 8)
+        self.slider.set_ext_click_area(100)
         self.slider.set_range(20, 255)
         self.slider.set_value(current_brightness, lv.ANIM.OFF)
         self.slider.align_to(self.container, lv.ALIGN.BOTTOM_MID, 0, 33)
@@ -407,9 +552,6 @@ class BacklightSetting(Screen):
 
 
 class PinMapSetting(Screen):
-    RANDOM = 0
-    ORDER = 1
-
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
             self._init = True
@@ -427,7 +569,7 @@ class PinMapSetting(Screen):
             self.container, _(i18n_keys.OPTION__ORDERED), has_next=False
         )
         self.order.add_check_img()
-        if device.is_order_pin_map():
+        if device.is_order_pin_map_enabled():
             self.order.set_checked()
         else:
             self.random.set_checked()
@@ -442,13 +584,13 @@ class PinMapSetting(Screen):
             if target == self.random:
                 self.random.set_checked()
                 self.order.set_uncheck()
-                if device.is_order_pin_map():
-                    device.set_pin_map_type(self.RANDOM)
+                if device.is_order_pin_map_enabled():
+                    device.set_order_pin_map_enable(False)
             elif target == self.order:
                 self.random.set_uncheck()
                 self.order.set_checked()
-                if not device.is_order_pin_map():
-                    device.set_pin_map_type(self.ORDER)
+                if not device.is_order_pin_map_enabled():
+                    device.set_order_pin_map_enable(True)
 
 
 class ConnectSetting(Screen):
@@ -590,33 +732,41 @@ class ShutingDown(FullSizeWindow):
 
 
 class HomeScreenSetting(Screen):
-    LIGHT_WALLPAPER = "A:/res/wallpaper_light.png"
-    DARK_WALLPAPER = "A:/res/wallpaper_dark.png"
+    CELL_SIZE = 128
 
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
             self._init = True
         else:
             return
-        cur = device.get_homescreen() or self.LIGHT_WALLPAPER
+        cur_index = device.get_wp_index()
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOME_SCREEN), nav_back=True
         )
-        self.container = ContanierGrid(self, self.title)
-        self.light = ImgBottonGridItem(
-            self.container, 0, 0, "A:/res/wallpaper_light_thumnail.png"
+        # TODO: retrieve the total nums of wps, need fatfs interface to enumerate files
+        pages_num = 5
+        rows_num = math.ceil(pages_num / 3)
+        row_dsc = [GRID_CELL_SIZE] * rows_num
+        row_dsc.append(lv.GRID_TEMPLATE.LAST)
+        # 3 columns
+        col_dsc = [
+            GRID_CELL_SIZE,
+            GRID_CELL_SIZE,
+            GRID_CELL_SIZE,
+            lv.GRID_TEMPLATE.LAST,
+        ]
+        self.container = ContanierGrid(
+            self, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.title
         )
-        self.dark = ImgBottonGridItem(
-            self.container, 1, 0, "A:/res/wallpaper_dark_thumnail.png"
-        )
-        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-
-        if cur == self.DARK_WALLPAPER:
-            self.dark.set_checked(True)
-            self.light.set_checked(False)
-        else:
-            self.light.set_checked(True)
-            self.dark.set_checked(False)
+        self.wps = []
+        for i in range(pages_num):
+            current_wp = ImgBottonGridItem(
+                self.container, i % 3, i // 3, f"A:/res/zoom-{i+1}.png"
+            )
+            self.wps.append(current_wp)
+            if cur_index == i:
+                current_wp.set_checked(True)
+        self.check_index = cur_index
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -625,14 +775,16 @@ class HomeScreenSetting(Screen):
         if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
-            if target == self.light:
-                self.light.set_checked(True)
-                self.dark.set_checked(False)
-                device.set_homescreen(self.LIGHT_WALLPAPER)
-            elif target == self.dark:
-                self.dark.set_checked(True)
-                self.light.set_checked(False)
-                device.set_homescreen(self.DARK_WALLPAPER)
+            if target not in self.wps:
+                return
+            last_checked = self.check_index
+            for idx, wp in enumerate(self.wps):
+                if target != wp and idx == last_checked:
+                    wp.set_checked(False)
+                if target == wp and idx != last_checked:
+                    device.set_cur_wp_index(idx)
+                    self.check_index = idx
+                    wp.set_checked(True)
 
 
 class SecurityScreen(Screen):
@@ -644,6 +796,7 @@ class SecurityScreen(Screen):
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
+        self.usb_lock = ListItemBtn(self.container, _(i18n_keys.ITEM__USB_LOCK))
         self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
         self.recovery_check = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
@@ -705,11 +858,60 @@ class SecurityScreen(Screen):
 
                 workflow.spawn(wipe_device(DUMMY_CONTEXT, WipeDevice()))
             elif target == self.pin_map_type:
-                self.load_screen(PinMapSetting(self))
+                PinMapSetting(self)
+            elif target == self.usb_lock:
+                UsbLockSetting(self)
             else:
                 if __debug__:
                     print("unknown")
         # pyright: on
+
+
+class UsbLockSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__USB_LOCK), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title)
+        self.usb_lock = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__USB_LOCK)
+        )
+        self.usb_lock.set_size(lv.pct(100), 78)
+        self.description = lv.label(self)
+        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_long_mode(lv.label.LONG.WRAP)
+        self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
+        self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
+        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 20)
+
+        if device.is_usb_lock_enabled():
+            self.usb_lock.add_state()
+            self.description.set_text(_(i18n_keys.CONTENT__USB_LOCK_ENABLED__HINT))
+        else:
+            self.usb_lock.clear_state()
+            self.description.set_text(_(i18n_keys.CONTENT__USB_LOCK_DISABLED__HINT))
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.usb_lock.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    self.description.set_text(
+                        _(i18n_keys.CONTENT__USB_LOCK_ENABLED__HINT)
+                    )
+                    device.set_usb_lock_enabled(True)
+                else:
+                    self.description.set_text(
+                        _(i18n_keys.CONTENT__USB_LOCK_DISABLED__HINT)
+                    )
+                    device.set_usb_lock_enabled(False)
 
 
 class CryptoScreen(Screen):
@@ -729,9 +931,9 @@ class CryptoScreen(Screen):
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
             if target == self.ethereum:
-                self.load_screen(EthereumSetting(self))
+                EthereumSetting(self)
             elif target == self.solana:
-                self.load_screen(SolanaSetting(self))
+                SolanaSetting(self)
 
 
 class EthereumSetting(Screen):
@@ -754,9 +956,7 @@ class EthereumSetting(Screen):
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
             if target == self.blind_sign:
-                self.load_screen(
-                    BlindSign(self, coin_type=_(i18n_keys.TITLE__ETHEREUM))
-                )
+                BlindSign(self, coin_type=_(i18n_keys.TITLE__ETHEREUM))
 
 
 class SolanaSetting(Screen):
@@ -779,7 +979,7 @@ class SolanaSetting(Screen):
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
             if target == self.blind_sign:
-                self.load_screen(BlindSign(self, coin_type=_(i18n_keys.TITLE__SOLANA)))
+                BlindSign(self, coin_type=_(i18n_keys.TITLE__SOLANA))
 
 
 class BlindSign(Screen):

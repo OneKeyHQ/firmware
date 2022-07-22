@@ -126,7 +126,7 @@ class StatusBar(lv.obj):
         # battery capacity icon
         self.battery = lv.img(self)
         self.battery.set_src("A:/res/battery-60-white.png")
-
+        self.battery.add_flag(lv.obj.FLAG.HIDDEN)
         # charging status
         self.charging = lv.img(self)
         self.charging.set_src("A:/res/charging.png")
@@ -164,6 +164,7 @@ class StatusBar(lv.obj):
         else:
             self.percent.add_flag(lv.obj.FLAG.HIDDEN)
         icon_path = retrieve_icon_path(value, charging)
+        self.battery.clear_flag(lv.obj.FLAG.HIDDEN)
         self.battery.set_src(icon_path)
 
 
@@ -252,6 +253,9 @@ def retrieve_icon_path(value: int, charging: bool) -> str:
             "A:/res/battery-5-green.png" if charging else "A:/res/battery-5-white.png"
         )
     else:
+        # show nothing, the path is not exist
         return (
-            "A:/res/battery-80-green.png" if charging else "A:/res/battery-80-white.png"
+            "A:/res/battery-none-green.png"
+            if charging
+            else "A:/res/battery-none-white.png"
         )

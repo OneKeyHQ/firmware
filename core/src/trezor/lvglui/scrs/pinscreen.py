@@ -72,7 +72,7 @@ class InputPin(FullSizeWindow):
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.CANCEL, None)
-        self.keyboard.ta.add_event_cb(self.on_event, lv.EVENT.VALUE_CHANGED, None)
+        self.keyboard.add_event_cb(self.on_event, lv.EVENT.VALUE_CHANGED, None)
 
     def on_event(self, event_obj):
         code = event_obj.code

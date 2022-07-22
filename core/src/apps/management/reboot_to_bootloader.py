@@ -11,13 +11,13 @@ if TYPE_CHECKING:
 
 
 async def reboot_to_bootloader(ctx: wire.Context, msg: RebootToBootloader) -> NoReturn:
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
     await confirm_action(
         ctx,
         "reboot",
-        "Go to bootloader",
-        "Do you want to restart OneKey in bootloader mode?",
-        hold_danger=True,
-        verb="Restart",
+        _(i18n_keys.TITLE__GO_TO_UPDATE_MODE),
+        description=_(i18n_keys.SUBTITLE__GO_TO_UPDATE_MODE),
     )
     await ctx.write(Success(message="Rebooting"))
     # make sure the outgoing USB buffer is flushed

@@ -11,7 +11,7 @@ class BootScreen(Screen):
 
         self.bar = lv.bar(self)
         self.bar.set_size(288, 8)
-        self.bar.align(lv.ALIGN.CENTER, 14, 236)
+        self.bar.align(lv.ALIGN.CENTER, 0, 236)
         self.bar.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.bar.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.bar.set_style_border_color(
