@@ -68,6 +68,9 @@ static PCD_HandleTypeDef pcd_fs_handle;
 #ifdef USE_USB_HS
 static PCD_HandleTypeDef pcd_hs_handle;
 #endif
+
+bool usb_connect_state = false;
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -282,6 +285,7 @@ void HAL_PCD_MspDeInit(PCD_HandleTypeDef *hpcd)
 void HAL_PCD_SetupStageCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_LL_SetupStage(hpcd->pData, (uint8_t *)hpcd->Setup);
+  usb_connect_state = true;
 }
 
 /**
@@ -354,6 +358,7 @@ void HAL_PCD_ResetCallback(PCD_HandleTypeDef *hpcd)
 void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_LL_Suspend(hpcd->pData);
+  usb_connect_state = false;
 }
 
 /**
@@ -396,6 +401,7 @@ void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
 void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_LL_DevConnected(hpcd->pData);
+  usb_connect_state = true;
 }
 
 /**
@@ -406,6 +412,7 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd)
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_LL_DevDisconnected(hpcd->pData);
+  usb_connect_state = false;
 }
 
 /*******************************************************************************
