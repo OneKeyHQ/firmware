@@ -85,6 +85,10 @@ __fatal_error(const char *expr, const char *msg, const char *file, int line,
   display_printf("rev : %02x%02x%02x%02x%02x\n", rev[0], rev[1], rev[2], rev[3],
                  rev[4]);
 #endif
+#ifdef BUILD_ID
+  const uint8_t *id = (const uint8_t *)BUILD_ID;
+  display_printf("build id: %s\n", id);
+#endif
   display_printf("\nPlease contact OneKey support.\n");
   shutdown();
   for (;;)

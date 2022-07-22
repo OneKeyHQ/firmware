@@ -668,4 +668,36 @@ TITLE__EXTRACT_FIRMWARE = 310
 # Do you want to extract device firmware? Your recovery phrase will not be rev
 # ealed.
 SUBTITLE__EXTRACT_FIRMWARE = 311
+# Security Check
+TITLE__SECURITY_CHECK = 312
+# Are you sure to authenticate your device with the OneKey secure server? Tap
+# confirm to check whether your device is genuine and without tampered.
+SUBTITLE__SECURITY_CHECK = 313
+# Swipe to Show Apps
+BUTTON__SWIPE_TO_SHOW_APPS = 314
+# Tap to Close
+BUTTON__TAP_TO_CLOSE = 315
+# Processing...
+BUTTON__PROCESSING = 316
+# Slide to Sign
+BUTTON__SLIDE_TO_SIGN = 317
+# Slide to Reset
+BUTTON__SLIDE_TO_RESET = 318
+# Slide to Confirm
+BUTTON__SLIDE_TO_CONFIRM = 319
+# USB Lock
+ITEM__USB_LOCK = 320
+TITLE__USB_LOCK = 320
+# USB Lock is enabled. Device will be automatically locked every time when USB
+# plug or unplug.
+CONTENT__USB_LOCK_ENABLED__HINT = 321
+# USB Lock is disabled. Device will always remain unlocked when USB plug or un
+# plug.
+CONTENT__USB_LOCK_DISABLED__HINT = 322
+# Go to Update Mode
+TITLE__GO_TO_UPDATE_MODE = 323
+# Do you want to restart device in update mode?
+SUBTITLE__GO_TO_UPDATE_MODE = 324
+# Build ID
+ITEM__BUILD_ID = 325
 # fmt: on

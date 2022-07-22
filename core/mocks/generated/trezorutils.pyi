@@ -87,6 +87,7 @@ def reboot_to_bootloader() -> None:
     Reboots to bootloader.
     """
 SCM_REVISION: bytes
+BUILD_ID: bytes
 VERSION_MAJOR: int
 VERSION_MINOR: int
 VERSION_PATCH: int

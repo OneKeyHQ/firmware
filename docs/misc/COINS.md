@@ -10,7 +10,7 @@ You can add new coin/token/network to the official Onekey firmware.
 
 If the coin you are adding is a fork of Bitcoin or other cryptocurrency we already support (in other words, new app is not needed) you can modify the definitions in the onekey-firmware repository and file a PR. In such case the coin does not have to be in TOP30 (see below), but we still reserve the right not to include the coin. The location depends on the type of the asset to be added:
 
-- Bitcoin clones should be added to the [common/defs/bitcoin](https://github.com/OneKeyHQ/firmware/tree/master/common/defs/bitcoin)subdirectory as separate .json files
+- Bitcoin clones should be added to the [common/defs/bitcoin](https://github.com/OneKeyHQ/firmware/tree/master/common/defs/bitcoin) subdirectory as separate .json files
 - Ethereum networks/chains should be added to the [ethereum-lists/chains](https://github.com/ethereum-lists/chains)
 - Ethereum tokens should be added to the [ethereum-lists/tokens](https://github.com/ethereum-lists/tokens) repository
 - NEM mosaics should be added to the [common/defs/nem/nem_mosaics.json](https://github.com/OneKeyHQ/firmware/tree/master/common/defs/nem/nem_mosaics.json) file

@@ -2199,6 +2199,7 @@ if TYPE_CHECKING:
         cpu_info: "str | None"
         pre_firmware: "str | None"
         coin_switch: "int | None"
+        build_id: "bytes | None"
 
         def __init__(
             self,
@@ -2257,6 +2258,7 @@ if TYPE_CHECKING:
             cpu_info: "str | None" = None,
             pre_firmware: "str | None" = None,
             coin_switch: "int | None" = None,
+            build_id: "bytes | None" = None,
         ) -> None:
             pass
 
