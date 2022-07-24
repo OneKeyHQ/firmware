@@ -77,9 +77,11 @@ def turn_on_lcd_if_possible() -> bool:
 def lcd_resume() -> bool:
     from trezor.ui import display
     from storage import device
+    from apps import base
 
     if display.backlight() != device.get_brightness():
         display.backlight(device.get_brightness())
+        base.reload_settings_from_storage()
         return True
     return False
 

@@ -5,10 +5,18 @@ import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
 async def lvgl_tick():
+    from trezor import workflow
+
+    inactive_time_bak = 0
     while True:
         lv.tick_inc(10)
         await loop.sleep(10)
         lv.timer_handler()
+        inactive_time = get_elapsed()
+        if inactive_time < inactive_time_bak:
+            workflow.idle_timer.touch()
+
+        inactive_time_bak = inactive_time
 
 
 def init_lvgl() -> None:

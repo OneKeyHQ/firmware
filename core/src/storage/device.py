@@ -68,7 +68,8 @@ if __debug__:
     AUTOLOCK_DELAY_MINIMUM = 10 * 1000  # 10 seconds
 else:
     AUTOLOCK_DELAY_MINIMUM = 60 * 1000  # 1 minute
-AUTOLOCK_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
+AUTOLOCK_DELAY_DEFAULT = 60 * 1000  # 1 minutes
+AUTOSHUTDOWN_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
 # autolock intervals larger than AUTOLOCK_DELAY_MAXIMUM cause issues in the scheduler
 AUTOLOCK_DELAY_MAXIMUM = 0x1000_0000  # ~3 days
 
