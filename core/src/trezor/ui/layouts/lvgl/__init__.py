@@ -71,7 +71,7 @@ async def confirm_action(
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
 
-    if description and description_param:
+    if description and description_param is not None:
         description = description.format(description_param)
     confirm_screen = FullSizeWindow(
         title,
@@ -886,4 +886,13 @@ async def confirm_domain(ctx: wire.GenericContext, **kwargs) -> None:
     screen = EIP712DOMAIN(_(i18n_keys.TITLE__CONFIRM_DOMAIN), **kwargs)
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_domain", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_security_check(ctx: wire.GenericContext) -> None:
+    from trezor.lvglui.scrs.template import SecurityCheck
+
+    screen = SecurityCheck()
+    await raise_if_cancelled(
+        interact(ctx, screen, "security_check", ButtonRequestType.ProtectCall)
     )

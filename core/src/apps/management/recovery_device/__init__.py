@@ -55,29 +55,29 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
 
         utils.play_dead()
 
-    # for dry run pin needs to be entered
-    if msg.dry_run:
-        curpin, salt = await request_pin_and_sd_salt(ctx, _(i18n_keys.TITLE__ENTER_PIN))
-        if not config.check_pin(curpin, salt):
-            await error_pin_invalid(ctx)
+    try:  # for dry run pin needs to be entered
+        if msg.dry_run:
+            curpin, salt = await request_pin_and_sd_salt(
+                ctx, _(i18n_keys.TITLE__ENTER_PIN)
+            )
+            if not config.check_pin(curpin, salt):
+                await error_pin_invalid(ctx)
 
-    if not msg.dry_run:
-        # set up pin if requested
-        if msg.pin_protection:
-            newpin = await request_pin_confirm(ctx, allow_cancel=False)
-            config.change_pin("", newpin, None, None)
+        if not msg.dry_run:
+            # set up pin if requested
+            if msg.pin_protection:
+                newpin = await request_pin_confirm(ctx, allow_cancel=False)
+                config.change_pin("", newpin, None, None)
 
-        storage.device.set_passphrase_enabled(bool(msg.passphrase_protection))
-        if msg.u2f_counter is not None:
-            storage.device.set_u2f_counter(msg.u2f_counter)
-        if msg.label is not None:
-            storage.device.set_label(msg.label)
+            storage.device.set_passphrase_enabled(bool(msg.passphrase_protection))
+            if msg.u2f_counter is not None:
+                storage.device.set_u2f_counter(msg.u2f_counter)
+            if msg.label is not None:
+                storage.device.set_label(msg.label)
 
-    storage.recovery.set_in_progress(True)
-    storage.recovery.set_dry_run(bool(msg.dry_run))
-
-    # workflow.set_default(recovery_homescreen)
-    try:
+        storage.recovery.set_in_progress(True)
+        storage.recovery.set_dry_run(bool(msg.dry_run))
+        # workflow.set_default(recovery_homescreen)
         result = await recovery_process(ctx)
     except BaseException as e:
         raise e

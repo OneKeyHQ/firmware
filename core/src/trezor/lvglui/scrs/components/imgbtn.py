@@ -14,7 +14,7 @@ class ImgBottonGridItem(lv.imgbtn):
         col_num,
         row_num,
         bg_img_path: str,
-        img_path_other: str = "A:/res/checked-green.png",
+        img_path_other: str = "A:/res/checked-solid.png",
     ):
         super().__init__(parent)
         self.set_grid_cell(
@@ -23,7 +23,8 @@ class ImgBottonGridItem(lv.imgbtn):
         self.set_style_bg_img_src(bg_img_path, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.check = lv.img(self)
         self.check.set_src(img_path_other)
-        self.check.align(lv.ALIGN.BOTTOM_RIGHT, -30, -20)
+        self.check.center()
+        self.set_checked(False)
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
     def set_checked(self, checked: bool):

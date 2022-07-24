@@ -4,7 +4,7 @@ from .. import font_PJSMID24, lv
 from .button import NormalButton
 from .container import ContainerFlexRow
 
-CONTENT_SIZE = 280
+CONTENT_SIZE = 260
 
 
 class PageAbleMessage(lv.obj):
@@ -20,7 +20,8 @@ class PageAbleMessage(lv.obj):
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         # content
         self.message = lv.label(self)
-        self.message.set_size(432, 556)
+        self.message.set_size(432, lv.SIZE.CONTENT)
+        self.message.set_style_max_height(560, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.message.align(lv.ALIGN.TOP_MID, 0, 68)
         self.message.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
