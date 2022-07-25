@@ -450,6 +450,11 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
 #define BUFSIZE 32768
 
   uint32_t offset = (uint32_t)(*arg);
+  uint32_t buffer_size = BUFSIZE;
+
+  if (update_mode == UPDATE_BLE) {
+    buffer_size = 4096;
+  }
 
   if (stream->bytes_left > IMAGE_CHUNK_SIZE) {
     chunk_size = 0;
@@ -478,13 +483,13 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
     }
 
     // read data
-    if (!pb_read(
-            stream, (pb_byte_t *)(chunk_buffer + chunk_written),
-            (stream->bytes_left > BUFSIZE) ? BUFSIZE : stream->bytes_left)) {
+    if (!pb_read(stream, (pb_byte_t *)(chunk_buffer + chunk_written),
+                 (stream->bytes_left > buffer_size) ? buffer_size
+                                                    : stream->bytes_left)) {
       chunk_size = 0;
       return false;
     }
-    chunk_written += BUFSIZE;
+    chunk_written += buffer_size;
   }
 
   return true;
@@ -732,19 +737,19 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
     uint32_t init_data_len = p_init[0] + (p_init[1] << 8);
     bool update_status = false;
 
+    MSG_SEND_INIT(Success);
+    MSG_SEND_ASSIGN_STRING(message, "Bluetooth download success");
+    MSG_SEND(Success);
+
+    hal_delay(200);
+
     update_status = updateBle(p_init + 4, init_data_len,
                               chunk_buffer + headers_offset + BLE_INIT_DATA_LEN,
                               ble_hdr.codelen - BLE_INIT_DATA_LEN);
 
     if (update_status == false) {
-      MSG_SEND_INIT(Failure);
-      MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_ProcessError);
-      MSG_SEND_ASSIGN_STRING(message, "Update bluetooth error");
-      MSG_SEND(Failure);
       return -6;
     } else {
-      MSG_SEND_INIT(Success);
-      MSG_SEND(Success);
       return 0;
     }
 
