@@ -67,6 +67,8 @@ class LockScreen(Screen):
             else:
                 if utils.turn_on_lcd_if_possible():
                     return
+                if utils.lcd_resume():
+                    return
                 from trezor import workflow
                 from apps.base import unlock_device
 
