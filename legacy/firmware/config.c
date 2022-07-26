@@ -817,7 +817,15 @@ bool config_getRootNode(HDNode *node, const char *curve) {
 }
 
 bool config_getLabel(char *dest, uint16_t dest_size) {
-  return sectrue == config_get_string(KEY_LABEL, dest, dest_size);
+  if (secfalse == config_get_string(KEY_LABEL, dest, dest_size)) {
+    memcpy(dest, "OneKey Mini", 12 /*strlen("OneKey Mini") + 1*/);
+  } else {
+    int len = strlen(dest);
+    if (0 == len) {
+      memcpy(dest, "OneKey Mini", 12 /*strlen("OneKey Mini") + 1*/);
+    }
+  }
+  return true;
 }
 
 bool config_getLanguage(char *dest, uint16_t dest_size) {
