@@ -76,6 +76,7 @@ typedef struct _ButtonRequest {
 } ButtonRequest;
 
 typedef PB_BYTES_ARRAY_T(32) DeviceInfo_NFT_voucher_t;
+typedef PB_BYTES_ARRAY_T(32) DeviceInfo_vendor_key_t;
 typedef struct _DeviceInfo { 
     bool has_serial_no;
     char serial_no[32]; 
@@ -89,8 +90,11 @@ typedef struct _DeviceInfo {
     char cpu_info[16]; 
     bool has_pre_firmware;
     char pre_firmware[16]; 
+    bool has_vendor_key;
+    DeviceInfo_vendor_key_t vendor_key; 
 } DeviceInfo;
 
+typedef PB_BYTES_ARRAY_T(32) DeviceInfoSettings_vendor_key_t;
 typedef struct _DeviceInfoSettings { 
     bool has_serial_no;
     char serial_no[32]; 
@@ -98,6 +102,8 @@ typedef struct _DeviceInfoSettings {
     char cpu_info[16]; 
     bool has_pre_firmware;
     char pre_firmware[16]; 
+    bool has_vendor_key;
+    DeviceInfoSettings_vendor_key_t vendor_key; 
 } DeviceInfoSettings;
 
 typedef struct _Failure { 
@@ -253,9 +259,9 @@ extern "C" {
 #define FirmwareRequest_init_default             {false, 0, false, 0}
 #define FirmwareErase_ex_init_default            {false, 0}
 #define FirmwareUpload_init_default              {{{NULL}, NULL}, false, {0, {0}}}
-#define DeviceInfoSettings_init_default          {false, "", false, "", false, ""}
+#define DeviceInfoSettings_init_default          {false, "", false, "", false, "", false, {0, {0}}}
 #define GetDeviceInfo_init_default               {0}
-#define DeviceInfo_init_default                  {false, "", false, "", false, "", false, {0, {0}}, false, "", false, ""}
+#define DeviceInfo_init_default                  {false, "", false, "", false, "", false, {0, {0}}, false, "", false, "", false, {0, {0}}}
 #define ReadSEPublicKey_init_default             {0}
 #define SEPublicKey_init_default                 {{0, {0}}}
 #define WriteSEPublicCert_init_default           {{0, {0}}}
@@ -275,9 +281,9 @@ extern "C" {
 #define FirmwareRequest_init_zero                {false, 0, false, 0}
 #define FirmwareErase_ex_init_zero               {false, 0}
 #define FirmwareUpload_init_zero                 {{{NULL}, NULL}, false, {0, {0}}}
-#define DeviceInfoSettings_init_zero             {false, "", false, "", false, ""}
+#define DeviceInfoSettings_init_zero             {false, "", false, "", false, "", false, {0, {0}}}
 #define GetDeviceInfo_init_zero                  {0}
-#define DeviceInfo_init_zero                     {false, "", false, "", false, "", false, {0, {0}}, false, "", false, ""}
+#define DeviceInfo_init_zero                     {false, "", false, "", false, "", false, {0, {0}}, false, "", false, "", false, {0, {0}}}
 #define ReadSEPublicKey_init_zero                {0}
 #define SEPublicKey_init_zero                    {{0, {0}}}
 #define WriteSEPublicCert_init_zero              {{0, {0}}}
@@ -294,9 +300,11 @@ extern "C" {
 #define DeviceInfo_NFT_voucher_tag               4
 #define DeviceInfo_cpu_info_tag                  5
 #define DeviceInfo_pre_firmware_tag              6
+#define DeviceInfo_vendor_key_tag                7
 #define DeviceInfoSettings_serial_no_tag         1
 #define DeviceInfoSettings_cpu_info_tag          2
 #define DeviceInfoSettings_pre_firmware_tag      3
+#define DeviceInfoSettings_vendor_key_tag        4
 #define Failure_code_tag                         1
 #define Failure_message_tag                      2
 #define Features_vendor_tag                      1
@@ -433,7 +441,8 @@ X(a, STATIC,   OPTIONAL, BYTES,    hash,              2)
 #define DeviceInfoSettings_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, STRING,   serial_no,         1) \
 X(a, STATIC,   OPTIONAL, STRING,   cpu_info,          2) \
-X(a, STATIC,   OPTIONAL, STRING,   pre_firmware,      3)
+X(a, STATIC,   OPTIONAL, STRING,   pre_firmware,      3) \
+X(a, STATIC,   OPTIONAL, BYTES,    vendor_key,        4)
 #define DeviceInfoSettings_CALLBACK NULL
 #define DeviceInfoSettings_DEFAULT NULL
 
@@ -448,7 +457,8 @@ X(a, STATIC,   OPTIONAL, STRING,   spiFlash_info,     2) \
 X(a, STATIC,   OPTIONAL, STRING,   SE_info,           3) \
 X(a, STATIC,   OPTIONAL, BYTES,    NFT_voucher,       4) \
 X(a, STATIC,   OPTIONAL, STRING,   cpu_info,          5) \
-X(a, STATIC,   OPTIONAL, STRING,   pre_firmware,      6)
+X(a, STATIC,   OPTIONAL, STRING,   pre_firmware,      6) \
+X(a, STATIC,   OPTIONAL, BYTES,    vendor_key,        7)
 #define DeviceInfo_CALLBACK NULL
 #define DeviceInfo_DEFAULT NULL
 
@@ -538,8 +548,8 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 /* FirmwareUpload_size depends on runtime parameters */
 #define ButtonAck_size                           0
 #define ButtonRequest_size                       2
-#define DeviceInfoSettings_size                  67
-#define DeviceInfo_size                          135
+#define DeviceInfoSettings_size                  101
+#define DeviceInfo_size                          169
 #define Failure_size                             260
 #define Features_size                            629
 #define FirmwareErase_ex_size                    6

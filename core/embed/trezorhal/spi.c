@@ -266,7 +266,7 @@ uint32_t spi_read_retry(uint8_t *buf) {
   for (int retry = 0;; retry++) {
     int r = wait_spi_rx_event(500);
     if (r == -1) {  // reading failed
-      if (r == -1 && retry < 2) {
+      if (r == -1 && retry < 10) {
         // only timeout => let's try again
       } else {
         // error
