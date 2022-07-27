@@ -326,5 +326,10 @@ translations = [
     "Go to Update Mode",
     "Do you want to restart device in update mode?",
     "Build ID",
+    "Wallet",
+    "Passphrase is enabled. Device will be required to enter passphrase every time when connect with OneKey apps.",
+    "Passphrase is disabled.",
+    "Disable",
+    "Check the phrase you entered and make sure it is correct.",
 ]
 # fmt: on

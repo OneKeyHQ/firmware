@@ -271,9 +271,9 @@ class SettingsScreen(Screen):
             _(i18n_keys.ITEM__SECURITY),
             left_img_src="A:/res/security.png",
         )
-        # self.crypto = ListItemBtn(
-        #     self.container, _(i18n_keys.FORM__CRYPTO), left_img_src="A:/res/crypto.png"
-        # )
+        self.wallet = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__WALLET), left_img_src="A:/res/wallet.png"
+        )
         self.about = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__ABOUT_DEVICE),
@@ -313,8 +313,8 @@ class SettingsScreen(Screen):
                 HomeScreenSetting(self)
             elif target == self.security:
                 SecurityScreen(self)
-            # elif target == self.crypto:
-            #     CryptoScreen(self)
+            elif target == self.wallet:
+                WalletScreen(self)
             elif target == self.about:
                 AboutSetting(self)
             elif target == self.power:
@@ -798,9 +798,9 @@ class SecurityScreen(Screen):
         self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
         self.usb_lock = ListItemBtn(self.container, _(i18n_keys.ITEM__USB_LOCK))
         self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
-        self.recovery_check = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
-        )
+        # self.recovery_check = ListItemBtn(
+        #     self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
+        # )
         # self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
         self.rest_device = ListItemBtn(
             self.container, _(i18n_keys.ITEM__RESET_DEVICE), has_next=False
@@ -824,34 +824,6 @@ class SecurityScreen(Screen):
                 from trezor.messages import ChangePin
 
                 workflow.spawn(change_pin(DUMMY_CONTEXT, ChangePin(remove=False)))
-            elif target == self.recovery_check:
-                from apps.management.recovery_device import recovery_device
-                from trezor.messages import RecoveryDevice
-
-                workflow.spawn(
-                    recovery_device(
-                        DUMMY_CONTEXT,
-                        RecoveryDevice(dry_run=True, enforce_wordlist=True),
-                    )
-                )
-            # elif target == self.passphrase:
-            #     from apps.management.apply_settings import apply_settings
-            #     from trezor.messages import ApplySettings
-
-            #     passphrase_enable = not device.is_passphrase_enabled()
-            #     if passphrase_enable:
-            #         on_device = True
-            #     else:
-            #         on_device = None
-            #     workflow.spawn(
-            #         apply_settings(
-            #             DUMMY_CONTEXT,
-            #             ApplySettings(
-            #                 use_passphrase=passphrase_enable,
-            #                 passphrase_always_on_device=on_device,
-            #             ),
-            #         )
-            #     )
             elif target == self.rest_device:
                 from apps.management.wipe_device import wipe_device
                 from trezor.messages import WipeDevice
@@ -887,7 +859,7 @@ class UsbLockSetting(Screen):
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
         self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 20)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
 
         if device.is_usb_lock_enabled():
             self.usb_lock.add_state()
@@ -912,6 +884,138 @@ class UsbLockSetting(Screen):
                         _(i18n_keys.CONTENT__USB_LOCK_DISABLED__HINT)
                     )
                     device.set_usb_lock_enabled(False)
+
+
+class WalletScreen(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(prev_scr, title=_(i18n_keys.TITLE__WALLET), nav_back=True)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.check_mnemonic = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
+        )
+        self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            from trezor.wire import DUMMY_CONTEXT
+
+            if target == self.check_mnemonic:
+                from apps.management.recovery_device import recovery_device
+                from trezor.messages import RecoveryDevice
+
+                # pyright: off
+                workflow.spawn(
+                    recovery_device(
+                        DUMMY_CONTEXT,
+                        RecoveryDevice(dry_run=True, enforce_wordlist=True),
+                    )
+                )
+                # pyright: on
+            elif target == self.passphrase:
+                PassphraseScreen(self)
+
+
+class PassphraseScreen(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__PASSPHRASE), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title)
+        self.passphrase = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__PASSPHRASE)
+        )
+        self.passphrase.set_size(lv.pct(100), 78)
+        self.description = lv.label(self)
+        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_long_mode(lv.label.LONG.WRAP)
+        self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
+        self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
+        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+
+        passphrase_enable = device.is_passphrase_enabled()
+        if passphrase_enable:
+            self.passphrase.add_state()
+            self.description.set_text(_(i18n_keys.CONTENT__PASSPHRASE_ENABLED__HINT))
+        else:
+            self.passphrase.clear_state()
+            self.description.set_text(_(i18n_keys.CONTENT__PASSPHRASE_DISABLED__HINT))
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+        self.add_event_cb(self.on_value_changed, lv.EVENT.READY, None)
+        self.add_event_cb(self.on_value_changed, lv.EVENT.CANCEL, None)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.passphrase.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    PassphraseTipsConfirm(
+                        _(i18n_keys.TITLE__ENABLE_PASSPHRASE),
+                        _(i18n_keys.SUBTITLE__ENABLE_PASSPHRASE),
+                        _(i18n_keys.BUTTON__ENABLE),
+                        self,
+                    )
+                else:
+                    PassphraseTipsConfirm(
+                        _(i18n_keys.TITLE__DISABLE_PASSPHRASE),
+                        _(i18n_keys.SUBTITLE__DISABLE_PASSPHRASE),
+                        _(i18n_keys.BUTTON__DISABLE),
+                        self,
+                    )
+        elif code == lv.EVENT.READY:
+            if self.passphrase.switch.has_state(lv.STATE.CHECKED):
+                self.description.set_text(
+                    _(i18n_keys.CONTENT__PASSPHRASE_ENABLED__HINT)
+                )
+                device.set_passphrase_enabled(True)
+            else:
+                self.description.set_text(
+                    _(i18n_keys.CONTENT__PASSPHRASE_DISABLED__HINT)
+                )
+                device.set_passphrase_enabled(False)
+        elif code == lv.EVENT.CANCEL:
+            if self.passphrase.switch.has_state(lv.STATE.CHECKED):
+                self.passphrase.clear_state()
+            else:
+                self.passphrase.add_state()
+
+
+class PassphraseTipsConfirm(FullSizeWindow):
+    def __init__(self, title: str, subtitle: str, confirm_text: str, callback_obj):
+        super().__init__(
+            title,
+            subtitle,
+            confirm_text,
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path="A:/res/shriek.png",
+        )
+        self.callback_obj = callback_obj
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            elif target == self.btn_no:
+                lv.event_send(self.callback_obj, lv.EVENT.CANCEL, None)
+            elif target == self.btn_yes:
+                lv.event_send(self.callback_obj, lv.EVENT.READY, None)
+            else:
+                return
+        self.destroy()
 
 
 class CryptoScreen(Screen):

@@ -326,5 +326,10 @@ translations = [
     "Vai alla modalità di aggiornamento",
     "Vuoi riavviare il dispositivo in modalità di aggiornamento?",
     "ID edificio",
+    "Portafoglio",
+    "La passphrase è abilitata. Il dispositivo dovrà inserire la passphrase ogni volta che ci si connette alle app OneKey.",
+    "La passphrase è disabilitata.",
+    "disattivare",
+    "Controlla la frase che hai inserito e assicurati che sia corretta.",
 ]
 # fmt: on

@@ -30,7 +30,9 @@ async def _request_from_user(ctx: wire.Context) -> str:
         raise wire.DataError(
             f"Maximum passphrase length is {_MAX_PASSPHRASE_LEN} bytes"
         )
+    from trezor.ui.layouts import require_confirm_passphrase
 
+    await require_confirm_passphrase(ctx, passphrase)
     return passphrase
 
 

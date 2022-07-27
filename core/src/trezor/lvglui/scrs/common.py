@@ -195,7 +195,7 @@ class FullSizeWindow(lv.obj):
                     self.btn_no.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
                     self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 32, -8)
                 self.btn_no.enable()
-            self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+            # self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
             if cancel_text:
                 if self.hold_confirm:
@@ -213,7 +213,7 @@ class FullSizeWindow(lv.obj):
                 self.slider.add_event_cb(self.eventhandler, lv.EVENT.READY, None)
             else:
                 self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
-                self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+                # self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if auto_close:
             self.destroy(delay_ms=10 * 1000)

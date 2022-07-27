@@ -11,8 +11,6 @@ class PassphraseRequest(FullSizeWindow):
 
     def on_ready(self, event_obj):
         input = self.keyboard.ta.get_text()
-        if input == "":
-            return
         self.channel.publish(input)
         self.keyboard.ta.set_text("")
         self.destroy()

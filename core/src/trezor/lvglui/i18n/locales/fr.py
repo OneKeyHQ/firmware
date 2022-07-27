@@ -326,5 +326,10 @@ translations = [
     "Aller en mode mise à jour",
     "Voulez-vous redémarrer l'appareil en mode mise à jour ?",
     "Build ID",
+    "Porte monnaie",
+    "La phrase secrète est activée. L'appareil devra saisir la phrase de passe à chaque fois qu'il se connectera aux applications OneKey.",
+    "La phrase secrète est désactivée.",
+    "Désactiver",
+    "Vérifiez la phrase que vous avez saisie et assurez-vous qu'elle est correcte.",
 ]
 # fmt: on

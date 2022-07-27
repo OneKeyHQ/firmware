@@ -326,5 +326,10 @@ translations = [
     "Wechseln Sie in den Update-Modus",
     "Möchten Sie das Gerät im Update-Modus neu starten?",
     "Build-ID",
+    "Geldbörse",
+    "Passphrase ist aktiviert. Das Gerät muss jedes Mal eine Passphrase eingeben, wenn es sich mit OneKey-Apps verbindet.",
+    "Passphrase ist deaktiviert.",
+    "Deaktivieren",
+    "Überprüfen Sie den eingegebenen Ausdruck und vergewissern Sie sich, dass er korrekt ist.",
 ]
 # fmt: on

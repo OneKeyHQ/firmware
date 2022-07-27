@@ -1,7 +1,14 @@
 from storage import device
 from trezor.crypto import bip39, random
 
-from .. import font_MONO24, font_PJSBOLD20, font_PJSBOLD32, lv, lv_colors
+from .. import (
+    font_MONO24,
+    font_PJSBOLD20,
+    font_PJSBOLD32,
+    font_STATUS_BAR,
+    lv,
+    lv_colors,
+)
 
 
 def compute_mask(text: str) -> int:
@@ -284,7 +291,7 @@ class NumberKeyboard(lv.keyboard):
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
-        self.ta.set_style_max_width(400, lv.STATE.DEFAULT)
+        self.ta.set_style_max_width(432, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
@@ -421,7 +428,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.ta = lv.textarea(parent)
         self.ta.align(lv.ALIGN.TOP_MID, 0, 200)
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
-        self.ta.set_style_max_width(300, lv.STATE.DEFAULT)
+        self.ta.set_style_max_width(432, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ta.set_style_text_align(
@@ -435,7 +442,7 @@ class PassphraseKeyboard(lv.btnmatrix):
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_<>.:@/|*\\!()+%&-[]?{},'`;\"~$^= "
         )
         self.ta.set_max_length(max_len)
-        self.ta.set_password_mode(True)
+        # self.ta.set_password_mode(True)
         self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.btn_map_text_lower = [
@@ -556,7 +563,7 @@ class PassphraseKeyboard(lv.btnmatrix):
             " ",
             "\n",
             lv.SYMBOL.BACKSPACE,
-            "123",
+            "abc",
             " ",
             lv.SYMBOL.OK,
             "",
@@ -645,7 +652,26 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.align(lv.ALIGN.BOTTOM_MID, 0, -48)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.add_event_cb(self.event_cb, lv.EVENT.ALL, None)
+
+        self.input_count_tips = lv.label(parent)
+        self.input_count_tips.align(lv.ALIGN.BOTTOM_MID, 0, -302)
+        self.input_count_tips.set_style_text_font(
+            font_STATUS_BAR, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.input_count_tips.set_style_text_letter_space(
+            1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.input_count_tips.set_style_text_color(
+            lv_colors.LIGHT_GRAY, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+
+        self.update_count_tips()
+
+        self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
+        self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
+
+    def update_count_tips(self):
+        self.input_count_tips.set_text(f"{len(self.ta.get_text())}/50")
 
     def event_cb(self, event):
         code = event.code
@@ -658,6 +684,8 @@ class PassphraseKeyboard(lv.btnmatrix):
                 change_key_bg(dsc, 31, 34, False)
             # if dsc.id in (22, 32):
             #     dsc.rect_dsc.bg_color = lv.color_hex(0x191919)
+            if dsc.id == 34:
+                dsc.rect_dsc.bg_color = lv_colors.ONEKEY_GREEN
         elif code == lv.EVENT.VALUE_CHANGED:
             target = event.get_target()
             if isinstance(target, lv.btnmatrix):
@@ -683,8 +711,10 @@ class PassphraseKeyboard(lv.btnmatrix):
                     return
                 elif text == lv.SYMBOL.BACKSPACE:
                     self.ta.del_char()
+                    self.update_count_tips()
                     return
                 elif text == lv.SYMBOL.OK:
                     lv.event_send(self, lv.EVENT.READY, None)
                     return
                 self.ta.add_text(text)
+                self.update_count_tips()
