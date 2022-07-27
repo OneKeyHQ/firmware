@@ -1005,21 +1005,12 @@ void process_msg_DeviceInfoSettings(uint8_t iface_num, uint32_t msg_size,
     if (!device_set_serial((char *)msg_recv.serial_no)) {
       send_failure(iface_num, FailureType_Failure_ProcessError,
                    "Set serial failed");
+    } else {
+      send_success(iface_num, "Set applied");
     }
+  } else {
+    send_failure(iface_num, FailureType_Failure_ProcessError, "serial null");
   }
-  if (msg_recv.has_vendor_key) {
-    if (msg_recv.vendor_key.size != 32) {
-      send_failure(iface_num, FailureType_Failure_ProcessError,
-                   "Vendor key length error");
-      return;
-    }
-    if (!device_set_vendor_key(msg_recv.vendor_key.bytes)) {
-      send_failure(iface_num, FailureType_Failure_ProcessError,
-                   "Set vendor key failed");
-      return;
-    }
-  }
-  send_success(iface_num, "Set applied");
 }
 
 void process_msg_GetDeviceInfo(uint8_t iface_num, uint32_t msg_size,
@@ -1030,12 +1021,8 @@ void process_msg_GetDeviceInfo(uint8_t iface_num, uint32_t msg_size,
   MSG_SEND_INIT(DeviceInfo);
 
   char *serial;
-  uint8_t vendor_key[32] = {0};
   if (device_get_serial(&serial)) {
     MSG_SEND_ASSIGN_STRING(serial_no, serial);
-  }
-  if (device_get_vendor_key(vendor_key)) {
-    MSG_SEND_ASSIGN_BYTES(vendor_key, vendor_key, 32);
   }
   MSG_SEND(DeviceInfo);
 }
