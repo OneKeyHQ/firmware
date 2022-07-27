@@ -69,13 +69,6 @@ void device_para_init(void) {
             sizeof(dev_info.pre_firmware));
   }
 
-  if (flash_otp_is_locked(FLASH_OTP_BLOCK_VENDOR_KEY)) {
-    dev_info.vendor_key_init = true;
-    ensure(flash_otp_read(FLASH_OTP_BLOCK_VENDOR_KEY, 0, dev_info.vendor_key,
-                          FLASH_OTP_BLOCK_SIZE),
-           NULL);
-  }
-
   if (!flash_otp_is_locked(FLASH_OTP_DEVICE_SERIAL)) {
     serial_set = false;
     return;
@@ -183,44 +176,6 @@ void device_get_enc_key(uint8_t key[32]) {
   sha256_Update(&ctx, (uint8_t *)dev_info.st_id, sizeof(dev_info.st_id));
   sha256_Update(&ctx, dev_info.random_key, sizeof(dev_info.random_key));
   sha256_Final(&ctx, key);
-}
-
-bool device_vendor_key_is_set(void) {
-  if (sectrue == flash_otp_is_locked(FLASH_OTP_BLOCK_VENDOR_KEY)) {
-    return true;
-  }
-  return false;
-}
-
-bool device_set_vendor_key(uint8_t key[32]) {
-  if (!device_is_factory_mode()) {
-    return false;
-  }
-  if (!flash_otp_is_locked(FLASH_OTP_BLOCK_VENDOR_KEY)) {
-    if (check_all_ones(flash_otp_data->flash_otp[FLASH_OTP_BLOCK_VENDOR_KEY],
-                       FLASH_OTP_BLOCK_SIZE)) {
-      ensure(flash_otp_write(FLASH_OTP_BLOCK_VENDOR_KEY, 0, key,
-                             FLASH_OTP_BLOCK_SIZE),
-             NULL);
-      ensure(flash_otp_lock(FLASH_OTP_BLOCK_VENDOR_KEY), NULL);
-      device_para_init();
-      return true;
-    }
-  }
-  return false;
-}
-
-bool device_get_vendor_key(uint8_t key[32]) {
-  if (!device_is_factory_mode()) {
-    return false;
-  }
-  if (!flash_otp_is_locked(FLASH_OTP_BLOCK_VENDOR_KEY)) {
-    return false;
-  }
-  ensure(
-      flash_otp_read(FLASH_OTP_BLOCK_VENDOR_KEY, 0, key, FLASH_OTP_BLOCK_SIZE),
-      NULL);
-  return true;
 }
 
 void ui_test_input(void) {

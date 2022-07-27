@@ -349,7 +349,7 @@ static void check_bootloader_version(void) {
 
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
-  bool serial_set = false, cert_set = false, vendor_key_set = false;
+  bool serial_set = false, cert_set = false;
   uint32_t cert_len = 0;
 
   SystemCoreClockUpdate();
@@ -366,11 +366,14 @@ int main(void) {
   device_para_init();
   device_test();
 
-  serial_set = device_serial_set();
-  cert_set = se_get_certificate_len(&cert_len);
-  vendor_key_set = device_vendor_key_is_set();
+  if (!serial_set) {
+    serial_set = device_serial_set();
+  }
+  if (!cert_set) {
+    cert_set = se_get_certificate_len(&cert_len);
+  }
 
-  if (!serial_set || !cert_set || !vendor_key_set) {
+  if (!serial_set || !cert_set) {
     display_clear();
     device_set_factory_mode(true);
     ui_bootloader_factory();
