@@ -27,9 +27,11 @@ async def confirm_webauthn(
             account_name = None
     confirm = ConfirmWebauthn(title, icon_path, app_name, account_name)
     if ctx is None:
-        return await confirm.request()
+        return bool(await confirm.request())
     else:
-        return await interact(ctx, confirm, "confirm_webauthn", ButtonRequestType.Other)
+        return bool(
+            await interact(ctx, confirm, "confirm_webauthn", ButtonRequestType.Other)
+        )
 
 
 async def confirm_webauthn_reset() -> bool:
