@@ -1387,7 +1387,7 @@ void layoutShowPassphrase(const char *passphrase) {
   const char **str =
       split_message((const uint8_t *)passphrase, strlen(passphrase), 21);
   for (int i = 0; i < 3; i++) {
-    oledDrawString(0, i * 9 + 4, str[i], FONT_FIXED);
+    oledDrawString(0, (i + 1) * 9, str[i], FONT_FIXED);
   }
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 2 * 9 - 1,
                               _("Use this passphrase?"), FONT_STANDARD);
@@ -1999,28 +1999,40 @@ void layoutProgressAdapter(const char *desc, int permil) {
 }
 
 void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
-                          uint8_t font) {
+                          uint8_t font, bool vert) {
   int l = 0;
   int y0 = font & FONT_DOUBLE ? 8 : 0;
   oledBox(x - 4, y - 8, x + 4, y + 16 + y0, false);
-  oledDrawBitmap(x - 4, y - 8, &bmp_btn_up);
+  oledDrawBitmap(x - 4, y - 10, &bmp_btn_up);
   l = oledStringWidth(text, font);
   if (bmp) {
     oledDrawBitmap(x - 4, y + 1, bmp);
   } else {
     oledDrawStringAdapter(x - l / 2, y, text, font);
+    if (vert) {
+      oledInvert(x - l / 2 - 1, y - 1, x + l / 2, y + 8);
+      oledClearPixel(x - l / 2 - 1, y - 1);
+      oledClearPixel(x - l / 2 - 1, y + 8);
+      oledClearPixel(x + l / 2, y - 1);
+      oledClearPixel(x + l / 2, y + 8);
+    }
   }
 
-  oledDrawBitmap(x - 4, y + 10 + y0, &bmp_btn_down);
+  oledDrawBitmap(x - 4, y + 11 + y0, &bmp_btn_down);
   oledRefresh();
 }
 
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font) {
-  _layout_iterm_select(x, y, NULL, text, font);
+  _layout_iterm_select(x, y, NULL, text, font, false);
+}
+
+void layoutItemsSelect_ex(int x, int y, const char *text, uint8_t font,
+                          bool vert) {
+  _layout_iterm_select(x, y, NULL, text, font, vert);
 }
 
 void layoutBmpSelect(int x, int y, const BITMAP *bmp) {
-  _layout_iterm_select(x, y, bmp, NULL, FONT_STANDARD);
+  _layout_iterm_select(x, y, bmp, NULL, FONT_STANDARD, false);
 }
 
 void layoutInputPin(uint8_t pos, const char *text, int index,
@@ -2087,6 +2099,98 @@ void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
 
   oledRefresh();
 }
+static char *input[4] = {"abc", "ABC", "123", "=/<"};
+static char *input1[4] = {"ab", "AB", "01", "=<"};
+
+void layoutInputMethod(uint8_t index) {
+  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
+                           NULL, _("OK"), index + 1, 4, NULL, NULL,
+                           input[index], index > 0 ? input[index - 1] : NULL,
+                           index < 3 ? input[index + 1] : NULL);
+}
+
+void layoutInputPassphrase(const char *text, uint8_t prefix_len,
+                           const char *prefix, uint8_t char_index,
+                           uint8_t input_type) {
+  int l, y = 10;
+  char word_show[9] = "_________";
+  char buf[2] = {0};
+  char index_str[16] = "";
+  uint8_t location = 0;
+
+  int x = 6, icon_x = 80;
+
+  if (prefix_len < 9) {
+    memcpy(word_show, prefix, prefix_len);
+  } else {
+    memcpy(word_show, prefix + prefix_len - 8, 8);
+  }
+
+  oledClear_ex();
+
+  // index
+  uint2str(prefix_len + 1, index_str);
+  strcat(index_str + strlen(index_str), "/");
+  uint2str(50, index_str + strlen(index_str));
+  oledDrawStringAdapter(1, 1, index_str, FONT_SMALL);
+
+  // input type
+  oledDrawString(icon_x, 1, input[input_type], FONT_SMALL);
+
+  l = oledStringWidth(input[input_type], FONT_SMALL);
+
+  oledInvert(icon_x - 2, 0, icon_x + l, 6);
+  oledClearPixel(icon_x - 2, 0);
+  oledClearPixel(icon_x - 2, 6);
+  oledClearPixel(icon_x + l, 0);
+  oledClearPixel(icon_x + l, 6);
+  oledRefresh();
+
+  // title
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, text, FONT_STANDARD);
+
+  y += 18;
+  if (prefix_len < 9) {
+    for (uint32_t i = 0; i < sizeof(word_show); i++) {
+      buf[0] = word_show[i];
+      l = oledStringWidth(buf, FONT_STANDARD);
+      oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+    }
+  } else {
+    oledDrawStringAdapter(0, y, "..", FONT_STANDARD);
+    for (uint32_t i = 0; i < sizeof(word_show); i++) {
+      buf[0] = word_show[i];
+      l = oledStringWidth(buf, FONT_STANDARD);
+      oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+    }
+  }
+
+  location = prefix_len > 8 ? 8 : prefix_len;
+  if (char_index == 0) {
+    layoutItemsSelect_ex(x + 13 * location + 7, y, input1[input_type],
+                         FONT_STANDARD, true);
+    layoutButtonYesAdapter(_("Switch"), &bmp_btn_switch);
+  } else if (char_index == 0xFF) {
+    layoutBmpSelect(x + 13 * location + 7, y, &bmp_btn_confirm);
+    layoutButtonYesAdapter(_("Submit"), &bmp_btn_confirm);
+  } else {
+    buf[0] = char_index;
+    layoutItemsSelect_ex(x + 13 * location + 7, y, buf, FONT_STANDARD, false);
+    if (prefix_len == (MAX_PASSPHRASE_LEN - 1)) {
+      layoutButtonYesAdapter(_("Submit"), &bmp_btn_confirm);
+    } else {
+      layoutButtonYesAdapter(_("Enter"), &bmp_btn_confirm);
+    }
+  }
+
+  if (prefix_len == 0) {
+    layoutButtonNoAdapter(_("Quit"), &bmp_btn_back);
+  } else {
+    layoutButtonNoAdapter(_("Back"), &bmp_btn_back);
+  }
+
+  oledRefresh();
+}
 
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
                               const BITMAP *bmp_no, const BITMAP *bmp_yes,
@@ -2140,11 +2244,11 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1, current, FONT_STANDARD);
   }
 
-  oledInvert(x - 3, y1 - 1, x + l + 2, y1 + cur_font->pixel);
-  oledClearPixel(x - 3, y1 - 1);
-  oledClearPixel(x - 3, y1 + cur_font->pixel);
-  oledClearPixel(x + l + 2, y1 - 1);
-  oledClearPixel(x + l + 2, y1 + cur_font->pixel);
+  oledInvert(x - 2, y1 - 1, x + l + 1, y1 + cur_font->pixel);
+  oledClearPixel(x - 2, y1 - 1);
+  oledClearPixel(x - 2, y1 + cur_font->pixel);
+  oledClearPixel(x + l + 1, y1 - 1);
+  oledClearPixel(x + l + 1, y1 + cur_font->pixel);
 
   if (next) {
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, y1 + cur_font->pixel + step,
