@@ -710,9 +710,11 @@ const uint8_t *config_getSeed(void) {
   char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
   if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
     char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-    if (!protectPassphrase(passphrase)) {
+    if (!protectPassphraseOnDevice(passphrase)) {
       memzero(mnemonic, sizeof(mnemonic));
       memzero(passphrase, sizeof(passphrase));
+      fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                      _("Passphrase dismissed"));
       return NULL;
     }
     // passphrase is used - confirm on the display

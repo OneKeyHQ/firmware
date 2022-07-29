@@ -54,6 +54,7 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed);
 bool protectChangePinOnDevice(bool is_prompt, bool set);
 bool protectSelectMnemonicNumber(uint32_t* number);
 bool protectPinCheck(bool retry);
+bool protectPassphraseOnDevice(char* passphrase);
 
 uint8_t protectButtonValue(ButtonRequestType type, bool confirm_only,
                            bool requset, uint32_t timeout_s);
