@@ -5,7 +5,6 @@
 #include "trans_fifo.h"
 
 #define _SUPPORT_SOFTI2C_ 0
-#define SI2C_BUF_MAX_IN_LEN MSG_IN_BUFFER_SIZE
 #define SI2C_BUF_MAX_OUT_LEN (1024 * 3)
 
 typedef enum _ChannelType {
