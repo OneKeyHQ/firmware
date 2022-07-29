@@ -262,12 +262,6 @@ if TYPE_CHECKING:
         EthereumSignMessageEIP712 = 10200
         GetPublicKeyMultiple = 10210
         PublicKeyMultiple = 10211
-        TronGetAddress = 10501
-        TronAddress = 10502
-        TronSignTx = 10503
-        TronSignedTx = 10504
-        TronSignMessage = 10505
-        TronMessageSignature = 10506
 
     class BinanceOrderType(IntEnum):
         OT_UNKNOWN = 0

@@ -588,17 +588,16 @@ static void _layout_home(bool update_menu) {
       char desc[64] = "";
       char label[MAX_LABEL_LEN + 1] = "";
       config_getLabel(label, sizeof(label));
-      if (strlen(label)) {
-        strcat(desc, label);
-      } else {
-        if (ble_name_state() == true) {
-          strcat(desc, ble_get_name());
-        }
+      strcat(desc, label);
+      if (ble_name_state() == true) {
+        strcat(desc, "(");
+        strcat(desc, ble_get_name());
+        strcat(desc, ")");
       }
       if (!config_isInitialized()) {
-        strcat(desc, "(");
-        strcat(desc, _("Not Actived"));
-        strcat(desc, ")");
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 8,
+                                    _("Not Actived"), FONT_STANDARD);
       } else {
         if (no_backup) {
           oledBox(0, OLED_HEIGHT - 8, 127, 8, false);
@@ -612,8 +611,8 @@ static void _layout_home(bool update_menu) {
           oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 9,
                                       _("Need Backup"), FONT_STANDARD);
         }
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
       }
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
       if (session_isUnlocked() || !config_hasPin()) {
         oledDrawStringCenterAdapter(
             OLED_WIDTH / 2, 42, _("Press any key to continue"), FONT_STANDARD);

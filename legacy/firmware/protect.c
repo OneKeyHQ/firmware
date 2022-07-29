@@ -44,6 +44,7 @@
 bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
 bool protectAbortedByTimeout = false;
+extern bool exitBlindSignByInitialize;
 
 static uint8_t device_sleep_state = SLEEP_NONE;
 
@@ -703,6 +704,33 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
     }
   }
   return true;
+}
+
+uint8_t blindsignWaitKey(void) {
+  uint8_t key = KEY_NULL;
+  exitBlindSignByInitialize = false;
+
+  usbTiny(1);
+  usbPoll();
+  protectAbortedByInitialize =
+      (msg_tiny_id == MessageType_MessageType_Initialize);
+  if (protectAbortedByInitialize) {
+    msg_tiny_id = 0xFFFF;
+  }
+  usbTiny(0);
+
+  if (protectAbortedByInitialize) {
+    if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    exitBlindSignByInitialize = true;
+    layoutHome();
+  }
+
+  key = keyScan();
+  if (key != KEY_NULL) {
+    if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_BUTTON;
+  }
+  return key;
 }
 
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
