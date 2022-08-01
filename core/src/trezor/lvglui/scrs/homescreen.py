@@ -569,10 +569,10 @@ class PinMapSetting(Screen):
             self.container, _(i18n_keys.OPTION__ORDERED), has_next=False
         )
         self.order.add_check_img()
-        if device.is_order_pin_map_enabled():
-            self.order.set_checked()
-        else:
+        if device.is_random_pin_map_enabled():
             self.random.set_checked()
+        else:
+            self.order.set_checked()
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -584,13 +584,13 @@ class PinMapSetting(Screen):
             if target == self.random:
                 self.random.set_checked()
                 self.order.set_uncheck()
-                if device.is_order_pin_map_enabled():
-                    device.set_order_pin_map_enable(False)
+                if not device.is_random_pin_map_enabled():
+                    device.set_random_pin_map_enable(True)
             elif target == self.order:
                 self.random.set_uncheck()
                 self.order.set_checked()
-                if not device.is_order_pin_map_enabled():
-                    device.set_order_pin_map_enable(True)
+                if device.is_random_pin_map_enabled():
+                    device.set_random_pin_map_enable(False)
 
 
 class ConnectSetting(Screen):
@@ -718,16 +718,13 @@ class PowerOff(FullSizeWindow):
 
 class ShutingDown(FullSizeWindow):
     def __init__(self):
-        super().__init__(
-            title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None, top_layer=True
-        )
+        super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
         from trezor import loop, uart
 
         async def shutdown_delay():
             await loop.sleep(3000)
             uart.ctrl_power_off()
 
-        self.destroy(3000)
         workflow.spawn(shutdown_delay())
 
 
@@ -1207,7 +1204,7 @@ class PowerOnOffDetails(FullSizeWindow):
         )
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1234,7 +1231,7 @@ class RecoveryPhraseDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1261,7 +1258,7 @@ class PinProtectionDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1288,7 +1285,7 @@ class HardwareWalletDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1315,7 +1312,7 @@ class PassphraseDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1363,5 +1360,5 @@ class HelpDetails(FullSizeWindow):
         )
         self.underline.align_to(self.website, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 0)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()

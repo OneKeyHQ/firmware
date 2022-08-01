@@ -164,11 +164,11 @@ def get_brightness() -> int:
     return int.from_bytes(brightness, "big")
 
 
-def set_order_pin_map_enable(enable: bool):
+def set_random_pin_map_enable(enable: bool):
     common.set_bool(_NAMESPACE, _USE_RANDOM_PIN_MAP, enable, public=True)
 
 
-def is_order_pin_map_enabled() -> bool:
+def is_random_pin_map_enabled() -> bool:
     return common.get_bool(_NAMESPACE, _USE_RANDOM_PIN_MAP, public=True)
 
 

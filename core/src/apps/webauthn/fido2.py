@@ -376,6 +376,9 @@ async def read_cmd(iface: io.HID) -> Cmd | None:
     read = loop.wait(iface.iface_num() | io.POLL_READ)
 
     buf = await read
+    from trezor.utils import lcd_resume
+
+    lcd_resume()
     while True:
         ifrm = overlay_struct(bytearray(buf), desc_init)
         bcnt = ifrm.bcnt

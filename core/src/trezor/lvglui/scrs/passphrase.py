@@ -4,7 +4,7 @@ from .components.keyboard import PassphraseKeyboard
 
 
 class PassphraseRequest(FullSizeWindow):
-    def __init__(self, max_len=50):
+    def __init__(self, max_len):
         super().__init__(_(i18n_keys.TITLE__ENTER_PASSPHRASE), None)
         self.keyboard = PassphraseKeyboard(self, max_len)
         self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
@@ -14,5 +14,3 @@ class PassphraseRequest(FullSizeWindow):
         self.channel.publish(input)
         self.keyboard.ta.set_text("")
         self.destroy()
-        if __debug__:
-            print(f"Enter passphrase: == {input}")

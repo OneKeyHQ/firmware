@@ -307,7 +307,7 @@ class NumberKeyboard(lv.keyboard):
         self.ta.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.ta.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.nums = [i for i in range(10)]
-        if not device.is_order_pin_map_enabled():
+        if device.is_random_pin_map_enabled():
             random.shuffle(self.nums)
         self.btnm_map = [
             str(self.nums[1]),

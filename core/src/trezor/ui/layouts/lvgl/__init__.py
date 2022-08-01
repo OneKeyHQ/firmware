@@ -826,7 +826,7 @@ async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -
     )
     from trezor.lvglui.scrs.passphrase import PassphraseRequest
 
-    screen = PassphraseRequest()
+    screen = PassphraseRequest(max_len)
     result = await ctx.wait(screen.request())
     # if not result:
     #     raise wire.ActionCancelled("Passphrase entry cancelled")

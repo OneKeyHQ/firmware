@@ -91,11 +91,6 @@ class Slider(lv.slider):
         elif code == lv.EVENT.RELEASED:
             if current_value < MAX_VISIBLE_VALUE:
                 self.set_value(MIN_VISIBLE_VALUE, lv.ANIM.ON)
-            else:
-                if self.has_flag(lv.obj.FLAG.CLICKABLE):
-                    self.clear_flag(lv.obj.FLAG.CLICKABLE)
-                    self.tips.clear_flag(lv.obj.FLAG.HIDDEN)
-                    lv.event_send(self, lv.EVENT.READY, None)
         elif code == lv.EVENT.DRAW_PART_BEGIN:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if dsc.part == lv.PART.KNOB:
@@ -108,7 +103,11 @@ class Slider(lv.slider):
                         else:
                             dsc.rect_dsc.bg_img_src = self.arrow_img_src
                     else:
+                        self.tips.clear_flag(lv.obj.FLAG.HIDDEN)
                         dsc.rect_dsc.bg_img_src = self.done_img_src
+                        if self.has_flag(lv.obj.FLAG.CLICKABLE):
+                            self.clear_flag(lv.obj.FLAG.CLICKABLE)
+                        lv.event_send(self, lv.EVENT.READY, None)
         elif code == lv.EVENT.DRAW_PART_END:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if dsc.part == lv.PART.MAIN:

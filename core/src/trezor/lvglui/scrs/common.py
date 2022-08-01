@@ -232,6 +232,8 @@ class FullSizeWindow(lv.obj):
                 return
             if hasattr(self, "btn_no") and target == self.btn_no:
                 self.channel.publish(0)
+                self.destroy(100)
+                return
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
                 if hasattr(self, "roller"):
                     self.channel.publish(self.select_option)
@@ -254,7 +256,7 @@ class FullSizeWindow(lv.obj):
     async def request(self) -> Any:
         return await self.channel.take()
 
-    def destroy(self, delay_ms=1000):
+    def destroy(self, delay_ms=400):
         self.del_delayed(delay_ms)
 
 
