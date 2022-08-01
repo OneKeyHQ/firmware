@@ -178,6 +178,9 @@ const char *languages[][2] = {
     {"Check the seed", "检查助记词"},
     // layout2.c
     {"Check the written", "请检查写下的"},
+    //
+    {"Check this device with\nOneKey secure server?",
+     "确定访问OneKey服务器对\n此设备进行防伪校验吗?"},
     {"Choose the correct\nwords based on the\nrecovery phrase\nyou've put "
      "down.",
      "接下来,请根据已写下的助\n记词选择正确的单词"},
