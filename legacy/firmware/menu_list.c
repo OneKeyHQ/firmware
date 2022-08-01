@@ -12,7 +12,7 @@
 #include "reset.h"
 
 extern uint8_t ui_language;
-
+bool exitBlindSignByInitialize;
 static struct menu settings_menu, main_menu, security_set_menu, blind_sign_menu;
 
 void menu_recovery_device(int index) {
@@ -485,7 +485,10 @@ step1:
   menu_display(&blind_sign_menu);
 
   while (1) {
-    key = protectWaitKey(0, 0);
+    key = blindsignWaitKey();
+    if (exitBlindSignByInitialize) {
+      return;
+    }
     if (key == KEY_CANCEL) {
       menu_init(&security_set_menu);
       return;
