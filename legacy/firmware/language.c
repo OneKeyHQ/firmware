@@ -129,6 +129,9 @@ const char *languages[][2] = {
     {"Check the seed", "检查助记词"},
     // layout2.c
     {"Check the written", "请检查写下的"},
+    //
+    {"Check this device with\nOneKey secure server?",
+     "确定访问OneKey服务器对\n此设备进行防伪校验吗?"},
     // layout2.c
     {"CoSi commit index #?", ""},
     // layout2.c
@@ -580,6 +583,8 @@ const char *languages[][2] = {
     {"Retry", "重试"},
     // layout2.c
     {"SE version:", "SE版本:"},
+    //
+    {"SECURITY CHECK", "防伪校验"},
     // layout2.c
     {"SEEDLESS", ""},
     //
