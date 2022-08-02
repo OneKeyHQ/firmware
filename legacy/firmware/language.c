@@ -129,6 +129,9 @@ const char *languages[][2] = {
     {"Check the seed", "检查助记词"},
     // layout2.c
     {"Check the written", "请检查写下的"},
+    //
+    {"Check this device with\nOneKey secure server?",
+     "确定访问OneKey服务器对\n此设备进行防伪校验吗?"},
     // layout2.c
     {"CoSi commit index #?", ""},
     // layout2.c
@@ -228,6 +231,12 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     {"Do you really want to", "请确认"},
+    //
+    {"Do you really want to \ndisable passphrase protection?",
+     "要禁用passphrase加密吗?"},
+    //
+    {"Do you really want to \nenable passphrase protection?",
+     "要启用passphrase加密吗?"},
     // fsm_msg_common.h
     {"Do you want to", "请确认"},
     // layout2.c
@@ -259,7 +268,11 @@ const char *languages[][2] = {
     // layout2.c layout2.c
     {"English", "简体中文"},
     //
+    {"Enter", "填入"},
+    //
     {"Enter PIN to unlock", "输入PIN码解锁"},
+    //
+    {"Enter Passphrase", "输入Passphrase"},
     // protect.c
     {"Enter new wipe code:", "输入新的擦除PIN码"},
     //
@@ -544,6 +557,8 @@ const char *languages[][2] = {
     {"Public Key:", "公钥"},
     // layout2.c
     {"QR Code", "二维码"},
+    //
+    {"Quit", "退出"},
     // layout2.c
     {"Quota:", "单次限额"},
     {"REJECT", "拒绝"},
@@ -568,6 +583,8 @@ const char *languages[][2] = {
     {"Retry", "重试"},
     // layout2.c
     {"SE version:", "SE版本:"},
+    //
+    {"SECURITY CHECK", "防伪校验"},
     // layout2.c
     {"SEEDLESS", ""},
     //
@@ -637,6 +654,10 @@ const char *languages[][2] = {
     {"Starting up", "启动中"},
     // config.c
     {"Storage failure", ""},
+    //
+    {"Submit", "提交"},
+    //
+    {"Switch", "切换"},
     // protect.c
     {"The new PIN must be different from your wipe code.", ""},
     // recovery.c

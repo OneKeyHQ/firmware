@@ -56,6 +56,12 @@ char* menu_para_sol_switch(void) {
   return config_getCoinSwitch(COIN_SWITCH_SOLANA) ? _(" On") : _(" Off");
 };
 
+char* menu_para_passphrase(void) {
+  bool passphrase_protection = false;
+  config_getPassphraseProtection(&passphrase_protection);
+  return passphrase_protection ? _(" On") : _(" Off");
+};
+
 void menu_para_set_ble(int index) {
   bool ble_state = index ? false : true;
   if (ble_state != ble_get_switch()) {
