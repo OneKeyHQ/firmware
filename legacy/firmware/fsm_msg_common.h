@@ -1059,6 +1059,18 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
 void fsm_msgSESignMessage(const SESignMessage *msg) {
   (void)msg;
 #if ONEKEY_MINI
+
+  layoutDialogSwipeCenterAdapterEx(
+      NULL, &bmp_button_back, _("Cancel"), &bmp_button_forward, _("Confirm"),
+      NULL, true, NULL, NULL, NULL, NULL,
+      _("Check this device with\nOneKey secure server?"), NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
   RESP_INIT(SEMessageSignature);
 
   if (se_sign_message((uint8_t *)msg->message.bytes, msg->message.size,
@@ -1071,6 +1083,7 @@ void fsm_msgSESignMessage(const SESignMessage *msg) {
 #else
   fsm_sendFailure(FailureType_Failure_UnexpectedMessage, _("Unknown message"));
 #endif
+  layoutHome();
   return;
 }
 
