@@ -314,31 +314,6 @@ step1:
   }
 }
 
-void menu_set_passphrase(int index) {
-  (void)index;
-
-  uint8_t key = KEY_NULL;
-
-  if (index) {
-    layoutDialogAdapter_ex(
-        NULL, &bmp_btn_back, _("Cancel"), &bmp_btn_forward, _("Confirm"), NULL,
-        NULL, _("Do you really want to \ndisable passphrase protection?"), NULL,
-        NULL, NULL, NULL);
-  } else {
-    layoutDialogAdapter_ex(
-        NULL, &bmp_btn_back, _("Cancel"), &bmp_btn_forward, _("Confirm"), NULL,
-        NULL, _("Do you really want to \nenable passphrase protection?"), NULL,
-        NULL, NULL, NULL);
-  }
-
-  key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
-    return;
-  }
-
-  config_setPassphraseProtection(index ? false : true);
-}
-
 static struct menu_item ble_set_menu_items[] = {
     {"On", NULL, true, menu_para_set_ble, NULL, true},
     {"Off", NULL, true, menu_para_set_ble, NULL, true}};
@@ -397,19 +372,6 @@ static struct menu shutdown_set_menu = {
     .previous = &settings_menu,
 };
 
-static struct menu_item passphrase_set_menu_items[] = {
-    {"On", NULL, true, menu_set_passphrase, NULL, true},
-    {"Off", NULL, true, menu_set_passphrase, NULL, true}};
-
-static struct menu passphrase_set_menu = {
-    .start = 0,
-    .current = 0,
-    .counts = COUNT_OF(passphrase_set_menu_items),
-    .title = NULL,
-    .items = passphrase_set_menu_items,
-    .previous = &security_set_menu,
-};
-
 static struct menu_item settings_menu_items[] = {
     {"Bluetooth", NULL, false, .sub_menu = &ble_set_menu, menu_para_ble_state,
      false},
@@ -432,8 +394,6 @@ static struct menu settings_menu = {
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
     {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
-    {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
-     menu_para_passphrase, true},
     {"Reset", NULL, true, menu_erase_device, NULL, false},
     //{"Check Mnemonic", NULL, true, menu_showMnemonic, NULL}
 };

@@ -8,8 +8,7 @@
 
 #ifndef FONT_SKIP_FIXED
 #define FONT_FIXED 1
-#define FONT_SMALL 2
-#define FONTS 3
+#define FONTS 2
 #else
 #define FONTS 1
 #endif

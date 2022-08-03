@@ -15,7 +15,6 @@ extern const BITMAP bmp_btn_confirm;
 extern const BITMAP bmp_btn_down;
 extern const BITMAP bmp_btn_forward;
 extern const BITMAP bmp_btn_retry;
-extern const BITMAP bmp_btn_switch;
 extern const BITMAP bmp_btn_up;
 extern const BITMAP bmp_button_back;
 extern const BITMAP bmp_button_down;
