@@ -1060,6 +1060,8 @@ void fsm_msgSESignMessage(const SESignMessage *msg) {
   (void)msg;
 #if ONEKEY_MINI
 
+  CHECK_PIN
+
   layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("Cancel"), &bmp_button_forward, _("Confirm"),
       NULL, true, NULL, NULL, NULL, NULL,
