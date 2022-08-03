@@ -39,4 +39,3 @@ def convert(imgfile, outfile):
 
 convert("fonts/fontfixed.png", "fontfixed.inc")
 convert("fonts/font.png", "font.inc")
-convert("fonts/font_small.png", "font_small.inc")
