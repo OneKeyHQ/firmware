@@ -779,6 +779,8 @@ void fsm_msgBixinMessageSE(const BixinMessageSE *msg) {
 }
 
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg) {
+  CHECK_PIN
+
   layoutDialogSwipe(NULL, _("Cancel"), _("Confirm"), _("SECURITY CHECK"), NULL,
                     _("Check this device with\nOneKey secure server?"), NULL,
                     NULL, NULL, NULL);
