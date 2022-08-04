@@ -7,8 +7,9 @@
 #define FONT_STANDARD 0
 
 #if ONEKEY_MINI
-#define FONT_FIXED 1
-#define FONTS 1
+#define FONT_FIXED 0
+#define FONT_SMALL 1
+#define FONTS 2
 #else
 #ifndef FONT_SKIP_FIXED
 #define FONT_FIXED 1

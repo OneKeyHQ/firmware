@@ -5,6 +5,9 @@ const uint8_t *const font_data[FONTS][128 - 32] = {
     {
 #include "fontfixed.inc"
     },
+    {
+#include "font_small.inc"
+    },
 #else
     {
 #include "font.inc"
