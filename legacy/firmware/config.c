@@ -496,6 +496,8 @@ void config_init(void) {
   if (se_is_wiping()) {
     config_wipe();
   }
+
+  se_get_status();
 #endif
 
   // imported xprv is not supported anymore so we set initialized to false

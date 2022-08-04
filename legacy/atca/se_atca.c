@@ -14,6 +14,7 @@ typedef struct {
 } PINCache;
 
 static bool se_has_pin = false;
+static bool se_is_init = false;
 
 extern ATCAPairingInfo *pair_info;
 
@@ -83,7 +84,7 @@ bool se_getSeedStrength(uint32_t *strength) {
 
 void pin_updateCounter(void) { atca_update_counter(); }
 
-bool se_hasPin(void) {
+void se_get_status(void) {
   ATCAUserState state = {0};
 
   atca_pair_unlock();
@@ -92,6 +93,17 @@ bool se_hasPin(void) {
   if (state.pin_set) {
     se_has_pin = true;
   } else {
+    se_has_pin = false;
+    pin_cacheSave(pair_info->init_pin);
+  }
+
+  if (state.initialized) {
+    se_is_init = true;
+  }
+}
+
+bool se_hasPin(void) {
+  if (!se_has_pin) {
     pin_cacheSave(pair_info->init_pin);
   }
   return se_has_pin;
@@ -184,13 +196,14 @@ bool se_changePin(const char *old_pin, const char *new_pin) {
 }
 
 bool se_isInitialized(void) {
-  ATCAUserState state = {0};
+  // ATCAUserState state = {0};
 
-  atca_pair_unlock();
+  // atca_pair_unlock();
 
-  atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
+  // atca_read_slot_data(SLOT_USER_SATATE, (uint8_t *)&state);
 
-  return state.initialized;
+  // return state.initialized;
+  return se_is_init;
 }
 
 bool se_importSeed(uint8_t *seed) {
@@ -206,6 +219,7 @@ bool se_importSeed(uint8_t *seed) {
                                        SLOT_IO_PROTECT_KEY)) {
       if (!state.initialized) {
         state.initialized = true;
+        se_is_init = true;
         atca_pair_unlock();
         if (ATCA_SUCCESS ==
             atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&state,
@@ -262,6 +276,8 @@ void se_reset_state(void) {
   atca_pair_unlock();
   atca_write_enc(SLOT_USER_SATATE, 0, (uint8_t *)&zeros, pair_info->protect_key,
                  SLOT_IO_PROTECT_KEY);
+  se_has_pin = false;
+  se_is_init = false;
 }
 
 void se_reset_storage(void) {
