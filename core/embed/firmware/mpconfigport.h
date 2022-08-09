@@ -106,7 +106,7 @@
 #define MICROPY_PY_BUILTINS_HELP_MODULES (0)
 #define MICROPY_PY_MICROPYTHON_MEM_INFO (1)
 #define MICROPY_PY_ARRAY_SLICE_ASSIGN (1)
-#define MICROPY_PY_COLLECTIONS       (0)
+#define MICROPY_PY_COLLECTIONS       (1)
 #define MICROPY_PY_COLLECTIONS_DEQUE (0)
 #define MICROPY_PY_COLLECTIONS_ORDEREDDICT (0)
 #define MICROPY_PY_MATH_SPECIAL_FUNCTIONS (0)
@@ -233,7 +233,7 @@ extern const struct _mp_obj_module_t mp_module_atca;
    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), (mp_obj_t)&mp_module_lvgl }, \
    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldrv }, \
    { MP_OBJ_NEW_QSTR(MP_QSTR_atca), (mp_obj_t)&mp_module_atca },
-   
+
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>
 

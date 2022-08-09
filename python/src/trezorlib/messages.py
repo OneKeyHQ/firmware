@@ -277,6 +277,10 @@ class MessageType(IntEnum):
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
+    SolanaGetAddress = 10100
+    SolanaAddress = 10101
+    SolanaSignTx = 10102
+    SolanaSignedTx = 10103
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
@@ -6926,6 +6930,68 @@ class RipplePayment(protobuf.MessageType):
         self.amount = amount
         self.destination = destination
         self.destination_tag = destination_tag
+
+
+class SolanaGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10100
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class SolanaAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10101
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "str",
+    ) -> None:
+        self.address = address
+
+
+class SolanaSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10102
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class SolanaSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10103
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class StellarAsset(protobuf.MessageType):

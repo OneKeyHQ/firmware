@@ -533,3 +533,121 @@ class PassphraseDisplayConfirm(FullSizeWindow):
         self.content.set_style_text_align(
             lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )
+
+
+class SolBlindingSign(FullSizeWindow):
+    def __init__(self, fee_payer: str, message_hex: str):
+        super().__init__(
+            _(i18n_keys.TITLE__VIEW_TRANSACTION),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container,
+            _(i18n_keys.LIST_KEY__FORMAT__COLON),
+            _(i18n_keys.LIST_VALUE__UNKNOWN__COLON),
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MESSAGE_HASH__COLON), message_hex
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
+        )
+
+
+class SolTransfer(FullSizeWindow):
+    def __init__(self, from_addr: str, fee_payer: str, to_addr: str, amount: str):
+        super().__init__(
+            title=_(i18n_keys.TITLE__STR_TRANSFER).format("SOL"),
+            subtitle=None,
+            confirm_text=_(i18n_keys.BUTTON__CONTINUE),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), to_addr
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), from_addr
+        )
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
+        )
+
+
+class SolCreateAssociatedTokenAccount(FullSizeWindow):
+    def __init__(
+        self,
+        fee_payer: str,
+        funding_account: str,
+        associated_token_account: str,
+        wallet_address: str,
+        token_mint: str,
+    ):
+        super().__init__(
+            title=_(i18n_keys.TITLE__CREATE_TOKEN_ACCOUNT),
+            subtitle=None,
+            confirm_text=_(i18n_keys.BUTTON__CONTINUE),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container,
+            _(i18n_keys.LIST_KEY__NEW_TOKEN_ACCOUNT),
+            associated_token_account,
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__OWNER), wallet_address
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MINT_ADDRESS), token_mint
+        )
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FUNDED_BY__COLON), funding_account
+        )
+        self.item5 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
+        )  # _(i18n_keys.LIST_KEY__FEE_PAYER__COLON)
+
+
+class SolTokenTransfer(FullSizeWindow):
+    def __init__(
+        self,
+        from_addr: str,
+        to: str,
+        amount: str,
+        source_owner: str,
+        fee_payer: str,
+        token_mint: str | None = None,
+    ):
+        super().__init__(
+            title=_(i18n_keys.TITLE__TOKEN_TRANSFER),
+            subtitle=None,
+            confirm_text=_(i18n_keys.BUTTON__CONTINUE),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TO_TOKEN_ACCOUNT__COLON), to
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM_TOKEN_ACCOUNT__COLON), from_addr
+        )
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), source_owner
+        )
+        self.item5 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
+        )
+        if token_mint:
+            self.item6 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__MINT_ADDRESS), token_mint
+            )

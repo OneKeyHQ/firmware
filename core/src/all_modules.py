@@ -282,8 +282,6 @@ trezor.ui.container
 import trezor.ui.container
 trezor.ui.layouts
 import trezor.ui.layouts
-trezor.ui.layouts.altcoin
-import trezor.ui.layouts.altcoin
 trezor.ui.layouts.common
 import trezor.ui.layouts.common
 trezor.ui.layouts.lvgl
@@ -296,10 +294,6 @@ trezor.ui.layouts.lvgl.recovery
 import trezor.ui.layouts.lvgl.recovery
 trezor.ui.layouts.lvgl.reset
 import trezor.ui.layouts.lvgl.reset
-trezor.ui.layouts.recovery
-import trezor.ui.layouts.recovery
-trezor.ui.layouts.reset
-import trezor.ui.layouts.reset
 trezor.ui.layouts.t1
 import trezor.ui.layouts.t1
 trezor.ui.layouts.tt
@@ -528,6 +522,44 @@ apps.misc.get_firmware_hash
 import apps.misc.get_firmware_hash
 apps.misc.sign_identity
 import apps.misc.sign_identity
+apps.solana
+import apps.solana
+apps.solana.constents
+import apps.solana.constents
+apps.solana.get_address
+import apps.solana.get_address
+apps.solana.message
+import apps.solana.message
+apps.solana.publickey
+import apps.solana.publickey
+apps.solana.sign_tx
+import apps.solana.sign_tx
+apps.solana.spl._layouts
+import apps.solana.spl._layouts
+apps.solana.spl._layouts.token_instructions
+import apps.solana.spl._layouts.token_instructions
+apps.solana.spl.ata_program
+import apps.solana.spl.ata_program
+apps.solana.spl.memo
+import apps.solana.spl.memo
+apps.solana.spl.memo.memo_program
+import apps.solana.spl.memo.memo_program
+apps.solana.spl.spl_token_program
+import apps.solana.spl.spl_token_program
+apps.solana.stake.program
+import apps.solana.stake.program
+apps.solana.system._layouts
+import apps.solana.system._layouts
+apps.solana.system._layouts.system_instructions
+import apps.solana.system._layouts.system_instructions
+apps.solana.system.program
+import apps.solana.system.program
+apps.solana.utils.helpers
+import apps.solana.utils.helpers
+apps.solana.utils.shortvec_encoding
+import apps.solana.utils.shortvec_encoding
+apps.solana.vote.program
+import apps.solana.vote.program
 apps.tron
 import apps.tron
 apps.tron.address
@@ -604,8 +636,6 @@ if not utils.BITCOIN_ONLY:
     import trezor.ui.layouts.tt.webauthn
     trezor.ui.layouts.tt_v2.webauthn
     import trezor.ui.layouts.tt_v2.webauthn
-    trezor.ui.layouts.webauthn
-    import trezor.ui.layouts.webauthn
     apps.binance
     import apps.binance
     apps.binance.get_address

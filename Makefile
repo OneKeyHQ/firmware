@@ -30,7 +30,7 @@ pystyle_check: ## run code style check on application sources and tests
 	@echo [PYLINT]
 	@pylint $(PY_FILES)
 	@echo [PYTHON]
-	make -C python style_check
+	# make -C python style_check
 
 pystyle_quick_check: ## run the basic style checks, suitable for a quick git hook
 	@isort --check-only $(PY_FILES)

@@ -5248,6 +5248,66 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RipplePayment"]:
             return isinstance(msg, cls)
 
+    class SolanaGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SolanaGetAddress"]:
+            return isinstance(msg, cls)
+
+    class SolanaAddress(protobuf.MessageType):
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SolanaAddress"]:
+            return isinstance(msg, cls)
+
+    class SolanaSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_tx: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SolanaSignTx"]:
+            return isinstance(msg, cls)
+
+    class SolanaSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SolanaSignedTx"]:
+            return isinstance(msg, cls)
+
     class StellarAsset(protobuf.MessageType):
         type: "StellarAssetType"
         code: "str | None"

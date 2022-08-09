@@ -48,6 +48,11 @@ __all__ = (
     "request_pin_on_device",
     "should_show_more",
     "request_strength",
+    "confirm_sol_blinding_sign",
+    "confirm_sol_transfer",
+    "confirm_sol_create_ata",
+    "confirm_sol_token_transfer",
+    "confirm_sol_memo",
 )
 
 
@@ -78,7 +83,9 @@ async def confirm_action(
         title,
         f"{description or ''}{' ' + (action or '')}",
         verb if hold else _(i18n_keys.BUTTON__CONFIRM),
-        cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        cancel_text=_(i18n_keys.BUTTON__REJECT)
+        if hold
+        else _(i18n_keys.BUTTON__CANCEL),
         icon_path=icon,
         hold_confirm=hold,
     )
@@ -905,4 +912,76 @@ async def confirm_security_check(ctx: wire.GenericContext) -> None:
     screen = SecurityCheck()
     await raise_if_cancelled(
         interact(ctx, screen, "security_check", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_sol_blinding_sign(
+    ctx: wire.GenericContext, fee_payer: str, message_hex: str
+) -> None:
+    from trezor.lvglui.scrs.template import SolBlindingSign
+
+    screen = SolBlindingSign(fee_payer, message_hex)
+    await raise_if_cancelled(
+        interact(ctx, screen, "sol_blinding_sign", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_sol_transfer(
+    ctx: wire.GenericContext, from_addr: str, to_addr: str, fee_payer: str, amount: str
+) -> None:
+    from trezor.lvglui.scrs.template import SolTransfer
+
+    screen = SolTransfer(
+        from_addr=from_addr, to_addr=to_addr, fee_payer=fee_payer, amount=amount
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "sol_transfer", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_sol_create_ata(
+    ctx: wire.GenericContext,
+    fee_payer: str,
+    funding_account: str,
+    associated_token_account: str,
+    wallet_address: str,
+    token_mint: str,
+):
+    from trezor.lvglui.scrs.template import SolCreateAssociatedTokenAccount
+
+    screen = SolCreateAssociatedTokenAccount(
+        fee_payer, funding_account, associated_token_account, wallet_address, token_mint
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "sol_create_ata", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_sol_token_transfer(
+    ctx: wire.GenericContext,
+    from_addr: str,
+    to_addr: str,
+    amount: str,
+    source_owner: str,
+    fee_payer: str,
+    token_mint: str = None,
+):
+    from trezor.lvglui.scrs.template import SolTokenTransfer
+
+    screen = SolTokenTransfer(
+        from_addr, to_addr, amount, source_owner, fee_payer, token_mint
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "sol_token_transfer", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_sol_memo(
+    ctx: wire.GenericContext, title: str, description: str, memo: str
+) -> None:
+    from trezor.lvglui.scrs.template import BlobDisPlay
+
+    screen = BlobDisPlay(title, description, memo, None)
+    await raise_if_cancelled(
+        interact(ctx, screen, "sol_memo", ButtonRequestType.ProtectCall)
     )

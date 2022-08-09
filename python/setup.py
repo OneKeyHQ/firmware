@@ -32,6 +32,7 @@ install_requires = [
     "typing_extensions>=3.10",
     "dataclasses ; python_version<'3.7'",
     "simple-rlp>=0.1.2 ; python_version>='3.7'",
+    "base58>=2.1.1",
 ]
 
 extras_require = {

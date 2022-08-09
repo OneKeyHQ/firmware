@@ -327,6 +327,7 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/py/unicode.c',
     'vendor/micropython/py/vstr.c',
     'vendor/micropython/py/warning.c',
+    'vendor/micropython/py/modcollections.c',
 ]
 
 if LVGL_UI == '1':
@@ -871,6 +872,9 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/decred.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/bitcoinlike.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/bitcoin/sign_tx/zcash_v4.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/solana/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/solana/*/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/solana/*/*/*.py'))
 
     source_mpy = env.FrozenModule(source=SOURCE_PY, source_dir=SOURCE_PY_DIR, bitcoin_only=BITCOIN_ONLY)
 
