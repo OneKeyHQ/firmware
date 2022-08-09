@@ -44,6 +44,10 @@
 #include "webusb.h"
 #include "winusb.h"
 
+#if ONEKEY_MINI
+#include <libopencm3/stm32/timer.h>
+#endif
+
 #define USB_INTERFACE_INDEX_MAIN 0
 #if DEBUG_LINK
 #define USB_INTERFACE_INDEX_DEBUG 1
@@ -320,6 +324,11 @@ static void u2f_rx_callback(usbd_device *dev, uint8_t ep) {
   if (usbd_ep_read_packet(dev, ENDPOINT_ADDRESS_U2F_OUT, buf, sizeof(buf)) !=
       USB_PACKET_SIZE)
     return;
+  timer_sleep_start_reset();
+#if ONEKEY_MINI
+  // open back light
+  timer_enable_oc_output(TIM3, TIM_OC2);
+#endif
   u2fhid_read(tiny, (const U2FHID_FRAME *)(void *)buf);
 }
 
@@ -338,6 +347,10 @@ static void main_rx_callback(usbd_device *dev, uint8_t ep) {
     host_channel = CHANNEL_SLAVE;
   }
   timer_sleep_start_reset();
+#if ONEKEY_MINI
+  // open back light
+  timer_enable_oc_output(TIM3, TIM_OC2);
+#endif
   debugLog(0, "", "main_rx_callback");
   if (!tiny) {
     msg_read(buf, sizeof(buf));
