@@ -2031,6 +2031,8 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
   char buf[2] = {0};
   int x = 6;
 
+  layoutLast = layoutInputPin;
+
   for (uint8_t i = 0; i < pos; i++) {
     pin_show[i] = '*';
   }

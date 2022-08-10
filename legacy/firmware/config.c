@@ -1011,8 +1011,10 @@ bool config_unlock(const char *pin) {
 
   } else {
     char oldTiny = usbTiny(1);
+    register_timer("usbpoll", timer1s / 30, usbPoll);
     secbool ret =
         storage_unlock((const uint8_t *)pin, strnlen(pin, MAX_PIN_LEN), NULL);
+    unregister_timer("usbpoll");
     usbTiny(oldTiny);
     return sectrue == ret;
   }
