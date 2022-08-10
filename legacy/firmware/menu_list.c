@@ -564,9 +564,9 @@ static struct menu shutdown_set_menu = {
 
 #if ONEKEY_MINI
 static struct menu_item brightness_set_menu_items[] = {
-    {"High", NULL, true, menu_para_set_brightness, NULL, false},
-    {"Medium", NULL, true, menu_para_set_brightness, NULL, false},
-    {"Low", NULL, true, menu_para_set_brightness, NULL, false}};
+    {"High", NULL, true, menu_para_set_brightness, NULL, true},
+    {"Medium", NULL, true, menu_para_set_brightness, NULL, true},
+    {"Low", NULL, true, menu_para_set_brightness, NULL, true}};
 
 static struct menu brightness_set_menu = {
     .start = 0,

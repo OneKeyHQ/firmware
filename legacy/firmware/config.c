@@ -496,6 +496,8 @@ void config_init(void) {
   if (se_is_wiping()) {
     config_wipe();
   }
+
+  se_get_status();
 #endif
 
   // imported xprv is not supported anymore so we set initialized to false
@@ -1069,7 +1071,9 @@ bool config_unlock(const char *pin) {
 #endif
     {
       if (!storage_is_unlocked()) {
+        register_timer("usbpoll", timer1s / 30, usbPoll);
         storage_unlock(PIN_EMPTY, PIN_EMPTY_LEN, NULL);
+        unregister_timer("usbpoll");
       }
 
       se_unlocked = sectrue;

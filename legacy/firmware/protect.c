@@ -766,6 +766,8 @@ uint8_t blindsignWaitKey(void) {
   return key;
 }
 
+extern bool u2f_init_command;
+
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
 
@@ -782,6 +784,13 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
       msg_tiny_id = 0xFFFF;
       break;
     }
+    if (layoutLast == layoutScreensaver) {
+      if (u2f_init_command) {
+        u2f_init_command = false;
+        break;
+      }
+    }
+
     key = keyScan();
     if (key != KEY_NULL) {
       if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_BUTTON;

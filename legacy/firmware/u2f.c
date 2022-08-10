@@ -30,6 +30,7 @@
 #include "hmac.h"
 #include "layout2.h"
 #include "memzero.h"
+#include "protect.h"
 #if !EMULATOR
 #include "mi2c.h"
 #endif
@@ -89,6 +90,11 @@ typedef enum {
 
 static U2F_STATE last_req_state = INIT;
 
+static bool input_pin = false;
+static bool first_package = true;
+static uint32_t package_len = 0, rec_len = 0;
+bool u2f_init_command = false;
+
 typedef struct {
   uint8_t reserved;
   uint8_t appId[U2F_APPID_SIZE];
@@ -132,12 +138,31 @@ U2F_ReadBuffer *reader;
 void u2fhid_read(char tiny, const U2FHID_FRAME *f) {
   // Always handle init packets directly
   if (f->init.cmd == U2FHID_INIT) {
+    u2f_init_command = true;
     u2fhid_init(f);
     if (tiny && reader && f->cid == cid) {
       // abort current channel
       reader->cmd = 0;
       reader->len = 0;
       reader->seq = 255;
+    }
+    return;
+  }
+
+  if (layoutLast == layoutInputPin) {
+    if (first_package) {
+      first_package = false;
+      package_len = MSG_LEN(*f);
+      rec_len = sizeof(f->cont.data);
+      while (rec_len < package_len) {
+        usbPoll();
+      }
+      send_u2f_error(U2F_SW_CONDITIONS_NOT_SATISFIED);
+      first_package = true;
+      return;
+    } else {
+      rec_len += sizeof(f->cont.data);
+      return;
     }
     return;
   }
@@ -258,6 +283,10 @@ void u2fhid_read_start(const U2FHID_FRAME *f) {
         last_req_state++;
         // standard requires to remember button press for 10 seconds.
         dialog_timeout = 10 * U2F_TIMEOUT;
+      }
+      if (reader == 0) {
+        layoutHome();
+        return;
       }
     }
 
@@ -632,6 +661,20 @@ void u2f_register(const APDU *a) {
     return;
   }
 
+  if (!session_isUnlocked()) {
+    input_pin = true;
+    send_u2f_error(U2F_SW_CONDITIONS_NOT_SATISFIED);
+  }
+
+  protectPinOnDevice(true, true);
+
+  if (input_pin) {
+    input_pin = false;
+    last_req_state = REG;
+    dialog_timeout = U2F_TIMEOUT;
+    return;
+  }
+
   // Validate basic request parameters
   debugLog(0, "", "u2f register");
   if (APDU_LEN(*a) != sizeof(U2F_REGISTER_REQ)) {
@@ -772,6 +815,20 @@ void u2f_authenticate(const APDU *a) {
   if (!node) {
     debugLog(0, "", "u2f auth - bad keyhandle len");
     send_u2f_error(U2F_SW_WRONG_DATA);  // error:bad key handle
+    return;
+  }
+
+  if (!session_isUnlocked()) {
+    input_pin = true;
+    send_u2f_error(U2F_SW_CONDITIONS_NOT_SATISFIED);
+  }
+
+  protectPinOnDevice(true, true);
+
+  if (input_pin) {
+    input_pin = false;
+    last_req_state = AUTH;
+    dialog_timeout = U2F_TIMEOUT;
     return;
   }
 
