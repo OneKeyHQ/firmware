@@ -35,6 +35,7 @@ class MnemonicDisplay(FullSizeWindow):
         self.panel.set_style_pad_ver(24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.panel.set_style_radius(12, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.word_col1 = lv.label(self.panel)
         self.word_col1.set_size(lv.pct(50), lv.SIZE.CONTENT)
         self.word_col1.set_recolor(True)

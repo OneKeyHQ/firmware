@@ -7,6 +7,8 @@ from trezor import config, io, log, loop, utils
 from trezor.lvglui import StatusBar
 from trezor.ui import display
 
+from apps import base
+
 if TYPE_CHECKING:
     from trezor.lvglui.scrs.ble import PairCodeDisplay
 
@@ -65,6 +67,7 @@ async def handle_usb_state():
                     config.lock()
                     # single to restart the main loop
                     raise loop.TASK_CLOSED
+            base.reload_settings_from_storage()
         except Exception as exec:
             if __debug__:
                 log.exception(__name__, exec)

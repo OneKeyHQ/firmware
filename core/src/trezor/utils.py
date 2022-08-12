@@ -34,7 +34,7 @@ BATTERY_CAP: int | None = None
 SHORT_AUTO_LOCK: bool | None = None
 SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
 DEFAULT_LABEL = "OneKey Touch"
-
+AUTO_POWER_OFF = False
 if __debug__:
     if EMULATOR:
         import uos

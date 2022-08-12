@@ -104,7 +104,7 @@ class MainScreen(Screen):
         self.bottom_tips.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.apps = None
+        self.apps = self.AppDrawer(self)
         self.add_event_cb(self.on_slide_up, lv.EVENT.GESTURE, None)
 
     def hidden_titles(self, hidden: bool = True):
@@ -130,12 +130,12 @@ class MainScreen(Screen):
         if code == lv.EVENT.GESTURE:
             _dir = lv.indev_get_act().get_gesture_dir()
             if _dir == lv.DIR.TOP:
-                # child_cnt == 4 in common if in homepage
-                if self.get_child_cnt() > 4:
+                # child_cnt == 5 in common if in homepage
+                if self.get_child_cnt() > 5:
                     return
-                if self.is_visible() and self.apps is None:
+                if self.is_visible():
                     self.hidden_titles()
-                    self.apps = self.AppDrawer(self)
+                    self.apps.show()
             elif _dir == lv.DIR.BOTTOM:
                 lv.event_send(self.apps, lv.EVENT.GESTURE, None)
 
@@ -144,7 +144,7 @@ class MainScreen(Screen):
             super().__init__(parent)
             self.parent = parent
             self.remove_style_all()
-            self.set_pos(0, 148)
+            self.set_pos(0, 800)
             self.set_size(lv.pct(100), 652)
             # header
             self.header = lv.obj(self)
@@ -200,31 +200,42 @@ class MainScreen(Screen):
             self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
-            self.show_anim = Anim(800, 148, self.set_pos, time=30)
-            self.show_anim.start()
-            self.dismiss_anim = Anim(
-                148, 800, self.set_pos, time=70, path_cb=lv.anim_t.path_ease_out
-            )
+            self.show_anim = Anim(800, 148, self.set_pos)
+            self.dismiss_anim = Anim(148, 800, self.set_pos)
             self.slide = False
+            self.visible = False
 
-        def clear(self):
-            if self.is_visible():
-                self.del_delayed(200)
-                self.parent.apps = None
-                self.parent.hidden_titles(False)
-                self.header.add_flag(lv.obj.FLAG.HIDDEN)
-                self.dismiss_anim.start()
+        def show(self):
+            if self.visible:
+                return
+            self.show_anim.start()
+            if self.header.has_flag(lv.obj.FLAG.HIDDEN):
+                self.header.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.slide = False
+            self.visible = True
+
+        def dismiss(self):
+            if not self.visible:
+                return
+            self.parent.hidden_titles(False)
+            self.header.add_flag(lv.obj.FLAG.HIDDEN)
+            self.dismiss_anim.start()
+            self.visible = False
 
         def on_click(self, event_obj):
             code = event_obj.code
             target = event_obj.get_target()
-            if code == lv.EVENT.CLICKED and not self.slide:
+            if code == lv.EVENT.CLICKED:
+                if utils.lcd_resume():
+                    return
+                if self.slide:
+                    return
                 if target == self.settings:
                     SettingsScreen(self.parent)
                 elif target == self.guide:
                     UserGuide(self.parent)
                 elif target == self.header:
-                    self.clear()
+                    self.dismiss()
 
         def on_slide_down(self, event_obj):
             code = event_obj.code
@@ -232,7 +243,7 @@ class MainScreen(Screen):
                 _dir = lv.indev_get_act().get_gesture_dir()
                 if _dir == lv.DIR.BOTTOM:
                     self.slide = True
-                    self.clear()
+                    self.dismiss()
 
 
 class SettingsScreen(Screen):

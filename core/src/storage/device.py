@@ -46,6 +46,7 @@ _BLE_NAME = const(0x80)  # bytes
 _BLE_VERSION = const(0x81)  # bytes
 _BLE_ENABLED = const(0x82)  # bool (0x01 or empty)
 _BRIGHTNESS = const(0x83)   # int
+_AUTOSHUTDOWN_DELAY_MS = const(0x84)  # int
 
 # deprecated
 _PIN_MAP_TYPES = const(0x84)  # int
@@ -68,10 +69,10 @@ if __debug__:
     AUTOLOCK_DELAY_MINIMUM = 10 * 1000  # 10 seconds
 else:
     AUTOLOCK_DELAY_MINIMUM = 60 * 1000  # 1 minute
-AUTOLOCK_DELAY_DEFAULT = 60 * 1000  # 1 minutes
-AUTOSHUTDOWN_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
+
+AUTOLOCK_DELAY_DEFAULT = AUTOSHUTDOWN_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
 # autolock intervals larger than AUTOLOCK_DELAY_MAXIMUM cause issues in the scheduler
-AUTOLOCK_DELAY_MAXIMUM = 0x1000_0000  # ~3 days
+AUTOSHUTDOWN_DELAY_MAXIMUM = AUTOLOCK_DELAY_MAXIMUM = 0x1000_0000  # ~3 days
 
 # Length of SD salt auth tag.
 # Other SD-salt-related constants are in sd_salt.py
@@ -400,6 +401,28 @@ def get_autolock_delay_ms() -> int:
 def set_autolock_delay_ms(delay_ms: int) -> None:
     delay_ms = _normalize_autolock_delay(delay_ms)
     common.set(_NAMESPACE, _AUTOLOCK_DELAY_MS, delay_ms.to_bytes(4, "big"))
+    utils.AUTO_POWER_OFF = False
+
+
+def _normalize_autoshutdown_delay(delay_ms: int) -> int:
+    delay_ms = max(delay_ms, AUTOSHUTDOWN_DELAY_DEFAULT)
+    delay_ms = min(delay_ms, AUTOSHUTDOWN_DELAY_MAXIMUM)
+    return delay_ms
+
+
+def get_autoshutdown_delay_ms() -> int:
+    b = common.get(_NAMESPACE, _AUTOSHUTDOWN_DELAY_MS, public=True)
+    if b is None:
+        return AUTOSHUTDOWN_DELAY_DEFAULT
+    else:
+        return _normalize_autoshutdown_delay(int.from_bytes(b, "big"))
+
+
+def set_autoshutdown_delay_ms(delay_ms: int) -> None:
+    delay_ms = _normalize_autoshutdown_delay(delay_ms)
+    common.set(
+        _NAMESPACE, _AUTOSHUTDOWN_DELAY_MS, delay_ms.to_bytes(4, "big"), public=True
+    )
 
 
 def next_u2f_counter() -> int:

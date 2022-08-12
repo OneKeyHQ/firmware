@@ -258,7 +258,7 @@ def get_state() -> str | None:
 
 
 def lock_device() -> None:
-    if config.has_pin():
+    if storage.device.is_initialized() and config.has_pin():
         config.lock()
         wire.find_handler = get_pinlocked_handler
         set_homescreen()
@@ -271,6 +271,7 @@ LATER_TOUCH = 0
 def lock_device_if_unlocked() -> None:
     if config.is_unlocked():
         lock_device()
+    utils.AUTO_POWER_OFF = True
     utils.turn_off_lcd()
 
 
@@ -286,7 +287,13 @@ def screen_off_if_possible() -> None:
 def shutdown_device() -> None:
     from trezor import uart
 
-    uart.ctrl_power_off()
+    if storage.device.is_initialized():
+        if uart.CHARGING:
+            from storage.device import AUTOSHUTDOWN_DELAY_DEFAULT
+
+            workflow.idle_timer.set(AUTOSHUTDOWN_DELAY_DEFAULT, shutdown_device)
+        else:
+            uart.ctrl_power_off()
 
 
 async def unlock_device(ctx: wire.GenericContext = wire.DUMMY_CONTEXT) -> None:
@@ -331,6 +338,8 @@ def get_pinlocked_handler(
 
 # this function is also called when handling ApplySettings
 def reload_settings_from_storage(timeout_ms: int | None = None) -> None:
+    if not storage.device.is_initialized():
+        return
     if timeout_ms:
         utils.SHORT_AUTO_LOCK = True
     else:
@@ -342,10 +351,12 @@ def reload_settings_from_storage(timeout_ms: int | None = None) -> None:
         else storage.device.get_autolock_delay_ms(),
         screen_off_if_possible,
     )
-
-    from storage.device import AUTOSHUTDOWN_DELAY_DEFAULT
-
-    workflow.idle_timer.set(AUTOSHUTDOWN_DELAY_DEFAULT, shutdown_device)
+    if utils.AUTO_POWER_OFF:
+        workflow.idle_timer.set(
+            storage.device.get_autoshutdown_delay_ms(), shutdown_device
+        )
+    else:
+        workflow.idle_timer.remove(shutdown_device)
     wire.experimental_enabled = storage.device.get_experimental_features()
     ui.display.orientation(storage.device.get_rotation())
 
