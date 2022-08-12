@@ -195,7 +195,7 @@ class FullSizeWindow(lv.obj):
                     self.btn_no.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
                     self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 32, -8)
                 self.btn_no.enable()
-            self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+            # self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
             if cancel_text:
                 if self.hold_confirm:
@@ -213,7 +213,7 @@ class FullSizeWindow(lv.obj):
                 self.slider.add_event_cb(self.eventhandler, lv.EVENT.READY, None)
             else:
                 self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
-                self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+                # self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if auto_close:
             self.destroy(delay_ms=10 * 1000)
@@ -232,6 +232,8 @@ class FullSizeWindow(lv.obj):
                 return
             if hasattr(self, "btn_no") and target == self.btn_no:
                 self.channel.publish(0)
+                self.destroy(100)
+                return
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
                 if hasattr(self, "roller"):
                     self.channel.publish(self.select_option)
@@ -254,7 +256,7 @@ class FullSizeWindow(lv.obj):
     async def request(self) -> Any:
         return await self.channel.take()
 
-    def destroy(self, delay_ms=1000):
+    def destroy(self, delay_ms=400):
         self.del_delayed(delay_ms)
 
 

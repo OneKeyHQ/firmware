@@ -2,6 +2,8 @@ from trezor.lvglui.scrs.components.button import NormalButton
 from trezor.lvglui.scrs.components.pageable import PageAbleMessage
 
 from ..i18n import gettext as _, keys as i18n_keys
+from ..lv_colors import lv_colors
+from . import font_PJSBOLD36
 from .common import FullSizeWindow, lv
 from .components.container import ContainerFlexCol
 from .components.listitem import DisplayItem
@@ -496,4 +498,38 @@ class SecurityCheck(FullSizeWindow):
             confirm_text=_(i18n_keys.BUTTON__CONFIRM),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
             icon_path="A:/res/security-check.png",
+        )
+
+
+class PassphraseDisplayConfirm(FullSizeWindow):
+    def __init__(self, passphrase: str):
+        super().__init__(
+            title=_(i18n_keys.TITLE__USE_THIS_PASSPHRASE),
+            subtitle=_(i18n_keys.SUBTITLE__USE_THIS_PASSPHRASE),
+            confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        )
+
+        self.panel = lv.obj(self.content_area)
+        self.panel.remove_style_all()
+        self.panel.set_size(432, lv.SIZE.CONTENT)
+        self.panel.set_style_min_height(80, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
+        self.panel.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.panel.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.set_style_pad_all(16, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.panel.set_style_text_color(
+            lv_colors.LIGHT_GRAY, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.panel.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content = lv.label(self.panel)
+        self.content.set_size(400, lv.SIZE.CONTENT)
+        self.content.set_text(passphrase)
+        self.content.set_long_mode(lv.label.LONG.WRAP)
+        self.content.set_style_text_align(
+            lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
         )

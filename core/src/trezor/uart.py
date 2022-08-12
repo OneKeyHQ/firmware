@@ -7,6 +7,8 @@ from trezor import config, io, log, loop, utils
 from trezor.lvglui import StatusBar
 from trezor.ui import display
 
+from apps import base
+
 if TYPE_CHECKING:
     from trezor.lvglui.scrs.ble import PairCodeDisplay
 
@@ -61,9 +63,11 @@ async def handle_usb_state():
                 and device.is_initialized()
                 and config.has_pin()
             ):
-                config.lock()
-                # single to restart the main loop
-                raise loop.TASK_CLOSED
+                if config.is_unlocked():
+                    config.lock()
+                    # single to restart the main loop
+                    raise loop.TASK_CLOSED
+            base.reload_settings_from_storage()
         except Exception as exec:
             if __debug__:
                 log.exception(__name__, exec)
@@ -144,9 +148,10 @@ async def _deal_button_press(value: bytes) -> None:
         if display.backlight():
             display.backlight(0)
             if device.is_initialized() and config.has_pin():
-                config.lock()
-                # single to restart the main loop
-                raise loop.TASK_CLOSED
+                if config.is_unlocked():
+                    config.lock()
+                    # single to restart the main loop
+                    raise loop.TASK_CLOSED
         else:
             utils.turn_on_lcd_if_possible()
     elif res == _PRESS_LONG:

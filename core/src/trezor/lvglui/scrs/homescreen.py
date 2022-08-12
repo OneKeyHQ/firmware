@@ -104,7 +104,7 @@ class MainScreen(Screen):
         self.bottom_tips.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.apps = None
+        self.apps = self.AppDrawer(self)
         self.add_event_cb(self.on_slide_up, lv.EVENT.GESTURE, None)
 
     def hidden_titles(self, hidden: bool = True):
@@ -130,12 +130,12 @@ class MainScreen(Screen):
         if code == lv.EVENT.GESTURE:
             _dir = lv.indev_get_act().get_gesture_dir()
             if _dir == lv.DIR.TOP:
-                # child_cnt == 4 in common if in homepage
-                if self.get_child_cnt() > 4:
+                # child_cnt == 5 in common if in homepage
+                if self.get_child_cnt() > 5:
                     return
-                if self.is_visible() and self.apps is None:
+                if self.is_visible():
                     self.hidden_titles()
-                    self.apps = self.AppDrawer(self)
+                    self.apps.show()
             elif _dir == lv.DIR.BOTTOM:
                 lv.event_send(self.apps, lv.EVENT.GESTURE, None)
 
@@ -144,7 +144,7 @@ class MainScreen(Screen):
             super().__init__(parent)
             self.parent = parent
             self.remove_style_all()
-            self.set_pos(0, 148)
+            self.set_pos(0, 800)
             self.set_size(lv.pct(100), 652)
             # header
             self.header = lv.obj(self)
@@ -200,31 +200,42 @@ class MainScreen(Screen):
             self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
-            self.show_anim = Anim(800, 148, self.set_pos, time=30)
-            self.show_anim.start()
-            self.dismiss_anim = Anim(
-                148, 800, self.set_pos, time=70, path_cb=lv.anim_t.path_ease_out
-            )
+            self.show_anim = Anim(800, 148, self.set_pos)
+            self.dismiss_anim = Anim(148, 800, self.set_pos)
             self.slide = False
+            self.visible = False
 
-        def clear(self):
-            if self.is_visible():
-                self.del_delayed(200)
-                self.parent.apps = None
-                self.parent.hidden_titles(False)
-                self.header.add_flag(lv.obj.FLAG.HIDDEN)
-                self.dismiss_anim.start()
+        def show(self):
+            if self.visible:
+                return
+            self.show_anim.start()
+            if self.header.has_flag(lv.obj.FLAG.HIDDEN):
+                self.header.clear_flag(lv.obj.FLAG.HIDDEN)
+            self.slide = False
+            self.visible = True
+
+        def dismiss(self):
+            if not self.visible:
+                return
+            self.parent.hidden_titles(False)
+            self.header.add_flag(lv.obj.FLAG.HIDDEN)
+            self.dismiss_anim.start()
+            self.visible = False
 
         def on_click(self, event_obj):
             code = event_obj.code
             target = event_obj.get_target()
-            if code == lv.EVENT.CLICKED and not self.slide:
+            if code == lv.EVENT.CLICKED:
+                if utils.lcd_resume():
+                    return
+                if self.slide:
+                    return
                 if target == self.settings:
                     SettingsScreen(self.parent)
                 elif target == self.guide:
                     UserGuide(self.parent)
                 elif target == self.header:
-                    self.clear()
+                    self.dismiss()
 
         def on_slide_down(self, event_obj):
             code = event_obj.code
@@ -232,7 +243,7 @@ class MainScreen(Screen):
                 _dir = lv.indev_get_act().get_gesture_dir()
                 if _dir == lv.DIR.BOTTOM:
                     self.slide = True
-                    self.clear()
+                    self.dismiss()
 
 
 class SettingsScreen(Screen):
@@ -271,9 +282,9 @@ class SettingsScreen(Screen):
             _(i18n_keys.ITEM__SECURITY),
             left_img_src="A:/res/security.png",
         )
-        # self.crypto = ListItemBtn(
-        #     self.container, _(i18n_keys.FORM__CRYPTO), left_img_src="A:/res/crypto.png"
-        # )
+        self.wallet = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__WALLET), left_img_src="A:/res/wallet.png"
+        )
         self.about = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__ABOUT_DEVICE),
@@ -313,8 +324,8 @@ class SettingsScreen(Screen):
                 HomeScreenSetting(self)
             elif target == self.security:
                 SecurityScreen(self)
-            # elif target == self.crypto:
-            #     CryptoScreen(self)
+            elif target == self.wallet:
+                WalletScreen(self)
             elif target == self.about:
                 AboutSetting(self)
             elif target == self.power:
@@ -569,10 +580,10 @@ class PinMapSetting(Screen):
             self.container, _(i18n_keys.OPTION__ORDERED), has_next=False
         )
         self.order.add_check_img()
-        if device.is_order_pin_map_enabled():
-            self.order.set_checked()
-        else:
+        if device.is_random_pin_map_enabled():
             self.random.set_checked()
+        else:
+            self.order.set_checked()
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -584,13 +595,13 @@ class PinMapSetting(Screen):
             if target == self.random:
                 self.random.set_checked()
                 self.order.set_uncheck()
-                if device.is_order_pin_map_enabled():
-                    device.set_order_pin_map_enable(False)
+                if not device.is_random_pin_map_enabled():
+                    device.set_random_pin_map_enable(True)
             elif target == self.order:
                 self.random.set_uncheck()
                 self.order.set_checked()
-                if not device.is_order_pin_map_enabled():
-                    device.set_order_pin_map_enable(True)
+                if device.is_random_pin_map_enabled():
+                    device.set_random_pin_map_enable(False)
 
 
 class ConnectSetting(Screen):
@@ -718,16 +729,13 @@ class PowerOff(FullSizeWindow):
 
 class ShutingDown(FullSizeWindow):
     def __init__(self):
-        super().__init__(
-            title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None, top_layer=True
-        )
+        super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
         from trezor import loop, uart
 
         async def shutdown_delay():
             await loop.sleep(3000)
             uart.ctrl_power_off()
 
-        self.destroy(3000)
         workflow.spawn(shutdown_delay())
 
 
@@ -798,9 +806,9 @@ class SecurityScreen(Screen):
         self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
         self.usb_lock = ListItemBtn(self.container, _(i18n_keys.ITEM__USB_LOCK))
         self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
-        self.recovery_check = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
-        )
+        # self.recovery_check = ListItemBtn(
+        #     self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
+        # )
         # self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
         self.rest_device = ListItemBtn(
             self.container, _(i18n_keys.ITEM__RESET_DEVICE), has_next=False
@@ -824,34 +832,6 @@ class SecurityScreen(Screen):
                 from trezor.messages import ChangePin
 
                 workflow.spawn(change_pin(DUMMY_CONTEXT, ChangePin(remove=False)))
-            elif target == self.recovery_check:
-                from apps.management.recovery_device import recovery_device
-                from trezor.messages import RecoveryDevice
-
-                workflow.spawn(
-                    recovery_device(
-                        DUMMY_CONTEXT,
-                        RecoveryDevice(dry_run=True, enforce_wordlist=True),
-                    )
-                )
-            # elif target == self.passphrase:
-            #     from apps.management.apply_settings import apply_settings
-            #     from trezor.messages import ApplySettings
-
-            #     passphrase_enable = not device.is_passphrase_enabled()
-            #     if passphrase_enable:
-            #         on_device = True
-            #     else:
-            #         on_device = None
-            #     workflow.spawn(
-            #         apply_settings(
-            #             DUMMY_CONTEXT,
-            #             ApplySettings(
-            #                 use_passphrase=passphrase_enable,
-            #                 passphrase_always_on_device=on_device,
-            #             ),
-            #         )
-            #     )
             elif target == self.rest_device:
                 from apps.management.wipe_device import wipe_device
                 from trezor.messages import WipeDevice
@@ -887,7 +867,7 @@ class UsbLockSetting(Screen):
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
         self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 20)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
 
         if device.is_usb_lock_enabled():
             self.usb_lock.add_state()
@@ -912,6 +892,138 @@ class UsbLockSetting(Screen):
                         _(i18n_keys.CONTENT__USB_LOCK_DISABLED__HINT)
                     )
                     device.set_usb_lock_enabled(False)
+
+
+class WalletScreen(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(prev_scr, title=_(i18n_keys.TITLE__WALLET), nav_back=True)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.check_mnemonic = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
+        )
+        self.passphrase = ListItemBtn(self.container, _(i18n_keys.ITEM__PASSPHRASE))
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            from trezor.wire import DUMMY_CONTEXT
+
+            if target == self.check_mnemonic:
+                from apps.management.recovery_device import recovery_device
+                from trezor.messages import RecoveryDevice
+
+                # pyright: off
+                workflow.spawn(
+                    recovery_device(
+                        DUMMY_CONTEXT,
+                        RecoveryDevice(dry_run=True, enforce_wordlist=True),
+                    )
+                )
+                # pyright: on
+            elif target == self.passphrase:
+                PassphraseScreen(self)
+
+
+class PassphraseScreen(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__PASSPHRASE), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title)
+        self.passphrase = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__PASSPHRASE)
+        )
+        self.passphrase.set_size(lv.pct(100), 78)
+        self.description = lv.label(self)
+        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_long_mode(lv.label.LONG.WRAP)
+        self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
+        self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
+        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+
+        passphrase_enable = device.is_passphrase_enabled()
+        if passphrase_enable:
+            self.passphrase.add_state()
+            self.description.set_text(_(i18n_keys.CONTENT__PASSPHRASE_ENABLED__HINT))
+        else:
+            self.passphrase.clear_state()
+            self.description.set_text(_(i18n_keys.CONTENT__PASSPHRASE_DISABLED__HINT))
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+        self.add_event_cb(self.on_value_changed, lv.EVENT.READY, None)
+        self.add_event_cb(self.on_value_changed, lv.EVENT.CANCEL, None)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.passphrase.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    PassphraseTipsConfirm(
+                        _(i18n_keys.TITLE__ENABLE_PASSPHRASE),
+                        _(i18n_keys.SUBTITLE__ENABLE_PASSPHRASE),
+                        _(i18n_keys.BUTTON__ENABLE),
+                        self,
+                    )
+                else:
+                    PassphraseTipsConfirm(
+                        _(i18n_keys.TITLE__DISABLE_PASSPHRASE),
+                        _(i18n_keys.SUBTITLE__DISABLE_PASSPHRASE),
+                        _(i18n_keys.BUTTON__DISABLE),
+                        self,
+                    )
+        elif code == lv.EVENT.READY:
+            if self.passphrase.switch.has_state(lv.STATE.CHECKED):
+                self.description.set_text(
+                    _(i18n_keys.CONTENT__PASSPHRASE_ENABLED__HINT)
+                )
+                device.set_passphrase_enabled(True)
+            else:
+                self.description.set_text(
+                    _(i18n_keys.CONTENT__PASSPHRASE_DISABLED__HINT)
+                )
+                device.set_passphrase_enabled(False)
+        elif code == lv.EVENT.CANCEL:
+            if self.passphrase.switch.has_state(lv.STATE.CHECKED):
+                self.passphrase.clear_state()
+            else:
+                self.passphrase.add_state()
+
+
+class PassphraseTipsConfirm(FullSizeWindow):
+    def __init__(self, title: str, subtitle: str, confirm_text: str, callback_obj):
+        super().__init__(
+            title,
+            subtitle,
+            confirm_text,
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path="A:/res/shriek.png",
+        )
+        self.callback_obj = callback_obj
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            elif target == self.btn_no:
+                lv.event_send(self.callback_obj, lv.EVENT.CANCEL, None)
+            elif target == self.btn_yes:
+                lv.event_send(self.callback_obj, lv.EVENT.READY, None)
+            else:
+                return
+        self.destroy()
 
 
 class CryptoScreen(Screen):
@@ -1103,7 +1215,7 @@ class PowerOnOffDetails(FullSizeWindow):
         )
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1130,7 +1242,7 @@ class RecoveryPhraseDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1157,7 +1269,7 @@ class PinProtectionDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1184,7 +1296,7 @@ class HardwareWalletDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1211,7 +1323,7 @@ class PassphraseDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()
 
 
@@ -1259,5 +1371,5 @@ class HelpDetails(FullSizeWindow):
         )
         self.underline.align_to(self.website, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 0)
 
-    def destroy(self):
+    def destroy(self, _delay):
         return self.delete()

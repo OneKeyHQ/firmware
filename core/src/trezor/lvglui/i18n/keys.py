@@ -177,10 +177,11 @@ MSG__INCORRECT_PIN_STR_ATTEMPTS_LEFT = 80
 TITLE__ENABLE_PASSPHRASE = 81
 # Do you want to enable passphrase encryption?
 SUBTITLE__SET_PASSPHRASE_ENABLED = 82
+SUBTITLE__ENABLE_PASSPHRASE = 82
 # Disable Passphrase
 TITLE__DISABLE_PASSPHRASE = 83
 # Do you want to disable passphrase encryption?
-SUBTITLE__SET_PASSPHRASE_DISABLED = 84
+SUBTITLE__DISABLE_PASSPHRASE = 84
 # Do you want to enter passphrase always on this device?
 SUBTITLE__SET_PASSPHRASE_ENABLED_FORCE_ON_DEVICE = 85
 # Passphrase Source
@@ -337,6 +338,7 @@ ITEM__USB = 154
 ITEM__RESET_DEVICE = 155
 # Passphrase
 ITEM__PASSPHRASE = 156
+TITLE__PASSPHRASE = 156
 # Off
 ITEM__STATUS__OFF = 157
 # Ethereum
@@ -700,4 +702,16 @@ TITLE__GO_TO_UPDATE_MODE = 323
 SUBTITLE__GO_TO_UPDATE_MODE = 324
 # Build ID
 ITEM__BUILD_ID = 325
+# Wallet
+ITEM__WALLET = 326
+TITLE__WALLET = 326
+# Passphrase is enabled. Device will be required to enter passphrase every tim
+# e when connect with OneKey apps.
+CONTENT__PASSPHRASE_ENABLED__HINT = 327
+# Passphrase is disabled.
+CONTENT__PASSPHRASE_DISABLED__HINT = 328
+# Disable
+BUTTON__DISABLE = 329
+# Check the phrase you entered and make sure it is correct.
+SUBTITLE__USE_THIS_PASSPHRASE = 330
 # fmt: on

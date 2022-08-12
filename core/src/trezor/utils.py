@@ -34,7 +34,7 @@ BATTERY_CAP: int | None = None
 SHORT_AUTO_LOCK: bool | None = None
 SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
 DEFAULT_LABEL = "OneKey Touch"
-
+AUTO_POWER_OFF = False
 if __debug__:
     if EMULATOR:
         import uos
@@ -63,15 +63,7 @@ def clear_screens() -> None:
 
 
 def turn_on_lcd_if_possible() -> bool:
-    from trezor.ui import display
-    from storage import device
-    from apps import base
-
-    if not display.backlight():
-        display.backlight(device.get_brightness())
-        base.reload_settings_from_storage(SHORT_AUTO_LOCK_TIME_MS)
-        return True
-    return False
+    return lcd_resume()
 
 
 def lcd_resume() -> bool:
