@@ -23,7 +23,7 @@ jobs:
           wget -q https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
           tar -jxf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
           export PATH="$PWD/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
-          git clone https://github.com/protocolbuffers/protobuf.git
+          git clone -b v21.5 https://github.com/protocolbuffers/protobuf.git
           cd protobuf
           git submodule update --init --recursive
           sudo ./autogen.sh
