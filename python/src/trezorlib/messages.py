@@ -257,6 +257,15 @@ class MessageType(IntEnum):
     BinanceOrderMsg = 707
     BinanceCancelMsg = 708
     BinanceSignedTx = 709
+    StarcoinGetAddress = 10300
+    StarcoinAddress = 10301
+    StarcoinGetPublicKey = 10302
+    StarcoinPublicKey = 10303
+    StarcoinSignTx = 10304
+    StarcoinSignedTx = 10305
+    StarcoinSignMessage = 10306
+    StarcoinMessageSignature = 10307
+    StarcoinVerifyMessage = 10308
     ConfluxGetAddress = 10401
     ConfluxAddress = 10402
     ConfluxSignTx = 10403
@@ -6992,6 +7001,156 @@ class SolanaSignedTx(protobuf.MessageType):
         signature: "bytes",
     ) -> None:
         self.signature = signature
+
+
+class StarcoinGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10300
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class StarcoinAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10301
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class StarcoinGetPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10302
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class StarcoinPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10303
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: "bytes",
+    ) -> None:
+        self.public_key = public_key
+
+
+class StarcoinSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10304
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        raw_tx: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class StarcoinSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10305
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: "bytes",
+        signature: "bytes",
+    ) -> None:
+        self.public_key = public_key
+        self.signature = signature
+
+
+class StarcoinSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10306
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        message: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+
+
+class StarcoinMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10307
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: "bytes",
+        signature: "bytes",
+    ) -> None:
+        self.public_key = public_key
+        self.signature = signature
+
+
+class StarcoinVerifyMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10308
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=False),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=False),
+        3: protobuf.Field("message", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: Optional["bytes"] = None,
+        signature: Optional["bytes"] = None,
+        message: Optional["bytes"] = None,
+    ) -> None:
+        self.public_key = public_key
+        self.signature = signature
+        self.message = message
 
 
 class StellarAsset(protobuf.MessageType):

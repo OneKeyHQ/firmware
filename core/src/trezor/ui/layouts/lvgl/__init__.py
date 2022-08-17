@@ -985,3 +985,12 @@ async def confirm_sol_memo(
     await raise_if_cancelled(
         interact(ctx, screen, "sol_memo", ButtonRequestType.ProtectCall)
     )
+
+
+async def confirm_stc_blinding_sign(ctx: wire.GenericContext, signer: str) -> None:
+    from trezor.lvglui.scrs.template import StcBlindingSign
+
+    screen = StcBlindingSign(signer)
+    await raise_if_cancelled(
+        interact(ctx, screen, "stc_blinding_sign", ButtonRequestType.ProtectCall)
+    )

@@ -231,6 +231,15 @@ if not utils.BITCOIN_ONLY:
     BinanceOrderMsg = 707
     BinanceCancelMsg = 708
     BinanceSignedTx = 709
+    StarcoinGetAddress = 10300
+    StarcoinAddress = 10301
+    StarcoinGetPublicKey = 10302
+    StarcoinPublicKey = 10303
+    StarcoinSignTx = 10304
+    StarcoinSignedTx = 10305
+    StarcoinSignMessage = 10306
+    StarcoinMessageSignature = 10307
+    StarcoinVerifyMessage = 10308
     ConfluxGetAddress = 10401
     ConfluxAddress = 10402
     ConfluxSignTx = 10403

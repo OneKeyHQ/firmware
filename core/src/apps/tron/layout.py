@@ -34,7 +34,6 @@ def require_confirm_tx(
     value: int,
 ) -> Awaitable[None]:
     to_str = to
-    print("value: ", value)
     return confirm_output(
         ctx,
         address=to_str,
