@@ -5,7 +5,7 @@ from trezor import utils, workflow
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.lv_colors import lv_colors
-from trezor.ui import display
+from trezor.ui import display, style
 
 from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36, font_PJSREG24
 from .common import (  # noqa: F401, F403, F405
@@ -22,7 +22,7 @@ from .components.listitem import DisplayItem
 
 
 def brightness2_percent_str(brightness: int) -> str:
-    return f"{int(brightness / 255 * 100)}%"
+    return f"{int(brightness / style.BACKLIGHT_MAX * 100)}%"
 
 
 GRID_CELL_SIZE = 128
@@ -541,7 +541,7 @@ class BacklightSetting(Screen):
         self.slider.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.slider.set_size(424, 8)
         self.slider.set_ext_click_area(100)
-        self.slider.set_range(20, 255)
+        self.slider.set_range(5, style.BACKLIGHT_MAX)
         self.slider.set_value(current_brightness, lv.ANIM.OFF)
         self.slider.align_to(self.container, lv.ALIGN.BOTTOM_MID, 0, 33)
         self.slider.set_style_bg_color(
