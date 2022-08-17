@@ -47,6 +47,7 @@ from . import (
     nem,
     ripple,
     settings,
+    sol,
     stellar,
     tezos,
     tron,
@@ -82,6 +83,7 @@ COMMAND_ALIASES = {
     "xlm": stellar.cli,
     "xtz": tezos.cli,
     "trx": tron.cli,
+    "sol": sol.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -365,6 +367,7 @@ cli.add_command(nem.cli)
 cli.add_command(ripple.cli)
 cli.add_command(settings.cli)
 cli.add_command(stellar.cli)
+cli.add_command(sol.cli)
 cli.add_command(tron.cli)
 cli.add_command(tezos.cli)
 

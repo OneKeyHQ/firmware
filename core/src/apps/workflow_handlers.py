@@ -211,6 +211,12 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.TronSignMessage:
             return "apps.tron.sign_message"
 
+        # solana
+        if msg_type == MessageType.SolanaGetAddress:
+            return "apps.solana.get_address"
+        if msg_type == MessageType.SolanaSignTx:
+            return "apps.solana.sign_tx"
+
     raise ValueError
 
 

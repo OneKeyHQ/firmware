@@ -269,6 +269,10 @@ if TYPE_CHECKING:
         WebAuthnCredentials = 801
         WebAuthnAddResidentCredential = 802
         WebAuthnRemoveResidentCredential = 803
+        SolanaGetAddress = 10100
+        SolanaAddress = 10101
+        SolanaSignTx = 10102
+        SolanaSignedTx = 10103
         DeviceBackToBoot = 903
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
