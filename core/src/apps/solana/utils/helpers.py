@@ -1,3 +1,6 @@
+from trezor.strings import format_amount
+
+
 def from_uint8_bytes(uint8: bytes) -> int:
     """Convert from uint8 to python int."""
     return int.from_bytes(uint8, byteorder="little")
@@ -13,5 +16,7 @@ def sol_format_amount(
 ) -> str:
     """Format amount for display."""
     if is_token:
-        return f"{amount if decimals is None else amount / 10 ** decimals} TOKEN"
-    return f"{amount / 1_000_000_000} SOL"
+        if decimals is None:
+            return f"{amount} Lamports TOKEN"
+        return f"{format_amount(amount, decimals)} TOKEN"
+    return f"{format_amount(amount, decimals=9)} SOL"
