@@ -394,7 +394,7 @@ void st7701_init_sequence(void) {
   HAL_Delay(20);
 }
 
-#define LED_PWM_TIM_PERIOD (10000)
+#define LED_PWM_TIM_PERIOD (100)
 
 void display_set_backlight(int val) {
   TIM1->CCR1 = (LED_PWM_TIM_PERIOD - 1) * val / 255;
