@@ -249,6 +249,8 @@ class FullSizeWindow(lv.obj):
         elif code == lv.EVENT.READY and self.hold_confirm:
             if target == self.slider:
                 self.channel.publish(1)
+                self.destroy(100)
+                return
             else:
                 return
         self.destroy()

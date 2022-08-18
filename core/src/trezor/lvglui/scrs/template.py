@@ -34,6 +34,9 @@ class Address(FullSizeWindow):
                 xpub,
             )
 
+    def destroy(self):
+        self.del_delayed(100)
+
 
 class XpubOrPub(FullSizeWindow):
     def __init__(self, title, path, xpub=None, pubkey=None):
