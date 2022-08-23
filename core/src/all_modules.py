@@ -560,6 +560,22 @@ apps.solana.utils.shortvec_encoding
 import apps.solana.utils.shortvec_encoding
 apps.solana.vote.program
 import apps.solana.vote.program
+apps.starcoin
+import apps.starcoin
+apps.starcoin.get_address
+import apps.starcoin.get_address
+apps.starcoin.get_public_key
+import apps.starcoin.get_public_key
+apps.starcoin.helper
+import apps.starcoin.helper
+apps.starcoin.layout
+import apps.starcoin.layout
+apps.starcoin.sign_message
+import apps.starcoin.sign_message
+apps.starcoin.sign_tx
+import apps.starcoin.sign_tx
+apps.starcoin.verify_message
+import apps.starcoin.verify_message
 apps.tron
 import apps.tron
 apps.tron.address

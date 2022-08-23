@@ -48,6 +48,7 @@ from . import (
     ripple,
     settings,
     sol,
+    starcoin,
     stellar,
     tezos,
     tron,
@@ -84,6 +85,7 @@ COMMAND_ALIASES = {
     "xtz": tezos.cli,
     "trx": tron.cli,
     "sol": sol.cli,
+    "starcoin": starcoin.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,

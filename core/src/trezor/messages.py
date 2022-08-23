@@ -5308,6 +5308,148 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SolanaSignedTx"]:
             return isinstance(msg, cls)
 
+    class StarcoinGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinGetAddress"]:
+            return isinstance(msg, cls)
+
+    class StarcoinAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinAddress"]:
+            return isinstance(msg, cls)
+
+    class StarcoinGetPublicKey(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinGetPublicKey"]:
+            return isinstance(msg, cls)
+
+    class StarcoinPublicKey(protobuf.MessageType):
+        public_key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinPublicKey"]:
+            return isinstance(msg, cls)
+
+    class StarcoinSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            raw_tx: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinSignTx"]:
+            return isinstance(msg, cls)
+
+    class StarcoinSignedTx(protobuf.MessageType):
+        public_key: "bytes"
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinSignedTx"]:
+            return isinstance(msg, cls)
+
+    class StarcoinSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            message: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinSignMessage"]:
+            return isinstance(msg, cls)
+
+    class StarcoinMessageSignature(protobuf.MessageType):
+        public_key: "bytes"
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinMessageSignature"]:
+            return isinstance(msg, cls)
+
+    class StarcoinVerifyMessage(protobuf.MessageType):
+        public_key: "bytes | None"
+        signature: "bytes | None"
+        message: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes | None" = None,
+            signature: "bytes | None" = None,
+            message: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["StarcoinVerifyMessage"]:
+            return isinstance(msg, cls)
+
     class StellarAsset(protobuf.MessageType):
         type: "StellarAssetType"
         code: "str | None"

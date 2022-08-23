@@ -353,6 +353,17 @@ enum MessageType {
     MessageType_BinanceCancelMsg = 708 [(wire_in) = true];
     MessageType_BinanceSignedTx = 709 [(wire_out) = true];
 
+    // Starcoin
+    MessageType_StarcoinGetAddress = 10300 [(wire_in) = true];
+    MessageType_StarcoinAddress = 10301 [(wire_out) = true];
+    MessageType_StarcoinGetPublicKey = 10302 [(wire_in) = true];
+    MessageType_StarcoinPublicKey = 10303 [(wire_out) = true];
+    MessageType_StarcoinSignTx = 10304 [(wire_in) = true];
+    MessageType_StarcoinSignedTx = 10305 [(wire_out) = true];
+    MessageType_StarcoinSignMessage = 10306 [(wire_in) = true];
+    MessageType_StarcoinMessageSignature = 10307 [(wire_out) = true];
+    MessageType_StarcoinVerifyMessage = 10308[(wire_in) = true];
+
     // Conflux
     MessageType_ConfluxGetAddress = 10401 [(wire_in) = true];
     MessageType_ConfluxAddress = 10402 [(wire_out) = true];

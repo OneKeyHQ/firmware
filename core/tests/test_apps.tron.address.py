@@ -10,7 +10,6 @@ if not utils.BITCOIN_ONLY:
 @unittest.skipUnless(not utils.BITCOIN_ONLY, "altcoin")
 class TestTronAddress(unittest.TestCase):
     def test_privkey_to_address(self):
-        #source of test data - binance javascript SDK
         privkey = "8d596057e510b14cbb9bf24f88803a6d6dbd138dd303a62b175b9e6cc0f3f941"
         expected_address = "TY72iA3SBtrds3QLYsS7LwYfkzXwAXCRWT"
 

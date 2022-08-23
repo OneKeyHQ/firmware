@@ -217,6 +217,18 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.SolanaSignTx:
             return "apps.solana.sign_tx"
 
+        # starcoin
+        if msg_type == MessageType.StarcoinGetAddress:
+            return "apps.starcoin.get_address"
+        if msg_type == MessageType.StarcoinGetPublicKey:
+            return "apps.starcoin.get_public_key"
+        if msg_type == MessageType.StarcoinSignTx:
+            return "apps.starcoin.sign_tx"
+        if msg_type == MessageType.StarcoinSignMessage:
+            return "apps.starcoin.sign_message"
+        if msg_type == MessageType.StarcoinVerifyMessage:
+            return "apps.starcoin.verify_message"
+
     raise ValueError
 
 
