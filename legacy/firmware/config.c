@@ -197,8 +197,10 @@ static secbool sleepDelayMsCached = secfalse;
 static uint32_t autoLockDelayMs = autoLockDelayMsDefault;
 static uint32_t autoSleepDelayMs = sleepDelayMsDefault;
 #if ONEKEY_MINI
+#if !EMULATOR
 static secbool brightnessCached = secfalse;
 static uint32_t brightnessValue = brightnessDefault;
+#endif
 #endif
 
 static uint32_t deviceState = 0;
@@ -1128,7 +1130,7 @@ bool config_changePin(const char *old_pin, const char *new_pin) {
     }
 #if DEBUG_LINK
     if (ret) {
-      if (nnew_pin[0] != '\0') {
+      if (new_pin[0] != '\0') {
         storage_set(KEY_DEBUG_LINK_PIN, new_pin, strnlen(new_pin, MAX_PIN_LEN));
       } else {
         storage_delete(KEY_DEBUG_LINK_PIN);
@@ -1382,6 +1384,7 @@ void config_setSleepDelayMs(uint32_t auto_sleep_ms) {
 }
 
 #if ONEKEY_MINI
+#if !EMULATOR
 uint32_t config_getBrightness(void) {
   if (sectrue == brightnessCached) {
     return brightnessValue;
@@ -1404,6 +1407,7 @@ void config_setBrightness(uint32_t value) {
 
   timer_set_oc_value(TIM3, TIM_OC2, brightnessValue);
 }
+#endif
 #endif
 
 void config_wipe(void) {

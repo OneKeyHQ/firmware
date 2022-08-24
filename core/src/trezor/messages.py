@@ -5259,13 +5259,13 @@ if TYPE_CHECKING:
 
     class SolanaSignTx(protobuf.MessageType):
         address_n: "list[int]"
-        raw_tx: "bytes | None"
+        raw_tx: "bytes"
 
         def __init__(
             self,
             *,
+            raw_tx: "bytes",
             address_n: "list[int] | None" = None,
-            raw_tx: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -6375,4 +6375,66 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronTriggerSmartContract"]:
+            return isinstance(msg, cls)
+
+    class AptosGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosGetAddress"]:
+            return isinstance(msg, cls)
+
+    class AptosAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosAddress"]:
+            return isinstance(msg, cls)
+
+    class AptosSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_tx: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosSignTx"]:
+            return isinstance(msg, cls)
+
+    class AptosSignedTx(protobuf.MessageType):
+        public_key: "bytes"
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosSignedTx"]:
             return isinstance(msg, cls)
