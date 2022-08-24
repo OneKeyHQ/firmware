@@ -52,6 +52,7 @@
 #include "util.h"
 #if ONEKEY_MINI
 #include "device.h"
+#include "fonts.h"
 #include "w25qxx.h"
 
 #define CROWDFUND_URL "crowdfund.onekey.so"
