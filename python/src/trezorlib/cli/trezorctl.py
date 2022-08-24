@@ -30,6 +30,7 @@ from ..transport import enumerate_devices
 from ..transport.udp import UdpTransport
 from . import (
     TrezorConnection,
+    aptos,
     binance,
     bixin,
     btc,
@@ -83,6 +84,7 @@ COMMAND_ALIASES = {
     "xlm": stellar.cli,
     "xtz": tezos.cli,
     "tron": tron.cli,
+    "aptos": aptos.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -367,6 +369,7 @@ cli.add_command(tezos.cli)
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
+cli.add_command(aptos.cli)
 
 #
 # Main

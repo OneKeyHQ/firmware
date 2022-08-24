@@ -360,6 +360,12 @@ enum MessageType {
     MessageType_StarcoinMessageSignature = 10307 [(wire_out) = true];
     MessageType_StarcoinVerifyMessage = 10308[(wire_in) = true];
 
+    // Aptos
+    MessageType_AptosGetAddress = 10600 [(wire_in) = true];
+    MessageType_AptosAddress = 10601 [(wire_out) = true];
+    MessageType_AptosSignTx = 10602 [(wire_in) = true];
+    MessageType_AptosSignedTx = 10603 [(wire_out) = true];
+   
     // WebAuthn
     MessageType_WebAuthnListResidentCredentials = 800 [(wire_in) = true];
     MessageType_WebAuthnCredentials = 801 [(wire_out) = true];

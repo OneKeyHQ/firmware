@@ -170,8 +170,8 @@ const char *languages[][2] = {
     {"Confirm address?", "确认地址"},
     // layout2.c lisk.c
     {"Confirm sending", "确认发送"},
-    // starcoin.c
-    {"Confirm signning", "确认签名"},
+    // starcoin.c aptos.c
+    {"Confirm signing", "确认签名"},
     // lisk.c lisk.c lisk.c lisk.c
     {"Confirm transaction", "确认交易"},
     // layout2.c layout2.c layout2.c

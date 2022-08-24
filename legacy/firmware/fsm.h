@@ -20,6 +20,7 @@
 #ifndef __FSM_H__
 #define __FSM_H__
 
+#include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
 #include "messages-crypto.pb.h"
 #include "messages-debug.pb.h"
@@ -168,5 +169,9 @@ void fsm_msgGetPublicKeyMultiple(const GetPublicKeyMultiple *msg);
 void fsm_msgTronSignMessage(TronSignMessage *msg);
 void fsm_msgTronGetAddress(TronGetAddress *msg);
 void fsm_msgTronSignTx(TronSignTx *msg);
+
+// aptos
+void fsm_msgAptosGetAddress(const AptosGetAddress *msg);
+void fsm_msgAptosSignTx(const AptosSignTx *msg);
 
 #endif
