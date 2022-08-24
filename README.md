@@ -23,30 +23,29 @@
 
 ## 🚀 Getting Onboard
 
-1. Install [poetry](https://python-poetry.org/)
-2. Install [nix](https://nixos.org/download.html)
-3. Pulling the latest code via the git command line tool,  setting up the development environment
+1. Install [nix](https://nixos.org/download.html)
+2. Pulling the latest code via the git command line tool,  setting up the development environment
 
 ```
   git clone --recurse-submodules https://github.com/OneKeyHQ/onekey-firmware.git
   cd onekey-firmware
-  poetry install
   nix-shell
+  poetry install
 ```
 
-4. Run the build with:
+3. Run the build with:
 
 ```
    cd core && poetry run make build_unix
 ```
 
-5. Now you can start the emulator
+4. Now you can start the emulator
 
 ```
    poetry run ./emu.py
 ```
 
-6. You can now install the command line client utility to interact with the emulator
+5. You can now install the command line client utility to interact with the emulator
 
 ```
    cd python && poetry run python3 -m pip install .
