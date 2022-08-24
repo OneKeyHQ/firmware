@@ -48,7 +48,7 @@ char* menu_para_shutdown(void) {
 
 char* menu_para_autolock(void) { return format_time(config_getSleepDelayMs()); }
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
 char* menu_para_brightness(void) {
   uint32_t value = config_getBrightness();
   switch (value) {
@@ -70,6 +70,12 @@ char* menu_para_eth_eip_switch(void) {
 
 char* menu_para_sol_switch(void) {
   return config_getCoinSwitch(COIN_SWITCH_SOLANA) ? _(" On") : _(" Off");
+};
+
+char* menu_para_passphrase(void) {
+  bool passphrase_protection = false;
+  config_getPassphraseProtection(&passphrase_protection);
+  return passphrase_protection ? _(" On") : _(" Off");
 };
 
 void menu_para_set_ble(int index) {
@@ -95,7 +101,7 @@ void menu_para_set_sleep(int index) {
   config_setSleepDelayMs(ms[index]);
 }
 
-#if ONEKEY_MINI
+#if ONEKEY_MINI && !EMULATOR
 void menu_para_set_brightness(int index) {
   uint32_t value[3] = {brightnessHigh, brightnessMedium, brightnessLow};
   config_setBrightness(value[index]);

@@ -194,6 +194,9 @@ void layoutDialogSwipeCenterAdapterFont(
     const char *line5, const char *line6);
 #endif
 void layoutItemsSelect(int x, int y, const char *text, uint8_t font);
+void layoutItemsSelect_ex(int x, int y, const char *text, uint8_t font,
+                          bool vert);
+
 void layoutBmpSelect(int x, int y, const BITMAP *bmp);
 void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
                               const BITMAP *bmp_no, const BITMAP *bmp_yes,
@@ -207,6 +210,11 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
 
 void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
                      const char *letter);
+
+void layoutInputMethod(uint8_t index);
+void layoutInputPassphrase(const char *text, uint8_t prefix_len,
+                           const char *prefix, uint8_t char_index,
+                           uint8_t input_type);
 
 void layoutDeviceParameters(int num);
 void layoutEnterSleep(void);
