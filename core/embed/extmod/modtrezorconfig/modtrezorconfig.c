@@ -75,6 +75,9 @@ STATIC mp_obj_t mod_trezorconfig_init(size_t n_args, const mp_obj_t *args) {
     storage_init(NULL, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   }
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
+#ifndef TREZOR_EMULATOR
+  se_get_status();
+#endif
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorconfig_init_obj, 0, 1,
