@@ -14,6 +14,7 @@ bool se_setSeedStrength(uint32_t strength);
 bool se_getSeedStrength(uint32_t *strength);
 bool se_importSeed(uint8_t *seed);
 bool se_export_seed(uint8_t *seed);
+void se_get_status(void);
 bool se_hasPin(void);
 bool se_verifyPin(const char *pin);
 bool se_changePin(const char *old_pin, const char *new_pin);
