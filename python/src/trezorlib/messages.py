@@ -283,6 +283,12 @@ class MessageType(IntEnum):
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
+    TronGetAddress = 10501
+    TronAddress = 10502
+    TronSignTx = 10503
+    TronSignedTx = 10504
+    TronSignMessage = 10505
+    TronMessageSignature = 10506
 
 
 class FailureType(IntEnum):
@@ -7683,7 +7689,7 @@ class TezosManagerTransfer(protobuf.MessageType):
 
 
 class TronGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10501
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -7700,7 +7706,7 @@ class TronGetAddress(protobuf.MessageType):
 
 
 class TronAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10502
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -7714,7 +7720,7 @@ class TronAddress(protobuf.MessageType):
 
 
 class TronSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10503
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("ref_block_bytes", "bytes", repeated=False, required=True),
@@ -7749,7 +7755,7 @@ class TronSignTx(protobuf.MessageType):
 
 
 class TronSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10504
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
         2: protobuf.Field("serialized_tx", "bytes", repeated=False, required=False),
@@ -7766,7 +7772,7 @@ class TronSignedTx(protobuf.MessageType):
 
 
 class TronSignMessage(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10505
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("message", "bytes", repeated=False, required=True),
@@ -7783,7 +7789,7 @@ class TronSignMessage(protobuf.MessageType):
 
 
 class TronMessageSignature(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10506
     FIELDS = {
         1: protobuf.Field("address", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),

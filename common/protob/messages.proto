@@ -389,11 +389,11 @@ enum MessageType {
     MessageType_PublicKeyMultiple = 10211 [(wire_out) = true];
 
     // tron
-    // MessageType_TronGetAddress = 10501 [(wire_in) = true];
-    // MessageType_TronAddress = 10502 [(wire_out) = true];
-    // MessageType_TronSignTx = 10503 [(wire_in) = true];
-    // MessageType_TronSignedTx = 10504 [(wire_out) = true];
-    // MessageType_TronSignMessage = 10505 [(wire_in) = true];
-    // MessageType_TronMessageSignature = 10506 [(wire_out) = true];
+    MessageType_TronGetAddress = 10501 [(wire_in) = true];
+    MessageType_TronAddress = 10502 [(wire_out) = true];
+    MessageType_TronSignTx = 10503 [(wire_in) = true];
+    MessageType_TronSignedTx = 10504 [(wire_out) = true];
+    MessageType_TronSignMessage = 10505 [(wire_in) = true];
+    MessageType_TronMessageSignature = 10506 [(wire_out) = true];
 
 }
