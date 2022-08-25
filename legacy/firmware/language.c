@@ -125,7 +125,10 @@ const char *languages[][2] = {
     {"Button expected", ""},  // msg
     // recovery.c reset.c
     {"By continuing you", " "},
+    // starcoin.c
+    {"CANCEL", "取消"},
     {"CONFIRM", "确认"},
+    {"CONFIRM SIGNING:", "确认签名:"},
     // fsm_msg_common.h
     {"Can't change se setting after device initialized", ""},  // msg
     // fsm_msg_coin.h
@@ -364,6 +367,8 @@ const char *languages[][2] = {
     {"FIRMWARE:", "固件版本:"},
     {"FLASH:", "闪存:"},
     {"FONT:", "字体:"},
+    // starcoin.c
+    {"FORMAT:", "格式:"},
     // signing.c signing.c signing.c signing.c
     // signing.c
     // signing.c
@@ -711,6 +716,9 @@ const char *languages[][2] = {
     {"SE version:", "SE版本:"},
     // layout2.c
     {"SEEDLESS", ""},
+    // starcoin.c
+    {"SENDER:", "发送方:"},
+    // layout2.c
     {"SERIAL:", "序列号:"},
     //
     {"SOL advance signing turn", "SOL高级签名"},
@@ -759,6 +767,8 @@ const char *languages[][2] = {
     {"Settings applied", ""},
     // layout2.c layout2.c
     {"Shutdown", "自动关机"},
+    // starcoin.c
+    {"Sign at you own risk", "签名风险自负"},
     // layout2.c
     {"Sign binary message?", ""},
     // layout2.c
@@ -824,6 +834,8 @@ const char *languages[][2] = {
      "了解如何使用\n请前往帮助中心"},
     // ethereum.c
     {"Too much data", ""},
+    // startcoin.c
+    {"Transaction data cannot be decoded", "交易无法解析"},
     // ethereum.c
     {"Transaction data:", ""},
     // signing.c signing.c signing.c
@@ -845,6 +857,8 @@ const char *languages[][2] = {
     {"Unencrypted message", ""},
     // fsm.c
     {"Unexpected message", ""},
+    // starcoin.c
+    {"Unknown", "未知"},
     // layout2.c
     {"Unknown Mosaic", ""},
     // tron_ui.c
@@ -1164,10 +1178,6 @@ const char *languages[][2] = {
     {"to:", ""},
     // ethereum.c
     {"token", "代币"},
-    //
-    // startcoin.c
-    {"transaction cannot be decoded", "交易无法解析"},
-    {"transaction:", "交易:"},
     //
     {"transaction is set to", "被设定为"},
     // layout2.c layout2.c
