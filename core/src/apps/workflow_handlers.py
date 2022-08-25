@@ -230,6 +230,11 @@ def find_message_handler_module(msg_type: int) -> str:
             return "apps.near.get_address"
         if msg_type == MessageType.NearSignTx:
             return "apps.near.sign_tx"
+        # aptos
+        if msg_type == MessageType.AptosGetAddress:
+            return "apps.aptos.get_address"
+        if msg_type == MessageType.AptosSignTx:
+            return "apps.aptos.sign_tx"
 
     raise ValueError
 

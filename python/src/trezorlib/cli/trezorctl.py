@@ -54,6 +54,7 @@ from . import (
     tezos,
     tron,
     with_client,
+    aptos,
 )
 
 if TYPE_CHECKING:
@@ -88,6 +89,7 @@ COMMAND_ALIASES = {
     "sol": sol.cli,
     "starcoin": starcoin.cli,
     "near": near.cli,
+    "aptos": aptos.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -374,6 +376,7 @@ cli.add_command(stellar.cli)
 cli.add_command(sol.cli)
 cli.add_command(tron.cli)
 cli.add_command(tezos.cli)
+cli.add_command(aptos.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)

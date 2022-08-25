@@ -656,7 +656,7 @@ class SolTokenTransfer(FullSizeWindow):
             )
 
 
-class StcBlindingSign(FullSizeWindow):
+class BlindingSignCommon(FullSizeWindow):
     def __init__(self, signer: str):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),

@@ -332,6 +332,14 @@ trezor.workflow
 import trezor.workflow
 apps
 import apps
+apps.aptos
+import apps.aptos
+apps.aptos.get_address
+import apps.aptos.get_address
+apps.aptos.helper
+import apps.aptos.helper
+apps.aptos.sign_tx
+import apps.aptos.sign_tx
 apps.base
 import apps.base
 apps.bitcoin
@@ -576,8 +584,6 @@ apps.starcoin.get_public_key
 import apps.starcoin.get_public_key
 apps.starcoin.helper
 import apps.starcoin.helper
-apps.starcoin.layout
-import apps.starcoin.layout
 apps.starcoin.sign_message
 import apps.starcoin.sign_message
 apps.starcoin.sign_tx
