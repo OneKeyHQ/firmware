@@ -48,3 +48,5 @@
   - [Changelog](misc/changelog.md)
   - [TOIF Image Format](misc/toif.md)
   - [COINS](misc/COINS.md)
+  - [Verify Onekey firmware](misc/verify-firmware.md)
+  - [Build custom Onekey firmware](misc/build-custom-firmware.md)
