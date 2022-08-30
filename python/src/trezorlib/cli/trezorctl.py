@@ -44,6 +44,7 @@ from . import (
     fido,
     firmware,
     monero,
+    near,
     nem,
     ripple,
     settings,
@@ -79,6 +80,7 @@ COMMAND_ALIASES = {
     "eth": ethereum.cli,
     "ada": cardano.cli,
     "stc": starcoin.cli,
+    "near": near.cli,
     "xmr": monero.cli,
     "xrp": ripple.cli,
     "xlm": stellar.cli,
@@ -365,6 +367,7 @@ cli.add_command(settings.cli)
 cli.add_command(starcoin.cli)
 cli.add_command(stellar.cli)
 cli.add_command(tezos.cli)
+cli.add_command(near.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)

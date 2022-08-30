@@ -1,0 +1,7 @@
+NearGetAddress.address_n                                   max_count:8
+NearAddress.address                                        max_size:67
+
+NearSignTx.address_n                                       max_count:8
+NearSignTx.raw_tx                                          max_size:1024
+
+NearSignedTx.signature                                     max_size:64

@@ -1075,9 +1075,13 @@ bool config_unlock(const char *pin) {
 #endif
     {
       if (!storage_is_unlocked()) {
+#if !EMULATOR
         register_timer("usbpoll", timer1s / 30, usbPoll);
+#endif
         storage_unlock(PIN_EMPTY, PIN_EMPTY_LEN, NULL);
+#if !EMULATOR
         unregister_timer("usbpoll");
+#endif
       }
 
       se_unlocked = sectrue;

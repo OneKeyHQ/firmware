@@ -1,7 +1,7 @@
 /*
- * This file is part of the Trezor project, https://trezor.io/
+ * This file is part of the OneKey project, https://onekey.so/
  *
- * Copyright (C) 2017 Saleem Rashid <trezor@saleemrashid.com>
+ * Copyright (C) 2021 OneKey Team <core@onekey.so>
  *
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,26 +17,17 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "buttons.h"
+#ifndef __NEAR_H__
+#define __NEAR_H__
 
-#include <SDL2/SDL.h>
+#include <stdbool.h>
+#include "bip32.h"
+#include "messages-near.pb.h"
 
-uint16_t buttonRead(void) {
-  uint16_t state = 0;
+bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
+                  NearSignedTx *resp);
 
-  const uint8_t *scancodes = SDL_GetKeyboardState(NULL);
-  if (scancodes[SDL_SCANCODE_LEFT]) {
-    state |= BTN_PIN_NO;
-  }
-  if (scancodes[SDL_SCANCODE_RIGHT]) {
-    state |= BTN_PIN_YES;
-  }
-  if (scancodes[SDL_SCANCODE_DOWN]) {
-    state |= BTN_PIN_DOWN;
-  }
-  if (scancodes[SDL_SCANCODE_UP]) {
-    state |= BTN_PIN_UP;
-  }
+// Helpers
+void near_get_address_from_public_key(const uint8_t *public_key, char *address);
 
-  return ~state;
-}
+#endif  // __NEAR_H__
