@@ -274,6 +274,10 @@ if TYPE_CHECKING:
         TronSignedTx = 10504
         TronSignMessage = 10505
         TronMessageSignature = 10506
+        NearGetAddress = 10701
+        NearAddress = 10702
+        NearSignTx = 10703
+        NearSignedTx = 10704
         WebAuthnListResidentCredentials = 800
         WebAuthnCredentials = 801
         WebAuthnAddResidentCredential = 802

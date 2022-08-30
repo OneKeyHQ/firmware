@@ -673,3 +673,22 @@ class StcBlindingSign(FullSizeWindow):
         self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
         )
+
+
+class NearBlindingSign(FullSizeWindow):
+    def __init__(self, signer: str):
+        super().__init__(
+            _(i18n_keys.TITLE__VIEW_TRANSACTION),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container,
+            _(i18n_keys.LIST_KEY__FORMAT__COLON),
+            _(i18n_keys.LIST_VALUE__UNKNOWN__COLON),
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
+        )

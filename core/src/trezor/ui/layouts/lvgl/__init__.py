@@ -994,3 +994,12 @@ async def confirm_stc_blinding_sign(ctx: wire.GenericContext, signer: str) -> No
     await raise_if_cancelled(
         interact(ctx, screen, "stc_blinding_sign", ButtonRequestType.ProtectCall)
     )
+
+
+async def confirm_near_blinding_sign(ctx: wire.GenericContext, signer: str) -> None:
+    from trezor.lvglui.scrs.template import NearBlindingSign
+
+    screen = NearBlindingSign(signer)
+    await raise_if_cancelled(
+        interact(ctx, screen, "near_blinding_sign", ButtonRequestType.ProtectCall)
+    )

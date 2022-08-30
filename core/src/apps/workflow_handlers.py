@@ -229,6 +229,12 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.StarcoinVerifyMessage:
             return "apps.starcoin.verify_message"
 
+        # near
+        if msg_type == MessageType.NearGetAddress:
+            return "apps.near.get_address"
+        if msg_type == MessageType.NearSignTx:
+            return "apps.near.sign_tx"
+
     raise ValueError
 
 
