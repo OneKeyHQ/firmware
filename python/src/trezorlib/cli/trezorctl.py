@@ -44,6 +44,7 @@ from . import (
     fido,
     firmware,
     monero,
+    near,
     nem,
     ripple,
     settings,
@@ -85,6 +86,7 @@ COMMAND_ALIASES = {
     "xtz": tezos.cli,
     "tron": tron.cli,
     "aptos": aptos.cli,
+    "near": near.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -365,6 +367,7 @@ cli.add_command(settings.cli)
 cli.add_command(starcoin.cli)
 cli.add_command(stellar.cli)
 cli.add_command(tezos.cli)
+cli.add_command(near.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)

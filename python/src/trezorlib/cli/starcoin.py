@@ -30,7 +30,7 @@ PATH_HELP = "BIP32 path. Always use hardened paths and the m/44'/101010'/0'/0'/ 
 
 @click.group(name="starcoin")
 def cli():
-    """Stellar commands."""
+    """Starcoin commands."""
 
 
 @cli.command()

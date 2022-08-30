@@ -1,0 +1,43 @@
+syntax = "proto2";
+package hw.trezor.messages.near;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageNear";
+
+/**
+ * Request: Ask device for Near address corresponding to address_n path
+ * @start
+ * @next NearAddress
+ * @next Failure
+ */
+message NearGetAddress {
+    repeated uint32 address_n = 1; // BIP-32 path to derive the key from master node
+    optional bool show_display = 2; // Optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains Near address derived from device private seed
+ * @end
+ */
+message NearAddress {
+    optional string address = 1; // Near address
+}
+
+/**
+ * Request: Ask device to sign Near transaction
+ * @start
+ * @next NearSignedTx
+ */
+message NearSignTx {
+    repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
+    optional bytes raw_tx = 2;                      // serialized raw transaction
+}
+
+/**
+ * Response: Contains Near transaction signature
+ * @end
+ */
+message NearSignedTx {
+    required bytes signature = 1; // Transaction signature
+}

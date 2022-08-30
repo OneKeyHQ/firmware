@@ -26,6 +26,7 @@ CORE_PROTOBUF_SOURCES="\
     $PROTOB/messages-webauthn.proto \
     $PROTOB/messages-tron.proto \
     $PROTOB/messages-aptos.proto \
+    $PROTOB/messages-near.proto \
 "
 
 PYTHON_PROTOBUF_SOURCES=$PROTOB/*.proto

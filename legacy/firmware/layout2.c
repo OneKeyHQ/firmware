@@ -38,6 +38,7 @@
 #include "memzero.h"
 #include "menu_core.h"
 #include "menu_list.h"
+#include "messages.h"
 #include "nem2.h"
 #include "oled.h"
 #include "prompt.h"
@@ -2432,4 +2433,118 @@ void layoutConfirmHash(const BITMAP *icon, const char *description,
   layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
   layoutButtonYes(_("Confirm"), &bmp_btn_confirm);
   oledRefresh();
+}
+
+bool layoutBlidSign(char *address) {
+  const struct font_desc *font = find_cur_font();
+  bool result = false;
+  int index = 0;
+  int y = 0;
+  uint8_t key = KEY_NULL;
+  const char **str =
+      split_message((const uint8_t *)address, strlen(address), 17);
+  int lines = (strlen(address) / 17) + 1;
+  if (lines > 4) lines = 4;
+
+  ButtonRequest resp = {0};
+  memzero(&resp, sizeof(ButtonRequest));
+  resp.has_code = true;
+  resp.code = ButtonRequestType_ButtonRequest_SignTx;
+  msg_write(MessageType_MessageType_ButtonRequest, &resp);
+
+refresh_menu:
+  oledClear_ex();
+  y = 0;
+  switch (index) {
+    case 0:
+      oledDrawStringAdapter(0, y, _("SENDER:"), FONT_STANDARD);
+      y += font->pixel + 5;
+      for (int i = 0; i < lines; i++) {
+        oledDrawString(0, y, str[i], FONT_STANDARD);
+        y += font->pixel + 1;
+      }
+
+      // scrollbar
+      for (int i = 0; i < OLED_HEIGHT; i += 3) {
+        oledDrawPixel(OLED_WIDTH - 1, i);
+      }
+      for (int i = 0; i < OLED_HEIGHT / 3; i++) {
+        oledDrawPixel(OLED_WIDTH - 1, i);
+      }
+      break;
+    case 1:
+      oledDrawStringAdapter(0, y, _("FORMAT:"), FONT_STANDARD);
+      y += font->pixel + 5;
+      oledDrawStringAdapter(0, y, _("Unknown"), FONT_STANDARD);
+      // scrollbar
+      for (int i = 0; i < OLED_HEIGHT; i += 3) {
+        oledDrawPixel(OLED_WIDTH - 1, i);
+      }
+      for (int i = OLED_HEIGHT / 3; i < 2 * OLED_HEIGHT / 3; i++) {
+        oledDrawPixel(OLED_WIDTH - 1, i);
+      }
+      break;
+    case 2:
+      oledDrawStringAdapter(0, y, _("CONFIRM SIGNING:"), FONT_STANDARD);
+      y += font->pixel + 5;
+      oledDrawStringAdapter(0, y, _("Transaction data cannot be decoded"),
+                            FONT_STANDARD);
+      if (0 == ui_language) {
+        y += 2 * font->pixel + 3;
+      } else {
+        y += font->pixel + 1;
+      }
+      oledDrawStringAdapter(0, y, _("Sign at you own risk"), FONT_STANDARD);
+
+      // scrollbar
+      for (int i = 0; i < OLED_HEIGHT - 10; i += 3) {
+        oledDrawPixel(OLED_WIDTH - 1, i);
+      }
+      for (int i = 2 * OLED_HEIGHT / 3; i < OLED_HEIGHT - 10; i++) {
+        oledDrawPixel(OLED_WIDTH - 1, i);
+      }
+
+      layoutButtonNoAdapter(_("CANCEL"), &bmp_btn_cancel);
+      layoutButtonYesAdapter(_("APPROVE"), &bmp_btn_confirm);
+      break;
+    default:
+      break;
+  }
+  oledRefresh();
+
+scan_key:
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      if (index > 0) {
+        index--;
+        goto refresh_menu;
+      } else {
+        goto scan_key;
+      }
+    case KEY_DOWN:
+      if (index < 2 /* 3 pages */) {
+        index++;
+        goto refresh_menu;
+      } else {
+        goto scan_key;
+      }
+
+    case KEY_CONFIRM:
+      if (2 == index) {
+        result = true;
+        break;
+      }
+      goto scan_key;
+    case KEY_CANCEL:
+      if (2 == index) {
+        result = false;
+        break;
+      }
+      goto scan_key;
+    default:
+      break;
+  }
+
+  return result;
 }
