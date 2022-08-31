@@ -26,6 +26,7 @@
 #include "messages-debug.pb.h"
 #include "messages-ethereum.pb.h"
 #include "messages-management.pb.h"
+#include "messages-near.pb.h"
 #include "messages-nem.pb.h"
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
@@ -184,5 +185,9 @@ void fsm_msgTronSignTx(TronSignTx *msg);
 // aptos
 void fsm_msgAptosGetAddress(const AptosGetAddress *msg);
 void fsm_msgAptosSignTx(const AptosSignTx *msg);
+
+// near
+void fsm_msgNearGetAddress(NearGetAddress *msg);
+void fsm_msgNearSignTx(const NearSignTx *msg);
 
 #endif

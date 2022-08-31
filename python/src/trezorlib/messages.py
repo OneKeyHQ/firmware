@@ -298,6 +298,10 @@ class MessageType(IntEnum):
     TronSignedTx = 10504
     TronSignMessage = 10505
     TronMessageSignature = 10506
+    NearGetAddress = 10701
+    NearAddress = 10702
+    NearSignTx = 10703
+    NearSignedTx = 10704
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
@@ -6515,6 +6519,68 @@ class MoneroExportedKeyImage(protobuf.MessageType):
     ) -> None:
         self.iv = iv
         self.blob = blob
+
+
+class NearGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10701
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class NearAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10702
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class NearSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10703
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        raw_tx: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class NearSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10704
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class NEMGetAddress(protobuf.MessageType):

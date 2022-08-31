@@ -18,15 +18,12 @@
  */
 
 #include "starcoin.h"
-#include "buttons.h"
 #include "config.h"
-#include "font.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
 #include "messages.h"
 #include "messages.pb.h"
-#include "protect.h"
 #include "sha3.h"
 
 // tx prefix: sha3_256("STARCOIN::RawUserTransaction") ->
@@ -61,9 +58,12 @@ void starcoin_get_address_from_public_key(const uint8_t *public_key,
 
 bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
                       StarcoinSignedTx *resp) {
-  char address[MAX_STARCOIN_ADDRESS_SIZE] = {'0', 'x'};
+  char address[MAX_STARCOIN_ADDRESS_SIZE + 1] = {0};
+  address[0] = '0';
+  address[1] = 'x';
   starcoin_get_address_from_public_key(node->public_key + 1, address + 2);
-  if (!layoutRequireConfirmBlidSign(address)) {
+
+  if (!layoutBlidSign(address)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
     return false;
@@ -134,111 +134,4 @@ bool starcoin_verify_message(const StarcoinVerifyMessage *msg) {
   memcpy(buf + 32 + msg_header_size, msg->message.bytes, msg->message.size);
   return 0 == ed25519_sign_open(buf, 32 + msg_header_size + msg->message.size,
                                 msg->public_key.bytes, msg->signature.bytes);
-}
-
-// Layouts
-bool layoutRequireConfirmBlidSign(char *address) {
-  const struct font_desc *font = find_cur_font();
-  bool result = false;
-  int index = 0;
-  int y = 0;
-  uint8_t key = KEY_NULL;
-
-  const char **str =
-      split_message((const uint8_t *)address, strlen(address), 17);
-
-refresh_menu:
-  oledClear_ex();
-  y = 0;
-  switch (index) {
-    case 0:
-      oledDrawStringAdapter(0, y, _("SENDER:"), FONT_STANDARD);
-      y += font->pixel + 5;
-      oledDrawString(0, y, str[0], FONT_STANDARD);
-      y += font->pixel + 1;
-      oledDrawString(0, y, str[1], FONT_STANDARD);
-
-      // scrollbar
-      for (int i = 0; i < OLED_HEIGHT; i += 3) {
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-      for (int i = 0; i < OLED_HEIGHT / 3; i++) {
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-      break;
-    case 1:
-      oledDrawStringAdapter(0, y, _("FORMAT:"), FONT_STANDARD);
-      y += font->pixel + 5;
-      oledDrawStringAdapter(0, y, _("Unknown"), FONT_STANDARD);
-      // scrollbar
-      for (int i = 0; i < OLED_HEIGHT; i += 3) {
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-      for (int i = OLED_HEIGHT / 3; i < 2 * OLED_HEIGHT / 3; i++) {
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-      break;
-    case 2:
-      oledDrawStringAdapter(0, y, _("CONFIRM SIGNING:"), FONT_STANDARD);
-      y += font->pixel + 5;
-      oledDrawStringAdapter(0, y, _("Transaction data cannot be decoded"),
-                            FONT_STANDARD);
-      if (0 == ui_language) {
-        y += 2 * font->pixel + 3;
-      } else {
-        y += font->pixel + 1;
-      }
-      oledDrawStringAdapter(0, y, _("Sign at you own risk"), FONT_STANDARD);
-
-      // scrollbar
-      for (int i = 0; i < OLED_HEIGHT - 10; i += 3) {
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-      for (int i = 2 * OLED_HEIGHT / 3; i < OLED_HEIGHT - 10; i++) {
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-
-      layoutButtonNoAdapter(_("CANCEL"), &bmp_btn_cancel);
-      layoutButtonYesAdapter(_("APPROVE"), &bmp_btn_confirm);
-      break;
-    default:
-      break;
-  }
-  oledRefresh();
-
-scan_key:
-  key = protectWaitKey(0, 0);
-  switch (key) {
-    case KEY_UP:
-      if (index > 0) {
-        index--;
-        goto refresh_menu;
-      } else {
-        goto scan_key;
-      }
-    case KEY_DOWN:
-      if (index < 2 /* 3 pages */) {
-        index++;
-        goto refresh_menu;
-      } else {
-        goto scan_key;
-      }
-
-    case KEY_CONFIRM:
-      if (2 == index) {
-        result = true;
-        break;
-      }
-      goto scan_key;
-    case KEY_CANCEL:
-      if (2 == index) {
-        result = false;
-        break;
-      }
-      goto scan_key;
-    default:
-      break;
-  }
-
-  return result;
 }

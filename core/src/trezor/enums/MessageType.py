@@ -260,6 +260,10 @@ if not utils.BITCOIN_ONLY:
     TronSignedTx = 10504
     TronSignMessage = 10505
     TronMessageSignature = 10506
+    NearGetAddress = 10701
+    NearAddress = 10702
+    NearSignTx = 10703
+    NearSignedTx = 10704
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

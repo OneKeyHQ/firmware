@@ -108,11 +108,10 @@ void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg) {
   if (!node) return;
 
   hdnode_fill_public_key(node);
-  starcoin_sign_message(node, msg, resp);
-
-  msg_write(MessageType_MessageType_StarcoinMessageSignature, resp);
-
-  layoutHome();
+  if (starcoin_sign_message(node, msg, resp)) {
+    msg_write(MessageType_MessageType_StarcoinMessageSignature, resp);
+    layoutHome();
+  }
 }
 
 void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg) {

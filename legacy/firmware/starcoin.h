@@ -35,7 +35,4 @@ bool starcoin_verify_message(const StarcoinVerifyMessage *msg);
 // Helpers
 void starcoin_get_address_from_public_key(const uint8_t *public_key,
                                           char *address);
-
-// Layout
-bool layoutRequireConfirmBlidSign(char *address);
 #endif  // __STARCOIN_H__
