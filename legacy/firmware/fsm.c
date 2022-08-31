@@ -63,6 +63,7 @@
 #if !BITCOIN_ONLY
 #include "aptos.h"
 #include "ethereum.h"
+#include "near.h"
 #include "nem.h"
 #include "nem2.h"
 #include "solana.h"
@@ -414,6 +415,7 @@ void fsm_msgRebootToBootloader(void) {
 
 #include "fsm_msg_aptos.h"
 #include "fsm_msg_ethereum.h"
+#include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"
