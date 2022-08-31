@@ -318,11 +318,6 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
 
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char *message) {
-#if ONEKEY_MINI
-  (void)wait;
-  (void)progress;
-  (void)message;
-#else
   const struct font_desc *font = find_cur_font();
   int y = 9;
   // Convert wait to secstr string.
@@ -356,7 +351,6 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
   }
   oledBox(2, OLED_HEIGHT - 6, 1 + progress, OLED_HEIGHT - 3, 1);
   oledRefresh();
-#endif
 
   // Check for Cancel / Initialize.
   protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
