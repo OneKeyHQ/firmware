@@ -522,6 +522,14 @@ apps.misc.get_firmware_hash
 import apps.misc.get_firmware_hash
 apps.misc.sign_identity
 import apps.misc.sign_identity
+apps.near
+import apps.near
+apps.near.get_address
+import apps.near.get_address
+apps.near.layout
+import apps.near.layout
+apps.near.sign_tx
+import apps.near.sign_tx
 apps.solana
 import apps.solana
 apps.solana.constents

@@ -4836,6 +4836,66 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["MoneroExportedKeyImage"]:
             return isinstance(msg, cls)
 
+    class NearGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["NearGetAddress"]:
+            return isinstance(msg, cls)
+
+    class NearAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["NearAddress"]:
+            return isinstance(msg, cls)
+
+    class NearSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            raw_tx: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["NearSignTx"]:
+            return isinstance(msg, cls)
+
+    class NearSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["NearSignedTx"]:
+            return isinstance(msg, cls)
+
     class NEMGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         network: "int"

@@ -52,6 +52,7 @@ from . import (
     stellar,
     tezos,
     tron,
+    near,
     with_client,
 )
 
@@ -86,6 +87,7 @@ COMMAND_ALIASES = {
     "trx": tron.cli,
     "sol": sol.cli,
     "starcoin": starcoin.cli,
+    "near": near.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
