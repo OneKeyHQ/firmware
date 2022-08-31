@@ -260,6 +260,10 @@ class MessageType(IntEnum):
     StarcoinSignMessage = 10306
     StarcoinMessageSignature = 10307
     StarcoinVerifyMessage = 10308
+    AptosGetAddress = 10600
+    AptosAddress = 10601
+    AptosSignTx = 10602
+    AptosSignedTx = 10603
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -581,6 +585,71 @@ class TezosBallotType(IntEnum):
     Yay = 0
     Nay = 1
     Pass = 2
+
+
+class AptosGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10600
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class AptosAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10601
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class AptosSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10602
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class AptosSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10603
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: "bytes",
+        signature: "bytes",
+    ) -> None:
+        self.public_key = public_key
+        self.signature = signature
 
 
 class BinanceGetAddress(protobuf.MessageType):
@@ -6691,14 +6760,14 @@ class SolanaSignTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 10102
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
+        raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
-        raw_tx: Optional["bytes"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx

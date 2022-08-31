@@ -1,0 +1,8 @@
+AptosGetAddress.address_n                                   max_count:8
+AptosAddress.address                                        max_size:67
+
+AptosSignTx.address_n                                       max_count:8
+AptosSignTx.raw_tx                                          max_size:1024
+
+AptosSignedTx.public_key                                    max_size:32
+AptosSignedTx.signature                                     max_size:64

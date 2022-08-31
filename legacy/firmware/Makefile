@@ -89,6 +89,7 @@ OBJS += stellar.o
 OBJS += tron.o
 OBJS += tron_ui.o
 OBJS += tron_tokens.o
+OBJS += aptos.o
 endif
 
 OBJS += debug.o
@@ -166,6 +167,7 @@ OBJS += protob/messages-solana.pb.o
 OBJS += protob/messages-starcoin.pb.o
 OBJS += protob/messages-stellar.pb.o
 OBJS += protob/messages-tron.pb.o
+OBJS += protob/messages-aptos.pb.o
 endif
 
 OPTFLAGS ?= -Os
