@@ -6269,3 +6269,153 @@ if TYPE_CHECKING:
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["NearSignedTx"]:
             return isinstance(msg, cls)
+
+    class ConfluxGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        chain_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxGetAddress"]:
+            return isinstance(msg, cls)
+
+    class ConfluxAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxAddress"]:
+            return isinstance(msg, cls)
+
+    class ConfluxSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        nonce: "bytes | None"
+        gas_price: "bytes | None"
+        gas_limit: "bytes | None"
+        to: "str | None"
+        value: "bytes | None"
+        epoch_height: "bytes | None"
+        storage_limit: "bytes | None"
+        data_initial_chunk: "bytes | None"
+        data_length: "int | None"
+        chain_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            nonce: "bytes | None" = None,
+            gas_price: "bytes | None" = None,
+            gas_limit: "bytes | None" = None,
+            to: "str | None" = None,
+            value: "bytes | None" = None,
+            epoch_height: "bytes | None" = None,
+            storage_limit: "bytes | None" = None,
+            data_initial_chunk: "bytes | None" = None,
+            data_length: "int | None" = None,
+            chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxSignTx"]:
+            return isinstance(msg, cls)
+
+    class ConfluxTxRequest(protobuf.MessageType):
+        data_length: "int | None"
+        signature_v: "int | None"
+        signature_r: "bytes | None"
+        signature_s: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data_length: "int | None" = None,
+            signature_v: "int | None" = None,
+            signature_r: "bytes | None" = None,
+            signature_s: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxTxRequest"]:
+            return isinstance(msg, cls)
+
+    class ConfluxTxAck(protobuf.MessageType):
+        data_chunk: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data_chunk: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxTxAck"]:
+            return isinstance(msg, cls)
+
+    class ConfluxSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            message: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxSignMessage"]:
+            return isinstance(msg, cls)
+
+    class ConfluxMessageSignature(protobuf.MessageType):
+        signature: "bytes | None"
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes | None" = None,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxMessageSignature"]:
+            return isinstance(msg, cls)
+
+    class ConfluxSignMessageCIP23(protobuf.MessageType):
+        address_n: "list[int]"
+        domain_hash: "bytes | None"
+        message_hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            domain_hash: "bytes | None" = None,
+            message_hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxSignMessageCIP23"]:
+            return isinstance(msg, cls)

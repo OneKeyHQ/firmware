@@ -62,6 +62,7 @@
 
 #if !BITCOIN_ONLY
 #include "aptos.h"
+#include "conflux.h"
 #include "ethereum.h"
 #include "near.h"
 #include "nem.h"
@@ -414,6 +415,7 @@ void fsm_msgRebootToBootloader(void) {
 #if !BITCOIN_ONLY
 
 #include "fsm_msg_aptos.h"
+#include "fsm_msg_conflux.h"
 #include "fsm_msg_ethereum.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"

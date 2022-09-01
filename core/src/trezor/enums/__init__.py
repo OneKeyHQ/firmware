@@ -266,6 +266,14 @@ if TYPE_CHECKING:
         EthereumSignMessageEIP712 = 10200
         GetPublicKeyMultiple = 10210
         PublicKeyMultiple = 10211
+        ConfluxGetAddress = 10401
+        ConfluxAddress = 10402
+        ConfluxSignTx = 10403
+        ConfluxTxRequest = 10404
+        ConfluxTxAck = 10405
+        ConfluxSignMessage = 10406
+        ConfluxSignMessageCIP23 = 10407
+        ConfluxMessageSignature = 10408
         TronGetAddress = 10501
         TronAddress = 10502
         TronSignTx = 10503

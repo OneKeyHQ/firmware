@@ -1,0 +1,31 @@
+ConfluxSignTx.address_n                max_count:8
+ConfluxSignTx.nonce                    max_size:32
+ConfluxSignTx.gas_price                max_size:32
+ConfluxSignTx.gas_limit                max_size:32
+ConfluxSignTx.to                       max_size:43
+ConfluxSignTx.value                    max_size:32
+ConfluxSignTx.epoch_height             max_size:32
+ConfluxSignTx.storage_limit            max_size:32
+ConfluxSignTx.chain_id                 max_size:32
+ConfluxSignTx.data_initial_chunk       max_size:1024
+
+ConfluxTxRequest.signature_r           max_size:32
+ConfluxTxRequest.signature_s           max_size:32
+
+ConfluxTxAck.data_chunk                max_size:1024
+
+ConfluxSignMessage.address_n           max_count:8
+ConfluxSignMessage.message             max_size:5120
+
+ConfluxSignMessageCIP23.address_n      max_count:8
+ConfluxSignMessageCIP23.domain_hash    max_size:32
+ConfluxSignMessageCIP23.message_hash   max_size:32
+
+ConfluxMessageSignature.address        max_size:43
+ConfluxMessageSignature.signature      max_size:65
+
+ConfluxGetAddress.address_n            max_count:8
+ConfluxGetAddress.chain_id             max_size:32
+
+ConfluxAddress.address                 max_size:52
+
