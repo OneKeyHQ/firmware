@@ -64,11 +64,13 @@ const char *languages[][2] = {
     // layout2.c
     {"BACKUP FAILED!", "备份失败"},
     // layout2.c
-    {"BLE Name:", "蓝牙名称:"},
-    // layout2.c
     {"BLE enable:", "使用蓝牙:"},
     // layout2.c
-    {"BLE version:", "蓝牙版本:"},
+    {"BLUETOOTH NAME:", "蓝牙名称:"},
+    //
+    {"BLUETOOTH VERSION:", "蓝牙版本:"},
+    //
+    {"BOOTLOADER:", "BOOTLOADER版本:"},
     // layout2.c
     {"BUILD ID:", "构建号:"},
     // recovery.c
@@ -190,6 +192,9 @@ const char *languages[][2] = {
     {"Create", "创建新钱包"},
     {"Create account", "创建账户"},
     {"Create multisig", "创建多重签名"},
+    // layout2.c
+    {"DEVICE ID:", "设备编号:"},
+    //
     {"DONE", "完成"},
     // fsm.c
     {"Data error", "数据错误"},
@@ -209,8 +214,6 @@ const char *languages[][2] = {
     {"Decrypted message", "解密消息"},
     // layout2.c
     {"Decrypted signed message", "解密签名消息"},
-    // layout2.c
-    {"Device ID:", "设备ID:"},
     // reset.c reset.c
     {"Device failed initialized", ""},  // msg
     //
@@ -304,6 +307,8 @@ const char *languages[][2] = {
     {"Expiry not enabled on this coin.", ""},  // msg
     // signing.c
     {"Extra data not enabled on this coin.", ""},  // msg
+    //
+    {"FIRMWARE VERSION:", "固件版本:"},
     // starcoin.c
     {"FORMAT:", "格式:"},
     // signing.c signing.c signing.c signing.c
@@ -405,6 +410,8 @@ const char *languages[][2] = {
     {"Locktime for this", "该交易时间锁定"},
     // layout2.c
     {"Login to:", "登录到"},
+    //
+    {"MODEL:", "型号:"},
     //
     {"Make sure you still have", "请确保您仍掌握"},
     // ethereum.c
@@ -589,13 +596,15 @@ const char *languages[][2] = {
     //
     {"Retry", "重试"},
     // layout2.c
-    {"SE version:", "SE版本:"},
+    {"SE VERSION:", "SE版本:"},
     //
     {"SECURITY CHECK", "防伪校验"},
     // layout2.c
     {"SEEDLESS", ""},
     // starcoin.c
     {"SENDER:", "发送方:"},
+    //
+    {"SERIAL NUMBER:", "序列号:"},
     //
     {"SOL advance signing turn", "SOL高级签名"},
     // ethereum.c
@@ -623,9 +632,8 @@ const char *languages[][2] = {
     {"Send SOL", "发送 SOL"},
     // layout2.c
     {"Send anyway?", ""},
+    //
     {"Sender", "发送方"},
-    // layout2.c
-    {"Serial:", "序列号:"},
     // fsm_msg_common.h
     {"Session cleared", ""},
     // layout2.c
