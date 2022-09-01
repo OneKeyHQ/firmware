@@ -6,7 +6,7 @@ from trezor.crypto.hashlib import sha256
 from trezor.messages import NearSignedTx, NearSignTx
 
 from apps.common import paths
-from apps.common.keychain import Keychain, auto_keychain
+from apps.common.keychain import FORBIDDEN_KEY_PATH, Keychain, auto_keychain
 
 from .layout import confirm_final, require_confirm_data, require_confirm_tx
 
@@ -17,6 +17,12 @@ async def sign_tx(
 ) -> NearSignedTx:
 
     await paths.validate_path(ctx, keychain, msg.address_n)
+    if (
+        len(msg.address_n) != 3
+        or msg.address_n[0] != 0x8000002C
+        or msg.address_n[1] != 0x8000018D
+    ):
+        raise FORBIDDEN_KEY_PATH
 
     node = keychain.derive(msg.address_n)
     pubkey = node.public_key()[1:]

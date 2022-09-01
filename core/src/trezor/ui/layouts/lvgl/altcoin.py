@@ -109,6 +109,7 @@ async def confirm_total_tron(
     to_address: str | None,
     amount: str,
     fee_max: str,
+    total_amount: str | None,
     network: str | None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsTRON
@@ -119,6 +120,7 @@ async def confirm_total_tron(
         to_address,
         amount,
         fee_max,
+        total_amount,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)

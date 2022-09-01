@@ -48,6 +48,29 @@ def require_confirm_tx(
     )
 
 
+def require_confirm_fee(
+    ctx: Context,
+    from_address: str | None = None,
+    to_address: str | None = None,
+    value: int = 0,
+    gas_price: int = 0,
+    gas_limit: int = 0,
+    network: str | None = None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl.altcoin import confirm_total_tron
+
+    fee_limit = gas_price * gas_limit
+    return confirm_total_tron(
+        ctx,
+        from_address,
+        to_address,
+        format_conflux_amount(value),
+        format_conflux_amount(fee_limit),
+        format_conflux_amount(value + fee_limit),
+        network,
+    )
+
+
 def format_conflux_amount(value: int) -> str:
     suffix = "CFX"
     decimals = helpers.DECIMALS

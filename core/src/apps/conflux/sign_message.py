@@ -31,20 +31,19 @@ def message_digest(message: bytes) -> bytes:
 async def sign_message(
     ctx: Context, msg: ConfluxSignMessage, keychain: Keychain
 ) -> ConfluxMessageSignature:
-    validate_message(msg.message)
+    message = msg.message if msg.message is not None else b""
+    validate_message(message)
     await paths.validate_path(ctx, keychain, msg.address_n)
 
     node = keychain.derive(msg.address_n)
 
     address = address_from_bytes(node.ethereum_pubkeyhash())
+    cfx_address = address_from_hex(address, 1029)
     await confirm_signverify(
-        ctx, "CFX", decode_message(msg.message), address, verify=False
+        ctx, "CFX", decode_message(message), cfx_address, verify=False
     )
 
-    address = address_from_bytes(node.ethereum_pubkeyhash(), None)
-    cfx_address = address_from_hex(address, 1029)
-
-    digest = message_digest(msg.message)
+    digest = message_digest(message)
     signature = secp256k1.sign(
         node.private_key(),
         digest,
@@ -53,6 +52,6 @@ async def sign_message(
     )
 
     return ConfluxMessageSignature(
-        address=cfx_address,
+        address=address,
         signature=signature[1:] + bytearray([signature[0] - 27]),
     )

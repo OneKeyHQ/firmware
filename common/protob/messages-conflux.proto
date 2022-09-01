@@ -26,28 +26,26 @@ message ConfluxAddress {
     optional string address = 1;                       // Conflux address as hex-encoded string
 }
 
-
 /**
  * Request: Ask device to sign transaction
- * gas_price, gas_limit and chain_id must be provided and non-zero.
- * All other fields are optional and default to value `0` if missing.
+ * All fields are optional from the protocol's point of view. Each field defaults to value `0` if missing.
  * Note: the first at most 1024 bytes of data MUST be transmitted as part of this message.
  * @start
  * @next ConfluxTxRequest
  * @next Failure
  */
 message ConfluxSignTx {
-    repeated uint32 address_n = 1;                       // BIP-32 path to derive the key from master node
-    required string to = 2;
-    required bytes nonce = 3;
-    required bytes value = 4;
-    required bytes gas = 5;
-    required bytes gas_price = 6;
-    required bytes storage_limit = 7;
-    required bytes epoch_height = 8;
-    required bytes data_initial_chunk = 9;  // The initial data chunk (<= 1024 bytes)
-    required uint32 data_length = 10;        // Length of transaction payload
-    required uint32 chain_id = 11;   // chain id
+    repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
+    optional bytes nonce = 2;               // <=256 bit unsigned big endian
+    optional bytes gas_price = 3;           // <=256 bit unsigned big endian (in wei)
+    optional bytes gas_limit = 4;           // <=256 bit unsigned big endian
+    optional string to = 5;                // recipient address
+    optional bytes value = 6;
+    optional bytes epoch_height = 7;
+    optional bytes storage_limit = 8;              // <=256 bit unsigned big endian (in wei)
+    optional bytes data_initial_chunk = 9;  // The initial data chunk (<= 1024 bytes)
+    optional uint32 data_length = 10;        // Length of transaction payload
+    optional uint32 chain_id = 11;           // Chain Id for EIP 155
 }
 
 /**
@@ -69,7 +67,7 @@ message ConfluxTxRequest {
  * @next ConfluxTxRequest
  */
 message ConfluxTxAck {
-    required bytes data_chunk = 1;  // Bytes from transaction payload (<= 1024 bytes)
+    optional bytes data_chunk = 1;  // Bytes from transaction payload (<= 1024 bytes)
 }
 
 /**
@@ -78,9 +76,9 @@ message ConfluxTxAck {
  * @next ConfluxMessageSignature
  * @next Failure
  */
- message ConfluxSignMessage {
+message ConfluxSignMessage {
     repeated uint32 address_n = 1;  // BIP-32 path to derive the key from master node
-    required bytes message = 2;     // message to be signed
+    optional bytes message = 2;     // message to be signed
 }
 
 /**
@@ -88,10 +86,9 @@ message ConfluxTxAck {
  * @end
  */
 message ConfluxMessageSignature {
-    required bytes signature = 2;   // signature of the message
-    required string address = 3;     // address used to sign the message
+    optional bytes signature = 2;   // signature of the message
+    optional string address = 3;     // address used to sign the message
 }
-
 /**
  * Request: Ask device to sign message cip23
  * @start
@@ -100,31 +97,6 @@ message ConfluxMessageSignature {
  */
 message ConfluxSignMessageCIP23 {
     repeated uint32 address_n = 1;  // BIP-32 path to derive the key from master node
-    required bytes domain_hash = 2;     // domain_separator hash
-    required bytes message_hash = 3;     // struct_hash
-}
-
-/**
- * Request: Ask device to verify message
- * @start
- * @next Success
- * @next Failure
- */
- message ConfluxVerifyMessage {
-    required bytes signature = 2;   // signature to verify
-    required bytes message = 3;     // message to verify
-    required string address = 4;     // address to verify
-}
-
-/**
- * Request: Ask device to verify message
- * @start
- * @next Success
- * @next Failure
- */
- message ConfluxVerifyMessageCIP23 {
-    required bytes signature = 2;   // signature to verify
-    required bytes domain_hash = 3;     // domain_separator hash
-    required bytes message_hash = 4;     // struct_hash
-    required string address = 5;     // address to verify
+    optional bytes domain_hash = 2;     // domain_separator hash
+    optional bytes message_hash = 3;     // struct_hash
 }

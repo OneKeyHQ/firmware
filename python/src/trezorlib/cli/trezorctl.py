@@ -44,6 +44,7 @@ from . import (
     fido,
     firmware,
     monero,
+    near,
     nem,
     ripple,
     settings,
@@ -52,7 +53,6 @@ from . import (
     stellar,
     tezos,
     tron,
-    near,
     with_client,
 )
 

@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2022 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 Onekey and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -71,10 +71,11 @@ def sign_message(client: "TrezorClient", address: str, message: str) -> Dict[str
     """Sign message with Conflux address."""
     address_n = tools.parse_path(address)
     ret = conflux.sign_message(client, address_n, message)
+    signature = ret.signature if ret.signature is not None else b""
     output = {
         "message": message,
         "address": ret.address,
-        "signature": f"0x{ret.signature.hex()}",
+        "signature": f"0x{signature.hex()}",
     }
     return output
 
@@ -89,44 +90,16 @@ def sign_message_cip23(
 ) -> Dict[str, str]:
     """Sign message with Conflux address."""
     address_n = tools.parse_path(address)
-    ret = conflux.sign_message_cip23(client, address_n, domain_hash, message_hash)
+    domain_hash_bytes = conflux.decode_hex(domain_hash) if domain_hash else None
+    message_hash_bytes = conflux.decode_hex(message_hash) if message_hash else None
+    ret = conflux.sign_message_cip23(
+        client, address_n, domain_hash_bytes, message_hash_bytes
+    )
+    signature = ret.signature if ret.signature is not None else b""
     output = {
         "domain_hash": domain_hash,
         "message_hash": message_hash,
         "address": ret.address,
-        "signature": f"0x{ret.signature.hex()}",
+        "signature": f"0x{signature.hex()}",
     }
     return output
-
-
-@cli.command()
-@click.argument("address")
-@click.argument("signature")
-@click.argument("message")
-@with_client
-def verify_message(
-    client: "TrezorClient", address: str, signature: str, message: str
-) -> bool:
-    """Verify message signed with Conflux address."""
-    signature_bytes = conflux.decode_hex(signature)
-    return conflux.verify_message(client, address, signature_bytes, message)
-
-
-@cli.command()
-@click.argument("address")
-@click.argument("signature")
-@click.argument("domain-hash")
-@click.argument("message-hash")
-@with_client
-def verify_message_cip23(
-    client: "TrezorClient",
-    address: str,
-    signature: str,
-    domain_hash: str,
-    message_hash: str,
-) -> bool:
-    """Verify message signed with Conflux address."""
-    signature_bytes = conflux.decode_hex(signature)
-    return conflux.verify_message_cip23(
-        client, address, signature_bytes, domain_hash, message_hash
-    )

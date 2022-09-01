@@ -5,7 +5,7 @@ from trezor.messages import NearAddress, NearGetAddress
 from trezor.ui.layouts import show_address
 
 from apps.common import paths
-from apps.common.keychain import Keychain, auto_keychain
+from apps.common.keychain import FORBIDDEN_KEY_PATH, Keychain, auto_keychain
 
 if TYPE_CHECKING:
     from trezor.wire import Context
@@ -16,6 +16,12 @@ async def get_address(
     ctx: Context, msg: NearGetAddress, keychain: Keychain
 ) -> NearAddress:
     await paths.validate_path(ctx, keychain, msg.address_n)
+    if (
+        len(msg.address_n) != 3
+        or msg.address_n[0] != 0x8000002C
+        or msg.address_n[1] != 0x8000018D
+    ):
+        raise FORBIDDEN_KEY_PATH
 
     node = keychain.derive(msg.address_n)
     public_key = node.public_key()[1:]

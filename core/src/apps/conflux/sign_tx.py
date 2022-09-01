@@ -8,8 +8,8 @@ from trezor.utils import HashWriter
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from .helpers import bytes_from_address, decode_hex_address
-from .layout import require_confirm_data, require_confirm_tx
+from .helpers import address_from_bytes, address_from_hex, bytes_from_address
+from .layout import require_confirm_data, require_confirm_fee, require_confirm_tx
 
 
 @auto_keychain(__name__)
@@ -17,33 +17,75 @@ async def sign_tx(
     ctx: wire.Context, msg: ConfluxSignTx, keychain: Keychain
 ) -> ConfluxTxRequest:
 
-    data_total = msg.data_length
+    data_total = msg.data_length if msg.data_length is not None else 0
 
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(msg.address_n)
 
-    await require_confirm_tx(ctx, msg.to, int.from_bytes(msg.value, "big"))
-    if msg.data_length > 0:
-        await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
+    if (
+        msg.gas_limit is None
+        or msg.gas_price is None
+        or msg.epoch_height is None
+        or msg.storage_limit is None
+    ):
+        raise wire.DataError("Invalid params")
 
-    msg.to = decode_hex_address(msg.to)
+    owner_address = address_from_bytes(node.ethereum_pubkeyhash(), None)
+    value = msg.value if msg.value is not None else b""
+    gas_price = msg.gas_price if msg.gas_price is not None else b""
+    gas_limit = msg.gas_limit if msg.gas_limit is not None else b""
+    to = msg.to if msg.to is not None else ""
+    storage_limit = msg.storage_limit if msg.storage_limit is not None else b""
+    epoch_height = msg.epoch_height if msg.epoch_height is not None else b""
+    nonce = msg.nonce if msg.nonce is not None else b""
+    chain_id = msg.chain_id if msg.chain_id is not None else 1029
+    data_initial_chunk = (
+        msg.data_initial_chunk if msg.data_initial_chunk is not None else b""
+    )
+    address = address_from_hex(to, chain_id)
+
+    await require_confirm_tx(ctx, address, int.from_bytes(value, "big"))
+    if gas_limit != b"" and gas_price != b"":
+        await require_confirm_fee(
+            ctx,
+            from_address=owner_address,
+            to_address=address,
+            value=int.from_bytes(value, "big"),
+            gas_price=int.from_bytes(gas_price, "big"),
+            gas_limit=int.from_bytes(gas_limit, "big"),
+            network="CFX",
+        )
+
+    if data_total > 0:
+        await require_confirm_data(ctx, data_initial_chunk, data_total)
 
     data = bytearray()
-    data += msg.data_initial_chunk
-    data_left = data_total - len(msg.data_initial_chunk)
+    data += data_initial_chunk
+    data_left = data_total - len(data_initial_chunk)
 
-    total_length = get_total_length(msg, data_total)
+    total_length = get_total_length(
+        value=value,
+        gas_price=gas_price,
+        gas_limit=gas_limit,
+        to=to,
+        storage_limit=storage_limit,
+        epoch_height=epoch_height,
+        nonce=nonce,
+        chain_id=chain_id,
+        data_initial_chunk=data_initial_chunk,
+        data_total=data_total,
+    )
 
     sha = HashWriter(sha3_256(keccak=True))
     rlp.write_header(sha, total_length, rlp.LIST_HEADER_BYTE)
-    rlp.write(sha, msg.nonce)
-    rlp.write(sha, msg.gas_price)
-    rlp.write(sha, msg.gas)
-    rlp.write(sha, bytes_from_address(msg.to))
-    rlp.write(sha, msg.value)
-    rlp.write(sha, msg.storage_limit)
-    rlp.write(sha, msg.epoch_height)
-    rlp.write(sha, msg.chain_id)
+    rlp.write(sha, nonce)
+    rlp.write(sha, gas_price)
+    rlp.write(sha, gas_limit)
+    rlp.write(sha, bytes_from_address(to))
+    rlp.write(sha, value)
+    rlp.write(sha, storage_limit)
+    rlp.write(sha, epoch_height)
+    rlp.write(sha, chain_id)
 
     if data_left == 0:
         rlp.write(sha, data)
@@ -53,8 +95,9 @@ async def sign_tx(
 
     while data_left > 0:
         resp = await send_request_chunk(ctx, data_left)
-        data_left -= len(resp.data_chunk)
-        sha.extend(resp.data_chunk)
+        data_chunk = resp.data_chunk if resp.data_chunk is not None else b""
+        data_left -= len(data_chunk)
+        sha.extend(data_chunk)
 
     digest = sha.get_digest()
     signature = secp256k1.sign(
@@ -69,24 +112,35 @@ async def sign_tx(
     return req
 
 
-def get_total_length(msg: ConfluxSignTx, data_total: int) -> int:
+def get_total_length(
+    value: bytes,
+    gas_price: bytes,
+    gas_limit: bytes,
+    to: str,
+    storage_limit: bytes,
+    epoch_height: bytes,
+    nonce: bytes,
+    chain_id: int,
+    data_initial_chunk: bytes,
+    data_total: int,
+) -> int:
     length = 0
 
     fields: tuple[rlp.RLPItem, ...] = (
-        msg.nonce,
-        msg.gas_price,
-        msg.gas,
-        bytes_from_address(msg.to),
-        msg.value,
-        msg.storage_limit,
-        msg.epoch_height,
-        msg.chain_id,
+        nonce,
+        gas_price,
+        gas_limit,
+        bytes_from_address(to),
+        value,
+        storage_limit,
+        epoch_height,
+        chain_id,
     )
 
     for field in fields:
         length += rlp.length(field)
 
-    length += rlp.header_length(data_total, msg.data_initial_chunk)
+    length += rlp.header_length(data_total, data_initial_chunk)
     length += data_total
 
     return length
