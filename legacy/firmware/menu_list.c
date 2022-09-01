@@ -408,6 +408,27 @@ void menu_set_eth_eip(int index) {
   layoutHome();
 }
 
+void menu_set_cfx_cip(int index) {
+  char desc[64] = {0};
+
+  bool state = index ? false : true;
+  if (config_hasPin()) {
+    if (!protectPinOnDevice(false, true)) {
+      return;
+    }
+  }
+
+  config_setCoinSwitch(COIN_SWITCH_CFX_CIP23, state);
+
+  strcat(desc, _("CFX advance signing turn"));
+  strcat(desc, state ? _(" On") : _(" Off"));
+  layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
+                                 _("Done"), NULL, NULL, NULL, NULL, desc, NULL,
+                                 NULL);
+  protectWaitKey(0, 1);
+  layoutHome();
+}
+
 void menu_set_sol_blind_sign(int index) {
   char desc[64] = {0};
 
@@ -815,11 +836,26 @@ static struct menu sol_switch_menu = {
     .previous = &blind_sign_menu,
 };
 
+static struct menu_item cfx_cip_set_menu_items[] = {
+    {"On", NULL, true, menu_set_cfx_cip, NULL, false},
+    {"Off", NULL, true, menu_set_cfx_cip, NULL, false}};
+
+static struct menu cfx_cip_switch_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(cfx_cip_set_menu_items),
+    .title = NULL,
+    .items = cfx_cip_set_menu_items,
+    .previous = &blind_sign_menu,
+};
+
 static struct menu_item blind_sign_menu_items[] = {
     {"Advance ETH Sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
      menu_para_eth_eip_switch, false},
     {"Advance SOL Sign", NULL, false, .sub_menu = &sol_switch_menu,
-     menu_para_sol_switch, false}};
+     menu_para_sol_switch, false},
+    {"Advance CFX Sign", NULL, false, .sub_menu = &cfx_cip_switch_menu,
+     menu_para_cfx_cip_switch, false}};
 
 static struct menu blind_sign_menu = {
     .start = 0,

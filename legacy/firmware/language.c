@@ -45,6 +45,8 @@ const char *languages[][2] = {
     // fsm_msg_coin.h fsm_msg_lisk.h
     {"Address:", "地址"},
     //
+    {"Advance CFX Sign", "CFX高级签名"},
+    //
     {"Advance ETH Sign", "ETH高级签名"},
     //
     {"Advance SOL Sign", "SOL高级签名"},
@@ -989,6 +991,8 @@ const char *languages[][2] = {
     {"and MATCHES", ""},
     // layout2.c
     {"and levy of", ""},
+    // tron_ui.c
+    {"and limit max fee to", "交易费上限"},
     // layout2.c c c
     {"and network fee of", ""},
     // fsm_msg_common.h
@@ -1048,7 +1052,7 @@ const char *languages[][2] = {
     // lisk.c
     {"fee:", "手续费"},
     // ethereum.c
-    {"for gas?", ""},
+    {"for gas?", "手续费"},
     // fsm_msg_coin.h
     {"for selected coin.", ""},
     {"format", "格式"},
@@ -1103,7 +1107,7 @@ const char *languages[][2] = {
     // protect.c
     {"passphrase using", "密语"},
     // ethereum.c
-    {"paying up to", ""},
+    {"paying up to", "支付最多"},
     // fsm_msg_common.h fsm_msg_common.h
     {"protection?", "保护"},
     // layout2.c

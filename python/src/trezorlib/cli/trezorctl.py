@@ -35,6 +35,7 @@ from . import (
     bixin,
     btc,
     cardano,
+    conflux,
     cosi,
     crypto,
     debug,
@@ -87,6 +88,7 @@ COMMAND_ALIASES = {
     "xtz": tezos.cli,
     "tron": tron.cli,
     "aptos": aptos.cli,
+    "conflux": conflux.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -368,6 +370,7 @@ cli.add_command(starcoin.cli)
 cli.add_command(stellar.cli)
 cli.add_command(tezos.cli)
 cli.add_command(near.cli)
+cli.add_command(conflux.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
