@@ -46,3 +46,4 @@ class lv_colors:
     WHITE_2 = LV_COLOR_MAKE(0xCC, 0xCC, 0xCC)  # subtitle text
     WHITE_3 = LV_COLOR_MAKE(0xE5, 0xE5, 0xE5)  # scrollbar
     GRAY_2 = LV_COLOR_MAKE(0xA6, 0xA6, 0xA6)  # page_able gray dot indicator
+    ONEKEY_YELLOW = LV_COLOR_MAKE(0xFF, 0xCC, 0x00)

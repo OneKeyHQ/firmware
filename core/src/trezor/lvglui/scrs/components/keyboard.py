@@ -1,10 +1,12 @@
 from storage import device
+from trezor import motor
 from trezor.crypto import bip39, random
 
 from .. import (
     font_MONO24,
     font_PJSBOLD20,
     font_PJSBOLD32,
+    font_PJSBOLD48,
     font_STATUS_BAR,
     lv,
     lv_colors,
@@ -131,7 +133,9 @@ class BIP39Keyboard(lv.keyboard):
             "READY",
         ]
         self.ctrl_map = [
-            lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG
+            lv.btnmatrix.CTRL.NO_REPEAT
+            | lv.btnmatrix.CTRL.CLICK_TRIG
+            | lv.btnmatrix.CTRL.POPOVER
         ] * 10
         self.ctrl_map.append(lv.btnmatrix.CTRL.HIDDEN)
         self.ctrl_map.extend(
@@ -140,6 +144,7 @@ class BIP39Keyboard(lv.keyboard):
                 | lv.btnmatrix.CTRL.NO_REPEAT
                 | lv.btnmatrix.CTRL.POPOVER
                 | lv.btnmatrix.CTRL.CLICK_TRIG
+                | lv.btnmatrix.CTRL.POPOVER
             ]
             * 9
         )
@@ -151,6 +156,7 @@ class BIP39Keyboard(lv.keyboard):
                 | lv.btnmatrix.CTRL.NO_REPEAT
                 | lv.btnmatrix.CTRL.DISABLED
                 | lv.btnmatrix.CTRL.CLICK_TRIG
+                | lv.btnmatrix.CTRL.POPOVER
             ]
         )
         self.ctrl_map.extend(
@@ -159,6 +165,7 @@ class BIP39Keyboard(lv.keyboard):
                 | lv.btnmatrix.CTRL.NO_REPEAT
                 | lv.btnmatrix.CTRL.POPOVER
                 | lv.btnmatrix.CTRL.CLICK_TRIG
+                | lv.btnmatrix.CTRL.POPOVER
             ]
             * 7
         )
@@ -168,6 +175,7 @@ class BIP39Keyboard(lv.keyboard):
                 | lv.btnmatrix.CTRL.NO_REPEAT
                 | lv.btnmatrix.CTRL.DISABLED
                 | lv.btnmatrix.CTRL.CLICK_TRIG
+                | lv.btnmatrix.CTRL.POPOVER
             ]
         )
         self.dummy_ctl_map = []
@@ -181,6 +189,7 @@ class BIP39Keyboard(lv.keyboard):
         self.set_style_bg_color(
             lv_colors.ONEKEY_BLACK, lv.PART.ITEMS | lv.STATE.DEFAULT
         )
+        self.set_style_bg_color(lv_colors.WHITE_1, lv.PART.ITEMS | lv.STATE.PRESSED)
         self.set_style_bg_opa(lv.OPA.COVER, lv.PART.ITEMS | lv.STATE.DEFAULT)
         self.set_style_bg_color(
             lv_colors.ONEKEY_BLACK_1, lv.PART.ITEMS | lv.STATE.DISABLED
@@ -235,6 +244,7 @@ class BIP39Keyboard(lv.keyboard):
             else:
                 change_key_bg(dsc, 21, 29, False)
         elif event.code == lv.EVENT.VALUE_CHANGED:
+            motor.vibrate()
             self.mnemonic_prompt.clean()
             txt_input = self.ta.get_text()
             if len(txt_input) > 0:
@@ -289,7 +299,7 @@ class NumberKeyboard(lv.keyboard):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.ta = lv.textarea(parent)
-        self.ta.align(lv.ALIGN.TOP_MID, 0, 260)
+        self.ta.align(lv.ALIGN.TOP_MID, 0, 248)
         self.ta.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
         self.ta.set_style_max_width(432, lv.STATE.DEFAULT)
         self.ta.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -346,9 +356,15 @@ class NumberKeyboard(lv.keyboard):
             "",
         ]
         self.ctrl_map = [
-            lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG
+            lv.btnmatrix.CTRL.NO_REPEAT
+            | lv.btnmatrix.CTRL.CLICK_TRIG
+            | lv.btnmatrix.CTRL.POPOVER
         ] * 12
-        self.ctrl_map[-1] = lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.DISABLED
+        self.ctrl_map[-1] = (
+            lv.btnmatrix.CTRL.NO_REPEAT
+            | lv.btnmatrix.CTRL.DISABLED
+            | lv.btnmatrix.CTRL.POPOVER
+        )
         self.set_map(lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map)
         self.set_mode(lv.keyboard.MODE.NUMBER)
         self.set_width(lv.pct(96))
@@ -356,6 +372,7 @@ class NumberKeyboard(lv.keyboard):
         self.set_style_bg_color(
             lv_colors.ONEKEY_BLACK, lv.PART.ITEMS | lv.STATE.DEFAULT
         )
+        self.set_style_bg_color(lv_colors.WHITE_1, lv.PART.ITEMS | lv.STATE.PRESSED)
         self.set_style_bg_color(
             lv_colors.ONEKEY_BLACK_1, lv.PART.ITEMS | lv.STATE.DISABLED
         )
@@ -363,14 +380,35 @@ class NumberKeyboard(lv.keyboard):
             lv_colors.ONEKEY_GRAY, lv.PART.ITEMS | lv.STATE.DISABLED
         )
         self.set_style_pad_row(12, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_column(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_radius(36, lv.PART.ITEMS | lv.STATE.DEFAULT)
-        self.set_style_text_font(font_PJSBOLD32, lv.PART.ITEMS | lv.STATE.DEFAULT)
-        self.set_height(324)
+        self.set_style_pad_column(12, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(44, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD48, lv.PART.ITEMS | lv.STATE.DEFAULT)
+        self.set_height(388)
+        self.set_popovers(True)
         self.align(lv.ALIGN.BOTTOM_MID, 0, -20)
         self.set_textarea(self.ta)
+
+        self.input_count_tips = lv.label(parent)
+        self.input_count_tips.align(lv.ALIGN.BOTTOM_MID, 0, -416)
+        self.input_count_tips.set_style_text_font(
+            font_STATUS_BAR, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.input_count_tips.set_style_text_letter_space(
+            1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.input_count_tips.set_style_text_color(
+            lv_colors.LIGHT_GRAY, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+
+        self.update_count_tips()
+
         self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
         self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
+        self.add_event_cb(self.event_cb, lv.EVENT.READY, None)
+        self.add_event_cb(self.event_cb, lv.EVENT.CANCEL, None)
+
+    def update_count_tips(self):
+        self.input_count_tips.set_text(f"{len(self.ta.get_text())}/50")
 
     def toggle_number_input_keys(self, enable: bool):
         if enable:
@@ -408,8 +446,10 @@ class NumberKeyboard(lv.keyboard):
             else:
                 change_key_bg(dsc, 9, 11, False)
                 if dsc.id == 9:
+                    dsc.rect_dsc.bg_color = lv_colors.ONEKEY_RED_1
                     dsc.rect_dsc.bg_img_src = "A:/res/keyboard-close.png"
         elif code == lv.EVENT.VALUE_CHANGED:
+            motor.vibrate()
             if input_len >= 50:
                 # disable number keys
                 self.toggle_number_input_keys(False)
@@ -420,6 +460,9 @@ class NumberKeyboard(lv.keyboard):
                 self.set_map(
                     lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map
                 )
+            self.update_count_tips()
+        elif code in (lv.EVENT.READY, lv.EVENT.CANCEL):
+            motor.vibrate()
 
 
 class PassphraseKeyboard(lv.btnmatrix):
@@ -633,18 +676,26 @@ class PassphraseKeyboard(lv.btnmatrix):
             [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.HIDDEN]
         )
         # line4
-        self.ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
-        self.ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT])
-        self.ctrl_map.extend([7 | lv.btnmatrix.CTRL.NO_REPEAT])
-        self.ctrl_map.extend([3 | lv.btnmatrix.CTRL.NO_REPEAT])
+        self.ctrl_map.extend(
+            [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+        )
+        self.ctrl_map.extend(
+            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+        )
+        self.ctrl_map.extend(
+            [7 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+        )
+        self.ctrl_map.extend(
+            [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+        )
         self.set_map(self.btn_map_text_lower)
         self.set_ctrl_map(self.ctrl_map)
-
         self.set_size(lv.pct(100), 230)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(
             lv_colors.ONEKEY_BLACK, lv.PART.ITEMS | lv.STATE.DEFAULT
         )
+        self.set_style_bg_color(lv_colors.WHITE_1, lv.PART.ITEMS | lv.STATE.PRESSED)
         self.set_style_pad_row(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(8, lv.PART.ITEMS | lv.STATE.DEFAULT)
@@ -689,6 +740,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         elif code == lv.EVENT.VALUE_CHANGED:
             target = event.get_target()
             if isinstance(target, lv.btnmatrix):
+                motor.vibrate()
                 btn_id = target.get_selected_btn()
                 text = target.get_btn_text(btn_id)
                 if text == "":

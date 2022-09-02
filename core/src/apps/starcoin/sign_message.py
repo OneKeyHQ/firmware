@@ -8,7 +8,11 @@ from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 from apps.common.signverify import decode_message
 
-from .helper import get_address_from_public_key, serialize_u32_as_uleb128
+from .helper import (
+    MESSAGE_PREFIX,
+    get_address_from_public_key,
+    serialize_u32_as_uleb128,
+)
 
 
 @auto_keychain(__name__)
@@ -20,7 +24,9 @@ async def sign_message(
     node = keychain.derive(msg.address_n)
     pubkey = node.public_key()[1:]
     address = get_address_from_public_key(pubkey)
-    data = decode_message(msg.message) if msg.message is not None else ""
+    if msg.message is None:
+        raise wire.DataError("Message can't be None")
+    data = decode_message(msg.message)
     await confirm_signverify(
         ctx,
         "STC",
@@ -28,10 +34,9 @@ async def sign_message(
         address,
         verify=False,
     )
-
-    prefix = sha3_256(b"STARCOIN::SigningMessage", keccak=False).digest()
-    msg_len = len(msg.message) if msg.message is not None else 0
-    data = prefix + serialize_u32_as_uleb128(msg_len) + bytes(data, "ascii")
+    prefix_bytes = sha3_256(MESSAGE_PREFIX).digest()
+    msg_len = len(msg.message)
+    data = prefix_bytes + serialize_u32_as_uleb128(msg_len) + msg.message
     signature = ed25519.sign(node.private_key(), data)
 
     return StarcoinMessageSignature(public_key=pubkey, signature=signature)

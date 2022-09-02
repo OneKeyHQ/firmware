@@ -15,7 +15,7 @@ def load_translations(lang):
         ).translations
 
 
-def i18n_refresh(lang: str = None):
+def i18n_refresh(lang: str | None = None):
     try:
         if lang is None:
             lang = device.get_language()

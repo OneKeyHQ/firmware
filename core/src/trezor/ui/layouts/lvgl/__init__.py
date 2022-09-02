@@ -838,8 +838,8 @@ async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -
 
     screen = PassphraseRequest(max_len)
     result = await ctx.wait(screen.request())
-    # if not result:
-    #     raise wire.ActionCancelled("Passphrase entry cancelled")
+    if result is None:
+        raise wire.ActionCancelled("Passphrase entry cancelled")
 
     assert isinstance(result, str)
     return result
@@ -1029,4 +1029,5 @@ async def confirm_near_blinding_sign(ctx: wire.GenericContext, signer: str) -> N
 
     screen = NearBlindingSign(signer)
     await raise_if_cancelled(
-        interact(ctx, screen, "near_blinding_sign", ButtonRequestType.ProtectCall))
+        interact(ctx, screen, "near_blinding_sign", ButtonRequestType.ProtectCall)
+    )

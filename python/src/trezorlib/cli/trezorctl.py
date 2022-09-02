@@ -377,7 +377,7 @@ cli.add_command(sol.cli)
 cli.add_command(tron.cli)
 cli.add_command(tezos.cli)
 cli.add_command(aptos.cli)
-
+cli.add_command(starcoin.cli)
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 

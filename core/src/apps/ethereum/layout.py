@@ -83,9 +83,9 @@ async def require_confirm_eip1559_fee(
     gas_limit: int,
     chain_id: int,
     token: tokens.TokenInfo | None = None,
-    from_address: str = None,
-    to_address: str = None,
-    network: str = None,
+    from_address: str | None = None,
+    to_address: str | None = None,
+    network: str | None = None,
 ) -> None:
 
     fee_max = max_gas_fee * gas_limit

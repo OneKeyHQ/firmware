@@ -1,5 +1,6 @@
 from trezor import wire
 from trezor.crypto.curve import ed25519
+from trezor.crypto.hashlib import sha3_256
 from trezor.messages import AptosSignedTx, AptosSignTx
 
 from apps.common import paths, seed
@@ -23,7 +24,8 @@ async def sign_tx(
 
     await confirm_blind_sign_common(ctx, address, msg.raw_tx)
     await confirm_final(ctx)
-    raw_tx = TRANSACTION_PREFIX + msg.raw_tx
+    prefix_bytes = sha3_256(TRANSACTION_PREFIX).digest()
+    raw_tx = prefix_bytes + msg.raw_tx
     signature = ed25519.sign(node.private_key(), raw_tx)
 
     return AptosSignedTx(public_key=pub_key_bytes, signature=signature)

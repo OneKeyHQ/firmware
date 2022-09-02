@@ -18,7 +18,7 @@ def require_confirm_tx(
 
 
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    from trezor.ui.layouts import confirm_data  # type: ignore["confirm_data" is unknown import symbol]
+    from trezor.ui.layouts import confirm_data
 
     return confirm_data(
         ctx,

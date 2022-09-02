@@ -22,52 +22,52 @@
 
 /// package: trezorio.__init__
 
-/// class MOTO:
+/// class MOTOR:
 ///     """
 ///     """
-typedef struct _mp_obj_MOTO_t {
+typedef struct _mp_obj_MOTOR_t {
   mp_obj_base_t base;
-} mp_obj_MOTO_t;
+} mp_obj_MOTOR_t;
 
 /// def __init__(
 ///     self,
 /// ) -> None:
 ///     """
 ///     """
-STATIC mp_obj_t mod_trezorio_MOTO_make_new(const mp_obj_type_t *type,
-                                           size_t n_args, size_t n_kw,
-                                           const mp_obj_t *args) {
-  mp_arg_check_num(n_args, n_kw, 1, 1, false);
+STATIC mp_obj_t mod_trezorio_MOTOR_make_new(const mp_obj_type_t *type,
+                                            size_t n_args, size_t n_kw,
+                                            const mp_obj_t *args) {
+  mp_arg_check_num(n_args, n_kw, 0, 0, false);
 
-  mp_obj_MOTO_t *o = m_new_obj(mp_obj_MOTO_t);
+  mp_obj_MOTOR_t *o = m_new_obj(mp_obj_MOTOR_t);
   o->base.type = type;
 
   return MP_OBJ_FROM_PTR(o);
 }
 
-/// def ctrl(self, msg: bytes) -> None:
+/// def ctrl(self, cmd: int) -> None:
 ///     """
 ///     Control the motor.
 ///     """
-STATIC mp_obj_t mod_trezorio_MOTO_ctrl(mp_obj_t self, mp_obj_t start) {
-  uint8_t b = trezor_obj_get_uint8(start);
+STATIC mp_obj_t mod_trezorio_MOTOR_ctrl(mp_obj_t self, mp_obj_t cmd) {
+  uint8_t b = trezor_obj_get_uint8(cmd);
   (void)b;
   motor_ctrl(b);
   return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_MOTO_ctrl_obj,
-                                 mod_trezorio_MOTO_ctrl);
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_MOTOR_ctrl_obj,
+                                 mod_trezorio_MOTOR_ctrl);
 
-STATIC const mp_rom_map_elem_t mod_trezorio_MOTO_locals_dict_table[] = {
-    {MP_ROM_QSTR(MP_QSTR_ctrl), MP_ROM_PTR(&mod_trezorio_MOTO_ctrl_obj)},
+STATIC const mp_rom_map_elem_t mod_trezorio_MOTOR_locals_dict_table[] = {
+    {MP_ROM_QSTR(MP_QSTR_ctrl), MP_ROM_PTR(&mod_trezorio_MOTOR_ctrl_obj)},
 };
 
-STATIC MP_DEFINE_CONST_DICT(mod_trezorio_MOTO_locals_dict,
-                            mod_trezorio_MOTO_locals_dict_table);
+STATIC MP_DEFINE_CONST_DICT(mod_trezorio_MOTOR_locals_dict,
+                            mod_trezorio_MOTOR_locals_dict_table);
 
-STATIC const mp_obj_type_t mod_trezorio_MOTO_type = {
+STATIC const mp_obj_type_t mod_trezorio_MOTOR_type = {
     {&mp_type_type},
-    .name = MP_QSTR_MOTO,
-    .make_new = mod_trezorio_MOTO_make_new,
-    .locals_dict = (void *)&mod_trezorio_MOTO_locals_dict,
+    .name = MP_QSTR_MOTOR,
+    .make_new = mod_trezorio_MOTOR_make_new,
+    .locals_dict = (void *)&mod_trezorio_MOTOR_locals_dict,
 };

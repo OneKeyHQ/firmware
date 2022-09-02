@@ -1,11 +1,14 @@
 import math
 
 from storage import device
-from trezor import utils, workflow
+from trezor import loop, uart, utils, workflow
+from trezor.enums import SafetyCheckLevel
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.lv_colors import lv_colors
 from trezor.ui import display, style
+
+from apps.common import safety_checks
 
 from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36, font_PJSREG24
 from .common import (  # noqa: F401, F403, F405
@@ -118,10 +121,12 @@ class MainScreen(Screen):
     def change_state(self, busy: bool):
         if busy:
             self.clear_flag(lv.obj.FLAG.CLICKABLE)
+            self.bottom_bar.clear_flag(lv.obj.FLAG.CLICKABLE)
             self.up_arrow.add_flag(lv.obj.FLAG.HIDDEN)
             self.bottom_tips.set_text(_(i18n_keys.BUTTON__PROCESSING))
         else:
             self.add_flag(lv.obj.FLAG.CLICKABLE)
+            self.bottom_bar.add_flag(lv.obj.FLAG.CLICKABLE)
             self.up_arrow.clear_flag(lv.obj.FLAG.HIDDEN)
             self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
 
@@ -191,12 +196,28 @@ class MainScreen(Screen):
             self.settings.set_style_bg_img_src(
                 "A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT
             )
+            # add click effect
+            self.settings.set_style_bg_img_recolor_opa(
+                lv.OPA._30, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+            self.settings.set_style_bg_img_recolor(
+                lv_colors.BLACK, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+
             self.settings.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
             self.guide = lv.imgbtn(self.panel)
             self.guide.align_to(self.settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
             self.guide.set_style_bg_img_src(
                 "A:/res/guide.png", lv.PART.MAIN | lv.STATE.DEFAULT
             )
+            # add click effect
+            self.guide.set_style_bg_img_recolor_opa(
+                lv.OPA._30, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+            self.guide.set_style_bg_img_recolor(
+                lv_colors.BLACK, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+
             self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
@@ -290,6 +311,12 @@ class SettingsScreen(Screen):
             _(i18n_keys.ITEM__ABOUT_DEVICE),
             left_img_src="A:/res/about.png",
         )
+        self.boot_loader = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__UPDATE_MODE),
+            left_img_src="A:/res/update_white.png",
+            has_next=False,
+        )
         self.power = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__POWER_OFF),
@@ -308,6 +335,7 @@ class SettingsScreen(Screen):
         self.home_scr.label_left.set_text(_(i18n_keys.ITEM__HOME_SCREEN))
         self.security.label_left.set_text(_(i18n_keys.ITEM__SECURITY))
         self.about.label_left.set_text(_(i18n_keys.ITEM__ABOUT_DEVICE))
+        self.boot_loader.label_left.set_text(_(i18n_keys.ITEM__UPDATE_MODE))
         self.power.label_left.set_text(_(i18n_keys.ITEM__POWER_OFF))
 
     def on_click(self, event_obj):
@@ -328,6 +356,8 @@ class SettingsScreen(Screen):
                 WalletScreen(self)
             elif target == self.about:
                 AboutSetting(self)
+            elif target == self.boot_loader:
+                Go2UpdateMode()
             elif target == self.power:
                 PowerOff()
             else:
@@ -373,6 +403,10 @@ class GeneralScreen(Screen):
             _(i18n_keys.ITEM__BRIGHTNESS),
             brightness2_percent_str(device.get_brightness()),
         )
+        self.keyboard_haptic = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__KEYBOARD_HAPTIC),
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def refresh_text(self):
@@ -407,6 +441,8 @@ class GeneralScreen(Screen):
                 LanguageSetting(self)
             elif target == self.backlight:
                 BacklightSetting(self)
+            elif target == self.keyboard_haptic:
+                KeyboardHapticSetting(self)
             else:
                 pass
 
@@ -445,8 +481,8 @@ class AutoLockSetting(Screen):
                 f"{GeneralScreen.cur_auto_lock}({_(i18n_keys.OPTION__CUSTOM__INSERT)})",
                 has_next=False,
             )
-            self.btns[-1].add_check_img()  # type: ignore[Cannot access member "add_check_img" for type "None"]
-            self.btns[-1].set_checked()  # type: ignore[Cannot access member "set_checked" for type "None"]
+            self.btns[-1].add_check_img()
+            self.btns[-1].set_checked()
             self.checked_index = -1
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -562,6 +598,35 @@ class BacklightSetting(Screen):
             device.set_brightness(value)
 
 
+class KeyboardHapticSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__KEYBOARD_HAPTIC), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title)
+        self.keyboard = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__HAPTIC))
+        self.keyboard.set_size(lv.pct(100), 78)
+        if device.keyboard_haptic_enabled():
+            self.keyboard.add_state()
+        else:
+            self.keyboard.clear_state()
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.keyboard.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    device.toggle_keyboard_haptic(True)
+                else:
+                    device.toggle_keyboard_haptic(False)
+
+
 class PinMapSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -616,7 +681,6 @@ class ConnectSetting(Screen):
         self.container = ContainerFlexCol(self, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
         self.ble.set_size(lv.pct(100), 78)
-        from trezor import uart
 
         if uart.is_ble_opened():
             self.ble.add_state()
@@ -629,7 +693,6 @@ class ConnectSetting(Screen):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.VALUE_CHANGED:
-            from trezor import uart
 
             if target == self.ble.switch:
                 if target.has_state(lv.STATE.CHECKED):
@@ -652,7 +715,6 @@ class AboutSetting(Screen):
         model = device.get_model()
         version = device.get_firmware_version()
         serial = device.get_serial()
-        from trezor import uart
 
         ble_name = uart.get_ble_name()
         storage = device.get_storage()
@@ -684,12 +746,66 @@ class AboutSetting(Screen):
             right_text=storage,
             has_next=False,
         )
-        self.storage = ListItemBtn(
+        self.build_id = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BUILD_ID),
             right_text=utils.BUILD_ID[-7:],
             has_next=False,
         )
+        self.board_loader = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__BOARDLOADER),
+        )
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        target = event_obj.get_target()
+        if target == self.board_loader:
+            GO2BoardLoader()
+
+
+class GO2BoardLoader(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            title=_(i18n_keys.TITLE__SWITCH_TO_BOARDLOADER),
+            subtitle=_(i18n_keys.SUBTITLE__SWITCH_TO_BOARDLOADER_RECONFIRM),
+            confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path="A:/res/warning.png",
+        )
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target == self.btn_yes:
+                utils.reboot2boardloader()
+            elif target == self.btn_no:
+                self.destroy(100)
+
+
+class Go2UpdateMode(FullSizeWindow):
+    def __init__(self):
+        super().__init__(
+            title=_(i18n_keys.TITLE__SWITCH_TO_UPDATE_MODE),
+            subtitle=_(i18n_keys.SUBTITLE__SWITCH_TO_UPDATE_MODE_RECONFIRM),
+            confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path="A:/res/update_green.png",
+        )
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target == self.btn_yes:
+                utils.reboot_to_bootloader()
+            elif target == self.btn_no:
+                self.destroy(100)
 
 
 class PowerOff(FullSizeWindow):
@@ -730,7 +846,6 @@ class PowerOff(FullSizeWindow):
 class ShutingDown(FullSizeWindow):
     def __init__(self):
         super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
-        from trezor import loop, uart
 
         async def shutdown_delay():
             await loop.sleep(3000)
@@ -752,7 +867,7 @@ class HomeScreenSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOME_SCREEN), nav_back=True
         )
         # TODO: retrieve the total nums of wps, need fatfs interface to enumerate files
-        pages_num = 5
+        pages_num = 4
         rows_num = math.ceil(pages_num / 3)
         row_dsc = [GRID_CELL_SIZE] * rows_num
         row_dsc.append(lv.GRID_TEMPLATE.LAST)
@@ -800,11 +915,17 @@ class SecurityScreen(Screen):
         if not hasattr(self, "_init"):
             self._init = True
         else:
+            self.safety_check.label_right.set_text(self.get_right_text())
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
         self.usb_lock = ListItemBtn(self.container, _(i18n_keys.ITEM__USB_LOCK))
+        self.safety_check = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__SAFETY_CHECKS),
+            right_text=self.get_right_text(),
+        )
         self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
         # self.recovery_check = ListItemBtn(
         #     self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
@@ -817,6 +938,13 @@ class SecurityScreen(Screen):
             lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def get_right_text(self) -> str:
+        return (
+            _(i18n_keys.ITEM__STATUS__STRICT)
+            if safety_checks.is_strict()
+            else _(i18n_keys.ITEM__STATUS__PROMPT)
+        )
 
     def on_click(self, event_obj):
         code = event_obj.code
@@ -841,6 +969,8 @@ class SecurityScreen(Screen):
                 PinMapSetting(self)
             elif target == self.usb_lock:
                 UsbLockSetting(self)
+            elif target == self.safety_check:
+                SafetyCheckSetting(self)
             else:
                 if __debug__:
                     print("unknown")
@@ -892,6 +1022,127 @@ class UsbLockSetting(Screen):
                         _(i18n_keys.CONTENT__USB_LOCK_DISABLED__HINT)
                     )
                     device.set_usb_lock_enabled(False)
+
+
+class SafetyCheckSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__SAFETY_CHECKS), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.strict = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__STATUS__STRICT), has_next=False
+        )
+        self.strict.add_check_img()
+        self.prompt = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__STATUS__PROMPT), has_next=False
+        )
+        self.prompt.add_check_img()
+        self.description = lv.label(self)
+        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_long_mode(lv.label.LONG.WRAP)
+        self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
+        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 5)
+        self.description.set_recolor(True)
+        self.set_checked()
+
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.add_event_cb(self.on_click, lv.EVENT.READY, None)
+
+    def set_checked(self):
+        if safety_checks.is_strict():
+            self.strict.set_checked()
+            self.prompt.set_uncheck()
+            self.description.set_text(_(i18n_keys.CONTENT__SAFETY_CHECKS_STRICT__HINT))
+            self.description.set_style_text_color(
+                lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT
+            )
+
+        else:
+            self.prompt.set_checked()
+            self.strict.set_uncheck()
+            if safety_checks.is_prompt_always():
+                self.description.set_text(
+                    _(i18n_keys.CONTENT__SAFETY_CHECKS_PERMANENTLY_PROMPT__HINT)
+                )
+                self.description.set_style_text_color(
+                    lv_colors.ONEKEY_RED_1, lv.STATE.DEFAULT
+                )
+            else:
+                self.description.set_text(
+                    _(i18n_keys.CONTENT__SAFETY_CHECKS_TEMPORARILY_PROMPT__HINT)
+                )
+                self.description.set_style_text_color(
+                    lv_colors.ONEKEY_YELLOW, lv.STATE.DEFAULT
+                )
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target == self.strict:
+                if self.strict.is_unchecked():
+                    SafetyCheckStrictConfirm(self)
+            elif target == self.prompt:
+                if self.prompt.is_unchecked():
+                    SafetyCheckPromptConfirm(self)
+        elif code == lv.EVENT.READY:
+            self.set_checked()
+
+
+class SafetyCheckStrictConfirm(FullSizeWindow):
+    def __init__(self, callback_obj):
+        super().__init__(
+            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_STRICT),
+            _(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_STRICT),
+            confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path="A:/res/shriek.png",
+        )
+        self.callback = callback_obj
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_yes:
+                safety_checks.apply_setting(SafetyCheckLevel.Strict)
+                lv.event_send(self.callback, lv.EVENT.READY, None)
+            elif target != self.btn_no:
+                return
+            self.destroy(100)
+
+
+class SafetyCheckPromptConfirm(FullSizeWindow):
+    def __init__(self, callback_obj):
+        super().__init__(
+            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_PROMPT),
+            _(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_PROMPT),
+            confirm_text=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
+            cancel_text=_(i18n_keys.BUTTON__REJECT),
+            icon_path="A:/res/shriek.png",
+            hold_confirm=True,
+        )
+        self.callback = callback_obj
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_no:
+                self.destroy(100)
+        elif code == lv.EVENT.READY:
+            if target == self.slider:
+                safety_checks.apply_setting(SafetyCheckLevel.PromptTemporarily)
+                lv.event_send(self.callback, lv.EVENT.READY, None)
+                self.destroy(100)
 
 
 class WalletScreen(Screen):

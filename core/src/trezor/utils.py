@@ -20,6 +20,7 @@ from trezorutils import (  # noqa: F401
     get_firmware_chunk,
     halt,
     memcpy,
+    reboot2boardloader,
     reboot_to_bootloader,
     reset,
 )
@@ -72,7 +73,9 @@ def lcd_resume() -> bool:
     from apps import base
 
     if display.backlight() != device.get_brightness():
+        global AUTO_POWER_OFF
         display.backlight(device.get_brightness())
+        AUTO_POWER_OFF = False
         base.reload_settings_from_storage()
         return True
     return False
@@ -83,7 +86,9 @@ def turn_off_lcd():
     from trezor import loop
 
     if display.backlight():
+        global AUTO_POWER_OFF
         display.backlight(0)
+        AUTO_POWER_OFF = True
     loop.clear()
 
 

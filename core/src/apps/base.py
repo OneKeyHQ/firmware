@@ -265,13 +265,9 @@ def lock_device() -> None:
         workflow.close_others()
 
 
-LATER_TOUCH = 0
-
-
 def lock_device_if_unlocked() -> None:
     if config.is_unlocked():
         lock_device()
-    utils.AUTO_POWER_OFF = True
     utils.turn_off_lcd()
 
 
@@ -288,11 +284,7 @@ def shutdown_device() -> None:
     from trezor import uart
 
     if storage.device.is_initialized():
-        if uart.CHARGING:
-            from storage.device import AUTOSHUTDOWN_DELAY_DEFAULT
-
-            workflow.idle_timer.set(AUTOSHUTDOWN_DELAY_DEFAULT, shutdown_device)
-        else:
+        if not uart.CHARGING:
             uart.ctrl_power_off()
 
 

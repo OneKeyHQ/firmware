@@ -218,6 +218,8 @@ trezor.lvglui.scrs.wipe_device
 import trezor.lvglui.scrs.wipe_device
 trezor.messages
 import trezor.messages
+trezor.motor
+import trezor.motor
 trezor.pin
 import trezor.pin
 trezor.protobuf

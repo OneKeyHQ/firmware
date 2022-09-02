@@ -62,7 +62,7 @@ if not utils.BITCOIN_ONLY:
         passphrase = await get_passphrase(ctx)
 
         if need_seed:
-            common_seed = mnemonic.get_seed(passphrase)
+            common_seed = mnemonic.get_seed(passphrase, progress_bar=False)
             cache.set(cache.APP_COMMON_SEED, common_seed)
 
         if need_cardano_secret:
@@ -84,7 +84,7 @@ else:
     @cache.stored_async(cache.APP_COMMON_SEED)
     async def get_seed(ctx: wire.Context) -> bytes:
         passphrase = await get_passphrase(ctx)
-        return mnemonic.get_seed(passphrase)
+        return mnemonic.get_seed(passphrase, progress_bar=False)
 
 
 @cache.stored(cache.APP_COMMON_SEED_WITHOUT_PASSPHRASE)

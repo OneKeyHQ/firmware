@@ -54,6 +54,7 @@ _PIN_MAP_TYPES = const(0x84)  # int
 _WALLPAPER_INDEX = const(0x85)  # inT
 _USE_USB_PROTECT = const(0x86)  # bool (0x01 or empty)
 _USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
+_KEYBOARD_HAPTIC = const(0x88)   # int
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -148,7 +149,7 @@ def get_model() -> str:
 
 def get_serial() -> str:
     if utils.EMULATOR:
-        return "OKT-20220101"
+        return "TC01WBD202206030544190000099"
     return config.get_serial()
 
 
@@ -179,6 +180,22 @@ def is_usb_lock_enabled() -> bool:
 
 def set_usb_lock_enabled(enable: bool) -> None:
     common.set_bool(_NAMESPACE, _USE_USB_PROTECT, enable, public=True)
+
+
+def keyboard_haptic_enabled() -> bool:
+    enabled = common.get(_NAMESPACE, _KEYBOARD_HAPTIC, public=True)
+    if enabled == common._FALSE_BYTE:
+        return False
+    return True
+
+
+def toggle_keyboard_haptic(enable: bool) -> None:
+    common.set(
+        _NAMESPACE,
+        _KEYBOARD_HAPTIC,
+        common._TRUE_BYTE if enable else common._FALSE_BYTE,
+        public=True,
+    )
 
 
 def is_initialized() -> bool:
