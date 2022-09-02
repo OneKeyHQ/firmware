@@ -357,6 +357,8 @@ int main(void) {
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   random_delays_init();
 
+  ble_usart_init();
+
   touch_init();
   touch_power_on();
 
@@ -396,10 +398,7 @@ int main(void) {
 
   buzzer_init();
   motor_init();
-  ble_usart_init();
   spi_slave_init();
-
-  display_clear();
 
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 
@@ -407,9 +406,6 @@ int main(void) {
     *STAY_IN_FLAG_ADDR = 0;
     stay_in_bootloader = sectrue;
   }
-
-  // delay to detect touch
-  uint32_t touched = boot_touch_detect(1000);
 
   vendor_header vhdr;
   image_header hdr;
@@ -451,7 +447,8 @@ int main(void) {
 
   // ... or if user touched the screen on start
   // ... or we have stay_in_bootloader flag to force it
-  if (touched || stay_in_bootloader == sectrue) {
+  if (stay_in_bootloader == sectrue) {
+    display_clear();
     ui_bootloader_first();
     // no ui_fadeout(); - we already start from black screen
     if (firmware_present != sectrue) {

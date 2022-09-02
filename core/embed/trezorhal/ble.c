@@ -64,6 +64,8 @@ bool ble_switch_state(void) { return get_ble_switch; }
 
 bool ble_charging_state(void) { return get_ble_charging; }
 
+uint32_t ble_power_button_state(void) { return dev_press_sta; }
+
 char *ble_get_name(void) { return ble_name; }
 
 char *ble_get_ver(void) { return ble_ver; }

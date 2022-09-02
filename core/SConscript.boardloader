@@ -79,6 +79,8 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_nand.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_qspi.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
@@ -86,6 +88,7 @@ if PRODUCTION_MODEL == 'H':
     SOURCE_BOARDLOADER = [
         'embed/boardloader/startup.s',
         'embed/boardloader/main.c',
+        'embed/boardloader/boardui.c',
     ]
     SOURCE_TREZORHAL = [
         'embed/trezorhal/system_stm32h7xx.c',
@@ -113,11 +116,14 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/usbd_msc_scsi.c',
         'embed/trezorhal/usbd_msc_storage.c',
         'embed/trezorhal/usbd_desc.c',
+        'embed/trezorhal/ble.c',
+        'embed/trezorhal/usart.c',
+        'embed/trezorhal/trans_fifo.c',
         'embed/trezorhal/util.s',
         'embed/trezorhal/vectortable.s',
         'embed/trezorhal/fatfs/ff.c',
         'embed/trezorhal/fatfs/ffunicode.c',
-        'embed/trezorhal/fatfs/diskio.c',
+        'embed/trezorhal/fatfs/diskio.c',        
     ]
 else:
     SOURCE_MOD += [
