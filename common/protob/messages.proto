@@ -361,10 +361,10 @@ enum MessageType {
     MessageType_StarcoinVerifyMessage = 10308[(wire_in) = true];
 
     // Aptos
-    MessageType_AptosGetAddress = 10600 [(wire_in) = true];
-    MessageType_AptosAddress = 10601 [(wire_out) = true];
-    MessageType_AptosSignTx = 10602 [(wire_in) = true];
-    MessageType_AptosSignedTx = 10603 [(wire_out) = true];
+    // MessageType_AptosGetAddress = 10600 [(wire_in) = true];
+    // MessageType_AptosAddress = 10601 [(wire_out) = true];
+    // MessageType_AptosSignTx = 10602 [(wire_in) = true];
+    // MessageType_AptosSignedTx = 10603 [(wire_out) = true];
    
     // WebAuthn
     MessageType_WebAuthnListResidentCredentials = 800 [(wire_in) = true];
@@ -394,18 +394,28 @@ enum MessageType {
     MessageType_GetPublicKeyMultiple = 10210 [(wire_in) = true];
     MessageType_PublicKeyMultiple = 10211 [(wire_out) = true];
 
+    // Conflux
+    // MessageType_ConfluxGetAddress = 10401 [(wire_in) = true];
+    // MessageType_ConfluxAddress = 10402 [(wire_out) = true];
+    // MessageType_ConfluxSignTx = 10403 [(wire_in) = true];
+    // MessageType_ConfluxTxRequest = 10404 [(wire_out) = true];
+    // MessageType_ConfluxTxAck = 10405 [(wire_in) = true];
+    // MessageType_ConfluxSignMessage = 10406 [(wire_in) = true];
+    // MessageType_ConfluxSignMessageCIP23 = 10407 [(wire_in) = true];
+    // MessageType_ConfluxMessageSignature = 10408 [(wire_out) = true];
+
     // tron
-    MessageType_TronGetAddress = 10501 [(wire_in) = true];
-    MessageType_TronAddress = 10502 [(wire_out) = true];
-    MessageType_TronSignTx = 10503 [(wire_in) = true];
-    MessageType_TronSignedTx = 10504 [(wire_out) = true];
-    MessageType_TronSignMessage = 10505 [(wire_in) = true];
-    MessageType_TronMessageSignature = 10506 [(wire_out) = true];
+    // MessageType_TronGetAddress = 10501 [(wire_in) = true];
+    // MessageType_TronAddress = 10502 [(wire_out) = true];
+    // MessageType_TronSignTx = 10503 [(wire_in) = true];
+    // MessageType_TronSignedTx = 10504 [(wire_out) = true];
+    // MessageType_TronSignMessage = 10505 [(wire_in) = true];
+    // MessageType_TronMessageSignature = 10506 [(wire_out) = true];
 
     // near
-    MessageType_NearGetAddress = 10701 [(wire_in) = true];
-    MessageType_NearAddress = 10702 [(wire_out) = true];
-    MessageType_NearSignTx = 10703 [(wire_in) = true];
-    MessageType_NearSignedTx = 10704 [(wire_out) = true];
+    // MessageType_NearGetAddress = 10701 [(wire_in) = true];
+    // MessageType_NearAddress = 10702 [(wire_out) = true];
+    // MessageType_NearSignTx = 10703 [(wire_in) = true];
+    // MessageType_NearSignedTx = 10704 [(wire_out) = true];
 
 }

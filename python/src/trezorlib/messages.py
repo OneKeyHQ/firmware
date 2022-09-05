@@ -260,10 +260,6 @@ class MessageType(IntEnum):
     StarcoinSignMessage = 10306
     StarcoinMessageSignature = 10307
     StarcoinVerifyMessage = 10308
-    AptosGetAddress = 10600
-    AptosAddress = 10601
-    AptosSignTx = 10602
-    AptosSignedTx = 10603
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -287,16 +283,6 @@ class MessageType(IntEnum):
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
-    TronGetAddress = 10501
-    TronAddress = 10502
-    TronSignTx = 10503
-    TronSignedTx = 10504
-    TronSignMessage = 10505
-    TronMessageSignature = 10506
-    NearGetAddress = 10701
-    NearAddress = 10702
-    NearSignTx = 10703
-    NearSignedTx = 10704
 
 
 class FailureType(IntEnum):
@@ -592,7 +578,7 @@ class TezosBallotType(IntEnum):
 
 
 class AptosGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10600
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -609,7 +595,7 @@ class AptosGetAddress(protobuf.MessageType):
 
 
 class AptosAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10601
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -623,7 +609,7 @@ class AptosAddress(protobuf.MessageType):
 
 
 class AptosSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10602
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
@@ -640,7 +626,7 @@ class AptosSignTx(protobuf.MessageType):
 
 
 class AptosSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10603
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),
@@ -2986,6 +2972,175 @@ class CardanoTxAuxiliaryDataType(protobuf.MessageType):
     ) -> None:
         self.blob = blob
         self.catalyst_registration_parameters = catalyst_registration_parameters
+
+
+class ConfluxGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        3: protobuf.Field("chain_id", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+        chain_id: Optional["int"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+        self.chain_id = chain_id
+
+
+class ConfluxAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class ConfluxSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("nonce", "bytes", repeated=False, required=False),
+        3: protobuf.Field("gas_price", "bytes", repeated=False, required=False),
+        4: protobuf.Field("gas_limit", "bytes", repeated=False, required=False),
+        5: protobuf.Field("to", "string", repeated=False, required=False),
+        6: protobuf.Field("value", "bytes", repeated=False, required=False),
+        7: protobuf.Field("epoch_height", "bytes", repeated=False, required=False),
+        8: protobuf.Field("storage_limit", "bytes", repeated=False, required=False),
+        9: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=False),
+        10: protobuf.Field("data_length", "uint32", repeated=False, required=False),
+        11: protobuf.Field("chain_id", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        nonce: Optional["bytes"] = None,
+        gas_price: Optional["bytes"] = None,
+        gas_limit: Optional["bytes"] = None,
+        to: Optional["str"] = None,
+        value: Optional["bytes"] = None,
+        epoch_height: Optional["bytes"] = None,
+        storage_limit: Optional["bytes"] = None,
+        data_initial_chunk: Optional["bytes"] = None,
+        data_length: Optional["int"] = None,
+        chain_id: Optional["int"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.nonce = nonce
+        self.gas_price = gas_price
+        self.gas_limit = gas_limit
+        self.to = to
+        self.value = value
+        self.epoch_height = epoch_height
+        self.storage_limit = storage_limit
+        self.data_initial_chunk = data_initial_chunk
+        self.data_length = data_length
+        self.chain_id = chain_id
+
+
+class ConfluxTxRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("data_length", "uint32", repeated=False, required=False),
+        2: protobuf.Field("signature_v", "uint32", repeated=False, required=False),
+        3: protobuf.Field("signature_r", "bytes", repeated=False, required=False),
+        4: protobuf.Field("signature_s", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: Optional["int"] = None,
+        signature_v: Optional["int"] = None,
+        signature_r: Optional["bytes"] = None,
+        signature_s: Optional["bytes"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.signature_v = signature_v
+        self.signature_r = signature_r
+        self.signature_s = signature_s
+
+
+class ConfluxTxAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: Optional["bytes"] = None,
+    ) -> None:
+        self.data_chunk = data_chunk
+
+
+class ConfluxSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        message: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+
+
+class ConfluxMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=False),
+        3: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: Optional["bytes"] = None,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class ConfluxSignMessageCIP23(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False),
+        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        domain_hash: Optional["bytes"] = None,
+        message_hash: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.domain_hash = domain_hash
+        self.message_hash = message_hash
 
 
 class CipherKeyValue(protobuf.MessageType):
@@ -6259,7 +6414,7 @@ class MoneroExportedKeyImage(protobuf.MessageType):
 
 
 class NearGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10701
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -6276,7 +6431,7 @@ class NearGetAddress(protobuf.MessageType):
 
 
 class NearAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10702
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -6290,7 +6445,7 @@ class NearAddress(protobuf.MessageType):
 
 
 class NearSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10703
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=False),
@@ -6307,7 +6462,7 @@ class NearSignTx(protobuf.MessageType):
 
 
 class NearSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10704
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
     }
@@ -7824,7 +7979,7 @@ class TezosManagerTransfer(protobuf.MessageType):
 
 
 class TronGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10501
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -7841,7 +7996,7 @@ class TronGetAddress(protobuf.MessageType):
 
 
 class TronAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10502
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -7855,7 +8010,7 @@ class TronAddress(protobuf.MessageType):
 
 
 class TronSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10503
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("ref_block_bytes", "bytes", repeated=False, required=True),
@@ -7890,7 +8045,7 @@ class TronSignTx(protobuf.MessageType):
 
 
 class TronSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10504
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
         2: protobuf.Field("serialized_tx", "bytes", repeated=False, required=False),
@@ -7907,7 +8062,7 @@ class TronSignedTx(protobuf.MessageType):
 
 
 class TronSignMessage(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10505
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("message", "bytes", repeated=False, required=True),
@@ -7924,7 +8079,7 @@ class TronSignMessage(protobuf.MessageType):
 
 
 class TronMessageSignature(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10506
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),

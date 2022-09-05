@@ -24,6 +24,14 @@ void fsm_msgNearGetAddress(NearGetAddress *msg) {
 
   RESP_INIT(NearAddress);
 
+  // m/44h/397h/0h
+  if ((msg->address_n_count != 3) || (msg->address_n[0] != 0x8000002c) ||
+      (msg->address_n[1] != 0x8000018d)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Invalid Path"));
+    layoutHome();
+    return;
+  }
+
   HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
                                     msg->address_n_count, NULL);
   if (!node) return;
@@ -53,6 +61,14 @@ void fsm_msgNearSignTx(const NearSignTx *msg) {
   CHECK_PIN
 
   RESP_INIT(NearSignedTx);
+
+  // m/44h/397h/0h
+  if ((msg->address_n_count != 3) || (msg->address_n[0] != 0x8000002c) ||
+      (msg->address_n[1] != 0x8000018d)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Invalid Path"));
+    layoutHome();
+    return;
+  }
 
   HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
                                     msg->address_n_count, NULL);
