@@ -79,7 +79,8 @@ typedef struct _Storage {
 
 typedef enum {
   COIN_SWITCH_ETH_EIP712 = 0x01,
-  COIN_SWITCH_SOLANA = 0x02
+  COIN_SWITCH_SOLANA = 0x02,
+  COIN_SWITCH_CFX_CIP23 = 0x04,
 } CoinSwitch;
 
 extern Storage configUpdate;

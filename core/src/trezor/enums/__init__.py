@@ -243,10 +243,6 @@ if TYPE_CHECKING:
         StarcoinSignMessage = 10306
         StarcoinMessageSignature = 10307
         StarcoinVerifyMessage = 10308
-        AptosGetAddress = 10600
-        AptosAddress = 10601
-        AptosSignTx = 10602
-        AptosSignedTx = 10603
         WebAuthnListResidentCredentials = 800
         WebAuthnCredentials = 801
         WebAuthnAddResidentCredential = 802
@@ -270,16 +266,6 @@ if TYPE_CHECKING:
         EthereumSignMessageEIP712 = 10200
         GetPublicKeyMultiple = 10210
         PublicKeyMultiple = 10211
-        TronGetAddress = 10501
-        TronAddress = 10502
-        TronSignTx = 10503
-        TronSignedTx = 10504
-        TronSignMessage = 10505
-        TronMessageSignature = 10506
-        NearGetAddress = 10701
-        NearAddress = 10702
-        NearSignTx = 10703
-        NearSignedTx = 10704
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003

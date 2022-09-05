@@ -10,6 +10,7 @@ char* menu_para_brightness(void);
 #endif
 char* menu_para_eth_eip_switch(void);
 char* menu_para_sol_switch(void);
+char* menu_para_cfx_cip_switch(void);
 char* menu_para_passphrase(void);
 
 void menu_para_set_ble(int index);

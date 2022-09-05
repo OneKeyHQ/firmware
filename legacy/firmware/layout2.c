@@ -3602,7 +3602,8 @@ bool layoutBlidSign(char *address) {
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
 refresh_menu:
-  oledClear_ex();
+  layoutSwipe();
+  oledClear();
   y = 0;
   switch (index) {
     case 0:
@@ -3619,9 +3620,13 @@ refresh_menu:
       }
       for (int i = 0; i < OLED_HEIGHT / 3; i++) {
         oledDrawPixel(OLED_WIDTH - 1, i);
+        oledDrawPixel(OLED_WIDTH - 2, i);
       }
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
+                     &bmp_btn_down);
       break;
     case 1:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       oledDrawStringAdapter(0, y, _("FORMAT:"), FONT_STANDARD);
       y += font->pixel + 5;
       oledDrawStringAdapter(0, y, _("Unknown"), FONT_STANDARD);
@@ -3631,9 +3636,13 @@ refresh_menu:
       }
       for (int i = OLED_HEIGHT / 3; i < 2 * OLED_HEIGHT / 3; i++) {
         oledDrawPixel(OLED_WIDTH - 1, i);
+        oledDrawPixel(OLED_WIDTH - 2, i);
       }
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
+                     &bmp_btn_down);
       break;
     case 2:
+      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       oledDrawStringAdapter(0, y, _("CONFIRM SIGNING:"), FONT_STANDARD);
       y += font->pixel + 5;
       oledDrawStringAdapter(0, y, _("Transaction data cannot be decoded"),
@@ -3651,6 +3660,7 @@ refresh_menu:
       }
       for (int i = 2 * OLED_HEIGHT / 3; i < OLED_HEIGHT - 10; i++) {
         oledDrawPixel(OLED_WIDTH - 1, i);
+        oledDrawPixel(OLED_WIDTH - 2, i);
       }
 
       layoutButtonNoAdapter(_("CANCEL"), &bmp_btn_cancel);
