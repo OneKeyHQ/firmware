@@ -476,14 +476,14 @@ void fsm_msgRebootToBootloader(void) {
 
 #if !BITCOIN_ONLY
 
-#include "fsm_msg_aptos.h"
-#include "fsm_msg_conflux.h"
+// #include "fsm_msg_aptos.h"
+// #include "fsm_msg_conflux.h"
 #include "fsm_msg_ethereum.h"
-#include "fsm_msg_near.h"
+// #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"
 #include "fsm_msg_stellar.h"
-#include "fsm_msg_tron.h"
+// #include "fsm_msg_tron.h"
 
 #endif
