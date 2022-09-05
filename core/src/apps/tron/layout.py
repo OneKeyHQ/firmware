@@ -84,12 +84,17 @@ def require_confirm_fee(
     fee_limit: int = 0,
     network: str | None = None,
 ) -> Awaitable[None]:
+    if token is None:
+        total_amount = format_amount_trx(value + fee_limit, None)
+    else:
+        total_amount = None
     return confirm_total_tron(
         ctx,
         from_address,
         to_address,
         format_amount_trx(value, token),
         format_amount_trx(fee_limit, None),
+        total_amount,
         network,
     )
 

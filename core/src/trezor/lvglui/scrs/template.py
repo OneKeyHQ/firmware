@@ -488,9 +488,9 @@ class TransactionDetailsTRON(FullSizeWindow):
         )
         if total_amount is None:
             total_amount = f"{amount}\n{fee_max}"
-            self.item5 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
-            )
+        self.item5 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
+        )
 
 
 class SecurityCheck(FullSizeWindow):

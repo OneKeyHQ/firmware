@@ -33,19 +33,19 @@ async def sign_message_cip23(
 
     node = keychain.derive(msg.address_n)
 
+    domain_hash = msg.domain_hash if msg.domain_hash is not None else b""
+    message_hash = msg.message_hash if msg.message_hash is not None else b""
     address = address_from_bytes(node.ethereum_pubkeyhash())
+    cfx_address = address_from_hex(address, 1029)
     await confirm_signverify(
         ctx,
         "CFX",
-        decode_message(msg.domain_hash + msg.message_hash),
-        address,
+        decode_message(domain_hash + message_hash),
+        cfx_address,
         verify=False,
     )
 
-    address = address_from_bytes(node.ethereum_pubkeyhash(), None)
-    cfx_address = address_from_hex(address, 1029)
-
-    digest = message_digest(msg.domain_hash, msg.message_hash)
+    digest = message_digest(domain_hash, message_hash)
     signature = secp256k1.sign(
         node.private_key(),
         digest,
@@ -54,6 +54,6 @@ async def sign_message_cip23(
     )
 
     return ConfluxMessageSignature(
-        address=cfx_address,
+        address=address,
         signature=signature[1:] + bytearray([signature[0] - 27]),
     )

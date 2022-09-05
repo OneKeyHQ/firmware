@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 
 PATH_HELP = "BIP-32 path, e.g. m/44'/397'/0'"
 
+
 @click.group(name="near")
 def cli():
     """Near commands."""

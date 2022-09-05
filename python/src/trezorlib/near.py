@@ -40,4 +40,3 @@ def get_address(
 @expect(messages.NearSignedTx)
 def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
     return client.call(messages.NearSignTx(address_n=address_n, raw_tx=rawtx))
-

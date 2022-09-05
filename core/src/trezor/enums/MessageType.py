@@ -248,8 +248,6 @@ if not utils.BITCOIN_ONLY:
     ConfluxSignMessage = 10406
     ConfluxSignMessageCIP23 = 10407
     ConfluxMessageSignature = 10408
-    ConfluxVerifyMessage = 10409
-    ConfluxVerifyMessageCIP23 = 10410
     TronGetAddress = 10501
     TronAddress = 10502
     TronSignTx = 10503

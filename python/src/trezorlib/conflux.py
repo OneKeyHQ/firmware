@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2022 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 Onekey and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -14,9 +14,9 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING, AnyStr, Tuple
+from typing import TYPE_CHECKING, AnyStr, Optional, Tuple
 
-from . import exceptions, messages
+from . import messages
 from .tools import expect, prepare_message_bytes, session
 
 if TYPE_CHECKING:
@@ -68,7 +68,7 @@ def sign_tx(
         to=tx_msg["to"],
         nonce=int_to_big_endian(tx_msg["nonce"]),
         value=int_to_big_endian(tx_msg["value"]),
-        gas=int_to_big_endian(tx_msg["gas"]),
+        gas_limit=int_to_big_endian(tx_msg["gas_limit"]),
         gas_price=int_to_big_endian(tx_msg["gas_price"]),
         storage_limit=int_to_big_endian(tx_msg["storage_limit"]),
         epoch_height=int_to_big_endian(tx_msg["epoch_height"]),
@@ -104,53 +104,15 @@ def sign_message(
 
 @expect(messages.ConfluxMessageSignature)
 def sign_message_cip23(
-    client: "TrezorClient", n: "Address", domain_hash: AnyStr, message_hash: AnyStr
+    client: "TrezorClient",
+    n: "Address",
+    domain_hash: Optional[bytes],
+    message_hash: Optional[bytes],
 ) -> "MessageType":
     return client.call(
         messages.ConfluxSignMessageCIP23(
             address_n=n,
-            domain_hash=prepare_message_bytes(domain_hash),
-            message_hash=prepare_message_bytes(message_hash),
+            domain_hash=domain_hash,
+            message_hash=message_hash,
         )
     )
-
-
-def verify_message(
-    client: "TrezorClient", address: str, signature: bytes, message: AnyStr
-) -> bool:
-    try:
-        resp = client.call(
-            messages.ConfluxVerifyMessage(
-                signature=signature,
-                message=prepare_message_bytes(message),
-                address=address,
-            )
-        )
-
-    except exceptions.TrezorFailure:
-        print("exceptions.TrezorFailure###")
-        return False
-    return isinstance(resp, messages.Success)
-
-
-def verify_message_cip23(
-    client: "TrezorClient",
-    address: str,
-    signature: bytes,
-    domain_hash: AnyStr,
-    message_hash: AnyStr,
-) -> bool:
-    try:
-        resp = client.call(
-            messages.ConfluxVerifyMessageCIP23(
-                signature=signature,
-                domain_hash=prepare_message_bytes(domain_hash),
-                message_hash=prepare_message_bytes(message_hash),
-                address=address,
-            )
-        )
-
-    except exceptions.TrezorFailure:
-        print("exceptions.TrezorFailure###")
-        return False
-    return isinstance(resp, messages.Success)
