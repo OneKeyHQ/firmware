@@ -260,10 +260,6 @@ class MessageType(IntEnum):
     StarcoinSignMessage = 10306
     StarcoinMessageSignature = 10307
     StarcoinVerifyMessage = 10308
-    AptosGetAddress = 10600
-    AptosAddress = 10601
-    AptosSignTx = 10602
-    AptosSignedTx = 10603
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -287,24 +283,6 @@ class MessageType(IntEnum):
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
-    ConfluxGetAddress = 10401
-    ConfluxAddress = 10402
-    ConfluxSignTx = 10403
-    ConfluxTxRequest = 10404
-    ConfluxTxAck = 10405
-    ConfluxSignMessage = 10406
-    ConfluxSignMessageCIP23 = 10407
-    ConfluxMessageSignature = 10408
-    TronGetAddress = 10501
-    TronAddress = 10502
-    TronSignTx = 10503
-    TronSignedTx = 10504
-    TronSignMessage = 10505
-    TronMessageSignature = 10506
-    NearGetAddress = 10701
-    NearAddress = 10702
-    NearSignTx = 10703
-    NearSignedTx = 10704
 
 
 class FailureType(IntEnum):
@@ -600,7 +578,7 @@ class TezosBallotType(IntEnum):
 
 
 class AptosGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10600
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -617,7 +595,7 @@ class AptosGetAddress(protobuf.MessageType):
 
 
 class AptosAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10601
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -631,7 +609,7 @@ class AptosAddress(protobuf.MessageType):
 
 
 class AptosSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10602
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
@@ -648,7 +626,7 @@ class AptosSignTx(protobuf.MessageType):
 
 
 class AptosSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10603
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),
@@ -2997,7 +2975,7 @@ class CardanoTxAuxiliaryDataType(protobuf.MessageType):
 
 
 class ConfluxGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10401
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -3017,7 +2995,7 @@ class ConfluxGetAddress(protobuf.MessageType):
 
 
 class ConfluxAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10402
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -3031,7 +3009,7 @@ class ConfluxAddress(protobuf.MessageType):
 
 
 class ConfluxSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10403
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("nonce", "bytes", repeated=False, required=False),
@@ -3075,7 +3053,7 @@ class ConfluxSignTx(protobuf.MessageType):
 
 
 class ConfluxTxRequest(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10404
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("data_length", "uint32", repeated=False, required=False),
         2: protobuf.Field("signature_v", "uint32", repeated=False, required=False),
@@ -3098,7 +3076,7 @@ class ConfluxTxRequest(protobuf.MessageType):
 
 
 class ConfluxTxAck(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10405
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("data_chunk", "bytes", repeated=False, required=False),
     }
@@ -3112,7 +3090,7 @@ class ConfluxTxAck(protobuf.MessageType):
 
 
 class ConfluxSignMessage(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10406
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("message", "bytes", repeated=False, required=False),
@@ -3129,7 +3107,7 @@ class ConfluxSignMessage(protobuf.MessageType):
 
 
 class ConfluxMessageSignature(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10408
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         2: protobuf.Field("signature", "bytes", repeated=False, required=False),
         3: protobuf.Field("address", "string", repeated=False, required=False),
@@ -3146,7 +3124,7 @@ class ConfluxMessageSignature(protobuf.MessageType):
 
 
 class ConfluxSignMessageCIP23(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10407
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False),
@@ -6436,7 +6414,7 @@ class MoneroExportedKeyImage(protobuf.MessageType):
 
 
 class NearGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10701
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -6453,7 +6431,7 @@ class NearGetAddress(protobuf.MessageType):
 
 
 class NearAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10702
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -6467,7 +6445,7 @@ class NearAddress(protobuf.MessageType):
 
 
 class NearSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10703
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=False),
@@ -6484,7 +6462,7 @@ class NearSignTx(protobuf.MessageType):
 
 
 class NearSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10704
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
     }
@@ -8001,7 +7979,7 @@ class TezosManagerTransfer(protobuf.MessageType):
 
 
 class TronGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10501
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -8018,7 +7996,7 @@ class TronGetAddress(protobuf.MessageType):
 
 
 class TronAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10502
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -8032,7 +8010,7 @@ class TronAddress(protobuf.MessageType):
 
 
 class TronSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10503
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("ref_block_bytes", "bytes", repeated=False, required=True),
@@ -8067,7 +8045,7 @@ class TronSignTx(protobuf.MessageType):
 
 
 class TronSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10504
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
         2: protobuf.Field("serialized_tx", "bytes", repeated=False, required=False),
@@ -8084,7 +8062,7 @@ class TronSignedTx(protobuf.MessageType):
 
 
 class TronSignMessage(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10505
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("message", "bytes", repeated=False, required=True),
@@ -8101,7 +8079,7 @@ class TronSignMessage(protobuf.MessageType):
 
 
 class TronMessageSignature(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10506
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),
