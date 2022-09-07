@@ -705,6 +705,7 @@ void menu_check_specified_word(int index) {
   }
 }
 
+#if 0
 static struct menu_item check_word_menu_items[] = {
     {"Verify All Words", NULL, true, menu_check_all_words, NULL, false},
     {"Verify Specified Word", NULL, true, menu_check_specified_word, NULL,
@@ -719,12 +720,15 @@ static struct menu check_word_menu = {
     .previous = &security_set_menu,
 };
 #endif
+#endif
 
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
+#if 0
 #if ONEKEY_MINI
     {"Recovery Phrase verify", NULL, false, .sub_menu = &check_word_menu, NULL,
      false},
+#endif
 #endif
     {"Blind Signing", NULL, true, menu_blind_sign, NULL, false},
     {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
