@@ -597,7 +597,7 @@ static void _layout_home(bool update_menu) {
       }
       if (!config_isInitialized()) {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, 32, desc, FONT_STANDARD);
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 8,
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 10,
                                     _("Not Actived"), FONT_STANDARD);
       } else {
         if (no_backup) {
