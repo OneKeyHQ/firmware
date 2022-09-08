@@ -242,6 +242,8 @@ bool msg_write_common(char type, uint16_t msg_id, const void *msg_ptr) {
   return status;
 }
 
+void clear_msg_out(void) { msg_out_start = msg_out_end; }
+
 enum {
   READSTATE_IDLE,
   READSTATE_READING,
