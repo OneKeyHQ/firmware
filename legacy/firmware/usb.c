@@ -17,6 +17,7 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libopencm3/stm32/rcc.h>
 #include <libopencm3/usb/hid.h>
 #include <libopencm3/usb/usbd.h>
 
@@ -427,6 +428,7 @@ static void i2c_slave_poll(void) {
     main_rx_callback(NULL, 0);
   }
 }
+
 void usbPoll(void) {
   static const uint8_t *data;
 
@@ -464,8 +466,17 @@ void usbPoll(void) {
   if (CHANNEL_USB == host_channel) {
     data = msg_out_data();
     if (data) {
+      timer_out_set(timer_out_resp, timer1s / 2);
       while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_MAIN_IN, data,
                                   USB_PACKET_SIZE) != USB_PACKET_SIZE) {
+        if (timer_out_get(timer_out_resp) == 0) {
+          clear_msg_out();
+
+          RCC_AHB2RSTR |= RCC_AHB2RSTR_OTGFSRST;
+          RCC_AHB2RSTR &= ~RCC_AHB2RSTR_OTGFSRST;
+          usbInit();
+          break;
+        }
       }
     }
   }

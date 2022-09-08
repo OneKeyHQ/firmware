@@ -57,7 +57,7 @@ static uint8_t device_sleep_state = SLEEP_NONE;
 bool protectButton(ButtonRequestType type, bool confirm_only) {
   ButtonRequest resp = {0};
   bool result = false;
-  bool acked = false;
+  bool acked = true;
   bool timeout_flag = true;
 #if DEBUG_LINK
   bool debug_decided = false;

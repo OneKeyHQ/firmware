@@ -333,12 +333,12 @@ void refreshNfcIcon(bool force_flag) {
   if (sys_nfcState() == true) {
     if (force_flag || false == nfc_status_old) {
       nfc_status_old = true;
-      oledDrawBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 16, 0, &bmp_nfc);
+      oledDrawBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 18, 0, &bmp_nfc);
       layout_refresh = true;
     }
   } else if (true == nfc_status_old) {
     nfc_status_old = false;
-    oledClearBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 16, 0, &bmp_nfc);
+    oledClearBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 18, 0, &bmp_nfc);
     layout_refresh = true;
   }
 }
@@ -351,7 +351,7 @@ uint8_t refreshBleIcon(bool force_flag) {
     if (sys_bleState() == true) {
       if (force_flag || false == ble_conn_status_old) {
         ble_conn_status_old = true;
-        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_blecon);
+        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 18, 0, &bmp_blecon);
         layout_refresh = true;
       }
     } else if (force_flag || true == ble_icon_status_old) {
@@ -359,7 +359,7 @@ uint8_t refreshBleIcon(bool force_flag) {
         ble_conn_status_old = false;
         ret = 1;
       }
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_ble);
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 18, 0, &bmp_ble);
       layout_refresh = true;
     }
     ble_icon_status_old = true;
@@ -369,7 +369,7 @@ uint8_t refreshBleIcon(bool force_flag) {
       ret = 1;
     }
     ble_icon_status_old = false;
-    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_ble);
+    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 18, 0, &bmp_ble);
     layout_refresh = true;
   }
   return ret;
@@ -489,12 +489,12 @@ void disUsbConnectSomething(uint8_t force_flag) {
 
     if (force_flag || false == usb_status_old) {
       usb_status_old = true;
-      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_usb);
+      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 18, 0, &bmp_usb);
       layout_refresh = true;
     }
   } else if (true == usb_status_old) {
     usb_status_old = false;
-    oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_usb);
+    oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - 18, 0, &bmp_usb);
     layout_refresh = true;
     cur_level_dis = battery_old;
     dis_power_flag = 0;
@@ -1598,124 +1598,6 @@ void layoutCosiCommitSign(const uint32_t *address_n, size_t address_n_count,
                     str[1], str[2], str[3], NULL, NULL);
 }
 
-void layoutDeviceInfo(uint8_t ucPage) {
-  const struct font_desc *font = find_cur_font();
-  uint64_t amount;
-  uint32_t times;
-  char str_out[32 + 3] = {0};
-  char times_str[12] = {0};
-  char *se_version = NULL;
-  char *se_sn;
-  int y = 0;
-  char label[MAX_LABEL_LEN + 1] = "";
-
-  oledClear_ex();
-
-  switch (ucPage) {
-    case 1:
-      oledDrawStringAdapter(0, y, _("Firmware version:"), FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y,
-                          VERSTR(VERSION_MAJOR) "." VERSTR(
-                              VERSION_MINOR) "." VERSTR(VERSION_PATCH),
-                          FONT_STANDARD);
-      y += font->pixel + 1;
-      if (ble_ver_state()) {
-        oledDrawStringAdapter(0, y, _("BLE version:"), FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_ver(), FONT_STANDARD);
-        y += font->pixel + 1;
-      }
-      se_version = se_get_version();
-      if (se_version) {
-        oledDrawStringAdapter(0, y, _("SE version:"), FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, se_version, FONT_STANDARD);
-        y += font->pixel + 1;
-      }
-
-      oledDrawStringAdapter(0, y, _("Device ID:"), FONT_STANDARD);
-      oledDrawStringAdapter(50, y, config_uuid_str, FONT_STANDARD);
-      y += font->pixel + 1;
-      break;
-    case 2:
-      config_getLabel(label, sizeof(label));
-
-      if (ble_switch_state()) {
-        oledDrawStringAdapter(0, y, _("BLE enable:"), FONT_STANDARD);
-        oledDrawStringRightAdapter(OLED_WIDTH - 1, y,
-                                   ble_switch_state() ? _("Yes") : _("No"),
-                                   FONT_STANDARD);
-        y += font->pixel + 1;
-      }
-      oledDrawStringAdapter(0, y, _("Use SE:"), FONT_STANDARD);
-      oledDrawStringRightAdapter(OLED_WIDTH - 1, y,
-                                 config_getWhetherUseSE() ? _("Yes") : _("No"),
-                                 FONT_STANDARD);
-      y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, _("Label:"), FONT_STANDARD);
-      oledDrawStringRightAdapter(OLED_WIDTH - 1, y, label, FONT_STANDARD);
-      y += font->pixel + 1;
-
-      if (se_get_sn(&se_sn)) {
-        oledDrawStringAdapter(0, y, _("Serial:"), FONT_STANDARD);
-        oledDrawStringRight(OLED_WIDTH - 1, y, se_sn, FONT_STANDARD);
-        y += font->pixel + 1;
-      }
-
-      char secstrbuf[] = "________0 s";
-      char *secstr = secstrbuf + 9;
-      uint32_t secs = 0;
-      secs = config_getAutoLockDelayMs() / 1000;
-      do {
-        secstr--;
-        *secstr = (secs % 10) + '0';
-        secs /= 10;
-      } while (secs > 0 && secstr >= secstrbuf);
-      oledDrawStringAdapter(0, y, _("Shutdown:"), FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y, secstr, FONT_STANDARD);
-      break;
-    case 3:
-      amount = config_getFastPayMoneyLimt();
-      times = config_getFastPayTimes();
-      uint2str(times, times_str);
-      // uint64_2str(amount, amount_str);
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Fastpay"),
-                                  FONT_STANDARD);
-      y += font->pixel + 1;
-      oledHLine(y + 1);
-      y += 3;
-      oledDrawStringAdapter(0, y, _("Skip pin check:"), FONT_STANDARD);
-      oledDrawStringRightAdapter(
-          OLED_WIDTH - 1, y, config_getFastPayPinFlag() ? _("Yes") : _("No"),
-          FONT_STANDARD);
-
-      y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, _("Skip button confirm:"), FONT_STANDARD);
-      oledDrawStringRightAdapter(
-          OLED_WIDTH - 1, y,
-          config_getFastPayConfirmFlag() ? _("Yes") : _("No"), FONT_STANDARD);
-
-      y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, _("Remaining times:"), FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y, times_str, FONT_STANDARD);
-
-      y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, _("Quota:"), FONT_STANDARD);
-      bn_format_uint64(amount, NULL, " BTC", 8, 0, false, str_out,
-                       sizeof(str_out) - 3);
-      oledDrawStringRight(OLED_WIDTH - 1, y, str_out, FONT_STANDARD);
-
-      break;
-    case 4:
-      oledDrawStringAdapter(0, y, _("BLE Name:"), FONT_STANDARD);
-      oledDrawStringRight(OLED_WIDTH - 1, y, ble_get_name(), FONT_STANDARD);
-      break;
-    default:
-      break;
-  }
-  oledRefresh();
-  layoutLast = layoutDeviceInfo;
-  system_millis_display_info_start = timer_ms();
-}
-
 void layoutHomeInfo(void) {
   uint8_t key = KEY_NULL;
   key = keyScan();
@@ -2004,7 +1886,7 @@ void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
   int l = 0;
   int y0 = font & FONT_DOUBLE ? 8 : 0;
   oledBox(x - 4, y - 8, x + 4, y + 16 + y0, false);
-  oledDrawBitmap(x - 4, y - 10, &bmp_btn_up);
+  oledDrawBitmap(x - 4, y - 9, &bmp_btn_up);
   l = oledStringWidth(text, font);
   if (bmp) {
     oledDrawBitmap(x - 4, y + 1, bmp);
@@ -2268,7 +2150,8 @@ void layoutItemsSelectAdapter(const BITMAP *bmp_up, const BITMAP *bmp_down,
   oledRefresh();
 }
 
-#define DEVICE_INFO_PAGE_NUM 3
+#define DEVICE_INFO_PAGE_NUM 9
+extern char bootloader_version[8];
 
 void layouKeyValue(int y, const char *desc, const char *value) {
   oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
@@ -2279,27 +2162,71 @@ void layoutDeviceParameters(int num) {
   (void)num;
   const struct font_desc *font = find_cur_font();
   char *se_version = NULL;
-  char *se_sn;
-  int x = 0, y = 0;
+  char *se_sn = NULL;
+  int y = 0;
   int index = 0;
   uint8_t key = KEY_NULL;
+  char index_str[16] = "";
 
 refresh_menu:
   y = 9;
   oledClear_ex();
+
+  // index
+  uint2str(index + 1, index_str);
+  strcat(index_str + strlen(index_str), "/");
+  uint2str(DEVICE_INFO_PAGE_NUM, index_str + strlen(index_str));
+  oledDrawStringAdapter(1, 1, index_str, FONT_SMALL);
+
   switch (index) {
     case 0:
-      if (se_get_sn(&se_sn)) {
-        layouKeyValue(y, _("Serial:"), se_sn);
-        y += font->pixel + 1;
-      }
 
-      layouKeyValue(y, _("BLE Name:"), ble_get_name());
+      oledDrawStringAdapter(0, y, _("MODEL:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, "OneKey Classic", FONT_STANDARD);
+      y += font->pixel + 4;
+
+      oledDrawStringAdapter(0, y, _("BLUETOOTH NAME:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, ble_get_name(), FONT_STANDARD);
+
+      break;
+    case 1:
+
+      oledDrawStringAdapter(0, y, _("FIRMWARE VERSION:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, ONEKEY_VERSION, FONT_STANDARD);
+      y += font->pixel + 4;
+
+      oledDrawStringAdapter(0, y, _("BLUETOOTH VERSION:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, ble_get_ver(), FONT_STANDARD);
+      break;
+
+    case 2:
+      se_version = se_get_version();
+      oledDrawStringAdapter(0, y, _("SE VERSION:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, se_version, FONT_STANDARD);
+      y += font->pixel + 4;
+
+      oledDrawStringAdapter(0, y, _("BOOTLOADER:"), FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawStringAdapter(0, y, bootloader_version, FONT_STANDARD);
       y += font->pixel + 1;
 
-      char *id_key = _("Device ID:");
-      oledDrawStringAdapter(0, y, id_key, FONT_STANDARD);
-      x = oledStringWidthAdapter(id_key, FONT_STANDARD) + 1;
+      break;
+
+    case 3:
+      oledDrawStringAdapter(0, y, _("SERIAL NUMBER:"), FONT_STANDARD);
+      y += font->pixel + 1;
+
+      se_get_sn(&se_sn);
+      oledDrawStringAdapter(0, y, se_sn, FONT_STANDARD);
+      break;
+    case 4:
+      oledDrawStringAdapter(0, y, _("DEVICE ID:"), FONT_STANDARD);
+      y += font->pixel + 1;
 
       // split uuid
       char uuid1[32] = {0};
@@ -2307,46 +2234,20 @@ refresh_menu:
 
       for (int i = 0; i < 2 * UUID_SIZE; i++) {
         uuid1[i] = config_uuid_str[i];
-        if (oledStringWidthAdapter(uuid1, FONT_STANDARD) > OLED_WIDTH - x) {
+        if (oledStringWidthAdapter(uuid1, FONT_STANDARD) > OLED_WIDTH) {
           uuid1[i] = 0;
           strcat(uuid2, config_uuid_str + i);
           break;
         }
       }
 
-      oledDrawStringAdapter(x, y, uuid1, FONT_STANDARD);
+      oledDrawStringAdapter(0, y, uuid1, FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringRightAdapter(OLED_WIDTH - 1, y, uuid2, FONT_STANDARD);
-
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                     &bmp_btn_down);
-
+      oledDrawStringAdapter(0, y, uuid2, FONT_STANDARD);
       break;
-    case 1:
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-      se_version = se_get_version();
-      layouKeyValue(y, _("Firmware version:"), ONEKEY_VERSION);
+    case 5:
+      oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
       y += font->pixel + 1;
-
-      layouKeyValue(y, _("BLE version:"), ble_get_ver());
-      y += font->pixel + 1;
-
-      layouKeyValue(y, _("SE version:"), se_version);
-      y += font->pixel + 1;
-
-      layouKeyValue(y, _("Font:"), "3type");
-      y += font->pixel + 1;
-
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                     &bmp_btn_down);
-      break;
-
-    case 2:
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-#ifdef BUILD_ID
-      char *build_id = _("BUILD ID:");
-      oledDrawStringAdapter(0, y, build_id, FONT_STANDARD);
-      x = oledStringWidthAdapter(build_id, FONT_STANDARD) + 1;
 
       // split build id
       char build_id1[64] = {0};
@@ -2354,22 +2255,40 @@ refresh_menu:
 
       for (int i = 0; i < BUILD_ID_MAX_LEN; i++) {
         build_id1[i] = BUILD_ID[i];
-        if (oledStringWidthAdapter(build_id1, FONT_STANDARD) > OLED_WIDTH - x) {
+        if (oledStringWidthAdapter(build_id1, FONT_STANDARD) > OLED_WIDTH) {
           build_id1[i] = 0;
           strcat(build_id2, BUILD_ID + i);
           break;
         }
       }
 
-      oledDrawStringAdapter(x, y, build_id1, FONT_STANDARD);
+      oledDrawStringAdapter(0, y, build_id1, FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringRightAdapter(OLED_WIDTH - 1, y, build_id2, FONT_STANDARD);
-#endif
+      oledDrawStringAdapter(0, y, build_id2, FONT_STANDARD);
+      break;
+    case 6:
+      oledDrawBitmap((OLED_WIDTH - bmp_Icon_fc.width) / 2, 4, &bmp_Icon_fc);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 40, "FCC ID:2AV5MBIXINKEY1",
+                                  FONT_STANDARD);
+      break;
+    case 7:
+      oledDrawBitmap((OLED_WIDTH - bmp_Icon_bc.width) / 2, 12, &bmp_Icon_bc);
+      break;
+    case 8:
+      oledDrawBitmap(20, 12, &bmp_Icon_ce);
+      oledDrawBitmap(72, 12, &bmp_Icon_weee);
       break;
     default:
       break;
   }
-  layoutButtonNoAdapter(_("Back"), &bmp_btn_cancel);
+  layoutButtonNoAdapter(NULL, &bmp_button_back);
+
+  // scrollbar
+  for (int i = 0; i < OLED_HEIGHT; i += 2) {
+    oledDrawPixel(OLED_WIDTH - 1, i);
+  }
+  oledBox(OLED_WIDTH - 2, index * 7, OLED_WIDTH, (index + 1) * 7, true);
+
   oledRefresh();
   key = protectWaitKey(0, 0);
   switch (key) {
