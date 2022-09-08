@@ -66,6 +66,7 @@ int oledStringWidthEx(const char *text, uint8_t font) {
 void oledDrawStringEx(int x, int y, const char *text, uint8_t font) {
   int steps = 0;
   int l = 0;
+  bool mixed = false;
   uint8_t char_width = 0;
   uint8_t height = font_get_height();
   const uint8_t *char_data = font_get_data((uint8_t *)text, &char_width);
@@ -86,11 +87,16 @@ void oledDrawStringEx(int x, int y, const char *text, uint8_t font) {
       }
       if (y > OLED_HEIGHT) y = 0;
       if (*text != '\n') {
-        oledDrawChar(x, y, *text, font);
+        if (mixed) {
+          oledDrawChar(x, y + 1, *text, font);
+        } else {
+          oledDrawChar(x, y, *text, font);
+        }
       }
       x += l;
       text++;
     } else {
+      mixed = true;
       steps = utf8_get_size(*text);
       if (x + char_width > (OLED_WIDTH - MINI_ADJUST) || (*text == '\n')) {
         x = MINI_ADJUST;
