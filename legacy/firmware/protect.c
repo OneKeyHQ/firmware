@@ -319,7 +319,7 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char *message) {
   const struct font_desc *font = find_cur_font();
-  int y = 9;
+  int y = 21;
   // Convert wait to secstr string.
   char secstrbuf[32] = "";
   uint2str(wait, secstrbuf);
@@ -332,7 +332,7 @@ secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
 
   oledClear_ex();
 
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, _(message), FONT_STANDARD);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 12, _(message), FONT_STANDARD);
   y += font->pixel + 1;
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Please wait"),
                               FONT_STANDARD);
@@ -949,7 +949,7 @@ pin_set:
     } else if (pin == PIN_CANCELED_BY_BUTTON)
       return false;
 
-    bool ret = config_unlock(pin);
+    bool ret = config_verify_pin(pin);
     if (ret == false) {
       if (protectPinCheck(true)) {
         goto input;

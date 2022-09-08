@@ -174,11 +174,11 @@ const char *languages[][2] = {
      "重新检查已输入的18位单\n词,确保它是正确的助记词"},
     {"Check the 24 words\nyou entered are the\ncorrect recovery\nphrase",
      "重新检查已输入的24位单\n词,确保它是正确的助记词"},
+    //
+    {"Check the entered", "请检查输入的"},
     {"Check the recovery\nphrase once more and\ncompare it to the\nbackup copy "
      "in your\nhand. Make sure the\nspelling and order\nare identical.",
      "再次查看助记词,并与手\n中的备份进行核对,确保\n二者完全一致."},
-    //
-    {"Check the entered", "请检查输入的"},
     //
     {"Check the seed", "检查助记词"},
     // layout2.c

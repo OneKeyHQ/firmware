@@ -1102,6 +1102,45 @@ bool config_unlock(const char *pin) {
   }
 }
 
+/* Same as config_unlock.  except that se_unlocked
+ * is not modified on failure.
+ */
+bool config_verify_pin(const char *pin) {
+#if !EMULATOR
+  if (g_bSelectSEFlag) {
+#if ONEKEY_MINI
+    if (se_verifyPin(pin))
+#else
+    if (se_verifyPin((pin_to_int(pin))))
+#endif
+    {
+      if (!storage_is_unlocked()) {
+#if !EMULATOR
+        register_timer("usbpoll", timer1s / 30, usbPoll);
+#endif
+        storage_unlock(PIN_EMPTY, PIN_EMPTY_LEN, NULL);
+#if !EMULATOR
+        unregister_timer("usbpoll");
+#endif
+      }
+
+      se_unlocked = sectrue;
+      return true;
+    } else {
+      return false;
+    }
+
+  } else
+#endif
+  {
+    char oldTiny = usbTiny(1);
+    secbool ret =
+        storage_unlock((const uint8_t *)pin, strnlen(pin, MAX_PIN_LEN), NULL);
+    usbTiny(oldTiny);
+    return sectrue == ret;
+  }
+}
+
 bool config_hasPin(void) {
 #if !EMULATOR
   if (g_bSelectSEFlag) {
