@@ -2,6 +2,10 @@ from ubinascii import hexlify
 
 from trezor.crypto.hashlib import sha3_256
 
+TRANSACTION_PREFIX = b"STARCOIN::RawUserTransaction"
+
+MESSAGE_PREFIX = b"STARCOIN::SigningMessage"
+
 
 def get_address_from_public_key(pubkey):
     msg = pubkey + b"\x00"

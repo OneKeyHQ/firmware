@@ -310,10 +310,9 @@ async def _handle_single_message(
 
     # We need to find a handler for this message type.  Should not raise.
     handler = find_handler(ctx.iface, msg.type)  # pylint: disable=assignment-from-none
-
     if handler is None:
         # If no handler is found, we can skip decoding and directly
-        # respond with failure.
+        # respond with failure.}
         await ctx.write(unexpected_message())
         return None
 

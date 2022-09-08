@@ -53,6 +53,9 @@ __all__ = (
     "confirm_sol_create_ata",
     "confirm_sol_token_transfer",
     "confirm_sol_memo",
+    "confirm_data",
+    "confirm_final",
+    "confirm_blind_sign_common",
 )
 
 
@@ -835,8 +838,8 @@ async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -
 
     screen = PassphraseRequest(max_len)
     result = await ctx.wait(screen.request())
-    # if not result:
-    #     raise wire.ActionCancelled("Passphrase entry cancelled")
+    if result is None:
+        raise wire.ActionCancelled("Passphrase entry cancelled")
 
     assert isinstance(result, str)
     return result
@@ -987,12 +990,37 @@ async def confirm_sol_memo(
     )
 
 
-async def confirm_stc_blinding_sign(ctx: wire.GenericContext, signer: str) -> None:
-    from trezor.lvglui.scrs.template import StcBlindingSign
+async def confirm_final(ctx: wire.Context) -> None:
+    from trezor.ui.layouts.lvgl import confirm_action
 
-    screen = StcBlindingSign(signer)
+    await confirm_action(
+        ctx,
+        "confirm_final",
+        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
+        action=_(i18n_keys.SUBTITLE__DO_YOU_WANT_TO_SIGN__THIS_TX),
+        verb=_(i18n_keys.BUTTON__SLIDE_TO_SIGN),
+        hold=True,
+    )
+
+
+async def confirm_blind_sign_common(
+    ctx: wire.Context, signer: str, raw_message: bytes
+) -> None:
+
+    from trezor.lvglui.scrs.template import BlindingSignCommon
+
+    screen = BlindingSignCommon(signer)
     await raise_if_cancelled(
         interact(ctx, screen, "stc_blinding_sign", ButtonRequestType.ProtectCall)
+    )
+    data_size = len(raw_message)
+    await confirm_data(
+        ctx,
+        "confirm_data",
+        title=_(i18n_keys.TITLE__VIEW_DATA),
+        description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_size),
+        data=raw_message,
+        br_code=ButtonRequestType.SignTx,
     )
 
 

@@ -204,12 +204,10 @@ async def require_confirm_safety_checks(
         await confirm_action(
             ctx,
             "set_safety_checks",
-            _(i18n_keys.TITLE__SAFETY_OVERRIDE),
+            _(i18n_keys.TITLE__DISABLE_SAFETY_CHECKS),
             hold=True,
-            verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
-            description=_(
-                i18n_keys.SUBTITLE__ONEKEY_WILL_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE
-            ),
+            verb=_(i18n_keys.BUTTON__SLIDE_TO_DISABLE),
+            description=_(i18n_keys.SUBTITLE__DISABLE_SAFETY_CHECKS),
             action="",
             reverse=True,
             larger_vspace=True,
@@ -219,12 +217,10 @@ async def require_confirm_safety_checks(
         await confirm_action(
             ctx,
             "set_safety_checks",
-            _(i18n_keys.TITLE__SAFETY_OVERRIDE),
+            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_PROMPT),
             hold=True,
             verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
-            description=_(
-                i18n_keys.SUBTITLE__ONEKEY_WILL_TEMPORARILY_ALLOW_YOU_TO_APPROVE_SOME_ACTIONS_WHICH_MIGHT_BE_UNSAFE
-            ),
+            description=_(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_PROMPT),
             action="",
             reverse=True,
             br_code=ButtonRequestType.ProtectCall,
@@ -233,10 +229,8 @@ async def require_confirm_safety_checks(
         await confirm_action(
             ctx,
             "set_safety_checks",
-            _(i18n_keys.TITLE__SAFETY_CHECKS),
-            description=_(
-                i18n_keys.SUBTITLE__DO_YOU_REALLY_WANT_TO_ENFORCE_STRICT_SAFETY_CHECKS_RECOMMENDED
-            ),
+            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_STRICT),
+            description=_(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_STRICT),
             br_code=ButtonRequestType.ProtectCall,
         )
     else:

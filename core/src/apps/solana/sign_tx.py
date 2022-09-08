@@ -99,6 +99,8 @@ async def sign_tx(
             # #     raise wire.ProcessError("Vote program not support for now")
             # else:
             #     print("Unknown instruction detached")
+    from trezor.ui.layouts import confirm_final
+
     await confirm_final(ctx)
     signature = ed25519.sign(node.private_key(), msg.raw_tx)
     return SolanaSignedTx(signature=signature)
@@ -111,17 +113,3 @@ def check(msg: SolanaSignTx):
         raise wire.DataError("Message overflow")
     elif len(raw_message) < HEADER_LENGTH:
         raise wire.DataError("Message too short")
-
-
-async def confirm_final(ctx: wire.Context):
-    from trezor.ui.layouts.lvgl import confirm_action
-    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-
-    await confirm_action(
-        ctx,
-        "confirm_final",
-        title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
-        action=_(i18n_keys.SUBTITLE__DO_YOU_WANT_TO_SIGN__THIS_TX),
-        verb=_(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-        hold=True,
-    )

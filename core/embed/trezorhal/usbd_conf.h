@@ -73,7 +73,7 @@
 #define USBD_DEBUG_LEVEL                      0
 #define USBD_LPM_ENABLED                      1
 
-extern bool usb_connect_state;
+extern volatile bool usb_connect_state;
 
 /* Exported macro ------------------------------------------------------------*/
 /* Memory management macros */

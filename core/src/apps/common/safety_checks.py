@@ -44,3 +44,7 @@ def is_strict() -> bool:
     Shorthand for checking whether the effective level is Strict.
     """
     return read_setting() == SafetyCheckLevel.Strict
+
+
+def is_prompt_always() -> bool:
+    return read_setting() == SafetyCheckLevel.PromptAlways

@@ -136,7 +136,7 @@
  *With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
  *However the opened images might consume additional RAM.
  *0: to disable caching*/
-#define LV_IMG_CACHE_DEF_SIZE   5
+#define LV_IMG_CACHE_DEF_SIZE   20
 
 /*Number of stops allowed per gradient. Increase this to allow more stops.
  *This adds (sizeof(lv_color_t) + 1) bytes per additional stop*/
@@ -384,7 +384,8 @@
     LV_FONT_DECLARE(lv_font_mix_bold_24) \
     LV_FONT_DECLARE(lv_font_mix_title_bold_36) \
     LV_FONT_DECLARE(lv_font_mono_reg_28) \
-    LV_FONT_DECLARE(lv_font_status_bar)
+    LV_FONT_DECLARE(lv_font_status_bar) \
+    LV_FONT_DECLARE(lv_font_pljs_bold_48)
 
 /*Always set a default font*/
 #define LV_FONT_DEFAULT &lv_font_scs_reg_26
@@ -505,7 +506,7 @@
 /*-----------
  * Widgets
  *----------*/
-#define LV_USE_CALENDAR   1
+#define LV_USE_CALENDAR   0
 #if LV_USE_CALENDAR
     #define LV_CALENDAR_WEEK_STARTS_MONDAY 0
     #if LV_CALENDAR_WEEK_STARTS_MONDAY
@@ -521,27 +522,27 @@
 
 #define LV_USE_CHART      1
 
-#define LV_USE_COLORWHEEL 1
+#define LV_USE_COLORWHEEL 0
 
 #define LV_USE_IMGBTN     1
 
 #define LV_USE_KEYBOARD   1
 
-#define LV_USE_LED        1
+#define LV_USE_LED        0
 
 #define LV_USE_LIST       1
 
-#define LV_USE_MENU       1
+#define LV_USE_MENU       0
 
-#define LV_USE_METER      1
+#define LV_USE_METER      0
 
-#define LV_USE_MSGBOX     1
+#define LV_USE_MSGBOX     0
 
-#define LV_USE_SPINBOX    1
+#define LV_USE_SPINBOX    0
 
 #define LV_USE_SPINNER    1
 
-#define LV_USE_TABVIEW    1
+#define LV_USE_TABVIEW    0
 
 #define LV_USE_TILEVIEW   1
 

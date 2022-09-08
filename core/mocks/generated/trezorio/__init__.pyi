@@ -103,7 +103,7 @@ class HID:
 
 
 # extmod/modtrezorio/modtrezorio-moto.h
-class MOTO:
+class MOTOR:
     """
     """
 
@@ -113,7 +113,7 @@ class MOTO:
         """
         """
 
-    def ctrl(self, msg: bytes) -> None:
+    def ctrl(self, cmd: int) -> None:
         """
         Control the motor.
         """

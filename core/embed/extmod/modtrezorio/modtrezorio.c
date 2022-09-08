@@ -91,6 +91,7 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
 
     {MP_ROM_QSTR(MP_QSTR_UART), MP_ROM_INT(UART_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_USB_STATE), MP_ROM_INT(USB_STATE_IFACE)},
+    {MP_ROM_QSTR(MP_QSTR_MOTOR), MP_ROM_PTR(&mod_trezorio_MOTOR_type)},
 #elif TREZOR_MODEL == 1
     {MP_ROM_QSTR(MP_QSTR_BUTTON), MP_ROM_INT(BUTTON_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_BUTTON_PRESSED),

@@ -147,11 +147,12 @@ async def _deal_button_press(value: bytes) -> None:
     if res == _PRESS_SHORT:
         if display.backlight():
             display.backlight(0)
-            if device.is_initialized() and config.has_pin():
-                if config.is_unlocked():
+            if device.is_initialized():
+                utils.AUTO_POWER_OFF = True
+                if config.has_pin() and config.is_unlocked():
                     config.lock()
-                    # single to restart the main loop
-                    raise loop.TASK_CLOSED
+                # single to restart the main loop
+                raise loop.TASK_CLOSED
         else:
             utils.turn_on_lcd_if_possible()
     elif res == _PRESS_LONG:

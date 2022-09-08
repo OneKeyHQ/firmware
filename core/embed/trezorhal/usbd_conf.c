@@ -69,7 +69,7 @@ static PCD_HandleTypeDef pcd_fs_handle;
 static PCD_HandleTypeDef pcd_hs_handle;
 #endif
 
-bool usb_connect_state = false;
+volatile bool usb_connect_state = false;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/

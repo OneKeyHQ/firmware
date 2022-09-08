@@ -83,9 +83,9 @@ async def require_confirm_eip1559_fee(
     gas_limit: int,
     chain_id: int,
     token: tokens.TokenInfo | None = None,
-    from_address: str = None,
-    to_address: str = None,
-    network: str = None,
+    from_address: str | None = None,
+    to_address: str | None = None,
+    network: str | None = None,
 ) -> None:
 
     fee_max = max_gas_fee * gas_limit
@@ -121,7 +121,7 @@ def require_confirm_unknown_token(
 
 
 def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    from trezor.ui.layouts import confirm_data  # type: ignore["confirm_data" is unknown import symbol]
+    from trezor.ui.layouts import confirm_data
 
     return confirm_data(
         ctx,

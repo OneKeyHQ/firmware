@@ -145,6 +145,9 @@ class ListItemBtn(lv.btn):
             self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
             self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
 
+    def is_unchecked(self) -> bool:
+        return self.img_right.has_flag(lv.obj.FLAG.HIDDEN)
+
 
 class ListItemBtnWithSwitch(lv.btn):
     def __init__(self, parent, text: str) -> None:
