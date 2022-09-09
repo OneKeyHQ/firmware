@@ -1011,7 +1011,7 @@ async def confirm_blind_sign_common(
 
     screen = BlindingSignCommon(signer)
     await raise_if_cancelled(
-        interact(ctx, screen, "stc_blinding_sign", ButtonRequestType.ProtectCall)
+        interact(ctx, screen, "common_blinding_sign", ButtonRequestType.ProtectCall)
     )
     data_size = len(raw_message)
     await confirm_data(
@@ -1021,13 +1021,4 @@ async def confirm_blind_sign_common(
         description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_size),
         data=raw_message,
         br_code=ButtonRequestType.SignTx,
-    )
-
-
-async def confirm_near_blinding_sign(ctx: wire.GenericContext, signer: str) -> None:
-    from trezor.lvglui.scrs.template import NearBlindingSign
-
-    screen = NearBlindingSign(signer)
-    await raise_if_cancelled(
-        interact(ctx, screen, "near_blinding_sign", ButtonRequestType.ProtectCall)
     )

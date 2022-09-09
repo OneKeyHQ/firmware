@@ -43,7 +43,6 @@ def get_address(client: "TrezorClient", address: str, show_display: bool) -> str
     return aptos.get_address(client, address_n, show_display)
 
 
-
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
 @click.argument("message")

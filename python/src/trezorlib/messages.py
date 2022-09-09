@@ -272,7 +272,6 @@ class MessageType(IntEnum):
     ConfluxTxRequest = 10404
     ConfluxTxAck = 10405
     ConfluxSignMessage = 10406
-    ConfluxSignMessageCIP23 = 10407
     ConfluxMessageSignature = 10408
     TronGetAddress = 10501
     TronAddress = 10502
@@ -3236,26 +3235,6 @@ class ConfluxMessageSignature(protobuf.MessageType):
     ) -> None:
         self.signature = signature
         self.address = address
-
-
-class ConfluxSignMessageCIP23(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10407
-    FIELDS = {
-        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False),
-        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        address_n: Optional[Sequence["int"]] = None,
-        domain_hash: Optional["bytes"] = None,
-        message_hash: Optional["bytes"] = None,
-    ) -> None:
-        self.address_n: Sequence["int"] = address_n if address_n is not None else []
-        self.domain_hash = domain_hash
-        self.message_hash = message_hash
 
 
 class CipherKeyValue(protobuf.MessageType):
@@ -6533,14 +6512,14 @@ class NearSignTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 10703
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
+        raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
-        raw_tx: Optional["bytes"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx

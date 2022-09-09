@@ -371,7 +371,7 @@ enum MessageType {
     MessageType_ConfluxTxRequest = 10404 [(wire_out) = true];
     MessageType_ConfluxTxAck = 10405 [(wire_in) = true];
     MessageType_ConfluxSignMessage = 10406 [(wire_in) = true];
-    MessageType_ConfluxSignMessageCIP23 = 10407 [(wire_in) = true];
+    // MessageType_ConfluxSignMessageCIP23 = 10407 [(wire_in) = true];
     MessageType_ConfluxMessageSignature = 10408 [(wire_out) = true];
 
     // tron
