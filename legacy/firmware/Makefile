@@ -86,11 +86,11 @@ OBJS += nem_mosaics.o
 OBJS += solana.o
 OBJS += starcoin.o
 OBJS += stellar.o
-# OBJS += tron.o
-# OBJS += tron_ui.o
-# OBJS += tron_tokens.o
+OBJS += tron.o
+OBJS += tron_ui.o
+OBJS += tron_tokens.o
 # OBJS += aptos.o
-# OBJS += near.o
+OBJS += near.o
 # OBJS += conflux.o
 endif
 
@@ -168,9 +168,9 @@ OBJS += protob/messages-nem.pb.o
 OBJS += protob/messages-solana.pb.o
 OBJS += protob/messages-starcoin.pb.o
 OBJS += protob/messages-stellar.pb.o
-# OBJS += protob/messages-tron.pb.o
+OBJS += protob/messages-tron.pb.o
 # OBJS += protob/messages-aptos.pb.o
-# OBJS += protob/messages-near.pb.o
+OBJS += protob/messages-near.pb.o
 # OBJS += protob/messages-conflux.pb.o
 endif
 
