@@ -125,6 +125,7 @@ void layoutHomeInfo(void);
 
 void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon);
 void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon);
+void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon);
 void layoutDialogAdapter(const BITMAP *icon, const char *btnNo,
                          const char *btnYes, const char *desc,
                          const char *line1, const char *line2,
