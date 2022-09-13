@@ -2210,11 +2210,12 @@ refresh_menu:
       oledDrawStringAdapter(0, y, se_version, FONT_STANDARD);
       y += font->pixel + 4;
 
+#if !EMULATOR
       oledDrawStringAdapter(0, y, _("BOOTLOADER:"), FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawStringAdapter(0, y, bootloader_version, FONT_STANDARD);
       y += font->pixel + 1;
-
+#endif
       break;
 
     case 3:

@@ -17,10 +17,6 @@ ConfluxTxAck.data_chunk                max_size:1024
 ConfluxSignMessage.address_n           max_count:8
 ConfluxSignMessage.message             max_size:5120
 
-ConfluxSignMessageCIP23.address_n      max_count:8
-ConfluxSignMessageCIP23.domain_hash    max_size:32
-ConfluxSignMessageCIP23.message_hash   max_size:32
-
 ConfluxMessageSignature.address        max_size:43
 ConfluxMessageSignature.signature      max_size:65
 
