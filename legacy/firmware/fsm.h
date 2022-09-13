@@ -197,6 +197,5 @@ void fsm_msgConfluxSignTx(ConfluxSignTx *msg);  // not const because we mutate
                                                 // transaction during validation
 void fsm_msgConfluxTxAck(const ConfluxTxAck *msg);
 void fsm_msgConfluxSignMessage(const ConfluxSignMessage *msg);
-void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg);
 
 #endif

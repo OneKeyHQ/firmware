@@ -770,7 +770,7 @@ const char *languages[][2] = {
     // layout2.c layout2.c
     {"Shutdown", "自动关机"},
     // starcoin.c
-    {"Sign at you own risk", "签名风险自负"},
+    {"Sign at you own risk", "签名可能存在安全风险,请谨慎操作"},
     // layout2.c
     {"Sign binary message?", ""},
     // layout2.c
