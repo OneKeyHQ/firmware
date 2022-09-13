@@ -35,7 +35,7 @@ def get_address(
         messages.AptosGetAddress(address_n=address_n, show_display=show_display)
     )
 
+
 @expect(messages.AptosSignedTx)
 def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
     return client.call(messages.AptosSignTx(address_n=address_n, raw_tx=rawtx))
-

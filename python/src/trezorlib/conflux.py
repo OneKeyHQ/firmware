@@ -14,7 +14,7 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING, AnyStr, Optional, Tuple
+from typing import AnyStr, TYPE_CHECKING, Tuple
 
 from . import messages
 from .tools import expect, prepare_message_bytes, session
@@ -99,20 +99,4 @@ def sign_message(
 ) -> "MessageType":
     return client.call(
         messages.ConfluxSignMessage(address_n=n, message=prepare_message_bytes(message))
-    )
-
-
-@expect(messages.ConfluxMessageSignature)
-def sign_message_cip23(
-    client: "TrezorClient",
-    n: "Address",
-    domain_hash: Optional[bytes],
-    message_hash: Optional[bytes],
-) -> "MessageType":
-    return client.call(
-        messages.ConfluxSignMessageCIP23(
-            address_n=n,
-            domain_hash=domain_hash,
-            message_hash=message_hash,
-        )
     )

@@ -31,6 +31,7 @@ from ..transport.udp import UdpTransport
 from . import (
     AliasedGroup,
     TrezorConnection,
+    aptos,
     binance,
     btc,
     cardano,
@@ -54,7 +55,6 @@ from . import (
     tezos,
     tron,
     with_client,
-    aptos,
 )
 
 if TYPE_CHECKING:
@@ -380,6 +380,7 @@ cli.add_command(aptos.cli)
 cli.add_command(starcoin.cli)
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
+cli.add_command(near.cli)
 
 #
 # Main

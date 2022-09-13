@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from trezor import ui
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
@@ -10,22 +11,27 @@ if TYPE_CHECKING:
 
 def require_confirm_tx(
     ctx: Context,
-    signer: str,
+    to: str,
+    value: int,
 ) -> Awaitable[None]:
-    from trezor.ui.layouts.lvgl import confirm_near_blinding_sign
+    from trezor.ui.layouts import confirm_output
 
-    return confirm_near_blinding_sign(ctx, signer)
+    # retain 5 decimal places
+    suffix = "NEAR"
+    decimals = 24
+    d = pow(10, decimals)
+    if value < pow(10, decimals - 5):
+        amount_str = f"< 0.00001 {suffix}"
+    else:
+        dp = f"{value % d:0{decimals}}"[:5]
+        amount_str = f"{value // d}.{dp}".rstrip("0").rstrip(".") + " " + suffix
 
-
-def require_confirm_data(ctx: Context, data: bytes, data_total: int) -> Awaitable[None]:
-    from trezor.ui.layouts import confirm_data
-
-    return confirm_data(
+    return confirm_output(
         ctx,
-        "confirm_data",
-        title=_(i18n_keys.TITLE__VIEW_DATA),
-        description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_total),
-        data=data,
+        address=to,
+        amount=amount_str,
+        font_amount=ui.BOLD,
+        color_to=ui.GREY,
         br_code=ButtonRequestType.SignTx,
     )
 

@@ -540,6 +540,8 @@ apps.near.layout
 import apps.near.layout
 apps.near.sign_tx
 import apps.near.sign_tx
+apps.near.transaction
+import apps.near.transaction
 apps.solana
 import apps.solana
 apps.solana.constents

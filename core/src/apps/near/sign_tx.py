@@ -6,9 +6,10 @@ from trezor.crypto.hashlib import sha256
 from trezor.messages import NearSignedTx, NearSignTx
 
 from apps.common import paths
-from apps.common.keychain import FORBIDDEN_KEY_PATH, Keychain, auto_keychain
+from apps.common.keychain import Keychain, auto_keychain
 
-from .layout import confirm_final, require_confirm_data, require_confirm_tx
+from .layout import confirm_final, require_confirm_tx
+from .transaction import Action_Transfer, Transaction
 
 
 @auto_keychain(__name__)
@@ -17,24 +18,25 @@ async def sign_tx(
 ) -> NearSignedTx:
 
     await paths.validate_path(ctx, keychain, msg.address_n)
-    if (
-        len(msg.address_n) != 3
-        or msg.address_n[0] != 0x8000002C
-        or msg.address_n[1] != 0x8000018D
-    ):
-        raise FORBIDDEN_KEY_PATH
-
     node = keychain.derive(msg.address_n)
     pubkey = node.public_key()[1:]
     address = "0x" + hexlify(pubkey).decode()
-    raw_tx = msg.raw_tx if msg.raw_tx is not None else b""
-    raw_tx_size = len(msg.raw_tx) if msg.raw_tx is not None else 0
 
-    await require_confirm_tx(ctx, address)
-    await require_confirm_data(ctx, raw_tx, raw_tx_size)
-    await confirm_final(ctx)
+    # parse message
+    try:
+        tx = Transaction.deserialize(msg.raw_tx)
+    except BaseException as e:
+        raise wire.DataError(f"Invalid message {e}")
 
-    hash = sha256(raw_tx).digest()
+    if tx.action.action_type == Action_Transfer:
+        await require_confirm_tx(ctx, tx.receiverId, tx.action.amount)
+    else:
+        from trezor.ui.layouts.lvgl import confirm_blind_sign_common
+
+        await confirm_blind_sign_common(ctx, address, msg.raw_tx)
+        await confirm_final(ctx)
+
+    hash = sha256(msg.raw_tx).digest()
     signature = ed25519.sign(node.private_key(), hash)
 
     return NearSignedTx(signature=signature)

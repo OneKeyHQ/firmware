@@ -246,7 +246,6 @@ if not utils.BITCOIN_ONLY:
     ConfluxTxRequest = 10404
     ConfluxTxAck = 10405
     ConfluxSignMessage = 10406
-    ConfluxSignMessageCIP23 = 10407
     ConfluxMessageSignature = 10408
     TronGetAddress = 10501
     TronAddress = 10502
