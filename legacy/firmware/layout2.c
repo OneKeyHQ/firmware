@@ -1841,12 +1841,12 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
 
   } else {
     if (line5) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1), line5,
-                                  FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * (font->pixel + 1) + 1,
+                                  line5, FONT_STANDARD);
     }
     if (line6) {
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1), line6,
-                                  FONT_STANDARD);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 5 * (font->pixel + 1) + 1,
+                                  line6, FONT_STANDARD);
     }
   }
   if (btnNo) {
@@ -2355,6 +2355,21 @@ void layoutConfirmHash(const BITMAP *icon, const char *description,
   oledRefresh();
 }
 
+void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
+  const struct font_desc *font = find_cur_font();
+  int icon_width = 0;
+  if (icon) {
+    oledDrawBitmap(OLED_WIDTH - 8 - 4, OLED_HEIGHT - 8 - 1, icon);
+    icon_width = icon->width;
+  }
+  oledDrawStringRightAdapter(OLED_WIDTH - icon_width - 6,
+                             OLED_HEIGHT - (font->pixel + 1), btnYes,
+                             FONT_STANDARD);
+  oledInvert(OLED_WIDTH - oledStringWidthAdapter(btnYes, FONT_STANDARD) -
+                 icon_width - 7,
+             OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH - 4, OLED_HEIGHT);
+}
+
 bool layoutBlidSign(char *address) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
@@ -2398,6 +2413,7 @@ refresh_menu:
       break;
     case 1:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+      y += bmp_btn_up.height + 1;
       oledDrawStringAdapter(0, y, _("FORMAT:"), FONT_STANDARD);
       y += font->pixel + 5;
       oledDrawStringAdapter(0, y, _("Unknown"), FONT_STANDARD);
@@ -2414,6 +2430,7 @@ refresh_menu:
       break;
     case 2:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+      y += bmp_btn_up.height + 1;
       oledDrawStringAdapter(0, y, _("CONFIRM SIGNING:"), FONT_STANDARD);
       y += font->pixel + 5;
       oledDrawStringAdapter(0, y, _("Transaction data cannot be decoded"),
@@ -2426,16 +2443,16 @@ refresh_menu:
       oledDrawStringAdapter(0, y, _("Sign at you own risk"), FONT_STANDARD);
 
       // scrollbar
-      for (int i = 0; i < OLED_HEIGHT - 10; i += 3) {
+      for (int i = 0; i < OLED_HEIGHT; i += 3) {
         oledDrawPixel(OLED_WIDTH - 1, i);
       }
-      for (int i = 2 * OLED_HEIGHT / 3; i < OLED_HEIGHT - 10; i++) {
+      for (int i = 2 * OLED_HEIGHT / 3; i < OLED_HEIGHT; i++) {
         oledDrawPixel(OLED_WIDTH - 1, i);
         oledDrawPixel(OLED_WIDTH - 2, i);
       }
 
       layoutButtonNoAdapter(_("CANCEL"), &bmp_btn_cancel);
-      layoutButtonYesAdapter(_("APPROVE"), &bmp_btn_confirm);
+      layoutScroollbarButtonYesAdapter(_("APPROVE"), &bmp_btn_confirm);
       break;
     default:
       break;
