@@ -39,9 +39,7 @@ void fsm_msgNearGetAddress(NearGetAddress *msg) {
   hdnode_fill_public_key(node);
 
   resp->has_address = true;
-  resp->address[0] = '0';
-  resp->address[1] = 'x';
-  near_get_address_from_public_key(node->public_key + 1, resp->address + 2);
+  near_get_address_from_public_key(node->public_key + 1, resp->address);
 
   if (msg->has_show_display && msg->show_display) {
     if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
