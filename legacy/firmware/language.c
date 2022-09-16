@@ -167,7 +167,13 @@ const char *languages[][2] = {
     {"Check PIN Code", "请先校验设备原PIN码"},
     {"Check Passed", "核对通过"},
     {"Check Recovery Phrase", "助记词核对"},
+    //
+    {"Check failed", "核对失败"},
+    //
     {"Check failed, Quit\nand try again", "核对失败,请退出重试"},
+    //
+    {"Check passed", "核对通过"},
+    //
     {"Check the 12 words\nyou entered are the\ncorrect recovery\nphrase",
      "重新检查已输入的12位单\n词,确保它是正确的助记词"},
     {"Check the 18 words\nyou entered are the\ncorrect recovery\nphrase",
@@ -683,8 +689,7 @@ const char *languages[][2] = {
     {"REJECT", "拒绝"},
     // layout2.c
     {"Raw levy value is", ""},
-    // protect.c
-    {"Enter PIN again", "再次输入PIN码"},
+    //
     {"RESTART", "重启"},
     {"RETRY", "重试"},
     // protect.c

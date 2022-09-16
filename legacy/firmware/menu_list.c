@@ -684,7 +684,7 @@ void menu_check_all_words(int index) {
       return;
     }
 
-    if (!verify_words(mnemonic, word_count, 0)) {
+    if (!verify_words(word_count)) {
       return;
     }
   }
@@ -699,7 +699,7 @@ void menu_check_specified_word(int index) {
     config_getMnemonic(mnemonic, sizeof(mnemonic));
     word_count = get_mnemonic_number(mnemonic);
 
-    if (!verify_words(mnemonic, word_count, 1)) {
+    if (!verify_words(word_count)) {
       return;
     }
   }
@@ -724,13 +724,8 @@ static struct menu check_word_menu = {
 
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
-#if 0
-#if ONEKEY_MINI
-    {"Recovery Phrase verify", NULL, false, .sub_menu = &check_word_menu, NULL,
-     false},
-#endif
-#endif
     {"Blind Signing", NULL, true, menu_blind_sign, NULL, false},
+    {"Recovery Phrase verify", NULL, true, menu_check_all_words, NULL, false},
     {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
      menu_para_passphrase, true},
     {"Reset", NULL, true, menu_erase_device, NULL, false},
