@@ -295,13 +295,13 @@ static int parse_transaction(const NearSignTx *msg, uint32_t *processed,
 bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
                   NearSignedTx *resp) {
   uint32_t processed = 0;
-  char receiver[67] = {'0', 'x'};
+  char receiver[67] = {0};
   char amount[64] = {0};
-  char address[67] = {'0', 'x'};
+  char address[67] = {0};
   char *var_name;
-  near_get_address_from_public_key(node->public_key + 1, address + 2);
+  near_get_address_from_public_key(node->public_key + 1, address);
 
-  int action_type = parse_transaction(msg, &processed, receiver + 2);
+  int action_type = parse_transaction(msg, &processed, receiver);
   switch (action_type) {
     case at_create_account:
       break;
