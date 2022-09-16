@@ -48,6 +48,8 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
     # Confirm transaction
     contract = transaction.contract
     if contract.transfer_contract:
+        from trezor.ui.layouts import confirm_final
+
         if contract.transfer_contract.amount is None:
             raise wire.DataError("Invalid Tron transfer amount")
 
@@ -56,17 +58,8 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
             contract.transfer_contract.to_address,
             contract.transfer_contract.amount,
         )
+        await confirm_final(ctx)
 
-        if transaction.fee_limit:
-            await layout.require_confirm_fee(
-                ctx,
-                None,
-                from_address=owner_address,
-                to_address=contract.transfer_contract.to_address,
-                value=contract.transfer_contract.amount,
-                fee_limit=transaction.fee_limit,
-                network="TRON",
-            )
         return
 
     if contract.trigger_smart_contract:
