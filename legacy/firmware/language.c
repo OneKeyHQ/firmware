@@ -131,6 +131,10 @@ const char *languages[][2] = {
     //
     {"Check PIN Code", "请先校验设备原PIN码"},
     //
+    {"Check failed", "核对失败"},
+    //
+    {"Check passed", "核对通过"},
+    //
     {"Check the entered", "请检查输入的"},
     //
     {"Check the seed", "检查助记词"},
@@ -529,6 +533,13 @@ const char *languages[][2] = {
     {"Percentile Levy", ""},
     // protect.c protect.c
     {"Please confirm PIN", "请确认PIN码"},
+    //
+    {"Please enter 12 words\nin order to verify\nyour recovery phrase",
+     "请依次输入12位助记词进\n行核对"},
+    {"Please enter 18 words\nin order to verify\nyour recovery phrase",
+     "请依次输入18位助记词进\n行核对"},
+    {"Please enter 24 words\nin order to verify\nyour recovery phrase",
+     "请依次输入24位助记词进\n行核对"},
     // protect.c
     {"Please enter current PIN", "请输入当前PIN码"},
     // protect.c
@@ -583,6 +594,8 @@ const char *languages[][2] = {
     // ethereum.c layout2.c
     {"Really send", "确认发送"},
     {"Recipient", "接收方"},
+    //
+    {"Recovery Phrase verify", "助记词核对"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c

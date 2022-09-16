@@ -214,36 +214,57 @@ static bool recovery_done(void) {
       bool match =
           (config_isInitialized() && config_containsMnemonic(new_mnemonic));
       memzero(new_mnemonic, sizeof(new_mnemonic));
-      if (match) {
-        layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
-                            _("The seed is valid"), _("and MATCHES"),
-                            _("the one in the device."), NULL, NULL, NULL);
-        protectButton(ButtonRequestType_ButtonRequest_Other, true);
-        fsm_sendSuccess(
-            _("The seed is valid and matches the one in the device"));
+      if (recovery_byself) {
+        if (match) {
+          layoutDialogCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
+                                    _("Okay"), NULL, NULL, NULL, NULL,
+                                    _("Check passed"), NULL, NULL);
+          protectWaitKey(0, 1);
+        } else {
+          layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL,
+                                    &bmp_btn_cancel, _("Quit"), NULL, NULL,
+                                    NULL, NULL, _("Check failed"), NULL, NULL);
+          protectWaitKey(0, 1);
+        }
       } else {
-        layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                            _("The seed is valid"), _("but does NOT MATCH"),
-                            _("the one in the device."), NULL, NULL, NULL);
-        protectButton(ButtonRequestType_ButtonRequest_Other, true);
-        fsm_sendFailure(
-            FailureType_Failure_DataError,
-            _("The seed is valid but does not match the one in the device"));
+        if (match) {
+          layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+                              _("The seed is valid"), _("and MATCHES"),
+                              _("the one in the device."), NULL, NULL, NULL);
+          protectButton(ButtonRequestType_ButtonRequest_Other, true);
+          fsm_sendSuccess(
+              _("The seed is valid and matches the one in the device"));
+        } else {
+          layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                              _("The seed is valid"), _("but does NOT MATCH"),
+                              _("the one in the device."), NULL, NULL, NULL);
+          protectButton(ButtonRequestType_ButtonRequest_Other, true);
+          fsm_sendFailure(
+              FailureType_Failure_DataError,
+              _("The seed is valid but does not match the one in the device"));
+        }
       }
     }
   } else {
     // New mnemonic is invalid.
     memzero(new_mnemonic, sizeof(new_mnemonic));
-    if (!dry_run) {
-      session_clear(true);
+    if (recovery_byself) {
+      layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL, &bmp_btn_cancel,
+                                _("Quit"), NULL, NULL, NULL, NULL,
+                                _("Check failed"), NULL, NULL);
+      protectWaitKey(0, 1);
     } else {
-      layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                          _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
-                          NULL);
-      protectButton(ButtonRequestType_ButtonRequest_Other, true);
+      if (!dry_run) {
+        session_clear(true);
+      } else {
+        layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                            _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
+                            NULL);
+        protectButton(ButtonRequestType_ButtonRequest_Other, true);
+      }
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Invalid seed, are words in correct order?"));
     }
-    fsm_sendFailure(FailureType_Failure_DataError,
-                    _("Invalid seed, are words in correct order?"));
   }
   awaiting_word = 0;
   layoutHome();
@@ -839,6 +860,34 @@ check_word:
 
   recovery_done();
 
+  recovery_byself = false;
+  return true;
+}
+
+uint32_t get_mnemonic_number(char *mnemonic) {
+  uint32_t i = 0, count = 0;
+
+  while (mnemonic[i]) {
+    if (mnemonic[i] == ' ') {
+      count++;
+    }
+    i++;
+  }
+  count++;
+  return count;
+}
+
+bool verify_words(uint32_t count) {
+  word_count = count;
+  recovery_byself = true;
+  word_index = 0;
+  enforce_wordlist = true;
+  dry_run = true;
+
+  if (!input_words()) {
+    return false;
+  }
+  recovery_done();
   recovery_byself = false;
   return true;
 }
