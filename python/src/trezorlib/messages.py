@@ -107,6 +107,8 @@ class MessageType(IntEnum):
     CosiCommitment = 72
     CosiSign = 73
     CosiSignature = 74
+    BatchGetPublickeys = 10016
+    EcdsaPublicKeys = 10017
     DebugLinkDecision = 100
     DebugLinkGetState = 101
     DebugLinkState = 102
@@ -3461,6 +3463,51 @@ class CosiSignature(protobuf.MessageType):
         signature: "bytes",
     ) -> None:
         self.signature = signature
+
+
+class BatchGetPublickeys(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10016
+    FIELDS = {
+        1: protobuf.Field("ecdsa_curve_name", "string", repeated=False, required=False),
+        2: protobuf.Field("paths", "Path", repeated=True, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        paths: Optional[Sequence["Path"]] = None,
+        ecdsa_curve_name: Optional["str"] = 'ed25519',
+    ) -> None:
+        self.paths: Sequence["Path"] = paths if paths is not None else []
+        self.ecdsa_curve_name = ecdsa_curve_name
+
+
+class EcdsaPublicKeys(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10017
+    FIELDS = {
+        1: protobuf.Field("public_keys", "bytes", repeated=True, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_keys: Optional[Sequence["bytes"]] = None,
+    ) -> None:
+        self.public_keys: Sequence["bytes"] = public_keys if public_keys is not None else []
+
+
+class Path(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
 
 
 class Initialize(protobuf.MessageType):

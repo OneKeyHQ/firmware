@@ -362,5 +362,15 @@ translations = [
     "Disabilita i controlli di sicurezza",
     "Scorri per disattivare",
     "Sei sicuro di disabilitare permanentemente i controlli di sicurezza? Continua solo se sai cosa stai facendo!",
+    "Scarica le app OneKey su",
+    "Scarica",
+    "Seleziona Connect-Wallet, quindi fai clic su Connetti portafoglio hardware OneKey.",
+    "Collega il dispositivo: {}.",
+    "Fai clic sull'icona del portafoglio in alto a sinistra nell'interfaccia dell'app, quindi fai clic su Aggiungi portafoglio.",
+    "Successivamente, l'app OneKey recupererà gli account che hai utilizzato in precedenza.",
+    "Aggiungi account",
+    "Seleziona la catena di cui hai bisogno, imposta un nome per il nuovo account, quindi fai clic sul pulsante Crea.",
+    "Fai clic sull'icona del portafoglio nel pannello in alto a sinistra, quindi fai clic sul pulsante Aggiungi account.",
+    "Esercitazione sull'app OneKey",
 ]
 # fmt: on

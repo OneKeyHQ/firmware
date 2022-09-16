@@ -362,5 +362,15 @@ translations = [
     "Sicherheitsprüfungen deaktivieren",
     "Auf Deaktivieren schieben",
     "Möchten Sie die Sicherheitsüberprüfungen wirklich dauerhaft deaktivieren? Fahren Sie nur fort, wenn Sie wissen, was Sie tun!",
+    "Laden Sie OneKey-Apps unter herunter",
+    "Download",
+    "Wählen Sie Connect-Wallet und klicken Sie dann auf Connect OneKey Hardware Wallet.",
+    "Schließen Sie das Gerät an: {}.",
+    "Klicken Sie oben links auf der App-Oberfläche auf das Brieftaschensymbol und dann auf Brieftasche hinzufügen.",
+    "Später stellt die OneKey-App zuvor verwendete Konten wieder her.",
+    "Konto hinzufügen",
+    "Wählen Sie die gewünschte Kette aus, legen Sie einen Namen für das neue Konto fest und klicken Sie dann auf die Schaltfläche Erstellen.",
+    "Klicken Sie oben links auf das Brieftaschensymbol und dann auf die Schaltfläche Konto hinzufügen.",
+    "OneKey-App-Lernprogramm",
 ]
 # fmt: on

@@ -117,6 +117,9 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # if we backed up the wallet, show success message
         if perform_backup:
             await layout.show_backup_success(ctx)
+        from trezor.ui.layouts import show_onekey_app_guide
+
+        await show_onekey_app_guide()
         set_homescreen()
     except BaseException as e:
         raise e

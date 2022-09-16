@@ -158,6 +158,8 @@ trezor.lvglui.lv_colors
 import trezor.lvglui.lv_colors
 trezor.lvglui.scrs
 import trezor.lvglui.scrs
+trezor.lvglui.scrs.app_guide
+import trezor.lvglui.scrs.app_guide
 trezor.lvglui.scrs.ble
 import trezor.lvglui.scrs.ble
 trezor.lvglui.scrs.bootscreen
@@ -520,6 +522,8 @@ apps.management.wipe_device
 import apps.management.wipe_device
 apps.misc
 import apps.misc
+apps.misc.batch_get_pubkeys
+import apps.misc.batch_get_pubkeys
 apps.misc.cipher_key_value
 import apps.misc.cipher_key_value
 apps.misc.get_ecdh_session_key

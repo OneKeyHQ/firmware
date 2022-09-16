@@ -1,15 +1,18 @@
 import utime
 
+import storage.device
 from trezor import io, utils
 
 if not utils.EMULATOR:
     MOTOR_CTL = io.MOTOR()
 
     def vibrate():
+        if not storage.device.keyboard_haptic_enabled():
+            return
         # start forward
         MOTOR_CTL.ctrl(2)
         # sleep
-        utime.sleep_ms(25)
+        utime.sleep_ms(15)
         # brake
         MOTOR_CTL.ctrl(3)
         # coast

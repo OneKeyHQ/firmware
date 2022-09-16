@@ -89,6 +89,13 @@ if TYPE_CHECKING:
 
 # If set to False protobuf messages marked with "unstable" option are rejected.
 experimental_enabled = False
+SIGNAL_CHANNEL = loop.chan()
+
+
+async def signal_ack():
+    if SIGNAL_CHANNEL.takers:
+        await SIGNAL_CHANNEL.put("cancel")
+        await SIGNAL_CHANNEL.take()
 
 
 def setup(iface: WireInterface, is_debug_session: bool = False) -> None:
@@ -267,7 +274,12 @@ class Context:
         while servicing the wire context.  If a message comes until one of the
         tasks ends, `UnexpectedMessageError` is raised.
         """
-        return loop.race(self.read_any(()), *tasks)
+        return loop.race(self.read_any(()), self.signal(), *tasks)
+
+    async def signal(self):
+        await SIGNAL_CHANNEL.take()
+        await self.write(failure(loop.TASK_CLOSED))
+        SIGNAL_CHANNEL.publish("done")
 
 
 class UnexpectedMessageError(Exception):

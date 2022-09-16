@@ -99,6 +99,8 @@ if TYPE_CHECKING:
         CosiCommitment = 72
         CosiSign = 73
         CosiSignature = 74
+        BatchGetPublickeys = 10016
+        EcdsaPublicKeys = 10017
         DebugLinkDecision = 100
         DebugLinkGetState = 101
         DebugLinkState = 102

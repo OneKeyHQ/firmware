@@ -44,7 +44,7 @@ class ContainerFlexRow(lv.obj):
         )
 
 
-class ContanierGrid(lv.obj):
+class ContainerGrid(lv.obj):
     def __init__(
         self,
         parent,

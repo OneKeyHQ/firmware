@@ -227,7 +227,6 @@ def set_homescreen() -> None:
     else:
         from trezor.lvglui.scrs.initscreen import InitScreen
 
-        store_ble_name(ble_name)
         InitScreen()
 
 

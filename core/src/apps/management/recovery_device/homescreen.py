@@ -155,6 +155,9 @@ async def _finish_recovery(
         header=_(i18n_keys.TITLE__WALLET_IS_READY),
         button=_(i18n_keys.BUTTON__DONE),
     )
+    from trezor.ui.layouts import show_onekey_app_guide
+
+    await show_onekey_app_guide()
     set_homescreen()
     return Success(message="Device recovered")
 

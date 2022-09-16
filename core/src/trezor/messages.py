@@ -2128,6 +2128,50 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["CosiSignature"]:
             return isinstance(msg, cls)
 
+    class BatchGetPublickeys(protobuf.MessageType):
+        ecdsa_curve_name: "str"
+        paths: "list[Path]"
+
+        def __init__(
+            self,
+            *,
+            paths: "list[Path] | None" = None,
+            ecdsa_curve_name: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BatchGetPublickeys"]:
+            return isinstance(msg, cls)
+
+    class EcdsaPublicKeys(protobuf.MessageType):
+        public_keys: "list[bytes]"
+
+        def __init__(
+            self,
+            *,
+            public_keys: "list[bytes] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EcdsaPublicKeys"]:
+            return isinstance(msg, cls)
+
+    class Path(protobuf.MessageType):
+        address_n: "list[int]"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["Path"]:
+            return isinstance(msg, cls)
+
     class Initialize(protobuf.MessageType):
         session_id: "bytes | None"
         derive_cardano: "bool | None"

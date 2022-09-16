@@ -399,8 +399,7 @@ class NumberKeyboard(lv.keyboard):
         self.input_count_tips.set_style_text_color(
             lv_colors.LIGHT_GRAY, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-
-        self.update_count_tips()
+        self.input_count_tips.add_flag(lv.obj.FLAG.HIDDEN)
 
         self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
         self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
@@ -408,7 +407,15 @@ class NumberKeyboard(lv.keyboard):
         self.add_event_cb(self.event_cb, lv.EVENT.CANCEL, None)
 
     def update_count_tips(self):
-        self.input_count_tips.set_text(f"{len(self.ta.get_text())}/50")
+        """Update/show tips only when input length larger than 10"""
+        input_len = len(self.ta.get_text())
+        if input_len >= 10:
+            self.input_count_tips.set_text(f"{len(self.ta.get_text())}/50")
+            if self.input_count_tips.has_flag(lv.obj.FLAG.HIDDEN):
+                self.input_count_tips.clear_flag(lv.obj.FLAG.HIDDEN)
+        else:
+            if not self.input_count_tips.has_flag(lv.obj.FLAG.HIDDEN):
+                self.input_count_tips.add_flag(lv.obj.FLAG.HIDDEN)
 
     def toggle_number_input_keys(self, enable: bool):
         if enable:
