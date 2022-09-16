@@ -295,9 +295,9 @@ static int parse_transaction(const NearSignTx *msg, uint32_t *processed,
 bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
                   NearSignedTx *resp) {
   uint32_t processed = 0;
-  char receiver[67] = {0};
+  char receiver[65] = {0};
   char amount[64] = {0};
-  char address[67] = {0};
+  char address[65] = {0};
   char *var_name;
   near_get_address_from_public_key(node->public_key + 1, address);
 
