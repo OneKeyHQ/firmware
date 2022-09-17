@@ -8,7 +8,8 @@ MEMORY {
   AXIRAM (wal) : ORIGIN = 0x24000000, LENGTH = 512K
   SRAM   (wal) : ORIGIN = 0x20000000, LENGTH = 128K
   SRAM1   (wal) : ORIGIN = 0x30000000, LENGTH = 256K
-  EXRAM   (wal) : ORIGIN = 0xD1000000, LENGTH = 2048K
+  /* SDRAM OFFSET 28*1024*1024*/
+  EXRAM   (wal) : ORIGIN = 0xD1C00000, LENGTH = 2048K
 }
 
 main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
