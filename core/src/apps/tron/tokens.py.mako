@@ -18,7 +18,7 @@ class TokenInfo:
         self.decimals = decimals
 
 
-UNKNOWN_TOKEN = TokenInfo("Sun UNKN", 0)
+UNKNOWN_TOKEN = TokenInfo("UNKN", 0)
 
 
 def token_by_address(token_type, address) -> TokenInfo:
