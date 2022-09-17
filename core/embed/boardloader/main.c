@@ -40,8 +40,10 @@
 #include "memzero.h"
 
 #include "ble.h"
-#include "boardui.h"
 #include "usart.h"
+
+#define BOARD_MODE 1
+#define BOOT_MODE 2
 
 #if PRODUCTION
 const uint8_t BOARDLOADER_KEY_M = 4;
