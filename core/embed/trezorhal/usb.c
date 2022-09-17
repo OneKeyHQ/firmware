@@ -33,7 +33,7 @@
 
 #if defined(USE_USB_FS)
 #define USB_PHY_ID USB_PHY_FS_ID
-#elif defined(USE_USB_HS) && defined(USE_USB_HS_IN_FS)
+#elif defined(USE_USB_HS)  //&& defined(USE_USB_HS_IN_FS)
 #define USB_PHY_ID USB_PHY_HS_ID
 #else
 #error Unable to determine proper USB_PHY_ID to use

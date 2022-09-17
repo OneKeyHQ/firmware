@@ -136,7 +136,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
   else if(hpcd->Instance == USB_OTG_HS)
   {
 #if defined(STM32H747xx)
-    uint32_t pin_alternate = GPIO_AF12_OTG1_FS;
+    // uint32_t pin_alternate = GPIO_AF12_OTG1_FS;
 #else
     uint32_t pin_alternate = GPIO_AF12_OTG_HS_FS;
 #endif
@@ -196,7 +196,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
+    GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* D0 */
@@ -204,7 +204,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
+    GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* D1 D2 D3 D4 D5 D6 D7 */
@@ -212,28 +212,28 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
                           GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
+    GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* STP */
     GPIO_InitStruct.Pin = GPIO_PIN_0;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
+    GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
     /* NXT */
     GPIO_InitStruct.Pin = GPIO_PIN_4;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
+    GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
     HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
     /* DIR */
     GPIO_InitStruct.Pin = GPIO_PIN_11;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
+    GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
     HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
 
     /* Enable USB HS Clocks */
@@ -458,7 +458,7 @@ USBD_StatusTypeDef  USBD_LL_Init (USBD_HandleTypeDef *pdev)
     }
   }
 #endif
-#if defined(USE_USB_HS_IN_FS)
+#if defined(USE_USB_HS)
   // Trezor T uses the OTG_HS peripheral
   if (pdev->id == USB_PHY_HS_ID) {
     /* Set LL Driver parameters */
@@ -468,9 +468,9 @@ USBD_StatusTypeDef  USBD_LL_Init (USBD_HandleTypeDef *pdev)
     pcd_hs_handle.Init.ep0_mps = 0x40;
     pcd_hs_handle.Init.dma_enable = 0;
     pcd_hs_handle.Init.low_power_enable = 0;
-    pcd_hs_handle.Init.phy_itface = PCD_PHY_EMBEDDED;
+    pcd_hs_handle.Init.phy_itface = PCD_PHY_ULPI;
     pcd_hs_handle.Init.Sof_enable = 1;
-    pcd_hs_handle.Init.speed = PCD_SPEED_HIGH_IN_FULL;
+    pcd_hs_handle.Init.speed = PCD_SPEED_HIGH;
     // Trezor T hardware has PB13 connected to HS_VBUS
     // but we leave vbus sensing disabled because
     // we don't use it for anything. the device is a bus powered peripheral.

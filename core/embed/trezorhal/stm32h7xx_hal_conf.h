@@ -31,7 +31,7 @@ extern "C" {
 
 #ifdef STM32H747xx
 #define USE_USB_HS
-#define USE_USB_HS_IN_FS
+// #define USE_USB_HS_IN_FS
 #endif
 
 /* Exported types ------------------------------------------------------------*/

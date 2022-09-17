@@ -134,7 +134,10 @@ int8_t STORAGE_GetCapacity(uint8_t lun, uint32_t *block_num, uint16_t *block_siz
   *******************************************************************************/
 int8_t  STORAGE_IsReady(uint8_t lun)
 {
-  return (0);
+  if(emmc_get_card_state()==MMC_TRANSFER_OK){
+    return (0);
+  }
+  return (-1);
 }
 
 /*******************************************************************************
@@ -165,6 +168,7 @@ int8_t STORAGE_Read(uint8_t lun, uint8_t *buf,
     }
   #else
   if(emmc_read_blocks(buf, blk_addr, blk_len, EMMC_TIMEOUT) == MMC_OK){
+      while (emmc_get_card_state()!=MMC_TRANSFER_OK);  
       return (0);
     }
   #endif
@@ -187,7 +191,8 @@ int8_t STORAGE_Write(uint8_t lun, uint8_t *buf,
     }
   #else
     if(emmc_write_blocks(buf, blk_addr, blk_len, EMMC_TIMEOUT) == MMC_OK){
-        return (0);
+      while (emmc_get_card_state()!=MMC_TRANSFER_OK);      
+      return (0);
     }
   #endif
   return (-1);
