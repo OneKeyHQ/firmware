@@ -96,7 +96,7 @@ int32_t spi_slave_init() {
   __HAL_RCC_SPI2_FORCE_RESET();
   __HAL_RCC_SPI2_RELEASE_RESET();
 
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_SPI2_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
@@ -111,13 +111,13 @@ int32_t spi_slave_init() {
   HAL_GPIO_WritePin(GPIOK, GPIO_PIN_5, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOK, GPIO_PIN_6, GPIO_PIN_SET);
 
-  // SPI2: PB12(NSS),PB13(SCK)
+  // SPI2: PA11(NSS),PA9(SCK)
   gpio.Mode = GPIO_MODE_AF_PP;
   gpio.Pull = GPIO_NOPULL;
   gpio.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   gpio.Alternate = GPIO_AF5_SPI2;
-  gpio.Pin = GPIO_PIN_12 | GPIO_PIN_13;
-  HAL_GPIO_Init(GPIOB, &gpio);
+  gpio.Pin = GPIO_PIN_9 | GPIO_PIN_11;
+  HAL_GPIO_Init(GPIOA, &gpio);
 
   // SPI2: PC2(MISO), PC3(MOSI)
   gpio.Mode = GPIO_MODE_AF_PP;

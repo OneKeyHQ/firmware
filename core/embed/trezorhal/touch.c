@@ -46,6 +46,7 @@ static I2C_HandleTypeDef i2c_handle;
 #define Y_POS_LSB (touch_data[3] & 0x0FU)
 
 void _i2c_msp_init(void) {
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
@@ -71,19 +72,19 @@ void _i2c_msp_init(void) {
   GPIO_InitStructure.Speed =
       GPIO_SPEED_FREQ_LOW;  // I2C is a KHz bus and low speed is still good into
                             // the low MHz
-  GPIO_InitStructure.Alternate = GPIO_AF4_I2C2;
-  GPIO_InitStructure.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+  GPIO_InitStructure.Alternate = GPIO_AF4_I2C1;
+  GPIO_InitStructure.Pin = GPIO_PIN_6 | GPIO_PIN_7;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 
   GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
   GPIO_InitStructure.Pull = GPIO_PULLUP;
   GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStructure.Pin = GPIO_PIN_0;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStructure);
+  GPIO_InitStructure.Pin = GPIO_PIN_2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  __HAL_RCC_I2C2_CLK_ENABLE();
-  __HAL_RCC_I2C2_FORCE_RESET();
-  __HAL_RCC_I2C2_RELEASE_RESET();
+  __HAL_RCC_I2C1_CLK_ENABLE();
+  __HAL_RCC_I2C1_FORCE_RESET();
+  __HAL_RCC_I2C1_RELEASE_RESET();
 }
 
 static void _i2c_init(void) {
@@ -91,7 +92,7 @@ static void _i2c_init(void) {
     return;
   }
 
-  i2c_handle.Instance = I2C2;
+  i2c_handle.Instance = I2C1;
   i2c_handle.Init.Timing = 0x70B03140;
   i2c_handle.Init.OwnAddress1 = 0;  // master
   i2c_handle.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -153,7 +154,7 @@ uint32_t touch_is_detected(void) {
   // the line goes low when a touch event is actively detected.
   // reference section 1.2 of "Application Note for FT6x06 CTPM".
   // we configure the touch controller to use "interrupt polling mode".
-  return GPIO_PIN_RESET == HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
+  return GPIO_PIN_RESET == HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2);
 }
 #if 0
 uint32_t touch_read(void) {

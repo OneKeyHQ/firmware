@@ -39,6 +39,10 @@
 
 #include "memzero.h"
 
+#include "ble.h"
+#include "boardui.h"
+#include "usart.h"
+
 #if PRODUCTION
 const uint8_t BOARDLOADER_KEY_M = 4;
 const uint8_t BOARDLOADER_KEY_N = 7;
@@ -315,7 +319,7 @@ static secbool copy_sdcard(uint32_t code_len) {
 }
 
 int main(void) {
-  volatile uint32_t stay_in_boardloader_flag = *STAY_IN_FLAG_ADDR;
+  volatile uint32_t startup_mode_flag = *STAY_IN_FLAG_ADDR;
 
   reset_flags_reset();
 
@@ -357,36 +361,73 @@ int main(void) {
 #endif
 
   touch_init();
+
   emmc_init();
   fatfs_init();
 
-  bool stay_in_msc = false;
-  uint32_t touched = 0;
+  uint32_t mode = 0;
 
-  if (stay_in_boardloader_flag == STAY_IN_BOARDLOADER_FLAG) {
-    stay_in_msc = true;
+  if (startup_mode_flag == STAY_IN_BOARDLOADER_FLAG) {
+    mode = BOARD_MODE;
     *STAY_IN_FLAG_ADDR = 0;
   } else if (fatfs_check_res() != 0) {
-    stay_in_msc = true;
+    mode = BOARD_MODE;
+  }
+  if (startup_mode_flag == STAY_IN_BOOTLOADER_FLAG) {
+    mode = BOOT_MODE;
   }
 
-  if (!stay_in_msc) {
-    for (int i = 0; i < 1000; i++) {
-      if (touch_num_detected() > 1) {
-        touched = 1;
+  if (!mode) {
+    ble_usart_init();
+    bool touched = false;
+    uint32_t touch_data, x_start, y_start, x_mov, y_mov;
+    touch_data = x_start = y_start = x_mov = y_mov = 0;
+
+    for (int timer = 0; timer < 1250; timer++) {
+      ble_uart_poll();
+
+      if (ble_power_button_state() == 2) {
+        if (touched) {
+          mode = BOARD_MODE;
+        } else {
+          mode = BOOT_MODE;
+        }
+        ble_usart_irq_disable();
         break;
       }
+      touch_data = touch_read();
+      if (touch_data != 0) {
+        if (touch_data & TOUCH_START) {
+          x_start = x_mov = (touch_data >> 12) & 0xFFF;
+          y_start = y_mov = touch_data & 0xFFF;
+        }
+
+        if (touch_data & TOUCH_MOVE) {
+          x_mov = (touch_data >> 12) & 0xFFF;
+          y_mov = touch_data & 0xFFF;
+        }
+
+        if ((abs(x_start - x_mov) > 100) || (abs(y_start - y_mov) > 100)) {
+          touched = true;
+        }
+      }
+
       hal_delay(1);
     }
   }
 
-  if (touched || stay_in_msc) {
+  if (mode == BOARD_MODE) {
     display_printf("OneKey Boardloader\n");
     display_printf("USB Mass Storage Mode\n");
     display_printf("=====================\n\n");
     usb_msc_init();
     while (1)
       ;
+  }
+
+  if (mode == BOOT_MODE) {
+    *STAY_IN_FLAG_ADDR = STAY_IN_BOOTLOADER_FLAG;
+    SCB_CleanDCache();
   }
 
   uint32_t code_len = 0;

@@ -73,6 +73,8 @@
 #define USBD_DEBUG_LEVEL                      0
 #define USBD_LPM_ENABLED                      1
 
+#define MSC_MEDIA_PACKET                     1024 * 16 
+
 extern volatile bool usb_connect_state;
 
 /* Exported macro ------------------------------------------------------------*/
