@@ -36,7 +36,7 @@ bool recovery_on_device(void);
 #if ONEKEY_MINI
 uint32_t get_mnemonic_number(char *mnemonic);
 uint32_t select_mnemonic_number(uint32_t count);
-bool verify_words(char *mnemonic, uint32_t count, uint32_t mode);
+bool verify_words(uint32_t count);
 #endif
 
 #endif

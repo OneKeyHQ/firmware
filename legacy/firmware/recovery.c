@@ -215,37 +215,54 @@ static bool recovery_done(void) {
       bool match =
           (config_isInitialized() && config_containsMnemonic(new_mnemonic));
       memzero(new_mnemonic, sizeof(new_mnemonic));
-      if (match) {
-#if ONEKEY_MINI
-        layoutDialogAdapterEx(
-            &bmp_icon_ok, NULL, _("Confirm"), NULL, NULL,
-            _("The seed is valid and matches the one in the device"), NULL,
-            NULL, NULL, NULL, FONT_STANDARD);
-#else
-        layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
-                            _("The seed is valid"), _("and MATCHES"),
-                            _("the one in the device."), NULL, NULL, NULL);
-#endif
-
-        protectButton(ButtonRequestType_ButtonRequest_Other, true);
-        fsm_sendSuccess(
-            _("The seed is valid and matches the one in the device"));
+      if (recovery_byself) {
+        setRgbBitmap(true);
+        if (match) {
+          layoutDialogCenterAdapterEx(
+              &bmp_icon_success, NULL, NULL, &bmp_btn_confirm, _("Okay"), NULL,
+              true, NULL, NULL, NULL, NULL, NULL, _("Check passed"), NULL, NULL,
+              NULL, NULL, NULL, NULL);
+        } else {
+          layoutDialogCenterAdapterEx(
+              &bmp_icon_err, NULL, NULL, &bmp_btn_cancel, _("Quit"), NULL, true,
+              NULL, NULL, NULL, NULL, NULL, _("Check failed"), NULL, NULL, NULL,
+              NULL, NULL, NULL);
+        }
+        setRgbBitmap(false);
+        protectWaitKey(0, 1);
       } else {
+        if (match) {
 #if ONEKEY_MINI
-        layoutDialogAdapterEx(
-            &bmp_icon_error, NULL, _("Confirm"), NULL, NULL,
-            _("The seed is valid but does not match the one in the device"),
-            NULL, NULL, NULL, NULL, FONT_STANDARD);
+          layoutDialogAdapterEx(
+              &bmp_icon_ok, NULL, _("Confirm"), NULL, NULL,
+              _("The seed is valid and matches the one in the device"), NULL,
+              NULL, NULL, NULL, FONT_STANDARD);
 #else
-        layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                            _("The seed is valid"), _("but does NOT MATCH"),
-                            _("the one in the device."), NULL, NULL, NULL);
+          layoutDialogAdapter(&bmp_icon_ok, NULL, _("Confirm"), NULL,
+                              _("The seed is valid"), _("and MATCHES"),
+                              _("the one in the device."), NULL, NULL, NULL);
 #endif
 
-        protectButton(ButtonRequestType_ButtonRequest_Other, true);
-        fsm_sendFailure(
-            FailureType_Failure_DataError,
-            _("The seed is valid but does not match the one in the device"));
+          protectButton(ButtonRequestType_ButtonRequest_Other, true);
+          fsm_sendSuccess(
+              _("The seed is valid and matches the one in the device"));
+        } else {
+#if ONEKEY_MINI
+          layoutDialogAdapterEx(
+              &bmp_icon_error, NULL, _("Confirm"), NULL, NULL,
+              _("The seed is valid but does not match the one in the device"),
+              NULL, NULL, NULL, NULL, FONT_STANDARD);
+#else
+          layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                              _("The seed is valid"), _("but does NOT MATCH"),
+                              _("the one in the device."), NULL, NULL, NULL);
+#endif
+
+          protectButton(ButtonRequestType_ButtonRequest_Other, true);
+          fsm_sendFailure(
+              FailureType_Failure_DataError,
+              _("The seed is valid but does not match the one in the device"));
+        }
       }
     }
   } else {
@@ -254,19 +271,29 @@ static bool recovery_done(void) {
     if (!dry_run) {
       session_clear(true);
     } else {
+      if (recovery_byself) {
+        setRgbBitmap(true);
+        layoutDialogCenterAdapterEx(&bmp_icon_err, NULL, NULL, &bmp_btn_cancel,
+                                    _("Quit"), NULL, true, NULL, NULL, NULL,
+                                    NULL, NULL, _("Check failed"), NULL, NULL,
+                                    NULL, NULL, NULL, NULL);
+        setRgbBitmap(false);
+        protectWaitKey(0, 1);
+      } else {
 #if ONEKEY_MINI
-      layoutDialogAdapterEx(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                            _("The seed is INVALID!"), NULL, NULL, NULL, NULL,
-                            NULL, FONT_STANDARD);
+        layoutDialogAdapterEx(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                              _("The seed is INVALID!"), NULL, NULL, NULL, NULL,
+                              NULL, FONT_STANDARD);
 #else
-      layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
-                          _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
-                          NULL);
+        layoutDialogAdapter(&bmp_icon_error, NULL, _("Confirm"), NULL,
+                            _("The seed is"), _("INVALID!"), NULL, NULL, NULL,
+                            NULL);
 #endif
-      protectButton(ButtonRequestType_ButtonRequest_Other, true);
+        protectButton(ButtonRequestType_ButtonRequest_Other, true);
+      }
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Invalid seed, are words in correct order?"));
     }
-    fsm_sendFailure(FailureType_Failure_DataError,
-                    _("Invalid seed, are words in correct order?"));
   }
   awaiting_word = 0;
   layoutHome();
@@ -1086,254 +1113,35 @@ check_word:
 }
 
 #if ONEKEY_MINI
-#define MAX_ERROR_CNT 5
-
-static char stored_words[24][12];
 
 uint32_t get_mnemonic_number(char *mnemonic) {
   uint32_t i = 0, count = 0;
 
-  memzero(stored_words, sizeof(stored_words));
-
-  while (mnemonic[i] != 0) {
-    int j = 0;
-    while (mnemonic[i] != ' ' && mnemonic[i] != 0 &&
-           j + 1 < (int)sizeof(stored_words[count])) {
-      stored_words[count][j] = mnemonic[i];
-      i++;
-      j++;
+  while (mnemonic[i]) {
+    if (mnemonic[i] == ' ') {
+      count++;
     }
-    count++;
-    if (mnemonic[i] != 0) {
-      i++;
-    }
+    i++;
   }
-
+  count++;
   return count;
 }
 
-uint32_t select_mnemonic_number(uint32_t count) {
-  uint8_t key = KEY_NULL;
-  uint32_t index = 0;
-  uint32_t num_s[24] = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-  char *numbers[24] = {"1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",
-                       "9",  "10", "11", "12", "13", "14", "15", "16",
-                       "17", "18", "19", "20", "21", "22", "23", "24"};
+bool verify_words(uint32_t count) {
+  word_count = count;
+  recovery_byself = true;
+  word_index = 0;
+  enforce_wordlist = true;
+  dry_run = true;
 
-refresh_menu:
-  layoutItemsSelectAdapterImp(
-      &bmp_btn_up, &bmp_btn_down, &bmp_button_back, &bmp_button_forward,
-      _("BACK"), _("OK"), index + 1, count, false, NULL, NULL, NULL, numbers);
-  key = protectWaitKey(0, 0);
-  switch (key) {
-    case KEY_UP:
-      if (index > 0) index--;
-      goto refresh_menu;
-    case KEY_DOWN:
-      if (index < count - 1) index++;
-      goto refresh_menu;
-    case KEY_CONFIRM:
-      return num_s[index];
-    case KEY_CANCEL:
-      return 0;
-    default:
-      return 0;
-  }
-}
-
-bool verify_words(char *mnemonic, uint32_t count, uint32_t mode) {
-  bool selected = false;
-  uint32_t no = 1, prefix_len = 0;
-  uint8_t key = KEY_NULL;
-  char letter_list[52] = "";
-  int index = 0;
-  int letter_count = 0;
-  char desc[64] = "";
-  static uint32_t counter = 0;
-
-  if (mnemonic == NULL) {
+  if (!input_words()) {
     return false;
   }
-
-select_indicate:
-  if (mode == 1) {
-    memset(desc, 0, sizeof(desc));
-    strcat(desc, _("Select the sequence\nnumber of word to be\nchecked"));
-    layoutDialogSwipeCenterAdapterEx(NULL, &bmp_button_back, _("BACK"),
-                                     &bmp_button_forward, _("NEXT"), NULL, true,
-                                     NULL, NULL, NULL, NULL, desc, NULL, NULL,
-                                     NULL, NULL, NULL, NULL, NULL);
-    key = protectWaitKey(0, 1);
-    if (key != KEY_CONFIRM) {
-      return false;
-    }
-
-  select_number:
-    no = select_mnemonic_number(count);
-    if (no == 0) {
-      goto select_indicate;
-    }
-  }
-
-  if (mode == 0) {
-    word_index = 0;
-  } else {
-    word_index = no - 1;
-  }
-
-  memzero(words[word_index], sizeof(words[word_index]));
-
-refresh_menu:
-  memzero(desc, sizeof(desc));
-  strcat(desc, _("Enter word"));
-  strcat(desc, _(" #"));
-
-  uint2str(word_index + 1, desc + strlen(desc));
-  memzero(letter_list, sizeof(letter_list));
-  letter_count = mnemonic_next_letter_with_prefix(words[word_index], prefix_len,
-                                                  letter_list);
-
-  layoutInputWord(desc, prefix_len, words[word_index], letter_list + 2 * index);
-  key = protectWaitKey(0, 0);
-  switch (key) {
-    case KEY_UP:
-      if (index < letter_count - 1)
-        index++;
-      else
-        index = 0;
-      goto refresh_menu;
-    case KEY_DOWN:
-      if (index > 0)
-        index--;
-      else
-        index = letter_count - 1;
-      goto refresh_menu;
-    case KEY_CONFIRM:
-      words[word_index][prefix_len++] = letter_list[2 * index];
-      letter_count = mnemonic_count_with_prefix(words[word_index], prefix_len);
-      if (letter_count > CANDIDATE_MAX_LEN) {
-        index = 0;
-        goto refresh_menu;
-      } else {
-        uint32_t candidate_location =
-            mnemonic_word_index_with_prefix(words[word_index], prefix_len);
-        selected = select_complete_word(NULL, candidate_location, letter_count);
-
-        if (word_index == count && mode != 1) {
-          char new_mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
-          strlcpy(new_mnemonic, words[0], sizeof(new_mnemonic));
-          for (uint32_t i = 1; i < count; i++) {
-            strlcat(new_mnemonic, " ", sizeof(new_mnemonic));
-            strlcat(new_mnemonic, words[i], sizeof(new_mnemonic));
-          }
-
-          if (!mnemonic_check(new_mnemonic)) {
-            setRgbBitmap(true);
-            layoutDialogSwipeCenterAdapterEx(
-                &bmp_icon_err, NULL, NULL, &bmp_button_forward, _("QUIT"), NULL,
-                true, NULL, NULL, NULL, NULL, NULL, NULL,
-                _("Check failed, Quit\nand try again"), NULL, NULL, NULL, NULL,
-                NULL);
-            protectWaitKey(0, 1);
-            setRgbBitmap(false);
-            counter = 0;
-            return false;
-          } else {
-            setRgbBitmap(true);
-            layoutDialogSwipeCenterAdapterEx(
-                &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("DONE"),
-                NULL, true, NULL, NULL, NULL, NULL, NULL, NULL,
-                _("Check Passed"), NULL, NULL, NULL, NULL, NULL);
-            protectWaitKey(0, 1);
-            setRgbBitmap(false);
-          }
-          return true;
-        } else {  // next word
-          prefix_len = 0;
-          index = 0;
-
-          if (word_index < count)
-            memzero(words[word_index], sizeof(words[word_index]));
-
-          if (strcmp(words[word_index - 1], stored_words[word_index - 1]) !=
-              0) {
-            if (!selected) {
-              goto refresh_menu;
-            }
-
-            counter++;
-            if (counter < MAX_ERROR_CNT) {
-              if (word_index > 0) {
-                word_index--;
-                prefix_len = 0;
-                index = 0;
-                memzero(words[word_index], sizeof(words[word_index]));
-              }
-
-              setRgbBitmap(true);
-              layoutDialogSwipeCenterAdapterEx(
-                  &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"),
-                  NULL, true, NULL, NULL, NULL, NULL, NULL, NULL,
-                  _("Incorrect word. Try\nagain"), NULL, NULL, NULL, NULL,
-                  NULL);
-              protectWaitKey(0, 1);
-              setRgbBitmap(false);
-            } else {
-              setRgbBitmap(true);
-              layoutDialogSwipeCenterAdapterEx(
-                  &bmp_icon_err, NULL, NULL, &bmp_button_forward, _("QUIT"),
-                  NULL, true, NULL, NULL, NULL, NULL, NULL, NULL,
-                  _("Check failed, Quit\nand try again"), NULL, NULL, NULL,
-                  NULL, NULL);
-              protectWaitKey(0, 1);
-              setRgbBitmap(false);
-              counter = 0;
-              return false;
-            }
-          } else {
-            if (mode == 1) {
-              setRgbBitmap(true);
-              layoutDialogSwipeCenterAdapterEx(
-                  &bmp_icon_success, &bmp_button_back, _("QUIT"),
-                  &bmp_button_forward, _("OK"), NULL, true, NULL, NULL, NULL,
-                  NULL, NULL, NULL, _("Check Passed"), NULL, NULL, NULL, NULL,
-                  NULL);
-              key = protectWaitKey(0, 1);
-              setRgbBitmap(false);
-              if (key == KEY_CONFIRM) {
-                goto select_number;
-              }
-              return true;
-            }
-          }
-          goto refresh_menu;
-        }
-      }
-    case KEY_CANCEL:
-      if (prefix_len > 0) {
-        prefix_len--;
-        index = 0;
-        words[word_index][prefix_len] = 0;
-      } else if (word_index > 0) {
-        if (mode == 0) {
-          word_index--;
-          prefix_len = 0;
-          index = 0;
-          memzero(words[word_index], sizeof(words[word_index]));
-        } else {
-          goto select_number;
-        }
-      } else {
-        break;
-      }
-      goto refresh_menu;
-    default:
-      break;
-  }
-
-  return false;
+  recovery_done();
+  recovery_byself = false;
+  return true;
 }
+
 #endif
 
 #if DEBUG_LINK
