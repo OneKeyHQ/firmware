@@ -88,7 +88,6 @@ if PRODUCTION_MODEL == 'H':
     SOURCE_BOARDLOADER = [
         'embed/boardloader/startup.s',
         'embed/boardloader/main.c',
-        'embed/boardloader/boardui.c',
     ]
     SOURCE_TREZORHAL = [
         'embed/trezorhal/system_stm32h7xx.c',
@@ -123,7 +122,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/vectortable.s',
         'embed/trezorhal/fatfs/ff.c',
         'embed/trezorhal/fatfs/ffunicode.c',
-        'embed/trezorhal/fatfs/diskio.c',        
+        'embed/trezorhal/fatfs/diskio.c',
     ]
 else:
     SOURCE_MOD += [
