@@ -433,6 +433,7 @@ int main(void) {
   // start the bootloader if no or broken firmware found ...
 
   if (firmware_present != sectrue) {
+    display_clear();
     ui_bootloader_first();
 
     // erase storage
