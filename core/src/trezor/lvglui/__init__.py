@@ -9,7 +9,7 @@ async def lvgl_tick():
 
     inactive_time_bak = 0
     while True:
-        lv.tick_inc(10)
+        # lv.tick_inc(10)
         await loop.sleep(10)
         lv.timer_handler()
         inactive_time = get_elapsed()

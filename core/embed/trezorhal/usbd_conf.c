@@ -57,6 +57,7 @@
 #include "irq.h"
 #include "supervise.h"
 #include "systemview.h"
+#include "common.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -136,13 +137,12 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
   else if(hpcd->Instance == USB_OTG_HS)
   {
 #if defined(STM32H747xx)
-    // uint32_t pin_alternate = GPIO_AF12_OTG1_FS;
+    uint32_t pin_alternate = GPIO_AF12_OTG1_FS;
 #else
     uint32_t pin_alternate = GPIO_AF12_OTG_HS_FS;
 #endif
 
-#if defined(USE_USB_HS_IN_FS)
-
+  if (PCB_VERSION_1_0_0 == pcb_version) {
     /* Configure USB FS GPIOs */
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -174,16 +174,14 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 #endif
     /*
-     * Enable calling WFI and correct
-     * function of the embedded USB_FS_IN_HS phy
-     */
+    * Enable calling WFI and correct
+    * function of the embedded USB_FS_IN_HS phy
+    */
     __OTGHSULPI_CLK_SLEEP_DISABLE();
     __OTGHS_CLK_SLEEP_ENABLE();
     /* Enable USB HS Clocks */
     __USB_OTG_HS_CLK_ENABLE();
-
-#else // !USE_USB_HS_IN_FS
-
+  }else{
     /* Configure USB HS GPIOs */
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -239,7 +237,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
     /* Enable USB HS Clocks */
     __HAL_RCC_USB_OTG_HS_CLK_ENABLE();
     __HAL_RCC_USB_OTG_HS_ULPI_CLK_ENABLE();
-#endif // !USE_USB_HS_IN_FS
+  }
 
     /* Set USBHS Interrupt to the lowest priority */
     svc_setpriority(OTG_HS_IRQn, IRQ_PRI_OTG_HS);
@@ -461,16 +459,29 @@ USBD_StatusTypeDef  USBD_LL_Init (USBD_HandleTypeDef *pdev)
 #if defined(USE_USB_HS)
   // Trezor T uses the OTG_HS peripheral
   if (pdev->id == USB_PHY_HS_ID) {
-    /* Set LL Driver parameters */
-    pcd_hs_handle.Instance = USB_OTG_HS;
-    pcd_hs_handle.Init.dev_endpoints = 6;
-    pcd_hs_handle.Init.use_dedicated_ep1 = 0;
-    pcd_hs_handle.Init.ep0_mps = 0x40;
-    pcd_hs_handle.Init.dma_enable = 0;
-    pcd_hs_handle.Init.low_power_enable = 0;
-    pcd_hs_handle.Init.phy_itface = PCD_PHY_ULPI;
-    pcd_hs_handle.Init.Sof_enable = 1;
-    pcd_hs_handle.Init.speed = PCD_SPEED_HIGH;
+    if (PCB_VERSION_1_0_0 == pcb_version) {
+      /* Set LL Driver parameters */
+      pcd_hs_handle.Instance = USB_OTG_HS;
+      pcd_hs_handle.Init.dev_endpoints = 6;
+      pcd_hs_handle.Init.use_dedicated_ep1 = 0;
+      pcd_hs_handle.Init.ep0_mps = 0x40;
+      pcd_hs_handle.Init.dma_enable = 0;
+      pcd_hs_handle.Init.low_power_enable = 0;
+      pcd_hs_handle.Init.phy_itface = PCD_PHY_EMBEDDED;
+      pcd_hs_handle.Init.Sof_enable = 1;
+      pcd_hs_handle.Init.speed = PCD_SPEED_HIGH_IN_FULL;
+    }else{
+      /* Set LL Driver parameters */
+      pcd_hs_handle.Instance = USB_OTG_HS;
+      pcd_hs_handle.Init.dev_endpoints = 6;
+      pcd_hs_handle.Init.use_dedicated_ep1 = 0;
+      pcd_hs_handle.Init.ep0_mps = 0x40;
+      pcd_hs_handle.Init.dma_enable = 0;
+      pcd_hs_handle.Init.low_power_enable = 0;
+      pcd_hs_handle.Init.phy_itface = PCD_PHY_ULPI;
+      pcd_hs_handle.Init.Sof_enable = 1;
+      pcd_hs_handle.Init.speed = PCD_SPEED_HIGH;
+    }    
     // Trezor T hardware has PB13 connected to HS_VBUS
     // but we leave vbus sensing disabled because
     // we don't use it for anything. the device is a bus powered peripheral.

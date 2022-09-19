@@ -322,6 +322,7 @@ static secbool copy_sdcard(uint32_t code_len) {
 
 int main(void) {
   volatile uint32_t startup_mode_flag = *STAY_IN_FLAG_ADDR;
+  pcb_version = PCB_VERSION_2_1_0;
 
   reset_flags_reset();
 
@@ -394,7 +395,6 @@ int main(void) {
         } else {
           mode = BOOT_MODE;
         }
-        ble_usart_irq_disable();
         break;
       }
       touch_data = touch_read();
@@ -416,6 +416,7 @@ int main(void) {
 
       hal_delay(1);
     }
+    ble_usart_irq_disable();
   }
 
   if (mode == BOARD_MODE) {

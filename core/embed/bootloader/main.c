@@ -359,9 +359,6 @@ int main(void) {
 
   ble_usart_init();
 
-  touch_init();
-  touch_power_on();
-
   atca_init();
   atca_config_init();
 
@@ -371,9 +368,27 @@ int main(void) {
   if (!serial_set) {
     serial_set = device_serial_set();
   }
+
   if (!cert_set) {
     cert_set = se_get_certificate_len(&cert_len);
   }
+
+  if (!serial_set) {
+    pcb_version = PCB_VERSION_2_1_0;
+  } else {
+    char *factory_data = NULL;
+    char *serial;
+    device_get_serial(&serial);
+    factory_data = serial + 7;
+    if (memcmp(factory_data, "20220910", 8) >= 0) {
+      pcb_version = PCB_VERSION_2_1_0;
+    } else {
+      pcb_version = PCB_VERSION_1_0_0;
+    }
+  }
+
+  touch_init();
+  touch_power_on();
 
   if (!serial_set || !cert_set) {
     display_clear();

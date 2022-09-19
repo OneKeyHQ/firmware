@@ -450,7 +450,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/sdram.c',
         'embed/trezorhal/stm32.c',
         'embed/trezorhal/systick.c',
-        #'embed/trezorhal/timer.c',
+        'embed/trezorhal/timer.c',
         'embed/trezorhal/usb.c',
         'embed/trezorhal/usbd_conf.c',
         'embed/trezorhal/usbd_core.c',
