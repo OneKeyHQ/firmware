@@ -331,11 +331,7 @@ def get_pinlocked_handler(
 def reload_settings_from_storage(timeout_ms: int | None = None) -> None:
     if not storage.device.is_initialized():
         return
-    if timeout_ms:
-        utils.SHORT_AUTO_LOCK = True
-    else:
-        utils.SHORT_AUTO_LOCK = False
-        workflow.idle_timer.remove(lock_device_if_unlocked)
+    workflow.idle_timer.remove(lock_device_if_unlocked)
     workflow.idle_timer.set(
         timeout_ms
         if timeout_ms is not None

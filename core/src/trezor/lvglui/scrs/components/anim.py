@@ -3,7 +3,7 @@ from .. import lv
 
 class Anim(lv.anim_t):
     def __init__(
-        self, stat_value, end_value, exec_cb, path_cb=lv.anim_t.path_linear, time=100
+        self, stat_value, end_value, exec_cb, path_cb=lv.anim_t.path_ease_out, time=150
     ):
         super().__init__()
         self.init()

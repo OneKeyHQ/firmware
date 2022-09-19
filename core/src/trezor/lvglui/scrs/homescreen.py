@@ -222,7 +222,9 @@ class MainScreen(Screen):
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
             self.show_anim = Anim(800, 148, self.set_pos)
-            self.dismiss_anim = Anim(148, 800, self.set_pos)
+            self.dismiss_anim = Anim(
+                148, 800, self.set_pos, path_cb=lv.anim_t.path_ease_in, time=300
+            )
             self.slide = False
             self.visible = False
 
