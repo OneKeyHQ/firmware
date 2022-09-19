@@ -37,7 +37,8 @@ typedef enum {
   at_add_key,
   at_delete_key,
   at_delete_account,
-  at_last_value = at_delete_account
+  at_mul_action,
+  at_last_value = at_mul_action
 } action_type_t;
 
 void near_get_address_from_public_key(const uint8_t *public_key,
@@ -279,7 +280,7 @@ static int parse_transaction(const NearSignTx *msg, uint32_t *processed,
   }
 
   if (actions_len != 1) {
-    return -1;
+    return at_mul_action;
   }
   // TODO: Parse more than one action
 
@@ -324,6 +325,8 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
     case at_delete_key:
       break;
     case at_delete_account:
+      break;
+    case at_mul_action:
       break;
     default:
       return false;
