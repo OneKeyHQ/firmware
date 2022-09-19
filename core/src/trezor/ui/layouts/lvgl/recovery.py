@@ -28,8 +28,6 @@ async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
         confirm_text=_(i18n_keys.BUTTON__CONTINUE),
         options="12\n18\n24",
     )
-    screen.roller.set_selected(0, 0)
-    screen.select_option = "12"
     count = await ctx.wait(screen.request())
     # WordSelector can return int, or string if the value came from debuglink
     # ctx.wait has a return type Any

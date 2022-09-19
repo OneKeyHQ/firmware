@@ -192,6 +192,8 @@ trezor.lvglui.scrs.components.popup
 import trezor.lvglui.scrs.components.popup
 trezor.lvglui.scrs.components.qrcode
 import trezor.lvglui.scrs.components.qrcode
+trezor.lvglui.scrs.components.radio
+import trezor.lvglui.scrs.components.radio
 trezor.lvglui.scrs.components.roller
 import trezor.lvglui.scrs.components.roller
 trezor.lvglui.scrs.components.slider

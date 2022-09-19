@@ -12,7 +12,10 @@ class ContainerFlexCol(lv.obj):
     ) -> None:
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.align_to(align_base, align, pos[0], pos[1])
+        if align_base is None:
+            self.align(lv.ALIGN.BOTTOM_MID, 0, -30)
+        else:
+            self.align_to(align_base, align, pos[0], pos[1])
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
