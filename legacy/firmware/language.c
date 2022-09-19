@@ -687,11 +687,11 @@ const char *languages[][2] = {
     {"Quit", "退出"},
     {"Quota:", "单次限额"},
     {"REJECT", "拒绝"},
-    // layout2.c
-    {"Raw levy value is", ""},
     //
     {"RESTART", "重启"},
     {"RETRY", "重试"},
+    // layout2.c
+    {"Raw levy value is", ""},
     // protect.c
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
