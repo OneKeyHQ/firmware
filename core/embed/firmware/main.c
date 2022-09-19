@@ -143,6 +143,7 @@ int main(void) {
   atca_config_init();
 
   emmc_init();
+  timer_init();
 
   // jump to unprivileged mode
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
