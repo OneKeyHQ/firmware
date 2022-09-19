@@ -35,6 +35,8 @@
 
 #define COLOR_FATAL_ERROR RGB16(0x7F, 0x00, 0x00)
 
+PCB_VERSION pcb_version;
+
 // from util.s
 extern void shutdown_privileged(void);
 

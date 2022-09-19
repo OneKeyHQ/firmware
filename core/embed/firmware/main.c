@@ -86,6 +86,18 @@ PARTITION VolToPart[FF_VOLUMES] = {
 int main(void) {
   SystemCoreClockUpdate();
 
+  device_para_init();
+
+  char *factory_data = NULL;
+  char *serial;
+  device_get_serial(&serial);
+  factory_data = serial + 7;
+  if (memcmp(factory_data, "20220910", 8) >= 0) {
+    pcb_version = PCB_VERSION_2_1_0;
+  } else {
+    pcb_version = PCB_VERSION_1_0_0;
+  }
+
   // Enable MPU
   mpu_config_firmware();
 
@@ -93,7 +105,6 @@ int main(void) {
   qspi_flash_config();
   qspi_flash_memory_mapped();
 
-  copyflash2sdram();
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   lcd_pwm_init();
   random_delays_init();
@@ -114,8 +125,6 @@ int main(void) {
 #endif
 
   ble_usart_init();
-
-  device_para_init();
 
 #if defined TREZOR_MODEL_T
 #if PRODUCTION
@@ -144,6 +153,8 @@ int main(void) {
 
   emmc_init();
   timer_init();
+
+  copyflash2sdram();
 
   // jump to unprivileged mode
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
