@@ -32,7 +32,6 @@ BLE_NAME: str | None = None
 DISABLE_ANIMATION = 0
 BLE_CONNECTED: bool | None = None
 BATTERY_CAP: int | None = None
-SHORT_AUTO_LOCK: bool | None = None
 SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
 DEFAULT_LABEL = "OneKey Touch"
 AUTO_POWER_OFF = False
@@ -76,7 +75,7 @@ def lcd_resume() -> bool:
         global AUTO_POWER_OFF
         display.backlight(device.get_brightness())
         AUTO_POWER_OFF = False
-        base.reload_settings_from_storage()
+        base.reload_settings_from_storage(timeout_ms=SHORT_AUTO_LOCK_TIME_MS)
         return True
     return False
 

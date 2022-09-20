@@ -7,7 +7,11 @@ from trezor.crypto import bip39, hashlib, random, slip39
 from trezor.enums import BackupType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.messages import EntropyAck, EntropyRequest, Success
-from trezor.ui.layouts import confirm_backup, confirm_reset_device
+from trezor.ui.layouts import (
+    confirm_backup,
+    confirm_reset_device,
+    show_onekey_app_guide,
+)
 
 from apps.base import set_homescreen
 
@@ -117,6 +121,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # if we backed up the wallet, show success message
         if perform_backup:
             await layout.show_backup_success(ctx)
+
+        await show_onekey_app_guide()
         set_homescreen()
     except BaseException as e:
         raise e

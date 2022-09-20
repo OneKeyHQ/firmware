@@ -3,18 +3,11 @@
 #include "lvgl.h"
 
 static TIM_HandleTypeDef TimHandle;
-
-void timer_init(void) {
+static void lvgl_timer_init(void) {
   __HAL_RCC_TIM4_CLK_ENABLE();
 
   TimHandle.Instance = TIM4;
 
-  /* Initialize TIMx peripheral as follows:
-       + Period = 10000 - 1
-       + Prescaler = (SystemCoreClock/10000) - 1
-       + ClockDivision = 0
-       + Counter direction = Up
-  */
   // 10 ms
   TimHandle.Init.Period = 100 - 1;
   TimHandle.Init.Prescaler = (uint32_t)(SystemCoreClock / (2 * 10000)) - 1;
@@ -34,6 +27,8 @@ void timer_init(void) {
 
   HAL_TIM_Base_Start_IT(&TimHandle);
 }
+
+void timer_init(void) { lvgl_timer_init(); }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) { lv_tick_inc(10); }
 

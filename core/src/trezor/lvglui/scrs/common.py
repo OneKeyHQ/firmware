@@ -8,7 +8,7 @@ from ..lv_colors import lv_colors
 from .components import slider
 from .components.button import NormalButton
 from .components.label import SubTitle, Title
-from .components.roller import Roller
+from .components.radio import Radio
 
 if TYPE_CHECKING:
     from typing import Any
@@ -38,11 +38,6 @@ class Screen(lv.obj):
         # subtitle
         if "subtitle" in kwargs:
             self.subtitle = SubTitle(self, self.title, 452, (0, 32), kwargs["subtitle"])
-        # roller
-        if "options" in kwargs:
-            self.roller = Roller(self, kwargs["options"])
-            self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
-            self.select_option = kwargs["options"].split()[1]
         # btn
         if "btn_text" in kwargs:
             self.btn = NormalButton(self, kwargs["btn_text"])
@@ -78,16 +73,14 @@ class Screen(lv.obj):
             else:
                 if hasattr(self, "btn") and target == self.btn:
                     self.on_click(target)
-        elif event == lv.EVENT.VALUE_CHANGED:
-            self.on_value_changed(target)
 
     # click event callback
     def on_click(self, event_obj):
         pass
 
-    # value changed callback
-    def on_value_changed(self, event_obj):
-        pass
+    # # value changed callback
+    # def on_value_changed(self, event_obj):
+    #     pass
 
     async def request(self) -> Any:
         return await self.channel.take()
@@ -179,12 +172,11 @@ class FullSizeWindow(lv.obj):
             self.icon.align(lv.ALIGN.TOP_MID, 0, 0)
 
         if options:
-            self.roller = Roller(self, options)
-            self.add_event_cb(self.eventhandler, lv.EVENT.VALUE_CHANGED, None)
-            self.select_option = options.split()[1]
-
-        self.content_area.set_style_max_height(646, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_style_min_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.content_area.set_height(646)
+            self.selector = Radio(self.content_area, options)
+        else:
+            self.content_area.set_style_max_height(646, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.content_area.set_style_min_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
         if cancel_text:
             self.btn_no = NormalButton(self, cancel_text)
             if confirm_text:
@@ -221,13 +213,7 @@ class FullSizeWindow(lv.obj):
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.VALUE_CHANGED:
-            if target == self.roller:
-                selected_str = " " * 11
-                target.get_selected_str(selected_str, len(selected_str))
-                self.select_option = selected_str.strip()[:-1]
-            return
-        elif code == lv.EVENT.CLICKED:
+        if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
             if hasattr(self, "btn_no") and target == self.btn_no:
@@ -235,12 +221,10 @@ class FullSizeWindow(lv.obj):
                 self.destroy(100)
                 return
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
-                if hasattr(self, "roller"):
-                    self.channel.publish(self.select_option)
+                if hasattr(self, "selector"):
+                    self.channel.publish(self.selector.get_selected_str())
                 else:
                     if not self.hold_confirm:
-                        # delete the confirm button manually to fix a display bug in reset process with desktop
-                        # self.btn_yes.del_delayed(10)
                         self.channel.publish(1)
                     else:
                         return

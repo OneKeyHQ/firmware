@@ -25,7 +25,7 @@ async def get_address(
 
     node = keychain.derive(msg.address_n)
     public_key = node.public_key()[1:]
-    address = "0x" + hexlify(public_key).decode()
+    address = hexlify(public_key).decode()
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
         await show_address(

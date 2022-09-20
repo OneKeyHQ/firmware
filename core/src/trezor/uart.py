@@ -65,6 +65,7 @@ async def handle_usb_state():
             ):
                 if config.is_unlocked():
                     config.lock()
+                    await safe_reloop()
                     # single to restart the main loop
                     raise loop.TASK_CLOSED
             base.reload_settings_from_storage()
@@ -73,6 +74,12 @@ async def handle_usb_state():
                 log.exception(__name__, exec)
             loop.clear()
             return  # pylint: disable=lost-exception
+
+
+async def safe_reloop():
+    from trezor import wire
+
+    await wire.signal_ack()
 
 
 async def handle_uart():
@@ -151,6 +158,7 @@ async def _deal_button_press(value: bytes) -> None:
                 utils.AUTO_POWER_OFF = True
                 if config.has_pin() and config.is_unlocked():
                     config.lock()
+                await safe_reloop()
                 # single to restart the main loop
                 raise loop.TASK_CLOSED
         else:
@@ -214,9 +222,9 @@ async def _deal_ble_status(value: bytes) -> None:
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
 
     elif res == _BLE_STATUS_OPENED:
+        BLE_ENABLED = True
         if utils.BLE_CONNECTED:
             return
-        BLE_ENABLED = True
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
         if config.is_unlocked():
             device.set_ble_status(enable=True)

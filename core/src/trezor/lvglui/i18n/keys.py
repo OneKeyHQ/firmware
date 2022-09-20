@@ -318,6 +318,7 @@ TITLE__ABOUT_DEVICE = 146
 # Connect
 ITEM__CONNECT = 147
 TITLE__CONNECT = 147
+TITLE__CONNECT__TUTORIAL_AFTER_INIT = 147
 # Auto-Lock
 ITEM__AUTO_LOCK = 148
 TITLE__AUTO_LOCK = 148
@@ -786,4 +787,27 @@ BUTTON__SLIDE_TO_DISABLE = 360
 # Are you sure to permanently disable safety checks? Continue only if you know
 # what you are doing!
 SUBTITLE__DISABLE_SAFETY_CHECKS = 361
+# Download OneKey apps at
+SUBTITLE__DOWNLOAD__TUTORIAL_AFTER_INIT = 362
+# Download
+TITLE__DOWNLOAD__TUTORIAL_AFTER_INIT = 363
+ITEM__DOWNLOAD = 363
+# Select Connect-Wallet, then click connect OneKey hardware wallet.
+SUBTITLE__CONNECT_2__TUTORIAL_AFTER_INIT = 364
+# Connect the device: {}.
+SUBTITLE__CONNECT_3__TUTORIAL_AFTER_INIT = 365
+# Click wallet icon at the top left of app interface, then click Add Wallet.
+SUBTITLE__CONNECT_1__TUTORIAL_AFTER_INIT = 366
+# Later, OneKey app will recover accounts you previously used.
+SUBTITLE__CONNECT_4__TUTORIAL_AFTER_INIT = 367
+# Add Account
+TITLE__ADD_ACCOUNT__TUTORIAL_AFTER_INIT = 368
+ITEM__ADD_ACCOUNT = 368
+# Select the chain you need, set a name for new account, then click Create but
+# ton.
+SUBTITLE__ADD_ACCOUNT_2__TUTORIAL_AFTER_INIT = 369
+# Click wallet icon on the top left panel, then click Add-Account button.
+SUBTITLE__ADD_ACCOUNT_1__TUTORIAL_AFTER_INIT = 370
+# OneKey App Tutorial
+ITEM__ONEKEY_APP_TUTORIAL = 371
 # fmt: on

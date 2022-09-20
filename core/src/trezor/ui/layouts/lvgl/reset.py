@@ -81,7 +81,8 @@ async def confirm_word(
     selector = FullSizeWindow(
         title, subtitle, _(i18n_keys.BUTTON__NEXT), options=options
     )
-    selector.roller.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
+    selector.selector.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
+    selector.selector.set_flag()
     selected_word: str = await ctx.wait(selector.request())
     # confirm it is the correct one
     return selected_word == share_words[offset]

@@ -3,13 +3,15 @@
 # from trezor.enums import BackupType
 
 from trezor import utils
-from trezor.langs import langs, langs_keys
+from trezor.langs import langs
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
-from trezor.lvglui.scrs import font_PJSBOLD24, font_PJSBOLD36
+from trezor.lvglui.scrs import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36
 
 from .common import FullSizeWindow, Screen, lv, lv_colors  # noqa: F401,F403,F405
+from .components.container import ContainerFlexCol
+from .components.label import Title
+from .components.radio import ButtonCell
 
-# from .components.button import NormalButton
 # from .components.keyboard import BIP39Keyboard
 # from .components.style import SubTitleStyle
 # from .pinscreen import PinTip
@@ -26,27 +28,76 @@ language = "en"
 class InitScreen(Screen):
     def __init__(self):
         super().__init__(
-            title=_(i18n_keys.TITLE__SELECT_LANGUAGE),
             btn_text=_(i18n_keys.BUTTON__CONTINUE),
-            icon_path="A:/res/language.png",
-            options="\n".join(lang[1] for lang in langs),
         )
-        self.roller.set_selected(0, lv.ANIM.OFF)
+        self.content_area = lv.obj(self)
+        self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
+        self.content_area.set_style_bg_color(
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.content_area.set_style_bg_color(
+            lv_colors.WHITE_3, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
+        )
+        self.content_area.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+        self.content_area.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+        self.content_area.set_style_max_height(646, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.content_area.set_style_min_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.icon = lv.img(self.content_area)
+        self.icon.set_src("A:/res/language.png")
+        self.icon.align(lv.ALIGN.TOP_MID, 0, 24)
+        self.title = Title(
+            self.content_area,
+            None,
+            452,
+            (),
+            _(i18n_keys.TITLE__SELECT_LANGUAGE),
+            pos_y=48,
+        )
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
         self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.roller.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=0)
+        self.lang_buttons: list[ButtonCell] = []
+        self.check_index = 0
+        for _idx, lang in enumerate(langs):
+            lang_button = ButtonCell(self.container, lang[1])
+            lang_button.label.set_style_text_font(
+                font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            if _idx == 0:
+                lang_button.set_checked()
+            self.lang_buttons.append(lang_button)
+        self.container.add_event_cb(self.on_selected_changed, lv.EVENT.CLICKED, None)
+
         self.btn.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.btn.enable(lv_colors.ONEKEY_GREEN)
 
-    def on_click(self, _target):
-        QuickStart()
+    def on_selected_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            last_checked = self.check_index
+            for idx, button in enumerate(self.lang_buttons):
+                if target != button and idx == last_checked:
+                    button.set_uncheck()
+                if target == button and idx != last_checked:
+                    self.check_index = idx
+                    button.set_checked()
+                    global language
+                    lang_key = langs[idx][0]
+                    i18n_refresh(lang_key)
+                    self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
+                    self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))
+                    language = lang_key
 
-    def on_value_changed(self, target):
-        global language
-        lang_key = langs_keys[target.get_selected()]
-        i18n_refresh(lang_key)
-        self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
-        self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))
-        language = lang_key
+    def on_click(self, event_obj):
+        QuickStart()
 
 
 class QuickStart(FullSizeWindow):
@@ -62,20 +113,15 @@ class QuickStart(FullSizeWindow):
                 ]
             ),
         )
-        self.roller.set_selected(0, lv.ANIM.OFF)
-        self.select_index = 0
 
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.VALUE_CHANGED:
-            if target == self.roller:
-                self.select_index = target.get_selected()
-        elif code == lv.EVENT.CLICKED:
+        if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
             if target == self.btn_yes:
-                if self.select_index == 0:
+                if self.selector.get_selected_index() == 0:
                     from trezor import workflow
                     from trezor.wire import DUMMY_CONTEXT
                     from apps.management.reset_device import reset_device
@@ -92,7 +138,7 @@ class QuickStart(FullSizeWindow):
                             ),
                         )
                     )
-                elif self.select_index == 1:
+                elif self.selector.get_selected_index() == 1:
                     from apps.management.recovery_device import recovery_device
                     from trezor.messages import RecoveryDevice
                     from trezor import workflow
@@ -123,22 +169,18 @@ class SelectMnemonicNum(FullSizeWindow):
             _(i18n_keys.BUTTON__CONTINUE),
             options="12\n18\n24",
         )
-        self.roller.set_selected(0, lv.ANIM.OFF)
         self.num = 12
 
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.VALUE_CHANGED:
-            if target == self.roller:
-                selected_str = " " * 11
-                target.get_selected_str(selected_str, len(selected_str))
-                self.num = int(selected_str.strip()[:-1])
-        elif code == lv.EVENT.CLICKED:
+        if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
             if target == self.btn_yes:
-                self.channel.publish(word_cnt_strength_map[self.num])
+                self.channel.publish(
+                    word_cnt_strength_map[self.selector.get_selected_index()]
+                )
                 self.destroy()
 
 

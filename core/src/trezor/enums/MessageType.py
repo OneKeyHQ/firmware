@@ -95,6 +95,8 @@ if not utils.BITCOIN_ONLY:
     NextU2FCounter = 81
     FirmwareErase_ex = 16
     TxAckPaymentRequest = 37
+    BatchGetPublickeys = 10016
+    EcdsaPublicKeys = 10017
     EthereumGetPublicKey = 450
     EthereumPublicKey = 451
     EthereumGetAddress = 56

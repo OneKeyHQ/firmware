@@ -116,7 +116,7 @@ class TransactionDetailsETH(FullSizeWindow):
             title,
             None,
             _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__REJECT),
+            _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
@@ -233,7 +233,7 @@ class TransactionDetailsBTC(FullSizeWindow):
             title,
             None,
             _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__REJECT),
+            _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
@@ -252,7 +252,7 @@ class JointTransactionDetailsBTC(FullSizeWindow):
             title,
             None,
             _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__REJECT),
+            _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
@@ -316,7 +316,7 @@ class ConfirmPaymentRequest(FullSizeWindow):
             title,
             subtitle,
             _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__REJECT),
+            _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
@@ -391,7 +391,7 @@ class ConfirmTransferBinance(FullSizeWindow):
             _(i18n_keys.TITLE__CONFIRM_TRANSFER),
             None,
             _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__REJECT),
+            _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
@@ -470,7 +470,7 @@ class TransactionDetailsTRON(FullSizeWindow):
             title,
             None,
             _(i18n_keys.BUTTON__HOLD_TO_SIGN),
-            _(i18n_keys.BUTTON__REJECT),
+            _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))

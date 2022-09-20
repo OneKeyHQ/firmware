@@ -19,7 +19,7 @@ from .common import (  # noqa: F401, F403, F405
 )
 from .components.anim import Anim
 from .components.button import ListItemBtn, ListItemBtnWithSwitch
-from .components.container import ContainerFlexCol, ContanierGrid
+from .components.container import ContainerFlexCol, ContainerGrid
 from .components.imgbtn import ImgBottonGridItem
 from .components.listitem import DisplayItem
 
@@ -222,7 +222,9 @@ class MainScreen(Screen):
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
             self.show_anim = Anim(800, 148, self.set_pos)
-            self.dismiss_anim = Anim(148, 800, self.set_pos)
+            self.dismiss_anim = Anim(
+                148, 800, self.set_pos, path_cb=lv.anim_t.path_ease_in, time=300
+            )
             self.slide = False
             self.visible = False
 
@@ -334,6 +336,7 @@ class SettingsScreen(Screen):
         self.connect.label_left.set_text(_(i18n_keys.ITEM__CONNECT))
         self.home_scr.label_left.set_text(_(i18n_keys.ITEM__HOME_SCREEN))
         self.security.label_left.set_text(_(i18n_keys.ITEM__SECURITY))
+        self.wallet.label_left.set_text(_(i18n_keys.ITEM__WALLET))
         self.about.label_left.set_text(_(i18n_keys.ITEM__ABOUT_DEVICE))
         self.boot_loader.label_left.set_text(_(i18n_keys.ITEM__UPDATE_MODE))
         self.power.label_left.set_text(_(i18n_keys.ITEM__POWER_OFF))
@@ -414,6 +417,7 @@ class GeneralScreen(Screen):
         self.auto_lock.label_left.set_text(_(i18n_keys.ITEM__AUTO_LOCK))
         self.language.label_left.set_text(_(i18n_keys.ITEM__LANGUAGE))
         self.backlight.label_left.set_text(_(i18n_keys.ITEM__BRIGHTNESS))
+        self.keyboard_haptic.label_left.set_text(_(i18n_keys.ITEM__KEYBOARD_HAPTIC))
 
     def get_str_from_lock_ms(self, time_ms) -> str:
         if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
@@ -878,7 +882,7 @@ class HomeScreenSetting(Screen):
             GRID_CELL_SIZE,
             lv.GRID_TEMPLATE.LAST,
         ]
-        self.container = ContanierGrid(
+        self.container = ContainerGrid(
             self, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.title
         )
         self.wps = []
@@ -1126,7 +1130,7 @@ class SafetyCheckPromptConfirm(FullSizeWindow):
             _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_PROMPT),
             _(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_PROMPT),
             confirm_text=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
-            cancel_text=_(i18n_keys.BUTTON__REJECT),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
             icon_path="A:/res/shriek.png",
             hold_confirm=True,
         )
@@ -1398,6 +1402,9 @@ class UserGuide(Screen):
         }
         super().__init__(**kwargs)
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.app_tutorial = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__ONEKEY_APP_TUTORIAL)
+        )
         self.power_off = ListItemBtn(
             self.container,
             _(i18n_keys.TITLE__POWER_ON_OFF__GUIDE),
@@ -1427,7 +1434,11 @@ class UserGuide(Screen):
         if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
-            if target == self.power_off:
+            if target == self.app_tutorial:
+                from trezor.lvglui.scrs import app_guide
+
+                app_guide.GuideAppDownload()
+            elif target == self.power_off:
                 PowerOnOffDetails()
             elif target == self.recovery_phrase:
                 RecoveryPhraseDetails()

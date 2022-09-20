@@ -362,5 +362,15 @@ translations = [
     "Disable Safety Checks",
     "Slide to Disable",
     "Are you sure to permanently disable safety checks? Continue only if you know what you are doing!",
+    "Download OneKey apps at",
+    "Download",
+    "Select Connect-Wallet, then click connect OneKey hardware wallet.",
+    "Connect the device: {}.",
+    "Click wallet icon at the top left of app interface, then click Add Wallet.",
+    "Later, OneKey app will recover accounts you previously used.",
+    "Add Account",
+    "Select the chain you need, set a name for new account, then click Create button.",
+    "Click wallet icon on the top left panel, then click Add-Account button.",
+    "OneKey App Tutorial",
 ]
 # fmt: on

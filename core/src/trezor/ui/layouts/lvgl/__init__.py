@@ -56,6 +56,7 @@ __all__ = (
     "confirm_data",
     "confirm_final",
     "confirm_blind_sign_common",
+    "show_onekey_app_guide",
 )
 
 
@@ -1022,3 +1023,10 @@ async def confirm_blind_sign_common(
         data=raw_message,
         br_code=ButtonRequestType.SignTx,
     )
+
+
+async def show_onekey_app_guide():
+    from trezor.lvglui.scrs import app_guide
+
+    app_guide.GuideAppDownload()
+    await app_guide.request()
