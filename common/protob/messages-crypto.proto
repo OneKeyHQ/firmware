@@ -130,3 +130,25 @@ message CosiSign {
 message CosiSignature {
     required bytes signature = 1;   // Signature
 }
+
+/**
+ * Request: Ask device for public keys corresponding to paths
+ * @start
+ * @next EcdsaPublicKeys
+ * @next Failure
+ */
+ message BatchGetPublickeys {
+    message Path {
+        repeated uint32 address_n = 1;
+    }
+    optional string ecdsa_curve_name = 1 [default="ed25519"];
+    repeated Path paths = 2;
+}
+
+/**
+ * Response: Contains public keys derived from device private seed
+ * @end
+ */
+message EcdsaPublicKeys {
+    repeated bytes public_keys = 1;
+}

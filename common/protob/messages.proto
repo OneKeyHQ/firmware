@@ -157,6 +157,8 @@ enum MessageType {
     MessageType_CosiCommitment = 72 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_CosiSign = 73 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_CosiSignature = 74 [(bitcoin_only) = true, (wire_out) = true];
+    MessageType_BatchGetPublickeys = 10016 [(wire_in) = true];
+    MessageType_EcdsaPublicKeys = 10017 [(wire_out) = true];
 
     // Debug
     MessageType_DebugLinkDecision = 100 [(bitcoin_only) = true, (wire_debug_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];

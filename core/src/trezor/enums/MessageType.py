@@ -87,6 +87,8 @@ if not utils.BITCOIN_ONLY:
     FirmwareUpload = 7
     FirmwareRequest = 8
     SelfTest = 32
+    BatchGetPublickeys = 10016
+    EcdsaPublicKeys = 10017
     EthereumGetPublicKey = 450
     EthereumPublicKey = 451
     EthereumGetAddress = 56
