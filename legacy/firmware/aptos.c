@@ -11,8 +11,9 @@
 
 // Prefix_bytes with SHA3_256 hash bytes of string `APTOS::RawTransaction`
 static const uint8_t APTOS_RAW_TX_PREFIX[32] = {
-    129, 233, 10, 2,   66,  120, 128, 71, 174, 165, 61,  66,  59,  155, 9,  13,
-    49,  234, 47, 204, 248, 247, 46,  81, 158, 47,  205, 167, 151, 43,  38, 72};
+    181, 233, 125, 176, 127, 160, 189, 14,  85,  152, 170,
+    54,  67,  169, 188, 111, 102, 147, 189, 220, 26,  159,
+    236, 158, 103, 74,  70,  30,  170, 0,   177, 147};
 
 static void layoutRequireConfirmTxSigner(char *address) {
   const char **str =

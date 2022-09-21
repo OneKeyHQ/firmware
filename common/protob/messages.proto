@@ -366,10 +366,10 @@ enum MessageType {
     MessageType_StarcoinVerifyMessage = 10308[(wire_in) = true];
 
     // Aptos
-    // MessageType_AptosGetAddress = 10600 [(wire_in) = true];
-    // MessageType_AptosAddress = 10601 [(wire_out) = true];
-    // MessageType_AptosSignTx = 10602 [(wire_in) = true];
-    // MessageType_AptosSignedTx = 10603 [(wire_out) = true];
+    MessageType_AptosGetAddress = 10600 [(wire_in) = true];
+    MessageType_AptosAddress = 10601 [(wire_out) = true];
+    MessageType_AptosSignTx = 10602 [(wire_in) = true];
+    MessageType_AptosSignedTx = 10603 [(wire_out) = true];
    
     // WebAuthn
     MessageType_WebAuthnListResidentCredentials = 800 [(wire_in) = true];
@@ -408,7 +408,7 @@ enum MessageType {
     // MessageType_ConfluxSignMessage = 10117 [(wire_in) = true];
     // MessageType_ConfluxSignMessageCIP23 = 10118 [(wire_in) = true];
     // MessageType_ConfluxMessageSignature = 10119 [(wire_out) = true];
-    
+
     // tron
     MessageType_TronGetAddress = 10501 [(wire_in) = true];
     MessageType_TronAddress = 10502 [(wire_out) = true];
