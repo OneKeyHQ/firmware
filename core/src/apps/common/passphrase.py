@@ -55,24 +55,24 @@ async def _request_on_host(ctx: wire.Context) -> str:
             "Passphrase not provided and on_device is False. Use empty string to set an empty passphrase."
         )
 
-    # non-empty passphrase
-    if ack.passphrase:
-        from trezor.ui.layouts import confirm_action
+    # # non-empty passphrase
+    # if ack.passphrase:
+    #     from trezor.ui.layouts import confirm_action
 
-        await confirm_action(
-            ctx,
-            "passphrase_host1",
-            title=_(i18n_keys.TITLE__ACCESS_HIDDEN_WALLET),
-            description=_(i18n_keys.SUBTITLE__ENTER_PASSPHRASE_ACCESS_HIDDEN_WALLET),
-        )
-        # TODO: i18n missing
-        await confirm_action(
-            ctx,
-            "passphrase_host2",
-            title=_(i18n_keys.TITLE__USE_THIS_PASSPHRASE),
-            description=ack.passphrase,
-            icon=None,
-        )
+    #     await confirm_action(
+    #         ctx,
+    #         "passphrase_host1",
+    #         title=_(i18n_keys.TITLE__ACCESS_HIDDEN_WALLET),
+    #         description=_(i18n_keys.SUBTITLE__ENTER_PASSPHRASE_ACCESS_HIDDEN_WALLET),
+    #     )
+    #     # TODO: i18n missing
+    #     await confirm_action(
+    #         ctx,
+    #         "passphrase_host2",
+    #         title=_(i18n_keys.TITLE__USE_THIS_PASSPHRASE),
+    #         description=ack.passphrase,
+    #         icon=None,
+    #     )
 
     return ack.passphrase
 

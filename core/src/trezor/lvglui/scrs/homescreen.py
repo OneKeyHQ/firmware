@@ -1243,6 +1243,7 @@ class PassphraseScreen(Screen):
                     _(i18n_keys.CONTENT__PASSPHRASE_ENABLED__HINT)
                 )
                 device.set_passphrase_enabled(True)
+                device.set_passphrase_always_on_device(False)
             else:
                 self.description.set_text(
                     _(i18n_keys.CONTENT__PASSPHRASE_DISABLED__HINT)

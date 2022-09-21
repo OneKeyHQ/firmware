@@ -299,8 +299,8 @@ def is_passphrase_enabled() -> bool:
 
 def set_passphrase_enabled(enable: bool) -> None:
     common.set_bool(_NAMESPACE, _USE_PASSPHRASE, enable)
-    # if not enable:
-    #     set_passphrase_always_on_device(False)
+    if not enable:
+        set_passphrase_always_on_device(False)
 
 
 def get_homescreen() -> str | None:
@@ -372,14 +372,12 @@ def get_passphrase_always_on_device() -> bool:
     - If HOST(2) => returns False, the check against b"\x01" in get_bool fails.
     Only support input on device.
     """
-    # return common.get_bool(_NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE)
-    return is_passphrase_enabled()
+    return common.get_bool(_NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE)
+    # return is_passphrase_enabled()
 
 
-# Deprecated
 def set_passphrase_always_on_device(enable: bool) -> None:
-    # common.set_bool(_NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE, enable)
-    pass
+    common.set_bool(_NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE, enable)
 
 
 def get_flags() -> int:
