@@ -342,9 +342,9 @@ void fsm_msgBatchGetPublickeys(const BatchGetPublickeys *msg) {
   CHECK_INITIALIZED
 
   const char *curve_name = msg->ecdsa_curve_name;
-  CHECK_PARAM(strcmp(curve_name, SUPPORTED_CURVES[0]) == 0 |
-                  strcmp(curve_name, SUPPORTED_CURVES[1]) == 0 |
-                  strcmp(curve_name, SUPPORTED_CURVES[2]) == 0,
+  CHECK_PARAM((strcmp(curve_name, SUPPORTED_CURVES[0]) == 0) |
+                  (strcmp(curve_name, SUPPORTED_CURVES[1]) == 0) |
+                  (strcmp(curve_name, SUPPORTED_CURVES[2]) == 0),
               "Curve not support")
   for (size_t i = 0; i < msg->paths_count; i++) {
     Path path = msg->paths[i];
