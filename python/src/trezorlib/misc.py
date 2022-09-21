@@ -14,7 +14,7 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from . import messages
 from .tools import expect
@@ -106,5 +106,19 @@ def decrypt_keyvalue(
             ask_on_encrypt=ask_on_encrypt,
             ask_on_decrypt=ask_on_decrypt,
             iv=iv,
+        )
+    )
+
+
+@expect(messages.EcdsaPublicKeys, field="public_keys", ret_type=List[bytes])
+def batch_get_publickeys(
+    client: "TrezorClient",
+    paths: List[List[int]],
+    ecdsa_curve_name: str = "ed25519",
+):
+    return client.call(
+        messages.BatchGetPublickeys(
+            paths=[messages.Path(address_n=path) for path in paths],
+            ecdsa_curve_name=ecdsa_curve_name,
         )
     )

@@ -314,3 +314,68 @@ void fsm_msgCosiSign(const CosiSign *msg) {
   msg_write(MessageType_MessageType_CosiSignature, resp);
   layoutHome();
 }
+
+static const char *SUPPORTED_CURVES[3] = {SECP256K1_NAME, ED25519_NAME,
+                                          ED25519_KECCAK_NAME};
+static const uint8_t MIN_PATH_DEPTH = 3;
+
+static const uint8_t ED25519_PUBLICKEY_SIZE = 32;
+
+static const uint8_t SECP256K1_COMPRESSED_PUBLICKEY_SIZE = 33;
+
+static bool is_all_harden(Path *path, size_t size) {
+  for (size_t i = 0; i < size; i++) {
+    if (!(path->address_n[i] & 0x80000000)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static void ed25519x_public_key_copy(uint8_t *dest, uint8_t *source) {
+  memcpy(dest, source + 1, ED25519_PUBLICKEY_SIZE);
+}
+static void secp256k1_public_key_copy(uint8_t *dest, uint8_t *source) {
+  memcpy(dest, source, SECP256K1_COMPRESSED_PUBLICKEY_SIZE);
+}
+void fsm_msgBatchGetPublickeys(const BatchGetPublickeys *msg) {
+  CHECK_INITIALIZED
+
+  const char *curve_name = msg->ecdsa_curve_name;
+  CHECK_PARAM(strcmp(curve_name, SUPPORTED_CURVES[0]) == 0 |
+                  strcmp(curve_name, SUPPORTED_CURVES[1]) == 0 |
+                  strcmp(curve_name, SUPPORTED_CURVES[2]) == 0,
+              "Curve not support")
+  for (size_t i = 0; i < msg->paths_count; i++) {
+    Path path = msg->paths[i];
+    CHECK_PARAM(path.address_n_count >= MIN_PATH_DEPTH, "Invalid path")
+    CHECK_PARAM(is_all_harden(&path, MIN_PATH_DEPTH), "Invalid path")
+  }
+
+  CHECK_PIN
+
+  RESP_INIT(EcdsaPublicKeys)
+
+  void (*m_copy)(uint8_t *, uint8_t *);
+  uint8_t key_size;
+  if (strcmp(curve_name, SECP256K1_NAME) == 0) {
+    m_copy = secp256k1_public_key_copy;
+    key_size = SECP256K1_COMPRESSED_PUBLICKEY_SIZE;
+  } else {
+    m_copy = ed25519x_public_key_copy;
+    key_size = ED25519_PUBLICKEY_SIZE;
+  }
+  size_t size = msg->paths_count;
+  for (size_t i = 0; i < size; i++) {
+    HDNode *node = fsm_getDerivedNode(curve_name, msg->paths[i].address_n,
+                                      msg->paths[i].address_n_count, NULL);
+    CHECK_PARAM(node, "Firmware error")
+
+    CHECK_PARAM(!hdnode_fill_public_key(node), "Failed to derive public key")
+    resp->public_keys[i].size = key_size;
+    m_copy(resp->public_keys[i].bytes, node->public_key);
+  }
+  resp->public_keys_count = size;
+  msg_write(MessageType_MessageType_EcdsaPublicKeys, resp);
+  layoutHome();
+}
