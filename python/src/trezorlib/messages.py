@@ -260,6 +260,10 @@ class MessageType(IntEnum):
     StarcoinSignMessage = 10306
     StarcoinMessageSignature = 10307
     StarcoinVerifyMessage = 10308
+    AptosGetAddress = 10600
+    AptosAddress = 10601
+    AptosSignTx = 10602
+    AptosSignedTx = 10603
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -588,7 +592,7 @@ class TezosBallotType(IntEnum):
 
 
 class AptosGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10600
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -605,7 +609,7 @@ class AptosGetAddress(protobuf.MessageType):
 
 
 class AptosAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10601
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -619,7 +623,7 @@ class AptosAddress(protobuf.MessageType):
 
 
 class AptosSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10602
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
@@ -636,7 +640,7 @@ class AptosSignTx(protobuf.MessageType):
 
 
 class AptosSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10603
     FIELDS = {
         1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),
