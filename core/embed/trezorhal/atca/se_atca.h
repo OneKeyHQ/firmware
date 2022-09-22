@@ -18,6 +18,7 @@ void se_get_status(void);
 bool se_hasPin(void);
 bool se_verifyPin(const char *pin);
 bool se_changePin(const char *old_pin, const char *new_pin);
+bool se_reset_pin(void);
 bool se_isInitialized(void);
 bool se_is_wiping(void);
 void se_set_wiping(bool flag);
