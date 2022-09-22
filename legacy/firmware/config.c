@@ -733,7 +733,7 @@ const uint8_t *config_getSeed(void) {
   char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
   if (config_getMnemonic(mnemonic, sizeof(mnemonic))) {
     char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-    if (!protectPassphraseOnDevice(passphrase)) {
+    if (!protectPassphrase(passphrase)) {
       memzero(mnemonic, sizeof(mnemonic));
       memzero(passphrase, sizeof(passphrase));
       fsm_sendFailure(FailureType_Failure_ActionCancelled,
