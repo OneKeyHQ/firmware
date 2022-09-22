@@ -234,6 +234,10 @@ if not utils.BITCOIN_ONLY:
     StarcoinSignMessage = 10306
     StarcoinMessageSignature = 10307
     StarcoinVerifyMessage = 10308
+    AptosGetAddress = 10600
+    AptosAddress = 10601
+    AptosSignTx = 10602
+    AptosSignedTx = 10603
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
