@@ -610,11 +610,7 @@ bool protectPassphrase(char *passphrase) {
       msg_tiny_id = 0xFFFF;
       PassphraseAck *ppa = (PassphraseAck *)msg_tiny;
       if (ppa->has_on_device && ppa->on_device == true) {
-        fsm_sendFailure(FailureType_Failure_DataError,
-                        _("This firmware is incapable of passphrase entry on "
-                          "the device."));
-        result = false;
-        break;
+        return protectPassphraseOnDevice(passphrase);
       }
       if (!ppa->has_passphrase) {
         fsm_sendFailure(FailureType_Failure_DataError,
