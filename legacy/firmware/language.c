@@ -229,6 +229,8 @@ const char *languages[][2] = {
     {"Confirm OP_RETURN:", "确认 OP_RETURN"},
     // layout2.c lisk.c
     {"Confirm address?", "确认地址"},
+    // ethereum.c
+    {"Confirm fee", "确认交易费"},
     // layout2.c lisk.c
     {"Confirm sending", "确认发送"},
     // starcoin.c aptos.c
@@ -495,6 +497,8 @@ const char *languages[][2] = {
     {"Malformed address", ""},
     // ethereum.c
     {"Malformed signature", ""},
+    {"Maximum fee", "交易费上限"},
+    {"Maximum fee per gas", "交易费上限单价"},
     {"Medium", "中"},
     {"Message Hash", "消息哈希值"},
     // layout2.c lisk.c
@@ -671,6 +675,8 @@ const char *languages[][2] = {
     //
     {"Prev", "后退"},
     {"Previous Page", "上一页"},
+    // ethereum.c
+    {"Priority fee per gas", "每份燃料消耗的优先费用"},
     // fsm.c
     {"Process error", ""},
     // storage.c
@@ -844,7 +850,7 @@ const char *languages[][2] = {
     // startcoin.c
     {"Transaction data cannot be decoded", "交易无法解析"},
     // ethereum.c
-    {"Transaction data:", ""},
+    {"Transaction data:", "交易数据:"},
     // signing.c signing.c signing.c
     {"Transaction has changed during signing", ""},
     // fsm_msg_coin.h
