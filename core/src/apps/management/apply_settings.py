@@ -71,13 +71,13 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
     if msg.passphrase_always_on_device is not None:
         if not storage.device.is_passphrase_enabled():
             raise wire.DataError("Passphrase is not enabled")
-        else:
-            if not msg.passphrase_always_on_device:
-                raise wire.DataError("Only support passphrase input on device")
-        # await require_confirm_change_passphrase_source(
-        #     ctx, msg.passphrase_always_on_device
-        # )
-        # storage.device.set_passphrase_always_on_device(msg.passphrase_always_on_device)
+        # else:
+        #     if not msg.passphrase_always_on_device:
+        #         raise wire.DataError("Only support passphrase input on device")
+        await require_confirm_change_passphrase_source(
+            ctx, msg.passphrase_always_on_device
+        )
+        storage.device.set_passphrase_always_on_device(msg.passphrase_always_on_device)
 
     if msg.auto_lock_delay_ms is not None:
         if msg.auto_lock_delay_ms < storage.device.AUTOLOCK_DELAY_MINIMUM:

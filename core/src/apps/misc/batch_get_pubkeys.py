@@ -22,9 +22,11 @@ async def batch_get_pubkeys(
     keychain = await get_keychain(ctx, msg.ecdsa_curve_name, [AlwaysMatchingSchema])
     pubkeys = []
 
-    def translator(pubkey: bytes) -> bytes:
-        return pubkey if "ed25519" not in msg.ecdsa_curve_name else pubkey[1:]
-
+    translator = (
+        (lambda pubkey: pubkey)
+        if "secp256k1" == msg.ecdsa_curve_name
+        else (lambda pubkey: pubkey[1:])
+    )
     for path in msg.paths:
         node = keychain.derive(path.address_n)
         pubkeys.append(translator(node.public_key()))

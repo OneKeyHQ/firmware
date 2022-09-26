@@ -489,7 +489,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.ta.set_one_line(True)
         # include NBSP
         self.ta.set_accepted_chars(
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_<>.:@/|*\\!()+%&-[]?{},'`;\"~$^= "
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_<>.:@/|*#\\!()+%&-[]?{},'`;\"~$^= "
         )
         self.ta.set_max_length(max_len)
         # self.ta.set_password_mode(True)
