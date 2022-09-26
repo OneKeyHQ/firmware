@@ -472,6 +472,22 @@ apps.debug
 import apps.debug
 apps.debug.load_device
 import apps.debug.load_device
+apps.fatfs.fclose
+import apps.fatfs.fclose
+apps.fatfs.flistdir
+import apps.fatfs.flistdir
+apps.fatfs.fmkdir
+import apps.fatfs.fmkdir
+apps.fatfs.fopen
+import apps.fatfs.fopen
+apps.fatfs.fread
+import apps.fatfs.fread
+apps.fatfs.fseek
+import apps.fatfs.fseek
+apps.fatfs.funlink
+import apps.fatfs.funlink
+apps.fatfs.fwrite
+import apps.fatfs.fwrite
 apps.homescreen
 import apps.homescreen
 apps.homescreen.homescreen

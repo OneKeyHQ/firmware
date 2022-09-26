@@ -2884,6 +2884,172 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SEMessageSignature"]:
             return isinstance(msg, cls)
 
+    class FatfsOpen(protobuf.MessageType):
+        path: "str"
+        mode: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+            mode: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsOpen"]:
+            return isinstance(msg, cls)
+
+    class FatfsClose(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsClose"]:
+            return isinstance(msg, cls)
+
+    class FatfsWrite(protobuf.MessageType):
+        data: "bytes"
+
+        def __init__(
+            self,
+            *,
+            data: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsWrite"]:
+            return isinstance(msg, cls)
+
+    class FatfsRead(protobuf.MessageType):
+        num_to_read: "int"
+
+        def __init__(
+            self,
+            *,
+            num_to_read: "int",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsRead"]:
+            return isinstance(msg, cls)
+
+    class FatfsReadData(protobuf.MessageType):
+        data: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsReadData"]:
+            return isinstance(msg, cls)
+
+    class FatfsSeek(protobuf.MessageType):
+        offset: "int"
+
+        def __init__(
+            self,
+            *,
+            offset: "int",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsSeek"]:
+            return isinstance(msg, cls)
+
+    class FatfsUnlink(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsUnlink"]:
+            return isinstance(msg, cls)
+
+    class FatfsMkdir(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsMkdir"]:
+            return isinstance(msg, cls)
+
+    class FatfsOpendir(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsOpendir"]:
+            return isinstance(msg, cls)
+
+    class FatfsListdir(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsListdir"]:
+            return isinstance(msg, cls)
+
+    class FatfsDirlist(protobuf.MessageType):
+        filelist: "list[FatfsFileinfo]"
+
+        def __init__(
+            self,
+            *,
+            filelist: "list[FatfsFileinfo] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsDirlist"]:
+            return isinstance(msg, cls)
+
+    class FatfsFileinfo(protobuf.MessageType):
+        file_size: "int"
+        file_mod: "str"
+        file_name: "str"
+
+        def __init__(
+            self,
+            *,
+            file_size: "int",
+            file_mod: "str",
+            file_name: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FatfsFileinfo"]:
+            return isinstance(msg, cls)
+
     class DebugLinkDecision(protobuf.MessageType):
         button: "DebugButton | None"
         swipe: "DebugSwipeDirection | None"

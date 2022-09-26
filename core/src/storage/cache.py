@@ -45,6 +45,8 @@ HOMESCREEN_ON = object()
 LOCKSCREEN_ON = object()
 homescreen_shown: object | None = None
 
+current_open_file = None
+
 
 class InvalidSessionError(Exception):
     pass

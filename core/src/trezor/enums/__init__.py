@@ -300,6 +300,17 @@ if TYPE_CHECKING:
         SEPublicCert = 10008
         SESignMessage = 10012
         SEMessageSignature = 10013
+        FatfsOpen = 10030
+        FatfsClose = 10031
+        FatfsWrite = 10032
+        FatfsRead = 10033
+        FatfsReadData = 10034
+        FatfsSeek = 10035
+        FatfsUnlink = 10036
+        FatfsMkdir = 10037
+        FatfsOpendir = 10038
+        FatfsListdir = 10039
+        FatfsDirlist = 10040
 
     class FailureType(IntEnum):
         UnexpectedMessage = 1

@@ -236,6 +236,24 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.AptosSignTx:
             return "apps.aptos.sign_tx"
 
+    # fatfs
+    if msg_type == MessageType.FatfsOpen:
+        return "apps.fatfs.fopen"
+    if msg_type == MessageType.FatfsClose:
+        return "apps.fatfs.fclose"
+    if msg_type == MessageType.FatfsWrite:
+        return "apps.fatfs.fwrite"
+    if msg_type == MessageType.FatfsRead:
+        return "apps.fatfs.fread"
+    if msg_type == MessageType.FatfsSeek:
+        return "apps.fatfs.fseek"
+    if msg_type == MessageType.FatfsSeek:
+        return "apps.fatfs.fseek"
+    if msg_type == MessageType.FatfsMkdir:
+        return "apps.fatfs.fmkdir"
+    if msg_type == MessageType.FatfsListdir:
+        return "apps.fatfs.flistdir"
+
     raise ValueError
 
 

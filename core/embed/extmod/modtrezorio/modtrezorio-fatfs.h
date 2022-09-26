@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
 #include "embed/extmod/trezorobj.h"
 #include "py/mperrno.h"
 #include "py/objstr.h"
@@ -56,9 +58,10 @@
 // clang-format on
 
 static FATFS fs_instance;
+static FATFS fs_instance1;
 
-bool _fatfs_instance_is_mounted() { return fs_instance.fs_type != 0; }
-void _fatfs_unmount_instance() { fs_instance.fs_type = 0; }
+bool _fatfs_instance_is_mounted() { return fs_instance1.fs_type != 0; }
+void _fatfs_unmount_instance() {}
 
 /// class FatFSError(OSError):
 ///     pass
@@ -390,7 +393,7 @@ STATIC mp_obj_t mod_trezorio_fatfs_open(mp_obj_t path, mp_obj_t flags) {
   }
   mp_obj_FatFSFile_t *f = m_new_obj(mp_obj_FatFSFile_t);
   f->base.type = &mod_trezorio_FatFSFile_type;
-  f->fp = fp;
+  memcpy(&f->fp, &fp, sizeof(FIL));
   return f;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_fatfs_open_obj,
@@ -411,7 +414,7 @@ STATIC mp_obj_t mod_trezorio_fatfs_listdir(mp_obj_t path) {
   }
   mp_obj_FatFSDir_t *d = m_new_obj(mp_obj_FatFSDir_t);
   d->base.type = &mod_trezorio_FatFSDir_type;
-  d->dp = dp;
+  memcpy(&d->dp, &dp, sizeof(DIR));
   return d;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorio_fatfs_listdir_obj,
@@ -496,14 +499,30 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_fatfs_rename_obj,
 ///     Mount the SD card filesystem.
 ///     """
 STATIC mp_obj_t mod_trezorio_fatfs_mount() {
-  FRESULT res = f_mount(&fs_instance, "", 1);
-  if (res != FR_OK) {
-    if (res == FR_NO_FILESYSTEM) {
-      FATFS_RAISE(NoFilesystem, FR_NO_FILESYSTEM);
-    } else {
-      FATFS_RAISE(FatFSError, res);
+  static bool fatfs_is_mount = false;
+
+  if (!fatfs_is_mount) {
+    FRESULT res = f_mount(&fs_instance, "", 1);
+    if (res != FR_OK) {
+      if (res == FR_NO_FILESYSTEM) {
+        FATFS_RAISE(NoFilesystem, FR_NO_FILESYSTEM);
+      } else {
+        FATFS_RAISE(FatFSError, res);
+      }
     }
+
+    res = f_mount(&fs_instance1, "1:", 1);
+    if (res != FR_OK) {
+      if (res == FR_NO_FILESYSTEM) {
+        FATFS_RAISE(NoFilesystem, FR_NO_FILESYSTEM);
+      } else {
+        FATFS_RAISE(FatFSError, res);
+      }
+    }
+
+    fatfs_is_mount = true;
   }
+
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorio_fatfs_mount_obj,
@@ -540,7 +559,7 @@ STATIC mp_obj_t mod_trezorio_fatfs_mkfs() {
   }
   MKFS_PARM params = {FM_FAT32, 0, 0, 0, 0};
   uint8_t working_buf[FF_MAX_SS] = {0};
-  FRESULT res = f_mkfs("", &params, working_buf, sizeof(working_buf));
+  FRESULT res = f_mkfs("1:", &params, working_buf, sizeof(working_buf));
   if (res != FR_OK) {
     FATFS_RAISE(FatFSError, res);
   }

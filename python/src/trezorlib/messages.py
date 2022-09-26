@@ -308,6 +308,17 @@ class MessageType(IntEnum):
     SEPublicCert = 10008
     SESignMessage = 10012
     SEMessageSignature = 10013
+    FatfsOpen = 10030
+    FatfsClose = 10031
+    FatfsWrite = 10032
+    FatfsRead = 10033
+    FatfsReadData = 10034
+    FatfsSeek = 10035
+    FatfsUnlink = 10036
+    FatfsMkdir = 10037
+    FatfsOpendir = 10038
+    FatfsListdir = 10039
+    FatfsDirlist = 10040
 
 
 class FailureType(IntEnum):
@@ -4287,6 +4298,173 @@ class SEMessageSignature(protobuf.MessageType):
         signature: "bytes",
     ) -> None:
         self.signature = signature
+
+
+class FatfsOpen(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10030
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+        2: protobuf.Field("mode", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+        mode: "str",
+    ) -> None:
+        self.path = path
+        self.mode = mode
+
+
+class FatfsClose(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10031
+
+
+class FatfsWrite(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10032
+    FIELDS = {
+        1: protobuf.Field("data", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data: "bytes",
+    ) -> None:
+        self.data = data
+
+
+class FatfsRead(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10033
+    FIELDS = {
+        1: protobuf.Field("num_to_read", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        num_to_read: "int",
+    ) -> None:
+        self.num_to_read = num_to_read
+
+
+class FatfsReadData(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10034
+    FIELDS = {
+        1: protobuf.Field("data", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data: Optional["bytes"] = None,
+    ) -> None:
+        self.data = data
+
+
+class FatfsSeek(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10035
+    FIELDS = {
+        1: protobuf.Field("offset", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        offset: "int",
+    ) -> None:
+        self.offset = offset
+
+
+class FatfsUnlink(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10036
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class FatfsMkdir(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10037
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class FatfsOpendir(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10038
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class FatfsListdir(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10039
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class FatfsDirlist(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10040
+    FIELDS = {
+        1: protobuf.Field("filelist", "FatfsFileinfo", repeated=True, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        filelist: Optional[Sequence["FatfsFileinfo"]] = None,
+    ) -> None:
+        self.filelist: Sequence["FatfsFileinfo"] = filelist if filelist is not None else []
+
+
+class FatfsFileinfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("file_size", "uint32", repeated=False, required=True),
+        2: protobuf.Field("file_mod", "string", repeated=False, required=True),
+        3: protobuf.Field("file_name", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        file_size: "int",
+        file_mod: "str",
+        file_name: "str",
+    ) -> None:
+        self.file_size = file_size
+        self.file_mod = file_mod
+        self.file_name = file_name
 
 
 class DebugLinkDecision(protobuf.MessageType):

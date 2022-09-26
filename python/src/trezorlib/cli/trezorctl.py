@@ -42,6 +42,7 @@ from . import (
     device,
     eos,
     ethereum,
+    fatfs,
     fido,
     firmware,
     monero,
@@ -96,6 +97,7 @@ COMMAND_ALIASES = {
     "upgrade-firmware": firmware.update,
     "firmware-upgrade": firmware.update,
     "firmware-update": firmware.update,
+    "fatfs":fatfs.cli,
 }
 
 
@@ -378,6 +380,8 @@ cli.add_command(tron.cli)
 cli.add_command(tezos.cli)
 cli.add_command(aptos.cli)
 cli.add_command(starcoin.cli)
+cli.add_command(fatfs.cli)
+
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(near.cli)

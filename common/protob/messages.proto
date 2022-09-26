@@ -426,4 +426,17 @@ enum MessageType {
     MessageType_SEMessageSignature = 10013 [(wire_out) = true, (wire_bootloader) = true];
     // MessageType_NFTWriteInfo = 10014 [deprecated = true];
     // MessageType_NFTWriteData = 10015 [deprecated = true];
+
+    //fatfs
+    MessageType_FatfsOpen = 10030 [(wire_in) = true];
+    MessageType_FatfsClose = 10031 [(wire_in) = true];
+    MessageType_FatfsWrite = 10032 [(wire_in) = true];
+    MessageType_FatfsRead = 10033 [(wire_in) = true];
+    MessageType_FatfsReadData = 10034 [(wire_out) = true];
+    MessageType_FatfsSeek = 10035 [(wire_in) = true];
+    MessageType_FatfsUnlink = 10036 [(wire_in) = true];
+    MessageType_FatfsMkdir = 10037 [(wire_in) = true];
+    MessageType_FatfsOpendir = 10038 [(wire_in) = true];
+    MessageType_FatfsListdir = 10039 [(wire_in) = true];
+    MessageType_FatfsDirlist = 10040 [(wire_out) = true];
 }

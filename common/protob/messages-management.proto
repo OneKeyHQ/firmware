@@ -596,3 +596,117 @@ message SESignMessage {
 message SEMessageSignature {
     required bytes signature = 1;   // signature of the message
 }
+
+/**
+ * Request: fatfs f_open
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsOpen {
+    required string path = 1;
+    required string mode = 2;
+}
+
+/**
+ * Request: fatfs f_close
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsClose {
+}
+
+/**
+ * Request: fatfs f_write
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsWrite {
+    required bytes data = 1;
+}
+
+/**
+ * Request: fatfs f_read
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsRead {
+    required uint32 num_to_read = 1;
+}
+
+/**
+ * Response: read data
+ * @end
+ */
+message FatfsReadData {
+    optional bytes data = 1;
+}
+
+/**
+ * Request: fatfs f_lseek
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsSeek {
+    required uint32 offset = 1;
+}
+
+/**
+ * Request: fatfs f_unlink
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsUnlink {
+    required string path = 1;
+}
+
+/**
+ * Request: fatfs f_mkdir
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsMkdir {
+    required string path = 1;
+}
+
+/**
+ * Request: fatfs f_opendir
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsOpendir {
+    required string path = 1;
+}
+
+/**
+ * Request: fatfs f_listdir
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsListdir {
+    required string path = 1;
+}
+
+/**
+ * Response: fatfs f_dirlist
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message FatfsDirlist {    
+    repeated FatfsFileinfo filelist = 1;
+
+    message FatfsFileinfo {
+        required uint32 file_size = 1;
+        required string file_mod = 2;
+        required string file_name = 3;
+    }
+}
