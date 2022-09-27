@@ -25,6 +25,5 @@ uint8_t emmc_write_blocks(uint8_t *data, uint32_t address, uint32_t nums,
                           uint32_t timeout);
 uint8_t emmc_erase(uint32_t start_address, uint32_t end_address);
 uint64_t emmc_get_capacity_in_bytes(void);
-void emmc_test(void);
 
 #endif

@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "common.h"
@@ -39,7 +40,11 @@
 
 #include "memzero.h"
 
+#include "atca_hal.h"
+
+#include "atca_command.h"
 #include "ble.h"
+#include "sys.h"
 #include "usart.h"
 
 #define BOARD_MODE 1
@@ -320,6 +325,439 @@ static secbool copy_sdcard(uint32_t code_len) {
   return sectrue;
 }
 
+#define COLOR_BL_BG COLOR_BLACK                   // background
+#define COLOR_BL_FG COLOR_WHITE                   // foreground
+#define COLOR_BL_FAIL RGB16(0xFF, 0x00, 0x00)     // red
+#define COLOR_BL_DONE RGB16(0x00, 0xAE, 0x0B)     // green
+#define COLOR_BL_PROCESS RGB16(0x4A, 0x90, 0xE2)  // blue
+#define COLOR_BL_GRAY RGB16(0x99, 0x99, 0x99)     // gray
+
+typedef enum {
+  SCREEN_TEST = 0,
+  TOUCH_TEST,
+  SE_TEST,
+  SPI_FLASH_TEST,
+  EMMC_TEST,
+  SDRAM_TEST,
+  BEEP_TEST,
+  MOTOR_TEST,
+  BLE_TEST,
+  TEST_NUMS
+} TEST_ITEM;
+
+static uint16_t screen_bg[TEST_NUMS + 1];
+
+static void ui_generic_confirm_simple(const char *msg) {
+  if (msg == NULL) return;
+  display_clear();
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, msg, -1, FONT_NORMAL,
+                      COLOR_WHITE, COLOR_BLACK);
+
+  display_bar_radius(32, DISPLAY_RESY - 160, 128, 64, COLOR_RED, COLOR_BLACK,
+                     16);
+  display_bar_radius(DISPLAY_RESX - 32 - 128, DISPLAY_RESY - 160, 128, 64,
+                     COLOR_GREEN, COLOR_BLACK, 16);
+  display_text(80, DISPLAY_RESY - 120, "No", -1, FONT_NORMAL, COLOR_WHITE,
+               COLOR_RED);
+  display_text(DISPLAY_RESX - 118, DISPLAY_RESY - 120, "Yes", -1, FONT_NORMAL,
+               COLOR_WHITE, COLOR_GREEN);
+}
+
+static bool ui_response(void) {
+  for (;;) {
+    uint32_t evt = touch_click();
+    uint16_t x = touch_unpack_x(evt);
+    uint16_t y = touch_unpack_y(evt);
+
+    if (!evt) {
+      continue;
+    }
+    // clicked on Cancel button
+    if (x >= 32 && x < 32 + 128 && y > DISPLAY_RESY - 160 &&
+        y < DISPLAY_RESY - 160 + 64) {
+      return false;
+    }
+    // clicked on Confirm button
+    if (x >= DISPLAY_RESX - 32 - 128 && x < DISPLAY_RESX - 32 &&
+        y > DISPLAY_RESY - 160 && y < DISPLAY_RESY - 160 + 64) {
+      return true;
+    }
+  }
+}
+
+void screen_test(void) {
+  display_bar(0, 0, MAX_DISPLAY_RESX, MAX_DISPLAY_RESY, COLOR_RED);
+  display_text_center(MAX_DISPLAY_RESX / 2, MAX_DISPLAY_RESY / 2,
+                      "TOUCH SCREEN", -1, FONT_NORMAL, COLOR_BL_FG, COLOR_RED);
+  while (!touch_click()) {
+  }
+
+  display_bar(0, 0, MAX_DISPLAY_RESX, MAX_DISPLAY_RESY, COLOR_GREEN);
+  display_text_center(MAX_DISPLAY_RESX / 2, MAX_DISPLAY_RESY / 2,
+                      "TOUCH SCREEN", -1, FONT_NORMAL, COLOR_BL_FG,
+                      COLOR_GREEN);
+  while (!touch_click()) {
+  }
+  display_bar(0, 0, MAX_DISPLAY_RESX, MAX_DISPLAY_RESY, COLOR_BLUE);
+  display_text_center(MAX_DISPLAY_RESX / 2, MAX_DISPLAY_RESY / 2,
+                      "TOUCH SCREEN", -1, FONT_NORMAL, COLOR_BL_FG, COLOR_BLUE);
+  while (!touch_click()) {
+  }
+  display_bar(0, 0, MAX_DISPLAY_RESX, MAX_DISPLAY_RESY, COLOR_BLACK);
+  display_text_center(MAX_DISPLAY_RESX / 2, MAX_DISPLAY_RESY / 2,
+                      "TOUCH SCREEN", -1, FONT_NORMAL, COLOR_BL_FG,
+                      COLOR_BLACK);
+  while (!touch_click()) {
+  }
+  display_bar(0, 0, MAX_DISPLAY_RESX, MAX_DISPLAY_RESY, COLOR_WHITE);
+  display_text_center(MAX_DISPLAY_RESX / 2, MAX_DISPLAY_RESY / 2,
+                      "TOUCH SCREEN", -1, FONT_NORMAL, COLOR_BLACK,
+                      COLOR_WHITE);
+  while (!touch_click()) {
+  }
+
+  ui_generic_confirm_simple("SCREEN PASS?");
+  if (ui_response()) {
+    screen_bg[SCREEN_TEST] = COLOR_GREEN;
+  } else {
+    screen_bg[SCREEN_TEST] = COLOR_RED;
+  }
+}
+
+void touch_input_test(void) {
+  display_clear();
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 5; j++) {
+      display_bar_radius(20 + j * 100, 20 + i * 180, 40, 40, COLOR_RED,
+                         COLOR_WHITE, 16);
+    }
+  }
+  uint32_t pos = 0;
+  for (;;) {
+    uint32_t evt = touch_read();
+    uint16_t x = touch_unpack_x(evt);
+    uint16_t y = touch_unpack_y(evt);
+
+    if (!evt) {
+      continue;
+    }
+
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 5; j++) {
+        if (x > (20 + j * 100) && x < (20 + j * 100 + 40) &&
+            y > (20 + i * 180) && y < (20 + i * 180 + 40)) {
+          display_bar_radius(20 + j * 100, 20 + i * 180, 40, 40, COLOR_GREEN,
+                             COLOR_WHITE, 16);
+          pos |= 1 << (5 * i + j);
+        }
+        if (pos == 0x1FFFFFF) {
+          screen_bg[TOUCH_TEST] = COLOR_GREEN;
+          return;
+        }
+      }
+    }
+  }
+}
+
+void beep_test(void) {
+  display_clear();
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "BEEP TEST", -1,
+                      FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+
+  buzzer_ctrl(1);
+  hal_delay(1000);
+  buzzer_ctrl(0);
+  hal_delay(1000);
+  buzzer_ctrl(1);
+  hal_delay(1000);
+  buzzer_ctrl(0);
+
+  display_bar_radius(32, DISPLAY_RESY - 160, 128, 64, COLOR_RED, COLOR_BLACK,
+                     16);
+  display_bar_radius(DISPLAY_RESX - 32 - 128, DISPLAY_RESY - 160, 128, 64,
+                     COLOR_GREEN, COLOR_BLACK, 16);
+  display_text(80, DISPLAY_RESY - 120, "No", -1, FONT_NORMAL, COLOR_WHITE,
+               COLOR_RED);
+  display_text(DISPLAY_RESX - 118, DISPLAY_RESY - 120, "Yes", -1, FONT_NORMAL,
+               COLOR_WHITE, COLOR_GREEN);
+
+  if (ui_response()) {
+    screen_bg[BEEP_TEST] = COLOR_GREEN;
+  } else {
+    screen_bg[BEEP_TEST] = COLOR_RED;
+  }
+}
+
+void motor_test(void) {
+  display_clear();
+
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "MOTOR TEST", -1,
+                      FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+
+  motor_ctrl(MOTOR_REVERSE);
+  hal_delay(1000);
+  motor_ctrl(MOTOR_BRAKE);
+
+  display_bar_radius(32, DISPLAY_RESY - 160, 128, 64, COLOR_RED, COLOR_BLACK,
+                     16);
+  display_bar_radius(DISPLAY_RESX - 32 - 128, DISPLAY_RESY - 160, 128, 64,
+                     COLOR_GREEN, COLOR_BLACK, 16);
+  display_text(80, DISPLAY_RESY - 120, "No", -1, FONT_NORMAL, COLOR_WHITE,
+               COLOR_RED);
+  display_text(DISPLAY_RESX - 118, DISPLAY_RESY - 120, "Yes", -1, FONT_NORMAL,
+               COLOR_WHITE, COLOR_GREEN);
+
+  if (ui_response()) {
+    screen_bg[MOTOR_TEST] = COLOR_GREEN;
+  } else {
+    screen_bg[MOTOR_TEST] = COLOR_RED;
+  }
+}
+
+void se_test(void) {
+  uint8_t rand_buffer[32];
+
+  if (atca_random(rand_buffer)) {
+    screen_bg[SE_TEST] = COLOR_RED;
+  } else {
+    screen_bg[SE_TEST] = COLOR_GREEN;
+  }
+}
+
+void spi_flash_test(void) {
+  if (qspi_flash_read_id() == 0) {
+    screen_bg[SPI_FLASH_TEST] = COLOR_RED;
+  } else {
+    screen_bg[SPI_FLASH_TEST] = COLOR_GREEN;
+  }
+}
+
+void emmc_test(void) {
+  if (emmc_get_capacity_in_bytes() == 0) {
+    screen_bg[EMMC_TEST] = COLOR_RED;
+  } else {
+    screen_bg[EMMC_TEST] = COLOR_GREEN;
+  }
+}
+
+void sdram_test(void) {
+  uint32_t i, j;
+  uint32_t write_start_time, write_end_time, read_start_time, read_end_time;
+  uint32_t *buffer;
+
+  // char write_info[128] = {0};
+  // char read_info[128] = {0};
+
+  write_start_time = HAL_GetTick();
+  j = 0;
+  buffer = (uint32_t *)(FMC_SDRAM_ADDRESS + 1024 * 1024);
+
+  for (i = ((1024 * 1024 / 4) - (1024 * 1024 / 128)); i > 0; i--) {
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+    *buffer++ = j++;
+  }
+  write_end_time = HAL_GetTick();
+
+  j = 0;
+  buffer = (uint32_t *)(FMC_SDRAM_ADDRESS + 1024 * 1024);
+  for (i = 0; i < ((1024 * 1024 * 8) - (1024 * 1024 / 4)); i++) {
+    if (*buffer++ != j++) {
+      screen_bg[SDRAM_TEST] = COLOR_RED;
+      return;
+    }
+  }
+
+  volatile uint32_t data;
+  (void)data;
+  buffer = (uint32_t *)FMC_SDRAM_ADDRESS;
+
+  read_start_time = HAL_GetTick();
+  for (i = 1024 * 1024 / 4; i > 0; i--) {
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+    data = *buffer++;
+  }
+  read_end_time = HAL_GetTick();
+  // display_clear();
+
+  // snprintf(write_info, sizeof(write_info), "write:time = %dms,speed= %dMB/s",
+  //          (unsigned)(write_end_time - write_start_time),
+  //          (unsigned)((32 * 1000) / (write_end_time - write_start_time)));
+  // snprintf(read_info, sizeof(read_info), "read:time = %dms,speed= %dMB/s",
+  //          (unsigned)(read_end_time - read_start_time),
+  //          (unsigned)((32 * 1000) / (read_end_time - read_start_time)));
+
+  // display_text(0, 100, write_info, -1, FONT_NORMAL, COLOR_WHITE,
+  // COLOR_BLACK); display_text(0, 150, read_info, -1, FONT_NORMAL, COLOR_WHITE,
+  // COLOR_BLACK); display_bar_radius(32, DISPLAY_RESY - 160, 128, 64,
+  // COLOR_RED, COLOR_BLACK,
+  //                    16);
+  // display_bar_radius(DISPLAY_RESX - 32 - 128, DISPLAY_RESY - 160, 128, 64,
+  //                    COLOR_GREEN, COLOR_BLACK, 16);
+  // display_text(80, DISPLAY_RESY - 120, "No", -1, FONT_NORMAL, COLOR_WHITE,
+  //              COLOR_RED);
+  // display_text(DISPLAY_RESX - 118, DISPLAY_RESY - 120, "Yes", -1,
+  // FONT_NORMAL,
+  //              COLOR_WHITE, COLOR_GREEN);
+
+  // if (ui_response()) {
+  //   screen_bg[SDRAM_TEST] = COLOR_GREEN;
+  // } else {
+  //   screen_bg[SDRAM_TEST] = COLOR_RED;
+  // }
+
+  if ((31 * 1000) / (write_end_time - write_start_time) > 400 &&
+      (32 * 1000) / (read_end_time - read_start_time) > 200) {
+    screen_bg[SDRAM_TEST] = COLOR_GREEN;
+  } else {
+    screen_bg[SDRAM_TEST] = COLOR_RED;
+  }
+}
+
+void ble_test(void) {
+  if (!ble_name_state()) {
+    ble_cmd_req(BLE_VER, BLE_VER_ADV);
+    hal_delay(5);
+  }
+  if (!ble_name_state()) {
+    screen_bg[BLE_TEST] = COLOR_GREEN;
+  } else {
+    screen_bg[BLE_TEST] = COLOR_RED;
+  }
+}
+
+uint16_t *p_test_result = (uint16_t *)0x08020000;
+uint16_t test_result[16];
+
+void test_menu(void) {
+  uint8_t secotrs[1];
+  secotrs[0] = 1;
+
+  memcpy(test_result, screen_bg, sizeof(screen_bg));
+
+  ensure(flash_erase_sectors(secotrs, 1, NULL), "erase data sector 1");
+  ensure(flash_unlock_write(), NULL);
+  ensure(flash_write_words(1, 0, (uint32_t *)test_result), "write test result");
+  ensure(flash_lock_write(), NULL);
+
+  display_clear();
+  display_text_center(DISPLAY_RESX / 2, 100, "DEVICE TEST", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 5; j++) {
+      display_bar_radius((i + 1) * 60 + i * 150, 150 + j * 100, 150, 80,
+                         screen_bg[j * 2 + i], COLOR_BLACK, 16);
+    }
+  }
+  display_text_center(135, 200, "SCREEN", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[SCREEN_TEST]);
+  display_text_center(345, 200, "TOUCH", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[TOUCH_TEST]);
+  display_text_center(135, 300, "SE", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[SE_TEST]);
+  display_text_center(345, 300, "SPI-FLASH", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[SPI_FLASH_TEST]);
+  display_text_center(135, 400, "EMMC", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[EMMC_TEST]);
+  display_text_center(345, 400, "SDRAM", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[SDRAM_TEST]);
+  display_text_center(135, 500, "BEEP", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[BEEP_TEST]);
+  display_text_center(345, 500, "MOTOR", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[MOTOR_TEST]);
+  display_text_center(135, 600, "BLE", -1, FONT_NORMAL, COLOR_BL_FG,
+                      screen_bg[BLE_TEST]);
+  // display_text_center(345, 600, "NULL", -1, FONT_NORMAL, COLOR_BL_FG,
+  //                     screen_bg[SCREEN_TEST]);
+}
+uint16_t pos_x, pos_y;
+uint32_t test_ui_response(void) {
+  for (;;) {
+    uint32_t evt = touch_click();
+    pos_x = touch_unpack_x(evt);
+    pos_y = touch_unpack_y(evt);
+
+    if (!evt) {
+      continue;
+    }
+
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 5; j++) {
+        if (pos_x > ((i + 1) * 60 + i * 150) &&
+            pos_x < ((i + 1) * 60 + (i + 1) * 150) && pos_y > (150 + j * 100) &&
+            pos_y < (150 + j * 100 + 80)) {
+          return j * 2 + i;
+        }
+      }
+    }
+  }
+}
+
 int main(void) {
   volatile uint32_t startup_mode_flag = *STAY_IN_FLAG_ADDR;
   pcb_version = PCB_VERSION_2_1_0;
@@ -347,7 +785,7 @@ int main(void) {
 
   qspi_flash_init();
   qspi_flash_config();
-  qspi_flash_memory_mapped();
+  // qspi_flash_memory_mapped();
 
   mpu_config();
 
@@ -366,7 +804,62 @@ int main(void) {
   touch_init();
 
   emmc_init();
-  fatfs_init();
+  atca_init();
+  buzzer_init();
+  motor_init();
+  ble_usart_init();
+
+  // fatfs_init();
+  memcpy(test_result, p_test_result, 32);
+  for (int i = 0; i < TEST_NUMS; i++) {
+    if (test_result[i] == (COLOR_RED)) {
+      screen_bg[i] = COLOR_RED;
+    } else if (test_result[i] == (COLOR_GREEN)) {
+      screen_bg[i] = COLOR_GREEN;
+    } else {
+      screen_bg[i] = COLOR_BL_GRAY;
+    }
+  }
+
+  screen_bg[TEST_NUMS] = COLOR_BLACK;
+
+  uint32_t button = 0;
+
+  while (1) {
+    test_menu();
+    button = test_ui_response();
+    switch (button) {
+      case SCREEN_TEST:
+        screen_test();
+        break;
+      case TOUCH_TEST:
+        touch_input_test();
+        break;
+      case SE_TEST:
+        se_test();
+        break;
+      case SPI_FLASH_TEST:
+        spi_flash_test();
+        break;
+      case EMMC_TEST:
+        emmc_test();
+        break;
+      case SDRAM_TEST:
+        sdram_test();
+        break;
+      case BEEP_TEST:
+        beep_test();
+        break;
+      case MOTOR_TEST:
+        motor_test();
+        break;
+      case BLE_TEST:
+        ble_test();
+        break;
+      default:
+        break;
+    }
+  }
 
   uint32_t mode = 0;
 

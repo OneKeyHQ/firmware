@@ -134,16 +134,3 @@ uint64_t emmc_get_capacity_in_bytes(void) {
   emmc_get_card_info(&card_info);
   return (uint64_t)card_info.LogBlockNbr * card_info.LogBlockSize;
 }
-
-void emmc_test(void) {
-  uint8_t buf[512];
-  for (int i = 0; i < 512; i++) {
-    buf[i] = i;
-  }
-  emmc_write_blocks(buf, 0, 1, 500);
-  memset(buf, 0x00, 512);
-  emmc_read_blocks(buf, 0, 1, 500);
-  for (int i = 0; i < 512; i++) {
-    // display_printf(" %X\n", buf[i]);
-  }
-}
