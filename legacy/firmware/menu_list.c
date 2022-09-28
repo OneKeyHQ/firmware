@@ -439,7 +439,8 @@ step1:
   layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
       true, NULL, NULL, NULL, NULL,
-      _("After enabling\"Blind Signing\",\nyour device will support\n signing "
+      _("After enabling\"Blind \nSigning\",your device \nwill support signing "
+        "\n"
         "for messages and \ntransactions, but it \ncan't decode the metadata."),
       NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
@@ -451,7 +452,7 @@ step1:
   layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
       true, NULL, NULL, NULL, NULL,
-      _("Visiting Help Center and \nsearch \"Blind Signing\" to \n learn "
+      _("Visiting Help Center \nand search \"Blind \nSigning\" to learn \n"
         "more\n \nhelp.onekey.so"),
       NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #else

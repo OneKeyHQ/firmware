@@ -3612,7 +3612,7 @@ void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
              OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH - 4, OLED_HEIGHT);
 }
 
-bool layoutBlidSign(char *address) {
+bool layoutBlindSign(char *address) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
   int index = 0;
