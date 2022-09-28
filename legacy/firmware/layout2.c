@@ -1746,7 +1746,14 @@ static void _layoutDialogAdapter(const BITMAP *icon, const BITMAP *bmp_no,
     oledDrawStringAdapter(left, 1 * (font->pixel + 1), line2, FONT_STANDARD);
   }
   if (line3) {
-    oledDrawStringAdapter(0, 2 * (font->pixel + 1), line3, FONT_STANDARD);
+    if (oledStringWidthAdapter(line2, FONT_STANDARD) >
+        (OLED_WIDTH - icon->width - 2)) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * (font->pixel + 1), line3,
+                                  FONT_STANDARD);
+    } else {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2 * (font->pixel + 1), line3,
+                                  FONT_STANDARD);
+    }
   }
   if (line4) {
     oledDrawStringAdapter(0, 3 * (font->pixel + 1), line4, FONT_STANDARD);
@@ -2370,7 +2377,7 @@ void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
              OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH - 4, OLED_HEIGHT);
 }
 
-bool layoutBlidSign(char *address) {
+bool layoutBlindSign(char *address) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
   int index = 0;
