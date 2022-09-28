@@ -289,6 +289,6 @@ static inline void layoutSwipe(void) {
 }
 #endif
 
-bool layoutBlidSign(char *address);
+bool layoutBlindSign(char *address);
 
 #endif

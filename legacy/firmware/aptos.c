@@ -15,19 +15,6 @@ static const uint8_t APTOS_RAW_TX_PREFIX[32] = {
     54,  67,  169, 188, 111, 102, 147, 189, 220, 26,  159,
     236, 158, 103, 74,  70,  30,  170, 0,   177, 147};
 
-static void layoutRequireConfirmTxSigner(char *address) {
-  const char **str =
-      split_message((const uint8_t *)address, strlen(address), 22);
-  layoutDialogSwipe(NULL, _("Cancel"), _("Continue"), _("CONFIRM SIGNING:"),
-                    _("SENDER:"), str[0], str[1], str[2], str[3], NULL);
-}
-
-static void layoutRequireConfirmRisk(void) {
-  layoutDialogSwipe(NULL, _("CANCEL"), _("APPROVE"), _("CONFIRM SIGNING:"),
-                    _("Transaction:"), _("Transaction data cannot be decoded"),
-                    NULL, _("Sign at you own risk"), NULL, NULL);
-}
-
 void aptos_get_address_from_public_key(const uint8_t *public_key,
                                        char *address) {
   uint8_t buf[SIZE_PUBKEY] = {0};
@@ -47,18 +34,8 @@ void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,
   char address[67] = {0};
   aptos_get_address_from_public_key(node->public_key + 1, address);
 
-  layoutRequireConfirmTxSigner(address);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                    "Signing cancelled by user");
-    layoutHome();
-    return;
-  }
-
-  layoutRequireConfirmRisk();
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                    "Signing cancelled by user");
+  if (!layoutBlindSign(address)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
     return;
   }

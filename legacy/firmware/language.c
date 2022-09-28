@@ -53,7 +53,7 @@ const char *languages[][2] = {
 //
 //
 #if ONEKEY_MINI
-    {"After enabling\"Blind Signing\",\nyour device will support\n signing "
+    {"After enabling\"Blind \nSigning\",your device \nwill support signing \n"
      "for messages and \ntransactions, but it \ncan't decode the metadata.",
      "开启盲签后,设备将支持\n对消息或交易进行签名,\n但不会解析元数据"},
 #else
@@ -930,8 +930,8 @@ const char *languages[][2] = {
 //
 #if ONEKEY_MINI
 
-    {"Visiting Help Center and \nsearch \"Blind Signing\" to \n learn more\n"
-     " \nhelp.onekey.so",
+    {"Visiting Help Center \nand search \"Blind \nSigning\" to learn \n"
+     "more\n \nhelp.onekey.so",
      "访问帮助中心搜索盲签\n了解更多\n \nhelp.onekey.so"},
 #else
     {"Visiting Help Center and search \"Blind Signing\" to "
