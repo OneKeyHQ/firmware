@@ -1746,8 +1746,8 @@ static void _layoutDialogAdapter(const BITMAP *icon, const BITMAP *bmp_no,
     oledDrawStringAdapter(left, 1 * (font->pixel + 1), line2, FONT_STANDARD);
   }
   if (line3) {
-    if (oledStringWidthAdapter(line2, FONT_STANDARD) >
-        (OLED_WIDTH - icon->width - 2)) {
+    if (line2 && (oledStringWidthAdapter(line2, FONT_STANDARD) >
+                  (OLED_WIDTH - icon->width - 2))) {
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 3 * (font->pixel + 1), line3,
                                   FONT_STANDARD);
     } else {
