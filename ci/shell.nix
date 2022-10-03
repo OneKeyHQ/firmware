@@ -95,6 +95,7 @@ stdenvNoCC.mkDerivation ({
     wget
     zlib
     moreutils
+    openocd # openocd shiped with distros may use different verson of libc, causing binary compatibility issues
   ] ++ lib.optionals (!stdenv.isDarwin) [
     procps
     valgrind
