@@ -19,7 +19,8 @@ CURRENT_DIR := '\"$(shell pwd)\"'
 UNIX_PORT_OPTS ?=
 CROSS_PORT_OPTS ?=
 
-PRODUCTION ?= 0
+# PRODUCTION ?= 0
+PRODUCTION = 0 # to ensure it's not set
 PYOPT      ?= 1
 BITCOIN_ONLY ?= 0
 TREZOR_MODEL ?= T
@@ -28,19 +29,37 @@ ADDRESS_SANITIZER ?= 0
 UI2 ?= 0
 PRODUCTION_MODEL = H
 
-# OpenOCD interface default. Alternative: ftdi/olimex-arm-usb-tiny-h
-OPENOCD_INTERFACE ?= stlink
-# OpenOCD transport default. Alternative: jtag
-OPENOCD_TRANSPORT ?= hla_swd
-OPENOCD = openocd -f interface/$(OPENOCD_INTERFACE).cfg -c "transport select $(OPENOCD_TRANSPORT)" -f target/stm32f4x.cfg
-OPENOCD_T1 = openocd -f interface/$(OPENOCD_INTERFACE).cfg -c "transport select $(OPENOCD_TRANSPORT)" -f target/stm32f2x.cfg
+# # OpenOCD interface default. Alternative: ftdi/olimex-arm-usb-tiny-h
+# OPENOCD_INTERFACE ?= stlink
+# # OpenOCD transport default. Alternative: jtag
+# OPENOCD_TRANSPORT ?= hla_swd
+# OPENOCD = openocd -f interface/$(OPENOCD_INTERFACE).cfg -c "transport select $(OPENOCD_TRANSPORT)" -f target/stm32f4x.cfg
+# OPENOCD_T1 = openocd -f interface/$(OPENOCD_INTERFACE).cfg -c "transport select $(OPENOCD_TRANSPORT)" -f target/stm32f2x.cfg
+
+# BOARDLOADER_START   = 0x08000000
+# BOOTLOADER_START    = 0x08020000
+# FIRMWARE_P1_START   = 0x08040000
+# FIRMWARE_P2_START   = 0x08120000
+# PRODTEST_START      = 0x08040000
+# FIRMWARE_T1_START   = 0x08010000
+
+# BOARDLOADER_MAXSIZE = 49152
+# BOOTLOADER_MAXSIZE  = 131072
+# FIRMWARE_P1_MAXSIZE = 786432
+# FIRMWARE_P2_MAXSIZE = 917504
+# FIRMWARE_MAXSIZE    = 1703936
+
+# customized openocd related things for Onekey Touch
+OPENOCD_BIN = openocd
+OPENOCD_SEARCH_LIST = -s $(shell pwd)/../openocd_scripts
+OPENOCD_STM32H7_OPTIONS = -f onekey_touch.cfg $(OPENOCD_SEARCH_LIST)
+OPENOCD_ONEKEY_TOUCH = $(OPENOCD_BIN) $(OPENOCD_STM32H7_OPTIONS)
+OPENOCD = $(OPENOCD_ONEKEY_TOUCH)
 
 BOARDLOADER_START   = 0x08000000
 BOOTLOADER_START    = 0x08020000
-FIRMWARE_P1_START   = 0x08040000
-FIRMWARE_P2_START   = 0x08120000
-PRODTEST_START      = 0x08040000
-FIRMWARE_T1_START   = 0x08010000
+FIRMWARE_P1_START   = 0x08060000
+FIRMWARE_P2_START   = 0x90000000
 
 BOARDLOADER_MAXSIZE = 49152
 BOOTLOADER_MAXSIZE  = 131072
@@ -229,7 +248,7 @@ flash_prodtest: $(PRODTEST_BUILD_DIR)/prodtest.bin ## flash prodtest using OpenO
 	$(OPENOCD) -c "init; reset halt; flash write_image erase $< $(PRODTEST_START); exit"
 
 flash_firmware: $(FIRMWARE_BUILD_DIR)/firmware.bin ## flash firmware using OpenOCD
-	$(OPENOCD) -c "init; reset halt; flash write_image erase $<.p1 $(FIRMWARE_P1_START); flash write_image erase $<.p2 $(FIRMWARE_P2_START); exit"
+	$(OPENOCD) -c "init; reset init; flash write_image erase $<.p1 $(FIRMWARE_P1_START); flash write_image erase unlock $<.p2 $(FIRMWARE_P2_START); exit"
 
 flash_firmware_t1: $(FIRMWARE_BUILD_DIR)/firmware.bin ## flash T1 core port on T1 using OpenOCD
 	$(OPENOCD_T1) -c "init; reset halt; flash write_image erase $< $(FIRMWARE_T1_START); exit"
@@ -314,3 +333,37 @@ upload_prodtest: ## upload prodtest using trezorctl
 
 coverage:  # generate coverage report
 	./tools/coverage-report
+
+
+# lazy options
+quick_boardloader: \
+	build_boardloader \
+	flash_boardloader \
+	openocd_reset
+quick_bootloader: \
+	build_bootloader \
+	flash_bootloader \
+	openocd_reset
+quick_firmware: \
+	build_firmware \
+	flash_firmware \
+	openocd_reset
+
+quick_all: \
+	build_boardloader \
+	flash_boardloader \
+	build_bootloader \
+	flash_bootloader \
+	build_firmware \
+	flash_firmware \
+	openocd_reset
+
+# 0x52001000 - 0x52001FFF Chrom-Art (DMA2D)
+# 0x50001000 - 0x50001FFF LTDC
+# 0x50000000 - 0x50000FFF DSIHOST
+dump_config_regs:
+	$(OPENOCD) -c "init; reset run; sleep 1500; halt; \
+	puts [mdw 0x52001000 82] ;\
+	puts [mdw 0x50001000 82] ;\
+	puts [mdw 0x50000000 82] ;\
+	exit" > dump_config_regs.txt
