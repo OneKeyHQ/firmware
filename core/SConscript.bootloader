@@ -48,7 +48,7 @@ CPPDEFINES_MOD += [
 
 if PRODUCTION_MODEL == 'H':
     SOURCE_MOD += [
-        'embed/extmod/modtrezorui/mipi_lcd.c',
+        'embed/extmod/drivers/mipi_lcd.c',
         'embed/extmod/modtrezorui/display.c',
         'embed/extmod/modtrezorui/font_bitmap.c',
         'embed/extmod/modtrezorui/font_roboto_regular_24.c',
@@ -241,6 +241,7 @@ if PRODUCTION_MODEL == 'H':
             'embed/trezorhal',
             'embed/trezorhal/atca',
             'embed/extmod/modtrezorui',
+            'embed/extmod/drivers',
             'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc',
             'vendor/micropython/lib/stm32lib/CMSIS/STM32H7xx/Include',
             'vendor/micropython/lib/cmsis/inc',
