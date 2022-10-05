@@ -53,7 +53,7 @@ typedef struct {
 typedef struct {
   uint32_t xres;
   uint32_t yres;
-  uint32_t bbp;
+  uint32_t bpp;
   uint32_t pixel_format;
   uint32_t fb_base;
 } LCD_PARAMS;

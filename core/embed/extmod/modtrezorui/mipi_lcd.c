@@ -14,7 +14,7 @@ DSI_HandleTypeDef hlcd_dsi;
 DMA2D_HandleTypeDef hlcd_dma2d;
 LTDC_HandleTypeDef hlcd_ltdc;
 
-static void ltcd_msp_init(LTDC_HandleTypeDef *hltdc) {
+static void ltdc_msp_init(LTDC_HandleTypeDef *hltdc) {
   if (hltdc->Instance == LTDC) {
     /** Enable the LTDC clock */
     __HAL_RCC_LTDC_CLK_ENABLE();
@@ -185,25 +185,25 @@ void fb_read_pixel(uint32_t x_pos, uint32_t y_pos, uint32_t *color) {
     /* Read data value from SDRAM memory */
     *color =
         *(uint32_t *)(lcd_params.fb_base +
-                      (lcd_params.bbp * (lcd_params.xres * y_pos + x_pos)));
+                      (lcd_params.bpp * (lcd_params.xres * y_pos + x_pos)));
 
   } else {
     /*LTDC_PIXEL_FORMAT_RGB565 */
     *color =
         *(uint16_t *)(lcd_params.fb_base +
-                      (lcd_params.bbp * (lcd_params.xres * y_pos + x_pos)));
+                      (lcd_params.bpp * (lcd_params.xres * y_pos + x_pos)));
   }
 }
 
 void fb_write_pixel(uint32_t x_pos, uint32_t y_pos, uint32_t color) {
   if (lcd_params.pixel_format == LTDC_PIXEL_FORMAT_ARGB8888) {
     *(uint32_t *)(lcd_params.fb_base +
-                  (lcd_params.bbp * (lcd_params.xres * y_pos + x_pos))) = color;
+                  (lcd_params.bpp * (lcd_params.xres * y_pos + x_pos))) = color;
 
   } else {
     /*LTDC_PIXEL_FORMAT_RGB565 */
     *(uint16_t *)(lcd_params.fb_base +
-                  (lcd_params.bbp * (lcd_params.xres * y_pos + x_pos))) = color;
+                  (lcd_params.bpp * (lcd_params.xres * y_pos + x_pos))) = color;
   }
 }
 
@@ -245,7 +245,7 @@ void fb_fill_rect(uint32_t x_pos, uint32_t y_pos, uint32_t width,
                   uint32_t height, uint32_t color) {
   /* Get the rectangle start address */
   uint32_t address = lcd_params.fb_base +
-                     ((lcd_params.bbp) * (lcd_params.xres * y_pos + x_pos));
+                     ((lcd_params.bpp) * (lcd_params.xres * y_pos + x_pos));
 
   /* Fill the rectangle */
   fb_fill_buffer((uint32_t *)address, width, height, (lcd_params.xres - width),
@@ -255,21 +255,21 @@ void fb_fill_rect(uint32_t x_pos, uint32_t y_pos, uint32_t width,
 void fb_draw_hline(uint32_t x_pos, uint32_t y_pos, uint32_t len,
                    uint32_t color) {
   uint32_t address = lcd_params.fb_base +
-                     ((lcd_params.bbp) * (lcd_params.xres * y_pos + x_pos));
+                     ((lcd_params.bpp) * (lcd_params.xres * y_pos + x_pos));
   fb_fill_buffer((uint32_t *)address, len, 1, 0, color);
 }
 
 void fb_draw_vline(uint32_t x_pos, uint32_t y_pos, uint32_t len,
                    uint32_t color) {
   uint32_t address = lcd_params.fb_base +
-                     ((lcd_params.bbp) * (lcd_params.xres * y_pos + x_pos));
+                     ((lcd_params.bpp) * (lcd_params.xres * y_pos + x_pos));
   fb_fill_buffer((uint32_t *)address, 1, len, lcd_params.xres - 1, color);
 }
 
 void dma2d_copy_buffer(uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y,
                        uint16_t xsize, uint16_t ysize) {
   uint32_t destination =
-      (uint32_t)pDst + (y * lcd_params.xres + x) * (lcd_params.bbp);
+      (uint32_t)pDst + (y * lcd_params.xres + x) * (lcd_params.bpp);
   uint32_t source = (uint32_t)pSrc;
 
   /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/
@@ -442,13 +442,13 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
     ltdc_pixel_format = LTDC_PIXEL_FORMAT_RGB565;
     dsi_pixel_format = DSI_RGB565;
     ctrl_pixel_format = ST7701S_FORMAT_RBG565;
-    lcd_params.bbp = 2;
+    lcd_params.bpp = 2;
 
   } else {
     ltdc_pixel_format = LCD_PIXEL_FORMAT_ARGB8888;
     dsi_pixel_format = DSI_RGB888;
     ctrl_pixel_format = ST7701S_FORMAT_RGB888;
-    lcd_params.bbp = 4;
+    lcd_params.bpp = 4;
   }
 
   lcd_params.pixel_format = ltdc_pixel_format;
@@ -456,7 +456,7 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
   lcd_params.yres = lcd_height;
   lcd_params.fb_base = DISPLAY_MEMORY_BASE;
 
-  ltcd_msp_init(&hlcd_ltdc);
+  ltdc_msp_init(&hlcd_ltdc);
 
   dma2d_msp_init(&hlcd_dma2d);
 
@@ -536,11 +536,11 @@ void lcd_para_init(uint32_t lcd_width, uint32_t lcd_height,
 
   if (pixel_format == LCD_PIXEL_FORMAT_RGB565) {
     ltdc_pixel_format = LTDC_PIXEL_FORMAT_RGB565;
-    lcd_params.bbp = 2;
+    lcd_params.bpp = 2;
 
   } else {
     ltdc_pixel_format = LCD_PIXEL_FORMAT_ARGB8888;
-    lcd_params.bbp = 4;
+    lcd_params.bpp = 4;
   }
 
   lcd_params.pixel_format = ltdc_pixel_format;
