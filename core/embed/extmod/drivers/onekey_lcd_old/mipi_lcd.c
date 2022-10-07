@@ -441,7 +441,7 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
   if (pixel_format == LCD_PIXEL_FORMAT_RGB565) {
     ltdc_pixel_format = LTDC_PIXEL_FORMAT_RGB565;
     dsi_pixel_format = DSI_RGB565;
-    ctrl_pixel_format = ST7701S_FORMAT_RBG565;
+    ctrl_pixel_format = ST7701S_FORMAT_RGB565;
     lcd_params.bpp = 2;
 
   } else {

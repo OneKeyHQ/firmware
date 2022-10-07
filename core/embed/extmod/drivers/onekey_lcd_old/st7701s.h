@@ -2,7 +2,7 @@
 #define _ST7701S_H_
 
 #define ST7701S_FORMAT_RGB888 0x70 /* Pixel  RGB888 : 24 bpp*/
-#define ST7701S_FORMAT_RBG565 0x50 /* Pixel  RGB565 : 16 bpp */
+#define ST7701S_FORMAT_RGB565 0x50 /* Pixel  RGB565 : 16 bpp */
 
 #define ST7701S_480X800_HSYNC 2 /* Horizontal synchronization */
 #define ST7701S_480X800_HBP 2   /* Horizontal back porch      */
