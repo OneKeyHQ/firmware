@@ -26,7 +26,8 @@
 #include "ff.h"
 #include "flash.h"
 #include "image.h"
-#include "mipi_lcd.h"
+// #include "mipi_lcd.h"
+#include "onekey_lcd.h"
 #include "qspi_flash.h"
 #include "rng.h"
 #include "sdcard.h"
@@ -351,7 +352,8 @@ int main(void) {
 
   mpu_config();
 
-  lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  // lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  onekey_lcd_init(DISPLAY_RESX, DISPLAY_RESY, ONEKEY_PIXEL_FORMAT_RGB565);
   display_clear();
   lcd_pwm_init();
 

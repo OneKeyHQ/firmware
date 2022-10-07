@@ -1,0 +1,97 @@
+#ifndef ONEKEY_LCD_ST7701S_H
+#define ONEKEY_LCD_ST7701S_H
+
+#include "mipi_display.h"
+#include "onekey_lcd_common.h"
+#include "onekey_lcd_st7701s_defines.h"
+
+typedef HAL_StatusTypeDef (*fp_dsi_read)(ONEKEY_LCD_PARAMS *, uint32_t, uint8_t *, uint32_t);
+typedef HAL_StatusTypeDef (*fp_dsi_write)(ONEKEY_LCD_PARAMS *, uint32_t, uint8_t *, uint32_t);
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define st7701_dsi_write(reg, seq...)                         \
+    {                                                         \
+        uint8_t array[] = {seq};                              \
+        dsi_write(lcd_params, reg, array, ARRAY_SIZE(array)); \
+    }
+
+// this is getting the brightness configured in the lcd module
+// do not get confused with the STM32 controlled PWM backlight
+uint8_t st7701_get_brightness(ONEKEY_LCD_PARAMS *lcd_params, fp_dsi_read dsi_read)
+{
+    uint8_t brightness_byte = 0x00;
+    dsi_read(lcd_params, MIPI_DCS_GET_DISPLAY_BRIGHTNESS, &brightness_byte, 1);
+    return brightness_byte;
+}
+
+void st7701_init(ONEKEY_LCD_PARAMS *lcd_params, fp_dsi_write dsi_write)
+{
+    st7701_dsi_write(MIPI_DCS_SOFT_RESET, 0x00);
+
+    /* We need to wait 5ms before sending new commands */
+    HAL_Delay(120);
+
+    st7701_dsi_write(MIPI_DCS_EXIT_SLEEP_MODE, 0x00);
+
+    HAL_Delay(120);
+
+    /* Command2, BK1 */
+    st7701_dsi_write(0xFF, 0x77, 0x01, 0x00, 0x00, 0x11);
+    st7701_dsi_write(0xD1, 0x11);
+
+    /* Command2, BK0 */
+    st7701_dsi_write(0xFF, 0x77, 0x01, 0x00, 0x00, 0x10);
+    st7701_dsi_write(0xC0, 0x63, 0x00);
+    st7701_dsi_write(0xC1, lcd_params->timing.vbp, lcd_params->timing.vfp);
+    st7701_dsi_write(0xC2, 0x31, 0x08);
+    st7701_dsi_write(0xB0, 0x00, 0x11, 0x19, 0x0C, 0x10, 0x06, 0x07, 0x0A, 0x09, 0x22,
+                     0x04, 0x10, 0x0E, 0x28, 0x30, 0x1C);
+    st7701_dsi_write(0xB1, 0x00, 0x12, 0x19, 0x0D, 0x10, 0x04, 0x06, 0x07, 0x08, 0x23,
+                     0x04, 0x12, 0x11, 0x28, 0x30, 0x1C);
+
+    /* Command2, BK1 */
+    st7701_dsi_write(0xFF, 0x77, 0x01, 0x00, 0x00, 0x11);
+    st7701_dsi_write(0xB0, 0x4D);
+    st7701_dsi_write(0xB1, 0x4A);
+    st7701_dsi_write(0xB2, 0x07);
+    st7701_dsi_write(0xB3, 0x80);
+    st7701_dsi_write(0xB5, 0x47);
+    st7701_dsi_write(0xB7, 0x8A);
+    st7701_dsi_write(0xB8, 0x21);
+    st7701_dsi_write(0xC1, 0x78);
+    st7701_dsi_write(0xC2, 0x78);
+    st7701_dsi_write(0xD0, 0x88);
+
+    HAL_Delay(100);
+
+    st7701_dsi_write(0xE0, 0x00, 0x00, 0x02);
+    st7701_dsi_write(0xE1, 0x01, 0xA0, 0x03, 0xA0, 0x02, 0xA0, 0x04, 0xA0, 0x00, 0x44,
+                     0x44);
+    st7701_dsi_write(0xE2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                     0x00, 0x00);
+    st7701_dsi_write(0xE3, 0x00, 0x00, 0x33, 0x33);
+    st7701_dsi_write(0xE4, 0x44, 0x44);
+    st7701_dsi_write(0xE5, 0x01, 0x26, 0xA0, 0xA0, 0x03, 0x28, 0xA0, 0xA0, 0x05, 0x2A,
+                     0xA0, 0xA0, 0x07, 0x2C, 0xA0, 0xA0);
+    st7701_dsi_write(0xE6, 0x00, 0x00, 0x33, 0x33);
+    st7701_dsi_write(0xE7, 0x44, 0x44);
+    st7701_dsi_write(0xE8, 0x02, 0x26, 0xA0, 0xA0, 0x04, 0x28, 0xA0, 0xA0, 0x06, 0x2A,
+                     0xA0, 0xA0, 0x08, 0x2C, 0xA0, 0xA0);
+    st7701_dsi_write(0xEB, 0x00, 0x00, 0xE4, 0xE4, 0x44, 0x00, 0x40);
+    st7701_dsi_write(0xED, 0xFF, 0xF7, 0x65, 0x4F, 0x0B, 0xA1, 0xCF, 0xFF, 0xFF, 0xFC,
+                     0x1A, 0xB0, 0xF4, 0x56, 0x7F, 0xFF);
+
+    /* disable Command2 */
+    st7701_dsi_write(0xFF, 0x77, 0x01, 0x00, 0x00, 00);
+    st7701_dsi_write(MIPI_DCS_SET_TEAR_ON, 0x00);
+    HAL_Delay(100);
+    st7701_dsi_write(MIPI_DCS_SET_PIXEL_FORMAT, 0x50);
+    st7701_dsi_write(MIPI_DCS_SET_DISPLAY_BRIGHTNESS, 0xFF);
+    st7701_dsi_write(MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x2C);
+    st7701_dsi_write(MIPI_DCS_WRITE_POWER_SAVE, 0x92);
+    st7701_dsi_write(MIPI_DCS_SET_CABC_MIN_BRIGHTNESS, 0xFF);
+    st7701_dsi_write(MIPI_DCS_SET_DISPLAY_ON, 0x00);
+    HAL_Delay(20);
+}
+
+#endif // ONEKEY_LCD_ST7701S_H

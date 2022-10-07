@@ -172,7 +172,8 @@ CPPDEFINES_MOD += [
     'TREZOR_FONT_MONO_ENABLE',
 ]
 SOURCE_MOD += [
-    'embed/extmod/drivers/mipi_lcd.c',
+    #'embed/extmod/drivers/onekey_lcd_old/mipi_lcd.c',
+    'embed/extmod/drivers/onekey_lcd/onekey_lcd.c',
     'embed/extmod/modtrezorui/display.c',
     'embed/extmod/modtrezorui/font_bitmap.c',
     'embed/extmod/modtrezorui/font_roboto_bold_20.c',
@@ -620,8 +621,9 @@ if PRODUCTION_MODEL == 'H':
             'embed/trezorhal',
             'embed/trezorhal/atca',
             'embed/trezorhal/fatfs',
-            'embed/extmod/drivers',
             'embed/extmod/modtrezorui',
+			#'embed/extmod/drivers/onekey_lcd_old',
+            'embed/extmod/drivers/onekey_lcd',
             'vendor/micropython',
             'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc',
             'vendor/micropython/lib/stm32lib/CMSIS/STM32H7xx/Include',

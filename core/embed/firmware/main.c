@@ -54,7 +54,8 @@
 #include "atca_api.h"
 #include "atca_hal.h"
 #include "device.h"
-#include "mipi_lcd.h"
+// #include "mipi_lcd.h"
+#include "onekey_lcd.h"
 #include "qspi_flash.h"
 #include "spi.h"
 #include "supervise.h"
@@ -105,7 +106,8 @@ int main(void) {
   qspi_flash_config();
   qspi_flash_memory_mapped();
 
-  lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  // lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  onekey_lcd_init(DISPLAY_RESX, DISPLAY_RESY, ONEKEY_PIXEL_FORMAT_RGB565);
   lcd_pwm_init();
   random_delays_init();
 

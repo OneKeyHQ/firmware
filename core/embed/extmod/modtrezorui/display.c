@@ -127,7 +127,8 @@ static struct { int x, y; } DISPLAY_OFFSET;
 #include "display-unix.h"
 #else
 #if PRODUCTION_MODEL == 'H'
-#include "mipi_lcd.h"
+// #include "mipi_lcd.h"
+#include "onekey_lcd.h"
 #elif defined TREZOR_MODEL_T
 #include "display-stm32_T.h"
 #elif TREZOR_MODEL == 1

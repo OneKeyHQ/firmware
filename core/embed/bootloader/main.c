@@ -30,7 +30,8 @@
 #include "flash.h"
 #include "image.h"
 #include "mini_printf.h"
-#include "mipi_lcd.h"
+// #include "mipi_lcd.h"
+#include "onekey_lcd.h"
 #include "mpu.h"
 #include "nand_flash.h"
 #include "qspi_flash.h"
@@ -354,7 +355,8 @@ int main(void) {
 
   SystemCoreClockUpdate();
 
-  lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  // lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
+  onekey_lcd_init(DISPLAY_RESX, DISPLAY_RESY, ONEKEY_PIXEL_FORMAT_RGB565);
   random_delays_init();
 
   ble_usart_init();
@@ -363,7 +365,6 @@ int main(void) {
   atca_config_init();
 
   device_para_init();
-  device_test();
 
   if (!serial_set) {
     serial_set = device_serial_set();
@@ -389,6 +390,8 @@ int main(void) {
 
   touch_init();
   touch_power_on();
+  
+  device_test();
 
   if (!serial_set || !cert_set) {
     display_clear();

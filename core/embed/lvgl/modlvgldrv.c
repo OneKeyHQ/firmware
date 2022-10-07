@@ -6,7 +6,7 @@
 #include "py/mphal.h"
 #include "py/runtime.h"
 
-#include "mipi_lcd.h"
+#include "onekey_lcd.h"
 #include "sdram.h"
 #include "touch.h"
 
@@ -31,7 +31,7 @@ static mp_obj_t mp_disp_drv_framebuffer(mp_obj_t n_obj) {
 
 static void mp_disp_drv_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area,
                               lv_color_t *color_p) {
-  dma2d_copy_buffer((uint32_t *)color_p, (uint32_t *)DISPLAY_MEMORY_BASE,
+  onekey_lcd_dma2d_copy_buffer((uint32_t *)color_p, (uint32_t *)DISPLAY_MEMORY_BASE,
                     area->x1, area->y1, area->x2 - area->x1 + 1,
                     area->y2 - area->y1 + 1);
   lv_disp_flush_ready(disp_drv);
