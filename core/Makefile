@@ -19,8 +19,8 @@ CURRENT_DIR := '\"$(shell pwd)\"'
 UNIX_PORT_OPTS ?=
 CROSS_PORT_OPTS ?=
 
-# PRODUCTION ?= 0
-PRODUCTION = 0 # to ensure it's not set
+PRODUCTION ?= 0
+# PRODUCTION = 0 # to ensure it's not set for debug
 PYOPT      ?= 1
 BITCOIN_ONLY ?= 0
 TREZOR_MODEL ?= T
