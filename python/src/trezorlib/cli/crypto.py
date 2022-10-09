@@ -14,7 +14,7 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING, Tuple, List
+from typing import TYPE_CHECKING, List, Tuple
 
 import click
 
@@ -63,7 +63,12 @@ def decrypt_keyvalue(
 
 
 @cli.command()
-@click.option("-c", "--curve", required=False, help="the ecdsa curve to use, e.g. ed25519, secp256k1...")
+@click.option(
+    "-c",
+    "--curve",
+    required=False,
+    help="the ecdsa curve to use, e.g. ed25519, secp256k1...",
+)
 @click.argument("paths", nargs=-1, required=True, type=str)
 @with_client
 def batch_get_publickeys(
@@ -72,7 +77,7 @@ def batch_get_publickeys(
     """Batch get publicKeys by given paths.
     paths: we want to used for public keys, e.g. "m/44'/0'/0'" "m/44'/0'/0'/0/0'"... support up to 20 path
     """
-    assert(len(paths) <= 20, "Support up to paths' size 20")
+    assert (len(paths) <= 20, "Support up to paths' size 20")
     paths_n = list(map(tools.parse_path, paths))
     pubkeys = misc.batch_get_publickeys(client, paths_n, curve)
     pubkeys_hex = [pubkey.hex() for pubkey in pubkeys]

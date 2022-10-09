@@ -274,6 +274,7 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/extmod/moductypes.c',
     'vendor/micropython/extmod/moduheapq.c',
     'vendor/micropython/extmod/modutimeq.c',
+    'vendor/micropython/extmod/modujson.c',
     'vendor/micropython/extmod/utime_mphal.c',
     'vendor/micropython/shared/readline/readline.c',
     'vendor/micropython/shared/timeutils/timeutils.c',

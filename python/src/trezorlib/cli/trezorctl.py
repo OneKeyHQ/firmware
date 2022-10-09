@@ -37,6 +37,7 @@ from . import (
     cardano,
     conflux,
     cosi,
+    cosmos,
     crypto,
     debug,
     device,
@@ -90,6 +91,7 @@ COMMAND_ALIASES = {
     "starcoin": starcoin.cli,
     "near": near.cli,
     "aptos": aptos.cli,
+    "cosmos": cosmos.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -381,6 +383,7 @@ cli.add_command(starcoin.cli)
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(near.cli)
+cli.add_command(cosmos.cli)
 
 #
 # Main

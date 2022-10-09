@@ -66,10 +66,10 @@ class Transaction:
         blockHash = raw_message[offset : offset + 32]
         offset += 32
         # actions_len
-        actions_len = int.from_bytes(raw_message[offset : offset + 4], "little")
+        # actions_len = int.from_bytes(raw_message[offset : offset + 4], "little")
         offset += 4
-        if actions_len != 1:
-            raise wire.DataError("Multiple action")
+        # if actions_len != 1:
+        #     raise wire.DataError("Multiple action")
         # action_type
         action_type = int.from_bytes(raw_message[offset : offset + 1], "little")
 

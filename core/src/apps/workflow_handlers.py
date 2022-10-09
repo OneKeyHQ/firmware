@@ -236,6 +236,12 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.AptosSignTx:
             return "apps.aptos.sign_tx"
 
+        # cosmos
+        if msg_type == MessageType.CosmosGetAddress:
+            return "apps.cosmos.get_address"
+        if msg_type == MessageType.CosmosSignTx:
+            return "apps.cosmos.sign_tx"
+
     raise ValueError
 
 

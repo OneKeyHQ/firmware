@@ -673,3 +673,30 @@ class BlindingSignCommon(FullSizeWindow):
         self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
         )
+
+
+class CosmosSignCommon(FullSizeWindow):
+    def __init__(self, chain_id: str, fee: str, memo: str, msgs: str):
+        super().__init__(
+            _(i18n_keys.TITLE__VIEW_TRANSACTION),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(self.container, "Chain ID", chain_id)
+        self.item2 = DisplayItem(self.container, "FEE", fee)
+        self.item3 = DisplayItem(self.container, "MEMO", memo)
+        self.show_full_message = NormalButton(
+            self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
+        )
+        self.show_full_message.align_to(self.item3, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+        self.show_full_message.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.message = msgs
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.show_full_message:
+                PageAbleMessage(self.message, _(i18n_keys.BUTTON__CLOSE))

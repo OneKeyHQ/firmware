@@ -1030,3 +1030,18 @@ async def show_onekey_app_guide():
 
     app_guide.GuideAppDownload()
     await app_guide.request()
+
+
+async def confirm_cosmos_sign_common(
+    ctx: wire.GenericContext,
+    chain_id: str,
+    fee: str,
+    memo: str,
+    msgs: str,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosSignCommon
+
+    screen = CosmosSignCommon(chain_id, fee, memo, msgs)
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
+    )
