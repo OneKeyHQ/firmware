@@ -241,6 +241,10 @@ if TYPE_CHECKING:
         StarcoinSignMessage = 10306
         StarcoinMessageSignature = 10307
         StarcoinVerifyMessage = 10308
+        CosmosGetAddress = 10800
+        CosmosAddress = 10801
+        CosmosSignTx = 10802
+        CosmosSignedTx = 10803
         AptosGetAddress = 10600
         AptosAddress = 10601
         AptosSignTx = 10602

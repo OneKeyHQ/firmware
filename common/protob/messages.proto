@@ -362,6 +362,12 @@ enum MessageType {
     MessageType_StarcoinMessageSignature = 10307 [(wire_out) = true];
     MessageType_StarcoinVerifyMessage = 10308[(wire_in) = true];
 
+    // Cosmos
+    MessageType_CosmosGetAddress = 10800 [(wire_in) = true];
+    MessageType_CosmosAddress = 10801 [(wire_out) = true];
+    MessageType_CosmosSignTx = 10802 [(wire_in) = true];
+    MessageType_CosmosSignedTx = 10803 [(wire_out) = true];
+
     // Aptos
     MessageType_AptosGetAddress = 10600 [(wire_in) = true];
     MessageType_AptosAddress = 10601 [(wire_out) = true];

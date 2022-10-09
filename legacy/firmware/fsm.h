@@ -23,6 +23,7 @@
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
 #include "messages-conflux.pb.h"
+#include "messages-cosmos.pb.h"
 #include "messages-crypto.pb.h"
 #include "messages-debug.pb.h"
 #include "messages-ethereum.pb.h"
@@ -187,5 +188,9 @@ void fsm_msgConfluxSignTx(ConfluxSignTx *msg);  // not const because we mutate
                                                 // transaction during validation
 void fsm_msgConfluxTxAck(const ConfluxTxAck *msg);
 void fsm_msgConfluxSignMessage(const ConfluxSignMessage *msg);
+
+// cosmos
+void fsm_msgCosmosGetAddress(CosmosGetAddress *msg);
+void fsm_msgCosmosSignTx(const CosmosSignTx *msg);
 
 #endif
