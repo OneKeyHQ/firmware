@@ -278,10 +278,21 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       }
       return;
     } else if (msg_id == 0x0010) {  // FirmwareErase message (id 16)
-      erase_ble_code_progress();
-      send_msg_success(dev);
-      flash_state = STATE_FLASHSTART;
-      timer_out_set(timer_out_oper, timer1s * 5);
+      bool proceed = false;
+      layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL, "Install ble",
+                   "firmware?", NULL, NULL, NULL, NULL);
+      proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
+      if (proceed) {
+        erase_ble_code_progress();
+        send_msg_success(dev);
+        flash_state = STATE_FLASHSTART;
+        timer_out_set(timer_out_oper, timer1s * 5);
+      } else {
+        send_msg_failure(dev);
+        flash_state = STATE_END;
+        show_unplug("Firmware installation", "aborted.");
+        shutdown();
+      }
       return;
     }
     send_msg_failure(dev, 1);  // Failure_UnexpectedMessage
