@@ -687,6 +687,7 @@ void usbLoop(void) {
   bool firmware_present = firmware_present_new();
   usbInit(firmware_present);
   for (;;) {
+    ble_update_poll();
     usbd_poll(usbd_dev);
     i2cSlavePoll();
     if (!firmware_present &&
