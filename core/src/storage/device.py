@@ -51,10 +51,11 @@ _AUTOSHUTDOWN_DELAY_MS = const(0x84)  # int
 # deprecated
 _PIN_MAP_TYPES = const(0x84)  # int
 
-_WALLPAPER_INDEX = const(0x85)  # inT
+_WALLPAPER_INDEX = const(0x85)  # int
 _USE_USB_PROTECT = const(0x86)  # bool (0x01 or empty)
 _USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
-_KEYBOARD_HAPTIC = const(0x88)   # int
+_KEYBOARD_HAPTIC = const(0x88)   # bool
+_TAP_AWAKE = const(0x89)  # bool
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -178,8 +179,24 @@ def is_usb_lock_enabled() -> bool:
     return common.get_bool(_NAMESPACE, _USE_USB_PROTECT, public=True)
 
 
-def set_usb_lock_enabled(enable: bool) -> None:
+def set_usb_lock_enable(enable: bool) -> None:
     common.set_bool(_NAMESPACE, _USE_USB_PROTECT, enable, public=True)
+
+
+def is_tap_awake_enabled() -> bool:
+    enabled = common.get(_NAMESPACE, _TAP_AWAKE, public=True)
+    if enabled == common._FALSE_BYTE:
+        return False
+    return True
+
+
+def set_tap_awake_enable(enable: bool) -> None:
+    common.set(
+        _NAMESPACE,
+        _TAP_AWAKE,
+        common._TRUE_BYTE if enable else common._FALSE_BYTE,
+        public=True,
+    )
 
 
 def keyboard_haptic_enabled() -> bool:
@@ -305,25 +322,13 @@ def set_passphrase_enabled(enable: bool) -> None:
 
 def get_homescreen() -> str | None:
     homescreen = common.get(_NAMESPACE, _HOMESCREEN, public=True)
-    return homescreen.decode() if homescreen else None
+    return homescreen.decode() if homescreen else "A:/res/wallpaper-1.png"
 
 
-def set_homescreen(homescreen: str) -> None:
+def set_homescreen(full_path: str) -> None:
     # if len(homescreen) > HOMESCREEN_MAXSIZE:
     #     raise ValueError  # homescreen too large
-    common.set(_NAMESPACE, _HOMESCREEN, homescreen.encode(), public=True)
-
-
-def get_wp_index() -> int:
-    index = common.get(_NAMESPACE, _WALLPAPER_INDEX, public=True)
-    if not index:
-        return 0
-    return int.from_bytes(index, "big")
-
-
-def set_cur_wp_index(index: int) -> None:
-    """Set the index of the current wallpaper"""
-    common.set(_NAMESPACE, _WALLPAPER_INDEX, index.to_bytes(2, "big"), public=True)
+    common.set(_NAMESPACE, _HOMESCREEN, full_path.encode(), public=True)
 
 
 def store_mnemonic_secret(

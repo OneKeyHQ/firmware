@@ -46,6 +46,7 @@ class MnemonicDisplay(FullSizeWindow):
         )
         self.word_col1.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.word_col1.set_style_text_line_space(18, lv.PART.MAIN | lv.STATE.DEFAULT)
+        # set_style_text_letter_space
         self.word_col2 = lv.label(self.panel)
         self.word_col2.set_size(lv.pct(50), lv.SIZE.CONTENT)
         self.word_col2.set_recolor(True)
@@ -60,8 +61,8 @@ class MnemonicDisplay(FullSizeWindow):
         text_col = ""
         text_col2 = ""
         for index in range(0, int(word_count / 2)):
-            text_col += f"#999999 {index+1:>2}.# {mnemonics[index]}\n"
-            text_col2 += f"#999999 {int(index+int(word_count/2)+1):>2}.# {mnemonics[int(index+int(word_count/2))]}\n"
+            text_col += f"#999999 {index+1:>2}.#{mnemonics[index]}\n"
+            text_col2 += f"#999999 {int(index+int(word_count/2)+1):>2}.#{mnemonics[int(index+int(word_count/2))]}\n"
             self.word_col1.set_text(text_col.rstrip())
             self.word_col2.set_text(text_col2.rstrip())
         self.item = ListItemWithLeadingCheckbox(

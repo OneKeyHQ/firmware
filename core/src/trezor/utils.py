@@ -54,7 +54,7 @@ SCREENS = []
 def clear_screens() -> None:
     for scr in SCREENS:
         try:
-            scr.delete()
+            scr.del_delayed(500)
             if hasattr(scr, "_init"):
                 del scr._init
         except BaseException:

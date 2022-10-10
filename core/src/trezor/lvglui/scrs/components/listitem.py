@@ -100,3 +100,48 @@ class DisplayItem(lv.obj):
         self.label.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_text(content)
         self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 6)
+
+
+class ImgGridItem(lv.img):
+    """Home Screen setting display"""
+
+    def __init__(
+        self,
+        parent,
+        col_num,
+        row_num,
+        img_path: str,
+        img_path_other: str = "A:/res/checked-solid.png",
+        is_internal: bool = False,
+    ):
+        super().__init__(parent)
+        self.set_grid_cell(
+            lv.GRID_ALIGN.CENTER, col_num, 1, lv.GRID_ALIGN.CENTER, row_num, 1
+        )
+        self.is_internal = is_internal
+
+        self.set_src(img_path)
+        # if img_path == "A:/res/wallpaper-4.png":
+        #     self.set_style_border_width(1, lv.PART.MAIN | lv.STATE.DEFAULT)
+        #     self.set_style_border_color(
+        #         lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        #     )
+        # self.set_size_mode(lv.img.SIZE_MODE.REAL)
+        # self.set_style_radius(4, lv.PART.MAIN | lv.STATE.DEFAULT)
+        # self.set_style_clip_corner(True, lv.PART.MAIN | lv.STATE.DEFAULT)
+        # self.set_antialias(True)
+        # self.set_zoom(76)
+        self.zoom_path = img_path
+        self.wp_path = img_path.replace("zoom-", "")
+        self.check = lv.img(self)
+        self.check.set_src(img_path_other)
+        self.check.center()
+        self.set_checked(False)
+        self.add_flag(lv.obj.FLAG.CLICKABLE)
+        self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+
+    def set_checked(self, checked: bool):
+        if checked:
+            self.check.clear_flag(lv.obj.FLAG.HIDDEN)
+        else:
+            self.check.add_flag(lv.obj.FLAG.HIDDEN)

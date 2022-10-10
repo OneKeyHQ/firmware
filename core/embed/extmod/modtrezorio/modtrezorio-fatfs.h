@@ -56,9 +56,10 @@
 // clang-format on
 
 static FATFS fs_instance;
+static FATFS fs_instance_slave;
 
-bool _fatfs_instance_is_mounted() { return fs_instance.fs_type != 0; }
-void _fatfs_unmount_instance() { fs_instance.fs_type = 0; }
+bool _fatfs_instance_is_mounted() { return fs_instance_slave.fs_type != 0; }
+void _fatfs_unmount_instance() {}
 
 /// class FatFSError(OSError):
 ///     pass
@@ -496,13 +497,28 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorio_fatfs_rename_obj,
 ///     Mount the SD card filesystem.
 ///     """
 STATIC mp_obj_t mod_trezorio_fatfs_mount() {
-  FRESULT res = f_mount(&fs_instance, "", 1);
-  if (res != FR_OK) {
-    if (res == FR_NO_FILESYSTEM) {
-      FATFS_RAISE(NoFilesystem, FR_NO_FILESYSTEM);
-    } else {
-      FATFS_RAISE(FatFSError, res);
+  static bool fatfs_is_mount = false;
+
+  if (!fatfs_is_mount) {
+    FRESULT res = f_mount(&fs_instance, "", 1);
+    if (res != FR_OK) {
+      if (res == FR_NO_FILESYSTEM) {
+        FATFS_RAISE(NoFilesystem, FR_NO_FILESYSTEM);
+      } else {
+        FATFS_RAISE(FatFSError, res);
+      }
     }
+
+    res = f_mount(&fs_instance_slave, "1:", 1);
+    if (res != FR_OK) {
+      if (res == FR_NO_FILESYSTEM) {
+        FATFS_RAISE(NoFilesystem, FR_NO_FILESYSTEM);
+      } else {
+        FATFS_RAISE(FatFSError, res);
+      }
+    }
+
+    fatfs_is_mount = true;
   }
   return mp_const_none;
 }
@@ -540,7 +556,7 @@ STATIC mp_obj_t mod_trezorio_fatfs_mkfs() {
   }
   MKFS_PARM params = {FM_FAT32, 0, 0, 0, 0};
   uint8_t working_buf[FF_MAX_SS] = {0};
-  FRESULT res = f_mkfs("", &params, working_buf, sizeof(working_buf));
+  FRESULT res = f_mkfs("1:", &params, working_buf, sizeof(working_buf));
   if (res != FR_OK) {
     FATFS_RAISE(FatFSError, res);
   }

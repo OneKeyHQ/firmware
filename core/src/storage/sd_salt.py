@@ -32,7 +32,7 @@ def compute_auth_tag(salt: bytes, auth_key: bytes) -> bytes:
 
 
 def _get_device_dir() -> str:
-    return f"/trezor/device_{storage.device.get_device_id().lower()}"
+    return f"1:/onekey/device_{storage.device.get_device_id().lower()}"
 
 
 def _get_salt_path(new: bool = False) -> str:
@@ -96,7 +96,7 @@ def load_sd_salt() -> bytearray | None:
 @with_filesystem
 def set_sd_salt(salt: bytes, salt_tag: bytes, stage: bool = False) -> None:
     salt_path = _get_salt_path(stage)
-    io.fatfs.mkdir("/trezor", True)
+    io.fatfs.mkdir("1:/onekey", True)
     io.fatfs.mkdir(_get_device_dir(), True)
     with io.fatfs.open(salt_path, "w") as f:
         f.write(salt)

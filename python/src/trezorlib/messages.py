@@ -308,6 +308,11 @@ class MessageType(IntEnum):
     SEPublicCert = 10008
     SESignMessage = 10012
     SEMessageSignature = 10013
+    ResourceUpload = 10018
+    ZoomRequest = 10019
+    ResourceRequest = 10020
+    ResourceAck = 10021
+    ResourceUpdate = 10022
 
 
 class FailureType(IntEnum):
@@ -513,6 +518,11 @@ class WordRequestType(IntEnum):
     Plain = 0
     Matrix9 = 1
     Matrix6 = 2
+
+
+class ResourceType(IntEnum):
+    WallPaper = 0
+    Nft = 1
 
 
 class DebugSwipeDirection(IntEnum):
@@ -4287,6 +4297,106 @@ class SEMessageSignature(protobuf.MessageType):
         signature: "bytes",
     ) -> None:
         self.signature = signature
+
+
+class ResourceUpload(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10018
+    FIELDS = {
+        1: protobuf.Field("extension", "string", repeated=False, required=True),
+        2: protobuf.Field("data_length", "uint32", repeated=False, required=True),
+        3: protobuf.Field("res_type", "ResourceType", repeated=False, required=True),
+        5: protobuf.Field("zoom_data_length", "uint32", repeated=False, required=True),
+        4: protobuf.Field("nft_meta_data", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        extension: "str",
+        data_length: "int",
+        res_type: "ResourceType",
+        zoom_data_length: "int",
+        nft_meta_data: Optional["bytes"] = None,
+    ) -> None:
+        self.extension = extension
+        self.data_length = data_length
+        self.res_type = res_type
+        self.zoom_data_length = zoom_data_length
+        self.nft_meta_data = nft_meta_data
+
+
+class ZoomRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10019
+    FIELDS = {
+        1: protobuf.Field("offset", "uint32", repeated=False, required=False),
+        2: protobuf.Field("data_length", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: "int",
+        offset: Optional["int"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.offset = offset
+
+
+class ResourceRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10020
+    FIELDS = {
+        1: protobuf.Field("offset", "uint32", repeated=False, required=False),
+        2: protobuf.Field("data_length", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: "int",
+        offset: Optional["int"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.offset = offset
+
+
+class ResourceAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10021
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=True),
+        2: protobuf.Field("hash", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: "bytes",
+        hash: Optional["bytes"] = None,
+    ) -> None:
+        self.data_chunk = data_chunk
+        self.hash = hash
+
+
+class ResourceUpdate(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10022
+    FIELDS = {
+        1: protobuf.Field("file_name", "string", repeated=False, required=True),
+        2: protobuf.Field("data_length", "uint32", repeated=False, required=True),
+        3: protobuf.Field("initial_data_chunk", "bytes", repeated=False, required=True),
+        4: protobuf.Field("hash", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        file_name: "str",
+        data_length: "int",
+        initial_data_chunk: "bytes",
+        hash: Optional["bytes"] = None,
+    ) -> None:
+        self.file_name = file_name
+        self.data_length = data_length
+        self.initial_data_chunk = initial_data_chunk
+        self.hash = hash
 
 
 class DebugLinkDecision(protobuf.MessageType):

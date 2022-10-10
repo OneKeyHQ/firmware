@@ -60,6 +60,14 @@ def find_message_handler_module(msg_type: int) -> str:
 
     if utils.MODEL == "T" and msg_type == MessageType.SdProtect:
         return "apps.management.sd_protect"
+    if utils.MODEL == "T" and msg_type == MessageType.ResourceUpload:
+        if utils.EMULATOR:
+            raise ValueError
+        return "apps.management.upload_res"
+    if utils.MODEL == "T" and msg_type == MessageType.ResourceUpdate:
+        if utils.EMULATOR:
+            raise ValueError
+        return "apps.management.update_res"
 
     # bitcoin
     if msg_type == MessageType.AuthorizeCoinJoin:

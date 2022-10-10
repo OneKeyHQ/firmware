@@ -28,8 +28,7 @@ CHECK__SETUP_SET_A_PIN__1 = 10
 CHECK__SETUP_SET_A_PIN__2 = 11
 # Set a PIN
 TITLE__SET_A_PIN = 12
-# Set a PIN to protect you wallet. OneKey will ask for PIN each time when unlo
-# ck your device. So you need to know:
+# Set a 4 to 50-digits length PIN to protect you wallet.
 SUBTITLE__SETUP_SET_A_PIN = 13
 # Enter New PIN
 TITLE__ENTER_NEW_PIN = 14
@@ -196,8 +195,8 @@ SUBTITLE__ENTER_PASSPHRASE_ON_SOFTWARE = 89
 BUTTON__VERIFY_PIN = 90
 # Wipe Device
 TITLE__WIPE_DEVICE = 91
-# To remove all data from your device, you can reset your device to factory de
-# fault.
+# To remove all data from your device, you can reset your device to factory se
+# ttings.
 SUBTITLE_WIPE_DEVICE_WIPE_DEVICE = 92
 # Factory Reset
 TITLE__FACTORY_RESET = 93
@@ -318,7 +317,6 @@ TITLE__ABOUT_DEVICE = 146
 # Connect
 ITEM__CONNECT = 147
 TITLE__CONNECT = 147
-TITLE__CONNECT__TUTORIAL_AFTER_INIT = 147
 # Auto-Lock
 ITEM__AUTO_LOCK = 148
 TITLE__AUTO_LOCK = 148
@@ -385,7 +383,7 @@ TITLE__READY_TO_CREATE = 174
 SUBTITLE__ENTER_PASSPHRASE_ACCESS_HIDDEN_WALLET = 175
 # Access Hidden Wallet?
 TITLE__ACCESS_HIDDEN_WALLET = 176
-# This is the wrong word, check and enter again.
+# This is a wrong word, check your backup and try again.
 SUBTITLE__DEVICE_BACKUP_INCORRECT_WORD = 177
 # Incorrect Word
 TITLE__INCORRECT_WORD = 178
@@ -792,22 +790,48 @@ SUBTITLE__DOWNLOAD__TUTORIAL_AFTER_INIT = 362
 # Download
 TITLE__DOWNLOAD__TUTORIAL_AFTER_INIT = 363
 ITEM__DOWNLOAD = 363
-# Select Connect-Wallet, then click connect OneKey hardware wallet.
-SUBTITLE__CONNECT_2__TUTORIAL_AFTER_INIT = 364
+# Connect Wallet
+TITLE__CONNECT__TUTORIAL_AFTER_INIT = 364
+# Tap Connect-Wallet button, then select Connect-OneKey-Hardware-Wallet.
+SUBTITLE__CONNECT_2__TUTORIAL_AFTER_INIT = 365
 # Connect the device: {}.
-SUBTITLE__CONNECT_3__TUTORIAL_AFTER_INIT = 365
-# Click wallet icon at the top left of app interface, then click Add Wallet.
-SUBTITLE__CONNECT_1__TUTORIAL_AFTER_INIT = 366
+SUBTITLE__CONNECT_3__TUTORIAL_AFTER_INIT = 366
+# Tap Create-Wallet button.
+SUBTITLE__CONNECT_1__TUTORIAL_AFTER_INIT = 367
 # Later, OneKey app will recover accounts you previously used.
-SUBTITLE__CONNECT_4__TUTORIAL_AFTER_INIT = 367
+SUBTITLE__CONNECT_4__TUTORIAL_AFTER_INIT = 368
 # Add Account
-TITLE__ADD_ACCOUNT__TUTORIAL_AFTER_INIT = 368
-ITEM__ADD_ACCOUNT = 368
-# Select the chain you need, set a name for new account, then click Create but
-# ton.
-SUBTITLE__ADD_ACCOUNT_2__TUTORIAL_AFTER_INIT = 369
-# Click wallet icon on the top left panel, then click Add-Account button.
-SUBTITLE__ADD_ACCOUNT_1__TUTORIAL_AFTER_INIT = 370
+TITLE__ADD_ACCOUNT__TUTORIAL_AFTER_INIT = 369
+ITEM__ADD_ACCOUNT = 369
+# Select the chain you need, then click Create button.
+SUBTITLE__ADD_ACCOUNT_2__TUTORIAL_AFTER_INIT = 370
+# Click account name on the top right panel, then click Add icon.
+SUBTITLE__ADD_ACCOUNT_1__TUTORIAL_AFTER_INIT = 371
 # OneKey App Tutorial
-ITEM__ONEKEY_APP_TUTORIAL = 371
+ITEM__ONEKEY_APP_TUTORIAL = 372
+# Set Homescreen
+TITLE__SET_HOMESCREEN = 373
+# Do you really want to change the homescreen image?
+SUBTITLE__SET_HOMESCREEN = 374
+# Delete Wallpaper
+TITLE__DELETE_WALLPAPER = 375
+# Do you want to delete this homescreen image?
+SUBTITLE__DELETE_WALLPAPER = 376
+# Delete
+BUTTON__DELETE = 377
+# Set Wallpaper
+BUTTON__SET_WALLPAPER = 378
+# Lock Screen
+ITEM__LOCK_SCREEN = 379
+TITLE__LOCK_SCREEN = 379
+# During locked, tap the screen to wake up the display.
+CONTENT__TAP_TO_WAKE_ENABLED__HINT = 380
+# Tap to Wake
+ITEM__TAP_TO_WAKE = 381
+# During locked, press the power button to wake the display.
+CONTENT__TAP_TO_WAKE_DISABLED__HINT = 382
+# Visible as "{}" to other devices.
+CONTENT__CONNECT_BLUETOOTH_ENABLED__HINT = 383
+# Turn on Bluetooth to connect with other nearby Bluetooth devices.
+CONTENT__CONNECT_BLUETOOTH_DISABLED__HINT = 384
 # fmt: on

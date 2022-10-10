@@ -282,3 +282,8 @@ if not utils.BITCOIN_ONLY:
     SEPublicCert = 10008
     SESignMessage = 10012
     SEMessageSignature = 10013
+    ResourceUpload = 10018
+    ZoomRequest = 10019
+    ResourceRequest = 10020
+    ResourceAck = 10021
+    ResourceUpdate = 10022

@@ -44,6 +44,10 @@ SD_PROTECT_OPERATIONS = {
     "refresh": messages.SdProtectOperationType.REFRESH,
 }
 
+RESOURCE_UPLOAD_PURPOSE = {
+    "wallpaper": messages.ResourceType.WallPaper,
+    "nft": messages.ResourceType.Nft,
+}
 
 @click.group(name="device")
 def cli() -> None:
@@ -295,3 +299,65 @@ def se_read_cert(obj: "TrezorConnection") -> bytes:
     with obj.client_context() as client:
         cert_bytes = device.se_read_cert(client).public_cert
         return cert_bytes
+
+@cli.command()
+# fmt: off
+@click.option("-f", "--fullpath", help="The full path of the file to upload")
+@click.option("-z", "--zoompath", help="The zoom file of the image to upload")
+@click.option("-p", "--purpose", type=ChoiceType(RESOURCE_UPLOAD_PURPOSE), default="wallpaper", help="The upload file used for")
+# fmt: on
+@with_client
+def upload_res(
+    client: "TrezorClient",
+    fullpath: str,
+    zoompath: str,
+    purpose: int,
+) -> None:
+    """Upload wallpaper/nft to device.
+    """
+    if fullpath:
+        ext = fullpath.split(".")[-1]
+        with open(zoompath, "rb") as f:
+            zoomdata = f.read()
+        with open(fullpath, "rb") as f:
+            data = f.read()
+        try:
+            click.echo("Please confirm the action on your Trezor device")
+
+            click.echo("Uploading...\r", nl=False)
+            with click.progressbar(
+                label="Uploading", length=len(data) + len(zoomdata), show_eta=False
+            ) as bar:
+                device.upload_res(client, ext, data, zoomdata, progress_update=bar.update, res_type=purpose)
+        except exceptions.Cancelled:
+            click.echo("Upload aborted on device.")
+        except exceptions.TrezorException as e:
+            click.echo(f"Upload failed: {e}")
+            sys.exit(3)
+
+@cli.command()
+# fmt: off
+@click.option("-f", "--fullpath", help="The full path of the file to update")
+# fmt: on
+@with_client
+def update_res(
+    client: "TrezorClient",
+    fullpath: str,
+) -> None:
+    """Update internal static resource(internal icons).
+    """
+    if fullpath:
+        file_name = fullpath.split("/")[-1]
+        with open(fullpath, "rb") as f:
+            data = f.read()
+        try:
+            click.echo("Uploading...\r", nl=False)
+            with click.progressbar(
+                label="Uploading", length=len(data), show_eta=False
+            ) as bar:
+                device.update_res(client, file_name, data, progress_update=bar.update)
+        except exceptions.Cancelled:
+            click.echo("Upload aborted on device.")
+        except exceptions.TrezorException as e:
+            click.echo(f"Update failed: {e}")
+            sys.exit(3)

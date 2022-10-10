@@ -300,6 +300,11 @@ if TYPE_CHECKING:
         SEPublicCert = 10008
         SESignMessage = 10012
         SEMessageSignature = 10013
+        ResourceUpload = 10018
+        ZoomRequest = 10019
+        ResourceRequest = 10020
+        ResourceAck = 10021
+        ResourceUpdate = 10022
 
     class FailureType(IntEnum):
         UnexpectedMessage = 1
@@ -482,6 +487,10 @@ if TYPE_CHECKING:
         Plain = 0
         Matrix9 = 1
         Matrix6 = 2
+
+    class ResourceType(IntEnum):
+        WallPaper = 0
+        Nft = 1
 
     class DebugSwipeDirection(IntEnum):
         UP = 0

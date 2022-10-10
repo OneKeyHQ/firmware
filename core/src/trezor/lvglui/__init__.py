@@ -56,7 +56,17 @@ def init_theme() -> None:
 
 def init_file_system() -> None:
     if not utils.EMULATOR:
+
+        def clean():
+            for size, attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
+                if size > 0 and attrs[1] == "h":
+                    io.fatfs.unlink(f"1:/res/wallpapers/{name}")
+
         io.fatfs.mount()
+        io.fatfs.mkdir("1:/res", True)
+        io.fatfs.mkdir("1:/res/wallpapers", True)
+        io.fatfs.mkdir("1:/res/nfts", True)
+        clean()
 
 
 def get_elapsed() -> int:
@@ -93,8 +103,8 @@ class StatusBar(lv.obj):
 
     def __init__(self):
         super().__init__(lv.layer_top())
-        self.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.align(lv.ALIGN.TOP_LEFT, 0, 0)
+        self.set_size(lv.pct(80), lv.SIZE.CONTENT)
+        self.align(lv.ALIGN.TOP_RIGHT, 0, 0)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)

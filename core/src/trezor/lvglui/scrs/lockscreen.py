@@ -1,5 +1,5 @@
 from storage import device
-from trezor import utils
+from trezor import ui, utils
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from . import font_PJSBOLD24
@@ -8,10 +8,12 @@ from .common import Screen, load_scr_with_animation, lv, lv_colors
 
 class LockScreen(Screen):
     def __init__(self, device_name, ble_name="", dev_state=None):
-        cur_index = device.get_wp_index()
-        lockscreen = f"A:/res/wallpaper-{cur_index+1}.png"
+        lockscreen = device.get_homescreen()
         if not hasattr(self, "_init"):
             self._init = True
+            super().__init__(
+                title=device_name, subtitle=ble_name, icon_path="A:/res/lock.png"
+            )
         else:
             if dev_state:
                 self.dev_state_text.set_text(dev_state)
@@ -21,10 +23,9 @@ class LockScreen(Screen):
                 load_scr_with_animation(self)
             if ble_name:
                 self.subtitle.set_text(ble_name)
+            self.set_style_bg_img_src(lockscreen, lv.PART.MAIN | lv.STATE.DEFAULT)
             return
-        super().__init__(
-            title=device_name, subtitle=ble_name, icon_path="A:/res/lock.png"
-        )
+
         self.icon.align(lv.ALIGN.TOP_MID, 0, 92)
         self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
         self.subtitle.set_style_text_color(
@@ -65,6 +66,8 @@ class LockScreen(Screen):
             if self.channel.takers:
                 self.channel.publish("clicked")
             else:
+                if not ui.display.backlight() and not device.is_tap_awake_enabled():
+                    return
                 if utils.turn_on_lcd_if_possible():
                     return
                 from trezor import workflow
