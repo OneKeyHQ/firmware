@@ -288,7 +288,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         flash_state = STATE_FLASHSTART;
         timer_out_set(timer_out_oper, timer1s * 5);
       } else {
-        send_msg_failure(dev);
+        send_msg_failure(dev, 4);
         flash_state = STATE_END;
         show_unplug("Firmware installation", "aborted.");
         shutdown();
