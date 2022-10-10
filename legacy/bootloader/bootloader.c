@@ -132,7 +132,7 @@ int main(void) {
 
     if (firmware_present_new() && !left_pressed && !force_boot) {
       oledClear();
-      oledDrawBitmap(28, 21, &bmp_launch_icon);
+      oledDrawBitmap(52, 20, &bmp_boot_icon);
       oledRefresh();
       const image_header *hdr =
           (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);

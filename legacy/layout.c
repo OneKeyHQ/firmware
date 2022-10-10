@@ -215,7 +215,7 @@ uint8_t layoutStatusLogo(bool force_fresh) {
   static bool ble_adv_status_bak = false;
   static bool usb_status_bak = false;
   static uint8_t battery_bak = 0xff;
-  uint8_t pad = 16;
+  uint8_t pad = 18;
   bool refresh = false;
   uint8_t ret = 0;
 
