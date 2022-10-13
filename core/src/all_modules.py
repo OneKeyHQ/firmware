@@ -114,6 +114,8 @@ trezor.enums.RecoveryDeviceType
 import trezor.enums.RecoveryDeviceType
 trezor.enums.RequestType
 import trezor.enums.RequestType
+trezor.enums.ResourceType
+import trezor.enums.ResourceType
 trezor.enums.SafetyCheckLevel
 import trezor.enums.SafetyCheckLevel
 trezor.enums.SdProtectOperationType
@@ -174,8 +176,6 @@ trezor.lvglui.scrs.components.button
 import trezor.lvglui.scrs.components.button
 trezor.lvglui.scrs.components.container
 import trezor.lvglui.scrs.components.container
-trezor.lvglui.scrs.components.imgbtn
-import trezor.lvglui.scrs.components.imgbtn
 trezor.lvglui.scrs.components.keyboard
 import trezor.lvglui.scrs.components.keyboard
 trezor.lvglui.scrs.components.label
@@ -520,6 +520,10 @@ apps.management.se_sign_message
 import apps.management.se_sign_message
 apps.management.set_u2f_counter
 import apps.management.set_u2f_counter
+apps.management.update_res
+import apps.management.update_res
+apps.management.upload_res
+import apps.management.upload_res
 apps.management.wipe_device
 import apps.management.wipe_device
 apps.misc

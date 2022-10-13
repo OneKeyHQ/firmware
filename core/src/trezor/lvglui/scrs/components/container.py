@@ -64,7 +64,9 @@ class ContainerGrid(lv.obj):
         else:
             self.align(lv.ALIGN.TOP_MID, 0, 48)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_all(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_grid_column_dsc_array(col_dsc, 0)
         self.set_style_grid_row_dsc_array(row_dsc, 0)
+        self.set_grid_align(lv.GRID_ALIGN.SPACE_EVENLY, lv.GRID_ALIGN.START)
         self.set_layout(lv.LAYOUT_GRID.value)

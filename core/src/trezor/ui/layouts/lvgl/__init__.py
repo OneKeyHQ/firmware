@@ -57,6 +57,8 @@ __all__ = (
     "confirm_final",
     "confirm_blind_sign_common",
     "show_onekey_app_guide",
+    "confirm_set_homescreen",
+    "confirm_del_wallpaper",
 )
 
 
@@ -1030,3 +1032,32 @@ async def show_onekey_app_guide():
 
     app_guide.GuideAppDownload()
     await app_guide.request()
+
+
+async def confirm_set_homescreen(ctx):
+    await confirm_action(
+        ctx=ctx,
+        br_type="confirm_homescreen",
+        title=_(i18n_keys.TITLE__SET_HOMESCREEN),
+        description=_(i18n_keys.SUBTITLE__SET_HOMESCREEN),
+        icon="A:/res/upload-res.png",
+    )
+
+
+async def confirm_del_wallpaper(ctx, confirm_callback, cancel_callback):
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    confirm_screen = FullSizeWindow(
+        title=_(i18n_keys.TITLE__DELETE_WALLPAPER),
+        subtitle=_(i18n_keys.SUBTITLE__DELETE_WALLPAPER),
+        confirm_text=_(i18n_keys.BUTTON__DELETE),
+        cancel_text=_(i18n_keys.BUTTON__CANCEL),
+    )
+    from trezor.lvglui.lv_colors import lv_colors
+
+    confirm_screen.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
+    confirm = await ctx.wait(confirm_screen.request())
+    if confirm:
+        confirm_callback()
+    else:
+        cancel_callback()

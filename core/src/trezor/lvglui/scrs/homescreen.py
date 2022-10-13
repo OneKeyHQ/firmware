@@ -1,7 +1,8 @@
 import math
+from micropython import const
 
 from storage import device
-from trezor import loop, uart, utils, workflow
+from trezor import io, loop, uart, utils, workflow
 from trezor.enums import SafetyCheckLevel
 from trezor.langs import langs, langs_keys
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
@@ -18,17 +19,17 @@ from .common import (  # noqa: F401, F403, F405
     lv,
 )
 from .components.anim import Anim
-from .components.button import ListItemBtn, ListItemBtnWithSwitch
+from .components.button import ListItemBtn, ListItemBtnWithSwitch, NormalButton
 from .components.container import ContainerFlexCol, ContainerGrid
-from .components.imgbtn import ImgBottonGridItem
-from .components.listitem import DisplayItem
+from .components.listitem import DisplayItem, ImgGridItem
 
 
 def brightness2_percent_str(brightness: int) -> str:
     return f"{int(brightness / style.BACKLIGHT_MAX * 100)}%"
 
 
-GRID_CELL_SIZE = 128
+GRID_CELL_SIZE_ROWS = const(240)
+GRID_CELL_SIZE_COLS = const(144)
 
 
 def change_state(is_busy: bool = False):
@@ -39,10 +40,10 @@ def change_state(is_busy: bool = False):
 
 class MainScreen(Screen):
     def __init__(self, device_name=None, ble_name=None, dev_state=None):
-        cur_index = device.get_wp_index()
-        homescreen = f"A:/res/wallpaper-{cur_index+1}.png"
+        homescreen = device.get_homescreen()
         if not hasattr(self, "_init"):
             self._init = True
+            super().__init__(title=device_name, subtitle=ble_name)
         else:
             if dev_state:
                 self.dev_state.clear_flag(lv.obj.FLAG.HIDDEN)
@@ -64,7 +65,6 @@ class MainScreen(Screen):
             if not self.is_visible():
                 load_scr_with_animation(self)
             return
-        super().__init__(title=device_name, subtitle=ble_name)
         self.title.align(lv.ALIGN.TOP_MID, 0, 92)
         self.subtitle.set_style_text_color(
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -328,6 +328,8 @@ class SettingsScreen(Screen):
         self.power.label_left.set_style_text_color(
             lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
+        if __debug__:
+            self.test = ListItemBtn(self.container, "UI test")
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def refresh_text(self):
@@ -365,7 +367,30 @@ class SettingsScreen(Screen):
                 PowerOff()
             else:
                 if __debug__:
-                    print("Unknown")
+                    if target == self.test:
+                        UITest()
+
+
+if __debug__:
+
+    class UITest(lv.obj):
+        def __init__(self) -> None:
+            super().__init__(lv.layer_sys())
+            self.set_size(lv.pct(100), lv.pct(100))
+            self.align(lv.ALIGN.TOP_LEFT, 0, 0)
+            self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_bg_img_src(
+                "A:/res/wallpaper-test.png", lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            self.add_flag(lv.obj.FLAG.CLICKABLE)
+            self.clear_flag(lv.obj.FLAG.SCROLLABLE)
+            self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+        def on_click(self, _event_obj):
+            self.delete()
 
 
 class GeneralScreen(Screen):
@@ -410,6 +435,7 @@ class GeneralScreen(Screen):
             self.container,
             _(i18n_keys.ITEM__KEYBOARD_HAPTIC),
         )
+        self.tap_awake = ListItemBtn(self.container, _(i18n_keys.ITEM__LOCK_SCREEN))
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def refresh_text(self):
@@ -418,6 +444,7 @@ class GeneralScreen(Screen):
         self.language.label_left.set_text(_(i18n_keys.ITEM__LANGUAGE))
         self.backlight.label_left.set_text(_(i18n_keys.ITEM__BRIGHTNESS))
         self.keyboard_haptic.label_left.set_text(_(i18n_keys.ITEM__KEYBOARD_HAPTIC))
+        self.tap_awake.label_left.set_text(_(i18n_keys.ITEM__LOCK_SCREEN))
 
     def get_str_from_lock_ms(self, time_ms) -> str:
         if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
@@ -447,6 +474,8 @@ class GeneralScreen(Screen):
                 BacklightSetting(self)
             elif target == self.keyboard_haptic:
                 KeyboardHapticSetting(self)
+            elif target == self.tap_awake:
+                TapAwakeSetting(self)
             else:
                 pass
 
@@ -631,6 +660,53 @@ class KeyboardHapticSetting(Screen):
                     device.toggle_keyboard_haptic(False)
 
 
+class TapAwakeSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__LOCK_SCREEN), nav_back=True
+        )
+        self.container = ContainerFlexCol(self, self.title)
+        self.tap_awake = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__TAP_TO_WAKE)
+        )
+        self.tap_awake.set_size(lv.pct(100), 78)
+        self.description = lv.label(self)
+        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_long_mode(lv.label.LONG.WRAP)
+        self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
+        self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
+        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+
+        if device.is_tap_awake_enabled():
+            self.tap_awake.add_state()
+            self.description.set_text(_(i18n_keys.CONTENT__TAP_TO_WAKE_ENABLED__HINT))
+        else:
+            self.tap_awake.clear_state()
+            self.description.set_text(_(i18n_keys.CONTENT__TAP_TO_WAKE_DISABLED__HINT))
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.tap_awake.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    self.description.set_text(
+                        _(i18n_keys.CONTENT__TAP_TO_WAKE_ENABLED__HINT)
+                    )
+                    device.set_tap_awake_enable(True)
+                else:
+                    self.description.set_text(
+                        _(i18n_keys.CONTENT__TAP_TO_WAKE_DISABLED__HINT)
+                    )
+                    device.set_tap_awake_enable(False)
+
+
 class PinMapSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -686,10 +762,26 @@ class ConnectSetting(Screen):
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
         self.ble.set_size(lv.pct(100), 78)
 
+        self.description = lv.label(self)
+        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_long_mode(lv.label.LONG.WRAP)
+        self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
+        self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
+        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+
         if uart.is_ble_opened():
             self.ble.add_state()
+            self.description.set_text(
+                _(i18n_keys.CONTENT__CONNECT_BLUETOOTH_ENABLED__HINT).format(
+                    device.get_ble_name()
+                )
+            )
         else:
             self.ble.clear_state()
+            self.description.set_text(
+                _(i18n_keys.CONTENT__CONNECT_BLUETOOTH_DISABLED__HINT)
+            )
         # self.usb = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__USB))
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
 
@@ -700,8 +792,18 @@ class ConnectSetting(Screen):
 
             if target == self.ble.switch:
                 if target.has_state(lv.STATE.CHECKED):
+                    self.description.set_text(
+                        self.description.set_text(
+                            _(
+                                i18n_keys.CONTENT__CONNECT_BLUETOOTH_ENABLED__HINT
+                            ).format(device.get_ble_name())
+                        )
+                    )
                     uart.ctrl_ble(enable=True)
                 else:
+                    self.description.set_text(
+                        _(i18n_keys.CONTENT__CONNECT_BLUETOOTH_DISABLED__HINT)
+                    )
                     uart.ctrl_ble(enable=False)
             # else:
             #     if target.has_state(lv.STATE.CHECKED):
@@ -859,41 +961,67 @@ class ShutingDown(FullSizeWindow):
 
 
 class HomeScreenSetting(Screen):
-    CELL_SIZE = 128
-
     def __init__(self, prev_scr=None):
+        homescreen = device.get_homescreen()
         if not hasattr(self, "_init"):
             self._init = True
+            super().__init__(
+                prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOME_SCREEN), nav_back=True
+            )
         else:
-            return
-        cur_index = device.get_wp_index()
-        super().__init__(
-            prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOME_SCREEN), nav_back=True
-        )
-        # TODO: retrieve the total nums of wps, need fatfs interface to enumerate files
-        pages_num = 4
-        rows_num = math.ceil(pages_num / 3)
-        row_dsc = [GRID_CELL_SIZE] * rows_num
+            self.container.delete()
+
+        internal_wp_nums = 4
+        wp_nums = internal_wp_nums
+
+        file_name_list = []
+        if not utils.EMULATOR:
+            for size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
+                if wp_nums >= 9:
+                    break
+                if size > 0 and name[:4] == "zoom":
+                    wp_nums += 1
+                    file_name_list.append(name)
+        rows_num = math.ceil(wp_nums / 3)
+        row_dsc = [GRID_CELL_SIZE_ROWS] * rows_num
         row_dsc.append(lv.GRID_TEMPLATE.LAST)
         # 3 columns
         col_dsc = [
-            GRID_CELL_SIZE,
-            GRID_CELL_SIZE,
-            GRID_CELL_SIZE,
+            GRID_CELL_SIZE_COLS,
+            GRID_CELL_SIZE_COLS,
+            GRID_CELL_SIZE_COLS,
             lv.GRID_TEMPLATE.LAST,
         ]
         self.container = ContainerGrid(
             self, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.title
         )
         self.wps = []
-        for i in range(pages_num):
-            current_wp = ImgBottonGridItem(
-                self.container, i % 3, i // 3, f"A:/res/zoom-{i+1}.png"
+        for i in range(wp_nums):
+            zoom_path = f"A:/res/zoom-wallpaper-{i+1}.png"
+            current_wp = ImgGridItem(
+                self.container,
+                i % 3,
+                i // 3,
+                zoom_path,
+                is_internal=True,
             )
             self.wps.append(current_wp)
-            if cur_index == i:
+            if homescreen == current_wp.wp_path:
                 current_wp.set_checked(True)
-        self.check_index = cur_index
+
+        if not utils.EMULATOR:
+            for i, file_name in enumerate(file_name_list):
+                zoom_path = f"A:1:/res/wallpapers/{file_name}"
+                current_wp = ImgGridItem(
+                    self.container,
+                    (i + internal_wp_nums) % 3,
+                    (i + internal_wp_nums) // 3,
+                    zoom_path,
+                    is_internal=False,
+                )
+                self.wps.append(current_wp)
+                if homescreen == current_wp.wp_path:
+                    current_wp.set_checked(True)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -904,14 +1032,94 @@ class HomeScreenSetting(Screen):
                 return
             if target not in self.wps:
                 return
-            last_checked = self.check_index
-            for idx, wp in enumerate(self.wps):
-                if target != wp and idx == last_checked:
-                    wp.set_checked(False)
-                if target == wp and idx != last_checked:
-                    device.set_cur_wp_index(idx)
-                    self.check_index = idx
-                    wp.set_checked(True)
+            for wp in self.wps:
+                if target == wp:
+                    WallPaperManage(
+                        self,
+                        file_path=wp.wp_path,
+                        zoom_path=wp.zoom_path,
+                        is_internal=wp.is_internal,
+                    )
+
+
+class WallPaperManage(Screen):
+    def __init__(
+        self,
+        prev_scr=None,
+        file_path: str = "",
+        zoom_path: str = "",
+        is_internal: bool = False,
+    ):
+        super().__init__(prev_scr)
+        self.img_path = file_path
+        self.zoom_path = zoom_path
+        self.img = lv.img(self)
+        self.img.set_src(file_path)
+        self.img.set_size_mode(lv.img.SIZE_MODE.REAL)
+        self.img.set_style_radius(4, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.img.set_style_clip_corner(True, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.img.set_antialias(True)
+        self.img.set_zoom(198)
+        self.img.align(lv.ALIGN.TOP_MID, 0, 56)
+
+        self.nav_back = lv.img(self)
+        self.nav_back.set_ext_click_area(20)
+        self.nav_back.set_src("A:/res/nav-back.png")
+        self.nav_back.set_size_mode(lv.img.SIZE_MODE.REAL)
+        self.nav_back.set_antialias(True)
+        self.nav_back.set_zoom(220)
+        self.nav_back.align(lv.ALIGN.TOP_LEFT, 6, 6)
+        self.nav_back.add_flag(lv.obj.FLAG.CLICKABLE)
+        self.nav_back.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+
+        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__SET_WALLPAPER))
+        self.btn_yes.set_style_text_color(
+            lv_colors.ONEKEY_GREEN_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        if not is_internal:
+            self.btn_del = NormalButton(self, _(i18n_keys.BUTTON__DELETE))
+            self.btn_del.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.btn_del.set_style_text_color(
+                lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
+            # self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ON)
+            self.btn_del.align_to(self.btn_yes, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
+
+    def del_callback(self):
+        io.fatfs.unlink(self.img_path[2:])
+        io.fatfs.unlink(self.zoom_path[2:])
+        if device.get_homescreen() == self.img_path:
+            device.set_homescreen("A:/res/wallpaper-1.png")
+        self.load_screen(self.prev_scr, destroy_self=True)
+
+    def cancel_callback(self):
+        self.btn_del.clear_flag(lv.obj.FLAG.HIDDEN)
+
+    def eventhandler(self, event_obj):
+        event = event_obj.code
+        target = event_obj.get_target()
+        if event == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if isinstance(target, lv.img):
+                if target == self.nav_back:
+                    if self.prev_scr is not None:
+                        self.load_screen(self.prev_scr, destroy_self=True)
+            else:
+                if target == self.btn_yes:
+                    device.set_homescreen(self.img_path)
+                    self.load_screen(self.prev_scr, destroy_self=True)
+                elif hasattr(self, "btn_del") and target == self.btn_del:
+                    from trezor.ui.layouts import confirm_del_wallpaper
+                    from trezor.wire import DUMMY_CONTEXT
+
+                    self.scroll_to_y(0, lv.ANIM.OFF)
+                    self.btn_del.add_flag(lv.obj.FLAG.HIDDEN)
+                    workflow.spawn(
+                        confirm_del_wallpaper(
+                            DUMMY_CONTEXT, self.del_callback, self.cancel_callback
+                        )
+                    )
 
 
 class SecurityScreen(Screen):
@@ -1020,12 +1228,12 @@ class UsbLockSetting(Screen):
                     self.description.set_text(
                         _(i18n_keys.CONTENT__USB_LOCK_ENABLED__HINT)
                     )
-                    device.set_usb_lock_enabled(True)
+                    device.set_usb_lock_enable(True)
                 else:
                     self.description.set_text(
                         _(i18n_keys.CONTENT__USB_LOCK_DISABLED__HINT)
                     )
-                    device.set_usb_lock_enabled(False)
+                    device.set_usb_lock_enable(False)
 
 
 class SafetyCheckSetting(Screen):

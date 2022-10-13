@@ -14,9 +14,11 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+from concurrent.futures import process
+from hashlib import blake2s
 import os
 import time
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from . import messages
 from .exceptions import Cancelled
@@ -230,3 +232,69 @@ def reboot_to_bootloader(client: "TrezorClient") -> "MessageType":
 def se_read_cert(client: "TrezorClient") -> "MessageType":
     out = client.call(messages.ReadSEPublicCert())
     return out
+
+
+@session
+def upload_res(
+    client: "TrezorClient",
+    ext: str,
+    data: bytes,
+    zoomdata: bytes,
+    res_type: messages.ResourceType = messages.ResourceType.WallPaper,
+    progress_update: Callable[[int], Any] = lambda _: None,
+):
+    resp = client.call(messages.ResourceUpload(extension=ext, data_length=len(data), res_type=res_type, zoom_data_length=len(zoomdata)))
+
+    while isinstance(resp, messages.ResourceRequest):
+        offset = resp.offset
+        length = resp.data_length
+        assert offset is not None
+        assert length is not None
+        payload = data[offset : offset + length]
+        digest = blake2s(payload).digest()
+        resp = client.call(messages.ResourceAck(data_chunk=payload, hash=digest))
+        progress_update(length)
+
+    while isinstance(resp, messages.ZoomRequest):
+        offset = resp.offset
+        length = resp.data_length
+        assert offset is not None
+        assert length is not None
+        payload = zoomdata[offset : offset + length]
+        digest = blake2s(payload).digest()
+        resp = client.call(messages.ResourceAck(data_chunk=payload, hash=digest))
+        progress_update(length)
+
+    if isinstance(resp, messages.Success):
+        return
+    else:
+        raise RuntimeError(f"Unexpected message {resp}")
+
+
+DATA_CHUNK_SIZE = 16 * 1024
+@session
+def update_res(
+    client: "TrezorClient",
+    file_name: str,
+    data: bytes,
+    progress_update: Callable[[int], Any] = lambda _: None,
+):
+    data_len = len(data)
+    initial_data = data[:DATA_CHUNK_SIZE]
+    digest = blake2s(initial_data).digest()
+    resp = client.call(messages.ResourceUpdate(file_name=file_name, data_length=data_len, initial_data_chunk=initial_data, hash=digest))
+    progress_update(len(initial_data))
+    while isinstance(resp, messages.ResourceRequest):
+        offset = resp.offset
+        length = resp.data_length
+        assert offset is not None
+        assert length is not None
+        payload = data[offset : offset + length]
+        digest = blake2s(payload).digest()
+        resp = client.call(messages.ResourceAck(data_chunk=payload, hash=digest))
+        progress_update(length)
+
+    if isinstance(resp, messages.Success):
+        return
+    else:
+        raise RuntimeError(f"Unexpected message {resp}")

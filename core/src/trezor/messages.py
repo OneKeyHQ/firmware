@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from trezor.enums import PinMatrixRequestType  # noqa: F401
     from trezor.enums import RecoveryDeviceType  # noqa: F401
     from trezor.enums import RequestType  # noqa: F401
+    from trezor.enums import ResourceType  # noqa: F401
     from trezor.enums import SafetyCheckLevel  # noqa: F401
     from trezor.enums import SdProtectOperationType  # noqa: F401
     from trezor.enums import StellarAssetType  # noqa: F401
@@ -2882,6 +2883,96 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SEMessageSignature"]:
+            return isinstance(msg, cls)
+
+    class ResourceUpload(protobuf.MessageType):
+        extension: "str"
+        data_length: "int"
+        res_type: "ResourceType"
+        zoom_data_length: "int"
+        nft_meta_data: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            extension: "str",
+            data_length: "int",
+            res_type: "ResourceType",
+            zoom_data_length: "int",
+            nft_meta_data: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ResourceUpload"]:
+            return isinstance(msg, cls)
+
+    class ZoomRequest(protobuf.MessageType):
+        offset: "int | None"
+        data_length: "int"
+
+        def __init__(
+            self,
+            *,
+            data_length: "int",
+            offset: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ZoomRequest"]:
+            return isinstance(msg, cls)
+
+    class ResourceRequest(protobuf.MessageType):
+        offset: "int | None"
+        data_length: "int"
+
+        def __init__(
+            self,
+            *,
+            data_length: "int",
+            offset: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ResourceRequest"]:
+            return isinstance(msg, cls)
+
+    class ResourceAck(protobuf.MessageType):
+        data_chunk: "bytes"
+        hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data_chunk: "bytes",
+            hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ResourceAck"]:
+            return isinstance(msg, cls)
+
+    class ResourceUpdate(protobuf.MessageType):
+        file_name: "str"
+        data_length: "int"
+        initial_data_chunk: "bytes"
+        hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            file_name: "str",
+            data_length: "int",
+            initial_data_chunk: "bytes",
+            hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ResourceUpdate"]:
             return isinstance(msg, cls)
 
     class DebugLinkDecision(protobuf.MessageType):
