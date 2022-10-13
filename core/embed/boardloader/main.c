@@ -371,12 +371,14 @@ int main(void) {
   fatfs_init();
 
   uint32_t mode = 0;
+  bool factory_mode = false;
 
   if (startup_mode_flag == STAY_IN_BOARDLOADER_FLAG) {
     mode = BOARD_MODE;
     *STAY_IN_FLAG_ADDR = 0;
   } else if (fatfs_check_res() != 0) {
     mode = BOARD_MODE;
+    factory_mode = true;
   }
   if (startup_mode_flag == STAY_IN_BOOTLOADER_FLAG) {
     mode = BOOT_MODE;
@@ -422,7 +424,13 @@ int main(void) {
   }
 
   if (mode == BOARD_MODE) {
-    display_printf("OneKey Boardloader\n");
+    if (!factory_mode) {
+      f_chmod("/res/", AM_RDO | AM_SYS, AM_RDO | AM_SYS | AM_HID);
+    }
+  } else {
+    f_chmod("/res/", 0, AM_RDO | AM_SYS | AM_HID);
+  }
+
   if (mode == BOARD_MODE) {
     display_printf("OneKey Boardloader 1.0.0\n");
     display_printf("USB Mass Storage Mode\n");
