@@ -105,6 +105,8 @@ static const uint8_t toi_icon_onekey[] = {
 
 #include "stm32h7xx_hal.h"
 
+extern volatile uint32_t system_reset;
+
 static FATFS fs_instance;
 PARTITION VolToPart[FF_VOLUMES] = {
     {0, 1},
@@ -421,11 +423,17 @@ int main(void) {
 
   if (mode == BOARD_MODE) {
     display_printf("OneKey Boardloader\n");
+  if (mode == BOARD_MODE) {
+    display_printf("OneKey Boardloader 1.0.0\n");
     display_printf("USB Mass Storage Mode\n");
     display_printf("=====================\n\n");
     usb_msc_init();
-    while (1)
-      ;
+    while (1) {
+      if (system_reset == 1) {
+        hal_delay(5);
+        restart();
+      }
+    }
   }
 
   if (mode == BOOT_MODE) {

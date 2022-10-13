@@ -36,6 +36,7 @@
 #define COLOR_FATAL_ERROR RGB16(0x7F, 0x00, 0x00)
 
 PCB_VERSION pcb_version;
+volatile uint32_t system_reset = 0;
 
 // from util.s
 extern void shutdown_privileged(void);
