@@ -425,7 +425,7 @@ enum MessageType {
     MessageType_NearSignTx = 10703 [(wire_in) = true];
     MessageType_NearSignedTx = 10704 [(wire_out) = true];
 
-    //onekey
+    // onekey
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
     MessageType_DeviceInfo = 10003 [(wire_out) = true];
@@ -439,7 +439,14 @@ enum MessageType {
     MessageType_SpiFlashData = 10011 [(wire_out) = true];
     MessageType_SESignMessage = 10012 [(wire_in) = true];
     MessageType_SEMessageSignature = 10013 [(wire_out) = true];
+    // {10014,10015} only avaiable on Onekey Mini
     MessageType_NFTWriteInfo = 10014 [(wire_in) = true];
     MessageType_NFTWriteData = 10015 [(wire_in) = true];
-
+    // {10018-10022} only avaiable on Onekey Touch
+    MessageType_ResourceUpload = 10018 [(wire_in) = true];
+    MessageType_ZoomRequest = 10019 [(wire_out) = true];
+    MessageType_ResourceRequest = 10020 [(wire_out) = true];
+    MessageType_ResourceAck = 10021 [(wire_in) = true];
+    MessageType_ResourceUpdate = 10022 [(wire_in) = true];
+    
 }

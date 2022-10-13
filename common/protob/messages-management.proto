@@ -708,6 +708,68 @@ message SEMessageSignature {
     required bytes signature = 1;   // signature of the message
 }
 
+
+/**
+ * Request: Ask for uoload resource to device (wallpaper/nft pics, mp4)
+ * @next ResourceRequest
+ * @next ZoomRequest
+ * @next Failure
+ */
+ message ResourceUpload {
+    required string extension = 1;  // the extension of the resource
+    required uint32 data_length = 2;  // total length of the data to be upload
+    required ResourceType res_type = 3;
+    required uint32 zoom_data_length = 5;
+    optional bytes nft_meta_data = 4;
+    enum ResourceType {
+        WallPaper = 0;
+        Nft = 1;
+    }
+}
+
+/**
+ * Response: Device asks for more data
+ * @next ResourceAck
+ */
+ message ZoomRequest {
+    optional uint32 offset = 1;       // offset of requested data chunk
+    required uint32 data_length = 2;  // length of requested data chunk
+}
+
+/**
+ * Response: Device asks for more data
+ * @next ResourceAck
+ */
+message ResourceRequest {
+    optional uint32 offset = 1;       // offset of requested data chunk
+    required uint32 data_length = 2;  // length of requested data chunk
+}
+
+/**
+ * Request: Send resource in binary form to the device
+ * @next ResourceRequest
+ * @next Success
+ * @next Failure
+ */
+message ResourceAck {
+    required bytes data_chunk = 1;
+    optional bytes hash = 2;   //  the hash of the data_chunk
+}
+
+/**
+ * Request: Ask for update the internal static resource on device
+ * @next ResourceRequest
+ * @next Success
+ * @next Failure
+ */
+message ResourceUpdate {
+    required string file_name = 1;
+    required uint32 data_length = 2;
+    required bytes initial_data_chunk = 3; // <= 16K
+    optional bytes hash = 4;
+}
+
+
 /**
  * Request: Write NFT picture information
  * @end
