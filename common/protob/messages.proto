@@ -397,13 +397,14 @@ enum MessageType {
     MessageType_PublicKeyMultiple = 10211 [(wire_out) = true];
 
     // Conflux
-    // MessageType_ConfluxGetAddress = 10401 [(wire_in) = true];
-    // MessageType_ConfluxAddress = 10402 [(wire_out) = true];
-    // MessageType_ConfluxSignTx = 10403 [(wire_in) = true];
-    // MessageType_ConfluxTxRequest = 10404 [(wire_out) = true];
-    // MessageType_ConfluxTxAck = 10405 [(wire_in) = true];
-    // MessageType_ConfluxSignMessage = 10406 [(wire_in) = true];
-    // MessageType_ConfluxMessageSignature = 10408 [(wire_out) = true];
+    MessageType_ConfluxGetAddress = 10112 [(wire_in) = true];
+    MessageType_ConfluxAddress = 10113 [(wire_out) = true];
+    MessageType_ConfluxSignTx = 10114 [(wire_in) = true];
+    MessageType_ConfluxTxRequest = 10115 [(wire_out) = true];
+    MessageType_ConfluxTxAck = 10116 [(wire_in) = true];
+    MessageType_ConfluxSignMessage = 10117 [(wire_in) = true];
+    MessageType_ConfluxSignMessageCIP23 = 10118 [(wire_in) = true];
+    MessageType_ConfluxMessageSignature = 10119 [(wire_out) = true];
 
     // tron
     MessageType_TronGetAddress = 10501 [(wire_in) = true];
