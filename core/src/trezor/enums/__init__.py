@@ -255,7 +255,6 @@ if TYPE_CHECKING:
         WebAuthnRemoveResidentCredential = 803
         BixinSeedOperate = 901
         BixinMessageSE = 902
-        BixinReboot = 903
         BixinOutMessageSE = 904
         BixinBackupRequest = 905
         BixinBackupAck = 906
@@ -272,6 +271,14 @@ if TYPE_CHECKING:
         EthereumSignMessageEIP712 = 10200
         GetPublicKeyMultiple = 10210
         PublicKeyMultiple = 10211
+        ConfluxGetAddress = 10112
+        ConfluxAddress = 10113
+        ConfluxSignTx = 10114
+        ConfluxTxRequest = 10115
+        ConfluxTxAck = 10116
+        ConfluxSignMessage = 10117
+        ConfluxSignMessageCIP23 = 10118
+        ConfluxMessageSignature = 10119
         TronGetAddress = 10501
         TronAddress = 10502
         TronSignTx = 10503
@@ -282,6 +289,15 @@ if TYPE_CHECKING:
         NearAddress = 10702
         NearSignTx = 10703
         NearSignedTx = 10704
+        CosmosGetAddress = 10800
+        CosmosAddress = 10801
+        CosmosSignTx = 10802
+        CosmosSignedTx = 10803
+        AlgorandGetAddress = 10900
+        AlgorandAddress = 10901
+        AlgorandSignTx = 10902
+        AlgorandSignedTx = 10903
+        DeviceBackToBoot = 903
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003
@@ -297,6 +313,11 @@ if TYPE_CHECKING:
         SEMessageSignature = 10013
         NFTWriteInfo = 10014
         NFTWriteData = 10015
+        ResourceUpload = 10018
+        ZoomRequest = 10019
+        ResourceRequest = 10020
+        ResourceAck = 10021
+        ResourceUpdate = 10022
 
     class BinanceOrderType(IntEnum):
         OT_UNKNOWN = 0
@@ -511,6 +532,10 @@ if TYPE_CHECKING:
         Add = 0
         Delete = 1
         Inquire = 2
+
+    class ResourceType(IntEnum):
+        WallPaper = 0
+        Nft = 1
 
     class DebugSwipeDirection(IntEnum):
         UP = 0
