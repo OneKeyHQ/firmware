@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from ubinascii import hexlify
 
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
@@ -8,7 +9,6 @@ from trezor.utils import HashWriter
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
-from apps.common.signverify import decode_message
 
 from .helpers import address_from_bytes, address_from_hex
 
@@ -35,12 +35,19 @@ async def sign_message_cip23(
 
     domain_hash = msg.domain_hash if msg.domain_hash is not None else b""
     message_hash = msg.message_hash if msg.message_hash is not None else b""
+    message = (
+        "domain_hash: "
+        + hexlify(domain_hash).decode()
+        + "\n"
+        + "message_hash: "
+        + hexlify(message_hash).decode()
+    )
     address = address_from_bytes(node.ethereum_pubkeyhash())
     cfx_address = address_from_hex(address, 1029)
     await confirm_signverify(
         ctx,
         "CFX",
-        decode_message(domain_hash + message_hash),
+        message,
         cfx_address,
         verify=False,
     )
