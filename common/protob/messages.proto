@@ -382,7 +382,6 @@ enum MessageType {
     // bixin
     MessageType_BixinSeedOperate = 901 [deprecated = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
-    MessageType_BixinReboot = 903 [(wire_in) = true];
     MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
     MessageType_BixinBackupRequest = 905 [deprecated = true];
     MessageType_BixinBackupAck = 906 [deprecated = true];
@@ -402,14 +401,14 @@ enum MessageType {
     MessageType_PublicKeyMultiple = 10211 [(wire_out) = true];
 
     // Conflux
-    // MessageType_ConfluxGetAddress = 10112 [(wire_in) = true];
-    // MessageType_ConfluxAddress = 10113 [(wire_out) = true];
-    // MessageType_ConfluxSignTx = 10114 [(wire_in) = true];
-    // MessageType_ConfluxTxRequest = 10115 [(wire_out) = true];
-    // MessageType_ConfluxTxAck = 10116 [(wire_in) = true];
-    // MessageType_ConfluxSignMessage = 10117 [(wire_in) = true];
-    // MessageType_ConfluxSignMessageCIP23 = 10118 [(wire_in) = true];
-    // MessageType_ConfluxMessageSignature = 10119 [(wire_out) = true];
+    MessageType_ConfluxGetAddress = 10112 [(wire_in) = true];
+    MessageType_ConfluxAddress = 10113 [(wire_out) = true];
+    MessageType_ConfluxSignTx = 10114 [(wire_in) = true];
+    MessageType_ConfluxTxRequest = 10115 [(wire_out) = true];
+    MessageType_ConfluxTxAck = 10116 [(wire_in) = true];
+    MessageType_ConfluxSignMessage = 10117 [(wire_in) = true];
+    MessageType_ConfluxSignMessageCIP23 = 10118 [(wire_in) = true];
+    MessageType_ConfluxMessageSignature = 10119 [(wire_out) = true];
 
     // tron
     MessageType_TronGetAddress = 10501 [(wire_in) = true];
@@ -426,6 +425,7 @@ enum MessageType {
     MessageType_NearSignedTx = 10704 [(wire_out) = true];
 
     // onekey
+    MessageType_DeviceBackToBoot = 903 [(wire_in) = true];
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
     MessageType_DeviceInfo = 10003 [(wire_out) = true];
