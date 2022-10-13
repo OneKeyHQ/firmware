@@ -487,7 +487,7 @@ message BixinOutMessageSE {
  * Request: Reboot firmware
  * @end
  */
-message BixinReboot {
+message DeviceBackToBoot {
 }
 
 /**

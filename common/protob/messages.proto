@@ -382,7 +382,6 @@ enum MessageType {
     // bixin
     MessageType_BixinSeedOperate = 901 [deprecated = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
-    MessageType_BixinReboot = 903 [(wire_in) = true];
     MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
     MessageType_BixinBackupRequest = 905 [deprecated = true];
     MessageType_BixinBackupAck = 906 [deprecated = true];
@@ -426,6 +425,7 @@ enum MessageType {
     MessageType_NearSignedTx = 10704 [(wire_out) = true];
 
     // onekey
+    MessageType_DeviceBackToBoot = 903 [(wire_in) = true];
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
     MessageType_DeviceInfo = 10003 [(wire_out) = true];
