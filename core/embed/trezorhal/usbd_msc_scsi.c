@@ -102,6 +102,8 @@ static int8_t SCSI_ProcessWrite(USBD_HandleTypeDef *pdev, uint8_t lun);
 
 static int8_t SCSI_UpdateBotData(USBD_MSC_BOT_HandleTypeDef *hmsc,
                                  uint8_t *pBuff, uint16_t length);
+
+static int8_t SCSI_UserCommand(USBD_HandleTypeDef *pdev, uint8_t lun, uint8_t *params);
 /**
   * @}
   */
@@ -190,6 +192,10 @@ int8_t SCSI_ProcessCmd(USBD_HandleTypeDef *pdev, uint8_t lun, uint8_t *cmd)
 
     case SCSI_VERIFY10:
       ret = SCSI_Verify10(pdev, lun, cmd);
+      break;
+    
+    case SCSI_USER_WRITE:
+      ret = SCSI_UserCommand(pdev, lun, cmd);
       break;
 
     default:
@@ -1165,6 +1171,44 @@ static int8_t SCSI_UpdateBotData(USBD_MSC_BOT_HandleTypeDef *hmsc,
 
   return 0;
 }
+
+extern volatile uint32_t system_reset;
+
+static int8_t SCSI_UserCommand(USBD_HandleTypeDef *pdev, uint8_t lun, uint8_t *params)
+{
+  USBD_MSC_BOT_HandleTypeDef *hmsc = (USBD_MSC_BOT_HandleTypeDef *)pdev->pClassData;
+
+  if (hmsc == NULL)
+  {
+    return -1;
+  }
+  static uint16_t len = 0;
+  if (hmsc->bot_state == USBD_BOT_IDLE) /* Idle */
+  {
+    len = (params[7] << 8) + params[8];
+
+    if(len > 64)
+    {
+      return -1;
+    }
+
+    /* Prepare EP to receive first data packet */
+    hmsc->bot_state = USBD_BOT_DATA_OUT;
+    (void)USBD_LL_PrepareReceive(pdev, MSC_EPOUT_ADDR, hmsc->bot_data, len);
+  }
+  else
+  {
+    if(hmsc->bot_data[0]==0x5A && hmsc->bot_data[1]==0xA5)
+    {
+      system_reset = 1;
+           
+    }
+    MSC_BOT_SendCSW(pdev, USBD_CSW_CMD_PASSED);
+  }
+  
+  return 0;
+}
+
 /**
   * @}
   */

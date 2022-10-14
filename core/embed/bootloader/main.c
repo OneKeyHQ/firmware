@@ -363,7 +363,6 @@ int main(void) {
   atca_config_init();
 
   device_para_init();
-  device_test();
 
   if (!serial_set) {
     serial_set = device_serial_set();
@@ -389,6 +388,8 @@ int main(void) {
 
   touch_init();
   touch_power_on();
+
+  device_test();
 
   if (!serial_set || !cert_set) {
     display_clear();
