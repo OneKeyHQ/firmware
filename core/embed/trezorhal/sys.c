@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "common.h"
 #include "sys.h"
 
 TIM_HandleTypeDef TIM8_Handle;
@@ -13,8 +14,12 @@ void buzzer_init(void) {
 
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_TIM8_CLK_ENABLE();
+  if (PCB_VERSION_1_0_0 == pcb_version) {
+    GPIO_InitStruct.Pin = GPIO_PIN_5;
+  } else {
+    GPIO_InitStruct.Pin = GPIO_PIN_7;
+  }
 
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
