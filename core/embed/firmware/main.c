@@ -84,6 +84,9 @@ PARTITION VolToPart[FF_VOLUMES] = {
 };
 
 int main(void) {
+  extern uint32_t _vector_offset;
+  SCB->VTOR = (uint32_t)&_vector_offset;
+
   SystemCoreClockUpdate();
 
   device_para_init();

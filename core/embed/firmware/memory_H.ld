@@ -55,6 +55,9 @@ SECTIONS {
   } >EXRAM AT>FLASH2
 
   .flash : ALIGN(512) {
+    KEEP(*(.vector_table_ex));
+    . = ALIGN(1024);
+    _vector_offset = .;
     KEEP(*(.vector_table));
     . = ALIGN(4);
     *(.text*);
