@@ -78,3 +78,28 @@ def sign_message(client: "TrezorClient", address: str, message: str) -> Dict[str
         "signature": f"0x{signature.hex()}",
     }
     return output
+
+
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.argument("domain-hash")
+@click.argument("message-hash")
+@with_client
+def sign_message_cip23(
+    client: "TrezorClient", address: str, domain_hash: str, message_hash: str
+) -> Dict[str, str]:
+    """Sign message with Conflux address."""
+    address_n = tools.parse_path(address)
+    domain_hash_bytes = conflux.decode_hex(domain_hash) if domain_hash else None
+    message_hash_bytes = conflux.decode_hex(message_hash) if message_hash else None
+    ret = conflux.sign_message_cip23(
+        client, address_n, domain_hash_bytes, message_hash_bytes
+    )
+    signature = ret.signature if ret.signature is not None else b""
+    output = {
+        "domain_hash": domain_hash,
+        "message_hash": message_hash,
+        "address": ret.address,
+        "signature": f"0x{signature.hex()}",
+    }
+    return output

@@ -1927,6 +1927,24 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxMessageSignature"]:
             return isinstance(msg, cls)
 
+    class ConfluxSignMessageCIP23(protobuf.MessageType):
+        address_n: "list[int]"
+        domain_hash: "bytes | None"
+        message_hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            domain_hash: "bytes | None" = None,
+            message_hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ConfluxSignMessageCIP23"]:
+            return isinstance(msg, cls)
+
     class CipherKeyValue(protobuf.MessageType):
         address_n: "list[int]"
         key: "str"
