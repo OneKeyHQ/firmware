@@ -294,6 +294,14 @@ class MessageType(IntEnum):
     EthereumSignMessageEIP712 = 10200
     GetPublicKeyMultiple = 10210
     PublicKeyMultiple = 10211
+    ConfluxGetAddress = 10112
+    ConfluxAddress = 10113
+    ConfluxSignTx = 10114
+    ConfluxTxRequest = 10115
+    ConfluxTxAck = 10116
+    ConfluxSignMessage = 10117
+    ConfluxSignMessageCIP23 = 10118
+    ConfluxMessageSignature = 10119
     TronGetAddress = 10501
     TronAddress = 10502
     TronSignTx = 10503
@@ -3011,7 +3019,7 @@ class CardanoTxAuxiliaryDataType(protobuf.MessageType):
 
 
 class ConfluxGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10112
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -3031,7 +3039,7 @@ class ConfluxGetAddress(protobuf.MessageType):
 
 
 class ConfluxAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10113
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -3045,7 +3053,7 @@ class ConfluxAddress(protobuf.MessageType):
 
 
 class ConfluxSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10114
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("nonce", "bytes", repeated=False, required=False),
@@ -3089,7 +3097,7 @@ class ConfluxSignTx(protobuf.MessageType):
 
 
 class ConfluxTxRequest(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10115
     FIELDS = {
         1: protobuf.Field("data_length", "uint32", repeated=False, required=False),
         2: protobuf.Field("signature_v", "uint32", repeated=False, required=False),
@@ -3112,7 +3120,7 @@ class ConfluxTxRequest(protobuf.MessageType):
 
 
 class ConfluxTxAck(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10116
     FIELDS = {
         1: protobuf.Field("data_chunk", "bytes", repeated=False, required=False),
     }
@@ -3126,7 +3134,7 @@ class ConfluxTxAck(protobuf.MessageType):
 
 
 class ConfluxSignMessage(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10117
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("message", "bytes", repeated=False, required=False),
@@ -3143,7 +3151,7 @@ class ConfluxSignMessage(protobuf.MessageType):
 
 
 class ConfluxMessageSignature(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 10119
     FIELDS = {
         2: protobuf.Field("signature", "bytes", repeated=False, required=False),
         3: protobuf.Field("address", "string", repeated=False, required=False),
@@ -3157,6 +3165,26 @@ class ConfluxMessageSignature(protobuf.MessageType):
     ) -> None:
         self.signature = signature
         self.address = address
+
+
+class ConfluxSignMessageCIP23(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10118
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False),
+        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        domain_hash: Optional["bytes"] = None,
+        message_hash: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.domain_hash = domain_hash
+        self.message_hash = message_hash
 
 
 class CipherKeyValue(protobuf.MessageType):

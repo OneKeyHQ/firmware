@@ -835,3 +835,39 @@ bool conflux_parse(const char *address, uint8_t pubkeyhash[20]) {
   }
   return true;
 }
+
+void conflux_message_sign_cip23(const ConfluxSignMessageCIP23 *msg,
+                                const HDNode *node,
+                                ConfluxMessageSignature *resp) {
+  uint8_t pubkeyhash[20] = {0};
+  if (!hdnode_get_ethereum_pubkeyhash(node, pubkeyhash)) {
+    return;
+  }
+
+  resp->has_address = true;
+  resp->address[0] = '0';
+  resp->address[1] = 'x';
+  get_ethereum_format_address(pubkeyhash, resp->address + 2);
+
+  uint8_t hash[32] = {0};
+  struct SHA3_CTX ctx = {0};
+
+  sha3_256_Init(&ctx);
+  sha3_Update(&ctx, (const uint8_t *)"\x19\x01",
+              2);  // CIP23 magic is the same as EIP712
+  sha3_Update(&ctx, msg->domain_hash.bytes, msg->domain_hash.size);
+  sha3_Update(&ctx, msg->message_hash.bytes, msg->message_hash.size);
+  keccak_Final(&ctx, hash);
+
+  uint8_t v = 0;
+  if (ecdsa_sign_digest(&secp256k1, node->private_key, hash,
+                        resp->signature.bytes, &v, conflux_is_canonic) != 0) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));
+    return;
+  }
+
+  resp->has_signature = true;
+  resp->signature.bytes[64] = v;
+  resp->signature.size = 65;
+  msg_write(MessageType_MessageType_ConfluxMessageSignature, resp);
+}

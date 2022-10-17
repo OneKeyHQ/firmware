@@ -88,3 +88,40 @@ void fsm_msgConfluxSignMessage(const ConfluxSignMessage *msg) {
   conflux_message_sign(msg, node, resp);
   layoutHome();
 }
+
+void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg) {
+  RESP_INIT(ConfluxMessageSignature);
+
+  CHECK_INITIALIZED
+
+  if (msg->domain_hash.size != 32 || msg->message_hash.size != 32) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, "data length error");
+    return;
+  }
+
+  if (!fsm_layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
+                                msg->domain_hash.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  if (!fsm_layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
+                                msg->message_hash.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  CHECK_PIN
+
+  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
+                                          msg->address_n_count, NULL);
+  if (!node) {
+    fsm_sendFailure(FailureType_Failure_DataError, NULL);
+    return;
+  }
+
+  conflux_message_sign_cip23(msg, node, resp);
+  layoutHome();
+}
