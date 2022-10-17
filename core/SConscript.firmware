@@ -419,6 +419,7 @@ if PRODUCTION_MODEL == 'H':
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c',
+        'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_jpeg.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c',
         'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c',
@@ -456,8 +457,6 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/usbd_core.c',
         'embed/trezorhal/usbd_ctlreq.c',
         'embed/trezorhal/usbd_ioreq.c',
-        'embed/trezorhal/util.s',
-        'embed/trezorhal/vectortable.s',
         'embed/trezorhal/atca/atca_hal.c',
         'embed/trezorhal/atca/atca_command.c',
         'embed/trezorhal/atca/atca_api.c',
@@ -468,6 +467,8 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/sys.c',
         'embed/trezorhal/ble.c',
         'embed/trezorhal/device.c',
+        'embed/trezorhal/util.s',
+        'embed/trezorhal/vectortable.s',
     ]
 else:
     SOURCE_STMHAL = [
