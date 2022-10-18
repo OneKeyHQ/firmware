@@ -22,7 +22,7 @@ async def lvgl_tick():
 
 def init_lvgl() -> None:
     import lvgldrv as lcd  # type: ignore[Import "lvgldrv" could not be resolved]
-    import stjpeg
+    import stjpeg  # type: ignore[Import "stjpeg" could not be resolved]
 
     lv.init()
     stjpeg.init()
