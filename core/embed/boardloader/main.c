@@ -364,9 +364,9 @@ void show_poweron_bar(void) {
     }
   }
 
-  display_bar_radius(160, 352, 160, 8, COLOR_DARK, COLOR_BLACK, 4);
-  display_bar_radius(160 + location, 352, indicator, 8, COLOR_WHITE,
-                     COLOR_BLACK, 4);
+  display_bar_radius(160, 352, 160, 4, COLOR_DARK, COLOR_BLACK, 2);
+  display_bar_radius(160 + location, 352, indicator, 4, COLOR_WHITE,
+                     COLOR_BLACK, 2);
 }
 
 int main(void) {
@@ -443,10 +443,10 @@ int main(void) {
 
     touch_data = x_start = y_start = x_mov = y_mov = 0;
 
-    for (int timer = 0; timer < 1500; timer++) {
+    for (int timer = 0; timer < 1600; timer++) {
       ble_uart_poll();
 
-      if (timer % 10 == 0) {
+      if (timer % 8 == 0) {
         show_poweron_bar();
       }
 
@@ -478,6 +478,7 @@ int main(void) {
       hal_delay(1);
     }
     ble_usart_irq_disable();
+    display_bar(160, 352, 160, 4, COLOR_BLACK);
   }
 
   if (mode == BOARD_MODE) {
