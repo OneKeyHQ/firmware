@@ -482,7 +482,7 @@ int main(void) {
 
   if (mode == BOARD_MODE) {
     if (!factory_mode) {
-      f_chmod("/res/", AM_RDO | AM_SYS, AM_RDO | AM_SYS | AM_HID);
+      f_chmod("/res/", AM_RDO | AM_SYS | AM_HID, AM_RDO | AM_SYS | AM_HID);
     }
   } else {
     f_chmod("/res/", 0, AM_RDO | AM_SYS | AM_HID);
