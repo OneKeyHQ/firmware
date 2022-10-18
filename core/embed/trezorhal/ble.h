@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define BLE_NAME_LEN 0x05
+#define BLE_NAME_LEN 16
 
 // BLE send command
 #define BLE_CMD_ADV 0x01

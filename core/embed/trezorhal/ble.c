@@ -98,7 +98,7 @@ void ble_uart_poll(void) {
 
   switch (ble_usart_msg.cmd) {
     case BLE_CMD_ADV:
-      memcpy(ble_name, ble_usart_msg.cmd_vale, BLE_NAME_LEN);
+      strlcpy(ble_name, (char *)ble_usart_msg.cmd_vale, sizeof(ble_name));
       get_ble_name = true;
       break;
     case BLE_CMD_CON_STA:
