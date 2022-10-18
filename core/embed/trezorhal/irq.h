@@ -135,7 +135,8 @@ static inline void restore_irq_pri(uint32_t state) {
 
 // DMA should be higher priority than USB, since USB Mass Storage calls
 // into the sdcard driver which waits for the DMA to complete.
-#define IRQ_PRI_DMA             NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 5, 0)
+#define IRQ_PRI_JPEG            NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 7, 0)
+#define IRQ_PRI_DMA             NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 8, 0)
 
 // Flash IRQ (used for flushing storage cache) must be at the same priority as
 // the USB IRQs, so that the IRQ priority can be raised to this level to disable

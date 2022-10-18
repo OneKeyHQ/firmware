@@ -7,7 +7,7 @@
 #include <string.h>
 
 static QSPI_HandleTypeDef hqspi;
-static MDMA_HandleTypeDef hmdma;
+// static MDMA_HandleTypeDef hmdma;
 
 static volatile uint8_t CmdCplt, RxCplt, TxCplt, StatusMatch;
 
@@ -69,33 +69,33 @@ int qspi_flash_init(void) {
   NVIC_SetPriority(QUADSPI_IRQn, IRQ_PRI_QSPI);
   HAL_NVIC_EnableIRQ(QUADSPI_IRQn);
 
-  hmdma.Init.Request = MDMA_REQUEST_QUADSPI_FIFO_TH;
-  hmdma.Init.TransferTriggerMode = MDMA_BUFFER_TRANSFER;
-  hmdma.Init.Priority = MDMA_PRIORITY_HIGH;
-  hmdma.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
+  // hmdma.Init.Request = MDMA_REQUEST_QUADSPI_FIFO_TH;
+  // hmdma.Init.TransferTriggerMode = MDMA_BUFFER_TRANSFER;
+  // hmdma.Init.Priority = MDMA_PRIORITY_HIGH;
+  // hmdma.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
 
-  hmdma.Init.SourceInc = MDMA_SRC_INC_BYTE;
-  hmdma.Init.DestinationInc = MDMA_DEST_INC_DISABLE;
-  hmdma.Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
-  hmdma.Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
-  hmdma.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
-  hmdma.Init.BufferTransferLength = 4;
-  hmdma.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
-  hmdma.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
+  // hmdma.Init.SourceInc = MDMA_SRC_INC_BYTE;
+  // hmdma.Init.DestinationInc = MDMA_DEST_INC_DISABLE;
+  // hmdma.Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
+  // hmdma.Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
+  // hmdma.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
+  // hmdma.Init.BufferTransferLength = 4;
+  // hmdma.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
+  // hmdma.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
 
-  hmdma.Init.SourceBlockAddressOffset = 0;
-  hmdma.Init.DestBlockAddressOffset = 0;
+  // hmdma.Init.SourceBlockAddressOffset = 0;
+  // hmdma.Init.DestBlockAddressOffset = 0;
 
-  hmdma.Instance = MDMA_Channel1;
+  // hmdma.Instance = MDMA_Channel1;
 
-  __HAL_LINKDMA(&hqspi, hmdma, hmdma);
+  // __HAL_LINKDMA(&hqspi, hmdma, hmdma);
 
-  HAL_MDMA_DeInit(&hmdma);
+  // HAL_MDMA_DeInit(&hmdma);
 
-  HAL_MDMA_Init(&hmdma);
+  // HAL_MDMA_Init(&hmdma);
 
-  NVIC_SetPriority(MDMA_IRQn, IRQ_PRI_DMA);
-  HAL_NVIC_EnableIRQ(MDMA_IRQn);
+  // NVIC_SetPriority(MDMA_IRQn, IRQ_PRI_DMA);
+  // HAL_NVIC_EnableIRQ(MDMA_IRQn);
 
   return HAL_OK;
 }
@@ -725,7 +725,7 @@ void QUADSPI_IRQHandler(void) { HAL_QSPI_IRQHandler(&hqspi); }
  * @retval None
  */
 
-void MDMA_IRQHandler(void) { HAL_MDMA_IRQHandler(hqspi.hmdma); }
+// void MDMA_IRQHandler(void) { HAL_MDMA_IRQHandler(hqspi.hmdma); }
 
 void qspi_flash_test(void) {
   uint8_t buf[256];

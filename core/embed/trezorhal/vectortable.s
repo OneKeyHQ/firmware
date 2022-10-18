@@ -13,6 +13,56 @@ default_handler:
     .thumb_set \symbol_name, default_handler
   .endm
 
+  .section .vector_table_ex, "a"
+vector_table_ex:
+  .word main_stack_base // defined in linker script
+  add_handler reset_handler
+  add_handler NMI_Handler
+  add_handler HardFault_Handler
+  add_handler MemManage_Handler
+  add_handler BusFault_Handler
+  add_handler UsageFault_Handler
+  add_handler architecture_reserved_handler
+  add_handler architecture_reserved_handler
+  add_handler architecture_reserved_handler
+  add_handler architecture_reserved_handler
+  add_handler SVC_Handler
+  add_handler DebugMon_Handler
+  add_handler architecture_reserved_handler
+  add_handler PendSV_Handler
+  add_handler SysTick_Handler
+  add_handler WWDG_IRQHandler
+  add_handler PVD_AVD_IRQHandler                /* PVD/AVD through EXTI Line detection */
+  add_handler TAMP_STAMP_IRQHandler             /* Tamper and TimeStamps through the EXTI line */
+  add_handler RTC_WKUP_IRQHandler               /* RTC Wakeup through the EXTI line */
+  add_handler FLASH_IRQHandler                  /* FLASH                        */
+  add_handler RCC_IRQHandler                    /* RCC                          */
+  add_handler EXTI0_IRQHandler                  /* EXTI Line0                   */
+  add_handler EXTI1_IRQHandler                  /* EXTI Line1                   */
+  add_handler EXTI2_IRQHandler                  /* EXTI Line2                   */
+  add_handler EXTI3_IRQHandler                  /* EXTI Line3                   */
+  add_handler EXTI4_IRQHandler                  /* EXTI Line4                   */
+  add_handler DMA1_Stream0_IRQHandler           /* DMA1 Stream 0                */
+  add_handler DMA1_Stream1_IRQHandler           /* DMA1 Stream 1                */
+  add_handler DMA1_Stream2_IRQHandler           /* DMA1 Stream 2                */
+  add_handler DMA1_Stream3_IRQHandler           /* DMA1 Stream 3                */
+  add_handler DMA1_Stream4_IRQHandler           /* DMA1 Stream 4                */
+  add_handler DMA1_Stream5_IRQHandler           /* DMA1 Stream 5                */
+  add_handler DMA1_Stream6_IRQHandler           /* DMA1 Stream 6                */
+  add_handler ADC_IRQHandler                    /* ADC1, ADC2 and ADC3s         */
+  add_handler FDCAN1_IT0_IRQHandler             /* FDCAN1 interrupt line 0      */
+  add_handler FDCAN2_IT0_IRQHandler             /* FDCAN2 interrupt line 0      */
+  add_handler FDCAN1_IT1_IRQHandler             /* FDCAN1 interrupt line 1      */
+  add_handler FDCAN2_IT1_IRQHandler             /* FDCAN2 interrupt line 1      */
+  add_handler EXTI9_5_IRQHandler                /* External Line[9:5]s          */
+  add_handler TIM1_BRK_IRQHandler               /* TIM1 Break interrupt         */
+  add_handler TIM1_UP_IRQHandler                /* TIM1 Update interrupt        */
+  add_handler TIM1_TRG_COM_IRQHandler           /* TIM1 Trigger and Commutation interrupt */
+  add_handler TIM1_CC_IRQHandler                /* TIM1 Capture Compare         */
+  add_handler TIM2_IRQHandler                   /* TIM2                         */
+  add_handler TIM3_IRQHandler                   /* TIM3                         */
+  add_handler TIM4_IRQHandler                   /* TIM4                         */
+
   // Reference:
   // Table 147 - STM32H757 Reference manual (RM0399)
   // Section B1.5 - ARMv7-M Architecture Reference Manual

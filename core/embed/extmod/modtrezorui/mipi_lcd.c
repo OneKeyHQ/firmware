@@ -308,6 +308,67 @@ void dma2d_copy_buffer(uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y,
   }
 }
 
+void dma2d_copy_ycbcr_to_rgb(uint32_t *pSrc, uint32_t *pDst, uint16_t xsize,
+                             uint16_t ysize, uint32_t ChromaSampling) {
+  uint32_t cssMode = DMA2D_CSS_420, inputLineOffset = 0;
+
+  if (ChromaSampling == JPEG_420_SUBSAMPLING) {
+    cssMode = DMA2D_CSS_420;
+
+    inputLineOffset = xsize % 16;
+    if (inputLineOffset != 0) {
+      inputLineOffset = 16 - inputLineOffset;
+    }
+  } else if (ChromaSampling == JPEG_444_SUBSAMPLING) {
+    cssMode = DMA2D_NO_CSS;
+
+    inputLineOffset = xsize % 8;
+    if (inputLineOffset != 0) {
+      inputLineOffset = 8 - inputLineOffset;
+    }
+  } else if (ChromaSampling == JPEG_422_SUBSAMPLING) {
+    cssMode = DMA2D_CSS_422;
+
+    inputLineOffset = xsize % 16;
+    if (inputLineOffset != 0) {
+      inputLineOffset = 16 - inputLineOffset;
+    }
+  }
+
+  /*##-1- Configure the DMA2D Mode, Color Mode and output offset #############*/
+  hlcd_dma2d.Init.Mode = DMA2D_M2M_PFC;
+  hlcd_dma2d.Init.ColorMode = DMA2D_OUTPUT_RGB565;
+  hlcd_dma2d.Init.OutputOffset = 0;
+  hlcd_dma2d.Init.AlphaInverted =
+      DMA2D_REGULAR_ALPHA; /* No Output Alpha Inversion*/
+  hlcd_dma2d.Init.RedBlueSwap =
+      DMA2D_RB_REGULAR; /* No Output Red & Blue swap */
+
+  /*##-2- DMA2D Callbacks Configuration ######################################*/
+  hlcd_dma2d.XferCpltCallback = NULL;
+
+  /*##-3- Foreground Configuration ###########################################*/
+  hlcd_dma2d.LayerCfg[1].AlphaMode = DMA2D_REPLACE_ALPHA;
+  hlcd_dma2d.LayerCfg[1].InputAlpha = 0xFF;
+  hlcd_dma2d.LayerCfg[1].InputColorMode = DMA2D_INPUT_YCBCR;
+  hlcd_dma2d.LayerCfg[1].ChromaSubSampling = cssMode;
+  hlcd_dma2d.LayerCfg[1].InputOffset = inputLineOffset;
+  hlcd_dma2d.LayerCfg[1].RedBlueSwap =
+      DMA2D_RB_REGULAR; /* No ForeGround Red/Blue swap */
+  hlcd_dma2d.LayerCfg[1].AlphaInverted =
+      DMA2D_REGULAR_ALPHA; /* No ForeGround Alpha inversion */
+
+  hlcd_dma2d.Instance = DMA2D;
+
+  /*##-4- DMA2D Initialization     ###########################################*/
+  HAL_DMA2D_Init(&hlcd_dma2d);
+  HAL_DMA2D_ConfigLayer(&hlcd_dma2d, 1);
+
+  HAL_DMA2D_Start(&hlcd_dma2d, (uint32_t)pSrc, (uint32_t)pDst, xsize, ysize);
+  HAL_DMA2D_PollForTransfer(
+      &hlcd_dma2d, 25); /* wait for the previous DMA2D transfer to ends */
+}
+
 void st7701_dsi_write(uint16_t reg, uint8_t *seq, uint16_t len) {
   if (len <= 1) {
     HAL_DSI_ShortWrite(&hlcd_dsi, 0, DSI_DCS_SHORT_PKT_WRITE_P1, reg,

@@ -58,7 +58,7 @@
 #else
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#if defined APP_VER || defined TREZOR_EMULATOR
+#if defined BOARDLOADER || defined APP_VER || defined TREZOR_EMULATOR
 #include "font_roboto_regular_20.h"
 #define FONT_NORMAL_DATA Font_Roboto_Regular_20
 #define FONT_NORMAL_HEIGHT 20
@@ -536,7 +536,7 @@ void display_loader(uint16_t progress, bool indeterminate, int yoffset,
 #define DISPLAY_FONT_SIZE 16
 #define DISPLAY_CHAR_X_RES 8
 #define DISPLAY_CHAR_WIDTH 16
-#define DISPLAY_CHAR_HIGHT 24
+#define DISPLAY_CHAR_HIGHT 20
 #define DISPLAY_PRINT_COLS (DISPLAY_RESX / DISPLAY_CHAR_WIDTH)
 #define DISPLAY_PRINT_ROWS (DISPLAY_RESY / DISPLAY_CHAR_HIGHT)
 #else

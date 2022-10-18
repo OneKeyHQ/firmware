@@ -67,6 +67,8 @@ void fb_draw_vline(uint32_t x_pos, uint32_t y_pos, uint32_t len,
                    uint32_t color);
 void dma2d_copy_buffer(uint32_t *pSrc, uint32_t *pDst, uint16_t x, uint16_t y,
                        uint16_t xsize, uint16_t ysize);
+void dma2d_copy_ycbcr_to_rgb(uint32_t *pSrc, uint32_t *pDst, uint16_t xsize,
+                             uint16_t ysize, uint32_t ChromaSampling);
 void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format);
 void lcd_para_init(uint32_t lcd_width, uint32_t lcd_height,
                    uint32_t pixel_format);

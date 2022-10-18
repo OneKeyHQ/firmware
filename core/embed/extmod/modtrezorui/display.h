@@ -61,6 +61,7 @@
 #define COLOR_RED RGB16(0xFF, 0x00, 0x00)    // red
 #define COLOR_BLUE RGB16(0x00, 0x00, 0xFF)   // blue
 #define COLOR_GREEN RGB16(0x00, 0xFF, 0x00)  // green
+#define COLOR_DARK RGB16(0x33, 0x33, 0x33)
 #define COLOR_GRAY RGB16(0x99, 0x99, 0x99)
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
