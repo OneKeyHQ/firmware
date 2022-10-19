@@ -80,13 +80,15 @@ static uint64_t polymod(const uint8_t *v, const uint8_t in_len) {
   return c ^ 1;
 }
 int get_base32_encode_address(uint8_t *in, char *out, size_t out_len,
-                              uint32_t network_id) {
+                              uint32_t network_id, bool is_sign) {
   static char CHARSET[] = "abcdefghjkmnprstuvwxyz0123456789";
 
   char prefix[10];  // the longest prefix is "net" + "65535" + ':' + '\0'
   uint8_t prefix_len = 0;
   // change the first nibble of the pubkeyhash to 0x1
-  in[0] = (in[0] & 0x0f) | 0x10;
+  if (!is_sign) {
+    in[0] = (in[0] & 0x0f) | 0x10;
+  }
   // initialize prefix based on network_id
   switch (network_id) {
     case CHAIN_ID_MAINNET: {
@@ -394,7 +396,7 @@ static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,
 
   if (to_len) {
     char to_str[52] = {0};
-    get_base32_encode_address(to, to_str, sizeof(to_str), chain_ids);
+    get_base32_encode_address(to, to_str, sizeof(to_str), chain_ids, true);
     if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
       memcpy(_to1 + 3, to_str, 20);
       memcpy(_to2, to_str + 20, strlen(to_str) - 20);
@@ -617,8 +619,13 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
                            msg->data_initial_chunk.bytes + 36, 32, token,
                            msg->chain_id);
   } else {
-    layoutConfluxConfirmTx(pubkeyhash, 20, msg->value.bytes, msg->value.size,
-                           NULL, msg->chain_id);
+    if (toset) {
+      layoutConfluxConfirmTx(pubkeyhash, 20, msg->value.bytes, msg->value.size,
+                             NULL, msg->chain_id);
+    } else {
+      layoutConfluxConfirmTx(pubkeyhash, 0, msg->value.bytes, msg->value.size,
+                             NULL, msg->chain_id);
+    }
   }
 
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
