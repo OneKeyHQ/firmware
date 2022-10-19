@@ -50,8 +50,8 @@ void fsm_msgConfluxGetAddress(const ConfluxGetAddress *msg) {
 
   resp->has_address = true;
 
-  int failed = get_base32_encode_address(pubkeyhash, resp->address,
-                                         sizeof(resp->address), msg->chain_id);
+  int failed = get_base32_encode_address(
+      pubkeyhash, resp->address, sizeof(resp->address), msg->chain_id, false);
   if (failed) {
     fsm_sendFailure(FailureType_Failure_DataError, "Get address failed");
     return;
