@@ -385,5 +385,10 @@ translations = [
     "Durante il blocco, premere il pulsante di accensione per riattivare il display.",
     "Visibile come \"{}\" su altri dispositivi.",
     "Attiva il Bluetooth per connetterti con altri dispositivi Bluetooth nelle vicinanze.",
+    "Corretta!",
+    "Sbagliato!",
+    "Aggiornamento delle risorse",
+    "Vuoi aggiornare la risorsa del firmware?",
+    "Aggiornare",
 ]
 # fmt: on

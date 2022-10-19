@@ -36,6 +36,7 @@ class lv_colors:
         0x4D, 0x4D, 0x4D
     )  # cancel button bg enable/number keyboard
     ONEKEY_BLACK_1 = LV_COLOR_MAKE(0x33, 0x33, 0x33)  # cancel button bg disable
+    ONEKEY_BLACK_2 = LV_COLOR_MAKE(0x1A, 0x1A, 0x1A)
     ONEKEY_GRAY = LV_COLOR_MAKE(
         0x8D, 0x8D, 0x93
     )  # cancel button disable text/ display item key

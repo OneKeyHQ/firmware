@@ -834,4 +834,14 @@ CONTENT__TAP_TO_WAKE_DISABLED__HINT = 382
 CONTENT__CONNECT_BLUETOOTH_ENABLED__HINT = 383
 # Turn on Bluetooth to connect with other nearby Bluetooth devices.
 CONTENT__CONNECT_BLUETOOTH_DISABLED__HINT = 384
+# Correct!
+MSG__CORRECT__EXCLAMATION = 385
+# Incorrect!
+MSG__INCORRECT__EXCLAMATION = 386
+# Resource Update
+TITLE__RESOURCE_UPDATE = 387
+# Do you want to update firmware resource?
+SUBTITLE__RESOURCE_UPDATE = 388
+# Update
+BUTTON__UPDATE = 389
 # fmt: on

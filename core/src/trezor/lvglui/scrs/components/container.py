@@ -1,3 +1,5 @@
+from trezor.lvglui.lv_colors import lv_colors
+
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
 
@@ -11,17 +13,21 @@ class ContainerFlexCol(lv.obj):
         padding_row: int = 12,
     ) -> None:
         super().__init__(parent)
+        self.remove_style_all()
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
         if align_base is None:
             self.align(lv.ALIGN.BOTTOM_MID, 0, -30)
         else:
             self.align_to(align_base, align, pos[0], pos[1])
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_row(padding_row, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_flex_flow(lv.FLEX_FLOW.COLUMN)
+        self.set_flex_align(
+            lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER
+        )
 
 
 class ContainerFlexRow(lv.obj):
@@ -34,10 +40,11 @@ class ContainerFlexRow(lv.obj):
         padding_col: int = 8,
     ) -> None:
         super().__init__(parent)
+        self.remove_style_all()
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.align_to(align_base, align, pos[0], pos[1])
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv.color_hex(0x000000), lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_column(padding_col, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_flex_flow(lv.FLEX_FLOW.ROW)

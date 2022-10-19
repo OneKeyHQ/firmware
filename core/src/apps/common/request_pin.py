@@ -94,6 +94,7 @@ async def verify_user_pin(
     retry: bool = True,
     cache_time_ms: int = 0,
     set_home: bool = False,
+    callback=None,
 ) -> None:
     last_unlock = _get_last_unlock_time()
     if (
@@ -119,6 +120,8 @@ async def verify_user_pin(
     except SdCardUnavailable:
         raise wire.PinCancelled("SD salt is unavailable")
     if config.unlock(pin, salt):
+        if callback:
+            callback()
         if set_home:
             set_homescreen()
         _set_last_unlock_time()
@@ -131,6 +134,8 @@ async def verify_user_pin(
             ctx, _(i18n_keys.TITLE__ENTER_PIN), pin_rem, allow_cancel
         )
         if config.unlock(pin, salt):
+            if callback:
+                callback()
             if set_home:
                 set_homescreen()
             _set_last_unlock_time()

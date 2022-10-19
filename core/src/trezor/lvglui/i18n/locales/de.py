@@ -385,5 +385,10 @@ translations = [
     "Drücken Sie im gesperrten Zustand die Ein/Aus-Taste, um das Display zu aktivieren.",
     "Für andere Geräte als \"{}\" sichtbar.",
     "Schalten Sie Bluetooth ein, um eine Verbindung mit anderen Bluetooth-Geräten in der Nähe herzustellen.",
+    "Richtig!",
+    "Falsch!",
+    "Ressourcenaktualisierung",
+    "Möchten Sie die Firmware-Ressource aktualisieren?",
+    "Aktualisieren",
 ]
 # fmt: on

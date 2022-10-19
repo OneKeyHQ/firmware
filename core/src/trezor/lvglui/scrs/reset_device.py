@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
+from trezor.lvglui.scrs.components.transition import DefaultTransition
 
 from . import font_MONO28, lv, lv_colors
 from .common import FullSizeWindow
@@ -143,3 +144,111 @@ class BackupTips(FullSizeWindow):
                 self.btn_yes.enable(bg_color=lv_colors.ONEKEY_GREEN)
             elif self.cb_cnt < 3:
                 self.btn_yes.disable()
+
+
+class CheckWord(FullSizeWindow):
+    def __init__(self, title: str, subtitle: str, options: str):
+        super().__init__(title, subtitle)
+
+        self.choices = Radio(self, options)
+        self.tip = lv.label(self.content_area)
+        self.tip.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.tip.set_recolor(True)
+        self.tip.set_text("")
+        self.tip.set_style_text_align(
+            lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.tip.align_to(self.choices.container, lv.ALIGN.OUT_TOP_MID, 0, -14)
+        self.add_event_cb(self.on_ready, lv.EVENT.READY, None)
+
+    def on_ready(self, event_obj):
+        self.channel.publish(self.choices.get_selected_str())
+        self.destroy()
+
+    def tip_correct(self):
+        self.tip.set_text(
+            f"#00CC36 {lv.SYMBOL.OK}# {_(i18n_keys.MSG__CORRECT__EXCLAMATION)}"
+        )
+        # self.tip.clear_flag(lv.obj.FLAG.HIDDEN)
+
+    def tip_incorrect(self):
+        self.tip.set_text(
+            f"#DF320C {lv.SYMBOL.CLOSE}# {_(i18n_keys.MSG__INCORRECT__EXCLAMATION)}"
+        )
+        # self.tip.clear_flag(lv.obj.FLAG.HIDDEN)
+
+
+class Radio:
+    def __init__(self, parent, options) -> None:
+        self.parent = parent
+        self.container = ContainerFlexCol(parent, None, padding_row=2)
+        self.container.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.items: list[RadioItem] = []
+        self.check_index = 0
+        self.choices = options.split("\n")
+        for _idx, choice in enumerate(self.choices):
+            item = RadioItem(self.container, choice)
+            self.items.append(item)
+        self.container.add_event_cb(self.on_selected_changed, lv.EVENT.CLICKED, None)
+
+    def on_selected_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            from trezor import utils
+
+            if utils.lcd_resume():
+                return
+            for idx, item in enumerate(self.items):
+                if target == item:
+                    self.check_index = idx
+                    lv.event_send(self.parent, lv.EVENT.READY, None)
+
+    def get_selected_index(self):
+        return self.check_index
+
+    def get_selected_str(self):
+        return self.items[self.check_index].get_text()
+
+
+class RadioItem(lv.btn):
+    def __init__(
+        self,
+        parent,
+        text: str,
+    ) -> None:
+        super().__init__(parent)
+        self.content = text
+        self.remove_style_all()
+        self.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_width(464, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_hor(16, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(4, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_align(lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT)
+
+        transition = DefaultTransition()
+
+        self.set_style_transform_height(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_transform_width(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_2, lv.PART.MAIN | lv.STATE.PRESSED
+        )
+        # self.set_style_text_color(
+        #     lv_colors.ONEKEY_GRAY, lv.PART.MAIN | lv.STATE.PRESSED
+        # )
+        self.set_style_transition(transition, lv.PART.MAIN | lv.STATE.PRESSED)
+
+        self.label = lv.label(self)
+        self.label.set_long_mode(lv.label.LONG.WRAP)
+        self.label.set_text(text)
+        self.label.set_align(lv.ALIGN.CENTER)
+        self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+
+    def get_text(self) -> str:
+        return self.content

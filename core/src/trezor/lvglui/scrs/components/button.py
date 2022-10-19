@@ -1,6 +1,7 @@
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from .. import font_PJSBOLD24, font_PJSMID24, lv, lv_colors
+from .transition import BtnClickTransition, DefaultTransition
 
 # class NormalButton(lv.btn):
 #     def __init__(self, parent, text="Next", pos=(-6, 300), enable=True) -> None:
@@ -37,9 +38,11 @@ from .. import font_PJSBOLD24, font_PJSMID24, lv, lv_colors
 class NormalButton(lv.btn):
     def __init__(self, parent, text=_(i18n_keys.BUTTON__NEXT), enable=True) -> None:
         super().__init__(parent)
-        self.set_size(416, 76)
+        self.remove_style_all()
+        self.set_style_height(76, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_width(464, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.align_to(parent, lv.ALIGN.BOTTOM_MID, 0, -18)
-        self.set_style_radius(44, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(38, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -47,6 +50,14 @@ class NormalButton(lv.btn):
             self.enable()
         else:
             self.disable()
+        transition = BtnClickTransition()
+        self.set_style_transform_height(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_transform_width(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_bg_opa(lv.OPA._30, lv.PART.MAIN | lv.STATE.PRESSED)
+        # self.set_style_text_color(
+        #     lv_colors.ONEKEY_GRAY, lv.PART.MAIN | lv.STATE.PRESSED
+        # )
+        self.set_style_transition(transition, lv.PART.MAIN | lv.STATE.PRESSED)
         # the next btn label
         self.label = lv.label(self)
         self.label.set_long_mode(lv.label.LONG.WRAP)
@@ -76,18 +87,37 @@ class ListItemBtn(lv.btn):
         text: str,
         right_text="",
         left_img_src: str = "",
-        has_next: bool = True,
+        has_next: bool = False,
     ) -> None:
         super().__init__(parent)
-        self.set_size(lv.pct(100), 78)
-        self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.remove_style_all()
+        self.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_width(464, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_hor(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
+
+        transition = DefaultTransition()
+        self.set_style_transform_height(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_transform_width(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_2, lv.PART.MAIN | lv.STATE.PRESSED
+        )
+        # self.set_style_text_color(
+        #     lv_colors.ONEKEY_GRAY, lv.PART.MAIN | lv.STATE.PRESSED
+        # )
+        self.set_style_transition(transition, lv.PART.MAIN | lv.STATE.PRESSED)
+
         if left_img_src:
-            img_left = lv.img(self)
-            img_left.set_src(left_img_src)
-            img_left.set_align(lv.ALIGN.LEFT_MID)
+            self.img_left = lv.img(self)
+            self.img_left.set_src(left_img_src)
+            self.img_left.set_align(lv.ALIGN.LEFT_MID)
+            self.img_left.add_flag(lv.obj.FLAG.CLICKABLE)
         if has_next:
             self.img_right = lv.img(self)
             self.img_right.set_src("A:/res/arrow-right.png")
@@ -95,22 +125,16 @@ class ListItemBtn(lv.btn):
         self.label_left = lv.label(self)
         self.label_left.set_style_width(374, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label_left.set_long_mode(lv.label.LONG.WRAP)
-        self.label_left.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.label_left.set_style_text_font(
-            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.label_left.set_text(text)
 
         if left_img_src:
-            self.label_left.align_to(img_left, lv.ALIGN.OUT_RIGHT_MID, 12, 0)  # type: ignore["img_left" is possibly unbound]
+            self.label_left.align(lv.ALIGN.LEFT_MID, 38, 0)
         else:
             self.label_left.set_align(lv.ALIGN.LEFT_MID)
         if right_text:
             self.label_right = lv.label(self)
             self.label_right.set_long_mode(lv.label.LONG.WRAP)
-            self.label_right.set_width(200)
+            self.label_right.set_width(225)
             self.label_right.set_style_text_align(
                 lv.TEXT_ALIGN.RIGHT, lv.PART.MAIN | lv.STATE.DEFAULT
             )
@@ -129,21 +153,23 @@ class ListItemBtn(lv.btn):
 
     def add_check_img(self) -> None:
         self.img_right = lv.img(self)
-        self.img_right.set_src("A:/res/checked-white.png")
+        self.img_right.set_src("A:/res/checked-green-1.png")
         self.img_right.set_align(lv.ALIGN.RIGHT_MID)
         self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
 
     def set_checked(self) -> None:
         if self.img_right.has_flag(lv.obj.FLAG.HIDDEN):
             self.img_right.clear_flag(lv.obj.FLAG.HIDDEN)
-            self.set_style_bg_color(
-                lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            self.label_left.set_style_text_color(
+                lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
             )
 
     def set_uncheck(self) -> None:
         if not self.img_right.has_flag(lv.obj.FLAG.HIDDEN):
             self.img_right.add_flag(lv.obj.FLAG.HIDDEN)
-            self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.label_left.set_style_text_color(
+                lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+            )
 
     def is_unchecked(self) -> bool:
         return self.img_right.has_flag(lv.obj.FLAG.HIDDEN)
@@ -152,16 +178,32 @@ class ListItemBtn(lv.btn):
 class ListItemBtnWithSwitch(lv.btn):
     def __init__(self, parent, text: str) -> None:
         super().__init__(parent)
-        self.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.remove_style_all()
+
+        self.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_width(464, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.set_style_pad_hor(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
+        transition = DefaultTransition()
+        self.set_style_transform_height(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_transform_width(-4, lv.PART.MAIN | lv.STATE.PRESSED)
+        self.set_style_bg_color(
+            lv_colors.ONEKEY_BLACK_2, lv.PART.MAIN | lv.STATE.PRESSED
+        )
+        # self.set_style_text_color(
+        #     lv_colors.ONEKEY_GRAY, lv.PART.MAIN | lv.STATE.PRESSED
+        # )
+        self.set_style_transition(transition, lv.PART.MAIN | lv.STATE.PRESSED)
+
         label_left = lv.label(self)
         label_left.set_text(text)
         label_left.set_long_mode(lv.label.LONG.WRAP)
-        label_left.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
-        label_left.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         label_left.set_align(lv.ALIGN.LEFT_MID)
         self.switch = lv.switch(self)
         self.switch.set_size(48, 24)

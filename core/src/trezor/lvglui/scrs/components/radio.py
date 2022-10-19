@@ -6,11 +6,11 @@ class Radio:
     def __init__(self, parent, options) -> None:
         self.change_color_only = False
         self.container = ContainerFlexCol(parent, None, padding_row=0)
-        self.items: list[ButtonCell] = []
+        self.items: list[RadioItem] = []
         self.check_index = 0
         self.choices = options.split("\n")
         for idx, choice in enumerate(self.choices):
-            item = ButtonCell(self.container, choice)
+            item = RadioItem(self.container, choice)
             if idx == 0:
                 item.set_checked()
             self.items.append(item)
@@ -47,7 +47,7 @@ class Radio:
             item.set_style_text_font(font, lv.PART.MAIN | lv.STATE.DEFAULT)
 
 
-class ButtonCell(lv.btn):
+class RadioItem(lv.btn):
     def __init__(
         self,
         parent,
@@ -55,7 +55,7 @@ class ButtonCell(lv.btn):
     ) -> None:
         super().__init__(parent)
         self.content = text
-        self.set_size(lv.pct(100), 78)
+        self.set_size(464, 78)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_hor(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)

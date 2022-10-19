@@ -10,6 +10,9 @@ from .components.button import NormalButton
 from .components.label import SubTitle, Title
 from .components.radio import Radio
 
+# from trezor.lvglui.scrs.components.anim import Anim
+
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -49,7 +52,7 @@ class Screen(lv.obj):
         if kwargs.get("nav_back", False):
             self.nav_back = lv.imgbtn(self)
             self.nav_back.set_size(48, 48)
-            self.nav_back.set_pos(24, 92)
+            self.nav_back.set_pos(8, 56)
             self.nav_back.set_ext_click_area(100)
             self.nav_back.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
             self.nav_back.set_style_bg_img_src(
@@ -137,6 +140,7 @@ class FullSizeWindow(lv.obj):
         self.channel = loop.chan()
         self.set_size(lv.pct(100), lv.pct(100))
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)
+        # self.set_pos(-480, 0)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -181,12 +185,11 @@ class FullSizeWindow(lv.obj):
             self.btn_no = NormalButton(self, cancel_text)
             if confirm_text:
                 if not self.hold_confirm:
-                    self.btn_no.set_size(192, 76)
-                    self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 32, -18)
+                    self.btn_no.set_size(216, 76)
+                    self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -18)
                 else:
                     self.btn_no.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-                    self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 32, -8)
-                self.btn_no.enable()
+                    self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
             # self.btn_no.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if confirm_text:
             if cancel_text:
@@ -197,8 +200,8 @@ class FullSizeWindow(lv.obj):
                     self.slider = slider.Slider(self, confirm_text, relative_y=-88)
                 else:
                     self.btn_yes = NormalButton(self, confirm_text)
-                    self.btn_yes.set_size(192, 76)
-                    self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -32, -18)
+                    self.btn_yes.set_size(216, 76)
+                    self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -18)
             else:
                 self.btn_yes = NormalButton(self, confirm_text)
             if self.hold_confirm:
@@ -206,9 +209,12 @@ class FullSizeWindow(lv.obj):
             else:
                 self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
                 # self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        # self.show_anim = Anim(-480, 0, self.set_pos, time=50, y_axis=False)
+        # self.dismiss_anim = Anim(0, -480, self.set_pos, path_cb=lv.anim_t.path_ease_in, time=50, y_axis=False)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if auto_close:
             self.destroy(delay_ms=10 * 1000)
+        # self.show_anim.start()
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -243,6 +249,7 @@ class FullSizeWindow(lv.obj):
         return await self.channel.take()
 
     def destroy(self, delay_ms=400):
+        # self.dismiss_anim.start()
         self.del_delayed(delay_ms)
 
 

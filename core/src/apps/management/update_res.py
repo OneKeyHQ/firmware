@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from trezor import io, wire
 from trezor.crypto.hashlib import blake2s
 from trezor.messages import ResourceAck, ResourceRequest, Success
+from trezor.ui.layouts import confirm_update_res
 
 if TYPE_CHECKING:
     from trezor.messages import ResourceUpdate
@@ -33,8 +34,10 @@ REQUEST_CHUNK_SIZE = const(16 * 1024)
 
 
 async def update_res(ctx: wire.Context, msg: ResourceUpdate) -> Success:
-    res_size = msg.data_length
 
+    await confirm_update_res(ctx)
+
+    res_size = msg.data_length
     initial_data = msg.initial_data_chunk
     if blake2s(initial_data).digest() != msg.hash:
         raise wire.DataError("Date digest is inconsistent")
