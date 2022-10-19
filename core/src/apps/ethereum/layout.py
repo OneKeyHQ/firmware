@@ -114,7 +114,7 @@ def require_confirm_unknown_token(
         contract_address_hex,
         description=_(i18n_keys.LIST_KEY__CONTRACT__COLON),
         br_type="unknown_token",
-        icon="A:/res/shriek.png",
+        icon="A:/res/warning.png",
         icon_color=ui.ORANGE,
         br_code=ButtonRequestType.SignTx,
     )

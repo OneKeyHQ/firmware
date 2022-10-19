@@ -188,7 +188,7 @@ class BlobDisPlay(FullSizeWindow):
         title,
         description: str,
         content: str,
-        icon_path: str = "A:/res/shriek.png",
+        icon_path: str = "A:/res/warning.png",
     ):
         super().__init__(
             title,

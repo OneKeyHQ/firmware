@@ -3,6 +3,7 @@ from typing import Sequence
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 from trezor.ui.layouts import confirm_blob, show_success, show_warning
 from trezor.ui.layouts.lvgl.common import interact
 from trezor.ui.layouts.lvgl.reset import (  # noqa: F401
@@ -94,9 +95,11 @@ async def _show_confirmation_failure(
         "warning_backup_check",
         header=header,
         subheader="",
+        icon="A:/res/danger.png",
         content=_(i18n_keys.SUBTITLE__DEVICE_BACKUP_INCORRECT_WORD),
-        button=_(i18n_keys.BUTTON__CONTINUE),
+        button=_(i18n_keys.BUTTON__TRY_AGAIN),
         br_code=ButtonRequestType.ResetDevice,
+        btn_yes_bg_color=lv_colors.ONEKEY_BLACK_1,
     )
 
 
@@ -106,7 +109,7 @@ async def show_backup_warning(ctx: wire.GenericContext, slip39: bool = False) ->
     # else:
     #     description = "Never make a digital copy of your recovery seed and never upload\nit online!"
     # if utils.LVGL_UI:
-    #     icon = "A:/res/shriek.png"
+    #     icon = "A:/res/warning.png"
     #     description = "Never make a digital copy of your recovery seed and never upload it online!"
     # else:
     #     icon = ui.ICON_NOCOPY

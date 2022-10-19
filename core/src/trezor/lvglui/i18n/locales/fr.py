@@ -385,5 +385,10 @@ translations = [
     "Pendant le verrouillage, appuyez sur le bouton d'alimentation pour réactiver l'affichage.",
     "Visible en tant que \"{}\" pour les autres appareils.",
     "Activez Bluetooth pour vous connecter à d'autres appareils Bluetooth à proximité.",
+    "Corriger!",
+    "Incorrect!",
+    "Mise à jour des ressources",
+    "Voulez-vous mettre à jour la ressource du micrologiciel ?",
+    "Mise à jour",
 ]
 # fmt: on

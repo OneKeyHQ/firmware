@@ -10,7 +10,7 @@ from trezor.lvglui.scrs import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36
 from .common import FullSizeWindow, Screen, lv, lv_colors  # noqa: F401,F403,F405
 from .components.container import ContainerFlexCol
 from .components.label import Title
-from .components.radio import ButtonCell
+from .components.radio import RadioItem
 
 # from .components.keyboard import BIP39Keyboard
 # from .components.style import SubTitleStyle
@@ -61,10 +61,10 @@ class InitScreen(Screen):
         self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
 
         self.container = ContainerFlexCol(self.content_area, self.title, padding_row=0)
-        self.lang_buttons: list[ButtonCell] = []
+        self.lang_buttons: list[RadioItem] = []
         self.check_index = 0
         for _idx, lang in enumerate(langs):
-            lang_button = ButtonCell(self.container, lang[1])
+            lang_button = RadioItem(self.container, lang[1])
             lang_button.label.set_style_text_font(
                 font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
             )

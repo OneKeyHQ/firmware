@@ -4,8 +4,7 @@ from trezor import ui, utils, wire
 from trezor.crypto import random
 from trezor.enums import BackupType, ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.lvglui.scrs import font_MONO28, lv
-from trezor.lvglui.scrs.common import FullSizeWindow
+from trezor.lvglui.scrs.reset_device import CheckWord
 
 from ...components.common.confirm import is_confirmed
 from ...components.tt.button import ButtonDefault
@@ -78,14 +77,21 @@ async def confirm_word(
     title = _(i18n_keys.TITLE__CHECK_WORD_STR).format(offset + 1)
     subtitle = _(i18n_keys.SUBTITLE__DEVICE_BACKUP_CHECK_WORD)
     options = f"{choices[0]}\n{choices[1]}\n{choices[2]}"
-    selector = FullSizeWindow(
-        title, subtitle, _(i18n_keys.BUTTON__NEXT), options=options
-    )
-    selector.selector.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
-    selector.selector.set_flag()
+    selector = CheckWord(title, subtitle, options=options)
+    # selector.selector.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
+    # selector.selector.set_flag()
     selected_word: str = await ctx.wait(selector.request())
     # confirm it is the correct one
-    return selected_word == share_words[offset]
+    is_correct = selected_word == share_words[offset]
+    if is_correct:
+        selector.tip_correct()
+    else:
+        selector.tip_incorrect()
+    from trezor import loop
+
+    await loop.sleep(240)
+
+    return is_correct
 
 
 def _split_share_into_pages(

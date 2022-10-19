@@ -1,3 +1,4 @@
+from trezor import motor
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 from .. import font_PJSBOLD24, lv, lv_colors
@@ -107,6 +108,7 @@ class Slider(lv.slider):
                         dsc.rect_dsc.bg_img_src = self.done_img_src
                         if self.has_flag(lv.obj.FLAG.CLICKABLE):
                             self.clear_flag(lv.obj.FLAG.CLICKABLE)
+                        motor.vibrate()
                         lv.event_send(self, lv.EVENT.READY, None)
         elif code == lv.EVENT.DRAW_PART_END:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())

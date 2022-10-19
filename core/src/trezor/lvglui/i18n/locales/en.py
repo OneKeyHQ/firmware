@@ -385,5 +385,10 @@ translations = [
     "During locked, press the power button to wake the display.",
     "Visible as \"{}\" to other devices.",
     "Turn on Bluetooth to connect with other nearby Bluetooth devices.",
+    "Correct!",
+    "Incorrect!",
+    "Resource Update",
+    "Do you want to update firmware resource?",
+    "Update",
 ]
 # fmt: on

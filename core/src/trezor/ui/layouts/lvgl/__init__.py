@@ -59,6 +59,7 @@ __all__ = (
     "show_onekey_app_guide",
     "confirm_set_homescreen",
     "confirm_del_wallpaper",
+    "confirm_update_res",
 )
 
 
@@ -74,7 +75,7 @@ async def confirm_action(
     verb_cancel: str = "Cancel",
     hold: bool = False,
     hold_danger: bool = False,
-    icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
+    icon: str | None = "A:/res/warning.png",  # TODO cleanup @ redesign
     icon_color: int | None = None,  # TODO cleanup @ redesign
     reverse: bool = False,  # TODO cleanup @ redesign
     larger_vspace: bool = False,  # TODO cleanup @ redesign
@@ -186,7 +187,7 @@ async def confirm_backup(ctx: wire.GenericContext) -> bool:
 
     title = _(i18n_keys.TITLE__WARNING)
     subtitle = _(i18n_keys.SUBTITLE__DEVICE_SETUP_SKIP_BACK_UP_WARNING)
-    icon = "A:/res/shriek.png"
+    icon = "A:/res/warning.png"
     screen = FullSizeWindow(title, subtitle, confirm_text, cancel_text, icon_path=icon)
     confirmed = await interact(
         ctx,
@@ -319,6 +320,7 @@ async def _show_modal(
     button_cancel: str | None,
     icon: str,
     icon_color: int,
+    btn_yes_bg_color=None,
     exc: ExceptionType = wire.ActionCancelled,
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
@@ -330,6 +332,8 @@ async def _show_modal(
         cancel_text=button_cancel,
         icon_path=icon,
     )
+    if btn_yes_bg_color:
+        screen.btn_yes.enable(bg_color=btn_yes_bg_color)
     await raise_if_cancelled(
         interact(
             ctx,
@@ -377,6 +381,7 @@ def show_warning(
     br_code: ButtonRequestType = ButtonRequestType.Warning,
     icon: str = "A:/res/warning.png",
     icon_color: int = ui.RED,
+    btn_yes_bg_color=None,
 ) -> Awaitable[None]:
     return _show_modal(
         ctx,
@@ -389,6 +394,7 @@ def show_warning(
         button_cancel=None,
         icon=icon,
         icon_color=icon_color,
+        btn_yes_bg_color=btn_yes_bg_color,
     )
 
 
@@ -496,7 +502,7 @@ async def confirm_blob(
     description: str | None = None,
     hold: bool = False,
     br_code: ButtonRequestType = ButtonRequestType.Other,
-    icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
+    icon: str | None = "A:/res/warning.png",  # TODO cleanup @ redesign
     icon_color: int = ui.GREEN,  # TODO cleanup @ redesign
     ask_pagination: bool = False,
 ) -> None:
@@ -574,7 +580,7 @@ async def confirm_text(
     data: str,
     description: str | None = None,
     br_code: ButtonRequestType = ButtonRequestType.Other,
-    icon: str | None = "A:/res/shriek.png",  # TODO cleanup @ redesign
+    icon: str | None = "A:/res/warning.png",  # TODO cleanup @ redesign
     icon_color: int = ui.GREEN,  # TODO cleanup @ redesign
 ) -> None:
     """Confirm textual data.
@@ -825,7 +831,7 @@ async def show_popup(
 def draw_simple_text(
     title: str,
     description: str = "",
-    icon_path: str | None = "A:/res/shriek.png",
+    icon_path: str | None = "A:/res/warning.png",
     auto_close: bool = False,
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
@@ -1042,6 +1048,18 @@ async def confirm_set_homescreen(ctx):
         description=_(i18n_keys.SUBTITLE__SET_HOMESCREEN),
         icon="A:/res/upload-res.png",
     )
+
+
+async def confirm_update_res(ctx):
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    confirm_screen = FullSizeWindow(
+        title=_(i18n_keys.TITLE__RESOURCE_UPDATE),
+        subtitle=_(i18n_keys.SUBTITLE__RESOURCE_UPDATE),
+        confirm_text=_(i18n_keys.BUTTON__UPDATE),
+        cancel_text=_(i18n_keys.BUTTON__CANCEL),
+    )
+    await raise_if_cancelled(interact(ctx, confirm_screen, "confirm_update_res"))
 
 
 async def confirm_del_wallpaper(ctx, confirm_callback, cancel_callback):

@@ -3,7 +3,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage import device
-from trezor import config, io, log, loop, utils
+from trezor import config, io, log, loop, motor, utils
 from trezor.lvglui import StatusBar
 from trezor.ui import display
 
@@ -49,6 +49,7 @@ async def handle_usb_state():
                     StatusBar.get_instance().set_battery_img(
                         utils.BATTERY_CAP, CHARGING
                     )
+                motor.vibrate()
             else:
                 StatusBar.get_instance().show_usb(False)
                 # deal with charging state

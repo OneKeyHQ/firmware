@@ -22,10 +22,12 @@ async def lvgl_tick():
 
 def init_lvgl() -> None:
     import lvgldrv as lcd  # type: ignore[Import "lvgldrv" could not be resolved]
-    import stjpeg  # type: ignore[Import "stjpeg" could not be resolved]
 
     lv.init()
-    stjpeg.init()
+    if not utils.EMULATOR:
+        import stjpeg  # type: ignore[Import "stjpeg" could not be resolved]
+
+        stjpeg.init()
     disp_buf1 = lv.disp_draw_buf_t()
     buf1_1 = lcd.framebuffer(1)
     disp_buf1.init(buf1_1, None, len(buf1_1) // lv.color_t.__SIZE__)

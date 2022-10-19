@@ -202,6 +202,8 @@ trezor.lvglui.scrs.components.style
 import trezor.lvglui.scrs.components.style
 trezor.lvglui.scrs.components.theme
 import trezor.lvglui.scrs.components.theme
+trezor.lvglui.scrs.components.transition
+import trezor.lvglui.scrs.components.transition
 trezor.lvglui.scrs.homescreen
 import trezor.lvglui.scrs.homescreen
 trezor.lvglui.scrs.initscreen
