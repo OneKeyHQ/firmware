@@ -267,7 +267,7 @@ def se_verify(client: "TrezorClient", data: bytes) -> "MessageType":
 
 @expect(messages.Success, field="message", ret_type=str)
 def reboot(client: "TrezorClient"):
-    ret = client.call(messages.BixinReboot())
+    ret = client.call(messages.DeviceBackToBoot())
     return ret
 
 
