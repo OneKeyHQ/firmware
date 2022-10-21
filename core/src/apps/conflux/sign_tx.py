@@ -42,22 +42,36 @@ async def sign_tx(
     data_initial_chunk = (
         msg.data_initial_chunk if msg.data_initial_chunk is not None else b""
     )
-    address = address_from_hex(to, chain_id)
-
-    await require_confirm_tx(ctx, address, int.from_bytes(value, "big"))
-    if gas_limit != b"" and gas_price != b"":
+    owner_cfx_address = address_from_hex(owner_address, chain_id)
+    if len(to) > 0:
+        address = address_from_hex(to, chain_id)
+        await require_confirm_tx(ctx, address, int.from_bytes(value, "big"))
+        if data_total > 0:
+            await require_confirm_data(ctx, data_initial_chunk, data_total)
         await require_confirm_fee(
             ctx,
-            from_address=owner_address,
+            from_address=owner_cfx_address,
             to_address=address,
             value=int.from_bytes(value, "big"),
             gas_price=int.from_bytes(gas_price, "big"),
             gas_limit=int.from_bytes(gas_limit, "big"),
             network="CFX",
         )
+    else:
+        address = "new contract?"
+        if data_total > 0:
+            from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
-    if data_total > 0:
-        await require_confirm_data(ctx, data_initial_chunk, data_total)
+            await confirm_blind_sign_common(ctx, owner_cfx_address, data_initial_chunk)
+        await require_confirm_fee(
+            ctx,
+            from_address=owner_cfx_address,
+            to_address=address,
+            value=int.from_bytes(value, "big"),
+            gas_price=int.from_bytes(gas_price, "big"),
+            gas_limit=int.from_bytes(gas_limit, "big"),
+            network="CFX",
+        )
 
     data = bytearray()
     data += data_initial_chunk
