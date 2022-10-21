@@ -34,7 +34,7 @@ void conflux_message_sign(const ConfluxSignMessage *msg, const HDNode *node,
 bool conflux_parse(const char *address, uint8_t pubkeyhash[20]);
 void get_ethereum_format_address(uint8_t pubkeyhash[20], char *address);
 int get_base32_encode_address(uint8_t *in, char *out, size_t out_len,
-                              uint32_t chain_id);
+                              uint32_t chain_id, bool is_sign);
 void conflux_message_sign_cip23(const ConfluxSignMessageCIP23 *msg,
                                 const HDNode *node,
                                 ConfluxMessageSignature *resp);
