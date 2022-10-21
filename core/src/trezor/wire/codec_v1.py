@@ -53,6 +53,10 @@ class CodecError(Exception):
     pass
 
 
+class WriteError(Exception):
+    pass
+
+
 class Message:
     def __init__(self, mtype: int, mdata: bytes) -> None:
         self.type = mtype
@@ -132,6 +136,8 @@ async def write_message(iface: WireInterface, mtype: int, mdata: bytes) -> None:
             while True:
                 await write
                 n = iface.write(report)
+                if n == 0:
+                    raise WriteError("write error")
                 if n == len(report):
                     break
 

@@ -164,9 +164,12 @@ int usb_webusb_write(uint8_t iface_num, const uint8_t *buf, uint32_t len) {
   volatile usb_webusb_state_t *state = &iface->webusb;
 
   state->ep_in_is_idle = 0;
-  USBD_LL_Transmit(&usb_dev_handle, state->ep_in, UNCONST(buf), (uint16_t)len);
-
-  return len;
+  if (USBD_LL_Transmit(&usb_dev_handle, state->ep_in, UNCONST(buf),
+                       (uint16_t)len) == USBD_OK) {
+    return len;
+  } else {
+    return 0;
+  }
 }
 
 int usb_webusb_read_select(uint32_t timeout) {

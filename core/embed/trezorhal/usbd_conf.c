@@ -71,6 +71,8 @@ static PCD_HandleTypeDef pcd_hs_handle;
 #endif
 
 volatile bool usb_connect_state = false;
+volatile bool data_in_done = false;
+static uint8_t data_in_ep = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -306,6 +308,9 @@ void HAL_PCD_DataOutStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
 void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
 {
   USBD_LL_DataInStage(hpcd->pData, epnum, hpcd->IN_ep[epnum].xfer_buff);
+  if(data_in_ep == epnum){
+    data_in_done = true;
+  }
 }
 
 /**
@@ -653,7 +658,25 @@ USBD_StatusTypeDef USBD_LL_Transmit(USBD_HandleTypeDef *pdev,
                                     uint8_t  *pbuf,
                                     uint16_t  size)
 {
-  HAL_PCD_EP_Transmit(pdev->pData, ep_addr, pbuf, size);
+  if(ep_addr != 0){
+    int32_t tickstart = HAL_GetTick();
+    data_in_done = false;
+    data_in_ep = ep_addr & EP_ADDR_MSK;
+    HAL_PCD_EP_Transmit(pdev->pData, ep_addr, pbuf, size);
+    while(!data_in_done){
+      if ((HAL_GetTick() - tickstart) > 500) {
+        __HAL_RCC_USB1_OTG_HS_FORCE_RESET();
+        __HAL_RCC_USB1_OTG_HS_RELEASE_RESET();  
+        USBD_LL_Init(pdev); 
+        USBD_LL_Start(pdev);      
+        return USBD_FAIL;
+      }
+    }
+    data_in_done = false;
+  }else{
+    HAL_PCD_EP_Transmit(pdev->pData, ep_addr, pbuf, size);
+  }
+  
   return USBD_OK;
 }
 
