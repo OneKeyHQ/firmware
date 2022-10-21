@@ -34,6 +34,7 @@
 
 #ifndef TREZOR_EMULATOR
 #include "image.h"
+#include "mini_printf.h"
 #endif
 
 static void ui_progress(mp_obj_t ui_wait_callback, uint32_t current,
@@ -283,6 +284,29 @@ STATIC mp_obj_t mod_trezorutils_reboot2boardloader() {
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_reboot2boardloader_obj,
                                  mod_trezorutils_reboot2boardloader);
 
+/// def boot_version() -> str:
+///     """
+///     Returns the bootloader version string.
+///     """
+STATIC mp_obj_t mod_trezorutils_boot_version(void) {
+#ifdef TREZOR_EMULATOR
+  return mp_obj_new_str_copy(&mp_type_str, (const uint8_t *)"EMULATOR", 8);
+#else
+  uint8_t *boot_header = (uint8_t *)BOOTLOADER_START;
+  uint32_t version;
+  char ver_str[64] = {0};
+
+  memcpy(&version, boot_header + 16, 4);
+
+  mini_snprintf(ver_str, sizeof(ver_str), "%d.%d.%d", (int)(version & 0xFF),
+                (int)((version >> 8) & 0xFF), (int)((version >> 16) & 0xFF));
+  return mp_obj_new_str_copy(&mp_type_str, (const uint8_t *)ver_str,
+                             strlen(ver_str));
+#endif
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_boot_version_obj,
+                                 mod_trezorutils_boot_version);
+
 STATIC mp_obj_str_t mod_trezorutils_revision_obj = {
     {&mp_type_bytes}, 0, sizeof(SCM_REVISION) - 1, (const byte *)SCM_REVISION};
 
@@ -324,6 +348,8 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
      MP_ROM_PTR(&mod_trezorutils_firmware_sector_size_obj)},
     {MP_ROM_QSTR(MP_QSTR_FIRMWARE_SECTORS_COUNT),
      MP_ROM_INT(FIRMWARE_SECTORS_COUNT)},
+    {MP_ROM_QSTR(MP_QSTR_boot_version),
+     MP_ROM_PTR(&mod_trezorutils_boot_version_obj)},
 
     // various built-in constants
     {MP_ROM_QSTR(MP_QSTR_SCM_REVISION),

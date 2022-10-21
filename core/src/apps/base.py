@@ -52,6 +52,7 @@ def get_features() -> Features:
         ble_enable=storage.device.ble_enabled(),
         serial_no=storage.device.get_serial(),
         build_id=utils.BUILD_ID,
+        bootloader_version=utils.boot_version(),
     )
 
     if utils.BITCOIN_ONLY:

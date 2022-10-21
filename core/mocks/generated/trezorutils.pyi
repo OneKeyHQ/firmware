@@ -93,6 +93,13 @@ def reboot2boardloader() -> None:
     """
     Reboots to boardloader.
     """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def boot_version() -> str:
+    """
+    Returns the bootloader version string.
+    """
 SCM_REVISION: bytes
 BUILD_ID: bytes
 VERSION_MAJOR: int
