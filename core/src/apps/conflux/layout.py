@@ -4,8 +4,9 @@ from trezor import ui
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
-from trezor.ui.layouts import confirm_output
+from trezor.ui.layouts import confirm_address, confirm_output
 
+from ..ethereum import tokens
 from . import helpers
 
 if TYPE_CHECKING:
@@ -31,17 +32,24 @@ def require_confirm_tx(
     ctx: Context,
     to: str,
     value: int,
+    token: tokens.TokenInfo | None = None,
 ) -> Awaitable[None]:
-    addr_type = helpers.get_address_type(to)
-    if addr_type == helpers.CONFLUX_TYPE_USER:
-        to_str = to
-    else:
+    if len(to) == 0:
         to_str = _(i18n_keys.LIST_VALUE__NEW_CONTRACT)
+    else:
+        to_str = to
+    if token is None:
+        if value == 0:
+            amount = "message"
+        else:
+            amount = format_conflux_amount(value, None)
+    else:
+        amount = format_conflux_amount(value, token)
 
     return confirm_output(
         ctx,
         address=to_str,
-        amount=format_conflux_amount(value),
+        amount=amount,
         font_amount=ui.BOLD,
         color_to=ui.GREY,
         br_code=ButtonRequestType.SignTx,
@@ -56,24 +64,33 @@ def require_confirm_fee(
     gas_price: int = 0,
     gas_limit: int = 0,
     network: str | None = None,
+    token: tokens.TokenInfo | None = None,
 ) -> Awaitable[None]:
     from trezor.ui.layouts.lvgl.altcoin import confirm_total_tron
 
     fee_limit = gas_price * gas_limit
+    if token is None:
+        total_amount = format_conflux_amount(value + fee_limit, None)
+    else:
+        total_amount = None
     return confirm_total_tron(
         ctx,
         from_address,
         to_address,
-        format_conflux_amount(value),
-        format_conflux_amount(fee_limit),
-        format_conflux_amount(value + fee_limit),
+        format_conflux_amount(value, token),
+        format_conflux_amount(fee_limit, None),
+        total_amount,
         network,
     )
 
 
-def format_conflux_amount(value: int) -> str:
-    suffix = "CFX"
-    decimals = helpers.DECIMALS
+def format_conflux_amount(value: int, token: tokens.TokenInfo | None) -> str:
+    if token:
+        suffix = token.symbol
+        decimals = token.decimals
+    else:
+        suffix = "CFX"
+        decimals = helpers.DECIMALS
 
     # Don't want to display wei values for tokens with small decimal numbers
     if decimals > 9 and value < 10 ** (decimals - 9):
@@ -81,3 +98,16 @@ def format_conflux_amount(value: int) -> str:
         decimals = 0
 
     return f"{format_amount(value, decimals)} {suffix}"
+
+
+def require_confirm_unknown_token(ctx: Context, address: str) -> Awaitable[None]:
+    return confirm_address(
+        ctx,
+        _(i18n_keys.TITLE__UNKNOWN_TOKEN),
+        address,
+        description=_(i18n_keys.LIST_KEY__CONTRACT__COLON),
+        br_type="unknown_token",
+        icon="A:/res/shriek.png",
+        icon_color=ui.ORANGE,
+        br_code=ButtonRequestType.SignTx,
+    )

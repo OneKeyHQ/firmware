@@ -142,8 +142,11 @@ def address_from_hex(hex_address: str, chain_id: int) -> str:
     network_prefix = "cfx"
     if chain_id == 1:
         network_prefix = "cfxtest"
-
-    eth_addr = eth_address_to_cfx(hex_address)
+    # 0x8: contract address
+    if hex_address.lower()[:3] == "0x8":
+        eth_addr = hex_address
+    else:
+        eth_addr = eth_address_to_cfx(hex_address)
     address_bytes = hex_address_bytes(eth_addr)
 
     payload = _encode(bytes(1) + address_bytes)
