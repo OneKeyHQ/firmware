@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "bootui.h"
+#include "br_check.h"
 #include "device.h"
 #include "display.h"
 #include "icon_cancel.h"
@@ -742,37 +743,43 @@ void ui_bootloader_second(const image_header *const hdr) {
                 sizeof(toi_icon_restart) - 12);
   display_text(offset, 160, "MODEL:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
-  display_text(offset, 194, "OneKey Touch", -1, FONT_NORMAL, COLOR_BL_BG,
+  display_text(offset, 192, "OneKey Touch", -1, FONT_NORMAL, COLOR_BL_BG,
                COLOR_BL_FG);
-  display_text(offset, 256, "FIRMWARE:", -1, FONT_NORMAL, COLOR_BL_GRAY,
+  display_text(offset, 240, "FIRMWARE:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
   if (hdr && hdr->onekey_version != 0) {
     ver_str = format_ver("%d.%d.%d", (hdr->onekey_version));
-    display_text(offset, 290, ver_str, -1, FONT_NORMAL, COLOR_BL_BG,
+    display_text(offset, 272, ver_str, -1, FONT_NORMAL, COLOR_BL_BG,
                  COLOR_BL_FG);
   } else {
-    display_text(offset, 290, "No Firmware", -1, FONT_NORMAL, COLOR_BL_BG,
+    display_text(offset, 272, "No Firmware", -1, FONT_NORMAL, COLOR_BL_BG,
                  COLOR_BL_FG);
   }
-  display_text(offset, 352, "SERIAL:", -1, FONT_NORMAL, COLOR_BL_GRAY,
+  display_text(offset, 320, "SERIAL:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
 
   char *dev_serial;
   if (device_get_serial(&dev_serial)) {
-    display_text(offset, 386, dev_serial, -1, FONT_NORMAL, COLOR_BL_BG,
+    display_text(offset, 352, dev_serial, -1, FONT_NORMAL, COLOR_BL_BG,
                  COLOR_BL_FG);
   } else {
-    display_text(offset, 386, "NULL", -1, FONT_NORMAL, COLOR_BL_BG,
+    display_text(offset, 352, "NULL", -1, FONT_NORMAL, COLOR_BL_BG,
                  COLOR_BL_FG);
   }
 
-  display_text(offset, 448, "SE:", -1, FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);
-  display_text(offset, 482, "ATECC608A", -1, FONT_NORMAL, COLOR_BL_BG,
+  display_text(offset, 400, "SE:", -1, FONT_NORMAL, COLOR_BL_GRAY, COLOR_BL_FG);
+  display_text(offset, 432, "ATECC608A", -1, FONT_NORMAL, COLOR_BL_BG,
                COLOR_BL_FG);
-  display_text(offset, 544, "BOOTLOADER:", -1, FONT_NORMAL, COLOR_BL_GRAY,
+
+  display_text(offset, 480, "BOARDLOADER:", -1, FONT_NORMAL, COLOR_BL_GRAY,
+               COLOR_BL_FG);
+  display_text(offset, 512, get_boardloader_version(), -1, FONT_NORMAL,
+               COLOR_BL_BG, COLOR_BL_FG);
+
+  display_text(offset, 560, "BOOTLOADER:", -1, FONT_NORMAL, COLOR_BL_GRAY,
                COLOR_BL_FG);
   ver_str = format_ver("%d.%d.%d", VERSION_UINT32);
-  display_text(offset, 578, ver_str, -1, FONT_NORMAL, COLOR_BL_BG, COLOR_BL_FG);
+  display_text(offset, 592, ver_str, -1, FONT_NORMAL, COLOR_BL_BG, COLOR_BL_FG);
 }
 
 void ui_bootloader_factory(void) {

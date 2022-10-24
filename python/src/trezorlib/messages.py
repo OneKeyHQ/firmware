@@ -3624,6 +3624,7 @@ class Features(protobuf.MessageType):
         516: protobuf.Field("pre_firmware", "string", repeated=False, required=False),
         517: protobuf.Field("coin_switch", "uint32", repeated=False, required=False),
         518: protobuf.Field("build_id", "bytes", repeated=False, required=False),
+        519: protobuf.Field("boardloader_version", "string", repeated=False, required=False),
     }
 
     def __init__(
@@ -3685,6 +3686,7 @@ class Features(protobuf.MessageType):
         pre_firmware: Optional["str"] = None,
         coin_switch: Optional["int"] = None,
         build_id: Optional["bytes"] = None,
+        boardloader_version: Optional["str"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3742,6 +3744,7 @@ class Features(protobuf.MessageType):
         self.pre_firmware = pre_firmware
         self.coin_switch = coin_switch
         self.build_id = build_id
+        self.boardloader_version = boardloader_version
 
 
 class LockDevice(protobuf.MessageType):
