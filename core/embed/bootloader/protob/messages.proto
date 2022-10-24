@@ -78,6 +78,7 @@ message Features {
     optional string bootloader_version = 510;
 
     optional uint32 initstates = 513;      // list of facotry state
+    optional string boardloader_version = 519;
 }
 
 /**

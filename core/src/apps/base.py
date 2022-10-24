@@ -53,6 +53,7 @@ def get_features() -> Features:
         serial_no=storage.device.get_serial(),
         build_id=utils.BUILD_ID,
         bootloader_version=utils.boot_version(),
+        boardloader_version=utils.board_version(),
     )
 
     if utils.BITCOIN_ONLY:

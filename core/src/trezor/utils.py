@@ -13,6 +13,7 @@ from trezorutils import (  # noqa: F401
     VERSION_MAJOR,
     VERSION_MINOR,
     VERSION_PATCH,
+    board_version,
     boot_version,
     consteq,
     firmware_hash,

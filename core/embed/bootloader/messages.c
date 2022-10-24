@@ -25,6 +25,7 @@
 #include "messages.pb.h"
 
 #include "blake2s.h"
+#include "br_check.h"
 #include "common.h"
 #include "device.h"
 #include "flash.h"
@@ -372,6 +373,9 @@ static void send_msg_features(uint8_t iface_num,
     if (device_get_serial(&serial)) {
       MSG_SEND_ASSIGN_STRING_LEN(serial_no, serial, strlen(serial));
     }
+    char *board_version = get_boardloader_version();
+    MSG_SEND_ASSIGN_STRING_LEN(boardloader_version, board_version,
+                               strlen(board_version));
   }
 
   MSG_SEND(Features);

@@ -100,6 +100,13 @@ def boot_version() -> str:
     """
     Returns the bootloader version string.
     """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def board_version() -> str:
+    """
+    Returns the bootloader version string.
+    """
 SCM_REVISION: bytes
 BUILD_ID: bytes
 VERSION_MAJOR: int

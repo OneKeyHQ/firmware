@@ -2269,6 +2269,7 @@ if TYPE_CHECKING:
         pre_firmware: "str | None"
         coin_switch: "int | None"
         build_id: "bytes | None"
+        boardloader_version: "str | None"
 
         def __init__(
             self,
@@ -2328,6 +2329,7 @@ if TYPE_CHECKING:
             pre_firmware: "str | None" = None,
             coin_switch: "int | None" = None,
             build_id: "bytes | None" = None,
+            boardloader_version: "str | None" = None,
         ) -> None:
             pass
 

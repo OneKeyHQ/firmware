@@ -132,6 +132,7 @@ message Features {
 
     optional uint32 coin_switch = 517;
     optional bytes build_id = 518;
+    optional string boardloader_version = 519;
 }
 
 /**
