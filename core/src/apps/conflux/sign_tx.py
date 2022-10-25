@@ -8,8 +8,14 @@ from trezor.utils import HashWriter
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
+from ..ethereum import tokens
 from .helpers import address_from_bytes, address_from_hex, bytes_from_address
-from .layout import require_confirm_data, require_confirm_fee, require_confirm_tx
+from .layout import (
+    require_confirm_data,
+    require_confirm_fee,
+    require_confirm_tx,
+    require_confirm_unknown_token,
+)
 
 
 @auto_keychain(__name__)
@@ -44,25 +50,48 @@ async def sign_tx(
     )
     owner_cfx_address = address_from_hex(owner_address, chain_id)
     if len(to) > 0:
-        address = address_from_hex(to, chain_id)
-        await require_confirm_tx(ctx, address, int.from_bytes(value, "big"))
+        cfx_to = address_from_hex(to, chain_id)
+        token = None
+        # detect ERC-20 like token
+        if (
+            len(value) == 0
+            and data_total == 68
+            and len(data_initial_chunk) == 68
+            and data_initial_chunk[:16]
+            == b"\xa9\x05\x9c\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        ):
+            # not support tokens display right now, return unknown recipient directly
+            amount = int.from_bytes(data_initial_chunk[36:68], "big")
+            address = address_from_hex(
+                address_from_bytes(data_initial_chunk[16:36], None), chain_id
+            )
+            if cfx_to == "cfx:acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7":
+                token = tokens.TokenInfo("cUSDT", 18)
+            else:
+                token = tokens.TokenInfo("UNKN", 0)
+                await require_confirm_unknown_token(ctx, cfx_to)
+        else:
+            amount = int.from_bytes(value, "big")
+            address = cfx_to
+
+        await require_confirm_tx(ctx, address, amount, token)
         if data_total > 0:
             await require_confirm_data(ctx, data_initial_chunk, data_total)
         await require_confirm_fee(
             ctx,
             from_address=owner_cfx_address,
             to_address=address,
-            value=int.from_bytes(value, "big"),
+            value=amount,
             gas_price=int.from_bytes(gas_price, "big"),
             gas_limit=int.from_bytes(gas_limit, "big"),
             network="CFX",
+            token=token,
         )
     else:
         address = "new contract?"
+        await require_confirm_tx(ctx, address, int.from_bytes(value, "big"), None)
         if data_total > 0:
-            from trezor.ui.layouts.lvgl import confirm_blind_sign_common
-
-            await confirm_blind_sign_common(ctx, owner_cfx_address, data_initial_chunk)
+            await require_confirm_data(ctx, data_initial_chunk, data_total)
         await require_confirm_fee(
             ctx,
             from_address=owner_cfx_address,
