@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
 
       - name: "Build boardloader bootloader firmware"
         env:
@@ -40,8 +40,8 @@ jobs:
           poetry run make build_firmware
           poetry run tools/headertool.py -h build/firmware/touch*Stable*.bin  -S 1:${{ secrets.SECRET_KEY_1 }} -S 2:${{ secrets.SECRET_KEY_2 }}
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v3
         with:
           name: firmware-${{ github.sha }}
           path: |
@@ -49,18 +49,18 @@ jobs:
             ./core/build/bootloader/bootloader.bin
             ./core/build/firmware/touch*Stable*.bin
 
-      - name: Set Env
+      - name: "Set Env"
         run: |
           artifacts_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           echo "ARTIFACTS_URL=$artifacts_url" >> $GITHUB_ENV
 
-      - name: 'Notify to Slack'
+      - name: "Notify to Slack"
         uses: onekeyhq/onekey-github-actions/notice-slack-app-update@main
         with:
           web-hook-url: ${{ secrets.SLACK_DEV_RELEASE_WEBHOOK }}
-          artifact-type: Firmware
+          artifact-type: TOUCH-FIRMWARE
           artifact-name: Touch-Hardware-Firmware
-          artifact-bundle-id: 'so.onekey.firmware'
+          artifact-bundle-id: 'so.onekey.firmware.touch'
           artifact-download-url: '${{ env.ARTIFACTS_URL }}'
           change-log: 'Download [Artifacts] at the bottom of page.'
           custom-issue-url: ''
