@@ -27,9 +27,13 @@ language = "en"
 
 class InitScreen(Screen):
     def __init__(self):
-        super().__init__(
-            btn_text=_(i18n_keys.BUTTON__CONTINUE),
-        )
+        if not hasattr(self, "_init"):
+            self._init = True
+            super().__init__(
+                btn_text=_(i18n_keys.BUTTON__CONTINUE),
+            )
+        else:
+            return
         self.content_area = lv.obj(self)
         self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)

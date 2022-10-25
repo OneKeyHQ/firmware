@@ -13,8 +13,6 @@ from trezorutils import (  # noqa: F401
     VERSION_MAJOR,
     VERSION_MINOR,
     VERSION_PATCH,
-    board_version,
-    boot_version,
     consteq,
     firmware_hash,
     firmware_sector_size,
@@ -27,6 +25,17 @@ from trezorutils import (  # noqa: F401
     reset,
 )
 from typing import TYPE_CHECKING
+
+if not EMULATOR:
+    from trezorutils import boot_version, board_version
+else:
+
+    def boot_version() -> str:
+        return "emulator-1.2.0"
+
+    def board_version() -> str:
+        return "emulator-1.0.0"
+
 
 # pyright: on
 

@@ -12,12 +12,7 @@ from trezor.ui import display, style
 from apps.common import safety_checks
 
 from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36, font_PJSREG24
-from .common import (  # noqa: F401, F403, F405
-    FullSizeWindow,
-    Screen,
-    load_scr_with_animation,
-    lv,
-)
+from .common import FullSizeWindow, Screen, lv  # noqa: F401, F403, F405
 from .components.anim import Anim
 from .components.button import ListItemBtn, ListItemBtnWithSwitch, NormalButton
 from .components.container import ContainerFlexCol, ContainerGrid
@@ -62,8 +57,6 @@ class MainScreen(Screen):
                 self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
             if self.apps:
                 self.apps.tips_top.set_text(_(i18n_keys.BUTTON__CLOSE))
-            if not self.is_visible():
-                load_scr_with_animation(self)
             return
         self.title.align(lv.ALIGN.TOP_MID, 0, 92)
         self.subtitle.set_style_text_color(
@@ -281,8 +274,6 @@ class SettingsScreen(Screen):
             super().__init__(**kwargs)
         else:
             self.refresh_text()
-            if not self.is_visible():
-                load_scr_with_animation(self)
             return
 
         self.title.align(lv.ALIGN.TOP_MID, 0, 56)
@@ -837,7 +828,10 @@ class AboutSetting(Screen):
         serial = device.get_serial()
 
         ble_name = device.get_ble_name()
+        ble_version = uart.get_ble_version()
         storage = device.get_storage()
+        boot_version = utils.boot_version()
+        board_version = utils.board_version()
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
@@ -848,21 +842,6 @@ class AboutSetting(Screen):
         )
         self.model.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.model.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.version = ListItemBtn(
-            self.container,
-            _(i18n_keys.ITEM__SYSTEM_VERSION),
-            right_text=version,
-            has_next=False,
-        )
-        self.version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.version.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.serial = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__SERIAL), right_text=serial, has_next=False
-        )
-        self.serial.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.serial.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.ble_mac = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLUETOOTH),
@@ -883,6 +862,47 @@ class AboutSetting(Screen):
         self.storage.set_style_bg_color(
             lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
         )
+
+        self.version = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__SYSTEM_VERSION),
+            right_text=version,
+            has_next=False,
+        )
+        self.version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.version.set_style_bg_color(
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.ble_version = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__BLUETOOTH_VERSION),
+            right_text=ble_version or "1.0.0",
+            has_next=False,
+        )
+        self.ble_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.ble_version.set_style_bg_color(
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.boot_version = ListItemBtn(
+            self.container,
+            "BootLoader",
+            right_text=boot_version,
+            has_next=False,
+        )
+        self.boot_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.boot_version.set_style_bg_color(
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.board_version = ListItemBtn(
+            self.container,
+            "BoardLoader",
+            right_text=board_version,
+            has_next=False,
+        )
+        self.board_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.board_version.set_style_bg_color(
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
         self.build_id = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BUILD_ID),
@@ -893,6 +913,11 @@ class AboutSetting(Screen):
         self.build_id.set_style_bg_color(
             lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
         )
+        self.serial = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__SERIAL), right_text=serial, has_next=False
+        )
+        self.serial.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.serial.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         # self.board_loader = ListItemBtn(
         #     self.container,
         #     _(i18n_keys.ITEM__BOARDLOADER),
@@ -977,9 +1002,6 @@ class PowerOff(Screen):
         if self.has_pin:
             config.lock()
 
-    def back(self):
-        self.load_screen(self.prev_scr, destroy_self=True)
-
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
@@ -996,11 +1018,10 @@ class PowerOff(Screen):
                         verify_user_pin(
                             set_home=self.set_home,
                             allow_cancel=False,
-                            callback=self.back,
                         )
                     )
                 else:
-                    self.back()
+                    self.load_screen(self.prev_scr, destroy_self=True)
 
 
 class ShutingDown(FullSizeWindow):

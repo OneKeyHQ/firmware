@@ -167,7 +167,14 @@ async def _deal_button_press(value: bytes) -> None:
     elif res == _PRESS_LONG:
         from trezor.lvglui.scrs.homescreen import PowerOff
 
-        PowerOff(set_home=True)
+        if device.is_initialized():
+            PowerOff(set_home=True)
+        else:
+            from trezor.lvglui.scrs.initscreen import InitScreen
+
+            PowerOff(InitScreen._instance)
+        await loop.sleep(100)
+        utils.lcd_resume()
 
 
 async def _deal_charging_state(value: bytes) -> None:
