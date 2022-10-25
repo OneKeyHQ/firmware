@@ -884,9 +884,9 @@ async def request_pin_on_device(
     result = await ctx.wait(pinscreen.request())
     if not result:
         if not allow_cancel:
-            from apps.base import set_homescreen
+            from trezor import loop
 
-            set_homescreen()
+            loop.clear()
         raise wire.PinCancelled
     assert isinstance(result, str)
     return result

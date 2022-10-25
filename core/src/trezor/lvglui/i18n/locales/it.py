@@ -390,5 +390,8 @@ translations = [
     "Aggiornamento delle risorse",
     "Vuoi aggiornare la risorsa del firmware?",
     "Aggiornare",
+    "Versione Bluetooth",
+    "Transazione firmata",
+    "Chiudi ({}s)",
 ]
 # fmt: on

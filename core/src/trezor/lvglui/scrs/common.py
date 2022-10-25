@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from trezor import loop, utils
+from trezor.lvglui.scrs.components.anim import Anim
 
 import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
@@ -9,9 +10,6 @@ from .components import slider
 from .components.button import NormalButton
 from .components.label import SubTitle, Title
 from .components.radio import Radio
-
-# from trezor.lvglui.scrs.components.anim import Anim
-
 
 if TYPE_CHECKING:
     from typing import Any
@@ -209,8 +207,16 @@ class FullSizeWindow(lv.obj):
             else:
                 self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
                 # self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
-        # self.show_anim = Anim(-480, 0, self.set_pos, time=50, y_axis=False)
-        # self.dismiss_anim = Anim(0, -480, self.set_pos, path_cb=lv.anim_t.path_ease_in, time=50, y_axis=False)
+        self.show_anim = Anim(-480, 0, self.set_pos, time=150, y_axis=False)
+        self.dismiss_anim = Anim(
+            0,
+            -480,
+            self.set_pos,
+            path_cb=lv.anim_t.path_ease_in,
+            time=100,
+            y_axis=False,
+            delay=50,
+        )
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if auto_close:
             self.destroy(delay_ms=10 * 1000)
@@ -256,5 +262,18 @@ class FullSizeWindow(lv.obj):
 def load_scr_with_animation(scr: Screen, back: bool = False) -> None:
     """Load a screen with animation."""
     # TODO: FIX ANIMATION LOAD
-    # lv.scr_load_anim(scr, lv.SCR_LOAD_ANIM.OVER_LEFT if back else lv.SCR_LOAD_ANIM.OVER_RIGHT, 100, 0, False)
+    # from .lockscreen import LockScreen
+    # from .homescreen import MainScreen
+    # from .initscreen import InitScreen
+
+    # if isinstance(scr, (LockScreen, MainScreen, InitScreen)) and not back:
+    #     lv.scr_load(scr)
+    # else:
+    #     lv.scr_load_anim(
+    #         scr,
+    #         lv.SCR_LOAD_ANIM.OVER_LEFT if back else lv.SCR_LOAD_ANIM.OVER_RIGHT,
+    #         150,
+    #         10,
+    #         False,
+    #     )
     lv.scr_load(scr)

@@ -24,6 +24,7 @@ class ContainerFlexCol(lv.obj):
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_row(padding_row, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.set_flex_flow(lv.FLEX_FLOW.COLUMN)
         self.set_flex_align(
             lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER, lv.FLEX_ALIGN.CENTER

@@ -27,6 +27,11 @@ class BootScreen(Screen):
         self.bar.set_value(100, lv.ANIM.ON)
         # self.add_event_cb(self.eventhandler, lv.EVENT.SCREEN_LOADED, None)
 
+    def load_screen(self, scr, _destroy_self: bool = False):
+        import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
+
+        return lv.scr_load(scr)
+
     # def eventhandler(self, event_obj):
     #     code = event_obj.code
     #     if code == lv.EVENT.SCREEN_LOADED:

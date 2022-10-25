@@ -1,6 +1,7 @@
 from micropython import const
 from typing import TYPE_CHECKING
 
+import storage.cache
 from trezor import io, wire
 from trezor.crypto.hashlib import blake2s
 from trezor.messages import ResourceAck, ResourceRequest, Success
@@ -35,7 +36,8 @@ REQUEST_CHUNK_SIZE = const(16 * 1024)
 
 async def update_res(ctx: wire.Context, msg: ResourceUpdate) -> Success:
 
-    await confirm_update_res(ctx)
+    if storage.cache.show_update_res_confirm():
+        await confirm_update_res(ctx)
 
     res_size = msg.data_length
     initial_data = msg.initial_data_chunk

@@ -15,6 +15,7 @@ async def lvgl_tick():
         lv.timer_handler()
         inactive_time = get_elapsed()
         if inactive_time < inactive_time_bak:
+            utils.lcd_resume()
             workflow.idle_timer.touch()
 
         inactive_time_bak = inactive_time
@@ -55,6 +56,7 @@ def init_theme() -> None:
         True,
         lv.font_default(),
     )
+    # dispp.set_bg_color(lv.color_hex(0x000000))
     dispp.set_theme(theme)
 
 
