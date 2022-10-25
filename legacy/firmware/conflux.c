@@ -366,6 +366,18 @@ static void confluxFormatAmount(const bignum256 *amnt, const TokenType *token,
     decimals = 0;
   } else {
     suffix = " CFX";
+    bn_format(amnt, NULL, suffix, decimals, 0, false, buf, buflen);
+    // Take 5 decimal places(ref coinmarkercap).
+    // Note that there may be a loss of precision between the real price value
+    // and what is shown to the user
+    char *dot_start = strchr(buf, '.');
+    if (dot_start) {
+      char *dot_end = strchr(dot_start, ' ');
+      if ((dot_end - dot_start) > 6) {
+        snprintf(dot_start + 6, 5, "%s", " CFX");
+      }
+    }
+    return;
   }
   bn_format(amnt, NULL, suffix, decimals, 0, false, buf, buflen);
 }
@@ -379,7 +391,7 @@ static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,
   memcpy(pad_val + (32 - value_len), value, value_len);
   bn_read_be(pad_val, &val);
 
-  char amount[32] = {0};
+  char amount[36] = {0};
   if (token == NULL) {
     if (bn_is_zero(&val)) {
       strcpy(amount, _("message"));
@@ -411,7 +423,7 @@ static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,
     strlcpy(_to2, "", sizeof(_to2));
     strlcpy(_to3, "", sizeof(_to3));
   }
-  if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
+  if (oledStringWidthAdapter(amount, FONT_STANDARD) > OLED_WIDTH) {
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                       _("Send"), amount, NULL, _to1, _to2, NULL);
   } else {
@@ -456,7 +468,7 @@ static void layoutConfluxFee(const uint8_t *value, uint32_t value_len,
                              bool is_token) {
   bignum256 val = {0}, gas = {0};
   uint8_t pad_val[32] = {0};
-  char tx_value[32] = {0};
+  char tx_value[36] = {0};
   char gas_value[32] = {0};
 
   memzero(tx_value, sizeof(tx_value));
