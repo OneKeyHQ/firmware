@@ -208,6 +208,7 @@ ALLOW_WHILE_LOCKED = (
 
 
 def set_homescreen() -> None:
+    import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 
     ble_name = storage.device.get_ble_name()
     if storage.device.is_initialized():
@@ -218,18 +219,21 @@ def set_homescreen() -> None:
                 print("Device is locked")
             from trezor.lvglui.scrs.lockscreen import LockScreen
 
-            LockScreen(device_name, ble_name, dev_state)
+            screen = LockScreen(device_name, ble_name, dev_state)
         else:
             if __debug__:
                 print("Device is unlocked")
             from trezor.lvglui.scrs.homescreen import MainScreen
 
             store_ble_name(ble_name)
-            MainScreen(device_name, ble_name, dev_state)
+            screen = MainScreen(device_name, ble_name, dev_state)
     else:
         from trezor.lvglui.scrs.initscreen import InitScreen
 
         InitScreen()
+        return
+    if not screen.is_visible():
+        lv.scr_load(screen)
 
 
 def store_ble_name(ble_name):

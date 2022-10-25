@@ -390,5 +390,8 @@ translations = [
     "Mise à jour des ressources",
     "Voulez-vous mettre à jour la ressource du micrologiciel ?",
     "Mise à jour",
+    "VersionBluetooth",
+    "Transaction signée",
+    "Se ferme)",
 ]
 # fmt: on
