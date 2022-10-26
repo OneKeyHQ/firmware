@@ -98,6 +98,7 @@ OBJS += tron_tokens.o
 OBJS += aptos.o
 OBJS += near.o
 OBJS += conflux.o
+OBJS += conflux_tokens.o
 endif
 
 OBJS += debug.o

@@ -296,6 +296,18 @@ def _load_nem_mosaics():
     return mosaics
 
 
+def _load_conflux_tokens():
+    """Load CRC20 tokens from conflux submodule."""
+    tron_tokens = load_json("conflux/crc20.json")
+    for token in tron_tokens:
+        shortcut = token["symbol"]
+        token.update(
+            shortcut=shortcut,
+            key=f"conflux:{token['type']}:{token['symbol']}",
+        )
+    return tron_tokens
+
+
 def _load_misc():
     """Loads miscellaneous networks from `misc/misc.json`"""
     others = load_json("misc/misc.json")
@@ -580,6 +592,7 @@ def collect_coin_info():
         eth=_load_ethereum_networks(),
         erc20=_load_erc20_tokens(),
         nem=_load_nem_mosaics(),
+        conflux=_load_conflux_tokens(),
         misc=_load_misc(),
     )
 
