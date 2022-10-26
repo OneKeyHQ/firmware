@@ -22,9 +22,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "address.h"
+#include "conflux_tokens.h"
 #include "crypto.h"
 #include "ecdsa.h"
-#include "ethereum_tokens.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -349,17 +349,18 @@ static void send_signature(void) {
  * using standard Conflux units.
  * The buffer must be at least 25 bytes.
  */
-static void confluxFormatAmount(const bignum256 *amnt, const TokenType *token,
-                                char *buf, int buflen) {
+static void confluxFormatAmount(const bignum256 *amnt,
+                                const ConfluxTokenType *token, char *buf,
+                                int buflen) {
   bignum256 bn1e9 = {0};
   bn_read_uint32(1000000000, &bn1e9);
   const char *suffix = NULL;
   int decimals = 18;
-  if (token == UnknownToken) {
+  if (token == ConfluxUnknownToken) {
     strlcpy(buf, "Unknown token value", buflen);
     return;
   } else if (token != NULL) {
-    suffix = token->ticker;
+    suffix = token->symbol;
     decimals = token->decimals;
   } else if (bn_is_less(amnt, &bn1e9)) {
     suffix = " Drip";
@@ -384,7 +385,8 @@ static void confluxFormatAmount(const bignum256 *amnt, const TokenType *token,
 
 static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,
                                    const uint8_t *value, uint32_t value_len,
-                                   const TokenType *token, uint32_t chain_ids) {
+                                   const ConfluxTokenType *token,
+                                   uint32_t chain_ids) {
   bignum256 val = {0};
   uint8_t pad_val[32] = {0};
   memzero(pad_val, sizeof(pad_val));
@@ -614,7 +616,7 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
     conflux_signing_abort();
     return;
   }
-  const TokenType *token = NULL;
+  const ConfluxTokenType *token = NULL;
 
   // detect ERC-20 like token
   if (toset && msg->value.size == 0 && data_total == 68 &&
@@ -622,8 +624,10 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
       memcmp(msg->data_initial_chunk.bytes,
              "\xa9\x05\x9c\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
              16) == 0) {
-    // not support tokens display right now, return unknown token directly
-    token = UnknownToken;
+    char to_str[52] = {0};
+    get_base32_encode_address(pubkeyhash, to_str, sizeof(to_str), msg->chain_id,
+                              true);
+    token = tokenByAddress(to_str);
   }
 
   if (token != NULL) {
@@ -656,9 +660,15 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
     }
   }
 
-  layoutConfluxFee(msg->value.bytes, msg->value.size, msg->gas_price.bytes,
-                   msg->gas_price.size, msg->gas_limit.bytes,
-                   msg->gas_limit.size, false);
+  if (token != NULL) {
+    layoutConfluxFee(msg->value.bytes, msg->value.size, msg->gas_price.bytes,
+                     msg->gas_price.size, msg->gas_limit.bytes,
+                     msg->gas_limit.size, true);
+  } else {
+    layoutConfluxFee(msg->value.bytes, msg->value.size, msg->gas_price.bytes,
+                     msg->gas_price.size, msg->gas_limit.bytes,
+                     msg->gas_limit.size, false);
+  }
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     conflux_signing_abort();
