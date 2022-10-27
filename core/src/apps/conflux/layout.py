@@ -6,8 +6,7 @@ from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_address, confirm_output
 
-from ..ethereum import tokens
-from . import helpers
+from . import helpers, tokens
 
 if TYPE_CHECKING:
     from typing import Awaitable

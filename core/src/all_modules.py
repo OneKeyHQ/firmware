@@ -466,6 +466,8 @@ apps.conflux.sign_message_cip23
 import apps.conflux.sign_message_cip23
 apps.conflux.sign_tx
 import apps.conflux.sign_tx
+apps.conflux.tokens
+import apps.conflux.tokens
 apps.conflux.verify_message
 import apps.conflux.verify_message
 apps.conflux.verify_message_cip23

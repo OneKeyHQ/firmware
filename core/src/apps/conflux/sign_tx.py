@@ -8,7 +8,7 @@ from trezor.utils import HashWriter
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from ..ethereum import tokens
+from . import tokens
 from .helpers import address_from_bytes, address_from_hex, bytes_from_address
 from .layout import (
     require_confirm_data,
@@ -50,7 +50,7 @@ async def sign_tx(
     )
     owner_cfx_address = address_from_hex(owner_address, chain_id)
     if len(to) > 0:
-        cfx_to = address_from_hex(to, chain_id)
+        cfx_to = address_from_hex(to, chain_id, True)
         token = None
         # detect ERC-20 like token
         if (
@@ -60,15 +60,12 @@ async def sign_tx(
             and data_initial_chunk[:16]
             == b"\xa9\x05\x9c\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
         ):
-            # not support tokens display right now, return unknown recipient directly
             amount = int.from_bytes(data_initial_chunk[36:68], "big")
             address = address_from_hex(
                 address_from_bytes(data_initial_chunk[16:36], None), chain_id
             )
-            if cfx_to == "cfx:acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7":
-                token = tokens.TokenInfo("cUSDT", 18)
-            else:
-                token = tokens.TokenInfo("UNKN", 0)
+            token = tokens.token_by_address("CRC20", cfx_to)
+            if token == tokens.UNKNOWN_TOKEN:
                 await require_confirm_unknown_token(ctx, cfx_to)
         else:
             amount = int.from_bytes(value, "big")
