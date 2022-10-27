@@ -202,6 +202,7 @@ int main(void) {
   for (;;) {
 #if EMULATOR
     usbSleep(10);
+    layoutHomeInfo();
 #else
     usbPoll();
     layoutHomeInfo();
