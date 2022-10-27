@@ -1,0 +1,268 @@
+[
+  {
+    "_id": "6358db080cd4c34d5b4bb1e9",
+    "name": "conflux MOON",
+    "type": "CRC20",
+    "symbol": "cMOON",
+    "address": "cfx:achcuvuasx3t8zcumtwuf35y51sksewvca0h0hj71a",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_achcuvuasx3t8zcumtwuf35y51sksewvca0h0hj71a.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1ea",
+    "name": "conflux USDT",
+    "type": "CRC20",
+    "symbol": "cUSDT",
+    "address": "cfx:acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acf2rcsh8payyxpg6xj7b0ztswwh81ute60tsw35j7.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1eb",
+    "name": "conflux ETH",
+    "type": "CRC20",
+    "symbol": "cETH",
+    "address": "cfx:acdrf821t59y12b4guyzckyuw2xf1gfpj2ba0x4sj6",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acdrf821t59y12b4guyzckyuw2xf1gfpj2ba0x4sj6.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1ec",
+    "name": "FansCoin",
+    "type": "CRC20",
+    "symbol": "FC",
+    "address": "cfx:achc8nxj7r451c223m18w2dwjnmhkd6rxawrvkvsy2",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_achc8nxj7r451c223m18w2dwjnmhkd6rxawrvkvsy2.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1ef",
+    "name": "conflux Binance Coin",
+    "type": "CRC20",
+    "symbol": "cBNB",
+    "address": "cfx:acczy0zs2fu03pnx0w1u19pkprsm6r50spkz7eg4c3",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acczy0zs2fu03pnx0w1u19pkprsm6r50spkz7eg4c3.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f0",
+    "name": "conflux Flux Protocol",
+    "type": "CRC20",
+    "symbol": "cFLUX",
+    "address": "cfx:acgbjtsmfpex2mbn97dsygtkfrt952sp0psmh8pnvz",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acgbjtsmfpex2mbn97dsygtkfrt952sp0psmh8pnvz.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f1",
+    "name": "Wrapped Conflux",
+    "type": "CRC20",
+    "symbol": "WCFX",
+    "address": "cfx:acg158kvr8zanb1bs048ryb6rtrhr283ma70vz70tx",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acg158kvr8zanb1bs048ryb6rtrhr283ma70vz70tx.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f3",
+    "name": "conflux COMP",
+    "type": "CRC20",
+    "symbol": "cCOMP",
+    "address": "cfx:accedvremfhmym60f9u4nghb8utxcgbtb2acewunwh",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_accedvremfhmym60f9u4nghb8utxcgbtb2acewunwh.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f2",
+    "name": "conflux USDC",
+    "type": "CRC20",
+    "symbol": "cUSDC",
+    "address": "cfx:aca13suyk7mbgxw9y3wbjn9vd136swu6s21tg67xmb",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_aca13suyk7mbgxw9y3wbjn9vd136swu6s21tg67xmb.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f4",
+    "name": "conflux DAI",
+    "type": "CRC20",
+    "symbol": "cDAI",
+    "address": "cfx:acd3fhs4u0yzx7kpzrujhj15yg63st2z6athmtka95",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acd3fhs4u0yzx7kpzrujhj15yg63st2z6athmtka95.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f5",
+    "name": "conflux BAND",
+    "type": "CRC20",
+    "symbol": "cBAND",
+    "address": "cfx:acbyc3ahvctpx5cabfw6n1s9fv40trur6ydbu1zr4x",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acbyc3ahvctpx5cabfw6n1s9fv40trur6ydbu1zr4x.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1f6",
+    "name": "conflux BTC",
+    "type": "CRC20",
+    "symbol": "cBTC",
+    "address": "cfx:acbb225r9wc7a2kt1dz9gw0tuv5v1kgdjuh5akdh3t",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_acbb225r9wc7a2kt1dz9gw0tuv5v1kgdjuh5akdh3t.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1fa",
+    "name": "conflux LINK",
+    "type": "CRC20",
+    "symbol": "cLINK",
+    "address": "cfx:accuj4mt4kmnhzr1b3xe653n63694tc0cjuzkj5t94",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_accuj4mt4kmnhzr1b3xe653n63694tc0cjuzkj5t94.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  },
+  {
+    "_id": "6358db080cd4c34d5b4bb1fd",
+    "name": "conflux YFII",
+    "type": "CRC20",
+    "symbol": "cYFII",
+    "address": "cfx:accxdrf7c3vntwyyhj8ws8mcatd433k8sjvrjbx39r",
+    "decimals": 18,
+    "logoURI": "https://common.onekey-asset.com/token/cfx-1029/cfx_accxdrf7c3vntwyyhj8ws8mcatd433k8sjvrjbx39r.png",
+    "impl": "cfx",
+    "verified": false,
+    "security": false,
+    "addToIndex": false,
+    "chainId": "1029",
+    "source": [
+      "confluxscan.io"
+    ],
+    "checked": true,
+    "isNative": false
+  }
+]
