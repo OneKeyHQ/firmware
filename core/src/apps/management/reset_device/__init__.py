@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import storage
 import storage.device
-from trezor import config, loop, wire
+from trezor import config, loop, utils, wire
 from trezor.crypto import bip39, hashlib, random, slip39
 from trezor.enums import BackupType
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
@@ -54,8 +54,6 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     await confirm_reset_device(ctx, prompt)
     # await LoadingAnimation()
     if isinstance(ctx, wire.DummyContext):
-        from trezor import utils
-
         utils.play_dead()
 
         # on device reset, we need to ask for a new strength to override the default  value 12
@@ -121,9 +119,11 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # if we backed up the wallet, show success message
         if perform_backup:
             await layout.show_backup_success(ctx)
-
-        await show_onekey_app_guide()
-        set_homescreen()
+        if isinstance(ctx, wire.DummyContext):
+            utils.make_show_app_guide()
+        else:
+            await show_onekey_app_guide()
+            set_homescreen()
     except BaseException as e:
         raise e
     else:

@@ -29,7 +29,7 @@ GRID_CELL_SIZE_COLS = const(144)
 
 def change_state(is_busy: bool = False):
     if hasattr(MainScreen, "_instance"):
-        if MainScreen._instance.is_visible():
+        if MainScreen._instance:
             MainScreen._instance.change_state(is_busy)
 
 
@@ -136,6 +136,9 @@ class MainScreen(Screen):
                     self.apps.show()
             elif _dir == lv.DIR.BOTTOM:
                 lv.event_send(self.apps, lv.EVENT.GESTURE, None)
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
     class AppDrawer(lv.obj):
         def __init__(self, parent) -> None:
@@ -363,6 +366,9 @@ class SettingsScreen(Screen):
                 if __debug__:
                     if target == self.test:
                         UITest()
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
 
 if __debug__:
@@ -827,7 +833,7 @@ class AboutSetting(Screen):
         version = device.get_firmware_version()
         serial = device.get_serial()
 
-        ble_name = device.get_ble_name()
+        ble_name = device.get_ble_name() or uart.get_ble_name()
         ble_version = uart.get_ble_version()
         storage = device.get_storage()
         boot_version = utils.boot_version()
@@ -835,6 +841,7 @@ class AboutSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
+        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.title.align(lv.ALIGN.TOP_MID, 0, 56)
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.model = ListItemBtn(
@@ -918,17 +925,29 @@ class AboutSetting(Screen):
         )
         self.serial.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.serial.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-        # self.board_loader = ListItemBtn(
-        #     self.container,
-        #     _(i18n_keys.ITEM__BOARDLOADER),
-        #     has_next=True
-        # )
-        # self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.board_loader = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=True
+        )
+        self.board_loader.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.board_loader.set_style_bg_color(
+            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+        self.serial.add_event_cb(self.on_long_pressed, lv.EVENT.LONG_PRESSED, None)
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
-    # def on_click(self, event_obj):
-    #     target = event_obj.get_target()
-    #     if target == self.board_loader:
-    #         GO2BoardLoader()
+    def on_click(self, event_obj):
+        target = event_obj.get_target()
+        if target == self.board_loader:
+            GO2BoardLoader()
+
+    def on_long_pressed(self, event_obj):
+        target = event_obj.get_target()
+        if target == self.serial:
+            if self.board_loader.has_flag(lv.obj.FLAG.HIDDEN):
+                self.board_loader.clear_flag(lv.obj.FLAG.HIDDEN)
+            else:
+                self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
 
 
 class GO2BoardLoader(FullSizeWindow):
@@ -1002,6 +1021,9 @@ class PowerOff(Screen):
         if self.has_pin:
             config.lock()
 
+    def back(self):
+        self.load_screen(self.prev_scr, destroy_self=True)
+
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
@@ -1018,10 +1040,14 @@ class PowerOff(Screen):
                         verify_user_pin(
                             set_home=self.set_home,
                             allow_cancel=False,
+                            callback=self.back,
                         )
                     )
                 else:
-                    self.load_screen(self.prev_scr, destroy_self=True)
+                    self.back()
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
 
 class ShutingDown(FullSizeWindow):
@@ -1206,6 +1232,7 @@ class SecurityScreen(Screen):
             self.safety_check.label_right.set_text(self.get_right_text())
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
+        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.title.align(lv.ALIGN.TOP_MID, 0, 56)
         self.container = ContainerFlexCol(self, self.title, padding_row=8)
         self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
@@ -1552,6 +1579,7 @@ class PassphraseTipsConfirm(FullSizeWindow):
             confirm_text,
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
             icon_path="A:/res/warning.png",
+            anim_dir=2,
         )
         self.callback_obj = callback_obj
 
@@ -1562,6 +1590,7 @@ class PassphraseTipsConfirm(FullSizeWindow):
             if utils.lcd_resume():
                 return
             elif target == self.btn_no:
+                self.show_dismiss_anim()
                 lv.event_send(self.callback_obj, lv.EVENT.CANCEL, None)
             elif target == self.btn_yes:
                 lv.event_send(self.callback_obj, lv.EVENT.READY, None)
@@ -1694,6 +1723,7 @@ class UserGuide(Screen):
             "nav_back": True,
         }
         super().__init__(**kwargs)
+        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.title.align(lv.ALIGN.TOP_MID, 0, 56)
         self.container = ContainerFlexCol(self, self.title, padding_row=8)
         self.app_tutorial = ListItemBtn(
@@ -1748,6 +1778,9 @@ class UserGuide(Screen):
                 if __debug__:
                     print("Unknown")
 
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
+
 
 class PowerOnOffDetails(FullSizeWindow):
     def __init__(self):
@@ -1771,8 +1804,8 @@ class PowerOnOffDetails(FullSizeWindow):
         )
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self, _delay):
-        return self.delete()
+    # def destroy(self, _delay):
+    #     return self.delete()
 
 
 class RecoveryPhraseDetails(FullSizeWindow):
@@ -1798,8 +1831,8 @@ class RecoveryPhraseDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self, _delay):
-        return self.delete()
+    # def destroy(self, _delay):
+    #     return self.delete()
 
 
 class PinProtectionDetails(FullSizeWindow):
@@ -1825,8 +1858,8 @@ class PinProtectionDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self, _delay):
-        return self.delete()
+    # def destroy(self, _delay):
+    #     return self.delete()
 
 
 class HardwareWalletDetails(FullSizeWindow):
@@ -1852,8 +1885,8 @@ class HardwareWalletDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self, _delay):
-        return self.delete()
+    # def destroy(self, _delay):
+    #     return self.delete()
 
 
 class PassphraseDetails(FullSizeWindow):
@@ -1879,8 +1912,8 @@ class PassphraseDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
-    def destroy(self, _delay):
-        return self.delete()
+    # def destroy(self, _delay):
+    #     return self.delete()
 
 
 class HelpDetails(FullSizeWindow):
@@ -1927,5 +1960,5 @@ class HelpDetails(FullSizeWindow):
         )
         self.underline.align_to(self.website, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 0)
 
-    def destroy(self, _delay):
-        return self.delete()
+    # def destroy(self, _delay):
+    #     return self.delete()

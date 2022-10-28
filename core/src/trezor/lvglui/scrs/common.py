@@ -26,6 +26,7 @@ class Screen(lv.obj):
         self.channel = loop.chan()
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
         # icon
         if "icon_path" in kwargs:
             self.icon = lv.img(self)
@@ -79,12 +80,27 @@ class Screen(lv.obj):
     def on_click(self, event_obj):
         pass
 
+    # def show_reload_anim(self):
+    #    self.set_x(-480)
+    #    Anim(-480, 0, self.set_pos, time=200, y_axis=False, delay=100).start()
+
     # # value changed callback
     # def on_value_changed(self, event_obj):
     #     pass
 
     async def request(self) -> Any:
         return await self.channel.take()
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        # """Load a screen with animation."""
+        # lv.scr_load_anim(
+        #     scr,
+        #     lv.SCR_LOAD_ANIM.MOVE_RIGHT if back else lv.SCR_LOAD_ANIM.MOVE_LEFT,
+        #     200,
+        #     80,
+        #     False,
+        # )
+        lv.scr_load(scr)
 
     # NOTE:====================Functional Code Don't Edit========================
 
@@ -96,14 +112,14 @@ class Screen(lv.obj):
 
     def load_screen(self, scr, destroy_self: bool = False):
         if destroy_self:
-            load_scr_with_animation(scr.__class__(), back=True)
-            utils.SCREENS.remove(self)
+            self._load_scr(scr.__class__(), back=True)
+            utils.try_remove_scr(self)
             self.del_delayed(1000)
             if hasattr(self, "_init"):
                 del self._init
             del self.__class__._instance
         else:
-            load_scr_with_animation(scr)
+            self._load_scr(scr)
 
     def __del__(self):
         """Micropython doesn't support user defined __del__ now, so this not work at all."""
@@ -113,6 +129,13 @@ class Screen(lv.obj):
             pass
 
     # NOTE:====================Functional Code Don't Edit========================
+
+
+class ANIM_DIRS:
+
+    NONE = 0
+    HOR = 1
+    VER = 2
 
 
 class FullSizeWindow(lv.obj):
@@ -129,6 +152,7 @@ class FullSizeWindow(lv.obj):
         hold_confirm: bool = False,
         top_layer: bool = False,
         auto_close: bool = False,
+        anim_dir: int = ANIM_DIRS.HOR,
     ):
         if top_layer:
             super().__init__(lv.layer_top())
@@ -136,9 +160,10 @@ class FullSizeWindow(lv.obj):
             super().__init__(lv.scr_act())
 
         self.channel = loop.chan()
+        self.anim_dir = anim_dir
         self.set_size(lv.pct(100), lv.pct(100))
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        # self.set_pos(-480, 0)
+        self.show_load_anim()
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -207,20 +232,9 @@ class FullSizeWindow(lv.obj):
             else:
                 self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
                 # self.btn_yes.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
-        self.show_anim = Anim(-480, 0, self.set_pos, time=150, y_axis=False)
-        self.dismiss_anim = Anim(
-            0,
-            -480,
-            self.set_pos,
-            path_cb=lv.anim_t.path_ease_in,
-            time=100,
-            y_axis=False,
-            delay=50,
-        )
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
         if auto_close:
             self.destroy(delay_ms=10 * 1000)
-        # self.show_anim.start()
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -230,13 +244,16 @@ class FullSizeWindow(lv.obj):
                 return
             if hasattr(self, "btn_no") and target == self.btn_no:
                 self.channel.publish(0)
-                self.destroy(100)
+                self.show_dismiss_anim()
+                self.destroy()
                 return
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
                 if hasattr(self, "selector"):
+                    self.show_unload_anim()
                     self.channel.publish(self.selector.get_selected_str())
                 else:
                     if not self.hold_confirm:
+                        self.show_unload_anim()
                         self.channel.publish(1)
                     else:
                         return
@@ -245,7 +262,8 @@ class FullSizeWindow(lv.obj):
         elif code == lv.EVENT.READY and self.hold_confirm:
             if target == self.slider:
                 self.channel.publish(1)
-                self.destroy(100)
+                self.show_dismiss_anim()
+                self.destroy()
                 return
             else:
                 return
@@ -255,25 +273,47 @@ class FullSizeWindow(lv.obj):
         return await self.channel.take()
 
     def destroy(self, delay_ms=400):
-        # self.dismiss_anim.start()
         self.del_delayed(delay_ms)
 
+    def _load_anim_hor(self):
+        Anim(480, 0, self.set_pos, time=200, y_axis=False, delay=80).start()
 
-def load_scr_with_animation(scr: Screen, back: bool = False) -> None:
-    """Load a screen with animation."""
-    # TODO: FIX ANIMATION LOAD
-    # from .lockscreen import LockScreen
-    # from .homescreen import MainScreen
-    # from .initscreen import InitScreen
+    def _load_anim_ver(self):
+        self.set_y(800)
+        Anim(800, 0, self.set_pos, time=200, y_axis=True, delay=80).start()
 
-    # if isinstance(scr, (LockScreen, MainScreen, InitScreen)) and not back:
-    #     lv.scr_load(scr)
-    # else:
-    #     lv.scr_load_anim(
-    #         scr,
-    #         lv.SCR_LOAD_ANIM.OVER_LEFT if back else lv.SCR_LOAD_ANIM.OVER_RIGHT,
-    #         150,
-    #         10,
-    #         False,
-    #     )
-    lv.scr_load(scr)
+    def _dismiss_anim_hor(self):
+        Anim(
+            0,
+            480,
+            self.set_pos,
+            time=200,
+            y_axis=False,
+            delay=80,
+        ).start()
+
+    def _dismiss_anim_ver(self):
+        Anim(0, 800, self.set_pos, time=140, y_axis=True, delay=20).start()
+
+    def show_load_anim(self):
+        # if self.anim_dir == ANIM_DIRS.NONE:
+        #     self.set_pos(0, 0)
+        # elif self.anim_dir == ANIM_DIRS.HOR:
+        #     self.set_pos(480, 0)
+        #     self._load_anim_hor()
+        # else:
+        #     self.set_pos(0, 800)
+        #     self._load_anim_ver()
+        pass
+
+    def show_dismiss_anim(self):
+        # if self.anim_dir == ANIM_DIRS.HOR:
+        #     self._dismiss_anim_hor()
+        # elif self.anim_dir == ANIM_DIRS.VER:
+        #     self._dismiss_anim_ver()
+        pass
+
+    def show_unload_anim(self):
+        # if self.anim_dir == ANIM_DIRS.HOR:
+        #     Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=100).start()
+        pass

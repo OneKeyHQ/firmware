@@ -13,7 +13,9 @@ class WipeDevice(FullSizeWindow):
         confirm_text = _(i18n_keys.BUTTON__VERIFY_PIN)
         cancel_text = _(i18n_keys.BUTTON__CANCEL)
         icon_path = "A:/res/warning.png"
-        super().__init__(title, subtitle, confirm_text, cancel_text, icon_path, None)
+        super().__init__(
+            title, subtitle, confirm_text, cancel_text, icon_path, None, anim_dir=2
+        )
         self.btn_yes.set_style_bg_color(
             lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
         )
@@ -87,7 +89,7 @@ class WipeDeviceSuccess(FullSizeWindow):
         icon_path = "A:/res/success.png"
         confirm_text = _(i18n_keys.BUTTON__RESTART)
         super().__init__(
-            title, subtitle, confirm_text=confirm_text, icon_path=icon_path
+            title, subtitle, confirm_text=confirm_text, icon_path=icon_path, anim_dir=0
         )
 
     def eventhandler(self, event_obj):

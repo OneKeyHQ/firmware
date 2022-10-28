@@ -25,7 +25,7 @@ class LockScreen(Screen):
                 self.subtitle.set_text(ble_name)
             self.set_style_bg_img_src(lockscreen, lv.PART.MAIN | lv.STATE.DEFAULT)
             return
-
+        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
         self.icon.align(lv.ALIGN.TOP_MID, 0, 92)
         self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
         self.subtitle.set_style_text_color(
@@ -74,3 +74,6 @@ class LockScreen(Screen):
                 from apps.base import unlock_device
 
                 workflow.spawn(unlock_device())
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)

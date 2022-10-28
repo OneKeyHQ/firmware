@@ -34,6 +34,7 @@ class InitScreen(Screen):
             )
         else:
             return
+        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
         self.content_area = lv.obj(self)
         self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
@@ -102,6 +103,9 @@ class InitScreen(Screen):
 
     def on_click(self, event_obj):
         QuickStart()
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
 
 class QuickStart(FullSizeWindow):

@@ -19,6 +19,7 @@ async def get_entropy(ctx: Context, msg: GetEntropy) -> Entropy:
         _(i18n_keys.TITLE__CONFIRM_ENTROPY),
         description=_(i18n_keys.SUBTITLE__CONFIRM_ENTROPY),
         br_code=ButtonRequestType.ProtectCall,
+        anim_dir=2,
     )
 
     size = min(msg.size, 1024)

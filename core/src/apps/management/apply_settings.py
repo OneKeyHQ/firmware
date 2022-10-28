@@ -92,8 +92,9 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
         safety_checks.apply_setting(msg.safety_checks)
 
     if msg.display_rotation is not None:
-        await require_confirm_change_display_rotation(ctx, msg.display_rotation)
-        storage.device.set_rotation(msg.display_rotation)
+        raise wire.ProcessError("Not support yet")
+        # await require_confirm_change_display_rotation(ctx, msg.display_rotation)
+        # storage.device.set_rotation(msg.display_rotation)
 
     if msg.experimental_features is not None:
         await require_confirm_experimental_features(ctx, msg.experimental_features)
@@ -122,6 +123,7 @@ async def require_confirm_change_label(ctx: wire.GenericContext, label: str) -> 
         description=_(i18n_keys.SUBTITLE__SET_LABEL_CHANGE_LABEL),
         description_param=label,
         br_code=ButtonRequestType.ProtectCall,
+        anim_dir=2,
     )
 
 
@@ -140,6 +142,7 @@ async def require_confirm_change_passphrase(
         else _(i18n_keys.TITLE__DISABLE_PASSPHRASE),
         description=description,
         br_code=ButtonRequestType.ProtectCall,
+        anim_dir=2,
     )
 
 
@@ -194,6 +197,7 @@ async def require_confirm_change_autolock_delay(
         ),
         description_param=format_duration_ms(delay_ms),
         br_code=ButtonRequestType.ProtectCall,
+        anim_dir=2,
     )
 
 
@@ -212,6 +216,7 @@ async def require_confirm_safety_checks(
             reverse=True,
             larger_vspace=True,
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=2,
         )
     elif level == SafetyCheckLevel.PromptTemporarily:
         await confirm_action(
@@ -224,6 +229,7 @@ async def require_confirm_safety_checks(
             action="",
             reverse=True,
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=2,
         )
     elif level == SafetyCheckLevel.Strict:
         await confirm_action(
@@ -232,6 +238,7 @@ async def require_confirm_safety_checks(
             _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_STRICT),
             description=_(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_STRICT),
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=2,
         )
     else:
         raise ValueError  # enum value out of range
@@ -249,4 +256,5 @@ async def require_confirm_experimental_features(
             action="",  # Only for development and beta testing!
             reverse=True,
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=2,
         )

@@ -122,4 +122,5 @@ async def _continue_dialog(ctx: wire.Context, msg: RecoveryDevice) -> None:
             verb=_(i18n_keys.BUTTON__CONTINUE),
             icon="A:/res/check-seed.png",
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=2,
         )
