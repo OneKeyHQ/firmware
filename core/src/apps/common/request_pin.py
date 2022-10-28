@@ -94,6 +94,7 @@ async def verify_user_pin(
     retry: bool = True,
     cache_time_ms: int = 0,
     set_home: bool = False,
+    callback=None,
 ) -> None:
     last_unlock = _get_last_unlock_time()
     if (
@@ -121,6 +122,8 @@ async def verify_user_pin(
     if config.unlock(pin, salt):
         if set_home:
             set_homescreen()
+        elif callback:
+            callback()
         _set_last_unlock_time()
         return
     elif not config.has_pin():
@@ -133,6 +136,8 @@ async def verify_user_pin(
         if config.unlock(pin, salt):
             if set_home:
                 set_homescreen()
+            elif callback:
+                callback()
             _set_last_unlock_time()
             return
 

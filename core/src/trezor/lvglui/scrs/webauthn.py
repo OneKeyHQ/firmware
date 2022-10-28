@@ -14,6 +14,7 @@ class ConfirmWebauthn(FullSizeWindow):
             confirm_text=_(i18n_keys.BUTTON__CONFIRM),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
             icon_path=app_icon,
+            anim_dir=2,
         )
         self.container = ContainerFlexCol(self, self.title, pos=(0, 48))
         self.item1 = DisplayItem(

@@ -173,7 +173,7 @@ async def _deal_button_press(value: bytes) -> None:
             from trezor.lvglui.scrs.initscreen import InitScreen
 
             PowerOff(InitScreen._instance)
-        await loop.sleep(100)
+        await loop.sleep(200)
         utils.lcd_resume()
 
 

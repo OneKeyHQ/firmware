@@ -81,6 +81,7 @@ async def confirm_action(
     larger_vspace: bool = False,  # TODO cleanup @ redesign
     exc: ExceptionType = wire.ActionCancelled,
     br_code: ButtonRequestType = ButtonRequestType.Other,
+    anim_dir: int = 1,
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
 
@@ -95,6 +96,7 @@ async def confirm_action(
         else _(i18n_keys.BUTTON__CANCEL),
         icon_path=icon,
         hold_confirm=hold,
+        anim_dir=anim_dir,
     )
     await raise_if_cancelled(
         interact(ctx, confirm_screen, br_type, br_code),
@@ -284,6 +286,9 @@ async def show_address(
         "show_address",
         ButtonRequestType.Address,
     )
+    # from trezor import loop
+
+    # await loop.sleep(400)
 
 
 async def show_pubkey(
@@ -323,9 +328,9 @@ async def _show_modal(
     btn_yes_bg_color=None,
     exc: ExceptionType = wire.ActionCancelled,
 ) -> None:
-    from trezor.lvglui.scrs.common import FullSizeWindow
+    from trezor.lvglui.scrs.template import Modal
 
-    screen = FullSizeWindow(
+    screen = Modal(
         header,
         content,
         confirm_text=button_confirm,
@@ -1047,17 +1052,19 @@ async def confirm_set_homescreen(ctx):
         title=_(i18n_keys.TITLE__SET_HOMESCREEN),
         description=_(i18n_keys.SUBTITLE__SET_HOMESCREEN),
         icon="A:/res/upload-res.png",
+        anim_dir=2,
     )
 
 
 async def confirm_update_res(ctx):
-    from trezor.lvglui.scrs.common import FullSizeWindow
+    from trezor.lvglui.scrs.template import Modal
 
-    confirm_screen = FullSizeWindow(
+    confirm_screen = Modal(
         title=_(i18n_keys.TITLE__RESOURCE_UPDATE),
         subtitle=_(i18n_keys.SUBTITLE__RESOURCE_UPDATE),
         confirm_text=_(i18n_keys.BUTTON__UPDATE),
         cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        anim_dir=2,
     )
     await raise_if_cancelled(interact(ctx, confirm_screen, "confirm_update_res"))
 

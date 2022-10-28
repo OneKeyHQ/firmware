@@ -15,7 +15,6 @@ async def lvgl_tick():
         lv.timer_handler()
         inactive_time = get_elapsed()
         if inactive_time < inactive_time_bak:
-            utils.lcd_resume()
             workflow.idle_timer.touch()
 
         inactive_time_bak = inactive_time

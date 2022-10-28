@@ -21,6 +21,7 @@ class MnemonicDisplay(FullSizeWindow):
             title,
             _(i18n_keys.SUBTITLE__DEVICE_BACKUP_MANUAL_BACKUP).format(word_count),
             _(i18n_keys.BUTTON__CONTINUE),
+            anim_dir=0,
         )
         # self.content_area.set_style_bg_color(
         #     lv_colors.WHITE_3, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
@@ -162,6 +163,7 @@ class CheckWord(FullSizeWindow):
         self.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 
     def on_ready(self, event_obj):
+        self.show_unload_anim()
         self.channel.publish(self.choices.get_selected_str())
         self.destroy()
 
@@ -176,6 +178,9 @@ class CheckWord(FullSizeWindow):
             f"#DF320C {lv.SYMBOL.CLOSE}# {_(i18n_keys.MSG__INCORRECT__EXCLAMATION)}"
         )
         # self.tip.clear_flag(lv.obj.FLAG.HIDDEN)
+
+    # def show_unload_anim(self):
+    #     Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=200).start()
 
 
 class Radio:

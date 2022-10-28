@@ -29,7 +29,9 @@ async def cipher_key_value(ctx: wire.Context, msg: CipherKeyValue) -> CipheredKe
             title = _(i18n_keys.TITLE__ENCRYPT_VALUE)
         else:
             title = _(i18n_keys.TITLE__DECRYPT_VALUE)
-        await confirm_action(ctx, "cipher_key_value", title, description=msg.key)
+        await confirm_action(
+            ctx, "cipher_key_value", title, description=msg.key, anim_dir=2
+        )
 
     node = keychain.derive(msg.address_n)
     value = compute_cipher_key_value(msg, node.private_key())

@@ -12,7 +12,9 @@ from .components.qrcode import QRCode
 
 class Address(FullSizeWindow):
     def __init__(self, title, path, address, xpubs=None, multisig_index=0):
-        super().__init__(title, None, confirm_text=_(i18n_keys.BUTTON__DONE))
+        super().__init__(
+            title, None, confirm_text=_(i18n_keys.BUTTON__DONE), anim_dir=2
+        )
         self.qr = QRCode(self.content_area, address)
         self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
         self.container = ContainerFlexCol(self.content_area, self.qr)
@@ -34,14 +36,15 @@ class Address(FullSizeWindow):
                 xpub,
             )
 
-    def destroy(self):
-        self.del_delayed(100)
-
 
 class XpubOrPub(FullSizeWindow):
     def __init__(self, title, path, xpub=None, pubkey=None):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__EXPORT), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__EXPORT),
+            _(i18n_keys.BUTTON__CANCEL),
+            anim_dir=2,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         self.item1 = DisplayItem(
@@ -59,7 +62,11 @@ class XpubOrPub(FullSizeWindow):
 class Message(FullSizeWindow):
     def __init__(self, title, address, message):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__SIGN), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__SIGN),
+            _(i18n_keys.BUTTON__CANCEL),
+            anim_dir=2,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         self.item1 = DisplayItem(
@@ -87,7 +94,11 @@ class Message(FullSizeWindow):
 class TransactionOverview(FullSizeWindow):
     def __init__(self, title, amount, address):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+            anim_dir=2,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         self.item1 = DisplayItem(
@@ -189,6 +200,7 @@ class BlobDisPlay(FullSizeWindow):
         description: str,
         content: str,
         icon_path: str = "A:/res/warning.png",
+        anim_dir: int = 1,
     ):
         super().__init__(
             title,
@@ -196,6 +208,7 @@ class BlobDisPlay(FullSizeWindow):
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
             icon_path=icon_path,
+            anim_dir=anim_dir,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         self.item1 = DisplayItem(self.container, description, content)
@@ -429,7 +442,11 @@ class ShouldShowMore(FullSizeWindow):
 class EIP712DOMAIN(FullSizeWindow):
     def __init__(self, title: str, **kwargs):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+            anim_dir=2,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         if kwargs.get("name"):
@@ -501,6 +518,7 @@ class SecurityCheck(FullSizeWindow):
             confirm_text=_(i18n_keys.BUTTON__CONFIRM),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
             icon_path="A:/res/security-check.png",
+            anim_dir=2,
         )
 
 
@@ -511,6 +529,7 @@ class PassphraseDisplayConfirm(FullSizeWindow):
             subtitle=_(i18n_keys.SUBTITLE__USE_THIS_PASSPHRASE),
             confirm_text=_(i18n_keys.BUTTON__CONFIRM),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            anim_dir=0,
         )
 
         self.panel = lv.obj(self.content_area)
@@ -673,3 +692,21 @@ class BlindingSignCommon(FullSizeWindow):
         self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
         )
+
+
+class Modal(FullSizeWindow):
+    def __init__(
+        self,
+        title: str | None,
+        subtitle: str | None,
+        confirm_text: str = "",
+        cancel_text: str = "",
+        icon_path: str | None = None,
+        anim_dir: int = 1,
+    ):
+        super().__init__(
+            title, subtitle, confirm_text, cancel_text, icon_path, anim_dir=anim_dir
+        )
+
+    # def show_unload_anim(self):
+    #     return super().show_dismiss_anim()

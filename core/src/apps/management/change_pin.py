@@ -78,6 +78,7 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
             description=_(i18n_keys.SUBTITLE__SET_PIN_PIN_DISABLED),
             action="",
             reverse=True,
+            anim_dir=2,
         )
 
     if not msg.remove and has_pin:  # changing pin
@@ -88,6 +89,7 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
             description=_(i18n_keys.SUBTITLE__SET_PIN_CHANGE_PIN),
             action="",
             reverse=True,
+            anim_dir=2,
         )
 
     if not msg.remove and not has_pin:  # setting new pin
@@ -98,6 +100,7 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
             description=_(i18n_keys.SUBTITLE__SET_PIN_ENABLE_PIN),
             action="",
             reverse=True,
+            anim_dir=2,
         )
 
     # removing non-existing PIN

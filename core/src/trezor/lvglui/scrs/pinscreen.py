@@ -65,6 +65,7 @@ class InputPin(FullSizeWindow):
         super().__init__(
             title=kwargs.get("title") or _(i18n_keys.TITLE__ENTER_PIN),
             subtitle=kwargs.get("subtitle", ""),
+            anim_dir=0,
         )
         self.subtitle.set_style_text_color(
             lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -77,6 +78,7 @@ class InputPin(FullSizeWindow):
     def on_event(self, event_obj):
         code = event_obj.code
         if code == lv.EVENT.VALUE_CHANGED:
+            utils.lcd_resume()
             if self.keyboard.ta.get_text() != "":
                 self.subtitle.set_text("")
             return

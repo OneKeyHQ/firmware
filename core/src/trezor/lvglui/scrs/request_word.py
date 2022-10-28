@@ -4,7 +4,7 @@ from .components.keyboard import BIP39Keyboard
 
 class WordEnter(FullSizeWindow):
     def __init__(self, title):
-        super().__init__(title, None)
+        super().__init__(title, None, anim_dir=0)
         self.keyboard = BIP39Keyboard(self)
         self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 

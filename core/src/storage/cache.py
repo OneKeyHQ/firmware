@@ -309,11 +309,3 @@ def clear_all() -> None:
     _SESSIONLESS_CACHE.clear()
     for session in _SESSIONS:
         session.clear()
-
-
-def show_update_res_confirm() -> bool:
-    global _show_update_res_confirm
-    if _show_update_res_confirm:
-        _show_update_res_confirm = False
-        return True
-    return False

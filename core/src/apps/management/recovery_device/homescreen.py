@@ -155,9 +155,11 @@ async def _finish_recovery(
         header=_(i18n_keys.TITLE__WALLET_IS_READY),
         button=_(i18n_keys.BUTTON__DONE),
     )
-
-    await show_onekey_app_guide()
-    set_homescreen()
+    if isinstance(ctx, wire.DummyContext):
+        utils.make_show_app_guide()
+    else:
+        await show_onekey_app_guide()
+        set_homescreen()
     return Success(message="Device recovered")
 
 

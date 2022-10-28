@@ -46,6 +46,7 @@ BATTERY_CAP: int | None = None
 SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
 DEFAULT_LABEL = "OneKey Touch"
 AUTO_POWER_OFF = False
+_SHOW_APP_GUIDE = False
 if __debug__:
     if EMULATOR:
         import uos
@@ -71,6 +72,13 @@ def clear_screens() -> None:
         except BaseException:
             pass
     SCREENS.clear()
+
+
+def try_remove_scr(screen):
+    try:
+        SCREENS.remove(screen)
+    except Exception:
+        pass
 
 
 def turn_on_lcd_if_possible() -> bool:
@@ -109,6 +117,19 @@ def play_dead():
 
     loop.pop_tasks_on_iface(usb.iface_wire.iface_num())
     loop.pop_tasks_on_iface(SPI_IFACE_NUM)
+
+
+def show_app_guide():
+    global _SHOW_APP_GUIDE
+    if _SHOW_APP_GUIDE:
+        _SHOW_APP_GUIDE = False
+        return True
+    return False
+
+
+def make_show_app_guide():
+    global _SHOW_APP_GUIDE
+    _SHOW_APP_GUIDE = True
 
 
 def unimport_begin() -> set[str]:

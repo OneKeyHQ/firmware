@@ -4,6 +4,7 @@ from .. import font_PJSBOLD24, font_PJSMID20, font_PJSREG24, lv, lv_colors
 class ListItemWithLeadingCheckbox(lv.obj):
     def __init__(self, parent, text):
         super().__init__(parent)
+        self.remove_style_all()
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.set_style_bg_color(
             lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
@@ -11,9 +12,11 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_all(16, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.checkbox = lv.checkbox(self)
-        self.checkbox.set_size(40, 40)
+        self.checkbox.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.checkbox.set_size(36, 36)
         self.checkbox.set_align(lv.ALIGN.TOP_LEFT)
         self.checkbox.set_text("")
         self.checkbox.set_style_radius(8, lv.PART.INDICATOR | lv.STATE.DEFAULT)
@@ -30,7 +33,9 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.checkbox.set_style_bg_opa(255, lv.PART.INDICATOR | lv.STATE.CHECKED)
         self.checkbox.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.label = lv.label(self)
-        self.label.set_size(340, lv.SIZE.CONTENT)
+        self.label.remove_style_all()
+        self.label.set_long_mode(lv.label.LONG.WRAP)
+        self.label.set_size(396, lv.SIZE.CONTENT)
         self.label.align_to(self.checkbox, lv.ALIGN.OUT_RIGHT_TOP, 0, 0)
         self.label.set_text(text)
         self.label.set_style_text_line_space(4, lv.PART.MAIN | lv.STATE.DEFAULT)

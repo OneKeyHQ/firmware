@@ -18,11 +18,12 @@ class ContainerFlexCol(lv.obj):
         if align_base is None:
             self.align(lv.ALIGN.BOTTOM_MID, 0, -30)
         else:
-            self.align_to(align_base, align, pos[0], pos[1])
+            self.align_to(align_base, align, 0, pos[1])
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_ver(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_hor(8, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_row(padding_row, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.clear_flag(lv.obj.FLAG.CLICKABLE)
         self.set_flex_flow(lv.FLEX_FLOW.COLUMN)

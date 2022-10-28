@@ -37,6 +37,11 @@ wire.setup(
         SPI_IFACE_NUM,
     )
 )
+if utils.show_app_guide():
+    from trezor.ui.layouts import show_onekey_app_guide
+
+    loop.schedule(show_onekey_app_guide())
+
 loop.run()
 
 if __debug__:
