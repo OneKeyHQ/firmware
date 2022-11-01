@@ -53,6 +53,12 @@
 #include "py/stackctrl.h"
 
 #include "common.h"
+#include "ff.h"
+
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},
+    {0, 2},
+};
 
 // Command line options, with their defaults
 STATIC bool compile_only = false;
