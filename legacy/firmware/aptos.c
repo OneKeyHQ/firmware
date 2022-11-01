@@ -15,6 +15,8 @@ static const uint8_t APTOS_RAW_TX_PREFIX[32] = {
     54,  67,  169, 188, 111, 102, 147, 189, 220, 26,  159,
     236, 158, 103, 74,  70,  30,  170, 0,   177, 147};
 
+static const char *MESSAGE_PREFIX = "APTOS\n";
+
 void aptos_get_address_from_public_key(const uint8_t *public_key,
                                        char *address) {
   uint8_t buf[SIZE_PUBKEY] = {0};
@@ -51,4 +53,57 @@ void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,
   resp->signature.size = 64;
   resp->public_key.size = 32;
   msg_write(MessageType_MessageType_AptosSignedTx, resp);
+}
+
+void aptos_sign_message(const AptosSignMessage *msg, const HDNode *node,
+                        AptosMessageSignature *resp) {
+  AptosMessagePayload payload = msg->payload;
+  char full_message[sizeof(AptosMessagePayload) + 58] = {0};
+
+  strcat(full_message, MESSAGE_PREFIX);
+  if (payload.has_address) {
+    char *address = payload.address;
+    strcat(full_message, "address: ");
+    strcat(full_message, address);
+    strcat(full_message, "\n");
+  }
+  if (payload.has_application) {
+    char *application = payload.application;
+    strcat(full_message, "application: ");
+    strcat(full_message, application);
+    strcat(full_message, "\n");
+  }
+  if (payload.has_chain_id) {
+    char *chain_id = payload.chain_id;
+    strcat(full_message, "chainId: ");
+    strcat(full_message, chain_id);
+    strcat(full_message, "\n");
+  }
+  char *message = payload.message;
+  strcat(full_message, "message: ");
+  strcat(full_message, message);
+  strcat(full_message, "\n");
+  char *nonce = payload.nonce;
+  strcat(full_message, "nonce: ");
+  strcat(full_message, nonce);
+
+  aptos_get_address_from_public_key(node->public_key + 1, resp->address);
+  // display here
+  layoutVerifyAddress(NULL, resp->address);
+  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+  if (!fsm_layoutSignMessage((const uint8_t *)full_message,
+                             strlen(full_message))) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+  ed25519_sign((const uint8_t *)full_message, strlen(full_message),
+               node->private_key, node->public_key + 1, resp->signature.bytes);
+
+  resp->signature.size = 64;
+  msg_write(MessageType_MessageType_AptosMessageSignature, resp);
 }
