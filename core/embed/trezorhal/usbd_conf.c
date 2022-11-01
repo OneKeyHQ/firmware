@@ -53,6 +53,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include STM32_HAL_H
 #include "usbd_core.h"
+#include "usbd_desc.h"
 #include "usb.h"
 #include "irq.h"
 #include "supervise.h"
@@ -72,7 +73,7 @@ static PCD_HandleTypeDef pcd_hs_handle;
 
 volatile bool usb_connect_state = false;
 volatile bool data_in_done = false;
-static uint8_t data_in_ep = 0;
+static uint8_t data_in_ep = 0xff;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -658,7 +659,7 @@ USBD_StatusTypeDef USBD_LL_Transmit(USBD_HandleTypeDef *pdev,
                                     uint8_t  *pbuf,
                                     uint16_t  size)
 {
-  if(ep_addr != 0){
+  if(ep_addr != 0 && pdev->pDesc != &MSC_Desc){
     int32_t tickstart = HAL_GetTick();
     data_in_done = false;
     data_in_ep = ep_addr & EP_ADDR_MSK;
