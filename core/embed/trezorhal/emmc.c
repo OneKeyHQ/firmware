@@ -83,6 +83,13 @@ void emmc_get_card_info(EMMC_CardInfoTypeDef* card_info) {
 uint8_t emmc_read_blocks(uint8_t* data, uint32_t address, uint32_t nums,
                          uint32_t timeout) {
   if (HAL_MMC_ReadBlocks(&hmmc1, data, address, nums, timeout) == HAL_OK) {
+    uint32_t tickstart = HAL_GetTick();
+    while (emmc_get_card_state() != MMC_TRANSFER_OK) {
+      /* Check for the Timeout */
+      if (((HAL_GetTick() - tickstart) > timeout) || (timeout == 0U)) {
+        return MMC_ERROR;
+      }
+    }
     return MMC_OK;
   } else {
     return MMC_ERROR;
@@ -92,6 +99,13 @@ uint8_t emmc_read_blocks(uint8_t* data, uint32_t address, uint32_t nums,
 uint8_t emmc_write_blocks(uint8_t* data, uint32_t address, uint32_t nums,
                           uint32_t timeout) {
   if (HAL_MMC_WriteBlocks(&hmmc1, data, address, nums, timeout) == HAL_OK) {
+    uint32_t tickstart = HAL_GetTick();
+    while (emmc_get_card_state() != MMC_TRANSFER_OK) {
+      /* Check for the Timeout */
+      if (((HAL_GetTick() - tickstart) > timeout) || (timeout == 0U)) {
+        return MMC_ERROR;
+      }
+    }
     return MMC_OK;
   } else {
     return MMC_ERROR;
@@ -126,7 +140,17 @@ uint8_t emmc_write_blocks_dma(uint8_t* data, uint32_t address, uint32_t nums,
 }
 
 uint8_t emmc_erase(uint32_t start_address, uint32_t end_address) {
-  return HAL_MMC_Erase(&hmmc1, start_address, end_address);
+  if (HAL_MMC_Erase(&hmmc1, start_address, end_address) == HAL_OK) {
+    uint32_t tickstart = HAL_GetTick();
+    while (emmc_get_card_state() != MMC_TRANSFER_OK) {
+      /* Check for the Timeout */
+      if ((HAL_GetTick() - tickstart) > EMMC_TIMEOUT) {
+        return MMC_ERROR;
+      }
+    }
+    return MMC_OK;
+  }
+  return MMC_ERROR;
 }
 
 uint64_t emmc_get_capacity_in_bytes(void) {

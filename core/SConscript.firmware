@@ -457,6 +457,7 @@ if PRODUCTION_MODEL == 'H':
         'embed/trezorhal/usbd_core.c',
         'embed/trezorhal/usbd_ctlreq.c',
         'embed/trezorhal/usbd_ioreq.c',
+        'embed/trezorhal/usbd_desc.c',
         'embed/trezorhal/atca/atca_hal.c',
         'embed/trezorhal/atca/atca_command.c',
         'embed/trezorhal/atca/atca_api.c',

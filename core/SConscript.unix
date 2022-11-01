@@ -203,8 +203,8 @@ SOURCE_MOD += [
 ]
 if TREZOR_MODEL == 'T':
     SOURCE_MOD += [
-        'embed/extmod/modtrezorio/ff.c',
-        'embed/extmod/modtrezorio/ffunicode.c',
+        'embed/trezorhal/fatfs/ff.c',
+        'embed/trezorhal/fatfs/ffunicode.c',
     ]
 
 # modtrezorui
@@ -489,6 +489,7 @@ env.Replace(
         '.',
         'embed/rust',
         'embed/unix',
+        'embed/trezorhal/fatfs',
         'embed/extmod/modtrezorui' if FEATURE_FLAGS['TREZOR_UI'] else '',
         'vendor/micropython',
         'vendor/micropython/ports/unix',

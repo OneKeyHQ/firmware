@@ -52,7 +52,7 @@ static JPEG_HandleTypeDef JPEG_Handle;
 static JPEG_ConfTypeDef JPEG_Info;
 
 static lv_fs_file_t f;
-volatile uint32_t Jpeg_HWDecodingEnd = 0;
+volatile uint32_t Jpeg_HWDecodingEnd = 0, Jpeg_HWDecodingError = 0;
 static uint32_t FrameBufferAddress;
 
 static uint8_t JPEG_Data_InBuffer0[CHUNK_SIZE_IN];
@@ -176,7 +176,7 @@ void MDMA_IRQHandler() {
 }
 
 uint32_t JPEG_InputHandler(JPEG_HandleTypeDef *hjpeg) {
-  if (Jpeg_HWDecodingEnd == 0) {
+  if (Jpeg_HWDecodingEnd == 0 && Jpeg_HWDecodingError == 0) {
     if (Jpeg_IN_BufferTab[JPEG_IN_Write_BufferIndex].State ==
         JPEG_BUFFER_EMPTY) {
       if (lv_fs_read(&f,
@@ -212,6 +212,7 @@ uint32_t JPEG_InputHandler(JPEG_HandleTypeDef *hjpeg) {
 
 void HAL_JPEG_GetDataCallback(JPEG_HandleTypeDef *hjpeg,
                               uint32_t NbDecodedData) {
+#if 0
   if (NbDecodedData ==
       Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].DataBufferSize) {
     Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].State = JPEG_BUFFER_EMPTY;
@@ -234,9 +235,27 @@ void HAL_JPEG_GetDataCallback(JPEG_HandleTypeDef *hjpeg,
   } else {
     HAL_JPEG_ConfigInputBuffer(
         hjpeg,
-        Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].DataBuffer + NbDecodedData,
+        Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].DataBuffer +
+        NbDecodedData,
         Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].DataBufferSize -
             NbDecodedData);
+  }
+#endif
+  if (NbDecodedData ==
+      Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].DataBufferSize) {
+    lv_fs_read(&f, Jpeg_IN_BufferTab[0].DataBuffer, CHUNK_SIZE_IN,
+               (uint32_t *)(&Jpeg_IN_BufferTab[0].DataBufferSize));
+    HAL_JPEG_ConfigInputBuffer(hjpeg, Jpeg_IN_BufferTab[0].DataBuffer,
+                               Jpeg_IN_BufferTab[0].DataBufferSize);
+  } else if (NbDecodedData <
+             Jpeg_IN_BufferTab[JPEG_IN_Read_BufferIndex].DataBufferSize) {
+    HAL_JPEG_ConfigInputBuffer(
+        hjpeg, Jpeg_IN_BufferTab[0].DataBuffer + NbDecodedData,
+        Jpeg_IN_BufferTab[0].DataBufferSize - NbDecodedData);
+    Jpeg_IN_BufferTab[0].DataBufferSize -= NbDecodedData;
+  } else {
+    HAL_JPEG_ConfigInputBuffer(hjpeg, NULL, 0);
+    Jpeg_IN_BufferTab[0].DataBufferSize = 0;
   }
 }
 
@@ -252,7 +271,9 @@ void HAL_JPEG_DataReadyCallback(JPEG_HandleTypeDef *hjpeg, uint8_t *pDataOut,
 void HAL_JPEG_InfoReadyCallback(JPEG_HandleTypeDef *hjpeg,
                                 JPEG_ConfTypeDef *pInfo) {}
 
-void HAL_JPEG_ErrorCallback(JPEG_HandleTypeDef *hjpeg) {}
+void HAL_JPEG_ErrorCallback(JPEG_HandleTypeDef *hjpeg) {
+  Jpeg_HWDecodingError = 1;
+}
 
 void HAL_JPEG_DecodeCpltCallback(JPEG_HandleTypeDef *hjpeg) {
   Jpeg_HWDecodingEnd = 1;
@@ -275,6 +296,72 @@ void lv_st_jpeg_init(void) {
  *   STATIC FUNCTIONS
  **********************/
 
+#define LDB_WORD(ptr)                                 \
+  (uint16_t)(((uint16_t) * ((uint8_t *)(ptr)) << 8) | \
+             (uint16_t) * (uint8_t *)((ptr) + 1))
+
+static uint32_t get_jpeg_info(const char *fn, uint16_t *w, uint16_t *h) {
+  uint8_t buf[64];
+  uint32_t len;
+
+  uint16_t marker, marker_len;
+
+  lv_fs_file_t file;
+  lv_fs_res_t res = lv_fs_open(&file, fn, LV_FS_MODE_RD);
+  if (res != LV_FS_RES_OK) {
+    return LV_RES_INV;
+  }
+
+  if (lv_fs_read(&file, buf, 2, &len) == LV_FS_RES_OK) {
+    marker = LDB_WORD(buf);
+    if (marker != 0xFFD8) {
+      return LV_RES_INV;
+    }
+
+    while (1) {
+      if (lv_fs_read(&file, buf, 4, &len) != LV_FS_RES_OK) {
+        break;
+      }
+      if (len == 0) {
+        break;
+      }
+      if (buf[0] != 0xFF) {
+        break;
+      }
+      switch (buf[1]) {
+        case 0xC0:
+          lv_fs_read(&file, buf, 16, &len);
+          *h = LDB_WORD(buf + 1);
+          *w = LDB_WORD(buf + 3);
+
+          lv_fs_close(&file);
+          return LV_RES_OK;
+          break;
+        case 0xC1: /* SOF1 */
+        case 0xC2: /* SOF2 */
+        case 0xC3: /* SOF3 */
+        case 0xC5: /* SOF5 */
+        case 0xC6: /* SOF6 */
+        case 0xC7: /* SOF7 */
+        case 0xC9: /* SOF9 */
+        case 0xCA: /* SOF10 */
+        case 0xCB: /* SOF11 */
+        case 0xCD: /* SOF13 */
+        case 0xCE: /* SOF14 */
+        case 0xCF: /* SOF15 */
+          lv_fs_close(&file);
+          return LV_RES_INV;
+        default:
+          marker_len = LDB_WORD(buf + 2);
+          lv_fs_seek(&file, marker_len - 2, LV_FS_SEEK_CUR);
+          break;
+      }
+    }
+  }
+  lv_fs_close(&file);
+  return LV_RES_INV;
+}
+
 /**
  * Get info about a PNG image
  * @param src can be file name or pointer to a C array
@@ -285,9 +372,7 @@ static lv_res_t decoder_info(struct _lv_img_decoder_t *decoder, const void *src,
                              lv_img_header_t *header) {
   (void)decoder; /*Unused*/
 
-  volatile uint32_t JpegProcessing_End = 0;
-  Jpeg_HWDecodingEnd = 0;
-  FrameBufferAddress = FMC_SDRAM_JPEG_OUTPUT_DATA_BUFFER_ADDRESS;
+  uint16_t w = 0, h = 0;
 
   lv_img_src_t src_type = lv_img_src_get_type(src); /*Get the source type*/
 
@@ -295,43 +380,21 @@ static lv_res_t decoder_info(struct _lv_img_decoder_t *decoder, const void *src,
   if (src_type == LV_IMG_SRC_FILE) {
     const char *fn = src;
     if (strncmp(lv_fs_get_ext(fn), "jpg", strlen("jpg")) == 0 ||
-        strncmp(lv_fs_get_ext(fn), "jpeg", strlen("jpeg")) ==
-            0) { /*Check the extension*/
-      lv_fs_res_t res = lv_fs_open(&f, fn, LV_FS_MODE_RD);
-      if (res != LV_FS_RES_OK) return LV_RES_INV;
+        strncmp(lv_fs_get_ext(fn), "jpeg", strlen("jpeg")) == 0) {
+      /*Check the extension*/
 
-      /* Read from JPG file and fill input buffers */
-      for (uint32_t i = 0; i < NB_INPUT_DATA_BUFFERS; i++) {
-        if (lv_fs_read(&f, Jpeg_IN_BufferTab[i].DataBuffer, CHUNK_SIZE_IN,
-                       (uint32_t *)(&Jpeg_IN_BufferTab[i].DataBufferSize)) ==
-            LV_FS_RES_OK) {
-          Jpeg_IN_BufferTab[i].State = JPEG_BUFFER_FULL;
-        } else {
-          return LV_RES_INV;
-        }
+      if (get_jpeg_info(fn, &w, &h) == LV_RES_OK) {
+        /*Save the data in the header*/
+        header->always_zero = 0;
+        header->cf = LV_IMG_CF_TRUE_COLOR;
+        /*The width and height are stored in Big endian format so convert
+        them to
+         * little endian*/
+        header->w = w;
+        header->h = h;
+
+        return LV_RES_OK;
       }
-      /* Start JPEG decoding with DMA method */
-      HAL_JPEG_Decode_DMA(&JPEG_Handle, Jpeg_IN_BufferTab[0].DataBuffer,
-                          Jpeg_IN_BufferTab[0].DataBufferSize,
-                          (uint8_t *)FrameBufferAddress, CHUNK_SIZE_OUT);
-
-      do {
-        JpegProcessing_End = JPEG_InputHandler(&JPEG_Handle);
-      } while (JpegProcessing_End == 0);
-      HAL_JPEG_GetInfo(&JPEG_Handle, &JPEG_Info);
-
-      lv_fs_close(&f);
-
-      /*Save the data in the header*/
-      header->always_zero = 0;
-      header->cf = LV_IMG_CF_TRUE_COLOR;
-      /*The width and height are stored in Big endian format so convert
-      them to
-       * little endian*/
-      header->w = JPEG_Info.ImageWidth;
-      header->h = JPEG_Info.ImageHeight;
-
-      return LV_RES_OK;
     }
   }
 
@@ -355,11 +418,52 @@ static lv_res_t decoder_open(lv_img_decoder_t *decoder,
   if (dsc->src_type == LV_IMG_SRC_FILE) {
     const char *fn = dsc->src;
     if (strncmp(lv_fs_get_ext(fn), "jpg", strlen("jpg")) == 0 ||
-        strncmp(lv_fs_get_ext(fn), "jpeg", strlen("jpeg")) ==
-            0) { /*Check the extension*/
+        strncmp(lv_fs_get_ext(fn), "jpeg", strlen("jpeg")) == 0) {
+      /*Check the extension*/
+      // volatile uint32_t JpegProcessing_End = 0;
+      Jpeg_HWDecodingEnd = 0;
+      Jpeg_HWDecodingError = 0;
+      FrameBufferAddress = FMC_SDRAM_JPEG_OUTPUT_DATA_BUFFER_ADDRESS;
+
+      lv_fs_res_t res = lv_fs_open(&f, fn, LV_FS_MODE_RD);
+      if (res != LV_FS_RES_OK) {
+        return LV_RES_INV;
+      }
+
+      /* Read from JPG file and fill input buffers */
+      for (uint32_t i = 0; i < 1; i++) {
+        if (lv_fs_read(&f, Jpeg_IN_BufferTab[i].DataBuffer, CHUNK_SIZE_IN,
+                       (uint32_t *)(&Jpeg_IN_BufferTab[i].DataBufferSize)) ==
+            LV_FS_RES_OK) {
+          Jpeg_IN_BufferTab[i].State = JPEG_BUFFER_FULL;
+        } else {
+          return LV_RES_INV;
+        }
+      }
+
+      /* Start JPEG decoding with DMA method */
+      HAL_JPEG_Decode_DMA(&JPEG_Handle, Jpeg_IN_BufferTab[0].DataBuffer,
+                          Jpeg_IN_BufferTab[0].DataBufferSize,
+                          (uint8_t *)FrameBufferAddress, CHUNK_SIZE_OUT);
+
+      // do {
+      //   JpegProcessing_End = JPEG_InputHandler(&JPEG_Handle);
+      // } while (JpegProcessing_End == 0);
+
+      while ((Jpeg_HWDecodingEnd == 0) && (Jpeg_HWDecodingError == 0))
+        ;
+
+      lv_fs_close(&f);
+      if (Jpeg_HWDecodingError == 1) {
+        return LV_RES_INV;
+      }
+      HAL_JPEG_GetInfo(&JPEG_Handle, &JPEG_Info);
 
       img_data =
           lodepng_malloc(JPEG_Info.ImageWidth * JPEG_Info.ImageHeight * 2);
+      if (!img_data) {
+        return LV_RES_INV;
+      }
       dma2d_copy_ycbcr_to_rgb(
           (uint32_t *)FMC_SDRAM_JPEG_OUTPUT_DATA_BUFFER_ADDRESS,
           (uint32_t *)img_data, JPEG_Info.ImageWidth, JPEG_Info.ImageHeight,
