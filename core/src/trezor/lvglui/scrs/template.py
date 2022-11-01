@@ -486,7 +486,7 @@ class TransactionDetailsTRON(FullSizeWindow):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__HOLD_TO_SIGN),
+            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
             _(i18n_keys.BUTTON__CANCEL),
             hold_confirm=True,
         )
