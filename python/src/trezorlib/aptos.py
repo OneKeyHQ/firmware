@@ -39,3 +39,16 @@ def get_address(
 @expect(messages.AptosSignedTx)
 def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
     return client.call(messages.AptosSignTx(address_n=address_n, raw_tx=rawtx))
+
+
+@expect(messages.AptosMessageSignature)
+def sign_message(client: "TrezorClient", address_n: "Address", payload):
+    return client.call(messages.AptosSignMessage(
+        address_n=address_n,
+        payload=messages.MessagePayload(
+        address=payload["address"],
+        chain_id=payload["chain_id"],
+        application=payload["application"],
+        nonce=payload["nonce"],
+        message=payload["message"]
+    )))

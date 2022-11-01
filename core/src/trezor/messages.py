@@ -6254,6 +6254,60 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosSignedTx"]:
             return isinstance(msg, cls)
 
+    class AptosSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        payload: "MessagePayload"
+
+        def __init__(
+            self,
+            *,
+            payload: "MessagePayload",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosSignMessage"]:
+            return isinstance(msg, cls)
+
+    class AptosMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosMessageSignature"]:
+            return isinstance(msg, cls)
+
+    class MessagePayload(protobuf.MessageType):
+        address: "str | None"
+        chain_id: "str | None"
+        application: "str | None"
+        nonce: "str"
+        message: "str"
+
+        def __init__(
+            self,
+            *,
+            nonce: "str",
+            message: "str",
+            address: "str | None" = None,
+            chain_id: "str | None" = None,
+            application: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["MessagePayload"]:
+            return isinstance(msg, cls)
+
     class NearGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"

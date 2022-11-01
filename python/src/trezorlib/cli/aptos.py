@@ -56,3 +56,27 @@ def sign_raw_tx(client: "TrezorClient", address: str, message: str):
         "signature": f"0x{resp.signature.hex()}",
     }
     return result
+
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.option("-a", "--addr")
+@click.option("-c", "--chain_id")
+@click.option("-app", "--application")
+@click.argument("nonce")
+@click.argument("message")
+@with_client
+def sign_message(client: "TrezorClient", address: str, addr:str, chain_id:str, application:str, nonce: str, message: str):
+    """Sign formatted message."""
+    address_n = tools.parse_path(address)
+    resp = aptos.sign_message(client, address_n, {
+        "address": addr,
+        "chain_id": chain_id,
+        "application": application,
+        "nonce":nonce,
+        "message": message
+    })
+    result = {
+        "address": resp.address,
+        "signature": f"0x{resp.signature.hex()}",
+    }
+    return result

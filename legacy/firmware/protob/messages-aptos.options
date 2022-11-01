@@ -6,3 +6,13 @@ AptosSignTx.raw_tx                                          max_size:1024
 
 AptosSignedTx.public_key                                    max_size:32
 AptosSignedTx.signature                                     max_size:64
+
+AptosSignMessage.address_n                                  max_count:8
+MessagePayload.address                                      max_size:67
+MessagePayload.chain_id                                     max_size: 8
+MessagePayload.application                                  max_size:128
+MessagePayload.nonce                                        max_size:64
+MessagePayload.message                                      max_size:1024
+
+AptosMessageSignature.signature                             max_size:64
+AptosMessageSignature.address                               max_size:67
