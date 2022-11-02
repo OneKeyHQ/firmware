@@ -133,6 +133,7 @@ async def handle_Initialize(ctx: wire.Context, msg: Initialize) -> Features:
 
     features = get_features()
     features.session_id = session_id
+    storage.cache.update_res_confirm_refresh()
     return features
 
 
