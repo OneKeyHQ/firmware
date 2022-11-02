@@ -69,8 +69,6 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
 
         if data is None:
             raise wire.DataError("Invalid Tron contract call data")
-        if len(data) != 68:
-            raise wire.DataError("Invalid TRC20 transfer method arguments data size")
 
         if (
             data[:16]
@@ -83,7 +81,7 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
         ):
             action = "Approve"
 
-        if action:
+        if action == "Transfer":
             token = tokens.token_by_address(
                 "TRC20", contract.trigger_smart_contract.contract_address
             )
@@ -107,7 +105,13 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
                     fee_limit=transaction.fee_limit,
                     network="TRON",
                 )
-            return
+        else:
+            from trezor.ui.layouts.lvgl import confirm_blind_sign_common, confirm_final
+
+            await confirm_blind_sign_common(ctx, owner_address, data)
+            await confirm_final(ctx)
+
+        return
 
     raise wire.DataError("Invalid transaction type")
 
