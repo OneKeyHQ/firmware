@@ -34,7 +34,6 @@ class InitScreen(Screen):
             )
         else:
             return
-        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
         self.content_area = lv.obj(self)
         self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
@@ -47,7 +46,7 @@ class InitScreen(Screen):
         self.content_area.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
         self.content_area.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.content_area.set_style_max_height(646, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_min_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
