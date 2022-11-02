@@ -264,6 +264,8 @@ if not utils.BITCOIN_ONLY:
     AptosAddress = 10601
     AptosSignTx = 10602
     AptosSignedTx = 10603
+    AptosSignMessage = 10604
+    AptosMessageSignature = 10605
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
