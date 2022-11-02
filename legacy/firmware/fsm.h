@@ -187,6 +187,7 @@ void fsm_msgTronSignTx(TronSignTx *msg);
 // aptos
 void fsm_msgAptosGetAddress(const AptosGetAddress *msg);
 void fsm_msgAptosSignTx(const AptosSignTx *msg);
+void fsm_msgAptosSignMessage(const AptosSignMessage *msg);
 
 // near
 void fsm_msgNearGetAddress(NearGetAddress *msg);

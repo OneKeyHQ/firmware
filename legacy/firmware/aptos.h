@@ -32,4 +32,6 @@ void aptos_get_address_from_public_key(const uint8_t *public_key,
                                        char *address);
 void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,
                    AptosSignedTx *resp);
+void aptos_sign_message(const AptosSignMessage *msg, const HDNode *node,
+                        AptosMessageSignature *resp);
 #endif  // __APTOS_H__
