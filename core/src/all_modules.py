@@ -346,6 +346,8 @@ apps.aptos.get_address
 import apps.aptos.get_address
 apps.aptos.helper
 import apps.aptos.helper
+apps.aptos.sign_message
+import apps.aptos.sign_message
 apps.aptos.sign_tx
 import apps.aptos.sign_tx
 apps.base
