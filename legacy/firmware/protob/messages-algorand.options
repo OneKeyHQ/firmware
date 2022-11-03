@@ -1,0 +1,7 @@
+AlgorandGetAddress.address_n                                   max_count:8
+AlgorandAddress.address                                        max_size:64
+
+AlgorandSignTx.address_n                                       max_count:8
+AlgorandSignTx.raw_tx                                          max_size:8192
+
+AlgorandSignedTx.signature                                     max_size:64

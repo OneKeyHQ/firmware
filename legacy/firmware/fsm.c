@@ -61,6 +61,7 @@
 #include "rtt_log.h"
 
 #if !BITCOIN_ONLY
+#include "algorand.h"
 #include "aptos.h"
 #include "conflux.h"
 #include "ethereum.h"
@@ -414,6 +415,7 @@ void fsm_msgRebootToBootloader(void) {
 
 #if !BITCOIN_ONLY
 
+#include "fsm_msg_algorand.h"
 #include "fsm_msg_aptos.h"
 #include "fsm_msg_conflux.h"
 #include "fsm_msg_ethereum.h"
