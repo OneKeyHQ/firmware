@@ -20,6 +20,7 @@
 #ifndef __FSM_H__
 #define __FSM_H__
 
+#include "messages-algorand.pb.h"
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
 #include "messages-conflux.pb.h"
@@ -33,7 +34,6 @@
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
 #include "messages-tron.pb.h"
-#include "messages-algorand.pb.h"
 
 // message functions
 
@@ -205,6 +205,5 @@ void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg);
 // algorand
 void fsm_msgAlgorandGetAddress(AlgorandGetAddress *msg);
 void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
-
 
 #endif

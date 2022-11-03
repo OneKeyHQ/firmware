@@ -62,6 +62,7 @@
 #include "rtt_log.h"
 
 #if !BITCOIN_ONLY
+#include "algorand.h"
 #include "aptos.h"
 #include "conflux.h"
 #include "ethereum.h"
@@ -72,7 +73,6 @@
 #include "starcoin.h"
 #include "stellar.h"
 #include "tron.h"
-#include "algorand.h"
 #endif
 
 #if EMULATOR
@@ -477,6 +477,7 @@ void fsm_msgRebootToBootloader(void) {
 
 #if !BITCOIN_ONLY
 
+#include "fsm_msg_algorand.h"
 #include "fsm_msg_aptos.h"
 #include "fsm_msg_conflux.h"
 #include "fsm_msg_ethereum.h"
@@ -486,6 +487,5 @@ void fsm_msgRebootToBootloader(void) {
 #include "fsm_msg_starcoin.h"
 #include "fsm_msg_stellar.h"
 #include "fsm_msg_tron.h"
-#include "fsm_msg_algorand.h"
 
 #endif
