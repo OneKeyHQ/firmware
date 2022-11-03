@@ -27,5 +27,6 @@ void layoutTronConfirmTx(const char *to_str, const uint64_t amount,
                          const uint8_t *value_bytes, ConstTronTokenPtr token);
 void layoutTronFee(const uint64_t amount, const uint8_t *value_bytes,
                    ConstTronTokenPtr token, const uint64_t fee);
+void layoutTronData(const uint8_t *data, uint32_t len, uint32_t total_len);
 
 #endif  // __TRON_UI_H__
