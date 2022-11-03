@@ -62,3 +62,20 @@ void fsm_msgAptosSignTx(const AptosSignTx *msg) {
 
   layoutHome();
 }
+
+void fsm_msgAptosSignMessage(const AptosSignMessage *msg) {
+  CHECK_INITIALIZED
+
+  CHECK_PIN
+  RESP_INIT(AptosMessageSignature)
+
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
+
+  hdnode_fill_public_key(node);
+
+  aptos_sign_message(msg, node, resp);
+
+  layoutHome();
+}

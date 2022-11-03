@@ -41,3 +41,30 @@ message AptosSignedTx {
     required bytes public_key = 1;  // public key for the private key used to sign tx
     required bytes signature = 2;           // the signature of the raw transaction
 }
+
+/**
+ * Request: ask device to sign Aptos message
+ * @start
+ * @next AptosMessageSignature
+ */
+ message AptosSignMessage {
+    repeated uint32 address_n = 1;
+    required AptosMessagePayload payload = 2;
+
+    message AptosMessagePayload {
+        optional string address = 2;
+        optional string chain_id = 3;
+        optional string application = 4;
+        required string nonce = 5;
+        required string message = 6;
+    }
+}
+
+/**
+* Response: signature for message
+* @end
+**/
+message AptosMessageSignature {
+    required bytes signature = 1;
+    required string address = 2;
+}
