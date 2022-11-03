@@ -314,34 +314,26 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
       return false;
     }
 
-    // parse chunk data as TRC20 transfer
-    static uint8_t TRANSFER_SIG[4] = {0xa9, 0x05, 0x9c, 0xbb};
-    // check method sig
-    if (memcmp(TRANSFER_SIG, msg->contract.trigger_smart_contract.data.bytes,
-               4)) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Invalid Tron contract call data"));
-      return false;
+    // detect TRC-20 like token
+    if (msg->contract.trigger_smart_contract.data.size == 68 &&
+        memcmp(
+            msg->contract.trigger_smart_contract.data.bytes,
+            "\xa9\x05\x9c\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            16) == 0) {
+      token = get_tron_token_by_address(
+          msg->contract.trigger_smart_contract.contract_address);
+      if (tron_eth_2_trx_address(
+              &msg->contract.trigger_smart_contract.data.bytes[4 + 12], to_str,
+              sizeof(to_str)) < 34) {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        _("Failed to encode to Tron address"));
+        return false;
+      }
+      memcpy(value_bytes,
+             &msg->contract.trigger_smart_contract.data.bytes[4 + 32], 32);
+    } else {
+      memcpy(to_str, msg->contract.trigger_smart_contract.contract_address, 36);
     }
-    if (msg->contract.trigger_smart_contract.data.size != 68) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Invalid TRC20 transfer method arguments data size"));
-      return false;
-    }
-
-    token = get_tron_token_by_address(
-        msg->contract.trigger_smart_contract.contract_address);
-
-    if (tron_eth_2_trx_address(
-            &msg->contract.trigger_smart_contract.data.bytes[4 + 12], to_str,
-            sizeof(to_str)) < 34) {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Failed to encode to Tron address"));
-      return false;
-    }
-
-    memcpy(value_bytes,
-           &msg->contract.trigger_smart_contract.data.bytes[4 + 32], 32);
   } else {
     fsm_sendFailure(FailureType_Failure_DataError, "unsupported contract type");
     return false;
@@ -354,6 +346,15 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     return false;
+  }
+  if ((token == NULL) && (msg->contract.has_trigger_smart_contract)) {
+    layoutTronData(msg->contract.trigger_smart_contract.data.bytes,
+                   msg->contract.trigger_smart_contract.data.size,
+                   msg->contract.trigger_smart_contract.data.size);
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
   }
   if (msg->has_fee_limit) {
     layoutTronFee(amount, value_bytes, token, msg->fee_limit);

@@ -3,13 +3,14 @@
 #include "gettext.h"
 #include "layout2.h"
 #include "tron.h"
+#include "util.h"
 
 void layoutTronConfirmTx(const char *to_str, const uint64_t value,
                          const uint8_t *value_bytes, ConstTronTokenPtr token) {
   char amount[60];
   if (token == NULL) {
     if (value == 0) {
-      strcpy(amount, _("Unknown Token"));
+      strcpy(amount, _("message"));
     } else {
       tron_format_amount(value, amount, sizeof(amount));
     }
@@ -59,4 +60,33 @@ void layoutTronFee(const uint64_t value, const uint8_t *value_bytes,
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Really send"), tx_value, _("and limit max fee to"),
                     gas_value, _("?"), NULL);
+}
+
+void layoutTronData(const uint8_t *data, uint32_t len, uint32_t total_len) {
+  char hexdata[3][17] = {0};
+  char summary[20] = {0};
+  uint32_t printed = 0;
+  for (int i = 0; i < 3; i++) {
+    uint32_t linelen = len - printed;
+    if (linelen > 8) {
+      linelen = 8;
+    }
+    data2hex(data, linelen, hexdata[i]);
+    data += linelen;
+    printed += linelen;
+  }
+
+  strcpy(summary, "...          bytes");
+  char *p = summary + 11;
+  uint32_t number = total_len;
+  while (number > 0) {
+    *p-- = '0' + number % 10;
+    number = number / 10;
+  }
+  char *summarystart = summary;
+  if (total_len == printed) summarystart = summary + 4;
+
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    _("Transaction data:"), hexdata[0], hexdata[1], hexdata[2],
+                    summarystart, NULL);
 }

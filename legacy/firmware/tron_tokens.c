@@ -2,7 +2,7 @@
 #include <string.h>
 
 #define TRON_TOKENS_COUNT 14
-const TronTokenType tron_tokens[TRON_TOKENS_COUNT] = {
+const TronTokenType tron_tokens[TRON_TOKENS_COUNT + 1] = {
     {"TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", " USDT", 6},
     {"TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR", " WTRX", 6},
     {"TKfjV9RNKJJCqPvBtK8L7Knykh7DNWvnYt", " WBTT", 6},
@@ -17,6 +17,7 @@ const TronTokenType tron_tokens[TRON_TOKENS_COUNT] = {
     {"TFczxzPhnThNSqr5by8tvxsdCFRRz6cPNq", " NFT", 6},
     {"TDyvndWuvX5xTBwHPYJi7J3Yq8pq8yh62h", " HT", 18},
     {"THbVQp8kMjStKNnf2iCY6NEzThKMK5aBHg", " DOGE", 8},
+    {"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", " UNKN", 0},
 };
 
 ConstTronTokenPtr get_tron_token_by_address(const char *address) {
@@ -25,5 +26,5 @@ ConstTronTokenPtr get_tron_token_by_address(const char *address) {
     return &tron_tokens[i];
   }
 
-  return NULL;
+  return &tron_tokens[TRON_TOKENS_COUNT];  // UNKN TOKEN
 }
