@@ -47,6 +47,9 @@ static void dsi_msp_init(DSI_HandleTypeDef *hdsi) {
   }
 }
 
+#define DSI_FREQ 30000U
+#define LTDC_FREQ 27500U
+
 HAL_StatusTypeDef dsi_host_init(DSI_HandleTypeDef *hdsi, uint32_t Width,
                                 uint32_t Height, uint32_t PixelFormat) {
   DSI_PLLInitTypeDef PLLInit;
@@ -56,9 +59,9 @@ HAL_StatusTypeDef dsi_host_init(DSI_HandleTypeDef *hdsi, uint32_t Width,
   hdsi->Init.AutomaticClockLaneControl = DSI_AUTO_CLK_LANE_CTRL_DISABLE;
   hdsi->Init.TXEscapeCkdiv = 4;
   hdsi->Init.NumberOfLanes = DSI_TWO_DATA_LANES;
-  PLLInit.PLLNDIV = 100;
+  PLLInit.PLLNDIV = 96;
   PLLInit.PLLIDF = DSI_PLL_IN_DIV5;
-  PLLInit.PLLODF = DSI_PLL_OUT_DIV1;
+  PLLInit.PLLODF = DSI_PLL_OUT_DIV2;
   if (HAL_DSI_Init(hdsi, &PLLInit) != HAL_OK) {
     return HAL_ERROR;
   }
@@ -78,12 +81,12 @@ HAL_StatusTypeDef dsi_host_init(DSI_HandleTypeDef *hdsi, uint32_t Width,
   VidCfg.HSPolarity = DSI_HSYNC_ACTIVE_HIGH;
   VidCfg.VSPolarity = DSI_VSYNC_ACTIVE_HIGH;
   VidCfg.DEPolarity = DSI_DATA_ENABLE_ACTIVE_HIGH;
-  VidCfg.HorizontalSyncActive = (lcd_time_seq.hsync * 62500U) / 27429U;
-  VidCfg.HorizontalBackPorch = (lcd_time_seq.hbp * 62500U) / 27429U;
+  VidCfg.HorizontalSyncActive = (lcd_time_seq.hsync * DSI_FREQ) / LTDC_FREQ;
+  VidCfg.HorizontalBackPorch = (lcd_time_seq.hbp * DSI_FREQ) / LTDC_FREQ;
   VidCfg.HorizontalLine =
       ((Width + lcd_time_seq.hsync + lcd_time_seq.hbp + lcd_time_seq.hfp) *
-       62500U) /
-      27429U;
+       DSI_FREQ) /
+      LTDC_FREQ;
   VidCfg.VerticalSyncActive = lcd_time_seq.vsync;
   VidCfg.VerticalBackPorch = lcd_time_seq.vbp;
   VidCfg.VerticalFrontPorch = lcd_time_seq.vfp;
