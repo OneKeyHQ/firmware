@@ -276,6 +276,10 @@ if not utils.BITCOIN_ONLY:
     NearAddress = 10702
     NearSignTx = 10703
     NearSignedTx = 10704
+    AlgorandGetAddress = 10900
+    AlgorandAddress = 10901
+    AlgorandSignTx = 10902
+    AlgorandSignedTx = 10903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

@@ -33,6 +33,7 @@
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
 #include "messages-tron.pb.h"
+#include "messages-algorand.pb.h"
 
 // message functions
 
@@ -200,5 +201,10 @@ void fsm_msgConfluxSignTx(ConfluxSignTx *msg);  // not const because we mutate
 void fsm_msgConfluxTxAck(const ConfluxTxAck *msg);
 void fsm_msgConfluxSignMessage(const ConfluxSignMessage *msg);
 void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg);
+
+// algorand
+void fsm_msgAlgorandGetAddress(AlgorandGetAddress *msg);
+void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
+
 
 #endif

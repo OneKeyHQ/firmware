@@ -99,6 +99,13 @@ OBJS += aptos.o
 OBJS += near.o
 OBJS += conflux.o
 OBJS += conflux_tokens.o
+OBJS += algorand.o
+OBJS += algo/algo_asa.o
+OBJS += algo/base64.o
+OBJS += algo/parser_encoding.o
+OBJS += algo/parser_impl.o
+OBJS += algo/parser.o
+OBJS += algo/tx.o
 endif
 
 OBJS += debug.o
@@ -154,6 +161,8 @@ OBJS += ../vendor/trezor-crypto/chacha20poly1305/rfc7539.o
 
 OBJS += ../vendor/trezor-crypto/nem.o
 
+OBJS += ../vendor/trezor-crypto/sha512.o
+
 OBJS += ../vendor/QR-Code-generator/c/qrcodegen.o
 
 OBJS += ../vendor/trezor-storage/storage.o
@@ -179,6 +188,7 @@ OBJS += protob/messages-tron.pb.o
 OBJS += protob/messages-aptos.pb.o
 OBJS += protob/messages-near.pb.o
 OBJS += protob/messages-conflux.pb.o
+OBJS += protob/messages-algorand.pb.o
 endif
 
 OPTFLAGS ?= -Os
