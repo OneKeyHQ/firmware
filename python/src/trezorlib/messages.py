@@ -266,6 +266,8 @@ class MessageType(IntEnum):
     AptosAddress = 10601
     AptosSignTx = 10602
     AptosSignedTx = 10603
+    AptosSignMessage = 10604
+    AptosMessageSignature = 10605
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -664,6 +666,66 @@ class AptosSignedTx(protobuf.MessageType):
     ) -> None:
         self.public_key = public_key
         self.signature = signature
+
+
+class AptosSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10604
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("payload", "AptosMessagePayload", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        payload: "AptosMessagePayload",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.payload = payload
+
+
+class AptosMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10605
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class AptosMessagePayload(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("address", "string", repeated=False, required=False),
+        3: protobuf.Field("chain_id", "string", repeated=False, required=False),
+        4: protobuf.Field("application", "string", repeated=False, required=False),
+        5: protobuf.Field("nonce", "string", repeated=False, required=True),
+        6: protobuf.Field("message", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        nonce: "str",
+        message: "str",
+        address: Optional["str"] = None,
+        chain_id: Optional["str"] = None,
+        application: Optional["str"] = None,
+    ) -> None:
+        self.nonce = nonce
+        self.message = message
+        self.address = address
+        self.chain_id = chain_id
+        self.application = application
 
 
 class BinanceGetAddress(protobuf.MessageType):
