@@ -4,12 +4,12 @@
 #define ST7701S_FORMAT_RGB888 0x70 /* Pixel  RGB888 : 24 bpp*/
 #define ST7701S_FORMAT_RBG565 0x50 /* Pixel  RGB565 : 16 bpp */
 
-#define ST7701S_480X800_HSYNC 2 /* Horizontal synchronization */
-#define ST7701S_480X800_HBP 2   /* Horizontal back porch      */
-#define ST7701S_480X800_HFP 2   /* Horizontal front porch     */
-#define ST7701S_480X800_VSYNC 2 /* Vertical synchronization   */
-#define ST7701S_480X800_VBP 10  /* Vertical back porch        */
-#define ST7701S_480X800_VFP 2   /* Vertical front porch       */
+#define ST7701S_480X800_HSYNC 4 /* Horizontal synchronization */
+#define ST7701S_480X800_HBP 38  /* Horizontal back porch      */
+#define ST7701S_480X800_HFP 38  /* Horizontal front porch     */
+#define ST7701S_480X800_VSYNC 4 /* Vertical synchronization   */
+#define ST7701S_480X800_VBP 9   /* Vertical back porch        */
+#define ST7701S_480X800_VFP 5   /* Vertical front porch       */
 
 // #define ST7701S_480X800_HSYNC 2 /* Horizontal synchronization */
 // #define ST7701S_480X800_HBP 34  /* Horizontal back porch      */
