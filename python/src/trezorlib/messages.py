@@ -314,6 +314,10 @@ class MessageType(IntEnum):
     NearAddress = 10702
     NearSignTx = 10703
     NearSignedTx = 10704
+    AlgorandGetAddress = 10900
+    AlgorandAddress = 10901
+    AlgorandSignTx = 10902
+    AlgorandSignedTx = 10903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
@@ -621,6 +625,68 @@ class TezosBallotType(IntEnum):
     Yay = 0
     Nay = 1
     Pass = 2
+
+
+class AlgorandGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10900
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        3: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class AlgorandAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10901
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class AlgorandSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10902
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class AlgorandSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10903
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class AptosGetAddress(protobuf.MessageType):

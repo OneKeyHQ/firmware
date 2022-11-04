@@ -427,6 +427,12 @@ enum MessageType {
     MessageType_NearSignTx = 10703 [(wire_in) = true];
     MessageType_NearSignedTx = 10704 [(wire_out) = true];
 
+    // Algorand
+    MessageType_AlgorandGetAddress = 10900 [(wire_in) = true];
+    MessageType_AlgorandAddress = 10901 [(wire_out) = true];
+    MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
+    MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
+
     //onekey
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];

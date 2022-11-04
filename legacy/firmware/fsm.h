@@ -20,6 +20,7 @@
 #ifndef __FSM_H__
 #define __FSM_H__
 
+#include "messages-algorand.pb.h"
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
 #include "messages-conflux.pb.h"
@@ -200,5 +201,9 @@ void fsm_msgConfluxSignTx(ConfluxSignTx *msg);  // not const because we mutate
 void fsm_msgConfluxTxAck(const ConfluxTxAck *msg);
 void fsm_msgConfluxSignMessage(const ConfluxSignMessage *msg);
 void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg);
+
+// algorand
+void fsm_msgAlgorandGetAddress(AlgorandGetAddress *msg);
+void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
 
 #endif
