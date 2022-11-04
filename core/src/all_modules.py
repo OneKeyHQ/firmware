@@ -340,6 +340,30 @@ trezor.workflow
 import trezor.workflow
 apps
 import apps
+apps.algorand
+import apps.algorand
+apps.algorand.encoding
+import apps.algorand.encoding
+apps.algorand.get_address
+import apps.algorand.get_address
+apps.algorand.sign_tx
+import apps.algorand.sign_tx
+apps.algorand.transactions
+import apps.algorand.transactions
+apps.algorand.transactions.constants
+import apps.algorand.transactions.constants
+apps.algorand.transactions.error
+import apps.algorand.transactions.error
+apps.algorand.transactions.transaction
+import apps.algorand.transactions.transaction
+apps.algorand.umsgpack
+import apps.algorand.umsgpack
+apps.algorand.umsgpack.as_load
+import apps.algorand.umsgpack.as_load
+apps.algorand.umsgpack.mp_dump
+import apps.algorand.umsgpack.mp_dump
+apps.algorand.umsgpack.mp_load
+import apps.algorand.umsgpack.mp_load
 apps.aptos
 import apps.aptos
 apps.aptos.get_address

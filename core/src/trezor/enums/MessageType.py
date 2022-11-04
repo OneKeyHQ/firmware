@@ -274,6 +274,10 @@ if not utils.BITCOIN_ONLY:
     SolanaAddress = 10101
     SolanaSignTx = 10102
     SolanaSignedTx = 10103
+    AlgorandGetAddress = 10900
+    AlgorandAddress = 10901
+    AlgorandSignTx = 10902
+    AlgorandSignedTx = 10903
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002

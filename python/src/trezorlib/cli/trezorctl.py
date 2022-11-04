@@ -31,6 +31,7 @@ from ..transport.udp import UdpTransport
 from . import (
     AliasedGroup,
     TrezorConnection,
+    algorand,
     aptos,
     binance,
     btc,
@@ -86,6 +87,7 @@ COMMAND_ALIASES = {
     "xlm": stellar.cli,
     "xtz": tezos.cli,
     "trx": tron.cli,
+    "algorand": algorand.cli,
     "sol": sol.cli,
     "starcoin": starcoin.cli,
     "near": near.cli,
@@ -375,6 +377,7 @@ cli.add_command(settings.cli)
 cli.add_command(stellar.cli)
 cli.add_command(sol.cli)
 cli.add_command(tron.cli)
+cli.add_command(algorand.cli)
 cli.add_command(tezos.cli)
 cli.add_command(aptos.cli)
 cli.add_command(starcoin.cli)

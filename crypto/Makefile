@@ -136,6 +136,7 @@ SRCS  += zkp_context.c
 SRCS  += zkp_ecdsa.c
 SRCS  += zkp_bip340.c
 SRCS  += cardano.c
+SRCS  += sha512.c
 
 OBJS   = $(SRCS:.c=.o)
 OBJS  += secp256k1-zkp.o

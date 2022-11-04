@@ -7,6 +7,7 @@ from trezorcrypto import (  # noqa: F401
     hmac,
     pbkdf2,
     random,
+    sha512_256,
 )
 
 from trezor import utils
