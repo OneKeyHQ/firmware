@@ -27,6 +27,7 @@
 #include "ff.h"
 #include "flash.h"
 #include "image.h"
+#include "mini_printf.h"
 #include "mipi_lcd.h"
 #include "qspi_flash.h"
 #include "rng.h"
@@ -684,10 +685,10 @@ void ble_test(void) {
     ble_cmd_req(BLE_VER, BLE_VER_ADV);
     hal_delay(5);
   }
-  if (!ble_name_state()) {
-    screen_bg[BLE_TEST] = COLOR_GREEN;
-  } else {
-    screen_bg[BLE_TEST] = COLOR_RED;
+
+  if (!ble_battery_state()) {
+    ble_cmd_req(BLE_PWR, BLE_PWR_EQ);
+    hal_delay(5);
   }
 }
 
@@ -737,24 +738,43 @@ void test_menu(void) {
 }
 uint16_t pos_x, pos_y;
 uint32_t test_ui_response(void) {
-  for (;;) {
-    uint32_t evt = touch_click();
-    pos_x = touch_unpack_x(evt);
-    pos_y = touch_unpack_y(evt);
+  uint32_t evt = touch_click();
+  pos_x = touch_unpack_x(evt);
+  pos_y = touch_unpack_y(evt);
 
-    if (!evt) {
-      continue;
-    }
+  if (!evt) {
+    return 0xFF;
+  }
 
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 5; j++) {
-        if (pos_x > ((i + 1) * 60 + i * 150) &&
-            pos_x < ((i + 1) * 60 + (i + 1) * 150) && pos_y > (150 + j * 100) &&
-            pos_y < (150 + j * 100 + 80)) {
-          return j * 2 + i;
-        }
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 5; j++) {
+      if (pos_x > ((i + 1) * 60 + i * 150) &&
+          pos_x < ((i + 1) * 60 + (i + 1) * 150) && pos_y > (150 + j * 100) &&
+          pos_y < (150 + j * 100 + 80)) {
+        return j * 2 + i;
       }
     }
+  }
+  return 0xFF;
+}
+
+void ble_response(void) {
+  static bool flag = true;
+  char battery_str[32] = {0};
+  if (ble_name_state()) {
+    display_text(0, 700, ble_get_name(), -1, FONT_NORMAL, COLOR_BL_FG,
+                 COLOR_BL_BG);
+    screen_bg[BLE_TEST] = COLOR_GREEN;
+    if (flag) {
+      flag = false;
+      test_menu();
+    }
+  }
+  if (ble_battery_state()) {
+    mini_snprintf(battery_str, sizeof(battery_str), "battery %d%%",
+                  battery_cap);
+    display_text(0, 730, battery_str, -1, FONT_NORMAL, COLOR_BL_FG,
+                 COLOR_BL_BG);
   }
 }
 
@@ -824,40 +844,44 @@ int main(void) {
   screen_bg[TEST_NUMS] = COLOR_BLACK;
 
   uint32_t button = 0;
-
+  test_menu();
   while (1) {
-    test_menu();
+    ble_uart_poll();
+    ble_response();
     button = test_ui_response();
-    switch (button) {
-      case SCREEN_TEST:
-        screen_test();
-        break;
-      case TOUCH_TEST:
-        touch_input_test();
-        break;
-      case SE_TEST:
-        se_test();
-        break;
-      case SPI_FLASH_TEST:
-        spi_flash_test();
-        break;
-      case EMMC_TEST:
-        emmc_test();
-        break;
-      case SDRAM_TEST:
-        sdram_test();
-        break;
-      case BEEP_TEST:
-        beep_test();
-        break;
-      case MOTOR_TEST:
-        motor_test();
-        break;
-      case BLE_TEST:
-        ble_test();
-        break;
-      default:
-        break;
+    if (button != 0xFF) {
+      switch (button) {
+        case SCREEN_TEST:
+          screen_test();
+          break;
+        case TOUCH_TEST:
+          touch_input_test();
+          break;
+        case SE_TEST:
+          se_test();
+          break;
+        case SPI_FLASH_TEST:
+          spi_flash_test();
+          break;
+        case EMMC_TEST:
+          emmc_test();
+          break;
+        case SDRAM_TEST:
+          sdram_test();
+          break;
+        case BEEP_TEST:
+          beep_test();
+          break;
+        case MOTOR_TEST:
+          motor_test();
+          break;
+        case BLE_TEST:
+          ble_test();
+          break;
+        default:
+          break;
+      }
+      test_menu();
     }
   }
 
