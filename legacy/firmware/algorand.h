@@ -1,7 +1,7 @@
 /*
- * This file is part of the Trezor project, https://trezor.io/
+ * This file is part of the OneKey project, https://onekey.so/
  *
- * Copyright (C) 2014 Pavol Rusnak <stick@satoshilabs.com>
+ * Copyright (C) 2021 OneKey Team <core@onekey.so>
  *
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,16 +17,18 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRON_UI_H__
-#define __TRON_UI_H__
+#ifndef __ALGORAND_H__
+#define __ALGORAND_H__
 
-#include <stdint.h>
-#include "tron_tokens.h"
+#include <stdbool.h>
+#include "bip32.h"
+#include "messages-algorand.pb.h"
 
-void layoutTronConfirmTx(const char *to_str, const uint64_t amount,
-                         const uint8_t *value_bytes, ConstTronTokenPtr token);
-void layoutTronFee(const uint64_t amount, const uint8_t *value_bytes,
-                   ConstTronTokenPtr token, const uint64_t fee);
-void layoutTronData(const uint8_t *data, uint32_t len, uint32_t total_len);
+bool algorand_sign_tx(const AlgorandSignTx *msg, const HDNode *node,
+                      AlgorandSignedTx *resp);
 
-#endif  // __TRON_UI_H__
+// Helpers
+void algorand_get_address_from_public_key(const uint8_t *public_key,
+                                          char *address);
+
+#endif  // __ALGORAND_H__

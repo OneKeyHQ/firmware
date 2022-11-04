@@ -288,6 +288,10 @@ if TYPE_CHECKING:
         NearAddress = 10702
         NearSignTx = 10703
         NearSignedTx = 10704
+        AlgorandGetAddress = 10900
+        AlgorandAddress = 10901
+        AlgorandSignTx = 10902
+        AlgorandSignedTx = 10903
 
     class BinanceOrderType(IntEnum):
         OT_UNKNOWN = 0
