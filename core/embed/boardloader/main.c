@@ -404,18 +404,22 @@ int main(void) {
   display_clear();
   lcd_pwm_init();
 
-  display_image((DISPLAY_RESX - 128) / 2, 190, 128, 128, toi_icon_onekey + 12,
-                sizeof(toi_icon_onekey) - 12);
+  if (startup_mode_flag != STAY_IN_BOARDLOADER_FLAG &&
+      startup_mode_flag != STAY_IN_BOOTLOADER_FLAG) {
+    display_image((DISPLAY_RESX - 128) / 2, 190, 128, 128, toi_icon_onekey + 12,
+                  sizeof(toi_icon_onekey) - 12);
 
-  display_image((DISPLAY_RESX - 140) / 2, DISPLAY_RESY - 120, 140, 30,
-                toi_icon_safeos + 12, sizeof(toi_icon_safeos) - 12);
-  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 64, "Powered by OneKey",
-                      -1, FONT_NORMAL, COLOR_GRAY, COLOR_BLACK);
+    display_image((DISPLAY_RESX - 140) / 2, DISPLAY_RESY - 120, 140, 30,
+                  toi_icon_safeos + 12, sizeof(toi_icon_safeos) - 12);
+    display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 64,
+                        "Powered by OneKey", -1, FONT_NORMAL, COLOR_GRAY,
+                        COLOR_BLACK);
 
 #if !PRODUCTION
-  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "TEST VERSION", -1,
-                      FONT_NORMAL, COLOR_RED, COLOR_BLACK);
+    display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "TEST VERSION", -1,
+                        FONT_NORMAL, COLOR_RED, COLOR_BLACK);
 #endif
+  }
 
   touch_init();
 
