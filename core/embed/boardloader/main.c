@@ -843,7 +843,37 @@ int main(void) {
 
   screen_bg[TEST_NUMS] = COLOR_BLACK;
 
+  display_clear();
+  display_text_center(DISPLAY_RESX / 2, 100, "AUTO TEST", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  display_text_center(DISPLAY_RESX / 2, 130, "SE TEST...", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  se_test();
+
+  display_text_center(DISPLAY_RESX / 2, 160, "SPI TEST...", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  spi_flash_test();
+
+  display_text_center(DISPLAY_RESX / 2, 190, "EMMC TEST...", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  emmc_test();
+
+  display_text_center(DISPLAY_RESX / 2, 220, "SDRAM TEST...", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  sdram_test();
+
+  display_text_center(DISPLAY_RESX / 2, 250, "BLE TEST...", -1, FONT_NORMAL,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  ble_test();
+
   uint32_t button = 0;
+
   test_menu();
   while (1) {
     ble_uart_poll();
