@@ -1086,3 +1086,245 @@ async def confirm_del_wallpaper(ctx, confirm_callback, cancel_callback):
         confirm_callback()
     else:
         cancel_callback()
+
+
+async def confirm_algo_payment(
+    ctx: wire.GenericContext,
+    sender: str | None = None,
+    receiver: str | None = None,
+    close_to: str | None = None,
+    rekey_to: str | None = None,
+    genesis_id: str | None = None,
+    genesis_hash: str | None = None,
+    note: str | None = None,
+    fee: str = 0,
+    amount: str = 0,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoPayment, AlgoCommon
+
+    screen = AlgoCommon("Payment")
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_payment", ButtonRequestType.ProtectCall)
+    )
+    screen = AlgoPayment(
+        sender,
+        receiver,
+        close_to,
+        rekey_to,
+        genesis_id,
+        genesis_hash,
+        note,
+        fee,
+        amount,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_payment", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_algo_asset_freeze(
+    ctx: wire.GenericContext,
+    sender: str | None = None,
+    rekey_to: str | None = None,
+    fee: str = 0,
+    index: str = 0,
+    target: str | None = None,
+    new_freeze_state: bool = None,
+    genesis_id: str | None = None,
+    genesis_hash: str | None = None,
+    note: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoAssetFreeze, AlgoCommon
+
+    screen = AlgoCommon("Asset Freeze")
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_asset_freeze", ButtonRequestType.ProtectCall)
+    )
+    screen = AlgoAssetFreeze(
+        sender,
+        rekey_to,
+        fee,
+        index,
+        target,
+        new_freeze_state,
+        genesis_id,
+        genesis_hash,
+        note,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_asset_freeze", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_algo_asset_xfer(
+    ctx: wire.GenericContext,
+    sender: str | None = None,
+    receiver: str | None = None,
+    index: str = 0,
+    fee: str = 0,
+    amount: str = 0,
+    close_assets_to: str | None = None,
+    revocation_target: str | None = None,
+    rekey_to: str | None = None,
+    genesis_id: str | None = None,
+    genesis_hash: str | None = None,
+    note: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoAssetXfer, AlgoCommon
+
+    screen = AlgoCommon("ASSET TRANSFER")
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_asset_transfer", ButtonRequestType.ProtectCall)
+    )
+    screen = AlgoAssetXfer(
+        sender,
+        receiver,
+        index,
+        fee,
+        amount,
+        close_assets_to,
+        revocation_target,
+        rekey_to,
+        genesis_id,
+        genesis_hash,
+        note,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_asset_transfer", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_algo_asset_cfg(
+    ctx: wire.GenericContext,
+    fee: str,
+    sender: str,
+    index: str | None = None,
+    total: str | None = None,
+    default_frozen: bool = None,
+    unit_name: str | None = None,
+    asset_name: str | None = None,
+    decimals: str | None = None,
+    manager: str | None = None,
+    reserve: str | None = None,
+    freeze: str | None = None,
+    clawback: str | None = None,
+    url: str | None = None,
+    metadata_hash: str | None = None,
+    rekey_to: str | None = None,
+    genesis_id: str | None = None,
+    genesis_hash: str | None = None,
+    note: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoAssetCfg, AlgoCommon
+
+    screen = AlgoCommon("ASSET CONFIG")
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_asset_cfg", ButtonRequestType.ProtectCall)
+    )
+    screen = AlgoAssetCfg(
+        fee,
+        sender,
+        index,
+        total,
+        default_frozen,
+        unit_name,
+        asset_name,
+        decimals,
+        manager,
+        reserve,
+        freeze,
+        clawback,
+        url,
+        metadata_hash,
+        rekey_to,
+        genesis_id,
+        genesis_hash,
+        note,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_asset_cfg", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_algo_keyregNonparticipating(
+    ctx: wire.GenericContext,
+    sender: str,
+    fee: str,
+    nonpart: bool,
+    rekey_to: str | None = None,
+    genesis_id: str | None = None,
+    genesis_hash: str | None = None,
+    note: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoKeyregNonp, AlgoCommon
+
+    screen = AlgoCommon("KEYREG NO PARTICIPATING")
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_keyreg_Nonp", ButtonRequestType.ProtectCall)
+    )
+    screen = AlgoKeyregNonp(
+        sender, fee, nonpart, rekey_to, genesis_id, genesis_hash, note
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_keyreg_Nonp", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_algo_keyregOnline(
+    ctx: wire.GenericContext,
+    format: str,
+    sender: str,
+    fee: str,
+    votekey: str | None = None,
+    selkey: str | None = None,
+    votefst: str | None = None,
+    votelst: str | None = None,
+    votekd: str | None = None,
+    sprfkey: str | None = None,
+    rekey_to: str | None = None,
+    genesis_id: str | None = None,
+    genesis_hash: str | None = None,
+    note: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoKeyregOnline, AlgoCommon
+
+    screen = AlgoCommon(format)
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_keyreg_online", ButtonRequestType.ProtectCall)
+    )
+    screen = AlgoKeyregOnline(
+        sender,
+        fee,
+        votekey,
+        selkey,
+        votefst,
+        votelst,
+        votekd,
+        sprfkey,
+        rekey_to,
+        genesis_id,
+        genesis_hash,
+        note,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "algo_keyreg_online", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_algo_app(ctx: wire.Context, signer: str, raw_message: bytes) -> None:
+
+    from trezor.lvglui.scrs.template import AlgoApplication
+
+    screen = AlgoApplication(signer)
+    await raise_if_cancelled(
+        interact(ctx, screen, "common_blinding_sign", ButtonRequestType.ProtectCall)
+    )
+    data_size = len(raw_message)
+    await confirm_data(
+        ctx,
+        "confirm_data",
+        title=_(i18n_keys.TITLE__VIEW_DATA),
+        description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_size),
+        data=raw_message,
+        br_code=ButtonRequestType.SignTx,
+    )

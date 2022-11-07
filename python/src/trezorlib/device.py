@@ -14,10 +14,9 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from concurrent.futures import process
-from hashlib import blake2s
 import os
 import time
+from hashlib import blake2s
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from . import messages
@@ -243,7 +242,14 @@ def upload_res(
     res_type: messages.ResourceType = messages.ResourceType.WallPaper,
     progress_update: Callable[[int], Any] = lambda _: None,
 ):
-    resp = client.call(messages.ResourceUpload(extension=ext, data_length=len(data), res_type=res_type, zoom_data_length=len(zoomdata)))
+    resp = client.call(
+        messages.ResourceUpload(
+            extension=ext,
+            data_length=len(data),
+            res_type=res_type,
+            zoom_data_length=len(zoomdata),
+        )
+    )
 
     while isinstance(resp, messages.ResourceRequest):
         offset = resp.offset
@@ -272,6 +278,8 @@ def upload_res(
 
 
 DATA_CHUNK_SIZE = 16 * 1024
+
+
 @session
 def update_res(
     client: "TrezorClient",
@@ -282,7 +290,14 @@ def update_res(
     data_len = len(data)
     initial_data = data[:DATA_CHUNK_SIZE]
     digest = blake2s(initial_data).digest()
-    resp = client.call(messages.ResourceUpdate(file_name=file_name, data_length=data_len, initial_data_chunk=initial_data, hash=digest))
+    resp = client.call(
+        messages.ResourceUpdate(
+            file_name=file_name,
+            data_length=data_len,
+            initial_data_chunk=initial_data,
+            hash=digest,
+        )
+    )
     progress_update(len(initial_data))
     while isinstance(resp, messages.ResourceRequest):
         offset = resp.offset

@@ -1,0 +1,43 @@
+syntax = "proto2";
+package hw.trezor.messages.algorand;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageAlgorand";
+
+/**
+ * Request: Ask device for Algorand address corresponding to address_n path
+ * @start
+ * @next AlgorandAddress
+ * @next Failure
+ */
+message AlgorandGetAddress {
+    repeated uint32 address_n = 1; // BIP-32 path to derive the key from master node
+    optional bool show_display = 3; // Optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains Algorand address derived from device private seed
+ * @end
+ */
+message AlgorandAddress {
+    optional string address = 1; // Algorand address
+}
+
+/**
+ * Request: Ask device to sign Algorand transaction
+ * @start
+ * @next AlgorandSignedTx
+ */
+message AlgorandSignTx {
+    repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
+    required bytes raw_tx = 2;                      // serialized raw transaction
+}
+
+/**
+ * Response: Contains Algorand transaction signature
+ * @end
+ */
+message AlgorandSignedTx {
+    required bytes signature = 1; // Transaction signature
+}

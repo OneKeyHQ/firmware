@@ -49,6 +49,7 @@ RESOURCE_UPLOAD_PURPOSE = {
     "nft": messages.ResourceType.Nft,
 }
 
+
 @click.group(name="device")
 def cli() -> None:
     """Device management commands - setup, recover seed, wipe, etc."""
@@ -300,6 +301,7 @@ def se_read_cert(obj: "TrezorConnection") -> bytes:
         cert_bytes = device.se_read_cert(client).public_cert
         return cert_bytes
 
+
 @cli.command()
 # fmt: off
 @click.option("-f", "--fullpath", help="The full path of the file to upload")
@@ -313,8 +315,7 @@ def upload_res(
     zoompath: str,
     purpose: int,
 ) -> None:
-    """Upload wallpaper/nft to device.
-    """
+    """Upload wallpaper/nft to device."""
     if fullpath:
         ext = fullpath.split(".")[-1]
         with open(zoompath, "rb") as f:
@@ -328,12 +329,20 @@ def upload_res(
             with click.progressbar(
                 label="Uploading", length=len(data) + len(zoomdata), show_eta=False
             ) as bar:
-                device.upload_res(client, ext, data, zoomdata, progress_update=bar.update, res_type=purpose)
+                device.upload_res(
+                    client,
+                    ext,
+                    data,
+                    zoomdata,
+                    progress_update=bar.update,
+                    res_type=purpose,
+                )
         except exceptions.Cancelled:
             click.echo("Upload aborted on device.")
         except exceptions.TrezorException as e:
             click.echo(f"Upload failed: {e}")
             sys.exit(3)
+
 
 @cli.command()
 # fmt: off
@@ -344,8 +353,7 @@ def update_res(
     client: "TrezorClient",
     fullpath: str,
 ) -> None:
-    """Update internal static resource(internal icons).
-    """
+    """Update internal static resource(internal icons)."""
     if fullpath:
         file_name = fullpath.split("/")[-1]
         with open(fullpath, "rb") as f:

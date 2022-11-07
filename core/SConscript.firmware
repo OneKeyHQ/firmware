@@ -103,6 +103,7 @@ SOURCE_MOD += [
     'vendor/trezor-crypto/sha3.c',
     'vendor/trezor-crypto/shamir.c',
     'vendor/trezor-crypto/slip39.c',
+    'vendor/trezor-crypto/sha512.c',
 ]
 if EVERYTHING:
     SOURCE_MOD += [
@@ -886,6 +887,9 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/aptos/*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/near/*.py'))
+
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/algorand/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/algorand/*/*.py'))
 
     source_mpy = env.FrozenModule(source=SOURCE_PY, source_dir=SOURCE_PY_DIR, bitcoin_only=BITCOIN_ONLY)
 
