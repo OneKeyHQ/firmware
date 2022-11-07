@@ -277,17 +277,25 @@ def sd_protect(
 @click.pass_obj
 def reboot_to_bootloader(obj: "TrezorConnection") -> str:
     """Reboot device into bootloader mode.
-
-    Currently only supported on Trezor Model One.
     """
     # avoid using @with_client because it closes the session afterwards,
     # which triggers double prompt on device
     with obj.client_context() as client:
-        if client.features.model != "1":
-            click.echo(
-                f"Warning: Rebooting into bootloader not supported on Trezor {client.features.model}"
-            )
-        return device.reboot_to_bootloader(client)
+        return device.reboot(client)
+
+@cli.command()
+@click.pass_obj
+def reboot_to_boardloader(obj: "TrezorConnection") -> str:
+    """Reboot device into boardloader mode.
+
+    Currently only supported on Trezor Model T.
+    """
+    # avoid using @with_client because it closes the session afterwards,
+    # which triggers double prompt on device
+    with obj.client_context() as client:
+        if client.features.model != "T":
+            click.echo(f"Reboot to boardloader is not support on OneKey {client.features.model}")
+        return device.reboot(client, False)
 
 
 @cli.command()

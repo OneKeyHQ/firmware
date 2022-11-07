@@ -279,6 +279,7 @@ if not utils.BITCOIN_ONLY:
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
     DeviceBackToBoot = 903
+    RebootToBoardloader = 904
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

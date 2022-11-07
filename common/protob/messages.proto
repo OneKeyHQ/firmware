@@ -419,6 +419,7 @@ enum MessageType {
 
     //onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];
+    MessageType_RebootToBoardloader = 904 [(wire_in) = true];
 
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true, (wire_bootloader) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true, (wire_bootloader) = true];
