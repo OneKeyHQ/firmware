@@ -113,7 +113,7 @@
 #define MICROPY_PY_MATH_ISCLOSE     (0)
 #define MICROPY_PY_MATH_FACTORIAL   (0)
 #define MICROPY_PY_CMATH            (0)
-#define MICROPY_PY_IO               (0)
+#define MICROPY_PY_IO               (1)
 #define MICROPY_PY_IO_IOBASE        (0)
 #define MICROPY_PY_IO_FILEIO        (MICROPY_VFS_FAT) // because mp_type_fileio/textio point to fatfs impl
 #define MICROPY_PY_SYS_MAXSIZE      (0)

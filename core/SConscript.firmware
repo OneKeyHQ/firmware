@@ -261,6 +261,7 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/py/modarray.c',
     'vendor/micropython/py/modbuiltins.c',
     'vendor/micropython/py/modgc.c',
+    'vendor/micropython/py/modio.c',
     'vendor/micropython/py/modmath.c',
     'vendor/micropython/py/modmicropython.c',
     'vendor/micropython/py/modstruct.c',
