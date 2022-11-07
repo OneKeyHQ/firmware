@@ -736,7 +736,6 @@ class AlgoPayment(FullSizeWindow):
         close_to,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
         fee,
         amount,
@@ -753,24 +752,30 @@ class AlgoPayment(FullSizeWindow):
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
         self.item2 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
-        )
-        self.item3 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), receiver
         )
-        self.item4 = DisplayItem(
+        self.item3 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        if close_to is not None:
-            self.item4 = DisplayItem(self.container, "ClOSE TO", close_to)
-        if rekey_to is not None:
-            self.item5 = DisplayItem(self.container, "REKEY TO", rekey_to)
-        if genesis_id is not None:
-            self.item6 = DisplayItem(self.container, "GENESIS ID", genesis_id)
-        if genesis_hash is not None:
-            self.item7 = DisplayItem(self.container, "GENESIS hash", genesis_hash)
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
+        )
         if note is not None:
-            self.item8 = DisplayItem(self.container, "NOTE", note)
+            self.item5 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
+            )
+        if close_to is not None:
+            self.item6 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__CLOSE_REMAINDER_TO__COLON),
+                close_to,
+            )
+        if rekey_to is not None:
+            self.item7 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
+            )
+        if genesis_id is not None:
+            self.item8 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoAssetFreeze(FullSizeWindow):
@@ -783,7 +788,6 @@ class AlgoAssetFreeze(FullSizeWindow):
         target,
         new_freeze_state,
         genesis_id,
-        genesis_hash,
         note,
     ):
         super().__init__(
@@ -795,29 +799,35 @@ class AlgoAssetFreeze(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
 
-        self.item1 = DisplayItem(self.container, "ASSET ID", index)
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
+        )
         self.item2 = DisplayItem(
-            self.container,
-            "FREEZE FLAG",
-            "Frozen" if new_freeze_state is True else "Unfrozen",
+            self.container, _(i18n_keys.LIST_KEY__FREEZE_ACCOUNT__COLON), target
         )
         self.item3 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__TO__COLON), target
+            self.container,
+            _(i18n_keys.LIST_KEY__FREEZE_ASSET_ID__COLON),
+            _(i18n_keys.LIST_VALUE__TRUE)
+            if new_freeze_state is True
+            else _(i18n_keys.LIST_VALUE__FALSE),
         )
         self.item4 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
+            self.container, _(i18n_keys.LIST_KEY__ASSET_ID__COLON), index
         )
         self.item5 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
-        if rekey_to is not None:
-            self.item5 = DisplayItem(self.container, "REKEY TO", rekey_to)
-        if genesis_id is not None:
-            self.item6 = DisplayItem(self.container, "GENESIS ID", genesis_id)
-        if genesis_hash is not None:
-            self.item7 = DisplayItem(self.container, "GENESIS hash", genesis_hash)
         if note is not None:
-            self.item8 = DisplayItem(self.container, "NOTE", note)
+            self.item6 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
+            )
+        if rekey_to is not None:
+            self.item7 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
+            )
+        if genesis_id is not None:
+            self.item8 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoAssetXfer(FullSizeWindow):
@@ -832,7 +842,6 @@ class AlgoAssetXfer(FullSizeWindow):
         revocation_target,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
     ):
         super().__init__(
@@ -843,33 +852,43 @@ class AlgoAssetXfer(FullSizeWindow):
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
-        self.item1 = DisplayItem(self.container, "ASSET ID", index)
-        self.item2 = DisplayItem(
+        self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item3 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
-        )
-        self.item4 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__TO__COLON), receiver
-        )
-        self.item5 = DisplayItem(
+        self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), receiver
+        )
         if revocation_target is not None:
-            self.item6 = DisplayItem(
-                self.container, "REVOCATION TARGET", revocation_target
+            self.item4 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__REVOCATION_ADDRESS__COLON),
+                revocation_target,
+            )
+        self.item5 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__ASSET_ID__COLON), index
+        )
+        self.item6 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
+        )
+        if note is not None:
+            self.item7 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
+            )
+        if rekey_to is not None:
+            self.item8 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
         if close_assets_to is not None:
-            self.item6 = DisplayItem(self.container, "ClOSE TO", close_assets_to)
-        if rekey_to is not None:
-            self.item7 = DisplayItem(self.container, "REKEY TO", rekey_to)
+            self.item9 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__CLOSE_ASSET_TO__COLON),
+                close_assets_to,
+            )
         if genesis_id is not None:
-            self.item8 = DisplayItem(self.container, "GENESIS ID", genesis_id)
-        if genesis_hash is not None:
-            self.item9 = DisplayItem(self.container, "GENESIS hash", genesis_hash)
-        if note is not None:
-            self.item10 = DisplayItem(self.container, "NOTE", note)
+            self.item10 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoAssetCfg(FullSizeWindow):
@@ -891,7 +910,6 @@ class AlgoAssetCfg(FullSizeWindow):
         metadata_hash,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
     ):
         super().__init__(
@@ -904,47 +922,77 @@ class AlgoAssetCfg(FullSizeWindow):
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
 
         self.item1 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
-        )
-        self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
+        if asset_name is not None:
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__ASSET_NAME__COLON), asset_name
+            )
         if index is not None and index != "0":
-            self.item3 = DisplayItem(self.container, "ASSET ID", index)
-        if total is not None:
-            self.item4 = DisplayItem(self.container, "TOTAL", total)
-        if default_frozen is not None:
+            self.item3 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__ASSET_ID__COLON), index
+            )
+        if url is not None:
+            self.item14 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__URL__COLON), url
+            )
+        if manager is not None:
             self.item5 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__MANAGER_ADDRESS__COLON), manager
+            )
+        if reserve is not None:
+            self.item6 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__RESERVE_ADDRESS__COLON), reserve
+            )
+        if clawback is not None:
+            self.item7 = DisplayItem(
                 self.container,
-                "DEFAULT FROZEN",
-                "Frozen" if default_frozen is True else "Unfrozen",
+                _(i18n_keys.LIST_KEY__CLAW_BACK_ADDRESS__COLON),
+                clawback,
+            )
+        if default_frozen is not None:
+            self.item8 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__FREEZE_ADDRESS__QUESTION),
+                _(i18n_keys.LIST_VALUE__TRUE)
+                if default_frozen is True
+                else _(i18n_keys.LIST_VALUE__FALSE),
+            )
+        if freeze is not None:
+            self.item9 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__FREEZE_ADDRESS__COLON), freeze
+            )
+        if total is not None:
+            self.item10 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__TOTAL__COLON), total
+            )
+        if decimals is not None and decimals != "0":
+            self.item11 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__DECIMALS__COLON), decimals
             )
         if unit_name is not None:
-            self.item6 = DisplayItem(self.container, "UNIT NAME", unit_name)
-        if asset_name is not None:
-            self.item7 = DisplayItem(self.container, "ASSET NAME", asset_name)
-        if decimals is not None and decimals != "0":
-            self.item8 = DisplayItem(self.container, "DECIMALS", decimals)
-        if manager is not None:
-            self.item9 = DisplayItem(self.container, "MANAGER", manager)
-        if reserve is not None:
-            self.item10 = DisplayItem(self.container, "RESERVE", reserve)
-        if freeze is not None:
-            self.item11 = DisplayItem(self.container, "FREEZE", freeze)
-        if clawback is not None:
-            self.item12 = DisplayItem(self.container, "CLAWBACK", clawback)
-        if url is not None:
-            self.item13 = DisplayItem(self.container, "URL", url)
+            self.item12 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__UNIT_NAME__COLON), unit_name
+            )
         if metadata_hash is not None:
-            self.item6 = DisplayItem(self.container, "METADATA HASH", metadata_hash)
-        if rekey_to is not None:
-            self.item14 = DisplayItem(self.container, "REKEY TO", rekey_to)
-        if genesis_id is not None:
-            self.item15 = DisplayItem(self.container, "GENESIS ID", genesis_id)
-        if genesis_hash is not None:
-            self.item16 = DisplayItem(self.container, "GENESIS hash", genesis_hash)
+            self.item13 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__METADATA_HASH__COLON),
+                metadata_hash,
+            )
+        self.item14 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
+        )
         if note is not None:
-            self.item17 = DisplayItem(self.container, "NOTE", note)
+            self.item15 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
+            )
+        if rekey_to is not None:
+            self.item16 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
+            )
+        if genesis_id is not None:
+            self.item17 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoKeyregOnline(FullSizeWindow):
@@ -954,13 +1002,9 @@ class AlgoKeyregOnline(FullSizeWindow):
         fee,
         votekey,
         selkey,
-        votefst,
-        votelst,
-        votekd,
         sprfkey,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
     ):
         super().__init__(
@@ -973,30 +1017,37 @@ class AlgoKeyregOnline(FullSizeWindow):
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
 
         self.item1 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
-        )
-        self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        self.item3 = DisplayItem(self.container, "VOTE PK", votekey)
-        self.item4 = DisplayItem(self.container, "VRF PK", selkey)
-        self.item5 = DisplayItem(self.container, "VOTE FIRST", votefst)
-        self.item6 = DisplayItem(self.container, "VOTE LAST", votelst)
-        self.item7 = DisplayItem(self.container, "VOTE KEY DILUTION", votekd)
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__VRF_PUBLIC_KEY__COLON), selkey
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__VOTE_PUBLIC_KEY__COLON), votekey
+        )
         if sprfkey is not None:
-            self.item6 = DisplayItem(self.container, "SPRF PK", sprfkey)
-        if rekey_to is not None:
-            self.item8 = DisplayItem(self.container, "REKEY TO", rekey_to)
-        if genesis_id is not None:
-            self.item9 = DisplayItem(self.container, "GENESIS ID", genesis_id)
-        if genesis_hash is not None:
-            self.item10 = DisplayItem(self.container, "GENESIS hash", genesis_hash)
+            self.item4 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__STATE_PROOF_PUBLIC_KEY__COLON),
+                sprfkey,
+            )
+        self.item5 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
+        )
         if note is not None:
-            self.item11 = DisplayItem(self.container, "NOTE", note)
+            self.item6 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
+            )
+        if rekey_to is not None:
+            self.item7 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
+            )
+        if genesis_id is not None:
+            self.item8 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoKeyregNonp(FullSizeWindow):
-    def __init__(self, sender, fee, nonpart, rekey_to, genesis_id, genesis_hash, note):
+    def __init__(self, sender, fee, nonpart, rekey_to, genesis_id, note):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
@@ -1007,23 +1058,26 @@ class AlgoKeyregNonp(FullSizeWindow):
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
 
         self.item1 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
-        )
-        self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-
-        self.item5 = DisplayItem(
-            self.container, "PARTICIPATING", "No" if True is True else "Yes"
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
+        )
+        if note is not None:
+            self.item3 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
+            )
+        self.item4 = DisplayItem(
+            self.container,
+            _(i18n_keys.LIST_KEY__NONPARTICIPATION__COLON),
+            _(i18n_keys.LIST_VALUE__FALSE)
+            if nonpart is True
+            else _(i18n_keys.LIST_VALUE__TRUE),
         )
         if rekey_to is not None:
-            self.item8 = DisplayItem(self.container, "REKEY TO", rekey_to)
-        if genesis_id is not None:
-            self.item9 = DisplayItem(self.container, "GENESIS ID", genesis_id)
-        if genesis_hash is not None:
-            self.item10 = DisplayItem(self.container, "GENESIS hash", genesis_hash)
-        if note is not None:
-            self.item11 = DisplayItem(self.container, "NOTE", note)
+            self.item5 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
+            )
 
 
 class AlgoApplication(FullSizeWindow):

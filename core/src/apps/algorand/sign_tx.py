@@ -43,7 +43,6 @@ async def sign_tx(
             if type(txn) is transactions.transaction.AssetFreezeTxn
             else False,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.PaymentTxn:
@@ -67,7 +66,6 @@ async def sign_tx(
             close_remainder_to,
             txn.rekey_to if txn is not None else None,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
             fee,
             amount,
@@ -102,7 +100,6 @@ async def sign_tx(
             else None,
             txn.rekey_to if txn is not None else None,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.AssetConfigTxn:
@@ -152,7 +149,6 @@ async def sign_tx(
             else None,
             txn.rekey_to if txn is not None else None,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.KeyregNonparticipatingTxn:
@@ -171,7 +167,6 @@ async def sign_tx(
             nonpart if type(nonpart) is bool else False,
             txn.rekey_to if txn is not None else None,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.KeyregOfflineTxn:
@@ -186,12 +181,8 @@ async def sign_tx(
             None,
             None,
             None,
-            None,
-            None,
-            None,
             txn.rekey_to if txn is not None else None,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.KeyregOnlineTxn:
@@ -205,21 +196,11 @@ async def sign_tx(
             fee,
             txn.votepk if type(txn) is transactions.transaction.KeyregOnlineTxn else "",
             txn.selkey if type(txn) is transactions.transaction.KeyregOnlineTxn else "",
-            str(txn.votefst)
-            if type(txn) is transactions.transaction.KeyregOnlineTxn
-            else "",
-            str(txn.votelst)
-            if type(txn) is transactions.transaction.KeyregOnlineTxn
-            else "",
-            str(txn.votekd)
-            if type(txn) is transactions.transaction.KeyregOnlineTxn
-            else "",
             txn.sprfkey
             if type(txn) is transactions.transaction.KeyregOnlineTxn
             else None,
             txn.rekey_to if txn is not None else None,
             txn.genesis_id if txn is not None else None,
-            txn.genesis_hash if txn is not None else None,
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.ApplicationCallTxn:
