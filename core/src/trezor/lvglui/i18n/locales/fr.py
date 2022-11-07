@@ -393,5 +393,6 @@ translations = [
     "VersionBluetooth",
     "Transaction signée",
     "Se ferme)",
+    "Voulez-vous changer l'image de l'écran d'accueil? Cela supprimera le plus ancien fond d'écran téléchargé.",
 ]
 # fmt: on

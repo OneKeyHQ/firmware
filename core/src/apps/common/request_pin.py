@@ -3,10 +3,8 @@ from typing import Any, NoReturn
 
 import storage.cache
 import storage.sd_salt
-from trezor import config, wire
+from trezor import config, loop, wire
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-
-from apps.base import set_homescreen
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -43,8 +41,6 @@ async def request_pin_confirm(ctx: wire.Context, *args: Any, **kwargs: Any) -> s
         if pin1 == pin2:
             return pin1
         await pin_mismatch()
-        from trezor import loop
-
         await loop.sleep(2000)
 
 
@@ -93,7 +89,7 @@ async def verify_user_pin(
     allow_cancel: bool = True,
     retry: bool = True,
     cache_time_ms: int = 0,
-    set_home: bool = False,
+    re_loop: bool = False,
     callback=None,
 ) -> None:
     last_unlock = _get_last_unlock_time()
@@ -120,8 +116,8 @@ async def verify_user_pin(
     except SdCardUnavailable:
         raise wire.PinCancelled("SD salt is unavailable")
     if config.unlock(pin, salt):
-        if set_home:
-            set_homescreen()
+        if re_loop:
+            loop.clear()
         elif callback:
             callback()
         _set_last_unlock_time()
@@ -134,8 +130,8 @@ async def verify_user_pin(
             ctx, _(i18n_keys.TITLE__ENTER_PIN), pin_rem, allow_cancel
         )
         if config.unlock(pin, salt):
-            if set_home:
-                set_homescreen()
+            if re_loop:
+                loop.clear()
             elif callback:
                 callback()
             _set_last_unlock_time()

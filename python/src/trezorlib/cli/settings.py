@@ -195,22 +195,20 @@ def flags(client: "TrezorClient", flags: str) -> str:
 )
 @with_client
 def homescreen(client: "TrezorClient", filename: str) -> str:
-    """Set new homescreen.
-
-    To revert to default homescreen, use 'trezorctl set homescreen default'
+    """Change wallpaper between internals.
     """
-    if filename == "default":
-        img = b""
-    else:
-        # use Click's facility to validate the path for us
-        param = click.Path(dir_okay=False, readable=True, exists=True)
-        param.convert(filename, None, None)
-        if client.features.model == "1":
-            img = image_to_t1(filename)
-        else:
-            img = image_to_tt(filename)
+    # if filename == "default":
+    #     img = b""
+    # else:
+    #     # use Click's facility to validate the path for us
+    #     param = click.Path(dir_okay=False, readable=True, exists=True)
+    #     param.convert(filename, None, None)
+    #     if client.features.model == "1":
+    #         img = image_to_t1(filename)
+    #     else:
+    #         img = image_to_tt(filename)
 
-    return device.apply_settings(client, homescreen=img)
+    return device.apply_settings(client, homescreen=filename.encode())
 
 
 @cli.command()

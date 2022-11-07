@@ -40,7 +40,6 @@ async def recovery_process(ctx: wire.GenericContext) -> Success:
         else:
             await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT))
             storage.wipe()
-            set_homescreen()
         raise wire.ActionCancelled
 
 

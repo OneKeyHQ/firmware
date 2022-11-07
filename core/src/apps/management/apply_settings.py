@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
 import storage.device
-from trezor import ui, wire
+from trezor import wire
 from trezor.enums import ButtonRequestType, SafetyCheckLevel
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import Success
 from trezor.strings import format_duration_ms
-from trezor.ui.layouts import confirm_action
+from trezor.ui.layouts import confirm_action, confirm_set_homescreen
 
 from apps.base import reload_settings_from_storage
 from apps.common import safety_checks
@@ -16,22 +16,30 @@ if TYPE_CHECKING:
 
 
 def validate_homescreen(homescreen: bytes) -> None:
-    if homescreen == b"":
-        return
+    # if homescreen == b"":
+    #     return
 
-    if len(homescreen) > storage.device.HOMESCREEN_MAXSIZE:
-        raise wire.DataError(
-            f"Homescreen is too large, maximum size is {storage.device.HOMESCREEN_MAXSIZE} bytes"
-        )
+    # if len(homescreen) > storage.device.HOMESCREEN_MAXSIZE:
+    #     raise wire.DataError(
+    #         f"Homescreen is too large, maximum size is {storage.device.HOMESCREEN_MAXSIZE} bytes"
+    #     )
 
-    try:
-        w, h, grayscale = ui.display.toif_info(homescreen)
-    except ValueError:
+    # try:
+    #     w, h, grayscale = ui.display.toif_info(homescreen)
+    # except ValueError:
+    #     raise wire.DataError("Invalid homescreen")
+    # if w != 144 or h != 144:
+    #     raise wire.DataError("Homescreen must be 144x144 pixel large")
+    # if grayscale:
+    #     raise wire.DataError("Homescreen must be full-color TOIF image")
+    internal_wallpapers = (
+        "wallpaper-1.png",
+        "wallpaper-2.png",
+        "wallpaper-3.png",
+        "wallpaper-4.png",
+    )
+    if not any(name == homescreen.decode() for name in internal_wallpapers):
         raise wire.DataError("Invalid homescreen")
-    if w != 144 or h != 144:
-        raise wire.DataError("Homescreen must be 144x144 pixel large")
-    if grayscale:
-        raise wire.DataError("Homescreen must be full-color TOIF image")
 
 
 async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
@@ -50,13 +58,9 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
         raise wire.ProcessError("No setting provided")
 
     if msg.homescreen is not None:
-        # validate_homescreen(msg.homescreen)
-        # await require_confirm_change_homescreen(ctx)
-        # try:
-        #     storage.device.set_homescreen(msg.homescreen)
-        # except ValueError:
-        #     raise wire.DataError("Invalid homescreen")
-        raise wire.ProcessError("Please set homescreen on the device")
+        validate_homescreen(msg.homescreen)
+        await confirm_set_homescreen(ctx)
+        storage.device.set_homescreen(f"A:/res/{msg.homescreen.decode()}")
 
     if msg.label is not None:
         if len(msg.label) > storage.device.LABEL_MAXLENGTH:

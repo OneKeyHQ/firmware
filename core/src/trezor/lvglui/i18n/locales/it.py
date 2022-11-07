@@ -393,5 +393,6 @@ translations = [
     "Versione Bluetooth",
     "Transazione firmata",
     "Chiudi ({}s)",
+    "Vuoi cambiare l'immagine della schermata iniziale? Questo eliminerà lo sfondo più vecchio caricato.",
 ]
 # fmt: on

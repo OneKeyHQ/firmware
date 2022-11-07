@@ -1045,12 +1045,14 @@ async def show_onekey_app_guide():
     await app_guide.request()
 
 
-async def confirm_set_homescreen(ctx):
+async def confirm_set_homescreen(ctx, replace: bool = False):
     await confirm_action(
         ctx=ctx,
         br_type="confirm_homescreen",
         title=_(i18n_keys.TITLE__SET_HOMESCREEN),
-        description=_(i18n_keys.SUBTITLE__SET_HOMESCREEN),
+        description=_(i18n_keys.SUBTITLE__SET_HOMESCREEN)
+        if not replace
+        else _(i18n_keys.SUBTITLE__SET_HOMESCREEN_AND_DELETE),
         icon="A:/res/upload-res.png",
         anim_dir=2,
     )

@@ -148,7 +148,7 @@ translations = [
     "Settings",
     "About Device",
     "Connect",
-    "Auto-Lock",
+    "Auto-lock",
     "Language",
     "{} minutes",
     "Never",
@@ -393,5 +393,6 @@ translations = [
     "Bluetooth Version",
     "Transaction Signed",
     "Close ({}s)",
+    "Do you want to change the homescreen image? This will delete the oldest uploaded wallpaper.",
 ]
 # fmt: on

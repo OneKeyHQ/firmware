@@ -1001,7 +1001,7 @@ class Go2UpdateMode(Screen):
 
 
 class PowerOff(Screen):
-    def __init__(self, prev_scr=None, set_home: bool = False):
+    def __init__(self, prev_scr=None, re_loop: bool = False):
         super().__init__(
             prev_scr=prev_scr,
             title=_(i18n_keys.TITLE__POWER_OFF),
@@ -1013,7 +1013,7 @@ class PowerOff(Screen):
         self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL))
         self.btn_no.set_size(216, 76)
         self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -18)
-        self.set_home = set_home
+        self.re_loop = re_loop
         self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
         from trezor import config
 
@@ -1038,7 +1038,7 @@ class PowerOff(Screen):
 
                     workflow.spawn(
                         verify_user_pin(
-                            set_home=self.set_home,
+                            re_loop=self.re_loop,
                             allow_cancel=False,
                             callback=self.back,
                         )
@@ -1052,7 +1052,9 @@ class PowerOff(Screen):
 
 class ShutingDown(FullSizeWindow):
     def __init__(self):
-        super().__init__(title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None)
+        super().__init__(
+            title=_(i18n_keys.TITLE__SHUTTING_DOWN), subtitle=None, anim_dir=0
+        )
 
         async def shutdown_delay():
             await loop.sleep(3000)
@@ -1590,7 +1592,7 @@ class PassphraseTipsConfirm(FullSizeWindow):
             if utils.lcd_resume():
                 return
             elif target == self.btn_no:
-                self.show_dismiss_anim()
+                # self.show_dismiss_anim()
                 lv.event_send(self.callback_obj, lv.EVENT.CANCEL, None)
             elif target == self.btn_yes:
                 lv.event_send(self.callback_obj, lv.EVENT.READY, None)

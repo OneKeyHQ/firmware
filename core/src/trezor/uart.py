@@ -59,16 +59,15 @@ async def handle_usb_state():
                     StatusBar.get_instance().set_battery_img(
                         utils.BATTERY_CAP, CHARGING
                     )
-            if (
-                device.is_usb_lock_enabled()
-                and device.is_initialized()
-                and config.has_pin()
-            ):
+            usb_auto_lock = device.is_usb_lock_enabled()
+            if usb_auto_lock and device.is_initialized() and config.has_pin():
                 if config.is_unlocked():
                     config.lock()
                     await safe_reloop()
                     # single to restart the main loop
                     raise loop.TASK_CLOSED
+            elif not usb_auto_lock and not state:
+                await safe_reloop()
             base.reload_settings_from_storage()
         except Exception as exec:
             if __debug__:
@@ -79,7 +78,9 @@ async def handle_usb_state():
 
 async def safe_reloop():
     from trezor import wire
+    from trezor.lvglui.scrs.homescreen import change_state
 
+    change_state()
     await wire.signal_ack()
 
 
@@ -168,7 +169,7 @@ async def _deal_button_press(value: bytes) -> None:
         from trezor.lvglui.scrs.homescreen import PowerOff
 
         if device.is_initialized():
-            PowerOff(set_home=True)
+            PowerOff(re_loop=True)
         else:
             from trezor.lvglui.scrs.initscreen import InitScreen
 
@@ -228,7 +229,7 @@ async def _deal_ble_status(value: bytes) -> None:
         if not BLE_ENABLED:
             return
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
-
+        await safe_reloop()
     elif res == _BLE_STATUS_OPENED:
         BLE_ENABLED = True
         if utils.BLE_CONNECTED:
