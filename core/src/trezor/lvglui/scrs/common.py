@@ -93,14 +93,13 @@ class Screen(lv.obj):
 
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
         # """Load a screen with animation."""
-        # lv.scr_load_anim(
-        #     scr,
-        #     lv.SCR_LOAD_ANIM.MOVE_RIGHT if back else lv.SCR_LOAD_ANIM.MOVE_LEFT,
-        #     200,
-        #     80,
-        #     False,
-        # )
-        lv.scr_load(scr)
+        lv.scr_load_anim(
+            scr,
+            lv.SCR_LOAD_ANIM.MOVE_RIGHT if back else lv.SCR_LOAD_ANIM.MOVE_LEFT,
+            200,
+            80,
+            False,
+        )
 
     # NOTE:====================Functional Code Don't Edit========================
 
@@ -115,9 +114,8 @@ class Screen(lv.obj):
             self._load_scr(scr.__class__(), back=True)
             utils.try_remove_scr(self)
             self.del_delayed(1000)
-            if hasattr(self, "_init"):
-                del self._init
             del self.__class__._instance
+            del self
         else:
             self._load_scr(scr)
 
@@ -150,25 +148,21 @@ class FullSizeWindow(lv.obj):
         icon_path: str | None = None,
         options: str | None = None,
         hold_confirm: bool = False,
-        top_layer: bool = False,
         auto_close: bool = False,
         anim_dir: int = ANIM_DIRS.HOR,
     ):
-        if top_layer:
-            super().__init__(lv.layer_top())
-        else:
-            super().__init__(lv.scr_act())
+        super().__init__(lv.scr_act())
 
         self.channel = loop.chan()
         self.anim_dir = anim_dir
         self.set_size(lv.pct(100), lv.pct(100))
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        self.show_load_anim()
+        # self.show_load_anim()
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.hold_confirm = hold_confirm  # and not utils.EMULATOR
+        self.hold_confirm = hold_confirm
         self.content_area = lv.obj(self)
         self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
@@ -244,16 +238,17 @@ class FullSizeWindow(lv.obj):
                 return
             if hasattr(self, "btn_no") and target == self.btn_no:
                 self.channel.publish(0)
-                self.show_dismiss_anim()
+                # self.show_dismiss_anim()
                 self.destroy()
                 return
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
+                # self.show_unload_anim()
                 if hasattr(self, "selector"):
-                    self.show_unload_anim()
+                    # self.show_unload_anim()
                     self.channel.publish(self.selector.get_selected_str())
                 else:
                     if not self.hold_confirm:
-                        self.show_unload_anim()
+                        # self.show_unload_anim()
                         self.channel.publish(1)
                     else:
                         return
@@ -262,8 +257,9 @@ class FullSizeWindow(lv.obj):
         elif code == lv.EVENT.READY and self.hold_confirm:
             if target == self.slider:
                 self.channel.publish(1)
-                self.show_dismiss_anim()
+                # self.show_dismiss_anim()
                 self.destroy()
+                # self.destroy(2000)
                 return
             else:
                 return
@@ -296,24 +292,24 @@ class FullSizeWindow(lv.obj):
         Anim(0, 800, self.set_pos, time=140, y_axis=True, delay=20).start()
 
     def show_load_anim(self):
-        # if self.anim_dir == ANIM_DIRS.NONE:
-        #     self.set_pos(0, 0)
-        # elif self.anim_dir == ANIM_DIRS.HOR:
-        #     self.set_pos(480, 0)
-        #     self._load_anim_hor()
-        # else:
-        #     self.set_pos(0, 800)
-        #     self._load_anim_ver()
-        pass
+        if self.anim_dir == ANIM_DIRS.NONE:
+            self.set_pos(0, 0)
+            self.fade_in(200, 50)
+        elif self.anim_dir == ANIM_DIRS.HOR:
+            self.set_pos(480, 0)
+            self._load_anim_hor()
+        else:
+            self.set_pos(0, 800)
+            self._load_anim_ver()
 
     def show_dismiss_anim(self):
-        # if self.anim_dir == ANIM_DIRS.HOR:
-        #     self._dismiss_anim_hor()
-        # elif self.anim_dir == ANIM_DIRS.VER:
-        #     self._dismiss_anim_ver()
-        pass
+        if self.anim_dir == ANIM_DIRS.HOR:
+            self._dismiss_anim_hor()
+        elif self.anim_dir == ANIM_DIRS.VER:
+            self._dismiss_anim_ver()
+        # else:
+        #     self.fade_out(200, 50)
 
     def show_unload_anim(self):
-        # if self.anim_dir == ANIM_DIRS.HOR:
-        #     Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=100).start()
-        pass
+        if self.anim_dir == ANIM_DIRS.HOR:
+            Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=100).start()

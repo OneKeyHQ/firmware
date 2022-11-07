@@ -150,7 +150,7 @@ class Context:
         self.sid = sid
         self.buffer = buffer
 
-    async def call(
+    async def _call(
         self,
         msg: protobuf.MessageType,
         expected_type: type[LoadedMessageType],
@@ -158,6 +158,13 @@ class Context:
         await self.write(msg)
         del msg
         return await self.read(expected_type)
+
+    async def call(
+        self,
+        msg: protobuf.MessageType,
+        expected_type: type[LoadedMessageType],
+    ) -> LoadedMessageType:
+        return await loop.race(self._call(msg, expected_type), self.signal())
 
     async def call_any(
         self, msg: protobuf.MessageType, *expected_wire_types: int

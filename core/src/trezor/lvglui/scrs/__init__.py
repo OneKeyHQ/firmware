@@ -5,6 +5,8 @@ import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
 from ..lv_colors import lv_colors  # noqa: F401
 
 if utils.EMULATOR:
+    font_PJSBOLD72 = lv.font_load("A:/res/PlusJakartaSans-Bold-72.bin")
+
     font_PJSBOLD48 = lv.font_load(
         "A:/res/PlusJakartaSans-Bold-48.bin"
     )  # only used for number keyboard
@@ -24,6 +26,7 @@ if utils.EMULATOR:
     font_STATUS_BAR = font_PJSREG24
 
 else:
+    font_PJSBOLD72 = lv.font_scs_bold_72
     font_PJSBOLD48 = lv.font_pljs_bold_48
     font_PJSBOLD36 = lv.font_scs_bold_38
     font_PJSBOLD32 = lv.font_scs_bold_38

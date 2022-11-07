@@ -35,6 +35,7 @@ async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None
             description=subtitle,
             icon=icon,
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=0,
         )
     else:
         icon = "A:/res/warning.png"
@@ -47,6 +48,7 @@ async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None
             reverse=True,
             icon=icon,
             br_code=ButtonRequestType.ProtectCall,
+            anim_dir=0,
         )
 
 

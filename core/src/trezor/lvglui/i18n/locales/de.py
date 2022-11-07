@@ -393,5 +393,6 @@ translations = [
     "Bluetooth-Version",
     "Transaktion unterzeichnet",
     "Schließen ({}s)",
+    "Möchten Sie das Bild des Startbildschirms ändern? Dadurch wird das älteste hochgeladene Hintergrundbild gelöscht.",
 ]
 # fmt: on

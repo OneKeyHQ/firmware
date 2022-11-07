@@ -317,7 +317,7 @@ TITLE__ABOUT_DEVICE = 146
 # Connect
 ITEM__CONNECT = 147
 TITLE__CONNECT = 147
-# Auto-Lock
+# Auto-lock
 ITEM__AUTO_LOCK = 148
 TITLE__AUTO_LOCK = 148
 # Language
@@ -850,4 +850,7 @@ ITEM__BLUETOOTH_VERSION = 390
 TITLE__TRANSACTION_SIGNED = 391
 # Close ({}s)
 BUTTON__CLOSE_AFTER_INT_SECONDS = 392
+# Do you want to change the homescreen image? This will delete the oldest uplo
+# aded wallpaper.
+SUBTITLE__SET_HOMESCREEN_AND_DELETE = 393
 # fmt: on

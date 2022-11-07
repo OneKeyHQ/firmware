@@ -10,8 +10,6 @@ from trezor.enums import ResourceType
 from trezor.messages import ResourceAck, ResourceRequest, Success, ZoomRequest
 from trezor.ui.layouts import confirm_set_homescreen
 
-from apps.base import set_homescreen
-
 if TYPE_CHECKING:
     from trezor.messages import ResourceUpload
 # Error code - 255
@@ -36,10 +34,11 @@ if TYPE_CHECKING:
 # FR_TOO_MANY_OPEN_FILES: int  # (18) Number of open files > FF_FS_LOCK
 # FR_INVALID_PARAMETER: int    # (19) Given parameter is invalid
 
-SUPPORTED_EXTS = (("jpg", "png"), ("jpg", "png", "mp4"))
+SUPPORTED_EXTS = (("jpg", "png", "jpeg"), ("jpg", "jpeg", "png", "mp4"))
 
 SUPPORTED_MAX_RESOURCE_SIZE = {
     "jpg": const(1024 * 1024),
+    "jpeg": const(1024 * 1024),
     "png": const(1024 * 1024),
     "mp4": const(10 * 1024 * 1024),
 }
@@ -59,19 +58,22 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
         raise wire.DataError("Not supported resource extension")
     elif res_size >= SUPPORTED_MAX_RESOURCE_SIZE[res_ext]:
         raise wire.DataError("Data size overflow")
+    replace = False
+    wallpapers = []
     try:
         file_counter = 0
         for size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
             if size > 0 and name[:4] == "zoom":
                 file_counter += 1
+                wallpapers.append(name)
             if file_counter >= MAX_WP_COUNTER:
-                raise Exception("Too many wallpaper exist")
-
+                replace = True
+                break
     except BaseException as e:
         raise wire.FirmwareError(f"File system error {e}")
     # ask user for confirm
     if res_type == ResourceType.WallPaper:
-        await confirm_set_homescreen(ctx)
+        await confirm_set_homescreen(ctx, replace)
 
     random_data = hexlify(blake2s(random.bytes(32)).digest()[:4]).decode()
     component = FILE_PATH_COMPONENTS[res_type]
@@ -115,9 +117,13 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
                 data_left -= REQUEST_CHUNK_SIZE
             # force refresh to disk
             f.sync()
+        if replace:
+            zoom_file = wallpapers[0]
+            wallpaper = zoom_file[5:]
+            io.fatfs.unlink(f"1:/res/wallpapers/{zoom_file}")
+            io.fatfs.unlink(f"1:/res/wallpapers/{wallpaper}")
     except BaseException as e:
         raise wire.FirmwareError(f"Failed to write file with error code {e}")
     if res_type == ResourceType.WallPaper:
         device.set_homescreen(f"A:{file_full_path}")
-        set_homescreen()
     return Success(message="Success")
