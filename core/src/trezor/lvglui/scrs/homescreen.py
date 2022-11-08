@@ -883,7 +883,7 @@ class AboutSetting(Screen):
         self.ble_version = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLUETOOTH_VERSION),
-            right_text=ble_version or "1.0.0",
+            right_text=ble_version,
             has_next=False,
         )
         self.ble_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
