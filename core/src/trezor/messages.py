@@ -2863,6 +2863,12 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RebootToBootloader"]:
             return isinstance(msg, cls)
 
+    class RebootToBoardloader(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RebootToBoardloader"]:
+            return isinstance(msg, cls)
+
     class GetNonce(protobuf.MessageType):
 
         @classmethod

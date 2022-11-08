@@ -485,6 +485,14 @@ message RebootToBootloader {
 }
 
 /**
+ * Request: Reboot firmware to boardloader
+ * @start
+ * @next Success
+ */
+ message RebootToBoardloader {
+}
+
+/**
  * Request: Ask device to generate a random nonce and store it in the session's cache
  * @start
  * @next Nonce

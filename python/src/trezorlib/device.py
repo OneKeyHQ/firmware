@@ -223,8 +223,8 @@ def cancel_authorization(client: "TrezorClient") -> "MessageType":
 
 @session
 @expect(messages.Success, field="message", ret_type=str)
-def reboot_to_bootloader(client: "TrezorClient") -> "MessageType":
-    return client.call(messages.RebootToBootloader())
+def reboot(client: "TrezorClient", boot: bool=True) -> "MessageType":
+    return client.call(messages.RebootToBootloader() if boot else messages.RebootToBoardloader())
 
 
 @expect(messages.SEPublicCert)

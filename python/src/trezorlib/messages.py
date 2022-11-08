@@ -305,6 +305,7 @@ class MessageType(IntEnum):
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
     DeviceBackToBoot = 903
+    RebootToBoardloader = 904
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
@@ -4296,6 +4297,10 @@ class CancelAuthorization(protobuf.MessageType):
 
 class RebootToBootloader(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 87
+
+
+class RebootToBoardloader(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 904
 
 
 class GetNonce(protobuf.MessageType):
