@@ -20,11 +20,11 @@ if __debug__:
 # run main event loop and specify which screen is the default
 apps.base.set_homescreen()
 
-loop.schedule(lvgl_tick())
-
 loop.schedule(handle_uart())
 
 loop.schedule(handle_usb_state())
+
+loop.schedule(lvgl_tick())
 
 # initialize the wire codec
 wire.setup(usb.iface_wire)
