@@ -108,8 +108,10 @@ int main(void) {
   qspi_flash_config();
   qspi_flash_memory_mapped();
 
+  display_set_backlight(0);
   lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   lcd_pwm_init();
+
   random_delays_init();
 
 #ifdef RDI
