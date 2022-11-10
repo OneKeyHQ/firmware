@@ -112,21 +112,6 @@ void check_lock_screen(void) {
   }
 }
 
-#if !EMULATOR
-
-void auto_poweroff_timer(void) {
-  if (config_getAutoLockDelayMs() == 0) return;
-  if (timer_get_sleep_count() >= config_getAutoLockDelayMs()) {
-    if (sys_nfcState() || sys_usbState()) {
-      // do nothing when usb inserted
-      timer_sleep_start_reset();
-    } else {
-      shutdown();
-    }
-  }
-}
-#endif
-
 static void collect_hw_entropy(bool privileged) {
 #if EMULATOR
   (void)privileged;
@@ -165,7 +150,6 @@ int main(void) {
 #if !EMULATOR
   register_timer("button", timer1s / 2, buttonsTimer);
   register_timer("charge_dis", timer1s, chargeDisTimer);
-  register_timer("poweroff", timer1s, auto_poweroff_timer);
 #endif
   __stack_chk_guard = random32();  // this supports compiler provided
                                    // unpredictable stack protection checks

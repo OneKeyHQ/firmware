@@ -2324,7 +2324,6 @@ void layoutEnterSleep(void) {
 
   if (config_getSleepDelayMs() > 0) {
     if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
-      timer_sleep_start_reset();
       enter_sleep();
     }
   }

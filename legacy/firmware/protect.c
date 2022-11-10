@@ -1069,6 +1069,18 @@ bool protectPinCheck(bool retry) {
 
 #if !EMULATOR
 
+void auto_poweroff_timer(void) {
+  if (config_getAutoLockDelayMs() == 0) return;
+  if (timer_get_sleep_count() >= config_getAutoLockDelayMs()) {
+    if (sys_nfcState() || sys_usbState()) {
+      // do nothing when usb inserted
+      timer_sleep_start_reset();
+    } else {
+      shutdown();
+    }
+  }
+}
+
 void enter_sleep(void) {
   static int sleep_count = 0;
   uint8_t key = KEY_NULL;
@@ -1077,6 +1089,8 @@ void enter_sleep(void) {
   void *layoutBack = NULL;
   sleep_count++;
   if (sleep_count == 1) {
+    timer_sleep_start_reset();
+    register_timer("poweroff", timer1s, auto_poweroff_timer);
     unlocked = session_isUnlocked();
     layoutBack = layoutLast;
     oledBufferLoad(oled_prev);

@@ -382,10 +382,10 @@ static struct menu autolock_set_menu = {
 };
 
 static struct menu_item shutdown_set_menu_items[] = {
-    {"10", "minute", true, menu_para_set_shutdown, NULL, true},
-    {"30", "minutes", true, menu_para_set_shutdown, NULL, true},
-    {"1", "hour", true, menu_para_set_shutdown, NULL, true},
-    {"2", "hours", true, menu_para_set_shutdown, NULL, true},
+    {"1", "minute", true, menu_para_set_shutdown, NULL, true},
+    {"3", "minutes", true, menu_para_set_shutdown, NULL, true},
+    {"5", "minutes", true, menu_para_set_shutdown, NULL, true},
+    {"10", "minutes", true, menu_para_set_shutdown, NULL, true},
     {"Never", NULL, true, menu_para_set_shutdown, NULL, true}};
 
 static struct menu shutdown_set_menu = {

@@ -75,8 +75,8 @@ void menu_para_set_language(int index) {
 }
 
 void menu_para_set_shutdown(int index) {
-  uint32_t ms[5] = {10 * 60 * 1000, 30 * 60 * 1000, 60 * 60 * 1000,
-                    2 * 60 * 60 * 1000, 0};
+  uint32_t ms[5] = {1 * 60 * 1000, 3 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000,
+                    0};
   config_setAutoLockDelayMs(ms[index]);
 }
 
