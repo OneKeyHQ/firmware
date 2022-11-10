@@ -502,7 +502,7 @@ void menu_check_specified_word(int index) {
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
     {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
-    {"Recovery Phrase verify", NULL, true, menu_check_all_words, NULL, false},
+    {"Check Recovery Phrase", NULL, true, menu_check_all_words, NULL, false},
     {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
      menu_para_passphrase, true},
     {"Reset", NULL, true, menu_erase_device, NULL, false},
