@@ -382,10 +382,10 @@ static struct menu autolock_set_menu = {
 };
 
 static struct menu_item shutdown_set_menu_items[] = {
-    {"10", "minute", true, menu_para_set_shutdown, NULL, true},
-    {"30", "minutes", true, menu_para_set_shutdown, NULL, true},
-    {"1", "hour", true, menu_para_set_shutdown, NULL, true},
-    {"2", "hours", true, menu_para_set_shutdown, NULL, true},
+    {"1", "minute", true, menu_para_set_shutdown, NULL, true},
+    {"3", "minutes", true, menu_para_set_shutdown, NULL, true},
+    {"5", "minutes", true, menu_para_set_shutdown, NULL, true},
+    {"10", "minutes", true, menu_para_set_shutdown, NULL, true},
     {"Never", NULL, true, menu_para_set_shutdown, NULL, true}};
 
 static struct menu shutdown_set_menu = {
@@ -502,7 +502,7 @@ void menu_check_specified_word(int index) {
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
     {"Blind Signing", NULL, true, menu_blindSign, NULL, false},
-    {"Recovery Phrase verify", NULL, true, menu_check_all_words, NULL, false},
+    {"Check Recovery Phrase", NULL, true, menu_check_all_words, NULL, false},
     {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
      menu_para_passphrase, true},
     {"Reset", NULL, true, menu_erase_device, NULL, false},

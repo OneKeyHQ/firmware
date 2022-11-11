@@ -131,6 +131,8 @@ const char *languages[][2] = {
     //
     {"Check PIN Code", "请先校验设备原PIN码"},
     //
+    {"Check Recovery Phrase", "助记词核对"},
+    //
     {"Check failed", "核对失败"},
     //
     {"Check passed", "核对通过"},
@@ -600,8 +602,6 @@ const char *languages[][2] = {
     // ethereum.c layout2.c
     {"Really send", "确认发送"},
     {"Recipient", "接收方"},
-    //
-    {"Recovery Phrase verify", "助记词核对"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
