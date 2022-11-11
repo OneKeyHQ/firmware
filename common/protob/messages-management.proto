@@ -799,3 +799,33 @@ message NFTWriteData {
  */
 message RebootToBootloader {
 }
+
+/**
+ * Request: Reboot firmware to boardloader
+ * @start
+ * @next Success
+ */
+ message RebootToBoardloader {
+}
+
+
+/**
+ * Request: the path of dir to enum
+ * @next FileNameList
+ * @next Failure
+ */
+ message ListResDir {
+    required string path = 1;
+}
+
+/**
+ * Response: The file info list of the dir
+ * @end
+ */
+message FileInfoList {
+    repeated FileInfo files = 1;
+    message FileInfo {
+        required string name = 1;
+        required uint64 size =2;
+    }
+}
