@@ -465,6 +465,12 @@ void display_set_backlight(int val) {
 }
 
 void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
+  __HAL_RCC_LTDC_FORCE_RESET();
+  __HAL_RCC_LTDC_RELEASE_RESET();
+
+  __HAL_RCC_DMA2D_FORCE_RESET();
+  __HAL_RCC_DMA2D_RELEASE_RESET();
+
   // RESET PIN
   GPIO_InitTypeDef gpio_init_structure;
 
