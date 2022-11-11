@@ -11,6 +11,7 @@ class Anim(lv.anim_t):
         time=150,
         y_axis=True,
         delay=0,
+        del_cb=None,
     ):
         super().__init__()
         self.init()
@@ -21,3 +22,5 @@ class Anim(lv.anim_t):
         self.set_custom_exec_cb(
             lambda anim, val: (exec_cb(0, val) if y_axis else exec_cb(val, 0))
         )
+        if del_cb:
+            self.set_deleted_cb(del_cb)

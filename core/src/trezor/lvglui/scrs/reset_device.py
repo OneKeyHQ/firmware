@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.lvglui.scrs.components.anim import Anim
 from trezor.lvglui.scrs.components.container import ContainerFlexCol
 from trezor.lvglui.scrs.components.listitem import ListItemWithLeadingCheckbox
 from trezor.lvglui.scrs.components.transition import DefaultTransition
@@ -164,9 +163,9 @@ class CheckWord(FullSizeWindow):
         self.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 
     def on_ready(self, event_obj):
-        # self.show_unload_anim()
+        self.show_unload_anim()
         self.channel.publish(self.choices.get_selected_str())
-        self.destroy()
+        # self.destroy()
 
     def tip_correct(self):
         self.tip.set_text(
@@ -179,9 +178,6 @@ class CheckWord(FullSizeWindow):
             f"#DF320C {lv.SYMBOL.CLOSE}# {_(i18n_keys.MSG__INCORRECT__EXCLAMATION)}"
         )
         # self.tip.clear_flag(lv.obj.FLAG.HIDDEN)
-
-    def show_unload_anim(self):
-        Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=400).start()
 
 
 class Radio:

@@ -1,14 +1,22 @@
 from storage import cache, common, device
-from trezor import config
+from trezor import config, io
 
 
 def set_current_version() -> None:
     device.set_version(common.STORAGE_VERSION_CURRENT)
 
 
+def clean_flash() -> None:
+    for _size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
+        io.fatfs.unlink(f"1:/res/wallpapers/{name}")
+    for _size, _attrs, name in io.fatfs.listdir("1:/res/nfts"):
+        io.fatfs.unlink(f"1:/res/nfts/{name}")
+
+
 def wipe() -> None:
     config.wipe()
     cache.clear_all()
+    clean_flash()
 
 
 def init_unlocked() -> None:

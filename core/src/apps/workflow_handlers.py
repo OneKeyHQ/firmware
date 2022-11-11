@@ -70,6 +70,10 @@ def find_message_handler_module(msg_type: int) -> str:
         if utils.EMULATOR:
             raise ValueError
         return "apps.management.update_res"
+    if utils.MODEL == "T" and msg_type == MessageType.ListResDir:
+        if utils.EMULATOR:
+            raise ValueError
+        return "apps.management.list_dir"
 
     # bitcoin
     if msg_type == MessageType.AuthorizeCoinJoin:

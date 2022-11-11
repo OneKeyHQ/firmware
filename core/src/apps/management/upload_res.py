@@ -1,10 +1,8 @@
 from micropython import const
 from typing import TYPE_CHECKING
-from ubinascii import hexlify
 
 from storage import device
 from trezor import io, wire
-from trezor.crypto import random
 from trezor.crypto.hashlib import blake2s
 from trezor.enums import ResourceType
 from trezor.messages import ResourceAck, ResourceRequest, Success, ZoomRequest
@@ -75,10 +73,11 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
     if res_type == ResourceType.WallPaper:
         await confirm_set_homescreen(ctx, replace)
 
-    random_data = hexlify(blake2s(random.bytes(32)).digest()[:4]).decode()
+    # random_data = hexlify(blake2s(random.bytes(32)).digest()[:4]).decode()
+    file_id = device.get_wp_cnts()
     component = FILE_PATH_COMPONENTS[res_type]
     path_dir = f"1:/res/{component[0]}"
-    file_name = f"{component[1]}-{random_data}.{res_ext}"
+    file_name = f"{component[1]}-{file_id}.{res_ext}"
     file_full_path = f"{path_dir}/{file_name}"
     try:
         with io.fatfs.open(file_full_path, "w") as f:
@@ -118,10 +117,14 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
             # force refresh to disk
             f.sync()
         if replace:
+            wallpapers.sort(
+                key=lambda name: int(name[5:].split("-")[1][: -(len(res_ext) + 1)])
+            )
             zoom_file = wallpapers[0]
             wallpaper = zoom_file[5:]
             io.fatfs.unlink(f"1:/res/wallpapers/{zoom_file}")
             io.fatfs.unlink(f"1:/res/wallpapers/{wallpaper}")
+        device.increase_wp_cnts()
     except BaseException as e:
         raise wire.FirmwareError(f"Failed to write file with error code {e}")
     if res_type == ResourceType.WallPaper:

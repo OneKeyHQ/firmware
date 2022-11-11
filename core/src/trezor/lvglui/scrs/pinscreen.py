@@ -101,6 +101,7 @@ class SetupComplete(FullSizeWindow):
             subtitle=subtitle,
             confirm_text=_(i18n_keys.BUTTON__CONTINUE),
             icon_path="A:/res/success.png",
+            anim_dir=0,
         )
 
     def eventhandler(self, event_obj: lv.event_t):

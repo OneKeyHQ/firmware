@@ -377,3 +377,13 @@ def update_res(
         except exceptions.TrezorException as e:
             click.echo(f"Update failed: {e}")
             sys.exit(3)
+
+@cli.command()
+# fmt: off
+@click.option("-p", "--path_dir", help="The path of dir to enum")
+# fmt: on
+@with_client
+def list_dir(client: "TrezorClient", path_dir: str) -> None:
+    files_info = device.list_dir(client, path_dir)
+    for info in files_info:
+        click.echo(f"file_name {info.name} with size {info.size} bytes")

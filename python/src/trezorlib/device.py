@@ -17,7 +17,7 @@
 import os
 import time
 from hashlib import blake2s
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from . import messages
 from .exceptions import Cancelled
@@ -313,3 +313,12 @@ def update_res(
         return
     else:
         raise RuntimeError(f"Unexpected message {resp}")
+
+@session
+def list_dir(client: "TrezorClient", path_dir: str) -> Sequence[messages.FileInfo]:
+    resp = client.call(messages.ListResDir(path=path_dir))
+    if isinstance(resp, messages.FileInfoList):
+        return resp.files
+    else:
+        raise RuntimeError(f"Unexpected message {resp}")
+

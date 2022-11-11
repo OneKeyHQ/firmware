@@ -1,5 +1,5 @@
-from apps.common.paths import PATTERN_STC
+from apps.common.paths import PATTERN_BIP44_ED25519
 
 CURVE = "ed25519"
 SLIP44_ID = 101010
-PATTERN = PATTERN_STC
+PATTERN = PATTERN_BIP44_ED25519
