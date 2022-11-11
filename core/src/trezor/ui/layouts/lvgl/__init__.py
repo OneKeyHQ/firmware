@@ -1097,7 +1097,6 @@ async def confirm_algo_payment(
     close_to: str | None = None,
     rekey_to: str | None = None,
     genesis_id: str | None = None,
-    genesis_hash: str | None = None,
     note: str | None = None,
     fee: str = 0,
     amount: str = 0,
@@ -1114,7 +1113,6 @@ async def confirm_algo_payment(
         close_to,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
         fee,
         amount,
@@ -1133,7 +1131,6 @@ async def confirm_algo_asset_freeze(
     target: str | None = None,
     new_freeze_state: bool = None,
     genesis_id: str | None = None,
-    genesis_hash: str | None = None,
     note: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoAssetFreeze, AlgoCommon
@@ -1150,7 +1147,6 @@ async def confirm_algo_asset_freeze(
         target,
         new_freeze_state,
         genesis_id,
-        genesis_hash,
         note,
     )
     await raise_if_cancelled(
@@ -1169,7 +1165,6 @@ async def confirm_algo_asset_xfer(
     revocation_target: str | None = None,
     rekey_to: str | None = None,
     genesis_id: str | None = None,
-    genesis_hash: str | None = None,
     note: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoAssetXfer, AlgoCommon
@@ -1188,7 +1183,6 @@ async def confirm_algo_asset_xfer(
         revocation_target,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
     )
     await raise_if_cancelled(
@@ -1214,7 +1208,6 @@ async def confirm_algo_asset_cfg(
     metadata_hash: str | None = None,
     rekey_to: str | None = None,
     genesis_id: str | None = None,
-    genesis_hash: str | None = None,
     note: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoAssetCfg, AlgoCommon
@@ -1240,7 +1233,6 @@ async def confirm_algo_asset_cfg(
         metadata_hash,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
     )
     await raise_if_cancelled(
@@ -1255,7 +1247,6 @@ async def confirm_algo_keyregNonparticipating(
     nonpart: bool,
     rekey_to: str | None = None,
     genesis_id: str | None = None,
-    genesis_hash: str | None = None,
     note: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoKeyregNonp, AlgoCommon
@@ -1264,9 +1255,7 @@ async def confirm_algo_keyregNonparticipating(
     await raise_if_cancelled(
         interact(ctx, screen, "algo_keyreg_Nonp", ButtonRequestType.ProtectCall)
     )
-    screen = AlgoKeyregNonp(
-        sender, fee, nonpart, rekey_to, genesis_id, genesis_hash, note
-    )
+    screen = AlgoKeyregNonp(sender, fee, nonpart, rekey_to, genesis_id, note)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_keyreg_Nonp", ButtonRequestType.ProtectCall)
     )
@@ -1285,7 +1274,6 @@ async def confirm_algo_keyregOnline(
     sprfkey: str | None = None,
     rekey_to: str | None = None,
     genesis_id: str | None = None,
-    genesis_hash: str | None = None,
     note: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoKeyregOnline, AlgoCommon
@@ -1299,13 +1287,9 @@ async def confirm_algo_keyregOnline(
         fee,
         votekey,
         selkey,
-        votefst,
-        votelst,
-        votekd,
         sprfkey,
         rekey_to,
         genesis_id,
-        genesis_hash,
         note,
     )
     await raise_if_cancelled(
