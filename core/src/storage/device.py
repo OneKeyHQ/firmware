@@ -51,7 +51,7 @@ _AUTOSHUTDOWN_DELAY_MS = const(0x84)  # int
 # deprecated
 _PIN_MAP_TYPES = const(0x84)  # int
 
-_WALLPAPER_INDEX = const(0x85)  # int
+_WALLPAPER_COUNTS = const(0x85)  # int
 _USE_USB_PROTECT = const(0x86)  # bool (0x01 or empty)
 _USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
 _KEYBOARD_HAPTIC = const(0x88)   # bool
@@ -213,6 +213,19 @@ def toggle_keyboard_haptic(enable: bool) -> None:
         common._TRUE_BYTE if enable else common._FALSE_BYTE,
         public=True,
     )
+
+
+def increase_wp_cnts() -> None:
+    cur_cnt = get_wp_cnts()
+    cnts = cur_cnt + 1
+    common.set(_NAMESPACE, _WALLPAPER_COUNTS, cnts.to_bytes(2, "big"), public=True)
+
+
+def get_wp_cnts() -> int:
+    cnts = common.get(_NAMESPACE, _WALLPAPER_COUNTS, public=True)
+    if cnts is None:
+        return 0
+    return int.from_bytes(cnts, "big")
 
 
 def is_initialized() -> bool:

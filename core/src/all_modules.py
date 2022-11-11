@@ -526,6 +526,8 @@ apps.management.get_next_u2f_counter
 import apps.management.get_next_u2f_counter
 apps.management.get_nonce
 import apps.management.get_nonce
+apps.management.list_dir
+import apps.management.list_dir
 apps.management.reboot_to_boardloader
 import apps.management.reboot_to_boardloader
 apps.management.reboot_to_bootloader

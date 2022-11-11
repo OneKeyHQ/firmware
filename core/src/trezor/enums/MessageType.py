@@ -295,3 +295,5 @@ if not utils.BITCOIN_ONLY:
     ResourceRequest = 10020
     ResourceAck = 10021
     ResourceUpdate = 10022
+    ListResDir = 10023
+    FileInfoList = 10024

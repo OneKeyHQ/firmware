@@ -96,8 +96,8 @@ class Screen(lv.obj):
         lv.scr_load_anim(
             scr,
             lv.SCR_LOAD_ANIM.MOVE_RIGHT if back else lv.SCR_LOAD_ANIM.MOVE_LEFT,
-            200,
-            80,
+            180,
+            60,
             False,
         )
 
@@ -157,7 +157,7 @@ class FullSizeWindow(lv.obj):
         self.anim_dir = anim_dir
         self.set_size(lv.pct(100), lv.pct(100))
         self.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        # self.show_load_anim()
+        self.show_load_anim()
         self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
@@ -175,7 +175,7 @@ class FullSizeWindow(lv.obj):
         self.content_area.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content_area.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.AUTO)
+        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
         self.content_area.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         if icon_path:
             self.icon = lv.img(self.content_area)
@@ -237,33 +237,19 @@ class FullSizeWindow(lv.obj):
             if utils.lcd_resume():
                 return
             if hasattr(self, "btn_no") and target == self.btn_no:
+                self.show_dismiss_anim()
                 self.channel.publish(0)
-                # self.show_dismiss_anim()
-                self.destroy()
-                return
             elif hasattr(self, "btn_yes") and target == self.btn_yes:
-                # self.show_unload_anim()
+                self.show_unload_anim()
                 if hasattr(self, "selector"):
-                    # self.show_unload_anim()
                     self.channel.publish(self.selector.get_selected_str())
                 else:
                     if not self.hold_confirm:
-                        # self.show_unload_anim()
                         self.channel.publish(1)
-                    else:
-                        return
-            else:
-                return
         elif code == lv.EVENT.READY and self.hold_confirm:
             if target == self.slider:
+                self.show_dismiss_anim()
                 self.channel.publish(1)
-                # self.show_dismiss_anim()
-                self.destroy()
-                # self.destroy(2000)
-                return
-            else:
-                return
-        self.destroy()
 
     async def request(self) -> Any:
         return await self.channel.take()
@@ -271,30 +257,29 @@ class FullSizeWindow(lv.obj):
     def destroy(self, delay_ms=400):
         self.del_delayed(delay_ms)
 
+    def _delete(self, _anim):
+        self.del_delayed(100)
+
     def _load_anim_hor(self):
-        Anim(480, 0, self.set_pos, time=200, y_axis=False, delay=80).start()
+        Anim(480, 0, self.set_pos, time=180, y_axis=False, delay=60).start()
 
     def _load_anim_ver(self):
         self.set_y(800)
-        Anim(800, 0, self.set_pos, time=200, y_axis=True, delay=80).start()
+        Anim(800, 0, self.set_pos, time=180, y_axis=True, delay=60).start()
 
     def _dismiss_anim_hor(self):
         Anim(
-            0,
-            480,
-            self.set_pos,
-            time=200,
-            y_axis=False,
-            delay=80,
+            0, 480, self.set_pos, time=180, y_axis=False, delay=60, del_cb=self._delete
         ).start()
 
     def _dismiss_anim_ver(self):
-        Anim(0, 800, self.set_pos, time=140, y_axis=True, delay=20).start()
+        Anim(
+            0, 800, self.set_pos, time=300, y_axis=True, delay=80, del_cb=self._delete
+        ).start()
 
     def show_load_anim(self):
         if self.anim_dir == ANIM_DIRS.NONE:
             self.set_pos(0, 0)
-            self.fade_in(200, 50)
         elif self.anim_dir == ANIM_DIRS.HOR:
             self.set_pos(480, 0)
             self._load_anim_hor()
@@ -307,9 +292,12 @@ class FullSizeWindow(lv.obj):
             self._dismiss_anim_hor()
         elif self.anim_dir == ANIM_DIRS.VER:
             self._dismiss_anim_ver()
-        # else:
-        #     self.fade_out(200, 50)
+        else:
+            self.destroy()
 
     def show_unload_anim(self):
-        if self.anim_dir == ANIM_DIRS.HOR:
-            Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=100).start()
+        # if self.anim_dir == ANIM_DIRS.HOR:
+        #     Anim(0, -480, self.set_pos, time=200, y_axis=False, delay=200, del_cb=self._delete).start()
+        # else:
+        #     self.show_dismiss_anim()
+        self.destroy(1000)

@@ -3115,6 +3115,50 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ResourceUpdate"]:
             return isinstance(msg, cls)
 
+    class ListResDir(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ListResDir"]:
+            return isinstance(msg, cls)
+
+    class FileInfoList(protobuf.MessageType):
+        files: "list[FileInfo]"
+
+        def __init__(
+            self,
+            *,
+            files: "list[FileInfo] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FileInfoList"]:
+            return isinstance(msg, cls)
+
+    class FileInfo(protobuf.MessageType):
+        name: "str"
+        size: "int"
+
+        def __init__(
+            self,
+            *,
+            name: "str",
+            size: "int",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FileInfo"]:
+            return isinstance(msg, cls)
+
     class DebugLinkDecision(protobuf.MessageType):
         button: "DebugButton | None"
         swipe: "DebugSwipeDirection | None"

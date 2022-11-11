@@ -119,6 +119,7 @@ class QuickStart(FullSizeWindow):
                     _(i18n_keys.OPTION__RESTORE_WALLET),
                 ]
             ),
+            anim_dir=0,
         )
 
     def eventhandler(self, event_obj):
@@ -175,6 +176,7 @@ class SelectMnemonicNum(FullSizeWindow):
             _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS),
             _(i18n_keys.BUTTON__CONTINUE),
             options="12\n18\n24",
+            anim_dir=0,
         )
         self.num = 12
 

@@ -321,6 +321,8 @@ class MessageType(IntEnum):
     ResourceRequest = 10020
     ResourceAck = 10021
     ResourceUpdate = 10022
+    ListResDir = 10023
+    FileInfoList = 10024
 
 
 class FailureType(IntEnum):
@@ -4554,6 +4556,51 @@ class ResourceUpdate(protobuf.MessageType):
         self.data_length = data_length
         self.initial_data_chunk = initial_data_chunk
         self.hash = hash
+
+
+class ListResDir(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10023
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class FileInfoList(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10024
+    FIELDS = {
+        1: protobuf.Field("files", "FileInfo", repeated=True, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        files: Optional[Sequence["FileInfo"]] = None,
+    ) -> None:
+        self.files: Sequence["FileInfo"] = files if files is not None else []
+
+
+class FileInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("name", "string", repeated=False, required=True),
+        2: protobuf.Field("size", "uint64", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        name: "str",
+        size: "int",
+    ) -> None:
+        self.name = name
+        self.size = size
 
 
 class DebugLinkDecision(protobuf.MessageType):

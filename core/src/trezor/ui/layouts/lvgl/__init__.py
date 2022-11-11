@@ -286,9 +286,9 @@ async def show_address(
         "show_address",
         ButtonRequestType.Address,
     )
-    # from trezor import loop
+    from trezor import loop
 
-    # await loop.sleep(400)
+    await loop.sleep(400)
 
 
 async def show_pubkey(

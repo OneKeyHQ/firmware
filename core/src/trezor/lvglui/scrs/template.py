@@ -708,9 +708,6 @@ class Modal(FullSizeWindow):
             title, subtitle, confirm_text, cancel_text, icon_path, anim_dir=anim_dir
         )
 
-    # def show_unload_anim(self):
-    #     return super().show_dismiss_anim()
-
 
 class AlgoCommon(FullSizeWindow):
     def __init__(self, type: str):

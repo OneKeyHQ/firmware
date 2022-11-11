@@ -665,3 +665,24 @@ message ResourceUpdate {
     required bytes initial_data_chunk = 3; // <= 16K
     optional bytes hash = 4;
 }
+
+/**
+ * Request: the path of dir to enum
+ * @next FileNameList
+ * @next Failure
+ */
+message ListResDir {
+    required string path = 1;
+}
+
+/**
+ * Response: The file info list of the dir
+ * @end
+ */
+message FileInfoList {
+    repeated FileInfo files = 1;
+    message FileInfo {
+        required string name = 1;
+        required uint64 size =2;
+    }
+}

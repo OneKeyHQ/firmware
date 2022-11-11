@@ -1114,6 +1114,11 @@ class HomeScreenSetting(Screen):
                 current_wp.set_checked(True)
 
         if not utils.EMULATOR:
+            file_name_list.sort(
+                key=lambda name: int(
+                    name[5:].split("-")[1][: -(len(name.split(".")[1]) + 1)]
+                )
+            )
             for i, file_name in enumerate(file_name_list):
                 zoom_path = f"A:1:/res/wallpapers/{file_name}"
                 current_wp = ImgGridItem(
@@ -1188,6 +1193,9 @@ class WallPaperManage(Screen):
             )
             # self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ON)
             self.btn_del.align_to(self.btn_yes, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
     def del_callback(self):
         io.fatfs.unlink(self.img_path[2:])
@@ -1592,13 +1600,12 @@ class PassphraseTipsConfirm(FullSizeWindow):
             if utils.lcd_resume():
                 return
             elif target == self.btn_no:
-                # self.show_dismiss_anim()
                 lv.event_send(self.callback_obj, lv.EVENT.CANCEL, None)
             elif target == self.btn_yes:
                 lv.event_send(self.callback_obj, lv.EVENT.READY, None)
             else:
                 return
-        self.destroy()
+            self.show_dismiss_anim()
 
 
 class CryptoScreen(Screen):
