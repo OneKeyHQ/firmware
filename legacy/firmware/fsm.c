@@ -73,6 +73,7 @@
 #include "starcoin.h"
 #include "stellar.h"
 #include "tron.h"
+#include "ripple.h"
 #endif
 
 #if EMULATOR
@@ -487,5 +488,6 @@ void fsm_msgRebootToBootloader(void) {
 #include "fsm_msg_starcoin.h"
 #include "fsm_msg_stellar.h"
 #include "fsm_msg_tron.h"
+#include "fsm_msg_ripple.h"
 
 #endif

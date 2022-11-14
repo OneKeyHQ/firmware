@@ -34,6 +34,7 @@
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
 #include "messages-tron.pb.h"
+#include "messages-ripple.pb.h"
 
 // message functions
 
@@ -205,5 +206,9 @@ void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg);
 // algorand
 void fsm_msgAlgorandGetAddress(AlgorandGetAddress *msg);
 void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
+
+// ripple
+void fsm_msgRippleGetAddress(RippleGetAddress *msg);
+void fsm_msgRippleSignTx(RippleSignTx *msg);
 
 #endif
