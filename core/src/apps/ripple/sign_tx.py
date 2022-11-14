@@ -32,10 +32,16 @@ async def sign_tx(
     to_sign = get_network_prefix() + tx
 
     check_fee(msg.fee)
-    if msg.payment.destination_tag is not None:
-        await layout.require_confirm_destination_tag(ctx, msg.payment.destination_tag)
-    await layout.require_confirm_fee(ctx, msg.fee)
+
     await layout.require_confirm_tx(ctx, msg.payment.destination, msg.payment.amount)
+    await layout.require_confirm_fee(
+        ctx,
+        source_address,
+        msg.payment.destination,
+        msg.fee,
+        msg.payment.amount,
+        msg.payment.destination_tag,
+    )
 
     signature = ecdsa_sign(node.private_key(), first_half_of_sha512(to_sign))
     tx = serialize(msg, source_address, pubkey=node.public_key(), signature=signature)
