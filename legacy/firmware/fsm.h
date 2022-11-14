@@ -30,11 +30,11 @@
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-ripple.pb.h"
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
 #include "messages-tron.pb.h"
-#include "messages-ripple.pb.h"
 
 // message functions
 
