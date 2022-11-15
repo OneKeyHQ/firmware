@@ -1307,6 +1307,8 @@ void config_wipe(void) {
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   config_setSeSessionKey(session_key, 16);
   config_getLanguage(config_language, sizeof(config_language));
+
+  change_ble_sta(BLE_ADV_ON);
 }
 
 void config_setFastPayPinFlag(bool flag) {
