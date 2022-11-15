@@ -161,10 +161,9 @@ refresh_menu:
 void menu_erase_device(int index) {
   (void)index;
   uint8_t key = KEY_NULL;
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 _("Make sure you still have"),
-                                 _("backup of seed phrases"), NULL, NULL);
+  layoutDialogSwipeCenterAdapter(
+      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
+      NULL, _("Make sure you still have"), _("backup of words"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return;

@@ -159,6 +159,7 @@ static void format_number(char *dest, int number) {
     }
     dest[4] = '0' + number % 10;
   }
+  strcat(dest, " ");
   strcat(dest, _("word"));
 }
 
@@ -335,7 +336,7 @@ static void display_choices(bool twoColumn, char choices[9][12], int num) {
     int nr = (word_index / 4) + 1;
     format_number(desc, nr);
     layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter the"),
-                      desc, _("of your mnemonic"), NULL, NULL, NULL);
+                      desc, _("of your recovery phrase"), NULL, NULL, NULL);
   } else {
     oledBox(0, 27, 127, 63, false);
   }
@@ -684,6 +685,7 @@ refresh_menu:
   memzero(desc, sizeof(desc));
   strcat(desc, " #");
   uint2str(index + 1, desc + strlen(desc));
+  strcat(desc, " ");
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, _("Okay"), index + 1, word_count, NULL, desc,
                            words[index], index > 0 ? words[index - 1] : NULL,
@@ -733,9 +735,10 @@ static bool input_words(void) {
 
 refresh_menu:
   memzero(desc, sizeof(desc));
-  strcat(desc, _("Enter seed phrase "));
+  strcat(desc, _("Enter word "));
   strcat(desc, _("#"));
   uint2str(word_index + 1, desc + strlen(desc));
+  strcat(desc, " ");
   memzero(letter_list, sizeof(letter_list));
   letter_count = mnemonic_next_letter_with_prefix(words[word_index], prefix_len,
                                                   letter_list);
@@ -801,7 +804,7 @@ bool recovery_on_device(void) {
 prompt_recovery:
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, _("Enter seed phrases to"), _("restore wallet"), NULL, NULL);
+      NULL, _("Enter words to"), _("restore wallet"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
@@ -818,7 +821,7 @@ select_mnemonic_count:
 
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 desc, _("seed phrases"), NULL, NULL);
+                                 desc, _("words"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     goto_check(select_mnemonic_count);
@@ -838,8 +841,8 @@ input_word:
   strcat(desc, _("Check the entered"));
   uint2str(word_count, desc + strlen(desc));
   layoutDialogCenterAdapter(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
-                            _("Next"), NULL, NULL, NULL, desc,
-                            _("seed phrases"), NULL, NULL);
+                            _("Next"), NULL, NULL, NULL, desc, _("words"), NULL,
+                            NULL);
 
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
@@ -850,7 +853,7 @@ check_word:
   if (!recovery_check_words()) {
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-        NULL, NULL, _("Invalid seed phrases"), _("Please try again"), NULL);
+        NULL, NULL, _("Invalid words"), _("Please try again"), NULL);
     protectWaitKey(0, 1);
     goto_check(prompt_recovery);
   }

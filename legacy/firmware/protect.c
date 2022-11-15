@@ -982,7 +982,7 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
 
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, _("Please select the"), _("number of Mnemonic"), NULL, NULL);
+      NULL, _("Please select the"), _("number of recovery phrase"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
