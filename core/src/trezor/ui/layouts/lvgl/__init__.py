@@ -1314,3 +1314,28 @@ async def confirm_algo_app(ctx: wire.Context, signer: str, raw_message: bytes) -
         data=raw_message,
         br_code=ButtonRequestType.SignTx,
     )
+
+
+async def confirm_ripple_payment(
+    ctx: wire.GenericContext,
+    sender: str | None = None,
+    receiver: str | None = None,
+    amount: str = 0,
+    fee: str = 0,
+    total: str | None = None,
+    tag: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import RipplePayment
+
+    screen = RipplePayment(
+        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("XRP"),
+        sender,
+        receiver,
+        amount,
+        fee,
+        total,
+        tag,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "ripple_payment", ButtonRequestType.ProtectCall)
+    )
