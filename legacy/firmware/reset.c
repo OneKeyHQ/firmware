@@ -527,7 +527,7 @@ select_mnemonic_count:
 
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
                                  &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 desc, _("wrods"), NULL, NULL);
+                                 desc, _("words"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     goto_check(select_mnemonic_count);
