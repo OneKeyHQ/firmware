@@ -7086,29 +7086,29 @@ class RippleSignTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 402
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        2: protobuf.Field("fee", "uint64", repeated=False, required=False),
+        2: protobuf.Field("fee", "uint64", repeated=False, required=True),
         3: protobuf.Field("flags", "uint32", repeated=False, required=False),
-        4: protobuf.Field("sequence", "uint32", repeated=False, required=False),
+        4: protobuf.Field("sequence", "uint32", repeated=False, required=True),
         5: protobuf.Field("last_ledger_sequence", "uint32", repeated=False, required=False),
-        6: protobuf.Field("payment", "RipplePayment", repeated=False, required=False),
+        6: protobuf.Field("payment", "RipplePayment", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
+        fee: "int",
+        sequence: "int",
+        payment: "RipplePayment",
         address_n: Optional[Sequence["int"]] = None,
-        fee: Optional["int"] = None,
-        flags: Optional["int"] = None,
-        sequence: Optional["int"] = None,
+        flags: Optional["int"] = 0,
         last_ledger_sequence: Optional["int"] = None,
-        payment: Optional["RipplePayment"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.fee = fee
-        self.flags = flags
         self.sequence = sequence
-        self.last_ledger_sequence = last_ledger_sequence
         self.payment = payment
+        self.flags = flags
+        self.last_ledger_sequence = last_ledger_sequence
 
 
 class RippleSignedTx(protobuf.MessageType):

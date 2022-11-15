@@ -30,6 +30,7 @@
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-ripple.pb.h"
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
@@ -196,5 +197,9 @@ void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg);
 // algorand
 void fsm_msgAlgorandGetAddress(AlgorandGetAddress *msg);
 void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
+
+// ripple
+void fsm_msgRippleGetAddress(RippleGetAddress *msg);
+void fsm_msgRippleSignTx(RippleSignTx *msg);
 
 #endif
