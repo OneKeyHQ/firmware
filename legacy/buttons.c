@@ -302,6 +302,7 @@ void buttonUpdate() {
   }
 #if !EMULATOR
   if (button.YesUp || button.NoUp || button.UpUp || button.DownUp) {
+    timer_sleep_start_reset();
     unregister_timer("poweroff");
   }
 #endif
