@@ -452,7 +452,7 @@ void st7701_init_sequence(void) {
   // HAL_Delay(100);
 
   // st7701_dsi(MIPI_DCS_SET_DISPLAY_BRIGHTNESS, 0xFF);
-  // st7701_dsi(MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x2C);
+  st7701_dsi(MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x2C);
   // st7701_dsi(MIPI_DCS_WRITE_POWER_SAVE, 0x92);
   // st7701_dsi(MIPI_DCS_SET_CABC_MIN_BRIGHTNESS, 0xFF);
   st7701_dsi(MIPI_DCS_SET_PIXEL_FORMAT, 0x55);
@@ -492,7 +492,7 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
   HAL_Delay(50);
   HAL_GPIO_WritePin(LCD_RESET_GPIO_PORT, LCD_RESET_PIN,
                     GPIO_PIN_SET); /* Deactivate XRES */
-  HAL_Delay(100);
+  HAL_Delay(120);
 
   /* LCD_TE_CTRL GPIO configuration */
   __HAL_RCC_GPIOJ_CLK_ENABLE();
