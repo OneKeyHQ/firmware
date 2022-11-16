@@ -494,7 +494,7 @@ int main(void) {
   }
 
   if (mode == BOARD_MODE) {
-    display_printf("OneKey Boardloader 1.3.0\n");
+    display_printf("OneKey Boardloader 1.3.1\n");
     display_printf("USB Mass Storage Mode\n");
     display_printf("======================\n\n");
     usb_msc_init();
