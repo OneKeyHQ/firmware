@@ -982,7 +982,7 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
 
   layoutDialogSwipeCenterAdapter(
       NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, _("Please select the"), _("number of Mnemonic"), NULL, NULL);
+      NULL, _("Please select the"), _("number of recovery phrase"), NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
@@ -1122,7 +1122,7 @@ void enter_sleep(void) {
         return;
       }
     input_pin:
-      if (!protectPinOnDevice(false, false)) {
+      if (!protectPinOnDevice(false, true)) {
         if (device_sleep_state == SLEEP_REENTER) {
           goto sleep_loop;
         }
@@ -1130,12 +1130,10 @@ void enter_sleep(void) {
           device_sleep_state = SLEEP_ENTER;
           goto input_pin;
         }
-        if (device_sleep_state == SLEEP_CANCEL_BY_USB) {
-          device_sleep_state = SLEEP_NONE;
-          layoutHome();
-          sleep_count = 0;
-          return;
-        }
+        device_sleep_state = SLEEP_NONE;
+        layoutHome();
+        sleep_count = 0;
+        return;
       }
     }
   }

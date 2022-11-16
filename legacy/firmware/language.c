@@ -141,7 +141,7 @@ const char *languages[][2] = {
     //
     {"Check the seed", "检查助记词"},
     // layout2.c
-    {"Check the written", "请检查写下的"},
+    {"Check the written ", "请检查写下的"},
     //
     {"Check this device with\nOneKey secure server?",
      "确定访问OneKey服务器对\n此设备进行防伪校验吗?"},
@@ -292,9 +292,9 @@ const char *languages[][2] = {
     // protect.c
     {"Enter new wipe code:", "输入新的擦除PIN码"},
     //
-    {"Enter seed phrase ", "输入助记词"},
+    {"Enter word ", "输入助记词"},
     //
-    {"Enter seed phrases to", "输入助记词"},
+    {"Enter words to", "输入助记词"},
     // fsm_msg_common.h
     {"Entory data error", ""},  // msg
     // fsm_msg_coin.h
@@ -390,8 +390,6 @@ const char *languages[][2] = {
     {"Invalid identity", ""},  // msg
     // lisk.c
     {"Invalid recipient_id", ""},  // msg
-    //
-    {"Invalid seed phrases", "助记词无效"},
     // fsm_msg_common.h
     {"Invalid seed strength", ""},  // msg
     // recovery.c
@@ -404,6 +402,8 @@ const char *languages[][2] = {
     {"Invalid transaction type", ""},  // msg
     // fsm_msg_common.h
     {"Invalid word count", ""},  // msg
+    //
+    {"Invalid words", "助记词无效"},
     // layout2.c
     {"Label:", "设备名称:"},
     // layout2.c layout2.c
@@ -441,8 +441,6 @@ const char *languages[][2] = {
     {"Mixing segwit and non-segwit inputs is not allowed", ""},
     //
     {"Mnemonic", "助记词"},
-    //
-    {"Mnemonic verified pass", "助记词校验通过"},
     // fsm_msg_common.h fsm_msg_common.h
     {"Mnemonic with wrong checksum provided", ""},
     // layout2.c
@@ -539,6 +537,8 @@ const char *languages[][2] = {
     {"Percentile Levy", ""},
     // protect.c protect.c
     {"Please confirm PIN", "请确认PIN码"},
+    // recovery.c
+    {"Please enter", "请输入"},
     //
     {"Please enter 12 words\nin order to verify\nyour recovery phrase",
      "请依次输入12位助记词进\n行核对"},
@@ -601,7 +601,10 @@ const char *languages[][2] = {
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
     {"Really send", "确认发送"},
+    //
     {"Recipient", "接收方"},
+    //
+    {"Recovery phrase verified pass", "助记词校验通过"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
@@ -632,8 +635,6 @@ const char *languages[][2] = {
     {"Scan the QR code below", "扫描下方二维码"},
     //
     {"Security", "安全"},
-    //
-    {"Seed Phrase", "助记词"},
     // reset.c
     {"Seed already backed up", ""},
     // reset.c
@@ -698,6 +699,8 @@ const char *languages[][2] = {
     {"Switch", "切换"},
     // protect.c
     {"The new PIN must be different from your wipe code.", ""},
+    //
+    {"The recovery phrase are the", " "},
     // recovery.c
     {"The seed is", "种子"},
     // recovery.c recovery.c
@@ -706,8 +709,6 @@ const char *languages[][2] = {
     {"The seed is valid and matches the one in the device", ""},
     // recovery.c
     {"The seed is valid but does not match the one in the device", ""},
-    //
-    {"The seed phrases are the", " "},
     // protect.c
     {"The wipe code must be different from your PIN.", ""},
     // u2f.c
@@ -823,6 +824,8 @@ const char *languages[][2] = {
     // recovery.c
     {"Word not found in a wordlist", ""},
     //
+    {"Words", "助记词"},
+    //
     {"Write down", "请抄写助记词"},
     // layout2.c
     {"Write down your ", "请抄写你的"},
@@ -833,7 +836,7 @@ const char *languages[][2] = {
     // signing.c signing.c
     {"Wrong input script type", ""},
     //
-    {"Wrong mnemonic", "错误的助记词"},
+    {"Wrong recovery phrase", "错误的助记词"},
     // recovery.c
     {"Wrong word retyped", ""},
     // layout2.c layout2.c layout2.c layout2.c
@@ -870,7 +873,7 @@ const char *languages[][2] = {
     // layout2.c
     {"auto-lock your device", ""},
     //
-    {"backup of seed phrases", "助记词的物理备份"},
+    {"backup of words", "助记词的物理备份"},
     // fsm_msg_common.h
     {"backup only", "仅备份"},
     //
@@ -963,9 +966,9 @@ const char *languages[][2] = {
     //
     {"mnemonic", "助记词"},
     //
-    {"number of Mnemonic", "助记词位数"},
+    {"number of recovery phrase", "助记词位数"},
     // recovery.c
-    {"of your mnemonic", "助记词"},
+    {"of your recovery phrase", "助记词"},
     // recovery.c
     {"on your computer", "在电脑上"},
     //
@@ -1000,8 +1003,6 @@ const char *languages[][2] = {
     {"seed import failed", ""},
     // fsm_msg_common.h
     {"seed import success", ""},
-    //
-    {"seed phrases", "助记词"},
     // signing.c
     {"segwit input amount", ""},
     // fsm_msg_common.h
@@ -1060,7 +1061,9 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"wipe the device?", "擦除设备"},
     //
-    {"word", "单词"},
+    {"word", "助记词"},
+    //
+    {"words", "助记词"},
     //
     {"you still have ", "还有"}};
 

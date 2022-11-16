@@ -2,7 +2,7 @@
 /* program starts at 0x08010400 */
 MEMORY
 {
-	rom (rx) : ORIGIN = 0x08010000, LENGTH = 1024K - 64K
+	rom (rx) : ORIGIN = 0x08010000, LENGTH = 1024K - 192K
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
 
