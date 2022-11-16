@@ -48,7 +48,7 @@ static void dsi_msp_init(DSI_HandleTypeDef *hdsi) {
 }
 
 #define DSI_FREQ 30000U
-#define LTDC_FREQ 27500U
+#define LTDC_FREQ 26400U
 
 HAL_StatusTypeDef dsi_host_init(DSI_HandleTypeDef *hdsi, uint32_t Width,
                                 uint32_t Height, uint32_t PixelFormat) {
@@ -118,7 +118,7 @@ HAL_StatusTypeDef ltdc_clock_config(LTDC_HandleTypeDef *hltdc) {
   PeriphClkInitStruct.PLL3.PLL3N = 132U;
   PeriphClkInitStruct.PLL3.PLL3P = 2U;
   PeriphClkInitStruct.PLL3.PLL3Q = 2U;
-  PeriphClkInitStruct.PLL3.PLL3R = 24U;
+  PeriphClkInitStruct.PLL3.PLL3R = 25U;
   PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLLCFGR_PLL3RGE_2;
   PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3VCOWIDE;
   PeriphClkInitStruct.PLL3.PLL3FRACN = 0U;
@@ -329,44 +329,31 @@ void st7701_dsi_write(uint16_t reg, uint8_t *seq, uint16_t len) {
   }
 
 void st7701_init_sequence(void) {
-  st7701_dsi(MIPI_DCS_SOFT_RESET, 0x00);
-
-  /* We need to wait 5ms before sending new commands */
-  HAL_Delay(120);
-
-  st7701_dsi(MIPI_DCS_EXIT_SLEEP_MODE, 0x00);
-
-  HAL_Delay(120);
-
   /* Command2, BK1 */
-  st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 0x11);
-  st7701_dsi(0xD1, 0x11);
+  st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 0x13);
+  st7701_dsi(0xEF, 0x08);
 
-  /* Command2, BK0 */
   st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 0x10);
   st7701_dsi(0xC0, 0x63, 0x00);
-  st7701_dsi(0xC1, lcd_time_seq.vbp, lcd_time_seq.vfp);
-  st7701_dsi(0xC2, 0x31, 0x08);
-  st7701_dsi(0xB0, 0x00, 0x11, 0x19, 0x0C, 0x10, 0x06, 0x07, 0x0A, 0x09, 0x22,
-             0x04, 0x10, 0x0E, 0x28, 0x30, 0x1C);
-  st7701_dsi(0xB1, 0x00, 0x12, 0x19, 0x0D, 0x10, 0x04, 0x06, 0x07, 0x08, 0x23,
-             0x04, 0x12, 0x11, 0x28, 0x30, 0x1C);
+  st7701_dsi(0xC1, 0x09, 0x0C);
+  st7701_dsi(0xC2, 0x07, 0x08);
+  st7701_dsi(0xB0, 0x00, 0x0D, 0x14, 0x0D, 0x11, 0x07, 0x04, 0x08, 0x08, 0x20,
+             0x05, 0x14, 0x12, 0x25, 0x2D, 0x1C);
+  st7701_dsi(0xB1, 0x00, 0x0C, 0x14, 0x0D, 0x11, 0x06, 0x03, 0x08, 0x08, 0x1F,
+             0x05, 0x14, 0x12, 0x25, 0x2E, 0x1C);
 
-  /* Command2, BK1 */
   st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 0x11);
-  st7701_dsi(0xB0, 0x45);  // 4.4V
-  st7701_dsi(0xB1, 0x4A);  // 1.025
-  st7701_dsi(0xB2, 0x07);  // 15V
+  st7701_dsi(0xB0, 0x68);
+  st7701_dsi(0xB1, 0x49);
+  st7701_dsi(0xB2, 0x80);
   st7701_dsi(0xB3, 0x80);
-  st7701_dsi(0xB5, 0x07);  //-9.51V
-  st7701_dsi(0xB7, 0x85);
-  st7701_dsi(0xB8, 0x20);
+  st7701_dsi(0xB5, 0x40);
+  st7701_dsi(0xB7, 0x8A);
+  st7701_dsi(0xB8, 0x21);
+  st7701_dsi(0xC0, 0x03);
   st7701_dsi(0xC1, 0x78);
   st7701_dsi(0xC2, 0x78);
   st7701_dsi(0xD0, 0x88);
-
-  HAL_Delay(100);
-
   st7701_dsi(0xE0, 0x00, 0x00, 0x02);
   st7701_dsi(0xE1, 0x01, 0xA0, 0x03, 0xA0, 0x02, 0xA0, 0x04, 0xA0, 0x00, 0x44,
              0x44);
@@ -383,16 +370,31 @@ void st7701_init_sequence(void) {
   st7701_dsi(0xEB, 0x00, 0x00, 0xE4, 0xE4, 0x44, 0x00, 0x40);
   st7701_dsi(0xED, 0xFF, 0xF7, 0x65, 0x4F, 0x0B, 0xA1, 0xCF, 0xFF, 0xFF, 0xFC,
              0x1A, 0xB0, 0xF4, 0x56, 0x7F, 0xFF);
+  st7701_dsi(0xEF, 0x08, 0x08, 0x08, 0x80, 0x3F, 0x64);
+
+  st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 0x13);
+  st7701_dsi(0xE8, 0x00, 0x0e);
 
   /* disable Command2 */
   st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 00);
+
+  st7701_dsi(MIPI_DCS_EXIT_SLEEP_MODE, 0x00);
+  HAL_Delay(120);
+
+  st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 0x13);
+  st7701_dsi(0xE8, 0x00, 0x0C);
+  HAL_Delay(20);
+  st7701_dsi(0xE8, 0x00, 0x00);
+
+  st7701_dsi(0xFF, 0x77, 0x01, 0x00, 0x00, 00);
   st7701_dsi(MIPI_DCS_SET_TEAR_ON, 0x00);
-  HAL_Delay(100);
-  st7701_dsi(MIPI_DCS_SET_PIXEL_FORMAT, 0x50);
-  st7701_dsi(MIPI_DCS_SET_DISPLAY_BRIGHTNESS, 0xFF);
-  st7701_dsi(MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x2C);
-  st7701_dsi(MIPI_DCS_WRITE_POWER_SAVE, 0x92);
-  st7701_dsi(MIPI_DCS_SET_CABC_MIN_BRIGHTNESS, 0xFF);
+  // HAL_Delay(100);
+
+  // st7701_dsi(MIPI_DCS_SET_DISPLAY_BRIGHTNESS, 0xFF);
+  // st7701_dsi(MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x2C);
+  // st7701_dsi(MIPI_DCS_WRITE_POWER_SAVE, 0x92);
+  // st7701_dsi(MIPI_DCS_SET_CABC_MIN_BRIGHTNESS, 0xFF);
+  st7701_dsi(MIPI_DCS_SET_PIXEL_FORMAT, 0x55);
   st7701_dsi(MIPI_DCS_SET_DISPLAY_ON, 0x00);
   HAL_Delay(20);
 }
@@ -417,11 +419,13 @@ void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
   HAL_GPIO_Init(LCD_RESET_GPIO_PORT, &gpio_init_structure);
 
   /* Activate XRES active low */
-  HAL_GPIO_WritePin(LCD_RESET_GPIO_PORT, LCD_RESET_PIN, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LCD_RESET_GPIO_PORT, LCD_RESET_PIN, GPIO_PIN_SET);
   HAL_Delay(20); /* wait 20 ms */
+  HAL_GPIO_WritePin(LCD_RESET_GPIO_PORT, LCD_RESET_PIN, GPIO_PIN_RESET);
+  HAL_Delay(50); /* wait 20 ms */
   HAL_GPIO_WritePin(LCD_RESET_GPIO_PORT, LCD_RESET_PIN,
                     GPIO_PIN_SET); /* Deactivate XRES */
-  HAL_Delay(10);
+  HAL_Delay(120);
 
   /* LCD_TE_CTRL GPIO configuration */
   __HAL_RCC_GPIOJ_CLK_ENABLE();
