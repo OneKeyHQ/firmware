@@ -283,11 +283,11 @@ STATIC mp_obj_t mod_trezorui_Display_loader(size_t n_args,
     } else {
       iconfgcolor = ~bgcolor;  // invert
     }
-    display_loader(progress, indeterminate, yoffset, fgcolor, bgcolor, icon.buf,
-                   icon.len, iconfgcolor);
+    display_loader_ex(progress, indeterminate, yoffset, fgcolor, bgcolor,
+                      icon.buf, icon.len, iconfgcolor);
   } else {
-    display_loader(progress, indeterminate, yoffset, fgcolor, bgcolor, NULL, 0,
-                   0);
+    display_loader_ex(progress, indeterminate, yoffset, fgcolor, bgcolor, NULL,
+                      0, 0);
   }
   return mp_const_none;
 }

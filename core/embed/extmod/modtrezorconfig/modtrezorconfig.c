@@ -34,6 +34,7 @@
 #ifndef TREZOR_EMULATOR
 #include "bip39.h"
 #include "device.h"
+#include "display.h"
 #include "emmc.h"
 #include "mini_printf.h"
 #include "se_atca.h"
@@ -105,6 +106,8 @@ STATIC mp_obj_t mod_trezorconfig_unlock(mp_obj_t pin, mp_obj_t ext_salt) {
     return mp_const_false;
   }
 #else
+  display_clear();
+  display_loader_ex(0, false, 0, 0xFFFF, 0x0000, NULL, 0, 0);
   secbool ret = secfalse;
   // verify se pin first when not in emulator
   bool verified = se_verifyPin(pin_b.buf);
@@ -240,11 +243,14 @@ STATIC mp_obj_t mod_trezorconfig_change_pin(size_t n_args,
     return mp_const_false;
   }
 #else
+  display_clear();
+  display_loader_ex(0, false, 0, 0xFFFF, 0x0000, NULL, 0, 0);
   if (sectrue != storage_change_pin(oldpin.buf, oldpin.len, newpin.buf,
                                     newpin.len, old_ext_salt, new_ext_salt)) {
     return mp_const_false;
   }
-  if (!se_changePin(oldpin.buf, newpin.buf)) {
+  display_loader_ex(1000, false, 0, 0xFFFF, 0x0000, NULL, 0, 0);
+  if (!se_setPin(newpin.buf)) {
     return mp_const_false;
   }
 #endif
