@@ -108,6 +108,8 @@ class Slider(lv.slider):
                         dsc.rect_dsc.bg_img_src = self.done_img_src
                         if self.has_flag(lv.obj.FLAG.CLICKABLE):
                             self.clear_flag(lv.obj.FLAG.CLICKABLE)
+                        else:
+                            return
                         motor.vibrate()
                         lv.event_send(self, lv.EVENT.READY, None)
         elif code == lv.EVENT.DRAW_PART_END:

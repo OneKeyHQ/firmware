@@ -63,11 +63,7 @@ def init_file_system() -> None:
     if not utils.EMULATOR:
 
         def clean():
-            need_clean = device.get_wp_cnts() == 0
             for size, attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
-                if need_clean:
-                    io.fatfs.unlink(f"1:/res/wallpapers/{name}")
-                    continue
                 if size > 0 and attrs[1] == "h":
                     io.fatfs.unlink(f"1:/res/wallpapers/{name}")
 
