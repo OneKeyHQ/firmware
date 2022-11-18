@@ -761,7 +761,9 @@ static void _layout_home(bool update_menu) {
 void layoutHome(void) {
 #if !EMULATOR
 #if ONEKEY_MINI
-  if (!config_isLanguageSet() && !config_isInitialized()) {
+  static bool first_boot = true;
+  if (!config_isInitialized() && first_boot) {
+    first_boot = false;
     layout_language_set(KEY_UP);
   } else
 #else
