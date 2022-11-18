@@ -1059,8 +1059,9 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
 void fsm_msgSESignMessage(const SESignMessage *msg) {
   (void)msg;
 #if ONEKEY_MINI
-
-  CHECK_PIN
+  if (!device_is_factory_mode()) {
+    CHECK_PIN
+  }
 
   layoutDialogSwipeCenterAdapterEx(
       NULL, &bmp_button_back, _("Cancel"), &bmp_button_forward, _("Confirm"),
