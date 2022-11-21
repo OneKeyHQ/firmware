@@ -58,5 +58,6 @@ void drbg_init(void);
 void drbg_reseed(const uint8_t *entropy, size_t len);
 void drbg_generate(uint8_t *buf, size_t len);
 uint32_t drbg_random32(void);
+void reset_to_firmware(void);
 
 #endif
