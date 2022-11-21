@@ -23,6 +23,7 @@
 #include "firmware/usb.h"
 #include "hmac_drbg.h"
 #include "layout.h"
+#include "memory.h"
 #include "oled.h"
 #include "rng.h"
 #include "util.h"
@@ -113,4 +114,11 @@ uint32_t drbg_random32(void) {
   uint32_t value = 0;
   drbg_generate((uint8_t *)&value, sizeof(value));
   return value;
+}
+
+void reset_to_firmware(void) {
+  svc_system_privileged();
+  vector_table_t *ivt = (vector_table_t *)(FLASH_APP_START);
+  __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
+  __asm__ volatile("b reset_handler");
 }
