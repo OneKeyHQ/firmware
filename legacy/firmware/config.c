@@ -478,15 +478,17 @@ void config_init(void) {
 
   config_getLanguage(config_language, sizeof(config_language));
 
+  // new devcie use se
+  if (g_bSelectSEFlag) {
+    if (config_isInitialized_ST()) {
+      g_bSelectSEFlag = false;
+    }
+  }
+
   // imported xprv is not supported anymore so we set initialized to false
   // if no mnemonic is present
   if (config_isInitialized() && !config_hasMnemonic()) {
     config_set_bool(KEY_INITIALIZED, false);
-  }
-
-  // new devcie never use se
-  if (!config_isInitialized() && (g_bSelectSEFlag == true)) {
-    g_bSelectSEFlag = false;
   }
 
   // Auto-unlock storage if no PIN is set.
@@ -1161,6 +1163,13 @@ bool config_isInitialized(void) {
   }
   return initialized;
 }
+
+bool config_isInitialized_ST(void) {
+  bool initialized = false;
+  config_get_bool(KEY_INITIALIZED, &initialized);
+  return initialized;
+}
+
 bool config_isInitializedSeeds(void) {
   bool initialized = false;
   config_get_bool(KEY_SEEDSFLAG, &initialized);

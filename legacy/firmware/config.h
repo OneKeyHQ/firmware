@@ -161,6 +161,7 @@ uint32_t config_nextU2FCounter(void);
 void config_setU2FCounter(uint32_t u2fcounter);
 
 bool config_isInitialized(void);
+bool config_isInitialized_ST(void);
 bool config_isInitializedSeeds(void);
 
 bool config_getImported(bool *imported);
