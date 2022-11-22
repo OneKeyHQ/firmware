@@ -416,6 +416,11 @@ enum MessageType {
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
 
+    // sui
+    MessageType_SuiGetAddress = 11100 [(wire_in) = true];
+    MessageType_SuiAddress = 11101 [(wire_out) = true];
+    MessageType_SuiSignTx = 11102 [(wire_in) = true];
+    MessageType_SuiSignedTx = 11103 [(wire_out) = true];
 
     //onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];

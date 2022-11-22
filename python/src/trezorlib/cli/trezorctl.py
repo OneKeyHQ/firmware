@@ -55,6 +55,7 @@ from . import (
     stellar,
     tezos,
     tron,
+    sui,
     with_client,
 )
 
@@ -92,6 +93,7 @@ COMMAND_ALIASES = {
     "starcoin": starcoin.cli,
     "near": near.cli,
     "aptos": aptos.cli,
+    "sui": sui.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -384,6 +386,7 @@ cli.add_command(starcoin.cli)
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(near.cli)
+cli.add_command(sui.cli)
 
 #
 # Main

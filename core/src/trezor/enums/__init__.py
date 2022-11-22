@@ -296,6 +296,10 @@ if TYPE_CHECKING:
         AlgorandAddress = 10901
         AlgorandSignTx = 10902
         AlgorandSignedTx = 10903
+        SuiGetAddress = 11100
+        SuiAddress = 11101
+        SuiSignTx = 11102
+        SuiSignedTx = 11103
         DeviceBackToBoot = 903
         RebootToBoardloader = 904
         DeviceInfoSettings = 10001
