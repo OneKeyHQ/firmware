@@ -114,6 +114,8 @@ trezor.enums.RecoveryDeviceType
 import trezor.enums.RecoveryDeviceType
 trezor.enums.RequestType
 import trezor.enums.RequestType
+trezor.enums.ResourceType
+import trezor.enums.ResourceType
 trezor.enums.SafetyCheckLevel
 import trezor.enums.SafetyCheckLevel
 trezor.enums.SdProtectOperationType
