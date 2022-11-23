@@ -2930,6 +2930,70 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RebootToBootloader"]:
             return isinstance(msg, cls)
 
+    class RebootToBoardloader(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RebootToBoardloader"]:
+            return isinstance(msg, cls)
+
+    class ListResDir(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["ListResDir"]:
+            return isinstance(msg, cls)
+
+    class FileInfoList(protobuf.MessageType):
+        files: "list[FileInfo]"
+
+        def __init__(
+            self,
+            *,
+            files: "list[FileInfo] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FileInfoList"]:
+            return isinstance(msg, cls)
+
+    class DeviceEraseSector(protobuf.MessageType):
+        sector: "int"
+
+        def __init__(
+            self,
+            *,
+            sector: "int",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceEraseSector"]:
+            return isinstance(msg, cls)
+
+    class FileInfo(protobuf.MessageType):
+        name: "str"
+        size: "int"
+
+        def __init__(
+            self,
+            *,
+            name: "str",
+            size: "int",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FileInfo"]:
+            return isinstance(msg, cls)
+
     class DebugLinkDecision(protobuf.MessageType):
         yes_no: "bool | None"
         swipe: "DebugSwipeDirection | None"
@@ -6572,6 +6636,60 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosSignedTx"]:
+            return isinstance(msg, cls)
+
+    class AptosSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        payload: "AptosMessagePayload"
+
+        def __init__(
+            self,
+            *,
+            payload: "AptosMessagePayload",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosSignMessage"]:
+            return isinstance(msg, cls)
+
+    class AptosMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosMessageSignature"]:
+            return isinstance(msg, cls)
+
+    class AptosMessagePayload(protobuf.MessageType):
+        address: "str | None"
+        chain_id: "str | None"
+        application: "str | None"
+        nonce: "str"
+        message: "str"
+
+        def __init__(
+            self,
+            *,
+            nonce: "str",
+            message: "str",
+            address: "str | None" = None,
+            chain_id: "str | None" = None,
+            application: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AptosMessagePayload"]:
             return isinstance(msg, cls)
 
     class NearGetAddress(protobuf.MessageType):

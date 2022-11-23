@@ -240,6 +240,8 @@ if not utils.BITCOIN_ONLY:
     AptosAddress = 10601
     AptosSignTx = 10602
     AptosSignedTx = 10603
+    AptosSignMessage = 10604
+    AptosMessageSignature = 10605
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -302,3 +304,7 @@ if not utils.BITCOIN_ONLY:
     ResourceRequest = 10020
     ResourceAck = 10021
     ResourceUpdate = 10022
+    ListResDir = 10023
+    FileInfoList = 10024
+    RebootToBoardloader = 10025
+    DeviceEraseSector = 10026
