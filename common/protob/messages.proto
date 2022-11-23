@@ -428,4 +428,7 @@ enum MessageType {
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
 
+    //onekey
+    MessageType_DeviceEraseSector= 10026 [(wire_in) = true];
+
 }

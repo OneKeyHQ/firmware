@@ -313,6 +313,7 @@ class MessageType(IntEnum):
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
+    DeviceEraseSector = 10026
 
 
 class FailureType(IntEnum):
@@ -4353,6 +4354,10 @@ class BixinBackupDeviceAck(protobuf.MessageType):
 
 class RebootToBootloader(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 87
+
+
+class DeviceEraseSector(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10026
 
 
 class DebugLinkDecision(protobuf.MessageType):

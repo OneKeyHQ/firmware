@@ -596,3 +596,10 @@ message BixinBackupDeviceAck {
  */
 message RebootToBootloader {
 }
+
+/**
+ * Request: Erase device sector
+ * @end
+ */
+message DeviceEraseSector {
+}

@@ -2610,6 +2610,12 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RebootToBootloader"]:
             return isinstance(msg, cls)
 
+    class DeviceEraseSector(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceEraseSector"]:
+            return isinstance(msg, cls)
+
     class DebugLinkDecision(protobuf.MessageType):
         yes_no: "bool | None"
         swipe: "DebugSwipeDirection | None"

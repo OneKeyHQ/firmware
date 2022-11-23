@@ -188,6 +188,8 @@ const char *languages[][2] = {
     {"Confirm transaction", "确认交易"},
     // layout2.c layout2.c layout2.c
     {"Confirm transfer of", "确认转移"},
+    //
+    {"Confirm your operation!", "确认操作!"},
     // layout2.c lisk.c reset.c fsm_msg_coin.h
     {"Continue", "继续"},
     // fsm_msg_coin.h
@@ -351,6 +353,8 @@ const char *languages[][2] = {
     {"Firmware error", "固件错误"},
     // layout2.c
     {"Firmware version:", "固件版本:"},
+    //
+    {"Firmware will be erased!", "固件将被擦除!"},
     // fsm_msg_common.h
     {"Flags applied", ""},  // msg
     //
