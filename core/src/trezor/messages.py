@@ -4986,21 +4986,21 @@ if TYPE_CHECKING:
 
     class RippleSignTx(protobuf.MessageType):
         address_n: "list[int]"
-        fee: "int"
-        flags: "int"
-        sequence: "int"
+        fee: "int | None"
+        flags: "int | None"
+        sequence: "int | None"
         last_ledger_sequence: "int | None"
-        payment: "RipplePayment"
+        payment: "RipplePayment | None"
 
         def __init__(
             self,
             *,
-            fee: "int",
-            sequence: "int",
-            payment: "RipplePayment",
             address_n: "list[int] | None" = None,
+            fee: "int | None" = None,
             flags: "int | None" = None,
+            sequence: "int | None" = None,
             last_ledger_sequence: "int | None" = None,
+            payment: "RipplePayment | None" = None,
         ) -> None:
             pass
 
