@@ -102,6 +102,10 @@ async def confirm_action(
         interact(ctx, confirm_screen, br_type, br_code),
         exc,
     )
+    if anim_dir == 2:
+        from trezor import loop
+
+        await loop.sleep(300)
 
 
 async def confirm_reset_device(
@@ -288,7 +292,7 @@ async def show_address(
     )
     from trezor import loop
 
-    await loop.sleep(400)
+    await loop.sleep(300)
 
 
 async def show_pubkey(

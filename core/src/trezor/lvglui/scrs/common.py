@@ -274,7 +274,7 @@ class FullSizeWindow(lv.obj):
 
     def _dismiss_anim_ver(self):
         Anim(
-            0, 800, self.set_pos, time=300, y_axis=True, delay=80, del_cb=self._delete
+            0, 800, self.set_pos, time=180, y_axis=True, delay=60, del_cb=self._delete
         ).start()
 
     def show_load_anim(self):
