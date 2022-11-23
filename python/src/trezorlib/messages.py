@@ -271,6 +271,8 @@ class MessageType(IntEnum):
     AptosAddress = 10601
     AptosSignTx = 10602
     AptosSignedTx = 10603
+    AptosSignMessage = 10604
+    AptosMessageSignature = 10605
     WebAuthnListResidentCredentials = 800
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
@@ -340,6 +342,10 @@ class MessageType(IntEnum):
     ResourceRequest = 10020
     ResourceAck = 10021
     ResourceUpdate = 10022
+    ListResDir = 10023
+    FileInfoList = 10024
+    RebootToBoardloader = 10025
+    DeviceEraseSector = 10026
 
 
 class FailureType(IntEnum):
@@ -764,6 +770,66 @@ class AptosSignedTx(protobuf.MessageType):
     ) -> None:
         self.public_key = public_key
         self.signature = signature
+
+
+class AptosSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10604
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("payload", "AptosMessagePayload", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        payload: "AptosMessagePayload",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.payload = payload
+
+
+class AptosMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10605
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class AptosMessagePayload(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("address", "string", repeated=False, required=False),
+        3: protobuf.Field("chain_id", "string", repeated=False, required=False),
+        4: protobuf.Field("application", "string", repeated=False, required=False),
+        5: protobuf.Field("nonce", "string", repeated=False, required=True),
+        6: protobuf.Field("message", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        nonce: "str",
+        message: "str",
+        address: Optional["str"] = None,
+        chain_id: Optional["str"] = None,
+        application: Optional["str"] = None,
+    ) -> None:
+        self.nonce = nonce
+        self.message = message
+        self.address = address
+        self.chain_id = chain_id
+        self.application = application
 
 
 class BinanceGetAddress(protobuf.MessageType):
@@ -4733,6 +4799,69 @@ class NFTWriteData(protobuf.MessageType):
 
 class RebootToBootloader(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 87
+
+
+class RebootToBoardloader(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10025
+
+
+class ListResDir(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10023
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class FileInfoList(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10024
+    FIELDS = {
+        1: protobuf.Field("files", "FileInfo", repeated=True, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        files: Optional[Sequence["FileInfo"]] = None,
+    ) -> None:
+        self.files: Sequence["FileInfo"] = files if files is not None else []
+
+
+class DeviceEraseSector(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10026
+    FIELDS = {
+        1: protobuf.Field("sector", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        sector: "int",
+    ) -> None:
+        self.sector = sector
+
+
+class FileInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("name", "string", repeated=False, required=True),
+        2: protobuf.Field("size", "uint64", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        name: "str",
+        size: "int",
+    ) -> None:
+        self.name = name
+        self.size = size
 
 
 class DebugLinkDecision(protobuf.MessageType):

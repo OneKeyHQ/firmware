@@ -829,3 +829,11 @@ message FileInfoList {
         required uint64 size =2;
     }
 }
+
+/**
+ * Request: Erase device sector
+ * @end
+ */
+message DeviceEraseSector {
+    required uint32 sector = 1;
+}

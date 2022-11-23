@@ -441,7 +441,6 @@ enum MessageType {
     
     // onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];
-    MessageType_RebootToBoardloader = 904 [(wire_in) = true];
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];
     MessageType_DeviceInfo = 10003 [(wire_out) = true];
@@ -466,5 +465,7 @@ enum MessageType {
     MessageType_ResourceUpdate = 10022 [(wire_in) = true];
     MessageType_ListResDir = 10023 [(wire_in) = true];
     MessageType_FileInfoList = 10024 [(wire_out) = true];
+    MessageType_RebootToBoardloader = 10025 [(wire_in) = true];
+    MessageType_DeviceEraseSector= 10026 [(wire_in) = true];
 
 }
