@@ -166,9 +166,6 @@ ATCA_STATUS atca_i2c_sleep(void) {
 
 #else
 
-static TIM_HandleTypeDef TimHandle;
-#define ATCA_TIMER TIM3
-
 #define ATCA_SWI_PORT GPIOD
 #define ATCA_SWI_PIN GPIO_PIN_13
 
@@ -177,22 +174,28 @@ static TIM_HandleTypeDef TimHandle;
 
 typedef enum { PIN_DIRECTION_OUT = 0, PIN_DIRECTION_IN } SWI_PIN_DIRECTION;
 
-static void atca_delay_us(uint32_t delay_us) {
-  HAL_TIM_Base_Stop(&TimHandle);
+// clang-format off
+#define DEMCR                     (*(volatile uint32_t*) (0xE000EDFCuL))   // Debug Exception and Monitor Control Register
+#define TRACEENA_BIT              (1uL << 24)                                   // Trace enable bit
+#define DWT_CTRL                  (*(volatile uint32_t*) (0xE0001000uL))   // DWT Control Register
+#define CYCCNTENA_BIT             (1uL << 0)
+#define DWT_CYCCNT                (*(volatile uint32_t*) (0xE0001004uL))
+// clang-format on
 
-  TimHandle.Init.Period = delay_us;
-  TIM_Base_SetConfig(TimHandle.Instance, &TimHandle.Init);
-  __HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_FLAG_UPDATE);
-  HAL_TIM_Base_Start(&TimHandle);
-  while (!__HAL_TIM_GET_FLAG(&TimHandle, TIM_FLAG_UPDATE))
+// 400MHZ  min 2.5ns,max 10.73s
+static void atca_delay_ns(uint32_t delay_ns) {
+  DWT_CYCCNT = 0;
+  uint32_t start = DWT_CYCCNT;
+  uint32_t count = (delay_ns * (SystemCoreClock / 100000000)) / 10;
+  while ((DWT_CYCCNT - start) < count)
     ;
-
-  HAL_TIM_Base_Stop(&TimHandle);
 }
 
-#define DELAY_1_BIT atca_delay_us(2)
-#define DELAY_5_BITS atca_delay_us(24)
-#define DELAY_7_BITS atca_delay_us(33)
+static void atca_delay_us(uint32_t delay_us) { atca_delay_ns(delay_us * 1000); }
+
+#define DELAY_1_BIT atca_delay_ns(4200)
+#define DELAY_5_BITS atca_delay_ns(26200)
+#define DELAY_7_BITS atca_delay_ns(34500)
 
 static void atca_pin_direction(SWI_PIN_DIRECTION direction) {
   if (PIN_DIRECTION_OUT == direction) {
@@ -226,15 +229,14 @@ void atca_swi_init(void) {
   GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(ATCA_SWI_PORT, &GPIO_InitStructure);
 
-  TimHandle.Instance = ATCA_TIMER;
-  TimHandle.Init.Prescaler = (uint32_t)(SystemCoreClock / (2 * 1000000)) - 1;
-  TimHandle.Init.ClockDivision = 0;
-  TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-  TimHandle.Init.RepetitionCounter = 0;
-
-  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK) {
-    ensure(secfalse, NULL);
+  if ((DEMCR & TRACEENA_BIT) == 0) {
+    DEMCR |= TRACEENA_BIT;
   }
+
+  if ((DWT_CTRL & CYCCNTENA_BIT) == 0) {  // Cycle counter not enabled?
+    DWT_CTRL |= CYCCNTENA_BIT;            // Enable Cycle counter
+  }
+  DWT_CYCCNT = 0;
 }
 
 ATCA_STATUS atca_swi_send_bytes(uint8_t *buffer, uint8_t len) {
