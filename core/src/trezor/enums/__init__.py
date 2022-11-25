@@ -251,18 +251,11 @@ if TYPE_CHECKING:
         WebAuthnCredentials = 801
         WebAuthnAddResidentCredential = 802
         WebAuthnRemoveResidentCredential = 803
-        BixinSeedOperate = 901
         BixinMessageSE = 902
         BixinReboot = 903
         BixinOutMessageSE = 904
-        BixinBackupRequest = 905
-        BixinBackupAck = 906
-        BixinRestoreRequest = 907
-        BixinRestoreAck = 908
         BixinVerifyDeviceRequest = 909
         BixinVerifyDeviceAck = 910
-        BixinWhiteListRequest = 911
-        BixinWhiteListAck = 912
         BixinLoadDevice = 913
         BixinBackupDevice = 914
         BixinBackupDeviceAck = 915
@@ -292,6 +285,10 @@ if TYPE_CHECKING:
         AlgorandAddress = 10901
         AlgorandSignTx = 10902
         AlgorandSignedTx = 10903
+        SuiGetAddress = 11100
+        SuiAddress = 11101
+        SuiSignTx = 11102
+        SuiSignedTx = 11103
         DeviceEraseSector = 10026
 
     class BinanceOrderType(IntEnum):
@@ -497,16 +494,6 @@ if TYPE_CHECKING:
         Plain = 0
         Matrix9 = 1
         Matrix6 = 2
-
-    class SeedRequestType(IntEnum):
-        Gen = 0
-        EncExport = 1
-        EncImport = 2
-
-    class WL_OperationType(IntEnum):
-        Add = 0
-        Delete = 1
-        Inquire = 2
 
     class DebugSwipeDirection(IntEnum):
         UP = 0

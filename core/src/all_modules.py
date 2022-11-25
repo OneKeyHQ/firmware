@@ -116,10 +116,6 @@ trezor.enums.SafetyCheckLevel
 import trezor.enums.SafetyCheckLevel
 trezor.enums.SdProtectOperationType
 import trezor.enums.SdProtectOperationType
-trezor.enums.SeedRequestType
-import trezor.enums.SeedRequestType
-trezor.enums.WL_OperationType
-import trezor.enums.WL_OperationType
 trezor.enums.WordRequestType
 import trezor.enums.WordRequestType
 trezor.enums

@@ -234,31 +234,6 @@ def cancel_authorization(client: "TrezorClient") -> "MessageType":
     return client.call(messages.CancelAuthorization())
 
 
-@expect(messages.BixinBackupAck, field="data", ret_type=bytes)
-def se_backup(client: "TrezorClient") -> "MessageType":
-    ret = client.call(messages.BixinBackupRequest())
-    return ret
-
-
-@expect(messages.Success, field="message", ret_type=str)
-def se_restore(
-    client: "TrezorClient",
-    data: str,
-    language: str = "en-US",
-    label: str = "BiXin Key",
-    passphrase_protection: bool = True,
-) -> "MessageType":
-    ret = client.call(
-        messages.BixinRestoreRequest(
-            data=bytes.fromhex(data),
-            language=language,
-            label=label,
-            passphrase_protection=bool(passphrase_protection),
-        )
-    )
-    return ret
-
-
 @expect(messages.BixinVerifyDeviceAck)
 def se_verify(client: "TrezorClient", data: bytes) -> "MessageType":
     ret = client.call(messages.BixinVerifyDeviceRequest(data=data))

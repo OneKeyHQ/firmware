@@ -100,6 +100,7 @@ OBJS += algo/parser_impl.o
 OBJS += algo/parser.o
 OBJS += algo/tx.o
 OBJS += ripple.o
+OBJS += sui.o
 endif
 
 OBJS += debug.o
@@ -184,15 +185,16 @@ OBJS += protob/messages-near.pb.o
 OBJS += protob/messages-conflux.pb.o
 OBJS += protob/messages-algorand.pb.o
 OBJS += protob/messages-ripple.pb.o
+OBJS += protob/messages-sui.pb.o
 endif
 
 OPTFLAGS ?= -Os
 
-../vendor/trezor-crypto/bip32.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/bip39.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/sha2.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -O3
+../vendor/trezor-crypto/bip32.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/bip39.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/sha2.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -Os
 
 include ../Makefile.include
 

@@ -272,18 +272,11 @@ class MessageType(IntEnum):
     WebAuthnCredentials = 801
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
-    BixinSeedOperate = 901
     BixinMessageSE = 902
     BixinReboot = 903
     BixinOutMessageSE = 904
-    BixinBackupRequest = 905
-    BixinBackupAck = 906
-    BixinRestoreRequest = 907
-    BixinRestoreAck = 908
     BixinVerifyDeviceRequest = 909
     BixinVerifyDeviceAck = 910
-    BixinWhiteListRequest = 911
-    BixinWhiteListAck = 912
     BixinLoadDevice = 913
     BixinBackupDevice = 914
     BixinBackupDeviceAck = 915
@@ -313,6 +306,10 @@ class MessageType(IntEnum):
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
+    SuiGetAddress = 11100
+    SuiAddress = 11101
+    SuiSignTx = 11102
+    SuiSignedTx = 11103
     DeviceEraseSector = 10026
 
 
@@ -525,18 +522,6 @@ class WordRequestType(IntEnum):
     Plain = 0
     Matrix9 = 1
     Matrix6 = 2
-
-
-class SeedRequestType(IntEnum):
-    Gen = 0
-    EncExport = 1
-    EncImport = 2
-
-
-class WL_OperationType(IntEnum):
-    Add = 0
-    Delete = 1
-    Inquire = 2
 
 
 class DebugSwipeDirection(IntEnum):
@@ -4145,23 +4130,6 @@ class CancelAuthorization(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 86
 
 
-class BixinSeedOperate(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 901
-    FIELDS = {
-        1: protobuf.Field("type", "SeedRequestType", repeated=False, required=True),
-        2: protobuf.Field("seed_importData", "bytes", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        type: "SeedRequestType",
-        seed_importData: Optional["bytes"] = None,
-    ) -> None:
-        self.type = type
-        self.seed_importData = seed_importData
-
-
 class BixinMessageSE(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 902
     FIELDS = {
@@ -4194,61 +4162,6 @@ class BixinReboot(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 903
 
 
-class BixinBackupRequest(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 905
-
-
-class BixinBackupAck(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 906
-    FIELDS = {
-        1: protobuf.Field("data", "bytes", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        data: "bytes",
-    ) -> None:
-        self.data = data
-
-
-class BixinRestoreRequest(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 907
-    FIELDS = {
-        1: protobuf.Field("data", "bytes", repeated=False, required=True),
-        2: protobuf.Field("language", "string", repeated=False, required=False),
-        3: protobuf.Field("label", "string", repeated=False, required=False),
-        4: protobuf.Field("passphrase_protection", "bool", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        data: "bytes",
-        language: Optional["str"] = None,
-        label: Optional["str"] = None,
-        passphrase_protection: Optional["bool"] = None,
-    ) -> None:
-        self.data = data
-        self.language = language
-        self.label = label
-        self.passphrase_protection = passphrase_protection
-
-
-class BixinRestoreAck(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 908
-    FIELDS = {
-        1: protobuf.Field("data", "bytes", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        data: "bytes",
-    ) -> None:
-        self.data = data
-
-
 class BixinVerifyDeviceRequest(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 909
     FIELDS = {
@@ -4278,37 +4191,6 @@ class BixinVerifyDeviceAck(protobuf.MessageType):
     ) -> None:
         self.cert = cert
         self.signature = signature
-
-
-class BixinWhiteListRequest(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 911
-    FIELDS = {
-        1: protobuf.Field("type", "WL_OperationType", repeated=False, required=True),
-        2: protobuf.Field("addr_in", "string", repeated=False, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        type: "WL_OperationType",
-        addr_in: Optional["str"] = None,
-    ) -> None:
-        self.type = type
-        self.addr_in = addr_in
-
-
-class BixinWhiteListAck(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 912
-    FIELDS = {
-        1: protobuf.Field("address", "string", repeated=True, required=False),
-    }
-
-    def __init__(
-        self,
-        *,
-        address: Optional[Sequence["str"]] = None,
-    ) -> None:
-        self.address: Sequence["str"] = address if address is not None else []
 
 
 class BixinLoadDevice(protobuf.MessageType):
@@ -7811,6 +7693,71 @@ class StellarBumpSequenceOp(protobuf.MessageType):
 
 class StellarSignedTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 230
+    FIELDS = {
+        1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        public_key: "bytes",
+        signature: "bytes",
+    ) -> None:
+        self.public_key = public_key
+        self.signature = signature
+
+
+class SuiGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11100
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class SuiAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11101
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class SuiSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11102
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class SuiSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11103
     FIELDS = {
         1: protobuf.Field("public_key", "bytes", repeated=False, required=True),
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),

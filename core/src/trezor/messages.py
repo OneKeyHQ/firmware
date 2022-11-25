@@ -51,13 +51,11 @@ if TYPE_CHECKING:
     from trezor.enums import RequestType  # noqa: F401
     from trezor.enums import SafetyCheckLevel  # noqa: F401
     from trezor.enums import SdProtectOperationType  # noqa: F401
-    from trezor.enums import SeedRequestType  # noqa: F401
     from trezor.enums import StellarAssetType  # noqa: F401
     from trezor.enums import StellarMemoType  # noqa: F401
     from trezor.enums import StellarSignerType  # noqa: F401
     from trezor.enums import TezosBallotType  # noqa: F401
     from trezor.enums import TezosContractType  # noqa: F401
-    from trezor.enums import WL_OperationType  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
 
     class BinanceGetAddress(protobuf.MessageType):
@@ -2400,22 +2398,6 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["CancelAuthorization"]:
             return isinstance(msg, cls)
 
-    class BixinSeedOperate(protobuf.MessageType):
-        type: "SeedRequestType"
-        seed_importData: "bytes | None"
-
-        def __init__(
-            self,
-            *,
-            type: "SeedRequestType",
-            seed_importData: "bytes | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinSeedOperate"]:
-            return isinstance(msg, cls)
-
     class BixinMessageSE(protobuf.MessageType):
         inputmessage: "bytes"
 
@@ -2450,60 +2432,6 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinReboot"]:
             return isinstance(msg, cls)
 
-    class BixinBackupRequest(protobuf.MessageType):
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinBackupRequest"]:
-            return isinstance(msg, cls)
-
-    class BixinBackupAck(protobuf.MessageType):
-        data: "bytes"
-
-        def __init__(
-            self,
-            *,
-            data: "bytes",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinBackupAck"]:
-            return isinstance(msg, cls)
-
-    class BixinRestoreRequest(protobuf.MessageType):
-        data: "bytes"
-        language: "str | None"
-        label: "str | None"
-        passphrase_protection: "bool | None"
-
-        def __init__(
-            self,
-            *,
-            data: "bytes",
-            language: "str | None" = None,
-            label: "str | None" = None,
-            passphrase_protection: "bool | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinRestoreRequest"]:
-            return isinstance(msg, cls)
-
-    class BixinRestoreAck(protobuf.MessageType):
-        data: "bytes"
-
-        def __init__(
-            self,
-            *,
-            data: "bytes",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinRestoreAck"]:
-            return isinstance(msg, cls)
-
     class BixinVerifyDeviceRequest(protobuf.MessageType):
         data: "bytes"
 
@@ -2532,36 +2460,6 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinVerifyDeviceAck"]:
-            return isinstance(msg, cls)
-
-    class BixinWhiteListRequest(protobuf.MessageType):
-        type: "WL_OperationType"
-        addr_in: "str | None"
-
-        def __init__(
-            self,
-            *,
-            type: "WL_OperationType",
-            addr_in: "str | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinWhiteListRequest"]:
-            return isinstance(msg, cls)
-
-    class BixinWhiteListAck(protobuf.MessageType):
-        address: "list[str]"
-
-        def __init__(
-            self,
-            *,
-            address: "list[str] | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["BixinWhiteListAck"]:
             return isinstance(msg, cls)
 
     class BixinLoadDevice(protobuf.MessageType):
@@ -6582,4 +6480,66 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AlgorandSignedTx"]:
+            return isinstance(msg, cls)
+
+    class SuiGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiGetAddress"]:
+            return isinstance(msg, cls)
+
+    class SuiAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiAddress"]:
+            return isinstance(msg, cls)
+
+    class SuiSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_tx: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiSignTx"]:
+            return isinstance(msg, cls)
+
+    class SuiSignedTx(protobuf.MessageType):
+        public_key: "bytes"
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiSignedTx"]:
             return isinstance(msg, cls)

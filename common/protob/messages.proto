@@ -377,18 +377,11 @@ enum MessageType {
     MessageType_WebAuthnRemoveResidentCredential = 803 [(wire_in) = true];
 
     // bixin
-    MessageType_BixinSeedOperate = 901 [deprecated = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
     MessageType_BixinReboot = 903 [(wire_in) = true];
     MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
-    MessageType_BixinBackupRequest = 905 [deprecated = true];
-    MessageType_BixinBackupAck = 906 [deprecated = true];
-    MessageType_BixinRestoreRequest = 907 [deprecated = true];
-    MessageType_BixinRestoreAck = 908 [deprecated = true];
     MessageType_BixinVerifyDeviceRequest = 909 [(wire_in) = true];
     MessageType_BixinVerifyDeviceAck = 910 [(wire_out) = true];
-    MessageType_BixinWhiteListRequest = 911 [deprecated = true];
-    MessageType_BixinWhiteListAck = 912 [deprecated = true];
     MessageType_BixinLoadDevice = 913 [(wire_in) = true];
     MessageType_BixinBackupDevice = 914 [(wire_in) = true];
     MessageType_BixinBackupDeviceAck = 915 [(wire_out) = true];
@@ -427,6 +420,12 @@ enum MessageType {
     MessageType_AlgorandAddress = 10901 [(wire_out) = true];
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
+
+    // sui
+    MessageType_SuiGetAddress = 11100 [(wire_in) = true];
+    MessageType_SuiAddress = 11101 [(wire_out) = true];
+    MessageType_SuiSignTx = 11102 [(wire_in) = true];
+    MessageType_SuiSignedTx = 11103 [(wire_out) = true];
 
     //onekey
     MessageType_DeviceEraseSector= 10026 [(wire_in) = true];

@@ -24,6 +24,7 @@ inline void delay(uint32_t wait) {
 }
 
 static const char *hexdigits = "0123456789ABCDEF";
+static const char *hexaddrdigits = "0123456789abcdef";
 
 void uint32hex(uint32_t num, char *str) {
   for (uint32_t i = 0; i < 8; i++) {
@@ -36,6 +37,15 @@ void data2hex(const uint8_t *data, uint32_t len, char *str) {
   for (uint32_t i = 0; i < len; i++) {
     str[i * 2] = hexdigits[(data[i] >> 4) & 0xF];
     str[i * 2 + 1] = hexdigits[data[i] & 0xF];
+  }
+  str[len * 2] = 0;
+}
+
+// converts data to hexa
+void data2hexaddr(const uint8_t *data, uint32_t len, char *str) {
+  for (uint32_t i = 0; i < len; i++) {
+    str[i * 2] = hexaddrdigits[(data[i] >> 4) & 0xF];
+    str[i * 2 + 1] = hexaddrdigits[data[i] & 0xF];
   }
   str[len * 2] = 0;
 }
