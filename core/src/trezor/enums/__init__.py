@@ -296,6 +296,10 @@ if TYPE_CHECKING:
         AlgorandAddress = 10901
         AlgorandSignTx = 10902
         AlgorandSignedTx = 10903
+        SuiGetAddress = 11100
+        SuiAddress = 11101
+        SuiSignTx = 11102
+        SuiSignedTx = 11103
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003
