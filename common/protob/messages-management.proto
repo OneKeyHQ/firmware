@@ -446,22 +446,6 @@ message CancelAuthorization {
 }
 
 /**
- * Request: Gen bitcon seeds random or seed encypt import and export
- * @end
- */
-message BixinSeedOperate {
-    required SeedRequestType type = 1;
-    optional bytes seed_importData = 2;
-    /**
-    * Type of Seed request
-    */
-    enum SeedRequestType {
-        SeedRequestType_Gen= 0;
-        SeedRequestType_EncExport = 1;
-        SeedRequestType_EncImport = 2;
-    }
-}
-/**
  * Request: message is se some cmd
  * @end
  */
@@ -485,40 +469,6 @@ message BixinReboot {
 }
 
 /**
- * Request: backup request
- * @end
- */
-message BixinBackupRequest {
-}
-
-/**
- * Request: backup ack
- * @end
- */
-message BixinBackupAck {
- required bytes data = 1;
-}
-
-/**
- * Request: restore request
- * @end
- */
-message BixinRestoreRequest {
- required bytes data = 1;
- optional string language = 2;
- optional string label = 3;
- optional bool passphrase_protection = 4;
-}
-
-/**
- * Request: restore ack
- * @end
- */
-message BixinRestoreAck {
- required bytes data = 1;
-}
-
-/**
  * Request: verify device request
  * @end
  */
@@ -533,31 +483,6 @@ message BixinVerifyDeviceRequest {
 message BixinVerifyDeviceAck {
  required bytes cert= 1;
  required bytes signature = 2;
-}
-
-/**
- * Request: bixin white list operation
- * @end
- */
-message BixinWhiteListRequest {
-    required WL_OperationType type = 1;
-    optional string addr_in = 2;
-    /**
-    * Type of Seed request
-    */
-    enum WL_OperationType {
-        WL_OperationType_Add= 0;
-        WL_OperationType_Delete = 1;
-        WL_OperationType_Inquire = 2;
-    }
-}
-
-/**
- * Response: output whitelist
- * @end
- */
-message BixinWhiteListAck {
-    repeated string address = 1;
 }
 
 /**

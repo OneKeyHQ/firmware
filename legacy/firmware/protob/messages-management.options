@@ -42,21 +42,13 @@ RecoveryDevice.label                    max_size:33
 
 WordAck.word                            max_size:12
 
-BixinSeedOperate.seed_importData        max_size:512
 
 BixinMessageSE.inputmessage             max_size:1025
 BixinOutMessageSE.outmessage            max_size:1025
 
-BixinBackupAck.data                     max_size:512
-BixinRestoreRequest.data                max_size:512
-BixinRestoreRequest.language            max_size:17
-BixinRestoreRequest.label               max_size:33
-BixinRestoreAck.data                    max_size:512
 BixinVerifyDeviceRequest.data           max_size:512
 BixinVerifyDeviceAck.cert               max_size:1024
 BixinVerifyDeviceAck.signature          max_size:512
-BixinWhiteListRequest.addr_in           max_size:130
-BixinWhiteListAck.address               max_count:10 max_size:130
 
 BixinLoadDevice.mnemonics               max_size:241
 BixinLoadDevice.language                max_size:17

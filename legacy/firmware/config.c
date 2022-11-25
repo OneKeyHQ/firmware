@@ -910,17 +910,6 @@ bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg) {
   get_msg->bytes[get_msg->size] = '\0';
   return true;
 }
-bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
-  if (!g_bSelectSEFlag) {
-    return false;
-  }
-  if (sectrue != se_transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF),
-                             input_msg->bytes, input_msg->size, NULL, NULL,
-                             FLAG_PUBLIC, DELETE_SESTORE_DATA)) {
-    return false;
-  }
-  return true;
-}
 
 bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size) {

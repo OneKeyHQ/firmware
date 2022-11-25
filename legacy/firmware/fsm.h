@@ -34,6 +34,7 @@
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
+#include "messages-sui.pb.h"
 #include "messages-tron.pb.h"
 
 // message functions
@@ -201,5 +202,9 @@ void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
 // ripple
 void fsm_msgRippleGetAddress(RippleGetAddress *msg);
 void fsm_msgRippleSignTx(RippleSignTx *msg);
+
+// sui
+void fsm_msgSuiGetAddress(const SuiGetAddress *msg);
+void fsm_msgSuiSignTx(const SuiSignTx *msg);
 
 #endif
