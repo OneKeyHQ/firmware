@@ -283,7 +283,7 @@ enum MessageType {
     MessageType_RippleGetAddress = 400 [(wire_in) = true];
     MessageType_RippleAddress = 401 [(wire_out) = true];
     MessageType_RippleSignTx = 402 [(wire_in) = true];
-    MessageType_RippleSignedTx = 403 [(wire_in) = true];
+    MessageType_RippleSignedTx = 403 [(wire_out) = true];
 
     // Monero
     MessageType_MoneroTransactionInitRequest = 501 [(wire_out) = true];
@@ -427,5 +427,8 @@ enum MessageType {
     MessageType_AlgorandAddress = 10901 [(wire_out) = true];
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
+
+    //onekey
+    MessageType_DeviceEraseSector= 10026 [(wire_in) = true];
 
 }

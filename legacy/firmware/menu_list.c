@@ -3,6 +3,7 @@
 #include "menu_para.h"
 
 #include "buttons.h"
+#include "common.h"
 #include "config.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -11,7 +12,6 @@
 #include "recovery.h"
 #include "reset.h"
 
-extern uint8_t ui_language;
 bool exitBlindSignByInitialize;
 
 static struct menu settings_menu, main_menu, security_set_menu, blind_sign_menu;
@@ -196,7 +196,8 @@ void menu_erase_device(int index) {
       NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
   protectWaitKey(0, 0);
 #if !EMULATOR
-  svc_system_reset();
+  // svc_system_reset();
+  reset_to_firmware();
 #endif
 }
 

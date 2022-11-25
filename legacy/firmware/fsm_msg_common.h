@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "flash.h"
 #include "menu_list.h"
 #include "mi2c.h"
 #include "se_chip.h"
 #include "storage.h"
-#include "storage_ex.h"
 
 extern char bootloader_version[8];
 
@@ -856,5 +856,26 @@ void fsm_msgBixinBackupDevice(void) {
 
   msg_write(MessageType_MessageType_BixinBackupDeviceAck, resp);
   layoutHome();
+  return;
+}
+
+void fsm_msgDeviceEraseSector(void) {
+  if (config_hasPin()) {
+    CHECK_PIN_UNCACHED
+  }
+
+  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_cancel, _("Cancel"),
+                                 &bmp_btn_confirm, _("Confirm"), NULL, NULL,
+                                 NULL, _("Firmware will be erased!"),
+                                 _("Confirm your operation!"), NULL, NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+  ensure(flash_erase(FLASH_BIXIN_DATE_SECTOR), "erase failed");
+  ensure(flash_unlock_write(), NULL);
+  ensure(flash_write_word(FLASH_CODE_SECTOR_FIRST, 0x00, 0x00), NULL);
+  sys_backtoboot();
   return;
 }

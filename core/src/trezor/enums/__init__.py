@@ -292,6 +292,7 @@ if TYPE_CHECKING:
         AlgorandAddress = 10901
         AlgorandSignTx = 10902
         AlgorandSignedTx = 10903
+        DeviceEraseSector = 10026
 
     class BinanceOrderType(IntEnum):
         OT_UNKNOWN = 0

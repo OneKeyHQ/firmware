@@ -36,7 +36,6 @@
 #include "protect.h"
 #include "ripemd160.h"
 #include "segwit_addr.h"
-#include "storage_ex.h"
 #include "util.h"
 #include "zkp_bip340.h"
 

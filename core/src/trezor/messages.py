@@ -2610,6 +2610,12 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["RebootToBootloader"]:
             return isinstance(msg, cls)
 
+    class DeviceEraseSector(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceEraseSector"]:
+            return isinstance(msg, cls)
+
     class DebugLinkDecision(protobuf.MessageType):
         yes_no: "bool | None"
         swipe: "DebugSwipeDirection | None"
@@ -4986,21 +4992,21 @@ if TYPE_CHECKING:
 
     class RippleSignTx(protobuf.MessageType):
         address_n: "list[int]"
-        fee: "int | None"
-        flags: "int | None"
-        sequence: "int | None"
+        fee: "int"
+        flags: "int"
+        sequence: "int"
         last_ledger_sequence: "int | None"
-        payment: "RipplePayment | None"
+        payment: "RipplePayment"
 
         def __init__(
             self,
             *,
+            fee: "int",
+            sequence: "int",
+            payment: "RipplePayment",
             address_n: "list[int] | None" = None,
-            fee: "int | None" = None,
             flags: "int | None" = None,
-            sequence: "int | None" = None,
             last_ledger_sequence: "int | None" = None,
-            payment: "RipplePayment | None" = None,
         ) -> None:
             pass
 
