@@ -29,6 +29,7 @@ CORE_PROTOBUF_SOURCES="\
     $PROTOB/messages-near.proto \
     $PROTOB/messages-conflux.proto \
     $PROTOB/messages-algorand.proto \
+    $PROTOB/messages-sui.proto \
 "
 
 PYTHON_PROTOBUF_SOURCES=$PROTOB/*.proto
