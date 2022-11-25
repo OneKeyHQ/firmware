@@ -638,6 +638,14 @@ apps.starcoin.sign_tx
 import apps.starcoin.sign_tx
 apps.starcoin.verify_message
 import apps.starcoin.verify_message
+apps.sui
+import apps.sui
+apps.sui.get_address
+import apps.sui.get_address
+apps.sui.helper
+import apps.sui.helper
+apps.sui.sign_tx
+import apps.sui.sign_tx
 apps.tron
 import apps.tron
 apps.tron.address
