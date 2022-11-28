@@ -384,7 +384,7 @@ enum MessageType {
     // bixin
     MessageType_BixinSeedOperate = 901 [deprecated = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
-    MessageType_BixinReboot = 903 [(wire_in) = true];
+    MessageType_BixinReboot = 903 [deprecated = true];
     MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
     MessageType_BixinBackupRequest = 905 [deprecated = true];
     MessageType_BixinBackupAck = 906 [deprecated = true];
