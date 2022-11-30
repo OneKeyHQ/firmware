@@ -876,6 +876,8 @@ void fsm_msgDeviceEraseSector(void) {
   ensure(flash_erase(FLASH_BIXIN_DATE_SECTOR), "erase failed");
   ensure(flash_unlock_write(), NULL);
   ensure(flash_write_word(FLASH_CODE_SECTOR_FIRST, 0x00, 0x00), NULL);
+#if !EMULATOR
   sys_backtoboot();
+#endif
   return;
 }

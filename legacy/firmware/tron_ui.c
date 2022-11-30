@@ -87,6 +87,6 @@ void layoutTronData(const uint8_t *data, uint32_t len, uint32_t total_len) {
   if (total_len == printed) summarystart = summary + 4;
 
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Transaction data:"), hexdata[0], hexdata[1], hexdata[2],
+                    _("Transaction"), _("data"), hexdata[0], hexdata[1],
                     summarystart, NULL);
 }

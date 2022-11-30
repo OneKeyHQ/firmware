@@ -157,7 +157,7 @@ int pack_contract(TronSignTx *msg, uint8_t *buf, int *index,
 
   int ret = *index, len = 0, cmessage_len = 0, cmessage_index = 0, capi_len = 0,
       capi_index = 0;
-  uint8_t cmessage[512] = {0};
+  uint8_t cmessage[1024] = {0};
   uint8_t capi[64] = {0};
   uint8_t addr_raw[MAX_ADDR_RAW_SIZE] = {0};
 
