@@ -374,8 +374,8 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
 
     ethereum_address_checksum(to, to_str, rskip60, chain_id);
     if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-      memcpy(_to1 + 5, to_str, 18);
-      memcpy(_to2, to_str + 18, 22);
+      memcpy(_to1 + 5, to_str, 15);
+      memcpy(_to2, to_str + 15, 25);
     } else {
       memcpy(_to1 + 5, to_str, 10);
       memcpy(_to2, to_str + 10, 15);
