@@ -222,6 +222,9 @@ CFLAGS += -DUSE_NEM=0
 MAKO_RENDER_FLAG = --bitcoin-only
 endif
 
+# disable certain optimizations and features when small footprint is required
+CFLAGS += -DUSE_PRECOMPUTED_CP=0
+
 %:: %.mako defs
 	@printf "  MAKO    $@\n"
 	$(Q)$(PYTHON) ../vendor/trezor-common/tools/cointool.py render $(MAKO_RENDER_FLAG) $@.mako

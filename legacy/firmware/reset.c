@@ -304,7 +304,7 @@ refresh_menu:
   memzero(desc, sizeof(desc));
   strcat(desc, _("Select your"));
   strcat(desc, " ");
-  strcat(desc, _("mnemonic"));
+  strcat(desc, _("word"));
   strcat(desc, " #");
   uint2str(rand_list[index] + 1, desc + strlen(desc));
   layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
@@ -474,8 +474,8 @@ write_mnemonic:
     }
     layoutDialogSwipeCenterAdapter(
         NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-        _("The recovery phrase are the"), _("only way to recover your"),
-        _("asset,Keep it safe"), NULL, NULL);
+        _("The recovery phrase are"), _("the only way to recover"),
+        _("your asset,Keep it safe"), NULL, NULL);
     key = protectWaitKey(0, 1);
     if (key != KEY_CONFIRM) {
       return false;

@@ -704,7 +704,7 @@ const char *languages[][2] = {
     // protect.c
     {"The new PIN must be different from your wipe code.", ""},
     //
-    {"The recovery phrase are the", " "},
+    {"The recovery phrase are", " "},
     // recovery.c
     {"The seed is", "种子"},
     // recovery.c recovery.c
@@ -728,6 +728,8 @@ const char *languages[][2] = {
     {"To", "接收方"},
     // ethereum.c
     {"Too much data", ""},
+    // tron_ui.c
+    {"Transaction", "交易"},
     // starcoin.c
     {"Transaction data cannot be decoded", "交易无法解析"},
     // ethereum.c
@@ -872,8 +874,6 @@ const char *languages[][2] = {
     {"and network fee of", ""},
     // fsm_msg_common.h
     {"answer to ping?", ""},
-    //
-    {"asset,Keep it safe", "凭证,请妥善保管"},
     // layout2.c
     {"auto-lock your device", ""},
     //
@@ -910,6 +910,8 @@ const char *languages[][2] = {
     {"contact our support.", ""},
     // reset.c
     {"create a new wallet?", "创建新的钱包?"},
+    // tron_ui.c
+    {"data", "数据"},
     // bl_check.c config.c
     {"detected.", ""},
     // fsm_msg_common.h fsm_msg_common.h
@@ -975,8 +977,6 @@ const char *languages[][2] = {
     {"of your recovery phrase", "助记词"},
     // recovery.c
     {"on your computer", "在电脑上"},
-    //
-    {"only way to recover your", "助记词是找回资产唯一"},
     // fsm_msg_coin.h
     {"own risk!", "风险"},
     // protect.c
@@ -1026,6 +1026,8 @@ const char *languages[][2] = {
     {"the computer's", "使用电脑的"},
     // recovery.c recovery.c
     {"the one in the device.", ""},
+    // reset.c
+    {"the only way to recover", "助记词是找回资产唯一"},
     //
     {"the passphrase!", "密语"},
     // layout2.c
@@ -1069,6 +1071,9 @@ const char *languages[][2] = {
     //
     {"words", "助记词"},
     //
-    {"you still have ", "还有"}};
+    {"you still have ", "还有"},
+    // reset.c
+    {"your asset,Keep it safe", "凭证,请妥善保管"},
+};
 
 int LANGUAGE_ITEMS = sizeof(languages) / sizeof(languages[0]);

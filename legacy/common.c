@@ -117,8 +117,10 @@ uint32_t drbg_random32(void) {
 }
 
 void reset_to_firmware(void) {
+#if !EMULATOR
   svc_system_privileged();
   vector_table_t *ivt = (vector_table_t *)(FLASH_APP_START);
   __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
   __asm__ volatile("b reset_handler");
+#endif
 }
