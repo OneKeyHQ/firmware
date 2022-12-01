@@ -9,10 +9,10 @@ TronSignTx.data                             max_size:200
 TronTransferContract.to_address             max_size:36
 
 TronTriggerSmartContract.contract_address   max_size:36
-TronTriggerSmartContract.data               max_size:1024
+TronTriggerSmartContract.data               max_size:2048
 
 TronSignedTx.signature                      max_size:65
-TronSignedTx.serialized_tx                  max_size:1024
+TronSignedTx.serialized_tx                  max_size:2048
 
 TronSignMessage.address_n	                max_count:8
 TronSignMessage.message		                max_size:1024
