@@ -96,6 +96,12 @@ async def handle_uart():
             return  # pylint: disable=lost-exception
 
 
+async def handle_ble_info():
+    while True:
+        fetch_ble_info()
+        await loop.sleep(500)
+
+
 async def process_push() -> None:
 
     uart = loop.wait(io.UART | io.POLL_READ)
@@ -291,6 +297,19 @@ def fetch_all():
     _request_ble_status()
     _request_battery_level()
     _request_charging_status()
+
+
+def fetch_ble_info():
+    if not utils.BLE_NAME:
+        BLE_CTRL.ctrl(0x83, 0x01)
+
+    global NRF_VERSION
+    if NRF_VERSION is None:
+        BLE_CTRL.ctrl(0x83, 0x02)
+
+    global BLE_ENABLED
+    if BLE_ENABLED is None:
+        BLE_CTRL.ctrl(0x81, 0x04)
 
 
 def ctrl_ble(enable: bool) -> None:

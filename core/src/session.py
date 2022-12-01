@@ -1,6 +1,6 @@
 from trezor import io, log, loop, utils, wire
 from trezor.lvglui import lvgl_tick
-from trezor.uart import handle_uart, handle_usb_state
+from trezor.uart import handle_ble_info, handle_uart, handle_usb_state
 
 import apps.base
 import usb
@@ -21,6 +21,8 @@ if __debug__:
 apps.base.set_homescreen()
 
 loop.schedule(handle_uart())
+
+loop.schedule(handle_ble_info())
 
 loop.schedule(handle_usb_state())
 
