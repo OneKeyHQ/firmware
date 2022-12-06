@@ -3637,6 +3637,7 @@ refresh_menu:
   y = 0;
   switch (index) {
     case 0:
+      y = bmp_btn_up.height + 3;
       oledDrawStringAdapter(0, y, _("SENDER:"), FONT_STANDARD);
       y += font->pixel + 5;
       for (int i = 0; i < lines; i++) {
