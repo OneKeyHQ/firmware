@@ -2,6 +2,7 @@ from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha256
 from trezor.enums import MessageType
+from trezor.lvglui.scrs import lv
 from trezor.messages import (
     BinanceCancelMsg,
     BinanceOrderMsg,
@@ -14,7 +15,7 @@ from trezor.messages import (
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from . import helpers, layout
+from . import ICON, PRIMARY_COLOR, helpers, layout
 
 
 @auto_keychain(__name__)
@@ -41,7 +42,7 @@ async def sign_tx(
         raise wire.DataError("Source is invalid.")
 
     msg_json = helpers.produce_json_for_signing(envelope, msg)
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     if BinanceTransferMsg.is_type_of(msg):
         await layout.require_confirm_transfer(ctx, msg)
     elif BinanceOrderMsg.is_type_of(msg):

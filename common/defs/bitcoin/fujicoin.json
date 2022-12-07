@@ -43,5 +43,6 @@
   "consensus_branch_id": null,
   "extra_data": false,
   "timestamp": false,
-  "confidential_assets": null
+  "confidential_assets": null,
+  "primary_color": "0x44AEEA"
 }

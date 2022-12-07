@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING
 
 from trezor.crypto import hashlib
+from trezor.lvglui.scrs import lv
 from trezor.messages import TezosAddress, TezosGetAddress
 from trezor.ui.layouts import show_address
 
 from apps.common import paths, seed
 from apps.common.keychain import with_slip44_keychain
 
-from . import CURVE, PATTERNS, SLIP44_ID, helpers
+from . import CURVE, ICON, PATTERNS, PRIMARY_COLOR, SLIP44_ID, helpers
 
 if TYPE_CHECKING:
     from apps.common.keychain import Keychain
@@ -27,9 +28,14 @@ async def get_address(
     address = helpers.base58_encode_check(
         pkh, prefix=helpers.TEZOS_ED25519_ADDRESS_PREFIX
     )
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
-        await show_address(ctx, address=address, address_n=path, network="XTZ")
+        await show_address(
+            ctx,
+            address=address,
+            address_n=path,
+            network="XTZ",
+        )
 
     return TezosAddress(address=address)

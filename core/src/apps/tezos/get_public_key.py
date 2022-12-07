@@ -1,12 +1,13 @@
 from typing import TYPE_CHECKING
 
+from trezor.lvglui.scrs import lv
 from trezor.messages import TezosGetPublicKey, TezosPublicKey
 from trezor.ui.layouts import show_pubkey
 
 from apps.common import paths, seed
 from apps.common.keychain import with_slip44_keychain
 
-from . import CURVE, PATTERNS, SLIP44_ID, helpers
+from . import CURVE, ICON, PATTERNS, PRIMARY_COLOR, SLIP44_ID, helpers
 
 if TYPE_CHECKING:
     from apps.common.keychain import Keychain
@@ -25,6 +26,12 @@ async def get_public_key(
 
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
-        await show_pubkey(ctx, pk_prefixed, path=path, network="XTZ")
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
+        await show_pubkey(
+            ctx,
+            pk_prefixed,
+            path=path,
+            network="XTZ",
+        )
 
     return TezosPublicKey(public_key=pk_prefixed)

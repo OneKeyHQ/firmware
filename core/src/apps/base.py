@@ -274,7 +274,9 @@ def lock_device() -> None:
 def lock_device_if_unlocked() -> None:
     if config.is_unlocked():
         lock_device()
-    utils.turn_off_lcd()
+    from trezor import loop
+
+    loop.schedule(utils.turn_off_lcd())
 
 
 def screen_off_if_possible() -> None:
@@ -282,7 +284,8 @@ def screen_off_if_possible() -> None:
         return
 
     if ui.display.backlight():
-        ui.display.backlight(ui.style.BACKLIGHT_LOW)
+        if config.is_unlocked():
+            ui.display.backlight(ui.style.BACKLIGHT_LOW)
         workflow.idle_timer.set(3 * 1000, lock_device_if_unlocked)
 
 

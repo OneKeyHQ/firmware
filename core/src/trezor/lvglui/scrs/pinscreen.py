@@ -1,21 +1,24 @@
 from trezor import utils
 
 from ..i18n import gettext as _, keys as i18n_keys
+from . import font_PJSBOLD30, font_PJSREG24
 from .common import FullSizeWindow, lv, lv_colors  # noqa: F401,F403
 from .components.button import NormalButton
 from .components.container import ContainerFlexCol
 from .components.keyboard import NumberKeyboard
 from .components.listitem import ListItemWithLeadingCheckbox
+from .widgets.style import StyleWrapper
 
 
 class PinTip(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            _(i18n_keys.TITLE__SET_A_PIN),
-            _(i18n_keys.SUBTITLE__SETUP_SET_A_PIN),
+            _(i18n_keys.TITLE__SETUP_CREATE_ENABLE_PIN_PROTECTION),
+            _(i18n_keys.SUBTITLE__SETUP_CREATE_ENABLE_PIN_PROTECTION),
+            anim_dir=0,
         )
         self.container = ContainerFlexCol(
-            self, self.subtitle, pos=(0, 10), padding_row=10
+            self.content_area, self.subtitle, pos=(0, 40), padding_row=10
         )
         self.container.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.item1 = ListItemWithLeadingCheckbox(
@@ -55,7 +58,9 @@ class PinTip(FullSizeWindow):
                     self.item2.enable_bg_color(False)
                     self.cb_cnt -= 1
             if self.cb_cnt == 2:
-                self.btn.enable(bg_color=lv_colors.ONEKEY_GREEN)
+                self.btn.enable(
+                    bg_color=lv_colors.ONEKEY_GREEN, text_color=lv_colors.BLACK
+                )
             elif self.cb_cnt < 2:
                 self.btn.disable()
 
@@ -67,9 +72,23 @@ class InputPin(FullSizeWindow):
             subtitle=kwargs.get("subtitle", ""),
             anim_dir=0,
         )
-        self.subtitle.set_style_text_color(
-            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.title.add_style(
+            StyleWrapper()
+            .text_font(font_PJSBOLD30)
+            .text_align_center()
+            .text_letter_space(0),
+            0,
         )
+        self.title.align(lv.ALIGN.TOP_MID, 0, 24)
+        self.subtitle.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .text_color(lv_colors.ONEKEY_RED_1)
+            .text_align_center(),
+            0,
+        )
+        self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.clear_flag(lv.obj.FLAG.SCROLLABLE)
         self.keyboard = NumberKeyboard(self)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.READY, None)
         self.keyboard.add_event_cb(self.on_event, lv.EVENT.CANCEL, None)

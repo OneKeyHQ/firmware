@@ -63,13 +63,17 @@ async def _continue_recovery_process(ctx: wire.GenericContext) -> Success:
     while secret is None:
         if is_first_step:
             # If we are starting recovery, ask for word count first...
-            word_count = await _request_word_count(ctx, dry_run)
+            if not word_count:
+                word_count = await _request_word_count(ctx, dry_run)
             # ...and only then show the starting screen with word count.
             await _request_share_first_screen(ctx, word_count)
         assert word_count is not None
 
         # ask for mnemonic words one by one
-        words = await layout.request_mnemonic(ctx, word_count, backup_type)
+        try:
+            words = await layout.request_mnemonic(ctx, word_count, backup_type)
+        except wire.ActionCancelled:
+            continue
 
         # if they were invalid or some checks failed we continue and request them again
         if not words:
@@ -152,7 +156,7 @@ async def _finish_recovery(
         "success_recovery",
         _(i18n_keys.SUBTITLE__DEVICE_RECOVER_WALLET_IS_READY),
         header=_(i18n_keys.TITLE__WALLET_IS_READY),
-        button=_(i18n_keys.BUTTON__DONE),
+        button=_(i18n_keys.BUTTON__CONTINUE),
     )
     if isinstance(ctx, wire.DummyContext):
         utils.make_show_app_guide()
@@ -163,9 +167,9 @@ async def _finish_recovery(
 
 
 async def _request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
-    await layout.homescreen_dialog(
-        ctx, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS)
-    )
+    # await layout.homescreen_dialog(
+    #     ctx, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.TITLE__SELECT_NUMBER_OF_WORDS)
+    # )
 
     # ask for the number of words
     return await layout.request_word_count(ctx, dry_run)
@@ -205,7 +209,7 @@ async def _request_share_first_screen(
                 ctx, "Enter share", "Enter any share", f"({word_count} words)"
             )
     else:  # BIP-39
-        btn_text = _(i18n_keys.BUTTON__ENTER)
+        btn_text = _(i18n_keys.BUTTON__CONTINUE)
         title = _(i18n_keys.TITLE__ENTER_RECOVERY_PHRASE)
         await layout.homescreen_dialog(ctx, btn_text, title, f"({word_count} words)")
 

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from trezor import ui, utils, wire
+from trezor import loop, ui, utils, wire
 from trezor.crypto import random
 from trezor.enums import BackupType, ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
@@ -31,7 +31,7 @@ async def show_share_words(
 ) -> None:
 
     if share_index is None:
-        header_title = _(i18n_keys.TITLE__MANUAL_BACKUP)
+        header_title = _(i18n_keys.TITLE__RECOVERY_PHRASE)
     elif group_index is None:
         header_title = f"Recovery share #{share_index + 1}"
     else:
@@ -74,20 +74,17 @@ async def confirm_word(
     random.shuffle(choices)
 
     # let the user pick a word
-    title = _(i18n_keys.TITLE__CHECK_WORD_STR).format(offset + 1)
-    subtitle = _(i18n_keys.SUBTITLE__DEVICE_BACKUP_CHECK_WORD)
+    title = _(i18n_keys.TITLE__WORD_STR).format(offset + 1)
     options = f"{choices[0]}\n{choices[1]}\n{choices[2]}"
-    selector = CheckWord(title, subtitle, options=options)
-    # selector.selector.set_style_text_font(font_MONO28, lv.PART.MAIN | lv.STATE.DEFAULT)
-    # selector.selector.set_flag()
+    selector = CheckWord(title, options=options)
     selected_word: str = await ctx.wait(selector.request())
     # confirm it is the correct one
     is_correct = selected_word == share_words[offset]
+    await loop.sleep(240)
     if is_correct:
         selector.tip_correct()
     else:
         selector.tip_incorrect()
-    from trezor import loop
 
     await loop.sleep(240)
 

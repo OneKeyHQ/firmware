@@ -85,7 +85,7 @@ def _schemas_from_chain_id(msg: EthereumSignTxAny) -> Iterable[paths.PathSchema]
         # allow cross-signing with Ethereum unless it's testnet
         slip44_id = (info.slip44, 60)
     else:
-        slip44_id = (info.slip44,)
+        slip44_id = (60, 1)  # (info.slip44,)
 
     schemas = [
         paths.PathSchema.parse(pattern, slip44_id) for pattern in PATTERNS_ADDRESS

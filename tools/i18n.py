@@ -6,7 +6,7 @@ LOKALISE_PROJECT_ID = "393278776072b9891cb763.27916840"
 BASE_PATH = os.path.join(
     os.path.dirname(__file__), "..", "core/src/trezor/lvglui/i18n/"
 )
-SUPPORTED_LANGS = ["en", "zh_CN", "fr", "de", "it", "zh_HK", "ja", "ko"]
+SUPPORTED_LANGS = ("en", "zh_CN", "zh_HK", "ja", "ko", "fr", "de", "ru", "es", "it")
 CHARS_NORMAL = set()
 CHARS_TITLE = set()
 CHARS_SUBTITLE = set()
@@ -75,6 +75,7 @@ def write_langfile(lang_map):
         f.write("# according to ISO_639-1 and ISO-3166 country codes\n")
         f.write("\n".join(content) + "\n")
         f.write("\nlangs_keys = [x[0] for x in langs]\n")
+        f.write("\nlangs_values = \"\\n\".join([v[1] for v in langs])\n")
 
 
 def main():

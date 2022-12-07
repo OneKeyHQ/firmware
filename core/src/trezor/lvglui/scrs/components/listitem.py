@@ -1,36 +1,57 @@
-from .. import font_PJSBOLD24, font_PJSMID20, font_PJSREG24, lv, lv_colors
+from .. import font_MONO28, font_PJSBOLD30, font_PJSMID30, font_PJSREG30, lv, lv_colors
+from ..widgets.style import StyleWrapper
 
 
 class ListItemWithLeadingCheckbox(lv.obj):
     def __init__(self, parent, text):
         super().__init__(parent)
         self.remove_style_all()
-        self.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.set_style_bg_color(
-            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.set_size(464, lv.SIZE.CONTENT)
+        self.add_style(
+            StyleWrapper()
+            .bg_color(lv_colors.ONEKEY_BLACK_4)
+            .bg_opa(lv.OPA.COVER)
+            .min_height(94)
+            .radius(0)
+            .border_width(1)
+            .border_color(lv_colors.ONEKEY_GRAY_2)
+            .pad_all(8)
+            .text_color(lv_colors.WHITE_1)
+            .text_font(font_PJSMID30)
+            .text_letter_space(-1),
+            0,
         )
-        self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_all(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_font(font_PJSMID20, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.checkbox = lv.checkbox(self)
-        self.checkbox.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.checkbox.set_size(36, 36)
         self.checkbox.set_align(lv.ALIGN.TOP_LEFT)
         self.checkbox.set_text("")
-        self.checkbox.set_style_radius(8, lv.PART.INDICATOR | lv.STATE.DEFAULT)
-        self.checkbox.set_style_border_color(
-            lv_colors.ONEKEY_GRAY, lv.PART.INDICATOR | lv.STATE.DEFAULT
+        self.checkbox.add_style(
+            StyleWrapper()
+            .pad_all(0)
+            .text_align(lv.TEXT_ALIGN.LEFT)
+            .text_color(lv_colors.WHITE_1)
+            .text_line_space(4),
+            0,
         )
-        self.checkbox.set_style_border_opa(255, lv.PART.INDICATOR | lv.STATE.DEFAULT)
-        self.checkbox.set_style_bg_color(
-            lv_colors.ONEKEY_GREEN, lv.PART.INDICATOR | lv.STATE.CHECKED
+        self.checkbox.add_style(
+            StyleWrapper()
+            .radius(0)
+            .pad_all(0)
+            .bg_color(lv_colors.ONEKEY_BLACK_4)
+            .border_color(lv_colors.ONEKEY_GRAY)
+            .border_width(2)
+            .border_opa(lv.OPA.COVER),
+            lv.PART.INDICATOR | lv.STATE.DEFAULT,
         )
-        self.checkbox.set_style_bg_color(
-            lv_colors.ONEKEY_BLACK_1, lv.PART.INDICATOR | lv.STATE.DEFAULT
+        self.checkbox.add_style(
+            StyleWrapper()
+            .bg_color(lv_colors.ONEKEY_GREEN)
+            .text_color(lv_colors.BLACK)
+            .text_font(font_MONO28)
+            .text_align(lv.TEXT_ALIGN.CENTER)
+            .border_width(0)
+            .bg_opa(),
+            lv.PART.INDICATOR | lv.STATE.CHECKED,
         )
-        self.checkbox.set_style_bg_opa(255, lv.PART.INDICATOR | lv.STATE.CHECKED)
         self.checkbox.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
         self.label = lv.label(self)
         self.label.remove_style_all()
@@ -38,11 +59,6 @@ class ListItemWithLeadingCheckbox(lv.obj):
         self.label.set_size(396, lv.SIZE.CONTENT)
         self.label.align_to(self.checkbox, lv.ALIGN.OUT_RIGHT_TOP, 0, 0)
         self.label.set_text(text)
-        self.label.set_style_text_line_space(4, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_color(lv_colors.WHITE_1, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.label.set_style_text_align(
-            lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE | lv.obj.FLAG.CLICKABLE)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
 
@@ -65,10 +81,18 @@ class ListItemWithLeadingCheckbox(lv.obj):
 
     def enable_bg_color(self, enable: bool = True):
         if enable:
-            self.set_style_text_color(lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.add_style(
+                StyleWrapper()
+                .text_color(lv_colors.WHITE)
+                .bg_color(lv_colors.ONEKEY_BLACK_3),
+                0,
+            )
         else:
-            self.set_style_text_color(
-                lv_colors.WHITE_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            self.add_style(
+                StyleWrapper()
+                .text_color(lv_colors.WHITE_1)
+                .bg_color(lv_colors.ONEKEY_BLACK_4),
+                0,
             )
 
 
@@ -76,35 +100,44 @@ class DisplayItem(lv.obj):
     def __init__(self, parent, title, content):
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_hor(24, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_ver(10, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_text_align(lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.add_style(
+            StyleWrapper()
+            .bg_color(lv_colors.ONEKEY_GRAY_3)
+            .bg_opa(lv.OPA.COVER)
+            .min_height(88)
+            .border_width(0)
+            .pad_all(8)
+            .radius(0)
+            .text_align_left(),
+            0,
+        )
         self.label_top = lv.label(self)
         self.label_top.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.label_top.set_style_text_font(
-            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.label_top.set_long_mode(lv.label.LONG.WRAP)
-        self.label_top.set_style_text_color(
-            lv_colors.WHITE_1, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.label_top.set_text(title)
         self.label_top.set_align(lv.ALIGN.TOP_LEFT)
+        self.label_top.add_style(
+            StyleWrapper()
+            .text_font(font_PJSBOLD30)
+            .text_color(lv_colors.WHITE)
+            .text_letter_space(-1),
+            0,
+        )
 
         self.label = lv.label(self)
         self.label.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.label.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_long_mode(lv.label.LONG.DOT)
-        self.label.set_style_max_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.label.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.label.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.label.set_text(content)
-        self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 6)
+        self.label.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG30)
+            .text_color(lv_colors.ONEKEY_WHITE_4)
+            .text_line_space(6)
+            .text_letter_space(-1)
+            .max_height(400),
+            0,
+        )
+        self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 4)
 
 
 class ImgGridItem(lv.img):
@@ -126,16 +159,6 @@ class ImgGridItem(lv.img):
         self.is_internal = is_internal
 
         self.set_src(img_path)
-        # if img_path == "A:/res/wallpaper-4.png":
-        #     self.set_style_border_width(1, lv.PART.MAIN | lv.STATE.DEFAULT)
-        #     self.set_style_border_color(
-        #         lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
-        #     )
-        # self.set_size_mode(lv.img.SIZE_MODE.REAL)
-        # self.set_style_radius(4, lv.PART.MAIN | lv.STATE.DEFAULT)
-        # self.set_style_clip_corner(True, lv.PART.MAIN | lv.STATE.DEFAULT)
-        # self.set_antialias(True)
-        # self.set_zoom(76)
         self.zoom_path = img_path
         self.wp_path = img_path.replace("zoom-", "")
         self.check = lv.img(self)

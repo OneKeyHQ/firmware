@@ -38,7 +38,16 @@ async def get_public_key(
     )
 
     if msg.show_display:
+        from .helpers import get_color_and_icon
+
         path = paths.address_n_to_str(msg.address_n)
-        await show_pubkey(ctx, hexlify(pubkey).decode(), path=path)
+        ctx.primary_color, ctx.icon_path = get_color_and_icon(
+            msg.address_n[1] & 0x7FFF_FFFF
+        )
+        await show_pubkey(
+            ctx,
+            hexlify(pubkey).decode(),
+            path=path,
+        )
 
     return EthereumPublicKey(node=node_type, xpub=node_xpub)

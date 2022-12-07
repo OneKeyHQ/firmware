@@ -2,8 +2,9 @@ from storage import device
 from trezor import ui, utils
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
-from . import font_PJSBOLD24
+from . import font_PJSREG24, font_PJSREG30
 from .common import Screen, lv, lv_colors
+from .widgets.style import StyleWrapper
 
 
 class LockScreen(Screen):
@@ -15,49 +16,31 @@ class LockScreen(Screen):
                 title=device_name, subtitle=ble_name, icon_path="A:/res/lock.png"
             )
         else:
-            if dev_state:
-                self.dev_state_text.set_text(dev_state)
-            elif hasattr(self, "dev_state") and dev_state is None:
-                self.dev_state.delete()
-            # if not self.is_visible():
-            #     lv.scr_load(self)
             if ble_name:
                 self.subtitle.set_text(ble_name)
-            self.set_style_bg_img_src(lockscreen, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.set_style_bg_img_src(lockscreen, 0)
             return
         self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
-        self.icon.align(lv.ALIGN.TOP_MID, 0, 92)
-        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
-        self.subtitle.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        if dev_state:
-            self.dev_state = lv.btn(self)
-            self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
-            self.dev_state.set_style_bg_color(
-                lv.color_hex(0xDCA312), lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state.set_style_radius(8, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
-            self.dev_state_text = lv.label(self.dev_state)
-            self.dev_state_text.set_text(dev_state)
-            self.dev_state_text.set_style_text_color(
-                lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state_text.set_style_text_font(
-                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.dev_state_text.center()
-        self.set_style_bg_img_src(lockscreen, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.icon.align(lv.ALIGN.TOP_MID, 0, 52)
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, -4, 24)
+        self.subtitle.set_style_text_color(lv_colors.WHITE, 0)
+        self.subtitle.set_style_text_font(font_PJSREG30, 0)
 
+        self.add_style(
+            StyleWrapper().bg_img_src(lockscreen).bg_img_opa(int(lv.OPA.COVER * 0.72)),
+            0,
+        )
         self.tap_tip = lv.label(self)
         self.tap_tip.set_long_mode(lv.label.LONG.WRAP)
         self.tap_tip.set_text(_(i18n_keys.LOCKED_TEXT__TAP_TO_UNLOCK))
-        self.tap_tip.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)  # 1
-        self.tap_tip.align(lv.ALIGN.BOTTOM_MID, 0, -100)
-        self.tap_tip.set_style_text_font(
-            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.tap_tip.align(lv.ALIGN.BOTTOM_MID, 0, -16)
+        self.tap_tip.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .text_letter_space(-1)
+            .max_width(464)
+            .text_align_center(),
+            0,
         )
 
     def eventhandler(self, event_obj: lv.event_t):

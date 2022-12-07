@@ -4,13 +4,15 @@ from ubinascii import hexlify
 from trezor.crypto.curve import ed25519
 from trezor.crypto.hashlib import sha256
 from trezor.enums import StellarMemoType
+from trezor.lvglui.scrs import lv
 from trezor.messages import StellarSignedTx, StellarSignTx, StellarTxOpRequest
+from trezor.ui.layouts import confirm_final
 from trezor.wire import DataError, ProcessError
 
 from apps.common import paths, seed
 from apps.common.keychain import auto_keychain
 
-from . import consts, helpers, layout, writers
+from . import ICON, PRIMARY_COLOR, consts, helpers, layout, writers
 from .operations import process_operation
 
 if TYPE_CHECKING:
@@ -33,6 +35,7 @@ async def sign_tx(
         raise ProcessError("Stellar: At least one operation is required")
 
     w = bytearray()
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await _init(ctx, w, pubkey, msg)
     await _timebounds(ctx, w, msg.timebounds_start, msg.timebounds_end)
     await _memo(ctx, w, msg)
@@ -42,7 +45,7 @@ async def sign_tx(
     # sign
     digest = sha256(w).digest()
     signature = ed25519.sign(node.private_key(), digest)
-
+    await confirm_final(ctx)
     # Add the public key for verification that the right account was used for signing
     return StellarSignedTx(public_key=pubkey, signature=signature)
 

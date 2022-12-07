@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor import utils, wire
 from trezor.enums import RequestType
+from trezor.lvglui.scrs import lv
 from trezor.messages import TxRequest
 
 from ..common import BITCOIN_NAMES
@@ -81,12 +82,19 @@ async def sign_tx(
     signer = signer_class(msg, keychain, coin, approver).signer()
 
     res: TxAckType | bool | None = None
+    ctx.primary_color, ctx.icon_path = (
+        lv.color_hex(coin.primary_color),
+        f"A:/res/{coin.icon}",
+    )
     while True:
         req = signer.send(res)
         if isinstance(req, tuple):
             request_class, req = req
             assert TxRequest.is_type_of(req)
             if req.request_type == RequestType.TXFINISHED:
+                from trezor.ui.layouts import confirm_final
+
+                await confirm_final(ctx)
                 return req
             res = await ctx.call(req, request_class)
         elif isinstance(req, helpers.UiConfirm):

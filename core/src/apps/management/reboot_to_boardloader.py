@@ -18,8 +18,9 @@ async def reboot_to_boardloader(
     await confirm_action(
         ctx,
         "reboot",
-        _(i18n_keys.TITLE__SWITCH_TO_BOARDLOADER),
+        _(i18n_keys.TITLE__ENTERING_BOARDLOADER),
         description=_(i18n_keys.SUBTITLE__SWITCH_TO_BOARDLOADER_RECONFIRM),
+        icon=None,
     )
     await ctx.write(Success(message="Rebooting"))
     # make sure the outgoing USB buffer is flushed

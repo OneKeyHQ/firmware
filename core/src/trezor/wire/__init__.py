@@ -149,6 +149,9 @@ class Context:
         self.iface = iface
         self.sid = sid
         self.buffer = buffer
+        self.primary_color = None
+        self.icon_path = ""
+        self.name = ""
 
     async def _call(
         self,

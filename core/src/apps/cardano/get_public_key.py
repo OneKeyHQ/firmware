@@ -2,11 +2,12 @@ from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor import log, wire
+from trezor.lvglui.scrs import lv
 from trezor.messages import CardanoPublicKey, HDNodeType
 
 from apps.common import paths
 
-from . import seed
+from . import ICON, PRIMARY_COLOR, seed
 from .helpers.paths import SCHEMA_MINT, SCHEMA_PUBKEY
 from .helpers.utils import derive_public_key
 
@@ -36,9 +37,13 @@ async def get_public_key(
     if msg.show_display:
         from trezor.ui.layouts import show_pubkey
 
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         path = paths.address_n_to_str(msg.address_n)
         await show_pubkey(
-            ctx, hexlify(key.node.public_key).decode(), path=path, network="ADA"
+            ctx,
+            hexlify(key.node.public_key).decode(),
+            path=path,
+            network="ADA",
         )
     return key
 

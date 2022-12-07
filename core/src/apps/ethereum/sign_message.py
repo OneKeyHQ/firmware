@@ -10,7 +10,7 @@ from apps.common import paths
 from apps.common.helpers import validate_message
 from apps.common.signverify import decode_message
 
-from .helpers import address_from_bytes
+from .helpers import address_from_bytes, get_color_and_icon
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
 if TYPE_CHECKING:
@@ -38,6 +38,10 @@ async def sign_message(
 
     node = keychain.derive(msg.address_n)
     address = address_from_bytes(node.ethereum_pubkeyhash())
+
+    ctx.primary_color, ctx.icon_path = get_color_and_icon(
+        msg.address_n[1] & 0x7FFF_FFFF
+    )
     await confirm_signverify(
         ctx, "ETH", decode_message(msg.message), address, verify=False
     )

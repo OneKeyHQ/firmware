@@ -81,27 +81,40 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
             anim_dir=2,
         )
 
-    if not msg.remove and has_pin:  # changing pin
+    if not msg.remove:  # changing pin
+        from trezor.lvglui.lv_colors import lv_colors
+
         return confirm_action(
             ctx,
             "set_pin",
             _(i18n_keys.TITLE__CHANGE_PIN),
-            description=_(i18n_keys.SUBTITLE__SET_PIN_CHANGE_PIN),
+            description=_(i18n_keys.SUBTITLE__SETUP_CREATE_ENABLE_PIN_PROTECTION),
             action="",
             reverse=True,
             anim_dir=2,
+            primary_color=lv_colors.ONEKEY_YELLOW,
         )
+    # if not msg.remove and has_pin:  # changing pin
+    #     return confirm_action(
+    #         ctx,
+    #         "set_pin",
+    #         _(i18n_keys.TITLE__CHANGE_PIN),
+    #         description=_(i18n_keys.SUBTITLE__SET_PIN_CHANGE_PIN),
+    #         action="",
+    #         reverse=True,
+    #         anim_dir=2,
+    #     )
 
-    if not msg.remove and not has_pin:  # setting new pin
-        return confirm_action(
-            ctx,
-            "set_pin",
-            _(i18n_keys.TITLE__ENABLED_PIN),
-            description=_(i18n_keys.SUBTITLE__SET_PIN_ENABLE_PIN),
-            action="",
-            reverse=True,
-            anim_dir=2,
-        )
+    # if not msg.remove and not has_pin:  # setting new pin
+    #     return confirm_action(
+    #         ctx,
+    #         "set_pin",
+    #         _(i18n_keys.TITLE__ENABLED_PIN),
+    #         description=_(i18n_keys.SUBTITLE__SET_PIN_ENABLE_PIN),
+    #         action="",
+    #         reverse=True,
+    #         anim_dir=2,
+    #     )
 
     # removing non-existing PIN
     raise wire.ProcessError("PIN protection already disabled")

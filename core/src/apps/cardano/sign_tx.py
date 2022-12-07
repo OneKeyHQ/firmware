@@ -10,6 +10,7 @@ from trezor.enums import (
     CardanoTxSigningMode,
     CardanoTxWitnessType,
 )
+from trezor.lvglui.scrs import lv
 from trezor.messages import (
     CardanoAddressParametersType,
     CardanoAssetGroup,
@@ -32,10 +33,11 @@ from trezor.messages import (
     CardanoTxWitnessRequest,
     CardanoTxWitnessResponse,
 )
+from trezor.ui.layouts import confirm_final
 
 from apps.common import cbor, safety_checks
 
-from . import seed
+from . import ICON, PRIMARY_COLOR, seed
 from .address import (
     ADDRESS_TYPES_PAYMENT_SCRIPT,
     derive_address_bytes,
@@ -189,6 +191,7 @@ async def sign_tx(
         tx_body_map_item_count, INVALID_TX_SIGNING_REQUEST
     )
     tx_dict.start(hash_fn)
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     with tx_dict:
         await _process_transaction(ctx, msg, keychain, tx_dict, account_path_checker)
 
@@ -209,6 +212,7 @@ async def sign_tx(
         await ctx.call(response_after_witness_requests, CardanoTxHostAck)
 
         await ctx.call(CardanoTxBodyHash(tx_hash=tx_hash), CardanoTxHostAck)
+        await confirm_final(ctx)
         return CardanoSignTxFinished()
 
     except ValueError as e:

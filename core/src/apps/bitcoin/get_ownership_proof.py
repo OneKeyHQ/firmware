@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor import ui, wire
 from trezor.enums import InputScriptType
+from trezor.lvglui.scrs import lv
 from trezor.messages import GetOwnershipProof, OwnershipProof
 from trezor.ui.layouts import confirm_action, confirm_blob
 
@@ -67,6 +68,10 @@ async def get_ownership_proof(
     # In order to set the "user confirmation" bit in the proof, the user must actually confirm.
     if msg.user_confirmation and not authorization:
         # TODO: i18n missing
+        ctx.primary_color, ctx.icon_path = (
+            lv.color_hex(coin.primary_color),
+            f"A:/res/{coin.icon}",
+        )
         await confirm_action(
             ctx,
             "confirm_ownership_proof",

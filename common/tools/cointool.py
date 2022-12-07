@@ -382,7 +382,7 @@ def check_icons(coins):
             icon = Image.open(icon_file)
         except Exception:
             print(key, ": failed to open icon file", icon_file)
-            check_passed = False
+            # check_passed = False
             continue
 
         if icon.size != (96, 96) or icon.mode != "RGBA":
@@ -657,7 +657,7 @@ def check(backend, icons, show_duplicates):
 
     if icons:
         print("Checking icon files...")
-        if not check_icons(defs.bitcoin):
+        if not check_icons(defs.bitcoin) or not check_icons(defs.eth):
             all_checks_passed = False
 
     if backend:

@@ -381,8 +381,10 @@
     LV_FONT_DECLARE(lv_font_pljs_bold_36) \
     LV_FONT_DECLARE(lv_font_pljs_regular_24) \
     LV_FONT_DECLARE(lv_font_scs_bold_26) \
+    LV_FONT_DECLARE(lv_font_scs_bold_30) \
     LV_FONT_DECLARE(lv_font_scs_bold_38) \
     LV_FONT_DECLARE(lv_font_scs_reg_26) \
+    LV_FONT_DECLARE(lv_font_scs_reg_30) \
     LV_FONT_DECLARE(lv_font_scs_bold_72) \
     LV_FONT_DECLARE(lv_font_mix_bold_24) \
     LV_FONT_DECLARE(lv_font_mix_title_bold_36) \

@@ -45,5 +45,6 @@
   },
   "extra_data": true,
   "timestamp": false,
-  "confidential_assets": null
+  "confidential_assets": null,
+  "primary_color": "0xECB244"
 }

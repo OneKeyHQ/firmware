@@ -2,12 +2,16 @@
 langs = [
     ("en", "English"),
     ("zh_cn", "简体中文"),
-    ("fr", "Français"),
-    ("de", "Deutsch"),
-    ("it", "Italiano"),
     ("zh_hk", "繁體中文"),
     ("ja", "日本語"),
     ("ko", "한국어"),
+    ("fr", "Français"),
+    ("de", "Deutsch"),
+    ("ru", "Russian"),
+    ("es", "Spanish"),
+    ("it", "Italiano"),
 ]
 
 langs_keys = [x[0] for x in langs]
+
+langs_values = "\n".join([v[1] for v in langs])

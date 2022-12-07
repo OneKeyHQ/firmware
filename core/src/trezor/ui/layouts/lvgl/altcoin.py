@@ -27,6 +27,7 @@ async def confirm_total_ethereum(
         fee_max,
         gas_price=gas_price,
         total_amount=total_amount,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
@@ -56,6 +57,7 @@ async def confirm_total_ethereum_eip1559(
         max_fee_per_gas=max_fee_per_gas,
         max_priority_fee_per_gas=max_priority_fee_per_gas,
         total_amount=total_amount,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
@@ -77,7 +79,7 @@ async def confirm_transfer_binance(
 ) -> None:
     from trezor.lvglui.scrs.template import ConfirmTransferBinance
 
-    screen = ConfirmTransferBinance(inputs_outputs)
+    screen = ConfirmTransferBinance(inputs_outputs, ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_transfer", ButtonRequestType.ConfirmOutput)
     )
@@ -91,7 +93,11 @@ async def confirm_decred_sstx_submission(
     from trezor.lvglui.scrs.template import ConfirmDecredSstxSubmission
 
     screen = ConfirmDecredSstxSubmission(
-        "Purchase ticket", "voting rights", amount, address
+        "Purchase ticket",
+        "voting rights",
+        amount,
+        address,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(
@@ -120,7 +126,8 @@ async def confirm_total_tron(
         to_address,
         amount,
         fee_max,
-        total_amount,
+        primary_color=ctx.primary_color,
+        total_amount=total_amount,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)

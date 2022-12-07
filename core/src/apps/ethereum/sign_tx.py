@@ -5,12 +5,13 @@ from trezor.crypto import rlp
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
 from trezor.messages import EthereumSignTx, EthereumTxAck, EthereumTxRequest
+from trezor.ui.layouts import confirm_final
 from trezor.utils import HashWriter
 
 from apps.common import paths
 
 from . import networks, tokens
-from .helpers import address_from_bytes, bytes_from_address
+from .helpers import address_from_bytes, bytes_from_address, get_color_and_icon
 from .keychain import with_keychain_from_chain_id
 from .layout import (
     require_confirm_data,
@@ -42,16 +43,18 @@ async def sign_tx(
     token, address_bytes, recipient, value = await handle_erc20(ctx, msg)
 
     data_total = msg.data_length
-
+    if len(msg.address_n) > 1:  # path has slip44 network identifier
+        network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+    else:
+        network = None
+    ctx.primary_color, ctx.icon_path = get_color_and_icon(
+        msg.address_n[1] & 0x7FFF_FFFF
+    )
     await require_confirm_tx(ctx, recipient, value, msg.chain_id, token)
     if token is None and msg.data_length > 0:
         await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
 
     node = keychain.derive(msg.address_n)
-    if len(msg.address_n) > 1:  # path has slip44 network identifier
-        network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
-    else:
-        network = None
     recipient_str = address_from_bytes(recipient, network)
     from_str = address_from_bytes(node.ethereum_pubkeyhash(), network)
     await require_confirm_fee(
@@ -99,7 +102,7 @@ async def sign_tx(
 
     digest = sha.get_digest()
     result = sign_digest(msg, keychain, digest)
-
+    await confirm_final(ctx)
     return result
 
 

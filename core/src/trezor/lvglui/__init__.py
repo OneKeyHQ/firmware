@@ -110,12 +110,12 @@ class StatusBar(lv.obj):
         super().__init__(lv.layer_top())
         self.set_size(lv.pct(80), lv.SIZE.CONTENT)
         self.align(lv.ALIGN.TOP_RIGHT, 0, 0)
-        self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_column(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_right(8, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_pad_top(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_border_width(0, 0)
+        self.set_style_bg_opa(0, 0)
+        self.set_style_pad_all(0, 0)
+        self.set_style_pad_column(0, 0)
+        self.set_style_pad_right(8, 0)
+        self.set_style_pad_top(6, 0)
         self.set_flex_flow(lv.FLEX_FLOW.ROW)
         # align style of the items in the container
         self.set_flex_align(
@@ -137,14 +137,11 @@ class StatusBar(lv.obj):
         self.percent = lv.label(self)
         from trezor.lvglui.scrs import font_STATUS_BAR
 
-        self.percent.set_style_text_font(
-            font_STATUS_BAR, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.percent.set_style_text_color(
-            lv.color_hex(0xFFFFFF), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.percent.set_style_pad_hor(5, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.percent.set_style_pad_ver(4, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.percent.set_style_text_font(font_STATUS_BAR, 0)
+        self.percent.set_style_text_letter_space(-1, 0)
+        self.percent.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
+        self.percent.set_style_pad_hor(5, 0)
+        self.percent.set_style_pad_ver(4, 0)
         self.percent.add_flag(lv.obj.FLAG.HIDDEN)
 
         # battery capacity icon

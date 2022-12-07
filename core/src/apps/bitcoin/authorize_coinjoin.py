@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.scrs import lv
 from trezor.messages import AuthorizeCoinJoin, Success
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_action, confirm_coinjoin, confirm_metadata
@@ -47,7 +48,10 @@ async def authorize_coinjoin(
 
     if not msg.address_n:
         raise wire.DataError("Empty path not allowed.")
-
+    ctx.primary_color, ctx.icon_path = (
+        lv.color_hex(coin.primary_color),
+        f"A:/res/{coin.icon}",
+    )
     await confirm_action(
         ctx,
         "coinjoin_coordinator",
@@ -56,6 +60,7 @@ async def authorize_coinjoin(
         description_param=msg.coordinator,
         description_param_font=ui.MONO,
         icon=ui.ICON_RECOVERY,
+        primary_color=ctx.primary_color,
     )
 
     max_fee_per_vbyte = format_amount(msg.max_fee_per_kvbyte, 3)

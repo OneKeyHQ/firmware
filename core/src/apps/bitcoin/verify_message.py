@@ -4,6 +4,7 @@ from trezor import utils, wire
 from trezor.crypto import base58
 from trezor.crypto.curve import secp256k1
 from trezor.enums import InputScriptType
+from trezor.lvglui.scrs import lv
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_signverify, show_success
 
@@ -99,7 +100,10 @@ async def verify_message(ctx: wire.Context, msg: VerifyMessage) -> Success:
 
     if addr != address:
         raise wire.ProcessError("Invalid signature")
-
+    ctx.primary_color, ctx.icon_path = (
+        lv.color_hex(coin.primary_color),
+        f"A:/res/{coin.icon}",
+    )
     await confirm_signverify(
         ctx,
         coin.coin_shortcut,

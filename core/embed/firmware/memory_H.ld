@@ -50,6 +50,7 @@ SECTIONS {
 
   .flash2 : ALIGN(512) {
     build/firmware/frozen_mpy.o(.rodata*);
+    build/firmware/embed/lvgl/lv_font_pljs_bold_36.o(.rodata*);
     build/firmware/vendor/secp256k1-zkp/src/secp256k1.o(.rodata*);
     . = ALIGN(512);
   } >EXRAM AT>FLASH2

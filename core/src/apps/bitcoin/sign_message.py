@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.enums import InputScriptType
+from trezor.lvglui.scrs import lv
 from trezor.messages import MessageSignature
 from trezor.ui.layouts import confirm_signverify
 
@@ -34,6 +35,10 @@ async def sign_message(
 
     node = keychain.derive(address_n)
     address = get_address(script_type, coin, node)
+    ctx.primary_color, ctx.icon_path = (
+        lv.color_hex(coin.primary_color),
+        f"A:/res/{coin.icon}",
+    )
     await confirm_signverify(
         ctx,
         coin.coin_shortcut,

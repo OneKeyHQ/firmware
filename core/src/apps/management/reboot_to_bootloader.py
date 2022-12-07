@@ -16,8 +16,9 @@ async def reboot_to_bootloader(ctx: wire.Context, msg: RebootToBootloader) -> No
     await confirm_action(
         ctx,
         "reboot",
-        _(i18n_keys.TITLE__GO_TO_UPDATE_MODE),
-        description=_(i18n_keys.SUBTITLE__GO_TO_UPDATE_MODE),
+        _(i18n_keys.TITLE__SYSTEM_UPDATE),
+        description=_(i18n_keys.SUBTITLE__SWITCH_TO_UPDATE_MODE_RECONFIRM),
+        icon=None,
     )
     await ctx.write(Success(message="Rebooting"))
     # make sure the outgoing USB buffer is flushed

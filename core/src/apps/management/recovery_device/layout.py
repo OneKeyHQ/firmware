@@ -4,6 +4,7 @@ import storage.recovery
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 from trezor.ui.layouts import confirm_action, show_success, show_warning
 from trezor.ui.layouts.common import button_request
 from trezor.ui.layouts.lvgl.recovery import (  # noqa: F401
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
 async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None:
     if dry_run:
         title = _(i18n_keys.TITLE__ABORT_CHECK)
-        subtitle = _(i18n_keys.SUBTITLE__DEVICE_RECOVER_CHECK_ABORT_CHECK)
+        subtitle = _(i18n_keys.SUBTITLE__ABORT_PROCESSING)
         icon = "A:/res/warning.png"
         await confirm_action(
             ctx,
@@ -36,6 +37,7 @@ async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None
             icon=icon,
             br_code=ButtonRequestType.ProtectCall,
             anim_dir=0,
+            primary_color=lv_colors.ONEKEY_YELLOW,
         )
     else:
         icon = "A:/res/warning.png"
@@ -43,12 +45,13 @@ async def confirm_abort(ctx: wire.GenericContext, dry_run: bool = False) -> None
         await confirm_action(
             ctx,
             "abort_recovery",
-            _(i18n_keys.TITLE__ABORT_RECOVERY),
-            description=_(i18n_keys.SUBTITLE__DEVICE_RECOVER_ABORT_RECOVERY),
+            _(i18n_keys.TITLE__ABORT_IMPORT),
+            description=_(i18n_keys.SUBTITLE__ABORT_PROCESSING),
             reverse=True,
             icon=icon,
             br_code=ButtonRequestType.ProtectCall,
             anim_dir=0,
+            primary_color=lv_colors.ONEKEY_YELLOW,
         )
 
 
@@ -58,23 +61,38 @@ async def request_mnemonic(
     await button_request(ctx, "mnemonic", code=ButtonRequestType.MnemonicInput)
 
     words: list[str] = []
-    for i in range(word_count):
-        word = await request_word(
-            ctx, i, word_count, is_slip39=backup_types.is_slip39_word_count(word_count)
-        )
-        words.append(word)
-
+    while True:
         try:
-            word_validity.check(backup_type, words)
-        except word_validity.AlreadyAdded:
-            await show_share_already_added(ctx)
-            return None
-        except word_validity.IdentifierMismatch:
-            await show_identifier_mismatch(ctx)
-            return None
-        except word_validity.ThresholdReached:
-            await show_group_threshold_reached(ctx)
-            return None
+            for i in range(len(words), word_count):
+                word = await request_word(
+                    ctx,
+                    i,
+                    word_count,
+                    is_slip39=backup_types.is_slip39_word_count(word_count),
+                )
+                words.append(word)
+
+                try:
+                    word_validity.check(backup_type, words)
+                except word_validity.AlreadyAdded:
+                    await show_share_already_added(ctx)
+                    words.clear()
+                except word_validity.IdentifierMismatch:
+                    await show_identifier_mismatch(ctx)
+                    words.clear()
+                except word_validity.ThresholdReached:
+                    await show_group_threshold_reached(ctx)
+                    words.clear()
+        except wire.ActionCancelled as e:
+            if len(words) == 0:
+                raise e
+            else:
+                words.pop()
+                continue
+        else:
+            if len(words) == 0:
+                return None
+            break
 
     return " ".join(words)
 
@@ -92,7 +110,7 @@ async def show_dry_run_result(
             ctx,
             "success_dry_recovery",
             text,
-            button=_(i18n_keys.BUTTON__CONTINUE),
+            button=_(i18n_keys.BUTTON__DONE),
             header=_(i18n_keys.TITLE__CORRECT),
         )
     else:
@@ -132,6 +150,7 @@ async def show_invalid_mnemonic(ctx: wire.GenericContext, word_count: int) -> No
             _(i18n_keys.SUBTITLE__DEVICE_RECOVER_INVALID_RECOVERY_PHRASE),
             header=_(i18n_keys.TITLE__INVALID_RECOVERY_PHRASE),
             icon="A:/res/danger.png",
+            btn_yes_bg_color=lv_colors.ONEKEY_BLACK,
         )
 
 

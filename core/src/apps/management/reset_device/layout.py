@@ -136,9 +136,26 @@ async def show_backup_success(ctx: wire.GenericContext) -> None:
         ctx,
         "success_backup",
         text,
-        header=_(i18n_keys.TITLE__BACK_UP_COMPLETE),
+        header=_(i18n_keys.TITLE__WALLET_IS_READY),
         button=_(i18n_keys.BUTTON__CONTINUE),
     )
+
+
+async def show_check_word_tips(ctx):
+    from trezor.lvglui.scrs.common import FullSizeWindow
+
+    screen = FullSizeWindow(
+        title=_(i18n_keys.TITLE__SETUP_CREATE_ALMOST_DONE),
+        subtitle=_(i18n_keys.SUBTITLE__SETUP_CREATE_ALMOST_DOWN),
+        confirm_text=_(i18n_keys.BUTTON__CONTINUE),
+        cancel_text=_(i18n_keys.BUTTON__BACK),
+        anim_dir=0,
+    )
+    result = await interact(
+        ctx, screen, "check_word_tips", ButtonRequestType.ProtectCall
+    )
+    if not result:
+        raise wire.ActionCancelled()
 
 
 # BIP39
@@ -155,7 +172,10 @@ async def bip39_show_and_confirm_mnemonic(
     while True:
         # display paginated mnemonic on the screen
         await show_share_words(ctx, share_words=words)
-
+        try:
+            await show_check_word_tips(ctx)
+        except wire.ActionCancelled:
+            continue
         # make the user confirm some words from the mnemonic
         if await _confirm_share_words(ctx, None, words):
             await _show_confirmation_success(ctx)
@@ -179,7 +199,8 @@ async def slip39_basic_show_and_confirm_shares(
         while True:
             # display paginated share on the screen
             await show_share_words(ctx, share_words, index)
-
+            # description before check word
+            await show_check_word_tips(ctx)
             # make the user confirm words from the share
             if await _confirm_share_words(ctx, index, share_words):
                 await _show_confirmation_success(
