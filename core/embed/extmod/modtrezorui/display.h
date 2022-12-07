@@ -79,6 +79,18 @@
 #ifdef TREZOR_FONT_BOLD36_ENABLE
 #define FONT_BOLD36 (-4)
 #endif
+#ifdef TREZOR_FONT_ROBOT_REGULAR_ENABLE
+#define FONT_ROBOT_REGULAR_24 (-6)
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_ENABLE
+#define FONT_PJKS_BOLD_38 (-7)
+#endif
+#ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
+#define FONT_PJKS_REGULAR_20 (-8)
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_26_ENABLE
+#define FONT_PJKS_BOLD_26 (-9)
+#endif
 
 // provided by port
 

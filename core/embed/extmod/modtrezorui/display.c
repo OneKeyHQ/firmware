@@ -58,15 +58,9 @@
 #else
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#if defined BOARDLOADER || defined APP_VER || defined TREZOR_EMULATOR
-#include "font_roboto_regular_20.h"
-#define FONT_NORMAL_DATA Font_Roboto_Regular_20
-#define FONT_NORMAL_HEIGHT 20
-#else
-#include "font_roboto_regular_24.h"
-#define FONT_NORMAL_DATA Font_Roboto_Regular_24
-#define FONT_NORMAL_HEIGHT 24
-#endif
+#include "font_plusjakartasans_regular_26.h"
+#define FONT_NORMAL_DATA Font_PlusJakartaSans_Regular_26
+#define FONT_NORMAL_HEIGHT 26
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE
 #include "font_roboto_bold_20.h"
@@ -83,7 +77,26 @@
 #define FONT_BOLD36_DATA Font_Roboto_Bold_36
 #define FONT_BOLD36_HEIGHT 36
 #endif
-
+#ifdef TREZOR_FONT_ROBOT_REGULAR_ENABLE
+#include "font_roboto_regular_24.h"
+#define FONT_ROBOT_REGULAR_24_DATA Font_Roboto_Regular_24
+#define FONT_ROBOT_REGULAR_24_HEIGHT 24
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_ENABLE
+#include "font_plusjakartasans_bold_38.h"
+#define FONT_PJKS_BOLD38_DATA Font_PlusJakartaSans_Bold_38
+#define FONT_PJKS_BOLD38_HEIGHT 38
+#endif
+#ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
+#include "font_plusjakartasans_regular_20.h"
+#define FONT_PJKS_REGULAR20_DATA Font_PlusJakartaSans_Regular_20
+#define FONT_PJKS_REGULAR20_HEIGHT 20
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_26_ENABLE
+#include "font_plusjakartasans_bold_26.h"
+#define FONT_PJKS_BOLD26_DATA Font_PlusJakartaSans_Bold_26
+#define FONT_PJKS_BOLD26_HEIGHT 26
+#endif
 #endif
 
 #elif TREZOR_MODEL == 1
@@ -425,6 +438,7 @@ bool display_toif_info(const uint8_t *data, uint32_t len, uint16_t *out_w,
 }
 
 #if PRODUCTION_MODEL == 'H'
+
 void display_loader(uint16_t progress, bool indeterminate, int yoffset,
                     uint16_t fgcolor, uint16_t bgcolor, const uint8_t *icon,
                     uint32_t iconlen, uint16_t iconfgcolor) {
@@ -534,8 +548,8 @@ void display_loader_ex(uint16_t progress, bool indeterminate, int yoffset,
 #if PRODUCTION_MODEL == 'H'
 #define DISPLAY_FONT_SIZE 16
 #define DISPLAY_CHAR_X_RES 8
-#define DISPLAY_CHAR_WIDTH 16
-#define DISPLAY_CHAR_HIGHT 20
+#define DISPLAY_CHAR_WIDTH 8
+#define DISPLAY_CHAR_HIGHT 26
 #define DISPLAY_PRINT_COLS (DISPLAY_RESX / DISPLAY_CHAR_WIDTH)
 #define DISPLAY_PRINT_ROWS (DISPLAY_RESY / DISPLAY_CHAR_HIGHT)
 #else
@@ -569,6 +583,68 @@ void display_print(const char *text, int textlen) {
     textlen = strlen(text);
   }
 
+#if PRODUCTION_MODEL == 'H'
+
+  // bool is_start = true;
+  // int spilt = 0, offset = 0, line = 0;
+  static int width = 0;
+  int w = 0;
+
+  // print characters to internal buffer (display_print_buf)
+  for (int i = 0; i < textlen; i++) {
+    switch (text[i]) {
+      case '\r':
+        break;
+      case '\n':
+        row++;
+        col = 0;
+        width = 0;
+        break;
+      default:
+        w = display_text_width(&text[i], 1, FONT_ROBOT_REGULAR_24);
+        width += w;
+
+        if (width >= DISPLAY_RESX - 8) {
+          width = w;
+          col = 0;
+          row++;
+        }
+        if (row >= DISPLAY_PRINT_ROWS) {
+          display_bar(0, 0, DISPLAY_RESX, DISPLAY_RESY, display_print_bgcolor);
+          for (int j = 0; j < DISPLAY_PRINT_ROWS - 1; j++) {
+            memcpy(display_print_buf[j], display_print_buf[j + 1],
+                   DISPLAY_PRINT_COLS);
+          }
+          memzero(display_print_buf[DISPLAY_PRINT_ROWS - 1],
+                  DISPLAY_PRINT_COLS);
+          row = DISPLAY_PRINT_ROWS - 1;
+        }
+        display_print_buf[row][col] = text[i];
+        col++;
+        break;
+    }
+  }
+
+  if (row >= DISPLAY_PRINT_ROWS) {
+    display_bar(0, 0, DISPLAY_RESX, DISPLAY_RESY, display_print_bgcolor);
+    for (int j = 0; j < DISPLAY_PRINT_ROWS - 1; j++) {
+      memcpy(display_print_buf[j], display_print_buf[j + 1],
+             DISPLAY_PRINT_COLS);
+    }
+    memzero(display_print_buf[DISPLAY_PRINT_ROWS - 1], DISPLAY_PRINT_COLS);
+    row = DISPLAY_PRINT_ROWS - 1;
+  }
+
+  for (int y = 0; y < DISPLAY_PRINT_ROWS; y++) {
+    if (display_print_buf[y][0] != 0) {
+      display_text(8, (y + 1) * DISPLAY_CHAR_HIGHT, &display_print_buf[y][0],
+                   -1, FONT_ROBOT_REGULAR_24, display_print_fgcolor,
+                   display_print_bgcolor);
+    }
+  }
+
+#else
+
   // print characters to internal buffer (display_print_buf)
   for (int i = 0; i < textlen; i++) {
     switch (text[i]) {
@@ -599,36 +675,6 @@ void display_print(const char *text, int textlen) {
       row = DISPLAY_PRINT_ROWS - 1;
     }
   }
-
-#if PRODUCTION_MODEL == 'H'
-
-  bool is_start = true;
-  int spilt = 0, offset = 0, line = 0;
-  for (int y = 0; y < DISPLAY_PRINT_ROWS; y++) {
-    line = 0;
-    for (int x = 0; x < DISPLAY_PRINT_COLS; x++) {
-      if (display_print_buf[y][x] != 0 && is_start) {
-        is_start = false;
-        do {
-          spilt = display_text_split(&display_print_buf[y][x] + offset, -1,
-                                     FONT_NORMAL, DISPLAY_RESX);
-          display_text(x * DISPLAY_CHAR_WIDTH,
-                       (y + line + 1) * DISPLAY_CHAR_HIGHT,
-                       &display_print_buf[y][x] + offset, spilt, FONT_NORMAL,
-                       display_print_fgcolor, display_print_bgcolor);
-          offset += spilt;
-          line++;
-        } while (spilt);
-
-      } else if (display_print_buf[y][x] == 0) {
-        is_start = true;
-        offset = 0;
-        line = 0;
-      }
-    }
-  }
-
-#else
 
   // render buffer to display
   display_set_window(0, 0, DISPLAY_RESX - 1, DISPLAY_RESY - 1);
@@ -744,6 +790,22 @@ static const uint8_t *get_glyph(int font, uint8_t c) {
       case FONT_BOLD36:
         return FONT_BOLD36_DATA[c - ' '];
 #endif
+#ifdef TREZOR_FONT_ROBOT_REGULAR_ENABLE
+      case FONT_ROBOT_REGULAR_24:
+        return FONT_ROBOT_REGULAR_24_DATA[c - ' '];
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_ENABLE
+      case FONT_PJKS_BOLD_38:
+        return FONT_PJKS_BOLD38_DATA[c - ' '];
+#endif
+#ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
+      case FONT_PJKS_REGULAR_20:
+        return FONT_PJKS_REGULAR20_DATA[c - ' '];
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_26_ENABLE
+      case FONT_PJKS_BOLD_26:
+        return FONT_PJKS_BOLD26_DATA[c - ' '];
+#endif
     }
     return 0;
   }
@@ -818,7 +880,7 @@ static void display_text_render(int x, int y, const char *text, int textlen,
         }
       }
     }
-    x += adv;
+    x += adv - 1;
   }
 }
 
@@ -856,7 +918,7 @@ int display_text_width(const char *text, int textlen, int font) {
     const uint8_t *g = get_glyph(font, (uint8_t)text[i]);
     if (!g) continue;
     const uint8_t adv = g[2];  // advance
-    width += adv;
+    width += adv - 1;
     /*
     if (i != textlen - 1) {
         const uint8_t adv = g[2]; // advance
@@ -888,7 +950,7 @@ int display_text_split(const char *text, int textlen, int font,
     const uint8_t *g = get_glyph(font, (uint8_t)text[i]);
     if (!g) continue;
     const uint8_t adv = g[2];  // advance
-    width += adv;
+    width += adv - 1;
     if (width > requested_width) {
       if (lastspace > 0) {
         return lastspace;
@@ -1020,7 +1082,7 @@ void display_utf8_substr(const char *buf_start, size_t buf_len, int char_off,
 }
 
 void display_progress_percent(int x, int y, int permil) {
-  char percent_asc[5] = {0};
+  volatile char percent_asc[8] = {0};
   int i = 0;
   if (permil < 10) {
     percent_asc[i++] = permil + 0x30;
@@ -1034,30 +1096,35 @@ void display_progress_percent(int x, int y, int permil) {
     percent_asc[i++] = permil % 10 + 0x30;
   }
   percent_asc[i] = '%';
-  display_text_center(x, y, percent_asc, -1, -1, COLOR_WHITE, COLOR_BLACK);
+#ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
+  display_bar(0, y - 24, MAX_DISPLAY_RESX, 24, COLOR_BLACK);
+  display_text_center(x, y, (const char *)percent_asc, -1, FONT_PJKS_REGULAR_20,
+                      RGB16(0xD2, 0xD2, 0xD2), COLOR_BLACK);
+#else
+  display_bar(0, y - 28, MAX_DISPLAY_RESX, 28, COLOR_BLACK);
+  display_text_center(x, y, (const char *)percent_asc, -1, FONT_NORMAL,
+                      RGB16(0xD2, 0xD2, 0xD2), COLOR_BLACK);
+#endif
+}
+
+void _display_progress(uint16_t y, const char *desc, int permil) {
+  if (desc) {
+    display_text_center(MAX_DISPLAY_RESX / 2, y, desc, -1, FONT_NORMAL,
+                        COLOR_WHITE, COLOR_BLACK);
+  }
+  display_progress_percent(MAX_DISPLAY_RESX / 2, y + 40, permil / 10);
+  if (permil == 0) {
+    display_bar(60, y, 360, 12, COLOR_WHITE);
+    display_bar(61, y + 1, 358, 10, COLOR_BLACK);
+  }
+
+  uint16_t width = permil * 360 / 1000;
+
+  display_bar(62, y + 2, width, 8, COLOR_WHITE);
 }
 
 void display_progress(const char *desc, int permil) {
-  if (desc) {
-    display_text_center(MAX_DISPLAY_RESX / 2, 588, desc, -1, -1, COLOR_WHITE,
-                        COLOR_BLACK);
-  }
-
-  display_bar(0, 657, MAX_DISPLAY_RESX, 20, COLOR_BLACK);
-  display_progress_percent(MAX_DISPLAY_RESX / 2, 675, permil / 10);
-
-  display_bar_radius(60, 631, MAX_DISPLAY_RESX - 120, 20, COLOR_GRAY,
-                     COLOR_BLACK, 8);
-
-  permil = permil * (MAX_DISPLAY_RESX - 120) / 1000;
-  if (permil < 4) {
-    permil = 4;
-  }
-  if (permil > MAX_DISPLAY_RESX - 120) {
-    permil = MAX_DISPLAY_RESX - 120;
-  }
-  display_bar_radius(60 + 4, 631 + 5, permil - 8, 10, COLOR_WHITE, COLOR_GRAY,
-                     4);
+  _display_progress(740, desc, permil);
 }
 
 #else
@@ -1821,6 +1888,26 @@ int display_text_height(int font) {
 #ifdef TREZOR_FONT_BOLD36_ENABLE
     case FONT_BOLD36:
       return FONT_BOLD36_HEIGHT;
+#endif
+#ifdef TREZOR_FONT_ROBOT_REGULAR_ENABLE
+    case FONT_ROBOT_REGULAR_24:
+      return FONT_ROBOT_REGULAR_24_HEIGHT;
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_ENABLE
+    case FONT_PJKS_BOLD_38:
+      return FONT_PJKS_BOLD38_HEIGHT;
+#endif
+#ifdef TREZOR_FONT_ROBOT_REGULAR_ENABLE
+    case FONT_ROBOT_REGULAR_24:
+      return FONT_ROBOT_REGULAR_24_HEIGHT;
+#endif
+#ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
+    case FONT_PJKS_REGULAR_20:
+      return FONT_PJKS_REGULAR20_HEIGHT;
+#endif
+#ifdef TREZOR_FONT_PJKS_BOLD_26_ENABLE
+    case FONT_PJKS_BOLD_26:
+      return FONT_PJKS_BOLD26_HEIGHT;
 #endif
   }
   return 0;

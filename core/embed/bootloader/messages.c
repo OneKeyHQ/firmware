@@ -598,7 +598,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 
         if (INPUT_CANCEL == response) {
           ui_fadeout();
-          ui_bootloader_first();
+          ui_bootloader_first(NULL);
           ui_fadein();
           send_user_abort(iface_num, "Firmware install cancelled");
           return -4;
@@ -685,7 +685,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
         if (INPUT_CANCEL == response) {
           ui_fadeout();
 #if PRODUCTION_MODEL == 'H'
-          ui_bootloader_first();
+          ui_bootloader_first(&current_hdr);
 #else
           ui_screen_firmware_info(&current_vhdr, &current_hdr);
 #endif
