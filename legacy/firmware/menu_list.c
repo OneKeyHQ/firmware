@@ -106,7 +106,7 @@ refresh_menu:
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
 #if ONEKEY_MINI
-      strcat(desc, "    ");
+      strcat(desc, "      ");
 #else
       strcat(desc, "        ");
 #endif
@@ -131,7 +131,7 @@ refresh_menu:
 
       strcat(desc, _("Press"));
 #if ONEKEY_MINI
-      strcat(desc, "    ");
+      strcat(desc, "      ");
 #else
       strcat(desc, "        ");
 #endif
@@ -145,14 +145,14 @@ refresh_menu:
 #if ONEKEY_MINI
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
-      strcat(desc, "    ");
+      strcat(desc, "      ");
       strcat(desc, _("Cancel or Back"));
       oledDrawBitmap(offset + len + 4, 48, &bmp_button_back);
       oledDrawStringAdapter(offset, 48, desc, FONT_STANDARD);
 
       memset(desc, 0, sizeof(desc));
       strcat(desc, _("Press"));
-      strcat(desc, "    ");
+      strcat(desc, "      ");
       strcat(desc, _("OK or Next"));
 
       // English
