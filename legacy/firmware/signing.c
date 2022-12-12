@@ -99,7 +99,7 @@ static uint8_t hash_inputs_check[32];
 static uint64_t total_in, total_out, change_out;
 static uint64_t orig_total_in, orig_total_out, orig_change_out;
 static uint32_t next_nonsegwit_input;
-static uint32_t progress, progress_step, progress_meta_step;
+static uint32_t progress, progress_step, progress_step1, progress_meta_step;
 static uint32_t tx_weight;
 
 typedef struct {
@@ -907,7 +907,9 @@ void signing_init(const SignTx *msg, const CoinInfo *_coin,
   progress = 0;
   // we step by 500/inputs_count per input in phase1 and phase2
   // this means 50 % per phase.
-  progress_step = (500 << PROGRESS_PRECISION) / info.inputs_count;
+  progress_step1 =
+      (100 << PROGRESS_PRECISION) / (info.inputs_count + info.outputs_count);
+  progress_step = (400 << PROGRESS_PRECISION) / info.inputs_count;
 
   next_nonsegwit_input = 0xffffffff;
   tx_output_info_counter = 0;
@@ -2375,7 +2377,7 @@ void signing_txack(TransactionType *tx) {
   }
 
   static int update_ctr = 0;
-  if (update_ctr++ == 20) {
+  if (update_ctr++ == 10) {
     layoutProgressAdapter(_("Signing transaction"), progress);
     update_ctr = 0;
   }
@@ -2388,6 +2390,8 @@ void signing_txack(TransactionType *tx) {
           !signing_add_input(&tx->inputs[0])) {
         return;
       }
+
+      progress = (idx1 * progress_step1) >> PROGRESS_PRECISION;
 
       if (!tx->inputs[0].has_amount) {
         fsm_sendFailure(FailureType_Failure_DataError,
@@ -2511,6 +2515,8 @@ void signing_txack(TransactionType *tx) {
           !signing_add_output(&tx->outputs[0])) {
         return;
       }
+      progress =
+          ((info.inputs_count + idx1) * progress_step1) >> PROGRESS_PRECISION;
       tx_weight += tx_output_weight(coin, &tx->outputs[0]);
 
       if (tx->outputs[0].has_orig_hash) {
@@ -2667,8 +2673,8 @@ void signing_txack(TransactionType *tx) {
       if (!signing_validate_input(&tx->inputs[0])) {
         return;
       }
-      progress = (idx1 * progress_step + idx2 * progress_meta_step) >>
-                 PROGRESS_PRECISION;
+      progress = 100 + ((idx1 * progress_step + idx2 * progress_meta_step) >>
+                        PROGRESS_PRECISION);
       if (!tx_serialize_input_hash(&tp, tx->inputs)) {
         fsm_sendFailure(FailureType_Failure_ProcessError,
                         _("Failed to serialize input"));
@@ -2687,9 +2693,9 @@ void signing_txack(TransactionType *tx) {
       if (!signing_validate_bin_output(&tx->bin_outputs[0])) {
         return;
       }
-      progress = (idx1 * progress_step +
-                  (tp.inputs_len + idx2) * progress_meta_step) >>
-                 PROGRESS_PRECISION;
+      progress = 100 + ((idx1 * progress_step +
+                         (tp.inputs_len + idx2) * progress_meta_step) >>
+                        PROGRESS_PRECISION);
       if (!tx_serialize_output_hash(&tp, tx->bin_outputs)) {
         fsm_sendFailure(FailureType_Failure_ProcessError,
                         _("Failed to serialize output"));
