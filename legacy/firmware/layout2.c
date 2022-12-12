@@ -1583,8 +1583,8 @@ void layoutDecryptIdentity(const IdentityType *identity) {
 
 void layoutU2FDialog(const char *verb, const char *appname) {
 #if ONEKEY_MINI
-  layoutDialogAdapterEx(&bmp_webauthn, NULL, verb, NULL, verb,
-                        _("U2F security key?"), NULL, appname, NULL, NULL,
+  layoutDialogAdapterEx(&bmp_webauthn, NULL, verb, NULL, NULL, verb,
+                        _("U2F security key?"), NULL, appname, NULL,
                         FONT_STANDARD);
 #else
   layoutDialogAdapter(&bmp_webauthn, NULL, verb, NULL, verb,
@@ -3296,7 +3296,7 @@ void layoutTransInformation(const BITMAP *bmp_up, const BITMAP *bmp_down,
 #endif
 
 #if ONEKEY_MINI
-#define DEVICE_INFO_PAGE_NUM 5
+#define DEVICE_INFO_PAGE_NUM 4
 #else
 #define DEVICE_INFO_PAGE_NUM 2
 #endif
@@ -3329,7 +3329,6 @@ void layoutDeviceParameters(int num) {
   uint8_t key = KEY_NULL;
 
 #if ONEKEY_MINI
-  char *serial;
   uint8_t jedec_id;
   char desc[33] = "";
 #endif
@@ -3343,16 +3342,6 @@ refresh_menu:
     case 0:
 #if !EMULATOR
 #if ONEKEY_MINI
-      oledDrawStringAdapter(0, y, _("SERIAL:"), FONT_STANDARD);
-      y += font->pixel + 1;
-      if (device_get_serial(&serial)) {
-        oledDrawString(0, y, serial, FONT_FIXED);
-      }
-      y += font->pixel + 1;
-
-      y += font->pixel + 1;
-      y += font->pixel + 1;
-
       oledDrawStringAdapter(0, y, _("MODEL NAME:"), FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawString(0, y, "OneKey Mini", FONT_FIXED);
@@ -3362,6 +3351,12 @@ refresh_menu:
       oledDrawStringAdapter(0, y, _("FIRMWARE:"), FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawStringAdapter(0, y, ONEKEY_VERSION, FONT_FIXED);
+
+      y += font->pixel + 1;
+      y += font->pixel + 1;
+      oledDrawString(0, y, "SE:", FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawString(0, y, SE_NAME, FONT_FIXED);
 #else
       if (se_get_sn(&se_sn)) {
         layouKeyValue(y, _("Serial:"), se_sn);
@@ -3401,12 +3396,6 @@ refresh_menu:
 
 #if !EMULATOR
 #if ONEKEY_MINI
-      oledDrawString(0, y, "SE:", FONT_STANDARD);
-      y += font->pixel + 1;
-      oledDrawString(0, y, SE_NAME, FONT_FIXED);
-      y += font->pixel + 1;
-      y += font->pixel + 1;
-
       memset(desc, 0, 33);
       strcat(desc, cpu_info);
       strcat(desc, "-");
@@ -3424,8 +3413,15 @@ refresh_menu:
       oledDrawString(0, y, config_uuid_str, FONT_FIXED);
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
                      &bmp_btn_down);
+
+      y += font->pixel + 1;
+      y += font->pixel + 1;
+      y += font->pixel + 1;
+
+      oledDrawString(0, y, "BOOTLOADER:", FONT_STANDARD);
+      y += font->pixel + 1;
+      oledDrawString(0, y, bootloader_version, FONT_FIXED);
 #else
-      layouKeyValue(y, _("Firmware version:"), ONEKEY_VERSION);
 
       y += font->pixel + 1;
       layouKeyValue(y, _("BLE version:"), ble_get_ver());
@@ -3444,14 +3440,8 @@ refresh_menu:
     case 2:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
 
-      oledDrawString(0, y, "BOOTLOADER:", FONT_STANDARD);
-      y += font->pixel + 1;
-      oledDrawString(0, y, bootloader_version, FONT_FIXED);
-
 #if !EMULATOR
       jedec_id = (w25qxx_read_id() >> 16) & 0xff;
-      y += font->pixel + 1;
-      y += font->pixel + 1;
       oledDrawStringAdapter(0, y, _("FLASH:"), FONT_STANDARD);
       y += font->pixel + 1;
       memset(desc, 0, 33);
@@ -3473,12 +3463,8 @@ refresh_menu:
       oledDrawStringAdapter(0, y, _("FONT:"), FONT_STANDARD);
       y += font->pixel + 1;
       oledDrawStringAdapter(0, y, "3type", FONT_FIXED);
-
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                     &bmp_btn_down);
-      break;
-    case 3:
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
+      y += font->pixel + 1;
+      y += font->pixel + 1;
 
 #ifdef BUILD_ID
       oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
@@ -3490,7 +3476,7 @@ refresh_menu:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
                      &bmp_btn_down);
       break;
-    case 4:
+    case 3:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       setRgbBitmap(true);
       oledDrawRgbBitmap(48, 16, &bmp_icon_egg);
