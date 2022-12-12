@@ -166,7 +166,7 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
         if (INPUT_CANCEL == response) {
           ui_fadeout();
 #if PRODUCTION_MODEL == 'H'
-          ui_bootloader_first();
+          ui_bootloader_first(hdr);
 #else
           ui_screen_firmware_info(vhdr, hdr);
 #endif
@@ -184,6 +184,9 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
           ui_fadein();
           usb_stop();
           usb_deinit();
+          while (!touch_click()) {
+          }
+          restart();
           return secfalse;  // shutdown
         } else {            // success
           ui_fadeout();
@@ -191,6 +194,9 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
           ui_fadein();
           usb_stop();
           usb_deinit();
+          while (!touch_click()) {
+          }
+          restart();
           return secfalse;  // shutdown
         }
         break;
@@ -205,6 +211,9 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
           ui_fadein();
           usb_stop();
           usb_deinit();
+          while (!touch_click()) {
+          }
+          restart();
           return secfalse;    // shutdown
         } else if (r == 0) {  // last chunk received
           ui_screen_install_progress_upload(1000);
@@ -451,7 +460,7 @@ int main(void) {
 
   if (firmware_present != sectrue) {
     display_clear();
-    ui_bootloader_first();
+    ui_bootloader_first(NULL);
 
     // erase storage
     // ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
@@ -467,7 +476,7 @@ int main(void) {
   // ... or we have stay_in_bootloader flag to force it
   if (stay_in_bootloader == sectrue) {
     display_clear();
-    ui_bootloader_first();
+    ui_bootloader_first(&hdr);
     // no ui_fadeout(); - we already start from black screen
     if (firmware_present != sectrue) {
       // and start the usb loop

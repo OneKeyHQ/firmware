@@ -1084,7 +1084,7 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
   wait_random();
   if (ctr >= PIN_MAX_TRIES) {
     storage_wipe();
-    error_reset("Too many wrong PIN", "attempts. Storage has", "been wiped.",
+    error_reset("Too many wrong PIN attempts.", "Storage has been wiped.", NULL,
                 NULL);
     return secfalse;
   }
@@ -1153,8 +1153,8 @@ static secbool unlock(const uint8_t *pin, size_t pin_len,
     wait_random();
     if (ctr + 1 >= PIN_MAX_TRIES) {
       storage_wipe();
-      error_reset("Too many wrong PIN", "attempts. Storage has", "been wiped.",
-                  NULL);
+      error_reset("Too many wrong PIN attempts.", "Storage has been wiped.",
+                  NULL, NULL);
     }
     return secfalse;
   }
