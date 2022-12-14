@@ -1,3 +1,4 @@
+from trezor.lvglui.scrs import lv
 from trezor.messages import MoneroAddress
 from trezor.ui.layouts import show_address
 
@@ -6,6 +7,8 @@ from apps.common.keychain import auto_keychain
 from apps.monero import misc
 from apps.monero.xmr import addresses, crypto, monero
 from apps.monero.xmr.networks import net_version
+
+from . import ICON, PRIMARY_COLOR
 
 
 @auto_keychain(__name__)
@@ -41,6 +44,8 @@ async def get_address(ctx, msg, keychain):
 
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
+
+        ctx.primary_color, ctx.icon = lv.color_hex(PRIMARY_COLOR), ICON
         await show_address(
             ctx,
             address=addr.decode(),

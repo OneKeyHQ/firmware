@@ -2,13 +2,15 @@ from trezor import wire
 from trezor.crypto import rlp
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
+from trezor.lvglui.scrs import lv
 from trezor.messages import ConfluxSignTx, ConfluxTxAck, ConfluxTxRequest
+from trezor.ui.layouts import confirm_final
 from trezor.utils import HashWriter
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from . import tokens
+from . import ICON, PRIMARY_COLOR, tokens
 from .helpers import address_from_bytes, address_from_hex, bytes_from_address
 from .layout import (
     require_confirm_data,
@@ -70,7 +72,7 @@ async def sign_tx(
         else:
             amount = int.from_bytes(value, "big")
             address = cfx_to
-
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         await require_confirm_tx(ctx, address, amount, token)
         if data_total > 0:
             await require_confirm_data(ctx, data_initial_chunk, data_total)
@@ -138,17 +140,15 @@ async def sign_tx(
         data_chunk = resp.data_chunk if resp.data_chunk is not None else b""
         data_left -= len(data_chunk)
         sha.extend(data_chunk)
-
     digest = sha.get_digest()
     signature = secp256k1.sign(
         node.private_key(), digest, False, secp256k1.CANONICAL_SIG_ETHEREUM
     )
-
+    await confirm_final(ctx)
     req = ConfluxTxRequest()
     req.signature_v = signature[0] - 27
     req.signature_r = signature[1:33]
     req.signature_s = signature[33:]
-
     return req
 
 

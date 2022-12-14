@@ -1,6 +1,7 @@
 from trezor import wire
 from trezor.crypto.curve import ed25519
 from trezor.crypto.hashlib import sha3_256
+from trezor.lvglui.scrs import lv
 from trezor.messages import StarcoinMessageSignature, StarcoinSignMessage
 from trezor.ui.layouts import confirm_signverify
 
@@ -8,6 +9,7 @@ from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 from apps.common.signverify import decode_message
 
+from . import ICON, PRIMARY_COLOR
 from .helper import (
     MESSAGE_PREFIX,
     get_address_from_public_key,
@@ -27,6 +29,7 @@ async def sign_message(
     if msg.message is None:
         raise wire.DataError("Message can't be None")
     data = decode_message(msg.message)
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_signverify(
         ctx,
         "STC",

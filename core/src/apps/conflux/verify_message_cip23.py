@@ -3,11 +3,13 @@ from typing import TYPE_CHECKING
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
+from trezor.lvglui.scrs import lv
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_signverify, show_success
 
 from apps.common.signverify import decode_message
 
+from . import ICON, PRIMARY_COLOR
 from .helpers import bytes_from_address, decode_hex_address
 from .sign_message_cip23 import message_digest
 
@@ -38,6 +40,8 @@ async def verify_message_cip23(ctx: Context, msg: ConfluxVerifyMessageCIP23) -> 
     domain_hash = decode_message(msg.domain_hash)
     message_hash = decode_message(msg.message_hash)
     message = "domain_hash: " + domain_hash + "\n" + "message_hash: " + message_hash
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
+
     await confirm_signverify(ctx, "CFX", message, address=msg.address, verify=True)
 
     await show_success(ctx, "verify_message", "The signature is valid.")

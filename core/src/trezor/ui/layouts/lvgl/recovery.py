@@ -1,34 +1,27 @@
 from typing import Callable, Iterable
 
-from trezor import strings, ui, wire
+from trezor import loop, strings, ui, wire
 from trezor.crypto.slip39 import MAX_SHARE_COUNT
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs.common import FullSizeWindow
-from trezor.lvglui.scrs.request_word import WordEnter
+from trezor.lvglui.scrs.recovery_device import SelectWordCounter, WordEnter
 
-from ...components.common.confirm import raise_if_cancelled
 from ...components.tt.confirm import Confirm
 from ...components.tt.scroll import Paginated
 from ...components.tt.text import Text
-from .common import button_request, interact
+from .common import button_request, interact, raise_if_cancelled
 
 
 async def request_word_count(ctx: wire.GenericContext, dry_run: bool) -> int:
     await button_request(ctx, "word_count", code=ButtonRequestType.MnemonicWordCount)
 
     if dry_run:
-        title = _(i18n_keys.TITLE__CHECK_RECOVERY_PHRASE)
+        title = _(i18n_keys.TITLE__READY_TO_CHECK)
     else:
-        title = _(i18n_keys.TITLE__READY_TO_RESTORE)
-    subtitle = _(i18n_keys.SUBTITLE__DEVICE_RECOVER_READY_TO_RESTORE)
-    screen = FullSizeWindow(
-        title,
-        subtitle,
-        confirm_text=_(i18n_keys.BUTTON__CONTINUE),
-        options="12\n18\n24",
-    )
-    count = await ctx.wait(screen.request())
+        title = _(i18n_keys.TITLE__READY_TO_IMPORT)
+    screen = SelectWordCounter(title)
+    count = await raise_if_cancelled(screen.request())
     # WordSelector can return int, or string if the value came from debuglink
     # ctx.wait has a return type Any
     # Hence, it is easier to convert the returned value to int explicitly
@@ -41,7 +34,11 @@ async def request_word(
     assert is_slip39 is False
     title = _(i18n_keys.TITLE__ENTER_WORD_STR).format(word_index + 1)
     screen = WordEnter(title)
-    word: str = await ctx.wait(screen.request())
+    word: str = await raise_if_cancelled(screen.request())
+    await loop.sleep(240)
+    screen.show_tips()
+    await loop.sleep(240)
+    screen.clear_input()
     return word
 
 
@@ -111,7 +108,7 @@ async def continue_recovery(
 ) -> bool:
     screen = FullSizeWindow(
         text,
-        _(i18n_keys.SUBTITLE__DEVICE_RECOVER_SELECT_NUMBER_OF_WORDS),
+        _(i18n_keys.SUBTITLE__ENTER_RECOVERY_PHRASE),
         confirm_text=button_label,
         cancel_text=_(i18n_keys.BUTTON__CANCEL),
     )

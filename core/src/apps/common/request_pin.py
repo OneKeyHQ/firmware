@@ -5,6 +5,7 @@ import storage.cache
 import storage.sd_salt
 from trezor import config, loop, wire
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 
 from .sdcard import SdCardUnavailable, request_sd_salt
 
@@ -29,7 +30,7 @@ async def request_pin(
 async def request_pin_confirm(ctx: wire.Context, *args: Any, **kwargs: Any) -> str:
     while True:
         if kwargs.get("show_tip", True):
-            from trezor.ui.layouts import request_pin_tips  # type: ignore["request_pin_tips" is unknown import symbol]
+            from trezor.ui.layouts import request_pin_tips
 
             await request_pin_tips(ctx)
         pin1 = await request_pin(
@@ -40,17 +41,19 @@ async def request_pin_confirm(ctx: wire.Context, *args: Any, **kwargs: Any) -> s
         )
         if pin1 == pin2:
             return pin1
-        await pin_mismatch()
-        await loop.sleep(2000)
+        await pin_mismatch(ctx)
 
 
-async def pin_mismatch() -> None:
-    from trezor.ui.layouts import show_popup
+async def pin_mismatch(ctx) -> None:
+    from trezor.ui.layouts import show_warning
 
-    await show_popup(
-        title=_(i18n_keys.TITLE__NOT_MATCH),
-        subtitle=_(i18n_keys.SUBTITLE__SETUP_SET_PIN_PIN_NOT_MATCH),
+    await show_warning(
+        ctx=ctx,
+        br_type="pin_not_match",
+        header=_(i18n_keys.TITLE__NOT_MATCH),
+        content=_(i18n_keys.SUBTITLE__SETUP_SET_PIN_PIN_NOT_MATCH),
         icon="A:/res/danger.png",
+        btn_yes_bg_color=lv_colors.ONEKEY_BLACK,
     )
 
 

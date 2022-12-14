@@ -6,7 +6,7 @@ from trezor.ui.layouts import show_address
 from apps.common import paths
 
 from . import networks
-from .helpers import address_from_bytes
+from .helpers import address_from_bytes, get_color_and_icon
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
 if TYPE_CHECKING:
@@ -32,6 +32,9 @@ async def get_address(
 
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
+        ctx.primary_color, ctx.icon_path = get_color_and_icon(
+            msg.address_n[1] & 0x7FFF_FFFF
+        )
         await show_address(
             ctx,
             address=address,

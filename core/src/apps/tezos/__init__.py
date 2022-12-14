@@ -6,3 +6,5 @@ PATTERNS = (
     PATTERN_SEP5,
     "m/44'/coin_type'/0'/account'",  # Ledger compatibility
 )
+PRIMARY_COLOR = 0x1F6DFF
+ICON = "A:/res/chain-xtz.png"

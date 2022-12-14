@@ -1,10 +1,12 @@
 from trezor import wire
 from trezor.crypto.curve import ed25519
+from trezor.lvglui.scrs import lv
 from trezor.messages import AptosMessageSignature, AptosSignMessage
 
 from apps.common import paths, seed
 from apps.common.keychain import Keychain, auto_keychain
 
+from . import ICON, PRIMARY_COLOR
 from .helper import aptos_address_from_pubkey
 
 
@@ -32,6 +34,7 @@ async def sign_message(
     # display here
     from trezor.ui.layouts import confirm_signverify
 
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_signverify(ctx, "Aptos", full_message, address, False)
 
     signature = ed25519.sign(node.private_key(), full_message.encode())

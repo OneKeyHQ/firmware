@@ -1,10 +1,13 @@
 from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
+from trezor.lvglui.scrs import lv
 from trezor.messages import StarcoinGetPublicKey, StarcoinPublicKey
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
+
+from . import ICON, PRIMARY_COLOR
 
 if TYPE_CHECKING:
     from trezor.wire import Context
@@ -22,6 +25,12 @@ async def get_public_key(
         from trezor.ui.layouts import show_pubkey
 
         path = paths.address_n_to_str(msg.address_n)
-        await show_pubkey(ctx, hexlify(pubkey).decode(), path=path, network="STC")
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
+        await show_pubkey(
+            ctx,
+            hexlify(pubkey).decode(),
+            path=path,
+            network="STC",
+        )
 
     return StarcoinPublicKey(public_key=pubkey)

@@ -213,15 +213,41 @@ def _load_btc_coins():
     coins = []
     for file in DEFS_DIR.glob("bitcoin/*.json"):
         coin = load_json(file)
+        is_testnet = "testnet" in coin["coin_name"].lower()
         coin.update(
             name=coin["coin_label"],
             shortcut=coin["coin_shortcut"],
             key=f"bitcoin:{coin['coin_shortcut']}",
-            icon=str(file.with_suffix(".png")),
+            icon=f"btc-{coin['coin_shortcut'].lower()}.png",
+            primary_color=int(
+                coin.get("primary_color", "0xFFFFFF" if not is_testnet else "0xE55651"),
+                16,
+            ),
         )
         coins.append(coin)
 
     return coins
+
+
+ETH_PRIMARY_COLOR_MAPPING = {
+    1: "0x637FFF",
+    10: "0xFF0420",
+    25: "0x1199FA",
+    56: "0xF0B90B",
+    61: "0x328332",
+    128: "0x01943F",
+    137: "0x8247E5",
+    250: "0x1969FF",
+    288: "0xCCFF00",
+    2222: "0xFF433E",
+    42161: "0x28A0F0",
+    42170: "0xEF8220",
+    42220: "0x35D07F",
+    43114: "0xE84142",
+    513100: "0xC3B6FF",
+    1666600000: "0x33D3D5",
+    13131615554: "0x5DEB5A",
+}
 
 
 def _load_ethereum_networks():
@@ -260,6 +286,10 @@ def _load_ethereum_networks():
             rskip60=rskip60,
             url=chain_data["infoURL"],
             key=f"eth:{shortcut}",
+            icon=f"evm-{chain_data['shortName'].lower()}.png",
+            primary_color=ETH_PRIMARY_COLOR_MAPPING.get(
+                chain_data["chainId"], "0xFFFFFF" if not is_testnet else "0xE55651"
+            ),
         )
         networks.append(network)
 

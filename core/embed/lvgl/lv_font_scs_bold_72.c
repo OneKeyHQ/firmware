@@ -131,6 +131,6 @@ static bool __user_font_get_glyph_dsc(const lv_font_t *font,
 const lv_font_t lv_font_scs_bold_72 = {
     .get_glyph_bitmap = __user_font_get_bitmap,
     .get_glyph_dsc = __user_font_get_glyph_dsc,
-    .line_height = 38,
+    .line_height = 72,
     .base_line = 3,
 };

@@ -215,32 +215,36 @@ async def require_confirm_safety_checks(
             _(i18n_keys.TITLE__DISABLE_SAFETY_CHECKS),
             hold=True,
             verb=_(i18n_keys.BUTTON__SLIDE_TO_DISABLE),
-            description=_(i18n_keys.SUBTITLE__DISABLE_SAFETY_CHECKS),
+            description=_(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_PROMPT),
             action="",
             reverse=True,
             larger_vspace=True,
             br_code=ButtonRequestType.ProtectCall,
             anim_dir=2,
+            hold_level=2,
+            icon=None,
         )
     elif level == SafetyCheckLevel.PromptTemporarily:
         await confirm_action(
             ctx,
             "set_safety_checks",
-            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_PROMPT),
+            _(i18n_keys.TITLE__DISABLE_SAFETY_CHECKS),
             hold=True,
-            verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
+            verb=_(i18n_keys.BUTTON__SLIDE_TO_DISABLE),
             description=_(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_PROMPT),
             action="",
             reverse=True,
             br_code=ButtonRequestType.ProtectCall,
             anim_dir=2,
+            hold_level=1,
+            icon=None,
         )
     elif level == SafetyCheckLevel.Strict:
         await confirm_action(
             ctx,
             "set_safety_checks",
-            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_STRICT),
-            description=_(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_STRICT),
+            _(i18n_keys.TITLE__ENABLE_SAFETY_CHECKS),
+            description=_(i18n_keys.SUBTITLE__ENABLE_SAFETY_CHECKS),
             br_code=ButtonRequestType.ProtectCall,
             anim_dir=2,
         )

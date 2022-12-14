@@ -3,11 +3,13 @@ from typing import TYPE_CHECKING
 from trezor import wire
 from trezor.crypto.curve import ed25519
 from trezor.crypto.hashlib import sha256
+from trezor.lvglui.scrs import lv
 from trezor.messages import SolanaSignedTx
 
 from apps.common import paths, seed
 from apps.common.keychain import auto_keychain
 
+from . import ICON, PRIMARY_COLOR
 from .message import Message
 from .publickey import PublicKey
 
@@ -64,6 +66,7 @@ async def sign_tx(
         accounts_keys[i.program_id_index] not in CURRENT_ALLOWED_PROGRAM_IDS
         for i in message.instructions
     )
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     if should_blind_sign:
         from trezor.ui.layouts.lvgl import confirm_sol_blinding_sign
         from apps.common.signverify import decode_message

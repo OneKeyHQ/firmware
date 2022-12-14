@@ -2,11 +2,13 @@ from typing import TYPE_CHECKING
 
 from trezor import wire
 from trezor.crypto.curve import secp256k1
+from trezor.lvglui.scrs import lv
 from trezor.messages import EosGetPublicKey, EosPublicKey
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
+from . import ICON, PRIMARY_COLOR
 from .helpers import public_key_to_wif
 
 if TYPE_CHECKING:
@@ -32,6 +34,12 @@ async def get_public_key(
         # await require_get_public_key(ctx, wif)
         from trezor.ui.layouts import show_pubkey
 
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         path = paths.address_n_to_str(msg.address_n)
-        await show_pubkey(ctx, wif, path=path, network="EOS")
+        await show_pubkey(
+            ctx,
+            wif,
+            path=path,
+            network="EOS",
+        )
     return EosPublicKey(wif_public_key=wif, raw_public_key=public_key)

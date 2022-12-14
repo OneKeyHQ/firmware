@@ -42,9 +42,9 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
         await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT), None, timeout_ms=1000)
         # wipe storage to make sure the device is in a clear state
         storage.reset()
-    if msg.language is not None:
-        storage.device.set_language(msg.language)
-        i18n_refresh()
+        if msg.language is not None:
+            storage.device.set_language(msg.language)
+            i18n_refresh()
     if storage.recovery.is_in_progress():
         return await recovery_process(ctx)
 

@@ -1,13 +1,14 @@
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha256
+from trezor.lvglui.scrs import lv
 from trezor.messages import EosSignedTx, EosSignTx, EosTxActionAck, EosTxActionRequest
 from trezor.utils import HashWriter
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from . import writers
+from . import ICON, PRIMARY_COLOR, writers
 from .actions import process_action
 from .helpers import base58_encode
 from .layout import require_sign_tx
@@ -22,6 +23,7 @@ async def sign_tx(ctx: wire.Context, msg: EosSignTx, keychain: Keychain) -> EosS
 
     node = keychain.derive(msg.address_n)
     sha = HashWriter(sha256())
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await _init(ctx, sha, msg)
     await _actions(ctx, sha, msg.num_actions)
     writers.write_uvarint(sha, 0)

@@ -18,7 +18,8 @@ from trezor.utils import HashWriter
 
 from apps.common import paths
 
-from .helpers import address_from_bytes, get_type_name
+from . import networks
+from .helpers import address_from_bytes, get_color_and_icon, get_type_name
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 from .layout import (
     confirm_empty_typed_message,
@@ -43,6 +44,11 @@ async def sign_typed_data(
 ) -> EthereumTypedDataSignature:
     await paths.validate_path(ctx, keychain, msg.address_n)
 
+    ctx.primary_color, ctx.icon_path = get_color_and_icon(
+        msg.address_n[1] & 0x7FFF_FFFF
+    )
+    network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+    ctx.name = network.name if network else "Ethereum"
     data_hash = await generate_typed_data_hash(
         ctx, msg.primary_type, msg.metamask_v4_compat
     )

@@ -89,24 +89,28 @@ def lcd_resume() -> bool:
     from trezor.ui import display
     from storage import device
     from apps import base
+    from trezor import config
 
     if display.backlight() != device.get_brightness():
         global AUTO_POWER_OFF
         display.backlight(device.get_brightness())
         AUTO_POWER_OFF = False
-        base.reload_settings_from_storage(timeout_ms=SHORT_AUTO_LOCK_TIME_MS)
+        base.reload_settings_from_storage(
+            timeout_ms=SHORT_AUTO_LOCK_TIME_MS if not config.is_unlocked() else None
+        )
         return True
     return False
 
 
-def turn_off_lcd():
+async def turn_off_lcd():
     from trezor.ui import display
-    from trezor import loop
+    from trezor import loop, wire
 
     if display.backlight():
         global AUTO_POWER_OFF
         display.backlight(0)
         AUTO_POWER_OFF = True
+    await wire.signal_ack()
     loop.clear()
 
 

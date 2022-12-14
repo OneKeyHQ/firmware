@@ -21,10 +21,10 @@ class Popup(lv.obj):
         super().__init__(parent)
         self.set_size(lv.pct(100), 750)
         self.set_pos(0, 50)
-        self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.set_style_pad_all(0, 0)
+        self.set_style_bg_opa(255, 0)
+        self.set_style_bg_color(lv_colors.BLACK, 0)
+        self.set_style_border_width(0, 0)
         self.close_img = lv.img(self)
         self.close_img.set_src("A:/res/close.png")
         self.close_img.align(lv.ALIGN.TOP_RIGHT, 0, 0)
@@ -32,8 +32,8 @@ class Popup(lv.obj):
         self.icon = lv.img(self)
         self.icon.set_src(icon_path)
         self.icon.align(lv.ALIGN.TOP_MID, 0, 18)
-        self.title = Title(self, self.icon, 452, (0, 36), title)
-        self.subtitle = SubTitle(self, self.title, 452, (0, 24), subtitle)
+        self.title = Title(self, self.icon, (0, 36), title)
+        self.subtitle = SubTitle(self, self.title, (0, 24), subtitle)
         self.container = ContainerFlexCol(
             self, self.subtitle, pos=(0, 10), padding_row=10
         )
@@ -81,27 +81,3 @@ class Popup(lv.obj):
                 self.btn.enable()
             elif self.cb_cnt < 2:
                 self.btn.disable()
-
-
-class PopupSample(lv.obj):
-    def __init__(
-        self, title: str, subtitle: str | None, icon_path: str | None, del_delay: int
-    ) -> None:
-        super().__init__(lv.scr_act())
-        self.set_size(lv.pct(100), lv.pct(100))
-        self.align(lv.ALIGN.TOP_LEFT, 0, 0)
-        self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        if icon_path:
-            self.icon = lv.img(self)
-            self.icon.set_src(icon_path)
-            self.icon.align(lv.ALIGN.TOP_MID, 0, 68)
-            self.title = Title(self, self.icon, 452, (0, 32), title)
-        else:
-            self.title = Title(self, None, 452, (0, 32), title)
-        if subtitle:
-            self.subtitle = SubTitle(self, self.title, 452, (0, 24), subtitle)
-        self.del_delayed(del_delay)

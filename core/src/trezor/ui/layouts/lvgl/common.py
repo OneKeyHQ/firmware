@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from trezor import log, wire, workflow
+from trezor import log, loop, wire, workflow
 from trezor.enums import ButtonRequestType
 from trezor.messages import ButtonAck, ButtonRequest
 
@@ -30,6 +30,7 @@ async def button_request(
 async def raise_if_cancelled(a: Awaitable[T], exc: Any = wire.ActionCancelled) -> T:
     result = await a
     if not result:
+        await loop.sleep(300)
         raise exc
     return result
 

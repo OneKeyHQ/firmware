@@ -4,7 +4,9 @@ from trezor import wire
 from trezor.crypto import hashlib
 from trezor.crypto.curve import ed25519
 from trezor.enums import TezosBallotType, TezosContractType
+from trezor.lvglui.scrs import lv
 from trezor.messages import TezosSignedTx
+from trezor.ui.layouts import confirm_final
 
 from apps.common import paths
 from apps.common.keychain import with_slip44_keychain
@@ -15,7 +17,7 @@ from apps.common.writers import (
     write_uint32_be,
 )
 
-from . import CURVE, PATTERNS, SLIP44_ID, helpers, layout
+from . import CURVE, ICON, PATTERNS, PRIMARY_COLOR, SLIP44_ID, helpers, layout
 
 if TYPE_CHECKING:
     from apps.common.keychain import Keychain
@@ -39,7 +41,7 @@ async def sign_tx(ctx: Context, msg: TezosSignTx, keychain: Keychain) -> TezosSi
     await paths.validate_path(ctx, keychain, msg.address_n)
 
     node = keychain.derive(msg.address_n)
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     if msg.transaction is not None:
         # if the transaction operation is used to execute code on a smart contract
         if msg.transaction.parameters_manager is not None:
@@ -136,7 +138,7 @@ async def sign_tx(ctx: Context, msg: TezosSignTx, keychain: Keychain) -> TezosSi
     sig_prefixed = helpers.base58_encode_check(
         signature, prefix=helpers.TEZOS_SIGNATURE_PREFIX
     )
-
+    await confirm_final(ctx)
     return TezosSignedTx(
         signature=sig_prefixed, sig_op_contents=sig_op_contents, operation_hash=ophash
     )

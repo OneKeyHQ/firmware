@@ -1,20 +1,12 @@
-# import storage
-# from trezor.crypto import bip39, hashlib, random
-# from trezor.enums import BackupType
-
 from trezor import utils
-from trezor.langs import langs
+from trezor.langs import langs_keys, langs_values
 from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
-from trezor.lvglui.scrs import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36
+from trezor.lvglui.scrs import font_PJSREG30
 
-from .common import FullSizeWindow, Screen, lv, lv_colors  # noqa: F401,F403,F405
+from .common import FullSizeWindow, Screen, lv  # noqa: F401,F403,F405
 from .components.container import ContainerFlexCol
-from .components.label import Title
-from .components.radio import RadioItem
-
-# from .components.keyboard import BIP39Keyboard
-# from .components.style import SubTitleStyle
-# from .pinscreen import PinTip
+from .components.navigation import Navigation
+from .components.radio import RadioTrigger
 
 word_cnt_strength_map = {
     12: 128,
@@ -30,77 +22,22 @@ class InitScreen(Screen):
         if not hasattr(self, "_init"):
             self._init = True
             super().__init__(
-                btn_text=_(i18n_keys.BUTTON__CONTINUE),
+                title=_(i18n_keys.TITLE__LANGUAGE), icon_path="A:/res/language.png"
             )
         else:
             return
-        self.content_area = lv.obj(self)
-        self.content_area.set_size(lv.pct(100), lv.SIZE.CONTENT)
-        self.content_area.align(lv.ALIGN.TOP_LEFT, 0, 44)
-        self.content_area.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.icon.align(lv.ALIGN.TOP_LEFT, 8, 44)
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 8)
+        self.container = ContainerFlexCol(
+            self.content_area, self.title, padding_row=2, pos=(0, 32)
         )
-        self.content_area.set_style_bg_color(
-            lv_colors.WHITE_3, lv.PART.SCROLLBAR | lv.STATE.DEFAULT
-        )
-        self.content_area.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
-        self.content_area.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
-        self.content_area.set_style_max_height(646, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.content_area.set_style_min_height(400, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.icon = lv.img(self.content_area)
-        self.icon.set_src("A:/res/language.png")
-        self.icon.align(lv.ALIGN.TOP_MID, 0, 24)
-        self.title = Title(
-            self.content_area,
-            None,
-            452,
-            (),
-            _(i18n_keys.TITLE__SELECT_LANGUAGE),
-            pos_y=48,
-        )
-        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
-        self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.choices = RadioTrigger(self.container, langs_values, font=font_PJSREG30)
+        self.container.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 
-        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=0)
-        self.lang_buttons: list[RadioItem] = []
-        self.check_index = 0
-        for _idx, lang in enumerate(langs):
-            lang_button = RadioItem(self.container, lang[1])
-            lang_button.label.set_style_text_font(
-                font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            if _idx == 0:
-                lang_button.set_checked()
-            self.lang_buttons.append(lang_button)
-        self.container.add_event_cb(self.on_selected_changed, lv.EVENT.CLICKED, None)
-
-        self.btn.set_style_text_font(font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.btn.enable(lv_colors.ONEKEY_GREEN)
-
-    def on_selected_changed(self, event_obj):
-        code = event_obj.code
-        target = event_obj.get_target()
-        if code == lv.EVENT.CLICKED:
-            if utils.lcd_resume():
-                return
-            last_checked = self.check_index
-            for idx, button in enumerate(self.lang_buttons):
-                if target != button and idx == last_checked:
-                    button.set_uncheck()
-                if target == button and idx != last_checked:
-                    self.check_index = idx
-                    button.set_checked()
-                    global language
-                    lang_key = langs[idx][0]
-                    i18n_refresh(lang_key)
-                    self.title.set_text(_(i18n_keys.TITLE__SELECT_LANGUAGE))
-                    self.btn.label.set_text(_(i18n_keys.BUTTON__CONTINUE))
-                    language = lang_key
-
-    def on_click(self, event_obj):
+    def on_ready(self, _event_obj):
+        global language
+        language = langs_keys[self.choices.get_selected_index()]
+        i18n_refresh(language)
         QuickStart()
 
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
@@ -112,15 +49,16 @@ class QuickStart(FullSizeWindow):
         super().__init__(
             _(i18n_keys.TITLE__QUICK_START),
             _(i18n_keys.SUBTITLE__SETUP_QUICK_START),
-            _(i18n_keys.BUTTON__START),
-            options="\n".join(
-                [
-                    _(i18n_keys.OPTION__CREATE_NEW_WALLET),
-                    _(i18n_keys.OPTION__RESTORE_WALLET),
-                ]
-            ),
+            confirm_text=_(i18n_keys.BUTTON__CREATE_NEW_WALLET),
+            cancel_text=_(i18n_keys.BUTTON__IMPORT_WALLET),
             anim_dir=0,
         )
+        self.nav_back = Navigation(self)
+        self.content_area.align_to(self.nav_back, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 8)
+        self.btn_no.set_size(464, 98)
+        self.btn_no.align(lv.ALIGN.BOTTOM_MID, 0, -8)
+        self.btn_yes.set_size(464, 98)
+        self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -8)
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -129,44 +67,43 @@ class QuickStart(FullSizeWindow):
             if utils.lcd_resume():
                 return
             if target == self.btn_yes:
-                if self.selector.get_selected_index() == 0:
-                    from trezor import workflow
-                    from trezor.wire import DUMMY_CONTEXT
-                    from apps.management.reset_device import reset_device
-                    from trezor.messages import ResetDevice
+                from trezor import workflow
+                from trezor.wire import DUMMY_CONTEXT
+                from apps.management.reset_device import reset_device
+                from trezor.messages import ResetDevice
 
-                    # pyright: off
-                    workflow.spawn(
-                        reset_device(
-                            DUMMY_CONTEXT,
-                            ResetDevice(
-                                strength=128,
-                                language=language,
-                                pin_protection=True,
-                            ),
-                        )
+                # pyright: off
+                workflow.spawn(
+                    reset_device(
+                        DUMMY_CONTEXT,
+                        ResetDevice(
+                            strength=128,
+                            language=language,
+                            pin_protection=True,
+                        ),
                     )
-                elif self.selector.get_selected_index() == 1:
-                    from apps.management.recovery_device import recovery_device
-                    from trezor.messages import RecoveryDevice
-                    from trezor import workflow
-                    from trezor.wire import DUMMY_CONTEXT
+                )
+            elif target == self.btn_no:
+                from apps.management.recovery_device import recovery_device
+                from trezor.messages import RecoveryDevice
+                from trezor import workflow
+                from trezor.wire import DUMMY_CONTEXT
 
-                    workflow.spawn(
-                        recovery_device(
-                            DUMMY_CONTEXT,
-                            RecoveryDevice(
-                                enforce_wordlist=True,
-                                language=language,
-                                pin_protection=True,
-                            ),
-                        )
-                    )  # pyright: on
-                else:
-                    return
+                workflow.spawn(
+                    recovery_device(
+                        DUMMY_CONTEXT,
+                        RecoveryDevice(
+                            enforce_wordlist=True,
+                            language=language,
+                            pin_protection=True,
+                        ),
+                    )
+                )  # pyright: on
+            elif target == self.nav_back.nav_btn:
+                pass
             else:
                 return
-            self.destroy()
+            self.destroy(100)
 
 
 class SelectMnemonicNum(FullSizeWindow):

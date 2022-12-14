@@ -144,6 +144,8 @@ trezor.lvglui.i18n.locales.de
 import trezor.lvglui.i18n.locales.de
 trezor.lvglui.i18n.locales.en
 import trezor.lvglui.i18n.locales.en
+trezor.lvglui.i18n.locales.es
+import trezor.lvglui.i18n.locales.es
 trezor.lvglui.i18n.locales.fr
 import trezor.lvglui.i18n.locales.fr
 trezor.lvglui.i18n.locales.it
@@ -152,6 +154,8 @@ trezor.lvglui.i18n.locales.ja
 import trezor.lvglui.i18n.locales.ja
 trezor.lvglui.i18n.locales.ko
 import trezor.lvglui.i18n.locales.ko
+trezor.lvglui.i18n.locales.ru
+import trezor.lvglui.i18n.locales.ru
 trezor.lvglui.i18n.locales.zh_cn
 import trezor.lvglui.i18n.locales.zh_cn
 trezor.lvglui.i18n.locales.zh_hk
@@ -180,12 +184,10 @@ trezor.lvglui.scrs.components.keyboard
 import trezor.lvglui.scrs.components.keyboard
 trezor.lvglui.scrs.components.label
 import trezor.lvglui.scrs.components.label
-trezor.lvglui.scrs.components.list
-import trezor.lvglui.scrs.components.list
 trezor.lvglui.scrs.components.listitem
 import trezor.lvglui.scrs.components.listitem
-trezor.lvglui.scrs.components.navback
-import trezor.lvglui.scrs.components.navback
+trezor.lvglui.scrs.components.navigation
+import trezor.lvglui.scrs.components.navigation
 trezor.lvglui.scrs.components.pageable
 import trezor.lvglui.scrs.components.pageable
 trezor.lvglui.scrs.components.popup
@@ -198,8 +200,6 @@ trezor.lvglui.scrs.components.roller
 import trezor.lvglui.scrs.components.roller
 trezor.lvglui.scrs.components.slider
 import trezor.lvglui.scrs.components.slider
-trezor.lvglui.scrs.components.style
-import trezor.lvglui.scrs.components.style
 trezor.lvglui.scrs.components.theme
 import trezor.lvglui.scrs.components.theme
 trezor.lvglui.scrs.components.transition
@@ -214,12 +214,30 @@ trezor.lvglui.scrs.passphrase
 import trezor.lvglui.scrs.passphrase
 trezor.lvglui.scrs.pinscreen
 import trezor.lvglui.scrs.pinscreen
-trezor.lvglui.scrs.request_word
-import trezor.lvglui.scrs.request_word
+trezor.lvglui.scrs.recovery_device
+import trezor.lvglui.scrs.recovery_device
 trezor.lvglui.scrs.reset_device
 import trezor.lvglui.scrs.reset_device
 trezor.lvglui.scrs.template
 import trezor.lvglui.scrs.template
+trezor.lvglui.scrs.widgets
+import trezor.lvglui.scrs.widgets
+trezor.lvglui.scrs.widgets.button
+import trezor.lvglui.scrs.widgets.button
+trezor.lvglui.scrs.widgets.img
+import trezor.lvglui.scrs.widgets.img
+trezor.lvglui.scrs.widgets.label
+import trezor.lvglui.scrs.widgets.label
+trezor.lvglui.scrs.widgets.lv_obj
+import trezor.lvglui.scrs.widgets.lv_obj
+trezor.lvglui.scrs.widgets.slider
+import trezor.lvglui.scrs.widgets.slider
+trezor.lvglui.scrs.widgets.style
+import trezor.lvglui.scrs.widgets.style
+trezor.lvglui.scrs.widgets.switch
+import trezor.lvglui.scrs.widgets.switch
+trezor.lvglui.scrs.widgets.textarea
+import trezor.lvglui.scrs.widgets.textarea
 trezor.lvglui.scrs.wipe_device
 import trezor.lvglui.scrs.wipe_device
 trezor.messages

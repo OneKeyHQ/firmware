@@ -5,7 +5,7 @@ class DefaultTransition(lv.style_transition_dsc_t):
     def __init__(self) -> None:
         super().__init__()
         props = [
-            lv.STYLE.TRANSFORM_WIDTH,
+            # lv.STYLE.TRANSFORM_WIDTH,
             lv.STYLE.TRANSFORM_HEIGHT,
             lv.STYLE.BG_COLOR,
             # lv.STYLE.TEXT_COLOR,

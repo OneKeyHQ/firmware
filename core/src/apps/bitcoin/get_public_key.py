@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor import wire
 from trezor.enums import InputScriptType
+from trezor.lvglui.scrs import lv
 from trezor.messages import HDNodeType, PublicKey
 
 from apps.common import coininfo, paths
@@ -66,8 +67,16 @@ async def get_public_key(ctx: wire.Context, msg: GetPublicKey) -> PublicKey:
     if msg.show_display:
         from trezor.ui.layouts import show_xpub
 
+        ctx.primary_color, ctx.icon_path = (
+            lv.color_hex(coin.primary_color),
+            f"A:/res/{coin.icon}",
+        )
         path = paths.address_n_to_str(msg.address_n)
-        await show_xpub(ctx, node_xpub, path=path)
+        await show_xpub(
+            ctx,
+            node_xpub,
+            path=path,
+        )
 
     return PublicKey(
         node=node_type,

@@ -1,5 +1,5 @@
 from ..i18n import gettext as _, keys as i18n_keys
-from . import font_PJSBOLD36, lv, lv_colors
+from . import font_PJSBOLD48, lv, lv_colors
 from .common import FullSizeWindow
 
 
@@ -8,7 +8,7 @@ class PairCodeDisplay(FullSizeWindow):
         super().__init__(
             _(i18n_keys.TITLE__BLUETOOTH_PAIR),
             _(i18n_keys.SUBTITLE__BLUETOOTH_PAIR),
-            _(i18n_keys.BUTTON__DONE),
+            _(i18n_keys.BUTTON__CLOSE),
             icon_path="A:/res/ble-blue.png",
         )
         self.pair_code = lv.label(self)
@@ -17,14 +17,14 @@ class PairCodeDisplay(FullSizeWindow):
             lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.pair_code.set_style_text_font(
-            font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT
+            font_PJSBOLD48, lv.PART.MAIN | lv.STATE.DEFAULT
         )
         self.pair_code.set_style_text_align(
-            lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
+            lv.TEXT_ALIGN.LEFT, lv.PART.MAIN | lv.STATE.DEFAULT
         )
-        self.pair_code.set_style_text_letter_space(8, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.pair_code.set_style_text_letter_space(-2, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.pair_code.set_text(pair_code)
-        self.pair_code.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
+        self.pair_code.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 40)
         self.btn_yes.enable(lv_colors.ONEKEY_BLACK)
         self.destroyed = False
 

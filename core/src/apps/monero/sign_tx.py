@@ -2,9 +2,13 @@ import gc
 
 from trezor import log, utils, wire
 from trezor.enums import MessageType
+from trezor.lvglui.scrs import lv
+from trezor.ui.layouts import confirm_final
 
 from apps.common.keychain import auto_keychain
 from apps.monero.signing.state import State
+
+from . import ICON, PRIMARY_COLOR
 
 
 @auto_keychain(__name__)
@@ -14,6 +18,8 @@ async def sign_tx(ctx, received_msg, keychain):
 
     # Splitting ctx.call() to write() and read() helps to reduce memory fragmentation
     # between calls.
+
+    ctx.primary_color, ctx.icon = lv.color_hex(PRIMARY_COLOR), ICON
     while True:
         if __debug__:
             log.debug(__name__, "#### F: %s, A: %s", gc.mem_free(), gc.mem_alloc())
@@ -29,7 +35,7 @@ async def sign_tx(ctx, received_msg, keychain):
         utils.unimport_end(mods)
 
         received_msg = await ctx.read_any(accept_msgs)
-
+    await confirm_final(ctx)
     utils.unimport_end(mods)
     return result_msg
 

@@ -31,13 +31,22 @@ def all_slip44_ids_hardened() -> Iterator[int]:
 
 class NetworkInfo:
     def __init__(
-        self, chain_id: int, slip44: int, shortcut: str, name: str, rskip60: bool
+        self,
+        chain_id: int,
+        slip44: int,
+        shortcut: str,
+        name: str,
+        rskip60: bool,
+        icon: str,
+        primary_color: int,
     ) -> None:
         self.chain_id = chain_id
         self.slip44 = slip44
         self.shortcut = shortcut
         self.name = name
         self.rskip60 = rskip60
+        self.icon = icon
+        self.primary_color = primary_color
 
 
 # fmt: off
@@ -48,6 +57,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ETH",
         name="Ethereum",
         rskip60=False,
+        icon="evm-eth.png",
+        primary_color=0x637FFF,
     )
     yield NetworkInfo(
         chain_id=2,
@@ -55,6 +66,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EXP",
         name="Expanse Network",
         rskip60=False,
+        icon="evm-exp.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=3,
@@ -62,6 +75,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tROP",
         name="Ropsten",
         rskip60=False,
+        icon="evm-rop.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=4,
@@ -69,6 +84,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tRIN",
         name="Rinkeby",
         rskip60=False,
+        icon="evm-rin.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=5,
@@ -76,6 +93,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tGOR",
         name="Görli",
         rskip60=False,
+        icon="evm-gor.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=6,
@@ -83,6 +102,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tKOT",
         name="Ethereum Classic Testnet Kotti",
         rskip60=False,
+        icon="evm-kot.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=7,
@@ -90,6 +111,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TCH",
         name="ThaiChain",
         rskip60=False,
+        icon="evm-tch.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=8,
@@ -97,6 +120,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="UBQ",
         name="Ubiq",
         rskip60=False,
+        icon="evm-ubq.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=9,
@@ -104,6 +129,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TUBQ",
         name="Ubiq Network Testnet",
         rskip60=False,
+        icon="evm-tubq.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=11,
@@ -111,6 +138,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="META",
         name="Metadium",
         rskip60=False,
+        icon="evm-meta.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=12,
@@ -118,6 +147,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tKAL",
         name="Metadium Testnet",
         rskip60=False,
+        icon="evm-kal.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=13,
@@ -125,6 +156,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tsDIODE",
         name="Diode Testnet Staging",
         rskip60=False,
+        icon="evm-dstg.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=14,
@@ -132,6 +165,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="FLR",
         name="Flare",
         rskip60=False,
+        icon="evm-flr.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=15,
@@ -139,6 +174,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="DIODE",
         name="Diode Prenet",
         rskip60=False,
+        icon="evm-diode.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=16,
@@ -146,6 +183,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tCFLR",
         name="Flare Testnet Coston",
         rskip60=False,
+        icon="evm-cflr.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=17,
@@ -153,6 +192,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TFI",
         name="ThaiChain 2.0 ThaiFi",
         rskip60=False,
+        icon="evm-tfi.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=18,
@@ -160,6 +201,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TST",
         name="ThunderCore Testnet",
         rskip60=False,
+        icon="evm-tst.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=19,
@@ -167,6 +210,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SGB",
         name="Songbird Canary-Network",
         rskip60=False,
+        icon="evm-sgb.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=20,
@@ -174,6 +219,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ELA",
         name="Elastos Smart Chain",
         rskip60=False,
+        icon="evm-elaeth.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=24,
@@ -181,6 +228,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="DTH",
         name="Dithereum",
         rskip60=False,
+        icon="evm-dthmainnet.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=25,
@@ -188,6 +237,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CRO",
         name="Cronos",
         rskip60=False,
+        icon="evm-cro.png",
+        primary_color=0x1199FA,
     )
     yield NetworkInfo(
         chain_id=27,
@@ -195,6 +246,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SHIB",
         name="ShibaChain",
         rskip60=False,
+        icon="evm-shib.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=29,
@@ -202,6 +255,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="L1",
         name="Genesis L1",
         rskip60=False,
+        icon="evm-l1.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=30,
@@ -209,6 +264,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="RBTC",
         name="RSK",
         rskip60=True,
+        icon="evm-rsk.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=31,
@@ -216,6 +273,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tRBTC",
         name="RSK Testnet",
         rskip60=False,
+        icon="evm-trsk.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=33,
@@ -223,6 +282,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GooD",
         name="GoodData",
         rskip60=False,
+        icon="evm-good.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=35,
@@ -230,6 +291,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TBG",
         name="TBWG Chain",
         rskip60=False,
+        icon="evm-tbwg.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=38,
@@ -237,6 +300,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="VAL",
         name="Valorbit",
         rskip60=False,
+        icon="evm-val.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=40,
@@ -244,6 +309,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TLOS",
         name="Telos EVM",
         rskip60=False,
+        icon="evm-telos evm.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=42,
@@ -251,6 +318,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tKOV",
         name="Kovan",
         rskip60=False,
+        icon="evm-kov.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=44,
@@ -258,6 +327,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CRAB",
         name="Darwinia Crab Network",
         rskip60=False,
+        icon="evm-crab.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=50,
@@ -265,6 +336,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="XDC",
         name="XinFin Network",
         rskip60=False,
+        icon="evm-xdc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=51,
@@ -272,6 +345,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TXDC",
         name="XinFin Apothem Testnet",
         rskip60=False,
+        icon="evm-txdc.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=52,
@@ -279,6 +354,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="cet",
         name="CoinEx Smart Chain",
         rskip60=False,
+        icon="evm-cet.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=55,
@@ -286,6 +363,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ZYX",
         name="Zyx",
         rskip60=False,
+        icon="evm-zyx.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=56,
@@ -293,6 +372,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BNB",
         name="Binance Smart Chain",
         rskip60=False,
+        icon="evm-bnb.png",
+        primary_color=0xF0B90B,
     )
     yield NetworkInfo(
         chain_id=58,
@@ -300,6 +381,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ONG",
         name="Ontology",
         rskip60=False,
+        icon="evm-ontology mainnet.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=60,
@@ -307,6 +390,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GO",
         name="GoChain",
         rskip60=False,
+        icon="evm-go.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=61,
@@ -314,6 +399,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ETC",
         name="Ethereum Classic",
         rskip60=False,
+        icon="evm-etc.png",
+        primary_color=0x328332,
     )
     yield NetworkInfo(
         chain_id=62,
@@ -321,6 +408,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TETC",
         name="Ethereum Classic Testnet Morden",
         rskip60=False,
+        icon="evm-tetc.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=63,
@@ -328,6 +417,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tMETC",
         name="Ethereum Classic Testnet Mordor",
         rskip60=False,
+        icon="evm-metc.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=64,
@@ -335,6 +426,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ELLA",
         name="Ellaism",
         rskip60=False,
+        icon="evm-ella.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=66,
@@ -342,6 +435,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="OKT",
         name="OKXChain",
         rskip60=False,
+        icon="evm-okt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=67,
@@ -349,6 +444,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tDBM",
         name="DBChain Testnet",
         rskip60=False,
+        icon="evm-dbm.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=68,
@@ -356,6 +453,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SOTER",
         name="SoterOne",
         rskip60=False,
+        icon="evm-so1.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=69,
@@ -363,6 +462,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tKOR",
         name="Optimism Kovan",
         rskip60=False,
+        icon="evm-okov.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=74,
@@ -370,6 +471,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EIDI",
         name="IDChain",
         rskip60=False,
+        icon="evm-idchain.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=76,
@@ -377,6 +480,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MIX",
         name="Mix",
         rskip60=False,
+        icon="evm-mix.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=77,
@@ -384,6 +489,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SPOA",
         name="POA Network Sokol",
         rskip60=False,
+        icon="evm-spoa.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=78,
@@ -391,6 +498,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PETH",
         name="PrimusChain",
         rskip60=False,
+        icon="evm-primuschain.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=80,
@@ -398,6 +507,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="RNA",
         name="GeneChain",
         rskip60=False,
+        icon="evm-genechain.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=82,
@@ -405,6 +516,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MTR",
         name="Meter",
         rskip60=False,
+        icon="evm-meter.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=86,
@@ -412,6 +525,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GT",
         name="GateChain",
         rskip60=False,
+        icon="evm-gt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=87,
@@ -419,6 +534,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SNT",
         name="Nova Network",
         rskip60=False,
+        icon="evm-nnw.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=88,
@@ -426,6 +543,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TOMO",
         name="TomoChain",
         rskip60=False,
+        icon="evm-tomo.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=90,
@@ -433,6 +552,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GAR",
         name="Garizon Stage0",
         rskip60=False,
+        icon="evm-gar-s0.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=96,
@@ -440,6 +561,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="NEXT",
         name="NEXT Smart Chain",
         rskip60=False,
+        icon="evm-nsc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=97,
@@ -447,6 +570,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tBNB",
         name="Binance Smart Chain Testnet",
         rskip60=False,
+        icon="evm-bnbt.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=99,
@@ -454,6 +579,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="POA",
         name="POA Network Core",
         rskip60=False,
+        icon="evm-poa.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100,
@@ -461,6 +588,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="xDAI",
         name="Gnosis Chain (formerly xDai)",
         rskip60=False,
+        icon="evm-gno.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=101,
@@ -468,6 +597,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ETI",
         name="EtherInc",
         rskip60=False,
+        icon="evm-eti.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=105,
@@ -475,6 +606,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="W3G",
         name="Web3Games Devnet",
         rskip60=False,
+        icon="evm-dw3g.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=106,
@@ -482,6 +615,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="VLX",
         name="Velas EVM",
         rskip60=False,
+        icon="evm-vlx.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=108,
@@ -489,6 +624,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TT",
         name="ThunderCore",
         rskip60=False,
+        icon="evm-tt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=111,
@@ -496,6 +633,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ETL",
         name="EtherLite Chain",
         rskip60=False,
+        icon="evm-etl.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=122,
@@ -503,6 +642,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="FUSE",
         name="Fuse",
         rskip60=False,
+        icon="evm-fuse.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=123,
@@ -510,6 +651,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SPARK",
         name="Fuse Sparknet",
         rskip60=False,
+        icon="evm-spark.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=124,
@@ -517,6 +660,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="DWU",
         name="Decentralized Web",
         rskip60=False,
+        icon="evm-dwu.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=126,
@@ -524,6 +669,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="OY",
         name="OYchain",
         rskip60=False,
+        icon="evm-oychain mainnet.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=127,
@@ -531,6 +678,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="FETH",
         name="Factory 127",
         rskip60=False,
+        icon="evm-feth.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=128,
@@ -538,6 +687,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="HT",
         name="Huobi ECO Chain",
         rskip60=False,
+        icon="evm-heco.png",
+        primary_color=0x01943F,
     )
     yield NetworkInfo(
         chain_id=137,
@@ -545,6 +696,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MATIC",
         name="Polygon",
         rskip60=False,
+        icon="evm-matic.png",
+        primary_color=0x8247E5,
     )
     yield NetworkInfo(
         chain_id=142,
@@ -552,6 +705,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="DAX",
         name="DAX CHAIN",
         rskip60=False,
+        icon="evm-dax.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=162,
@@ -559,6 +714,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tPHT",
         name="Lightstreams Testnet",
         rskip60=False,
+        icon="evm-tpht.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=163,
@@ -566,6 +723,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PHT",
         name="Lightstreams",
         rskip60=False,
+        icon="evm-pht.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=186,
@@ -573,6 +732,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="Seele",
         name="Seele",
         rskip60=False,
+        icon="evm-seele.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=188,
@@ -580,6 +741,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BTM",
         name="BMC",
         rskip60=False,
+        icon="evm-bmc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=199,
@@ -587,6 +750,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BTT",
         name="BitTorrent Chain",
         rskip60=False,
+        icon="evm-btt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=211,
@@ -594,6 +759,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="0xF",
         name="Freight Trust Network",
         rskip60=False,
+        icon="evm-edi.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=222,
@@ -601,6 +768,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ASK",
         name="Permission",
         rskip60=False,
+        icon="evm-ask.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=225,
@@ -608,6 +777,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="LA",
         name="LACHAIN",
         rskip60=False,
+        icon="evm-la.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=246,
@@ -615,6 +786,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EWT",
         name="Energy Web Chain",
         rskip60=False,
+        icon="evm-ewt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=250,
@@ -622,6 +795,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="FTM",
         name="Fantom Opera",
         rskip60=False,
+        icon="evm-ftm.png",
+        primary_color=0x1969FF,
     )
     yield NetworkInfo(
         chain_id=256,
@@ -629,6 +804,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="thtt",
         name="Huobi ECO Chain Testnet",
         rskip60=False,
+        icon="evm-hecot.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=258,
@@ -636,6 +813,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SETM",
         name="Setheum",
         rskip60=False,
+        icon="evm-setm.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=262,
@@ -643,6 +822,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SRN",
         name="SUR Blockchain Network",
         rskip60=False,
+        icon="evm-sur.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=269,
@@ -650,6 +831,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="HPB",
         name="High Performance Blockchain",
         rskip60=False,
+        icon="evm-hpb.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=321,
@@ -657,6 +840,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="KCS",
         name="KCC",
         rskip60=False,
+        icon="evm-kcs.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=333,
@@ -664,6 +849,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="W3Q",
         name="Web3Q",
         rskip60=False,
+        icon="evm-w3q.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=336,
@@ -671,6 +858,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SDN",
         name="Shiden",
         rskip60=False,
+        icon="evm-sdn.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=369,
@@ -678,6 +867,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PLS",
         name="PulseChain",
         rskip60=False,
+        icon="evm-pls.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=385,
@@ -685,6 +876,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="LISINSKI",
         name="Lisinski",
         rskip60=False,
+        icon="evm-lisinski.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=420,
@@ -692,6 +885,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tGOR",
         name="Optimistic Ethereum Testnet Goerli",
         rskip60=False,
+        icon="evm-ogor.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=499,
@@ -699,6 +894,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="RUPX",
         name="Rupaya",
         rskip60=False,
+        icon="evm-rupx.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=512,
@@ -706,6 +903,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="AAC",
         name="Double-A Chain",
         rskip60=False,
+        icon="evm-aac.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=555,
@@ -713,6 +912,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CLASS",
         name="Vela1 Chain",
         rskip60=False,
+        icon="evm-class.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=558,
@@ -720,6 +921,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TAO",
         name="Tao Network",
         rskip60=False,
+        icon="evm-tao.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=595,
@@ -727,6 +930,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tmACA",
         name="Acala Mandala Testnet",
         rskip60=False,
+        icon="evm-maca.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=686,
@@ -734,6 +939,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="KAR",
         name="Karura Network",
         rskip60=False,
+        icon="evm-kar.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=707,
@@ -741,6 +948,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BCS",
         name="BlockChain Station",
         rskip60=False,
+        icon="evm-bcs.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=777,
@@ -748,6 +957,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="cTH",
         name="cheapETH",
         rskip60=False,
+        icon="evm-cth.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=787,
@@ -755,6 +966,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ACA",
         name="Acala Network",
         rskip60=False,
+        icon="evm-aca.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=803,
@@ -762,6 +975,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="HAIC",
         name="Haic",
         rskip60=False,
+        icon="evm-haic.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=820,
@@ -769,6 +984,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CLO",
         name="Callisto",
         rskip60=False,
+        icon="evm-clo.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=821,
@@ -776,6 +993,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TCLO",
         name="Callisto Testnet",
         rskip60=False,
+        icon="evm-tclo.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=880,
@@ -783,6 +1002,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="AMBR",
         name="Ambros Chain",
         rskip60=False,
+        icon="evm-ambros.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=888,
@@ -790,6 +1011,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="WAN",
         name="Wanchain",
         rskip60=False,
+        icon="evm-wan.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=977,
@@ -797,6 +1020,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="YETI",
         name="Nepal Blockchain Network",
         rskip60=False,
+        icon="evm-yeti.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=998,
@@ -804,6 +1029,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="L99",
         name="Lucky Network",
         rskip60=False,
+        icon="evm-ln.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1001,
@@ -811,6 +1038,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tKLAY",
         name="Klaytn Testnet Baobab",
         rskip60=False,
+        icon="evm-baobab.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=1007,
@@ -818,6 +1047,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tNEW",
         name="Newton Testnet",
         rskip60=False,
+        icon="evm-tnew.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=1010,
@@ -825,6 +1056,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EVC",
         name="Evrice Network",
         rskip60=False,
+        icon="evm-evc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1012,
@@ -832,6 +1065,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="NEW",
         name="Newton",
         rskip60=False,
+        icon="evm-new.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1022,
@@ -839,6 +1074,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="SKU",
         name="Sakura",
         rskip60=False,
+        icon="evm-sku.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1024,
@@ -846,6 +1083,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CLV",
         name="Clover",
         rskip60=False,
+        icon="evm-clv.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1030,
@@ -853,6 +1092,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CFX",
         name="Conflux eSpace",
         rskip60=False,
+        icon="evm-cfx.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1088,
@@ -860,6 +1101,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="METIS",
         name="Metis Andromeda",
         rskip60=False,
+        icon="evm-metis-andromeda.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1139,
@@ -867,6 +1110,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MATH",
         name="MathChain",
         rskip60=False,
+        icon="evm-math.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1140,
@@ -874,6 +1119,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tMATH",
         name="MathChain Testnet",
         rskip60=False,
+        icon="evm-tmath.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=1197,
@@ -881,6 +1128,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="IORA",
         name="Iora Chain",
         rskip60=False,
+        icon="evm-iora.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1202,
@@ -888,6 +1137,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="WTT",
         name="World Trade Technical Chain",
         rskip60=False,
+        icon="evm-wtt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1213,
@@ -895,6 +1146,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="POP",
         name="Popcateum",
         rskip60=False,
+        icon="evm-popcat.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1214,
@@ -902,6 +1155,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ENTER",
         name="EnterChain",
         rskip60=False,
+        icon="evm-enter.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1280,
@@ -909,6 +1164,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="HO",
         name="HALO",
         rskip60=False,
+        icon="evm-ho.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1284,
@@ -916,6 +1173,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GLMR",
         name="Moonbeam",
         rskip60=False,
+        icon="evm-mbeam.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1285,
@@ -923,6 +1182,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MOVR",
         name="Moonriver",
         rskip60=False,
+        icon="evm-mriver.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1287,
@@ -930,6 +1191,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="DEV",
         name="Moonbase Alpha",
         rskip60=False,
+        icon="evm-mbase.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1288,
@@ -937,6 +1200,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ROC",
         name="Moonrock",
         rskip60=False,
+        icon="evm-mrock.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1618,
@@ -944,6 +1209,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CATE",
         name="Catecoin Chain",
         rskip60=False,
+        icon="evm-cate.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1657,
@@ -951,6 +1218,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BTA",
         name="Btachain",
         rskip60=False,
+        icon="evm-bta.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1856,
@@ -958,6 +1227,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TSF",
         name="Teslafunds",
         rskip60=False,
+        icon="evm-tsf.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1898,
@@ -965,6 +1236,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BOY",
         name="BON Network",
         rskip60=False,
+        icon="evm-boya.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1987,
@@ -972,6 +1245,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EGEM",
         name="EtherGem",
         rskip60=False,
+        icon="evm-egem.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2020,
@@ -979,6 +1254,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="420",
         name="420coin",
         rskip60=False,
+        icon="evm-420.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2021,
@@ -986,6 +1263,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EDG",
         name="Edgeware",
         rskip60=False,
+        icon="evm-edg.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2025,
@@ -993,6 +1272,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="RPG",
         name="Rangers Protocol",
         rskip60=False,
+        icon="evm-rpg.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2100,
@@ -1000,6 +1281,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ECO",
         name="Ecoball",
         rskip60=False,
+        icon="evm-eco.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2213,
@@ -1007,6 +1290,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EVA",
         name="Evanesco",
         rskip60=False,
+        icon="evm-evanesco.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2559,
@@ -1014,6 +1299,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="KTO",
         name="Kortho",
         rskip60=False,
+        icon="evm-ktoc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=3400,
@@ -1021,6 +1308,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PRB",
         name="Paribu Net",
         rskip60=False,
+        icon="evm-prb.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=3966,
@@ -1028,6 +1317,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="DYNO",
         name="DYNO",
         rskip60=False,
+        icon="evm-dyno.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=4689,
@@ -1035,6 +1326,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="IOTX",
         name="IoTeX Network",
         rskip60=False,
+        icon="evm-iotex-mainnet.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=5197,
@@ -1042,6 +1335,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ES",
         name="EraSwap",
         rskip60=False,
+        icon="evm-es.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=5315,
@@ -1049,6 +1344,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="UZMI",
         name="Uzmi Network",
         rskip60=False,
+        icon="evm-uzmi.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=5869,
@@ -1056,6 +1353,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="RBD",
         name="Wegochain Rubidium",
         rskip60=False,
+        icon="evm-rbd.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=6626,
@@ -1063,6 +1362,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PIX",
         name="Pixie Chain",
         rskip60=False,
+        icon="evm-pixie-chain.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=8000,
@@ -1070,6 +1371,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TELE",
         name="Teleport",
         rskip60=False,
+        icon="evm-teleport.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=8217,
@@ -1077,6 +1380,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="KLAY",
         name="Klaytn",
         rskip60=False,
+        icon="evm-cypress.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=8723,
@@ -1084,6 +1389,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="OLO",
         name="TOOL Global",
         rskip60=False,
+        icon="evm-olo.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=8995,
@@ -1091,6 +1398,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="U+25B3",
         name="bloxberg",
         rskip60=False,
+        icon="evm-berg.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=9001,
@@ -1098,6 +1407,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="EVMOS",
         name="Evmos",
         rskip60=False,
+        icon="evm-evmos.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=9100,
@@ -1105,6 +1416,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GNC",
         name="Genesis Coin",
         rskip60=False,
+        icon="evm-genec.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=10101,
@@ -1112,6 +1425,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="GEN",
         name="Blockchain Genesis",
         rskip60=False,
+        icon="evm-gen.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=10823,
@@ -1119,6 +1434,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CCP",
         name="CryptoCoinPay",
         rskip60=False,
+        icon="evm-ccp.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=11111,
@@ -1126,6 +1443,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="WGM",
         name="WAGMI",
         rskip60=False,
+        icon="evm-wagmi.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=12052,
@@ -1133,6 +1452,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ZERO",
         name="Singularity ZERO",
         rskip60=False,
+        icon="evm-zero.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=13381,
@@ -1140,6 +1461,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PHX",
         name="Phoenix",
         rskip60=False,
+        icon="evm-phoenix.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=16000,
@@ -1147,6 +1470,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MTT",
         name="MetaDot",
         rskip60=False,
+        icon="evm-mtt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=19845,
@@ -1154,6 +1479,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BTCIX",
         name="BTCIX Network",
         rskip60=False,
+        icon="evm-btcix.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=21816,
@@ -1161,6 +1488,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="OML",
         name="omChain",
         rskip60=False,
+        icon="evm-oml.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=24484,
@@ -1168,6 +1497,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="WEB",
         name="Webchain",
         rskip60=False,
+        icon="evm-web.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=24734,
@@ -1175,6 +1506,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MINTME",
         name="MintMe.com Coin",
         rskip60=False,
+        icon="evm-mintme.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=31102,
@@ -1182,6 +1515,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ESN",
         name="Ethersocial Network",
         rskip60=False,
+        icon="evm-esn.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=32659,
@@ -1189,6 +1524,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="FSN",
         name="Fusion",
         rskip60=False,
+        icon="evm-fsn.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=39797,
@@ -1196,6 +1533,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="NRG",
         name="Energi",
         rskip60=False,
+        icon="evm-nrg.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=42069,
@@ -1203,6 +1542,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="peggle",
         name="pegglecoin",
         rskip60=False,
+        icon="evm-pc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=42220,
@@ -1210,6 +1551,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="CELO",
         name="Celo",
         rskip60=False,
+        icon="evm-celo.png",
+        primary_color=0x35D07F,
     )
     yield NetworkInfo(
         chain_id=42262,
@@ -1217,6 +1560,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ROSE",
         name="Emerald Paratime",
         rskip60=False,
+        icon="evm-oasis.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=43113,
@@ -1224,6 +1569,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tAVAX",
         name="Avalanche Fuji Testnet",
         rskip60=False,
+        icon="evm-fuji.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=43114,
@@ -1231,6 +1578,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="AVAX",
         name="Avalanche C-Chain",
         rskip60=False,
+        icon="evm-avalanche.png",
+        primary_color=0xE84142,
     )
     yield NetworkInfo(
         chain_id=44787,
@@ -1238,6 +1587,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tCELO",
         name="Celo Alfajores Testnet",
         rskip60=False,
+        icon="evm-alfa.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=47805,
@@ -1245,6 +1596,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="REI",
         name="REI Network",
         rskip60=False,
+        icon="evm-rei.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=49797,
@@ -1252,6 +1605,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tNRG",
         name="Energi Testnet",
         rskip60=False,
+        icon="evm-tnrg.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=53935,
@@ -1259,6 +1614,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="JEWEL",
         name="DFK Chain",
         rskip60=False,
+        icon="evm-dfk.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=62320,
@@ -1266,6 +1623,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tCELO",
         name="Celo Baklava Testnet",
         rskip60=False,
+        icon="evm-bklv.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=63000,
@@ -1273,6 +1632,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ECS",
         name="eCredits",
         rskip60=False,
+        icon="evm-ecs.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=73799,
@@ -1280,6 +1641,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tVT",
         name="Energy Web Volta Testnet",
         rskip60=False,
+        icon="evm-vt.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=78110,
@@ -1287,6 +1650,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="FIN",
         name="Firenze test network",
         rskip60=False,
+        icon="evm-firenze.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=80001,
@@ -1294,6 +1659,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tMATIC",
         name="Mumbai",
         rskip60=False,
+        icon="evm-maticmum.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=99999,
@@ -1301,6 +1668,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="UBC",
         name="UB Smart Chain",
         rskip60=False,
+        icon="evm-usc.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100000,
@@ -1308,6 +1677,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-r.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100001,
@@ -1315,6 +1686,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s0.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100002,
@@ -1322,6 +1695,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s1.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100003,
@@ -1329,6 +1704,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s2.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100004,
@@ -1336,6 +1713,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s3.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100005,
@@ -1343,6 +1722,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s4.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100006,
@@ -1350,6 +1731,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s5.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100007,
@@ -1357,6 +1740,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s6.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=100008,
@@ -1364,6 +1749,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKC",
         name="QuarkChain",
         rskip60=False,
+        icon="evm-qkc-s7.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=108801,
@@ -1371,6 +1758,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="BRO",
         name="BROChain",
         rskip60=False,
+        icon="evm-bro.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=200625,
@@ -1378,6 +1767,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="AKA",
         name="Akroma",
         rskip60=False,
+        icon="evm-aka.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=201018,
@@ -1385,6 +1776,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="atp",
         name="Alaya",
         rskip60=False,
+        icon="evm-alaya.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=210425,
@@ -1392,6 +1785,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="lat",
         name="PlatON",
         rskip60=False,
+        icon="evm-platon.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=246529,
@@ -1399,6 +1794,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ATS",
         name="ARTIS sigma1",
         rskip60=False,
+        icon="evm-ats.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=246785,
@@ -1406,6 +1803,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tATS",
         name="ARTIS Testnet tau1",
         rskip60=False,
+        icon="evm-atstau.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=281121,
@@ -1413,6 +1812,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="$OC",
         name="Social Smart Chain",
         rskip60=False,
+        icon="evm-sochain.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=333999,
@@ -1420,6 +1821,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="POLIS",
         name="Polis",
         rskip60=False,
+        icon="evm-olympus.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=888888,
@@ -1427,6 +1830,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="VS",
         name="Vision -",
         rskip60=False,
+        icon="evm-vision.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=955305,
@@ -1434,6 +1839,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ELV",
         name="Eluvio Content Fabric",
         rskip60=False,
+        icon="evm-elv.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1313114,
@@ -1441,6 +1848,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ETHO",
         name="Etho Protocol",
         rskip60=False,
+        icon="evm-etho.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1313500,
@@ -1448,6 +1857,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="XERO",
         name="Xerom",
         rskip60=False,
+        icon="evm-xero.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=7762959,
@@ -1455,6 +1866,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MUSIC",
         name="Musicoin",
         rskip60=False,
+        icon="evm-music.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=11155111,
@@ -1462,6 +1875,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="tSEP",
         name="Sepolia",
         rskip60=False,
+        icon="evm-sep.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=13371337,
@@ -1469,6 +1884,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TPEP",
         name="PepChain Churchill",
         rskip60=False,
+        icon="evm-tpep.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=18289463,
@@ -1476,6 +1893,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ILT",
         name="IOLite",
         rskip60=False,
+        icon="evm-ilt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=20181205,
@@ -1483,6 +1902,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="QKI",
         name="quarkblockchain",
         rskip60=False,
+        icon="evm-qki.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=28945486,
@@ -1490,6 +1911,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="AUX",
         name="Auxilium Network",
         rskip60=False,
+        icon="evm-auxi.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=35855456,
@@ -1497,6 +1920,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="JOYS",
         name="Joys Digital",
         rskip60=False,
+        icon="evm-joys.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=61717561,
@@ -1504,6 +1929,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="AQUA",
         name="Aquachain",
         rskip60=False,
+        icon="evm-aqua.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=99415706,
@@ -1511,6 +1938,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="TOYS",
         name="Joys Digital TestNet",
         rskip60=False,
+        icon="evm-toys.png",
+        primary_color=0xE55651,
     )
     yield NetworkInfo(
         chain_id=245022934,
@@ -1518,6 +1947,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="NEON",
         name="Neon EVM",
         rskip60=False,
+        icon="evm-neonevm-mainnet.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=311752642,
@@ -1525,6 +1956,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="OLT",
         name="OneLedger",
         rskip60=False,
+        icon="evm-oneledger.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1122334455,
@@ -1532,6 +1965,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="IPOS",
         name="IPOS Network",
         rskip60=False,
+        icon="evm-ipos.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1666600000,
@@ -1539,6 +1974,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ONE",
         name="Harmony",
         rskip60=False,
+        icon="evm-hmy-s0.png",
+        primary_color=0x33D3D5,
     )
     yield NetworkInfo(
         chain_id=1666600001,
@@ -1546,6 +1983,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ONE",
         name="Harmony",
         rskip60=False,
+        icon="evm-hmy-s1.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1666600002,
@@ -1553,6 +1992,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ONE",
         name="Harmony",
         rskip60=False,
+        icon="evm-hmy-s2.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=1666600003,
@@ -1560,6 +2001,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="ONE",
         name="Harmony",
         rskip60=False,
+        icon="evm-hmy-s3.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=2021121117,
@@ -1567,6 +2010,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="HOP",
         name="DataHopper",
         rskip60=False,
+        icon="evm-hop.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=3125659152,
@@ -1574,6 +2019,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PIRL",
         name="Pirl",
         rskip60=False,
+        icon="evm-pirl.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=11297108109,
@@ -1581,6 +2028,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="PALM",
         name="Palm",
         rskip60=False,
+        icon="evm-palm.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=197710212030,
@@ -1588,6 +2037,8 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="NTT",
         name="Ntity",
         rskip60=False,
+        icon="evm-ntt.png",
+        primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
         chain_id=6022140761023,
@@ -1595,4 +2046,6 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="MOLE",
         name="Molereum Network",
         rskip60=False,
+        icon="evm-mole.png",
+        primary_color=0xFFFFFF,
     )

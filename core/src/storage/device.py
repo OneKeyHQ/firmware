@@ -68,9 +68,9 @@ HOMESCREEN_MAXSIZE = 16384
 LABEL_MAXLENGTH = 32
 
 if __debug__:
-    AUTOLOCK_DELAY_MINIMUM = 10 * 1000  # 10 seconds
+    AUTOLOCK_DELAY_MINIMUM = AUTOSHUTDOWN_DELAY_MINIMUM = 10 * 1000  # 10 seconds
 else:
-    AUTOLOCK_DELAY_MINIMUM = 60 * 1000  # 1 minute
+    AUTOLOCK_DELAY_MINIMUM = AUTOSHUTDOWN_DELAY_MINIMUM = 60 * 1000  # 1 minute
 
 AUTOLOCK_DELAY_DEFAULT = AUTOSHUTDOWN_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
 # autolock intervals larger than AUTOLOCK_DELAY_MAXIMUM cause issues in the scheduler
@@ -438,7 +438,7 @@ def set_autolock_delay_ms(delay_ms: int) -> None:
 
 
 def _normalize_autoshutdown_delay(delay_ms: int) -> int:
-    delay_ms = max(delay_ms, AUTOSHUTDOWN_DELAY_DEFAULT)
+    delay_ms = max(delay_ms, AUTOSHUTDOWN_DELAY_MINIMUM)
     delay_ms = min(delay_ms, AUTOSHUTDOWN_DELAY_MAXIMUM)
     return delay_ms
 

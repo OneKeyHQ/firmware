@@ -10,6 +10,7 @@ from trezor.messages import EntropyAck, EntropyRequest, Success
 from trezor.ui.layouts import (
     confirm_backup,
     confirm_reset_device,
+    request_strength,
     show_onekey_app_guide,
 )
 
@@ -57,7 +58,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         utils.play_dead()
 
         # on device reset, we need to ask for a new strength to override the default  value 12
-        # msg.strength = await request_strength()
+        msg.strength = await request_strength()
     try:
         # request and set new PIN
         if msg.pin_protection:

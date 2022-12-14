@@ -1,5 +1,5 @@
 from storage import cache, common, device
-from trezor import config, io
+from trezor import config, io, utils
 
 
 def set_current_version() -> None:
@@ -16,7 +16,8 @@ def clean_flash() -> None:
 def wipe() -> None:
     config.wipe()
     cache.clear_all()
-    clean_flash()
+    if not utils.EMULATOR:
+        clean_flash()
 
 
 def init_unlocked() -> None:

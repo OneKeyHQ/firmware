@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
+from trezor.lvglui.scrs import lv
 from trezor.messages import ConfluxMessageSignature
 from trezor.ui.layouts import confirm_signverify
 from trezor.utils import HashWriter
@@ -11,6 +12,7 @@ from apps.common.helpers import validate_message
 from apps.common.keychain import Keychain, auto_keychain
 from apps.common.signverify import decode_message
 
+from . import ICON, PRIMARY_COLOR
 from .helpers import address_from_bytes, address_from_hex
 
 if TYPE_CHECKING:
@@ -39,6 +41,7 @@ async def sign_message(
 
     address = address_from_bytes(node.ethereum_pubkeyhash())
     cfx_address = address_from_hex(address, 1029)
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_signverify(
         ctx, "CFX", decode_message(message), cfx_address, verify=False
     )

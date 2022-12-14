@@ -5,6 +5,8 @@ from trezor import wire
 from trezor.enums import EthereumDataType
 from trezor.messages import EthereumFieldType
 
+from . import networks
+
 if TYPE_CHECKING:
     from .networks import NetworkInfo
 
@@ -124,3 +126,13 @@ def from_bytes_bigendian_signed(b: bytes) -> int:
         return -result - 1
     else:
         return int.from_bytes(b, "big")
+
+
+def get_color_and_icon(slip44_id):
+    from trezor.lvglui.scrs import lv
+
+    network: NetworkInfo | None = networks.by_slip44(slip44_id)
+    if network:
+        return lv.color_hex(network.primary_color), f"A:/res/{network.icon}"
+    else:
+        return lv.color_hex(0xFFFFFF), "A:/res/evm-eth.png"

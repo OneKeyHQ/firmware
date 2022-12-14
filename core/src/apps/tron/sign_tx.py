@@ -1,14 +1,16 @@
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha256
+from trezor.lvglui.scrs import lv
 from trezor.messages import TronSignedTx, TronSignTx
+from trezor.ui.layouts import confirm_final
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 from apps.tron.address import _address_base58, get_address_from_public_key
 from apps.tron.serialize import serialize
 
-from . import layout, tokens
+from . import ICON, PRIMARY_COLOR, layout, tokens
 
 
 @auto_keychain(__name__)
@@ -25,7 +27,7 @@ async def sign_tx(
     seckey = node.private_key()
     public_key = secp256k1.publickey(seckey, False)
     address = get_address_from_public_key(public_key[:65])
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     try:
         await _require_confirm_by_type(ctx, msg, address)
     except AttributeError:
@@ -48,7 +50,6 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
     # Confirm transaction
     contract = transaction.contract
     if contract.transfer_contract:
-        from trezor.ui.layouts import confirm_final
 
         if contract.transfer_contract.amount is None:
             raise wire.DataError("Invalid Tron transfer amount")
@@ -58,11 +59,7 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
             contract.transfer_contract.to_address,
             contract.transfer_contract.amount,
         )
-        await confirm_final(ctx)
-
-        return
-
-    if contract.trigger_smart_contract:
+    elif contract.trigger_smart_contract:
         # check if TRC20 transfer/approval
         data = contract.trigger_smart_contract.data
         action = None
@@ -106,14 +103,14 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
                     network="TRON",
                 )
         else:
-            from trezor.ui.layouts.lvgl import confirm_blind_sign_common, confirm_final
+            from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
             await confirm_blind_sign_common(ctx, owner_address, data)
-            await confirm_final(ctx)
 
-        return
+    else:
+        raise wire.DataError("Invalid transaction type")
 
-    raise wire.DataError("Invalid transaction type")
+    await confirm_final(ctx)
 
 
 def validate(msg: TronSignTx):

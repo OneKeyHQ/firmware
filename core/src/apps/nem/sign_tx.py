@@ -2,13 +2,25 @@ from typing import TYPE_CHECKING
 
 from trezor import wire
 from trezor.crypto.curve import ed25519
+from trezor.lvglui.scrs import lv
 from trezor.messages import NEMSignedTx, NEMSignTx
+from trezor.ui.layouts import confirm_final
 
 from apps.common import seed
 from apps.common.keychain import with_slip44_keychain
 from apps.common.paths import validate_path
 
-from . import CURVE, PATTERNS, SLIP44_ID, mosaic, multisig, namespace, transfer
+from . import (
+    CURVE,
+    ICON,
+    PATTERNS,
+    PRIMARY_COLOR,
+    SLIP44_ID,
+    mosaic,
+    multisig,
+    namespace,
+    transfer,
+)
 from .helpers import NEM_HASH_ALG, check_path
 from .validators import validate
 
@@ -28,7 +40,7 @@ async def sign_tx(ctx: wire.Context, msg: NEMSignTx, keychain: Keychain) -> NEMS
     )
 
     node = keychain.derive(msg.transaction.address_n)
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     if msg.multisig:
         if msg.multisig.signer is None:
             raise wire.DataError("No signer provided")
@@ -76,8 +88,8 @@ async def sign_tx(ctx: wire.Context, msg: NEMSignTx, keychain: Keychain) -> NEMS
             tx = multisig.initiate(
                 seed.remove_ed25519_prefix(node.public_key()), msg.transaction, tx
             )
-
     signature = ed25519.sign(node.private_key(), tx, NEM_HASH_ALG)
+    await confirm_final(ctx)
 
     return NEMSignedTx(
         data=tx,

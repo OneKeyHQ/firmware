@@ -1,52 +1,127 @@
+from trezor import utils
 from trezor.lvglui.scrs.components.button import NormalButton
 from trezor.lvglui.scrs.components.pageable import PageAbleMessage
 
 from ..i18n import gettext as _, keys as i18n_keys
 from ..lv_colors import lv_colors
-from . import font_PJSBOLD36
+from . import font_PJSBOLD36, font_PJSBOLD48, font_STATUS_BAR
 from .common import FullSizeWindow, lv
 from .components.container import ContainerFlexCol
 from .components.listitem import DisplayItem
 from .components.qrcode import QRCode
+from .widgets.style import StyleWrapper
 
 
 class Address(FullSizeWindow):
-    def __init__(self, title, path, address, xpubs=None, multisig_index=0):
+    class SHOW_TYPE:
+        ADDRESS = 0
+        QRCODE = 1
+
+    def __init__(
+        self,
+        title,
+        path,
+        address,
+        primary_color,
+        icon_path: str,
+        xpubs=None,
+        multisig_index: int | None = 0,
+    ):
         super().__init__(
-            title, None, confirm_text=_(i18n_keys.BUTTON__DONE), anim_dir=2
+            title,
+            address,
+            confirm_text=_(i18n_keys.BUTTON__DONE),
+            cancel_text=_(i18n_keys.BUTTON__QRCODE),
+            anim_dir=2,
+            primary_color=primary_color,
         )
-        self.qr = QRCode(self.content_area, address)
-        self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
-        self.container = ContainerFlexCol(self.content_area, self.qr)
+        self.path = path
+        self.xpubs = xpubs
+        self.multisig_index = multisig_index
+        self.address = address
+        self.icon = icon_path
+        if primary_color:
+            self.title.add_style(StyleWrapper().text_color(primary_color), 0)
+        if __debug__:
+            self.subtitle.add_style(
+                StyleWrapper().text_font(font_PJSBOLD36).text_color(lv_colors.WHITE), 0
+            )
+        else:
+            self.subtitle.add_style(
+                StyleWrapper().text_font(font_PJSBOLD48).text_color(lv_colors.WHITE), 0
+            )
+        self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 48)
+        self.show_address()
+
+    def show_address(self):
+        self.current = self.SHOW_TYPE.ADDRESS
+        if hasattr(self, "qr"):
+            self.qr.delete()
+            del self.qr
+        self.btn_no.label.set_text(_(i18n_keys.BUTTON__QRCODE))
+        self.container = ContainerFlexCol(
+            self.content_area, self.subtitle, pos=(0, 16), padding_row=8
+        )
         self.item1 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__PATH__COLON), path
+            self.container, _(i18n_keys.LIST_KEY__PATH__COLON), self.path
         )
-        self.item2 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
-        )
-        if xpubs:
-            self.title.align(lv.ALIGN.TOP_MID, 0, 100)
-            self.btn_yes.align(lv.ALIGN.BOTTOM_MID, 0, -30)
-        for i, xpub in enumerate(xpubs or []):
+        # self.item2 = DisplayItem(
+        #     self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
+        # )
+        # if xpubs:
+        #     self.title.align(lv.ALIGN.TOP_MID, 0, 100)
+        #     self.btn_yes.align(lv.ALIGN.BOTTOM_MID, 0, -30)
+        self.current = 0
+        for i, xpub in enumerate(self.xpubs or []):
             self.item3 = DisplayItem(
                 self.container,
                 _(i18n_keys.LIST_KEY__XPUB_STR_MINE__COLON).format(i + 1)
-                if i == multisig_index
+                if i == self.multisig_index
                 else _(i18n_keys.LIST_KEY__XPUB_STR_COSIGNER__COLON).format(i + 1),
                 xpub,
             )
 
+    def show_qr_code(self):
+        self.current = self.SHOW_TYPE.QRCODE
+        if hasattr(self, "container"):
+            self.container.delete()
+            del self.container
+        self.btn_no.label.set_text(_(i18n_keys.BUTTON__ADDRESS))
+        self.qr = QRCode(self.content_area, self.address, self.icon)
+        self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            utils.lcd_resume()
+            if target == self.btn_no:
+                if self.current == self.SHOW_TYPE.ADDRESS:
+                    self.show_qr_code()
+                else:
+                    self.show_address()
+            elif target == self.btn_yes:
+                self.show_unload_anim()
+                self.channel.publish(1)
+
 
 class XpubOrPub(FullSizeWindow):
-    def __init__(self, title, path, xpub=None, pubkey=None):
+    def __init__(
+        self, title, path, primary_color, icon_path: str, xpub=None, pubkey=None
+    ):
         super().__init__(
             title,
             None,
             _(i18n_keys.BUTTON__EXPORT),
             _(i18n_keys.BUTTON__CANCEL),
             anim_dir=2,
+            icon_path=icon_path,
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.title.add_style(StyleWrapper().text_color(primary_color), 0)
+        self.container = ContainerFlexCol(
+            self.content_area, self.title, pos=(0, 40), padding_row=16
+        )
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__PATH__COLON), path
         )
@@ -60,53 +135,79 @@ class XpubOrPub(FullSizeWindow):
 
 
 class Message(FullSizeWindow):
-    def __init__(self, title, address, message):
+    def __init__(self, title, address, message, primary_color, icon_path):
         super().__init__(
             title,
             None,
             _(i18n_keys.BUTTON__SIGN),
             _(i18n_keys.BUTTON__CANCEL),
             anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.primary_color = primary_color
+        self.container = ContainerFlexCol(
+            self.content_area, self.title, pos=(0, 40), padding_row=8
+        )
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
         )
-        self.item2 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MESSAGE__COLON), message
-        )
-        if len(message) > 100:
-            self.show_full_message = NormalButton(
-                self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
-            )
-            self.show_full_message.align_to(self.item2, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
-            self.show_full_message.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.long_message = False
+        if len(message) > 80:
+            # self.show_full_message = NormalButton(
+            #     self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
+            # )
+            # self.show_full_message.align_to(self.item2, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+            # self.show_full_message.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.message = message
+            self.long_message = True
+            self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
+        else:
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__MESSAGE__COLON), message
+            )
 
-    def on_click(self, event_obj):
+    def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
-            if target == self.show_full_message:
-                PageAbleMessage(self.message, _(i18n_keys.BUTTON__CLOSE))
+            if target == self.btn_yes:
+                if self.long_message:
+                    PageAbleMessage(
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
+                        self.message,
+                        self.channel,
+                        primary_color=self.primary_color,
+                        confirm_text=_(i18n_keys.BUTTON__SIGN),
+                    )
+                    self.destroy()
+                else:
+                    self.show_unload_anim()
+                    self.channel.publish(1)
+            elif target == self.btn_no:
+                self.show_dismiss_anim()
+                self.channel.publish(0)
 
 
 class TransactionOverview(FullSizeWindow):
-    def __init__(self, title, amount, address):
+    def __init__(self, title, amount, address, primary_color, icon_path):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__VIEW),
+            _(i18n_keys.BUTTON__REJECT),
             anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
-            f"{_(i18n_keys.INSERT__SEND)} #FFFFFF {amount} # {_(i18n_keys.INSERT__TO)}:",
+            f"#878787 {_(i18n_keys.INSERT__SEND)}#  {amount}  #878787 {_(i18n_keys.INSERT__TO)}#",
             address,
         )
         self.item1.label_top.set_recolor(True)
+        self.item1.set_style_bg_color(lv_colors.BLACK, 0)
 
 
 class TransactionDetailsETH(FullSizeWindow):
@@ -122,15 +223,16 @@ class TransactionDetailsETH(FullSizeWindow):
         max_priority_fee_per_gas=None,
         max_fee_per_gas=None,
         total_amount=None,
+        primary_color=lv_colors.ONEKEY_GREEN,
     ):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -166,31 +268,48 @@ class TransactionDetailsETH(FullSizeWindow):
 
 
 class ContractDataOverview(FullSizeWindow):
-    def __init__(self, title, description, data):
+    def __init__(self, title, description, data, primary_color):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.primary_color = primary_color
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__SIZE__COLON), description
         )
-        self.item2 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__DATA__COLON), data
-        )
-        if len(data) > 100:
-            self.show_full_data = NormalButton(
-                self, _(i18n_keys.BUTTON__VIEW_FULL_DATA)
-            )
-            self.show_full_data.align_to(self.item2, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
-            self.show_full_data.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.long_data = False
+        if len(data) > 80:
             self.data = data
+            self.long_data = True
+            self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
+        else:
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__DATA__COLON), data
+            )
 
-    def on_click(self, event_obj):
+    def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
-            if target == self.show_full_data:
-                PageAbleMessage(self.data, _(i18n_keys.BUTTON__CLOSE))
+            if target == self.btn_yes:
+                if self.long_data:
+                    PageAbleMessage(
+                        _(i18n_keys.TITLE__VIEW_DATA),
+                        self.data,
+                        self.channel,
+                        primary_color=self.primary_color,
+                    )
+                    self.destroy()
+                else:
+                    self.show_unload_anim()
+                    self.channel.publish(1)
+            elif target == self.btn_no:
+                self.show_dismiss_anim()
+                self.channel.publish(0)
 
 
 class BlobDisPlay(FullSizeWindow):
@@ -201,6 +320,7 @@ class BlobDisPlay(FullSizeWindow):
         content: str,
         icon_path: str = "A:/res/warning.png",
         anim_dir: int = 1,
+        primary_color=lv_colors.ONEKEY_GREEN,
     ):
         super().__init__(
             title,
@@ -209,47 +329,62 @@ class BlobDisPlay(FullSizeWindow):
             _(i18n_keys.BUTTON__CANCEL),
             icon_path=icon_path,
             anim_dir=anim_dir,
+            primary_color=primary_color or lv_colors.ONEKEY_GREEN,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(self.container, description, content)
-        if len(content) > 300:
-            self.show_full_data = NormalButton(
-                self, _(i18n_keys.BUTTON__VIEW_FULL_DATA)
-            )
-            self.show_full_data.align_to(self.item1, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
-            self.show_full_data.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.long_message = False
+        if len(content) > 240:
+            self.long_message = True
+            self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
             self.data = content
 
-    def on_click(self, event_obj):
+    def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
-            if target == self.show_full_data:
-                PageAbleMessage(self.data, _(i18n_keys.BUTTON__CLOSE))
+            if target == self.btn_yes:
+                if self.long_message:
+                    PageAbleMessage(
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
+                        self.message,
+                        self.channel,
+                    )
+                    self.destroy()
+                else:
+                    self.show_unload_anim()
+                    self.channel.publish(1)
+            elif target == self.btn_no:
+                self.show_dismiss_anim()
+                self.channel.publish(0)
 
 
 class ConfirmMetaData(FullSizeWindow):
-    def __init__(self, title, subtitle, description, data):
+    def __init__(self, title, subtitle, description, data, primary_color):
         super().__init__(
-            title, subtitle, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            subtitle,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
         if description:
             self.container = ContainerFlexCol(
-                self.content_area, self.subtitle, pos=(0, 48)
+                self.content_area, self.subtitle, pos=(0, 40)
             )
             self.item1 = DisplayItem(self.container, description, data)
 
 
 class TransactionDetailsBTC(FullSizeWindow):
-    def __init__(self, title: str, amount: str, fee: str, total: str):
+    def __init__(self, title: str, amount: str, fee: str, total: str, primary_color):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -260,15 +395,15 @@ class TransactionDetailsBTC(FullSizeWindow):
 
 
 class JointTransactionDetailsBTC(FullSizeWindow):
-    def __init__(self, title: str, amount: str, total: str):
+    def __init__(self, title: str, amount: str, total: str, primary_color):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT_YOU_SPEND__COLON), amount
         )
@@ -278,14 +413,15 @@ class JointTransactionDetailsBTC(FullSizeWindow):
 
 
 class ModifyFee(FullSizeWindow):
-    def __init__(self, description: str, fee_change: str, fee_new: str):
+    def __init__(self, description: str, fee_change: str, fee_new: str, primary_color):
         super().__init__(
             _(i18n_keys.TITLE__MODIFY_FEE),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(self.container, description, fee_change)
         self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__NEW_FEE__COLON), fee_new
@@ -294,15 +430,21 @@ class ModifyFee(FullSizeWindow):
 
 class ModifyOutput(FullSizeWindow):
     def __init__(
-        self, address: str, description: str, amount_change: str, amount_new: str
+        self,
+        address: str,
+        description: str,
+        amount_change: str,
+        amount_new: str,
+        primary_Color,
     ):
         super().__init__(
             _(i18n_keys.TITLE__MODIFY_AMOUNT),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_Color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
         )
@@ -313,26 +455,30 @@ class ModifyOutput(FullSizeWindow):
 
 
 class ConfirmReplacement(FullSizeWindow):
-    def __init__(self, title: str, txid: str):
+    def __init__(self, title: str, txid: str, primary_color):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TRANSACTION_ID__COLON), txid
         )
 
 
 class ConfirmPaymentRequest(FullSizeWindow):
-    def __init__(self, title: str, subtitle, amount: str, to_addr: str):
+    def __init__(self, title: str, subtitle, amount: str, to_addr: str, primary_color):
         super().__init__(
             title,
             subtitle,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), to_addr
         )
@@ -342,11 +488,17 @@ class ConfirmPaymentRequest(FullSizeWindow):
 
 
 class ConfirmDecredSstxSubmission(FullSizeWindow):
-    def __init__(self, title: str, subtitle: str, amount: str, to_addr: str):
+    def __init__(
+        self, title: str, subtitle: str, amount: str, to_addr: str, primary_color
+    ):
         super().__init__(
-            title, subtitle, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            subtitle,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -357,12 +509,21 @@ class ConfirmDecredSstxSubmission(FullSizeWindow):
 
 class ConfirmCoinJoin(FullSizeWindow):
     def __init__(
-        self, title: str, coin_name: str, max_rounds: str, max_fee_per_vbyte: str
+        self,
+        title: str,
+        coin_name: str,
+        max_rounds: str,
+        max_fee_per_vbyte: str,
+        primary_color,
     ):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__COIN_NAME__COLON), coin_name
         )
@@ -377,37 +538,46 @@ class ConfirmCoinJoin(FullSizeWindow):
 
 
 class ConfirmSignIdentity(FullSizeWindow):
-    def __init__(self, title: str, identity: str, subtitle: str | None):
+    def __init__(self, title: str, identity: str, subtitle: str | None, primary_color):
         super().__init__(
-            title, subtitle, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            subtitle,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
         align_base = self.title if subtitle is None else self.subtitle
-        self.container = ContainerFlexCol(self.content_area, align_base, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, align_base, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__IDENTITY__COLON), identity
         )
 
 
 class ConfirmProperties(FullSizeWindow):
-    def __init__(self, title: str, properties: list[tuple[str, str]]):
+    def __init__(self, title: str, properties: list[tuple[str, str]], primary_color):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         for key, value in properties:
             self.item = DisplayItem(self.container, f"{key.upper()}", value)
 
 
 class ConfirmTransferBinance(FullSizeWindow):
-    def __init__(self, items: list[tuple[str, str, str]]):
+    def __init__(self, items: list[tuple[str, str, str]], primary_color, icon_path):
         super().__init__(
             _(i18n_keys.TITLE__CONFIRM_TRANSFER),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         for key, value, address in items:
             self.item1 = DisplayItem(self.container, key, "")
             self.item2 = DisplayItem(
@@ -419,11 +589,17 @@ class ConfirmTransferBinance(FullSizeWindow):
 
 
 class ShouldShowMore(FullSizeWindow):
-    def __init__(self, title: str, key: str, value: str, button_text: str):
+    def __init__(
+        self, title: str, key: str, value: str, button_text: str, primary_color
+    ):
         super().__init__(
-            title, None, _(i18n_keys.BUTTON__CONTINUE), _(i18n_keys.BUTTON__CANCEL)
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item = DisplayItem(self.container, f"{key}:", value)
         self.show_more = NormalButton(self.content_area, button_text)
         self.show_more.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
@@ -440,15 +616,17 @@ class ShouldShowMore(FullSizeWindow):
 
 
 class EIP712DOMAIN(FullSizeWindow):
-    def __init__(self, title: str, **kwargs):
+    def __init__(self, title: str, primary_color, icon_path, **kwargs):
         super().__init__(
             title,
             None,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
             anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         if kwargs.get("name"):
             self.item1 = DisplayItem(
                 self.container, "name (string):", kwargs.get("name")
@@ -481,16 +659,17 @@ class TransactionDetailsTRON(FullSizeWindow):
         address_to,
         amount,
         fee_max,
+        primary_color,
         total_amount=None,
     ):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -534,38 +713,49 @@ class PassphraseDisplayConfirm(FullSizeWindow):
 
         self.panel = lv.obj(self.content_area)
         self.panel.remove_style_all()
-        self.panel.set_size(432, lv.SIZE.CONTENT)
-        self.panel.set_style_min_height(80, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 48)
-        self.panel.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.panel.set_style_bg_color(
-            lv_colors.ONEKEY_BLACK_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.panel.set_size(464, 264)
+        self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
+
+        self.panel.add_style(
+            StyleWrapper()
+            .bg_color(lv_colors.ONEKEY_BLACK_3)
+            .bg_opa()
+            .border_width(0)
+            .text_font(font_PJSBOLD36)
+            .text_color(lv_colors.LIGHT_GRAY)
+            .text_align_left()
+            .pad_all(8)
+            .radius(0),
+            0,
         )
-        self.panel.set_style_bg_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.panel.set_style_pad_all(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.panel.set_style_radius(16, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.panel.set_style_text_color(
-            lv_colors.LIGHT_GRAY, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.panel.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.content = lv.label(self.panel)
-        self.content.set_size(400, lv.SIZE.CONTENT)
+        self.content.set_size(lv.pct(100), lv.pct(100))
         self.content.set_text(passphrase)
         self.content.set_long_mode(lv.label.LONG.WRAP)
-        self.content.set_style_text_align(
-            lv.TEXT_ALIGN.CENTER, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.input_count_tips = lv.label(self.content_area)
+        self.input_count_tips.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 8)
+        self.input_count_tips.add_style(
+            StyleWrapper()
+            .text_font(font_STATUS_BAR)
+            .text_letter_space(-1)
+            .text_align_left()
+            .text_color(lv_colors.LIGHT_GRAY),
+            0,
         )
+        self.input_count_tips.set_text(f"{len(passphrase)}/50")
 
 
 class SolBlindingSign(FullSizeWindow):
-    def __init__(self, fee_payer: str, message_hex: str):
+    def __init__(self, fee_payer: str, message_hex: str, primary_color, icon_path):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
@@ -580,14 +770,17 @@ class SolBlindingSign(FullSizeWindow):
 
 
 class SolTransfer(FullSizeWindow):
-    def __init__(self, from_addr: str, fee_payer: str, to_addr: str, amount: str):
+    def __init__(
+        self, from_addr: str, fee_payer: str, to_addr: str, amount: str, primary_color
+    ):
         super().__init__(
             title=_(i18n_keys.TITLE__STR_TRANSFER).format("SOL"),
             subtitle=None,
             confirm_text=_(i18n_keys.BUTTON__CONTINUE),
-            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            cancel_text=_(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -610,14 +803,16 @@ class SolCreateAssociatedTokenAccount(FullSizeWindow):
         associated_token_account: str,
         wallet_address: str,
         token_mint: str,
+        primary_color,
     ):
         super().__init__(
             title=_(i18n_keys.TITLE__CREATE_TOKEN_ACCOUNT),
             subtitle=None,
             confirm_text=_(i18n_keys.BUTTON__CONTINUE),
-            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            cancel_text=_(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
             _(i18n_keys.LIST_KEY__NEW_TOKEN_ACCOUNT),
@@ -645,15 +840,17 @@ class SolTokenTransfer(FullSizeWindow):
         amount: str,
         source_owner: str,
         fee_payer: str,
+        primary_color,
         token_mint: str | None = None,
     ):
         super().__init__(
             title=_(i18n_keys.TITLE__TOKEN_TRANSFER),
             subtitle=None,
             confirm_text=_(i18n_keys.BUTTON__CONTINUE),
-            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            cancel_text=_(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -676,14 +873,16 @@ class SolTokenTransfer(FullSizeWindow):
 
 
 class BlindingSignCommon(FullSizeWindow):
-    def __init__(self, signer: str):
+    def __init__(self, signer: str, primary_color, icon_path):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
@@ -710,14 +909,16 @@ class Modal(FullSizeWindow):
 
 
 class AlgoCommon(FullSizeWindow):
-    def __init__(self, type: str):
+    def __init__(self, type: str, primary_color, icon_path):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
@@ -736,15 +937,16 @@ class AlgoPayment(FullSizeWindow):
         note,
         fee,
         amount,
+        primary_color,
     ):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -786,15 +988,16 @@ class AlgoAssetFreeze(FullSizeWindow):
         new_freeze_state,
         genesis_id,
         note,
+        primary_color,
     ):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
@@ -840,15 +1043,16 @@ class AlgoAssetXfer(FullSizeWindow):
         rekey_to,
         genesis_id,
         note,
+        primary_color,
     ):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
@@ -908,15 +1112,16 @@ class AlgoAssetCfg(FullSizeWindow):
         rekey_to,
         genesis_id,
         note,
+        primary_color,
     ):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
@@ -1003,15 +1208,16 @@ class AlgoKeyregOnline(FullSizeWindow):
         rekey_to,
         genesis_id,
         note,
+        primary_color,
     ):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
@@ -1044,15 +1250,15 @@ class AlgoKeyregOnline(FullSizeWindow):
 
 
 class AlgoKeyregNonp(FullSizeWindow):
-    def __init__(self, sender, fee, nonpart, rekey_to, genesis_id, note):
+    def __init__(self, sender, fee, nonpart, rekey_to, genesis_id, note, primary_color):
         super().__init__(
             _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("ALGO"),
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
@@ -1078,14 +1284,16 @@ class AlgoKeyregNonp(FullSizeWindow):
 
 
 class AlgoApplication(FullSizeWindow):
-    def __init__(self, signer: str):
+    def __init__(self, signer: str, primary_color, icon_path):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
-            _(i18n_keys.BUTTON__CANCEL),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+            icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
@@ -1106,15 +1314,16 @@ class RipplePayment(FullSizeWindow):
         fee_max,
         total_amount=None,
         tag=None,
+        primary_color=None,
     ):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__SLIDE_TO_SIGN),
-            _(i18n_keys.BUTTON__CANCEL),
-            hold_confirm=True,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )

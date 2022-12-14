@@ -4,34 +4,45 @@ from trezor.lvglui.lv_colors import lv_colors
 from .common import FullSizeWindow, lv
 from .components.container import ContainerFlexCol
 from .components.listitem import ListItemWithLeadingCheckbox
+from .widgets.style import StyleWrapper
 
 
 class WipeDevice(FullSizeWindow):
     def __init__(self):
-        title = _(i18n_keys.TITLE__WIPE_DEVICE)
-        subtitle = _(i18n_keys.SUBTITLE_WIPE_DEVICE_WIPE_DEVICE)
-        confirm_text = _(i18n_keys.BUTTON__VERIFY_PIN)
+        title = _(i18n_keys.TITLE__RESET_DEVICE)
+        subtitle = _(i18n_keys.SUBTITLE__RESET_DEVICE)
+        confirm_text = _(i18n_keys.BUTTON__CONTINUE)
         cancel_text = _(i18n_keys.BUTTON__CANCEL)
         icon_path = "A:/res/warning.png"
         super().__init__(
             title, subtitle, confirm_text, cancel_text, icon_path, None, anim_dir=2
         )
         self.btn_yes.set_style_bg_color(
-            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            lv_colors.ONEKEY_YELLOW, lv.PART.MAIN | lv.STATE.DEFAULT
+        )
+        self.status_bar = lv.obj(self)
+        self.status_bar.remove_style_all()
+        self.status_bar.set_size(lv.pct(100), 44)
+        self.status_bar.add_style(
+            StyleWrapper()
+            .bg_opa()
+            .align(lv.ALIGN.TOP_LEFT)
+            .bg_img_src("A:/res/warning_bar.png"),
+            0,
         )
 
 
 class WipeDeviceTips(FullSizeWindow):
     def __init__(self):
-        title = _(i18n_keys.TITLE__FACTORY_RESET)
+        title = _(i18n_keys.TITLE__ERASE_THIS_DEVICE)
         subtitle = _(i18n_keys.SUBTITLE__DEVICE_WIPE_DEVICE_FACTORY_RESET)
-        icon_path = "A:/res/danger.png"
+        # icon_path = "A:/res/danger.png"
         super().__init__(
             title,
             subtitle,
             _(i18n_keys.BUTTON__SLIDE_TO_RESET),
             _(i18n_keys.BUTTON__CANCEL),
-            icon_path=icon_path,
+            # icon_path=icon_path,
             hold_confirm=True,
         )
         self.container = ContainerFlexCol(
@@ -46,7 +57,6 @@ class WipeDeviceTips(FullSizeWindow):
             _(i18n_keys.CHECK__DEVICE_WIPE_DEVICE_FACTORY_RESET_2),
         )
         self.slider_enable(False)
-        self.btn_no.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
         self.cb_cnt = 0
 
@@ -85,7 +95,7 @@ class WipeDeviceTips(FullSizeWindow):
 class WipeDeviceSuccess(FullSizeWindow):
     def __init__(self):
         title = _(i18n_keys.TITLE__RESET_COMPLETE)
-        subtitle = _(i18n_keys.SUBTITLE__DEVICE_WIPE_DEVICE_RESET_COMPLETE)
+        subtitle = _(i18n_keys.SUBTITLE__THE_DEVICE_IS_RESET)
         icon_path = "A:/res/success.png"
         confirm_text = _(i18n_keys.BUTTON__RESTART)
         super().__init__(

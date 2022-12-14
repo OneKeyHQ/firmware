@@ -11,12 +11,13 @@ from trezor.ui import display, style
 
 from apps.common import safety_checks
 
-from . import font_LANG_MIX, font_PJSBOLD24, font_PJSBOLD36, font_PJSREG24
+from . import font_PJSBOLD30, font_PJSREG24, font_PJSREG30
 from .common import FullSizeWindow, Screen, lv  # noqa: F401, F403, F405
 from .components.anim import Anim
 from .components.button import ListItemBtn, ListItemBtnWithSwitch, NormalButton
 from .components.container import ContainerFlexCol, ContainerGrid
 from .components.listitem import DisplayItem, ImgGridItem
+from .widgets.style import StyleWrapper
 
 
 def brightness2_percent_str(brightness: int) -> str:
@@ -40,65 +41,59 @@ class MainScreen(Screen):
             self._init = True
             super().__init__(title=device_name, subtitle=ble_name)
         else:
-            if dev_state:
-                self.dev_state.clear_flag(lv.obj.FLAG.HIDDEN)
-                self.dev_state_text.set_text(dev_state)
-            else:
+            if hasattr(self, "dev_state"):
                 from apps.base import get_state
 
                 state = get_state()
                 if state:
-                    self.dev_state.clear_flag(lv.obj.FLAG.HIDDEN)
-                    self.dev_state_text.set_text(state)
+                    self.dev_state.show(state)
+                    self.title.align_to(self.dev_state, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
+                    self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
                 else:
-                    self.dev_state.add_flag(lv.obj.FLAG.HIDDEN)
-            self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
+                    self.dev_state.delete()
+                    del self.dev_state
+                    self.title.align(lv.ALIGN.TOP_LEFT, 8, 52)
+                    self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+            self.set_style_bg_img_src(homescreen, 0)
             if self.bottom_tips:
                 self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
             if self.apps:
-                self.apps.tips_top.set_text(_(i18n_keys.BUTTON__CLOSE))
+                self.apps.tips.set_text(_(i18n_keys.CONTENT__SWIPE_DOWN_TO_CLOSE))
             return
-        self.title.align(lv.ALIGN.TOP_MID, 0, 92)
-        self.subtitle.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.dev_state = lv.btn(self)
-        self.dev_state.set_size(lv.pct(96), lv.SIZE.CONTENT)
-        self.dev_state.set_style_bg_color(
-            lv.color_hex(0xDCA312), lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.dev_state.set_style_radius(8, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.dev_state.align(lv.ALIGN.TOP_MID, 0, 52)
-        self.dev_state_text = lv.label(self.dev_state)
-        self.dev_state_text.set_style_text_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.dev_state_text.set_style_text_font(
-            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.dev_state_text.center()
+        self.subtitle.set_style_text_color(lv_colors.WHITE, 0)
         if dev_state:
-            self.dev_state_text.set_text(dev_state)
-        else:
-            self.dev_state.add_flag(lv.obj.FLAG.HIDDEN)
-        self.set_style_bg_img_src(homescreen, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.set_style_bg_img_opa(255, lv.PART.MAIN | lv.STATE.DEFAULT)
+            self.dev_state = MainScreen.DevStateTipsBar(self)
+            self.dev_state.show(dev_state)
+            self.title.align_to(self.dev_state, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
+            self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+
+        self.add_style(
+            StyleWrapper().bg_img_src(homescreen).bg_img_opa(int(lv.OPA.COVER * 0.92)),
+            0,
+        )
+        # self.add_style(StyleWrapper()
+        #     .transform_zoom(512)
+        #     , lv.PART.MAIN | lv.STATE.USER_1
+        #     )
         self.clear_flag(lv.obj.FLAG.SCROLLABLE)
         self.bottom_bar = lv.btn(self)
         self.bottom_bar.remove_style_all()
         self.bottom_bar.set_size(lv.pct(100), 100)
         self.bottom_bar.set_align(lv.ALIGN.BOTTOM_MID)
-        self.up_arrow = lv.img(self.bottom_bar)
-        self.up_arrow.set_src("A:/res/up-home.png")
-        self.up_arrow.set_align(lv.ALIGN.TOP_MID)
+        # self.up_arrow = lv.img(self.bottom_bar)
+        # self.up_arrow.set_src("A:/res/up-home.png")
+        # self.up_arrow.set_align(lv.ALIGN.TOP_MID)
         self.bottom_tips = lv.label(self.bottom_bar)
         self.bottom_tips.align(lv.ALIGN.BOTTOM_MID, 0, -16)
+        self.bottom_tips.set_width(464)
+        self.bottom_tips.set_long_mode(lv.label.LONG.WRAP)
         self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
-        self.bottom_tips.set_style_text_font(
-            font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.bottom_tips.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.bottom_tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .text_color(lv_colors.WHITE)
+            .text_align_center(),
+            0,
         )
         self.apps = self.AppDrawer(self)
         self.add_event_cb(self.on_slide_up, lv.EVENT.GESTURE, None)
@@ -107,6 +102,7 @@ class MainScreen(Screen):
         if hidden:
             self.subtitle.add_flag(lv.obj.FLAG.HIDDEN)
             self.title.add_flag(lv.obj.FLAG.HIDDEN)
+
         else:
             self.subtitle.clear_flag(lv.obj.FLAG.HIDDEN)
             self.title.clear_flag(lv.obj.FLAG.HIDDEN)
@@ -115,12 +111,12 @@ class MainScreen(Screen):
         if busy:
             self.clear_flag(lv.obj.FLAG.CLICKABLE)
             self.bottom_bar.clear_flag(lv.obj.FLAG.CLICKABLE)
-            self.up_arrow.add_flag(lv.obj.FLAG.HIDDEN)
+            # self.up_arrow.add_flag(lv.obj.FLAG.HIDDEN)
             self.bottom_tips.set_text(_(i18n_keys.BUTTON__PROCESSING))
         else:
             self.add_flag(lv.obj.FLAG.CLICKABLE)
             self.bottom_bar.add_flag(lv.obj.FLAG.CLICKABLE)
-            self.up_arrow.clear_flag(lv.obj.FLAG.HIDDEN)
+            # self.up_arrow.clear_flag(lv.obj.FLAG.HIDDEN)
             self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
 
     def on_slide_up(self, event_obj):
@@ -132,7 +128,9 @@ class MainScreen(Screen):
                 if self.get_child_cnt() > 5:
                     return
                 if self.is_visible():
-                    self.hidden_titles()
+                    # self.hidden_titles()
+                    # if hasattr(self, "dev_state"):
+                    #     self.dev_state.hidden()
                     self.apps.show()
             elif _dir == lv.DIR.BOTTOM:
                 lv.event_send(self.apps, lv.EVENT.GESTURE, None)
@@ -140,96 +138,141 @@ class MainScreen(Screen):
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
         lv.scr_load(scr)
 
+    class DevStateTipsBar(lv.obj):
+        def __init__(self, parent) -> None:
+            super().__init__(parent)
+            self.remove_style_all()
+            self.set_size(lv.pct(100), 66)
+            self.add_style(
+                StyleWrapper()
+                .bg_color(lv.color_hex(0x6B5C00))
+                .bg_opa(lv.OPA.COVER)
+                .border_width(0)
+                .pad_ver(16)
+                .pad_hor(8)
+                .radius(0)
+                .text_font(font_PJSBOLD30)
+                .text_align_left(),
+                0,
+            )
+            self.align(lv.ALIGN.TOP_MID, 0, 44)
+
+            self.icon = lv.img(self)
+            self.icon.set_align(lv.ALIGN.LEFT_MID)
+            self.icon.set_src("A:/res/icon-warning_bar.png")
+            self.warnings = lv.label(self)
+            self.warnings.align_to(self.icon, lv.ALIGN.OUT_RIGHT_MID, 8, 0)
+
+        def show(self, text=None):
+            self.clear_flag(lv.obj.FLAG.HIDDEN)
+            if text:
+                self.warnings.set_text(text)
+
+        def hidden(self):
+            self.add_flag(lv.obj.FLAG.HIDDEN)
+
     class AppDrawer(lv.obj):
         def __init__(self, parent) -> None:
             super().__init__(parent)
             self.parent = parent
             self.remove_style_all()
             self.set_pos(0, 800)
-            self.set_size(lv.pct(100), 652)
-            # header
-            self.header = lv.obj(self)
-            self.header.remove_style_all()
-            self.header.set_size(lv.pct(100), 100)
-            self.header.set_align(lv.ALIGN.TOP_MID)
-            self.header.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
-            self.tips_top = lv.label(self.header)
-            self.tips_top.set_style_text_font(
-                font_PJSBOLD24, lv.PART.MAIN | lv.STATE.DEFAULT
+            self.set_size(lv.pct(100), lv.pct(100))
+            self.add_style(
+                StyleWrapper()
+                .bg_color(lv_colors.BLACK)
+                .bg_opa(lv.OPA.COVER)
+                .border_width(0),
+                0,
             )
-            self.tips_top.set_style_text_color(
-                lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
+            # # header
+            # self.header = lv.obj(self)
+            # self.header.remove_style_all()
+            # self.header.set_size(lv.pct(100), 100)
+            # self.header.set_align(lv.ALIGN.TOP_MID)
+            # self.header.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            # self.tips_top = lv.label(self.header)
+            # self.tips_top.set_style_text_font(font_PJSBOLD24, 0)
+            # self.tips_top.set_style_text_color(lv_colors.WHITE, 0)
+            # self.tips_top.set_text(_(i18n_keys.BUTTON__CLOSE))
+            # self.tips_top.align(lv.ALIGN.TOP_MID, 0, 16)
+            # self.down_img = lv.img(self.header)
+            # self.down_img.set_src("A:/res/down-home.png")
+            # self.down_img.align_to(self.tips_top, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+            # # content panel
+            # self.panel = lv.obj(self)
+            # self.panel.remove_style_all()
+            # self.panel.set_size(lv.pct(100), 552)
+            # self.panel.align_to(self.down_img, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
+            # self.panel.set_style_bg_color(lv_colors.WHITE_3, 0)
+            # self.panel.set_style_bg_opa(lv.OPA.COVER, 0)
+            # self.panel.set_style_radius(30, 0)
+            # self.panel.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            # # mask
+            # self.mask = lv.obj(self)
+            # self.mask.remove_style_all()
+            # self.mask.set_size(lv.pct(100), 40)
+            # self.mask.set_style_bg_color(lv_colors.WHITE_3, 0)
+            # self.mask.set_style_bg_opa(lv.OPA.COVER, 0)
+            # self.mask.set_align(lv.ALIGN.BOTTOM_MID)
+            self.tips = lv.label(self)
+            self.tips.set_long_mode(lv.label.LONG.WRAP)
+            self.tips.add_style(
+                StyleWrapper()
+                .text_font(font_PJSREG24)
+                .max_width(464)
+                .text_color(lv_colors.ONEKEY_GRAY_4)
+                .text_align_center(),
+                0,
             )
-            self.tips_top.set_text(_(i18n_keys.BUTTON__CLOSE))
-            self.tips_top.align(lv.ALIGN.TOP_MID, 0, 16)
-            self.down_img = lv.img(self.header)
-            self.down_img.set_src("A:/res/down-home.png")
-            self.down_img.align_to(self.tips_top, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
-            # content panel
-            self.panel = lv.obj(self)
-            self.panel.remove_style_all()
-            self.panel.set_size(lv.pct(100), 552)
-            self.panel.align_to(self.down_img, lv.ALIGN.OUT_BOTTOM_MID, 0, 0)
-            self.panel.set_style_bg_color(
-                lv_colors.WHITE_3, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.panel.set_style_bg_opa(lv.OPA.COVER, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.panel.set_style_radius(30, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.panel.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
-            # mask
-            self.mask = lv.obj(self)
-            self.mask.remove_style_all()
-            self.mask.set_size(lv.pct(100), 40)
-            self.mask.set_style_bg_color(
-                lv_colors.WHITE_3, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            self.mask.set_style_bg_opa(lv.OPA.COVER, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.mask.set_align(lv.ALIGN.BOTTOM_MID)
-
+            self.tips.set_text(_(i18n_keys.CONTENT__SWIPE_DOWN_TO_CLOSE))
+            self.tips.align(lv.ALIGN.TOP_MID, 0, 52)
             # buttons
-            self.settings = lv.imgbtn(self.panel)
-            self.settings.set_pos(80, 48)
-            self.settings.set_style_bg_img_src(
-                "A:/res/settings.png", lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            # add click effect
-            self.settings.set_style_bg_img_recolor_opa(
-                lv.OPA._30, lv.PART.MAIN | lv.STATE.PRESSED
-            )
-            self.settings.set_style_bg_img_recolor(
-                lv_colors.BLACK, lv.PART.MAIN | lv.STATE.PRESSED
+            click_style = (
+                StyleWrapper()
+                .bg_img_recolor_opa(lv.OPA._30)
+                .bg_img_recolor(lv_colors.BLACK)
             )
 
+            self.settings = lv.imgbtn(self)
+            self.settings.set_pos(78, 134)
+            self.settings.set_style_bg_img_src("A:/res/settings.png", 0)
+            self.settings.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.settings.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
-            self.guide = lv.imgbtn(self.panel)
-            self.guide.align_to(self.settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
-            self.guide.set_style_bg_img_src(
-                "A:/res/guide.png", lv.PART.MAIN | lv.STATE.DEFAULT
-            )
-            # add click effect
-            self.guide.set_style_bg_img_recolor_opa(
-                lv.OPA._30, lv.PART.MAIN | lv.STATE.PRESSED
-            )
-            self.guide.set_style_bg_img_recolor(
-                lv_colors.BLACK, lv.PART.MAIN | lv.STATE.PRESSED
-            )
 
+            self.guide = lv.imgbtn(self)
+            self.guide.align_to(self.settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
+            self.guide.set_style_bg_img_src("A:/res/guide.png", 0)
+            self.guide.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+
+            self.nft = lv.imgbtn(self)
+            self.nft.set_style_bg_img_src("A:/res/app_nft.png", 0)
+            self.nft.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
+            self.nft.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.nft.align_to(self.settings, lv.ALIGN.OUT_BOTTOM_MID, 0, 65)
+
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
-            self.show_anim = Anim(800, 148, self.set_pos)
+            self.show_anim = Anim(
+                800, 0, self.set_pos, start_cb=self.anim_start_cb, delay=10
+            )
             self.dismiss_anim = Anim(
-                148, 800, self.set_pos, path_cb=lv.anim_t.path_ease_in, time=300
+                0, 800, self.set_pos, path_cb=lv.anim_t.path_ease_in, time=300
             )
             self.slide = False
             self.visible = False
 
+        def anim_start_cb(self, _anim):
+            self.parent.clear_state(lv.STATE.USER_1)
+
         def show(self):
             if self.visible:
                 return
+            self.parent.add_state(lv.STATE.USER_1)
             self.show_anim.start()
-            if self.header.has_flag(lv.obj.FLAG.HIDDEN):
-                self.header.clear_flag(lv.obj.FLAG.HIDDEN)
+            # if self.header.has_flag(lv.obj.FLAG.HIDDEN):
+            #     self.header.clear_flag(lv.obj.FLAG.HIDDEN)
             self.slide = False
             self.visible = True
 
@@ -237,7 +280,9 @@ class MainScreen(Screen):
             if not self.visible:
                 return
             self.parent.hidden_titles(False)
-            self.header.add_flag(lv.obj.FLAG.HIDDEN)
+            if hasattr(self.parent, "dev_state"):
+                self.parent.dev_state.show()
+            # self.header.add_flag(lv.obj.FLAG.HIDDEN)
             self.dismiss_anim.start()
             self.visible = False
 
@@ -253,8 +298,8 @@ class MainScreen(Screen):
                     SettingsScreen(self.parent)
                 elif target == self.guide:
                     UserGuide(self.parent)
-                elif target == self.header:
-                    self.dismiss()
+                elif target == self.nft:
+                    NftGallery(self.parent)
 
         def on_slide_down(self, event_obj):
             code = event_obj.code
@@ -263,6 +308,33 @@ class MainScreen(Screen):
                 if _dir == lv.DIR.BOTTOM:
                     self.slide = True
                     self.dismiss()
+
+
+class NftGallery(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+            kwargs = {
+                "prev_scr": prev_scr,
+                "title": _(i18n_keys.TITLE__NFT_GALLERY),
+                "nav_back": True,
+            }
+            super().__init__(**kwargs)
+        else:
+            return
+        self.tips = lv.label(self)
+        self.tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG30)
+            .text_color(lv_colors.WHITE_2)
+            .text_letter_space(-1),
+            0,
+        )
+        self.tips.set_text(_(i18n_keys.CONTENT__COMING_SOON))
+        self.tips.align(lv.ALIGN.TOP_MID, 0, 372)
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
 
 class SettingsScreen(Screen):
@@ -278,10 +350,9 @@ class SettingsScreen(Screen):
         else:
             self.refresh_text()
             return
-
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+        # if __debug__:
+        #     self.add_style(StyleWrapper().bg_color(lv_colors.ONEKEY_GREEN_1), 0)
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
         self.general = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__GENERAL),
@@ -294,7 +365,7 @@ class SettingsScreen(Screen):
         )
         self.home_scr = ListItemBtn(
             self.container,
-            _(i18n_keys.ITEM__HOME_SCREEN),
+            _(i18n_keys.ITEM__HOMESCREEN),
             left_img_src="A:/res/homescreen.png",
         )
         self.security = ListItemBtn(
@@ -310,11 +381,16 @@ class SettingsScreen(Screen):
             _(i18n_keys.ITEM__ABOUT_DEVICE),
             left_img_src="A:/res/about.png",
         )
-        self.boot_loader = ListItemBtn(
+        # self.boot_loader = ListItemBtn(
+        #     self.container,
+        #     _(i18n_keys.ITEM__UPDATE_MODE),
+        #     left_img_src="A:/res/update_white.png",
+        #     has_next=False,
+        # )
+        self.develop = ListItemBtn(
             self.container,
-            _(i18n_keys.ITEM__UPDATE_MODE),
-            left_img_src="A:/res/update_white.png",
-            has_next=False,
+            _(i18n_keys.ITEM__DEVELOPER_OPTIONS),
+            left_img_src="A:/res/develop.png",
         )
         self.power = ListItemBtn(
             self.container,
@@ -322,11 +398,9 @@ class SettingsScreen(Screen):
             left_img_src="A:/res/poweroff.png",
             has_next=False,
         )
-        self.power.label_left.set_style_text_color(
-            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        if __debug__:
-            self.test = ListItemBtn(self.container, "UI test")
+        self.power.label_left.set_style_text_color(lv_colors.ONEKEY_RED_1, 0)
+        # if __debug__:
+        #     self.test = ListItemBtn(self.container, "UI test")
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def refresh_text(self):
@@ -337,7 +411,8 @@ class SettingsScreen(Screen):
         self.security.label_left.set_text(_(i18n_keys.ITEM__SECURITY))
         self.wallet.label_left.set_text(_(i18n_keys.ITEM__WALLET))
         self.about.label_left.set_text(_(i18n_keys.ITEM__ABOUT_DEVICE))
-        self.boot_loader.label_left.set_text(_(i18n_keys.ITEM__UPDATE_MODE))
+        # self.boot_loader.label_left.set_text(_(i18n_keys.ITEM__UPDATE_MODE))
+        self.develop.label_left.set_text(_(i18n_keys.ITEM__DEVELOPER_OPTIONS))
         self.power.label_left.set_text(_(i18n_keys.ITEM__POWER_OFF))
 
     def on_click(self, event_obj):
@@ -358,8 +433,10 @@ class SettingsScreen(Screen):
                 WalletScreen(self)
             elif target == self.about:
                 AboutSetting(self)
-            elif target == self.boot_loader:
-                Go2UpdateMode(self)
+            # elif target == self.boot_loader:
+            #     Go2UpdateMode(self)
+            elif target == self.develop:
+                DevelopSettings(self)
             elif target == self.power:
                 PowerOff(self)
             else:
@@ -378,13 +455,11 @@ if __debug__:
             super().__init__(lv.layer_sys())
             self.set_size(lv.pct(100), lv.pct(100))
             self.align(lv.ALIGN.TOP_LEFT, 0, 0)
-            self.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.set_style_pad_all(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.set_style_radius(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.set_style_bg_img_src(
-                "A:/res/wallpaper-test.png", lv.PART.MAIN | lv.STATE.DEFAULT
-            )
+            self.set_style_bg_color(lv_colors.BLACK, 0)
+            self.set_style_pad_all(0, 0)
+            self.set_style_border_width(0, 0)
+            self.set_style_radius(0, 0)
+            self.set_style_bg_img_src("A:/res/wallpaper-test.png", 0)
             self.add_flag(lv.obj.FLAG.CLICKABLE)
             self.clear_flag(lv.obj.FLAG.SCROLLABLE)
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
@@ -396,30 +471,39 @@ if __debug__:
 class GeneralScreen(Screen):
     cur_auto_lock = ""
     cur_auto_lock_ms = 0
+    cur_auto_shutdown = ""
+    cur_auto_shutdown_ms = 0
     cur_language = ""
 
     def __init__(self, prev_scr=None):
         GeneralScreen.cur_auto_lock_ms = device.get_autolock_delay_ms()
-        GeneralScreen.cur_auto_lock = self.get_str_from_lock_ms(
+        GeneralScreen.cur_auto_shutdown_ms = device.get_autoshutdown_delay_ms()
+        GeneralScreen.cur_auto_lock = self.get_str_from_ms(
             GeneralScreen.cur_auto_lock_ms
+        )
+        GeneralScreen.cur_auto_shutdown = self.get_str_from_ms(
+            GeneralScreen.cur_auto_shutdown_ms
         )
         if not hasattr(self, "_init"):
             self._init = True
         else:
-            if self.cur_auto_lock_ms:
+            if self.cur_auto_lock:
                 self.auto_lock.label_right.set_text(GeneralScreen.cur_auto_lock)
             if self.cur_language:
                 self.language.label_right.set_text(self.cur_language)
             self.backlight.label_right.set_text(
                 brightness2_percent_str(device.get_brightness())
             )
+            if self.cur_auto_shutdown:
+                self.auto_shutdown.label_right.set_text(GeneralScreen.cur_auto_shutdown)
             self.refresh_text()
             return
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__GENERAL), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
+        self.container.set_height(580)
         self.auto_lock = ListItemBtn(
             self.container, _(i18n_keys.ITEM__AUTO_LOCK), self.cur_auto_lock
         )
@@ -434,9 +518,12 @@ class GeneralScreen(Screen):
         )
         self.keyboard_haptic = ListItemBtn(
             self.container,
-            _(i18n_keys.ITEM__KEYBOARD_HAPTIC),
+            _(i18n_keys.ITEM__VIBRATION_AND_HAPTIC),
         )
         self.tap_awake = ListItemBtn(self.container, _(i18n_keys.ITEM__LOCK_SCREEN))
+        self.auto_shutdown = ListItemBtn(
+            self.container, _(i18n_keys.ITEM__SHUTDOWN), self.cur_auto_shutdown
+        )
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def refresh_text(self):
@@ -444,21 +531,30 @@ class GeneralScreen(Screen):
         self.auto_lock.label_left.set_text(_(i18n_keys.ITEM__AUTO_LOCK))
         self.language.label_left.set_text(_(i18n_keys.ITEM__LANGUAGE))
         self.backlight.label_left.set_text(_(i18n_keys.ITEM__BRIGHTNESS))
-        self.keyboard_haptic.label_left.set_text(_(i18n_keys.ITEM__KEYBOARD_HAPTIC))
+        self.keyboard_haptic.label_left.set_text(
+            _(i18n_keys.ITEM__VIBRATION_AND_HAPTIC)
+        )
         self.tap_awake.label_left.set_text(_(i18n_keys.ITEM__LOCK_SCREEN))
+        self.auto_shutdown.label_left.set_text(_(i18n_keys.ITEM__SHUTDOWN))
 
-    def get_str_from_lock_ms(self, time_ms) -> str:
+    def get_str_from_ms(self, time_ms) -> str:
         if time_ms == device.AUTOLOCK_DELAY_MAXIMUM:
             return _(i18n_keys.ITEM__STATUS__NEVER)
         auto_lock_time = time_ms / 1000 // 60
         if auto_lock_time > 60:
-            text = _(i18n_keys.OPTION__STR_HOUR).format(
-                str(auto_lock_time // 60).split(".")[0]
-            )
+            value = str(auto_lock_time // 60).split(".")[0]
+            text = _(
+                i18n_keys.OPTION__STR_HOUR
+                if value == "1"
+                else i18n_keys.OPTION__STR_HOURS
+            ).format(value)
         else:
-            text = _(i18n_keys.ITEM__STATUS__STR_MINUTES).format(
-                str(auto_lock_time).split(".")[0]
-            )
+            value = str(auto_lock_time).split(".")[0]
+            text = _(
+                i18n_keys.OPTION__STR_MINUTE
+                if value == "1"
+                else i18n_keys.OPTION__STR_MINUTES
+            ).format(value)
         return text
 
     def on_click(self, event_obj):
@@ -477,6 +573,8 @@ class GeneralScreen(Screen):
                 KeyboardHapticSetting(self)
             elif target == self.tap_awake:
                 TapAwakeSetting(self)
+            elif target == self.auto_shutdown:
+                AutoShutDownSetting(self)
             else:
                 pass
 
@@ -492,20 +590,28 @@ class AutoLockSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__AUTO_LOCK), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
-        self.setting_items = [1, 2, 5, 10, 30, "Never"]
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.setting_items = [1, 2, 5, 10, 30, "Never", None]
         has_custom = True
         self.checked_index = 0
-        self.btns = [None] * (len(self.setting_items) + 1)
+        self.btns: [ListItemBtn] = [None] * (len(self.setting_items))
         for index, item in enumerate(self.setting_items):
+            if item is None:
+                break
             if not item == "Never":  # last item
-                item = _(i18n_keys.ITEM__STATUS__STR_MINUTES).format(item)
+                item = _(
+                    i18n_keys.ITEM__STATUS__STR_MINUTES
+                    if item != 1
+                    else i18n_keys.OPTION__STR_MINUTE
+                ).format(item)
             else:
                 item = _(i18n_keys.ITEM__STATUS__NEVER)
-            self.btns[index] = ListItemBtn(self.container, item, has_next=False)
-            self.btns[index].label_left.set_style_text_color(
-                lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
+            self.btns[index] = ListItemBtn(
+                self.container, item, has_next=False, has_bgcolor=False
+            )
+            self.btns[index].label_left.add_style(
+                StyleWrapper().text_font(font_PJSREG30), 0
             )
             self.btns[index].add_check_img()
             if item == GeneralScreen.cur_auto_lock:
@@ -514,15 +620,49 @@ class AutoLockSetting(Screen):
                 self.checked_index = index
 
         if has_custom:
+            self.custom = device.get_autolock_delay_ms()
             self.btns[-1] = ListItemBtn(
                 self.container,
                 f"{GeneralScreen.cur_auto_lock}({_(i18n_keys.OPTION__CUSTOM__INSERT)})",
                 has_next=False,
+                has_bgcolor=False,
             )
             self.btns[-1].add_check_img()
             self.btns[-1].set_checked()
+            self.btns[-1].label_left.add_style(
+                StyleWrapper().text_font(font_PJSREG30), 0
+            )
             self.checked_index = -1
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.tips = lv.label(self)
+        self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
+        self.tips.set_long_mode(lv.label.LONG.WRAP)
+        self.fresh_tips()
+        self.tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .width(448)
+            .text_color(lv_colors.WHITE_2)
+            .text_align_left()
+            .text_letter_space(-1)
+            .pad_ver(16),
+            0,
+        )
+
+    def fresh_tips(self):
+        item_text = self.btns[self.checked_index].label_left.get_text()
+        if self.setting_items[self.checked_index] is None:
+            item_text = item_text.split("(")[0]
+        if self.setting_items[self.checked_index] == "Never":
+            self.tips.set_text(
+                _(i18n_keys.CONTENT__SETTINGS_GENERAL_AUTO_LOCK_OFF_HINT)
+            )
+        else:
+            self.tips.set_text(
+                _(i18n_keys.CONTENT__SETTINGS_GENERAL_AUTO_LOCK_ON_HINT).format(
+                    item_text or GeneralScreen.cur_auto_lock[:1]
+                )
+            )
 
     def on_click(self, event_obj):
         code = event_obj.code
@@ -533,17 +673,18 @@ class AutoLockSetting(Screen):
             if target in self.btns:
                 for index, item in enumerate(self.btns):
                     if item == target and self.checked_index != index:
-                        item.set_checked()  # type: ignore[Cannot access member "set_checked" for type "None"]
-                        self.btns[self.checked_index].set_uncheck()  # type: ignore[Cannot access member "set_uncheck" for type "None"]
+                        item.set_checked()
+                        self.btns[self.checked_index].set_uncheck()
                         self.checked_index = index
                         if index == 5:
                             auto_lock_time = device.AUTOLOCK_DELAY_MAXIMUM
                         elif index == 6:
-                            auto_lock_time = int(GeneralScreen.cur_auto_lock_ms)
+                            auto_lock_time = self.custom
                         else:
                             auto_lock_time = self.setting_items[index] * 60 * 1000
                         device.set_autolock_delay_ms(auto_lock_time)
                         GeneralScreen.cur_auto_lock_ms = auto_lock_time
+                        self.fresh_tips()
                         from apps.base import reload_settings_from_storage
 
                         reload_settings_from_storage()
@@ -559,19 +700,15 @@ class LanguageSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__LANGUAGE), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.check_index = 0
-        self.title.set_style_text_font(font_PJSBOLD36, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.lang_buttons = []
         for idx, lang in enumerate(langs):
-            lang_button = ListItemBtn(self.container, lang[1], has_next=False)
-            lang_button.label_left.set_style_text_font(
-                font_LANG_MIX, lv.PART.MAIN | lv.STATE.DEFAULT
+            lang_button = ListItemBtn(
+                self.container, lang[1], has_next=False, has_bgcolor=False
             )
-            lang_button.label_left.set_style_text_color(
-                lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-            )
+            lang_button.label_left.add_style(StyleWrapper().text_font(font_PJSREG30), 0)
             lang_button.add_check_img()
             self.lang_buttons.append(lang_button)
             if GeneralScreen.cur_language == lang[1]:
@@ -607,29 +744,36 @@ class BacklightSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__BRIGHTNESS), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        # self.container = ContainerFlexCol(self, self.title, padding_row=2)
         current_brightness = device.get_brightness()
-        self.item1 = ListItemBtn(
-            self.container,
-            _(i18n_keys.ITEM__BRIGHTNESS),
-            brightness2_percent_str(current_brightness),
-            has_next=False,
-        )
+        # self.item1 = ListItemBtn(
+        #     self.container,
+        #     _(i18n_keys.ITEM__BRIGHTNESS),
+        #     brightness2_percent_str(current_brightness),
+        #     has_next=False,
+        # )
         self.slider = lv.slider(self)
-        self.slider.set_style_border_width(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.slider.set_size(424, 8)
+        self.slider.set_size(464, 82)
         self.slider.set_ext_click_area(100)
         self.slider.set_range(5, style.BACKLIGHT_MAX)
         self.slider.set_value(current_brightness, lv.ANIM.OFF)
-        self.slider.align_to(self.container, lv.ALIGN.BOTTOM_MID, 0, 33)
-        self.slider.set_style_bg_color(
-            lv_colors.GRAY_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.slider.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 40)
+        self.slider.add_style(
+            StyleWrapper().border_width(0).radius(0).bg_color(lv_colors.GRAY_1), 0
         )
-        self.slider.set_style_bg_color(lv_colors.WHITE, lv.PART.KNOB | lv.STATE.DEFAULT)
-        self.slider.set_style_bg_color(
-            lv_colors.WHITE, lv.PART.INDICATOR | lv.STATE.DEFAULT
+        self.slider.add_style(
+            StyleWrapper().bg_color(lv_colors.WHITE).pad_all(-50), lv.PART.KNOB
         )
+        self.slider.add_style(
+            StyleWrapper().radius(0).bg_color(lv_colors.WHITE), lv.PART.INDICATOR
+        )
+        self.percent = lv.label(self)
+        self.percent.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 16, 64)
+        self.percent.add_style(
+            StyleWrapper().text_font(font_PJSREG30).text_color(lv_colors.BLACK), 0
+        )
+        self.percent.set_text(brightness2_percent_str(current_brightness))
         self.slider.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
 
     def on_value_changed(self, event_obj):
@@ -637,7 +781,7 @@ class BacklightSetting(Screen):
         if target == self.slider:
             value = target.get_value()
             display.backlight(value)
-            self.item1.label_right.set_text(brightness2_percent_str(value))
+            self.percent.set_text(brightness2_percent_str(value))
             device.set_brightness(value)
 
 
@@ -648,15 +792,32 @@ class KeyboardHapticSetting(Screen):
         else:
             return
         super().__init__(
-            prev_scr=prev_scr, title=_(i18n_keys.TITLE__KEYBOARD_HAPTIC), nav_back=True
+            prev_scr=prev_scr,
+            title=_(i18n_keys.TITLE__VIBRATION_AND_HAPTIC),
+            nav_back=True,
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.container = ContainerFlexCol(self, self.title)
-        self.keyboard = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__HAPTIC))
+        self.keyboard = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__KEYBOARD_HAPTIC)
+        )
+        self.tips = lv.label(self)
+        self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
+        self.tips.set_long_mode(lv.label.LONG.WRAP)
+        self.tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .width(448)
+            .text_color(lv_colors.WHITE_2)
+            .text_align_left(),
+            0,
+        )
+        self.tips.set_text(_(i18n_keys.CONTENT__VIBRATION_HAPTIC__HINT))
         if device.keyboard_haptic_enabled():
             self.keyboard.add_state()
         else:
             self.keyboard.clear_state()
+
         self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
 
     def on_value_changed(self, event_obj):
@@ -679,18 +840,18 @@ class TapAwakeSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__LOCK_SCREEN), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.container = ContainerFlexCol(self, self.title)
         self.tap_awake = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__TAP_TO_WAKE)
         )
         self.description = lv.label(self)
-        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
-        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.description.set_style_text_line_space(3, 0)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
 
         if device.is_tap_awake_enabled():
             self.tap_awake.add_state()
@@ -717,6 +878,114 @@ class TapAwakeSetting(Screen):
                     device.set_tap_awake_enable(False)
 
 
+class AutoShutDownSetting(Screen):
+    # TODO: i18n
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__SHUTDOWN), nav_back=True
+        )
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.setting_items = [1, 2, 5, 10, "Never", None]
+        has_custom = True
+        self.checked_index = 0
+        # pyright: off
+        self.btns: [ListItemBtn] = [None] * (len(self.setting_items))
+        for index, item in enumerate(self.setting_items):
+            if item is None:
+                break
+            if not item == "Never":  # last item
+                item = _(
+                    i18n_keys.ITEM__STATUS__STR_MINUTES
+                    if item != 1
+                    else i18n_keys.OPTION__STR_MINUTE
+                ).format(item)
+            else:
+                item = _(i18n_keys.ITEM__STATUS__NEVER)
+            self.btns[index] = ListItemBtn(
+                self.container, item, has_next=False, has_bgcolor=False
+            )
+            self.btns[index].label_left.add_style(
+                StyleWrapper().text_font(font_PJSREG30), 0
+            )
+            self.btns[index].add_check_img()
+            if item == GeneralScreen.cur_auto_shutdown:
+                has_custom = False
+                self.btns[index].set_checked()
+                self.checked_index = index
+
+        if has_custom:
+            self.custom = device.get_autoshutdown_delay_ms()
+            self.btns[-1] = ListItemBtn(
+                self.container,
+                f"{GeneralScreen.cur_auto_shutdown}({_(i18n_keys.OPTION__CUSTOM__INSERT)})",
+                has_next=False,
+                has_bgcolor=False,
+            )
+            self.btns[-1].add_check_img()
+            self.btns[-1].set_checked()
+            self.checked_index = -1
+        # pyright: on
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.tips = lv.label(self)
+        self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
+        self.tips.set_long_mode(lv.label.LONG.WRAP)
+        self.fresh_tips()
+        self.tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .width(448)
+            .text_color(lv_colors.WHITE_2)
+            .text_align_left()
+            .text_letter_space(-1)
+            .pad_ver(16),
+            0,
+        )
+
+    def fresh_tips(self):
+        item_text = self.btns[self.checked_index].label_left.get_text()
+        if self.setting_items[self.checked_index] is None:
+            item_text = item_text.split("(")[0]
+
+        if self.setting_items[self.checked_index] == "Never":
+            self.tips.set_text(_(i18n_keys.CONTENT__SETTINGS_GENERAL_SHUTDOWN_OFF_HINT))
+        else:
+            self.tips.set_text(
+                _(i18n_keys.CONTENT__SETTINGS_GENERAL_SHUTDOWN_ON_HINT).format(
+                    item_text or GeneralScreen.cur_auto_shutdown[:1]
+                )
+            )
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target in self.btns:
+                for index, item in enumerate(self.btns):
+                    if item == target and self.checked_index != index:
+                        item.set_checked()
+                        self.btns[self.checked_index].set_uncheck()
+                        self.checked_index = index
+                        if index == 4:
+                            auto_shutdown_time = device.AUTOSHUTDOWN_DELAY_MAXIMUM
+                        elif index == 5:
+                            auto_shutdown_time = self.custom
+                        else:
+                            auto_shutdown_time = self.setting_items[index] * 60 * 1000
+                        device.set_autoshutdown_delay_ms(auto_shutdown_time)
+                        GeneralScreen.cur_auto_shutdown_ms = auto_shutdown_time
+                        self.fresh_tips()
+                        from apps.base import reload_settings_from_storage
+
+                        reload_settings_from_storage()
+
+
 class PinMapSetting(Screen):
     def __init__(self, prev_scr=None):
         if not hasattr(self, "_init"):
@@ -724,23 +993,52 @@ class PinMapSetting(Screen):
         else:
             return
         super().__init__(
-            prev_scr=prev_scr, title=_(i18n_keys.TITLE__PIN_KEYBOARD), nav_back=True
+            prev_scr=prev_scr, title=_(i18n_keys.TITLE__PIN_KEYPAD), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
-        self.random = ListItemBtn(
-            self.container, _(i18n_keys.OPTION__RANDOMIZED), has_next=False
-        )
-        self.random.add_check_img()
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=0)
         self.order = ListItemBtn(
-            self.container, _(i18n_keys.OPTION__ORDERED), has_next=False
+            self.container,
+            _(i18n_keys.OPTION__DEFAULT),
+            has_next=False,
+            has_bgcolor=False,
         )
         self.order.add_check_img()
+        self.random = ListItemBtn(
+            self.container,
+            _(i18n_keys.OPTION__RANDOMIZED),
+            has_next=False,
+            has_bgcolor=False,
+        )
+        self.random.add_check_img()
+        self.tips = lv.label(self)
+        self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
+        self.tips.set_long_mode(lv.label.LONG.WRAP)
+        self.fresh_tips()
+        self.tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .width(448)
+            .text_color(lv_colors.WHITE_2)
+            .text_letter_space(-1)
+            .text_align_left()
+            .pad_ver(16),
+            0,
+        )
+
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def fresh_tips(self):
         if device.is_random_pin_map_enabled():
             self.random.set_checked()
+            self.tips.set_text(
+                _(i18n_keys.CONTENT__SECURITY_PIN_KEYPAD_LAYOUT_RANDOMIZED__HINT)
+            )
         else:
             self.order.set_checked()
-        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            self.tips.set_text(
+                _(i18n_keys.CONTENT__SECURITY_PIN_KEYPAD_LAYOUT_DEFAULT__HINT)
+            )
 
     def on_click(self, event_obj):
         code = event_obj.code
@@ -758,6 +1056,9 @@ class PinMapSetting(Screen):
                 self.order.set_checked()
                 if device.is_random_pin_map_enabled():
                     device.set_random_pin_map_enable(False)
+            else:
+                return
+            self.fresh_tips()
 
 
 class ConnectSetting(Screen):
@@ -769,17 +1070,17 @@ class ConnectSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.container = ContainerFlexCol(self, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
 
         self.description = lv.label(self)
-        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
-        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.description.set_style_text_line_space(3, 0)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
 
         if uart.is_ble_opened():
             self.ble.add_state()
@@ -841,105 +1142,119 @@ class AboutSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
-        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.container = ContainerFlexCol(self, self.title, padding_row=0)
-        self.model = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__MODEL), right_text=model, has_next=False
+
+        self.model = DisplayItem(self.container, _(i18n_keys.ITEM__MODEL), model)
+        self.model.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.model.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.model.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.ble_mac = ListItemBtn(
+        self.model.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.model.set_style_bg_color(lv_colors.BLACK, 0)
+
+        self.ble_mac = DisplayItem(
             self.container,
-            _(i18n_keys.ITEM__BLUETOOTH),
-            right_text=ble_name,
-            has_next=False,
+            _(i18n_keys.ITEM__BLUETOOTH_NAME),
+            ble_name,
         )
-        self.ble_mac.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.ble_mac.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.ble_mac.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.storage = ListItemBtn(
+        self.ble_mac.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.ble_mac.set_style_bg_color(lv_colors.BLACK, 0)
+
+        self.storage = DisplayItem(
             self.container,
             _(i18n_keys.ITEM__STORAGE),
-            right_text=storage,
-            has_next=False,
+            storage,
         )
-        self.storage.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.storage.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.storage.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
+        self.storage.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.storage.set_style_bg_color(lv_colors.BLACK, 0)
 
-        self.version = ListItemBtn(
-            self.container,
-            _(i18n_keys.ITEM__SYSTEM_VERSION),
-            right_text=version,
-            has_next=False,
+        self.version = DisplayItem(
+            self.container, _(i18n_keys.ITEM__SYSTEM_VERSION), version
         )
-        self.version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.version.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.version.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.ble_version = ListItemBtn(
+        self.version.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.version.set_style_bg_color(lv_colors.BLACK, 0)
+
+        self.ble_version = DisplayItem(
             self.container,
             _(i18n_keys.ITEM__BLUETOOTH_VERSION),
-            right_text=ble_version,
-            has_next=False,
+            ble_version,
         )
-        self.ble_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.ble_version.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.ble_version.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.boot_version = ListItemBtn(
+        self.ble_version.label_top.add_style(
+            StyleWrapper().text_color(lv_colors.WHITE), 0
+        )
+        self.ble_version.set_style_bg_color(lv_colors.BLACK, 0)
+
+        self.boot_version = DisplayItem(
+            self.container, _(i18n_keys.ITEM__BOOTLOADER_VERSION), boot_version
+        )
+        self.boot_version.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
+        )
+        self.boot_version.label_top.add_style(
+            StyleWrapper().text_color(lv_colors.WHITE), 0
+        )
+        self.boot_version.set_style_bg_color(lv_colors.BLACK, 0)
+
+        self.board_version = DisplayItem(
             self.container,
-            "BootLoader",
-            right_text=boot_version,
-            has_next=False,
+            _(i18n_keys.ITEM__BOARDLOADER_VERSION),
+            board_version,
         )
-        self.boot_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.boot_version.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.board_version.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.board_version = ListItemBtn(
-            self.container,
-            "BoardLoader",
-            right_text=board_version,
-            has_next=False,
+        self.board_version.label_top.add_style(
+            StyleWrapper().text_color(lv_colors.WHITE), 0
         )
-        self.board_version.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.board_version.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.board_version.set_style_bg_color(lv_colors.BLACK, 0)
+        self.build_id = DisplayItem(
+            self.container, _(i18n_keys.ITEM__BUILD_ID), utils.BUILD_ID[-7:]
         )
-        self.build_id = ListItemBtn(
-            self.container,
-            _(i18n_keys.ITEM__BUILD_ID),
-            right_text=utils.BUILD_ID[-7:],
-            has_next=False,
+        self.build_id.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.build_id.set_style_height(56, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.build_id.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.build_id.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.build_id.set_style_bg_color(lv_colors.BLACK, 0)
+
+        self.serial = DisplayItem(
+            self.container, _(i18n_keys.ITEM__SERIAL_NUMBER), serial
         )
-        self.serial = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__SERIAL), right_text=serial, has_next=False
+        self.serial.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.serial.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.serial.set_style_bg_color(lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.serial.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.serial.set_style_bg_color(lv_colors.BLACK, 0)
+        self.serial.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+
         self.board_loader = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=True
+            self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
         )
-        self.board_loader.set_style_height(84, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.board_loader.set_style_bg_color(
-            lv_colors.BLACK, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.board_loader.set_style_bg_color(lv_colors.BLACK, 0)
         self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+        self.firmware_update = NormalButton(self, _(i18n_keys.BUTTON__SYSTEM_UPDATE))
+        self.firmware_update.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
         self.serial.add_event_cb(self.on_long_pressed, lv.EVENT.LONG_PRESSED, None)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.firmware_update.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
         target = event_obj.get_target()
         if target == self.board_loader:
             GO2BoardLoader()
+        if target == self.firmware_update:
+            Go2UpdateMode(self)
 
     def on_long_pressed(self, event_obj):
         target = event_obj.get_target()
@@ -953,11 +1268,11 @@ class AboutSetting(Screen):
 class GO2BoardLoader(FullSizeWindow):
     def __init__(self):
         super().__init__(
-            title=_(i18n_keys.TITLE__SWITCH_TO_BOARDLOADER),
+            title=_(i18n_keys.TITLE__ENTERING_BOARDLOADER),
             subtitle=_(i18n_keys.SUBTITLE__SWITCH_TO_BOARDLOADER_RECONFIRM),
-            confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+            confirm_text=_(i18n_keys.BUTTON__RESTART),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
-            icon_path="A:/res/warning.png",
+            # icon_path="A:/res/warning.png",
         )
 
     def eventhandler(self, event_obj):
@@ -976,17 +1291,17 @@ class Go2UpdateMode(Screen):
     def __init__(self, prev_scr):
         super().__init__(
             prev_scr=prev_scr,
-            title=_(i18n_keys.TITLE__SWITCH_TO_UPDATE_MODE),
+            title=_(i18n_keys.TITLE__SYSTEM_UPDATE),
             subtitle=_(i18n_keys.SUBTITLE__SWITCH_TO_UPDATE_MODE_RECONFIRM),
-            icon_path="A:/res/update_green.png",
+            # icon_path="A:/res/update_green.png",
         )
-        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__CONFIRM))
-        self.btn_yes.set_size(216, 76)
-        self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -18)
-        self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
+        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__RESTART))
+        self.btn_yes.set_size(231, 98)
+        self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+        self.btn_yes.enable(lv_colors.ONEKEY_GREEN, lv_colors.BLACK)
         self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL))
-        self.btn_no.set_size(216, 76)
-        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -18)
+        self.btn_no.set_size(231, 98)
+        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -1007,14 +1322,14 @@ class PowerOff(Screen):
             title=_(i18n_keys.TITLE__POWER_OFF),
         )
         self.btn_yes = NormalButton(self, _(i18n_keys.ITEM__POWER_OFF))
-        self.btn_yes.set_size(216, 76)
-        self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -18)
-        self.btn_yes.enable(lv_colors.ONEKEY_GREEN)
+        self.btn_yes.set_size(231, 98)
+        self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+        self.btn_yes.enable(lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
+
         self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL))
-        self.btn_no.set_size(216, 76)
-        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -18)
+        self.btn_no.set_size(231, 98)
+        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
         self.re_loop = re_loop
-        self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
         from trezor import config
 
         self.has_pin = config.has_pin()
@@ -1050,6 +1365,40 @@ class PowerOff(Screen):
         lv.scr_load(scr)
 
 
+class DevelopSettings(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            # self.safety_check.label_right.set_text(self.get_right_text())
+            return
+        super().__init__(
+            prev_scr=prev_scr,
+            title=_(i18n_keys.TITLE__DEVELOPER_OPTIONS),
+            nav_back=True,
+        )
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.safety_check = ListItemBtn(
+            self.container,
+            _(i18n_keys.ITEM__SAFETY_CHECKS),
+            # right_text=self.get_right_text(),
+        )
+        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def get_right_text(self) -> str:
+        return (
+            _(i18n_keys.ITEM__STATUS__STRICT)
+            if safety_checks.is_strict()
+            else _(i18n_keys.ITEM__STATUS__PROMPT)
+        )
+
+    def on_click(self, event_obj):
+        target = event_obj.get_target()
+        if target == self.safety_check:
+            SafetyCheckSetting(self)
+
+
 class ShutingDown(FullSizeWindow):
     def __init__(self):
         super().__init__(
@@ -1069,9 +1418,9 @@ class HomeScreenSetting(Screen):
         if not hasattr(self, "_init"):
             self._init = True
             super().__init__(
-                prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOME_SCREEN), nav_back=True
+                prev_scr=prev_scr, title=_(i18n_keys.TITLE__HOMESCREEN), nav_back=True
             )
-            self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         else:
             self.container.delete()
 
@@ -1159,40 +1508,53 @@ class WallPaperManage(Screen):
         zoom_path: str = "",
         is_internal: bool = False,
     ):
-        super().__init__(prev_scr)
+        super().__init__(
+            prev_scr,
+            icon_path=zoom_path,
+            title=_(i18n_keys.TITLE__MANAGE_WALLPAPER),
+            subtitle=_(i18n_keys.SUBTITLE__MANAGE_WALLPAPER),
+            nav_back=True,
+        )
         self.img_path = file_path
         self.zoom_path = zoom_path
-        self.img = lv.img(self)
-        self.img.set_src(file_path)
-        self.img.set_size_mode(lv.img.SIZE_MODE.REAL)
-        self.img.set_style_radius(4, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.img.set_style_clip_corner(True, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.img.set_antialias(True)
-        self.img.set_zoom(198)
-        self.img.align(lv.ALIGN.TOP_MID, 0, 56)
 
-        self.nav_back = lv.img(self)
-        self.nav_back.set_ext_click_area(20)
-        self.nav_back.set_src("A:/res/nav-back.png")
-        self.nav_back.set_size_mode(lv.img.SIZE_MODE.REAL)
-        self.nav_back.set_antialias(True)
-        self.nav_back.set_zoom(220)
-        self.nav_back.align(lv.ALIGN.TOP_LEFT, 6, 6)
-        self.nav_back.add_flag(lv.obj.FLAG.CLICKABLE)
-        self.nav_back.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
-
-        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__SET_WALLPAPER))
-        self.btn_yes.set_style_text_color(
-            lv_colors.ONEKEY_GREEN_1, lv.PART.MAIN | lv.STATE.DEFAULT
+        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__SET))
+        self.btn_yes.add_style(
+            StyleWrapper().bg_color(lv_colors.ONEKEY_GREEN).text_color(lv_colors.BLACK),
+            0,
         )
         if not is_internal:
-            self.btn_del = NormalButton(self, _(i18n_keys.BUTTON__DELETE))
-            self.btn_del.set_style_bg_opa(0, lv.PART.MAIN | lv.STATE.DEFAULT)
-            self.btn_del.set_style_text_color(
-                lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
+            self.btn_yes.set_size(231, 98)
+            self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+            self.btn_del = NormalButton(self, "")
+            self.btn_del.set_size(231, 98)
+            self.btn_del.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
+            # self.btn_del.add_style(
+            #     StyleWrapper()
+            #     .bg_color(lv_colors.ONEKEY_RED)
+            #     .text_color(lv_colors.ONEKEY_RED_1),
+            #     0,
+            # )
+            self.panel = lv.obj(self.btn_del)
+            self.panel.remove_style_all()
+            self.panel.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+            self.panel.clear_flag(lv.obj.FLAG.CLICKABLE)
+
+            self.btn_del_img = lv.img(self.panel)
+            self.btn_del_img.set_src("A:/res/btn-del.png")
+            self.btn_label = lv.label(self.panel)
+            self.btn_label.set_text(_(i18n_keys.BUTTON__DELETE))
+            self.btn_label.align_to(self.btn_del_img, lv.ALIGN.OUT_RIGHT_MID, 4, 1)
+
+            self.panel.add_style(
+                StyleWrapper()
+                .bg_color(lv_colors.ONEKEY_BLACK)
+                .text_color(lv_colors.ONEKEY_RED_1)
+                .bg_opa(lv.OPA.TRANSP)
+                .border_width(0)
+                .align(lv.ALIGN.CENTER),
+                0,
             )
-            # self.set_scrollbar_mode(lv.SCROLLBAR_MODE.ON)
-            self.btn_del.align_to(self.btn_yes, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
 
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
         lv.scr_load(scr)
@@ -1204,8 +1566,8 @@ class WallPaperManage(Screen):
             device.set_homescreen("A:/res/wallpaper-1.png")
         self.load_screen(self.prev_scr, destroy_self=True)
 
-    def cancel_callback(self):
-        self.btn_del.clear_flag(lv.obj.FLAG.HIDDEN)
+    # def cancel_callback(self):
+    #     self.btn_del.clear_flag(lv.obj.FLAG.HIDDEN)
 
     def eventhandler(self, event_obj):
         event = event_obj.code
@@ -1213,8 +1575,8 @@ class WallPaperManage(Screen):
         if event == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
-            if isinstance(target, lv.img):
-                if target == self.nav_back:
+            if isinstance(target, lv.imgbtn):
+                if target == self.nav_back.nav_btn:
                     if self.prev_scr is not None:
                         self.load_screen(self.prev_scr, destroy_self=True)
             else:
@@ -1225,12 +1587,8 @@ class WallPaperManage(Screen):
                     from trezor.ui.layouts import confirm_del_wallpaper
                     from trezor.wire import DUMMY_CONTEXT
 
-                    self.scroll_to_y(0, lv.ANIM.OFF)
-                    self.btn_del.add_flag(lv.obj.FLAG.HIDDEN)
                     workflow.spawn(
-                        confirm_del_wallpaper(
-                            DUMMY_CONTEXT, self.del_callback, self.cancel_callback
-                        )
+                        confirm_del_wallpaper(DUMMY_CONTEXT, self.del_callback)
                     )
 
 
@@ -1239,19 +1597,19 @@ class SecurityScreen(Screen):
         if not hasattr(self, "_init"):
             self._init = True
         else:
-            self.safety_check.label_right.set_text(self.get_right_text())
+            # self.safety_check.label_right.set_text(self.get_right_text())
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
-        self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYBOARD))
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYPAD))
         self.usb_lock = ListItemBtn(self.container, _(i18n_keys.ITEM__USB_LOCK))
-        self.safety_check = ListItemBtn(
-            self.container,
-            _(i18n_keys.ITEM__SAFETY_CHECKS),
-            right_text=self.get_right_text(),
-        )
+        # self.safety_check = ListItemBtn(
+        #     self.container,
+        #     _(i18n_keys.ITEM__SAFETY_CHECKS),
+        #     right_text=self.get_right_text(),
+        # )
         self.change_pin = ListItemBtn(self.container, _(i18n_keys.ITEM__CHANGE_PIN))
         # self.recovery_check = ListItemBtn(
         #     self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
@@ -1260,17 +1618,15 @@ class SecurityScreen(Screen):
         self.rest_device = ListItemBtn(
             self.container, _(i18n_keys.ITEM__RESET_DEVICE), has_next=False
         )
-        self.rest_device.label_left.set_style_text_color(
-            lv_colors.ONEKEY_RED_1, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.rest_device.label_left.set_style_text_color(lv_colors.ONEKEY_RED_1, 0)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
-    def get_right_text(self) -> str:
-        return (
-            _(i18n_keys.ITEM__STATUS__STRICT)
-            if safety_checks.is_strict()
-            else _(i18n_keys.ITEM__STATUS__PROMPT)
-        )
+    # def get_right_text(self) -> str:
+    #     return (
+    #         _(i18n_keys.ITEM__STATUS__STRICT)
+    #         if safety_checks.is_strict()
+    #         else _(i18n_keys.ITEM__STATUS__PROMPT)
+    #     )
 
     def on_click(self, event_obj):
         code = event_obj.code
@@ -1295,8 +1651,8 @@ class SecurityScreen(Screen):
                 PinMapSetting(self)
             elif target == self.usb_lock:
                 UsbLockSetting(self)
-            elif target == self.safety_check:
-                SafetyCheckSetting(self)
+            # elif target == self.safety_check:
+            #     SafetyCheckSetting(self)
             else:
                 if __debug__:
                     print("unknown")
@@ -1312,19 +1668,19 @@ class UsbLockSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__USB_LOCK), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.container = ContainerFlexCol(self, self.title)
         self.usb_lock = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__USB_LOCK)
         )
 
         self.description = lv.label(self)
-        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
-        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.description.set_style_text_line_space(3, 0)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
 
         if device.is_usb_lock_enabled():
             self.usb_lock.add_state()
@@ -1360,79 +1716,114 @@ class SafetyCheckSetting(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__SAFETY_CHECKS), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
-        self.strict = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__STATUS__STRICT), has_next=False
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        # self.strict = ListItemBtn(
+        #     self.container, _(i18n_keys.ITEM__STATUS__STRICT), has_next=False
+        # )
+        # self.strict.add_check_img()
+        # self.prompt = ListItemBtn(
+        #     self.container, _(i18n_keys.ITEM__STATUS__PROMPT), has_next=False
+        # )
+        self.safety_check = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__SAFETY_CHECKS)
         )
-        self.strict.add_check_img()
-        self.prompt = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__STATUS__PROMPT), has_next=False
-        )
-        self.prompt.add_check_img()
+        # self.prompt.add_check_img()
         self.description = lv.label(self)
-        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
-        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.description.set_style_text_line_space(3, 0)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
         self.description.set_recolor(True)
-        self.set_checked()
+        # self.set_checked()
+        self.retrieval_state()
 
-        self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.container.add_event_cb(self.on_click, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.on_click, lv.EVENT.READY, None)
 
-    def set_checked(self):
+    def retrieval_state(self):
         if safety_checks.is_strict():
-            self.strict.set_checked()
-            self.prompt.set_uncheck()
+            self.safety_check.add_state()
             self.description.set_text(_(i18n_keys.CONTENT__SAFETY_CHECKS_STRICT__HINT))
             self.description.set_style_text_color(
                 lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT
             )
-
+            self.clear_warning_desc()
         else:
-            self.prompt.set_checked()
-            self.strict.set_uncheck()
+            self.safety_check.clear_state()
             if safety_checks.is_prompt_always():
                 self.description.set_text(
                     _(i18n_keys.CONTENT__SAFETY_CHECKS_PERMANENTLY_PROMPT__HINT)
                 )
-                self.description.set_style_text_color(
-                    lv_colors.ONEKEY_RED_1, lv.STATE.DEFAULT
+                self.add_warning_desc(
+                    lv_colors.ONEKEY_RED_2,
+                    lv_colors.ONEKEY_RED_3,
+                    "A:/res/alert-danger.png",
+                    lv.color_hex(0x290700),
                 )
             else:
                 self.description.set_text(
                     _(i18n_keys.CONTENT__SAFETY_CHECKS_TEMPORARILY_PROMPT__HINT)
                 )
-                self.description.set_style_text_color(
-                    lv_colors.ONEKEY_YELLOW, lv.STATE.DEFAULT
+                self.add_warning_desc(
+                    lv_colors.ONEKEY_YELLOW,
+                    lv.color_hex(0xC1A400),
+                    "A:/res/alert-warning.png",
+                    lv.color_hex(0x332C00),
                 )
+
+    def add_warning_desc(self, primary_color, border_color, icon_path, bg_color):
+        if not hasattr(self, "warning_desc"):
+            self.warning_desc = lv.obj(self)
+            self.warning_desc.remove_style_all()
+            self.warning_desc.set_size(464, lv.SIZE.CONTENT)
+            self.warning_desc.align(lv.ALIGN.BOTTOM_MID, 0, -8)
+            self.warning_desc.add_style(
+                StyleWrapper()
+                .bg_color(bg_color)
+                .pad_all(8)
+                .border_color(border_color)
+                .border_width(1)
+                .text_color(primary_color)
+                .text_font(font_PJSREG24),
+                0,
+            )
+            self.icon = lv.img(self.warning_desc)
+            self.icon.set_src(icon_path)
+            self.icon.set_align(lv.ALIGN.TOP_LEFT)
+            self.desc = lv.label(self.warning_desc)
+            self.desc.set_width(408)
+            self.desc.set_long_mode(lv.label.LONG.WRAP)
+            self.desc.align_to(self.icon, lv.ALIGN.OUT_RIGHT_TOP, 4, 0)
+            self.desc.set_text(_(i18n_keys.MSG__SAFETY_CHECKS_PROMPT_WARNING))
+
+    def clear_warning_desc(self):
+        if hasattr(self, "warning_desc"):
+            self.warning_desc.delete()
+            del self.warning_desc
 
     def on_click(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.CLICKED:
-            if utils.lcd_resume():
-                return
-            if target == self.strict:
-                if self.strict.is_unchecked():
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.safety_check.switch:
+                if target.has_state(lv.STATE.CHECKED):
                     SafetyCheckStrictConfirm(self)
-            elif target == self.prompt:
-                if self.prompt.is_unchecked():
+                else:
                     SafetyCheckPromptConfirm(self)
         elif code == lv.EVENT.READY:
-            self.set_checked()
+            self.retrieval_state()
 
 
 class SafetyCheckStrictConfirm(FullSizeWindow):
     def __init__(self, callback_obj):
         super().__init__(
-            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_STRICT),
-            _(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_STRICT),
+            _(i18n_keys.TITLE__ENABLE_SAFETY_CHECKS),
+            _(i18n_keys.SUBTITLE__ENABLE_SAFETY_CHECKS),
             confirm_text=_(i18n_keys.BUTTON__CONFIRM),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
-            icon_path="A:/res/warning.png",
+            # icon_path="A:/res/warning.png",
         )
         self.callback = callback_obj
 
@@ -1442,22 +1833,34 @@ class SafetyCheckStrictConfirm(FullSizeWindow):
         if code == lv.EVENT.CLICKED:
             if target == self.btn_yes:
                 safety_checks.apply_setting(SafetyCheckLevel.Strict)
-                lv.event_send(self.callback, lv.EVENT.READY, None)
             elif target != self.btn_no:
                 return
-            self.destroy(100)
+            lv.event_send(self.callback, lv.EVENT.READY, None)
+            self.destroy(0)
 
 
 class SafetyCheckPromptConfirm(FullSizeWindow):
     def __init__(self, callback_obj):
         super().__init__(
-            _(i18n_keys.TITLE__SET_SAFETY_CHECKS_TO_PROMPT),
+            _(i18n_keys.TITLE__DISABLE_SAFETY_CHECKS),
             _(i18n_keys.SUBTITLE__SET_SAFETY_CHECKS_TO_PROMPT),
-            confirm_text=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
+            confirm_text=_(i18n_keys.BUTTON__SLIDE_TO_DISABLE),
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
-            icon_path="A:/res/warning.png",
+            # icon_path="A:/res/warning.png",
             hold_confirm=True,
+            anim_dir=0,
         )
+        self.slider.change_knob_style(1)
+        # self.status_bar = lv.obj(self)
+        # self.status_bar.remove_style_all()
+        # self.status_bar.set_size(lv.pct(100), 44)
+        # self.status_bar.add_style(
+        #     StyleWrapper()
+        #     .bg_opa()
+        #     .align(lv.ALIGN.TOP_LEFT)
+        #     .bg_img_src("A:/res/warning_bar.png"),
+        #     0,
+        # )
         self.callback = callback_obj
 
     def eventhandler(self, event_obj):
@@ -1469,8 +1872,8 @@ class SafetyCheckPromptConfirm(FullSizeWindow):
         elif code == lv.EVENT.READY:
             if target == self.slider:
                 safety_checks.apply_setting(SafetyCheckLevel.PromptTemporarily)
-                lv.event_send(self.callback, lv.EVENT.READY, None)
-                self.destroy(100)
+                self.destroy(0)
+        lv.event_send(self.callback, lv.EVENT.READY, None)
 
 
 class WalletScreen(Screen):
@@ -1480,8 +1883,8 @@ class WalletScreen(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__WALLET), nav_back=True)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
         self.check_mnemonic = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
         )
@@ -1519,18 +1922,18 @@ class PassphraseScreen(Screen):
         super().__init__(
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__PASSPHRASE), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.container = ContainerFlexCol(self, self.title)
         self.passphrase = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__PASSPHRASE)
         )
         self.description = lv.label(self)
-        self.description.set_size(416, lv.SIZE.CONTENT)
+        self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
-        self.description.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.description.set_style_text_line_space(3, 0)
+        self.description.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
 
         passphrase_enable = device.is_passphrase_enabled()
         if passphrase_enable:
@@ -1549,18 +1952,21 @@ class PassphraseScreen(Screen):
         if code == lv.EVENT.VALUE_CHANGED:
             if target == self.passphrase.switch:
                 if target.has_state(lv.STATE.CHECKED):
-                    PassphraseTipsConfirm(
+                    screen = PassphraseTipsConfirm(
                         _(i18n_keys.TITLE__ENABLE_PASSPHRASE),
                         _(i18n_keys.SUBTITLE__ENABLE_PASSPHRASE),
                         _(i18n_keys.BUTTON__ENABLE),
                         self,
+                        primary_color=lv_colors.ONEKEY_YELLOW,
                     )
+                    screen.btn_yes.enable(lv_colors.ONEKEY_YELLOW, lv_colors.BLACK)
                 else:
                     PassphraseTipsConfirm(
                         _(i18n_keys.TITLE__DISABLE_PASSPHRASE),
                         _(i18n_keys.SUBTITLE__DISABLE_PASSPHRASE),
                         _(i18n_keys.BUTTON__DISABLE),
                         self,
+                        icon_path="",
                     )
         elif code == lv.EVENT.READY:
             if self.passphrase.switch.has_state(lv.STATE.CHECKED):
@@ -1582,14 +1988,23 @@ class PassphraseScreen(Screen):
 
 
 class PassphraseTipsConfirm(FullSizeWindow):
-    def __init__(self, title: str, subtitle: str, confirm_text: str, callback_obj):
+    def __init__(
+        self,
+        title: str,
+        subtitle: str,
+        confirm_text: str,
+        callback_obj,
+        icon_path="A:/res/warning.png",
+        primary_color=lv_colors.ONEKEY_GREEN,
+    ):
         super().__init__(
             title,
             subtitle,
             confirm_text,
             cancel_text=_(i18n_keys.BUTTON__CANCEL),
-            icon_path="A:/res/warning.png",
+            icon_path=icon_path,
             anim_dir=2,
+            primary_color=primary_color,
         )
         self.callback_obj = callback_obj
 
@@ -1615,8 +2030,8 @@ class CryptoScreen(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__CRYPTO), nav_back=True)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
         self.ethereum = ListItemBtn(self.container, _(i18n_keys.TITLE__ETHEREUM))
         self.solana = ListItemBtn(self.container, _(i18n_keys.TITLE__SOLANA))
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
@@ -1638,8 +2053,8 @@ class EthereumSetting(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__ETHEREUM), nav_back=True)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
         self.blind_sign = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLIND_SIGNING),
@@ -1662,8 +2077,8 @@ class SolanaSetting(Screen):
         else:
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SOLANA), nav_back=True)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
         self.blind_sign = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__BLIND_SIGNING),
@@ -1689,9 +2104,9 @@ class BlindSign(Screen):
         super().__init__(
             prev_scr, title=_(i18n_keys.TITLE__BLIND_SIGNING), nav_back=True
         )
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
+
         self.coin_type = coin_type
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+        self.container = ContainerFlexCol(self, self.title, padding_row=2)
         self.blind_sign = ListItemBtnWithSwitch(
             self.container, f"{coin_type} Blind Signing"
         )
@@ -1732,9 +2147,8 @@ class UserGuide(Screen):
             "nav_back": True,
         }
         super().__init__(**kwargs)
-        self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
-        self.title.align(lv.ALIGN.TOP_MID, 0, 56)
-        self.container = ContainerFlexCol(self, self.title, padding_row=8)
+
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.app_tutorial = ListItemBtn(
             self.container, _(i18n_keys.ITEM__ONEKEY_APP_TUTORIAL)
         )
@@ -1805,12 +2219,8 @@ class PowerOnOffDetails(FullSizeWindow):
             _(i18n_keys.TITLE__POWER_ON_OFF__GUIDE),
             _(i18n_keys.SUBTITLE__POWER_ON_OFF__GUIDE),
         )
-        self.item.label_top.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.item.label.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.item.label_top.set_style_text_color(lv_colors.WHITE, 0)
+        self.item.label.set_style_text_color(lv_colors.WHITE_2, 0)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
     # def destroy(self, _delay):
@@ -1831,12 +2241,8 @@ class RecoveryPhraseDetails(FullSizeWindow):
             _(i18n_keys.TITLE__WHAT_IS_RECOVERY_PHRASE__GUIDE),
             _(i18n_keys.SUBTITLE__WHAT_IS_RECOVERY_PHRASE__GUIDE),
         )
-        self.item.label_top.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.item.label.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.item.label_top.set_style_text_color(lv_colors.WHITE, 0)
+        self.item.label.set_style_text_color(lv_colors.WHITE_2, 0)
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
@@ -1858,12 +2264,8 @@ class PinProtectionDetails(FullSizeWindow):
             _(i18n_keys.TITLE__ENABLE_PIN_PROTECTION__GUIDE),
             _(i18n_keys.SUBTITLE__ENABLE_PIN_PROTECTION__GUIDE),
         )
-        self.item.label_top.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.item.label.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.item.label_top.set_style_text_color(lv_colors.WHITE, 0)
+        self.item.label.set_style_text_color(lv_colors.WHITE_2, 0)
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
@@ -1885,12 +2287,8 @@ class HardwareWalletDetails(FullSizeWindow):
             _(i18n_keys.TITLE__HOW_HARDWARE_WALLET_WORKS__GUIDE),
             _(i18n_keys.SUBTITLE__HOW_HARDWARE_WALLET_WORKS__GUIDE),
         )
-        self.item.label_top.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.item.label.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.item.label_top.set_style_text_color(lv_colors.WHITE, 0)
+        self.item.label.set_style_text_color(lv_colors.WHITE_2, 0)
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
@@ -1912,12 +2310,8 @@ class PassphraseDetails(FullSizeWindow):
             _(i18n_keys.TITLE__ACCESS_HIDDEN_WALLET),
             _(i18n_keys.SUBTITLE__PASSPHRASE_ACCESS_HIDDEN_WALLETS__GUIDE),
         )
-        self.item.label_top.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.item.label.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.item.label_top.set_style_text_color(lv_colors.WHITE, 0)
+        self.item.label.set_style_text_color(lv_colors.WHITE_2, 0)
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
 
@@ -1939,21 +2333,15 @@ class HelpDetails(FullSizeWindow):
             _(i18n_keys.TITLE__NEED_HELP__GUIDE),
             _(i18n_keys.SUBTITLE__NEED_HELP__GUIDE),
         )
-        self.item.label_top.set_style_text_color(
-            lv_colors.WHITE, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.item.label.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.item.label_top.set_style_text_color(lv_colors.WHITE, 0)
+        self.item.label.set_style_text_color(lv_colors.WHITE_2, 0)
         self.item.label.set_long_mode(lv.label.LONG.WRAP)
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
 
         self.website = lv.label(self.content_area)
-        self.website.set_style_text_font(font_PJSREG24, lv.PART.MAIN | lv.STATE.DEFAULT)
-        self.website.set_style_text_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
-        self.website.set_style_text_line_space(6, lv.PART.MAIN | lv.STATE.DEFAULT)
+        self.website.set_style_text_font(font_PJSREG24, 0)
+        self.website.set_style_text_color(lv_colors.WHITE_2, 0)
+        self.website.set_style_text_line_space(3, 0)
         self.website.set_text("help.onekey.so/hc")
         self.website.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 24, 0)
         self.underline = lv.line(self.content_area)
@@ -1964,9 +2352,7 @@ class HelpDetails(FullSizeWindow):
             ],
             2,
         )
-        self.underline.set_style_line_color(
-            lv_colors.WHITE_2, lv.PART.MAIN | lv.STATE.DEFAULT
-        )
+        self.underline.set_style_line_color(lv_colors.WHITE_2, 0)
         self.underline.align_to(self.website, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 0)
 
     # def destroy(self, _delay):

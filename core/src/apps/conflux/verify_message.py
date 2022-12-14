@@ -3,11 +3,13 @@ from typing import TYPE_CHECKING
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
+from trezor.lvglui.scrs import lv
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_signverify, show_success
 
 from apps.common.signverify import decode_message
 
+from . import ICON, PRIMARY_COLOR
 from .helpers import bytes_from_address, decode_hex_address
 from .sign_message import message_digest
 
@@ -33,7 +35,7 @@ async def verify_message(ctx: Context, msg: ConfluxVerifyMessage) -> Success:
     address_bytes = bytes_from_address(hex_addr)
     if address_bytes != pkh:
         raise wire.DataError("Invalid signature")
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_signverify(
         ctx, "CFX", decode_message(msg.message), address=msg.address, verify=True
     )

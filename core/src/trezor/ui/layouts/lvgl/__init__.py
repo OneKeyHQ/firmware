@@ -4,6 +4,7 @@ from ubinascii import hexlify
 from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 
 from ...constants.tt import MONO_ADDR_PER_LINE
 from .common import button_request, interact, raise_if_cancelled
@@ -60,6 +61,8 @@ __all__ = (
     "confirm_set_homescreen",
     "confirm_del_wallpaper",
     "confirm_update_res",
+    "confirm_domain",
+    "request_pin_tips",
 )
 
 
@@ -82,6 +85,8 @@ async def confirm_action(
     exc: ExceptionType = wire.ActionCancelled,
     br_code: ButtonRequestType = ButtonRequestType.Other,
     anim_dir: int = 1,
+    hold_level: int = 0,
+    primary_color=lv_colors.ONEKEY_GREEN,
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
 
@@ -97,7 +102,10 @@ async def confirm_action(
         icon_path=icon,
         hold_confirm=hold,
         anim_dir=anim_dir,
+        primary_color=primary_color,
     )
+    if hold_level:
+        confirm_screen.slider.change_knob_style(hold_level)
     await raise_if_cancelled(
         interact(ctx, confirm_screen, br_type, br_code),
         exc,
@@ -114,15 +122,15 @@ async def confirm_reset_device(
     from trezor.lvglui.scrs.common import FullSizeWindow
 
     if recovery:
-        title = _(i18n_keys.TITLE__RESTORE_WALLET)
-        icon = "A:/res/recovery.png"
+        title = _(i18n_keys.TITLE__IMPORT_WALLET)
+        # icon = "A:/res/recovery.png"
     else:
         title = _(i18n_keys.TITLE__CREATE_NEW_WALLET)
-        icon = "A:/res/add.png"
-    confirm_text = _(i18n_keys.BUTTON__CONFIRM)
+        # icon = "A:/res/add.png"
+    confirm_text = _(i18n_keys.BUTTON__CONTINUE)
     cancel_text = _(i18n_keys.BUTTON__CANCEL)
     restscreen = FullSizeWindow(
-        title, prompt, confirm_text, cancel_text, icon_path=icon
+        title, prompt, confirm_text, cancel_text, icon_path=None, anim_dir=0
     )
     await raise_if_cancelled(
         interact(
@@ -137,10 +145,16 @@ async def confirm_reset_device(
 
 
 async def request_strength() -> int:
-    from trezor.lvglui.scrs.initscreen import SelectMnemonicNum
+    from trezor.lvglui.scrs.recovery_device import SelectWordCounter
 
-    screen = SelectMnemonicNum()
-    return await screen.request()
+    word_cnt_strength_map = {
+        12: 128,
+        18: 192,
+        24: 256,
+    }
+    screen = SelectWordCounter(_(i18n_keys.TITLE__READY_TO_CREATE))
+    word_cnt = await screen.request()
+    return word_cnt_strength_map[word_cnt]
 
 
 async def confirm_wipe_device(ctx: wire.GenericContext):
@@ -176,7 +190,7 @@ async def confirm_backup(ctx: wire.GenericContext) -> bool:
 
     title = _(i18n_keys.TITLE__WALLET_IS_READY)
     subtitle = _(i18n_keys.SUBTITLE__DEVICE_SETUP_WALLET_IS_READY)
-    confirm_text = _(i18n_keys.BUTTON__BACK_UP)
+    confirm_text = _(i18n_keys.BUTTON__CONTINUE)
     cancel_text = _(i18n_keys.BUTTON__SKIP)
     icon = "A:/res/success.png"
     if ctx == wire.DUMMY_CONTEXT:
@@ -208,7 +222,6 @@ async def confirm_path_warning(
     ctx: wire.GenericContext, path: str, path_type: str = "Path"
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
-    from trezor.lvglui.lv_colors import lv_colors
 
     screen = FullSizeWindow(
         _(i18n_keys.TITLE__UNKNOWN_PATH),
@@ -217,7 +230,7 @@ async def confirm_path_warning(
         _(i18n_keys.BUTTON__CANCEL),
         icon_path="A:/res/warning.png",
     )
-    screen.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
+    screen.btn_yes.enable(bg_color=lv_colors.ONEKEY_YELLOW, text_color=lv_colors.BLACK)
     await raise_if_cancelled(
         interact(
             ctx,
@@ -242,7 +255,11 @@ async def show_xpub(
         interact(
             ctx,
             XpubOrPub(
-                _(i18n_keys.TITLE__STR_PUBLIC_KEY).format(network), path=path, xpub=xpub
+                _(i18n_keys.TITLE__STR_PUBLIC_KEY).format(network),
+                path=path,
+                primary_color=ctx.primary_color,
+                icon_path=ctx.icon_path,
+                xpub=xpub,
             ),
             "show_pubkey",
             ButtonRequestType.PublicKey,
@@ -257,7 +274,7 @@ async def show_address(
     address_qr: str | None = None,
     case_sensitive: bool = True,
     address_n: str | None,
-    network: str | None = None,
+    network: str = "",
     multisig_index: int | None = None,
     xpubs: Sequence[str] = (),
     address_extra: str | None = None,
@@ -274,6 +291,8 @@ async def show_address(
                 title,
                 address_n,
                 address,
+                ctx.primary_color,
+                ctx.icon_path,
                 xpubs,
                 multisig_index,
             ),
@@ -286,6 +305,8 @@ async def show_address(
             title if title else _(i18n_keys.TITLE__STR_ADDRESS).format(network.upper()),
             address_n,
             address,
+            ctx.primary_color,
+            ctx.icon_path,
         ),
         "show_address",
         ButtonRequestType.Address,
@@ -311,6 +332,8 @@ async def show_pubkey(
                 _(i18n_keys.TITLE__STR_PUBLIC_KEY).format(network),
                 path=path,
                 pubkey=pubkey,
+                primary_color=ctx.primary_color,
+                icon_path=ctx.icon_path,
             ),
             "show_pubkey",
             ButtonRequestType.PublicKey,
@@ -342,7 +365,7 @@ async def _show_modal(
         icon_path=icon,
     )
     if btn_yes_bg_color:
-        screen.btn_yes.enable(bg_color=btn_yes_bg_color)
+        screen.btn_yes.enable(bg_color=btn_yes_bg_color or lv_colors.ONEKEY_GREEN)
     await raise_if_cancelled(
         interact(
             ctx,
@@ -360,7 +383,7 @@ async def show_error_and_raise(
     content: str,
     header: str = "Error",
     subheader: str | None = None,
-    button: str = "Close",
+    button: str | None = None,
     red: bool = False,
     exc: ExceptionType = wire.ActionCancelled,
 ) -> NoReturn:
@@ -372,7 +395,7 @@ async def show_error_and_raise(
         subheader=subheader,
         content=content,
         button_confirm=None,
-        button_cancel=_(i18n_keys.BUTTON__CLOSE),
+        button_cancel=button if button else _(i18n_keys.BUTTON__CLOSE),
         icon="A:/res/danger.png",
         icon_color=ui.RED if red else ui.ORANGE_ICON,
         exc=exc,
@@ -396,7 +419,7 @@ def show_warning(
         ctx,
         br_type=br_type,
         br_code=br_code,
-        header=_(i18n_keys.TITLE__WARNING),
+        header=header,
         subheader=subheader,
         content=content,
         button_confirm=_(i18n_keys.BUTTON__TRY_AGAIN),
@@ -449,7 +472,13 @@ async def confirm_output(
     await raise_if_cancelled(
         interact(
             ctx,
-            TransactionOverview(_(i18n_keys.TITLE__VIEW_TRANSACTION), amount, address),
+            TransactionOverview(
+                _(i18n_keys.TITLE__VIEW_TRANSACTION),
+                amount,
+                address,
+                primary_color=ctx.primary_color,
+                icon_path=ctx.icon_path,
+            ),
             "confirm_output",
             br_code,
         )
@@ -471,6 +500,7 @@ async def confirm_payment_request(
         subtitle,
         amount,
         recipient_name,
+        primary_color=ctx.primary_color,
     )
     return await raise_if_cancelled(
         interact(
@@ -496,7 +526,13 @@ async def should_show_more(
     contents = []
     for _i, text in para:
         contents.append(text)
-    show_more = ShouldShowMore(title, contents[0], "\n".join(contents[1:]), button_text)
+    show_more = ShouldShowMore(
+        title,
+        contents[0],
+        "\n".join(contents[1:]),
+        button_text,
+        primary_color=ctx.primary_color,
+    )
     result = await raise_if_cancelled(interact(ctx, show_more, br_type, br_code))
     assert result in (CONFIRM, SHOW_MORE)
 
@@ -532,7 +568,11 @@ async def confirm_blob(
     else:
         data_str = data
     blob = BlobDisPlay(
-        title, description if description is not None else "", data_str, icon_path=icon
+        title,
+        description if description is not None else "",
+        data_str,
+        icon_path=icon,
+        primary_color=ctx.primary_color,
     )
     return await raise_if_cancelled(interact(ctx, blob, br_type, br_code))
 
@@ -553,7 +593,12 @@ async def confirm_data(
         data_str = data
     return await raise_if_cancelled(
         interact(
-            ctx, ContractDataOverview(title, description, data_str), br_type, br_code
+            ctx,
+            ContractDataOverview(
+                title, description, data_str, primary_color=ctx.primary_color
+            ),
+            br_type,
+            br_code,
         )
     )
 
@@ -602,7 +647,9 @@ async def confirm_text(
     """
     from trezor.lvglui.scrs.template import BlobDisPlay
 
-    screen = BlobDisPlay(title, description, data, icon_path=icon)
+    screen = BlobDisPlay(
+        title, description, data, icon_path=icon, primary_color=ctx.primary_color
+    )
     await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
 
@@ -651,7 +698,7 @@ async def confirm_properties(
                 para.append((key, val))
             elif isinstance(val, bytes):
                 para.append((key, hexlify(val).decode()))
-    screen = ConfirmProperties(title, para)
+    screen = ConfirmProperties(title, para, ctx.primary_color)
     await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
 
@@ -675,6 +722,7 @@ async def confirm_total(
         amount,
         fee_amount,
         total_amount,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(interact(ctx, screen, br_type, br_code))
 
@@ -691,6 +739,7 @@ async def confirm_joint_total(
         _(i18n_keys.TITLE__SIGN_STR_JOINT_TX).format(coin_shortcut),
         spending_amount,
         total_amount,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_joint_total", ButtonRequestType.SignTx)
@@ -714,7 +763,7 @@ async def confirm_metadata(
 ) -> None:
     from trezor.lvglui.scrs.template import ConfirmMetaData
 
-    confirm = ConfirmMetaData(title, content, description, param)
+    confirm = ConfirmMetaData(title, content, description, param, ctx.primary_color)
     await raise_if_cancelled(interact(ctx, confirm, br_type, br_code))
 
 
@@ -723,7 +772,7 @@ async def confirm_replacement(
 ) -> None:
     from trezor.lvglui.scrs.template import ConfirmReplacement
 
-    screen = ConfirmReplacement(description, txid)
+    screen = ConfirmReplacement(description, txid, ctx.primary_color)
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_replacement", ButtonRequestType.SignTx)
     )
@@ -742,7 +791,9 @@ async def confirm_modify_output(
         description = _(i18n_keys.LIST_KEY__DECREASED_BY__COLON)
     from trezor.lvglui.scrs.template import ModifyOutput
 
-    screen = ModifyOutput(address, description, amount_change, amount_new)
+    screen = ModifyOutput(
+        address, description, amount_change, amount_new, primary_Color=ctx.primary_color
+    )
     await raise_if_cancelled(
         interact(
             ctx,
@@ -769,7 +820,7 @@ async def confirm_modify_fee(
 
     from trezor.lvglui.scrs.template import ModifyFee
 
-    screen = ModifyFee(description, user_fee_change, total_fee_new)
+    screen = ModifyFee(description, user_fee_change, total_fee_new, ctx.primary_color)
     await raise_if_cancelled(
         interact(ctx, screen, "modify_fee", ButtonRequestType.SignTx)
     )
@@ -782,7 +833,11 @@ async def confirm_coinjoin(
     from trezor.lvglui.scrs.template import ConfirmCoinJoin
 
     screen = ConfirmCoinJoin(
-        title, coin_name, str(max_rounds), f"{max_fee_per_vbyte} sats/vbyte"
+        title,
+        coin_name,
+        str(max_rounds),
+        f"{max_fee_per_vbyte} sats/vbyte",
+        ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "coinjoin_final", ButtonRequestType.Other)
@@ -795,7 +850,12 @@ async def confirm_sign_identity(
 ) -> None:
     from trezor.lvglui.scrs.template import ConfirmSignIdentity
 
-    screen = ConfirmSignIdentity(f"Sign {proto}", identity, subtitle=challenge_visual)
+    screen = ConfirmSignIdentity(
+        f"Sign {proto}",
+        identity,
+        subtitle=challenge_visual,
+        primary_color=ctx.primary_color,
+    )
     await raise_if_cancelled(
         interact(ctx, screen, "sign_identity", ButtonRequestType.Other)
     )
@@ -814,7 +874,10 @@ async def confirm_signverify(
 
     await raise_if_cancelled(
         interact(
-            ctx, Message(header, address, message), br_type, ButtonRequestType.Other
+            ctx,
+            Message(header, address, message, ctx.primary_color, ctx.icon_path),
+            br_type,
+            ButtonRequestType.Other,
         )
     )
 
@@ -827,25 +890,29 @@ async def show_popup(
     timeout_ms: int = 3000,
     icon: str | None = None,
 ) -> None:
-    from trezor.lvglui.scrs.components.popup import PopupSample
+    from trezor.lvglui.scrs.common import FullSizeWindow
     from trezor import loop
 
     if description and description_param:
         description = description.format(description_param)
     subtitle = f"{subtitle or ''} {description or ''}"
-    PopupSample(title, subtitle, icon, timeout_ms)
-    await loop.sleep(50)
+    FullSizeWindow(
+        title, subtitle, icon_path=icon, auto_close_ms=timeout_ms, anim_dir=0
+    )
+    await loop.sleep(500)
 
 
 def draw_simple_text(
     title: str,
     description: str = "",
     icon_path: str | None = "A:/res/warning.png",
-    auto_close: bool = False,
+    auto_close_ms: int = 2000,
 ) -> None:
     from trezor.lvglui.scrs.common import FullSizeWindow
 
-    FullSizeWindow(title, description, icon_path=icon_path, auto_close=auto_close)
+    FullSizeWindow(
+        title, description, icon_path=icon_path, auto_close_ms=auto_close_ms, anim_dir=0
+    )
 
 
 async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -> str:
@@ -921,7 +988,12 @@ async def show_pairing_error() -> None:
 async def confirm_domain(ctx: wire.GenericContext, **kwargs) -> None:
     from trezor.lvglui.scrs.template import EIP712DOMAIN
 
-    screen = EIP712DOMAIN(_(i18n_keys.TITLE__CONFIRM_DOMAIN), **kwargs)
+    screen = EIP712DOMAIN(
+        _(i18n_keys.TITLE__STR_TYPED_DATA).format(ctx.name),
+        primary_color=ctx.primary_color,
+        icon_path=ctx.icon_path,
+        **kwargs,
+    )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_domain", ButtonRequestType.ProtectCall)
     )
@@ -941,7 +1013,7 @@ async def confirm_sol_blinding_sign(
 ) -> None:
     from trezor.lvglui.scrs.template import SolBlindingSign
 
-    screen = SolBlindingSign(fee_payer, message_hex)
+    screen = SolBlindingSign(fee_payer, message_hex, ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "sol_blinding_sign", ButtonRequestType.ProtectCall)
     )
@@ -953,7 +1025,11 @@ async def confirm_sol_transfer(
     from trezor.lvglui.scrs.template import SolTransfer
 
     screen = SolTransfer(
-        from_addr=from_addr, to_addr=to_addr, fee_payer=fee_payer, amount=amount
+        from_addr=from_addr,
+        to_addr=to_addr,
+        fee_payer=fee_payer,
+        amount=amount,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "sol_transfer", ButtonRequestType.ProtectCall)
@@ -971,7 +1047,12 @@ async def confirm_sol_create_ata(
     from trezor.lvglui.scrs.template import SolCreateAssociatedTokenAccount
 
     screen = SolCreateAssociatedTokenAccount(
-        fee_payer, funding_account, associated_token_account, wallet_address, token_mint
+        fee_payer,
+        funding_account,
+        associated_token_account,
+        wallet_address,
+        token_mint,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "sol_create_ata", ButtonRequestType.ProtectCall)
@@ -990,7 +1071,13 @@ async def confirm_sol_token_transfer(
     from trezor.lvglui.scrs.template import SolTokenTransfer
 
     screen = SolTokenTransfer(
-        from_addr, to_addr, amount, source_owner, fee_payer, token_mint
+        from_addr,
+        to_addr,
+        amount,
+        source_owner,
+        fee_payer,
+        primary_color=ctx.primary_color,
+        token_mint=token_mint,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "sol_token_transfer", ButtonRequestType.ProtectCall)
@@ -1018,6 +1105,12 @@ async def confirm_final(ctx: wire.Context) -> None:
         action=_(i18n_keys.SUBTITLE__DO_YOU_WANT_TO_SIGN__THIS_TX),
         verb=_(i18n_keys.BUTTON__SLIDE_TO_SIGN),
         hold=True,
+        anim_dir=0,
+    )
+    await show_popup(
+        _(i18n_keys.TITLE__TRANSACTION_SIGNED),
+        icon="A:/res/success.png",
+        timeout_ms=2000,
     )
 
 
@@ -1027,7 +1120,7 @@ async def confirm_blind_sign_common(
 
     from trezor.lvglui.scrs.template import BlindingSignCommon
 
-    screen = BlindingSignCommon(signer)
+    screen = BlindingSignCommon(signer, ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "common_blinding_sign", ButtonRequestType.ProtectCall)
     )
@@ -1053,11 +1146,11 @@ async def confirm_set_homescreen(ctx, replace: bool = False):
     await confirm_action(
         ctx=ctx,
         br_type="confirm_homescreen",
-        title=_(i18n_keys.TITLE__SET_HOMESCREEN),
-        description=_(i18n_keys.SUBTITLE__SET_HOMESCREEN)
+        title=_(i18n_keys.TITLE__SET_AS_HOMESCREEN),
+        description=_(i18n_keys.SUBTITLE__SET_AS_HOMESCREEN)
         if not replace
         else _(i18n_keys.SUBTITLE__SET_HOMESCREEN_AND_DELETE),
-        icon="A:/res/upload-res.png",
+        icon=None,
         anim_dir=2,
     )
 
@@ -1075,7 +1168,7 @@ async def confirm_update_res(ctx):
     await raise_if_cancelled(interact(ctx, confirm_screen, "confirm_update_res"))
 
 
-async def confirm_del_wallpaper(ctx, confirm_callback, cancel_callback):
+async def confirm_del_wallpaper(ctx, confirm_callback):
     from trezor.lvglui.scrs.common import FullSizeWindow
 
     confirm_screen = FullSizeWindow(
@@ -1084,14 +1177,12 @@ async def confirm_del_wallpaper(ctx, confirm_callback, cancel_callback):
         confirm_text=_(i18n_keys.BUTTON__DELETE),
         cancel_text=_(i18n_keys.BUTTON__CANCEL),
     )
-    from trezor.lvglui.lv_colors import lv_colors
-
-    confirm_screen.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1)
+    confirm_screen.btn_yes.enable(
+        bg_color=lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK
+    )
     confirm = await ctx.wait(confirm_screen.request())
     if confirm:
         confirm_callback()
-    else:
-        cancel_callback()
 
 
 async def confirm_algo_payment(
@@ -1107,7 +1198,7 @@ async def confirm_algo_payment(
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoPayment, AlgoCommon
 
-    screen = AlgoCommon("Payment")
+    screen = AlgoCommon("Payment", ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_payment", ButtonRequestType.ProtectCall)
     )
@@ -1120,6 +1211,7 @@ async def confirm_algo_payment(
         note,
         fee,
         amount,
+        ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "algo_payment", ButtonRequestType.ProtectCall)
@@ -1139,7 +1231,7 @@ async def confirm_algo_asset_freeze(
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoAssetFreeze, AlgoCommon
 
-    screen = AlgoCommon("Asset Freeze")
+    screen = AlgoCommon("Asset Freeze", ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_asset_freeze", ButtonRequestType.ProtectCall)
     )
@@ -1152,6 +1244,7 @@ async def confirm_algo_asset_freeze(
         new_freeze_state,
         genesis_id,
         note,
+        ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "algo_asset_freeze", ButtonRequestType.ProtectCall)
@@ -1173,7 +1266,7 @@ async def confirm_algo_asset_xfer(
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoAssetXfer, AlgoCommon
 
-    screen = AlgoCommon("ASSET TRANSFER")
+    screen = AlgoCommon("ASSET TRANSFER", ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_asset_transfer", ButtonRequestType.ProtectCall)
     )
@@ -1188,6 +1281,7 @@ async def confirm_algo_asset_xfer(
         rekey_to,
         genesis_id,
         note,
+        ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "algo_asset_transfer", ButtonRequestType.ProtectCall)
@@ -1216,7 +1310,7 @@ async def confirm_algo_asset_cfg(
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoAssetCfg, AlgoCommon
 
-    screen = AlgoCommon("ASSET CONFIG")
+    screen = AlgoCommon("ASSET CONFIG", ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_asset_cfg", ButtonRequestType.ProtectCall)
     )
@@ -1238,6 +1332,7 @@ async def confirm_algo_asset_cfg(
         rekey_to,
         genesis_id,
         note,
+        ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "algo_asset_cfg", ButtonRequestType.ProtectCall)
@@ -1255,11 +1350,13 @@ async def confirm_algo_keyregNonparticipating(
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoKeyregNonp, AlgoCommon
 
-    screen = AlgoCommon("KEYREG NO PARTICIPATING")
+    screen = AlgoCommon("KEYREG NO PARTICIPATING", ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_keyreg_Nonp", ButtonRequestType.ProtectCall)
     )
-    screen = AlgoKeyregNonp(sender, fee, nonpart, rekey_to, genesis_id, note)
+    screen = AlgoKeyregNonp(
+        sender, fee, nonpart, rekey_to, genesis_id, note, ctx.primary_color
+    )
     await raise_if_cancelled(
         interact(ctx, screen, "algo_keyreg_Nonp", ButtonRequestType.ProtectCall)
     )
@@ -1282,7 +1379,7 @@ async def confirm_algo_keyregOnline(
 ) -> None:
     from trezor.lvglui.scrs.template import AlgoKeyregOnline, AlgoCommon
 
-    screen = AlgoCommon(format)
+    screen = AlgoCommon(format, ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "algo_keyreg_online", ButtonRequestType.ProtectCall)
     )
@@ -1295,6 +1392,7 @@ async def confirm_algo_keyregOnline(
         rekey_to,
         genesis_id,
         note,
+        ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "algo_keyreg_online", ButtonRequestType.ProtectCall)
@@ -1305,7 +1403,7 @@ async def confirm_algo_app(ctx: wire.Context, signer: str, raw_message: bytes) -
 
     from trezor.lvglui.scrs.template import AlgoApplication
 
-    screen = AlgoApplication(signer)
+    screen = AlgoApplication(signer, ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "common_blinding_sign", ButtonRequestType.ProtectCall)
     )
@@ -1339,6 +1437,7 @@ async def confirm_ripple_payment(
         fee,
         total,
         tag,
+        primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "ripple_payment", ButtonRequestType.ProtectCall)

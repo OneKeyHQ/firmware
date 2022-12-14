@@ -31,13 +31,22 @@ def all_slip44_ids_hardened() -> Iterator[int]:
 
 class NetworkInfo:
     def __init__(
-        self, chain_id: int, slip44: int, shortcut: str, name: str, rskip60: bool
+        self,
+        chain_id: int,
+        slip44: int,
+        shortcut: str,
+        name: str,
+        rskip60: bool,
+        icon: str,
+        primary_color: int,
     ) -> None:
         self.chain_id = chain_id
         self.slip44 = slip44
         self.shortcut = shortcut
         self.name = name
         self.rskip60 = rskip60
+        self.icon = icon
+        self.primary_color = primary_color
 
 
 # fmt: off
@@ -49,5 +58,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         shortcut="${n.shortcut}",
         name="${n.name}",
         rskip60=${n.rskip60},
+        icon="${n.icon}",
+        primary_color=${n.primary_color},
     )
 % endfor

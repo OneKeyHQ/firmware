@@ -8,7 +8,7 @@ from trezor.ui.layouts import confirm_signverify, show_success
 
 from apps.common.signverify import decode_message
 
-from .helpers import address_from_bytes, bytes_from_address
+from .helpers import address_from_bytes, bytes_from_address, get_color_and_icon
 from .sign_message import message_digest
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
         raise wire.DataError("Invalid signature")
 
     address = address_from_bytes(address_bytes)
-
+    ctx.primary_color, ctx.icon_path = get_color_and_icon(-1)
     await confirm_signverify(
         ctx, "ETH", decode_message(msg.message), address=address, verify=True
     )

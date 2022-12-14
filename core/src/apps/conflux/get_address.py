@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
 
+from trezor.lvglui.scrs import lv
 from trezor.messages import ConfluxAddress, ConfluxGetAddress
 from trezor.ui.layouts import show_address
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
+from . import ICON, PRIMARY_COLOR
 from .helpers import CONFLUX_MAIN_NET_NETWORK_ID, address_from_bytes, address_from_hex
 
 if TYPE_CHECKING:
@@ -27,6 +29,7 @@ async def get_address(
 
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         await show_address(
             ctx,
             address=cfx_address,

@@ -2,13 +2,15 @@ from ubinascii import b2a_base64
 
 from trezor import wire
 from trezor.crypto.curve import ed25519
+from trezor.lvglui.scrs import lv
 from trezor.messages import AlgorandSignedTx, AlgorandSignTx
 from trezor.strings import format_amount
+from trezor.ui.layouts.lvgl import confirm_final
 
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from . import encoding, transactions
+from . import ICON, PRIMARY_COLOR, encoding, transactions
 
 
 @auto_keychain(__name__)
@@ -26,6 +28,7 @@ async def sign_tx(
     sender = txn.sender if txn is not None else ""
     fee = txn.fee if txn is not None else 0
     note = txn.note if txn is not None else None
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     if type(txn) == transactions.transaction.AssetFreezeTxn:
         from trezor.ui.layouts.lvgl import confirm_algo_asset_freeze
 
@@ -204,15 +207,14 @@ async def sign_tx(
             note.decode("utf-8") if note is not None else None,
         )
     elif type(txn) == transactions.transaction.ApplicationCallTxn:
-        from trezor.ui.layouts.lvgl import confirm_algo_app, confirm_final
+        from trezor.ui.layouts.lvgl import confirm_algo_app
 
         await confirm_algo_app(ctx, address, msg.raw_tx)
-        await confirm_final(ctx)
     else:
-        from trezor.ui.layouts.lvgl import confirm_blind_sign_common, confirm_final
+        from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
         await confirm_blind_sign_common(ctx, address, msg.raw_tx)
-        await confirm_final(ctx)
 
     signature = ed25519.sign(node.private_key(), msg.raw_tx)
+    await confirm_final(ctx)
     return AlgorandSignedTx(signature=signature)

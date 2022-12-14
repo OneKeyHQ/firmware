@@ -794,6 +794,7 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/i18n/locales/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/components/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/lvglui/scrs/widgets/*.py'))
 
     SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/wire/*.py'))
 

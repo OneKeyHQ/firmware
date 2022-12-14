@@ -3,13 +3,15 @@ from typing import TYPE_CHECKING
 from trezor.crypto import der
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha512
+from trezor.lvglui.scrs import lv
 from trezor.messages import RippleSignedTx, RippleSignTx
+from trezor.ui.layouts import confirm_final
 from trezor.wire import ProcessError
 
 from apps.common import paths
 from apps.common.keychain import auto_keychain
 
-from . import helpers, layout
+from . import ICON, PRIMARY_COLOR, helpers, layout
 from .serialize import serialize
 
 if TYPE_CHECKING:
@@ -32,7 +34,7 @@ async def sign_tx(
     to_sign = get_network_prefix() + tx
 
     check_fee(msg.fee)
-
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await layout.require_confirm_tx(ctx, msg.payment.destination, msg.payment.amount)
     await layout.require_confirm_fee(
         ctx,
@@ -42,8 +44,8 @@ async def sign_tx(
         msg.payment.amount,
         msg.payment.destination_tag,
     )
-
     signature = ecdsa_sign(node.private_key(), first_half_of_sha512(to_sign))
+    await confirm_final(ctx)
     tx = serialize(msg, source_address, pubkey=node.public_key(), signature=signature)
     return RippleSignedTx(signature=signature, serialized_tx=tx)
 

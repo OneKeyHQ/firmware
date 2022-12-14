@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor.crypto import bip32
 from trezor.enums import InputScriptType
+from trezor.lvglui.scrs import lv
 from trezor.messages import Address
 from trezor.ui.layouts import show_address
 
@@ -91,6 +92,10 @@ async def get_address(
     if msg.show_display:
         from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
+        ctx.primary_color, ctx.icon_path = (
+            lv.color_hex(coin.primary_color),
+            f"A:/res/{coin.icon}",
+        )
         path = address_n_to_str(msg.address_n)
         if msg.multisig:
             if msg.multisig.nodes:
@@ -113,27 +118,27 @@ async def get_address(
                 network=coin.coin_shortcut,
             )
         else:
-            if msg.script_type == InputScriptType.SPENDWITNESS:
-                title = _(i18n_keys.TITLE__STR_ADDRESS_SEGWIT).format(
-                    coin.coin_shortcut.upper()
-                )
-            elif msg.script_type == InputScriptType.SPENDP2SHWITNESS:
-                title = _(i18n_keys.TITLE__STR_ADDRESS_LEGACY_SEGWIT).format(
-                    coin.coin_shortcut.upper()
-                )
-            elif msg.script_type == InputScriptType.SPENDTAPROOT:
-                title = _(i18n_keys.TITLE__STR_ADDRESS_TAPROOT).format(
-                    coin.coin_shortcut.upper()
-                )
-            else:
-                title = _(i18n_keys.TITLE__STR_ADDRESS).format(
-                    coin.coin_shortcut.upper()
-                )
+            # if msg.script_type == InputScriptType.SPENDWITNESS:
+            #     title = _(i18n_keys.TITLE__STR_ADDRESS_SEGWIT).format(
+            #         coin.coin_shortcut.upper()
+            #     )
+            # elif msg.script_type == InputScriptType.SPENDP2SHWITNESS:
+            #     title = _(i18n_keys.TITLE__STR_ADDRESS_LEGACY_SEGWIT).format(
+            #         coin.coin_shortcut.upper()
+            #     )
+            # elif msg.script_type == InputScriptType.SPENDTAPROOT:
+            #     title = _(i18n_keys.TITLE__STR_ADDRESS_TAPROOT).format(
+            #         coin.coin_shortcut.upper()
+            #     )
+            # else:
+            #     title = _(i18n_keys.TITLE__STR_ADDRESS).format(
+            #         coin.coin_shortcut.upper()
+            #     )
             await show_address(
                 ctx,
                 address=address,
                 address_n=path,
-                title=title,
+                title=_(i18n_keys.TITLE__STR_ADDRESS).format(coin.coin_name),
             )
 
     return Address(address=address, mac=mac)

@@ -1,21 +1,29 @@
 from ..i18n import gettext as _, keys as i18n_keys
+from . import font_PJSBOLD24, lv_colors
 from .common import FullSizeWindow, lv
 from .components.keyboard import PassphraseKeyboard
+from .components.navigation import Navigation
+from .widgets.style import StyleWrapper
 
 
 class PassphraseRequest(FullSizeWindow):
     def __init__(self, max_len):
-        super().__init__(_(i18n_keys.TITLE__ENTER_PASSPHRASE), None)
+        super().__init__(_(i18n_keys.CONTENT__ENTER_PASSPHRASE_COLON), None, anim_dir=0)
+        self.nav_back = Navigation(self)
+        self.content_area.align_to(self.nav_back, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 24)
+        self.title.add_style(
+            StyleWrapper()
+            .text_font(font_PJSBOLD24)
+            .text_color(lv_colors.WHITE_2)
+            .text_align_left()
+            .text_letter_space(-1)
+            .text_line_space(0)
+            .pad_left(8),
+            0,
+        )
         self.keyboard = PassphraseKeyboard(self, max_len)
         self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 
-        self.nav_back = lv.imgbtn(self)
-        self.nav_back.set_size(48, 48)
-        self.nav_back.set_pos(24, 92)
-        self.nav_back.set_ext_click_area(100)
-        self.nav_back.set_style_bg_img_src(
-            "A:/res/nav-back.png", lv.PART.MAIN | lv.STATE.DEFAULT
-        )
         self.nav_back.add_event_cb(self.on_cancel, lv.EVENT.CLICKED, None)
 
     def on_ready(self, event_obj):
@@ -25,7 +33,6 @@ class PassphraseRequest(FullSizeWindow):
         self.destroy()
 
     def on_cancel(self, event_obj):
-        code = event_obj.code
         target = event_obj.get_target()
-        if code == lv.EVENT.CLICKED and target == self.nav_back:
+        if target == self.nav_back.nav_btn:
             self.channel.publish(None)

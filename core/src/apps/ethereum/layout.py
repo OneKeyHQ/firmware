@@ -174,7 +174,7 @@ async def confirm_domain(ctx: Context, domain: dict[str, bytes]) -> None:
         else None
     )
     salt = decode_typed_data(domain["salt"], "bytes32") if domain.get("salt") else None
-    from trezor.ui.layouts import confirm_domain  # type: ignore["confirm_domain" is unknown import symbol]
+    from trezor.ui.layouts import confirm_domain
 
     await confirm_domain(
         ctx,
