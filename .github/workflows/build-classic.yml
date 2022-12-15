@@ -15,6 +15,20 @@ jobs:
         with:
           ref: bixin_dev
 
+      - name: Populate vars
+        id: vars
+        run: |
+          BOOT_VERSION=$(./tools/version.sh ./legacy/bootloader/version.h)
+          FIRMWARE_VERSION=$(cat ./legacy/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
+          BUILD_DATE=$(date +"%Y%m%d")
+          SHORT_HASH=$(git rev-parse --short HEAD)
+
+          echo "BOOT_VERSION=$BOOT_VERSION" >> $GITHUB_ENV
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
+          echo "FIRMWARE_VERSION=$FIRMWARE_VERSION" >> $GITHUB_ENV
+          echo "ARTIFACTS_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"" >> $GITHUB_ENV
+
       - name: "Build classic firmware"
         run: |
           sudo apt install protobuf-compiler libprotobuf-dev
@@ -31,29 +45,25 @@ jobs:
           poetry run ./script/setup
           poetry run ./script/cibuild
 
-
       - name: "Upload Artifacts"
         uses: actions/upload-artifact@v3
         with:
           name: firmware-${{ github.sha }}
           path: |
             ./legacy/firmware/classic*Stable*.bin
-            ./legacy/bootloader/bootloader.bin
-
-      - name: "Set Env"
-        run: |
-          artifacts_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          echo "ARTIFACTS_URL=$artifacts_url" >> $GITHUB_ENV
+            ./legacy/bootloader/bootloader*Stable*.bin
 
       - name: "Notify to Slack"
-        uses: onekeyhq/onekey-github-actions/notice-slack-app-update@main
+        uses: onekeyhq/actions/notice-slack-app-update@main
         with:
           web-hook-url: ${{ secrets.SLACK_DEV_RELEASE_WEBHOOK }}
           artifact-type: CLASSIC-FIRMWARE
           artifact-name: Classic-Hardware-Firmware
           artifact-bundle-id: 'so.onekey.firmware.classic'
+          artifact-version-name: '${{ env.FIRMWARE_VERSION }}'
+          artifact-version-code: '${{ env.SHORT_HASH }}-${{ env.BUILD_DATE }}'
           artifact-download-url: '${{ env.ARTIFACTS_URL }}'
-          change-log: 'Download [Artifacts] at the bottom of page.'
+          change-log: 'firmware@${{ env.FIRMWARE_VERSION }} / boot@${{ env.BOOT_VERSION }}'
           custom-issue-url: ''
           custom-message-title: ''
           custom-message-payload: ''
