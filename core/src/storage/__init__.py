@@ -17,7 +17,10 @@ def wipe() -> None:
     config.wipe()
     cache.clear_all()
     if not utils.EMULATOR:
-        clean_flash()
+        try:
+            clean_flash()
+        except BaseException:
+            pass
 
 
 def init_unlocked() -> None:
