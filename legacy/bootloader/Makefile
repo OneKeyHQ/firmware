@@ -1,4 +1,7 @@
-NAME  = bootloader
+BOOT_BUILD_VERSION=$(shell ../../tools/version.sh version.h)
+BOOT_BUILD_DATE=$(shell date "+%m%d")
+BUILD_COMMIT=$(shell git rev-parse HEAD | cut -c1-7)
+NAME  = bootloader.$(BOOT_BUILD_VERSION)-Stable-$(BOOT_BUILD_DATE)-$(BUILD_COMMIT)
 
 OBJS += bootloader.o
 OBJS += signatures.o
