@@ -49,16 +49,20 @@ FIRMWARE_P2_MAXSIZE = 917504
 FIRMWARE_MAXSIZE    = 1703936
 
 CFLAGS += -DSCM_REVISION='\"$(shell git rev-parse HEAD | sed 's:\(..\):\\x\1:g')\"'
+BUILD_DATE=$(shell date "+%m%d")
+
+BOOT_BUILD_VERSION=$(shell ../tools/version.sh ./embed/bootloader/version.h)
 FIRMWARE_BUILD_VERSION=$(shell cat ./embed/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
-FIRMWARE_BUILD_DATE=$(shell date "+%m%d")
 ifndef BUILD_ID
 BUILD_COMMIT=$(shell git rev-parse HEAD | cut -c1-7)
-NAME=touch.$(FIRMWARE_BUILD_VERSION)-Stable-$(FIRMWARE_BUILD_DATE)-$(BUILD_COMMIT)
+FIRMWARE_BUILD_NAME=touch.$(FIRMWARE_BUILD_VERSION)-Stable-$(BUILD_DATE)-$(BUILD_COMMIT)
+BOOT_BUILD_NAME=bootloader.$(BOOT_BUILD_VERSION)-Stable-$(BUILD_DATE)-$(BUILD_COMMIT)
 else
-NAME=touch.$(FIRMWARE_BUILD_VERSION)-Alpha-$(FIRMWARE_BUILD_DATE)-$(BUILD_ID)
+FIRMWARE_BUILD_NAME=touch.$(FIRMWARE_BUILD_VERSION)-Alpha-$(BUILD_DATE)-$(BUILD_ID)
+BOOT_BUILD_NAME=bootloader.$(BOOT_BUILD_VERSION)-Alpha-$(BUILD_DATE)-$(BUILD_ID)
 endif
 #CFLAGS += -DBUILD_ID='\"$(BUILD_COMMIT)\"'
-CFLAGS += -DBUILD_ID='\"$(NAME)\"'
+CFLAGS += -DBUILD_ID='\"$(FIRMWARE_BUILD_NAME)\"'
 
 
 TESTPATH = $(CURDIR)/../tests
@@ -155,6 +159,7 @@ build_boardloader: ## build boardloader
 
 build_bootloader: ## build bootloader
 	$(SCONS) CFLAGS="$(CFLAGS)" PRODUCTION="$(PRODUCTION)" TREZOR_MODEL="$(TREZOR_MODEL)" PRODUCTION_MODEL="$(PRODUCTION_MODEL)" $(BOOTLOADER_BUILD_DIR)/bootloader.bin
+	cp $(BOOTLOADER_BUILD_DIR)/bootloader.bin $(BOOTLOADER_BUILD_DIR)/$(BOOT_BUILD_NAME).bin
 
 build_bootloader_ci: ## build CI device testing bootloader
 	$(SCONS) CFLAGS="$(CFLAGS)" PRODUCTION="$(PRODUCTION)" TREZOR_MODEL="$(TREZOR_MODEL)" $(BOOTLOADER_CI_BUILD_DIR)/bootloader.bin
@@ -169,7 +174,7 @@ build_reflash: ## build reflash firmware + reflash image
 
 build_firmware: templates build_cross ## build firmware with frozen modules
 	$(SCONS) CFLAGS="$(CFLAGS)" PRODUCTION="$(PRODUCTION)" TREZOR_MODEL="$(TREZOR_MODEL)" PRODUCTION_MODEL="$(PRODUCTION_MODEL)" PYOPT="$(PYOPT)" BITCOIN_ONLY="$(BITCOIN_ONLY)" UI2="$(UI2)" $(FIRMWARE_BUILD_DIR)/firmware.bin
-	cp $(FIRMWARE_BUILD_DIR)/firmware.bin $(FIRMWARE_BUILD_DIR)/$(NAME).bin
+	cp $(FIRMWARE_BUILD_DIR)/firmware.bin $(FIRMWARE_BUILD_DIR)/$(FIRMWARE_BUILD_NAME).bin
 
 build_unix: templates ## build unix port
 	$(SCONS) CFLAGS="$(CFLAGS)" $(UNIX_BUILD_DIR)/trezor-emu-core $(UNIX_PORT_OPTS) TREZOR_MODEL="$(TREZOR_MODEL)" BITCOIN_ONLY="$(BITCOIN_ONLY)" TREZOR_EMULATOR_ASAN="$(ADDRESS_SANITIZER)" UI2="$(UI2)" UNAME_S="$(UNAME_S)" CURRENT_DIR="$(CURRENT_DIR)"
