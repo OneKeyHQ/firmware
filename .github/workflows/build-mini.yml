@@ -52,7 +52,7 @@ jobs:
           name: firmware-${{ github.sha }}
           path: |
             ./legacy/firmware/mini*Stable*.bin
-            ./legacy/bootloader/bootloader.bin
+            ./legacy/bootloader/bootloader*Stable*.bin
 
       - name: "Set Env"
         run: |
