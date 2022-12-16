@@ -36,7 +36,10 @@ class MnemonicDisplay(FullSizeWindow):
             lv.GRID_TEMPLATE.LAST,
         ]
         self.container = ContainerGrid(
-            self, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.subtitle
+            self.content_area,
+            row_dsc=row_dsc,
+            col_dsc=col_dsc,
+            align_base=self.subtitle,
         )
         word_style = (
             StyleWrapper()
@@ -56,6 +59,7 @@ class MnemonicDisplay(FullSizeWindow):
             0,
         )
         self.clear_flag(lv.obj.FLAG.SCROLLABLE)
+        self.content_area.set_scroll_dir(lv.DIR.VER)
         self.set_grid_align(lv.GRID_ALIGN.CENTER, lv.GRID_ALIGN.CENTER)
         half = word_count // 2
         for i in range(word_count):
