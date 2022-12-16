@@ -34,6 +34,7 @@
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
 #include "messages-stellar.pb.h"
+#include "messages-sui.pb.h"
 #include "messages-tron.pb.h"
 
 // message functions
@@ -162,7 +163,7 @@ bool fsm_layoutSignMessage_ex(const char *description, const uint8_t *msg,
                               uint32_t len);
 bool fsm_layoutVerifyMessage(const uint8_t *msg, uint32_t len);
 
-void fsm_msgBixinReboot(const BixinReboot *msg);
+// void fsm_msgBixinReboot(const BixinReboot *msg);
 void fsm_msgBixinMessageSE(const BixinMessageSE *msg);
 void fsm_msgBixinVerifyDeviceRequest(const BixinVerifyDeviceRequest *msg);
 void fsm_msgBixinLoadDevice(const BixinLoadDevice *msg);
@@ -210,5 +211,9 @@ void fsm_msgAlgorandSignTx(const AlgorandSignTx *msg);
 // ripple
 void fsm_msgRippleGetAddress(RippleGetAddress *msg);
 void fsm_msgRippleSignTx(RippleSignTx *msg);
+
+// sui
+void fsm_msgSuiGetAddress(const SuiGetAddress *msg);
+void fsm_msgSuiSignTx(const SuiSignTx *msg);
 
 #endif

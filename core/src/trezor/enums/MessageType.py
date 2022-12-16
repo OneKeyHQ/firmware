@@ -247,7 +247,6 @@ if not utils.BITCOIN_ONLY:
     WebAuthnAddResidentCredential = 802
     WebAuthnRemoveResidentCredential = 803
     BixinMessageSE = 902
-    BixinReboot = 903
     BixinOutMessageSE = 904
     BixinVerifyDeviceRequest = 909
     BixinVerifyDeviceAck = 910
@@ -280,6 +279,10 @@ if not utils.BITCOIN_ONLY:
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
+    SuiGetAddress = 11100
+    SuiAddress = 11101
+    SuiSignTx = 11102
+    SuiSignedTx = 11103
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

@@ -6806,3 +6806,65 @@ if TYPE_CHECKING:
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["AlgorandSignedTx"]:
             return isinstance(msg, cls)
+
+    class SuiGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiGetAddress"]:
+            return isinstance(msg, cls)
+
+    class SuiAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiAddress"]:
+            return isinstance(msg, cls)
+
+    class SuiSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_tx: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiSignTx"]:
+            return isinstance(msg, cls)
+
+    class SuiSignedTx(protobuf.MessageType):
+        public_key: "bytes"
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            public_key: "bytes",
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["SuiSignedTx"]:
+            return isinstance(msg, cls)

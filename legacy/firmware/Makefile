@@ -107,6 +107,7 @@ OBJS += algo/parser_impl.o
 OBJS += algo/parser.o
 OBJS += algo/tx.o
 OBJS += ripple.o
+OBJS += sui.o
 endif
 
 OBJS += debug.o
@@ -191,6 +192,7 @@ OBJS += protob/messages-near.pb.o
 OBJS += protob/messages-conflux.pb.o
 OBJS += protob/messages-algorand.pb.o
 OBJS += protob/messages-ripple.pb.o
+OBJS += protob/messages-sui.pb.o
 endif
 
 OPTFLAGS ?= -Os

@@ -57,6 +57,7 @@ void uint32hex(uint32_t num, char *str);
 
 // converts data to hexa
 void data2hex(const uint8_t *data, uint32_t len, char *str);
+void data2hexaddr(const uint8_t *data, uint32_t len, char *str);
 
 void uint2str(uint32_t num, char *str);
 
