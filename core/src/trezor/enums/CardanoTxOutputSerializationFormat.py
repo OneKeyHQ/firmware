@@ -2,5 +2,5 @@
 # fmt: off
 # isort:skip_file
 
-NONE = 0
-GOVERNANCE_REGISTRATION_SIGNATURE = 1
+ARRAY_LEGACY = 0
+MAP_BABBAGE = 1
