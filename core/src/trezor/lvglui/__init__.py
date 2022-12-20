@@ -66,11 +66,23 @@ def init_file_system() -> None:
             for size, attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
                 if size > 0 and attrs[1] == "h":
                     io.fatfs.unlink(f"1:/res/wallpapers/{name}")
+            for size, attrs, name in io.fatfs.listdir("1:/res/nfts/imgs"):
+                if size > 0 and attrs[1] == "h":
+                    io.fatfs.unlink(f"1:/res/nfts/imgs/{name}")
+            for size, attrs, name in io.fatfs.listdir("1:/res/nfts/zooms"):
+                if size > 0 and (attrs[1] == "h" or name[:1] == "."):
+                    io.fatfs.unlink(f"1:/res/nfts/zooms/{name}")
+            for size, attrs, name in io.fatfs.listdir("1:/res/nfts/desc"):
+                if size > 0 and (attrs[1] == "h" or name[:1] == "."):
+                    io.fatfs.unlink(f"1:/res/nfts/desc/{name}")
 
         io.fatfs.mount()
         io.fatfs.mkdir("1:/res", True)
         io.fatfs.mkdir("1:/res/wallpapers", True)
         io.fatfs.mkdir("1:/res/nfts", True)
+        io.fatfs.mkdir("1:/res/nfts/imgs", True)
+        io.fatfs.mkdir("1:/res/nfts/zooms", True)
+        io.fatfs.mkdir("1:/res/nfts/desc", True)
         clean()
 
 

@@ -6,7 +6,9 @@ from trezor import io, wire
 from trezor.crypto.hashlib import blake2s
 from trezor.enums import ResourceType
 from trezor.messages import ResourceAck, ResourceRequest, Success, ZoomRequest
-from trezor.ui.layouts import confirm_set_homescreen
+from trezor.ui.layouts import confirm_collect_nft, confirm_set_homescreen
+
+import ujson as json
 
 if TYPE_CHECKING:
     from trezor.messages import ResourceUpload
@@ -40,11 +42,12 @@ SUPPORTED_MAX_RESOURCE_SIZE = {
     "png": const(1024 * 1024),
     "mp4": const(10 * 1024 * 1024),
 }
-FILE_PATH_COMPONENTS = (("wallpapers", "wp"), ("nfts", "nft"))
-
+# FILE_PATH_COMPONENTS = (("wallpapers", "wp"), ("nfts", "nft"))
+NFT_METADATA_ALLOWED_KEYS = ("header", "subheader", "network", "owner")
 REQUEST_CHUNK_SIZE = const(16 * 1024)
 
 MAX_WP_COUNTER = const(5)
+MAX_NFT_COUNTER = const(24)
 
 
 async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
@@ -56,29 +59,55 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
         raise wire.DataError("Not supported resource extension")
     elif res_size >= SUPPORTED_MAX_RESOURCE_SIZE[res_ext]:
         raise wire.DataError("Data size overflow")
+    if res_type == ResourceType.Nft:
+        if msg.nft_metadata is None:
+            raise wire.DataError("NFT metadata required")
+        try:
+            metadata = json.loads(msg.nft_metadata.decode("utf-8"))
+        except BaseException as e:
+            raise wire.DataError(f"Invalid metadata {e}")
+        if any(key not in metadata.keys() for key in NFT_METADATA_ALLOWED_KEYS):
+            raise wire.DataError("Invalid metadata")
     replace = False
-    wallpapers = []
+    name_list = []
     try:
         file_counter = 0
-        for size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
-            if size > 0 and name[:4] == "zoom":
-                file_counter += 1
-                wallpapers.append(name)
-            if file_counter >= MAX_WP_COUNTER:
-                replace = True
-                break
+        if res_type == ResourceType.WallPaper:
+            for size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
+                if size > 0 and name[:4] == "zoom":
+                    file_counter += 1
+                    name_list.append(name)
+                if file_counter >= MAX_WP_COUNTER:
+                    replace = True
+                    break
+        else:
+            for size, _attrs, name in io.fatfs.listdir("1:/res/nfts/zooms"):
+                if size > 0:
+                    file_counter += 1
+                    name_list.append(name)
+                if file_counter >= MAX_NFT_COUNTER:
+                    replace = True
+                    break
     except BaseException as e:
         raise wire.FirmwareError(f"File system error {e}")
+    file_name = msg.file_name_no_ext
+    for name in name_list:
+        if file_name[: file_name.rindex("-")] == name[5 : name.rindex("-")]:
+            raise wire.DataError("File already exists")
     # ask user for confirm
     if res_type == ResourceType.WallPaper:
         await confirm_set_homescreen(ctx, replace)
+    elif res_type == ResourceType.Nft:
+        await confirm_collect_nft(ctx, replace)
 
-    # random_data = hexlify(blake2s(random.bytes(32)).digest()[:4]).decode()
-    file_id = device.get_wp_cnts()
-    component = FILE_PATH_COMPONENTS[res_type]
-    path_dir = f"1:/res/{component[0]}"
-    file_name = f"{component[1]}-{file_id}.{res_ext}"
-    file_full_path = f"{path_dir}/{file_name}"
+    config_path = ""
+    if res_type == ResourceType.WallPaper:
+        file_full_path = f"1:/res/wallpapers/{file_name}.{res_ext}"
+        zoom_path = f"1:/res/wallpapers/zoom-{file_name}.{res_ext}"
+    else:
+        file_full_path = f"1:/res/nfts/imgs/{file_name}.{res_ext}"
+        zoom_path = f"1:/res/nfts/zooms/zoom-{file_name}.{res_ext}"
+        config_path = f"1:/res/nfts/desc/{file_name}.json"
     try:
         with io.fatfs.open(file_full_path, "w") as f:
             data_left = res_size
@@ -98,7 +127,6 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
             # force refresh to disk
             f.sync()
 
-        zoom_path = f"{path_dir}/zoom-{file_name}"
         with io.fatfs.open(zoom_path, "w") as f:
             data_left = res_zoom_size
             offset = 0
@@ -116,15 +144,28 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
                 data_left -= REQUEST_CHUNK_SIZE
             # force refresh to disk
             f.sync()
+        if res_type == ResourceType.Nft and config_path:
+            with io.fatfs.open(config_path, "w") as f:
+                assert msg.nft_metadata
+                f.write(msg.nft_metadata)
+                f.sync()
         if replace:
-            wallpapers.sort(
-                key=lambda name: int(name[5:].split("-")[1][: -(len(res_ext) + 1)])
+            name_list.sort(
+                key=lambda name: int(name[5:].split("-")[-1][: -(len(res_ext) + 1)])
             )
-            zoom_file = wallpapers[0]
-            wallpaper = zoom_file[5:]
-            io.fatfs.unlink(f"1:/res/wallpapers/{zoom_file}")
-            io.fatfs.unlink(f"1:/res/wallpapers/{wallpaper}")
-        device.increase_wp_cnts()
+            zoom_file = name_list[0]
+            file_name = zoom_file[5:]
+            if res_type == ResourceType.WallPaper:
+                io.fatfs.unlink(f"1:/res/wallpapers/{zoom_file}")
+                io.fatfs.unlink(f"1:/res/wallpapers/{file_name}")
+            else:
+                io.fatfs.unlink(f"1:/res/nfts/zooms/{zoom_file}")
+                io.fatfs.unlink(f"1:/res/nfts/imgs/{file_name}")
+                config_name = file_name[: -(len(res_ext) + 1)]
+                io.fatfs.unlink(f"1:/res/nfts/desc/{config_name}.json")
+        elif res_type == ResourceType.WallPaper:
+            device.increase_wp_cnts()
+
     except BaseException as e:
         raise wire.FirmwareError(f"Failed to write file with error code {e}")
     if res_type == ResourceType.WallPaper:

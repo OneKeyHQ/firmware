@@ -23,13 +23,17 @@ class WordEnter(FullSizeWindow):
         self.keyboard = BIP39Keyboard(self)
         self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
         self.add_event_cb(self.on_back, lv.EVENT.CLICKED, None)
+        self.submitted = False
 
-    def on_ready(self, event_obj):
+    def on_ready(self, _event_obj):
+        if self.submitted:
+            return
         input = self.keyboard.ta.get_text()
         if input == "":
             return
+        self.submitted = True
         self.channel.publish(input)
-        self.destroy(600)
+        self.destroy(1000)
 
     def clear_input(self):
         self.keyboard.ta.set_text("")

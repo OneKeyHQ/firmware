@@ -9,6 +9,7 @@ from trezor.lvglui.i18n import gettext as _, i18n_refresh, keys as i18n_keys
 from trezor.lvglui.lv_colors import lv_colors
 from trezor.ui import display, style
 
+import ujson as json
 from apps.common import safety_checks
 
 from . import font_PJSBOLD30, font_PJSREG24, font_PJSREG30
@@ -17,6 +18,7 @@ from .components.anim import Anim
 from .components.button import ListItemBtn, ListItemBtnWithSwitch, NormalButton
 from .components.container import ContainerFlexCol, ContainerGrid
 from .components.listitem import DisplayItem, ImgGridItem
+from .components.navigation import Navigation
 from .widgets.style import StyleWrapper
 
 
@@ -321,20 +323,242 @@ class NftGallery(Screen):
             }
             super().__init__(**kwargs)
         else:
-            return
-        self.tips = lv.label(self)
-        self.tips.add_style(
+            self.overview.delete()
+            self.container.delete()
+
+        nft_counts = 0
+        file_name_list = []
+        if not utils.EMULATOR:
+            for size, _attrs, name in io.fatfs.listdir("1:/res/nfts/zooms"):
+                # if nft_counts >= 9:
+                #     break
+                if size > 0:
+                    nft_counts += 1
+                    file_name_list.append(name)
+        if nft_counts == 0:
+            self.empty()
+        else:
+            rows_num = math.ceil(nft_counts / 2)
+            row_dsc = [238] * rows_num
+            row_dsc.append(lv.GRID_TEMPLATE.LAST)
+            # 3 columns
+            col_dsc = [
+                238,
+                238,
+                lv.GRID_TEMPLATE.LAST,
+            ]
+
+            self.overview = lv.label(self.content_area)
+            self.overview.set_size(464, lv.SIZE.CONTENT)
+            self.overview.add_style(
+                StyleWrapper()
+                .text_font(font_PJSREG30)
+                .text_color(lv_colors.WHITE_2)
+                .text_align_left()
+                .text_letter_space(-1),
+                0,
+            )
+            self.overview.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 32)
+            self.overview.set_text(f"{nft_counts} items")
+            self.container = ContainerGrid(
+                self.content_area,
+                row_dsc=row_dsc,
+                col_dsc=col_dsc,
+                align_base=self.title,
+                pos=(-8, 74),
+                pad_gap=4,
+            )
+            self.nfts = []
+            if not utils.EMULATOR:
+                file_name_list.sort(
+                    key=lambda name: int(
+                        name[5:].split("-")[-1][: -(len(name.split(".")[1]) + 1)]
+                    )
+                )
+                for i, file_name in enumerate(file_name_list):
+                    path_dir = "A:1:/res/nfts/zooms/"
+                    current_nft = ImgGridItem(
+                        self.container,
+                        (i) % 2,
+                        (i) // 2,
+                        file_name,
+                        path_dir,
+                        is_internal=False,
+                    )
+                    self.nfts.append(current_nft)
+
+            self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def empty(self):
+
+        self.empty_tips = lv.label(self)
+        self.empty_tips.set_text(_(i18n_keys.CONTENT__NO_ITEMS))
+        self.empty_tips.add_style(
             StyleWrapper()
             .text_font(font_PJSREG30)
             .text_color(lv_colors.WHITE_2)
             .text_letter_space(-1),
             0,
         )
-        self.tips.set_text(_(i18n_keys.CONTENT__COMING_SOON))
-        self.tips.align(lv.ALIGN.TOP_MID, 0, 372)
+        self.empty_tips.align(lv.ALIGN.TOP_MID, 0, 372)
+
+        self.tips_bar = lv.obj(self)
+        self.tips_bar.remove_style_all()
+        self.tips_bar.add_style(
+            StyleWrapper()
+            .width(464)
+            .height(lv.SIZE.CONTENT)
+            .text_font(font_PJSREG30)
+            .text_color(lv_colors.ONEKEY_GRAY_4)
+            .text_letter_space(-1)
+            .bg_color(lv_colors.ONEKEY_GRAY_3)
+            .bg_opa()
+            .radius(0)
+            .border_width(0)
+            .pad_hor(8)
+            .pad_ver(16),
+            0,
+        )
+        self.tips_bar.align(lv.ALIGN.BOTTOM_MID, 0, -8)
+        self.tips_bar_img = lv.img(self.tips_bar)
+        self.tips_bar_img.set_src("A:/res/notice.png")
+        self.tips_bar_img.set_align(lv.ALIGN.TOP_LEFT)
+        self.tips_bar_desc = lv.label(self.tips_bar)
+        self.tips_bar_desc.set_size(408, lv.SIZE.CONTENT)
+        self.tips_bar_desc.set_long_mode(lv.label.LONG.WRAP)
+        self.tips_bar_desc.align_to(self.tips_bar_img, lv.ALIGN.OUT_RIGHT_TOP, 8, 0)
+        self.tips_bar_desc.set_text(_(i18n_keys.CONTENT__HOW_TO_COLLECT_NFT__HINT))
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target not in self.nfts:
+                return
+            for nft in self.nfts:
+                if target == nft:
+                    file_name_without_ext = nft.file_name[5:-4]
+                    desc_file_path = f"1:/res/nfts/desc/{file_name_without_ext}.json"
+                    config = {
+                        "header": "",
+                        "subheader": "",
+                        "network": "",
+                        "owner": "",
+                    }
+                    with io.fatfs.open(desc_file_path, "r") as f:
+                        description = bytearray(2048)
+                        n = f.read(description)
+                        if n > 0:
+                            config = json.loads((description[:n]).decode("utf-8"))
+                    NftManager(config, nft.file_name)
 
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
         lv.scr_load(scr)
+
+
+class NftManager(FullSizeWindow):
+    def __init__(self, nft_config, file_name):
+        self.zoom_path = f"A:1:/res/nfts/zooms/{file_name}"
+        self.file_name = file_name.replace("zoom-", "")
+        self.img_path = f"A:1:/res/nfts/imgs/{self.file_name}"
+        super().__init__(
+            title=nft_config["header"],
+            subtitle=nft_config["subheader"],
+            icon_path=self.img_path,
+            anim_dir=0,
+        )
+        self.nft_config = nft_config
+        self.content_area.set_style_max_height(756, 0)
+        self.nav_back = Navigation(self.content_area)
+        self.nav_back.align(lv.ALIGN.TOP_MID, 0, 0)
+        self.icon.align_to(self.nav_back, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 8)
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+
+        self.btn_yes = NormalButton(self.content_area)
+        self.btn_yes.set_size(464, 98)
+        self.btn_yes.enable(lv_colors.ONEKEY_PURPLE, lv_colors.BLACK)
+        self.btn_yes.label.set_text(_(i18n_keys.BUTTON__SET_AS_HOMESCREEN))
+        self.btn_yes.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+
+        self.btn_del = NormalButton(self.content_area, "")
+        self.btn_del.set_size(464, 98)
+        self.btn_del.align_to(self.btn_yes, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+        self.panel = lv.obj(self.btn_del)
+        self.panel.remove_style_all()
+        self.panel.set_size(lv.SIZE.CONTENT, lv.SIZE.CONTENT)
+        self.panel.clear_flag(lv.obj.FLAG.CLICKABLE)
+        self.panel.add_style(
+            StyleWrapper()
+            .bg_color(lv_colors.ONEKEY_BLACK)
+            .text_color(lv_colors.ONEKEY_RED_1)
+            .bg_opa(lv.OPA.TRANSP)
+            .border_width(0)
+            .align(lv.ALIGN.CENTER),
+            0,
+        )
+        self.btn_del_img = lv.img(self.panel)
+        self.btn_del_img.set_src("A:/res/btn-del.png")
+        self.btn_label = lv.label(self.panel)
+        self.btn_label.set_text(_(i18n_keys.BUTTON__DELETE))
+        self.btn_label.align_to(self.btn_del_img, lv.ALIGN.OUT_RIGHT_MID, 4, 1)
+
+    def del_callback(self):
+        io.fatfs.unlink(self.zoom_path[2:])
+        io.fatfs.unlink(self.img_path[2:])
+        io.fatfs.unlink("1:/res/nfts/desc/" + self.file_name[:-3] + "json")
+        if device.get_homescreen() == self.img_path:
+            device.set_homescreen("A:/res/wallpaper-1.jpg")
+        self.delete()
+        NftGallery()
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if utils.lcd_resume():
+                return
+            if target == self.btn_yes:
+                NftManager.ConfirmSetHomeScreen(self.img_path)
+
+            elif target == self.btn_del:
+                from trezor.ui.layouts import confirm_remove_nft
+                from trezor.wire import DUMMY_CONTEXT
+
+                workflow.spawn(
+                    confirm_remove_nft(
+                        DUMMY_CONTEXT,
+                        self.del_callback,
+                        self.zoom_path,
+                    )
+                )
+            elif target == self.nav_back.nav_btn:
+                self.destroy(0)
+
+    class ConfirmSetHomeScreen(FullSizeWindow):
+        def __init__(self, homescreen):
+            super().__init__(
+                title=_(i18n_keys.TITLE__SET_AS_HOMESCREEN),
+                subtitle=_(i18n_keys.SUBTITLE__SET_AS_HOMESCREEN),
+                confirm_text=_(i18n_keys.BUTTON__CONFIRM),
+                cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            )
+            self.homescreen = homescreen
+
+        def eventhandler(self, event_obj):
+            code = event_obj.code
+            target = event_obj.get_target()
+            if code == lv.EVENT.CLICKED:
+                if utils.lcd_resume():
+                    return
+                if target == self.btn_yes:
+                    device.set_homescreen(self.homescreen)
+                    self.destroy(0)
+                    workflow.spawn(utils.internal_reloop())
+                elif target == self.btn_no:
+                    self.destroy()
 
 
 class SettingsScreen(Screen):
@@ -352,7 +576,7 @@ class SettingsScreen(Screen):
             return
         # if __debug__:
         #     self.add_style(StyleWrapper().bg_color(lv_colors.ONEKEY_GREEN_1), 0)
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.general = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__GENERAL),
@@ -503,7 +727,7 @@ class GeneralScreen(Screen):
         )
 
         self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
-        self.container.set_height(580)
+        # self.container.set_height(580)
         self.auto_lock = ListItemBtn(
             self.container, _(i18n_keys.ITEM__AUTO_LOCK), self.cur_auto_lock
         )
@@ -520,6 +744,7 @@ class GeneralScreen(Screen):
             self.container,
             _(i18n_keys.ITEM__VIBRATION_AND_HAPTIC),
         )
+        self.animation = ListItemBtn(self.container, _(i18n_keys.ITEM__ANIMATIONS))
         self.tap_awake = ListItemBtn(self.container, _(i18n_keys.ITEM__LOCK_SCREEN))
         self.auto_shutdown = ListItemBtn(
             self.container, _(i18n_keys.ITEM__SHUTDOWN), self.cur_auto_shutdown
@@ -534,6 +759,7 @@ class GeneralScreen(Screen):
         self.keyboard_haptic.label_left.set_text(
             _(i18n_keys.ITEM__VIBRATION_AND_HAPTIC)
         )
+        self.animation.label_left.set_text(_(i18n_keys.ITEM__ANIMATIONS))
         self.tap_awake.label_left.set_text(_(i18n_keys.ITEM__LOCK_SCREEN))
         self.auto_shutdown.label_left.set_text(_(i18n_keys.ITEM__SHUTDOWN))
 
@@ -571,6 +797,8 @@ class GeneralScreen(Screen):
                 BacklightSetting(self)
             elif target == self.keyboard_haptic:
                 KeyboardHapticSetting(self)
+            elif target == self.animation:
+                AnimationSetting(self)
             elif target == self.tap_awake:
                 TapAwakeSetting(self)
             elif target == self.auto_shutdown:
@@ -829,6 +1057,53 @@ class KeyboardHapticSetting(Screen):
                     device.toggle_keyboard_haptic(True)
                 else:
                     device.toggle_keyboard_haptic(False)
+
+
+class AnimationSetting(Screen):
+    def __init__(self, prev_scr=None):
+        if not hasattr(self, "_init"):
+            self._init = True
+        else:
+            return
+        super().__init__(
+            prev_scr=prev_scr,
+            title=_(i18n_keys.TITLE__ANIMATIONS),
+            nav_back=True,
+        )
+
+        self.container = ContainerFlexCol(self, self.title)
+        self.item = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__ANIMATIONS))
+        self.tips = lv.label(self)
+        self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
+        self.tips.set_long_mode(lv.label.LONG.WRAP)
+        self.tips.add_style(
+            StyleWrapper()
+            .text_font(font_PJSREG24)
+            .width(448)
+            .text_color(lv_colors.WHITE_2)
+            .text_align_left(),
+            0,
+        )
+        if device.is_animation_enabled():
+            self.item.add_state()
+            self.tips.set_text(_(i18n_keys.CONTENT__ANIMATIONS__ENABLED_HINT))
+        else:
+            self.item.clear_state()
+            self.tips.set_text(_(i18n_keys.CONTENT__ANIMATIONS__DISABLED_HINT))
+
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.item.switch:
+                if target.has_state(lv.STATE.CHECKED):
+                    device.set_animation_enable(True)
+                    self.tips.set_text(_(i18n_keys.CONTENT__ANIMATIONS__ENABLED_HINT))
+                else:
+                    device.set_animation_enable(False)
+                    self.tips.set_text(_(i18n_keys.CONTENT__ANIMATIONS__DISABLED_HINT))
 
 
 class TapAwakeSetting(Screen):
@@ -1426,7 +1701,7 @@ class HomeScreenSetting(Screen):
 
         internal_wp_nums = 4
         wp_nums = internal_wp_nums
-
+        self.clear_flag(lv.obj.FLAG.SCROLLABLE)
         file_name_list = []
         if not utils.EMULATOR:
             for size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
@@ -1450,35 +1725,42 @@ class HomeScreenSetting(Screen):
         )
         self.wps = []
         for i in range(wp_nums):
-            zoom_path = f"A:/res/zoom-wallpaper-{i+1}.png"
+            path_dir = "A:/res/"
+            if utils.EMULATOR:
+                file_name = f"zoom-wallpaper-{i+1}.png"
+            else:
+                file_name = f"zoom-wallpaper-{i+1}.jpg"
+
             current_wp = ImgGridItem(
                 self.container,
                 i % 3,
                 i // 3,
-                zoom_path,
+                file_name,
+                path_dir,
                 is_internal=True,
             )
             self.wps.append(current_wp)
-            if homescreen == current_wp.wp_path:
+            if homescreen == current_wp.img_path:
                 current_wp.set_checked(True)
 
         if not utils.EMULATOR:
             file_name_list.sort(
                 key=lambda name: int(
-                    name[5:].split("-")[1][: -(len(name.split(".")[1]) + 1)]
+                    name[5:].split("-")[-1][: -(len(name.split(".")[1]) + 1)]
                 )
             )
             for i, file_name in enumerate(file_name_list):
-                zoom_path = f"A:1:/res/wallpapers/{file_name}"
+                path_dir = "A:1:/res/wallpapers/"
                 current_wp = ImgGridItem(
                     self.container,
                     (i + internal_wp_nums) % 3,
                     (i + internal_wp_nums) // 3,
-                    zoom_path,
+                    file_name,
+                    path_dir,
                     is_internal=False,
                 )
                 self.wps.append(current_wp)
-                if homescreen == current_wp.wp_path:
+                if homescreen == current_wp.img_path:
                     current_wp.set_checked(True)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
@@ -1494,7 +1776,7 @@ class HomeScreenSetting(Screen):
                 if target == wp:
                     WallPaperManage(
                         self,
-                        file_path=wp.wp_path,
+                        img_path=wp.img_path,
                         zoom_path=wp.zoom_path,
                         is_internal=wp.is_internal,
                     )
@@ -1504,7 +1786,7 @@ class WallPaperManage(Screen):
     def __init__(
         self,
         prev_scr=None,
-        file_path: str = "",
+        img_path: str = "",
         zoom_path: str = "",
         is_internal: bool = False,
     ):
@@ -1515,7 +1797,7 @@ class WallPaperManage(Screen):
             subtitle=_(i18n_keys.SUBTITLE__MANAGE_WALLPAPER),
             nav_back=True,
         )
-        self.img_path = file_path
+        self.img_path = img_path
         self.zoom_path = zoom_path
 
         self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__SET))
@@ -1563,7 +1845,7 @@ class WallPaperManage(Screen):
         io.fatfs.unlink(self.img_path[2:])
         io.fatfs.unlink(self.zoom_path[2:])
         if device.get_homescreen() == self.img_path:
-            device.set_homescreen("A:/res/wallpaper-1.png")
+            device.set_homescreen("A:/res/wallpaper-1.jpg")
         self.load_screen(self.prev_scr, destroy_self=True)
 
     # def cancel_callback(self):

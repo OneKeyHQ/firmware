@@ -9,8 +9,12 @@ def set_current_version() -> None:
 def clean_flash() -> None:
     for _size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
         io.fatfs.unlink(f"1:/res/wallpapers/{name}")
-    for _size, _attrs, name in io.fatfs.listdir("1:/res/nfts"):
-        io.fatfs.unlink(f"1:/res/nfts/{name}")
+    for _size, _attrs, name in io.fatfs.listdir("1:/res/nfts/imgs"):
+        io.fatfs.unlink(f"1:/res/nfts/imgs/{name}")
+    for _size, _attrs, name in io.fatfs.listdir("1:/res/nfts/zooms"):
+        io.fatfs.unlink(f"1:/res/nfts/zooms/{name}")
+    for _size, _attrs, name in io.fatfs.listdir("1:/res/nfts/desc"):
+        io.fatfs.unlink(f"1:/res/nfts/desc/{name}")
 
 
 def wipe() -> None:

@@ -63,6 +63,8 @@ __all__ = (
     "confirm_update_res",
     "confirm_domain",
     "request_pin_tips",
+    "confirm_remove_nft",
+    "confirm_collect_nft",
 )
 
 
@@ -1155,6 +1157,19 @@ async def confirm_set_homescreen(ctx, replace: bool = False):
     )
 
 
+async def confirm_collect_nft(ctx, replace: bool = False):
+    await confirm_action(
+        ctx=ctx,
+        br_type="confirm_collect_nft",
+        title=_(i18n_keys.TITLE__COLLECT_NFT),
+        description=_(i18n_keys.SUBTITLE__COLLECT_NFT)
+        if not replace
+        else _(i18n_keys.SUBTITLE__COLLECT_NFT_AND_DELETE),
+        icon=None,
+        anim_dir=2,
+    )
+
+
 async def confirm_update_res(ctx):
     from trezor.lvglui.scrs.template import Modal
 
@@ -1180,6 +1195,15 @@ async def confirm_del_wallpaper(ctx, confirm_callback):
     confirm_screen.btn_yes.enable(
         bg_color=lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK
     )
+    confirm = await ctx.wait(confirm_screen.request())
+    if confirm:
+        confirm_callback()
+
+
+async def confirm_remove_nft(ctx, confirm_callback, icon_path):
+    from trezor.lvglui.scrs.template import NftRemoveConfirm
+
+    confirm_screen = NftRemoveConfirm(icon_path)
     confirm = await ctx.wait(confirm_screen.request())
     if confirm:
         confirm_callback()

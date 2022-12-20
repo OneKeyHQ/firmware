@@ -240,14 +240,20 @@ def upload_res(
     data: bytes,
     zoomdata: bytes,
     res_type: messages.ResourceType = messages.ResourceType.WallPaper,
+    nft_metadata: Optional[str] = None,
     progress_update: Callable[[int], Any] = lambda _: None,
 ):
+    mac = blake2s(data).digest()
+    timestamp = int(round(time.time() * 1000))
+    file_name_no_ext = f"{'wp' if res_type == messages.ResourceType.WallPaper else 'nft'}-{mac[:4].hex()}-{str(timestamp)}"
     resp = client.call(
         messages.ResourceUpload(
             extension=ext,
             data_length=len(data),
             res_type=res_type,
             zoom_data_length=len(zoomdata),
+            file_name_no_ext=file_name_no_ext,
+            nft_metadata=nft_metadata.encode() if nft_metadata else None,
         )
     )
 

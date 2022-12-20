@@ -1345,3 +1345,19 @@ class RipplePayment(FullSizeWindow):
         self.item6 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
+
+
+class NftRemoveConfirm(FullSizeWindow):
+    def __init__(self, icon_path):
+        super().__init__(
+            title=_(i18n_keys.TITLE__REMOVE_NFT),
+            subtitle=_(i18n_keys.SUBTITLE__REMOVE_NFT),
+            confirm_text=_(i18n_keys.BUTTON__REMOVE),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            icon_path=icon_path,
+            anim_dir=0,
+        )
+        self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
+
+    def destroy(self, _delay_ms):
+        self.delete()
