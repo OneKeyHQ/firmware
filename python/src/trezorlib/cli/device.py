@@ -315,6 +315,7 @@ def se_read_cert(obj: "TrezorConnection") -> bytes:
 @click.option("-f", "--fullpath", help="The full path of the file to upload")
 @click.option("-z", "--zoompath", help="The zoom file of the image to upload")
 @click.option("-p", "--purpose", type=ChoiceType(RESOURCE_UPLOAD_PURPOSE), default="wallpaper", help="The upload file used for")
+@click.option("-m", "--metadata", help="the metadata of the nft, a json string include header, subheader, network and owner fields")
 # fmt: on
 @with_client
 def upload_res(
@@ -322,6 +323,7 @@ def upload_res(
     fullpath: str,
     zoompath: str,
     purpose: int,
+    metadata: str
 ) -> None:
     """Upload wallpaper/nft to device."""
     if fullpath:
@@ -344,6 +346,7 @@ def upload_res(
                     zoomdata,
                     progress_update=bar.update,
                     res_type=purpose,
+                    nft_metadata=metadata if metadata else None,
                 )
         except exceptions.Cancelled:
             click.echo("Upload aborted on device.")

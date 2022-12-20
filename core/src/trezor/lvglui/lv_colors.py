@@ -58,3 +58,4 @@ class lv_colors:
     ONEKEY_YELLOW = LV_COLOR_MAKE(0xFF, 0xD5, 0x00)
     ONEKEY_GRAY_1 = LV_COLOR_MAKE(0x69, 0x69, 0x69)  # slider border color disable
     ONEKEY_GRAY_2 = LV_COLOR_MAKE(0x3C, 0x3C, 0x3C)  # switch border color disable
+    ONEKEY_PURPLE = LV_COLOR_MAKE(0x9F, 0x00, 0xFF)

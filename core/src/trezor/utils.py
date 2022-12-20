@@ -102,6 +102,12 @@ def lcd_resume() -> bool:
     return False
 
 
+async def internal_reloop():
+    from trezor import loop
+
+    loop.clear()
+
+
 async def turn_off_lcd():
     from trezor.ui import display
     from trezor import loop, wire

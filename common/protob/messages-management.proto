@@ -122,7 +122,7 @@ message Features {
     optional string onekey_version = 508;       // OneKey version
     optional string onekey_serial = 509;
     optional string bootloader_version = 510;
-    
+
     optional string serial_no= 511;
     optional string spi_flash = 512;
     optional uint32 initstates = 513;      // list of facotry state
@@ -616,8 +616,11 @@ message SEMessageSignature {
     required string extension = 1;  // the extension of the resource
     required uint32 data_length = 2;  // total length of the data to be upload
     required ResourceType res_type = 3;
-    required uint32 zoom_data_length = 5;
-    optional bytes nft_meta_data = 4;
+    required uint32 zoom_data_length = 4;
+    required string file_name_no_ext = 5; // name template: nft/wp - mac(unique verify) - timestamp(sort)
+
+    optional bytes nft_metadata = 6;
+
     enum ResourceType {
         WallPaper = 0;
         Nft = 1;

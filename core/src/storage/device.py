@@ -56,6 +56,7 @@ _USE_USB_PROTECT = const(0x86)  # bool (0x01 or empty)
 _USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
 _KEYBOARD_HAPTIC = const(0x88)   # bool
 _TAP_AWAKE = const(0x89)  # bool
+_ANIMATION = const(0x8A)  # bool
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -194,6 +195,22 @@ def set_tap_awake_enable(enable: bool) -> None:
     common.set(
         _NAMESPACE,
         _TAP_AWAKE,
+        common._TRUE_BYTE if enable else common._FALSE_BYTE,
+        public=True,
+    )
+
+
+def is_animation_enabled() -> bool:
+    enabled = common.get(_NAMESPACE, _ANIMATION, public=True)
+    if enabled == common._FALSE_BYTE:
+        return False
+    return True
+
+
+def set_animation_enable(enable: bool) -> None:
+    common.set(
+        _NAMESPACE,
+        _ANIMATION,
         common._TRUE_BYTE if enable else common._FALSE_BYTE,
         public=True,
     )

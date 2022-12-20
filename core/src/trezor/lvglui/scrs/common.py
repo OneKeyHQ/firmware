@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from storage import device
 from trezor import loop, utils
 from trezor.lvglui.scrs.components.anim import Anim
 
@@ -98,13 +99,17 @@ class Screen(lv.obj):
 
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
         # """Load a screen with animation."""
-        lv.scr_load_anim(
-            scr,
-            lv.SCR_LOAD_ANIM.MOVE_RIGHT if back else lv.SCR_LOAD_ANIM.MOVE_LEFT,
-            180,
-            60,
-            False,
-        )
+        if device.is_animation_enabled():
+            lv.scr_load_anim(
+                scr,
+                lv.SCR_LOAD_ANIM.MOVE_RIGHT if back else lv.SCR_LOAD_ANIM.MOVE_LEFT,
+                180,
+                60,
+                False,
+            )
+        else:
+            scr.set_pos(0, 0)
+            lv.scr_load(scr)
 
     # NOTE:====================Functional Code Don't Edit========================
 
@@ -299,6 +304,9 @@ class FullSizeWindow(lv.obj):
         ).start_anim()
 
     def show_load_anim(self):
+        if not device.is_animation_enabled():
+            self.set_pos(0, 0)
+            return
         if self.anim_dir == ANIM_DIRS.NONE:
             self.set_pos(0, 0)
         elif self.anim_dir == ANIM_DIRS.HOR:
@@ -309,6 +317,9 @@ class FullSizeWindow(lv.obj):
             self._load_anim_ver()
 
     def show_dismiss_anim(self):
+        if not device.is_animation_enabled():
+            self.destroy()
+            return
         if self.anim_dir == ANIM_DIRS.HOR:
             self._dismiss_anim_hor()
         elif self.anim_dir == ANIM_DIRS.VER:

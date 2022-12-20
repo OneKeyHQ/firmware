@@ -77,6 +77,7 @@ class ContainerGrid(lv.obj):
         align_base=None,
         align_type=lv.ALIGN.OUT_BOTTOM_LEFT,
         pos: tuple = (0, 40),
+        pad_gap=16,
     ) -> None:
         super().__init__(parent)
         self.set_size(lv.pct(100), lv.SIZE.CONTENT)
@@ -91,7 +92,7 @@ class ContainerGrid(lv.obj):
             .radius(0)
             .bg_opa()
             .pad_all(0)
-            .pad_gap(16)
+            .pad_gap(pad_gap)
             .border_width(0)
             .grid_column_dsc_array(col_dsc)
             .grid_row_dsc_array(row_dsc),

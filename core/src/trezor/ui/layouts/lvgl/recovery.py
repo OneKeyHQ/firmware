@@ -38,7 +38,7 @@ async def request_word(
     await loop.sleep(240)
     screen.show_tips()
     await loop.sleep(240)
-    screen.clear_input()
+    # screen.clear_input()
     return word
 
 

@@ -227,6 +227,8 @@ if FEATURE_FLAGS["TREZOR_UI"]:
         'embed/extmod/modtrezorui/font_pixeloperator_bold_8.c',
         'embed/extmod/modtrezorui/font_pixeloperator_regular_8.c',
         'embed/extmod/modtrezorui/font_pixeloperatormono_regular_8.c',
+        'embed/extmod/modtrezorui/font_roboto_regular_24.c',
+        'embed/extmod/modtrezorui/font_plusjakartasans_regular_26.c',
         'embed/extmod/modtrezorui/modtrezorui.c',
         'vendor/micropython/lib/uzlib/adler32.c',
         'vendor/micropython/lib/uzlib/crc32.c',
@@ -275,6 +277,7 @@ SOURCE_MICROPYTHON = [
     'vendor/micropython/extmod/moductypes.c',
     'vendor/micropython/extmod/moduheapq.c',
     'vendor/micropython/extmod/modutimeq.c',
+    'vendor/micropython/extmod/modujson.c',
     'vendor/micropython/extmod/utime_mphal.c',
     'vendor/micropython/shared/readline/readline.c',
     'vendor/micropython/shared/timeutils/timeutils.c',
@@ -502,8 +505,8 @@ env.Replace(
         'TREZOR_MODEL_'+TREZOR_MODEL,
         ('LVGL_UI', '$LVGL_UI'),
         ('MP_CONFIGFILE', '\\"embed/unix/mpconfigport.h\\"'),
-        ('CURRENT_DIR', '$CURRENT_DIR'),   
-        ('RES_DIR', '\\"/src/trezor/lvglui\\"'),       
+        ('CURRENT_DIR', '$CURRENT_DIR'),
+        ('RES_DIR', '\\"/src/trezor/lvglui\\"'),
     ] + CPPDEFINES_MOD,
     ASPPFLAGS='$CFLAGS $CCFLAGS', )
 

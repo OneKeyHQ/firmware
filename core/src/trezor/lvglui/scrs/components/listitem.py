@@ -148,7 +148,8 @@ class ImgGridItem(lv.img):
         parent,
         col_num,
         row_num,
-        img_path: str,
+        file_name: str,
+        path_dir: str,
         img_path_other: str = "A:/res/checked-solid.png",
         is_internal: bool = False,
     ):
@@ -157,10 +158,10 @@ class ImgGridItem(lv.img):
             lv.GRID_ALIGN.CENTER, col_num, 1, lv.GRID_ALIGN.CENTER, row_num, 1
         )
         self.is_internal = is_internal
-
-        self.set_src(img_path)
-        self.zoom_path = img_path
-        self.wp_path = img_path.replace("zoom-", "")
+        self.file_name = file_name
+        self.zoom_path = path_dir + file_name
+        self.set_src(self.zoom_path)
+        self.img_path = self.zoom_path.replace("zoom-", "")
         self.check = lv.img(self)
         self.check.set_src(img_path_other)
         self.check.center()
