@@ -10,6 +10,7 @@ from apps.common import paths
 from apps.common.helpers import validate_message
 from apps.common.signverify import decode_message
 
+from . import networks
 from .helpers import address_from_bytes, get_color_and_icon
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
@@ -39,11 +40,23 @@ async def sign_message(
     node = keychain.derive(msg.address_n)
     address = address_from_bytes(node.ethereum_pubkeyhash())
 
+    if msg.chain_id:
+        network = networks.by_chain_id(msg.chain_id)
+    else:
+        if len(msg.address_n) > 1:  # path has slip44 network identifier
+            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+        else:
+            network = None
+
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
-        msg.address_n[1] & 0x7FFF_FFFF
+        network.chain_id if network else None
     )
     await confirm_signverify(
-        ctx, "ETH", decode_message(msg.message), address, verify=False
+        ctx,
+        network.shortcut if network else "ETH",
+        decode_message(msg.message),
+        address,
+        verify=False,
     )
 
     signature = secp256k1.sign(

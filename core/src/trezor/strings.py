@@ -11,7 +11,7 @@ def format_amount(amount: int, decimals: int) -> str:
     else:
         sign = ""
     d = pow(10, decimals)
-    s = f"{sign}{amount // d}.{amount % d:0{decimals}}".rstrip("0").rstrip(".")
+    s = f"{sign}{(amount // d):,}.{amount % d:0{decimals}}".rstrip("0").rstrip(".")
     return s
 
 

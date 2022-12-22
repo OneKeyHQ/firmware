@@ -24,16 +24,19 @@ async def get_address(
 
     node = keychain.derive(msg.address_n)
 
-    if len(msg.address_n) > 1:  # path has slip44 network identifier
-        network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+    if msg.chain_id:
+        network = networks.by_chain_id(msg.chain_id)
     else:
-        network = None
+        if len(msg.address_n) > 1:  # path has slip44 network identifier
+            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+        else:
+            network = None
     address = address_from_bytes(node.ethereum_pubkeyhash(), network)
 
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
         ctx.primary_color, ctx.icon_path = get_color_and_icon(
-            msg.address_n[1] & 0x7FFF_FFFF
+            network.chain_id if network else None
         )
         await show_address(
             ctx,

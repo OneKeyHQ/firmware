@@ -44,10 +44,16 @@ async def sign_typed_data(
 ) -> EthereumTypedDataSignature:
     await paths.validate_path(ctx, keychain, msg.address_n)
 
+    if msg.chain_id:
+        network = networks.by_chain_id(msg.chain_id)
+    else:
+        if len(msg.address_n) > 1:  # path has slip44 network identifier
+            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+        else:
+            network = None
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
-        msg.address_n[1] & 0x7FFF_FFFF
+        network.chain_id if network else None
     )
-    network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
     ctx.name = network.name if network else "Ethereum"
     data_hash = await generate_typed_data_hash(
         ctx, msg.primary_type, msg.metamask_v4_compat

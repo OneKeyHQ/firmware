@@ -220,7 +220,7 @@ def _load_btc_coins():
             key=f"bitcoin:{coin['coin_shortcut']}",
             icon=f"btc-{coin['coin_shortcut'].lower()}.png",
             primary_color=int(
-                coin.get("primary_color", "0xFFFFFF" if not is_testnet else "0xE55651"),
+                coin.get("primary_color", "0xFFFFFF" if not is_testnet else "0x969696"),
                 16,
             ),
         )
@@ -286,9 +286,9 @@ def _load_ethereum_networks():
             rskip60=rskip60,
             url=chain_data["infoURL"],
             key=f"eth:{shortcut}",
-            icon=f"evm-{chain_data['shortName'].lower()}.png",
+            icon=f"evm-{shortcut.lower()}.png",
             primary_color=ETH_PRIMARY_COLOR_MAPPING.get(
-                chain_data["chainId"], "0xFFFFFF" if not is_testnet else "0xE55651"
+                chain_data["chainId"], "0xFFFFFF" if not is_testnet else "0x969696"
             ),
         )
         networks.append(network)
@@ -298,20 +298,23 @@ def _load_ethereum_networks():
 
 def _load_erc20_tokens():
     """Load ERC20 tokens from `ethereum/tokens` submodule."""
-    networks = _load_ethereum_networks()
+    # networks = _load_ethereum_networks()
     tokens = []
-    for network in networks:
-        chain = network["chain"]
+    # for network in networks:
+    #     chain = network["chain"]
 
-        chain_path = DEFS_DIR / "ethereum" / "tokens" / "tokens" / chain
-        for file in sorted(chain_path.glob("*.json")):
-            token = load_json(file)
+    chain_path = DEFS_DIR / "evm_tokens"
+    for file in sorted(chain_path.glob("*.json")):
+        chain = load_json(file)
+        chain_name = chain["chain"]
+        _tokens = chain["tokens"]
+        for token in _tokens:
             token.update(
-                chain=chain,
-                chain_id=network["chain_id"],
+                chain=chain_name,
+                chain_id=int(file.name.split(".")[0]),
                 address_bytes=bytes.fromhex(token["address"][2:]),
                 shortcut=token["symbol"],
-                key=f"erc20:{chain}:{token['symbol']}",
+                key=f"erc20:{chain_name}:{token['symbol']}",
             )
             tokens.append(token)
 

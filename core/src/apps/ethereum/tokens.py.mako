@@ -21,7 +21,7 @@ UNKNOWN_TOKEN = TokenInfo("Wei UNKN", 0)
 
 
 def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
-% for token_chain_id, tokens in group_tokens(supported_on("trezor2", erc20)).items():
+% for token_chain_id, tokens in group_tokens(erc20).items():
     if chain_id == ${token_chain_id}:
         % for t in tokens:
         if address == ${black_repr(t.address_bytes)}:

@@ -277,8 +277,8 @@ def check(check_tokens, ignore_missing):
 
     orphaned = find_orphaned_support_keys(coins_dict)
     for orphan in orphaned:
-        print(f"orphaned key {orphan}")
-        checks_ok = False
+        print(f"Warning: orphaned key {orphan}")
+        # checks_ok = False
 
     missing = find_unsupported_coins(coins_dict)
     for device, values in missing.items():
