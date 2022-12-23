@@ -6,6 +6,7 @@ from trezor.ui.layouts import show_pubkey
 
 from apps.common import coins, paths
 
+from . import networks
 from .keychain import with_keychain_from_path
 
 if TYPE_CHECKING:
@@ -40,14 +41,22 @@ async def get_public_key(
     if msg.show_display:
         from .helpers import get_color_and_icon
 
+        if msg.chain_id:
+            network = networks.by_chain_id(msg.chain_id)
+        else:
+            if len(msg.address_n) > 1:  # path has slip44 network identifier
+                network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+            else:
+                network = None
         path = paths.address_n_to_str(msg.address_n)
         ctx.primary_color, ctx.icon_path = get_color_and_icon(
-            msg.address_n[1] & 0x7FFF_FFFF
+            network.chain_id if network else None
         )
         await show_pubkey(
             ctx,
             hexlify(pubkey).decode(),
             path=path,
+            network=network.shortcut if network else "ETH",
         )
 
     return EthereumPublicKey(node=node_type, xpub=node_xpub)

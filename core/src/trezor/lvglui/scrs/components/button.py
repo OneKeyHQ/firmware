@@ -39,6 +39,19 @@ class NormalButton(lv.btn):
         self.label.set_align(lv.ALIGN.CENTER)
         self.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
+        self.click_mask = lv.obj(self)
+        self.click_mask.add_style(
+            StyleWrapper()
+            .align(lv.ALIGN.CENTER)
+            .height(50)
+            .width(140)
+            .bg_opa(lv.OPA.TRANSP)
+            .border_width(0),
+            0,
+        )
+        self.click_mask.clear_flag(lv.obj.FLAG.CLICKABLE)
+        self.click_mask.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+
     def disable(
         self, bg_color=lv_colors.ONEKEY_BLACK_1, text_color=lv_colors.ONEKEY_GRAY
     ) -> None:

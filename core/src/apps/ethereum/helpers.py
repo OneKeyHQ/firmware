@@ -128,10 +128,12 @@ def from_bytes_bigendian_signed(b: bytes) -> int:
         return int.from_bytes(b, "big")
 
 
-def get_color_and_icon(slip44_id):
+def get_color_and_icon(chain_id: int | None):
     from trezor.lvglui.scrs import lv
 
-    network: NetworkInfo | None = networks.by_slip44(slip44_id)
+    if chain_id is None:
+        return lv.color_hex(0xFFFFFF), "A:/res/evm-eth.png"
+    network: NetworkInfo | None = networks.by_chain_id(chain_id)
     if network:
         return lv.color_hex(network.primary_color), f"A:/res/{network.icon}"
     else:

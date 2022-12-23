@@ -222,6 +222,14 @@ class FullSizeWindow(lv.obj):
             if confirm_text:
                 if not self.hold_confirm:
                     self.btn_no.set_size(231, 98)
+                else:
+                    self.btn_no.add_style(StyleWrapper().bg_color(lv_colors.BLACK), 0)
+                    self.btn_no.add_style(
+                        StyleWrapper().bg_color(lv_colors.ONEKEY_BLACK).bg_opa(),
+                        lv.PART.MAIN | lv.STATE.PRESSED,
+                    )
+                    self.btn_no.clear_flag(lv.obj.FLAG.CLICKABLE)
+                    self.btn_no.click_mask.add_flag(lv.obj.FLAG.CLICKABLE)
                 self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
                 # else:
                 #     self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
@@ -250,7 +258,11 @@ class FullSizeWindow(lv.obj):
         if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
-            if hasattr(self, "btn_no") and target == self.btn_no:
+            if hasattr(self, "btn_no") and (
+                (target == self.btn_no.click_mask)
+                if self.hold_confirm
+                else (target == self.btn_no)
+            ):
                 self.show_dismiss_anim()
                 self.channel.publish(0)
             elif hasattr(self, "btn_yes") and target == self.btn_yes:

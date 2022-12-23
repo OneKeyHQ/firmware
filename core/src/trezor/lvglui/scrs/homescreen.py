@@ -2149,7 +2149,7 @@ class SafetyCheckPromptConfirm(FullSizeWindow):
         code = event_obj.code
         target = event_obj.get_target()
         if code == lv.EVENT.CLICKED:
-            if target == self.btn_no:
+            if target == self.btn_no.click_mask:
                 self.destroy(100)
         elif code == lv.EVENT.READY:
             if target == self.slider:
@@ -2621,11 +2621,12 @@ class HelpDetails(FullSizeWindow):
         self.item.label.align_to(self.item.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
 
         self.website = lv.label(self.content_area)
-        self.website.set_style_text_font(font_PJSREG24, 0)
+        self.website.set_style_text_font(font_PJSREG30, 0)
         self.website.set_style_text_color(lv_colors.WHITE_2, 0)
         self.website.set_style_text_line_space(3, 0)
+        self.website.set_style_text_letter_space(-1, 0)
         self.website.set_text("help.onekey.so/hc")
-        self.website.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 24, 0)
+        self.website.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
         self.underline = lv.line(self.content_area)
         self.underline.set_points(
             [

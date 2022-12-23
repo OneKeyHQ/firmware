@@ -185,7 +185,7 @@ def by_name(name: str) -> CoinInfo:
             overwintered=False,
             confidential_assets=None,
             icon="btc-test.png",
-            primary_color=0xE55651,
+            primary_color=0x969696,
         )
     if not utils.BITCOIN_ONLY:
         if name == "Actinium":
@@ -310,7 +310,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tbch.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Bgold":
             return CoinInfo(
@@ -372,7 +372,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tbtg.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Bprivate":
             return CoinInfo(
@@ -558,7 +558,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tdash.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Decred":
             return CoinInfo(
@@ -620,7 +620,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tdcr.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "DigiByte":
             return CoinInfo(
@@ -806,7 +806,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tfiro.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Florincoin":
             return CoinInfo(
@@ -930,7 +930,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tgrs.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Komodo":
             return CoinInfo(
@@ -1054,7 +1054,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tltc.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Monacoin":
             return CoinInfo(
@@ -1209,7 +1209,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tppc.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Primecoin":
             return CoinInfo(
@@ -1302,7 +1302,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tqtum.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Ravencoin":
             return CoinInfo(
@@ -1364,7 +1364,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-trvn.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Ritocoin":
             return CoinInfo(
@@ -1457,7 +1457,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=False,
                 confidential_assets=None,
                 icon="btc-tsmart.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Stakenet":
             return CoinInfo(
@@ -1767,7 +1767,7 @@ def by_name(name: str) -> CoinInfo:
                 overwintered=True,
                 confidential_assets=None,
                 icon="btc-taz.png",
-                primary_color=0xE55651,
+                primary_color=0x969696,
             )
         if name == "Brhodium":
             return CoinInfo(
