@@ -22,7 +22,7 @@ def require_confirm_tx(
     if value < pow(10, decimals - 5):
         amount_str = f"< 0.00001 {suffix}"
     else:
-        dp = f"{value % d:0{decimals}}"[:5]
+        dp = f"{value % d:0{decimals}}"
         amount_str = f"{value // d}.{dp}".rstrip("0").rstrip(".") + " " + suffix
 
     return confirm_output(

@@ -5,7 +5,7 @@ from trezor.messages import SuiSignedTx, SuiSignTx
 from apps.common import paths, seed
 from apps.common.keychain import Keychain, auto_keychain
 
-from .helper import TRANSACTION_PREFIX, sui_address_from_pubkey
+from .helper import INTENT_BYTES, sui_address_from_pubkey
 
 
 @auto_keychain(__name__)
@@ -19,8 +19,8 @@ async def sign_tx(ctx: wire.Context, msg: SuiSignTx, keychain: Keychain) -> SuiS
 
     from trezor.ui.layouts import confirm_blind_sign_common, confirm_final
 
-    type_tag = msg.raw_tx[:17]
-    if TRANSACTION_PREFIX != type_tag:
+    intent = msg.raw_tx[:3]
+    if INTENT_BYTES != intent:
         raise wire.DataError("Invalid raw tx")
 
     await confirm_blind_sign_common(ctx, address, msg.raw_tx)
