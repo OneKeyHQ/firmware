@@ -1,15 +1,15 @@
 {
   "name": "Optimism",
-  "chain": "ETH",
+  "chain": "OPT",
   "tokens":
   [
     {
       "_id": "62e8a3d58edb7c3c91a56bd6",
-      "name": "Tether USD",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
       "decimals": 6,
-      "logoURI": "https://common.onekey-asset.com/token/evm-10/0x94b008aA00579c1307B0EF2c499aD98a8ce58e58.png",
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0xdAC17F958D2ee523a2206206994597C13D831ec7.jpg",
       "impl": "evm",
       "status": "LISTED",
       "verified": true,
@@ -23,9 +23,33 @@
       "checked": true,
       "coingeckoId": "tether",
       "createdAt": "2022-08-02T04:11:01.732Z",
-      "updatedAt": "2022-09-16T16:46:53.932Z",
+      "updatedAt": "2022-11-28T15:13:18.331Z",
       "__v": 0,
       "marketCap": "67571192044.25072"
+    },
+    {
+      "_id": "62e8a3d58edb7c3c91a56baf",
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "address": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-10/0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": true,
+      "chainId": "10",
+      "source": [
+        "Uniswap Labs Default",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "dai",
+      "createdAt": "2022-08-02T04:11:01.710Z",
+      "updatedAt": "2022-09-16T16:46:53.903Z",
+      "__v": 0,
+      "marketCap": "6510173321.729998"
     },
     {
       "_id": "62e8a3d58edb7c3c91a56bd9",

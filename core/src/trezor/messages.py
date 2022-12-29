@@ -3029,9 +3029,9 @@ if TYPE_CHECKING:
         extension: "str"
         data_length: "int"
         res_type: "ResourceType"
+        nft_meta_data: "bytes | None"
         zoom_data_length: "int"
-        file_name_no_ext: "str"
-        nft_metadata: "bytes | None"
+        file_name_no_ext: "str | None"
 
         def __init__(
             self,
@@ -3040,8 +3040,8 @@ if TYPE_CHECKING:
             data_length: "int",
             res_type: "ResourceType",
             zoom_data_length: "int",
-            file_name_no_ext: "str",
-            nft_metadata: "bytes | None" = None,
+            nft_meta_data: "bytes | None" = None,
+            file_name_no_ext: "str | None" = None,
         ) -> None:
             pass
 

@@ -321,7 +321,8 @@ def check_dups(buckets, print_at_level=logging.WARNING):
             # Two or more colliding nontokens. This is always fatal.
             # XXX consider allowing two nontokens as long as only one is supported?
             level = logging.ERROR
-            check_passed = False
+            if symbol.upper() != "ETH":
+                check_passed = False
         elif len(supported) > 1:
             # more than one supported coin in bucket
             if cleared:

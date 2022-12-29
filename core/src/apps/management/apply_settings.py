@@ -37,6 +37,10 @@ def validate_homescreen(homescreen: bytes) -> None:
         "wallpaper-2.png",
         "wallpaper-3.png",
         "wallpaper-4.png",
+        "wallpaper-1.jpg",
+        "wallpaper-2.jpg",
+        "wallpaper-3.jpg",
+        "wallpaper-4.jpg",
     )
     if not any(name == homescreen.decode() for name in internal_wallpapers):
         raise wire.DataError("Invalid homescreen")
@@ -128,6 +132,7 @@ async def require_confirm_change_label(ctx: wire.GenericContext, label: str) -> 
         description_param=label,
         br_code=ButtonRequestType.ProtectCall,
         anim_dir=2,
+        icon=None,
     )
 
 

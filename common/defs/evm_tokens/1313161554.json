@@ -5,11 +5,11 @@
   [
     {
       "_id": "62f4d0dbc48d4bf5fb3ba533",
-      "name": "TetherUS",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0x4988a896b1227218e4a686fde5eabdcabd91571f",
       "decimals": 6,
-      "logoURI": "",
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0xdAC17F958D2ee523a2206206994597C13D831ec7.jpg",
       "impl": "evm",
       "status": "LISTED",
       "verified": true,
@@ -24,7 +24,7 @@
       "marketCap": "67571192044.25072",
       "coingeckoId": "tether",
       "createdAt": "2022-08-11T09:50:19.371Z",
-      "updatedAt": "2022-09-16T16:46:54.517Z",
+      "updatedAt": "2022-11-28T15:13:18.393Z",
       "__v": 0
     },
     {
@@ -48,7 +48,31 @@
       "marketCap": "52121379228.05066",
       "coingeckoId": "usd-coin",
       "createdAt": "2022-08-11T09:50:19.366Z",
-      "updatedAt": "2022-12-17T10:18:37.340Z",
+      "updatedAt": "2022-12-17T10:18:29.113Z",
+      "__v": 0
+    },
+    {
+      "_id": "62f4d0dbc48d4bf5fb3ba47f",
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "address": "0xe3520349f477a5f6eb06107066048508498a291b",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-1313161554/0xe3520349f477a5f6eb06107066048508498a291b.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "1313161554",
+      "source": [
+        "Aurora",
+        "Coingecko"
+      ],
+      "checked": true,
+      "marketCap": "6510173321.729998",
+      "coingeckoId": "dai",
+      "createdAt": "2022-08-11T09:50:19.208Z",
+      "updatedAt": "2022-09-16T16:46:54.373Z",
       "__v": 0
     },
     {

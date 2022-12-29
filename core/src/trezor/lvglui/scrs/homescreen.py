@@ -308,6 +308,7 @@ class MainScreen(Screen):
             if code == lv.EVENT.GESTURE:
                 _dir = lv.indev_get_act().get_gesture_dir()
                 if _dir == lv.DIR.BOTTOM:
+                    # lv.indev_get_act().wait_release()
                     self.slide = True
                     self.dismiss()
 
@@ -504,6 +505,14 @@ class NftManager(FullSizeWindow):
         self.btn_label = lv.label(self.panel)
         self.btn_label.set_text(_(i18n_keys.BUTTON__DELETE))
         self.btn_label.align_to(self.btn_del_img, lv.ALIGN.OUT_RIGHT_MID, 4, 1)
+        self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
+
+    def on_nav_back(self, event_obj):
+        code = event_obj.code
+        if code == lv.EVENT.GESTURE:
+            _dir = lv.indev_get_act().get_gesture_dir()
+            if _dir == lv.DIR.RIGHT:
+                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     def del_callback(self):
         io.fatfs.unlink(self.zoom_path[2:])

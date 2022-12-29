@@ -24,9 +24,34 @@
       "coingeckoId": "usd-coin",
       "swftId": "USDC(FTM)",
       "createdAt": "2022-08-02T04:11:00.207Z",
-      "updatedAt": "2022-12-17T10:18:37.325Z",
+      "updatedAt": "2022-12-17T10:18:29.098Z",
       "__v": 0,
       "marketCap": "52152103479.05381"
+    },
+    {
+      "_id": "62e8a3d48edb7c3c91a5625b",
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "address": "0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-250/0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E.jpg",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": true,
+      "chainId": "250",
+      "source": [
+        "sushi",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "dai",
+      "swftId": "DAI(FTM)",
+      "createdAt": "2022-08-02T04:11:00.212Z",
+      "updatedAt": "2022-09-16T16:46:52.016Z",
+      "__v": 0,
+      "marketCap": "6514432102.253393"
     },
     {
       "_id": "62e8a3d48edb7c3c91a56255",

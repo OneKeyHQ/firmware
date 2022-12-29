@@ -5,11 +5,11 @@
   [
     {
       "_id": "62e8a3d58edb7c3c91a56774",
-      "name": "Heco-Peg USDT Token",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0xa71edc38d189767582c38a3145b5873052c3e47a",
       "decimals": 18,
-      "logoURI": "https://common.onekey-asset.com/token/evm-128/0xa71edc38d189767582c38a3145b5873052c3e47a.png",
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0xdAC17F958D2ee523a2206206994597C13D831ec7.jpg",
       "impl": "evm",
       "status": "LISTED",
       "verified": true,
@@ -26,7 +26,7 @@
       "coingeckoId": "tether",
       "swftId": "USDT(HECO)",
       "createdAt": "2022-08-02T04:11:01.035Z",
-      "updatedAt": "2022-09-16T16:46:53.037Z",
+      "updatedAt": "2022-11-28T15:13:18.325Z",
       "__v": 0
     },
     {

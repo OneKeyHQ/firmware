@@ -6,7 +6,7 @@ from trezor.ui.layouts import show_address
 from apps.common import paths
 
 from . import networks
-from .helpers import address_from_bytes, get_color_and_icon
+from .helpers import address_from_bytes, get_color_and_icon, get_display_network_name
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ async def get_address(
             ctx,
             address=address,
             address_n=path,
-            network=network.shortcut if network else "ETH",
+            network=get_display_network_name(network),
         )
 
     return EthereumAddress(address=address)

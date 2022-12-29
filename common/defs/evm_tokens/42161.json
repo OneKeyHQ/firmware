@@ -1,15 +1,15 @@
 {
   "name": "Arbitrum One",
-  "chain": "ETH",
+  "chain": "Arbitrum",
   "tokens":
   [
     {
       "_id": "62e8a3d58edb7c3c91a56a5c",
-      "name": "Tether USD",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
       "decimals": 6,
-      "logoURI": "https://common.onekey-asset.com/token/evm-42161/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9.jpg",
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0xdAC17F958D2ee523a2206206994597C13D831ec7.jpg",
       "impl": "evm",
       "status": "LISTED",
       "verified": true,
@@ -25,7 +25,7 @@
       "coingeckoId": "tether",
       "swftId": "USDT(ARB)",
       "createdAt": "2022-08-02T04:11:01.505Z",
-      "updatedAt": "2022-09-16T16:46:53.634Z",
+      "updatedAt": "2022-11-28T15:13:18.328Z",
       "__v": 0,
       "marketCap": "67603800606.47246"
     },
@@ -51,9 +51,34 @@
       "coingeckoId": "usd-coin",
       "swftId": "USDC(ARB)",
       "createdAt": "2022-08-02T04:11:01.553Z",
-      "updatedAt": "2022-12-17T10:18:37.332Z",
+      "updatedAt": "2022-12-17T10:18:29.105Z",
       "__v": 0,
       "marketCap": "52152103479.05381"
+    },
+    {
+      "_id": "62e8a3d58edb7c3c91a56b0d",
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "address": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-42161/0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": true,
+      "chainId": "42161",
+      "source": [
+        "sushi",
+        "Uniswap Labs Default",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "dai",
+      "createdAt": "2022-08-02T04:11:01.613Z",
+      "updatedAt": "2022-09-16T16:46:53.773Z",
+      "__v": 0,
+      "marketCap": "6514432102.253393"
     },
     {
       "_id": "62e8a3d58edb7c3c91a56ab3",

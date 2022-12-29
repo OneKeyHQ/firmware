@@ -253,7 +253,7 @@ def upload_res(
             res_type=res_type,
             zoom_data_length=len(zoomdata),
             file_name_no_ext=file_name_no_ext,
-            nft_metadata=nft_metadata.encode() if nft_metadata else None,
+            nft_meta_data=nft_metadata.encode() if nft_metadata else None,
         )
     )
 

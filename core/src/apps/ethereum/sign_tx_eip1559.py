@@ -11,7 +11,12 @@ from trezor.utils import HashWriter
 from apps.common import paths
 
 from . import networks
-from .helpers import address_from_bytes, bytes_from_address, get_color_and_icon
+from .helpers import (
+    address_from_bytes,
+    bytes_from_address,
+    get_color_and_icon,
+    get_display_network_name,
+)
 from .keychain import with_keychain_from_chain_id
 from .layout import (
     require_confirm_data,
@@ -93,7 +98,7 @@ async def sign_tx_eip1559(
         token,
         from_address=from_str,
         to_address=recipient_str,
-        network=network.shortcut if network else "ETH",
+        network=get_display_network_name(network),
     )
     data = bytearray()
     data += msg.data_initial_chunk

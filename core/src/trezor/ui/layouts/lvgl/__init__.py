@@ -1108,6 +1108,7 @@ async def confirm_final(ctx: wire.Context) -> None:
         verb=_(i18n_keys.BUTTON__SLIDE_TO_SIGN),
         hold=True,
         anim_dir=0,
+        icon=None,
     )
     await show_popup(
         _(i18n_keys.TITLE__TRANSACTION_SIGNED),
