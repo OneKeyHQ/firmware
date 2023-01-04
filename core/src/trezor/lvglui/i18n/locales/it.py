@@ -434,7 +434,6 @@ translations = [
     "Sei sicuro di eliminare questo sfondo?",
     "Impostare",
     "Gestisci lo sfondo",
-    "Imposta come schermata iniziale o elimina.",
     "Tastiera PIN",
     "Predefinito",
     "I numeri sul tastierino PIN disposti in sequenza.",
@@ -512,5 +511,12 @@ translations = [
     "Animazioni",
     "Consente effetti dinamici nell'interfaccia utente.",
     "Gli effetti dinamici dell'interfaccia utente sono disabilitati.",
+    "Limite gas:",
+    "Tariffa gas:",
+    "Premio gas:",
+    "Indirizzo del contratto:",
+    "ID token:",
+    "Trasferimento NFT",
+    "Puoi impostarlo come schermata iniziale.",
 ]
 # fmt: on

@@ -15,12 +15,21 @@ async def confirm_total_ethereum(
     from_address: str | None,
     to_address: str | None,
     network: str | None,
-    total_amount: str | None = None,
+    total_amount: str | None,
+    contract_addr: str | None,
+    token_id: int | None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
+    if contract_addr:
+        title = _(i18n_keys.TITLE__NFT_TRANSFER)
+    else:
+        if total_amount:
+            title = _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network)
+        else:
+            title = _(i18n_keys.TITLE__TOKEN_TRANSFER)
     screen = TransactionDetailsETH(
-        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network),
+        title,
         from_address,
         to_address,
         amount,
@@ -28,6 +37,8 @@ async def confirm_total_ethereum(
         gas_price=gas_price,
         total_amount=total_amount,
         primary_color=ctx.primary_color,
+        contract_addr=contract_addr,
+        token_id=str(token_id),
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
@@ -43,12 +54,21 @@ async def confirm_total_ethereum_eip1559(
     from_address: str | None,
     to_address: str | None,
     network: str | None,
-    total_amount: str | None = None,
+    total_amount: str | None,
+    contract_addr: str | None,
+    token_id: int | None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
+    if contract_addr:
+        title = _(i18n_keys.TITLE__NFT_TRANSFER)
+    else:
+        if total_amount:
+            title = _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network)
+        else:
+            title = _(i18n_keys.TITLE__TOKEN_TRANSFER)
     screen = TransactionDetailsETH(
-        _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network),
+        title,
         from_address,
         to_address,
         amount,
@@ -58,6 +78,8 @@ async def confirm_total_ethereum_eip1559(
         max_priority_fee_per_gas=max_priority_fee_per_gas,
         total_amount=total_amount,
         primary_color=ctx.primary_color,
+        contract_addr=contract_addr,
+        token_id=str(token_id),
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)

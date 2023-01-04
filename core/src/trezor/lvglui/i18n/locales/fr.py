@@ -434,7 +434,6 @@ translations = [
     "Êtes-vous sûr de vouloir supprimer ce fond d'écran ?",
     "Régler",
     "Gérer le fond d'écran",
-    "Définir comme écran d'accueil ou supprimer.",
     "Clavier NIP",
     "Défaut",
     "Les chiffres du clavier PIN disposés en séquence.",
@@ -512,5 +511,12 @@ translations = [
     "Animations",
     "Autorise les effets dynamiques dans l'interface utilisateur.",
     "Les effets dynamiques de l'interface utilisateur sont désactivés.",
+    "Limite de gaz:",
+    "Plafond des frais de gaz:",
+    "Prime d'essence:",
+    "Adresse du contrat:",
+    "ID de jeton:",
+    "Transfert NFT",
+    "Vous pouvez le définir comme écran d'accueil.",
 ]
 # fmt: on

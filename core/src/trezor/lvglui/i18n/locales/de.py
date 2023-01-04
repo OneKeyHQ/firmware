@@ -434,7 +434,6 @@ translations = [
     "Möchten Sie dieses Hintergrundbild wirklich löschen?",
     "Satz",
     "Hintergrundbild verwalten",
-    "Als Startbildschirm festlegen oder löschen.",
     "PIN-Tastatur",
     "Standard",
     "Die Zahlen auf der PIN-Tastatur sind der Reihe nach angeordnet.",
@@ -512,5 +511,12 @@ translations = [
     "Animationen",
     "Ermöglicht dynamische Effekte in der Benutzeroberfläche.",
     "Dynamische Effekte der Benutzeroberfläche sind deaktiviert.",
+    "Gaslimit:",
+    "Gasgebührenobergrenze:",
+    "Gasprämie:",
+    "Vertragsadresse:",
+    "Token-ID:",
+    "NFT-Übertragung",
+    "Sie können es als Startbildschirm festlegen.",
 ]
 # fmt: on

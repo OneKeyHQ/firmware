@@ -58,13 +58,24 @@ async def sign_tx(
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
-    await require_confirm_tx(ctx, recipient, value, msg.chain_id, token)
-    if token is None and msg.data_length > 0:
+    is_nft_transfer = False
+    token_id = None
+    from_addr = None
+    if token is None:
+        res = await handle_erc_721_or_1155(ctx, msg)
+        if res is not None:
+            is_nft_transfer = True
+            from_addr, recipient, token_id, value = res
+
+    await require_confirm_tx(
+        ctx, recipient, value, msg.chain_id, token, is_nft_transfer
+    )
+    if token is None and token_id is None and msg.data_length > 0:
         await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
 
     node = keychain.derive(msg.address_n)
     recipient_str = address_from_bytes(recipient, network)
-    from_str = address_from_bytes(node.ethereum_pubkeyhash(), network)
+    from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
     await require_confirm_fee(
         ctx,
         value,
@@ -75,6 +86,10 @@ async def sign_tx(
         from_address=from_str,
         to_address=recipient_str,
         network=get_display_network_name(network),
+        contract_addr=address_from_bytes(address_bytes, network)
+        if token_id is not None
+        else None,
+        token_id=token_id,
     )
 
     data = bytearray()
@@ -136,6 +151,53 @@ async def handle_erc20(
             await require_confirm_unknown_token(ctx, address_bytes)
 
     return token, address_bytes, recipient, value
+
+
+async def handle_erc_721_or_1155(
+    ctx: wire.Context, msg: EthereumSignTxAny
+) -> None | tuple[bytes, bytes, int, int]:
+
+    from_addr = recipient = None
+    token_id = 0
+    value = 0
+    if (
+        len(msg.to) in (40, 42)
+        and len(msg.value) == 0
+        and msg.data_length
+        == 228  # assume data is 00 aka the recipient is not a contract
+        and len(msg.data_initial_chunk) == 228
+        and msg.data_initial_chunk[:16]
+        == b"\xf2\x42\x43\x2a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"  # erc1155 f242432a == keccak("safeTransferFrom(address,address,uint256,uint256,bytes)")[:4].hex()
+    ):
+        from_addr = msg.data_initial_chunk[16:36]
+        recipient = msg.data_initial_chunk[48:68]
+        token_id = int.from_bytes(msg.data_initial_chunk[68:100], "big")
+
+        value = int.from_bytes(msg.data_initial_chunk[100:132], "big")
+        assert (
+            int.from_bytes(msg.data_initial_chunk[132:164], "big") == 0xA0
+        )  # dyn data position
+        data_len = int.from_bytes(msg.data_initial_chunk[164:196], "big")
+        data = msg.data_initial_chunk[-data_len:]
+        if not (data_len == 1 and data == b"\x00"):
+            await require_confirm_data(ctx, data, data_len)
+    elif (
+        len(msg.to) in (40, 42)
+        and len(msg.value) == 0
+        and msg.data_length == 100
+        and len(msg.data_initial_chunk) == 100
+        and msg.data_initial_chunk[:16]
+        == b"\x42\x84\x2e\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"  # erc721 42842e0e ==  keccak("safeTransferFrom(address,address,uint256)")[:4].hex()
+    ):
+        from_addr = msg.data_initial_chunk[16:36]
+        recipient = msg.data_initial_chunk[48:68]
+        token_id = int.from_bytes(msg.data_initial_chunk[68:100], "big")
+        value = 1
+    if from_addr:
+        assert recipient is not None
+        return from_addr, recipient, token_id, value
+    else:
+        return None
 
 
 def get_total_length(msg: EthereumSignTx, data_total: int) -> int:

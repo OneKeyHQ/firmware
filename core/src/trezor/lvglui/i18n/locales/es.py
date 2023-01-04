@@ -434,7 +434,6 @@ translations = [
     "¿Estás seguro de eliminar este fondo de pantalla?",
     "Establecer",
     "Administrar fondo de pantalla",
-    "Establecer como pantalla de inicio o eliminar.",
     "Teclado PIN",
     "Defecto",
     "Los números en el teclado PIN dispuestos en secuencia.",
@@ -512,5 +511,12 @@ translations = [
     "animaciones",
     "Permite efectos dinámicos en la interfaz de usuario.",
     "Los efectos dinámicos de la interfaz de usuario están deshabilitados.",
+    "Límite de gases:",
+    "Límite de tarifa de gas:",
+    "Prima de gasolina:",
+    "Dirección del contrato:",
+    "Identificación del token:",
+    "Transferencia NFT",
+    "Puede configurarlo como pantalla de inicio.",
 ]
 # fmt: on

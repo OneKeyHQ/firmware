@@ -34,6 +34,7 @@ def require_confirm_tx(
     value: int,
     chain_id: int,
     token: tokens.TokenInfo | None = None,
+    is_nft: bool = False,
 ) -> Awaitable[None]:
     if to_bytes:
         to_str = address_from_bytes(to_bytes, networks.by_chain_id(chain_id))
@@ -42,7 +43,7 @@ def require_confirm_tx(
     return confirm_output(
         ctx,
         address=to_str,
-        amount=format_ethereum_amount(value, token, chain_id),
+        amount=format_ethereum_amount(value, token, chain_id, is_nft),
         font_amount=ui.BOLD,
         color_to=ui.GREY,
         br_code=ButtonRequestType.SignTx,
@@ -59,6 +60,8 @@ def require_confirm_fee(
     from_address: str | None = None,
     to_address: str | None = None,
     network: str | None = None,
+    contract_addr: str | None = None,
+    token_id: int | None = None,
 ) -> Awaitable[None]:
     fee_max = gas_price * gas_limit
     return confirm_total_ethereum(
@@ -70,8 +73,10 @@ def require_confirm_fee(
         to_address,
         network,
         format_ethereum_amount(spending + fee_max, None, chain_id)
-        if token is None
+        if (token is None and contract_addr is None)
         else None,
+        contract_addr,
+        token_id,
     )
 
 
@@ -86,6 +91,8 @@ async def require_confirm_eip1559_fee(
     from_address: str | None = None,
     to_address: str | None = None,
     network: str | None = None,
+    contract_addr: str | None = None,
+    token_id: int | None = None,
 ) -> None:
 
     fee_max = max_gas_fee * gas_limit
@@ -99,8 +106,10 @@ async def require_confirm_eip1559_fee(
         to_address,
         network,
         format_ethereum_amount(spending + fee_max, None, chain_id)
-        if token is None
+        if (token is None and contract_addr is None)
         else None,
+        contract_addr,
+        token_id,
     )
 
 
@@ -291,8 +300,10 @@ async def confirm_typed_value(
 
 
 def format_ethereum_amount(
-    value: int, token: tokens.TokenInfo | None, chain_id: int
+    value: int, token: tokens.TokenInfo | None, chain_id: int, is_nft: bool = False
 ) -> str:
+    if is_nft:
+        return f"{value} NFT"
     if token:
         suffix = token.symbol
         decimals = token.decimals
