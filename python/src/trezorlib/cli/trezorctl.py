@@ -37,6 +37,7 @@ from . import (
     cardano,
     conflux,
     cosi,
+    cosmos,
     crypto,
     debug,
     device,
@@ -91,6 +92,7 @@ COMMAND_ALIASES = {
     "aptos": aptos.cli,
     "conflux": conflux.cli,
     "filecoin": filecoin.cli,
+    "cosmos": cosmos.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -373,12 +375,14 @@ cli.add_command(stellar.cli)
 cli.add_command(tezos.cli)
 cli.add_command(near.cli)
 cli.add_command(conflux.cli)
+cli.add_command(tron.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
 cli.add_command(aptos.cli)
 cli.add_command(filecoin.cli)
+cli.add_command(cosmos.cli)
 
 #
 # Main

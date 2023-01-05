@@ -500,6 +500,9 @@ const char *languages[][2] = {
     {"Maximum fee", "交易费上限"},
     {"Maximum fee per gas", "交易费上限单价"},
     {"Medium", "中"},
+    // cosmos.c
+    {"Memo", "备注"},
+    // ethereum.c
     {"Message Hash", "消息哈希值"},
     // layout2.c lisk.c
     {"Message signed by:", ""},
@@ -860,6 +863,8 @@ const char *languages[][2] = {
     {"Transfer", "发送"},
     // ethereum.c
     {"Txtype out of bounds", ""},
+    // cosmos.c
+    {"Type", "类型"},
     // fsm_msg_common.h
     {"U2F counter set", ""},
     // layout2.c

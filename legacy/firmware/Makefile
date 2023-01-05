@@ -114,6 +114,13 @@ OBJS += filecoin/cborvalidation.o
 OBJS += filecoin/parser_impl.o
 OBJS += filecoin/tx.o
 OBJS += filecoin/parser.o
+OBJS += jsmn.o
+OBJS += cosmos/json_parser.o
+OBJS += cosmos/tx_validate.o
+OBJS += cosmos/tx_parser.o
+OBJS += cosmos/tx_display.o
+OBJS += cosmos/parser.o
+OBJS += cosmos.o
 endif
 
 OBJS += debug.o
@@ -200,6 +207,7 @@ OBJS += protob/messages-algorand.pb.o
 OBJS += protob/messages-ripple.pb.o
 OBJS += protob/messages-sui.pb.o
 OBJS += protob/messages-filecoin.pb.o
+OBJS += protob/messages-cosmos.pb.o
 endif
 
 OPTFLAGS ?= -Os

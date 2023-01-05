@@ -314,6 +314,10 @@ class MessageType(IntEnum):
     NearAddress = 10702
     NearSignTx = 10703
     NearSignedTx = 10704
+    CosmosGetAddress = 10800
+    CosmosAddress = 10801
+    CosmosSignTx = 10802
+    CosmosSignedTx = 10803
     AlgorandGetAddress = 10900
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
@@ -3321,6 +3325,71 @@ class ConfluxSignMessageCIP23(protobuf.MessageType):
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.domain_hash = domain_hash
         self.message_hash = message_hash
+
+
+class CosmosGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10800
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("hrp", "string", repeated=False, required=False),
+        3: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        hrp: Optional["str"] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.hrp = hrp
+        self.show_display = show_display
+
+
+class CosmosAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10801
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class CosmosSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10802
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class CosmosSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10803
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class CipherKeyValue(protobuf.MessageType):

@@ -292,6 +292,10 @@ if TYPE_CHECKING:
         NearAddress = 10702
         NearSignTx = 10703
         NearSignedTx = 10704
+        CosmosGetAddress = 10800
+        CosmosAddress = 10801
+        CosmosSignTx = 10802
+        CosmosSignedTx = 10803
         AlgorandGetAddress = 10900
         AlgorandAddress = 10901
         AlgorandSignTx = 10902
