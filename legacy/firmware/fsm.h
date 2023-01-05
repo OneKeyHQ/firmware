@@ -24,6 +24,7 @@
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
 #include "messages-conflux.pb.h"
+#include "messages-cosmos.pb.h"
 #include "messages-crypto.pb.h"
 #include "messages-debug.pb.h"
 #include "messages-ethereum.pb.h"
@@ -211,5 +212,9 @@ void fsm_msgSuiSignTx(const SuiSignTx *msg);
 // filecoin
 void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg);
 void fsm_msgFilecoinSignTx(const FilecoinSignTx *msg);
+
+// cosmos
+void fsm_msgCosmosGetAddress(CosmosGetAddress *msg);
+void fsm_msgCosmosSignTx(const CosmosSignTx *msg);
 
 #endif

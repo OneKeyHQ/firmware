@@ -1,0 +1,44 @@
+syntax = "proto2";
+package hw.trezor.messages.cosmos;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageCosmos";
+
+/**
+ * Request: Ask device for Cosmos address corresponding to address_n path
+ * @start
+ * @next CosmosAddress
+ * @next Failure
+ */
+message CosmosGetAddress {
+    repeated uint32 address_n = 1; // BIP-32 path to derive the key from master node
+    optional string hrp = 2; // BECH32 HRP
+    optional bool show_display = 3; // Optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains Cosmos address derived from device private seed
+ * @end
+ */
+message CosmosAddress {
+    optional string address = 1; // Cosmos address
+}
+
+/**
+ * Request: Ask device to sign Cosmos transaction
+ * @start
+ * @next CosmosSignedTx
+ */
+message CosmosSignTx {
+    repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
+    required bytes raw_tx = 2;                      // serialized raw transaction
+}
+
+/**
+ * Response: Contains Cosmos transaction signature
+ * @end
+ */
+message CosmosSignedTx {
+    required bytes signature = 1; // Transaction signature
+}

@@ -37,6 +37,7 @@ from . import (
     cardano,
     conflux,
     cosi,
+    cosmos,
     crypto,
     debug,
     device,
@@ -87,6 +88,7 @@ COMMAND_ALIASES = {
     "xlm": stellar.cli,
     "xtz": tezos.cli,
     "tron": tron.cli,
+    "cosmos": cosmos.cli,
     "aptos": aptos.cli,
     "near": near.cli,
     "conflux": conflux.cli,
@@ -374,11 +376,13 @@ cli.add_command(tezos.cli)
 cli.add_command(near.cli)
 cli.add_command(conflux.cli)
 cli.add_command(filecoin.cli)
+cli.add_command(tron.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
 cli.add_command(aptos.cli)
+cli.add_command(cosmos.cli)
 
 #
 # Main
