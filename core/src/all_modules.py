@@ -508,6 +508,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoCertificateType
     trezor.enums.CardanoDerivationType
     import trezor.enums.CardanoDerivationType
+    trezor.enums.CardanoGovernanceRegistrationFormat
+    import trezor.enums.CardanoGovernanceRegistrationFormat
     trezor.enums.CardanoNativeScriptHashDisplayFormat
     import trezor.enums.CardanoNativeScriptHashDisplayFormat
     trezor.enums.CardanoNativeScriptType
@@ -516,6 +518,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoPoolRelayType
     trezor.enums.CardanoTxAuxiliaryDataSupplementType
     import trezor.enums.CardanoTxAuxiliaryDataSupplementType
+    trezor.enums.CardanoTxOutputSerializationFormat
+    import trezor.enums.CardanoTxOutputSerializationFormat
     trezor.enums.CardanoTxSigningMode
     import trezor.enums.CardanoTxSigningMode
     trezor.enums.CardanoTxWitnessType
