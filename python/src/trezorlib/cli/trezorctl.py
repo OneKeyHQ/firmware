@@ -43,6 +43,7 @@ from . import (
     eos,
     ethereum,
     fido,
+    filecoin,
     firmware,
     monero,
     near,
@@ -89,6 +90,7 @@ COMMAND_ALIASES = {
     "tron": tron.cli,
     "aptos": aptos.cli,
     "conflux": conflux.cli,
+    "filecoin": filecoin.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -376,6 +378,7 @@ cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
 cli.add_command(aptos.cli)
+cli.add_command(filecoin.cli)
 
 #
 # Main

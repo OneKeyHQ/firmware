@@ -27,6 +27,7 @@
 #include "messages-crypto.pb.h"
 #include "messages-debug.pb.h"
 #include "messages-ethereum.pb.h"
+#include "messages-filecoin.pb.h"
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
@@ -215,5 +216,9 @@ void fsm_msgRippleSignTx(RippleSignTx *msg);
 // sui
 void fsm_msgSuiGetAddress(const SuiGetAddress *msg);
 void fsm_msgSuiSignTx(const SuiSignTx *msg);
+
+// filecoin
+void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg);
+void fsm_msgFilecoinSignTx(const FilecoinSignTx *msg);
 
 #endif
