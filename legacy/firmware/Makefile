@@ -101,6 +101,13 @@ OBJS += algo/parser.o
 OBJS += algo/tx.o
 OBJS += ripple.o
 OBJS += sui.o
+OBJS += filecoin.o
+OBJS += filecoin/cborparser.o
+OBJS += filecoin/cborvalidation.o
+OBJS += filecoin/parser_impl.o
+OBJS += filecoin/tx.o
+OBJS += filecoin/parser.o
+
 endif
 
 OBJS += debug.o
@@ -186,6 +193,7 @@ OBJS += protob/messages-conflux.pb.o
 OBJS += protob/messages-algorand.pb.o
 OBJS += protob/messages-ripple.pb.o
 OBJS += protob/messages-sui.pb.o
+OBJS += protob/messages-filecoin.pb.o
 endif
 
 OPTFLAGS ?= -Os
@@ -224,6 +232,8 @@ endif
 
 # disable certain optimizations and features when small footprint is required
 CFLAGS += -DUSE_PRECOMPUTED_CP=0
+
+CFLAGS += -DCBOR_NO_FLOATING_POINT=l
 
 %:: %.mako defs
 	@printf "  MAKO    $@\n"

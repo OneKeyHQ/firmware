@@ -310,6 +310,10 @@ class MessageType(IntEnum):
     SuiAddress = 11101
     SuiSignTx = 11102
     SuiSignedTx = 11103
+    FilecoinGetAddress = 11200
+    FilecoinAddress = 11201
+    FilecoinSignTx = 11202
+    FilecoinSignedTx = 11203
     DeviceEraseSector = 10026
 
 
@@ -5525,6 +5529,68 @@ class EthereumAccessList(protobuf.MessageType):
     ) -> None:
         self.storage_keys: Sequence["bytes"] = storage_keys if storage_keys is not None else []
         self.address = address
+
+
+class FilecoinGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11200
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class FilecoinAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11201
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class FilecoinSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11202
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class FilecoinSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11203
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class MoneroTransactionSourceEntry(protobuf.MessageType):

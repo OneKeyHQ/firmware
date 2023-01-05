@@ -43,6 +43,7 @@ from . import (
     eos,
     ethereum,
     fido,
+    filecoin,
     firmware,
     monero,
     near,
@@ -89,6 +90,7 @@ COMMAND_ALIASES = {
     "aptos": aptos.cli,
     "near": near.cli,
     "conflux": conflux.cli,
+    "filecoin": filecoin.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -371,6 +373,7 @@ cli.add_command(stellar.cli)
 cli.add_command(tezos.cli)
 cli.add_command(near.cli)
 cli.add_command(conflux.cli)
+cli.add_command(filecoin.cli)
 
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
