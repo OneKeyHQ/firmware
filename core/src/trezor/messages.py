@@ -6990,3 +6990,63 @@ if TYPE_CHECKING:
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["CosmosSignedTx"]:
             return isinstance(msg, cls)
+
+    class PolkadotGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotGetAddress"]:
+            return isinstance(msg, cls)
+
+    class PolkadotAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotAddress"]:
+            return isinstance(msg, cls)
+
+    class PolkadotSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_tx: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotSignTx"]:
+            return isinstance(msg, cls)
+
+    class PolkadotSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotSignedTx"]:
+            return isinstance(msg, cls)

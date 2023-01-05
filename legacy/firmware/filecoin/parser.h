@@ -1,7 +1,17 @@
 #ifndef __FILECOIN_PARSER_H__
 #define __FILECOIN_PARSER_H__
 
+#include <stdbool.h>
 #include "parser_impl.h"
+
+#define LESS_THAN_64_DIGIT(num_digit) \
+  if (num_digit > 64) return parser_value_out_of_range;
+
+extern bool bignumBigEndian_bcdprint(char *outBuffer, uint16_t outBufferLen,
+                                     const uint8_t *bcdIn, uint16_t bcdInLen);
+extern void bignumBigEndian_to_bcd(uint8_t *bcdOut, uint16_t bcdOutLen,
+                                   const uint8_t *binValue,
+                                   uint16_t binValueLen);
 
 const char *fil_parser_getErrorDescription(parser_error_t err);
 

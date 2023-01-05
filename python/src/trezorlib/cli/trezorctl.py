@@ -49,6 +49,7 @@ from . import (
     monero,
     near,
     nem,
+    polkadot,
     ripple,
     settings,
     starcoin,
@@ -93,6 +94,7 @@ COMMAND_ALIASES = {
     "conflux": conflux.cli,
     "filecoin": filecoin.cli,
     "cosmos": cosmos.cli,
+    "polkadot": polkadot.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -383,6 +385,7 @@ cli.add_command(bixin.cli)
 cli.add_command(aptos.cli)
 cli.add_command(filecoin.cli)
 cli.add_command(cosmos.cli)
+cli.add_command(polkadot.cli)
 
 #
 # Main

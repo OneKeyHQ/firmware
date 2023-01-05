@@ -64,6 +64,7 @@
 #if !BITCOIN_ONLY
 #include "algorand.h"
 #include "aptos.h"
+#include "cardano.h"
 #include "conflux.h"
 #include "cosmos.h"
 #include "ethereum.h"
@@ -71,6 +72,7 @@
 #include "near.h"
 #include "nem.h"
 #include "nem2.h"
+#include "polkadot.h"
 #include "ripple.h"
 #include "solana.h"
 #include "starcoin.h"
@@ -489,6 +491,7 @@ void fsm_msgRebootToBootloader(void) {
 #include "fsm_msg_filecoin.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
+#include "fsm_msg_polkadot.h"
 #include "fsm_msg_ripple.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"
