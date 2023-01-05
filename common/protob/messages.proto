@@ -445,12 +445,23 @@ enum MessageType {
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
 
+    // Polkadot
+    MessageType_PolkadotGetAddress = 11000 [(wire_in) = true];
+    MessageType_PolkadotAddress = 11001 [(wire_out) = true];
+    MessageType_PolkadotSignTx = 11002 [(wire_in) = true];
+    MessageType_PolkadotSignedTx = 11003 [(wire_out) = true];
+
     // sui
     MessageType_SuiGetAddress = 11100 [(wire_in) = true];
     MessageType_SuiAddress = 11101 [(wire_out) = true];
     MessageType_SuiSignTx = 11102 [(wire_in) = true];
     MessageType_SuiSignedTx = 11103 [(wire_out) = true];
     
+    // Filecoin
+    MessageType_FilecoinGetAddress = 11200 [(wire_in) = true];
+    MessageType_FilecoinAddress = 11201 [(wire_out) = true];
+    MessageType_FilecoinSignTx = 11202 [(wire_in) = true];
+    MessageType_FilecoinSignedTx = 11203 [(wire_out) = true];
     
     // onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];

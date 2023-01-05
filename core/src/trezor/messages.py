@@ -2960,9 +2960,9 @@ if TYPE_CHECKING:
         extension: "str"
         data_length: "int"
         res_type: "ResourceType"
+        nft_meta_data: "bytes | None"
         zoom_data_length: "int"
-        file_name_no_ext: "str"
-        nft_metadata: "bytes | None"
+        file_name_no_ext: "str | None"
 
         def __init__(
             self,
@@ -2971,8 +2971,8 @@ if TYPE_CHECKING:
             data_length: "int",
             res_type: "ResourceType",
             zoom_data_length: "int",
-            file_name_no_ext: "str",
-            nft_metadata: "bytes | None" = None,
+            nft_meta_data: "bytes | None" = None,
+            file_name_no_ext: "str | None" = None,
         ) -> None:
             pass
 
@@ -3923,12 +3923,14 @@ if TYPE_CHECKING:
     class EthereumGetPublicKey(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
+        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -3955,12 +3957,14 @@ if TYPE_CHECKING:
     class EthereumGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
+        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4085,12 +4089,14 @@ if TYPE_CHECKING:
     class EthereumSignMessage(protobuf.MessageType):
         address_n: "list[int]"
         message: "bytes"
+        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             message: "bytes",
             address_n: "list[int] | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4118,6 +4124,7 @@ if TYPE_CHECKING:
         signature: "bytes"
         message: "bytes"
         address: "str"
+        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4125,6 +4132,7 @@ if TYPE_CHECKING:
             signature: "bytes",
             message: "bytes",
             address: "str",
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4154,6 +4162,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         domain_separator_hash: "bytes"
         message_hash: "bytes | None"
+        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4161,6 +4170,7 @@ if TYPE_CHECKING:
             domain_separator_hash: "bytes",
             address_n: "list[int] | None" = None,
             message_hash: "bytes | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4204,6 +4214,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         primary_type: "str"
         metamask_v4_compat: "bool"
+        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4211,6 +4222,7 @@ if TYPE_CHECKING:
             primary_type: "str",
             address_n: "list[int] | None" = None,
             metamask_v4_compat: "bool | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
