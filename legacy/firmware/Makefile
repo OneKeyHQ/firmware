@@ -108,6 +108,30 @@ OBJS += algo/parser.o
 OBJS += algo/tx.o
 OBJS += ripple.o
 OBJS += sui.o
+OBJS += filecoin.o
+OBJS += filecoin/cborparser.o
+OBJS += filecoin/cborvalidation.o
+OBJS += filecoin/parser_impl.o
+OBJS += filecoin/tx.o
+OBJS += filecoin/parser.o
+OBJS += jsmn.o
+OBJS += cosmos/json_parser.o
+OBJS += cosmos/tx_validate.o
+OBJS += cosmos/tx_parser.o
+OBJS += cosmos/tx_display.o
+OBJS += cosmos/parser.o
+OBJS += cosmos.o
+OBJS += polkadot.o
+OBJS += polkadot/crypto_helper.o
+OBJS += polkadot/bignum.o
+OBJS += polkadot/substrate/substrate_types_V15.o
+OBJS += polkadot/substrate/substrate_types.o
+OBJS += polkadot/substrate/substrate_dispatch_V15.o
+OBJS += polkadot/substrate/substrate_dispatch.o
+OBJS += polkadot/parser_impl_common.o
+OBJS += polkadot/parser_impl.o
+OBJS += polkadot/parser.o
+OBJS += polkadot/tx.o
 endif
 
 OBJS += debug.o
@@ -163,6 +187,8 @@ OBJS += ../vendor/trezor-crypto/chacha20poly1305/rfc7539.o
 
 OBJS += ../vendor/trezor-crypto/nem.o
 
+OBJS += ../vendor/trezor-crypto/cardano.o
+
 OBJS += ../vendor/trezor-crypto/sha512.o
 
 OBJS += ../vendor/QR-Code-generator/c/qrcodegen.o
@@ -193,6 +219,9 @@ OBJS += protob/messages-conflux.pb.o
 OBJS += protob/messages-algorand.pb.o
 OBJS += protob/messages-ripple.pb.o
 OBJS += protob/messages-sui.pb.o
+OBJS += protob/messages-filecoin.pb.o
+OBJS += protob/messages-cosmos.pb.o
+OBJS += protob/messages-polkadot.pb.o
 endif
 
 OPTFLAGS ?= -Os
@@ -228,6 +257,10 @@ CFLAGS += -DUSE_ETHEREUM=0
 CFLAGS += -DUSE_NEM=0
 MAKO_RENDER_FLAG = --bitcoin-only
 endif
+
+CFLAGS += -DCBOR_NO_FLOATING_POINT=l
+
+CFLAGS += -DUSE_CARDANO=1
 
 %:: %.mako defs
 	@printf "  MAKO    $@\n"

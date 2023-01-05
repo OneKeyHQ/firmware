@@ -30,6 +30,9 @@ CORE_PROTOBUF_SOURCES="\
     $PROTOB/messages-conflux.proto \
     $PROTOB/messages-algorand.proto \
     $PROTOB/messages-sui.proto \
+    $PROTOB/messages-filecoin.proto \
+    $PROTOB/messages-cosmos.proto \
+    $PROTOB/messages-polkadot.proto \
 "
 
 PYTHON_PROTOBUF_SOURCES=$PROTOB/*.proto

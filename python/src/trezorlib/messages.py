@@ -314,14 +314,26 @@ class MessageType(IntEnum):
     NearAddress = 10702
     NearSignTx = 10703
     NearSignedTx = 10704
+    CosmosGetAddress = 10800
+    CosmosAddress = 10801
+    CosmosSignTx = 10802
+    CosmosSignedTx = 10803
     AlgorandGetAddress = 10900
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
+    PolkadotGetAddress = 11000
+    PolkadotAddress = 11001
+    PolkadotSignTx = 11002
+    PolkadotSignedTx = 11003
     SuiGetAddress = 11100
     SuiAddress = 11101
     SuiSignTx = 11102
     SuiSignedTx = 11103
+    FilecoinGetAddress = 11200
+    FilecoinAddress = 11201
+    FilecoinSignTx = 11202
+    FilecoinSignedTx = 11203
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
@@ -3319,6 +3331,71 @@ class ConfluxSignMessageCIP23(protobuf.MessageType):
         self.message_hash = message_hash
 
 
+class CosmosGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10800
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("hrp", "string", repeated=False, required=False),
+        3: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        hrp: Optional["str"] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.hrp = hrp
+        self.show_display = show_display
+
+
+class CosmosAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10801
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class CosmosSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10802
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class CosmosSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10803
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
+
+
 class CipherKeyValue(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 23
     FIELDS = {
@@ -5907,6 +5984,68 @@ class EthereumAccessList(protobuf.MessageType):
         self.address = address
 
 
+class FilecoinGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11200
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class FilecoinAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11201
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class FilecoinSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11202
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class FilecoinSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11203
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
+
+
 class MoneroTransactionSourceEntry(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
@@ -7311,6 +7450,68 @@ class NEMCosignatoryModification(protobuf.MessageType):
     ) -> None:
         self.type = type
         self.public_key = public_key
+
+
+class PolkadotGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11000
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        3: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class PolkadotAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11001
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+
+
+class PolkadotSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11002
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+
+
+class PolkadotSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11003
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class RippleGetAddress(protobuf.MessageType):

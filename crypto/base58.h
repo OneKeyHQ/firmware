@@ -36,6 +36,7 @@ int base58_encode_check(const uint8_t *data, int len, HasherType hasher_type,
                         char *str, int strsize);
 int base58_decode_check(const char *str, HasherType hasher_type, uint8_t *data,
                         int datalen);
+int base58_encode(const uint8_t *data, int len, char *str, int strsize);
 
 // Private
 bool b58tobin(void *bin, size_t *binszp, const char *b58);
