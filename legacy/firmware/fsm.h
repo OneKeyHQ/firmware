@@ -32,6 +32,7 @@
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-polkadot.pb.h"
 #include "messages-ripple.pb.h"
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
@@ -216,5 +217,9 @@ void fsm_msgFilecoinSignTx(const FilecoinSignTx *msg);
 // cosmos
 void fsm_msgCosmosGetAddress(CosmosGetAddress *msg);
 void fsm_msgCosmosSignTx(const CosmosSignTx *msg);
+
+// polkadot
+void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg);
+void fsm_msgPolkadotSignTx(const PolkadotSignTx *msg);
 
 #endif

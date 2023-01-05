@@ -1,0 +1,7 @@
+PolkadotGetAddress.address_n                                   max_count:8
+PolkadotAddress.address                                        max_size:64
+
+PolkadotSignTx.address_n                                       max_count:8
+PolkadotSignTx.raw_tx                                          max_size:1024
+
+PolkadotSignedTx.signature                                     max_size:64

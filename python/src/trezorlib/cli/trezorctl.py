@@ -49,6 +49,7 @@ from . import (
     monero,
     near,
     nem,
+    polkadot,
     ripple,
     settings,
     starcoin,
@@ -89,6 +90,7 @@ COMMAND_ALIASES = {
     "xtz": tezos.cli,
     "tron": tron.cli,
     "cosmos": cosmos.cli,
+    "polkadot": polkadot.cli,
     "aptos": aptos.cli,
     "near": near.cli,
     "conflux": conflux.cli,
@@ -383,6 +385,7 @@ cli.add_command(debug.cli)
 cli.add_command(bixin.cli)
 cli.add_command(aptos.cli)
 cli.add_command(cosmos.cli)
+cli.add_command(polkadot.cli)
 
 #
 # Main

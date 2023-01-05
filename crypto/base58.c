@@ -201,6 +201,15 @@ int base58_encode_check(const uint8_t *data, int datalen,
   return success ? res : 0;
 }
 
+int base58_encode(const uint8_t *data, int datalen, char *str, int strsize) {
+  if (datalen > 128) {
+    return 0;
+  }
+  size_t res = strsize;
+  bool success = b58enc(str, &res, data, datalen);
+  return success ? res : 0;
+}
+
 int base58_decode_check(const char *str, HasherType hasher_type, uint8_t *data,
                         int datalen) {
   if (datalen > 128) {
