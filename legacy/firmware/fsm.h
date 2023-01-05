@@ -24,12 +24,15 @@
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
 #include "messages-conflux.pb.h"
+#include "messages-cosmos.pb.h"
 #include "messages-crypto.pb.h"
 #include "messages-debug.pb.h"
 #include "messages-ethereum.pb.h"
+#include "messages-filecoin.pb.h"
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-polkadot.pb.h"
 #include "messages-ripple.pb.h"
 #include "messages-solana.pb.h"
 #include "messages-starcoin.pb.h"
@@ -206,5 +209,17 @@ void fsm_msgRippleSignTx(RippleSignTx *msg);
 // sui
 void fsm_msgSuiGetAddress(const SuiGetAddress *msg);
 void fsm_msgSuiSignTx(const SuiSignTx *msg);
+
+// filecoin
+void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg);
+void fsm_msgFilecoinSignTx(const FilecoinSignTx *msg);
+
+// cosmos
+void fsm_msgCosmosGetAddress(CosmosGetAddress *msg);
+void fsm_msgCosmosSignTx(const CosmosSignTx *msg);
+
+// polkadot
+void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg);
+void fsm_msgPolkadotSignTx(const PolkadotSignTx *msg);
 
 #endif

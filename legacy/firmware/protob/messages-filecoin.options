@@ -1,0 +1,7 @@
+FilecoinGetAddress.address_n                              max_count:8
+FilecoinAddress.address                                   max_size:45
+
+FilecoinSignTx.address_n                                  max_count:8
+FilecoinSignTx.raw_tx                                     max_size:4096
+
+FilecoinSignedTx.signature                                max_size:65
