@@ -1376,3 +1376,47 @@ class NftRemoveConfirm(FullSizeWindow):
 
     def destroy(self, _delay_ms):
         self.delete()
+
+
+class FilecoinPayment(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        address_from,
+        address_to,
+        amount,
+        gaslimit,
+        gasfeecap=None,
+        gaspremium=None,
+        total_amount=None,
+        primary_color=None,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
+        )
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__GAS_LIMIT__COLON), gaslimit
+        )
+        self.item5 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__GAS_FEE_CAP__COLON), gasfeecap
+        )
+        self.item6 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__GAS_PREMIUM__COLON), gaspremium
+        )
+        self.item6 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
+        )

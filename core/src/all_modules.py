@@ -520,6 +520,18 @@ apps.debug
 import apps.debug
 apps.debug.load_device
 import apps.debug.load_device
+apps.filecoin
+import apps.filecoin
+apps.filecoin.get_address
+import apps.filecoin.get_address
+apps.filecoin.helper
+import apps.filecoin.helper
+apps.filecoin.layout
+import apps.filecoin.layout
+apps.filecoin.sign_tx
+import apps.filecoin.sign_tx
+apps.filecoin.transaction
+import apps.filecoin.transaction
 apps.homescreen
 import apps.homescreen
 apps.homescreen.homescreen

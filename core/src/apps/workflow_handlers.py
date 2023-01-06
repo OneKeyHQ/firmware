@@ -266,6 +266,12 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.SuiSignTx:
             return "apps.sui.sign_tx"
 
+        # filecoin
+        if msg_type == MessageType.FilecoinGetAddress:
+            return "apps.filecoin.get_address"
+        if msg_type == MessageType.FilecoinSignTx:
+            return "apps.filecoin.sign_tx"
+
     raise ValueError
 
 

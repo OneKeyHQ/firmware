@@ -56,6 +56,7 @@ from . import (
     tezos,
     tron,
     sui,
+    filecoin,
     with_client,
 )
 
@@ -94,6 +95,7 @@ COMMAND_ALIASES = {
     "near": near.cli,
     "aptos": aptos.cli,
     "sui": sui.cli,
+    "filecoin": filecoin.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -387,6 +389,7 @@ cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(near.cli)
 cli.add_command(sui.cli)
+cli.add_command(filecoin.cli)
 
 #
 # Main
