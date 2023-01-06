@@ -47,6 +47,7 @@ class Screen(lv.obj):
         # nav_back
         if kwargs.get("nav_back", False):
             self.nav_back = Navigation(self.content_area)
+            self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
         # icon
         if "icon_path" in kwargs:
             self.icon = lv.img(self.content_area)
@@ -74,6 +75,13 @@ class Screen(lv.obj):
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
 
         self.load_screen(self)
+
+    def on_nav_back(self, event_obj):
+        code = event_obj.code
+        if code == lv.EVENT.GESTURE:
+            _dir = lv.indev_get_act().get_gesture_dir()
+            if _dir == lv.DIR.RIGHT:
+                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     # event callback
     def eventhandler(self, event_obj):
@@ -249,6 +257,7 @@ class FullSizeWindow(lv.obj):
             else:
                 self.btn_yes.enable(primary_color, text_color=lv_colors.BLACK)
         self.add_event_cb(self.eventhandler, lv.EVENT.CLICKED, None)
+        self.clear_flag(lv.obj.FLAG.GESTURE_BUBBLE)
         if auto_close_ms:
             self.destroy(delay_ms=auto_close_ms)
 

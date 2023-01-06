@@ -5,11 +5,11 @@
   [
     {
       "_id": "62e8a3d38edb7c3c91a55cbe",
-      "name": "(PoS) Tether USD",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
       "decimals": 6,
-      "logoURI": "https://common.onekey-asset.com/token/evm-137/0xc2132D05D31c914a87C6611C10748AEb04B58e8F.jpg",
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0xdAC17F958D2ee523a2206206994597C13D831ec7.jpg",
       "impl": "evm",
       "status": "LISTED",
       "verified": true,
@@ -26,7 +26,7 @@
       "coingeckoId": "tether",
       "swftId": "USDT(MATIC)",
       "createdAt": "2022-08-02T04:10:59.028Z",
-      "updatedAt": "2022-09-16T16:46:50.870Z",
+      "updatedAt": "2022-11-28T15:13:18.280Z",
       "__v": 0,
       "marketCap": "67603800606.47246"
     },
@@ -53,7 +53,7 @@
       "coingeckoId": "usd-coin",
       "swftId": "USDC(MATIC)",
       "createdAt": "2022-08-02T04:10:59.026Z",
-      "updatedAt": "2022-12-17T10:18:37.319Z",
+      "updatedAt": "2022-12-17T10:18:29.095Z",
       "__v": 0,
       "marketCap": "52152103479.05381"
     },
@@ -78,6 +78,32 @@
       "createdAt": "2022-08-02T04:11:01.995Z",
       "updatedAt": "2022-09-16T16:46:54.261Z",
       "marketCap": "19227185730.297874"
+    },
+    {
+      "_id": "62e8a3d28edb7c3c91a55c22",
+      "name": "(PoS) Dai Stablecoin",
+      "symbol": "DAI",
+      "address": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-137/0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063.jpg",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": true,
+      "chainId": "137",
+      "source": [
+        "sushi",
+        "Uniswap Labs Default",
+        "quickswap-default-token-list",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "dai",
+      "createdAt": "2022-08-02T04:10:58.919Z",
+      "updatedAt": "2022-09-16T16:46:50.748Z",
+      "__v": 0,
+      "marketCap": "6514432102.253393"
     },
     {
       "_id": "62e8a3d38edb7c3c91a55cc1",
@@ -1212,30 +1238,6 @@
       "coingeckoId": "monsoon-finance",
       "createdAt": "2022-08-02T04:10:59.527Z",
       "updatedAt": "2022-09-16T16:46:51.463Z",
-      "__v": 0,
-      "marketCap": 0
-    },
-    {
-      "_id": "62e8a3d38edb7c3c91a55fe8",
-      "name": "NFT Champions",
-      "symbol": "CHAMP",
-      "address": "0x8f9e8e833a69aa467e42c46cca640da84dd4585f",
-      "decimals": 8,
-      "logoURI": "https://common.onekey-asset.com/token/evm-137/0x8f9E8e833A69Aa467E42c46cCA640da84DD4585f.png",
-      "impl": "evm",
-      "status": "LISTED",
-      "verified": true,
-      "security": false,
-      "addToIndex": false,
-      "chainId": "137",
-      "source": [
-        "quickswap-default-token-list",
-        "Coingecko"
-      ],
-      "checked": true,
-      "coingeckoId": "nft-champions",
-      "createdAt": "2022-08-02T04:10:59.586Z",
-      "updatedAt": "2022-09-16T16:46:51.515Z",
       "__v": 0,
       "marketCap": 0
     }

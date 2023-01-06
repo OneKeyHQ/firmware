@@ -19,7 +19,12 @@ from trezor.utils import HashWriter
 from apps.common import paths
 
 from . import networks
-from .helpers import address_from_bytes, get_color_and_icon, get_type_name
+from .helpers import (
+    address_from_bytes,
+    get_color_and_icon,
+    get_display_network_name,
+    get_type_name,
+)
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 from .layout import (
     confirm_empty_typed_message,
@@ -54,7 +59,7 @@ async def sign_typed_data(
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
-    ctx.name = network.name if network else "Ethereum"
+    ctx.name = get_display_network_name(network)
     data_hash = await generate_typed_data_hash(
         ctx, msg.primary_type, msg.metamask_v4_compat
     )

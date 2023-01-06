@@ -434,7 +434,6 @@ translations = [
     "Are you sure to delete this wallpaper?",
     "Set",
     "Manage Wallpaper",
-    "Set as homescreen or delete.",
     "PIN Keypad",
     "Default",
     "The numbers on PIN keypad arranged in sequence.",
@@ -512,5 +511,12 @@ translations = [
     "Animations",
     "Allows dynamic effects in the user interface.",
     "Dynamic effects of the user interface are disabled.",
+    "Gas Limit:",
+    "Gas Fee Cap:",
+    "Gas Premium:",
+    "Contract Address:",
+    "Token ID:",
+    "NFT Transfer",
+    "You can set it as homescreen.",
 ]
 # fmt: on

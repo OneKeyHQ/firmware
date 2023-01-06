@@ -5,11 +5,11 @@
   [
     {
       "_id": "62e8a3d58edb7c3c91a56c60",
-      "name": "USDT",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0x382bb369d343125bfb2117af9c149795c6c65c50",
       "decimals": 18,
-      "logoURI": "https://common.onekey-asset.com/token/evm-66/0x382bB369d343125BfB2117af9c149795C6C65C50.jpg",
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0xdAC17F958D2ee523a2206206994597C13D831ec7.jpg",
       "impl": "evm",
       "status": "LISTED",
       "verified": true,
@@ -25,7 +25,7 @@
       "coingeckoId": "tether",
       "swftId": "USDT(OKExChain)",
       "createdAt": "2022-08-02T04:11:01.814Z",
-      "updatedAt": "2022-09-16T16:46:54.021Z",
+      "updatedAt": "2022-11-28T15:13:18.333Z",
       "__v": 0,
       "marketCap": "67571192044.25072"
     },
@@ -51,7 +51,7 @@
       "coingeckoId": "usd-coin",
       "swftId": "USDC(OKExChain)",
       "createdAt": "2022-08-02T04:11:01.810Z",
-      "updatedAt": "2022-12-17T10:18:37.336Z",
+      "updatedAt": "2022-12-17T10:18:29.108Z",
       "__v": 0,
       "marketCap": "52121379228.05066"
     },

@@ -9,6 +9,7 @@ from trezor.messages import ResourceAck, ResourceRequest, Success, ZoomRequest
 from trezor.ui.layouts import confirm_collect_nft, confirm_set_homescreen
 
 import ujson as json
+import ure as re  # type: ignore[Import "ure" could not be resolved]
 
 if TYPE_CHECKING:
     from trezor.messages import ResourceUpload
@@ -49,6 +50,9 @@ REQUEST_CHUNK_SIZE = const(16 * 1024)
 MAX_WP_COUNTER = const(5)
 MAX_NFT_COUNTER = const(24)
 
+# a more precise version should be ^(nft|wp)-[0-9,a-f]{8}-\\d{13,}$, but micropython not support limit range {}
+PATTERN = re.compile(r"^(nft|wp)-[0-9a-f]+-\d+$")
+
 
 async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
     res_type = msg.res_type
@@ -59,11 +63,18 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
         raise wire.DataError("Not supported resource extension")
     elif res_size >= SUPPORTED_MAX_RESOURCE_SIZE[res_ext]:
         raise wire.DataError("Data size overflow")
+    if msg.file_name_no_ext:
+        if PATTERN.match(msg.file_name_no_ext) is None:
+            raise wire.DataError(
+                "File name should follow the pattern (^(nft|wp)-[0-9a-f]{8}-\\d{13,}$)"
+            )
+    else:
+        raise wire.DataError("File name required")
     if res_type == ResourceType.Nft:
-        if msg.nft_metadata is None:
+        if msg.nft_meta_data is None:
             raise wire.DataError("NFT metadata required")
         try:
-            metadata = json.loads(msg.nft_metadata.decode("utf-8"))
+            metadata = json.loads(msg.nft_meta_data.decode("utf-8"))
         except BaseException as e:
             raise wire.DataError(f"Invalid metadata {e}")
         if any(key not in metadata.keys() for key in NFT_METADATA_ALLOWED_KEYS):
@@ -146,8 +157,8 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
             f.sync()
         if res_type == ResourceType.Nft and config_path:
             with io.fatfs.open(config_path, "w") as f:
-                assert msg.nft_metadata
-                f.write(msg.nft_metadata)
+                assert msg.nft_meta_data
+                f.write(msg.nft_meta_data)
                 f.sync()
         if replace:
             name_list.sort(

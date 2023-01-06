@@ -35,6 +35,8 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("COMP", 18)  # ETH / Compound
         if address == b"\xd5\x33\xa9\x49\x74\x0b\xb3\x30\x6d\x11\x9c\xc7\x77\xfa\x90\x0b\xa0\x34\xcd\x52":
             return TokenInfo("CRV", 18)  # ETH / Curve DAO Token
+        if address == b"\x6b\x17\x54\x74\xe8\x90\x94\xc4\x4d\xa9\x8b\x95\x4e\xed\xea\xc4\x95\x27\x1d\x0f":
+            return TokenInfo("DAI", 18)  # ETH / Dai Stablecoin
         if address == b"\x0f\x51\xbb\x10\x11\x97\x27\xa7\xe5\xea\x35\x38\x07\x4f\xb3\x41\xf5\x6b\x09\xad":
             return TokenInfo("DAO", 18)  # ETH / DAO Maker
         if address == b"\x92\xd6\xc1\xe3\x1e\x14\x52\x0e\x67\x6a\x68\x7f\x0a\x93\x78\x8b\x71\x6b\xef\xf5":
@@ -81,8 +83,6 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("OKB", 18)  # ETH / OKB
         if address == b"\xd2\x61\x14\xcd\x6e\xe2\x89\xac\xcf\x82\x35\x0c\x8d\x84\x87\xfe\xdb\x8a\x0c\x07":
             return TokenInfo("OMG", 18)  # ETH / OMGToken
-        if address == b"\x99\x92\xec\x3c\xf6\xa5\x5b\x00\x97\x8c\xdd\xf2\xb2\x7b\xc6\x88\x2d\x88\xd1\xec":
-            return TokenInfo("POLY", 18)  # ETH / Polymath
         if address == b"\x95\xad\x61\xb0\xa1\x50\xd7\x92\x19\xdc\xf6\x4e\x1e\x6c\xc0\x1f\x0b\x64\xc4\xce":
             return TokenInfo("SHIB", 18)  # ETH / SHIBA INU
         if address == b"\xc0\x11\xa7\x3e\xe8\x57\x6f\xb4\x6f\x5e\x1c\x57\x51\xca\x3b\x9f\xe0\xaf\x2a\x6f":
@@ -102,7 +102,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\x8e\x87\x0d\x67\xf6\x60\xd9\x5d\x5b\xe5\x30\x38\x0d\x0e\xc0\xbd\x38\x82\x89\xe1":
             return TokenInfo("USDP", 18)  # ETH / Pax Dollar
         if address == b"\xda\xc1\x7f\x95\x8d\x2e\xe5\x23\xa2\x20\x62\x06\x99\x45\x97\xc1\x3d\x83\x1e\xc7":
-            return TokenInfo("USDT", 6)  # ETH / Tether USD
+            return TokenInfo("USDT", 6)  # ETH / Tether
         if address == b"\x1c\xf4\x59\x2e\xbf\xfd\x73\x0c\x7d\xc9\x2c\x1b\xdf\xfd\xfc\x3b\x9e\xfc\xf2\x9a":
             return TokenInfo("WAVES", 18)  # ETH / WAVES
         if address == b"\x22\x60\xfa\xc5\xe5\x54\x2a\x77\x3a\xa4\x4f\xbc\xfe\xdf\x7c\x19\x3b\xc2\xc5\x99":
@@ -115,21 +115,23 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("ZRX", 18)  # ETH / 0x Protocol Token
     if chain_id == 10:
         if address == b"\x3e\x7e\xf8\xf5\x02\x46\xf7\x25\x88\x51\x02\xe8\x23\x8c\xbb\xa3\x3f\x27\x67\x47":
-            return TokenInfo("BOND", 18)  # ETH / BarnBridge Governance Token (Optimism)
+            return TokenInfo("BOND", 18)  # OPT / BarnBridge Governance Token (Optimism)
+        if address == b"\xda\x10\x00\x9c\xbd\x5d\x07\xdd\x0c\xec\xc6\x61\x61\xfc\x93\xd7\xc9\x00\x0d\xa1":
+            return TokenInfo("DAI", 18)  # OPT / Dai Stablecoin
         if address == b"\x35\x0a\x79\x1b\xfc\x2c\x21\xf9\xed\x5d\x10\x98\x0d\xad\x2e\x26\x38\xff\xa7\xf6":
-            return TokenInfo("LINK", 18)  # ETH / ChainLink Token
+            return TokenInfo("LINK", 18)  # OPT / ChainLink Token
         if address == b"\x9e\x10\x28\xf5\xf1\xd5\xed\xe5\x97\x48\xff\xce\xe5\x53\x25\x09\x97\x68\x40\xe0":
-            return TokenInfo("PERP", 18)  # ETH / Perpetual
+            return TokenInfo("PERP", 18)  # OPT / Perpetual
         if address == b"\x7f\xb6\x88\xcc\xf6\x82\xd5\x8f\x86\xd7\xe3\x8e\x03\xf9\xd2\x2e\x77\x05\x44\x8b":
-            return TokenInfo("RAI", 18)  # ETH / Rai Reflex Index
+            return TokenInfo("RAI", 18)  # OPT / Rai Reflex Index
         if address == b"\x87\x00\xda\xec\x35\xaf\x8f\xf8\x8c\x16\xbd\xf0\x41\x87\x74\xcb\x3d\x75\x99\xb4":
-            return TokenInfo("SNX", 18)  # ETH / Synthetix Network Token
+            return TokenInfo("SNX", 18)  # OPT / Synthetix Network Token
         if address == b"\x6f\xd9\xd7\xad\x17\x24\x2c\x41\xf7\x13\x1d\x25\x72\x12\xc5\x4a\x0e\x81\x66\x91":
-            return TokenInfo("UNI", 18)  # ETH / Uniswap
+            return TokenInfo("UNI", 18)  # OPT / Uniswap
         if address == b"\x94\xb0\x08\xaa\x00\x57\x9c\x13\x07\xb0\xef\x2c\x49\x9a\xd9\x8a\x8c\xe5\x8e\x58":
-            return TokenInfo("USDT", 6)  # ETH / Tether USD
+            return TokenInfo("USDT", 6)  # OPT / Tether
         if address == b"\x68\xf1\x80\xfc\xce\x68\x36\x68\x8e\x90\x84\xf0\x35\x30\x9e\x29\xbf\x0a\x20\x95":
-            return TokenInfo("WBTC", 8)  # ETH / Wrapped BTC
+            return TokenInfo("WBTC", 8)  # OPT / Wrapped BTC
     if chain_id == 25:
         if address == b"\x98\x93\x6b\xde\x1c\xf1\xbf\xf1\xe7\xa8\x01\x2c\xee\x5e\x25\x83\x85\x1f\x20\x67":
             return TokenInfo("ANN", 18)  # CRO / Annex
@@ -137,12 +139,14 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("CRONA", 18)  # CRO / CronaSwap Token
         if address == b"\xe2\x43\xcc\xab\x9e\x66\xe6\xcf\x12\x15\x37\x69\x80\x81\x1d\xdf\x1e\xb7\xf6\x89":
             return TokenInfo("CRX", 18)  # CRO / Crodex Token
+        if address == b"\xf2\x00\x1b\x14\x5b\x43\x03\x2a\xaf\x5e\xe2\x88\x4e\x45\x6c\xcd\x80\x5f\x67\x7d":
+            return TokenInfo("DAI", 18)  # CRO / Dai Stablecoin
         if address == b"\x65\x4b\xac\x3e\xc7\x7d\x6d\xb4\x97\x89\x24\x78\xf8\x54\xcf\x6e\x82\x45\xdc\xa9":
             return TokenInfo("SVN", 18)  # CRO / Savanna Token
         if address == b"\xc2\x12\x23\x24\x9c\xa2\x83\x97\xb4\xb6\x54\x1d\xff\xae\xcc\x53\x9b\xff\x0c\x59":
             return TokenInfo("USDC", 6)  # CRO / USD Coin
         if address == b"\x66\xe4\x28\xc3\xf6\x7a\x68\x87\x85\x62\xe7\x9a\x02\x34\xc1\xf8\x3c\x20\x87\x70":
-            return TokenInfo("USDT", 6)  # CRO / Tether USD
+            return TokenInfo("USDT", 6)  # CRO / Tether
         if address == b"\x2d\x03\xbe\xce\x67\x47\xad\xc0\x0e\x1a\x13\x1b\xba\x14\x69\xc1\x5f\xd1\x1e\x03":
             return TokenInfo("VVS", 18)  # CRO / VVSToken
         if address == b"\x06\x2e\x66\x47\x7f\xaf\x21\x9f\x25\xd2\x7d\xce\xd6\x47\xbf\x57\xc3\x10\x7d\x52":
@@ -154,6 +158,8 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
     if chain_id == 56:
         if address == b"\xfe\xea\x0b\xdd\x3d\x07\xeb\x6f\xe3\x05\x93\x88\x78\xc0\xca\xdb\xfa\x16\x90\x42":
             return TokenInfo("8PAY", 18)  # BSC / 8PAY Network
+        if address == b"\x3e\xe2\x20\x0e\xfb\x34\x00\xfa\xbb\x9a\xac\xf3\x12\x97\xcb\xdd\x1d\x43\x5d\x47":
+            return TokenInfo("ADA", 18)  # BSC / Cardano Token
         if address == b"\x8f\x05\x28\xce\x5e\xf7\xb5\x11\x52\xa5\x97\x45\xbe\xfd\xd9\x1d\x97\x09\x1d\x2f":
             return TokenInfo("ALPACA", 18)  # BSC / AlpacaToken
         if address == b"\xa1\xfa\xa1\x13\xcb\xe5\x34\x36\xdf\x28\xff\x0a\xee\x54\x27\x5c\x13\xb4\x09\x75":
@@ -164,22 +170,12 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("AXS", 18)  # BSC / Axie Infinity Shard
         if address == b"\xe0\x2d\xf9\xe3\xe6\x22\xde\xbd\xd6\x9f\xb8\x38\xbb\x79\x9e\x3f\x16\x89\x02\xc5":
             return TokenInfo("BAKE", 18)  # BSC / BakeryToken
-        if address == b"\xd4\x84\x74\xe7\x44\x47\x27\xbf\x50\x0a\x32\xd5\xab\xe0\x19\x43\xf3\xa5\x9a\x64":
-            return TokenInfo("BBT", 8)  # BSC / BitBook
         if address == b"\x8f\xf7\x95\xa6\xf4\xd9\x7e\x78\x87\xc7\x9b\xea\x79\xab\xa5\xcc\x76\x44\x4a\xdf":
             return TokenInfo("BCH", 18)  # BSC / Bitcoin Cash Token
-        if address == b"\x19\x0b\x58\x9c\xf9\xfb\x8d\xde\xab\xbf\xea\xe3\x6a\x81\x3f\xfb\x2a\x70\x24\x54":
-            return TokenInfo("BDO", 18)  # BSC / bDollar
-        if address == b"\x25\x06\x32\x37\x8e\x57\x3c\x6b\xe1\xac\x2f\x97\xfc\xdf\x00\x51\x5d\x0a\xa9\x1b":
-            return TokenInfo("BETH", 18)  # BSC / Binance Beacon ETH
-        if address == b"\x63\x87\x0a\x18\xb6\xe4\x2b\x01\xef\x1a\xd8\xa2\x30\x2e\xf5\x0b\x71\x32\x05\x4f":
-            return TokenInfo("blink", 6)  # BSC / BLinkToken
         if address == b"\xf8\x59\xbf\x77\xcb\xe8\x69\x90\x13\xd6\xdb\xc7\xc2\xb9\x26\xaa\xf3\x07\xf8\x30":
             return TokenInfo("BRY", 18)  # BSC / Berry Tributes
         if address == b"\x71\x30\xd2\xa1\x2b\x9b\xcb\xfa\xe4\xf2\x63\x4d\x86\x4a\x1e\xe1\xce\x3e\xad\x9c":
             return TokenInfo("BTCB", 18)  # BSC / BTCB Token
-        if address == b"\x85\x95\xf9\xda\x7b\x86\x8b\x18\x22\x19\x4f\xae\xd3\x12\x23\x5e\x43\x00\x7b\x49":
-            return TokenInfo("BTT", 18)  # BSC / BitTorrent
         if address == b"\xc9\x84\x9e\x6f\xdb\x74\x3d\x08\xfa\xee\x3e\x34\xdd\x2d\x1b\xc6\x9e\xa1\x1a\x51":
             return TokenInfo("BUNNY", 18)  # BSC / Bunny Token
         if address == b"\xe9\xe7\xce\xa3\xde\xdc\xa5\x98\x47\x80\xba\xfc\x59\x9b\xd6\x9a\xdd\x08\x7d\x56":
@@ -192,12 +188,18 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("CHESS", 18)  # BSC / Chess
         if address == b"\x52\xce\x07\x1b\xd9\xb1\xc4\xb0\x0a\x0b\x92\xd2\x98\xc5\x12\x47\x8c\xad\x67\xe8":
             return TokenInfo("COMP", 18)  # BSC / Compound Coin
+        if address == b"\x1a\xf3\xf3\x29\xe8\xbe\x15\x40\x74\xd8\x76\x9d\x1f\xfa\x4e\xe0\x58\xb1\xdb\xc3":
+            return TokenInfo("DAI", 18)  # BSC / Dai Token
         if address == b"\x23\x3d\x91\xa0\x71\x31\x55\x00\x3f\xc4\xdc\xe0\xaf\xa8\x71\xb5\x08\xb3\xb7\x15":
             return TokenInfo("DITTO", 9)  # BSC / Ditto
         if address == b"\x67\xee\x3c\xb0\x86\xf8\xa1\x6f\x34\xbe\xe3\xca\x72\xfa\xd3\x6f\x7d\xb9\x29\xe2":
             return TokenInfo("DODO", 18)  # BSC / DODO bird
+        if address == b"\x56\xb6\xfb\x70\x8f\xc5\x73\x2d\xec\x1a\xfc\x8d\x85\x56\x42\x3a\x2e\xdc\xcb\xd6":
+            return TokenInfo("EOS", 18)  # BSC / EOS Token
         if address == b"\xa7\xf5\x52\x07\x8d\xcc\x24\x7c\x26\x84\x33\x60\x20\xc0\x36\x48\x50\x0c\x6d\x9f":
             return TokenInfo("EPS", 18)  # BSC / Ellipsis
+        if address == b"\x21\x70\xed\x08\x80\xac\x9a\x75\x5f\xd2\x9b\x26\x88\x95\x6b\xd9\x59\xf9\x33\xf8":
+            return TokenInfo("ETH", 18)  # BSC / Ethereum Token
         if address == b"\x4e\x64\x15\xa5\x72\x7e\xa0\x8a\xae\x45\x80\x05\x71\x87\x92\x3a\xec\x33\x12\x27":
             return TokenInfo("FINE", 18)  # BSC / Refinable
         if address == b"\x65\x8a\x10\x9c\x59\x00\xbc\x6d\x23\x57\xc8\x75\x49\xb6\x51\x67\x0e\x5b\x05\x39":
@@ -210,14 +212,16 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("Helmet", 18)  # BSC / Helmet.insure Governance Token
         if address == b"\xc0\xef\xf7\x74\x9b\x12\x54\x44\x95\x3e\xf8\x96\x82\x20\x1f\xb8\xc6\xa9\x17\xcd":
             return TokenInfo("HZN", 18)  # BSC / Horizon Protocol
-        if address == b"\x1a\x2f\xb0\xaf\x67\x0d\x02\x34\xc2\x85\x7f\xad\x35\xb7\x89\xf8\xcb\x72\x55\x84":
-            return TokenInfo("KUN", 18)  # BSC / QIAN governance token
         if address == b"\xf8\xa0\xbf\x9c\xf5\x4b\xb9\x2f\x17\x37\x4d\x9e\x9a\x32\x1e\x6a\x11\x1a\x51\xbd":
             return TokenInfo("LINK", 18)  # BSC / ChainLink Token
+        if address == b"\x43\x38\x66\x5c\xbb\x7b\x24\x85\xa8\x85\x5a\x13\x9b\x75\xd5\xe3\x4a\xb0\xdb\x94":
+            return TokenInfo("LTC", 18)  # BSC / Litecoin Token
         if address == b"\x85\x7b\x22\x2f\xc7\x9e\x1c\xbb\xf8\xca\x5f\x78\xcb\x13\x3d\x1b\x7c\xf3\x4b\xbd":
             return TokenInfo("LTO", 18)  # BSC / LTO Network
         if address == b"\xee\x98\x01\x66\x9c\x61\x38\xe8\x4b\xd5\x0d\xeb\x50\x08\x27\xb7\x76\x77\x7d\x28":
             return TokenInfo("O3", 18)  # BSC / O3 Swap Token
+        if address == b"\xfd\x7b\x3a\x77\x84\x8f\x1c\x2d\x67\xe0\x5e\x54\xd7\x8d\x17\x4a\x0c\x85\x03\x35":
+            return TokenInfo("ONT", 18)  # BSC / Ontology Token
         if address == b"\xed\x28\xa4\x57\xa5\xa7\x65\x96\xac\x48\xd8\x7c\x0f\x57\x70\x20\xf6\xea\x1c\x4c":
             return TokenInfo("pBTC", 18)  # BSC / pTokens BTC
         if address == b"\xaf\x53\xd5\x6f\xf9\x9f\x13\x22\x51\x5e\x54\xfd\xde\x93\xff\x8b\x3b\x7d\xaf\xd5":
@@ -239,7 +243,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\x8a\xc7\x6a\x51\xcc\x95\x0d\x98\x22\xd6\x8b\x83\xfe\x1a\xd9\x7b\x32\xcd\x58\x0d":
             return TokenInfo("USDC", 18)  # BSC / USD Coin
         if address == b"\x55\xd3\x98\x32\x6f\x99\x05\x9f\xf7\x75\x48\x52\x46\x99\x90\x27\xb3\x19\x79\x55":
-            return TokenInfo("USDT", 18)  # BSC / Tether USD
+            return TokenInfo("USDT", 18)  # BSC / Tether
         if address == b"\x4b\xd1\x70\x03\x47\x33\x89\xa4\x2d\xaf\x6a\x0a\x72\x9f\x6f\xdb\x32\x8b\xbb\xd7":
             return TokenInfo("VAI", 18)  # BSC / VAI Stablecoin
         if address == b"\x8b\x30\x3d\x5b\xbf\xbb\xf4\x6f\x1a\x4d\x97\x41\xe4\x91\xe0\x69\x86\x89\x4e\x18":
@@ -292,7 +296,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\xdc\xac\x52\xe0\x01\xf5\xbd\x41\x3a\xa6\xea\x83\x95\x64\x38\xf2\x90\x98\x16\x6b":
             return TokenInfo("USDK", 18)  # okexchain / USDK
         if address == b"\x38\x2b\xb3\x69\xd3\x43\x12\x5b\xfb\x21\x17\xaf\x9c\x14\x97\x95\xc6\xc6\x5c\x50":
-            return TokenInfo("USDT", 18)  # okexchain / USDT
+            return TokenInfo("USDT", 18)  # okexchain / Tether
         if address == b"\x8f\x85\x26\xdb\xfd\x6e\x38\xe3\xd8\x30\x77\x02\xca\x84\x69\xba\xe6\xc5\x6c\x15":
             return TokenInfo("WOKT", 18)  # okexchain / Wrapped OKT
         if address == b"\xcd\x08\xd3\x21\xf6\xbc\x10\xa1\x0f\x09\x4e\x4b\x2e\x6c\x9b\x8b\xf9\x90\x64\x01":
@@ -408,7 +412,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\x93\x62\xbb\xef\x4b\x83\x13\xa8\xaa\x9f\x0c\x98\x08\xb8\x05\x77\xaa\x26\xb7\x3b":
             return TokenInfo("USDC-HECO", 6)  # Heco / Heco-Peg USDCHECO Token
         if address == b"\xa7\x1e\xdc\x38\xd1\x89\x76\x75\x82\xc3\x8a\x31\x45\xb5\x87\x30\x52\xc3\xe4\x7a":
-            return TokenInfo("USDT", 18)  # Heco / Heco-Peg USDT Token
+            return TokenInfo("USDT", 18)  # Heco / Tether
         if address == b"\x55\x45\x15\x3c\xcf\xca\x01\xfb\xd7\xdd\x11\xc0\xb2\x3b\xa6\x94\xd9\x50\x9a\x6f":
             return TokenInfo("WHT", 18)  # Heco / Wrapped HT
         if address == b"\xe0\xfe\x25\xee\xfc\xfc\xad\xde\xf8\x44\xfe\x30\xb8\xbe\x1d\x68\xac\x6b\x7a\xf3":
@@ -432,12 +436,12 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("BETS", 18)  # Polygon / BetSwirl Token
         if address == b"\xda\xb5\x29\xf4\x0e\x67\x1a\x1d\x4b\xf9\x13\x61\xc2\x1b\xf9\xf0\xc9\x71\x2a\xb7":
             return TokenInfo("BUSD", 18)  # Polygon / Binance-Peg BUSD Token
-        if address == b"\x8f\x9e\x8e\x83\x3a\x69\xaa\x46\x7e\x42\xc4\x6c\xca\x64\x0d\xa8\x4d\xd4\x58\x5f":
-            return TokenInfo("CHAMP", 8)  # Polygon / NFT Champions
         if address == b"\x85\x05\xb9\xd2\x25\x4a\x7a\xe4\x68\xc0\xe9\xdd\x10\xcc\xea\x3a\x83\x7a\xef\x5c":
             return TokenInfo("COMP", 18)  # Polygon / (PoS) Compound
         if address == b"\x17\x23\x70\xd5\xcd\x63\x27\x9e\xfa\x6d\x50\x2d\xab\x29\x17\x19\x33\xa6\x10\xaf":
             return TokenInfo("CRV", 18)  # Polygon / CRV (PoS)
+        if address == b"\x8f\x3c\xf7\xad\x23\xcd\x3c\xad\xbd\x97\x35\xaf\xf9\x58\x02\x32\x39\xc6\xa0\x63":
+            return TokenInfo("DAI", 18)  # Polygon / (PoS) Dai Stablecoin
         if address == b"\xa0\xe3\x90\xe9\xce\xa0\xd0\xe8\xcd\x40\x04\x8c\xed\x9f\xa9\xea\x10\xd7\x16\x39":
             return TokenInfo("DSLA", 18)  # Polygon / DSLA (PoS)
         if address == b"\x51\xde\x72\xb1\x7c\x7b\xd1\x2e\x9e\x6d\x69\xeb\x50\x6a\x66\x9e\xb6\xb5\x24\x9e":
@@ -505,7 +509,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\x27\x91\xbc\xa1\xf2\xde\x46\x61\xed\x88\xa3\x0c\x99\xa7\xa9\x44\x9a\xa8\x41\x74":
             return TokenInfo("USDC", 6)  # Polygon / USD Coin
         if address == b"\xc2\x13\x2d\x05\xd3\x1c\x91\x4a\x87\xc6\x61\x1c\x10\x74\x8a\xeb\x04\xb5\x8e\x8f":
-            return TokenInfo("USDT", 6)  # Polygon / (PoS) Tether USD
+            return TokenInfo("USDT", 6)  # Polygon / Tether
         if address == b"\xd0\x25\x8a\x3f\xd0\x0f\x38\xaa\x80\x90\xdf\xee\x34\x3f\x10\xa9\xd4\xd3\x0d\x3f":
             return TokenInfo("VOXEL", 18)  # Polygon / VOXEL Token
         if address == b"\x1b\xfd\x67\x03\x7b\x42\xcf\x73\xac\xf2\x04\x70\x67\xbd\x4f\x2c\x47\xd9\xbf\xd6":
@@ -531,6 +535,8 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("CREAM", 18)  # FTM / Cream
         if address == b"\x1e\x4f\x97\xb9\xf9\xf9\x13\xc4\x6f\x16\x32\x78\x17\x32\x92\x7b\x90\x19\xc6\x8b":
             return TokenInfo("CRV", 18)  # FTM / Curve DAO
+        if address == b"\x8d\x11\xec\x38\xa3\xeb\x5e\x95\x6b\x05\x2f\x67\xda\x8b\xdc\x9b\xef\x8a\xbf\x3e":
+            return TokenInfo("DAI", 18)  # FTM / Dai Stablecoin
         if address == b"\x74\xb2\x38\x82\xa3\x02\x90\x45\x1a\x17\xc4\x4f\x4f\x05\x24\x3b\x6b\x58\xc7\x6d":
             return TokenInfo("ETH", 18)  # FTM / Ethereum
         if address == b"\x07\x8e\xef\x5a\x2f\xb5\x33\xe1\xa4\xd4\x87\xef\x64\xb2\x7d\xf1\x13\xd1\x2c\x32":
@@ -575,76 +581,78 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("YFI", 18)  # FTM / yearn.finance
     if chain_id == 288:
         if address == b"\x12\x16\x36\xc4\x3e\x96\xd9\x7a\xb0\x0b\x6c\x69\x94\xcd\xde\xbe\xf2\x7d\xe1\xc7":
-            return TokenInfo("BDoge", 18)  # ETH / BobaDoge
+            return TokenInfo("BDoge", 18)  # Boba / BobaDoge
         if address == b"\x3a\x93\xbd\x0f\xa1\x00\x50\xd2\x06\x37\x0e\xea\x53\x27\x65\x42\xa1\x05\xc8\x85":
-            return TokenInfo("BRE", 18)  # ETH / Brewery
+            return TokenInfo("BRE", 18)  # Boba / Brewery
         if address == b"\x61\x8c\xc6\x54\x9d\xdf\x12\xde\x63\x7d\x46\xcd\xda\xda\xfc\x0c\x29\x51\x13\x1c":
-            return TokenInfo("KYO", 18)  # ETH / Kōyō Token
+            return TokenInfo("KYO", 18)  # Boba / Kōyō Token
         if address == b"\xf0\x8a\xd7\xc3\xf6\xb1\xc6\x84\x3b\xa0\x27\xad\x54\xed\x8d\xdb\x6d\x71\x16\x9b":
-            return TokenInfo("SB", 18)  # ETH / Shibui
+            return TokenInfo("SB", 18)  # Boba / Shibui
     if chain_id == 42161:
         if address == b"\x15\x5f\x0d\xd0\x44\x24\x93\x93\x68\x97\x2f\x4e\x18\x38\x68\x7d\x6a\x83\x11\x51":
-            return TokenInfo("ADoge", 18)  # ETH / ArbiDoge
+            return TokenInfo("ADoge", 18)  # Arbitrum / ArbiDoge
         if address == b"\x9f\x20\xde\x1f\xc9\xb1\x61\xb3\x40\x89\xcb\xea\xe8\x88\x16\x8b\x44\xb0\x34\x61":
-            return TokenInfo("ARBIS", 18)  # ETH / ARBIS | We have the yields
+            return TokenInfo("ARBIS", 18)  # Arbitrum / ARBIS | We have the yields
         if address == b"\x86\xa1\x01\x2d\x43\x7b\xbf\xf8\x4f\xbd\xf6\x25\x69\xd1\x2d\x4f\xd3\x39\x6f\x8c":
-            return TokenInfo("ARBYS", 18)  # ETH / Arbys
+            return TokenInfo("ARBYS", 18)  # Arbitrum / Arbys
         if address == b"\xbf\xa6\x41\x05\x1b\xa0\xa0\xad\x1b\x0a\xcf\x54\x9a\x89\x53\x6a\x0d\x76\x47\x2e":
-            return TokenInfo("BADGER", 18)  # ETH / Badger
+            return TokenInfo("BADGER", 18)  # Arbitrum / Badger
         if address == b"\x04\x0d\x1e\xdc\x95\x69\xd4\xba\xb2\xd1\x52\x87\xdc\x5a\x4f\x10\xf5\x6a\x56\xb8":
-            return TokenInfo("BAL", 18)  # ETH / Balancer
+            return TokenInfo("BAL", 18)  # Arbitrum / Balancer
         if address == b"\x3a\x8b\x78\x7f\x78\xd7\x75\xae\xcf\xee\xa1\x57\x06\xd4\x22\x1b\x40\xf3\x45\xab":
-            return TokenInfo("CELR", 18)  # ETH / CelerToken
+            return TokenInfo("CELR", 18)  # Arbitrum / CelerToken
         if address == b"\x35\x4a\x6d\xa3\xfc\xde\x09\x8f\x83\x89\xca\xd8\x4b\x01\x82\x72\x5c\x6c\x91\xde":
-            return TokenInfo("COMP", 18)  # ETH / Compound
+            return TokenInfo("COMP", 18)  # Arbitrum / Compound
         if address == b"\xf4\xd4\x8c\xe3\xee\x1a\xc3\x65\x19\x98\x97\x15\x41\xba\xdb\xb9\xa1\x4d\x72\x34":
-            return TokenInfo("CREAM", 18)  # ETH / Cream
+            return TokenInfo("CREAM", 18)  # Arbitrum / Cream
         if address == b"\x11\xcd\xb4\x2b\x0e\xb4\x6d\x95\xf9\x90\xbe\xdd\x46\x95\xa6\xe3\xfa\x03\x49\x78":
-            return TokenInfo("CRV", 18)  # ETH / Curve DAO Token
+            return TokenInfo("CRV", 18)  # Arbitrum / Curve DAO Token
+        if address == b"\xda\x10\x00\x9c\xbd\x5d\x07\xdd\x0c\xec\xc6\x61\x61\xfc\x93\xd7\xc9\x00\x0d\xa1":
+            return TokenInfo("DAI", 18)  # Arbitrum / Dai Stablecoin
         if address == b"\x69\xeb\x4f\xa4\xa2\xfb\xd4\x98\xc2\x57\xc5\x7e\xa8\xb7\x65\x5a\x25\x59\xa5\x81":
-            return TokenInfo("DODO", 18)  # ETH / DODO bird
+            return TokenInfo("DODO", 18)  # Arbitrum / DODO bird
         if address == b"\x6c\x2c\x06\x79\x0b\x3e\x3e\x3c\x38\xe1\x2e\xe2\x2f\x81\x83\xb3\x7a\x13\xee\x55":
-            return TokenInfo("DPX", 18)  # ETH / Dopex Governance Token
+            return TokenInfo("DPX", 18)  # Arbitrum / Dopex Governance Token
         if address == b"\xa0\xb8\x62\xf6\x0e\xde\xf4\x45\x2f\x25\xb4\x16\x0f\x17\x7d\xb4\x4d\xeb\x6c\xf1":
-            return TokenInfo("GNO", 18)  # ETH / Gnosis Token
+            return TokenInfo("GNO", 18)  # Arbitrum / Gnosis Token
         if address == b"\x23\xa9\x41\x03\x6a\xe7\x78\xac\x51\xab\x04\xce\xa0\x8e\xd6\xe2\xfe\x10\x36\x14":
-            return TokenInfo("GRT", 18)  # ETH / Graph Token
+            return TokenInfo("GRT", 18)  # Arbitrum / Graph Token
         if address == b"\xb4\x1b\xd4\xc9\x9d\xa7\x35\x10\xd9\xe0\x81\xc5\xfa\xdb\xe7\xa2\x7a\xc1\xf8\x14":
-            return TokenInfo("IMO", 18)  # ETH / Ideamarket
+            return TokenInfo("IMO", 18)  # Arbitrum / Ideamarket
         if address == b"\xf9\x7f\x4d\xf7\x51\x17\xa7\x8c\x1a\x5a\x0d\xbb\x81\x4a\xf9\x24\x58\x53\x9f\xb4":
-            return TokenInfo("LINK", 18)  # ETH / ChainLink Token
+            return TokenInfo("LINK", 18)  # Arbitrum / ChainLink Token
         if address == b"\x46\xd0\xce\x7d\xe6\x24\x7b\x0a\x95\xf6\x7b\x43\xb5\x89\xb4\x04\x1b\xae\x7f\xbe":
-            return TokenInfo("LRC", 18)  # ETH / LoopringCoin V2
+            return TokenInfo("LRC", 18)  # Arbitrum / LoopringCoin V2
         if address == b"\x99\xf4\x0b\x01\xba\x9c\x46\x91\x93\xb3\x60\xf7\x27\x40\xe4\x16\xb1\x7a\xc3\x32":
-            return TokenInfo("MATH", 18)  # ETH / MATH Token
+            return TokenInfo("MATH", 18)  # Arbitrum / MATH Token
         if address == b"\xfe\xa7\xa6\xa0\xb3\x46\x36\x2b\xf8\x8a\x9e\x4a\x88\x41\x6b\x77\xa5\x7d\x6c\x2a":
-            return TokenInfo("MIM", 18)  # ETH / Magic Internet Money
+            return TokenInfo("MIM", 18)  # Arbitrum / Magic Internet Money
         if address == b"\xed\x3f\xb7\x61\x41\x4d\xa7\x4b\x74\xf3\x3e\x5c\x5a\x1f\x78\x10\x4b\x18\x8d\xfc":
-            return TokenInfo("NYAN", 18)  # ETH / ArbiNYAN
+            return TokenInfo("NYAN", 18)  # Arbitrum / ArbiNYAN
         if address == b"\x3e\x66\x48\xc5\xa7\x0a\x15\x0a\x88\xbc\xe6\x5f\x4a\xd4\xd5\x06\xfe\x15\xd2\xaf":
-            return TokenInfo("SPELL", 18)  # ETH / Spell Token
+            return TokenInfo("SPELL", 18)  # Arbitrum / Spell Token
         if address == b"\xa9\x70\xaf\x1a\x58\x45\x79\xb6\x18\xbe\x4d\x69\xad\x6f\x73\x45\x9d\x11\x2f\x95":
-            return TokenInfo("sUSD", 18)  # ETH / Synth sUSD
+            return TokenInfo("sUSD", 18)  # Arbitrum / Synth sUSD
         if address == b"\xd4\xd4\x2f\x0b\x6d\xef\x4c\xe0\x38\x36\x36\x77\x0e\xf7\x73\x39\x0d\x85\xc6\x1a":
-            return TokenInfo("SUSHI", 18)  # ETH / SushiToken
+            return TokenInfo("SUSHI", 18)  # Arbitrum / SushiToken
         if address == b"\xa7\x21\x59\xfc\x39\x0f\x0e\x3c\x6d\x41\x5e\x65\x82\x64\xc7\xc4\x05\x1e\x9b\x87":
-            return TokenInfo("TCR", 18)  # ETH / Tracer
+            return TokenInfo("TCR", 18)  # Arbitrum / Tracer
         if address == b"\xfa\x7f\x89\x80\xb0\xf1\xe6\x4a\x20\x62\x79\x1c\xc3\xb0\x87\x15\x72\xf1\xf7\xf0":
-            return TokenInfo("UNI", 18)  # ETH / Uniswap
+            return TokenInfo("UNI", 18)  # Arbitrum / Uniswap
         if address == b"\xff\x97\x0a\x61\xa0\x4b\x1c\xa1\x48\x34\xa4\x3f\x5d\xe4\x53\x3e\xbd\xdb\x5c\xc8":
-            return TokenInfo("USDC", 6)  # ETH / USD Coin
+            return TokenInfo("USDC", 6)  # Arbitrum / USD Coin
         if address == b"\xfd\x08\x6b\xc7\xcd\x5c\x48\x1d\xcc\x9c\x85\xeb\xe4\x78\xa1\xc0\xb6\x9f\xcb\xb9":
-            return TokenInfo("USDT", 6)  # ETH / Tether USD
+            return TokenInfo("USDT", 6)  # Arbitrum / Tether
         if address == b"\x99\x5c\x23\x55\x21\x82\x0f\x26\x37\x30\x3c\xa1\x97\x0c\x7c\x04\x45\x83\xdf\x44":
-            return TokenInfo("VISR", 18)  # ETH / VISOR
+            return TokenInfo("VISR", 18)  # Arbitrum / VISOR
         if address == b"\x2f\x2a\x25\x43\xb7\x6a\x41\x66\x54\x9f\x7a\xab\x2e\x75\xbe\xf0\xae\xfc\x5b\x0f":
-            return TokenInfo("WBTC", 8)  # ETH / Wrapped BTC
+            return TokenInfo("WBTC", 8)  # Arbitrum / Wrapped BTC
         if address == b"\x82\xaf\x49\x44\x7d\x8a\x07\xe3\xbd\x95\xbd\x0d\x56\xf3\x52\x41\x52\x3f\xba\xb1":
-            return TokenInfo("WETH", 18)  # ETH / Wrapped Ether
+            return TokenInfo("WETH", 18)  # Arbitrum / Wrapped Ether
         if address == b"\xca\xfc\xd8\x5d\x8c\xa7\xad\x1e\x1c\x6f\x82\xf6\x51\xfa\x15\xe3\x3a\xef\xd0\x7b":
-            return TokenInfo("WOO", 18)  # ETH / Wootrade Network
+            return TokenInfo("WOO", 18)  # Arbitrum / Wootrade Network
         if address == b"\x82\xe3\xa8\xf0\x66\xa6\x98\x96\x66\xb0\x31\xd9\x16\xc4\x36\x72\x08\x5b\x15\x82":
-            return TokenInfo("YFI", 18)  # ETH / yearn.finance
+            return TokenInfo("YFI", 18)  # Arbitrum / yearn.finance
     if chain_id == 42220:
         if address == b"\x63\x9a\x64\x7f\xbe\x20\xb6\xc8\xac\x19\xe4\x8e\x2d\xe4\x4e\xa7\x92\xc6\x2c\x5c":
             return TokenInfo("BIFI", 18)  # Celo / beefy.finance
@@ -683,6 +691,8 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("CAI", 18)  # AVAX / Colony Avalanche Index
         if address == b"\x63\x7a\xfe\xff\x75\xca\x66\x9f\xf9\x2e\x45\x70\xb1\x4d\x63\x99\xa6\x58\x90\x2f":
             return TokenInfo("COOK", 18)  # AVAX / Poly-Peg COOK
+        if address == b"\xd5\x86\xe7\xf8\x44\xce\xa2\xf8\x7f\x50\x15\x26\x65\xbc\xbc\x2c\x27\x9d\x8d\x70":
+            return TokenInfo("DAI.e", 18)  # AVAX / Dai Stablecoin
         if address == b"\x50\x85\x43\x42\x27\xab\x73\x15\x1f\xad\x2d\xe5\x46\x21\x0c\xbc\x86\x63\xdf\x96":
             return TokenInfo("DBY", 18)  # AVAX / Metaderby token
         if address == b"\xfc\xc6\xce\x74\xf4\xcd\x7e\xde\xf0\xc5\x42\x9b\xb9\x9d\x38\xa3\x60\x80\x43\xa5":
@@ -720,7 +730,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\xa7\xd7\x07\x9b\x0f\xea\xd9\x1f\x3e\x65\xf8\x6e\x89\x15\xcb\x59\xc1\xa4\xc6\x64":
             return TokenInfo("USDC.e", 6)  # AVAX / USD Coin
         if address == b"\x97\x02\x23\x0a\x8e\xa5\x36\x01\xf5\xcd\x2d\xc0\x0f\xdb\xc1\x3d\x4d\xf4\xa8\xc7":
-            return TokenInfo("USDt", 6)  # AVAX / TetherToken
+            return TokenInfo("USDT", 6)  # AVAX / Tether
         if address == b"\xc7\x19\x84\x37\x98\x0c\x04\x1c\x80\x5a\x1e\xdc\xba\x50\xc1\xce\x5d\xb9\x51\x18":
             return TokenInfo("USDT.e", 6)  # AVAX / Tether USD
         if address == b"\x84\x6d\x50\x24\x8b\xaf\x8b\x7c\xea\xa9\xd9\xb5\x3b\xfd\x12\xd7\xd7\xfb\xb2\x5a":
@@ -756,6 +766,8 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
             return TokenInfo("BBT", 18)  # NEAR / BlueBit Token
         if address == b"\x9f\x1f\x93\x3c\x66\x0a\x1d\xc8\x56\xf0\xe0\xfe\x05\x84\x35\x87\x9c\x5c\xce\xf0":
             return TokenInfo("BSTN", 18)  # NEAR / Bastion
+        if address == b"\xe3\x52\x03\x49\xf4\x77\xa5\xf6\xeb\x06\x10\x70\x66\x04\x85\x08\x49\x8a\x29\x1b":
+            return TokenInfo("DAI", 18)  # NEAR / Dai Stablecoin
         if address == b"\xe3\x01\xed\x8c\x76\x30\xc9\x67\x8c\x39\xe4\xe4\x51\x93\xd1\xe7\xdf\xb9\x14\xf7":
             return TokenInfo("DODO", 18)  # NEAR / DODO bird
         if address == b"\x17\xcb\xd9\xc2\x74\xe9\x0c\x53\x77\x90\xc5\x1b\x40\x15\xa6\x5c\xd0\x15\x49\x7e":
@@ -797,7 +809,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> TokenInfo:
         if address == b"\xb1\x2b\xfc\xa5\xa5\x58\x06\xaa\xf6\x4e\x99\x52\x19\x18\xa4\xbf\x0f\xc4\x08\x02":
             return TokenInfo("USDC", 6)  # NEAR / USD Coin
         if address == b"\x49\x88\xa8\x96\xb1\x22\x72\x18\xe4\xa6\x86\xfd\xe5\xea\xbd\xca\xbd\x91\x57\x1f":
-            return TokenInfo("USDT", 6)  # NEAR / TetherUS
+            return TokenInfo("USDT", 6)  # NEAR / Tether
         if address == b"\x51\x83\xe1\xb1\x09\x18\x04\xbc\x26\x02\x58\x69\x19\xe6\x88\x0a\xc1\xcf\x28\x96":
             return TokenInfo("USN", 18)  # NEAR / USN
         if address == b"\xa6\x9d\x9b\xa0\x86\xd4\x14\x25\xf3\x59\x88\x61\x3c\x15\x6d\xb9\xa8\x8a\x1a\x96":

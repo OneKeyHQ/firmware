@@ -5,7 +5,7 @@
   [
     {
       "_id": "62e8a3d28edb7c3c91a5584a",
-      "name": "Tether USD",
+      "name": "Tether",
       "symbol": "USDT",
       "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
       "decimals": 6,
@@ -25,7 +25,7 @@
       "coingeckoId": "tether",
       "swftId": "USDT(ERC20)",
       "createdAt": "2022-08-02T04:10:58.205Z",
-      "updatedAt": "2022-09-16T16:46:49.921Z",
+      "updatedAt": "2022-11-28T15:13:18.247Z",
       "__v": 0,
       "marketCap": "67600751622.405464"
     },
@@ -51,7 +51,7 @@
       "coingeckoId": "usd-coin",
       "swftId": "USDC",
       "createdAt": "2022-08-02T04:10:58.196Z",
-      "updatedAt": "2022-12-17T10:18:37.311Z",
+      "updatedAt": "2022-12-17T10:18:29.091Z",
       "__v": 0,
       "marketCap": "52137757305.98288"
     },
@@ -79,6 +79,32 @@
       "__v": 0,
       "marketCap": "19215809262.622444",
       "swftId": "BUSD"
+    },
+    {
+      "_id": "62e8a3d18edb7c3c91a55640",
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0x6B175474E89094C44Da98b954EedeAC495271d0F.jpg",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": true,
+      "chainId": "1",
+      "source": [
+        "sushi",
+        "Uniswap Labs Default",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "dai",
+      "swftId": "DAI",
+      "createdAt": "2022-08-02T04:10:57.781Z",
+      "updatedAt": "2022-09-16T16:46:49.457Z",
+      "__v": 0,
+      "marketCap": "6512888979.494833"
     },
     {
       "_id": "62e8a3d28edb7c3c91a55bbc",
@@ -127,7 +153,7 @@
       "coingeckoId": "matic-network",
       "swftId": "MATIC",
       "createdAt": "2022-08-02T04:10:58.228Z",
-      "updatedAt": "2022-11-17T15:54:40.566Z",
+      "updatedAt": "2022-11-16T13:02:51.357Z",
       "__v": 0,
       "marketCap": "6126893790.915463"
     },
@@ -481,7 +507,7 @@
       "checked": true,
       "coingeckoId": "fantom",
       "createdAt": "2022-08-02T04:10:57.864Z",
-      "updatedAt": "2022-11-17T15:55:54.261Z",
+      "updatedAt": "2022-11-16T13:06:57.387Z",
       "__v": 0,
       "marketCap": "776816681.3809156"
     },
@@ -1237,31 +1263,6 @@
       "updatedAt": "2022-09-16T16:46:49.461Z",
       "__v": 0,
       "marketCap": "192347985.13471806"
-    },
-    {
-      "_id": "62e8a3d28edb7c3c91a55799",
-      "name": "Polymath",
-      "symbol": "POLY",
-      "address": "0x9992ec3cf6a55b00978cddf2b27bc6882d88d1ec",
-      "decimals": 18,
-      "logoURI": "https://common.onekey-asset.com/token/evm-1/0x9992eC3cF6A55b00978cdDF2b27BC6882d88D1eC.png",
-      "impl": "evm",
-      "status": "LISTED",
-      "verified": true,
-      "security": false,
-      "addToIndex": false,
-      "chainId": "1",
-      "source": [
-        "sushi",
-        "Uniswap Labs Default",
-        "Coingecko"
-      ],
-      "checked": true,
-      "coingeckoId": "polymath",
-      "createdAt": "2022-08-02T04:10:58.063Z",
-      "updatedAt": "2022-09-16T16:46:49.765Z",
-      "__v": 0,
-      "marketCap": "186763563.73699468"
     }
   ]
 }

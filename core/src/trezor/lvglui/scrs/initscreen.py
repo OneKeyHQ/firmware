@@ -59,6 +59,14 @@ class QuickStart(FullSizeWindow):
         self.btn_no.align(lv.ALIGN.BOTTOM_MID, 0, -8)
         self.btn_yes.set_size(464, 98)
         self.btn_yes.align_to(self.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -8)
+        self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
+
+    def on_nav_back(self, event_obj):
+        code = event_obj.code
+        if code == lv.EVENT.GESTURE:
+            _dir = lv.indev_get_act().get_gesture_dir()
+            if _dir == lv.DIR.RIGHT:
+                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     def eventhandler(self, event_obj):
         code = event_obj.code

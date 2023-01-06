@@ -224,6 +224,8 @@ class TransactionDetailsETH(FullSizeWindow):
         max_fee_per_gas=None,
         total_amount=None,
         primary_color=lv_colors.ONEKEY_GREEN,
+        contract_addr=None,
+        token_id=None,
     ):
         super().__init__(
             title,
@@ -233,9 +235,19 @@ class TransactionDetailsETH(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
-        )
+        if contract_addr:
+            self.item0 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__CONTRACT_ADDRESS__COLON),
+                contract_addr,
+            )
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__TOKEN_ID__COLON), token_id
+            )
+        else:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+            )
         if not is_eip1559:
             self.item2 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__GAS_PRICE__COLON), gas_price
@@ -261,7 +273,10 @@ class TransactionDetailsETH(FullSizeWindow):
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
         )
         if total_amount is None:
-            total_amount = f"{amount}\n{fee_max}"
+            if not contract_addr:
+                total_amount = f"{amount}\n{fee_max}"
+            else:
+                total_amount = f"{fee_max}"
         self.item6 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )

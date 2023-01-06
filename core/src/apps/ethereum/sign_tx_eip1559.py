@@ -11,14 +11,24 @@ from trezor.utils import HashWriter
 from apps.common import paths
 
 from . import networks
-from .helpers import address_from_bytes, bytes_from_address, get_color_and_icon
+from .helpers import (
+    address_from_bytes,
+    bytes_from_address,
+    get_color_and_icon,
+    get_display_network_name,
+)
 from .keychain import with_keychain_from_chain_id
 from .layout import (
     require_confirm_data,
     require_confirm_eip1559_fee,
     require_confirm_tx,
 )
-from .sign_tx import check_common_fields, handle_erc20, send_request_chunk
+from .sign_tx import (
+    check_common_fields,
+    handle_erc20,
+    handle_erc_721_or_1155,
+    send_request_chunk,
+)
 
 if TYPE_CHECKING:
     from trezor.messages import EthereumSignTxEIP1559
@@ -75,14 +85,24 @@ async def sign_tx_eip1559(
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
-    await require_confirm_tx(ctx, recipient, value, msg.chain_id, token)
-    if token is None and msg.data_length > 0:
+    is_nft_transfer = False
+    token_id = None
+    from_addr = None
+    if token is None:
+        res = await handle_erc_721_or_1155(ctx, msg)
+        if res is not None:
+            is_nft_transfer = True
+            from_addr, recipient, token_id, value = res
+    await require_confirm_tx(
+        ctx, recipient, value, msg.chain_id, token, is_nft_transfer
+    )
+    if token is None and token_id is None and msg.data_length > 0:
         await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
 
     node = keychain.derive(msg.address_n)
 
     recipient_str = address_from_bytes(recipient, network)
-    from_str = address_from_bytes(node.ethereum_pubkeyhash(), network)
+    from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
     await require_confirm_eip1559_fee(
         ctx,
         value,
@@ -93,7 +113,11 @@ async def sign_tx_eip1559(
         token,
         from_address=from_str,
         to_address=recipient_str,
-        network=network.shortcut if network else "ETH",
+        network=get_display_network_name(network),
+        contract_addr=address_from_bytes(address_bytes, network)
+        if token_id is not None
+        else None,
+        token_id=token_id,
     )
     data = bytearray()
     data += msg.data_initial_chunk

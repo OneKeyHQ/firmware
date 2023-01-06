@@ -248,6 +248,7 @@ ETH_PRIMARY_COLOR_MAPPING = {
     1666600000: "0x33D3D5",
     13131615554: "0x5DEB5A",
 }
+EVM_ICON_NAME_OVERRIDE = {10: "oeth", 288: "boba", 42161: "arb1", 1313161554: "aurora"}
 
 
 def _load_ethereum_networks():
@@ -286,7 +287,7 @@ def _load_ethereum_networks():
             rskip60=rskip60,
             url=chain_data["infoURL"],
             key=f"eth:{shortcut}",
-            icon=f"evm-{shortcut.lower()}.png",
+            icon=f"evm-{EVM_ICON_NAME_OVERRIDE.get(chain_data['chainId'], None) or shortcut.lower()}.png",
             primary_color=ETH_PRIMARY_COLOR_MAPPING.get(
                 chain_data["chainId"], "0xFFFFFF" if not is_testnet else "0x969696"
             ),
@@ -314,7 +315,7 @@ def _load_erc20_tokens():
                 chain_id=int(file.name.split(".")[0]),
                 address_bytes=bytes.fromhex(token["address"][2:]),
                 shortcut=token["symbol"],
-                key=f"erc20:{chain_name}:{token['symbol']}",
+                key=f"erc20:{chain_name.lower()}:{token['symbol']}",
             )
             tokens.append(token)
 

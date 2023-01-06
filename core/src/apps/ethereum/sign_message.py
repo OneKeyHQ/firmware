@@ -11,7 +11,7 @@ from apps.common.helpers import validate_message
 from apps.common.signverify import decode_message
 
 from . import networks
-from .helpers import address_from_bytes, get_color_and_icon
+from .helpers import address_from_bytes, get_color_and_icon, get_display_network_name
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ async def sign_message(
     )
     await confirm_signverify(
         ctx,
-        network.shortcut if network else "ETH",
+        get_display_network_name(network),
         decode_message(msg.message),
         address,
         verify=False,

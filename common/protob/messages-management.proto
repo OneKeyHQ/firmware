@@ -616,10 +616,9 @@ message SEMessageSignature {
     required string extension = 1;  // the extension of the resource
     required uint32 data_length = 2;  // total length of the data to be upload
     required ResourceType res_type = 3;
-    required uint32 zoom_data_length = 4;
-    required string file_name_no_ext = 5; // name template: nft/wp - mac(unique verify) - timestamp(sort)
-
-    optional bytes nft_metadata = 6;
+    optional bytes nft_meta_data = 4;
+    required uint32 zoom_data_length = 5;
+    optional string file_name_no_ext = 6; // name template: nft/wp - mac(unique verify) - timestamp(sort)
 
     enum ResourceType {
         WallPaper = 0;

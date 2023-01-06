@@ -4468,9 +4468,9 @@ class ResourceUpload(protobuf.MessageType):
         1: protobuf.Field("extension", "string", repeated=False, required=True),
         2: protobuf.Field("data_length", "uint32", repeated=False, required=True),
         3: protobuf.Field("res_type", "ResourceType", repeated=False, required=True),
-        4: protobuf.Field("zoom_data_length", "uint32", repeated=False, required=True),
-        5: protobuf.Field("file_name_no_ext", "string", repeated=False, required=True),
-        6: protobuf.Field("nft_metadata", "bytes", repeated=False, required=False),
+        4: protobuf.Field("nft_meta_data", "bytes", repeated=False, required=False),
+        5: protobuf.Field("zoom_data_length", "uint32", repeated=False, required=True),
+        6: protobuf.Field("file_name_no_ext", "string", repeated=False, required=False),
     }
 
     def __init__(
@@ -4480,15 +4480,15 @@ class ResourceUpload(protobuf.MessageType):
         data_length: "int",
         res_type: "ResourceType",
         zoom_data_length: "int",
-        file_name_no_ext: "str",
-        nft_metadata: Optional["bytes"] = None,
+        nft_meta_data: Optional["bytes"] = None,
+        file_name_no_ext: Optional["str"] = None,
     ) -> None:
         self.extension = extension
         self.data_length = data_length
         self.res_type = res_type
         self.zoom_data_length = zoom_data_length
+        self.nft_meta_data = nft_meta_data
         self.file_name_no_ext = file_name_no_ext
-        self.nft_metadata = nft_metadata
 
 
 class ZoomRequest(protobuf.MessageType):

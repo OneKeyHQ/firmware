@@ -133,6 +133,15 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         primary_color=0x969696,
     )
     yield NetworkInfo(
+        chain_id=10,
+        slip44=60,
+        shortcut="ETH",
+        name="Optimism",
+        rskip60=False,
+        icon="evm-oeth.png",
+        primary_color=0xFF0420,
+    )
+    yield NetworkInfo(
         chain_id=11,
         slip44=916,
         shortcut="META",
@@ -833,6 +842,15 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         rskip60=False,
         icon="evm-hpb.png",
         primary_color=0xFFFFFF,
+    )
+    yield NetworkInfo(
+        chain_id=288,
+        slip44=60,
+        shortcut="ETH",
+        name="Boba Network",
+        rskip60=False,
+        icon="evm-boba.png",
+        primary_color=0xCCFF00,
     )
     yield NetworkInfo(
         chain_id=321,
@@ -1546,6 +1564,15 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
+        chain_id=42161,
+        slip44=60,
+        shortcut="ETH",
+        name="Arbitrum One",
+        rskip60=False,
+        icon="evm-arb1.png",
+        primary_color=0x28A0F0,
+    )
+    yield NetworkInfo(
         chain_id=42220,
         slip44=60,
         shortcut="CELO",
@@ -1966,6 +1993,15 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="IPOS Network",
         rskip60=False,
         icon="evm-ipos.png",
+        primary_color=0xFFFFFF,
+    )
+    yield NetworkInfo(
+        chain_id=1313161554,
+        slip44=60,
+        shortcut="ETH",
+        name="Aurora",
+        rskip60=False,
+        icon="evm-aurora.png",
         primary_color=0xFFFFFF,
     )
     yield NetworkInfo(

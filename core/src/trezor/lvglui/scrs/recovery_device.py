@@ -24,6 +24,14 @@ class WordEnter(FullSizeWindow):
         self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
         self.add_event_cb(self.on_back, lv.EVENT.CLICKED, None)
         self.submitted = False
+        self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
+
+    def on_nav_back(self, event_obj):
+        code = event_obj.code
+        if code == lv.EVENT.GESTURE:
+            _dir = lv.indev_get_act().get_gesture_dir()
+            if _dir == lv.DIR.RIGHT:
+                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     def on_ready(self, _event_obj):
         if self.submitted:
@@ -65,6 +73,14 @@ class SelectWordCounter(FullSizeWindow):
         self.choices = RadioTrigger(self, optional_str, font_PJSREG30)
         self.add_event_cb(self.on_ready, lv.EVENT.READY, None)
         self.add_event_cb(self.on_back, lv.EVENT.CLICKED, None)
+        self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
+
+    def on_nav_back(self, event_obj):
+        code = event_obj.code
+        if code == lv.EVENT.GESTURE:
+            _dir = lv.indev_get_act().get_gesture_dir()
+            if _dir == lv.DIR.RIGHT:
+                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     def on_ready(self, _event_obj):
         self.show_dismiss_anim()

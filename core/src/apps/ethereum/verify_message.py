@@ -9,7 +9,12 @@ from trezor.ui.layouts import confirm_signverify, show_success
 from apps.common.signverify import decode_message
 
 from . import networks
-from .helpers import address_from_bytes, bytes_from_address, get_color_and_icon
+from .helpers import (
+    address_from_bytes,
+    bytes_from_address,
+    get_color_and_icon,
+    get_display_network_name,
+)
 from .sign_message import message_digest
 
 if TYPE_CHECKING:
@@ -45,7 +50,7 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
     )
     await confirm_signverify(
         ctx,
-        network.shortcut if network else "ETH",
+        get_display_network_name(network),
         decode_message(msg.message),
         address=address,
         verify=True,

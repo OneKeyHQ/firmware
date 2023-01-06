@@ -39,7 +39,7 @@ async def get_public_key(
     )
 
     if msg.show_display:
-        from .helpers import get_color_and_icon
+        from .helpers import get_color_and_icon, get_display_network_name
 
         if msg.chain_id:
             network = networks.by_chain_id(msg.chain_id)
@@ -56,7 +56,7 @@ async def get_public_key(
             ctx,
             hexlify(pubkey).decode(),
             path=path,
-            network=network.shortcut if network else "ETH",
+            network=get_display_network_name(network),
         )
 
     return EthereumPublicKey(node=node_type, xpub=node_xpub)
