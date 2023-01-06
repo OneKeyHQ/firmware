@@ -231,11 +231,6 @@ ATCA_STATUS atca_i2c_sleep(void) {
 
 #else
 
-#include <libopencm3/stm32/timer.h>
-
-#define ATCA_TIMER TIM2
-static uint32_t timer_frequency = 0;
-
 #define ATCA_SWI_PORT GPIOB
 #define ATCA_SWI_PIN GPIO7
 
@@ -244,22 +239,30 @@ static uint32_t timer_frequency = 0;
 
 typedef enum { PIN_DIRECTION_OUT = 0, PIN_DIRECTION_IN } SWI_PIN_DIRECTION;
 
-static void atca_delay_us(uint32_t delay_us) {
-  timer_disable_counter(ATCA_TIMER);
-  timer_set_counter(ATCA_TIMER, 29);
-  timer_enable_counter(ATCA_TIMER);
-  while (delay_us--) {
-    while (!timer_get_flag(ATCA_TIMER, TIM_SR_UIF))
-      ;
-    timer_clear_flag(ATCA_TIMER, TIM_SR_UIF);
-    timer_set_counter(ATCA_TIMER, 29);
-  }
-  timer_disable_counter(ATCA_TIMER);
+// clang-format off
+#define DEMCR                     (*(volatile uint32_t*) (0xE000EDFCuL))   // Debug Exception and Monitor Control Register
+#define TRACEENA_BIT              (1uL << 24)                                   // Trace enable bit
+#define DWT_CTRL                  (*(volatile uint32_t*) (0xE0001000uL))   // DWT Control Register
+#define CYCCNTENA_BIT             (1uL << 0)
+#define DWT_CYCCNT                (*(volatile uint32_t*) (0xE0001004uL))
+// clang-format on
+
+static uint32_t SystemCoreClock = 120000000;
+
+// 120MHZ  min 8.3333ns,max 35.79s
+static void atca_delay_ns(uint32_t delay_ns) {
+  DWT_CYCCNT = 0;
+  uint32_t start = DWT_CYCCNT;
+  uint32_t count = (delay_ns * (SystemCoreClock / 100000000)) / 10;
+  while ((DWT_CYCCNT - start) < count)
+    ;
 }
 
-#define DELAY_1_BIT atca_delay_us(4)
-#define DELAY_5_BITS atca_delay_us(26)
-#define DELAY_7_BITS atca_delay_us(35)
+static void atca_delay_us(uint32_t delay_us) { atca_delay_ns(delay_us * 1000); }
+
+#define DELAY_1_BIT atca_delay_ns(4200)
+#define DELAY_5_BITS atca_delay_ns(26200)
+#define DELAY_7_BITS atca_delay_ns(34500)
 
 static void atca_pin_direction(SWI_PIN_DIRECTION direction) {
   if (PIN_DIRECTION_OUT == direction) {
@@ -289,13 +292,14 @@ void atca_swi_init(void) {
                           ATCA_SWI_PIN);
   atca_pin_direction(PIN_DIRECTION_OUT);
 
-  // enable TIM2 clock APB1 30Mhz
-  rcc_periph_clock_enable(RCC_TIM2);
-  timer_set_mode(ATCA_TIMER, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE,
-                 TIM_CR1_DIR_DOWN);
-  timer_disable_counter(ATCA_TIMER);
-  timer_disable_preload(ATCA_TIMER);
-  timer_frequency = 30 * 1000 * 1000;
+  if ((DEMCR & TRACEENA_BIT) == 0) {
+    DEMCR |= TRACEENA_BIT;
+  }
+
+  if ((DWT_CTRL & CYCCNTENA_BIT) == 0) {  // Cycle counter not enabled?
+    DWT_CTRL |= CYCCNTENA_BIT;            // Enable Cycle counter
+  }
+  DWT_CYCCNT = 0;
 }
 
 ATCA_STATUS atca_swi_send_bytes(uint8_t *buffer, uint8_t len) {

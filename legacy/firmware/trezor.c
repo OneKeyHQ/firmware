@@ -39,6 +39,7 @@
 #if ONEKEY_MINI
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/timer.h>
+#include "atca_hal.h"
 #include "device.h"
 #include "device2.h"
 #include "flash_enc.h"
@@ -195,6 +196,7 @@ int main(void) {
 #else
   check_and_replace_bootloader(true);
   setupApp();
+  atca_init();
 #if ONEKEY_MINI
   bool serial_set = false, font_set = false, cert_set = false;
   bool usb_init = false;
