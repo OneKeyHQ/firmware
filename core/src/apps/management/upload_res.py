@@ -104,7 +104,18 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
     file_name = msg.file_name_no_ext
     for name in name_list:
         if file_name[: file_name.rindex("-")] == name[5 : name.rindex("-")]:
-            raise wire.DataError("File already exists")
+            if res_type == ResourceType.WallPaper:
+                old_path = "1:res/wallpapers/" + name[5:]
+                new_path = f"1:/res/wallpapers/{file_name}.{res_ext}"
+                old_path_zoom = f"1:res/wallpapers/{name}"
+                new_path_zoom = f"1:/res/wallpapers/zoom-{file_name}.{res_ext}"
+                io.fatfs.rename(old_path, new_path)
+                io.fatfs.rename(old_path_zoom, new_path_zoom)
+                await confirm_set_homescreen(ctx, False)
+                device.set_homescreen(f"A:{new_path}")
+                return Success(message="Success")
+            else:
+                raise wire.DataError("File already exists")
     # ask user for confirm
     if res_type == ResourceType.WallPaper:
         await confirm_set_homescreen(ctx, replace)
