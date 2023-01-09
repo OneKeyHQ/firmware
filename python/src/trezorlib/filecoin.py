@@ -34,13 +34,22 @@ DEFAULT_BIP32_PATH = "m/44h/461h/0h/0/0"
 
 @expect(messages.FilecoinAddress, field="address", ret_type=str)
 def get_address(
-    client: "TrezorClient", address_n: "Address", show_display: bool = False
+    client: "TrezorClient",
+    address_n: "Address",
+    show_display: bool = False,
+    testnet: bool = False,
 ) -> "MessageType":
     return client.call(
-        messages.FilecoinGetAddress(address_n=address_n, show_display=show_display)
+        messages.FilecoinGetAddress(
+            address_n=address_n, show_display=show_display, testnet=testnet
+        )
     )
 
 
 @expect(messages.FilecoinSignedTx)
-def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
-    return client.call(messages.FilecoinSignTx(address_n=address_n, raw_tx=rawtx))
+def sign_tx(
+    client: "TrezorClient", address_n: "Address", rawtx: bytes, testnet: bool = False
+):
+    return client.call(
+        messages.FilecoinSignTx(address_n=address_n, raw_tx=rawtx, testnet=testnet)
+    )

@@ -430,7 +430,7 @@ void fsm_msgRebootToBootloader(void) {
 #include "fsm_msg_filecoin.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
-#include "fsm_msg_polkadot.h"
+// #include "fsm_msg_polkadot.h"
 #include "fsm_msg_ripple.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"

@@ -284,10 +284,6 @@ if not utils.BITCOIN_ONLY:
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
-    PolkadotGetAddress = 11000
-    PolkadotAddress = 11001
-    PolkadotSignTx = 11002
-    PolkadotSignedTx = 11003
     SuiGetAddress = 11100
     SuiAddress = 11101
     SuiSignTx = 11102
