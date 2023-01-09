@@ -111,6 +111,7 @@ async def continue_recovery(
         _(i18n_keys.SUBTITLE__ENTER_RECOVERY_PHRASE),
         confirm_text=button_label,
         cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        anim_dir=0,
     )
     return await interact(
         ctx,

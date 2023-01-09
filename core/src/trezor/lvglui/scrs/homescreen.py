@@ -41,7 +41,9 @@ class MainScreen(Screen):
         homescreen = device.get_homescreen()
         if not hasattr(self, "_init"):
             self._init = True
-            super().__init__(title=device_name, subtitle=ble_name)
+            super().__init__(
+                title=device_name, subtitle=ble_name or uart.get_ble_name()
+            )
         else:
             if hasattr(self, "dev_state"):
                 from apps.base import get_state
