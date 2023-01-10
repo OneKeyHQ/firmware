@@ -6126,6 +6126,7 @@ class FilecoinGetAddress(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        3: protobuf.Field("testnet", "bool", repeated=False, required=False),
     }
 
     def __init__(
@@ -6133,9 +6134,11 @@ class FilecoinGetAddress(protobuf.MessageType):
         *,
         address_n: Optional[Sequence["int"]] = None,
         show_display: Optional["bool"] = None,
+        testnet: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.show_display = show_display
+        self.testnet = testnet
 
 
 class FilecoinAddress(protobuf.MessageType):
@@ -6157,6 +6160,7 @@ class FilecoinSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("testnet", "bool", repeated=False, required=False),
     }
 
     def __init__(
@@ -6164,9 +6168,11 @@ class FilecoinSignTx(protobuf.MessageType):
         *,
         raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
+        testnet: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.testnet = testnet
 
 
 class FilecoinSignedTx(protobuf.MessageType):
