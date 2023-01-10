@@ -72,11 +72,7 @@ async def get_public_key(ctx: wire.Context, msg: GetPublicKey) -> PublicKey:
             f"A:/res/{coin.icon}",
         )
         path = paths.address_n_to_str(msg.address_n)
-        await show_xpub(
-            ctx,
-            node_xpub,
-            path=path,
-        )
+        await show_xpub(ctx, node_xpub, path=path, network=coin.coin_name)
 
     return PublicKey(
         node=node_type,

@@ -142,8 +142,8 @@ def get_color_and_icon(chain_id: int | None):
 
 def get_display_network_name(network: NetworkInfo | None):
     if network is None:
-        return "ETH"
-    elif len(network.name) <= 8:
-        return network.name
+        return "Ethereum"
+    # elif len(network.name) <= 8:
+    #     return network.name
     else:
-        return network.shortcut
+        return network.name

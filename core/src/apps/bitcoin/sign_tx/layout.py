@@ -116,7 +116,7 @@ async def confirm_payment_request(
         msg.recipient_name,
         format_coin_amount(msg.amount, coin, amount_unit),
         memo_texts,
-        coin_shortcut=coin.coin_shortcut,
+        coin_shortcut=coin.coin_name,
     )
 
 
@@ -173,7 +173,7 @@ async def confirm_joint_total(
         ctx,
         spending_amount=format_coin_amount(spending, coin, amount_unit),
         total_amount=format_coin_amount(total, coin, amount_unit),
-        coin_shortcut=coin.coin_shortcut,
+        coin_shortcut=coin.coin_name,
     )
 
 
@@ -189,7 +189,7 @@ async def confirm_total(
         total_amount=format_coin_amount(spending, coin, amount_unit),
         fee_amount=format_coin_amount(fee, coin, amount_unit),
         amount=format_coin_amount(spending - fee, coin, amount_unit),
-        coin_shortcut=coin.coin_shortcut,
+        coin_shortcut=coin.coin_name,
     )
 
 
