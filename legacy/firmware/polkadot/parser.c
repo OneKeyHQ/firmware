@@ -25,7 +25,7 @@ parser_error_t polkadot_parser_parse(parser_context_t *ctx, const uint8_t *data,
   ctx->tx_obj->nestCallIdx._ptr = NULL;
   ctx->tx_obj->nestCallIdx._nextPtr = NULL;
   ctx->tx_obj->nestCallIdx.isTail = true;
-  parser_error_t err = _readTx(ctx, ctx->tx_obj);
+  parser_error_t err = _polkadot_readTx(ctx, ctx->tx_obj);
   CTX_CHECK_AVAIL(ctx, 0)
 
   return err;
