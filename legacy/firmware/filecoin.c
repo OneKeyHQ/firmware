@@ -17,6 +17,7 @@
 #include "util.h"
 
 const char *BASE32_ALPHABET_RFC4648_S = "abcdefghijklmnopqrstuvwxyz234567";
+bool filecoin_testnet = false;
 extern int ethereum_is_canonic(uint8_t v, uint8_t signature[64]);
 
 uint16_t decompressLEB128(const uint8_t *input, uint16_t inputSize,
@@ -63,7 +64,11 @@ uint16_t formatProtocol(const uint8_t *addressBytes, uint16_t addressSize,
 
   const uint8_t protocol = addressBytes[0];
 
-  formattedAddress[0] = 'f';  // mainnet
+  if (filecoin_testnet) {
+    formattedAddress[0] = 't';
+  } else {
+    formattedAddress[0] = 'f';
+  }
   formattedAddress[1] = (char)(protocol + '0');
 
   uint16_t payloadSize = 0;
@@ -166,13 +171,13 @@ bool get_filecoin_addr(uint8_t *pubkey, FilecoinAddress *address) {
 static bool layoutFilSign(void) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
-  int index = 0;
-  int y = 0;
+  int index = 0, len, y = 0;
   uint8_t key = KEY_NULL;
   uint8_t numItems = 0;
   uint8_t max_index = 0;
   char token_key[64];
   char token_val[64];
+  char *p;
   uint8_t pageCount = 0;
 
   ButtonRequest resp = {0};
@@ -190,6 +195,20 @@ refresh_menu:
   fil_tx_getItem(index, token_key, sizeof(token_key), token_val,
                  sizeof(token_val), 0, &pageCount);
   if ((0 == index) || (4 == index) || (5 == index)) {
+    p = strchr(token_val, '.');
+    if (p) {
+      len = strlen(token_val);
+      for (int i = len - 1; i > 0; i--) {
+        if (token_val[i] == '0') {
+          token_val[i] = '\0';
+        } else if (token_val[i] == '.') {
+          token_val[i] = '\0';
+          break;
+        } else {
+          break;
+        }
+      }
+    }
     memcpy(token_val + strlen(token_val), " FIL", 5);
   }
   if (index == 0) {

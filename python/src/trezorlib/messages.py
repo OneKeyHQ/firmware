@@ -322,10 +322,6 @@ class MessageType(IntEnum):
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
-    PolkadotGetAddress = 11000
-    PolkadotAddress = 11001
-    PolkadotSignTx = 11002
-    PolkadotSignedTx = 11003
     SuiGetAddress = 11100
     SuiAddress = 11101
     SuiSignTx = 11102
@@ -5989,6 +5985,7 @@ class FilecoinGetAddress(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        3: protobuf.Field("testnet", "bool", repeated=False, required=False),
     }
 
     def __init__(
@@ -5996,9 +5993,11 @@ class FilecoinGetAddress(protobuf.MessageType):
         *,
         address_n: Optional[Sequence["int"]] = None,
         show_display: Optional["bool"] = None,
+        testnet: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.show_display = show_display
+        self.testnet = testnet
 
 
 class FilecoinAddress(protobuf.MessageType):
@@ -6020,6 +6019,7 @@ class FilecoinSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("testnet", "bool", repeated=False, required=False),
     }
 
     def __init__(
@@ -6027,9 +6027,11 @@ class FilecoinSignTx(protobuf.MessageType):
         *,
         raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
+        testnet: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.testnet = testnet
 
 
 class FilecoinSignedTx(protobuf.MessageType):
@@ -7453,7 +7455,7 @@ class NEMCosignatoryModification(protobuf.MessageType):
 
 
 class PolkadotGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 11000
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         3: protobuf.Field("show_display", "bool", repeated=False, required=False),
@@ -7470,7 +7472,7 @@ class PolkadotGetAddress(protobuf.MessageType):
 
 
 class PolkadotAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 11001
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
     }
@@ -7484,7 +7486,7 @@ class PolkadotAddress(protobuf.MessageType):
 
 
 class PolkadotSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 11002
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
@@ -7501,7 +7503,7 @@ class PolkadotSignTx(protobuf.MessageType):
 
 
 class PolkadotSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 11003
+    MESSAGE_WIRE_TYPE = None
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
     }
