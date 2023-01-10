@@ -57,7 +57,7 @@ void fsm_msgConfluxGetAddress(const ConfluxGetAddress *msg) {
     return;
   }
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, _("Address:"), true, 0,
+    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
                            msg->address_n, msg->address_n_count, false, NULL, 0,
                            0, NULL)) {
       return;
