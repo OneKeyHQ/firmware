@@ -42,21 +42,27 @@ def cli():
     default=filecoin.DEFAULT_BIP32_PATH,
 )
 @click.option("-d", "--show-display", is_flag=True)
+@click.option("-t", "--testnet", is_flag=True)
 @with_client
-def get_address(client: "TrezorClient", address: str, show_display: bool):
+def get_address(
+    client: "TrezorClient", address: str, show_display: bool, testnet: bool
+):
     """Get filecoin address."""
     address_n = tools.parse_path(address)
-    return filecoin.get_address(client, address_n, show_display)
+    return filecoin.get_address(client, address_n, show_display, testnet)
 
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.option("-t", "--testnet", is_flag=True)
 @click.argument("message")
 @with_client
-def sign_raw_transaction(client: "TrezorClient", address: str, message: str):
+def sign_raw_transaction(
+    client: "TrezorClient", address: str, message: str, testnet: bool
+):
     """Sign a hex-encoded transaction ."""
     address_n = tools.parse_path(address)
-    ret = filecoin.sign_tx(client, address_n, bytes.fromhex(message))
+    ret = filecoin.sign_tx(client, address_n, bytes.fromhex(message), testnet)
     output = {
         "signature": "0x%s" % ret.signature.hex(),
     }

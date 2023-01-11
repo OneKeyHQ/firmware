@@ -5,15 +5,19 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../parser_common.h"
-#include "substrate_dispatch_V15.h"
+#include "substrate_dispatch_V18.h"
+#include "substrate_dispatch_V19.h"
 
 #define GEN_GETCALL(CALL) _getpdCall_##CALL(ctx->tx_obj->transactionVersion)
 #define GEN_DEC_GETCALL(CALL) uint32_t _getpdCall_##CALL(uint32_t txVersion)
 #define GEN_DEF_GETCALL(CALL)                      \
   uint32_t _getpdCall_##CALL(uint32_t txVersion) { \
     switch (txVersion) {                           \
-      case 15:                                     \
-        return PD_CALL_##CALL##_V15;               \
+      case 19:                                     \
+        return PD_CALL_##CALL##_V19;               \
+                                                   \
+      case 18:                                     \
+        return PD_CALL_##CALL##_V18;               \
                                                    \
       default:                                     \
         return 0;                                  \

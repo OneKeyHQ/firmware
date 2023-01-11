@@ -6547,12 +6547,14 @@ if TYPE_CHECKING:
     class FilecoinGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
+        testnet: "bool | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
+            testnet: "bool | None" = None,
         ) -> None:
             pass
 
@@ -6577,12 +6579,14 @@ if TYPE_CHECKING:
     class FilecoinSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_tx: "bytes"
+        testnet: "bool | None"
 
         def __init__(
             self,
             *,
             raw_tx: "bytes",
             address_n: "list[int] | None" = None,
+            testnet: "bool | None" = None,
         ) -> None:
             pass
 

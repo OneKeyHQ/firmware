@@ -170,7 +170,7 @@ parser_error_t _readCallIndex(parser_context_t *c, pd_CallIndex_t *v);
 
 parser_error_t _readEra(parser_context_t *c, pd_ExtrinsicEra_t *v);
 
-parser_error_t _readTx(parser_context_t *c, parser_tx_t *v);
+parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v);
 
 parser_error_t _checkVersions(parser_context_t *c);
 

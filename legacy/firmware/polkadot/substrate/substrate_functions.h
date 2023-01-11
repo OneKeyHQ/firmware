@@ -31,6 +31,14 @@ parser_error_t _readOptionu32(parser_context_t* c, pd_Optionu32_t* v);
 parser_error_t _readVecu32(parser_context_t* c, pd_Vecu32_t* v);
 parser_error_t _readVecu8(parser_context_t* c, pd_Vecu8_t* v);
 
+parser_error_t _readu8_array_20(parser_context_t* c, pd_u8_array_20_t* v);
+parser_error_t _readData(parser_context_t* c, pd_Data_t* v);
+parser_error_t _readTupleDataData(parser_context_t* c, pd_TupleDataData_t* v);
+parser_error_t _readOptionu8_array_20(parser_context_t* c,
+                                      pd_Optionu8_array_20_t* v);
+parser_error_t _readVecTupleDataData(parser_context_t* c,
+                                     pd_VecTupleDataData_t* v);
+
 // Common toString functions
 
 parser_error_t _toStringu8(const pd_u8_t* v, char* outValue,
@@ -113,5 +121,25 @@ parser_error_t _toStringVecu32(const pd_Vecu32_t* v, char* outValue,
 parser_error_t _toStringVecu8(const pd_Vecu8_t* v, char* outValue,
                               uint16_t outValueLen, uint8_t pageIdx,
                               uint8_t* pageCount);
+
+parser_error_t _toStringu8_array_20(const pd_u8_array_20_t* v, char* outValue,
+                                    uint16_t outValueLen, uint8_t pageIdx,
+                                    uint8_t* pageCount);
+
+parser_error_t _toStringData(const pd_Data_t* v, char* outValue,
+                             uint16_t outValueLen, uint8_t pageIdx,
+                             uint8_t* pageCount);
+
+parser_error_t _toStringTupleDataData(const pd_TupleDataData_t* v,
+                                      char* outValue, uint16_t outValueLen,
+                                      uint8_t pageIdx, uint8_t* pageCount);
+
+parser_error_t _toStringOptionu8_array_20(const pd_Optionu8_array_20_t* v,
+                                          char* outValue, uint16_t outValueLen,
+                                          uint8_t pageIdx, uint8_t* pageCount);
+
+parser_error_t _toStringVecTupleDataData(const pd_VecTupleDataData_t* v,
+                                         char* outValue, uint16_t outValueLen,
+                                         uint8_t pageIdx, uint8_t* pageCount);
 
 #endif

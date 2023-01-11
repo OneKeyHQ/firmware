@@ -32,7 +32,19 @@ void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg) {
   if (ecdsa_get_public_key65(node->curve->params, node->private_key, pk) != 0) {
     return;
   }
+  if (msg->has_testnet && msg->testnet) {
+    filecoin_testnet = true;
+  } else {
+    filecoin_testnet = false;
+  }
   if (!get_filecoin_addr(pk, resp)) return;
+  if (msg->has_show_display && msg->show_display) {
+    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
+                           msg->address_n, msg->address_n_count, true, NULL, 0,
+                           0, NULL)) {
+      return;
+    }
+  }
 
   msg_write(MessageType_MessageType_FilecoinAddress, resp);
   layoutHome();
@@ -48,6 +60,11 @@ void fsm_msgFilecoinSignTx(const FilecoinSignTx *msg) {
                                     msg->address_n_count, NULL);
   if (!node) return;
 
+  if (msg->has_testnet && msg->testnet) {
+    filecoin_testnet = true;
+  } else {
+    filecoin_testnet = false;
+  }
   if (!filecoin_sign_tx(msg, node, resp)) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Signing failed"));
     layoutHome();

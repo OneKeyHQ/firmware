@@ -9,7 +9,7 @@
 
 extern uint16_t __address_type;
 
-parser_error_t _readTx(parser_context_t *c, parser_tx_t *v) {
+parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v) {
   CHECK_INPUT()
   //  Reverse parse to retrieve spec before forward parsing
   CHECK_ERROR(_checkVersions(c))
