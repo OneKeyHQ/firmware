@@ -23,6 +23,7 @@
 #include "bip32.h"
 #include "messages-filecoin.pb.h"
 
+extern bool filecoin_testnet;
 bool get_filecoin_addr(uint8_t *pubkey, FilecoinAddress *address);
 bool filecoin_sign_tx(const FilecoinSignTx *msg, const HDNode *node,
                       FilecoinSignedTx *resp);

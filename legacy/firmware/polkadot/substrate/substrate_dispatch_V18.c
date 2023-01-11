@@ -1,320 +1,322 @@
-#include "substrate_dispatch_V15.h"
+#include "substrate_dispatch_V18.h"
 #include <stdint.h>
 #include "../common_defs.h"
 #include "substrate_strings.h"
 
-__Z_INLINE parser_error_t _readMethod_balances_transfer_V15(
-    parser_context_t* c, pd_balances_transfer_V15_t* m) {
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->dest))
+__Z_INLINE parser_error_t _readMethod_balances_transfer_V18(
+    parser_context_t* c, pd_balances_transfer_V18_t* m) {
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->dest))
   CHECK_ERROR(_readCompactBalance(c, &m->amount))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_balances_force_transfer_V15(
-    parser_context_t* c, pd_balances_force_transfer_V15_t* m) {
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->source))
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->dest))
+__Z_INLINE parser_error_t _readMethod_balances_force_transfer_V18(
+    parser_context_t* c, pd_balances_force_transfer_V18_t* m) {
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->source))
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->dest))
   CHECK_ERROR(_readCompactBalance(c, &m->amount))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_balances_transfer_keep_alive_V15(
-    parser_context_t* c, pd_balances_transfer_keep_alive_V15_t* m) {
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->dest))
+__Z_INLINE parser_error_t _readMethod_balances_transfer_keep_alive_V18(
+    parser_context_t* c, pd_balances_transfer_keep_alive_V18_t* m) {
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->dest))
   CHECK_ERROR(_readCompactBalance(c, &m->amount))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_balances_transfer_all_V15(
-    parser_context_t* c, pd_balances_transfer_all_V15_t* m) {
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->dest))
+__Z_INLINE parser_error_t _readMethod_balances_transfer_all_V18(
+    parser_context_t* c, pd_balances_transfer_all_V18_t* m) {
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->dest))
   CHECK_ERROR(_readbool(c, &m->keep_alive))
   return parser_ok;
 }
 
 __Z_INLINE parser_error_t
-_readMethod_staking_bond_V15(parser_context_t* c, pd_staking_bond_V15_t* m) {
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->controller))
+_readMethod_staking_bond_V18(parser_context_t* c, pd_staking_bond_V18_t* m) {
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->controller))
   CHECK_ERROR(_readCompactBalance(c, &m->amount))
-  CHECK_ERROR(_readRewardDestination_V15(c, &m->payee))
+  CHECK_ERROR(_readRewardDestination_V18(c, &m->payee))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_bond_extra_V15(
-    parser_context_t* c, pd_staking_bond_extra_V15_t* m) {
-  CHECK_ERROR(_readCompactBalance(c, &m->amount))
-  return parser_ok;
-}
-
-__Z_INLINE parser_error_t _readMethod_staking_unbond_V15(
-    parser_context_t* c, pd_staking_unbond_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_staking_bond_extra_V18(
+    parser_context_t* c, pd_staking_bond_extra_V18_t* m) {
   CHECK_ERROR(_readCompactBalance(c, &m->amount))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_withdraw_unbonded_V15(
-    parser_context_t* c, pd_staking_withdraw_unbonded_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_staking_unbond_V18(
+    parser_context_t* c, pd_staking_unbond_V18_t* m) {
+  CHECK_ERROR(_readCompactBalance(c, &m->amount))
+  return parser_ok;
+}
+
+__Z_INLINE parser_error_t _readMethod_staking_withdraw_unbonded_V18(
+    parser_context_t* c, pd_staking_withdraw_unbonded_V18_t* m) {
   CHECK_ERROR(_readu32(c, &m->num_slashing_spans))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_validate_V15(
-    parser_context_t* c, pd_staking_validate_V15_t* m) {
-  CHECK_ERROR(_readValidatorPrefs_V15(c, &m->prefs))
+__Z_INLINE parser_error_t _readMethod_staking_validate_V18(
+    parser_context_t* c, pd_staking_validate_V18_t* m) {
+  CHECK_ERROR(_readValidatorPrefs_V18(c, &m->prefs))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_nominate_V15(
-    parser_context_t* c, pd_staking_nominate_V15_t* m) {
-  CHECK_ERROR(_readVecAccountIdLookupOfT_V15(c, &m->targets))
+__Z_INLINE parser_error_t _readMethod_staking_nominate_V18(
+    parser_context_t* c, pd_staking_nominate_V18_t* m) {
+  CHECK_ERROR(_readVecAccountIdLookupOfT_V18(c, &m->targets))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_chill_V15(void) {
+__Z_INLINE parser_error_t _readMethod_staking_chill_V18(void) {
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_set_payee_V15(
-    parser_context_t* c, pd_staking_set_payee_V15_t* m) {
-  CHECK_ERROR(_readRewardDestination_V15(c, &m->payee))
+__Z_INLINE parser_error_t _readMethod_staking_set_payee_V18(
+    parser_context_t* c, pd_staking_set_payee_V18_t* m) {
+  CHECK_ERROR(_readRewardDestination_V18(c, &m->payee))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_set_controller_V15(
-    parser_context_t* c, pd_staking_set_controller_V15_t* m) {
-  CHECK_ERROR(_readAccountIdLookupOfT_V15(c, &m->controller))
+__Z_INLINE parser_error_t _readMethod_staking_set_controller_V18(
+    parser_context_t* c, pd_staking_set_controller_V18_t* m) {
+  CHECK_ERROR(_readAccountIdLookupOfT_V18(c, &m->controller))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_payout_stakers_V15(
-    parser_context_t* c, pd_staking_payout_stakers_V15_t* m) {
-  CHECK_ERROR(_readAccountId_V15(c, &m->validator_stash))
-  CHECK_ERROR(_readEraIndex_V15(c, &m->era))
+__Z_INLINE parser_error_t _readMethod_staking_payout_stakers_V18(
+    parser_context_t* c, pd_staking_payout_stakers_V18_t* m) {
+  CHECK_ERROR(_readAccountId_V18(c, &m->validator_stash))
+  CHECK_ERROR(_readEraIndex_V18(c, &m->era))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_staking_rebond_V15(
-    parser_context_t* c, pd_staking_rebond_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_staking_rebond_V18(
+    parser_context_t* c, pd_staking_rebond_V18_t* m) {
   CHECK_ERROR(_readCompactBalance(c, &m->amount))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_session_set_keys_V15(
-    parser_context_t* c, pd_session_set_keys_V15_t* m) {
-  CHECK_ERROR(_readKeys_V15(c, &m->keys))
+__Z_INLINE parser_error_t _readMethod_session_set_keys_V18(
+    parser_context_t* c, pd_session_set_keys_V18_t* m) {
+  CHECK_ERROR(_readKeys_V18(c, &m->keys))
   CHECK_ERROR(_substrate_readBytes(c, &m->proof))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_session_purge_keys_V15(void) {
+__Z_INLINE parser_error_t _readMethod_session_purge_keys_V18(void) {
   return parser_ok;
 }
 
 __Z_INLINE parser_error_t
-_readMethod_utility_batch_V15(parser_context_t* c, pd_utility_batch_V15_t* m) {
+_readMethod_utility_batch_V18(parser_context_t* c, pd_utility_batch_V18_t* m) {
   CHECK_ERROR(_readVecCall(c, &m->calls))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_utility_batch_all_V15(
-    parser_context_t* c, pd_utility_batch_all_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_utility_batch_all_V18(
+    parser_context_t* c, pd_utility_batch_all_V18_t* m) {
   CHECK_ERROR(_readVecCall(c, &m->calls))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_utility_force_batch_V15(
-    parser_context_t* c, pd_utility_force_batch_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_utility_force_batch_V18(
+    parser_context_t* c, pd_utility_force_batch_V18_t* m) {
   CHECK_ERROR(_readVecCall(c, &m->calls))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_create_V15(
-    parser_context_t* c, pd_crowdloan_create_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_crowdloan_create_V18(
+    parser_context_t* c, pd_crowdloan_create_V18_t* m) {
   CHECK_ERROR(_readCompactu32(c, &m->index))
   CHECK_ERROR(_readCompactu128(c, &m->cap))
   CHECK_ERROR(_readCompactu32(c, &m->first_period))
   CHECK_ERROR(_readCompactu32(c, &m->last_period))
   CHECK_ERROR(_readCompactu32(c, &m->end))
-  CHECK_ERROR(_readOptionMultiSigner_V15(c, &m->verifier))
+  CHECK_ERROR(_readOptionMultiSigner_V18(c, &m->verifier))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_contribute_V15(
-    parser_context_t* c, pd_crowdloan_contribute_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_crowdloan_contribute_V18(
+    parser_context_t* c, pd_crowdloan_contribute_V18_t* m) {
   CHECK_ERROR(_readCompactu32(c, &m->index))
   CHECK_ERROR(_readCompactu128(c, &m->amount))
-  CHECK_ERROR(_readOptionMultiSignature_V15(c, &m->signature))
+  CHECK_ERROR(_readOptionMultiSignature_V18(c, &m->signature))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_withdraw_V15(
-    parser_context_t* c, pd_crowdloan_withdraw_V15_t* m) {
-  CHECK_ERROR(_readAccountId_V15(c, &m->who))
+__Z_INLINE parser_error_t _readMethod_crowdloan_withdraw_V18(
+    parser_context_t* c, pd_crowdloan_withdraw_V18_t* m) {
+  CHECK_ERROR(_readAccountId_V18(c, &m->who))
   CHECK_ERROR(_readCompactu32(c, &m->index))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_refund_V15(
-    parser_context_t* c, pd_crowdloan_refund_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_crowdloan_refund_V18(
+    parser_context_t* c, pd_crowdloan_refund_V18_t* m) {
   CHECK_ERROR(_readCompactu32(c, &m->index))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_dissolve_V15(
-    parser_context_t* c, pd_crowdloan_dissolve_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_crowdloan_dissolve_V18(
+    parser_context_t* c, pd_crowdloan_dissolve_V18_t* m) {
   CHECK_ERROR(_readCompactu32(c, &m->index))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_edit_V15(
-    parser_context_t* c, pd_crowdloan_edit_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_crowdloan_edit_V18(
+    parser_context_t* c, pd_crowdloan_edit_V18_t* m) {
   CHECK_ERROR(_readCompactu32(c, &m->index))
   CHECK_ERROR(_readCompactu128(c, &m->cap))
   CHECK_ERROR(_readCompactu32(c, &m->first_period))
   CHECK_ERROR(_readCompactu32(c, &m->last_period))
   CHECK_ERROR(_readCompactu32(c, &m->end))
-  CHECK_ERROR(_readOptionMultiSigner_V15(c, &m->verifier))
+  CHECK_ERROR(_readOptionMultiSigner_V18(c, &m->verifier))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_add_memo_V15(
-    parser_context_t* c, pd_crowdloan_add_memo_V15_t* m) {
-  CHECK_ERROR(_readParaId_V15(c, &m->index))
+__Z_INLINE parser_error_t _readMethod_crowdloan_add_memo_V18(
+    parser_context_t* c, pd_crowdloan_add_memo_V18_t* m) {
+  CHECK_ERROR(_readParaId_V18(c, &m->index))
   CHECK_ERROR(_readVecu8(c, &m->memo))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_poke_V15(
-    parser_context_t* c, pd_crowdloan_poke_V15_t* m) {
-  CHECK_ERROR(_readParaId_V15(c, &m->index))
+__Z_INLINE parser_error_t _readMethod_crowdloan_poke_V18(
+    parser_context_t* c, pd_crowdloan_poke_V18_t* m) {
+  CHECK_ERROR(_readParaId_V18(c, &m->index))
   return parser_ok;
 }
 
-__Z_INLINE parser_error_t _readMethod_crowdloan_contribute_all_V15(
-    parser_context_t* c, pd_crowdloan_contribute_all_V15_t* m) {
+__Z_INLINE parser_error_t _readMethod_crowdloan_contribute_all_V18(
+    parser_context_t* c, pd_crowdloan_contribute_all_V18_t* m) {
   CHECK_ERROR(_readCompactu32(c, &m->index))
-  CHECK_ERROR(_readOptionMultiSignature_V15(c, &m->signature))
+  CHECK_ERROR(_readOptionMultiSignature_V18(c, &m->signature))
   return parser_ok;
 }
 
-parser_error_t _readMethod_V15(parser_context_t* c, uint8_t moduleIdx,
-                               uint8_t callIdx, pd_Method_V15_t* method) {
+parser_error_t _readMethod_V18(parser_context_t* c, uint8_t moduleIdx,
+                               uint8_t callIdx, pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
+
   switch (callPrivIdx) {
     case 1280: /* module 5 call 0 */
-      CHECK_ERROR(_readMethod_balances_transfer_V15(
-          c, &method->nested.balances_transfer_V15))
+      CHECK_ERROR(_readMethod_balances_transfer_V18(
+          c, &method->nested.balances_transfer_V18))
       break;
     case 1282: /* module 5 call 2 */
-      CHECK_ERROR(_readMethod_balances_force_transfer_V15(
-          c, &method->nested.balances_force_transfer_V15))
+      CHECK_ERROR(_readMethod_balances_force_transfer_V18(
+          c, &method->nested.balances_force_transfer_V18))
       break;
     case 1283: /* module 5 call 3 */
-      CHECK_ERROR(_readMethod_balances_transfer_keep_alive_V15(
-          c, &method->nested.balances_transfer_keep_alive_V15))
+      CHECK_ERROR(_readMethod_balances_transfer_keep_alive_V18(
+          c, &method->nested.balances_transfer_keep_alive_V18))
       break;
     case 1284: /* module 5 call 4 */
-      CHECK_ERROR(_readMethod_balances_transfer_all_V15(
-          c, &method->basic.balances_transfer_all_V15))
+      CHECK_ERROR(_readMethod_balances_transfer_all_V18(
+          c, &method->basic.balances_transfer_all_V18))
       break;
     case 1792: /* module 7 call 0 */
       CHECK_ERROR(
-          _readMethod_staking_bond_V15(c, &method->basic.staking_bond_V15))
+          _readMethod_staking_bond_V18(c, &method->nested.staking_bond_V18))
       break;
     case 1793: /* module 7 call 1 */
-      CHECK_ERROR(_readMethod_staking_bond_extra_V15(
-          c, &method->basic.staking_bond_extra_V15))
+      CHECK_ERROR(_readMethod_staking_bond_extra_V18(
+          c, &method->basic.staking_bond_extra_V18))
       break;
     case 1794: /* module 7 call 2 */
       CHECK_ERROR(
-          _readMethod_staking_unbond_V15(c, &method->basic.staking_unbond_V15))
+          _readMethod_staking_unbond_V18(c, &method->nested.staking_unbond_V18))
       break;
     case 1795: /* module 7 call 3 */
-      CHECK_ERROR(_readMethod_staking_withdraw_unbonded_V15(
-          c, &method->basic.staking_withdraw_unbonded_V15))
+      CHECK_ERROR(_readMethod_staking_withdraw_unbonded_V18(
+          c, &method->basic.staking_withdraw_unbonded_V18))
       break;
     case 1796: /* module 7 call 4 */
-      CHECK_ERROR(_readMethod_staking_validate_V15(
-          c, &method->basic.staking_validate_V15))
+      CHECK_ERROR(_readMethod_staking_validate_V18(
+          c, &method->basic.staking_validate_V18))
       break;
     case 1797: /* module 7 call 5 */
-      CHECK_ERROR(_readMethod_staking_nominate_V15(
-          c, &method->basic.staking_nominate_V15))
+      CHECK_ERROR(_readMethod_staking_nominate_V18(
+          c, &method->nested.staking_nominate_V18))
       break;
     case 1798: /* module 7 call 6 */
-      CHECK_ERROR(_readMethod_staking_chill_V15())
+      CHECK_ERROR(_readMethod_staking_chill_V18())
       break;
     case 1799: /* module 7 call 7 */
-      CHECK_ERROR(_readMethod_staking_set_payee_V15(
-          c, &method->basic.staking_set_payee_V15))
+      CHECK_ERROR(_readMethod_staking_set_payee_V18(
+          c, &method->basic.staking_set_payee_V18))
       break;
     case 1800: /* module 7 call 8 */
-      CHECK_ERROR(_readMethod_staking_set_controller_V15(
-          c, &method->basic.staking_set_controller_V15))
+      CHECK_ERROR(_readMethod_staking_set_controller_V18(
+          c, &method->nested.staking_set_controller_V18))
       break;
     case 1810: /* module 7 call 18 */
-      CHECK_ERROR(_readMethod_staking_payout_stakers_V15(
-          c, &method->basic.staking_payout_stakers_V15))
+      CHECK_ERROR(_readMethod_staking_payout_stakers_V18(
+          c, &method->basic.staking_payout_stakers_V18))
       break;
     case 1811: /* module 7 call 19 */
       CHECK_ERROR(
-          _readMethod_staking_rebond_V15(c, &method->basic.staking_rebond_V15))
+          _readMethod_staking_rebond_V18(c, &method->basic.staking_rebond_V18))
       break;
     case 2304: /* module 9 call 0 */
-      CHECK_ERROR(_readMethod_session_set_keys_V15(
-          c, &method->basic.session_set_keys_V15))
+      CHECK_ERROR(_readMethod_session_set_keys_V18(
+          c, &method->basic.session_set_keys_V18))
       break;
     case 2305: /* module 9 call 1 */
-      CHECK_ERROR(_readMethod_session_purge_keys_V15())
+      CHECK_ERROR(_readMethod_session_purge_keys_V18())
       break;
     case 6656: /* module 26 call 0 */
       CHECK_ERROR(
-          _readMethod_utility_batch_V15(c, &method->basic.utility_batch_V15))
+          _readMethod_utility_batch_V18(c, &method->basic.utility_batch_V18))
       break;
     case 6658: /* module 26 call 2 */
-      CHECK_ERROR(_readMethod_utility_batch_all_V15(
-          c, &method->basic.utility_batch_all_V15))
+      CHECK_ERROR(_readMethod_utility_batch_all_V18(
+          c, &method->basic.utility_batch_all_V18))
       break;
     case 6660: /* module 26 call 4 */
-      CHECK_ERROR(_readMethod_utility_force_batch_V15(
-          c, &method->basic.utility_force_batch_V15))
+      CHECK_ERROR(_readMethod_utility_force_batch_V18(
+          c, &method->basic.utility_force_batch_V18))
       break;
     case 18688: /* module 73 call 0 */
-      CHECK_ERROR(_readMethod_crowdloan_create_V15(
-          c, &method->basic.crowdloan_create_V15))
+      CHECK_ERROR(_readMethod_crowdloan_create_V18(
+          c, &method->basic.crowdloan_create_V18))
       break;
     case 18689: /* module 73 call 1 */
-      CHECK_ERROR(_readMethod_crowdloan_contribute_V15(
-          c, &method->basic.crowdloan_contribute_V15))
+      CHECK_ERROR(_readMethod_crowdloan_contribute_V18(
+          c, &method->basic.crowdloan_contribute_V18))
       break;
     case 18690: /* module 73 call 2 */
-      CHECK_ERROR(_readMethod_crowdloan_withdraw_V15(
-          c, &method->basic.crowdloan_withdraw_V15))
+      CHECK_ERROR(_readMethod_crowdloan_withdraw_V18(
+          c, &method->basic.crowdloan_withdraw_V18))
       break;
     case 18691: /* module 73 call 3 */
-      CHECK_ERROR(_readMethod_crowdloan_refund_V15(
-          c, &method->basic.crowdloan_refund_V15))
+      CHECK_ERROR(_readMethod_crowdloan_refund_V18(
+          c, &method->basic.crowdloan_refund_V18))
       break;
     case 18692: /* module 73 call 4 */
-      CHECK_ERROR(_readMethod_crowdloan_dissolve_V15(
-          c, &method->basic.crowdloan_dissolve_V15))
+      CHECK_ERROR(_readMethod_crowdloan_dissolve_V18(
+          c, &method->basic.crowdloan_dissolve_V18))
       break;
     case 18693: /* module 73 call 5 */
       CHECK_ERROR(
-          _readMethod_crowdloan_edit_V15(c, &method->basic.crowdloan_edit_V15))
+          _readMethod_crowdloan_edit_V18(c, &method->basic.crowdloan_edit_V18))
       break;
     case 18694: /* module 73 call 6 */
-      CHECK_ERROR(_readMethod_crowdloan_add_memo_V15(
-          c, &method->basic.crowdloan_add_memo_V15))
+      CHECK_ERROR(_readMethod_crowdloan_add_memo_V18(
+          c, &method->basic.crowdloan_add_memo_V18))
       break;
     case 18695: /* module 73 call 7 */
       CHECK_ERROR(
-          _readMethod_crowdloan_poke_V15(c, &method->basic.crowdloan_poke_V15))
+          _readMethod_crowdloan_poke_V18(c, &method->basic.crowdloan_poke_V18))
       break;
     case 18696: /* module 73 call 8 */
-      CHECK_ERROR(_readMethod_crowdloan_contribute_all_V15(
-          c, &method->basic.crowdloan_contribute_all_V15))
+      CHECK_ERROR(_readMethod_crowdloan_contribute_all_V18(
+          c, &method->basic.crowdloan_contribute_all_V18))
       break;
+
     default:
       return parser_unexpected_callIndex;
   }
@@ -327,7 +329,7 @@ parser_error_t _readMethod_V15(parser_context_t* c, uint8_t moduleIdx,
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
-const char* _getMethod_ModuleName_V15(uint8_t moduleIdx) {
+const char* _getMethod_ModuleName_V18(uint8_t moduleIdx) {
   switch (moduleIdx) {
     case 5:
       return STR_MO_BALANCES;
@@ -346,7 +348,7 @@ const char* _getMethod_ModuleName_V15(uint8_t moduleIdx) {
   return NULL;
 }
 
-const char* _getMethod_Name_V15(uint8_t moduleIdx, uint8_t callIdx) {
+const char* _getMethod_Name_V18(uint8_t moduleIdx, uint8_t callIdx) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
   switch (callPrivIdx) {
@@ -409,13 +411,13 @@ const char* _getMethod_Name_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 18696: /* module 73 call 8 */
       return STR_ME_CONTRIBUTE_ALL;
     default:
-      return _getMethod_Name_V15_ParserFull(callPrivIdx);
+      return _getMethod_Name_V18_ParserFull(callPrivIdx);
   }
 
   return NULL;
 }
 
-const char* _getMethod_Name_V15_ParserFull(uint16_t callPrivIdx) {
+const char* _getMethod_Name_V18_ParserFull(uint16_t callPrivIdx) {
   switch (callPrivIdx) {
     default:
       return NULL;
@@ -424,7 +426,7 @@ const char* _getMethod_Name_V15_ParserFull(uint16_t callPrivIdx) {
   return NULL;
 }
 
-uint8_t _getMethod_NumItems_V15(uint8_t moduleIdx, uint8_t callIdx) {
+uint8_t _getMethod_NumItems_V18(uint8_t moduleIdx, uint8_t callIdx) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
   switch (callPrivIdx) {
@@ -493,7 +495,7 @@ uint8_t _getMethod_NumItems_V15(uint8_t moduleIdx, uint8_t callIdx) {
   return 0;
 }
 
-const char* _getMethod_ItemName_V15(uint8_t moduleIdx, uint8_t callIdx,
+const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
                                     uint8_t itemIdx) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
@@ -752,7 +754,7 @@ const char* _getMethod_ItemName_V15(uint8_t moduleIdx, uint8_t callIdx,
   return NULL;
 }
 
-parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
+parser_error_t _getMethod_ItemValue_V18(pd_Method_V18_t* m, uint8_t moduleIdx,
                                         uint8_t callIdx, uint8_t itemIdx,
                                         char* outValue, uint16_t outValueLen,
                                         uint8_t pageIdx, uint8_t* pageCount) {
@@ -761,89 +763,89 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
   switch (callPrivIdx) {
     case 1280: /* module 5 call 0 */
       switch (itemIdx) {
-        case 0: /* balances_transfer_V15 - dest */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->nested.balances_transfer_V15.dest, outValue, outValueLen,
+        case 0: /* balances_transfer_V18 - dest */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_transfer_V18.dest, outValue, outValueLen,
               pageIdx, pageCount);
-        case 1: /* balances_transfer_V15 - amount */;
+        case 1: /* balances_transfer_V18 - amount */;
           return _toStringCompactBalance(
-              &m->nested.balances_transfer_V15.amount, outValue, outValueLen,
+              &m->nested.balances_transfer_V18.amount, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1282: /* module 5 call 2 */
       switch (itemIdx) {
-        case 0: /* balances_force_transfer_V15 - source */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->nested.balances_force_transfer_V15.source, outValue,
+        case 0: /* balances_force_transfer_V18 - source */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_force_transfer_V18.source, outValue,
               outValueLen, pageIdx, pageCount);
-        case 1: /* balances_force_transfer_V15 - dest */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->nested.balances_force_transfer_V15.dest, outValue,
+        case 1: /* balances_force_transfer_V18 - dest */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_force_transfer_V18.dest, outValue,
               outValueLen, pageIdx, pageCount);
-        case 2: /* balances_force_transfer_V15 - amount */;
+        case 2: /* balances_force_transfer_V18 - amount */;
           return _toStringCompactBalance(
-              &m->nested.balances_force_transfer_V15.amount, outValue,
+              &m->nested.balances_force_transfer_V18.amount, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1283: /* module 5 call 3 */
       switch (itemIdx) {
-        case 0: /* balances_transfer_keep_alive_V15 - dest */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->nested.balances_transfer_keep_alive_V15.dest, outValue,
+        case 0: /* balances_transfer_keep_alive_V18 - dest */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_transfer_keep_alive_V18.dest, outValue,
               outValueLen, pageIdx, pageCount);
-        case 1: /* balances_transfer_keep_alive_V15 - amount */;
+        case 1: /* balances_transfer_keep_alive_V18 - amount */;
           return _toStringCompactBalance(
-              &m->nested.balances_transfer_keep_alive_V15.amount, outValue,
+              &m->nested.balances_transfer_keep_alive_V18.amount, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1284: /* module 5 call 4 */
       switch (itemIdx) {
-        case 0: /* balances_transfer_all_V15 - dest */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->basic.balances_transfer_all_V15.dest, outValue, outValueLen,
+        case 0: /* balances_transfer_all_V18 - dest */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->basic.balances_transfer_all_V18.dest, outValue, outValueLen,
               pageIdx, pageCount);
-        case 1: /* balances_transfer_all_V15 - keep_alive */;
-          return _toStringbool(&m->basic.balances_transfer_all_V15.keep_alive,
+        case 1: /* balances_transfer_all_V18 - keep_alive */;
+          return _toStringbool(&m->basic.balances_transfer_all_V18.keep_alive,
                                outValue, outValueLen, pageCount);
         default:
           return parser_no_data;
       }
     case 1792: /* module 7 call 0 */
       switch (itemIdx) {
-        case 0: /* staking_bond_V15 - controller */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->basic.staking_bond_V15.controller, outValue, outValueLen,
+        case 0: /* staking_bond_V18 - controller */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.staking_bond_V18.controller, outValue, outValueLen,
               pageIdx, pageCount);
-        case 1: /* staking_bond_V15 - amount */;
-          return _toStringCompactBalance(&m->basic.staking_bond_V15.amount,
+        case 1: /* staking_bond_V18 - amount */;
+          return _toStringCompactBalance(&m->nested.staking_bond_V18.amount,
                                          outValue, outValueLen, pageIdx,
                                          pageCount);
-        case 2: /* staking_bond_V15 - payee */;
-          return _toStringRewardDestination_V15(
-              &m->basic.staking_bond_V15.payee, outValue, outValueLen, pageIdx,
+        case 2: /* staking_bond_V18 - payee */;
+          return _toStringRewardDestination_V18(
+              &m->nested.staking_bond_V18.payee, outValue, outValueLen, pageIdx,
               pageCount);
         default:
           return parser_no_data;
       }
     case 1793: /* module 7 call 1 */
       switch (itemIdx) {
-        case 0: /* staking_bond_extra_V15 - amount */;
+        case 0: /* staking_bond_extra_V18 - amount */;
           return _toStringCompactBalance(
-              &m->basic.staking_bond_extra_V15.amount, outValue, outValueLen,
+              &m->basic.staking_bond_extra_V18.amount, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1794: /* module 7 call 2 */
       switch (itemIdx) {
-        case 0: /* staking_unbond_V15 - amount */;
-          return _toStringCompactBalance(&m->basic.staking_unbond_V15.amount,
+        case 0: /* staking_unbond_V18 - amount */;
+          return _toStringCompactBalance(&m->nested.staking_unbond_V18.amount,
                                          outValue, outValueLen, pageIdx,
                                          pageCount);
         default:
@@ -851,27 +853,27 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
       }
     case 1795: /* module 7 call 3 */
       switch (itemIdx) {
-        case 0: /* staking_withdraw_unbonded_V15 - num_slashing_spans */;
+        case 0: /* staking_withdraw_unbonded_V18 - num_slashing_spans */;
           return _toStringu32(
-              &m->basic.staking_withdraw_unbonded_V15.num_slashing_spans,
+              &m->basic.staking_withdraw_unbonded_V18.num_slashing_spans,
               outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1796: /* module 7 call 4 */
       switch (itemIdx) {
-        case 0: /* staking_validate_V15 - prefs */;
-          return _toStringValidatorPrefs_V15(
-              &m->basic.staking_validate_V15.prefs, outValue, outValueLen,
+        case 0: /* staking_validate_V18 - prefs */;
+          return _toStringValidatorPrefs_V18(
+              &m->basic.staking_validate_V18.prefs, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1797: /* module 7 call 5 */
       switch (itemIdx) {
-        case 0: /* staking_nominate_V15 - targets */;
-          return _toStringVecAccountIdLookupOfT_V15(
-              &m->basic.staking_nominate_V15.targets, outValue, outValueLen,
+        case 0: /* staking_nominate_V18 - targets */;
+          return _toStringVecAccountIdLookupOfT_V18(
+              &m->nested.staking_nominate_V18.targets, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
@@ -883,30 +885,30 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
       }
     case 1799: /* module 7 call 7 */
       switch (itemIdx) {
-        case 0: /* staking_set_payee_V15 - payee */;
-          return _toStringRewardDestination_V15(
-              &m->basic.staking_set_payee_V15.payee, outValue, outValueLen,
+        case 0: /* staking_set_payee_V18 - payee */;
+          return _toStringRewardDestination_V18(
+              &m->basic.staking_set_payee_V18.payee, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1800: /* module 7 call 8 */
       switch (itemIdx) {
-        case 0: /* staking_set_controller_V15 - controller */;
-          return _toStringAccountIdLookupOfT_V15(
-              &m->basic.staking_set_controller_V15.controller, outValue,
+        case 0: /* staking_set_controller_V18 - controller */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.staking_set_controller_V18.controller, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 1810: /* module 7 call 18 */
       switch (itemIdx) {
-        case 0: /* staking_payout_stakers_V15 - validator_stash */;
-          return _toStringAccountId_V15(
-              &m->basic.staking_payout_stakers_V15.validator_stash, outValue,
+        case 0: /* staking_payout_stakers_V18 - validator_stash */;
+          return _toStringAccountId_V18(
+              &m->basic.staking_payout_stakers_V18.validator_stash, outValue,
               outValueLen, pageIdx, pageCount);
-        case 1: /* staking_payout_stakers_V15 - era */;
-          return _toStringEraIndex_V15(&m->basic.staking_payout_stakers_V15.era,
+        case 1: /* staking_payout_stakers_V18 - era */;
+          return _toStringEraIndex_V18(&m->basic.staking_payout_stakers_V18.era,
                                        outValue, outValueLen, pageIdx,
                                        pageCount);
         default:
@@ -914,8 +916,8 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
       }
     case 1811: /* module 7 call 19 */
       switch (itemIdx) {
-        case 0: /* staking_rebond_V15 - amount */;
-          return _toStringCompactBalance(&m->basic.staking_rebond_V15.amount,
+        case 0: /* staking_rebond_V18 - amount */;
+          return _toStringCompactBalance(&m->basic.staking_rebond_V18.amount,
                                          outValue, outValueLen, pageIdx,
                                          pageCount);
         default:
@@ -923,11 +925,11 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
       }
     case 2304: /* module 9 call 0 */
       switch (itemIdx) {
-        case 0: /* session_set_keys_V15 - keys */;
-          return _toStringKeys_V15(&m->basic.session_set_keys_V15.keys,
+        case 0: /* session_set_keys_V18 - keys */;
+          return _toStringKeys_V18(&m->basic.session_set_keys_V18.keys,
                                    outValue, outValueLen, pageIdx, pageCount);
-        case 1: /* session_set_keys_V15 - proof */;
-          return _toStringBytes(&m->basic.session_set_keys_V15.proof, outValue,
+        case 1: /* session_set_keys_V18 - proof */;
+          return _toStringBytes(&m->basic.session_set_keys_V18.proof, outValue,
                                 outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
@@ -939,151 +941,151 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
       }
     case 6656: /* module 26 call 0 */
       switch (itemIdx) {
-        case 0: /* utility_batch_V15 - calls */;
-          return _toStringVecCall(&m->basic.utility_batch_V15.calls, outValue,
+        case 0: /* utility_batch_V18 - calls */;
+          return _toStringVecCall(&m->basic.utility_batch_V18.calls, outValue,
                                   outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 6658: /* module 26 call 2 */
       switch (itemIdx) {
-        case 0: /* utility_batch_all_V15 - calls */;
-          return _toStringVecCall(&m->basic.utility_batch_all_V15.calls,
+        case 0: /* utility_batch_all_V18 - calls */;
+          return _toStringVecCall(&m->basic.utility_batch_all_V18.calls,
                                   outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 6660: /* module 26 call 4 */
       switch (itemIdx) {
-        case 0: /* utility_force_batch_V15 - calls */;
-          return _toStringVecCall(&m->basic.utility_force_batch_V15.calls,
+        case 0: /* utility_force_batch_V18 - calls */;
+          return _toStringVecCall(&m->basic.utility_force_batch_V18.calls,
                                   outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18688: /* module 73 call 0 */
       switch (itemIdx) {
-        case 0: /* crowdloan_create_V15 - index */;
-          return _toStringCompactu32(&m->basic.crowdloan_create_V15.index,
+        case 0: /* crowdloan_create_V18 - index */;
+          return _toStringCompactu32(&m->basic.crowdloan_create_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 1: /* crowdloan_create_V15 - cap */;
-          return _toStringCompactu128(&m->basic.crowdloan_create_V15.cap,
+        case 1: /* crowdloan_create_V18 - cap */;
+          return _toStringCompactu128(&m->basic.crowdloan_create_V18.cap,
                                       outValue, outValueLen, pageIdx,
                                       pageCount);
-        case 2: /* crowdloan_create_V15 - first_period */;
+        case 2: /* crowdloan_create_V18 - first_period */;
           return _toStringCompactu32(
-              &m->basic.crowdloan_create_V15.first_period, outValue,
+              &m->basic.crowdloan_create_V18.first_period, outValue,
               outValueLen, pageIdx, pageCount);
-        case 3: /* crowdloan_create_V15 - last_period */;
-          return _toStringCompactu32(&m->basic.crowdloan_create_V15.last_period,
+        case 3: /* crowdloan_create_V18 - last_period */;
+          return _toStringCompactu32(&m->basic.crowdloan_create_V18.last_period,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 4: /* crowdloan_create_V15 - end */;
-          return _toStringCompactu32(&m->basic.crowdloan_create_V15.end,
+        case 4: /* crowdloan_create_V18 - end */;
+          return _toStringCompactu32(&m->basic.crowdloan_create_V18.end,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 5: /* crowdloan_create_V15 - verifier */;
-          return _toStringOptionMultiSigner_V15(
-              &m->basic.crowdloan_create_V15.verifier, outValue, outValueLen,
+        case 5: /* crowdloan_create_V18 - verifier */;
+          return _toStringOptionMultiSigner_V18(
+              &m->basic.crowdloan_create_V18.verifier, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18689: /* module 73 call 1 */
       switch (itemIdx) {
-        case 0: /* crowdloan_contribute_V15 - index */;
-          return _toStringCompactu32(&m->basic.crowdloan_contribute_V15.index,
+        case 0: /* crowdloan_contribute_V18 - index */;
+          return _toStringCompactu32(&m->basic.crowdloan_contribute_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 1: /* crowdloan_contribute_V15 - amount */;
-          return _toStringCompactu128(&m->basic.crowdloan_contribute_V15.amount,
+        case 1: /* crowdloan_contribute_V18 - amount */;
+          return _toStringCompactu128(&m->basic.crowdloan_contribute_V18.amount,
                                       outValue, outValueLen, pageIdx,
                                       pageCount);
-        case 2: /* crowdloan_contribute_V15 - signature */;
-          return _toStringOptionMultiSignature_V15(
-              &m->basic.crowdloan_contribute_V15.signature, outValue,
+        case 2: /* crowdloan_contribute_V18 - signature */;
+          return _toStringOptionMultiSignature_V18(
+              &m->basic.crowdloan_contribute_V18.signature, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18690: /* module 73 call 2 */
       switch (itemIdx) {
-        case 0: /* crowdloan_withdraw_V15 - who */;
-          return _toStringAccountId_V15(&m->basic.crowdloan_withdraw_V15.who,
+        case 0: /* crowdloan_withdraw_V18 - who */;
+          return _toStringAccountId_V18(&m->basic.crowdloan_withdraw_V18.who,
                                         outValue, outValueLen, pageIdx,
                                         pageCount);
-        case 1: /* crowdloan_withdraw_V15 - index */;
-          return _toStringCompactu32(&m->basic.crowdloan_withdraw_V15.index,
+        case 1: /* crowdloan_withdraw_V18 - index */;
+          return _toStringCompactu32(&m->basic.crowdloan_withdraw_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18691: /* module 73 call 3 */
       switch (itemIdx) {
-        case 0: /* crowdloan_refund_V15 - index */;
-          return _toStringCompactu32(&m->basic.crowdloan_refund_V15.index,
+        case 0: /* crowdloan_refund_V18 - index */;
+          return _toStringCompactu32(&m->basic.crowdloan_refund_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18692: /* module 73 call 4 */
       switch (itemIdx) {
-        case 0: /* crowdloan_dissolve_V15 - index */;
-          return _toStringCompactu32(&m->basic.crowdloan_dissolve_V15.index,
+        case 0: /* crowdloan_dissolve_V18 - index */;
+          return _toStringCompactu32(&m->basic.crowdloan_dissolve_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18693: /* module 73 call 5 */
       switch (itemIdx) {
-        case 0: /* crowdloan_edit_V15 - index */;
-          return _toStringCompactu32(&m->basic.crowdloan_edit_V15.index,
+        case 0: /* crowdloan_edit_V18 - index */;
+          return _toStringCompactu32(&m->basic.crowdloan_edit_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 1: /* crowdloan_edit_V15 - cap */;
-          return _toStringCompactu128(&m->basic.crowdloan_edit_V15.cap,
+        case 1: /* crowdloan_edit_V18 - cap */;
+          return _toStringCompactu128(&m->basic.crowdloan_edit_V18.cap,
                                       outValue, outValueLen, pageIdx,
                                       pageCount);
-        case 2: /* crowdloan_edit_V15 - first_period */;
-          return _toStringCompactu32(&m->basic.crowdloan_edit_V15.first_period,
+        case 2: /* crowdloan_edit_V18 - first_period */;
+          return _toStringCompactu32(&m->basic.crowdloan_edit_V18.first_period,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 3: /* crowdloan_edit_V15 - last_period */;
-          return _toStringCompactu32(&m->basic.crowdloan_edit_V15.last_period,
+        case 3: /* crowdloan_edit_V18 - last_period */;
+          return _toStringCompactu32(&m->basic.crowdloan_edit_V18.last_period,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 4: /* crowdloan_edit_V15 - end */;
-          return _toStringCompactu32(&m->basic.crowdloan_edit_V15.end, outValue,
+        case 4: /* crowdloan_edit_V18 - end */;
+          return _toStringCompactu32(&m->basic.crowdloan_edit_V18.end, outValue,
                                      outValueLen, pageIdx, pageCount);
-        case 5: /* crowdloan_edit_V15 - verifier */;
-          return _toStringOptionMultiSigner_V15(
-              &m->basic.crowdloan_edit_V15.verifier, outValue, outValueLen,
+        case 5: /* crowdloan_edit_V18 - verifier */;
+          return _toStringOptionMultiSigner_V18(
+              &m->basic.crowdloan_edit_V18.verifier, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18694: /* module 73 call 6 */
       switch (itemIdx) {
-        case 0: /* crowdloan_add_memo_V15 - index */;
-          return _toStringParaId_V15(&m->basic.crowdloan_add_memo_V15.index,
+        case 0: /* crowdloan_add_memo_V18 - index */;
+          return _toStringParaId_V18(&m->basic.crowdloan_add_memo_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
-        case 1: /* crowdloan_add_memo_V15 - memo */;
-          return _toStringVecu8(&m->basic.crowdloan_add_memo_V15.memo, outValue,
+        case 1: /* crowdloan_add_memo_V18 - memo */;
+          return _toStringVecu8(&m->basic.crowdloan_add_memo_V18.memo, outValue,
                                 outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18695: /* module 73 call 7 */
       switch (itemIdx) {
-        case 0: /* crowdloan_poke_V15 - index */;
-          return _toStringParaId_V15(&m->basic.crowdloan_poke_V15.index,
+        case 0: /* crowdloan_poke_V18 - index */;
+          return _toStringParaId_V18(&m->basic.crowdloan_poke_V18.index,
                                      outValue, outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
       }
     case 18696: /* module 73 call 8 */
       switch (itemIdx) {
-        case 0: /* crowdloan_contribute_all_V15 - index */;
+        case 0: /* crowdloan_contribute_all_V18 - index */;
           return _toStringCompactu32(
-              &m->basic.crowdloan_contribute_all_V15.index, outValue,
+              &m->basic.crowdloan_contribute_all_V18.index, outValue,
               outValueLen, pageIdx, pageCount);
-        case 1: /* crowdloan_contribute_all_V15 - signature */;
-          return _toStringOptionMultiSignature_V15(
-              &m->basic.crowdloan_contribute_all_V15.signature, outValue,
+        case 1: /* crowdloan_contribute_all_V18 - signature */;
+          return _toStringOptionMultiSignature_V18(
+              &m->basic.crowdloan_contribute_all_V18.signature, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
@@ -1095,7 +1097,7 @@ parser_error_t _getMethod_ItemValue_V15(pd_Method_V15_t* m, uint8_t moduleIdx,
   return parser_ok;
 }
 
-bool _getMethod_ItemIsExpert_V15(uint8_t moduleIdx, uint8_t callIdx,
+bool _getMethod_ItemIsExpert_V18(uint8_t moduleIdx, uint8_t callIdx,
                                  uint8_t itemIdx) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
@@ -1141,7 +1143,7 @@ bool _getMethod_ItemIsExpert_V15(uint8_t moduleIdx, uint8_t callIdx,
   }
 }
 
-bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
+bool _getMethod_IsNestingSupported_V18(uint8_t moduleIdx, uint8_t callIdx) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
   switch (callPrivIdx) {
@@ -1157,17 +1159,13 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 1028:   // Indices:Freeze
     case 1284:   // Balances:Transfer all
     case 1285:   // Balances:Force unreserve
-    case 1792:   // Staking:Bond
     case 1793:   // Staking:Bond extra
-    case 1794:   // Staking:Unbond
     case 1795:   // Staking:Withdraw Unbonded
     case 1796:   // Staking:Validate
-    case 1797:   // Staking:Nominate
-    case 1798:   // Staking:Chill
     case 1799:   // Staking:Set payee
-    case 1800:   // Staking:Set controller
     case 1801:   // Staking:Set validator count
     case 1802:   // Staking:Increase validator count
+    case 1803:   // Staking:Scale validator count
     case 1804:   // Staking:Force no eras
     case 1805:   // Staking:Force new era
     case 1806:   // Staking:Set invulnerables
@@ -1178,27 +1176,26 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 1811:   // Staking:Rebond
     case 1812:   // Staking:Reap stash
     case 1813:   // Staking:Kick
+    case 1814:   // Staking:Set staking configs
     case 1815:   // Staking:Chill other
     case 1816:   // Staking:Force apply min commission
     case 2304:   // Session:Set keys
     case 2305:   // Session:Purge keys
-    case 2818:   // Grandpa:Note stalled
-    case 3598:   // Democracy:Note preimage
-    case 3599:   // Democracy:Note preimage operational
-    case 3600:   // Democracy:Note imminent preimage
-    case 3601:   // Democracy:Note imminent preimage operational
+    case 3600:   // Democracy:Blacklist
     case 3840:   // Council:Set members
     case 3841:   // Council:Execute
     case 3842:   // Council:Propose
     case 3843:   // Council:Vote
-    case 3844:   // Council:Close
+    case 3844:   // Council:Close old weight
     case 3845:   // Council:Disapprove proposal
+    case 3846:   // Council:Close
     case 4096:   // TechnicalCommittee:Set members
     case 4097:   // TechnicalCommittee:Execute
     case 4098:   // TechnicalCommittee:Propose
     case 4099:   // TechnicalCommittee:Vote
-    case 4100:   // TechnicalCommittee:Close
+    case 4100:   // TechnicalCommittee:Close old weight
     case 4101:   // TechnicalCommittee:Disapprove proposal
+    case 4102:   // TechnicalCommittee:Close
     case 4352:   // PhragmenElection:Vote
     case 4353:   // PhragmenElection:Remove voter
     case 4354:   // PhragmenElection:Submit candidacy
@@ -1228,13 +1225,19 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 6656:   // Utility:Batch
     case 6658:   // Utility:Batch all
     case 6660:   // Utility:Force batch
+    case 6661:   // Utility:With weight
     case 7168:   // Identity:Add registrar
+    case 7169:   // Identity:Set identity
+    case 7170:   // Identity:Set subs
     case 7171:   // Identity:Clear identity
     case 7172:   // Identity:Request judgement
     case 7173:   // Identity:Cancel request
     case 7174:   // Identity:Set fee
     case 7175:   // Identity:Set account id
+    case 7177:   // Identity:Provide judgement
     case 7178:   // Identity:Kill identity
+    case 7179:   // Identity:Add sub
+    case 7180:   // Identity:Rename sub
     case 7181:   // Identity:Remove sub
     case 7182:   // Identity:Quit sub
     case 7425:   // Proxy:Add proxy
@@ -1265,7 +1268,6 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 8963:   // Tips:Tip
     case 8964:   // Tips:Close tip
     case 8965:   // Tips:Slash tip
-    case 9220:   // ElectionProviderMultiPhase:Governance fallback
     case 9472:   // VoterList:Rebag
     case 9473:   // VoterList:Put in front of
     case 9984:   // NominationPools:Join
@@ -1274,13 +1276,11 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 9987:   // NominationPools:Unbond
     case 9988:   // NominationPools:Pool withdraw unbonded
     case 9989:   // NominationPools:Withdraw Unbonded
-    case 9990:   // NominationPools:Create
-    case 9991:   // NominationPools:Nominate
-    case 9992:   // NominationPools:Set state
-    case 9993:   // NominationPools:Set metadata
-    case 9994:   // NominationPools:Set configs
-    case 9995:   // NominationPools:Update roles
-    case 9996:   // NominationPools:Chill
+    case 9991:   // NominationPools:Create with pool id
+    case 9993:   // NominationPools:Set state
+    case 9995:   // NominationPools:Set configs
+    case 9996:   // NominationPools:Update roles
+    case 9997:   // NominationPools:Chill
     case 10240:  // FastUnstake:Register fast unstake
     case 10241:  // FastUnstake:Deregister
     case 10242:  // FastUnstake:Control
@@ -1330,10 +1330,7 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 13100:  // Configuration:Set bypass consistency check
     case 14592:  // Initializer:Force approve
     case 15104:  // Ump:Service overweight
-    case 15364:  // Hrmp:Force process hrmp open
-    case 15365:  // Hrmp:Force process hrmp close
     case 15872:  // ParasDisputes:Force unfreeze
-    case 17925:  // Registrar:Reserve
     case 18432:  // Auctions:New auction
     case 18433:  // Auctions:Bid
     case 18434:  // Auctions:Cancel auction
@@ -1346,6 +1343,8 @@ bool _getMethod_IsNestingSupported_V15(uint8_t moduleIdx, uint8_t callIdx) {
     case 18694:  // Crowdloan:Add memo
     case 18695:  // Crowdloan:Poke
     case 18696:  // Crowdloan:Contribute all
+    case 25346:  // XcmPallet:Reserve transfer assets
+    case 25352:  // XcmPallet:Limited reserve transfer assets
       return false;
     default:
       return true;
