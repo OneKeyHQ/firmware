@@ -300,6 +300,10 @@ if TYPE_CHECKING:
         SuiAddress = 11101
         SuiSignTx = 11102
         SuiSignedTx = 11103
+        FilecoinGetAddress = 11200
+        FilecoinAddress = 11201
+        FilecoinSignTx = 11202
+        FilecoinSignedTx = 11203
         DeviceBackToBoot = 903
         RebootToBoardloader = 904
         DeviceInfoSettings = 10001

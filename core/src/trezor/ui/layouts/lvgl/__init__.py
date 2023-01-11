@@ -1467,3 +1467,55 @@ async def confirm_ripple_payment(
     await raise_if_cancelled(
         interact(ctx, screen, "ripple_payment", ButtonRequestType.ProtectCall)
     )
+
+
+async def confirm_filecoin_tx(
+    ctx: wire.GenericContext,
+    address: str,
+    amount: str,
+    br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
+) -> None:
+    from trezor.lvglui.scrs.template import TransactionOverview
+
+    await raise_if_cancelled(
+        interact(
+            ctx,
+            TransactionOverview(
+                _(i18n_keys.TITLE__STR_TRANSACTION).format("Filecoin"),
+                amount,
+                address,
+                primary_color=ctx.primary_color,
+                icon_path=ctx.icon_path,
+            ),
+            "confirm_output",
+            br_code,
+        )
+    )
+
+
+async def confirm_filecoin_payment(
+    ctx: wire.GenericContext,
+    sender: str | None = None,
+    receiver: str | None = None,
+    amount: str | None = None,
+    gaslimit: str | None = None,
+    gasfeecap: str | None = None,
+    gaspremium: str | None = None,
+    total_amount: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import FilecoinPayment
+
+    screen = FilecoinPayment(
+        _(i18n_keys.TITLE__VIEW_TRANSACTION),
+        sender,
+        receiver,
+        amount,
+        gaslimit,
+        gasfeecap,
+        gaspremium,
+        total_amount,
+        primary_color=ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "filecoin_payment", ButtonRequestType.ProtectCall)
+    )
