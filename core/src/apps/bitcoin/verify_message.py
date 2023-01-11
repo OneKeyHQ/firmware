@@ -106,7 +106,7 @@ async def verify_message(ctx: wire.Context, msg: VerifyMessage) -> Success:
     )
     await confirm_signverify(
         ctx,
-        coin.coin_shortcut,
+        coin.coin_name,
         decode_message(message),
         address=address_short(coin, address),
         verify=True,

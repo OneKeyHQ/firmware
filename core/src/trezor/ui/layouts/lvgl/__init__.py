@@ -304,7 +304,7 @@ async def show_address(
     await interact(
         ctx,
         Address(
-            title if title else _(i18n_keys.TITLE__STR_ADDRESS).format(network.upper()),
+            title if title else _(i18n_keys.TITLE__STR_ADDRESS).format(network),
             address_n,
             address,
             ctx.primary_color,

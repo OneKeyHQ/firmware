@@ -105,7 +105,7 @@ async def get_address(
             multisig_index = multisig_pubkey_index(msg.multisig, node.public_key())
 
             title = _(i18n_keys.TITLE__STR_MULTISIG_ADDRESS_STR_OF_STR).format(
-                coin.coin_shortcut.upper(), msg.multisig.m, len(pubnodes)
+                coin.coin_name, msg.multisig.m, len(pubnodes)
             )
             await show_address(
                 ctx,
@@ -115,7 +115,7 @@ async def get_address(
                 multisig_index=multisig_index,
                 xpubs=_get_xpubs(coin, multisig_xpub_magic, pubnodes),
                 address_n=path,
-                network=coin.coin_shortcut,
+                network=coin.coin_name,
             )
         else:
             # if msg.script_type == InputScriptType.SPENDWITNESS:
