@@ -46,8 +46,8 @@ class Transaction:
         nonce = tx[3]
         value = int.from_bytes(tx[4], "big")
         gaslimit = tx[5]
-        gaspremium = int.from_bytes(tx[6], "big")
-        gasfeecap = int.from_bytes(tx[7], "big")
+        gasfeecap = int.from_bytes(tx[6], "big")
+        gaspremium = int.from_bytes(tx[7], "big")
         method = tx[8]
         if method != 0:
             wire.DataError("unexpected method")
