@@ -2,8 +2,11 @@ from collections import namedtuple
 from typing import Any
 
 from trezor import wire
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 import ujson as json
+
+from .networks import formatAmont, getChainName
 
 MessageArgs = namedtuple(
     "MessageArgs",
@@ -99,6 +102,7 @@ class Transaction:
     def __init__(self, args: MessageArgs) -> None:
         self.account_number = args.account_number
         self.chain_id = args.chain_id
+        self.chain_name = getChainName(args.chain_id)
         self.fee = args.fee
         self.memo = args.memo
         self.msgs = args.msgs
@@ -128,11 +132,64 @@ class Transaction:
         else:
             self.msgs_item[key_prefix] = json.dumps(j)
 
+    # not support combined & group tx
+    def get_tx_type(self) -> None:
+        for key, value in self.msgs_item.items():
+            if key != "Type":
+                continue
+            if value == "Send":
+                from_address = self.msgs_item["From"]
+                to = self.msgs_item["To"]
+                amount = self.msgs_item["Amount"]
+                self.tx = SendTxn(from_address, to, amount)
+                self.msgs_item.pop("Type", None)
+            elif value == "Delegate":
+                delegator = self.msgs_item["Delegator"]
+                validator = self.msgs_item["Validator"]
+                amount = self.msgs_item["Amount"]
+                self.tx = DelegateTxn(delegator, validator, amount)
+                self.msgs_item.pop("Type", None)
+            elif value == "Undelegate":
+                self.tx = UndelegateTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Redelegate":
+                self.tx = RedelegateTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Propose":
+                self.tx = ProposeTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Deposit":
+                self.tx = DepositTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Vote":
+                self.tx = VoteTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Withdraw Reward":
+                self.tx = WithdrawRewardTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Withdraw Val. Commission":
+                self.tx = WithdrawValCommissionTxn()
+                self.msgs_item.pop("Type", None)
+            elif value == "Multi Send":
+                self.tx = MultiSendTxn()
+                self.msgs_item.pop("Type", None)
+            else:
+                self.tx = UnknownTxn(key, value)
+            break
+
+        # Separate page
+        self.msgs_item.pop("Memo", None)
+        if hasattr(self, "tx") is False:
+            self.tx = UnknownTxn("Unknown key", "Unknown value")
+
     def tx_display_make_friendly(self) -> None:
         for key, value in self.msgs_item.items():
             if key in AMOUNT_KEY:
                 j = json.loads(value)
-                v = j[0]["amount"] + " " + j[0]["denom"]
+                if type(j) == dict:
+                    v = formatAmont(self.chain_id, j["amount"], j["denom"])
+                else:
+                    v = formatAmont(self.chain_id, j[0]["amount"], j[0]["denom"])
                 self.msgs_item[key] = v
             else:
                 for element in VALUE_SUBSTITUTIONS:
@@ -151,6 +208,8 @@ class Transaction:
             if has_key is False:
                 new_msgs_item[key] = value
         self.msgs_item = new_msgs_item
+
+        self.get_tx_type()
 
     @staticmethod
     def deserialize(raw_message: bytes) -> "Transaction":
@@ -182,3 +241,75 @@ class Transaction:
                 sequence=sequence,
             )
         )
+
+
+class SendTxn:
+    def __init__(self, from_address, to, amount):
+        self.i18n_title = _(i18n_keys.TITLE__SEND)
+        self.i18n_value = "MsgSend"
+        self.from_address = from_address
+        self.to = to
+        self.amount = amount
+
+
+class DelegateTxn:
+    def __init__(self, delegator, validator, amount):
+        self.i18n_title = _(i18n_keys.TITLE__DELEGATE)
+        self.i18n_value = "MsgDelegate"
+        self.delegator = delegator
+        self.validator = validator
+        self.amount = amount
+
+
+class UndelegateTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__UNDELEGATE)
+        self.i18n_value = "MsgUndelegate"
+
+
+class RedelegateTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__REDELEGATE)
+        self.i18n_value = "MsgBeginRedelegate"
+
+
+class ProposeTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__PROPOSE)
+        self.i18n_value = "MsgSubmitProposal"
+
+
+class DepositTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__DEPOSIT)
+        self.i18n_value = "MsgDeposit"
+
+
+class VoteTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__VOTE)
+        self.i18n_value = "MsgVote"
+
+
+class WithdrawRewardTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__WITHDRAW_REWARD)
+        self.i18n_value = "MsgWithdrawDelegationReward"
+
+
+class WithdrawValCommissionTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__WITHDRAW_VALIDATOR_COMMISSION)
+        self.i18n_value = "MsgWithdrawValidatorCommission"
+
+
+class MultiSendTxn:
+    def __init__(self):
+        self.i18n_title = _(i18n_keys.TITLE__MULTI_SEND)
+        self.i18n_value = "MsgMultiSend"
+
+
+class UnknownTxn:
+    def __init__(self, title, value):
+        self.i18n_title = title
+        self.i18n_value = value

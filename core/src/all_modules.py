@@ -520,6 +520,8 @@ apps.cosmos
 import apps.cosmos
 apps.cosmos.get_address
 import apps.cosmos.get_address
+apps.cosmos.networks
+import apps.cosmos.networks
 apps.cosmos.sign_tx
 import apps.cosmos.sign_tx
 apps.cosmos.transaction
