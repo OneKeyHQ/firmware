@@ -274,6 +274,10 @@ if not utils.BITCOIN_ONLY:
     SolanaAddress = 10101
     SolanaSignTx = 10102
     SolanaSignedTx = 10103
+    CosmosGetAddress = 10800
+    CosmosAddress = 10801
+    CosmosSignTx = 10802
+    CosmosSignedTx = 10803
     AlgorandGetAddress = 10900
     AlgorandAddress = 10901
     AlgorandSignTx = 10902

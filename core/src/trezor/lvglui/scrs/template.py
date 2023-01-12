@@ -1420,3 +1420,22 @@ class FilecoinPayment(FullSizeWindow):
         self.item6 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
+
+
+class CosmosSignCommon(FullSizeWindow):
+    def __init__(self, chain_id: str, fee: str, gas: str, memo: str, msgs_item: dict):
+        super().__init__(
+            _(i18n_keys.TITLE__VIEW_TRANSACTION),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        for key, value in msgs_item.items():
+            self.item1 = DisplayItem(self.container, key, value)
+        self.item2 = DisplayItem(self.container, "Chain ID", chain_id)
+        if fee is not None:
+            self.item3 = DisplayItem(self.container, "Fee", fee)
+        self.item4 = DisplayItem(self.container, "Gas", gas)
+        if len(memo) != 0:
+            self.item5 = DisplayItem(self.container, "Memo", memo)

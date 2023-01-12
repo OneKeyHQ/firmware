@@ -1519,3 +1519,19 @@ async def confirm_filecoin_payment(
     await raise_if_cancelled(
         interact(ctx, screen, "filecoin_payment", ButtonRequestType.ProtectCall)
     )
+
+
+async def confirm_cosmos_sign_common(
+    ctx: wire.GenericContext,
+    chain_id: str,
+    fee: str | None,
+    gas: str,
+    memo: str,
+    msgs_item: dict,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosSignCommon
+
+    screen = CosmosSignCommon(chain_id, fee, gas, memo, msgs_item)
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
+    )
