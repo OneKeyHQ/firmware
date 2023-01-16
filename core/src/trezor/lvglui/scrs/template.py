@@ -362,7 +362,7 @@ class BlobDisPlay(FullSizeWindow):
                 if self.long_message:
                     PageAbleMessage(
                         _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
-                        self.message,
+                        self.data,
                         self.channel,
                     )
                     self.destroy()
@@ -1420,3 +1420,203 @@ class FilecoinPayment(FullSizeWindow):
         self.item6 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
+
+
+class CosmosTransactionOverview(FullSizeWindow):
+    def __init__(self, title, type, value, amount, address, primary_color, icon_path):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__VIEW),
+            _(i18n_keys.BUTTON__REJECT),
+            anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        if type == _(i18n_keys.TITLE__SEND):
+            self.item1 = DisplayItem(
+                self.container,
+                f"#878787 {_(i18n_keys.INSERT__SEND)}#  {amount}  #878787 {_(i18n_keys.INSERT__TO)}#",
+                address,
+            )
+            self.item1.label_top.set_recolor(True)
+            self.item1.set_style_bg_color(lv_colors.BLACK, 0)
+        else:
+            self.item1 = DisplayItem(
+                self.container,
+                "#878787 Transaction Type:#",
+                value,
+            )
+            self.item1.label_top.set_recolor(True)
+            self.item1.set_style_bg_color(lv_colors.BLACK, 0)
+
+
+class CosmosSend(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        chain_id,
+        chain_name,
+        address_from,
+        address_to,
+        amount,
+        fee,
+        primary_color=None,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
+        )
+        self.item4 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        if chain_name is not None:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
+            )
+        else:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
+            )
+
+
+class CosmosDelegate(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        chain_id,
+        chain_name,
+        delegator,
+        validator,
+        amount,
+        fee,
+        primary_color=None,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__DELEGATOR__COLON), delegator
+        )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__VALIDATOR__COLON), validator
+        )
+        self.item4 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        if chain_name is not None:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
+            )
+        else:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
+            )
+
+
+class CosmosSignCommon(FullSizeWindow):
+    def __init__(
+        self,
+        chain_id: str,
+        chain_name: str,
+        fee: str,
+        msgs_item: dict,
+        title: str,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        if chain_name is not None:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
+            )
+        else:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
+            )
+        for key, value in msgs_item.items():
+            if len(value) <= 80:
+                self.item2 = DisplayItem(self.container, key, value)
+        if fee is not None:
+            self.item3 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
+            )
+
+
+class CosmosLongValue(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        content: str,
+        primary_color,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color or lv_colors.ONEKEY_GREEN,
+        )
+
+        PageAbleMessage(
+            title,
+            content,
+            self.channel,
+            primary_color=lv_colors.ONEKEY_GREEN,
+        )
+        self.destroy()
+
+
+class CosmosSignCombined(FullSizeWindow):
+    def __init__(self, chain_id: str, fee: str, msgs: str):
+        super().__init__(
+            _(i18n_keys.TITLE__VIEW_TRANSACTION),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
+        )
+        self.item2 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        self.show_full_message = NormalButton(
+            self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
+        )
+        self.show_full_message.align_to(self.item2, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+        self.show_full_message.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.message = msgs
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.show_full_message:
+                PageAbleMessage(
+                    _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE),
+                    self.message,
+                    self.channel,
+                    primary_color=lv_colors.ONEKEY_GREEN,
+                )

@@ -410,6 +410,12 @@ enum MessageType {
     MessageType_SolanaSignTx = 10102 [(wire_in) = true];
     MessageType_SolanaSignedTx = 10103 [(wire_out) = true];
 
+    // Cosmos
+    MessageType_CosmosGetAddress = 10800 [(wire_in) = true];
+    MessageType_CosmosAddress = 10801 [(wire_out) = true];
+    MessageType_CosmosSignTx = 10802 [(wire_in) = true];
+    MessageType_CosmosSignedTx = 10803 [(wire_out) = true];
+
     // Algorand
     MessageType_AlgorandGetAddress = 10900 [(wire_in) = true];
     MessageType_AlgorandAddress = 10901 [(wire_out) = true];

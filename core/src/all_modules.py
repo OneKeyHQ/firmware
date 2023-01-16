@@ -516,6 +516,16 @@ apps.conflux.verify_message
 import apps.conflux.verify_message
 apps.conflux.verify_message_cip23
 import apps.conflux.verify_message_cip23
+apps.cosmos
+import apps.cosmos
+apps.cosmos.get_address
+import apps.cosmos.get_address
+apps.cosmos.networks
+import apps.cosmos.networks
+apps.cosmos.sign_tx
+import apps.cosmos.sign_tx
+apps.cosmos.transaction
+import apps.cosmos.transaction
 apps.debug
 import apps.debug
 apps.debug.load_device

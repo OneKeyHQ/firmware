@@ -1519,3 +1519,135 @@ async def confirm_filecoin_payment(
     await raise_if_cancelled(
         interact(ctx, screen, "filecoin_payment", ButtonRequestType.ProtectCall)
     )
+
+
+async def confirm_cosmos_tx(
+    ctx: wire.GenericContext,
+    title: str | None,
+    value: str | None,
+    address: str | None,
+    amount: str | None,
+    br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosTransactionOverview
+
+    await raise_if_cancelled(
+        interact(
+            ctx,
+            CosmosTransactionOverview(
+                _(i18n_keys.TITLE__STR_TRANSACTION).format("Cosmos"),
+                title,
+                value,
+                amount,
+                address,
+                primary_color=ctx.primary_color,
+                icon_path=ctx.icon_path,
+            ),
+            "confirm_output",
+            br_code,
+        )
+    )
+
+
+async def confirm_cosmos_send(
+    ctx: wire.GenericContext,
+    fee: str,
+    chain_id: str,
+    chain_name: str | None,
+    sender: str | None = None,
+    receiver: str | None = None,
+    amount: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosSend
+
+    screen = CosmosSend(
+        _(i18n_keys.TITLE__VIEW_TRANSACTION),
+        chain_id,
+        chain_name,
+        sender,
+        receiver,
+        amount,
+        fee,
+        primary_color=ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_send", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_cosmos_delegate(
+    ctx: wire.GenericContext,
+    fee: str,
+    chain_id: str,
+    chain_name: str | None,
+    delegator: str | None = None,
+    validator: str | None = None,
+    amount: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosDelegate
+
+    screen = CosmosDelegate(
+        _(i18n_keys.TITLE__VIEW_TRANSACTION),
+        chain_id,
+        chain_name,
+        delegator,
+        validator,
+        amount,
+        fee,
+        primary_color=ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_send", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_cosmos_sign_common(
+    ctx: wire.GenericContext,
+    chain_id: str,
+    chain_name: str | None,
+    fee: str,
+    msgs_item: dict,
+    title: str,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosSignCommon, CosmosLongValue
+
+    screen = CosmosSignCommon(chain_id, chain_name, fee, msgs_item, title)
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
+    )
+
+    for key, value in msgs_item.items():
+        if len(value) > 80:
+            screen = CosmosLongValue(key, value, ctx.primary_color)
+            await raise_if_cancelled(
+                interact(
+                    ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall
+                )
+            )
+
+
+async def confirm_cosmos_memo(
+    ctx: wire.GenericContext, title: str, description: str, memo: str
+) -> None:
+    from trezor.lvglui.scrs.template import BlobDisPlay
+
+    screen = BlobDisPlay(title, description, memo, None)
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_memo", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_cosmos_sign_combined(
+    ctx: wire.GenericContext,
+    chain_id: str,
+    fee: str,
+    msgs: str,
+) -> None:
+    from trezor.lvglui.scrs.template import CosmosSignCombined
+
+    screen = CosmosSignCombined(chain_id, fee, msgs)
+    await raise_if_cancelled(
+        interact(
+            ctx, screen, "confirm_cosmos_sign_combined", ButtonRequestType.ProtectCall
+        )
+    )

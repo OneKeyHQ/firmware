@@ -57,6 +57,7 @@ from . import (
     tron,
     sui,
     filecoin,
+    cosmos,
     with_client,
 )
 
@@ -96,6 +97,7 @@ COMMAND_ALIASES = {
     "aptos": aptos.cli,
     "sui": sui.cli,
     "filecoin": filecoin.cli,
+    "cosmos": cosmos.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -389,7 +391,7 @@ cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(near.cli)
 cli.add_command(sui.cli)
-cli.add_command(filecoin.cli)
+cli.add_command(cosmos.cli)
 
 #
 # Main
