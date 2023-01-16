@@ -22,6 +22,7 @@
 #include "config.h"
 #include "cosmos/json_parser.h"
 #include "cosmos/parser.h"
+#include "cosmos_networks.h"
 #include "font.h"
 #include "fsm.h"
 #include "gettext.h"
@@ -91,10 +92,21 @@ refresh_menu:
   y = 0;
   cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key), token_val,
                         sizeof(token_val), 0, &pageCount);
+  if (memcmp(token_key, "Chain ID", 8) == 0) {
+    const CosmosNetworkType *n = cosmosnetworkByChainId(token_val);
+    if (n) {
+      memcpy(token_key, "Chain Name", 11);
+      memcpy(token_val, n->chain_name, strlen(n->chain_name) + 1);
+    }
+  }
   if (index == 0) {
     y += bmp_btn_up.height + 1;
     oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    y += font->pixel + 5;
+    if (oledStringWidthAdapter(token_key, FONT_STANDARD) > (OLED_WIDTH - 5)) {
+      y += 2 * font->pixel + 5;
+    } else {
+      y += font->pixel + 5;
+    }
     oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
 
     // scrollbar
@@ -112,7 +124,11 @@ refresh_menu:
     y += bmp_btn_up.height + 1;
 
     oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    y += font->pixel + 5;
+    if (oledStringWidthAdapter(token_key, FONT_STANDARD) > (OLED_WIDTH - 5)) {
+      y += 2 * font->pixel + 5;
+    } else {
+      y += font->pixel + 5;
+    }
     oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
 
     // scrollbar
@@ -131,7 +147,11 @@ refresh_menu:
     y += bmp_btn_up.height + 1;
 
     oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    y += font->pixel + 5;
+    if (oledStringWidthAdapter(token_key, FONT_STANDARD) > (OLED_WIDTH - 5)) {
+      y += 2 * font->pixel + 5;
+    } else {
+      y += font->pixel + 5;
+    }
     oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
 
     // scrollbar

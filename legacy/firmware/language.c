@@ -120,8 +120,12 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h
     {"Cancel", "取消"},
+    // cosmos.c
+    {"Chain ID", "链 ID"},
     // ethereum.c
     {"Chain Id out of bounds", ""},  // msg
+    // cosmos.c
+    {"Chain Name", "链名称"},
     //
     {"Change PIN", "修改PIN码"},
     // layout2.c
@@ -224,6 +228,16 @@ const char *languages[][2] = {
     {"Decrypted message", "解密消息"},
     // layout2.c
     {"Decrypted signed message", "解密签名消息"},
+    // cosmos.c
+    {"Delegate", "委托"},
+    {"Delegator", "代理方"},
+    {"Deposit", "存款"},
+    {"Deposit Amount", "存款金额"},
+    {"Deposit Denomination", "存款面值"},
+    {"Depositer", "存款方"},
+    {"Description", "描述"},
+    {"Destination Address", "目标地址"},
+    {"Destination Coins", "来源金额"},
     // reset.c reset.c
     {"Device failed initialized", ""},  // msg
     //
@@ -368,6 +382,8 @@ const char *languages[][2] = {
     {"From", "发送方"},
     // layout2.c
     {"GPG sign for:", ""},
+    // cosmos.c
+    {"Granter", "授予人"},
     // layout2.c
     {"Guide", "使用教程"},
     // layout2.c c fsm_msg_common.h
@@ -454,6 +470,8 @@ const char *languages[][2] = {
     {"Mosaic", ""},
     // layout2.c
     {"Mosaic Description", ""},
+    // cosmos.c
+    {"Multi Send", "多签"},
     // signing.c signing.c
     {"Multisig field provided but not expected.", ""},
     {"NEXT", "继续"},
@@ -517,6 +535,8 @@ const char *languages[][2] = {
     {"Okay", "确认"},
     //
     {"On", "开启"},
+    // cosmos.c
+    {"Option", "选项"},
     // signing.c
     {"Output's address_n provided but not expected.", ""},
     // protect.c protect.c protect.c protect.c protect.c
@@ -591,6 +611,11 @@ const char *languages[][2] = {
     {"Process error", ""},
     // storage.c
     {"Processing", "处理中"},
+    // cosmos.c
+    {"Proposal", "提案"},
+    {"Proposal ID", "提案 ID"},
+    {"Propose", "投票"},
+    {"Proposer", "提案申请人"},
     // signing.c
     {"Pubkey not found in multisig script", ""},
     // lisk.c
@@ -612,6 +637,8 @@ const char *languages[][2] = {
     {"Recipient", "接收方"},
     //
     {"Recovery phrase verified pass", "助记词校验通过"},
+    // cosmos.c
+    {"Redelegate", "重新委托"},
     // u2f.c
     {"Register", "注册"},
     // layout2.c
@@ -696,6 +723,9 @@ const char *languages[][2] = {
     {"Skip pin check:", "免密支付"},
     //
     {"Sleep Mode", "休眠模式"},
+    // cosmos.c
+    {"Source Address", "来源地址"},
+    {"Source Coins", "来源金额"},
     // storage.c
     {"Starting up", "启动中"},
     // config.c
@@ -728,6 +758,11 @@ const char *languages[][2] = {
     {"Timestamp must be set.", ""},
     // signing.c fsm_msg_coin.h
     {"Timestamp not enabled on this coin.", ""},
+    // cosmos.c
+    {"Tip Amount", "小费金额"},
+    {"Tipper", "小费支付方"},
+    {"Title", "标题"},
+    // signing.c fsm_msg_coin.h
     {"To", "接收方"},
     // ethereum.c
     {"Too much data", ""},
@@ -752,6 +787,8 @@ const char *languages[][2] = {
     {"U2F counter set", ""},
     // layout2.c
     {"U2F security key?", ""},
+    // cosmos.c
+    {"Undelegate", "取消委托"},
     // layout2.c
     {"Unencrypted hex data", ""},
     // layout2.c
@@ -791,6 +828,10 @@ const char *languages[][2] = {
     {"Use SE:", "使用SE:"},
     //
     {"Use this passphrase?", "确认密语"},
+    // cosmos
+    {"Validator", "验证方"},
+    {"Validator Destination", "验证方目标"},
+    {"Validator Source", "验证方来源"},
     // fsm_msg_crypto.h
     {"Value length must be a multiple of 16", ""},
     // signing.c signing.c signing.c signing.c signing.c
@@ -814,6 +855,9 @@ const char *languages[][2] = {
     {"Visiting Help Center and search \"Blind Signing\" to "
      "learn more\n help.onekey.so",
      "访问help.onekey.so搜索盲签了解更多"},
+    // cosmos.c
+    {"Vote", "投票"},
+    {"Voter", "投票方"},
     // config.c
     {"Waking up", "唤醒"},
     //
@@ -832,6 +876,9 @@ const char *languages[][2] = {
     {"Wipe code removed", ""},
     // fsm_msg_common.h
     {"Wipe code set", ""},
+    // cosmos.c
+    {"Withdraw Reward", "提取奖励"},
+    {"Withdraw Validator Commission", "提取验证者佣金"},
     // recovery.c
     {"Word not found in a wordlist", ""},
     //
@@ -976,6 +1023,8 @@ const char *languages[][2] = {
     {"minutes", "分钟"},
     //
     {"mnemonic", "助记词"},
+    // cosmos.c
+    {"none", "无"},
     //
     {"number of recovery phrase", "助记词位数"},
     // recovery.c
