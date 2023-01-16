@@ -286,11 +286,13 @@ __Z_INLINE uint8_t get_subitem_count(root_item_e root_item) {
 
   switch (root_item) {
     case root_item_chain_id:
+      break;
     case root_item_sequence:
     case root_item_account_number:
-      if (!tx_is_expert_mode()) {
-        tmp_num_items = 0;
-      }
+      // if (!tx_is_expert_mode()) {
+      //   tmp_num_items = 0;
+      // }
+      tmp_num_items = 0;
       break;
     case root_item_msgs: {
       // Remove grouped items from list
@@ -311,9 +313,10 @@ __Z_INLINE uint8_t get_subitem_count(root_item_e root_item) {
     case root_item_memo:
       break;
     case root_item_fee:
-      if (!tx_is_expert_mode()) {
-        tmp_num_items = 1;  // Only Amount
-      }
+      // if (!tx_is_expert_mode()) {
+      //   tmp_num_items = 1;  // Only Amount
+      // }
+      tmp_num_items = 1;  // Only Amount
       break;
     case root_item_tip:
       tmp_num_items += 0;

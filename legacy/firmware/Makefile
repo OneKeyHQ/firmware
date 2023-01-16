@@ -120,6 +120,7 @@ OBJS += cosmos/tx_validate.o
 OBJS += cosmos/tx_parser.o
 OBJS += cosmos/tx_display.o
 OBJS += cosmos/parser.o
+OBJS += cosmos_networks.o
 OBJS += cosmos.o
 OBJS += polkadot.o
 OBJS += polkadot/crypto_helper.o
