@@ -1,8 +1,12 @@
 #include "parser.h"
 #include <stdio.h>
+#include "../cosmos_networks.h"
+#include "../gettext.h"
 #include "coin.h"
 #include "tx_display.h"
 #include "tx_parser.h"
+
+static char cosmos_chain_id[128] = {0};
 
 parser_error_t cosmos_parser_parse(parser_context_t *ctx, const uint8_t *data,
                                    size_t dataLen) {
@@ -26,6 +30,9 @@ parser_error_t cosmos_parser_validate(const parser_context_t *ctx) {
     CHECK_PARSER_ERR(cosmos_parser_getItem(ctx, idx, tmpKey, sizeof(tmpKey),
                                            tmpVal, sizeof(tmpVal), 0,
                                            &pageCount))
+    if (memcmp(tmpKey, "Chain ID", 8) == 0) {
+      memcpy(cosmos_chain_id, tmpVal, strlen(tmpVal) + 1);
+    }
   }
 
   return parser_ok;
@@ -122,7 +129,7 @@ __Z_INLINE parser_error_t parser_formatAmountItem(uint16_t amountToken,
 
   if (numElements == 0) {
     *pageCount = 1;
-    snprintf(outVal, outValLen, "Empty");
+    snprintf(outVal, outValLen, _("none"));
     return parser_ok;
   }
 
@@ -186,8 +193,21 @@ __Z_INLINE parser_error_t parser_formatAmountItem(uint16_t amountToken,
                      COIN_DEFAULT_DENOM_FACTOR) != 0) {
       return parser_unexpected_error;
     }
-    number_inplace_trimming(bufferUI, COIN_DEFAULT_DENOM_TRIMMING);
+    number_inplace_trimming(bufferUI, 0);
     snprintf(tmpDenom, sizeof(tmpDenom), " %s", COIN_DEFAULT_DENOM_REPR);
+  } else {
+    const CosmosNetworkType *n = cosmosnetworkByChainId(cosmos_chain_id);
+    if (n) {
+      if (memcmp(tmpDenom, n->coin_minimal_denom,
+                 strlen(n->coin_minimal_denom)) == 0) {
+        if (fpstr_to_str(bufferUI, sizeof(bufferUI), tmpAmount, n->decimals) !=
+            0) {
+          return parser_unexpected_error;
+        }
+        number_inplace_trimming(bufferUI, 0);
+        snprintf(tmpDenom, sizeof(tmpDenom), " %s", n->coin_denom);
+      }
+    }
   }
 
   z_str3join(bufferUI, sizeof(bufferUI), "", tmpDenom);
@@ -242,7 +262,7 @@ __Z_INLINE parser_error_t parser_formatAmount(uint16_t amountToken,
 
   if (totalPages == 0) {
     *pageCount = 1;
-    snprintf(outVal, outValLen, "Empty");
+    snprintf(outVal, outValLen, _("none"));
     return parser_ok;
   }
 
