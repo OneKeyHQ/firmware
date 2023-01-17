@@ -29,7 +29,7 @@ void aptos_get_address_from_public_key(const uint8_t *public_key,
   sha3_Final(&ctx, buf);
   address[0] = '0';
   address[1] = 'x';
-  data2hex((const uint8_t *)buf, SIZE_PUBKEY, address + 2);
+  data2hexaddr((const uint8_t *)buf, SIZE_PUBKEY, address + 2);
 }
 
 void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,

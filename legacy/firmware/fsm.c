@@ -284,7 +284,7 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
         const char *display_addr = address;
         // strip cashaddr prefix
         if (prefixlen) {
-          display_addr += prefixlen;
+          // display_addr += prefixlen;
         }
         layoutAddress(display_addr, desc, false, ignorecase, address_n,
                       address_n_count, address_is_account);
