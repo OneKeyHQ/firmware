@@ -149,6 +149,8 @@ const char *languages[][2] = {
     //
     {"Check this device with\nOneKey secure server?",
      "确定访问OneKey服务器对\n此设备进行防伪校验吗?"},
+    // algorand.c
+    {"Close to", "关闭账户并转移资产到"},
     // layout2.c
     {"CoSi commit index #?", ""},
     // layout2.c
@@ -521,6 +523,8 @@ const char *languages[][2] = {
     {"Not in Signing mode", ""},
     // u2f.c
     {"Not registered.", ""},
+    // algorand.c
+    {"Note", "备注"},
     // layout2.c u2f.c u2f.c fsm_msg_common.h
     {"OK", "确认"},
     // signing.c
@@ -633,6 +637,7 @@ const char *languages[][2] = {
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
     {"Really send", "确认发送"},
+    {"Receiver", "接收方"},
     //
     {"Recipient", "接收方"},
     //
@@ -641,6 +646,8 @@ const char *languages[][2] = {
     {"Redelegate", "重新委托"},
     // u2f.c
     {"Register", "注册"},
+    // algorand.c
+    {"Rekey to", "重新授权给"},
     // layout2.c
     {"Remaining times:", "剩余次数"},
     //
@@ -779,6 +786,8 @@ const char *languages[][2] = {
     // fsm_msg_coin.h
     {"Transaction must have at least one output", ""},
     {"Transfer", "发送"},
+    // algo
+    {"Txn type", "类型"},
     // ethereum.c
     {"Txtype out of bounds", ""},
     // cosmos.c
