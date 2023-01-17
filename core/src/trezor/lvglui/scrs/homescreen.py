@@ -394,7 +394,7 @@ class NftGallery(Screen):
 
     def empty(self):
 
-        self.empty_tips = lv.label(self)
+        self.empty_tips = lv.label(self.content_area)
         self.empty_tips.set_text(_(i18n_keys.CONTENT__NO_ITEMS))
         self.empty_tips.add_style(
             StyleWrapper()
@@ -405,7 +405,7 @@ class NftGallery(Screen):
         )
         self.empty_tips.align(lv.ALIGN.TOP_MID, 0, 372)
 
-        self.tips_bar = lv.obj(self)
+        self.tips_bar = lv.obj(self.content_area)
         self.tips_bar.remove_style_all()
         self.tips_bar.add_style(
             StyleWrapper()
@@ -830,7 +830,7 @@ class AutoLockSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__AUTO_LOCK), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.setting_items = [1, 2, 5, 10, 30, "Never", None]
         has_custom = True
         self.checked_index = 0
@@ -873,7 +873,7 @@ class AutoLockSetting(Screen):
             )
             self.checked_index = -1
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-        self.tips = lv.label(self)
+        self.tips = lv.label(self.content_area)
         self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
         self.tips.set_long_mode(lv.label.LONG.WRAP)
         self.fresh_tips()
@@ -941,7 +941,7 @@ class LanguageSetting(Screen):
         )
 
         self.check_index = 0
-        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=0)
         self.lang_buttons = []
         for idx, lang in enumerate(langs):
             lang_button = ListItemBtn(
@@ -992,7 +992,7 @@ class BacklightSetting(Screen):
         #     brightness2_percent_str(current_brightness),
         #     has_next=False,
         # )
-        self.slider = lv.slider(self)
+        self.slider = lv.slider(self.content_area)
         self.slider.set_size(464, 82)
         self.slider.set_ext_click_area(100)
         self.slider.set_range(5, style.BACKLIGHT_MAX)
@@ -1007,7 +1007,7 @@ class BacklightSetting(Screen):
         self.slider.add_style(
             StyleWrapper().radius(0).bg_color(lv_colors.WHITE), lv.PART.INDICATOR
         )
-        self.percent = lv.label(self)
+        self.percent = lv.label(self.content_area)
         self.percent.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 16, 64)
         self.percent.add_style(
             StyleWrapper().text_font(font_PJSREG30).text_color(lv_colors.BLACK), 0
@@ -1036,11 +1036,11 @@ class KeyboardHapticSetting(Screen):
             nav_back=True,
         )
 
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self.content_area, self.title)
         self.keyboard = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__KEYBOARD_HAPTIC)
         )
-        self.tips = lv.label(self)
+        self.tips = lv.label(self.content_area)
         self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
         self.tips.set_long_mode(lv.label.LONG.WRAP)
         self.tips.add_style(
@@ -1082,9 +1082,9 @@ class AnimationSetting(Screen):
             nav_back=True,
         )
 
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self.content_area, self.title)
         self.item = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__ANIMATIONS))
-        self.tips = lv.label(self)
+        self.tips = lv.label(self.content_area)
         self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
         self.tips.set_long_mode(lv.label.LONG.WRAP)
         self.tips.add_style(
@@ -1127,11 +1127,11 @@ class TapAwakeSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__LOCK_SCREEN), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self.content_area, self.title)
         self.tap_awake = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__TAP_TO_WAKE)
         )
-        self.description = lv.label(self)
+        self.description = lv.label(self.content_area)
         self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
@@ -1175,7 +1175,7 @@ class AutoShutDownSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__SHUTDOWN), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.setting_items = [1, 2, 5, 10, "Never", None]
         has_custom = True
         self.checked_index = 0
@@ -1217,7 +1217,7 @@ class AutoShutDownSetting(Screen):
             self.checked_index = -1
         # pyright: on
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
-        self.tips = lv.label(self)
+        self.tips = lv.label(self.content_area)
         self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
         self.tips.set_long_mode(lv.label.LONG.WRAP)
         self.fresh_tips()
@@ -1282,7 +1282,7 @@ class PinMapSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__PIN_KEYPAD), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=0)
         self.order = ListItemBtn(
             self.container,
             _(i18n_keys.OPTION__DEFAULT),
@@ -1297,7 +1297,7 @@ class PinMapSetting(Screen):
             has_bgcolor=False,
         )
         self.random.add_check_img()
-        self.tips = lv.label(self)
+        self.tips = lv.label(self.content_area)
         self.tips.align_to(self.container, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 0)
         self.tips.set_long_mode(lv.label.LONG.WRAP)
         self.fresh_tips()
@@ -1357,10 +1357,10 @@ class ConnectSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__CONNECT), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self.content_area, self.title)
         self.ble = ListItemBtnWithSwitch(self.container, _(i18n_keys.ITEM__BLUETOOTH))
 
-        self.description = lv.label(self)
+        self.description = lv.label(self.content_area)
         self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
@@ -1429,7 +1429,7 @@ class AboutSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__ABOUT_DEVICE), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=0)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=0)
 
         self.model = DisplayItem(self.container, _(i18n_keys.ITEM__MODEL), model)
         self.model.label.add_style(
@@ -1529,7 +1529,9 @@ class AboutSetting(Screen):
         )
         self.board_loader.set_style_bg_color(lv_colors.BLACK, 0)
         self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
-        self.firmware_update = NormalButton(self, _(i18n_keys.BUTTON__SYSTEM_UPDATE))
+        self.firmware_update = NormalButton(
+            self.content_area, _(i18n_keys.BUTTON__SYSTEM_UPDATE)
+        )
         self.firmware_update.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
         self.serial.add_event_cb(self.on_long_pressed, lv.EVENT.LONG_PRESSED, None)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
@@ -1581,11 +1583,11 @@ class Go2UpdateMode(Screen):
             subtitle=_(i18n_keys.SUBTITLE__SWITCH_TO_UPDATE_MODE_RECONFIRM),
             # icon_path="A:/res/update_green.png",
         )
-        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__RESTART))
+        self.btn_yes = NormalButton(self.content_area, _(i18n_keys.BUTTON__RESTART))
         self.btn_yes.set_size(231, 98)
-        self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+        self.btn_yes.align(lv.ALIGN.BOTTOM_RIGHT, -8, -8)
         self.btn_yes.enable(lv_colors.ONEKEY_GREEN, lv_colors.BLACK)
-        self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL))
+        self.btn_no = NormalButton(self.content_area, _(i18n_keys.BUTTON__CANCEL))
         self.btn_no.set_size(231, 98)
         self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
 
@@ -1607,12 +1609,12 @@ class PowerOff(Screen):
             prev_scr=prev_scr,
             title=_(i18n_keys.TITLE__POWER_OFF),
         )
-        self.btn_yes = NormalButton(self, _(i18n_keys.ITEM__POWER_OFF))
+        self.btn_yes = NormalButton(self.content_area, _(i18n_keys.ITEM__POWER_OFF))
         self.btn_yes.set_size(231, 98)
-        self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+        self.btn_yes.align(lv.ALIGN.BOTTOM_RIGHT, -8, -8)
         self.btn_yes.enable(lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
 
-        self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__CANCEL))
+        self.btn_no = NormalButton(self.content_area, _(i18n_keys.BUTTON__CANCEL))
         self.btn_no.set_size(231, 98)
         self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
         self.re_loop = re_loop
@@ -1664,7 +1666,7 @@ class DevelopSettings(Screen):
             nav_back=True,
         )
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.safety_check = ListItemBtn(
             self.container,
             _(i18n_keys.ITEM__SAFETY_CHECKS),
@@ -1712,7 +1714,6 @@ class HomeScreenSetting(Screen):
 
         internal_wp_nums = 4
         wp_nums = internal_wp_nums
-        self.clear_flag(lv.obj.FLAG.SCROLLABLE)
         file_name_list = []
         if not utils.EMULATOR:
             for size, _attrs, name in io.fatfs.listdir("1:/res/wallpapers"):
@@ -1732,7 +1733,7 @@ class HomeScreenSetting(Screen):
             lv.GRID_TEMPLATE.LAST,
         ]
         self.container = ContainerGrid(
-            self, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.title
+            self.content_area, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.title
         )
         self.wps = []
         for i in range(wp_nums):
@@ -1811,15 +1812,15 @@ class WallPaperManage(Screen):
         self.img_path = img_path
         self.zoom_path = zoom_path
 
-        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__SET))
+        self.btn_yes = NormalButton(self.content_area, _(i18n_keys.BUTTON__SET))
         self.btn_yes.add_style(
             StyleWrapper().bg_color(lv_colors.ONEKEY_GREEN).text_color(lv_colors.BLACK),
             0,
         )
         if not is_internal:
             self.btn_yes.set_size(231, 98)
-            self.btn_yes.align_to(self, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
-            self.btn_del = NormalButton(self, "")
+            self.btn_yes.align_to(self.content_area, lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+            self.btn_del = NormalButton(self.content_area, "")
             self.btn_del.set_size(231, 98)
             self.btn_del.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
             # self.btn_del.add_style(
@@ -1895,7 +1896,7 @@ class SecurityScreen(Screen):
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__SECURITY), nav_back=True)
         self.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.pin_map_type = ListItemBtn(self.container, _(i18n_keys.ITEM__PIN_KEYPAD))
         self.usb_lock = ListItemBtn(self.container, _(i18n_keys.ITEM__USB_LOCK))
         # self.safety_check = ListItemBtn(
@@ -1962,12 +1963,12 @@ class UsbLockSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__USB_LOCK), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self.content_area, self.title)
         self.usb_lock = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__USB_LOCK)
         )
 
-        self.description = lv.label(self)
+        self.description = lv.label(self.content_area)
         self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
@@ -2010,7 +2011,7 @@ class SafetyCheckSetting(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__SAFETY_CHECKS), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         # self.strict = ListItemBtn(
         #     self.container, _(i18n_keys.ITEM__STATUS__STRICT), has_next=False
         # )
@@ -2022,7 +2023,7 @@ class SafetyCheckSetting(Screen):
             self.container, _(i18n_keys.ITEM__SAFETY_CHECKS)
         )
         # self.prompt.add_check_img()
-        self.description = lv.label(self)
+        self.description = lv.label(self.content_area)
         self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_font(font_PJSREG24, lv.STATE.DEFAULT)
@@ -2068,7 +2069,7 @@ class SafetyCheckSetting(Screen):
 
     def add_warning_desc(self, primary_color, border_color, icon_path, bg_color):
         if not hasattr(self, "warning_desc"):
-            self.warning_desc = lv.obj(self)
+            self.warning_desc = lv.obj(self.content_area)
             self.warning_desc.remove_style_all()
             self.warning_desc.set_size(464, lv.SIZE.CONTENT)
             self.warning_desc.align(lv.ALIGN.BOTTOM_MID, 0, -8)
@@ -2177,7 +2178,7 @@ class WalletScreen(Screen):
             return
         super().__init__(prev_scr, title=_(i18n_keys.TITLE__WALLET), nav_back=True)
 
-        self.container = ContainerFlexCol(self, self.title, padding_row=2)
+        self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
         self.check_mnemonic = ListItemBtn(
             self.container, _(i18n_keys.ITEM__CHECK_RECOVERY_PHRASE)
         )
@@ -2216,11 +2217,11 @@ class PassphraseScreen(Screen):
             prev_scr=prev_scr, title=_(i18n_keys.TITLE__PASSPHRASE), nav_back=True
         )
 
-        self.container = ContainerFlexCol(self, self.title)
+        self.container = ContainerFlexCol(self.content_area, self.title)
         self.passphrase = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__PASSPHRASE)
         )
-        self.description = lv.label(self)
+        self.description = lv.label(self.content_area)
         self.description.set_size(464, lv.SIZE.CONTENT)
         self.description.set_long_mode(lv.label.LONG.WRAP)
         self.description.set_style_text_color(lv_colors.ONEKEY_GRAY, lv.STATE.DEFAULT)
