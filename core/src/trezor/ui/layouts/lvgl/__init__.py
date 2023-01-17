@@ -1561,7 +1561,7 @@ async def confirm_cosmos_send(
     from trezor.lvglui.scrs.template import CosmosSend
 
     screen = CosmosSend(
-        _(i18n_keys.TITLE__VIEW_TRANSACTION),
+        _(i18n_keys.TITLE__SEND),
         chain_id,
         chain_name,
         sender,
@@ -1587,7 +1587,7 @@ async def confirm_cosmos_delegate(
     from trezor.lvglui.scrs.template import CosmosDelegate
 
     screen = CosmosDelegate(
-        _(i18n_keys.TITLE__VIEW_TRANSACTION),
+        _(i18n_keys.TITLE__DELEGATE),
         chain_id,
         chain_name,
         delegator,
@@ -1597,7 +1597,7 @@ async def confirm_cosmos_delegate(
         primary_color=ctx.primary_color,
     )
     await raise_if_cancelled(
-        interact(ctx, screen, "cosmos_send", ButtonRequestType.ProtectCall)
+        interact(ctx, screen, "cosmos_delegate", ButtonRequestType.ProtectCall)
     )
 
 
@@ -1605,13 +1605,23 @@ async def confirm_cosmos_sign_common(
     ctx: wire.GenericContext,
     chain_id: str,
     chain_name: str | None,
+    signer: str | None,
     fee: str,
     msgs_item: dict,
     title: str,
+    value: str,
 ) -> None:
-    from trezor.lvglui.scrs.template import CosmosSignCommon, CosmosLongValue
+    from trezor.lvglui.scrs.template import (
+        CosmosSignCommon,
+        CosmosSignContent,
+        CosmosLongValue,
+    )
 
-    screen = CosmosSignCommon(chain_id, chain_name, fee, msgs_item, title)
+    screen = CosmosSignCommon(chain_id, chain_name, signer, fee, title, value)
+    await raise_if_cancelled(
+        interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
+    )
+    screen = CosmosSignContent(msgs_item)
     await raise_if_cancelled(
         interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
     )
@@ -1640,12 +1650,13 @@ async def confirm_cosmos_memo(
 async def confirm_cosmos_sign_combined(
     ctx: wire.GenericContext,
     chain_id: str,
+    signer: str | None,
     fee: str,
     msgs: str,
 ) -> None:
     from trezor.lvglui.scrs.template import CosmosSignCombined
 
-    screen = CosmosSignCombined(chain_id, fee, msgs)
+    screen = CosmosSignCombined(chain_id, signer, fee, msgs)
     await raise_if_cancelled(
         interact(
             ctx, screen, "confirm_cosmos_sign_combined", ButtonRequestType.ProtectCall

@@ -180,7 +180,7 @@ class Transaction:
         # Separate page
         self.msgs_item.pop("Memo", None)
         if hasattr(self, "tx") is False:
-            self.tx = UnknownTxn("Unknown key", "Unknown value")
+            self.tx = UnknownTxn("Unknown type", "")
 
     def tx_display_make_friendly(self) -> None:
         for key, value in self.msgs_item.items():
@@ -310,6 +310,7 @@ class MultiSendTxn:
 
 
 class UnknownTxn:
-    def __init__(self, title, value):
-        self.i18n_title = title
+    def __init__(self, type, value):
+        self.i18n_title = _(i18n_keys.TITLE__VIEW_TRANSACTION)
         self.i18n_value = value
+        self.type = type
