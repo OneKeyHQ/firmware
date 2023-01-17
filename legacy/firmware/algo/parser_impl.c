@@ -707,12 +707,12 @@ static parser_error_t _readTxCommonParams(parser_context_t *c, parser_tx_t *v) {
 
   if (_findKey(c, KEY_COMMON_GEN_ID) == parser_ok) {
     CHECK_ERROR(_readString(c, (uint8_t *)v->genesisID, sizeof(v->genesisID)))
-    DISPLAY_ITEM(IDX_COMMON_GEN_ID, 1, common_num_items)
+    // DISPLAY_ITEM(IDX_COMMON_GEN_ID, 1, common_num_items)
   }
 
   CHECK_ERROR(_findKey(c, KEY_COMMON_GEN_HASH))
   CHECK_ERROR(_readBinFixed(c, v->genesisHash, sizeof(v->genesisHash)))
-  DISPLAY_ITEM(IDX_COMMON_GEN_HASH, 1, common_num_items)
+  // DISPLAY_ITEM(IDX_COMMON_GEN_HASH, 1, common_num_items)
 
   if (_findKey(c, KEY_COMMON_GROUP_ID) == parser_ok) {
     CHECK_ERROR(_readBinFixed(c, v->groupID, sizeof(v->groupID)))
