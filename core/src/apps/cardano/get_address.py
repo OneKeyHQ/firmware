@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING
 
 from trezor import log, wire
+from trezor.lvglui.scrs import lv
 from trezor.messages import CardanoAddress
 
-from . import seed
+from . import ICON, PRIMARY_COLOR, seed
 from .address import derive_human_readable_address, validate_address_parameters
 from .helpers.credential import Credential, should_show_address_credentials
 from .layout import show_address_credentials, show_cardano_address
@@ -35,6 +36,7 @@ async def get_address(
         raise wire.ProcessError("Deriving address failed")
 
     if msg.show_display:
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         await _display_address(ctx, address_parameters, address, msg.protocol_magic)
 
     return CardanoAddress(address=address)

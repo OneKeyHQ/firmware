@@ -877,7 +877,7 @@ async def confirm_signverify(
     await raise_if_cancelled(
         interact(
             ctx,
-            Message(header, address, message, ctx.primary_color, ctx.icon_path),
+            Message(header, address, message, ctx.primary_color, ctx.icon_path, verify),
             br_type,
             ButtonRequestType.Other,
         )

@@ -44,5 +44,13 @@ async def verify_message_cip23(ctx: Context, msg: ConfluxVerifyMessageCIP23) -> 
 
     await confirm_signverify(ctx, "CFX", message, address=msg.address, verify=True)
 
-    await show_success(ctx, "verify_message", "The signature is valid.")
+    from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+
+    await show_success(
+        ctx,
+        "verify_message",
+        header=_(i18n_keys.TITLE__VERIFIED),
+        content=_(i18n_keys.SUBTITLE__THE_SIGNATURE_IS_VALID),
+        button=_(i18n_keys.BUTTON__DONE),
+    )
     return Success(message="Message verified")

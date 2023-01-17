@@ -135,11 +135,13 @@ class XpubOrPub(FullSizeWindow):
 
 
 class Message(FullSizeWindow):
-    def __init__(self, title, address, message, primary_color, icon_path):
+    def __init__(
+        self, title, address, message, primary_color, icon_path, verify: bool = False
+    ):
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__SIGN),
+            _(i18n_keys.BUTTON__VERIFY) if verify else _(i18n_keys.BUTTON__SIGN),
             _(i18n_keys.BUTTON__CANCEL),
             anim_dir=2,
             primary_color=primary_color,

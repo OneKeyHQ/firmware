@@ -98,5 +98,5 @@ class ContainerGrid(lv.obj):
             .grid_row_dsc_array(row_dsc),
             0,
         )
-        self.set_grid_align(lv.GRID_ALIGN.START, lv.GRID_ALIGN.END)
+        self.set_grid_align(lv.GRID_ALIGN.SPACE_AROUND, lv.GRID_ALIGN.END)
         self.set_layout(lv.LAYOUT_GRID.value)
