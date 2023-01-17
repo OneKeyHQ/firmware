@@ -11,12 +11,14 @@ class NetworkInfo:
         coinDenom: str,
         coinMinimalDenom: str,
         coinDecimals: int,
+        hrp: str,
     ) -> None:
         self.chainId = chainId
         self.chainName = chainName
         self.coinDenom = coinDenom
         self.coinMinimalDenom = coinMinimalDenom
         self.coinDecimals = coinDecimals
+        self.hrp = hrp
 
 
 def getChainName(chainId: str) -> str | None:
@@ -25,6 +27,14 @@ def getChainName(chainId: str) -> str | None:
         return None
 
     return n.chainName
+
+
+def getChainHrp(chainId: str) -> str | None:
+    n = by_chain_id(chainId)
+    if n is None:
+        return None
+
+    return n.hrp
 
 
 def formatAmont(chainId: str, amount: str, denom: str) -> str:
@@ -53,6 +63,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="ATOM",
         coinMinimalDenom="uatom",
         coinDecimals=6,
+        hrp="cosmos",
     )
     yield NetworkInfo(
         chainId="osmosis-1",
@@ -60,6 +71,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="OSMO",
         coinMinimalDenom="uosmo",
         coinDecimals=6,
+        hrp="osmo",
     )
     yield NetworkInfo(
         chainId="secret-4",
@@ -67,6 +79,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="SCRT",
         coinMinimalDenom="uscrt",
         coinDecimals=6,
+        hrp="secret",
     )
     yield NetworkInfo(
         chainId="akashnet-2",
@@ -74,6 +87,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="AKT",
         coinMinimalDenom="uakt",
         coinDecimals=6,
+        hrp="akash",
     )
     yield NetworkInfo(
         chainId="crypto-org-chain-mainnet-1",
@@ -81,6 +95,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="CRO",
         coinMinimalDenom="basecro",
         coinDecimals=8,
+        hrp="cro",
     )
     yield NetworkInfo(
         chainId="iov-mainnet-ibc",
@@ -88,6 +103,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="IOV",
         coinMinimalDenom="uiov",
         coinDecimals=6,
+        hrp="star",
     )
     yield NetworkInfo(
         chainId="sifchain-1",
@@ -95,6 +111,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="ROWAN",
         coinMinimalDenom="rowan",
         coinDecimals=18,
+        hrp="sif",
     )
     yield NetworkInfo(
         chainId="shentu-2.2",
@@ -102,6 +119,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="CTK",
         coinMinimalDenom="uctk",
         coinDecimals=6,
+        hrp="certik",
     )
     yield NetworkInfo(
         chainId="irishub-1",
@@ -109,6 +127,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="IRIS",
         coinMinimalDenom="uiris",
         coinDecimals=6,
+        hrp="iaa",
     )
     yield NetworkInfo(
         chainId="regen-1",
@@ -116,6 +135,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="REGEN",
         coinMinimalDenom="uregen",
         coinDecimals=6,
+        hrp="regen",
     )
     yield NetworkInfo(
         chainId="core-1",
@@ -123,6 +143,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="XPRT",
         coinMinimalDenom="uxprt",
         coinDecimals=6,
+        hrp="persistence",
     )
     yield NetworkInfo(
         chainId="sentinelhub-2",
@@ -130,6 +151,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="DVPN",
         coinMinimalDenom="udvpn",
         coinDecimals=6,
+        hrp="sent",
     )
     yield NetworkInfo(
         chainId="ixo-4",
@@ -137,6 +159,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="IXO",
         coinMinimalDenom="uixo",
         coinDecimals=6,
+        hrp="ixo",
     )
     yield NetworkInfo(
         chainId="emoney-3",
@@ -144,6 +167,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="NGM",
         coinMinimalDenom="ungm",
         coinDecimals=6,
+        hrp="emoney",
     )
     yield NetworkInfo(
         chainId="agoric-3",
@@ -151,6 +175,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="BLD",
         coinMinimalDenom="ubld",
         coinDecimals=6,
+        hrp="agoric",
     )
     yield NetworkInfo(
         chainId="bostrom",
@@ -158,6 +183,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="BOOT",
         coinMinimalDenom="boot",
         coinDecimals=0,
+        hrp="bostrom",
     )
     yield NetworkInfo(
         chainId="juno-1",
@@ -165,6 +191,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="JUNO",
         coinMinimalDenom="ujuno",
         coinDecimals=6,
+        hrp="juno",
     )
     yield NetworkInfo(
         chainId="stargaze-1",
@@ -172,6 +199,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="STARS",
         coinMinimalDenom="ustars",
         coinDecimals=6,
+        hrp="stars",
     )
     yield NetworkInfo(
         chainId="axelar-dojo-1",
@@ -179,6 +207,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="AXL",
         coinMinimalDenom="uaxl",
         coinDecimals=6,
+        hrp="axelar",
     )
     yield NetworkInfo(
         chainId="sommelier-3",
@@ -186,6 +215,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="SOMM",
         coinMinimalDenom="usomm",
         coinDecimals=6,
+        hrp="somm",
     )
     yield NetworkInfo(
         chainId="umee-1",
@@ -193,6 +223,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="UMEE",
         coinMinimalDenom="uumee",
         coinDecimals=6,
+        hrp="umee",
     )
     yield NetworkInfo(
         chainId="gravity-bridge-3",
@@ -200,6 +231,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="GRAV",
         coinMinimalDenom="ugraviton",
         coinDecimals=6,
+        hrp="gravity",
     )
     yield NetworkInfo(
         chainId="tgrade-mainnet-1",
@@ -207,6 +239,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="TGD",
         coinMinimalDenom="utgd",
         coinDecimals=6,
+        hrp="tgrade",
     )
     yield NetworkInfo(
         chainId="stride-1",
@@ -214,6 +247,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="STRD",
         coinMinimalDenom="ustrd",
         coinDecimals=6,
+        hrp="stride",
     )
     yield NetworkInfo(
         chainId="evmos_9001-2",
@@ -221,6 +255,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="EVMOS",
         coinMinimalDenom="aevmos",
         coinDecimals=18,
+        hrp="evmos",
     )
     yield NetworkInfo(
         chainId="injective-1",
@@ -228,6 +263,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="INJ",
         coinMinimalDenom="inj",
         coinDecimals=18,
+        hrp="inj",
     )
     yield NetworkInfo(
         chainId="kava_2222-10",
@@ -235,6 +271,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="KAVA",
         coinMinimalDenom="ukava",
         coinDecimals=6,
+        hrp="kava",
     )
     yield NetworkInfo(
         chainId="quicksilver-1",
@@ -242,4 +279,5 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDenom="QCK",
         coinMinimalDenom="uqck",
         coinDecimals=6,
+        hrp="quick",
     )

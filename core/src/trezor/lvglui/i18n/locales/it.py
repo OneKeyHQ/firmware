@@ -554,5 +554,6 @@ translations = [
     "Ritirare la commissione del validatore",
     "Invio multiplo",
     "nessuno",
+    "Contenuto",
 ]
 # fmt: on

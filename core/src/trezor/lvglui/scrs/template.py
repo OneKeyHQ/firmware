@@ -1445,7 +1445,7 @@ class CosmosTransactionOverview(FullSizeWindow):
         else:
             self.item1 = DisplayItem(
                 self.container,
-                "#878787 Transaction Type:#",
+                f"#878787 {_(i18n_keys.LIST_KEY__TYPE__COLON)}#",
                 value,
             )
             self.item1.label_top.set_recolor(True)
@@ -1537,9 +1537,10 @@ class CosmosSignCommon(FullSizeWindow):
         self,
         chain_id: str,
         chain_name: str,
+        signer: str,
         fee: str,
-        msgs_item: dict,
         title: str,
+        value: str,
     ):
         super().__init__(
             title,
@@ -1556,13 +1557,34 @@ class CosmosSignCommon(FullSizeWindow):
             self.item1 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
             )
+        if signer:
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
+            )
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), value
+        )
+        if fee is not None:
+            self.item4 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
+            )
+
+
+class CosmosSignContent(FullSizeWindow):
+    def __init__(
+        self,
+        msgs_item: dict,
+    ):
+        super().__init__(
+            _(i18n_keys.TITLE__CONTENT),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         for key, value in msgs_item.items():
             if len(value) <= 80:
                 self.item2 = DisplayItem(self.container, key, value)
-        if fee is not None:
-            self.item3 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
-            )
 
 
 class CosmosLongValue(FullSizeWindow):
@@ -1590,7 +1612,7 @@ class CosmosLongValue(FullSizeWindow):
 
 
 class CosmosSignCombined(FullSizeWindow):
-    def __init__(self, chain_id: str, fee: str, msgs: str):
+    def __init__(self, chain_id: str, signer: str, fee: str, msgs: str):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),
             None,
@@ -1601,11 +1623,15 @@ class CosmosSignCombined(FullSizeWindow):
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
         )
-        self.item2 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        if signer:
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
+            )
+        self.item3 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
         self.show_full_message = NormalButton(
             self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
         )
-        self.show_full_message.align_to(self.item2, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+        self.show_full_message.align_to(self.item3, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
         self.show_full_message.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
         self.message = msgs
 

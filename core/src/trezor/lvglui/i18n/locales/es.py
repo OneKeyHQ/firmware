@@ -554,5 +554,6 @@ translations = [
     "Retirar Comisión Validador",
     "Envío múltiple",
     "ninguno",
+    "Contenido",
 ]
 # fmt: on

@@ -1,6 +1,8 @@
 from trezor import wire
+from trezor.crypto import bech32
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha256
+from trezor.crypto.scripts import sha256_ripemd160
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs import lv
 from trezor.messages import CosmosSignedTx, CosmosSignTx
@@ -19,7 +21,7 @@ from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
 from . import ICON, PRIMARY_COLOR
-from .networks import formatAmont
+from .networks import formatAmont, getChainHrp
 from .transaction import DelegateTxn, SendTxn, Transaction
 
 
@@ -31,6 +33,7 @@ async def sign_tx(
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(msg.address_n)
     ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
+    public_key = node.public_key()
     privkey = node.private_key()
 
     # parse message
@@ -38,6 +41,15 @@ async def sign_tx(
         tx = Transaction.deserialize(msg.raw_tx)
     except BaseException as e:
         raise wire.DataError(f"Invalid message {e}")
+
+    hrp = getChainHrp(tx.chain_id)
+    if hrp is None:
+        signer = None
+    else:
+        h = sha256_ripemd160(public_key).digest()
+        convertedbits = bech32.convertbits(h, 8, 5)
+        assert convertedbits is not None, "Unsuccessful bech32.convertbits call"
+        signer = bech32.bech32_encode(hrp, convertedbits, bech32.Encoding.BECH32)
 
     if tx.amount is not None and tx.denom is not None:
         fee = formatAmont(tx.chain_id, tx.amount, tx.denom)
@@ -81,12 +93,16 @@ async def sign_tx(
                 ctx,
                 tx.chain_id,
                 tx.chain_name,
+                signer,
                 fee,
                 tx.msgs_item,
                 tx.tx.i18n_title,
+                tx.tx.i18n_value,
             )
     else:
-        await confirm_cosmos_sign_combined(ctx, tx.chain_id, fee, json.dumps(tx.msgs))
+        await confirm_cosmos_sign_combined(
+            ctx, tx.chain_id, signer, fee, json.dumps(tx.msgs)
+        )
 
     if len(tx.memo) > 0:
         await confirm_cosmos_memo(

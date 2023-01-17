@@ -554,5 +554,6 @@ translations = [
     "Validator-Provision zurückziehen",
     "Mehrfach senden",
     "keiner",
+    "Inhalt",
 ]
 # fmt: on
