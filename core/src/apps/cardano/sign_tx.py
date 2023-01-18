@@ -164,6 +164,7 @@ POOL_REGISTRATION_CERTIFICATE_ITEMS_COUNT = 10
 async def sign_tx(
     ctx: wire.Context, msg: CardanoSignTxInit, keychain: seed.Keychain
 ) -> CardanoSignTxFinished:
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await show_transaction_signing_mode(ctx, msg.signing_mode)
 
     is_network_id_verifiable = await _validate_tx_signing_request(ctx, msg)
@@ -191,7 +192,6 @@ async def sign_tx(
         tx_body_map_item_count, INVALID_TX_SIGNING_REQUEST
     )
     tx_dict.start(hash_fn)
-    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     with tx_dict:
         await _process_transaction(ctx, msg, keychain, tx_dict, account_path_checker)
 

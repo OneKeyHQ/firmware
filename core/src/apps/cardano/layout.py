@@ -10,7 +10,6 @@ from trezor.enums import (
     CardanoTxSigningMode,
 )
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.lvglui.scrs import lv
 from trezor.messages import CardanoAddressParametersType
 from trezor.strings import format_amount
 from trezor.ui.layouts import (
@@ -25,7 +24,7 @@ from trezor.ui.layouts import (
 
 from apps.common.paths import address_n_to_str
 
-from . import ICON, PRIMARY_COLOR, seed
+from . import seed
 from .address import derive_human_readable_address, encode_human_readable_address
 from .helpers import bech32, network_ids, protocol_magics
 from .helpers.utils import (
@@ -843,7 +842,6 @@ async def show_cardano_address(
         elif address_parameters.address_n_staking:
             address_extra = address_n_to_str(address_parameters.address_n_staking)
             # title_qr = address_n_to_str(address_parameters.address_n_staking)
-    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await show_address(
         ctx,
         address=address,

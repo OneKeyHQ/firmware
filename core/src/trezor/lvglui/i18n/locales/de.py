@@ -555,5 +555,8 @@ translations = [
     "Mehrfach senden",
     "keiner",
     "Inhalt",
+    "Erfolg",
+    "Die Unterschrift ist gültig.",
+    "Verifizieren",
 ]
 # fmt: on

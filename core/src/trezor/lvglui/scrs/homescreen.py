@@ -1733,7 +1733,11 @@ class HomeScreenSetting(Screen):
             lv.GRID_TEMPLATE.LAST,
         ]
         self.container = ContainerGrid(
-            self.content_area, row_dsc=row_dsc, col_dsc=col_dsc, align_base=self.title
+            self.content_area,
+            row_dsc=row_dsc,
+            col_dsc=col_dsc,
+            align_base=self.title,
+            pos=(-8, 40),
         )
         self.wps = []
         for i in range(wp_nums):
