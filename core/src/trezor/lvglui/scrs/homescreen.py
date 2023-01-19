@@ -18,7 +18,6 @@ from .components.anim import Anim
 from .components.button import ListItemBtn, ListItemBtnWithSwitch, NormalButton
 from .components.container import ContainerFlexCol, ContainerGrid
 from .components.listitem import DisplayItem, ImgGridItem
-from .components.navigation import Navigation
 from .widgets.style import StyleWrapper
 
 
@@ -362,7 +361,11 @@ class NftGallery(Screen):
                 0,
             )
             self.overview.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 32)
-            self.overview.set_text(f"{nft_counts} items")
+            self.overview.set_text(
+                _(i18n_keys.CONTENT__STR_ITEMS).format(nft_counts)
+                if nft_counts > 1
+                else _(i18n_keys.CONTENT__STR_ITEM).format(nft_counts)
+            )
             self.container = ContainerGrid(
                 self.content_area,
                 row_dsc=row_dsc,
@@ -442,9 +445,9 @@ class NftGallery(Screen):
                 return
             for nft in self.nfts:
                 if target == nft:
-                    file_name_without_ext = nft.file_name[5:-4]
+                    file_name_without_ext = nft.file_name.split(".")[0][5:]
                     desc_file_path = f"1:/res/nfts/desc/{file_name_without_ext}.json"
-                    config = {
+                    metadata = {
                         "header": "",
                         "subheader": "",
                         "network": "",
@@ -453,31 +456,42 @@ class NftGallery(Screen):
                     with io.fatfs.open(desc_file_path, "r") as f:
                         description = bytearray(2048)
                         n = f.read(description)
-                        if n > 0:
-                            config = json.loads((description[:n]).decode("utf-8"))
-                    NftManager(config, nft.file_name)
+                        if 0 < n < 2048:
+                            try:
+                                metadata_load = json.loads(
+                                    (description[:n]).decode("utf-8")
+                                )
+                            except BaseException as e:
+                                if __debug__:
+                                    print(f"Invalid json {e}")
+                            else:
+                                if all(
+                                    key in metadata_load.keys()
+                                    for key in metadata.keys()
+                                ):
+                                    metadata = metadata_load
+                    NftManager(self, metadata, nft.file_name)
 
     def _load_scr(self, scr: "Screen", back: bool = False) -> None:
         lv.scr_load(scr)
 
 
-class NftManager(FullSizeWindow):
-    def __init__(self, nft_config, file_name):
+class NftManager(Screen):
+    def __init__(self, prev_scr, nft_config, file_name):
         self.zoom_path = f"A:1:/res/nfts/zooms/{file_name}"
         self.file_name = file_name.replace("zoom-", "")
         self.img_path = f"A:1:/res/nfts/imgs/{self.file_name}"
         super().__init__(
+            prev_scr,
             title=nft_config["header"],
             subtitle=nft_config["subheader"],
             icon_path=self.img_path,
-            anim_dir=0,
+            nav_back=True,
         )
         self.nft_config = nft_config
         self.content_area.set_style_max_height(756, 0)
-        self.nav_back = Navigation(self.content_area)
-        self.nav_back.align(lv.ALIGN.TOP_MID, 0, 0)
-        self.icon.align_to(self.nav_back, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 8)
-        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.icon.align_to(self.nav_back, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 8)
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_LEFT, 8, 16)
         self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
 
         self.btn_yes = NormalButton(self.content_area)
@@ -507,23 +521,17 @@ class NftManager(FullSizeWindow):
         self.btn_label = lv.label(self.panel)
         self.btn_label.set_text(_(i18n_keys.BUTTON__DELETE))
         self.btn_label.align_to(self.btn_del_img, lv.ALIGN.OUT_RIGHT_MID, 4, 1)
-        self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
-
-    def on_nav_back(self, event_obj):
-        code = event_obj.code
-        if code == lv.EVENT.GESTURE:
-            _dir = lv.indev_get_act().get_gesture_dir()
-            if _dir == lv.DIR.RIGHT:
-                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     def del_callback(self):
         io.fatfs.unlink(self.zoom_path[2:])
         io.fatfs.unlink(self.img_path[2:])
-        io.fatfs.unlink("1:/res/nfts/desc/" + self.file_name[:-3] + "json")
+        io.fatfs.unlink("1:/res/nfts/desc/" + self.file_name.split(".")[0] + ".json")
         if device.get_homescreen() == self.img_path:
             device.set_homescreen("A:/res/wallpaper-1.jpg")
-        self.delete()
-        NftGallery()
+        self.load_screen(self.prev_scr, destroy_self=True)
+
+    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
+        lv.scr_load(scr)
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -531,22 +539,25 @@ class NftManager(FullSizeWindow):
         if code == lv.EVENT.CLICKED:
             if utils.lcd_resume():
                 return
-            if target == self.btn_yes:
-                NftManager.ConfirmSetHomeScreen(self.img_path)
+            if isinstance(target, lv.imgbtn):
+                if target == self.nav_back.nav_btn:
+                    if self.prev_scr is not None:
+                        self.load_screen(self.prev_scr, destroy_self=True)
+            else:
+                if target == self.btn_yes:
+                    NftManager.ConfirmSetHomeScreen(self.img_path)
 
-            elif target == self.btn_del:
-                from trezor.ui.layouts import confirm_remove_nft
-                from trezor.wire import DUMMY_CONTEXT
+                elif target == self.btn_del:
+                    from trezor.ui.layouts import confirm_remove_nft
+                    from trezor.wire import DUMMY_CONTEXT
 
-                workflow.spawn(
-                    confirm_remove_nft(
-                        DUMMY_CONTEXT,
-                        self.del_callback,
-                        self.zoom_path,
+                    workflow.spawn(
+                        confirm_remove_nft(
+                            DUMMY_CONTEXT,
+                            self.del_callback,
+                            self.zoom_path,
+                        )
                     )
-                )
-            elif target == self.nav_back.nav_btn:
-                self.destroy(0)
 
     class ConfirmSetHomeScreen(FullSizeWindow):
         def __init__(self, homescreen):
@@ -648,6 +659,9 @@ class SettingsScreen(Screen):
         self.about.label_left.set_text(_(i18n_keys.ITEM__ABOUT_DEVICE))
         # self.boot_loader.label_left.set_text(_(i18n_keys.ITEM__UPDATE_MODE))
         self.develop.label_left.set_text(_(i18n_keys.ITEM__DEVELOPER_OPTIONS))
+        self.develop.label_left.align_to(
+            self.develop.img_left, lv.ALIGN.OUT_RIGHT_MID, 16, 0
+        )
         self.power.label_left.set_text(_(i18n_keys.ITEM__POWER_OFF))
 
     def on_click(self, event_obj):
@@ -2647,7 +2661,7 @@ class HelpDetails(FullSizeWindow):
         self.underline.set_points(
             [
                 {"x": 0, "y": 2},
-                {"x": 232, "y": 2},
+                {"x": 249, "y": 2},
             ],
             2,
         )
