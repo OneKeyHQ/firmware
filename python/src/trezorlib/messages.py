@@ -7599,16 +7599,22 @@ class PolkadotGetAddress(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 11000
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        3: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        2: protobuf.Field("prefix", "uint32", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
+        4: protobuf.Field("show_display", "bool", repeated=False, required=False),
     }
 
     def __init__(
         self,
         *,
+        prefix: "int",
+        network: "str",
         address_n: Optional[Sequence["int"]] = None,
         show_display: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.prefix = prefix
+        self.network = network
         self.show_display = show_display
 
 
@@ -7616,14 +7622,17 @@ class PolkadotAddress(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 11001
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False),
+        2: protobuf.Field("public_key", "string", repeated=False, required=False),
     }
 
     def __init__(
         self,
         *,
         address: Optional["str"] = None,
+        public_key: Optional["str"] = None,
     ) -> None:
         self.address = address
+        self.public_key = public_key
 
 
 class PolkadotSignTx(protobuf.MessageType):
@@ -7631,16 +7640,19 @@ class PolkadotSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
         raw_tx: "bytes",
+        network: "str",
         address_n: Optional[Sequence["int"]] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.network = network
 
 
 class PolkadotSignedTx(protobuf.MessageType):
