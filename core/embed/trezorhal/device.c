@@ -181,8 +181,8 @@ void device_get_enc_key(uint8_t key[32]) {
 void ui_test_input(void) {
   display_clear();
   for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < 5; j++) {
-      display_bar_radius(20 + j * 100, 20 + i * 180, 40, 40, COLOR_RED,
+    for (int j = 0; j < 6; j++) {
+      display_bar_radius(j * 80, (j % 2) * 80 + i * 160, 80, 80, COLOR_RED,
                          COLOR_WHITE, 16);
     }
   }
@@ -197,14 +197,14 @@ void ui_test_input(void) {
     }
 
     for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        if (x > (20 + j * 100) && x < (20 + j * 100 + 40) &&
-            y > (20 + i * 180) && y < (20 + i * 180 + 40)) {
-          display_bar_radius(20 + j * 100, 20 + i * 180, 40, 40, COLOR_GREEN,
-                             COLOR_WHITE, 16);
-          pos |= 1 << (5 * i + j);
+      for (int j = 0; j < 6; j++) {
+        if (x > (j * 80) && x < (j * 80 + 80) && y > ((j % 2) * 80 + i * 160) &&
+            y < ((j % 2) * 80 + i * 160 + 80)) {
+          display_bar_radius(j * 80, (j % 2) * 80 + i * 160, 80, 80,
+                             COLOR_GREEN, COLOR_WHITE, 16);
+          pos |= 1 << (6 * i + j);
         }
-        if (pos == 0x1FFFFFF) {
+        if (pos == 0x3FFFFFFF) {
           return;
         }
       }
@@ -345,7 +345,7 @@ void device_test(void) {
   ensure(flash_otp_lock(FLASH_OTP_FACTORY_TEST), NULL);
 
   char count_str[24] = {0};
-  for (int i = 3; i >= 0; i--) {
+  for (int i = 1; i >= 0; i--) {
     display_bar(0, 140, DISPLAY_RESX, 140, COLOR_BLACK);
     mini_snprintf(count_str, sizeof(count_str), "Done! Restarting in %d s", i);
     display_text(0, 170, count_str, -1, FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
@@ -353,3 +353,4 @@ void device_test(void) {
   }
   HAL_NVIC_SystemReset();
 }
+
