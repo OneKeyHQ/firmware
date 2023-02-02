@@ -329,8 +329,8 @@ secbool flash_write_word(uint8_t sector, uint32_t offset, uint32_t data) {
 
 secbool flash_write_words(uint8_t sector, uint32_t offset, uint32_t data[8]) {
   uint32_t flash_word[8];
+  int retry = -1;
 
-  memcpy(flash_word, data, 32);
   uint32_t address = (uint32_t)flash_get_address(sector, offset, 4);
   if (address == 0) {
     return secfalse;
@@ -347,23 +347,30 @@ secbool flash_write_words(uint8_t sector, uint32_t offset, uint32_t data[8]) {
       return secfalse;
     }
   }
+rewrite:
+  retry++;
+  if (retry == 3) {
+    return secfalse;
+  }
+  memcpy(flash_word, data, 32);
+
   if (sector >= FLASH_SECTOR_BOOTLOADER_1 &&
       sector <= FLASH_SECTOR_OTP_EMULATOR) {
     if (HAL_OK != HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, address,
                                     (uint32_t)&flash_word)) {
-      return secfalse;
+      goto rewrite;
     }
   } else {
     if (HAL_OK !=
         qspi_flash_write_buffer_unsafe((uint8_t *)&flash_word,
                                        address - QSPI_FLASH_BASE_ADDRESS, 32)) {
-      return secfalse;
+      goto rewrite;
     }
   }
 
   for (int i = 0; i < 8; i++) {
     if (flash_word[i] != *((const uint32_t *)(address + 4 * i))) {
-      return secfalse;
+      goto rewrite;
     }
   }
   return sectrue;
