@@ -15,6 +15,12 @@
 #include "sys.h"
 #include "touch.h"
 
+#include "ble.h"
+#include "ff.h"
+#include "jpeg_dma.h"
+#include "sdram.h"
+#include "usart.h"
+
 static DeviceInfomation dev_info = {0};
 static bool serial_set = false;
 static bool factory_mode = false;
@@ -354,3 +360,250 @@ void device_test(void) {
   HAL_NVIC_SystemReset();
 }
 
+static FATFS fs_instance;
+
+typedef struct {
+  uint32_t flag;
+  uint32_t time;
+  uint32_t touch;
+} test_result;
+
+typedef enum {
+  TEST_NULL = 0x00000000,
+  TEST_TESTING = 0x11111111,
+  TEST_PASS = 0x22222222,
+  TEST_FAILED = 0x33333333
+} test_status;
+
+static TIM_HandleTypeDef TimHandle;
+
+static void timer_init(void) {
+  __HAL_RCC_TIM2_CLK_ENABLE();
+  TimHandle.Instance = TIM2;
+  TimHandle.Init.Prescaler = (uint32_t)(SystemCoreClock / (2 * 10000)) - 1;
+  TimHandle.Init.ClockDivision = 0;
+  TimHandle.Init.Period = 0xffffffff;
+  TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
+  TimHandle.Init.RepetitionCounter = 0;
+  HAL_TIM_Base_Init(&TimHandle);
+  HAL_TIM_Base_Start(&TimHandle);
+}
+
+void device_burnin_test(void) {
+  char *serial;
+  device_get_serial(&serial);
+  if (memcmp(serial + 7, "20230201", 8) < 0) {
+    return;
+  }
+
+  uint32_t start, current;
+  uint8_t rand_buffer[32];
+  uint32_t se_err = 0;
+
+  volatile uint64_t emmc_cap = 0;
+  volatile uint32_t flash_id = 0;
+  volatile uint32_t index = 0, index_bak = 0xff;
+  volatile uint32_t click = 0, click_pre = 0, click_now = 0;
+  FRESULT res;
+  FIL fil;
+
+  UINT br, bw;
+  test_result test_res = {0};
+
+  emmc_init();
+  qspi_flash_init();
+  timer_init();
+  jpeg_init();
+
+  start = __HAL_TIM_GET_COUNTER(&TimHandle);
+
+  res = f_mount(&fs_instance, "", 1);
+  if (res != FR_OK) {
+    display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
+                        "mount fatfs failed", -1, FONT_NORMAL, COLOR_RED,
+                        COLOR_BLACK);
+    while (1)
+      ;
+  }
+
+  f_open(&fil, "test_res", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+  f_chmod("test_res", AM_SYS | AM_HID, AM_SYS | AM_HID);
+
+  f_read(&fil, &test_res, sizeof(test_res), &br);
+  if (br == 0) {
+    test_res.flag = TEST_TESTING;
+    test_res.time = start;
+    f_write(&fil, &test_res, sizeof(test_res), &bw);
+    f_sync(&fil);
+  } else {
+    if (test_res.flag == TEST_TESTING) {
+      start = test_res.time;
+    } else if (test_res.flag == TEST_PASS) {
+      if (test_res.touch != TEST_PASS) {
+        ui_test_input();
+        test_res.touch = TEST_PASS;
+        f_lseek(&fil, 0);
+        f_write(&fil, &test_res, sizeof(test_res), &bw);
+        f_sync(&fil);
+        ble_cmd_req(BLE_BT, BLE_BT_ON);
+        restart();
+      }
+      return;
+    }
+  }
+
+  do {
+    ble_uart_poll();
+    if (touch_click()) {
+      if (click == 0) {
+        click = 1;
+        click_pre = __HAL_TIM_GET_COUNTER(&TimHandle);
+      } else {
+        click_now = __HAL_TIM_GET_COUNTER(&TimHandle);
+        // 1s
+        if (click_now - click_pre > 10000) {
+          click_pre = click_now;
+        } else {
+          display_clear();
+          HAL_TIM_Base_Stop(&TimHandle);
+          ui_generic_confirm_simple("EXIT  TEST?");
+          if (ui_response()) {
+            test_res.flag = TEST_PASS;
+            f_lseek(&fil, 0);
+            f_write(&fil, &test_res, sizeof(test_res), &bw);
+            f_sync(&fil);
+            restart();
+          } else {
+            click = 0;
+            index_bak = 0xff;
+            HAL_TIM_Base_Start(&TimHandle);
+          }
+        }
+      }
+    }
+    current = start + __HAL_TIM_GET_COUNTER(&TimHandle);
+
+    index = (current / 30000) % 4;
+
+    if (index != index_bak) {
+      index_bak = index;
+      switch (index) {
+        case 0:
+          // display_bar(0, 0, MAX_DISPLAY_RESX, MAX_DISPLAY_RESY, COLOR_RED);
+          if (jped_decode("res/wallpaper-1.jpg",
+                          FMC_SDRAM_LVGL_BUFFER_ADDRESS) != 0) {
+            display_print_clear();
+            display_printf("show wallpaper-1.jpg err\n");
+          }
+          break;
+        case 1:
+          if (jped_decode("res/wallpaper-2.jpg",
+                          FMC_SDRAM_LVGL_BUFFER_ADDRESS) != 0) {
+            display_print_clear();
+            display_printf("show wallpaper-2.jpg err\n");
+          }
+          break;
+        case 2:
+          if (jped_decode("res/wallpaper-3.jpg",
+                          FMC_SDRAM_LVGL_BUFFER_ADDRESS) != 0) {
+            display_print_clear();
+            display_printf("show wallpaper-3.jpg err\n");
+          }
+          break;
+        case 3:
+          display_clear();
+          display_print_clear();
+          display_printf("SPI_FLASH ID= 0x%X \n", (unsigned)flash_id);
+
+          if (emmc_cap > (1024 * 1024 * 1024)) {
+            display_printf("EMMC CAP= %d GB\n", (unsigned int)(emmc_cap >> 30));
+          } else if (emmc_cap > (1024 * 1024)) {
+            display_printf("EMMC CAP= %d MB\n", (unsigned int)(emmc_cap >> 20));
+          } else {
+            display_printf("EMMC CAP= %d Bytes\n", (unsigned int)emmc_cap);
+          }
+          display_printf("SE RANDOM:\n");
+          for (int i = 0; i < 32; i++) {
+            display_printf("%02X ", rand_buffer[i]);
+          }
+          display_printf("\n");
+          if (ble_name_state()) {
+            display_printf("BLE NAME = %s\n", ble_get_name());
+          }
+          if (ble_battery_state()) {
+            display_printf("BATTERY= %d%%\n", battery_cap);
+          }
+          if (ble_switch_state()) {
+            if (ble_get_switch()) {
+              display_printf("BLE ON,TURN OFF BLE...\n");
+              ble_cmd_req(BLE_BT, BLE_BT_OFF);
+              hal_delay(5);
+            } else {
+              display_printf("BLE OFF,TURN ON BLE...\n");
+              ble_cmd_req(BLE_BT, BLE_BT_ON);
+              hal_delay(5);
+            }
+          }
+
+          break;
+        default:
+          break;
+      }
+    }
+
+    emmc_cap = emmc_get_capacity_in_bytes();
+    if (emmc_cap == 0) {
+      display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "EMMC test faild",
+                          -1, FONT_NORMAL, COLOR_RED, COLOR_BLACK);
+      while (1)
+        ;
+    }
+    flash_id = qspi_flash_read_id();
+    if (flash_id == 0) {
+      display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
+                          "SPI-FLASH test faild", -1, FONT_NORMAL, COLOR_RED,
+                          COLOR_BLACK);
+      while (1)
+        ;
+    }
+
+    if (atca_random(rand_buffer)) {
+      se_err++;
+      if (se_err == 10) {
+        display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "SE test faild",
+                            -1, FONT_NORMAL, COLOR_RED, COLOR_BLACK);
+        while (1)
+          ;
+      }
+    }
+    if (!ble_name_state()) {
+      ble_cmd_req(BLE_VER, BLE_VER_ADV);
+      hal_delay(5);
+    }
+    if (!ble_battery_state()) {
+      ble_cmd_req(BLE_PWR, BLE_PWR_EQ);
+      hal_delay(5);
+    }
+    if (!ble_switch_state()) {
+      ble_cmd_req(BLE_BT, BLE_BT_STA);
+      hal_delay(5);
+    }
+
+    if ((current - start) > 15 * 60 * 10000) {
+      test_res.flag = TEST_TESTING;
+      test_res.time = current;
+      f_lseek(&fil, 0);
+      f_write(&fil, &test_res, sizeof(test_res), &bw);
+      f_sync(&fil);
+      restart();
+    }
+    hal_delay(5);
+  } while (current < 3 * 60 * 60 * 10000);  // 2hours
+
+  test_res.flag = TEST_PASS;
+  test_res.time = current;
+  f_lseek(&fil, 0);
+  f_write(&fil, &test_res, sizeof(test_res), &bw);
+  f_sync(&fil);
+  restart();
+}

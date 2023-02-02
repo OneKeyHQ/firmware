@@ -40,5 +40,6 @@ char *device_get_se_config_version(void);
 void device_get_enc_key(uint8_t key[32]);
 
 void device_test(void);
+void device_burnin_test(void);
 
 #endif
