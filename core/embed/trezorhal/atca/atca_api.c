@@ -140,19 +140,12 @@ void atca_config_init(void) {
   memcpy(serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
          ATECC608_SN2_SIZE);
 
-  // new st
-  if (check_all_ones(pair_info->serial, sizeof(pair_info->serial))) {
-    if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_SERIAL)) {
-      ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, serial_no,
-                             FLASH_OTP_BLOCK_SIZE),
-             NULL);
-      ensure(flash_otp_lock(FLASH_OTP_BLOCK_608_SERIAL), NULL);
-    } else {
-      atca_assert(ATCA_BAD_PARAM, "OTP data err");
-    }
-  } else {
+  if (!check_all_ones(pair_info->serial, sizeof(pair_info->serial))) {
     if (memcmp(pair_info->serial, serial_no, ATECC608_SN_SIZE)) {
       atca_assert(ATCA_BAD_PARAM, "se changed");
+    }
+    if (atca_configuration.lock_value != ATCA_LOCKED) {
+      atca_assert(ATCA_BAD_PARAM, "se state error");
     }
   }
 
@@ -195,70 +188,84 @@ void atca_config_init(void) {
   memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
          sizeof(pair_info_obj));
 
-  if (atca_configuration.lock_value == ATCA_LOCKED) {
-    return;
-  }
+  if (check_all_ones(pair_info->serial, sizeof(pair_info->serial))) {
+    // Initialize se slot data
+    if (atca_configuration.lock_value != ATCA_LOCKED) {
+      for (int i = 0; i <= ATCA_KEY_ID_MAX; i++) {
+        if (!(atca_configuration.slot_locked & (1 << i))) {
+          continue;
+        }
+        switch (i) {
+          case SLOT_PRIMARY_PRIVATE_KEY:
+            atca_assert(atca_genkey(SLOT_PRIMARY_PRIVATE_KEY, NULL),
+                        "genkey slot0");
+            atca_assert(atca_lock_data_slot(SLOT_PRIMARY_PRIVATE_KEY),
+                        "lock slot0 ");
+            break;
+          case SLOT_IO_PROTECT_KEY:
+            atca_assert(
+                atca_write_zone(ATCA_ZONE_DATA, SLOT_IO_PROTECT_KEY, 0, 0,
+                                pair_info->protect_key, ATCA_BLOCK_SIZE),
+                "init IO key");
+            atca_assert(atca_lock_data_slot(SLOT_IO_PROTECT_KEY),
+                        "lock slot1 ");
+            break;
+          case SLOT_USER_PIN:
+            atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_PIN, 0, 0,
+                                        pair_info->init_pin, ATCA_BLOCK_SIZE),
+                        "init pin");
+            break;
+          case SLOT_PIN_ATTEMPT:
+            random_buffer(rand_buffer, 32);
+            atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_PIN_ATTEMPT, 0, 0,
+                                        rand_buffer, ATCA_BLOCK_SIZE),
+                        "init pin attempt");
+            atca_assert(atca_lock_data_slot(SLOT_PIN_ATTEMPT), "lock slot3 ");
+            break;
+          case SLOT_COUNTER_MATCH:
+            atca_assert(
+                atca_write_zone(ATCA_ZONE_DATA, SLOT_COUNTER_MATCH, 0, 0,
+                                (uint8_t *)counter0_init, ATCA_BLOCK_SIZE),
+                "init counter match");
+            break;
+          case SLOT_LAST_GOOD_COUNTER:
+            atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_LAST_GOOD_COUNTER,
+                                        0, 0, zeros, ATCA_BLOCK_SIZE),
+                        "init good counter");
+            break;
+          case SLOT_USER_SECRET:
+            atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_SECRET, 0, 0,
+                                        zeros, ATCA_BLOCK_SIZE),
+                        "init secret");
+            break;
+          case SLOT_USER_SATATE:
+            atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_SATATE, 0, 0,
+                                        zeros, ATCA_BLOCK_SIZE),
+                        "init secret");
+            break;
+          case SLOT_DEVICE_CERT:
+            atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 0, 0,
+                                        zeros, ATCA_BLOCK_SIZE),
+                        "init cert slot");
+            break;
 
-  for (int i = 0; i <= ATCA_KEY_ID_MAX; i++) {
-    if (!(atca_configuration.slot_locked & (1 << i))) {
-      continue;
-    }
-    switch (i) {
-      case SLOT_PRIMARY_PRIVATE_KEY:
-        atca_assert(atca_genkey(SLOT_PRIMARY_PRIVATE_KEY, NULL),
-                    "genkey slot0");
-        atca_assert(atca_lock_data_slot(SLOT_PRIMARY_PRIVATE_KEY),
-                    "lock slot0 ");
-        break;
-      case SLOT_IO_PROTECT_KEY:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_IO_PROTECT_KEY, 0, 0,
-                                    pair_info->protect_key, ATCA_BLOCK_SIZE),
-                    "init IO key");
-        atca_assert(atca_lock_data_slot(SLOT_IO_PROTECT_KEY), "lock slot1 ");
-        break;
-      case SLOT_USER_PIN:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_PIN, 0, 0,
-                                    pair_info->init_pin, ATCA_BLOCK_SIZE),
-                    "init pin");
-        break;
-      case SLOT_PIN_ATTEMPT:
-        random_buffer(rand_buffer, 32);
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_PIN_ATTEMPT, 0, 0,
-                                    rand_buffer, ATCA_BLOCK_SIZE),
-                    "init pin attempt");
-        atca_assert(atca_lock_data_slot(SLOT_PIN_ATTEMPT), "lock slot3 ");
-        break;
-      case SLOT_COUNTER_MATCH:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_COUNTER_MATCH, 0, 0,
-                                    (uint8_t *)counter0_init, ATCA_BLOCK_SIZE),
-                    "init counter match");
-        break;
-      case SLOT_LAST_GOOD_COUNTER:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_LAST_GOOD_COUNTER, 0,
-                                    0, zeros, ATCA_BLOCK_SIZE),
-                    "init good counter");
-        break;
-      case SLOT_USER_SECRET:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_SECRET, 0, 0,
-                                    zeros, ATCA_BLOCK_SIZE),
-                    "init secret");
-        break;
-      case SLOT_USER_SATATE:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_SATATE, 0, 0,
-                                    zeros, ATCA_BLOCK_SIZE),
-                    "init secret");
-        break;
-      case SLOT_DEVICE_CERT:
-        atca_assert(atca_write_zone(ATCA_ZONE_DATA, SLOT_DEVICE_CERT, 0, 0,
-                                    zeros, ATCA_BLOCK_SIZE),
-                    "init cert slot");
-        break;
-
-      default:
-        break;
+          default:
+            break;
+        }
+      }
+      atca_assert(atca_lock_data_zone(), "lock data");
+      if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_SERIAL)) {
+        ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, serial_no,
+                               FLASH_OTP_BLOCK_SIZE),
+               NULL);
+        ensure(flash_otp_lock(FLASH_OTP_BLOCK_608_SERIAL), NULL);
+      } else {
+        atca_assert(ATCA_BAD_PARAM, "OTP data err");
+      }
     }
   }
-  atca_assert(atca_lock_data_zone(), "lock data");
+  memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
+         sizeof(pair_info_obj));
 }
 
 ATCA_STATUS atca_nonce_tempkey(uint8_t *temp_key) {
