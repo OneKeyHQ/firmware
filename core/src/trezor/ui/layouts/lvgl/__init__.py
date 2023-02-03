@@ -1171,12 +1171,16 @@ async def confirm_collect_nft(ctx, replace: bool = False):
     )
 
 
-async def confirm_update_res(ctx):
+async def confirm_update_res(ctx, update_boot: bool = False):
     from trezor.lvglui.scrs.template import Modal
 
     confirm_screen = Modal(
-        title=_(i18n_keys.TITLE__RESOURCE_UPDATE),
-        subtitle=_(i18n_keys.SUBTITLE__RESOURCE_UPDATE),
+        title=_(i18n_keys.TITLE__BOOTLOADER_UPDATE)
+        if update_boot
+        else _(i18n_keys.TITLE__RESOURCE_UPDATE),
+        subtitle=_(i18n_keys.SUBTITLE__BOOTLOADER_UPDATE)
+        if update_boot
+        else _(i18n_keys.SUBTITLE__RESOURCE_UPDATE),
         confirm_text=_(i18n_keys.BUTTON__UPDATE),
         cancel_text=_(i18n_keys.BUTTON__CANCEL),
         anim_dir=2,
