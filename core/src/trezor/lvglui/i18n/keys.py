@@ -468,6 +468,7 @@ SUBTITLE__NO_MESSAGE_FIELD = 216
 TITLE__CONFIRM_TRANSACTION = 217
 # Transaction Fee:
 LIST_KEY__TRANSACTION_FEE_COLON = 218
+LIST_KEY__TRANSACTION_FEE__COLON = 218
 # View Locktime
 TITLE__CONFIRM_LOCKTIME = 219
 # Set locktime for this transaction
@@ -1213,4 +1214,50 @@ TITLE__SUCCESS = 555
 SUBTITLE__THE_SIGNATURE_IS_VALID = 556
 # Verify
 BUTTON__VERIFY = 557
+# The following transaction output contains tokens.
+SUBTITLE__ADA_TX_CONTAINS_TOKEN = 558
+# Amount Sent:
+LIST_KEY__AMOUNT_SENT__COLON = 559
+# Transaction Type:
+LIST_KEY__TRANSACTION_TYPE__COLON = 560
+# Stake key registration
+LIST_VALUE__STAKE_KEY_REGISTRATION = 561
+# Stake delegation
+LIST_VALUE__STAKE_DELEGATION = 562
+# Stake key deregistration
+LIST_VALUE__STAKE_KEY_DEREGISTRATION = 563
+# Stakepool registration
+LIST_VALUE__STAKEPOOL_REGISTRATION = 564
+# To Pool:
+LIST_KEY__TO_POOL__COLON = 565
+# Confirming a Plutus transaction -- loss of collateral is possible. Check all
+# items carefully.
+SUBTITLE__ADA_TX_CONFIRM_PLUTUS_TX = 566
+# The transaction contains no collateral inputs, Plutus script will not be abl
+# e to run.
+SUBTITLE__ADA_TX_CONTAINS_NO_COLLATERAL_INPUTS = 567
+# Input ID:
+LIST_KEY__INPUT_ID__COLON = 568
+# Input Index:
+LIST_KEY__INPUT_INDEX__COLON = 569
+# Unknown collateral amount, check all items carefully.
+SUBTITLE__ADA_TX_UNKNOWN_COLLATERAL_AMOUNT = 570
+# The following transaction output contains datum hash:
+SUBTITLE__CARDANO_TX_CONTAIN_DATUM_HASH = 571
+# Datum Hash:
+LIST_KEY__DATUM_HASH__COLON = 572
+# Auxiliary Data Hash:
+LIST_KEY__AUXILIARY_DATA_HASH__COLON = 573
+# Asset Fingerprint:
+LIST_KEY__ASSET_FINGERPRINT__COLON = 574
+# Script Data Hash:
+LIST_KEY__SCRIPT_DATA_HASH__COLON = 575
+# Signer Path:
+LIST_KEY__SIGNER_PATH__COLON = 576
+# Token Amount:
+LIST_KEY__TOKEN_AMOUNT__COLON = 577
+# Bootloader Update
+TITLE__BOOTLOADER_UPDATE = 578
+# Do you want to update bootloader?
+SUBTITLE__BOOTLOADER_UPDATE = 579
 # fmt: on

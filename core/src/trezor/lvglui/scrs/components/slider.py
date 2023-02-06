@@ -158,11 +158,15 @@ class Slider(lv.slider):
                 label_area.x1 = (
                     dsc.draw_area.x1
                     + dsc.draw_area.get_width() // 2
-                    - label_size.x // 2
+                    - min(98, label_size.x // 2)
                 )
-                label_area.x2 = label_area.x1 + label_size.x + 20
-                label_area.y2 = dsc.draw_area.y1 + 65
-                label_area.y1 = label_area.y2 - label_size.y
+                label_area.x2 = dsc.draw_area.x2 - 8
+                label_area.y1 = (
+                    dsc.draw_area.y1
+                    + dsc.draw_area.get_height() // 2
+                    - (label_size.y if label_size.x > 300 else label_size.y // 2)
+                )
+                label_area.y2 = dsc.draw_area.y2 - 8
                 label_draw_dsc = lv.draw_label_dsc_t()
                 label_draw_dsc.init()
                 label_draw_dsc.color = (

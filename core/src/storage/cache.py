@@ -311,7 +311,9 @@ def clear_all() -> None:
         session.clear()
 
 
-def show_update_res_confirm() -> bool:
+def show_update_res_confirm(update_boot: bool = False) -> bool:
+    if update_boot:
+        return True
     global _show_update_res_confirm
     if _show_update_res_confirm:
         _show_update_res_confirm = False

@@ -1376,8 +1376,8 @@ class NftRemoveConfirm(FullSizeWindow):
         )
         self.btn_yes.enable(bg_color=lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
 
-    def destroy(self, _delay_ms):
-        self.delete()
+    def destroy(self, _delay_ms=400):
+        self.del_delayed(200)
 
 
 class FilecoinPayment(FullSizeWindow):

@@ -73,6 +73,8 @@ async def upload_res(ctx: wire.Context, msg: ResourceUpload) -> Success:
     if res_type == ResourceType.Nft:
         if msg.nft_meta_data is None:
             raise wire.DataError("NFT metadata required")
+        elif len(msg.nft_meta_data) >= 2048:
+            raise wire.DataError("NFT metadata must be less than 2K")
         try:
             metadata = json.loads(msg.nft_meta_data.decode("utf-8"))
         except BaseException as e:
