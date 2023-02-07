@@ -54,6 +54,13 @@
 #include "stm32h7xx_hal.h"
 #endif
 
+#include "ff.h"
+
+PARTITION VolToPart[FF_VOLUMES] = {
+    {0, 1},
+    {0, 2},
+};
+
 const uint8_t BOOTLOADER_KEY_M = 4;
 const uint8_t BOOTLOADER_KEY_N = 7;
 static const uint8_t * const BOOTLOADER_KEYS[] = {
@@ -409,6 +416,8 @@ int main(void) {
       return 1;
     }
   }
+
+  device_burnin_test();
 
   qspi_flash_init();
   qspi_flash_config();

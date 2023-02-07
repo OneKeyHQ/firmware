@@ -52,7 +52,7 @@ int qspi_flash_init(void) {
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   hqspi.Instance = QUADSPI;
-  hqspi.Init.ClockPrescaler = 1;
+  hqspi.Init.ClockPrescaler = 2;
   hqspi.Init.FifoThreshold = 4;
   hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
   hqspi.Init.FlashSize = QSPI_FLASH_SIZE;

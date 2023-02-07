@@ -59,8 +59,8 @@ static int onekey_known_boardloader(const uint8_t *hash) {
     memcpy(boardloader_version, "1.3.1", strlen("1.3.1"));
     return 1;
   }
-  memcpy(boardloader_version, "unkonw boardloader",
-         strlen("unkonw boardloader"));
+  memcpy(boardloader_version, "unknow boardloader",
+         strlen("unknow boardloader"));
   return 1;
 }
 
