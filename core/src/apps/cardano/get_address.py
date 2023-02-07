@@ -1,33 +1,34 @@
 from typing import TYPE_CHECKING
 
-from trezor import log, wire
-from trezor.lvglui.scrs import lv
-from trezor.messages import CardanoAddress
-
-from . import ICON, PRIMARY_COLOR, seed
-from .address import derive_human_readable_address, validate_address_parameters
-from .helpers.credential import Credential, should_show_address_credentials
-from .layout import show_address_credentials, show_cardano_address
-from .sign_tx import validate_network_info
+from . import seed
 
 if TYPE_CHECKING:
-    from trezor.messages import (
-        CardanoAddressParametersType,
-        CardanoGetAddress,
-    )
+    from trezor.wire import Context
+    from trezor.messages import CardanoGetAddress, CardanoAddress
 
 
 @seed.with_keychain
 async def get_address(
-    ctx: wire.Context, msg: CardanoGetAddress, keychain: seed.Keychain
+    ctx: Context, msg: CardanoGetAddress, keychain: seed.Keychain
 ) -> CardanoAddress:
-    address_parameters = msg.address_parameters
+    from trezor.messages import CardanoAddress
+    from trezor import log, wire
+    from .helpers.credential import Credential, should_show_credentials
+    from .helpers.utils import validate_network_info
+    from .layout import show_cardano_address, show_credentials
+    from . import addresses
+    from trezor.lvglui.scrs import lv
+    from . import ICON, PRIMARY_COLOR
+
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
+
+    address_parameters = msg.address_parameters  # local_cache_attribute
 
     validate_network_info(msg.network_id, msg.protocol_magic)
-    validate_address_parameters(address_parameters)
+    addresses.validate_address_parameters(address_parameters)
 
     try:
-        address = derive_human_readable_address(
+        address = addresses.derive_human_readable(
             keychain, address_parameters, msg.protocol_magic, msg.network_id
         )
     except ValueError as e:
@@ -36,23 +37,13 @@ async def get_address(
         raise wire.ProcessError("Deriving address failed")
 
     if msg.show_display:
-        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
-        await _display_address(ctx, address_parameters, address, msg.protocol_magic)
+        # _display_address
+        if should_show_credentials(address_parameters):
+            await show_credentials(
+                ctx,
+                Credential.payment_credential(address_parameters),
+                Credential.stake_credential(address_parameters),
+            )
+        await show_cardano_address(ctx, address_parameters, address, msg.protocol_magic)
 
     return CardanoAddress(address=address)
-
-
-async def _display_address(
-    ctx: wire.Context,
-    address_parameters: CardanoAddressParametersType,
-    address: str,
-    protocol_magic: int,
-) -> None:
-    if should_show_address_credentials(address_parameters):
-        await show_address_credentials(
-            ctx,
-            Credential.payment_credential(address_parameters),
-            Credential.stake_credential(address_parameters),
-        )
-
-    await show_cardano_address(ctx, address_parameters, address, protocol_magic)

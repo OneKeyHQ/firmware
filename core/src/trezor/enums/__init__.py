@@ -163,14 +163,10 @@ if TYPE_CHECKING:
         StellarManageBuyOfferOp = 222
         StellarPathPaymentStrictSendOp = 223
         StellarSignedTx = 230
-        CardanoSignTx = 303
         CardanoGetPublicKey = 305
         CardanoPublicKey = 306
         CardanoGetAddress = 307
         CardanoAddress = 308
-        CardanoSignedTx = 310
-        CardanoSignedTxChunk = 311
-        CardanoSignedTxChunkAck = 312
         CardanoTxItemAck = 313
         CardanoTxAuxiliaryDataSupplement = 314
         CardanoTxWitnessRequest = 315
@@ -193,6 +189,11 @@ if TYPE_CHECKING:
         CardanoTxMint = 332
         CardanoTxCollateralInput = 333
         CardanoTxRequiredSigner = 334
+        CardanoTxInlineDatumChunk = 335
+        CardanoTxReferenceScriptChunk = 336
+        CardanoTxReferenceInput = 337
+        CardanoSignMessage = 350
+        CardanoMessageSignature = 351
         RippleGetAddress = 400
         RippleAddress = 401
         RippleSignTx = 402
@@ -442,6 +443,10 @@ if TYPE_CHECKING:
         BECH32 = 1
         POLICY_ID = 2
 
+    class CardanoTxOutputSerializationFormat(IntEnum):
+        ARRAY_LEGACY = 0
+        MAP_BABBAGE = 1
+
     class CardanoCertificateType(IntEnum):
         STAKE_REGISTRATION = 0
         STAKE_DEREGISTRATION = 1
@@ -455,7 +460,11 @@ if TYPE_CHECKING:
 
     class CardanoTxAuxiliaryDataSupplementType(IntEnum):
         NONE = 0
-        CATALYST_REGISTRATION_SIGNATURE = 1
+        GOVERNANCE_REGISTRATION_SIGNATURE = 1
+
+    class CardanoGovernanceRegistrationFormat(IntEnum):
+        CIP15 = 0
+        CIP36 = 1
 
     class CardanoTxSigningMode(IntEnum):
         ORDINARY_TRANSACTION = 0

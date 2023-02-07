@@ -377,13 +377,14 @@ class BlobDisPlay(FullSizeWindow):
 
 
 class ConfirmMetaData(FullSizeWindow):
-    def __init__(self, title, subtitle, description, data, primary_color):
+    def __init__(self, title, subtitle, description, data, primary_color, icon_path):
         super().__init__(
             title,
             subtitle,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__REJECT),
             primary_color=primary_color,
+            icon_path=icon_path,
         )
         if description:
             self.container = ContainerFlexCol(
