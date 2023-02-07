@@ -36,7 +36,12 @@ if TYPE_CHECKING:
     from .client import TrezorClient
     from .protobuf import MessageType
 
-PROTOCOL_MAGICS = {"mainnet": 764824073, "testnet": 1097911063}
+PROTOCOL_MAGICS = {
+    "mainnet": 764824073,
+    "testnet_preprod": 1,
+    "testnet_preview": 2,
+    "testnet_legacy": 1097911063,
+}
 NETWORK_IDS = {"mainnet": 1, "testnet": 0}
 
 REQUIRED_FIELDS_TRANSACTION = ("inputs", "outputs")
@@ -52,12 +57,12 @@ REQUIRED_FIELDS_POOL_PARAMETERS = (
     "owners",
 )
 REQUIRED_FIELDS_TOKEN_GROUP = ("policy_id", "tokens")
-REQUIRED_FIELDS_CATALYST_REGISTRATION = (
-    "voting_public_key",
+REQUIRED_FIELDS_GOVERNANCE_REGISTRATION = (
     "staking_path",
     "nonce",
     "reward_address_parameters",
 )
+REQUIRED_FIELDS_GOVERNANCE_DELEGATION = ("voting_public_key", "weight")
 
 INCOMPLETE_OUTPUT_ERROR_MESSAGE = "The output is missing some fields"
 
@@ -503,34 +508,55 @@ def parse_auxiliary_data(
     # include all provided fields so we can test validation in FW
     hash = parse_optional_bytes(auxiliary_data.get("hash"))
 
-    catalyst_registration_parameters = None
-    if "catalyst_registration_parameters" in auxiliary_data:
-        catalyst_registration = auxiliary_data["catalyst_registration_parameters"]
+    governance_registration_parameters = None
+    if "governance_registration_parameters" in auxiliary_data:
+        governance_registration = auxiliary_data["governance_registration_parameters"]
         if not all(
-            k in catalyst_registration for k in REQUIRED_FIELDS_CATALYST_REGISTRATION
+            k in governance_registration
+            for k in REQUIRED_FIELDS_GOVERNANCE_REGISTRATION
         ):
             raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
 
-        catalyst_registration_parameters = (
-            messages.CardanoCatalystRegistrationParametersType(
-                voting_public_key=bytes.fromhex(
-                    catalyst_registration["voting_public_key"]
+        serialization_format = governance_registration.get("format")
+
+        delegations = []
+        for delegation in governance_registration.get("delegations", []):
+            if not all(k in delegation for k in REQUIRED_FIELDS_GOVERNANCE_DELEGATION):
+                raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
+            delegations.append(
+                messages.CardanoGovernanceRegistrationDelegation(
+                    voting_public_key=bytes.fromhex(delegation["voting_public_key"]),
+                    weight=int(delegation["weight"]),
+                )
+            )
+
+        voting_purpose = None
+        if serialization_format == messages.CardanoGovernanceRegistrationFormat.CIP36:
+            voting_purpose = governance_registration.get("voting_purpose")
+
+        governance_registration_parameters = (
+            messages.CardanoGovernanceRegistrationParametersType(
+                voting_public_key=parse_optional_bytes(
+                    governance_registration.get("voting_public_key")
                 ),
-                staking_path=tools.parse_path(catalyst_registration["staking_path"]),
-                nonce=catalyst_registration["nonce"],
+                staking_path=tools.parse_path(governance_registration["staking_path"]),
+                nonce=governance_registration["nonce"],
                 reward_address_parameters=_parse_address_parameters(
-                    catalyst_registration["reward_address_parameters"],
+                    governance_registration["reward_address_parameters"],
                     str(AUXILIARY_DATA_MISSING_FIELDS_ERROR),
                 ),
+                format=serialization_format,
+                delegations=delegations,
+                voting_purpose=voting_purpose,
             )
         )
 
-    if hash is None and catalyst_registration_parameters is None:
+    if hash is None and governance_registration_parameters is None:
         raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
 
     return messages.CardanoTxAuxiliaryData(
         hash=hash,
-        catalyst_registration_parameters=catalyst_registration_parameters,
+        governance_registration_parameters=governance_registration_parameters,
     )
 
 
@@ -843,3 +869,14 @@ def sign_tx(
         raise UNEXPECTED_RESPONSE_ERROR
 
     return sign_tx_response
+
+
+@expect(messages.CardanoMessageSignature)
+def sign_message(
+    client: "TrezorClient",
+    n: List[int],
+    derivation_type: messages.CardanoDerivationType,
+    network_id: int,
+    message: bytes,
+):
+    return client.call(messages.CardanoSignMessage(address_n=n, derivation_type=derivation_type, network_id=network_id, message=message))

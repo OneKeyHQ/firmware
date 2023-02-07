@@ -27,6 +27,12 @@ if TYPE_CHECKING:
 
 PATH_HELP = "BIP-32 path to key, e.g. m/44'/1815'/0'/0/0"
 
+TESTNET_CHOICES = {
+    "preprod": "testnet_preprod",
+    "preview": "testnet_preview",
+    "legacy": "testnet_legacy",
+}
+
 
 @click.group(name="cardano")
 def cli() -> None:
@@ -46,7 +52,7 @@ def cli() -> None:
     "-p", "--protocol-magic", type=int, default=cardano.PROTOCOL_MAGICS["mainnet"]
 )
 @click.option("-N", "--network-id", type=int, default=cardano.NETWORK_IDS["mainnet"])
-@click.option("-t", "--testnet", is_flag=True)
+@click.option("-t", "--testnet", type=ChoiceType(TESTNET_CHOICES))
 @click.option(
     "-D",
     "--derivation-type",
@@ -61,7 +67,7 @@ def sign_tx(
     signing_mode: messages.CardanoTxSigningMode,
     protocol_magic: int,
     network_id: int,
-    testnet: bool,
+    testnet: str,
     derivation_type: messages.CardanoDerivationType,
     include_network_id: bool,
 ) -> cardano.SignTxResponse:
@@ -69,7 +75,7 @@ def sign_tx(
     transaction = json.load(file)
 
     if testnet:
-        protocol_magic = cardano.PROTOCOL_MAGICS["testnet"]
+        protocol_magic = cardano.PROTOCOL_MAGICS[testnet]
         network_id = cardano.NETWORK_IDS["testnet"]
 
     inputs = [cardano.parse_input(input) for input in transaction["inputs"]]
@@ -143,9 +149,11 @@ def sign_tx(
         auxiliary_data_supplement["auxiliary_data_hash"] = auxiliary_data_supplement[
             "auxiliary_data_hash"
         ].hex()
-        catalyst_signature = auxiliary_data_supplement.get("catalyst_signature")
-        if catalyst_signature:
-            auxiliary_data_supplement["catalyst_signature"] = catalyst_signature.hex()
+        governance_signature = auxiliary_data_supplement.get("governance_signature")
+        if governance_signature:
+            auxiliary_data_supplement[
+                "governance_signature"
+            ] = governance_signature.hex()
         sign_tx_response["auxiliary_data_supplement"] = auxiliary_data_supplement
     return sign_tx_response
 
@@ -170,7 +178,7 @@ def sign_tx(
     "-p", "--protocol-magic", type=int, default=cardano.PROTOCOL_MAGICS["mainnet"]
 )
 @click.option("-N", "--network-id", type=int, default=cardano.NETWORK_IDS["mainnet"])
-@click.option("-e", "--testnet", is_flag=True)
+@click.option("-e", "--testnet", type=ChoiceType(TESTNET_CHOICES))
 @click.option(
     "-D",
     "--derivation-type",
@@ -192,7 +200,7 @@ def get_address(
     protocol_magic: int,
     network_id: int,
     show_display: bool,
-    testnet: bool,
+    testnet: str,
     derivation_type: messages.CardanoDerivationType,
 ) -> str:
     """
@@ -210,7 +218,7 @@ def get_address(
     Byron, enterprise and reward addresses only require the general parameters.
     """
     if testnet:
-        protocol_magic = cardano.PROTOCOL_MAGICS["testnet"]
+        protocol_magic = cardano.PROTOCOL_MAGICS[testnet]
         network_id = cardano.NETWORK_IDS["testnet"]
 
     staking_key_hash_bytes = cardano.parse_optional_bytes(staking_key_hash)
@@ -289,3 +297,31 @@ def get_native_script_hash(
     return cardano.get_native_script_hash(
         client, native_script, display_format, derivation_type=derivation_type
     )
+
+
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.option(
+    "-D",
+    "--derivation-type",
+    type=ChoiceType({m.name: m for m in messages.CardanoDerivationType}),
+    default=messages.CardanoDerivationType.ICARUS,
+)
+@click.option("-N", "--network-id", type=int, default=cardano.NETWORK_IDS["mainnet"])
+@click.argument("message")
+@with_client
+def sign_message(client: "TrezorClient",
+    address: str,
+    derivation_type: messages.CardanoDerivationType,
+    network_id: int,
+    message: str
+) -> dict:
+    """Sign message with cardano address."""
+    address_n = tools.parse_path(address)
+    client.init_device(derive_cardano=True)
+    res = cardano.sign_message(client, address_n, derivation_type, network_id, bytes(message, encoding="utf8"))
+    output = {
+        "signature": res.signature.hex(),
+        "key": res.key.hex(),
+    }
+    return output

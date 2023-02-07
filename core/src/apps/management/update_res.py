@@ -2,7 +2,7 @@ from micropython import const
 from typing import TYPE_CHECKING
 
 from storage.cache import show_update_res_confirm
-from trezor import io, wire
+from trezor import io, loop, utils, wire
 from trezor.crypto.hashlib import blake2s
 from trezor.messages import ResourceAck, ResourceRequest, Success
 from trezor.ui.layouts import confirm_update_res
@@ -35,14 +35,15 @@ REQUEST_CHUNK_SIZE = const(16 * 1024)
 
 
 async def update_res(ctx: wire.Context, msg: ResourceUpdate) -> Success:
-    if show_update_res_confirm():
-        await confirm_update_res(ctx)
+    is_update_boot = msg.file_name == "bootloader.bin"
+    if show_update_res_confirm(is_update_boot):
+        await confirm_update_res(ctx, is_update_boot)
     res_size = msg.data_length
     initial_data = msg.initial_data_chunk
     if blake2s(initial_data).digest() != msg.hash:
         raise wire.DataError("Date digest is inconsistent")
 
-    file_path = make_file_path(msg.file_name)
+    file_path = make_file_path(msg.file_name, is_update_boot)
     data_left = res_size - REQUEST_CHUNK_SIZE
     offset = REQUEST_CHUNK_SIZE
     try:
@@ -65,8 +66,15 @@ async def update_res(ctx: wire.Context, msg: ResourceUpdate) -> Success:
             f.sync()
     except BaseException as e:
         raise wire.FirmwareError(f"Failed to write file with error code {e}")
-    return Success(message="Success")
+    else:
+        if is_update_boot:
+            await ctx.write(Success(message="Restarting"))
+            # make sure the outgoing USB buffer is flushed
+            await loop.wait(ctx.iface.iface_num() | io.POLL_WRITE)
+            utils.reset()
+            assert False  # this should be not reachable
+        return Success(message="Success")
 
 
-def make_file_path(file_name) -> str:
-    return f"/res/{file_name}"
+def make_file_path(file_name, update_boot: bool = False) -> str:
+    return f"/{'boot' if update_boot else 'res'}/{file_name}"

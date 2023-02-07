@@ -460,7 +460,7 @@ async def confirm_output(
     amount: str,
     font_amount: int = ui.NORMAL,  # TODO cleanup @ redesign
     title: str = "Confirm Transaction",
-    subtitle: str | None = None,  # TODO cleanup @ redesign
+    subtitle: str | None = None,
     color_to: int = ui.FG,  # TODO cleanup @ redesign
     to_str: str = " to\n",  # TODO cleanup @ redesign
     to_paginated: bool = False,  # TODO cleanup @ redesign
@@ -475,7 +475,9 @@ async def confirm_output(
         interact(
             ctx,
             TransactionOverview(
-                _(i18n_keys.TITLE__VIEW_TRANSACTION),
+                _(i18n_keys.TITLE__VIEW_TRANSACTION)
+                if subtitle is None
+                else _(i18n_keys.TITLE__STR_TRANSACTION).format(subtitle),
                 amount,
                 address,
                 primary_color=ctx.primary_color,
@@ -765,7 +767,15 @@ async def confirm_metadata(
 ) -> None:
     from trezor.lvglui.scrs.template import ConfirmMetaData
 
-    confirm = ConfirmMetaData(title, content, description, param, ctx.primary_color)
+    has_icon_path = hasattr(ctx, "icon_path")
+    confirm = ConfirmMetaData(
+        title,
+        content,
+        description,
+        param,
+        ctx.primary_color,
+        ctx.icon_path if has_icon_path is True else None,
+    )
     await raise_if_cancelled(interact(ctx, confirm, br_type, br_code))
 
 
@@ -1171,12 +1181,16 @@ async def confirm_collect_nft(ctx, replace: bool = False):
     )
 
 
-async def confirm_update_res(ctx):
+async def confirm_update_res(ctx, update_boot: bool = False):
     from trezor.lvglui.scrs.template import Modal
 
     confirm_screen = Modal(
-        title=_(i18n_keys.TITLE__RESOURCE_UPDATE),
-        subtitle=_(i18n_keys.SUBTITLE__RESOURCE_UPDATE),
+        title=_(i18n_keys.TITLE__BOOTLOADER_UPDATE)
+        if update_boot
+        else _(i18n_keys.TITLE__RESOURCE_UPDATE),
+        subtitle=_(i18n_keys.SUBTITLE__BOOTLOADER_UPDATE)
+        if update_boot
+        else _(i18n_keys.SUBTITLE__RESOURCE_UPDATE),
         confirm_text=_(i18n_keys.BUTTON__UPDATE),
         cancel_text=_(i18n_keys.BUTTON__CANCEL),
         anim_dir=2,
