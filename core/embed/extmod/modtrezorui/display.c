@@ -571,9 +571,15 @@ void display_print_color(uint16_t fgcolor, uint16_t bgcolor) {
   display_print_bgcolor = bgcolor;
 }
 
+static uint8_t row = 0, col = 0;
+
+void display_print_clear(void) {
+  memset(display_print_buf, 0x00, sizeof(display_print_buf));
+  row = col = 0;
+}
+
 // display text using bitmap font
 void display_print(const char *text, int textlen) {
-  static uint8_t row = 0, col = 0;
   if (row == 0) {
     display_bar(0, 0, DISPLAY_RESX, DISPLAY_RESY, display_print_bgcolor);
   }

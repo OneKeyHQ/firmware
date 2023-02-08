@@ -126,6 +126,7 @@ void display_loader_ex(uint16_t progress, bool indeterminate, int yoffset,
 void display_progress(const char *desc, int permil);
 
 #ifndef TREZOR_PRINT_DISABLE
+void display_print_clear(void);
 void display_print_color(uint16_t fgcolor, uint16_t bgcolor);
 void display_print(const char *text, int textlen);
 void display_printf(const char *fmt, ...)
