@@ -366,6 +366,8 @@ apps.algorand.get_address
 import apps.algorand.get_address
 apps.algorand.sign_tx
 import apps.algorand.sign_tx
+apps.algorand.tokens
+import apps.algorand.tokens
 apps.algorand.transactions
 import apps.algorand.transactions
 apps.algorand.transactions.constants

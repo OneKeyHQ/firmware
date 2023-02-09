@@ -33,5 +33,7 @@
     "tron:TRC20:USDT": false,
     "tron:TRC20:DOGE": false,
     "tron:TRC20:ETH": false,
-    "tron:TRC20:HT": false
+    "tron:TRC20:HT": false,
+    "algo:ASA:USDt": false,
+    "algo:ASA:USDC": false
 }

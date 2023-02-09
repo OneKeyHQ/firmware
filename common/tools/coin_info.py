@@ -356,6 +356,18 @@ def _load_conflux_tokens():
     return tron_tokens
 
 
+def _load_algo_tokens():
+    """Load Algo tokens from algo submodule."""
+    algo_tokens = load_json("algo/tokens.json")
+    for token in algo_tokens:
+        shortcut = token["symbol"]
+        token.update(
+            shortcut=shortcut,
+            key=f"algo:{token['type']}:{token['symbol']}",
+        )
+    return algo_tokens
+
+
 def _load_misc():
     """Loads miscellaneous networks from `misc/misc.json`"""
     others = load_json("misc/misc.json")
@@ -642,6 +654,7 @@ def collect_coin_info():
         nem=_load_nem_mosaics(),
         tron=_load_tron_tokens(),
         conflux=_load_conflux_tokens(),
+        algorand=_load_algo_tokens(),
         misc=_load_misc(),
     )
 
