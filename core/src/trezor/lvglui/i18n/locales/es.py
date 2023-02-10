@@ -580,5 +580,18 @@ translations = [
     "Cantidad de fichas:",
     "Actualización del cargador de arranque",
     "¿Quieres actualizar el gestor de arranque?",
+    "Copia de seguridad con KeyTag",
+    "¿Ya tiene un KeyTag de OneKey? Toque el botón \"Copia de seguridad\" para convertir la frase de recuperación en un mapa de puntos BIP39.",
+    "Respaldo",
+    "Ahora no",
+    "Saltar copia de seguridad",
+    "Todavía puede hacer una copia de seguridad con KeyTag más adelante en \"Seguridad - Comprobar frase de recuperación\".",
+    "KeyTag",
+    "Frente (#{} - {})",
+    "Atrás (#{} - {})",
+    "Siga el mapa de puntos, marque los puntos en KeyTag con el punzón central para finalizar su copia de seguridad.",
+    "Finalizar copia de seguridad de KeyTag",
+    "Si desea realizar otra copia de seguridad de KeyTag, puede ver el mapa de puntos de KeyTag en \"Seguridad - Comprobar frase de recuperación\" después de verificar su frase de recuperación.",
+    "Ver parte trasera",
 ]
 # fmt: on

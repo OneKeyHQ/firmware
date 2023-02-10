@@ -580,5 +580,18 @@ translations = [
     "Token Amount:",
     "Bootloader Update",
     "Do you want to update bootloader?",
+    "Back Up with KeyTag",
+    "Already have a OneKey KeyTag? Tap the \"Backup\" button to convert the recovery phrase into a BIP39 dotmap.",
+    "Backup",
+    "Not Now",
+    "Skip Backup",
+    "You can still backup with KeyTag later in “Security - Check Recovery Phrase”.",
+    "KeyTag",
+    "Front (#{} - {})",
+    "Back (#{} - {})",
+    "Follow the dotmap, punch the dots on KeyTag with center punch to finish your backup.",
+    "Finish KeyTag Backup",
+    "If you want to make another KeyTag backup, you can view the KeyTag  dotmap in “Security - Check Recovery Phrase” after verifying your recovery phrase.",
+    "View Backside",
 ]
 # fmt: on

@@ -580,5 +580,18 @@ translations = [
     "Token-Betrag:",
     "Bootloader-Update",
     "Möchten Sie den Bootloader aktualisieren?",
+    "Sichern Sie mit KeyTag",
+    "Sie haben bereits einen OneKey KeyTag? Tippen Sie auf die Schaltfläche „Backup“, um die Wiederherstellungsphrase in eine BIP39-Dotmap zu konvertieren.",
+    "Sicherung",
+    "Nicht jetzt",
+    "Sicherung überspringen",
+    "Sie können später unter „Sicherheit – Wiederherstellungssatz prüfen“ immer noch mit KeyTag sichern.",
+    "KeyTag",
+    "Vorderseite (#{} - {})",
+    "Zurück (#{} - {})",
+    "Folgen Sie der Punktkarte, stanzen Sie die Punkte auf dem KeyTag mit der Mitte, um Ihre Sicherung abzuschließen.",
+    "Beenden Sie die KeyTag-Sicherung",
+    "Wenn Sie eine weitere KeyTag-Sicherung erstellen möchten, können Sie die KeyTag-Dotmap unter „Sicherheit – Wiederherstellungssatz prüfen“ anzeigen, nachdem Sie Ihren Wiederherstellungssatz überprüft haben.",
+    "Rückseite ansehen",
 ]
 # fmt: on

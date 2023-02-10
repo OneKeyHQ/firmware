@@ -166,6 +166,8 @@ trezor.lvglui.scrs
 import trezor.lvglui.scrs
 trezor.lvglui.scrs.app_guide
 import trezor.lvglui.scrs.app_guide
+trezor.lvglui.scrs.bip39_dotmap
+import trezor.lvglui.scrs.bip39_dotmap
 trezor.lvglui.scrs.ble
 import trezor.lvglui.scrs.ble
 trezor.lvglui.scrs.bootscreen

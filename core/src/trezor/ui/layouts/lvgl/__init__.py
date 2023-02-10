@@ -65,6 +65,7 @@ __all__ = (
     "request_pin_tips",
     "confirm_remove_nft",
     "confirm_collect_nft",
+    "show_bip39_dotmap",
 )
 
 
@@ -1676,3 +1677,56 @@ async def confirm_cosmos_sign_combined(
             ctx, screen, "confirm_cosmos_sign_combined", ButtonRequestType.ProtectCall
         )
     )
+
+
+async def show_bip39_dotmap(
+    ctx: wire.GenericContext, mnemonics: bytes, recovery_check: bool = False
+) -> None:
+    from trezor.lvglui.scrs.common import FullSizeWindow, lv
+
+    while True:
+        ask_screen = FullSizeWindow(
+            _(i18n_keys.TITLE__BACK_UP_WITH_KEYTAG),
+            _(i18n_keys.SUBTITLE__BACK_UP_WITH_KEYTAG),
+            confirm_text=_(i18n_keys.BUTTON__BACKUP),
+            cancel_text=_(i18n_keys.BUTTON__NOT_NOW),
+            icon_path="A:/res/icon_dotmap.png",
+            anim_dir=0,
+        )
+        ask_screen.btn_no.set_size(464, 98)
+        ask_screen.btn_no.align(lv.ALIGN.BOTTOM_MID, 0, -8)
+        ask_screen.btn_yes.set_size(464, 98)
+        ask_screen.btn_yes.align_to(ask_screen.btn_no, lv.ALIGN.OUT_TOP_MID, 0, -8)
+        if await ask_screen.request():
+            while True:
+                from trezor.lvglui.scrs.bip39_dotmap import Bip39DotMap
+
+                screen = Bip39DotMap(len(mnemonics.decode().split()))
+                screen.show(mnemonics.decode())
+                if await screen.request():
+                    if recovery_check:
+                        break
+                    final_confirm = FullSizeWindow(
+                        _(i18n_keys.TITLE__FINISH_KEYTAG_BACKUP),
+                        _(i18n_keys.SUBTITLE__FINISH_KEYTAG_BACKUP),
+                        confirm_text=_(i18n_keys.BUTTON__DONE),
+                        cancel_text=_(i18n_keys.BUTTON__CANCEL),
+                        icon_path="A:/res/icon_tips_blue.png",
+                        anim_dir=0,
+                    )
+                    if await final_confirm.request():
+                        break
+            break
+        else:
+            if recovery_check:
+                break
+            confirm_screen = FullSizeWindow(
+                _(i18n_keys.TITLE__SKIP_BACKUP),
+                _(i18n_keys.SUBTITLE__SKIP_BACKUP),
+                confirm_text=_(i18n_keys.BUTTON__SKIP),
+                cancel_text=_(i18n_keys.BUTTON__CANCEL),
+                icon_path="A:/res/warning.png",
+                anim_dir=0,
+            )
+            if await confirm_screen.request():
+                break

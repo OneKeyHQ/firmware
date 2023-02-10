@@ -28,6 +28,7 @@ class lv_colors:
 
     ONEKEY_GREEN = LV_COLOR_MAKE(0x00, 0xFF, 0x33)  # ok button bg
     ONEKEY_GREEN_1 = LV_COLOR_MAKE(0x00, 0xB8, 0x12)
+    ONEKEY_GREEN_2 = LV_COLOR_MAKE(0x00, 0xBE, 0x2D)
     ONEKEY_RED = LV_COLOR_MAKE(0x29, 0x07, 0x00)  #
     ONEKEY_RED_1 = LV_COLOR_MAKE(
         0xFF, 0x11, 0x00

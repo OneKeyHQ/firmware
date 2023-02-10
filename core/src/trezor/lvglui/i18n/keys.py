@@ -1003,6 +1003,7 @@ TITLE__RECOVERY_PHRASE = 460
 TITLE__READY_TO_IMPORT = 461
 # {} Words
 OPTION__STR_WRODS = 462
+SUBTITLE__STR_WORDS = 462
 # Quit
 BUTTON__QUIT = 463
 # Abort Import?
@@ -1260,4 +1261,34 @@ LIST_KEY__TOKEN_AMOUNT__COLON = 577
 TITLE__BOOTLOADER_UPDATE = 578
 # Do you want to update bootloader?
 SUBTITLE__BOOTLOADER_UPDATE = 579
+# Back Up with KeyTag
+TITLE__BACK_UP_WITH_KEYTAG = 580
+# Already have a OneKey KeyTag? Tap the "Backup" button to convert the recover
+# y phrase into a BIP39 dotmap.
+SUBTITLE__BACK_UP_WITH_KEYTAG = 581
+# Backup
+BUTTON__BACKUP = 582
+# Not Now
+BUTTON__NOT_NOW = 583
+# Skip Backup
+TITLE__SKIP_BACKUP = 584
+# You can still backup with KeyTag later in “Security - Check Recovery Phrase”
+# .
+SUBTITLE__SKIP_BACKUP = 585
+# KeyTag
+TITLE__KEYTAG = 586
+# Front (#{} - {})
+CONTENT__FRONT_STR = 587
+# Back (#{} - {})
+CONTENT__BACK_STR = 588
+# Follow the dotmap, punch the dots on KeyTag with center punch to finish your
+# backup.
+CONTENT__FOLLOW_DOTMAP_TO_BACKUP_WITH_KEYTAG = 589
+# Finish KeyTag Backup
+TITLE__FINISH_KEYTAG_BACKUP = 590
+# If you want to make another KeyTag backup, you can view the KeyTag  dotmap i
+# n “Security - Check Recovery Phrase” after verifying your recovery phrase.
+SUBTITLE__FINISH_KEYTAG_BACKUP = 591
+# View Backside
+BUTTON__VIEW_BACKSIDE = 592
 # fmt: on

@@ -123,7 +123,7 @@ async def _finish_recovery_dry_run(
 
     storage.recovery.end_progress()
 
-    await layout.show_dry_run_result(ctx, result, is_slip39)
+    await layout.show_dry_run_result(ctx, result, is_slip39, secret)
 
     if result:
         return Success(message="The seed is valid and matches the one in the device")

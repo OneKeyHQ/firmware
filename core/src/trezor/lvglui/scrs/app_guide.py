@@ -81,7 +81,7 @@ class GuideAppDownload(lv.obj):
 
         self.images = lv.img(self.content_area)
         self.images.set_src("A:/res/download.png")
-        self.images.align_to(self.label2, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 40)
+        self.images.align_to(self.label2, lv.ALIGN.OUT_BOTTOM_LEFT, 32, 40)
 
         # self.website = lv.label(self.content_area)
         # self.website.set_style_text_font(font_PJSREG30, 0)

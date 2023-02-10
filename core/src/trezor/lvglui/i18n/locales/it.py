@@ -580,5 +580,18 @@ translations = [
     "Importo del gettone:",
     "Aggiornamento del bootloader",
     "Vuoi aggiornare il bootloader?",
+    "Backup con KeyTag",
+    "Possiedi già un KeyTag OneKey? Tocca il pulsante \"Backup\" per convertire la frase di ripristino in una mappa di punti BIP39.",
+    "Backup",
+    "Non adesso",
+    "Salta backup",
+    "È comunque possibile eseguire il backup con KeyTag in seguito in \"Sicurezza - Verifica frase di ripristino\".",
+    "KeyTag",
+    "Davanti (#{} - {})",
+    "Indietro (#{} - {})",
+    "Segui la mappa dei punti, colpisci i punti su KeyTag con il pugno centrale per completare il backup.",
+    "Termina il backup del KeyTag",
+    "Se si desidera eseguire un altro backup del KeyTag, è possibile visualizzare la mappa dei punti del KeyTag in \"Sicurezza - Verifica frase di ripristino\" dopo aver verificato la frase di ripristino.",
+    "Visualizza il retro",
 ]
 # fmt: on

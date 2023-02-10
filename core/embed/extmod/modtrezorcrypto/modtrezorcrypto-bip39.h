@@ -113,6 +113,35 @@ STATIC mp_obj_t mod_trezorcrypto_bip39_check(mp_obj_t mnemonic) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_bip39_check_obj,
                                  mod_trezorcrypto_bip39_check);
 
+/// def find(mnemonic: str) -> int:
+///     """
+///     Find the word in word list and return the index.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_bip39_find(mp_obj_t mnemonic) {
+  mp_buffer_info_t text = {0};
+  mp_get_buffer_raise(mnemonic, &text, MP_BUFFER_READ);
+  return mp_obj_new_int(mnemonic_find_word(text.buf));
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_bip39_find_obj,
+                                 mod_trezorcrypto_bip39_find);
+
+/// def get_word(index: int) -> str:
+///     """
+///     Find the word in word list for given index.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_bip39_get_word(mp_obj_t index) {
+  int i = mp_obj_get_int(index);
+  if (i < 0 || i > 2047) {
+    mp_raise_ValueError("Invalid index (only 0-2047 is allowed)");
+  }
+  const char *word = mnemonic_get_word(i);
+  mp_obj_t res =
+      mp_obj_new_str_copy(&mp_type_str, (const uint8_t *)word, strlen(word));
+  return res;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_bip39_get_word_obj,
+                                 mod_trezorcrypto_bip39_get_word);
 /// def seed(
 ///     mnemonic: str,
 ///     passphrase: str,
@@ -158,6 +187,9 @@ STATIC const mp_rom_map_elem_t mod_trezorcrypto_bip39_globals_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_bip39_from_data_obj)},
     {MP_ROM_QSTR(MP_QSTR_check), MP_ROM_PTR(&mod_trezorcrypto_bip39_check_obj)},
     {MP_ROM_QSTR(MP_QSTR_seed), MP_ROM_PTR(&mod_trezorcrypto_bip39_seed_obj)},
+    {MP_ROM_QSTR(MP_QSTR_find), MP_ROM_PTR(&mod_trezorcrypto_bip39_find_obj)},
+    {MP_ROM_QSTR(MP_QSTR_get_word),
+     MP_ROM_PTR(&mod_trezorcrypto_bip39_get_word_obj)},
 };
 STATIC MP_DEFINE_CONST_DICT(mod_trezorcrypto_bip39_globals,
                             mod_trezorcrypto_bip39_globals_table);

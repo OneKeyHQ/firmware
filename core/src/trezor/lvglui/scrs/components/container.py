@@ -24,7 +24,7 @@ class ContainerFlexCol(lv.obj):
         self.add_style(
             StyleWrapper()
             .bg_color(lv_colors.BLACK)
-            .bg_opa(lv.OPA.COVER)
+            .bg_opa(lv.OPA.TRANSP)
             .radius(0)
             .border_width(0)
             .pad_hor(0)
@@ -55,7 +55,7 @@ class ContainerFlexRow(lv.obj):
         self.add_style(
             StyleWrapper()
             .bg_color(lv_colors.BLACK)
-            .bg_opa()
+            .bg_opa(lv.OPA.TRANSP)
             .radius(0)
             .border_width(0)
             .pad_column(padding_col),

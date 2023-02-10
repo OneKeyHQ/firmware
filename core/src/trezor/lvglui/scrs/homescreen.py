@@ -343,7 +343,7 @@ class NftGallery(Screen):
             rows_num = math.ceil(nft_counts / 2)
             row_dsc = [238] * rows_num
             row_dsc.append(lv.GRID_TEMPLATE.LAST)
-            # 3 columns
+            # 2 columns
             col_dsc = [
                 238,
                 238,
