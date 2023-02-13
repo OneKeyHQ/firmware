@@ -5,6 +5,7 @@
 #include "common.h"
 #include "layout2.h"
 #include "otp.h"
+#include "se_atca.h"
 #include "util.h"
 #include "w25qxx.h"
 
@@ -24,6 +25,8 @@ void device_test(void) {
     if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
       return;
     }
+    // configure se
+    se_init();
   }
 
   // LCD TEST

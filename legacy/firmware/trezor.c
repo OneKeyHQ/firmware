@@ -39,6 +39,7 @@
 #if ONEKEY_MINI
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/timer.h>
+#include "atca_api.h"
 #include "atca_hal.h"
 #include "device.h"
 #include "device2.h"
@@ -207,7 +208,7 @@ int main(void) {
   w25qxx_init();
   flash_enc_init();
   font_init();
-  se_init();
+  atca_config_check();
 
   uint32_t idcode = *(uint32_t *)DBGMCU_IDCODE & 0xFFF;
   if (idcode == 0x411) {
