@@ -28,6 +28,7 @@ ATCA_STATUS atca_sha_hmac(const uint8_t *data, size_t data_size,
                           uint16_t key_slot, uint8_t *digest);
 void atca_pair_unlock(void);
 void atca_config_init(void);
+void atca_config_check(void);
 void atca_read_slot_data(uint16_t key_id, uint8_t data[32]);
 void atca_update_counter(void);
 uint32_t atca_get_failed_counter(void);
