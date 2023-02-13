@@ -15,6 +15,7 @@ from apps.common import safety_checks
 from . import font_PJSBOLD30, font_PJSREG24, font_PJSREG30
 from .common import FullSizeWindow, Screen, lv  # noqa: F401, F403, F405
 from .components.anim import Anim
+from .components.banner import LEVEL, Banner
 from .components.button import ListItemBtn, ListItemBtnWithSwitch, NormalButton
 from .components.container import ContainerFlexCol, ContainerGrid
 from .components.listitem import DisplayItem, ImgGridItem
@@ -408,32 +409,11 @@ class NftGallery(Screen):
         )
         self.empty_tips.align(lv.ALIGN.TOP_MID, 0, 372)
 
-        self.tips_bar = lv.obj(self.content_area)
-        self.tips_bar.remove_style_all()
-        self.tips_bar.add_style(
-            StyleWrapper()
-            .width(464)
-            .height(lv.SIZE.CONTENT)
-            .text_font(font_PJSREG30)
-            .text_color(lv_colors.ONEKEY_GRAY_4)
-            .text_letter_space(-1)
-            .bg_color(lv_colors.ONEKEY_GRAY_3)
-            .bg_opa()
-            .radius(0)
-            .border_width(0)
-            .pad_hor(8)
-            .pad_ver(16),
-            0,
+        self.tips_bar = Banner(
+            self.content_area,
+            LEVEL.HIGHLIGHT,
+            _(i18n_keys.CONTENT__HOW_TO_COLLECT_NFT__HINT),
         )
-        self.tips_bar.align(lv.ALIGN.BOTTOM_MID, 0, -8)
-        self.tips_bar_img = lv.img(self.tips_bar)
-        self.tips_bar_img.set_src("A:/res/notice.png")
-        self.tips_bar_img.set_align(lv.ALIGN.TOP_LEFT)
-        self.tips_bar_desc = lv.label(self.tips_bar)
-        self.tips_bar_desc.set_size(408, lv.SIZE.CONTENT)
-        self.tips_bar_desc.set_long_mode(lv.label.LONG.WRAP)
-        self.tips_bar_desc.align_to(self.tips_bar_img, lv.ALIGN.OUT_RIGHT_TOP, 8, 0)
-        self.tips_bar_desc.set_text(_(i18n_keys.CONTENT__HOW_TO_COLLECT_NFT__HINT))
 
     def on_click(self, event_obj):
         code = event_obj.code
@@ -2068,47 +2048,18 @@ class SafetyCheckSetting(Screen):
                 self.description.set_text(
                     _(i18n_keys.CONTENT__SAFETY_CHECKS_PERMANENTLY_PROMPT__HINT)
                 )
-                self.add_warning_desc(
-                    lv_colors.ONEKEY_RED_2,
-                    lv_colors.ONEKEY_RED_3,
-                    "A:/res/alert-danger.png",
-                    lv.color_hex(0x290700),
-                )
+                self.add_warning_desc(LEVEL.DANGER)
             else:
                 self.description.set_text(
                     _(i18n_keys.CONTENT__SAFETY_CHECKS_TEMPORARILY_PROMPT__HINT)
                 )
-                self.add_warning_desc(
-                    lv_colors.ONEKEY_YELLOW,
-                    lv.color_hex(0xC1A400),
-                    "A:/res/alert-warning.png",
-                    lv.color_hex(0x332C00),
-                )
+                self.add_warning_desc(LEVEL.WARNING)
 
-    def add_warning_desc(self, primary_color, border_color, icon_path, bg_color):
+    def add_warning_desc(self, level):
         if not hasattr(self, "warning_desc"):
-            self.warning_desc = lv.obj(self.content_area)
-            self.warning_desc.remove_style_all()
-            self.warning_desc.set_size(464, lv.SIZE.CONTENT)
-            self.warning_desc.align(lv.ALIGN.BOTTOM_MID, 0, -8)
-            self.warning_desc.add_style(
-                StyleWrapper()
-                .bg_color(bg_color)
-                .pad_all(8)
-                .border_color(border_color)
-                .border_width(1)
-                .text_color(primary_color)
-                .text_font(font_PJSREG24),
-                0,
+            self.warning_desc = Banner(
+                self.content_area, level, _(i18n_keys.MSG__SAFETY_CHECKS_PROMPT_WARNING)
             )
-            self.icon = lv.img(self.warning_desc)
-            self.icon.set_src(icon_path)
-            self.icon.set_align(lv.ALIGN.TOP_LEFT)
-            self.desc = lv.label(self.warning_desc)
-            self.desc.set_width(408)
-            self.desc.set_long_mode(lv.label.LONG.WRAP)
-            self.desc.align_to(self.icon, lv.ALIGN.OUT_RIGHT_TOP, 4, 0)
-            self.desc.set_text(_(i18n_keys.MSG__SAFETY_CHECKS_PROMPT_WARNING))
 
     def clear_warning_desc(self):
         if hasattr(self, "warning_desc"):

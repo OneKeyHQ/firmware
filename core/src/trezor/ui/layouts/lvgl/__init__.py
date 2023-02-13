@@ -1727,7 +1727,7 @@ async def show_bip39_dotmap(
                 _(i18n_keys.SUBTITLE__SKIP_BACKUP),
                 confirm_text=_(i18n_keys.BUTTON__SKIP),
                 cancel_text=_(i18n_keys.BUTTON__CANCEL),
-                icon_path="A:/res/warning.png",
+                icon_path="A:/res/icon_tips_blue.png",
                 anim_dir=0,
             )
             if await confirm_screen.request():

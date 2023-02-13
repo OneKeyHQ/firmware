@@ -178,6 +178,8 @@ trezor.lvglui.scrs.components
 import trezor.lvglui.scrs.components
 trezor.lvglui.scrs.components.anim
 import trezor.lvglui.scrs.components.anim
+trezor.lvglui.scrs.components.banner
+import trezor.lvglui.scrs.components.banner
 trezor.lvglui.scrs.components.button
 import trezor.lvglui.scrs.components.button
 trezor.lvglui.scrs.components.container

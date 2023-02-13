@@ -2,11 +2,12 @@ from trezor import utils
 from trezor.crypto import bip39
 from trezor.errors import MnemonicError
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.lvglui.scrs import font_PJSREG24, font_PJSREG30
+from trezor.lvglui.scrs import font_PJSREG24
 from trezor.lvglui.scrs.components.button import NormalButton
 
 from . import lv, lv_colors
 from .common import FullSizeWindow
+from .components.banner import LEVEL, Banner
 from .components.container import ContainerFlexCol, ContainerFlexRow
 from .widgets.style import StyleWrapper
 
@@ -49,34 +50,12 @@ class Bip39DotMap(FullSizeWindow):
         self.tag_label.set_text(_(i18n_keys.CONTENT__FRONT_STR).format(1, 12))
         self.tag_label.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
 
-        self.tips_bar = lv.obj(self.content_area)
-        self.tips_bar.remove_style_all()
-        self.tips_bar.add_style(
-            StyleWrapper()
-            .width(464)
-            .height(lv.SIZE.CONTENT)
-            .text_font(font_PJSREG30)
-            .text_color(lv_colors.ONEKEY_GRAY_4)
-            .text_letter_space(-1)
-            .bg_color(lv_colors.ONEKEY_GRAY_3)
-            .bg_opa()
-            .radius(0)
-            .border_width(0)
-            .pad_hor(8)
-            .pad_ver(16),
-            0,
+        self.tips_bar = Banner(
+            self.content_area,
+            LEVEL.DEFAULT,
+            _(i18n_keys.CONTENT__FOLLOW_DOTMAP_TO_BACKUP_WITH_KEYTAG),
         )
         self.tips_bar.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 61)
-        self.tips_bar_img = lv.img(self.tips_bar)
-        self.tips_bar_img.set_src("A:/res/notice.png")
-        self.tips_bar_img.set_align(lv.ALIGN.TOP_LEFT)
-        self.tips_bar_desc = lv.label(self.tips_bar)
-        self.tips_bar_desc.set_size(408, lv.SIZE.CONTENT)
-        self.tips_bar_desc.set_long_mode(lv.label.LONG.WRAP)
-        self.tips_bar_desc.align_to(self.tips_bar_img, lv.ALIGN.OUT_RIGHT_TOP, 8, 0)
-        self.tips_bar_desc.set_text(
-            _(i18n_keys.CONTENT__FOLLOW_DOTMAP_TO_BACKUP_WITH_KEYTAG)
-        )
         self.content_area.set_style_max_height(756, 0)
         self.btn_yes.set_parent(self.content_area)
         self.btn_yes.align_to(self.tips_bar, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
@@ -104,6 +83,7 @@ class Bip39DotMap(FullSizeWindow):
         for i, word in enumerate(words[:12] if front else words[12:]):
             if not front:
                 i += 12
+            # find the index of word in the word list(the returned index is start from 0 rather than 1 like normal word list map, so we + 1)
             index = bip39.find(word) + 1
             self.indexs[i].show_binary_index(index)
 
@@ -181,16 +161,20 @@ class Bip39DotMap(FullSizeWindow):
             )
             self.points = []
             for i in range(12):
+                # use 12 points to perform the bits status of the word index
                 point = self.Point(self.container, self.point_style)
                 if i != 11:
                     Line(self.container, 2 if i % 4 == 3 else 1)
                 self.points.append(point)
 
         def show_binary_index(self, word_index: int) -> None:
+            assert 0 < word_index <= 2048
+            # check the dots status of the word index
             for i, point in enumerate(self.points):
                 point.clear_flag(lv.obj.FLAG.CLICKABLE)
-                self.pow_value = pow(2, 11 - i)
+                self.pow_value = pow(2, 11 - i)  # bit mask
                 if word_index & self.pow_value == self.pow_value:
+                    # if the bit is set we change the point color
                     point.set_checked()
 
         # def to_word(self) -> str:
