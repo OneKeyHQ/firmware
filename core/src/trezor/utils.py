@@ -62,6 +62,25 @@ if TYPE_CHECKING:
 
 SCREENS = []
 
+SPI_IFACE_NUM = 6
+
+
+def set_up() -> None:
+    from trezor import wire, io
+    import usb
+
+    # initialize the wire codec
+    wire.setup(usb.iface_wire)
+    if __debug__:
+        wire.setup(usb.iface_debug, is_debug_session=True)
+    # interface used for trezor wire protocol
+
+    wire.setup(
+        io.SPI(
+            SPI_IFACE_NUM,
+        )
+    )
+
 
 def clear_screens() -> None:
     for scr in SCREENS:
@@ -123,7 +142,6 @@ async def turn_off_lcd():
 def play_dead():
     from trezor import loop
     import usb
-    from session import SPI_IFACE_NUM
 
     loop.pop_tasks_on_iface(usb.iface_wire.iface_num())
     loop.pop_tasks_on_iface(SPI_IFACE_NUM)

@@ -1,4 +1,4 @@
-from trezor import io, log, loop, utils, wire
+from trezor import log, loop, utils
 from trezor.lvglui import lvgl_tick
 from trezor.uart import handle_ble_info, handle_uart, handle_usb_state
 
@@ -28,17 +28,7 @@ loop.schedule(handle_usb_state())
 
 loop.schedule(lvgl_tick())
 
-# initialize the wire codec
-wire.setup(usb.iface_wire)
-if __debug__:
-    wire.setup(usb.iface_debug, is_debug_session=True)
-# interface used for trezor wire protocol
-SPI_IFACE_NUM = 6
-wire.setup(
-    io.SPI(
-        SPI_IFACE_NUM,
-    )
-)
+utils.set_up()
 if utils.show_app_guide():
     from trezor.ui.layouts import show_onekey_app_guide
 

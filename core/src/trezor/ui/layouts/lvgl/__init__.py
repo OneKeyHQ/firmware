@@ -157,6 +157,8 @@ async def request_strength() -> int:
     }
     screen = SelectWordCounter(_(i18n_keys.TITLE__READY_TO_CREATE))
     word_cnt = await screen.request()
+    if not word_cnt:
+        raise wire.ActionCancelled()
     return word_cnt_strength_map[word_cnt]
 
 
