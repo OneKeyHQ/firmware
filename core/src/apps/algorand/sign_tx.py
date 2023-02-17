@@ -10,7 +10,7 @@ from trezor.ui.layouts.lvgl import confirm_final
 from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
-from . import ICON, PRIMARY_COLOR, encoding, transactions
+from . import ICON, PRIMARY_COLOR, encoding, tokens, transactions
 
 
 @auto_keychain(__name__)
@@ -88,13 +88,20 @@ async def sign_tx(
         amount = (
             txn.amount if type(txn) is transactions.transaction.AssetTransferTxn else 0
         )
+
+        token = tokens.token_by_address("ASA", str(index))
+        if token == tokens.UNKNOWN_TOKEN:
+            amount = str(amount)
+        else:
+            amount = f"{format_amount(amount, token.decimals)} {token.symbol}"
+
         await confirm_algo_asset_xfer(
             ctx,
             sender,
             receiver,
             str(index),
             fee,
-            str(amount),
+            amount,
             txn.close_assets_to
             if type(txn) is transactions.transaction.AssetTransferTxn
             else None,

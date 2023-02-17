@@ -125,9 +125,8 @@ class Signer:
         tx_hash = hash_fn.digest()
         await self._confirm_tx(tx_hash)
 
-        await confirm_final(self.ctx)
-
         response_after_witness_requests = await self._process_witness_requests(tx_hash)
+        await confirm_final(self.ctx)
         await self.ctx.call(response_after_witness_requests, messages.CardanoTxHostAck)
         await self.ctx.call(
             messages.CardanoTxBodyHash(tx_hash=tx_hash), messages.CardanoTxHostAck
