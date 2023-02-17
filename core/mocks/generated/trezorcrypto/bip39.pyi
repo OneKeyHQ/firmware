@@ -39,6 +39,20 @@ def check(mnemonic: str) -> bool:
 
 
 # extmod/modtrezorcrypto/modtrezorcrypto-bip39.h
+def find(mnemonic: str) -> int:
+    """
+    Find the word in word list and return the index.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-bip39.h
+def get_word(index: int) -> str:
+    """
+    Find the word in word list for given index.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-bip39.h
 def seed(
     mnemonic: str,
     passphrase: str,

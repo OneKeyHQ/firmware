@@ -11,6 +11,7 @@ from trezor.ui.layouts import (
     confirm_backup,
     confirm_reset_device,
     request_strength,
+    show_bip39_dotmap,
     show_onekey_app_guide,
 )
 
@@ -57,9 +58,10 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     if isinstance(ctx, wire.DummyContext):
         utils.play_dead()
 
+    try:
         # on device reset, we need to ask for a new strength to override the default  value 12
         msg.strength = await request_strength()
-    try:
+
         # request and set new PIN
         if msg.pin_protection:
             newpin = await request_pin_confirm(ctx)
@@ -104,7 +106,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # generate and display backup information for the master secret
         if perform_backup:
             await backup_seed(ctx, msg.backup_type, secret)
-
+            await show_bip39_dotmap(ctx, secret)
         # write settings and master secret into storage
         if msg.label is not None:
             storage.device.set_label(msg.label)

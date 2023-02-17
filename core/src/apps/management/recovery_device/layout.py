@@ -5,7 +5,12 @@ from trezor import ui, wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.lv_colors import lv_colors
-from trezor.ui.layouts import confirm_action, show_success, show_warning
+from trezor.ui.layouts import (
+    confirm_action,
+    show_bip39_dotmap,
+    show_success,
+    show_warning,
+)
 from trezor.ui.layouts.common import button_request
 from trezor.ui.layouts.lvgl.recovery import (  # noqa: F401
     continue_recovery,
@@ -98,7 +103,7 @@ async def request_mnemonic(
 
 
 async def show_dry_run_result(
-    ctx: wire.GenericContext, result: bool, is_slip39: bool
+    ctx: wire.GenericContext, result: bool, is_slip39: bool, mnemonics: bytes
 ) -> None:
     if result:
         if is_slip39:
@@ -110,9 +115,11 @@ async def show_dry_run_result(
             ctx,
             "success_dry_recovery",
             text,
-            button=_(i18n_keys.BUTTON__DONE),
+            button=_(i18n_keys.BUTTON__CONTINUE),
             header=_(i18n_keys.TITLE__CORRECT),
         )
+        if not is_slip39:
+            await show_bip39_dotmap(ctx, mnemonics, recovery_check=True)
     else:
         if is_slip39:
             raise

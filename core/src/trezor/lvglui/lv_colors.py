@@ -28,6 +28,7 @@ class lv_colors:
 
     ONEKEY_GREEN = LV_COLOR_MAKE(0x00, 0xFF, 0x33)  # ok button bg
     ONEKEY_GREEN_1 = LV_COLOR_MAKE(0x00, 0xB8, 0x12)
+    ONEKEY_GREEN_2 = LV_COLOR_MAKE(0x00, 0xBE, 0x2D)
     ONEKEY_RED = LV_COLOR_MAKE(0x29, 0x07, 0x00)  #
     ONEKEY_RED_1 = LV_COLOR_MAKE(
         0xFF, 0x11, 0x00
@@ -59,3 +60,7 @@ class lv_colors:
     ONEKEY_GRAY_1 = LV_COLOR_MAKE(0x69, 0x69, 0x69)  # slider border color disable
     ONEKEY_GRAY_2 = LV_COLOR_MAKE(0x3C, 0x3C, 0x3C)  # switch border color disable
     ONEKEY_PURPLE = LV_COLOR_MAKE(0x9F, 0x00, 0xFF)
+    ONEKEY_DARK_BLUE = LV_COLOR_MAKE(0x00, 0x18, 0x47)
+    ONEKEY_BLUE = LV_COLOR_MAKE(0x41, 0x78, 0xFF)
+    ONEKEY_YELLOW_1 = LV_COLOR_MAKE(0xE0, 0xBC, 0x00)
+    ONEKEY_YELLOW_2 = LV_COLOR_MAKE(0x33, 0x2C, 0x00)

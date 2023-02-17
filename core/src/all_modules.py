@@ -166,6 +166,8 @@ trezor.lvglui.scrs
 import trezor.lvglui.scrs
 trezor.lvglui.scrs.app_guide
 import trezor.lvglui.scrs.app_guide
+trezor.lvglui.scrs.bip39_dotmap
+import trezor.lvglui.scrs.bip39_dotmap
 trezor.lvglui.scrs.ble
 import trezor.lvglui.scrs.ble
 trezor.lvglui.scrs.bootscreen
@@ -176,6 +178,8 @@ trezor.lvglui.scrs.components
 import trezor.lvglui.scrs.components
 trezor.lvglui.scrs.components.anim
 import trezor.lvglui.scrs.components.anim
+trezor.lvglui.scrs.components.banner
+import trezor.lvglui.scrs.components.banner
 trezor.lvglui.scrs.components.button
 import trezor.lvglui.scrs.components.button
 trezor.lvglui.scrs.components.container
