@@ -154,7 +154,7 @@ int main(void) {
   spi_slave_init();
 
   atca_init();
-  atca_config_init();
+  atca_config_check();
 
   emmc_init();
   timer_init();

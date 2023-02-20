@@ -268,6 +268,65 @@ void atca_config_init(void) {
          sizeof(pair_info_obj));
 }
 
+void atca_config_check(void) {
+  uint8_t serial_no[32] = {0};
+
+  memset(serial_no, 0xff, sizeof(serial_no));
+  memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
+         sizeof(pair_info_obj));
+
+  atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
+              "get config");
+
+  if (atca_configuration.lock_config != ATCA_LOCKED) {
+    atca_assert(ATCA_BAD_PARAM, "se state error");
+  }
+
+  if (atca_configuration.lock_value != ATCA_LOCKED) {
+    atca_assert(ATCA_BAD_PARAM, "se state error");
+  }
+
+  memcpy(serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
+  memcpy(serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
+         ATECC608_SN2_SIZE);
+
+  if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_SERIAL)) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+
+  if (check_all_ones(pair_info->serial, sizeof(pair_info->serial))) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  } else {
+    if (memcmp(pair_info->serial, serial_no, ATECC608_SN_SIZE)) {
+      atca_assert(ATCA_BAD_PARAM, "se changed");
+    }
+  }
+
+  if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_PROTECT_KEY)) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+
+  if (check_all_ones(pair_info->protect_key, sizeof(pair_info->protect_key))) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+
+  if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_INIT_PIN)) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+
+  if (check_all_ones(pair_info->init_pin, sizeof(pair_info->init_pin))) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+
+  if (!flash_otp_is_locked(FLASH_OTP_BLOCK_608_MIX_PIN)) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+
+  if (check_all_ones(pair_info->hash_mix, sizeof(pair_info->hash_mix))) {
+    atca_assert(ATCA_BAD_PARAM, "OTP data err");
+  }
+}
+
 ATCA_STATUS atca_nonce_tempkey(uint8_t *temp_key) {
   ATCA_STATUS status;
 
