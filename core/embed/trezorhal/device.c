@@ -272,6 +272,7 @@ void device_test(void) {
 
   uint8_t rand_buffer[32];
   atca_init();
+  atca_config_init();
 
   if (atca_random(rand_buffer)) {
     display_text(0, 20, "SE test faild", -1, FONT_NORMAL, COLOR_RED,

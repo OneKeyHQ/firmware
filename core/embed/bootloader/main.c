@@ -376,17 +376,10 @@ int main(void) {
 
   ble_usart_init();
 
-  atca_init();
-  atca_config_init();
-
   device_para_init();
 
   if (!serial_set) {
     serial_set = device_serial_set();
-  }
-
-  if (!cert_set) {
-    cert_set = se_get_certificate_len(&cert_len);
   }
 
   if (!serial_set) {
@@ -407,6 +400,13 @@ int main(void) {
   touch_power_on();
 
   device_test();
+
+  atca_init();
+  atca_config_check();
+
+  if (!cert_set) {
+    cert_set = se_get_certificate_len(&cert_len);
+  }
 
   if (!serial_set || !cert_set) {
     display_clear();
