@@ -18,7 +18,7 @@ class Bip39DotMap(FullSizeWindow):
     def __init__(self, word_count: int) -> None:
         super().__init__(
             _(i18n_keys.TITLE__KEYTAG),
-            _(i18n_keys.SUBTITLE__STR_WORDS).format(word_count),
+            None,
             _(i18n_keys.BUTTON__VIEW_BACKSIDE)
             if word_count > 12
             else _(i18n_keys.BUTTON__DONE),
@@ -30,7 +30,7 @@ class Bip39DotMap(FullSizeWindow):
         self.word_cnt = word_count
         self.front = True
         self.panel = lv.obj(self.content_area)
-        self.panel.align_to(self.subtitle, lv.ALIGN.OUT_BOTTOM_LEFT, 4, 40)
+        self.panel.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 4, 40)
         self.panel.add_style(
             StyleWrapper()
             .width(456)
@@ -56,9 +56,8 @@ class Bip39DotMap(FullSizeWindow):
             _(i18n_keys.CONTENT__FOLLOW_DOTMAP_TO_BACKUP_WITH_KEYTAG),
         )
         self.tips_bar.align_to(self.panel, lv.ALIGN.OUT_BOTTOM_MID, 0, 61)
-        self.content_area.set_style_max_height(756, 0)
-        self.btn_yes.set_parent(self.content_area)
-        self.btn_yes.align_to(self.tips_bar, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
+        # self.content_area.set_style_max_height(756, 0)
+        # self.btn_yes.align_to(self.tips_bar, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
 
         self.matrix = ContainerFlexCol(self.panel, None, padding_row=0)
         self.matrix.align(lv.ALIGN.TOP_LEFT, 59, 75)
@@ -114,13 +113,13 @@ class Bip39DotMap(FullSizeWindow):
     def show_back(self):
         self.front = False
         self.btn_yes.delete()
-        self.btn_yes = NormalButton(self.content_area, _(i18n_keys.BUTTON__DONE))
+        self.btn_yes = NormalButton(self, _(i18n_keys.BUTTON__DONE))
         self.btn_yes.set_size(231, 98)
         self.btn_yes.enable(lv_colors.ONEKEY_GREEN, text_color=lv_colors.BLACK)
-        self.btn_yes.align_to(self.tips_bar, lv.ALIGN.OUT_BOTTOM_RIGHT, 0, 16)
-        self.btn_no = NormalButton(self.content_area, _(i18n_keys.BUTTON__BACK))
+        self.btn_yes.align(lv.ALIGN.BOTTOM_RIGHT, -8, -8)
+        self.btn_no = NormalButton(self, _(i18n_keys.BUTTON__BACK))
         self.btn_no.set_size(231, 98)
-        self.btn_no.align_to(self.tips_bar, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
         self.tag_label.set_text(
             _(i18n_keys.CONTENT__BACK_STR).format(13, self.word_cnt)
         )

@@ -521,7 +521,7 @@ class ConfirmDecredSstxSubmission(FullSizeWindow):
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
         self.item2 = DisplayItem(
-            self.container, -(i18n_keys.LIST_KEY__TO__COLON), to_addr
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), to_addr
         )
 
 
