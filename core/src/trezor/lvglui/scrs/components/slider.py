@@ -109,7 +109,7 @@ class Slider(lv.slider):
             # self.arrow_img_src = "A:/res/slide-arrow-black.png"
             # self.done_img_src = "A:/res/slider-done-black.png"
         elif level == 2:
-            self.slider.add_style(
+            self.add_style(
                 StyleWrapper().bg_color(lv_colors.ONEKEY_RED_1),
                 lv.PART.KNOB | lv.STATE.DEFAULT,
             )
