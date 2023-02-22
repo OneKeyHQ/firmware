@@ -77,6 +77,7 @@ def init_file_system() -> None:
                     io.fatfs.unlink(f"1:/res/nfts/desc/{name}")
 
         io.fatfs.mount()
+        io.fatfs.mkdir("/boot", True)
         io.fatfs.mkdir("1:/res", True)
         io.fatfs.mkdir("1:/res/wallpapers", True)
         io.fatfs.mkdir("1:/res/nfts", True)
