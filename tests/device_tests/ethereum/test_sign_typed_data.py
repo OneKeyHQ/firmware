@@ -96,14 +96,9 @@ DATA = {
 
 def input_flow_show_more(client: Client):
     """Clicks show_more button wherever possible"""
-    yield  # confirm domain
+    yield  # confirm domain properties
     client.debug.wait_layout()
-    client.debug.click(SHOW_MORE)
-
-    # confirm domain properties
-    for _ in range(4):
-        yield
-        client.debug.press_yes()
+    client.debug.press_yes()
 
     yield  # confirm message
     client.debug.wait_layout()

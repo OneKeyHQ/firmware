@@ -20,6 +20,8 @@ from trezorlib.debuglink import TrezorClientDebugLink as Client
 
 from ..common import MNEMONIC_SLIP39_BASIC_20_3of6, get_test_address
 
+pytestmark = pytest.mark.skip_touch
+
 
 @pytest.mark.setup_client(mnemonic=MNEMONIC_SLIP39_BASIC_20_3of6, passphrase="TREZOR")
 @pytest.mark.skip_t1

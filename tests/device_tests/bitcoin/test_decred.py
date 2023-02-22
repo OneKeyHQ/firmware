@@ -85,7 +85,7 @@ def test_send_decred(client: Client):
                 request_output(0, FAKE_TXHASH_4d8acd),
                 request_output(1, FAKE_TXHASH_4d8acd),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -142,7 +142,7 @@ def test_purchase_ticket_decred(client: Client):
                 request_output(0, FAKE_TXHASH_4d8acd),
                 request_output(1, FAKE_TXHASH_4d8acd),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -211,7 +211,7 @@ def test_spend_from_stake_generation_and_revocation_decred(client: Client):
                 request_output(0, FAKE_TXHASH_51bc9c),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -298,7 +298,7 @@ def test_send_decred_change(client: Client):
                 request_input(0),
                 request_input(1),
                 request_input(2),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -396,7 +396,7 @@ def test_decred_multisig_change(client: Client):
                     request_output(1, FAKE_TXHASH_48f5b8),
                     request_input(0),
                     request_input(1),
-                    request_finished(),
+                    *request_finished(),
                 ]
             )
             signature, serialized_tx = btc.sign_tx(

@@ -98,7 +98,7 @@ def test_send_p2sh(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -150,7 +150,7 @@ def test_send_p2sh_change(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -203,7 +203,7 @@ def test_send_native(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -288,7 +288,7 @@ def test_send_native_change(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -366,7 +366,7 @@ def test_send_both(client: Client):
                 request_output(2),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -433,7 +433,7 @@ def test_send_multisig_1(client: Client):
         request_input(0),
         request_output(0),
         request_input(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:
@@ -509,7 +509,7 @@ def test_send_multisig_2(client: Client):
         request_input(0),
         request_output(0),
         request_input(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:
@@ -591,7 +591,7 @@ def test_send_multisig_3_change(client: Client):
         request_input(0),
         request_output(0),
         request_input(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:
@@ -674,7 +674,7 @@ def test_send_multisig_4_change(client: Client):
         request_input(0),
         request_output(0),
         request_input(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:
@@ -785,7 +785,7 @@ def test_multisig_mismatch_inputs_single(client: Client):
                 request_output(1),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
 

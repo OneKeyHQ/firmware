@@ -193,6 +193,9 @@ class Message(FullSizeWindow):
 
 class TransactionOverview(FullSizeWindow):
     def __init__(self, title, amount, address, primary_color, icon_path):
+        if __debug__:
+            self.layout_address = address
+
         super().__init__(
             title,
             None,
@@ -210,6 +213,15 @@ class TransactionOverview(FullSizeWindow):
         )
         self.item1.label_top.set_recolor(True)
         self.item1.set_style_bg_color(lv_colors.BLACK, 0)
+
+    if __debug__:
+
+        def read_content(self) -> list[str]:
+            return (
+                [self.layout_title or ""]
+                + [self.layout_subtitle or ""]
+                + [self.layout_address or ""]
+            )
 
 
 class TransactionDetailsETH(FullSizeWindow):
@@ -378,6 +390,9 @@ class BlobDisPlay(FullSizeWindow):
 
 class ConfirmMetaData(FullSizeWindow):
     def __init__(self, title, subtitle, description, data, primary_color, icon_path):
+        if __debug__:
+            self.layout_data = data
+
         super().__init__(
             title,
             subtitle,
@@ -386,11 +401,21 @@ class ConfirmMetaData(FullSizeWindow):
             primary_color=primary_color,
             icon_path=icon_path,
         )
+
         if description:
             self.container = ContainerFlexCol(
                 self.content_area, self.subtitle, pos=(0, 40)
             )
             self.item1 = DisplayItem(self.container, description, data)
+
+    if __debug__:
+
+        def read_content(self) -> list[str]:
+            return (
+                [self.layout_title or ""]
+                + [self.layout_subtitle or ""]
+                + [self.layout_data or ""]
+            )
 
 
 class TransactionDetailsBTC(FullSizeWindow):

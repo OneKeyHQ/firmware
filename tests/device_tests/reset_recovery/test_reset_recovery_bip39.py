@@ -72,6 +72,7 @@ def reset(client: Client, strength=128, skip_backup=False):
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.Success),
                 messages.ButtonRequest(code=B.Success),
                 messages.Success,
@@ -108,8 +109,8 @@ def recover(client: Client, mnemonic):
     def input_flow():
         yield  # Confirm recovery
         debug.press_yes()
-        yield  # Homescreen
-        debug.press_yes()
+        # yield  # Homescreen
+        # debug.press_yes()
 
         yield  # Enter word count
         debug.input(str(len(words)))
@@ -128,7 +129,7 @@ def recover(client: Client, mnemonic):
         client.set_expected_responses(
             [
                 messages.ButtonRequest(code=B.ProtectCall),
-                messages.ButtonRequest(code=B.RecoveryHomepage),
+                # messages.ButtonRequest(code=B.RecoveryHomepage),
                 messages.ButtonRequest(code=B.MnemonicWordCount),
                 messages.ButtonRequest(code=B.RecoveryHomepage),
                 messages.ButtonRequest(code=B.MnemonicInput),

@@ -36,6 +36,16 @@ async def show_share_words(
         header_title = f"Recovery share #{share_index + 1}"
     else:
         header_title = f"Group {group_index + 1} - Share {share_index + 1}"
+
+    if __debug__:
+        from apps import debug
+
+        def export_displayed_words() -> None:
+            # export currently displayed mnemonic words into debuglink
+            debug.reset_current_words.publish(share_words)
+
+        export_displayed_words()
+
     # shares_words_check = []  # check we display correct data
     from trezor.lvglui.scrs.reset_device import MnemonicDisplay
 
@@ -72,6 +82,11 @@ async def confirm_word(
     choices = [non_duplicates[-1], non_duplicates[0], share_words[offset]]
     # shuffle again so the confirmed word is not always the first choice
     random.shuffle(choices)
+
+    if __debug__:
+        from apps import debug
+
+        debug.reset_word_index.publish(offset)
 
     # let the user pick a word
     title = _(i18n_keys.TITLE__WORD_STR).format(offset + 1)

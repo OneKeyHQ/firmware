@@ -149,7 +149,7 @@ def test_set_pin_to_wipe_code(client: Client):
     # Try to set the PIN to the current wipe code value.
     with client, pytest.raises(TrezorFailure):
         client.set_expected_responses(
-            [messages.ButtonRequest()] * 4
+            [messages.ButtonRequest()] * 5
             + [messages.Failure(code=messages.FailureType.PinInvalid)]
         )
         client.use_pin_sequence([WIPE_CODE4, WIPE_CODE4])

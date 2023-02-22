@@ -58,7 +58,7 @@ def test_set_pin(client: Client):
     with client:
         client.use_pin_sequence([PIN_MAX, PIN_MAX])
         client.set_expected_responses(
-            [messages.ButtonRequest] * 4 + [messages.Success, messages.Features]
+            [messages.ButtonRequest] * 5 + [messages.Success, messages.Features]
         )
         device.change_pin(client)
 

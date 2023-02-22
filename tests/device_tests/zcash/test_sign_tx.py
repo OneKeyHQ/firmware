@@ -103,7 +103,7 @@ def test_spend_v4_input(client: Client):
                 messages.ButtonRequest(code=B.SignTx),
                 request_input(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -150,7 +150,7 @@ def test_send_to_multisig(client: Client):
                 messages.ButtonRequest(code=B.SignTx),
                 request_input(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -196,7 +196,7 @@ def test_spend_v5_input(client: Client):
                 messages.ButtonRequest(code=B.SignTx),
                 request_input(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -250,7 +250,7 @@ def test_one_two(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -314,7 +314,7 @@ def test_external_presigned(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -421,7 +421,7 @@ def test_spend_multisig(client: Client):
         messages.ButtonRequest(code=B.SignTx),
         request_input(0),
         request_output(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:

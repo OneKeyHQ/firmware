@@ -60,7 +60,7 @@ def test_apply_auto_lock_delay(client: Client):
         client.set_expected_responses([messages.Address])
         get_test_address(client)
 
-    time.sleep(10.5)  # sleep more than auto-lock delay
+    time.sleep(13)  # sleep more than auto-lock delay
     with client:
         client.use_pin_sequence([PIN4])
         client.set_expected_responses([pin_request(client), messages.Address])

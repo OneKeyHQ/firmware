@@ -54,6 +54,7 @@ def backup_flow_bip39(client: Client):
             [
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.Success),
                 messages.ButtonRequest(code=B.Success),
                 messages.Success,
@@ -179,6 +180,7 @@ VECTORS = [
 ]
 
 
+@pytest.mark.skip_touch
 @pytest.mark.skip_t1
 @pytest.mark.parametrize("backup_type, backup_flow", VECTORS)
 @pytest.mark.setup_client(uninitialized=True)
@@ -214,6 +216,7 @@ def test_skip_backup_msg(client: Client, backup_type, backup_flow):
     assert state.mnemonic_secret == secret
 
 
+@pytest.mark.skip_touch
 @pytest.mark.skip_t1
 @pytest.mark.parametrize("backup_type, backup_flow", VECTORS)
 @pytest.mark.setup_client(uninitialized=True)

@@ -75,7 +75,7 @@ def test_one_one_fee_sapling(client: Client):
                 request_extra_data(0, 11, TXHASH_2807c),
                 request_input(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -141,7 +141,7 @@ def test_one_one_rewards_claim(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
 

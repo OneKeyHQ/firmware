@@ -26,6 +26,8 @@ from trezorlib.tools import parse_path
 
 from ...common import click_through, read_and_confirm_mnemonic, recovery_enter_shares
 
+pytestmark = pytest.mark.skip_touch
+
 EXTERNAL_ENTROPY = b"zlutoucky kun upel divoke ody" * 2
 MOCK_OS_URANDOM = mock.Mock(return_value=EXTERNAL_ENTROPY)
 

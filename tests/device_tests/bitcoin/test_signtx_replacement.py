@@ -142,7 +142,7 @@ def test_p2pkh_fee_bump(client: Client):
                 request_output(1),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -266,7 +266,7 @@ def test_p2tr_fee_bump(client: Client):
                 request_output(1),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -336,7 +336,7 @@ def test_p2wpkh_finalize(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -475,7 +475,7 @@ def test_p2wpkh_payjoin(
                 request_output(1),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -550,7 +550,7 @@ def test_p2wpkh_in_p2sh_remove_change(client: Client):
                 request_output(0),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -632,7 +632,7 @@ def test_p2wpkh_in_p2sh_fee_bump_from_external(client: Client):
                 request_output(0),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -783,7 +783,7 @@ def test_tx_meld(client: Client):
                 request_input(1),
                 request_input(2),
                 request_input(3),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

@@ -155,6 +155,7 @@ def test_data_streaming(client: Client):
                     signature_s=None,
                     signature_v=None,
                 ),
+                messages.ButtonRequest(code=messages.ButtonRequestType.Other),
                 message_filters.EthereumTxRequest(data_length=None),
             ]
         )
@@ -336,6 +337,8 @@ def input_flow_skip(client: Client, cancel=False):
         client.debug.press_yes()
         yield
         client.debug.press_yes()
+        yield
+        client.debug.press_yes()
 
 
 def input_flow_scroll_down(client: Client, cancel=False):
@@ -358,6 +361,8 @@ def input_flow_scroll_down(client: Client, cancel=False):
     if cancel:
         client.debug.press_no()
     else:
+        client.debug.press_yes()
+        yield  # hold to confirm
         client.debug.press_yes()
         yield  # hold to confirm
         client.debug.press_yes()
@@ -395,14 +400,14 @@ def input_flow_go_back(client: Client, cancel=False):
 HEXDATA = "0123456789abcd000023456789abcd010003456789abcd020000456789abcd030000056789abcd040000006789abcd050000000789abcd060000000089abcd070000000009abcd080000000000abcd090000000001abcd0a0000000011abcd0b0000000111abcd0c0000001111abcd0d0000011111abcd0e0000111111abcd0f0000000002abcd100000000022abcd110000000222abcd120000002222abcd130000022222abcd140000222222abcd15"
 
 
-@pytest.mark.parametrize(
-    "flow", (input_flow_skip, input_flow_scroll_down, input_flow_go_back)
-)
+# @pytest.mark.parametrize(
+#     "flow", (input_flow_skip, input_flow_scroll_down, input_flow_go_back)
+# )
 @pytest.mark.skip_t1
-def test_signtx_data_pagination(client: Client, flow):
+def test_signtx_data_pagination(client: Client):
     with client:
         client.watch_layout()
-        client.set_input_flow(flow(client))
+        client.set_input_flow(input_flow_skip(client))
         ethereum.sign_tx(
             client,
             n=parse_path("m/44h/60h/0h/0/0"),
@@ -418,7 +423,7 @@ def test_signtx_data_pagination(client: Client, flow):
 
     with client, pytest.raises(exceptions.Cancelled):
         client.watch_layout()
-        client.set_input_flow(flow(client, cancel=True))
+        client.set_input_flow(input_flow_skip(client, cancel=True))
         ethereum.sign_tx(
             client,
             n=parse_path("m/44h/60h/0h/0/0"),

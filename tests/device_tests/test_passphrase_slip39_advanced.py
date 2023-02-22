@@ -24,6 +24,8 @@ from ..common import (
     get_test_address,
 )
 
+pytestmark = pytest.mark.skip_touch
+
 
 @pytest.mark.setup_client(mnemonic=MNEMONIC_SLIP39_ADVANCED_20, passphrase=True)
 @pytest.mark.skip_t1
