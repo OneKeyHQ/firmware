@@ -1115,7 +1115,7 @@ void display_progress_percent(int x, int y, int permil) {
 
 void _display_progress(uint16_t y, const char *desc, int permil) {
   if (desc) {
-    display_text_center(MAX_DISPLAY_RESX / 2, y, desc, -1, FONT_NORMAL,
+    display_text_center(MAX_DISPLAY_RESX / 2, y - 20, desc, -1, FONT_NORMAL,
                         COLOR_WHITE, COLOR_BLACK);
   }
   display_progress_percent(MAX_DISPLAY_RESX / 2, y + 40, permil / 10);

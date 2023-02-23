@@ -281,7 +281,7 @@ bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
 
   // firmware
   if (select_object(fw_type) != true) return false;
-  display_bar(0, 556, DISPLAY_RESX, 64, COLOR_BLACK);
+  display_bar(0, 400, DISPLAY_RESX, 400, COLOR_BLACK);
   while (fm_len > 0) {
     display_progress("Installing bluetooth firmware",
                      1000 * offset_i / totol_len);
