@@ -180,6 +180,7 @@ def test_get_public_key(client: Client):
             [
                 _pin_request(client),
                 messages.PassphraseRequest,
+                messages.ButtonRequest,
                 messages.PublicKey,
             ]
         )
@@ -194,6 +195,7 @@ def test_get_address(client: Client):
             [
                 _pin_request(client),
                 messages.PassphraseRequest,
+                messages.ButtonRequest,
                 messages.Address,
             ]
         )
@@ -204,7 +206,13 @@ def test_wipe_device(client: Client):
     _assert_protection(client)
     with client:
         client.set_expected_responses(
-            [messages.ButtonRequest, messages.Success, messages.Features]
+            [
+                messages.ButtonRequest,
+                messages.ButtonRequest,
+                messages.ButtonRequest,
+                messages.Success,
+                messages.Features,
+            ]
         )
         device.wipe(client)
 
@@ -321,7 +329,6 @@ def test_verify_message_t2(client: Client):
                 _pin_request(client),
                 messages.ButtonRequest,
                 messages.ButtonRequest,
-                messages.ButtonRequest,
                 messages.Success,
             ]
         )
@@ -359,6 +366,7 @@ def test_signtx(client: Client):
             [
                 _pin_request(client),
                 messages.PassphraseRequest,
+                messages.ButtonRequest,
                 request_input(0),
                 request_output(0),
                 messages.ButtonRequest(code=B.ConfirmOutput),
@@ -371,7 +379,7 @@ def test_signtx(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         btc.sign_tx(client, "Bitcoin", [inp1], [out1], prev_txes=TxCache("Bitcoin"))
@@ -405,7 +413,9 @@ def test_unlocked(client: Client):
 def test_passphrase_cached(client: Client):
     _assert_protection(client, pin=False)
     with client:
-        client.set_expected_responses([messages.PassphraseRequest, messages.Address])
+        client.set_expected_responses(
+            [messages.PassphraseRequest, messages.ButtonRequest, messages.Address]
+        )
         get_test_address(client)
 
     with client:

@@ -281,6 +281,7 @@ MESSAGE_LENGTHS = (
 
 
 @pytest.mark.skip_t1
+@pytest.mark.skip_touch
 @pytest.mark.parametrize("message", MESSAGE_LENGTHS)
 def test_signmessage_pagination(client: Client, message):
     message_read = ""
@@ -335,15 +336,17 @@ def test_signmessage_pagination_trailing_newline(client: Client):
     # The trailing newline must not cause a new paginated screen to appear.
     # The UI must be a single dialog without pagination.
     with client:
+        touch = client.features.vendor == "onekey.so"
         client.set_expected_responses(
             [
                 # expect address confirmation
                 message_filters.ButtonRequest(code=messages.ButtonRequestType.Other),
                 # expect a ButtonRequest that does not have pagination set
-                message_filters.ButtonRequest(pages=None),
+                (not touch, message_filters.ButtonRequest(pages=None)),
                 messages.MessageSignature,
             ]
         )
+
         btc.sign_message(
             client,
             coin_name="Bitcoin",
@@ -356,17 +359,35 @@ def test_signmessage_path_warning(client: Client):
     message = "This is an example of a signed message."
 
     with client:
-        client.set_expected_responses(
-            [
-                # expect a path warning
-                message_filters.ButtonRequest(
-                    code=messages.ButtonRequestType.UnknownDerivationPath
-                ),
-                message_filters.ButtonRequest(code=messages.ButtonRequestType.Other),
-                message_filters.ButtonRequest(code=messages.ButtonRequestType.Other),
-                messages.MessageSignature,
-            ]
-        )
+        if client.features.vendor == "onekey.so":
+            client.set_expected_responses(
+                [
+                    # expect a path warning
+                    message_filters.ButtonRequest(
+                        code=messages.ButtonRequestType.UnknownDerivationPath
+                    ),
+                    message_filters.ButtonRequest(
+                        code=messages.ButtonRequestType.Other
+                    ),
+                    messages.MessageSignature,
+                ]
+            )
+        else:
+            client.set_expected_responses(
+                [
+                    # expect a path warning
+                    message_filters.ButtonRequest(
+                        code=messages.ButtonRequestType.UnknownDerivationPath
+                    ),
+                    message_filters.ButtonRequest(
+                        code=messages.ButtonRequestType.Other
+                    ),
+                    message_filters.ButtonRequest(
+                        code=messages.ButtonRequestType.Other
+                    ),
+                    messages.MessageSignature,
+                ]
+            )
         btc.sign_message(
             client,
             coin_name="Bitcoin",

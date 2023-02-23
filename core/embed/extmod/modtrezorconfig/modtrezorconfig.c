@@ -504,7 +504,8 @@ STATIC mp_obj_t mod_trezorconfig_se_export_mnemonic(void) {
   uint32_t strength = 0;
 
   if (!se_isInitialized()) {
-    mp_raise_ValueError("Device not initialized");
+    // mp_raise_ValueError("Device not initialized");
+    return mp_const_none;
   }
   if (!se_getSeedStrength(&strength)) {
     mp_raise_ValueError("Get mnemonic strength");

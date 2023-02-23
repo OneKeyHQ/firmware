@@ -172,6 +172,10 @@ class FullSizeWindow(lv.obj):
     ):
         super().__init__(lv.scr_act())
 
+        if __debug__:
+            self.layout_title = title
+            self.layout_subtitle = subtitle
+
         self.channel = loop.chan()
         self.anim_dir = anim_dir
         self.set_size(lv.pct(100), lv.pct(100))
@@ -261,6 +265,9 @@ class FullSizeWindow(lv.obj):
         if auto_close_ms:
             self.destroy(delay_ms=auto_close_ms)
 
+        if __debug__:
+            self.notify_change()
+
     def eventhandler(self, event_obj):
         code = event_obj.code
         target = event_obj.get_target()
@@ -287,7 +294,33 @@ class FullSizeWindow(lv.obj):
                 self.channel.publish(1)
 
     async def request(self) -> Any:
-        return await self.channel.take()
+        if __debug__:
+            from apps.debug import confirm_signal, input_signal
+            from trezor.ui import Result
+
+            value = None
+            # return await loop.race(confirm_signal(),self.channel.take())
+            try:
+                value = await loop.race(
+                    confirm_signal(), input_signal(), self.channel.take()
+                )
+            except Result as result:
+                # Result exception was raised, this means this layout is complete.
+                value = result.value
+            return value
+
+        else:
+            return await self.channel.take()
+
+    if __debug__:
+
+        def notify_change(self):
+            from apps.debug import notify_layout_change
+
+            notify_layout_change(self)
+
+        def read_content(self) -> list[str]:
+            return [self.layout_title or ""] + [self.layout_subtitle or ""]
 
     def destroy(self, delay_ms=400):
         self.del_delayed(delay_ms)

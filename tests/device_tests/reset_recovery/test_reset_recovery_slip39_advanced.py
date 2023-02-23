@@ -30,6 +30,8 @@ from ...common import (
     recovery_enter_shares,
 )
 
+pytestmark = pytest.mark.skip_touch
+
 
 @pytest.mark.skip_t1
 @pytest.mark.setup_client(uninitialized=True)

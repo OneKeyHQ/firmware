@@ -87,7 +87,7 @@ def test_send_p2tr(client: Client):
                 request_input(0),
                 request_output(0),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -145,7 +145,7 @@ def test_send_two_with_change(client: Client):
                 request_output(1),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -285,7 +285,7 @@ def test_send_mixed(client: Client):
                 request_input(1),
                 request_input(2),
                 (client.features.model == "1", request_input(3)),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

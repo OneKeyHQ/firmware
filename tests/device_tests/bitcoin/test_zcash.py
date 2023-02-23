@@ -121,7 +121,7 @@ def test_one_one_fee_sapling(client: Client):
                 request_extra_data(0, 1, TXHASH_e38206),
                 request_input(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -281,7 +281,7 @@ def test_external_presigned(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
 

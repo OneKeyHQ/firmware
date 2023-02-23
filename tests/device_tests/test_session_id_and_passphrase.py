@@ -61,7 +61,6 @@ def _get_xpub(client: Client, passphrase=None):
         expected_responses = [
             messages.PassphraseRequest,
             messages.ButtonRequest,
-            messages.ButtonRequest,
             messages.PublicKey,
         ]
     else:
@@ -268,6 +267,9 @@ def test_passphrase_on_device(client: Client):
     assert isinstance(response, messages.ButtonRequest)
     client.debug.input("A")
     response = client.call_raw(messages.ButtonAck())
+    assert isinstance(response, messages.ButtonRequest)
+    client.debug.press_yes()
+    response = client.call_raw(messages.ButtonAck())
     assert isinstance(response, messages.PublicKey)
     assert response.xpub == XPUB_PASSPHRASES["A"]
 
@@ -292,6 +294,9 @@ def test_passphrase_always_on_device(client: Client):
     assert isinstance(response, messages.ButtonRequest)
     client.debug.input("")  # Input empty passphrase.
     response = client.call_raw(messages.ButtonAck())
+    assert isinstance(response, messages.ButtonRequest)
+    client.debug.press_yes()
+    response = client.call_raw(messages.ButtonAck())
     assert isinstance(response, messages.PublicKey)
     assert response.xpub == XPUB_PASSPHRASE_NONE
 
@@ -306,6 +311,9 @@ def test_passphrase_always_on_device(client: Client):
     response = client.call_raw(XPUB_REQUEST)
     assert isinstance(response, messages.ButtonRequest)
     client.debug.input("A")  # Input non-empty passphrase.
+    response = client.call_raw(messages.ButtonAck())
+    assert isinstance(response, messages.ButtonRequest)
+    client.debug.press_yes()
     response = client.call_raw(messages.ButtonAck())
     assert isinstance(response, messages.PublicKey)
     assert response.xpub == XPUB_PASSPHRASES["A"]

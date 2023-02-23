@@ -36,7 +36,7 @@ def test_wipe_device(client: Client):
     device.wipe(client)
 
     assert client.features.initialized is False
-    assert client.features.label is None
+    assert client.features.label == "OneKey Touch"
     assert client.features.passphrase_protection is False
     assert client.get_device_id() != device_id
 

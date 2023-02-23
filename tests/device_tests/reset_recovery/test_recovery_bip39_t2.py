@@ -31,32 +31,36 @@ def test_tt_pin_passphrase(client: Client):
 
     def input_flow():
         yield
-        assert "Do you really want to recover a wallet?" in layout().text
+        assert "Import recovery phrase to restore existing wallet." in layout().text
         client.debug.press_yes()
 
         yield
-        assert layout().text == "PinDialog"
-        client.debug.input("654")
-
-        yield
-        assert layout().text == "PinDialog"
-        client.debug.input("654")
-
-        yield
-        assert "Select number of words" in layout().text
+        assert "Enable PIN Protection" in layout().text.replace("\n", " ")
         client.debug.press_yes()
 
         yield
-        assert "WordSelector" in layout().text
+        assert layout().text == "Enter New PIN "
+        client.debug.input("654")
+
+        yield
+        assert layout().text == "Enter PIN Again "
+        client.debug.input("654")
+
+        yield
+        assert "Select the number of words" in layout().text
         client.debug.input(str(len(mnemonic)))
 
+        # yield
+        # assert "WordSelector" in layout().text
+        # client.debug.input(str(len(mnemonic)))
+
         yield
-        assert "Enter recovery seed" in layout().text
+        assert "Enter Recovery Phrase" in layout().text
         client.debug.press_yes()
 
         yield
         for word in mnemonic:
-            assert layout().text == "Bip39Keyboard"
+            assert "Enter Word" in layout().text
             client.debug.input(word)
 
         yield
@@ -85,24 +89,20 @@ def test_tt_nopin_nopassphrase(client: Client):
 
     def input_flow():
         yield
-        assert "Do you really want to recover a wallet?" in layout().text
+        assert "Import recovery phrase to restore existing wallet." in layout().text
         client.debug.press_yes()
 
         yield
-        assert "Select number of words" in layout().text
-        client.debug.press_yes()
-
-        yield
-        assert "WordSelector" in layout().text
+        assert "Select the number of words" in layout().text
         client.debug.input(str(len(mnemonic)))
 
         yield
-        assert "Enter recovery seed" in layout().text
+        assert "Enter Recovery Phrase" in layout().text
         client.debug.press_yes()
 
         yield
         for word in mnemonic:
-            assert layout().text == "Bip39Keyboard"
+            assert "Enter Word" in layout().text
             client.debug.input(word)
 
         yield

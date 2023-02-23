@@ -441,5 +441,6 @@ class Layout(Component):
 
 
 def wait_until_layout_is_running() -> Awaitable[None]:  # type: ignore [awaitable-is-generator]
+    return
     while not layout_chan.takers:
         yield

@@ -107,7 +107,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # generate and display backup information for the master secret
         if perform_backup:
             await backup_seed(ctx, msg.backup_type, secret)
-            await show_bip39_dotmap(ctx, secret)
+            if not __debug__:
+                await show_bip39_dotmap(ctx, secret)
         # write settings and master secret into storage
         if msg.label is not None:
             storage.device.set_label(msg.label)

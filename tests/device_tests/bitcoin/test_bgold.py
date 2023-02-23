@@ -86,7 +86,7 @@ def test_send_bitcoin_gold_change(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -143,7 +143,7 @@ def test_send_bitcoin_gold_nochange(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -266,7 +266,7 @@ def test_send_btg_multisig_change(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         signatures, serialized_tx = btc.sign_tx(
@@ -304,7 +304,7 @@ def test_send_btg_multisig_change(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         signatures, serialized_tx = btc.sign_tx(
@@ -359,7 +359,7 @@ def test_send_p2sh(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -409,7 +409,7 @@ def test_send_p2sh_witness_change(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -466,7 +466,7 @@ def test_send_multisig_1(client: Client):
                 request_input(0),
                 request_output(0),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         signatures, _ = btc.sign_tx(client, "Bgold", [inp1], [out1], prev_txes=TX_API)
@@ -488,7 +488,7 @@ def test_send_multisig_1(client: Client):
                 request_input(0),
                 request_output(0),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -587,7 +587,7 @@ def test_send_btg_external_presigned(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

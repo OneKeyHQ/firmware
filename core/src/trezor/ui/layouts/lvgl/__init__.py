@@ -987,7 +987,9 @@ async def request_pin_tips(ctx: wire.GenericContext) -> None:
     from trezor.lvglui.scrs.pinscreen import PinTip
 
     tipscreen = PinTip()
-    await ctx.wait(tipscreen.request())
+    await raise_if_cancelled(
+        interact(ctx, tipscreen, "set_pin", ButtonRequestType.Other)
+    )
 
 
 async def show_pairing_error() -> None:
@@ -1152,10 +1154,11 @@ async def confirm_blind_sign_common(
 
 
 async def show_onekey_app_guide():
-    from trezor.lvglui.scrs import app_guide
+    if not __debug__:
+        from trezor.lvglui.scrs import app_guide
 
-    app_guide.GuideAppDownload()
-    await app_guide.request()
+        app_guide.GuideAppDownload()
+        await app_guide.request()
 
 
 async def confirm_set_homescreen(ctx, replace: bool = False):

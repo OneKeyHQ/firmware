@@ -244,7 +244,7 @@ def test_p2wpkh_in_p2sh_presigned(client: Client):
                 request_output(2),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -416,7 +416,7 @@ def test_p2wsh_external_presigned(client: Client):
                 request_output(0),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
 
@@ -516,7 +516,7 @@ def test_p2tr_external_presigned(client: Client):
                 request_output(1),
                 request_input(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -625,7 +625,7 @@ def test_p2wpkh_with_proof(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -703,7 +703,7 @@ def test_p2tr_with_proof(client: Client):
                 request_input(1),
                 request_output(0),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

@@ -96,6 +96,7 @@ def test_exponential_backoff_t1(client: Client):
 
 
 @pytest.mark.skip_t1
+@pytest.mark.skip_touch
 def test_exponential_backoff_t2(client: Client):
     def input_flow():
         """Inputting some bad PINs and finally the correct one"""

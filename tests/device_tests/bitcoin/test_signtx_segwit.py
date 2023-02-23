@@ -82,7 +82,7 @@ def test_send_p2sh(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -132,7 +132,7 @@ def test_send_p2sh_change(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -183,7 +183,7 @@ def test_testnet_segwit_big_amount(client: Client):
                 request_input(0),
                 request_output(0),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -239,7 +239,7 @@ def test_send_multisig_1(client: Client):
         request_input(0),
         request_output(0),
         request_input(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:
@@ -310,7 +310,7 @@ def test_attack_change_input_address(client: Client):
                 request_output(0),
                 request_output(1),
                 request_input(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -392,7 +392,7 @@ def test_attack_mixed_inputs(client: Client):
         request_input(1),
         request_output(0),
         request_input(1),
-        request_finished(),
+        *request_finished(),
     ]
 
     if client.features.model == "1":

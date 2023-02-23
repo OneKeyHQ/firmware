@@ -72,7 +72,7 @@ def test_send_dash(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(client, "Dash", [inp1], [out1], prev_txes=TX_API)
@@ -121,7 +121,7 @@ def test_send_dash_dip2_input(client: Client):
                 request_output(1),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

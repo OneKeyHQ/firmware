@@ -209,6 +209,9 @@ def test_payment_request_details(client: Client):
         yield  # confirm transaction
         client.debug.press_yes()
 
+        yield  # confirm transaction
+        client.debug.press_yes()
+
     with client:
         client.set_input_flow(input_flow)
         client.watch_layout(True)

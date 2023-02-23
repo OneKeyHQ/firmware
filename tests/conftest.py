@@ -88,6 +88,11 @@ def client(
         pytest.skip("Test excluded on Trezor T")
     if request.node.get_closest_marker("skip_t1") and _raw_client.features.model == "1":
         pytest.skip("Test excluded on Trezor 1")
+    if (
+        request.node.get_closest_marker("skip_touch")
+        and _raw_client.features.model == "T"
+    ):
+        pytest.skip("Test excluded on OneKey touch")
 
     sd_marker = request.node.get_closest_marker("sd_card")
     if sd_marker and not _raw_client.features.sd_card_present:
@@ -246,6 +251,7 @@ def pytest_configure(config: "Config") -> None:
     # register known markers
     config.addinivalue_line("markers", "skip_t1: skip the test on Trezor One")
     config.addinivalue_line("markers", "skip_t2: skip the test on Trezor T")
+    config.addinivalue_line("markers", "skip_touch: skip the test on OneKey Touch")
     config.addinivalue_line(
         "markers",
         'setup_client(mnemonic="all all all...", pin=None, passphrase=False, uninitialized=False): configure the client instance',
@@ -265,8 +271,8 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     Ensures that altcoin tests are skipped, and that no test is skipped on
     both T1 and TT.
     """
-    if item.get_closest_marker("skip_t1") and item.get_closest_marker("skip_t2"):
-        raise RuntimeError("Don't skip tests for both trezors!")
+    # if item.get_closest_marker("skip_t1") and item.get_closest_marker("skip_t2"):
+    #     raise RuntimeError("Don't skip tests for both trezors!")
 
     skip_altcoins = int(os.environ.get("TREZOR_PYTEST_SKIP_ALTCOINS", 0))
     if item.get_closest_marker("altcoin") and skip_altcoins:

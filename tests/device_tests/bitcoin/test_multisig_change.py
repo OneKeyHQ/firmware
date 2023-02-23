@@ -171,7 +171,7 @@ def _responses(INP1, INP2, change=0):
         request_output(1),
         request_output(0),
         request_output(1),
-        request_finished(),
+        *request_finished(),
     ]
     return resp
 

@@ -80,7 +80,7 @@ def test_opreturn(client: Client):
                 request_output(1),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
