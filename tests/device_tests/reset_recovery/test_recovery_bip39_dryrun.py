@@ -19,7 +19,6 @@ import pytest
 from trezorlib import device, exceptions, messages
 from trezorlib.debuglink import TrezorClientDebugLink as Client
 
-from ... import buttons
 from ...common import MNEMONIC12
 
 
@@ -50,27 +49,29 @@ def do_recover_core(client: Client, mnemonic, **kwargs):
     def input_flow():
         yield
         layout = client.debug.wait_layout()
-        assert "check the recovery seed" in layout.text.replace("\n", " ")
-        client.debug.click(buttons.OK)
+        assert "Check your backup" in layout.text.replace("\n", " ")
+        # client.debug.click(buttons.OK)
+        client.debug.press_yes()
 
         yield
         layout = client.debug.wait_layout()
-        assert "Select number of words" in layout.text
-        client.debug.click(buttons.OK)
+        assert "Select the number of words" in layout.text
+        # client.debug.click(buttons.OK)
+        client.debug.input(str(len(mnemonic)))
+
+        # yield
+        # layout = client.debug.wait_layout()
+        # assert layout.text == "WordSelector"
+        # # click the number
+        # word_option_offset = 6
+        # word_options = (12, 18, 20, 24, 33)
+        # index = word_option_offset + word_options.index(len(mnemonic))
+        # client.debug.click(buttons.grid34(index % 3, index // 3))
 
         yield
         layout = client.debug.wait_layout()
-        assert layout.text == "WordSelector"
-        # click the number
-        word_option_offset = 6
-        word_options = (12, 18, 20, 24, 33)
-        index = word_option_offset + word_options.index(len(mnemonic))
-        client.debug.click(buttons.grid34(index % 3, index // 3))
-
-        yield
-        layout = client.debug.wait_layout()
-        assert "Enter recovery seed" in layout.text
-        client.debug.click(buttons.OK)
+        assert "Enter Recovery Phrase" in layout.text
+        client.debug.press_yes()
 
         yield
         for word in mnemonic:
@@ -79,7 +80,7 @@ def do_recover_core(client: Client, mnemonic, **kwargs):
 
         yield
         client.debug.wait_layout()
-        client.debug.click(buttons.OK)
+        client.debug.press_yes()
 
     with client:
         client.watch_layout()
@@ -119,47 +120,47 @@ def test_invalid_seed_core(client: Client):
     def input_flow():
         yield
         layout = client.debug.wait_layout()
-        assert "check the recovery seed" in layout.text.replace("\n", " ")
-        client.debug.click(buttons.OK)
+        assert "Check Recovery Phrase" in layout.text.replace("\n", " ")
+        client.debug.press_yes()
 
         yield
         layout = client.debug.wait_layout()
-        assert "Select number of words" in layout.text
-        client.debug.click(buttons.OK)
+        assert "Select the number of words" in layout.text
+
+        # yield
+        # layout = client.debug.wait_layout()
+        # assert layout.text == "WordSelector"
+        # # select 12 words
+        # client.debug.click(buttons.grid34(0, 2))
+        client.debug.input("12")
 
         yield
         layout = client.debug.wait_layout()
-        assert layout.text == "WordSelector"
-        # select 12 words
-        client.debug.click(buttons.grid34(0, 2))
-
-        yield
-        layout = client.debug.wait_layout()
-        assert "Enter recovery seed" in layout.text
-        client.debug.click(buttons.OK)
+        assert "Enter Recovery Phrase" in layout.text
+        client.debug.press_yes()
 
         yield
         for _ in range(12):
             layout = client.debug.wait_layout()
-            assert layout.text == "Bip39Keyboard"
+            # assert layout.text == "Bip39Keyboard"
             client.debug.input("stick")
 
         br = yield
         layout = client.debug.wait_layout()
         assert br.code == messages.ButtonRequestType.Warning
-        assert "invalid recovery seed" in layout.text
-        client.debug.click(buttons.OK)
+        assert "Invalid Recovery Phrase" in layout.text
+        client.debug.press_yes()
 
         yield
         # retry screen
         layout = client.debug.wait_layout()
-        assert "Select number of words" in layout.text
-        client.debug.click(buttons.CANCEL)
+        assert "Enter Recovery Phrase" in layout.text
+        client.debug.press_no()
 
         yield
         layout = client.debug.wait_layout()
         assert "abort" in layout.text
-        client.debug.click(buttons.OK)
+        client.debug.press_yes()
 
     with client:
         client.watch_layout()

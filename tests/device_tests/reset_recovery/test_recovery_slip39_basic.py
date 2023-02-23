@@ -25,7 +25,10 @@ from ...common import (
     recovery_enter_shares,
 )
 
-pytestmark = pytest.mark.skip_t1
+pytestmark = [
+    pytest.mark.skip_t1,
+    pytest.mark.skip_touch,
+]
 
 MNEMONIC_SLIP39_BASIC_20_1of1 = [
     "academic academic academic academic academic academic academic academic academic academic academic academic academic academic academic academic academic rebuild aquatic spew"

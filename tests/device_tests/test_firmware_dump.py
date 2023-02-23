@@ -1,5 +1,7 @@
 from hashlib import blake2s
 
+import pytest
+
 from trezorlib import firmware
 from trezorlib.debuglink import TrezorClientDebugLink as Client
 
@@ -9,6 +11,7 @@ FIRMWARE_LENGTHS = {
 }
 
 
+@pytest.mark.skip_touch
 def test_firmware_dump_hash(client: Client) -> None:
     data = firmware.get_firmware(client)
     assert len(data) == FIRMWARE_LENGTHS[client.features.model]

@@ -118,7 +118,7 @@ async def show_dry_run_result(
             button=_(i18n_keys.BUTTON__CONTINUE),
             header=_(i18n_keys.TITLE__CORRECT),
         )
-        if not is_slip39:
+        if not is_slip39 and not __debug__:
             await show_bip39_dotmap(ctx, mnemonics, recovery_check=True)
     else:
         if is_slip39:

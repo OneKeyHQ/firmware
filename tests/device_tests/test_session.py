@@ -36,6 +36,7 @@ def test_clear_session(client: Client):
     init_responses = [
         messages.PinMatrixRequest if is_trezor1 else messages.ButtonRequest,
         messages.PassphraseRequest,
+        messages.ButtonRequest,
     ]
 
     cached_responses = [messages.PublicKey]
@@ -135,7 +136,6 @@ def test_session_recycling(client: Client):
         client.set_expected_responses(
             [
                 messages.PassphraseRequest,
-                messages.ButtonRequest,
                 messages.ButtonRequest,
                 messages.Address,
             ]

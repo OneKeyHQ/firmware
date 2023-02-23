@@ -68,6 +68,7 @@ def reset_device(client: Client, strength):
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.Success),
                 messages.ButtonRequest(code=B.Success),
                 messages.Success,
@@ -131,6 +132,11 @@ def test_reset_device_pin(client: Client):
         assert br.code == B.ResetDevice
         client.debug.press_yes()
 
+        # Enable PIN
+        br = yield
+        assert br.code == B.Other
+        client.debug.press_yes()
+
         # Enter new PIN
         yield
         client.debug.input("654")
@@ -172,6 +178,7 @@ def test_reset_device_pin(client: Client):
         client.set_expected_responses(
             [
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.Other),
                 messages.ButtonRequest(code=B.PinEntry),
                 messages.ButtonRequest(code=B.PinEntry),
                 messages.ButtonRequest(code=B.ResetDevice),
@@ -179,6 +186,7 @@ def test_reset_device_pin(client: Client):
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.Success),
                 messages.ButtonRequest(code=B.Success),
                 messages.Success,
@@ -256,8 +264,10 @@ def test_reset_failed_check(client: Client):
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.Success),
                 messages.ButtonRequest(code=B.Success),
                 messages.Success,

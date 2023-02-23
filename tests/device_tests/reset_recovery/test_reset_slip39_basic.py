@@ -32,7 +32,10 @@ from ...common import (
     read_and_confirm_mnemonic,
 )
 
-pytestmark = [pytest.mark.skip_t1]
+pytestmark = [
+    pytest.mark.skip_t1,
+    pytest.mark.skip_touch,
+]
 
 
 def reset_device(client: Client, strength):

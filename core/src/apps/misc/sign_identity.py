@@ -3,12 +3,15 @@ from ustruct import pack, unpack
 
 from trezor import wire
 from trezor.crypto.hashlib import sha256
+from trezor.lvglui.scrs import lv
 from trezor.messages import SignedIdentity
 from trezor.ui.layouts import confirm_sign_identity
 
 from apps.common import coininfo
 from apps.common.keychain import get_keychain
 from apps.common.paths import HARDENED, AlwaysMatchingSchema
+
+from . import PRIMARY_COLOR
 
 if TYPE_CHECKING:
     from trezor.messages import IdentityType, SignIdentity
@@ -82,6 +85,7 @@ async def require_confirm_sign_identity(
     ctx: wire.Context, identity: IdentityType, challenge_visual: str | None
 ) -> None:
     proto = identity.proto.upper() if identity.proto else "identity"
+    ctx.primary_color = lv.color_hex(PRIMARY_COLOR)
     await confirm_sign_identity(
         ctx, proto, serialize_identity_without_proto(identity), challenge_visual
     )

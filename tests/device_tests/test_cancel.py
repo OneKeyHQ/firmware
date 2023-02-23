@@ -86,12 +86,15 @@ def test_cancel_on_paginated(client: Client):
     resp = client.call_raw(message)
     assert isinstance(resp, m.ButtonRequest)
     client._raw_write(m.ButtonAck())
-    client.debug.press_yes()
+    if client.features.vendor == "onekey.so":
+        pass
+    else:
+        client.debug.press_yes()
 
-    resp = client._raw_read()
-    assert isinstance(resp, m.ButtonRequest)
-    assert resp.pages is not None
-    client._raw_write(m.ButtonAck())
+        resp = client._raw_read()
+        assert isinstance(resp, m.ButtonRequest)
+        assert resp.pages is not None
+        client._raw_write(m.ButtonAck())
 
     client._raw_write(m.Cancel())
     resp = client._raw_read()

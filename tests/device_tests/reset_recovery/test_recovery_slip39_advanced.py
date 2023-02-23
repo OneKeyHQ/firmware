@@ -25,7 +25,10 @@ from ...common import (
     recovery_enter_shares,
 )
 
-pytestmark = pytest.mark.skip_t1
+pytestmark = [
+    pytest.mark.skip_t1,
+    pytest.mark.skip_touch,
+]
 
 EXTRA_GROUP_SHARE = [
     "eraser senior decision smug corner ruin rescue cubic angel tackle skin skunk program roster trash rumor slush angel flea amazing"

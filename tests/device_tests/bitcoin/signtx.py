@@ -10,6 +10,7 @@ from bitcoin.wallet import CBitcoinAddress
 from trezorlib import messages
 
 T = messages.RequestType
+B = messages.ButtonRequestType
 
 
 def request_input(n: int, tx_hash: bytes = None) -> messages.TxRequest:
@@ -54,8 +55,11 @@ def request_meta(tx_hash: bytes) -> messages.TxRequest:
     )
 
 
-def request_finished() -> messages.TxRequest:
-    return messages.TxRequest(request_type=T.TXFINISHED)
+def request_finished() -> tuple[messages.ButtonRequest, messages.TxRequest]:
+    return (
+        messages.ButtonRequest(code=B.Other),
+        messages.TxRequest(request_type=T.TXFINISHED),
+    )
 
 
 def request_extra_data(ofs: int, len: int, tx_hash: bytes) -> messages.TxRequest:

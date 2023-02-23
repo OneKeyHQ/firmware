@@ -86,7 +86,7 @@ def test_send_bch_change(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -143,7 +143,7 @@ def test_send_bch_nochange(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -200,7 +200,7 @@ def test_send_bch_oldaddr(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(
@@ -336,7 +336,7 @@ def test_send_bch_multisig_wrongchange(client: Client):
                 request_output(1, FAKE_TXHASH_062fbd),
                 request_input(0),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         (signatures1, serialized_tx) = btc.sign_tx(
@@ -404,7 +404,7 @@ def test_send_bch_multisig_change(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         (signatures1, serialized_tx) = btc.sign_tx(
@@ -442,7 +442,7 @@ def test_send_bch_multisig_change(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         (signatures1, serialized_tx) = btc.sign_tx(
@@ -509,7 +509,7 @@ def test_send_bch_external_presigned(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

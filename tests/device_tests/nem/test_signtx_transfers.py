@@ -40,6 +40,7 @@ def test_nem_signtx_simple(client: Client):
                 messages.ButtonRequest(code=messages.ButtonRequestType.ConfirmOutput),
                 # Confirm recipient
                 messages.ButtonRequest(code=messages.ButtonRequestType.SignTx),
+                messages.ButtonRequest(code=messages.ButtonRequestType.Other),
                 messages.NEMSignedTx,
             ]
         )
@@ -83,6 +84,7 @@ def test_nem_signtx_encrypted_payload(client: Client):
                 messages.ButtonRequest(code=messages.ButtonRequestType.ConfirmOutput),
                 # Confirm recipient
                 messages.ButtonRequest(code=messages.ButtonRequestType.SignTx),
+                messages.ButtonRequest(code=messages.ButtonRequestType.Other),
                 messages.NEMSignedTx,
             ]
         )

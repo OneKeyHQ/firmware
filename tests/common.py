@@ -141,8 +141,8 @@ def recovery_enter_shares(
     word_count = len(shares[0].split(" "))
 
     # Homescreen - proceed to word number selection
-    yield
-    debug.press_yes()
+    # yield
+    # debug.press_yes()
     # Input word number
     br = yield
     assert br.code == ButtonRequestType.MnemonicWordCount
@@ -215,18 +215,22 @@ def read_and_confirm_mnemonic(
         mnemonic = yield from read_and_confirm_mnemonic(client.debug)
     """
     mnemonic = []
-    br = yield
-    assert br.pages is not None
-    for _ in range(br.pages - 1):
-        mnemonic.extend(debug.read_reset_word().split())
-        debug.swipe_up(wait=True)
+    yield
+    # br = yield
+    # assert br.pages is not None
+    # for _ in range(br.pages - 1):
+    #     mnemonic.extend(debug.read_reset_word().split())
+    #     debug.swipe_up(wait=True)
 
     # last page is confirmation
     mnemonic.extend(debug.read_reset_word().split())
     debug.press_yes()
 
+    yield
+    debug.press_yes()
+
     # check share
-    for _ in range(3):
+    for _ in range(len(mnemonic)):
         index = debug.read_reset_word_pos()
         if choose_wrong:
             debug.input(mnemonic[(index + 1) % len(mnemonic)])

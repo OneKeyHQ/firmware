@@ -203,7 +203,7 @@ def test_sign_tx(client: Client):
                 request_output(3),
                 request_output(4),
                 request_input(1),
-                request_finished(),
+                *request_finished(),
             ]
         )
         _, serialized_tx = btc.sign_tx(

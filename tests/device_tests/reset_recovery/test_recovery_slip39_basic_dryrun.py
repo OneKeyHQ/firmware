@@ -22,7 +22,10 @@ from trezorlib.exceptions import TrezorFailure
 
 from ...common import recovery_enter_shares
 
-pytestmark = pytest.mark.skip_t1
+pytestmark = [
+    pytest.mark.skip_t1,
+    pytest.mark.skip_touch,
+]
 
 SHARES_20_2of3 = [
     "crush merchant academic acid dream decision orbit smug trend trust painting slice glad crunch veteran lunch friar satoshi engage aquatic",

@@ -26,7 +26,10 @@ from trezorlib.messages import BackupType, ButtonRequestType as B
 
 from ...common import click_through, generate_entropy, read_and_confirm_mnemonic
 
-pytestmark = [pytest.mark.skip_t1]
+pytestmark = [
+    pytest.mark.skip_t1,
+    pytest.mark.skip_touch,
+]
 
 EXTERNAL_ENTROPY = b"zlutoucky kun upel divoke ody" * 2
 

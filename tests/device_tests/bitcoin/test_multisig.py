@@ -94,7 +94,7 @@ def test_2_of_3(client: Client):
         request_input(0),
         request_output(0),
         request_output(0),
-        request_finished(),
+        *request_finished(),
     ]
 
     with client:

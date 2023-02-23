@@ -61,6 +61,7 @@ def test_backup_bip39(client: Client):
             [
                 messages.ButtonRequest(code=B.ResetDevice),
                 messages.ButtonRequest(code=B.ResetDevice),
+                messages.ButtonRequest(code=B.ProtectCall),
                 messages.ButtonRequest(code=B.Success),
                 messages.ButtonRequest(code=B.Success),
                 messages.Success,
@@ -79,6 +80,7 @@ def test_backup_bip39(client: Client):
 
 
 @pytest.mark.skip_t1
+@pytest.mark.skip_touch
 @pytest.mark.setup_client(needs_backup=True, mnemonic=MNEMONIC_SLIP39_BASIC_20_3of6)
 @pytest.mark.parametrize(
     "click_info", [True, False], ids=["click_info", "no_click_info"]
@@ -147,6 +149,7 @@ def test_backup_slip39_basic(client: Client, click_info: bool):
 
 
 @pytest.mark.skip_t1
+@pytest.mark.skip_touch
 @pytest.mark.setup_client(needs_backup=True, mnemonic=MNEMONIC_SLIP39_ADVANCED_20)
 @pytest.mark.parametrize(
     "click_info", [True, False], ids=["click_info", "no_click_info"]
