@@ -406,7 +406,8 @@ void process_msg_Ping(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
   MSG_SEND(Success);
 }
 
-static uint32_t firmware_remaining, firmware_block, chunk_requested;
+static uint32_t firmware_remaining, firmware_len, firmware_block,
+    chunk_requested;
 
 void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
                                uint8_t *buf) {
@@ -417,7 +418,7 @@ void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
   MSG_RECV_INIT(FirmwareErase);
   MSG_RECV(FirmwareErase);
 
-  firmware_remaining = msg_recv.has_length ? msg_recv.length : 0;
+  firmware_len = firmware_remaining = msg_recv.has_length ? msg_recv.length : 0;
   if ((firmware_remaining > 0) &&
       ((firmware_remaining % sizeof(uint32_t)) == 0) &&
       (firmware_remaining <= (FIRMWARE_SECTORS_COUNT * IMAGE_CHUNK_SIZE))) {
@@ -476,8 +477,7 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
   while (stream->bytes_left) {
     // update loader but skip first block
     if (update_mode == UPDATE_BLE) {
-      ui_screen_install_progress_upload(1000 * chunk_written /
-                                        firmware_remaining);
+      ui_screen_install_progress_upload(1000 * chunk_written / firmware_len);
     } else {
       if (firmware_block > 0) {
         ui_screen_install_progress_upload(
@@ -494,6 +494,10 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
       return false;
     }
     chunk_written += buffer_size;
+  }
+
+  if (update_mode == UPDATE_BLE) {
+    ui_screen_install_progress_upload(1000 * chunk_written / firmware_len);
   }
 
   return true;
