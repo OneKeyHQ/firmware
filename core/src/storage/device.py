@@ -57,6 +57,7 @@ _USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
 _KEYBOARD_HAPTIC = const(0x88)   # bool
 _TAP_AWAKE = const(0x89)  # bool
 _ANIMATION = const(0x8A)  # bool
+_USE_TREZOR_COMP_MODE = const(0x8B)  # bool
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
@@ -185,6 +186,14 @@ def is_usb_lock_enabled() -> bool:
 
 def set_usb_lock_enable(enable: bool) -> None:
     common.set_bool(_NAMESPACE, _USE_USB_PROTECT, enable, public=True)
+
+
+def is_trezor_comp_mode_enabled() -> bool:
+    return common.get_bool(_NAMESPACE, _USE_TREZOR_COMP_MODE, public=True)
+
+
+def set_trezor_comp_mode_enable(enable: bool) -> None:
+    common.set_bool(_NAMESPACE, _USE_TREZOR_COMP_MODE, enable, public=True)
 
 
 def is_tap_awake_enabled() -> bool:

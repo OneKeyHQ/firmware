@@ -1,10 +1,11 @@
 from micropython import const
 
+from storage import device
 from trezor import io, utils
 
 bus = io.USB(
     vendor_id=0x1209,
-    product_id=0x53C1,
+    product_id=0x53C1 if device.is_trezor_comp_mode_enabled() else 0x4F4B,
     release_num=0x0200,
     manufacturer="OneKey",
     product="OneKey",
