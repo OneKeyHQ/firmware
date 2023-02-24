@@ -84,3 +84,13 @@ void menu_para_set_sleep(int index) {
   uint32_t ms[5] = {60 * 1000, 2 * 60 * 1000, 5 * 60 * 1000, 10 * 60 * 1000, 0};
   config_setSleepDelayMs(ms[index]);
 }
+
+char* menu_para_trezor_comp_mode_state(void) {
+  bool trezor_comp_mode_current = false;
+  config_getTrezorCompMode(&trezor_comp_mode_current);
+  return trezor_comp_mode_current ? _(" On") : _(" Off");
+}
+
+void menu_para_set_trezor_comp_mode(int index) {
+  config_setTrezorCompMode(index ? false : true);
+}

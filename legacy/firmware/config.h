@@ -125,6 +125,10 @@ bool config_isLanguageSet(void);
 void config_setPassphraseProtection(bool passphrase_protection);
 bool config_getPassphraseProtection(bool *passphrase_protection);
 
+void config_setTrezorCompMode(bool trezor_comp_mode);
+bool config_getTrezorCompMode(bool *trezor_comp_mode);
+
+
 bool config_getHomescreen(uint8_t *dest, uint16_t dest_size);
 void config_setHomescreen(const uint8_t *data, uint32_t size);
 

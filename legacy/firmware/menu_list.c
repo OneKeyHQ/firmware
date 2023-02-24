@@ -352,6 +352,19 @@ static struct menu ble_set_menu = {
     .previous = &settings_menu,
 };
 
+static struct menu_item trezor_comp_mode_set_menu_items[] = {
+    {"On", NULL, true, menu_para_set_trezor_comp_mode, NULL, true},
+    {"Off", NULL, true, menu_para_set_trezor_comp_mode, NULL, true}};
+
+static struct menu trezor_comp_mode_set_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(trezor_comp_mode_set_menu_items),
+    .title = NULL,
+    .items = trezor_comp_mode_set_menu_items,
+    .previous = &settings_menu,
+};
+
 static struct menu_item language_set_menu_items[] = {
     {"English ", NULL, true, menu_para_set_language, NULL, true},
     {"简体中文", NULL, true, menu_para_set_language, NULL, true}};
@@ -418,7 +431,9 @@ static struct menu_item settings_menu_items[] = {
     {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
      menu_para_autolock, false},
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
-     menu_para_shutdown, false}};
+     menu_para_shutdown, false},
+    {"Trezor Mode", NULL, false, .sub_menu = &trezor_comp_mode_set_menu,
+    menu_para_trezor_comp_mode_state, false}};
 
 static struct menu settings_menu = {
     .start = 0,

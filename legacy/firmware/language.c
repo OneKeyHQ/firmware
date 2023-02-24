@@ -1137,6 +1137,8 @@ const char *languages[][2] = {
     {"you still have ", "还有"},
     // reset.c
     {"your asset,Keep it safe", "凭证,请妥善保管"},
+    //
+    {"Trezor Mode", "Trezor模式"},
 };
 
 int LANGUAGE_ITEMS = sizeof(languages) / sizeof(languages[0]);
