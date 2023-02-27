@@ -605,6 +605,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
           ui_bootloader_first(NULL);
           ui_fadein();
           send_user_abort(iface_num, "Firmware install cancelled");
+          update_mode = 0;
           return -4;
         }
 
@@ -695,6 +696,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 #endif
           ui_fadein();
           send_user_abort(iface_num, "Firmware install cancelled");
+          update_mode = 0;
           return -4;
         }
 
