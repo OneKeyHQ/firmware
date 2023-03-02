@@ -1,0 +1,69 @@
+name: "build-classic"
+
+on:
+  schedule:
+    - cron: '30 19 * * 0,1,2,3,4'
+  workflow_dispatch:
+
+jobs:
+  build-classic:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        with:
+          ref: feat/tw-v9.9.99
+
+      - name: Populate vars
+        id: vars
+        run: |
+          BOOT_VERSION=$(./tools/version.sh ./legacy/bootloader/version.h)
+          FIRMWARE_VERSION=$(cat ./legacy/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
+          BUILD_DATE=$(date +"%Y%m%d")
+          SHORT_HASH=$(git rev-parse --short HEAD)
+
+          echo "BOOT_VERSION=$BOOT_VERSION" >> $GITHUB_ENV
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
+          echo "FIRMWARE_VERSION=$FIRMWARE_VERSION" >> $GITHUB_ENV
+          echo "ARTIFACTS_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"" >> $GITHUB_ENV
+
+      - name: "Build classic firmware"
+        run: |
+          sudo apt install protobuf-compiler libprotobuf-dev
+          curl -sSL https://install.python-poetry.org | python3 -
+          wget -q https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          tar -jxf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          export PATH="$PWD/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
+          sh <(curl -L https://nixos.org/nix/install) --no-daemon
+          . $HOME/.nix-profile/etc/profile.d/nix.sh
+          poetry install
+          nix-shell
+          cd legacy
+          poetry run make vendor
+          poetry run ./script/setup
+          poetry run ./script/cibuild
+
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-${{ github.sha }}
+          path: |
+            ./legacy/firmware/classic*Stable*.bin
+            ./legacy/bootloader/bootloader*Stable*.bin
+
+      - name: "Notify to Slack"
+        uses: onekeyhq/actions/notice-slack-app-update@main
+        with:
+          web-hook-url: ${{ secrets.SLACK_DEV_RELEASE_WEBHOOK }}
+          artifact-type: CLASSIC-FIRMWARE
+          artifact-name: Classic-Hardware-Firmware
+          artifact-bundle-id: 'so.onekey.firmware.classic'
+          artifact-version-name: '${{ env.FIRMWARE_VERSION }}'
+          artifact-version-code: '${{ env.SHORT_HASH }}-${{ env.BUILD_DATE }}'
+          artifact-download-url: '${{ env.ARTIFACTS_URL }}'
+          change-log: 'firmware@${{ env.FIRMWARE_VERSION }} / boot@${{ env.BOOT_VERSION }}'
+          custom-issue-url: ''
+          custom-message-title: ''
+          custom-message-payload: ''
