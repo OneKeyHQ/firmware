@@ -2,27 +2,27 @@
 
 const char *languages[][2] = {
     //
-    {" Off", "已关闭"},
+    {" Off", "已關閉"},
     //
-    {" On", "已开启"},
+    {" On", "已開啟"},
     // layout2.c
     {" decrypt for:", "解密"},
     // layout2.c
-    {" login to:", "登录到"},
+    {" login to:", "登錄到"},
     //
     {" to", "到"},
     // recovery.c
-    {"##th", "第##个"},
+    {"##th", "第##個"},
     // starcoin.c
-    {"APPROVE", "授权"},
+    {"APPROVE", "授權"},
     // fsm_msg_coin.h
     {"Abort", "取消"},
     // menu.c
-    {"About", "关于本机"},
+    {"About", "關於本機"},
     // layout2.c
     {"Absolute Levy", ""},
     //
-    {"Access hidden wallet?", "使用隐藏钱包?"},
+    {"Access hidden wallet?", "使用隱藏錢包?"},
     // layout2.c
     {"Acitve", "激活"},
     // fsm.c
@@ -30,73 +30,73 @@ const char *languages[][2] = {
     // fsm_msg_coin.h fsm_msg_lisk.h
     {"Address:", "地址"},
     //
-    {"Advance CFX Sign", "CFX高级签名"},
+    {"Advance CFX Sign", "CFX高級簽名"},
     //
-    {"Advance ETH Sign", "ETH高级签名"},
+    {"Advance ETH Sign", "ETH高級簽名"},
     //
-    {"Advance SOL Sign", "SOL高级签名"},
+    {"Advance SOL Sign", "SOL高級簽名"},
     //
     {"After enabling \n\"Blind Signing\",your device  will support signing for "
      "messages and transactions, but it can't decode the metadata.",
-     "\n开启盲签后,设备将支持对消息或交易进行签名,但不会解析元数据"},
+     "\n開啟盲簽後,設備將支持對消息或交易進行簽名,但不會解析元數據"},
     // layout2.c
     {"Again", "再次"},
     // fsm_msg_common.h
-    {"All data will be lost.", "所有数据将丢失"},
+    {"All data will be lost.", "所有數據將丟失"},
     // u2f.c
-    {"Already registered.", "已注册"},
-    {"Amount", "金额"},
+    {"Already registered.", "已註冊"},
+    {"Amount", "金額"},
     // u2f.c
-    {"Another U2F device", "另外的U2F设备"},
+    {"Another U2F device", "另外的U2F設備"},
     //
-    {"Are you sure to reset?", "确定要重置吗?"},
+    {"Are you sure to reset?", "確定要重置嗎?"},
     //
-    {"Are you sure to update?", "确定升级固件吗?"},
+    {"Are you sure to update?", "確定升級固件嗎?"},
     // u2f.c
-    {"Authenticate", "认证"},
-    {"Authorized by", "授权方"},
+    {"Authenticate", "認證"},
+    {"Authorized by", "授權方"},
     // fsm_msg_common.h
     {"Auto-lock delay too long", ""},  // msg
     // fsm_msg_common.h
     {"Auto-lock delay too short", ""},  // msg
     //
-    {"AutoLock", "锁定时间"},
+    {"AutoLock", "鎖定時間"},
     // layout2.c
-    {"BACKUP FAILED!", "备份失败"},
+    {"BACKUP FAILED!", "備份失敗"},
     // layout2.c
-    {"BLE enable:", "使用蓝牙:"},
+    {"BLE enable:", "使用藍牙:"},
     // layout2.c
-    {"BLUETOOTH NAME:", "蓝牙名称:"},
+    {"BLUETOOTH NAME:", "藍牙名稱:"},
     //
-    {"BLUETOOTH VERSION:", "蓝牙版本:"},
+    {"BLUETOOTH VERSION:", "藍牙版本:"},
     //
     {"BOOTLOADER:", "BOOTLOADER版本:"},
     // layout2.c
-    {"BUILD ID:", "构建号:"},
+    {"BUILD ID:", "構建號:"},
     // recovery.c
     {"Back", "返回"},
     // layout2.c
-    {"Backup Only", "仅备份"},
+    {"Backup Only", "僅備份"},
     //
-    {"Before your start", "继续操作前"},
+    {"Before your start", "繼續操作前"},
     //
-    {"Blind Signing", "盲签"},
+    {"Blind Signing", "盲簽"},
     // layout2.c layout2.c
-    {"Bluetooth", "蓝牙"},
+    {"Bluetooth", "藍牙"},
     // signing.c
     {"Both address and address_n provided.", ""},  // msg
     // signing.c
     {"Branch ID must be set.", ""},  // msg
     // signing.c signing.c
     {"Branch ID not enabled on this coin.", ""},  // msg
-    {"Burn tokens", "销毁代币"},
+    {"Burn tokens", "銷毀代幣"},
     // fsm.c
     {"Button expected", ""},  // msg
     // recovery.c reset.c
     {"By continuing you", " "},
     // starcoin
     {"CANCEL", "取消"},
-    {"CONFIRM SIGNING:", "确认签名:"},
+    {"CONFIRM SIGNING:", "確認簽名:"},
     // fsm_msg_common.h
     {"Can't change se setting after device initialized", ""},  // msg
     // fsm_msg_coin.h
@@ -121,36 +121,36 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h
     {"Cancel", "取消"},
     // cosmos.c
-    {"Chain ID", "链 ID"},
+    {"Chain ID", "鏈 ID"},
     // ethereum.c
     {"Chain Id out of bounds", ""},  // msg
     // cosmos.c
-    {"Chain Name", "链名称"},
+    {"Chain Name", "鏈名稱"},
     //
-    {"Change PIN", "修改PIN码"},
+    {"Change PIN", "修改PIN碼"},
     // layout2.c
-    {"Change language to", "设置语言为"},
+    {"Change language to", "設置語言為"},
     //
-    {"Check Mnemonic", "查看助记词"},
+    {"Check Mnemonic", "查看助記詞"},
     //
-    {"Check PIN Code", "请先校验设备原PIN码"},
+    {"Check PIN Code", "請先校驗設備原PIN碼"},
     //
-    {"Check Recovery Phrase", "助记词核对"},
+    {"Check Recovery Phrase", "助記詞核對"},
     //
-    {"Check failed", "核对失败"},
+    {"Check failed", "核對失敗"},
     //
-    {"Check passed", "核对通过"},
+    {"Check passed", "核對通過"},
     //
-    {"Check the entered", "请检查输入的"},
+    {"Check the entered", "請檢查輸入的"},
     //
-    {"Check the seed", "检查助记词"},
+    {"Check the seed", "檢查助記詞"},
     // layout2.c
-    {"Check the written ", "请检查写下的"},
+    {"Check the written ", "請檢查寫下的"},
     //
     {"Check this device with\nOneKey secure server?",
-     "确定访问OneKey服务器对\n此设备进行防伪校验吗?"},
+     "確定訪問OneKey服務器對\n此設備進行防偽校驗嗎?"},
     // algorand.c
-    {"Close to", "关闭账户并转移资产到"},
+    {"Close to", "關閉賬戶並轉移資產到"},
     // layout2.c
     {"CoSi commit index #?", ""},
     // layout2.c
@@ -177,43 +177,43 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
-    {"Confirm", "确认"},
+    {"Confirm", "確認"},
     // layout2.c
-    {"Confirm OMNI Transaction:", "确认 OMNI 交易"},
+    {"Confirm OMNI Transaction:", "確認 OMNI 交易"},
     // layout2.c
-    {"Confirm OP_RETURN:", "确认 OP_RETURN"},
+    {"Confirm OP_RETURN:", "確認 OP_RETURN"},
     // layout2.c lisk.c
-    {"Confirm address?", "确认地址"},
+    {"Confirm address?", "確認地址"},
     // ethereum.c
-    {"Confirm fee", "确认交易费"},
+    {"Confirm fee", "確認交易費"},
     // layout2.c lisk.c
-    {"Confirm sending", "确认发送"},
+    {"Confirm sending", "確認發送"},
     // starcoin.c aptos.c
-    {"Confirm signing", "确认签名"},
+    {"Confirm signing", "確認簽名"},
     // lisk.c lisk.c lisk.c lisk.c
-    {"Confirm transaction", "确认交易"},
+    {"Confirm transaction", "確認交易"},
     // layout2.c layout2.c layout2.c
-    {"Confirm transfer of", "确认转移"},
+    {"Confirm transfer of", "確認轉移"},
     //
-    {"Confirm your operation!", "确认操作!"},
+    {"Confirm your operation!", "確認操作!"},
     // layout2.c lisk.c reset.c fsm_msg_coin.h
-    {"Continue", "继续"},
+    {"Continue", "繼續"},
     // fsm_msg_coin.h
-    {"Continue at your", "继续"},
+    {"Continue at your", "繼續"},
     // fsm_msg_common.h
-    {"Continue only if you", "继续"},
+    {"Continue only if you", "繼續"},
     // layout2.c
-    {"Continue?", "继续"},
+    {"Continue?", "繼續"},
     // layout2.c
-    {"Create", "创建新钱包"},
-    {"Create account", "创建账户"},
-    {"Create multisig", "创建多重签名"},
+    {"Create", "創建新錢包"},
+    {"Create account", "創建賬戶"},
+    {"Create multisig", "創建多重簽名"},
     // layout2.c
-    {"DEVICE ID:", "设备编号:"},
+    {"DEVICE ID:", "設備編號:"},
     //
     {"DONE", "完成"},
     // fsm.c
-    {"Data error", "数据错误"},
+    {"Data error", "數據錯誤"},
     // ethereum.c
     {"Data length exceeds limit", ""},  // msg
     // ethereum.c
@@ -225,25 +225,25 @@ const char *languages[][2] = {
     // layout2.c
     {"Decrypt for:", "解密"},
     // layout2.c
-    {"Decrypt value of this key?", "为该值解密"},
+    {"Decrypt value of this key?", "為該值解密"},
     // layout2.c
     {"Decrypted message", "解密消息"},
     // layout2.c
-    {"Decrypted signed message", "解密签名消息"},
+    {"Decrypted signed message", "解密簽名消息"},
     // cosmos.c
     {"Delegate", "委托"},
     {"Delegator", "代理方"},
     {"Deposit", "存款"},
-    {"Deposit Amount", "存款金额"},
+    {"Deposit Amount", "存款金額"},
     {"Deposit Denomination", "存款面值"},
     {"Depositer", "存款方"},
     {"Description", "描述"},
-    {"Destination Address", "目标地址"},
-    {"Destination Coins", "来源金额"},
+    {"Destination Address", "目標地址"},
+    {"Destination Coins", "來源金額"},
     // reset.c reset.c
     {"Device failed initialized", ""},  // msg
     //
-    {"Device has been reset", "设备已重置"},
+    {"Device has been reset", "設備已重置"},
     // fsm.c
     {"Device is already initialized. Use Wipe first.", ""},  // msg
     // fsm_msg_common.h fsm_msg_common.h
@@ -253,7 +253,7 @@ const char *languages[][2] = {
     // recovery.c
     {"Device recovered", ""},  // msg
     //
-    {"Device reset in progress", "设备重置中"},
+    {"Device reset in progress", "設備重置中"},
     // reset.c reset.c reset.c fsm_msg_common.h
     {"Device successfully initialized", ""},  // msg
     // fsm_msg_common.h
@@ -264,27 +264,27 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
-    {"Do you really want to", "请确认"},
+    {"Do you really want to", "請確認"},
     //
     {"Do you really want to \ndisable passphrase protection?",
-     "要禁用passphrase加密吗?"},
+     "要禁用passphrase加密嗎?"},
     //
     {"Do you really want to \nenable passphrase protection?",
-     "要启用passphrase加密吗?"},
+     "要啟用passphrase加密嗎?"},
     // fsm_msg_common.h
-    {"Do you want to", "请确认"},
+    {"Do you want to", "請確認"},
     // layout2.c
-    {"Do you want to decrypt?", "请确认解密"},
+    {"Do you want to decrypt?", "請確認解密"},
     // fsm_msg_common.h
-    {"Do you want to set", "请确认设置"},
+    {"Do you want to set", "請確認設置"},
     // layout2.c
-    {"Do you want to sign in?", "请确认登录"},
+    {"Do you want to sign in?", "請確認登錄"},
     //
     {"Done", "完成"},
     //
-    {"Download Onekey", "下载Onekey"},
+    {"Download Onekey", "下載Onekey"},
     //
-    {"ETH advance signing turn", "ETH高级签名"},
+    {"ETH advance signing turn", "ETH高級簽名"},
     // ethereum.c
     {"Empty data chunk received", ""},  // msg
     // signing.c signing.c
@@ -292,27 +292,27 @@ const char *languages[][2] = {
     // layout2.c
     {"Encrypt message?", "加密消息"},
     // layout2.c
-    {"Encrypt value of this key?", "为这个值加密"},
+    {"Encrypt value of this key?", "為這個值加密"},
     // layout2.c
-    {"Encrypt+Sign message?", "加密+签名消息"},
+    {"Encrypt+Sign message?", "加密+簽名消息"},
     // layout2.c
-    {"Encrypted hex data", "加密十六进制数据"},
+    {"Encrypted hex data", "加密十六進製數據"},
     // layout2.c
     {"Encrypted message", "加密信息"},
     // layout2.c layout2.c
-    {"English", "简体中文"},
+    {"English", "簡體中文"},
     //
     {"Enter", "填入"},
     //
-    {"Enter PIN to unlock", "输入PIN码解锁"},
+    {"Enter PIN to unlock", "輸入PIN碼解鎖"},
     //
-    {"Enter Passphrase", "输入Passphrase"},
+    {"Enter Passphrase", "輸入Passphrase"},
     // protect.c
-    {"Enter new wipe code:", "输入新的擦除PIN码"},
+    {"Enter new wipe code:", "輸入新的擦除PIN碼"},
     //
-    {"Enter word ", "输入助记词"},
+    {"Enter word ", "輸入助記詞"},
     //
-    {"Enter words to", "输入助记词"},
+    {"Enter words to", "輸入助記詞"},
     // fsm_msg_common.h
     {"Entory data error", ""},  // msg
     // fsm_msg_coin.h
@@ -359,29 +359,29 @@ const char *languages[][2] = {
     // menu.c
     {"Fastpay", "快捷支付"},
     // layout2.c
-    {"Fee", "手续费"},
+    {"Fee", "手續費"},
     // layout2.c
-    {"Fee included:", "已包含手续费"},
-    {"Fee payer", "手续费支付方"},
+    {"Fee included:", "已包含手續費"},
+    {"Fee payer", "手續費支付方"},
     // layout2.c
     {"Finish", "完成"},
     // fsm.c
-    {"Firmware error", "固件错误"},
+    {"Firmware error", "固件錯誤"},
     // layout2.c
     {"Firmware version:", "固件版本:"},
     //
-    {"Firmware will be erased!", "固件将被擦除!"},
+    {"Firmware will be erased!", "固件將被擦除!"},
     // fsm_msg_common.h
     {"Flags applied", ""},  // msg
     //
     {"Follow the prompts", "按照屏幕提示"},
     //
-    {"Font:", "字体支持:"},
+    {"Font:", "字體支持:"},
     //
     {"For more information", "了解更多"},
     // fsm_msg_common.h
     {"Forbidden field set in dry-run", ""},  // msg
-    {"From", "发送方"},
+    {"From", "發送方"},
     // layout2.c
     {"GPG sign for:", ""},
     // cosmos.c
@@ -389,13 +389,13 @@ const char *languages[][2] = {
     // layout2.c
     {"Guide", "使用教程"},
     // layout2.c c fsm_msg_common.h
-    {"I take the risk", "确认风险"},
+    {"I take the risk", "確認風險"},
     // recovery.c
     {"INVALID!", "不可用"},
     // fsm_msg_common.h
-    {"If import seed,", "如果导入种子"},
+    {"If import seed,", "如果導入種子"},
     //
-    {"Inconsistent PIN code", "PIN码前后不一致"},
+    {"Inconsistent PIN code", "PIN碼前後不一致"},
     // fsm_msg_ethereum.h
     {"Invalid address", ""},  // msg
     // signing.c
@@ -425,33 +425,33 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"Invalid word count", ""},  // msg
     //
-    {"Invalid words", "助记词无效"},
+    {"Invalid words", "助記詞無效"},
     // layout2.c
-    {"Label:", "设备名称:"},
+    {"Label:", "設備名稱:"},
     // layout2.c layout2.c
-    {"Language", "语言"},
+    {"Language", "語言"},
     // layout2.c
     {"Levy is", ""},
     // fsm_msg_common.h
-    {"Loading private seed", "导入私钥"},
+    {"Loading private seed", "導入私鑰"},
     // trezor.c
-    {"Lock Device", "锁定设备"},
+    {"Lock Device", "鎖定設備"},
     //
-    {"Locktime for this", "该交易时间锁定"},
+    {"Locktime for this", "該交易時間鎖定"},
     // layout2.c
-    {"Login to:", "登录到"},
+    {"Login to:", "登錄到"},
     //
-    {"MODEL:", "型号:"},
+    {"MODEL:", "型號:"},
     //
-    {"Make sure you still have", "请确保您仍掌握"},
+    {"Make sure you still have", "請確保您仍掌握"},
     // ethereum.c
     {"Malformed address", ""},
     // ethereum.c
     {"Malformed signature", ""},
-    {"Maximum fee", "交易费上限"},
-    {"Maximum fee per gas", "交易费上限单价"},
+    {"Maximum fee", "交易費上限"},
+    {"Maximum fee per gas", "交易費上限單價"},
     // cosmos.c
-    {"Memo", "备注"},
+    {"Memo", "備註"},
     // ethereum.c
     {"Message Hash", "消息哈希值"},
     // layout2.c lisk.c
@@ -465,7 +465,7 @@ const char *languages[][2] = {
     // signing.c signing.c signing.c
     {"Mixing segwit and non-segwit inputs is not allowed", ""},
     //
-    {"Mnemonic", "助记词"},
+    {"Mnemonic", "助記詞"},
     // fsm_msg_common.h fsm_msg_common.h
     {"Mnemonic with wrong checksum provided", ""},
     // layout2.c
@@ -473,18 +473,18 @@ const char *languages[][2] = {
     // layout2.c
     {"Mosaic Description", ""},
     // cosmos.c
-    {"Multi Send", "多签"},
+    {"Multi Send", "多簽"},
     // signing.c signing.c
     {"Multisig field provided but not expected.", ""},
-    {"NEXT", "继续"},
+    {"NEXT", "繼續"},
     // layout2.c
-    {"Need Backup", "未备份"},
+    {"Need Backup", "未備份"},
     //
     {"Never", "永不"},
     // layout2.c
-    {"Next", "继续"},
+    {"Next", "繼續"},
     //
-    {"Next screen will show", "下一屏幕将显示"},
+    {"Next screen will show", "下一屏幕將顯示"},
     // layout2.c layout2.c layout2.c layout2.c layout2.c
     // layout2.c layout2.c layout2.c layout2.c
     // layout2.c
@@ -524,9 +524,9 @@ const char *languages[][2] = {
     // u2f.c
     {"Not registered.", ""},
     // algorand.c
-    {"Note", "备注"},
+    {"Note", "備註"},
     // layout2.c u2f.c u2f.c fsm_msg_common.h
-    {"OK", "确认"},
+    {"OK", "確認"},
     // signing.c
     {"OP RETURN data provided but not OP RETURN script type.", ""},
     // signing.c
@@ -534,146 +534,146 @@ const char *languages[][2] = {
     // signing.c
     {"OP_RETURN output with non-zero amount", ""},
     //
-    {"Off", "关闭"},
+    {"Off", "關閉"},
     //
-    {"Okay", "确认"},
+    {"Okay", "確認"},
     //
-    {"On", "开启"},
+    {"On", "開啟"},
     // cosmos.c
-    {"Option", "选项"},
+    {"Option", "選項"},
     // signing.c
     {"Output's address_n provided but not expected.", ""},
     // protect.c protect.c protect.c protect.c protect.c
     // fsm.c
     {"PIN cancelled", ""},
     // fsm_msg_common.h
-    {"PIN code change", "PIN码修改"},
+    {"PIN code change", "PIN碼修改"},
     //
-    {"PIN code set", "PIN设置"},
+    {"PIN code set", "PIN設置"},
     // fsm.c
     {"PIN expected", ""},
     // fsm.c
-    {"PIN invalid", "PIN码错误"},
+    {"PIN invalid", "PIN碼錯誤"},
     // fsm.c
-    {"PIN mismatch", "两次输入不相同"},
+    {"PIN mismatch", "兩次輸入不相同"},
     // fsm_msg_common.h fsm_msg_common.h
     {"PIN removed", ""},
     //
-    {"Page down", "下一页"},
+    {"Page down", "下一頁"},
     //
-    {"Page up", "上一页"},
+    {"Page up", "上一頁"},
     // layout2.c
     {"Path: m", ""},
     // layout2.c
     {"Percentile Levy", ""},
     // protect.c protect.c
-    {"Please confirm PIN", "请确认PIN码"},
+    {"Please confirm PIN", "請確認PIN碼"},
     // recovery.c
-    {"Please enter", "请输入"},
+    {"Please enter", "請輸入"},
     //
     {"Please enter 12 words\nin order to verify\nyour recovery phrase",
-     "请依次输入12位助记词进\n行核对"},
+     "請依次輸入12位助記詞進\n行核對"},
     {"Please enter 18 words\nin order to verify\nyour recovery phrase",
-     "请依次输入18位助记词进\n行核对"},
+     "請依次輸入18位助記詞進\n行核對"},
     {"Please enter 24 words\nin order to verify\nyour recovery phrase",
-     "请依次输入24位助记词进\n行核对"},
+     "請依次輸入24位助記詞進\n行核對"},
     // protect.c
-    {"Please enter current PIN", "请输入当前PIN码"},
+    {"Please enter current PIN", "請輸入當前PIN碼"},
     // protect.c
-    {"Please enter new PIN", "请输入新PIN码"},
+    {"Please enter new PIN", "請輸入新PIN碼"},
     // recovery.c
-    {"Please enter the", "请输入"},
+    {"Please enter the", "請輸入"},
     // protect.c
-    {"Please enter your", "请输入你的"},
+    {"Please enter your", "請輸入你的"},
     // protect.c
-    {"Please enter your PIN:", "请输入PIN码"},
+    {"Please enter your PIN:", "請輸入PIN碼"},
     // layout2.c
-    {"Please input PIN", "请输入PIN码"},
+    {"Please input PIN", "請輸入PIN碼"},
     // protect.c
-    {"Please re-enter new PIN", "请再次输入新PIN码"},
+    {"Please re-enter new PIN", "請再次輸入新PIN碼"},
     //
-    {"Please reboot", "按确认将重启"},
+    {"Please reboot", "按確認將重啟"},
     // bl_check.c
     {"Please reconnect", ""},
     // recovery.c
-    {"Please select the", "请选择"},
+    {"Please select the", "請選擇"},
     //
-    {"Please set the PIN", "请设置PIN码"},
+    {"Please set the PIN", "請設置PIN碼"},
     //
-    {"Please try again", "请重新输入"},
+    {"Please try again", "請重新輸入"},
     // protect.c
-    {"Please wait", "请等待"},
+    {"Please wait", "請等待"},
     //
     {"Press", "按"},
     //
-    {"Press any key to continue", "按任意键继续"},
+    {"Press any key to continue", "按任意鍵繼續"},
     //
-    {"Prev", "后退"},
+    {"Prev", "後退"},
     // ethereum.c
-    {"Priority fee per gas", "每份燃料消耗的优先费用"},
+    {"Priority fee per gas", "每份燃料消耗的優先費用"},
     // fsm.c
     {"Process error", ""},
     // storage.c
-    {"Processing", "处理中"},
+    {"Processing", "處理中"},
     // cosmos.c
     {"Proposal", "提案"},
     {"Proposal ID", "提案 ID"},
     {"Propose", "投票"},
-    {"Proposer", "提案申请人"},
+    {"Proposer", "提案申請人"},
     // signing.c
     {"Pubkey not found in multisig script", ""},
     // lisk.c
-    {"Public Key:", "公钥"},
+    {"Public Key:", "公鑰"},
     // layout2.c
-    {"QR Code", "二维码"},
+    {"QR Code", "二維碼"},
     //
     {"Quit", "退出"},
     // layout2.c
-    {"Quota:", "单次限额"},
-    {"REJECT", "拒绝"},
+    {"Quota:", "單次限額"},
+    {"REJECT", "拒絕"},
     // layout2.c
     {"Raw levy value is", ""},
     // protect.c
     {"Re-enter new wipe code:", ""},
     // ethereum.c layout2.c
-    {"Really send", "确认发送"},
+    {"Really send", "確認發送"},
     {"Receiver", "接收方"},
     //
     {"Recipient", "接收方"},
     //
-    {"Recovery phrase verified pass", "助记词校验通过"},
+    {"Recovery phrase verified pass", "助記詞校驗通過"},
     // cosmos.c
     {"Redelegate", "重新委托"},
     // u2f.c
-    {"Register", "注册"},
+    {"Register", "註冊"},
     // algorand.c
-    {"Rekey to", "重新授权给"},
+    {"Rekey to", "重新授權給"},
     // layout2.c
-    {"Remaining times:", "剩余次数"},
+    {"Remaining times:", "剩余次數"},
     //
-    {"Reset", "重置设备"},
+    {"Reset", "重置設備"},
     //
     {"Reset ", "重置"},
     //
-    {"Restore", "恢复钱包"},
+    {"Restore", "恢復錢包"},
     //
-    {"Retry", "重试"},
+    {"Retry", "重試"},
     // layout2.c
     {"SE VERSION:", "SE版本:"},
     //
-    {"SECURITY CHECK", "防伪校验"},
+    {"SECURITY CHECK", "防偽校驗"},
     // layout2.c
     {"SEEDLESS", ""},
     // starcoin.c
-    {"SENDER:", "发送方:"},
+    {"SENDER:", "發送方:"},
     //
-    {"SERIAL NUMBER:", "序列号:"},
+    {"SERIAL NUMBER:", "序列號:"},
     //
-    {"SOL advance signing turn", "SOL高级签名"},
+    {"SOL advance signing turn", "SOL高級簽名"},
     // ethereum.c
     {"Safety check failed", ""},
     //
-    {"Scan the QR code below", "扫描下方二维码"},
+    {"Scan the QR code below", "掃描下方二維碼"},
     //
     {"Security", "安全"},
     // reset.c
@@ -685,68 +685,68 @@ const char *languages[][2] = {
     // signing.c
     {"Segwit not enabled on this coin", ""},
     //
-    {"Select correct word below", "按提示选择正确的单词"},
+    {"Select correct word below", "按提示選擇正確的單詞"},
     //
-    {"Select your", "选择你的"},
+    {"Select your", "選擇你的"},
     // ethereum.c
-    {"Send", "发送"},
-    {"Send SOL", "发送 SOL"},
+    {"Send", "發送"},
+    {"Send SOL", "發送 SOL"},
     // layout2.c
     {"Send anyway?", ""},
     //
-    {"Sender", "发送方"},
+    {"Sender", "發送方"},
     // fsm_msg_common.h
     {"Session cleared", ""},
     // layout2.c
-    {"Set auto power off time", "设置自动关机时间"},
+    {"Set auto power off time", "設置自動關機時間"},
     // menu.c
-    {"Settings", "设置项"},
+    {"Settings", "設置項"},
     // fsm_msg_common.h
     {"Settings applied", ""},
     // layout2.c layout2.c
-    {"Shutdown", "自动关机"},
+    {"Shutdown", "自動關機"},
     // starcoin
-    {"Sign at you own risk", "签名可能存在安全风险,请谨慎操作"},
+    {"Sign at you own risk", "簽名可能存在安全風險,請謹慎操作"},
     // layout2.c
     {"Sign binary message?", ""},
     // layout2.c
-    {"Sign message?", "签名消息"},
+    {"Sign message?", "簽名消息"},
     // ethereum.c ethereum.c ethereum.c ethereum.c lisk.c
-    {"Signing", "签名中"},
+    {"Signing", "簽名中"},
     // signing.c
     {"Signing error", ""},
     // ethereum.c ethereum.c signing.c
     {"Signing failed", ""},
     // lisk.c signing.c signing.c signing.c signing.c
     // signing.c signing.c signing.c signing.c
-    {"Signing transaction", "签名交易中"},
+    {"Signing transaction", "簽名交易中"},
     // layout2.c
     {"Simple send of ", ""},
     // fsm_msg_coin.h fsm_msg_crypto.h
     {"Singing", ""},
     // layout2.c
-    {"Skip button confirm:", "跳过确认"},
+    {"Skip button confirm:", "跳過確認"},
     // layout2.c
     {"Skip pin check:", "免密支付"},
     //
     {"Sleep Mode", "休眠模式"},
     // cosmos.c
-    {"Source Address", "来源地址"},
-    {"Source Coins", "来源金额"},
+    {"Source Address", "來源地址"},
+    {"Source Coins", "來源金額"},
     // storage.c
-    {"Starting up", "启动中"},
+    {"Starting up", "啟動中"},
     // config.c
     {"Storage failure", ""},
     //
     {"Submit", "提交"},
     //
-    {"Switch", "切换"},
+    {"Switch", "切換"},
     // protect.c
     {"The new PIN must be different from your wipe code.", ""},
     //
     {"The recovery phrase are", " "},
     // recovery.c
-    {"The seed is", "种子"},
+    {"The seed is", "種子"},
     // recovery.c recovery.c
     {"The seed is valid", ""},
     // recovery.c
@@ -758,7 +758,7 @@ const char *languages[][2] = {
     // u2f.c
     {"This U2F device is", ""},
     //
-    {"This cannot be undo!", "本操作不可撤销!"},
+    {"This cannot be undo!", "本操作不可撤銷!"},
     // protect.c fsm_msg_common.h
     {"This firmware is incapable of passphrase entry on the device.", ""},
     // signing.c fsm_msg_coin.h
@@ -766,9 +766,9 @@ const char *languages[][2] = {
     // signing.c fsm_msg_coin.h
     {"Timestamp not enabled on this coin.", ""},
     // cosmos.c
-    {"Tip Amount", "小费金额"},
-    {"Tipper", "小费支付方"},
-    {"Title", "标题"},
+    {"Tip Amount", "小費金額"},
+    {"Tipper", "小費支付方"},
+    {"Title", "標題"},
     // signing.c fsm_msg_coin.h
     {"To", "接收方"},
     // ethereum.c
@@ -776,22 +776,22 @@ const char *languages[][2] = {
     // tron_ui.c
     {"Transaction", "交易"},
     // starcoin.c
-    {"Transaction data cannot be decoded", "交易无法解析"},
+    {"Transaction data cannot be decoded", "交易無法解析"},
     // ethereum.c
-    {"Transaction data:", "交易数据:"},
+    {"Transaction data:", "交易數據:"},
     // signing.c signing.c signing.c
     {"Transaction has changed during signing", ""},
     // fsm_msg_coin.h
     {"Transaction must have at least one input", ""},
     // fsm_msg_coin.h
     {"Transaction must have at least one output", ""},
-    {"Transfer", "发送"},
+    {"Transfer", "發送"},
     // algo
-    {"Txn type", "类型"},
+    {"Txn type", "類型"},
     // ethereum.c
     {"Txtype out of bounds", ""},
     // cosmos.c
-    {"Type", "类型"},
+    {"Type", "類型"},
     // fsm_msg_common.h
     {"U2F counter set", ""},
     // layout2.c
@@ -809,7 +809,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Unknown Mosaic", ""},
     // tron_ui.c
-    {"Unknown Token", "未知代币"},
+    {"Unknown Token", "未知代幣"},
     // bl_check.c
     {"Unknown bootloader", ""},
     // layout2.c
@@ -820,7 +820,7 @@ const char *languages[][2] = {
     {"Unknown transaction", ""},
     // bl_check.c bl_check.c
     {"Unplug your Trezor", ""},
-    {"Unrecognized", "未被识别"},
+    {"Unrecognized", "未被識別"},
     // config.c
     {"Unsupported curve", ""},
     // signing.c
@@ -836,11 +836,11 @@ const char *languages[][2] = {
     // layout2.c
     {"Use SE:", "使用SE:"},
     //
-    {"Use this passphrase?", "确认密语"},
+    {"Use this passphrase?", "確認密語"},
     // cosmos
-    {"Validator", "验证方"},
-    {"Validator Destination", "验证方目标"},
-    {"Validator Source", "验证方来源"},
+    {"Validator", "驗證方"},
+    {"Validator Destination", "驗證方目標"},
+    {"Validator Source", "驗證方來源"},
     // fsm_msg_crypto.h
     {"Value length must be a multiple of 16", ""},
     // signing.c signing.c signing.c signing.c signing.c
@@ -853,7 +853,7 @@ const char *languages[][2] = {
     // fsm_msg_coin.h
     {"Verifying", ""},
     // storage.c
-    {"Verifying PIN", "校验PIN"},
+    {"Verifying PIN", "校驗PIN"},
     // signing.c
     {"Version group ID must be set when version >= 3.", ""},
     // signing.c
@@ -863,16 +863,16 @@ const char *languages[][2] = {
     //
     {"Visiting Help Center and search \"Blind Signing\" to "
      "learn more\n help.onekey.so",
-     "访问help.onekey.so搜索盲签了解更多"},
+     "訪問help.onekey.so搜索盲簽了解更多"},
     // cosmos.c
     {"Vote", "投票"},
     {"Voter", "投票方"},
     // config.c
-    {"Waking up", "唤醒"},
+    {"Waking up", "喚醒"},
     //
-    {"Wallet Recovery Success", "钱包恢复成功"},
+    {"Wallet Recovery Success", "錢包恢復成功"},
     //
-    {"Wallet created success", "钱包创建成功"},
+    {"Wallet created success", "錢包創建成功"},
     // layout2.c
     {"Warning!", "警告"},
     // layout2.c
@@ -886,33 +886,33 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"Wipe code set", ""},
     // cosmos.c
-    {"Withdraw Reward", "提取奖励"},
-    {"Withdraw Validator Commission", "提取验证者佣金"},
+    {"Withdraw Reward", "提取獎勵"},
+    {"Withdraw Validator Commission", "提取驗證者傭金"},
     // recovery.c
     {"Word not found in a wordlist", ""},
     //
-    {"Words", "助记词"},
+    {"Words", "助記詞"},
     //
-    {"Write down", "请抄写助记词"},
+    {"Write down", "請抄寫助記詞"},
     // layout2.c
-    {"Write down your ", "请抄写你的"},
+    {"Write down your ", "請抄寫你的"},
     //
-    {"Wrong PIN for ", "您已输错"},
+    {"Wrong PIN for ", "您已輸錯"},
     // fsm_msg_coin.h
     {"Wrong address path", ""},
     // signing.c signing.c
     {"Wrong input script type", ""},
     //
-    {"Wrong recovery phrase", "错误的助记词"},
+    {"Wrong recovery phrase", "錯誤的助記詞"},
     // recovery.c
     {"Wrong word retyped", ""},
     // layout2.c layout2.c layout2.c layout2.c
     // layout2.c
     {"Yes", "是"},
     //
-    {"You still have 9 times", "连续输入10次将重置设备"},
+    {"You still have 9 times", "連續輸入10次將重置設備"},
     // layout2.c
-    {"active device", "激活设备"},
+    {"active device", "激活設備"},
     // fsm_msg_common.h
     {"addres is existed", ""},
     // fsm_msg_common.h fsm_msg_common.h
@@ -924,13 +924,13 @@ const char *languages[][2] = {
     // recovery.c reset.c
     {"agree to trezor.io/tos", " "},
     // u2f.c
-    {"already registered", "已注册"},
+    {"already registered", "已註冊"},
     // recovery.c
     {"and MATCHES", ""},
     // layout2.c
     {"and levy of", ""},
     // tron_ui.c
-    {"and limit max fee to", "交易费上限"},
+    {"and limit max fee to", "交易費上限"},
     // layout2.c c c
     {"and network fee of", ""},
     // fsm_msg_common.h
@@ -938,27 +938,27 @@ const char *languages[][2] = {
     // layout2.c
     {"auto-lock your device", ""},
     //
-    {"backup of words", "助记词的物理备份"},
+    {"backup of words", "助記詞的物理備份"},
     // fsm_msg_common.h
-    {"backup only", "仅备份"},
+    {"backup only", "僅備份"},
     //
-    {"blockheight:", "区块高度:"},
+    {"blockheight:", "區塊高度:"},
     // bl_check.c
     {"broken.", ""},
     // recovery.c
     {"but does NOT MATCH", ""},
     //
-    {"chances", "次机会"},
+    {"chances", "次機會"},
     // fsm_msg_common.h
     {"change bluetooth", ""},
     // fsm_msg_common.h
-    {"change current PIN?", "修改PIN码"},
+    {"change current PIN?", "修改PIN碼"},
     // fsm_msg_common.h
     {"change fastpay settings", "修改快捷支付"},
     // fsm_msg_common.h
-    {"change language to", "修改语言为"},
+    {"change language to", "修改語言為"},
     // fsm_msg_common.h
-    {"change name to", "修改名称为"},
+    {"change name to", "修改名稱為"},
     // fsm_msg_common.h
     {"change the current", ""},
     // fsm_msg_common.h
@@ -970,40 +970,40 @@ const char *languages[][2] = {
     // bl_check.c bl_check.c
     {"contact our support.", ""},
     // reset.c
-    {"create a new wallet?", "创建新的钱包?"},
+    {"create a new wallet?", "創建新的錢包?"},
     // tron_ui.c
-    {"data", "数据"},
+    {"data", "數據"},
     // bl_check.c config.c
     {"detected.", ""},
     // fsm_msg_common.h fsm_msg_common.h
     {"device initialied success", ""},
     // fsm_msg_common.h
-    {"device is used for", "设备用于"},
+    {"device is used for", "設備用於"},
     // fsm_msg_common.h
-    {"disable passphrase", "禁用密语"},
+    {"disable passphrase", "禁用密語"},
     // fsm_msg_common.h
     {"disable wipe code", ""},
     // fsm_msg_common.h fsm_msg_common.h
     {"doing!", "操作"},
     // fsm_msg_common.h
-    {"enable passphrase", "使用密语"},
+    {"enable passphrase", "使用密語"},
     // lisk.c
-    {"fee:", "手续费"},
+    {"fee:", "手續費"},
     // ethereum.c
-    {"for gas?", "手续费"},
+    {"for gas?", "手續費"},
     // fsm_msg_coin.h
     {"for selected coin.", ""},
     {"format", "格式"},
     // layout2.c
-    {"from your wallet?", "从钱包中"},
+    {"from your wallet?", "從錢包中"},
     // startcoin.c
-    {"from:", "从:"},
+    {"from:", "從:"},
     // layout2.c
-    {"hour", "小时"},
+    {"hour", "小時"},
     //
-    {"hours", "小时"},
+    {"hours", "小時"},
     // recovery.c
-    {"imported succeed", "导入成功"},
+    {"imported succeed", "導入成功"},
     // layout2.c
     {"in", ""},
     // layout2.c
@@ -1017,43 +1017,43 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"is not recommended.", ""},
     // layout2.c
-    {"is unexpectedly high.", "过高"},
+    {"is unexpectedly high.", "過高"},
     // protect.c
-    {"keyboard.", "键盘"},
+    {"keyboard.", "鍵盤"},
     // fsm_msg_common.h fsm_msg_common.h
     {"know what you are", "清楚你的"},
     // trezor.c
-    {"lock your Trezor?", "锁定设备"},
+    {"lock your Trezor?", "鎖定設備"},
     // ethereum.c ethereum.c
     {"message", "消息"},
     // layout2.c
-    {"minute", "分钟"},
+    {"minute", "分鐘"},
     //
-    {"minutes", "分钟"},
+    {"minutes", "分鐘"},
     //
-    {"mnemonic", "助记词"},
+    {"mnemonic", "助記詞"},
     // cosmos.c
-    {"none", "无"},
+    {"none", "無"},
     //
-    {"number of recovery phrase", "助记词位数"},
+    {"number of recovery phrase", "助記詞位數"},
     // recovery.c
-    {"of your recovery phrase", "助记词"},
+    {"of your recovery phrase", "助記詞"},
     // recovery.c
-    {"on your computer", "在电脑上"},
+    {"on your computer", "在電腦上"},
     // fsm_msg_coin.h
-    {"own risk!", "风险"},
+    {"own risk!", "風險"},
     // protect.c
-    {"passphrase using", "密语"},
+    {"passphrase using", "密語"},
     // ethereum.c
     {"paying up to", "支付最多"},
     // fsm_msg_common.h fsm_msg_common.h
-    {"protection?", "保护"},
+    {"protection?", "保護"},
     // layout2.c
     {"raw units of", ""},
     // fsm_msg_common.h
     {"reboot start", ""},
     // recovery.c
-    {"recover the device?", "恢复钱包"},
+    {"recover the device?", "恢復錢包"},
     // lisk.c
     {"register a delegate?", ""},
     // fsm_msg_common.h
@@ -1061,7 +1061,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"restore data err", ""},
     //
-    {"restore wallet", "恢复已拥有的钱包"},
+    {"restore wallet", "恢復已擁有的錢包"},
     // layout2.c
     {"s", "秒"},
     // layout2.c protect.c
@@ -1073,12 +1073,12 @@ const char *languages[][2] = {
     // signing.c
     {"segwit input amount", ""},
     // fsm_msg_common.h
-    {"send entropy?", "发送熵值"},
-    {"sender", "发送方"},
+    {"send entropy?", "發送熵值"},
+    {"sender", "發送方"},
     // fsm_msg_common.h
     {"set a new wipe code?", ""},
     // fsm_msg_common.h
-    {"set new PIN?", "设置PIN码"},
+    {"set new PIN?", "設置PIN碼"},
     // fsm_msg_common.h
     {"status always?", ""},
     // bl_check.c
@@ -1086,57 +1086,57 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h
     {"the U2F counter?", ""},
     // protect.c
-    {"the computer's", "使用电脑的"},
+    {"the computer's", "使用電腦的"},
     // recovery.c recovery.c
     {"the one in the device.", ""},
     // reset.c
-    {"the only way to recover", "助记词是找回资产唯一"},
+    {"the only way to recover", "助記詞是找回資產唯一"},
     //
-    {"the passphrase!", "密语"},
+    {"the passphrase!", "密語"},
     // layout2.c
     {"the same mosaic", ""},
     //
     {"times", "次"},
     //
-    {"timestamp:", "时间戳:"},
+    {"timestamp:", "時間戳:"},
     //
-    {"to back", "键返回"},
+    {"to back", "鍵返回"},
     //
-    {"to confirm", "键确认"},
+    {"to confirm", "鍵確認"},
     // protect.c
     {"to continue ...", " "},
     //
-    {"to creat wallet", "开始创建新钱包"},
+    {"to creat wallet", "開始創建新錢包"},
     // ethereum.c
-    {"to new contract?", "新合约"},
+    {"to new contract?", "新合約"},
     //
-    {"to scroll down", "键查看下一页"},
+    {"to scroll down", "鍵查看下一頁"},
     //
-    {"to scroll up", "键查看上一页"},
+    {"to scroll up", "鍵查看上一頁"},
     //
     {"to try", " "},
     // lisk.c
     {"to:", ""},
     // ethereum.c
-    {"token", "代币"},
+    {"token", "代幣"},
     //
-    {"transaction is set to", "被设定为"},
+    {"transaction is set to", "被設定為"},
     // layout2.c layout2.c
-    {"user: ", "用户:"},
+    {"user: ", "用戶:"},
     // u2f.c
-    {"was used to register", "注册"},
+    {"was used to register", "註冊"},
     // fsm_msg_common.h
-    {"wipe code?", "擦除PIN码"},
+    {"wipe code?", "擦除PIN碼"},
     // fsm_msg_common.h
-    {"wipe the device?", "擦除设备"},
+    {"wipe the device?", "擦除設備"},
     //
-    {"word", "助记词"},
+    {"word", "助記詞"},
     //
-    {"words", "助记词"},
+    {"words", "助記詞"},
     //
-    {"you still have ", "还有"},
+    {"you still have ", "還有"},
     // reset.c
-    {"your asset,Keep it safe", "凭证,请妥善保管"},
+    {"your asset,Keep it safe", "憑證,請妥善保管"},
 };
 
 int LANGUAGE_ITEMS = sizeof(languages) / sizeof(languages[0]);

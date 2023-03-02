@@ -354,7 +354,7 @@ static struct menu ble_set_menu = {
 
 static struct menu_item language_set_menu_items[] = {
     {"English ", NULL, true, menu_para_set_language, NULL, true},
-    {"简体中文", NULL, true, menu_para_set_language, NULL, true}};
+    {"繁体中文", NULL, true, menu_para_set_language, NULL, true}};
 
 static struct menu language_set_menu = {
     .start = 0,
@@ -598,9 +598,9 @@ void menu_language_init(void) {
 refresh_menu:
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
                            NULL, index == 0 ? "Okay" : "确认", index + 1, 2,
-                           NULL, NULL, index == 0 ? "English" : "简体中文",
+                           NULL, NULL, index == 0 ? "English" : "繁体中文",
                            index > 0 ? "English" : NULL,
-                           index == 0 ? "简体中文" : NULL);
+                           index == 0 ? "繁体中文" : NULL);
 
   key = waitKey(0, 0);
   switch (key) {
