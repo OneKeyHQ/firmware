@@ -428,8 +428,8 @@ void screen_test(void) {
 void touch_input_test(void) {
   display_clear();
   for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < 5; j++) {
-      display_bar_radius(20 + j * 100, 20 + i * 180, 40, 40, COLOR_RED,
+    for (int j = 0; j < 6; j++) {
+      display_bar_radius(j * 80, (j % 2) * 80 + i * 160, 80, 80, COLOR_RED,
                          COLOR_WHITE, 16);
     }
   }
@@ -444,14 +444,14 @@ void touch_input_test(void) {
     }
 
     for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        if (x > (20 + j * 100) && x < (20 + j * 100 + 40) &&
-            y > (20 + i * 180) && y < (20 + i * 180 + 40)) {
-          display_bar_radius(20 + j * 100, 20 + i * 180, 40, 40, COLOR_GREEN,
-                             COLOR_WHITE, 16);
-          pos |= 1 << (5 * i + j);
+      for (int j = 0; j < 6; j++) {
+        if (x > (j * 80) && x < (j * 80 + 80) && y > ((j % 2) * 80 + i * 160) &&
+            y < ((j % 2) * 80 + i * 160 + 80)) {
+          display_bar_radius(j * 80, (j % 2) * 80 + i * 160, 80, 80,
+                             COLOR_GREEN, COLOR_WHITE, 16);
+          pos |= 1 << (6 * i + j);
         }
-        if (pos == 0x1FFFFFF) {
+        if (pos == 0x3FFFFFFF) {
           screen_bg[TOUCH_TEST] = COLOR_GREEN;
           return;
         }
@@ -525,12 +525,67 @@ void se_test(void) {
   }
 }
 
-void spi_flash_test(void) {
-  if (qspi_flash_read_id() == 0) {
-    screen_bg[SPI_FLASH_TEST] = COLOR_RED;
-  } else {
-    screen_bg[SPI_FLASH_TEST] = COLOR_GREEN;
+int spi_flash_test(void) {
+  // if (qspi_flash_read_id() == 0) {
+  //   screen_bg[SPI_FLASH_TEST] = COLOR_RED;
+  // } else {
+  //   screen_bg[SPI_FLASH_TEST] = COLOR_GREEN;
+  // }
+  char show_tip[64] = {0};
+  volatile uint32_t write_start_time, write_end_time;
+  write_start_time = HAL_GetTick();
+
+  uint8_t flash_data[2048] = {0};
+  uint8_t test_data[2048] = {0};
+  for (uint32_t i = 0; i < sizeof(test_data); i++) {
+    test_data[i] = i;
   }
+
+  for (uint32_t address = 0; address < (1 * 1024 * 1024);
+       address += QSPI_SECTOR_SIZE) {
+    qspi_flash_erase_block_64k(address);
+
+    for (uint32_t offset = 0; offset < QSPI_SECTOR_SIZE;
+         offset += sizeof(flash_data)) {
+      qspi_flash_read_buffer(flash_data, address + offset, sizeof(flash_data));
+      for (uint32_t i = 0; i < sizeof(flash_data); i++) {
+        if (flash_data[i] != 0xFF) {
+          screen_bg[SPI_FLASH_TEST] = COLOR_RED;
+          return 0;
+        }
+      }
+    }
+
+    for (uint32_t offset = 0; offset < QSPI_SECTOR_SIZE;
+         offset += sizeof(test_data)) {
+      qspi_flash_write_buffer_unsafe(test_data, address + offset,
+                                     sizeof(test_data));
+      memset(flash_data, 0x00, sizeof(flash_data));
+      qspi_flash_read_buffer(flash_data, address + offset, sizeof(flash_data));
+      for (uint32_t i = 0; i < sizeof(flash_data); i++) {
+        if (flash_data[i] != i % 256) {
+          screen_bg[SPI_FLASH_TEST] = COLOR_RED;
+          return 0;
+        }
+      }
+    }
+
+    qspi_flash_erase_block_64k(address);
+
+    display_bar(0, 130, 480, 30, COLOR_BL_BG);
+    mini_snprintf(show_tip, sizeof(show_tip), "SPI TEST... %d%%",
+                  (unsigned int)(address * 100) / (1024 * 1024));
+    display_text_center(DISPLAY_RESX / 2, 160, show_tip, -1, FONT_NORMAL,
+                        COLOR_BL_FG, COLOR_BL_BG);
+  }
+
+  display_bar(0, 130, 480, 30, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, 160, "SPI TEST... 100%", -1,
+                      FONT_NORMAL, COLOR_BL_FG, COLOR_BL_BG);
+
+  write_end_time = HAL_GetTick();
+  screen_bg[SPI_FLASH_TEST] = COLOR_GREEN;
+  return write_end_time - write_start_time;
 }
 
 void emmc_test(void) {

@@ -13,7 +13,7 @@
 #define READ_STATUS2_REG_CMD 0x35
 #define WRITE_STATUS_REG_CMD 0x01
 #define WRITE_STATUS2_REG_CMD 0x31
-#define BULK_ERASE_CMD 0xC7
+#define BULK_ERASE_CMD 0x60
 #define SUBSECTOR_ERASE_4_BYTE_ADDR_CMD 0x20
 #define SECTOR_64K_ERASE_CMD 0xD8
 #define QUAD_IN_FAST_PROG_4_BYTE_ADDR_CMD 0x32
@@ -44,6 +44,7 @@ uint32_t qspi_flash_read_id(void);
 int qspi_flash_memory_mapped(void);
 int qspi_flash_quit_memory_mapped(void);
 int qspi_flash_erase_block_64k(uint32_t address);
+int qspi_flash_erase_chip(void);
 int qspi_flash_write_page(uint8_t *data, uint32_t address, uint16_t len);
 int qspi_flash_write_buffer_unsafe(uint8_t *data, uint32_t address,
                                    uint32_t len);

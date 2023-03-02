@@ -184,8 +184,8 @@ static int qspi_flash_atuo_polling_mem_ready(void) {
   config.Interval = 0x10;
   config.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
 
-  if (HAL_QSPI_AutoPolling(&hqspi, &command, &config,
-                           HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
+  if (HAL_QSPI_AutoPolling(&hqspi, &command, &config, HAL_MAX_DELAY) !=
+      HAL_OK) {
     return HAL_ERROR;
   }
 
@@ -522,7 +522,7 @@ int qspi_flash_erase_chip(void) {
   command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
   command.Instruction = BULK_ERASE_CMD;
-  command.AddressMode = QSPI_DATA_NONE;
+  command.AddressMode = QSPI_ADDRESS_NONE;
   command.Address = 0;
   command.DataMode = QSPI_DATA_NONE;
   command.DummyCycles = 0;
