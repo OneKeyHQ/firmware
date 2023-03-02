@@ -549,10 +549,10 @@ void layout_language_set(uint8_t key) {
   }
 
   layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
-                           NULL, index == 0 ? "Okay" : "确认", index + 1, 2,
-                           NULL, NULL, index == 0 ? "English" : "繁体中文",
+                           NULL, index == 0 ? "Okay" : "確認", index + 1, 2,
+                           NULL, NULL, index == 0 ? "English" : "繁體中文",
                            index > 0 ? "English" : NULL,
-                           index == 0 ? "繁体中文" : NULL);
+                           index == 0 ? "繁體中文" : NULL);
 }
 
 static void _layout_home(bool update_menu) {
