@@ -19,6 +19,7 @@
 
 #include <string.h>
 
+#include "blake2s.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
@@ -113,6 +114,8 @@ static const uint8_t toi_icon_safeos[] = {
 };
 // clang-format on
 
+#define BOARD_VERSION "OneKey Boardloader 1.4.0\n"
+
 #if defined(STM32H747xx)
 
 #include "stm32h7xx_hal.h"
@@ -125,6 +128,7 @@ PARTITION VolToPart[FF_VOLUMES] = {
     {0, 2},
 };
 uint32_t *sdcard_buf = (uint32_t *)0x24000000;
+uint32_t *sdcard_buf1 = (uint32_t *)0x24000000 + IMAGE_HEADER_SIZE;
 
 void fatfs_init(void) {
   FRESULT res;
@@ -174,16 +178,89 @@ int fatfs_check_res(void) {
   return res;
 }
 
-static uint32_t check_sdcard(void) {
+secbool check_sd_card_image_contents(const image_header *const hdr,
+                                     uint32_t firstskip, FIL fsrc) {
+  void *data = sdcard_buf1;
+
+  FRESULT res;
+  UINT num_of_read = 0;
+
+  res = f_read(&fsrc, data, IMAGE_CHUNK_SIZE - firstskip, &num_of_read);
+  if ((num_of_read != (IMAGE_CHUNK_SIZE - firstskip)) || (res != FR_OK)) {
+    f_close(&fsrc);
+    return secfalse;
+  }
+
+  int remaining = hdr->codelen;
+  if (remaining <= IMAGE_CHUNK_SIZE - firstskip) {
+    if (sectrue != check_single_hash(hdr->hashes, data,
+                                     MIN(remaining, IMAGE_CHUNK_SIZE))) {
+      return secfalse;
+    } else {
+      return sectrue;
+    }
+  }
+
+  BLAKE2S_CTX ctx;
+  uint8_t hash[BLAKE2S_DIGEST_LENGTH];
+  blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
+
+  blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE - firstskip));
+  int block = 1;
+  int update_flag = 1;
+  remaining -= IMAGE_CHUNK_SIZE - firstskip;
+  while (remaining > 0) {
+    res = f_read(&fsrc, data, MIN(remaining, IMAGE_CHUNK_SIZE), &num_of_read);
+    if ((num_of_read != MIN(remaining, IMAGE_CHUNK_SIZE)) || (res != FR_OK)) {
+      f_close(&fsrc);
+      return secfalse;
+    }
+
+    if (remaining - IMAGE_CHUNK_SIZE > 0) {
+      if (block % 2) {
+        update_flag = 0;
+        blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE));
+        blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
+        if (0 != memcmp(hdr->hashes + (block / 2) * 32, hash,
+                        BLAKE2S_DIGEST_LENGTH)) {
+          return secfalse;
+        }
+      } else {
+        blake2s_Init(&ctx, BLAKE2S_DIGEST_LENGTH);
+        blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE));
+        update_flag = 1;
+      }
+    } else {
+      if (update_flag) {
+        blake2s_Update(&ctx, data, MIN(remaining, IMAGE_CHUNK_SIZE));
+        blake2s_Final(&ctx, hash, BLAKE2S_DIGEST_LENGTH);
+        if (0 != memcmp(hdr->hashes + (block / 2) * 32, hash,
+                        BLAKE2S_DIGEST_LENGTH)) {
+          return secfalse;
+        }
+      } else {
+        if (sectrue != check_single_hash(hdr->hashes + (block / 2) * 32, data,
+                                         MIN(remaining, IMAGE_CHUNK_SIZE))) {
+          return secfalse;
+        }
+      }
+    }
+    block++;
+    remaining -= MIN(remaining, IMAGE_CHUNK_SIZE);
+  }
+  return sectrue;
+}
+
+static secbool check_sdcard(image_header *hdr) {
   FRESULT res;
 
   res = f_mount(&fs_instance, "", 1);
   if (res != FR_OK) {
-    return 0;
+    return secfalse;
   }
   uint64_t cap = emmc_get_capacity_in_bytes();
   if (cap < 1024 * 1024) {
-    return 0;
+    return secfalse;
   }
 
   memzero(sdcard_buf, IMAGE_HEADER_SIZE);
@@ -193,36 +270,26 @@ static uint32_t check_sdcard(void) {
 
   res = f_open(&fsrc, "/boot/bootloader.bin", FA_READ);
   if (res != FR_OK) {
-    return 0;
+    return secfalse;
   }
   res = f_read(&fsrc, sdcard_buf, IMAGE_HEADER_SIZE, &num_of_read);
   if ((num_of_read != IMAGE_HEADER_SIZE) || (res != FR_OK)) {
     f_close(&fsrc);
-    return 0;
+    return secfalse;
   }
-  f_close(&fsrc);
 
-  image_header hdr_old;
-  image_header hdr_new;
-  secbool new_present = secfalse, old_present = secfalse;
-
-  old_present = load_image_header(
-      (const uint8_t *)BOOTLOADER_START, BOOTLOADER_IMAGE_MAGIC,
-      BOOTLOADER_IMAGE_MAXSIZE, BOARDLOADER_KEY_M, BOARDLOADER_KEY_N,
-      BOARDLOADER_KEYS, &hdr_old);
+  secbool new_present = secfalse;
 
   new_present =
       load_image_header((const uint8_t *)sdcard_buf, BOOTLOADER_IMAGE_MAGIC,
                         BOOTLOADER_IMAGE_MAXSIZE, BOARDLOADER_KEY_M,
-                        BOARDLOADER_KEY_N, BOARDLOADER_KEYS, &hdr_new);
-  if (sectrue == new_present && secfalse == old_present) {
-    return hdr_new.codelen;
-  } else if (sectrue == new_present && sectrue == old_present) {
-    if (memcmp(&hdr_new.version, &hdr_old.version, 4) > 0) {
-      return hdr_new.codelen;
-    }
+                        BOARDLOADER_KEY_N, BOARDLOADER_KEYS, hdr);
+  if (sectrue == new_present) {
+    new_present = check_sd_card_image_contents(hdr, IMAGE_HEADER_SIZE, fsrc);
   }
-  return 0;
+
+  f_close(&fsrc);
+  return sectrue == new_present ? sectrue : secfalse;
 }
 
 static void progress_callback(int pos, int len) { display_printf("."); }
@@ -230,31 +297,10 @@ static void progress_callback(int pos, int len) { display_printf("."); }
 static secbool copy_sdcard(uint32_t code_len) {
   display_backlight(255);
 
-  display_printf("OneKey Boardloader\n");
-  display_printf("==================\n\n");
+  display_printf(BOARD_VERSION);
+  display_printf("=====================\n\n");
 
   display_printf("new version bootloader found\n\n");
-  display_printf("applying bootloader in 5 seconds\n\n");
-  display_printf("touch screen if you want to abort\n\n");
-
-  uint32_t touched = 0;
-  for (int i = 5; i >= 0; i--) {
-    display_printf("%d ", i);
-    hal_delay(1000);
-
-    touched = touch_is_detected() | touch_read();
-    if (touched) {
-      display_printf("\n\ncanceled, aborting\n");
-      display_printf("Device will be restart in 3 seconds\n");
-
-      for (int i = 3; i >= 0; i--) {
-        display_printf("%d ", i);
-        hal_delay(1000);
-      }
-      HAL_NVIC_SystemReset();
-      return secfalse;
-    }
-  }
 
   display_printf("\n\nerasing flash:\n\n");
 
@@ -321,6 +367,7 @@ static secbool copy_sdcard(uint32_t code_len) {
     }
   }
   f_close(&fsrc);
+  f_unlink("/boot/bootloader.bin");
   ensure(flash_lock_write(), NULL);
 
   display_printf("\ndone\n\n");
@@ -494,7 +541,7 @@ int main(void) {
   }
 
   if (mode == BOARD_MODE) {
-    display_printf("OneKey Boardloader 1.3.2\n");
+    display_printf(BOARD_VERSION);
     display_printf("USB Mass Storage Mode\n");
     display_printf("======================\n\n");
     usb_msc_init();
@@ -511,27 +558,46 @@ int main(void) {
     SCB_CleanDCache();
   }
 
-  uint32_t code_len = 0;
-  code_len = check_sdcard();
-  if (code_len) {
-    return copy_sdcard(code_len) == sectrue ? 0 : 3;
-  }
-
-  image_header hdr;
-
-  ensure(load_image_header((const uint8_t *)BOOTLOADER_START,
-                           BOOTLOADER_IMAGE_MAGIC, BOOTLOADER_IMAGE_MAXSIZE,
-                           BOARDLOADER_KEY_M, BOARDLOADER_KEY_N,
-                           BOARDLOADER_KEYS, &hdr),
-         "invalid bootloader header");
+  image_header hdr_inner, hdr_sd;
 
   const uint8_t sectors[] = {
       FLASH_SECTOR_BOOTLOADER_1,
       FLASH_SECTOR_BOOTLOADER_2,
   };
-  ensure(
-      check_image_contents(&hdr, IMAGE_HEADER_SIZE, sectors, sizeof(sectors)),
-      "invalid bootloader hash");
+  secbool boot_hdr = secfalse, boot_present = secfalse;
+
+  boot_hdr = load_image_header((const uint8_t *)BOOTLOADER_START,
+                               BOOTLOADER_IMAGE_MAGIC, BOOTLOADER_IMAGE_MAXSIZE,
+                               BOARDLOADER_KEY_M, BOARDLOADER_KEY_N,
+                               BOARDLOADER_KEYS, &hdr_inner);
+
+  if (sectrue == boot_hdr) {
+    boot_present = check_image_contents(&hdr_inner, IMAGE_HEADER_SIZE, sectors,
+                                        sizeof(sectors));
+  }
+
+  if (sectrue == check_sdcard(&hdr_sd)) {
+    if (sectrue == boot_hdr) {
+      if (memcmp(&hdr_sd.version, &hdr_inner.version, 4) >= 0) {
+        return copy_sdcard(hdr_sd.codelen) == sectrue ? 0 : 3;
+      }
+    } else {
+      return copy_sdcard(hdr_sd.codelen) == sectrue ? 0 : 3;
+    }
+  }
+
+  if (boot_present == secfalse) {
+    display_printf(BOARD_VERSION);
+    display_printf("USB Mass Storage Mode\n");
+    display_printf("======================\n\n");
+    usb_msc_init();
+    while (1) {
+      if (system_reset == 1) {
+        hal_delay(5);
+        restart();
+      }
+    }
+  }
 
   jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
 
