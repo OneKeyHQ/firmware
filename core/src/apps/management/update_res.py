@@ -33,11 +33,16 @@ if TYPE_CHECKING:
 
 REQUEST_CHUNK_SIZE = const(16 * 1024)
 
+BOOTLOADER_NAME = "bootloader.bin"
+
+BOOTLOADER_TEMP_NAME = BOOTLOADER_NAME + ".tmp"
+
 
 async def update_res(ctx: wire.Context, msg: ResourceUpdate) -> Success:
-    is_update_boot = msg.file_name == "bootloader.bin"
+    is_update_boot = msg.file_name == BOOTLOADER_NAME
     if show_update_res_confirm(is_update_boot):
         await confirm_update_res(ctx, is_update_boot)
+        msg.file_name = BOOTLOADER_TEMP_NAME
     res_size = msg.data_length
     initial_data = msg.initial_data_chunk
     if blake2s(initial_data).digest() != msg.hash:
@@ -68,13 +73,37 @@ async def update_res(ctx: wire.Context, msg: ResourceUpdate) -> Success:
         raise wire.FirmwareError(f"Failed to write file with error code {e}")
     else:
         if is_update_boot:
-            await ctx.write(Success(message="Restarting"))
-            # make sure the outgoing USB buffer is flushed
-            await loop.wait(ctx.iface.iface_num() | io.POLL_WRITE)
-            utils.reset()
-            assert False  # this should be not reachable
+            try:
+                size, _, _ = io.fatfs.stat(file_path)
+                if size != calc_bootloader_size(msg.initial_data_chunk):
+                    io.fatfs.unlink(file_path)
+                    raise wire.FirmwareError("Invalid bootloader detected")
+
+                bootloader_path = make_file_path(BOOTLOADER_NAME, True)
+                try:
+                    # delete the existing file
+                    io.fatfs.unlink(bootloader_path)
+                except BaseException:
+                    # the file was not exist, ignored
+                    pass
+                io.fatfs.rename(file_path, bootloader_path)
+            except BaseException as e:
+                raise wire.FirmwareError(f"File system error {e}")
+            else:
+                await ctx.write(Success(message="Restarting"))
+                # make sure the outgoing USB buffer is flushed
+                await loop.wait(ctx.iface.iface_num() | io.POLL_WRITE)
+                utils.reset()
+                assert False  # this should be not reachable
         return Success(message="Success")
 
 
 def make_file_path(file_name, update_boot: bool = False) -> str:
     return f"/{'boot' if update_boot else 'res'}/{file_name}"
+
+
+def calc_bootloader_size(header: bytes) -> int:
+    # bootloader_size = hdrlen + _codelen
+    return int.from_bytes(header[4:8], "little") + int.from_bytes(
+        header[12:16], "little"
+    )
