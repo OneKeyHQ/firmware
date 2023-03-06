@@ -59,8 +59,16 @@ static int onekey_known_boardloader(const uint8_t *hash) {
     memcpy(boardloader_version, "1.3.1", strlen("1.3.1"));
     return 1;
   }
-  memcpy(boardloader_version, "unknow boardloader",
-         strlen("unknow boardloader"));
+  if (0 ==
+      memcmp(hash,
+             "\xff\xf7\x0b\x68\xa0\x1c\x79\xf0\x59\xfc\x82\x0f\x4f\x73\xac\x4e"
+             "\xe7\x76\x56\x5a\x14\x1b\x0b\x1d\x24\xfc\xac\x83\x76\x6e\x8b\xd2",
+             32)) {
+    memcpy(boardloader_version, "1.4.0", strlen("1.4.0"));
+    return 1;
+  }
+  memcpy(boardloader_version, "unknown boardloader",
+         strlen("unknown boardloader"));
   return 1;
 }
 
