@@ -390,7 +390,20 @@ static void timer_init(void) {
   HAL_TIM_Base_Start(&TimHandle);
 }
 
+static void lock_burnin_test_otp(void) {
+  uint8_t buf[FLASH_OTP_BLOCK_SIZE] = {0};
+  memcpy(buf, "device burn-in test done", strlen("device burn-in test done"));
+  ensure(flash_otp_write(FLASH_OTP_BLOCK_BURNIN_TEST, 0, buf,
+                         FLASH_OTP_BLOCK_SIZE),
+         NULL);
+  ensure(flash_otp_lock(FLASH_OTP_BLOCK_BURNIN_TEST), NULL);
+}
+
 void device_burnin_test(void) {
+  if (flash_otp_is_locked(FLASH_OTP_BLOCK_BURNIN_TEST)) {
+    return;
+  }
+
   char *serial;
   device_get_serial(&serial);
   if (memcmp(serial + 7, "20230201", 8) < 0) {
@@ -405,6 +418,7 @@ void device_burnin_test(void) {
   volatile uint32_t flash_id = 0;
   volatile uint32_t index = 0, index_bak = 0xff;
   volatile uint32_t click = 0, click_pre = 0, click_now = 0;
+  volatile uint32_t se_pre = 0, se_now = 0;
   FRESULT res;
   FIL fil;
 
@@ -447,6 +461,7 @@ void device_burnin_test(void) {
         f_write(&fil, &test_res, sizeof(test_res), &bw);
         f_sync(&fil);
         ble_cmd_req(BLE_BT, BLE_BT_ON);
+        lock_burnin_test_otp();
         restart();
       }
       return;
@@ -457,28 +472,30 @@ void device_burnin_test(void) {
     ble_uart_poll();
     if (touch_click()) {
       if (click == 0) {
-        click = 1;
-        click_pre = __HAL_TIM_GET_COUNTER(&TimHandle);
-      } else {
         click_now = __HAL_TIM_GET_COUNTER(&TimHandle);
-        // 1s
-        if (click_now - click_pre > 10000) {
-          click_pre = click_now;
+      }
+      click++;
+      click_pre = click_now;
+      click_now = __HAL_TIM_GET_COUNTER(&TimHandle);
+
+      if (click_now - click_pre > 5000) {
+        click = 0;
+      }
+      if (click == 3) {
+        click = 0;
+        display_clear();
+        HAL_TIM_Base_Stop(&TimHandle);
+        ui_generic_confirm_simple("EXIT  TEST?");
+        if (ui_response()) {
+          test_res.flag = TEST_PASS;
+          f_lseek(&fil, 0);
+          f_write(&fil, &test_res, sizeof(test_res), &bw);
+          f_sync(&fil);
+          restart();
         } else {
-          display_clear();
-          HAL_TIM_Base_Stop(&TimHandle);
-          ui_generic_confirm_simple("EXIT  TEST?");
-          if (ui_response()) {
-            test_res.flag = TEST_PASS;
-            f_lseek(&fil, 0);
-            f_write(&fil, &test_res, sizeof(test_res), &bw);
-            f_sync(&fil);
-            restart();
-          } else {
-            click = 0;
-            index_bak = 0xff;
-            HAL_TIM_Base_Start(&TimHandle);
-          }
+          click = 0;
+          index_bak = 0xff;
+          HAL_TIM_Base_Start(&TimHandle);
         }
       }
     }
@@ -568,15 +585,22 @@ void device_burnin_test(void) {
         ;
     }
 
-    if (atca_random(rand_buffer)) {
-      se_err++;
-      if (se_err == 10) {
-        display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "SE test faild",
-                            -1, FONT_NORMAL, COLOR_RED, COLOR_BLACK);
-        while (1)
-          ;
+    se_now = __HAL_TIM_GET_COUNTER(&TimHandle);
+    // 500 ms
+    if (se_now - se_pre >= 5000) {
+      se_pre = se_now;
+      if (atca_random(rand_buffer)) {
+        se_err++;
+        if (se_err == 10) {
+          display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
+                              "SE test faild", -1, FONT_NORMAL, COLOR_RED,
+                              COLOR_BLACK);
+          while (1)
+            ;
+        }
       }
     }
+
     if (!ble_name_state()) {
       ble_cmd_req(BLE_VER, BLE_VER_ADV);
       hal_delay(5);
@@ -599,12 +623,13 @@ void device_burnin_test(void) {
       restart();
     }
     hal_delay(5);
-  } while (current < 3 * 60 * 60 * 10000);  // 2hours
+  } while (current < 3 * 60 * 60 * 10000);  // 3hours
 
   test_res.flag = TEST_PASS;
   test_res.time = current;
   f_lseek(&fil, 0);
   f_write(&fil, &test_res, sizeof(test_res), &bw);
   f_sync(&fil);
+  lock_burnin_test_otp();
   restart();
 }
