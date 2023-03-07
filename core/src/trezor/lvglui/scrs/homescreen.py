@@ -1008,6 +1008,7 @@ class BacklightSetting(Screen):
         )
         self.percent.set_text(brightness2_percent_str(current_brightness))
         self.slider.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
+        self.slider.clear_flag(lv.obj.FLAG.GESTURE_BUBBLE)
 
     def on_value_changed(self, event_obj):
         target = event_obj.get_target()
