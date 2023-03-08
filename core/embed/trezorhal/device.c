@@ -399,6 +399,9 @@ static void lock_burnin_test_otp(void) {
   ensure(flash_otp_lock(FLASH_OTP_BLOCK_BURNIN_TEST), NULL);
 }
 
+#define TIMER_1S 10000
+#define TEST_DURATION (3 * 60 * 60 * TIMER_1S)  // 3 hours
+
 void device_burnin_test(void) {
   if (flash_otp_is_locked(FLASH_OTP_BLOCK_BURNIN_TEST)) {
     return;
@@ -410,9 +413,10 @@ void device_burnin_test(void) {
     return;
   }
 
-  uint32_t start, current;
+  uint32_t start, current, remain, previous;
   uint8_t rand_buffer[32];
   uint32_t se_err = 0;
+  char remain_timer[16] = {0};
 
   volatile uint64_t emmc_cap = 0;
   volatile uint32_t flash_id = 0;
@@ -468,6 +472,8 @@ void device_burnin_test(void) {
     }
   }
 
+  previous = 0;
+
   do {
     ble_uart_poll();
     if (touch_click()) {
@@ -478,7 +484,7 @@ void device_burnin_test(void) {
       click_pre = click_now;
       click_now = __HAL_TIM_GET_COUNTER(&TimHandle);
 
-      if (click_now - click_pre > 5000) {
+      if (click_now - click_pre > (TIMER_1S / 2)) {
         click = 0;
       }
       if (click == 3) {
@@ -487,6 +493,7 @@ void device_burnin_test(void) {
         HAL_TIM_Base_Stop(&TimHandle);
         ui_generic_confirm_simple("EXIT  TEST?");
         if (ui_response()) {
+          ble_cmd_req(BLE_BT, BLE_BT_ON);
           test_res.flag = TEST_PASS;
           f_lseek(&fil, 0);
           f_write(&fil, &test_res, sizeof(test_res), &bw);
@@ -501,8 +508,27 @@ void device_burnin_test(void) {
     }
     current = start + __HAL_TIM_GET_COUNTER(&TimHandle);
 
-    index = (current / 30000) % 4;
+    remain = TEST_DURATION - current;
+    if (previous == 0) {
+      previous = remain;
+    }
 
+    if (previous - remain >= (TIMER_1S / 2)) {
+      previous = remain;
+      remain /= TIMER_1S;
+      uint8_t hour = remain / 3600;
+      uint8_t min = (remain % 3600) / 60;
+      uint8_t sec = (remain % 3600) % 60;
+
+      int w = display_text_width(remain_timer, -1, FONT_PJKS_BOLD_38);
+      mini_snprintf(remain_timer, sizeof(remain_timer), "%02d:%02d:%02d", hour,
+                    min, sec);
+      display_bar(DISPLAY_RESX / 2 - w / 2, 690, w, 34, COLOR_BLACK);
+      display_text_center(DISPLAY_RESX / 2, 720, remain_timer, -1,
+                          FONT_PJKS_BOLD_38, COLOR_WHITE, COLOR_BLACK);
+    }
+
+    index = (current / (TIMER_1S * 3)) % 4;
     if (index != index_bak) {
       index_bak = index;
       switch (index) {
@@ -587,7 +613,7 @@ void device_burnin_test(void) {
 
     se_now = __HAL_TIM_GET_COUNTER(&TimHandle);
     // 500 ms
-    if (se_now - se_pre >= 5000) {
+    if (se_now - se_pre >= (TIMER_1S / 2)) {
       se_pre = se_now;
       if (atca_random(rand_buffer)) {
         se_err++;
@@ -614,7 +640,7 @@ void device_burnin_test(void) {
       hal_delay(5);
     }
 
-    if ((current - start) > 15 * 60 * 10000) {
+    if ((current - start) > 15 * 60 * TIMER_1S) {
       test_res.flag = TEST_TESTING;
       test_res.time = current;
       f_lseek(&fil, 0);
@@ -623,13 +649,13 @@ void device_burnin_test(void) {
       restart();
     }
     hal_delay(5);
-  } while (current < 3 * 60 * 60 * 10000);  // 3hours
+  } while (current < TEST_DURATION);
 
   test_res.flag = TEST_PASS;
   test_res.time = current;
+  ble_cmd_req(BLE_BT, BLE_BT_ON);
   f_lseek(&fil, 0);
   f_write(&fil, &test_res, sizeof(test_res), &bw);
   f_sync(&fil);
-  lock_burnin_test_otp();
   restart();
 }
