@@ -839,8 +839,8 @@ void ui_bootloader_second(const image_header *const hdr) {
   display_text(offset_x, offset_y, "BuildID", -1, FONT_PJKS_BOLD_26,
                COLOR_BL_FG, COLOR_BL_BG);
   offset_y += offset_line;
-  display_text(offset_x, offset_y, BUILD_ID, -1, FONT_NORMAL, COLOR_BL_TAGVALUE,
-               COLOR_BL_BG);
+  display_text(offset_x, offset_y, BUILD_ID + strlen(BUILD_ID) - 7, -1,
+               FONT_NORMAL, COLOR_BL_TAGVALUE, COLOR_BL_BG);
 
   display_bar(8, 694, 231, 98, COLOR_BL_ICON);
   display_text_center(DISPLAY_RESX / 4, 755, "Back", -1, FONT_PJKS_BOLD_26,
