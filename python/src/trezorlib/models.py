@@ -29,7 +29,7 @@ TREZOR_T = TrezorModel(
     name="T",
     minimum_version=(2, 1, 0),
     vendors=VENDORS,
-    usb_ids=((0x1209, 0x53C1), (0x1209, 0x53C0)),
+    usb_ids=((0x1209, 0x53C1), (0x1209, 0x53C0), (0x1209, 0x4F4B), (0x1209, 0x4F4A)),
     default_mapping=mapping.DEFAULT_MAPPING,
 )
 

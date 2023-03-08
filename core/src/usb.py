@@ -2,12 +2,19 @@ from micropython import const
 
 from trezor import io, utils
 
+
+def get_product_id():
+    import storage.device
+
+    return 0x53C1 if storage.device.is_trezor_compatible() else 0x4F4B
+
+
 bus = io.USB(
     vendor_id=0x1209,
-    product_id=0x53C1,
+    product_id=get_product_id(),
     release_num=0x0200,
     manufacturer="OneKey",
-    product="OneKey",
+    product="OneKey Touch",
     interface="OneKey Interface",
     usb21_landing=False,
 )

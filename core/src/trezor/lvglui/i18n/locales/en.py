@@ -296,7 +296,6 @@ translations = [
     "Do you want to export entropy? Continue only if you know what you are doing!",
     "Extract Firmware",
     "Do you want to extract device firmware? Your recovery phrase will not be revealed.",
-    "Security Check",
     "Are you sure to authenticate your device with the OneKey secure server? Tap confirm to check whether your device is genuine and without tampered.",
     "Tap to Close",
     "Processing...",
@@ -593,5 +592,13 @@ translations = [
     "Connect to the OneKey app, find the NFT owned by this hardware wallet, and tap the Collect button.",
     "You can still backup with KeyTag later in \"Wallet - Check Recovery Phrase\".",
     "If you want to make another KeyTag backup, you can view the KeyTag  dotmap in \"Wallet - Check Recovery Phrase\" after verifying your recovery phrase.",
+    "Authenticity Check",
+    "Disable Trezor Compatibility",
+    "If not sure, do not change this setting",
+    "Restore Trezor Compatibility",
+    "Compatible with Trezor",
+    "USB Identifier:",
+    "It takes effect after device restart.",
+    "This will prevent you from using third-party wallet clients and websites that only support Trezor.\nIt takes effect after device restart.",
 ]
 # fmt: on

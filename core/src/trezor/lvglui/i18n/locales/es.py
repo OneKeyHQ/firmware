@@ -296,7 +296,6 @@ translations = [
     "¿Quieres exportar entropía? ¡Continúe solo si sabe lo que está haciendo!",
     "Extraer firmware",
     "¿Quieres extraer el firmware del dispositivo? Su frase de recuperación no será revelada.",
-    "Control de seguridad",
     "¿Está seguro de autenticar su dispositivo con el servidor seguro OneKey? Toque confirmar para verificar si su dispositivo es genuino y no ha sido manipulado.",
     "Toque para cerrar",
     "Procesando...",
@@ -593,5 +592,13 @@ translations = [
     "Conéctese a la aplicación OneKey, busque el NFT propiedad de esta billetera de hardware y toque el botón Recopilar.",
     "Todavía puede hacer una copia de seguridad con KeyTag más adelante en \"Wallet - Check Recovery Phrase\".",
     "Si desea realizar otra copia de seguridad de KeyTag, puede ver el mapa de puntos de KeyTag en \"Billetera - Verificar frase de recuperación\" después de verificar su frase de recuperación.",
+    "Comprobación de autenticidad",
+    "Deshabilitar la compatibilidad con Trezor",
+    "Si no está seguro, no cambie esta configuración",
+    "Restaurar la compatibilidad de Trezor",
+    "Compatible con Trezor",
+    "Identificador USB:",
+    "Entra en vigor después de reiniciar el dispositivo.",
+    "Esto evitará que utilice clientes de billetera de terceros y sitios web que solo admitan Trezor. \n Entra en vigor después de reiniciar el dispositivo.",
 ]
 # fmt: on

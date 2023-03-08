@@ -57,7 +57,7 @@ _USE_RANDOM_PIN_MAP = const(0x87)  # bool (0x01 or empty)
 _KEYBOARD_HAPTIC = const(0x88)   # bool
 _TAP_AWAKE = const(0x89)  # bool
 _ANIMATION = const(0x8A)  # bool
-
+_TREZOR_COMPATIBLE = const(0x8B)
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
 _DEFAULT_SAFETY_CHECK_LEVEL = SAFETY_CHECK_LEVEL_STRICT
@@ -570,3 +570,19 @@ def set_experimental_features(enabled: bool) -> None:
     cached_bytes = b"\x01" if enabled else b""
     storage.cache.set(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES, cached_bytes)
     common.set_true_or_delete(_NAMESPACE, _EXPERIMENTAL_FEATURES, enabled)
+
+
+def is_trezor_compatible() -> bool:
+    enabled = common.get(_NAMESPACE, _TREZOR_COMPATIBLE, public=True)
+    if enabled == common._FALSE_BYTE:
+        return False
+    return True
+
+
+def enable_trezor_compatible(enable: bool) -> None:
+    common.set(
+        _NAMESPACE,
+        _TREZOR_COMPATIBLE,
+        common._TRUE_BYTE if enable else common._FALSE_BYTE,
+        public=True,
+    )

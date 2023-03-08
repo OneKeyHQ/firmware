@@ -1519,6 +1519,12 @@ class AboutSetting(Screen):
         self.serial.set_style_bg_color(lv_colors.BLACK, 0)
         self.serial.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
+        self.trezor_mode = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__COMPATIBLE_WITH_TREZOR)
+        )
+        self.trezor_mode.set_style_bg_color(lv_colors.BLACK, 0)
+        if not device.is_trezor_compatible():
+            self.trezor_mode.clear_state()
         self.board_loader = ListItemBtn(
             self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
         )
@@ -1527,9 +1533,10 @@ class AboutSetting(Screen):
         self.firmware_update = NormalButton(
             self.content_area, _(i18n_keys.BUTTON__SYSTEM_UPDATE)
         )
-        self.firmware_update.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 24)
+        self.firmware_update.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
         self.serial.add_event_cb(self.on_long_pressed, lv.EVENT.LONG_PRESSED, None)
         self.container.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.container.add_event_cb(self.on_value_changed, lv.EVENT.VALUE_CHANGED, None)
         self.firmware_update.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
 
     def on_click(self, event_obj):
@@ -1546,6 +1553,65 @@ class AboutSetting(Screen):
                 self.board_loader.clear_flag(lv.obj.FLAG.HIDDEN)
             else:
                 self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+
+    def on_value_changed(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.VALUE_CHANGED:
+            if target == self.trezor_mode.switch:
+                TrezorModeToggle(self, not device.is_trezor_compatible())
+
+    def reset_switch(self):
+        if device.is_trezor_compatible():
+            self.trezor_mode.add_state()
+        else:
+            self.trezor_mode.clear_state()
+
+
+class TrezorModeToggle(FullSizeWindow):
+    def __init__(self, callback_obj, enable=False):
+        super().__init__(
+            title=_(
+                i18n_keys.TITLE__RESTORE_TREZOR_COMPATIBILITY
+                if enable
+                else i18n_keys.TITLE__DISABLE_TREZOR_COMPATIBILITY
+            ),
+            subtitle=_(
+                i18n_keys.SUBTITLE__RESTORE_TREZOR_COMPATIBILITY
+                if enable
+                else i18n_keys.SUBTITLE__DISABLE_TREZOR_COMPATIBILITY
+            ),
+            confirm_text=_(i18n_keys.BUTTON__RESTART),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+        )
+        self.enable = enable
+        self.callback_obj = callback_obj
+        if not enable:
+            self.btn_yes.enable(
+                bg_color=lv_colors.ONEKEY_YELLOW, text_color=lv_colors.BLACK
+            )
+            self.tips_bar = Banner(
+                self.content_area, 2, _(i18n_keys.MSG__DO_NOT_CHANGE_THIS_SETTING)
+            )
+            self.tips_bar.align(lv.ALIGN.TOP_LEFT, 8, 8)
+            self.title.align_to(self.tips_bar, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+            self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_no:
+                self.callback_obj.reset_switch()
+                self.destroy(200)
+            elif target == self.btn_yes:
+
+                async def restart_delay():
+                    await loop.sleep(1000)
+                    utils.reset()
+
+                device.enable_trezor_compatible(self.enable)
+                workflow.spawn(restart_delay())
 
 
 class GO2BoardLoader(FullSizeWindow):

@@ -942,6 +942,8 @@ async def request_passphrase_on_device(ctx: wire.GenericContext, max_len: int) -
         raise wire.ActionCancelled("Passphrase entry cancelled")
 
     assert isinstance(result, str)
+
+    await require_confirm_passphrase(ctx, result)
     return result
 
 

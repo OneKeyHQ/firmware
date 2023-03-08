@@ -23,6 +23,10 @@ if TYPE_CHECKING:
     )
 
 
+def get_vendor():
+    return "trezor.io" if storage.device.is_trezor_compatible() else "onekey.so"
+
+
 def get_features() -> Features:
     import storage.recovery
     import storage.sd_salt
@@ -35,7 +39,7 @@ def get_features() -> Features:
     from apps.common import mnemonic, safety_checks
 
     f = Features(
-        vendor="onekey.so",
+        vendor=get_vendor(),
         language=storage.device.get_language(),
         major_version=utils.VERSION_MAJOR,
         minor_version=utils.VERSION_MINOR,
