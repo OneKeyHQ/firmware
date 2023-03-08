@@ -270,6 +270,7 @@ if PRODUCTION_MODEL == 'H':
             'PB_FIELD_16BIT',
             'PB_ENCODE_ARRAYS_UNPACKED',
             'PB_VALIDATE_UTF8',
+            'BOOT_ONLY',
         ] + CPPDEFINES_MOD,
         ASFLAGS=CPU_ASFLAGS,
         ASPPFLAGS='$CFLAGS $CCFLAGS', )
