@@ -361,6 +361,8 @@ void device_test(void) {
   HAL_NVIC_SystemReset();
 }
 
+#ifdef BOOT_ONLY
+
 static FATFS fs_instance;
 
 typedef struct {
@@ -659,3 +661,4 @@ void device_burnin_test(void) {
   f_sync(&fil);
   restart();
 }
+#endif
