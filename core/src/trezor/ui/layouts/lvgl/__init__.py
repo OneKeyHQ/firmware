@@ -66,6 +66,7 @@ __all__ = (
     "confirm_remove_nft",
     "confirm_collect_nft",
     "show_bip39_dotmap",
+    "confirm_sign_typed_hash",
 )
 
 
@@ -1683,6 +1684,23 @@ async def confirm_cosmos_sign_combined(
         interact(
             ctx, screen, "confirm_cosmos_sign_combined", ButtonRequestType.ProtectCall
         )
+    )
+
+
+async def confirm_sign_typed_hash(
+    ctx: wire.GenericContext, domain_hash: str, message_hash: str
+) -> None:
+    from trezor.lvglui.scrs.template import ConfirmTypedHash
+
+    screen = ConfirmTypedHash(
+        _(i18n_keys.TITLE__STR_TYPED_HASH).format(ctx.name),
+        ctx.icon_path,
+        domain_hash,
+        message_hash,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_sign_typed_hash", ButtonRequestType.ProtectCall)
     )
 
 

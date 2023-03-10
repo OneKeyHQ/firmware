@@ -1417,7 +1417,7 @@ class AboutSetting(Screen):
 
         ble_name = device.get_ble_name() or uart.get_ble_name()
         ble_version = uart.get_ble_version()
-        storage = device.get_storage()
+        # storage = device.get_storage()
         boot_version = utils.boot_version()
         board_version = utils.board_version()
         super().__init__(
@@ -1444,16 +1444,16 @@ class AboutSetting(Screen):
         self.ble_mac.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
         self.ble_mac.set_style_bg_color(lv_colors.BLACK, 0)
 
-        self.storage = DisplayItem(
-            self.container,
-            _(i18n_keys.ITEM__STORAGE),
-            storage,
-        )
-        self.storage.label.add_style(
-            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
-        )
-        self.storage.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
-        self.storage.set_style_bg_color(lv_colors.BLACK, 0)
+        # self.storage = DisplayItem(
+        #     self.container,
+        #     _(i18n_keys.ITEM__STORAGE),
+        #     storage,
+        # )
+        # self.storage.label.add_style(
+        #     StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
+        # )
+        # self.storage.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        # self.storage.set_style_bg_color(lv_colors.BLACK, 0)
 
         self.version = DisplayItem(
             self.container, _(i18n_keys.ITEM__SYSTEM_VERSION), version

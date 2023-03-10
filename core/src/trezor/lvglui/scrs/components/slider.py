@@ -11,7 +11,7 @@ MIN_VISIBLE_VALUE = 20
 class Slider(lv.slider):
     SLIDER_DISABLE_ARROW_IMG_SRC = "A:/res/slide-arrow-disable.png"
     SLIDER_DEFAULT_ARROW_IMG_SRC = "A:/res/slide-arrow-black.png"
-    SLIDER_DEFAULT_DONE_IMG_SRC = "A:/res/slide-done-black.png"
+    SLIDER_DEFAULT_DONE_IMG_SRC = "A:/res/slider-done-black.png"
     SLIDER_ARROW_WHITE_IMG_SRC = "A:/res/slide-arrow-white.png"
     SLIDER_DONE_WHITE_IMG_SRC = "A:/res/slide-done-white.png"
 

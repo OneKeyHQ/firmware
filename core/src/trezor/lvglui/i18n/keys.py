@@ -1292,17 +1292,32 @@ SUBTITLE__FINISH_KEYTAG_BACKUP = 591
 TITLE__SECURITY_CHECK = 592
 # Disable Trezor Compatibility
 TITLE__DISABLE_TREZOR_COMPATIBILITY = 593
-# If not sure, do not change this setting
-MSG__DO_NOT_CHANGE_THIS_SETTING = 594
 # Restore Trezor Compatibility
-TITLE__RESTORE_TREZOR_COMPATIBILITY = 595
+TITLE__RESTORE_TREZOR_COMPATIBILITY = 594
 # Compatible with Trezor
-ITEM__COMPATIBLE_WITH_TREZOR = 596
+ITEM__COMPATIBLE_WITH_TREZOR = 595
 # USB Identifier:
-LIST_VALUE__USB_IDENTIFIER = 597
+LIST_VALUE__USB_IDENTIFIER = 596
 # It takes effect after device restart.
-SUBTITLE__RESTORE_TREZOR_COMPATIBILITY = 598
+SUBTITLE__RESTORE_TREZOR_COMPATIBILITY = 597
 # This will prevent you from using third-party wallet clients and websites tha
 # t only support Trezor.\nIt takes effect after device restart.
-SUBTITLE__DISABLE_TREZOR_COMPATIBILITY = 599
+SUBTITLE__DISABLE_TREZOR_COMPATIBILITY = 598
+# If not sure, do not change this setting
+MSG__DO_NOT_CHANGE_THIS_SETTING = 599
+# {} Typed Hash
+TITLE__STR_TYPED_HASH = 600
+# Domain Separator Hash:
+LIST_KEY__DOMAIN_SEPARATOR_HASH__COLON = 601
+# Signing this message may have security risk. Only sign these on sites you fu
+# lly trust.
+MSG__SIGNING_MSG_MAY_HAVE_RISK = 602
+# Sign {} Typed Hash
+TITLE__SIGN_STR_TYPED_HASH = 603
+# Do you want to sign this typed hash?
+SUBTITLE__SIGN_STR_TYPED_HASH = 604
+# Sign {} Typed Data
+TITLE__SIGN_STR_TYPED_DATA = 605
+# Do you want to sign this typed data?
+SUBTITLE__SIGN_STR_TYPED_DATA = 606
 # fmt: on
