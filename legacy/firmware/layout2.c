@@ -3296,7 +3296,7 @@ void layoutTransInformation(const BITMAP *bmp_up, const BITMAP *bmp_down,
 #endif
 
 #if ONEKEY_MINI
-#define DEVICE_INFO_PAGE_NUM 4
+#define DEVICE_INFO_PAGE_NUM 3
 #else
 #define DEVICE_INFO_PAGE_NUM 2
 #endif
@@ -3472,21 +3472,6 @@ refresh_menu:
       oledDrawStringAdapter(0, y, BUILD_ID, FONT_FIXED);
       y += font->pixel + 1;
 #endif
-
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                     &bmp_btn_down);
-      break;
-    case 3:
-      oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-      setRgbBitmap(true);
-      oledDrawRgbBitmap(48, 16, &bmp_icon_egg);
-      oledDrawStringCenterAdapterEx(
-          OLED_WIDTH / 2, 5 * 10,
-          _("To learn more about\nhow to get NFT Pet,\ngo to the"),
-          FONT_STANDARD);
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 9 * 10, CROWDFUND_URL,
-                                  FONT_FIXED);
-      oledBox(11, 100, 119, 100, true);
       break;
 #endif
     default:

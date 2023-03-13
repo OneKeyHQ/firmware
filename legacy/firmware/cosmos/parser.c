@@ -194,8 +194,6 @@ __Z_INLINE parser_error_t parser_formatAmountItem(uint16_t amountToken,
       return parser_unexpected_error;
     }
     number_inplace_trimming(bufferUI, 0);
-    const size_t len = strlen(bufferUI);
-    if (bufferUI[len - 1] == '.') bufferUI[len - 1] = '\0';
     snprintf(tmpDenom, sizeof(tmpDenom), " %s", COIN_DEFAULT_DENOM_REPR);
   } else {
     const CosmosNetworkType *n = cosmosnetworkByChainId(cosmos_chain_id);
@@ -212,6 +210,8 @@ __Z_INLINE parser_error_t parser_formatAmountItem(uint16_t amountToken,
     }
   }
 
+  const size_t len = strlen(bufferUI);
+  if (bufferUI[len - 1] == '.') bufferUI[len - 1] = '\0';
   z_str3join(bufferUI, sizeof(bufferUI), "", tmpDenom);
   pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 

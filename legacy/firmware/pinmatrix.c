@@ -34,7 +34,7 @@ void pinmatrix_draw(const char *text) {
   };
   layoutSwipe();
   if (text) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, text, FONT_STANDARD);
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 2, text, FONT_STANDARD);
   }
   const int w = bmp_digit0.width, h = bmp_digit0.height, pad = 2;
   for (int i = 0; i < 3; i++) {
@@ -42,10 +42,10 @@ void pinmatrix_draw(const char *text) {
       // use (2 - j) instead of j to achieve 789456123 layout
       int k = pinmatrix_perm[i + (2 - j) * 3] - '0';
 #if ONEKEY_MINI
-      oledDrawBitmap(
-          (OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
-          OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad) - (OLED_HEIGHT / 2),
-          bmp_digits[k]);
+      oledDrawBitmap((OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
+                     OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad) -
+                         (OLED_HEIGHT / 2) + pad,
+                     bmp_digits[k]);
 #else
       oledDrawBitmap((OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
                      OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad),
@@ -56,7 +56,7 @@ void pinmatrix_draw(const char *text) {
   for (int i = 0; i < 3; i++) {
     // 36 is the maximum pixels used for a pin matrix pixel row
     // but we use 56 pixels to add some extra
-    oledSCAInside(12 + i * (h + pad), 12 + i * (h + pad) + h - 1, 56, 38,
+    oledSCAInside(12 + i * (h + pad) + pad, 12 + i * (h + pad) + h, 56, 38,
                   OLED_WIDTH - 38);
   }
   oledRefresh();
