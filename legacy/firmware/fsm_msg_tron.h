@@ -81,17 +81,10 @@ void fsm_msgTronGetAddress(TronGetAddress *msg) {
   resp->has_address = 1;
 
   if (msg->has_show_display && msg->show_display) {
-    char desc[16];
-    strlcpy(desc, _("Address:"), sizeof(desc));
-
-    bool qrcode = false;
-    for (;;) {
-      layoutAddress(resp->address, desc, qrcode, false, msg->address_n,
-                    msg->address_n_count, false);
-      if (protectButton(ButtonRequestType_ButtonRequest_Address, false)) {
-        break;
-      }
-      qrcode = !qrcode;
+    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
+                           msg->address_n, msg->address_n_count, true, NULL, 0,
+                           0, NULL)) {
+      return;
     }
   }
 
