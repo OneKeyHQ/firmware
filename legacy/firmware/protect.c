@@ -1039,7 +1039,7 @@ bool protectPinCheck(bool retry) {
   } else {
     layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                               _("Device reset in progress"), NULL, NULL, NULL);
-    protectWaitKey(timer1s * 1, 0);
+    protectWaitKey(timer1s / 2, 0);
 
     uint8_t ui_language_bak = ui_language;
 
@@ -1121,15 +1121,11 @@ void enter_sleep(void) {
         sleep_count = 0;
         return;
       }
-    input_pin:
       if (!protectPinOnDevice(false, true)) {
         if (device_sleep_state == SLEEP_REENTER) {
           goto sleep_loop;
         }
-        if (device_sleep_state == SLEEP_CANCEL_BY_BUTTON) {
-          device_sleep_state = SLEEP_ENTER;
-          goto input_pin;
-        }
+
         device_sleep_state = SLEEP_NONE;
         layoutHome();
         sleep_count = 0;

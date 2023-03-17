@@ -488,6 +488,12 @@ void config_init(void) {
     g_bSelectSEFlag = false;
   }
 
+  uint32_t fails = config_getPinFails();
+
+  if (fails >= 10) {
+    config_wipe();
+  }
+
   // Auto-unlock storage if no PIN is set.
   if (storage_is_unlocked() == secfalse && storage_has_pin() == secfalse) {
     storage_unlock(PIN_EMPTY, PIN_EMPTY_LEN, NULL);
