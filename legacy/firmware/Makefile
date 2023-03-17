@@ -9,29 +9,24 @@ else
 NAME=classic.$(FIRMWARE_BUILD_VERSION)-Alpha-$(FIRMWARE_BUILD_DATE)-$(BUILD_ID)
 endif
 
-SECP256K1_ZKP ?= 0
+SECP256K1_ZKP ?= 1
 
 
 ifeq ($(SECP256K1_ZKP),1)
+CFLAGS   += -DSECP256K1_ZKP
 CFLAGS   += -DUSE_SECP256K1_ZKP
 CFLAGS   += -DUSE_SECP256K1_ZKP_ECDSA
 ifeq ($(EMULATOR),1)
 CFLAGS += -DSECP256K1_CONTEXT_SIZE=208
 else
-CFLAGS += -DSECP256K1_CONTEXT_SIZE=184
+CFLAGS += -DSECP256K1_CONTEXT_SIZE=180
 OBJS += field_10x26_arm.o
 endif
 ZKP_CFLAGS = \
 	-DUSE_ASM_ARM \
-	-DUSE_NUM_NONE \
-	-DUSE_FIELD_INV_BUILTIN \
-	-DUSE_SCALAR_INV_BUILTIN \
 	-DUSE_EXTERNAL_ASM \
-	-DUSE_FIELD_10X26 \
-	-DUSE_SCALAR_8X32 \
-	-DUSE_ECMULT_STATIC_PRECOMPUTATION \
 	-DUSE_EXTERNAL_DEFAULT_CALLBACKS \
-	-DECMULT_GEN_PREC_BITS=4 \
+	-DECMULT_GEN_PREC_BITS=2 \
 	-DECMULT_WINDOW_SIZE=8 \
 	-DENABLE_MODULE_GENERATOR \
 	-DENABLE_MODULE_RECOVERY \
@@ -39,6 +34,8 @@ ZKP_CFLAGS = \
 	-DENABLE_MODULE_EXTRAKEYS
 
 OBJS += secp256k1-zkp.o
+OBJS += precomputed_ecmult.o
+OBJS += precomputed_ecmult_gen.o
 OBJS += ../vendor/trezor-crypto/zkp_bip340.o
 OBJS += ../vendor/trezor-crypto/zkp_context.o
 OBJS += ../vendor/trezor-crypto/zkp_ecdsa.o
@@ -236,7 +233,7 @@ DEBUG_LOG  ?= 0
 ifeq ($(EMULATOR),1)
 CFLAGS += --warn-no-unused-parameter
 endif
-CFLAGS += -fstack-protector-all
+CFLAGS += -fstack-protector-strong
 CFLAGS += -Wno-sequence-point
 CFLAGS += -I../vendor/nanopb -Iprotob -DPB_FIELD_16BIT=1 -DPB_ENCODE_ARRAYS_UNPACKED=1 -DPB_VALIDATE_UTF8=1
 CFLAGS += -DDEBUG_LINK=$(DEBUG_LINK)
