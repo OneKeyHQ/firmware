@@ -1519,12 +1519,12 @@ class AboutSetting(Screen):
         self.serial.set_style_bg_color(lv_colors.BLACK, 0)
         self.serial.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
 
-        self.trezor_mode = ListItemBtnWithSwitch(
-            self.container, _(i18n_keys.ITEM__COMPATIBLE_WITH_TREZOR)
-        )
-        self.trezor_mode.set_style_bg_color(lv_colors.BLACK, 0)
-        if not device.is_trezor_compatible():
-            self.trezor_mode.clear_state()
+        # self.trezor_mode = ListItemBtnWithSwitch(
+        #     self.container, _(i18n_keys.ITEM__COMPATIBLE_WITH_TREZOR)
+        # )
+        # self.trezor_mode.set_style_bg_color(lv_colors.BLACK, 0)
+        # if not device.is_trezor_compatible():
+        #     self.trezor_mode.clear_state()
         self.board_loader = ListItemBtn(
             self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
         )
