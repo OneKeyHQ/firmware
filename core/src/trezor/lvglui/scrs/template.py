@@ -6,6 +6,7 @@ from ..i18n import gettext as _, keys as i18n_keys
 from ..lv_colors import lv_colors
 from . import font_PJSBOLD36, font_PJSBOLD48, font_STATUS_BAR
 from .common import FullSizeWindow, lv
+from .components.banner import Banner
 from .components.container import ContainerFlexCol
 from .components.listitem import DisplayItem
 from .components.qrcode import QRCode
@@ -1674,3 +1675,31 @@ class CosmosSignCombined(FullSizeWindow):
                     self.channel,
                     primary_color=lv_colors.ONEKEY_GREEN,
                 )
+
+
+class ConfirmTypedHash(FullSizeWindow):
+    def __init__(self, title, icon, domain_hash, message_hash, primary_color):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            icon,
+            primary_color=primary_color,
+            anim_dir=0,
+        )
+        self.banner = Banner(
+            self.content_area, 2, _(i18n_keys.MSG__SIGNING_MSG_MAY_HAVE_RISK)
+        )
+        self.banner.align(lv.ALIGN.TOP_LEFT, 8, 8)
+        self.icon.align_to(self.banner, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        self.item1 = DisplayItem(
+            self.container,
+            _(i18n_keys.LIST_KEY__DOMAIN_SEPARATOR_HASH__COLON),
+            domain_hash,
+        )
+        self.item2 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__MESSAGE_HASH__COLON), message_hash
+        )

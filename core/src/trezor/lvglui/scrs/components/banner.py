@@ -43,20 +43,20 @@ class Banner(lv.obj):
 def get_style(level: int):
     if level == LEVEL.HIGHLIGHT:
         return (
-            lv_colors.ONEKEY_DARK_BLUE,
-            lv_colors.ONEKEY_BLUE,
+            lv.color_hex(0x00206B),
+            lv.color_hex(0x4178FF),
             "A:/res/banner-icon-blue.png",
         )
     elif level == LEVEL.WARNING:
         return (
-            lv_colors.ONEKEY_YELLOW_2,
-            lv_colors.ONEKEY_YELLOW_1,
+            lv.color_hex(0x6B5C00),
+            lv.color_hex(0xFFD500),
             "A:/res/banner-icon-yellow.png",
         )
     elif level == LEVEL.DANGER:
         return (
-            lv_colors.ONEKEY_RED,
-            lv_colors.ONEKEY_RED_2,
+            lv.color_hex(0x640E00),
+            lv.color_hex(0xFF1100),
             "A:/res/banner-icon-red.png",
         )
     else:

@@ -99,7 +99,7 @@ class ListItemWithLeadingCheckbox(lv.obj):
 class DisplayItem(lv.obj):
     def __init__(self, parent, title, content):
         super().__init__(parent)
-        self.set_size(lv.pct(100), lv.SIZE.CONTENT)
+        self.set_size(464, lv.SIZE.CONTENT)
         self.add_style(
             StyleWrapper()
             .bg_color(lv_colors.ONEKEY_GRAY_3)

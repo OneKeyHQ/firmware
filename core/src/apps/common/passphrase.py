@@ -30,9 +30,7 @@ async def _request_from_user(ctx: wire.Context) -> str:
         raise wire.DataError(
             f"Maximum passphrase length is {_MAX_PASSPHRASE_LEN} bytes"
         )
-    from trezor.ui.layouts import require_confirm_passphrase
 
-    await require_confirm_passphrase(ctx, passphrase)
     return passphrase
 
 
@@ -56,23 +54,10 @@ async def _request_on_host(ctx: wire.Context) -> str:
         )
 
     # # non-empty passphrase
-    # if ack.passphrase:
-    #     from trezor.ui.layouts import confirm_action
+    if ack.passphrase:
+        from trezor.ui.layouts import require_confirm_passphrase
 
-    #     await confirm_action(
-    #         ctx,
-    #         "passphrase_host1",
-    #         title=_(i18n_keys.TITLE__ACCESS_HIDDEN_WALLET),
-    #         description=_(i18n_keys.SUBTITLE__ENTER_PASSPHRASE_ACCESS_HIDDEN_WALLET),
-    #     )
-    #     # TODO: i18n missing
-    #     await confirm_action(
-    #         ctx,
-    #         "passphrase_host2",
-    #         title=_(i18n_keys.TITLE__USE_THIS_PASSPHRASE),
-    #         description=ack.passphrase,
-    #         icon=None,
-    #     )
+        await require_confirm_passphrase(ctx, ack.passphrase)
 
     return ack.passphrase
 

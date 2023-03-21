@@ -11,6 +11,7 @@ from trezor.ui.layouts import (
     confirm_address,
     confirm_blob,
     confirm_output,
+    confirm_sign_typed_hash,
     confirm_text,
     should_show_more,
 )
@@ -146,11 +147,30 @@ async def confirm_typed_data_final(ctx: Context) -> None:
     await confirm_action(
         ctx,
         "confirm_typed_data_final",
-        title=_(i18n_keys.TITLE__SIGN_712_TYPED_DATA),
+        title=_(i18n_keys.TITLE__SIGN_STR_TYPED_DATA).format(ctx.name),
         action=_(i18n_keys.SUBTITLE__SIGN_712_TYPED_DATA),
         verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
+        icon=None,
         hold=True,
+        anim_dir=0,
     )
+
+
+async def confirm_typed_hash_final(ctx: Context) -> None:
+    await confirm_action(
+        ctx,
+        "confirm_typed_hash_final",
+        title=_(i18n_keys.TITLE__SIGN_STR_TYPED_HASH).format(ctx.name),
+        action=_(i18n_keys.SUBTITLE__SIGN_STR_TYPED_HASH),
+        verb=_(i18n_keys.BUTTON__SLIDE_TO_CONFIRM),
+        icon=None,
+        hold=True,
+        anim_dir=0,
+    )
+
+
+async def confirm_typed_hash(ctx: Context, domain_hash, message_hash) -> None:
+    await confirm_sign_typed_hash(ctx, domain_hash, message_hash)
 
 
 def confirm_empty_typed_message(ctx: Context) -> Awaitable[None]:

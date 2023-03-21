@@ -34,10 +34,6 @@ if __debug__:
 # as a UI callback for storage, which can be invoked at any time
 import trezor.pin  # noqa: F401
 
-# === Prepare the USB interfaces first. Do not connect to the host yet.
-# usb imports trezor.utils and trezor.io which is a C module
-import usb
-
 
 # create an unimport manager that will be reused in the main loop
 unimport_manager = utils.unimport()
@@ -46,6 +42,10 @@ unimport_manager = utils.unimport()
 with unimport_manager:
     import boot
     del boot
+
+# === Prepare the USB interfaces first. Do not connect to the host yet.
+# usb imports trezor.utils and trezor.io which is a C module
+import usb
 
 # start the USB
 import storage.device
