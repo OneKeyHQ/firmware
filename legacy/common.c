@@ -32,6 +32,8 @@ uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 
 uint8_t ui_language = 0;
 
+uint8_t cpu_mode = 0;
+
 bool g_bSelectSEFlag = false;
 bool g_bIsBixinAPP = false;
 uint32_t g_uiFastPayFlag = 0;

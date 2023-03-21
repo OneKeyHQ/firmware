@@ -454,6 +454,9 @@ void usbPoll(void) {
     svc_system_privileged();
     vector_table_t *ivt = (vector_table_t *)FLASH_PTR(FLASH_APP_START);
     __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
+    if (cpu_mode == UNPRIVILEGED) {
+      mpu_config_firmware();
+    }
     __asm__ volatile("b reset_handler");
   }
 

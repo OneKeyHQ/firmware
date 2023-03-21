@@ -32,6 +32,13 @@ extern uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 #define WORK_MODE_USB 0x20
 #define WORK_MODE_NFC 0x30
 
+typedef enum {
+  PRIVILEGED = 0,
+  UNPRIVILEGED,
+} CPU_MODE;
+
+extern uint8_t cpu_mode;
+
 extern uint8_t ui_language;
 
 extern bool g_bSelectSEFlag;

@@ -158,6 +158,7 @@ int main(void) {
   drbg_init();
 
   if (!is_mode_unprivileged()) {
+    cpu_mode = PRIVILEGED;
     collect_hw_entropy(true);
     timer_init();
 #ifdef APPVER
@@ -165,6 +166,7 @@ int main(void) {
     mpu_config_firmware();
 #endif
   } else {
+    cpu_mode = UNPRIVILEGED;
     collect_hw_entropy(false);
   }
 
