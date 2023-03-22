@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -29,16 +29,11 @@ from typing import (
 from ..exceptions import TrezorException
 
 if TYPE_CHECKING:
+    from ..models import TrezorModel
+
     T = TypeVar("T", bound="Transport")
 
 LOG = logging.getLogger(__name__)
-
-# USB vendor/product IDs for Trezors
-DEV_TREZOR1 = (0x534C, 0x0001)
-DEV_TREZOR2 = (0x1209, 0x53C1)
-DEV_TREZOR2_BL = (0x1209, 0x53C0)
-
-TREZORS = {DEV_TREZOR1, DEV_TREZOR2, DEV_TREZOR2_BL}
 
 UDEV_RULES_STR = """
 Do you have udev rules installed?
@@ -50,6 +45,10 @@ MessagePayload = Tuple[int, bytes]
 
 
 class TransportException(TrezorException):
+    pass
+
+
+class DeviceIsBusy(TransportException):
     pass
 
 
@@ -95,7 +94,9 @@ class Transport:
         raise NotImplementedError
 
     @classmethod
-    def enumerate(cls: Type["T"]) -> Iterable["T"]:
+    def enumerate(
+        cls: Type["T"], models: Optional[Iterable["TrezorModel"]] = None
+    ) -> Iterable["T"]:
         raise NotImplementedError
 
     @classmethod
@@ -126,12 +127,14 @@ def all_transports() -> Iterable[Type["Transport"]]:
     return set(t for t in transports if t.ENABLED)
 
 
-def enumerate_devices() -> Sequence["Transport"]:
+def enumerate_devices(
+    models: Optional[Iterable["TrezorModel"]] = None,
+) -> Sequence["Transport"]:
     devices: List["Transport"] = []
     for transport in all_transports():
         name = transport.__name__
         try:
-            found = list(transport.enumerate())
+            found = list(transport.enumerate(models))
             LOG.info(f"Enumerating {name}: found {len(found)} devices")
             devices.extend(found)
         except NotImplementedError:

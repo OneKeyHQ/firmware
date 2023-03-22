@@ -28,7 +28,89 @@
 
 char bootloader_version[8] = {0};
 
-#if MEMORY_PROTECT
+#if BOOTLOADER_QA
+static int known_bootloader(int r, const uint8_t *hash) {
+  if (r != 32) return 0;
+  if (0 ==
+      memcmp(hash,
+             "\x1b\xd8\x1c\x0a\x82\x20\x43\x28\xe9\xaf\x7b\xb6\xb1\x6b\x45\x27"
+             "\x81\x31\xcc\x76\x0a\xfa\x9f\xd0\x81\x6e\xc1\xe1\x12\x86\x49\x83",
+             32))
+    return 1;  // 1.3.2
+  if (0 ==
+      memcmp(hash,
+             "\x19\x27\x59\xce\x15\x51\xc4\x21\x03\xcc\x9b\xe8\x4e\x06\x54\x24"
+             "\x68\x8a\x06\xfa\xbb\xe6\xb0\x19\x18\x11\xcd\xbc\x19\x6c\x2f\x1b",
+             32))
+    return 1;  // 1.3.3
+  if (0 ==
+      memcmp(hash,
+             "\x09\x34\x2f\x51\x56\x58\xc1\xe5\x95\x64\x1c\x4f\x8d\xf1\xce\x2b"
+             "\x2b\x6a\x86\x39\x14\x35\x0a\x97\x0d\x6e\x4f\x37\xb1\xd7\xde\x65",
+             32))
+    return 1;  // 1.4.0
+  if (0 ==
+      memcmp(hash,
+             "\x73\x37\xfa\x82\x2b\x62\x90\x50\x49\x3c\x6c\x39\x3a\x9f\x17\x41"
+             "\x75\xe8\x1b\x39\xf3\xb7\x1b\xff\xab\xa2\xb9\x79\x7f\xf1\x0a\x2b",
+             32))
+    return 1;  // 1.5.0
+  if (0 ==
+      memcmp(hash,
+             "\x5c\x8b\x5e\xfc\x8d\x8f\x78\xf3\xa0\x23\x9d\x5f\x90\x95\x4d\xe7"
+             "\xe6\xb5\xb7\x09\xc9\x1c\x3a\xb2\xaa\x14\x6f\x0e\x26\x6e\x70\x60",
+             32))
+    return 1;  // 1.5.1
+  if (0 ==
+      memcmp(hash,
+             "\xec\xbd\x06\xd3\x37\x25\xd5\xa6\xbe\xba\x2b\xe3\xde\xf4\x64\x7e"
+             "\xef\x5d\x7b\xb9\x2b\x0c\x19\x8d\xd2\x89\x47\x3b\xad\xd3\x4c\x97",
+             32))
+    return 1;  // 1.6.0
+  if (0 ==
+      memcmp(hash,
+             "\xec\xca\xff\x24\x34\xdf\x3b\x49\xef\x00\x0c\x0f\x07\x1f\xa5\x60"
+             "\x18\x16\xfa\x19\x56\x0b\x23\xb4\x73\x52\x0e\x68\xc5\x2d\xe5\x7a",
+             32))
+    return 1;  // 1.6.1
+  if (0 ==
+      memcmp(hash,
+             "\xe0\xc7\xfd\xb9\x1a\x14\xcb\x39\xd7\xc1\x43\xff\x70\xd2\x3a\x0b"
+             "\xfb\x0a\xef\xb5\x49\xb6\x15\x0a\xa9\x09\xf8\x35\x0a\xa5\xeb\xa2",
+             32))
+    return 1;  // 1.8.0
+  if (0 ==
+      memcmp(hash,
+             "\xf9\x9f\x49\xf8\xd0\xc3\xfa\x82\xd6\xad\x1e\xf4\xf2\xf2\xd7\x2d"
+             "\x01\xa5\xdc\xa3\x6f\x11\xba\xb9\x13\xbd\xfe\xaf\x84\xb2\x6f\x4a",
+             32))
+    return 1;  // 1.10.0
+  if (0 ==
+      memcmp(hash,
+             "\x8f\x83\x57\x70\x11\x75\xaf\x5c\x1a\xe5\xb9\x6f\x13\x42\x2f\x7f"
+             "\x1a\x52\xed\x96\xcd\xa0\x18\x07\x63\x0e\x0d\x25\x6c\xd9\x18\x78",
+             32))
+    return 1;  // 1.11.0
+  // BEGIN AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
+  if (0 ==
+      memcmp(hash,
+             "\x21\xb9\x49\xf4\xf5\xfd\x9f\x3a\x7d\x63\x43\xd1\x07\x6f\x96\x0f"
+             "\xb4\x54\x18\x19\x65\x31\xb9\xf2\x97\x4a\x68\xed\xe8\xdb\x2e\xa1",
+             32))
+    return 1;  // 1.12.0 shipped with fw 1.12.0
+  if (0 ==
+      memcmp(hash,
+             "\xb4\xe5\x92\x44\x18\x5c\xe1\xcd\x6c\x8f\x59\x03\x10\x37\x02\x18"
+             "\x50\x9c\x39\x32\x26\xf0\x07\x4b\x8c\xf6\xad\xed\xb3\xcd\x4d\x55",
+             32))
+    return 1;  // 1.12.1 shipped with fw 1.12.1
+  // END AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
+  return 0;
+}
+#endif
+
+#if PRODUCTION
+
 #if 0
 static int known_bootloader(int r, const uint8_t *hash) {
   if (r != 32) return 0;
@@ -134,6 +216,86 @@ static int known_bootloader(int r, const uint8_t *hash) {
              "\xb9\xc7\xf6\x03\xcd\xc7\x30\xe7\x30\x78\x50\xa3\xf4\xd6\x2a\x5c",
              32))
     return 1;  // 1.10.0 shipped with fw 1.10.0
+  if (0 ==
+      memcmp(hash,
+             "\xfa\x12\xa4\x4f\xa0\x5f\xd1\xd2\x05\x39\x35\x8b\x54\xf3\x01\xce"
+             "\xe4\xc3\x21\x9c\x9f\x1b\xb3\xa5\x77\x2f\xfd\x60\x9a\xf9\xe8\xe2",
+             32))
+    return 1;  // 1.11.0 shipped with fw 1.11.1
+  // BEGIN AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
+  if (0 ==
+      memcmp(hash,
+             "\xe9\xec\x8f\xa2\xfe\xfa\xd2\xb3\xb6\xb7\xc4\xab\x76\x69\x1a\x33"
+             "\x61\xb3\xee\xfb\x8a\x0d\xda\xa3\x4d\x7e\x45\xb6\x3b\x3d\x56\x64",
+             32))
+    return 1;  // 1.12.0 shipped with fw 1.12.0
+  if (0 ==
+      memcmp(hash,
+             "\x94\xf1\xc9\x0d\xb2\x8d\xb1\xf8\xce\x5d\xca\x96\x69\x76\x34\x36"
+             "\x58\xf5\xda\xde\xe8\x38\x34\x98\x7c\x8b\x04\x9c\x49\xd1\xed\xd0",
+             32))
+    return 1;  // 1.12.1 shipped with fw 1.12.1
+  if (0 ==
+      memcmp(hash,
+             "\x38\x83\x85\xb2\x55\xf3\x80\x07\x70\xb2\xc4\x47\x65\x8c\x4d\xd0"
+             "\xa7\x43\xa7\x80\xbf\x3a\xcb\xe8\xc6\xe1\xc8\x1f\x8d\xfd\x75\x90",
+             32))
+    return 1;  // 1.9.0 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\x7e\xa1\xd0\x17\x19\x15\x64\xc0\xc4\x06\x10\xc1\x5b\xa8\x5a\x2c"
+             "\xc5\x00\x2b\xa8\xac\x57\x78\x72\x8c\x2c\x11\x28\x87\xfa\xf3\x78",
+             32))
+    return 1;  // 1.10.0 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\xa3\xdb\x14\x14\xf9\x26\x0e\x45\x27\x80\x5c\x20\xb9\xe9\xb7\xbb"
+             "\xec\x1f\x2d\xd0\x9b\x72\x0a\x5e\xf2\xc3\x12\x44\xbe\xb8\xe4\x81",
+             32))
+    return 1;  // 1.10.0 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\x2b\x1e\xff\xf5\x1a\xee\x3c\x6d\x4d\x95\x31\x20\xc7\x27\xd4\x54"
+             "\x03\x42\x4f\xf5\xb1\x6b\x86\x15\x50\x8e\xc1\xd7\x37\x36\x58\x3a",
+             32))
+    return 1;  // 1.10.0 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\x98\x68\x2e\xc8\x0b\x56\xf1\x4a\x93\x0a\x2f\xf0\xd1\xe6\x27\xf0"
+             "\x67\x74\x10\x81\x45\x05\xba\xca\x8b\x82\xea\xe7\x3f\x8d\xcc\x77",
+             32))
+    return 1;  // 1.10.1 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\x15\xe6\xfb\x17\x03\x8a\xdf\x67\x00\x4e\x37\x0e\xe7\xcd\x76\xe5"
+             "\x3c\x40\xac\x8d\xbe\x75\xa8\xcf\xa5\xfa\x88\x6a\x9d\xd4\xa4\xa0",
+             32))
+    return 1;  // 1.10.2 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\xe9\xd1\x86\xb6\x91\x7c\xcc\x1e\x66\x9b\x52\xd4\xb4\x86\xbb\x39"
+             "\x88\x5c\xaf\x37\x19\x15\xa1\xaa\xc0\x59\xe7\x5a\x9e\xe9\x4b\x9c",
+             32))
+    return 1;  // 1.10.1 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\x93\x01\x16\xfc\x1b\x4d\xd8\x98\x73\x1d\xf7\xa4\x62\xca\x5e\xc0"
+             "\x27\x4e\x8c\x51\x87\xa0\x05\xf4\x1a\x1e\xdd\xb8\x77\x9f\x7b\x25",
+             32))
+    return 1;  // 1.10.2 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\xd7\x74\x32\xdb\xdd\xed\xb2\x76\x8f\xa0\x99\x87\x40\xe7\xf5\xf8"
+             "\xc7\x77\xe8\x76\x10\x8c\x8f\x02\x85\xe9\xc8\x8e\x16\xba\x31\xef",
+             32))
+    return 1;  // 2.0.0 shipped with fw 1.99.99
+  if (0 ==
+      memcmp(hash,
+             "\x9d\x0c\x16\x94\xc2\x22\x24\x58\x1f\x0d\x54\x92\xf9\x87\x71\xa8"
+             "\x05\x3b\x6f\xdd\xe8\xc8\xaf\xef\x3c\xc1\xe8\x02\x98\x4c\x32\x98",
+             32))
+    return 1;  // 1.10.0 shipped with fw 1.99.99
+  // END AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   return 0;
 }
 #endif
@@ -209,34 +371,33 @@ static int onekey_known_bootloader(int r, const uint8_t *hash) {
  * @param shutdown_on_replace: if true, shuts down device instead of return
  */
 void check_and_replace_bootloader(bool shutdown_on_replace) {
-#if MEMORY_PROTECT
+#if PRODUCTION || BOOTLOADER_QA
   uint8_t hash[32] = {0};
   int r = memory_bootloader_hash(hash);
 
   if (!onekey_known_bootloader(r, hash)) {
     layoutDialog(&bmp_icon_error, NULL, NULL, NULL, _("Unknown bootloader"),
-                 _("detected."), NULL, _("Unplug your Trezor"),
+                 _("detected."), NULL, _("Shutdown your OneKey"),
                  _("contact our support."), NULL);
     delay_ms(1000);
-    shutdown();
+    // shutdown();
   }
 
   if (is_mode_unprivileged()) {
     return;
   }
-#if 0
+
   if (r == 32 && 0 == memcmp(hash, bl_hash, 32)) {
     // all OK -> done
     return;
   }
-  // useless for onekey
 
   // ENABLE THIS AT YOUR OWN RISK
   // ATTEMPTING TO OVERWRITE BOOTLOADER WITH UNSIGNED FIRMWARE MAY BRICK
   // YOUR DEVICE.
 
   layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, _("Updating bootloader"),
-               NULL, NULL, _("DO NOT UNPLUG"), _("YOUR TREZOR!"), NULL);
+               NULL, NULL, _("DO NOT UNPLUG"), _("YOUR ONEKEY!"), NULL);
 
   // unlock sectors
   memory_write_unlock();
@@ -274,7 +435,6 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
                _("contact our support."), NULL);
   shutdown();
 #endif
-#endif
-  // prevent compiler warning when MEMORY_PROTECT==0
+  // prevent compiler warning when PRODUCTION==0
   (void)shutdown_on_replace;
 }

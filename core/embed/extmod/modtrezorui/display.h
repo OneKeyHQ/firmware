@@ -21,45 +21,30 @@
 #define __DISPLAY_H__
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
-#if TREZOR_MODEL == T
+#include "buffers.h"
+#include "colors.h"
+#include TREZOR_BOARD
+#include "display_interface.h"
+#include "fonts/fonts.h"
 
-// ILI9341V, GC9307 and ST7789V drivers support 240px x 320px display resolution
-#define MAX_DISPLAY_RESX 240
-#define MAX_DISPLAY_RESY 320
-#define DISPLAY_RESX 240
-#define DISPLAY_RESY 240
-#define TREZOR_FONT_BPP 4
-
-#elif TREZOR_MODEL == 1
-
-#define MAX_DISPLAY_RESX 128
-#define MAX_DISPLAY_RESY 64
-#define DISPLAY_RESX 128
-#define DISPLAY_RESY 64
-#define TREZOR_FONT_BPP 1
-
+#define AVATAR_IMAGE_SIZE 144
+#if defined TREZOR_MODEL_T || defined TREZOR_MODEL_1
+#define LOADER_ICON_SIZE 64
+#elif defined TREZOR_MODEL_R
+#define LOADER_ICON_SIZE 24
 #else
 #error Unknown Trezor model
 #endif
 
-#define AVATAR_IMAGE_SIZE 144
-#define LOADER_ICON_SIZE 64
-
-#define RGB16(R, G, B) ((R & 0xF8) << 8) | ((G & 0xFC) << 3) | ((B & 0xF8) >> 3)
-#define COLOR_WHITE 0xFFFF
-#define COLOR_BLACK 0x0000
-
-#ifdef TREZOR_FONT_NORMAL_ENABLE
-#define FONT_NORMAL (-1)
-#endif
-#ifdef TREZOR_FONT_BOLD_ENABLE
-#define FONT_BOLD (-2)
-#endif
-#ifdef TREZOR_FONT_MONO_ENABLE
-#define FONT_MONO (-3)
-#endif
+typedef enum {
+  TOIF_FULL_COLOR_BE = 0,  // big endian
+  TOIF_GRAYSCALE_OH = 1,   // odd hi
+  TOIF_FULL_COLOR_LE = 2,  // little endian
+  TOIF_GRAYSCALE_EH = 3,   // even hi
+} toif_format_t;
 
 // provided by port
 
@@ -76,9 +61,11 @@ void display_clear(void);
 void display_bar(int x, int y, int w, int h, uint16_t c);
 void display_bar_radius(int x, int y, int w, int h, uint16_t c, uint16_t b,
                         uint8_t r);
+void display_bar_radius_buffer(int x, int y, int w, int h, uint8_t r,
+                               buffer_text_t *buffer);
 
 bool display_toif_info(const uint8_t *buf, uint32_t len, uint16_t *out_w,
-                       uint16_t *out_h, bool *out_grayscale);
+                       uint16_t *out_h, toif_format_t *out_format);
 void display_image(int x, int y, int w, int h, const void *data,
                    uint32_t datalen);
 void display_avatar(int x, int y, const void *data, uint32_t datalen,
@@ -105,17 +92,19 @@ void display_text_right(int x, int y, const char *text, int textlen, int font,
 int display_text_width(const char *text, int textlen, int font);
 int display_text_split(const char *text, int textlen, int font,
                        int requested_width);
+void display_text_render_buffer(const char *text, int textlen, int font,
+                                buffer_text_t *buffer, int text_offset);
 
-void display_qrcode(int x, int y, const char *data, uint32_t datalen,
-                    uint8_t scale);
+void display_qrcode(int x, int y, const char *data, uint8_t scale);
 
 void display_offset(int set_xy[2], int *get_x, int *get_y);
-int display_orientation(int degrees);
-int display_backlight(int val);
 void display_fade(int start, int end, int delay);
 
 // helper for locating a substring in buffer with utf-8 string
 void display_utf8_substr(const char *buf_start, size_t buf_len, int char_off,
                          int char_len, const char **out_start, int *out_len);
+
+// pixeldata accessor
+void display_pixeldata_dirty();
 
 #endif

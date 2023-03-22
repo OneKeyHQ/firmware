@@ -2,11 +2,10 @@ ifneq ($(V),1)
 Q := @
 endif
 
-SKIPPED_MESSAGES := Binance Cardano DebugMonero Eos Monero Ontology SdProtect Tezos WebAuthn \
-	DebugLinkRecordScreen DebugLinkReseedRandom DebugLinkShowText DebugLinkEraseSdCard DebugLinkWatchLayout \
-	GetOwnershipProof OwnershipProof GetOwnershipId OwnershipId AuthorizeCoinJoin DoPreauthorized \
-	CancelAuthorization DebugLinkLayout \
-	TxAckInput TxAckOutput TxAckPrev \
+SKIPPED_MESSAGES := Binance Cardano DebugMonero Eos Monero Ontology Ripple SdProtect Tezos WebAuthn \
+	DebugLinkRecordScreen DebugLinkEraseSdCard DebugLinkWatchLayout \
+	DebugLinkLayout GetNonce \
+	TxAckInput TxAckOutput TxAckPrev TxAckPaymentRequest \
 	EthereumSignTypedData EthereumTypedDataStructRequest EthereumTypedDataStructAck \
 	EthereumTypedDataValueRequest EthereumTypedDataValueAck
 

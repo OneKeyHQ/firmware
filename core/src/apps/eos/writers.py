@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from apps.common.writers import (
     write_bytes_fixed,
     write_bytes_unchecked,
@@ -8,7 +10,7 @@ from apps.common.writers import (
     write_uvarint,
 )
 
-if False:
+if TYPE_CHECKING:
     from trezor.messages import (
         EosActionBuyRam,
         EosActionBuyRamBytes,
@@ -16,6 +18,7 @@ if False:
         EosActionDelegate,
         EosActionDeleteAuth,
         EosActionLinkAuth,
+        EosActionUnlinkAuth,
         EosActionNewAccount,
         EosActionRefund,
         EosActionSellRam,
@@ -31,9 +34,13 @@ if False:
 
 
 def write_auth(w: Writer, auth: EosAuthorization) -> None:
+    from trezor.wire import DataError
+
     write_uint32_le(w, auth.threshold)
     write_uvarint(w, len(auth.keys))
     for key in auth.keys:
+        if key.key is None:
+            raise DataError("Key must be provided explicitly.")
         write_uvarint(w, key.type)
         write_bytes_fixed(w, key.key, 33)
         write_uint16_le(w, key.weight)
@@ -63,7 +70,7 @@ def write_action_transfer(w: Writer, msg: EosActionTransfer) -> None:
     write_uint64_le(w, msg.sender)
     write_uint64_le(w, msg.receiver)
     write_asset(w, msg.quantity)
-    write_bytes_prefixed(w, msg.memo)
+    write_bytes_prefixed(w, msg.memo.encode())
 
 
 def write_action_buyram(w: Writer, msg: EosActionBuyRam) -> None:
@@ -84,14 +91,13 @@ def write_action_sellram(w: Writer, msg: EosActionSellRam) -> None:
 
 
 def write_action_delegate(w: Writer, msg: EosActionDelegate) -> None:
-    write_uint64_le(w, msg.sender)
-    write_uint64_le(w, msg.receiver)
-    write_asset(w, msg.net_quantity)
-    write_asset(w, msg.cpu_quantity)
+    write_action_undelegate(w, msg)
     write_uint8(w, 1 if msg.transfer else 0)
 
 
-def write_action_undelegate(w: Writer, msg: EosActionUndelegate) -> None:
+def write_action_undelegate(
+    w: Writer, msg: EosActionUndelegate | EosActionDelegate
+) -> None:
     write_uint64_le(w, msg.sender)
     write_uint64_le(w, msg.receiver)
     write_asset(w, msg.net_quantity)
@@ -111,25 +117,26 @@ def write_action_voteproducer(w: Writer, msg: EosActionVoteProducer) -> None:
 
 
 def write_action_updateauth(w: Writer, msg: EosActionUpdateAuth) -> None:
-    write_uint64_le(w, msg.account)
-    write_uint64_le(w, msg.permission)
+    write_action_deleteauth(w, msg)
     write_uint64_le(w, msg.parent)
     write_auth(w, msg.auth)
 
 
-def write_action_deleteauth(w: Writer, msg: EosActionDeleteAuth) -> None:
+def write_action_deleteauth(
+    w: Writer, msg: EosActionDeleteAuth | EosActionUpdateAuth
+) -> None:
     write_uint64_le(w, msg.account)
     write_uint64_le(w, msg.permission)
 
 
 def write_action_linkauth(w: Writer, msg: EosActionLinkAuth) -> None:
-    write_uint64_le(w, msg.account)
-    write_uint64_le(w, msg.code)
-    write_uint64_le(w, msg.type)
+    write_action_unlinkauth(w, msg)
     write_uint64_le(w, msg.requirement)
 
 
-def write_action_unlinkauth(w: Writer, msg: EosActionLinkAuth) -> None:
+def write_action_unlinkauth(
+    w: Writer, msg: EosActionUnlinkAuth | EosActionLinkAuth
+) -> None:
     write_uint64_le(w, msg.account)
     write_uint64_le(w, msg.code)
     write_uint64_le(w, msg.type)

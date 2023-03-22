@@ -1,23 +1,34 @@
-use core::convert::{Infallible, TryInto};
+use core::{
+    convert::{Infallible, TryInto},
+    num::TryFromIntError,
+};
 
 use cstr_core::CStr;
 
+#[cfg(feature = "micropython")]
 use crate::micropython::{ffi, obj::Obj, qstr::Qstr};
 
 #[allow(clippy::enum_variant_names)] // We mimic the Python exception classnames here.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum Error {
     TypeError,
     OutOfRange,
     MissingKwargs,
     AllocationFailed,
+    IndexError,
+    #[cfg(feature = "micropython")]
     CaughtException(Obj),
+    #[cfg(feature = "micropython")]
     KeyError(Obj),
+    #[cfg(feature = "micropython")]
     AttributeError(Qstr),
+    #[cfg(feature = "micropython")]
     ValueError(&'static CStr),
+    #[cfg(feature = "micropython")]
     ValueErrorParam(&'static CStr, Obj),
 }
 
+#[cfg(feature = "micropython")]
 impl Error {
     /// Create an exception instance matching the error code. The result of this
     /// call should only be used to immediately raise the exception, because the
@@ -32,6 +43,7 @@ impl Error {
                 Error::OutOfRange => ffi::mp_obj_new_exception(&ffi::mp_type_OverflowError),
                 Error::MissingKwargs => ffi::mp_obj_new_exception(&ffi::mp_type_TypeError),
                 Error::AllocationFailed => ffi::mp_obj_new_exception(&ffi::mp_type_MemoryError),
+                Error::IndexError => ffi::mp_obj_new_exception(&ffi::mp_type_IndexError),
                 Error::CaughtException(obj) => obj,
                 Error::KeyError(key) => {
                     ffi::mp_obj_new_exception_args(&ffi::mp_type_KeyError, 1, &key)
@@ -65,5 +77,11 @@ impl Error {
 impl From<Infallible> for Error {
     fn from(_: Infallible) -> Self {
         unreachable!()
+    }
+}
+
+impl From<TryFromIntError> for Error {
+    fn from(_: TryFromIntError) -> Self {
+        Self::OutOfRange
     }
 }

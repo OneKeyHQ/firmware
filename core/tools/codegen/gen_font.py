@@ -52,24 +52,14 @@ def process_bitmap_buffer(buf, bpp):
     return res
 
 
-def process_face(name, style, size, bpp=4, shave_bearingX=0):
+def process_face(name, style, size, bpp=4, shave_bearingX=0, ext="ttf"):
     print("Processing ... %s %s %s" % (name, style, size))
-    face = freetype.Face("fonts/%s-%s.ttf" % (name, style))
+    face = freetype.Face("fonts/%s-%s.%s" % (name, style, ext))
     face.set_pixel_sizes(0, size)
     fontname = "%s_%s_%d" % (name.lower(), style.lower(), size)
-    with open("font_%s.h" % fontname, "wt") as f:
-        f.write("#include <stdint.h>\n\n")
-        f.write("#if TREZOR_FONT_BPP != %d\n" % bpp)
-        f.write("#error Wrong TREZOR_FONT_BPP (expected %d)\n" % bpp)
-        f.write("#endif\n")
-        f.write(
-            "extern const uint8_t* const Font_%s_%s_%d[%d + 1 - %d];\n"
-            % (name, style, size, MAX_GLYPH, MIN_GLYPH)
-        )
-        f.write(
-            "extern const uint8_t Font_%s_%s_%d_glyph_nonprintable[];\n"
-            % (name, style, size)
-        )
+    font_ymin = 0
+    font_ymax = 0
+
     with open("font_%s.c" % fontname, "wt") as f:
         f.write("#include <stdint.h>\n\n")
         f.write("// clang-format off\n\n")
@@ -94,18 +84,25 @@ def process_face(name, style, size, bpp=4, shave_bearingX=0):
             rows = bitmap.rows
             advance = metrics.horiAdvance // 64
             bearingX = metrics.horiBearingX // 64
+
             # discard space on the left side
             if shave_bearingX > 0:
                 advance -= min(advance, bearingX, shave_bearingX)
                 bearingX -= min(advance, bearingX, shave_bearingX)
             # the following code is here just for some letters (listed below)
             # not using negative bearingX makes life so much easier; add it to advance instead
-            if c in "jy}),/" and bearingX < 0:
-                advance += -bearingX
-                bearingX = 0
+            if bearingX < 0:
+                if c in "AXYjxy}),/_":
+                    advance += -bearingX
+                    bearingX = 0
+                else:
+                    raise ValueError("Negative bearingX for character '%s'" % c)
             bearingY = metrics.horiBearingY // 64
             assert advance >= 0 and advance <= 255
             assert bearingX >= 0 and bearingX <= 255
+            if bearingY < 0: # HACK
+                print("normalizing bearingY %d for '%s'" % (bearingY, c))
+                bearingY = 0
             assert bearingY >= 0 and bearingY <= 255
             print(
                 'Loaded glyph "%c" ... %d x %d @ %d grays (%d bytes, metrics: %d, %d, %d)'
@@ -142,6 +139,12 @@ def process_face(name, style, size, bpp=4, shave_bearingX=0):
                 )
                 nonprintable += " };\n"
 
+
+            yMin = bearingY - rows
+            yMax = yMin + rows
+            font_ymin = min(font_ymin, yMin)
+            font_ymax = max(font_ymax, yMax)
+
         f.write(nonprintable)
 
         f.write(
@@ -152,11 +155,33 @@ def process_face(name, style, size, bpp=4, shave_bearingX=0):
             f.write("    Font_%s_%s_%d_glyph_%d,\n" % (name, style, size, i))
         f.write("};\n")
 
+    with open("font_%s.h" % fontname, "wt") as f:
+        f.write("#include <stdint.h>\n\n")
+        f.write("#if TREZOR_FONT_BPP != %d\n" % bpp)
+        f.write("#error Wrong TREZOR_FONT_BPP (expected %d)\n" % bpp)
+        f.write("#endif\n")
+
+        f.write("#define Font_%s_%s_%d_HEIGHT %d\n" % (name, style, size, size))
+        f.write("#define Font_%s_%s_%d_MAX_HEIGHT %d\n" % (name, style, size, font_ymax - font_ymin))
+        f.write("#define Font_%s_%s_%d_BASELINE %d\n" % (name, style, size, -font_ymin))
+        f.write(
+            "extern const uint8_t* const Font_%s_%s_%d[%d + 1 - %d];\n"
+            % (name, style, size, MAX_GLYPH, MIN_GLYPH)
+        )
+        f.write(
+            "extern const uint8_t Font_%s_%s_%d_glyph_nonprintable[];\n"
+            % (name, style, size)
+        )
+
 
 process_face("Roboto", "Regular", 20)
 process_face("Roboto", "Bold", 20)
+
+process_face("TTHoves", "Regular", 18, ext="otf")
+process_face("TTHoves", "DemiBold", 18, ext="otf")
+process_face("TTHoves", "Bold", 16, ext="otf")
 process_face("RobotoMono", "Regular", 20)
 
-process_face("PixelOperator", "Regular", 8, 1, 1)
-process_face("PixelOperator", "Bold", 8, 1, 1)
-process_face("PixelOperatorMono", "Regular", 8, 1, 1)
+process_face("PixelOperator", "Regular", 8, bpp=1, shave_bearingX=1)
+process_face("PixelOperator", "Bold", 8, bpp=1, shave_bearingX=1)
+process_face("PixelOperatorMono", "Regular", 8, bpp=1, shave_bearingX=1)

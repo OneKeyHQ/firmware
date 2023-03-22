@@ -1,11 +1,14 @@
 # generated from coininfo.py.mako
+# (by running `make templates` in `core`)
 # do not edit manually!
+
+# NOTE: using positional arguments saves 4500 bytes of flash size
+
+from typing import Any
+
 from trezor import utils
 from trezor.crypto.base58 import blake256d_32, groestl512d_32, keccak_32, sha256d_32
 from trezor.crypto.scripts import blake256_ripemd160, sha256_ripemd160
-
-if False:
-    from typing import Any, Type
 
 # flake8: noqa
 
@@ -69,7 +72,7 @@ class CoinInfo:
         if curve_name == "secp256k1-groestl":
             self.b58_hash = groestl512d_32
             self.sign_hash_double = False
-            self.script_hash: Type[utils.HashContext] = sha256_ripemd160
+            self.script_hash: type[utils.HashContextInitable] = sha256_ripemd160
         elif curve_name == "secp256k1-decred":
             self.b58_hash = blake256d_32
             self.sign_hash_double = False
@@ -136,29 +139,22 @@ btc_names = ["Bitcoin", "Testnet", "Regtest"]
 coins_btc = [c for c in supported_on("trezor2", bitcoin) if c.name in btc_names]
 coins_alt = [c for c in supported_on("trezor2", bitcoin) if c.name not in btc_names]
 
-for c in coins_btc + coins_alt:
-    c.overwintered = bool(c.consensus_branch_id)
-
 %>\
 def by_name(name: str) -> CoinInfo:
-    if False:
-        pass
 % for coin in coins_btc:
-    elif name == ${black_repr(coin["coin_name"])}:
+    if name == ${black_repr(coin["coin_name"])}:
         return CoinInfo(
             % for attr, func in ATTRIBUTES:
-            ${attr}=${func(coin[attr])},
+            ${func(coin[attr])},  # ${attr}
             % endfor
         )
 % endfor
     if not utils.BITCOIN_ONLY:
-        if False:
-            pass
 % for coin in coins_alt:
-        elif name == ${black_repr(coin["coin_name"])}:
+        if name == ${black_repr(coin["coin_name"])}:
             return CoinInfo(
                 % for attr, func in ATTRIBUTES:
-                ${attr}=${func(coin[attr])},
+                ${func(coin[attr])},  # ${attr}
                 % endfor
             )
 % endfor

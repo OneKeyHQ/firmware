@@ -6,6 +6,8 @@ if not __debug__:
 if __debug__:
     from storage import debug as storage
 
+    import trezorui2
+
     from trezor import log, loop, wire
     from trezor.ui import display
     from trezor.enums import MessageType
@@ -16,7 +18,9 @@ if __debug__:
 
     from apps import workflow_handlers
 
-    if False:
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
         from trezor.ui import Layout
         from trezor.messages import (
             DebugLinkDecision,
@@ -59,31 +63,42 @@ if __debug__:
         if storage.watch_layout_changes or layout_change_chan.takers:
             layout_change_chan.publish(storage.current_content)
 
-    async def dispatch_debuglink_decision(msg: DebugLinkDecision) -> None:
-        from trezor.enums import DebugSwipeDirection
-        from trezor.ui import Result
-        from trezor.ui.components.tt import confirm, swipe
+    async def _dispatch_debuglink_decision(msg: DebugLinkDecision) -> None:
+        from trezor.enums import DebugButton, DebugSwipeDirection
+        from trezor.ui import (
+            Result,
+            SWIPE_UP,
+            SWIPE_DOWN,
+            SWIPE_LEFT,
+            SWIPE_RIGHT,
+        )
 
-        if msg.yes_no is not None:
-            await confirm_chan.put(
-                Result(confirm.CONFIRMED if msg.yes_no else confirm.CANCELLED)
-            )
-        if msg.swipe is not None:
-            if msg.swipe == DebugSwipeDirection.UP:
-                await swipe_chan.put(swipe.SWIPE_UP)
-            elif msg.swipe == DebugSwipeDirection.DOWN:
-                await swipe_chan.put(swipe.SWIPE_DOWN)
-            elif msg.swipe == DebugSwipeDirection.LEFT:
-                await swipe_chan.put(swipe.SWIPE_LEFT)
-            elif msg.swipe == DebugSwipeDirection.RIGHT:
-                await swipe_chan.put(swipe.SWIPE_RIGHT)
+        button = msg.button  # local_cache_attribute
+        swipe = msg.swipe  # local_cache_attribute
+
+        if button is not None:
+            if button == DebugButton.NO:
+                await confirm_chan.put(Result(trezorui2.CANCELLED))
+            elif button == DebugButton.YES:
+                await confirm_chan.put(Result(trezorui2.CONFIRMED))
+            elif button == DebugButton.INFO:
+                await confirm_chan.put(Result(trezorui2.INFO))
+        if swipe is not None:
+            if swipe == DebugSwipeDirection.UP:
+                await swipe_chan.put(SWIPE_UP)
+            elif swipe == DebugSwipeDirection.DOWN:
+                await swipe_chan.put(SWIPE_DOWN)
+            elif swipe == DebugSwipeDirection.LEFT:
+                await swipe_chan.put(SWIPE_LEFT)
+            elif swipe == DebugSwipeDirection.RIGHT:
+                await swipe_chan.put(SWIPE_RIGHT)
         if msg.input is not None:
             await input_chan.put(Result(msg.input))
 
     async def debuglink_decision_dispatcher() -> None:
         while True:
             msg = await debuglink_decision_chan.take()
-            await dispatch_debuglink_decision(msg)
+            await _dispatch_debuglink_decision(msg)
 
     async def return_layout_change() -> None:
         content = await layout_change_chan.take()
@@ -108,7 +123,8 @@ if __debug__:
         from trezor import ui
 
         layout_change_chan.putters.clear()
-        await ui.wait_until_layout_is_running()
+        if msg.watch:
+            await ui.wait_until_layout_is_running()
         storage.watch_layout_changes = bool(msg.watch)
         log.debug(__name__, "Watch layout changes: %s", storage.watch_layout_changes)
         return Success()
@@ -120,13 +136,15 @@ if __debug__:
 
         if debuglink_decision_chan.putters:
             log.warning(__name__, "DebugLinkDecision queue is not empty")
+        x = msg.x  # local_cache_attribute
+        y = msg.y  # local_cache_attribute
 
-        if msg.x is not None and msg.y is not None:
-            evt_down = io.TOUCH_START, msg.x, msg.y
-            evt_up = io.TOUCH_END, msg.x, msg.y
+        if x is not None and y is not None:
+            evt_down = io.TOUCH_START, x, y
+            evt_up = io.TOUCH_END, x, y
             loop.synthetic_events.append((io.TOUCH, evt_down))
             if msg.hold_ms is not None:
-                loop.schedule(touch_hold(msg.x, msg.y, msg.hold_ms))
+                loop.schedule(touch_hold(x, y, msg.hold_ms))
             else:
                 loop.synthetic_events.append((io.TOUCH, evt_up))
         else:
@@ -189,38 +207,34 @@ if __debug__:
     ) -> Success:
         from trezor import io
 
+        sdcard = io.sdcard  # local_cache_attribute
+
         try:
-            io.sdcard.power_on()
+            sdcard.power_on()
             if msg.format:
                 io.fatfs.mkfs()
             else:
                 # trash first 1 MB of data to destroy the FAT filesystem
-                assert io.sdcard.capacity() >= 1024 * 1024
-                empty_block = bytes([0xFF] * io.sdcard.BLOCK_SIZE)
-                for i in range(1024 * 1024 // io.sdcard.BLOCK_SIZE):
-                    io.sdcard.write(i, empty_block)
+                assert sdcard.capacity() >= 1024 * 1024
+                empty_block = bytes([0xFF] * sdcard.BLOCK_SIZE)
+                for i in range(1024 * 1024 // sdcard.BLOCK_SIZE):
+                    sdcard.write(i, empty_block)
 
         except OSError:
             raise wire.ProcessError("SD card operation failed")
         finally:
-            io.sdcard.power_off()
+            sdcard.power_off()
         return Success()
 
     def boot() -> None:
-        workflow_handlers.register(MessageType.DebugLinkDecision, dispatch_DebugLinkDecision)  # type: ignore
-        workflow_handlers.register(MessageType.DebugLinkGetState, dispatch_DebugLinkGetState)  # type: ignore
-        workflow_handlers.register(
-            MessageType.DebugLinkReseedRandom, dispatch_DebugLinkReseedRandom
-        )
-        workflow_handlers.register(
-            MessageType.DebugLinkRecordScreen, dispatch_DebugLinkRecordScreen
-        )
-        workflow_handlers.register(
-            MessageType.DebugLinkEraseSdCard, dispatch_DebugLinkEraseSdCard
-        )
-        workflow_handlers.register(
-            MessageType.DebugLinkWatchLayout, dispatch_DebugLinkWatchLayout
-        )
+        register = workflow_handlers.register  # local_cache_attribute
+
+        register(MessageType.DebugLinkDecision, dispatch_DebugLinkDecision)  # type: ignore [Argument of type "(ctx: Context, msg: DebugLinkDecision) -> Coroutine[Any, Any, None]" cannot be assigned to parameter "handler" of type "Handler[Msg@register]" in function "register"]
+        register(MessageType.DebugLinkGetState, dispatch_DebugLinkGetState)  # type: ignore [Argument of type "(ctx: Context, msg: DebugLinkGetState) -> Coroutine[Any, Any, DebugLinkState | None]" cannot be assigned to parameter "handler" of type "Handler[Msg@register]" in function "register"]
+        register(MessageType.DebugLinkReseedRandom, dispatch_DebugLinkReseedRandom)
+        register(MessageType.DebugLinkRecordScreen, dispatch_DebugLinkRecordScreen)
+        register(MessageType.DebugLinkEraseSdCard, dispatch_DebugLinkEraseSdCard)
+        register(MessageType.DebugLinkWatchLayout, dispatch_DebugLinkWatchLayout)
 
         loop.schedule(debuglink_decision_dispatcher())
         if storage.layout_watcher is not LAYOUT_WATCHER_NONE:

@@ -31,13 +31,13 @@
     "Normal": 10
   },
   "dust_limit": 546,
-  "blocktime_seconds": 600,
+  "blocktime_seconds": 300,
   "uri_prefix": "bitcoin",
   "min_address_length": 35,
   "max_address_length": 35,
   "negative_fee": false,
   "cooldown": 100,
-  "consensus_branch_id": null,
+  "overwintered": false,
   "extra_data": false,
   "timestamp": false,
   "confidential_assets": null

@@ -86,7 +86,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
 
     // button acked - check buttons
     if (acked) {
-      usbSleep(5);
+      waitAndProcessUSBRequests(5);
       buttonUpdate();
       if (button.YesUp) {
         timeout_flag = false;
@@ -116,7 +116,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
     if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
       msg_tiny_id = 0xFFFF;
       DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
-      result = dld->yes_no;
+      result = dld->button;
       debug_decided = true;
     }
 
@@ -620,6 +620,12 @@ bool protectPassphrase(char *passphrase) {
       msg_tiny_id = 0xFFFF;
       break;
     }
+#if DEBUG_LINK
+    if (msg_tiny_id == MessageType_MessageType_DebugLinkGetState) {
+      msg_tiny_id = 0xFFFF;
+      fsm_msgDebugLinkGetState((DebugLinkGetState *)msg_tiny);
+    }
+#endif
   }
   usbTiny(0);
   layoutHome();

@@ -2,6 +2,7 @@ from common import *
 from trezor.crypto import slip39, random
 from slip39_vectors import vectors
 
+
 def combinations(iterable, r):
     # Taken from https://docs.python.org/3.7/library/itertools.html#itertools.combinations
     pool = tuple(iterable)
@@ -151,20 +152,6 @@ class TestCryptoSlip39(unittest.TestCase):
             else:
                 with self.assertRaises(slip39.MnemonicError):
                     slip39.recover_ems(mnemonics)
-
-
-    def test_error_location(self):
-        mnemonics = [
-            "duckling enlarge academic academic agency result length solution fridge kidney coal piece deal husband erode duke ajar critical decision keyboard",
-            "theory painting academic academic armed sweater year military elder discuss acne wildlife boring employer fused large satoshi bundle carbon diagnose anatomy hamster leaves tracks paces beyond phantom capital marvel lips brave detect luck",
-        ]
-        for mnemonic in mnemonics:
-            data = tuple(slip39._mnemonic_to_indices(mnemonic))
-            self.assertEqual(slip39._rs1024_error_index(data), None)
-            for i in range(len(data)):
-                for _ in range(50):
-                    error_data = error_data = data[:i] + (data[i] ^ (random.uniform(1023) + 1), ) + data[i + 1:]
-                    self.assertEqual(slip39._rs1024_error_index(error_data), i)
 
 
 if __name__ == '__main__':

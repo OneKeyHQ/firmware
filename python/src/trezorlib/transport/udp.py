@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -17,11 +17,14 @@
 import logging
 import socket
 import time
-from typing import Iterable, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
 from ..log import DUMP_PACKETS
 from . import TransportException
 from .protocol import ProtocolBasedTransport, ProtocolV1
+
+if TYPE_CHECKING:
+    from ..models import TrezorModel
 
 SOCKET_TIMEOUT = 10
 
@@ -33,7 +36,7 @@ class UdpTransport(ProtocolBasedTransport):
     DEFAULT_HOST = "127.0.0.1"
     DEFAULT_PORT = 21324
     PATH_PREFIX = "udp"
-    ENABLED = True
+    ENABLED: bool = True
 
     def __init__(self, device: Optional[str] = None) -> None:
         if not device:
@@ -70,7 +73,9 @@ class UdpTransport(ProtocolBasedTransport):
             d.close()
 
     @classmethod
-    def enumerate(cls) -> Iterable["UdpTransport"]:
+    def enumerate(
+        cls, _models: Optional[Iterable["TrezorModel"]] = None
+    ) -> Iterable["UdpTransport"]:
         default_path = f"{cls.DEFAULT_HOST}:{cls.DEFAULT_PORT}"
         try:
             return [cls._try_path(default_path)]
@@ -79,11 +84,17 @@ class UdpTransport(ProtocolBasedTransport):
 
     @classmethod
     def find_by_path(cls, path: str, prefix_search: bool = False) -> "UdpTransport":
+        try:
+            path = path.replace(f"{cls.PATH_PREFIX}:", "")
+            return cls._try_path(path)
+        except TransportException:
+            if not prefix_search:
+                raise
+
         if prefix_search:
             return super().find_by_path(path, prefix_search)
         else:
-            path = path.replace(f"{cls.PATH_PREFIX}:", "")
-            return cls._try_path(path)
+            raise TransportException(f"No UDP device at {path}")
 
     def wait_until_ready(self, timeout: float = 10) -> None:
         try:

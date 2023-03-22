@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -14,12 +14,13 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING, Optional
+import os
+from typing import TYPE_CHECKING, Optional, cast
 
 import click
 
-from .. import device, firmware, messages, toif
-from . import ChoiceType, with_client
+from .. import device, messages, toif
+from . import AliasedGroup, ChoiceType, with_client
 
 if TYPE_CHECKING:
     from ..client import TrezorClient
@@ -59,7 +60,7 @@ def image_to_t1(filename: str) -> bytes:
     return image.tobytes("raw", "1")
 
 
-def image_to_tt(filename: str) -> bytes:
+def image_to_toif_144x144(filename: str) -> bytes:
     if filename.endswith(".toif"):
         try:
             toif_image = toif.load(filename)
@@ -83,10 +84,59 @@ def image_to_tt(filename: str) -> bytes:
     if toif_image.size != (144, 144):
         raise click.ClickException("Wrong size of image - should be 144x144")
 
-    if toif_image.mode != firmware.ToifMode.full_color:
+    if toif_image.mode != toif.ToifMode.full_color:
         raise click.ClickException("Wrong image mode - should be full_color")
 
     return toif_image.to_bytes()
+
+
+def image_to_jpeg_240x240(filename: str) -> bytes:
+    if not (filename.endswith(".jpg") or filename.endswith(".jpeg")):
+        raise click.ClickException("Please use a jpg image")
+
+    elif not PIL_AVAILABLE:
+        raise click.ClickException(
+            "Image library is missing. Please install via 'pip install Pillow'."
+        )
+
+    else:
+        try:
+            image = Image.open(filename)
+        except Exception as e:
+            raise click.ClickException("Failed to open image") from e
+
+    if "progressive" in image.info:
+        raise click.ClickException("Progressive JPEG is not supported")
+
+    if image.size != (240, 240):
+        raise click.ClickException("Wrong size of image - should be 240x240")
+
+    image.close()
+
+    file_stats = os.stat(filename)
+
+    if file_stats.st_size > 16384:
+        raise click.ClickException("File is too big, please use maximum 16kB")
+
+    in_file = open(filename, "rb")
+    bytes = in_file.read()
+    in_file.close()
+    return bytes
+
+
+def _should_remove(enable: Optional[bool], remove: bool) -> bool:
+    """Helper to decide whether to remove something or not.
+
+    Needed for backwards compatibility purposes, so we can support
+    both positive (enable) and negative (remove) args.
+    """
+    if remove and enable:
+        raise click.ClickException("Argument and option contradict each other")
+
+    if remove or enable is False:
+        return True
+
+    return False
 
 
 @click.group(name="set")
@@ -95,24 +145,28 @@ def cli() -> None:
 
 
 @cli.command()
-@click.option("-r", "--remove", is_flag=True)
+@click.option("-r", "--remove", is_flag=True, hidden=True)
+@click.argument("enable", type=ChoiceType({"on": True, "off": False}), required=False)
 @with_client
-def pin(client: "TrezorClient", remove: bool) -> str:
+def pin(client: "TrezorClient", enable: Optional[bool], remove: bool) -> str:
     """Set, change or remove PIN."""
-    return device.change_pin(client, remove)
+    # Remove argument is there for backwards compatibility
+    return device.change_pin(client, remove=_should_remove(enable, remove))
 
 
 @cli.command()
-@click.option("-r", "--remove", is_flag=True)
+@click.option("-r", "--remove", is_flag=True, hidden=True)
+@click.argument("enable", type=ChoiceType({"on": True, "off": False}), required=False)
 @with_client
-def wipe_code(client: "TrezorClient", remove: bool) -> str:
+def wipe_code(client: "TrezorClient", enable: Optional[bool], remove: bool) -> str:
     """Set or remove the wipe code.
 
     The wipe code functions as a "self-destruct PIN". If the wipe code is ever
     entered into any PIN entry dialog, then all private data will be immediately
     removed and the device will be reset to factory defaults.
     """
-    return device.change_wipe_code(client, remove)
+    # Remove argument is there for backwards compatibility
+    return device.change_wipe_code(client, remove=_should_remove(enable, remove))
 
 
 @cli.command()
@@ -189,7 +243,21 @@ def homescreen(client: "TrezorClient", filename: str) -> str:
         if client.features.model == "1":
             img = image_to_t1(filename)
         else:
-            img = image_to_tt(filename)
+            if (
+                client.features.homescreen_format
+                == messages.HomescreenFormat.Jpeg240x240
+            ):
+                img = image_to_jpeg_240x240(filename)
+            elif (
+                client.features.homescreen_format
+                == messages.HomescreenFormat.Toif144x144
+                or client.features.homescreen_format is None
+            ):
+                img = image_to_toif_144x144(filename)
+            else:
+                raise click.ClickException(
+                    "Unknown image format requested by the device."
+                )
 
     return device.apply_settings(client, homescreen=img)
 
@@ -265,25 +333,50 @@ def experimental_features(client: "TrezorClient", enable: bool) -> str:
 #
 
 
-@cli.group()
-def passphrase() -> None:
+# Using special class AliasedGroup, so we can support multiple commands
+# to invoke the same function to keep backwards compatibility
+@cli.command(cls=AliasedGroup, name="passphrase")
+def passphrase_main() -> None:
     """Enable, disable or configure passphrase protection."""
     # this exists in order to support command aliases for "enable-passphrase"
     # and "disable-passphrase". Otherwise `passphrase` would just take an argument.
 
 
-@passphrase.command(name="enabled")
+# Cast for type-checking purposes
+passphrase = cast(AliasedGroup, passphrase_main)
+
+
+@passphrase.command(name="on")
 @click.option("-f/-F", "--force-on-device/--no-force-on-device", default=None)
 @with_client
-def passphrase_enable(client: "TrezorClient", force_on_device: Optional[bool]) -> str:
+def passphrase_on(client: "TrezorClient", force_on_device: Optional[bool]) -> str:
     """Enable passphrase."""
     return device.apply_settings(
         client, use_passphrase=True, passphrase_always_on_device=force_on_device
     )
 
 
-@passphrase.command(name="disabled")
+@passphrase.command(name="off")
 @with_client
-def passphrase_disable(client: "TrezorClient") -> str:
+def passphrase_off(client: "TrezorClient") -> str:
     """Disable passphrase."""
     return device.apply_settings(client, use_passphrase=False)
+
+
+# Registering the aliases for backwards compatibility
+# (these are not shown in --help docs)
+passphrase.aliases = {
+    "enabled": passphrase_on,
+    "disabled": passphrase_off,
+}
+
+
+@passphrase.command(name="hide")
+@click.argument("hide", type=ChoiceType({"on": True, "off": False}))
+@with_client
+def hide_passphrase_from_host(client: "TrezorClient", hide: bool) -> str:
+    """Enable or disable hiding passphrase coming from host.
+
+    This is a developer feature. Use with caution.
+    """
+    return device.apply_settings(client, hide_passphrase_from_host=hide)

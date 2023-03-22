@@ -331,7 +331,7 @@ static void ethereumFormatAmount(const bignum256 *amnt, const TokenType *token,
   } else {
     ASSIGN_ETHEREUM_SUFFIX(suffix, chain_id);
   }
-  bn_format(amnt, NULL, suffix, decimals, 0, false, buf, buflen);
+  bn_format(amnt, NULL, suffix, decimals, 0, false, ',', buf, buflen);
 }
 
 static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
@@ -359,7 +359,7 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
   char _to3[] = "_______________?";
 
   if (to_len) {
-    char to_str[41] = {0};
+    char to_str[43] = {0};
 
     bool rskip60 = false;
     // constants from trezor-common/defs/ethereum/networks.json
@@ -496,9 +496,8 @@ static void layoutEthereumFeeEIP1559(const char *description,
 
   ethereumFormatAmount(&amount_val, NULL, amount_str, sizeof(amount_str));
 
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Confirm fee"), description, amount_str, NULL, NULL,
-                    NULL);
+  layoutDialogSwipeWrapping(&bmp_icon_question, _("Cancel"), _("Confirm"),
+                            _("Confirm fee"), description, amount_str);
 }
 
 /*
@@ -1092,4 +1091,107 @@ bool ethereum_parse(const char *address, uint8_t pubkeyhash[20]) {
     }
   }
   return true;
+}
+
+static bool ethereum_path_check_bip44(uint32_t address_n_count,
+                                      const uint32_t *address_n,
+                                      bool pubkey_export, uint64_t chain) {
+  bool valid = (address_n_count >= 3);
+  valid = valid && (address_n[0] == (PATH_HARDENED | 44));
+  valid = valid && (address_n[1] & PATH_HARDENED);
+  valid = valid && (address_n[2] & PATH_HARDENED);
+  valid = valid && ((address_n[2] & PATH_UNHARDEN_MASK) <= PATH_MAX_ACCOUNT);
+
+  uint32_t path_slip44 = address_n[1] & PATH_UNHARDEN_MASK;
+  if (chain == CHAIN_ID_UNKNOWN) {
+    valid = valid && (is_ethereum_slip44(path_slip44));
+  } else {
+    uint32_t chain_slip44 = ethereum_slip44_by_chain_id(chain);
+    if (chain_slip44 == SLIP44_UNKNOWN) {
+      // Allow Ethereum or testnet paths for unknown networks.
+      valid = valid && (path_slip44 == 60 || path_slip44 == 1);
+    } else if (chain_slip44 != 60 && chain_slip44 != 1) {
+      // Allow cross-signing with Ethereum unless it's testnet.
+      valid = valid && (path_slip44 == chain_slip44 || path_slip44 == 60);
+    } else {
+      valid = valid && (path_slip44 == chain_slip44);
+    }
+  }
+
+  if (pubkey_export) {
+    // m/44'/coin_type'/account'/*
+    return valid;
+  }
+
+  if (address_n_count == 3) {
+    // SEP-0005 for non-UTXO-based currencies, defined by Stellar:
+    // https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md
+    // m/44'/coin_type'/account'
+    return valid;
+  }
+
+  if (address_n_count == 4) {
+    // Also to support "Ledger Live" legacy paths
+    // https://github.com/trezor/trezor-firmware/issues/1749
+    // m/44'/coin_type'/0'/account
+    valid = valid && (address_n[2] == (PATH_HARDENED | 0));
+    valid = valid && (address_n[3] <= PATH_MAX_ACCOUNT);
+    return valid;
+  }
+
+  // We believe Ethereum should use the SEP-0005 scheme for everything, because
+  // it is account-based, rather than UTXO-based. Unfortunately, a lot of
+  // Ethereum tools (MEW, Metamask) do not use such scheme and set account = 0
+  // and then iterate the address index. For compatibility, we allow this scheme
+  // as well.
+  // m/44'/coin_type'/account'/change/address_index
+  valid = valid && (address_n_count == 5);
+  valid = valid && (address_n[3] <= PATH_MAX_CHANGE);
+  valid = valid && (address_n[4] <= PATH_MAX_ADDRESS_INDEX);
+
+  return valid;
+}
+
+static bool ethereum_path_check_casa45(uint32_t address_n_count,
+                                       const uint32_t *address_n,
+                                       uint64_t chain) {
+  bool valid = (address_n_count == 5);
+  valid = valid && (address_n[0] == (PATH_HARDENED | 45));
+  valid = valid && (address_n[1] < PATH_HARDENED);
+  valid = valid && (address_n[2] <= PATH_MAX_ACCOUNT);
+  valid = valid && (address_n[3] <= PATH_MAX_CHANGE);
+  valid = valid && (address_n[4] <= PATH_MAX_ADDRESS_INDEX);
+
+  uint32_t path_slip44 = address_n[1];
+  if (chain == CHAIN_ID_UNKNOWN) {
+    valid = valid && (is_ethereum_slip44(path_slip44));
+  } else {
+    uint32_t chain_slip44 = ethereum_slip44_by_chain_id(chain);
+    if (chain_slip44 == SLIP44_UNKNOWN) {
+      // Allow Ethereum or testnet paths for unknown networks.
+      valid = valid && (path_slip44 == 60 || path_slip44 == 1);
+    } else if (chain_slip44 != 60 && chain_slip44 != 1) {
+      // Allow cross-signing with Ethereum unless it's testnet.
+      valid = valid && (path_slip44 == chain_slip44 || path_slip44 == 60);
+    } else {
+      valid = valid && (path_slip44 == chain_slip44);
+    }
+  }
+
+  return valid;
+}
+
+bool ethereum_path_check(uint32_t address_n_count, const uint32_t *address_n,
+                         bool pubkey_export, uint64_t chain) {
+  if (address_n_count == 0) {
+    return false;
+  }
+  if (address_n[0] == (PATH_HARDENED | 44)) {
+    return ethereum_path_check_bip44(address_n_count, address_n, pubkey_export,
+                                     chain);
+  }
+  if (address_n[0] == (PATH_HARDENED | 45)) {
+    return ethereum_path_check_casa45(address_n_count, address_n, chain);
+  }
+  return false;
 }

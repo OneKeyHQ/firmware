@@ -19,6 +19,7 @@ import time
 import pytest
 
 from trezorlib import device, messages
+from trezorlib.debuglink import TrezorClientDebugLink as Client
 
 from ..common import get_test_address
 
@@ -26,7 +27,7 @@ PIN4 = "1234"
 
 
 @pytest.mark.setup_client(passphrase=True)
-def test_wipe_device(client):
+def test_wipe_device(client: Client):
     assert client.features.initialized is True
     assert client.features.label == "test"
     assert client.features.passphrase_protection is True
@@ -35,13 +36,13 @@ def test_wipe_device(client):
     device.wipe(client)
 
     assert client.features.initialized is False
-    assert client.features.label is None
+    assert client.features.label == "OneKey Classic"
     assert client.features.passphrase_protection is False
     assert client.get_device_id() != device_id
 
 
 @pytest.mark.setup_client(pin=PIN4)
-def test_autolock_not_retained(client):
+def test_autolock_not_retained(client: Client):
     with client:
         client.use_pin_sequence([PIN4])
         device.apply_settings(client, auto_lock_delay_ms=10_000)

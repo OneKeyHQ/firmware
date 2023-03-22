@@ -3,24 +3,12 @@ from common import *
 if not utils.BITCOIN_ONLY:
     from trezor.messages import RipplePayment
     from trezor.messages import RippleSignTx
-    from apps.ripple.serialize import serialize, serialize_amount
-    from apps.ripple.sign_tx import get_network_prefix
+    from apps.ripple.serialize import serialize
+    from apps.ripple import helpers
 
 
 @unittest.skipUnless(not utils.BITCOIN_ONLY, "altcoin")
 class TestRippleSerializer(unittest.TestCase):
-    def test_amount(self):
-        # https://github.com/ripple/ripple-binary-codec/blob/4581f1b41e712f545ba08be15e188a557c731ecf/test/fixtures/data-driven-tests.json#L2494
-        self.assertEqual(serialize_amount(0), unhexlify("4000000000000000"))
-        self.assertEqual(serialize_amount(1), unhexlify("4000000000000001"))
-        self.assertEqual(serialize_amount(93493429243), unhexlify("40000015c4a483fb"))
-        with self.assertRaises(ValueError):
-            serialize_amount(1000000000000000000)  # too large
-        with self.assertRaises(ValueError):
-            serialize_amount(-1)  # negative not supported
-        with self.assertRaises(Exception):
-            serialize_amount(1.1)  # float numbers not supported
-
     def test_transactions(self):
         # from https://github.com/miracle2k/ripple-python
         source_address = "r3P9vH81KBayazSTrQj6S25jW6kDb779Gi"
@@ -36,7 +24,7 @@ class TestRippleSerializer(unittest.TestCase):
             payment=payment,
         )
         self.assertEqual(
-            serialize(common, source_address),
+            serialize(common, source_address, pubkey=None),
             unhexlify(
                 "120000240000000161400000000bebc20068400000000000000a811450f97a072f1c4357f1ad84566a609479d927c9428314550fc62003e785dc231a1058a05e56e3f09cf4e6"
             ),
@@ -55,7 +43,7 @@ class TestRippleSerializer(unittest.TestCase):
             payment=payment,
         )
         self.assertEqual(
-            serialize(common, source_address),
+            serialize(common, source_address, pubkey=None),
             unhexlify(
                 "12000024000000636140000000000000016840000000000000638114550fc62003e785dc231a1058a05e56e3f09cf4e6831450f97a072f1c4357f1ad84566a609479d927c942"
             ),
@@ -75,7 +63,7 @@ class TestRippleSerializer(unittest.TestCase):
             payment=payment,
         )
         self.assertEqual(
-            serialize(common, source_address),
+            serialize(common, source_address, pubkey=None),
             unhexlify(
                 "120000220000000024000000026140000000017d784068400000000000000a81145ccb151f6e9d603f394ae778acf10d3bece874f68314e851bbbe79e328e43d68f43445368133df5fba5a"
             ),
@@ -96,7 +84,7 @@ class TestRippleSerializer(unittest.TestCase):
         )
         # 201b005ee9ba removed from the test vector because last ledger sequence is not supported
         self.assertEqual(
-            serialize(common, source_address),
+            serialize(common, source_address, pubkey=None),
             unhexlify(
                 "12000022000000002400000090614000000000030d4068400000000000000f8114aa1bd19d9e87be8069fdbf6843653c43837c03c6831467fe6ec28e0464dd24fb2d62a492aac697cfad02"
             ),
@@ -118,7 +106,7 @@ class TestRippleSerializer(unittest.TestCase):
             payment=payment,
         )
         self.assertEqual(
-            serialize(common, source_address),
+            serialize(common, source_address, pubkey=None),
             unhexlify(
                 "120000220000000024000000012ef72d50ca6140000000017d784068400000000000000c8114e851bbbe79e328e43d68f43445368133df5fba5a831476dac5e814cd4aa74142c3ab45e69a900e637aa2"
             ),
@@ -146,7 +134,8 @@ class TestRippleSerializer(unittest.TestCase):
                 "ed5f5ac8b98974a3ca843326d9b88cebd0560177b973ee0b149f782cfaa06dc66a"
             ),
         )
-        tx = get_network_prefix() + tx
+        network_prefix = helpers.HASH_TX_SIGN.to_bytes(4, "big")
+        tx = network_prefix + tx
 
         self.assertEqual(tx[0:4], unhexlify("53545800"))  # signing prefix
         self.assertEqual(tx[4:7], unhexlify("120000"))  # transaction type

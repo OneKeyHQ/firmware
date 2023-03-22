@@ -1,3 +1,21 @@
+/// Create an object for an exported function taking no arguments.
+macro_rules! obj_fn_0 {
+    ($f:expr) => {{
+        #[allow(unused_unsafe)]
+        unsafe {
+            use $crate::micropython::ffi;
+
+            ffi::mp_obj_fun_builtin_fixed_t {
+                base: ffi::mp_obj_base_t {
+                    type_: &ffi::mp_type_fun_builtin_0,
+                },
+                fun: ffi::_mp_obj_fun_builtin_fixed_t__bindgen_ty_1 { _0: Some($f) },
+            }
+        }
+    }};
+}
+
+/// Create an object for an exported function taking 1 arg.
 macro_rules! obj_fn_1 {
     ($f:expr) => {{
         #[allow(unused_unsafe)]
@@ -14,6 +32,7 @@ macro_rules! obj_fn_1 {
     }};
 }
 
+/// Create an object for an exported function taking 2 args.
 macro_rules! obj_fn_2 {
     ($f:expr) => {{
         #[allow(unused_unsafe)]
@@ -30,6 +49,7 @@ macro_rules! obj_fn_2 {
     }};
 }
 
+/// Create an object for an exported function taking 3 args.
 macro_rules! obj_fn_3 {
     ($f:expr) => {{
         #[allow(unused_unsafe)]
@@ -46,6 +66,7 @@ macro_rules! obj_fn_3 {
     }};
 }
 
+/// Create an object for an exported function taking a variable number of args.
 macro_rules! obj_fn_var {
     ($min:expr, $max:expr, $f:expr) => {{
         #[allow(unused_unsafe)]
@@ -63,6 +84,7 @@ macro_rules! obj_fn_var {
     }};
 }
 
+/// Create an object for an exported function taking key-value args.
 macro_rules! obj_fn_kw {
     ($min:expr, $f:expr) => {{
         #[allow(unused_unsafe)]
@@ -111,6 +133,7 @@ macro_rules! obj_dict {
     }};
 }
 
+/// Compose a `Type` object definition.
 macro_rules! obj_type {
     (name: $name:expr,
      $(locals: $locals:expr,)?
@@ -134,8 +157,8 @@ macro_rules! obj_type {
             $(call = Some($call_fn);)?
 
             // TODO: This is safe only if we pass in `Dict` with fixed `Map` (created by
-            // `Map::fixed()`), because only then will Micropython treat `locals_dict` as
-            // immutable, and make the mutable cast safe.
+            // `Map::fixed()`, usually through `obj_map!`), because only then will
+            // MicroPython treat `locals_dict` as immutable, and make the mutable cast safe.
             #[allow(unused_mut)]
             #[allow(unused_assignments)]
             let mut locals_dict = ::core::ptr::null_mut();
@@ -163,4 +186,62 @@ macro_rules! obj_type {
             }
         }
     }};
+}
+
+/// Construct an extmod definition.
+macro_rules! obj_module {
+    ($($key:expr => $val:expr),*) => ({
+        #[allow(unused_unsafe)]
+        #[allow(unused_doc_comments)]
+        unsafe {
+            use $crate::micropython::ffi;
+
+            static DICT: ffi::mp_obj_dict_t = ffi::mp_obj_dict_t {
+                base: ffi::mp_obj_base_t {
+                    /// SAFETY: Reasonable to assume the pointer stays valid.
+                    type_: unsafe { &ffi::mp_type_dict },
+                },
+                map: Map::from_fixed_static(&[
+                    $(
+                        Map::at($key, $val),
+                    )*
+                ])
+            };
+            ffi::mp_obj_module_t {
+                base: ffi::mp_obj_base_t {
+                    type_: &ffi::mp_type_module,
+                },
+                // This is safe only because we are passing in a static dict with fixed `Map`
+                // (created by `Map::from_fixed_static()`). Only then will MicroPython treat
+                // `globals` as immutable, making the mutable cast safe.
+                globals: &DICT as *const _ as *mut _,
+            }
+    }});
+    ($($key:expr => $val:expr),* ,) => ({
+        obj_module!($($key => $val),*)
+    });
+}
+
+/// Print arbitrary amounts of slices into a terminal.
+/// Does not include a newline at the end.
+/// Does not do anything when not in debugging mode.
+#[allow(unused_macros)] // Should be used only for debugging purposes
+macro_rules! print {
+    ($($string:expr),+) => {
+        #[cfg(feature = "debug")]
+        {
+            $(crate::micropython::print::print($string);)+
+        }
+    }
+}
+
+/// Print arbitrary amounts of slices into a terminal.
+/// Includes a newline at the end.
+/// Does not do anything when not in debugging mode.
+#[allow(unused_macros)] // Should be used only for debugging purposes
+macro_rules! println {
+    ($($string:expr),+) => {
+        // Just delegating to print! and adding a newline
+        print!($($string),+, "\n");
+    }
 }

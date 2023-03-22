@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -36,7 +36,7 @@ def get_address(
     client: "TrezorClient",
     n: "Address",
     show_display: bool = False,
-    network_type: int = 0,
+    network_type: messages.MoneroNetworkType = messages.MoneroNetworkType.MAINNET,
 ) -> "MessageType":
     return client.call(
         messages.MoneroGetAddress(
@@ -47,7 +47,9 @@ def get_address(
 
 @expect(messages.MoneroWatchKey)
 def get_watch_key(
-    client: "TrezorClient", n: "Address", network_type: int = 0
+    client: "TrezorClient",
+    n: "Address",
+    network_type: messages.MoneroNetworkType = messages.MoneroNetworkType.MAINNET,
 ) -> "MessageType":
     return client.call(
         messages.MoneroGetWatchKey(address_n=n, network_type=network_type)

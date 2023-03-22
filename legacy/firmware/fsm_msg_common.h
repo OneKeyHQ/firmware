@@ -27,6 +27,19 @@ extern char bootloader_version[8];
 bool get_features(Features *resp) {
   char *sn_version = NULL;
   char *serial = NULL;
+  resp->has_fw_vendor = true;
+#if EMULATOR
+  strlcpy(resp->fw_vendor, "EMULATOR", sizeof(resp->fw_vendor));
+#else
+  const image_header *hdr =
+      (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
+  // allow both v2 and v3 signatures
+  if (SIG_OK == signatures_match(hdr, NULL)) {
+    strlcpy(resp->fw_vendor, "OneKey", sizeof(resp->fw_vendor));
+  } else {
+    strlcpy(resp->fw_vendor, "UNSAFE, DO NOT USE!", sizeof(resp->fw_vendor));
+  }
+#endif
   resp->has_vendor = true;
   strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   resp->major_version = VERSION_MAJOR;
@@ -67,6 +80,8 @@ bool get_features(Features *resp) {
   strlcpy(resp->model, "1", sizeof(resp->model));
   resp->has_safety_checks = true;
   resp->safety_checks = config_getSafetyCheckLevel();
+  resp->has_busy = true;
+  resp->busy = (system_millis_busy_deadline > timer_ms());
   if (session_isUnlocked()) {
     resp->has_wipe_code_protection = true;
     resp->wipe_code_protection = config_hasWipeCode();
@@ -139,8 +154,7 @@ bool get_features(Features *resp) {
 }
 
 void fsm_msgInitialize(const Initialize *msg) {
-  recovery_abort();
-  signing_abort();
+  fsm_abortWorkflows();
 
   uint8_t *session_id;
   if (msg && msg->has_session_id) {
@@ -314,6 +328,8 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
 }
 
 void fsm_msgGetEntropy(const GetEntropy *msg) {
+  CHECK_PIN
+
 #if !DEBUG_RNG
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Do you really want to"), _("send entropy?"), NULL, NULL,
@@ -407,11 +423,7 @@ void fsm_msgBackupDevice(const BackupDevice *msg) {
 
 void fsm_msgCancel(const Cancel *msg) {
   (void)msg;
-  recovery_abort();
-  signing_abort();
-#if !BITCOIN_ONLY
-  ethereum_signing_abort();
-#endif
+  fsm_abortWorkflows();
   fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
 }
 
@@ -631,9 +643,15 @@ void fsm_msgRecoveryDevice(const RecoveryDevice *msg) {
                 msg->has_u2f_counter ? msg->u2f_counter : 0, dry_run);
 }
 
-void fsm_msgWordAck(const WordAck *msg) { recovery_word(msg->word); }
+void fsm_msgWordAck(const WordAck *msg) {
+  CHECK_UNLOCKED
+
+  recovery_word(msg->word);
+}
 
 void fsm_msgSetU2FCounter(const SetU2FCounter *msg) {
+  CHECK_PIN
+
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Do you want to set"), _("the U2F counter?"), NULL, NULL,
                     NULL, NULL);
@@ -648,6 +666,8 @@ void fsm_msgSetU2FCounter(const SetU2FCounter *msg) {
 }
 
 void fsm_msgGetNextU2FCounter() {
+  CHECK_PIN
+
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
                     _("Do you want to"), _("increase and retrieve"),
                     _("the U2F counter?"), NULL, NULL, NULL);
@@ -662,6 +682,35 @@ void fsm_msgGetNextU2FCounter() {
   resp->u2f_counter = counter;
   msg_write(MessageType_MessageType_NextU2FCounter, resp);
   layoutHome();
+}
+
+static void progress_callback(uint32_t iter, uint32_t total) {
+  layoutProgress(_("Please wait"), 1000 * iter / total);
+}
+
+void fsm_msgGetFirmwareHash(const GetFirmwareHash *msg) {
+  RESP_INIT(FirmwareHash);
+  layoutProgressSwipe(_("Please wait"), 0);
+  if (memory_firmware_hash(msg->challenge.bytes, msg->challenge.size,
+                           progress_callback, resp->hash.bytes) != 0) {
+    fsm_sendFailure(FailureType_Failure_FirmwareError, NULL);
+    return;
+  }
+
+  resp->hash.size = sizeof(resp->hash.bytes);
+  msg_write(MessageType_MessageType_FirmwareHash, resp);
+  layoutHome();
+}
+
+void fsm_msgSetBusy(const SetBusy *msg) {
+  if (msg->has_expiry_ms) {
+    system_millis_busy_deadline = timer_ms() + msg->expiry_ms;
+  } else {
+    system_millis_busy_deadline = 0;
+  }
+  fsm_sendSuccess(NULL);
+  layoutHome();
+  return;
 }
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
@@ -856,28 +905,5 @@ void fsm_msgBixinBackupDevice(void) {
 
   msg_write(MessageType_MessageType_BixinBackupDeviceAck, resp);
   layoutHome();
-  return;
-}
-
-void fsm_msgDeviceEraseSector(void) {
-  if (config_hasPin()) {
-    CHECK_PIN_UNCACHED
-  }
-
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_cancel, _("Cancel"),
-                                 &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-                                 NULL, _("Firmware will be erased!"),
-                                 _("Confirm your operation!"), NULL, NULL);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-  ensure(flash_erase(FLASH_BIXIN_DATE_SECTOR), "erase failed");
-  ensure(flash_unlock_write(), NULL);
-  ensure(flash_write_word(FLASH_CODE_SECTOR_FIRST, 0x00, 0x00), NULL);
-#if !EMULATOR
-  sys_backtoboot();
-#endif
   return;
 }

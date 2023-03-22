@@ -1,4 +1,5 @@
 # generated from all_modules.py.mako
+# (by running `make templates` in `core`)
 # do not edit manually!
 # flake8: noqa
 # fmt: off
@@ -38,6 +39,8 @@ main
 import main
 session
 import session
+typing
+import typing
 usb
 import usb
 storage
@@ -92,6 +95,8 @@ trezor.enums.ButtonRequestType
 import trezor.enums.ButtonRequestType
 trezor.enums.Capability
 import trezor.enums.Capability
+trezor.enums.DebugButton
+import trezor.enums.DebugButton
 trezor.enums.DebugSwipeDirection
 import trezor.enums.DebugSwipeDirection
 trezor.enums.DecredStakingSpendType
@@ -100,6 +105,8 @@ trezor.enums.ExportType
 import trezor.enums.ExportType
 trezor.enums.FailureType
 import trezor.enums.FailureType
+trezor.enums.HomescreenFormat
+import trezor.enums.HomescreenFormat
 trezor.enums.InputScriptType
 import trezor.enums.InputScriptType
 trezor.enums.MessageType
@@ -126,164 +133,42 @@ trezor.log
 import trezor.log
 trezor.loop
 import trezor.loop
-trezor.messages.ApplySettings
-import trezor.messages.ApplySettings
-trezor.messages.BIP32Address
-import trezor.messages.BIP32Address
-trezor.messages.BixinBackupAck
-import trezor.messages.BixinBackupAck
-trezor.messages.BixinBackupDevice
-import trezor.messages.BixinBackupDevice
-trezor.messages.BixinBackupDeviceAck
-import trezor.messages.BixinBackupDeviceAck
-trezor.messages.BixinBackupRequest
-import trezor.messages.BixinBackupRequest
-trezor.messages.BixinLoadDevice
-import trezor.messages.BixinLoadDevice
-trezor.messages.BixinMessageSE
-import trezor.messages.BixinMessageSE
-trezor.messages.BixinOutMessageSE
-import trezor.messages.BixinOutMessageSE
-trezor.messages.BixinPinInputOnDevice
-import trezor.messages.BixinPinInputOnDevice
-trezor.messages.BixinReboot
-import trezor.messages.BixinReboot
-trezor.messages.BixinRestoreAck
-import trezor.messages.BixinRestoreAck
-trezor.messages.BixinRestoreRequest
-import trezor.messages.BixinRestoreRequest
-trezor.messages.BixinSeedOperate
-import trezor.messages.BixinSeedOperate
-trezor.messages.BixinVerifyDeviceAck
-import trezor.messages.BixinVerifyDeviceAck
-trezor.messages.BixinVerifyDeviceRequest
-import trezor.messages.BixinVerifyDeviceRequest
-trezor.messages.BixinWhiteListAck
-import trezor.messages.BixinWhiteListAck
-trezor.messages.BixinWhiteListRequest
-import trezor.messages.BixinWhiteListRequest
-trezor.messages.ExportType
-import trezor.messages.ExportType
-trezor.messages.Features
-import trezor.messages.Features
-trezor.messages.GetPublicKeyMultiple
-import trezor.messages.GetPublicKeyMultiple
-trezor.messages.MessageType
-import trezor.messages.MessageType
-trezor.messages.PublicKeyMultiple
-import trezor.messages.PublicKeyMultiple
-trezor.messages.SeedRequestType
-import trezor.messages.SeedRequestType
-trezor.messages.SolanaAddress
-import trezor.messages.SolanaAddress
-trezor.messages.SolanaGetAddress
-import trezor.messages.SolanaGetAddress
-trezor.messages.SolanaSignTx
-import trezor.messages.SolanaSignTx
-trezor.messages.SolanaSignedTx
-import trezor.messages.SolanaSignedTx
-trezor.messages.StarcoinAddress
-import trezor.messages.StarcoinAddress
-trezor.messages.StarcoinGetAddress
-import trezor.messages.StarcoinGetAddress
-trezor.messages.StarcoinGetPublicKey
-import trezor.messages.StarcoinGetPublicKey
-trezor.messages.StarcoinMessageSignature
-import trezor.messages.StarcoinMessageSignature
-trezor.messages.StarcoinPublicKey
-import trezor.messages.StarcoinPublicKey
-trezor.messages.StarcoinSignMessage
-import trezor.messages.StarcoinSignMessage
-trezor.messages.StarcoinSignTx
-import trezor.messages.StarcoinSignTx
-trezor.messages.StarcoinSignedTx
-import trezor.messages.StarcoinSignedTx
-trezor.messages.StarcoinVerifyMessage
-import trezor.messages.StarcoinVerifyMessage
-trezor.messages.WL_OperationType
-import trezor.messages.WL_OperationType
 trezor.messages
 import trezor.messages
 trezor.pin
 import trezor.pin
 trezor.protobuf
 import trezor.protobuf
-trezor.res
-import trezor.res
-trezor.res.resources
-import trezor.res.resources
 trezor.sdcard
 import trezor.sdcard
 trezor.strings
 import trezor.strings
 trezor.ui
 import trezor.ui
-trezor.ui.components
-import trezor.ui.components
-trezor.ui.components.common
-import trezor.ui.components.common
-trezor.ui.components.common.confirm
-import trezor.ui.components.common.confirm
-trezor.ui.components.common.text
-import trezor.ui.components.common.text
-trezor.ui.components.tt.button
-import trezor.ui.components.tt.button
-trezor.ui.components.tt.checklist
-import trezor.ui.components.tt.checklist
-trezor.ui.components.tt.confirm
-import trezor.ui.components.tt.confirm
-trezor.ui.components.tt.info
-import trezor.ui.components.tt.info
-trezor.ui.components.tt.keyboard_bip39
-import trezor.ui.components.tt.keyboard_bip39
-trezor.ui.components.tt.keyboard_slip39
-import trezor.ui.components.tt.keyboard_slip39
-trezor.ui.components.tt.num_input
-import trezor.ui.components.tt.num_input
-trezor.ui.components.tt.passphrase
-import trezor.ui.components.tt.passphrase
-trezor.ui.components.tt.pin
-import trezor.ui.components.tt.pin
-trezor.ui.components.tt.recovery
-import trezor.ui.components.tt.recovery
-trezor.ui.components.tt.reset
-import trezor.ui.components.tt.reset
-trezor.ui.components.tt.scroll
-import trezor.ui.components.tt.scroll
-trezor.ui.components.tt.swipe
-import trezor.ui.components.tt.swipe
-trezor.ui.components.tt.text
-import trezor.ui.components.tt.text
-trezor.ui.components.tt.word_select
-import trezor.ui.components.tt.word_select
-trezor.ui.constants
-import trezor.ui.constants
-trezor.ui.constants.t1
-import trezor.ui.constants.t1
-trezor.ui.constants.tt
-import trezor.ui.constants.tt
-trezor.ui.container
-import trezor.ui.container
 trezor.ui.layouts
 import trezor.ui.layouts
 trezor.ui.layouts.common
 import trezor.ui.layouts.common
-trezor.ui.layouts.t1
-import trezor.ui.layouts.t1
-trezor.ui.layouts.tt
-import trezor.ui.layouts.tt
-trezor.ui.layouts.tt.altcoin
-import trezor.ui.layouts.tt.altcoin
-trezor.ui.layouts.tt.recovery
-import trezor.ui.layouts.tt.recovery
-trezor.ui.layouts.tt.reset
-import trezor.ui.layouts.tt.reset
-trezor.ui.loader
-import trezor.ui.loader
-trezor.ui.popup
-import trezor.ui.popup
-trezor.ui.qr
-import trezor.ui.qr
+trezor.ui.layouts.fido
+import trezor.ui.layouts.fido
+trezor.ui.layouts.homescreen
+import trezor.ui.layouts.homescreen
+trezor.ui.layouts.recovery
+import trezor.ui.layouts.recovery
+trezor.ui.layouts.reset
+import trezor.ui.layouts.reset
+trezor.ui.layouts.tr
+import trezor.ui.layouts.tr
+trezor.ui.layouts.tt_v2
+import trezor.ui.layouts.tt_v2
+trezor.ui.layouts.tt_v2.fido
+import trezor.ui.layouts.tt_v2.fido
+trezor.ui.layouts.tt_v2.homescreen
+import trezor.ui.layouts.tt_v2.homescreen
+trezor.ui.layouts.tt_v2.recovery
+import trezor.ui.layouts.tt_v2.recovery
+trezor.ui.layouts.tt_v2.reset
+import trezor.ui.layouts.tt_v2.reset
 trezor.ui.style
 import trezor.ui.style
 trezor.utils
@@ -350,6 +235,8 @@ apps.bitcoin.sign_tx.matchcheck
 import apps.bitcoin.sign_tx.matchcheck
 apps.bitcoin.sign_tx.omni
 import apps.bitcoin.sign_tx.omni
+apps.bitcoin.sign_tx.payment_request
+import apps.bitcoin.sign_tx.payment_request
 apps.bitcoin.sign_tx.progress
 import apps.bitcoin.sign_tx.progress
 apps.bitcoin.sign_tx.sig_hasher
@@ -366,6 +253,8 @@ apps.bitcoin.writers
 import apps.bitcoin.writers
 apps.common
 import apps.common
+apps.common.address_mac
+import apps.common.address_mac
 apps.common.address_type
 import apps.common.address_type
 apps.common.authorization
@@ -402,12 +291,6 @@ apps.debug.load_device
 import apps.debug.load_device
 apps.homescreen
 import apps.homescreen
-apps.homescreen.homescreen
-import apps.homescreen.homescreen
-apps.homescreen.lockscreen
-import apps.homescreen.lockscreen
-apps.management
-import apps.management
 apps.management.apply_flags
 import apps.management.apply_flags
 apps.management.apply_settings
@@ -422,6 +305,10 @@ apps.management.change_wipe_code
 import apps.management.change_wipe_code
 apps.management.get_next_u2f_counter
 import apps.management.get_next_u2f_counter
+apps.management.get_nonce
+import apps.management.get_nonce
+apps.management.reboot_to_bootloader
+import apps.management.reboot_to_bootloader
 apps.management.recovery_device
 import apps.management.recovery_device
 apps.management.recovery_device.homescreen
@@ -446,10 +333,14 @@ apps.misc
 import apps.misc
 apps.misc.cipher_key_value
 import apps.misc.cipher_key_value
+apps.misc.cosi_commit
+import apps.misc.cosi_commit
 apps.misc.get_ecdh_session_key
 import apps.misc.get_ecdh_session_key
 apps.misc.get_entropy
 import apps.misc.get_entropy
+apps.misc.get_firmware_hash
+import apps.misc.get_firmware_hash
 apps.misc.sign_identity
 import apps.misc.sign_identity
 apps.workflow_handlers
@@ -468,6 +359,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoCertificateType
     trezor.enums.CardanoDerivationType
     import trezor.enums.CardanoDerivationType
+    trezor.enums.CardanoGovernanceRegistrationFormat
+    import trezor.enums.CardanoGovernanceRegistrationFormat
     trezor.enums.CardanoNativeScriptHashDisplayFormat
     import trezor.enums.CardanoNativeScriptHashDisplayFormat
     trezor.enums.CardanoNativeScriptType
@@ -476,12 +369,16 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoPoolRelayType
     trezor.enums.CardanoTxAuxiliaryDataSupplementType
     import trezor.enums.CardanoTxAuxiliaryDataSupplementType
+    trezor.enums.CardanoTxOutputSerializationFormat
+    import trezor.enums.CardanoTxOutputSerializationFormat
     trezor.enums.CardanoTxSigningMode
     import trezor.enums.CardanoTxSigningMode
     trezor.enums.CardanoTxWitnessType
     import trezor.enums.CardanoTxWitnessType
     trezor.enums.EthereumDataType
     import trezor.enums.EthereumDataType
+    trezor.enums.MoneroNetworkType
+    import trezor.enums.MoneroNetworkType
     trezor.enums.NEMImportanceTransferMode
     import trezor.enums.NEMImportanceTransferMode
     trezor.enums.NEMModificationType
@@ -500,14 +397,6 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.TezosBallotType
     trezor.enums.TezosContractType
     import trezor.enums.TezosContractType
-    trezor.messages.EthereumSignMessageEIP712
-    import trezor.messages.EthereumSignMessageEIP712
-    trezor.ui.components.common.webauthn
-    import trezor.ui.components.common.webauthn
-    trezor.ui.components.tt.webauthn
-    import trezor.ui.components.tt.webauthn
-    trezor.ui.layouts.tt.webauthn
-    import trezor.ui.layouts.tt.webauthn
     apps.binance
     import apps.binance
     apps.binance.get_address
@@ -520,16 +409,16 @@ if not utils.BITCOIN_ONLY:
     import apps.binance.layout
     apps.binance.sign_tx
     import apps.binance.sign_tx
-    apps.bitcoin.sign_tx.zcash
-    import apps.bitcoin.sign_tx.zcash
+    apps.bitcoin.sign_tx.zcash_v4
+    import apps.bitcoin.sign_tx.zcash_v4
     apps.cardano
     import apps.cardano
-    apps.cardano.address
-    import apps.cardano.address
+    apps.cardano.addresses
+    import apps.cardano.addresses
     apps.cardano.auxiliary_data
     import apps.cardano.auxiliary_data
-    apps.cardano.byron_address
-    import apps.cardano.byron_address
+    apps.cardano.byron_addresses
+    import apps.cardano.byron_addresses
     apps.cardano.certificates
     import apps.cardano.certificates
     apps.cardano.get_address
@@ -564,6 +453,16 @@ if not utils.BITCOIN_ONLY:
     import apps.cardano.seed
     apps.cardano.sign_tx
     import apps.cardano.sign_tx
+    apps.cardano.sign_tx.multisig_signer
+    import apps.cardano.sign_tx.multisig_signer
+    apps.cardano.sign_tx.ordinary_signer
+    import apps.cardano.sign_tx.ordinary_signer
+    apps.cardano.sign_tx.plutus_signer
+    import apps.cardano.sign_tx.plutus_signer
+    apps.cardano.sign_tx.pool_owner_signer
+    import apps.cardano.sign_tx.pool_owner_signer
+    apps.cardano.sign_tx.signer
+    import apps.cardano.sign_tx.signer
     apps.common.mnemonic
     import apps.common.mnemonic
     apps.eos
@@ -638,8 +537,6 @@ if not utils.BITCOIN_ONLY:
     import apps.monero.signing.step_01_init_transaction
     apps.monero.signing.step_02_set_input
     import apps.monero.signing.step_02_set_input
-    apps.monero.signing.step_03_inputs_permutation
-    import apps.monero.signing.step_03_inputs_permutation
     apps.monero.signing.step_04_input_vini
     import apps.monero.signing.step_04_input_vini
     apps.monero.signing.step_05_all_inputs_set
@@ -652,22 +549,24 @@ if not utils.BITCOIN_ONLY:
     import apps.monero.signing.step_09_sign_input
     apps.monero.signing.step_10_sign_final
     import apps.monero.signing.step_10_sign_final
+    apps.monero.xmr
+    import apps.monero.xmr
     apps.monero.xmr.addresses
     import apps.monero.xmr.addresses
     apps.monero.xmr.bulletproof
     import apps.monero.xmr.bulletproof
+    apps.monero.xmr.chacha_poly
+    import apps.monero.xmr.chacha_poly
+    apps.monero.xmr.clsag
+    import apps.monero.xmr.clsag
     apps.monero.xmr.credentials
     import apps.monero.xmr.credentials
-    apps.monero.xmr.crypto
-    import apps.monero.xmr.crypto
-    apps.monero.xmr.crypto.chacha_poly
-    import apps.monero.xmr.crypto.chacha_poly
+    apps.monero.xmr.crypto_helpers
+    import apps.monero.xmr.crypto_helpers
     apps.monero.xmr.keccak_hasher
     import apps.monero.xmr.keccak_hasher
     apps.monero.xmr.key_image
     import apps.monero.xmr.key_image
-    apps.monero.xmr.mlsag
-    import apps.monero.xmr.mlsag
     apps.monero.xmr.mlsag_hasher
     import apps.monero.xmr.mlsag_hasher
     apps.monero.xmr.monero
@@ -696,8 +595,6 @@ if not utils.BITCOIN_ONLY:
     import apps.monero.xmr.serialize_messages.tx_prefix
     apps.monero.xmr.serialize_messages.tx_rsig_bulletproof
     import apps.monero.xmr.serialize_messages.tx_rsig_bulletproof
-    apps.monero.xmr.types
-    import apps.monero.xmr.types
     apps.nem
     import apps.nem
     apps.nem.get_address
@@ -804,6 +701,16 @@ if not utils.BITCOIN_ONLY:
     import apps.webauthn.remove_resident_credential
     apps.webauthn.resident_credentials
     import apps.webauthn.resident_credentials
+    apps.zcash
+    import apps.zcash
+    apps.zcash.f4jumble
+    import apps.zcash.f4jumble
+    apps.zcash.hasher
+    import apps.zcash.hasher
+    apps.zcash.signer
+    import apps.zcash.signer
+    apps.zcash.unified_addresses
+    import apps.zcash.unified_addresses
 
 # generate full alphabet
 a

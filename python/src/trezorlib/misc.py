@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -108,6 +108,11 @@ def decrypt_keyvalue(
             iv=iv,
         )
     )
+
+
+@expect(messages.Nonce, field="nonce", ret_type=bytes)
+def get_nonce(client: "TrezorClient"):
+    return client.call(messages.GetNonce())
 
 
 @expect(messages.EcdsaPublicKeys, field="public_keys", ret_type=List[bytes])

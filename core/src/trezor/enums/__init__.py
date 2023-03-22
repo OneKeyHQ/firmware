@@ -1,11 +1,24 @@
-if False:
-    from typing import TYPE_CHECKING
-else:
-    TYPE_CHECKING = False
-
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from enum import IntEnum
+
+    class BinanceOrderType(IntEnum):
+        OT_UNKNOWN = 0
+        MARKET = 1
+        LIMIT = 2
+        OT_RESERVED = 3
+
+    class BinanceOrderSide(IntEnum):
+        SIDE_UNKNOWN = 0
+        BUY = 1
+        SELL = 2
+
+    class BinanceTimeInForce(IntEnum):
+        TIF_UNKNOWN = 0
+        GTE = 1
+        TIF_RESERVED = 2
+        IOC = 3
 
     class MessageType(IntEnum):
         Initialize = 0
@@ -18,6 +31,7 @@ if TYPE_CHECKING:
         Entropy = 10
         LoadDevice = 13
         ResetDevice = 14
+        SetBusy = 16
         Features = 17
         PinMatrixRequest = 18
         PinMatrixAck = 19
@@ -27,6 +41,8 @@ if TYPE_CHECKING:
         ButtonRequest = 26
         ButtonAck = 27
         ApplyFlags = 28
+        GetNonce = 31
+        Nonce = 33
         BackupDevice = 34
         EntropyRequest = 35
         EntropyAck = 36
@@ -43,6 +59,10 @@ if TYPE_CHECKING:
         PreauthorizedRequest = 85
         CancelAuthorization = 86
         RebootToBootloader = 87
+        GetFirmwareHash = 88
+        FirmwareHash = 89
+        UnlockPath = 93
+        UnlockedPathRequest = 94
         SetU2FCounter = 63
         GetNextU2FCounter = 80
         NextU2FCounter = 81
@@ -60,6 +80,7 @@ if TYPE_CHECKING:
         TxAck = 22
         GetAddress = 29
         Address = 30
+        TxAckPaymentRequest = 37
         SignMessage = 38
         VerifyMessage = 39
         MessageSignature = 40
@@ -142,14 +163,10 @@ if TYPE_CHECKING:
         StellarManageBuyOfferOp = 222
         StellarPathPaymentStrictSendOp = 223
         StellarSignedTx = 230
-        CardanoSignTx = 303
         CardanoGetPublicKey = 305
         CardanoPublicKey = 306
         CardanoGetAddress = 307
         CardanoAddress = 308
-        CardanoSignedTx = 310
-        CardanoSignedTxChunk = 311
-        CardanoSignedTxChunkAck = 312
         CardanoTxItemAck = 313
         CardanoTxAuxiliaryDataSupplement = 314
         CardanoTxWitnessRequest = 315
@@ -170,6 +187,11 @@ if TYPE_CHECKING:
         CardanoGetNativeScriptHash = 330
         CardanoNativeScriptHash = 331
         CardanoTxMint = 332
+        CardanoTxCollateralInput = 333
+        CardanoTxRequiredSigner = 334
+        CardanoTxInlineDatumChunk = 335
+        CardanoTxReferenceScriptChunk = 336
+        CardanoTxReferenceInput = 337
         RippleGetAddress = 400
         RippleAddress = 401
         RippleSignTx = 402
@@ -178,8 +200,6 @@ if TYPE_CHECKING:
         MoneroTransactionInitAck = 502
         MoneroTransactionSetInputRequest = 503
         MoneroTransactionSetInputAck = 504
-        MoneroTransactionInputsPermutationRequest = 505
-        MoneroTransactionInputsPermutationAck = 506
         MoneroTransactionInputViniRequest = 507
         MoneroTransactionInputViniAck = 508
         MoneroTransactionAllInputsSetRequest = 509
@@ -299,23 +319,6 @@ if TYPE_CHECKING:
         FilecoinSignedTx = 11203
         DeviceEraseSector = 10026
 
-    class BinanceOrderType(IntEnum):
-        OT_UNKNOWN = 0
-        MARKET = 1
-        LIMIT = 2
-        OT_RESERVED = 3
-
-    class BinanceOrderSide(IntEnum):
-        SIDE_UNKNOWN = 0
-        BUY = 1
-        SELL = 2
-
-    class BinanceTimeInForce(IntEnum):
-        TIF_UNKNOWN = 0
-        GTE = 1
-        TIF_RESERVED = 2
-        IOC = 3
-
     class FailureType(IntEnum):
         UnexpectedMessage = 1
         ButtonExpected = 2
@@ -399,6 +402,7 @@ if TYPE_CHECKING:
         TXEXTRADATA = 4
         TXORIGINPUT = 5
         TXORIGOUTPUT = 6
+        TXPAYMENTREQ = 7
 
     class CardanoDerivationType(IntEnum):
         LEDGER = 0
@@ -431,6 +435,10 @@ if TYPE_CHECKING:
         BECH32 = 1
         POLICY_ID = 2
 
+    class CardanoTxOutputSerializationFormat(IntEnum):
+        ARRAY_LEGACY = 0
+        MAP_BABBAGE = 1
+
     class CardanoCertificateType(IntEnum):
         STAKE_REGISTRATION = 0
         STAKE_DEREGISTRATION = 1
@@ -444,12 +452,17 @@ if TYPE_CHECKING:
 
     class CardanoTxAuxiliaryDataSupplementType(IntEnum):
         NONE = 0
-        CATALYST_REGISTRATION_SIGNATURE = 1
+        GOVERNANCE_REGISTRATION_SIGNATURE = 1
+
+    class CardanoGovernanceRegistrationFormat(IntEnum):
+        CIP15 = 0
+        CIP36 = 1
 
     class CardanoTxSigningMode(IntEnum):
         ORDINARY_TRANSACTION = 0
         POOL_REGISTRATION_AS_OWNER = 1
         MULTISIG_TRANSACTION = 2
+        PLUTUS_TRANSACTION = 3
 
     class CardanoTxWitnessType(IntEnum):
         BYRON_WITNESS = 0
@@ -464,6 +477,10 @@ if TYPE_CHECKING:
         Strict = 0
         PromptAlways = 1
         PromptTemporarily = 2
+
+    class HomescreenFormat(IntEnum):
+        Toif144x144 = 1
+        Jpeg240x240 = 2
 
     class Capability(IntEnum):
         Bitcoin = 1
@@ -509,6 +526,11 @@ if TYPE_CHECKING:
         LEFT = 2
         RIGHT = 3
 
+    class DebugButton(IntEnum):
+        NO = 0
+        YES = 1
+        INFO = 2
+
     class EthereumDataType(IntEnum):
         UINT = 1
         INT = 2
@@ -518,6 +540,12 @@ if TYPE_CHECKING:
         ADDRESS = 6
         ARRAY = 7
         STRUCT = 8
+
+    class MoneroNetworkType(IntEnum):
+        MAINNET = 0
+        TESTNET = 1
+        STAGENET = 2
+        FAKECHAIN = 3
 
     class NEMMosaicLevy(IntEnum):
         MosaicLevy_Absolute = 1

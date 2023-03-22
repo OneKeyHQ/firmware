@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -26,19 +26,18 @@ from .. import exceptions, firmware
 from . import with_client
 
 if TYPE_CHECKING:
-    import construct as c
     from ..client import TrezorClient
     from . import TrezorConnection
 
 ALLOWED_FIRMWARE_FORMATS = {
-    1: (firmware.FirmwareFormat.TREZOR_ONE, firmware.FirmwareFormat.TREZOR_ONE_V2),
-    2: (firmware.FirmwareFormat.TREZOR_T,),
+    1: (firmware.LegacyFirmware, firmware.LegacyV2Firmware),
+    2: (firmware.VendorFirmware,),
 }
 
 
-def _print_version(version: dict) -> None:
-    vstr = "Firmware version {major}.{minor}.{patch} build {build}".format(**version)
-    click.echo(vstr)
+def _print_version(version: Tuple[int, int, int, int]) -> None:
+    major, minor, patch, build = version
+    click.echo(f"Firmware version {major}.{minor}.{patch} build {build}")
 
 
 def _is_bootloader_onev2(client: "TrezorClient") -> bool:
@@ -59,31 +58,27 @@ def _get_file_name_from_url(url: str) -> str:
     return os.path.basename(full_path)
 
 
-def print_firmware_version(
-    version: firmware.FirmwareFormat,
-    fw: "c.Container",
-) -> None:
+def print_firmware_version(fw: "firmware.FirmwareType") -> None:
     """Print out the firmware version and details."""
-    if version == firmware.FirmwareFormat.TREZOR_ONE:
-        if fw.embedded_onev2:
+    if isinstance(fw, firmware.LegacyFirmware):
+        if fw.embedded_v2:
             click.echo("Trezor One firmware with embedded v2 image (1.8.0 or later)")
-            _print_version(fw.embedded_onev2.header.version)
+            _print_version(fw.embedded_v2.header.version)
         else:
             click.echo("Trezor One firmware image.")
-    elif version == firmware.FirmwareFormat.TREZOR_ONE_V2:
+    elif isinstance(fw, firmware.LegacyV2Firmware):
         click.echo("Trezor One v2 firmware (1.8.0 or later)")
         _print_version(fw.header.version)
-    elif version == firmware.FirmwareFormat.TREZOR_T:
+    elif isinstance(fw, firmware.VendorFirmware):
         click.echo("Trezor T firmware image.")
         vendor = fw.vendor_header.text
-        vendor_version = "{major}.{minor}".format(**fw.vendor_header.version)
+        vendor_version = "{}.{}".format(*fw.vendor_header.version)
         click.echo(f"Vendor header from {vendor}, version {vendor_version}")
-        _print_version(fw.image.header.version)
+        _print_version(fw.firmware.header.version)
 
 
 def validate_signatures(
-    version: firmware.FirmwareFormat,
-    fw: "c.Container",
+    fw: "firmware.FirmwareType", prompt_unsigned: bool = True
 ) -> None:
     """Check the signatures on the firmware.
 
@@ -92,18 +87,28 @@ def validate_signatures(
     Exits if the validation fails.
     """
     try:
-        firmware.validate(version, fw, allow_unsigned=False)
-        click.echo("Signatures are valid.")
+        fw.verify()
     except firmware.Unsigned:
+        if not prompt_unsigned or not isinstance(
+            fw, (firmware.LegacyFirmware, firmware.LegacyV2Firmware)
+        ):
+            click.echo("Firmware is not signed, aborting.")
+            sys.exit(4)
+
+        # allow legacy firmware without signatures
         if not click.confirm("No signatures found. Continue?", default=False):
             sys.exit(1)
-        try:
-            firmware.validate(version, fw, allow_unsigned=True)
-            click.echo("Unsigned firmware looking OK.")
-        except firmware.FirmwareIntegrityError as e:
-            click.echo(e)
-            click.echo("Firmware validation failed, aborting.")
-            sys.exit(4)
+
+        if firmware.is_onev2(fw):
+            try:
+                assert fw.embedded_v2 is not None
+                fw.embedded_v2.verify_unsigned()
+            except firmware.FirmwareIntegrityError as e:
+                click.echo(e)
+                click.echo("Firmware validation failed, aborting.")
+                sys.exit(4)
+        click.echo("Unsigned firmware looking OK.")
+
     except firmware.FirmwareIntegrityError as e:
         click.echo(e)
         click.echo("Firmware validation failed, aborting.")
@@ -111,8 +116,7 @@ def validate_signatures(
 
 
 def validate_fingerprint(
-    version: firmware.FirmwareFormat,
-    fw: "c.Container",
+    fw: "firmware.FirmwareType",
     expected_fingerprint: Optional[str] = None,
 ) -> None:
     """Determine and validate the firmware fingerprint.
@@ -120,12 +124,11 @@ def validate_fingerprint(
     Prints the fingerprint.
     Exits if the validation fails.
     """
-    fingerprint = firmware.digest(version, fw).hex()
+    fingerprint = fw.digest().hex()
     click.echo(f"Firmware fingerprint: {fingerprint}")
-    if version == firmware.FirmwareFormat.TREZOR_ONE and fw.embedded_onev2:
-        fingerprint_onev2 = firmware.digest(
-            firmware.FirmwareFormat.TREZOR_ONE_V2, fw.embedded_onev2
-        ).hex()
+    if firmware.is_onev2(fw):
+        assert fw.embedded_v2 is not None
+        fingerprint_onev2 = fw.embedded_v2.digest().hex()
         click.echo(f"Embedded v2 image fingerprint: {fingerprint_onev2}")
     if expected_fingerprint and fingerprint != expected_fingerprint:
         click.echo(f"Expected fingerprint: {expected_fingerprint}")
@@ -134,8 +137,7 @@ def validate_fingerprint(
 
 
 def check_device_match(
-    version: firmware.FirmwareFormat,
-    fw: "c.Container",
+    fw: "firmware.FirmwareType",
     bootloader_onev2: bool,
     trezor_major_version: int,
 ) -> None:
@@ -143,22 +145,22 @@ def check_device_match(
 
     Prints error message and exits if the validation fails.
     """
-    if (
-        bootloader_onev2
-        and version == firmware.FirmwareFormat.TREZOR_ONE
-        and not fw.embedded_onev2
-    ):
-        click.echo("Firmware is too old for your device. Aborting.")
-        sys.exit(3)
-    elif not bootloader_onev2 and version == firmware.FirmwareFormat.TREZOR_ONE_V2:
-        click.echo("You need to upgrade to bootloader 1.8.0 first.")
-        sys.exit(3)
-
     if trezor_major_version not in ALLOWED_FIRMWARE_FORMATS:
         click.echo("trezorctl doesn't know your device version. Aborting.")
         sys.exit(3)
-    elif version not in ALLOWED_FIRMWARE_FORMATS[trezor_major_version]:
+    elif not isinstance(fw, ALLOWED_FIRMWARE_FORMATS[trezor_major_version]):
         click.echo("Firmware does not match your device, aborting.")
+        sys.exit(3)
+
+    if (
+        bootloader_onev2
+        and isinstance(fw, firmware.LegacyFirmware)
+        and not fw.embedded_v2
+    ):
+        click.echo("Firmware is too old for your device. Aborting.")
+        sys.exit(3)
+    elif not bootloader_onev2 and isinstance(fw, firmware.LegacyV2Firmware):
+        click.echo("You need to upgrade to bootloader 1.8.0 first.")
         sys.exit(3)
 
 
@@ -283,6 +285,8 @@ def find_best_firmware_version(
                 if closest_version > want_version:
                     # stop at first that is higher than the requested
                     break
+            else:
+                raise click.ClickException("No versions were found!")
             # if there was no break, the newest is used
             click.echo(f"Closest available version: {version_str(closest_version)}")
             if not beta and want_version > highest_version:
@@ -338,6 +342,7 @@ def validate_firmware(
     fingerprint: Optional[str] = None,
     bootloader_onev2: Optional[bool] = None,
     trezor_major_version: Optional[int] = None,
+    prompt_unsigned: bool = True,
 ) -> None:
     """Validate the firmware through multiple tests.
 
@@ -346,18 +351,17 @@ def validate_firmware(
     - being compatible with the device (when chosen)
     """
     try:
-        version, fw = firmware.parse(firmware_data)
+        fw = firmware.parse(firmware_data)
     except Exception as e:
         click.echo(e)
         sys.exit(2)
 
-    print_firmware_version(version, fw)
-    validate_signatures(version, fw)
-    validate_fingerprint(version, fw, fingerprint)
+    print_firmware_version(fw)
+    validate_fingerprint(fw, fingerprint)
+    validate_signatures(fw, prompt_unsigned=prompt_unsigned)
 
     if bootloader_onev2 is not None and trezor_major_version is not None:
         check_device_match(
-            version=version,
             fw=fw,
             bootloader_onev2=bootloader_onev2,
             trezor_major_version=trezor_major_version,
@@ -370,7 +374,7 @@ def extract_embedded_fw(
     bootloader_onev2: bool,
 ) -> bytes:
     """Modify the firmware data for sending into Trezor, if necessary."""
-    # special handling for embedded-OneV2 format:
+    # special handling for embedded_v2-OneV2 format:
     # for bootloader < 1.8, keep the embedding
     # for bootloader 1.8.0 and up, strip the old OneV1 header
     if (
@@ -378,7 +382,7 @@ def extract_embedded_fw(
         and firmware_data[:4] == b"TRZR"
         and firmware_data[256 : 256 + 4] == b"TRZF"
     ):
-        click.echo("Extracting embedded firmware image.")
+        click.echo("Extracting embedded_v2 firmware image.")
         return firmware_data[256:]
 
     return firmware_data
@@ -394,7 +398,12 @@ def upload_firmware_into_device(
         if f.major_version == 1 and f.firmware_present is not False:
             # Trezor One does not send ButtonRequest
             click.echo("Please confirm the action on your Trezor device")
-        firmware.update(client, firmware_data)
+
+        click.echo("Uploading...\r", nl=False)
+        with click.progressbar(
+            label="Uploading", length=len(firmware_data), show_eta=False
+        ) as bar:
+            firmware.update(client, firmware_data, bar.update)
     except exceptions.Cancelled:
         click.echo("Update aborted on device.")
     except exceptions.TrezorException as e:
@@ -444,6 +453,7 @@ def verify(
         fingerprint=fingerprint,
         bootloader_onev2=bootloader_onev2,
         trezor_major_version=trezor_major_version,
+        prompt_unsigned=False,
     )
 
 
@@ -582,7 +592,13 @@ def update(
     if dry_run:
         click.echo("Dry run. Not uploading firmware to device.")
     else:
-        upload_firmware_into_device(
-            client=client,
-            firmware_data=firmware_data,
-        )
+        upload_firmware_into_device(client=client, firmware_data=firmware_data)
+
+
+@cli.command()
+@click.argument("hex_challenge", required=False)
+@with_client
+def get_hash(client: "TrezorClient", hex_challenge: Optional[str]) -> str:
+    """Get a hash of the installed firmware combined with the optional challenge."""
+    challenge = bytes.fromhex(hex_challenge) if hex_challenge else None
+    return firmware.get_hash(client, challenge).hex()

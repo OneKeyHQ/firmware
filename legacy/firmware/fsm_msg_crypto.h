@@ -17,6 +17,10 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+static uint8_t cosi_nonce[32] = {0};
+static uint8_t cosi_commitment[32] = {0};
+static bool cosi_nonce_is_set = false;
+
 void fsm_msgCipherKeyValue(const CipherKeyValue *msg) {
   CHECK_INITIALIZED
 
@@ -75,6 +79,8 @@ void fsm_msgSignIdentity(const SignIdentity *msg) {
 
   CHECK_INITIALIZED
 
+  CHECK_PIN
+
   layoutSignIdentity(&(msg->identity),
                      msg->has_challenge_visual ? msg->challenge_visual : 0);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
@@ -82,8 +88,6 @@ void fsm_msgSignIdentity(const SignIdentity *msg) {
     layoutHome();
     return;
   }
-
-  CHECK_PIN
 
   uint8_t hash[32];
   if (cryptoIdentityFingerprint(&(msg->identity), hash) == 0) {
@@ -93,14 +97,14 @@ void fsm_msgSignIdentity(const SignIdentity *msg) {
   }
 
   uint32_t address_n[5];
-  address_n[0] = 0x80000000 | 13;
-  address_n[1] = 0x80000000 | hash[0] | (hash[1] << 8) | (hash[2] << 16) |
+  address_n[0] = PATH_HARDENED | 13;
+  address_n[1] = PATH_HARDENED | hash[0] | (hash[1] << 8) | (hash[2] << 16) |
                  ((uint32_t)hash[3] << 24);
-  address_n[2] = 0x80000000 | hash[4] | (hash[5] << 8) | (hash[6] << 16) |
+  address_n[2] = PATH_HARDENED | hash[4] | (hash[5] << 8) | (hash[6] << 16) |
                  ((uint32_t)hash[7] << 24);
-  address_n[3] = 0x80000000 | hash[8] | (hash[9] << 8) | (hash[10] << 16) |
+  address_n[3] = PATH_HARDENED | hash[8] | (hash[9] << 8) | (hash[10] << 16) |
                  ((uint32_t)hash[11] << 24);
-  address_n[4] = 0x80000000 | hash[12] | (hash[13] << 8) | (hash[14] << 16) |
+  address_n[4] = PATH_HARDENED | hash[12] | (hash[13] << 8) | (hash[14] << 16) |
                  ((uint32_t)hash[15] << 24);
 
   const char *curve = SECP256K1_NAME;
@@ -179,14 +183,14 @@ void fsm_msgGetECDHSessionKey(const GetECDHSessionKey *msg) {
 
   CHECK_INITIALIZED
 
+  CHECK_PIN
+
   layoutDecryptIdentity(&msg->identity);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
   }
-
-  CHECK_PIN
 
   uint8_t hash[32];
   if (cryptoIdentityFingerprint(&(msg->identity), hash) == 0) {
@@ -196,14 +200,14 @@ void fsm_msgGetECDHSessionKey(const GetECDHSessionKey *msg) {
   }
 
   uint32_t address_n[5];
-  address_n[0] = 0x80000000 | 17;
-  address_n[1] = 0x80000000 | hash[0] | (hash[1] << 8) | (hash[2] << 16) |
+  address_n[0] = PATH_HARDENED | 17;
+  address_n[1] = PATH_HARDENED | hash[0] | (hash[1] << 8) | (hash[2] << 16) |
                  ((uint32_t)hash[3] << 24);
-  address_n[2] = 0x80000000 | hash[4] | (hash[5] << 8) | (hash[6] << 16) |
+  address_n[2] = PATH_HARDENED | hash[4] | (hash[5] << 8) | (hash[6] << 16) |
                  ((uint32_t)hash[7] << 24);
-  address_n[3] = 0x80000000 | hash[8] | (hash[9] << 8) | (hash[10] << 16) |
+  address_n[3] = PATH_HARDENED | hash[8] | (hash[9] << 8) | (hash[10] << 16) |
                  ((uint32_t)hash[11] << 24);
-  address_n[4] = 0x80000000 | hash[12] | (hash[13] << 8) | (hash[14] << 16) |
+  address_n[4] = PATH_HARDENED | hash[12] | (hash[13] << 8) | (hash[14] << 16) |
                  ((uint32_t)hash[15] << 24);
 
   const char *curve = SECP256K1_NAME;
@@ -235,39 +239,47 @@ void fsm_msgGetECDHSessionKey(const GetECDHSessionKey *msg) {
   layoutHome();
 }
 
+static bool fsm_checkCosiPath(uint32_t address_n_count,
+                              const uint32_t *address_n) {
+  // The path should typically match "m / 10018' / [0-9]'", but we allow
+  // any path from the SLIP-18 domain "m / 10018' / *".
+  if (address_n_count >= 1 && address_n[0] == PATH_HARDENED + 10018) {
+    return true;
+  }
+
+  if (config_getSafetyCheckLevel() == SafetyCheckLevel_Strict) {
+    fsm_sendFailure(FailureType_Failure_DataError, _("Forbidden key path"));
+    return false;
+  }
+
+  return fsm_layoutPathWarning();
+}
+
 void fsm_msgCosiCommit(const CosiCommit *msg) {
   RESP_INIT(CosiCommitment);
 
   CHECK_INITIALIZED
 
-  CHECK_PARAM(msg->has_data, _("No data provided"));
+  CHECK_PIN
 
-  layoutCosiCommitSign(msg->address_n, msg->address_n_count, msg->data.bytes,
-                       msg->data.size, false);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+  if (!fsm_checkCosiPath(msg->address_n_count, msg->address_n)) {
     layoutHome();
     return;
   }
-
-  CHECK_PIN
 
   const HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
   if (!node) return;
 
-  uint8_t nonce[32];
-  sha256_Raw(msg->data.bytes, msg->data.size, nonce);
-  rfc6979_state rng;
-  init_rfc6979(node->private_key, nonce, &rng);
-  generate_rfc6979(nonce, &rng);
+  if (!cosi_nonce_is_set) {
+    ed25519_cosi_commit(cosi_nonce, cosi_commitment);
+    cosi_nonce_is_set = true;
+  }
 
-  resp->has_commitment = true;
-  resp->has_pubkey = true;
   resp->commitment.size = 32;
   resp->pubkey.size = 32;
 
-  ed25519_publickey(nonce, resp->commitment.bytes);
+  memcpy(resp->commitment.bytes, cosi_commitment, sizeof(cosi_commitment));
   ed25519_publickey(node->private_key, resp->pubkey.bytes);
 
   msg_write(MessageType_MessageType_CosiCommitment, resp);
@@ -279,40 +291,52 @@ void fsm_msgCosiSign(const CosiSign *msg) {
 
   CHECK_INITIALIZED
 
-  CHECK_PARAM(msg->has_data, _("No data provided"));
-  CHECK_PARAM(msg->has_global_commitment && msg->global_commitment.size == 32,
+  CHECK_PARAM(msg->global_commitment.size == 32,
               _("Invalid global commitment"));
-  CHECK_PARAM(msg->has_global_pubkey && msg->global_pubkey.size == 32,
-              _("Invalid global pubkey"));
+  CHECK_PARAM(msg->global_pubkey.size == 32, _("Invalid global pubkey"));
 
-  layoutCosiCommitSign(msg->address_n, msg->address_n_count, msg->data.bytes,
-                       msg->data.size, true);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+  if (!cosi_nonce_is_set) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("CoSi nonce not set"));
+    layoutHome();
+    return;
+  }
+
+  if (!fsm_checkCosiPath(msg->address_n_count, msg->address_n)) {
     layoutHome();
     return;
   }
 
   CHECK_PIN
 
+  layoutCosiSign(msg->address_n, msg->address_n_count, msg->data.bytes,
+                 msg->data.size);
+  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
   const HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
   if (!node) return;
 
-  uint8_t nonce[32];
-  sha256_Raw(msg->data.bytes, msg->data.size, nonce);
-  rfc6979_state rng;
-  init_rfc6979(node->private_key, nonce, &rng);
-  generate_rfc6979(nonce, &rng);
-
   resp->signature.size = 32;
+  cosi_nonce_is_set = false;
 
-  ed25519_cosi_sign(msg->data.bytes, msg->data.size, node->private_key, nonce,
-                    msg->global_commitment.bytes, msg->global_pubkey.bytes,
-                    resp->signature.bytes);
-
-  msg_write(MessageType_MessageType_CosiSignature, resp);
+  if (ed25519_cosi_sign(msg->data.bytes, msg->data.size, node->private_key,
+                        cosi_nonce, msg->global_commitment.bytes,
+                        msg->global_pubkey.bytes, resp->signature.bytes) == 0) {
+    msg_write(MessageType_MessageType_CosiSignature, resp);
+  } else {
+    fsm_sendFailure(FailureType_Failure_FirmwareError, NULL);
+  }
+  fsm_clearCosiNonce();
   layoutHome();
+}
+
+void fsm_clearCosiNonce(void) {
+  cosi_nonce_is_set = false;
+  memzero(cosi_nonce, sizeof(cosi_nonce));
 }
 
 static const char *SUPPORTED_CURVES[3] = {SECP256K1_NAME, ED25519_NAME,

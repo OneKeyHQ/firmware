@@ -317,11 +317,11 @@ refresh_menu:
   selected = mnemonic_find_word(words[rand_list[index]]);
   words_order[0] = selected;
   do {
-    words_order[1] = random_uniform(BIP39_WORDS);
+    words_order[1] = random_uniform(BIP39_WORD_COUNT);
   } while (words_order[1] == selected);
 
   do {
-    words_order[2] = random_uniform(BIP39_WORDS);
+    words_order[2] = random_uniform(BIP39_WORD_COUNT);
   } while (words_order[2] == selected || words_order[2] == words_order[1]);
 
   random_order(words_order, 3);

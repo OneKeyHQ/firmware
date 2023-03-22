@@ -27,7 +27,7 @@ from trezor.enums import OutputScriptType
 
 from apps.common import coins
 from apps.common.keychain import Keychain
-from apps.bitcoin.keychain import get_schemas_for_coin
+from apps.bitcoin.keychain import _get_schemas_for_coin
 from apps.bitcoin.sign_tx import bitcoinlike, helpers
 
 
@@ -80,6 +80,9 @@ class TestSignSegwitTxNativeP2WPKH_GRS(unittest.TestCase):
         )
         tx = SignTx(coin_name='Groestlcoin Testnet', version=1, lock_time=650713, inputs_count=1, outputs_count=2)
 
+        # precomputed tx weight is 142 = ceil(566 / 4)
+        fee_rate = 11000 / 142
+
         messages = [
             None,
 
@@ -102,7 +105,7 @@ class TestSignSegwitTxNativeP2WPKH_GRS(unittest.TestCase):
             helpers.UiConfirmNonDefaultLocktime(tx.lock_time, lock_time_disabled=False),
             True,
 
-            helpers.UiConfirmTotal(12300000, 11000, coin, AmountUnit.BITCOIN),
+            helpers.UiConfirmTotal(12300000, 11000, fee_rate, coin, AmountUnit.BITCOIN),
             True,
 
             # check prev tx
@@ -158,7 +161,7 @@ class TestSignSegwitTxNativeP2WPKH_GRS(unittest.TestCase):
             )),
         ]
 
-        ns = get_schemas_for_coin(coin)
+        ns = _get_schemas_for_coin(coin)
         keychain = Keychain(seed, coin.curve_name, ns)
         signer = bitcoinlike.Bitcoinlike(tx, keychain, coin, None).signer()
         for request, expected_response in chunks(messages, 2):
@@ -203,12 +206,16 @@ class TestSignSegwitTxNativeP2WPKH_GRS(unittest.TestCase):
         )
         out2 = TxOutput(
             address=None,
+            # 84'/1'/0'/1/0" - tgrs1qejqxwzfld7zr6mf7ygqy5s5se5xq7vmt9lkd57
             address_n=[84 | 0x80000000, 1 | 0x80000000, 0 | 0x80000000, 1, 0],
             script_type=OutputScriptType.PAYTOWITNESS,
             amount=12300000 - 11000 - 5000000,
             multisig=None,
         )
         tx = SignTx(coin_name='Groestlcoin Testnet', version=1, lock_time=650713, inputs_count=1, outputs_count=2)
+
+        # precomputed tx weight is 142 = ceil(566 / 4)
+        fee_rate = 11000 / 142
 
         messages = [
             None,
@@ -229,7 +236,7 @@ class TestSignSegwitTxNativeP2WPKH_GRS(unittest.TestCase):
             helpers.UiConfirmNonDefaultLocktime(tx.lock_time, lock_time_disabled=False),
             True,
 
-            helpers.UiConfirmTotal(5000000 + 11000, 11000, coin, AmountUnit.BITCOIN),
+            helpers.UiConfirmTotal(5000000 + 11000, 11000, fee_rate, coin, AmountUnit.BITCOIN),
             True,
 
             # check prev tx
@@ -286,7 +293,7 @@ class TestSignSegwitTxNativeP2WPKH_GRS(unittest.TestCase):
             )),
         ]
 
-        ns = get_schemas_for_coin(coin)
+        ns = _get_schemas_for_coin(coin)
         keychain = Keychain(seed, coin.curve_name, ns)
         signer = bitcoinlike.Bitcoinlike(tx, keychain, coin, None).signer()
         for request, expected_response in chunks(messages, 2):

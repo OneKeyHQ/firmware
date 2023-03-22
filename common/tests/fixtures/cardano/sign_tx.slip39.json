@@ -15,6 +15,7 @@
         "network_id": 1,
         "fee": 42,
         "ttl": 10,
+        "validity_interval_start": null,
         "certificates": [],
         "withdrawals": [],
         "auxiliary_data": null,
@@ -32,8 +33,15 @@
           }
         ],
         "mint": [],
+        "script_data_hash": null,
+        "collateral_inputs": [],
+        "required_signers": [],
+        "collateral_return": null,
+        "total_collateral": null,
+        "reference_inputs": [],
         "signing_mode": "ORDINARY_TRANSACTION",
-        "additional_witness_requests": []
+        "additional_witness_requests": [],
+        "include_network_id": false
       },
       "result": {
         "tx_hash": "73e09bdebf98a9e0f17f86a2d11e0f14f4f8dae77cdf26ff1678e821f20c8db6",
@@ -54,6 +62,7 @@
         "network_id": 1,
         "fee": 42,
         "ttl": 10,
+        "validity_interval_start": null,
         "certificates": [],
         "withdrawals": [],
         "auxiliary_data": null,
@@ -76,8 +85,15 @@
           }
         ],
         "mint": [],
+        "script_data_hash": null,
+        "collateral_inputs": [],
+        "required_signers": [],
+        "collateral_return": null,
+        "total_collateral": null,
+        "reference_inputs": [],
         "signing_mode": "ORDINARY_TRANSACTION",
-        "additional_witness_requests": []
+        "additional_witness_requests": [],
+        "include_network_id": false
       },
       "result": {
         "tx_hash": "4c43ce4c72f145b145ae7add414722735e250d048f61c4585a5becafcbffa6ae",
@@ -98,6 +114,7 @@
         "network_id": 0,
         "fee": 42,
         "ttl": 10,
+        "validity_interval_start": null,
         "certificates": [],
         "withdrawals": [],
         "auxiliary_data": null,
@@ -120,8 +137,15 @@
           }
         ],
         "mint": [],
+        "script_data_hash": null,
+        "collateral_inputs": [],
+        "required_signers": [],
+        "collateral_return": null,
+        "total_collateral": null,
+        "reference_inputs": [],
         "signing_mode": "ORDINARY_TRANSACTION",
-        "additional_witness_requests": []
+        "additional_witness_requests": [],
+        "include_network_id": false
       },
       "result": {
         "tx_hash": "93a2c3cfb67ef1e4bae167b0f443c3370664bdb9171bc9cd41bad98e5cc049b2",

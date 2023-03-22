@@ -1,21 +1,24 @@
-from trezor import wire
-from trezor.messages import PrevTx, SignTx, TxInput
+from typing import TYPE_CHECKING
 
-from apps.common.writers import write_bitcoin_varint
-
-from .. import multisig, writers
-from ..common import NONSEGWIT_INPUT_SCRIPT_TYPES, SigHashType
+from .. import writers
 from . import helpers
 from .bitcoin import Bitcoin
 
-if False:
+if TYPE_CHECKING:
     from typing import Sequence
+    from trezor.messages import PrevTx, SignTx, TxInput
     from .tx_info import OriginalTxInfo, TxInfo
 
 
 class Bitcoinlike(Bitcoin):
     async def sign_nonsegwit_bip143_input(self, i_sign: int) -> None:
+        from trezor import wire
+        from .. import multisig
+        from ..common import NONSEGWIT_INPUT_SCRIPT_TYPES
+
         txi = await helpers.request_tx_input(self.tx_req, i_sign, self.coin)
+        self.tx_info.check_input(txi)
+        self.approver.check_internal_input(txi)
 
         if txi.script_type not in NONSEGWIT_INPUT_SCRIPT_TYPES:
             raise wire.ProcessError("Transaction has changed during signing")
@@ -26,7 +29,8 @@ class Bitcoinlike(Bitcoin):
             multisig.multisig_pubkey_index(txi.multisig, public_key)
 
         # serialize input with correct signature
-        self.write_tx_input_derived(self.serialized_tx, txi, public_key, signature)
+        if self.serialize:
+            self.write_tx_input_derived(self.serialized_tx, txi, public_key, signature)
         self.set_serialized_signature(i_sign, signature)
 
     async def sign_nonsegwit_input(self, i_sign: int) -> None:
@@ -59,6 +63,8 @@ class Bitcoinlike(Bitcoin):
             )
 
     def get_hash_type(self, txi: TxInput) -> int:
+        from ..common import SigHashType
+
         hashtype = super().get_hash_type(txi)
         if self.coin.fork_id is not None:
             hashtype |= (self.coin.fork_id << 8) | SigHashType.SIGHASH_FORKID
@@ -70,13 +76,15 @@ class Bitcoinlike(Bitcoin):
         tx: SignTx | PrevTx,
         witness_marker: bool,
     ) -> None:
+        from apps.common.writers import write_compact_size
+
         writers.write_uint32(w, tx.version)  # nVersion
         if self.coin.timestamp:
             assert tx.timestamp is not None  # checked in sanitize_*
             writers.write_uint32(w, tx.timestamp)
         if witness_marker:
-            write_bitcoin_varint(w, 0x00)  # segwit witness marker
-            write_bitcoin_varint(w, 0x01)  # segwit witness flag
+            write_compact_size(w, 0x00)  # segwit witness marker
+            write_compact_size(w, 0x01)  # segwit witness flag
 
     async def write_prev_tx_footer(
         self, w: writers.Writer, tx: PrevTx, prev_hash: bytes

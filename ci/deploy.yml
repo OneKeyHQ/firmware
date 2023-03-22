@@ -2,6 +2,90 @@ image: registry.gitlab.com/satoshilabs/trezor/trezor-firmware/trezor-firmware-en
 
 # Releases
 
+release core fw regular deploy:
+  stage: deploy
+  variables:
+    DEPLOY_DIRECTORY: "releases/firmwares/tt"
+    GIT_SUBMODULE_STRATEGY: "none"
+  before_script: []  # no poetry
+  needs:
+    - core fw regular build
+  script:
+    - export VERSION=$(./tools/version.sh core/embed/firmware/version.h)
+    - export NAME="firmware-T2T1-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
+    - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
+    - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
+  only:
+    - /^core\//
+  except:
+    - branches  # run for tags only
+  tags:
+    - deploy
+
+release core fw btconly deploy:
+  stage: deploy
+  variables:
+    DEPLOY_DIRECTORY: "releases/firmwares/tt"
+    GIT_SUBMODULE_STRATEGY: "none"
+  before_script: []  # no poetry
+  needs:
+    - core fw btconly build
+  script:
+    - export VERSION=$(./tools/version.sh core/embed/firmware/version.h)
+    - export NAME="firmware-T2T1-btconly-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
+    - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
+    - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
+  only:
+    - /^core\//
+  except:
+    - branches  # run for tags only
+  tags:
+    - deploy
+
+release core fw regular debug deploy:
+  stage: deploy
+  variables:
+    DEPLOY_DIRECTORY: "releases/firmwares/tt"
+    GIT_SUBMODULE_STRATEGY: "none"
+  before_script: []  # no poetry
+  needs:
+    - core fw regular debug build
+  script:
+    - export VERSION=$(./tools/version.sh core/embed/firmware/version.h)
+    - export NAME="firmware-T2T1-debug-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
+    - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
+    - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
+  only:
+    - /^core\//
+  except:
+    - branches  # run for tags only
+  tags:
+    - deploy
+
+release core fw btconly debug deploy:
+  stage: deploy
+  variables:
+    DEPLOY_DIRECTORY: "releases/firmwares/tt"
+    GIT_SUBMODULE_STRATEGY: "none"
+  before_script: []  # no poetry
+  needs:
+    - core fw btconly debug build
+  script:
+    - export VERSION=$(./tools/version.sh core/embed/firmware/version.h)
+    - export NAME="firmware-T2T1-btconly-debug-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
+    - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
+    - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
+  only:
+    - /^core\//
+  except:
+    - branches  # run for tags only
+  tags:
+    - deploy
+
 # Legacy
 
 release legacy fw regular deploy:
@@ -14,7 +98,7 @@ release legacy fw regular deploy:
     - legacy fw regular build
   script:
     - export VERSION=$(./tools/version.sh legacy/firmware/version.h)
-    - export NAME="trezor-fw-regular-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - export NAME="firmware-T1B1-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
     - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
     - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
     - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
@@ -35,7 +119,7 @@ release legacy fw btconly deploy:
     - legacy fw btconly build
   script:
     - export VERSION=$(./tools/version.sh legacy/firmware/version.h)
-    - export NAME="trezor-fw-btconly-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - export NAME="firmware-T1B1-btconly-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
     - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
     - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
     - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
@@ -56,7 +140,7 @@ release legacy fw regular debug deploy:
     - legacy fw regular debug build
   script:
     - export VERSION=$(./tools/version.sh legacy/firmware/version.h)
-    - export NAME="trezor-fw-regular-debug-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - export NAME="firmware-T1B1-debug-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
     - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
     - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
     - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
@@ -77,7 +161,7 @@ release legacy fw btconly debug deploy:
     - legacy fw btconly debug build
   script:
     - export VERSION=$(./tools/version.sh legacy/firmware/version.h)
-    - export NAME="trezor-fw-btconly-debug-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
+    - export NAME="firmware-T1B1-btconly-debug-$VERSION-$CI_COMMIT_SHORT_SHA.bin"
     - echo "Deploying to ${DEPLOY_DIRECTORY}/$NAME"
     - mkdir -p "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}"
     - rsync --delete -va $NAME "${DEPLOY_BASE_DIR}/${DEPLOY_DIRECTORY}/$NAME"
@@ -98,12 +182,16 @@ release core unix debug deploy:
   before_script: []  # no poetry
   needs:
     - core unix frozen debug build
+    - core unix frozen debug build arm
   script:
     - export VERSION=$(./tools/version.sh core/embed/firmware/version.h)
     - DEST="$DEPLOY_PATH/trezor-emu-core-v$VERSION"
-    - echo "Deploying to $DEST"
-    - nix-shell -p patchelf --run "patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 core/build/unix/trezor-emu-core"
+    - DEST_ARM="$DEPLOY_PATH/arm/trezor-emu-core-v$VERSION-arm"
+    - echo "Deploying to $DEST and $DEST_ARM"
+    - $NIX_SHELL -p patchelf --run "patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 core/build/unix/trezor-emu-core"
+    - $NIX_SHELL -p patchelf --run "patchelf --set-interpreter /lib/ld-linux-aarch64.so.1 core/build/unix/trezor-emu-core-arm"
     - rsync --delete -va core/build/unix/trezor-emu-core "$DEST"
+    - rsync --delete -va core/build/unix/trezor-emu-core-arm "$DEST_ARM"
   only:
     - /^core\//
   except:
@@ -119,12 +207,16 @@ release legacy unix debug deploy:
   before_script: []  # no poetry
   needs:
     - legacy emu regular debug build
+    - legacy emu regular debug build arm
   script:
     - export VERSION=$(./tools/version.sh legacy/firmware/version.h)
     - DEST="$DEPLOY_PATH/trezor-emu-legacy-v$VERSION"
-    - echo "Deploying to $DEST"
-    - nix-shell -p patchelf --run "patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 legacy/firmware/*.elf"
-    - rsync --delete -va legacy/firmware/*.elf "$DEST"
+    - DEST_ARM="$DEPLOY_PATH/arm/trezor-emu-legacy-v$VERSION-arm"
+    - echo "Deploying to $DEST and $DEST_ARM"
+    - $NIX_SHELL -p patchelf --run "patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 legacy/firmware/trezor.elf"
+    - $NIX_SHELL -p patchelf --run "patchelf --set-interpreter /lib/ld-linux-aarch64.so.1 legacy/firmware/trezor-arm.elf"
+    - rsync --delete -va legacy/firmware/trezor.elf "$DEST"
+    - rsync --delete -va legacy/firmware/trezor-arm.elf "$DEST_ARM"
   only:
     - /^legacy\//
   except:
@@ -134,16 +226,64 @@ release legacy unix debug deploy:
 
 # UI tests
 
-ui tests core fixtures deploy:
+ui tests fixtures deploy:
   stage: deploy
   variables:
     DEPLOY_PATH: "${DEPLOY_BASE_DIR}/ui_tests/"
+    BUCKET: "data.trezor.io"
     GIT_SUBMODULE_STRATEGY: "none"
   before_script: []  # no poetry
   needs:
-    - core device ui test
+    - core click test
+    - core device test
+    - legacy device test
   script:
     - echo "Deploying to $DEPLOY_PATH"
     - rsync --delete -va ci/ui_test_records/* "$DEPLOY_PATH"
+    - source ${AWS_DEPLOY_DATA}
+    - aws s3 sync $DEPLOY_PATH s3://$BUCKET/dev/firmware/ui_tests
+    # This "hack" is needed because aws does not have an easy option to generate autoindex. We fetch the one autogenerated by nginx on local server.
+    - wget https://firmware.corp.sldev.cz/ui_tests/ -O index.html && aws s3 cp index.html s3://$BUCKET/dev/firmware/ui_tests/
   tags:
     - deploy
+
+# sync to aws
+
+sync emulators to aws:
+  stage: deploy
+  variables:
+    DEPLOY_PATH: "${DEPLOY_BASE_DIR}/releases/emulators/"
+    BUCKET: "data.trezor.io"
+    GIT_SUBMODULE_STRATEGY: "none"
+  before_script: []  # no poetry
+  script:
+    - source ${AWS_DEPLOY_DATA}
+    - aws s3 sync $DEPLOY_PATH s3://$BUCKET/dev/firmware/releases/emulators/
+    # This "hack" is needed because aws does not have an easy option to generate autoindex. We fetch the one autogenerated by nginx on local server.
+    - wget https://firmware.corp.sldev.cz/releases/emulators/ -O index.html && aws s3 cp index.html s3://$BUCKET/dev/firmware/releases/emulators/
+    - wget https://firmware.corp.sldev.cz/releases/emulators/arm/ -O index.html && aws s3 cp index.html s3://$BUCKET/dev/firmware/releases/emulators/arm/
+    # invalidate cloudfront cache for dev/ directory.
+    - aws cloudfront create-invalidation --distribution-id E1ERY5K2OTKKI1 --paths '/dev/*'
+  only:
+    - /^legacy\//
+    - /^core\//
+  except:
+    - branches  # run for tags only
+  tags:
+    - deploy
+
+# common sync to trezor-common
+
+common sync:
+  stage: deploy
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
+    GIT_STRATEGY: clone  # clone entire repo instead of reusing workspace
+    GIT_DEPTH: 0  # avoid shallow clone
+  only:
+    - schedules
+  needs: []
+  before_script: []  # no poetry
+  script:
+    - echo "Synchronizing common with the trezor-common repository"
+    - ./ci/common_sync/common_repo_sync.sh

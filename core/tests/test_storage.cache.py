@@ -11,6 +11,11 @@ from apps.base import handle_Initialize, handle_EndSession
 KEY = 0
 
 
+# Function moved from cache.py, as it was not used there
+def is_session_started() -> bool:
+    return cache._active_session_idx is not None
+
+
 class TestStorageCache(unittest.TestCase):
     def setUp(self):
         cache.clear_all()
@@ -29,15 +34,15 @@ class TestStorageCache(unittest.TestCase):
 
     def test_end_session(self):
         session_id = cache.start_session()
-        self.assertTrue(cache.is_session_started())
+        self.assertTrue(is_session_started())
         cache.set(KEY, b"A")
         cache.end_current_session()
-        self.assertFalse(cache.is_session_started())
+        self.assertFalse(is_session_started())
         self.assertRaises(cache.InvalidSessionError, cache.get, KEY)
 
         # ending an ended session should be a no-op
         cache.end_current_session()
-        self.assertFalse(cache.is_session_started())
+        self.assertFalse(is_session_started())
 
         session_id_a = cache.start_session(session_id)
         # original session no longer exists
@@ -83,6 +88,24 @@ class TestStorageCache(unittest.TestCase):
         with self.assertRaises(cache.InvalidSessionError):
             cache.get(KEY)
 
+    def test_get_set_int(self):
+        session_id1 = cache.start_session()
+        cache.set_int(KEY, 1234)
+        self.assertEqual(cache.get_int(KEY), 1234)
+
+        session_id2 = cache.start_session()
+        cache.set_int(KEY, 5678)
+        self.assertEqual(cache.get_int(KEY), 5678)
+
+        cache.start_session(session_id2)
+        self.assertEqual(cache.get_int(KEY), 5678)
+        cache.start_session(session_id1)
+        self.assertEqual(cache.get_int(KEY), 1234)
+
+        cache.clear_all()
+        with self.assertRaises(cache.InvalidSessionError):
+            cache.get_int(KEY)
+
     def test_delete(self):
         session_id1 = cache.start_session()
         self.assertIsNone(cache.get(KEY))
@@ -101,13 +124,6 @@ class TestStorageCache(unittest.TestCase):
 
         cache.start_session(session_id1)
         self.assertEqual(cache.get(KEY), b"hello")
-
-    def test_decorator_mismatch(self):
-        with self.assertRaises(AssertionError):
-
-            @cache.stored(KEY)
-            async def async_fun():
-                pass
 
     def test_decorators(self):
         run_count = 0
@@ -206,10 +222,10 @@ class TestStorageCache(unittest.TestCase):
     def test_EndSession(self):
         self.assertRaises(cache.InvalidSessionError, cache.get, KEY)
         session_id = cache.start_session()
-        self.assertTrue(cache.is_session_started())
+        self.assertTrue(is_session_started())
         self.assertIsNone(cache.get(KEY))
         await_result(handle_EndSession(DUMMY_CONTEXT, EndSession()))
-        self.assertFalse(cache.is_session_started())
+        self.assertFalse(is_session_started())
         self.assertRaises(cache.InvalidSessionError, cache.get, KEY)
 
 
