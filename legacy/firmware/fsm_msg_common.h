@@ -36,7 +36,7 @@ bool get_features(Features *resp) {
   if (device_is_factory_mode()) {
     uint32_t cert_len = 0;
     resp->has_vendor = true;
-    strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+    strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
     resp->has_model = true;
     strlcpy(resp->model, "factory", sizeof(resp->model));
     resp->major_version = VERSION_MAJOR;
@@ -53,7 +53,7 @@ bool get_features(Features *resp) {
 #endif
   {
     resp->has_vendor = true;
-    strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+    strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
     resp->major_version = VERSION_MAJOR;
     resp->minor_version = VERSION_MINOR;
     resp->patch_version = VERSION_PATCH;
