@@ -2,12 +2,13 @@ from typing import TYPE_CHECKING
 
 from storage import cache, device
 from trezor import wire
-from trezor.crypto import cardano
+from trezor.crypto import bip32, cardano
+from trezor.enums import CardanoDerivationType
 
 from apps.common import mnemonic
-from apps.common.seed import get_seed
+from apps.common.seed import derive_and_store_roots, get_seed
 
-from .helpers.paths import BYRON_ROOT, MINTING_ROOT, MULTISIG_ROOT, SHELLEY_ROOT
+from .helpers import paths
 
 if TYPE_CHECKING:
     from typing import Callable, Awaitable, TypeVar
@@ -16,8 +17,6 @@ if TYPE_CHECKING:
     from apps.common.keychain import MsgOut, Handler
 
     from trezor import messages
-    from trezor.enums import CardanoDerivationType
-    from trezor.crypto import bip32
 
     CardanoMessages = (
         messages.CardanoGetAddress
@@ -38,10 +37,10 @@ class Keychain:
     """
 
     def __init__(self, root: bip32.HDNode) -> None:
-        self.byron_root = self._derive_path(root, BYRON_ROOT)
-        self.shelley_root = self._derive_path(root, SHELLEY_ROOT)
-        self.multisig_root = self._derive_path(root, MULTISIG_ROOT)
-        self.minting_root = self._derive_path(root, MINTING_ROOT)
+        self.byron_root = self._derive_path(root, paths.BYRON_ROOT)
+        self.shelley_root = self._derive_path(root, paths.SHELLEY_ROOT)
+        self.multisig_root = self._derive_path(root, paths.MULTISIG_ROOT)
+        self.minting_root = self._derive_path(root, paths.MINTING_ROOT)
         root.__del__()
 
     @staticmethod
@@ -81,11 +80,11 @@ class Keychain:
 
         # this is true now, so for simplicity we don't branch on path type
         assert (
-            len(BYRON_ROOT) == len(SHELLEY_ROOT)
-            and len(MULTISIG_ROOT) == len(SHELLEY_ROOT)
-            and len(MINTING_ROOT) == len(SHELLEY_ROOT)
+            len(paths.BYRON_ROOT) == len(paths.SHELLEY_ROOT)
+            and len(paths.MULTISIG_ROOT) == len(paths.SHELLEY_ROOT)
+            and len(paths.MINTING_ROOT) == len(paths.SHELLEY_ROOT)
         )
-        suffix = node_path[len(SHELLEY_ROOT) :]
+        suffix = node_path[len(paths.SHELLEY_ROOT) :]
 
         # derive child node from the root
         return self._derive_path(path_root, suffix)
@@ -96,19 +95,19 @@ class Keychain:
 
 
 def is_byron_path(path: Bip32Path) -> bool:
-    return path[: len(BYRON_ROOT)] == BYRON_ROOT
+    return path[: len(paths.BYRON_ROOT)] == paths.BYRON_ROOT
 
 
 def is_shelley_path(path: Bip32Path) -> bool:
-    return path[: len(SHELLEY_ROOT)] == SHELLEY_ROOT
+    return path[: len(paths.SHELLEY_ROOT)] == paths.SHELLEY_ROOT
 
 
 def is_multisig_path(path: Bip32Path) -> bool:
-    return path[: len(MULTISIG_ROOT)] == MULTISIG_ROOT
+    return path[: len(paths.MULTISIG_ROOT)] == paths.MULTISIG_ROOT
 
 
 def is_minting_path(path: Bip32Path) -> bool:
-    return path[: len(MINTING_ROOT)] == MINTING_ROOT
+    return path[: len(paths.MINTING_ROOT)] == paths.MINTING_ROOT
 
 
 def derive_and_store_secrets(passphrase: str) -> None:
@@ -137,12 +136,18 @@ def derive_and_store_secrets(passphrase: str) -> None:
     cache.set(cache.APP_CARDANO_ICARUS_TREZOR_SECRET, icarus_trezor_secret)
 
 
+async def _get_secret(ctx: wire.Context, cache_entry: int) -> bytes:
+    secret = cache.get(cache_entry)
+    if secret is None:
+        await derive_and_store_roots(ctx)
+        secret = cache.get(cache_entry)
+        assert secret is not None
+    return secret
+
+
 async def _get_keychain_bip39(
     ctx: wire.Context, derivation_type: CardanoDerivationType
 ) -> Keychain:
-    from apps.common.seed import derive_and_store_roots
-    from trezor.enums import CardanoDerivationType
-
     if not device.is_initialized():
         raise wire.NotInitialized("Device is not initialized")
 
@@ -158,18 +163,12 @@ async def _get_keychain_bip39(
     else:
         cache_entry = cache.APP_CARDANO_ICARUS_TREZOR_SECRET
 
-    # _get_secret
-    secret = cache.get(cache_entry)
-    if secret is None:
-        await derive_and_store_roots(ctx)
-        secret = cache.get(cache_entry)
-        assert secret is not None
-
+    secret = await _get_secret(ctx, cache_entry)
     root = cardano.from_secret(secret)
     return Keychain(root)
 
 
-async def _get_keychain(
+async def get_keychain(
     ctx: wire.Context, derivation_type: CardanoDerivationType
 ) -> Keychain:
     if mnemonic.is_bip39():
@@ -182,7 +181,7 @@ async def _get_keychain(
 
 def with_keychain(func: HandlerWithKeychain[MsgIn, MsgOut]) -> Handler[MsgIn, MsgOut]:
     async def wrapper(ctx: wire.Context, msg: MsgIn) -> MsgOut:
-        keychain = await _get_keychain(ctx, msg.derivation_type)
+        keychain = await get_keychain(ctx, msg.derivation_type)
         return await func(ctx, msg, keychain)
 
     return wrapper

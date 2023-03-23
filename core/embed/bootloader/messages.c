@@ -448,6 +448,9 @@ uint8_t *const chunk_buffer = (uint8_t *const)0x24000000;
 // SRAM is unused, so we can use it for chunk buffer
 uint8_t *const chunk_buffer = (uint8_t *const)0x20000000;
 #endif
+// __attribute__((section(".buf"))) uint32_t chunk_buffer[IMAGE_CHUNK_SIZE / 4];
+
+// #define CHUNK_BUFFER_PTR ((const uint8_t *const)&chunk_buffer)
 
 /* we don't use secbool/sectrue/secfalse here as it is a nanopb api */
 static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
@@ -468,7 +471,7 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
 
   if (offset == 0) {
     // clear chunk buffer
-    memset(chunk_buffer, 0xFF, IMAGE_CHUNK_SIZE);
+    memset((uint8_t *)&chunk_buffer, 0xFF, IMAGE_CHUNK_SIZE);
   }
 
   uint32_t chunk_written = offset;

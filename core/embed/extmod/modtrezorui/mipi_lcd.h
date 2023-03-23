@@ -72,12 +72,6 @@ void dma2d_copy_ycbcr_to_rgb(uint32_t *pSrc, uint32_t *pDst, uint16_t xsize,
 void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format);
 void lcd_para_init(uint32_t lcd_width, uint32_t lcd_height,
                    uint32_t pixel_format);
-void display_set_backlight(int val);
-void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-void display_set_orientation(int degrees);
-void display_clear_save(void);
-const char *display_save(const char *prefix);
-void display_refresh(void);
 void lcd_pwm_init(void);
 
 #ifdef __cplusplus

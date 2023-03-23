@@ -68,48 +68,37 @@ if __debug__:
         if storage.watch_layout_changes or layout_change_chan.takers:
             layout_change_chan.publish(storage.current_content)
 
-    def get_layout_text(obj):
-        result: list[str] = []
-        count = obj.get_child_cnt()
-        for i in range(count):
-            child_obj = obj.get_child(i)
-            if hasattr(child_obj, "get_text"):
-                result.append(child_obj.get_text())
-            result += get_layout_text(child_obj)
-        return result
-
     async def dispatch_debuglink_decision(msg: DebugLinkDecision) -> None:
         from trezor.enums import DebugButton, DebugSwipeDirection
         from trezor.ui import Result
+        from trezor.ui.components.common import (
+            SWIPE_UP,
+            SWIPE_DOWN,
+            SWIPE_LEFT,
+            SWIPE_RIGHT,
+        )
 
         if UI2:
             confirm = trezorui2
-
-            class swipe:
-                SWIPE_UP = 0x01
-                SWIPE_DOWN = 0x02
-                SWIPE_LEFT = 0x04
-                SWIPE_RIGHT = 0x08
-
         else:
-            from trezor.ui.components.tt import confirm, swipe
+            from trezor.ui.components.tt import confirm
 
         if msg.button is not None:
             if msg.button == DebugButton.NO:
-                await confirm_chan.put(Result(0))
+                await confirm_chan.put(Result(confirm.CANCELLED))
             elif msg.button == DebugButton.YES:
-                await confirm_chan.put(Result(1))
+                await confirm_chan.put(Result(confirm.CONFIRMED))
             elif msg.button == DebugButton.INFO:
                 await confirm_chan.put(Result(confirm.INFO))
         if msg.swipe is not None:
             if msg.swipe == DebugSwipeDirection.UP:
-                await swipe_chan.put(swipe.SWIPE_UP)
+                await swipe_chan.put(SWIPE_UP)
             elif msg.swipe == DebugSwipeDirection.DOWN:
-                await swipe_chan.put(swipe.SWIPE_DOWN)
+                await swipe_chan.put(SWIPE_DOWN)
             elif msg.swipe == DebugSwipeDirection.LEFT:
-                await swipe_chan.put(swipe.SWIPE_LEFT)
+                await swipe_chan.put(SWIPE_LEFT)
             elif msg.swipe == DebugSwipeDirection.RIGHT:
-                await swipe_chan.put(swipe.SWIPE_RIGHT)
+                await swipe_chan.put(SWIPE_RIGHT)
         if msg.input is not None:
             await input_chan.put(Result(msg.input))
 
@@ -122,7 +111,7 @@ if __debug__:
         content = await layout_change_chan.take()
         assert DEBUG_CONTEXT is not None
         if storage.layout_watcher is LAYOUT_WATCHER_LAYOUT:
-            await DEBUG_CONTEXT.write(DebugLinkLayout())
+            await DEBUG_CONTEXT.write(DebugLinkLayout(lines=content))
         else:
             from trezor.messages import DebugLinkState
 
@@ -150,23 +139,19 @@ if __debug__:
     async def dispatch_DebugLinkDecision(
         ctx: wire.Context, msg: DebugLinkDecision
     ) -> None:
+        from trezor import io
 
         if debuglink_decision_chan.putters:
             log.warning(__name__, "DebugLinkDecision queue is not empty")
 
         if msg.x is not None and msg.y is not None:
-            # evt_down = io.TOUCH_START, msg.x, msg.y
-            # evt_up = io.TOUCH_END, msg.x, msg.y
-            # loop.synthetic_events.append((io.TOUCH, evt_down))
-            # if msg.hold_ms is not None:
-            #     loop.schedule(touch_hold(msg.x, msg.y, msg.hold_ms))
-            # else:
-            #     loop.synthetic_events.append((io.TOUCH, evt_up))
-            from trezor.ui import Result
-
-            # SHOW_MORE
-            if msg.x == 143 and msg.y == 167:
-                await confirm_chan.put(Result(2))
+            evt_down = io.TOUCH_START, msg.x, msg.y
+            evt_up = io.TOUCH_END, msg.x, msg.y
+            loop.synthetic_events.append((io.TOUCH, evt_down))
+            if msg.hold_ms is not None:
+                loop.schedule(touch_hold(msg.x, msg.y, msg.hold_ms))
+            else:
+                loop.synthetic_events.append((io.TOUCH, evt_up))
         else:
             debuglink_decision_chan.publish(msg)
 

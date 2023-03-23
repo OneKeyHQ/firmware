@@ -1,4 +1,5 @@
 # generated from knownapps.py.mako
+# (by running `make templates` in `core`)
 # do not edit manually!
 
 
@@ -66,6 +67,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
             use_sign_count=None,
             use_self_attestation=None,
         )
+    if rp_id_hash == b"\x19\x81\x5c\xb9\xa5\xfb\x25\xd8\x05\xde\xbd\x7b\x32\x53\x7e\xd5\x78\x63\x9b\x3e\xd1\x08\xec\x7c\x5b\xb9\xe8\xf0\xdf\xb1\x68\x73":
+        # WebAuthn key for Cloudflare
+        return FIDOApp(
+            label="dash.cloudflare.com",
+            icon="A:/res/icon_cloudflare.png",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
     if rp_id_hash == b"\xe2\x7d\x61\xb4\xe9\x9d\xe0\xed\x98\x16\x3c\xb3\x8b\x7a\xf9\x33\xc6\x66\x5e\x55\x09\xe8\x49\x08\x37\x05\x58\x13\x77\x8e\x23\x6a":
         # WebAuthn key for Coinbase
         return FIDOApp(
@@ -118,6 +127,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         # U2F key for FastMail
         return FIDOApp(
             label="www.fastmail.com",
+            icon="A:/res/icon_fastmail.png",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
+    if rp_id_hash == b"\x3f\xcb\x82\x82\xb8\x46\x76\xeb\xee\x71\x40\xe3\x9e\xca\xe1\x6e\xeb\x19\x90\x64\xc7\xc7\xe4\x43\x2e\x28\xc9\xb5\x7e\x4b\x60\x39":
+        # WebAuthn key for FastMail
+        return FIDOApp(
+            label="fastmail.com",
             icon="A:/res/icon_fastmail.png",
             use_sign_count=None,
             use_self_attestation=None,
@@ -194,6 +211,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
             use_sign_count=None,
             use_self_attestation=None,
         )
+    if rp_id_hash == b"\x9c\x2e\x02\xc4\xff\xf7\x76\x62\xe1\xde\x80\x3b\x43\x9e\x11\xc0\xdd\x0c\x3f\x66\x42\xce\xc4\xe6\x84\xd6\x49\x87\x0a\xd1\xbb\x59":
+        # WebAuthn key for Invity
+        return FIDOApp(
+            label="invity.io",
+            icon="A:/res/icon_invity.png",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
     if rp_id_hash == b"\x53\xa1\x5b\xa4\x2a\x7c\x03\x25\xb8\xdb\xee\x28\x96\x34\xa4\x8f\x58\xae\xa3\x24\x66\x45\xd5\xff\x41\x8f\x9b\xb8\x81\x98\x85\xa9":
         # U2F key for Keeper
         return FIDOApp(
@@ -207,6 +232,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         return FIDOApp(
             label="keepersecurity.eu",
             icon="A:/res/icon_keeper.png",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
+    if rp_id_hash == b"\x3f\x37\x50\x85\x33\x2c\xac\x4f\xad\xf9\xe5\xdd\x28\xcd\x54\x69\x8f\xab\x98\x4b\x75\xd9\xc3\x6a\x07\x2c\xb1\x60\x77\x3f\x91\x52":
+        # WebAuthn key for Kraken
+        return FIDOApp(
+            label="kraken.com",
+            icon="A:/res/icon_kraken.png",
             use_sign_count=None,
             use_self_attestation=None,
         )
@@ -239,6 +272,14 @@ def by_rp_id_hash(rp_id_hash: bytes) -> FIDOApp | None:
         return FIDOApp(
             label="www.namecheap.com",
             icon="A:/res/icon_namecheap.png",
+            use_sign_count=None,
+            use_self_attestation=None,
+        )
+    if rp_id_hash == b"\xa2\x59\xc2\xb5\x0d\x78\x50\x80\xf8\xbe\x7f\x17\xca\xf8\x15\x6c\x8d\x18\xf4\x7e\xdb\xaf\x51\x8f\xa6\xf5\x9f\x29\xcd\x28\xf1\x5c":
+        # WebAuthn key for Proton
+        return FIDOApp(
+            label="proton.me",
+            icon="A:/res/icon_proton.png",
             use_sign_count=None,
             use_self_attestation=None,
         )

@@ -1,13 +1,11 @@
 use crate::ui::{
     component::{Component, Event, EventCtx},
     display::{self, Color, Font},
+    event::{ButtonEvent, PhysicalButton},
     geometry::{Offset, Point, Rect},
 };
 
-use super::{
-    event::{ButtonEvent, T1Button},
-    theme,
-};
+use super::theme;
 
 pub enum ButtonMsg {
     Clicked,
@@ -20,10 +18,10 @@ pub enum ButtonPos {
 }
 
 impl ButtonPos {
-    fn hit(&self, b: &T1Button) -> bool {
+    fn hit(&self, b: &PhysicalButton) -> bool {
         matches!(
             (self, b),
-            (Self::Left, T1Button::Left) | (Self::Right, T1Button::Right)
+            (Self::Left, PhysicalButton::Left) | (Self::Right, PhysicalButton::Right)
         )
     }
 }
@@ -94,7 +92,7 @@ impl<T: AsRef<str>> Button<T> {
 
         let start_of_baseline = area.bottom_left() + Offset::new(border_width, -2);
 
-        return (area, start_of_baseline);
+        (area, start_of_baseline)
     }
 }
 
@@ -132,7 +130,7 @@ where
 
         match &self.content {
             ButtonContent::Text(text) => {
-                let background_color = style.text_color.neg();
+                let background_color = style.text_color.negate();
                 if style.border_horiz {
                     display::rect_fill_rounded1(self.area, background_color, theme::BG);
                 } else {

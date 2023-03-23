@@ -58,7 +58,10 @@ def cli() -> None:
 @cli.command()
 @with_client
 def self_test(client: "TrezorClient") -> str:
-    """Perform a self-test."""
+    """Perform a factory self-test.
+
+    Only available on PRODTEST firmware.
+    """
     return debuglink.self_test(client)
 
 
@@ -131,17 +134,25 @@ def load(
         if not label:
             label = "SLIP-0014"
 
-    return debuglink.load_device(
-        client,
-        mnemonic=list(mnemonic),
-        pin=pin,
-        passphrase_protection=passphrase_protection,
-        label=label,
-        language="en-US",
-        skip_checksum=ignore_checksum,
-        needs_backup=needs_backup,
-        no_backup=no_backup,
-    )
+    try:
+        return debuglink.load_device(
+            client,
+            mnemonic=list(mnemonic),
+            pin=pin,
+            passphrase_protection=passphrase_protection,
+            label=label,
+            language="en-US",
+            skip_checksum=ignore_checksum,
+            needs_backup=needs_backup,
+            no_backup=no_backup,
+        )
+    except exceptions.TrezorFailure as e:
+        if e.code == messages.FailureType.UnexpectedMessage:
+            raise click.ClickException(
+                "Unrecognized message. Make sure your Trezor is using debug firmware."
+            )
+        else:
+            raise
 
 
 @cli.command()
@@ -390,3 +401,29 @@ def list_dir(client: "TrezorClient", path_dir: str) -> None:
     files_info = device.list_dir(client, path_dir)
     for info in files_info:
         click.echo(f"file_name {info.name} with size {info.size} bytes")
+
+@cli.command()
+@click.argument("enable", type=ChoiceType({"on": True, "off": False}), required=False)
+@click.option(
+    "-e",
+    "--expiry",
+    type=int,
+    help="Dialog expiry in seconds.",
+)
+@with_client
+def set_busy(
+    client: "TrezorClient", enable: Optional[bool], expiry: Optional[int]
+) -> str:
+    """Show a "Do not disconnect" dialog."""
+    if enable is False:
+        return device.set_busy(client, None)
+
+    if expiry is None:
+        raise click.ClickException("Missing option '-e' / '--expiry'.")
+
+    if expiry <= 0:
+        raise click.ClickException(
+            f"Invalid value for '-e' / '--expiry': '{expiry}' is not a positive integer."
+        )
+
+    return device.set_busy(client, expiry * 1000)

@@ -103,7 +103,7 @@ def test_spend_v4_input(client: Client):
                 messages.ButtonRequest(code=B.SignTx),
                 request_input(0),
                 request_output(0),
-                *request_finished(),
+                request_finished(),
             ]
         )
 
@@ -150,7 +150,7 @@ def test_send_to_multisig(client: Client):
                 messages.ButtonRequest(code=B.SignTx),
                 request_input(0),
                 request_output(0),
-                *request_finished(),
+                request_finished(),
             ]
         )
 
@@ -196,7 +196,7 @@ def test_spend_v5_input(client: Client):
                 messages.ButtonRequest(code=B.SignTx),
                 request_input(0),
                 request_output(0),
-                *request_finished(),
+                request_finished(),
             ]
         )
 
@@ -250,7 +250,64 @@ def test_one_two(client: Client):
                 request_input(0),
                 request_output(0),
                 request_output(1),
-                *request_finished(),
+                request_finished(),
+            ]
+        )
+
+        _, serialized_tx = btc.sign_tx(
+            client,
+            "Zcash Testnet",
+            [inp1],
+            [out1, out2],
+            version=5,
+            version_group_id=VERSION_GROUP_ID,
+            branch_id=BRANCH_ID,
+        )
+
+        # Accepted by network: txid = d8cfa377012ca0b8d856586693b530835bf2fa14add0380e24ec6755bed5b931
+        assert (
+            serialized_tx.hex()
+            == "050000800a27a726b4d0d6c2000000000000000001bf79ce8a0403de4775d3538c670de802af72e8961c8b9174f36b8fa1d69b30c5000000006b483045022100be78eccf801dda4dd33f9d4e04c2aae01022869d1d506d51669204ec269d71a90220394a51838faf40176058cf45fe7032be9c5c942e21aff35d7dbe4b96ab5e0a500121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0ffffffff0240420f00000000001976a9141efeae5c937bfc7f095a06aabdb5476a5d6d19db88ac30cd2f00000000001976a914a579388225827d9f2fe9014add644487808c695d88ac000000"
+        )
+
+
+@pytest.mark.skip_t1
+def test_unified_address(client: Client):
+    # identical to the test_one_two
+    # but receiver address is unified with an orchard address
+    inp1 = messages.TxInputType(
+        # tmQoJ3PTXgQLaRRZZYT6xk8XtjRbr2kCqwu
+        address_n=parse_path("m/44h/1h/0h/0/0"),
+        amount=4_134_720,
+        prev_hash=TXHASH_c5309b,
+        prev_index=0,
+    )
+
+    out1 = messages.TxOutputType(
+        # p2pkh: m/44h/1h/0h/0/8 + orchard: m/32h/1h/0h
+        address="utest1xt8k2akcdnncjfz8sfxkm49quc4w627skp3qpggkwp8c8ay3htftjf7tur9kftcw0w4vu4scwfg93ckfag84khy9k40yanl5k0qkanh9cyhddgws786qeqn37rtyf6rx4eflz09zk06",
+        amount=1_000_000,
+        script_type=messages.OutputScriptType.PAYTOADDRESS,
+    )
+
+    out2 = messages.TxOutputType(
+        address_n=parse_path("m/44h/1h/0h/0/0"),
+        amount=4_134_720 - 1_000_000 - 2_000,
+        script_type=messages.OutputScriptType.PAYTOADDRESS,
+    )
+
+    with client:
+        client.set_expected_responses(
+            [
+                request_input(0),
+                request_output(0),
+                messages.ButtonRequest(code=B.ConfirmOutput),
+                request_output(1),
+                messages.ButtonRequest(code=B.SignTx),
+                request_input(0),
+                request_output(0),
+                request_output(1),
+                request_finished(),
             ]
         )
 
@@ -292,7 +349,7 @@ def test_external_presigned(client: Client):
             "76a914a579388225827d9f2fe9014add644487808c695d88ac"
         ),
         script_sig=bytes.fromhex(
-            "48304502210090020ba5d1c945145f04e940c4b6026a24d2b9e58e7ae53834eca6f606e457e4022040d214cb7ad2bd2cff14bac8d7b8eab0bb603c239a962ecd8535ea49ca25071e0121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0"
+            "47304402207635614c690bfe8701ebe822a7322273feaa8d664a82780901628fd4c907879e022011541c320b9d994b16ee7251b41a76e5edb5842cf2fa77db2c9381f32f921b0f0121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0"
         ),
     )
 
@@ -314,7 +371,7 @@ def test_external_presigned(client: Client):
                 request_input(0),
                 request_input(1),
                 request_output(0),
-                *request_finished(),
+                request_finished(),
             ]
         )
 
@@ -324,14 +381,14 @@ def test_external_presigned(client: Client):
             [inp1, inp2],
             [out1],
             version=5,
-            version_group_id=0x892F2085,
-            branch_id=0x76B809BB,
+            version_group_id=VERSION_GROUP_ID,
+            branch_id=BRANCH_ID,
         )
 
         # FAKE tx
         assert (
             serialized_tx.hex()
-            == "0500008085202f89bb09b87600000000000000000268039326c180fa7b1e999392e25a3ec6a8aec83c11b787ddb1746922020682e3000000006a473044022033bdf8ca157ae0583f6f17bab3ee440a3cbfc664caa33ee93c26adde27cb5160022062ba9e410a1a45289fafb4d31b5704938a2262a311be1104418a15660f5281cf0121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0ffffffffdc754d63eff4698ee321476872519c53f14cfe58c9425c7ee464c206461ef5aa010000006b48304502210090020ba5d1c945145f04e940c4b6026a24d2b9e58e7ae53834eca6f606e457e4022040d214cb7ad2bd2cff14bac8d7b8eab0bb603c239a962ecd8535ea49ca25071e0121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0ffffffff016c3ec323000000001976a9145b157a678a10021243307e4bb58f36375aa80e1088ac000000"
+            == "050000800a27a726b4d0d6c200000000000000000268039326c180fa7b1e999392e25a3ec6a8aec83c11b787ddb1746922020682e3000000006b48304502210083493f0a49e80b95469ea933e369500b69e73871d3e6d6c404f4bc8fc98701a80220326f5159a3fa17abc001cc6126ba5268ec78f34cccd559821fb7b57cbe0697080121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0ffffffffdc754d63eff4698ee321476872519c53f14cfe58c9425c7ee464c206461ef5aa010000006a47304402207635614c690bfe8701ebe822a7322273feaa8d664a82780901628fd4c907879e022011541c320b9d994b16ee7251b41a76e5edb5842cf2fa77db2c9381f32f921b0f0121030e669acac1f280d1ddf441cd2ba5e97417bf2689e4bbec86df4f831bf9f7ffd0ffffffff016c3ec323000000001976a9145b157a678a10021243307e4bb58f36375aa80e1088ac000000"
         )
 
 
@@ -421,7 +478,7 @@ def test_spend_multisig(client: Client):
         messages.ButtonRequest(code=B.SignTx),
         request_input(0),
         request_output(0),
-        *request_finished(),
+        request_finished(),
     ]
 
     with client:

@@ -25,8 +25,7 @@
 
 #include "common.h"
 #include "display.h"
-
-#include "font_bitmap.h"
+#include "fonts/font_bitmap.h"
 
 #if defined TREZOR_MODEL_T
 
@@ -34,22 +33,22 @@
 #if TREZOR_UI2
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#include "font_tthoves_regular_18.h"
+#include "fonts/font_tthoves_regular_18.h"
 #define FONT_NORMAL_DATA Font_TTHoves_Regular_18
 #define FONT_NORMAL_HEIGHT 18
 #endif
 #ifdef TREZOR_FONT_MEDIUM_ENABLE
-#include "font_tthoves_medium_20.h"
+#include "fonts/font_tthoves_medium_20.h"
 #define FONT_MEDIUM_DATA Font_TTHoves_Medium_20
 #define FONT_MEDIUM_HEIGHT 20
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE
-#include "font_tthoves_bold_16.h"
+#include "fonts/font_tthoves_bold_16.h"
 #define FONT_BOLD_DATA Font_TTHoves_Bold_16
 #define FONT_BOLD_HEIGHT 16
 #endif
 #ifdef TREZOR_FONT_MONO_ENABLE
-#include "font_robotomono_regular_20.h"
+#include "fonts/font_robotomono_regular_20.h"
 #define FONT_MONO_DATA Font_RobotoMono_Regular_20
 #define FONT_MONO_HEIGHT 20
 #endif
@@ -58,42 +57,42 @@
 #else
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#include "font_plusjakartasans_regular_26.h"
+#include "fonts/font_plusjakartasans_regular_26.h"
 #define FONT_NORMAL_DATA Font_PlusJakartaSans_Regular_26
 #define FONT_NORMAL_HEIGHT 26
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE
-#include "font_roboto_bold_20.h"
+#include "fonts/font_roboto_bold_20.h"
 #define FONT_BOLD_DATA Font_Roboto_Bold_20
 #define FONT_BOLD_HEIGHT 20
 #endif
 #ifdef TREZOR_FONT_MONO_ENABLE
-#include "font_robotomono_regular_20.h"
+#include "fonts/font_robotomono_regular_20.h"
 #define FONT_MONO_DATA Font_RobotoMono_Regular_20
 #define FONT_MONO_HEIGHT 20
 #endif
 #ifdef TREZOR_FONT_BOLD36_ENABLE
-#include "font_roboto_bold_36.h"
+#include "fonts/font_roboto_bold_36.h"
 #define FONT_BOLD36_DATA Font_Roboto_Bold_36
 #define FONT_BOLD36_HEIGHT 36
 #endif
 #ifdef TREZOR_FONT_ROBOT_REGULAR_ENABLE
-#include "font_roboto_regular_24.h"
+#include "fonts/font_roboto_regular_24.h"
 #define FONT_ROBOT_REGULAR_24_DATA Font_Roboto_Regular_24
 #define FONT_ROBOT_REGULAR_24_HEIGHT 24
 #endif
 #ifdef TREZOR_FONT_PJKS_BOLD_ENABLE
-#include "font_plusjakartasans_bold_38.h"
+#include "fonts/font_plusjakartasans_bold_38.h"
 #define FONT_PJKS_BOLD38_DATA Font_PlusJakartaSans_Bold_38
 #define FONT_PJKS_BOLD38_HEIGHT 38
 #endif
 #ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
-#include "font_plusjakartasans_regular_20.h"
+#include "fonts/font_plusjakartasans_regular_20.h"
 #define FONT_PJKS_REGULAR20_DATA Font_PlusJakartaSans_Regular_20
 #define FONT_PJKS_REGULAR20_HEIGHT 20
 #endif
 #ifdef TREZOR_FONT_PJKS_BOLD_26_ENABLE
-#include "font_plusjakartasans_bold_26.h"
+#include "fonts/font_plusjakartasans_bold_26.h"
 #define FONT_PJKS_BOLD26_DATA Font_PlusJakartaSans_Bold_26
 #define FONT_PJKS_BOLD26_HEIGHT 26
 #endif
@@ -102,22 +101,22 @@
 #elif TREZOR_MODEL == 1
 
 #ifdef TREZOR_FONT_NORMAL_ENABLE
-#include "font_pixeloperator_regular_8.h"
+#include "fonts/font_pixeloperator_regular_8.h"
 #define FONT_NORMAL_DATA Font_PixelOperator_Regular_8
 #define FONT_NORMAL_HEIGHT 8
 #endif
 #ifdef TREZOR_FONT_MEDIUM_ENABLE
-#include "font_pixeloperator_regular_8.h"
+#include "fonts/font_pixeloperator_regular_8.h"
 #define FONT_MEDIUM_DATA Font_PixelOperator_Regular_8
 #define FONT_MEDIUM_HEIGHT 8
 #endif
 #ifdef TREZOR_FONT_BOLD_ENABLE
-#include "font_pixeloperator_bold_8.h"
+#include "fonts/font_pixeloperator_bold_8.h"
 #define FONT_BOLD_DATA Font_PixelOperator_Bold_8
 #define FONT_BOLD_HEIGHT 8
 #endif
 #ifdef TREZOR_FONT_MONO_ENABLE
-#include "font_pixeloperatormono_regular_8.h"
+#include "fonts/font_pixeloperatormono_regular_8.h"
 #define FONT_MONO_DATA Font_PixelOperatorMono_Regular_8
 #define FONT_MONO_HEIGHT 8
 #endif
@@ -131,23 +130,11 @@
 
 #include "memzero.h"
 
-static int DISPLAY_BACKLIGHT = -1;
-static int DISPLAY_ORIENTATION = -1;
-
 static struct { int x, y; } DISPLAY_OFFSET;
 
-#ifdef TREZOR_EMULATOR
-#include "display-unix.h"
-#else
+
 #if PRODUCTION_MODEL == 'H'
 #include "mipi_lcd.h"
-#elif defined TREZOR_MODEL_T
-#include "display-stm32_T.h"
-#elif TREZOR_MODEL == 1
-#include "display-stm32_1.h"
-#else
-#error Unknown Trezor model
-#endif
 #endif
 
 // common display functions
@@ -446,7 +433,7 @@ void display_loader(uint16_t progress, bool indeterminate, int yoffset,
 }
 
 #if defined TREZOR_MODEL_T
-#include "loader.h"
+#include "loader_T.h"
 #endif
 
 void display_loader_ex(uint16_t progress, bool indeterminate, int yoffset,
@@ -1017,33 +1004,6 @@ void display_offset(int set_xy[2], int *get_x, int *get_y) {
   *get_y = DISPLAY_OFFSET.y;
 }
 
-int display_orientation(int degrees) {
-  if (degrees != DISPLAY_ORIENTATION) {
-#if defined TREZOR_MODEL_T
-    if (degrees == 0 || degrees == 90 || degrees == 180 || degrees == 270) {
-#elif TREZOR_MODEL == 1
-    if (degrees == 0 || degrees == 180) {
-#else
-#error Unknown Trezor model
-#endif
-      DISPLAY_ORIENTATION = degrees;
-      display_set_orientation(degrees);
-    }
-  }
-  return DISPLAY_ORIENTATION;
-}
-
-int display_backlight(int val) {
-#if TREZOR_MODEL == 1
-  val = 255;
-#endif
-  if (DISPLAY_BACKLIGHT != val && val >= 0 && val <= 255) {
-    DISPLAY_BACKLIGHT = val;
-    display_set_backlight(val);
-  }
-  return DISPLAY_BACKLIGHT;
-}
-
 void display_fade(int start, int end, int delay) {
   for (int i = 0; i < 100; i++) {
     display_backlight(start + i * (end - start) / 100);
@@ -1164,7 +1124,10 @@ static inline void clamp_coords(int x, int y, int w, int h, int *x0, int *y0,
 }
 
 void display_clear(void) {
-  const int saved_orientation = DISPLAY_ORIENTATION;
+  const int saved_orientation = display_get_orientation();
+
+  display_reset_state();
+
   // set MADCTL first so that we can set the window correctly next
   display_orientation(0);
   // address the complete frame memory
@@ -1451,7 +1414,7 @@ bool display_toif_info(const uint8_t *data, uint32_t len, uint16_t *out_w,
 }
 
 #if defined TREZOR_MODEL_T
-#include "loader.h"
+#include "loader_T.h"
 #endif
 
 void display_loader_ex(uint16_t progress, bool indeterminate, int yoffset,
@@ -1967,33 +1930,6 @@ void display_offset(int set_xy[2], int *get_x, int *get_y) {
   }
   *get_x = DISPLAY_OFFSET.x;
   *get_y = DISPLAY_OFFSET.y;
-}
-
-int display_orientation(int degrees) {
-  if (degrees != DISPLAY_ORIENTATION) {
-#if defined TREZOR_MODEL_T
-    if (degrees == 0 || degrees == 90 || degrees == 180 || degrees == 270) {
-#elif TREZOR_MODEL == 1
-    if (degrees == 0 || degrees == 180) {
-#else
-#error Unknown Trezor model
-#endif
-      DISPLAY_ORIENTATION = degrees;
-      display_set_orientation(degrees);
-    }
-  }
-  return DISPLAY_ORIENTATION;
-}
-
-int display_backlight(int val) {
-#if TREZOR_MODEL == 1
-  val = 255;
-#endif
-  if (DISPLAY_BACKLIGHT != val && val >= 0 && val <= 255) {
-    DISPLAY_BACKLIGHT = val;
-    display_set_backlight(val);
-  }
-  return DISPLAY_BACKLIGHT;
 }
 
 void display_fade(int start, int end, int delay) {

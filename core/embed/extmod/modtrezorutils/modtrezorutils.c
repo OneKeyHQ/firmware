@@ -19,6 +19,9 @@
 
 #include "py/objstr.h"
 #include "py/runtime.h"
+#ifndef TREZOR_EMULATOR
+#include "supervise.h"
+#endif
 
 #include "version.h"
 
@@ -31,6 +34,7 @@
 #include "blake2s.h"
 #include "common.h"
 #include "flash.h"
+#include "usb.h"
 
 #ifndef TREZOR_EMULATOR
 #include "br_check.h"
@@ -218,46 +222,6 @@ STATIC mp_obj_t mod_trezorutils_firmware_vendor(void) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_firmware_vendor_obj,
                                  mod_trezorutils_firmware_vendor);
 
-/// def firmware_sector_size(sector: int) -> int:
-///     """
-///     Returns the size of the firmware sector.
-///     """
-STATIC mp_obj_t mod_trezorutils_firmware_sector_size(mp_obj_t sector) {
-  mp_uint_t sector_id = trezor_obj_get_uint(sector);
-  if (sector_id >= FIRMWARE_SECTORS_COUNT) {
-    mp_raise_msg(&mp_type_ValueError, "Invalid sector.");
-  }
-  return mp_obj_new_int(flash_sector_size(FIRMWARE_SECTORS[sector_id]));
-}
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorutils_firmware_sector_size_obj,
-                                 mod_trezorutils_firmware_sector_size);
-
-/// def get_firmware_chunk(index: int, offset: int, buffer: bytearray) -> None:
-///     """
-///     Reads a chunk of the firmware into `buffer`.
-///     """
-STATIC mp_obj_t mod_trezorutils_get_firmware_chunk(const mp_obj_t index_obj,
-                                                   const mp_obj_t offset_obj,
-                                                   const mp_obj_t buffer) {
-  mp_uint_t index = trezor_obj_get_uint(index_obj);
-  if (index >= FIRMWARE_SECTORS_COUNT) {
-    mp_raise_msg(&mp_type_ValueError, "Invalid sector.");
-  }
-  int sector = FIRMWARE_SECTORS[index];
-  mp_uint_t offset = trezor_obj_get_uint(offset_obj);
-  mp_buffer_info_t buf = {0};
-  mp_get_buffer_raise(buffer, &buf, MP_BUFFER_WRITE);
-  const void *data = flash_get_address(sector, offset, buf.len);
-  if (data == NULL) {
-    mp_raise_msg(&mp_type_ValueError, "Invalid read.");
-  }
-  memcpy(buf.buf, data, buf.len);
-
-  return mp_const_none;
-}
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(mod_trezorutils_get_firmware_chunk_obj,
-                                 mod_trezorutils_get_firmware_chunk);
-
 /// def reboot_to_bootloader() -> None:
 ///     """
 ///     Reboots to bootloader.
@@ -325,6 +289,16 @@ STATIC mp_obj_t mod_trezorutils_board_version(void) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_board_version_obj,
                                  mod_trezorutils_board_version);
+/// def usb_data_connected() -> bool:
+///     """
+///     Returns whether USB has been enumerated/configured
+///     (and is not just connected by cable without data pins)
+///     """
+STATIC mp_obj_t mod_trezorutils_usb_data_connected() {
+  return usb_configured() == sectrue ? mp_const_true : mp_const_false;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_usb_data_connected_obj,
+                                 mod_trezorutils_usb_data_connected);
 
 STATIC mp_obj_str_t mod_trezorutils_revision_obj = {
     {&mp_type_bytes}, 0, sizeof(SCM_REVISION) - 1, (const byte *)SCM_REVISION};
@@ -361,17 +335,13 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
      MP_ROM_PTR(&mod_trezorutils_firmware_hash_obj)},
     {MP_ROM_QSTR(MP_QSTR_firmware_vendor),
      MP_ROM_PTR(&mod_trezorutils_firmware_vendor_obj)},
-    {MP_ROM_QSTR(MP_QSTR_get_firmware_chunk),
-     MP_ROM_PTR(&mod_trezorutils_get_firmware_chunk_obj)},
-    {MP_ROM_QSTR(MP_QSTR_firmware_sector_size),
-     MP_ROM_PTR(&mod_trezorutils_firmware_sector_size_obj)},
-    {MP_ROM_QSTR(MP_QSTR_FIRMWARE_SECTORS_COUNT),
-     MP_ROM_INT(FIRMWARE_SECTORS_COUNT)},
     {MP_ROM_QSTR(MP_QSTR_boot_version),
      MP_ROM_PTR(&mod_trezorutils_boot_version_obj)},
     {MP_ROM_QSTR(MP_QSTR_board_version),
      MP_ROM_PTR(&mod_trezorutils_board_version_obj)},
 
+    {MP_ROM_QSTR(MP_QSTR_usb_data_connected),
+     MP_ROM_PTR(&mod_trezorutils_usb_data_connected_obj)},
     // various built-in constants
     {MP_ROM_QSTR(MP_QSTR_SCM_REVISION),
      MP_ROM_PTR(&mod_trezorutils_revision_obj)},
@@ -385,6 +355,8 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_MODEL), MP_ROM_QSTR(MP_QSTR_1)},
 #elif defined TREZOR_MODEL_T
     {MP_ROM_QSTR(MP_QSTR_MODEL), MP_ROM_QSTR(MP_QSTR_T)},
+#elif defined TREZOR_MODEL_R
+    {MP_ROM_QSTR(MP_QSTR_MODEL), MP_ROM_QSTR(MP_QSTR_R)},
 #else
 #error Unknown Trezor model
 #endif

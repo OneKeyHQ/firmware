@@ -34,7 +34,11 @@
 #include "stm32h7xx_ll_utils.h"
 #endif
 
+#ifdef RGB16
 #define COLOR_FATAL_ERROR RGB16(0x7F, 0x00, 0x00)
+#else
+#define COLOR_FATAL_ERROR COLOR_BLACK
+#endif
 
 // clang-format off
 static const uint8_t toi_icon_warning[] = {
@@ -225,6 +229,7 @@ void __assert_func(const char *file, int line, const char *func,
 #endif
 
 void hal_delay(uint32_t ms) { HAL_Delay(ms); }
+uint32_t hal_ticks_ms() { return HAL_GetTick(); }
 
 // reference RM0090 section 35.12.1 Figure 413
 #define USB_OTG_HS_DATA_FIFO_RAM (USB_OTG_HS_PERIPH_BASE + 0x20000U)
@@ -298,4 +303,13 @@ bool check_all_zeros(const void *data, int len) {
   }
 
   return (result == 0x00);
+}
+
+// this function resets settings changed in one layer (bootloader/firmware),
+// which might be incompatible with the other layers older versions,
+// where this setting might be unknown
+void ensure_compatible_settings(void) {
+#ifdef TREZOR_MODEL_T
+  display_set_big_endian();
+#endif
 }

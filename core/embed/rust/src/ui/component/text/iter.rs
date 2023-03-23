@@ -1,8 +1,4 @@
-use crate::ui::{
-    component::{text::layout::Op, LineBreaking},
-    display::Font,
-    geometry::Offset,
-};
+use crate::ui::{component::LineBreaking, display::Font};
 use core::iter;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -10,7 +6,7 @@ struct LineBreak {
     /// Index of character **after** the line-break.
     offset: usize,
     /// Distance from the last line-break of the sequence, in pixels.
-    width: i32,
+    width: i16,
     style: BreakStyle,
 }
 
@@ -23,8 +19,8 @@ enum BreakStyle {
 
 fn limit_line_breaks(
     breaks: impl Iterator<Item = LineBreak>,
-    line_height: i32,
-    available_height: i32,
+    line_height: i16,
+    available_height: i16,
 ) -> impl Iterator<Item = LineBreak> {
     breaks.take(available_height as usize / line_height as usize)
 }
@@ -46,7 +42,7 @@ fn break_text_to_spans(
     text_font: impl GlyphMetrics,
     hyphen_font: impl GlyphMetrics,
     breaking: LineBreaking,
-    available_width: i32,
+    available_width: i16,
 ) -> impl Iterator<Item = Span> {
     let mut finished = false;
     let mut last_break = LineBreak {
@@ -93,7 +89,7 @@ fn select_line_breaks(
     text_font: impl GlyphMetrics,
     hyphen_font: impl GlyphMetrics,
     breaking: LineBreaking,
-    available_width: i32,
+    available_width: i16,
 ) -> impl Iterator<Item = LineBreak> {
     let hyphen_width = hyphen_font.char_width('-');
 
@@ -162,17 +158,17 @@ fn select_line_breaks(
     })
 }
 
-trait GlyphMetrics {
-    fn char_width(&self, ch: char) -> i32;
-    fn line_height(&self) -> i32;
+pub trait GlyphMetrics {
+    fn char_width(&self, ch: char) -> i16;
+    fn line_height(&self) -> i16;
 }
 
 impl GlyphMetrics for Font {
-    fn char_width(&self, ch: char) -> i32 {
+    fn char_width(&self, ch: char) -> i16 {
         Font::char_width(*self, ch)
     }
 
-    fn line_height(&self) -> i32 {
+    fn line_height(&self) -> i16 {
         Font::line_height(*self)
     }
 }
@@ -209,21 +205,21 @@ mod tests {
 
     #[derive(Copy, Clone)]
     struct Fixed {
-        width: i32,
-        height: i32,
+        width: i16,
+        height: i16,
     }
 
     impl GlyphMetrics for Fixed {
-        fn char_width(&self, _ch: char) -> i32 {
+        fn char_width(&self, _ch: char) -> i16 {
             self.width
         }
 
-        fn line_height(&self) -> i32 {
+        fn line_height(&self) -> i16 {
             self.height
         }
     }
 
-    fn break_text(s: &str, w: i32) -> Vec<Span> {
+    fn break_text(s: &str, w: i16) -> Vec<Span> {
         break_text_to_spans(
             s,
             Fixed {
@@ -240,7 +236,7 @@ mod tests {
         .collect::<Vec<_>>()
     }
 
-    fn line_breaks(s: &str, w: i32) -> Vec<LineBreak> {
+    fn line_breaks(s: &str, w: i16) -> Vec<LineBreak> {
         select_line_breaks(
             s.char_indices(),
             Fixed {
@@ -257,7 +253,7 @@ mod tests {
         .collect::<Vec<_>>()
     }
 
-    fn hard(offset: usize, width: i32) -> LineBreak {
+    fn hard(offset: usize, width: i16) -> LineBreak {
         LineBreak {
             offset,
             width,
@@ -265,7 +261,7 @@ mod tests {
         }
     }
 
-    fn whitespace(offset: usize, width: i32) -> LineBreak {
+    fn whitespace(offset: usize, width: i16) -> LineBreak {
         LineBreak {
             offset,
             width,
@@ -273,7 +269,7 @@ mod tests {
         }
     }
 
-    fn inside_word(offset: usize, width: i32) -> LineBreak {
+    fn inside_word(offset: usize, width: i16) -> LineBreak {
         LineBreak {
             offset,
             width,

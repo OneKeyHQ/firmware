@@ -1,28 +1,17 @@
-from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
-from . import seed
+from trezor import log, messages, wire
+from trezor.ui.layouts import show_pubkey
 
-if TYPE_CHECKING:
-    from trezor.wire import Context
-    from trezor.messages import CardanoGetPublicKey, CardanoPublicKey
+from apps.common import paths
+
+from . import seed
 
 
 @seed.with_keychain
 async def get_public_key(
-    ctx: Context, msg: CardanoGetPublicKey, keychain: seed.Keychain
-) -> CardanoPublicKey:
-    from trezor import log, wire
-    from trezor.ui.layouts import show_pubkey
-    from apps.common import paths
-    from .helpers.paths import SCHEMA_MINT, SCHEMA_PUBKEY
-    from trezor.lvglui.scrs import lv
-    from . import ICON, PRIMARY_COLOR
-
-    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
-
-    address_n = msg.address_n  # local_cache_attribute
-
+    ctx: wire.Context, msg: messages.CardanoGetPublicKey, keychain: seed.Keychain
+) -> messages.CardanoPublicKey:
     await paths.validate_path(
         ctx,
         keychain,
@@ -39,23 +28,20 @@ async def get_public_key(
         raise wire.ProcessError("Deriving public key failed")
 
     if msg.show_display:
-        await show_pubkey(ctx, hexlify(key.node.public_key).decode(), network="Cardano")
+        await show_pubkey(ctx, hexlify(key.node.public_key).decode())
     return key
 
 
 def _get_public_key(
     keychain: seed.Keychain, derivation_path: list[int]
-) -> CardanoPublicKey:
-    from .helpers.utils import derive_public_key
-    from trezor.messages import HDNodeType, CardanoPublicKey
-
+) -> messages.CardanoPublicKey:
     node = keychain.derive(derivation_path)
 
     public_key = hexlify(derive_public_key(keychain, derivation_path)).decode()
     chain_code = hexlify(node.chain_code()).decode()
     xpub_key = public_key + chain_code
 
-    node_type = HDNodeType(
+    node_type = messages.HDNodeType(
         depth=node.depth(),
         child_num=node.child_num(),
         fingerprint=node.fingerprint(),
@@ -63,4 +49,4 @@ def _get_public_key(
         public_key=derive_public_key(keychain, derivation_path),
     )
 
-    return CardanoPublicKey(node=node_type, xpub=xpub_key)
+    return messages.CardanoPublicKey(node=node_type, xpub=xpub_key)

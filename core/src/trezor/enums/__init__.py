@@ -31,6 +31,7 @@ if TYPE_CHECKING:
         Entropy = 10
         LoadDevice = 13
         ResetDevice = 14
+        SetBusy = 16
         Features = 17
         PinMatrixRequest = 18
         PinMatrixAck = 19
@@ -60,9 +61,8 @@ if TYPE_CHECKING:
         RebootToBootloader = 87
         GetFirmwareHash = 88
         FirmwareHash = 89
-        GetFirmware = 90
-        FirmwareChunk = 91
-        FirmwareChunkAck = 92
+        UnlockPath = 93
+        UnlockedPathRequest = 94
         SetU2FCounter = 63
         GetNextU2FCounter = 80
         NextU2FCounter = 81
@@ -202,8 +202,6 @@ if TYPE_CHECKING:
         MoneroTransactionInitAck = 502
         MoneroTransactionSetInputRequest = 503
         MoneroTransactionSetInputAck = 504
-        MoneroTransactionInputsPermutationRequest = 505
-        MoneroTransactionInputsPermutationAck = 506
         MoneroTransactionInputViniRequest = 507
         MoneroTransactionInputViniAck = 508
         MoneroTransactionAllInputsSetRequest = 509
@@ -547,6 +545,12 @@ if TYPE_CHECKING:
         ADDRESS = 6
         ARRAY = 7
         STRUCT = 8
+
+    class MoneroNetworkType(IntEnum):
+        MAINNET = 0
+        TESTNET = 1
+        STAGENET = 2
+        FAKECHAIN = 3
 
     class NEMMosaicLevy(IntEnum):
         MosaicLevy_Absolute = 1

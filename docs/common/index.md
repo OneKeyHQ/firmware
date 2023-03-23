@@ -13,3 +13,5 @@ Common Protobuf definitions for the Onekey protocol. Also see [Communication](co
 ## Tools
 
 Tools for managing coin definitions and related data.
+
+## Message Workflows

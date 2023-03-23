@@ -1,18 +1,14 @@
 from common import *
-from trezor import log, loop, utils
+from trezor import utils
 
 if not utils.BITCOIN_ONLY:
     from apps.monero.xmr.serialize.int_serialize import (
-        dump_uint,
         dump_uvarint,
-        load_uint,
         load_uvarint,
     )
     from apps.monero.xmr.serialize.readwriter import MemoryReaderWriter
     from apps.monero.xmr.serialize_messages.base import ECPoint
-    from apps.monero.xmr.serialize_messages.tx_prefix import (
-        TxinToKey,
-    )
+    from apps.monero.xmr.serialize_messages.tx_prefix import TxinToKey
 
 
 @unittest.skipUnless(not utils.BITCOIN_ONLY, "altcoin")
@@ -58,7 +54,7 @@ class TestMoneroSerializer(unittest.TestCase):
         :return:
         """
         msg = TxinToKey(
-            amount=123, key_offsets=[1, 2, 3, 2 ** 76], k_image=bytearray(range(32))
+            amount=123, key_offsets=[1, 2, 3, 2**76], k_image=bytearray(range(32))
         )
 
         writer = MemoryReaderWriter()
@@ -66,7 +62,8 @@ class TestMoneroSerializer(unittest.TestCase):
         test_deser = TxinToKey.load(MemoryReaderWriter(writer.get_buffer()))
 
         self.assertEqual(msg.amount, test_deser.amount)
-        self.assertEqual(msg, test_deser)
+        self.assertEqual(msg.k_image, test_deser.k_image)
+        self.assertEqual(msg.key_offsets, test_deser.key_offsets)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ def format_amount(amount: int, decimals: int) -> str:
         sign = "-"
     else:
         sign = ""
-    d = 10 ** decimals
+    d = 10**decimals
     integer = amount // d
     decimal = amount % d
 

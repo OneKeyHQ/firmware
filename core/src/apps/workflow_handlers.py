@@ -60,7 +60,7 @@ def find_message_handler_module(msg_type: int) -> str:
     elif msg_type == MessageType.ReadSEPublicCert:
         return "apps.management.se_read_cert"
 
-    if utils.MODEL == "T" and msg_type == MessageType.SdProtect:
+    if utils.MODEL in ("T",) and msg_type == MessageType.SdProtect:
         return "apps.management.sd_protect"
     if utils.MODEL == "T" and msg_type == MessageType.ResourceUpload:
         if utils.EMULATOR:
@@ -104,8 +104,6 @@ def find_message_handler_module(msg_type: int) -> str:
         return "apps.misc.cipher_key_value"
     if msg_type == MessageType.GetFirmwareHash:
         return "apps.misc.get_firmware_hash"
-    if msg_type == MessageType.GetFirmware:
-        return "apps.misc.get_firmware"
     if msg_type == MessageType.BatchGetPublickeys:
         return "apps.misc.batch_get_pubkeys"
 

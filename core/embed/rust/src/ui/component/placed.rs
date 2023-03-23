@@ -27,7 +27,7 @@ impl<T> GridPlaced<T> {
         self
     }
 
-    pub fn with_spacing(mut self, spacing: i32) -> Self {
+    pub fn with_spacing(mut self, spacing: i16) -> Self {
         self.grid.spacing = spacing;
         self
     }
@@ -73,6 +73,50 @@ where
 {
     fn trace(&self, d: &mut dyn crate::trace::Tracer) {
         d.open("GridPlaced");
+        d.field("inner", &self.inner);
+        d.close();
+    }
+}
+
+pub struct FixedHeightBar<T> {
+    inner: T,
+    height: i16,
+}
+
+impl<T> FixedHeightBar<T> {
+    pub const fn bottom(inner: T, height: i16) -> Self {
+        Self { inner, height }
+    }
+}
+
+impl<T> Component for FixedHeightBar<T>
+where
+    T: Component,
+{
+    type Msg = T::Msg;
+
+    fn place(&mut self, bounds: Rect) -> Rect {
+        let (_, bar) = bounds.split_bottom(self.height);
+        self.inner.place(bar)
+    }
+
+    fn event(&mut self, ctx: &mut EventCtx, event: Event) -> Option<Self::Msg> {
+        self.inner.event(ctx, event)
+    }
+
+    fn paint(&mut self) {
+        self.inner.paint()
+    }
+}
+
+#[cfg(feature = "ui_debug")]
+impl<T> crate::trace::Trace for FixedHeightBar<T>
+where
+    T: Component,
+    T: crate::trace::Trace,
+{
+    fn trace(&self, d: &mut dyn crate::trace::Tracer) {
+        d.open("FixedHeightBar");
         d.field("inner", &self.inner);
         d.close();
     }

@@ -71,6 +71,7 @@ __all__ = (
     "confirm_modify_output",
     "confirm_modify_fee",
     "confirm_coinjoin",
+    "show_coinjoin",
     "show_popup",
     "draw_simple_text",
     "request_passphrase_on_device",
@@ -553,12 +554,17 @@ async def should_show_more(
     br_code: ButtonRequestType = ButtonRequestType.Other,
     icon: str = ui.ICON_DEFAULT,
     icon_color: int = ui.ORANGE_ICON,
+    confirm: str | bytes | None = None,
+    major_confirm: bool = False,
 ) -> bool:
     """Return True if the user wants to show more (they click a special button)
     and False when the user wants to continue without showing details.
 
     Raises ActionCancelled if the user cancels.
     """
+    if confirm is None:
+        confirm = Confirm.DEFAULT_CONFIRM
+
     page = Text(
         title,
         header_icon=icon,
@@ -568,7 +574,12 @@ async def should_show_more(
     )
     for font, text in para:
         page.content.extend((font, text, "\n"))
-    ask_dialog = Confirm(AskPaginated(page, button_text))
+
+    ask_dialog = Confirm(
+        AskPaginated(page, button_text),
+        confirm=confirm,
+        major_confirm=major_confirm,
+    )
 
     result = await raise_if_cancelled(interact(ctx, ask_dialog, br_type, br_code))
     assert result in (SHOW_PAGINATED, CONFIRMED)
@@ -860,6 +871,7 @@ async def confirm_total(
     ctx: wire.GenericContext,
     total_amount: str,
     fee_amount: str,
+    fee_rate_amount: str | None = None,
     title: str = "Confirm transaction",
     total_label: str = "Total amount:\n",
     fee_label: str = "\nincluding fee:\n",
@@ -872,6 +884,10 @@ async def confirm_total(
     text.bold(total_amount)
     text.normal(fee_label)
     text.bold(fee_amount)
+
+    if fee_rate_amount is not None:
+        text.normal(f"\n({fee_rate_amount})")
+
     await raise_if_cancelled(interact(ctx, HoldToConfirm(text), br_type, br_code))
 
 
@@ -968,6 +984,7 @@ async def confirm_modify_fee(
     sign: int,
     user_fee_change: str,
     total_fee_new: str,
+    fee_rate_amount: str | None = None,
 ) -> None:
     text = Text("Modify fee", ui.ICON_SEND, ui.GREEN, new_lines=False)
     if sign == 0:
@@ -979,29 +996,35 @@ async def confirm_modify_fee(
             text.normal("Increase your fee by:\n")
         text.bold(user_fee_change)
         text.br()
-    text.br_half()
     text.normal("Transaction fee:\n")
     text.bold(total_fee_new)
+    if fee_rate_amount is not None:
+        text.normal(f"\n({fee_rate_amount})")
     await raise_if_cancelled(
         interact(ctx, HoldToConfirm(text), "modify_fee", ButtonRequestType.SignTx)
     )
 
 
 async def confirm_coinjoin(
-    ctx: wire.GenericContext, coin_name: str, max_rounds: int, max_fee_per_vbyte: str
+    ctx: wire.GenericContext, max_rounds: int, max_fee_per_vbyte: str
 ) -> None:
     text = Text("Authorize CoinJoin", ui.ICON_RECOVERY, new_lines=False)
-    text.normal("Coin name: ")
-    text.bold(f"{coin_name}\n")
-    text.br_half()
     text.normal("Maximum rounds: ")
     text.bold(f"{max_rounds}\n")
     text.br_half()
     text.normal("Maximum mining fee:\n")
-    text.bold(f"{max_fee_per_vbyte} sats/vbyte")
+    text.bold(max_fee_per_vbyte)
     await raise_if_cancelled(
         interact(ctx, HoldToConfirm(text), "coinjoin_final", ButtonRequestType.Other)
     )
+
+
+def show_coinjoin() -> None:
+    text = Text("Please wait", ui.ICON_CONFIG, ui.RED)
+    text.normal("CoinJoin in progress.")
+    text.br()
+    text.bold("Do not disconnect your Trezor.")
+    ui.draw_simple(text)
 
 
 # TODO cleanup @ redesign

@@ -56,6 +56,7 @@ void error_reset(const char *line1, const char *line2, const char *line3,
        : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
 
 void hal_delay(uint32_t ms);
+void emulator_poll_events(void);
 
 void collect_hw_entropy(void);
 #define HW_ENTROPY_LEN (12 + 32)

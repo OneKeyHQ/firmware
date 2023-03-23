@@ -20,18 +20,23 @@
 #include <string.h>
 
 #include "button.h"
+#include "common.h"
 #include "display.h"
 #include "embed/extmod/trezorobj.h"
 #include "spi.h"
 #include "usart.h"
 
 #define SPI_IFACE (6)
+#define USB_DATA_IFACE (253)
 #define BUTTON_IFACE (254)
 #define TOUCH_IFACE (255)
 #define POLL_READ (0x0000)
 #define POLL_WRITE (0x0100)
 #define UART_IFACE (127)
 #define USB_STATE_IFACE (128)
+
+extern bool usb_connected_previously;
+
 /// package: trezorio.__init__
 
 /// def poll(ifaces: Iterable[int], list_ref: list, timeout_ms: int) -> bool:
@@ -76,6 +81,10 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
       const mp_uint_t iface = i & 0x00FF;
       const mp_uint_t mode = i & 0xFF00;
 
+#if defined TREZOR_EMULATOR
+      emulator_poll_events();
+#endif
+
       if (false) {
       }
 #if defined TREZOR_MODEL_T
@@ -113,8 +122,16 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
           ret->items[1] = MP_OBJ_FROM_PTR(tuple);
           return mp_const_true;
         }
+      } else if (iface == USB_DATA_IFACE) {
+        bool usb_connected = usb_configured() == sectrue ? true : false;
+        if (usb_connected != usb_connected_previously) {
+          usb_connected_previously = usb_connected;
+          ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+          ret->items[1] = usb_connected ? mp_const_true : mp_const_false;
+          return mp_const_true;
+        }
       }
-#elif defined TREZOR_MODEL_1
+#elif defined TREZOR_MODEL_1 || defined TREZOR_MODEL_R
       else if (iface == BUTTON_IFACE) {
         const uint32_t evt = button_read();
         if (evt & (BTN_EVT_DOWN | BTN_EVT_UP)) {

@@ -37,7 +37,13 @@
 #include "random_delays.h"
 #include "se_atca.h"
 #include "secbool.h"
+#ifdef TREZOR_MODEL_T
 #include "touch.h"
+#endif
+#if defined TREZOR_MODEL_R
+#include "button.h"
+#include "rgb_led.h"
+#endif
 #include "usb.h"
 #include "version.h"
 
@@ -395,9 +401,16 @@ int main(void) {
       pcb_version = PCB_VERSION_1_0_0;
     }
   }
+#if defined TREZOR_MODEL_T
+// display_set_little_endian();
+touch_init();
+touch_power_on();
+#endif
 
-  touch_init();
-  touch_power_on();
+#if defined TREZOR_MODEL_R
+  button_init();
+  rgb_led_init();
+#endif
 
   device_test();
 
@@ -441,6 +454,26 @@ int main(void) {
     *STAY_IN_FLAG_ADDR = 0;
     stay_in_bootloader = sectrue;
   }
+
+  // delay to detect touch or skip if we know we are staying in bootloader
+  // anyway
+  uint32_t touched = 0;
+#if defined TREZOR_MODEL_T
+  if (stay_in_bootloader != sectrue) {
+    for (int i = 0; i < 100; i++) {
+      touched = touch_is_detected() | touch_read();
+      if (touched) {
+        break;
+      }
+      hal_delay(1);
+    }
+  }
+#elif defined TREZOR_MODEL_R
+  button_read();
+  if (button_state_left() == 1) {
+    touched = 1;
+  }
+#endif
 
   vendor_header vhdr;
   image_header hdr;
@@ -540,6 +573,7 @@ int main(void) {
 
     ui_fadeout();
   }
+
 
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);

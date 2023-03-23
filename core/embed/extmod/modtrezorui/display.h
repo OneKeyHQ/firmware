@@ -21,33 +21,16 @@
 #define __DISPLAY_H__
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
+#include "display_defs.h"
+#include "display_interface.h"
 
-#if PRODUCTION_MODEL == 'H'
-
-#define MAX_DISPLAY_RESX 480
-#define MAX_DISPLAY_RESY 800
-#define DISPLAY_RESX 480
-#define DISPLAY_RESY (800)
-#define TREZOR_FONT_BPP 4
-
-#elif defined TREZOR_MODEL_T
-
-// ILI9341V, GC9307 and ST7789V drivers support 240px x 320px display resolution
-#define MAX_DISPLAY_RESX 480
-#define MAX_DISPLAY_RESY 800
-#define DISPLAY_RESX 480
-#define DISPLAY_RESY 800
-#define TREZOR_FONT_BPP 4
-
-#elif defined TREZOR_MODEL_1
-
-#define MAX_DISPLAY_RESX 128
-#define MAX_DISPLAY_RESY 64
-#define DISPLAY_RESX 128
-#define DISPLAY_RESY 64
-#define TREZOR_FONT_BPP 1
-
+#define AVATAR_IMAGE_SIZE 144
+#if defined TREZOR_MODEL_T || defined TREZOR_MODEL_1
+#define LOADER_ICON_SIZE 64
+#elif defined TREZOR_MODEL_R
+#define LOADER_ICON_SIZE 24
 #else
 #error Unknown Trezor model
 #endif
@@ -148,8 +131,6 @@ void display_qrcode(int x, int y, const char *data, uint32_t datalen,
                     uint8_t scale);
 
 void display_offset(int set_xy[2], int *get_x, int *get_y);
-int display_orientation(int degrees);
-int display_backlight(int val);
 void display_fade(int start, int end, int delay);
 
 // helper for locating a substring in buffer with utf-8 string

@@ -284,3 +284,4 @@ BUTTON_RELEASED: int  # button up event
 BUTTON_LEFT: int  # button number of left button
 BUTTON_RIGHT: int  # button number of right button
 WireInterface = Union[HID, WebUSB, SPI]
+USB_CHECK: int # interface id for check of USB data connection

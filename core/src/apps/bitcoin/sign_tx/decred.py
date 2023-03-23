@@ -7,13 +7,15 @@ from trezor.enums import DecredStakingSpendType, InputScriptType
 from trezor.messages import PrevOutput
 from trezor.utils import HashWriter, ensure
 
+from apps.bitcoin.sign_tx.tx_weight import TxWeightCalculator
 from apps.common.writers import write_compact_size
 
 from .. import multisig, scripts_decred, writers
 from ..common import SigHashType, ecdsa_hash_pubkey, ecdsa_sign
-from . import approvers, helpers, progress
+from . import approvers, helpers
 from .approvers import BasicApprover
 from .bitcoin import Bitcoin
+from .progress import progress
 
 DECRED_SERIALIZE_FULL = const(0 << 16)
 DECRED_SERIALIZE_NO_WITNESS = const(1 << 16)
@@ -26,6 +28,7 @@ OUTPUT_SCRIPT_NULL_SSTXCHANGE = (
 if TYPE_CHECKING:
     from typing import Sequence
 
+    from trezor.crypto import bip32
     from trezor.messages import (
         SignTx,
         TxInput,
@@ -40,7 +43,53 @@ if TYPE_CHECKING:
     from .sig_hasher import SigHasher
 
 
+# Decred input size (without script): 32 prevhash, 4 idx, 1 Decred tree, 4 sequence
+_TXSIZE_DECRED_INPUT = const(41)
+
+# Decred script version: 2 bytes
+_TXSIZE_DECRED_SCRIPT_VERSION = const(2)
+
+# Decred expiry size: 4 bytes in footer
+_TXSIZE_DECRED_EXPIRY = const(4)
+
+# Decred witness size (without script): 8 byte amount, 4 byte block height, 4 byte block index
+_TXSIZE_DECRED_WITNESS = 16
+
+
+class DecredTxWeightCalculator(TxWeightCalculator):
+    def get_base_weight(self) -> int:
+        base_weight = super().get_base_weight()
+        base_weight += 4 * _TXSIZE_DECRED_EXPIRY
+        # Add witness input count.
+        base_weight += 4 * self.compact_size_len(self.inputs_count)
+        return base_weight
+
+    def add_input(self, i: TxInput) -> None:
+        self.inputs_count += 1
+
+        # Input.
+        self.counter += 4 * _TXSIZE_DECRED_INPUT
+
+        # Input witness.
+        input_script_size = self.input_script_size(i)
+        if i.script_type == InputScriptType.SPENDMULTISIG:
+            # Decred fixed the the OP_FALSE bug in multisig.
+            input_script_size -= 1  # Subtract one OP_FALSE byte.
+
+        self.counter += 4 * _TXSIZE_DECRED_WITNESS
+        self.counter += 4 * self.compact_size_len(input_script_size)
+        self.counter += 4 * input_script_size
+
+    def add_output(self, script: bytes) -> None:
+        super().add_output(script)
+        self.counter += 4 * _TXSIZE_DECRED_SCRIPT_VERSION
+
+
 class DecredApprover(BasicApprover):
+    def __init__(self, tx: SignTx, coin: CoinInfo) -> None:
+        super().__init__(tx, coin)
+        self.weight = DecredTxWeightCalculator()
+
     async def add_decred_sstx_submission(
         self, txo: TxOutput, script_pubkey: bytes
     ) -> None:
@@ -102,8 +151,11 @@ class Decred(Bitcoin):
         approver = DecredApprover(tx, coin)
         super().__init__(tx, keychain, coin, approver)
 
-        self.write_tx_header(self.serialized_tx, self.tx_info.tx, witness_marker=True)
-        write_compact_size(self.serialized_tx, self.tx_info.tx.inputs_count)
+        if self.serialize:
+            self.write_tx_header(
+                self.serialized_tx, self.tx_info.tx, witness_marker=True
+            )
+            write_compact_size(self.serialized_tx, self.tx_info.tx.inputs_count)
 
         writers.write_uint32(
             self.h_prefix, self.tx_info.tx.version | DECRED_SERIALIZE_NO_WITNESS
@@ -117,22 +169,25 @@ class Decred(Bitcoin):
         return DecredSigHasher(self.h_prefix)
 
     async def step2_approve_outputs(self) -> None:
-        write_compact_size(self.serialized_tx, self.tx_info.tx.outputs_count)
         write_compact_size(self.h_prefix, self.tx_info.tx.outputs_count)
+        if self.serialize:
+            write_compact_size(self.serialized_tx, self.tx_info.tx.outputs_count)
 
         if self.tx_info.tx.decred_staking_ticket:
             await self.approve_staking_ticket()
         else:
             await super().step2_approve_outputs()
 
-        self.write_tx_footer(self.serialized_tx, self.tx_info.tx)
         self.write_tx_footer(self.h_prefix, self.tx_info.tx)
+        if self.serialize:
+            self.write_tx_footer(self.serialized_tx, self.tx_info.tx)
 
-    async def process_internal_input(self, txi: TxInput) -> None:
-        await super().process_internal_input(txi)
+    async def process_internal_input(self, txi: TxInput, node: bip32.HDNode) -> None:
+        await super().process_internal_input(txi, node)
 
         # Decred serializes inputs early.
-        self.write_tx_input(self.serialized_tx, txi, bytes())
+        if self.serialize:
+            self.write_tx_input(self.serialized_tx, txi, bytes())
 
     async def process_external_input(self, txi: TxInput) -> None:
         raise wire.DataError("External inputs not supported")
@@ -147,10 +202,12 @@ class Decred(Bitcoin):
         orig_txo: TxOutput | None,
     ) -> None:
         await super().approve_output(txo, script_pubkey, orig_txo)
-        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+        if self.serialize:
+            self.write_tx_output(self.serialized_tx, txo, script_pubkey)
 
     async def step4_serialize_inputs(self) -> None:
-        write_compact_size(self.serialized_tx, self.tx_info.tx.inputs_count)
+        if self.serialize:
+            write_compact_size(self.serialized_tx, self.tx_info.tx.inputs_count)
 
         prefix_hash = self.h_prefix.get_digest()
 
@@ -212,10 +269,11 @@ class Decred(Bitcoin):
             signature = ecdsa_sign(key_sign, sig_hash)
 
             # serialize input with correct signature
-            self.write_tx_input_witness(
-                self.serialized_tx, txi_sign, key_sign_pub, signature
-            )
             self.set_serialized_signature(i_sign, signature)
+            if self.serialize:
+                self.write_tx_input_witness(
+                    self.serialized_tx, txi_sign, key_sign_pub, signature
+                )
 
     async def step5_serialize_outputs(self) -> None:
         pass
@@ -224,6 +282,9 @@ class Decred(Bitcoin):
         pass
 
     async def step7_finish(self) -> None:
+        if __debug__:
+            progress.assert_finished()
+
         await helpers.request_tx_finish(self.tx_req)
 
     def check_prevtx_output(self, txo_bin: PrevOutput) -> None:
@@ -272,24 +333,29 @@ class Decred(Bitcoin):
             raise wire.DataError("Ticket has wrong number of outputs.")
 
         # SSTX submission
+        progress.advance()
         txo = await helpers.request_tx_output(self.tx_req, 0, self.coin)
         if txo.address is None:
             raise wire.DataError("Missing address.")
         script_pubkey = scripts_decred.output_script_sstxsubmissionpkh(txo.address)
         await self.approver.add_decred_sstx_submission(txo, script_pubkey)
         self.tx_info.add_output(txo, script_pubkey)
-        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+        if self.serialize:
+            self.write_tx_output(self.serialized_tx, txo, script_pubkey)
 
         # SSTX commitment
+        progress.advance()
         txo = await helpers.request_tx_output(self.tx_req, 1, self.coin)
         if txo.amount != self.approver.total_in:
             raise wire.DataError("Wrong sstxcommitment amount.")
         script_pubkey = self.process_sstx_commitment_owned(txo)
         self.approver.add_change_output(txo, script_pubkey)
         self.tx_info.add_output(txo, script_pubkey)
-        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+        if self.serialize:
+            self.write_tx_output(self.serialized_tx, txo, script_pubkey)
 
         # SSTX change
+        progress.advance()
         txo = await helpers.request_tx_output(self.tx_req, 2, self.coin)
         if txo.address is None:
             raise wire.DataError("Missing address.")
@@ -303,7 +369,8 @@ class Decred(Bitcoin):
             raise wire.DataError("Only zeroed addresses accepted for sstx change.")
         self.approver.add_change_output(txo, script_pubkey)
         self.tx_info.add_output(txo, script_pubkey)
-        self.write_tx_output(self.serialized_tx, txo, script_pubkey)
+        if self.serialize:
+            self.write_tx_output(self.serialized_tx, txo, script_pubkey)
 
     def write_tx_header(
         self,
