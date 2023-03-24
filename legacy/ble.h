@@ -48,7 +48,7 @@ void change_ble_sta(uint8_t mode);
 #else
 #define ble_name_state(...) false
 #define ble_ver_state(...) false
-#define ble_get_name(...) "BixinKEY814591011"
+#define ble_get_name(...) "K0000"
 #define ble_get_ver(...) "1.0.1"
 #define ble_switch_state(...) false
 #define ble_set_switch(...)

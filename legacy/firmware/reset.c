@@ -261,10 +261,8 @@ bool verify_mnemonic(const char *mnemonic) {
   uint32_t words_order[3];
   uint32_t i = 0, word_count = 0;
   uint32_t index = 0, selected = 0;
-  uint32_t rand_list[3] = {0};
 
   memzero(words, sizeof(words));
-
   while (mnemonic[i] != 0) {
     // copy current_word
     int j = 0;
@@ -281,40 +279,25 @@ bool verify_mnemonic(const char *mnemonic) {
     }
   }
 
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, NULL, _("Select correct word below"), NULL, NULL);
+  layoutDialogAdapterEx(
+      _("Check Recovery Phrase"), &bmp_bottom_left_arrow, NULL,
+      &bmp_bottom_right_arrow, NULL,
+      _("Next, follow the guide and\ncheck words one by one."), NULL, NULL,
+      NULL, NULL);
 
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
   }
-
-  rand_list[0] = random_uniform(word_count);
-  do {
-    rand_list[1] = random_uniform(word_count);
-  } while (rand_list[1] == rand_list[0]);
-
-  do {
-    rand_list[2] = random_uniform(word_count);
-  } while (rand_list[2] == rand_list[0] || rand_list[2] == rand_list[1]);
 
 refresh_menu:
   i = 0;
   memzero(desc, sizeof(desc));
-  strcat(desc, _("Select your"));
-  strcat(desc, " ");
-  strcat(desc, _("word"));
+  strcat(desc, _("Check Word "));
   strcat(desc, " #");
-  uint2str(rand_list[index] + 1, desc + strlen(desc));
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-                                 NULL, desc, NULL, NULL, NULL);
-  key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
-    return false;
-  }
-  selected = mnemonic_find_word(words[rand_list[index]]);
+  uint2str(index + 1, desc + strlen(desc));
+
+  selected = mnemonic_find_word(words[index]);
   words_order[0] = selected;
   do {
     words_order[1] = random_uniform(BIP39_WORD_COUNT);
@@ -327,11 +310,14 @@ refresh_menu:
   random_order(words_order, 3);
 
 select_word:
-  layoutItemsSelectAdapter(
-      &bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm, NULL, _("Okay"),
-      i + 1, 3, NULL, NULL, mnemonic_get_word(words_order[i]),
+  layoutItemsSelectAdapterWords(
+      &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down, NULL,
+      &bmp_bottom_right_arrow, NULL, NULL, i + 1, 3, desc,
+      mnemonic_get_word(words_order[i]), mnemonic_get_word(words_order[i]),
       i > 0 ? mnemonic_get_word(words_order[i - 1]) : NULL,
-      i < 2 ? mnemonic_get_word(words_order[i + 1]) : NULL);
+      i > 1 ? mnemonic_get_word(words_order[i - 2]) : NULL, NULL,
+      i < 2 ? mnemonic_get_word(words_order[i + 1]) : NULL,
+      i < 1 ? mnemonic_get_word(words_order[i + 2]) : NULL, NULL, false, true);
 
   key = protectWaitKey(0, 0);
   switch (key) {
@@ -346,8 +332,9 @@ select_word:
     case KEY_CONFIRM:
       if (words_order[i] != selected) {
         layoutDialogSwipeCenterAdapter(
-            &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-            NULL, NULL, _("Wrong recovery phrase"), NULL, NULL);
+            &bmp_icon_error, NULL, NULL, &bmp_bottom_right_retry, NULL, NULL,
+            NULL, NULL, NULL, _("Incorrect word! check your"),
+            _("backup and try again."), NULL);
 
         key = protectWaitKey(0, 1);
         if (key != KEY_CONFIRM) {
@@ -356,7 +343,7 @@ select_word:
         goto refresh_menu;
       } else {
         index++;
-        if (index == 3)
+        if (index == word_count)
           break;
         else
           goto refresh_menu;
@@ -366,12 +353,14 @@ select_word:
   }
 
   layoutDialogSwipeCenterAdapter(
-      &bmp_icon_ok, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL,
-      NULL, NULL, NULL, _("Recovery phrase verified pass"), NULL, NULL);
+      &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+      NULL, _("Awesome!"), _("Your backup is complete."), NULL);
 
-  key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
-    return false;
+  while (1) {
+    key = protectWaitKey(0, 1);
+    if (key == KEY_CONFIRM) {
+      break;
+    }
   }
 
   memzero(words, sizeof(words));
@@ -382,10 +371,9 @@ bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type) {
   uint8_t key = KEY_NULL;
   char desc[64] = "";
   char words[24][12];
-  uint32_t i = 0, word_count = 0;
+  uint32_t pages, i = 0, index = 0, word_count = 0;
 
   memzero(words, sizeof(words));
-
   while (mnemonic[i] != 0) {
     // copy current_word
     int j = 0;
@@ -402,28 +390,57 @@ bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type) {
     }
   }
   i = 0;
+  pages = word_count / 6;
 refresh_menu:
   if (type == 0) {
     memzero(desc, sizeof(desc));
     strcat(desc, pre_desc);
     strcat(desc, " #");
     uint2str(i + 1, desc + strlen(desc));
-    layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Prev"),
-                                   &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-                                   NULL, desc, words[i], NULL, NULL);
+
+    if (i == 0) {
+      layoutItemsSelectAdapterWords(
+          &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
+          &bmp_bottom_left_close, &bmp_bottom_right_arrow, NULL, NULL, 1, 1,
+          desc, words[i], words[i], NULL, NULL, NULL, NULL, NULL, NULL, false,
+          false);
+    } else {
+      layoutItemsSelectAdapterWords(
+          &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
+          &bmp_bottom_left_arrow, &bmp_bottom_right_arrow, NULL, NULL, 1, 1,
+          desc, words[i], words[i], NULL, NULL, NULL, NULL, NULL, NULL, false,
+          false);
+    }
   } else if (type == 1) {
     memzero(desc, sizeof(desc));
-    strcat(desc, " #");
-    uint2str(i + 1, desc + strlen(desc));
-    layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
-                             NULL, _("Okay"), i + 1, word_count, NULL, desc,
-                             words[i], i > 0 ? words[i - 1] : NULL,
-                             i < word_count - 1 ? words[i + 1] : NULL);
+    strcat(desc, _("Recovery Phrase "));
+    if (index == 0) {
+      strcat(desc, "(1-6)");
+    } else if (index == 1) {
+      strcat(desc, "(7-12)");
+    } else if (index == 2) {
+      strcat(desc, "(13-18)");
+    } else {
+      strcat(desc, "(19-24)");
+    }
+    if (index == pages - 1) {
+      layoutWords(desc, &bmp_bottom_middle_arrow_up,
+                  &bmp_bottom_middle_arrow_down, NULL, &bmp_bottom_right_arrow,
+                  index + 1, pages, words[index * 6 + 0], words[index * 6 + 1],
+                  words[index * 6 + 2], words[index * 6 + 3],
+                  words[index * 6 + 4], words[index * 6 + 5]);
+    } else {
+      layoutWords(
+          desc, &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
+          NULL, &bmp_bottom_right_arrow_off, index + 1, pages,
+          words[index * 6 + 0], words[index * 6 + 1], words[index * 6 + 2],
+          words[index * 6 + 3], words[index * 6 + 4], words[index * 6 + 5]);
+    }
   }
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
-      if (i > 0) i--;
+      if (index > 0) index--;
       goto refresh_menu;
     case KEY_CANCEL:
       if (type == 0) {
@@ -434,9 +451,16 @@ refresh_menu:
       }
       goto refresh_menu;
     case KEY_DOWN:
-      if (i < word_count - 1) i++;
+      if (index < pages - 1) index++;
       goto refresh_menu;
     case KEY_CONFIRM:
+      if (type == 1) {
+        if (index == pages - 1) {
+          return true;
+        } else {
+          index++;
+        }
+      }
       if (i == word_count - 1)
         return true;
       else {
@@ -451,19 +475,36 @@ refresh_menu:
   return false;
 }
 
-bool writedown_mnemonic(const char *mnemonic) {
+bool writedown_mnemonic(const char *mnemonic, uint32_t count) {
   uint8_t key = KEY_NULL;
-  char desc[32] = "";
-  strcat(desc, _("Check the written "));
-  uint2str(words_count, desc + strlen(desc));
+  char desc[63] = "";
+  strcat(desc, _("Next, check the written "));
+  uint2str(count, desc + strlen(desc));
+  strcat(desc, _(" words again."));
 write_mnemonic:
   if (scroll_mnemonic(_("Words"), mnemonic, 0)) {
-    layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                   &bmp_btn_forward, _("Next"), NULL, NULL,
-                                   NULL, desc, _("words"), NULL, NULL);
-    key = protectWaitKey(0, 1);
+  check_words_again:
+    layoutDialogAdapterEx(_("Check Words Again"), &bmp_bottom_left_close, NULL,
+                          &bmp_bottom_right_arrow, NULL, desc, NULL, NULL, NULL,
+                          NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM || key == KEY_CANCEL) {
+        break;
+      }
+    }
     if (key != KEY_CONFIRM) {
-      return false;
+      layoutDialogAdapterEx(
+          _("Abort Backup?"), &bmp_bottom_left_close, NULL,
+          &bmp_bottom_right_confirm, NULL,
+          _("Are you sure to abort this\nprocess? All progress\nwill be lost."),
+          NULL, NULL, NULL, NULL);
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        return false;
+      } else {
+        goto check_words_again;
+      }
     }
   check_mnemonic:
     if (!scroll_mnemonic(NULL, mnemonic, 1)) {
@@ -472,17 +513,21 @@ write_mnemonic:
     if (!verify_mnemonic(mnemonic)) {
       goto_check(check_mnemonic);
     }
-    layoutDialogSwipeCenterAdapter(
-        NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-        _("The recovery phrase are"), _("the only way to recover"),
-        _("your asset,Keep it safe"), NULL, NULL);
-    key = protectWaitKey(0, 1);
-    if (key != KEY_CONFIRM) {
-      return false;
+    layoutDialogAdapterEx(_("Almost Done!"), NULL, NULL,
+                          &bmp_bottom_right_arrow, NULL,
+                          _("Recovery phrase is the \nonly way to recover "
+                            "your\nassets. So keep it in a\nsafe place."),
+                          NULL, NULL, NULL, NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        break;
+      }
     }
-    if (!protectChangePinOnDevice(false, true)) {
+    if (!protectChangePinOnDevice(true, true, false)) {
       goto_check(check_mnemonic);
     }
+
     config_setMnemonic(mnemonic, false);
     return true;
   }
@@ -490,13 +535,16 @@ write_mnemonic:
 }
 
 bool reset_on_device(void) {
-  char desc[64] = "";
+  char desc[128] = "";
   uint8_t key = KEY_NULL;
 
 prompt_creat:
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, _("Follow the prompts"), _("to creat wallet"), NULL, NULL);
+  layoutDialogAdapterEx(
+      _("Create New Wallet"), &bmp_bottom_left_close, NULL,
+      &bmp_bottom_right_arrow, NULL,
+      _("Generating a standard\nwallet with a new set of\nrecovery phrase."),
+      NULL, NULL, NULL, NULL);
+
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     return false;
@@ -522,12 +570,15 @@ select_mnemonic_count:
   }
 
   memzero(desc, sizeof(desc));
-  strcat(desc, _("Write down your "));
+  strcat(desc, _("The next screen will start\ndisplay "));
   uint2str(words_count, desc + strlen(desc));
+  strcat(
+      desc,
+      _(" words called\nRecovery Phrase. Write it\ndown on sheet in order."));
 
-  layoutDialogSwipeCenterAdapter(NULL, &bmp_btn_back, _("Back"),
-                                 &bmp_btn_forward, _("Next"), NULL, NULL, NULL,
-                                 desc, _("words"), NULL, NULL);
+  layoutDialogAdapterEx(_("Back Up Recovery Phrase"), &bmp_bottom_left_arrow,
+                        NULL, &bmp_bottom_right_arrow, NULL, desc, NULL, NULL,
+                        NULL, NULL);
   key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     goto_check(select_mnemonic_count);
@@ -555,7 +606,7 @@ select_mnemonic_count:
   const char *mnemonic = mnemonic_from_data(int_entropy, strength / 8);
   memzero(int_entropy, 32);
 
-  if (!writedown_mnemonic(mnemonic)) {
+  if (!writedown_mnemonic(mnemonic, words_count)) {
     goto_check(select_mnemonic_count);
   }
 

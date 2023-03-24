@@ -11,9 +11,11 @@ extern uint16_t __address_type;
 
 parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v) {
   CHECK_INPUT()
+
+  __address_type = _detectAddressType(c);
+
   //  Reverse parse to retrieve spec before forward parsing
   CHECK_ERROR(_checkVersions(c))
-
   // Now forward parse
   CHECK_ERROR(_readCallIndex(c, &v->callIndex))
   CHECK_ERROR(
@@ -33,8 +35,6 @@ parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v) {
   if (c->offset > c->bufferLen) {
     return parser_unexpected_buffer_end;
   }
-
-  __address_type = _detectAddressType(c);
 
   return parser_ok;
 }

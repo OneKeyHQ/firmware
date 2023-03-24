@@ -7,6 +7,10 @@
 #include "substrate/substrate_dispatch.h"
 #include "substrate/substrate_types.h"
 
+extern char polkadot_network[32];
+uint16_t __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES;
+char __polkadot_ticker[8] = {0};
+
 static parser_error_t parser_init_context(parser_context_t *ctx,
                                           const uint8_t *buffer,
                                           uint16_t bufferSize) {
@@ -293,8 +297,8 @@ parser_error_t _toStringCompactIndex(const pd_CompactIndex_t *v, char *outValue,
 parser_error_t _toStringCompactBalance(const pd_CompactBalance_t *v,
                                        char *outValue, uint16_t outValueLen,
                                        uint8_t pageIdx, uint8_t *pageCount) {
-  CHECK_ERROR(_toStringCompactInt(&v->value, COIN_AMOUNT_DECIMAL_PLACES, true,
-                                  "", COIN_TICKER, outValue, outValueLen,
+  CHECK_ERROR(_toStringCompactInt(&v->value, __polkadot_dicimal, true,
+                                  __polkadot_ticker, "", outValue, outValueLen,
                                   pageIdx, pageCount))
   return parser_ok;
 }
@@ -333,15 +337,15 @@ parser_error_t _checkVersions(parser_context_t *c) {
   transactionVersion += (uint32_t)p[2] << 16u;
   transactionVersion += (uint32_t)p[3] << 24u;
 
-  // transactionVersion);
-  if (transactionVersion != (SUPPORTED_TX_VERSION_CURRENT) &&
-      transactionVersion != (SUPPORTED_TX_VERSION_PREVIOUS)) {
-    return parser_tx_version_not_supported;
-  }
+  // transactionVersion
+  // if (transactionVersion != (SUPPORTED_TX_VERSION_CURRENT) &&
+  //     transactionVersion != (SUPPORTED_TX_VERSION_PREVIOUS)) {
+  //   return parser_tx_version_not_supported;
+  // }
 
-  if (specVersion < SUPPORTED_MINIMUM_SPEC_VERSION) {
-    return parser_spec_not_supported;
-  }
+  // if (specVersion < SUPPORTED_MINIMUM_SPEC_VERSION) {
+  //   return parser_spec_not_supported;
+  // }
 
   c->tx_obj->specVersion = specVersion;
   c->tx_obj->transactionVersion = transactionVersion;
@@ -354,16 +358,23 @@ uint16_t __address_type;
 uint16_t _getAddressType() { return __address_type; }
 
 uint16_t _detectAddressType(const parser_context_t *c) {
-  char hashstr[65];
-  uint8_t pc;
-
-  if (c->tx_obj->genesisHash._ptr != NULL) {
-    _toStringHash(&c->tx_obj->genesisHash, hashstr, 65, 0, &pc);
-
-    // Compare with known genesis hashes
-    if (strcmp(hashstr, COIN_GENESIS_HASH) == 0) {
-      return PK_ADDRESS_TYPE;
-    }
+  (void)c;
+  if (!strncmp(polkadot_network, "polkadot", 8)) {
+    __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES;
+    memcpy(__polkadot_ticker, COIN_TICKER, 4);
+    return 0;
+  } else if (!strncmp(polkadot_network, "kusuma", 6)) {
+    __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_12;
+    memcpy(__polkadot_ticker, KUSAMA_COIN_TICKER, 4);
+    return 2;
+  } else if (!strncmp(polkadot_network, "astar", 5)) {
+    __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_18;
+    memcpy(__polkadot_ticker, ASTAR_COIN_TICKER, 4);
+    return 5;
+  } else if (!strncmp(polkadot_network, "westend", 5)) {
+    __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_12;
+    memcpy(__polkadot_ticker, WESTEND_COIN_TICKER, 4);
+    return 42;
   }
 
   return 42;

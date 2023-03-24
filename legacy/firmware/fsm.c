@@ -25,6 +25,7 @@
 #include "bip32.h"
 #include "bip39.h"
 #include "ble.h"
+#include "buttons.h"
 #include "coins.h"
 #include "common.h"
 #include "config.h"
@@ -62,6 +63,7 @@
 #include "rtt_log.h"
 
 #if !BITCOIN_ONLY
+#include "ada.h"
 #include "algorand.h"
 #include "aptos.h"
 #include "cardano.h"
@@ -304,25 +306,28 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
                               const MultisigRedeemScriptType *multisig,
                               int multisig_index, uint32_t multisig_xpub_magic,
                               const CoinInfo *coin) {
+  (void)prefixlen;
   bool button_request = true;
-  int screen = 0, screens = 2;
+  uint8_t key = KEY_NULL;
+  int screen = 0, screens = 3;
   if (multisig) {
     screens += 2 * cryptoMultisigPubkeyCount(multisig);
   }
   for (;;) {
+    key = KEY_NULL;
     switch (screen) {
       case 0: {  // show address
-        const char *display_addr = address;
-        // strip cashaddr prefix
-        if (prefixlen) {
-          // display_addr += prefixlen;
-        }
-        layoutAddress(display_addr, desc, false, ignorecase, address_n,
+        key = layoutAddress(address, desc, false, false, ignorecase, address_n,
+                            address_n_count, address_is_account);
+        break;
+      }
+      case 1: {
+        layoutAddress(address, desc, false, true, ignorecase, address_n,
                       address_n_count, address_is_account);
         break;
       }
-      case 1: {  // show QR code
-        layoutAddress(address, desc, true, ignorecase, address_n,
+      case 2: {  // show QR code
+        layoutAddress(address, desc, true, false, ignorecase, address_n,
                       address_n_count, address_is_account);
         break;
       }
@@ -355,10 +360,37 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
         break;
       }
     }
-    if (protectButton_ex(ButtonRequestType_ButtonRequest_Address, false,
-                         button_request, 0)) {
-      return true;
+
+    if (key == KEY_NULL) {
+      while (1) {
+        key = protectButtonValue(ButtonRequestType_ButtonRequest_Address, false,
+                                 button_request, 0);
+        if (key == KEY_CONFIRM || key == KEY_CANCEL) {
+          break;
+        }
+      }
     }
+
+    if (key == KEY_CONFIRM) {
+      if (multisig) {
+        // todo
+        screen = (screen + 1) % screens;
+
+      } else {
+        if (screen == 1 || screen == 2) {
+          return true;
+        }
+        screen++;
+      }
+    } else {
+      if (screen == 0)
+        screen = 2;
+      else if (screen == 1)
+        screen = 2;
+      else if (screen == 2)
+        screen = 0;
+    }
+
     if (g_bIsBixinAPP) button_request = false;
     if (protectAbortedByCancel || protectAbortedByInitialize) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -368,7 +400,6 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       layoutHome();
       return false;
     }
-    screen = (screen + 1) % screens;
   }
 }
 
@@ -399,29 +430,36 @@ static bool fsm_layoutPaginated(const char *description, const uint8_t *msg,
   return true;
 }
 
-bool fsm_layoutSignMessage(const uint8_t *msg, uint32_t len) {
+bool fsm_layoutSignMessage(const char *chain_name, const char *signer,
+                           const uint8_t *msg, uint32_t len) {
   if (is_valid_ascii(msg, len)) {
-    return fsm_layoutPaginated(_("Sign message?"), msg, len, true);
+    return layoutSignMessage(chain_name, false, signer, msg, len, true);
   } else {
-    return fsm_layoutPaginated(_("Sign binary message?"), msg, len, false);
+    return layoutSignMessage(chain_name, false, signer, msg, len, false);
   }
 }
 
-bool fsm_layoutSignMessage_ex(const char *description, const uint8_t *msg,
-                              uint32_t len) {
+bool fsm_layoutVerifyMessage(const char *chain_name, const char *signer,
+                             const uint8_t *msg, uint32_t len) {
   if (is_valid_ascii(msg, len)) {
-    return fsm_layoutPaginated(description, msg, len, true);
+    return layoutSignMessage(chain_name, true, signer, msg, len, true);
   } else {
-    return fsm_layoutPaginated(description, msg, len, false);
+    return layoutSignMessage(chain_name, true, signer, msg, len, false);
   }
 }
 
-bool fsm_layoutVerifyMessage(const uint8_t *msg, uint32_t len) {
-  if (is_valid_ascii(msg, len)) {
-    return fsm_layoutPaginated(_("Verified message?"), msg, len, true);
-  } else {
-    return fsm_layoutPaginated(_("Verified binary message?"), msg, len, false);
-  }
+bool fsm_layoutSignHash(const char *chain_name, const char *signer,
+                        const char *domain_hash, const char *message_hash,
+                        const char *warning) {
+  return layoutSignHash(chain_name, false, signer, domain_hash, message_hash,
+                        warning);
+}
+
+bool fsm_layoutVerifyHash(const char *chain_name, const char *signer,
+                          const char *domain_hash, const char *message_hash,
+                          const char *warning) {
+  return layoutSignHash(chain_name, true, signer, domain_hash, message_hash,
+                        warning);
 }
 
 bool fsm_layoutCommitmentData(const uint8_t *msg, uint32_t len) {
@@ -474,10 +512,15 @@ void fsm_postMsgCleanup(MessageType message_type) {
   }
 }
 
-bool fsm_layoutPathWarning(void) {
-  layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
-                    _("Wrong address path"), _("for selected coin."), NULL,
-                    _("Continue at your"), _("own risk!"), NULL);
+bool fsm_layoutPathWarning(uint32_t address_n_count,
+                           const uint32_t *address_n) {
+  char desc[128] = {0};
+  strcat(desc, address_n_str(address_n, address_n_count, false));
+  strcat(desc, _(" is a non-standard path. Are you sure to use this path?"));
+  layoutDialogAdapterEx(_("Check Path"), &bmp_bottom_left_close, NULL,
+                        &bmp_bottom_right_confirm, NULL, desc, NULL, NULL, NULL,
+                        NULL);
+
   if (!protectButton(ButtonRequestType_ButtonRequest_UnknownDerivationPath,
                      false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -493,6 +536,7 @@ bool fsm_layoutPathWarning(void) {
 
 #if !BITCOIN_ONLY
 
+#include "fsm_msg_ada.h"
 #include "fsm_msg_algorand.h"
 #include "fsm_msg_aptos.h"
 #include "fsm_msg_conflux.h"
@@ -501,7 +545,7 @@ bool fsm_layoutPathWarning(void) {
 #include "fsm_msg_filecoin.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
-// #include "fsm_msg_polkadot.h"
+#include "fsm_msg_polkadot.h"
 #include "fsm_msg_ripple.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"

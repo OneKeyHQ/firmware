@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from trezor.enums import StellarSignerType  # noqa: F401
     from trezor.enums import TezosBallotType  # noqa: F401
     from trezor.enums import TezosContractType  # noqa: F401
+    from trezor.enums import TronResourceCode  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
 
     class AlgorandGetAddress(protobuf.MessageType):
@@ -2077,6 +2078,42 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["CardanoSignTxFinished"]:
+            return isinstance(msg, cls)
+
+    class CardanoSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+        derivation_type: "CardanoDerivationType"
+        network_id: "int"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            derivation_type: "CardanoDerivationType",
+            network_id: "int",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoSignMessage"]:
+            return isinstance(msg, cls)
+
+    class CardanoMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+        key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoMessageSignature"]:
             return isinstance(msg, cls)
 
     class ConfluxGetAddress(protobuf.MessageType):
@@ -4124,12 +4161,14 @@ if TYPE_CHECKING:
     class EthereumGetPublicKey(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
+        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4156,12 +4195,14 @@ if TYPE_CHECKING:
     class EthereumGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
+        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4286,12 +4327,14 @@ if TYPE_CHECKING:
     class EthereumSignMessage(protobuf.MessageType):
         address_n: "list[int]"
         message: "bytes"
+        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             message: "bytes",
             address_n: "list[int] | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4319,6 +4362,7 @@ if TYPE_CHECKING:
         signature: "bytes"
         message: "bytes"
         address: "str"
+        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4326,6 +4370,7 @@ if TYPE_CHECKING:
             signature: "bytes",
             message: "bytes",
             address: "str",
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4355,6 +4400,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         domain_separator_hash: "bytes"
         message_hash: "bytes | None"
+        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4362,6 +4408,7 @@ if TYPE_CHECKING:
             domain_separator_hash: "bytes",
             address_n: "list[int] | None" = None,
             message_hash: "bytes | None" = None,
+            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -5699,11 +5746,15 @@ if TYPE_CHECKING:
 
     class PolkadotGetAddress(protobuf.MessageType):
         address_n: "list[int]"
+        prefix: "int"
+        network: "str"
         show_display: "bool | None"
 
         def __init__(
             self,
             *,
+            prefix: "int",
+            network: "str",
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
         ) -> None:
@@ -5715,11 +5766,13 @@ if TYPE_CHECKING:
 
     class PolkadotAddress(protobuf.MessageType):
         address: "str | None"
+        public_key: "str | None"
 
         def __init__(
             self,
             *,
             address: "str | None" = None,
+            public_key: "str | None" = None,
         ) -> None:
             pass
 
@@ -5730,11 +5783,13 @@ if TYPE_CHECKING:
     class PolkadotSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_tx: "bytes"
+        network: "str"
 
         def __init__(
             self,
             *,
             raw_tx: "bytes",
+            network: "str",
             address_n: "list[int] | None" = None,
         ) -> None:
             pass
@@ -6921,12 +6976,16 @@ if TYPE_CHECKING:
 
     class TronContract(protobuf.MessageType):
         transfer_contract: "TronTransferContract | None"
+        freeze_balance_contract: "TronFreezeBalanceContract | None"
+        unfreeze_balance_contract: "TronUnfreezeBalanceContract | None"
         trigger_smart_contract: "TronTriggerSmartContract | None"
 
         def __init__(
             self,
             *,
             transfer_contract: "TronTransferContract | None" = None,
+            freeze_balance_contract: "TronFreezeBalanceContract | None" = None,
+            unfreeze_balance_contract: "TronUnfreezeBalanceContract | None" = None,
             trigger_smart_contract: "TronTriggerSmartContract | None" = None,
         ) -> None:
             pass
@@ -6971,6 +7030,42 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["TronTriggerSmartContract"]:
+            return isinstance(msg, cls)
+
+    class TronFreezeBalanceContract(protobuf.MessageType):
+        frozen_balance: "int | None"
+        frozen_duration: "int | None"
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            frozen_balance: "int | None" = None,
+            frozen_duration: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronFreezeBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronUnfreezeBalanceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnfreezeBalanceContract"]:
             return isinstance(msg, cls)
 
     class WebAuthnListResidentCredentials(protobuf.MessageType):

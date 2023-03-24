@@ -37,7 +37,8 @@ void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,
   char address[67] = {0};
   aptos_get_address_from_public_key(node->public_key + 1, address);
 
-  if (!layoutBlindSign(address)) {
+  if (!layoutBlindSign("Aptos", false, NULL, address, msg->raw_tx.bytes,
+                       msg->raw_tx.size, NULL, NULL, NULL, NULL, NULL, NULL)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled,
                     "Signing cancelled by user");
     layoutHome();
@@ -89,18 +90,14 @@ void aptos_sign_message(const AptosSignMessage *msg, const HDNode *node,
 
   aptos_get_address_from_public_key(node->public_key + 1, resp->address);
   // display here
-  layoutVerifyAddress(NULL, resp->address);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-  if (!fsm_layoutSignMessage((const uint8_t *)full_message,
+  if (!fsm_layoutSignMessage("Aptos", resp->address,
+                             (const uint8_t *)full_message,
                              strlen(full_message))) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
   }
+
   ed25519_sign((const uint8_t *)full_message, strlen(full_message),
                node->private_key, resp->signature.bytes);
 

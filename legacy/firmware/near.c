@@ -244,7 +244,7 @@ static void strcpy_ellipsis(size_t dst_size, char *dst, size_t src_size,
 static int parse_transaction(const NearSignTx *msg, uint32_t *processed,
                              char *receiver) {
   char singer[65] = {0};
-  char *var_name;
+  char *var_name = NULL;
   uint32_t len = 0;
 
   // singer
@@ -332,7 +332,7 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
       return false;
   }
   if (at_transfer == action_type) {
-    char _to1[70] = "to ____________";
+    char _to1[70] = {0};
     char _amount_str[32] = {0};
     int i, receiver_len = strlen(receiver);
     bool has_dot = false;
@@ -370,17 +370,18 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
     } else {
       memcpy(_amount_str + len, " NEAR", 6);
     }
-    memcpy(_to1 + 3, receiver, receiver_len);
-    memcpy(_to1 + 3 + receiver_len, "?", 2);
-
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Send"), _amount_str, _to1, NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    memcpy(_to1, receiver, receiver_len);
+    if (!layoutTransactionSign("Near", false, _amount_str, _to1, address, NULL,
+                               NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL,
+                               NULL, NULL, NULL)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      layoutHome();
       return false;
     }
   } else {
-    if (!layoutBlindSign(address)) {
+    if (!layoutBlindSign("Near", false, NULL, address, msg->raw_tx.bytes,
+                         msg->raw_tx.size, NULL, NULL, NULL, NULL, NULL,
+                         NULL)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
       layoutHome();
       return false;

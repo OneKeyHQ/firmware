@@ -383,98 +383,14 @@ static void confluxFormatAmount(const bignum256 *amnt,
   bn_format(amnt, NULL, suffix, decimals, 0, false, 0, buf, buflen);
 }
 
-static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,
-                                   const uint8_t *value, uint32_t value_len,
-                                   const ConfluxTokenType *token,
-                                   uint32_t chain_ids) {
-  bignum256 val = {0};
-  uint8_t pad_val[32] = {0};
-  memzero(pad_val, sizeof(pad_val));
-  memcpy(pad_val + (32 - value_len), value, value_len);
-  bn_read_be(pad_val, &val);
-
-  char amount[36] = {0};
-  if (token == NULL) {
-    if (bn_is_zero(&val)) {
-      strcpy(amount, _("message"));
-    } else {
-      confluxFormatAmount(&val, NULL, amount, sizeof(amount));
-    }
-  } else {
-    confluxFormatAmount(&val, token, amount, sizeof(amount));
-  }
-
-  char _to1[30] = "to ____________";
-  char _to2[30] = "______________";
-  char _to3[] = "________________?";
-
-  if (to_len) {
-    char to_str[52] = {0};
-    get_base32_encode_address(to, to_str, sizeof(to_str), chain_ids, true);
-    if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-      memcpy(_to1 + 3, to_str, 20);
-      memcpy(_to2, to_str + 20, strlen(to_str) - 20);
-    } else {
-      memcpy(_to1 + 3, to_str, 16);
-      memcpy(_to2, to_str + 16, strlen(to_str) - 32);
-      memcpy(_to3, to_str + (strlen(to_str) - 16), 16);
-    }
-
-  } else {
-    strlcpy(_to1, _("to new contract?"), sizeof(_to1));
-    strlcpy(_to2, "", sizeof(_to2));
-    strlcpy(_to3, "", sizeof(_to3));
-  }
-  if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Send"), amount, NULL, _to1, _to2, NULL);
-  } else {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Send"), amount, _to1, _to2, _to3, NULL);
-  }
-}
-
-static void layoutConfluxData(const uint8_t *data, uint32_t len,
-                              uint32_t total_len) {
-  char hexdata[3][17] = {0};
-  char summary[20] = {0};
-  uint32_t printed = 0;
-  for (int i = 0; i < 3; i++) {
-    uint32_t linelen = len - printed;
-    if (linelen > 8) {
-      linelen = 8;
-    }
-    data2hex(data, linelen, hexdata[i]);
-    data += linelen;
-    printed += linelen;
-  }
-
-  strcpy(summary, "...          bytes");
-  char *p = summary + 11;
-  uint32_t number = total_len;
-  while (number > 0) {
-    *p-- = '0' + number % 10;
-    number = number / 10;
-  }
-  char *summarystart = summary;
-  if (total_len == printed) summarystart = summary + 4;
-
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Transaction data:"), hexdata[0], hexdata[1], hexdata[2],
-                    summarystart, NULL);
-}
-
-static void layoutConfluxFee(const uint8_t *value, uint32_t value_len,
-                             const uint8_t *gas_price, uint32_t gas_price_len,
-                             const uint8_t *gas_limit, uint32_t gas_limit_len,
-                             bool is_token) {
+static bool layoutConfluxConfirmTx(
+    uint8_t *to, uint32_t to_len, const char *signer, const uint8_t *value,
+    uint32_t value_len, const ConfluxTokenType *token, uint32_t chain_ids,
+    const uint8_t *gas_price, uint32_t gas_price_len, const uint8_t *gas_limit,
+    uint32_t gas_limit_len) {
   bignum256 val = {0}, gas = {0};
   uint8_t pad_val[32] = {0};
-  char tx_value[36] = {0};
   char gas_value[32] = {0};
-
-  memzero(tx_value, sizeof(tx_value));
-  memzero(gas_value, sizeof(gas_value));
 
   memzero(pad_val, sizeof(pad_val));
   memcpy(pad_val + (32 - gas_price_len), gas_price, gas_price_len);
@@ -491,24 +407,29 @@ static void layoutConfluxFee(const uint8_t *value, uint32_t value_len,
   memcpy(pad_val + (32 - value_len), value, value_len);
   bn_read_be(pad_val, &val);
 
-  if (bn_is_zero(&val)) {
-    strcpy(tx_value, is_token ? _("token") : _("message"));
+  char amount[36] = {0};
+  char to_str[52] = {0};
+  if (to_len) {
+    get_base32_encode_address(to, to_str, sizeof(to_str), chain_ids, true);
   } else {
-    confluxFormatAmount(&val, NULL, tx_value, sizeof(tx_value));
+    strlcpy(to_str, _("to new contract?"), sizeof(to_str));
   }
-  if (oledStringWidthAdapter(tx_value, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-    char buf[64] = {0};
-    strcat(buf, _("paying up to"));
-    strcat(buf, _(" "));
-    strcat(buf, gas_value);
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Really send"), tx_value, NULL, buf, _("for gas?"),
-                      NULL);
+  if (token == NULL) {
+    if (bn_is_zero(&val)) {
+      strcpy(amount, _("message"));  // contract
+    } else {
+      confluxFormatAmount(&val, NULL, amount, sizeof(amount));
+      return layoutTransactionSign(
+          "Conflux", false, amount, to_str, signer, NULL, NULL, NULL, 0,
+          _("Maximum Fee"), gas_value, NULL, NULL, NULL, NULL, NULL, NULL);
+    }
   } else {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Really send"), tx_value, _("paying up to"), gas_value,
-                      _("for gas?"), NULL);
+    confluxFormatAmount(&val, token, amount, sizeof(amount));
+    return layoutTransactionSign("Conflux", true, amount, to_str, signer, NULL,
+                                 NULL, NULL, 0, _("Maximum Fee"), gas_value,
+                                 NULL, NULL, NULL, NULL, NULL, NULL);
   }
+  return true;
 }
 
 /*
@@ -630,49 +551,67 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
     token = tokenByAddress(to_str);
   }
 
-  if (token != NULL) {
-    layoutConfluxConfirmTx(msg->data_initial_chunk.bytes + 16, 20,
-                           msg->data_initial_chunk.bytes + 36, 32, token,
-                           msg->chain_id);
-  } else {
-    if (toset) {
-      layoutConfluxConfirmTx(pubkeyhash, 20, msg->value.bytes, msg->value.size,
-                             NULL, msg->chain_id);
-    } else {
-      layoutConfluxConfirmTx(pubkeyhash, 0, msg->value.bytes, msg->value.size,
-                             NULL, msg->chain_id);
-    }
+  uint8_t signerhash[20];
+  char signer[52] = {0};
+  if (!hdnode_get_ethereum_pubkeyhash(node, signerhash)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    conflux_signing_abort();
+    return;
   }
-
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+  if (get_base32_encode_address(signerhash, signer, 52, msg->chain_id, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     conflux_signing_abort();
     return;
   }
 
-  if (data_total > 0) {
-    layoutConfluxData(msg->data_initial_chunk.bytes,
-                      msg->data_initial_chunk.size, data_total);
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+  if (token != NULL) {
+    if (!layoutConfluxConfirmTx(msg->data_initial_chunk.bytes + 16, 20, signer,
+                                msg->data_initial_chunk.bytes + 36, 32, token,
+                                msg->chain_id, msg->gas_price.bytes,
+                                msg->gas_price.size, msg->gas_limit.bytes,
+                                msg->gas_limit.size)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       conflux_signing_abort();
       return;
     }
+  } else {
+    if (toset) {
+      if (!layoutConfluxConfirmTx(pubkeyhash, 20, signer, msg->value.bytes,
+                                  msg->value.size, NULL, msg->chain_id,
+                                  msg->gas_price.bytes, msg->gas_price.size,
+                                  msg->gas_limit.bytes, msg->gas_limit.size)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        conflux_signing_abort();
+        return;
+      }
+    } else {
+      if (!layoutConfluxConfirmTx(pubkeyhash, 0, signer, msg->value.bytes,
+                                  msg->value.size, NULL, msg->chain_id,
+                                  msg->gas_price.bytes, msg->gas_price.size,
+                                  msg->gas_limit.bytes, msg->gas_limit.size)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        conflux_signing_abort();
+        return;
+      }
+    }
   }
 
-  if (token != NULL) {
-    layoutConfluxFee(msg->value.bytes, msg->value.size, msg->gas_price.bytes,
-                     msg->gas_price.size, msg->gas_limit.bytes,
-                     msg->gas_limit.size, true);
-  } else {
-    layoutConfluxFee(msg->value.bytes, msg->value.size, msg->gas_price.bytes,
-                     msg->gas_price.size, msg->gas_limit.bytes,
-                     msg->gas_limit.size, false);
-  }
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    conflux_signing_abort();
-    return;
+  if ((token == NULL) && (data_total > 0)) {
+    char to_str[52] = {0};
+    if (toset) {
+      get_base32_encode_address(pubkeyhash, to_str, sizeof(to_str),
+                                msg->chain_id, true);
+    } else {
+      strlcpy(to_str, _("to new contract?"), sizeof(to_str));
+    }
+
+    if (!layoutBlindSign("Conflux", true, to_str, signer,
+                         msg->data_initial_chunk.bytes, data_total, NULL, NULL,
+                         NULL, NULL, NULL, NULL)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      layoutHome();
+      return;
+    }
   }
 
   /* Stage 1: Calculate total RLP length */

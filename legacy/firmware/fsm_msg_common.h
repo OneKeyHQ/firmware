@@ -304,27 +304,55 @@ void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
 }
 
 void fsm_msgWipeDevice(const WipeDevice *msg) {
-  if (g_bIsBixinAPP) {
-    CHECK_PIN_UNCACHED
-  }
   (void)msg;
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Do you really want to"), _("wipe the device?"), NULL,
-                    _("All data will be lost."), NULL, NULL);
+  uint8_t key = KEY_NULL;
 
-  if (!protectButton(ButtonRequestType_ButtonRequest_WipeDevice, false)) {
+  if (!layoutEraseDevice()) {
     i2c_set_wait(false);
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
   }
+  if (!protectPinOnDevice(false, true)) {
+    i2c_set_wait(false);
+    fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+    layoutHome();
+    return;
+  }
+  layoutDialogAdapterEx(
+      _("Erase Device"), &bmp_bottom_left_delete, _("Back"),
+      &bmp_bottom_right_confirm, _("Reset "),
+      _("Are you sure to reset this \ndevice? This action can not be undo!"),
+      NULL, NULL, NULL, NULL);
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    i2c_set_wait(false);
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  uint8_t ui_language_bak = ui_language;
+
   config_wipe();
+  if (ui_language_bak) {
+    ui_language = ui_language_bak;
+  }
+  layoutDialogAdapterEx(
+      _("Reset Complete"), NULL, NULL, &bmp_bottom_right_confirm, _("Reset "),
+      _("The device is reset, restart now."), NULL, NULL, NULL, NULL);
+  protectWaitKey(0, 0);
+
   // the following does not work on Mac anyway :-/ Linux/Windows are fine, so it
   // is not needed usbReconnect(); // force re-enumeration because of the serial
   // number change
   i2c_set_wait(false);
   fsm_sendSuccess(_("Device wiped"));
   layoutHome();
+#if !EMULATOR
+  // svc_system_reset();
+  reset_to_firmware();
+#endif
 }
 
 void fsm_msgGetEntropy(const GetEntropy *msg) {
@@ -593,7 +621,8 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     config_setHomescreen(msg->homescreen.bytes, msg->homescreen.size);
   }
   if (msg->has_auto_lock_delay_ms) {
-    config_setAutoLockDelayMs(msg->auto_lock_delay_ms);
+    config_setSleepDelayMs(msg->auto_lock_delay_ms);
+    menu_autolock_added_custom();
   }
   if (msg->has_use_ble) {
     config_setBleTrans(msg->use_ble);
@@ -715,9 +744,10 @@ void fsm_msgSetBusy(const SetBusy *msg) {
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_cancel, _("Cancel"), &bmp_btn_confirm, _("Confirm"), NULL,
-      NULL, NULL, NULL, _("Are you sure to update?"), NULL, NULL);
+  layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                            &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                            NULL, _("Do you want to restart"),
+                            _("device in update mode?"), NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();

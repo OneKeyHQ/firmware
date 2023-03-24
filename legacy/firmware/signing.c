@@ -1152,7 +1152,7 @@ static bool validate_path(InputScriptType script_type,
 
       if (!foreign_address_confirmed) {
         if (signing_stage < STAGE_REQUEST_3_INPUT) {
-          if (!fsm_layoutPathWarning()) {
+          if (!fsm_layoutPathWarning(address_n_count, address_n)) {
             signing_abort();
             return false;
           }

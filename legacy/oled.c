@@ -291,14 +291,13 @@ void oledDrawChar(int x, int y, char c, uint8_t font) {
   if (x <= -char_width) {
     return;
   }
-
   for (int xo = 0; xo < char_width; xo++) {
     for (int yo = 0; yo < FONT_HEIGHT; yo++) {
       if (char_data[xo] & (1 << (FONT_HEIGHT - 1 - yo))) {
         if (zoom <= 1) {
           oledDrawPixel(x + xo, y + yo);
         } else {
-          oledBox(x + xo, y + yo * zoom, x + (xo + 1) - 1,
+          oledBox(x + xo * zoom, y + yo * zoom, x + (xo + 1) * zoom - 1,
                   y + (yo + 1) * zoom - 1, true);
         }
       }

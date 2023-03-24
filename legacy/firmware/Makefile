@@ -84,7 +84,6 @@ OBJS += solana.o
 OBJS += starcoin.o
 OBJS += stellar.o
 OBJS += tron.o
-OBJS += tron_ui.o
 OBJS += tron_tokens.o
 OBJS += aptos.o
 OBJS += near.o
@@ -98,7 +97,6 @@ OBJS += algo/parser_impl.o
 OBJS += algo/parser.o
 OBJS += algo/tx.o
 OBJS += ripple.o
-OBJS += sui.o
 OBJS += filecoin.o
 OBJS += filecoin/cborparser.o
 OBJS += filecoin/cborvalidation.o
@@ -117,15 +115,16 @@ OBJS += polkadot.o
 OBJS += polkadot/crypto_helper.o
 OBJS += polkadot/bignum.o
 OBJS += polkadot/substrate/substrate_types_V18.o
-OBJS += polkadot/substrate/substrate_types_V19.o
 OBJS += polkadot/substrate/substrate_types.o
 OBJS += polkadot/substrate/substrate_dispatch_V18.o
-OBJS += polkadot/substrate/substrate_dispatch_V19.o
 OBJS += polkadot/substrate/substrate_dispatch.o
 OBJS += polkadot/parser_impl_common.o
 OBJS += polkadot/parser_impl.o
 OBJS += polkadot/parser.o
 OBJS += polkadot/tx.o
+OBJS += ada.o
+OBJS += cbor.o
+OBJS += sui.o
 endif
 
 OBJS += debug.o
@@ -215,10 +214,11 @@ OBJS += protob/messages-near.pb.o
 OBJS += protob/messages-conflux.pb.o
 OBJS += protob/messages-algorand.pb.o
 OBJS += protob/messages-ripple.pb.o
-OBJS += protob/messages-sui.pb.o
 OBJS += protob/messages-filecoin.pb.o
 OBJS += protob/messages-cosmos.pb.o
 OBJS += protob/messages-polkadot.pb.o
+OBJS += protob/messages-cardano.pb.o
+OBJS += protob/messages-sui.pb.o
 endif
 
 OPTFLAGS ?= -Os
@@ -235,7 +235,7 @@ include ../Makefile.include
 ifeq ($(EMULATOR),1)
 CFLAGS += --warn-no-unused-parameter
 endif
-CFLAGS += -fstack-protector-strong
+# CFLAGS += -fstack-protector-all
 CFLAGS += -Wno-sequence-point
 CFLAGS += -I../vendor/nanopb -Iprotob -DPB_FIELD_16BIT=1 -DPB_ENCODE_ARRAYS_UNPACKED=1 -DPB_VALIDATE_UTF8=1
 CFLAGS += -DSCM_REVISION='"$(shell git rev-parse HEAD | sed 's:\(..\):\\x\1:g')"'

@@ -109,6 +109,52 @@ inline void layoutDialogEx(const BITMAP *icon, const char *btnNo,
   oledRefresh();
 }
 
+void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
+                                 const BITMAP *bmp_yes, const char *title,
+                                 const char *line1, const char *line2,
+                                 const char *line3, const char *line4) {
+  int y = 0;
+  oledClear();
+  if (icon) {
+    y = 21;
+    oledDrawBitmap(56, 2, icon);
+  } else if (title) {
+    y = 13;
+    // layoutHeader
+    oledBox(0, 0, OLED_WIDTH, 10, false);
+    oledDrawStringCenter(OLED_WIDTH / 2, 2, title, FONT_STANDARD);
+
+    oledInvert(0, 0, OLED_WIDTH, 10);
+
+    oledBox(0, 0, 2, 2, false);
+    oledBox(1, 1, 2, 2, true);
+    oledBox(0, 10 - 2, 2, 10, false);
+    oledBox(1, 10 - 2, 2, 10 - 1, true);
+
+    oledBox(OLED_WIDTH - 3, 0, OLED_WIDTH - 1, 2, false);
+    oledBox(OLED_WIDTH - 3, 1, OLED_WIDTH - 2, 2, true);
+    oledBox(OLED_WIDTH - 3, 10 - 2, OLED_WIDTH - 1, 10, false);
+    oledBox(OLED_WIDTH - 3, 10 - 3, OLED_WIDTH - 2, 10 - 1, true);
+  }
+
+  if (line1)
+    oledDrawStringCenter(OLED_WIDTH / 2, y + (0 * 10), line1, FONT_STANDARD);
+  if (line2)
+    oledDrawStringCenter(OLED_WIDTH / 2, y + (1 * 10), line2, FONT_STANDARD);
+  if (line3)
+    oledDrawStringCenter(OLED_WIDTH / 2, y + (2 * 10), line3, FONT_STANDARD);
+  if (line4)
+    oledDrawStringCenter(OLED_WIDTH / 2, y + (3 * 10), line4, FONT_STANDARD);
+
+  if (bmp_no) {
+    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+  }
+  if (bmp_yes) {
+    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+  }
+  oledRefresh();
+}
+
 void layoutinfoCenter(const char *line1, const char *line2, const char *line3,
                       const char *line4, const char *line5, const char *line6) {
   oledClear();
@@ -165,22 +211,40 @@ void layoutProgressPercent(int permil) {
 
 void layoutProgress(const char *desc, int permil) {
   oledClear();
-  layoutProgressPercent(permil / 10);
+  oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT / 2 - 6, desc,
+                       FONT_STANDARD);
+
   // progressbar
-  oledFrame(0, OLED_HEIGHT - 8, OLED_WIDTH - 1, OLED_HEIGHT - 1);
-  oledBox(1, OLED_HEIGHT - 7, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
+  oledBox(2, OLED_HEIGHT - 13, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
+  oledBox(5, OLED_HEIGHT - 13, OLED_WIDTH - 3, OLED_HEIGHT - 13, 1);
+  oledBox(5, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1);
+
   permil = permil * (OLED_WIDTH - 4) / 1000;
-  if (permil < 0) {
-    permil = 0;
-  }
   if (permil > OLED_WIDTH - 4) {
     permil = OLED_WIDTH - 4;
   }
-  oledBox(2, OLED_HEIGHT - 6, 1 + permil, OLED_HEIGHT - 3, 1);
-  // text
-  oledBox(0, OLED_HEIGHT - 16, OLED_WIDTH - 1, OLED_HEIGHT - 16 + 7, 0);
-  if (desc) {
-    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 16, desc, FONT_STANDARD);
+  oledBox(2, OLED_HEIGHT - 10, 2, OLED_HEIGHT - 6, 1);
+  oledBox(3, OLED_HEIGHT - 12, 4, OLED_HEIGHT - 4, 1);
+  if (permil > 3) {
+    oledBox(5, OLED_HEIGHT - 12, permil + 1, OLED_HEIGHT - 4, 1);
+  }
+
+  oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 13, OLED_WIDTH - 3, OLED_HEIGHT - 3, 0);
+
+  oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 12, OLED_WIDTH - 4, OLED_HEIGHT - 11,
+          1);
+  oledClearPixel(OLED_WIDTH - 5, OLED_HEIGHT - 11);
+  oledBox(OLED_WIDTH - 3, OLED_HEIGHT - 10, OLED_WIDTH - 3, OLED_HEIGHT - 6, 1);
+  oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 5, OLED_WIDTH - 4, OLED_HEIGHT - 4, 1);
+  oledClearPixel(OLED_WIDTH - 5, OLED_HEIGHT - 5);
+
+  if (permil >= OLED_WIDTH - 6) {
+    oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 11, OLED_WIDTH - 5, OLED_HEIGHT - 5,
+            1);
+    if (permil > OLED_WIDTH - 6) {
+      oledBox(OLED_WIDTH - 4, OLED_HEIGHT - 11, OLED_WIDTH - 4, OLED_HEIGHT - 5,
+              1);
+    }
   }
   oledRefresh();
 }
@@ -189,22 +253,22 @@ void layoutProgress(const char *desc, int permil) {
 void disBatteryLevel(uint8_t cur_level) {
   switch (cur_level) {
     case 0:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_battery_0);
+      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_0);
       break;
     case 1:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_battery_1);
+      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_1);
       break;
     case 2:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_battery_2);
+      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_2);
       break;
     case 3:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_battery_3);
+      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_3);
       break;
     case 4:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_battery_4);
+      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_4);
       break;
     default:
-      oledClearBitmap(OLED_WIDTH - 18, 0, &bmp_battery_4);
+      oledClearBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_4);
       break;
   }
 }
@@ -246,23 +310,24 @@ uint8_t layoutStatusLogo(bool force_fresh) {
   if (sys_bleState() == true) {
     if (force_fresh || false == ble_status_bak) {
       ble_status_bak = true;
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_blecon);
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0,
+                     &bmp_status_ble_connect);
       refresh = true;
     }
   } else if (true == ble_status_bak) {
     ble_status_bak = false;
-    oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+    oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_status_ble);
     refresh = true;
     ret = 1;
   } else if (ble_get_switch() == true) {
     if (force_fresh || false == ble_adv_status_bak) {
       ble_adv_status_bak = true;
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_status_ble);
       refresh = true;
     }
   } else if (true == ble_adv_status_bak) {
     ble_adv_status_bak = false;
-    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_ble);
+    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - pad, 0, &bmp_status_ble);
     refresh = true;
     ret = 1;
   }
@@ -272,12 +337,12 @@ uint8_t layoutStatusLogo(bool force_fresh) {
   if (sys_usbState() == true) {
     if (force_fresh || false == usb_status_bak) {
       usb_status_bak = true;
-      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
+      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_status_usb);
       refresh = true;
     }
   } else if (true == usb_status_bak) {
     usb_status_bak = false;
-    oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_usb);
+    oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - pad, 0, &bmp_status_usb);
     refresh = true;
   }
 
@@ -302,8 +367,7 @@ void layoutBlePasskey(uint8_t *passkey) {
 void layoutFillBleName(uint8_t line) {
   if (line < (OLED_HEIGHT / 8)) {
     if (ble_name_state() == true) {
-      oledclearLine(line);
-      oledDrawStringCenter(64, line * 8, ble_get_name(), FONT_STANDARD);
+      oledDrawString(50, 38, ble_get_name(), FONT_STANDARD);
     }
   }
 }

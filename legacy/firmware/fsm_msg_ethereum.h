@@ -30,7 +30,7 @@ static bool fsm_ethereumCheckPath(uint32_t address_n_count,
     return false;
   }
 
-  return fsm_layoutPathWarning();
+  return fsm_layoutPathWarning(address_n_count, address_n);
 }
 
 void fsm_msgEthereumGetPublicKey(const EthereumGetPublicKey *msg) {
@@ -64,8 +64,10 @@ void fsm_msgEthereumGetPublicKey(const EthereumGetPublicKey *msg) {
   }
 
   if (msg->has_show_display && msg->show_display) {
-    layoutPublicKey(node->public_key);
-    if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
+    char pubkey[65] = {0};
+    data2hexaddr(node->public_key, 32, pubkey);
+    if (!layoutXPUB("Ethereum", pubkey, msg->address_n, msg->address_n_count)) {
+      memzero(resp, sizeof(PublicKey));
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
       return;
@@ -175,9 +177,16 @@ void fsm_msgEthereumGetAddress(const EthereumGetAddress *msg) {
   // ethereum_address_checksum adds trailing zero
 
   if (msg->has_show_display && msg->show_display) {
-    char desc[16];
-    strlcpy(desc, "Address:", sizeof(desc));
-
+    char desc[32] = {0};
+    const char *chain_name = NULL;
+    if (msg->has_chain_id) {
+      ASSIGN_ETHEREUM_NAME(chain_name, msg->chain_id);
+    } else {
+      ASSIGN_ETHEREUM_NAME(chain_name, 42170);  // unknown chain
+    }
+    strcat(desc, chain_name);
+    strcat(desc, " ");
+    strcat(desc, _("Address:"));
     if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
@@ -214,14 +223,8 @@ void fsm_msgEthereumSignMessage(const EthereumSignMessage *msg) {
   ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
   // ethereum_address_checksum adds trailing zero
 
-  layoutVerifyAddress(NULL, resp->address);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
+  if (!fsm_layoutSignMessage("Ethereum", resp->address, msg->message.bytes,
+                             msg->message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
@@ -243,14 +246,8 @@ void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg) {
     return;
   }
 
-  layoutVerifyAddress(NULL, msg->address);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  if (!fsm_layoutVerifyMessage(msg->message.bytes, msg->message.size)) {
+  if (!fsm_layoutVerifyMessage("Ethereum", msg->address, msg->message.bytes,
+                               msg->message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
@@ -280,21 +277,13 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
     return;
   }
 
-  if (!config_getCoinSwitch(COIN_SWITCH_ETH_EIP712)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("EIP712 blind sign is disabled"));
-    return;
-  }
-
-  if (!fsm_layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
-                                msg->domain_hash.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  if (!fsm_layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
-                                msg->message_hash.size)) {
+  char domain_hash[65] = {0};
+  char msg_hash[65] = {0};
+  data2hex(msg->domain_hash.bytes, 32, domain_hash);
+  data2hex(msg->message_hash.bytes, 32, msg_hash);
+  if (!fsm_layoutSignHash(
+          "Ethereum", resp->address, domain_hash, msg_hash,
+          _("Unable to show EIP-712 data. Sign at your own risk."))) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
@@ -330,15 +319,6 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
     return;
   }
 
-  layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
-                    _("Unable to show"), _("EIP-712 data."), NULL,
-                    _("Sign at your own risk."), NULL, NULL);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
   const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
   if (!node) return;
@@ -352,27 +332,26 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
   ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
   // ethereum_address_checksum adds trailing zero
 
-  layoutVerifyAddress(NULL, resp->address);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  layoutConfirmHash(&bmp_icon_warning, _("EIP-712 domain hash"),
-                    msg->domain_separator_hash.bytes, 32);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  // No message hash when setting primaryType="EIP712Domain"
-  // https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
+  char warn_msg[64] = {0};
+  strcat(warn_msg, _("Unable to show EIP-712 data. Sign at your own risk."));
   if (msg->has_message_hash) {
-    layoutConfirmHash(&bmp_icon_warning, _("EIP-712 message hash"),
-                      msg->message_hash.bytes, 32);
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+    char domain_hash[65] = {0};
+    char msg_hash[65] = {0};
+    data2hex(msg->domain_separator_hash.bytes, 32, domain_hash);
+    data2hex(msg->message_hash.bytes, 32, msg_hash);
+    if (!fsm_layoutSignHash("Ethereum", resp->address, domain_hash, msg_hash,
+                            warn_msg)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
+    }
+  } else {
+    // No message hash when setting primaryType="EIP712Domain"
+    // https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
+    char domain_hash[65] = {0};
+    data2hex(msg->domain_separator_hash.bytes, 32, domain_hash);
+    if (!fsm_layoutSignHash("Ethereum", resp->address, domain_hash, NULL,
+                            warn_msg)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
       return;
