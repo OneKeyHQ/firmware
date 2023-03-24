@@ -37,7 +37,8 @@ async def _request_from_user(ctx: wire.Context) -> str:
 async def _request_on_host(ctx: wire.Context) -> str:
     from trezor.messages import PassphraseAck, PassphraseRequest
 
-    _entry_dialog()
+    # disable passphrase entry dialog for now
+    # _entry_dialog()
 
     request = PassphraseRequest()
     ack = await ctx.call(request, PassphraseAck)
