@@ -6,8 +6,8 @@ from hashlib import sha256
 
 class Signatures:
     # offsets from T1 firmware hash
-    sig_offsets = [544, 608, 672]
-    sigindex_offsets = [736, 737, 738]
+    sig_offsets = [544, 608, 672, 736]
+    sigindex_offsets = [800, 801, 802, 803]
     signature_pairs = []  # list of tupes (int, bytes)
 
     def __init__(self, filename):
@@ -45,7 +45,7 @@ class Signatures:
         Patch signatures from signature_pairs.
         Requires filling signature_pairs beforehand.
         """
-        assert len(self.signature_pairs) <= 3
+        assert len(self.signature_pairs) <= 4
 
         for i in range(len(self.signature_pairs)):
             sigindex_ofs = self.sigindex_offsets[i]

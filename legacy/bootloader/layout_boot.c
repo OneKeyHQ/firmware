@@ -7,7 +7,11 @@ void layoutBootHome(void) {
     oledClear();
     oledDrawBitmap(30, 20, &bmp_home_logo);
     oledDrawStringCenter(85, 20, "OneKey", FONT_STANDARD);
+#if BOOTLOADER_QA
+    oledDrawStringCenter(85, 30, "Bootloader-QA", FONT_STANDARD);
+#else
     oledDrawStringCenter(85, 30, "Bootloader", FONT_STANDARD);
+#endif
     oledDrawStringCenter(85, 40,
                          VERSTR(VERSION_MAJOR) "." VERSTR(
                              VERSION_MINOR) "." VERSTR(VERSION_PATCH),

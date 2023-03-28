@@ -1,6 +1,8 @@
 APPVER = 1.8.0
 
-NAME  = trezor
+FIRMWARE_BUILD_VERSION=$(shell echo "VERSION_MAJOR.VERSION_MINOR.VERSION_PATCH" | cpp -include ../bootloader/version.h -nostdinc -P | tr -d " ")
+
+NAME  = classic_boot_update_$(FIRMWARE_BUILD_VERSION)
 
 OBJS += trezor.o
 OBJS += header.o
@@ -12,11 +14,11 @@ OBJS += ../vendor/trezor-crypto/sha2.o
 OPTFLAGS ?= -Os
 
 
-../vendor/trezor-crypto/bip32.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/bip39.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/sha2.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -O3
+../vendor/trezor-crypto/bip32.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/bip39.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/sha2.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -Os
 
 include ../Makefile.include
 CFLAGS:=$(filter-out -fstack-protector-all,$(CFLAGS))

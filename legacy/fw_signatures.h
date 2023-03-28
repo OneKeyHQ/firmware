@@ -53,10 +53,12 @@ typedef struct {
   uint8_t sig1[64];
   uint8_t sig2[64];
   uint8_t sig3[64];
+  uint8_t sig4[64];
   uint8_t sigindex1;
   uint8_t sigindex2;
   uint8_t sigindex3;
-  uint8_t __reserved2[220];
+  uint8_t sigindex4;
+  uint8_t __reserved2[155];
   uint8_t __sigmask;
   uint8_t __sig[64];
 } __attribute__((packed)) image_header;

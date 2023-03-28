@@ -547,10 +547,12 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
         if (msg_id != 0x001B) {  // ButtonAck message (id 27)
           return;
         }
-        uint8_t hash[32] = {0};
-        compute_firmware_fingerprint(hdr, hash);
-        layoutFirmwareFingerprint(hash);
-        hash_check_ok = waitButtonResponse(BTN_PIN_YES, default_oper_time);
+        // OneKey not allowed Unofficial firmware
+        hash_check_ok = false;
+        // uint8_t hash[32] = {0};
+        // compute_firmware_fingerprint(hdr, hash);
+        // layoutFirmwareFingerprint(hash);
+        // hash_check_ok = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       } else {
         hash_check_ok = true;
       }
@@ -603,6 +605,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
                      "You need to repeat", "the procedure with",
                      "the correct firmware.");
         send_msg_failure(dev, 9);  // Failure_ProcessError
+        delay_ms(1000);
         shutdown();
       }
       return;

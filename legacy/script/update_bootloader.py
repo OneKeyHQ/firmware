@@ -25,8 +25,10 @@ BL_CHECK_PATTERN = """\
       memcmp(hash,
              {line1}
              {line2},
-             32))
+             32)) {{
+    memcpy(bootloader_version, "{version}", strlen("{version}"));
     return 1;  // {comment}
+  }}
 """
 
 BL_CHECK_AUTO_BEGIN = "  // BEGIN AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)\n"
@@ -62,6 +64,14 @@ def load_version(filename: Path) -> str:
     return "{major}.{minor}.{patch}".format(**vdict)
 
 
+def load_onekey_version(filename: Path) -> str:
+    """Load version from version.h"""
+    with open(filename) as f:
+        for line in f:
+            if line.startswith("#define ONEKEY_VERSION"):
+                return line.split('"')[1]
+
+
 def load_hash_entries(txt_file) -> dict[bytes, str]:
     """Load hash entries from bl_check.txt"""
     return {
@@ -74,6 +84,7 @@ def load_hash_entries(txt_file) -> dict[bytes, str]:
 
 def regenerate_bl_check(
     hash_entries: t.Iterable[tuple[bytes, str]],
+    version,
     begin,
     end,
 ) -> None:
@@ -92,6 +103,7 @@ def regenerate_bl_check(
                 BL_CHECK_PATTERN.format(
                     line1=cstrify(digest[:16]),
                     line2=cstrify(digest[16:]),
+                    version=version,
                     comment=comment,
                 )
             )
@@ -139,7 +151,7 @@ def main(comment: str | None, qa: bool) -> None:
     else:
         if comment is None:
             bl_version = load_version(BOOTLOADER_VERSION)
-            fw_version = load_version(FIRMWARE_VERSION)
+            fw_version = load_onekey_version(FIRMWARE_VERSION)
             comment = f"{bl_version} shipped with fw {fw_version}"
 
         # insert new bootloader
@@ -150,7 +162,7 @@ def main(comment: str | None, qa: bool) -> None:
         click.echo("Inserted new entry: " + comment)
 
     # rewrite bl_check.c
-    regenerate_bl_check(entries.items(), begin, end)
+    regenerate_bl_check(entries.items(), load_version(BOOTLOADER_VERSION), begin, end)
     click.echo("Regenerated bl_check.c")
 
     # overwrite bootloader.dat

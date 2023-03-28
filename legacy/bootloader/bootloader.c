@@ -68,7 +68,7 @@ void show_unplug(const char *line1, const char *line2) {
   delay_ms(1000);
 }
 
-static void show_unofficial_warning(const uint8_t *hash) {
+void show_unofficial_warning(const uint8_t *hash) {
 // On production bootloader, show warning and wait for user
 // to accept or reject it
 // On non-production we only use unofficial firmwares,
@@ -158,7 +158,7 @@ int main(void) {
       uint8_t fingerprint[32] = {0};
       int signed_firmware = signatures_match(hdr, fingerprint);
       if (SIG_OK != signed_firmware) {
-        show_unofficial_warning(fingerprint);
+        show_halt("Unofficial firmware", "aborted.");
       }
 
       if (SIG_OK != check_firmware_hashes(hdr)) {
