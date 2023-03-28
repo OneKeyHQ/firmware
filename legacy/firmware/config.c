@@ -724,8 +724,6 @@ const uint8_t *config_getSeed(void) {
     if (!protectPassphrase(passphrase)) {
       memzero(mnemonic, sizeof(mnemonic));
       memzero(passphrase, sizeof(passphrase));
-      fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                      _("Passphrase dismissed"));
       return NULL;
     }
     // passphrase is used - confirm on the display

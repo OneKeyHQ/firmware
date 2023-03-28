@@ -61,6 +61,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   bool timeout_flag = true;
 #if DEBUG_LINK
   bool debug_decided = false;
+  acked = false;
 #endif
 
   protectAbortedByTimeout = false;
@@ -140,11 +141,12 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
 static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
                                  bool requset, uint32_t timeout_s) {
   ButtonRequest resp = {0};
-  bool acked = false;
+  bool acked = true;
   bool timeout_flag = true;
   uint8_t key = KEY_NULL;
 #if DEBUG_LINK
   bool debug_decided = false;
+  acked = false;
 #endif
 
   protectAbortedByTimeout = false;
@@ -160,8 +162,6 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
   if (timeout_s) {
     timer_out_set(timer_out_oper, timeout_s);
   }
-  if (g_bIsBixinAPP) acked = true;
-  acked = true;
 
   while (1) {
     if (timeout_s) {
@@ -203,10 +203,13 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
     if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
       msg_tiny_id = 0xFFFF;
       DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
-      if (dld->yes_no) {
+      if (dld->button == DebugButton_YES) {
         key = KEY_CONFIRM;
+      } else if (dld->button == DebugButton_NO) {
+        key = KEY_CANCEL;
       }
       debug_decided = true;
+      timeout_flag = false;
     }
 
     if (acked && debug_decided) {
