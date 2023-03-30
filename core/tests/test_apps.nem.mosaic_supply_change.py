@@ -6,9 +6,7 @@ if not utils.BITCOIN_ONLY:
     from apps.nem.helpers import *
     from apps.nem.mosaic import *
     from apps.nem.mosaic.serialize import *
-    from trezor.messages import NEMSignTx
-    from trezor.messages import NEMMosaicSupplyChange
-
+    from trezor.messages import NEMSignTx, NEMMosaicSupplyChange, NEMTransactionCommon
 
 @unittest.skipUnless(not utils.BITCOIN_ONLY, "altcoin")
 class TestNemMosaicSupplyChange(unittest.TestCase):
@@ -74,19 +72,24 @@ class TestNemMosaicSupplyChange(unittest.TestCase):
 
 def _create_msg(network: int, timestamp: int, fee: int, deadline: int,
                 namespace: str, mosaic: str, mod_type: int, delta: int):
-    m = NEMSignTx()
-    m.transaction = NEMTransactionCommon()
-    m.transaction.network = network
-    m.transaction.timestamp = timestamp
-    m.transaction.fee = fee
-    m.transaction.deadline = deadline
+    transaction = NEMTransactionCommon(
+        network=network,
+        timestamp=timestamp,
+        fee=fee,
+        deadline=deadline,
+    )
 
-    m.supply_change = NEMMosaicSupplyChange()
-    m.supply_change.namespace = namespace
-    m.supply_change.mosaic = mosaic
-    m.supply_change.type = mod_type
-    m.supply_change.delta = delta
-    return m
+    supply_change = NEMMosaicSupplyChange(
+        namespace=namespace,
+        mosaic=mosaic,
+        type=mod_type,
+        delta=delta,
+    )
+
+    return NEMSignTx(
+        transaction=transaction,
+        supply_change=supply_change,
+    )
 
 
 if __name__ == '__main__':

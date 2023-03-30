@@ -1,23 +1,22 @@
-from trezor import wire
+from trezor.wire import DataError
 
 
-class Error(wire.DataError):
+class Error(DataError):
     pass
 
 
-class ChangeAddressError(wire.DataError):
+class ChangeAddressError(DataError):
     pass
 
 
-class NotEnoughOutputsError(wire.DataError):
+class NotEnoughOutputsError(DataError):
     pass
 
 
 class RctType:
     """
     There are several types of monero Ring Confidential Transactions
-    like RCTTypeFull and RCTTypeSimple but currently we use only Bulletproof2
+    like RCTTypeFull and RCTTypeSimple, but currently we use only RCTTypeBulletproofPlus
     """
 
-    Bulletproof2 = 4
-    CLSAG = 5
+    RCTTypeBulletproofPlus = 6

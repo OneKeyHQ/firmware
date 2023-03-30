@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -27,6 +27,12 @@ if TYPE_CHECKING:
 
 PATH_HELP = "BIP-32 path to key, e.g. m/44'/1815'/0'/0/0"
 
+TESTNET_CHOICES = {
+    "preprod": "testnet_preprod",
+    "preview": "testnet_preview",
+    "legacy": "testnet_legacy",
+}
+
 
 @click.group(name="cardano")
 def cli() -> None:
@@ -46,13 +52,14 @@ def cli() -> None:
     "-p", "--protocol-magic", type=int, default=cardano.PROTOCOL_MAGICS["mainnet"]
 )
 @click.option("-N", "--network-id", type=int, default=cardano.NETWORK_IDS["mainnet"])
-@click.option("-t", "--testnet", is_flag=True)
+@click.option("-t", "--testnet", type=ChoiceType(TESTNET_CHOICES))
 @click.option(
     "-D",
     "--derivation-type",
     type=ChoiceType({m.name: m for m in messages.CardanoDerivationType}),
     default=messages.CardanoDerivationType.ICARUS,
 )
+@click.option("-i", "--include-network-id", is_flag=True)
 @with_client
 def sign_tx(
     client: "TrezorClient",
@@ -60,14 +67,15 @@ def sign_tx(
     signing_mode: messages.CardanoTxSigningMode,
     protocol_magic: int,
     network_id: int,
-    testnet: bool,
+    testnet: str,
     derivation_type: messages.CardanoDerivationType,
+    include_network_id: bool,
 ) -> cardano.SignTxResponse:
     """Sign Cardano transaction."""
     transaction = json.load(file)
 
     if testnet:
-        protocol_magic = cardano.PROTOCOL_MAGICS["testnet"]
+        protocol_magic = cardano.PROTOCOL_MAGICS[testnet]
         network_id = cardano.NETWORK_IDS["testnet"]
 
     inputs = [cardano.parse_input(input) for input in transaction["inputs"]]
@@ -85,6 +93,27 @@ def sign_tx(
     ]
     auxiliary_data = cardano.parse_auxiliary_data(transaction.get("auxiliary_data"))
     mint = cardano.parse_mint(transaction.get("mint", ()))
+    script_data_hash = cardano.parse_script_data_hash(
+        transaction.get("script_data_hash")
+    )
+    collateral_inputs = [
+        cardano.parse_collateral_input(collateral_input)
+        for collateral_input in transaction.get("collateral_inputs", ())
+    ]
+    required_signers = [
+        cardano.parse_required_signer(required_signer)
+        for required_signer in transaction.get("required_signers", ())
+    ]
+    collateral_return = (
+        cardano.parse_output(transaction["collateral_return"])
+        if transaction.get("collateral_return")
+        else None
+    )
+    total_collateral = transaction.get("total_collateral")
+    reference_inputs = [
+        cardano.parse_reference_input(reference_input)
+        for reference_input in transaction.get("reference_inputs", ())
+    ]
     additional_witness_requests = [
         cardano.parse_additional_witness_request(p)
         for p in transaction["additional_witness_requests"]
@@ -105,8 +134,15 @@ def sign_tx(
         network_id,
         auxiliary_data,
         mint,
+        script_data_hash,
+        collateral_inputs,
+        required_signers,
+        collateral_return,
+        total_collateral,
+        reference_inputs,
         additional_witness_requests,
         derivation_type=derivation_type,
+        include_network_id=include_network_id,
     )
 
     sign_tx_response["tx_hash"] = sign_tx_response["tx_hash"].hex()
@@ -126,9 +162,11 @@ def sign_tx(
         auxiliary_data_supplement["auxiliary_data_hash"] = auxiliary_data_supplement[
             "auxiliary_data_hash"
         ].hex()
-        catalyst_signature = auxiliary_data_supplement.get("catalyst_signature")
-        if catalyst_signature:
-            auxiliary_data_supplement["catalyst_signature"] = catalyst_signature.hex()
+        governance_signature = auxiliary_data_supplement.get("governance_signature")
+        if governance_signature:
+            auxiliary_data_supplement[
+                "governance_signature"
+            ] = governance_signature.hex()
         sign_tx_response["auxiliary_data_supplement"] = auxiliary_data_supplement
     return sign_tx_response
 
@@ -153,7 +191,7 @@ def sign_tx(
     "-p", "--protocol-magic", type=int, default=cardano.PROTOCOL_MAGICS["mainnet"]
 )
 @click.option("-N", "--network-id", type=int, default=cardano.NETWORK_IDS["mainnet"])
-@click.option("-e", "--testnet", is_flag=True)
+@click.option("-e", "--testnet", type=ChoiceType(TESTNET_CHOICES))
 @click.option(
     "-D",
     "--derivation-type",
@@ -175,7 +213,7 @@ def get_address(
     protocol_magic: int,
     network_id: int,
     show_display: bool,
-    testnet: bool,
+    testnet: str,
     derivation_type: messages.CardanoDerivationType,
 ) -> str:
     """
@@ -193,7 +231,7 @@ def get_address(
     Byron, enterprise and reward addresses only require the general parameters.
     """
     if testnet:
-        protocol_magic = cardano.PROTOCOL_MAGICS["testnet"]
+        protocol_magic = cardano.PROTOCOL_MAGICS[testnet]
         network_id = cardano.NETWORK_IDS["testnet"]
 
     staking_key_hash_bytes = cardano.parse_optional_bytes(staking_key_hash)

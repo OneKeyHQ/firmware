@@ -36,18 +36,30 @@
 #include "ports/stm32/pendsv.h"
 
 #include "bl_check.h"
-#include "button.h"
+#include "board_capabilities.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
 #include "flash.h"
+#include "image.h"
 #include "mpu.h"
 #include "random_delays.h"
+#ifdef TREZOR_MODEL_R
+#include "rgb_led.h"
+#endif
+#ifdef TREZOR_MODEL_T
+#include "dma2d.h"
+#endif
+#if defined TREZOR_MODEL_R || defined TREZOR_MODEL_1
+#include "button.h"
+#endif
+
 #ifdef SYSTEM_VIEW
 #include "systemview.h"
 #endif
 #include "rng.h"
 #include "sdcard.h"
+#include "stm32.h"
 #include "supervise.h"
 #include "touch.h"
 #ifdef USE_SECP256K1_ZKP
@@ -65,7 +77,7 @@ int main(void) {
 #endif
 
   // reinitialize HAL for Trezor One
-#if TREZOR_MODEL == 1
+#if defined TREZOR_MODEL_1
   HAL_Init();
 #endif
 
@@ -75,7 +87,11 @@ int main(void) {
   enable_systemview();
 #endif
 
-#if TREZOR_MODEL == T
+  display_reinit();
+
+#if !defined TREZOR_MODEL_1
+  parse_boardloader_capabilities();
+
 #if PRODUCTION
   check_and_replace_bootloader();
 #endif
@@ -86,23 +102,37 @@ int main(void) {
   // Init peripherals
   pendsv_init();
 
-#if TREZOR_MODEL == 1
-  display_init();
+#ifdef USE_DMA2D
+  dma2d_init();
+#endif
+
+#if !PRODUCTION
+  // enable BUS fault and USAGE fault handlers
+  SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk);
+#endif
+
+#if defined TREZOR_MODEL_1
   button_init();
 #endif
 
-#if TREZOR_MODEL == T
-  // display_init_seq();
-  sdcard_init();
-  touch_init();
-  touch_power_on();
+#if defined TREZOR_MODEL_R
+  button_init();
+  rgb_led_init();
+#endif
 
+#if defined TREZOR_MODEL_T
+  set_core_clock(CLOCK_180_MHZ);
+  touch_init();
+  sdcard_init();
+#endif
+
+  display_clear();
+
+#if !defined TREZOR_MODEL_1
   // jump to unprivileged mode
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
   __asm__ volatile("msr control, %0" ::"r"(0x1));
   __asm__ volatile("isb");
-
-  display_clear();
 #endif
 
 #ifdef USE_SECP256K1_ZKP
@@ -113,7 +143,7 @@ int main(void) {
   // Stack limit should be less than real stack size, so we have a chance
   // to recover from limit hit.
   mp_stack_set_top(&_estack);
-  mp_stack_set_limit((char *)&_estack - (char *)&_heap_end - 1024);
+  mp_stack_set_limit((char *)&_estack - (char *)&_sstack - 1024);
 
 #if MICROPY_ENABLE_PYSTACK
   static mp_obj_t pystack[1024];
@@ -163,8 +193,12 @@ void HardFault_Handler(void) {
   error_shutdown("Internal error", "(HF)", NULL, NULL);
 }
 
-void MemManage_Handler(void) {
+void MemManage_Handler_MM(void) {
   error_shutdown("Internal error", "(MM)", NULL, NULL);
+}
+
+void MemManage_Handler_SO(void) {
+  error_shutdown("Internal error", "(SO)", NULL, NULL);
 }
 
 void BusFault_Handler(void) {
@@ -173,6 +207,13 @@ void BusFault_Handler(void) {
 
 void UsageFault_Handler(void) {
   error_shutdown("Internal error", "(UF)", NULL, NULL);
+}
+
+__attribute__((noreturn)) void reboot_to_bootloader() {
+  jump_to_with_flag(BOOTLOADER_START + IMAGE_HEADER_SIZE,
+                    STAY_IN_BOOTLOADER_FLAG);
+  for (;;)
+    ;
 }
 
 void SVC_C_Handler(uint32_t *stack) {
@@ -197,6 +238,17 @@ void SVC_C_Handler(uint32_t *stack) {
       for (;;)
         ;
       break;
+    case SVC_REBOOT_TO_BOOTLOADER:
+      ensure_compatible_settings();
+      mpu_config_bootloader();
+      __asm__ volatile("msr control, %0" ::"r"(0x0));
+      __asm__ volatile("isb");
+      // See stack layout in
+      // https://developer.arm.com/documentation/ka004005/latest We are changing
+      // return address in PC to land into reboot to avoid any bug with ROP and
+      // raising privileges.
+      stack[6] = (uintptr_t)reboot_to_bootloader;
+      return;
     default:
       stack[0] = 0xffffffff;
       break;

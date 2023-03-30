@@ -14,21 +14,70 @@ REVIEWER = Jan Matejek <jan.matejek@satoshilabs.com>, Tomas Susanka <tomas.susan
 
 [Cardano developer documentation](https://developers.cardano.org/) - official developer documentation.
 
-[Delegation Design Spec](https://hydra.iohk.io/build/2006688/download/1/delegation_design_spec.pdf) - contains information about delegation (addresses, certificates, withdrawals, ...).
+[Cardano Ledger repository](https://github.com/input-output-hk/cardano-ledger/tree/master) - design docs and CDDL specs for each Cardano era.
 
-[Multi Asset CDDL spec](https://github.com/input-output-hk/cardano-ledger-specs/blob/097890495cbb0e8b62106bcd090a5721c3f4b36f/shelley-ma/shelley-ma-test/cddl-files/shelley-ma.cddl).
+[CIPs](https://github.com/cardano-foundation/CIPs) - Cardano improvement proposals.
+
+[Delegation Design Spec](https://hydra.iohk.io/build/2006688/download/1/delegation_design_spec.pdf) - contains information about delegation (addresses, certificates, withdrawals, ...).
 
 [Byron address format](https://github.com/input-output-hk/cardano-wallet/wiki/About-Address-Format---Byron).
 
 [The Shelley 1852' purpose and staking path](https://github.com/input-output-hk/implementation-decisions/blob/e2d1bed5e617f0907bc5e12cf1c3f3302a4a7c42/text/1852-hd-chimeric.md).
 
-[cbor.me](http://cbor.me/) - very useful tool for CBOR inspection.
+[cbor.me](http://cbor.me/), [cbor.nemo157.com](https://cbor.nemo157.com/), [VS Code extension](https://marketplace.visualstudio.com/items?itemName=gabrielkerekes.cbor) - useful tools for CBOR inspection.
 
-## Important notes
 
-Cardano requires a custom `seed.py` file and `Keychain` class. This is because the original Cardano derivation schemes don't separate seed generation from key tree derivation and also because we need to support Byron (44'), Shelley (1852'), multi-sig ([1854'](https://cips.cardano.org/cips/cip1854/)) and minting ([1855'](https://cips.cardano.org/cips/cip1855/)) purposes. More on this can be found [here](https://github.com/satoshilabs/slips/blob/master/slip-0023.md) and [here](https://github.com/input-output-hk/implementation-decisions/blob/e2d1bed5e617f0907bc5e12cf1c3f3302a4a7c42/text/1852-hd-chimeric.md).
+## Seed derivation schemes
+
+When using a **BIP-39 seed phrase**, multiple seed derivation schemes are [specified](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0003/README.md):
+
+* `ICARUS`, which is the recommended default.
+* `ICARUS_TREZOR`, which differs from Icarus for 24-word seed phrases due to a [historic bug](https://github.com/trezor/trezor-firmware/issues/1387).
+  When a seed shorter than 24 words is used, the result is the same as `ICARUS`.
+* `LEDGER`, designed and used by the Ledger wallet.
+
+Given the same seed phrase, each of the schemes may produce a different master seed,
+and so opens a different wallet.
+
+Icarus (and Icarus-Trezor) scheme processes the seed phrase in a manner incompatible
+with BIP-39. A separate derivation step is required when using the Icarus scheme, which
+prolongs Trezor's first-response time by 2 seconds, plus additional 2 seconds for
+Icarus-Trezor if the seed phrase is 24 words long.
+
+Since firmware version 2.4.3, wallets that require the Cardano-derived seed must specify
+`derive_cardano=true` in the `Initialize` call. Otherwise an error will be returned when
+performing any Cardano call with an Icarus-like derivation.
+
+Ledger derivation scheme is compatible with BIP-39 and does not require the separate
+derivation step. For that reason, it is available even if `derive_cardano=true` was not
+specified.
+
+Since firmware version 2.4.3, Trezor requires the caller to specify derivation type in
+every Cardano call. In older versions, the Icarus-Trezor derivation is always used.
+
+For compatibility with older firmwares, wallet implementations should default to the
+Icarus-Trezor derivation. For compatibility with other wallet vendors, wallets should
+make the derivation scheme configurable by user -- or perform a discovery for all three
+schemes.
+
+When using **SLIP-39 backup**, the only supported derivation is [SLIP-23](https://github.com/satoshilabs/slips/blob/master/slip-0023.md).
+The `derive_cardano=true` parameter is not required, and the value of `derivation_type`
+is ignored.
 
 Cardano uses extended public keys. This also means that the transaction signature is built using the `ed25519.sign_ext` function.
+
+
+## Multiple BIP-32 purposes
+
+Cardano is using the following values for BIP-32 purpose field:
+
+* Byron: 44'
+* Shelley: 1852'
+* Multi-sig: [1854'](https://cips.cardano.org/cips/cip1854/)
+* Minting: [1855'](https://cips.cardano.org/cips/cip1855/)
+
+Details about the purpose identifiers can be found [here](https://github.com/input-output-hk/implementation-decisions/blob/e2d1bed5e617f0907bc5e12cf1c3f3302a4a7c42/text/1852-hd-chimeric.md).
+
 
 ## Protocol magic vs. Network id
 
@@ -37,6 +86,8 @@ Protocol magic is used to identify the network on the protocol level. Each netwo
 _Current mainnet protocol magic:_ 764824073
 
 _Current mainnet network id:_ 1
+
+Since Alonzo era, network id may be included as an item in the transaction body.
 
 ## Key types
 
@@ -64,7 +115,7 @@ Testnet: `2657WMsDfac7BteXkJq5Jzdog4h47fPbkwUM49isuWbYAr2cFRHa3rURP236h9PBe`
 
 #### Credentials
 
-Shelley addresses are built using credentials - `payment_credential` and `staking_credential`. These credentials can either be key hashes or script IDs (hashes). The type of the address (and thus also its header) changes based on which credentials are used. Addresses with key hashes usually represent accounts owned by single users. Addresses with scripts either represent multi-sig (shared) accounts derived from native scripts or they represent Plutus scripts directly.
+Shelley addresses are built using credentials - `payment_credential` and `staking_credential`. These credentials can either be key hashes or script IDs (hashes). The type of the address (and thus also its header) changes based on which credentials are used. Addresses with key hashes usually represent accounts owned by single users. Addresses with scripts either represent multi-sig (shared) accounts derived from native scripts or they represent Plutus scripts directly (note that these two cases cannot be distinguished from each other based only on the script hash itself).
 
 #### Base address
 
@@ -133,7 +184,7 @@ For security and in some cases UX purposes we use transaction signing mode so th
 
 #### Ordinary transaction
 
-An ordinary transaction cannot contain a pool registration certificate. Also multi-sig (1854') witnesses can't be requested.
+An ordinary transaction cannot contain a pool registration certificate or items related to Plutus script evaluation (collateral inputs, ...). Also multi-sig (1854') witnesses can't be requested.
 
 #### Pool registration as owner
 
@@ -142,6 +193,7 @@ When signing a pool registration transaction as an owner, the transaction cannot
 - other certificates
 - withdrawals
 - token minting
+- items related to Plutus script evaluation (collateral inputs, ...)
 
 Including inputs with a path would cause the transaction to be signed by such a path without letting the user know. Of course, we could let the user know that the transaction is being signed by the user's payment key, however, a pool owner should never be the one paying for the pool registration anyways so such a witness request doesn't make sense.
 
@@ -149,7 +201,17 @@ Just like a pool registration certificate, other certificates and withdrawals ar
 
 #### Multi-sig transaction
 
-Represents a multi-sig transaction using native scripts. Script credentials must be used in certificates and withdrawals when signing a multi-sig transaction. Ordinary (1852') witness requests are not allowed and all the witness requests are shown. Transaction cannot contain a pool registration certificate.
+Represents a multi-sig transaction using native scripts. Script credentials must be used in certificates and withdrawals when signing a multi-sig transaction. Ordinary (1852') witness requests are not allowed and all the witness requests are shown. Transaction cannot contain a pool registration certificate or items related to Plutus script evaluation (collateral inputs, ...).
+
+#### Plutus transaction
+
+The signing mode intended for transactions containing Plutus script evaluation. Plutus scripts may access almost all transaction items and make decisions based on them, therefore all items should be shown to the user.
+
+Even though Plutus scripts cannot access collateral inputs and the collateral return output, we must show them to the user so that they can verify what collateral amount is at stake. However, if the client declares this amount in the total collateral field, collateral inputs and the collateral return output (if it contains an address governed by the device) can be hidden.
+
+Collateral inputs, collateral return output, total collateral and reference inputs are allowed only in Plutus transactions. Required signers are meant for Plutus transactions as well (from the blockchain point of view), but some applications utilize them for their own purposes, so we allow them in all signing modes (except for pool registration as owner).
+
+Since Plutus scripts may have many unforseen use cases, we put no further limitations on transactions (except forbidding pool registration certificates). Stake credentials in certificates and withdrawals may be given as key paths, key hashes or script hashes.
 
 ### Single account model
 
@@ -229,9 +291,9 @@ Each transaction may contain auxiliary data. Auxiliary data format can be found 
 
 Auxiliary data can be sent to Trezor as a hash or as an object with parameters. The hash will be included in the transaction body as is and will be shown to the user.
 
-The only object currently supported is Catalyst voting key registration. To be in compliance with the CDDL and other Cardano tools, Catalyst voting key registration object is being wrapped in a tuple and an empty tuple follows it. The empty tuple represents `auxiliary_scripts` which are not yet supported on Trezor and are thus always empty. Byron addresses are not supported as Catalyst reward addresses. The Catalyst registration signature is returned in the form of `CardanoTxAuxiliaryDataSupplement` which also contains the auxiliary data hash calculated by Trezor.
+The only object currently supported is governance voting key registration (currently, this is used only by Catalyst, but there may be other governance use cases in the future). To be in compliance with the CDDL and other Cardano tools, governance voting key registration object is being wrapped in a tuple and an empty tuple follows it. The empty tuple represents `auxiliary_scripts` which are not yet supported on Trezor and are thus always empty. Byron addresses are not supported as governance reward addresses. The governance registration signature is returned in the form of `CardanoTxAuxiliaryDataSupplement` which also contains the auxiliary data hash calculated by Trezor.
 
-[Catalyst Registration Transaction Metadata Format](https://github.com/cardano-foundation/CIPs/blob/749f22eccd78e05fcdc4552c49639bb3bbd0a458/CIP-0015/CIP-0015.md)
+[Governance Registration Transaction Metadata Format](https://cips.cardano.org/cips/cip36/)
 
 ### Native scripts
 
@@ -239,22 +301,38 @@ Native scripts are used to describe the multi-sig scheme belonging to a script a
 
 In order for the user to be able to verify native scripts a `get_native_script_hash` is available on Trezor. This enables the user to verify the contents and the final hash of the script.
 
-#### Transaction Explorer
+### Plutus scripts
 
-[Cardano explorer](https://explorer.cardano.org/en.html).
+_Plutus script support has been added in the Cardano Alonzo era_
 
-#### Submitting a transaction
+When creating a UTXO with a Plutus script address (in any signing mode), it should also contain a `datum_hash` or an `inline_datum` which provides additional UTXO-related data to the script. However, there are use cases for datums in an output controlled by a key, so we allow those as well.
+
+A UTXO can also contain a `reference_script` -- a script body that the user wants to embed in an output for later reference.
+
+Note that including `inline_datum` and/or `reference_script` requires using the `MAP_BABBAGE` (also known as post-Alonzo) output serialization format introduced in the Babbage era.
+
+When one wants to spend funds from a Plutus script address (which is possible only in the Plutus signing mode), they have to attach the Plutus script body as well as the datum referenced in the UTXO (if they did not utilize `inline_datum` and `reference_script` with `reference_inputs`). A redeemer must be provided too. These items are outside the transaction body which is signed by Trezor, so their hash is included in the transaction body as `script_data_hash`.
+
+### Level of details ("Show All"/"Show Simple")
+
+With the introduction of Plutus scripts the transaction signing UI has become a pain for the users. There are many elements which an ordinary user has no chance to verify and they might only confuse and bother him during the transaction signing process. This is why we have introduced the option to hide some transaction elements by letting the user choose the level of details for the transaction signing. This is done by adding an initial screen to the transaction signing flow on which two buttons are displayed: "Show All" button to display all transaction details and a "Show Simple" button to only show the critical transaction details.
+
+### Transaction Explorer
+
+[Cardano explorer](https://explorer.cardano.org/en.html), [Cardanoscan](https://cardanoscan.io/).
+
+### Submitting a transaction
 
 You can use a combination of [cardano-node](https://github.com/input-output-hk/cardano-node) and cardano-cli (part of the cardano-node repo) to submit a transaction.
 
 ## Serialization format
-Cardano uses [CBOR](https://www.rfc-editor.org/info/rfc7049) as a serialization format. [Here](https://github.com/input-output-hk/cardano-ledger-specs/blob/097890495cbb0e8b62106bcd090a5721c3f4b36f/shelley-ma/shelley-ma-test/cddl-files/shelley-ma.cddl) is the [CDDL](https://tools.ietf.org/html/rfc8610) specification for after Multi Asset support has been added.
+Cardano uses [CBOR](https://www.rfc-editor.org/info/rfc7049) as a serialization format. [Here](https://github.com/input-output-hk/cardano-ledger/blob/1cbf1fc2bb005a8206e5b5a7cdf44d35baaca455/eras/babbage/test-suite/cddl-files/babbage.cddl) is the [CDDL](https://tools.ietf.org/html/rfc8610) specification for Babbage era.
 
-#### Transaction body example
-Input for trezorctl to sign the transaction can be found [here](https://gist.github.com/gabrielKerekes/ad6c168b12ebb43b082df5b92d67e276).
+### Transaction body example
+Input for trezorctl to sign the transaction can be found [here](https://gist.github.com/gabrielKerekes/ad6c168b12ebb43b082df5b92d67e276). The command to use is `trezorctl cardano sign-tx -f tx_for_readme.json -s ORDINARY_TRANSACTION`.
 
 ```
-a900818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018282583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1910e18258390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427719115c02182a030a048182008200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427705a1581de1122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771903e8075820a943e9166f1bb6d767b175384d3bd7d23645170df36fc1861fbf344135d8e120081409a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a007838624875652474436f696e3a00783861
+a900818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018382583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821904d2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a14874652474436f696e1910e18258390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427719115c83581d71477e52b3116b62fe8cd34a312615f5fcd678c94e1d6cdb86c1a3964c190c4658203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702182a030a048182008200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427705a1581de1122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771903e8075820a943e9166f1bb6d767b175384d3bd7d23645170df36fc1861fbf344135d8e120081409a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24874652474436f696e1a007838624875652474436f696e3a00783861
 ```
 
 #### The same transaction body with structure description
@@ -266,8 +344,8 @@ a900818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001
   # uint(0), array(1), array(2), bytes(32), uint(0)
   0: [[h'3B4...', 0]],
 
-  # outputs [address, [ada_amount, { policy_id => { asset_name => asset_amount }}]]
-  # uint(1), array(2)
+  # outputs [address, [ada_amount, { policy_id => { asset_name => asset_amount }}], datum_hash?]
+  # uint(1), array(3)
   1: [
     # multi asset output
     # array(2), bytes(57), uint(1234), map(1), bytes(28), map(1), bytes(8), uint(4321)
@@ -283,6 +361,9 @@ a900818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001
     # output containing only ADA [address, ada_amount]
     # array(2), bytes(57), uint(4444)
     [h'018...', 4444],
+    # output with datum_hash [address, ada_amount, datum_hash]
+    # array(3), bytes(29), uint(3142), bytes(32)
+    [h'714...', 3142, h'3b4...'],
   ]
 
   # fee
@@ -317,4 +398,11 @@ a900818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001
     }
   }
 }
+```
+
+### Babbage-era transaction body example
+This Plutus transaction body contains elements introduced in the Babbage era (perhaps the most interesting elements with regards to the CBOR encoding are the inline datum and the reference script). You can use one of the CBOR inspection tools listed on top of this document to examine the transaction body structure.
+
+```
+a8008182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d000181a4005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100028201d81841a003d8185846820158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004102000b5820853cbe68f7fccdeeeb0fd7b711ea147912190c35ac52d9d94080ae82809b2f840d8182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d0110a2005839008b3303988371208dd0916cc4548c4eafc2fd3d6205ea8ec180c1b1d9e0820d5929d99bce8aa81e86195fd2b824e6550820a03af325f6ff220100110a128182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d02
 ```

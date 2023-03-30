@@ -1,21 +1,12 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .base_types import Reader, Writer
+
 _UINT_BUFFER = bytearray(1)
 
 
-def load_uint(reader, width):
-    """
-    Constant-width integer serialization
-    """
-    buffer = _UINT_BUFFER
-    result = 0
-    shift = 0
-    for _ in range(width):
-        reader.readinto(buffer)
-        result += buffer[0] << shift
-        shift += 8
-    return result
-
-
-def dump_uint(writer, n, width):
+def dump_uint(writer: Writer, n: int, width: int) -> None:
     """
     Constant-width integer serialization
     """
@@ -26,7 +17,7 @@ def dump_uint(writer, n, width):
         n >>= 8
 
 
-def uvarint_size(n):
+def uvarint_size(n: int) -> int:
     """
     Returns size in bytes n would occupy serialized as varint
     """
@@ -37,21 +28,7 @@ def uvarint_size(n):
     return bts
 
 
-def load_uvarint_b(buffer):
-    """
-    Variable int deserialization, synchronous from buffer.
-    """
-    result = 0
-    idx = 0
-    byte = 0x80
-    while byte & 0x80:
-        byte = buffer[idx]
-        result += (byte & 0x7F) << (7 * idx)
-        idx += 1
-    return result
-
-
-def dump_uvarint_b(n):
+def dump_uvarint_b(n: int) -> bytearray:
     """
     Serializes uvarint to the buffer
     """
@@ -59,7 +36,7 @@ def dump_uvarint_b(n):
     return dump_uvarint_b_into(n, buffer, 0)
 
 
-def dump_uvarint_b_into(n, buffer, offset=0):
+def dump_uvarint_b_into(n: int, buffer: bytearray, offset: int = 0) -> bytearray:
     """
     Serializes n as variable size integer to the provided buffer.
     """
@@ -74,17 +51,7 @@ def dump_uvarint_b_into(n, buffer, offset=0):
     return buffer
 
 
-def dump_uint_b_into(n, width, buffer, offset=0):
-    """
-    Serializes fixed size integer to the buffer
-    """
-    for idx in range(width):
-        buffer[idx + offset] = n & 0xFF
-        n >>= 8
-    return buffer
-
-
-def load_uvarint(reader):
+def load_uvarint(reader: Reader) -> int:
     buffer = _UINT_BUFFER
     result = 0
     shift = 0
@@ -97,7 +64,7 @@ def load_uvarint(reader):
     return result
 
 
-def dump_uvarint(writer, n):
+def dump_uvarint(writer: Writer, n: int) -> None:
     if n < 0:
         raise ValueError("Cannot dump signed value, convert it to unsigned first.")
     buffer = _UINT_BUFFER

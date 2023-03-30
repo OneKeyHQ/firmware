@@ -18,8 +18,10 @@ import random
 
 import pytest
 
-from trezorlib import exceptions, messages
-from trezorlib.messages import FailureType
+from trezorlib import device, exceptions, messages
+from trezorlib.debuglink import TrezorClientDebugLink as Client
+from trezorlib.exceptions import TrezorFailure
+from trezorlib.messages import FailureType, SafetyCheckLevel
 from trezorlib.tools import parse_path
 
 XPUB_PASSPHRASES = {
@@ -38,13 +40,13 @@ XPUB_PASSPHRASE_NONE = "xpub6BiVtCpG9fQPxnPmHXG8PhtzQdWC2Su4qWu6XW9tpWFYhxydCLJG
 XPUB_CARDANO_PASSPHRASE_A = "d37eba66d6183547b11b4d0c3e08e761da9f07c3ef32183f8b79360b2b66850e47e8eb3865251784c3c471a854ee40dfc067f7f3afe47d093388ea45239606fd"
 XPUB_CARDANO_PASSPHRASE_B = "d80e770f6dfc3edb58eaab68aa091b2c27b08a47583471e93437ac5f8baa61880c7af4938a941c084c19731e6e57a5710e6ad1196263291aea297ce0eec0f177"
 
-ADDRESS_N = parse_path("44h/0h/0h")
+ADDRESS_N = parse_path("m/44h/0h/0h")
 XPUB_REQUEST = messages.GetPublicKey(address_n=ADDRESS_N, coin_name="Bitcoin")
 
 SESSIONS_STORED = 10
 
 
-def _init_session(client, session_id=None, derive_cardano=False):
+def _init_session(client: Client, session_id=None, derive_cardano=False):
     """Call Initialize, check and return the session ID."""
     response = client.call(
         messages.Initialize(session_id=session_id, derive_cardano=derive_cardano)
@@ -54,7 +56,7 @@ def _init_session(client, session_id=None, derive_cardano=False):
     return response.session_id
 
 
-def _get_xpub(client, passphrase=None):
+def _get_xpub(client: Client, passphrase=None):
     """Get XPUB and check that the appropriate passphrase flow has happened."""
     if passphrase is not None:
         expected_responses = [
@@ -74,7 +76,7 @@ def _get_xpub(client, passphrase=None):
 
 
 @pytest.mark.setup_client(passphrase=True)
-def test_session_with_passphrase(client):
+def test_session_with_passphrase(client: Client):
     # Let's start the communication by calling Initialize.
     session_id = _init_session(client)
 
@@ -101,7 +103,7 @@ def test_session_with_passphrase(client):
 
 
 @pytest.mark.setup_client(passphrase=True)
-def test_multiple_sessions(client):
+def test_multiple_sessions(client: Client):
     # start SESSIONS_STORED sessions
     session_ids = []
     for _ in range(SESSIONS_STORED):
@@ -140,7 +142,7 @@ def test_multiple_sessions(client):
 
 
 @pytest.mark.setup_client(passphrase=True)
-def test_multiple_passphrases(client):
+def test_multiple_passphrases(client: Client):
     # start a session
     session_a = _init_session(client)
     assert _get_xpub(client, passphrase="A") == XPUB_PASSPHRASES["A"]
@@ -174,7 +176,7 @@ def test_multiple_passphrases(client):
 
 @pytest.mark.slow
 @pytest.mark.setup_client(passphrase=True)
-def test_max_sessions_with_passphrases(client):
+def test_max_sessions_with_passphrases(client: Client):
     # for the following tests, we are using as many passphrases as there are available sessions
     assert len(XPUB_PASSPHRASES) == SESSIONS_STORED
 
@@ -214,7 +216,7 @@ def test_max_sessions_with_passphrases(client):
         _get_xpub(client, passphrase="whatever")  # passphrase is prompted
 
 
-def test_session_enable_passphrase(client):
+def test_session_enable_passphrase(client: Client):
     # Let's start the communication by calling Initialize.
     session_id = _init_session(client)
 
@@ -239,7 +241,7 @@ def test_session_enable_passphrase(client):
 
 @pytest.mark.skip_t1
 @pytest.mark.setup_client(passphrase=True)
-def test_passphrase_on_device(client):
+def test_passphrase_on_device(client: Client):
     _init_session(client)
 
     # try to get xpub with passphrase on host:
@@ -278,7 +280,7 @@ def test_passphrase_on_device(client):
 
 @pytest.mark.skip_t1
 @pytest.mark.setup_client(passphrase=True)
-def test_passphrase_always_on_device(client):
+def test_passphrase_always_on_device(client: Client):
     # Let's start the communication by calling Initialize.
     session_id = _init_session(client)
 
@@ -312,7 +314,7 @@ def test_passphrase_always_on_device(client):
 
 @pytest.mark.skip_t2
 @pytest.mark.setup_client(passphrase="")
-def test_passphrase_on_device_not_possible_on_t1(client):
+def test_passphrase_on_device_not_possible_on_t1(client: Client):
     # This setting makes no sense on T1.
     response = client.call_raw(messages.ApplySettings(passphrase_always_on_device=True))
     assert isinstance(response, messages.Failure)
@@ -327,7 +329,7 @@ def test_passphrase_on_device_not_possible_on_t1(client):
 
 
 @pytest.mark.setup_client(passphrase=True)
-def test_passphrase_ack_mismatch(client):
+def test_passphrase_ack_mismatch(client: Client):
     response = client.call_raw(XPUB_REQUEST)
     assert isinstance(response, messages.PassphraseRequest)
     response = client.call_raw(messages.PassphraseAck(passphrase="A", on_device=True))
@@ -336,7 +338,7 @@ def test_passphrase_ack_mismatch(client):
 
 
 @pytest.mark.setup_client(passphrase="")
-def test_passphrase_missing(client):
+def test_passphrase_missing(client: Client):
     response = client.call_raw(XPUB_REQUEST)
     assert isinstance(response, messages.PassphraseRequest)
     response = client.call_raw(messages.PassphraseAck(passphrase=None))
@@ -351,7 +353,7 @@ def test_passphrase_missing(client):
 
 
 @pytest.mark.setup_client(passphrase=True)
-def test_passphrase_length(client):
+def test_passphrase_length(client: Client):
     def call(passphrase: str, expected_result: bool):
         _init_session(client)
         response = client.call_raw(XPUB_REQUEST)
@@ -374,9 +376,86 @@ def test_passphrase_length(client):
     call(passphrase="A" * 49 + "š", expected_result=False)
 
 
-def _get_xpub_cardano(client, passphrase):
+@pytest.mark.skip_t1
+@pytest.mark.setup_client(passphrase=True)
+def test_hide_passphrase_from_host(client: Client):
+    # Without safety checks, turning it on fails
+    with pytest.raises(TrezorFailure, match="Safety checks are strict"), client:
+        device.apply_settings(client, hide_passphrase_from_host=True)
+
+    device.apply_settings(client, safety_checks=SafetyCheckLevel.PromptTemporarily)
+
+    # Turning it on
+    device.apply_settings(client, hide_passphrase_from_host=True)
+
+    passphrase = "abc"
+
+    with client:
+
+        def input_flow():
+            yield
+            layout = client.debug.wait_layout()
+            assert (
+                "Passphrase provided by host will be used but will not be displayed due to the device settings."
+                in layout.get_content()
+            )
+            client.debug.press_yes()
+
+        client.watch_layout()
+        client.set_input_flow(input_flow)
+        client.set_expected_responses(
+            [
+                messages.PassphraseRequest,
+                messages.ButtonRequest,
+                messages.PublicKey,
+            ]
+        )
+        client.use_passphrase(passphrase)
+        result = client.call(XPUB_REQUEST)
+        assert isinstance(result, messages.PublicKey)
+        xpub_hidden_passphrase = result.xpub
+
+    # Turning it off
+    device.apply_settings(client, hide_passphrase_from_host=False)
+
+    # Starting new session, otherwise the passphrase would be cached
+    _init_session(client)
+
+    with client:
+
+        def input_flow():
+            yield
+            layout = client.debug.wait_layout()
+            assert "Next screen will show the passphrase!" in layout.get_content()
+            client.debug.press_yes()
+
+            yield
+            layout = client.debug.wait_layout()
+            assert "Use this passphrase?" in layout.get_content()
+            assert passphrase in layout.get_content()
+            client.debug.press_yes()
+
+        client.watch_layout()
+        client.set_input_flow(input_flow)
+        client.set_expected_responses(
+            [
+                messages.PassphraseRequest,
+                messages.ButtonRequest,
+                messages.ButtonRequest,
+                messages.PublicKey,
+            ]
+        )
+        client.use_passphrase(passphrase)
+        result = client.call(XPUB_REQUEST)
+        assert isinstance(result, messages.PublicKey)
+        xpub_shown_passphrase = result.xpub
+
+    assert xpub_hidden_passphrase == xpub_shown_passphrase
+
+
+def _get_xpub_cardano(client: Client, passphrase):
     msg = messages.CardanoGetPublicKey(
-        address_n=parse_path("44'/1815'/0'/0/0"),
+        address_n=parse_path("m/44h/1815h/0h/0/0"),
         derivation_type=messages.CardanoDerivationType.ICARUS,
     )
     response = client.call_raw(msg)
@@ -390,7 +469,7 @@ def _get_xpub_cardano(client, passphrase):
 @pytest.mark.skip_t1
 @pytest.mark.altcoin
 @pytest.mark.setup_client(passphrase=True)
-def test_cardano_passphrase(client):
+def test_cardano_passphrase(client: Client):
     # Cardano has a separate derivation method that needs to access the plaintext
     # of the passphrase.
     # Historically, Cardano calls would ask for passphrase again. Now, they should not.

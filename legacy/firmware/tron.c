@@ -390,7 +390,7 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
 
 void tron_format_amount(const uint64_t amount, char *buf, int buflen) {
   char str_amount[12] = {0};
-  bn_format_uint64(amount, NULL, NULL, 6, 0, false, str_amount,
+  bn_format_uint64(amount, NULL, NULL, 6, 0, false, 0, str_amount,
                    sizeof(str_amount));
   snprintf(buf, buflen, "%s TRX", str_amount);
 }
@@ -401,5 +401,6 @@ void tron_format_token_amount(const bignum256 *amnt, ConstTronTokenPtr token,
     strlcpy(buf, "Unknown token value", buflen);
     return;
   }
-  bn_format(amnt, NULL, token->ticker, token->decimals, 0, false, buf, buflen);
+  bn_format(amnt, NULL, token->ticker, token->decimals, 0, false, 0, buf,
+            buflen);
 }

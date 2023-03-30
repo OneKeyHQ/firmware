@@ -182,7 +182,7 @@ bool algorand_sign_tx(const AlgorandSignTx *msg, const HDNode *node,
     return false;
   }
   ed25519_sign(msg->raw_tx.bytes, msg->raw_tx.size, node->private_key,
-               &node->public_key[1], resp->signature.bytes);
+               resp->signature.bytes);
   resp->signature.size = 64;
 
   return true;

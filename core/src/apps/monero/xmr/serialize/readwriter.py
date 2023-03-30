@@ -4,14 +4,12 @@ import gc
 class MemoryReaderWriter:
     def __init__(
         self,
-        buffer=None,
-        read_empty=False,
-        threshold=None,
-        do_gc=False,
-        preallocate=None,
-        **kwargs
-    ):
-        self.buffer = buffer
+        buffer: bytearray | memoryview | None = None,
+        read_empty: bool = False,
+        threshold: int | None = None,
+        do_gc: bool = False,
+        preallocate: int | None = None,
+    ) -> None:
         self.nread = 0
         self.nwritten = 0
 
@@ -25,20 +23,18 @@ class MemoryReaderWriter:
 
         if preallocate is not None:
             self.preallocate(preallocate)
-        elif self.buffer is None:
+        elif buffer is None:
             self.buffer = bytearray(0)
         else:
+            self.buffer = buffer
             self.woffset = len(buffer)
 
-    def is_empty(self):
-        return self.offset == len(self.buffer) or self.offset == self.woffset
-
-    def preallocate(self, size):
+    def preallocate(self, size: int) -> None:
         self.buffer = bytearray(size)
         self.offset = 0
         self.woffset = 0
 
-    def readinto(self, buf):
+    def readinto(self, buf: bytearray | memoryview) -> int:
         ln = len(buf)
         if not self.read_empty and ln > 0 and self.offset == len(self.buffer):
             raise EOFError
@@ -62,15 +58,18 @@ class MemoryReaderWriter:
 
         return nread
 
-    def write(self, buf):
+    def write(self, buf: bytes) -> None:
+        buffer = self.buffer  # local_cache_attribute
+
+        assert isinstance(buffer, bytearray)
         nwritten = len(buf)
-        nall = len(self.buffer)
+        nall = len(buffer)
         towrite = nwritten
         bufoff = 0
 
         # Fill existing place in the buffer
         while towrite > 0 and nall - self.woffset > 0:
-            self.buffer[self.woffset] = buf[bufoff]
+            buffer[self.woffset] = buf[bufoff]
             self.woffset += 1
             bufoff += 1
             towrite -= 1
@@ -86,15 +85,15 @@ class MemoryReaderWriter:
                 bufoff += 1
                 towrite -= 1
 
-            self.buffer.extend(chunk)
+            buffer.extend(chunk)
             if self.do_gc:
                 chunk = None  # dereference
                 gc.collect()
 
         self.nwritten += nwritten
         self.ndata += nwritten
-        return nwritten
+        # return nwritten
 
-    def get_buffer(self):
+    def get_buffer(self) -> bytes:
         mv = memoryview(self.buffer)
         return mv[self.offset : self.woffset]

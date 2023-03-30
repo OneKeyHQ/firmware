@@ -1,21 +1,24 @@
 APPVER = 1.8.0
 
-NAME  = trezor
+FIRMWARE_BUILD_VERSION=$(shell echo "VERSION_MAJOR.VERSION_MINOR.VERSION_PATCH" | cpp -include ../bootloader/version.h -nostdinc -P | tr -d " ")
+
+NAME  = classic_boot_update_$(FIRMWARE_BUILD_VERSION)
 
 OBJS += trezor.o
 OBJS += header.o
 OBJS += bl_check.o
+OBJS += startup.o
 OBJS += ../vendor/trezor-crypto/memzero.o
 OBJS += ../vendor/trezor-crypto/sha2.o
 
 OPTFLAGS ?= -Os
 
 
-../vendor/trezor-crypto/bip32.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/bip39.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/sha2.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -O3
+../vendor/trezor-crypto/bip32.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/bip39.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/sha2.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -Os
 
 include ../Makefile.include
 CFLAGS:=$(filter-out -fstack-protector-all,$(CFLAGS))
@@ -43,10 +46,15 @@ endif
 	@printf "  MAKO    $@\n"
 	$(Q)$(PYTHON) ../vendor/trezor-common/tools/cointool.py render $(MAKO_RENDER_FLAG) $@.mako
 
+ifeq ($(BOOTLOADER_QA), 0)
 bl_data.h: bl_data.py bootloader.dat
-	@printf "  PYTHON  bl_data.py\n"
-	$(Q)$(PYTHON) bl_data.py
-
+	@printf "  PYTHON  bl_data.py bootloader.dat\n"
+	$(Q)$(PYTHON) bl_data.py bootloader.dat
+else
+bl_data.h: bl_data.py bootloader_qa.dat
+	@printf "  PYTHON  bl_data.py bootloader_qa.dat\n"
+	$(Q)$(PYTHON) bl_data.py bootloader_qa.dat
+endif
 clean::
 	rm -f bl_data.h
 	find -maxdepth 1 -name "*.mako" | sed 's/.mako$$//' | xargs rm -f

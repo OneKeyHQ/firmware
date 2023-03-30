@@ -75,7 +75,7 @@ bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
   memcpy(buf + 32, msg->raw_tx.bytes, msg->raw_tx.size);
 
   ed25519_sign(buf, msg->raw_tx.size + 32, node->private_key,
-               &node->public_key[1], resp->signature.bytes);
+               resp->signature.bytes);
 
   memcpy(resp->public_key.bytes, &node->public_key[1], 32);
   resp->signature.size = 64;
@@ -114,7 +114,7 @@ bool starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
   memcpy(buf + 32, (uint8_t *)&msg_length_data, msg_header_size);
   memcpy(buf + 32 + msg_header_size, msg->message.bytes, msg->message.size);
   ed25519_sign(buf, 32 + msg_header_size + msg->message.size, node->private_key,
-               &node->public_key[1], resp->signature.bytes);
+               resp->signature.bytes);
 
   memcpy(resp->public_key.bytes, &node->public_key[1], 32);
 

@@ -31,6 +31,9 @@
 #include "touch.h"
 #include "usb.h"
 
+// Whether USB data pins were connected on last check (USB configured)
+bool usb_connected_previously = true;
+
 #define CHECK_PARAM_RANGE(value, minimum, maximum)  \
   if (value < minimum || value > maximum) {         \
     mp_raise_ValueError(#value " is out of range"); \
@@ -44,13 +47,14 @@
 #include "modtrezorio-webusb.h"
 #include "modtrezorio-usb.h"
 // clang-format on
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
 #include "modtrezorio-fatfs.h"
 #include "modtrezorio-sbu.h"
 #include "modtrezorio-sdcard.h"
 #endif
 
 /// package: trezorio.__init__
+/// from . import fatfs, sdcard
 
 /// POLL_READ: int  # wait until interface is readable and return read data
 /// POLL_WRITE: int  # wait until interface is writable
@@ -66,15 +70,14 @@
 /// BUTTON_LEFT: int  # button number of left button
 /// BUTTON_RIGHT: int  # button number of right button
 
-/// WireInterface = Union[HID, WebUSB]
+/// USB_CHECK: int # interface id for check of USB data connection
 
-/// if False:
-///     from . import fatfs, sdcard
+/// WireInterface = Union[HID, WebUSB]
 
 STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_trezorio)},
 
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
     {MP_ROM_QSTR(MP_QSTR_fatfs), MP_ROM_PTR(&mod_trezorio_fatfs_module)},
     {MP_ROM_QSTR(MP_QSTR_SBU), MP_ROM_PTR(&mod_trezorio_SBU_type)},
     {MP_ROM_QSTR(MP_QSTR_sdcard), MP_ROM_PTR(&mod_trezorio_sdcard_module)},
@@ -83,7 +86,7 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_TOUCH_START), MP_ROM_INT((TOUCH_START >> 24) & 0xFFU)},
     {MP_ROM_QSTR(MP_QSTR_TOUCH_MOVE), MP_ROM_INT((TOUCH_MOVE >> 24) & 0xFFU)},
     {MP_ROM_QSTR(MP_QSTR_TOUCH_END), MP_ROM_INT((TOUCH_END >> 24) & 0xFFU)},
-#elif TREZOR_MODEL == 1
+#elif defined TREZOR_MODEL_1 || defined TREZOR_MODEL_R
     {MP_ROM_QSTR(MP_QSTR_BUTTON), MP_ROM_INT(BUTTON_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_BUTTON_PRESSED),
      MP_ROM_INT((BTN_EVT_DOWN >> 24) & 0x3U)},
@@ -103,6 +106,8 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_poll), MP_ROM_PTR(&mod_trezorio_poll_obj)},
     {MP_ROM_QSTR(MP_QSTR_POLL_READ), MP_ROM_INT(POLL_READ)},
     {MP_ROM_QSTR(MP_QSTR_POLL_WRITE), MP_ROM_INT(POLL_WRITE)},
+
+    {MP_ROM_QSTR(MP_QSTR_USB_CHECK), MP_ROM_INT(USB_DATA_IFACE)},
 };
 
 STATIC MP_DEFINE_CONST_DICT(mp_module_trezorio_globals,

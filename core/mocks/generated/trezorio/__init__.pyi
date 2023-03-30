@@ -190,6 +190,7 @@ class WebUSB:
         """
         Sends message using USB WebUSB (device) or UDP (emulator).
         """
+from . import fatfs, sdcard
 POLL_READ: int  # wait until interface is readable and return read data
 POLL_WRITE: int  # wait until interface is writable
 TOUCH: int  # interface id of the touch events
@@ -201,6 +202,5 @@ BUTTON_PRESSED: int  # button down event
 BUTTON_RELEASED: int  # button up event
 BUTTON_LEFT: int  # button number of left button
 BUTTON_RIGHT: int  # button number of right button
+USB_CHECK: int # interface id for check of USB data connection
 WireInterface = Union[HID, WebUSB]
-if False:
-    from . import fatfs, sdcard

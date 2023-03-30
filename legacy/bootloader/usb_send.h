@@ -1,20 +1,3 @@
-static uint8_t getintprotobuf(uint8_t *ptr, uint32_t value) {
-  uint8_t i = 0;
-
-  if (value <= 0x7F) {
-    *ptr = value;
-    return 1;
-  }
-
-  while (value) {
-    ptr[i] = (uint8_t)((value & 0x7F) | 0x80);
-    value >>= 7;
-    i++;
-  }
-  ptr[i - 1] &= 0x7F; /* Unset top bit on last byte */
-  return i;
-}
-
 static void send_response(usbd_device *dev, uint8_t *buf) {
   if (dev != NULL) {
     while (usbd_ep_write_packet(dev, ENDPOINT_ADDRESS_IN, buf, 64) != 64) {
@@ -55,15 +38,13 @@ static void send_msg_failure(usbd_device *dev, uint8_t code) {
          10);
   // assign code value
   response[10] = code;
-  while (usbd_ep_write_packet(dev, ENDPOINT_ADDRESS_IN, response, 64) != 64) {
-  }
+  send_response(dev, response);
 }
 
 static void send_msg_features(usbd_device *dev) {
   uint8_t response[64];
-  uint8_t len;
   memzero(response, sizeof(response));
-  len = getintprotobuf(response + 37, flash_pos);
+
   // response: Features message (id 17), payload len 26
   //           - vendor = "onekey.so"
   //           - major_version = VERSION_MAJOR
@@ -72,30 +53,62 @@ static void send_msg_features(usbd_device *dev) {
   //           - bootloader_mode = True
   //           - firmware_present = True/False
   //           - model = "1"
-  memcpy(response,
-         // header
-         "?##"
-         // msg_id
-         "\x00\x11"
-         // msg_size
-         "\x00\x00\x00\x1a"
-         // data
-         "\x0a"
-         "\x09"
-         "onekey.so"
-         "\x10" VERSION_MAJOR_CHAR "\x18" VERSION_MINOR_CHAR
-         "\x20" VERSION_PATCH_CHAR
-         "\x28"
-         "\x01"
-         "\x90\x01"
-         "\x00"
-         "\xaa"
-         "\x01\x01"
-         "1"
-         "\xa0\x1f",
-         37);
-  response[8] = 0x1c + len;
-  response[30] = firmware_present_new() ? 0x01 : 0x00;
+  //           ? fw_version_major = version_major
+  //           ? fw_version_minor = version_minor
+  //           ? fw_version_patch = version_patch
+  const bool firmware_present = firmware_present_new();
+  const image_header *current_hdr = (const image_header *)FLASH_FWHEADER_START;
+  uint32_t version = firmware_present ? current_hdr->version : 0;
+
+  // clang-format off
+  const uint8_t feature_bytes[] = {
+    0x0a,  // vendor field
+    0x09,  // vendor length
+    'o', 'n', 'e', 'k', 'e', 'y', '.', 's', 'o',
+    0x10, VERSION_MAJOR,
+    0x18, VERSION_MINOR,
+    0x20, VERSION_PATCH,
+    0x28, 0x01, // bootloader_mode
+    0x90, 0x01, // firmware_present field
+    firmware_present ? 0x01 : 0x00,
+    0xaa, 0x01, // model field
+    0x01,      // model length
+    '1',
+  };
+
+  const uint8_t version_bytes[] = {
+    // fw_version_major
+    0xb0, 0x01, version & 0xff,
+    // fw_version_minor
+    0xb8, 0x01, (version >> 8) & 0xff,
+    // fw_version_patch
+    0xc0, 0x01, (version >> 16) & 0xff,
+  };
+
+  uint8_t header_bytes[] = {
+    // header
+    '?', '#', '#',
+    // msg_id
+    0x00, 0x11,
+    // msg_size
+    0x00, 0x00, 0x00, sizeof(feature_bytes) + (firmware_present ? sizeof(version_bytes) : 0),
+  };
+  // clang-format on
+
+  // Check that the response will fit into an USB packet, and also that the
+  // sizeof expression above fits into a single byte
+  _Static_assert(
+      sizeof(feature_bytes) + sizeof(version_bytes) + sizeof(header_bytes) <=
+          64,
+      "Features response too long");
+
+  memcpy(response, header_bytes, sizeof(header_bytes));
+  memcpy(response + sizeof(header_bytes), feature_bytes, sizeof(feature_bytes));
+  if (firmware_present) {
+    memcpy(response + sizeof(header_bytes) + sizeof(feature_bytes),
+           version_bytes, sizeof(version_bytes));
+  }
+
   send_response(dev, response);
 }
 

@@ -1,20 +1,45 @@
+# CLANG_VERSION is empty if the compiler is not clang-based
+CLANG_VERSION = $(shell $(CC) --version | sed -nr 's/^.*clang version ([0-9.]+).*$$/\1/p')
+CLANG_VERSION_MAJOR = $(shell echo $(CLANG_VERSION) | cut -f1 -d.)
+
+# determine specific version ranges
+ifneq ($(CLANG_VERSION),)
+$(if $(shell [ $(CLANG_VERSION_MAJOR) -ge 13 ] && echo "OK"), \
+    $(eval CLANG_AT_LEAST_13 := true), \
+    $(eval CLANG_AT_LEAST_13 := false))
+endif
+
 ifeq ($(FUZZER),1)
 CC       ?= clang
 LD       ?= $(CC)
-
 SANFLAGS += -fsanitize=fuzzer
 
-CFLAGS   += $(SANFLAGS)
-LDFLAGS  += $(SANFLAGS)
+# only clang versions >= 13 support this feature
+ifeq ($(CLANG_AT_LEAST_13),true)
+$(info "info: using -fsanitize-ignorelist")
+SANFLAGS += -fsanitize-ignorelist=fuzzer/sanitizer_ignorelist.txt
+else
+$(info "info: not using -fsanitize-ignorelist")
 endif
 
-CC       ?= gcc
+# TODO is there a better solution, for example by disabling a specific optimization technique?
+# there is a clang optimization issue in relation with the blake2 code at -fsanitize=undefined
+$(warning "warning: disabling optimization on blake2 code as workaround")
+blake2b.o: OPTFLAGS += -O0
+blake2s.o: OPTFLAGS += -O0
+
+else ifeq ($(ADDRESS_SANITIZER),1)
+SANFLAGS += -fsanitize=address,undefined
+endif
+
+CC       ?= cc
 
 CFLAGS   += -DUSE_SE=0
 
 OPTFLAGS ?= -O3 -g
 
 CFLAGS   += $(OPTFLAGS) \
+            $(SANFLAGS) \
             -std=gnu99 \
             -W \
             -Wall \
@@ -37,12 +62,6 @@ CFLAGS   += $(OPTFLAGS) \
             -Werror
 
 ZKP_CFLAGS = \
-	-DUSE_NUM_NONE \
-	-DUSE_FIELD_INV_BUILTIN \
-	-DUSE_SCALAR_INV_BUILTIN \
-	-DUSE_FIELD_10X26 \
-	-DUSE_SCALAR_8X32 \
-	-DUSE_ECMULT_STATIC_PRECOMPUTATION \
 	-DECMULT_GEN_PREC_BITS=4 \
 	-DECMULT_WINDOW_SIZE=8 \
 	-DENABLE_MODULE_GENERATOR \
@@ -50,15 +69,17 @@ ZKP_CFLAGS = \
 	-DENABLE_MODULE_SCHNORRSIG \
 	-DENABLE_MODULE_EXTRAKEYS
 ZKP_PATH = ../vendor/secp256k1-zkp
+# this is specific for 64-bit builds
 CFLAGS += -DSECP256K1_CONTEXT_SIZE=208
 
 VALGRIND ?= 1
+ifeq ($(VALGRIND),1)
+CFLAGS += -DVALGRIND
+endif
 
 CFLAGS += -I.
 CFLAGS += -I..
-CFLAGS += -DVALGRIND=$(VALGRIND)
 CFLAGS += -DUSE_ETHEREUM=1
-CFLAGS += -DUSE_GRAPHENE=1
 CFLAGS += -DUSE_KECCAK=1
 CFLAGS += -DUSE_MONERO=1
 CFLAGS += -DUSE_NEM=1
@@ -70,7 +91,7 @@ ifdef SMALL
 CFLAGS += -DUSE_PRECOMPUTED_CP=0
 endif
 
-SRCS   = bignum.c ecdsa.c curves.c secp256k1.c nist256p1.c rand.c hmac.c bip32.c bip39.c pbkdf2.c base58.c base32.c
+SRCS   = bignum.c ecdsa.c curves.c secp256k1.c nist256p1.c rand.c hmac.c bip32.c bip39.c bip39_english.c pbkdf2.c base58.c base32.c
 SRCS  += address.c
 SRCS  += script.c
 SRCS  += ripemd160.c
@@ -84,7 +105,6 @@ SRCS  += ed25519-donna/ed25519.c ed25519-donna/curve25519-donna-scalarmult-base.
 SRCS  += monero/base58.c
 SRCS  += monero/serialize.c
 SRCS  += monero/xmr.c
-SRCS  += monero/range_proof.c
 SRCS  += blake256.c
 SRCS  += blake2b.c blake2s.c
 SRCS  += chacha_drbg.c
@@ -98,7 +118,6 @@ SRCS  += shamir.c
 SRCS  += hmac_drbg.c
 SRCS  += rfc6979.c
 SRCS  += slip39.c
-SRCS  += schnorr.c
 SRCS  += zkp_context.c
 SRCS  += zkp_ecdsa.c
 SRCS  += zkp_bip340.c
@@ -106,6 +125,8 @@ SRCS  += cardano.c
 
 OBJS   = $(SRCS:.c=.o)
 OBJS  += secp256k1-zkp.o
+OBJS  += precomputed_ecmult.o
+OBJS  += precomputed_ecmult_gen.o
 
 TESTLIBS = $(shell pkg-config --libs check) -lpthread -lm
 TESTSSLLIBS = $(shell pkg-config --libs openssl)
@@ -118,41 +139,43 @@ all: tools tests
 tests: tests/test_check tests/test_openssl tests/test_speed tests/libtrezor-crypto.so tests/aestst
 
 tests/aestst: aes/aestst.o aes/aescrypt.o aes/aeskey.o aes/aestab.o
-	$(CC) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 tests/test_check.o: tests/test_check_cardano.h tests/test_check_monero.h tests/test_check_cashaddr.h tests/test_check_segwit.h
 
 tests/test_check: tests/test_check.o $(OBJS)
-	$(CC) tests/test_check.o $(OBJS) $(TESTLIBS) -o tests/test_check
+	$(CC) $(CFLAGS) tests/test_check.o $(OBJS) $(TESTLIBS) -o tests/test_check
 
 tests/test_speed: tests/test_speed.o $(OBJS)
-	$(CC) tests/test_speed.o $(OBJS) -o tests/test_speed
+	$(CC) $(CFLAGS) tests/test_speed.o $(OBJS) -o tests/test_speed
 
 tests/test_openssl: tests/test_openssl.o $(OBJS)
-	$(CC) tests/test_openssl.o $(OBJS) $(TESTSSLLIBS) -o tests/test_openssl
+	$(CC) $(CFLAGS) tests/test_openssl.o $(OBJS) $(TESTSSLLIBS) -o tests/test_openssl
 
-tests/libtrezor-crypto.so: $(SRCS) secp256k1-zkp.o
-	$(CC) $(CFLAGS) -DAES_128 -DAES_192 -fPIC -shared $(SRCS) secp256k1-zkp.o -o tests/libtrezor-crypto.so
+tests/libtrezor-crypto.so: $(SRCS) secp256k1-zkp.o precomputed_ecmult.o precomputed_ecmult_gen.o
+	$(CC) $(CFLAGS) -DAES_128 -DAES_192 -fPIC -shared $(SRCS) secp256k1-zkp.o precomputed_ecmult.o precomputed_ecmult_gen.o -o tests/libtrezor-crypto.so
 
 tools: tools/xpubaddrgen tools/mktable tools/bip39bruteforce
 
 tools/xpubaddrgen: tools/xpubaddrgen.o $(OBJS)
-	$(CC) tools/xpubaddrgen.o $(OBJS) -o tools/xpubaddrgen
+	$(CC) $(CFLAGS) tools/xpubaddrgen.o $(OBJS) -o tools/xpubaddrgen
 
 tools/mktable: tools/mktable.o $(OBJS)
-	$(CC) tools/mktable.o $(OBJS) -o tools/mktable
+	$(CC) $(CFLAGS) tools/mktable.o $(OBJS) -o tools/mktable
 
 tools/bip39bruteforce: tools/bip39bruteforce.o $(OBJS)
-	$(CC) tools/bip39bruteforce.o $(OBJS) -o tools/bip39bruteforce
+	$(CC) $(CFLAGS) tools/bip39bruteforce.o $(OBJS) -o tools/bip39bruteforce
 
 fuzzer: fuzzer/fuzzer.o $(OBJS)
 	$(CC) $(CFLAGS) fuzzer/fuzzer.o $(OBJS) -o fuzzer/fuzzer
 
-$(ZKP_PATH)/src/ecmult_static_context.h: $(ZKP_PATH)/src/gen_context.c
-	$(CC) $(ZKP_CFLAGS) $(ZKP_PATH)/src/gen_context.c -o $(ZKP_PATH)/gen_context
-	cd $(ZKP_PATH) && ./gen_context
+precomputed_ecmult.o:
+	$(CC) $(CFLAGS) -Wno-unused-function $(ZKP_CFLAGS) -fPIC -c $(ZKP_PATH)/src/precomputed_ecmult.c -o precomputed_ecmult.o
 
-secp256k1-zkp.o: $(ZKP_PATH)/src/ecmult_static_context.h
+precomputed_ecmult_gen.o:
+	$(CC) $(CFLAGS) -Wno-unused-function $(ZKP_CFLAGS) -fPIC -c $(ZKP_PATH)/src/precomputed_ecmult_gen.c -o precomputed_ecmult_gen.o
+
+secp256k1-zkp.o:
 	$(CC) $(CFLAGS) -Wno-unused-function $(ZKP_CFLAGS) -fPIC -I$(ZKP_PATH) -I$(ZKP_PATH)/src -c $(ZKP_PATH)/src/secp256k1.c -o secp256k1-zkp.o
 
 clean:
@@ -160,9 +183,7 @@ clean:
 	rm -f tests/*.o tests/test_check tests/test_speed tests/test_openssl tests/libtrezor-crypto.so tests/aestst
 	rm -f tools/*.o tools/xpubaddrgen tools/mktable tools/bip39bruteforce
 	rm -f fuzzer/*.o fuzzer/fuzzer
-	rm -f secp256k1-zkp.o
-	rm -f $(ZKP_PATH)/gen_context
-	rm -f $(ZKP_PATH)/src/ecmult_static_context.h
+	rm -f secp256k1-zkp.o precomputed_ecmult.o precomputed_ecmult_gen.o
 
 clean-fuzzer: clean
 	rm -f crash-* fuzz-*.log slow-unit-* timeout-*

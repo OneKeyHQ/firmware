@@ -1,59 +1,81 @@
 use core::{
     cell::RefCell,
     convert::{TryFrom, TryInto},
-    time::Duration,
 };
 
 use crate::{
     error::Error,
     micropython::{
+        buffer::StrBuffer,
         gc::Gc,
         map::Map,
         obj::{Obj, ObjBase},
         qstr::Qstr,
         typ::Type,
+        util,
     },
-    ui::component::{Child, Component, Event, EventCtx, Never, TimerToken},
-    util,
+    time::Duration,
+    ui::{
+        component::{Child, Component, Event, EventCtx, Never, TimerToken},
+        constant,
+        display::sync,
+        geometry::Rect,
+    },
 };
 
-#[cfg(feature = "model_tt")]
-use crate::ui::model_tt::event::TouchEvent;
-
-#[cfg(feature = "model_t1")]
-use crate::ui::model_t1::event::ButtonEvent;
+#[cfg(feature = "buttons")]
+use crate::ui::event::ButtonEvent;
+#[cfg(feature = "touch")]
+use crate::ui::event::TouchEvent;
+use crate::ui::event::USBEvent;
 
 /// Conversion trait implemented by components that know how to convert their
-/// message values into MicroPython `Obj`s. We can automatically implement
-/// `ComponentMsgObj` for components whose message types implement `TryInto`.
+/// message values into MicroPython `Obj`s.
 pub trait ComponentMsgObj: Component {
     fn msg_try_into_obj(&self, msg: Self::Msg) -> Result<Obj, Error>;
 }
 
-impl<T> ComponentMsgObj for T
-where
-    T: Component,
-    T::Msg: TryInto<Obj, Error = Error>,
-{
-    fn msg_try_into_obj(&self, msg: Self::Msg) -> Result<Obj, Error> {
-        msg.try_into()
-    }
+#[cfg(feature = "ui_debug")]
+mod maybe_trace {
+    pub trait MaybeTrace: crate::trace::Trace {}
+    impl<T> MaybeTrace for T where T: crate::trace::Trace {}
 }
 
-/// In order to store any type of component in a layout, we need to access it
-/// through an object-safe trait. `Component` itself is not object-safe because
-/// of `Component::Msg` associated type. `ObjComponent` is a simple object-safe
-/// wrapping trait that is implemented for all components where `Component::Msg`
-/// can be converted to `Obj` through the `ComponentMsgObj` trait.
-pub trait ObjComponent {
+#[cfg(not(feature = "ui_debug"))]
+mod maybe_trace {
+    pub trait MaybeTrace {}
+    impl<T> MaybeTrace for T {}
+}
+
+/// Stand-in for the optionally-compiled trait `Trace`.
+/// If UI debugging is enabled, `MaybeTrace` implies `Trace` and is implemented
+/// for everything that implements Trace. If disabled, `MaybeTrace` is
+/// implemented for everything.
+use maybe_trace::MaybeTrace;
+
+/// Object-safe interface between trait `Component` and MicroPython world. It
+/// converts the result of `Component::event` into `Obj` via the
+/// `ComponentMsgObj` trait, in order to easily return the value to Python. It
+/// also optionally implies `Trace` for UI debugging.
+/// Note: we need to use an object-safe trait in order to store it in a `Gc<dyn
+/// T>` field. `Component` itself is not object-safe because of `Component::Msg`
+/// associated type.
+pub trait ObjComponent: MaybeTrace {
+    fn obj_place(&mut self, bounds: Rect) -> Rect;
     fn obj_event(&mut self, ctx: &mut EventCtx, event: Event) -> Result<Obj, Error>;
-    fn obj_paint(&mut self);
+    fn obj_paint(&mut self) -> bool;
+    fn obj_bounds(&self, sink: &mut dyn FnMut(Rect));
+    fn obj_skip_paint(&mut self) {}
 }
 
 impl<T> ObjComponent for Child<T>
 where
-    T: ComponentMsgObj,
+    T: ComponentMsgObj + MaybeTrace,
 {
+    fn obj_place(&mut self, bounds: Rect) -> Rect {
+        self.place(bounds)
+    }
+
     fn obj_event(&mut self, ctx: &mut EventCtx, event: Event) -> Result<Obj, Error> {
         if let Some(msg) = self.event(ctx, event) {
             self.inner().msg_try_into_obj(msg)
@@ -62,26 +84,20 @@ where
         }
     }
 
-    fn obj_paint(&mut self) {
+    fn obj_paint(&mut self) -> bool {
+        let will_paint = self.will_paint();
         self.paint();
+        will_paint
+    }
+
+    fn obj_bounds(&self, sink: &mut dyn FnMut(Rect)) {
+        self.bounds(sink)
+    }
+
+    fn obj_skip_paint(&mut self) {
+        self.skip_paint()
     }
 }
-
-#[cfg(feature = "ui_debug")]
-mod maybe_trace {
-    pub trait ObjComponentTrace: super::ObjComponent + crate::trace::Trace {}
-    impl<T> ObjComponentTrace for T where T: super::ObjComponent + crate::trace::Trace {}
-}
-
-#[cfg(not(feature = "ui_debug"))]
-mod maybe_trace {
-    pub trait ObjComponentTrace: super::ObjComponent {}
-    impl<T> ObjComponentTrace for T where T: super::ObjComponent {}
-}
-
-/// Trait that combines `ObjComponent` with `Trace` if `ui_debug` is enabled,
-/// and pure `ObjComponent` otherwise.
-use maybe_trace::ObjComponentTrace;
 
 /// `LayoutObj` is a GC-allocated object exported to MicroPython, with type
 /// `LayoutObj::obj_type()`. It wraps a root component through the
@@ -93,17 +109,21 @@ pub struct LayoutObj {
 }
 
 struct LayoutObjInner {
-    root: Gc<dyn ObjComponentTrace>,
+    root: Gc<dyn ObjComponent>,
     event_ctx: EventCtx,
     timer_fn: Obj,
+    page_count: u16,
 }
 
 impl LayoutObj {
     /// Create a new `LayoutObj`, wrapping a root component.
-    pub fn new(root: impl ObjComponentTrace + 'static) -> Result<Gc<Self>, Error> {
+    pub fn new(root: impl ComponentMsgObj + MaybeTrace + 'static) -> Result<Gc<Self>, Error> {
+        // Let's wrap the root component into a `Child` to maintain the top-level
+        // invalidation logic.
+        let wrapped_root = Child::new(root);
         // SAFETY: We are coercing GC-allocated sized ptr into an unsized one.
         let root =
-            unsafe { Gc::from_raw(Gc::into_raw(Gc::new(root)?) as *mut dyn ObjComponentTrace) };
+            unsafe { Gc::from_raw(Gc::into_raw(Gc::new(wrapped_root)?) as *mut dyn ObjComponent) };
 
         Gc::new(Self {
             base: Self::obj_type().as_base(),
@@ -111,8 +131,16 @@ impl LayoutObj {
                 root,
                 event_ctx: EventCtx::new(),
                 timer_fn: Obj::const_none(),
+                page_count: 1,
             }),
         })
+    }
+
+    pub fn skip_first_paint(&self) {
+        let mut inner = self.inner.borrow_mut();
+
+        // SAFETY: `inner.root` is unique because of the `inner.borrow_mut()`.
+        unsafe { Gc::as_mut(&mut inner.root) }.obj_skip_paint();
     }
 
     /// Timer callback is expected to be a callable object of the following
@@ -128,8 +156,14 @@ impl LayoutObj {
     fn obj_event(&self, event: Event) -> Result<Obj, Error> {
         let inner = &mut *self.inner.borrow_mut();
 
-        // Clear the upwards-propagating paint request flag from the last event pass.
-        inner.event_ctx.clear_paint_requests();
+        // Place the root component on the screen in case it was previously requested.
+        if inner.event_ctx.needs_place_before_next_event_or_paint() {
+            // SAFETY: `inner.root` is unique because of the `inner.borrow_mut()`.
+            unsafe { Gc::as_mut(&mut inner.root) }.obj_place(constant::screen());
+        }
+
+        // Clear the leftover flags from the previous event pass.
+        inner.event_ctx.clear();
 
         // Send the event down the component tree. Bail out in case of failure.
         // SAFETY: `inner.root` is unique because of the `inner.borrow_mut()`.
@@ -149,14 +183,28 @@ impl LayoutObj {
             }
         }
 
+        if let Some(count) = inner.event_ctx.page_count() {
+            inner.page_count = count as u16;
+        }
+
         Ok(msg)
     }
 
-    /// Run a paint pass over the component tree.
-    fn obj_paint_if_requested(&self) {
+    /// Run a paint pass over the component tree. Returns true if any component
+    /// actually requested painting since last invocation of the function.
+    fn obj_paint_if_requested(&self) -> bool {
         let mut inner = self.inner.borrow_mut();
+
+        // Place the root component on the screen in case it was previously requested.
+        if inner.event_ctx.needs_place_before_next_event_or_paint() {
+            // SAFETY: `inner.root` is unique because of the `inner.borrow_mut()`.
+            unsafe { Gc::as_mut(&mut inner.root) }.obj_place(constant::screen());
+        }
+
+        sync();
+
         // SAFETY: `inner.root` is unique because of the `inner.borrow_mut()`.
-        unsafe { Gc::as_mut(&mut inner.root) }.obj_paint();
+        unsafe { Gc::as_mut(&mut inner.root) }.obj_paint()
     }
 
     /// Run a tracing pass over the component tree. Passed `callback` is called
@@ -169,6 +217,10 @@ impl LayoutObj {
         struct CallbackTracer(Obj);
 
         impl Tracer for CallbackTracer {
+            fn int(&mut self, i: i64) {
+                self.0.call_with_n_args(&[i.try_into().unwrap()]).unwrap();
+            }
+
             fn bytes(&mut self, b: &[u8]) {
                 self.0.call_with_n_args(&[b.try_into().unwrap()]).unwrap();
             }
@@ -179,24 +231,30 @@ impl LayoutObj {
 
             fn symbol(&mut self, name: &str) {
                 self.0
-                    .call_with_n_args(&[name.try_into().unwrap()])
+                    .call_with_n_args(&[
+                        "<".try_into().unwrap(),
+                        name.try_into().unwrap(),
+                        ">".try_into().unwrap(),
+                    ])
                     .unwrap();
             }
 
             fn open(&mut self, name: &str) {
                 self.0
-                    .call_with_n_args(&[name.try_into().unwrap()])
+                    .call_with_n_args(&["<".try_into().unwrap(), name.try_into().unwrap()])
                     .unwrap();
             }
 
             fn field(&mut self, name: &str, value: &dyn Trace) {
                 self.0
-                    .call_with_n_args(&[name.try_into().unwrap()])
+                    .call_with_n_args(&[name.try_into().unwrap(), ": ".try_into().unwrap()])
                     .unwrap();
                 value.trace(self);
             }
 
-            fn close(&mut self) {}
+            fn close(&mut self) {
+                self.0.call_with_n_args(&[">".try_into().unwrap()]).unwrap();
+            }
         }
 
         self.inner
@@ -205,16 +263,42 @@ impl LayoutObj {
             .trace(&mut CallbackTracer(callback));
     }
 
+    fn obj_page_count(&self) -> Obj {
+        self.inner.borrow().page_count.into()
+    }
+
+    #[cfg(feature = "ui_debug")]
+    fn obj_bounds(&self) {
+        use crate::ui::display;
+
+        // Sink for `Trace::bounds` that draws the boundaries using pseudorandom color.
+        fn wireframe(r: Rect) {
+            let w = r.width() as u16;
+            let h = r.height() as u16;
+            let color = display::Color::from_u16(w.rotate_right(w.into()).wrapping_add(h * 8));
+            display::rect_stroke(r, color)
+        }
+
+        // use crate::ui::model_tt::theme;
+        // wireframe(theme::borders());
+        self.inner.borrow().root.obj_bounds(&mut wireframe);
+    }
+
     fn obj_type() -> &'static Type {
         static TYPE: Type = obj_type! {
             name: Qstr::MP_QSTR_Layout,
             locals: &obj_dict!(obj_map! {
-                Qstr::MP_QSTR_set_timer_fn => obj_fn_2!(ui_layout_set_timer_fn).as_obj(),
+                Qstr::MP_QSTR_attach_timer_fn => obj_fn_2!(ui_layout_attach_timer_fn).as_obj(),
                 Qstr::MP_QSTR_touch_event => obj_fn_var!(4, 4, ui_layout_touch_event).as_obj(),
                 Qstr::MP_QSTR_button_event => obj_fn_var!(3, 3, ui_layout_button_event).as_obj(),
+                Qstr::MP_QSTR_progress_event => obj_fn_var!(3, 3, ui_layout_progress_event).as_obj(),
+                Qstr::MP_QSTR_usb_event => obj_fn_var!(2, 2, ui_layout_usb_event).as_obj(),
                 Qstr::MP_QSTR_timer => obj_fn_2!(ui_layout_timer).as_obj(),
                 Qstr::MP_QSTR_paint => obj_fn_1!(ui_layout_paint).as_obj(),
+                Qstr::MP_QSTR_request_complete_repaint => obj_fn_1!(ui_layout_request_complete_repaint).as_obj(),
                 Qstr::MP_QSTR_trace => obj_fn_2!(ui_layout_trace).as_obj(),
+                Qstr::MP_QSTR_bounds => obj_fn_1!(ui_layout_bounds).as_obj(),
+                Qstr::MP_QSTR_page_count => obj_fn_1!(ui_layout_page_count).as_obj(),
             }),
         };
         &TYPE
@@ -250,7 +334,7 @@ impl TryFrom<Obj> for TimerToken {
     type Error = Error;
 
     fn try_from(value: Obj) -> Result<Self, Self::Error> {
-        let raw: usize = value.try_into()?;
+        let raw: u32 = value.try_into()?;
         let this = Self::from_raw(raw);
         Ok(this)
     }
@@ -268,27 +352,31 @@ impl TryFrom<Duration> for Obj {
     type Error = Error;
 
     fn try_from(value: Duration) -> Result<Self, Self::Error> {
-        let millis: usize = value.as_millis().try_into()?;
+        let millis: usize = value.to_millis().try_into()?;
         millis.try_into()
     }
 }
 
-impl From<Never> for Obj {
-    fn from(_: Never) -> Self {
+impl TryFrom<Never> for Obj {
+    type Error = Error;
+
+    fn try_from(_: Never) -> Result<Self, Self::Error> {
         unreachable!()
     }
 }
 
-extern "C" fn ui_layout_set_timer_fn(this: Obj, timer_fn: Obj) -> Obj {
+extern "C" fn ui_layout_attach_timer_fn(this: Obj, timer_fn: Obj) -> Obj {
     let block = || {
         let this: Gc<LayoutObj> = this.try_into()?;
         this.obj_set_timer_fn(timer_fn);
-        Ok(Obj::const_true())
+        let msg = this.obj_event(Event::Attach)?;
+        assert!(msg == Obj::const_none());
+        Ok(Obj::const_none())
     };
     unsafe { util::try_or_raise(block) }
 }
 
-#[cfg(feature = "model_tt")]
+#[cfg(feature = "touch")]
 extern "C" fn ui_layout_touch_event(n_args: usize, args: *const Obj) -> Obj {
     let block = |args: &[Obj], _kwargs: &Map| {
         if args.len() != 4 {
@@ -306,12 +394,12 @@ extern "C" fn ui_layout_touch_event(n_args: usize, args: *const Obj) -> Obj {
     unsafe { util::try_with_args_and_kwargs(n_args, args, &Map::EMPTY, block) }
 }
 
-#[cfg(not(feature = "model_tt"))]
+#[cfg(not(feature = "touch"))]
 extern "C" fn ui_layout_touch_event(_n_args: usize, _args: *const Obj) -> Obj {
     Obj::const_none()
 }
 
-#[cfg(feature = "model_t1")]
+#[cfg(feature = "buttons")]
 extern "C" fn ui_layout_button_event(n_args: usize, args: *const Obj) -> Obj {
     let block = |args: &[Obj], _kwargs: &Map| {
         if args.len() != 3 {
@@ -325,9 +413,36 @@ extern "C" fn ui_layout_button_event(n_args: usize, args: *const Obj) -> Obj {
     unsafe { util::try_with_args_and_kwargs(n_args, args, &Map::EMPTY, block) }
 }
 
-#[cfg(not(feature = "model_t1"))]
+#[cfg(not(feature = "buttons"))]
 extern "C" fn ui_layout_button_event(_n_args: usize, _args: *const Obj) -> Obj {
     Obj::const_none()
+}
+
+extern "C" fn ui_layout_progress_event(n_args: usize, args: *const Obj) -> Obj {
+    let block = |args: &[Obj], _kwargs: &Map| {
+        if args.len() != 3 {
+            return Err(Error::TypeError);
+        }
+        let this: Gc<LayoutObj> = args[0].try_into()?;
+        let value: u16 = args[1].try_into()?;
+        let description: StrBuffer = args[2].try_into()?;
+        let msg = this.obj_event(Event::Progress(value, description.as_ref()))?;
+        Ok(msg)
+    };
+    unsafe { util::try_with_args_and_kwargs(n_args, args, &Map::EMPTY, block) }
+}
+
+extern "C" fn ui_layout_usb_event(n_args: usize, args: *const Obj) -> Obj {
+    let block = |args: &[Obj], _kwargs: &Map| {
+        if args.len() != 2 {
+            return Err(Error::TypeError);
+        }
+        let this: Gc<LayoutObj> = args[0].try_into()?;
+        let event = USBEvent::Connected(args[1].try_into()?);
+        let msg = this.obj_event(Event::USB(event))?;
+        Ok(msg)
+    };
+    unsafe { util::try_with_args_and_kwargs(n_args, args, &Map::EMPTY, block) }
 }
 
 extern "C" fn ui_layout_timer(this: Obj, token: Obj) -> Obj {
@@ -343,8 +458,32 @@ extern "C" fn ui_layout_timer(this: Obj, token: Obj) -> Obj {
 extern "C" fn ui_layout_paint(this: Obj) -> Obj {
     let block = || {
         let this: Gc<LayoutObj> = this.try_into()?;
-        this.obj_paint_if_requested();
-        Ok(Obj::const_true())
+        let painted = this.obj_paint_if_requested().into();
+        Ok(painted)
+    };
+    unsafe { util::try_or_raise(block) }
+}
+
+extern "C" fn ui_layout_request_complete_repaint(this: Obj) -> Obj {
+    let block = || {
+        let this: Gc<LayoutObj> = this.try_into()?;
+        let event = Event::RequestPaint;
+        let msg = this.obj_event(event)?;
+        if msg != Obj::const_none() {
+            // Messages raised during a `RequestPaint` dispatch are not propagated, let's
+            // make sure we don't do that.
+            #[cfg(feature = "ui_debug")]
+            panic!("cannot raise messages during RequestPaint");
+        };
+        Ok(Obj::const_none())
+    };
+    unsafe { util::try_or_raise(block) }
+}
+
+extern "C" fn ui_layout_page_count(this: Obj) -> Obj {
+    let block = || {
+        let this: Gc<LayoutObj> = this.try_into()?;
+        Ok(this.obj_page_count())
     };
     unsafe { util::try_or_raise(block) }
 }
@@ -367,5 +506,20 @@ extern "C" fn ui_layout_trace(this: Obj, callback: Obj) -> Obj {
 
 #[cfg(not(feature = "ui_debug"))]
 extern "C" fn ui_layout_trace(_this: Obj, _callback: Obj) -> Obj {
+    Obj::const_none()
+}
+
+#[cfg(feature = "ui_debug")]
+extern "C" fn ui_layout_bounds(this: Obj) -> Obj {
+    let block = || {
+        let this: Gc<LayoutObj> = this.try_into()?;
+        this.obj_bounds();
+        Ok(Obj::const_none())
+    };
+    unsafe { util::try_or_raise(block) }
+}
+
+#[cfg(not(feature = "ui_debug"))]
+extern "C" fn ui_layout_bounds(_this: Obj) -> Obj {
     Obj::const_none()
 }

@@ -30,7 +30,9 @@ on one page here.
     -v, --verbose             Show communication messages.
     -j, --json                Print result as JSON object
     -P, --passphrase-on-host  Enter passphrase on host.
+    -S, --script              Use UI for usage in scripts.
     -s, --session-id HEX      Resume given session ID.
+    -r, --record TEXT         Record screen changes into a specified directory.
     --version                 Show the version and exit.
     --help                    Show this message and exit.
 
@@ -186,6 +188,7 @@ Miscellaneous debug features.
     --help  Show this message and exit.
 
   Commands:
+    record      Record screen changes into a specified directory.
     send-bytes  Send raw bytes to Trezor.
 
 Device management commands - setup, recover seed, wipe, etc.
@@ -210,7 +213,8 @@ Device management commands - setup, recover seed, wipe, etc.
     reboot-to-bootloader  Reboot device into bootloader mode.
     recover               Start safe recovery workflow.
     sd-protect            Secure the device with SD card protection.
-    self-test             Perform a self-test.
+    self-test             Perform a factory self-test.
+    set-busy              Show a "Do not disconnect" dialog.
     setup                 Perform device setup and generate new seed.
     wipe                  Reset device to factory defaults and remove all private data.
 
@@ -251,12 +255,13 @@ Ethereum commands.
     --help  Show this message and exit.
 
   Commands:
-    get-address      Get Ethereum address in hex encoding.
-    get-public-node  Get Ethereum public node of given path.
-    sign-message     Sign message with Ethereum address.
-    sign-typed-data  Sign typed data (EIP-712) with Ethereum address.
-    sign-tx          Sign (and optionally publish) Ethereum transaction.
-    verify-message   Verify message signed with Ethereum address.
+    get-address           Get Ethereum address in hex encoding.
+    get-public-node       Get Ethereum public node of given path.
+    sign-message          Sign message with Ethereum address.
+    sign-tx               Sign (and optionally publish) Ethereum transaction.
+    sign-typed-data       Sign typed data (EIP-712) with Ethereum address.
+    sign-typed-data-hash  Sign hash of typed data (EIP-712) with Ethereum address.
+    verify-message        Verify message signed with Ethereum address.
 
 FIDO2, U2F and WebAuthN management commands.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -296,6 +301,7 @@ Firmware commands.
 
   Commands:
     download  Download and save the firmware image.
+    get-hash  Get a hash of the installed firmware combined with the optional challenge.
     update    Upload new firmware to device.
     verify    Verify the integrity of the firmware data stored in a file.
 

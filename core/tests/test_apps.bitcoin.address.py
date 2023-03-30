@@ -1,11 +1,16 @@
 from common import *
 from trezor.crypto import bip32, bip39
+from trezor import wire
 from trezor.messages import GetAddress
+from trezor.enums import InputScriptType
 from trezor.utils import HashWriter
 
 from apps.common import coins
-from apps.bitcoin import scripts
 from apps.bitcoin.addresses import *
+from apps.bitcoin.addresses import (
+    _address_p2wsh, _address_p2wsh_in_p2sh,
+    _address_multisig_p2wsh_in_p2sh, _address_multisig_p2sh
+)
 from apps.bitcoin.keychain import validate_path_against_script_type
 from apps.bitcoin.writers import *
 
@@ -73,7 +78,7 @@ class TestAddress(unittest.TestCase):
         h = HashWriter(sha256())
         write_bytes_unchecked(h, script)
 
-        address = address_p2wsh(
+        address = _address_p2wsh(
             h.get_digest(),
             coin.bech32_prefix
         )
@@ -83,7 +88,7 @@ class TestAddress(unittest.TestCase):
         coin = coins.by_name('Bitcoin')
 
         # test data from Mastering Bitcoin
-        address = address_p2wsh_in_p2sh(
+        address = _address_p2wsh_in_p2sh(
             unhexlify('9592d601848d04b172905e0ddb0adde59f1590f1e553ffc81ddc4b0ed927dd73'),
             coin
         )
@@ -99,7 +104,7 @@ class TestAddress(unittest.TestCase):
         #     unhexlify('046ce31db9bdd543e72fe3039a1f1c047dab87037c36a669ff90e28da1848f640de68c2fe913d363a51154a0c62d7adea1b822d05035077418267b1a1379790187'),
         #     unhexlify('0411ffd36c70776538d079fbae117dc38effafb33304af83ce4894589747aee1ef992f63280567f52f5ba870678b4ab4ff6c8ea600bd217870a8b4f1f09f3a8e83'),
         # ]
-        # address = address_multisig_p2sh(pubkeys, 2, coin.address_type_p2sh)
+        # address = _address_multisig_p2sh(pubkeys, 2, coin.address_type_p2sh)
         # self.assertEqual(address, '347N1Thc213QqfYCz3PZkjoJpNv5b14kBd')
 
         coin = coins.by_name('Bitcoin')
@@ -107,12 +112,12 @@ class TestAddress(unittest.TestCase):
             unhexlify('02fe6f0a5a297eb38c391581c4413e084773ea23954d93f7753db7dc0adc188b2f'),
             unhexlify('02ff12471208c14bd580709cb2358d98975247d8765f92bc25eab3b2763ed605f8'),
         ]
-        address = address_multisig_p2sh(pubkeys, 2, coin)
+        address = _address_multisig_p2sh(pubkeys, 2, coin)
         self.assertEqual(address, '39bgKC7RFbpoCRbtD5KEdkYKtNyhpsNa3Z')
 
         for invalid_m in (-1, 0, len(pubkeys) + 1, 16):
             with self.assertRaises(wire.DataError):
-                address_multisig_p2sh(pubkeys, invalid_m, coin)
+                _address_multisig_p2sh(pubkeys, invalid_m, coin)
 
     def test_multisig_address_p2wsh_in_p2sh(self):
         # test data from
@@ -123,7 +128,7 @@ class TestAddress(unittest.TestCase):
             unhexlify('0320ce424c6d61f352ccfea60d209651672cfb03b2dc77d1d64d3ba519aec756ae'),
         ]
 
-        address = address_multisig_p2wsh_in_p2sh(pubkeys, 2, coin)
+        address = _address_multisig_p2wsh_in_p2sh(pubkeys, 2, coin)
         self.assertEqual(address, '2MsZ2fpGKUydzY62v6trPHR8eCx5JTy1Dpa')
 
     # def test_multisig_address_p2wsh(self):
@@ -225,6 +230,27 @@ class TestAddress(unittest.TestCase):
 
         for path, input_type in incorrect_derivation_paths:
             self.assertFalse(self.validate(path, coin, input_type))
+
+    def test_address_mac(self):
+        from apps.common.address_mac import check_address_mac, get_address_mac
+        from apps.common.keychain import Keychain
+        from apps.common.paths import AlwaysMatchingSchema
+
+        VECTORS = (
+            ('Bitcoin', '1DyHzbQUoQEsLxJn6M7fMD8Xdt1XvNiwNE', '9cf7c230041d6ed95b8273bd32e023d3f227ec8c44257f6463c743a4b4add028'),
+            ('Testnet', 'mm6kLYbGEL1tGe4ZA8xacfgRPdW1NLjCbZ', '4375089e50423505dc3480e6e85b0ba37a52bd1e009db5d260b6329f22c950d9')
+        )
+        seed = bip39.seed(' '.join(['all'] * 12), '')
+
+        for coin_name, address, mac in VECTORS:
+            coin = coins.by_name(coin_name)
+            mac = unhexlify(mac)
+            keychain = Keychain(seed, coin.curve_name, [AlwaysMatchingSchema], slip21_namespaces=[[b"SLIP-0024"]])
+            self.assertEqual(get_address_mac(address, coin.slip44, keychain), mac)
+            check_address_mac(address, mac, coin.slip44, keychain)
+            with self.assertRaises(wire.DataError):
+                mac = bytes([mac[0]^1]) + mac[1:]
+                check_address_mac(address, mac, coin.slip44, keychain)
 
 
 if __name__ == '__main__':

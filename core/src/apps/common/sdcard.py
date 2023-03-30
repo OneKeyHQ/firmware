@@ -1,6 +1,5 @@
-import storage.sd_salt
 from storage.sd_salt import SD_CARD_HOT_SWAPPABLE
-from trezor import io, sdcard, ui, wire
+from trezor import io, wire
 from trezor.ui.layouts import confirm_action, show_error_and_raise
 
 
@@ -14,21 +13,18 @@ async def _confirm_retry_wrong_card(ctx: wire.GenericContext) -> None:
             ctx,
             "warning_wrong_sd",
             "SD card protection",
-            action="Wrong SD card.",
-            description="Please insert the correct SD card for this device.",
+            "Wrong SD card.",
+            "Please insert the correct SD card for this device.",
             verb="Retry",
             verb_cancel="Abort",
-            icon=ui.ICON_WRONG,
-            larger_vspace=True,
             exc=SdCardUnavailable("Wrong SD card."),
         )
     else:
         await show_error_and_raise(
             ctx,
             "warning_wrong_sd",
-            header="SD card protection",
-            subheader="Wrong SD card.",
-            content="Please unplug the\ndevice and insert the correct SD card.",
+            "Please unplug the device and insert the correct SD card.",
+            "Wrong SD card.",
             exc=SdCardUnavailable("Wrong SD card."),
         )
 
@@ -39,21 +35,18 @@ async def _confirm_retry_insert_card(ctx: wire.GenericContext) -> None:
             ctx,
             "warning_no_sd",
             "SD card protection",
-            action="SD card required.",
-            description="Please insert your SD card.",
+            "SD card required.",
+            "Please insert your SD card.",
             verb="Retry",
             verb_cancel="Abort",
-            icon=ui.ICON_WRONG,
-            larger_vspace=True,
             exc=SdCardUnavailable("SD card required."),
         )
     else:
         await show_error_and_raise(
             ctx,
             "warning_no_sd",
-            header="SD card protection",
-            subheader="SD card required.",
-            content="Please unplug the\ndevice and insert your SD card.",
+            "Please unplug the device and insert your SD card.",
+            "SD card required.",
             exc=SdCardUnavailable("SD card required."),
         )
 
@@ -64,13 +57,10 @@ async def _confirm_format_card(ctx: wire.GenericContext) -> None:
         ctx,
         "warning_format_sd",
         "SD card error",
-        action="Unknown filesystem.",
-        description="Use a different card or format the SD card to the FAT32 filesystem.",
-        icon=ui.ICON_WRONG,
-        icon_color=ui.RED,
+        "Unknown filesystem.",
+        "Use a different card or format the SD card to the FAT32 filesystem.",
         verb="Format",
         verb_cancel="Cancel",
-        larger_vspace=True,
         exc=SdCardUnavailable("SD card not formatted."),
     )
 
@@ -79,14 +69,11 @@ async def _confirm_format_card(ctx: wire.GenericContext) -> None:
         ctx,
         "confirm_format_sd",
         "Format SD card",
-        action="All data on the SD card will be lost.",
-        description="Do you really want to format the SD card?",
+        "All data on the SD card will be lost.",
+        "Do you really want to format the SD card?",
         reverse=True,
         verb="Format SD card",
-        icon=ui.ICON_WIPE,
-        icon_color=ui.RED,
         hold=True,
-        larger_vspace=True,
         exc=SdCardUnavailable("SD card not formatted."),
     )
 
@@ -99,10 +86,8 @@ async def confirm_retry_sd(
         ctx,
         "warning_sd_retry",
         "SD card problem",
-        action=None,
-        description="There was a problem accessing the SD card.",
-        icon=ui.ICON_WRONG,
-        icon_color=ui.RED,
+        None,
+        "There was a problem accessing the SD card.",
         verb="Retry",
         verb_cancel="Abort",
         exc=exc,
@@ -121,18 +106,20 @@ async def ensure_sdcard(
     filesystem, and allows the user to format the card if a filesystem cannot be
     mounted.
     """
+    from trezor import sdcard
+
     while not sdcard.is_present():
         await _confirm_retry_insert_card(ctx)
 
     if not ensure_filesystem:
         return
-
+    fatfs = io.fatfs  # local_cache_attribute
     while True:
         try:
             try:
                 with sdcard.filesystem(mounted=False):
-                    io.fatfs.mount()
-            except io.fatfs.NoFilesystem:
+                    fatfs.mount()
+            except fatfs.NoFilesystem:
                 # card not formatted. proceed out of the except clause
                 pass
             else:
@@ -143,9 +130,9 @@ async def ensure_sdcard(
 
             # Proceed to formatting. Failure is caught by the outside OSError handler
             with sdcard.filesystem(mounted=False):
-                io.fatfs.mkfs()
-                io.fatfs.mount()
-                io.fatfs.setlabel("TREZOR")
+                fatfs.mkfs()
+                fatfs.mount()
+                fatfs.setlabel("TREZOR")
 
             # format and mount succeeded
             return
@@ -158,14 +145,16 @@ async def ensure_sdcard(
 async def request_sd_salt(
     ctx: wire.GenericContext = wire.DUMMY_CONTEXT,
 ) -> bytearray | None:
-    if not storage.sd_salt.is_enabled():
+    import storage.sd_salt as storage_sd_salt
+
+    if not storage_sd_salt.is_enabled():
         return None
 
     while True:
         await ensure_sdcard(ctx, ensure_filesystem=False)
         try:
-            return storage.sd_salt.load_sd_salt()
-        except (storage.sd_salt.WrongSdCard, io.fatfs.NoFilesystem):
+            return storage_sd_salt.load_sd_salt()
+        except (storage_sd_salt.WrongSdCard, io.fatfs.NoFilesystem):
             await _confirm_retry_wrong_card(ctx)
         except OSError:
             # Generic problem with loading the SD salt (hardware problem, or we could

@@ -1,12 +1,14 @@
-from trezor import wire
+from typing import TYPE_CHECKING
 
 from apps.common import paths
 from apps.common.keychain import get_keychain
 
 from . import CURVE, networks
 
-if False:
-    from typing import Callable, Iterable, TypeVar, Union
+if TYPE_CHECKING:
+    from typing import Callable, Iterable, TypeVar
+
+    from trezor.wire import Context
 
     from trezor.messages import (
         EthereumGetAddress,
@@ -19,19 +21,16 @@ if False:
 
     from apps.common.keychain import MsgOut, Handler, HandlerWithKeychain
 
-    EthereumMessages = Union[
-        EthereumGetAddress,
-        EthereumGetPublicKey,
-        EthereumSignTx,
-        EthereumSignMessage,
-        EthereumSignTypedData,
-    ]
+    EthereumMessages = (
+        EthereumGetAddress
+        | EthereumGetPublicKey
+        | EthereumSignTx
+        | EthereumSignMessage
+        | EthereumSignTypedData
+    )
     MsgIn = TypeVar("MsgIn", bound=EthereumMessages)
 
-    EthereumSignTxAny = Union[
-        EthereumSignTx,
-        EthereumSignTxEIP1559,
-    ]
+    EthereumSignTxAny = EthereumSignTx | EthereumSignTxEIP1559
     MsgInChainId = TypeVar("MsgInChainId", bound=EthereumSignTxAny)
 
 
@@ -39,17 +38,25 @@ if False:
 # account-based, rather than UTXO-based. Unfortunately, lot of Ethereum
 # tools (MEW, Metamask) do not use such scheme and set a = 0 and then
 # iterate the address index i. For compatibility, we allow this scheme as well.
+# Also to support "Ledger Live" legacy paths we allow 44'/60'/0'/a paths.
 
-PATTERNS_ADDRESS = (paths.PATTERN_BIP44, paths.PATTERN_SEP5)
+PATTERNS_ADDRESS = (
+    paths.PATTERN_BIP44,
+    paths.PATTERN_SEP5,
+    paths.PATTERN_SEP5_LEDGER_LIVE_LEGACY,
+    paths.PATTERN_CASA,
+)
 
 
 def _schemas_from_address_n(
     patterns: Iterable[str], address_n: paths.Bip32Path
 ) -> Iterable[paths.PathSchema]:
-    if len(address_n) < 2:
-        return ()
+    # Casa paths (purpose of 45) do not have hardened coin types
+    if address_n[0] == 45 | paths.HARDENED and not address_n[1] & paths.HARDENED:
+        slip44_hardened = address_n[1] | paths.HARDENED
+    else:
+        slip44_hardened = address_n[1]
 
-    slip44_hardened = address_n[1]
     if slip44_hardened not in networks.all_slip44_ids_hardened():
         return ()
 
@@ -65,7 +72,7 @@ def with_keychain_from_path(
     *patterns: str,
 ) -> Callable[[HandlerWithKeychain[MsgIn, MsgOut]], Handler[MsgIn, MsgOut]]:
     def decorator(func: HandlerWithKeychain[MsgIn, MsgOut]) -> Handler[MsgIn, MsgOut]:
-        async def wrapper(ctx: wire.Context, msg: MsgIn) -> MsgOut:
+        async def wrapper(ctx: Context, msg: MsgIn) -> MsgOut:
             schemas = _schemas_from_address_n(patterns, msg.address_n)
             keychain = await get_keychain(ctx, CURVE, schemas)
             with keychain:
@@ -98,7 +105,7 @@ def with_keychain_from_chain_id(
     func: HandlerWithKeychain[MsgInChainId, MsgOut]
 ) -> Handler[MsgInChainId, MsgOut]:
     # this is only for SignTx, and only PATTERN_ADDRESS is allowed
-    async def wrapper(ctx: wire.Context, msg: MsgInChainId) -> MsgOut:
+    async def wrapper(ctx: Context, msg: MsgInChainId) -> MsgOut:
         schemas = _schemas_from_chain_id(msg)
         keychain = await get_keychain(ctx, CURVE, schemas)
         with keychain:

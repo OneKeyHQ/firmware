@@ -17,7 +17,7 @@
 from typing import TYPE_CHECKING, AnyStr, Optional, Tuple
 
 from . import messages
-from .tools import expect, normalize_nfc, session
+from .tools import expect, prepare_message_bytes, session
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -98,7 +98,7 @@ def sign_message(
     client: "TrezorClient", n: "Address", message: AnyStr
 ) -> "MessageType":
     return client.call(
-        messages.ConfluxSignMessage(address_n=n, message=normalize_nfc(message))
+        messages.ConfluxSignMessage(address_n=n, message=prepare_message_bytes(message))
     )
 
 

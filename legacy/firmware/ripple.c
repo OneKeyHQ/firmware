@@ -272,7 +272,7 @@ static int ripple_is_canonic(uint8_t v, uint8_t signature[64]) {
 
 void ripple_format_amount(const uint64_t amount, char *buf, int buflen) {
   char str_amount[12] = {0};
-  bn_format_uint64(amount, NULL, NULL, 6, 0, false, str_amount,
+  bn_format_uint64(amount, NULL, NULL, 6, 0, false, 0, str_amount,
                    sizeof(str_amount));
   snprintf(buf, buflen, "%s XRP", str_amount);
 }

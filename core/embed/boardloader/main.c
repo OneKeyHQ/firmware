@@ -19,13 +19,16 @@
 
 #include <string.h>
 
+#include "board_capabilities.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
 #include "flash.h"
 #include "image.h"
 #include "rng.h"
+#ifdef TREZOR_MODEL_T
 #include "sdcard.h"
+#endif
 
 #include "lowlevel.h"
 #include "version.h"
@@ -46,10 +49,26 @@ static const uint8_t * const BOARDLOADER_KEYS[] = {
 #endif
 };
 
+struct BoardCapabilities capablities
+    __attribute__((section(".capabilities_section"))) = {
+        .header = CAPABILITIES_HEADER,
+        .model_tag = MODEL_NAME,
+        .model_length = sizeof(uint32_t),
+        .model_name = HW_MODEL,
+        .version_tag = BOARDLOADER_VERSION,
+        .version_length = sizeof(struct BoardloaderVersion),
+        .version = {.version_major = VERSION_MAJOR,
+                    .version_minor = VERSION_MINOR,
+                    .version_patch = VERSION_PATCH,
+                    .version_build = VERSION_BUILD},
+        .terminator_tag = TERMINATOR,
+        .terminator_length = 0};
+
 // we use SRAM as SD card read buffer (because DMA can't access the CCMRAM)
 extern uint32_t sram_start[];
 #define sdcard_buf sram_start
 
+#if defined TREZOR_MODEL_T
 static uint32_t check_sdcard(void) {
   if (sectrue != sdcard_power_on()) {
     return 0;
@@ -68,17 +87,29 @@ static uint32_t check_sdcard(void) {
 
   sdcard_power_off();
 
-  image_header hdr;
+  if (sectrue == read_status) {
+    const image_header *hdr =
+        read_image_header((const uint8_t *)sdcard_buf, BOOTLOADER_IMAGE_MAGIC,
+                          BOOTLOADER_IMAGE_MAXSIZE);
 
-  if ((sectrue == read_status) &&
-      (sectrue ==
-       load_image_header((const uint8_t *)sdcard_buf, BOOTLOADER_IMAGE_MAGIC,
-                         BOOTLOADER_IMAGE_MAXSIZE, BOARDLOADER_KEY_M,
-                         BOARDLOADER_KEY_N, BOARDLOADER_KEYS, &hdr))) {
-    return hdr.codelen;
-  } else {
-    return 0;
+    if (hdr != (const image_header *)sdcard_buf) {
+      return 0;
+    }
+
+    if (sectrue != check_image_model(hdr)) {
+      return 0;
+    }
+
+    if (sectrue != check_image_header_sig(hdr, BOARDLOADER_KEY_M,
+                                          BOARDLOADER_KEY_N,
+                                          BOARDLOADER_KEYS)) {
+      return 0;
+    }
+
+    return hdr->codelen;
   }
+
+  return 0;
 }
 
 static void progress_callback(int pos, int len) { display_printf("."); }
@@ -165,6 +196,7 @@ static secbool copy_sdcard(void) {
 
   return sectrue;
 }
+#endif
 
 int main(void) {
   reset_flags_reset();
@@ -184,25 +216,34 @@ int main(void) {
   clear_otg_hs_memory();
 
   display_init();
+  display_clear();
+
+#if defined TREZOR_MODEL_T
   sdcard_init();
 
   if (check_sdcard()) {
     return copy_sdcard() == sectrue ? 0 : 3;
   }
+#endif
 
-  image_header hdr;
+  const image_header *hdr =
+      read_image_header((const uint8_t *)BOOTLOADER_START,
+                        BOOTLOADER_IMAGE_MAGIC, BOOTLOADER_IMAGE_MAXSIZE);
 
-  ensure(load_image_header((const uint8_t *)BOOTLOADER_START,
-                           BOOTLOADER_IMAGE_MAGIC, BOOTLOADER_IMAGE_MAXSIZE,
-                           BOARDLOADER_KEY_M, BOARDLOADER_KEY_N,
-                           BOARDLOADER_KEYS, &hdr),
+  ensure(hdr == (const image_header *)BOOTLOADER_START ? sectrue : secfalse,
          "invalid bootloader header");
+
+  ensure(check_image_header_sig(hdr, BOARDLOADER_KEY_M, BOARDLOADER_KEY_N,
+                                BOARDLOADER_KEYS),
+         "invalid bootloader signature");
 
   const uint8_t sectors[] = {
       FLASH_SECTOR_BOOTLOADER,
   };
-  ensure(check_image_contents(&hdr, IMAGE_HEADER_SIZE, sectors, 1),
+  ensure(check_image_contents(hdr, IMAGE_HEADER_SIZE, sectors, 1),
          "invalid bootloader hash");
+
+  ensure_compatible_settings();
 
   jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
 

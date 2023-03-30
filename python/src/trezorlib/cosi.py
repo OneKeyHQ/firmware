@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -14,8 +14,9 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+import warnings
 from functools import reduce
-from typing import TYPE_CHECKING, Iterable, List, Tuple
+from typing import TYPE_CHECKING, Iterable, Optional, Sequence, Tuple
 
 from . import _ed25519, messages
 from .tools import expect
@@ -89,7 +90,7 @@ def verify(
     signature: Ed25519Signature,
     digest: bytes,
     sigs_required: int,
-    keys: List[Ed25519PublicPoint],
+    keys: Sequence[Ed25519PublicPoint],
     mask: int,
 ) -> None:
     """Verify a CoSi multi-signature. Raise exception if the signature is invalid.
@@ -141,8 +142,17 @@ def sign_with_privkey(
 
 
 @expect(messages.CosiCommitment)
-def commit(client: "TrezorClient", n: "Address", data: bytes) -> "MessageType":
-    return client.call(messages.CosiCommit(address_n=n, data=data))
+def commit(
+    client: "TrezorClient", n: "Address", data: Optional[bytes] = None
+) -> "MessageType":
+    if data is not None:
+        warnings.warn(
+            "'data' argument is deprecated",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+    return client.call(messages.CosiCommit(address_n=n))
 
 
 @expect(messages.CosiSignature)
