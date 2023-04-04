@@ -32,7 +32,7 @@ void reset_backup(bool separated, const char *mnemonic);
 uint32_t reset_get_int_entropy(uint8_t *entropy);
 const char *reset_get_word(void);
 bool scroll_mnemonic(const char *pre_desc, const char *mnemonic, uint8_t type);
-bool writedown_mnemonic(const char *mnemonic);
+bool writedown_mnemonic(const char *mnemonic, uint32_t words_count);
 bool reset_on_device(void);
 
 #endif

@@ -43,6 +43,45 @@ bool ethereum_parse(const char *address, uint8_t pubkeyhash[20]);
 void ethereum_message_sign_eip712(const EthereumSignMessageEIP712 *msg,
                                   const HDNode *node,
                                   EthereumMessageSignature *resp);
+const char *get_chain_name(uint32_t chain_id);
+
+// To reduce space, only some EVM networks are supported
+#define ASSIGN_ETHEREUM_NAME(chain_name, chain_id) \
+  switch (chain_id) {                              \
+    case 1:                                        \
+      chain_name = "Ethereum";                     \
+      break;                                       \
+    case 4:                                        \
+      chain_name = "Rinkeby";                      \
+      break;                                       \
+    case 10:                                       \
+      chain_name = "Optimistic";                   \
+      break;                                       \
+    case 56:                                       \
+      chain_name = "BSC";                          \
+      break;                                       \
+    case 61:                                       \
+      chain_name = "Ethereum Classic";             \
+      break;                                       \
+    case 66:                                       \
+      chain_name = "OKXChain";                     \
+      break;                                       \
+    case 128:                                      \
+      chain_name = "Huobi ECO";                    \
+      break;                                       \
+    case 137:                                      \
+      chain_name = "Polygon";                      \
+      break;                                       \
+    case 42161:                                    \
+      chain_name = "Arbitrum One";                 \
+      break;                                       \
+    case 42170:                                    \
+      chain_name = "Arbitrum Nova";                \
+      break;                                       \
+    default:                                       \
+      chain_name = "Unknown Chain";                \
+      break; /* unknown chain */                   \
+  }
 
 bool ethereum_path_check(uint32_t address_n_count, const uint32_t *address_n,
                          bool pubkey_export, uint64_t chain);

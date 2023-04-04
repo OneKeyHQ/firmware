@@ -28,7 +28,8 @@
 
 void tron_message_sign(TronSignMessage *msg, const HDNode *node,
                        TronMessageSignature *resp);
-int tron_eth_2_trx_address(const uint8_t *eth_address, char *str, int strsize);
+int tron_eth_2_trx_address(const uint8_t eth_address[20], char *str,
+                           int strsize);
 bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
                   const HDNode *node, TronSignedTx *resp);
 

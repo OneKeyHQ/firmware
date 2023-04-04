@@ -33,28 +33,11 @@ void fsm_msgTronSignMessage(TronSignMessage *msg) {
   if (!hdnode_get_ethereum_pubkeyhash(node, eth_address)) return;
   tron_eth_2_trx_address(eth_address, signer_str, sizeof(signer_str));
 
-  layoutVerifyAddress(NULL, signer_str);
-  if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+  if (!fsm_layoutSignMessage("Tron", signer_str, msg->message.bytes,
+                             msg->message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
-  }
-
-  if (is_valid_ascii(msg->message.bytes, msg->message.size)) {
-    if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  } else {
-    unsigned char buf[65];
-    size_t len = msg->message.size >= 32 ? 32 : msg->message.size;
-    data2hex(msg->message.bytes, len, (char *)buf);
-    if (!fsm_layoutSignMessage(buf, len * 2)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
   }
 
   resp->address.size = strlen(signer_str);
@@ -81,9 +64,11 @@ void fsm_msgTronGetAddress(TronGetAddress *msg) {
   resp->has_address = 1;
 
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
-                           msg->address_n, msg->address_n_count, true, NULL, 0,
-                           0, NULL)) {
+    char desc[16] = {0};
+    strcat(desc, "Tron");
+    strcat(desc, _("Address:"));
+    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+                           msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }
   }

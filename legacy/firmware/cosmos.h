@@ -22,6 +22,7 @@
 
 #include <stdbool.h>
 #include "bip32.h"
+#include "cosmos_networks.h"
 #include "messages-cosmos.pb.h"
 
 int cosmos_get_address(char *address, const uint8_t *public_key,

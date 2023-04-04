@@ -281,32 +281,32 @@ def get_public_key(
     return cardano.get_public_key(client, address_n, derivation_type=derivation_type)
 
 
-@cli.command()
-@click.argument("file", type=click.File("r"))
-@click.option(
-    "-d",
-    "--display-format",
-    type=ChoiceType({m.name: m for m in messages.CardanoNativeScriptHashDisplayFormat}),
-    default="HIDE",
-)
-@click.option(
-    "-D",
-    "--derivation-type",
-    type=ChoiceType({m.name: m for m in messages.CardanoDerivationType}),
-    default=messages.CardanoDerivationType.ICARUS,
-)
-@with_client
-def get_native_script_hash(
-    client: "TrezorClient",
-    file: TextIO,
-    display_format: messages.CardanoNativeScriptHashDisplayFormat,
-    derivation_type: messages.CardanoDerivationType,
-) -> messages.CardanoNativeScriptHash:
-    """Get Cardano native script hash."""
-    native_script_json = json.load(file)
-    native_script = cardano.parse_native_script(native_script_json)
+# @cli.command()
+# @click.argument("file", type=click.File("r"))
+# @click.option(
+#     "-d",
+#     "--display-format",
+#     type=ChoiceType({m.name: m for m in messages.CardanoNativeScriptHashDisplayFormat}),
+#     default="HIDE",
+# )
+# @click.option(
+#     "-D",
+#     "--derivation-type",
+#     type=ChoiceType({m.name: m for m in messages.CardanoDerivationType}),
+#     default=messages.CardanoDerivationType.ICARUS,
+# )
+# @with_client
+# def get_native_script_hash(
+#     client: "TrezorClient",
+#     file: TextIO,
+#     display_format: messages.CardanoNativeScriptHashDisplayFormat,
+#     derivation_type: messages.CardanoDerivationType,
+# ) -> messages.CardanoNativeScriptHash:
+#     """Get Cardano native script hash."""
+#     native_script_json = json.load(file)
+#     native_script = cardano.parse_native_script(native_script_json)
 
-    client.init_device(derive_cardano=True)
-    return cardano.get_native_script_hash(
-        client, native_script, display_format, derivation_type=derivation_type
-    )
+#     client.init_device(derive_cardano=True)
+#     return cardano.get_native_script_hash(
+#         client, native_script, display_format, derivation_type=derivation_type
+#     )

@@ -33,9 +33,11 @@ void fsm_msgSolanaGetAddress(const SolanaGetAddress *msg) {
   solana_get_address_from_public_key(&node->public_key[1], resp->address);
 
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
-                           msg->address_n, msg->address_n_count, false, NULL, 0,
-                           0, NULL)) {
+    char desc[16] = {0};
+    strcat(desc, "Solana");
+    strcat(desc, _("Address:"));
+    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+                           msg->address_n_count, false, NULL, 0, 0, NULL)) {
       return;
     }
   }

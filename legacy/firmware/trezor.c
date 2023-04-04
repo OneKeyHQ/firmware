@@ -65,56 +65,57 @@ uint32_t system_millis_lock_start = 0;
 /* Busyscreen timeout */
 uint32_t system_millis_busy_deadline = 0;
 
-void check_lock_screen(void) {
-  buttonUpdate();
+// void check_lock_screen(void) {
+//   buttonUpdate();
 
-  // wake from screensaver on any button
-  if (layoutLast == layoutScreensaver && (button.NoUp || button.YesUp)) {
-    layoutHome();
-    return;
-  }
+//   // wake from screensaver on any button
+//   if (layoutLast == layoutScreensaver && (button.NoUp || button.YesUp)) {
+//     layoutHome();
+//     return;
+//   }
 
-  // button held for long enough (5 seconds)
-  if ((layoutLast == layoutHomescreen || layoutLast == layoutBusyscreen) &&
-      button.NoDown >= 114000 * 5) {
-    layoutDialogAdapter(&bmp_icon_question, _("Cancel"), _("Lock Device"), NULL,
-                        _("Do you really want to"), _("lock your Trezor?"),
-                        NULL, NULL, NULL, NULL);
+//   // button held for long enough (5 seconds)
+//   if ((layoutLast == layoutHomescreen || layoutLast == layoutBusyscreen) &&
+//       button.NoDown >= 114000 * 5) {
+//     layoutDialogAdapter(&bmp_icon_question, _("Cancel"), _("Lock Device"),
+//     NULL,
+//                         _("Do you really want to"), _("lock your Trezor?"),
+//                         NULL, NULL, NULL, NULL);
 
-    // wait until NoButton is released
-    usbTiny(1);
-    do {
-      waitAndProcessUSBRequests(5);
-      buttonUpdate();
-    } while (!button.NoUp);
+//     // wait until NoButton is released
+//     usbTiny(1);
+//     do {
+//       waitAndProcessUSBRequests(5);
+//       buttonUpdate();
+//     } while (!button.NoUp);
 
-    // wait for confirmation/cancellation of the dialog
-    do {
-      waitAndProcessUSBRequests(5);
-      buttonUpdate();
-    } while (!button.YesUp && !button.NoUp);
-    usbTiny(0);
+//     // wait for confirmation/cancellation of the dialog
+//     do {
+//       waitAndProcessUSBRequests(5);
+//       buttonUpdate();
+//     } while (!button.YesUp && !button.NoUp);
+//     usbTiny(0);
 
-    if (button.YesUp) {
-      // lock the screen
-      config_lockDevice();
-      layoutScreensaver();
-    } else {
-      // resume homescreen
-      layoutHome();
-    }
-  }
+//     if (button.YesUp) {
+//       // lock the screen
+//       config_lockDevice();
+//       layoutScreensaver();
+//     } else {
+//       // resume homescreen
+//       layoutHome();
+//     }
+//   }
 
-  // if homescreen is shown for too long
-  if (layoutLast == layoutHomescreen) {
-    if ((timer_ms() - system_millis_lock_start) >=
-        config_getAutoLockDelayMs()) {
-      // lock the screen
-      config_lockDevice();
-      layoutScreensaver();
-    }
-  }
-}
+//   // if homescreen is shown for too long
+//   if (layoutLast == layoutHomescreen) {
+//     if ((timer_ms() - system_millis_lock_start) >=
+//         config_getAutoLockDelayMs()) {
+//       // lock the screen
+//       config_lockDevice();
+//       layoutScreensaver();
+//     }
+//   }
+// }
 
 void check_busy_screen(void) {
   // Clear the busy screen once it expires.
@@ -157,7 +158,7 @@ int main(void) {
                                    // unpredictable stack protection checks
   oledInit();
 #else
-  check_and_replace_bootloader(true);
+  // check_and_replace_bootloader(true);
   setupApp();
   ble_reset();
 #if !EMULATOR
@@ -197,6 +198,9 @@ int main(void) {
   layoutHome();
   usbInit();
 
+#if EMULATOR
+  system_millis_lock_start = timer_ms();
+#endif
   for (;;) {
 #if EMULATOR
     waitAndProcessUSBRequests(10);

@@ -277,48 +277,29 @@ void ripple_format_amount(const uint64_t amount, char *buf, int buflen) {
   snprintf(buf, buflen, "%s XRP", str_amount);
 }
 
-void layoutRippleConfirmTx(const char *to_str, const uint64_t value) {
-  char amount[60];
-  ripple_format_amount(value, amount, sizeof(amount));
-
-  char _to1[] = "to   ________";
-  char _to2[] = "_____________";
-  char _to3[] = "_____________?";
-
-  memcpy(_to1 + 5, to_str, 8);
-  memcpy(_to2, to_str + 8, 13);
-  memcpy(_to3, to_str + 21, 13);
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Send"), amount, _to1, _to2, _to3, NULL);
-}
-
-void layoutRippleFee(const uint64_t value, const uint64_t fee) {
-  char gas_value[32];
-  char amount[60];
-  ripple_format_amount(fee, gas_value, sizeof(gas_value));
-  ripple_format_amount(value, amount, sizeof(amount));
-
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Really send"), amount, _("and limit max fee to"),
-                    gas_value, _("?"), NULL);
-}
-
 bool ripple_sign_tx(const RippleSignTx *msg, HDNode *node,
                     RippleSignedTx *resp) {
   int index = 4;
   uint8_t net_prefix[] = {0x53, 0x54, 0x58, 0x00};
   uint8_t *raw = resp->serialized_tx.bytes;
+  char address[70];
+  char amount[60];
+  char gas_value[32];
   memcpy(raw, net_prefix, 4);
   serialize(msg, raw, &index, node->public_key, NULL, 0);
 
-  layoutRippleConfirmTx(msg->payment.destination, msg->payment.amount);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+  if (!get_ripple_address(node->public_key, address)) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Get address failed");
     return false;
   }
-  layoutRippleFee(msg->payment.amount, msg->fee);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+
+  ripple_format_amount(msg->payment.amount, amount, sizeof(amount));
+  ripple_format_amount(msg->fee, gas_value, sizeof(gas_value));
+  if (!layoutTransactionSign("Ripple", false, amount, msg->payment.destination,
+                             address, NULL, NULL, NULL, 0, _("Maximum Fee"),
+                             gas_value, NULL, NULL, NULL, NULL, NULL, NULL)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+    layoutHome();
     return false;
   }
 

@@ -6,16 +6,22 @@ int oledStringWidthAdapter(const char *text, uint8_t font) {
   if (!text) return 0;
   const struct font_desc *font_dese = find_cur_font();
   int l = 0;
+  int zoom = (font & FONT_DOUBLE) ? 2 : 1;
+
   while (*text) {
     if ((uint8_t)*text < 0x80) {
-      l += fontCharWidth(font & 0x7f, (uint8_t)*text) +
-           ((font & FONT_DOUBLE) ? 2 : 1);
+      if (zoom == 2) {
+        l += (fontCharWidth(font & 0x7f, (uint8_t)*text) + 1) * zoom + 1;
+      } else {
+        l += fontCharWidth(font & 0x7f, (uint8_t)*text) + 1;
+      }
       text++;
     } else {
       if (font_dese->idx == DEFAULT_IDX) {
         font_dese = find_font("dingmao_9x9");
       }
-      l += font_dese->width + ((font & FONT_DOUBLE) ? 2 : 1);
+      // l += font_dese->width + ((font & FONT_DOUBLE) ? 2 : 1);
+      l += font_dese->width + ((font & FONT_DOUBLE) ? 1 : 0);
       text += HZ_CODE_LEN;
     }
   }
@@ -66,7 +72,10 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
     if ((uint8_t)*text < 0x80) {
       if (*text == '\n') {
         x = 0;
-        y += font_desc->pixel + 1;
+        if (font_desc->pixel <= 8)
+          y += font_desc->pixel + 2;
+        else
+          y += font_desc->pixel + 1;
         text++;
         continue;
       }
@@ -77,7 +86,10 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
       }
       if (y > OLED_HEIGHT) y = 0;
       oledDrawChar(x, y + font_desc->pixel - 8, *text, font);
-      x += l;
+      if (font & FONT_DOUBLE)
+        x += l * space - 1;
+      else
+        x += l;
       text++;
     } else {
       if (font_desc_bak->idx == DEFAULT_IDX) {
@@ -89,7 +101,11 @@ void oledDrawStringAdapter(int x, int y, const char *text, uint8_t font) {
       }
       if (y > OLED_HEIGHT) y = 0;
       oledDrawChar_zh(x, y, text, font, font_desc_bak);
-      x += font_desc_bak->width + ((font & FONT_DOUBLE) ? 2 : 1);
+      // x += font_desc_bak->width + ((font & FONT_DOUBLE) ? 2 : 1);
+      x += font_desc_bak->width +
+           ((font & FONT_DOUBLE)
+                ? 1
+                : 0);  // dingmao_9x9: .width = 10 include 1 space
       text += HZ_CODE_LEN;
     }
   }

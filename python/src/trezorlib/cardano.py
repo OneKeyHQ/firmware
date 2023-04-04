@@ -809,20 +809,20 @@ def get_public_key(
     )
 
 
-@expect(messages.CardanoNativeScriptHash)
-def get_native_script_hash(
-    client: "TrezorClient",
-    native_script: messages.CardanoNativeScript,
-    display_format: messages.CardanoNativeScriptHashDisplayFormat = messages.CardanoNativeScriptHashDisplayFormat.HIDE,
-    derivation_type: messages.CardanoDerivationType = messages.CardanoDerivationType.ICARUS,
-) -> "MessageType":
-    return client.call(
-        messages.CardanoGetNativeScriptHash(
-            script=native_script,
-            display_format=display_format,
-            derivation_type=derivation_type,
-        )
-    )
+# @expect(messages.CardanoNativeScriptHash)
+# def get_native_script_hash(
+#     client: "TrezorClient",
+#     native_script: messages.CardanoNativeScript,
+#     display_format: messages.CardanoNativeScriptHashDisplayFormat = messages.CardanoNativeScriptHashDisplayFormat.HIDE,
+#     derivation_type: messages.CardanoDerivationType = messages.CardanoDerivationType.ICARUS,
+# ) -> "MessageType":
+#     return client.call(
+#         messages.CardanoGetNativeScriptHash(
+#             script=native_script,
+#             display_format=display_format,
+#             derivation_type=derivation_type,
+#         )
+#     )
 
 
 def sign_tx(

@@ -25,7 +25,7 @@
 #include "bip32.h"
 #include "messages-ripple.pb.h"
 
-bool get_ripple_address(const uint8_t pubkeyhash[20], char *address);
+bool get_ripple_address(const uint8_t pubkey[33], char *address);
 bool ripple_sign_tx(const RippleSignTx *msg, HDNode *node,
                     RippleSignedTx *resp);
 

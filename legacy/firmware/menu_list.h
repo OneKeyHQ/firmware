@@ -5,5 +5,6 @@
 
 void menu_language_init(void);
 void main_menu_init(bool state);
+void menu_autolock_added_custom(void);
 
 #endif

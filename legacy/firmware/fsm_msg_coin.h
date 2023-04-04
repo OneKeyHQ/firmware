@@ -112,14 +112,12 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
   }
 
   if (msg->has_show_display && msg->show_display) {
-    for (int page = 0; page < 2; page++) {
-      layoutXPUB(resp->xpub, page);
-      if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
-        memzero(resp, sizeof(PublicKey));
-        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-        layoutHome();
-        return;
-      }
+    if (!layoutXPUB(coin->coin_name, resp->xpub, msg->address_n,
+                    msg->address_n_count)) {
+      memzero(resp, sizeof(PublicKey));
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return;
     }
   }
 
@@ -226,7 +224,7 @@ bool fsm_checkCoinPath(const CoinInfo *coin, InputScriptType script_type,
   }
 
   if (show_warning) {
-    return fsm_layoutPathWarning();
+    return fsm_layoutPathWarning(address_n_count, address_n);
   }
 
   return true;
@@ -308,7 +306,9 @@ void fsm_msgGetAddress(const GetAddress *msg) {
       multisig_index =
           cryptoMultisigPubkeyIndex(coin, &(msg->multisig), node->public_key);
     } else {
-      strlcpy(desc, _("Address:"), sizeof(desc));
+      strcat(desc, coin->coin_name);
+      strcat(desc, " ");
+      strlcpy(desc + strlen(desc), _("Address:"), sizeof(desc));
     }
 
     uint32_t multisig_xpub_magic = coin->xpub_magic;
@@ -379,14 +379,8 @@ void fsm_msgSignMessage(const SignMessage *msg) {
     return;
   }
 
-  layoutVerifyAddress(coin, resp->address);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
+  if (!fsm_layoutSignMessage(msg->coin_name, resp->address, msg->message.bytes,
+                             msg->message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
@@ -418,22 +412,8 @@ void fsm_msgVerifyMessage(const VerifyMessage *msg) {
   int result = cryptoMessageVerify(coin, msg->message.bytes, msg->message.size,
                                    msg->address, msg->signature.bytes);
   if (result == 0) {
-    layoutVerifyAddress(coin, msg->address);
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-
-    if (!fsm_layoutVerifyMessage(msg->message.bytes, msg->message.size)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-
-    layoutDialogSwipe(&bmp_icon_ok, NULL, _("Continue"), NULL, NULL,
-                      _("The signature is valid."), NULL, NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, true)) {
+    if (!fsm_layoutVerifyMessage(msg->coin_name, msg->address,
+                                 msg->message.bytes, msg->message.size)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
       return;
@@ -723,7 +703,7 @@ void fsm_msgAuthorizeCoinJoin(const AuthorizeCoinJoin *msg) {
 
   bool path_warning_shown = false;
   if (msg->address_n[0] != PATH_SLIP25_PURPOSE) {
-    if (!fsm_layoutPathWarning()) {
+    if (!fsm_layoutPathWarning(msg->address_n_count, msg->address_n)) {
       layoutHome();
       return;
     }
@@ -922,14 +902,13 @@ void fsm_msgGetPublicKeyMultiple(const GetPublicKeyMultiple *msg) {
     }
 
     if (msg->has_show_display && msg->show_display) {
-      for (int page = 0; page < 2; page++) {
-        layoutXPUB(resp->xpubs[i], page);
-        if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
-          memzero(resp, sizeof(PublicKey));
-          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-          layoutHome();
-          return;
-        }
+      if (!layoutXPUB(coin->coin_name, resp->xpubs[i],
+                      msg->addresses->address_n,
+                      msg->addresses->address_n_count)) {
+        memzero(resp, sizeof(PublicKey));
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return;
       }
     }
   }

@@ -63,7 +63,8 @@ bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
   address[1] = 'x';
   starcoin_get_address_from_public_key(node->public_key + 1, address + 2);
 
-  if (!layoutBlindSign(address)) {
+  if (!layoutBlindSign("Starcoin", false, NULL, address, msg->raw_tx.bytes,
+                       msg->raw_tx.size, NULL, NULL, NULL, NULL, NULL, NULL)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
     return false;
@@ -97,12 +98,6 @@ static void unsigned_int_to_leb128(uint32_t val, uint8_t *s) {
 
 bool starcoin_sign_message(const HDNode *node, const StarcoinSignMessage *msg,
                            StarcoinMessageSignature *resp) {
-  if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return false;
-  }
-
   layoutProgressSwipe(_("Signing"), 0);
 
   uint8_t buf[sizeof(StarcoinSignMessage_message_t) + 32 + 2] = {0};

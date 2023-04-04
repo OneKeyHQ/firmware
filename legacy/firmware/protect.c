@@ -232,11 +232,14 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
 bool protectButton_ex(ButtonRequestType type, bool confirm_only, bool requset,
                       uint32_t timeout_s) {
   uint8_t key = KEY_NULL;
-  key = _protectButton_ex(type, confirm_only, requset, timeout_s);
-  if (key == KEY_CONFIRM) {
-    return true;
-  } else {
-    return false;
+
+  while (1) {
+    key = _protectButton_ex(type, confirm_only, requset, timeout_s);
+    if (key == KEY_CONFIRM) {
+      return true;
+    } else if (key == KEY_CANCEL) {
+      return false;
+    }
   }
 }
 
@@ -317,37 +320,44 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
 
 secbool protectPinUiCallback(uint32_t wait, uint32_t progress,
                              const char *message) {
-  const struct font_desc *font = find_cur_font();
-  int y = 9;
-  // Convert wait to secstr string.
-  char secstrbuf[32] = "";
-  uint2str(wait, secstrbuf);
-
-  strcat(secstrbuf, _("second"));
-
-  if (ui_language == 0) {
-    if (wait > 1) strcat(secstrbuf, "s");
-  }
-
+  (void)wait;
+  (void)message;
   oledClear_ex();
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, _(message), FONT_STANDARD);
-  y += font->pixel + 1;
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("Please wait"),
-                              FONT_STANDARD);
-  y += font->pixel + 1;
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, secstrbuf, FONT_STANDARD);
-  y += font->pixel + 1;
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, _("to continue ..."),
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT / 2 - 6, _(message),
                               FONT_STANDARD);
 
   // progressbar
-  oledFrame(0, OLED_HEIGHT - 8, OLED_WIDTH - 1, OLED_HEIGHT - 1);
-  oledBox(1, OLED_HEIGHT - 7, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
+  oledBox(2, OLED_HEIGHT - 13, OLED_WIDTH - 2, OLED_HEIGHT - 2, 0);
+  oledBox(5, OLED_HEIGHT - 13, OLED_WIDTH - 3, OLED_HEIGHT - 13, 1);
+  oledBox(5, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1);
+
   progress = progress * (OLED_WIDTH - 4) / 1000;
   if (progress > OLED_WIDTH - 4) {
     progress = OLED_WIDTH - 4;
   }
-  oledBox(2, OLED_HEIGHT - 6, 1 + progress, OLED_HEIGHT - 3, 1);
+  oledBox(2, OLED_HEIGHT - 10, 2, OLED_HEIGHT - 6, 1);
+  oledBox(3, OLED_HEIGHT - 12, 4, OLED_HEIGHT - 4, 1);
+  if (progress > 3) {
+    oledBox(5, OLED_HEIGHT - 12, progress + 1, OLED_HEIGHT - 4, 1);
+  }
+
+  oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 13, OLED_WIDTH - 3, OLED_HEIGHT - 3, 0);
+
+  oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 12, OLED_WIDTH - 4, OLED_HEIGHT - 11,
+          1);
+  oledClearPixel(OLED_WIDTH - 5, OLED_HEIGHT - 11);
+  oledBox(OLED_WIDTH - 3, OLED_HEIGHT - 10, OLED_WIDTH - 3, OLED_HEIGHT - 6, 1);
+  oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 5, OLED_WIDTH - 4, OLED_HEIGHT - 4, 1);
+  oledClearPixel(OLED_WIDTH - 5, OLED_HEIGHT - 5);
+
+  if (progress >= OLED_WIDTH - 6) {
+    oledBox(OLED_WIDTH - 5, OLED_HEIGHT - 11, OLED_WIDTH - 5, OLED_HEIGHT - 5,
+            1);
+    if (progress > OLED_WIDTH - 6) {
+      oledBox(OLED_WIDTH - 4, OLED_HEIGHT - 11, OLED_WIDTH - 4, OLED_HEIGHT - 5,
+              1);
+    }
+  }
   oledRefresh();
   // Check for Cancel / Initialize.
   protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
@@ -578,9 +588,10 @@ bool protectPassphrase(char *passphrase) {
   msg_write(MessageType_MessageType_PassphraseRequest, &resp);
 
   if (!g_bIsBixinAPP) {
-    layoutDialogSwipe(&bmp_icon_info, NULL, NULL, NULL, _("Please enter your"),
-                      _("passphrase using"), _("the computer's"),
-                      _("keyboard."), NULL, NULL);
+    layoutDialogAdapterEx(_("Enter Passphrase"), &bmp_bottom_left_close, NULL,
+                          NULL, NULL,
+                          _("Enter your Passphrase on\nconnnected device."),
+                          NULL, NULL, NULL, NULL);
   }
 
   bool result = false;
@@ -607,10 +618,6 @@ bool protectPassphrase(char *passphrase) {
     }
     if (button.NoUp) {
       result = false;
-      break;
-    }
-    if (button.YesUp) {
-      result = true;
       break;
     }
     // check for Cancel / Initialize
@@ -806,7 +813,9 @@ refresh_menu:
       max_index = 9;
     }
     if (counter >= DEFAULT_PIN_LEN) {
-      index = 10;
+      do {
+        index = random_uniform(10);
+      } while (index == 0);
       first_num = true;
     } else {
       do {
@@ -814,10 +823,6 @@ refresh_menu:
       } while (index == 0);
     }
   } else if (first_num) {
-    first_num = false;
-    do {
-      index = random_uniform(10);
-    } while (index == 0);
   }
 
   layoutInputPin(counter, text, index, cancel_allowed);
@@ -869,8 +874,8 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
-    pin = protectInputPin(_("Please enter current PIN"), MIN_PIN_LEN,
-                          MAX_PIN_LEN, cancel_allowed);
+    pin = protectInputPin(_("Enter PIN"), MIN_PIN_LEN, MAX_PIN_LEN,
+                          cancel_allowed);
     // input_pin = false;
     if (!pin) {
       return false;
@@ -888,7 +893,7 @@ input:
   return ret;
 }
 
-bool protectChangePinOnDevice(bool is_prompt, bool set) {
+bool protectChangePinOnDevice(bool is_prompt, bool set, bool cancel_allowed) {
   static CONFIDENTIAL char old_pin[MAX_PIN_LEN + 1] = "";
   static CONFIDENTIAL char new_pin[MAX_PIN_LEN + 1] = "";
   const char *pin = NULL;
@@ -899,8 +904,7 @@ pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
-    pin = protectInputPin(_("Please enter current PIN"), MIN_PIN_LEN,
-                          MAX_PIN_LEN, true);
+    pin = protectInputPin(_("Enter PIN"), MIN_PIN_LEN, MAX_PIN_LEN, true);
 
     if (pin == NULL) {
       return false;
@@ -914,20 +918,41 @@ pin_set:
       } else
         return false;
     }
-
-    strlcpy(old_pin, pin, sizeof(old_pin));
-  } else {
-    layoutDialogSwipeCenterAdapter(
-        NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-        NULL, NULL, _("Please set the PIN"), NULL, NULL);
+    layoutDialogAdapterEx(_("Set PIN"), &bmp_bottom_left_arrow, NULL,
+                          &bmp_bottom_right_arrow, NULL,
+                          _("Set a 4 to 9-digits PIN to\nprotect your wallet."),
+                          NULL, NULL, NULL, NULL);
     key = protectWaitKey(0, 1);
     if (key != KEY_CONFIRM) {
       return false;
     }
+    strlcpy(old_pin, pin, sizeof(old_pin));
+  } else {
+    if (!cancel_allowed) {
+      layoutDialogAdapterEx(
+          _("Set PIN"), NULL, NULL, &bmp_bottom_right_arrow, NULL,
+          _("Set a 4 to 9-digits PIN to\nprotect your wallet."), NULL, NULL,
+          NULL, NULL);
+      while (1) {
+        key = protectWaitKey(0, 1);
+        if (key == KEY_CONFIRM) {
+          break;
+        }
+      }
+    } else {
+      layoutDialogAdapterEx(
+          _("Set PIN"), &bmp_bottom_left_arrow, NULL, &bmp_bottom_right_arrow,
+          NULL, _("Set a 4 to 9-digits PIN to\nprotect your wallet."), NULL,
+          NULL, NULL, NULL);
+      key = protectWaitKey(0, 1);
+      if (key != KEY_CONFIRM) {
+        return false;
+      }
+    }
   }
+
 retry:
-  pin = protectInputPin(_("Please enter new PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
-                        true);
+  pin = protectInputPin(_("Enter New PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN, true);
   if (pin == PIN_CANCELED_BY_BUTTON) {
     return false;
   } else if (pin == NULL || pin[0] == '\0') {
@@ -939,8 +964,8 @@ retry:
   }
   strlcpy(new_pin, pin, sizeof(new_pin));
 
-  pin = protectInputPin(_("Please re-enter new PIN"), DEFAULT_PIN_LEN,
-                        MAX_PIN_LEN, true);
+  pin = protectInputPin(_("Enter New PIN Again"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
+                        true);
   if (pin == NULL) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
@@ -953,9 +978,9 @@ retry:
   if (strncmp(new_pin, pin, sizeof(new_pin)) != 0) {
     memzero(old_pin, sizeof(old_pin));
     memzero(new_pin, sizeof(new_pin));
-    layoutDialogSwipeCenterAdapter(
-        &bmp_icon_error, NULL, NULL, &bmp_btn_retry, _("Retry"), NULL, NULL,
-        NULL, NULL, _("Inconsistent PIN code"), _("Please try again"), NULL);
+    layoutDialogAdapterEx(_("Not Match!"), NULL, NULL, &bmp_bottom_right_retry,
+                          NULL, _("PIN not match. Try again."), NULL, NULL,
+                          NULL, NULL);
     while (1) {
       key = protectWaitKey(0, 1);
       if (key == KEY_CONFIRM) {
@@ -972,11 +997,19 @@ retry:
   if (ret == false) {
   } else {
     if (is_prompt) {
-      layoutDialogSwipeCenterAdapter(
-          &bmp_icon_ok, NULL, NULL, &bmp_btn_confirm, _("Done"), NULL, NULL,
-          NULL, NULL, is_change ? _("PIN code change") : _("PIN code set"),
-          _("successfully"), NULL);
-      protectWaitKey(0, 1);
+      layoutDialogCenterAdapter(
+          &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
+          NULL, NULL,
+          is_change ? _("You have successfully changed your PIN.")
+                    : _("PIN is set!"),
+          NULL, NULL);
+
+      while (1) {
+        key = protectWaitKey(0, 1);
+        if (key == KEY_CONFIRM) {
+          break;
+        }
+      }
       layoutHome();
     }
   }
@@ -987,22 +1020,17 @@ bool protectSelectMnemonicNumber(uint32_t *number) {
   uint8_t key = KEY_NULL;
   uint32_t index = 0;
   uint32_t num_s[3] = {12, 18, 24};
-  char *numbers[3] = {"12", "18", "24"};
-
-  layoutDialogSwipeCenterAdapter(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      NULL, _("Please select the"), _("number of recovery phrase"), NULL, NULL);
-  key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
-    return false;
-  }
+  char *numbers[3] = {_("12 Words"), _("18 Words"), _("24 Words")};
 
 refresh_menu:
-  layoutItemsSelectAdapter(&bmp_btn_up, &bmp_btn_down, NULL, &bmp_btn_confirm,
-                           NULL, _("Okay"), index + 1, 3, NULL, NULL,
-                           numbers[index],
-                           index > 0 ? numbers[index - 1] : NULL,
-                           index < 2 ? numbers[index + 1] : NULL);
+  layoutItemsSelectAdapterEx(
+      &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
+      &bmp_bottom_left_arrow, &bmp_bottom_right_arrow, NULL, NULL, index + 1, 3,
+      _("Select Number of Words"), _(numbers[index]), _(numbers[index]), NULL,
+      NULL, index > 0 ? numbers[index - 1] : NULL,
+      index > 1 ? numbers[index - 2] : NULL, NULL,
+      index < 2 ? numbers[index + 1] : NULL,
+      index < 1 ? numbers[index + 2] : NULL, NULL, false);
 
   key = protectWaitKey(0, 0);
   switch (key) {
@@ -1016,64 +1044,97 @@ refresh_menu:
       *number = num_s[index];
       return true;
     case KEY_CANCEL:
-      goto refresh_menu;
+      return false;
     default:
       return false;
   }
 }
 
 bool protectPinCheck(bool retry) {
-#if !EMULATOR
   uint8_t key = KEY_NULL;
-  char desc1[64] = "";
-  char desc2[64] = "";
+  char desc[64] = "";
 
   uint32_t fails = config_getPinFails();
   if (fails == 1) {
     layoutDialogCenterAdapter(
-        &bmp_icon_error, NULL, NULL, retry ? &bmp_btn_retry : &bmp_btn_confirm,
-        retry ? _("Retry") : _("Okay"), NULL, NULL, NULL, NULL,
-        _("PIN invalid"), _("You still have 9 times"), _("to try"));
+        &bmp_icon_error, NULL, NULL,
+        retry ? &bmp_bottom_right_retry : &bmp_bottom_right_confirm, NULL, NULL,
+        NULL, NULL, NULL, _("Incorrect PIN"), _("9 attempts left, try again."),
+        NULL);
   } else if (fails > 1 && fails < 10) {
-    strcat(desc1, _("Wrong PIN for "));
-    uint2str(fails, desc1 + strlen(desc1));
-    strcat(desc1, _("times"));
-    strcat(desc2, _("you still have "));
-    uint2str(10 - fails, desc2 + strlen(desc2));
-    strcat(desc2, _("chances"));
-    layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL,
-                              retry ? &bmp_btn_retry : &bmp_btn_confirm,
-                              retry ? _("Retry") : _("Okay"), NULL, NULL, NULL,
-                              NULL, desc1, desc2, _("to try"));
+    if (ui_language == 0) {
+      uint2str(10 - fails, desc);
+      strcat(desc, " attempts left, try again.");
+    } else {
+      strcat(desc, _(" left "));
+      uint2str(10 - fails, desc + strlen(desc));
+      strcat(desc, _(" times"));
+      strcat(desc, _(" attempts left, try again."));
+    }
+    layoutDialogCenterAdapter(
+        &bmp_icon_error, NULL, NULL,
+        retry ? &bmp_bottom_right_retry : &bmp_bottom_right_confirm, NULL, NULL,
+        NULL, NULL, NULL, _("Incorrect PIN"), desc, NULL);
   } else {
-    layoutDialogCenterAdapter(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                              _("Device reset in progress"), NULL, NULL, NULL);
-    protectWaitKey(timer1s / 2, 0);
+    layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL, NULL, NULL, NULL,
+                              NULL, NULL, NULL, _("Incorrect PIN"),
+                              _("0 attempts left, device"),
+                              _(" will be reset now..."));
+    protectWaitKey(timer1s * 1, 0);
 
     uint8_t ui_language_bak = ui_language;
-
     config_wipe();
     if (ui_language_bak) {
       ui_language = ui_language_bak;
     }
-    layoutDialogSwipeCenterAdapter(
-        &bmp_icon_info, NULL, NULL, &bmp_btn_confirm, _("Confirm"), NULL, NULL,
-        NULL, NULL, _("Device has been reset"), _("Please reboot"), NULL);
+    if (ui_language == 0) {
+      layoutDialogCenterAdapter(
+          &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
+          NULL, NULL, _("Device reset complete,"), _("restart now!"), NULL);
+    } else {
+      layoutDialogCenterAdapter(
+          &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
+          NULL, NULL, _("Device reset complete, restart now!"), NULL, NULL);
+    }
     protectWaitKey(0, 0);
-
+#if !EMULATOR
     svc_system_reset();
+#endif
   }
   while (1) {
     key = protectWaitKey(0, 1);
     if (key == KEY_CONFIRM) {
-      return true;
-    } else if (key == KEY_NULL) {
-      return false;
+      break;
     }
   }
 
-#endif
-  return false;
+  if (fails >= 5) {
+    memset(desc, 0, 64);
+    strcat(desc, _("after "));
+    uint2str(10 - fails, desc + strlen(desc));
+    if (ui_language == 0) {
+      strcat(desc, _(" attempts wrong,"));
+      layoutDialogCenterAdapter(
+          &bmp_icon_info, NULL, NULL, &bmp_bottom_right_arrow, NULL, NULL, NULL,
+          NULL, NULL, _("CAUTION!"), desc, "the device will be reset.");
+    } else {
+      memset(desc, 0, 64);
+      strcat(desc, _("after "));
+      uint2str(10 - fails, desc + strlen(desc));
+      strcat(desc, _(" attempts wrong, the device will be reset."));
+      layoutDialogCenterAdapter(&bmp_icon_info, NULL, NULL,
+                                &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                                NULL, _("CAUTION!"), desc, NULL);
+    }
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        break;
+      }
+    }
+  }
+
+  return true;
 }
 
 #if !EMULATOR
@@ -1120,6 +1181,7 @@ void enter_sleep(void) {
       return;
     }
     if (unlocked) {
+    unlocked_loop:
       layoutHomeEx();
       key = protectWaitKey(0, 0);
       if (device_sleep_state == SLEEP_REENTER) {
@@ -1134,7 +1196,10 @@ void enter_sleep(void) {
         if (device_sleep_state == SLEEP_REENTER) {
           goto sleep_loop;
         }
-
+        if (device_sleep_state == SLEEP_CANCEL_BY_BUTTON) {
+          device_sleep_state = SLEEP_ENTER;
+          goto unlocked_loop;
+        }
         device_sleep_state = SLEEP_NONE;
         layoutHome();
         sleep_count = 0;
@@ -1167,6 +1232,7 @@ bool inputPassphraseOnDevice(char *passphrase) {
   uint8_t menu_status = MENU_INPUT_PASSPHRASE;
   uint8_t counter = 0, index = 0, symbol_index = 0;
   static uint8_t symbol_table[33] = " \'\",./_\?!:;&*$#=+-()[]{}<>@\\^`%|~";
+  static uint8_t last_symbol = 0;
 
 input_passphrase:
   layoutInputPassphrase(_("Enter Passphrase"), counter, words, index,
@@ -1275,15 +1341,26 @@ wait_key:
       case KEY_CANCEL:
         if (counter > 0) {
           words[counter--] = 0;
+          last_symbol = words[counter];
           words[counter] = 0;
-          if (INPUT_LOWERCASE == input_type) {
-            index = 'a';
-          } else if (INPUT_CAPITAL == input_type) {
-            index = 'A';
-          } else if (INPUT_NUMS == input_type) {
-            index = '0';
+          if (last_symbol >= 'a' && last_symbol <= 'z') {
+            input_type = INPUT_LOWERCASE;
+            index = last_symbol;
+          } else if (last_symbol >= 'A' && last_symbol <= 'Z') {
+            input_type = INPUT_CAPITAL;
+            index = last_symbol;
+          } else if (last_symbol >= '0' && last_symbol <= '9') {
+            input_type = INPUT_NUMS;
+            index = last_symbol;
           } else {
+            input_type = INPUT_SYMBOLS;
             symbol_index = 0;
+            for (int i = 0; i < 32 /*sizeof(symbol_table) - 1*/; i++) {
+              if (symbol_table[i] == last_symbol) {
+                symbol_index = i;
+                break;
+              }
+            }
             index = symbol_table[symbol_index];
           }
         } else {

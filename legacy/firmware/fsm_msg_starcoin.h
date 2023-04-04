@@ -35,9 +35,11 @@ void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg) {
   starcoin_get_address_from_public_key(node->public_key + 1, resp->address + 2);
 
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
-                           msg->address_n, msg->address_n_count, true, NULL, 0,
-                           0, NULL)) {
+    char desc[16] = {0};
+    strcat(desc, "Starcoin");
+    strcat(desc, _("Address:"));
+    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+                           msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }
   }
@@ -107,6 +109,16 @@ void fsm_msgStarcoinSignMessage(const StarcoinSignMessage *msg) {
                                     msg->address_n_count, NULL);
   if (!node) return;
 
+  char address[MAX_STARCOIN_ADDRESS_SIZE] = {'0', 'x'};
+  hdnode_fill_public_key(node);
+  starcoin_get_address_from_public_key(node->public_key + 1, address + 2);
+  if (!fsm_layoutSignMessage("Starcoin", address, msg->message.bytes,
+                             msg->message.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
   hdnode_fill_public_key(node);
   if (starcoin_sign_message(node, msg, resp)) {
     msg_write(MessageType_MessageType_StarcoinMessageSignature, resp);
@@ -120,18 +132,13 @@ void fsm_msgStarcoinVerifyMessage(const StarcoinVerifyMessage *msg) {
     starcoin_get_address_from_public_key(msg->public_key.bytes, address + 2);
     layoutVerifyAddress(NULL, address);
 
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+    if (!fsm_layoutVerifyMessage("Starcoin", address, msg->message.bytes,
+                                 msg->message.size)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
       return;
     }
-    fsm_layoutVerifyMessage(msg->message.bytes, msg->message.size);
 
-    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
     fsm_sendSuccess(_("Message verified"));
   } else {
     fsm_sendFailure(FailureType_Failure_DataError, _("Invalid signature"));

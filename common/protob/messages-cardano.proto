@@ -497,3 +497,26 @@ message CardanoTxBodyHash {
  */
 message CardanoSignTxFinished {
 }
+
+
+/**
+ * Request: Ask device to sign message
+ * @start
+ * @next CardanoMessageSignature
+ * @next Failure
+ */
+ message CardanoSignMessage {
+    repeated uint32 address_n = 1;
+    required bytes message = 2;
+    required CardanoDerivationType derivation_type = 3;
+    required uint32 network_id = 4;                                 // network id - mainnet or testnet
+}
+
+/**
+ * Response: Signed message
+ * @end
+ */
+message CardanoMessageSignature {
+    required bytes signature = 1;
+    required bytes key = 2;
+}

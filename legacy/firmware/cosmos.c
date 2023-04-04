@@ -22,7 +22,6 @@
 #include "config.h"
 #include "cosmos/json_parser.h"
 #include "cosmos/parser.h"
-#include "cosmos_networks.h"
 #include "font.h"
 #include "fsm.h"
 #include "gettext.h"
@@ -66,16 +65,17 @@ int cosmos_get_address(char *address, const uint8_t *public_key,
 }
 
 bool layoutCosmosSign(parser_context_t *ctx) {
-  const struct font_desc *font = find_cur_font();
   bool result = false;
-  int index = 0;
+  int index = 0, sub_index = 0;
   int y = 0;
   uint8_t key = KEY_NULL;
   uint8_t numItems = 0;
   uint8_t max_index = 0;
   char token_key[64];
+  char desc[64];
   char token_val[64];
-  uint8_t pageCount = 0;
+  uint8_t pageCount = 0, max_page_count;
+  const char **tx_msg = format_tx_message("Cosmos");
 
   ButtonRequest resp = {0};
   memzero(&resp, sizeof(ButtonRequest));
@@ -84,12 +84,12 @@ bool layoutCosmosSign(parser_context_t *ctx) {
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
   cosmos_parser_getNumItems(ctx, &numItems);
-  max_index = numItems - 1;
+  max_index = numItems;
 
 refresh_menu:
   layoutSwipe();
   oledClear();
-  y = 0;
+  y = 13;
   cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key), token_val,
                         sizeof(token_val), 0, &pageCount);
   if (memcmp(token_key, "Chain ID", 8) == 0) {
@@ -99,105 +99,119 @@ refresh_menu:
       memcpy(token_val, n->chain_name, strlen(n->chain_name) + 1);
     }
   }
+  memset(desc, 0, 64);
+  strcat(desc, _(token_key));
+  strcat(desc, ":");
   if (index == 0) {
-    y += bmp_btn_up.height + 1;
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    if (oledStringWidthAdapter(token_key, FONT_STANDARD) > (OLED_WIDTH - 5)) {
-      y += 2 * font->pixel + 5;
-    } else {
-      y += font->pixel + 5;
-    }
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
-
-    // scrollbar
-    for (int i = 0; i < OLED_HEIGHT; i += 3) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-    }
-    for (int i = 0; i < OLED_HEIGHT / numItems; i++) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-      oledDrawPixel(OLED_WIDTH - 2, i);
-    }
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                   &bmp_btn_down);
+    sub_index = 0;
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
+    oledDrawStringAdapter(0, y + 10, token_val, FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if (max_index == index) {
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-    y += bmp_btn_up.height + 1;
-
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    if (oledStringWidthAdapter(token_key, FONT_STANDARD) > (OLED_WIDTH - 5)) {
-      y += 2 * font->pixel + 5;
-    } else {
-      y += font->pixel + 5;
-    }
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
-
-    // scrollbar
-    for (int i = 0; i < OLED_HEIGHT; i += 3) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-    }
-    for (int i = index * OLED_HEIGHT / numItems; i < OLED_HEIGHT; i++) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-      oledDrawPixel(OLED_WIDTH - 2, i);
-    }
-
-    layoutButtonNoAdapter(_("CANCEL"), &bmp_btn_cancel);
-    layoutScroollbarButtonYesAdapter(_("APPROVE"), &bmp_btn_confirm);
+    layoutHeader(_("Sign Transaction"));
+    oledDrawStringAdapter(0, 13, tx_msg[1], FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
   } else {
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-    y += bmp_btn_up.height + 1;
-
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    if (oledStringWidthAdapter(token_key, FONT_STANDARD) > (OLED_WIDTH - 5)) {
-      y += 2 * font->pixel + 5;
+    layoutHeader(tx_msg[0]);
+    if (1 == pageCount) {
+      oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
+      if (oledStringWidthAdapter(desc, FONT_STANDARD) > (OLED_WIDTH - 3)) {
+        oledDrawStringAdapter(0, y + 20, token_val, FONT_STANDARD);
+      } else {
+        oledDrawStringAdapter(0, y + 10, token_val, FONT_STANDARD);
+      }
     } else {
-      y += font->pixel + 5;
-    }
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
+      int lines = 3;
+      if (oledStringWidthAdapter(desc, FONT_STANDARD) > (OLED_WIDTH - 3)) {
+        lines--;
+      }
 
-    // scrollbar
-    for (int i = 0; i < OLED_HEIGHT; i += 3) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-    }
-    for (int i = index * OLED_HEIGHT / numItems;
-         i < (index + 1) * OLED_HEIGHT / numItems; i++) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-      oledDrawPixel(OLED_WIDTH - 2, i);
-    }
+      cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key), token_val,
+                            20, 0, &max_page_count);  // 20 per line
+      max_page_count++;
+      if (0 == sub_index) {
+        if (3 == lines) {
+          oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
+          cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key),
+                                token_val, 20, 0, &pageCount);
+          oledDrawStringAdapter(0, y + 10, token_val, FONT_STANDARD);
+          cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key),
+                                token_val, 20, 1, &pageCount);
+          oledDrawStringAdapter(0, y + 20, token_val, FONT_STANDARD);
+          cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key),
+                                token_val, 20, 2, &pageCount);
+          oledDrawStringAdapter(0, y + 30, token_val, FONT_STANDARD);
+        } else {
+          oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
+          cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key),
+                                token_val, 20, 0, &pageCount);
+          oledDrawStringAdapter(0, y + 20, token_val, FONT_STANDARD);
+          cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key),
+                                token_val, 20, 1, &pageCount);
+          oledDrawStringAdapter(0, y + 30, token_val, FONT_STANDARD);
+        }
+      } else {
+        for (int i = sub_index; i < sub_index + 4; i++) {
+          if (i < max_page_count - 1) {
+            cosmos_parser_getItem(ctx, index, token_key, sizeof(token_key),
+                                  token_val, 20, i, &pageCount);
+            oledDrawStringAdapter(0, y + (i - sub_index) * 10, token_val,
+                                  FONT_STANDARD);
+          }
+        }
+      }
 
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                   &bmp_btn_down);
+      if (sub_index == 0) {
+        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_down);
+      } else if (sub_index == max_page_count - 4) {
+        oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_up);
+      } else {
+        oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_up);
+        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_down);
+      }
+    }
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   }
   oledRefresh();
 
-scan_key:
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
-      if (index > 0) {
-        index--;
-        goto refresh_menu;
-      } else {
-        goto scan_key;
+      if (sub_index > 0) {
+        sub_index--;
       }
+      goto refresh_menu;
     case KEY_DOWN:
-      if (index < max_index) {
-        index++;
-        goto refresh_menu;
-      } else {
-        goto scan_key;
+      if (sub_index < max_page_count - 4) {
+        sub_index++;
       }
+      goto refresh_menu;
     case KEY_CONFIRM:
       if (max_index == index) {
         result = true;
         break;
       }
-      goto scan_key;
+      if (index < max_index) {
+        index++;
+      }
+      goto refresh_menu;
     case KEY_CANCEL:
-      if (max_index == index) {
+      if (0 == index || max_index == index) {
         result = false;
         break;
       }
-      goto scan_key;
+      if (index > 0) {
+        index--;
+      }
+      goto refresh_menu;
     default:
       break;
   }

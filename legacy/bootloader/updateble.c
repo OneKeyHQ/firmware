@@ -53,7 +53,7 @@ unsigned char bUBLE_UpdateBleFirmware(unsigned int ulBleLen,
   // program
   while (templen >= g_page_size) {
     vHAL_Read(ulbleaddr + g_offset, flashram, (unsigned short)g_page_size);
-    layoutProgress("INSTALLING BLE firmware...", 1000 * g_offset / ulBleLen);
+    layoutProgress("Installing BLE firmware...", 1000 * g_offset / ulBleLen);
     res = swd_download(flashram, g_page_size, ucMode);
     if (res != 1) {
       return FALSE;

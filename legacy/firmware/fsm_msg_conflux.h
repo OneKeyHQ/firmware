@@ -57,9 +57,11 @@ void fsm_msgConfluxGetAddress(const ConfluxGetAddress *msg) {
     return;
   }
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, _("Address:"), false, 0,
-                           msg->address_n, msg->address_n_count, false, NULL, 0,
-                           0, NULL)) {
+    char desc[16] = {0};
+    strcat(desc, "Conflux");
+    strcat(desc, _("Address:"));
+    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+                           msg->address_n_count, false, NULL, 0, 0, NULL)) {
       return;
     }
   }
@@ -73,17 +75,24 @@ void fsm_msgConfluxSignMessage(const ConfluxSignMessage *msg) {
 
   CHECK_INITIALIZED
 
-  if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
   CHECK_PIN
 
   const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
   if (!node) return;
+
+  char signer_str[64];
+  uint8_t pubkeyhash[20];
+  if (!hdnode_get_ethereum_pubkeyhash(node, pubkeyhash)) return;
+  get_base32_encode_address(pubkeyhash, signer_str, sizeof(signer_str), 1029,
+                            false);
+
+  if (!fsm_layoutSignMessage("Conflux", signer_str, msg->message.bytes,
+                             msg->message.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
 
   conflux_message_sign(msg, node, resp);
   layoutHome();
@@ -99,26 +108,29 @@ void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg) {
     return;
   }
 
-  if (!fsm_layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
-                                msg->domain_hash.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  if (!fsm_layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
-                                msg->message_hash.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
   CHECK_PIN
 
   const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
   if (!node) {
     fsm_sendFailure(FailureType_Failure_DataError, NULL);
+    return;
+  }
+
+  char signer_str[64];
+  uint8_t pubkeyhash[20];
+  char domain_hash[65] = {0};
+  char msg_hash[65] = {0};
+  if (!hdnode_get_ethereum_pubkeyhash(node, pubkeyhash)) return;
+  get_base32_encode_address(pubkeyhash, signer_str, sizeof(signer_str), 1029,
+                            false);
+  data2hex(msg->domain_hash.bytes, 32, domain_hash);
+  data2hex(msg->message_hash.bytes, 32, msg_hash);
+  if (!fsm_layoutSignHash(
+          "Conflux", signer_str, domain_hash, msg_hash,
+          _("Unable to show CIP-712 data. Sign at your own risk."))) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
     return;
   }
 

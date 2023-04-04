@@ -13,7 +13,6 @@
 #include "protect.h"
 #include "secp256k1.h"
 #include "stdint.h"
-#include "sui.h"
 #include "util.h"
 
 const char *BASE32_ALPHABET_RFC4648_S = "abcdefghijklmnopqrstuvwxyz234567";
@@ -169,7 +168,6 @@ bool get_filecoin_addr(uint8_t *pubkey, FilecoinAddress *address) {
 }
 
 static bool layoutFilSign(void) {
-  const struct font_desc *font = find_cur_font();
   bool result = false;
   int index = 0, len, y = 0;
   uint8_t key = KEY_NULL;
@@ -177,8 +175,10 @@ static bool layoutFilSign(void) {
   uint8_t max_index = 0;
   char token_key[64];
   char token_val[64];
+  char desc[64] = {0};
   char *p;
   uint8_t pageCount = 0;
+  const char **tx_msg = format_tx_message("Filecoin");
 
   ButtonRequest resp = {0};
   memzero(&resp, sizeof(ButtonRequest));
@@ -187,85 +187,49 @@ static bool layoutFilSign(void) {
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
   fil_tx_getNumItems(&numItems);
-  max_index = numItems - 1;
+  max_index = numItems;
 refresh_menu:
   layoutSwipe();
   oledClear();
-  y = 0;
-  fil_tx_getItem(index, token_key, sizeof(token_key), token_val,
-                 sizeof(token_val), 0, &pageCount);
-  if ((0 == index) || (4 == index) || (5 == index)) {
-    p = strchr(token_val, '.');
-    if (p) {
-      len = strlen(token_val);
-      for (int i = len - 1; i > 0; i--) {
-        if (token_val[i] == '0') {
-          token_val[i] = '\0';
-        } else if (token_val[i] == '.') {
-          token_val[i] = '\0';
-          break;
-        } else {
-          break;
+  y = 13;
+  if (index == max_index) {
+    layoutHeader(_("Sign Transaction"));
+    oledDrawStringAdapter(0, y, tx_msg[1], FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
+  } else {
+    fil_tx_getItem(index, token_key, sizeof(token_key), token_val,
+                   sizeof(token_val), 0, &pageCount);
+    memset(desc, 0, 64);
+    token_key[strlen(token_key) - 1] = '\0';  // remove ':'
+    strcat(desc, _(token_key));
+    strcat(desc, ":");
+    if ((0 == index) || (4 == index) || (5 == index)) {
+      p = strchr(token_val, '.');
+      if (p) {
+        len = strlen(token_val);
+        for (int i = len - 1; i > 0; i--) {
+          if (token_val[i] == '0') {
+            token_val[i] = '\0';
+          } else if (token_val[i] == '.') {
+            token_val[i] = '\0';
+            break;
+          } else {
+            break;
+          }
         }
       }
+      memcpy(token_val + strlen(token_val), " FIL", 5);
     }
-    memcpy(token_val + strlen(token_val), " FIL", 5);
-  }
-  if (index == 0) {
-    y += bmp_btn_up.height + 1;
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    y += font->pixel + 5;
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
-
-    // scrollbar
-    for (int i = 0; i < OLED_HEIGHT; i += 3) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
+    oledDrawStringAdapter(0, y + 10, token_val, FONT_STANDARD);
+    if (index == 0) {
+      layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    } else {
+      layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     }
-    for (int i = 0; i < OLED_HEIGHT / numItems; i++) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-      oledDrawPixel(OLED_WIDTH - 2, i);
-    }
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                   &bmp_btn_down);
-  } else if (max_index == index) {
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-    y += bmp_btn_up.height + 1;
-
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    y += font->pixel + 5;
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
-
-    // scrollbar
-    for (int i = 0; i < OLED_HEIGHT; i += 3) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-    }
-    for (int i = index * OLED_HEIGHT / numItems; i < OLED_HEIGHT; i++) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-      oledDrawPixel(OLED_WIDTH - 2, i);
-    }
-
-    layoutButtonNoAdapter(_("CANCEL"), &bmp_btn_cancel);
-    layoutScroollbarButtonYesAdapter(_("APPROVE"), &bmp_btn_confirm);
-  } else {
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
-    y += bmp_btn_up.height + 1;
-
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
-    y += font->pixel + 5;
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
-
-    // scrollbar
-    for (int i = 0; i < OLED_HEIGHT; i += 3) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-    }
-    for (int i = index * OLED_HEIGHT / numItems;
-         i < (index + 1) * OLED_HEIGHT / numItems; i++) {
-      oledDrawPixel(OLED_WIDTH - 1, i);
-      oledDrawPixel(OLED_WIDTH - 2, i);
-    }
-
-    oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, OLED_HEIGHT - 8,
-                   &bmp_btn_down);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   }
   oledRefresh();
 
@@ -273,31 +237,27 @@ scan_key:
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
-      if (index > 0) {
-        index--;
-        goto refresh_menu;
-      } else {
-        goto scan_key;
-      }
+      goto scan_key;
     case KEY_DOWN:
-      if (index < max_index) {
-        index++;
-        goto refresh_menu;
-      } else {
-        goto scan_key;
-      }
+      goto scan_key;
     case KEY_CONFIRM:
-      if (max_index == index) {
+      if (index == max_index) {
         result = true;
         break;
       }
-      goto scan_key;
+      if (index < max_index) {
+        index++;
+      }
+      goto refresh_menu;
     case KEY_CANCEL:
-      if (max_index == index) {
+      if ((0 == index) || (index == max_index)) {
         result = false;
         break;
       }
-      goto scan_key;
+      if (index > 0) {
+        index--;
+      }
+      goto refresh_menu;
     default:
       break;
   }

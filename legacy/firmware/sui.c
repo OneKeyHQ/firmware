@@ -10,16 +10,15 @@
 
 void sui_get_address_from_public_key(const uint8_t *public_key, char *address) {
   uint8_t buf[32] = {0};
-  struct SHA3_CTX ctx = {0};
+  BLAKE2B_CTX ctx;
+  blake2b_Init(&ctx, 32);
+  blake2b_Update(&ctx, (const uint8_t *)"\x00", 1);
+  blake2b_Update(&ctx, public_key, 32);
+  blake2b_Final(&ctx, buf, 32);
 
-  sha3_256_Init(&ctx);
-  // append single-signature scheme identifier
-  sha3_Update(&ctx, (const uint8_t *)"\x00", 1);
-  sha3_Update(&ctx, public_key, 32);
-  sha3_Final(&ctx, buf);
   address[0] = '0';
   address[1] = 'x';
-  data2hexaddr((const uint8_t *)buf, 20, address + 2);
+  data2hexaddr((const uint8_t *)buf, 32, address + 2);
 }
 
 void sui_sign_tx(const SuiSignTx *msg, const HDNode *node, SuiSignedTx *resp) {
@@ -33,7 +32,8 @@ void sui_sign_tx(const SuiSignTx *msg, const HDNode *node, SuiSignedTx *resp) {
     layoutHome();
   }
 
-  if (!layoutBlindSign(address)) {
+  if (!layoutBlindSign("Sui", false, NULL, address, msg->raw_tx.bytes,
+                       msg->raw_tx.size, NULL, NULL, NULL, NULL, NULL, NULL)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled,
                     "Signing cancelled by user");
     layoutHome();

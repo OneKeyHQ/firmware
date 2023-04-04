@@ -290,9 +290,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     if (msg_id == 0x0006) {  // FirmwareErase message (id 6)
       bool proceed = false;
       if (firmware_present_new()) {
-        layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL,
-                     "Install new", "firmware?", NULL, "Never do this without",
-                     "your recovery card!", NULL);
+        layoutDialogCenterAdapterEx(NULL, &bmp_bottom_left_close,
+                                    &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                    "Install firmware by", "OneKey?");
         proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       } else {
         proceed = true;
@@ -483,8 +483,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
     timer_out_set(timer_out_oper, timer1s * 5);
     static uint8_t flash_anim = 0;
     if (flash_anim % 32 == 4) {
-      layoutProgress("INSTALLING ... Please wait",
-                     1000 * flash_pos / flash_len);
+      layoutProgress("Installing...", 1000 * flash_pos / flash_len);
     }
     flash_anim++;
 
@@ -556,7 +555,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       } else {
         hash_check_ok = true;
       }
-      layoutProgress("Programing ... Please wait", 1000);
+      layoutProgress("Programing...", 1000);
 
       // wipe storage if:
       // 1) old firmware was unsigned or not present
@@ -597,7 +596,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       flash_state = STATE_END;
       if (hash_check_ok) {
         send_msg_success(dev);
-        show_unplug("New firmware", "successfully installed.");
+        layoutDialogCenterAdapterEx(&bmp_icon_ok, NULL, NULL, NULL,
+                                    "New firmware installed.",
+                                    "Device will be power off.", NULL, NULL);
         shutdown();
       } else {
         layoutDialog(&bmp_icon_warning, NULL, NULL, NULL,
