@@ -755,9 +755,9 @@ void fsm_msgBixinReboot(const BixinReboot *msg) {
   }
   CHECK_PIN_UNCACHED
   fsm_sendSuccess(_("reboot start"));
-  usbPoll();  // send response before reboot
+  usbFlush(500);  // send response before reboot
 #if !EMULATOR
-  sys_backtoboot();
+  svc_reboot_to_bootloader();
 #endif
 }
 
