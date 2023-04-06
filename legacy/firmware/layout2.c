@@ -766,7 +766,7 @@ void layoutBusyscreen(void) {
 
   layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, _("Please wait"), NULL,
                _("Coinjoin in progress."), NULL, _("Do not disconnect"),
-               _("your Trezor."));
+               _("your OneKey."));
 }
 
 void layoutHome(void) {

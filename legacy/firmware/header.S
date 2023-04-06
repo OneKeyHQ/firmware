@@ -28,9 +28,11 @@ g_header:
     . = . + 64                       // sig1
     . = . + 64                       // sig2
     . = . + 64                       // sig3
+    . = . + 64                       // sig4
     .byte 0                          // sigindex1
     .byte 0                          // sigindex2
     .byte 0                          // sigindex3
-    . = . + 220                      // reserved
+    .byte 0                          // sigindex4
+    . = . + 155                      // reserved
     . = . + 65                       // reserved
 g_header_end:

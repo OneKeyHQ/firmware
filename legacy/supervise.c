@@ -27,8 +27,6 @@
 #include "memory.h"
 #include "util.h"
 
-#define FLASH_UTXO_CACHE_SECTOR 10
-
 #if !EMULATOR
 
 static void svhandler_flash_unlock(void) {
@@ -51,9 +49,8 @@ static void svhandler_flash_program(uint32_t psize) {
 
 static void svhandler_flash_erase_sector(uint8_t sector) {
   /* we only allow erasing storage sectors 2 and 3. */
-  if (sector == FLASH_UTXO_CACHE_SECTOR) {
-  } else if (sector < FLASH_STORAGE_SECTOR_FIRST ||
-             sector > FLASH_STORAGE_SECTOR_LAST) {
+  if (sector < FLASH_STORAGE_SECTOR_FIRST ||
+      sector > FLASH_STORAGE_SECTOR_LAST) {
     return;
   }
   flash_erase_sector(sector, FLASH_CR_PROGRAM_X32);
