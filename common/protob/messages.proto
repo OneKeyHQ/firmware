@@ -283,8 +283,8 @@ enum MessageType {
     MessageType_CardanoTxAuxiliaryData = 327 [(wire_in) = true];
     MessageType_CardanoPoolOwner = 328 [(wire_in) = true];
     MessageType_CardanoPoolRelayParameters = 329 [(wire_in) = true];
-    MessageType_CardanoGetNativeScriptHash = 330 [(wire_in) = true];
-    MessageType_CardanoNativeScriptHash = 331 [(wire_out) = true];
+    // MessageType_CardanoGetNativeScriptHash = 330 [(wire_in) = true];
+    // MessageType_CardanoNativeScriptHash = 331 [(wire_out) = true];
     MessageType_CardanoTxMint = 332 [(wire_in) = true];
     MessageType_CardanoTxCollateralInput = 333 [(wire_in) = true];
     MessageType_CardanoTxRequiredSigner = 334 [(wire_in) = true];

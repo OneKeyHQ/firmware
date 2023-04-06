@@ -347,33 +347,33 @@ def _create_data_chunks(data: bytes) -> Iterator[bytes]:
         processed_size += MAX_CHUNK_SIZE
 
 
-def parse_native_script(native_script: dict) -> messages.CardanoNativeScript:
-    if "type" not in native_script:
-        raise ValueError("Script is missing some fields")
+# def parse_native_script(native_script: dict) -> messages.CardanoNativeScript:
+#     if "type" not in native_script:
+#         raise ValueError("Script is missing some fields")
 
-    type = native_script["type"]
-    scripts = [
-        parse_native_script(sub_script)
-        for sub_script in native_script.get("scripts", ())
-    ]
+#     type = native_script["type"]
+#     scripts = [
+#         parse_native_script(sub_script)
+#         for sub_script in native_script.get("scripts", ())
+#     ]
 
-    key_hash = parse_optional_bytes(native_script.get("key_hash"))
-    key_path = tools.parse_path(native_script.get("key_path", ""))
-    required_signatures_count = parse_optional_int(
-        native_script.get("required_signatures_count")
-    )
-    invalid_before = parse_optional_int(native_script.get("invalid_before"))
-    invalid_hereafter = parse_optional_int(native_script.get("invalid_hereafter"))
+#     key_hash = parse_optional_bytes(native_script.get("key_hash"))
+#     key_path = tools.parse_path(native_script.get("key_path", ""))
+#     required_signatures_count = parse_optional_int(
+#         native_script.get("required_signatures_count")
+#     )
+#     invalid_before = parse_optional_int(native_script.get("invalid_before"))
+#     invalid_hereafter = parse_optional_int(native_script.get("invalid_hereafter"))
 
-    return messages.CardanoNativeScript(
-        type=type,
-        scripts=scripts,
-        key_hash=key_hash,
-        key_path=key_path,
-        required_signatures_count=required_signatures_count,
-        invalid_before=invalid_before,
-        invalid_hereafter=invalid_hereafter,
-    )
+#     return messages.CardanoNativeScript(
+#         type=type,
+#         scripts=scripts,
+#         key_hash=key_hash,
+#         key_path=key_path,
+#         required_signatures_count=required_signatures_count,
+#         invalid_before=invalid_before,
+#         invalid_hereafter=invalid_hereafter,
+#     )
 
 
 def parse_certificate(certificate: dict) -> CertificateWithPoolOwnersAndRelays:

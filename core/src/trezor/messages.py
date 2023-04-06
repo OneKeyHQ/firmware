@@ -1432,64 +1432,6 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["CardanoBlockchainPointerType"]:
             return isinstance(msg, cls)
 
-    class CardanoNativeScript(protobuf.MessageType):
-        type: "CardanoNativeScriptType"
-        scripts: "list[CardanoNativeScript]"
-        key_hash: "bytes | None"
-        key_path: "list[int]"
-        required_signatures_count: "int | None"
-        invalid_before: "int | None"
-        invalid_hereafter: "int | None"
-
-        def __init__(
-            self,
-            *,
-            type: "CardanoNativeScriptType",
-            scripts: "list[CardanoNativeScript] | None" = None,
-            key_path: "list[int] | None" = None,
-            key_hash: "bytes | None" = None,
-            required_signatures_count: "int | None" = None,
-            invalid_before: "int | None" = None,
-            invalid_hereafter: "int | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoNativeScript"]:
-            return isinstance(msg, cls)
-
-    class CardanoGetNativeScriptHash(protobuf.MessageType):
-        script: "CardanoNativeScript"
-        display_format: "CardanoNativeScriptHashDisplayFormat"
-        derivation_type: "CardanoDerivationType"
-
-        def __init__(
-            self,
-            *,
-            script: "CardanoNativeScript",
-            display_format: "CardanoNativeScriptHashDisplayFormat",
-            derivation_type: "CardanoDerivationType",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoGetNativeScriptHash"]:
-            return isinstance(msg, cls)
-
-    class CardanoNativeScriptHash(protobuf.MessageType):
-        script_hash: "bytes"
-
-        def __init__(
-            self,
-            *,
-            script_hash: "bytes",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoNativeScriptHash"]:
-            return isinstance(msg, cls)
-
     class CardanoAddressParametersType(protobuf.MessageType):
         address_type: "CardanoAddressType"
         address_n: "list[int]"

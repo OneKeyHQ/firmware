@@ -166,8 +166,6 @@ if not utils.BITCOIN_ONLY:
     CardanoTxAuxiliaryData = 327
     CardanoPoolOwner = 328
     CardanoPoolRelayParameters = 329
-    CardanoGetNativeScriptHash = 330
-    CardanoNativeScriptHash = 331
     CardanoTxMint = 332
     CardanoTxCollateralInput = 333
     CardanoTxRequiredSigner = 334
