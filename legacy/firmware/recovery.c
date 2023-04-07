@@ -41,12 +41,12 @@
 /* number of words expected in the new seed */
 static uint32_t word_count;
 
-/* recovery mode:
- * 0: not recovering
- * 1: recover by scrambled plain text words
- * 2: recover by matrix entry
- */
-static int awaiting_word = 0;
+/* recovery mode */
+static enum {
+  RECOVERY_NONE = 0,       // recovery not in progress
+  RECOVERY_SCRAMBLED = 1,  // standard recovery by scrambled plain text words
+  RECOVERY_MATRIX = 2,     // advanced recovery by matrix entry
+} recovery_mode = RECOVERY_NONE;
 
 /* True if we should not write anything back to config
  * (can be used for testing seed for correctness).
@@ -168,7 +168,7 @@ static void format_number(char *dest, int number) {
 static void recovery_request(void) {
   WordRequest resp = {0};
   memzero(&resp, sizeof(WordRequest));
-  if (awaiting_word == 1) {
+  if (recovery_mode == RECOVERY_SCRAMBLED) {
     resp.type = WordRequestType_WordRequestType_Plain;
   } else if (word_index % 4 == 3) {
     resp.type = WordRequestType_WordRequestType_Matrix6;
@@ -268,8 +268,11 @@ static bool recovery_done(void) {
   } else {
     // New mnemonic is invalid.
     memzero(new_mnemonic, sizeof(new_mnemonic));
-    if (!dry_run) {
-      session_clear(true);
+    if (recovery_byself) {
+      layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL, &bmp_btn_cancel,
+                                _("Quit"), NULL, NULL, NULL, NULL,
+                                _("Check failed"), NULL, NULL);
+      protectWaitKey(0, 1);
     } else {
       if (recovery_byself) {
         setRgbBitmap(true);
@@ -295,7 +298,9 @@ static bool recovery_done(void) {
                       _("Invalid seed, are words in correct order?"));
     }
   }
-  awaiting_word = 0;
+  memzero(words, sizeof(words));
+  word_pincode = 0;
+  recovery_mode = RECOVERY_NONE;
   layoutHome();
 
   return success;
@@ -513,7 +518,7 @@ static void recovery_digit(const char digit) {
     oledInvert(x + 1, y, x + 62, y + 9);
     oledRefresh();
     usbTiny(1);
-    usbSleep(250);
+    waitAndProcessUSBRequests(250);
     usbTiny(0);
 
     /* index of the chosen word */
@@ -544,7 +549,7 @@ void next_word(void) {
                               FONT_STANDARD);
   word_pos = word_order[word_index];
   if (word_pos == 0) {
-    strlcpy(fake_word, mnemonic_get_word(random_uniform(BIP39_WORDS)),
+    strlcpy(fake_word, mnemonic_get_word(random_uniform(BIP39_WORD_COUNT)),
             sizeof(fake_word));
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, fake_word,
                                 FONT_FIXED | FONT_DOUBLE);
@@ -570,6 +575,9 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection,
                    bool _dry_run) {
   if (_word_count != 12 && _word_count != 18 && _word_count != 24) return;
 
+  recovery_mode = RECOVERY_NONE;
+  word_pincode = 0;
+  word_index = 0;
   word_count = _word_count;
 #if !EMULATOR
   _enforce_wordlist = true;
@@ -600,10 +608,9 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection,
     config_setU2FCounter(u2f_counter);
   }
 
+  // Prefer matrix recovery if the host supports it.
   if ((type & RecoveryDeviceType_RecoveryDeviceType_Matrix) != 0) {
-    awaiting_word = 2;
-    word_index = 0;
-    word_pincode = 0;
+    recovery_mode = RECOVERY_MATRIX;
     next_matrix();
   } else {
     for (uint32_t i = 0; i < word_count; i++) {
@@ -613,8 +620,7 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection,
       word_order[i] = 0;
     }
     random_permute(word_order, 24);
-    awaiting_word = 1;
-    word_index = 0;
+    recovery_mode = RECOVERY_SCRAMBLED;
     next_word();
   }
 }
@@ -623,29 +629,18 @@ static void recovery_scrambledword(const char *word) {
   int index = -1;
   if (enforce_wordlist) {  // check if word is valid
     index = mnemonic_find_word(word);
-  }
-  if (word_pos == 0) {  // fake word
-    if (strcmp(word, fake_word) != 0) {
+    if (index < 0) {  // not found
       if (!dry_run) {
         session_clear(true);
       }
-      fsm_sendFailure(FailureType_Failure_ProcessError,
-                      _("Wrong word retyped"));
-      layoutHome();
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      _("Word not found in a wordlist"));
+      recovery_abort();
       return;
     }
-  } else {  // real word
-    if (enforce_wordlist) {
-      if (index < 0) {  // not found
-        if (!dry_run) {
-          session_clear(true);
-        }
-        fsm_sendFailure(FailureType_Failure_DataError,
-                        _("Word not found in a wordlist"));
-        layoutHome();
-        return;
-      }
-    }
+  }
+
+  if (word_pos != 0) {  // ignore fake words
     strlcpy(words[word_pos - 1], word, sizeof(words[word_pos - 1]));
   }
 
@@ -661,11 +656,11 @@ static void recovery_scrambledword(const char *word) {
  * for scrambled recovery.
  */
 void recovery_word(const char *word) {
-  switch (awaiting_word) {
-    case 2:
+  switch (recovery_mode) {
+    case RECOVERY_MATRIX:
       recovery_digit(word[0]);
       break;
-    case 1:
+    case RECOVERY_SCRAMBLED:
       recovery_scrambledword(word);
       break;
     default:
@@ -678,9 +673,11 @@ void recovery_word(const char *word) {
 /* Abort recovery.
  */
 void recovery_abort(void) {
-  if (awaiting_word) {
+  memzero(words, sizeof(words));
+  word_pincode = 0;
+  if (recovery_mode != RECOVERY_NONE) {
     layoutHome();
-    awaiting_word = 0;
+    recovery_mode = RECOVERY_NONE;
   }
 }
 

@@ -1,7 +1,4 @@
-use core::{
-    convert::{TryFrom, TryInto},
-    num::TryFromIntError,
-};
+use core::convert::{TryFrom, TryInto};
 
 use cstr_core::CStr;
 
@@ -289,6 +286,23 @@ impl TryFrom<&'static CStr> for Obj {
     }
 }
 
+impl TryFrom<(Obj, Obj)> for Obj {
+    type Error = Error;
+
+    fn try_from(val: (Obj, Obj)) -> Result<Self, Self::Error> {
+        // SAFETY:
+        //  - Should work with any micropython objects.
+        // EXCEPTION: Will raise if allocation fails.
+        let values = [val.0, val.1];
+        let obj = catch_exception(|| unsafe { ffi::mp_obj_new_tuple(2, values.as_ptr()) })?;
+        if obj.is_null() {
+            Err(Error::AllocationFailed)
+        } else {
+            Ok(obj)
+        }
+    }
+}
+
 //
 // # Additional conversions based on the methods above.
 //
@@ -296,14 +310,14 @@ impl TryFrom<&'static CStr> for Obj {
 impl From<u8> for Obj {
     fn from(val: u8) -> Self {
         // `u8` will fit into smallint so no error should happen here.
-        u32::from(val).try_into().unwrap()
+        unwrap!(u32::from(val).try_into())
     }
 }
 
 impl From<u16> for Obj {
     fn from(val: u16) -> Self {
         // `u16` will fit into smallint so no error should happen here.
-        u32::from(val).try_into().unwrap()
+        unwrap!(u32::from(val).try_into())
     }
 }
 
@@ -397,8 +411,17 @@ impl Obj {
     }
 }
 
-impl From<TryFromIntError> for Error {
-    fn from(_: TryFromIntError) -> Self {
-        Self::OutOfRange
+impl Obj {
+    pub fn is_bytes(self) -> bool {
+        unsafe {
+            ffi::mp_type_bytes.is_type_of(self)
+                || ffi::mp_type_bytearray.is_type_of(self)
+                || ffi::mp_type_memoryview.is_type_of(self)
+        }
+    }
+
+    pub fn is_str(self) -> bool {
+        let is_type_str = unsafe { ffi::mp_type_str.is_type_of(self) };
+        is_type_str || self.is_qstr()
     }
 }

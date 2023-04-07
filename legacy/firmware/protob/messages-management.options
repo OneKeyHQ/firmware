@@ -8,7 +8,6 @@ Features.revision                       max_size:20
 Features.bootloader_hash                max_size:32
 Features.model                          max_size:17
 Features.fw_vendor                      max_size:256
-Features.fw_vendor_keys                 max_size:32
 Features.capabilities                   max_count:32
 Features.session_id                     max_size:32
 Features.ble_name                       max_size:32
@@ -17,6 +16,7 @@ Features.se_ver                         max_size:16
 Features.onekey_version                 max_size:16
 Features.onekey_serial                  max_size:32
 Features.bootloader_version             max_size:8
+Features.build_id                       max_size:64
 Features.spi_flash                      max_size:17
 Features.serial_no                      max_size:32
 Features.NFT_voucher                    max_size:32
@@ -47,21 +47,24 @@ RecoveryDevice.label                    max_size:33
 
 WordAck.word                            max_size:12
 
-BixinSeedOperate.seed_importData        max_size:512
+Nonce.nonce                             max_size:32
+
+GetFirmwareHash.challenge               max_size:32
+FirmwareHash.hash                       max_size:32
+
+
+UnlockPath.address_n                    max_count:8
+UnlockPath.mac                          max_size:32
+
+UnlockedPathRequest.mac                 max_size:32
+
 
 BixinMessageSE.inputmessage             max_size:1025
 BixinOutMessageSE.outmessage            max_size:1025
 
-BixinBackupAck.data                     max_size:512
-BixinRestoreRequest.data                max_size:512
-BixinRestoreRequest.language            max_size:17
-BixinRestoreRequest.label               max_size:33
-BixinRestoreAck.data                    max_size:512
 BixinVerifyDeviceRequest.data           max_size:512
 BixinVerifyDeviceAck.cert               max_size:1024
 BixinVerifyDeviceAck.signature          max_size:512
-BixinWhiteListRequest.addr_in           max_size:130
-BixinWhiteListAck.address               max_count:10 max_size:130
 
 BixinLoadDevice.mnemonics               max_size:241
 BixinLoadDevice.language                max_size:17

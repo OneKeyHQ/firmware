@@ -174,6 +174,8 @@ typedef struct {
   uint32_t last_use;
   uint8_t seed[64];
   secbool seedCached;
+  MessageType authorization_type;
+  AuthorizeCoinJoin coinjoin_authorization;
 } Session;
 
 static void session_clearCache(Session *session);
@@ -397,8 +399,10 @@ static secbool config_upgrade_v10(void) {
   storage_init(NULL, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
   storage_unlock(PIN_EMPTY, PIN_EMPTY_LEN, NULL);
   if (config.has_pin) {
+    size_t pin_len =
+        MIN(strnlen(config.pin, sizeof(config.pin)), (size_t)MAX_PIN_LEN);
     storage_change_pin(PIN_EMPTY, PIN_EMPTY_LEN, (const uint8_t *)config.pin,
-                       strnlen(config.pin, MAX_PIN_LEN), NULL, NULL);
+                       pin_len, NULL, NULL);
   }
 
   while (pin_wait != 0) {
@@ -554,9 +558,13 @@ void session_clearCache(Session *session) {
   memzero(session->id, sizeof(session->id));
   memzero(session->seed, sizeof(session->seed));
   session->seedCached = false;
+  session->authorization_type = 0;
+  memzero(&session->coinjoin_authorization,
+          sizeof(session->coinjoin_authorization));
 }
 
 void config_lockDevice(void) {
+  fsm_abortWorkflows();
   if (g_bSelectSEFlag) {
     se_unlocked = secfalse;
   }
@@ -714,7 +722,7 @@ void config_setHomescreen(const uint8_t *data, uint32_t size) {
 }
 
 static void get_root_node_callback(uint32_t iter, uint32_t total) {
-  usbSleep(1);
+  waitAndProcessUSBRequests(1);
   layoutProgressAdapter(_("Waking up"), 1000 * iter / total);
 }
 
@@ -789,6 +797,50 @@ const uint8_t *config_getSeed(void) {
   }
 
   return NULL;
+}
+
+bool config_setCoinJoinAuthorization(const AuthorizeCoinJoin *authorization) {
+  if (activeSessionCache == NULL) {
+    fsm_sendFailure(FailureType_Failure_InvalidSession, "Invalid session");
+    return false;
+  }
+
+  if (authorization != NULL) {
+    activeSessionCache->authorization_type =
+        MessageType_MessageType_AuthorizeCoinJoin;
+    memcpy(&activeSessionCache->coinjoin_authorization, authorization,
+           sizeof(AuthorizeCoinJoin));
+  } else {
+    activeSessionCache->authorization_type = 0;
+    memzero(&activeSessionCache->coinjoin_authorization,
+            sizeof(AuthorizeCoinJoin));
+  }
+
+  return true;
+}
+
+MessageType config_getAuthorizationType(void) {
+  if (activeSessionCache == NULL) {
+    return 0;
+  }
+
+  return activeSessionCache->authorization_type;
+}
+
+const AuthorizeCoinJoin *config_getCoinJoinAuthorization(void) {
+  if (activeSessionCache == NULL) {
+    fsm_sendFailure(FailureType_Failure_InvalidSession, "Invalid session");
+    return NULL;
+  }
+
+  if (activeSessionCache->authorization_type !=
+      MessageType_MessageType_AuthorizeCoinJoin) {
+    fsm_sendFailure(FailureType_Failure_InvalidSession,
+                    "Coinjoin not authorized");
+    return NULL;
+  }
+
+  return &activeSessionCache->coinjoin_authorization;
 }
 
 static bool config_loadNode(const StorageHDNode *node, const char *curve,
@@ -944,31 +996,6 @@ bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len) {
 
   return true;
 }
-#if !ONEKEY_MINI
-bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg) {
-  if (!g_bSelectSEFlag) {
-    return false;
-  }
-  if (sectrue != se_transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF), NULL, 0,
-                             get_msg->bytes, &get_msg->size, FLAG_PUBLIC,
-                             GET_SESTORE_DATA)) {
-    return false;
-  }
-  get_msg->bytes[get_msg->size] = '\0';
-  return true;
-}
-bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg) {
-  if (!g_bSelectSEFlag) {
-    return false;
-  }
-  if (sectrue != se_transmit(MI2C_CMD_WR_PIN, (KEY_SEEDS & 0xFF),
-                             input_msg->bytes, input_msg->size, NULL, NULL,
-                             FLAG_PUBLIC, DELETE_SESTORE_DATA)) {
-    return false;
-  }
-  return true;
-}
-#endif
 
 bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size) {
@@ -1479,6 +1506,16 @@ void config_wipe(void) {
   safetyCheckLevel = SafetyCheckLevel_Strict;
   storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
+  session_clear(false);
+  fsm_abortWorkflows();
+  fsm_clearCosiNonce();
+
+#if USE_BIP32_CACHE
+  bip32_cache_clear();
+#endif
+#if USE_BIP39_CACHE
+  bip39_cache_clear();
+#endif
   config_setSeSessionKey(session_key, 16);
   config_getLanguage(config_language, sizeof(config_language));
 

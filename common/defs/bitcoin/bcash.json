@@ -3,7 +3,7 @@
   "coin_shortcut": "BCH",
   "coin_label": "Bitcoin Cash",
   "website": "https://www.bitcoincash.org",
-  "github": "https://github.com/Bitcoin-ABC/bitcoin-abc",
+  "github": "https://github.com/bitcoin-cash-node/bitcoin-cash-node",
   "maintainer": "Jochen Hoenicke <hoenicke@gmail.com>",
   "curve_name": "secp256k1",
   "decimals": 8,
@@ -28,10 +28,10 @@
   "fork_id": 0,
   "force_bip143": true,
   "default_fee_b": {
-    "Low": 10,
-    "Economy": 70,
-    "Normal": 140,
-    "High": 200
+    "Low": 1,
+    "Economy": 1,
+    "Normal": 1,
+    "High": 100
   },
   "dust_limit": 546,
   "blocktime_seconds": 600,
@@ -40,7 +40,7 @@
   "max_address_length": 34,
   "negative_fee": false,
   "cooldown": 100,
-  "consensus_branch_id": null,
+  "overwintered": false,
   "extra_data": false,
   "timestamp": false,
   "confidential_assets": null

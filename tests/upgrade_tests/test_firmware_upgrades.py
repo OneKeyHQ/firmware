@@ -14,9 +14,12 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+import dataclasses
+from typing import TYPE_CHECKING, List, Optional
+
 import pytest
 
-from trezorlib import MINIMUM_FIRMWARE_VERSION, btc, debuglink, device, exceptions, fido
+from trezorlib import btc, debuglink, device, exceptions, fido, models
 from trezorlib.messages import BackupType
 from trezorlib.tools import H_
 
@@ -26,9 +29,12 @@ from ..device_handler import BackgroundDeviceHandler
 from ..emulators import ALL_TAGS, EmulatorWrapper
 from . import for_all, for_tags
 
-MINIMUM_FIRMWARE_VERSION["1"] = (1, 0, 0)
-MINIMUM_FIRMWARE_VERSION["T"] = (2, 0, 0)
+if TYPE_CHECKING:
+    from trezorlib.debuglink import TrezorClientDebugLink as Client
 
+models.TREZOR_ONE = dataclasses.replace(models.TREZOR_ONE, minimum_version=(1, 0, 0))
+models.TREZOR_T = dataclasses.replace(models.TREZOR_T, minimum_version=(2, 0, 0))
+models.TREZORS = {models.TREZOR_ONE, models.TREZOR_T}
 
 # **** COMMON DEFINITIONS ****
 
@@ -41,8 +47,8 @@ STRENGTH = 128
 
 
 @for_all()
-def test_upgrade_load(gen, tag):
-    def asserts(client):
+def test_upgrade_load(gen: str, tag: str) -> None:
+    def asserts(client: "Client"):
         assert not client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -69,10 +75,10 @@ def test_upgrade_load(gen, tag):
 
 
 @for_all("legacy")
-def test_upgrade_load_pin(gen, tag):
+def test_upgrade_load_pin(gen: str, tag: str) -> None:
     PIN = "1234"
 
-    def asserts(client):
+    def asserts(client: "Client") -> None:
         assert client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -111,10 +117,10 @@ def test_upgrade_load_pin(gen, tag):
     ("legacy", ["v1.7.0", "v1.9.0"]),
     ("legacy", ["v1.8.0", "v1.9.0"]),
 )
-def test_storage_upgrade_progressive(gen, tags):
+def test_storage_upgrade_progressive(gen: str, tags: List[str]):
     PIN = "1234"
 
-    def asserts(client):
+    def asserts(client: "Client") -> None:
         assert client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -146,11 +152,11 @@ def test_storage_upgrade_progressive(gen, tags):
 
 
 @for_all("legacy", legacy_minimum_version=(1, 9, 0))
-def test_upgrade_wipe_code(gen, tag):
+def test_upgrade_wipe_code(gen: str, tag: str):
     PIN = "1234"
     WIPE_CODE = "4321"
 
-    def asserts(client):
+    def asserts(client: "Client"):
         assert client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -191,8 +197,8 @@ def test_upgrade_wipe_code(gen, tag):
 
 
 @for_all("legacy")
-def test_upgrade_reset(gen, tag):
-    def asserts(client):
+def test_upgrade_reset(gen: str, tag: str):
+    def asserts(client: "Client"):
         assert not client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -224,8 +230,8 @@ def test_upgrade_reset(gen, tag):
 
 
 @for_all()
-def test_upgrade_reset_skip_backup(gen, tag):
-    def asserts(client):
+def test_upgrade_reset_skip_backup(gen: str, tag: str):
+    def asserts(client: "Client"):
         assert not client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -258,8 +264,8 @@ def test_upgrade_reset_skip_backup(gen, tag):
 
 
 @for_all(legacy_minimum_version=(1, 7, 2))
-def test_upgrade_reset_no_backup(gen, tag):
-    def asserts(client):
+def test_upgrade_reset_no_backup(gen: str, tag: str):
+    def asserts(client: "Client"):
         assert not client.features.pin_protection
         assert not client.features.passphrase_protection
         assert client.features.initialized
@@ -293,7 +299,7 @@ def test_upgrade_reset_no_backup(gen, tag):
 
 # Although Shamir was introduced in 2.1.2 already, the debug instrumentation was not present until 2.1.9.
 @for_all("core", core_minimum_version=(2, 1, 9))
-def test_upgrade_shamir_recovery(gen, tag):
+def test_upgrade_shamir_recovery(gen: str, tag: Optional[str]):
     with EmulatorWrapper(gen, tag) as emu, BackgroundDeviceHandler(
         emu.client
     ) as device_handler:
@@ -303,9 +309,14 @@ def test_upgrade_shamir_recovery(gen, tag):
 
         device_handler.run(device.recover, pin_protection=False)
 
-        recovery.confirm_recovery(debug)
-        recovery.select_number_of_words(debug)
-        layout = recovery.enter_share(debug, MNEMONIC_SLIP39_BASIC_20_3of6[0])
+        # Flow is different for old UI and new UI
+        legacy_ui = emu.client.version < (2, 5, 4)
+
+        recovery.confirm_recovery(debug, legacy_ui=legacy_ui)
+        recovery.select_number_of_words(debug, legacy_ui=legacy_ui)
+        layout = recovery.enter_share(
+            debug, MNEMONIC_SLIP39_BASIC_20_3of6[0], legacy_ui=legacy_ui
+        )
         assert "2 more shares" in layout.text
 
         device_id = emu.client.features.device_id
@@ -328,12 +339,13 @@ def test_upgrade_shamir_recovery(gen, tag):
 
         # Check the result
         state = debug.state()
+        assert state.mnemonic_secret is not None
         assert state.mnemonic_secret.hex() == MNEMONIC_SLIP39_BASIC_20_3of6_SECRET
         assert state.mnemonic_type == BackupType.Slip39_Basic
 
 
 @for_all(legacy_minimum_version=(1, 8, 4), core_minimum_version=(2, 1, 9))
-def test_upgrade_u2f(gen, tag):
+def test_upgrade_u2f(gen: str, tag: str):
     """Check U2F counter stayed the same after an upgrade."""
     with EmulatorWrapper(gen, tag) as emu:
         debuglink.load_device_by_mnemonic(

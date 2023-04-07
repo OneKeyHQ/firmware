@@ -32,14 +32,15 @@ See https://github.com/satoshilabs/slips/blob/master/slip-0039.md.
 
 from micropython import const
 from trezorcrypto import shamir, slip39
+from typing import TYPE_CHECKING
 
-from trezor.crypto import hmac, pbkdf2, random
+from trezor.crypto import random
 from trezor.errors import MnemonicError
 
-if False:
-    from typing import Callable, Iterable, Tuple
+if TYPE_CHECKING:
+    from typing import Callable, Iterable
 
-    Indices = Tuple[int, ...]
+    Indices = tuple[int, ...]
     MnemonicGroups = dict[int, tuple[int, set[tuple[int, bytes]]]]
 
 
@@ -101,25 +102,6 @@ _SECRET_INDEX = const(255)
 
 _DIGEST_INDEX = const(254)
 """The index of the share containing the digest of the shared secret."""
-
-
-# === Keyboard functions ===
-
-KEYBOARD_FULL_MASK = const(0x1FF)
-"""All buttons are allowed. 9-bit bitmap all set to 1."""
-
-
-def word_completion_mask(prefix: str) -> int:
-    if not prefix:
-        return KEYBOARD_FULL_MASK
-    return slip39.word_completion_mask(int(prefix))
-
-
-def button_sequence_to_word(prefix: str) -> str:
-    if not prefix:
-        return ""
-    return slip39.button_sequence_to_word(int(prefix))
-
 
 # === External API ===
 
@@ -410,42 +392,13 @@ def _rs1024_verify_checksum(data: Indices) -> bool:
     return _rs1024_polymod(tuple(_CUSTOMIZATION_STRING) + data) == 1
 
 
-def _rs1024_error_index(data: Indices) -> int | None:
-    """
-    Returns the index where an error possibly occurred.
-    Currently unused.
-    """
-    GEN = (
-        0x91F_9F87,
-        0x122F_1F07,
-        0x244E_1E07,
-        0x81C_1C07,
-        0x1028_1C0E,
-        0x2040_1C1C,
-        0x10_3838,
-        0x20_7070,
-        0x40_E0E0,
-        0x81_C1C0,
-    )
-    chk = _rs1024_polymod(tuple(_CUSTOMIZATION_STRING) + data) ^ 1
-    if chk == 0:
-        return None
-
-    for i in reversed(range(len(data))):
-        b = chk & 0x3FF
-        chk >>= 10
-        if chk == 0:
-            return i
-        for j in range(10):
-            chk ^= GEN[j] if ((b >> j) & 1) else 0
-    return None
-
-
 # === Internal functions ===
 
 
 def _round_function(i: int, passphrase: bytes, e: int, salt: bytes, r: bytes) -> bytes:
     """The round function used internally by the Feistel cipher."""
+    from trezor.crypto import pbkdf2
+
     return pbkdf2(
         pbkdf2.HMAC_SHA256,
         bytes([i]) + passphrase,
@@ -461,6 +414,8 @@ def _get_salt(identifier: int) -> bytes:
 
 
 def _create_digest(random_data: bytes, shared_secret: bytes) -> bytes:
+    from trezor.crypto import hmac
+
     return hmac(hmac.SHA256, random_data, shared_secret).digest()[:_DIGEST_LENGTH_BYTES]
 
 

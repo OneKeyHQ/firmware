@@ -271,7 +271,8 @@ int bn_is_equal(const bignum256 *x, const bignum256 *y) {
 //   &truecase == &falsecase or &res == &truecase == &falsecase
 void bn_cmov(bignum256 *res, volatile uint32_t cond, const bignum256 *truecase,
              const bignum256 *falsecase) {
-  assert((cond == 1) | (cond == 0));
+  // Intentional use of bitwise OR operator to ensure constant-time
+  assert((int)(cond == 1) | (int)(cond == 0));
 
   uint32_t tmask = -cond;   // tmask = 0xFFFFFFFF if cond else 0x00000000
   uint32_t fmask = ~tmask;  // fmask = 0x00000000 if cond else 0xFFFFFFFF
@@ -290,7 +291,8 @@ void bn_cmov(bignum256 *res, volatile uint32_t cond, const bignum256 *truecase,
 // Assumes prime is normalized and
 //   0 < prime < 2**260 == 2**(BITS_PER_LIMB * LIMBS - 1)
 void bn_cnegate(volatile uint32_t cond, bignum256 *x, const bignum256 *prime) {
-  assert((cond == 1) | (cond == 0));
+  // Intentional use of bitwise OR operator to ensure constant time
+  assert((int)(cond == 1) | (int)(cond == 0));
 
   uint32_t tmask = -cond;   // tmask = 0xFFFFFFFF if cond else 0x00000000
   uint32_t fmask = ~tmask;  // fmask = 0x00000000 if cond else 0xFFFFFFFF
@@ -1668,27 +1670,31 @@ void bn_divmod10(bignum256 *x, uint32_t *r) { bn_long_division(x, 10, x, r); }
 // Assumes output is an array of length output_length
 // The function doesn't have neither constant control flow nor constant memory
 //   access flow with regard to any its argument
-size_t bn_format(const bignum256 *amount, const char *prefix, const char *suffix, unsigned int decimals, int exponent, bool trailing, char *output, size_t output_length) {
+size_t bn_format(const bignum256 *amount, const char *prefix, const char *suffix, unsigned int decimals, int exponent, bool trailing, char thousands, char *output, size_t output_length) {
 
 /*
   Python prototype of the function:
 
-  def format(amount, prefix, suffix, decimals, exponent, trailing):
+  def format(amount, prefix, suffix, decimals, exponent, trailing, thousands):
       if exponent >= 0:
-          amount *= 10 ** exponent
+          amount *= 10**exponent
       else:
           amount //= 10 ** (-exponent)
 
       d = pow(10, decimals)
 
-      if decimals:
-          output = "%d.%0*d" % (amount // d, decimals, amount % d)
-          if not trailing:
-              output = output.rstrip("0").rstrip(".")
-      else:
-          output = "%d" % (amount // d)
+      integer_part = amount // d
+      integer_str = f"{integer_part:,}".replace(",", thousands or "")
 
-      return prefix + output + suffix
+      if decimals:
+          decimal_part = amount % d
+          decimal_str = f".{decimal_part:0{decimals}d}"
+          if not trailing:
+              decimal_str = decimal_str.rstrip("0").rstrip(".")
+      else:
+          decimal_str = ""
+
+      return prefix + integer_str + decimal_str + suffix
 */
 
 // Auxiliary macro for bn_format
@@ -1771,18 +1777,29 @@ size_t bn_format(const bignum256 *amount, const char *prefix, const char *suffix
 
   {  // Add integer-part digits of amount
     // Add trailing zeroes
+    int digits = 0;
     if (!bn_is_zero(&temp)) {
       for (; exponent > 0; --exponent) {
+        ++digits;
         BN_FORMAT_ADD_OUTPUT_CHAR('0')
+        if (thousands != 0 && digits % 3 == 0) {
+          BN_FORMAT_ADD_OUTPUT_CHAR(thousands)
+        }
       }
     }
     // decimals == 0 && exponent == 0
 
     // Add significant digits
+    bool is_zero = false;
     do {
+      ++digits;
       bn_divmod10(&temp, &digit);
+      is_zero = bn_is_zero(&temp);
       BN_FORMAT_ADD_OUTPUT_CHAR('0' + digit)
-    } while (!bn_is_zero(&temp));
+      if (thousands != 0 && !is_zero && digits % 3 == 0) {
+        BN_FORMAT_ADD_OUTPUT_CHAR(thousands)
+      }
+    } while (!is_zero);
   }
 
   // Add prefix

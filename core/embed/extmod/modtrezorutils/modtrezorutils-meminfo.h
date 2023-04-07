@@ -36,6 +36,7 @@
 #include "embed/rust/librust.h"
 #include "embed/trezorhal/usb.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define WORDS_PER_BLOCK ((MICROPY_BYTES_PER_GC_BLOCK) / MP_BYTES_PER_OBJ_WORD)
@@ -653,9 +654,11 @@ void dump_value_opt(FILE *out, mp_const_obj_t value, bool eval_short) {
     dump_protodef(out, value);
   }
 
+#ifdef TREZOR_UI2
   else if (mp_obj_is_type(value, ui_debug_layout_type())) {
     dump_uilayout(out, value);
   }
+#endif
 
   else {
     print_type(out, "unknown", NULL, value, true);

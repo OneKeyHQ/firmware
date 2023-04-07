@@ -21,8 +21,10 @@
 #define __CONFIG_H__
 
 #include "bip32.h"
+#include "messages-bitcoin.pb.h"
 #include "messages-common.pb.h"
 #include "messages-management.pb.h"
+#include "messages.pb.h"
 
 #define STORAGE_FIELD(TYPE, NAME) \
   bool has_##NAME;                \
@@ -118,6 +120,10 @@ void config_loadDevice_ex(const BixinLoadDevice *msg);
 
 const uint8_t *config_getSeed(void);
 
+bool config_setCoinJoinAuthorization(const AuthorizeCoinJoin *authorization);
+MessageType config_getAuthorizationType(void);
+const AuthorizeCoinJoin *config_getCoinJoinAuthorization(void);
+
 bool config_getU2FRoot(HDNode *node);
 bool config_getRootNode(HDNode *node, const char *curve);
 
@@ -144,8 +150,6 @@ bool config_getMnemonicBytes(uint8_t *dest, uint16_t dest_size,
                              uint16_t *real_size);
 
 bool config_setSeedsBytes(const uint8_t *seeds, uint8_t len);
-bool config_SeedsEncExportBytes(BixinOutMessageSE_outmessage_t *get_msg);
-bool config_SeedsEncImportBytes(BixinSeedOperate_seed_importData_t *input_msg);
 
 bool config_stBackUpEntoryToSe(uint8_t *seed, uint8_t seed_len);
 bool config_stRestoreEntoryFromSe(uint8_t *seed, uint8_t *seed_len);

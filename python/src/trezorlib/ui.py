@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -15,6 +15,7 @@
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import os
+import sys
 from typing import Any, Callable, Optional, Union
 
 import click
@@ -54,6 +55,12 @@ PIN_CONFIRM = PinMatrixRequestType.NewSecond
 WIPE_CODE_NEW = PinMatrixRequestType.WipeCodeFirst
 WIPE_CODE_CONFIRM = PinMatrixRequestType.WipeCodeSecond
 
+# Workaround for limitation of Git Bash
+# getpass function does not work correctly on Windows when not using a real terminal
+# (the hidden input is not allowed and it also freezes the script completely)
+# Details: https://bugs.python.org/issue44762
+CAN_HANDLE_HIDDEN_INPUT = sys.stdin and sys.stdin.isatty()
+
 
 class TrezorClientUI(Protocol):
     def button_request(self, br: messages.ButtonRequest) -> None:
@@ -70,8 +77,12 @@ def echo(*args: Any, **kwargs: Any) -> None:
     return click.echo(*args, err=True, **kwargs)
 
 
-def prompt(*args: Any, **kwargs: Any) -> Any:
-    return click.prompt(*args, err=True, **kwargs)
+def prompt(text: str, *, hide_input: bool = False, **kwargs: Any) -> Any:
+    # Disallowing hidden input and warning user when it would cause issues
+    if not CAN_HANDLE_HIDDEN_INPUT and hide_input:
+        hide_input = False
+        text += " (WARNING: will be displayed!)"
+    return click.prompt(text, hide_input=hide_input, err=True, **kwargs)
 
 
 class ClickUI:
@@ -144,6 +155,9 @@ class ClickUI:
                     default="",
                     show_default=False,
                 )
+                # In case user sees the input on the screen, we do not need confirmation
+                if not CAN_HANDLE_HIDDEN_INPUT:
+                    return passphrase
                 second = prompt(
                     "Confirm your passphrase",
                     hide_input=True,
@@ -156,6 +170,56 @@ class ClickUI:
                     echo("Passphrase did not match. Please try again.")
             except click.Abort:
                 raise Cancelled from None
+
+
+class ScriptUI:
+    """Interface to be used by scripts, not directly by user.
+
+    Communicates with a client application using print() and input().
+
+    Lot of `ClickUI` logic is outsourced to the client application, which
+    is responsible for supplying the PIN and passphrase.
+
+    Reference client implementation can be found under `tools/trezorctl_script_client.py`.
+    """
+
+    @staticmethod
+    def button_request(br: messages.ButtonRequest) -> None:
+        # TODO: send name={br.name} when it will be supported
+        code = br.code.name if br.code else None
+        print(f"?BUTTON code={code} pages={br.pages}")
+
+    @staticmethod
+    def get_pin(code: Optional[PinMatrixRequestType] = None) -> str:
+        if code is None:
+            print("?PIN")
+        else:
+            print(f"?PIN code={code.name}")
+
+        pin = input()
+        if pin == "CANCEL":
+            raise Cancelled from None
+        elif not pin.startswith(":"):
+            raise RuntimeError("Sent PIN must start with ':'")
+        else:
+            return pin[1:]
+
+    @staticmethod
+    def get_passphrase(available_on_device: bool) -> Union[str, object]:
+        if available_on_device:
+            print("?PASSPHRASE available_on_device")
+        else:
+            print("?PASSPHRASE")
+
+        passphrase = input()
+        if passphrase == "CANCEL":
+            raise Cancelled from None
+        elif passphrase == "ON_DEVICE":
+            return PASSPHRASE_ON_DEVICE
+        elif not passphrase.startswith(":"):
+            raise RuntimeError("Sent passphrase must start with ':'")
+        else:
+            return passphrase[1:]
 
 
 def mnemonic_words(

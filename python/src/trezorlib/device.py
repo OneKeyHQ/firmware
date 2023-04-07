@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -19,8 +19,8 @@ import time
 from typing import TYPE_CHECKING, Callable, Optional
 
 from . import messages
-from .exceptions import Cancelled
-from .tools import expect, session
+from .exceptions import Cancelled, TrezorException
+from .tools import Address, expect, session
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -50,6 +50,7 @@ def apply_settings(
     fastpay_money_limit: Optional[int] = None,
     fastpay_times: Optional[int] = None,
     experimental_features: Optional[bool] = None,
+    hide_passphrase_from_host: Optional[bool] = None,
 ) -> "MessageType":
     settings = messages.ApplySettings(
         label=label,
@@ -68,6 +69,7 @@ def apply_settings(
         fastpay_times=fastpay_times,
         safety_checks=safety_checks,
         experimental_features=experimental_features,
+        hide_passphrase_from_host=hide_passphrase_from_host,
     )
 
     out = client.call(settings)
@@ -234,29 +236,17 @@ def cancel_authorization(client: "TrezorClient") -> "MessageType":
     return client.call(messages.CancelAuthorization())
 
 
-@expect(messages.BixinBackupAck, field="data", ret_type=bytes)
-def se_backup(client: "TrezorClient") -> "MessageType":
-    ret = client.call(messages.BixinBackupRequest())
-    return ret
+@expect(messages.UnlockedPathRequest, field="mac", ret_type=bytes)
+def unlock_path(client: "TrezorClient", n: "Address") -> "MessageType":
+    resp = client.call(messages.UnlockPath(address_n=n))
 
-
-@expect(messages.Success, field="message", ret_type=str)
-def se_restore(
-    client: "TrezorClient",
-    data: str,
-    language: str = "en-US",
-    label: str = "BiXin Key",
-    passphrase_protection: bool = True,
-) -> "MessageType":
-    ret = client.call(
-        messages.BixinRestoreRequest(
-            data=bytes.fromhex(data),
-            language=language,
-            label=label,
-            passphrase_protection=bool(passphrase_protection),
-        )
-    )
-    return ret
+    # Cancel the UnlockPath workflow now that we have the authentication code.
+    try:
+        client.call(messages.Cancel())
+    except Cancelled:
+        return resp
+    else:
+        raise TrezorException("Unexpected response in UnlockPath flow")
 
 
 @expect(messages.BixinVerifyDeviceAck)
@@ -275,3 +265,16 @@ def reboot(client: "TrezorClient"):
 @expect(messages.Success, field="message", ret_type=str)
 def reboot_to_bootloader(client: "TrezorClient") -> "MessageType":
     return client.call(messages.RebootToBootloader())
+
+
+@expect(messages.Success, field="message", ret_type=str)
+@session
+def set_busy(client: "TrezorClient", expiry_ms: Optional[int]) -> "MessageType":
+    """Sets or clears the busy state of the device.
+
+    In the busy state the device shows a "Do not disconnect" message instead of the homescreen.
+    Setting `expiry_ms=None` clears the busy state.
+    """
+    ret = client.call(messages.SetBusy(expiry_ms=expiry_ms))
+    client.refresh_features()
+    return ret

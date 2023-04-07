@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -17,13 +17,13 @@
 import warnings
 from copy import copy
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, AnyStr, Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, AnyStr, List, Optional, Sequence, Tuple
 
 # TypedDict is not available in typing for python < 3.8
-from typing_extensions import TypedDict
+from typing_extensions import Protocol, TypedDict
 
 from . import exceptions, messages
-from .tools import expect, normalize_nfc, session
+from .tools import expect, prepare_message_bytes, session
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -65,6 +65,13 @@ if TYPE_CHECKING:
         vin: List[Vin]
         vout: List[Vout]
 
+    class TxCacheType(Protocol):
+        def __getitem__(self, __key: bytes) -> messages.TransactionType:
+            ...
+
+        def __contains__(self, __key: bytes) -> bool:
+            ...
+
 
 def from_json(json_dict: "Transaction") -> messages.TransactionType:
     def make_input(vin: "Vin") -> messages.TxInputType:
@@ -86,7 +93,7 @@ def from_json(json_dict: "Transaction") -> messages.TransactionType:
 
     def make_bin_output(vout: "Vout") -> messages.TxOutputBinType:
         return messages.TxOutputBinType(
-            amount=int(Decimal(vout["value"]) * (10 ** 8)),
+            amount=int(Decimal(vout["value"]) * (10**8)),
             script_pubkey=bytes.fromhex(vout["scriptPubKey"]["hex"]),
         )
 
@@ -107,7 +114,16 @@ def get_public_node(
     coin_name: Optional[str] = None,
     script_type: messages.InputScriptType = messages.InputScriptType.SPENDADDRESS,
     ignore_xpub_magic: bool = False,
+    unlock_path: Optional[List[int]] = None,
+    unlock_path_mac: Optional[bytes] = None,
 ) -> "MessageType":
+    if unlock_path:
+        res = client.call(
+            messages.UnlockPath(address_n=unlock_path, mac=unlock_path_mac)
+        )
+        if not isinstance(res, messages.UnlockedPathRequest):
+            raise exceptions.TrezorException("Unexpected message")
+
     return client.call(
         messages.GetPublicKey(
             address_n=n,
@@ -121,7 +137,12 @@ def get_public_node(
 
 
 @expect(messages.Address, field="address", ret_type=str)
-def get_address(
+def get_address(*args: Any, **kwargs: Any):
+    return get_authenticated_address(*args, **kwargs)
+
+
+@expect(messages.Address)
+def get_authenticated_address(
     client: "TrezorClient",
     coin_name: str,
     n: "Address",
@@ -129,7 +150,16 @@ def get_address(
     multisig: Optional[messages.MultisigRedeemScriptType] = None,
     script_type: messages.InputScriptType = messages.InputScriptType.SPENDADDRESS,
     ignore_xpub_magic: bool = False,
+    unlock_path: Optional[List[int]] = None,
+    unlock_path_mac: Optional[bytes] = None,
 ) -> "MessageType":
+    if unlock_path:
+        res = client.call(
+            messages.UnlockPath(address_n=unlock_path, mac=unlock_path_mac)
+        )
+        if not isinstance(res, messages.UnlockedPathRequest):
+            raise exceptions.TrezorException("Unexpected message")
+
     return client.call(
         messages.GetAddress(
             address_n=n,
@@ -207,7 +237,7 @@ def sign_message(
         messages.SignMessage(
             coin_name=coin_name,
             address_n=n,
-            message=normalize_nfc(message),
+            message=prepare_message_bytes(message),
             script_type=script_type,
             no_script_type=no_script_type,
         )
@@ -226,7 +256,7 @@ def verify_message(
             messages.VerifyMessage(
                 address=address,
                 signature=signature,
-                message=normalize_nfc(message),
+                message=prepare_message_bytes(message),
                 coin_name=coin_name,
             )
         )
@@ -242,8 +272,11 @@ def sign_tx(
     inputs: Sequence[messages.TxInputType],
     outputs: Sequence[messages.TxOutputType],
     details: Optional[messages.SignTx] = None,
-    prev_txes: Optional[Dict[bytes, messages.TransactionType]] = None,
+    prev_txes: Optional["TxCacheType"] = None,
+    payment_reqs: Sequence[messages.TxAckPaymentRequest] = (),
     preauthorized: bool = False,
+    unlock_path: Optional[List[int]] = None,
+    unlock_path_mac: Optional[bytes] = None,
     **kwargs: Any,
 ) -> Tuple[Sequence[Optional[bytes]], bytes]:
     """Sign a Bitcoin-like transaction.
@@ -281,7 +314,13 @@ def sign_tx(
             if hasattr(signtx, name):
                 setattr(signtx, name, value)
 
-    if preauthorized:
+    if unlock_path:
+        res = client.call(
+            messages.UnlockPath(address_n=unlock_path, mac=unlock_path_mac)
+        )
+        if not isinstance(res, messages.UnlockedPathRequest):
+            raise exceptions.TrezorException("Unexpected message")
+    elif preauthorized:
         res = client.call(messages.DoPreauthorized())
         if not isinstance(res, messages.PreauthorizedRequest):
             raise exceptions.TrezorException("Unexpected message")
@@ -334,38 +373,48 @@ def sign_tx(
 
         # Device asked for one more information, let's process it.
         if res.details.tx_hash is not None:
+            if res.details.tx_hash not in prev_txes:
+                raise ValueError(
+                    f"Previous transaction {res.details.tx_hash.hex()} not available"
+                )
             current_tx = prev_txes[res.details.tx_hash]
         else:
             current_tx = this_tx
 
-        msg = messages.TransactionType()
-
-        if res.request_type == R.TXMETA:
-            msg = copy_tx_meta(current_tx)
-        elif res.request_type in (R.TXINPUT, R.TXORIGINPUT):
+        if res.request_type == R.TXPAYMENTREQ:
             assert res.details.request_index is not None
-            msg.inputs = [current_tx.inputs[res.details.request_index]]
-        elif res.request_type == R.TXOUTPUT:
-            assert res.details.request_index is not None
-            if res.details.tx_hash:
-                msg.bin_outputs = [current_tx.bin_outputs[res.details.request_index]]
-            else:
-                msg.outputs = [current_tx.outputs[res.details.request_index]]
-        elif res.request_type == R.TXORIGOUTPUT:
-            assert res.details.request_index is not None
-            msg.outputs = [current_tx.outputs[res.details.request_index]]
-        elif res.request_type == R.TXEXTRADATA:
-            assert res.details.extra_data_offset is not None
-            assert res.details.extra_data_len is not None
-            assert current_tx.extra_data is not None
-            o, l = res.details.extra_data_offset, res.details.extra_data_len
-            msg.extra_data = current_tx.extra_data[o : o + l]
+            msg = payment_reqs[res.details.request_index]
+            res = client.call(msg)
         else:
-            raise exceptions.TrezorException(
-                f"Unknown request type - {res.request_type}."
-            )
+            msg = messages.TransactionType()
+            if res.request_type == R.TXMETA:
+                msg = copy_tx_meta(current_tx)
+            elif res.request_type in (R.TXINPUT, R.TXORIGINPUT):
+                assert res.details.request_index is not None
+                msg.inputs = [current_tx.inputs[res.details.request_index]]
+            elif res.request_type == R.TXOUTPUT:
+                assert res.details.request_index is not None
+                if res.details.tx_hash:
+                    msg.bin_outputs = [
+                        current_tx.bin_outputs[res.details.request_index]
+                    ]
+                else:
+                    msg.outputs = [current_tx.outputs[res.details.request_index]]
+            elif res.request_type == R.TXORIGOUTPUT:
+                assert res.details.request_index is not None
+                msg.outputs = [current_tx.outputs[res.details.request_index]]
+            elif res.request_type == R.TXEXTRADATA:
+                assert res.details.extra_data_offset is not None
+                assert res.details.extra_data_len is not None
+                assert current_tx.extra_data is not None
+                o, l = res.details.extra_data_offset, res.details.extra_data_len
+                msg.extra_data = current_tx.extra_data[o : o + l]
+            else:
+                raise exceptions.TrezorException(
+                    f"Unknown request type - {res.request_type}."
+                )
 
-        res = client.call(messages.TxAck(tx=msg))
+            res = client.call(messages.TxAck(tx=msg))
 
     if not isinstance(res, messages.TxRequest):
         raise exceptions.TrezorException("Unexpected message")
@@ -381,19 +430,21 @@ def sign_tx(
 def authorize_coinjoin(
     client: "TrezorClient",
     coordinator: str,
-    max_total_fee: int,
+    max_rounds: int,
+    max_coordinator_fee_rate: int,
+    max_fee_per_kvbyte: int,
     n: "Address",
     coin_name: str,
-    fee_per_anonymity: Optional[int] = None,
     script_type: messages.InputScriptType = messages.InputScriptType.SPENDADDRESS,
 ) -> "MessageType":
     return client.call(
         messages.AuthorizeCoinJoin(
             coordinator=coordinator,
-            max_total_fee=max_total_fee,
+            max_rounds=max_rounds,
+            max_coordinator_fee_rate=max_coordinator_fee_rate,
+            max_fee_per_kvbyte=max_fee_per_kvbyte,
             address_n=n,
             coin_name=coin_name,
-            fee_per_anonymity=fee_per_anonymity,
             script_type=script_type,
         )
     )

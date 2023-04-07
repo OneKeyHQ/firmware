@@ -74,6 +74,9 @@ void secp256k1_default_error_callback_fn(const char *str, void *data) {
 /* Screen timeout */
 uint32_t system_millis_lock_start = 0;
 
+/* Busyscreen timeout */
+uint32_t system_millis_busy_deadline = 0;
+
 void check_lock_screen(void) {
   buttonUpdate();
 
@@ -83,8 +86,9 @@ void check_lock_screen(void) {
     return;
   }
 
-  // button held for long enough (2 seconds)
-  if (layoutLast == layoutHome && button.NoDown >= 285000 * 2) {
+  // button held for long enough (5 seconds)
+  if ((layoutLast == layoutHomescreen || layoutLast == layoutBusyscreen) &&
+      button.NoDown >= 114000 * 5) {
     layoutDialogAdapter(&bmp_icon_question, _("Cancel"), _("Lock Device"), NULL,
                         _("Do you really want to"), _("lock your Trezor?"),
                         NULL, NULL, NULL, NULL);
@@ -92,13 +96,13 @@ void check_lock_screen(void) {
     // wait until NoButton is released
     usbTiny(1);
     do {
-      usbSleep(5);
+      waitAndProcessUSBRequests(5);
       buttonUpdate();
     } while (!button.NoUp);
 
     // wait for confirmation/cancellation of the dialog
     do {
-      usbSleep(5);
+      waitAndProcessUSBRequests(5);
       buttonUpdate();
     } while (!button.YesUp && !button.NoUp);
     usbTiny(0);
@@ -114,7 +118,7 @@ void check_lock_screen(void) {
   }
 
   // if homescreen is shown for too long
-  if (layoutLast == layoutHome) {
+  if (layoutLast == layoutHomescreen) {
     if ((timer_ms() - system_millis_lock_start) >=
         config_getAutoLockDelayMs()) {
       // lock the screen
@@ -124,20 +128,14 @@ void check_lock_screen(void) {
   }
 }
 
-#if !EMULATOR
-
-void auto_poweroff_timer(void) {
-  if (config_getAutoLockDelayMs() == 0) return;
-  if (timer_get_sleep_count() >= config_getAutoLockDelayMs()) {
-    if (sys_nfcState() || sys_usbState()) {
-      // do nothing when usb inserted
-      timer_sleep_start_reset();
-    } else {
-      shutdown();
-    }
+void check_busy_screen(void) {
+  // Clear the busy screen once it expires.
+  if (system_millis_busy_deadline != 0 &&
+      system_millis_busy_deadline < timer_ms()) {
+    system_millis_busy_deadline = 0;
+    layoutHome();
   }
 }
-#endif
 
 static void collect_hw_entropy(bool privileged) {
 #if EMULATOR
@@ -251,7 +249,6 @@ int main(void) {
   ble_reset();
   register_timer("button", timer1s / 2, buttonsTimer);
   register_timer("charge_dis", timer1s, chargeDisTimer);
-  register_timer("poweroff", timer1s, auto_poweroff_timer);
 #endif
   __stack_chk_guard = random32();  // this supports compiler provided
                                    // unpredictable stack protection checks
@@ -275,7 +272,6 @@ int main(void) {
 #endif
 
 #if DEBUG_LINK
-  oledSetDebugLink(1);
 #if !EMULATOR
   config_wipe();
 #endif
@@ -290,11 +286,14 @@ int main(void) {
 
   for (;;) {
 #if EMULATOR
-    usbSleep(10);
+    waitAndProcessUSBRequests(10);
+    layoutHomeInfo();
 #else
     usbPoll();
     layoutHomeInfo();
 #endif
+    // check_lock_screen();
+    check_busy_screen();
   }
   return 0;
 }

@@ -6,13 +6,14 @@
 # https://github.com/trezor/trezor-mcu/commit/e1fa7af1da79e86ccaae5f3cd2a6c4644f546f8a
 
 from micropython import const
+from typing import TYPE_CHECKING
 
 from trezor import wire
 from trezor.enums import InputScriptType
 
-from .. import common, ownership
+from .. import common
 
-if False:
+if TYPE_CHECKING:
     from trezor.messages import TxInput
 
 # transaction header size: 4 byte version
@@ -44,41 +45,68 @@ class TxWeightCalculator:
     def __init__(self) -> None:
         self.inputs_count = 0
         self.outputs_count = 0
-        self.counter = 4 * (_TXSIZE_HEADER + _TXSIZE_FOOTER)
+        self.counter = 0
         self.segwit_inputs_count = 0
 
-    def add_input(self, i: TxInput) -> None:
-        self.inputs_count += 1
+    @classmethod
+    def input_script_size(cls, i: TxInput) -> int:
+        script_type = i.script_type  # local_cache_attribute
+        script_pubkey = i.script_pubkey  # local_cache_attribute
+        multisig = i.multisig  # local_cache_attribute
+        IST = InputScriptType  # local_cache_global
 
-        if i.multisig:
-            if i.script_type == InputScriptType.SPENDTAPROOT:
+        if common.input_is_external_unverified(i):
+            assert script_pubkey is not None  # checked in _sanitize_tx_input
+
+            # Guess the script type from the scriptPubKey.
+            if script_pubkey[0] == 0x76:  # OP_DUP (P2PKH)
+                script_type = IST.SPENDADDRESS
+            elif script_pubkey[0] == 0xA9:  # OP_HASH_160 (P2SH)
+                # Probably nested P2WPKH.
+                script_type = IST.SPENDP2SHWITNESS
+            elif script_pubkey[0] == 0x00:  # SegWit v0 (probably P2WPKH)
+                script_type = IST.SPENDWITNESS
+            elif script_pubkey[0] == 0x51:  # SegWit v1 (P2TR)
+                script_type = IST.SPENDTAPROOT
+            else:  # Unknown script type.
+                pass
+
+        if multisig:
+            if script_type == IST.SPENDTAPROOT:
                 raise wire.ProcessError("Multisig not supported for taproot")
 
-            n = len(i.multisig.nodes) if i.multisig.nodes else len(i.multisig.pubkeys)
+            n = len(multisig.nodes) if multisig.nodes else len(multisig.pubkeys)
             multisig_script_size = _TXSIZE_MULTISIGSCRIPT + n * (1 + _TXSIZE_PUBKEY)
-            if i.script_type in common.SEGWIT_INPUT_SCRIPT_TYPES:
-                multisig_script_size += self.varint_size(multisig_script_size)
+            if script_type in common.SEGWIT_INPUT_SCRIPT_TYPES:
+                multisig_script_size += cls.compact_size_len(multisig_script_size)
             else:
-                multisig_script_size += self.op_push_size(multisig_script_size)
+                multisig_script_size += cls.op_push_len(multisig_script_size)
 
-            input_script_size = (
+            return (
                 1  # the OP_FALSE bug in multisig
-                + i.multisig.m * (1 + _TXSIZE_DER_SIGNATURE)
+                + multisig.m * (1 + _TXSIZE_DER_SIGNATURE)
                 + multisig_script_size
             )
-        elif i.script_type == InputScriptType.SPENDTAPROOT:
-            input_script_size = 1 + _TXSIZE_SCHNORR_SIGNATURE
+        elif script_type == IST.SPENDTAPROOT:
+            return 1 + _TXSIZE_SCHNORR_SIGNATURE
         else:
-            input_script_size = 1 + _TXSIZE_DER_SIGNATURE + 1 + _TXSIZE_PUBKEY
+            return 1 + _TXSIZE_DER_SIGNATURE + 1 + _TXSIZE_PUBKEY
 
+    def add_input(self, i: TxInput) -> None:
+        from .. import ownership
+
+        script_type = i.script_type  # local_cache_attribute
+
+        self.inputs_count += 1
         self.counter += 4 * _TXSIZE_INPUT
+        input_script_size = self.input_script_size(i)
 
-        if i.script_type in common.NONSEGWIT_INPUT_SCRIPT_TYPES:
-            input_script_size += self.varint_size(input_script_size)
+        if script_type in common.NONSEGWIT_INPUT_SCRIPT_TYPES:
+            input_script_size += self.compact_size_len(input_script_size)
             self.counter += 4 * input_script_size
-        elif i.script_type in common.SEGWIT_INPUT_SCRIPT_TYPES:
+        elif script_type in common.SEGWIT_INPUT_SCRIPT_TYPES:
             self.segwit_inputs_count += 1
-            if i.script_type == InputScriptType.SPENDP2SHWITNESS:
+            if script_type == InputScriptType.SPENDP2SHWITNESS:
                 # add script_sig size
                 if i.multisig:
                     self.counter += 4 * (2 + _TXSIZE_WITNESSSCRIPT)
@@ -87,7 +115,7 @@ class TxWeightCalculator:
             else:
                 self.counter += 4  # empty script_sig (1 byte)
             self.counter += 1 + input_script_size  # discounted witness
-        elif i.script_type == InputScriptType.EXTERNAL:
+        elif script_type == InputScriptType.EXTERNAL:
             if i.ownership_proof:
                 script_sig, witness = ownership.read_scriptsig_witness(
                     i.ownership_proof
@@ -101,29 +129,44 @@ class TxWeightCalculator:
             if witness_size > 1:
                 self.segwit_inputs_count += 1
 
-            self.counter += 4 * (self.varint_size(script_sig_size) + script_sig_size)
+            self.counter += 4 * (
+                self.compact_size_len(script_sig_size) + script_sig_size
+            )
             self.counter += witness_size
         else:
             raise wire.DataError("Invalid script type")
 
     def add_output(self, script: bytes) -> None:
         self.outputs_count += 1
-        script_size = self.varint_size(len(script)) + len(script)
+        script_size = self.compact_size_len(len(script)) + len(script)
         self.counter += 4 * (_TXSIZE_OUTPUT + script_size)
 
-    def get_total(self) -> int:
-        total = self.counter
-        total += 4 * self.varint_size(self.inputs_count)
-        total += 4 * self.varint_size(self.outputs_count)
+    def get_base_weight(self) -> int:
+        base_weight = 4 * (_TXSIZE_HEADER + _TXSIZE_FOOTER)
+        base_weight += 4 * self.compact_size_len(self.inputs_count)
+        base_weight += 4 * self.compact_size_len(self.outputs_count)
         if self.segwit_inputs_count:
-            total += _TXSIZE_SEGWIT_OVERHEAD
+            base_weight += _TXSIZE_SEGWIT_OVERHEAD
+
+        return base_weight
+
+    def get_weight(self) -> int:
+        total = self.counter
+        total += self.get_base_weight()
+        if self.segwit_inputs_count:
             # add one byte of witness stack item count per non-segwit input
             total += self.inputs_count - self.segwit_inputs_count
 
         return total
 
+    def get_virtual_size(self) -> int:
+        # Convert transaction weight to virtual transaction size, which is is defined
+        # as weight / 4 rounded up to the next integer.
+        # https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#transaction-size-calculations
+        return (self.get_weight() + 3) // 4
+
     @staticmethod
-    def varint_size(length: int) -> int:
+    def compact_size_len(length: int) -> int:
         if length < 253:
             return 1
         if length < 0x1_0000:
@@ -131,7 +174,7 @@ class TxWeightCalculator:
         return 5
 
     @staticmethod
-    def op_push_size(length: int) -> int:
+    def op_push_len(length: int) -> int:
         if length < 0x4C:
             return 1
         if length < 0x100:

@@ -24,17 +24,14 @@
 #include <stdint.h>
 #include "bip32.h"
 #include "coins.h"
+#include "crypto.h"
 #include "hasher.h"
 #include "messages-bitcoin.pb.h"
 
-#define SIGN_FREEPAY_NOPIN 0x81000000
-#define SIGN_FREEPAY_NOBUTTON 0x82000000
-#define SIGN_FREEPAY_LIEMTPAY 0x84000000
-#define SIGN_FREEPAY_LIEMTTIME 0x88000000
-
-void signing_init(const SignTx *msg, const CoinInfo *_coin,
-                  const HDNode *_root);
+void signing_init(const SignTx *msg, const CoinInfo *_coin, const HDNode *_root,
+                  const AuthorizeCoinJoin *authorization, PathSchema unlock);
 void signing_abort(void);
 void signing_txack(TransactionType *tx);
+bool signing_is_preauthorized(void);
 
 #endif

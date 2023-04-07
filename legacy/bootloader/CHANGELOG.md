@@ -142,3 +142,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Initial import of code.
 
 [#1461]: https://github.com/trezor/trezor-firmware/pull/1461
+[#1642]: https://github.com/trezor/trezor-firmware/pull/1642
+[#1884]: https://github.com/trezor/trezor-firmware/pull/1884
+[#2231]: https://github.com/trezor/trezor-firmware/pull/2231
+[#2423]: https://github.com/trezor/trezor-firmware/pull/2423
+[#2568]: https://github.com/trezor/trezor-firmware/pull/2568

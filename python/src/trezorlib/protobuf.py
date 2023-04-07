@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -37,7 +37,7 @@ MT = TypeVar("MT", bound="MessageType")
 
 
 class Reader(Protocol):
-    def readinto(self, buf: bytearray) -> int:
+    def readinto(self, __buf: bytearray) -> int:
         """
         Reads exactly `len(buffer)` bytes into `buffer`. Returns number of bytes read,
         or 0 if it cannot read that much.
@@ -46,7 +46,7 @@ class Reader(Protocol):
 
 
 class Writer(Protocol):
-    def write(self, buf: bytes) -> int:
+    def write(self, __buf: bytes) -> int:
         """
         Writes all bytes from `buffer`, or raises `EOFError`
         """
@@ -168,27 +168,26 @@ class Field:
 
     def value_fits(self, value: int) -> bool:
         if self.type == "uint32":
-            return 0 <= value < 2 ** 32
+            return 0 <= value < 2**32
         if self.type == "uint64":
-            return 0 <= value < 2 ** 64
+            return 0 <= value < 2**64
         if self.type == "sint32":
-            return -(2 ** 31) <= value < 2 ** 31
+            return -(2**31) <= value < 2**31
         if self.type == "sint64":
-            return -(2 ** 63) <= value < 2 ** 63
+            return -(2**63) <= value < 2**63
 
         raise ValueError(f"Cannot check range bounds for {self.type}")
 
 
 class _MessageTypeMeta(type):
     def __init__(cls, name: str, bases: tuple, d: dict) -> None:
-        super().__init__(name, bases, d)  # type: ignore [Expected 1 positional]
+        super().__init__(name, bases, d)  # type: ignore [Expected 1 positional argument]
         if name != "MessageType":
-            cls.__init__ = MessageType.__init__  # type: ignore [Cannot assign member "__init__" for type "_MessageTypeMeta"]
+            cls.__init__ = MessageType.__init__  # type: ignore ["__init__" is obscured by a declaration of the same name;;Cannot assign member "__init__" for type "_MessageTypeMeta"]
 
 
 class MessageType(metaclass=_MessageTypeMeta):
     MESSAGE_WIRE_TYPE: Optional[int] = None
-    UNSTABLE: bool = False
 
     FIELDS: Dict[int, Field] = {}
 
@@ -550,9 +549,13 @@ def format_message(
 
         return repr(value)
 
-    return "{name} ({size} bytes) {content}".format(
+    try:
+        byte_size = str(pb.ByteSize()) + " bytes"
+    except Exception:
+        byte_size = "encoding failed"
+    return "{name} ({size}) {content}".format(
         name=pb.__class__.__name__,
-        size=pb.ByteSize(),
+        size=byte_size,
         content=pformat("", pb.__dict__, indent),
     )
 

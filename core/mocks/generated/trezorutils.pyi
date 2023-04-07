@@ -40,6 +40,39 @@ def halt(msg: str | None = None) -> None:
     """
     Halts execution.
     """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def firmware_hash(
+    challenge: bytes | None = None,
+    callback: Callable[[int, int], None] | None = None,
+) -> bytes:
+    """
+    Computes the Blake2s hash of the firmware with an optional challenge as
+    the key.
+    """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def firmware_vendor() -> str:
+    """
+    Returns the firmware vendor string from the vendor header.
+    """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def reboot_to_bootloader() -> None:
+    """
+    Reboots to bootloader.
+    """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def usb_data_connected() -> bool:
+    """
+    Returns whether USB has been enumerated/configured
+    (and is not just connected by cable without data pins)
+    """
 SCM_REVISION: bytes
 VERSION_MAJOR: int
 VERSION_MINOR: int

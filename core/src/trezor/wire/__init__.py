@@ -35,6 +35,9 @@ reads the message's header. When the message type is known the first handler is 
 
 """
 
+from micropython import const
+from typing import TYPE_CHECKING
+
 from storage.cache import InvalidSessionError
 from trezor import log, loop, protobuf, utils, workflow
 from trezor.enums import FailureType
@@ -46,7 +49,8 @@ from trezor.wire.errors import ActionCancelled, DataError, Error
 # other packages.
 from trezor.wire.errors import *  # isort:skip # noqa: F401,F403
 
-if False:
+
+if TYPE_CHECKING:
     from typing import (
         Any,
         Awaitable,
@@ -54,6 +58,7 @@ if False:
         Container,
         Coroutine,
         Iterable,
+        Protocol,
         TypeVar,
     )
     from trezorio import WireInterface
@@ -61,19 +66,6 @@ if False:
     Msg = TypeVar("Msg", bound=protobuf.MessageType)
     HandlerTask = Coroutine[Any, Any, protobuf.MessageType]
     Handler = Callable[["Context", Msg], HandlerTask]
-
-
-# If set to False protobuf messages marked with "unstable" option are rejected.
-experimental_enabled: bool = False
-
-
-def setup(iface: WireInterface, is_debug_session: bool = False) -> None:
-    """Initialize the wire stack on passed USB interface."""
-    loop.schedule(handle_session(iface, codec_v1.SESSION_ID, is_debug_session))
-
-
-if False:
-    from typing import Protocol, TypeVar
 
     LoadedMessageType = TypeVar("LoadedMessageType", bound=protobuf.MessageType)
 
@@ -94,6 +86,15 @@ if False:
         # XXX modify type signature so that the return value must be of the same type?
         async def wait(self, *tasks: Awaitable) -> Any:
             ...
+
+
+# If set to False protobuf messages marked with "experimental_message" option are rejected.
+experimental_enabled = False
+
+
+def setup(iface: WireInterface, is_debug_session: bool = False) -> None:
+    """Initialize the wire stack on passed USB interface."""
+    loop.schedule(handle_session(iface, codec_v1.SESSION_ID, is_debug_session))
 
 
 def _wrap_protobuf_load(
@@ -132,9 +133,13 @@ class DummyContext:
 
 DUMMY_CONTEXT = DummyContext()
 
-PROTOBUF_BUFFER_SIZE = 8192
+_PROTOBUF_BUFFER_SIZE = const(8192)
 
-WIRE_BUFFER = bytearray(PROTOBUF_BUFFER_SIZE)
+WIRE_BUFFER = bytearray(_PROTOBUF_BUFFER_SIZE)
+
+if __debug__:
+    PROTOBUF_BUFFER_SIZE_DEBUG = 1024
+    WIRE_BUFFER_DEBUG = bytearray(PROTOBUF_BUFFER_SIZE_DEBUG)
 
 
 class Context:
@@ -381,7 +386,12 @@ async def _handle_single_message(
 async def handle_session(
     iface: WireInterface, session_id: int, is_debug_session: bool = False
 ) -> None:
-    ctx = Context(iface, session_id, WIRE_BUFFER)
+    if __debug__ and is_debug_session:
+        ctx_buffer = WIRE_BUFFER_DEBUG
+    else:
+        ctx_buffer = WIRE_BUFFER
+
+    ctx = Context(iface, session_id, ctx_buffer)
     next_msg: codec_v1.Message | None = None
 
     if __debug__ and is_debug_session:

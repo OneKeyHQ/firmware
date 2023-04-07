@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -17,11 +17,11 @@
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from mnemonic import Mnemonic
 
-from . import MINIMUM_FIRMWARE_VERSION, exceptions, mapping, messages
+from . import exceptions, mapping, messages, models
 from .log import DUMP_BYTES
 from .messages import Capability
 from .tools import expect, parse_path, session
@@ -31,9 +31,10 @@ if TYPE_CHECKING:
     from .ui import TrezorClientUI
     from .transport import Transport
 
+UI = TypeVar("UI", bound="TrezorClientUI")
+
 LOG = logging.getLogger(__name__)
 
-VENDORS = ("bitcointrezor.com", "trezor.io", "onekey.so")
 MAX_PASSPHRASE_LENGTH = 50
 MAX_PIN_LENGTH = 9
 
@@ -71,39 +72,60 @@ def get_default_client(
     return TrezorClient(transport, ui, **kwargs)
 
 
-class TrezorClient:
+class TrezorClient(Generic[UI]):
     """Trezor client, a connection to a Trezor device.
 
     This class allows you to manage connection state, send and receive protobuf
     messages, handle user interactions, and perform some generic tasks
     (send a cancel message, initialize or clear a session, ping the device).
-
-    You have to provide a transport, i.e., a raw connection to the device. You can use
-    `trezorlib.transport.get_transport` to find one.
-
-    You have to provide an UI implementation for the three kinds of interaction:
-    - button request (notify the user that their interaction is needed)
-    - PIN request (on T1, ask the user to input numbers for a PIN matrix)
-    - passphrase request (ask the user to enter a passphrase)
-    See `trezorlib.ui` for details.
-
-    You can supply a `session_id` you might have saved in the previous session.
-    If you do, the user might not need to enter their passphrase again.
     """
 
     def __init__(
         self,
         transport: "Transport",
-        ui: "TrezorClientUI",
+        ui: UI,
         session_id: Optional[bytes] = None,
         derive_cardano: Optional[bool] = None,
+        model: Optional[models.TrezorModel] = None,
+        _init_device: bool = True,
     ) -> None:
+        """Create a TrezorClient instance.
+
+        You have to provide a `transport`, i.e., a raw connection to the device. You can
+        use `trezorlib.transport.get_transport` to find one.
+
+        You have to provide an UI implementation for the three kinds of interaction:
+        - button request (notify the user that their interaction is needed)
+        - PIN request (on T1, ask the user to input numbers for a PIN matrix)
+        - passphrase request (ask the user to enter a passphrase) See `trezorlib.ui` for
+          details.
+
+        You can supply a `session_id` you might have saved in the previous session. If
+        you do, the user might not need to enter their passphrase again.
+
+        You can provide Trezor model information. If not provided, it is detected from
+        the model name reported at initialization time.
+
+        By default, the instance will open a connection to the Trezor device, send an
+        `Initialize` message, set up the `features` field from the response, and connect
+        to a session. By specifying `_init_device=False`, this step is skipped. Notably,
+        this means that `client.features` is unset. Use `client.init_device()` or
+        `client.refresh_features()` to fix that, otherwise A LOT OF THINGS will break.
+        Only use this if you are _sure_ that you know what you are doing. This feature
+        might be removed at any time.
+        """
         LOG.info(f"creating client instance for device: {transport.get_path()}")
+        self.model = model
+        if self.model:
+            self.mapping = self.model.default_mapping
+        else:
+            self.mapping = mapping.DEFAULT_MAPPING
         self.transport = transport
         self.ui = ui
         self.session_counter = 0
         self.session_id = session_id
-        self.init_device(session_id=session_id, derive_cardano=derive_cardano)
+        if _init_device:
+            self.init_device(session_id=session_id, derive_cardano=derive_cardano)
 
     def open(self) -> None:
         if self.session_counter == 0:
@@ -130,7 +152,7 @@ class TrezorClient:
             f"sending message: {msg.__class__.__name__}",
             extra={"protobuf": msg},
         )
-        msg_type, msg_bytes = mapping.encode(msg)
+        msg_type, msg_bytes = self.mapping.encode(msg)
         LOG.log(
             DUMP_BYTES,
             f"encoded as type {msg_type} ({len(msg_bytes)} bytes): {msg_bytes.hex()}",
@@ -144,7 +166,7 @@ class TrezorClient:
             DUMP_BYTES,
             f"received type {msg_type} ({len(msg_bytes)} bytes): {msg_bytes.hex()}",
         )
-        msg = mapping.decode(msg_type, msg_bytes)
+        msg = self.mapping.decode(msg_type, msg_bytes)
         LOG.debug(
             f"received message: {msg.__class__.__name__}",
             extra={"protobuf": msg},
@@ -241,7 +263,14 @@ class TrezorClient:
 
     def _refresh_features(self, features: messages.Features) -> None:
         """Update internal fields based on passed-in Features message."""
-        if features.vendor not in VENDORS:
+
+        if not self.model:
+            # Trezor Model One bootloader 1.8.0 or older does not send model name
+            self.model = models.by_name(features.model or "1")
+            if self.model is None:
+                raise RuntimeError("Unsupported Trezor model")
+
+        if features.vendor not in self.model.vendors:
             raise RuntimeError("Unsupported device")
 
         self.features = features
@@ -340,9 +369,9 @@ class TrezorClient:
     def is_outdated(self) -> bool:
         if self.features.bootloader_mode:
             return False
-        model = self.features.model or "1"
-        required_version = MINIMUM_FIRMWARE_VERSION[model]
-        return self.version < required_version
+
+        assert self.model is not None  # should happen in _refresh_features
+        return self.version < self.model.minimum_version
 
     def check_firmware_version(self, warn_only: bool = False) -> None:
         if self.is_outdated():

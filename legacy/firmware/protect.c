@@ -65,6 +65,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
   bool timeout_flag = true;
 #if DEBUG_LINK
   bool debug_decided = false;
+  acked = false;
 #endif
 
   protectAbortedByTimeout = false;
@@ -90,7 +91,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
 
     // button acked - check buttons
     if (acked) {
-      usbSleep(5);
+      waitAndProcessUSBRequests(5);
       buttonUpdate();
       if (button.YesUp) {
         timeout_flag = false;
@@ -120,7 +121,7 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
     if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
       msg_tiny_id = 0xFFFF;
       DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
-      result = dld->yes_no;
+      result = dld->button;
       debug_decided = true;
     }
 
@@ -144,11 +145,12 @@ bool protectButton(ButtonRequestType type, bool confirm_only) {
 static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
                                  bool requset, uint32_t timeout_s) {
   ButtonRequest resp = {0};
-  bool acked = false;
+  bool acked = true;
   bool timeout_flag = true;
   uint8_t key = KEY_NULL;
 #if DEBUG_LINK
   bool debug_decided = false;
+  acked = false;
 #endif
 
   protectAbortedByTimeout = false;
@@ -164,8 +166,6 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
   if (timeout_s) {
     timer_out_set(timer_out_oper, timeout_s);
   }
-  if (g_bIsBixinAPP) acked = true;
-  acked = true;
 
   while (1) {
     if (timeout_s) {
@@ -207,10 +207,13 @@ static uint8_t _protectButton_ex(ButtonRequestType type, bool confirm_only,
     if (msg_tiny_id == MessageType_MessageType_DebugLinkDecision) {
       msg_tiny_id = 0xFFFF;
       DebugLinkDecision *dld = (DebugLinkDecision *)msg_tiny;
-      if (dld->yes_no) {
+      if (dld->button == DebugButton_YES) {
         key = KEY_CONFIRM;
+      } else if (dld->button == DebugButton_NO) {
+        key = KEY_CANCEL;
       }
       debug_decided = true;
+      timeout_flag = false;
     }
 
     if (acked && debug_decided) {
@@ -641,6 +644,12 @@ bool protectPassphrase(char *passphrase) {
       msg_tiny_id = 0xFFFF;
       break;
     }
+#if DEBUG_LINK
+    if (msg_tiny_id == MessageType_MessageType_DebugLinkGetState) {
+      msg_tiny_id = 0xFFFF;
+      fsm_msgDebugLinkGetState((DebugLinkGetState *)msg_tiny);
+    }
+#endif
   }
   usbTiny(0);
   layoutHome();
@@ -1313,21 +1322,15 @@ void enter_sleep(void) {
         sleep_count = 0;
         return;
       }
-    input_pin:
-      if (!protectPinOnDevice(false, false)) {
+      if (!protectPinOnDevice(false, true)) {
         if (device_sleep_state == SLEEP_REENTER) {
           goto sleep_loop;
         }
-        if (device_sleep_state == SLEEP_CANCEL_BY_BUTTON) {
-          device_sleep_state = SLEEP_ENTER;
-          goto input_pin;
-        }
-        if (device_sleep_state == SLEEP_CANCEL_BY_USB) {
-          device_sleep_state = SLEEP_NONE;
-          layoutHome();
-          sleep_count = 0;
-          return;
-        }
+
+        device_sleep_state = SLEEP_NONE;
+        layoutHome();
+        sleep_count = 0;
+        return;
       }
     }
   }

@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -39,8 +39,8 @@ BACKUP_TYPE = {
 }
 
 SD_PROTECT_OPERATIONS = {
-    "enable": messages.SdProtectOperationType.ENABLE,
-    "disable": messages.SdProtectOperationType.DISABLE,
+    "on": messages.SdProtectOperationType.ENABLE,
+    "off": messages.SdProtectOperationType.DISABLE,
     "refresh": messages.SdProtectOperationType.REFRESH,
 }
 
@@ -53,7 +53,10 @@ def cli() -> None:
 @cli.command()
 @with_client
 def self_test(client: "TrezorClient") -> str:
-    """Perform a self-test."""
+    """Perform a factory self-test.
+
+    Only available on PRODTEST firmware.
+    """
     return debuglink.self_test(client)
 
 
@@ -126,17 +129,25 @@ def load(
         if not label:
             label = "SLIP-0014"
 
-    return debuglink.load_device(
-        client,
-        mnemonic=list(mnemonic),
-        pin=pin,
-        passphrase_protection=passphrase_protection,
-        label=label,
-        language="en-US",
-        skip_checksum=ignore_checksum,
-        needs_backup=needs_backup,
-        no_backup=no_backup,
-    )
+    try:
+        return debuglink.load_device(
+            client,
+            mnemonic=list(mnemonic),
+            pin=pin,
+            passphrase_protection=passphrase_protection,
+            label=label,
+            language="en-US",
+            skip_checksum=ignore_checksum,
+            needs_backup=needs_backup,
+            no_backup=no_backup,
+        )
+    except exceptions.TrezorFailure as e:
+        if e.code == messages.FailureType.UnexpectedMessage:
+            raise click.ClickException(
+                "Unrecognized message. Make sure your Trezor is using debug firmware."
+            )
+        else:
+            raise
 
 
 @cli.command()
@@ -259,8 +270,8 @@ def sd_protect(
     device. The options are:
 
     \b
-    enable - Generate SD card secret and use it to protect the PIN and storage.
-    disable - Remove SD card secret protection.
+    on - Generate SD card secret and use it to protect the PIN and storage.
+    off - Remove SD card secret protection.
     refresh - Replace the current SD card secret with a new one.
     """
     if client.features.model == "1":
@@ -278,11 +289,34 @@ def reboot_to_bootloader(obj: "TrezorConnection") -> str:
     # avoid using @with_client because it closes the session afterwards,
     # which triggers double prompt on device
     with obj.client_context() as client:
-        if client.features.model != "1":
-            click.echo(
-                f"Warning: Rebooting into bootloader not supported on Trezor {client.features.model}"
-            )
         return device.reboot_to_bootloader(client)
+
+
+@cli.command()
+@click.argument("enable", type=ChoiceType({"on": True, "off": False}), required=False)
+@click.option(
+    "-e",
+    "--expiry",
+    type=int,
+    help="Dialog expiry in seconds.",
+)
+@with_client
+def set_busy(
+    client: "TrezorClient", enable: Optional[bool], expiry: Optional[int]
+) -> str:
+    """Show a "Do not disconnect" dialog."""
+    if enable is False:
+        return device.set_busy(client, None)
+
+    if expiry is None:
+        raise click.ClickException("Missing option '-e' / '--expiry'.")
+
+    if expiry <= 0:
+        raise click.ClickException(
+            f"Invalid value for '-e' / '--expiry': '{expiry}' is not a positive integer."
+        )
+
+    return device.set_busy(client, expiry * 1000)
 
 
 @cli.command()

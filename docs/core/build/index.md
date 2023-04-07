@@ -1,5 +1,7 @@
 # Build
 
+_Building for Trezor Model One? See the [legacy](../../legacy/index.md) documentation._
+
 ## New Project
 
 Run the following to checkout the project:
@@ -23,7 +25,7 @@ If you are building from an existing checkout, do not forget to refresh the subm
 
 ```sh
 git submodule update --init --recursive --force
-poetry install
+poetry install --remove-untracked
 ```
 
 ## Poetry

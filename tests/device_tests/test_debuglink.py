@@ -17,42 +17,47 @@
 import pytest
 
 from trezorlib import debuglink, device, messages, misc
+from trezorlib.debuglink import TrezorClientDebugLink as Client
+from trezorlib.tools import parse_path
 from trezorlib.transport import udp
 
 from ..common import MNEMONIC12
 
 
 @pytest.mark.skip_t2
-class TestDebuglink:
-    def test_layout(self, client):
-        layout = client.debug.state().layout
-        assert len(layout) == 1024
+def test_layout(client: Client):
+    layout = client.debug.state().layout
+    assert len(layout) == 1024
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12)
-    def test_mnemonic(self, client):
-        client.ensure_unlocked()
-        mnemonic = client.debug.state().mnemonic_secret
-        assert mnemonic == MNEMONIC12.encode()
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12, pin="1234", passphrase="")
-    def test_pin(self, client):
-        resp = client.call_raw(messages.GetAddress())
-        assert isinstance(resp, messages.PinMatrixRequest)
+@pytest.mark.skip_t2
+@pytest.mark.setup_client(mnemonic=MNEMONIC12)
+def test_mnemonic(client: Client):
+    client.ensure_unlocked()
+    mnemonic = client.debug.state().mnemonic_secret
+    assert mnemonic == MNEMONIC12.encode()
 
-        state = client.debug.state()
-        assert state.pin == "1234"
-        assert state.matrix != ""
 
-        pin_encoded = client.debug.encode_pin("1234")
-        resp = client.call_raw(messages.PinMatrixAck(pin=pin_encoded))
-        assert isinstance(resp, messages.PassphraseRequest)
+@pytest.mark.skip_t2
+@pytest.mark.setup_client(mnemonic=MNEMONIC12, pin="1234", passphrase="")
+def test_pin(client: Client):
+    resp = client.call_raw(messages.GetAddress(address_n=parse_path("m/44'/0'/0'/0/0")))
+    assert isinstance(resp, messages.PinMatrixRequest)
 
-        resp = client.call_raw(messages.PassphraseAck(passphrase=""))
-        assert isinstance(resp, messages.Address)
+    state = client.debug.state()
+    assert state.pin == "1234"
+    assert state.matrix != ""
+
+    pin_encoded = client.debug.encode_pin("1234")
+    resp = client.call_raw(messages.PinMatrixAck(pin=pin_encoded))
+    assert isinstance(resp, messages.PassphraseRequest)
+
+    resp = client.call_raw(messages.PassphraseAck(passphrase=""))
+    assert isinstance(resp, messages.Address)
 
 
 @pytest.mark.skip_t1
-def test_softlock_instability(client):
+def test_softlock_instability(client: Client):
     def load_device():
         debuglink.load_device(
             client,

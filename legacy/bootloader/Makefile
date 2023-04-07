@@ -3,8 +3,8 @@ BOOT_BUILD_DATE=$(shell date "+%m%d")
 BUILD_COMMIT=$(shell git rev-parse HEAD | cut -c1-7)
 NAME  = bootloader.$(BOOT_BUILD_VERSION)-Stable-$(BOOT_BUILD_DATE)-$(BUILD_COMMIT)
 
+OBJS += startup.o
 OBJS += bootloader.o
-OBJS += signatures.o
 OBJS += usb.o
 
 ifneq ($(ONEKEY_MINI),1)
@@ -27,7 +27,8 @@ CFLAGS += -DFONT_SKIP_FIXED=1
 endif
 OBJS += ../gen/fonts.small.o
 
-# overrides from trezor-crypto
+# Overrides from trezor-crypto
+CFLAGS += -DUSE_PRECOMPUTED_CP=0
 CFLAGS += -DUSE_PRECOMPUTED_IV=0
 CFLAGS += -DUSE_PRECOMPUTED_CP=0
 OBJS += ../vendor/trezor-crypto/bignum.small.o
@@ -41,5 +42,7 @@ OPTFLAGS ?= -Os
 
 include ../Makefile.include
 
-align: $(NAME).bin
-	./firmware_align.py $(NAME).bin
+bootloader.bin: $(NAME).bin
+	./firmware_align.py $< $@
+
+all: bootloader.bin

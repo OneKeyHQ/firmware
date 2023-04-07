@@ -550,7 +550,7 @@ char usbTiny(char set) {
   return old;
 }
 
-void usbSleep(uint32_t millis) {
+void waitAndProcessUSBRequests(uint32_t millis) {
   uint32_t start = timer_ms();
 
   while ((timer_ms() - start) < millis) {
@@ -576,3 +576,23 @@ void usb_u2f_response(void) {
 }
 
 #endif
+
+void usbFlush(uint32_t millis) {
+  if (usbd_dev == NULL) {
+    return;
+  }
+
+  static const uint8_t *data;
+  data = msg_out_data();
+  if (data) {
+    while (usbd_ep_write_packet(usbd_dev, ENDPOINT_ADDRESS_MAIN_IN, data,
+                                USB_PACKET_SIZE) != USB_PACKET_SIZE) {
+    }
+  }
+
+  uint32_t start = timer_ms();
+
+  while ((timer_ms() - start) < millis) {
+    asm("nop");
+  }
+}

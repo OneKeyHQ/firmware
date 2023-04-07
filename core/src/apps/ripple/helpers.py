@@ -1,7 +1,5 @@
 from micropython import const
 
-from trezor.crypto.hashlib import ripemd160, sha256
-
 from . import base58_ripple
 
 # HASH_TX_ID = const(0x5458_4E00)  # 'TXN'
@@ -19,7 +17,7 @@ MAX_FEE = const(1_000_000)  # equals 1 XRP
 # the value in docs is in XRP, we declare it here in drops
 MAX_ALLOWED_AMOUNT = const(100_000_000_000_000_000)
 
-FLAG_FULLY_CANONICAL = 0x8000_0000
+FLAG_FULLY_CANONICAL = const(0x8000_0000)
 
 
 def address_from_public_key(pubkey: bytes) -> str:
@@ -36,6 +34,9 @@ def address_from_public_key(pubkey: bytes) -> str:
 
     Returns the Ripple address created using base58
     """
+    # NOTE: local imports here saves 8 bytes
+    from trezor.crypto.hashlib import ripemd160, sha256
+
     h = sha256(pubkey).digest()
     h = ripemd160(h).digest()
 
@@ -45,7 +46,7 @@ def address_from_public_key(pubkey: bytes) -> str:
     return base58_ripple.encode_check(bytes(address))
 
 
-def decode_address(address: str):
+def decode_address(address: str) -> bytes:
     """Returns so called Account ID"""
     adr = base58_ripple.decode_check(address)
     return adr[1:]

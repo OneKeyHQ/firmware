@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "trans_fifo.h"
+
 #define BLE_NAME_LEN 0x12
 #define BLE_ADV_OFF 0x00
 #define BLE_ADV_ON 0x01
@@ -30,6 +32,7 @@ void ble_request_info(uint8_t type);
 void ble_ctl_onoff(void);
 void ble_reset(void);
 void ble_uart_poll(void);
+void ble_update_poll(void);
 
 #if !EMULATOR
 bool ble_is_enable(void);

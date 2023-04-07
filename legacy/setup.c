@@ -327,7 +327,7 @@ void mpu_config_bootloader(void) {
 
 // Never use in bootloader! Disables access to PPB (including MPU, NVIC, SCB)
 void mpu_config_firmware(void) {
-#if MEMORY_PROTECT
+#if PRODUCTION || BOOTLOADER_QA
   // Disable MPU
   MPU_CTRL = 0;
 
@@ -336,7 +336,7 @@ void mpu_config_firmware(void) {
   // Flash (0x08000000 - 0x0807FFFF, 1 MiB, read-only)
   MPU_RBAR = FLASH_BASE | MPU_RBAR_VALID | (0 << MPU_RBAR_REGION_LSB);
   MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_ATTR_FLASH | MPU_RASR_SIZE_1MB |
-             MPU_RASR_ATTR_AP_PRO_URO;
+             MPU_RASR_ATTR_AP_PRW_URW;
 
   // Metadata in Flash is read-write when unlocked
   // (0x08008000 - 0x0800FFFF, 32 KiB, read-write, execute never)
@@ -350,7 +350,7 @@ void mpu_config_firmware(void) {
   MPU_RBAR =
       (FLASH_BASE + 0xC0000) | MPU_RBAR_VALID | (2 << MPU_RBAR_REGION_LSB);
   MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_ATTR_FLASH | MPU_RASR_SIZE_128KB |
-             MPU_RASR_ATTR_AP_PRW_URW | MPU_RASR_ATTR_XN;
+             MPU_RASR_ATTR_AP_PRW_URW;
 
   // SRAM (0x20000000 - 0x2001FFFF, read-write, execute never)
   MPU_RBAR = SRAM_BASE | MPU_RBAR_VALID | (3 << MPU_RBAR_REGION_LSB);

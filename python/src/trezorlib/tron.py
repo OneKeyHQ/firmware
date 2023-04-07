@@ -17,7 +17,7 @@
 from typing import TYPE_CHECKING, AnyStr
 
 from . import messages
-from .tools import expect, normalize_nfc, session
+from .tools import expect, prepare_message_bytes, session
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -43,7 +43,7 @@ def sign_message(
     return client.call(
         messages.TronSignMessage(
             address_n=n,
-            message=normalize_nfc(message),
+            message=prepare_message_bytes(message),
         )
     )
 

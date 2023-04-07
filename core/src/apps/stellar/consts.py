@@ -1,9 +1,9 @@
 from micropython import const
+from typing import TYPE_CHECKING
 
 from trezor.enums import MessageType
 
-if False:
-    from typing import Union
+if TYPE_CHECKING:
     from trezor import protobuf
 
     from trezor.messages import (
@@ -22,21 +22,21 @@ if False:
         StellarSetOptionsOp,
     )
 
-    StellarMessageType = Union[
-        StellarAccountMergeOp,
-        StellarAllowTrustOp,
-        StellarBumpSequenceOp,
-        StellarChangeTrustOp,
-        StellarCreateAccountOp,
-        StellarCreatePassiveSellOfferOp,
-        StellarManageDataOp,
-        StellarManageBuyOfferOp,
-        StellarManageSellOfferOp,
-        StellarPathPaymentStrictReceiveOp,
-        StellarPathPaymentStrictSendOp,
-        StellarPaymentOp,
-        StellarSetOptionsOp,
-    ]
+    StellarMessageType = (
+        StellarAccountMergeOp
+        | StellarAllowTrustOp
+        | StellarBumpSequenceOp
+        | StellarChangeTrustOp
+        | StellarCreateAccountOp
+        | StellarCreatePassiveSellOfferOp
+        | StellarManageDataOp
+        | StellarManageBuyOfferOp
+        | StellarManageSellOfferOp
+        | StellarPathPaymentStrictReceiveOp
+        | StellarPathPaymentStrictSendOp
+        | StellarPaymentOp
+        | StellarSetOptionsOp
+    )
 
 
 TX_TYPE = b"\x00\x00\x00\x02"
@@ -59,26 +59,6 @@ op_codes: dict[int, int] = {
     MessageType.StellarSetOptionsOp: 5,
 }
 
-op_wire_types = [
-    MessageType.StellarAccountMergeOp,
-    MessageType.StellarAllowTrustOp,
-    MessageType.StellarBumpSequenceOp,
-    MessageType.StellarChangeTrustOp,
-    MessageType.StellarCreateAccountOp,
-    MessageType.StellarCreatePassiveSellOfferOp,
-    MessageType.StellarManageDataOp,
-    MessageType.StellarManageBuyOfferOp,
-    MessageType.StellarManageSellOfferOp,
-    MessageType.StellarPathPaymentStrictReceiveOp,
-    MessageType.StellarPathPaymentStrictSendOp,
-    MessageType.StellarPaymentOp,
-    MessageType.StellarSetOptionsOp,
-]
-
-# https://github.com/stellar/go/blob/e0ffe19f58879d3c31e2976b97a5bf10e13a337b/xdr/xdr_generated.go#L584
-ASSET_TYPE_NATIVE = const(0)
-ASSET_TYPE_ALPHANUM4 = const(1)
-ASSET_TYPE_ALPHANUM12 = const(2)
 
 # https://www.stellar.org/developers/guides/concepts/accounts.html#balance
 # https://github.com/stellar/go/blob/3d2c1defe73dbfed00146ebe0e8d7e07ce4bb1b6/amount/main.go#L23
@@ -99,4 +79,5 @@ def get_op_code(msg: protobuf.MessageType) -> int:
     wire = msg.MESSAGE_WIRE_TYPE
     if wire not in op_codes:
         raise ValueError("Stellar: op code unknown")
+    assert isinstance(wire, int)
     return op_codes[wire]

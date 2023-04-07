@@ -4,10 +4,7 @@
 
 from trezor import protobuf
 
-if False:
-    from typing import TYPE_CHECKING, Any, TypeGuard
-else:
-    TYPE_CHECKING = False
+from typing import Any, TYPE_CHECKING
 
 
 def __getattr__(name: str) -> Any:
@@ -18,6 +15,7 @@ def __getattr__(name: str) -> Any:
 
 
 if TYPE_CHECKING:
+    from typing import TypeGuard
 % for enum in sorted(enums, key=lambda e: e.name):
     from trezor.enums import ${enum.name}  # noqa: F401
 % endfor
@@ -61,6 +59,6 @@ def member_type(field):
 % endif  # if fields
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["${message.name}"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["${message.name}"]:
             return isinstance(msg, cls)
 % endfor

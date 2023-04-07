@@ -26,13 +26,13 @@
 #include "bootloader.h"
 #include "buttons.h"
 #include "compiler_traits.h"
+#include "fw_signatures.h"
 #include "layout.h"
 #include "layout_boot.h"
 #include "memory.h"
 #include "oled.h"
 #include "rng.h"
 #include "setup.h"
-#include "signatures.h"
 #include "supervise.h"
 #include "sys.h"
 #include "usb.h"
@@ -77,6 +77,12 @@ void show_unplug(const char *line1, const char *line2) {
 
 #if !ONEKEY_MINI
 static void show_unofficial_warning(const uint8_t *hash) {
+// On production bootloader, show warning and wait for user
+// to accept or reject it
+// On non-production we only use unofficial firmwares,
+// so just show hash for a while to see bootloader started
+// but continue
+#if PRODUCTION
   layoutDialog(&bmp_icon_warning, "Abort", "I'll take the risk", NULL,
                "WARNING!", NULL, "Unofficial firmware", "detected.", NULL,
                NULL);
@@ -94,6 +100,10 @@ static void show_unofficial_warning(const uint8_t *hash) {
   }
 
   // everything is OK, user pressed 2x Continue -> continue program
+#else
+  layoutFirmwareFingerprint(hash);
+  delay(100000000);
+#endif
 }
 #endif
 
@@ -111,102 +121,90 @@ static void bootloader_loop(void) { usbLoop(); }
 const char *cpu_info;
 
 int main(void) {
+  // grab "stay in bootloader" flag as soon as possible
+  register uint32_t r11 __asm__("r11");
+  volatile uint32_t stay_in_bootloader_flag = r11;
+
   static bool force_boot = false;
   if (memcmp((uint8_t *)(ST_RAM_END - 4), "boot", 4) == 0) {
     force_boot = true;
   }
 
-  if (force_boot) {
-    setReboot();
-    __stack_chk_guard = random32();  // this supports compiler provided
-// unpredictable stack protection check
-#if !ONEKEY_MINI
-    buttonsIrqInit();
-    timer_init();
-    register_timer("button", timer1s / 2, buttonsTimer);
-#endif
-    mpu_config_bootloader();
-  } else {
+  if (stay_in_bootloader_flag == STAY_IN_BOOTLOADER_FLAG) {
+    force_boot = true;
+  }
+
 #ifndef APPVER
-    setup();
+  setup();
 #endif
-    __stack_chk_guard = random32();  // this supports compiler provided
-                                     // unpredictable stack protection checks
+  __stack_chk_guard = random32();  // this supports compiler provided
+                                   // unpredictable stack protection checks
 #ifndef APPVER
-    oledInit();
+  oledInit();
 #if ONEKEY_MINI
+  oledClear();
+  // fix starting flower screen
+  oledDrawBitmap(52, 52, &bmp_boot_icon);
+  oledRefresh();
+  oledBackligthCtl(true);
+#endif
+#if ONEKEY_MINI
+  device_init();
+  w25qxx_init();
+  atca_init();
+#else
+  sys_poweron();
+  buttonsIrqInit();
+  timer_init();
+  register_timer("button", timer1s / 2, buttonsTimer);
+#endif
+
+  memory_protect();
+
+  uint32_t idcode = *(uint32_t *)DBGMCU_IDCODE & 0xFFF;
+  if (idcode == 0x411) {
+    cpu_info = "STM32F2XX";
+  } else if (idcode == 0x413) {
+    cpu_info = "STM32F4XX";
+  } else {
+    cpu_info = "unknown-";
+  }
+
+#endif
+  mpu_config_bootloader();
+#ifndef APPVER
+
+#if ONEKEY_MINI
+  bool boot_button_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
+
+  if (!boot_button_pressed && !force_boot) {
+    update_from_spi_flash(false);
+  }
+#else
+  bool boot_button_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
+#endif
+
+  if (firmware_present_new() && !boot_button_pressed && !force_boot) {
     oledClear();
-    // fix starting flower screen
     oledDrawBitmap(52, 52, &bmp_boot_icon);
     oledRefresh();
-    oledBackligthCtl(true);
-#endif
-#if ONEKEY_MINI
-    device_init();
-    w25qxx_init();
-    atca_init();
-#else
-    sys_poweron();
-    buttonsIrqInit();
-    timer_init();
-    register_timer("button", timer1s / 2, buttonsTimer);
-#endif
+    const image_header *hdr =
+        (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
 
-    memory_protect();
-
-    uint32_t idcode = *(uint32_t *)DBGMCU_IDCODE & 0xFFF;
-    if (idcode == 0x411) {
-      cpu_info = "STM32F2XX";
-    } else if (idcode == 0x413) {
-      cpu_info = "STM32F4XX";
-    } else {
-      cpu_info = "unkown-";
+    uint8_t fingerprint[32] = {0};
+    int signed_firmware = signatures_match(hdr, fingerprint);
+    if (SIG_OK != signed_firmware) {
+      show_halt("Unofficial firmware", "aborted.");
     }
 
-#endif
-    mpu_config_bootloader();
-#ifndef APPVER
-
-#if ONEKEY_MINI
-    bool boot_button_pressed = (buttonRead() & BTN_PIN_FUNC) == 0;
-
-    if (!boot_button_pressed && !force_boot) {
-      update_from_spi_flash(false);
+    if (SIG_OK != check_firmware_hashes(hdr)) {
+      show_halt("Broken firmware", "detected.");
     }
-#else
-    bool boot_button_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
-#endif
+    mpu_config_off();
 
-    if (firmware_present_new() && !boot_button_pressed && !force_boot) {
-      oledClear();
-#if ONEKEY_MINI
-      oledDrawBitmap(52, 52, &bmp_boot_icon);
-#else
-      oledDrawBitmap(28, 21, &bmp_launch_icon);
-#endif
-      oledRefresh();
-      const image_header *hdr =
-          (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
-
-      uint8_t fingerprint[32] = {0};
-      int signed_firmware = signatures_new_ok(hdr, fingerprint);
-      if (SIG_OK != signed_firmware) {
-#if !ONEKEY_MINI
-        show_unofficial_warning(fingerprint);
-#else
-        show_halt("Unofficial firmware", "aborted.");
-#endif
-      }
-
-      if (SIG_OK != check_firmware_hashes(hdr)) {
-        show_halt("Broken firmware", "detected.");
-      }
-      mpu_config_off();
-
-      load_app(signed_firmware);
-    }
-#endif
+    load_app(signed_firmware);
   }
+#endif
 
   layoutBootHome();
   bootloader_loop();

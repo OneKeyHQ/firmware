@@ -10,15 +10,23 @@ def format_amount(amount: int, decimals: int) -> str:
         sign = "-"
     else:
         sign = ""
-    d = pow(10, decimals)
-    s = f"{sign}{amount // d}.{amount % d:0{decimals}}".rstrip("0").rstrip(".")
+    d = 10**decimals
+    integer = amount // d
+    decimal = amount % d
+
+    # TODO: bug in mpz: https://github.com/micropython/micropython/issues/8984
+    grouped_integer = f"{integer:,}".lstrip(",")
+
+    s = f"{sign}{grouped_integer}.{decimal:0{decimals}}".rstrip("0").rstrip(".")
     return s
 
 
-def format_ordinal(number: int) -> str:
-    return str(number) + {1: "st", 2: "nd", 3: "rd"}.get(
-        4 if 10 <= number % 100 < 20 else number % 10, "th"
-    )
+if False:  # noqa
+
+    def format_ordinal(number: int) -> str:
+        return str(number) + {1: "st", 2: "nd", 3: "rd"}.get(
+            4 if 10 <= number % 100 < 20 else number % 10, "th"
+        )
 
 
 def format_plural(string: str, count: int, plural: str) -> str:

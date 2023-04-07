@@ -88,7 +88,7 @@ void __attribute__((noinline, noreturn, section(".data#")))
 reboot_device(void) {
   __disable_irq();
   *STAY_IN_BOOTLOADER_FLAG_ADDR = STAY_IN_BOOTLOADER_FLAG;
-  SCB_AIRCR = SCB_AIRCR_VECTKEY | SCB_AIRCR_SYSRESETREQ;
+  SCB_AIRCR = SCB_AIRCR_VECTKEY | SCB_AIRCR_VECTRESET;
   while (1)
     ;
 }
@@ -108,9 +108,11 @@ int main(void) {
   __stack_chk_guard = random32();  // this supports compiler provided
                                    // unpredictable stack protection checks
   oledInit();
+
   if (is_mode_unprivileged()) {
     layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "Cannot update", NULL,
                  NULL, "Unprivileged mode", "Unsigned firmware", NULL);
+    delay_ms(1000);
     shutdown();
   }
 

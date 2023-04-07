@@ -14,9 +14,12 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+from typing import Iterator
+
 import pytest
 
-from trezorlib import MINIMUM_FIRMWARE_VERSION, btc, device, mapping, messages, protobuf
+from trezorlib import btc, device, mapping, messages, models, protobuf
+from trezorlib._internal.emulator import Emulator
 from trezorlib.tools import parse_path
 
 from ..emulators import EmulatorWrapper
@@ -36,11 +39,11 @@ class ApplySettingsCompat(protobuf.MessageType):
     }
 
 
-mapping.map_class_to_type[ApplySettingsCompat] = ApplySettingsCompat.MESSAGE_WIRE_TYPE
+mapping.DEFAULT_MAPPING.register(ApplySettingsCompat)
 
 
 @pytest.fixture
-def emulator(gen, tag):
+def emulator(gen: str, tag: str) -> Iterator[Emulator]:
     with EmulatorWrapper(gen, tag) as emu:
         # set up a passphrase-protected device
         device.reset(
@@ -57,10 +60,10 @@ def emulator(gen, tag):
 
 
 @for_all(
-    core_minimum_version=MINIMUM_FIRMWARE_VERSION["T"],
-    legacy_minimum_version=MINIMUM_FIRMWARE_VERSION["1"],
+    core_minimum_version=models.TREZOR_T.minimum_version,
+    legacy_minimum_version=models.TREZOR_ONE.minimum_version,
 )
-def test_passphrase_works(emulator):
+def test_passphrase_works(emulator: Emulator):
     """Check that passphrase handling in trezorlib works correctly in all versions."""
     if emulator.client.features.model == "T" and emulator.client.version < (2, 3, 0):
         expected_responses = [
@@ -92,10 +95,10 @@ def test_passphrase_works(emulator):
 
 
 @for_all(
-    core_minimum_version=MINIMUM_FIRMWARE_VERSION["T"],
+    core_minimum_version=models.TREZOR_T.minimum_version,
     legacy_minimum_version=(1, 9, 0),
 )
-def test_init_device(emulator):
+def test_init_device(emulator: Emulator):
     """Check that passphrase caching and session_id retaining works correctly across
     supported versions.
     """

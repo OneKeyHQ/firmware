@@ -367,7 +367,7 @@ static void confluxFormatAmount(const bignum256 *amnt,
     decimals = 0;
   } else {
     suffix = " CFX";
-    bn_format(amnt, NULL, suffix, decimals, 0, false, buf, buflen);
+    bn_format(amnt, NULL, suffix, decimals, 0, false, 0, buf, buflen);
     // Take 5 decimal places(ref coinmarkercap).
     // Note that there may be a loss of precision between the real price value
     // and what is shown to the user
@@ -380,7 +380,7 @@ static void confluxFormatAmount(const bignum256 *amnt,
     }
     return;
   }
-  bn_format(amnt, NULL, suffix, decimals, 0, false, buf, buflen);
+  bn_format(amnt, NULL, suffix, decimals, 0, false, 0, buf, buflen);
 }
 
 static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,

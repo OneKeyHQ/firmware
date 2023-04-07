@@ -5,8 +5,8 @@
 #include "../atca/se_atca.h"
 #include "buttons.h"
 #include "device.h"
+#include "fw_signatures.h"
 #include "memory.h"
-#include "signatures.h"
 #include "util.h"
 #include "w25qxx.h"
 
@@ -169,8 +169,12 @@ void layoutBootHome(void) {
   if (layoutNeedRefresh()) {
     oledClear();
     oledDrawBitmap(30, 20, &bmp_home_logo);
-    oledDrawStringCenter(85, 20, PRODUCT_STRING, FONT_STANDARD);
+    oledDrawStringCenter(85, 20, "OneKey", FONT_STANDARD);
+#if BOOTLOADER_QA
+    oledDrawStringCenter(85, 30, "Bootloader-QA", FONT_STANDARD);
+#else
     oledDrawStringCenter(85, 30, "Bootloader", FONT_STANDARD);
+#endif
     oledDrawStringCenter(85, 40,
                          VERSTR(VERSION_MAJOR) "." VERSTR(
                              VERSION_MINOR) "." VERSTR(VERSION_PATCH),
