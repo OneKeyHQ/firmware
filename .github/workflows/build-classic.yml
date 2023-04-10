@@ -52,6 +52,7 @@ jobs:
           path: |
             ./legacy/firmware/classic*Stable*.bin
             ./legacy/bootloader/bootloader*Stable*.bin
+            ./legacy/intermediate_fw/classic*.bin
 
       - name: "Notify to Slack"
         uses: onekeyhq/actions/notice-slack-app-update@main
