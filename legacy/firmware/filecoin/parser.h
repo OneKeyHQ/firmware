@@ -7,6 +7,9 @@
 #define LESS_THAN_64_DIGIT(num_digit) \
   if (num_digit > 64) return parser_value_out_of_range;
 
+#define LESS_THAN_32_DIGIT(num_digit) \
+  if (num_digit > 32) return parser_value_out_of_range;
+
 extern bool bignumBigEndian_bcdprint(char *outBuffer, uint16_t outBufferLen,
                                      const uint8_t *bcdIn, uint16_t bcdInLen);
 extern void bignumBigEndian_to_bcd(uint8_t *bcdOut, uint16_t bcdOutLen,
