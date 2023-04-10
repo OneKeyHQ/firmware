@@ -57,6 +57,7 @@ if TYPE_CHECKING:
     from trezor.enums import StellarSignerType  # noqa: F401
     from trezor.enums import TezosBallotType  # noqa: F401
     from trezor.enums import TezosContractType  # noqa: F401
+    from trezor.enums import TronResourceCode  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
 
     class AlgorandGetAddress(protobuf.MessageType):
@@ -5801,6 +5802,74 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["NEMCosignatoryModification"]:
             return isinstance(msg, cls)
 
+    class PolkadotGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        prefix: "int"
+        network: "str"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            prefix: "int",
+            network: "str",
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotGetAddress"]:
+            return isinstance(msg, cls)
+
+    class PolkadotAddress(protobuf.MessageType):
+        address: "str | None"
+        public_key: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+            public_key: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotAddress"]:
+            return isinstance(msg, cls)
+
+    class PolkadotSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_tx: "bytes"
+        network: "str"
+
+        def __init__(
+            self,
+            *,
+            raw_tx: "bytes",
+            network: "str",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotSignTx"]:
+            return isinstance(msg, cls)
+
+    class PolkadotSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotSignedTx"]:
+            return isinstance(msg, cls)
+
     class RippleGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
@@ -6965,12 +7034,16 @@ if TYPE_CHECKING:
 
     class TronContract(protobuf.MessageType):
         transfer_contract: "TronTransferContract | None"
+        freeze_balance_contract: "TronFreezeBalanceContract | None"
+        unfreeze_balance_contract: "TronUnfreezeBalanceContract | None"
         trigger_smart_contract: "TronTriggerSmartContract | None"
 
         def __init__(
             self,
             *,
             transfer_contract: "TronTransferContract | None" = None,
+            freeze_balance_contract: "TronFreezeBalanceContract | None" = None,
+            unfreeze_balance_contract: "TronUnfreezeBalanceContract | None" = None,
             trigger_smart_contract: "TronTriggerSmartContract | None" = None,
         ) -> None:
             pass
@@ -7015,6 +7088,42 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronTriggerSmartContract"]:
+            return isinstance(msg, cls)
+
+    class TronFreezeBalanceContract(protobuf.MessageType):
+        frozen_balance: "int | None"
+        frozen_duration: "int | None"
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            frozen_balance: "int | None" = None,
+            frozen_duration: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronFreezeBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronUnfreezeBalanceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronUnfreezeBalanceContract"]:
             return isinstance(msg, cls)
 
     class WebAuthnListResidentCredentials(protobuf.MessageType):

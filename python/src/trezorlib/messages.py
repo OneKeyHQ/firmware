@@ -309,6 +309,10 @@ class MessageType(IntEnum):
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
+    PolkadotGetAddress = 11000
+    PolkadotAddress = 11001
+    PolkadotSignTx = 11002
+    PolkadotSignedTx = 11003
     SuiGetAddress = 11100
     SuiAddress = 11101
     SuiSignTx = 11102
@@ -631,6 +635,11 @@ class TezosBallotType(IntEnum):
     Yay = 0
     Nay = 1
     Pass = 2
+
+
+class TronResourceCode(IntEnum):
+    BANDWIDTH = 0
+    ENERGY = 1
 
 
 class AlgorandGetAddress(protobuf.MessageType):
@@ -7321,6 +7330,80 @@ class NEMCosignatoryModification(protobuf.MessageType):
         self.public_key = public_key
 
 
+class PolkadotGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11000
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("prefix", "uint32", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
+        4: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        prefix: "int",
+        network: "str",
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.prefix = prefix
+        self.network = network
+        self.show_display = show_display
+
+
+class PolkadotAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11001
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False),
+        2: protobuf.Field("public_key", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+        public_key: Optional["str"] = None,
+    ) -> None:
+        self.address = address
+        self.public_key = public_key
+
+
+class PolkadotSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11002
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_tx: "bytes",
+        network: "str",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_tx = raw_tx
+        self.network = network
+
+
+class PolkadotSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11003
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
+
+
 class RippleGetAddress(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 400
     FIELDS = {
@@ -8636,6 +8719,8 @@ class TronContract(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
         2: protobuf.Field("transfer_contract", "TronTransferContract", repeated=False, required=False),
+        11: protobuf.Field("freeze_balance_contract", "TronFreezeBalanceContract", repeated=False, required=False),
+        12: protobuf.Field("unfreeze_balance_contract", "TronUnfreezeBalanceContract", repeated=False, required=False),
         31: protobuf.Field("trigger_smart_contract", "TronTriggerSmartContract", repeated=False, required=False),
     }
 
@@ -8643,9 +8728,13 @@ class TronContract(protobuf.MessageType):
         self,
         *,
         transfer_contract: Optional["TronTransferContract"] = None,
+        freeze_balance_contract: Optional["TronFreezeBalanceContract"] = None,
+        unfreeze_balance_contract: Optional["TronUnfreezeBalanceContract"] = None,
         trigger_smart_contract: Optional["TronTriggerSmartContract"] = None,
     ) -> None:
         self.transfer_contract = transfer_contract
+        self.freeze_balance_contract = freeze_balance_contract
+        self.unfreeze_balance_contract = unfreeze_balance_contract
         self.trigger_smart_contract = trigger_smart_contract
 
 
@@ -8690,6 +8779,46 @@ class TronTriggerSmartContract(protobuf.MessageType):
         self.data = data
         self.call_token_value = call_token_value
         self.asset_id = asset_id
+
+
+class TronFreezeBalanceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("frozen_balance", "uint64", repeated=False, required=False),
+        2: protobuf.Field("frozen_duration", "uint64", repeated=False, required=False),
+        3: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False),
+        4: protobuf.Field("receiver_address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        frozen_balance: Optional["int"] = None,
+        frozen_duration: Optional["int"] = None,
+        resource: Optional["TronResourceCode"] = None,
+        receiver_address: Optional["str"] = None,
+    ) -> None:
+        self.frozen_balance = frozen_balance
+        self.frozen_duration = frozen_duration
+        self.resource = resource
+        self.receiver_address = receiver_address
+
+
+class TronUnfreezeBalanceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False),
+        2: protobuf.Field("receiver_address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        resource: Optional["TronResourceCode"] = None,
+        receiver_address: Optional["str"] = None,
+    ) -> None:
+        self.resource = resource
+        self.receiver_address = receiver_address
 
 
 class WebAuthnListResidentCredentials(protobuf.MessageType):

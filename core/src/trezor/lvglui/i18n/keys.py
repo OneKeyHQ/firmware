@@ -1320,4 +1320,48 @@ SUBTITLE__SIGN_STR_TYPED_HASH = 604
 TITLE__SIGN_STR_TYPED_DATA = 605
 # Do you want to sign this typed data?
 SUBTITLE__SIGN_STR_TYPED_DATA = 606
+# Confirm Export
+TITLE__CONFIRM_EXPORT = 607
+# Do you really want to export watch-only credentials?'
+SUBTITLE__CONFIRM_EXPORT_WATCH_ONLY_CREDENTIALS = 608
+# Key Image Sync
+TITLE__CONFIRM_KEY_IMAGE_SYNC = 609
+# Do you really want to sync key images?
+SUBTITLE__CONFIRM_KEY_IMAGE_SYNC = 610
+# Confirm Refresh
+TITLE__CONFIRM_REFRESH = 611
+# Do you really want to start refresh?
+SUBTITLE__CONFIRM_REFRESH = 612
+# Do you really want to export tx_key?
+SUBTITLE__CONFIRM_EXPORT_TX_KEY = 613
+# Do you really want to export tx_der for tx_proof?
+SUBTITLE__CONFIRM_EXPORT_TX_DER_FOR_TX_PROOF = 614
+# Sync
+BUTTON__SYNC = 615
+# Refresh
+BUTTON__FRESH = 616
+# Payment ID
+TITLE__PAYMENT_ID = 617
+# Confirm Unlock Time
+TITLE__CONFIRM_UNLOCK_TIME = 618
+# Unlock time for this transaction is set to {}
+SUBTITLE__UNLOCK_TIME_SET_TO_STR = 619
+# Source:
+LIST_KEY__SOURCE_COLON = 620
+# Tip:
+LIST_KEY__TIP_COLON = 621
+# Keep Alive:
+LIST_KEY__KEEP_ALIVE_COLON = 622
+# Frozen Balance:
+LIST_KEY__FROZEN_BALANCE_COLON = 623
+# Frozen Duration (Day):
+LIST_KEY__FROZEN_DURATION_COLON = 624
+# Receiver Address:
+LIST_KEY__RECEIVER_ADDRESS_COLON = 625
+# Resource:
+LIST_KEY__RESOURCE_COLON = 626
+# Bandwidth
+LIST_KEY__BANDWIDTH = 627
+# Energy
+LIST_KEY__ENERGY = 628
 # fmt: on

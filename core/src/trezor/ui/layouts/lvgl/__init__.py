@@ -67,6 +67,7 @@ __all__ = (
     "confirm_collect_nft",
     "show_bip39_dotmap",
     "confirm_sign_typed_hash",
+    "confirm_polkadot_balances",
 )
 
 
@@ -1755,3 +1756,63 @@ async def show_bip39_dotmap(
             )
             if await confirm_screen.request():
                 break
+
+
+async def confirm_polkadot_balances(
+    ctx: wire.GenericContext,
+    chain_name: str,
+    module: str,
+    method: str,
+    sender: str,
+    dest: str,
+    source: str | None = None,
+    balance: str | None = None,
+    tip: str | None = None,
+    keep_alive: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import PolkadotBalances
+
+    screen = PolkadotBalances(
+        chain_name,
+        module,
+        method,
+        sender,
+        dest,
+        source,
+        balance,
+        tip,
+        keep_alive,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "polkadot_balance", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_freeze(
+    ctx: wire.GenericContext,
+    title: str,
+    sender: str,
+    resource: str | None = None,
+    balance: str | None = None,
+    duration: str | None = None,
+    receiver: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import TronAssetFreeze, AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "tron_asset_freeze", ButtonRequestType.ProtectCall)
+    )
+    screen = TronAssetFreeze(
+        True,
+        sender,
+        resource,
+        balance,
+        duration,
+        receiver,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "tron_asset_freeze", ButtonRequestType.ProtectCall)
+    )

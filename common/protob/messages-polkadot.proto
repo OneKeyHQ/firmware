@@ -1,0 +1,47 @@
+syntax = "proto2";
+package hw.trezor.messages.polkadot;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessagePolkadot";
+
+/**
+ * Request: Ask device for Polkadot address corresponding to address_n path
+ * @start
+ * @next PolkadotAddress
+ * @next Failure
+ */
+message PolkadotGetAddress {
+    repeated uint32 address_n = 1;  // BIP-32 path to derive the key from master node
+    required uint32 prefix = 2;     // SS58 address-type
+    required string network = 3;    // Network name
+    optional bool show_display = 4; // Optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains Polkadot address derived from device private seed
+ * @end
+ */
+message PolkadotAddress {
+    optional string address = 1; // Polkadot address
+    optional string public_key = 2;  // public key
+}
+
+/**
+ * Request: Ask device to sign Polkadot transaction
+ * @start
+ * @next PolkadotSignedTx
+ */
+message PolkadotSignTx {
+    repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
+    required bytes raw_tx = 2;                      // serialized raw transaction
+    required string network = 3;                    // Network name
+}
+
+/**
+ * Response: Contains Polkadot transaction signature
+ * @end
+ */
+message PolkadotSignedTx {
+    required bytes signature = 1; // Transaction signature
+}

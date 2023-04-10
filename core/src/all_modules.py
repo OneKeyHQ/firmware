@@ -120,6 +120,8 @@ trezor.enums.SafetyCheckLevel
 import trezor.enums.SafetyCheckLevel
 trezor.enums.SdProtectOperationType
 import trezor.enums.SdProtectOperationType
+trezor.enums.TronResourceCode
+import trezor.enums.TronResourceCode
 trezor.enums.WordRequestType
 import trezor.enums.WordRequestType
 trezor.enums
@@ -632,6 +634,28 @@ apps.near.sign_tx
 import apps.near.sign_tx
 apps.near.transaction
 import apps.near.transaction
+apps.polkadot
+import apps.polkadot
+apps.polkadot.codec
+import apps.polkadot.codec
+apps.polkadot.codec.base
+import apps.polkadot.codec.base
+apps.polkadot.codec.types
+import apps.polkadot.codec.types
+apps.polkadot.get_address
+import apps.polkadot.get_address
+apps.polkadot.helper
+import apps.polkadot.helper
+apps.polkadot.layout
+import apps.polkadot.layout
+apps.polkadot.paths
+import apps.polkadot.paths
+apps.polkadot.seed
+import apps.polkadot.seed
+apps.polkadot.sign_tx
+import apps.polkadot.sign_tx
+apps.polkadot.transaction
+import apps.polkadot.transaction
 apps.solana
 import apps.solana
 apps.solana.constents
