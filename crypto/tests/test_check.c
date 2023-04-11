@@ -32,7 +32,7 @@
 
 #include "check_mem.h"
 
-#if VALGRIND
+#ifdef VALGRIND
 #include <valgrind/memcheck.h>
 #include <valgrind/valgrind.h>
 #endif
@@ -65,7 +65,6 @@
 #include "rand.h"
 #include "rc4.h"
 #include "rfc6979.h"
-#include "schnorr.h"
 #include "script.h"
 #include "secp256k1.h"
 #include "sha2.h"
@@ -77,7 +76,7 @@
 #include "zkp_context.h"
 #include "zkp_ecdsa.h"
 
-#if VALGRIND
+#ifdef VALGRIND
 /*
  * This is a clever trick to make Valgrind's Memcheck verify code
  * is constant-time with respect to secret data.
@@ -564,13 +563,13 @@ START_TEST(test_bignum_format_uint64) {
   uint64_t m = 1;
   for (int i = 0; i <= 19; i++, m *= 10) {
     sprintf(str, "%" PRIu64, m);
-    r = bn_format_uint64(m, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+    r = bn_format_uint64(m, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
     ck_assert_uint_eq(r, strlen(str));
     ck_assert_str_eq(buf, str);
 
     uint64_t n = m - 1;
     sprintf(str, "%" PRIu64, n);
-    r = bn_format_uint64(n, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+    r = bn_format_uint64(n, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
     ck_assert_uint_eq(r, strlen(str));
     ck_assert_str_eq(buf, str);
   }
@@ -586,7 +585,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "0");
 
@@ -594,7 +593,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, NULL, NULL, 20, 0, true, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 20, 0, true, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 22);
   ck_assert_str_eq(buf, "0.00000000000000000000");
 
@@ -602,7 +601,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 5, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 5, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "0");
 
@@ -610,7 +609,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, -5, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, -5, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "0");
 
@@ -618,7 +617,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, "", "", 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, "", "", 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "0");
 
@@ -626,7 +625,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, NULL, "SFFX", 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, "SFFX", 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1 + 4);
   ck_assert_str_eq(buf, "0SFFX");
 
@@ -634,7 +633,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, "PRFX", NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, "PRFX", NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 4 + 1);
   ck_assert_str_eq(buf, "PRFX0");
 
@@ -642,7 +641,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, "PRFX", "SFFX", 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, "PRFX", "SFFX", 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 4 + 1 + 4);
   ck_assert_str_eq(buf, "PRFX0SFFX");
 
@@ -650,7 +649,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000000"),
       &a);
-  r = bn_format(&a, NULL, NULL, 18, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 18, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "0");
 
@@ -658,7 +657,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000001"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "1");
 
@@ -666,15 +665,55 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000001"),
       &a);
-  r = bn_format(&a, NULL, NULL, 6, 6, true, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 6, 6, true, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 8);
   ck_assert_str_eq(buf, "1.000000");
 
   bn_read_be(
       fromhex(
+          "0000000000000000000000000000000000000000000000000000000000000001"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 1, 5, true, 0, buf, sizeof(buf));
+  ck_assert_uint_eq(r, 7);
+  ck_assert_str_eq(buf, "10000.0");
+
+  bn_read_be(
+      fromhex(
+          "0000000000000000000000000000000000000000000000000000000000000001"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 1, 5, true, ',', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 8);
+  ck_assert_str_eq(buf, "10,000.0");
+
+  bn_read_be(
+      fromhex(
+          "000000000000000000000000000000000000000000000000000000000001e240"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 0, 0, true, ',', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 7);
+  ck_assert_str_eq(buf, "123,456");
+
+  bn_read_be(
+      fromhex(
+          "000000000000000000000000000000000000000000000000000000000001e240"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 0, 1, true, ',', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 9);
+  ck_assert_str_eq(buf, "1,234,560");
+
+  bn_read_be(
+      fromhex(
+          "000000000000000000000000000000000000000000000000000000000001e240"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 0, 5, true, ',', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 14);
+  ck_assert_str_eq(buf, "12,345,600,000");
+
+  bn_read_be(
+      fromhex(
           "0000000000000000000000000000000000000000000000000000000000000002"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "2");
 
@@ -682,7 +721,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000005"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "5");
 
@@ -690,7 +729,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000009"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "9");
 
@@ -698,7 +737,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "000000000000000000000000000000000000000000000000000000000000000a"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 2);
   ck_assert_str_eq(buf, "10");
 
@@ -706,7 +745,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000014"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 2);
   ck_assert_str_eq(buf, "20");
 
@@ -714,7 +753,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000032"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 2);
   ck_assert_str_eq(buf, "50");
 
@@ -722,7 +761,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000063"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 2);
   ck_assert_str_eq(buf, "99");
 
@@ -730,7 +769,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "0000000000000000000000000000000000000000000000000000000000000064"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 3);
   ck_assert_str_eq(buf, "100");
 
@@ -738,7 +777,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "00000000000000000000000000000000000000000000000000000000000000c8"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 3);
   ck_assert_str_eq(buf, "200");
 
@@ -746,7 +785,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "00000000000000000000000000000000000000000000000000000000000001f4"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 3);
   ck_assert_str_eq(buf, "500");
 
@@ -754,7 +793,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "00000000000000000000000000000000000000000000000000000000000003e7"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 3);
   ck_assert_str_eq(buf, "999");
 
@@ -762,15 +801,23 @@ START_TEST(test_bignum_format) {
       fromhex(
           "00000000000000000000000000000000000000000000000000000000000003e8"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 4);
   ck_assert_str_eq(buf, "1000");
 
   bn_read_be(
       fromhex(
+          "00000000000000000000000000000000000000000000000000000000000003e8"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 0, 0, false, ',', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 5);
+  ck_assert_str_eq(buf, "1,000");
+
+  bn_read_be(
+      fromhex(
           "0000000000000000000000000000000000000000000000000000000000989680"),
       &a);
-  r = bn_format(&a, NULL, NULL, 7, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 7, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 1);
   ck_assert_str_eq(buf, "1");
 
@@ -778,7 +825,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 78);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -788,7 +835,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 1, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 1, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 79);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -798,7 +845,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 2, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 2, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 79);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -808,7 +855,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 8, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 8, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 79);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -816,9 +863,31 @@ START_TEST(test_bignum_format) {
 
   bn_read_be(
       fromhex(
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 9, 0, false, ',', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 101);
+  ck_assert_str_eq(
+      buf,
+      "115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,"
+      "665,640,564,039,457,584,007,913.129639935");
+
+  bn_read_be(
+      fromhex(
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+      &a);
+  r = bn_format(&a, NULL, NULL, 9, 0, false, ' ', buf, sizeof(buf));
+  ck_assert_uint_eq(r, 101);
+  ck_assert_str_eq(
+      buf,
+      "115 792 089 237 316 195 423 570 985 008 687 907 853 269 984 "
+      "665 640 564 039 457 584 007 913.129639935");
+
+  bn_read_be(
+      fromhex(
           "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffe3bbb00"),
       &a);
-  r = bn_format(&a, NULL, NULL, 8, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 8, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 70);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -828,7 +897,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 18, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 18, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 79);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -838,7 +907,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "fffffffffffffffffffffffffffffffffffffffffffffffff7e52fe5afe40000"),
       &a);
-  r = bn_format(&a, NULL, NULL, 18, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 18, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 60);
   ck_assert_str_eq(
       buf, "115792089237316195423570985008687907853269984665640564039457");
@@ -847,7 +916,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 78, 0, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 78, 0, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 80);
   ck_assert_str_eq(buf,
                    "0."
@@ -858,7 +927,7 @@ START_TEST(test_bignum_format) {
       fromhex(
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
-  r = bn_format(&a, NULL, NULL, 0, 10, false, buf, sizeof(buf));
+  r = bn_format(&a, NULL, NULL, 0, 10, false, 0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 88);
   ck_assert_str_eq(buf,
                    "11579208923731619542357098500868790785326998466564056403945"
@@ -869,7 +938,7 @@ START_TEST(test_bignum_format) {
           "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
       &a);
   r = bn_format(&a, "quite a long prefix", "even longer suffix", 60, 0, false,
-                buf, sizeof(buf));
+                0, buf, sizeof(buf));
   ck_assert_uint_eq(r, 116);
   ck_assert_str_eq(buf,
                    "quite a long "
@@ -882,12 +951,12 @@ START_TEST(test_bignum_format) {
           "0000000000000000000000000000000000000000000000000123456789abcdef"),
       &a);
   memset(buf, 'a', sizeof(buf));
-  r = bn_format(&a, "prefix", "suffix", 10, 0, false, buf, 31);
+  r = bn_format(&a, "prefix", "suffix", 10, 0, false, 0, buf, 31);
   ck_assert_str_eq(buf, "prefix8198552.9216486895suffix");
   ck_assert_uint_eq(r, 30);
 
   memset(buf, 'a', sizeof(buf));
-  r = bn_format(&a, "prefix", "suffix", 10, 0, false, buf, 30);
+  r = bn_format(&a, "prefix", "suffix", 10, 0, false, 0, buf, 30);
   ck_assert_uint_eq(r, 0);
   ck_assert_str_eq(buf, "");
 }
@@ -1132,47 +1201,6 @@ START_TEST(test_base58) {
   }
 }
 END_TEST
-
-#if USE_GRAPHENE
-
-// Graphene Base85CheckEncoding
-START_TEST(test_base58gph) {
-  static const char *base58_vector[] = {
-      "02e649f63f8e8121345fd7f47d0d185a3ccaa843115cd2e9392dcd9b82263bc680",
-      "6dumtt9swxCqwdPZBGXh9YmHoEjFFnNfwHaTqRbQTghGAY2gRz",
-      "021c7359cd885c0e319924d97e3980206ad64387aff54908241125b3a88b55ca16",
-      "5725vivYpuFWbeyTifZ5KevnHyqXCi5hwHbNU9cYz1FHbFXCxX",
-      "02f561e0b57a552df3fa1df2d87a906b7a9fc33a83d5d15fa68a644ecb0806b49a",
-      "6kZKHSuxqAwdCYsMvwTcipoTsNE2jmEUNBQufGYywpniBKXWZK",
-      "03e7595c3e6b58f907bee951dc29796f3757307e700ecf3d09307a0cc4a564eba3",
-      "8b82mpnH8YX1E9RHnU2a2YgLTZ8ooevEGP9N15c1yFqhoBvJur",
-      0,
-      0,
-  };
-  const char **raw = base58_vector;
-  const char **str = base58_vector + 1;
-  uint8_t rawn[34];
-  char strn[53];
-  int r;
-  while (*raw && *str) {
-    int len = strlen(*raw) / 2;
-
-    memcpy(rawn, fromhex(*raw), len);
-    r = base58gph_encode_check(rawn, len, strn, sizeof(strn));
-    ck_assert_int_eq((size_t)r, strlen(*str) + 1);
-    ck_assert_str_eq(strn, *str);
-
-    r = base58gph_decode_check(strn, rawn, len);
-    ck_assert_int_eq(r, len);
-    ck_assert_mem_eq(rawn, fromhex(*raw), len);
-
-    raw += 2;
-    str += 2;
-  }
-}
-END_TEST
-
-#endif
 
 START_TEST(test_bignum_divmod) {
   uint32_t r;
@@ -3574,6 +3602,14 @@ static void test_ecdsa_recover_pub_from_sig_helper(int (
           "0490d2bd2e9a564d6e1d8324fc6ad00aa4ae597684ecf4abea58bdfe7287ea4fa729"
           "68c2e5b0b40999ede3d7898d94e82c3f8dc4536a567a4bd45998c826a4c4b2"),
       65);
+  // The point at infinity is not considered to be a valid public key.
+  res = ecdsa_recover_pub_from_sig_fn(
+      curve, pubkey,
+      fromhex(
+          "220cf4c7b6d568f2256a8c30cc1784a625a28c3627dac404aa9a9ecd08314ec81a88"
+          "828f20d69d102bab5de5f6ee7ef040cb0ff7b8e1ba3f29d79efb5250f47d"),
+      digest, 0);
+  ck_assert_int_eq(res, 1);
 
   memcpy(
       digest,
@@ -3750,7 +3786,7 @@ END_TEST
 #define test_deterministic(KEY, MSG, K)           \
   do {                                            \
     sha256_Raw((uint8_t *)MSG, strlen(MSG), buf); \
-    init_rfc6979(fromhex(KEY), buf, &rng);        \
+    init_rfc6979(fromhex(KEY), buf, NULL, &rng);  \
     generate_k_rfc6979(&k, &rng);                 \
     bn_write_be(&k, buf);                         \
     ck_assert_mem_eq(buf, fromhex(K), 32);        \
@@ -3792,6 +3828,54 @@ START_TEST(test_rfc6979) {
       "about. It's a very serious disease and it interferes completely with "
       "the work. The trouble with computers is that you 'play' with them!",
       "1f4b84c23a86a221d233f2521be018d9318639d5b8bbd6374a8a59232d16ad3d");
+}
+END_TEST
+
+static void test_ecdsa_sign_digest_deterministic_helper(
+    int (*ecdsa_sign_digest_fn)(const ecdsa_curve *, const uint8_t *,
+                                const uint8_t *, uint8_t *, uint8_t *,
+                                int (*)(uint8_t by, uint8_t sig[64]))) {
+  static struct {
+    const char *priv_key;
+    const char *digest;
+    const char *sig;
+  } tests[] = {
+      {"312155017c70a204106e034520e0cdf17b3e54516e2ece38e38e38e38e38e38e",
+       "ffffffffffffffffffffffffffffffff20202020202020202020202020202020",
+       "e3d70248ea2fc771fc8d5e62d76b9cfd5402c96990333549eaadce1ae9f737eb"
+       "5cfbdc7d1e0ec18cc9b57bbb18f0a57dc929ec3c4dfac9073c581705015f6a8a"},
+      {"312155017c70a204106e034520e0cdf17b3e54516e2ece38e38e38e38e38e38e",
+       "2020202020202020202020202020202020202020202020202020202020202020",
+       "40666188895430715552a7e4c6b53851f37a93030fb94e043850921242db78e8"
+       "75aa2ac9fd7e5a19402973e60e64382cdc29a09ebf6cb37e92f23be5b9251aee"},
+  };
+
+  const ecdsa_curve *curve = &secp256k1;
+  uint8_t priv_key[32] = {0};
+  uint8_t digest[32] = {0};
+  uint8_t expected_sig[64] = {0};
+  uint8_t computed_sig[64] = {0};
+  int res = 0;
+
+  for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
+    memcpy(priv_key, fromhex(tests[i].priv_key), 32);
+    memcpy(digest, fromhex(tests[i].digest), 32);
+    memcpy(expected_sig, fromhex(tests[i].sig), 64);
+
+    res =
+        ecdsa_sign_digest_fn(curve, priv_key, digest, computed_sig, NULL, NULL);
+    ck_assert_int_eq(res, 0);
+    ck_assert_mem_eq(expected_sig, computed_sig, 64);
+  }
+}
+
+START_TEST(test_ecdsa_sign_digest_deterministic) {
+  test_ecdsa_sign_digest_deterministic_helper(ecdsa_sign_digest);
+}
+END_TEST
+
+START_TEST(test_zkp_ecdsa_sign_digest_deterministic) {
+  test_ecdsa_sign_digest_deterministic_helper(zkp_ecdsa_sign_digest);
 }
 END_TEST
 
@@ -5548,7 +5632,7 @@ END_TEST
 START_TEST(test_mnemonic_find_word) {
   ck_assert_int_eq(-1, mnemonic_find_word("aaaa"));
   ck_assert_int_eq(-1, mnemonic_find_word("zzzz"));
-  for (int i = 0; i < BIP39_WORDS; i++) {
+  for (int i = 0; i < BIP39_WORD_COUNT; i++) {
     const char *word = mnemonic_get_word(i);
     int index = mnemonic_find_word(word);
     ck_assert_int_eq(i, index);
@@ -6247,6 +6331,11 @@ START_TEST(test_ecdsa_der) {
           "00000000000000000000000000000000000000000000000000000000000000ff",
           "3008020200ee020200ff",
       },
+      {
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "3006020100020100",
+      },
   };
 
   uint8_t sig[64];
@@ -6535,7 +6624,7 @@ START_TEST(test_ed25519) {
     UNMARK_SECRET_DATA(pk, sizeof(pk));
     ck_assert_mem_eq(pk, fromhex(*spk), 32);
 
-    ed25519_sign(pk, 32, sk, pk, sig);
+    ed25519_sign(pk, 32, sk, sig);
     UNMARK_SECRET_DATA(sig, sizeof(sig));
     ck_assert_mem_eq(sig, fromhex(*ssig), 64);
 
@@ -6753,7 +6842,7 @@ START_TEST(test_ed25519_keccak) {
     ck_assert_mem_eq(public_key, fromhex(tests[i].public_key), 32);
 
     ed25519_sign_keccak(fromhex(tests[i].data), tests[i].length, private_key,
-                        public_key, signature);
+                        signature);
     UNMARK_SECRET_DATA(signature, sizeof(signature));
     ck_assert_mem_eq(signature, fromhex(tests[i].signature), 64);
 
@@ -6778,7 +6867,7 @@ START_TEST(test_ed25519_cosi) {
           "26c76712d89d906e6672dafa614c42e5cb1caac8c6568e4d2493087db51f0d36"),
       fromhex(
           "26659c1cf7321c178c07437150639ff0c5b7679c7ea195253ed9abda2e081a37"),
-      &rng);
+      NULL, &rng);
 
   for (int N = 1; N < 11; N++) {
     ed25519_public_key pk;
@@ -6796,8 +6885,7 @@ START_TEST(test_ed25519_cosi) {
 
     /* phase 1: create nonces, commitments (R values) and combine commitments */
     for (int j = 0; j < N; j++) {
-      generate_rfc6979(nonces[j], &rng);
-      ed25519_publickey(nonces[j], Rs[j]);
+      ed25519_cosi_commit(nonces[j], Rs[j]);
     }
     res = ed25519_cosi_combine_publickeys(R, Rs, N);
     ck_assert_int_eq(res, 0);
@@ -6805,7 +6893,9 @@ START_TEST(test_ed25519_cosi) {
     MARK_SECRET_DATA(keys, sizeof(keys));
     /* phase 2: sign and combine signatures */
     for (int j = 0; j < N; j++) {
-      ed25519_cosi_sign(msg, sizeof(msg), keys[j], nonces[j], R, pk, sigs[j]);
+      res = ed25519_cosi_sign(msg, sizeof(msg), keys[j], nonces[j], R, pk,
+                              sigs[j]);
+      ck_assert_int_eq(res, 0);
     }
     UNMARK_SECRET_DATA(sigs, sizeof(sigs));
 
@@ -7309,25 +7399,25 @@ START_TEST(test_ethereum_pubkeyhash) {
 END_TEST
 
 START_TEST(test_ethereum_address) {
-  static const char *vectors[] = {"52908400098527886E0F7030069857D2E4169EE7",
-                                  "8617E340B3D01FA5F11F306F4090FD50E238070D",
-                                  "de709f2102306220921060314715629080e2fb77",
-                                  "27b1fdb04752bbc536007a920d24acb045561c26",
-                                  "5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
-                                  "fB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
-                                  "dbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB",
-                                  "D1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb",
-                                  "5A4EAB120fB44eb6684E5e32785702FF45ea344D",
-                                  "5be4BDC48CeF65dbCbCaD5218B1A7D37F58A0741",
-                                  "a7dD84573f5ffF821baf2205745f768F8edCDD58",
-                                  "027a49d11d118c0060746F1990273FcB8c2fC196",
-                                  "CD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+  static const char *vectors[] = {"0x52908400098527886E0F7030069857D2E4169EE7",
+                                  "0x8617E340B3D01FA5F11F306F4090FD50E238070D",
+                                  "0xde709f2102306220921060314715629080e2fb77",
+                                  "0x27b1fdb04752bbc536007a920d24acb045561c26",
+                                  "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+                                  "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+                                  "0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB",
+                                  "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb",
+                                  "0x5A4EAB120fB44eb6684E5e32785702FF45ea344D",
+                                  "0x5be4BDC48CeF65dbCbCaD5218B1A7D37F58A0741",
+                                  "0xa7dD84573f5ffF821baf2205745f768F8edCDD58",
+                                  "0x027a49d11d118c0060746F1990273FcB8c2fC196",
+                                  "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
                                   0};
   uint8_t addr[20];
-  char address[41];
+  char address[43];
   const char **vec = vectors;
   while (*vec) {
-    memcpy(addr, fromhex(*vec), 20);
+    memcpy(addr, fromhex(*vec + 2), 20);
     ethereum_address_checksum(addr, address, false, 0);
     ck_assert_str_eq(address, *vec);
     vec++;
@@ -7339,29 +7429,29 @@ END_TEST
 // https://github.com/rsksmart/RSKIPs/blob/master/IPs/RSKIP60.md
 START_TEST(test_rsk_address) {
   uint8_t addr[20];
-  char address[41];
+  char address[43];
 
   static const char *rskip60_chain30[] = {
-      "5aaEB6053f3e94c9b9a09f33669435E7ef1bEAeD",
-      "Fb6916095cA1Df60bb79ce92cE3EA74c37c5d359",
-      "DBF03B407c01E7CD3cBea99509D93F8Dddc8C6FB",
-      "D1220A0Cf47c7B9BE7a2e6ba89F429762E7B9adB", 0};
+      "0x5aaEB6053f3e94c9b9a09f33669435E7ef1bEAeD",
+      "0xFb6916095cA1Df60bb79ce92cE3EA74c37c5d359",
+      "0xDBF03B407c01E7CD3cBea99509D93F8Dddc8C6FB",
+      "0xD1220A0Cf47c7B9BE7a2e6ba89F429762E7B9adB", 0};
   const char **vec = rskip60_chain30;
   while (*vec) {
-    memcpy(addr, fromhex(*vec), 20);
+    memcpy(addr, fromhex(*vec + 2), 20);
     ethereum_address_checksum(addr, address, true, 30);
     ck_assert_str_eq(address, *vec);
     vec++;
   }
 
   static const char *rskip60_chain31[] = {
-      "5aAeb6053F3e94c9b9A09F33669435E7EF1BEaEd",
-      "Fb6916095CA1dF60bb79CE92ce3Ea74C37c5D359",
-      "dbF03B407C01E7cd3cbEa99509D93f8dDDc8C6fB",
-      "d1220a0CF47c7B9Be7A2E6Ba89f429762E7b9adB", 0};
+      "0x5aAeb6053F3e94c9b9A09F33669435E7EF1BEaEd",
+      "0xFb6916095CA1dF60bb79CE92ce3Ea74C37c5D359",
+      "0xdbF03B407C01E7cd3cbEa99509D93f8dDDc8C6fB",
+      "0xd1220a0CF47c7B9Be7A2E6Ba89f429762E7b9adB", 0};
   vec = rskip60_chain31;
   while (*vec) {
-    memcpy(addr, fromhex(*vec), 20);
+    memcpy(addr, fromhex(*vec + 2), 20);
     ethereum_address_checksum(addr, address, true, 31);
     ck_assert_str_eq(address, *vec);
     vec++;
@@ -8987,231 +9077,6 @@ START_TEST(test_compress_coords) {
 }
 END_TEST
 
-START_TEST(test_schnorr_sign_verify_digest) {
-  static struct {
-    const char *digest;
-    const char *priv_key;
-    const char *sig;
-  } tests[] = {
-      {
-          /* Very deterministic message */
-          "5255683DA567900BFD3E786ED8836A4E7763C221BF1AC20ECE2A5171B9199E8A",
-          "12B004FFF7F4B69EF8650E767F18F11EDE158148B425660723B9F9A66E61F747",
-          "2C56731AC2F7A7E7F11518FC7722A166B02438924CA9D8B4D111347B81D07175"
-          "71846DE67AD3D913A8FDF9D8F3F73161A4C48AE81CB183B214765FEB86E255CE",
-      },
-  };
-
-  const ecdsa_curve *curve = &secp256k1;
-  uint8_t digest[SHA256_DIGEST_LENGTH] = {0};
-  uint8_t priv_key[32] = {0};
-  uint8_t pub_key[33] = {0};
-  uint8_t result[SCHNORR_SIG_LENGTH] = {0};
-  uint8_t expected[SCHNORR_SIG_LENGTH] = {0};
-  int res = 0;
-
-  for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
-    memcpy(digest, fromhex(tests[i].digest), SHA256_DIGEST_LENGTH);
-    memcpy(priv_key, fromhex(tests[i].priv_key), 32);
-    memcpy(expected, fromhex(tests[i].sig), SCHNORR_SIG_LENGTH);
-
-    ck_assert_int_eq(ecdsa_get_public_key33(curve, priv_key, pub_key), 0);
-
-    schnorr_sign_digest(curve, priv_key, digest, result);
-
-    ck_assert_mem_eq(expected, result, SCHNORR_SIG_LENGTH);
-
-    res = schnorr_verify_digest(curve, pub_key, digest, result);
-    ck_assert_int_eq(res, 0);
-  }
-}
-END_TEST
-
-START_TEST(test_schnorr_verify_digest) {
-  static struct {
-    const char *digest;
-    const char *pub_key;
-    const char *sig;
-    const int res;
-  } tests[] = {
-      {
-          /* Very deterministic message */
-          "5255683DA567900BFD3E786ED8836A4E7763C221BF1AC20ECE2A5171B9199E8A",
-          "030B4C866585DD868A9D62348A9CD008D6A312937048FFF31670E7E920CFC7A744",
-          "2C56731AC2F7A7E7F11518FC7722A166B02438924CA9D8B4D111347B81D07175"
-          "71846DE67AD3D913A8FDF9D8F3F73161A4C48AE81CB183B214765FEB86E255CE",
-          0, /* Success */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 1.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "0000000000000000000000000000000000000000000000000000000000000000",
-          "0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798",
-          "787A848E71043D280C50470E8E1532B2DD5D20EE912A45DBDD2BD1DFBF187EF6"
-          "7031A98831859DC34DFFEEDDA86831842CCD0079E1F92AF177F7F22CC1DCED05",
-          0, /* Success */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 2.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "2A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D"
-          "1E51A22CCEC35599B8F266912281F8365FFC2D035A230434A1A64DC59F7013FD",
-          0, /* Success */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 3.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "5E2D58D8B3BCDF1ABADEC7829054F90DDA9805AAB56C77333024B9D0A508B75C",
-          "03FAC2114C2FBB091527EB7C64ECB11F8021CB45E8E7809D3C0938E4B8C0E5F84B",
-          "00DA9B08172A9B6F0466A2DEFD817F2D7AB437E0D253CB5395A963866B3574BE"
-          "00880371D01766935B92D2AB4CD5C8A2A5837EC57FED7660773A05F0DE142380",
-          0, /* Success */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 4.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "4DF3C3F68FCC83B27E9D42C90431A72499F17875C81A599B566C9889B9696703",
-          "03DEFDEA4CDB677750A420FEE807EACF21EB9898AE79B9768766E4FAA04A2D4A34",
-          "00000000000000000000003B78CE563F89A0ED9414F5AA28AD0D96D6795F9C63"
-          "02A8DC32E64E86A333F20EF56EAC9BA30B7246D6D25E22ADB8C6BE1AEB08D49D",
-          0, /* Success */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 4b.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "0000000000000000000000000000000000000000000000000000000000000000",
-          "031B84C5567B126440995D3ED5AABA0565D71E1834604819FF9C17F5E9D5DD078F",
-          "52818579ACA59767E3291D91B76B637BEF062083284992F2D95F564CA6CB4E35"
-          "30B1DA849C8E8304ADC0CFE870660334B3CFC18E825EF1DB34CFAE3DFC5D8187",
-          0, /* Success */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 6.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "2A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D"
-          "FA16AEE06609280A19B67A24E1977E4697712B5FD2943914ECD5F730901B4AB7",
-          6, /* R.y is not a quadratic residue */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 7.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "5E2D58D8B3BCDF1ABADEC7829054F90DDA9805AAB56C77333024B9D0A508B75C",
-          "03FAC2114C2FBB091527EB7C64ECB11F8021CB45E8E7809D3C0938E4B8C0E5F84B",
-          "00DA9B08172A9B6F0466A2DEFD817F2D7AB437E0D253CB5395A963866B3574BE"
-          "D092F9D860F1776A1F7412AD8A1EB50DACCC222BC8C0E26B2056DF2F273EFDEC",
-          5, /* Negated message hash, R.x mismatch */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 8.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "0000000000000000000000000000000000000000000000000000000000000000",
-          "0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798",
-          "787A848E71043D280C50470E8E1532B2DD5D20EE912A45DBDD2BD1DFBF187EF6"
-          "8FCE5677CE7A623CB20011225797CE7A8DE1DC6CCD4F754A47DA6C600E59543C",
-          5, /* Negated s, R.x mismatch */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 9.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "03DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "2A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D"
-          "1E51A22CCEC35599B8F266912281F8365FFC2D035A230434A1A64DC59F7013FD",
-          5, /* Negated P, R.x mismatch */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 10.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "2A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D"
-          "8C3428869A663ED1E954705B020CBB3E7BB6AC31965B9EA4C73E227B17C5AF5A",
-          4, /* s * G = e * P, R = 0 */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 11.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "4A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D"
-          "1E51A22CCEC35599B8F266912281F8365FFC2D035A230434A1A64DC59F7013FD",
-          5, /* R.x not on the curve, R.x mismatch */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 12.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC2F"
-          "1E51A22CCEC35599B8F266912281F8365FFC2D035A230434A1A64DC59F7013FD",
-          1, /* r = p */
-      },
-      {
-          /*
-           * From Bitcoin ABC libsecp256k1, test vector 13.
-           * https://github.com/Bitcoin-ABC/secp256k1/blob/master/src/modules/schnorr/tests_impl.h
-           */
-          "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89",
-          "02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659",
-          "2A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D"
-          "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141",
-          1, /* s = n */
-      },
-      {
-          /* Very deterministic message */
-          "5255683DA567900BFD3E786ED8836A4E7763C221BF1AC20ECE2A5171B9199E8A",
-          "010B4C866585DD868A9D62348A9CD008D6A312937048FFF31670E7E920CFC7A744",
-          "2C56731AC2F7A7E7F11518FC7722A166B02438924CA9D8B4D111347B81D07175"
-          "71846DE67AD3D913A8FDF9D8F3F73161A4C48AE81CB183B214765FEB86E255CE",
-          2, /* Invalid public key */
-      },
-  };
-
-  const ecdsa_curve *curve = &secp256k1;
-  uint8_t digest[SHA256_DIGEST_LENGTH] = {0};
-  uint8_t pub_key[33] = {0};
-  uint8_t signature[SCHNORR_SIG_LENGTH] = {0};
-  int res = 0;
-
-  for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
-    memcpy(digest, fromhex(tests[i].digest), SHA256_DIGEST_LENGTH);
-    memcpy(pub_key, fromhex(tests[i].pub_key), 33);
-    memcpy(signature, fromhex(tests[i].sig), SCHNORR_SIG_LENGTH);
-
-    res = schnorr_verify_digest(curve, pub_key, digest, signature);
-    ck_assert_int_eq(res, tests[i].res);
-  }
-}
-END_TEST
-
 START_TEST(test_zkp_bip340_sign) {
   static struct {
     const char *priv_key;
@@ -9295,22 +9160,22 @@ START_TEST(test_zkp_bip340_sign) {
   uint8_t expected_pub_key[32] = {0};
   uint8_t aux_input[32] = {0};
   uint8_t digest[32] = {0};
-  uint8_t expected_sig[32] = {0};
+  uint8_t expected_sig[64] = {0};
   uint8_t pub_key[32] = {0};
-  uint8_t sig[32] = {0};
+  uint8_t sig[64] = {0};
 
   for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
     memcpy(priv_key, fromhex(tests[i].priv_key), 32);
     memcpy(expected_pub_key, fromhex(tests[i].pub_key), 32);
     memcpy(aux_input, fromhex(tests[i].aux_input), 32);
     memcpy(digest, fromhex(tests[i].digest), 32);
-    memcpy(expected_sig, fromhex(tests[i].sig), 32);
+    memcpy(expected_sig, fromhex(tests[i].sig), 64);
 
     zkp_bip340_get_public_key(priv_key, pub_key);
     ck_assert_mem_eq(expected_pub_key, pub_key, 32);
 
     res = zkp_bip340_sign_digest(priv_key, digest, sig, aux_input);
-    ck_assert_mem_eq(expected_sig, sig, 32);
+    ck_assert_mem_eq(expected_sig, sig, 64);
     ck_assert_int_eq(res, 0);
   }
 }
@@ -9535,6 +9400,28 @@ START_TEST(test_zkp_bip340_tweak) {
 }
 END_TEST
 
+START_TEST(test_zkp_bip340_verify_publickey) {
+  static struct {
+    const char *public_key;
+    const int result;
+  } tests[] = {
+      // Test vectors 0, 5 and 14 from
+      // https://github.com/bitcoin/bips/blob/afa13249ed45826c2d7086714026c9bc1ccbf963/bip-0340/test-vectors.csv
+      {"F9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9", 0},
+      {"EEFDEA4CDB677750A420FEE807EACF21EB9898AE79B9768766E4FAA04A2D4A34", 1},
+      {"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC30", 1}};
+
+  int result = 0;
+  uint8_t public_key[32] = {0};
+
+  for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
+    memcpy(public_key, fromhex(tests[i].public_key), 32);
+    result = zkp_bip340_verify_publickey(public_key);
+    ck_assert_int_eq(result, tests[i].result);
+  }
+}
+END_TEST
+
 static int my_strncasecmp(const char *s1, const char *s2, size_t n) {
   size_t i = 0;
   while (i < n) {
@@ -9598,12 +9485,6 @@ Suite *test_suite(void) {
   tcase_add_test(tc, test_base58);
   suite_add_tcase(s, tc);
 
-#if USE_GRAPHENE
-  tc = tcase_create("base58gph");
-  tcase_add_test(tc, test_base58gph);
-  suite_add_tcase(s, tc);
-#endif
-
   tc = tcase_create("bignum_divmod");
   tcase_add_test(tc, test_bignum_divmod);
   suite_add_tcase(s, tc);
@@ -9652,6 +9533,10 @@ Suite *test_suite(void) {
   tcase_add_test(tc, test_zkp_ecdsa_get_public_key65);
   tcase_add_test(tc, test_zkp_ecdsa_recover_pub_from_sig);
   tcase_add_test(tc, test_zkp_ecdsa_verify_digest);
+#if USE_RFC6979
+  tcase_add_test(tc, test_ecdsa_sign_digest_deterministic);
+  tcase_add_test(tc, test_zkp_ecdsa_sign_digest_deterministic);
+#endif
   suite_add_tcase(s, tc);
 
   tc = tcase_create("rfc6979");
@@ -9843,15 +9728,11 @@ Suite *test_suite(void) {
   tcase_add_test(tc, test_compress_coords);
   suite_add_tcase(s, tc);
 
-  tc = tcase_create("schnorr");
-  tcase_add_test(tc, test_schnorr_sign_verify_digest);
-  tcase_add_test(tc, test_schnorr_verify_digest);
-  suite_add_tcase(s, tc);
-
   tc = tcase_create("zkp_bip340");
   tcase_add_test(tc, test_zkp_bip340_sign);
   tcase_add_test(tc, test_zkp_bip340_verify);
   tcase_add_test(tc, test_zkp_bip340_tweak);
+  tcase_add_test(tc, test_zkp_bip340_verify_publickey);
   suite_add_tcase(s, tc);
 
 #if USE_CARDANO
@@ -9913,7 +9794,6 @@ Suite *test_suite(void) {
   tcase_add_test(tc, test_xmr_get_subaddress_secret_key);
   tcase_add_test(tc, test_xmr_gen_c);
   tcase_add_test(tc, test_xmr_varint);
-  tcase_add_test(tc, test_xmr_gen_range_sig);
   suite_add_tcase(s, tc);
 #endif
   return s;

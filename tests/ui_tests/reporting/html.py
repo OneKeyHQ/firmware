@@ -1,11 +1,30 @@
-import base64
-import filecmp
-from itertools import zip_longest
+from __future__ import annotations
 
+import shutil
+from pathlib import Path
+from typing import Iterable
+
+from dominate import document
 from dominate.tags import a, i, img, table, td, th, tr
 
+from ..common import UI_TESTS_DIR
 
-def report_links(tests, reports_path, actual_hashes=None):
+_IMAGE_DIR = UI_TESTS_DIR / "images"
+
+
+def set_image_dir(path: Path) -> None:
+    global _IMAGE_DIR
+    _IMAGE_DIR = path
+
+
+def store_images(screens: Iterable[Path], hashes: Iterable[str]) -> None:
+    for screen, hash in zip(screens, hashes):
+        shutil.copy(screen, _IMAGE_DIR / f"{hash}.png")
+
+
+def report_links(
+    tests: list[Path], reports_path: Path, actual_hashes: dict[str, str] | None = None
+) -> None:
     if actual_hashes is None:
         actual_hashes = {}
 
@@ -21,32 +40,52 @@ def report_links(tests, reports_path, actual_hashes=None):
                 td(a(test.name, href=path))
 
 
-def write(fixture_test_path, doc, filename):
+def write(fixture_test_path: Path, doc: document, filename: str) -> Path:
     (fixture_test_path / filename).write_text(doc.render())
     return fixture_test_path / filename
 
 
-def image(src):
+def image_column(hash: str | None, cur_dir: Path) -> None:
+    """Put image into table as one cell."""
     with td():
-        if src:
-            # open image file
-            image = src.read_bytes()
-            # encode image as base64
-            image = base64.b64encode(image)
-            # convert output to str
-            image = image.decode()
-            # img(src=src.relative_to(fixture_test_path))
-            img(src="data:image/png;base64, " + image)
+        if hash:
+            image_link(hash, cur_dir)
         else:
             i("missing")
 
 
-def diff_table(left_screens, right_screens):
-    for left, right in zip_longest(left_screens, right_screens):
-        if left and right and filecmp.cmp(right, left):
+def _relative_path(cur_dir: Path, path_to: Path) -> str:
+    """Find best relative path to refer to path_to from cur_dir."""
+    cur_dir = cur_dir.resolve()
+    path_to = path_to.resolve()
+    if not cur_dir.is_dir():
+        cur_dir = cur_dir.parent
+
+    common = cur_dir
+    while common not in path_to.parents:
+        common = common.parent
+    ascent = len(cur_dir.parts) - len(common.parts)
+    relpath = path_to.relative_to(common)
+    components = [".."] * ascent + list(relpath.parts)
+    return "/".join(components)
+
+
+def image_link(hash: str, cur_dir: Path, title: str = "") -> None:
+    """Put image into table as one cell."""
+    path = _IMAGE_DIR / f"{hash}.png"
+    img(
+        src=_relative_path(cur_dir, path),
+        title=title,
+        loading="lazy",
+    )
+
+
+def diff_table(diff: Iterable[tuple[str | None, str | None]], cur_dir: Path) -> None:
+    for left, right in diff:
+        if left == right:
             background = "white"
         else:
             background = "red"
         with tr(bgcolor=background):
-            image(left)
-            image(right)
+            image_column(left, cur_dir)
+            image_column(right, cur_dir)

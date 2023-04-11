@@ -120,6 +120,44 @@
                 "sig_r": "07f8c967227c5a190cb90525c3387691a426fe61f8e0503274280724060ea95c",
                 "sig_s": "0bf83eaf74e24aa9146b23e06f9edec6e25acb81d3830e8d146b9e7b6923ad1e"
             }
+        },
+        {
+            "name": "Ledger Live legacy path",
+            "parameters": {
+                "data": "",
+                "path": "m/44'/60'/0'/0",
+                "to_address": "0x1d1c328764a41bda0492b66baa30c4a339ff85ef",
+                "chain_id": 1,
+                "nonce": "0x0",
+                "gas_limit": "0x14",
+                "max_gas_fee": "0x14",
+                "max_priority_fee": "0x1",
+                "value": "0xa"
+            },
+            "result": {
+                "sig_v": 1,
+                "sig_r": "3a5e8fa47bfdb758837643485b2951f6c54894996f124dce6282662289ebcf79",
+                "sig_s": "5b5b9e0f9af273466cc1e991cb86fadb2abedeb4de150163a8dbf348422b5fe2"
+            }
+        },
+        {
+            "name": "long_fees",
+            "parameters": {
+                "data": "",
+                "path": "m/44'/60'/0'/0/0",
+                "to_address": "0x1d1c328764a41bda0492b66baa30c4a339ff85ef",
+                "chain_id": 1,
+                "nonce": "0x0",
+                "gas_limit": "0xff",
+                "max_gas_fee": "0x15681d9b48e13b1e2",
+                "max_priority_fee": "0x6b14e9f812f366fb9",
+                "value": "0xa"
+            },
+            "result": {
+                "sig_v": 0,
+                "sig_r": "e592ffedd8b802c95b634520f2b700f27e394ed47fe2555f2f378e26cdc2c1ff",
+                "sig_s": "0ad471ea5e6fdc90dc25c4a012f12d48bb3d5679cd5a39ad7d5bbfc26b5d333f"
+            }
         }
     ]
 }

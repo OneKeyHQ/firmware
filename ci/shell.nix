@@ -3,15 +3,15 @@
  }:
 
 let
-  # the last commit from master as of 2021-09-13
+  # the last commit from master as of 2022-08-02
   rustOverlay = import (builtins.fetchTarball {
-    url = "https://github.com/oxalica/rust-overlay/archive/9fd1c36484a844683153896f37d6fd28b365b931.tar.gz";
-    sha256 = "1nylnc16y9jwjajvq2zj314lla2g16p77jhaj3vapfgq17n78i12";
+    url = "https://github.com/oxalica/rust-overlay/archive/b38c1683594aeefa5c3c4dde115401f059146be6.tar.gz";
+    sha256 = "0rk4i42cys2v7k2ir57x5qa8dc37nrs432cdpbr4cddskgvyi8ky";
   });
-  # the last successful build of nixpkgs-unstable as of 2021-11-18
+  # the last successful build of nixpkgs-unstable as of 2022-06-20
   nixpkgs = import (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/7fad01d9d5a3f82081c00fb57918d64145dc904c.tar.gz";
-    sha256 = "0g0jn8cp1f3zgs7xk2xb2vwa44gb98qlp7k0dvigs0zh163c2kim";
+    url = "https://github.com/NixOS/nixpkgs/archive/e0a42267f73ea52adc061a64650fddc59906fc99.tar.gz";
+    sha256 = "0r1dsj51x2rm016xwvdnkm94v517jb1rpn4rk63k6krc4d0n3kh9";
   }) { overlays = [ rustOverlay ]; };
   # commit before python36 was removed
   python36nixpkgs = import (builtins.fetchTarball {
@@ -19,8 +19,8 @@ let
     sha256 = "02s3qkb6kz3ndyx7rfndjbvp4vlwiqc42fxypn3g6jnc0v5jyz95";
   }) { };
   moneroTests = nixpkgs.fetchurl {
-    url = "https://github.com/ph4r05/monero/releases/download/v0.17.1.9-tests/trezor_tests";
-    sha256 = "410bc4ff2ff1edc65e17f15b549bd1bf8a3776cf67abdea86aed52cf4bce8d9d";
+    url = "https://github.com/ph4r05/monero/releases/download/v0.18.1.0-dev-tests-u18.04-01/trezor_tests";
+    sha256 = "7a8bab583d5f2f06f092ea297b1417008f20c1c5ca23c74e0eb11660068dead9";
   };
   moneroTestsPatched = nixpkgs.runCommandCC "monero_trezor_tests" {} ''
     cp ${moneroTests} $out
@@ -28,37 +28,53 @@ let
     ${nixpkgs.patchelf}/bin/patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out"
     chmod -w $out
   '';
-  rustStable = nixpkgs.rust-bin.stable."1.55.0".minimal.override {
+  # NOTE: don't forget to update Minimum Supported Rust Version in docs/core/build/emulator.md
+  rustProfiles = nixpkgs.rust-bin.nightly."2022-08-02";
+  rustNightly = rustProfiles.minimal.override {
     targets = [
       "thumbv7em-none-eabihf" # TT
       "thumbv7m-none-eabi"    # T1
     ];
     # we use rustfmt from nixpkgs because it's built with the nighly flag needed for wrap_comments
     # to use official binary, remove rustfmt from buildInputs and add it to extensions:
-    extensions = [ "clippy" ];
+    extensions = [ "rust-src" "clippy" "rustfmt" ];
   };
+  llvmPackages = nixpkgs.llvmPackages_13;
+  # see pyright/README.md for update procedure
+  pyright = nixpkgs.callPackage ./pyright {};
+  # HWI tests need https://github.com/bitcoin/bitcoin/pull/22558
+  # remove this once nixpkgs version contains this patch
+  bitcoind = (nixpkgs.bitcoind.overrideAttrs (attrs: {
+    version = attrs.version + "-taproot-psbt";
+    src = nixpkgs.fetchFromGitHub {
+      owner = "achow101";
+      repo = "bitcoin";
+      rev = "b704884935766748cf533577c1babacfb6d4b5a5"; # taproot-psbt
+      sha256 = "sha256-gz/knimKY1pkpsp1YmYHPMCbeiSxKGSOGJOSEgFbptE=";
+    };
+  }));
 in
 with nixpkgs;
-stdenv.mkDerivation ({
+stdenvNoCC.mkDerivation ({
   name = "trezor-firmware-env";
   buildInputs = lib.optionals fullDeps [
+    bitcoind
     # install other python versions for tox testing
     # NOTE: running e.g. "python3" in the shell runs the first version in the following list,
-    #       and poetry uses the default version (currently 3.8)
-    python38
+    #       and poetry uses the default version (currently 3.9)
     python39
+    python310
+    python38
     python37
     python36nixpkgs.python36
   ] ++ [
     SDL2
     SDL2_image
-    autoflake
     bash
     check
-    clang-tools
-    clang
+    curl  # for connect tests
     editorconfig-checker
-    gcc
+    gcc-arm-embedded
     git
     gitAndTools.git-subrepo
     gnumake
@@ -66,21 +82,20 @@ stdenv.mkDerivation ({
     libffi
     libjpeg
     libusb1
+    llvmPackages.clang
     openssl
     pkgconfig
     poetry
-    protobuf3_6
+    protobuf
     pyright
-    rustfmt
-    rustStable
+    rustNightly
     wget
     zlib
     moreutils
   ] ++ lib.optionals (!stdenv.isDarwin) [
+    autoPatchelfHook
     procps
     valgrind
-  ] ++ lib.optionals (!stdenv.isDarwin || !stdenv.isAarch64) [
-    gcc-arm-embedded  # not yet available for aarch64-darwin
   ] ++ lib.optionals (stdenv.isDarwin) [
     darwin.apple_sdk.frameworks.CoreAudio
     darwin.apple_sdk.frameworks.AudioToolbox
@@ -99,6 +114,7 @@ stdenv.mkDerivation ({
     dejavu_fonts
   ];
   LD_LIBRARY_PATH = "${libffi}/lib:${libjpeg.out}/lib:${libusb1}/lib:${libressl.out}/lib";
+  DYLD_LIBRARY_PATH = "${libffi}/lib:${libjpeg.out}/lib:${libusb1}/lib:${libressl.out}/lib";
   NIX_ENFORCE_PURITY = 0;
 
   # Fix bdist-wheel problem by setting source date epoch to a more recent date
@@ -110,6 +126,9 @@ stdenv.mkDerivation ({
   # don't try to use stack protector for Apple Silicon (emulator) binaries
   # it's broken at the moment
   hardeningDisable = lib.optionals (stdenv.isDarwin && stdenv.isAarch64) [ "stackprotector" ];
+
+  # Enabling rust-analyzer extension in VSCode
+  RUST_SRC_PATH = "${rustProfiles.rust-src}/lib/rustlib/src/rust/library";
 
 } // (lib.optionalAttrs fullDeps) {
   TREZOR_MONERO_TESTS_PATH = moneroTestsPatched;

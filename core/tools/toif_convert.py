@@ -16,6 +16,11 @@ def toif_convert(infile, outfile):
     Examples:
       toif_convert.py somefile.jpg outfile.toif
       toif_convert.py infile.toif outfile.png
+
+    \b
+      # ensure gray-scale output TOIF
+      mogrify -colorspace gray icon.png
+      toif_convert.py icon.png icon.toif
     """
     if infile.name.endswith(".toif") or infile.name == "-":
         toi = toif.from_bytes(infile.read())

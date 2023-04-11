@@ -2,11 +2,10 @@ ifneq ($(V),1)
 Q := @
 endif
 
-SKIPPED_MESSAGES := Binance Cardano DebugMonero Eos Monero Ontology SdProtect Tezos WebAuthn \
-	DebugLinkRecordScreen DebugLinkReseedRandom DebugLinkShowText DebugLinkEraseSdCard DebugLinkWatchLayout \
-	GetOwnershipProof OwnershipProof GetOwnershipId OwnershipId AuthorizeCoinJoin DoPreauthorized \
-	CancelAuthorization DebugLinkLayout \
-	TxAckInput TxAckOutput TxAckPrev \
+SKIPPED_MESSAGES := Binance Cardano DebugMonero Eos Monero Ontology Ripple SdProtect Tezos WebAuthn \
+	DebugLinkRecordScreen DebugLinkEraseSdCard DebugLinkWatchLayout \
+	DebugLinkLayout GetNonce \
+	TxAckInput TxAckOutput TxAckPrev TxAckPaymentRequest \
 	EthereumSignTypedData EthereumTypedDataStructRequest EthereumTypedDataStructAck \
 	EthereumTypedDataValueRequest EthereumTypedDataValueAck
 
@@ -37,6 +36,7 @@ messages.pb.h: $(PROTO_COMPILED) $(PROTO_OPTIONS)
 		-s "mangle_names:M_FLATTEN"
 	@grep " CALLBACK, " $@ && echo "CALLBACK field found" && rm $@ && exit 1  || :
 
+
 %.pb: %.proto
 	@printf "  PROTOC  $@\n"
 	$(Q)protoc -I/usr/include -I. $< -o $@
@@ -47,6 +47,7 @@ messages.pb.h: $(PROTO_COMPILED) $(PROTO_OPTIONS)
 
 messages_map.h messages_map_limits.h: messages_map.py messages_pb2.py
 	$(Q)$(PYTHON) $< ${SKIPPED_MESSAGES}
+
 
 clean:
 	rm -f *.pb *.o *.d *.pb.c *.pb.h *_pb2.py messages_map.h messages_map_limits.h

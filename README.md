@@ -27,7 +27,7 @@
 2. Pulling the latest code via the git command line tool,  setting up the development environment
 
 ```
-  git clone -b mini https://github.com/OneKeyHQ/onekey-firmware.git onekey-firmware
+  git clone -b bixin_dev https://github.com/OneKeyHQ/onekey-firmware.git onekey-firmware
   cd onekey-firmware
   nix-shell
   poetry install
@@ -37,7 +37,7 @@
 
 ```
   cd legacy
-  export ONEKEY_MINI=1 EMULATOR=1 DEBUG_LINK=1 DEBUG_LOG=1
+  export EMULATOR=1 DEBUG_LINK=1 DEBUG_LOG=1
   poetry run make vendor
   poetry run ./script/setup
   poetry run ./script/cibuild
@@ -46,7 +46,7 @@
 4. Now you can start the emulator
 
 ```
-   ./firmware/mini*Stable*.bin
+   ./firmware/classic*Stable*.bin
 ```
 
 5. You can now install the command line client utility to interact with the emulator

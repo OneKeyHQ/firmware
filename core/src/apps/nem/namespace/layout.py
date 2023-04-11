@@ -1,11 +1,19 @@
-from trezor.messages import NEMProvisionNamespace, NEMTransactionCommon
+from typing import TYPE_CHECKING
 
-from ..layout import require_confirm_content, require_confirm_fee, require_confirm_final
+if TYPE_CHECKING:
+    from trezor.messages import NEMProvisionNamespace, NEMTransactionCommon
+    from trezor.wire import Context
 
 
 async def ask_provision_namespace(
-    ctx, common: NEMTransactionCommon, namespace: NEMProvisionNamespace
-):
+    ctx: Context, common: NEMTransactionCommon, namespace: NEMProvisionNamespace
+) -> None:
+    from ..layout import (
+        require_confirm_content,
+        require_confirm_fee,
+        require_confirm_final,
+    )
+
     if namespace.parent:
         content = [
             ("Create namespace", namespace.namespace),

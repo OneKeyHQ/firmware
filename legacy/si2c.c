@@ -19,15 +19,14 @@
 
 ChannelType host_channel = CHANNEL_NULL;
 
-uint8_t *i2c_data_in = msg_in_buffer;
 volatile uint32_t i2c_data_inlen;
 volatile bool i2c_recv_done = false;
 uint8_t i2c_data_out[SI2C_BUF_MAX_OUT_LEN];
 volatile uint32_t i2c_data_outlen, i2c_data_out_pos;
 static volatile bool wait_response = true;
 
-trans_fifo i2c_fifo_in = {.p_buf = msg_in_buffer,
-                          .buf_size = SI2C_BUF_MAX_IN_LEN,
+trans_fifo i2c_fifo_in = {.p_buf = i2c_data_out,
+                          .buf_size = sizeof(i2c_data_out),
                           .over_pre = false,
                           .read_pos = 0,
                           .write_pos = 0,

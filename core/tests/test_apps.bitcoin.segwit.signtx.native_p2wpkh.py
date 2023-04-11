@@ -28,7 +28,7 @@ from trezor import wire
 
 from apps.common import coins
 from apps.common.keychain import Keychain
-from apps.bitcoin.keychain import get_schemas_for_coin
+from apps.bitcoin.keychain import _get_schemas_for_coin
 from apps.bitcoin.sign_tx import helpers, bitcoin
 
 
@@ -79,6 +79,9 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
         )
         tx = SignTx(coin_name='Testnet', version=1, lock_time=0, inputs_count=1, outputs_count=2)
 
+        # precomputed tx weight is 142 = ceil(566 / 4)
+        fee_rate = 11000 / 142
+
         messages = [
             None,
 
@@ -101,7 +104,7 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
             helpers.UiConfirmOutput(out2, coin, AmountUnit.BITCOIN),
             True,
 
-            helpers.UiConfirmTotal(12300000, 11000, coin, AmountUnit.BITCOIN),
+            helpers.UiConfirmTotal(12300000, 11000, fee_rate, coin, AmountUnit.BITCOIN),
             True,
 
             # check prev tx
@@ -157,7 +160,7 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
             )),
         ]
 
-        ns = get_schemas_for_coin(coin)
+        ns = _get_schemas_for_coin(coin)
         keychain = Keychain(seed, coin.curve_name, ns)
         signer = bitcoin.Bitcoin(tx, keychain, coin, None).signer()
         for request, response in chunks(messages, 2):
@@ -202,12 +205,16 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
         )
         out2 = TxOutput(
             address=None,
+            # 49'/1'/0'/1/0" - 2N1LGaGg836mqSQqiuUBLfcyGBhyZbremDX
             address_n=[49 | 0x80000000, 1 | 0x80000000, 0 | 0x80000000, 1, 0],
             script_type=OutputScriptType.PAYTOWITNESS,
             amount=12300000 - 11000 - 5000000,
             multisig=None,
         )
         tx = SignTx(coin_name='Testnet', version=1, lock_time=0, inputs_count=1, outputs_count=2)
+
+        # precomputed tx weight is 142 = ceil(566 / 4)
+        fee_rate = 11000 / 142
 
         messages = [
             None,
@@ -228,7 +235,10 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
             TxRequest(request_type=TXOUTPUT, details=TxRequestDetailsType(request_index=1, tx_hash=None), serialized=EMPTY_SERIALIZED),
             TxAckOutput(tx=TxAckOutputWrapper(output=out2)),
 
-            helpers.UiConfirmTotal(5000000 + 11000, 11000, coin, AmountUnit.BITCOIN),
+            helpers.UiConfirmForeignAddress(address_n=out2.address_n),
+            True,
+
+            helpers.UiConfirmTotal(5000000 + 11000, 11000, fee_rate, coin, AmountUnit.BITCOIN),
             True,
 
             # check prev tx
@@ -285,7 +295,7 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
             )),
         ]
 
-        ns = get_schemas_for_coin(coin)
+        ns = _get_schemas_for_coin(coin)
         keychain = Keychain(seed, coin.curve_name, ns)
         signer = bitcoin.Bitcoin(tx, keychain, coin, None).signer()
         for request, expected_response in chunks(messages, 2):
@@ -345,7 +355,7 @@ class TestSignSegwitTxNativeP2WPKH(unittest.TestCase):
             None
         ]
 
-        ns = get_schemas_for_coin(coin)
+        ns = _get_schemas_for_coin(coin)
         keychain = Keychain(seed, coin.curve_name, ns)
         signer = bitcoin.Bitcoin(tx, keychain, coin, None).signer()
         for request, expected_response in chunks(messages, 2):

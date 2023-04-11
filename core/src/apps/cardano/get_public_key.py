@@ -1,33 +1,34 @@
+from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
-from trezor import log, wire
-from trezor.messages import CardanoPublicKey, HDNodeType
-from trezor.ui.layouts import show_pubkey
-
-from apps.common import paths
-
 from . import seed
-from .helpers.paths import SCHEMA_MINT, SCHEMA_PUBKEY
-from .helpers.utils import derive_public_key
 
-if False:
-    from trezor.messages import CardanoGetPublicKey
+if TYPE_CHECKING:
+    from trezor.wire import Context
+    from trezor.messages import CardanoGetPublicKey, CardanoPublicKey
 
 
 @seed.with_keychain
 async def get_public_key(
-    ctx: wire.Context, msg: CardanoGetPublicKey, keychain: seed.Keychain
+    ctx: Context, msg: CardanoGetPublicKey, keychain: seed.Keychain
 ) -> CardanoPublicKey:
+    from trezor import log, wire
+    from trezor.ui.layouts import show_pubkey
+    from apps.common import paths
+    from .helpers.paths import SCHEMA_MINT, SCHEMA_PUBKEY
+
+    address_n = msg.address_n  # local_cache_attribute
+
     await paths.validate_path(
         ctx,
         keychain,
-        msg.address_n,
+        address_n,
         # path must match the PUBKEY schema
-        SCHEMA_PUBKEY.match(msg.address_n) or SCHEMA_MINT.match(msg.address_n),
+        SCHEMA_PUBKEY.match(address_n) or SCHEMA_MINT.match(address_n),
     )
 
     try:
-        key = _get_public_key(keychain, msg.address_n)
+        key = _get_public_key(keychain, address_n)
     except ValueError as e:
         if __debug__:
             log.exception(__name__, e)
@@ -41,6 +42,9 @@ async def get_public_key(
 def _get_public_key(
     keychain: seed.Keychain, derivation_path: list[int]
 ) -> CardanoPublicKey:
+    from .helpers.utils import derive_public_key
+    from trezor.messages import HDNodeType, CardanoPublicKey
+
     node = keychain.derive(derivation_path)
 
     public_key = hexlify(derive_public_key(keychain, derivation_path)).decode()

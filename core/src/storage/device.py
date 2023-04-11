@@ -1,10 +1,10 @@
 from micropython import const
-from ubinascii import hexlify
+from typing import TYPE_CHECKING
 
-import storage.cache
+import storage.cache as storage_cache
 from storage import common
 
-if False:
+if TYPE_CHECKING:
     from trezor.enums import BackupType
     from typing_extensions import Literal
 
@@ -16,7 +16,6 @@ _NAMESPACE = common.APP_DEVICE
 DEVICE_ID                  = const(0x00)  # bytes
 _VERSION                   = const(0x01)  # int
 _MNEMONIC_SECRET           = const(0x02)  # bytes
-_LANGUAGE                  = const(0x03)  # str
 _LABEL                     = const(0x04)  # str
 _USE_PASSPHRASE            = const(0x05)  # bool (0x01 or empty)
 _HOMESCREEN                = const(0x06)  # bytes
@@ -35,24 +34,25 @@ _SD_SALT_AUTH_KEY          = const(0x12)  # bytes
 INITIALIZED                = const(0x13)  # bool (0x01 or empty)
 _SAFETY_CHECK_LEVEL        = const(0x14)  # int
 _EXPERIMENTAL_FEATURES     = const(0x15)  # bool (0x01 or empty)
+_HIDE_PASSPHRASE_FROM_HOST = const(0x16)  # bool (0x01 or empty)
 
 SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
 SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
 _DEFAULT_SAFETY_CHECK_LEVEL = SAFETY_CHECK_LEVEL_STRICT
-if False:
+if TYPE_CHECKING:
     StorageSafetyCheckLevel = Literal[0, 1]
 # fmt: on
 
-HOMESCREEN_MAXSIZE = 16384
-LABEL_MAXLENGTH = 32
+HOMESCREEN_MAXSIZE = const(16384)
+LABEL_MAXLENGTH = const(32)
 
 if __debug__:
     AUTOLOCK_DELAY_MINIMUM = 10 * 1000  # 10 seconds
 else:
     AUTOLOCK_DELAY_MINIMUM = 60 * 1000  # 1 minute
-AUTOLOCK_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
+AUTOLOCK_DELAY_DEFAULT = const(10 * 60 * 1000)  # 10 minutes
 # autolock intervals larger than AUTOLOCK_DELAY_MAXIMUM cause issues in the scheduler
-AUTOLOCK_DELAY_MAXIMUM = 0x2000_0000  # ~6 days
+AUTOLOCK_DELAY_MAXIMUM = const(0x2000_0000)  # ~6 days
 
 # Length of SD salt auth tag.
 # Other SD-salt-related constants are in sd_salt.py
@@ -75,16 +75,15 @@ def is_initialized() -> bool:
     return common.get_bool(_NAMESPACE, INITIALIZED, public=True)
 
 
-def _new_device_id() -> str:
+def get_device_id() -> str:
+    from ubinascii import hexlify
     from trezorcrypto import random  # avoid pulling in trezor.crypto
 
-    return hexlify(random.bytes(12)).decode().upper()
-
-
-def get_device_id() -> str:
     dev_id = common.get(_NAMESPACE, DEVICE_ID, public=True)
     if not dev_id:
-        dev_id = _new_device_id().encode()
+        # _new_device_id
+        new_dev_id_str = hexlify(random.bytes(12)).decode().upper()
+        dev_id = new_dev_id_str.encode()
         common.set(_NAMESPACE, DEVICE_ID, dev_id, public=True)
     return dev_id.decode()
 
@@ -133,7 +132,7 @@ def get_backup_type() -> BackupType:
     ):
         # Invalid backup type
         raise RuntimeError
-    return backup_type  # type: ignore
+    return backup_type  # type: ignore [int-into-enum]
 
 
 def is_passphrase_enabled() -> bool:
@@ -144,10 +143,6 @@ def set_passphrase_enabled(enable: bool) -> None:
     common.set_bool(_NAMESPACE, _USE_PASSPHRASE, enable)
     if not enable:
         set_passphrase_always_on_device(False)
-
-
-def get_homescreen() -> bytes | None:
-    return common.get(_NAMESPACE, _HOMESCREEN, public=True)
 
 
 def set_homescreen(homescreen: bytes) -> None:
@@ -198,6 +193,11 @@ def get_passphrase_always_on_device() -> bool:
     - If DEVICE(1) => returns True, the check against b"\x01" in get_bool succeeds.
     - If HOST(2) => returns False, the check against b"\x01" in get_bool fails.
     """
+    from trezor import utils
+
+    # Some models do not support passphrase input on device
+    if utils.MODEL in ("1", "R"):
+        return False
     return common.get_bool(_NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE)
 
 
@@ -309,7 +309,7 @@ def safety_check_level() -> StorageSafetyCheckLevel:
     if level not in (SAFETY_CHECK_LEVEL_STRICT, SAFETY_CHECK_LEVEL_PROMPT):
         return _DEFAULT_SAFETY_CHECK_LEVEL
     else:
-        return level  # type: ignore
+        return level  # type: ignore [int-into-enum]
 
 
 # do not use this function directly, see apps.common.safety_checks instead
@@ -319,7 +319,7 @@ def set_safety_check_level(level: StorageSafetyCheckLevel) -> None:
     common.set_uint8(_NAMESPACE, _SAFETY_CHECK_LEVEL, level)
 
 
-@storage.cache.stored(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES)
+@storage_cache.stored(storage_cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES)
 def _get_experimental_features() -> bytes:
     if common.get_bool(_NAMESPACE, _EXPERIMENTAL_FEATURES):
         return b"\x01"
@@ -333,5 +333,19 @@ def get_experimental_features() -> bool:
 
 def set_experimental_features(enabled: bool) -> None:
     cached_bytes = b"\x01" if enabled else b""
-    storage.cache.set(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES, cached_bytes)
+    storage_cache.set(storage_cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES, cached_bytes)
     common.set_true_or_delete(_NAMESPACE, _EXPERIMENTAL_FEATURES, enabled)
+
+
+def set_hide_passphrase_from_host(hide: bool) -> None:
+    """
+    Whether we should hide the passphrase from the host.
+    """
+    common.set_bool(_NAMESPACE, _HIDE_PASSPHRASE_FROM_HOST, hide)
+
+
+def get_hide_passphrase_from_host() -> bool:
+    """
+    Whether we should hide the passphrase from the host.
+    """
+    return common.get_bool(_NAMESPACE, _HIDE_PASSPHRASE_FROM_HOST)

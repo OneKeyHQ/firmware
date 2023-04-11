@@ -26,7 +26,7 @@ from trezor.enums import OutputScriptType
 
 from apps.common import coins
 from apps.common.keychain import Keychain
-from apps.bitcoin.keychain import get_schemas_for_coin
+from apps.bitcoin.keychain import _get_schemas_for_coin
 from apps.bitcoin.sign_tx import bitcoinlike, helpers
 
 
@@ -61,6 +61,9 @@ class TestSignTx_GRS(unittest.TestCase):
                             address_n=[])
         tx = SignTx(coin_name='Groestlcoin', version=1, lock_time=0, inputs_count=1, outputs_count=1)
 
+        # precomputed tx weight is 768
+        fee_rate = 192 / (768 / 4)
+
         messages = [
             None,
             TxRequest(request_type=TXINPUT, details=TxRequestDetailsType(request_index=0, tx_hash=None), serialized=EMPTY_SERIALIZED),
@@ -69,7 +72,7 @@ class TestSignTx_GRS(unittest.TestCase):
             TxAckOutput(tx=TxAckOutputWrapper(output=out1)),
             helpers.UiConfirmOutput(out1, coin, AmountUnit.BITCOIN),
             True,
-            helpers.UiConfirmTotal(210016, 192, coin, AmountUnit.BITCOIN),
+            helpers.UiConfirmTotal(210016, 192, fee_rate, coin, AmountUnit.BITCOIN),
             True,
             TxRequest(request_type=TXINPUT, details=TxRequestDetailsType(request_index=0, tx_hash=None), serialized=EMPTY_SERIALIZED),
             TxAckInput(tx=TxAckInputWrapper(input=inp1)),
@@ -101,7 +104,7 @@ class TestSignTx_GRS(unittest.TestCase):
         ]
 
         seed = bip39.seed(' '.join(['all'] * 12), '')
-        ns = get_schemas_for_coin(coin)
+        ns = _get_schemas_for_coin(coin)
         keychain = Keychain(seed, coin.curve_name, ns)
         signer = bitcoinlike.Bitcoinlike(tx, keychain, coin, None).signer()
         for request, expected_response in chunks(messages, 2):

@@ -1,31 +1,28 @@
 # pylint: disable=wrong-import-position
-import math
 import utime
 from micropython import const
 from trezorui import Display
+from typing import TYPE_CHECKING, Any, Awaitable, Generator
 
-from trezor import io, loop, res, utils, workflow
-
-if False:
-    from typing import Any, Awaitable, Generator, TypeVar
-
-    Pos = tuple[int, int]
-    Area = tuple[int, int, int, int]
-    ResultValue = TypeVar("ResultValue")
+from trezor import io, loop, utils, workflow
 
 # all rendering is done through a singleton of `Display`
 display = Display()
 
 # re-export constants from modtrezorui
-NORMAL = Display.FONT_NORMAL
-BOLD = Display.FONT_BOLD
-MONO = Display.FONT_MONO
-WIDTH = Display.WIDTH
-HEIGHT = Display.HEIGHT
+NORMAL: int = Display.FONT_NORMAL
+BOLD: int = Display.FONT_BOLD
+MONO: int = Display.FONT_MONO
+WIDTH: int = Display.WIDTH
+HEIGHT: int = Display.HEIGHT
 
-# viewport margins
-VIEWX = const(6)
-VIEWY = const(9)
+if __debug__:
+    # common symbols to transfer swipes between debuglink and the UI
+    SWIPE_UP = const(0x01)
+    SWIPE_DOWN = const(0x02)
+    SWIPE_LEFT = const(0x04)
+    SWIPE_RIGHT = const(0x08)
+
 
 # channel used to cancel layouts, see `Cancelled` exception
 layout_chan = loop.chan()
@@ -40,33 +37,17 @@ if __debug__:
         from apps.debug import screenshot
 
         if not screenshot():
-            display.bar(Display.WIDTH - 8, 0, 8, 8, 0xF800)
+            side = Display.WIDTH // 30
+            display.bar(Display.WIDTH - side, 0, side, side, 0xF800)
         display.refresh()
 
-
 else:
-    refresh = display.refresh
+    refresh = display.refresh  # type: ignore [obscured-by-same-name]
 
 
 # in both debug and production, emulator needs to draw the screen explicitly
-if utils.EMULATOR or utils.MODEL == "1":
+if utils.EMULATOR or utils.MODEL in ("1", "R"):
     loop.after_step_hook = refresh
-
-
-def lerpi(a: int, b: int, t: float) -> int:
-    return int(a + t * (b - a))
-
-
-def rgb(r: int, g: int, b: int) -> int:
-    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3)
-
-
-def blend(ca: int, cb: int, t: float) -> int:
-    return rgb(
-        lerpi((ca >> 8) & 0xF8, (cb >> 8) & 0xF8, t),
-        lerpi((ca >> 3) & 0xFC, (cb >> 3) & 0xFC, t),
-        lerpi((ca << 3) & 0xF8, (cb << 3) & 0xF8, t),
-    )
 
 
 # import style later to avoid circular dep
@@ -74,11 +55,6 @@ from trezor.ui import style  # isort:skip
 
 # import style definitions into namespace
 from trezor.ui.style import *  # isort:skip # noqa: F401,F403
-
-
-def pulse(period: int, offset: int = 0) -> float:
-    # normalize sin from interval -1:1 to 0:1
-    return 0.5 + 0.5 * math.sin(2 * math.pi * (utime.ticks_us() + offset) / period)
 
 
 async def _alert(count: int) -> None:
@@ -105,112 +81,21 @@ def alert(count: int = 3) -> None:
     loop.schedule(_alert(count))
 
 
-async def click() -> Pos:
-    touch = loop.wait(io.TOUCH)
-    while True:
-        ev, *pos = await touch
-        if ev == io.TOUCH_START:
-            break
-    while True:
-        ev, *pos = await touch
-        if ev == io.TOUCH_END:
-            break
-    return pos  # type: ignore
-
-
 def backlight_fade(val: int, delay: int = 14000, step: int = 15) -> None:
     if __debug__:
         if utils.DISABLE_ANIMATION:
             display.backlight(val)
             return
     current = display.backlight()
-    if current > val:
+    if current < 0:
+        display.backlight(val)
+        return
+    elif current > val:
         step = -step
     for i in range(current, val, step):
         display.backlight(i)
         utime.sleep_us(delay)
-
-
-def header(
-    title: str,
-    icon: str = style.ICON_DEFAULT,
-    fg: int = style.FG,
-    bg: int = style.BG,
-    ifg: int = style.GREEN,
-) -> None:
-    if icon is not None:
-        display.icon(14, 15, res.load(icon), ifg, bg)
-    display.text(44, 35, title, BOLD, fg, bg)
-
-
-def header_warning(message: str, clear: bool = True) -> None:
-    display.bar(0, 0, WIDTH, 30, style.YELLOW)
-    display.text_center(WIDTH // 2, 22, message, BOLD, style.BLACK, style.YELLOW)
-    if clear:
-        display.bar(0, 30, WIDTH, HEIGHT - 30, style.BG)
-
-
-def header_error(message: str, clear: bool = True) -> None:
-    display.bar(0, 0, WIDTH, 30, style.RED)
-    display.text_center(WIDTH // 2, 22, message, BOLD, style.WHITE, style.RED)
-    if clear:
-        display.bar(0, 30, WIDTH, HEIGHT - 30, style.BG)
-
-
-def draw_simple(t: "Component") -> None:
-    """Render a component synchronously.
-
-    Useful when you need to put something on screen and go on to do other things.
-
-    This function bypasses the UI workflow engine, so other layouts will not know
-    that something was drawn over them. In particular, if no other Layout is shown
-    in a workflow, the homescreen will not redraw when the workflow is finished.
-    Make sure you use `workflow.close_others()` before invoking this function
-    (note that `workflow.close_others()` is implicitly called with `button_request()`).
-    """
-    backlight_fade(style.BACKLIGHT_DIM)
-    display.clear()
-    t.on_render()
-    refresh()
-    backlight_fade(style.BACKLIGHT_NORMAL)
-
-
-def grid(
-    i: int,  # i-th cell of the table of which we wish to return Area (snake-like starting with 0)
-    n_x: int = 3,  # number of rows in the table
-    n_y: int = 5,  # number of columns in the table
-    start_x: int = VIEWX,  # where the table starts on x-axis
-    start_y: int = VIEWY,  # where the table starts on y-axis
-    end_x: int = (WIDTH - VIEWX),  # where the table ends on x-axis
-    end_y: int = (HEIGHT - VIEWY),  # where the table ends on y-axis
-    cells_x: int = 1,  # number of cells to be merged into one in the direction of x-axis
-    cells_y: int = 1,  # number of cells to be merged into one in the direction of y-axis
-    spacing: int = 0,  # spacing size between cells
-) -> Area:
-    """
-    Returns area (tuple of four integers, in pixels) of a cell on i-th position
-    in a table you define yourself.  Example:
-
-    >>> ui.grid(4, n_x=2, n_y=3, start_x=20, start_y=20)
-    (20, 160, 107, 70)
-
-    Returns 5th cell from the following table.  It has two columns, three rows
-    and starts on coordinates 20-20.
-
-        |____|____|
-        |____|____|
-        |XXXX|____|
-    """
-    w = (end_x - start_x) // n_x
-    h = (end_y - start_y) // n_y
-    x = (i % n_x) * w
-    y = (i // n_x) * h
-    return (x + start_x, y + start_y, (w - spacing) * cells_x, (h - spacing) * cells_y)
-
-
-def in_area(area: Area, x: int, y: int) -> bool:
-    ax, ay, aw, ah = area
-    return ax <= x < ax + aw and ay <= y < ay + ah
+    display.backlight(val)
 
 
 # Component events.  Should be different from `io.TOUCH_*` events.
@@ -240,7 +125,7 @@ class Component:
     def __init__(self) -> None:
         self.repaint = True
 
-    if utils.MODEL == "T":
+    if utils.MODEL in ("T",):
 
         def dispatch(self, event: int, x: int, y: int) -> None:
             if event is RENDER:
@@ -263,7 +148,7 @@ class Component:
         def on_touch_end(self, x: int, y: int) -> None:
             pass
 
-    elif utils.MODEL == "1":
+    elif utils.MODEL in ("1", "R"):
 
         def dispatch(self, event: int, x: int, y: int) -> None:
             if event is RENDER:
@@ -298,7 +183,7 @@ class Result(Exception):
     See `Layout.__iter__` for details.
     """
 
-    def __init__(self, value: ResultValue) -> None:
+    def __init__(self, value: Any) -> None:
         super().__init__()
         self.value = value
 
@@ -327,7 +212,7 @@ class Layout(Component):
     BACKLIGHT_LEVEL = style.BACKLIGHT_NORMAL
     RENDER_SLEEP: loop.Syscall = loop.sleep(_RENDER_DELAY_MS)
 
-    async def __iter__(self) -> ResultValue:
+    async def __iter__(self) -> Any:
         """
         Run the layout and wait until it completes.  Returns the result value.
         Usually not overridden.
@@ -357,10 +242,15 @@ class Layout(Component):
             value = result.value
         return value
 
-    def __await__(self) -> Generator[Any, Any, ResultValue]:
-        return self.__iter__()  # type: ignore
+    if TYPE_CHECKING:
 
-    def create_tasks(self) -> tuple[loop.Task, ...]:
+        def __await__(self) -> Generator:
+            return self.__iter__()  # type: ignore [Expression of type "Coroutine[Any, Any, Any]" cannot be assigned to return type "Generator[Unknown, Unknown, Unknown]"]
+
+    else:
+        __await__ = __iter__
+
+    def create_tasks(self) -> tuple[loop.AwaitableTask, ...]:
         """
         Called from `__iter__`.  Creates and returns a sequence of tasks that
         run this layout.  Tasks are executed in parallel.  When one of them
@@ -369,9 +259,9 @@ class Layout(Component):
         Usually overridden to add another tasks to the list."""
         return self.handle_input(), self.handle_rendering()
 
-    if utils.MODEL == "T":
+    if utils.MODEL in ("T",):
 
-        def handle_input(self) -> loop.Task:  # type: ignore
+        def handle_input(self) -> Generator:
             """Task that is waiting for the user input."""
             touch = loop.wait(io.TOUCH)
             while True:
@@ -383,9 +273,9 @@ class Layout(Component):
                 # way to get the lowest input-to-render latency.
                 self.dispatch(RENDER, 0, 0)
 
-    elif utils.MODEL == "1":
+    elif utils.MODEL in ("1", "R"):
 
-        def handle_input(self) -> loop.Task:  # type: ignore
+        def handle_input(self) -> Generator:
             """Task that is waiting for the user input."""
             button = loop.wait(io.BUTTON)
             while True:
@@ -399,7 +289,7 @@ class Layout(Component):
 
     def _before_render(self) -> None:
         # Before the first render, we dim the display.
-        backlight_fade(style.BACKLIGHT_DIM)
+        backlight_fade(style.BACKLIGHT_NONE)
         # Clear the screen of any leftovers, make sure everything is marked for
         # repaint (we can be running the same layout instance multiple times)
         # and paint it.
@@ -422,7 +312,7 @@ class Layout(Component):
         refresh()
         backlight_fade(self.BACKLIGHT_LEVEL)
 
-    def handle_rendering(self) -> loop.Task:  # type: ignore
+    def handle_rendering(self) -> loop.Task:  # type: ignore [awaitable-is-generator]
         """Task that is rendering the layout in a busy loop."""
         self._before_render()
         sleep = self.RENDER_SLEEP
@@ -435,30 +325,6 @@ class Layout(Component):
             self.dispatch(RENDER, 0, 0)
 
 
-def wait_until_layout_is_running() -> Awaitable[None]:  # type: ignore
+def wait_until_layout_is_running() -> Awaitable[None]:  # type: ignore [awaitable-is-generator]
     while not layout_chan.takers:
         yield
-
-
-if utils.MODEL == "1":
-
-    class RustLayout(Layout):
-        def __init__(self, layout: Any):
-            super().__init__()
-            self.layout = layout
-            self.layout.set_timer_fn(self.set_timer)
-
-        def set_timer(self, token: int, deadline: int) -> None:
-            # TODO: schedule a timer tick with `token` in `deadline` ms
-            print("timer", token, deadline)
-
-        def dispatch(self, event: int, x: int, y: int) -> None:
-            msg = None
-            if event is RENDER:
-                self.layout.paint()
-            elif event in (io.BUTTON_PRESSED, io.BUTTON_RELEASED):
-                msg = self.layout.button_event(event, x)
-            # elif event in (io.TOUCH_START, io.TOUCH_MOVE, io.TOUCH_END):
-            #    self.layout.touch_event(event, x, y)
-            if msg is not None:
-                raise Result(msg)

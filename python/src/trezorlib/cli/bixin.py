@@ -38,37 +38,6 @@ def self_test(client: "TrezorClient"):
 
 
 @cli.command()
-@with_client
-def backup(client: "TrezorClient"):
-    """Perform device seed backup."""
-    ret = device.se_backup(client)
-    return "data: {}".format(ret.hex())
-
-
-@cli.command()
-@click.argument("hex_data")
-@click.argument("language")
-@click.argument("label")
-@click.argument("passphrase_protection")
-@with_client
-def restore(
-    client: "TrezorClient",
-    hex_data: str,
-    language: str = "en-US",
-    label: str = "BiXin Key",
-    passphrase_protection: bool = True,
-):
-    """Perform device seed restore."""
-    return device.se_restore(
-        client,
-        data=hex_data,
-        language=language,
-        label=label,
-        passphrase_protection=bool(passphrase_protection),
-    )
-
-
-@cli.command()
 @click.argument("data")
 @with_client
 def verify(client: "TrezorClient", data: str):

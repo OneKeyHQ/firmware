@@ -6,10 +6,10 @@ Q := @
 endif
 
 PYTHON ?= python
-CC_FOR_BUILD ?= gcc
+CC_FOR_BUILD ?= cc
 
 ifeq ($(EMULATOR),1)
-CC       ?= gcc
+CC       ?= cc
 LD       := $(CC)
 OBJCOPY  := true
 OBJDUMP  := true
@@ -21,6 +21,9 @@ OPTFLAGS ?= -O3
 DBGFLAGS ?= -g3 -ggdb3
 CPUFLAGS ?=
 FPUFLAGS ?=
+ifeq ($(ADDRESS_SANITIZER),1)
+SANFLAGS += -fsanitize=address,undefined
+endif
 else
 PREFIX   ?= arm-none-eabi-
 CC       := $(PREFIX)gcc
@@ -33,6 +36,7 @@ OPENOCD  := openocd -f interface/stlink.cfg -c "transport select hla_swd" -f tar
 
 GDB      := $(PREFIX)gdb --nx -ex 'set remotetimeout unlimited' -ex 'set confirm off' -ex 'target remote 127.0.0.1:3333' -ex 'monitor reset halt'
 
+CONFFLAG ?= -DCONFIDENTIAL='__attribute__((section("confidential")))'
 OPTFLAGS ?= -Os
 DBGFLAGS ?= -g -DNDEBUG
 CPUFLAGS ?= -mcpu=cortex-m3 -mthumb
@@ -46,8 +50,12 @@ endif
 
 endif
 
+DEBUG_LINK ?= 0
+DEBUG_LOG  ?= 0
+
 CFLAGS   += $(OPTFLAGS) \
             $(DBGFLAGS) \
+            $(SANFLAGS) \
             -std=gnu11 \
             -W \
             -Wall \
@@ -77,7 +85,8 @@ CFLAGS   += $(OPTFLAGS) \
             $(FPUFLAGS) \
             $(CONFFLAG) \
             -DSTM32F2 \
-            -DRAND_PLATFORM_INDEPENDENT=1 \
+            -DDEBUG_LINK=$(DEBUG_LINK) \
+            -DDEBUG_LOG=$(DEBUG_LOG) \
             -I$(TOOLCHAIN_DIR)/include \
             -I$(TOP_DIR) \
             -I$(TOP_DIR)gen \
@@ -90,6 +99,7 @@ CFLAGS   += $(OPTFLAGS) \
 
 LDFLAGS  += -L$(TOP_DIR) \
             $(DBGFLAGS) \
+            $(SANFLAGS) \
             $(CPUFLAGS) \
             $(FPUFLAGS) \
 
@@ -97,6 +107,13 @@ LDFLAGS  += -L$(TOP_DIR)vendor/libsol
 LDLIBS   += -lsol
 
 ZKP_PATH = $(TOP_DIR)vendor/secp256k1-zkp
+
+# hw_model = T1B1 = 0x31423154
+HW_MODEL = 0x31423154
+CPUFLAGS   += -DHW_MODEL=$(HW_MODEL)
+CPUFLAGS   += -DHW_REVISION=0
+CFLAGS   += -DHW_MODEL=$(HW_MODEL)
+CFLAGS   += -DHW_REVISION=0
 
 ifeq ($(EMULATOR),1)
 CFLAGS   += -DEMULATOR=1
@@ -112,10 +129,6 @@ LIBDEPS  += $(TOP_DIR)/libtrezor.a $(TOP_DIR)emulator/libemulator.a
 CFLAGS   += $(shell pkg-config --cflags sdl2 SDL2_image)
 LDLIBS   += $(shell pkg-config --libs sdl2 SDL2_image)
 
-ifdef RANDOM_DEV_FILE
-CFLAGS += -DRANDOM_DEV_FILE=\"$(RANDOM_DEV_FILE)\"
-endif
-
 else
 ifdef APPVER
 CFLAGS   += -DAPPVER=$(APPVER)
@@ -125,6 +138,7 @@ LDSCRIPT  = $(TOP_DIR)/memory.ld
 endif
 
 CFLAGS   += -DEMULATOR=0
+CFLAGS   += -DRAND_PLATFORM_INDEPENDENT=1
 
 LDFLAGS  += --static \
             -Wl,--start-group \
@@ -153,20 +167,38 @@ CFLAGS += -DBITCOIN_ONLY=0
 CFLAGS += -DU2F_ENABLED=1
 endif
 
-ifeq ($(MEMORY_PROTECT), 0)
-CFLAGS   += -DMEMORY_PROTECT=0
-CPUFLAGS += -DMEMORY_PROTECT=0
-$(info MEMORY_PROTECT=0)
+ifeq ($(PRODUCTION), 0)
+CFLAGS   += -DPRODUCTION=0
+CPUFLAGS += -DPRODUCTION=0
+$(info PRODUCTION=0)
 else
-CFLAGS   += -DMEMORY_PROTECT=1
-CPUFLAGS += -DMEMORY_PROTECT=1
-$(info MEMORY_PROTECT=1)
+CFLAGS   += -DPRODUCTION=1
+CPUFLAGS += -DPRODUCTION=1
+$(info PRODUCTION=1)
 endif
+
+BOOTLOADER_QA ?= 0
+ifeq ($(BOOTLOADER_QA), 0)
+CFLAGS   += -DBOOTLOADER_QA=0
+CPUFLAGS += -DBOOTLOADER_QA=0
+$(info BOOTLOADER_QA=0)
+else
+CFLAGS   += -DBOOTLOADER_QA=1
+CPUFLAGS += -DBOOTLOADER_QA=1
+$(info BOOTLOADER_QA=1)
+endif
+
 
 ifeq ($(DEBUG_RNG), 1)
 CFLAGS += -DDEBUG_RNG=1
 else
 CFLAGS += -DDEBUG_RNG=0
+endif
+
+ifeq ($(DEBUG_T1_SIGNATURES), 1)
+CFLAGS += -DDEBUG_T1_SIGNATURES=1
+else
+CFLAGS += -DDEBUG_T1_SIGNATURES=0
 endif
 
 ifeq ($(BLE_SWD_UPDATE), 1)

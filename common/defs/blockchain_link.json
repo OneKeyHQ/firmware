@@ -75,12 +75,6 @@
       "https://explorer.fujicoin.org"
     ]
   },
-  "bitcoin:GAME": {
-    "type": "blockbook",
-    "url": [
-      "https://blockbook.gamecredits.network"
-    ]
-  },
   "bitcoin:GRS": {
     "type": "blockbook",
     "url": [
@@ -128,12 +122,6 @@
       "https://blockbook.pivx.link"
     ]
   },
-  "bitcoin:POLIS": {
-    "type": "blockbook",
-    "url": [
-      "https://blockbook.polispay.org"
-    ]
-  },
   "bitcoin:PPC": {
     "type": "blockbook",
     "url": [
@@ -155,7 +143,7 @@
   "bitcoin:SYS": {
     "type": "blockbook",
     "url": [
-      "https://sys1.bcfn.ca"
+      "https://blockbook.elint.services"
     ]
   },
   "bitcoin:TEST": {
@@ -279,7 +267,7 @@
   "misc:tADA": {
     "type": "blockfrost",
     "url": [
-      "wss://trezor-cardano-testnet.blockfrost.io"
+      "wss://trezor-cardano-preview.blockfrost.io"
     ]
   }
 }

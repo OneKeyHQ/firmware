@@ -20,6 +20,7 @@
 #ifndef __FSM_H__
 #define __FSM_H__
 
+#include "coins.h"
 #include "messages-algorand.pb.h"
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
@@ -39,6 +40,9 @@
 #include "messages-stellar.pb.h"
 #include "messages-sui.pb.h"
 #include "messages-tron.pb.h"
+
+// CoinJoin fee rate multiplier.
+#define FEE_RATE_DECIMALS (1000000)
 
 // message functions
 
@@ -81,6 +85,8 @@ void fsm_msgRecoveryDevice(const RecoveryDevice *msg);
 void fsm_msgWordAck(const WordAck *msg);
 void fsm_msgSetU2FCounter(const SetU2FCounter *msg);
 void fsm_msgGetNextU2FCounter(void);
+void fsm_msgGetFirmwareHash(const GetFirmwareHash *msg);
+void fsm_msgSetBusy(const SetBusy *msg);
 
 // coin
 void fsm_msgGetPublicKey(const GetPublicKey *msg);
@@ -90,6 +96,12 @@ void fsm_msgTxAck(
 void fsm_msgGetAddress(const GetAddress *msg);
 void fsm_msgSignMessage(const SignMessage *msg);
 void fsm_msgVerifyMessage(const VerifyMessage *msg);
+void fsm_msgGetOwnershipId(const GetOwnershipId *msg);
+void fsm_msgGetOwnershipProof(const GetOwnershipProof *msg);
+void fsm_msgAuthorizeCoinJoin(const AuthorizeCoinJoin *msg);
+void fsm_msgCancelAuthorization(const CancelAuthorization *msg);
+void fsm_msgDoPreauthorized(const DoPreauthorized *msg);
+void fsm_msgUnlockPath(const UnlockPath *msg);
 
 // crypto
 void fsm_msgCipherKeyValue(const CipherKeyValue *msg);
@@ -98,6 +110,7 @@ void fsm_msgGetECDHSessionKey(const GetECDHSessionKey *msg);
 void fsm_msgCosiCommit(const CosiCommit *msg);
 void fsm_msgCosiSign(const CosiSign *msg);
 void fsm_msgBatchGetPublickeys(const BatchGetPublickeys *msg);
+void fsm_clearCosiNonce(void);
 
 // debug
 #if DEBUG_LINK
@@ -107,6 +120,7 @@ void fsm_msgDebugLinkStop(const DebugLinkStop *msg);
 void fsm_msgDebugLinkMemoryWrite(const DebugLinkMemoryWrite *msg);
 void fsm_msgDebugLinkMemoryRead(const DebugLinkMemoryRead *msg);
 void fsm_msgDebugLinkFlashErase(const DebugLinkFlashErase *msg);
+void fsm_msgDebugLinkReseedRandom(const DebugLinkReseedRandom *msg);
 #endif
 
 // ethereum
@@ -230,5 +244,16 @@ void fsm_msgCosmosSignTx(const CosmosSignTx *msg);
 // polkadot
 void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg);
 void fsm_msgPolkadotSignTx(const PolkadotSignTx *msg);
+bool fsm_layoutPathWarning(void);
+bool fsm_checkCoinPath(const CoinInfo *coin, InputScriptType script_type,
+                       uint32_t address_n_count, const uint32_t *address_n,
+                       bool has_multisig, MessageType message_type,
+                       bool show_warning);
+
+bool fsm_getOwnershipId(uint8_t *script_pubkey, size_t script_pubkey_size,
+                        uint8_t ownership_id[32]);
+
+void fsm_abortWorkflows(void);
+void fsm_postMsgCleanup(MessageType message_type);
 
 #endif

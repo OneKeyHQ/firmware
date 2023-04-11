@@ -17,7 +17,7 @@
 import pytest
 
 from trezorlib import ethereum, exceptions, messages
-from trezorlib.debuglink import message_filters
+from trezorlib.debuglink import TrezorClientDebugLink as Client, message_filters
 from trezorlib.exceptions import TrezorFailure
 from trezorlib.tools import parse_path
 
@@ -34,7 +34,7 @@ pytestmark = [pytest.mark.altcoin, pytest.mark.ethereum]
     "ethereum/sign_tx.json",
     "ethereum/sign_tx_eip155.json",
 )
-def test_signtx(client, parameters, result):
+def test_signtx(client: Client, parameters, result):
     with client:
         sig_v, sig_r, sig_s = ethereum.sign_tx(
             client,
@@ -57,7 +57,7 @@ def test_signtx(client, parameters, result):
 
 
 @parametrize_using_common_fixtures("ethereum/sign_tx_eip1559.json")
-def test_signtx_eip1559(client, parameters, result):
+def test_signtx_eip1559(client: Client, parameters, result):
     with client:
         sig_v, sig_r, sig_s = ethereum.sign_tx_eip1559(
             client,
@@ -77,7 +77,7 @@ def test_signtx_eip1559(client, parameters, result):
     assert sig_v == result["sig_v"]
 
 
-def test_sanity_checks(client):
+def test_sanity_checks(client: Client):
     """Is not vectorized because these are internal-only tests that do not
     need to be exposed to the public.
     """
@@ -85,12 +85,12 @@ def test_sanity_checks(client):
     with pytest.raises(TrezorFailure, match=r"DataError"):
         ethereum.sign_tx(
             client,
-            n=parse_path("44'/60'/0'/0/0"),
-            nonce=123456,
-            gas_price=20000,
-            gas_limit=20000,
+            n=parse_path("m/44h/60h/0h/0/0"),
+            nonce=123_456,
+            gas_price=20_000,
+            gas_limit=20_000,
             to="",
-            value=12345678901234567890,
+            value=12_345_678_901_234_567_890,
             chain_id=1,
         )
 
@@ -98,12 +98,12 @@ def test_sanity_checks(client):
     with pytest.raises(TrezorFailure, match=r"DataError"):
         ethereum.sign_tx(
             client,
-            n=parse_path("44'/60'/0'/0/0"),
-            nonce=123456,
+            n=parse_path("m/44h/60h/0h/0/0"),
+            nonce=123_456,
             gas_price=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             gas_limit=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             to=TO_ADDR,
-            value=12345678901234567890,
+            value=12_345_678_901_234_567_890,
             chain_id=1,
         )
 
@@ -111,40 +111,44 @@ def test_sanity_checks(client):
     with pytest.raises(TrezorFailure, match=r"Chain ID out of bounds"):
         ethereum.sign_tx(
             client,
-            n=parse_path("44'/60'/0'/0/0"),
-            nonce=123456,
-            gas_price=20000,
-            gas_limit=20000,
+            n=parse_path("m/44h/60h/0h/0/0"),
+            nonce=123_456,
+            gas_price=20_000,
+            gas_limit=20_000,
             to=TO_ADDR,
-            value=12345678901234567890,
+            value=12_345_678_901_234_567_890,
             chain_id=0,
         )
 
 
-def test_data_streaming(client):
+def test_data_streaming(client: Client):
     """Only verifying the expected responses, the signatures are
     checked in vectorized function above.
     """
     with client:
+        tt = client.features.model == "T"
         client.set_expected_responses(
             [
                 messages.ButtonRequest(code=messages.ButtonRequestType.SignTx),
                 messages.ButtonRequest(code=messages.ButtonRequestType.SignTx),
                 messages.ButtonRequest(code=messages.ButtonRequestType.SignTx),
+                (tt, messages.ButtonRequest(code=messages.ButtonRequestType.Other)),
+                (tt, messages.ButtonRequest(code=messages.ButtonRequestType.SignTx)),
+                (tt, messages.ButtonRequest(code=messages.ButtonRequestType.SignTx)),
                 message_filters.EthereumTxRequest(
-                    data_length=1024,
+                    data_length=1_024,
                     signature_r=None,
                     signature_s=None,
                     signature_v=None,
                 ),
                 message_filters.EthereumTxRequest(
-                    data_length=1024,
+                    data_length=1_024,
                     signature_r=None,
                     signature_s=None,
                     signature_v=None,
                 ),
                 message_filters.EthereumTxRequest(
-                    data_length=1024,
+                    data_length=1_024,
                     signature_r=None,
                     signature_s=None,
                     signature_v=None,
@@ -161,10 +165,10 @@ def test_data_streaming(client):
 
         ethereum.sign_tx(
             client,
-            n=parse_path("44'/60'/0'/0/0"),
+            n=parse_path("m/44h/60h/0h/0/0"),
             nonce=0,
-            gas_price=20000,
-            gas_limit=20000,
+            gas_price=20_000,
+            gas_limit=20_000,
             to=TO_ADDR,
             value=0,
             data=b"ABCDEFGHIJKLMNOP" * 256 + b"!!!",
@@ -172,12 +176,12 @@ def test_data_streaming(client):
         )
 
 
-def test_signtx_eip1559_access_list(client):
+def test_signtx_eip1559_access_list(client: Client):
     with client:
 
         sig_v, sig_r, sig_s = ethereum.sign_tx_eip1559(
             client,
-            n=parse_path("44'/60'/0'/0/100"),
+            n=parse_path("m/44h/60h/0h/0/100"),
             nonce=0,
             gas_limit=20,
             to="0x1d1c328764a41bda0492b66baa30c4a339ff85ef",
@@ -211,12 +215,12 @@ def test_signtx_eip1559_access_list(client):
     )
 
 
-def test_signtx_eip1559_access_list_larger(client):
+def test_signtx_eip1559_access_list_larger(client: Client):
     with client:
 
         sig_v, sig_r, sig_s = ethereum.sign_tx_eip1559(
             client,
-            n=parse_path("44'/60'/0'/0/100"),
+            n=parse_path("m/44h/60h/0h/0/100"),
             nonce=0,
             gas_limit=20,
             to="0x1d1c328764a41bda0492b66baa30c4a339ff85ef",
@@ -264,7 +268,7 @@ def test_signtx_eip1559_access_list_larger(client):
     )
 
 
-def test_sanity_checks_eip1559(client):
+def test_sanity_checks_eip1559(client: Client):
     """Is not vectorized because these are internal-only tests that do not
     need to be exposed to the public.
     """
@@ -272,7 +276,7 @@ def test_sanity_checks_eip1559(client):
     with pytest.raises(TrezorFailure, match=r"DataError"):
         ethereum.sign_tx_eip1559(
             client,
-            n=parse_path("44'/60'/0'/0/100"),
+            n=parse_path("m/44h/60h/0h/0/100"),
             nonce=0,
             gas_limit=20,
             to="",
@@ -286,7 +290,7 @@ def test_sanity_checks_eip1559(client):
     with pytest.raises(TrezorFailure, match=r"DataError"):
         ethereum.sign_tx_eip1559(
             client,
-            n=parse_path("44'/60'/0'/0/100"),
+            n=parse_path("m/44h/60h/0h/0/100"),
             nonce=0,
             gas_limit=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             to=TO_ADDR,
@@ -300,7 +304,7 @@ def test_sanity_checks_eip1559(client):
     with pytest.raises(TrezorFailure, match=r"DataError"):
         ethereum.sign_tx_eip1559(
             client,
-            n=parse_path("44'/60'/0'/0/100"),
+            n=parse_path("m/44h/60h/0h/0/100"),
             nonce=0,
             gas_limit=0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
             to=TO_ADDR,
@@ -314,7 +318,7 @@ def test_sanity_checks_eip1559(client):
     with pytest.raises(TrezorFailure, match=r"Chain ID out of bounds"):
         ethereum.sign_tx_eip1559(
             client,
-            n=parse_path("44'/60'/0'/0/100"),
+            n=parse_path("m/44h/60h/0h/0/100"),
             nonce=0,
             gas_limit=20,
             to=TO_ADDR,
@@ -325,24 +329,32 @@ def test_sanity_checks_eip1559(client):
         )
 
 
-def input_flow_skip(client, cancel=False):
-    yield  # confirm sending
+def input_flow_skip(client: Client, cancel: bool = False):
+    yield  # confirm address
     client.debug.press_yes()
-
+    yield  # confirm amount
+    client.debug.wait_layout()
+    client.debug.press_yes()
     yield  # confirm data
     if cancel:
         client.debug.press_no()
     else:
         client.debug.press_yes()
-        yield
+        yield  # gas price
+        client.debug.press_yes()
+        yield  # maximum fee
+        client.debug.press_yes()
+        yield  # hold to confirm
         client.debug.press_yes()
 
 
-def input_flow_scroll_down(client, cancel=False):
-    yield  # confirm sending
+def input_flow_scroll_down(client: Client, cancel: bool = False):
+    yield  # confirm address
     client.debug.wait_layout()
     client.debug.press_yes()
-
+    yield  # confirm amount
+    client.debug.wait_layout()
+    client.debug.press_yes()
     yield  # confirm data
     client.debug.wait_layout()
     client.debug.click(SHOW_ALL)
@@ -359,15 +371,21 @@ def input_flow_scroll_down(client, cancel=False):
         client.debug.press_no()
     else:
         client.debug.press_yes()
+        yield  # gas price
+        client.debug.press_yes()
+        yield  # maximum fee
+        client.debug.press_yes()
         yield  # hold to confirm
         client.debug.press_yes()
 
 
-def input_flow_go_back(client, cancel=False):
-    br = yield  # confirm sending
+def input_flow_go_back(client: Client, cancel: bool = False):
+    br = yield  # confirm address
     client.debug.wait_layout()
     client.debug.press_yes()
-
+    br = yield  # confirm amount
+    client.debug.wait_layout()
+    client.debug.press_yes()
     br = yield  # confirm data
     client.debug.wait_layout()
     client.debug.click(SHOW_ALL)
@@ -382,6 +400,12 @@ def input_flow_go_back(client, cancel=False):
             if cancel:
                 client.debug.press_no()
             else:
+                client.debug.press_yes()
+                yield  # confirm address
+                client.debug.wait_layout()
+                client.debug.press_yes()
+                yield  # confirm amount
+                client.debug.wait_layout()
                 client.debug.press_yes()
                 yield  # hold to confirm
                 client.debug.wait_layout()
@@ -399,13 +423,13 @@ HEXDATA = "0123456789abcd000023456789abcd010003456789abcd020000456789abcd0300000
     "flow", (input_flow_skip, input_flow_scroll_down, input_flow_go_back)
 )
 @pytest.mark.skip_t1
-def test_signtx_data_pagination(client, flow):
+def test_signtx_data_pagination(client: Client, flow):
     with client:
         client.watch_layout()
         client.set_input_flow(flow(client))
         ethereum.sign_tx(
             client,
-            n=parse_path("m/44'/60'/0'/0/0"),
+            n=parse_path("m/44h/60h/0h/0/0"),
             nonce=0x0,
             gas_price=0x14,
             gas_limit=0x14,
@@ -421,7 +445,7 @@ def test_signtx_data_pagination(client, flow):
         client.set_input_flow(flow(client, cancel=True))
         ethereum.sign_tx(
             client,
-            n=parse_path("m/44'/60'/0'/0/0"),
+            n=parse_path("m/44h/60h/0h/0/0"),
             nonce=0x0,
             gas_price=0x14,
             gas_limit=0x14,

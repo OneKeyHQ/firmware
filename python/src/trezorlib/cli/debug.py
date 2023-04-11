@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -14,11 +14,12 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 import click
 
 from .. import mapping, messages, protobuf
+from ..debuglink import TrezorClientDebugLink, record_screen
 
 if TYPE_CHECKING:
     from . import TrezorConnection
@@ -69,8 +70,31 @@ def send_bytes(
     click.echo(f"Response data: {response_data.hex()}")
 
     try:
-        msg = mapping.decode(response_type, response_data)
+        msg = mapping.DEFAULT_MAPPING.decode(response_type, response_data)
         click.echo("Parsed message:")
         click.echo(protobuf.format_message(msg))
     except Exception as e:
         click.echo(f"Could not parse response: {e}")
+
+
+@cli.command()
+@click.argument("directory", required=False)
+@click.option("-s", "--stop", is_flag=True, help="Stop the recording")
+@click.pass_obj
+def record(obj: "TrezorConnection", directory: Union[str, None], stop: bool) -> None:
+    """Record screen changes into a specified directory.
+
+    Recording can be stopped with `-s / --stop` option.
+    """
+    record_screen_from_connection(obj, None if stop else directory)
+
+
+def record_screen_from_connection(
+    obj: "TrezorConnection", directory: Union[str, None]
+) -> None:
+    """Record screen helper to transform TrezorConnection into TrezorClientDebugLink."""
+    transport = obj.get_transport()
+    debug_client = TrezorClientDebugLink(transport, auto_interact=False)
+    debug_client.open()
+    record_screen(debug_client, directory, report_func=click.echo)
+    debug_client.close()

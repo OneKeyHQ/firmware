@@ -1,6 +1,11 @@
-import storage.device
-from trezor import ui, utils, workflow
-from trezor.enums import BackupType
+from typing import TYPE_CHECKING
+
+import storage.device as storage_device
+from trezor import utils
+
+if TYPE_CHECKING:
+    from trezor.enums import BackupType
+    from trezor.ui.layouts.common import ProgressLayout
 
 
 def get() -> tuple[bytes | None, BackupType]:
@@ -8,11 +13,11 @@ def get() -> tuple[bytes | None, BackupType]:
 
 
 def get_secret() -> bytes | None:
-    return storage.device.get_mnemonic_secret()
+    return storage_device.get_mnemonic_secret()
 
 
 def get_type() -> BackupType:
-    return storage.device.get_backup_type()
+    return storage_device.get_backup_type()
 
 
 def is_bip39() -> bool:
@@ -20,6 +25,8 @@ def is_bip39() -> bool:
     If False then SLIP-39 (either Basic or Advanced).
     Other invalid values are checked directly in storage.
     """
+    from trezor.enums import BackupType
+
     return get_type() == BackupType.Bip39
 
 
@@ -41,8 +48,8 @@ def get_seed(passphrase: str = "", progress_bar: bool = True) -> bytes:
     else:  # SLIP-39
         from trezor.crypto import slip39
 
-        identifier = storage.device.get_slip39_identifier()
-        iteration_exponent = storage.device.get_slip39_iteration_exponent()
+        identifier = storage_device.get_slip39_identifier()
+        iteration_exponent = storage_device.get_slip39_iteration_exponent()
         if identifier is None or iteration_exponent is None:
             # Identifier or exponent expected but not found
             raise RuntimeError
@@ -78,21 +85,34 @@ if not utils.BITCOIN_ONLY:
 
         from trezor.crypto import cardano
 
-        return cardano.derive_icarus(
+        seed = cardano.derive_icarus(
             mnemonic_secret.decode(), passphrase, trezor_derivation, render_func
         )
+        _finish_progress()
+        return seed
+
+
+_progress_obj: ProgressLayout | None = None
 
 
 def _start_progress() -> None:
-    from trezor.ui.layouts import draw_simple_text
+    from trezor import workflow
+    from trezor.ui.layouts import progress
+
+    global _progress_obj
 
     # Because we are drawing to the screen manually, without a layout, we
     # should make sure that no other layout is running.
     workflow.close_others()
-    draw_simple_text("Please wait")
+    _progress_obj = progress()
 
 
 def _render_progress(progress: int, total: int) -> None:
-    p = 1000 * progress // total
-    ui.display.loader(p, False, 18, ui.WHITE, ui.BG)
-    ui.refresh()
+    global _progress_obj
+    if _progress_obj is not None:
+        _progress_obj.report(1000 * progress // total)
+
+
+def _finish_progress() -> None:
+    global _progress_obj
+    _progress_obj = None

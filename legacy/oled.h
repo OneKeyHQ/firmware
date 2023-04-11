@@ -100,14 +100,13 @@ void oledUpdateClk(void);
 
 void oledRefresh(void);
 
-void oledSetDebugLink(bool set);
 void oledInvertDebugLink(void);
 
 void oledBufferBak(void);
 void oledBufferResume(void);
 void oledBufferLoad(uint8_t *buffer);
 void oledBufferRestore(uint8_t *buffer);
-void oledSetBuffer(uint8_t *buf, uint16_t usLen);
+void oledSetBuffer(uint8_t *buf);
 void oledclearLine(uint8_t line);
 const uint8_t *oledGetBuffer(void);
 bool oledGetPixel(int x, int y);

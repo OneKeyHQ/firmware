@@ -1,11 +1,14 @@
 from micropython import const
+from typing import TYPE_CHECKING
 
-from trezor import wire
-from trezor.crypto import base58
 from trezor.utils import BufferReader, ensure
+from trezor.wire import DataError
 
 from apps.common.readers import read_uint32_be
-from apps.common.writers import write_bytes_unchecked, write_uint8
+
+if TYPE_CHECKING:
+    from trezor.utils import Writer
+
 
 TEZOS_AMOUNT_DECIMALS = const(6)
 TEZOS_ED25519_ADDRESS_PREFIX = "tz1"
@@ -55,23 +58,18 @@ MICHELSON_SEQUENCE_TAG = const(2)
 BRANCH_HASH_SIZE = const(32)
 PROPOSAL_HASH_SIZE = const(32)
 PUBLIC_KEY_HASH_SIZE = const(20)
-TAGGED_PUBKEY_HASH_SIZE = 1 + PUBLIC_KEY_HASH_SIZE
+TAGGED_PUBKEY_HASH_SIZE = const(1 + PUBLIC_KEY_HASH_SIZE)
 CONTRACT_ID_SIZE = const(22)
-ED25519_PUBLIC_KEY_SIZE = const(32)
-SECP256K1_PUBLIC_KEY_SIZE = const(33)
-P256_PUBLIC_KEY_SIZE = const(33)
+_ED25519_PUBLIC_KEY_SIZE = const(32)
+_SECP256K1_PUBLIC_KEY_SIZE = const(33)
+_P256_PUBLIC_KEY_SIZE = const(33)
 
 PUBLIC_KEY_TAG_TO_SIZE = {
-    0: ED25519_PUBLIC_KEY_SIZE,
-    1: SECP256K1_PUBLIC_KEY_SIZE,
-    2: P256_PUBLIC_KEY_SIZE,
+    0: _ED25519_PUBLIC_KEY_SIZE,
+    1: _SECP256K1_PUBLIC_KEY_SIZE,
+    2: _P256_PUBLIC_KEY_SIZE,
 }
 
-OP_TAG_ENDORSEMENT = const(0)
-OP_TAG_SEED_NONCE_REVELATION = const(1)
-OP_TAG_DOUBLE_ENDORSEMENT_EVIDENCE = const(2)
-OP_TAG_DOUBLE_BAKING_EVIDENCE = const(3)
-OP_TAG_ACTIVATE_ACCOUNT = const(4)
 OP_TAG_PROPOSALS = const(5)
 OP_TAG_BALLOT = const(6)
 OP_TAG_REVEAL = const(107)
@@ -79,31 +77,27 @@ OP_TAG_TRANSACTION = const(108)
 OP_TAG_ORIGINATION = const(109)
 OP_TAG_DELEGATION = const(110)
 
-EP_TAG_NAMED = const(255)
+_EP_TAG_NAMED = const(255)
 
 
-def base58_encode_check(payload, prefix=None):
+def base58_encode_check(payload: bytes, prefix: str | None = None) -> str:
+    from trezor.crypto import base58
+
     result = payload
     if prefix is not None:
         result = TEZOS_PREFIX_BYTES[prefix] + payload
     return base58.encode_check(result)
 
 
-def base58_decode_check(enc, prefix=None):
-    decoded = base58.decode_check(enc)
-    if prefix is not None:
-        decoded = decoded[len(TEZOS_PREFIX_BYTES[prefix]) :]
-    return decoded
+def write_bool(w: Writer, boolean: bool) -> None:
+    from apps.common.writers import write_uint8
+
+    write_uint8(w, 255 if boolean else 0)
 
 
-def write_bool(w: bytearray, boolean: bool):
-    if boolean:
-        write_uint8(w, 255)
-    else:
-        write_uint8(w, 0)
+def write_instruction(w: Writer, instruction: str) -> None:
+    from apps.common.writers import write_bytes_unchecked
 
-
-def write_instruction(w: bytearray, instruction: str) -> int:
     write_bytes_unchecked(w, MICHELSON_INSTRUCTION_BYTES[instruction])
 
 
@@ -115,19 +109,19 @@ def check_script_size(script: bytes) -> None:
         n = read_uint32_be(r)
         ensure(r.remaining_count() == n)
     except (AssertionError, EOFError):
-        raise wire.DataError("Invalid script")
+        raise DataError("Invalid script")
 
 
 def check_tx_params_size(params: bytes) -> None:
     try:
         r = BufferReader(params)
         tag = r.get()
-        if tag == EP_TAG_NAMED:
+        if tag == _EP_TAG_NAMED:
             n = r.get()
             r.read(n)
         elif tag > 4:
-            raise wire.DataError("Unknown entrypoint tag")
+            raise DataError("Unknown entrypoint tag")
         n = read_uint32_be(r)
         ensure(r.remaining_count() == n)
     except (AssertionError, EOFError):
-        raise wire.DataError("Invalid transaction parameters")
+        raise DataError("Invalid transaction parameters")

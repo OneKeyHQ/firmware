@@ -20,13 +20,17 @@
 #include <string.h>
 
 #include "button.h"
+#include "common.h"
 #include "display.h"
 #include "embed/extmod/trezorobj.h"
 
+#define USB_DATA_IFACE (253)
 #define BUTTON_IFACE (254)
 #define TOUCH_IFACE (255)
 #define POLL_READ (0x0000)
 #define POLL_WRITE (0x0100)
+
+extern bool usb_connected_previously;
 
 /// package: trezorio.__init__
 
@@ -52,7 +56,15 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
     mp_raise_TypeError("invalid list_ref");
   }
 
-  const mp_uint_t timeout = trezor_obj_get_uint(timeout_ms);
+  // The value `timeout_ms` can be negative in a minority of cases, indicating a
+  // deadline overrun. This is not a problem because we use the `timeout` only
+  // to calculate a `deadline`, and having deadline in the past works fine
+  // (except when it overflows, but the code misbehaves near the overflow
+  // anyway). Instead of bothering to correct the negative value in Python, we
+  // just coerce it to an uint. Deliberately assigning *get_int* to *uint_t*
+  // will give us C's wrapping unsigned overflow behavior, and the `deadline`
+  // result will come out correct.
+  const mp_uint_t timeout = trezor_obj_get_int(timeout_ms);
   const mp_uint_t deadline = mp_hal_ticks_ms() + timeout;
   mp_obj_iter_buf_t iterbuf = {0};
 
@@ -64,9 +76,13 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
       const mp_uint_t iface = i & 0x00FF;
       const mp_uint_t mode = i & 0xFF00;
 
+#if defined TREZOR_EMULATOR
+      emulator_poll_events();
+#endif
+
       if (false) {
       }
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T
       else if (iface == TOUCH_IFACE) {
         const uint32_t evt = touch_read();
         if (evt) {
@@ -101,8 +117,16 @@ STATIC mp_obj_t mod_trezorio_poll(mp_obj_t ifaces, mp_obj_t list_ref,
           ret->items[1] = MP_OBJ_FROM_PTR(tuple);
           return mp_const_true;
         }
+      } else if (iface == USB_DATA_IFACE) {
+        bool usb_connected = usb_configured() == sectrue ? true : false;
+        if (usb_connected != usb_connected_previously) {
+          usb_connected_previously = usb_connected;
+          ret->items[0] = MP_OBJ_NEW_SMALL_INT(i);
+          ret->items[1] = usb_connected ? mp_const_true : mp_const_false;
+          return mp_const_true;
+        }
       }
-#elif TREZOR_MODEL == 1
+#elif defined TREZOR_MODEL_1 || defined TREZOR_MODEL_R
       else if (iface == BUTTON_IFACE) {
         const uint32_t evt = button_read();
         if (evt & (BTN_EVT_DOWN | BTN_EVT_UP)) {

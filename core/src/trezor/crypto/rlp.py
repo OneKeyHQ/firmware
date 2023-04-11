@@ -1,13 +1,19 @@
 from micropython import const
+from typing import TYPE_CHECKING
 
-if False:
-    from typing import Union
+if TYPE_CHECKING:
     from trezor.utils import Writer
 
-    # what we want:
-    # RLPItem = Union[list["RLPItem"], bytes, int]
-    # what mypy can process:
-    RLPItem = Union[list, bytes, int]
+    # The intention below is basically:
+    # RLPItem = int | bytes | list[RLPItem]
+    # That will not typecheck though. Type `list` is invariant in its parameter, meaning
+    # that we cannot pass list[bytes] into a list[RLPItem] parameter (what if the
+    # function wanted to append an int?). We do want to enforce that it's a `list`, not
+    # a generic `Sequence` (because we do isinstance checks for a list). We are however
+    # only reading from the list and passing into things that consume a RLPItem. Hence
+    # we have to enumerate single-type lists as well as the universal list[RLPItem].
+    RLPList = list[int] | list[bytes] | list["RLPItem"]
+    RLPItem = RLPList | bytes | int
 
 
 STRING_HEADER_BYTE = const(0x80)
@@ -18,7 +24,7 @@ def _byte_size(x: int) -> int:
     if x < 0:
         raise ValueError  # only unsigned ints are supported
     for exp in range(64):
-        if x < 0x100 ** exp:
+        if x < 0x100**exp:
             return exp
 
     raise ValueError  # int is too large
@@ -74,12 +80,12 @@ def length(item: RLPItem) -> int:
     return header_length(item_length, data) + item_length
 
 
-def write_string(w: Writer, string: bytes) -> None:
+def _write_string(w: Writer, string: bytes) -> None:
     write_header(w, len(string), STRING_HEADER_BYTE, string)
     w.extend(string)
 
 
-def write_list(w: Writer, lst: list[RLPItem]) -> None:
+def _write_list(w: Writer, lst: RLPList) -> None:
     payload_length = sum(length(item) for item in lst)
     write_header(w, payload_length, LIST_HEADER_BYTE)
     for item in lst:
@@ -88,10 +94,10 @@ def write_list(w: Writer, lst: list[RLPItem]) -> None:
 
 def write(w: Writer, item: RLPItem) -> None:
     if isinstance(item, int):
-        write_string(w, int_to_bytes(item))
+        _write_string(w, int_to_bytes(item))
     elif isinstance(item, (bytes, bytearray)):
-        write_string(w, item)
+        _write_string(w, item)
     elif isinstance(item, list):
-        write_list(w, item)
+        _write_list(w, item)
     else:
         raise TypeError

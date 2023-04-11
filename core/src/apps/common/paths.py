@@ -1,8 +1,10 @@
 from micropython import const
+from typing import TYPE_CHECKING
 
 HARDENED = const(0x8000_0000)
+SLIP25_PURPOSE = const(10025 | HARDENED)
 
-if False:
+if TYPE_CHECKING:
     from typing import (
         Any,
         Callable,
@@ -17,7 +19,7 @@ if False:
 
     Bip32Path = Sequence[int]
     Slip21Path = Sequence[bytes]
-    PathType = TypeVar("PathType", Bip32Path, Slip21Path)
+    PathType = TypeVar("PathType", Bip32Path, Slip21Path, contravariant=True)
 
     class PathSchemaType(Protocol):
         def match(self, path: Bip32Path) -> bool:
@@ -105,7 +107,7 @@ class PathSchema:
     _EMPTY_TUPLE = ()
 
     @staticmethod
-    def _parse_hardened(s: str) -> int:
+    def _parse_hardened(s: str | int) -> int:
         return int(s) | HARDENED
 
     @staticmethod
@@ -195,23 +197,24 @@ class PathSchema:
 
             # optionally replace a keyword
             component = cls.REPLACEMENTS.get(component, component)
+            append = schema.append  # local_cache_attribute
 
             if "-" in component:
                 # parse as a range
                 a, b = [parse(s) for s in component.split("-", 1)]
-                schema.append(Interval(a, b))
+                append(Interval(a, b))
 
             elif "," in component:
                 # parse as a list of values
-                schema.append(set(parse(s) for s in component.split(",")))
+                append(set(parse(s) for s in component.split(",")))
 
             elif component == "coin_type":
                 # substitute SLIP-44 ids
-                schema.append(set(parse(s) for s in slip44_id))
+                append(set(parse(s) for s in slip44_id))
 
             else:
                 # plain constant
-                schema.append((parse(component),))
+                append((parse(component),))
 
         return cls(schema, trailing_components, compact=True)
 
@@ -245,61 +248,83 @@ class PathSchema:
 
         return True
 
+    def set_never_matching(self) -> None:
+        """Sets the schema to never match any paths."""
+        self.schema = []
+        self.trailing_components = self._EMPTY_TUPLE
+
+    def restrict(self, path: Bip32Path) -> bool:
+        """
+        Restricts the schema to patterns that are prefixed by the specified
+        path. If the restriction results in a never-matching schema, then False
+        is returned.
+        """
+        schema = self.schema  # local_cache_attribute
+
+        for i, value in enumerate(path):
+            if i < len(schema):
+                # Ensure that the path is a prefix of the schema.
+                if value not in schema[i]:
+                    self.set_never_matching()
+                    return False
+
+                # Restrict the schema component if there are multiple choices.
+                component = schema[i]
+                if not isinstance(component, tuple) or len(component) != 1:
+                    schema[i] = (value,)
+            else:
+                # The path is longer than the schema. We need to restrict the
+                # trailing components.
+
+                if value not in self.trailing_components:
+                    self.set_never_matching()
+                    return False
+
+                schema.append((value,))
+
+        return True
+
     if __debug__:
 
         def __repr__(self) -> str:
             components = ["m"]
-
-            def unharden(item: int) -> int:
-                return item ^ (item & HARDENED)
+            append = components.append  # local_cache_attribute
 
             for component in self.schema:
                 if isinstance(component, Interval):
                     a, b = component.min, component.max
                     prime = "'" if a & HARDENED else ""
-                    components.append(f"[{unharden(a)}-{unharden(b)}]{prime}")
+                    append(f"[{unharden(a)}-{unharden(b)}]{prime}")
                 else:
-                    # mypy thinks component is a Contanier but we're using it as a Collection.
+                    # typechecker thinks component is a Contanier but we're using it
+                    # as a Collection.
                     # Which in practice it is, the only non-Collection is Interval.
                     # But we're not going to introduce an additional type requirement
                     # for the sake of __repr__ that doesn't exist in production anyway
-                    collection: Collection[int] = component  # type: ignore
+                    collection: Collection[int] = component  # type: ignore [Expression of type "Container[int]" cannot be assigned to declared type "Collection[int]"]
                     component_str = ",".join(str(unharden(i)) for i in collection)
                     if len(collection) > 1:
                         component_str = "[" + component_str + "]"
                     if next(iter(collection)) & HARDENED:
                         component_str += "'"
-                    components.append(component_str)
+                    append(component_str)
 
             if self.trailing_components:
                 for key, val in self.WILDCARD_RANGES.items():
                     if self.trailing_components is val:
-                        components.append(key)
+                        append(key)
                         break
                 else:
-                    components.append("???")
+                    append("???")
 
             return "<schema:" + "/".join(components) + ">"
 
 
-class _AlwaysMatchingSchema:
+class AlwaysMatchingSchema:
     @staticmethod
     def match(path: Bip32Path) -> bool:
         return True
 
-
-class _NeverMatchingSchema:
-    @staticmethod
-    def match(path: Bip32Path) -> bool:
-        return False
-
-
-# type objects _AlwaysMatchingSchema and _NeverMatching schema conform to the
-# PathSchemaType protocol, but mypy fails to recognize this due to:
-# https://github.com/python/mypy/issues/4536,
-# hence the following trickery
-AlwaysMatchingSchema: PathSchemaType = _AlwaysMatchingSchema  # type: ignore
-NeverMatchingSchema: PathSchemaType = _NeverMatchingSchema  # type: ignore
 
 # BIP-44 for basic (legacy) Bitcoin accounts, and widely used for other currencies:
 # https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
@@ -309,6 +334,11 @@ PATTERN_BIP44_PUBKEY = "m/44'/coin_type'/account'/*"
 # SEP-0005 for non-UTXO-based currencies, defined by Stellar:
 # https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md
 PATTERN_SEP5 = "m/44'/coin_type'/account'"
+# SEP-0005 Ledger Live legacy path
+# https://github.com/trezor/trezor-firmware/issues/1749
+PATTERN_SEP5_LEDGER_LIVE_LEGACY = "m/44'/coin_type'/0'/account"
+
+PATTERN_CASA = "m/45'/coin_type/account/change/address_index"
 
 
 async def validate_path(
@@ -337,7 +367,7 @@ def path_is_hardened(address_n: Bip32Path) -> bool:
 
 
 def address_n_to_str(address_n: Iterable[int]) -> str:
-    def path_item(i: int) -> str:
+    def _path_item(i: int) -> str:
         if i & HARDENED:
             return str(i ^ HARDENED) + "'"
         else:
@@ -346,4 +376,8 @@ def address_n_to_str(address_n: Iterable[int]) -> str:
     if not address_n:
         return "m"
 
-    return "m/" + "/".join(path_item(i) for i in address_n)
+    return "m/" + "/".join(_path_item(i) for i in address_n)
+
+
+def unharden(item: int) -> int:
+    return item ^ (item & HARDENED)

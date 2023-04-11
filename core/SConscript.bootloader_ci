@@ -1,13 +1,38 @@
 # pylint: disable=E0602
 
 import os
+import tools
 
 TREZOR_MODEL = ARGUMENTS.get('TREZOR_MODEL', 'T')
+CMAKELISTS = int(ARGUMENTS.get('CMAKELISTS', 0))
+
+if TREZOR_MODEL in ('1', ):
+    # skip bootloader_ci build
+    env = Environment()
+    def build_bootloader_ci(target,source,env):
+        print(f'Bootloader_ci: nothing to build for Model {TREZOR_MODEL}')
+    program_bin = env.Command(
+                 target='bootloader_ci.bin',
+                 source=None,
+                 action=build_bootloader_ci
+             )
+    Return()
 
 CCFLAGS_MOD = ''
 CPPPATH_MOD = []
 CPPDEFINES_MOD = []
 SOURCE_MOD = []
+
+if TREZOR_MODEL in ('1', 'R'):
+    FONT_NORMAL='Font_PixelOperator_Regular_8'
+    FONT_DEMIBOLD=None
+    FONT_BOLD=None
+    FONT_MONO='Font_PixelOperatorMono_Regular_8'
+if TREZOR_MODEL in ('T', ):
+    FONT_NORMAL='Font_Roboto_Regular_20'
+    FONT_DEMIBOLD=None
+    FONT_BOLD=None
+    FONT_MONO='Font_RobotoMono_Regular_20'
 
 # modtrezorcrypto
 CCFLAGS_MOD += '-Wno-sequence-point '
@@ -39,15 +64,11 @@ SOURCE_MOD += [
 CPPPATH_MOD += [
         'vendor/micropython/lib/uzlib',
 ]
-CPPDEFINES_MOD += [
-    'TREZOR_FONT_NORMAL_ENABLE',
-    'TREZOR_FONT_MONO_ENABLE',
-]
 SOURCE_MOD += [
     'embed/extmod/modtrezorui/display.c',
-    'embed/extmod/modtrezorui/font_bitmap.c',
-    'embed/extmod/modtrezorui/font_roboto_regular_20.c',
-    'embed/extmod/modtrezorui/font_robotomono_regular_20.c',
+    'embed/extmod/modtrezorui/colors.c',
+    'embed/extmod/modtrezorui/fonts/fonts.c',
+    'embed/extmod/modtrezorui/fonts/font_bitmap.c',
     'vendor/micropython/lib/uzlib/adler32.c',
     'vendor/micropython/lib/uzlib/crc32.c',
     'vendor/micropython/lib/uzlib/tinflate.c',
@@ -109,28 +130,35 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/vectortable.s',
 ]
 
+# fonts
+tools.add_font('NORMAL', FONT_NORMAL, CPPDEFINES_MOD, SOURCE_MOD)
+tools.add_font('BOLD', FONT_BOLD, CPPDEFINES_MOD, SOURCE_MOD)
+tools.add_font('DEMIBOLD', FONT_DEMIBOLD, CPPDEFINES_MOD, SOURCE_MOD)
+tools.add_font('MONO', FONT_MONO, CPPDEFINES_MOD, SOURCE_MOD)
+
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0')))
 
+tools.configure_board(TREZOR_MODEL, env, CPPDEFINES_MOD, SOURCE_TREZORHAL)
+
 env.Replace(
+    CP='cp',
     AS='arm-none-eabi-as',
     AR='arm-none-eabi-ar',
     CC='arm-none-eabi-gcc',
     LINK='arm-none-eabi-gcc',
     SIZE='arm-none-eabi-size',
     STRIP='arm-none-eabi-strip',
-    OBJCOPY='arm-none-eabi-objcopy', )
+    OBJCOPY='arm-none-eabi-objcopy',
+    PYTHON='python',
+    MAKECMAKELISTS='$PYTHON tools/make_cmakelists.py',)
 
 env.Replace(
     TREZOR_MODEL=TREZOR_MODEL, )
 
-if TREZOR_MODEL == 'T':
+if TREZOR_MODEL in ('T', 'R'):
     CPU_ASFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16'
     CPU_CCFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mtune=cortex-m4 '
     CPU_MODEL   = 'STM32F427xx'
-elif TREZOR_MODEL == '1':
-    CPU_ASFLAGS = '-mthumb -mcpu=cortex-m3 -mfloat-abi=soft'
-    CPU_CCFLAGS = '-mthumb -mtune=cortex-m3 -mcpu=cortex-m3 -mfloat-abi=soft '
-    CPU_MODEL   = 'STM32F405xx'
 else:
     raise ValueError('Unknown Trezor model')
 
@@ -158,7 +186,7 @@ env.Replace(
         'vendor/nanopb',
     ] + CPPPATH_MOD,
     CPPDEFINES=[
-        ('TREZOR_MODEL', '$TREZOR_MODEL'),
+        'TREZOR_MODEL_'+TREZOR_MODEL,
         CPU_MODEL,
         'USE_HAL_DRIVER',
         ('STM32_HAL_H', '"<stm32f4xx.h>"'),
@@ -167,11 +195,23 @@ env.Replace(
         'PB_VALIDATE_UTF8',
     ] + CPPDEFINES_MOD,
     ASFLAGS=CPU_ASFLAGS,
-    ASPPFLAGS='$CFLAGS $CCFLAGS', )
+    ASPPFLAGS='$CFLAGS $CCFLAGS',
+    ALLSOURCES=SOURCE_MOD + SOURCE_BOOTLOADER + SOURCE_STMHAL + SOURCE_TREZORHAL+ SOURCE_NANOPB, )
 
 env.Replace(
     HEADERTOOL='tools/headertool.py',
 )
+
+env.Replace(
+    ALLSOURCES=SOURCE_MOD + SOURCE_BOOTLOADER + SOURCE_NANOPB + SOURCE_STMHAL + SOURCE_TREZORHAL,
+    ALLDEFS=tools.get_defs_for_cmake(env['CPPDEFINES']))
+
+cmake_gen = env.Command(
+    target='CMakeLists.txt',
+    source='',
+    action='$MAKECMAKELISTS --sources $ALLSOURCES --dirs $CPPPATH --defs $ALLDEFS',
+)
+
 
 #
 # Program objects
@@ -191,10 +231,20 @@ program_elf = env.Command(
     '$LINK -o $TARGET $CCFLAGS $CFLAGS $LINKFLAGS $SOURCES -lc_nano -lgcc',
 )
 
+BINARY_NAME = f"build/bootloader_ci/bootloader_ci-{tools.get_model_identifier(TREZOR_MODEL)}"
+BINARY_NAME += "-" + tools.get_version('embed/bootloader_ci/version.h')
+BINARY_NAME += "-" + tools.get_git_revision_short_hash()
+BINARY_NAME += "-dirty" if tools.get_git_modified() else ""
+BINARY_NAME += ".bin"
+
+if CMAKELISTS != 0:
+    env.Depends(program_elf, cmake_gen)
+
 program_bin = env.Command(
     target='bootloader.bin',
     source=program_elf,
     action=[
         '$OBJCOPY -O binary -j .header -j .flash -j .data $SOURCE $TARGET',
         '$HEADERTOOL $TARGET ' + ('-D' if ARGUMENTS.get('PRODUCTION', '0') == '0' else ''),
+        '$CP $TARGET ' + BINARY_NAME,
     ], )

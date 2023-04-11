@@ -11,7 +11,7 @@ from trezor.enums import EthereumDataType as EDT
 if not utils.BITCOIN_ONLY:
     from apps.ethereum.sign_typed_data import (
         encode_field,
-        validate_value,
+        _validate_value,
         validate_field_type,
         keccak256,
         TypedDataEnvelope,
@@ -582,8 +582,8 @@ class TestEthereumSignTypedData(unittest.TestCase):
             ),
             (
                 EFT(data_type=EDT.STRING, size=None),
-                [b"\x7f", b"a" * 1024],
-                [b"\x80", b"a" * 1025],
+                [b"\x7f"],
+                [b"\x80"],
             ),
             (
                 EFT(data_type=EDT.ADDRESS, size=None),
@@ -594,10 +594,10 @@ class TestEthereumSignTypedData(unittest.TestCase):
 
         for field, valid_values, invalid_values in VECTORS_VALID_INVALID:
             for valid_value in valid_values:
-                validate_value(field=field, value=valid_value)
+                _validate_value(field=field, value=valid_value)
             for invalid_value in invalid_values:
                 with self.assertRaises(wire.DataError):
-                    validate_value(field=field, value=invalid_value)
+                    _validate_value(field=field, value=invalid_value)
 
     def test_validate_field_type(self):
         ET = EFT(data_type=EDT.BYTES, size=8)

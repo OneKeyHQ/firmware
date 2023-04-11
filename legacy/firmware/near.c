@@ -394,8 +394,7 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
   sha256_Update(&ctx, msg->raw_tx.bytes, msg->raw_tx.size);
   sha256_Final(&ctx, hash);
 
-  ed25519_sign(hash, 32, node->private_key, &node->public_key[1],
-               resp->signature.bytes);
+  ed25519_sign(hash, 32, node->private_key, resp->signature.bytes);
 
   resp->signature.size = 64;
   return true;

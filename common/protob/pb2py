@@ -164,7 +164,7 @@ class ProtoField:
 
     @property
     def experimental(self):
-        return bool(self.extensions.get("experimental"))
+        return bool(self.extensions.get("experimental_field"))
 
     @property
     def is_message(self):
@@ -573,7 +573,7 @@ class RustBlobRenderer:
             raise ValueError("Unsupported wire type")
 
         flags_and_wire_type = wire_type
-        if message.extensions.get("unstable"):
+        if message.extensions.get("experimental_message"):
             flags_and_wire_type |= 0x8000
 
         return flags_and_wire_type
@@ -638,7 +638,7 @@ class RustBlobRenderer:
             return DEFAULT_VARINT_ENTRY.build((field.number, int(default)))
 
         elif field.type == FieldDescriptor.TYPE_BOOL:
-            return DEFAULT_VARINT_ENTRY.build((field.number, int(default == "True")))
+            return DEFAULT_VARINT_ENTRY.build((field.number, int(default == "true")))
 
         elif field.type == FieldDescriptor.TYPE_BYTES:
             if default != "":

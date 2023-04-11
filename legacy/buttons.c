@@ -19,9 +19,12 @@
 
 #include "buttons.h"
 #include "common.h"
+#include "oled.h"
+#include "util.h"
 
 struct buttonState button = {0};
 static volatile bool btn_up_long = false, btn_down_long = false;
+#define SHAKE_DELAY 3
 
 #if !EMULATOR
 #include <libopencm3/cm3/nvic.h>
@@ -231,8 +234,9 @@ void buttonUpdate() {
       button.YesDown = 0;
       button.YesUp = false;
     }
-  } else {                                  // Yes button is up
-    if ((last_state & BTN_PIN_YES) == 0) {  // last Yes was down
+  } else {  // Yes button is up
+    if ((last_state & BTN_PIN_YES) == 0 &&
+        button.YesDown > SHAKE_DELAY) {  // last Yes was down
       button.YesDown = 0;
       button.YesUp = true;
     } else {  // last Yes was up
@@ -249,8 +253,9 @@ void buttonUpdate() {
       button.NoDown = 0;
       button.NoUp = false;
     }
-  } else {                            // No button is up
-    if ((last_state & BTN_PIN_NO)) {  // last No was down
+  } else {  // No button is up
+    if ((last_state & BTN_PIN_NO) &&
+        button.NoDown > SHAKE_DELAY) {  // last No was down
       button.NoDown = 0;
       button.NoUp = true;
     } else {  // last No was up
@@ -285,8 +290,9 @@ void buttonUpdate() {
       button.UpDown = 0;
       button.UpUp = false;
     }
-  } else {                                 // UP button is up
-    if ((last_state & BTN_PIN_UP) == 0) {  // last UP was down
+  } else {  // UP button is up
+    if ((last_state & BTN_PIN_UP) == 0 &&
+        button.UpDown > SHAKE_DELAY) {  // last UP was down
       if (btn_up_long) {
         btn_up_long = false;
         button.UpUp = false;
@@ -308,8 +314,9 @@ void buttonUpdate() {
       button.DownDown = 0;
       button.DownUp = false;
     }
-  } else {                                   // down button is up
-    if ((last_state & BTN_PIN_DOWN) == 0) {  // last down was down
+  } else {  // down button is up
+    if ((last_state & BTN_PIN_DOWN) == 0 &&
+        button.DownDown > SHAKE_DELAY) {  // last down was down
       button.DownUp = true;
       button.DownDown = 0;
     } else {  // last down was up
@@ -346,6 +353,7 @@ void buttonUpdate() {
 #else
   if (button.YesUp || button.NoUp || button.UpUp || button.DownUp) {
     timer_sleep_start_reset();
+    unregister_timer("poweroff");
   }
 #endif
 #endif

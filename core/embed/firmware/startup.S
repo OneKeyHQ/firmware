@@ -6,17 +6,17 @@
   .type reset_handler, STT_FUNC
 reset_handler:
 
-// The following loading of VTOR address only works if T1 bootloader was built with MEMORY_PROTECT=0
+// The following loading of VTOR address only works if T1 bootloader was built with PRODUCTION=0
 // or the firmware was properly signed. All other variants end up in hard fault due to MPU
 // (cf mpu_config_firmware in legacy bootloader)
 
-#if TREZOR_MODEL == 1
+#if defined TREZOR_MODEL_1
   cpsid if
   ldr r0, =0xE000ED08  // r0 = VTOR address
   ldr r1, =0x08010400  // r1 = FLASH_APP_START
   str r1, [r0]         // assign
 
-  ldr r0, =_estack - 8  // r0 = stack pointer, T1 bootloader had 8 bytes reserved at end
+  ldr r0, =_estack      // r0 = stack pointer
   msr msp, r0           // set stack pointer
   dsb
   isb
@@ -48,9 +48,9 @@ reset_handler:
   // according to "ARM Cortex-M Programming Guide to Memory Barrier Instructions" Application Note 321, section 4.7:
   // "If it is not necessary to ensure that a pended interrupt is recognized immediately before
   // subsequent operations, it is not necessary to insert a memory barrier instruction."
-#if TREZOR_MODEL == T
+#if defined TREZOR_MODEL_T || defined TREZOR_MODEL_R
   cpsie f
-#elif TREZOR_MODEL == 1
+#elif defined TREZOR_MODEL_1
   cpsie if
 #endif
 
@@ -58,5 +58,17 @@ reset_handler:
   bl main
 
   b shutdown_privileged
+
+  .global MemManage_Handler
+  .type MemManage_Handler, STT_FUNC
+MemManage_Handler:
+  ldr r2, =_sstack
+  mrs r1, msp
+  ldr r0, =_estack
+  msr msp, r0
+  cmp r1, r2
+  IT lt
+  bllt MemManage_Handler_SO
+  bl MemManage_Handler_MM
 
   .end

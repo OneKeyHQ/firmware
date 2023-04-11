@@ -52,6 +52,7 @@ endif
 OBJS += usb.o
 OBJS += bl_check.o
 OBJS += header.o
+OBJS += startup.o
 endif
 
 OBJS += font.o
@@ -157,17 +158,18 @@ OBJS += ../vendor/trezor-crypto/ed25519-donna/ed25519-keccak.o
 OBJS += ../vendor/trezor-crypto/hmac.o
 OBJS += ../vendor/trezor-crypto/bip32.o
 OBJS += ../vendor/trezor-crypto/bip39.o
+OBJS += ../vendor/trezor-crypto/bip39_english.o
 OBJS += ../vendor/trezor-crypto/pbkdf2.o
 OBJS += ../vendor/trezor-crypto/base32.o
 OBJS += ../vendor/trezor-crypto/base58.o
 OBJS += ../vendor/trezor-crypto/segwit_addr.o
-OBJS += ../vendor/trezor-crypto/cash_addr.o
 
 OBJS += ../vendor/trezor-crypto/ripemd160.o
 OBJS += ../vendor/trezor-crypto/sha2.o
 OBJS += ../vendor/trezor-crypto/sha3.o
 OBJS += ../vendor/trezor-crypto/blake256.o
 OBJS += ../vendor/trezor-crypto/blake2b.o
+OBJS += ../vendor/trezor-crypto/blake2s.o
 OBJS += ../vendor/trezor-crypto/groestl.o
 OBJS += ../vendor/trezor-crypto/hasher.o
 
@@ -202,7 +204,9 @@ OBJS += protob/messages-common.pb.o
 OBJS += protob/messages-crypto.pb.o
 OBJS += protob/messages-debug.pb.o
 OBJS += protob/messages-management.pb.o
+
 ifneq ($(BITCOIN_ONLY),1)
+OBJS += ../vendor/trezor-crypto/cash_addr.o
 OBJS += protob/messages-ethereum.pb.o
 OBJS += protob/messages-nem.pb.o
 OBJS += protob/messages-solana.pb.o
@@ -222,16 +226,14 @@ endif
 
 OPTFLAGS ?= -Os
 
-../vendor/trezor-crypto/bip32.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/bip39.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/sha2.o: OPTFLAGS = -O3
-../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -O3
+../vendor/trezor-crypto/bip32.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/bip39.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/ecdsa.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/sha2.o: OPTFLAGS = -Os
+../vendor/trezor-crypto/secp256k1.o: OPTFLAGS = -Os
 
 include ../Makefile.include
 
-DEBUG_LINK ?= 0
-DEBUG_LOG  ?= 0
 
 ifeq ($(EMULATOR),1)
 CFLAGS += --warn-no-unused-parameter
@@ -239,8 +241,6 @@ endif
 CFLAGS += -fstack-protector-all
 CFLAGS += -Wno-sequence-point
 CFLAGS += -I../vendor/nanopb -Iprotob -DPB_FIELD_16BIT=1 -DPB_ENCODE_ARRAYS_UNPACKED=1 -DPB_VALIDATE_UTF8=1
-CFLAGS += -DDEBUG_LINK=$(DEBUG_LINK)
-CFLAGS += -DDEBUG_LOG=$(DEBUG_LOG)
 CFLAGS += -DSCM_REVISION='"$(shell git rev-parse HEAD | sed 's:\(..\):\\x\1:g')"'
 CFLAGS += -DBUILD_ID='"$(NAME)"'
 CFLAGS += -DUSE_MONERO=0
@@ -262,9 +262,17 @@ CFLAGS += -DUSE_CARDANO=1
 	@printf "  MAKO    $@\n"
 	$(Q)$(PYTHON) ../vendor/trezor-common/tools/cointool.py render $(MAKO_RENDER_FLAG) $@.mako
 
+ifeq ($(BOOTLOADER_QA), 0)
 bl_data.h: bl_data.py bootloader.dat
-	@printf "  PYTHON  bl_data.py\n"
-	$(Q)$(PYTHON) bl_data.py
+	@printf "  PYTHON  bl_data.py bootloader.dat\n"
+	$(Q)$(PYTHON) bl_data.py bootloader.dat
+else
+bl_data.h: bl_data.py bootloader_qa.dat
+	@printf "  PYTHON  bl_data.py bootloader_qa.dat\n"
+	$(Q)$(PYTHON) bl_data.py bootloader_qa.dat
+endif
+
+header.o: version.h
 
 clean::
 	rm -f bl_data.h

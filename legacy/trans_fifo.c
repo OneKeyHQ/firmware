@@ -108,9 +108,7 @@ bool fifo_write_no_overflow(trans_fifo *p_fifo, uint8_t *buf,
                             uint32_t buf_size) {
   uint32_t i;
   for (i = 0; i < buf_size; i++) {
-    while (buf_size--) {
-      if (!fifo_put_no_overflow(p_fifo, buf[i])) return false;
-    }
+    if (!fifo_put_no_overflow(p_fifo, buf[i])) return false;
   }
   fifo_lockpos_set(p_fifo);
   return true;

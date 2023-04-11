@@ -55,13 +55,13 @@ extend google.protobuf.EnumOptions {
 
 /** Options for tagging message types */
 extend google.protobuf.MessageOptions {
-    optional bool unstable = 52001;   // indicate that a message definition might change at any time
+    optional bool experimental_message = 52001;   // indicate that a message is intended for development and beta testing only and its definition may change at any time
     optional uint32 wire_type = 52002;   // override wire type specified in the MessageType enum
 }
 
 /** Options for tagging field types */
 extend google.protobuf.FieldOptions {
-    optional bool experimental = 53001;   // indicate that a field is intended for development and beta testing only
+    optional bool experimental_field = 53001;   // indicate that a field is intended for development and beta testing only
 }
 
 /** Options for tagging files with protobuf definitions */
@@ -80,18 +80,20 @@ enum CommandFlags {
  */
 enum MessageType {
     option (has_bitcoin_only_values) = true;
+    option allow_alias = true;
 
     // Management
     MessageType_Initialize = 0 [(bitcoin_only) = true, (wire_in) = true, (wire_tiny) = true];
     MessageType_Ping = 1 [(bitcoin_only) = true, (wire_in) = true];
-    MessageType_Success = 2 [(bitcoin_only) = true, (wire_out) = true];
-    MessageType_Failure = 3 [(bitcoin_only) = true, (wire_out) = true];
+    MessageType_Success = 2 [(bitcoin_only) = true, (wire_out) = true, (wire_debug_out) = true];
+    MessageType_Failure = 3 [(bitcoin_only) = true, (wire_out) = true, (wire_debug_out) = true];
     MessageType_ChangePin = 4 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_WipeDevice = 5 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_GetEntropy = 9 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_Entropy = 10 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_LoadDevice = 13 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_ResetDevice = 14 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_SetBusy = 16 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_Features = 17 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_PinMatrixRequest = 18 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_PinMatrixAck = 19 [(bitcoin_only) = true, (wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
@@ -101,6 +103,8 @@ enum MessageType {
     MessageType_ButtonRequest = 26 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_ButtonAck = 27 [(bitcoin_only) = true, (wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
     MessageType_ApplyFlags = 28 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_GetNonce = 31 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_Nonce = 33 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_BackupDevice = 34 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_EntropyRequest = 35 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_EntropyAck = 36 [(bitcoin_only) = true, (wire_in) = true];
@@ -117,6 +121,11 @@ enum MessageType {
     MessageType_PreauthorizedRequest = 85 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_CancelAuthorization = 86 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_RebootToBootloader = 87 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_GetFirmwareHash = 88 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_FirmwareHash = 89 [(bitcoin_only) = true, (wire_out) = true];
+    reserved 90 to 92;
+    MessageType_UnlockPath = 93 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_UnlockedPathRequest = 94 [(bitcoin_only) = true, (wire_out) = true];
 
     MessageType_SetU2FCounter = 63 [(wire_in) = true];
     MessageType_GetNextU2FCounter = 80 [(wire_in) = true];
@@ -142,6 +151,7 @@ enum MessageType {
     MessageType_TxAck = 22 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_GetAddress = 29 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_Address = 30 [(bitcoin_only) = true, (wire_out) = true];
+    MessageType_TxAckPaymentRequest = 37 [(wire_in) = true];
     MessageType_SignMessage = 38 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_VerifyMessage = 39 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_MessageSignature = 40 [(bitcoin_only) = true, (wire_out) = true];
@@ -255,14 +265,12 @@ enum MessageType {
     // Cardano
     // dropped Sign/VerifyMessage ids 300-302
     // dropped TxRequest/TxAck ids 304 and 309 (shelley update)
-    MessageType_CardanoSignTx = 303 [(wire_in) = true];
+    // dropped SignTx/SignedTx/SignedTxChunk/SignedTxChunkAck ids 303, 310, 311 and 312
+    reserved 300 to 304, 309 to 312;
     MessageType_CardanoGetPublicKey = 305 [(wire_in) = true];
     MessageType_CardanoPublicKey = 306 [(wire_out) = true];
     MessageType_CardanoGetAddress = 307 [(wire_in) = true];
     MessageType_CardanoAddress = 308 [(wire_out) = true];
-    MessageType_CardanoSignedTx = 310 [(wire_out) = true];
-    MessageType_CardanoSignedTxChunk = 311 [(wire_out) = true];
-    MessageType_CardanoSignedTxChunkAck = 312 [(wire_in) = true];
     MessageType_CardanoTxItemAck = 313 [(wire_out) = true];
     MessageType_CardanoTxAuxiliaryDataSupplement = 314 [(wire_out) = true];
     MessageType_CardanoTxWitnessRequest = 315 [(wire_in) = true];
@@ -283,6 +291,11 @@ enum MessageType {
     MessageType_CardanoGetNativeScriptHash = 330 [(wire_in) = true];
     MessageType_CardanoNativeScriptHash = 331 [(wire_out) = true];
     MessageType_CardanoTxMint = 332 [(wire_in) = true];
+    MessageType_CardanoTxCollateralInput = 333 [(wire_in) = true];
+    MessageType_CardanoTxRequiredSigner = 334 [(wire_in) = true];
+    MessageType_CardanoTxInlineDatumChunk = 335 [(wire_in) = true];
+    MessageType_CardanoTxReferenceScriptChunk = 336 [(wire_in) = true];
+    MessageType_CardanoTxReferenceInput = 337 [(wire_in) = true];
 
     // Ripple
     MessageType_RippleGetAddress = 400 [(wire_in) = true];
@@ -295,8 +308,6 @@ enum MessageType {
     MessageType_MoneroTransactionInitAck = 502 [(wire_out) = true];
     MessageType_MoneroTransactionSetInputRequest = 503 [(wire_out) = true];
     MessageType_MoneroTransactionSetInputAck = 504 [(wire_out) = true];
-    MessageType_MoneroTransactionInputsPermutationRequest = 505 [(wire_out) = true];
-    MessageType_MoneroTransactionInputsPermutationAck = 506 [(wire_out) = true];
     MessageType_MoneroTransactionInputViniRequest = 507 [(wire_out) = true];
     MessageType_MoneroTransactionInputViniAck = 508 [(wire_out) = true];
     MessageType_MoneroTransactionAllInputsSetRequest = 509 [(wire_out) = true];
@@ -382,18 +393,11 @@ enum MessageType {
     MessageType_WebAuthnRemoveResidentCredential = 803 [(wire_in) = true];
 
     // bixin
-    MessageType_BixinSeedOperate = 901 [deprecated = true];
     MessageType_BixinMessageSE = 902 [(wire_in) = true];
     MessageType_BixinReboot = 903 [deprecated = true];
     MessageType_BixinOutMessageSE = 904 [(wire_out) = true];
-    MessageType_BixinBackupRequest = 905 [deprecated = true];
-    MessageType_BixinBackupAck = 906 [deprecated = true];
-    MessageType_BixinRestoreRequest = 907 [deprecated = true];
-    MessageType_BixinRestoreAck = 908 [deprecated = true];
     MessageType_BixinVerifyDeviceRequest = 909 [(wire_in) = true];
     MessageType_BixinVerifyDeviceAck = 910 [(wire_out) = true];
-    MessageType_BixinWhiteListRequest = 911 [deprecated = true];
-    MessageType_BixinWhiteListAck = 912 [deprecated = true];
     MessageType_BixinLoadDevice = 913 [(wire_in) = true];
     MessageType_BixinBackupDevice = 914 [(wire_in) = true];
     MessageType_BixinBackupDeviceAck = 915 [(wire_out) = true];

@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -32,6 +32,8 @@ from typing import (
     Union,
     overload,
 )
+
+import construct
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -107,7 +109,7 @@ __b58base = len(__b58chars)
 
 
 def b58encode(v: bytes) -> str:
-    """ encode v, which is a string of bytes, to base58."""
+    """encode v, which is a string of bytes, to base58."""
 
     long_value = 0
     for c in v:
@@ -133,7 +135,7 @@ def b58encode(v: bytes) -> str:
 
 
 def b58decode(v: AnyStr, length: Optional[int] = None) -> bytes:
-    """ decode v into a string of len bytes."""
+    """decode v into a string of len bytes."""
     str_v = v.decode() if isinstance(v, bytes) else v
 
     for c in str_v:
@@ -142,7 +144,7 @@ def b58decode(v: AnyStr, length: Optional[int] = None) -> bytes:
 
     long_value = 0
     for (i, c) in enumerate(str_v[::-1]):
-        long_value += __b58chars.find(c) * (__b58base ** i)
+        long_value += __b58chars.find(c) * (__b58base**i)
 
     result = b""
     while long_value >= 256:
@@ -211,13 +213,15 @@ def parse_path(nstr: str) -> Address:
         raise ValueError("Invalid BIP32 path", nstr) from e
 
 
-def normalize_nfc(txt: AnyStr) -> bytes:
+def prepare_message_bytes(txt: AnyStr) -> bytes:
     """
-    Normalize message to NFC and return bytes suitable for protobuf.
-    This seems to be bitcoin-qt standard of doing things.
+    Make message suitable for protobuf.
+    If the message is a Unicode string, normalize it.
+    If it's bytes, return the raw bytes.
     """
-    str_txt = txt.decode() if isinstance(txt, bytes) else txt
-    return unicodedata.normalize("NFC", str_txt).encode()
+    if isinstance(txt, bytes):
+        return txt
+    return unicodedata.normalize("NFC", txt).encode()
 
 
 # NOTE for type tests (mypy/pyright):
@@ -370,3 +374,31 @@ def descriptor_checksum(desc: str) -> str:
     for j in range(0, 8):
         ret[j] = CHECKSUM_CHARSET[(c >> (5 * (7 - j))) & 31]
     return "".join(ret)
+
+
+class EnumAdapter(construct.Adapter):
+    def __init__(self, subcon: Any, enum: Any) -> None:
+        self.enum = enum
+        super().__init__(subcon)
+
+    def _encode(self, obj: Any, ctx: Any, path: Any):
+        if isinstance(obj, self.enum):
+            return obj.value
+        return obj
+
+    def _decode(self, obj: Any, ctx: Any, path: Any):
+        try:
+            return self.enum(obj)
+        except ValueError:
+            return obj
+
+
+class TupleAdapter(construct.Adapter):
+    def __init__(self, *subcons: Any) -> None:
+        super().__init__(construct.Sequence(*subcons))
+
+    def _encode(self, obj: Any, ctx: Any, path: Any):
+        return obj
+
+    def _decode(self, obj: Any, ctx: Any, path: Any):
+        return tuple(obj)

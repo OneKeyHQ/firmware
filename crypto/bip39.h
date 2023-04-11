@@ -27,8 +27,17 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define BIP39_WORDS 2048
+#include "options.h"
+
+#define BIP39_WORD_COUNT 2048
 #define BIP39_PBKDF2_ROUNDS 2048
+
+#if USE_BIP39_CACHE
+void bip39_cache_clear(void);
+#endif
+
+extern const char *const BIP39_WORDLIST_ENGLISH[BIP39_WORD_COUNT];
+extern unsigned short wordlist_letters_offset[27];
 
 const char *mnemonic_generate(int strength);  // strength in bits
 const char *mnemonic_from_data(const uint8_t *data, int len);

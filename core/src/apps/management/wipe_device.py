@@ -1,29 +1,28 @@
-import storage
-from trezor import ui
-from trezor.enums import ButtonRequestType
-from trezor.messages import Success
-from trezor.ui.layouts import confirm_action
+from typing import TYPE_CHECKING
 
-from .apply_settings import reload_settings_from_storage
-
-if False:
-    from trezor import wire
-    from trezor.messages import WipeDevice
+if TYPE_CHECKING:
+    from trezor.wire import GenericContext
+    from trezor.messages import WipeDevice, Success
 
 
-async def wipe_device(ctx: wire.GenericContext, msg: WipeDevice) -> Success:
+async def wipe_device(ctx: GenericContext, msg: WipeDevice) -> Success:
+    import storage
+    from trezor.enums import ButtonRequestType
+    from trezor.messages import Success
+    from trezor.ui.layouts import confirm_action
+
+    from apps.base import reload_settings_from_storage
+
     await confirm_action(
         ctx,
         "confirm_wipe",
-        title="Wipe device",
-        description="Do you really want to\nwipe the device?\n",
-        action="All data will be lost.",
+        "Wipe device",
+        "All data will be erased.",
+        "Do you really want to wipe the device?\n",
         reverse=True,
         verb="Hold to confirm",
         hold=True,
         hold_danger=True,
-        icon=ui.ICON_WIPE,
-        icon_color=ui.RED,
         br_code=ButtonRequestType.WipeDevice,
     )
 

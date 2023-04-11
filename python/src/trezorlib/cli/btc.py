@@ -1,6 +1,6 @@
 # This file is part of the Trezor project.
 #
-# Copyright (C) 2012-2019 SatoshiLabs and contributors
+# Copyright (C) 2012-2022 SatoshiLabs and contributors
 #
 # This library is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License version 3
@@ -49,6 +49,20 @@ OUTPUT_SCRIPTS = {
     "tr": messages.OutputScriptType.PAYTOTAPROOT,
 }
 
+BIP_PURPOSE_TO_SCRIPT_TYPE = {
+    tools.H_(44): messages.InputScriptType.SPENDADDRESS,
+    tools.H_(49): messages.InputScriptType.SPENDP2SHWITNESS,
+    tools.H_(84): messages.InputScriptType.SPENDWITNESS,
+    tools.H_(86): messages.InputScriptType.SPENDTAPROOT,
+    tools.H_(10025): messages.InputScriptType.SPENDTAPROOT,
+}
+
+BIP48_SCRIPT_TYPES = {
+    tools.H_(0): messages.InputScriptType.SPENDMULTISIG,
+    tools.H_(1): messages.InputScriptType.SPENDP2SHWITNESS,
+    tools.H_(2): messages.InputScriptType.SPENDWITNESS,
+}
+
 DEFAULT_COIN = "Bitcoin"
 
 
@@ -78,11 +92,33 @@ def xpub_deserialize(xpubstr: str) -> Tuple[str, messages.HDNodeType]:
         fingerprint=data.fingerprint,
         child_num=data.child_num,
         chain_code=data.chain_code,
-        public_key=public_key,  # type: ignore ["Unknown | None" cannot be assigned to parameter "public_key"]
+        public_key=public_key,  # type: ignore [Argument of type "Unknown | None" cannot be assigned to parameter "public_key" of type "bytes"]
         private_key=private_key,
     )
 
     return data.version, node
+
+
+def guess_script_type_from_path(address_n: List[int]) -> messages.InputScriptType:
+    if len(address_n) < 1:
+        return messages.InputScriptType.SPENDADDRESS
+
+    purpose = address_n[0]
+    if purpose in BIP_PURPOSE_TO_SCRIPT_TYPE:
+        return BIP_PURPOSE_TO_SCRIPT_TYPE[purpose]
+
+    if purpose == tools.H_(48) and len(address_n) >= 4:
+        script_type_field = address_n[3]
+        if script_type_field in BIP48_SCRIPT_TYPES:
+            return BIP48_SCRIPT_TYPES[script_type_field]
+
+    return messages.InputScriptType.SPENDADDRESS
+
+
+def get_unlock_path(address_n: List[int]) -> Optional[List[int]]:
+    if address_n and address_n[0] == tools.H_(10025):
+        return address_n[:1]
+    return None
 
 
 @click.group(name="btc")
@@ -98,7 +134,7 @@ def cli() -> None:
 @cli.command()
 @click.option("-c", "--coin", default=DEFAULT_COIN)
 @click.option("-n", "--address", required=True, help="BIP-32 path")
-@click.option("-t", "--script-type", type=ChoiceType(INPUT_SCRIPTS), default="address")
+@click.option("-t", "--script-type", type=ChoiceType(INPUT_SCRIPTS))
 @click.option("-d", "--show-display", is_flag=True)
 @click.option("-x", "--multisig-xpub", multiple=True, help="XPUBs of multisig owners")
 @click.option("-m", "--multisig-threshold", type=int, help="Number of signatures")
@@ -114,7 +150,7 @@ def get_address(
     client: "TrezorClient",
     coin: str,
     address: str,
-    script_type: messages.InputScriptType,
+    script_type: Optional[messages.InputScriptType],
     show_display: bool,
     multisig_xpub: List[str],
     multisig_threshold: Optional[int],
@@ -141,6 +177,8 @@ def get_address(
     use final xpubs, specify '-N 0'.
     """
     address_n = tools.parse_path(address)
+    if script_type is None:
+        script_type = guess_script_type_from_path(address_n)
 
     multisig: Optional[messages.MultisigRedeemScriptType]
     if multisig_xpub:
@@ -164,6 +202,7 @@ def get_address(
         show_display,
         script_type=script_type,
         multisig=multisig,
+        unlock_path=get_unlock_path(address_n),
     )
 
 
@@ -171,7 +210,7 @@ def get_address(
 @click.option("-c", "--coin", default=DEFAULT_COIN)
 @click.option("-n", "--address", required=True, help="BIP-32 path, e.g. m/44'/0'/0'")
 @click.option("-e", "--curve")
-@click.option("-t", "--script-type", type=ChoiceType(INPUT_SCRIPTS), default="address")
+@click.option("-t", "--script-type", type=ChoiceType(INPUT_SCRIPTS))
 @click.option("-d", "--show-display", is_flag=True)
 @with_client
 def get_public_node(
@@ -179,11 +218,13 @@ def get_public_node(
     coin: str,
     address: str,
     curve: Optional[str],
-    script_type: messages.InputScriptType,
+    script_type: Optional[messages.InputScriptType],
     show_display: bool,
 ) -> dict:
     """Get public node of given path."""
     address_n = tools.parse_path(address)
+    if script_type is None:
+        script_type = guess_script_type_from_path(address_n)
     result = btc.get_public_node(
         client,
         address_n,
@@ -191,6 +232,7 @@ def get_public_node(
         show_display=show_display,
         coin_name=coin,
         script_type=script_type,
+        unlock_path=get_unlock_path(address_n),
     )
     return {
         "node": {
@@ -332,7 +374,13 @@ def sign_tx(client: "TrezorClient", json_file: TextIO) -> None:
 @cli.command()
 @click.option("-c", "--coin", default=DEFAULT_COIN)
 @click.option("-n", "--address", required=True, help="BIP-32 path")
-@click.option("-t", "--script-type", type=ChoiceType(INPUT_SCRIPTS), default="address")
+@click.option("-t", "--script-type", type=ChoiceType(INPUT_SCRIPTS))
+@click.option(
+    "-e",
+    "--electrum-compat",
+    is_flag=True,
+    help="Generate Electrum-compatible signature",
+)
 @click.argument("message")
 @with_client
 def sign_message(
@@ -340,11 +388,16 @@ def sign_message(
     coin: str,
     address: str,
     message: str,
-    script_type: messages.InputScriptType,
+    script_type: Optional[messages.InputScriptType],
+    electrum_compat: bool,
 ) -> Dict[str, str]:
     """Sign message using address of given path."""
     address_n = tools.parse_path(address)
-    res = btc.sign_message(client, coin, address_n, message, script_type)
+    if script_type is None:
+        script_type = guess_script_type_from_path(address_n)
+    res = btc.sign_message(
+        client, coin, address_n, message, script_type, electrum_compat
+    )
     return {
         "message": message,
         "address": res.address,
