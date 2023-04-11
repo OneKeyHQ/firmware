@@ -571,6 +571,16 @@ apps.homescreen.initscreen
 import apps.homescreen.initscreen
 apps.homescreen.lockscreen
 import apps.homescreen.lockscreen
+apps.kaspa
+import apps.kaspa
+apps.kaspa.addresses
+import apps.kaspa.addresses
+apps.kaspa.common
+import apps.kaspa.common
+apps.kaspa.get_address
+import apps.kaspa.get_address
+apps.kaspa.sign_tx
+import apps.kaspa.sign_tx
 apps.management.apply_flags
 import apps.management.apply_flags
 apps.management.apply_settings

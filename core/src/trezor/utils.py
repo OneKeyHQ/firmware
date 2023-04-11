@@ -1,7 +1,9 @@
 # pyright: off
 import gc
 import sys
-from trezorutils import (  # noqa: F401
+from typing import TYPE_CHECKING
+
+from trezorutils import (  # noqa: F401; FIRMWARE_SECTORS_COUNT,; firmware_sector_size,; get_firmware_chunk,
     BITCOIN_ONLY,
     BUILD_ID,
     EMULATOR,
@@ -22,7 +24,6 @@ from trezorutils import (  # noqa: F401
     reset,
     usb_data_connected,
 )
-from typing import TYPE_CHECKING
 
 if not EMULATOR:
     from trezorutils import boot_version, board_version

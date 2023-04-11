@@ -286,6 +286,12 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.CosmosSignTx:
             return "apps.cosmos.sign_tx"
 
+        # kaspa
+        if msg_type == MessageType.KaspaGetAddress:
+            return "apps.kaspa.get_address"
+        if msg_type == MessageType.KaspaSignTx:
+            return "apps.kaspa.sign_tx"
+
     raise ValueError
 
 
