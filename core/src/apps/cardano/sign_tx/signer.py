@@ -10,6 +10,7 @@ from trezor.enums import (
     CardanoTxOutputSerializationFormat,
     CardanoTxWitnessType,
 )
+from trezor.ui.layouts.lvgl import confirm_final
 
 from apps.common import cbor, safety_checks
 
@@ -21,7 +22,6 @@ from ..helpers import (
     OUTPUT_DATUM_HASH_SIZE,
     SCRIPT_DATA_HASH_SIZE,
 )
-from trezor.ui.layouts.lvgl import confirm_final
 from ..helpers.account_path_check import AccountPathChecker
 from ..helpers.credential import Credential, should_show_credentials
 from ..helpers.hash_builder_collection import (

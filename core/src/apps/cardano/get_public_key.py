@@ -6,12 +6,15 @@ from trezor.ui.layouts import show_pubkey
 from apps.common import paths
 
 from . import seed
+from .helpers.paths import SCHEMA_MINT, SCHEMA_PUBKEY
+from .helpers.utils import derive_public_key
 
 
 @seed.with_keychain
 async def get_public_key(
     ctx: wire.Context, msg: messages.CardanoGetPublicKey, keychain: seed.Keychain
 ) -> messages.CardanoPublicKey:
+    address_n = msg.address_n
     await paths.validate_path(
         ctx,
         keychain,

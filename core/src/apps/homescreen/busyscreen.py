@@ -1,10 +1,11 @@
 import storage.cache
 from trezor import loop, ui
-from trezor.ui.layouts import show_coinjoin
 
 from apps.base import busy_expiry_ms, set_homescreen
 
 from . import HomescreenBase
+
+# from trezor.ui.layouts import show_coinjoin
 
 
 async def busyscreen() -> None:
@@ -23,5 +24,5 @@ class Busyscreen(HomescreenBase):
         set_homescreen()
         raise ui.Result(None)
 
-    def do_render(self) -> None:
-        show_coinjoin()
+    # def do_render(self) -> None:
+    #     show_coinjoin()

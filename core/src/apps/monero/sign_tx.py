@@ -10,6 +10,7 @@ from apps.common.keychain import auto_keychain
 from apps.monero.signing.state import State
 
 from . import ICON, PRIMARY_COLOR
+
 if TYPE_CHECKING:
     from trezor.messages import MoneroTransactionFinalAck
     from apps.common.keychain import Keychain

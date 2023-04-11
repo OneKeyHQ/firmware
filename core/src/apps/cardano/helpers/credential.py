@@ -9,7 +9,7 @@ from .utils import to_account_path
 
 if TYPE_CHECKING:
     from trezor import messages
-    from trezor.ui.layouts import PropertyType
+    from trezor.ui.layouts.lvgl import PropertyType
 
 CREDENTIAL_TYPE_PAYMENT: str = "payment"
 CREDENTIAL_TYPE_STAKE: str = "stake"

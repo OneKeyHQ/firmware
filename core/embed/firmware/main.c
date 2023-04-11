@@ -132,13 +132,13 @@ int main(void) {
 
   ble_usart_init();
 
-#if !defined TREZOR_MODEL_1
-  parse_boardloader_capabilities();
+// #if !defined TREZOR_MODEL_1
+//   parse_boardloader_capabilities();
 
 #if PRODUCTION
   // check_and_replace_bootloader();
 #endif
-#endif
+// #endif
 
   // Init peripherals
   pendsv_init();

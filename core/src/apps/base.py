@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
 def get_vendor():
     return "trezor.io" if storage.device.is_trezor_compatible() else "onekey.so"
+
+
 def busy_expiry_ms() -> int:
     """
     Returns the time left until the busy state expires or 0 if the device is not in the busy state.

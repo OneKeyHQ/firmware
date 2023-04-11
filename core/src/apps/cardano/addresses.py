@@ -290,7 +290,7 @@ def _validate_bech32_hrp(
     address_str: str, address_type: CardanoAddressType, network_id: int
 ) -> None:
     valid_hrp = _get_bech32_hrp(address_type, network_id)
-    bech32_hrp = bech32.get_hrp(address_str)
+    bech32_hrp = bech32.get_hrp(address_str)  # type: ignore["get_hrp" is not a known member of module]
 
     assert_cond(valid_hrp == bech32_hrp)
 

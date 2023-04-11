@@ -90,7 +90,11 @@ class Address(FullSizeWindow):
             self.container.delete()
             del self.container
         self.btn_no.label.set_text(_(i18n_keys.BUTTON__ADDRESS))
-        self.qr = QRCode(self.content_area, self.address if self.address_qr is None else self.address_qr, self.icon)
+        self.qr = QRCode(
+            self.content_area,
+            self.address if self.address_qr is None else self.address_qr,
+            self.icon,
+        )
         self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
 
     def eventhandler(self, event_obj):

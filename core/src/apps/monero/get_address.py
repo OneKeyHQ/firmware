@@ -1,7 +1,7 @@
-from trezor.lvglui.scrs import lv
 from typing import TYPE_CHECKING
 
 from trezor import wire
+from trezor.lvglui.scrs import lv
 from trezor.messages import MoneroAddress
 from trezor.ui.layouts import show_address
 
@@ -12,6 +12,7 @@ from apps.monero.xmr import addresses, crypto_helpers, monero
 from apps.monero.xmr.networks import net_version
 
 from . import ICON, PRIMARY_COLOR
+
 if TYPE_CHECKING:
     from trezor.messages import MoneroGetAddress
 

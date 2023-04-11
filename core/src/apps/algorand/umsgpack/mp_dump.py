@@ -49,16 +49,16 @@ def _pack_integer(obj, fp):
     else:
         if obj < 128:
             fp.write(struct.pack("B", obj))
-        elif obj < 2 ** 8:
+        elif obj < 2**8:
             fp.write(b"\xcc")
             fp.write(struct.pack("B", obj))
-        elif obj < 2 ** 16:
+        elif obj < 2**16:
             fp.write(b"\xcd")
             fp.write(struct.pack(">H", obj))
-        elif obj < 2 ** 32:
+        elif obj < 2**32:
             fp.write(b"\xce")
             fp.write(struct.pack(">I", obj))
-        elif obj < 2 ** 64:
+        elif obj < 2**64:
             fp.write(b"\xcf")
             fp.write(struct.pack(">Q", obj))
         else:
@@ -90,13 +90,13 @@ def _pack_string(obj, fp):
     obj_len = len(obj)
     if obj_len < 32:
         fp.write(struct.pack("B", 0xA0 | obj_len))
-    elif obj_len < 2 ** 8:
+    elif obj_len < 2**8:
         fp.write(b"\xd9")
         fp.write(struct.pack("B", obj_len))
-    elif obj_len < 2 ** 16:
+    elif obj_len < 2**16:
         fp.write(b"\xda")
         fp.write(struct.pack(">H", obj_len))
-    elif obj_len < 2 ** 32:
+    elif obj_len < 2**32:
         fp.write(b"\xdb")
         fp.write(struct.pack(">I", obj_len))
     else:
@@ -106,13 +106,13 @@ def _pack_string(obj, fp):
 
 def _pack_binary(obj, fp):
     obj_len = len(obj)
-    if obj_len < 2 ** 8:
+    if obj_len < 2**8:
         fp.write(b"\xc4")
         fp.write(struct.pack("B", obj_len))
-    elif obj_len < 2 ** 16:
+    elif obj_len < 2**16:
         fp.write(b"\xc5")
         fp.write(struct.pack(">H", obj_len))
-    elif obj_len < 2 ** 32:
+    elif obj_len < 2**32:
         fp.write(b"\xc6")
         fp.write(struct.pack(">I", obj_len))
     else:
@@ -130,13 +130,13 @@ def _pack_ext(
     if code:
         fp.write(int.to_bytes(code, 1, "big"))
         fp.write(struct.pack("B", ot))
-    elif obj_len < 2 ** 8:
+    elif obj_len < 2**8:
         fp.write(b"\xc7")
         fp.write(struct.pack("BB", obj_len, ot))
-    elif obj_len < 2 ** 16:
+    elif obj_len < 2**16:
         fp.write(b"\xc8")
         fp.write(struct.pack(">HB", obj_len, ot))
-    elif obj_len < 2 ** 32:
+    elif obj_len < 2**32:
         fp.write(b"\xc9")
         fp.write(struct.pack(">IB", obj_len, ot))
     else:
@@ -148,10 +148,10 @@ def _pack_array(obj, fp, options):
     obj_len = len(obj)
     if obj_len < 16:
         fp.write(struct.pack("B", 0x90 | obj_len))
-    elif obj_len < 2 ** 16:
+    elif obj_len < 2**16:
         fp.write(b"\xdc")
         fp.write(struct.pack(">H", obj_len))
-    elif obj_len < 2 ** 32:
+    elif obj_len < 2**32:
         fp.write(b"\xdd")
         fp.write(struct.pack(">I", obj_len))
     else:
@@ -165,10 +165,10 @@ def _pack_map(obj, fp, options):
     obj_len = len(obj)
     if obj_len < 16:
         fp.write(struct.pack("B", 0x80 | obj_len))
-    elif obj_len < 2 ** 16:
+    elif obj_len < 2**16:
         fp.write(b"\xde")
         fp.write(struct.pack(">H", obj_len))
-    elif obj_len < 2 ** 32:
+    elif obj_len < 2**32:
         fp.write(b"\xdf")
         fp.write(struct.pack(">I", obj_len))
     else:

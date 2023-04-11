@@ -9,20 +9,17 @@ from trezor.strings import format_amount, format_timestamp
 from trezor.ui import layouts
 
 from .. import addresses
+from ..common import format_fee_rate
 from . import omni
 
 if not utils.BITCOIN_ONLY:
-    if not utils.LVGL_UI:
-        from trezor.ui.layouts.tt import altcoin
-    else:
-        from trezor.ui.layouts.lvgl import altcoin
+    from trezor.ui.layouts.lvgl import altcoin
 
 
 if TYPE_CHECKING:
     from typing import Any
 
     from trezor.messages import TxAckPaymentRequest, TxOutput
-    from trezor.ui.layouts import LayoutType
 
     from apps.common.coininfo import CoinInfo
 
@@ -33,7 +30,9 @@ def format_coin_amount(amount: int, coin: CoinInfo, amount_unit: AmountUnit) -> 
     decimals, shortcut = coin.decimals, coin.coin_shortcut
     if amount_unit == AmountUnit.SATOSHI:
         decimals = 0
-        shortcut = "sat " + shortcut
+        shortcut = "sat"
+        if coin.coin_shortcut != "BTC":
+            shortcut += " " + coin.coin_shortcut
     elif amount_unit == AmountUnit.MICROBITCOIN and decimals >= 6:
         decimals -= 6
         shortcut = "u" + shortcut
@@ -52,7 +51,7 @@ async def confirm_output(
         assert data is not None
         if omni.is_valid(data):
             # OMNI transaction
-            layout: LayoutType = layouts.confirm_metadata(
+            layout = layouts.confirm_metadata(
                 ctx,
                 "omni_transaction",
                 "OMNI transaction",
@@ -151,6 +150,7 @@ async def confirm_modify_fee(
     ctx: wire.Context,
     user_fee_change: int,
     total_fee_new: int,
+    fee_rate: float,
     coin: CoinInfo,
     amount_unit: AmountUnit,
 ) -> None:
@@ -159,6 +159,7 @@ async def confirm_modify_fee(
         user_fee_change,
         format_coin_amount(abs(user_fee_change), coin, amount_unit),
         format_coin_amount(total_fee_new, coin, amount_unit),
+        fee_rate_amount=format_fee_rate(fee_rate, coin) if fee_rate >= 0 else None,
     )
 
 
@@ -181,6 +182,7 @@ async def confirm_total(
     ctx: wire.Context,
     spending: int,
     fee: int,
+    fee_rate: float,
     coin: CoinInfo,
     amount_unit: AmountUnit,
 ) -> None:
@@ -190,6 +192,7 @@ async def confirm_total(
         fee_amount=format_coin_amount(fee, coin, amount_unit),
         amount=format_coin_amount(spending - fee, coin, amount_unit),
         coin_shortcut=coin.coin_name,
+        fee_rate_amount=format_fee_rate(fee_rate, coin) if fee_rate >= 0 else None,
     )
 
 

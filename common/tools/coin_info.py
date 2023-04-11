@@ -392,7 +392,7 @@ ETH_PRIMARY_COLOR_MAPPING = {
 EVM_ICON_NAME_OVERRIDE = {10: "oeth", 288: "boba", 42161: "arb1", 1313161554: "aurora"}
 
 
-def _load_ethereum_networks()  -> Coins:
+def _load_ethereum_networks() -> Coins:
     """Load ethereum networks from `ethereum/networks.json`"""
     chains_path = DEFS_DIR / "ethereum" / "chains" / "_data" / "chains"
     networks: Coins = []

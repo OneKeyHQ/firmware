@@ -38,7 +38,7 @@ class Qr(ui.Component):
         self.y = y
         self.scale = QR_SIDE_MAX // size
 
-    def on_render(self) -> None:
-        if self.repaint:
-            ui.display.qrcode(self.x, self.y, self.data, self.scale)
-            self.repaint = False
+    # def on_render(self) -> None:
+    #     if self.repaint:
+    #         ui.display.qrcode(self.x, self.y, self.data, self.scale)
+    #         self.repaint = False
