@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "bl_data.h"
+#include "buttons.h"
 #include "gettext.h"
 #include "layout.h"
 #include "memory.h"
@@ -66,11 +67,11 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // BEGIN AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
   if (0 ==
       memcmp(hash,
-             "\x33\xe1\x0a\x96\x18\xea\x9c\xd7\x15\x61\x7b\xf5\xc3\x13\x8a\x41"
-             "\x89\x34\x96\x97\x59\x72\x1d\x56\x92\xc9\x02\xe7\x96\xa5\xfe\x00",
+             "\xb9\xdb\x20\x23\x4a\xa7\xa9\xe5\x50\x89\x6f\xaa\x4a\xee\xdf\x6f"
+             "\x9b\x67\x11\xdd\x12\xca\x08\x67\x84\x72\xd3\x2d\xda\x6f\x9d\xbe",
              32)) {
-    memcpy(bootloader_version, "1.10.0", strlen("1.10.0"));
-    return 1;  // 1.10.0 shipped with fw 2.11.0
+    memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
+    return 1;  // 2.0.0 shipped with fw 2.11.0
   }
   // END AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
 
@@ -116,11 +117,11 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // BEGIN AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   if (0 ==
       memcmp(hash,
-             "\x8b\xfb\xb1\xfb\xd6\x41\x21\x9a\xaf\x5e\xf4\x4e\x8b\x6f\x2b\xf9"
-             "\xd1\x4b\x21\x56\x4e\x95\xe2\xad\x9d\xd1\x23\x70\x3c\x5f\x16\xd4",
+             "\xd3\x27\xbb\x1a\x44\xa9\x21\xe7\xd6\xae\x87\xda\x3c\xb6\xcc\x84"
+             "\xdb\x7a\x7b\xce\x94\x3f\x1d\xd7\x01\xbd\x8c\x81\xaf\xd9\x74\xef",
              32)) {
-    memcpy(bootloader_version, "1.10.0", strlen("1.10.0"));
-    return 1;  // 1.10.0 shipped with fw 2.11.0
+    memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
+    return 1;  // 2.0.0 shipped with fw 2.11.0
   }
   // END AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   return 0;
@@ -160,8 +161,18 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
   // ATTEMPTING TO OVERWRITE BOOTLOADER WITH UNSIGNED FIRMWARE MAY BRICK
   // YOUR DEVICE.
 
-  layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, _("Updating bootloader"),
-               NULL, NULL, _("DO NOT UNPLUG"), _("YOUR ONEKEY!"), NULL);
+  layoutDialog2(&bmp_icon_warning, &bmp_btn_cancel, &bmp_btn_confirm, NULL,
+                NULL, _("DO NOT power off during"), _("update,or it may cause"),
+                _("irreversible malfunction"), NULL, NULL);
+
+  while (1) {
+    uint8_t key = keyScan();
+    if (key == KEY_CONFIRM) {
+      break;
+    } else if (key == KEY_CANCEL) {
+      return;
+    }
+  }
 
   // unlock sectors
   memory_write_unlock();
@@ -197,6 +208,7 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
   layoutDialog(&bmp_icon_error, NULL, NULL, NULL, _("Bootloader update"),
                _("broken."), NULL, _("Unplug your OneKey"),
                _("contact our support."), NULL);
+  delay_ms(1000);
   shutdown();
 #endif
   // prevent compiler warning when PRODUCTION==0

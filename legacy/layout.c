@@ -75,10 +75,13 @@ void layoutButtonYes(const char *btnYes, const BITMAP *icon) {
 }
 
 #if ONEKEY_MINI
-void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
-                  const char *desc, const char *line1, const char *line2,
-                  const char *line3, const char *line4, const char *line5,
-                  const char *line6) {
+
+static void _layoutDialog_ex(const BITMAP *icon, const BITMAP *bmp_no,
+                             const char *btnNo, const BITMAP *bmp_yes,
+                             const char *btnYes, const char *desc,
+                             const char *line1, const char *line2,
+                             const char *line3, const char *line4,
+                             const char *line5, const char *line6) {
   oledClear();
   if (icon) {
     oledDrawBitmap((OLED_WIDTH - icon->width) / 2, 9, icon);
@@ -102,14 +105,30 @@ void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
       oledHLine(OLED_HEIGHT - 13);
     }
   }
-  if (btnNo) {
-    layoutButtonNo(btnNo, &bmp_button_back);
+  if (btnNo || bmp_no) {
+    layoutButtonNo(btnNo, bmp_no);
   }
-  if (btnYes) {
-    layoutButtonYes(btnYes, &bmp_button_forward);
+  if (btnYes || bmp_yes) {
+    layoutButtonYes(btnYes, bmp_yes);
   }
   oledRefresh();
 }
+
+void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
+                  const char *desc, const char *line1, const char *line2,
+                  const char *line3, const char *line4, const char *line5,
+                  const char *line6) {
+  _layoutDialog_ex(icon, NULL, btnNo, NULL, btnYes, desc, line1, line2, line3,
+                   line4, line5, line6);
+}
+void layoutDialog2(const BITMAP *icon, const BITMAP *bmp_no,
+                   const BITMAP *bmp_yes, const char *desc, const char *line1,
+                   const char *line2, const char *line3, const char *line4,
+                   const char *line5, const char *line6) {
+  _layoutDialog_ex(icon, bmp_no, NULL, bmp_yes, NULL, desc, line1, line2, line3,
+                   line4, line5, line6);
+}
+
 #else
 void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
                   const char *desc, const char *line1, const char *line2,

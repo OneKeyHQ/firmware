@@ -38,6 +38,10 @@ void layoutDialog(const BITMAP *icon, const char *btnNo, const char *btnYes,
                   const char *desc, const char *line1, const char *line2,
                   const char *line3, const char *line4, const char *line5,
                   const char *line6);
+void layoutDialog2(const BITMAP *icon, const BITMAP *bmp_no,
+                   const BITMAP *bmp_yes, const char *desc, const char *line1,
+                   const char *line2, const char *line3, const char *line4,
+                   const char *line5, const char *line6);
 void layoutDialogEx(const BITMAP *icon, const char *btnNo, const char *btnYes,
                     const char *desc, const char *line1, const char *line2,
                     const char *line3, const char *line4, const char *line5,

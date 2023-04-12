@@ -175,10 +175,10 @@ int main(void) {
 #ifndef APPVER
 
 #if ONEKEY_MINI
-  bool boot_button_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
+  bool boot_button_pressed = (buttonRead() & BTN_PIN_FUNC) == 0;
 
   if (!boot_button_pressed && !force_boot) {
-    update_from_spi_flash(false);
+    update_from_spi_flash();
   }
 #else
   bool boot_button_pressed = (buttonRead() & BTN_PIN_DOWN) == 0;
