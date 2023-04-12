@@ -85,29 +85,39 @@ static void send_msg_features(usbd_device *dev) {
     0xc0, 0x01, (version >> 16) & 0xff,
   };
 
+  uint8_t battery_level[] = {
+    0xc0, 0x20, battery_cap
+  };
+
   uint8_t header_bytes[] = {
     // header
     '?', '#', '#',
     // msg_id
     0x00, 0x11,
     // msg_size
-    0x00, 0x00, 0x00, sizeof(feature_bytes) + (firmware_present ? sizeof(version_bytes) : 0),
+    0x00, 0x00, 0x00, sizeof(feature_bytes) + (firmware_present ? sizeof(version_bytes) : 0) + sizeof(battery_level),
   };
   // clang-format on
 
   // Check that the response will fit into an USB packet, and also that the
   // sizeof expression above fits into a single byte
-  _Static_assert(
-      sizeof(feature_bytes) + sizeof(version_bytes) + sizeof(header_bytes) <=
-          64,
-      "Features response too long");
+  _Static_assert(sizeof(feature_bytes) + sizeof(version_bytes) +
+                         sizeof(header_bytes) + sizeof(battery_level) <=
+                     64,
+                 "Features response too long");
+
+  uint32_t offset = 0;
 
   memcpy(response, header_bytes, sizeof(header_bytes));
-  memcpy(response + sizeof(header_bytes), feature_bytes, sizeof(feature_bytes));
+  offset += sizeof(header_bytes);
+  memcpy(response + offset, feature_bytes, sizeof(feature_bytes));
+  offset += sizeof(feature_bytes);
   if (firmware_present) {
-    memcpy(response + sizeof(header_bytes) + sizeof(feature_bytes),
-           version_bytes, sizeof(version_bytes));
+    memcpy(response + offset, version_bytes, sizeof(version_bytes));
+    offset += sizeof(version_bytes);
   }
+
+  memcpy(response + offset, battery_level, sizeof(battery_level));
 
   send_response(dev, response);
 }

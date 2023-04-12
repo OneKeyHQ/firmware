@@ -338,6 +338,7 @@ if TYPE_CHECKING:
         PinMismatch = 12
         WipeCodeMismatch = 13
         InvalidSession = 14
+        BatteryLow = 30
         FirmwareError = 99
 
     class ButtonRequestType(IntEnum):

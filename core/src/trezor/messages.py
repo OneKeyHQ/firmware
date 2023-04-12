@@ -2589,6 +2589,7 @@ if TYPE_CHECKING:
         bootloader_version: "str | None"
         coin_switch: "int | None"
         build_id: "str | None"
+        battery_level: "int | None"
 
         def __init__(
             self,
@@ -2645,6 +2646,7 @@ if TYPE_CHECKING:
             bootloader_version: "str | None" = None,
             coin_switch: "int | None" = None,
             build_id: "str | None" = None,
+            battery_level: "int | None" = None,
         ) -> None:
             pass
 

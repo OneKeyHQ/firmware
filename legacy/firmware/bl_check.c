@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <string.h>
 #include "bl_data.h"
+#include "ble.h"
+#include "buttons.h"
 #include "gettext.h"
 #include "layout.h"
 #include "memory.h"
@@ -92,11 +94,11 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // BEGIN AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
   if (0 ==
       memcmp(hash,
-             "\x33\xe1\x0a\x96\x18\xea\x9c\xd7\x15\x61\x7b\xf5\xc3\x13\x8a\x41"
-             "\x89\x34\x96\x97\x59\x72\x1d\x56\x92\xc9\x02\xe7\x96\xa5\xfe\x00",
+             "\x8c\xce\xa2\x13\xba\x7b\x8e\x06\x62\x95\xd4\xac\x44\x6f\x71\x4f"
+             "\xe5\x62\x93\x03\x06\xef\xd1\xe5\x2d\xad\x98\x38\x79\x6d\x57\xe2",
              32)) {
-    memcpy(bootloader_version, "1.10.0", strlen("1.10.0"));
-    return 1;  // 1.10.0 shipped with fw 2.11.0
+    memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
+    return 1;  // 2.0.0 shipped with fw 3.0.0
   }
   // END AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
 
@@ -167,8 +169,8 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // BEGIN AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   if (0 ==
       memcmp(hash,
-             "\x98\x77\xad\x4e\xf6\x94\xef\x4a\x7b\xc1\xb2\xd0\xa0\xfa\x98\x5f"
-             "\xd5\x9b\x2b\xb7\x1e\xba\xc4\x21\xcf\xef\x9e\x31\x04\x7a\xc4\x7e",
+             "\xed\xf1\x9e\x2f\x39\x0c\xb5\xb0\xe7\x32\xb0\x9c\xc7\xb4\xb6\x11"
+             "\xea\xf3\x26\x2a\xec\x8c\x21\x18\x30\x72\xe9\x00\xa5\x01\x1b\xdb",
              32)) {
     memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
     return 1;  // 2.0.0 shipped with fw 3.0.0
@@ -195,7 +197,7 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
                  _("detected."), NULL, _("Shutdown your OneKey"),
                  _("contact our support."), NULL);
     delay_ms(1000);
-    // shutdown();
+    shutdown();
   }
 
   if (is_mode_unprivileged()) {
@@ -207,12 +209,55 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
     return;
   }
 
+  if (sys_usbState() == false && battery_cap == 0xff) {
+    layoutDialogCenterAdapterEx(NULL, NULL, NULL, NULL,
+                                _("Get battery level..."), NULL, NULL, NULL);
+    while (1) {
+      if (battery_cap == 0xff) {
+        ble_request_info(BLE_CMD_BATTERY);
+      } else {
+        break;
+      }
+      if (sys_usbState() == true) {
+        break;
+      }
+      delay_ms(5);
+    }
+  }
+
+  if (sys_usbState() == false && battery_cap < 2) {
+    layoutDialogCenterAdapterEx(
+        &bmp_icon_warning, NULL, &bmp_bottom_right_confirm, NULL,
+        _("Low Battery!Use cable or"), _("Charge to 25% before"),
+        _("updating the bootloader"), NULL);
+    while (1) {
+      uint8_t key = keyScan();
+      if (key == KEY_CONFIRM) {
+        return;
+      }
+      if (sys_usbState() == true) {
+        break;
+      }
+    }
+  }
+
   // ENABLE THIS AT YOUR OWN RISK
   // ATTEMPTING TO OVERWRITE BOOTLOADER WITH UNSIGNED FIRMWARE MAY BRICK
   // YOUR DEVICE.
 
-  layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, _("Updating bootloader"),
-               NULL, NULL, _("DO NOT UNPLUG"), _("YOUR ONEKEY!"), NULL);
+  layoutDialogCenterAdapterEx(
+      &bmp_icon_warning, &bmp_bottom_left_close, &bmp_bottom_right_confirm,
+      NULL, _("DO NOT power off during"), _("update,or it may cause"),
+      _("irreversible malfunction"), NULL);
+
+  while (1) {
+    uint8_t key = keyScan();
+    if (key == KEY_CONFIRM) {
+      break;
+    } else if (key == KEY_CANCEL) {
+      return;
+    }
+  }
 
   // unlock sectors
   memory_write_unlock();
@@ -248,6 +293,7 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
   layoutDialog(&bmp_icon_error, NULL, NULL, NULL, _("Bootloader update"),
                _("broken."), NULL, _("Unplug your OneKey"),
                _("contact our support."), NULL);
+  delay_ms(1000);
   shutdown();
 #endif
   // prevent compiler warning when PRODUCTION==0

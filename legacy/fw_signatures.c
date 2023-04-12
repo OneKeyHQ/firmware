@@ -81,12 +81,12 @@ static const uint8_t * const pubkey_v3[PUBKEYS_V3] = {
  */
 
 static const uint8_t * const pubkey_v2[PUBKEYS_V2] = {
-    (const uint8_t *)"\x03\x2c\x0b\x7c\xf9\x53\x24\xa0\x7d\x05\x39\x8b\x24\x01\x74\xdc\x0c\x2b\xe4\x44\xd9\x6b\x15\x9a\xa6\xc7\xf7\xb1\xe6\x68\x68\x09\x91",
-    (const uint8_t *)"\x02\xed\xab\xbd\x16\xb4\x1c\x83\x71\xb9\x2e\xf2\xf0\x4c\x11\x85\xb4\xf0\x3b\x6d\xcd\x52\xba\x9b\x78\xd9\xd7\xc8\x9c\x8f\x22\x11\x45",
-    (const uint8_t *)"\x03\x66\x5f\x66\x0a\x50\x52\xbe\x7a\x95\x54\x6a\x02\x17\x90\x58\xd9\x3d\x3e\x08\xa7\x79\x73\x49\x14\x59\x43\x46\x07\x5b\xb0\xaf\xd4",
-    (const uint8_t *)"\x03\x66\x63\x5d\x99\x94\x17\xb6\x55\x66\x86\x6c\x65\x63\x0d\x97\x7a\x7a\xe7\x23\xfe\x5f\x6c\x4c\xd1\x7f\xa0\x0f\x08\x8b\xa1\x84\xc1",
-    (const uint8_t *)"\x03\xf3\x6c\x7d\x0f\xb6\x15\xad\xa4\x3d\x71\x88\x58\x0f\x15\xeb\xda\x22\xd6\xf6\xb9\xb1\xa9\x2b\xff\x16\xc6\x93\x77\x99\xdc\xbc\x66"
-    };
+    (const uint8_t *)"\x02\xad\x90\x35\xd6\x7a\xc4\x79\x5c\x91\x3c\x45\x2d\x25\x15\x6f\x0b\x09\x4c\x34\xf6\x56\xa2\x49\xb9\x4d\x8d\x66\x19\xab\x0d\x92\xb1",
+    (const uint8_t *)"\x03\x95\xb8\x3d\xa4\x42\xc6\x89\xbd\xa8\x2e\x9f\x95\x43\x81\x1f\xec\x2f\x58\x33\x4f\x5c\x76\x36\x1f\x5a\x49\xfb\xb6\x63\x4a\x81\x15",
+    (const uint8_t *)"\x02\xe0\xd5\xef\x94\xcf\x95\x0b\x9f\x85\x5f\xb5\x52\x67\x64\xdc\x28\xd2\xd9\x65\x82\xc1\xca\x1a\xd3\x9c\xab\xab\x65\x3e\x61\x98\xf8",
+    (const uint8_t *)"\x03\xc9\xec\x74\x0c\xb3\x32\x81\x65\xdc\x3f\xdb\x93\xa5\x4e\x70\x75\x56\x9b\x7a\x54\xcd\xee\xc0\x21\x1f\xa9\xd9\x52\xc6\x64\x79\x60",
+    (const uint8_t *)"\x02\xd2\x08\xab\xa7\x9b\x6f\x60\xf1\x78\x60\x81\x67\xdd\xb7\x77\x86\x0a\x81\x55\x02\x2e\x28\xf1\x20\xa4\x16\x30\x86\x9a\x4e\x0f\x0d"
+};
 
 #else  // DEBUG_T1_SIGNATURES is now 0
 // These public keys are production keys
@@ -109,7 +109,7 @@ static const uint8_t * const pubkey_v2[PUBKEYS_V2] = {
     (const uint8_t *)"\x03\x95\xb8\x3d\xa4\x42\xc6\x89\xbd\xa8\x2e\x9f\x95\x43\x81\x1f\xec\x2f\x58\x33\x4f\x5c\x76\x36\x1f\x5a\x49\xfb\xb6\x63\x4a\x81\x15",
     (const uint8_t *)"\x02\xe0\xd5\xef\x94\xcf\x95\x0b\x9f\x85\x5f\xb5\x52\x67\x64\xdc\x28\xd2\xd9\x65\x82\xc1\xca\x1a\xd3\x9c\xab\xab\x65\x3e\x61\x98\xf8",
     (const uint8_t *)"\x03\xc9\xec\x74\x0c\xb3\x32\x81\x65\xdc\x3f\xdb\x93\xa5\x4e\x70\x75\x56\x9b\x7a\x54\xcd\xee\xc0\x21\x1f\xa9\xd9\x52\xc6\x64\x79\x60",
-    (const uint8_t *)"\x02\xd2\x08\xab\xa7\x9b\x6f\x60\xf1\x78\x60\x81\x67\xdd\xb7\x77\x86\x0a\x81\x55\x02\x2e\x28\xf1\x20\xa4\x16\x30\x86\x9a\x4e\x0f\x0d",
+    (const uint8_t *)"\x02\xd2\x08\xab\xa7\x9b\x6f\x60\xf1\x78\x60\x81\x67\xdd\xb7\x77\x86\x0a\x81\x55\x02\x2e\x28\xf1\x20\xa4\x16\x30\x86\x9a\x4e\x0f\x0d"
 };
 #endif
 
@@ -140,11 +140,11 @@ void compute_firmware_fingerprint(const image_header *hdr, uint8_t hash[32]) {
   memzero(copy.sig1, sizeof(copy.sig1));
   memzero(copy.sig2, sizeof(copy.sig2));
   memzero(copy.sig3, sizeof(copy.sig3));
-  memzero(copy.sig4, sizeof(copy.sig4));
-  copy.sigindex1 = 0;
-  copy.sigindex2 = 0;
-  copy.sigindex3 = 0;
-  copy.sigindex4 = 0;
+  memzero(copy.signatures_4.sig4, sizeof(copy.signatures_4.sig4));
+  copy.signatures_4.sigindex1 = 0;
+  copy.signatures_4.sigindex2 = 0;
+  copy.signatures_4.sigindex3 = 0;
+  copy.signatures_4.sigindex4 = 0;
   sha256_Raw((const uint8_t *)&copy, sizeof(image_header), hash);
 }
 
@@ -184,63 +184,75 @@ int signatures_ok(const image_header *hdr, uint8_t store_fingerprint[32],
   // which set of public keys depend on scheme
   const uint8_t *const *pubkey_ptr = NULL;
   uint8_t pubkeys = 0;
-  if (use_verifymessage == sectrue) {
+  uint8_t sigindex1, sigindex2, sigindex3, sigindex4;
+  if (hdr->signatures_4.sigindex1 >= 1 &&
+      hdr->signatures_4.sigindex1 <= PUBKEYS_V3) {  // 4/7 signatures v3
+    if (use_verifymessage != sectrue) {
+      return SIG_FAIL;
+    }
     pubkey_ptr = pubkey_v3;
     compute_firmware_fingerprint_for_verifymessage(hdr, hash);
     pubkeys = PUBKEYS_V3;
-  } else {
+    sigindex1 = hdr->signatures_4.sigindex1;
+    sigindex2 = hdr->signatures_4.sigindex2;
+    sigindex3 = hdr->signatures_4.sigindex3;
+    sigindex4 = hdr->signatures_4.sigindex4;
+  } else {  // 3/5 signatures v2
+    if (use_verifymessage != secfalse) {
+      return SIG_FAIL;
+    }
     pubkey_ptr = pubkey_v2;
     compute_firmware_fingerprint(hdr, hash);
     pubkeys = PUBKEYS_V2;
+    sigindex1 = hdr->signatures_3.sigindex1;
+    sigindex2 = hdr->signatures_3.sigindex2;
+    sigindex3 = hdr->signatures_3.sigindex3;
+    sigindex4 = 0;
   }
 
   if (store_fingerprint) {
     memcpy(store_fingerprint, hash, 32);
   }
 
-  if (hdr->sigindex1 < 1 || hdr->sigindex1 > pubkeys)
-    return SIG_FAIL;  // invalid index
-  if (hdr->sigindex2 < 1 || hdr->sigindex2 > pubkeys)
-    return SIG_FAIL;  // invalid index
-  if (hdr->sigindex3 < 1 || hdr->sigindex3 > pubkeys) {
+  if (sigindex1 < 1 || sigindex1 > pubkeys) return SIG_FAIL;  // invalid index
+  if (sigindex2 < 1 || sigindex2 > pubkeys) return SIG_FAIL;  // invalid index
+  if (sigindex3 < 1 || sigindex3 > pubkeys) {
     return SIG_FAIL;  // invalid index
   }
   if (use_verifymessage == sectrue) {
-    if (hdr->sigindex4 < 1 || hdr->sigindex4 > pubkeys) {
+    if (sigindex4 < 1 || sigindex4 > pubkeys) {
       return SIG_FAIL;  // invalid index
     }
   }
 
-  if (hdr->sigindex1 == hdr->sigindex2) return SIG_FAIL;  // duplicate use
-  if (hdr->sigindex1 == hdr->sigindex3) return SIG_FAIL;  // duplicate use
-  if (hdr->sigindex2 == hdr->sigindex3) return SIG_FAIL;  // duplicate use
+  if (sigindex1 == sigindex2) return SIG_FAIL;  // duplicate use
+  if (sigindex1 == sigindex3) return SIG_FAIL;  // duplicate use
+  if (sigindex2 == sigindex3) return SIG_FAIL;  // duplicate use
 
   if (use_verifymessage == sectrue) {
-    if (hdr->sigindex4 == hdr->sigindex1) return SIG_FAIL;  // duplicate use
-    if (hdr->sigindex4 == hdr->sigindex2) return SIG_FAIL;  // duplicate use
-    if (hdr->sigindex4 == hdr->sigindex3) return SIG_FAIL;  // duplicate use
+    if (sigindex4 == sigindex1) return SIG_FAIL;  // duplicate use
+    if (sigindex4 == sigindex2) return SIG_FAIL;  // duplicate use
+    if (sigindex4 == sigindex3) return SIG_FAIL;  // duplicate use
   }
 
-  if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[hdr->sigindex1 - 1],
-                               hdr->sig1, hash)) {  // failure
+  if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[sigindex1 - 1], hdr->sig1,
+                               hash)) {  // failure
     return SIG_FAIL;
   }
 
-  if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[hdr->sigindex2 - 1],
-                               hdr->sig2, hash)) {  // failure
+  if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[sigindex2 - 1], hdr->sig2,
+                               hash)) {  // failure
     return SIG_FAIL;
   }
 
-  if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[hdr->sigindex3 - 1],
-                               hdr->sig3, hash))  // failure
-  {
+  if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[sigindex3 - 1], hdr->sig3,
+                               hash)) {  // failure
     return SIG_FAIL;
   }
 
   if (use_verifymessage == sectrue) {
-    if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[hdr->sigindex4 - 1],
-                                 hdr->sig4, hash))  // failure
-    {
+    if (0 != ecdsa_verify_digest(&secp256k1, pubkey_ptr[sigindex4 - 1],
+                                 hdr->signatures_4.sig4, hash)) {  // failure
       return SIG_FAIL;
     }
   }

@@ -347,6 +347,7 @@ class FailureType(IntEnum):
     PinMismatch = 12
     WipeCodeMismatch = 13
     InvalidSession = 14
+    BatteryLow = 30
     FirmwareError = 99
 
 
@@ -3760,6 +3761,7 @@ class Features(protobuf.MessageType):
         510: protobuf.Field("bootloader_version", "string", repeated=False, required=False, default=None),
         517: protobuf.Field("coin_switch", "uint32", repeated=False, required=False, default=None),
         518: protobuf.Field("build_id", "string", repeated=False, required=False, default=None),
+        520: protobuf.Field("battery_level", "uint32", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -3818,6 +3820,7 @@ class Features(protobuf.MessageType):
         bootloader_version: Optional["str"] = None,
         coin_switch: Optional["int"] = None,
         build_id: Optional["str"] = None,
+        battery_level: Optional["int"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3872,6 +3875,7 @@ class Features(protobuf.MessageType):
         self.bootloader_version = bootloader_version
         self.coin_switch = coin_switch
         self.build_id = build_id
+        self.battery_level = battery_level
 
 
 class LockDevice(protobuf.MessageType):

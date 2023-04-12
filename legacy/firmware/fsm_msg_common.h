@@ -150,6 +150,11 @@ bool get_features(Features *resp) {
   resp->coin_switch |=
       config_getCoinSwitch(COIN_SWITCH_SOLANA) ? COIN_SWITCH_SOLANA : 0;
 
+  if (battery_cap != 0xff) {
+    resp->has_battery_level = true;
+    resp->battery_level = battery_cap;
+  }
+
   return resp;
 }
 
@@ -744,6 +749,25 @@ void fsm_msgSetBusy(const SetBusy *msg) {
 
 void fsm_msgBixinReboot(const BixinReboot *msg) {
   (void)msg;
+
+  if (sys_usbState() == false && battery_cap < 2) {
+    layoutDialogCenterAdapterEx(
+        &bmp_icon_warning, NULL, &bmp_bottom_right_confirm, NULL,
+        _("Low Battery!Use cable or"), _("Charge to 25% before"),
+        _("updating the bootloader"), NULL);
+    while (1) {
+      uint8_t key = keyScan();
+      if (key == KEY_CONFIRM) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        layoutHome();
+        return;
+      }
+      if (sys_usbState() == true) {
+        break;
+      }
+    }
+  }
+
   layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                             &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
                             NULL, _("Do you want to restart"),
