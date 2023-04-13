@@ -41,22 +41,30 @@ def cli():
     help=PATH_HELP,
     default=polkadot.DEFAULT_BIP32_PATH,
 )
+@click.option("-p", "--prefix", type=int, help="SS58 prefix, e.g. Polkadot is 0")
+# https://github.com/paritytech/ss58-registry/blob/main/ss58-registry.json
+@click.option("-N", "--network", help="Network Name")
 @click.option("-d", "--show-display", is_flag=True)
 @with_client
-def get_address(client: "TrezorClient", address: str, show_display: bool):
+def get_address(
+    client: "TrezorClient", address: str, prefix: int, network: str, show_display: bool
+):
     """Get polkadot address."""
     address_n = tools.parse_path(address)
-    return polkadot.get_address(client, address_n, show_display)
+    return polkadot.get_address(client, address_n, prefix, network, show_display)
 
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.option("-N", "--network", help="Network Name")
 @click.argument("message")
 @with_client
-def sign_raw_transaction(client: "TrezorClient", address: str, message: str):
+def sign_raw_transaction(
+    client: "TrezorClient", address: str, message: str, network: str
+):
     """Sign a hex-encoded transaction ."""
     address_n = tools.parse_path(address)
-    ret = polkadot.sign_tx(client, address_n, bytes.fromhex(message))
+    ret = polkadot.sign_tx(client, address_n, bytes.fromhex(message), network)
     output = {
         "signature": "0x%s" % ret.signature.hex(),
     }

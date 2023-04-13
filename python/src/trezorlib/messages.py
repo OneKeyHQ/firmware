@@ -197,14 +197,14 @@ class MessageType(IntEnum):
     CardanoTxAuxiliaryData = 327
     CardanoPoolOwner = 328
     CardanoPoolRelayParameters = 329
-    CardanoGetNativeScriptHash = 330
-    CardanoNativeScriptHash = 331
     CardanoTxMint = 332
     CardanoTxCollateralInput = 333
     CardanoTxRequiredSigner = 334
     CardanoTxInlineDatumChunk = 335
     CardanoTxReferenceScriptChunk = 336
     CardanoTxReferenceInput = 337
+    CardanoSignMessage = 350
+    CardanoMessageSignature = 351
     RippleGetAddress = 400
     RippleAddress = 401
     RippleSignTx = 402
@@ -322,6 +322,10 @@ class MessageType(IntEnum):
     AlgorandAddress = 10901
     AlgorandSignTx = 10902
     AlgorandSignedTx = 10903
+    PolkadotGetAddress = 11000
+    PolkadotAddress = 11001
+    PolkadotSignTx = 11002
+    PolkadotSignedTx = 11003
     SuiGetAddress = 11100
     SuiAddress = 11101
     SuiSignTx = 11102
@@ -2478,72 +2482,6 @@ class CardanoBlockchainPointerType(protobuf.MessageType):
         self.certificate_index = certificate_index
 
 
-class CardanoNativeScript(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
-    FIELDS = {
-        1: protobuf.Field("type", "CardanoNativeScriptType", repeated=False, required=True),
-        2: protobuf.Field("scripts", "CardanoNativeScript", repeated=True, required=False, default=None),
-        3: protobuf.Field("key_hash", "bytes", repeated=False, required=False, default=None),
-        4: protobuf.Field("key_path", "uint32", repeated=True, required=False, default=None),
-        5: protobuf.Field("required_signatures_count", "uint32", repeated=False, required=False, default=None),
-        6: protobuf.Field("invalid_before", "uint64", repeated=False, required=False, default=None),
-        7: protobuf.Field("invalid_hereafter", "uint64", repeated=False, required=False, default=None),
-    }
-
-    def __init__(
-        self,
-        *,
-        type: "CardanoNativeScriptType",
-        scripts: Optional[Sequence["CardanoNativeScript"]] = None,
-        key_path: Optional[Sequence["int"]] = None,
-        key_hash: Optional["bytes"] = None,
-        required_signatures_count: Optional["int"] = None,
-        invalid_before: Optional["int"] = None,
-        invalid_hereafter: Optional["int"] = None,
-    ) -> None:
-        self.scripts: Sequence["CardanoNativeScript"] = scripts if scripts is not None else []
-        self.key_path: Sequence["int"] = key_path if key_path is not None else []
-        self.type = type
-        self.key_hash = key_hash
-        self.required_signatures_count = required_signatures_count
-        self.invalid_before = invalid_before
-        self.invalid_hereafter = invalid_hereafter
-
-
-class CardanoGetNativeScriptHash(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 330
-    FIELDS = {
-        1: protobuf.Field("script", "CardanoNativeScript", repeated=False, required=True),
-        2: protobuf.Field("display_format", "CardanoNativeScriptHashDisplayFormat", repeated=False, required=True),
-        3: protobuf.Field("derivation_type", "CardanoDerivationType", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        script: "CardanoNativeScript",
-        display_format: "CardanoNativeScriptHashDisplayFormat",
-        derivation_type: "CardanoDerivationType",
-    ) -> None:
-        self.script = script
-        self.display_format = display_format
-        self.derivation_type = derivation_type
-
-
-class CardanoNativeScriptHash(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 331
-    FIELDS = {
-        1: protobuf.Field("script_hash", "bytes", repeated=False, required=True),
-    }
-
-    def __init__(
-        self,
-        *,
-        script_hash: "bytes",
-    ) -> None:
-        self.script_hash = script_hash
-
-
 class CardanoAddressParametersType(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
@@ -3209,6 +3147,46 @@ class CardanoTxBodyHash(protobuf.MessageType):
 
 class CardanoSignTxFinished(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 319
+
+
+class CardanoSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 350
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("derivation_type", "CardanoDerivationType", repeated=False, required=True),
+        4: protobuf.Field("network_id", "uint32", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        derivation_type: "CardanoDerivationType",
+        network_id: "int",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+        self.derivation_type = derivation_type
+        self.network_id = network_id
+
+
+class CardanoMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 351
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("key", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        key: "bytes",
+    ) -> None:
+        self.signature = signature
+        self.key = key
 
 
 class ConfluxGetAddress(protobuf.MessageType):
@@ -7491,55 +7469,67 @@ class NEMCosignatoryModification(protobuf.MessageType):
 
 
 class PolkadotGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 11000
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
-        3: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+        2: protobuf.Field("prefix", "uint32", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
+        4: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
     }
 
     def __init__(
         self,
         *,
+        prefix: "int",
+        network: "str",
         address_n: Optional[Sequence["int"]] = None,
         show_display: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.prefix = prefix
+        self.network = network
         self.show_display = show_display
 
 
 class PolkadotAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 11001
     FIELDS = {
         1: protobuf.Field("address", "string", repeated=False, required=False, default=None),
+        2: protobuf.Field("public_key", "string", repeated=False, required=False, default=None),
     }
 
     def __init__(
         self,
         *,
         address: Optional["str"] = None,
+        public_key: Optional["str"] = None,
     ) -> None:
         self.address = address
+        self.public_key = public_key
 
 
 class PolkadotSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 11002
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
         raw_tx: "bytes",
+        network: "str",
         address_n: Optional[Sequence["int"]] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.network = network
 
 
 class PolkadotSignedTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = None
+    MESSAGE_WIRE_TYPE = 11003
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
     }

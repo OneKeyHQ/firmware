@@ -1,0 +1,89 @@
+CardanoNativeScript.scripts                                 max_count:5
+CardanoNativeScript.key_hash                                max_size:28
+CardanoNativeScript.key_path                                max_count:8
+
+CardanoNativeScriptHash.script_hash                         max_size:28
+
+CardanoAddressParametersType.address_n                      max_count:8
+CardanoAddressParametersType.address_n_staking              max_count:8
+CardanoAddressParametersType.staking_key_hash               max_size:28
+CardanoAddressParametersType.script_payment_hash            max_size:28
+CardanoAddressParametersType.script_staking_hash            max_size:28
+
+CardanoAddress.address                                      max_size:128
+
+CardanoGetPublicKey.address_n                               max_count:8
+
+CardanoPublicKey.xpub                                       max_size:129
+
+CardanoSignTxInit.script_data_hash                          max_size:32
+
+CardanoTxInput.prev_hash                                    max_size:32
+
+CardanoTxOutput.address                                     max_size:128
+CardanoTxOutput.datum_hash                                  max_size:32
+
+CardanoAssetGroup.policy_id                                 max_size:28
+
+CardanoToken.asset_name_bytes                               max_size:32
+
+CardanoTxInlineDatumChunk.data                              max_size:1024
+
+CardanoTxReferenceScriptChunk.data                          max_size:1024
+
+CardanoPoolOwner.staking_key_path                           max_count:8
+CardanoPoolOwner.staking_key_hash                           max_size:28
+
+CardanoPoolRelayParameters.ipv4_address                     max_size:4
+CardanoPoolRelayParameters.ipv6_address                     max_size:16
+CardanoPoolRelayParameters.host_name                        max_size:64
+
+CardanoPoolMetadataType.url                                 max_size:64
+CardanoPoolMetadataType.hash                                max_size:32
+
+CardanoPoolParametersType.pool_id                           max_size:28
+CardanoPoolParametersType.vrf_key_hash                      max_size:32
+CardanoPoolParametersType.reward_account                    max_size:128
+
+CardanoTxCertificate.path                                   max_count:8
+CardanoTxCertificate.pool                                   max_size:28
+CardanoTxCertificate.script_hash                            max_size:28
+CardanoTxCertificate.key_hash                               max_size:28
+
+CardanoTxWithdrawal.path                                    max_count:8
+CardanoTxWithdrawal.script_hash                             max_size:28
+CardanoTxWithdrawal.key_hash                                max_size:28
+
+CardanoGovernanceRegistrationDelegation.voting_public_key   max_size:128
+
+CardanoGovernanceRegistrationParametersType.voting_public_key   max_size:128
+CardanoGovernanceRegistrationParametersType.staking_path        max_count:8
+CardanoGovernanceRegistrationParametersType.delegations         max_count:32
+
+CardanoTxAuxiliaryData.hash                                     max_size:32
+
+CardanoTxCollateralInput.prev_hash                              max_size:32
+
+CardanoTxRequiredSigner.key_hash                                max_size:28
+CardanoTxRequiredSigner.key_path                                max_count:8
+
+CardanoTxReferenceInput.prev_hash                               max_size:32
+
+
+CardanoTxAuxiliaryDataSupplement.auxiliary_data_hash            max_size:32
+CardanoTxAuxiliaryDataSupplement.governance_signature           max_size:64
+
+CardanoTxWitnessRequest.path                                    max_count:8
+
+CardanoTxWitnessResponse.pub_key                                max_size:64
+CardanoTxWitnessResponse.signature                              max_size:64
+CardanoTxWitnessResponse.chain_code                             max_size:32
+
+CardanoTxBodyHash.tx_hash                                       max_size:32
+
+CardanoSignMessage.address_n                                    max_count:8
+CardanoSignMessage.message                                      max_size:1024
+
+CardanoMessageSignature.signature                               max_size:1024
+CardanoMessageSignature.key                                     max_size:64
+

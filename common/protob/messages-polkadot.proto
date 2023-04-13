@@ -12,8 +12,10 @@ option java_outer_classname = "TrezorMessagePolkadot";
  * @next Failure
  */
 message PolkadotGetAddress {
-    repeated uint32 address_n = 1; // BIP-32 path to derive the key from master node
-    optional bool show_display = 3; // Optionally show on display before sending the result
+    repeated uint32 address_n = 1;  // BIP-32 path to derive the key from master node
+    required uint32 prefix = 2;     // SS58 address-type
+    required string network = 3;    // Network name
+    optional bool show_display = 4; // Optionally show on display before sending the result
 }
 
 /**
@@ -22,6 +24,7 @@ message PolkadotGetAddress {
  */
 message PolkadotAddress {
     optional string address = 1; // Polkadot address
+    optional string public_key = 2;  // public key
 }
 
 /**
@@ -32,6 +35,7 @@ message PolkadotAddress {
 message PolkadotSignTx {
     repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
     required bytes raw_tx = 2;                      // serialized raw transaction
+    required string network = 3;                    // Network name
 }
 
 /**

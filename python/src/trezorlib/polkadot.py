@@ -32,17 +32,26 @@ DEFAULT_BIP32_PATH = "m/44h/354h/0h/0h/0h"
 # ====== Client functions ====== #
 
 
-@expect(messages.PolkadotAddress, field="address", ret_type=str)
+@expect(messages.PolkadotAddress)
 def get_address(
     client: "TrezorClient",
     address_n: "Address",
+    prefix: int,
+    network: str,
     show_display: bool = False,
 ) -> "MessageType":
     return client.call(
-        messages.PolkadotGetAddress(address_n=address_n, show_display=show_display)
+        messages.PolkadotGetAddress(
+            address_n=address_n,
+            prefix=prefix,
+            network=network,
+            show_display=show_display,
+        )
     )
 
 
 @expect(messages.PolkadotSignedTx)
-def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
-    return client.call(messages.PolkadotSignTx(address_n=address_n, raw_tx=rawtx))
+def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes, network: str):
+    return client.call(
+        messages.PolkadotSignTx(address_n=address_n, raw_tx=rawtx, network=network)
+    )

@@ -1432,64 +1432,6 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["CardanoBlockchainPointerType"]:
             return isinstance(msg, cls)
 
-    class CardanoNativeScript(protobuf.MessageType):
-        type: "CardanoNativeScriptType"
-        scripts: "list[CardanoNativeScript]"
-        key_hash: "bytes | None"
-        key_path: "list[int]"
-        required_signatures_count: "int | None"
-        invalid_before: "int | None"
-        invalid_hereafter: "int | None"
-
-        def __init__(
-            self,
-            *,
-            type: "CardanoNativeScriptType",
-            scripts: "list[CardanoNativeScript] | None" = None,
-            key_path: "list[int] | None" = None,
-            key_hash: "bytes | None" = None,
-            required_signatures_count: "int | None" = None,
-            invalid_before: "int | None" = None,
-            invalid_hereafter: "int | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoNativeScript"]:
-            return isinstance(msg, cls)
-
-    class CardanoGetNativeScriptHash(protobuf.MessageType):
-        script: "CardanoNativeScript"
-        display_format: "CardanoNativeScriptHashDisplayFormat"
-        derivation_type: "CardanoDerivationType"
-
-        def __init__(
-            self,
-            *,
-            script: "CardanoNativeScript",
-            display_format: "CardanoNativeScriptHashDisplayFormat",
-            derivation_type: "CardanoDerivationType",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoGetNativeScriptHash"]:
-            return isinstance(msg, cls)
-
-    class CardanoNativeScriptHash(protobuf.MessageType):
-        script_hash: "bytes"
-
-        def __init__(
-            self,
-            *,
-            script_hash: "bytes",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoNativeScriptHash"]:
-            return isinstance(msg, cls)
-
     class CardanoAddressParametersType(protobuf.MessageType):
         address_type: "CardanoAddressType"
         address_n: "list[int]"
@@ -2078,6 +2020,42 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["CardanoSignTxFinished"]:
+            return isinstance(msg, cls)
+
+    class CardanoSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+        derivation_type: "CardanoDerivationType"
+        network_id: "int"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            derivation_type: "CardanoDerivationType",
+            network_id: "int",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoSignMessage"]:
+            return isinstance(msg, cls)
+
+    class CardanoMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+        key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoMessageSignature"]:
             return isinstance(msg, cls)
 
     class ConfluxGetAddress(protobuf.MessageType):
@@ -5928,11 +5906,15 @@ if TYPE_CHECKING:
 
     class PolkadotGetAddress(protobuf.MessageType):
         address_n: "list[int]"
+        prefix: "int"
+        network: "str"
         show_display: "bool | None"
 
         def __init__(
             self,
             *,
+            prefix: "int",
+            network: "str",
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
         ) -> None:
@@ -5944,11 +5926,13 @@ if TYPE_CHECKING:
 
     class PolkadotAddress(protobuf.MessageType):
         address: "str | None"
+        public_key: "str | None"
 
         def __init__(
             self,
             *,
             address: "str | None" = None,
+            public_key: "str | None" = None,
         ) -> None:
             pass
 
@@ -5959,11 +5943,13 @@ if TYPE_CHECKING:
     class PolkadotSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_tx: "bytes"
+        network: "str"
 
         def __init__(
             self,
             *,
             raw_tx: "bytes",
+            network: "str",
             address_n: "list[int] | None" = None,
         ) -> None:
             pass

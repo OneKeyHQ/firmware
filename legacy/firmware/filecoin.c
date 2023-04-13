@@ -177,6 +177,7 @@ static bool layoutFilSign(void) {
   uint8_t max_index = 0;
   char token_key[64];
   char token_val[64];
+  char desc[64] = {0};
   char *p;
   uint8_t pageCount = 0;
 
@@ -194,6 +195,10 @@ refresh_menu:
   y = 0;
   fil_tx_getItem(index, token_key, sizeof(token_key), token_val,
                  sizeof(token_val), 0, &pageCount);
+  memset(desc, 0, 64);
+  token_key[strlen(token_key) - 1] = '\0';  // remove ':'
+  strcat(desc, _(token_key));
+  strcat(desc, ":");
   if ((0 == index) || (4 == index) || (5 == index)) {
     p = strchr(token_val, '.');
     if (p) {
@@ -213,7 +218,7 @@ refresh_menu:
   }
   if (index == 0) {
     y += bmp_btn_up.height + 1;
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
+    oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
     y += font->pixel + 5;
     oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
 
@@ -231,7 +236,7 @@ refresh_menu:
     oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
     y += bmp_btn_up.height + 1;
 
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
+    oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
     y += font->pixel + 5;
     oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
 
@@ -250,7 +255,7 @@ refresh_menu:
     oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
     y += bmp_btn_up.height + 1;
 
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
+    oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
     y += font->pixel + 5;
     oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
 

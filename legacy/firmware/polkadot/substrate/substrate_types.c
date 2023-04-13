@@ -5,6 +5,9 @@
 #include "substrate_coin.h"
 #include "substrate_dispatch.h"
 
+extern char __polkadot_ticker[8];
+extern uint16_t __polkadot_dicimal;
+
 #define IS_PRINTABLE(c) (c >= 0x20 && c <= 0x7e)
 
 parser_error_t _readbool(parser_context_t* c, pd_bool_t* v) {
@@ -332,14 +335,15 @@ parser_error_t _substrate_toStringBalance(const pd_Balance_t* v, char* outValue,
   }
 
   // Format number
-  if (intstr_to_fpstr_inplace(bufferUI, sizeof(bufferUI),
-                              COIN_AMOUNT_DECIMAL_PLACES) == 0) {
+  if (intstr_to_fpstr_inplace(bufferUI, sizeof(bufferUI), __polkadot_dicimal) ==
+      0) {
     return parser_unexpected_value;
   }
 
   number_inplace_trimming(bufferUI, 1);
   number_inplace_trimming(bufferUI, 1);
-  if (z_str3join(bufferUI, sizeof(bufferUI), COIN_TICKER, "") != zxerr_ok) {
+  if (z_str3join(bufferUI, sizeof(bufferUI), "", __polkadot_ticker) !=
+      zxerr_ok) {
     return parser_print_not_supported;
   }
 

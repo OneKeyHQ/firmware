@@ -114,9 +114,8 @@ static const char *slip44_extras(uint32_t coin_type) {
 
 #endif
 
-static const char *address_n_str(const uint32_t *address_n,
-                                 size_t address_n_count,
-                                 bool address_is_account) {
+const char *address_n_str(const uint32_t *address_n, size_t address_n_count,
+                          bool address_is_account) {
   if (address_n_count > 8) {
     return _("Unknown long path");
   }
@@ -314,6 +313,18 @@ void layoutDialogSwipeWrapping(const BITMAP *icon, const char *btnNo,
       split_message((const uint8_t *)wrap_text, strlen(wrap_text), row_len);
   layoutDialogSwipe(icon, btnNo, btnYes, NULL, heading, description, str[0],
                     str[1], str[2], str[3]);
+}
+
+const char **format_tx_message(const char *chain_name) {
+  static char str[2][64 + 1];
+
+  memzero(str, sizeof(str));
+  snprintf(str[0], 65, "%s %s", chain_name, _("Transaction"));
+  snprintf(str[1], 65, "%s%s %s", _("Do you want to sign this\n"), chain_name,
+           _("transaction?"));
+
+  static const char *ret[2] = {str[0], str[1]};
+  return ret;
 }
 
 void layoutDialogSwipe(const BITMAP *icon, const char *btnNo,

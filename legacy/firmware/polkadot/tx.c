@@ -1,26 +1,25 @@
 #include "tx.h"
 #include <string.h>
 #include "parser.h"
-#include "parser_common.h"
 #include "parser_txdef.h"
 
 static parser_tx_t tx_obj;
 static parser_context_t ctx_parsed_tx;
 
-const char *polkadot_tx_parse(const uint8_t *data, size_t dataLen) {
+parser_error_t polkadot_tx_parse(const uint8_t *data, size_t dataLen) {
   uint8_t err = polkadot_parser_parse(&ctx_parsed_tx, data, dataLen, &tx_obj);
   if (err != parser_ok) {
-    return polkadot_parser_getErrorDescription(err);
+    return err;
   }
 
   err = polkadot_parser_validate(&ctx_parsed_tx);
   CHECK_APP_CANARY()
 
   if (err != parser_ok) {
-    return polkadot_parser_getErrorDescription(err);
+    return err;
   }
 
-  return NULL;
+  return parser_ok;
 }
 
 zxerr_t polkadot_tx_getNumItems(uint8_t *num_items) {

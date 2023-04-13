@@ -1,10 +1,12 @@
 #include "parser.h"
 #include <stdio.h>
+#include "../util.h"
 #include "bignum.h"
 #include "coin.h"
 #include "memzero.h"
 #include "parser_impl.h"
 #include "parser_txdef.h"
+#include "secp256k1.h"
 
 parser_error_t fil_parser_parse(parser_context_t *ctx, const uint8_t *data,
                                 size_t dataLen) {
@@ -85,6 +87,29 @@ __Z_INLINE parser_error_t parser_printBigIntFixedPoint(const bigint_t *b,
   return parser_ok;
 }
 
+__Z_INLINE parser_error_t parser_printBigIntFixedPointTotal(
+    const bigint_t *value, const bigint_t *gasfeecap, uint64_t gaslimit,
+    char *outVal, uint16_t outValLen) {
+  LESS_THAN_32_DIGIT(value->len)
+  LESS_THAN_32_DIGIT(gasfeecap->len)
+  bignum256 total = {0}, val = {0}, gas = {0}, limit = {0};
+  uint8_t val_bytes[32] = {0};
+  uint8_t gas_bytes[32] = {0};
+  memcpy(val_bytes + (32 - value->len + 1), value->buffer + 1, value->len - 1);
+  memcpy(gas_bytes + (32 - gasfeecap->len + 1), gasfeecap->buffer + 1,
+         gasfeecap->len - 1);
+
+  bn_read_be(val_bytes, &val);
+  bn_read_be(gas_bytes, &gas);
+  bn_read_uint64(gaslimit, &limit);
+  bn_multiply(&limit, &gas, &secp256k1.prime);
+  bn_add(&total, &val);
+  bn_add(&total, &gas);
+  bn_format(&total, NULL, " FIL", 18, 0, false, 0, outVal, outValLen);
+
+  return parser_ok;
+}
+
 parser_error_t fil_parser_getItem(const parser_context_t *ctx,
                                   uint8_t displayIdx, char *outKey,
                                   uint16_t outKeyLen, char *outVal,
@@ -141,6 +166,14 @@ parser_error_t fil_parser_getItem(const parser_context_t *ctx,
     snprintf(outKey, outKeyLen, "Gas Premium:");
     return parser_printBigIntFixedPoint(&fil_parser_tx_obj.gaspremium, outVal,
                                         outValLen, pageIdx, pageCount);
+  }
+
+  if (displayIdx == 6) {
+    snprintf(outKey, outKeyLen, "Total Amount:");
+    *pageCount = 1;
+    return parser_printBigIntFixedPointTotal(
+        &fil_parser_tx_obj.value, &fil_parser_tx_obj.gasfeecap,
+        fil_parser_tx_obj.gaslimit, outVal, outValLen);
   }
 
   if (fil_parser_tx_obj.method != 0) {

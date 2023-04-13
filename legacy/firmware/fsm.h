@@ -24,6 +24,7 @@
 #include "messages-algorand.pb.h"
 #include "messages-aptos.pb.h"
 #include "messages-bitcoin.pb.h"
+#include "messages-cardano.pb.h"
 #include "messages-conflux.pb.h"
 #include "messages-cosmos.pb.h"
 #include "messages-crypto.pb.h"
@@ -255,5 +256,29 @@ bool fsm_getOwnershipId(uint8_t *script_pubkey, size_t script_pubkey_size,
 
 void fsm_abortWorkflows(void);
 void fsm_postMsgCleanup(MessageType message_type);
+
+// cardano
+void fsm_msgCardanoGetPublicKey(CardanoGetPublicKey *msg);
+void fsm_msgCardanoGetAddress(CardanoGetAddress *msg);
+void fsm_msgCardanoTxWitnessRequest(CardanoTxWitnessRequest *msg);
+void fsm_msgCardanoTxHostAck(void);
+void fsm_msgCardanoSignTxInit(CardanoSignTxInit *msg);
+void fsm_msgCardanoTxInput(CardanoTxInput *msg);
+void fsm_msgCardanoTxOutput(CardanoTxOutput *msg);
+void fsm_msgCardanoAssetGroup(CardanoAssetGroup *msg);
+void fsm_msgCardanoToken(CardanoToken *msg);
+void fsm_msgCardanoTxCertificate(CardanoTxCertificate *msg);
+void fsm_msgCardanoTxWithdrawal(CardanoTxWithdrawal *msg);
+void fsm_msgCardanoTxAuxiliaryData(CardanoTxAuxiliaryData *msg);
+void fsm_msgCardanoPoolOwner(CardanoPoolOwner *msg);
+void fsm_msgCardanoPoolRelayParameters(CardanoPoolRelayParameters *msg);
+void fsm_msgCardanoGetNativeScriptHash(void);
+void fsm_msgCardanoTxMint(CardanoTxMint *msg);
+void fsm_msgCardanoTxCollateralInput(CardanoTxCollateralInput *msg);
+void fsm_msgCardanoTxRequiredSigner(CardanoTxRequiredSigner *msg);
+void fsm_msgCardanoTxInlineDatumChunk(CardanoTxInlineDatumChunk *msg);
+void fsm_msgCardanoTxReferenceScriptChunk(CardanoTxReferenceScriptChunk *msg);
+void fsm_msgCardanoTxReferenceInput(CardanoTxReferenceInput *msg);
+void fsm_msgCardanoSignMessage(CardanoSignMessage *msg);
 
 #endif
