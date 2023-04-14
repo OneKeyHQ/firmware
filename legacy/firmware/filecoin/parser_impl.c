@@ -548,7 +548,7 @@ parser_error_t _fil_validateTx(__Z_UNUSED const parser_context_t *c,
 
 uint8_t _fil_getNumItems(__Z_UNUSED const parser_context_t *c,
                          const parser_tx_t *v) {
-  uint8_t itemCount = 6;
+  uint8_t itemCount = 7;
 
   return itemCount + v->numparams;
 }
