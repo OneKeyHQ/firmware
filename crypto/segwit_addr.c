@@ -66,7 +66,8 @@ int bech32_encode(char *output, const char *hrp, const uint8_t *data, size_t dat
         chk = bech32_polymod_step(chk) ^ (ch >> 5);
         ++i;
     }
-    if (i + 7 + data_len > 90) return 0;
+    // for compatibility cardano does not limit the length
+    // if (i + 7 + data_len > 90) return 0;
     chk = bech32_polymod_step(chk);
     while (*hrp != 0) {
         chk = bech32_polymod_step(chk) ^ (*hrp & 0x1f);
@@ -103,7 +104,7 @@ bech32_encoding bech32_decode(char* hrp, uint8_t *data, size_t *data_len, const 
         ++(*data_len);
     }
     hrp_len = input_len - (1 + *data_len);
-    if (1 + *data_len >= input_len || *data_len < 6 || hrp_len > BECH32_MAX_HRP_LEN) {
+    if (1 + *data_len >= input_len || *data_len < 6) {
         return BECH32_ENCODING_NONE;
     }
     *(data_len) -= 6;
@@ -192,7 +193,6 @@ int segwit_addr_decode(int* witver, uint8_t* witdata, size_t* witdata_len, const
     uint8_t data[84] = {0};
     char hrp_actual[84] = {0};
     size_t data_len = 0;
-    if (strlen(addr) > 90) return 0;
     bech32_encoding enc = bech32_decode(hrp_actual, data, &data_len, addr);
     if (enc == BECH32_ENCODING_NONE) return 0;
     if (data_len == 0 || data_len > 65) return 0;

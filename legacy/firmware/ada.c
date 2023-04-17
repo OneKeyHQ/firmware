@@ -45,10 +45,10 @@ bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
   int res;
   char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
   char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-  if (!config_getMnemonic(mnemonic, sizeof(mnemonic))) {
-    fsm_sendFailure(FailureType_Failure_ProcessError, _("Mnemonic dismissed"));
+  if (!config_hasMnemonic()) {
     return false;
   }
+  config_getMnemonic(mnemonic, sizeof(mnemonic));
   if (!protectPassphrase(passphrase)) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Passphrase dismissed"));
@@ -468,25 +468,27 @@ static bool layoutOutput(const CardanoTxOutput *output) {
     }
   }
 
-  oledClear();
-  layoutHeader(tx_msg[0]);
-  bn_format_uint64(output->amount, NULL, " ADA", 6, 0, false, ',', str_amount,
-                   sizeof(str_amount));
-  strcat(desc, _("Amount"));
-  strcat(desc, ":");
-  oledDrawStringAdapter(0, 13, desc, FONT_STANDARD);
-  oledDrawStringAdapter(0, 13 + 10, str_amount, FONT_STANDARD);
-  layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
-  layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  oledRefresh();
-  while (1) {
-    key = protectWaitKey(0, 1);
-    if (key == KEY_CONFIRM) {
-      ret = true;
-      break;
-    }
-    if (key == KEY_CANCEL) {
-      return false;
+  if (!output->has_address_parameters) {
+    oledClear();
+    layoutHeader(tx_msg[0]);
+    bn_format_uint64(output->amount, NULL, " ADA", 6, 0, false, ',', str_amount,
+                     sizeof(str_amount));
+    strcat(desc, _("Amount"));
+    strcat(desc, ":");
+    oledDrawStringAdapter(0, 13, desc, FONT_STANDARD);
+    oledDrawStringAdapter(0, 13 + 10, str_amount, FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+    oledRefresh();
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        ret = true;
+        break;
+      }
+      if (key == KEY_CANCEL) {
+        return false;
+      }
     }
   }
   if (output->has_address) {
