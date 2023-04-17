@@ -359,18 +359,17 @@ uint8_t layoutStatusLogo(bool force_fresh) {
 }
 
 void layoutBlePasskey(uint8_t *passkey) {
-  uint8_t key[20] = {0};
-  int j = 0, len = strlen((char *)passkey);
-  for (int i = 0; i < len; i++) {
-    key[j++] = passkey[i];
-    key[j++] = ' ';
-    key[j++] = ' ';
+  uint8_t key[16] = {0};
+  int i, j = 0;
+  memset(key, ' ', 15);
+  for (i = 0; i < 6; i++) {
+    key[j] = passkey[i];
+    j += 3;
   }
   oledClear();
   layoutTitle("Bluetooth Pair");
   oledDrawStringCenter(60, 20, (char *)key, FONT_DOUBLE);
   oledDrawStringCenter(60, 40, "Enter pair code on device", FONT_STANDARD);
-
   oledRefresh();
 }
 
