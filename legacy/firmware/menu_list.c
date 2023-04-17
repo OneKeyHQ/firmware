@@ -364,24 +364,25 @@ void menu_set_trezor_compatibility(int index) {
 #endif
 }
 
-static struct menu_item trezor_compatibility_set_menu_items[] = {
-    {"Enable", NULL, true, menu_set_trezor_compatibility, NULL, true},
-    {"Disable", NULL, true, menu_set_trezor_compatibility, NULL, true}};
+// static struct menu_item trezor_compatibility_set_menu_items[] = {
+//     {"Enable", NULL, true, menu_set_trezor_compatibility, NULL, true},
+//     {"Disable", NULL, true, menu_set_trezor_compatibility, NULL, true}};
 
-static struct menu trezor_compatibility_set_menu = {
-    .start = 0,
-    .current = 0,
-    .counts = COUNT_OF(trezor_compatibility_set_menu_items),
-    .title = "Trezor Compatibility",
-    .items = trezor_compatibility_set_menu_items,
-    .previous = &about_menu,
-};
+// static struct menu trezor_compatibility_set_menu = {
+//     .start = 0,
+//     .current = 0,
+//     .counts = COUNT_OF(trezor_compatibility_set_menu_items),
+//     .title = "Trezor Compatibility",
+//     .items = trezor_compatibility_set_menu_items,
+//     .previous = &about_menu,
+// };
 
 static struct menu_item about_menu_items[] = {
     {"Device Info", NULL, true, layoutDeviceParameters, NULL, false},
     {"Certification", NULL, true, layoutAboutCertifications, NULL, false},
-    {"Trezor Compat", NULL, false, .sub_menu = &trezor_compatibility_set_menu,
-     menu_para_trezor_comp_mode_state, true},
+    // {"Trezor Compat", NULL, false, .sub_menu =
+    // &trezor_compatibility_set_menu,
+    //  menu_para_trezor_comp_mode_state, true},
 };
 
 static struct menu about_menu = {
