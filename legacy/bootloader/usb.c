@@ -288,6 +288,27 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
 
   if (flash_state == STATE_OPEN) {
     if (msg_id == 0x0006) {  // FirmwareErase message (id 6)
+
+      if (sys_usbState() == false && battery_cap < 2) {
+        layoutDialogCenterAdapterEx(
+            &bmp_icon_warning, NULL, &bmp_bottom_right_confirm, NULL,
+            "Low Battery!Use cable or", "Charge to 25% before",
+            "updating the bootloader", NULL);
+        while (1) {
+          uint8_t key = keyScan();
+          if (key == KEY_CONFIRM) {
+            send_msg_failure(dev, 30);  // FailureType_Failure_BatteryLow
+            flash_state = STATE_END;
+            show_unplug("Low battery!", "aborted.");
+            shutdown();
+            return;
+          }
+          if (sys_usbState() == true) {
+            break;
+          }
+        }
+      }
+
       bool proceed = false;
       if (firmware_present_new()) {
         layoutDialogCenterAdapterEx(NULL, &bmp_bottom_left_close,

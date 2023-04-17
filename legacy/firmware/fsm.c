@@ -222,6 +222,9 @@ void fsm_sendFailure(FailureType code, const char *text)
       case FailureType_Failure_InvalidSession:
         text = _("Invalid session");
         break;
+      case FailureType_Failure_BatteryLow:
+        text = _("Battery low");
+        break;
       case FailureType_Failure_FirmwareError:
         text = _("Firmware error");
         break;

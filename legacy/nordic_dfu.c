@@ -255,14 +255,15 @@ bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
   uint32_t offset_i = 0;
   uint32_t len;
   uint32_t totol_len = fm_len;
-
-  layoutinfoCenter(NULL, NULL, "Enter BLE boot", NULL, NULL, NULL);
+  layoutDialogCenterAdapterEx(NULL, NULL, NULL, NULL, NULL, "Enter BLE boot",
+                              NULL, NULL);
   enter_boot();
   for (uint8_t i = 0; i < 5; i++) {
     if (ping_boot(i) == true)
       break;
     else if (i == 4) {
-      layoutinfoCenter(NULL, NULL, "Enter BLE boot", "Failed", NULL, NULL);
+      layoutDialogCenterAdapterEx(NULL, NULL, NULL, NULL, NULL,
+                                  "Enter BLE boot", "Failed", NULL);
       return false;
     }
   }

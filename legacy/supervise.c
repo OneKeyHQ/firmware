@@ -80,7 +80,7 @@ static void svhandler_system_privileged(void) {
 
 static void __attribute__((noreturn)) svhandler_reboot_to_bootloader(void) {
   *STAY_IN_BOOTLOADER_FLAG_ADDR = STAY_IN_BOOTLOADER_FLAG;
-  scb_reset_system();
+  scb_reset_core();
 }
 
 extern volatile uint32_t system_millis;
