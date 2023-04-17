@@ -102,22 +102,6 @@ void menu_display(struct menu *menu) {
       menu->current < menu->counts - 1 ? next_desc : NULL,
       menu->current < menu->counts - 2 ? next_next_desc : NULL,
       menu->current < menu->counts - 3 ? next_next_next_desc : NULL);
-
-  // layoutMenuItemsEx(
-  //     text_yes, bmp_yes, menu->current + 1, menu->counts,
-  //     menu->title ? _(menu->title) : NULL,
-  //     desc,
-  //     _(menu->items[menu->current].name),
-  //     menu->items[menu->current].name2 ? _(menu->items[menu->current].name2):
-  //     NULL, menu->items[menu->current].para?
-  //     menu->items[menu->current].para(): NULL, menu->current > 0 ?
-  //     _(menu->items[menu->current - 1].name) : NULL, menu->current > 1 ?
-  //     _(menu->items[menu->current - 2].name) : NULL, menu->current > 2 ?
-  //     _(menu->items[menu->current - 3].name) : NULL, menu->current <
-  //     menu->counts - 1 ? _(menu->items[menu->current + 1].name): NULL,
-  //     menu->current < menu->counts - 2 ? _(menu->items[menu->current +
-  //     2].name): NULL, menu->current < menu->counts - 3 ?
-  //     _(menu->items[menu->current + 3].name): NULL);
 }
 
 void menu_up(void) {

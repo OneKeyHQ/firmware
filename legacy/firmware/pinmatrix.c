@@ -33,9 +33,7 @@ void pinmatrix_draw(const char *text) {
       &bmp_digit5, &bmp_digit6, &bmp_digit7, &bmp_digit8, &bmp_digit9,
   };
   layoutSwipe();
-  if (text) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, text, FONT_STANDARD);
-  }
+  layoutHeader(text);
   const int w = bmp_digit0.width, h = bmp_digit0.height, pad = 2;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {

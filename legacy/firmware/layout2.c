@@ -2784,9 +2784,9 @@ void layoutItemsSelectAdapterEx(
     hide_icon = false;
 #endif
     if (cur_font->pixel > 8) {
-      y = 10;
+      y = 9;
     } else {
-      y = 11;
+      y = 10;
     }
   }
 

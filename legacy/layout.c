@@ -109,6 +109,23 @@ inline void layoutDialogEx(const BITMAP *icon, const char *btnNo,
   oledRefresh();
 }
 
+static void layoutTitle(const char *title) {
+  oledBox(0, 0, OLED_WIDTH, 10, false);
+  oledDrawStringCenter(OLED_WIDTH / 2, 2, title, FONT_STANDARD);
+
+  oledInvert(0, 0, OLED_WIDTH, 10);
+
+  oledBox(0, 0, 2, 2, false);
+  oledBox(1, 1, 2, 2, true);
+  oledBox(0, 10 - 2, 2, 10, false);
+  oledBox(1, 10 - 2, 2, 10 - 1, true);
+
+  oledBox(OLED_WIDTH - 3, 0, OLED_WIDTH - 1, 2, false);
+  oledBox(OLED_WIDTH - 3, 1, OLED_WIDTH - 2, 2, true);
+  oledBox(OLED_WIDTH - 3, 10 - 2, OLED_WIDTH - 1, 10, false);
+  oledBox(OLED_WIDTH - 3, 10 - 3, OLED_WIDTH - 2, 10 - 1, true);
+}
+
 void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
                                  const BITMAP *bmp_yes, const char *title,
                                  const char *line1, const char *line2,
@@ -120,21 +137,7 @@ void layoutDialogCenterAdapterEx(const BITMAP *icon, const BITMAP *bmp_no,
     oledDrawBitmap(56, 2, icon);
   } else if (title) {
     y = 13;
-    // layoutHeader
-    oledBox(0, 0, OLED_WIDTH, 10, false);
-    oledDrawStringCenter(OLED_WIDTH / 2, 2, title, FONT_STANDARD);
-
-    oledInvert(0, 0, OLED_WIDTH, 10);
-
-    oledBox(0, 0, 2, 2, false);
-    oledBox(1, 1, 2, 2, true);
-    oledBox(0, 10 - 2, 2, 10, false);
-    oledBox(1, 10 - 2, 2, 10 - 1, true);
-
-    oledBox(OLED_WIDTH - 3, 0, OLED_WIDTH - 1, 2, false);
-    oledBox(OLED_WIDTH - 3, 1, OLED_WIDTH - 2, 2, true);
-    oledBox(OLED_WIDTH - 3, 10 - 2, OLED_WIDTH - 1, 10, false);
-    oledBox(OLED_WIDTH - 3, 10 - 3, OLED_WIDTH - 2, 10 - 1, true);
+    layoutTitle(title);
   }
 
   if (line1)
@@ -356,9 +359,18 @@ uint8_t layoutStatusLogo(bool force_fresh) {
 }
 
 void layoutBlePasskey(uint8_t *passkey) {
+  uint8_t key[20] = {0};
+  int j = 0, len = strlen((char *)passkey);
+  for (int i = 0; i < len; i++) {
+    key[j++] = passkey[i];
+    key[j++] = ' ';
+    key[j++] = ' ';
+  }
   oledClear();
-  oledDrawStringCenter(60, 20, "Bluetooth passkey:", FONT_STANDARD);
-  oledDrawStringCenter(60, 30, (char *)passkey, FONT_DOUBLE);
+  layoutTitle("Bluetooth Pair");
+  oledDrawStringCenter(60, 20, (char *)key, FONT_DOUBLE);
+  oledDrawStringCenter(60, 40, "Enter pair code on device", FONT_STANDARD);
+
   oledRefresh();
 }
 

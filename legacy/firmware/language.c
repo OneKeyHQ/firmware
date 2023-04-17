@@ -330,8 +330,6 @@ const char *languages[][2] = {
     {"Encrypted hex data", "加密十六进制数据"},
     // layout2.c
     {"Encrypted message", "加密信息"},
-    // layout2.c layout2.c
-    {"English", "简体中文"},
     //
     {"Enter", "填入"},
     // protect.c

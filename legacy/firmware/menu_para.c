@@ -38,9 +38,7 @@ char* menu_para_ble_state(void) {
   return ble_get_switch() ? _(" On") : _(" Off");
 }
 
-char* menu_para_language(void) {
-  return ui_language ? _("English") : "English";
-}
+char* menu_para_language(void) { return ui_language ? "简体中文" : "English"; }
 
 char* menu_para_shutdown(void) {
   return format_time(config_getAutoLockDelayMs());
