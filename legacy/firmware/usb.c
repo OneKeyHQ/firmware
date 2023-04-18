@@ -409,7 +409,12 @@ static const struct usb_bos_descriptor bos_descriptor = {
 
 void usbInit(void) {
   bool trezor_comp_mode = false;
-  config_getTrezorCompMode(&trezor_comp_mode);
+  if (!config_hasTrezorCompMode()) {
+    config_setTrezorCompMode(true);
+    trezor_comp_mode = true;
+  } else {
+    config_getTrezorCompMode(&trezor_comp_mode);
+  }
   // dev_descr.idProduct = trezor_comp_mode ? 0x53c1 : 0x4F4B;
   if (trezor_comp_mode) {
     dev_descr.idProduct = 0x53c1;

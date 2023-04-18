@@ -158,7 +158,7 @@ int main(void) {
                                    // unpredictable stack protection checks
   oledInit();
 #else
-  // check_and_replace_bootloader(true);
+  check_and_replace_bootloader(true);
   setupApp();
   ble_reset();
 #if !EMULATOR
