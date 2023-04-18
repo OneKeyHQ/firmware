@@ -1528,6 +1528,10 @@ void config_setCoinSwitch(CoinSwitch loc, bool flag) {
   storage_set(KEY_COIN_FUNCTION_SWITCH, &coin_switch, sizeof(coin_switch));
 }
 
+bool config_hasTrezorCompMode(void) {
+  return sectrue == storage_has(KEY_TREZOR_COMP_MODE);
+}
+
 void config_setTrezorCompMode(bool trezor_comp_mode) {
   config_set_bool(KEY_TREZOR_COMP_MODE, trezor_comp_mode);
 }
