@@ -106,7 +106,22 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
             from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
             await confirm_blind_sign_common(ctx, owner_address, data)
-
+    elif contract.freeze_balance_contract:
+        await layout.require_confirm_freeze(
+            ctx,
+            owner_address,
+            contract.freeze_balance_contract.frozen_balance,
+            contract.freeze_balance_contract.frozen_duration,
+            contract.freeze_balance_contract.resource,
+            contract.freeze_balance_contract.receiver_address,
+        )
+    elif contract.unfreeze_balance_contract:
+        await layout.require_confirm_unfreeze(
+            ctx,
+            owner_address,
+            contract.unfreeze_balance_contract.resource,
+            contract.unfreeze_balance_contract.receiver_address,
+        )
     else:
         raise wire.DataError("Invalid transaction type")
 

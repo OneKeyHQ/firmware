@@ -90,6 +90,45 @@ def pack_contract(contract, owner_address):
             add_field(cmessage, 6, TYPE_VARINT)
             write_varint(cmessage, contract.trigger_smart_contract.asset_id)
 
+    if contract.freeze_balance_contract:
+        write_varint(retc, 11)
+        api = "FreezeBalanceContract"
+
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+        add_field(cmessage, 2, TYPE_VARINT)
+        write_varint(cmessage, contract.freeze_balance_contract.frozen_balance)
+        add_field(cmessage, 3, TYPE_VARINT)
+        write_varint(cmessage, contract.freeze_balance_contract.frozen_duration)
+        if contract.freeze_balance_contract.resource is not None:
+            add_field(cmessage, 10, TYPE_VARINT)
+            write_varint(cmessage, contract.freeze_balance_contract.resource)
+        if contract.freeze_balance_contract.receiver_address is not None:
+            add_field(cmessage, 15, TYPE_STRING)
+            write_bytes_with_length(
+                cmessage,
+                base58.decode_check(contract.freeze_balance_contract.receiver_address),
+            )
+
+    if contract.unfreeze_balance_contract:
+        write_varint(retc, 12)
+        api = "UnfreezeBalanceContract"
+
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+        if contract.unfreeze_balance_contract.resource is not None:
+            add_field(cmessage, 10, TYPE_VARINT)
+            write_varint(cmessage, contract.unfreeze_balance_contract.resource)
+        if contract.unfreeze_balance_contract.receiver_address is not None:
+            add_field(cmessage, 15, TYPE_STRING)
+            write_bytes_with_length(
+                cmessage,
+                base58.decode_check(
+                    contract.unfreeze_balance_contract.receiver_address
+                ),
+            )
+
     # write API
     capi = bytearray()
     add_field(capi, 1, TYPE_STRING)
@@ -109,7 +148,6 @@ def pack_contract(contract, owner_address):
 def serialize(transaction: TronSignTx, owner_address: str):
     # transaction parameters
     ret = bytearray()
-
     add_field(ret, 1, TYPE_STRING)
     write_bytes_with_length(ret, transaction.ref_block_bytes)
     add_field(ret, 4, TYPE_STRING)

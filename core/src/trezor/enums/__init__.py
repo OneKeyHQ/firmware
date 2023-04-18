@@ -301,6 +301,10 @@ if TYPE_CHECKING:
         AlgorandAddress = 10901
         AlgorandSignTx = 10902
         AlgorandSignedTx = 10903
+        PolkadotGetAddress = 11000
+        PolkadotAddress = 11001
+        PolkadotSignTx = 11002
+        PolkadotSignedTx = 11003
         SuiGetAddress = 11100
         SuiAddress = 11101
         SuiSignTx = 11102
@@ -585,3 +589,7 @@ if TYPE_CHECKING:
         Yay = 0
         Nay = 1
         Pass = 2
+
+    class TronResourceCode(IntEnum):
+        BANDWIDTH = 0
+        ENERGY = 1

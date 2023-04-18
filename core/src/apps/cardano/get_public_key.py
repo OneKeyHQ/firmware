@@ -16,6 +16,10 @@ async def get_public_key(
     from trezor.ui.layouts import show_pubkey
     from apps.common import paths
     from .helpers.paths import SCHEMA_MINT, SCHEMA_PUBKEY
+    from trezor.lvglui.scrs import lv
+    from . import ICON, PRIMARY_COLOR
+
+    ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
 
     address_n = msg.address_n  # local_cache_attribute
 
@@ -35,7 +39,7 @@ async def get_public_key(
         raise wire.ProcessError("Deriving public key failed")
 
     if msg.show_display:
-        await show_pubkey(ctx, hexlify(key.node.public_key).decode())
+        await show_pubkey(ctx, hexlify(key.node.public_key).decode(), network="Cardano")
     return key
 
 

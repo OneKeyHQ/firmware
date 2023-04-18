@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from trezor import ui
-from trezor.enums import ButtonRequestType
+from trezor.enums import ButtonRequestType, TronResourceCode
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_address, confirm_output
@@ -96,6 +96,59 @@ def require_confirm_fee(
         format_amount_trx(fee_limit, None),
         total_amount,
         network,
+    )
+
+
+def require_confirm_freeze(
+    ctx: Context,
+    signer: str,
+    frozen_balance: int | None = None,
+    frozen_duration: int | None = None,
+    resource: int | None = None,
+    receiver_address: str | None = None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_freeze
+
+    if resource is TronResourceCode.BANDWIDTH:
+        res = _(i18n_keys.LIST_KEY__BANDWIDTH)
+    elif resource == TronResourceCode.ENERGY:
+        res = _(i18n_keys.LIST_KEY__ENERGY)
+    else:
+        res = None
+
+    return confirm_tron_freeze(
+        ctx,
+        "Freeze",
+        signer,
+        res,
+        format_amount_trx(frozen_balance, None) if frozen_balance is not None else None,
+        str(frozen_duration),
+        receiver_address,
+    )
+
+
+def require_confirm_unfreeze(
+    ctx: Context,
+    signer: str,
+    resource: int | None = None,
+    receiver_address: str | None = None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_freeze
+
+    if resource is TronResourceCode.BANDWIDTH:
+        res = _(i18n_keys.LIST_KEY__BANDWIDTH)
+    elif resource == TronResourceCode.ENERGY:
+        res = _(i18n_keys.LIST_KEY__ENERGY)
+    else:
+        res = None
+    return confirm_tron_freeze(
+        ctx,
+        "UnFreeze",
+        signer,
+        res,
+        None,
+        None,
+        receiver_address,
     )
 
 

@@ -1703,3 +1703,95 @@ class ConfirmTypedHash(FullSizeWindow):
         self.item2 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__MESSAGE_HASH__COLON), message_hash
         )
+
+
+class PolkadotBalances(FullSizeWindow):
+    def __init__(
+        self,
+        chain_name,
+        module,
+        method,
+        sender,
+        dest,
+        source,
+        balance,
+        tip,
+        keep_alive,
+        primary_color,
+    ):
+        super().__init__(
+            _(i18n_keys.TITLE__VIEW_TRANSACTION),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
+        if balance:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), balance
+            )
+        self.item2 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__TO__COLON), dest)
+        self.item3 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), sender
+        )
+        self.item4 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
+        )
+        # self.item5 = DisplayItem(self.container, module, method)
+        if source:
+            self.item6 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__SOURCE_COLON), source
+            )
+        if tip is not None:
+            self.item7 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__TIP_COLON), tip
+            )
+        if keep_alive is not None:
+            self.item8 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__KEEP_ALIVE_COLON), keep_alive
+            )
+
+
+class TronAssetFreeze(FullSizeWindow):
+    def __init__(
+        self,
+        is_freeze,
+        sender,
+        resource,
+        balance,
+        duration,
+        receiver,
+        primary_color,
+    ):
+        super().__init__(
+            _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("Tron"),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+
+        self.item1 = DisplayItem(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
+        )
+        if resource is not None:
+            self.item2 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__RESOURCE_COLON), resource
+            )
+        if is_freeze:
+            if balance:
+                self.item2 = DisplayItem(
+                    self.container, _(i18n_keys.LIST_KEY__FROZEN_BALANCE_COLON), balance
+                )
+            if duration:
+                self.item2 = DisplayItem(
+                    self.container,
+                    _(i18n_keys.LIST_KEY__FROZEN_DURATION_COLON),
+                    duration,
+                )
+        if receiver is not None:
+            self.item4 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__RECEIVER_ADDRESS_COLON), receiver
+            )

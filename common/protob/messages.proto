@@ -425,6 +425,12 @@ enum MessageType {
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
 
+    // Polkadot
+    MessageType_PolkadotGetAddress = 11000 [(wire_in) = true];
+    MessageType_PolkadotAddress = 11001 [(wire_out) = true];
+    MessageType_PolkadotSignTx = 11002 [(wire_in) = true];
+    MessageType_PolkadotSignedTx = 11003 [(wire_out) = true];
+
     // sui
     MessageType_SuiGetAddress = 11100 [(wire_in) = true];
     MessageType_SuiAddress = 11101 [(wire_out) = true];
