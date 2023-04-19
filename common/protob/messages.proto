@@ -463,6 +463,14 @@ enum MessageType {
     MessageType_FilecoinSignTx = 11202 [(wire_in) = true];
     MessageType_FilecoinSignedTx = 11203 [(wire_out) = true];
 
+    // Kaspa
+    MessageType_KaspaGetAddress = 11300 [(wire_in) = true];
+    MessageType_KaspaAddress = 11301 [(wire_out) = true];
+    MessageType_KaspaSignTx = 11302 [(wire_in) = true];
+    MessageType_KaspaSignedTx = 11303 [(wire_out) = true];
+    MessageType_KaspaTxInputRequest = 11304 [(wire_out) = true];
+    MessageType_KaspaTxInputAck = 11305 [(wire_in) = true];
+    
     //onekey
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];

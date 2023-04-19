@@ -325,6 +325,12 @@ if TYPE_CHECKING:
         FilecoinAddress = 11201
         FilecoinSignTx = 11202
         FilecoinSignedTx = 11203
+        KaspaGetAddress = 11300
+        KaspaAddress = 11301
+        KaspaSignTx = 11302
+        KaspaSignedTx = 11303
+        KaspaTxInputRequest = 11304
+        KaspaTxInputAck = 11305
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003
