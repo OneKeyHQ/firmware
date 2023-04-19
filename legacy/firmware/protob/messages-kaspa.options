@@ -1,0 +1,12 @@
+KaspaGetAddress.address_n                                   max_count:8
+KaspaGetAddress.prefix                                      max_size:10
+KaspaGetAddress.schema                                      max_size:8
+KaspaAddress.address                                        max_size:72
+KaspaSignTx.address_n                                       max_count:8
+KaspaSignTx.raw_message                                     max_size:512
+KaspaSignTx.prefix                                          max_size:10
+KaspaSignTx.schema                                          max_size:8
+KaspaTxInputRequest.signature                               max_size:71
+KaspaTxInputAck.address_n                                   max_count:8
+KaspaTxInputAck.raw_message                                 max_size:512
+KaspaSignedTx.signature                                     max_size:71
