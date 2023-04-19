@@ -45,10 +45,10 @@ bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
   int res;
   char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
   char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-  if (!config_getMnemonic(mnemonic, sizeof(mnemonic))) {
-    fsm_sendFailure(FailureType_Failure_ProcessError, _("Mnemonic dismissed"));
+  if (!config_hasMnemonic()) {
     return false;
   }
+  config_getMnemonic(mnemonic, sizeof(mnemonic));
   if (!protectPassphrase(passphrase)) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     _("Passphrase dismissed"));
@@ -454,15 +454,17 @@ static bool layoutOutput(const CardanoTxOutput *output) {
     }
   }
 
-  bn_format_uint64(output->amount, NULL, " ADA", 6, 0, false, ',', str_amount,
-                   sizeof(str_amount));
-  strcat(desc, _("Amount"));
-  strcat(desc, ":");
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                    desc, str_amount, NULL, NULL, NULL);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    return false;
+  if (!output->has_address_parameters) {
+    bn_format_uint64(output->amount, NULL, " ADA", 6, 0, false, ',', str_amount,
+                     sizeof(str_amount));
+    strcat(desc, _("Amount"));
+    strcat(desc, ":");
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
+                      desc, str_amount, NULL, NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
   }
 
   if (output->has_address) {

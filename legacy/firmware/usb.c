@@ -80,7 +80,7 @@
 
 #define USB_STRINGS                                 \
   X(MANUFACTURER, "ByteForge")                      \
-  X(PRODUCT, "ONEKEY")                              \
+  X(PRODUCT, "ONEKEY MINI")                         \
   X(SERIAL_NUMBER, config_uuid_str)                 \
   X(INTERFACE_MAIN, "ONEKEY Interface")             \
   X(INTERFACE_DEBUG, "ONEKEY Debug Link Interface") \
@@ -100,7 +100,7 @@ uint16_t s_usOffset;
 static const char *usb_strings[] = {USB_STRINGS};
 #undef X
 
-static const struct usb_device_descriptor dev_descr = {
+static struct usb_device_descriptor dev_descr = {
     .bLength = USB_DT_DEVICE_SIZE,
     .bDescriptorType = USB_DT_DEVICE,
     .bcdUSB = 0x0210,
@@ -109,7 +109,7 @@ static const struct usb_device_descriptor dev_descr = {
     .bDeviceProtocol = 0,
     .bMaxPacketSize0 = USB_PACKET_SIZE,
     .idVendor = 0x1209,
-    .idProduct = 0x53c1,
+    .idProduct = 0x4F4B,
     .bcdDevice = 0x0100,
     .iManufacturer = USB_STRING_MANUFACTURER,
     .iProduct = USB_STRING_PRODUCT,
@@ -419,6 +419,17 @@ static const struct usb_bos_descriptor bos_descriptor = {
     .capabilities = capabilities};
 
 void usbInit(void) {
+  bool trezor_comp_mode = false;
+  if (!config_hasTrezorCompMode()) {
+    config_setTrezorCompMode(true);
+    trezor_comp_mode = true;
+  } else {
+    config_getTrezorCompMode(&trezor_comp_mode);
+  }
+  // dev_descr.idProduct = trezor_comp_mode ? 0x53c1 : 0x4F4B;
+  if (trezor_comp_mode) {
+    dev_descr.idProduct = 0x53c1;
+  }
   usbd_dev = usbd_init(&otgfs_usb_driver, &dev_descr, &config, usb_strings,
                        sizeof(usb_strings) / sizeof(*usb_strings),
                        usbd_control_buffer, sizeof(usbd_control_buffer));

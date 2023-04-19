@@ -238,6 +238,10 @@ uint32_t config_getPinFails(void);
 bool config_getCoinSwitch(CoinSwitch loc);
 void config_setCoinSwitch(CoinSwitch loc, bool flag);
 
+bool config_hasTrezorCompMode(void);
+void config_setTrezorCompMode(bool trezor_comp_mode);
+bool config_getTrezorCompMode(bool *trezor_comp_mode);
+
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 
 #endif
