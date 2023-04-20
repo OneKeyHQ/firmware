@@ -63,6 +63,7 @@
 #include "rtt_log.h"
 
 #if !BITCOIN_ONLY
+#include "ada.h"
 #include "algorand.h"
 #include "aptos.h"
 #include "cardano.h"
@@ -554,6 +555,7 @@ bool fsm_layoutPathWarning(void) {
 
 #if !BITCOIN_ONLY
 
+#include "fsm_msg_ada.h"
 #include "fsm_msg_algorand.h"
 #include "fsm_msg_aptos.h"
 #include "fsm_msg_conflux.h"
@@ -562,7 +564,7 @@ bool fsm_layoutPathWarning(void) {
 #include "fsm_msg_filecoin.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
-// #include "fsm_msg_polkadot.h"
+#include "fsm_msg_polkadot.h"
 #include "fsm_msg_ripple.h"
 #include "fsm_msg_solana.h"
 #include "fsm_msg_starcoin.h"

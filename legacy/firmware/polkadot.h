@@ -29,6 +29,6 @@ bool polkadot_sign_tx(const PolkadotSignTx *msg, const HDNode *node,
 
 // Helpers
 void polkadot_get_address_from_public_key(const uint8_t *public_key,
-                                          char *address);
+                                          char *address, uint16_t addressType);
 
 #endif  // __POLKADOT_H__

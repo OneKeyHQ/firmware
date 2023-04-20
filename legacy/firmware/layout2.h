@@ -135,6 +135,7 @@ void layoutConfirmOwnershipProof(void);
 
 const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen);
 const char **split_message_hex(const uint8_t *msg, uint32_t len);
+const char **format_tx_message(const char *chain_name);
 
 bool is_valid_ascii(const uint8_t *data, uint32_t size);
 
@@ -304,5 +305,7 @@ static inline void layoutSwipe(void) {
 #endif
 
 bool layoutBlindSign(char *address);
+const char *address_n_str(const uint32_t *address_n, size_t address_n_count,
+                          bool address_is_account);
 
 #endif

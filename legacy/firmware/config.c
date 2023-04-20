@@ -120,6 +120,8 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 
 #define KEY_COIN_FUNCTION_SWITCH (39 | APP | FLAG_PUBLIC_SHIFTED)       // uint32
 
+#define KEY_TREZOR_COMP_MODE (40 | APP | FLAG_PUBLIC_SHIFTED)       // bool
+
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)            // string(10)
 // clang-format on
 
@@ -1696,4 +1698,16 @@ void config_setCoinSwitch(CoinSwitch loc, bool flag) {
     coin_switch &= ~loc;
   }
   storage_set(KEY_COIN_FUNCTION_SWITCH, &coin_switch, sizeof(coin_switch));
+}
+
+bool config_hasTrezorCompMode(void) {
+  return sectrue == storage_has(KEY_TREZOR_COMP_MODE);
+}
+
+void config_setTrezorCompMode(bool trezor_comp_mode) {
+  config_set_bool(KEY_TREZOR_COMP_MODE, trezor_comp_mode);
+}
+
+bool config_getTrezorCompMode(bool *trezor_comp_mode) {
+  return sectrue == config_get_bool(KEY_TREZOR_COMP_MODE, trezor_comp_mode);
 }

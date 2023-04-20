@@ -209,7 +209,8 @@ __Z_INLINE const char *uint64_to_str(char *data, int dataLen, uint64_t number) {
 
 __Z_INLINE uint8_t intstr_to_fpstr_inplace(char *number, size_t number_max_size,
                                            uint8_t decimalPlaces) {
-  uint16_t numChars = strnlen(number, number_max_size);
+  uint16_t numChars = strlen(number);
+  if (numChars > number_max_size) numChars = number_max_size;
   memzero(number + numChars, number_max_size - numChars);
 
   if (number_max_size < 1) {
@@ -289,8 +290,10 @@ __Z_INLINE size_t z_strlen(const char *buffer, size_t maxSize) {
 __Z_INLINE zxerr_t z_str3join(char *buffer, size_t bufferSize,
                               const char *prefix, const char *suffix) {
   size_t messageSize = z_strlen(buffer, bufferSize);
-  const size_t prefixSize = z_strlen(prefix, bufferSize);
-  const size_t suffixSize = z_strlen(suffix, bufferSize);
+  size_t prefixSize = strlen(prefix);
+  size_t suffixSize = strlen(suffix);
+  if (prefixSize > bufferSize) prefixSize = bufferSize;
+  if (suffixSize > bufferSize) suffixSize = bufferSize;
 
   size_t requiredSize =
       1 /* termination */ + messageSize + prefixSize + suffixSize;

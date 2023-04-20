@@ -33,9 +33,11 @@
 #include "sha3.h"
 #include "util.h"
 
+char polkadot_network[32] = {0};
+
 void polkadot_get_address_from_public_key(const uint8_t *public_key,
-                                          char *address) {
-  crypto_SS58EncodePubkey((uint8_t *)address, 64, 0, public_key);
+                                          char *address, uint16_t addressType) {
+  crypto_SS58EncodePubkey((uint8_t *)address, 64, addressType, public_key);
 }
 
 static bool layoutPolkadotSign(void) {
@@ -158,20 +160,52 @@ scan_key:
   return result;
 }
 
+static bool get_signer_address(const PolkadotSignTx *msg, const HDNode *node,
+                               char *address) {
+  uint16_t addressType = 0;
+  if (!strncmp(msg->network, "polkadot", 8)) {
+    addressType = 0;
+  } else if (!strncmp(msg->network, "kusuma", 6)) {
+    addressType = 2;
+  } else if (!strncmp(msg->network, "astar", 5)) {
+    addressType = 5;
+  } else if (!strncmp(msg->network, "westend", 5)) {
+    addressType = 42;
+  } else {
+    return false;
+  }
+  polkadot_get_address_from_public_key(node->public_key + 1, address,
+                                       addressType);
+  return true;
+}
+
 bool polkadot_sign_tx(const PolkadotSignTx *msg, const HDNode *node,
                       PolkadotSignedTx *resp) {
-  const char *error_msg =
-      polkadot_tx_parse(msg->raw_tx.bytes, msg->raw_tx.size);
-  if (error_msg) {
-    fsm_sendFailure(FailureType_Failure_DataError, "Tx invalid");
+  char signer[64] = {0};
+  if (!get_signer_address(msg, node, signer)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
     return false;
   }
 
-  if (!layoutPolkadotSign()) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+  memcpy(polkadot_network, msg->network, strlen(msg->network) + 1);
+  parser_error_t ret = polkadot_tx_parse(msg->raw_tx.bytes, msg->raw_tx.size);
+  if (ret == parser_unexpected_callIndex) {
+    if (!layoutBlindSign(signer)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      layoutHome();
+      return false;
+    }
+  } else if (ret != parser_ok) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Tx invalid");
     layoutHome();
     return false;
+  } else {
+    if (!layoutPolkadotSign()) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      layoutHome();
+      return false;
+    }
   }
 
   ed25519_sign(msg->raw_tx.bytes, msg->raw_tx.size, node->private_key,

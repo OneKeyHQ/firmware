@@ -120,15 +120,15 @@ OBJS += polkadot.o
 OBJS += polkadot/crypto_helper.o
 OBJS += polkadot/bignum.o
 OBJS += polkadot/substrate/substrate_types_V18.o
-OBJS += polkadot/substrate/substrate_types_V19.o
 OBJS += polkadot/substrate/substrate_types.o
 OBJS += polkadot/substrate/substrate_dispatch_V18.o
-OBJS += polkadot/substrate/substrate_dispatch_V19.o
 OBJS += polkadot/substrate/substrate_dispatch.o
 OBJS += polkadot/parser_impl_common.o
 OBJS += polkadot/parser_impl.o
 OBJS += polkadot/parser.o
 OBJS += polkadot/tx.o
+OBJS += ada.o
+OBJS += cbor.o
 endif
 
 OBJS += debug.o
@@ -222,6 +222,7 @@ OBJS += protob/messages-sui.pb.o
 OBJS += protob/messages-filecoin.pb.o
 OBJS += protob/messages-cosmos.pb.o
 OBJS += protob/messages-polkadot.pb.o
+OBJS += protob/messages-cardano.pb.o
 endif
 
 OPTFLAGS ?= -Os

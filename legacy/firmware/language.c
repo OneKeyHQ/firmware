@@ -81,6 +81,8 @@ const char *languages[][2] = {
     //
     {"Are you sure to update?", "确定升级固件吗?"},
     {"Are you sure you want\nto reset your device?", "确定要重置吗?"},
+    // ada.c
+    {"Asset Fingerprint:", "资产指纹:"},
     // u2f.c
     {"Authenticate", "认证"},
     {"Authorized by", "授权方"},
@@ -330,6 +332,7 @@ const char *languages[][2] = {
     {"Do you want to set", "请确认设置"},
     // layout2.c
     {"Do you want to sign in?", "请确认登录"},
+    {"Do you want to sign this\n", "确认要签署此 "},
     //
     {"Done", "完成"},
     {"Download OneKey", "下载OneKey"},
@@ -445,6 +448,9 @@ const char *languages[][2] = {
     {"From", "发送方"},
     // layout2.c
     {"GPG sign for:", ""},
+    {"Gas Fee Cap", "燃料单价上限"},
+    {"Gas Limit", "燃料用量上限"},
+    {"Gas Premium", "优先费用"},
     // cosmos.c
     {"Granter", "授予人"},
     // layout2.c
@@ -800,6 +806,7 @@ const char *languages[][2] = {
     {"Send SOL", "发送 SOL"},
     // layout2.c
     {"Send anyway?", ""},
+    {"Send to:", "发送给:"},
     {"Sender", "发送方"},
     // layout2.c
     {"Serial:", "序列号:"},
@@ -853,6 +860,9 @@ const char *languages[][2] = {
     {"Submit", "提交"},
     //
     {"Switch", "切换"},
+    // ada.c
+    {"The following transaction output contains tokens.",
+     "此交易的交易输入中包含代币."},
     // protect.c
     {"The new PIN must be different from your wipe code.", ""},
     // recovery.c
@@ -889,8 +899,12 @@ const char *languages[][2] = {
      "了解如何获取NFT Pet\n请前往众筹首页"},
     {"To learn more about\nhow to use, go to the\nHelp Center",
      "了解如何使用\n请前往帮助中心"},
+    // ada.c
+    {"Token Amount:", "代币金额:"},
     // ethereum.c
     {"Too much data", ""},
+    // ada.c
+    {"Total Amount", "总金额"},
     // startcoin.c
     {"Transaction data cannot be decoded", "交易无法解析"},
     // ethereum.c
@@ -1258,6 +1272,7 @@ const char *languages[][2] = {
     //
     {"transaction is set to", "被设定为"},
     // layout2.c layout2.c
+    {"transaction?", "交易?"},
     {"user: ", "用户:"},
     // u2f.c
     {"was used to register", "注册"},

@@ -149,21 +149,6 @@ parser_error_t polkadot_parser_getItem(const parser_context_t *ctx,
   } else {
     // CONTINUE WITH FIXED ARGUMENTS
     displayIdx -= methodArgCount;
-    if (displayIdx == FIELD_NETWORK) {
-      if (_getAddressType() == PK_ADDRESS_TYPE) {
-        if (parser_show_expert_fields()) {
-          snprintf(outKey, outKeyLen, "Chain");
-          snprintf(outVal, outValLen, COIN_NAME);
-          return err;
-        }
-      } else {
-        snprintf(outKey, outKeyLen, "Genesis Hash");
-        _toStringHash(&ctx->tx_obj->genesisHash, outVal, outValLen, pageIdx,
-                      pageCount);
-        return err;
-      }
-    }
-
     if (!parser_show_expert_fields()) {
       displayIdx++;
     }
@@ -179,42 +164,11 @@ parser_error_t polkadot_parser_getItem(const parser_context_t *ctx,
     }
 
     if (displayIdx == FIELD_TIP && parser_show_tip(ctx)) {
-      snprintf(outKey, outKeyLen, "Tip");
+      snprintf(outKey, outKeyLen, "Tip Amount");
       err = _toStringCompactBalance(&ctx->tx_obj->tip, outVal, outValLen,
                                     pageIdx, pageCount);
       if (err != parser_ok) return err;
       number_inplace_trimming(outVal, 1);
-      return err;
-    }
-
-    if (!parser_show_tip(ctx)) {
-      displayIdx++;
-    }
-
-    if (displayIdx == FIELD_ERA_PHASE && parser_show_expert_fields()) {
-      snprintf(outKey, outKeyLen, "Era Phase");
-      uint64_to_str(outVal, outValLen, ctx->tx_obj->era.phase);
-      return err;
-    }
-
-    if (!parser_show_expert_fields()) {
-      displayIdx++;
-    }
-
-    if (displayIdx == FIELD_ERA_PERIOD && parser_show_expert_fields()) {
-      snprintf(outKey, outKeyLen, "Era Period");
-      uint64_to_str(outVal, outValLen, ctx->tx_obj->era.period);
-      return err;
-    }
-
-    if (!parser_show_expert_fields()) {
-      displayIdx++;
-    }
-
-    if (displayIdx == FIELD_BLOCK_HASH && parser_show_expert_fields()) {
-      snprintf(outKey, outKeyLen, "Block");
-      _toStringHash(&ctx->tx_obj->blockHash, outVal, outValLen, pageIdx,
-                    pageCount);
       return err;
     }
 
