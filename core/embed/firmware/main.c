@@ -132,20 +132,20 @@ int main(void) {
 
   ble_usart_init();
 
-// #if !defined TREZOR_MODEL_1
-//   parse_boardloader_capabilities();
+  // #if !defined TREZOR_MODEL_1
+  //   parse_boardloader_capabilities();
 
 #if PRODUCTION
   // check_and_replace_bootloader();
 #endif
-// #endif
+  // #endif
 
   // Init peripherals
   pendsv_init();
 
-// #ifdef USE_DMA2D
-//   dma2d_init();
-// #endif
+  // #ifdef USE_DMA2D
+  //   dma2d_init();
+  // #endif
 
 #if !PRODUCTION
   // enable BUS fault and USAGE fault handlers
@@ -180,7 +180,6 @@ int main(void) {
   display_clear();
   rgb_led_init();
 #endif
-
 
 #if !defined TREZOR_MODEL_1
   // jump to unprivileged mode

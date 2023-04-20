@@ -730,7 +730,6 @@ static secbool copy_sdcard(void) {
 }
 #endif
 
-
 int main(void) {
   reset_flags_reset();
 
@@ -772,7 +771,6 @@ int main(void) {
   };
   ensure(check_image_contents(&hdr, IMAGE_HEADER_SIZE, sectors, 1),
          "invalid bootloader hash");
-
 
   jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
 

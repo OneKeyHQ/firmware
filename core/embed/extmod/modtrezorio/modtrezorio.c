@@ -80,8 +80,6 @@ bool usb_connected_previously = true;
 /// WireInterface = Union[HID, WebUSB, SPI]
 /// USB_CHECK: int # interface id for check of USB data connection
 
-
-
 STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_trezorio)},
 

@@ -36,9 +36,9 @@ uint32_t touch_read(void) {
   SDL_PumpEvents();
   if (SDL_PollEvent(&event) > 0) {
     switch (event.type) {
-      case SDL_MOUSEBUTTONDOWN: // 1025
-      case SDL_MOUSEMOTION: // 1024
-      case SDL_MOUSEBUTTONUP: { // 1026
+      case SDL_MOUSEBUTTONDOWN:  // 1025
+      case SDL_MOUSEMOTION:      // 1024
+      case SDL_MOUSEBUTTONUP: {  // 1026
         const int x = event.button.x - sdl_touch_offset_x;
         const int y = event.button.y - sdl_touch_offset_y;
         if (x < 0 || y < 0 || x >= sdl_display_res_x ||

@@ -5948,7 +5948,7 @@ if TYPE_CHECKING:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotGetAddress"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["PolkadotGetAddress"]:
             return isinstance(msg, cls)
 
     class PolkadotAddress(protobuf.MessageType):
@@ -5964,7 +5964,7 @@ if TYPE_CHECKING:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotAddress"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["PolkadotAddress"]:
             return isinstance(msg, cls)
 
     class PolkadotSignTx(protobuf.MessageType):
@@ -5982,7 +5982,7 @@ if TYPE_CHECKING:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotSignTx"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["PolkadotSignTx"]:
             return isinstance(msg, cls)
 
     class PolkadotSignedTx(protobuf.MessageType):
@@ -5996,7 +5996,7 @@ if TYPE_CHECKING:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["PolkadotSignedTx"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["PolkadotSignedTx"]:
             return isinstance(msg, cls)
 
     class RippleGetAddress(protobuf.MessageType):
@@ -7236,7 +7236,7 @@ if TYPE_CHECKING:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronFreezeBalanceContract"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronFreezeBalanceContract"]:
             return isinstance(msg, cls)
 
     class TronUnfreezeBalanceContract(protobuf.MessageType):
@@ -7252,7 +7252,7 @@ if TYPE_CHECKING:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronUnfreezeBalanceContract"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnfreezeBalanceContract"]:
             return isinstance(msg, cls)
 
     class WebAuthnListResidentCredentials(protobuf.MessageType):

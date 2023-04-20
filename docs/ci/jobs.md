@@ -4,7 +4,7 @@
 It consists of multiple stages below, each having one or more jobs
 Latest CI pipeline of master branch can be seen at [https://gitlab.com/satoshilabs/trezor/trezor-firmware/-/pipelines/master/latest](https://gitlab.com/satoshilabs/trezor/trezor-firmware/-/pipelines/master/latest)
 
-## ENVIRONMENT stage - [environment.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/environment.yml)
+## ENVIRONMENT stage - [environment.yml](../../ci/environment.yml)
 Connected with creating the testing image for CI.
 
 Consists of **3 jobs** below:
@@ -20,7 +20,7 @@ Almost all CI jobs run inside this docker image.
 ### [environment scheduled](https://github.com/trezor/trezor-firmware/blob/master/ci/environment.yml#L35)
 
 ---
-## PREBUILD stage - [prebuild.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/prebuild.yml)
+## PREBUILD stage - [prebuild.yml](../../ci/prebuild.yml)
 Static checks on the code.
 
 Consists of **7 jobs** below:
@@ -51,7 +51,7 @@ Verifying that all commits changing some functionality have a changelog entry
 or contain `[no changelog]` in the commit message.
 
 ---
-## BUILD stage - [build.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/build.yml)
+## BUILD stage - [build.yml](../../ci/build.yml)
 All builds are published as artifacts so they can be downloaded and used.
 
 Consists of **28 jobs** below:
@@ -138,7 +138,7 @@ Bitcoin-only version.
 ### [legacy emu btconly debug asan build](https://github.com/trezor/trezor-firmware/blob/master/ci/build.yml#L526)
 
 ---
-## TEST stage - [test.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/test.yml)
+## TEST stage - [test.yml](../../ci/test.yml)
 All the tests run test cases on the freshly built emulators from the previous `BUILD` stage.
 
 Consists of **35 jobs** below:
@@ -228,7 +228,7 @@ Persistence tests.
 ### [connect test core](https://github.com/trezor/trezor-firmware/blob/master/ci/test.yml#L687)
 
 ---
-## TEST-HW stage - [test-hw.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/test-hw.yml)
+## TEST-HW stage - [test-hw.yml](../../ci/test-hw.yml)
 
 Consists of **5 jobs** below:
 
@@ -261,7 +261,7 @@ device capable of pushing an actual buttons on the device.
 Also device tests on physical Trezor 1 but with Bitcoin-only firmware.
 
 ---
-## POSTTEST stage - [posttest.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/posttest.yml)
+## POSTTEST stage - [posttest.yml](../../ci/posttest.yml)
 
 Consists of **2 jobs** below:
 
@@ -270,7 +270,7 @@ Consists of **2 jobs** below:
 ### [unix ui changes](https://github.com/trezor/trezor-firmware/blob/master/ci/posttest.yml#L31)
 
 ---
-## DEPLOY stage - [deploy.yml](https://github.com/trezor/trezor-firmware/blob/master/ci/deploy.yml)
+## DEPLOY stage - [deploy.yml](../../ci/deploy.yml)
 
 Consists of **14 jobs** below:
 

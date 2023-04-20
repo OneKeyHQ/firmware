@@ -260,7 +260,8 @@ int mnemonic_find_first_match_index(const char *prefix, int len) {
     if (cmp == 0) {
       for (;;) {
         // find the first match
-        if (mid == 0 || strncmp(BIP39_WORDLIST_ENGLISH[mid - 1], prefix, len) != 0) {
+        if (mid == 0 ||
+            strncmp(BIP39_WORDLIST_ENGLISH[mid - 1], prefix, len) != 0) {
           return mid;
         }
         mid--;

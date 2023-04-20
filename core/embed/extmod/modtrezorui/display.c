@@ -132,7 +132,6 @@
 
 static struct { int x, y; } DISPLAY_OFFSET;
 
-
 #if PRODUCTION_MODEL == 'H'
 #include "mipi_lcd.h"
 #endif

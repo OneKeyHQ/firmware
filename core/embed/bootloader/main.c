@@ -402,9 +402,9 @@ int main(void) {
     }
   }
 #if defined TREZOR_MODEL_T
-// display_set_little_endian();
-touch_init();
-touch_power_on();
+  // display_set_little_endian();
+  touch_init();
+  touch_power_on();
 #endif
 
 #if defined TREZOR_MODEL_R
@@ -573,7 +573,6 @@ touch_power_on();
 
     ui_fadeout();
   }
-
 
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
