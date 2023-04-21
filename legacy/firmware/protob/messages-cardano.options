@@ -1,9 +1,3 @@
-CardanoNativeScript.scripts                                 max_count:5
-CardanoNativeScript.key_hash                                max_size:28
-CardanoNativeScript.key_path                                max_count:8
-
-CardanoNativeScriptHash.script_hash                         max_size:28
-
 CardanoAddressParametersType.address_n                      max_count:8
 CardanoAddressParametersType.address_n_staking              max_count:8
 CardanoAddressParametersType.staking_key_hash               max_size:28

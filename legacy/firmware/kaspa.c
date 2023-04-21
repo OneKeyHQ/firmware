@@ -22,8 +22,8 @@ static const uint8_t TRANSACTION_SIGNING_ECDSA_DOMAIN_HASH[32] = {
     164, 242, 236, 228, 90, 40, 108, 177, 236, 10, 78,  77, 56,  52,  104, 208,
     0,   247, 23,  87,  5,  43, 21,  4,   170, 52, 149, 50, 141, 245, 244, 234};
 
-u_int16_t input_count;
-u_int16_t input_index;
+uint16_t input_count;
+uint16_t input_index;
 static bool kaspa_signing = false;
 static char schema[8] = {0};
 static char prefix[10] = {0};
