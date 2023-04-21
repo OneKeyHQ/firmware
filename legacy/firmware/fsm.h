@@ -31,6 +31,7 @@
 #include "messages-debug.pb.h"
 #include "messages-ethereum.pb.h"
 #include "messages-filecoin.pb.h"
+#include "messages-kaspa.pb.h"
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
@@ -277,4 +278,8 @@ void fsm_msgCardanoTxReferenceScriptChunk(CardanoTxReferenceScriptChunk *msg);
 void fsm_msgCardanoTxReferenceInput(CardanoTxReferenceInput *msg);
 void fsm_msgCardanoSignMessage(CardanoSignMessage *msg);
 
+// Kaspa
+void fsm_msgKaspaGetAddress(const KaspaGetAddress *msg);
+void fsm_msgKaspaSignTx(const KaspaSignTx *msg);
+void fsm_msgKaspaTxInputAck(const KaspaTxInputAck *msg);
 #endif

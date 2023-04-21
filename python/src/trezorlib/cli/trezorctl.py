@@ -31,6 +31,7 @@ from ..transport.udp import UdpTransport
 from . import (
     AliasedGroup,
     TrezorConnection,
+    algorand,
     aptos,
     binance,
     bixin,
@@ -47,14 +48,17 @@ from . import (
     fido,
     filecoin,
     firmware,
+    kaspa,
     monero,
     near,
     nem,
     polkadot,
     ripple,
     settings,
+    sol,
     starcoin,
     stellar,
+    sui,
     tezos,
     tron,
     with_client,
@@ -98,6 +102,10 @@ COMMAND_ALIASES = {
     "near": near.cli,
     "conflux": conflux.cli,
     "filecoin": filecoin.cli,
+    "solana": sol.cli,
+    "algorand": algorand.cli,
+    "kaspa": kaspa.cli,
+    "sui": sui.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -442,6 +450,10 @@ cli.add_command(bixin.cli)
 cli.add_command(aptos.cli)
 cli.add_command(cosmos.cli)
 cli.add_command(polkadot.cli)
+cli.add_command(algorand.cli)
+cli.add_command(sol.cli)
+cli.add_command(kaspa.cli)
+cli.add_command(sui.cli)
 
 #
 # Main

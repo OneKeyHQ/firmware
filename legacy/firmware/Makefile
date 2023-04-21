@@ -125,6 +125,7 @@ OBJS += polkadot/tx.o
 OBJS += ada.o
 OBJS += cbor.o
 OBJS += sui.o
+OBJS += kaspa.o
 endif
 
 OBJS += debug.o
@@ -219,6 +220,7 @@ OBJS += protob/messages-cosmos.pb.o
 OBJS += protob/messages-polkadot.pb.o
 OBJS += protob/messages-cardano.pb.o
 OBJS += protob/messages-sui.pb.o
+OBJS += protob/messages-kaspa.pb.o
 endif
 
 OPTFLAGS ?= -Os

@@ -439,7 +439,7 @@ enum MessageType {
     MessageType_AlgorandAddress = 10901 [(wire_out) = true];
     MessageType_AlgorandSignTx = 10902 [(wire_in) = true];
     MessageType_AlgorandSignedTx = 10903 [(wire_out) = true];
- 
+
     // Polkadot
     MessageType_PolkadotGetAddress = 11000 [(wire_in) = true];
     MessageType_PolkadotAddress = 11001 [(wire_out) = true];
@@ -458,6 +458,14 @@ enum MessageType {
     MessageType_FilecoinSignTx = 11202 [(wire_in) = true];
     MessageType_FilecoinSignedTx = 11203 [(wire_out) = true];
 
+    // Kaspa
+    MessageType_KaspaGetAddress = 11300 [(wire_in) = true];
+    MessageType_KaspaAddress = 11301 [(wire_out) = true];
+    MessageType_KaspaSignTx = 11302 [(wire_in) = true];
+    MessageType_KaspaSignedTx = 11303 [(wire_out) = true];
+    MessageType_KaspaTxInputRequest = 11304 [(wire_out) = true];
+    MessageType_KaspaTxInputAck = 11305 [(wire_in) = true];
+    
     //onekey
     MessageType_DeviceEraseSector= 10026 [deprecated = true];
 
