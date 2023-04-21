@@ -441,29 +441,29 @@ static bool layoutOutput(const CardanoTxOutput *output) {
   char desc[32] = {0};
   char str_amount[32] = {0};
   const char **tx_msg = format_tx_message("Cardano");
-
-  if (output->asset_groups_count > 0) {
-    oledClear();
-    layoutHeader(tx_msg[0]);
-    oledDrawStringAdapter(
-        0, 13, _("The following transaction output contains tokens."),
-        FONT_STANDARD);
-    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
-    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-    oledRefresh();
-    while (1) {
-      key = protectWaitKey(0, 1);
-      if (key == KEY_CONFIRM) {
-        ret = true;
-        break;
-      }
-      if (key == KEY_CANCEL) {
-        return false;
+  ada_signer.is_change = false;
+  if (!output->has_address_parameters) {
+    if (output->asset_groups_count > 0) {
+      oledClear();
+      layoutHeader(tx_msg[0]);
+      oledDrawStringAdapter(
+          0, 13, _("The following transaction output contains tokens."),
+          FONT_STANDARD);
+      layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+      layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+      oledRefresh();
+      while (1) {
+        key = protectWaitKey(0, 1);
+        if (key == KEY_CONFIRM) {
+          ret = true;
+          break;
+        }
+        if (key == KEY_CANCEL) {
+          return false;
+        }
       }
     }
-  }
 
-  if (!output->has_address_parameters) {
     oledClear();
     layoutHeader(tx_msg[0]);
     bn_format_uint64(output->amount, NULL, " ADA", 6, 0, false, ',', str_amount,
@@ -485,6 +485,8 @@ static bool layoutOutput(const CardanoTxOutput *output) {
         return false;
       }
     }
+  } else {
+    ada_signer.is_change = true;
   }
   if (output->has_address) {
     uint32_t rowlen = 21, addrlen = strlen(output->address);
@@ -1191,7 +1193,9 @@ bool hash_stage() {
         layoutHome();
         return false;
       }
-      msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
+      if (!ada_signer.is_witnessed) {
+        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
+      }
       ada_signer.is_finished = true;
     }
   }
@@ -1299,6 +1303,11 @@ void cardano_txack(void) {
 
 bool cardano_txwitness(CardanoTxWitnessRequest *msg,
                        CardanoTxWitnessResponse *resp) {
+  if (ada_signer.tx_dict_items_count > 0) {
+    ada_signer.outputState = TX_OUTPUT_FINISHED;
+    ada_signer.is_witnessed = true;
+    hash_stage();
+  }
   HDNode node = {0};
   uint32_t fingerprint;
   fsm_getCardanoIcaruNode(&node, msg->path, msg->path_count, &fingerprint);

@@ -126,7 +126,7 @@ static bool get_signer_address(const PolkadotSignTx *msg, const HDNode *node,
   uint16_t addressType = 0;
   if (!strncmp(msg->network, "polkadot", 8)) {
     addressType = 0;
-  } else if (!strncmp(msg->network, "kusuma", 6)) {
+  } else if (!strncmp(msg->network, "kusama", 6)) {
     addressType = 2;
   } else if (!strncmp(msg->network, "astar", 5)) {
     addressType = 5;

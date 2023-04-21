@@ -3607,7 +3607,11 @@ refresh_menu:
     sub_index = 0;
     layoutHeader(title);
     memset(desc, 0, 64);
-    strcat(desc, _("Amount"));
+    if (token_transfer && token_id && ui_language) {  // nft
+      strcat(desc, "数量");
+    } else {
+      strcat(desc, _("Amount"));
+    }
     strcat(desc, ":");
     oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
     oledDrawStringAdapter(0, y + 10, amount, FONT_STANDARD);
