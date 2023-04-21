@@ -10,7 +10,7 @@
 
 parser_error_t _readMethod_V18(parser_context_t* c, uint8_t moduleIdx,
                                uint8_t callIdx, pd_Method_V18_t* method);
-parser_error_t _readMethod_V18_kusuma(parser_context_t* c, uint8_t moduleIdx,
+parser_error_t _readMethod_V18_kusama(parser_context_t* c, uint8_t moduleIdx,
                                       uint8_t callIdx, pd_Method_V18_t* method);
 parser_error_t _readMethod_V18_westend(parser_context_t* c, uint8_t moduleIdx,
                                        uint8_t callIdx,

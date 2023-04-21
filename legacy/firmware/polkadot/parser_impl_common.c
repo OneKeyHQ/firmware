@@ -363,7 +363,7 @@ uint16_t _detectAddressType(const parser_context_t *c) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES;
     memcpy(__polkadot_ticker, COIN_TICKER, 4);
     return 0;
-  } else if (!strncmp(polkadot_network, "kusuma", 6)) {
+  } else if (!strncmp(polkadot_network, "kusama", 6)) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_12;
     memcpy(__polkadot_ticker, KUSAMA_COIN_TICKER, 4);
     return 2;
