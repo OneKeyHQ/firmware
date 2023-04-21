@@ -182,7 +182,7 @@ void fsm_msgEthereumGetAddress(const EthereumGetAddress *msg) {
     if (msg->has_chain_id) {
       ASSIGN_ETHEREUM_NAME(chain_name, msg->chain_id);
     } else {
-      ASSIGN_ETHEREUM_NAME(chain_name, 42170);  // unknown chain
+      ASSIGN_ETHEREUM_NAME(chain_name, 0);  // unknown chain
     }
     strcat(desc, chain_name);
     strcat(desc, " ");
@@ -332,7 +332,7 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
   ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
   // ethereum_address_checksum adds trailing zero
 
-  char warn_msg[64] = {0};
+  char warn_msg[128] = {0};
   strcat(warn_msg, _("Unable to show EIP-712 data. Sign at your own risk."));
   if (msg->has_message_hash) {
     char domain_hash[65] = {0};

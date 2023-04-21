@@ -2,7 +2,7 @@ ifneq ($(V),1)
 Q := @
 endif
 
-SKIPPED_MESSAGES := Binance DebugMonero Eos Monero Ontology Ripple SdProtect Tezos WebAuthn \
+SKIPPED_MESSAGES := Binance DebugMonero Eos Monero Ontology SdProtect Tezos WebAuthn \
 	DebugLinkRecordScreen DebugLinkEraseSdCard DebugLinkWatchLayout \
 	DebugLinkLayout GetNonce \
 	TxAckInput TxAckOutput TxAckPrev TxAckPaymentRequest \

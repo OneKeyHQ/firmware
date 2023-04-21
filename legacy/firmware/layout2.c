@@ -493,7 +493,7 @@ static void layoutWelcome(void) {
   if (desc[0] == 'P') {
     offset = 8;
     oledDrawBitmap(offset + len - 1, 19, &bmp_icon_exit);
-    oledDrawBitmap(offset + len - 1, 34, &bmp_icon_enter);
+    oledDrawBitmap(offset + len - 1, 33, &bmp_icon_enter);
   } else {
     offset = 20;
     oledDrawBitmap(offset + len - 1, 20, &bmp_icon_exit);
@@ -624,7 +624,7 @@ void onboarding(uint8_t key) {
                               NULL, NULL, NULL, NULL);
         l = oledStringWidthAdapter("help.onekey.so", FONT_STANDARD);
         if (ui_language == 0) {
-          oledBox(0, 43, l, 43, true);
+          oledBox(0, 45, l, 45, true);
           oledRefresh();
         } else {
           oledBox(0, 46, l, 46, true);
@@ -641,8 +641,8 @@ void onboarding(uint8_t key) {
 
         layoutDialogAdapterEx(
             _("Done!"), NULL, NULL, &bmp_bottom_right_confirm, _("Next"),
-            _("OneKey Classic is set up,\nyou will return to home\nscreen"),
-            NULL, NULL, NULL, NULL);
+            _("OneKey Classic is set up,\nyou will back to home\nscreen"), NULL,
+            NULL, NULL, NULL);
         while (1) {
           key = protectWaitKey(0, 1);
           if (key == KEY_CONFIRM) {
@@ -2766,6 +2766,8 @@ void layoutItemsSelectAdapterEx(
     const char *previous, const char *pre_previous,
     const char *pre_pre_previous, const char *next, const char *next_next,
     const char *next_next_next, bool show_index) {
+  (void)btnNo;
+  (void)btnYes;
   int x, l, y;
   int step = 2;
   char index_str[16] = "";
@@ -2946,10 +2948,10 @@ void layoutItemsSelectAdapterEx(
                           FONT_SMALL);
   }
 
-  if (btnNo) {
+  if (bmp_no) {
     oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
   }
-  if (btnYes) {
+  if (bmp_yes) {
     oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
   }
   oledRefresh();
@@ -2962,6 +2964,8 @@ void layoutItemsSelectAdapterWords(
     const char *current, const char *previous, const char *pre_previous,
     const char *pre_pre_previous, const char *next, const char *next_next,
     const char *next_next_next, bool show_index, bool is_select) {
+  (void)btnNo;
+  (void)btnYes;
   int x, l, y, p = 0;
   char index_str[16] = "";
   int item_height = 11;
@@ -3083,10 +3087,10 @@ void layoutItemsSelectAdapterWords(
                           FONT_SMALL);
   }
 
-  if (btnNo) {
+  if (bmp_no) {
     oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
   }
-  if (btnYes) {
+  if (bmp_yes) {
     oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
   }
 
@@ -3565,6 +3569,10 @@ bool layoutTransactionSign(const char *chain_name, bool token_transfer,
   char title_data[32] = {0};
   char lines[21] = {0};
   int data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
+  uint32_t rowlen = 21;
+  const char **str;
+  uint32_t tokenid_len = strlen(token_id);
+  int token_id_rowcount = tokenid_len / rowlen + 1;
   const char **tx_msg = format_tx_message(chain_name);
   if (token_transfer && token_id == NULL) {
     strcat(title, _("Token Transfer"));
@@ -3614,10 +3622,43 @@ refresh_menu:
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if (2 == index && token_transfer && token_id) {  // nft token id
-    sub_index = 0;
     layoutHeader(title);
-    oledDrawStringAdapter(0, y, _("Token ID:"), FONT_STANDARD);
-    oledDrawStringAdapter(0, y + 10, token_id, FONT_STANDARD);
+
+    if (strlen(token_id) > 3) {
+      str = split_message((const uint8_t *)token_id, tokenid_len, rowlen);
+      if (0 == sub_index) {
+        oledDrawStringAdapter(0, 13, _("Token ID:"), FONT_STANDARD);
+        oledDrawStringAdapter(0, 13 + 1 * 10, str[0], FONT_STANDARD);
+        oledDrawStringAdapter(0, 13 + 2 * 10, str[1], FONT_STANDARD);
+        oledDrawStringAdapter(0, 13 + 3 * 10, str[2], FONT_STANDARD);
+        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_down);
+      } else {
+        oledDrawStringAdapter(0, 13, str[sub_index - 1], FONT_STANDARD);
+        oledDrawStringAdapter(0, 13 + 1 * 10, str[sub_index], FONT_STANDARD);
+        oledDrawStringAdapter(0, 13 + 2 * 10, str[sub_index + 1],
+                              FONT_STANDARD);
+        oledDrawStringAdapter(0, 13 + 3 * 10, str[sub_index + 2],
+                              FONT_STANDARD);
+        if (sub_index == token_id_rowcount - 3) {
+          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_up);
+        } else {
+          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_up);
+          oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_down);
+        }
+      }
+
+      // scrollbar
+      drawScrollbar(2, sub_index);
+
+    } else {
+      oledDrawStringAdapter(0, y, _("Token ID:"), FONT_STANDARD);
+      oledDrawStringAdapter(0, y + 10, token_id, FONT_STANDARD);
+    }
+
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if (3 == index && token_transfer && token_id) {  // nft recipient
@@ -3749,6 +3790,10 @@ refresh_menu:
       goto refresh_menu;
     case KEY_DOWN:
       if (len > 0 && index == 3 && sub_index < data_rowcount - 4) {
+        sub_index++;
+      }
+      if (token_transfer && token_id && index == 2 &&
+          sub_index < token_id_rowcount - 3) {  // token_id
         sub_index++;
       }
       goto refresh_menu;

@@ -999,10 +999,8 @@ retry:
     if (is_prompt) {
       layoutDialogCenterAdapter(
           &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
-          NULL, NULL,
-          is_change ? _("You have successfully changed your PIN.")
-                    : _("PIN is set!"),
-          NULL, NULL);
+          NULL, NULL, is_change ? _("PIN Changed") : _("PIN is set!"), NULL,
+          NULL);
 
       while (1) {
         key = protectWaitKey(0, 1);
@@ -1026,7 +1024,7 @@ refresh_menu:
   layoutItemsSelectAdapterEx(
       &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
       &bmp_bottom_left_arrow, &bmp_bottom_right_arrow, NULL, NULL, index + 1, 3,
-      _("Select Number of Words"), _(numbers[index]), _(numbers[index]), NULL,
+      _("Select Number of Word"), _(numbers[index]), _(numbers[index]), NULL,
       NULL, index > 0 ? numbers[index - 1] : NULL,
       index > 1 ? numbers[index - 2] : NULL, NULL,
       index < 2 ? numbers[index + 1] : NULL,
@@ -1057,7 +1055,7 @@ bool protectPinCheck(bool retry) {
   uint32_t fails = config_getPinFails();
   if (fails == 1) {
     layoutDialogCenterAdapter(
-        &bmp_icon_error, NULL, NULL,
+        &bmp_icon_warning, NULL, NULL,
         retry ? &bmp_bottom_right_retry : &bmp_bottom_right_confirm, NULL, NULL,
         NULL, NULL, NULL, _("Incorrect PIN"), _("9 attempts left, try again."),
         NULL);
@@ -1072,11 +1070,11 @@ bool protectPinCheck(bool retry) {
       strcat(desc, _(" attempts left, try again."));
     }
     layoutDialogCenterAdapter(
-        &bmp_icon_error, NULL, NULL,
+        &bmp_icon_warning, NULL, NULL,
         retry ? &bmp_bottom_right_retry : &bmp_bottom_right_confirm, NULL, NULL,
         NULL, NULL, NULL, _("Incorrect PIN"), desc, NULL);
   } else {
-    layoutDialogCenterAdapter(&bmp_icon_error, NULL, NULL, NULL, NULL, NULL,
+    layoutDialogCenterAdapter(&bmp_icon_warning, NULL, NULL, NULL, NULL, NULL,
                               NULL, NULL, NULL, _("Incorrect PIN"),
                               _("0 attempts left, device"),
                               _(" will be reset now..."));

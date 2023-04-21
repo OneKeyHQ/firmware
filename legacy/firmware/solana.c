@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "solana.h"
+#include <stdio.h>
 #include "buttons.h"
 #include "config.h"
 #include "fsm.h"
@@ -87,6 +87,8 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   size_t num_summary_steps = 0;
   size_t steps = 0;
   uint8_t steps_list[MAX_TRANSACTION_SUMMARY_ITEMS];
+  char title_str[65] = {0};
+  snprintf(title_str, 65, "%s %s", "Solana", _("Transaction"));
   if (transaction_summary_finalize(summary_step_kinds, &num_summary_steps) ==
       0) {
     for (size_t i = 0; i < num_summary_steps; i++) {
@@ -124,11 +126,11 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
 
         steps_list[steps++] = i;
 
-        layoutDialogAdapterEx(
-            _("Solana Tranasction"), &bmp_bottom_left_close, NULL,
-            i < num_summary_steps - 1 ? &bmp_bottom_right_arrow
-                                      : &bmp_bottom_right_confirm,
-            NULL, NULL, desc, _(text), NULL, NULL);
+        layoutDialogAdapterEx(title_str, &bmp_bottom_left_close, NULL,
+                              i < num_summary_steps - 1
+                                  ? &bmp_bottom_right_arrow
+                                  : &bmp_bottom_right_confirm,
+                              NULL, NULL, desc, _(text), NULL, NULL);
 
         uint8_t key;
       button_scan:
