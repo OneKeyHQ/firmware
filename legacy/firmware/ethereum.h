@@ -72,6 +72,12 @@ const char *get_chain_name(uint32_t chain_id);
     case 137:                                      \
       chain_name = "Polygon";                      \
       break;                                       \
+    case 324:                                      \
+      chain_name = "zkSync Era";                   \
+      break;                                       \
+    case 1030:                                     \
+      chain_name = "Conflux eSpace";               \
+      break;                                       \
     case 42161:                                    \
       chain_name = "Arbitrum One";                 \
       break;                                       \
@@ -79,7 +85,7 @@ const char *get_chain_name(uint32_t chain_id);
       chain_name = "Arbitrum Nova";                \
       break;                                       \
     default:                                       \
-      chain_name = "Unknown Chain";                \
+      chain_name = "EVM";                          \
       break; /* unknown chain */                   \
   }
 

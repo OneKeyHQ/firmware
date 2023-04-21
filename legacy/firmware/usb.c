@@ -77,7 +77,7 @@
 
 #define USB_STRINGS                                 \
   X(MANUFACTURER, "ByteForge")                      \
-  X(PRODUCT, "ONEKEY")                              \
+  X(PRODUCT, "ONEKEY CLASSIC")                      \
   X(SERIAL_NUMBER, config_uuid_str)                 \
   X(INTERFACE_MAIN, "ONEKEY Interface")             \
   X(INTERFACE_DEBUG, "ONEKEY Debug Link Interface") \
