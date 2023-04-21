@@ -1,7 +1,6 @@
 
 #ifndef __KASPA_H__
 #define __KASPA_H__
-#include <stdint.h>
 #include "bip32.h"
 #include "messages-kaspa.pb.h"
 
@@ -13,6 +12,6 @@ void kaspa_sign_sighash(HDNode *node, const uint8_t *raw_message,
 void kaspa_signing_init(const KaspaSignTx *msg);
 void kaspa_signing_abort(void);
 
-extern u_int16_t input_count;
-extern u_int16_t input_index;
+extern uint16_t input_count;
+extern uint16_t input_index;
 #endif  // __KASPA_H__
