@@ -24,7 +24,7 @@
 
 void usbLoop(void);
 #if ONEKEY_MINI
-void update_from_spi_flash(bool force);
+void update_from_spi_flash(void);
 #endif
 
 #endif

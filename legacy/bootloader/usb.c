@@ -645,7 +645,7 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
                                    SPI_FLASH_FIRMWARE_ADDR_START,
                                    FLASH_FWHEADER_LEN);
         layoutProgress("Verifing ... Please\nwait", 500);
-        update_from_spi_flash(true);
+        update_from_spi_flash();
       }
 #else
       flash_enter();
@@ -834,20 +834,14 @@ void usbLoop(void) {
 }
 
 #if ONEKEY_MINI
-void update_from_spi_flash(bool force) {
-  image_header *p_hdr, hdr = {0};
+void update_from_spi_flash(void) {
+  image_header hdr = {0};
   w25qxx_read_bytes((uint8_t *)&hdr, SPI_FLASH_FIRMWARE_ADDR_START,
                     sizeof(image_header));
   if (hdr.magic != FIRMWARE_MAGIC_NEW) return;
   if (hdr.codelen > FLASH_APP_LEN) return;
   if (hdr.codelen < 4096) return;
 
-  if (firmware_present_new() && !force) {
-    p_hdr = (image_header *)FLASH_PTR(FLASH_FWHEADER_START);
-    if (memcmp(&(p_hdr->onekey_version), &(hdr.onekey_version), 4) >= 0) {
-      return;
-    }
-  }
   int signed_firmware = signatures_match(&hdr, NULL);
   if (SIG_OK != signed_firmware) {
     return;
@@ -880,5 +874,7 @@ void update_from_spi_flash(bool force) {
   flash_program(FLASH_FWHEADER_START, (uint8_t *)FW_CHUNK, FLASH_FWHEADER_LEN);
 
   flash_exit();
+
+  w25qxx_erase_block((SPI_FLASH_FIRMWARE_ADDR_START / SPI_FLASH_BLOCK_SIZE));
 }
 #endif

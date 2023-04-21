@@ -120,16 +120,19 @@ void layoutBootHome(void) {
   uint8_t key = KEY_NULL;
   static uint8_t index = 0;
   static bool menu = false;
-  char buf[64] = "";
 
   if (layoutNeedRefresh()) {
-    strcat(buf, "BOOTLOADER ");
-    strcat(buf, VERSTR(VERSION_MAJOR) "." VERSTR(VERSION_MINOR) "." VERSTR(
-                    VERSION_PATCH));
-
     oledClear();
     oledDrawStringCenter(63, 20, PRODUCT_STRING, FONT_STANDARD);
-    oledDrawStringCenter(63, 45, buf, FONT_STANDARD);
+#if BOOTLOADER_QA
+    oledDrawStringCenter(OLED_WIDTH / 2, 45, "Bootloader-QA", FONT_STANDARD);
+#else
+    oledDrawStringCenter(OLED_WIDTH / 2, 45, "Bootloader", FONT_STANDARD);
+#endif
+    oledDrawStringCenter(OLED_WIDTH / 2, 55,
+                         VERSTR(VERSION_MAJOR) "." VERSTR(
+                             VERSION_MINOR) "." VERSTR(VERSION_PATCH),
+                         FONT_STANDARD);
     oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
     oledRefresh();
     oledBackligthCtl(true);
