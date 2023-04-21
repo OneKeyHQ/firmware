@@ -2,8 +2,8 @@
 
 const char *languages[][2] = {
     //
-    {" Disable", "禁用"},
-    {" Enable", "启用"},
+    {" Disabled", "已禁用"},
+    {" Enabled", "已启用"},
     {" Off", "已关闭"},
     //
     {" On", "已开启"},
@@ -49,7 +49,7 @@ const char *languages[][2] = {
     {"Abort Backup?", "终止备份?"},
     {"Abort Import?", "终止导入?"},
     // menu.c
-    {"About", "关于本机"},
+    {"About Device", "关于设备"},
     // layout2.c
     {"Access hidden wallet?", "使用隐藏钱包?"},
     // ada.c
@@ -95,7 +95,6 @@ const char *languages[][2] = {
     {"Authorized by", "授权方"},
     // layout2.c
     {"Auto-Lock", "自动锁定"},  // msg
-    {"AutoLock", "锁定时间"},
     // reset.c
     {"Awesome!", "棒!"},
     // layout2.c
@@ -169,7 +168,7 @@ const char *languages[][2] = {
     {"Check PIN Code", "请先校验设备原PIN码"},
     {"Check Path", "核对路径"},
     //
-    {"Check Recovery Phrase", "助记词核对"},
+    {"Check Recovery Phrase", "核对助记词"},
     // reset.c
     {"Check Word ", "核对单词 "},
     // layout2.c
@@ -283,6 +282,7 @@ const char *languages[][2] = {
     {"Device reset in progress", "设备重置中"},
     // menu_list.c
     {"Disable", "禁用"},
+    {"Disable Passphrase", "禁用 Passphrase"},
     {"Disable Trezor Compat", "禁用 Trezor 兼容"},
     {"Do not change this setting", "如果您不确定此操作的后"},
     // layout2.c lisk.c recovery.c reset.c trezor.c
@@ -320,6 +320,7 @@ const char *languages[][2] = {
     {"ETH advance signing turn", "ETH高级签名"},
     // menu_list.c
     {"Enable", "启用"},
+    {"Enable Passphrase", "启用 Passphrase"},
     // layout2.c
     {"Encrypt message?", "加密消息"},
     // layout2.c
@@ -354,7 +355,7 @@ const char *languages[][2] = {
     {"Enter your 24-words  \nRecovery Phrase in order.",
      "请按顺序依次输入 24 位的\n助记词."},
     {"Enter your Passphrase on\nconnnected device.",
-     "请在已连接的设备上输入 Passphrase."},
+     "请在已连接的设备上输入\nPassphrase."},
     // menu_list.c
     {"Erase Device", "擦除设备"},
     // signing.c
@@ -492,7 +493,7 @@ const char *languages[][2] = {
     {"Okay", "确认"},
     //
     {"On", "开启"},
-    {"OneKey Classic is set up,\nyou will return to home\nscreen",
+    {"OneKey Classic is set up,\nyou will back to home\nscreen",
      "OneKey Classic 设置成功,\n即将回到系统主屏幕."},
     // cosmos.c
     {"Option", "选项"},
@@ -581,6 +582,8 @@ const char *languages[][2] = {
     {"Recovery phrase is the \nonly way to recover your\nassets. So keep it in "
      "a\nsafe place.",
      "助记词是找回您加密资产的\n唯一方式, 请妥善保管."},
+    {"Recovery phrase is valid\n but does not match.\nCheck and try again.",
+     "输入的助记词有效但与设备\n中存储的不匹配.请检查您\n的备份后重试."},
     {"Recovery phrase verified pass", "助记词校验通过"},
     // cosmos.c
     {"Redelegate", "重新委托"},
@@ -623,7 +626,7 @@ const char *languages[][2] = {
     //
     {"Security", "安全"},
     // protect.c
-    {"Select Number of Words", "选择助记词位数"},
+    {"Select Number of Word", "选择助记词位数"},
     //
     {"Select correct word below", "按提示选择正确的单词"},
     // ethereum.c
@@ -644,9 +647,9 @@ const char *languages[][2] = {
     // layout2.c
     {"Set auto power off time", "设置自动关机时间"},
     // menu.c
-    {"Settings", "设置项"},
+    {"Settings", "系统设置"},
     // layout2.c layout2.c
-    {"Shutdown", "自动关机"},
+    {"Shutdown", "关机"},
     {"Sign Binary Message?", "签署二进制消息?"},
     {"Sign Message", "签署消息"},
     {"Sign Transaction", "签署交易"},
@@ -686,12 +689,7 @@ const char *languages[][2] = {
     {"Switch Input (Symbol)", "切换输入法 (符号)"},
     {"Switch Input (Uppercase)", "切换输入法 (大写字母)"},
     // protect.c
-    {"The Recovery Phrase you \nentered is matched, your \nbackup is correct.",
-     "输入的助记词完全匹配,\n你的备份是正确的."},
     {"The device is reset,\nrestart now!", "设备已重置, 请重启!"},
-    {"The entered Recovery\nPhrase is valid but does\nnot match the one "
-     "stored\nn device.",
-     "输入的助记词有效, 但与设\n备中存储的助记词不一致."},
     {"The following transaction output contains tokens.",
      "此交易的交易输入中包含代币."},
     // reset.c
@@ -737,6 +735,9 @@ const char *languages[][2] = {
     {"Txn type", "类型"},
     // cosmos.c
     {"Type", "类型"},
+    // fsm_msg_ethereum.h
+    {"Unable to show EIP-712 data. Sign at your own risk.",
+     "无法显示 EIP-712 数据.\n请谨慎甄别项目方后决定是否签名, 自负风险"},
     // cosmos.c
     {"Undelegate", "取消委托"},
     // starcoin.c
@@ -796,7 +797,7 @@ const char *languages[][2] = {
     {"Word not found in a wordlist", ""},
     {"Wordlist ", "单词列表 "},
     //
-    {"Words", "单词"},
+    {"Word", "单词"},
     //
     {"Write down", "请抄写助记词"},
     // layout2.c
@@ -811,7 +812,6 @@ const char *languages[][2] = {
     // layout2.c
     {"Yes", "是"},
     //
-    {"You have successfully changed your PIN.", "PIN 码更改成功."},
     {"You still have 9 times", "连续输入10次将重置设备"},
     {"You wallet is restored.", "钱包恢复成功."},
     // reset.c

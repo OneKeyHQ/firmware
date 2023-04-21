@@ -587,7 +587,7 @@ static bool ethereum_signing_handle_nft(struct signing_params *params,
     memzero(pad_val, sizeof(pad_val));
     memcpy(pad_val, params->data_initial_chunk_bytes + 68, 32);
     bn_read_be(pad_val, &val_token_id);
-    bn_format(&val_token_id, NULL, NULL, 0, 0, false, ',', token_id, 32);
+    bn_format(&val_token_id, NULL, NULL, 0, 0, false, ',', token_id, 256);
     // toekn value
     memzero(pad_val, sizeof(pad_val));
     memcpy(pad_val, params->data_initial_chunk_bytes + 100, 32);
@@ -609,7 +609,7 @@ static bool ethereum_signing_handle_nft(struct signing_params *params,
     memzero(pad_val, sizeof(pad_val));
     memcpy(pad_val, params->data_initial_chunk_bytes + 68, 32);
     bn_read_be(pad_val, &val_token_id);
-    bn_format(&val_token_id, NULL, NULL, 0, 0, false, ',', token_id, 32);
+    bn_format(&val_token_id, NULL, NULL, 0, 0, false, 0, token_id, 256);
     // token value
     strcat(value, "1");
 
@@ -691,7 +691,7 @@ void ethereum_signing_init(const EthereumSignTx *msg, const HDNode *node) {
   }
 
   bool is_nft_transfer = false;
-  char token_id[32] = {0}, token_value[32] = {0};
+  char token_id[256] = {0}, token_value[32] = {0};
   uint8_t recipient[20];
   ethereum_signing_handle_erc20(&params);
   if (params.token == NULL) {
@@ -816,7 +816,7 @@ void ethereum_signing_init_eip1559(const EthereumSignTxEIP1559 *msg,
   }
 
   bool is_nft_transfer = false;
-  char token_id[32] = {0}, token_value[32] = {0};
+  char token_id[256] = {0}, token_value[32] = {0};
   uint8_t recipient[20];
   ethereum_signing_handle_erc20(&params);
   if (params.token == NULL) {

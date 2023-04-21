@@ -49,8 +49,8 @@ parser_error_t polkadot_parser_validate(const parser_context_t *ctx) {
   uint8_t numItems = 0;
   CHECK_PARSER_ERR(polkadot_parser_getNumItems(ctx, &numItems))
 
-  char tmpKey[40];
-  char tmpVal[40];
+  char tmpKey[128];
+  char tmpVal[128];
 
   for (uint8_t idx = 0; idx < numItems; idx++) {
     uint8_t pageCount = 0;

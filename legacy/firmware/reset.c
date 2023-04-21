@@ -482,7 +482,7 @@ bool writedown_mnemonic(const char *mnemonic, uint32_t count) {
   uint2str(count, desc + strlen(desc));
   strcat(desc, _(" words again."));
 write_mnemonic:
-  if (scroll_mnemonic(_("Words"), mnemonic, 0)) {
+  if (scroll_mnemonic(_("Word"), mnemonic, 0)) {
   check_words_again:
     layoutDialogAdapterEx(_("Check Words Again"), &bmp_bottom_left_close, NULL,
                           &bmp_bottom_right_arrow, NULL, desc, NULL, NULL, NULL,

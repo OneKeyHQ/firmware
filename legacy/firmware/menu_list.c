@@ -93,7 +93,7 @@ void menu_set_passphrase(int index) {
 
   if (index) {
     layoutDialogAdapterEx(
-        _("Enable Passphrase"), &bmp_bottom_left_close, NULL,
+        _("Disable Passphrase"), &bmp_bottom_left_close, NULL,
         &bmp_bottom_right_confirm, NULL, NULL,
         _("Do you really want to \ndisable passphrase protection?"), NULL, NULL,
         NULL);
@@ -114,8 +114,8 @@ void menu_set_passphrase(int index) {
 }
 
 static struct menu_item ble_set_menu_items[] = {
-    {"On", NULL, true, menu_para_set_ble, NULL, true},
-    {"Off", NULL, true, menu_para_set_ble, NULL, true}};
+    {"Enable", NULL, true, menu_para_set_ble, NULL, true},
+    {"Disable", NULL, true, menu_para_set_ble, NULL, true}};
 
 static struct menu ble_set_menu = {
     .start = 0,
@@ -197,7 +197,7 @@ static struct menu_item settings_menu_items[] = {
      false},
     {"Language", NULL, false, .sub_menu = &language_set_menu,
      menu_para_language, false},
-    {"AutoLock", NULL, false, .sub_menu = &autolock_set_menu,
+    {"Auto-Lock", NULL, false, .sub_menu = &autolock_set_menu,
      menu_para_autolock, false},
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
      menu_para_shutdown, false}};
@@ -218,6 +218,7 @@ void menu_check_all_words(int index) {
   uint8_t key = KEY_NULL;
   uint32_t word_count = 0;
 
+refresh_menu:
   layoutDialogAdapterEx(_("Check Recovery Phrase"), &bmp_bottom_left_arrow,
                         NULL, &bmp_bottom_right_arrow, NULL,
                         _("Check your Recovery \nPhrase backup, make sure \nit "
@@ -233,7 +234,9 @@ void menu_check_all_words(int index) {
     memset(desc, 0, sizeof(desc));
     config_getMnemonic(mnemonic, sizeof(mnemonic));
 
-    word_count = get_mnemonic_number(mnemonic);
+    if (!protectSelectMnemonicNumber(&word_count)) {
+      goto refresh_menu;
+    }
     if (word_count == 12)
       strcat(desc, _("Enter your 12-words  \nRecovery Phrase in order."));
     else if (word_count == 18)
@@ -398,7 +401,7 @@ static struct menu about_menu = {
 static struct menu_item main_menu_items[] = {
     {"Settings", NULL, false, .sub_menu = &settings_menu, NULL, false},
     {"Security", NULL, false, .sub_menu = &security_set_menu, NULL, false},
-    {"About", NULL, false, .sub_menu = &about_menu, NULL, false}};
+    {"About Device", NULL, false, .sub_menu = &about_menu, NULL, false}};
 
 static struct menu main_menu = {
     .start = 0,

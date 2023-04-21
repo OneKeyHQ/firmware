@@ -130,7 +130,7 @@ static bool get_signer_address(const PolkadotSignTx *msg, const HDNode *node,
     addressType = 2;
   } else if (!strncmp(msg->network, "astar", 5)) {
     addressType = 5;
-  } else if (!strncmp(msg->network, "westend", 5)) {
+  } else if (!strncmp(msg->network, "westend", 7)) {
     addressType = 42;
   } else {
     return false;

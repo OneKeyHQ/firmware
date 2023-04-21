@@ -264,7 +264,7 @@ const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
         default:
           return NULL;
       }
-    case 1284 || 1028 || 7940: /* module 5 call 4 */
+    case 1284: /* module 5 call 4 */
     case 1028:
     case 7940:
       switch (itemIdx) {
