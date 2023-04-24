@@ -602,19 +602,17 @@ void onboarding(uint8_t key) {
                               NULL, NULL, NULL, NULL);
         l = oledStringWidthAdapter("onekey.so/download", FONT_STANDARD);
         if (ui_language == 0) {
-          oledBox(0, 34, l, 34, true);
+          oledBox(0, 34, l, 35, true);
           oledRefresh();
         } else {
           oledBox(0, 36, l, 36, true);
           oledRefresh();
         }
-        while (1) {
-          key = protectWaitKey(0, 1);
-          if (key == KEY_CONFIRM) {
-            break;
-          } else if (key == KEY_CANCEL) {
-            goto done1;
-          }
+        key = protectWaitKey(0, 1);
+        if (key == KEY_CONFIRM) {
+          break;
+        } else if (key == KEY_CANCEL) {
+          goto done1;
         }
 
         layoutDialogAdapterEx(_("Support"), &bmp_bottom_left_arrow, _("Back"),
@@ -630,24 +628,20 @@ void onboarding(uint8_t key) {
           oledBox(0, 46, l, 46, true);
           oledRefresh();
         }
-        while (1) {
-          key = protectWaitKey(0, 1);
-          if (key == KEY_CONFIRM) {
-            break;
-          } else if (key == KEY_CANCEL) {
-            goto done2;
-          }
+        key = protectWaitKey(0, 1);
+        if (key == KEY_CONFIRM) {
+          break;
+        } else if (key == KEY_CANCEL) {
+          goto done2;
         }
 
         layoutDialogAdapterEx(
             _("Done!"), NULL, NULL, &bmp_bottom_right_confirm, _("Next"),
             _("OneKey Classic is set up,\nyou will back to home\nscreen"), NULL,
             NULL, NULL, NULL);
-        while (1) {
-          key = protectWaitKey(0, 1);
-          if (key == KEY_CONFIRM) {
-            break;
-          }
+        key = protectWaitKey(0, 1);
+        if (key == KEY_CONFIRM) {
+          break;
         }
         index = 0;
         layoutHome();
@@ -716,7 +710,7 @@ static void _layout_home(bool update_menu) {
                      &bmp_bottom_right_arrow);
       if (session_isUnlocked() || !config_hasPin()) {
         oledDrawBitmap(52, 0, &bmp_onekey_logo);
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 26, label, FONT_STANDARD);
+        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 29, label, FONT_STANDARD);
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 10,
                                     ble_get_name(), FONT_STANDARD);
       } else {
@@ -770,14 +764,13 @@ void layoutBusyscreen(void) {
 }
 
 void layoutHome(void) {
-  // TODO
-  // #if !EMULATOR
+#if !EMULATOR
   static bool first_boot = true;
   if (first_boot && !config_isInitialized() && !se_isFactoryMode()) {
     first_boot = false;
     onboarding(KEY_UP);
   } else
-  // #endif
+#endif
   {
     _layout_home(true);
   }
@@ -1572,12 +1565,12 @@ static void _layout_xpub(const char *xpub, const char *desc, int page) {
 bool layoutXPUB(const char *coin_name, const char *xpub,
                 const uint32_t *address_n, size_t address_n_count) {
   bool result = false;
-  int i, index = 0, sub_index = 0;
+  int index = 0, sub_index = 0;
   uint8_t key = KEY_NULL;
   uint8_t max_index = 2, max_sub_index = 2;
   char title[64] = {0};
   const char **str = split_message((const uint8_t *)xpub, strlen(xpub), 20);
-  if (strlen(xpub) < 80) {
+  if (strlen(xpub) < 60) {
     max_sub_index = 1;
   }
   strcat(title, coin_name);
@@ -1598,19 +1591,27 @@ refresh_menu:
   layoutLast = layoutXPUB;
   if (index == 0) {
     layoutHeader(title);
-    for (i = 0; i < 4; i++) {
-      if ((i + sub_index * 4) < 6)
-        oledDrawString(0, 13 + i * 10, str[i + sub_index * 4], FONT_STANDARD);
-    }
-
     if (max_sub_index > 1 && sub_index == 0) {
+      oledDrawString(0, 13, "xPub:", FONT_STANDARD);
+      oledDrawString(0, 13 + 10, str[0], FONT_STANDARD);
+      oledDrawString(0, 13 + 2 * 10, str[1], FONT_STANDARD);
+      oledDrawString(0, 13 + 3 * 10, str[2], FONT_STANDARD);
       oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
                      &bmp_bottom_middle_arrow_down);
+      drawScrollbar(2, sub_index);
     } else if (max_sub_index > 1) {
+      if (str[3]) oledDrawString(0, 13, str[3], FONT_STANDARD);
+      if (str[4]) oledDrawString(0, 13 + 1 * 10, str[4], FONT_STANDARD);
+      if (str[5]) oledDrawString(0, 13 + 2 * 10, str[5], FONT_STANDARD);
       oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
                      &bmp_bottom_middle_arrow_up);
+      drawScrollbar(2, sub_index);
+    } else {
+      oledDrawString(0, 13, "xPub:", FONT_STANDARD);
+      if (str[0]) oledDrawString(0, 13 + 1 * 10, str[0], FONT_STANDARD);
+      if (str[1]) oledDrawString(0, 13 + 2 * 10, str[1], FONT_STANDARD);
+      if (str[2]) oledDrawString(0, 13 + 3 * 10, str[2], FONT_STANDARD);
     }
-    drawScrollbar(2, sub_index);
 
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
@@ -2512,7 +2513,9 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
       oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
     }
   }
-
+  if (1 == ui_language) {
+    y = y - 1;
+  }
   if (index > 0 && index < 10) {
     layoutItemsSelect(x + 13 * pos + 7, y, table[index], FONT_STANDARD);
   } else {
@@ -2837,10 +2840,11 @@ void layoutItemsSelectAdapterEx(
       y += cur_font->pixel + step;
     }
   } else {
-    if (count == 1) y = 27;
-    if (count == 2) y = 21;
-    if (count == 3) y = 15;
-    // if(0 == ui_language) y++;
+    if (title) {
+      if (count == 1) y = 27;
+      if (count == 2) y = 21;
+      if (count == 3) y = 15;
+    }
     if (pre_pre_previous) {
       if (title) {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, pre_pre_previous,
@@ -3241,9 +3245,9 @@ refresh_menu:
                        &bmp_bottom_middle_arrow_up);
       } else {
         memset(desc, 0, 128);
-        strcat(desc, _("Recovery Phrase is the \nonly way to restore "
-                       "the \nprivate keys that own the\nassets."));
-        strcat(desc, _("Make sure you still have a backup of current wallet."));
+        strcat(desc,
+               "助记词是找回私钥的唯一方\n式.\n继续该操作前,"
+               "请确保您仍\n持有当前钱包的助记词.");
         layoutDialogAdapterEx(_("WARNING! (2/2)"), &bmp_bottom_left_arrow,
                               _("Back"), &bmp_bottom_right_arrow, _("Next"),
                               desc, NULL, NULL, NULL, NULL);
@@ -3412,7 +3416,17 @@ refresh_menu:
   oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
                  &bmp_bottom_right_confirm);
 
-  drawScrollbar(5, index);
+  // drawScrollbar(5, index);
+  int i, bar_start = 12 - 3, bar_end = 52;
+  int bar_heght = 44 - 2 * (5 - 1);
+  for (i = bar_start; i < bar_end; i += 2) {
+    oledDrawPixel(OLED_WIDTH - 1, i);
+  }
+  for (i = bar_start + 2 * ((int)index);
+       i < (bar_start + bar_heght + 2 * ((int)index)) - 1; i++) {
+    oledDrawPixel(OLED_WIDTH - 1, i);
+    oledDrawPixel(OLED_WIDTH - 2, i);
+  }
 
   oledRefresh();
   key = protectWaitKey(0, 0);
@@ -3487,7 +3501,17 @@ refresh_menu:
                  &bmp_bottom_right_confirm);
 
   // scrollbar
-  drawScrollbar(3, index);
+  // drawScrollbar(3, index);
+  int i, bar_start = 12 - 3, bar_end = 52;
+  int bar_heght = 44 - 2 * (3 - 1);
+  for (i = bar_start; i < bar_end; i += 2) {
+    oledDrawPixel(OLED_WIDTH - 1, i);
+  }
+  for (i = bar_start + 2 * ((int)index);
+       i < (bar_start + bar_heght + 2 * ((int)index)) - 1; i++) {
+    oledDrawPixel(OLED_WIDTH - 1, i);
+    oledDrawPixel(OLED_WIDTH - 2, i);
+  }
 
   oledRefresh();
   key = protectWaitKey(0, 0);
@@ -3560,7 +3584,7 @@ bool layoutTransactionSign(const char *chain_name, bool token_transfer,
                            const char *key3, const char *value3,
                            const char *key4, const char *value4) {
   bool result = false;
-  int index = 0, sub_index = 0;
+  int index = 0, sub_index = 0, tokenid_len = 0, token_id_rowcount = 0;
   int i, y = 0, bar_heght, bar_start = 12, bar_end = 52;
   uint8_t key = KEY_NULL;
   uint8_t max_index = 4;
@@ -3571,8 +3595,10 @@ bool layoutTransactionSign(const char *chain_name, bool token_transfer,
   int data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
   uint32_t rowlen = 21;
   const char **str;
-  uint32_t tokenid_len = strlen(token_id);
-  int token_id_rowcount = tokenid_len / rowlen + 1;
+  if (token_id) {
+    tokenid_len = strlen(token_id);
+    token_id_rowcount = tokenid_len / rowlen + 1;
+  }
   const char **tx_msg = format_tx_message(chain_name);
   if (token_transfer && token_id == NULL) {
     strcat(title, _("Token Transfer"));

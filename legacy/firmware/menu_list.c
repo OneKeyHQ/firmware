@@ -48,7 +48,7 @@ void menu_erase_device(int index) {
   } else {
     layoutDialogSwipeCenterAdapter(
         &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
-        NULL, NULL, "The device is reset,", "restart now!", NULL);
+        NULL, NULL, "Device reset complete,", "restart now!", NULL);
   }
   while (1) {
     key = protectWaitKey(0, 1);
@@ -280,7 +280,7 @@ static struct menu_item security_set_menu_items[] = {
     {"Check Recovery Phrase", NULL, true, menu_check_all_words, NULL, false},
     {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
      menu_para_passphrase, true},
-    {"Reset", NULL, true, menu_erase_device, NULL, false},
+    {"Reset Device", NULL, true, menu_erase_device, NULL, false},
 };
 
 static struct menu security_set_menu = {

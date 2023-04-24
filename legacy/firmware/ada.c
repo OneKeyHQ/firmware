@@ -49,6 +49,9 @@ bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
     return false;
   }
   config_getMnemonic(mnemonic, sizeof(mnemonic));
+  if (!protectPassphrase(passphrase)) {
+    return false;
+  }
 
   uint8_t mnemonic_bits[64] = {0};
   int mnemonic_bits_len = mnemonic_to_bits(mnemonic, mnemonic_bits);
