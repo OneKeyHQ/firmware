@@ -117,7 +117,7 @@ void ble_update_poll(void) {
 void ble_uart_poll(void) {
   static uint8_t read_status = UARTSTATE_IDLE;
   static uint8_t buf[32] = {0};
-  uint8_t passkey[7] = {0};
+  uint8_t passkey[17] = {0};
   static uint8_t index = 0;
   volatile uint8_t xor ;
   static bool need_refresh = false;
@@ -190,7 +190,13 @@ void ble_uart_poll(void) {
         break;
       case BLE_CMD_PASSKEY:
         if (ble_usart_msg.cmd_len == 0x06) {
-          memcpy(passkey, ble_usart_msg.cmd_vale, 6);
+          for (int i = 0, j = 0; i < 16; i++) {
+            if (i % 3 == 0) {
+              passkey[i] = ble_usart_msg.cmd_vale[j++];
+            } else {
+              passkey[i] = ' ';
+            }
+          }
           layoutBlePasskey(passkey);
           need_refresh = true;
         }

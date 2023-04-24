@@ -538,6 +538,9 @@ bool reset_on_device(void) {
   char desc[128] = "";
   uint8_t key = KEY_NULL;
 
+  if (config_hasPin()) {
+    config_wipe();
+  }
 prompt_creat:
   layoutDialogAdapterEx(
       _("Create New Wallet"), &bmp_bottom_left_close, NULL,

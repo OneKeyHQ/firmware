@@ -159,7 +159,7 @@ const uint8_t WIPE_CODE_EMPTY[] = {0, 0, 0, 0};
 
 const char *const VERIFYING_PIN_MSG = "Verifing...";
 const char *const PROCESSING_MSG = "Processing...";
-const char *const STARTING_MSG = "Starting up";
+const char *const STARTING_MSG = "Starting...";
 
 static secbool initialized = secfalse;
 static secbool unlocked = secfalse;

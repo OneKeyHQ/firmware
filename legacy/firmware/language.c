@@ -174,7 +174,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Check Words Again", "再次检查助记词"},
     // recovery.c
-    {"Check and try again.", "备份后重新输入."},
+    {"Check and try again.", "备份后重试."},
     //
     {"Check failed", "核对失败"},
     //
@@ -444,7 +444,7 @@ const char *languages[][2] = {
     //
     {"Make sure you still have", "请确保您仍掌握"},
     {"Make sure you still have a backup of current wallet.",
-     "请确保你仍持有当前钱包的助记词."},
+     "继续该操作前, 请确保你仍持有当前钱包的助记词."},
     // layout2.c
     {"Maximum Fee Per Gas:", "交易费上限单价:"},
     {"Maximum Fee:", "交易费上限:"},
@@ -677,7 +677,7 @@ const char *languages[][2] = {
     {"Stake deregistration", "质押密钥取消注册"},
     {"Stake key registration", "质押密钥注册"},
     // storage.c
-    {"Starting up", "启动中"},
+    {"Starting...", "启动中..."},
     //
     {"Submit", "提交"},
     // layout2.c

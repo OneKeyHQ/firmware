@@ -883,6 +883,9 @@ bool recovery_on_device(void) {
   char desc[128] = "";
   uint8_t ret, key = KEY_NULL;
 
+  if (config_hasPin()) {
+    config_wipe();
+  }
 prompt_recovery:
   layoutDialogAdapterEx(
       _("Import Wallet"), &bmp_bottom_left_arrow, NULL, &bmp_bottom_right_arrow,

@@ -282,9 +282,9 @@ bool ripple_sign_tx(const RippleSignTx *msg, HDNode *node,
   int index = 4;
   uint8_t net_prefix[] = {0x53, 0x54, 0x58, 0x00};
   uint8_t *raw = resp->serialized_tx.bytes;
-  char address[70];
-  char amount[60];
-  char gas_value[32];
+  char address[70] = {0};
+  char amount[60] = {0};
+  char gas_value[32] = {0};
   memcpy(raw, net_prefix, 4);
   serialize(msg, raw, &index, node->public_key, NULL, 0);
 
@@ -296,7 +296,7 @@ bool ripple_sign_tx(const RippleSignTx *msg, HDNode *node,
   ripple_format_amount(msg->payment.amount, amount, sizeof(amount));
   ripple_format_amount(msg->fee, gas_value, sizeof(gas_value));
   if (!layoutTransactionSign("Ripple", false, amount, msg->payment.destination,
-                             address, NULL, NULL, NULL, 0, _("Maximum Fee"),
+                             address, NULL, NULL, NULL, 0, _("Maximum Fee:"),
                              gas_value, NULL, NULL, NULL, NULL, NULL, NULL)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
