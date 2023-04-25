@@ -132,6 +132,7 @@ message Features {
 
     optional uint32 coin_switch = 517;
     optional string build_id = 518;
+    optional uint32 battery_level = 520;
 }
 
 /**

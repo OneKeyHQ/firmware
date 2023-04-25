@@ -336,6 +336,12 @@ class MessageType(IntEnum):
     FilecoinAddress = 11201
     FilecoinSignTx = 11202
     FilecoinSignedTx = 11203
+    KaspaGetAddress = 11300
+    KaspaAddress = 11301
+    KaspaSignTx = 11302
+    KaspaSignedTx = 11303
+    KaspaTxInputRequest = 11304
+    KaspaTxInputAck = 11305
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
@@ -3704,6 +3710,7 @@ class Features(protobuf.MessageType):
         516: protobuf.Field("pre_firmware", "string", repeated=False, required=False),
         517: protobuf.Field("coin_switch", "uint32", repeated=False, required=False),
         518: protobuf.Field("build_id", "string", repeated=False, required=False),
+        520: protobuf.Field("battery_level", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -3766,6 +3773,7 @@ class Features(protobuf.MessageType):
         pre_firmware: Optional["str"] = None,
         coin_switch: Optional["int"] = None,
         build_id: Optional["str"] = None,
+        battery_level: Optional["int"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3824,6 +3832,7 @@ class Features(protobuf.MessageType):
         self.pre_firmware = pre_firmware
         self.coin_switch = coin_switch
         self.build_id = build_id
+        self.battery_level = battery_level
 
 
 class LockDevice(protobuf.MessageType):
@@ -6179,6 +6188,117 @@ class FilecoinSignedTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 11203
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
+
+
+class KaspaGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11300
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        3: protobuf.Field("prefix", "string", repeated=False, required=False),
+        4: protobuf.Field("scheme", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+        prefix: Optional["str"] = 'kaspa',
+        scheme: Optional["str"] = 'schnorr',
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+        self.prefix = prefix
+        self.scheme = scheme
+
+
+class KaspaAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11301
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "str",
+    ) -> None:
+        self.address = address
+
+
+class KaspaSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11302
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("scheme", "string", repeated=False, required=False),
+        4: protobuf.Field("prefix", "string", repeated=False, required=False),
+        5: protobuf.Field("input_count", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+        scheme: Optional["str"] = 'schnorr',
+        prefix: Optional["str"] = 'kaspa',
+        input_count: Optional["int"] = 1,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_message = raw_message
+        self.scheme = scheme
+        self.prefix = prefix
+        self.input_count = input_count
+
+
+class KaspaTxInputRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11304
+    FIELDS = {
+        1: protobuf.Field("request_index", "uint32", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        request_index: "int",
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.request_index = request_index
+        self.signature = signature
+
+
+class KaspaTxInputAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11305
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_message = raw_message
+
+
+class KaspaSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11303
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
     }
 
     def __init__(
