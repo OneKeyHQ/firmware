@@ -71,6 +71,7 @@
 #include "cosmos.h"
 #include "ethereum.h"
 #include "filecoin.h"
+#include "kaspa.h"
 #include "near.h"
 #include "nem.h"
 #include "nem2.h"
@@ -562,6 +563,7 @@ bool fsm_layoutPathWarning(void) {
 #include "fsm_msg_cosmos.h"
 #include "fsm_msg_ethereum.h"
 #include "fsm_msg_filecoin.h"
+#include "fsm_msg_kaspa.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_polkadot.h"
@@ -571,5 +573,4 @@ bool fsm_layoutPathWarning(void) {
 #include "fsm_msg_stellar.h"
 #include "fsm_msg_sui.h"
 #include "fsm_msg_tron.h"
-
 #endif

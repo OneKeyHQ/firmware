@@ -4672,6 +4672,108 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["FilecoinSignedTx"]:
             return isinstance(msg, cls)
 
+    class KaspaGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        prefix: "str"
+        schema: "str"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            prefix: "str | None" = None,
+            schema: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["KaspaGetAddress"]:
+            return isinstance(msg, cls)
+
+    class KaspaAddress(protobuf.MessageType):
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["KaspaAddress"]:
+            return isinstance(msg, cls)
+
+    class KaspaSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+        schema: "str"
+        prefix: "str"
+        input_count: "int"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+            schema: "str | None" = None,
+            prefix: "str | None" = None,
+            input_count: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["KaspaSignTx"]:
+            return isinstance(msg, cls)
+
+    class KaspaTxInputRequest(protobuf.MessageType):
+        request_index: "int"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            request_index: "int",
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["KaspaTxInputRequest"]:
+            return isinstance(msg, cls)
+
+    class KaspaTxInputAck(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["KaspaTxInputAck"]:
+            return isinstance(msg, cls)
+
+    class KaspaSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["KaspaSignedTx"]:
+            return isinstance(msg, cls)
+
     class MoneroTransactionSourceEntry(protobuf.MessageType):
         outputs: "list[MoneroOutputEntry]"
         real_output: "int | None"
