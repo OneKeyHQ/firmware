@@ -234,9 +234,9 @@ const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
     case 7936:
       switch (itemIdx) {
         case 0:
-          return STR_IT_dest;
-        case 1:
           return STR_IT_amount;
+        case 1:
+          return STR_IT_dest;
         default:
           return NULL;
       }
@@ -245,11 +245,11 @@ const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
     case 7938:
       switch (itemIdx) {
         case 0:
-          return STR_IT_source;
+          return STR_IT_amount;
         case 1:
           return STR_IT_dest;
         case 2:
-          return STR_IT_amount;
+          return STR_IT_source;
         default:
           return NULL;
       }
@@ -258,9 +258,9 @@ const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
     case 7939:
       switch (itemIdx) {
         case 0:
-          return STR_IT_dest;
-        case 1:
           return STR_IT_amount;
+        case 1:
+          return STR_IT_dest;
         default:
           return NULL;
       }
@@ -293,13 +293,13 @@ parser_error_t _getMethod_ItemValue_V18(pd_Method_V18_t* m, uint8_t moduleIdx,
     case 1024: /* module 5 call 0 */
     case 7936: /* module 5 call 0 */
       switch (itemIdx) {
-        case 0: /* balances_transfer_V18 - dest */;
-          return _toStringAccountIdLookupOfT_V18(
-              &m->nested.balances_transfer_V18.dest, outValue, outValueLen,
-              pageIdx, pageCount);
-        case 1: /* balances_transfer_V18 - amount */;
+        case 0: /* balances_transfer_V18 - amount */;
           return _toStringCompactBalance(
               &m->nested.balances_transfer_V18.amount, outValue, outValueLen,
+              pageIdx, pageCount);
+        case 1: /* balances_transfer_V18 - dest */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_transfer_V18.dest, outValue, outValueLen,
               pageIdx, pageCount);
         default:
           return parser_no_data;
@@ -308,17 +308,17 @@ parser_error_t _getMethod_ItemValue_V18(pd_Method_V18_t* m, uint8_t moduleIdx,
     case 1026: /* module 5 call 2 */
     case 7938: /* module 5 call 2 */
       switch (itemIdx) {
-        case 0: /* balances_force_transfer_V18 - source */;
-          return _toStringAccountIdLookupOfT_V18(
-              &m->nested.balances_force_transfer_V18.source, outValue,
+        case 0: /* balances_force_transfer_V18 - amount */;
+          return _toStringCompactBalance(
+              &m->nested.balances_force_transfer_V18.amount, outValue,
               outValueLen, pageIdx, pageCount);
         case 1: /* balances_force_transfer_V18 - dest */;
           return _toStringAccountIdLookupOfT_V18(
               &m->nested.balances_force_transfer_V18.dest, outValue,
               outValueLen, pageIdx, pageCount);
-        case 2: /* balances_force_transfer_V18 - amount */;
-          return _toStringCompactBalance(
-              &m->nested.balances_force_transfer_V18.amount, outValue,
+        case 2: /* balances_force_transfer_V18 - source */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_force_transfer_V18.source, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;
@@ -327,13 +327,13 @@ parser_error_t _getMethod_ItemValue_V18(pd_Method_V18_t* m, uint8_t moduleIdx,
     case 1027: /* module 5 call 3 */
     case 7939: /* module 5 call 3 */
       switch (itemIdx) {
-        case 0: /* balances_transfer_keep_alive_V18 - dest */;
-          return _toStringAccountIdLookupOfT_V18(
-              &m->nested.balances_transfer_keep_alive_V18.dest, outValue,
-              outValueLen, pageIdx, pageCount);
-        case 1: /* balances_transfer_keep_alive_V18 - amount */;
+        case 0: /* balances_transfer_keep_alive_V18 - amount */;
           return _toStringCompactBalance(
               &m->nested.balances_transfer_keep_alive_V18.amount, outValue,
+              outValueLen, pageIdx, pageCount);
+        case 1: /* balances_transfer_keep_alive_V18 - dest */;
+          return _toStringAccountIdLookupOfT_V18(
+              &m->nested.balances_transfer_keep_alive_V18.dest, outValue,
               outValueLen, pageIdx, pageCount);
         default:
           return parser_no_data;

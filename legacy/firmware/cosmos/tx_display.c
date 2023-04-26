@@ -449,7 +449,7 @@ static const key_subst_t key_substitutions[] = {
     {"msgs/value/outputs/coins", "Dest Coins"},
 
     {"msgs/value/from_address", "From"},
-    {"msgs/value/to_address", "To"},
+    {"msgs/value/to_address", "Send to"},
     {"msgs/value/amount", "Amount"},
     {"msgs/value/delegator_address", "Delegator"},
     {"msgs/value/validator_address", "Validator"},

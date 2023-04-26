@@ -234,7 +234,7 @@ refresh_menu:
     memset(desc, 0, sizeof(desc));
     config_getMnemonic(mnemonic, sizeof(mnemonic));
 
-    if (!protectSelectMnemonicNumber(&word_count)) {
+    if (!protectSelectMnemonicNumber(&word_count, true)) {
       goto refresh_menu;
     }
     if (word_count == 12)

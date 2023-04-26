@@ -407,7 +407,7 @@ static void report_progress(bool force) {
     progress = 1000 * progress_step / progress_steps;
   }
 
-  layoutProgress(progress_label, progress);
+  layoutProgressAdapter(progress_label, progress);
   update_ctr = 0;
 }
 
@@ -2567,9 +2567,8 @@ static bool payment_confirm_tx(void) {
     }
 
     // last confirmation
-    layoutConfirmTx(coin, amount_unit, total_in, external_in, total_out,
-                    change_out, tx_weight);
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+    if (!layoutConfirmTx(coin, amount_unit, total_in, external_in, total_out,
+                         change_out, tx_weight)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       signing_abort();
       return false;

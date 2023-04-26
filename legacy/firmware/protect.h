@@ -52,7 +52,7 @@ const char* protectInputPin(const char* text, uint8_t min_pin_len,
                             uint8_t max_pin_len, bool cancel_allowed);
 bool protectPinOnDevice(bool use_cached, bool cancel_allowed);
 bool protectChangePinOnDevice(bool is_prompt, bool set, bool cancel_allowed);
-bool protectSelectMnemonicNumber(uint32_t* number);
+bool protectSelectMnemonicNumber(uint32_t* number, bool cancel_allowed);
 bool protectPinCheck(bool retry);
 bool protectPassphraseOnDevice(char* passphrase);
 
