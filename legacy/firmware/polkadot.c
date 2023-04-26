@@ -42,7 +42,7 @@ void polkadot_get_address_from_public_key(const uint8_t *public_key,
 
 static bool layoutPolkadotSign(void) {
   bool result = false;
-  int index = 0;
+  int index = 1;
   int y = 0;
   uint8_t key = KEY_NULL;
   uint8_t numItems = 0;
@@ -69,7 +69,7 @@ refresh_menu:
   memset(desc, 0, 64);
   strcat(desc, _(token_key));
   strcat(desc, ":");
-  if (index == 0) {
+  if (index == 1) {
     layoutHeader(tx_msg[0]);
     oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
     oledDrawStringAdapter(0, y + 10, token_val, FONT_STANDARD);
@@ -106,11 +106,11 @@ scan_key:
       }
       goto refresh_menu;
     case KEY_CANCEL:
-      if (0 == index || max_index == index) {
+      if (1 == index || max_index == index) {
         result = false;
         break;
       }
-      if (index > 0) {
+      if (index > 1) {
         index--;
       }
       goto refresh_menu;

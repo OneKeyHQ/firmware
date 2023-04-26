@@ -237,6 +237,7 @@ include ../Makefile.include
 ifeq ($(EMULATOR),1)
 CFLAGS += --warn-no-unused-parameter
 endif
+CFLAGS += -fstack-protector-strong
 # CFLAGS += -fstack-protector-all
 CFLAGS += -Wno-sequence-point
 CFLAGS += -I../vendor/nanopb -Iprotob -DPB_FIELD_16BIT=1 -DPB_ENCODE_ARRAYS_UNPACKED=1 -DPB_VALIDATE_UTF8=1

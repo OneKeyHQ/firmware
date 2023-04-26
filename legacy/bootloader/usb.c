@@ -344,8 +344,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       return;
     } else if (msg_id == 0x0010) {  // FirmwareErase message (id 16)
       bool proceed = false;
-      layoutDialog(&bmp_icon_question, "Abort", "Continue", NULL, "Install ble",
-                   "firmware?", NULL, NULL, NULL, NULL);
+      layoutDialogCenterAdapterEx(NULL, &bmp_bottom_left_close,
+                                  &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                  "Install ble firmware by", "OneKey?");
       proceed = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       if (proceed) {
         erase_ble_code_progress();

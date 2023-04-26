@@ -201,7 +201,6 @@ refresh_menu:
     fil_tx_getItem(index, token_key, sizeof(token_key), token_val,
                    sizeof(token_val), 0, &pageCount);
     memset(desc, 0, 64);
-    token_key[strlen(token_key) - 1] = '\0';  // remove ':'
     strcat(desc, _(token_key));
     strcat(desc, ":");
     if ((0 == index) || (4 == index) || (5 == index)) {

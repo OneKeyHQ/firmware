@@ -130,25 +130,25 @@ parser_error_t fil_parser_getItem(const parser_context_t *ctx,
   }
 
   if (displayIdx == 0) {
-    snprintf(outKey, outKeyLen, "Amount:");
+    snprintf(outKey, outKeyLen, "Amount");
     return parser_printBigIntFixedPoint(&fil_parser_tx_obj.value, outVal,
                                         outValLen, pageIdx, pageCount);
   }
 
   if (displayIdx == 1) {
-    snprintf(outKey, outKeyLen, "To:");
+    snprintf(outKey, outKeyLen, "Send to");
     return _fil_printAddress(&fil_parser_tx_obj.to, outVal, outValLen, pageIdx,
                              pageCount);
   }
 
   if (displayIdx == 2) {
-    snprintf(outKey, outKeyLen, "From:");
+    snprintf(outKey, outKeyLen, "From");
     return _fil_printAddress(&fil_parser_tx_obj.from, outVal, outValLen,
                              pageIdx, pageCount);
   }
 
   if (displayIdx == 3) {
-    snprintf(outKey, outKeyLen, "Gas Limit:");
+    snprintf(outKey, outKeyLen, "Gas Limit");
     if (int64_to_str(outVal, outValLen, fil_parser_tx_obj.gaslimit) != NULL) {
       return parser_unexepected_error;
     }
@@ -157,19 +157,19 @@ parser_error_t fil_parser_getItem(const parser_context_t *ctx,
   }
 
   if (displayIdx == 4) {
-    snprintf(outKey, outKeyLen, "Gas Fee Cap:");
+    snprintf(outKey, outKeyLen, "Gas Fee Cap");
     return parser_printBigIntFixedPoint(&fil_parser_tx_obj.gasfeecap, outVal,
                                         outValLen, pageIdx, pageCount);
   }
 
   if (displayIdx == 5) {
-    snprintf(outKey, outKeyLen, "Gas Premium:");
+    snprintf(outKey, outKeyLen, "Gas Premium");
     return parser_printBigIntFixedPoint(&fil_parser_tx_obj.gaspremium, outVal,
                                         outValLen, pageIdx, pageCount);
   }
 
   if (displayIdx == 6) {
-    snprintf(outKey, outKeyLen, "Total Amount:");
+    snprintf(outKey, outKeyLen, "Total Amount");
     *pageCount = 1;
     return parser_printBigIntFixedPointTotal(
         &fil_parser_tx_obj.value, &fil_parser_tx_obj.gasfeecap,
