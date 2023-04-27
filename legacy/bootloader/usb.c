@@ -259,9 +259,10 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
       return;
     }
     if (msg_id == 0x0005) {  // WipeDevice message (id 5)
-      layoutDialog(&bmp_icon_question, "Cancel", "Confirm", NULL,
-                   "Do you really want to", "wipe the device?", NULL,
-                   "All data will be lost.", NULL, NULL);
+      layoutDialogCenterAdapterEx(&bmp_icon_question, &bmp_bottom_left_close,
+                                  &bmp_bottom_right_confirm, NULL,
+                                  "Do you really want to", "wipe the device?",
+                                  "All data will be lost.", NULL);
       bool but = waitButtonResponse(BTN_PIN_YES, default_oper_time);
       if (host_channel == CHANNEL_SLAVE) {
       } else {
@@ -623,10 +624,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
                                     "Device will be power off.", NULL, NULL);
         shutdown();
       } else {
-        layoutDialog(&bmp_icon_warning, NULL, NULL, NULL,
-                     "Firmware installation", "aborted.", NULL,
-                     "You need to repeat", "the procedure with",
-                     "the correct firmware.");
+        layoutDialogCenterAdapterEx(
+            &bmp_icon_warning, NULL, NULL, NULL, "Installation Aborted!",
+            "Repeat the procedure with", "OneKey official firmware", NULL);
         send_msg_failure(dev, 9);  // Failure_ProcessError
         delay_ms(1000);
         shutdown();
@@ -659,9 +659,9 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
 #endif
 #endif
       if (update_status == false) {
-        layoutDialog(&bmp_icon_warning, NULL, NULL, NULL, "ble installation",
-                     "aborted.", NULL, "You need to repeat",
-                     "the procedure with", "the correct firmware.");
+        layoutDialogCenterAdapterEx(
+            &bmp_icon_warning, NULL, NULL, NULL, "ble installation aborted!",
+            "Repeat the procedure with", "OneKey official firmware", NULL);
       } else {
         show_unplug("ble firmware", "successfully installed.");
       }

@@ -887,6 +887,7 @@ bool config_getCardanoRootNode(HDNode *node) {
   if (activeSessionCache->seedCached != sectrue) {
     const uint8_t *seed = config_getSeed();
     if (seed == NULL) {
+      fsm_sendFailure(FailureType_Failure_InvalidSession, "Invalid Seed");
       return false;
     }
   }

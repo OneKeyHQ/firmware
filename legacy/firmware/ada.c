@@ -39,6 +39,7 @@ static CardanoTxItemAck ada_msg_item_ack;
 static CardanoSignTxFinished ada_msg_sign_tx_finished;
 extern int convert_bits(uint8_t *out, size_t *outlen, int outbits,
                         const uint8_t *in, size_t inlen, int inbits, int pad);
+static HDNode ada_node;
 
 bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
                              size_t address_n_count, uint32_t *fingerprint) {
@@ -46,6 +47,20 @@ bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
     layoutHome();
     return 0;
   }
+  if (hdnode_private_ckd_cached(node, address_n, address_n_count,
+                                fingerprint) == 0) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Failed to derive private key"));
+    return false;
+  }
+  hdnode_fill_public_key(node);
+
+  return true;
+}
+
+bool deriveCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
+                            size_t address_n_count, uint32_t *fingerprint) {
+  memcpy(node, &ada_node, sizeof(HDNode));
   if (hdnode_private_ckd_cached(node, address_n, address_n_count,
                                 fingerprint) == 0) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
@@ -129,8 +144,8 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
     uint8_t extpubkey[64] = {0};
     HDNode node = {0};
     uint32_t fingerprint;
-    fsm_getCardanoIcaruNode(&node, address_parameters->address_n,
-                            address_parameters->address_n_count, &fingerprint);
+    deriveCardanoIcaruNode(&node, address_parameters->address_n,
+                           address_parameters->address_n_count, &fingerprint);
     memcpy(extpubkey, node.public_key + 1, 32);
     memcpy(extpubkey + 32, node.chain_code, 32);
 
@@ -231,9 +246,8 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
     if (address_parameters->address_n_count > 0) {
       HDNode node = {0};
       uint32_t fingerprint;
-      fsm_getCardanoIcaruNode(&node, address_parameters->address_n,
-                              address_parameters->address_n_count,
-                              &fingerprint);
+      deriveCardanoIcaruNode(&node, address_parameters->address_n,
+                             address_parameters->address_n_count, &fingerprint);
       memcpy(public_key, node.public_key + 1, 32);
 
       uint8_t hash[ADDRESS_KEY_HASH_SIZE] = {0};
@@ -254,9 +268,9 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
     } else if (address_parameters->address_n_staking_count > 0) {
       HDNode node = {0};
       uint32_t fingerprint;
-      fsm_getCardanoIcaruNode(&node, address_parameters->address_n_staking,
-                              address_parameters->address_n_staking_count,
-                              &fingerprint);
+      deriveCardanoIcaruNode(&node, address_parameters->address_n_staking,
+                             address_parameters->address_n_staking_count,
+                             &fingerprint);
       memcpy(public_key, node.public_key + 1, 32);
       uint8_t hash[ADDRESS_KEY_HASH_SIZE] = {0};
       blake2b(public_key, 32, hash, ADDRESS_KEY_HASH_SIZE);
@@ -287,6 +301,16 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
 bool ada_get_address(const CardanoGetAddress *msg, char *address) {
   uint8_t address_bytes[128] = {0};
   int address_bytes_len = 0;
+  memset(&ada_node, 0, sizeof(HDNode));
+  if (!config_hasMnemonic()) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("No mnemonic"));
+    return false;
+  }
+  if (!config_getCardanoRootNode(&ada_node)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Deriving root failed"));
+    return false;
+  }
   derive_bytes(&msg->address_parameters, msg->network_id, msg->protocol_magic,
                address_bytes, &address_bytes_len);
 
@@ -781,7 +805,7 @@ static void get_public_key_hash(const uint32_t *address_n,
   HDNode node = {0};
   uint32_t fingerprint;
   uint8_t public_key[32] = {0};
-  fsm_getCardanoIcaruNode(&node, address_n, address_n_count, &fingerprint);
+  deriveCardanoIcaruNode(&node, address_n, address_n_count, &fingerprint);
   memcpy(public_key, node.public_key + 1, 32);
   blake2b(public_key, 32, hash, ADDRESS_KEY_HASH_SIZE);
 }
@@ -1055,8 +1079,7 @@ bool hash_stage() {
       break;
     case TX_HASH_BUILDER_IN_OUTPUTS:
       if (ada_signer.remainingOutputs > 0 ||
-          (ada_signer.remainingOutputs == 0 &&
-           ada_signer.outputState != TX_OUTPUT_FINISHED)) {
+          (ada_signer.remainingOutputs == 0 && ada_signer.is_feeed == false)) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
       }
       break;
@@ -1242,6 +1265,17 @@ bool _processs_tx_init(CardanoSignTxInit *msg) {
   ada_signer.is_feeed = false;
   ada_signer.is_finished = false;
 
+  memset(&ada_node, 0, sizeof(HDNode));
+  if (!config_hasMnemonic()) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("No mnemonic"));
+    return false;
+  }
+  if (!config_getCardanoRootNode(&ada_node)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Deriving root failed"));
+    return false;
+  }
+
   txHashBuilder_enterInputs();
   msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
   return true;
@@ -1285,7 +1319,7 @@ bool cardano_txwitness(CardanoTxWitnessRequest *msg,
   }
   HDNode node = {0};
   uint32_t fingerprint;
-  fsm_getCardanoIcaruNode(&node, msg->path, msg->path_count, &fingerprint);
+  deriveCardanoIcaruNode(&node, msg->path, msg->path_count, &fingerprint);
   resp->pub_key.size = 32;
   memcpy(resp->pub_key.bytes, node.public_key + 1, 32);
   ed25519_public_key pk = {0};
