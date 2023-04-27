@@ -38,8 +38,7 @@ void sui_sign_tx(const SuiSignTx *msg, const HDNode *node, SuiSignedTx *resp) {
   blake2b_Update(&ctx, msg->raw_tx.bytes, msg->raw_tx.size);
   blake2b_Final(&ctx, digest, 32);
 
-  if (!layoutBlindSign("Sui", false, NULL, address, msg->raw_tx.bytes,
-                       msg->raw_tx.size, NULL, NULL, NULL, NULL, NULL, NULL)) {
+  if (!layoutBlindSign(address)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled,
                     "Signing cancelled by user");
     layoutHome();

@@ -43,7 +43,7 @@ void polkadot_get_address_from_public_key(const uint8_t *public_key,
 static bool layoutPolkadotSign(void) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
-  int index = 0;
+  int index = 1;
   int y = 0;
   uint8_t key = KEY_NULL;
   uint8_t numItems = 0;
@@ -66,7 +66,7 @@ refresh_menu:
   y = 0;
   polkadot_tx_getItem(index, token_key, sizeof(token_key), token_val,
                       sizeof(token_val), 0, &pageCount);
-  if (index == 0) {
+  if (index == 1) {
     y += bmp_btn_up.height + 1;
     oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
     y += font->pixel + 5;
@@ -76,7 +76,7 @@ refresh_menu:
     for (int i = 0; i < OLED_HEIGHT; i += 3) {
       oledDrawPixel(OLED_WIDTH - 1, i);
     }
-    for (int i = 0; i < OLED_HEIGHT / numItems; i++) {
+    for (int i = 0; i < OLED_HEIGHT / (numItems - 1); i++) {
       oledDrawPixel(OLED_WIDTH - 1, i);
       oledDrawPixel(OLED_WIDTH - 2, i);
     }
@@ -94,7 +94,8 @@ refresh_menu:
     for (int i = 0; i < OLED_HEIGHT; i += 3) {
       oledDrawPixel(OLED_WIDTH - 1, i);
     }
-    for (int i = index * OLED_HEIGHT / numItems; i < OLED_HEIGHT; i++) {
+    for (int i = (index - 1) * OLED_HEIGHT / (numItems - 1); i < OLED_HEIGHT;
+         i++) {
       oledDrawPixel(OLED_WIDTH - 1, i);
       oledDrawPixel(OLED_WIDTH - 2, i);
     }
@@ -113,8 +114,8 @@ refresh_menu:
     for (int i = 0; i < OLED_HEIGHT; i += 3) {
       oledDrawPixel(OLED_WIDTH - 1, i);
     }
-    for (int i = index * OLED_HEIGHT / numItems;
-         i < (index + 1) * OLED_HEIGHT / numItems; i++) {
+    for (int i = (index - 1) * OLED_HEIGHT / (numItems - 1);
+         i < (index)*OLED_HEIGHT / (numItems - 1); i++) {
       oledDrawPixel(OLED_WIDTH - 1, i);
       oledDrawPixel(OLED_WIDTH - 2, i);
     }
@@ -128,7 +129,7 @@ scan_key:
   key = protectWaitKey(0, 0);
   switch (key) {
     case KEY_UP:
-      if (index > 0) {
+      if (index > 1) {
         index--;
         goto refresh_menu;
       } else {
@@ -165,7 +166,7 @@ static bool get_signer_address(const PolkadotSignTx *msg, const HDNode *node,
   uint16_t addressType = 0;
   if (!strncmp(msg->network, "polkadot", 8)) {
     addressType = 0;
-  } else if (!strncmp(msg->network, "kusuma", 6)) {
+  } else if (!strncmp(msg->network, "kusama", 6)) {
     addressType = 2;
   } else if (!strncmp(msg->network, "astar", 5)) {
     addressType = 5;

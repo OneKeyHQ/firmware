@@ -9,8 +9,8 @@ parser_error_t _readMethod(parser_context_t* c, uint8_t moduleIdx,
                            uint8_t callIdx, pd_Method_t* method) {
   if (!strncmp(polkadot_network, "polkadot", 8)) {
     return _readMethod_V18(c, moduleIdx, callIdx, &method->V18);
-  } else if (!strncmp(polkadot_network, "kusuma", 6)) {
-    return _readMethod_V18_kusuma(c, moduleIdx, callIdx, &method->V18);
+  } else if (!strncmp(polkadot_network, "kusama", 6)) {
+    return _readMethod_V18_kusama(c, moduleIdx, callIdx, &method->V18);
   } else if (!strncmp(polkadot_network, "westend", 7)) {
     return _readMethod_V18_westend(c, moduleIdx, callIdx, &method->V18);
   } else if (!strncmp(polkadot_network, "astar", 5)) {

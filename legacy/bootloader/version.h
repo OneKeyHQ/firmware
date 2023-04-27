@@ -3,4 +3,4 @@
 #define VERSION_PATCH 0
 
 // Keep same as firmware/version.h define
-#define ONEKEY_VERSION "2.1.11"
+#define ONEKEY_VERSION "3.0.0"

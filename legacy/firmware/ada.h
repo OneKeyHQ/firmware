@@ -124,7 +124,9 @@ struct AdaSigner {
   tx_hash_builder_output_state_t outputState;
   tx_hash_builder_state_t state;
 
+  bool is_feeed;
   bool is_finished;
+  bool is_change;
   uint8_t policy_id[28];
   uint16_t policy_id_size;
 };
