@@ -539,7 +539,11 @@ bool reset_on_device(void) {
   uint8_t key = KEY_NULL;
 
   if (config_hasPin()) {
+    uint8_t ui_language_bak = ui_language;
+    const char *lang[2] = {"en-US", "zh-CN"};
     config_wipe();
+    ui_language = ui_language_bak;
+    config_setLanguage(lang[ui_language]);
   }
 prompt_creat:
   layoutDialogAdapterEx(
@@ -555,7 +559,7 @@ prompt_creat:
 
 select_mnemonic_count:
   words_count = 0;
-  if (!protectSelectMnemonicNumber(&words_count)) {
+  if (!protectSelectMnemonicNumber(&words_count, true)) {
     goto_check(prompt_creat);
   }
   switch (words_count) {

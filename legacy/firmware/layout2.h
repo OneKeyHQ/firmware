@@ -61,7 +61,7 @@ bool layoutConfirmOutput(const CoinInfo *coin, AmountUnit amount_unit,
                          const TxOutputType *out);
 void layoutConfirmOmni(const uint8_t *data, uint32_t size);
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size);
-void layoutConfirmTx(const CoinInfo *coin, AmountUnit amount_unit,
+bool layoutConfirmTx(const CoinInfo *coin, AmountUnit amount_unit,
                      uint64_t total_in, uint64_t external_in,
                      uint64_t total_out, uint64_t change_out,
                      uint64_t tx_weight);
@@ -282,5 +282,6 @@ bool layoutSignHash(const char *chain_name, bool verify, const char *signer,
 bool layoutPaginated(const char *title, const uint8_t *data, uint16_t len);
 
 void onboarding(uint8_t key);
+void hide_icons(void);
 
 #endif

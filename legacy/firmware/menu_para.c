@@ -35,7 +35,7 @@ char* format_time(uint32_t ms) {
 }
 
 char* menu_para_ble_state(void) {
-  return ble_get_switch() ? _(" Enable") : _(" Disable");
+  return ble_get_switch() ? _(" Enabled") : _(" Disabled");
 }
 
 char* menu_para_language(void) { return ui_language ? "简体中文" : "English"; }

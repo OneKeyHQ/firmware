@@ -192,9 +192,9 @@ void fsm_msgPing(const Ping *msg) {
   RESP_INIT(Success);
 
   if (msg->has_button_protection && msg->button_protection) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                       _("Do you really want to"), _("answer to ping?"), NULL,
-                      NULL, NULL, NULL);
+                      NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -222,8 +222,8 @@ void fsm_msgChangePin(const ChangePin *msg) {
   if (removal) {
     if (config_hasPin()) {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("remove current PIN?"),
-                        NULL, NULL, NULL, NULL);
+                        NULL, _("Do you really want to"),
+                        _("remove current PIN?"), NULL, NULL, NULL);
     } else {
       fsm_sendSuccess(_("PIN removed"));
       return;
@@ -231,14 +231,14 @@ void fsm_msgChangePin(const ChangePin *msg) {
   } else {
     if (config_hasPin()) {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("change current PIN?"),
-                        NULL, NULL, NULL, NULL);
+                        NULL, _("Do you really want to"),
+                        _("change current PIN?"), NULL, NULL, NULL);
     } else {
       if (g_bIsBixinAPP) {
         button_confirm = false;
       } else {
         layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          _("Do you really want to"), _("set new PIN?"), NULL,
+                          NULL, _("Do you really want to"), _("set new PIN?"),
                           NULL, NULL, NULL);
       }
     }
@@ -274,8 +274,8 @@ void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
     // Note that if storage is locked, then config_hasWipeCode() returns false.
     if (has_wipe_code || !session_isUnlocked()) {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("disable wipe code"),
-                        _("protection?"), NULL, NULL, NULL);
+                        NULL, _("Do you really want to"),
+                        _("disable wipe code"), _("protection?"), NULL, NULL);
     } else {
       fsm_sendSuccess(_("Wipe code removed"));
       return;
@@ -283,12 +283,12 @@ void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
   } else {
     if (has_wipe_code) {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("change the current"),
-                        _("wipe code?"), NULL, NULL, NULL);
+                        NULL, _("Do you really want to"),
+                        _("change the current"), _("wipe code?"), NULL, NULL);
     } else {
       layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        _("Do you really want to"), _("set a new wipe code?"),
-                        NULL, NULL, NULL, NULL);
+                        NULL, _("Do you really want to"),
+                        _("set a new wipe code?"), NULL, NULL, NULL);
     }
   }
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
@@ -366,9 +366,9 @@ void fsm_msgGetEntropy(const GetEntropy *msg) {
   CHECK_PIN
 
 #if !DEBUG_RNG
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                     _("Do you really want to"), _("send entropy?"), NULL, NULL,
-                    NULL, NULL);
+                    NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
@@ -507,9 +507,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
 
   if (msg->has_label) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                       _("Do you really want to"), _("change name to"),
-                      msg->label, "?", NULL, NULL);
+                      msg->label, "?", NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -517,9 +517,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_language) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                       _("Do you really want to"), _("change language to"),
-                      (fsm_getLang(msg) ? "中文" : "English"), "?", NULL, NULL);
+                      (fsm_getLang(msg) ? "中文" : "English"), "?", NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -528,10 +528,10 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if (msg->has_use_passphrase) {
     layoutDialogSwipe(
-        &bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+        &bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
         _("Do you really want to"),
         msg->use_passphrase ? _("enable passphrase") : _("disable passphrase"),
-        _("protection?"), NULL, NULL, NULL);
+        _("protection?"), NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -539,9 +539,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_homescreen) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                       _("Do you really want to"), _("change the home screen"),
-                      NULL, NULL, NULL, NULL);
+                      NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -572,9 +572,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
       (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                       _("Do you really want to"), _("change fastpay settings"),
-                      NULL, NULL, NULL, NULL);
+                      NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -582,9 +582,9 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_use_ble) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                       _("Do you really want to"), _("change bluetooth"),
-                      _("status always?"), NULL, NULL, NULL);
+                      _("status always?"), NULL, NULL);
 
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
@@ -721,7 +721,7 @@ void fsm_msgGetNextU2FCounter() {
 }
 
 static void progress_callback(uint32_t iter, uint32_t total) {
-  layoutProgress(_("Please wait"), 1000 * iter / total);
+  layoutProgressAdapter(_("Please wait"), 1000 * iter / total);
 }
 
 void fsm_msgGetFirmwareHash(const GetFirmwareHash *msg) {

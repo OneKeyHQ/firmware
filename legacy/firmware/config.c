@@ -28,6 +28,7 @@
 #include "bip32.h"
 #include "bip39.h"
 #include "ble.h"
+#include "cardano.h"
 #include "common.h"
 #include "config.h"
 #include "curves.h"
@@ -171,6 +172,8 @@ typedef struct {
   secbool seedCached;
   MessageType authorization_type;
   AuthorizeCoinJoin coinjoin_authorization;
+  uint8_t cardano_icarus_secret[96];
+  secbool cardanoSecretCached;
 } Session;
 
 static void session_clearCache(Session *session);
@@ -542,6 +545,9 @@ void session_clearCache(Session *session) {
   session->authorization_type = 0;
   memzero(&session->coinjoin_authorization,
           sizeof(session->coinjoin_authorization));
+  memzero(session->cardano_icarus_secret,
+          sizeof(session->cardano_icarus_secret));
+  session->cardanoSecretCached = false;
 }
 
 void config_lockDevice(void) {
@@ -766,10 +772,28 @@ const uint8_t *config_getSeed(void) {
     char oldTiny = usbTiny(1);
     mnemonic_to_seed(mnemonic, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
+
+    // Cardano ICARUS
+    uint8_t mnemonic_bits[64] = {0};
+    int mnemonic_bits_len = mnemonic_to_bits(mnemonic, mnemonic_bits);
+    if (mnemonic_bits_len == 0 || mnemonic_bits_len % 33 != 0) {
+      fsm_sendFailure(FailureType_Failure_ProcessError, _("Invalid mnemonic"));
+      return false;
+    }
+    int entropy_len = mnemonic_bits_len - mnemonic_bits_len / 33;
+    int mnemonic_bytes_used = 0;
+
+    // Exclude checksum (original Icarus spec)
+    mnemonic_bytes_used = entropy_len / 8;
+    secret_from_entropy_cardano_icarus(
+        (const uint8_t *)passphrase, strlen(passphrase), mnemonic_bits,
+        mnemonic_bytes_used, activeSessionCache->cardano_icarus_secret, NULL);
+
     memzero(mnemonic, sizeof(mnemonic));
     memzero(passphrase, sizeof(passphrase));
     usbTiny(oldTiny);
     activeSessionCache->seedCached = sectrue;
+    activeSessionCache->cardanoSecretCached = sectrue;
     return activeSessionCache->seed;
   } else {
     fsm_sendFailure(FailureType_Failure_NotInitialized,
@@ -852,6 +876,29 @@ bool config_getRootNode(HDNode *node, const char *curve) {
     fsm_sendFailure(FailureType_Failure_NotInitialized, _("Unsupported curve"));
   }
   return result;
+}
+
+bool config_getCardanoRootNode(HDNode *node) {
+  if (activeSessionCache == NULL) {
+    fsm_sendFailure(FailureType_Failure_InvalidSession, "Invalid session");
+    return false;
+  }
+
+  if (activeSessionCache->seedCached != sectrue) {
+    const uint8_t *seed = config_getSeed();
+    if (seed == NULL) {
+      return false;
+    }
+  }
+  // activeSessionCache->cardano_icarus_secret
+  int res = hdnode_from_secret_cardano(
+      activeSessionCache->cardano_icarus_secret, node);
+  if (res != 1) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Unexpected failure in constructing cardano node"));
+    return false;
+  }
+  return true;
 }
 
 bool config_getLabel(char *dest, uint16_t dest_size) {
