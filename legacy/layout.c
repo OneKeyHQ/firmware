@@ -386,7 +386,7 @@ void layoutFillBleVersion(uint8_t line) {
 extern void shutdown(void);
 
 void layoutError(const char *line1, const char *line2) {
-  layoutDialog(&bmp_icon_error, NULL, NULL, NULL, line1, line2, NULL,
-               "Your device", "will reset.", NULL);
+  layoutDialogCenterAdapterEx(&bmp_icon_error, NULL, NULL, NULL, line1, line2,
+                              "Your device", "will reset.");
   shutdown();
 }

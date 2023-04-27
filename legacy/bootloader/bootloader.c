@@ -43,8 +43,9 @@ void layoutFirmwareFingerprint(const uint8_t *hash) {
   for (int i = 0; i < 4; i++) {
     data2hex(hash + i * 8, 8, str[i]);
   }
-  layoutDialog(&bmp_icon_question, "Abort", "Continue", "Compare fingerprints",
-               str[0], str[1], str[2], str[3], NULL, NULL);
+  layoutDialogCenterAdapterEx(NULL, &bmp_bottom_left_close,
+                              &bmp_bottom_right_confirm, "Compare fingerprints",
+                              str[0], str[1], str[2], str[3]);
 }
 
 bool get_button_response(void) {
@@ -56,15 +57,15 @@ bool get_button_response(void) {
 }
 
 void show_halt(const char *line1, const char *line2) {
-  layoutDialog(&bmp_icon_error, NULL, NULL, NULL, line1, line2, NULL,
-               "Your device", "will be poweroff.", NULL);
+  layoutDialogCenterAdapterEx(&bmp_icon_error, NULL, NULL, NULL, line1, line2,
+                              "Your device", "will be poweroff.");
   delay_ms(1000);
   shutdown();
 }
 
 void show_unplug(const char *line1, const char *line2) {
-  layoutDialog(&bmp_icon_ok, NULL, NULL, NULL, line1, line2, NULL,
-               "Your device", "will be poweroff.", NULL);
+  layoutDialogCenterAdapterEx(&bmp_icon_ok, NULL, NULL, NULL, line1, line2,
+                              "Your device", "will be poweroff.");
   delay_ms(1000);
 }
 
@@ -75,9 +76,9 @@ void show_unofficial_warning(const uint8_t *hash) {
 // so just show hash for a while to see bootloader started
 // but continue
 #if PRODUCTION
-  layoutDialog(&bmp_icon_warning, "Abort", "I'll take the risk", NULL,
-               "WARNING!", NULL, "Unofficial firmware", "detected.", NULL,
-               NULL);
+  layoutDialogCenterAdapterEx(
+      &bmp_icon_warning, NULL, NULL, NULL, "Installation Aborted!",
+      "Repeat the procedure with", "OneKey official firmware", NULL);
 
   bool but = get_button_response();
   if (!but) {  // no button was pressed -> halt
