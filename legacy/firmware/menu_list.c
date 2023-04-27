@@ -57,8 +57,8 @@ void menu_erase_device(int index) {
     }
   }
 #if !EMULATOR
-  // svc_system_reset();
-  reset_to_firmware();
+  svc_system_reset();
+  // reset_to_firmware();
 #endif
 }
 
