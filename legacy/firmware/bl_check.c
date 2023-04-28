@@ -26,6 +26,7 @@
 #include "gettext.h"
 #include "layout.h"
 #include "memory.h"
+#include "oled.h"
 #include "util.h"
 
 char bootloader_version[8] = {0};
@@ -246,17 +247,16 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
   // YOUR DEVICE.
 
   layoutDialogCenterAdapterEx(
-      &bmp_icon_warning, &bmp_bottom_left_close, &bmp_bottom_right_confirm,
-      NULL, _("DO NOT power off during"), _("update,or it may cause"),
-      _("irreversible malfunction"), NULL);
+      &bmp_icon_warning, NULL, NULL, NULL, _("DO NOT power off during"),
+      _("update,or it may cause"), _("irreversible malfunction"), NULL);
 
-  while (1) {
-    uint8_t key = keyScan();
-    if (key == KEY_CONFIRM) {
-      break;
-    } else if (key == KEY_CANCEL) {
-      return;
-    }
+  char delay_str[4] = "3s";
+  for (int i = 2; i >= 0; i--) {
+    oledclearLine(7);
+    delay_str[0] = '1' + i;
+    oledDrawStringCenter(OLED_WIDTH / 2, 54, delay_str, FONT_STANDARD);
+    oledRefresh();
+    delay_ms(1000);
   }
 
   // unlock sectors
