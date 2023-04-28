@@ -806,6 +806,7 @@ const char *languages[][2] = {
     {"Send SOL", "发送 SOL"},
     // layout2.c
     {"Send anyway?", ""},
+    {"Send to", "发送给"},
     {"Send to:", "发送给:"},
     {"Sender", "发送方"},
     // layout2.c

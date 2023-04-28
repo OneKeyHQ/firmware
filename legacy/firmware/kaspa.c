@@ -109,8 +109,7 @@ void kaspa_sign_sighash(HDNode *node, const uint8_t *raw_message,
   }
   // show display
   if (show_confirm_signing(address, sizeof(address))) {
-    if (!layoutBlindSign("Kaspa", false, NULL, address, raw_message,
-                         raw_message_len, NULL, NULL, NULL, NULL, NULL, NULL)) {
+    if (!layoutBlindSign(address)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled,
                       "Signing cancelled by user");
       kaspa_signing_abort();

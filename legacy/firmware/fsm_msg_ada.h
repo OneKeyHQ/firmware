@@ -160,7 +160,6 @@ void fsm_msgCardanoTxAuxiliaryData(CardanoTxAuxiliaryData *msg) {
     layoutHome();
     return;
   }
-  hash_stage();
 }
 
 void fsm_msgCardanoPoolOwner(CardanoPoolOwner *msg) {  // unsupport

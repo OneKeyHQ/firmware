@@ -39,44 +39,13 @@ static CardanoTxItemAck ada_msg_item_ack;
 static CardanoSignTxFinished ada_msg_sign_tx_finished;
 extern int convert_bits(uint8_t *out, size_t *outlen, int outbits,
                         const uint8_t *in, size_t inlen, int inbits, int pad);
+static HDNode ada_node;
 
 bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
                              size_t address_n_count, uint32_t *fingerprint) {
-  int res;
-  char mnemonic[MAX_MNEMONIC_LEN + 1] = {0};
-  char passphrase[MAX_PASSPHRASE_LEN + 1] = {0};
-  if (!config_hasMnemonic()) {
-    return false;
-  }
-  config_getMnemonic(mnemonic, sizeof(mnemonic));
-  if (!protectPassphrase(passphrase)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Passphrase dismissed"));
-    return false;
-  }
-
-  uint8_t mnemonic_bits[64] = {0};
-  int mnemonic_bits_len = mnemonic_to_bits(mnemonic, mnemonic_bits);
-  if (mnemonic_bits_len == 0 || mnemonic_bits_len % 33 != 0) {
-    fsm_sendFailure(FailureType_Failure_ProcessError, _("Invalid mnemonic"));
-    return false;
-  }
-  int entropy_len = mnemonic_bits_len - mnemonic_bits_len / 33;
-  int mnemonic_bytes_used = 0;
-
-  // Exclude checksum (original Icarus spec)
-  mnemonic_bytes_used = entropy_len / 8;
-
-  uint8_t icarus_secret[96] = {0};
-  secret_from_entropy_cardano_icarus((const uint8_t *)passphrase,
-                                     strlen(passphrase), mnemonic_bits,
-                                     mnemonic_bytes_used, icarus_secret, NULL);
-
-  res = hdnode_from_secret_cardano(icarus_secret, node);
-  if (res != 1) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Unexpected failure in constructing cardano node"));
-    return false;
+  if (!config_getCardanoRootNode(node)) {
+    layoutHome();
+    return 0;
   }
   if (hdnode_private_ckd_cached(node, address_n, address_n_count,
                                 fingerprint) == 0) {
@@ -85,6 +54,21 @@ bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
     return false;
   }
   hdnode_fill_public_key(node);
+
+  return true;
+}
+
+bool deriveCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
+                            size_t address_n_count, uint32_t *fingerprint) {
+  memcpy(node, &ada_node, sizeof(HDNode));
+  if (hdnode_private_ckd_cached(node, address_n, address_n_count,
+                                fingerprint) == 0) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Failed to derive private key"));
+    return false;
+  }
+  hdnode_fill_public_key(node);
+
   return true;
 }
 
@@ -160,8 +144,8 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
     uint8_t extpubkey[64] = {0};
     HDNode node = {0};
     uint32_t fingerprint;
-    fsm_getCardanoIcaruNode(&node, address_parameters->address_n,
-                            address_parameters->address_n_count, &fingerprint);
+    deriveCardanoIcaruNode(&node, address_parameters->address_n,
+                           address_parameters->address_n_count, &fingerprint);
     memcpy(extpubkey, node.public_key + 1, 32);
     memcpy(extpubkey + 32, node.chain_code, 32);
 
@@ -262,9 +246,8 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
     if (address_parameters->address_n_count > 0) {
       HDNode node = {0};
       uint32_t fingerprint;
-      fsm_getCardanoIcaruNode(&node, address_parameters->address_n,
-                              address_parameters->address_n_count,
-                              &fingerprint);
+      deriveCardanoIcaruNode(&node, address_parameters->address_n,
+                             address_parameters->address_n_count, &fingerprint);
       memcpy(public_key, node.public_key + 1, 32);
 
       uint8_t hash[ADDRESS_KEY_HASH_SIZE] = {0};
@@ -285,9 +268,9 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
     } else if (address_parameters->address_n_staking_count > 0) {
       HDNode node = {0};
       uint32_t fingerprint;
-      fsm_getCardanoIcaruNode(&node, address_parameters->address_n_staking,
-                              address_parameters->address_n_staking_count,
-                              &fingerprint);
+      deriveCardanoIcaruNode(&node, address_parameters->address_n_staking,
+                             address_parameters->address_n_staking_count,
+                             &fingerprint);
       memcpy(public_key, node.public_key + 1, 32);
       uint8_t hash[ADDRESS_KEY_HASH_SIZE] = {0};
       blake2b(public_key, 32, hash, ADDRESS_KEY_HASH_SIZE);
@@ -318,6 +301,16 @@ bool derive_bytes(const CardanoAddressParametersType *address_parameters,
 bool ada_get_address(const CardanoGetAddress *msg, char *address) {
   uint8_t address_bytes[128] = {0};
   int address_bytes_len = 0;
+  memset(&ada_node, 0, sizeof(HDNode));
+  if (!config_hasMnemonic()) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("No mnemonic"));
+    return false;
+  }
+  if (!config_getCardanoRootNode(&ada_node)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Deriving root failed"));
+    return false;
+  }
   derive_bytes(&msg->address_parameters, msg->network_id, msg->protocol_magic,
                address_bytes, &address_bytes_len);
 
@@ -402,6 +395,7 @@ void txHashBuilder_addInput(const CardanoTxInput *input) {
   ada_signer.remainingInputs--;
   cbor_append_txInput(input->prev_hash.bytes, input->prev_hash.size,
                       input->prev_index);
+  msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
 }
 
 // ============================== output ==============================
@@ -444,17 +438,20 @@ static bool layoutOutput(const CardanoTxOutput *output) {
   char desc[32] = {0};
   char str_amount[32] = {0};
 
-  if (output->asset_groups_count > 0) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("The following transaction output contains tokens."),
-                      NULL, NULL, NULL, NULL);
-    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      return false;
-    }
-  }
+  ada_signer.is_change = false;
 
   if (!output->has_address_parameters) {
+    if (output->asset_groups_count > 0) {
+      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                        NULL,
+                        _("The following transaction output contains tokens."),
+                        NULL, NULL, NULL, NULL);
+      if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+        return false;
+      }
+    }
+
     bn_format_uint64(output->amount, NULL, " ADA", 6, 0, false, ',', str_amount,
                      sizeof(str_amount));
     strcat(desc, _("Amount"));
@@ -465,6 +462,8 @@ static bool layoutOutput(const CardanoTxOutput *output) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;
     }
+  } else {
+    ada_signer.is_change = true;
   }
 
   if (output->has_address) {
@@ -594,6 +593,8 @@ bool txHashBuilder_addToken(const CardanoToken *msg) {
 
   uint2str(msg->amount, amount);
 
+  if (ada_signer.is_change) return true;
+
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
                     _("Asset Fingerprint:"), fingerprint, NULL, NULL, NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
@@ -619,17 +620,6 @@ bool txHashBuilder_addToken(const CardanoToken *msg) {
 
 // ============================== FEE ==============================
 
-void txHashBuilder_addFee(uint64_t fee) {
-  // add fee item into the main tx body map
-  BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_FEE);
-  BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, fee);
-
-  ada_signer.state = TX_HASH_BUILDER_IN_FEE;
-  ada_signer.tx_dict_items_count--;
-}
-
-// ============================== TTL ==============================
-
 void txHashBuilder_addTtl(uint64_t ttl) {
   BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_TTL);
   BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, ttl);
@@ -638,13 +628,26 @@ void txHashBuilder_addTtl(uint64_t ttl) {
   ada_signer.tx_dict_items_count--;
 }
 
+void txHashBuilder_addFee(uint64_t fee) {
+  // add fee item into the main tx body map
+  BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_FEE);
+  BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, fee);
+
+  ada_signer.state = TX_HASH_BUILDER_IN_FEE;
+  ada_signer.tx_dict_items_count--;
+
+  if (ada_signer.signertx.has_ttl) {
+    txHashBuilder_addTtl(ada_signer.signertx.ttl);
+  }
+}
+
 static void get_public_key_hash(const uint32_t *address_n,
                                 size_t address_n_count,
                                 uint8_t hash[ADDRESS_KEY_HASH_SIZE]) {
   HDNode node = {0};
   uint32_t fingerprint;
   uint8_t public_key[32] = {0};
-  fsm_getCardanoIcaruNode(&node, address_n, address_n_count, &fingerprint);
+  deriveCardanoIcaruNode(&node, address_n, address_n_count, &fingerprint);
   memcpy(public_key, node.public_key + 1, 32);
   blake2b(public_key, 32, hash, ADDRESS_KEY_HASH_SIZE);
 }
@@ -702,6 +705,10 @@ static bool layoutCertificate(const CardanoTxCertificate *cert) {
 }
 
 bool txHashBuilder_addCertificate(const CardanoTxCertificate *cert) {
+  if (!ada_signer.is_feeed) {
+    txHashBuilder_addFee(ada_signer.signertx.fee);
+    ada_signer.is_feeed = true;
+  }
   if (!layoutCertificate(cert)) {
     return false;
   }
@@ -793,6 +800,10 @@ bool txHashBuilder_addCertificate(const CardanoTxCertificate *cert) {
 // ============================== Withdrawal ==============================
 
 bool txHashBuilder_addWithdrawal(const CardanoTxWithdrawal *wdr) {
+  if (!ada_signer.is_feeed) {
+    txHashBuilder_addFee(ada_signer.signertx.fee);
+    ada_signer.is_feeed = true;
+  }
   if (ada_signer.state != TX_HASH_BUILDER_IN_WITHDRAWALS) {
     // enter Certificate
     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_WITHDRAWALS);
@@ -842,6 +853,10 @@ bool txHashBuilder_addWithdrawal(const CardanoTxWithdrawal *wdr) {
 
 bool txHashBuilder_addAuxiliaryData(const CardanoTxAuxiliaryData *au) {
   CardanoTxAuxiliaryDataSupplement au_data_sup;
+  if (!ada_signer.is_feeed) {
+    txHashBuilder_addFee(ada_signer.signertx.fee);
+    ada_signer.is_feeed = true;
+  }
 
   memset(&au_data_sup, 0, sizeof(CardanoTxAuxiliaryDataSupplement));
 
@@ -870,57 +885,35 @@ bool txHashBuilder_addAuxiliaryData(const CardanoTxAuxiliaryData *au) {
 
 bool hash_stage() {
   switch (ada_signer.state) {
-    case TX_HASH_BUILDER_INIT:
-      msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-      txHashBuilder_enterInputs();
-      break;
     case TX_HASH_BUILDER_IN_INPUTS:
       if (0 == ada_signer.remainingInputs) {
         ada_signer.state = TX_HASH_BUILDER_IN_OUTPUTS;
         txHashBuilder_enterOutputs();
       }
-      if (ada_signer.state != TX_HASH_BUILDER_IN_OUTPUTS) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
-      }
-      //-fallthrough
+      break;
     case TX_HASH_BUILDER_IN_OUTPUTS:
       if (ada_signer.remainingOutputs > 0 ||
           (ada_signer.remainingOutputs == 0 &&
-           ada_signer.outputState != TX_OUTPUT_FINISHED)) {
+           (ada_signer.is_feeed == false))) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
       }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_FEE:
-      txHashBuilder_addFee(ada_signer.signertx.fee);
-      if (0 == ada_signer.tx_dict_items_count) break;
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_TTL:
-      ada_signer.state = TX_HASH_BUILDER_IN_TTL;
-      if (ada_signer.signertx.has_ttl) {
-        txHashBuilder_addTtl(ada_signer.signertx.ttl);
-      }
-      //-fallthrough
+      break;
     case TX_HASH_BUILDER_IN_CERTIFICATES:
       if (ada_signer.remainingCertificates > 0) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
       }
-      //-fallthrough
+      break;
     case TX_HASH_BUILDER_IN_WITHDRAWALS:
       if (ada_signer.remainingWithdrawals > 0) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
       }
-      //-fallthrough
+      break;
     case TX_HASH_BUILDER_IN_AUX_DATA:
       if (ada_signer.signertx.has_auxiliary_data &&
           ada_signer.tx_dict_items_count > 0) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
       }
-      //-fallthrough
+      break;
     case TX_HASH_BUILDER_IN_VALIDITY_INTERVAL_START:
       if (ada_signer.signertx.has_validity_interval_start) {
         BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
@@ -940,76 +933,69 @@ bool hash_stage() {
       //-fallthrough
     case TX_HASH_BUILDER_IN_SCRIPT_DATA_HASH:
       if (ada_signer.signertx.has_script_data_hash) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
-      }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_COLLATERAL_INPUTS:
-      if (ada_signer.remainingCollateralInputs > 0) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
-      }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_REQUIRED_SIGNERS:
-      if (ada_signer.remainingRequiredSigners > 0) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
-      }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_NETWORK_ID:
-      if (ada_signer.signertx.has_include_network_id &&
-          ada_signer.signertx.include_network_id) {
-        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_NETWORK_ID);
-        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, ada_signer.signertx.network_id);
-        ada_signer.signertx.has_include_network_id = false;
-        ada_signer.state = TX_HASH_BUILDER_IN_COLLATERAL_OUTPUT;
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_SCRIPT_HASH_DATA);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES,
+                            ada_signer.signertx.script_data_hash.size);
+        BUILDER_APPEND_DATA(ada_signer.signertx.script_data_hash.bytes,
+                            ada_signer.signertx.script_data_hash.size);
+        ada_signer.signertx.has_script_data_hash = false;
+        ada_signer.state = TX_HASH_BUILDER_IN_SCRIPT_DATA_HASH;
         ada_signer.tx_dict_items_count--;
+        // msg_write(MessageType_MessageType_CardanoTxItemAck,
+        // &ada_msg_item_ack);
       }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_COLLATERAL_OUTPUT:
-      if (ada_signer.remainingCollateralInputs > 0) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
-      }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_TOTAL_COLLATERAL:
-      if (ada_signer.signertx.has_total_collateral) {
-        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_TOTAL_COLLATERAL);
-        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
-                            ada_signer.signertx.total_collateral);
-        ada_signer.signertx.has_total_collateral = false;
-        ada_signer.tx_dict_items_count--;
-      }
-      //-fallthrough
-    case TX_HASH_BUILDER_IN_REFERENCE_INPUTS:
-      if (ada_signer.remainingReferenceInputs > 0) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-        break;
-      }
-      //-fallthrough
-    case TX_HASH_BUILDER_FINISHED:
-      ada_signer.state = TX_HASH_BUILDER_FINISHED;
       break;
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_IN_COLLATERAL_INPUTS:
+    //   if (ada_signer.remainingCollateralInputs > 0) {
+    //     msg_write(MessageType_MessageType_CardanoTxItemAck,
+    //     &ada_msg_item_ack); break;
+    //   }
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_IN_REQUIRED_SIGNERS:
+    //   if (ada_signer.remainingRequiredSigners > 0) {
+    //     msg_write(MessageType_MessageType_CardanoTxItemAck,
+    //     &ada_msg_item_ack); break;
+    //   }
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_IN_NETWORK_ID:
+    //   if (ada_signer.signertx.has_include_network_id &&
+    //       ada_signer.signertx.include_network_id) {
+    //     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_NETWORK_ID);
+    //     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+    //     ada_signer.signertx.network_id);
+    //     ada_signer.signertx.has_include_network_id = false;
+    //     ada_signer.state = TX_HASH_BUILDER_IN_COLLATERAL_OUTPUT;
+    //     ada_signer.tx_dict_items_count--;
+    //   }
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_IN_COLLATERAL_OUTPUT:
+    //   if (ada_signer.remainingCollateralInputs > 0) {
+    //     msg_write(MessageType_MessageType_CardanoTxItemAck,
+    //     &ada_msg_item_ack); break;
+    //   }
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_IN_TOTAL_COLLATERAL:
+    //   if (ada_signer.signertx.has_total_collateral) {
+    //     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+    //     TX_BODY_KEY_TOTAL_COLLATERAL);
+    //     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+    //                         ada_signer.signertx.total_collateral);
+    //     ada_signer.signertx.has_total_collateral = false;
+    //     ada_signer.tx_dict_items_count--;
+    //   }
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_IN_REFERENCE_INPUTS:
+    //   if (ada_signer.remainingReferenceInputs > 0) {
+    //     msg_write(MessageType_MessageType_CardanoTxItemAck,
+    //     &ada_msg_item_ack); break;
+    //   }
+    //   //-fallthrough
+    // case TX_HASH_BUILDER_FINISHED:
+    //   ada_signer.state = TX_HASH_BUILDER_FINISHED;
+    //   break;
     default:
-      return false;
-  }
-
-  if (!ada_signer.is_finished &&
-      0 == ada_signer.tx_dict_items_count) {  // finish
-    if ((ada_signer.remainingCertificates == 0) &&
-        (ada_signer.remainingCollateralInputs == 0) &&
-        (ada_signer.remainingRequiredSigners == 0) &&
-        (ada_signer.remainingReferenceInputs == 0)) {
-      blake2b_Final(&ada_signer.ctx, ada_signer.digest, 32);
-      if (!layoutFee()) {
-        fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                        "Signing cancelled");
-        layoutHome();
-        return false;
-      }
-      msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-      ada_signer.is_finished = true;
-    }
+      break;
   }
 
   return true;
@@ -1091,16 +1077,33 @@ bool _processs_tx_init(CardanoSignTxInit *msg) {
     ada_signer.remainingReferenceInputs =
         ada_signer.signertx.reference_inputs_count;
 
+  ada_signer.is_feeed = false;
   ada_signer.is_finished = false;
-  return hash_stage();
+
+  memset(&ada_node, 0, sizeof(HDNode));
+  if (!config_hasMnemonic()) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("No mnemonic"));
+    return false;
+  }
+  if (!config_getCardanoRootNode(&ada_node)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("Deriving root failed"));
+    return false;
+  }
+
+  txHashBuilder_enterInputs();
+  msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
+  return true;
 }
 
 void cardano_txack(void) {
   if (ada_signer.state == TX_HASH_BUILDER_IN_AUX_DATA) {
     msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-    ada_signer.state = TX_HASH_BUILDER_IN_VALIDITY_INTERVAL_START;
-    hash_stage();
-  } else if (ada_signer.state != TX_SIGN_FINISHED) {
+    if (ada_signer.tx_dict_items_count > 0) {
+      ada_signer.state = TX_HASH_BUILDER_IN_VALIDITY_INTERVAL_START;
+      hash_stage();
+    }
+  } else if (ada_signer.state == TX_HASH_BUILDER_FINISHED) {
     ada_signer.state = TX_SIGN_FINISHED;
     CardanoTxBodyHash resp;
     memset(&resp, 0, sizeof(CardanoTxBodyHash));
@@ -1115,9 +1118,23 @@ void cardano_txack(void) {
 
 bool cardano_txwitness(CardanoTxWitnessRequest *msg,
                        CardanoTxWitnessResponse *resp) {
+  if (!ada_signer.is_feeed) {
+    txHashBuilder_addFee(ada_signer.signertx.fee);
+    ada_signer.is_feeed = true;
+  }
+  if (!ada_signer.is_finished) {
+    blake2b_Final(&ada_signer.ctx, ada_signer.digest, 32);
+    if (!layoutFee()) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      layoutHome();
+      return false;
+    }
+    ada_signer.state = TX_HASH_BUILDER_FINISHED;
+    ada_signer.is_finished = true;
+  }
   HDNode node = {0};
   uint32_t fingerprint;
-  fsm_getCardanoIcaruNode(&node, msg->path, msg->path_count, &fingerprint);
+  deriveCardanoIcaruNode(&node, msg->path, msg->path_count, &fingerprint);
   resp->pub_key.size = 32;
   memcpy(resp->pub_key.bytes, node.public_key + 1, 32);
   ed25519_public_key pk = {0};

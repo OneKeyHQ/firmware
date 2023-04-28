@@ -126,6 +126,7 @@ const AuthorizeCoinJoin *config_getCoinJoinAuthorization(void);
 
 bool config_getU2FRoot(HDNode *node);
 bool config_getRootNode(HDNode *node, const char *curve);
+bool config_getCardanoRootNode(HDNode *node);
 
 bool config_getLabel(char *dest, uint16_t dest_size);
 void config_setLabel(const char *label);
