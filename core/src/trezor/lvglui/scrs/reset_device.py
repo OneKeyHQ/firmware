@@ -40,6 +40,7 @@ class MnemonicDisplay(FullSizeWindow):
             row_dsc=row_dsc,
             col_dsc=col_dsc,
             align_base=self.subtitle,
+            pos=(-8, 40),
         )
         word_style = (
             StyleWrapper()

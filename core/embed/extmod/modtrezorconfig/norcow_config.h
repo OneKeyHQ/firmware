@@ -27,7 +27,7 @@
 
 #if PRODUCTION_MODEL == 'H'
 #define NORCOW_SECTOR_SIZE (64 * 1024)
-#elif defined TREZOR_MODEL_T
+#elif defined TREZOR_MODEL_T || defined TREZOR_MODEL_R
 #define NORCOW_SECTOR_SIZE (64 * 1024)
 #elif defined TREZOR_MODEL_1
 #define NORCOW_SECTOR_SIZE (16 * 1024)
@@ -43,4 +43,4 @@
  */
 #define NORCOW_VERSION ((uint32_t)0x00000003)
 
-#endif
+#endif  //__NORCOW_CONFIG_H__

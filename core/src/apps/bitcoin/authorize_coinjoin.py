@@ -1,19 +1,19 @@
 from micropython import const
 from typing import TYPE_CHECKING
 
-from trezor import ui, wire
+from trezor import wire
 from trezor.enums import ButtonRequestType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs import lv
 from trezor.messages import AuthorizeCoinJoin, Success
-from trezor.strings import format_amount
 from trezor.ui.layouts import confirm_action, confirm_coinjoin, confirm_metadata
 
 from apps.common import authorization, safety_checks
-from apps.common.paths import validate_path
+from apps.common.keychain import FORBIDDEN_KEY_PATH
+from apps.common.paths import SLIP25_PURPOSE, validate_path
 
 from .authorization import FEE_RATE_DECIMALS
-from .common import BIP32_WALLET_DEPTH
+from .common import BIP32_WALLET_DEPTH, format_fee_rate
 from .keychain import validate_path_against_script_type, with_keychain
 
 if TYPE_CHECKING:
@@ -52,28 +52,31 @@ async def authorize_coinjoin(
         lv.color_hex(coin.primary_color),
         f"A:/res/{coin.icon}",
     )
+    if msg.address_n[0] != SLIP25_PURPOSE and safety_checks.is_strict():
+        raise FORBIDDEN_KEY_PATH
+
     await confirm_action(
         ctx,
         "coinjoin_coordinator",
         title=_(i18n_keys.TITLE__AUTHORIZE_COINJOIN),
         description="Do you really want to take part in a CoinJoin transaction at:\n{}",
         description_param=msg.coordinator,
-        description_param_font=ui.MONO,
-        icon=ui.ICON_RECOVERY,
         primary_color=ctx.primary_color,
     )
-
-    max_fee_per_vbyte = format_amount(msg.max_fee_per_kvbyte, 3)
-    await confirm_coinjoin(ctx, coin.coin_name, msg.max_rounds, max_fee_per_vbyte)
 
     validation_path = msg.address_n + [0] * BIP32_WALLET_DEPTH
     await validate_path(
         ctx,
         keychain,
         validation_path,
+        msg.address_n[0] == SLIP25_PURPOSE,
         validate_path_against_script_type(
             coin, address_n=validation_path, script_type=msg.script_type
         ),
+    )
+
+    max_fee_per_vbyte = format_fee_rate(
+        msg.max_fee_per_kvbyte / 1000, coin, include_shortcut=True
     )
 
     if msg.max_fee_per_kvbyte > coin.maxfee_kb:
@@ -81,11 +84,12 @@ async def authorize_coinjoin(
             ctx,
             "fee_over_threshold",
             "High mining fee",
-            "The mining fee is unexpectedly high.",
-            max_fee_per_vbyte + " sats/vbyte",
+            "The mining fee of\n{}\nis unexpectedly high.",
+            max_fee_per_vbyte,
             ButtonRequestType.FeeOverThreshold,
-            description="MINING FEE",
         )
+
+    await confirm_coinjoin(ctx, coin.coin_name, msg.max_rounds, max_fee_per_vbyte)
 
     authorization.set(msg)
 

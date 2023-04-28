@@ -1,4 +1,5 @@
 # generated from all_modules.py.mako
+# (by running `make templates` in `core`)
 # do not edit manually!
 # flake8: noqa
 # fmt: off
@@ -308,12 +309,16 @@ trezor.ui.constants
 import trezor.ui.constants
 trezor.ui.constants.t1
 import trezor.ui.constants.t1
+trezor.ui.constants.tr
+import trezor.ui.constants.tr
 trezor.ui.constants.tt
 import trezor.ui.constants.tt
 trezor.ui.container
 import trezor.ui.container
 trezor.ui.layouts
 import trezor.ui.layouts
+trezor.ui.layouts.altcoin
+import trezor.ui.layouts.altcoin
 trezor.ui.layouts.common
 import trezor.ui.layouts.common
 trezor.ui.layouts.lvgl
@@ -326,8 +331,14 @@ trezor.ui.layouts.lvgl.recovery
 import trezor.ui.layouts.lvgl.recovery
 trezor.ui.layouts.lvgl.reset
 import trezor.ui.layouts.lvgl.reset
+trezor.ui.layouts.recovery
+import trezor.ui.layouts.recovery
+trezor.ui.layouts.reset
+import trezor.ui.layouts.reset
 trezor.ui.layouts.t1
 import trezor.ui.layouts.t1
+trezor.ui.layouts.tr
+import trezor.ui.layouts.tr
 trezor.ui.layouts.tt
 import trezor.ui.layouts.tt
 trezor.ui.layouts.tt.altcoin
@@ -552,12 +563,24 @@ apps.filecoin.transaction
 import apps.filecoin.transaction
 apps.homescreen
 import apps.homescreen
+apps.homescreen.busyscreen
+import apps.homescreen.busyscreen
 apps.homescreen.homescreen
 import apps.homescreen.homescreen
 apps.homescreen.initscreen
 import apps.homescreen.initscreen
 apps.homescreen.lockscreen
 import apps.homescreen.lockscreen
+apps.kaspa
+import apps.kaspa
+apps.kaspa.addresses
+import apps.kaspa.addresses
+apps.kaspa.common
+import apps.kaspa.common
+apps.kaspa.get_address
+import apps.kaspa.get_address
+apps.kaspa.sign_tx
+import apps.kaspa.sign_tx
 apps.management.apply_flags
 import apps.management.apply_flags
 apps.management.apply_settings
@@ -618,8 +641,6 @@ apps.misc.get_ecdh_session_key
 import apps.misc.get_ecdh_session_key
 apps.misc.get_entropy
 import apps.misc.get_entropy
-apps.misc.get_firmware
-import apps.misc.get_firmware
 apps.misc.get_firmware_hash
 import apps.misc.get_firmware_hash
 apps.misc.sign_identity
@@ -766,6 +787,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoTxWitnessType
     trezor.enums.EthereumDataType
     import trezor.enums.EthereumDataType
+    trezor.enums.MoneroNetworkType
+    import trezor.enums.MoneroNetworkType
     trezor.enums.NEMImportanceTransferMode
     import trezor.enums.NEMImportanceTransferMode
     trezor.enums.NEMModificationType
@@ -796,6 +819,8 @@ if not utils.BITCOIN_ONLY:
     import trezor.ui.layouts.tt.webauthn
     trezor.ui.layouts.tt_v2.webauthn
     import trezor.ui.layouts.tt_v2.webauthn
+    trezor.ui.layouts.webauthn
+    import trezor.ui.layouts.webauthn
     apps.binance
     import apps.binance
     apps.binance.get_address
@@ -940,8 +965,6 @@ if not utils.BITCOIN_ONLY:
     import apps.monero.signing.step_01_init_transaction
     apps.monero.signing.step_02_set_input
     import apps.monero.signing.step_02_set_input
-    apps.monero.signing.step_03_inputs_permutation
-    import apps.monero.signing.step_03_inputs_permutation
     apps.monero.signing.step_04_input_vini
     import apps.monero.signing.step_04_input_vini
     apps.monero.signing.step_05_all_inputs_set
@@ -954,22 +977,24 @@ if not utils.BITCOIN_ONLY:
     import apps.monero.signing.step_09_sign_input
     apps.monero.signing.step_10_sign_final
     import apps.monero.signing.step_10_sign_final
+    apps.monero.xmr
+    import apps.monero.xmr
     apps.monero.xmr.addresses
     import apps.monero.xmr.addresses
     apps.monero.xmr.bulletproof
     import apps.monero.xmr.bulletproof
+    apps.monero.xmr.chacha_poly
+    import apps.monero.xmr.chacha_poly
+    apps.monero.xmr.clsag
+    import apps.monero.xmr.clsag
     apps.monero.xmr.credentials
     import apps.monero.xmr.credentials
-    apps.monero.xmr.crypto
-    import apps.monero.xmr.crypto
-    apps.monero.xmr.crypto.chacha_poly
-    import apps.monero.xmr.crypto.chacha_poly
+    apps.monero.xmr.crypto_helpers
+    import apps.monero.xmr.crypto_helpers
     apps.monero.xmr.keccak_hasher
     import apps.monero.xmr.keccak_hasher
     apps.monero.xmr.key_image
     import apps.monero.xmr.key_image
-    apps.monero.xmr.mlsag
-    import apps.monero.xmr.mlsag
     apps.monero.xmr.mlsag_hasher
     import apps.monero.xmr.mlsag_hasher
     apps.monero.xmr.monero
@@ -998,8 +1023,6 @@ if not utils.BITCOIN_ONLY:
     import apps.monero.xmr.serialize_messages.tx_prefix
     apps.monero.xmr.serialize_messages.tx_rsig_bulletproof
     import apps.monero.xmr.serialize_messages.tx_rsig_bulletproof
-    apps.monero.xmr.types
-    import apps.monero.xmr.types
     apps.nem
     import apps.nem
     apps.nem.get_address
@@ -1108,10 +1131,14 @@ if not utils.BITCOIN_ONLY:
     import apps.webauthn.resident_credentials
     apps.zcash
     import apps.zcash
+    apps.zcash.f4jumble
+    import apps.zcash.f4jumble
     apps.zcash.hasher
     import apps.zcash.hasher
     apps.zcash.signer
     import apps.zcash.signer
+    apps.zcash.unified_addresses
+    import apps.zcash.unified_addresses
 
 # generate full alphabet
 a

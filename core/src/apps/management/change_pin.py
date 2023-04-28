@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from storage.device import is_initialized
 from trezor import config, wire
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
+from trezor.lvglui.lv_colors import lv_colors
 from trezor.messages import Success
 from trezor.ui.layouts import confirm_action, show_success
 
@@ -70,19 +71,20 @@ async def change_pin(ctx: wire.Context, msg: ChangePin) -> Success:
 
 def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[None]:
     has_pin = config.has_pin()
+
     if msg.remove and has_pin:  # removing pin
         return confirm_action(
             ctx,
             "set_pin",
-            _(i18n_keys.TITLE__PIN_DISABLED),
-            description=_(i18n_keys.SUBTITLE__SET_PIN_PIN_DISABLED),
+            _(i18n_keys.TITLE__DISABLE_PIN_PROTECTION),
+            description=_(i18n_keys.SUBTITLE__DISABLE_PIN_PROTECTION),
             action="",
-            reverse=True,
             anim_dir=2,
+            verb=_(i18n_keys.BUTTON__REMOVE),
+            primary_color=lv_colors.ONEKEY_YELLOW,
         )
 
     if not msg.remove:  # changing pin
-        from trezor.lvglui.lv_colors import lv_colors
 
         return confirm_action(
             ctx,
@@ -90,7 +92,6 @@ def require_confirm_change_pin(ctx: wire.Context, msg: ChangePin) -> Awaitable[N
             _(i18n_keys.TITLE__CHANGE_PIN),
             description=_(i18n_keys.SUBTITLE__SETUP_CREATE_ENABLE_PIN_PROTECTION),
             action="",
-            reverse=True,
             anim_dir=2,
             primary_color=lv_colors.ONEKEY_YELLOW,
         )

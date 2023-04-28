@@ -498,7 +498,6 @@ message CardanoTxBodyHash {
 message CardanoSignTxFinished {
 }
 
-
 /**
  * Request: Ask device to sign message
  * @start

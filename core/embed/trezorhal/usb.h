@@ -145,5 +145,6 @@ void usb_start(void);
 void usb_stop(void);
 void usb_msc_init(void);
 secbool is_usb_connected(void);
+secbool usb_configured(void);
 
 #endif

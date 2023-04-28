@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         EosActionVoteProducer,
         EosAuthorization,
     )
-    from trezor.ui.layouts import PropertyType
+    from trezor.ui.layouts.lvgl import PropertyType
 
 
 async def confirm_action_buyram(ctx: wire.Context, msg: EosActionBuyRam) -> None:

@@ -54,13 +54,13 @@ extend google.protobuf.EnumOptions {
 
 /** Options for tagging message types */
 extend google.protobuf.MessageOptions {
-    optional bool unstable = 52001;   // indicate that a message definition might change at any time
+    optional bool experimental_message = 52001;   // indicate that a message is intended for development and beta testing only and its definition may change at any time
     optional uint32 wire_type = 52002;   // override wire type specified in the MessageType enum
 }
 
 /** Options for tagging field types */
 extend google.protobuf.FieldOptions {
-    optional bool experimental = 53001;   // indicate that a field is intended for development and beta testing only
+    optional bool experimental_field = 53001;   // indicate that a field is intended for development and beta testing only
 }
 
 /** Options for tagging files with protobuf definitions */
@@ -75,7 +75,7 @@ extend google.protobuf.FileOptions {
  */
 enum MessageType {
     option (has_bitcoin_only_values) = true;
-
+    option allow_alias = true;
     // Management
     MessageType_Initialize = 0 [(bitcoin_only) = true, (wire_in) = true, (wire_tiny) = true];
     MessageType_Ping = 1 [(bitcoin_only) = true, (wire_in) = true];
@@ -87,6 +87,7 @@ enum MessageType {
     MessageType_Entropy = 10 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_LoadDevice = 13 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_ResetDevice = 14 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_SetBusy = 16 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_Features = 17 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_PinMatrixRequest = 18 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_PinMatrixAck = 19 [(bitcoin_only) = true, (wire_in) = true, (wire_tiny) = true, (wire_no_fsm) = true];
@@ -116,9 +117,9 @@ enum MessageType {
     MessageType_RebootToBootloader = 87 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_GetFirmwareHash = 88 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_FirmwareHash = 89 [(bitcoin_only) = true, (wire_out) = true];
-    MessageType_GetFirmware = 90 [(bitcoin_only) = true, (wire_in) = true];
-    MessageType_FirmwareChunk = 91 [(bitcoin_only) = true, (wire_out) = true];
-    MessageType_FirmwareChunkAck = 92 [(bitcoin_only) = true, (wire_in) = true];
+    reserved 90 to 92;
+    MessageType_UnlockPath = 93 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_UnlockedPathRequest = 94 [(bitcoin_only) = true, (wire_out) = true];
 
     MessageType_SetU2FCounter = 63 [(wire_in) = true];
     MessageType_GetNextU2FCounter = 80 [(wire_in) = true];
@@ -303,8 +304,6 @@ enum MessageType {
     MessageType_MoneroTransactionInitAck = 502 [(wire_out) = true];
     MessageType_MoneroTransactionSetInputRequest = 503 [(wire_out) = true];
     MessageType_MoneroTransactionSetInputAck = 504 [(wire_out) = true];
-    MessageType_MoneroTransactionInputsPermutationRequest = 505 [(wire_out) = true];
-    MessageType_MoneroTransactionInputsPermutationAck = 506 [(wire_out) = true];
     MessageType_MoneroTransactionInputViniRequest = 507 [(wire_out) = true];
     MessageType_MoneroTransactionInputViniAck = 508 [(wire_out) = true];
     MessageType_MoneroTransactionAllInputsSetRequest = 509 [(wire_out) = true];
@@ -442,6 +441,13 @@ enum MessageType {
     MessageType_FilecoinAddress = 11201 [(wire_out) = true];
     MessageType_FilecoinSignTx = 11202 [(wire_in) = true];
     MessageType_FilecoinSignedTx = 11203 [(wire_out) = true];
+    // Kaspa
+    MessageType_KaspaGetAddress = 11300 [(wire_in) = true];
+    MessageType_KaspaAddress = 11301 [(wire_out) = true];
+    MessageType_KaspaSignTx = 11302 [(wire_in) = true];
+    MessageType_KaspaSignedTx = 11303 [(wire_out) = true];
+    MessageType_KaspaTxInputRequest = 11304 [(wire_out) = true];
+    MessageType_KaspaTxInputAck = 11305 [(wire_in) = true];
 
     //onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];

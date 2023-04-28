@@ -2,6 +2,9 @@
 
 #include "mipi_lcd.h"
 
+static int DISPLAY_BACKLIGHT = -1;
+static int DISPLAY_ORIENTATION = -1;
+
 LCD_PARAMS lcd_params;
 LCD_TIME_SEQUENCE lcd_time_seq = {.hsync = ST7701S_480X800_HSYNC,
                                   .hfp = ST7701S_480X800_HFP,
@@ -462,8 +465,31 @@ void st7701_init_sequence(void) {
 
 #define LED_PWM_TIM_PERIOD (100)
 
-void display_set_backlight(int val) {
-  TIM1->CCR1 = (LED_PWM_TIM_PERIOD - 1) * val / 255;
+int display_backlight(int val) {
+#if TREZOR_MODEL == 1
+  val = 255;
+#endif
+  if (DISPLAY_BACKLIGHT != val && val >= 0 && val <= 255) {
+    DISPLAY_BACKLIGHT = val;
+    TIM1->CCR1 = (LED_PWM_TIM_PERIOD - 1) * val / 255;
+  }
+  return DISPLAY_BACKLIGHT;
+}
+
+int display_orientation(int degrees) {
+  if (degrees != DISPLAY_ORIENTATION) {
+#if defined TREZOR_MODEL_T
+    if (degrees == 0 || degrees == 90 || degrees == 180 || degrees == 270) {
+#elif TREZOR_MODEL == 1
+    if (degrees == 0 || degrees == 180) {
+#else
+#error Unknown Trezor model
+#endif
+      DISPLAY_ORIENTATION = degrees;
+      // noop
+    }
+  }
+  return DISPLAY_ORIENTATION;
 }
 
 void lcd_init(uint32_t lcd_width, uint32_t lcd_height, uint32_t pixel_format) {
@@ -630,8 +656,8 @@ void lcd_para_init(uint32_t lcd_width, uint32_t lcd_height,
 
 void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {}
 
-void display_set_orientation(int degrees) {}
-
+int display_get_orientation(void) { return DISPLAY_ORIENTATION; }
+void display_reset_state() {}
 void display_clear_save(void) {}
 const char *display_save(const char *prefix) { return NULL; }
 void display_refresh(void) {}

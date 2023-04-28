@@ -12,6 +12,7 @@ MEMORY {
 }
 
 main_stack_base = ORIGIN(SRAM) + LENGTH(SRAM); /* 8-byte aligned full descending stack */
+_sstack = main_stack_base - SIZEOF(.stack);
 _estack = main_stack_base;
 
 /* used by the startup code to populate variables used by the C code */
@@ -85,7 +86,7 @@ SECTIONS {
   } >SRAM
 
   .stack : ALIGN(8) {
-    . = 4K; /* this acts as a build time assertion that at least this much memory is available for stack use */
+    . = 16K; /* this acts as a build time assertion that at least this much memory is available for stack use */
   } >SRAM
 
   .heap : ALIGN(4) {

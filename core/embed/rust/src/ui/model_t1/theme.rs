@@ -1,15 +1,9 @@
 use crate::ui::{
-    component::text::layout::DefaultTextTheme,
+    component::text::{formatted::FormattedFonts, TextStyle},
     display::{Color, Font},
 };
 
 use super::component::{ButtonStyle, ButtonStyleSheet};
-
-// Font constants.
-pub const FONT_NORMAL: Font = Font::new(-1);
-pub const FONT_MEDIUM: Font = Font::new(-5);
-pub const FONT_BOLD: Font = Font::new(-2);
-pub const FONT_MONO: Font = Font::new(-3);
 
 // Color palette.
 pub const WHITE: Color = Color::rgb(255, 255, 255);
@@ -21,12 +15,12 @@ pub const BG: Color = BLACK; // Default background color.
 pub fn button_default() -> ButtonStyleSheet {
     ButtonStyleSheet {
         normal: &ButtonStyle {
-            font: FONT_BOLD,
+            font: Font::BOLD,
             text_color: BG,
             border_horiz: true,
         },
         active: &ButtonStyle {
-            font: FONT_BOLD,
+            font: Font::BOLD,
             text_color: FG,
             border_horiz: true,
         },
@@ -36,31 +30,26 @@ pub fn button_default() -> ButtonStyleSheet {
 pub fn button_cancel() -> ButtonStyleSheet {
     ButtonStyleSheet {
         normal: &ButtonStyle {
-            font: FONT_BOLD,
+            font: Font::BOLD,
             text_color: FG,
             border_horiz: false,
         },
         active: &ButtonStyle {
-            font: FONT_BOLD,
+            font: Font::BOLD,
             text_color: BG,
             border_horiz: false,
         },
     }
 }
 
-pub struct T1DefaultText;
+pub const TEXT_NORMAL: TextStyle = TextStyle::new(Font::NORMAL, FG, BG, FG, FG);
+pub const TEXT_DEMIBOLD: TextStyle = TextStyle::new(Font::DEMIBOLD, FG, BG, FG, FG);
+pub const TEXT_BOLD: TextStyle = TextStyle::new(Font::BOLD, FG, BG, FG, FG);
+pub const TEXT_MONO: TextStyle = TextStyle::new(Font::MONO, FG, BG, FG, FG);
 
-impl DefaultTextTheme for T1DefaultText {
-    const BACKGROUND_COLOR: Color = BG;
-    const TEXT_FONT: Font = FONT_NORMAL;
-    const TEXT_COLOR: Color = FG;
-    const HYPHEN_FONT: Font = FONT_NORMAL;
-    const HYPHEN_COLOR: Color = FG;
-    const ELLIPSIS_FONT: Font = FONT_NORMAL;
-    const ELLIPSIS_COLOR: Color = FG;
-
-    const NORMAL_FONT: Font = FONT_NORMAL;
-    const MEDIUM_FONT: Font = FONT_MEDIUM;
-    const BOLD_FONT: Font = FONT_BOLD;
-    const MONO_FONT: Font = FONT_MONO;
-}
+pub const FORMATTED: FormattedFonts = FormattedFonts {
+    normal: Font::NORMAL,
+    demibold: Font::DEMIBOLD,
+    bold: Font::BOLD,
+    mono: Font::MONO,
+};

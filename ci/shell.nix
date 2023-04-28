@@ -3,24 +3,29 @@
  }:
 
 let
-  # the last commit from master as of 2022-02-08
+  # the last commit from master as of 2022-08-02
   rustOverlay = import (builtins.fetchTarball {
-    url = "https://github.com/oxalica/rust-overlay/archive/2eae19e246433530998cbf239d5505b7b87bc854.tar.gz";
-    sha256 = "0panx24sqcvx52wza02zsxmpkhg6xld7hklrv7dybc59akqm2ira";
+    url = "https://github.com/oxalica/rust-overlay/archive/b38c1683594aeefa5c3c4dde115401f059146be6.tar.gz";
+    sha256 = "0rk4i42cys2v7k2ir57x5qa8dc37nrs432cdpbr4cddskgvyi8ky";
   });
-  # the last successful build of nixpkgs-unstable as of 2022-02-10
+  # the last successful build of nixpkgs-unstable as of 2022-06-20
   nixpkgs = import (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/1882c6b7368fd284ad01b0a5b5601ef136321292.tar.gz";
-    sha256 = "0zg7ak2mcmwzi2kg29g4v9fvbvs0viykjsg2pwaphm1fi13s7s0i";
+    url = "https://github.com/NixOS/nixpkgs/archive/e0a42267f73ea52adc061a64650fddc59906fc99.tar.gz";
+    sha256 = "0r1dsj51x2rm016xwvdnkm94v517jb1rpn4rk63k6krc4d0n3kh9";
   }) { overlays = [ rustOverlay ]; };
   # commit before python36 was removed
   python36nixpkgs = import (builtins.fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/b9126f77f553974c90ab65520eff6655415fc5f4.tar.gz";
     sha256 = "02s3qkb6kz3ndyx7rfndjbvp4vlwiqc42fxypn3g6jnc0v5jyz95";
   }) { };
+  # commit emulator works fine
+  sdlnixpkgs = import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/1882c6b7368fd284ad01b0a5b5601ef136321292.tar.gz";
+    sha256 = "0zg7ak2mcmwzi2kg29g4v9fvbvs0viykjsg2pwaphm1fi13s7s0i";
+  }) { };
   moneroTests = nixpkgs.fetchurl {
-    url = "https://github.com/ph4r05/monero/releases/download/v0.17.3.0-dev-tests/trezor_tests";
-    sha256 = "sha256-tTQTe/Yk6oURq7GDOEotJ7Y2UpCgyuU5odjEHNTMrmE=";
+    url = "https://github.com/ph4r05/monero/releases/download/v0.18.1.1-dev-tests-u18.04-02/trezor_tests";
+    sha256 = "81424cfc3965abdc24de573274bf631337b52fd25cefc895513214c613fe05c9";
   };
   moneroTestsPatched = nixpkgs.runCommandCC "monero_trezor_tests" {} ''
     cp ${moneroTests} $out
@@ -29,15 +34,15 @@ let
     chmod -w $out
   '';
   # NOTE: don't forget to update Minimum Supported Rust Version in docs/core/build/emulator.md
-  rustProfiles = nixpkgs.rust-bin.stable."1.58.1";
-  rustStable = rustProfiles.minimal.override {
+  rustProfiles = nixpkgs.rust-bin.nightly."2022-08-02";
+  rustNightly = rustProfiles.minimal.override {
     targets = [
       "thumbv7em-none-eabihf" # TT
       "thumbv7m-none-eabi"    # T1
     ];
     # we use rustfmt from nixpkgs because it's built with the nighly flag needed for wrap_comments
     # to use official binary, remove rustfmt from buildInputs and add it to extensions:
-    extensions = [ "clippy" ];
+    extensions = [ "rust-src" "clippy" "rustfmt" ];
   };
   llvmPackages = nixpkgs.llvmPackages_13;
   # see pyright/README.md for update procedure
@@ -68,10 +73,8 @@ stdenvNoCC.mkDerivation ({
     python37
     python36nixpkgs.python36
   ] ++ [
-    SDL2
-    SDL2_image
-    autoflake
-    autoPatchelfHook
+    sdlnixpkgs.SDL2
+    sdlnixpkgs.SDL2_image
     bash
     check
     curl  # for connect tests
@@ -88,14 +91,14 @@ stdenvNoCC.mkDerivation ({
     openssl
     pkgconfig
     poetry
-    protobuf3_6
+    protobuf
     pyright
-    rustfmt
-    rustStable
+    rustNightly
     wget
     zlib
     moreutils
   ] ++ lib.optionals (!stdenv.isDarwin) [
+    autoPatchelfHook
     procps
     valgrind
   ] ++ lib.optionals (stdenv.isDarwin) [

@@ -31,6 +31,9 @@
 #include "touch.h"
 #include "usb.h"
 
+// Whether USB data pins were connected on last check (USB configured)
+bool usb_connected_previously = true;
+
 #define CHECK_PARAM_RANGE(value, minimum, maximum)  \
   if (value < minimum || value > maximum) {         \
     mp_raise_ValueError(#value " is out of range"); \
@@ -75,6 +78,7 @@
 /// BUTTON_RIGHT: int  # button number of right button
 
 /// WireInterface = Union[HID, WebUSB, SPI]
+/// USB_CHECK: int # interface id for check of USB data connection
 
 STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_trezorio)},
@@ -92,7 +96,7 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_UART), MP_ROM_INT(UART_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_USB_STATE), MP_ROM_INT(USB_STATE_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_MOTOR), MP_ROM_PTR(&mod_trezorio_MOTOR_type)},
-#elif TREZOR_MODEL == 1
+#elif defined TREZOR_MODEL_1 || defined TREZOR_MODEL_R
     {MP_ROM_QSTR(MP_QSTR_BUTTON), MP_ROM_INT(BUTTON_IFACE)},
     {MP_ROM_QSTR(MP_QSTR_BUTTON_PRESSED),
      MP_ROM_INT((BTN_EVT_DOWN >> 24) & 0x3U)},
@@ -113,6 +117,8 @@ STATIC const mp_rom_map_elem_t mp_module_trezorio_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_poll), MP_ROM_PTR(&mod_trezorio_poll_obj)},
     {MP_ROM_QSTR(MP_QSTR_POLL_READ), MP_ROM_INT(POLL_READ)},
     {MP_ROM_QSTR(MP_QSTR_POLL_WRITE), MP_ROM_INT(POLL_WRITE)},
+
+    {MP_ROM_QSTR(MP_QSTR_USB_CHECK), MP_ROM_INT(USB_DATA_IFACE)},
 };
 
 STATIC MP_DEFINE_CONST_DICT(mp_module_trezorio_globals,

@@ -43,11 +43,11 @@ CPPPATH_MOD += [
 
 if PRODUCTION_MODEL == 'H':
     SOURCE_MOD += [
-        'embed/extmod/modtrezorui/font_roboto_regular_24.c',
-        'embed/extmod/modtrezorui/font_plusjakartasans_regular_26.c',
+        'embed/extmod/modtrezorui/fonts/font_roboto_regular_24.c',
+        'embed/extmod/modtrezorui/fonts/font_plusjakartasans_regular_26.c',
         'embed/extmod/modtrezorui/mipi_lcd.c',
         'embed/extmod/modtrezorui/display.c',
-        'embed/extmod/modtrezorui/font_bitmap.c',
+        'embed/extmod/modtrezorui/fonts/font_bitmap.c',
         'vendor/micropython/lib/uzlib/adler32.c',
         'vendor/micropython/lib/uzlib/crc32.c',
         'vendor/micropython/lib/uzlib/tinflate.c',
@@ -129,7 +129,7 @@ if PRODUCTION_MODEL == 'H':
 else:
     SOURCE_MOD += [
         'embed/extmod/modtrezorui/display.c',
-        'embed/extmod/modtrezorui/font_bitmap.c',
+        'embed/extmod/modtrezorui/fonts/font_bitmap.c',
     ]
     SOURCE_STMHAL = [
         'vendor/micropython/lib/stm32lib/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c',
@@ -193,14 +193,10 @@ if PRODUCTION_MODEL == 'H':
     CPU_CCFLAGS = '-mthumb -mcpu=cortex-m7 -mfloat-abi=hard -mfpu=fpv5-d16 -mtune=cortex-m7 --specs=nano.specs '
     CPU_MODEL   = 'STM32H747xx'
     CORE_MODEL = 'CORE_CM7'
-elif TREZOR_MODEL == 'T':
+elif TREZOR_MODEL in ('T', 'R'):
     CPU_ASFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16'
     CPU_CCFLAGS = '-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mtune=cortex-m4 '
     CPU_MODEL   = 'STM32F427xx'
-elif TREZOR_MODEL == '1':
-    CPU_ASFLAGS = '-mthumb -mcpu=cortex-m3 -mfloat-abi=soft'
-    CPU_CCFLAGS = '-mthumb -mtune=cortex-m3 -mcpu=cortex-m3 -mfloat-abi=soft '
-    CPU_MODEL   = 'STM32F405xx'
 else:
     raise ValueError('Unknown Trezor model')
 

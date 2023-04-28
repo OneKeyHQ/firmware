@@ -6,13 +6,13 @@ use crate::{
         component::{Event, EventCtx, TimerToken},
         display::{self, Color, Font},
         geometry::{Offset, Point, Rect},
+        util::ResultExt,
     },
-    util::ResultExt,
 };
 
-pub const HEADER_HEIGHT: i32 = 25;
-pub const HEADER_PADDING_SIDE: i32 = 5;
-pub const HEADER_PADDING_BOTTOM: i32 = 12;
+pub const HEADER_HEIGHT: i16 = 25;
+pub const HEADER_PADDING_SIDE: i16 = 5;
+pub const HEADER_PADDING_BOTTOM: i16 = 12;
 
 /// Contains state commonly used in implementations multi-tap keyboards.
 pub struct MultiTapKeyboard {
@@ -111,7 +111,7 @@ impl MultiTapKeyboard {
 
         assert!(!key_text.is_empty());
         // Now we can be sure that a looped iterator will return a value
-        let ch = key_text.chars().cycle().nth(press).unwrap();
+        let ch = unwrap!(key_text.chars().cycle().nth(press));
         if is_pending {
             TextEdit::ReplaceLast(ch)
         } else {
@@ -153,6 +153,10 @@ impl<const L: usize> TextBox<L> {
 
     pub fn is_empty(&self) -> bool {
         self.text.is_empty()
+    }
+
+    pub fn is_full(&self) -> bool {
+        self.text.len() == self.text.capacity()
     }
 
     /// Delete the last character of content, if any.
@@ -207,6 +211,7 @@ impl<const L: usize> TextBox<L> {
     }
 }
 
+/// Create a visible "underscoring" of the last letter of a text.
 pub fn paint_pending_marker(text_baseline: Point, text: &str, font: Font, color: Color) {
     // Measure the width of the last character of input.
     if let Some(last) = text.chars().last() {

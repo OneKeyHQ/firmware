@@ -20,8 +20,8 @@ from hashlib import blake2s
 from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from . import messages
-from .exceptions import Cancelled
-from .tools import expect, session
+from .exceptions import Cancelled, TrezorException
+from .tools import Address, expect, session
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -221,6 +221,19 @@ def cancel_authorization(client: "TrezorClient") -> "MessageType":
     return client.call(messages.CancelAuthorization())
 
 
+@expect(messages.UnlockedPathRequest, field="mac", ret_type=bytes)
+def unlock_path(client: "TrezorClient", n: "Address") -> "MessageType":
+    resp = client.call(messages.UnlockPath(address_n=n))
+
+    # Cancel the UnlockPath workflow now that we have the authentication code.
+    try:
+        client.call(messages.Cancel())
+    except Cancelled:
+        return resp
+    else:
+        raise TrezorException("Unexpected response in UnlockPath flow")
+
+
 @session
 @expect(messages.Success, field="message", ret_type=str)
 def reboot(client: "TrezorClient", boot: bool=True) -> "MessageType":
@@ -328,3 +341,15 @@ def list_dir(client: "TrezorClient", path_dir: str) -> Sequence[messages.FileInf
     else:
         raise RuntimeError(f"Unexpected message {resp}")
 
+
+@expect(messages.Success, field="message", ret_type=str)
+@session
+def set_busy(client: "TrezorClient", expiry_ms: Optional[int]) -> "MessageType":
+    """Sets or clears the busy state of the device.
+
+    In the busy state the device shows a "Do not disconnect" message instead of the homescreen.
+    Setting `expiry_ms=None` clears the busy state.
+    """
+    ret = client.call(messages.SetBusy(expiry_ms=expiry_ms))
+    client.refresh_features()
+    return ret

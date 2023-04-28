@@ -633,7 +633,7 @@ class SettingsScreen(Screen):
         self.title.set_text(_(i18n_keys.TITLE__SETTINGS))
         self.general.label_left.set_text(_(i18n_keys.ITEM__GENERAL))
         self.connect.label_left.set_text(_(i18n_keys.ITEM__CONNECT))
-        self.home_scr.label_left.set_text(_(i18n_keys.ITEM__HOME_SCREEN))
+        self.home_scr.label_left.set_text(_(i18n_keys.ITEM__HOMESCREEN))
         self.security.label_left.set_text(_(i18n_keys.ITEM__SECURITY))
         self.wallet.label_left.set_text(_(i18n_keys.ITEM__WALLET))
         self.about.label_left.set_text(_(i18n_keys.ITEM__ABOUT_DEVICE))

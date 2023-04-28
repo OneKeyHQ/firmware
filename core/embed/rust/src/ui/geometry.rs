@@ -1,20 +1,47 @@
-use core::ops::{Add, Sub};
+use crate::ui::lerp::Lerp;
+use core::ops::{Add, Neg, Sub};
+
+const fn min(a: i16, b: i16) -> i16 {
+    if a < b {
+        a
+    } else {
+        b
+    }
+}
+
+const fn max(a: i16, b: i16) -> i16 {
+    if a > b {
+        a
+    } else {
+        b
+    }
+}
+
+const fn clamp(x: i16, min: i16, max: i16) -> i16 {
+    if x < min {
+        min
+    } else if x > max {
+        max
+    } else {
+        x
+    }
+}
 
 /// Relative offset in 2D space, used for representing translation and
 /// dimensions of objects. Absolute positions on the screen are represented by
 /// the `Point` type.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Offset {
-    pub x: i32,
-    pub y: i32,
+    pub x: i16,
+    pub y: i16,
 }
 
 impl Offset {
-    pub const fn new(x: i32, y: i32) -> Self {
+    pub const fn new(x: i16, y: i16) -> Self {
         Self { x, y }
     }
 
-    pub const fn uniform(a: i32) -> Self {
+    pub const fn uniform(a: i16) -> Self {
         Self::new(a, a)
     }
 
@@ -22,35 +49,35 @@ impl Offset {
         Self::new(0, 0)
     }
 
-    pub const fn x(x: i32) -> Self {
+    pub const fn x(x: i16) -> Self {
         Self::new(x, 0)
     }
 
-    pub const fn y(y: i32) -> Self {
+    pub const fn y(y: i16) -> Self {
         Self::new(0, y)
     }
 
-    pub fn on_axis(axis: Axis, a: i32) -> Self {
+    pub const fn on_axis(axis: Axis, a: i16) -> Self {
         match axis {
             Axis::Horizontal => Self::new(a, 0),
             Axis::Vertical => Self::new(0, a),
         }
     }
 
-    pub fn axis(&self, axis: Axis) -> i32 {
+    pub const fn axis(&self, axis: Axis) -> i16 {
         match axis {
             Axis::Horizontal => self.x,
             Axis::Vertical => self.y,
         }
     }
 
-    pub fn abs(self) -> Self {
+    pub const fn abs(self) -> Self {
         Self::new(self.x.abs(), self.y.abs())
     }
 
     /// With `self` representing a rectangle size, returns top-left corner of
     /// the rectangle such that it is aligned relative to the `point`.
-    pub fn snap(self, point: Point, x: Alignment, y: Alignment) -> Point {
+    pub const fn snap(self, point: Point, x: Alignment, y: Alignment) -> Point {
         let x_off = match x {
             Alignment::Start => 0,
             Alignment::Center => self.x / 2,
@@ -61,7 +88,19 @@ impl Offset {
             Alignment::Center => self.y / 2,
             Alignment::End => self.y,
         };
-        point - Self::new(x_off, y_off)
+        point.ofs(Self::new(-x_off, -y_off))
+    }
+
+    pub const fn neg(self) -> Self {
+        Self::new(-self.x, -self.y)
+    }
+
+    pub const fn add(self, rhs: Offset) -> Self {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
+
+    pub const fn sub(self, rhs: Offset) -> Self {
+        self.add(rhs.neg())
     }
 }
 
@@ -69,7 +108,15 @@ impl Add<Offset> for Offset {
     type Output = Offset;
 
     fn add(self, rhs: Offset) -> Self::Output {
-        Self::new(self.x + rhs.x, self.y + rhs.y)
+        Offset::add(self, rhs)
+    }
+}
+
+impl Neg for Offset {
+    type Output = Offset;
+
+    fn neg(self) -> Self::Output {
+        Offset::neg(self)
     }
 }
 
@@ -77,7 +124,13 @@ impl Sub<Offset> for Offset {
     type Output = Offset;
 
     fn sub(self, rhs: Offset) -> Self::Output {
-        Self::new(self.x - rhs.x, self.y - rhs.y)
+        Offset::sub(self, rhs)
+    }
+}
+
+impl From<Point> for Offset {
+    fn from(val: Point) -> Self {
+        Offset::new(val.x, val.y)
     }
 }
 
@@ -85,12 +138,12 @@ impl Sub<Offset> for Offset {
 /// coordinates, vectors, and offsets are represented by the `Offset` type.
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Point {
-    pub x: i32,
-    pub y: i32,
+    pub x: i16,
+    pub y: i16,
 }
 
 impl Point {
-    pub const fn new(x: i32, y: i32) -> Self {
+    pub const fn new(x: i16, y: i16) -> Self {
         Self { x, y }
     }
 
@@ -98,8 +151,16 @@ impl Point {
         Self::new(0, 0)
     }
 
-    pub fn center(self, rhs: Self) -> Self {
+    pub const fn center(self, rhs: Self) -> Self {
         Self::new((self.x + rhs.x) / 2, (self.y + rhs.y) / 2)
+    }
+
+    pub const fn ofs(self, rhs: Offset) -> Self {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
+
+    pub const fn sub(self, rhs: Point) -> Offset {
+        Offset::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
@@ -107,7 +168,7 @@ impl Add<Offset> for Point {
     type Output = Point;
 
     fn add(self, rhs: Offset) -> Self::Output {
-        Self::new(self.x + rhs.x, self.y + rhs.y)
+        self.ofs(rhs)
     }
 }
 
@@ -115,7 +176,7 @@ impl Sub<Offset> for Point {
     type Output = Point;
 
     fn sub(self, rhs: Offset) -> Self::Output {
-        Self::new(self.x - rhs.x, self.y - rhs.y)
+        self.ofs(-rhs)
     }
 }
 
@@ -123,7 +184,19 @@ impl Sub<Point> for Point {
     type Output = Offset;
 
     fn sub(self, rhs: Point) -> Self::Output {
-        Offset::new(self.x - rhs.x, self.y - rhs.y)
+        Point::sub(self, rhs)
+    }
+}
+
+impl Lerp for Point {
+    fn lerp(a: Self, b: Self, t: f32) -> Self {
+        Point::new(i16::lerp(a.x, b.x, t), i16::lerp(a.y, b.y, t))
+    }
+}
+
+impl From<Offset> for Point {
+    fn from(val: Offset) -> Self {
+        Point::new(val.x, val.y)
     }
 }
 
@@ -131,10 +204,10 @@ impl Sub<Point> for Point {
 /// bottom-right point `x1`,`y1`.
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Rect {
-    pub x0: i32,
-    pub y0: i32,
-    pub x1: i32,
-    pub y1: i32,
+    pub x0: i16,
+    pub y0: i16,
+    pub x1: i16,
+    pub y1: i16,
 }
 
 impl Rect {
@@ -160,7 +233,7 @@ impl Rect {
         }
     }
 
-    pub fn from_center_and_size(p: Point, size: Offset) -> Self {
+    pub const fn from_center_and_size(p: Point, size: Offset) -> Self {
         Self {
             x0: p.x - size.x / 2,
             y0: p.y - size.y / 2,
@@ -169,68 +242,68 @@ impl Rect {
         }
     }
 
-    pub fn with_top_left(self, p0: Point) -> Self {
+    pub const fn with_top_left(self, p0: Point) -> Self {
         Self::from_top_left_and_size(p0, self.size())
     }
 
-    pub fn with_size(self, size: Offset) -> Self {
+    pub const fn with_size(self, size: Offset) -> Self {
         Self::from_top_left_and_size(self.top_left(), size)
     }
 
-    pub fn with_width(self, width: i32) -> Self {
+    pub const fn with_width(self, width: i16) -> Self {
         self.with_size(Offset::new(width, self.height()))
     }
 
-    pub fn with_height(self, height: i32) -> Self {
+    pub const fn with_height(self, height: i16) -> Self {
         self.with_size(Offset::new(self.width(), height))
     }
 
-    pub fn width(&self) -> i32 {
+    pub const fn width(&self) -> i16 {
         self.x1 - self.x0
     }
 
-    pub fn height(&self) -> i32 {
+    pub const fn height(&self) -> i16 {
         self.y1 - self.y0
     }
 
-    pub fn size(&self) -> Offset {
+    pub const fn size(&self) -> Offset {
         Offset::new(self.width(), self.height())
     }
 
-    pub fn top_left(&self) -> Point {
+    pub const fn top_left(&self) -> Point {
         Point::new(self.x0, self.y0)
     }
 
-    pub fn top_right(&self) -> Point {
+    pub const fn top_right(&self) -> Point {
         Point::new(self.x1, self.y0)
     }
 
-    pub fn bottom_left(&self) -> Point {
+    pub const fn bottom_left(&self) -> Point {
         Point::new(self.x0, self.y1)
     }
 
-    pub fn bottom_right(&self) -> Point {
+    pub const fn bottom_right(&self) -> Point {
         Point::new(self.x1, self.y1)
     }
 
-    pub fn center(&self) -> Point {
+    pub const fn center(&self) -> Point {
         self.top_left().center(self.bottom_right())
     }
 
-    pub fn bottom_center(&self) -> Point {
+    pub const fn bottom_center(&self) -> Point {
         self.bottom_left().center(self.bottom_right())
     }
 
-    pub fn contains(&self, point: Point) -> bool {
+    pub const fn contains(&self, point: Point) -> bool {
         point.x >= self.x0 && point.x < self.x1 && point.y >= self.y0 && point.y < self.y1
     }
 
-    pub fn union(&self, other: Self) -> Self {
+    pub const fn union(&self, other: Self) -> Self {
         Self {
-            x0: self.x0.min(other.x0),
-            y0: self.y0.min(other.y0),
-            x1: self.x1.max(other.x1),
-            y1: self.y1.max(other.y1),
+            x0: min(self.x0, other.x0),
+            y0: min(self.y0, other.y0),
+            x1: max(self.x1, other.x1),
+            y1: max(self.y1, other.y1),
         }
     }
 
@@ -243,7 +316,7 @@ impl Rect {
         }
     }
 
-    pub fn cut_from_left(&self, width: i32) -> Self {
+    pub const fn cut_from_left(&self, width: i16) -> Self {
         Self {
             x0: self.x0,
             y0: self.y0,
@@ -252,7 +325,7 @@ impl Rect {
         }
     }
 
-    pub fn cut_from_right(&self, width: i32) -> Self {
+    pub const fn cut_from_right(&self, width: i16) -> Self {
         Self {
             x0: self.x1 - width,
             y0: self.y0,
@@ -261,8 +334,8 @@ impl Rect {
         }
     }
 
-    pub fn split_top(self, height: i32) -> (Self, Self) {
-        let height = height.clamp(0, self.height());
+    pub const fn split_top(self, height: i16) -> (Self, Self) {
+        let height = clamp(height, 0, self.height());
 
         let top = Self {
             y1: self.y0 + height,
@@ -275,12 +348,12 @@ impl Rect {
         (top, bottom)
     }
 
-    pub fn split_bottom(self, height: i32) -> (Self, Self) {
+    pub const fn split_bottom(self, height: i16) -> (Self, Self) {
         self.split_top(self.height() - height)
     }
 
-    pub fn split_left(self, width: i32) -> (Self, Self) {
-        let width = width.clamp(0, self.width());
+    pub const fn split_left(self, width: i16) -> (Self, Self) {
+        let width = clamp(width, 0, self.width());
 
         let left = Self {
             x1: self.x0 + width,
@@ -293,11 +366,28 @@ impl Rect {
         (left, right)
     }
 
-    pub fn split_right(self, width: i32) -> (Self, Self) {
+    pub const fn split_right(self, width: i16) -> (Self, Self) {
         self.split_left(self.width() - width)
     }
 
-    pub fn translate(&self, offset: Offset) -> Self {
+    pub const fn clamp(self, limit: Rect) -> Self {
+        Self {
+            x0: max(self.x0, limit.x0),
+            y0: max(self.y0, limit.y0),
+            x1: min(self.x1, limit.x1),
+            y1: min(self.y1, limit.y1),
+        }
+    }
+
+    pub const fn ensure_even_width(self) -> Self {
+        if self.width() % 2 == 0 {
+            self
+        } else {
+            self.with_size(Offset::new(self.size().x - 1, self.size().y))
+        }
+    }
+
+    pub const fn translate(&self, offset: Offset) -> Self {
         Self {
             x0: self.x0 + offset.x,
             y0: self.y0 + offset.y,
@@ -309,14 +399,14 @@ impl Rect {
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Insets {
-    pub top: i32,
-    pub right: i32,
-    pub bottom: i32,
-    pub left: i32,
+    pub top: i16,
+    pub right: i16,
+    pub bottom: i16,
+    pub left: i16,
 }
 
 impl Insets {
-    pub const fn new(top: i32, right: i32, bottom: i32, left: i32) -> Self {
+    pub const fn new(top: i16, right: i16, bottom: i16, left: i16) -> Self {
         Self {
             top,
             right,
@@ -325,24 +415,28 @@ impl Insets {
         }
     }
 
-    pub const fn uniform(d: i32) -> Self {
+    pub const fn uniform(d: i16) -> Self {
         Self::new(d, d, d, d)
     }
 
-    pub const fn top(d: i32) -> Self {
+    pub const fn top(d: i16) -> Self {
         Self::new(d, 0, 0, 0)
     }
 
-    pub const fn right(d: i32) -> Self {
+    pub const fn right(d: i16) -> Self {
         Self::new(0, d, 0, 0)
     }
 
-    pub const fn bottom(d: i32) -> Self {
+    pub const fn bottom(d: i16) -> Self {
         Self::new(0, 0, d, 0)
     }
 
-    pub const fn left(d: i32) -> Self {
+    pub const fn left(d: i16) -> Self {
         Self::new(0, 0, 0, d)
+    }
+
+    pub const fn sides(d: i16) -> Self {
+        Self::new(0, d, 0, d)
     }
 }
 
@@ -367,7 +461,7 @@ impl Axis {
         }
     }
 
-    pub fn cross(self) -> Self {
+    pub const fn cross(self) -> Self {
         match self {
             Axis::Horizontal => Axis::Vertical,
             Axis::Vertical => Axis::Horizontal,
@@ -381,13 +475,13 @@ pub struct Grid {
     /// Number of columns (cells on the x-axis) in the grid.
     pub cols: usize,
     /// Padding between cells.
-    pub spacing: i32,
+    pub spacing: i16,
     /// Total area covered by this grid.
     pub area: Rect,
 }
 
 impl Grid {
-    pub fn new(area: Rect, rows: usize, cols: usize) -> Self {
+    pub const fn new(area: Rect, rows: usize, cols: usize) -> Self {
         Self {
             rows,
             cols,
@@ -396,16 +490,15 @@ impl Grid {
         }
     }
 
-    pub fn with_spacing(mut self, spacing: i32) -> Self {
-        self.spacing = spacing;
-        self
+    pub const fn with_spacing(self, spacing: i16) -> Self {
+        Self { spacing, ..self }
     }
 
-    pub fn row_col(&self, row: usize, col: usize) -> Rect {
-        let ncols = self.cols as i32;
-        let nrows = self.rows as i32;
-        let col = (col as i32).min(ncols - 1);
-        let row = (row as i32).min(nrows - 1);
+    pub const fn row_col(&self, row: usize, col: usize) -> Rect {
+        let ncols = self.cols as i16;
+        let nrows = self.rows as i16;
+        let col = min(col as i16, ncols - 1);
+        let row = min(row as i16, nrows - 1);
 
         // Total number of horizontal pixels used for spacing.
         let spacing_width = self.spacing * (ncols - 1);
@@ -421,14 +514,13 @@ impl Grid {
         let leftover_width = (self.area.width() - spacing_width) % ncols;
         let leftover_height = (self.area.height() - spacing_height) % nrows;
 
-        let mut top_left = self.area.top_left()
-            + Offset::new(
-                col * (cell_width + self.spacing),
-                row * (cell_height + self.spacing),
-            );
+        let mut top_left = self.area.top_left().ofs(Offset::new(
+            col * (cell_width + self.spacing),
+            row * (cell_height + self.spacing),
+        ));
         // Some previous cells were 1px wider.
-        top_left.x += leftover_width.min(col);
-        top_left.y += leftover_height.min(row);
+        top_left.x += min(leftover_width, col);
+        top_left.y += min(leftover_height, row);
 
         let mut size = Offset::new(cell_width, cell_height);
         // This cell might be 1px wider.
@@ -442,11 +534,11 @@ impl Grid {
         Rect::from_top_left_and_size(top_left, size)
     }
 
-    pub fn cell(&self, index: usize) -> Rect {
+    pub const fn cell(&self, index: usize) -> Rect {
         self.row_col(index / self.cols, index % self.cols)
     }
 
-    pub fn cells(&self, cells: GridCellSpan) -> Rect {
+    pub const fn cells(&self, cells: GridCellSpan) -> Rect {
         let from = self.row_col(cells.from.0, cells.from.1);
         let to = self.row_col(cells.to.0, cells.to.1);
         from.union(to)
@@ -463,11 +555,11 @@ pub struct GridCellSpan {
 pub struct LinearPlacement {
     pub axis: Axis,
     pub align: Alignment,
-    pub spacing: i32,
+    pub spacing: i16,
 }
 
 impl LinearPlacement {
-    pub fn horizontal() -> Self {
+    pub const fn horizontal() -> Self {
         Self {
             axis: Axis::Horizontal,
             align: Alignment::Start,
@@ -475,7 +567,7 @@ impl LinearPlacement {
         }
     }
 
-    pub fn vertical() -> Self {
+    pub const fn vertical() -> Self {
         Self {
             axis: Axis::Vertical,
             align: Alignment::Start,
@@ -483,30 +575,35 @@ impl LinearPlacement {
         }
     }
 
-    pub fn align_at_start(mut self) -> Self {
-        self.align = Alignment::Start;
-        self
+    pub const fn align_at_start(self) -> Self {
+        Self {
+            align: Alignment::Start,
+            ..self
+        }
     }
 
-    pub fn align_at_center(mut self) -> Self {
-        self.align = Alignment::Center;
-        self
+    pub const fn align_at_center(self) -> Self {
+        Self {
+            align: Alignment::Center,
+            ..self
+        }
     }
 
-    pub fn align_at_end(mut self) -> Self {
-        self.align = Alignment::End;
-        self
+    pub const fn align_at_end(self) -> Self {
+        Self {
+            align: Alignment::End,
+            ..self
+        }
     }
 
-    pub fn with_spacing(mut self, spacing: i32) -> Self {
-        self.spacing = spacing;
-        self
+    pub const fn with_spacing(self, spacing: i16) -> Self {
+        Self { spacing, ..self }
     }
 
     /// Arranges all `items` by parameters configured in `self` into `area`.
     /// Does not change the size of the items (only the position).
     pub fn arrange(&self, area: Rect, items: &mut [impl Dimensions]) {
-        let size_sum: i32 = items
+        let size_sum: i16 = items
             .iter_mut()
             .map(|i| i.area().size().axis(self.axis))
             .sum();
@@ -532,7 +629,7 @@ impl LinearPlacement {
         sink: &mut dyn FnMut(Point),
     ) {
         let item_size = size.axis(self.axis);
-        let (mut cursor, spacing) = self.compute_spacing(area, count, (count as i32) * item_size);
+        let (mut cursor, spacing) = self.compute_spacing(area, count, (count as i16) * item_size);
         let cross_coord =
             area.size().axis(self.axis.cross()) / 2 - size.axis(self.axis.cross()) / 2;
 
@@ -546,17 +643,17 @@ impl LinearPlacement {
         }
     }
 
-    fn compute_spacing(&self, area: Rect, count: usize, size_sum: i32) -> (i32, i32) {
+    const fn compute_spacing(&self, area: Rect, count: usize, size_sum: i16) -> (i16, i16) {
         let spacing_count = count.saturating_sub(1);
-        let spacing_sum = spacing_count as i32 * self.spacing;
+        let spacing_sum = spacing_count as i16 * self.spacing;
         let naive_size = size_sum + spacing_sum;
         let available_space = area.size().axis(self.axis);
 
         // scale down spacing to fit everything into area
         let (total_size, spacing) = if naive_size > available_space {
-            let scaled_space = (available_space - size_sum) / spacing_count.max(1) as i32;
+            let scaled_space = (available_space - size_sum) / max(spacing_count as i16, 1);
             // forbid negative spacing
-            (available_space, scaled_space.max(0))
+            (available_space, max(scaled_space, 0))
         } else {
             (naive_size, self.spacing)
         };

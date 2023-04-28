@@ -4,7 +4,7 @@ import storage.cache
 import storage.device
 from trezor import config, ui, utils, wire, workflow
 from trezor.enums import MessageType
-from trezor.messages import Success
+from trezor.messages import Success, UnlockPath
 
 from . import workflow_handlers
 
@@ -20,11 +20,27 @@ if TYPE_CHECKING:
         Ping,
         DoPreauthorized,
         CancelAuthorization,
+        SetBusy,
     )
 
 
 def get_vendor():
     return "trezor.io" if storage.device.is_trezor_compatible() else "onekey.so"
+
+
+def busy_expiry_ms() -> int:
+    """
+    Returns the time left until the busy state expires or 0 if the device is not in the busy state.
+    """
+
+    busy_deadline_ms = storage.cache.get_int(storage.cache.APP_COMMON_BUSY_DEADLINE_MS)
+    if busy_deadline_ms is None:
+        return 0
+
+    import utime
+
+    expiry_ms = utime.ticks_diff(busy_deadline_ms, utime.ticks_ms())
+    return expiry_ms if expiry_ms > 0 else 0
 
 
 def get_features() -> Features:
@@ -58,6 +74,7 @@ def get_features() -> Features:
         build_id=utils.BUILD_ID,
         bootloader_version=utils.boot_version(),
         boardloader_version=utils.board_version(),
+        busy=busy_expiry_ms() > 0,
     )
 
     if utils.BITCOIN_ONLY:
@@ -66,7 +83,6 @@ def get_features() -> Features:
             Capability.Crypto,
             Capability.Shamir,
             Capability.ShamirGroups,
-            Capability.PassphraseEntry,
         ]
     else:
         f.capabilities = [
@@ -85,8 +101,12 @@ def get_features() -> Features:
             Capability.U2F,
             Capability.Shamir,
             Capability.ShamirGroups,
-            Capability.PassphraseEntry,
         ]
+
+    # Other models are not capable of PassphraseEntry
+    if utils.MODEL in ("T",):
+        f.capabilities.append(Capability.PassphraseEntry)
+
     f.sd_card_present = sdcard.is_present()
     f.initialized = storage.device.is_initialized()
 
@@ -154,6 +174,22 @@ async def handle_LockDevice(ctx: wire.Context, msg: LockDevice) -> Success:
     return Success()
 
 
+async def handle_SetBusy(ctx: wire.Context, msg: SetBusy) -> Success:
+    if not storage.device.is_initialized():
+        raise wire.NotInitialized("Device is not initialized")
+
+    if msg.expiry_ms:
+        import utime
+
+        deadline = utime.ticks_add(utime.ticks_ms(), msg.expiry_ms)
+        storage.cache.set_int(storage.cache.APP_COMMON_BUSY_DEADLINE_MS, deadline)
+    else:
+        storage.cache.delete(storage.cache.APP_COMMON_BUSY_DEADLINE_MS)
+    set_homescreen()
+    workflow.close_others()
+    return Success()
+
+
 async def handle_EndSession(ctx: wire.Context, msg: EndSession) -> Success:
     storage.cache.end_current_session()
     return Success()
@@ -192,6 +228,55 @@ async def handle_DoPreauthorized(
     return await handler(ctx, req, authorization.get())  # type: ignore [Expected 2 positional arguments]
 
 
+async def handle_UnlockPath(ctx: wire.Context, msg: UnlockPath) -> protobuf.MessageType:
+    from trezor.crypto import hmac
+    from trezor.messages import UnlockedPathRequest
+    from trezor.ui.layouts import confirm_action
+    from apps.common.paths import SLIP25_PURPOSE
+    from apps.common.seed import Slip21Node, get_seed
+    from apps.common.writers import write_uint32_le
+
+    _KEYCHAIN_MAC_KEY_PATH = [b"TREZOR", b"Keychain MAC key"]
+
+    # UnlockPath is relevant only for SLIP-25 paths.
+    # Note: Currently we only allow unlocking the entire SLIP-25 purpose subtree instead of
+    # per-coin or per-account unlocking in order to avoid UI complexity.
+    if msg.address_n != [SLIP25_PURPOSE]:
+        raise wire.DataError("Invalid path")
+
+    seed = await get_seed(ctx)
+    node = Slip21Node(seed)
+    node.derive_path(_KEYCHAIN_MAC_KEY_PATH)
+    mac = utils.HashWriter(hmac(hmac.SHA256, node.key()))
+    for i in msg.address_n:
+        write_uint32_le(mac, i)
+    expected_mac = mac.get_digest()
+
+    # Require confirmation to access SLIP25 paths unless already authorized.
+    if msg.mac:
+        if len(msg.mac) != len(expected_mac) or not utils.consteq(
+            expected_mac, msg.mac
+        ):
+            raise wire.DataError("Invalid MAC")
+    else:
+        await confirm_action(
+            ctx,
+            "confirm_coinjoin_access",
+            title="CoinJoin account",
+            description="Do you want to allow access to your CoinJoin account?",
+        )
+
+    wire_types = (MessageType.GetAddress, MessageType.GetPublicKey, MessageType.SignTx)
+    req = await ctx.call_any(UnlockedPathRequest(mac=expected_mac), *wire_types)
+
+    assert req.MESSAGE_WIRE_TYPE in wire_types
+    handler = workflow_handlers.find_registered_handler(
+        ctx.iface, req.MESSAGE_WIRE_TYPE
+    )
+    assert handler is not None
+    return await handler(ctx, req, msg)  # type: ignore [Expected 2 positional arguments]
+
+
 async def handle_CancelAuthorization(
     ctx: wire.Context, msg: CancelAuthorization
 ) -> protobuf.MessageType:
@@ -209,6 +294,7 @@ ALLOW_WHILE_LOCKED = (
     MessageType.LockDevice,
     MessageType.DoPreauthorized,
     MessageType.WipeDevice,
+    MessageType.SetBusy,
 )
 
 
@@ -370,9 +456,11 @@ def boot() -> None:
     workflow_handlers.register(MessageType.EndSession, handle_EndSession)
     workflow_handlers.register(MessageType.Ping, handle_Ping)
     workflow_handlers.register(MessageType.DoPreauthorized, handle_DoPreauthorized)
+    workflow_handlers.register(MessageType.UnlockPath, handle_UnlockPath)
     workflow_handlers.register(
         MessageType.CancelAuthorization, handle_CancelAuthorization
     )
+    workflow_handlers.register(MessageType.SetBusy, handle_SetBusy)
 
     reload_settings_from_storage()
     if config.is_unlocked():

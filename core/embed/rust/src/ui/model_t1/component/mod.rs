@@ -3,7 +3,7 @@ mod dialog;
 mod frame;
 mod page;
 
-use super::{event, theme};
+use super::theme;
 
 pub use button::{Button, ButtonContent, ButtonMsg, ButtonPos, ButtonStyle, ButtonStyleSheet};
 pub use dialog::{Dialog, DialogMsg};

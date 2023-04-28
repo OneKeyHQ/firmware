@@ -36,13 +36,14 @@
 #include "ports/stm32/pendsv.h"
 
 #include "bl_check.h"
-#include "button.h"
+#include "board_capabilities.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "display.h"
 #include "emmc.h"
 #include "ff.h"
 #include "flash.h"
+#include "image.h"
 #include "mpu.h"
 #include "random_delays.h"
 #include "usart.h"
@@ -108,7 +109,7 @@ int main(void) {
   qspi_flash_config();
   qspi_flash_memory_mapped();
 
-  display_set_backlight(0);
+  display_backlight(0);
   lcd_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   lcd_pwm_init();
 
@@ -131,17 +132,29 @@ int main(void) {
 
   ble_usart_init();
 
-#if defined TREZOR_MODEL_T
+  // #if !defined TREZOR_MODEL_1
+  //   parse_boardloader_capabilities();
+
 #if PRODUCTION
   // check_and_replace_bootloader();
 #endif
-#endif
+  // #endif
 
   // Init peripherals
   pendsv_init();
 
+  // #ifdef USE_DMA2D
+  //   dma2d_init();
+  // #endif
+
+#if !PRODUCTION
+  // enable BUS fault and USAGE fault handlers
+  SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk);
+#endif
+
 #if defined TREZOR_MODEL_1
   display_init();
+  display_clear();
   button_init();
 #endif
   display_clear();
@@ -160,7 +173,15 @@ int main(void) {
   timer_init();
 
   copyflash2sdram();
+#endif
 
+#if defined TREZOR_MODEL_R
+  button_init();
+  display_clear();
+  rgb_led_init();
+#endif
+
+#if !defined TREZOR_MODEL_1
   // jump to unprivileged mode
   // http://infocenter.arm.com/help/topic/com.arm.doc.dui0552a/CHDBIBGJ.html
   // __asm__ volatile("msr control, %0" ::"r"(0x1));
@@ -175,7 +196,7 @@ int main(void) {
   // Stack limit should be less than real stack size, so we have a chance
   // to recover from limit hit.
   mp_stack_set_top(&_estack);
-  mp_stack_set_limit((char *)&_estack - (char *)&_heap_end - 1024);
+  mp_stack_set_limit((char *)&_estack - (char *)&_sstack - 1024);
 
 #if MICROPY_ENABLE_PYSTACK
   static mp_obj_t pystack[1024];
@@ -258,8 +279,12 @@ void HardFault_Handler(void) {
 }
 #endif
 
-void MemManage_Handler(void) {
+void MemManage_Handler_MM(void) {
   error_shutdown("Internal error", "(MM)", NULL, NULL);
+}
+
+void MemManage_Handler_SO(void) {
+  error_shutdown("Internal error", "(SO)", NULL, NULL);
 }
 
 void BusFault_Handler(void) {
@@ -268,6 +293,13 @@ void BusFault_Handler(void) {
 
 void UsageFault_Handler(void) {
   error_shutdown("Internal error", "(UF)", NULL, NULL);
+}
+
+__attribute__((noreturn)) void reboot_to_bootloader() {
+  jump_to_with_flag(BOOTLOADER_START + IMAGE_HEADER_SIZE,
+                    STAY_IN_BOOTLOADER_FLAG);
+  for (;;)
+    ;
 }
 
 void SVC_C_Handler(uint32_t *stack) {

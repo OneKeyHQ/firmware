@@ -26,6 +26,7 @@ class Address(FullSizeWindow):
         primary_color,
         icon_path: str,
         xpubs=None,
+        address_qr=None,
         multisig_index: int | None = 0,
     ):
         super().__init__(
@@ -40,6 +41,7 @@ class Address(FullSizeWindow):
         self.xpubs = xpubs
         self.multisig_index = multisig_index
         self.address = address
+        self.address_qr = address_qr
         self.icon = icon_path
         if primary_color:
             self.title.add_style(StyleWrapper().text_color(primary_color), 0)
@@ -88,7 +90,11 @@ class Address(FullSizeWindow):
             self.container.delete()
             del self.container
         self.btn_no.label.set_text(_(i18n_keys.BUTTON__ADDRESS))
-        self.qr = QRCode(self.content_area, self.address, self.icon)
+        self.qr = QRCode(
+            self.content_area,
+            self.address if self.address_qr is None else self.address_qr,
+            self.icon,
+        )
         self.qr.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
 
     def eventhandler(self, event_obj):

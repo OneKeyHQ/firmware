@@ -79,8 +79,8 @@ async def confirm_action(
     description: str | None = None,
     description_param: str | None = None,
     description_param_font: int = ui.BOLD,
-    verb: str = "Confirm",
-    verb_cancel: str = "Cancel",
+    verb: str | None = None,
+    verb_cancel: str | None = None,
     hold: bool = False,
     hold_danger: bool = False,
     icon: str | None = "A:/res/warning.png",  # TODO cleanup @ redesign
@@ -100,8 +100,10 @@ async def confirm_action(
     confirm_screen = FullSizeWindow(
         title,
         f"{description or ''}{' ' + (action or '')}",
-        verb if hold else _(i18n_keys.BUTTON__CONFIRM),
-        cancel_text=_(i18n_keys.BUTTON__REJECT)
+        verb if verb else _(i18n_keys.BUTTON__CONFIRM),
+        cancel_text=verb_cancel
+        if verb_cancel
+        else _(i18n_keys.BUTTON__REJECT)
         if hold
         else _(i18n_keys.BUTTON__CANCEL),
         icon_path=icon,
@@ -301,6 +303,7 @@ async def show_address(
                 ctx.primary_color,
                 ctx.icon_path,
                 xpubs,
+                address_qr,
                 multisig_index,
             ),
             "show_address",
@@ -314,6 +317,7 @@ async def show_address(
             address,
             ctx.primary_color,
             ctx.icon_path,
+            address_qr=address_qr,
         ),
         "show_address",
         ButtonRequestType.Address,
@@ -723,6 +727,7 @@ async def confirm_total(
     br_code: ButtonRequestType = ButtonRequestType.SignTx,
     amount: str | None = None,
     coin_shortcut: str = "BTC",
+    fee_rate_amount: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsBTC
 
@@ -826,6 +831,7 @@ async def confirm_modify_fee(
     sign: int,
     user_fee_change: str,
     total_fee_new: str,
+    fee_rate_amount: str | None = None,
 ) -> None:
     if sign == 0:
         description = _(i18n_keys.LIST_KEY__NO_CHANGE__COLON)
@@ -853,7 +859,7 @@ async def confirm_coinjoin(
         title,
         coin_name,
         str(max_rounds),
-        f"{max_fee_per_vbyte} sats/vbyte",
+        max_fee_per_vbyte,
         ctx.primary_color,
     )
     await raise_if_cancelled(

@@ -30,6 +30,7 @@ APP_COMMON_SEED_WITHOUT_PASSPHRASE = 0 | _SESSIONLESS_FLAG
 APP_COMMON_SAFETY_CHECKS_TEMPORARY = 1 | _SESSIONLESS_FLAG
 STORAGE_DEVICE_EXPERIMENTAL_FEATURES = 2 | _SESSIONLESS_FLAG
 APP_COMMON_REQUEST_PIN_LAST_UNLOCK = 3 | _SESSIONLESS_FLAG
+APP_COMMON_BUSY_DEADLINE_MS = 4 | _SESSIONLESS_FLAG
 
 APP_BLE_NAME = 4 | _SESSIONLESS_FLAG
 APP_CHARGING_STATE = 5 | _SESSIONLESS_FLAG
@@ -43,6 +44,7 @@ APP_CHARGING_STATE = 5 | _SESSIONLESS_FLAG
 # is still on. This way we can avoid unnecessary fadeins/fadeouts when a workflow ends.
 HOMESCREEN_ON = object()
 LOCKSCREEN_ON = object()
+BUSYSCREEN_ON = object()
 homescreen_shown: object | None = None
 
 _show_update_res_confirm = True
@@ -136,9 +138,10 @@ class SessionlessCache(DataCache):
             64,  # APP_COMMON_SEED_WITHOUT_PASSPHRASE
             1,  # APP_COMMON_SAFETY_CHECKS_TEMPORARY
             1,  # STORAGE_DEVICE_EXPERIMENTAL_FEATURES
-            4,  # APP_COMMON_REQUEST_PIN_LAST_UNLOCK
+            8,  # APP_COMMON_REQUEST_PIN_LAST_UNLOCK
             8,  # APP_BLE_NAME
             1,  # APP_CHARGING_STATE
+            8,  # APP_COMMON_BUSY_DEADLINE_MS
         )
         super().__init__()
 
@@ -231,6 +234,23 @@ def set(key: int, value: bytes) -> None:
     _SESSIONS[_active_session_idx].set(key, value)
 
 
+def set_int(key: int, value: int) -> None:
+    if key & _SESSIONLESS_FLAG:
+        length = _SESSIONLESS_CACHE.fields[key ^ _SESSIONLESS_FLAG]
+    elif _active_session_idx is None:
+        raise InvalidSessionError
+    else:
+        length = _SESSIONS[_active_session_idx].fields[key]
+
+    encoded = value.to_bytes(length, "big")
+
+    # Ensure that the value fits within the length. Micropython's int.to_bytes()
+    # doesn't raise OverflowError.
+    assert int.from_bytes(encoded, "big") == value
+
+    set(key, encoded)
+
+
 if TYPE_CHECKING:
 
     @overload
@@ -248,6 +268,14 @@ def get(key: int, default: T | None = None) -> bytes | T | None:  # noqa: F811
     if _active_session_idx is None:
         raise InvalidSessionError
     return _SESSIONS[_active_session_idx].get(key, default)
+
+
+def get_int(key: int, default: T | None = None) -> int | T | None:  # noqa: F811
+    encoded = get(key)
+    if encoded is None:
+        return default
+    else:
+        return int.from_bytes(encoded, "big")
 
 
 def is_set(key: int) -> bool:

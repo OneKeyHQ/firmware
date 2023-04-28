@@ -1,5 +1,6 @@
 from trezor import wire
 from trezor.crypto.curve import ed25519
+from trezor.crypto.hashlib import blake2b
 from trezor.messages import SuiSignedTx, SuiSignTx
 
 from apps.common import paths, seed
@@ -25,6 +26,8 @@ async def sign_tx(ctx: wire.Context, msg: SuiSignTx, keychain: Keychain) -> SuiS
 
     await confirm_blind_sign_common(ctx, address, msg.raw_tx)
     await confirm_final(ctx)
-    signature = ed25519.sign(node.private_key(), msg.raw_tx)
+    signature = ed25519.sign(
+        node.private_key(), blake2b(data=msg.raw_tx, outlen=32).digest()
+    )
 
     return SuiSignedTx(public_key=pub_key_bytes, signature=signature)

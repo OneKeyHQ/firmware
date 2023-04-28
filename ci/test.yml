@@ -60,7 +60,7 @@ core unit t1 test:
 # Device tests for Core. Running device tests and also comparing screens
 # with the expected UI result.
 # See artifacts for a comprehensive report of UI.
-# See [docs/tests/ui-tests](../docs/tests/ui-tests.md) for more info.
+# See [docs/tests/ui-tests](../tests/ui-tests.md) for more info.
 core device test:
   stage: test
   <<: *gitlab_caching
@@ -131,6 +131,8 @@ core device asan test:
     - core unix frozen debug asan build
   only:
     - schedules  # nightly build
+  variables:
+    PYTEST_TIMEOUT: "600"
   script:
     - nix-shell --run "poetry run make -C core test_emu | ts -s"
   artifacts:
@@ -171,6 +173,7 @@ core btconly device asan test:
   variables:
     MICROPYTHON: "build/unix/trezor-emu-core-bitcoinonly"
     TREZOR_PYTEST_SKIP_ALTCOINS: 1
+    PYTEST_TIMEOUT: "600"
   script:
     - nix-shell --run "poetry run make -C core test_emu | ts -s"
   artifacts:
@@ -301,7 +304,7 @@ core fido2 asan test:
     when: always
 
 # Click tests.
-# See [docs/tests/click-tests](../docs/tests/click-tests.md) for more info.
+# See [docs/tests/click-tests](../tests/click-tests.md) for more info.
 core click test:
   stage: test
   <<: *gitlab_caching
@@ -339,7 +342,7 @@ core click asan test:
     when: always
 
 # Upgrade tests.
-# See [docs/tests/upgrade-tests](../docs/tests/upgrade-tests.md) for more info.
+# See [docs/tests/upgrade-tests](../tests/upgrade-tests.md) for more info.
 core upgrade test:
   stage: test
   <<: *gitlab_caching
@@ -623,6 +626,13 @@ python test:
     # https://github.com/NixOS/nixpkgs/pull/98915
     - nix-shell --arg fullDeps true --run "unset _PYTHON_SYSCONFIGDATA_NAME && cd python && poetry run tox | ts -s"
 
+python support test:
+  stage: test
+  <<: *gitlab_caching
+  needs: []
+  script:
+    - nix-shell --run "poetry run make python_support_check | ts -s"
+
 
 # Storage
 
@@ -677,21 +687,22 @@ core unix memory profiler:
 connect test core:
   image: ghcr.io/trezor/trezor-user-env
   stage: test
+  tags:
+    - runner-internal
   needs:
     - core unix frozen debug build
   variables:
     SDL_VIDEODRIVER: "dummy"
   before_script:
     - cp /builds/satoshilabs/trezor/trezor-firmware/core/build/unix/trezor-emu-core /trezor-user-env/src/binaries/firmware/bin/trezor-emu-core-v2.99.99
-    - chmod u+x /trezor-user-env/src/binaries/firmware/bin/trezor-emu-core-v2.99.99
-    - nix-shell -p autoPatchelfHook SDL2 SDL2_image --run "autoPatchelf /trezor-user-env/src/binaries/firmware/bin/trezor-emu-core-v2.99.99"
+    - chmod +x /trezor-user-env/src/binaries/firmware/bin/trezor-emu-core-v2.99.99
+    - nix-shell --run "autoPatchelf /trezor-user-env/src/binaries/firmware/bin/trezor-emu-core-v2.99.99"
   script:
     - /trezor-user-env/run-nix.sh &
     - nix-shell --run "tests/connect_tests/connect_tests.sh 2.99.99"
   after_script:
     - cp /trezor-user-env/logs/debugging.log trezor-user-env-debugging.log
     - cp /trezor-user-env/logs/emulator_bridge.log tenv-emulator-bridge-debugging.log
-  allow_failure: true
   artifacts:
     paths:
       - trezor-user-env-debugging.log
