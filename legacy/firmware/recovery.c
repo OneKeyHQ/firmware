@@ -746,11 +746,11 @@ refresh_menu:
         words[index * 6 + 0], words[index * 6 + 1], words[index * 6 + 2],
         words[index * 6 + 3], words[index * 6 + 4], words[index * 6 + 5]);
   } else {
-    layoutWords(desc, &bmp_bottom_middle_arrow_up,
-                &bmp_bottom_middle_arrow_down, &bmp_bottom_left_arrow, NULL,
-                index + 1, pages, words[index * 6 + 0], words[index * 6 + 1],
-                words[index * 6 + 2], words[index * 6 + 3],
-                words[index * 6 + 4], words[index * 6 + 5]);
+    layoutWords(
+        desc, &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
+        &bmp_bottom_left_arrow, &bmp_bottom_right_arrow_off, index + 1, pages,
+        words[index * 6 + 0], words[index * 6 + 1], words[index * 6 + 2],
+        words[index * 6 + 3], words[index * 6 + 4], words[index * 6 + 5]);
   }
   key = protectWaitKey(0, 0);
   switch (key) {

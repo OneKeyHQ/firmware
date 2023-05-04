@@ -622,9 +622,11 @@ const char *languages[][2] = {
     //
     {"SOL advance signing turn", "SOL高级签名"},
     //
+    {"Safety Checks", "安全检查"},
+    //
     {"Scan the QR code below", "扫描下方二维码"},
     //
-    {"Security", "安全"},
+    {"Security", "安全检查"},
     // protect.c
     {"Select Number of Word", "选择助记词位数"},
     //

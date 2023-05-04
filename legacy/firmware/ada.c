@@ -27,6 +27,7 @@
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
+#include "memzero.h"
 #include "messages.h"
 #include "messages.pb.h"
 #include "protect.h"
@@ -441,6 +442,7 @@ static bool layoutOutput(const CardanoTxOutput *output) {
   char str_amount[32] = {0};
   const char **tx_msg = format_tx_message("Cardano");
   ada_signer.is_change = false;
+
   if (!output->has_address_parameters) {
     if (output->asset_groups_count > 0) {
       oledClear();
@@ -462,6 +464,12 @@ static bool layoutOutput(const CardanoTxOutput *output) {
         }
       }
     }
+
+    ButtonRequest resp = {0};
+    memzero(&resp, sizeof(ButtonRequest));
+    resp.has_code = true;
+    resp.code = ButtonRequestType_ButtonRequest_SignTx;
+    msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
     oledClear();
     layoutHeader(tx_msg[0]);

@@ -590,11 +590,9 @@ void onboarding(uint8_t key) {
                               _("Wallet is ready! Download\nOneKey apps and "
                                 "have fun\nwith your OneKey Classic."),
                               NULL, NULL, NULL, NULL);
-        while (1) {
-          key = protectWaitKey(0, 1);
-          if (key == KEY_CONFIRM) {
-            break;
-          }
+        key = protectWaitKey(0, 1);
+        if (key != KEY_CONFIRM) {
+          goto done1;
         }
 
       done2:
@@ -693,6 +691,17 @@ static void _layout_home(bool update_menu) {
     b.height = 64;
     b.data = homescreen;
     oledDrawBitmap(0, 0, &b);
+
+    if (!session_isUnlocked()) {
+      oledBox(128 / 2 - 5, 0, 128 / 2 + 4, 7, 0);
+      oledDrawBitmap(128 / 2 - 4, 0, &bmp_status_locked);
+    }
+
+    int l = oledStringWidth(ble_get_name(), FONT_STANDARD);
+    oledBox(OLED_WIDTH / 2 - l / 2 - 2, OLED_HEIGHT - 12,
+            OLED_WIDTH / 2 + l / 2, OLED_HEIGHT, 0);
+    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 10, ble_get_name(),
+                         FONT_STANDARD);
   } else {
     if (backup_only) {
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, _("Backup Mode"),
@@ -868,6 +877,12 @@ bool layoutConfirmOutput(const CoinInfo *coin, AmountUnit amount_unit,
   char title[32] = {0};
   char str_out[32 + 3] = {0};
   char desc[32] = {0};
+
+  ButtonRequest resp = {0};
+  memzero(&resp, sizeof(ButtonRequest));
+  resp.has_code = true;
+  resp.code = ButtonRequestType_ButtonRequest_SignTx;
+  msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
   strcat(title, coin->coin_name);
   strcat(title, _("Transaction"));
@@ -2479,7 +2494,7 @@ void layoutProgressAdapter(const char *desc, int permil) {
     percent_asc[i++] = permil_tmp % 10 + 0x30;
   }
   percent_asc[i] = '%';
-  snprintf(buf, 65, "%s(%s)", desc, percent_asc);
+  snprintf(buf, 65, "%s (%s)", desc, percent_asc);
 
   oledClear();
   oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT / 2 - 6, buf,
@@ -2525,10 +2540,20 @@ void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
   int l = 0;
   int y0 = font & FONT_DOUBLE ? 8 : 0;
   oledBox(x - 4, y - 8, x + 4, y + 16 + y0, false);
-  oledDrawBitmap(x - 4, y - 7, &bmp_arrow_up_w5);
+  if (ui_language == 1) {
+    oledDrawBitmap(x - 4, y - 7 + 1, &bmp_arrow_up_w5);
+    oledDrawBitmap(x - 4, y + 11 + y0 + 1, &bmp_arrow_down_w5);
+  } else {
+    oledDrawBitmap(x - 4, y - 7, &bmp_arrow_up_w5);
+    oledDrawBitmap(x - 4, y + 11 + y0, &bmp_arrow_down_w5);
+  }
   l = oledStringWidth(text, font);
   if (bmp) {
-    oledDrawBitmap(x - 4, y + 1, bmp);
+    if (ui_language == 1) {
+      oledDrawBitmap(x - 4, y + 2, bmp);
+    } else {
+      oledDrawBitmap(x - 4, y + 1, bmp);
+    }
   } else {
     oledDrawStringAdapter(x - l / 2, y, text, font);
     if (vert) {
@@ -2540,7 +2565,6 @@ void _layout_iterm_select(int x, int y, const BITMAP *bmp, const char *text,
     }
   }
 
-  oledDrawBitmap(x - 4, y + 11 + y0, &bmp_arrow_down_w5);
   oledRefresh();
 }
 
@@ -2577,13 +2601,14 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
     buf[0] = pin_show[i];
     l = oledStringWidth(buf, FONT_STANDARD);
     if (i < pos) {
-      oledDrawBitmap(x + 13 * i + 7 - l / 2, y + 1, &bmp_pin_filled);
+      if (ui_language == 1) {
+        oledDrawBitmap(x + 13 * i + 7 - l / 2, y + 2, &bmp_pin_filled);
+      } else {
+        oledDrawBitmap(x + 13 * i + 7 - l / 2, y + 1, &bmp_pin_filled);
+      }
     } else {
       oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
     }
-  }
-  if (1 == ui_language) {
-    y = y - 1;
   }
   if (index > 0 && index < 10) {
     layoutItemsSelect(x + 13 * pos + 7, y, table[index], FONT_STANDARD);
@@ -3601,6 +3626,13 @@ void layoutEnterSleep(void) {
     if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
       layoutStatusLogoEx(true, false);
       system_millis_logo_refresh = timer_ms();
+
+      if (layoutLast == layoutHome) {
+        oledBox(96, 0, 128, 8, 0);
+        refreshBleIcon(true);
+        disUsbConnectSomething(true);
+        refreshBatteryLevel(true);
+      }
     }
   }
 
@@ -3641,7 +3673,7 @@ bool layoutTransactionSign(const char *chain_name, bool token_transfer,
   uint8_t key = KEY_NULL;
   uint8_t max_index = 4;
   char desc[64] = {0};
-  char title[32] = {0};
+  char title[64] = {0};
   char title_data[32] = {0};
   char lines[21] = {0};
   int data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
@@ -3942,9 +3974,7 @@ bool layoutBlindSign(const char *chain_name, bool is_contract,
 refresh_layout:
   layoutSwipe();
   oledClear();
-
   if (0 == index) {
-    sub_index = 0;
     layoutHeader(tx_msg[0]);
     if (is_contract) {
       oledDrawStringAdapter(0, 13, _("Contract:"), FONT_STANDARD);
@@ -4056,7 +4086,6 @@ refresh_layout:
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_next);
   } else if (max_index - 1 == index) {
-    sub_index = 0;
     layoutHeader(_("Sign Transaction"));
     oledDrawStringAdapter(0, 13, tx_msg[1], FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
@@ -4103,6 +4132,7 @@ refresh_layout:
       }
       goto refresh_layout;
     case KEY_CONFIRM:
+      sub_index = 0;
       if (index == max_index - 1) {
         result = true;
         break;
@@ -4112,6 +4142,7 @@ refresh_layout:
       }
       goto refresh_layout;
     case KEY_CANCEL:
+      sub_index = 0;
       if (0 == index || index == max_index - 1) {
         result = false;
         break;
@@ -4134,7 +4165,7 @@ bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
   int i, bar_heght, bar_start = 12, bar_end = 52;
   uint8_t max_index = 3;
   uint8_t key = KEY_NULL;
-  char title[32] = {0};
+  char title[64] = {0};
   char title_tx[64] = {0};
   char lines[21] = {0};
   uint32_t rowlen = 21;
@@ -4152,6 +4183,7 @@ bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
     strcat(title_tx, _("Do you want to verify this message?"));
   } else {
     strcat(title, chain_name);
+    strcat(title, " ");
     strcat(title, _("Message"));
     snprintf(title_tx, 64, "%s%s %s?", _("Do you want to sign this\n"),
              chain_name, _("message"));
@@ -4360,7 +4392,7 @@ bool layoutSignHash(const char *chain_name, bool verify, const char *signer,
   int index = 0;
   uint8_t max_index = 5;
   uint8_t key = KEY_NULL;
-  char title[32] = {0};
+  char title[64] = {0};
   char title_tx[64] = {0};
   char domain_desc[32] = {0};
   if (!message_hash) max_index--;
@@ -4373,6 +4405,7 @@ bool layoutSignHash(const char *chain_name, bool verify, const char *signer,
     strcat(title_tx, _("Do you want to verify this message?"));
   } else {
     strcat(title, chain_name);
+    strcat(title, " ");
     strcat(title, _("Message"));
     snprintf(title_tx, 64, "%s%s %s?", _("Do you want to sign this\n"),
              chain_name, _("message"));
