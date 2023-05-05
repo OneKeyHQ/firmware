@@ -28,7 +28,7 @@
 #include "oled.h"
 #include "util.h"
 
-char bootloader_version[8] = "1.8.9";
+char bootloader_version[8] = "";
 
 #if BOOTLOADER_QA
 static int known_bootloader(int r, const uint8_t *hash) {
@@ -75,7 +75,7 @@ static int known_bootloader(int r, const uint8_t *hash) {
     return 1;  // 2.0.0 shipped with fw 2.11.0
   }
   // END AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
-
+  memcpy(bootloader_version, "unknown", strlen("unknown"));
   return 0;
 }
 #endif
@@ -125,6 +125,7 @@ static int known_bootloader(int r, const uint8_t *hash) {
     return 1;  // 2.0.0 shipped with fw 2.11.0
   }
   // END AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
+  memcpy(bootloader_version, "unknown", strlen("unknown"));
   return 0;
 }
 
