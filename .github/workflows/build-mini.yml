@@ -53,6 +53,7 @@ jobs:
           path: |
             ./legacy/firmware/mini*Stable*.bin
             ./legacy/bootloader/bootloader*Stable*.bin
+            ./legacy/intermediate_fw/mini*.bin
 
       - name: "Set Env"
         run: |
