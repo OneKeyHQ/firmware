@@ -548,6 +548,14 @@ bool txHashBuilder_addOutput(const CardanoTxOutput *output) {
       BUILDER_APPEND_CBOR(CBOR_TYPE_MAP, output->asset_groups_count);
 
       ada_signer.outputState = TX_OUTPUT_TOP_LEVEL_DATA;
+      ada_signer.output_asset_groups_count = output->asset_groups_count;
+      if (output->has_datum_hash) {
+        memcpy(ada_signer.datum_hash, output->datum_hash.bytes,
+               output->datum_hash.size);
+        ada_signer.datum_hash_size = output->datum_hash.size;
+      } else {
+        ada_signer.datum_hash_size = 0;
+      }
     }
   } else if (output->format == CardanoTxOutputSerializationFormat_MAP_BABBAGE) {
     return false;  // unsupport
@@ -573,6 +581,15 @@ bool txHashBuilder_addToken(const CardanoToken *msg) {
   BUILDER_APPEND_DATA(msg->asset_name_bytes.bytes, msg->asset_name_bytes.size);
   if (msg->has_amount) {
     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, msg->amount);
+  }
+  if (ada_signer.outputState != TX_OUTPUT_FINISHED) {
+    ada_signer.output_asset_groups_count--;
+    if ((0 == ada_signer.output_asset_groups_count) &&
+        (0 != ada_signer.datum_hash_size)) {
+      BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, ada_signer.datum_hash_size);
+      BUILDER_APPEND_DATA(ada_signer.datum_hash, ada_signer.datum_hash_size);
+      ada_signer.outputState = TX_OUTPUT_FINISHED;
+    }
   }
 
   uint8_t message_digest[20];
