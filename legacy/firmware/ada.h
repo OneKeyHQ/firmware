@@ -121,6 +121,7 @@ struct AdaSigner {
   uint16_t remainingReferenceInputs;
   uint16_t remainingMintingAssetGroupsCount;
 
+  uint16_t output_asset_groups_count;
   tx_hash_builder_output_state_t outputState;
   tx_hash_builder_state_t state;
 
@@ -129,6 +130,8 @@ struct AdaSigner {
   bool is_change;
   uint8_t policy_id[28];
   uint16_t policy_id_size;
+  uint8_t datum_hash[32];
+  uint16_t datum_hash_size;
 };
 
 bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,

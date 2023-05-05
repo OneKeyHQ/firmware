@@ -600,8 +600,7 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   if (msg->has_safety_checks) {
     if (msg->safety_checks == SafetyCheckLevel_Strict ||
         msg->safety_checks == SafetyCheckLevel_PromptTemporarily) {
-      layoutConfirmSafetyChecks(msg->safety_checks);
-      if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      if (!layoutConfirmSafetyChecks(msg->safety_checks)) {
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         layoutHome();
         return;
