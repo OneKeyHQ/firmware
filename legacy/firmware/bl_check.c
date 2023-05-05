@@ -25,6 +25,7 @@
 #include "gettext.h"
 #include "layout.h"
 #include "memory.h"
+#include "oled.h"
 #include "util.h"
 
 char bootloader_version[8] = "1.8.9";
@@ -161,17 +162,18 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
   // ATTEMPTING TO OVERWRITE BOOTLOADER WITH UNSIGNED FIRMWARE MAY BRICK
   // YOUR DEVICE.
 
-  layoutDialog2(&bmp_icon_warning, &bmp_btn_cancel, &bmp_btn_confirm, NULL,
-                NULL, _("DO NOT power off during"), _("update,or it may cause"),
+  layoutDialog2(&bmp_icon_warning, NULL, NULL, NULL, NULL,
+                _("DO NOT power off during"), _("update,or it may cause"),
                 _("irreversible malfunction"), NULL, NULL);
 
-  while (1) {
-    uint8_t key = keyScan();
-    if (key == KEY_CONFIRM) {
-      break;
-    } else if (key == KEY_CANCEL) {
-      return;
-    }
+  char delay_str[4] = "3s";
+  for (int i = 2; i >= 0; i--) {
+    oledclearLine(15);
+    oledRefresh();
+    delay_str[0] = '1' + i;
+    oledDrawStringCenter(OLED_WIDTH / 2, 120, delay_str, FONT_STANDARD);
+    oledRefresh();
+    delay_ms(1000);
   }
 
   // unlock sectors
