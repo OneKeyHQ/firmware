@@ -449,6 +449,7 @@ const char *languages[][2] = {
      "继续该操作前, 请确保你仍持有当前钱包的助记词."},
     // layout2.c
     {"Maximum Fee Per Gas:", "交易费上限单价:"},
+    {"Maximum Fee", "交易费上限"},
     {"Maximum Fee:", "交易费上限:"},
     // cosmos.c
     {"Memo", "备注"},
@@ -551,7 +552,7 @@ const char *languages[][2] = {
     //
     {"Prev", "后退"},
     // ethereum.c
-    {"Priority fee per gas:", "每份燃料消耗的优先费用"},
+    {"Priority fee per gas:", "每份燃料消耗的优先费用:"},
     // storage.c
     {"Processing...", "处理中..."},
     // cosmos.c
@@ -660,7 +661,7 @@ const char *languages[][2] = {
     {"Sign at you own risk", "签名可能存在安全风险,请谨慎操作"},
     // layout2.c
     {"Sign message?", "签名消息"},
-    {"Signer:", "签名者"},
+    {"Signer:", "签名者:"},
     // ethereum.c ethereum.c ethereum.c ethereum.c lisk.c
     {"Signing", "签名中"},
     // lisk.c signing.c signing.c signing.c signing.c

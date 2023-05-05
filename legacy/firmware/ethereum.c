@@ -366,7 +366,7 @@ static bool layoutEthereumConfirmTx(
   memcpy(pad_val + (32 - value_len), value, value_len);
   bn_read_be(pad_val, &val);
 
-  char to_str[52] = "0x__________";
+  char to_str[52] = "____________";
   char amount[32] = {0};
   char total_amount[64] = {0};
   if (to_len) {
@@ -380,12 +380,12 @@ static bool layoutEthereumConfirmTx(
         rskip60 = true;
         break;
     }
-    ethereum_address_checksum(to, to_str + 2, rskip60, chain_id);
+    ethereum_address_checksum(to, to_str, rskip60, chain_id);
   } else {
     strlcpy(to_str, _("to new contract?"), sizeof(to_str));
   }
   if (is_nft_transfer) {
-    char recip[64] = "0x";
+    char recip[64] = {0};
     bool rskip60 = false;
     switch (chain_id) {
       case 30:
@@ -395,7 +395,7 @@ static bool layoutEthereumConfirmTx(
         rskip60 = true;
         break;
     }
-    ethereum_address_checksum(recipient, recip + 2, rskip60, chain_id);
+    ethereum_address_checksum(recipient, recip, rskip60, chain_id);
     if (!is_eip1559) {
       return layoutTransactionSign(
           "NFT", true, token_amount, to_str, signer, recip, token_id, NULL, 0,
@@ -723,9 +723,7 @@ void ethereum_signing_init(const EthereumSignTx *msg, const HDNode *node) {
       break;
   }
 
-  signer[0] = '0';
-  signer[1] = 'x';
-  ethereum_address_checksum(signerhash, signer + 2, rskip60, chainid);
+  ethereum_address_checksum(signerhash, signer, rskip60, chainid);
 
   if (!ethereum_signing_confirm_common(
           &params, signer, msg->gas_price.bytes, msg->gas_price.size,
@@ -848,9 +846,7 @@ void ethereum_signing_init_eip1559(const EthereumSignTxEIP1559 *msg,
       break;
   }
 
-  signer[0] = '0';
-  signer[1] = 'x';
-  ethereum_address_checksum(signerhash, signer + 2, rskip60, chainid);
+  ethereum_address_checksum(signerhash, signer, rskip60, chainid);
 
   char max_fee_per_gas_str[32] = {0};
   char priority_fee_per_gas_str[32] = {0};
@@ -1040,10 +1036,8 @@ void ethereum_message_sign_eip712(const EthereumSignMessageEIP712 *msg,
     return;
   }
 
-  resp->address[0] = '0';
-  resp->address[1] = 'x';
   // ethereum_address_checksum adds trailing zero
-  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
+  ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
 
   uint8_t hash[32] = {0};
   struct SHA3_CTX ctx = {0};

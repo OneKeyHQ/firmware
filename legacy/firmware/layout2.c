@@ -2918,10 +2918,19 @@ void layoutInputPassphrase(const char *text, uint8_t prefix_len,
                         FONT_SMALL);
 
   y += 18;
-  for (uint32_t i = 0; i < sizeof(word_show); i++) {
-    buf[0] = word_show[i];
-    l = oledStringWidth(buf, FONT_STANDARD);
-    oledDrawStringAdapter(x + 9 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+  if (prefix_len < 14) {
+    for (uint32_t i = 0; i < sizeof(word_show); i++) {
+      buf[0] = word_show[i];
+      l = oledStringWidth(buf, FONT_STANDARD);
+      oledDrawStringAdapter(x + 9 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+    }
+  } else {
+    oledDrawStringAdapter(4, y - 3, "...", FONT_STANDARD);
+    for (uint32_t i = 1; i < sizeof(word_show); i++) {
+      buf[0] = word_show[i];
+      l = oledStringWidth(buf, FONT_STANDARD);
+      oledDrawStringAdapter(x + 9 * i + 7 - l / 2, y, buf, FONT_STANDARD);
+    }
   }
 
   location = prefix_len > 13 ? 13 : prefix_len;
@@ -3952,7 +3961,7 @@ refresh_menu:
   } else if (2 == index && token_transfer && token_id) {  // nft token id
     layoutHeader(title);
 
-    if (strlen(token_id) > 3) {
+    if (strlen(token_id) / rowlen > 3) {
       str = split_message((const uint8_t *)token_id, tokenid_len, rowlen);
       if (0 == sub_index) {
         oledDrawStringAdapter(0, 13, _("Token ID:"), FONT_STANDARD);
@@ -4158,7 +4167,7 @@ bool layoutBlindSign(const char *chain_name, bool is_contract,
   bool result = false;
   int index = 0, sub_index = 0;
   int i, bar_heght, bar_start = 12, bar_end = 52;
-  uint8_t max_index = 4;
+  uint8_t max_index = 5;
   uint8_t key = KEY_NULL;
   char title_data[32] = {0};
   char desc[64] = {0};
@@ -4188,6 +4197,19 @@ refresh_layout:
   layoutSwipe();
   oledClear();
   if (0 == index) {
+    if (0 == ui_language) {
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                                NULL, "Unable to decode data",
+                                "from this transaction. ",
+                                "Sign at your own risk");
+    } else {
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                                NULL, "无法解析交易数据.",
+                                "可能存在风险, 请谨慎甄别", NULL);
+    }
+  } else if (1 == index) {
     layoutHeader(tx_msg[0]);
     if (is_contract) {
       oledDrawStringAdapter(0, 13, _("Contract:"), FONT_STANDARD);
@@ -4196,9 +4218,9 @@ refresh_layout:
       oledDrawStringAdapter(0, 13, _("Format:"), FONT_STANDARD);
       oledDrawStringAdapter(0, 13 + 10, _("Unknown"), FONT_STANDARD);
     }
-    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if (1 == index) {
+  } else if (2 == index) {
     layoutHeader(tx_msg[0]);
     if (address_rowcount > 3) {
       str = split_message((const uint8_t *)address, addrlen, rowlen);
@@ -4237,7 +4259,7 @@ refresh_layout:
 
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if (2 == index) {
+  } else if (3 == index) {
     layoutHeader(title_data);
     if (data_rowcount > 4) {
       data2hexaddr(data + 10 * (sub_index), 10, lines);
@@ -4305,22 +4327,19 @@ refresh_layout:
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
   } else {
     layoutHeader(tx_msg[0]);
-    if (3 == index) {
+    if (4 == index) {
       memset(desc, 0, 64);
       strcat(desc, _(key1));
-      strcat(desc, ":");
       oledDrawStringAdapter(0, 13, desc, FONT_STANDARD);
       oledDrawStringAdapter(0, 13 + 10, value1, FONT_STANDARD);
-    } else if (4 == index) {
-      memset(desc, 0, 64);
-      strcat(desc, _(key2));
-      strcat(desc, ":");
-      oledDrawStringAdapter(0, 13, desc, FONT_STANDARD);
-      oledDrawStringAdapter(0, 13 + 10, value2, FONT_STANDARD);
     } else if (5 == index) {
       memset(desc, 0, 64);
+      strcat(desc, _(key2));
+      oledDrawStringAdapter(0, 13, desc, FONT_STANDARD);
+      oledDrawStringAdapter(0, 13 + 10, value2, FONT_STANDARD);
+    } else if (6 == index) {
+      memset(desc, 0, 64);
       strcat(desc, _(key3));
-      strcat(desc, ":");
       oledDrawStringAdapter(0, 13, desc, FONT_STANDARD);
       oledDrawStringAdapter(0, 13 + 10, value3, FONT_STANDARD);
     }
@@ -4337,10 +4356,10 @@ refresh_layout:
       }
       goto refresh_layout;
     case KEY_DOWN:
-      if (index == 1 && sub_index < address_rowcount - 3) {
+      if (index == 2 && sub_index < address_rowcount - 3) {
         sub_index++;
       }
-      if (index == 2 && sub_index < data_rowcount - 4) {
+      if (index == 3 && sub_index < data_rowcount - 4) {
         sub_index++;
       }
       goto refresh_layout;
@@ -4601,6 +4620,7 @@ refresh_layout:
 bool layoutSignHash(const char *chain_name, bool verify, const char *signer,
                     const char *domain_hash, const char *message_hash,
                     const char *warning) {
+  (void)warning;
   bool result = false;
   int index = 0;
   uint8_t max_index = 5;
@@ -4635,10 +4655,18 @@ refresh_layout:
   oledClear();
 
   if (0 == index) {
-    layoutHeader(title);
-    oledDrawStringAdapter(0, 13, warning, FONT_STANDARD);
-    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
-    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+    // Unable to show EIP-712 data. Sign at your own risk
+    if (ui_language == 0) {
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                                NULL, "Unable to show EIP-712",
+                                "data. Sign at your own risk", NULL);
+    } else {
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                                NULL, "无法显示 EIP-712 数据.",
+                                "请谨慎甄别项目方后决定是", "否签名, 自负风险");
+    }
   } else if (1 == index) {
     layoutHeader(title);
     oledDrawStringAdapter(0, 13, _("Signer:"), FONT_STANDARD);
