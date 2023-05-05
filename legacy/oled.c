@@ -541,8 +541,7 @@ void oledBufferRestore(uint8_t *buffer) {
 
 void oledclearLine(uint8_t line) {
   if (line < (OLED_HEIGHT / 8)) {
-    memzero(_oledbuffer + OLED_WIDTH * (OLED_HEIGHT / 8 - line - 1),
-            OLED_WIDTH);
+    memzero(_oledbuffer + OLED_WIDTH * line, OLED_WIDTH);
   }
 }
 
