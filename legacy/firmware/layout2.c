@@ -2172,19 +2172,185 @@ void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
   oledRefresh();
 }
 
-void layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
+bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
+  uint8_t key = KEY_NULL;
+  ButtonRequest resp = {0};
+  memzero(&resp, sizeof(ButtonRequest));
+  resp.has_code = true;
+  resp.code = ButtonRequestType_ButtonRequest_ProtectCall;
+  msg_write(MessageType_MessageType_ButtonRequest, &resp);
   if (safety_ckeck_level == SafetyCheckLevel_Strict) {
     // Disallow unsafe actions. This is the default.
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("enforce strict safety"),
-                      _("checks?"), _("(Recommended.)"), NULL, NULL);
+    if (ui_language == 0) {
+    page1:
+      layoutDialogCenterAdapterV2(
+          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
+          NULL, &bmp_bottom_middle_arrow_down, "Safety-Checks is running,",
+          "protect you from non-", "standard (non-BIP-44",
+          "compliant) address");
+      drawScrollbar(5, 0);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto page1;
+      }
+    page2:
+      layoutDialogCenterAdapterV2(
+          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
+          &bmp_bottom_middle_arrow_down, &bmp_bottom_middle_arrow_up,
+          "protect you from non-", "standard (non-BIP-44", "compliant) address",
+          "derivation, performing");
+      drawScrollbar(5, 1);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto page1;
+      }
+    page3:
+      layoutDialogCenterAdapterV2(
+          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
+          &bmp_bottom_middle_arrow_down, &bmp_bottom_middle_arrow_up,
+          "standard (non-BIP-44", "compliant) address",
+          "derivation, performing", "potentially risky");
+      drawScrollbar(5, 2);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto page2;
+      }
+    page4:
+      layoutDialogCenterAdapterV2(
+          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
+          &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
+          "compliant) address", "derivation, performing", "potentially risky",
+          "transactions, or");
+      drawScrollbar(5, 3);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto page3;
+      }
+    page5:
+      layoutDialogCenterAdapterV2(
+          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow,
+          &bmp_bottom_middle_arrow_up, NULL, "derivation, performing",
+          "potentially risky", "transactions, or", "unexpected high fees.");
+      drawScrollbar(5, 4);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto page4;
+      }
+      if (key == KEY_DOWN) {
+        goto page5;
+      }
+
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                NULL, NULL, "Are you sure to enable ",
+                                "Safety-Checks?", NULL);
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+    } else {
+    cn_page1:
+      layoutDialogCenterAdapterV2(
+          "安全检查", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off, NULL,
+          &bmp_bottom_middle_arrow_down, "安全检查运行期间, 将禁止",
+          "派生非标准 (不符合 BIP-44", "协议) 的地址, 并避免执行",
+          "有潜在安全风险或费用过高");
+      drawScrollbar(2, 0);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto cn_page1;
+      }
+    cn_page2:
+      layoutDialogCenterAdapterV2(
+          "安全检查", &bmp_bottom_left_close, &bmp_bottom_right_arrow,
+          &bmp_bottom_middle_arrow_up, NULL, "派生非标准 (不符合 BIP-44",
+          "协议) 的地址, 并避免执行", "有潜在安全风险或费用过高", "的交易.");
+      drawScrollbar(2, 1);
+      oledRefresh();
+      key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      if (key == KEY_UP) {
+        goto cn_page1;
+      }
+      if (key == KEY_DOWN) {
+        goto cn_page2;
+      }
+
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                NULL, NULL, "确定要启用安全检查吗?", NULL,
+                                NULL);
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+    }
   } else if (safety_ckeck_level == SafetyCheckLevel_PromptTemporarily) {
     // Ask user before unsafe action. Reverts to Strict after reboot.
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Do you really want to"), _("be temporarily able"),
-                      _("to approve some"), _("actions which might"),
-                      _("be unsafe?"), NULL);
+    if (ui_language == 0) {
+      layoutDialogCenterAdapterV2(
+          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow,
+          NULL, NULL, "It will temporarily allow", "you to perform some",
+          "actions with potentially", "risky.");
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                NULL, NULL, "Are you sure to",
+                                "temporarily disable", "safety checks?");
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+    } else {
+      layoutDialogCenterAdapterV2("Safety Checks", &bmp_bottom_left_close,
+                                  &bmp_bottom_right_arrow, NULL, NULL, NULL,
+                                  "它将暂时允许您执行一些具",
+                                  "有潜在风险的操作.", NULL);
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+      layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
+                                &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                NULL, NULL, "确定暂时禁用安全检查吗?", NULL,
+                                NULL);
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CANCEL) {
+        return false;
+      }
+    }
   }
+
+  return true;
 }
 
 void layoutConfirmHash(const BITMAP *icon, const char *description,
@@ -2474,6 +2640,53 @@ void layoutDialogAdapterEx(const char *title, const BITMAP *bmp_no,
   }
   if (btnYes || bmp_yes) {
     oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+  }
+  oledRefresh();
+}
+
+void layoutDialogCenterAdapterV2(const char *title, const BITMAP *bmp_no,
+                                 const BITMAP *bmp_yes, const BITMAP *bmp_up,
+                                 const BITMAP *bmp_down, const char *line1,
+                                 const char *line2, const char *line3,
+                                 const char *line4) {
+  const struct font_desc *font = find_cur_font();
+  int y = 0;
+
+  oledClear_ex();
+  if (title) {
+    y = 14;
+    if (ui_language) y--;
+    layoutHeader(title);
+  }
+
+  if (line1) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 0 * (font->pixel + 1),
+                                line1, FONT_STANDARD);
+  }
+  if (line2) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 1 * (font->pixel + 1),
+                                line2, FONT_STANDARD);
+  }
+  if (line3) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 2 * (font->pixel + 1),
+                                line3, FONT_STANDARD);
+  }
+  if (line4) {
+    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 3 * (font->pixel + 1),
+                                line4, FONT_STANDARD);
+  }
+
+  if (bmp_no) {
+    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+  }
+  if (bmp_yes) {
+    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+  }
+  if (bmp_up) {
+    oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8, bmp_up);
+  }
+  if (bmp_down) {
+    oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8, bmp_down);
   }
   oledRefresh();
 }
