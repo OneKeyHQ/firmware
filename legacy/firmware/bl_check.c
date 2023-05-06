@@ -170,22 +170,6 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // BEGIN AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   if (0 ==
       memcmp(hash,
-             "\xed\xf1\x9e\x2f\x39\x0c\xb5\xb0\xe7\x32\xb0\x9c\xc7\xb4\xb6\x11"
-             "\xea\xf3\x26\x2a\xec\x8c\x21\x18\x30\x72\xe9\x00\xa5\x01\x1b\xdb",
-             32)) {
-    memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
-    return 1;  // 2.0.0 shipped with fw 3.0.0
-  }
-  if (0 ==
-      memcmp(hash,
-             "\xfa\x80\x88\xb1\x6b\x31\x7f\x7d\x0b\x66\xad\x6e\xb4\x69\xc4\x75"
-             "\x37\x5c\xf3\xd5\x70\x72\xad\x38\xd8\x91\xa0\x7f\x24\x17\x8a\x0e",
-             32)) {
-    memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
-    return 1;  // 2.0.0 shipped with fw 3.0.0
-  }
-  if (0 ==
-      memcmp(hash,
              "\xa8\xbe\x50\xe3\xb5\x25\x28\x08\xf5\x22\x47\x96\x99\x1b\x6e\x10"
              "\xec\x70\x72\x6d\xc7\x29\x17\x93\x5b\x59\xaa\xf2\x0f\xca\xb2\x95",
              32)) {
