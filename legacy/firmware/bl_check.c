@@ -118,11 +118,11 @@ static int known_bootloader(int r, const uint8_t *hash) {
   // BEGIN AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   if (0 ==
       memcmp(hash,
-             "\xd3\x27\xbb\x1a\x44\xa9\x21\xe7\xd6\xae\x87\xda\x3c\xb6\xcc\x84"
-             "\xdb\x7a\x7b\xce\x94\x3f\x1d\xd7\x01\xbd\x8c\x81\xaf\xd9\x74\xef",
+             "\x2c\x71\xba\x92\x0d\x05\x98\xaf\xf8\x42\x9d\xa1\x88\xf4\x72\x53"
+             "\x6a\xa0\x6f\x19\xbd\xbf\xbb\xd8\xfc\xd0\xd1\x0e\x43\x36\x54\x6b",
              32)) {
     memcpy(bootloader_version, "2.0.0", strlen("2.0.0"));
-    return 1;  // 2.0.0 shipped with fw 2.11.0
+    return 1;  // 2.0.0 shipped with fw 3.0.0
   }
   // END AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
   memcpy(bootloader_version, "unknown", strlen("unknown"));
