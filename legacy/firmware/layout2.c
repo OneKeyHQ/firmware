@@ -1305,70 +1305,34 @@ void layoutDecryptMessage(const uint8_t *msg, uint32_t len,
 
 void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
   layoutLast = layoutResetWord;
-  layoutSwipe();
+  oledClear();
+  char header_str[64] = {0};
 
-  const char *btnYes = NULL;
+  if (pass == 1) {
+    strcat(header_str, _("Check Word "));
+    strcat(header_str, "#");
+  } else {
+    strcat(header_str, _("Word"));
+    strcat(header_str, " #");
+  }
+  uint2str(word_pos, header_str + strlen(header_str));
+
+  layoutHeader(header_str);
+  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 24, word, FONT_DOUBLE);
+
   if (last) {
     if (pass == 1) {
-      btnYes = _("Finish");
+      oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
+                     &bmp_bottom_right_confirm);
     } else {
-      btnYes = _("Again");
+      oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
+                     &bmp_bottom_right_next);
     }
   } else {
-    btnYes = _("Next");
+    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
+                   &bmp_bottom_right_arrow);
   }
 
-  const char *action = NULL;
-  if (pass == 1) {
-    action = _("Check the seed");
-  } else {
-    action = _("Write down");
-  }
-
-  char index_str[] = "##th word is:";
-  char index_str_zh[] = "第##个:";
-  char *index;
-  if (ui_language == 0) {
-    if (word_pos < 10) {
-      index_str[0] = ' ';
-    } else {
-      index_str[0] = '0' + word_pos / 10;
-    }
-    index_str[1] = '0' + word_pos % 10;
-    if (word_pos == 1 || word_pos == 21) {
-      index_str[2] = 's';
-      index_str[3] = 't';
-    } else if (word_pos == 2 || word_pos == 22) {
-      index_str[2] = 'n';
-      index_str[3] = 'd';
-    } else if (word_pos == 3 || word_pos == 23) {
-      index_str[2] = 'r';
-      index_str[3] = 'd';
-    }
-    index = index_str;
-  } else {
-    if (word_pos < 10) {
-      index_str_zh[3] = ' ';
-    } else {
-      index_str_zh[3] = '0' + word_pos / 10;
-    }
-    index_str_zh[4] = '0' + word_pos % 10;
-    index = index_str_zh;
-  }
-
-  int left = 0;
-  oledClear_ex();
-  oledDrawBitmap(0, 0, &bmp_icon_info);
-  left = bmp_icon_info.width + 4;
-
-  oledDrawStringAdapter(left, 0 * 9, action, FONT_STANDARD);
-  oledDrawStringAdapter(left, 2 * 9, index, FONT_STANDARD);
-  oledDrawStringCenterAdapter(OLED_WIDTH / 2, 4 * 9 - 3, word,
-                              FONT_FIXED | FONT_DOUBLE);
-  // 30 is the maximum pixels used for a pixel row in the BIP39 word "abstract"
-  oledSCA(4 * 9 - 3 - 2, 4 * 9 - 3 + 15 + 2, 30);
-  oledInvert(0, 4 * 9 - 3 - 2, OLED_WIDTH - 1, 4 * 9 - 3 + 15 + 2);
-  layoutButtonYesAdapter(btnYes, &bmp_btn_confirm);
   oledRefresh();
 }
 
@@ -2184,10 +2148,10 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
     if (ui_language == 0) {
     page1:
       layoutDialogCenterAdapterV2(
-          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
-          NULL, &bmp_bottom_middle_arrow_down, "Safety-Checks is running,",
-          "protect you from non-", "standard (non-BIP-44",
-          "compliant) address");
+          "Safety Checks", NULL, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow_off, NULL, &bmp_bottom_middle_arrow_down,
+          "Safety-Checks is running,", "protect you from non-",
+          "standard (non-BIP-44", "compliant) address", NULL);
       drawScrollbar(5, 0);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2199,10 +2163,11 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
       }
     page2:
       layoutDialogCenterAdapterV2(
-          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
-          &bmp_bottom_middle_arrow_down, &bmp_bottom_middle_arrow_up,
-          "protect you from non-", "standard (non-BIP-44", "compliant) address",
-          "derivation, performing");
+          "Safety Checks", NULL, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow_off, &bmp_bottom_middle_arrow_down,
+          &bmp_bottom_middle_arrow_up, "protect you from non-",
+          "standard (non-BIP-44", "compliant) address",
+          "derivation, performing", NULL);
       drawScrollbar(5, 1);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2214,10 +2179,11 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
       }
     page3:
       layoutDialogCenterAdapterV2(
-          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
-          &bmp_bottom_middle_arrow_down, &bmp_bottom_middle_arrow_up,
-          "standard (non-BIP-44", "compliant) address",
-          "derivation, performing", "potentially risky");
+          "Safety Checks", NULL, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow_off, &bmp_bottom_middle_arrow_down,
+          &bmp_bottom_middle_arrow_up, "standard (non-BIP-44",
+          "compliant) address", "derivation, performing", "potentially risky",
+          NULL);
       drawScrollbar(5, 2);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2229,10 +2195,11 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
       }
     page4:
       layoutDialogCenterAdapterV2(
-          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
-          &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
-          "compliant) address", "derivation, performing", "potentially risky",
-          "transactions, or");
+          "Safety Checks", NULL, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow_off, &bmp_bottom_middle_arrow_up,
+          &bmp_bottom_middle_arrow_down, "compliant) address",
+          "derivation, performing", "potentially risky", "transactions, or",
+          NULL);
       drawScrollbar(5, 3);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2244,9 +2211,10 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
       }
     page5:
       layoutDialogCenterAdapterV2(
-          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow,
-          &bmp_bottom_middle_arrow_up, NULL, "derivation, performing",
-          "potentially risky", "transactions, or", "unexpected high fees.");
+          "Safety Checks", NULL, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow, &bmp_bottom_middle_arrow_up, NULL,
+          "derivation, performing", "potentially risky", "transactions, or",
+          "unexpected high fees.", NULL);
       drawScrollbar(5, 4);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2271,10 +2239,10 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
     } else {
     cn_page1:
       layoutDialogCenterAdapterV2(
-          "安全检查", &bmp_bottom_left_close, &bmp_bottom_right_arrow_off, NULL,
-          &bmp_bottom_middle_arrow_down, "安全检查运行期间, 将禁止",
+          "安全检查", NULL, &bmp_bottom_left_close, &bmp_bottom_right_arrow_off,
+          NULL, &bmp_bottom_middle_arrow_down, "安全检查运行期间, 将禁止",
           "派生非标准 (不符合 BIP-44", "协议) 的地址, 并避免执行",
-          "有潜在安全风险或费用过高");
+          "有潜在安全风险或费用过高", NULL);
       drawScrollbar(2, 0);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2286,9 +2254,10 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
       }
     cn_page2:
       layoutDialogCenterAdapterV2(
-          "安全检查", &bmp_bottom_left_close, &bmp_bottom_right_arrow,
+          "安全检查", NULL, &bmp_bottom_left_close, &bmp_bottom_right_arrow,
           &bmp_bottom_middle_arrow_up, NULL, "派生非标准 (不符合 BIP-44",
-          "协议) 的地址, 并避免执行", "有潜在安全风险或费用过高", "的交易.");
+          "协议) 的地址, 并避免执行", "有潜在安全风险或费用过高", "的交易.",
+          NULL);
       drawScrollbar(2, 1);
       oledRefresh();
       key = protectWaitKey(0, 0);
@@ -2315,9 +2284,9 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
     // Ask user before unsafe action. Reverts to Strict after reboot.
     if (ui_language == 0) {
       layoutDialogCenterAdapterV2(
-          "Safety Checks", &bmp_bottom_left_close, &bmp_bottom_right_arrow,
-          NULL, NULL, "It will temporarily allow", "you to perform some",
-          "actions with potentially", "risky.");
+          "Safety Checks", NULL, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow, NULL, NULL, "It will temporarily allow",
+          "you to perform some", "actions with potentially", "risky.", NULL);
       key = protectWaitKey(0, 1);
       if (key == KEY_CANCEL) {
         return false;
@@ -2331,10 +2300,10 @@ bool layoutConfirmSafetyChecks(SafetyCheckLevel safety_ckeck_level) {
         return false;
       }
     } else {
-      layoutDialogCenterAdapterV2("Safety Checks", &bmp_bottom_left_close,
+      layoutDialogCenterAdapterV2("Safety Checks", NULL, &bmp_bottom_left_close,
                                   &bmp_bottom_right_arrow, NULL, NULL, NULL,
                                   "它将暂时允许您执行一些具",
-                                  "有潜在风险的操作.", NULL);
+                                  "有潜在风险的操作.", NULL, NULL);
       key = protectWaitKey(0, 1);
       if (key == KEY_CANCEL) {
         return false;
@@ -2644,38 +2613,76 @@ void layoutDialogAdapterEx(const char *title, const BITMAP *bmp_no,
   oledRefresh();
 }
 
-void layoutDialogCenterAdapterV2(const char *title, const BITMAP *bmp_no,
-                                 const BITMAP *bmp_yes, const BITMAP *bmp_up,
-                                 const BITMAP *bmp_down, const char *line1,
-                                 const char *line2, const char *line3,
-                                 const char *line4) {
+void layoutDialogCenterAdapterV2(const char *title, const BITMAP *icon,
+                                 const BITMAP *bmp_no, const BITMAP *bmp_yes,
+                                 const BITMAP *bmp_up, const BITMAP *bmp_down,
+                                 const char *line1, const char *line2,
+                                 const char *line3, const char *line4,
+                                 const char *desc) {
   const struct font_desc *font = find_cur_font();
-  int y = 0;
+  int i, len, index = 0, lines = 0, y = 0;
+  char buf[36] = {0};
 
   oledClear_ex();
-  if (title) {
+  if (icon) {
+    y = 21;
+    oledDrawBitmap(56, 2, icon);
+  } else if (title) {
     y = 14;
     if (ui_language) y--;
     layoutHeader(title);
   }
 
-  if (line1) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 0 * (font->pixel + 1),
-                                line1, FONT_STANDARD);
+  if (desc) {
+    len = strlen(desc);
+    if (!icon) {
+      lines = 1;
+      for (i = 0; i < len; i++) {
+        if (desc[i] == '\n') lines++;
+      }
+      if (lines <= 3) {
+        y = 17;
+      }
+    }
+    lines = 0;
+    for (i = 0; i < len; i++) {
+      if (desc[i] == '\n') {
+        memset(buf, 0, 36);
+        if ((i - index) > 36) continue;
+        memcpy(buf, desc + index, i - index);
+        oledDrawStringCenterAdapter(
+            OLED_WIDTH / 2, y + lines * (font->pixel + 1), buf, FONT_STANDARD);
+        index = i + 1;
+        lines++;
+      }
+    }
+    if (0 == lines) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + lines * (font->pixel + 1),
+                                  desc, FONT_STANDARD);
+    } else if ((index < len) && ((len - index) < 36)) {
+      memset(buf, 0, 36);
+      memcpy(buf, desc + index, len - index);
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + lines * (font->pixel + 1),
+                                  buf, FONT_STANDARD);
+    }
+  } else {
+    if (line1) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 0 * (font->pixel + 1),
+                                  line1, FONT_STANDARD);
+    }
+    if (line2) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 1 * (font->pixel + 1),
+                                  line2, FONT_STANDARD);
+    }
+    if (line3) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 2 * (font->pixel + 1),
+                                  line3, FONT_STANDARD);
+    }
+    if (line4) {
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 3 * (font->pixel + 1),
+                                  line4, FONT_STANDARD);
+    }
   }
-  if (line2) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 1 * (font->pixel + 1),
-                                line2, FONT_STANDARD);
-  }
-  if (line3) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 2 * (font->pixel + 1),
-                                line3, FONT_STANDARD);
-  }
-  if (line4) {
-    oledDrawStringCenterAdapter(OLED_WIDTH / 2, y + 3 * (font->pixel + 1),
-                                line4, FONT_STANDARD);
-  }
-
   if (bmp_no) {
     oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
   }

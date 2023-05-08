@@ -51,7 +51,7 @@ const char *languages[][2] = {
     // menu.c
     {"About Device", "关于设备"},
     // layout2.c
-    {"Access hidden wallet?", "使用隐藏钱包?"},
+    {"Access hidden wallet", "访问隐藏钱包"},
     // ada.c
     {"Account:", "账号:"},
     // layout2.c
@@ -81,7 +81,9 @@ const char *languages[][2] = {
     // reset.c
     {"Are you sure to abort this\nprocess? All progress\nwill be lost.",
      "确定要终止本次流程吗? \n所有的进度都将丢失."},
-    //
+    // fsm_msg_common.h
+    {"Are you sure to change the label to", "确定要将标签改为"},
+    {"Are you sure to disable\nPIN protection?", "确定要禁用 PIN 码保护吗?"},
     {"Are you sure to reset this \ndevice? This action can not be undo!",
      "您确定要重置设备吗? 该\n操作无法撤消!"},
     {"Are you sure to reset?", "确定要重置吗?"},
@@ -160,6 +162,7 @@ const char *languages[][2] = {
     {"Chain Name", "链名称"},
     //
     {"Change Auto-Lock Time", "更改自动锁定时间"},
+    {"Change Label", "更改标签"},
     {"Change PIN", "修改PIN码"},
     // layout2.c
     {"Change language to", "设置语言为"},
@@ -294,6 +297,7 @@ const char *languages[][2] = {
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     {"Do you really want to", "请确认"},
     //
+    {"Do you really want to \nchange fastpay settings?", "确认要修改快捷支付?"},
     {"Do you really want to \ndisable passphrase protection?",
      "要禁用passphrase加密吗?"},
     //
@@ -301,9 +305,14 @@ const char *languages[][2] = {
      "要启用passphrase加密吗?"},
     // fsm_msg_common.h
     {"Do you want to", "请确认"},
+    {"Do you want to change the\nhome screen?", "确定要更改主屏幕吗?"},
     // layout2.c
     {"Do you want to decrypt?", "请确认解密"},
     // fsm_msg_common.h
+    {"Do you want to disable\npassphrase protection?",
+     "要禁用 passphrase 加密吗?"},
+    {"Do you want to enable\npassphrase protection?",
+     "要启用 passphrase 加密吗?"},
     {"Do you want to restart", "确定要重启设备并进入更新"},
     {"Do you want to set", "请确认设置"},
     // layout2.c
@@ -341,6 +350,8 @@ const char *languages[][2] = {
     //
     {"Enter Passphrase", "输入Passphrase"},
     {"Enter Recovery Phrase", "输入助记词"},
+    // recovery.c
+    {"Enter Word", "输入单词"},
     // protect.c
     {"Enter new wipe code:", "输入新的擦除PIN码"},
     //
@@ -435,6 +446,8 @@ const char *languages[][2] = {
     {"Language", "语言"},
     // fsm_msg_common.h
     {"Loading private seed", "导入私钥"},
+    // signing.c
+    {"Loading transaction", "载入交易"},
     // trezor.c
     {"Lock Device", "锁定设备"},
     //
@@ -471,7 +484,8 @@ const char *languages[][2] = {
     // layout2.c
     {"Next", "继续"},
     //
-    {"Next screen will show", "下一屏幕将显示"},
+    {"Next screen will show the\npassphrase!",
+     "接下来, 将在屏幕中展示输 \n 入的 Passphrase"},
     {"Next, Follow the onscreen\ninstructions to set up your\nOneKey Classic.",
      "接下来,请按照屏幕上的指令\n完成开始设置您的 \nOneKey Classic"},
     {"Next, check the written ", "接下来, 请再次检查刚刚抄写\n的 "},
@@ -627,7 +641,7 @@ const char *languages[][2] = {
     //
     {"Scan the QR code below", "扫描下方二维码"},
     //
-    {"Security", "安全检查"},
+    {"Security", "安全"},
     // protect.c
     {"Select Number of Word", "选择助记词位数"},
     //
@@ -701,6 +715,11 @@ const char *languages[][2] = {
     {"The next screen will start\ndisplay ", "接下来将依次展示 "},
     // recovery.c
     {"The seed is", "种子"},
+    // u2f.c
+    {"This U2F device is already\nregistered in this\napplication.",
+     "当前设备已在此应用程序中\n注册."},
+    {"This U2F device is not\nregistered in this\napplication.",
+     "当前设备尚未在此应用程序\n中注册."},
     //
     {"This cannot be undo!", "本操作不可撤销!"},
     // protect.c fsm_msg_common.h
@@ -742,6 +761,9 @@ const char *languages[][2] = {
     {"Txn type", "类型"},
     // cosmos.c
     {"Type", "类型"},
+    // u2f.c
+    {"U2F Already Registered", "U2F 已注册"},
+    {"U2F Not Registered", "U2F 未注册"},
     // fsm_msg_ethereum.h
     {"Unable to show EIP-712 data. Sign at your own risk.",
      "无法显示 EIP-712 数据.\n请谨慎甄别项目方后决定是否签名, 自负风险"},
@@ -801,10 +823,9 @@ const char *languages[][2] = {
     {"Withdraw Reward", "提取奖励"},
     {"Withdraw Validator Commission", "提取验证者佣金"},
     // recovery.c
+    {"Word", "单词"},
     {"Word not found in a wordlist", ""},
     {"Wordlist ", "单词列表 "},
-    //
-    {"Word", "单词"},
     //
     {"Write down", "请抄写助记词"},
     // layout2.c
@@ -844,9 +865,7 @@ const char *languages[][2] = {
     //
     {"chances", "次机会"},
     // fsm_msg_common.h
-    {"change current PIN?", "修改PIN码"},
-    // fsm_msg_common.h
-    {"change fastpay settings", "修改快捷支付"},
+    {"change current PIN?", "修改PIN码?"},
     // fsm_msg_common.h
     {"change language to", "修改语言为"},
     // fsm_msg_common.h
@@ -930,7 +949,7 @@ const char *languages[][2] = {
     // layout2.c protect.c
     {"second", "秒"},
     // fsm_msg_common.h
-    {"send entropy?", "发送熵值"},
+    {"send entropy?", "发送entropy值?"},
     {"sender", "发送方"},
     // fsm_msg_common.h
     {"set new PIN?", "设置PIN码"},
