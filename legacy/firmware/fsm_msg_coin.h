@@ -114,7 +114,7 @@ void fsm_msgGetPublicKey(const GetPublicKey *msg) {
   if (msg->has_show_display && msg->show_display) {
     for (int page = 0; page < 2; page++) {
       layoutXPUB(resp->xpub, page);
-      if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, true)) {
+      if (!protectButton(ButtonRequestType_ButtonRequest_PublicKey, false)) {
         memzero(resp, sizeof(PublicKey));
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         layoutHome();

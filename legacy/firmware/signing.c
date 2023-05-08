@@ -407,7 +407,7 @@ static void report_progress(bool force) {
     progress = 1000 * progress_step / progress_steps;
   }
 
-  layoutProgress(progress_label, progress);
+  layoutProgressAdapter(progress_label, progress);
   update_ctr = 0;
 }
 

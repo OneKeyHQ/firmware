@@ -219,6 +219,8 @@ static const uint32_t CONFIG_VERSION = 11;
 static const uint8_t FALSE_BYTE = '\x00';
 static const uint8_t TRUE_BYTE = '\x01';
 
+static bool derive_cardano = 0;
+
 static uint32_t pin_to_int(const char *pin) {
   uint32_t val = 1;
   size_t i = 0;
@@ -795,27 +797,30 @@ const uint8_t *config_getSeed(void) {
     mnemonic_to_seed(mnemonic, passphrase, activeSessionCache->seed,
                      get_root_node_callback);  // BIP-0039
 
-    // Cardano ICARUS
-    uint8_t mnemonic_bits[64] = {0};
-    int mnemonic_bits_len = mnemonic_to_bits(mnemonic, mnemonic_bits);
-    if (mnemonic_bits_len == 0 || mnemonic_bits_len % 33 != 0) {
-      fsm_sendFailure(FailureType_Failure_ProcessError, _("Invalid mnemonic"));
-      return false;
-    }
-    int entropy_len = mnemonic_bits_len - mnemonic_bits_len / 33;
-    int mnemonic_bytes_used = 0;
+    if (derive_cardano) {
+      // Cardano ICARUS
+      uint8_t mnemonic_bits[64] = {0};
+      int mnemonic_bits_len = mnemonic_to_bits(mnemonic, mnemonic_bits);
+      if (mnemonic_bits_len == 0 || mnemonic_bits_len % 33 != 0) {
+        fsm_sendFailure(FailureType_Failure_ProcessError,
+                        _("Invalid mnemonic"));
+        return false;
+      }
+      int entropy_len = mnemonic_bits_len - mnemonic_bits_len / 33;
+      int mnemonic_bytes_used = 0;
 
-    // Exclude checksum (original Icarus spec)
-    mnemonic_bytes_used = entropy_len / 8;
-    secret_from_entropy_cardano_icarus(
-        (const uint8_t *)passphrase, strlen(passphrase), mnemonic_bits,
-        mnemonic_bytes_used, activeSessionCache->cardano_icarus_secret, NULL);
+      // Exclude checksum (original Icarus spec)
+      mnemonic_bytes_used = entropy_len / 8;
+      secret_from_entropy_cardano_icarus(
+          (const uint8_t *)passphrase, strlen(passphrase), mnemonic_bits,
+          mnemonic_bytes_used, activeSessionCache->cardano_icarus_secret, NULL);
+      activeSessionCache->cardanoSecretCached = sectrue;
+    }
 
     memzero(mnemonic, sizeof(mnemonic));
     memzero(passphrase, sizeof(passphrase));
     usbTiny(oldTiny);
     activeSessionCache->seedCached = sectrue;
-    activeSessionCache->cardanoSecretCached = sectrue;
     return activeSessionCache->seed;
   } else {
     fsm_sendFailure(FailureType_Failure_NotInitialized,
@@ -912,6 +917,11 @@ bool config_getCardanoRootNode(HDNode *node) {
       fsm_sendFailure(FailureType_Failure_InvalidSession, "Invalid Seed");
       return false;
     }
+  }
+  if (activeSessionCache->cardanoSecretCached != sectrue) {
+    fsm_sendFailure(FailureType_Failure_InvalidSession,
+                    "Invalid Cardano ICARUS derive");
+    return false;
   }
   // activeSessionCache->cardano_icarus_secret
   int res = hdnode_from_secret_cardano(
@@ -1759,3 +1769,7 @@ void config_setTrezorCompMode(bool trezor_comp_mode) {
 bool config_getTrezorCompMode(bool *trezor_comp_mode) {
   return sectrue == config_get_bool(KEY_TREZOR_COMP_MODE, trezor_comp_mode);
 }
+
+bool config_getDeriveCardano(void) { return derive_cardano; }
+
+void config_setDeriveCardano(bool on) { derive_cardano = on; }
