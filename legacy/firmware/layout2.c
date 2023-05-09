@@ -3288,36 +3288,21 @@ void layoutTransInformation(const BITMAP *bmp_up, const BITMAP *bmp_down,
       oledDrawStringAdapter(12, y, data, FONT_FIXED);
     }
   } else {
-    uint8_t codedata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
-    uint8_t tempdata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
+    uint8_t codedata[qrcodegen_BUFFER_LEN_FOR_VERSION(11)] = {0};
+    uint8_t tempdata[qrcodegen_BUFFER_LEN_FOR_VERSION(11)] = {0};
 
     int side = 0;
-    if (qrcodegen_encodeText(data, tempdata, codedata, qrcodegen_Ecc_LOW,
-                             qrcodegen_VERSION_MIN, QR_MAX_VERSION,
-                             qrcodegen_Mask_AUTO, true)) {
+    if (qrcodegen_encodeText(data, tempdata, codedata, qrcodegen_Ecc_LOW, 11,
+                             11, qrcodegen_Mask_AUTO, true)) {
       side = qrcodegen_getSize(codedata);
     }
 
-    oledInvert(OLED_WIDTH / 4, y, OLED_WIDTH / 4 + 63, y + 63);
-    if (side > 0 && side <= 29) {
-      int offset_x = OLED_WIDTH / 4 + 32 - side;
-      int offset_y = y + 32 - side;
-      for (int i = 0; i < side; i++) {
-        for (int j = 0; j < side; j++) {
-          if (qrcodegen_getModule(codedata, i, j)) {
-            oledBox(offset_x + i * 2, offset_y + j * 2, offset_x + 1 + i * 2,
-                    offset_y + 1 + j * 2, false);
-          }
-        }
-      }
-    } else if (side > 0 && side <= 60) {
-      int offset_x = OLED_WIDTH / 4 + 32 - side / 2;
-      int offset_y = y + 32 - side / 2;
-      for (int i = 0; i < side; i++) {
-        for (int j = 0; j < side; j++) {
-          if (qrcodegen_getModule(codedata, i, j)) {
-            oledClearPixel(offset_x + i, offset_y + j);
-          }
+    oledInvert(33, y, 95, y + 62);
+    int offset = 32 - (side / 2);
+    for (int i = 0; i < side; i++) {
+      for (int j = 0; j < side; j++) {
+        if (qrcodegen_getModule(codedata, i, j)) {
+          oledClearPixel(32 + offset + i, offset + j + y - 1);
         }
       }
     }
