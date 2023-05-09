@@ -551,7 +551,7 @@ static void recovery_digit(const char digit) {
 void next_word(void) {
   layoutLast = layoutDialogSwipe;
   layoutSwipe();
-  layoutHeader("Enter word ");
+  layoutHeader("Enter Word");
   word_pos = word_order[word_index];
   if (word_pos == 0) {
     strlcpy(fake_word, mnemonic_get_word(random_uniform(BIP39_WORD_COUNT)),
@@ -585,9 +585,11 @@ void recovery_init(uint32_t _word_count, bool passphrase_protection,
   dry_run = _dry_run;
 
   if (!dry_run) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("recover the device?"),
-                      NULL, NULL, NULL);
+    layoutDialogAdapterEx(
+        _("Import Wallet"), &bmp_bottom_left_close, NULL,
+        &bmp_bottom_right_arrow, NULL,
+        _("Restore the wallet you\npreviously used from a \nrecovery phrase"),
+        NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();

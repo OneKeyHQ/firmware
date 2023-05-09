@@ -385,6 +385,7 @@ static bool is_external_input(uint32_t i) {
 
 static void report_progress(bool force) {
   static uint32_t update_ctr = 0;
+
   if (!force && update_ctr < progress_update) {
     update_ctr++;
     return;

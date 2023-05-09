@@ -233,6 +233,9 @@ bool config_hasTrezorCompMode(void);
 void config_setTrezorCompMode(bool trezor_comp_mode);
 bool config_getTrezorCompMode(bool *trezor_comp_mode);
 
+bool config_getDeriveCardano(void);
+void config_setDeriveCardano(bool on);
+
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 
 #endif

@@ -163,6 +163,12 @@ bool get_features(Features *resp) {
 void fsm_msgInitialize(const Initialize *msg) {
   fsm_abortWorkflows();
 
+  if (msg && msg->has_derive_cardano && msg->derive_cardano) {
+    config_setDeriveCardano(true);
+  } else {
+    config_setDeriveCardano(false);
+  }
+
   uint8_t *session_id;
   if (msg && msg->has_session_id) {
     session_id = session_startSession(msg->session_id.bytes);
@@ -192,9 +198,11 @@ void fsm_msgPing(const Ping *msg) {
   RESP_INIT(Success);
 
   if (msg->has_button_protection && msg->button_protection) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("answer to ping?"), NULL,
-                      NULL, NULL);
+    layoutDialogCenterAdapterV2(
+        NULL, &bmp_icon_question, &bmp_bottom_left_close,
+        &bmp_bottom_right_confirm, NULL, NULL, _("Do you really want to"),
+        _("answer to ping"), NULL, NULL, NULL);
+
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -221,25 +229,28 @@ void fsm_msgChangePin(const ChangePin *msg) {
   bool button_confirm = true;
   if (removal) {
     if (config_hasPin()) {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        NULL, _("Do you really want to"),
-                        _("remove current PIN?"), NULL, NULL, NULL);
+      layoutDialogCenterAdapterV2(
+          NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+          &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+          _("Are you sure to disable\nPIN protection?"));
     } else {
       fsm_sendSuccess(_("PIN removed"));
       return;
     }
   } else {
     if (config_hasPin()) {
-      layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                        NULL, _("Do you really want to"),
-                        _("change current PIN?"), NULL, NULL, NULL);
+      layoutDialogCenterAdapterV2(
+          NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+          &bmp_bottom_right_confirm, NULL, NULL, _("Do you really want to"),
+          _("change current PIN?"), NULL, NULL, NULL);
     } else {
       if (g_bIsBixinAPP) {
         button_confirm = false;
       } else {
-        layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                          NULL, _("Do you really want to"), _("set new PIN?"),
-                          NULL, NULL, NULL);
+        layoutDialogCenterAdapterV2(
+            NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+            &bmp_bottom_right_confirm, NULL, NULL, _("Do you really want to"),
+            _("set new PIN?"), NULL, NULL, NULL);
       }
     }
   }
@@ -366,9 +377,10 @@ void fsm_msgGetEntropy(const GetEntropy *msg) {
   CHECK_PIN
 
 #if !DEBUG_RNG
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                    _("Do you really want to"), _("send entropy?"), NULL, NULL,
-                    NULL);
+  layoutDialogCenterAdapterV2(NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+                              &bmp_bottom_right_confirm, NULL, NULL,
+                              _("Do you really want to"), _("send entropy?"),
+                              NULL, NULL, NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
@@ -507,9 +519,17 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
 
   if (msg->has_label) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("change name to"),
-                      msg->label, "?", NULL);
+    char label[72] = {0};
+    if (ui_language == 1) {
+      snprintf(label, 72, "%s \"%s\"吗?",
+               _("Are you sure to change the label to"), msg->label);
+    } else {
+      snprintf(label, 72, "%s \"%s\"?",
+               _("Are you sure to change the label to"), msg->label);
+    }
+    layoutDialogCenterAdapterV2("Change Label", NULL, &bmp_bottom_left_close,
+                                &bmp_bottom_right_confirm, NULL, NULL,
+                                (const char *)label, NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -517,9 +537,10 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_language) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("change language to"),
-                      (fsm_getLang(msg) ? "中文" : "English"), "?", NULL);
+    layoutDialogCenterAdapterV2(
+        _("Language"), NULL, &bmp_bottom_left_close, &bmp_bottom_right_confirm,
+        NULL, NULL, _("Do you really want to"), _("change language to"),
+        (fsm_getLang(msg) ? "中文" : "English"), "?", NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -527,11 +548,17 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_use_passphrase) {
-    layoutDialogSwipe(
-        &bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-        _("Do you really want to"),
-        msg->use_passphrase ? _("enable passphrase") : _("disable passphrase"),
-        _("protection?"), NULL, NULL);
+    if (msg->use_passphrase) {
+      layoutDialogCenterAdapterV2(
+          NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+          &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+          _("Do you want to enable\npassphrase protection?"));
+    } else {
+      layoutDialogCenterAdapterV2(
+          NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+          &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+          _("Do you want to disable\npassphrase protection?"));
+    }
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -539,9 +566,10 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_homescreen) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("change the home screen"),
-                      NULL, NULL, NULL);
+    layoutDialogCenterAdapterV2(NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+                                &bmp_bottom_right_confirm, NULL, NULL, NULL,
+                                NULL, NULL, NULL,
+                                _("Do you want to change the\nhome screen?"));
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -572,9 +600,10 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
   }
   if ((msg->has_fastpay_pin) || (msg->has_fastpay_confirm) ||
       (msg->has_fastpay_money_limit) || (msg->has_fastpay_times)) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("change fastpay settings"),
-                      NULL, NULL, NULL);
+    layoutDialogCenterAdapterV2(
+        NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+        &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+        _("Do you really want to \nchange fastpay settings?"));
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -582,10 +611,10 @@ void fsm_msgApplySettings(const ApplySettings *msg) {
     }
   }
   if (msg->has_use_ble) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("change bluetooth"),
-                      _("status always?"), NULL, NULL);
-
+    layoutDialogCenterAdapterV2(
+        NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+        &bmp_bottom_right_confirm, NULL, NULL, _("Do you really want to"),
+        _("change bluetooth"), _("status always?"), NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
@@ -687,9 +716,10 @@ void fsm_msgWordAck(const WordAck *msg) {
 void fsm_msgSetU2FCounter(const SetU2FCounter *msg) {
   CHECK_PIN
 
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Do you want to set"), _("the U2F counter?"), NULL, NULL,
-                    NULL, NULL);
+  layoutDialogCenterAdapterV2(NULL, &bmp_icon_question, &bmp_bottom_left_close,
+                              &bmp_bottom_right_confirm, NULL, NULL,
+                              _("Do you want to set"), _("the U2F counter?"),
+                              NULL, NULL, NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
@@ -703,9 +733,10 @@ void fsm_msgSetU2FCounter(const SetU2FCounter *msg) {
 void fsm_msgGetNextU2FCounter() {
   CHECK_PIN
 
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Do you want to"), _("increase and retrieve"),
-                    _("the U2F counter?"), NULL, NULL, NULL);
+  layoutDialogCenterAdapterV2(NULL, &bmp_icon_question, &bmp_bottom_left_close,
+                              &bmp_bottom_right_confirm, NULL, NULL,
+                              _("Do you want to"), _("increase and retrieve"),
+                              _("the U2F counter?"), NULL, NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
@@ -771,10 +802,10 @@ void fsm_msgBixinReboot(const BixinReboot *msg) {
   }
 #endif
 
-  layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
-                            &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
-                            NULL, _("Do you want to restart"),
-                            _("device in update mode?"), NULL);
+  layoutDialogCenterAdapterV2(NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+                              &bmp_bottom_right_confirm, NULL, NULL,
+                              _("Do you want to restart"),
+                              _("device in update mode?"), NULL, NULL, NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();

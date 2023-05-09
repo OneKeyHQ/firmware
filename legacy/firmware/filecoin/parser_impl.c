@@ -378,7 +378,7 @@ __Z_INLINE parser_error_t readMethod(parser_tx_t *tx, CborValue *value) {
   tx->numparams = 0;
   memzero(tx->params, sizeof(tx->params));
 
-  CHECK_PARSER_ERR(fil_checkMethod(methodValue))
+  // CHECK_PARSER_ERR(fil_checkMethod(methodValue))
 
   // This area reads the entire params byte string (if present) into the
   // txn->params and sets txn->numparams to the number of params within cbor

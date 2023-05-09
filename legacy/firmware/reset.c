@@ -67,10 +67,11 @@ void reset_init(bool display_random, uint32_t _strength,
   }
 
   if (!g_bIsBixinAPP) {
-    layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                      _("Do you really want to"), _("create a new wallet?"),
-                      NULL, NULL, NULL);
-
+    layoutDialogAdapterEx(
+        _("Create New Wallet"), &bmp_bottom_left_close, NULL,
+        &bmp_bottom_right_arrow, NULL,
+        _("Generating a standard\nwallet with a new set of\nrecovery phrase."),
+        NULL, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();

@@ -692,15 +692,15 @@ void u2f_register(const APDU *a) {
     if (0 == memcmp(req->appId, BOGUS_APPID_CHROME, U2F_APPID_SIZE) ||
         0 == memcmp(req->appId, BOGUS_APPID_FIREFOX, U2F_APPID_SIZE)) {
       if (cid == last_good_auth_check_cid) {
-        layoutDialogAdapter(&bmp_icon_warning, NULL, _("OK"), NULL,
-                            _("Already registered."), NULL,
-                            _("This U2F device is"), _("already registered"),
-                            _("in this application."), NULL);
+        layoutDialogCenterAdapterV2(
+            "U2F Already Registered", NULL, NULL, &bmp_bottom_right_confirm,
+            NULL, NULL, NULL, NULL, NULL, NULL,
+            _("This U2F device is already\nregistered in this\napplication."));
       } else {
-        layoutDialogAdapter(&bmp_icon_warning, NULL, _("OK"), NULL,
-                            _("Not registered."), NULL, _("Another U2F device"),
-                            _("was used to register"),
-                            _("in this application."), NULL);
+        layoutDialogCenterAdapterV2(
+            "U2F Not Registered", NULL, NULL, &bmp_bottom_right_confirm, NULL,
+            NULL, NULL, NULL, NULL, NULL,
+            _("This U2F device is not\nregistered in this\napplication."));
       }
     } else {
       const char *appname = NULL;
