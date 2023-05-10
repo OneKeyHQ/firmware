@@ -226,13 +226,7 @@ async def confirm_sending(
     output_type: Literal["address", "change", "collateral-return"],
     network_id: int,
 ) -> None:
-    if output_type == "address":
-        message = "Confirm sending"
-    elif output_type == "change":
-        message = "Change amount"
-    elif output_type == "collateral-return":
-        message = "Collateral return"
-    else:
+    if output_type not in ("address", "change", "collateral-return"):
         raise RuntimeError  # should be unreachable
 
     await confirm_output(
@@ -240,11 +234,7 @@ async def confirm_sending(
         to,
         format_coin_amount(ada_amount, network_id),
         title=TITLE,
-        subtitle=f"{message}:",
-        font_amount=ui.BOLD,
-        width_paginated=17,
-        to_str="\nto\n",
-        to_paginated=True,
+        subtitle="Cardano",
         br_code=ButtonRequestType.Other,
     )
 
@@ -528,11 +518,6 @@ async def confirm_tx(
 
     if total_collateral is not None:
         append(("Total collateral:", format_coin_amount(total_collateral, network_id)))
-
-    if total_collateral is not None:
-        props.append(
-            ("Total collateral:", format_coin_amount(total_collateral, network_id))
-        )
 
     if is_network_id_verifiable:
         append((f"Network: {protocol_magics.to_ui_string(protocol_magic)}", None))

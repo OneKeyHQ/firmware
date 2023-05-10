@@ -932,6 +932,8 @@ if FROZEN:
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/filecoin/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/cosmos/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/polkadot/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/polkadot/*/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/kaspa/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Zcash*.py'))
 

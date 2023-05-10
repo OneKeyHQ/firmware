@@ -19,7 +19,7 @@ class PoolOwnerSigner(Signer):
     staking key in the list of pool owners.
     """
 
-    SIGNING_MODE_TITLE = "Confirming pool registration as owner."
+    SIGNING_MODE_TITLE = "Confirming pool registration as owner"
 
     def _validate_tx_init(self) -> None:
         super()._validate_tx_init()
