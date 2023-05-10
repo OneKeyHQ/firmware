@@ -1598,6 +1598,13 @@ bool config_getTrezorCompMode(bool *trezor_comp_mode) {
   return sectrue == config_get_bool(KEY_TREZOR_COMP_MODE, trezor_comp_mode);
 }
 
-bool config_getDeriveCardano(void) { return derive_cardano; }
+bool config_getDeriveCardano(void) {
+  if ((activeSessionCache->cardanoSecretCached != sectrue) &&
+      (activeSessionCache->seedCached == sectrue)) {
+    return false;  // only BIP-0039
+  }
+
+  return true;
+}
 
 void config_setDeriveCardano(bool on) { derive_cardano = on; }

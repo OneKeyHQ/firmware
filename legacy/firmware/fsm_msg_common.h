@@ -163,17 +163,24 @@ bool get_features(Features *resp) {
 void fsm_msgInitialize(const Initialize *msg) {
   fsm_abortWorkflows();
 
-  if (msg && msg->has_derive_cardano && msg->derive_cardano) {
-    config_setDeriveCardano(true);
-  } else {
-    config_setDeriveCardano(false);
-  }
-
   uint8_t *session_id;
   if (msg && msg->has_session_id) {
     session_id = session_startSession(msg->session_id.bytes);
   } else {
     session_id = session_startSession(NULL);
+  }
+
+  if (msg && msg->has_derive_cardano && msg->derive_cardano) {
+    if (!config_getDeriveCardano()) {
+      // seed is already derived, and host wants to change derive_cardano
+      // setting
+      // => create a new session
+      session_endCurrentSession();
+      session_id = session_startSession(NULL);
+    }
+    config_setDeriveCardano(true);
+  } else {
+    config_setDeriveCardano(false);
   }
 
   RESP_INIT(Features);
