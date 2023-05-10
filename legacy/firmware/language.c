@@ -485,7 +485,7 @@ const char *languages[][2] = {
     {"Next", "继续"},
     //
     {"Next screen will show the\npassphrase!",
-     "接下来, 将在屏幕中展示输 \n 入的 Passphrase"},
+     "接下来, 将在屏幕中展示输\n入的 Passphrase"},
     {"Next, Follow the onscreen\ninstructions to set up your\nOneKey Classic.",
      "接下来,请按照屏幕上的指令\n完成开始设置您的 \nOneKey Classic"},
     {"Next, check the written ", "接下来, 请再次检查刚刚抄写\n的 "},
