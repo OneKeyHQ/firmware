@@ -65,5 +65,6 @@ void enter_sleep(void);
 
 extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
+extern bool protectAbortedByInitializeOnboarding;
 extern bool protectAbortedByTimeout;
 #endif

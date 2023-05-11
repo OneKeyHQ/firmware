@@ -591,7 +591,7 @@ void onboarding(uint8_t key) {
                                 "have fun\nwith your OneKey Classic."),
                               NULL, NULL, NULL, NULL);
         key = protectWaitKey(0, 1);
-        if (protectAbortedByInitialize) return;
+        if (protectAbortedByInitializeOnboarding) return;
         if (key != KEY_CONFIRM) {
           goto done1;
         }
@@ -610,7 +610,7 @@ void onboarding(uint8_t key) {
           oledRefresh();
         }
         key = protectWaitKey(0, 1);
-        if (protectAbortedByInitialize) return;
+        if (protectAbortedByInitializeOnboarding) return;
         if (key != KEY_CONFIRM) {
           goto done1;
         }
@@ -629,7 +629,7 @@ void onboarding(uint8_t key) {
           oledRefresh();
         }
         key = protectWaitKey(0, 1);
-        if (protectAbortedByInitialize) return;
+        if (protectAbortedByInitializeOnboarding) return;
         if (key != KEY_CONFIRM) {
           goto done2;
         }

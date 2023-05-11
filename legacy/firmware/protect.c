@@ -42,6 +42,8 @@
 #define MAX_WRONG_PINS 15
 
 bool protectAbortedByCancel = false;
+// allow the app to connect to the device when in the tutorial page
+bool protectAbortedByInitializeOnboarding = false;
 bool protectAbortedByInitialize = false;
 bool protectAbortedByTimeout = false;
 extern bool exitBlindSignByInitialize;
@@ -751,6 +753,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
 
   protectAbortedByInitialize = false;
+  protectAbortedByInitializeOnboarding = false;
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
@@ -784,6 +787,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     }
   }
   usbTiny(0);
+  protectAbortedByInitializeOnboarding = protectAbortedByInitialize;
   if (protectAbortedByInitialize) {
     if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
