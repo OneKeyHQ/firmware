@@ -25,14 +25,14 @@ class PassphraseRequest(FullSizeWindow):
         self.keyboard.add_event_cb(self.on_ready, lv.EVENT.READY, None)
 
         self.nav_back.add_event_cb(self.on_cancel, lv.EVENT.CLICKED, None)
-        self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
+        # self.add_event_cb(self.on_nav_back, lv.EVENT.GESTURE, None)
 
-    def on_nav_back(self, event_obj):
-        code = event_obj.code
-        if code == lv.EVENT.GESTURE:
-            _dir = lv.indev_get_act().get_gesture_dir()
-            if _dir == lv.DIR.RIGHT:
-                lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
+    # def on_nav_back(self, event_obj):
+    #     code = event_obj.code
+    #     if code == lv.EVENT.GESTURE:
+    #         _dir = lv.indev_get_act().get_gesture_dir()
+    #         if _dir == lv.DIR.RIGHT:
+    #             lv.event_send(self.nav_back.nav_btn, lv.EVENT.CLICKED, None)
 
     def on_ready(self, event_obj):
         input = self.keyboard.ta.get_text()
