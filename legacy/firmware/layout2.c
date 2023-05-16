@@ -826,6 +826,9 @@ void layoutHome(void) {
 #if ONEKEY_MINI
   static bool first_boot = true;
   if (!config_isInitialized() && first_boot) {
+    if (config_hasPin()) {
+      config_wipe();
+    }
     first_boot = false;
     layout_language_set(KEY_UP);
   } else
@@ -3584,8 +3587,8 @@ void layoutConfirmHash(const BITMAP *icon, const char *description,
   oledDrawString(20, 4 * 9, str[3], FONT_FIXED);
   oledHLine(OLED_HEIGHT - 13);
 
-  layoutButtonNo(_("Cancel"), &bmp_btn_cancel);
-  layoutButtonYes(_("Confirm"), &bmp_btn_confirm);
+  layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
+  layoutButtonYesAdapter(_("Confirm"), &bmp_btn_confirm);
   oledRefresh();
 }
 
@@ -3617,12 +3620,13 @@ void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
              OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH - 4, OLED_HEIGHT);
 }
 
-bool layoutBlindSign(char *address) {
+bool layoutBlindSign(const char *chain_name, char *address) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
   int index = 0;
   int y = 0;
   uint8_t key = KEY_NULL;
+  const char **tx_msg = format_tx_message(chain_name);
   const char **str =
       split_message((const uint8_t *)address, strlen(address), 17);
   int lines = (strlen(address) / 17) + 1;
@@ -3633,6 +3637,20 @@ bool layoutBlindSign(char *address) {
   resp.has_code = true;
   resp.code = ButtonRequestType_ButtonRequest_SignTx;
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
+
+  if (0 == ui_language) {
+    layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
+                      _("Unable to decode data"), _("from this transaction. "),
+                      NULL, _("Sign at your own risk."), NULL, NULL);
+  } else {
+    layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
+                      "无法解析交易数据.", "可能存在风险, 请谨慎甄别.", NULL,
+                      NULL, NULL, NULL);
+  }
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return false;
+  }
 
 refresh_menu:
   layoutSwipe();
@@ -3679,16 +3697,10 @@ refresh_menu:
     case 2:
       oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
       y += bmp_btn_up.height + 3;
+
       oledDrawStringAdapter(0, y, _("CONFIRM SIGNING:"), FONT_STANDARD);
       y += font->pixel + 5;
-      oledDrawStringAdapter(0, y, _("Transaction data cannot be decoded"),
-                            FONT_STANDARD);
-      if (0 == ui_language) {
-        y += 2 * font->pixel + 3;
-      } else {
-        y += font->pixel + 1;
-      }
-      oledDrawStringAdapter(0, y, _("Sign at you own risk"), FONT_STANDARD);
+      oledDrawStringAdapter(0, y, tx_msg[1], FONT_STANDARD);
 
       // scrollbar
       for (int i = 0; i < OLED_HEIGHT; i += 3) {

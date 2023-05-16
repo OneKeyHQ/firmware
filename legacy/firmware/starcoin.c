@@ -63,7 +63,7 @@ bool starcoin_sign_tx(const StarcoinSignTx *msg, const HDNode *node,
   address[1] = 'x';
   starcoin_get_address_from_public_key(node->public_key + 1, address + 2);
 
-  if (!layoutBlindSign(address)) {
+  if (!layoutBlindSign("Starcoin", address)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
     return false;

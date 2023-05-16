@@ -380,7 +380,7 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
       return false;
     }
   } else {
-    if (!layoutBlindSign(address)) {
+    if (!layoutBlindSign("Near", address)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
       layoutHome();
       return false;

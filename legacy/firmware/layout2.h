@@ -304,7 +304,7 @@ static inline void layoutSwipe(void) {
 }
 #endif
 
-bool layoutBlindSign(char *address);
+bool layoutBlindSign(const char *chain_name, char *address);
 const char *address_n_str(const uint32_t *address_n, size_t address_n_count,
                           bool address_is_account);
 

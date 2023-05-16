@@ -13,7 +13,7 @@
 
 extern uint8_t ui_language;
 bool exitBlindSignByInitialize;
-static struct menu settings_menu, main_menu, security_set_menu, blind_sign_menu;
+static struct menu settings_menu, main_menu, security_set_menu;
 
 void menu_recovery_device(int index) {
   (void)index;
@@ -387,120 +387,6 @@ void menu_showMnemonic(int index) {
   }
 }
 
-void menu_set_eth_eip(int index) {
-  char desc[64] = {0};
-
-  bool state = index ? false : true;
-  if (config_hasPin()) {
-    if (!protectPinOnDevice(false, true)) {
-      return;
-    }
-  }
-
-  config_setCoinSwitch(COIN_SWITCH_ETH_EIP712, state);
-
-  strcat(desc, _("ETH advance signing turn"));
-  strcat(desc, state ? _(" On") : _(" Off"));
-  layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
-                                 _("Done"), NULL, NULL, NULL, NULL, desc, NULL,
-                                 NULL);
-  protectWaitKey(0, 1);
-  layoutHome();
-}
-
-void menu_set_sol_blind_sign(int index) {
-  char desc[64] = {0};
-
-  bool state = index ? false : true;
-  if (config_hasPin()) {
-    if (!protectPinOnDevice(false, true)) {
-      return;
-    }
-  }
-
-  config_setCoinSwitch(COIN_SWITCH_SOLANA, state);
-
-  strcat(desc, _("SOL advance signing turn"));
-  strcat(desc, state ? _(" On") : _(" Off"));
-  layoutDialogSwipeCenterAdapter(&bmp_icon_ok, NULL, NULL, &bmp_btn_confirm,
-                                 _("Done"), NULL, NULL, NULL, NULL, desc, NULL,
-                                 NULL);
-  protectWaitKey(0, 1);
-  layoutHome();
-}
-
-void menu_blind_sign(int index) {
-  (void)index;
-
-  uint8_t key = KEY_NULL;
-
-step1:
-#if ONEKEY_MINI
-  layoutDialogSwipeCenterAdapterEx(
-      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      true, NULL, NULL, NULL, NULL,
-      _("After enabling\"Blind \nSigning\",your device \nwill support signing "
-        "\n"
-        "for messages and \ntransactions, but it \ncan't decode the metadata."),
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-
-  key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
-    return;
-  }
-
-  layoutDialogSwipeCenterAdapterEx(
-      NULL, &bmp_button_back, _("BACK"), &bmp_button_forward, _("NEXT"), NULL,
-      true, NULL, NULL, NULL, NULL,
-      _("Visiting Help Center \nand search \"Blind \nSigning\" to learn \n"
-        "more\n \nhelp.onekey.so"),
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-#else
-  layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward,
-                         _("Next"), NULL,
-                         _("After enabling \n\"Blind Signing\",your device "
-                           " will support signing for messages and "
-                           "transactions, but it can't decode the metadata."),
-                         NULL, NULL, NULL, NULL, NULL);
-
-  key = protectWaitKey(0, 1);
-  if (key != KEY_CONFIRM) {
-    return;
-  }
-
-  layoutDialogAdapter_ex(
-      NULL, &bmp_btn_back, _("Back"), &bmp_btn_forward, _("Next"), NULL, NULL,
-      _("Visiting Help Center and search \"Blind Signing\" to "
-        "learn more\n help.onekey.so"),
-      NULL, NULL, NULL, NULL);
-#endif
-
-  key = protectWaitKey(0, 1);
-  if (key == KEY_CANCEL) {
-    goto step1;
-  } else if (key != KEY_CONFIRM) {
-    return;
-  }
-
-  menu_init(&blind_sign_menu);
-  menu_display(&blind_sign_menu);
-
-  while (1) {
-    key = blindsignWaitKey();
-    if (exitBlindSignByInitialize) {
-      return;
-    }
-    if (key == KEY_CANCEL) {
-      menu_init(&security_set_menu);
-      return;
-    }
-    menu_run(key, 0);
-    if (layoutLast == layoutHome) {
-      return;
-    }
-  }
-}
-
 void menu_set_passphrase(int index) {
   (void)index;
 
@@ -725,7 +611,6 @@ static struct menu check_word_menu = {
 
 static struct menu_item security_set_menu_items[] = {
     {"Change PIN", NULL, true, menu_changePin, NULL, false},
-    {"Blind Signing", NULL, true, menu_blind_sign, NULL, false},
     {"Recovery Phrase verify", NULL, true, menu_check_all_words, NULL, false},
     {"Passphrase", NULL, false, .sub_menu = &passphrase_set_menu,
      menu_para_passphrase, true},
@@ -785,48 +670,6 @@ static struct menu main_uninitilized_menu = {
     .counts = COUNT_OF(main_uninitialized_menu_items),
     .title = NULL,
     .items = main_uninitialized_menu_items,
-    .previous = NULL,
-    .button_type = BTN_TYPE_NEXT,
-};
-
-static struct menu_item eth_eip_set_menu_items[] = {
-    {"On", NULL, true, menu_set_eth_eip, NULL, false},
-    {"Off", NULL, true, menu_set_eth_eip, NULL, false}};
-
-static struct menu eth_eip_switch_menu = {
-    .start = 0,
-    .current = 0,
-    .counts = COUNT_OF(eth_eip_set_menu_items),
-    .title = NULL,
-    .items = eth_eip_set_menu_items,
-    .previous = &blind_sign_menu,
-};
-
-static struct menu_item sol_set_menu_items[] = {
-    {"On", NULL, true, menu_set_sol_blind_sign, NULL, false},
-    {"Off", NULL, true, menu_set_sol_blind_sign, NULL, false}};
-
-static struct menu sol_switch_menu = {
-    .start = 0,
-    .current = 0,
-    .counts = COUNT_OF(sol_set_menu_items),
-    .title = NULL,
-    .items = sol_set_menu_items,
-    .previous = &blind_sign_menu,
-};
-
-static struct menu_item blind_sign_menu_items[] = {
-    {"Advance ETH Sign", NULL, false, .sub_menu = &eth_eip_switch_menu,
-     menu_para_eth_eip_switch, false},
-    {"Advance SOL Sign", NULL, false, .sub_menu = &sol_switch_menu,
-     menu_para_sol_switch, false}};
-
-static struct menu blind_sign_menu = {
-    .start = 0,
-    .current = 0,
-    .counts = COUNT_OF(blind_sign_menu_items),
-    .title = NULL,
-    .items = blind_sign_menu_items,
     .previous = NULL,
     .button_type = BTN_TYPE_NEXT,
 };

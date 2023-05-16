@@ -625,12 +625,6 @@ bool txHashBuilder_addToken(const CardanoToken *msg) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     return false;
   }
-  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL, NULL,
-                    _("Token Amount:"), amount, NULL, NULL, NULL);
-  if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    return false;
-  }
 
   return true;
 }

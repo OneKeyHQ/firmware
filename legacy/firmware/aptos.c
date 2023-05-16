@@ -37,7 +37,7 @@ void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,
   char address[67] = {0};
   aptos_get_address_from_public_key(node->public_key + 1, address);
 
-  if (!layoutBlindSign(address)) {
+  if (!layoutBlindSign("Aptos", address)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled,
                     "Signing cancelled by user");
     layoutHome();
