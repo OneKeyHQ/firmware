@@ -57,6 +57,8 @@ async def sign_tx(
             # pyright: on
         else:
             break
+
+    await confirm_final(ctx)
     return KaspaSignedTx(signature=signature)
 
 
@@ -76,8 +78,7 @@ async def sign_input(ctx, msg: Signable, keychain) -> bytes:
     if msg.address_n not in addresses:
         addresses.append(msg.address_n)
         await confirm_blind_sign_common(ctx, address, msg.raw_message)
-    if request_index == input_count - 1:
-        await confirm_final(ctx)
+
     if schema == "schnorr":
         signature = bip340_sign(node, sig_hash)
     else:

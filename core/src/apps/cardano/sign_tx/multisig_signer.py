@@ -11,7 +11,7 @@ class MultisigSigner(Signer):
     The multisig signing mode only allows signing with multisig (and minting) keys.
     """
 
-    SIGNING_MODE_TITLE = "Confirming a multisig transaction."
+    SIGNING_MODE_TITLE = "Confirming a multisig transaction"
 
     def _validate_tx_init(self) -> None:
         super()._validate_tx_init()

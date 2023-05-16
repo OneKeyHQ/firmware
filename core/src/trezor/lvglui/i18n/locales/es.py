@@ -79,7 +79,6 @@ translations = [
     "Ingrese su PIN",
     "PIN incorrecto, quedan {} intentos.",
     "Habilitar frase de contraseña",
-    "¿Desea habilitar el cifrado de frase de contraseña?",
     "Deshabilitar frase de contraseña",
     "¿Desea deshabilitar el cifrado de frase de contraseña?",
     "¿Desea ingresar la frase de contraseña siempre en este dispositivo?",

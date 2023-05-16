@@ -13,7 +13,7 @@ class PlutusSigner(Signer):
     validation rules are less strict, but more tx items/warnings are shown to the user.
     """
 
-    SIGNING_MODE_TITLE = "Confirming a Plutus transaction."
+    SIGNING_MODE_TITLE = "Confirming a Plutus transaction"
 
     async def _show_tx_init(self) -> None:
         await super()._show_tx_init()
