@@ -192,7 +192,7 @@ bool polkadot_sign_tx(const PolkadotSignTx *msg, const HDNode *node,
   memcpy(polkadot_network, msg->network, strlen(msg->network) + 1);
   parser_error_t ret = polkadot_tx_parse(msg->raw_tx.bytes, msg->raw_tx.size);
   if (ret == parser_unexpected_callIndex) {
-    if (!layoutBlindSign(signer)) {
+    if (!layoutBlindSign(polkadot_network, signer)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
       layoutHome();
       return false;

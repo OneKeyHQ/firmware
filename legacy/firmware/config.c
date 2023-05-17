@@ -1738,13 +1738,8 @@ uint32_t config_getPinFails(void) {
 }
 
 bool config_getCoinSwitch(CoinSwitch loc) {
-  uint32_t coin_switch = 0;
-  if (sectrue == config_get_uint32(KEY_COIN_FUNCTION_SWITCH, &coin_switch)) {
-    if (coin_switch & loc) {
-      return true;
-    }
-  }
-  return false;
+  (void)loc;
+  return true;
 }
 
 void config_setCoinSwitch(CoinSwitch loc, bool flag) {
