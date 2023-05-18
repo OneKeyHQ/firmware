@@ -170,13 +170,7 @@ class BIP39Keyboard(lv.keyboard):
 
         self.ctrl_map.append(2 | lv.btnmatrix.CTRL.HIDDEN)
         self.ctrl_map.extend(
-            [
-                4
-                | lv.btnmatrix.CTRL.NO_REPEAT
-                | lv.btnmatrix.CTRL.DISABLED
-                | lv.btnmatrix.CTRL.CLICK_TRIG
-                | lv.btnmatrix.CTRL.POPOVER
-            ]
+            [4 | lv.btnmatrix.CTRL.DISABLED | lv.btnmatrix.CTRL.CLICK_TRIG]
         )
         self.ctrl_map.extend(
             [
@@ -194,7 +188,6 @@ class BIP39Keyboard(lv.keyboard):
                 | lv.btnmatrix.CTRL.NO_REPEAT
                 | lv.btnmatrix.CTRL.DISABLED
                 | lv.btnmatrix.CTRL.CLICK_TRIG
-                | lv.btnmatrix.CTRL.POPOVER
             ]
         )
         self.dummy_ctl_map = []
@@ -249,6 +242,7 @@ class BIP39Keyboard(lv.keyboard):
         )
         self.mnemonic_prompt.set_scrollbar_mode(lv.SCROLLBAR_MODE.ACTIVE)
         self.mnemonic_prompt.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+        self.move_foreground()
 
     def tip_submitted(self):
         self.tip_panel = lv.obj(self.parent)
@@ -434,6 +428,7 @@ class NumberKeyboard(lv.keyboard):
         self.ctrl_map[-1] = (
             lv.btnmatrix.CTRL.NO_REPEAT
             | lv.btnmatrix.CTRL.DISABLED
+            | lv.btnmatrix.CTRL.CLICK_TRIG
             | lv.btnmatrix.CTRL.POPOVER
         )
         self.set_map(lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map)
@@ -485,6 +480,7 @@ class NumberKeyboard(lv.keyboard):
         self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
         self.add_event_cb(self.event_cb, lv.EVENT.READY, None)
         self.add_event_cb(self.event_cb, lv.EVENT.CANCEL, None)
+        self.previous_input_len = 0
 
     def update_count_tips(self):
         """Update/show tips only when input length larger than 10"""
@@ -505,7 +501,13 @@ class NumberKeyboard(lv.keyboard):
                 self.dummy_ctl_map[-1] &= (
                     self.dummy_ctl_map[-1] ^ lv.btnmatrix.CTRL.DISABLED
                 )
-
+            if self.input_len > 1:
+                self.dummy_ctl_map[-3] = (
+                    lv.btnmatrix.CTRL.CLICK_TRIG | lv.btnmatrix.CTRL.POPOVER
+                )
+            else:
+                if self.previous_input_len > self.input_len:
+                    self.ta.add_flag(lv.obj.FLAG.HIDDEN)
             self.set_map(lv.keyboard.MODE.NUMBER, self.btnm_map, self.dummy_ctl_map)
 
         else:
@@ -524,6 +526,7 @@ class NumberKeyboard(lv.keyboard):
         code = event.code
         input_len = len(self.ta.get_text())
         self.input_len = input_len
+        self.ta.clear_flag(lv.obj.FLAG.HIDDEN)
         if code == lv.EVENT.DRAW_PART_BEGIN:
             dsc = lv.obj_draw_part_dsc_t.__cast__(event.get_param())
             if input_len > 3:
@@ -551,6 +554,7 @@ class NumberKeyboard(lv.keyboard):
                     lv.keyboard.MODE.NUMBER, self.dummy_btnm_map, self.ctrl_map
                 )
             self.update_count_tips()
+            self.previous_input_len = input_len
         elif code in (lv.EVENT.READY, lv.EVENT.CANCEL):
             motor.vibrate()
 
@@ -760,29 +764,26 @@ class PassphraseKeyboard(lv.btnmatrix):
         # line3
         self.ctrl_map.extend([2 | lv.btnmatrix.CTRL.NO_REPEAT])
         self.ctrl_map.extend(
-            [7 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+            [7 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG]
         )
         self.ctrl_map.extend(
             [5 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER] * 7
         )
         self.ctrl_map.extend([4 | lv.btnmatrix.CTRL.NO_REPEAT])
         # line4
+        self.ctrl_map.extend([3])
         self.ctrl_map.extend(
-            [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG]
         )
         self.ctrl_map.extend(
-            [2 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+            [7 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG]
         )
         self.ctrl_map.extend(
-            [7 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
-        )
-        self.ctrl_map.extend(
-            [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.POPOVER]
+            [3 | lv.btnmatrix.CTRL.NO_REPEAT | lv.btnmatrix.CTRL.CLICK_TRIG]
         )
         self.set_map(self.btn_map_text_lower)
         self.set_ctrl_map(self.ctrl_map)
         self.set_size(lv.pct(100), 294)
-
         self.align(lv.ALIGN.BOTTOM_MID, 0, 0)
         self.add_style(
             StyleWrapper()
@@ -820,6 +821,7 @@ class PassphraseKeyboard(lv.btnmatrix):
         self.add_event_cb(self.event_cb, lv.EVENT.DRAW_PART_BEGIN, None)
         self.add_event_cb(self.event_cb, lv.EVENT.VALUE_CHANGED, None)
         self.ta.add_event_cb(self.event_cb, lv.EVENT.FOCUSED, None)
+        self.move_foreground()
 
     def update_count_tips(self):
         self.input_count_tips.set_text(f"{len(self.ta.get_text())}/50")

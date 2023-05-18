@@ -79,7 +79,6 @@ translations = [
     "输入 PIN",
     "PIN 不正确，剩余 {} 次尝试机会。",
     "启用 Passphrase",
-    "要启用 Passphrase 加密功能吗？",
     "禁用 Passphrase",
     "要禁用 Passphrase 加密吗？",
     "总是在本机输入 Passphrase 吗？",

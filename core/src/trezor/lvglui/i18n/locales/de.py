@@ -79,7 +79,6 @@ translations = [
     "Pin eingeben",
     "Falsche PIN, noch {} Versuche.",
     "Passphrase aktivieren",
-    "Möchten Sie die Passphrase-Verschlüsselung aktivieren?",
     "Passphrase deaktivieren",
     "Möchten Sie die Passphrase-Verschlüsselung deaktivieren?",
     "Möchten Sie die Passphrase immer auf diesem Gerät eingeben?",

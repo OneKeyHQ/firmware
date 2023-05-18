@@ -210,6 +210,8 @@ async def _deal_charging_state(value: bytes) -> None:
         StatusBar.get_instance().show_charging()
         if utils.BATTERY_CAP:
             StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
+    if res == _USB_STATUS_PLUG_OUT:
+        StatusBar.get_instance().show_usb(False)
 
 
 async def _deal_pair_res(value: bytes) -> None:

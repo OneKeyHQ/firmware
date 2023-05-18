@@ -97,7 +97,7 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
                     ctx,
                     token,
                     from_address=owner_address,
-                    to_address=contract.trigger_smart_contract.contract_address,
+                    to_address=recipient,
                     value=value,
                     fee_limit=transaction.fee_limit,
                     network="TRON",
