@@ -88,7 +88,7 @@ void __attribute__((noinline, noreturn, section(".data#")))
 reboot_device(void) {
   __disable_irq();
   *STAY_IN_BOOTLOADER_FLAG_ADDR = STAY_IN_BOOTLOADER_FLAG;
-  SCB_AIRCR = SCB_AIRCR_VECTKEY | SCB_AIRCR_VECTRESET;
+  SCB_AIRCR = SCB_AIRCR_VECTKEY | SCB_AIRCR_SYSRESETREQ;
   while (1)
     ;
 }
