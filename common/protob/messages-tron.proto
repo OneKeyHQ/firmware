@@ -59,7 +59,28 @@ message TronSignTx {
             optional uint64 asset_id = 6;           // Asset signature
         }
 
+        // Tron freeze resouce Type
+        enum TronResourceCode {
+            BANDWIDTH = 0x00;
+            ENERGY = 0x01;
+        }
+
+        // Freeze TRX balance
+        message TronFreezeBalanceContract {
+            optional uint64 frozen_balance = 1;     // Amount to freeze
+            optional uint64 frozen_duration = 2;    // Freeze minimal duration in days
+            optional TronResourceCode resource = 3; // Resource type
+            optional string receiver_address = 4;   // Rental Freeze receiver address - base 58
+        }
+        // Unfreeze TRX Balance
+        message TronUnfreezeBalanceContract {
+            optional TronResourceCode resource = 1; // Resource type
+            optional string receiver_address = 2;   // Rental Freeze receiver address - base 58
+        }
+
         optional TronTransferContract transfer_contract = 2;
+        optional TronFreezeBalanceContract freeze_balance_contract = 11;
+        optional TronUnfreezeBalanceContract unfreeze_balance_contract = 12;
         optional TronTriggerSmartContract trigger_smart_contract = 31;
     }
 }

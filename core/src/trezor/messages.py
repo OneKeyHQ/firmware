@@ -61,6 +61,7 @@ if TYPE_CHECKING:
     from trezor.enums import StellarSignerType  # noqa: F401
     from trezor.enums import TezosBallotType  # noqa: F401
     from trezor.enums import TezosContractType  # noqa: F401
+    from trezor.enums import TronResourceCode  # noqa: F401
     from trezor.enums import WL_OperationType  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
 
@@ -6702,12 +6703,16 @@ if TYPE_CHECKING:
 
     class TronContract(protobuf.MessageType):
         transfer_contract: "TronTransferContract | None"
+        freeze_balance_contract: "TronFreezeBalanceContract | None"
+        unfreeze_balance_contract: "TronUnfreezeBalanceContract | None"
         trigger_smart_contract: "TronTriggerSmartContract | None"
 
         def __init__(
             self,
             *,
             transfer_contract: "TronTransferContract | None" = None,
+            freeze_balance_contract: "TronFreezeBalanceContract | None" = None,
+            unfreeze_balance_contract: "TronUnfreezeBalanceContract | None" = None,
             trigger_smart_contract: "TronTriggerSmartContract | None" = None,
         ) -> None:
             pass
@@ -6752,6 +6757,42 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronTriggerSmartContract"]:
+            return isinstance(msg, cls)
+
+    class TronFreezeBalanceContract(protobuf.MessageType):
+        frozen_balance: "int | None"
+        frozen_duration: "int | None"
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            frozen_balance: "int | None" = None,
+            frozen_duration: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronFreezeBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronUnfreezeBalanceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["TronUnfreezeBalanceContract"]:
             return isinstance(msg, cls)
 
     class AptosGetAddress(protobuf.MessageType):

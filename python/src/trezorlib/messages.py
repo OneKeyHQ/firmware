@@ -677,6 +677,11 @@ class TezosBallotType(IntEnum):
     Pass = 2
 
 
+class TronResourceCode(IntEnum):
+    BANDWIDTH = 0
+    ENERGY = 1
+
+
 class AlgorandGetAddress(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 10900
     FIELDS = {
@@ -9104,6 +9109,8 @@ class TronContract(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
         2: protobuf.Field("transfer_contract", "TronTransferContract", repeated=False, required=False),
+        11: protobuf.Field("freeze_balance_contract", "TronFreezeBalanceContract", repeated=False, required=False),
+        12: protobuf.Field("unfreeze_balance_contract", "TronUnfreezeBalanceContract", repeated=False, required=False),
         31: protobuf.Field("trigger_smart_contract", "TronTriggerSmartContract", repeated=False, required=False),
     }
 
@@ -9111,9 +9118,13 @@ class TronContract(protobuf.MessageType):
         self,
         *,
         transfer_contract: Optional["TronTransferContract"] = None,
+        freeze_balance_contract: Optional["TronFreezeBalanceContract"] = None,
+        unfreeze_balance_contract: Optional["TronUnfreezeBalanceContract"] = None,
         trigger_smart_contract: Optional["TronTriggerSmartContract"] = None,
     ) -> None:
         self.transfer_contract = transfer_contract
+        self.freeze_balance_contract = freeze_balance_contract
+        self.unfreeze_balance_contract = unfreeze_balance_contract
         self.trigger_smart_contract = trigger_smart_contract
 
 
@@ -9158,6 +9169,46 @@ class TronTriggerSmartContract(protobuf.MessageType):
         self.data = data
         self.call_token_value = call_token_value
         self.asset_id = asset_id
+
+
+class TronFreezeBalanceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("frozen_balance", "uint64", repeated=False, required=False),
+        2: protobuf.Field("frozen_duration", "uint64", repeated=False, required=False),
+        3: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False),
+        4: protobuf.Field("receiver_address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        frozen_balance: Optional["int"] = None,
+        frozen_duration: Optional["int"] = None,
+        resource: Optional["TronResourceCode"] = None,
+        receiver_address: Optional["str"] = None,
+    ) -> None:
+        self.frozen_balance = frozen_balance
+        self.frozen_duration = frozen_duration
+        self.resource = resource
+        self.receiver_address = receiver_address
+
+
+class TronUnfreezeBalanceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False),
+        2: protobuf.Field("receiver_address", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        resource: Optional["TronResourceCode"] = None,
+        receiver_address: Optional["str"] = None,
+    ) -> None:
+        self.resource = resource
+        self.receiver_address = receiver_address
 
 
 class WebAuthnListResidentCredentials(protobuf.MessageType):
