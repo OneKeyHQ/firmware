@@ -31,28 +31,13 @@ jobs:
         env:
           PRODUCTION: 1
         run: |
-          sudo apt-get update
-          sudo apt-get install wget make autoconf automake libtool curl make g++ unzip scons llvm-dev libclang-dev clang libsdl2-dev libsdl2-image-dev
-          curl -sSL https://install.python-poetry.org | python3 -
-          wget -q https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-          tar -jxf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-          export PATH="$PWD/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
-          git clone -b v21.5 https://github.com/protocolbuffers/protobuf.git
-          cd protobuf
+          sh <(curl -L https://nixos.org/nix/install) --no-daemon
+          . $HOME/.nix-profile/etc/profile.d/nix.sh
+          nix-shell --run "poetry install"
           git submodule update --init --recursive
-          sudo ./autogen.sh
-          sudo ./configure
-          sudo make
-          sudo make install
-          sudo ldconfig
-          cd ..
-          rustup target add thumbv7em-none-eabihf
-          git submodule update --init --recursive
-          poetry install
-          cd core
-          poetry run make build_boardloader
-          poetry run make build_bootloader
-          poetry run make build_firmware
+          nix-shell --run "poetry run make -C core build_boardloader"
+          nix-shell --run "poetry run make -C core build_bootloader"
+          nix-shell --run "poetry run make -C core build_firmware"
           poetry run tools/headertool.py -h build/firmware/touch*Stable*.bin -S 1:${{ secrets.SECRET_KEY_1 }} -S 2:${{ secrets.SECRET_KEY_2 }}
 
       - name: "Upload Artifacts"
