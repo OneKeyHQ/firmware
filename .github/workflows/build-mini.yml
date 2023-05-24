@@ -31,7 +31,7 @@ jobs:
       - name: "Build mini firmware"
         run: |
           sudo apt install protobuf-compiler libprotobuf-dev
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://install.python-poetry.org | python3 - --version 1.4.2
           wget -q https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
           tar -jxf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
           export PATH="$PWD/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
