@@ -12,6 +12,7 @@ static bool get_ble_battery = false;
 static bool ble_connect = false;
 static bool ble_switch = false;
 static bool get_ble_switch = false;
+static bool passkey_state = false;
 static char ble_name[BLE_NAME_LEN + 1] = {0};
 static char ble_ver[6] = {0};
 
@@ -81,6 +82,7 @@ char *ble_get_ver(void) { return ble_ver; }
 
 void ble_set_switch(bool flag) { ble_switch = flag; }
 bool ble_get_switch(void) { return ble_switch; }
+bool ble_passkey_state(void) { return passkey_state; }
 
 void ble_reset(void) {
   ble_power_off();
@@ -185,6 +187,7 @@ void ble_uart_poll(void) {
           ble_connect = false;
         if (need_refresh) {
           need_refresh = false;
+          passkey_state = false;
           layoutRefreshSet(true);
         }
         break;
@@ -197,6 +200,7 @@ void ble_uart_poll(void) {
               passkey[i] = ' ';
             }
           }
+          passkey_state = true;
           layoutBlePasskey(passkey);
           need_refresh = true;
         }
@@ -226,6 +230,7 @@ void ble_uart_poll(void) {
         } else {
           ble_switch = true;
         }
+        passkey_state = false;
         layoutRefreshSet(true);
         break;
       default:

@@ -425,6 +425,7 @@ uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh) {
   uint8_t ret = 0;
 #if !EMULATOR
   if (hide_icon) return ret;
+  if (ble_passkey_state()) return ret;
 #endif
   getBleDevInformation();
 
@@ -2048,6 +2049,9 @@ void layoutHomeInfo(void) {
   uint8_t key = KEY_NULL;
   key = keyScan();
   if (layoutLast == onboarding) {
+    if (ble_passkey_state()) {
+      return;
+    }
     onboarding(key);
   } else {
     layoutEnterSleep();
