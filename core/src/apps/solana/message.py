@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from trezor.crypto import base58
 
-from .constents import HEADER_LENGTH
+from .constents import LEGACY_HEADER_LEN, VERSION_PREFIX_MASK, VERSIONED_HEADER_LEN
 from .publickey import PublicKey
 from .utils import shortvec_encoding as shortvec
 
@@ -62,17 +62,32 @@ class Message:
         self.instructions = args.instructions
 
     @staticmethod
-    def deserialize(raw_message: bytes) -> "Message":
-
-        num_required_signatures = raw_message[0]
-        num_readonly_signed_accounts = raw_message[1]
-        num_readonly_unsigned_accounts = raw_message[2]
+    def deserialize(raw_message: bytes) -> tuple["Message", bool]:
+        """Deserialize a message from a byte array."""
+        prefix = raw_message[0]
+        if prefix & VERSION_PREFIX_MASK:
+            version = prefix & ~VERSION_PREFIX_MASK
+            if version != 0:
+                raise ValueError(
+                    f"Expected versioned message with version 0 but found version {version}"
+                )
+            is_versioned = True
+            num_required_signatures = raw_message[1]
+            num_readonly_signed_accounts = raw_message[2]
+            num_readonly_unsigned_accounts = raw_message[3]
+            body_index = VERSIONED_HEADER_LEN
+        else:
+            is_versioned = False
+            num_required_signatures = raw_message[0]
+            num_readonly_signed_accounts = raw_message[1]
+            num_readonly_unsigned_accounts = raw_message[2]
+            body_index = LEGACY_HEADER_LEN
         header = MessageHeader(
             num_required_signatures=num_required_signatures,
             num_readonly_signed_accounts=num_readonly_signed_accounts,
             num_readonly_unsigned_accounts=num_readonly_unsigned_accounts,
         )
-        raw_message = raw_message[HEADER_LENGTH:]
+        raw_message = raw_message[body_index:]
 
         account_keys = []
         accounts_length, accounts_offset = shortvec.decode_length(raw_message)
@@ -110,11 +125,14 @@ class Message:
                 )
             )
 
-        return Message(
-            MessageArgs(
-                header=header,
-                account_keys=account_keys,
-                recent_blockhash=recent_blockhash,
-                instructions=instructions,
-            )
+        return (
+            Message(
+                MessageArgs(
+                    header=header,
+                    account_keys=account_keys,
+                    recent_blockhash=recent_blockhash,
+                    instructions=instructions,
+                )
+            ),
+            is_versioned,
         )
