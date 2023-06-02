@@ -53,3 +53,38 @@ message SelfTest {
 message FirmwareErase_ex {
     optional uint32 length = 1; // length of new firmware
 }
+
+/**
+ * Type of reboot request
+ * @embed
+ */
+ enum RebootType {
+    Normal = 0;
+    Boardloader = 1;
+    BootLoader = 2;
+}
+
+/**
+ * Request: Reboot according to requested type
+ * @start
+ * @next Success
+ * @next Failure
+ */
+ message Reboot {
+    required RebootType reboot_type = 1;
+ }
+
+/**
+ * Request: Perform a firmware update by using file stored in EMMC
+ * @next Success
+ * @next Failure
+ */
+message FirmwareUpdateEmmc {
+    // update firmware from emmc
+    required string path = 1;
+    // reboot or back to main screen when success
+    optional bool reboot_on_success = 2;
+    // default False, erase storage and SE decided by policy
+    // if set to True, always erase storage and SE
+    // optional bool force_erase = 3;
+}
