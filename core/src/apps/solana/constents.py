@@ -1,7 +1,11 @@
 from .publickey import PublicKey
 
-HEADER_LENGTH = 3
-"""Length of the message header."""
+LEGACY_HEADER_LEN = 3
+"""Constant for the length of the legacy Message header."""
+VERSIONED_HEADER_LEN = 4
+"""Constant for the length of the versioned Message header."""
+VERSION_PREFIX_MASK = 0b10000000
+"""Mask for the version prefix bit in a serialized Message."""
 SIG_LENGTH = 64
 """Constant for standard length of a signature."""
 

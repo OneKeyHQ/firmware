@@ -213,7 +213,7 @@ class TransactionUnknown(Transaction):
     ) -> None:
         from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
-        await confirm_blind_sign_common(ctx, sender, self.data)
+        await confirm_blind_sign_common(ctx, sender, self.data.data)
 
 
 class BalancesTransfer(Transaction):

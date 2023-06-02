@@ -14,7 +14,7 @@ from .message import Message
 from .publickey import PublicKey
 
 from .constents import (  # STAKE_PROGRAM_ID,; VOTE_PROGRAM_ID,
-    HEADER_LENGTH,
+    VERSIONED_HEADER_LEN,
     MAX_DATA_SIZE,
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
     SPL_MEMO_PROGRAM_ID,
@@ -47,14 +47,13 @@ async def sign_tx(
     node = keychain.derive(msg.address_n)
     signer_pub_key_bytes = seed.remove_ed25519_prefix(node.public_key())
 
+    is_versioned_message = False
     # parse message
     try:
-        message = Message.deserialize(msg.raw_tx)
+        message, is_versioned_message = Message.deserialize(msg.raw_tx)
     except BaseException as e:
         raise wire.DataError(f"Invalid message {e}")
-    # TODO:
     _is_multisig = message.header.num_required_signatures > 1  # noqa: F841
-
     accounts_keys = message.account_keys
     # verify fee payer
     if accounts_keys[0].get() != signer_pub_key_bytes:
@@ -62,7 +61,7 @@ async def sign_tx(
 
     # recent_blockhash is something like nonce in ethereum
     _recent_blockhash = message.recent_blockhash  # noqa: F841
-    should_blind_sign = any(
+    should_blind_sign = is_versioned_message or any(
         accounts_keys[i.program_id_index] not in CURRENT_ALLOWED_PROGRAM_IDS
         for i in message.instructions
     )
@@ -114,5 +113,5 @@ def check(msg: SolanaSignTx):
     raw_message_len = len(raw_message)
     if raw_message_len > MAX_DATA_SIZE:
         raise wire.DataError("Message overflow")
-    elif len(raw_message) < HEADER_LENGTH:
+    elif len(raw_message) < VERSIONED_HEADER_LEN:
         raise wire.DataError("Message too short")

@@ -1697,7 +1697,7 @@ class PowerOff(Screen):
             if target == self.btn_yes:
                 ShutingDown()
             elif target == self.btn_no:
-                if self.has_pin:
+                if self.has_pin and device.is_initialized():
                     from apps.common.request_pin import verify_user_pin
 
                     workflow.spawn(
