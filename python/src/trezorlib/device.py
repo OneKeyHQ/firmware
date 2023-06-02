@@ -353,3 +353,69 @@ def set_busy(client: "TrezorClient", expiry_ms: Optional[int]) -> "MessageType":
     ret = client.call(messages.SetBusy(expiry_ms=expiry_ms))
     client.refresh_features()
     return ret
+
+# new feautres
+# Reboot
+@session
+def reboot(client: "TrezorClient", reboot_type:messages.RebootType) -> "MessageType":
+    resp = client.call(messages.Reboot(reboot_type))
+    return resp
+
+# FirmwareUpdateEmmc
+@session
+def firmware_update_emmc(client: "TrezorClient", path_file: str, force_erease: bool) -> "MessageType":
+    msg = messages.FirmwareUpdateEmmc(path=path_file, force_erease=force_erease)
+    resp = client.call(msg)
+    return resp
+
+# EmmcPathInfo
+@session
+def emmc_path_info(client: "TrezorClient", path: str) -> "MessageType":
+    resp = client.call(messages.EmmcPathInfo(path=path))
+    return resp
+
+# EmmcFixPermission
+@session
+def emmc_fix_permission(client: "TrezorClient") -> "MessageType":
+    resp = client.call(messages.EmmcFixPermission())
+    return resp
+
+# EmmcFileRead
+@session
+def emmc_file_read(client: "TrezorClient", path_file: str, len:int, offset: int, ui_percentage:int) -> "MessageType":
+    msg_file = messages.EmmcFile(path=path_file, len=len, offset=offset, data=None)
+    msg = messages.EmmcFileRead(file=msg_file, ui_percentage=ui_percentage)
+    resp = client.call(msg)
+    return resp
+
+# EmmcFileWrite
+@session
+def emmc_file_write(client: "TrezorClient", path_file: str, len:int, offset: int, data: bytes, overwrite: bool, append: bool, ui_percentage:int) -> "MessageType":
+    msg_file = messages.EmmcFile(path=path_file, len=len, offset=offset, data=data)
+    msg = messages.EmmcFileWrite(file=msg_file, overwrite=overwrite, append=append, ui_percentage=ui_percentage)
+    resp = client.call(msg)
+    return resp
+
+# EmmcFileDelete
+@session
+def emmc_file_delete(client: "TrezorClient", path_file: str) -> "MessageType":
+    resp = client.call(messages.EmmcFileDelete(path=path_file))
+    return resp
+
+# EmmcDirList
+@session
+def emmc_dir_list(client: "TrezorClient", path_dir: str) -> "MessageType":
+    resp = client.call(messages.EmmcDirList(path=path_dir))
+    return resp
+
+# EmmcDirMake
+@session
+def emmc_dir_make(client: "TrezorClient", path_dir: str) -> "MessageType":
+    resp = client.call(messages.EmmcDirMake(path=path_dir))
+    return resp
+
+# EmmcDirRemove
+@session
+def emmc_dir_remove(client: "TrezorClient", path_dir: str) -> "MessageType":
+    resp = client.call(messages.EmmcDirRemove(path=path_dir))
+    return resp

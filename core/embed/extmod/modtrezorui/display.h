@@ -106,6 +106,7 @@ void display_loader(uint16_t progress, bool indeterminate, int yoffset,
 void display_loader_ex(uint16_t progress, bool indeterminate, int yoffset,
                        uint16_t fgcolor, uint16_t bgcolor, const uint8_t *icon,
                        uint32_t iconlen, uint16_t iconfgcolor);
+void display_progress_percent(int x, int y, int permil);
 void display_progress(const char *desc, int permil);
 
 #ifndef TREZOR_PRINT_DISABLE

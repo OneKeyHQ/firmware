@@ -297,3 +297,67 @@ bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
   display_bar(0, 556, DISPLAY_RESX, 64, COLOR_BLACK);
   return true;
 }
+
+void bluetooth_reset() {
+  ble_usart_irq_disable();
+  BLE_RST_PIN_LOW();  // reset ble
+  hal_delay(100);
+  BLE_RST_PIN_HIGH();
+  hal_delay(500);
+  ble_usart_init();
+}
+
+bool bluetooth_enter_dfu() {
+  enter_boot();
+
+  for (uint8_t i = 0; i < 5; i++) {
+    if (ping_boot(i) == true)
+      break;
+    else if (i == 4) {
+      return false;
+    }
+  }
+
+  if (set_prn() != true) return false;
+  if (get_mtu() != true) return false;
+
+  return true;
+}
+
+bool bluetooth_update(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
+                      uint32_t fm_len,
+                      void (*ui_display_progressBar)(char *title, char *notes,
+                                                     int progress)) {
+  uint32_t crc_i = 0;
+  uint32_t offset_i = 0;
+  uint32_t len;
+  uint32_t totol_len = fm_len;
+
+  // init data
+  if (create_object(init_type, init_len) != true) return false;
+  crc_i = crc32(init_data, init_len);
+  write_object(init_data, init_len);
+  if (crc_object(crc_i) != true) return false;
+  if (excute_object() != true) return false;
+
+  // firmware
+  if (select_object(fw_type) != true) return false;
+
+  while (fm_len > 0) {
+    ui_display_progressBar(
+        NULL, NULL,
+        100U * offset_i /
+            totol_len);  // both message set to NULL to keep whatever was there
+
+    len = fm_len > max_size ? max_size : fm_len;
+    if (create_object(fw_type, len) != true) return false;
+    crc_i = crc32(firmware, offset_i + len);
+    write_object(firmware + offset_i, len);
+    if (crc_object(crc_i) != true) return false;
+    if (excute_object() != true) return false;
+    fm_len -= len;
+    offset_i += len;
+  }
+
+  return true;
+}

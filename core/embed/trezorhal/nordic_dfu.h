@@ -45,7 +45,14 @@ typedef enum {
              //!< nrf_dfu_ext_error_code_t.
 } nrf_dfu_result_t;
 
-bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
+bool updateBle(uint8_t* init_data, uint8_t init_len, uint8_t* firmware,
                uint32_t fm_len);
+
+void bluetooth_reset();
+bool bluetooth_enter_dfu();
+bool bluetooth_update(uint8_t* init_data, uint8_t init_len, uint8_t* firmware,
+                      uint32_t fm_len,
+                      void (*ui_display_progressBar)(char* title, char* notes,
+                                                     int progress));
 
 #endif

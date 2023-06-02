@@ -120,7 +120,6 @@ void atca_config_init(void) {
 
   static FlashLockedData *flash_otp_data = (FlashLockedData *)0x081E0000;
 
-  memset(serial_no, 0xff, sizeof(serial_no));
   memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
          sizeof(pair_info_obj));
 
@@ -136,6 +135,7 @@ void atca_config_init(void) {
                 "get config");
   }
 
+  memset(serial_no, 0xff, sizeof(serial_no));
   memcpy(serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
   memcpy(serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
          ATECC608_SN2_SIZE);

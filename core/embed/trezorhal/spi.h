@@ -49,6 +49,7 @@ int32_t spi_slave_init();
 uint32_t spi_slave_poll(uint8_t *buf);
 secbool spi_can_write(void);
 uint32_t spi_read_retry(uint8_t *buf);
+uint32_t spi_read_blocking(uint8_t *buf, int timeout);
 #endif
 
 #endif

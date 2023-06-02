@@ -15,9 +15,11 @@ typedef enum _MessageType {
     MessageType_MessageType_Ping = 1, 
     MessageType_MessageType_Success = 2, 
     MessageType_MessageType_Failure = 3, 
+    MessageType_MessageType_WipeDevice = 5, 
     MessageType_MessageType_FirmwareErase = 6, 
     MessageType_MessageType_FirmwareUpload = 7, 
     MessageType_MessageType_FirmwareRequest = 8, 
+    MessageType_MessageType_FirmwareErase_ex = 16, 
     MessageType_MessageType_Features = 17, 
     MessageType_MessageType_ButtonRequest = 26, 
     MessageType_MessageType_ButtonAck = 27, 
@@ -31,8 +33,27 @@ typedef enum _MessageType {
     MessageType_MessageType_ReadSEPublicCert = 10007, 
     MessageType_MessageType_SEPublicCert = 10008, 
     MessageType_MessageType_SESignMessage = 10012, 
-    MessageType_MessageType_SEMessageSignature = 10013 
+    MessageType_MessageType_SEMessageSignature = 10013, 
+    MessageType_MessageType_Reboot = 30000, 
+    MessageType_MessageType_FirmwareUpdateEmmc = 30001, 
+    MessageType_MessageType_EmmcFixPermission = 30100, 
+    MessageType_MessageType_EmmcPath = 30101, 
+    MessageType_MessageType_EmmcPathInfo = 30102, 
+    MessageType_MessageType_EmmcFile = 30103, 
+    MessageType_MessageType_EmmcFileRead = 30104, 
+    MessageType_MessageType_EmmcFileWrite = 30105, 
+    MessageType_MessageType_EmmcFileDelete = 30106, 
+    MessageType_MessageType_EmmcDir = 30107, 
+    MessageType_MessageType_EmmcDirList = 30108, 
+    MessageType_MessageType_EmmcDirMake = 30109, 
+    MessageType_MessageType_EmmcDirRemove = 30110 
 } MessageType;
+
+typedef enum _RebootType { 
+    RebootType_Normal = 0, 
+    RebootType_Boardloader = 1, 
+    RebootType_BootLoader = 2 
+} RebootType;
 
 typedef enum _FailureType { 
     FailureType_Failure_UnexpectedMessage = 1, 
@@ -49,6 +70,10 @@ typedef enum _ButtonRequestType {
 typedef struct _ButtonAck { 
     char dummy_field;
 } ButtonAck;
+
+typedef struct _EmmcFixPermission { 
+    char dummy_field;
+} EmmcFixPermission;
 
 typedef struct _GetDeviceInfo { 
     char dummy_field;
@@ -69,6 +94,10 @@ typedef struct _ReadSEPublicCert {
 typedef struct _ReadSEPublicKey { 
     char dummy_field;
 } ReadSEPublicKey;
+
+typedef struct _WipeDevice { 
+    char dummy_field;
+} WipeDevice;
 
 typedef struct _ButtonRequest { 
     bool has_code;
@@ -99,6 +128,59 @@ typedef struct _DeviceInfoSettings {
     bool has_pre_firmware;
     char pre_firmware[16]; 
 } DeviceInfoSettings;
+
+typedef struct _EmmcDir { 
+    char path[256]; 
+    pb_callback_t child_dirs; 
+    pb_callback_t child_files; 
+} EmmcDir;
+
+typedef struct _EmmcDirList { 
+    char path[256]; 
+} EmmcDirList;
+
+typedef struct _EmmcDirMake { 
+    char path[256]; 
+} EmmcDirMake;
+
+typedef struct _EmmcDirRemove { 
+    char path[256]; 
+} EmmcDirRemove;
+
+typedef struct _EmmcFile { 
+    char path[256]; 
+    uint32_t offset; 
+    uint32_t len; 
+    pb_callback_t data; 
+    bool has_data_hash;
+    uint32_t data_hash; 
+    bool has_processed_byte;
+    uint32_t processed_byte; 
+} EmmcFile;
+
+typedef struct _EmmcFileDelete { 
+    char path[256]; 
+} EmmcFileDelete;
+
+typedef struct _EmmcPath { 
+    bool exist; 
+    uint64_t size; 
+    uint32_t year; 
+    uint32_t month; 
+    uint32_t day; 
+    uint32_t hour; 
+    uint32_t minute; 
+    uint32_t second; 
+    bool readonly; 
+    bool hidden; 
+    bool system; 
+    bool archive; 
+    bool directory; 
+} EmmcPath;
+
+typedef struct _EmmcPathInfo { 
+    char path[256]; 
+} EmmcPathInfo;
 
 typedef struct _Failure { 
     bool has_code;
@@ -181,6 +263,12 @@ typedef struct _FirmwareRequest {
     uint32_t length; 
 } FirmwareRequest;
 
+typedef struct _FirmwareUpdateEmmc { 
+    char path[256]; 
+    bool has_reboot_on_success;
+    bool reboot_on_success; 
+} FirmwareUpdateEmmc;
+
 typedef PB_BYTES_ARRAY_T(32) FirmwareUpload_hash_t;
 typedef struct _FirmwareUpload { 
     pb_callback_t payload; 
@@ -192,6 +280,10 @@ typedef struct _Ping {
     bool has_message;
     char message[256]; 
 } Ping;
+
+typedef struct _Reboot { 
+    RebootType reboot_type; 
+} Reboot;
 
 typedef PB_BYTES_ARRAY_T(64) SEMessageSignature_signature_t;
 typedef struct _SEMessageSignature { 
@@ -223,11 +315,29 @@ typedef struct _WriteSEPublicCert {
     WriteSEPublicCert_public_cert_t public_cert; 
 } WriteSEPublicCert;
 
+typedef struct _EmmcFileRead { 
+    EmmcFile file; 
+    bool has_ui_percentage;
+    uint32_t ui_percentage; 
+} EmmcFileRead;
+
+typedef struct _EmmcFileWrite { 
+    EmmcFile file; 
+    bool overwrite; 
+    bool append; 
+    bool has_ui_percentage;
+    uint32_t ui_percentage; 
+} EmmcFileWrite;
+
 
 /* Helper constants for enums */
 #define _MessageType_MIN MessageType_MessageType_Initialize
-#define _MessageType_MAX MessageType_MessageType_SEMessageSignature
-#define _MessageType_ARRAYSIZE ((MessageType)(MessageType_MessageType_SEMessageSignature+1))
+#define _MessageType_MAX MessageType_MessageType_EmmcDirRemove
+#define _MessageType_ARRAYSIZE ((MessageType)(MessageType_MessageType_EmmcDirRemove+1))
+
+#define _RebootType_MIN RebootType_Normal
+#define _RebootType_MAX RebootType_BootLoader
+#define _RebootType_ARRAYSIZE ((RebootType)(RebootType_BootLoader+1))
 
 #define _FailureType_MIN FailureType_Failure_UnexpectedMessage
 #define _FailureType_MAX FailureType_Failure_ProcessError
@@ -249,12 +359,26 @@ extern "C" {
 #define Ping_init_default                        {false, ""}
 #define Success_init_default                     {false, ""}
 #define Failure_init_default                     {false, _FailureType_MIN, false, ""}
+#define WipeDevice_init_default                  {0}
 #define ButtonRequest_init_default               {false, _ButtonRequestType_MIN}
 #define ButtonAck_init_default                   {0}
 #define FirmwareErase_init_default               {false, 0}
 #define FirmwareRequest_init_default             {false, 0, false, 0}
 #define FirmwareErase_ex_init_default            {false, 0}
 #define FirmwareUpload_init_default              {{{NULL}, NULL}, false, {0, {0}}}
+#define Reboot_init_default                      {_RebootType_MIN}
+#define FirmwareUpdateEmmc_init_default          {"", false, 0}
+#define EmmcFixPermission_init_default           {0}
+#define EmmcPath_init_default                    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define EmmcPathInfo_init_default                {""}
+#define EmmcFile_init_default                    {"", 0, 0, {{NULL}, NULL}, false, 0, false, 0}
+#define EmmcFileRead_init_default                {EmmcFile_init_default, false, 0}
+#define EmmcFileWrite_init_default               {EmmcFile_init_default, 0, 0, false, 0}
+#define EmmcFileDelete_init_default              {""}
+#define EmmcDir_init_default                     {"", {{NULL}, NULL}, {{NULL}, NULL}}
+#define EmmcDirList_init_default                 {""}
+#define EmmcDirMake_init_default                 {""}
+#define EmmcDirRemove_init_default               {""}
 #define DeviceInfoSettings_init_default          {false, "", false, "", false, ""}
 #define GetDeviceInfo_init_default               {0}
 #define DeviceInfo_init_default                  {false, "", false, "", false, "", false, {0, {0}}, false, "", false, ""}
@@ -271,12 +395,26 @@ extern "C" {
 #define Ping_init_zero                           {false, ""}
 #define Success_init_zero                        {false, ""}
 #define Failure_init_zero                        {false, _FailureType_MIN, false, ""}
+#define WipeDevice_init_zero                     {0}
 #define ButtonRequest_init_zero                  {false, _ButtonRequestType_MIN}
 #define ButtonAck_init_zero                      {0}
 #define FirmwareErase_init_zero                  {false, 0}
 #define FirmwareRequest_init_zero                {false, 0, false, 0}
 #define FirmwareErase_ex_init_zero               {false, 0}
 #define FirmwareUpload_init_zero                 {{{NULL}, NULL}, false, {0, {0}}}
+#define Reboot_init_zero                         {_RebootType_MIN}
+#define FirmwareUpdateEmmc_init_zero             {"", false, 0}
+#define EmmcFixPermission_init_zero              {0}
+#define EmmcPath_init_zero                       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define EmmcPathInfo_init_zero                   {""}
+#define EmmcFile_init_zero                       {"", 0, 0, {{NULL}, NULL}, false, 0, false, 0}
+#define EmmcFileRead_init_zero                   {EmmcFile_init_zero, false, 0}
+#define EmmcFileWrite_init_zero                  {EmmcFile_init_zero, 0, 0, false, 0}
+#define EmmcFileDelete_init_zero                 {""}
+#define EmmcDir_init_zero                        {"", {{NULL}, NULL}, {{NULL}, NULL}}
+#define EmmcDirList_init_zero                    {""}
+#define EmmcDirMake_init_zero                    {""}
+#define EmmcDirRemove_init_zero                  {""}
 #define DeviceInfoSettings_init_zero             {false, "", false, "", false, ""}
 #define GetDeviceInfo_init_zero                  {0}
 #define DeviceInfo_init_zero                     {false, "", false, "", false, "", false, {0, {0}}, false, "", false, ""}
@@ -299,6 +437,33 @@ extern "C" {
 #define DeviceInfoSettings_serial_no_tag         1
 #define DeviceInfoSettings_cpu_info_tag          2
 #define DeviceInfoSettings_pre_firmware_tag      3
+#define EmmcDir_path_tag                         1
+#define EmmcDir_child_dirs_tag                   2
+#define EmmcDir_child_files_tag                  3
+#define EmmcDirList_path_tag                     1
+#define EmmcDirMake_path_tag                     1
+#define EmmcDirRemove_path_tag                   1
+#define EmmcFile_path_tag                        1
+#define EmmcFile_offset_tag                      2
+#define EmmcFile_len_tag                         3
+#define EmmcFile_data_tag                        4
+#define EmmcFile_data_hash_tag                   5
+#define EmmcFile_processed_byte_tag              6
+#define EmmcFileDelete_path_tag                  1
+#define EmmcPath_exist_tag                       1
+#define EmmcPath_size_tag                        2
+#define EmmcPath_year_tag                        3
+#define EmmcPath_month_tag                       4
+#define EmmcPath_day_tag                         5
+#define EmmcPath_hour_tag                        6
+#define EmmcPath_minute_tag                      7
+#define EmmcPath_second_tag                      8
+#define EmmcPath_readonly_tag                    9
+#define EmmcPath_hidden_tag                      10
+#define EmmcPath_system_tag                      11
+#define EmmcPath_archive_tag                     12
+#define EmmcPath_directory_tag                   13
+#define EmmcPathInfo_path_tag                    1
 #define Failure_code_tag                         1
 #define Failure_message_tag                      2
 #define Features_vendor_tag                      1
@@ -333,15 +498,24 @@ extern "C" {
 #define FirmwareErase_ex_length_tag              1
 #define FirmwareRequest_offset_tag               1
 #define FirmwareRequest_length_tag               2
+#define FirmwareUpdateEmmc_path_tag              1
+#define FirmwareUpdateEmmc_reboot_on_success_tag 2
 #define FirmwareUpload_payload_tag               1
 #define FirmwareUpload_hash_tag                  2
 #define Ping_message_tag                         1
+#define Reboot_reboot_type_tag                   1
 #define SEMessageSignature_signature_tag         1
 #define SEPublicCert_public_cert_tag             1
 #define SEPublicKey_public_key_tag               1
 #define SESignMessage_message_tag                1
 #define Success_message_tag                      1
 #define WriteSEPublicCert_public_cert_tag        1
+#define EmmcFileRead_file_tag                    1
+#define EmmcFileRead_ui_percentage_tag           2
+#define EmmcFileWrite_file_tag                   1
+#define EmmcFileWrite_overwrite_tag              2
+#define EmmcFileWrite_append_tag                 3
+#define EmmcFileWrite_ui_percentage_tag          4
 
 /* Struct field encoding specification for nanopb */
 #define Initialize_FIELDLIST(X, a) \
@@ -402,6 +576,11 @@ X(a, STATIC,   OPTIONAL, STRING,   message,           2)
 #define Failure_CALLBACK NULL
 #define Failure_DEFAULT (const pb_byte_t*)"\x08\x01\x00"
 
+#define WipeDevice_FIELDLIST(X, a) \
+
+#define WipeDevice_CALLBACK NULL
+#define WipeDevice_DEFAULT NULL
+
 #define ButtonRequest_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, UENUM,    code,              1)
 #define ButtonRequest_CALLBACK NULL
@@ -433,6 +612,97 @@ X(a, CALLBACK, REQUIRED, BYTES,    payload,           1) \
 X(a, STATIC,   OPTIONAL, BYTES,    hash,              2)
 #define FirmwareUpload_CALLBACK pb_default_field_callback
 #define FirmwareUpload_DEFAULT NULL
+
+#define Reboot_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, UENUM,    reboot_type,       1)
+#define Reboot_CALLBACK NULL
+#define Reboot_DEFAULT NULL
+
+#define FirmwareUpdateEmmc_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1) \
+X(a, STATIC,   OPTIONAL, BOOL,     reboot_on_success,   2)
+#define FirmwareUpdateEmmc_CALLBACK NULL
+#define FirmwareUpdateEmmc_DEFAULT NULL
+
+#define EmmcFixPermission_FIELDLIST(X, a) \
+
+#define EmmcFixPermission_CALLBACK NULL
+#define EmmcFixPermission_DEFAULT NULL
+
+#define EmmcPath_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, BOOL,     exist,             1) \
+X(a, STATIC,   REQUIRED, UINT64,   size,              2) \
+X(a, STATIC,   REQUIRED, UINT32,   year,              3) \
+X(a, STATIC,   REQUIRED, UINT32,   month,             4) \
+X(a, STATIC,   REQUIRED, UINT32,   day,               5) \
+X(a, STATIC,   REQUIRED, UINT32,   hour,              6) \
+X(a, STATIC,   REQUIRED, UINT32,   minute,            7) \
+X(a, STATIC,   REQUIRED, UINT32,   second,            8) \
+X(a, STATIC,   REQUIRED, BOOL,     readonly,          9) \
+X(a, STATIC,   REQUIRED, BOOL,     hidden,           10) \
+X(a, STATIC,   REQUIRED, BOOL,     system,           11) \
+X(a, STATIC,   REQUIRED, BOOL,     archive,          12) \
+X(a, STATIC,   REQUIRED, BOOL,     directory,        13)
+#define EmmcPath_CALLBACK NULL
+#define EmmcPath_DEFAULT NULL
+
+#define EmmcPathInfo_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1)
+#define EmmcPathInfo_CALLBACK NULL
+#define EmmcPathInfo_DEFAULT NULL
+
+#define EmmcFile_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1) \
+X(a, STATIC,   REQUIRED, UINT32,   offset,            2) \
+X(a, STATIC,   REQUIRED, UINT32,   len,               3) \
+X(a, CALLBACK, OPTIONAL, BYTES,    data,              4) \
+X(a, STATIC,   OPTIONAL, UINT32,   data_hash,         5) \
+X(a, STATIC,   OPTIONAL, UINT32,   processed_byte,    6)
+#define EmmcFile_CALLBACK pb_default_field_callback
+#define EmmcFile_DEFAULT NULL
+
+#define EmmcFileRead_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, MESSAGE,  file,              1) \
+X(a, STATIC,   OPTIONAL, UINT32,   ui_percentage,     2)
+#define EmmcFileRead_CALLBACK NULL
+#define EmmcFileRead_DEFAULT NULL
+#define EmmcFileRead_file_MSGTYPE EmmcFile
+
+#define EmmcFileWrite_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, MESSAGE,  file,              1) \
+X(a, STATIC,   REQUIRED, BOOL,     overwrite,         2) \
+X(a, STATIC,   REQUIRED, BOOL,     append,            3) \
+X(a, STATIC,   OPTIONAL, UINT32,   ui_percentage,     4)
+#define EmmcFileWrite_CALLBACK NULL
+#define EmmcFileWrite_DEFAULT NULL
+#define EmmcFileWrite_file_MSGTYPE EmmcFile
+
+#define EmmcFileDelete_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1)
+#define EmmcFileDelete_CALLBACK NULL
+#define EmmcFileDelete_DEFAULT NULL
+
+#define EmmcDir_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1) \
+X(a, CALLBACK, OPTIONAL, STRING,   child_dirs,        2) \
+X(a, CALLBACK, OPTIONAL, STRING,   child_files,       3)
+#define EmmcDir_CALLBACK pb_default_field_callback
+#define EmmcDir_DEFAULT NULL
+
+#define EmmcDirList_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1)
+#define EmmcDirList_CALLBACK NULL
+#define EmmcDirList_DEFAULT NULL
+
+#define EmmcDirMake_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1)
+#define EmmcDirMake_CALLBACK NULL
+#define EmmcDirMake_DEFAULT NULL
+
+#define EmmcDirRemove_FIELDLIST(X, a) \
+X(a, STATIC,   REQUIRED, STRING,   path,              1)
+#define EmmcDirRemove_CALLBACK NULL
+#define EmmcDirRemove_DEFAULT NULL
 
 #define DeviceInfoSettings_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, STRING,   serial_no,         1) \
@@ -497,12 +767,26 @@ extern const pb_msgdesc_t Features_msg;
 extern const pb_msgdesc_t Ping_msg;
 extern const pb_msgdesc_t Success_msg;
 extern const pb_msgdesc_t Failure_msg;
+extern const pb_msgdesc_t WipeDevice_msg;
 extern const pb_msgdesc_t ButtonRequest_msg;
 extern const pb_msgdesc_t ButtonAck_msg;
 extern const pb_msgdesc_t FirmwareErase_msg;
 extern const pb_msgdesc_t FirmwareRequest_msg;
 extern const pb_msgdesc_t FirmwareErase_ex_msg;
 extern const pb_msgdesc_t FirmwareUpload_msg;
+extern const pb_msgdesc_t Reboot_msg;
+extern const pb_msgdesc_t FirmwareUpdateEmmc_msg;
+extern const pb_msgdesc_t EmmcFixPermission_msg;
+extern const pb_msgdesc_t EmmcPath_msg;
+extern const pb_msgdesc_t EmmcPathInfo_msg;
+extern const pb_msgdesc_t EmmcFile_msg;
+extern const pb_msgdesc_t EmmcFileRead_msg;
+extern const pb_msgdesc_t EmmcFileWrite_msg;
+extern const pb_msgdesc_t EmmcFileDelete_msg;
+extern const pb_msgdesc_t EmmcDir_msg;
+extern const pb_msgdesc_t EmmcDirList_msg;
+extern const pb_msgdesc_t EmmcDirMake_msg;
+extern const pb_msgdesc_t EmmcDirRemove_msg;
 extern const pb_msgdesc_t DeviceInfoSettings_msg;
 extern const pb_msgdesc_t GetDeviceInfo_msg;
 extern const pb_msgdesc_t DeviceInfo_msg;
@@ -521,12 +805,26 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 #define Ping_fields &Ping_msg
 #define Success_fields &Success_msg
 #define Failure_fields &Failure_msg
+#define WipeDevice_fields &WipeDevice_msg
 #define ButtonRequest_fields &ButtonRequest_msg
 #define ButtonAck_fields &ButtonAck_msg
 #define FirmwareErase_fields &FirmwareErase_msg
 #define FirmwareRequest_fields &FirmwareRequest_msg
 #define FirmwareErase_ex_fields &FirmwareErase_ex_msg
 #define FirmwareUpload_fields &FirmwareUpload_msg
+#define Reboot_fields &Reboot_msg
+#define FirmwareUpdateEmmc_fields &FirmwareUpdateEmmc_msg
+#define EmmcFixPermission_fields &EmmcFixPermission_msg
+#define EmmcPath_fields &EmmcPath_msg
+#define EmmcPathInfo_fields &EmmcPathInfo_msg
+#define EmmcFile_fields &EmmcFile_msg
+#define EmmcFileRead_fields &EmmcFileRead_msg
+#define EmmcFileWrite_fields &EmmcFileWrite_msg
+#define EmmcFileDelete_fields &EmmcFileDelete_msg
+#define EmmcDir_fields &EmmcDir_msg
+#define EmmcDirList_fields &EmmcDirList_msg
+#define EmmcDirMake_fields &EmmcDirMake_msg
+#define EmmcDirRemove_fields &EmmcDirRemove_msg
 #define DeviceInfoSettings_fields &DeviceInfoSettings_msg
 #define GetDeviceInfo_fields &GetDeviceInfo_msg
 #define DeviceInfo_fields &DeviceInfo_msg
@@ -540,26 +838,40 @@ extern const pb_msgdesc_t SEMessageSignature_msg;
 
 /* Maximum encoded size of messages (where known) */
 /* FirmwareUpload_size depends on runtime parameters */
+/* EmmcFile_size depends on runtime parameters */
+/* EmmcFileRead_size depends on runtime parameters */
+/* EmmcFileWrite_size depends on runtime parameters */
+/* EmmcDir_size depends on runtime parameters */
 #define ButtonAck_size                           0
 #define ButtonRequest_size                       2
 #define DeviceInfoSettings_size                  67
 #define DeviceInfo_size                          135
+#define EmmcDirList_size                         258
+#define EmmcDirMake_size                         258
+#define EmmcDirRemove_size                       258
+#define EmmcFileDelete_size                      258
+#define EmmcFixPermission_size                   0
+#define EmmcPathInfo_size                        258
+#define EmmcPath_size                            59
 #define Failure_size                             260
 #define Features_size                            663
 #define FirmwareErase_ex_size                    6
 #define FirmwareErase_size                       6
 #define FirmwareRequest_size                     12
+#define FirmwareUpdateEmmc_size                  260
 #define GetDeviceInfo_size                       0
 #define GetFeatures_size                         0
 #define Initialize_size                          0
 #define Ping_size                                258
 #define ReadSEPublicCert_size                    0
 #define ReadSEPublicKey_size                     0
+#define Reboot_size                              2
 #define SEMessageSignature_size                  66
 #define SEPublicCert_size                        419
 #define SEPublicKey_size                         66
 #define SESignMessage_size                       1027
 #define Success_size                             258
+#define WipeDevice_size                          0
 #define WriteSEPublicCert_size                   419
 
 #ifdef __cplusplus

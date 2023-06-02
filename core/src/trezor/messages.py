@@ -3625,6 +3625,198 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["DebugLinkWatchLayout"]:
             return isinstance(msg, cls)
 
+    class EmmcFixPermission(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcFixPermission"]:
+            return isinstance(msg, cls)
+
+    class EmmcPath(protobuf.MessageType):
+        exist: "bool"
+        size: "int"
+        year: "int"
+        month: "int"
+        day: "int"
+        hour: "int"
+        minute: "int"
+        second: "int"
+        readonly: "bool"
+        hidden: "bool"
+        system: "bool"
+        archive: "bool"
+        directory: "bool"
+
+        def __init__(
+            self,
+            *,
+            exist: "bool",
+            size: "int",
+            year: "int",
+            month: "int",
+            day: "int",
+            hour: "int",
+            minute: "int",
+            second: "int",
+            readonly: "bool",
+            hidden: "bool",
+            system: "bool",
+            archive: "bool",
+            directory: "bool",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcPath"]:
+            return isinstance(msg, cls)
+
+    class EmmcPathInfo(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcPathInfo"]:
+            return isinstance(msg, cls)
+
+    class EmmcFile(protobuf.MessageType):
+        path: "str"
+        offset: "int"
+        len: "int"
+        data: "bytes | None"
+        data_hash: "int | None"
+        processed_byte: "int | None"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+            offset: "int",
+            len: "int",
+            data: "bytes | None" = None,
+            data_hash: "int | None" = None,
+            processed_byte: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcFile"]:
+            return isinstance(msg, cls)
+
+    class EmmcFileRead(protobuf.MessageType):
+        file: "EmmcFile"
+        ui_percentage: "int | None"
+
+        def __init__(
+            self,
+            *,
+            file: "EmmcFile",
+            ui_percentage: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcFileRead"]:
+            return isinstance(msg, cls)
+
+    class EmmcFileWrite(protobuf.MessageType):
+        file: "EmmcFile"
+        overwrite: "bool"
+        append: "bool"
+        ui_percentage: "int | None"
+
+        def __init__(
+            self,
+            *,
+            file: "EmmcFile",
+            overwrite: "bool",
+            append: "bool",
+            ui_percentage: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcFileWrite"]:
+            return isinstance(msg, cls)
+
+    class EmmcFileDelete(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcFileDelete"]:
+            return isinstance(msg, cls)
+
+    class EmmcDir(protobuf.MessageType):
+        path: "str"
+        child_dirs: "str | None"
+        child_files: "str | None"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+            child_dirs: "str | None" = None,
+            child_files: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcDir"]:
+            return isinstance(msg, cls)
+
+    class EmmcDirList(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcDirList"]:
+            return isinstance(msg, cls)
+
+    class EmmcDirMake(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcDirMake"]:
+            return isinstance(msg, cls)
+
+    class EmmcDirRemove(protobuf.MessageType):
+        path: "str"
+
+        def __init__(
+            self,
+            *,
+            path: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EmmcDirRemove"]:
+            return isinstance(msg, cls)
+
     class EosGetPublicKey(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"

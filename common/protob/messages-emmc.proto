@@ -1,0 +1,160 @@
+syntax = "proto2";
+package hw.trezor.messages.emmc;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageEmmc";
+
+option (include_in_bitcoin_only) = true;
+
+import "messages.proto";
+
+/**
+ * Request: Check and repair filesystem permissions on Emmc
+ * @next Success
+ * @next Failure
+ */
+message EmmcFixPermission {
+    // fix update issue caused by some file has read only flag
+    // available in boot only
+}
+
+/**
+ * Response: The result return by EmmcPathInfo
+ * @end
+ */
+message EmmcPath {
+    // exist
+    required bool exist = 1;
+    // size
+    required uint64 size = 2;
+    // last modified date and time
+    required uint32 year = 3;
+    required uint32 month = 4;
+    required uint32 day = 5;
+    required uint32 hour = 6;
+    required uint32 minute = 7;
+    required uint32 second = 8;
+    // attribute
+    required bool readonly = 9;
+    required bool hidden = 10;
+    required bool system = 11;
+    required bool archive = 12;
+    required bool directory = 13;
+}
+
+/**
+ * Request: Gather various information of the path
+ * @start
+ * @next EmmcPath
+ * @next Failure
+ */
+message EmmcPathInfo {
+    // available in boot and firmware
+    required string path = 1;
+}
+
+/**
+ * Part of the request accepted by EmmcFileRead and EmmcFileWrite
+ * The result returned by EmmcFileRead and EmmcFileWrite
+ * @embed
+ * @end
+ */
+message EmmcFile {
+    required string path = 1;
+    required uint32 offset = 2;
+    required uint32 len = 3;
+    optional bytes data = 4;
+    optional uint32 data_hash = 5;
+    optional uint32 processed_byte = 6;
+}
+
+/**
+ * Request: Read file chunk from Emmc
+ * @start
+ * @next EmmcFile
+ * @next Failure
+ */
+message EmmcFileRead {
+    // available in boot only
+    required EmmcFile file = 1;
+    // this is only used for progress display
+    // if not provided, progress bar won't display
+    optional uint32 ui_percentage = 2;
+}
+
+/**
+ * Request: Write file chunk to Emmc
+ * @start
+ * @next EmmcFile
+ * @next Failure
+ */
+message EmmcFileWrite {
+    // available in boot and firmware
+    // allow overwrite in boot only
+    // path that not exists will be created
+    required EmmcFile file = 1;
+    required bool overwrite = 2;
+    required bool append = 3;
+    // this is only used for progress display
+    // if not provided, progress bar won't display
+    optional uint32 ui_percentage = 4;
+}
+
+/**
+ * Request: Delete file from Emmc
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message EmmcFileDelete {
+    // available in boot only
+    required string path = 1;
+}
+
+/**
+ * Response: The result return by EmmcDirList
+ * @end
+ */
+message EmmcDir {
+    required string path = 1;
+    // both are '\n' seprated multiline strings
+    optional string child_dirs = 2;
+    optional string child_files = 3;
+}
+
+/**
+ * Request: Gather Emmc file and directory list
+ * @start
+ * @next EmmcPath
+ * @next Failure
+ */
+message EmmcDirList {
+    // available in boot only
+    // always recursive
+    required string path = 1;
+}
+
+/**
+ * Request: Make directory on Emmc
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message EmmcDirMake {
+    // available in boot and firmware
+    // path that not exists will be created
+    required string path = 1;
+}
+
+/**
+ * Request: Remove directory from Emmc
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message EmmcDirRemove {
+    // available in boot only
+    // always recursive
+    required string path = 1;
+}

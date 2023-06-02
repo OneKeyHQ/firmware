@@ -21,6 +21,21 @@ Failure.message                 max_size:256
 
 FirmwareUpload.hash             max_size:32
 
+FirmwareUpdateEmmc.path max_size:256
+
+EmmcPathInfo.path max_size:256
+
+EmmcFile.path max_size:256
+EmmcFile.data type:FT_CALLBACK
+EmmcFileDelete.path max_size:256
+
+EmmcDir.path max_size:256
+EmmcDir.child_dirs type:FT_CALLBACK
+EmmcDir.child_files type:FT_CALLBACK
+EmmcDirList.path max_size:256
+EmmcDirMake.path max_size:256
+EmmcDirRemove.path max_size:256
+
 DeviceInfoSettings.serial_no            max_size:32
 DeviceInfoSettings.cpu_info             max_size:16
 DeviceInfoSettings.pre_firmware         max_size:16

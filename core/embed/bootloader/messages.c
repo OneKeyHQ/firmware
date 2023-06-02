@@ -17,19 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-
-#include <pb.h>
-#include <pb_decode.h>
-#include <pb_encode.h>
-#include "messages.pb.h"
-
 #include "blake2s.h"
 #include "br_check.h"
 #include "common.h"
 #include "device.h"
 #include "flash.h"
 #include "image.h"
+#include "sdram.h"
 #include "se_atca.h"
 #include "secbool.h"
 #include "usb.h"
@@ -313,6 +307,19 @@ static secbool _recv_msg(uint8_t iface_num, uint32_t msg_size, uint8_t *buf,
 #define MSG_RECV(TYPE) \
   _recv_msg(iface_num, msg_size, buf, TYPE##_fields, &msg_recv)
 
+void send_success(uint8_t iface_num, const char *text) {
+  MSG_SEND_INIT(Success);
+  MSG_SEND_ASSIGN_STRING(message, text);
+  MSG_SEND(Success);
+}
+
+void send_failure(uint8_t iface_num, FailureType type, const char *text) {
+  MSG_SEND_INIT(Failure);
+  MSG_SEND_ASSIGN_VALUE(code, type);
+  MSG_SEND_ASSIGN_STRING(message, text);
+  MSG_SEND(Failure);
+}
+
 void send_user_abort(uint8_t iface_num, const char *msg) {
   MSG_SEND_INIT(Failure);
   MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_ActionCancelled);
@@ -406,6 +413,42 @@ void process_msg_Ping(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
   MSG_SEND(Success);
 }
 
+void process_msg_Reboot(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
+  MSG_RECV_INIT(Reboot);
+  MSG_RECV(Reboot);
+
+  switch (msg_recv.reboot_type) {
+    case RebootType_Normal: {
+      MSG_SEND_INIT(Success);
+      MSG_SEND_ASSIGN_STRING(message, "Reboot type Normal accepted!");
+      MSG_SEND(Success);
+    }
+      *STAY_IN_FLAG_ADDR = 0;
+      restart();
+      break;
+    case RebootType_Boardloader: {
+      MSG_SEND_INIT(Success);
+      MSG_SEND_ASSIGN_STRING(message, "Reboot type Boardloader accepted!");
+      MSG_SEND(Success);
+    }
+      reboot_to_board();
+      break;
+    case RebootType_BootLoader: {
+      MSG_SEND_INIT(Success);
+      MSG_SEND_ASSIGN_STRING(message, "Reboot type BootLoader accepted!");
+      MSG_SEND(Success);
+    }
+      reboot_to_boot();
+      break;
+
+    default: {
+      MSG_SEND_INIT(Failure);
+      MSG_SEND_ASSIGN_STRING(message, "Reboot type invalid!");
+      MSG_SEND(Failure);
+    } break;
+  }
+}
+
 static uint32_t firmware_remaining, firmware_len, firmware_block,
     chunk_requested;
 
@@ -442,8 +485,9 @@ void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
 static uint32_t chunk_size = 0;
 
 #if defined(STM32H747xx)
-// SRAM is unused, so we can use it for chunk buffer
-uint8_t *const chunk_buffer = (uint8_t *const)0x24000000;
+// USE SDRAM
+uint8_t *const chunk_buffer =
+    (uint8_t *const)FMC_SDRAM_BOOLOADER_BUFFER_ADDRESS;
 #else
 // SRAM is unused, so we can use it for chunk buffer
 uint8_t *const chunk_buffer = (uint8_t *const)0x20000000;
@@ -471,7 +515,7 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
 
   if (offset == 0) {
     // clear chunk buffer
-    memset((uint8_t *)&chunk_buffer, 0xFF, IMAGE_CHUNK_SIZE);
+    memset(chunk_buffer, 0xFF, IMAGE_CHUNK_SIZE);
   }
 
   uint32_t chunk_written = offset;
@@ -993,20 +1037,6 @@ void process_msg_unknown(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
   MSG_SEND_ASSIGN_VALUE(code, FailureType_Failure_UnexpectedMessage);
   MSG_SEND_ASSIGN_STRING(message, "Unexpected message");
   MSG_SEND(Failure);
-}
-
-static void send_failure(uint8_t iface_num, FailureType type,
-                         const char *text) {
-  MSG_SEND_INIT(Failure);
-  MSG_SEND_ASSIGN_VALUE(code, type);
-  MSG_SEND_ASSIGN_STRING(message, text);
-  MSG_SEND(Failure);
-}
-
-static void send_success(uint8_t iface_num, const char *text) {
-  MSG_SEND_INIT(Success);
-  MSG_SEND_ASSIGN_STRING(message, text);
-  MSG_SEND(Success);
 }
 
 void process_msg_DeviceInfoSettings(uint8_t iface_num, uint32_t msg_size,

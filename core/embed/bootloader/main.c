@@ -21,12 +21,12 @@
 #include <sys/types.h>
 
 #include "atca_api.h"
+#include "atca_command.h"
 #include "atca_hal.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "device.h"
 #include "display.h"
-#include "emmc.h"
 #include "flash.h"
 #include "image.h"
 #include "mini_printf.h"
@@ -56,20 +56,16 @@
 #include "sys.h"
 #include "usart.h"
 
+#define MSG_NAME_TO_ID(x) MessageType_MessageType_##x
+
 #if defined(STM32H747xx)
 #include "stm32h7xx_hal.h"
 #endif
 
-#include "ff.h"
-
-PARTITION VolToPart[FF_VOLUMES] = {
-    {0, 1},
-    {0, 2},
-};
-
+#include "emmc_wrapper.h"
 const uint8_t BOOTLOADER_KEY_M = 4;
 const uint8_t BOOTLOADER_KEY_N = 7;
-static const uint8_t * const BOOTLOADER_KEYS[] = {
+const uint8_t * const BOOTLOADER_KEYS[] = {
     (const uint8_t *)"\x15\x4b\x8a\xb2\x61\xcc\x88\x79\x48\x3f\x68\x9a\x2d\x41\x24\x3a\xe7\xdb\xc4\x02\x16\x72\xbb\xd2\x5c\x33\x8a\xe8\x4d\x93\x11\x54",
     (const uint8_t *)"\xa9\xe6\x5e\x07\xfe\x6d\x39\xa8\xa8\x4e\x11\xa9\x96\xa0\x28\x3f\x88\x1e\x17\x5c\xba\x60\x2e\xb5\xac\x44\x2f\xb7\x5b\x39\xe8\xe0",
     (const uint8_t *)"\x6c\x88\x05\xab\xb2\xdf\x9d\x36\x79\xf1\xd2\x8a\x40\xcd\x99\x03\x99\xb9\x9f\xc3\xee\x4e\x06\x57\xd8\x1d\x38\x1e\xa1\x48\x8a\x12",
@@ -84,6 +80,132 @@ static const uint8_t * const BOOTLOADER_KEYS[] = {
 };
 
 #define USB_IFACE_NUM 0
+
+#if !PRODUCTION
+#define atca_assert(expr, msg) \
+  (((expr) == ATCA_SUCCESS)    \
+       ? (void)0               \
+       : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
+
+// Note: this is for developers to setup a dummy config only!
+// configuration to SE is permanent, there is no way to reset it!
+static void write_dev_dummy_config() {
+  // DO NOT ENABLE THIS UNLESS YOU KNOW WHAT YOU ARE DOING
+  // reset OTP to pair with a new SE
+  // ensure(flash_erase(FLASH_SECTOR_OTP_EMULATOR), NULL);
+
+  mpu_config_off();
+
+  // device serial
+  if (!device_serial_set()) {
+    device_set_serial("TCTestSerialNumberXXXXXXXXXXXXX");
+  }
+
+  // se keys
+  atca_init();
+
+  ATCAConfiguration atca_configuration;
+  ATCAPairingInfo pair_info_obj = {0};
+  uint8_t se_serial_no[32] = {0};
+  FlashLockedData *flash_otp_data = (FlashLockedData *)0x081E0000;
+
+  // get otp data
+  memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
+         sizeof(pair_info_obj));
+
+  // get se config
+  atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
+              "get config");
+
+  // get se sn from config
+  memset(se_serial_no, 0xff, sizeof(se_serial_no));
+  memcpy(se_serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
+  memcpy(se_serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
+         ATECC608_SN2_SIZE);
+
+  uint8_t dummy_key[32] = {
+      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,  // 0-7
+      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,  // 8-15
+      0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,  // 16-23
+      0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0,  // 24-32
+  };
+
+  if (check_all_ones(pair_info_obj.serial, sizeof(pair_info_obj.serial))) {
+    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, se_serial_no,
+                           FLASH_OTP_BLOCK_SIZE),
+           NULL);
+  }
+  if (check_all_ones(pair_info_obj.protect_key,
+                     sizeof(pair_info_obj.protect_key))) {
+    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, dummy_key,
+                           FLASH_OTP_BLOCK_SIZE),
+           NULL);
+    ATCA_STATUS ret =
+        atca_write_zone(ATCA_ZONE_DATA, SLOT_IO_PROTECT_KEY, 0, 0,
+                        pair_info_obj.protect_key, ATCA_BLOCK_SIZE);
+    // atca_assert(ret, "init IO key");
+    UNUSED(ret);
+  }
+  if (check_all_ones(pair_info_obj.init_pin, sizeof(pair_info_obj.init_pin))) {
+    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_INIT_PIN, 0, dummy_key,
+                           FLASH_OTP_BLOCK_SIZE),
+           NULL);
+
+    ATCA_STATUS ret = atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_PIN, 0, 0,
+                                      pair_info_obj.init_pin, ATCA_BLOCK_SIZE);
+    // atca_assert(ret, "init IO key");
+    UNUSED(ret);
+  }
+  if (check_all_ones(pair_info_obj.hash_mix, sizeof(pair_info_obj.hash_mix))) {
+    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_MIX_PIN, 0, dummy_key,
+                           FLASH_OTP_BLOCK_SIZE),
+           NULL);
+  }
+
+  atca_config_init();
+
+  // se cert
+  uint8_t dummy_cert[] = {
+      0x30, 0x82, 0x01, 0x58, 0x30, 0x82, 0x01, 0x0A, 0xA0, 0x03, 0x02, 0x01,
+      0x02, 0x02, 0x08, 0x44, 0x9F, 0x65, 0xB6, 0x90, 0xE4, 0x90, 0x09, 0x30,
+      0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x30, 0x36, 0x31, 0x0F, 0x30, 0x0D,
+      0x06, 0x03, 0x55, 0x04, 0x0A, 0x13, 0x06, 0x4F, 0x6E, 0x65, 0x4B, 0x65,
+      0x79, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x02,
+      0x4E, 0x41, 0x31, 0x16, 0x30, 0x14, 0x06, 0x03, 0x55, 0x04, 0x03, 0x0C,
+      0x0D, 0x4F, 0x4E, 0x45, 0x4B, 0x45, 0x59, 0x5F, 0x44, 0x45, 0x56, 0x5F,
+      0x43, 0x41, 0x30, 0x22, 0x18, 0x0F, 0x39, 0x39, 0x39, 0x39, 0x31, 0x32,
+      0x33, 0x31, 0x32, 0x33, 0x35, 0x39, 0x35, 0x39, 0x5A, 0x18, 0x0F, 0x39,
+      0x39, 0x39, 0x39, 0x31, 0x32, 0x33, 0x31, 0x32, 0x33, 0x35, 0x39, 0x35,
+      0x39, 0x5A, 0x30, 0x2A, 0x31, 0x28, 0x30, 0x26, 0x06, 0x03, 0x55, 0x04,
+      0x03, 0x13, 0x1F, 0x54, 0x43, 0x54, 0x65, 0x73, 0x74, 0x53, 0x65, 0x72,
+      0x69, 0x61, 0x6C, 0x4E, 0x75, 0x6D, 0x62, 0x65, 0x72, 0x58, 0x58, 0x58,
+      0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x30, 0x59,
+      0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06,
+      0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
+      0x04, 0x20, 0x32, 0xF5, 0xC1, 0x3B, 0x55, 0x5C, 0x8B, 0xF7, 0xE0, 0xB4,
+      0x8A, 0x83, 0x5C, 0x67, 0xD3, 0xC2, 0x04, 0xB7, 0x90, 0x2F, 0x49, 0x78,
+      0xF8, 0x5D, 0x2B, 0xFE, 0xA1, 0xAF, 0x0B, 0xCA, 0x6F, 0x94, 0xD3, 0x20,
+      0xD9, 0x04, 0x5B, 0xD7, 0x0B, 0xB2, 0x8D, 0xA7, 0xF1, 0x8D, 0x39, 0xA9,
+      0xC5, 0x44, 0x53, 0x67, 0x5C, 0xA9, 0x6D, 0x5F, 0x45, 0x74, 0x77, 0x32,
+      0x38, 0x8D, 0x91, 0x5F, 0xE2, 0xA3, 0x0F, 0x30, 0x0D, 0x30, 0x0B, 0x06,
+      0x03, 0x55, 0x1D, 0x0F, 0x04, 0x04, 0x03, 0x02, 0x07, 0x80, 0x30, 0x05,
+      0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x41, 0x00, 0x9F, 0x5D, 0x95, 0xFB,
+      0x4A, 0xAD, 0xE6, 0xC6, 0x3B, 0x8E, 0x15, 0xB0, 0xBD, 0x0D, 0xF0, 0x70,
+      0x81, 0x4E, 0x05, 0x9A, 0xAD, 0xC4, 0xE4, 0x6E, 0x44, 0xDE, 0xF1, 0xDB,
+      0x51, 0xCB, 0x85, 0xB7, 0x5F, 0xAF, 0x55, 0xEB, 0x28, 0x9A, 0x66, 0x95,
+      0xAA, 0x08, 0x66, 0x8E, 0x84, 0xC1, 0x22, 0x5D, 0x34, 0x75, 0xF3, 0x01,
+      0x2F, 0x6D, 0x33, 0x21, 0x35, 0x1E, 0x54, 0xEC, 0x71, 0xEC, 0x3D, 0x04};
+
+  atca_config_check();
+  uint32_t cert_len = 0;
+  if (!se_get_certificate_len(&cert_len)) {
+    if (!se_write_certificate(dummy_cert, sizeof(dummy_cert)))
+      ensure(secfalse, "set cert failed");
+  }
+
+  mpu_config_bootloader();
+}
+#endif
 
 static void usb_init_all(secbool usb21_landing) {
   usb_dev_info_t dev_info = {
@@ -132,6 +254,19 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
 
   for (;;) {
     ble_uart_poll();
+
+    // give a way to go back to bootloader home page
+
+    // if(ble_power_button_state() == 1) // short press
+    if (ble_power_button_state() == 2)  // long press
+    {
+      ble_power_button_state_clear();
+      ui_progress_bar_visible_clear();
+      ui_fadeout();
+      ui_bootloader_first(NULL);
+      ui_fadein();
+    }
+
     r = spi_slave_poll(buf);
     if (r != USB_PACKET_SIZE) {
       r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);
@@ -157,13 +292,13 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
     }
 
     switch (msg_id) {
-      case 0:  // Initialize
+      case MSG_NAME_TO_ID(Initialize):  // Initialize
         process_msg_Initialize(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;
-      case 1:  // Ping
+      case MSG_NAME_TO_ID(Ping):  // Ping
         process_msg_Ping(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 5:  // WipeDevice
+      case MSG_NAME_TO_ID(WipeDevice):  // WipeDevice
         ui_fadeout();
 #if PRODUCTION_MODEL == 'H'
         ui_wipe_confirm(hdr);
@@ -213,10 +348,10 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
           return secfalse;  // shutdown
         }
         break;
-      case 6:  // FirmwareErase
+      case MSG_NAME_TO_ID(FirmwareErase):  // FirmwareErase
         process_msg_FirmwareErase(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 7:  // FirmwareUpload
+      case MSG_NAME_TO_ID(FirmwareUpload):  // FirmwareUpload
         r = process_msg_FirmwareUpload(USB_IFACE_NUM, msg_size, buf);
         if (r < 0 && r != -4) {  // error, but not user abort (-4)
           ui_fadeout();
@@ -245,11 +380,41 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
           return sectrue;  // jump to firmware
         }
         break;
-      case 16:  // erase ble update buffer
+      case MSG_NAME_TO_ID(FirmwareErase_ex):  // erase ble update buffer
         process_msg_FirmwareEraseBLE(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 55:  // GetFeatures
+      case MSG_NAME_TO_ID(GetFeatures):  // GetFeatures
         process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
+        break;
+      case MSG_NAME_TO_ID(Reboot):  // Reboot
+        process_msg_Reboot(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(FirmwareUpdateEmmc):  // FirmwareUpdateEmmc
+        process_msg_FirmwareUpdateEmmc(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcFixPermission):  // EmmcFixPermission
+        process_msg_EmmcFixPermission(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcPathInfo):  // EmmcPathInfo
+        process_msg_EmmcPathInfo(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcFileRead):  // EmmcFileRead
+        process_msg_EmmcFileRead(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcFileWrite):  // EmmcFileWrite
+        process_msg_EmmcFileWrite(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcFileDelete):  // EmmcFileDelete
+        process_msg_EmmcFileDelete(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcDirList):  // EmmcDirList
+        process_msg_EmmcDirList(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcDirMake):  // EmmcDirMake
+        process_msg_EmmcDirMake(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcDirRemove):  // EmmcDirRemove
+        process_msg_EmmcDirRemove(USB_IFACE_NUM, msg_size, buf);
         break;
       default:
         process_msg_unknown(USB_IFACE_NUM, msg_size, buf);
@@ -283,32 +448,59 @@ secbool bootloader_usb_loop_factory(const vendor_header *const vhdr,
     }
 
     switch (msg_id) {
-      case 0:  // Initialize
+      case MSG_NAME_TO_ID(Initialize):  // Initialize
         process_msg_Initialize(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;
-      case 1:  // Ping
+      case MSG_NAME_TO_ID(Ping):  // Ping
         process_msg_Ping(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 55:  // GetFeatures
+      case MSG_NAME_TO_ID(GetFeatures):  // GetFeatures
         process_msg_GetFeatures(USB_IFACE_NUM, msg_size, buf, vhdr, hdr);
         break;
-      case 10001:  // DeviceInfoSettings
+      case MSG_NAME_TO_ID(DeviceInfoSettings):  // DeviceInfoSettings
         process_msg_DeviceInfoSettings(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 10002:  // GetDeviceInfo
+      case MSG_NAME_TO_ID(GetDeviceInfo):  // GetDeviceInfo
         process_msg_GetDeviceInfo(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 10004:  // ReadSEPublicKey
+      case MSG_NAME_TO_ID(ReadSEPublicKey):  // ReadSEPublicKey
         process_msg_ReadSEPublicKey(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 10006:  // WriteSEPublicCert
+      case MSG_NAME_TO_ID(WriteSEPublicCert):  // WriteSEPublicCert
         process_msg_WriteSEPublicCert(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 10007:  // ReadSEPublicCert
+      case MSG_NAME_TO_ID(ReadSEPublicCert):  // ReadSEPublicCert
         process_msg_ReadSEPublicCert(USB_IFACE_NUM, msg_size, buf);
         break;
-      case 10012:  // SESignMessage
+      case MSG_NAME_TO_ID(SESignMessage):  // SESignMessage
         process_msg_SESignMessage(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(Reboot):  // Reboot
+        process_msg_Reboot(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcFixPermission):  // EmmcFixPermission
+        process_msg_EmmcFixPermission(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcPathInfo):  // EmmcPathInfo
+        process_msg_EmmcPathInfo(USB_IFACE_NUM, msg_size, buf);
+        break;
+      // case MSG_NAME_TO_ID(EmmcFileRead): // EmmcFileRead
+      //   process_msg_EmmcFileRead(USB_IFACE_NUM, msg_size, buf);
+      //   break;
+      // case MSG_NAME_TO_ID(EmmcFileWrite): // EmmcFileWrite
+      //   process_msg_EmmcFileWrite(USB_IFACE_NUM, msg_size, buf);
+      //   break;
+      // case MSG_NAME_TO_ID(EmmcFileDelete): // EmmcFileDelete
+      //   process_msg_EmmcFileDelete(USB_IFACE_NUM, msg_size, buf);
+      //   break;
+      case MSG_NAME_TO_ID(EmmcDirList):  // EmmcDirList
+        process_msg_EmmcDirList(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcDirMake):  // EmmcDirMake
+        process_msg_EmmcDirMake(USB_IFACE_NUM, msg_size, buf);
+        break;
+      case MSG_NAME_TO_ID(EmmcDirRemove):  // EmmcDirRemove
+        process_msg_EmmcDirRemove(USB_IFACE_NUM, msg_size, buf);
         break;
       default:
         process_msg_unknown(USB_IFACE_NUM, msg_size, buf);
@@ -372,7 +564,6 @@ static void check_bootloader_version(void) {
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
   bool serial_set = false, cert_set = false;
-  uint32_t cert_len = 0;
 
   SystemCoreClockUpdate();
 
@@ -412,12 +603,18 @@ int main(void) {
   rgb_led_init();
 #endif
 
+#if !PRODUCTION
+  // write_dev_dummy_config();
+  UNUSED(write_dev_dummy_config);
+#endif
+
   device_test();
 
   atca_init();
   atca_config_check();
 
   if (!cert_set) {
+    uint32_t cert_len = 0;
     cert_set = se_get_certificate_len(&cert_len);
   }
 
@@ -430,7 +627,9 @@ int main(void) {
     }
   }
 
+#if PRODUCTION
   device_burnin_test();
+#endif
 
   qspi_flash_init();
   qspi_flash_config();
@@ -442,7 +641,8 @@ int main(void) {
   check_bootloader_version();
 #endif
 
-  emmc_init();
+  ensure_emmcfs(emmc_fs_init(), "emmc_fs_init");
+  ensure_emmcfs(emmc_fs_mount(true, false), "emmc_fs_mount");
 
   buzzer_init();
   motor_init();
@@ -475,38 +675,10 @@ int main(void) {
   }
 #endif
 
-  vendor_header vhdr;
-  image_header hdr;
-
-  // detect whether the devices contains a valid firmware
-
-  secbool firmware_present =
-      load_vendor_header_keys((const uint8_t *)FIRMWARE_START, &vhdr);
-  if (sectrue == firmware_present) {
-    firmware_present = check_vendor_header_lock(&vhdr);
-  }
-
-  if (sectrue == firmware_present) {
-    firmware_present = load_image_header(
-        (const uint8_t *)(FIRMWARE_START + vhdr.hdrlen), FIRMWARE_IMAGE_MAGIC,
-        FIRMWARE_IMAGE_MAXSIZE, vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr);
-  }
-
-  if (sectrue == firmware_present) {
-    firmware_present =
-        check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
-                             FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT);
-  }
-
-  // start the bootloader if no or broken firmware found ...
-
-  if (firmware_present != sectrue) {
+  // if stay_in_bootloader flag is set
+  if (stay_in_bootloader == sectrue) {
     display_clear();
     ui_bootloader_first(NULL);
-
-    // erase storage
-    // ensure(flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
-    //        NULL);
 
     // and start the usb loop
     if (bootloader_usb_loop(NULL, NULL) != sectrue) {
@@ -514,25 +686,46 @@ int main(void) {
     }
   }
 
-  // ... or if user touched the screen on start
-  // ... or we have stay_in_bootloader flag to force it
-  if (stay_in_bootloader == sectrue) {
+  // check firmware
+  vendor_header vhdr;
+  image_header hdr;
+  secbool firmware_present = secfalse;
+
+  while (true) {
+    if (sectrue !=
+        load_vendor_header_keys((const uint8_t *)FIRMWARE_START, &vhdr))
+      break;
+
+    if (sectrue != check_vendor_header_lock(&vhdr)) break;
+
+    if (sectrue !=
+        load_image_header((const uint8_t *)(FIRMWARE_START + vhdr.hdrlen),
+                          FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
+                          vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr))
+      break;
+
+    if (sectrue != check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
+                                        FIRMWARE_SECTORS,
+                                        FIRMWARE_SECTORS_COUNT))
+      break;
+
+    // all check passed, set flag to true
+    firmware_present = sectrue;
+    break;
+  }
+
+  // if no firmware found
+  if (firmware_present != sectrue) {
     display_clear();
-    ui_bootloader_first(&hdr);
-    // no ui_fadeout(); - we already start from black screen
-    if (firmware_present != sectrue) {
-      // and start the usb loop
-      if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-        return 1;
-      }
-    } else {
-      // and start the usb loop
-      if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
-        return 1;
-      }
+    ui_bootloader_first(NULL);
+
+    // and start the usb loop
+    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+      return 1;
     }
   }
 
+  // if firmware found
   ensure(load_vendor_header_keys((const uint8_t *)FIRMWARE_START, &vhdr),
          "invalid vendor header");
 
