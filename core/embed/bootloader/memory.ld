@@ -54,4 +54,12 @@ SECTIONS {
   .stack : ALIGN(8) {
     . = 4K; /* this acts as a build time assertion that at least this much memory is available for stack use */
   } >SRAM
+
+  /* this is needed, otherwise will have "undefined reference to `end'" error */
+  .heap : ALIGN(4) {
+    PROVIDE ( end = . );
+    PROVIDE ( _end = . );
+    . = 512K; /* this acts as a build time assertion that at least this much memory is available for heap use */
+    /*. = ABSOLUTE(sram_end - 16K);  this explicitly sets the end of the heap effectively giving the stack at most 16K */
+  } >AXIRAM
 }

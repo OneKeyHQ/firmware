@@ -130,7 +130,9 @@
 
 #include "memzero.h"
 
-static struct { int x, y; } DISPLAY_OFFSET;
+static struct {
+  int x, y;
+} DISPLAY_OFFSET;
 
 #if PRODUCTION_MODEL == 'H'
 #include "mipi_lcd.h"
@@ -1062,7 +1064,7 @@ void display_progress_percent(int x, int y, int permil) {
   }
   percent_asc[i] = '%';
 #ifdef TREZOR_FONT_PJKS_REGULAR_20_ENABLE
-  display_bar(0, y - 24, MAX_DISPLAY_RESX, 24, COLOR_BLACK);
+  display_bar(0, y - 23, MAX_DISPLAY_RESX, 25, COLOR_BLACK);
   display_text_center(x, y, (const char *)percent_asc, -1, FONT_PJKS_REGULAR_20,
                       RGB16(0xD2, 0xD2, 0xD2), COLOR_BLACK);
 #else

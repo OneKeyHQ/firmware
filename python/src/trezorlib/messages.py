@@ -81,6 +81,8 @@ class MessageType(IntEnum):
     FirmwareRequest = 8
     FirmwareErase_ex = 16
     SelfTest = 32
+    Reboot = 30000
+    FirmwareUpdateEmmc = 30001
     GetPublicKey = 11
     PublicKey = 12
     SignTx = 15
@@ -123,6 +125,17 @@ class MessageType(IntEnum):
     DebugLinkRecordScreen = 9003
     DebugLinkEraseSdCard = 9005
     DebugLinkWatchLayout = 9006
+    EmmcFixPermission = 30100
+    EmmcPath = 30101
+    EmmcPathInfo = 30102
+    EmmcFile = 30103
+    EmmcFileRead = 30104
+    EmmcFileWrite = 30105
+    EmmcFileDelete = 30106
+    EmmcDir = 30107
+    EmmcDirList = 30108
+    EmmcDirMake = 30109
+    EmmcDirRemove = 30110
     EthereumGetPublicKey = 450
     EthereumPublicKey = 451
     EthereumGetAddress = 56
@@ -435,6 +448,12 @@ class RequestType(IntEnum):
     TXORIGINPUT = 5
     TXORIGOUTPUT = 6
     TXPAYMENTREQ = 7
+
+
+class RebootType(IntEnum):
+    Normal = 0
+    Boardloader = 1
+    BootLoader = 2
 
 
 class CardanoDerivationType(IntEnum):
@@ -2388,6 +2407,37 @@ class SelfTest(protobuf.MessageType):
         payload: Optional["bytes"] = None,
     ) -> None:
         self.payload = payload
+
+
+class Reboot(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30000
+    FIELDS = {
+        1: protobuf.Field("reboot_type", "RebootType", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        reboot_type: "RebootType",
+    ) -> None:
+        self.reboot_type = reboot_type
+
+
+class FirmwareUpdateEmmc(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30001
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+        2: protobuf.Field("reboot_on_success", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+        reboot_on_success: Optional["bool"] = None,
+    ) -> None:
+        self.path = path
+        self.reboot_on_success = reboot_on_success
 
 
 class CardanoBlockchainPointerType(protobuf.MessageType):
@@ -4907,6 +4957,219 @@ class DebugLinkWatchLayout(protobuf.MessageType):
         watch: Optional["bool"] = None,
     ) -> None:
         self.watch = watch
+
+
+class EmmcFixPermission(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30100
+
+
+class EmmcPath(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30101
+    FIELDS = {
+        1: protobuf.Field("exist", "bool", repeated=False, required=True),
+        2: protobuf.Field("size", "uint64", repeated=False, required=True),
+        3: protobuf.Field("year", "uint32", repeated=False, required=True),
+        4: protobuf.Field("month", "uint32", repeated=False, required=True),
+        5: protobuf.Field("day", "uint32", repeated=False, required=True),
+        6: protobuf.Field("hour", "uint32", repeated=False, required=True),
+        7: protobuf.Field("minute", "uint32", repeated=False, required=True),
+        8: protobuf.Field("second", "uint32", repeated=False, required=True),
+        9: protobuf.Field("readonly", "bool", repeated=False, required=True),
+        10: protobuf.Field("hidden", "bool", repeated=False, required=True),
+        11: protobuf.Field("system", "bool", repeated=False, required=True),
+        12: protobuf.Field("archive", "bool", repeated=False, required=True),
+        13: protobuf.Field("directory", "bool", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        exist: "bool",
+        size: "int",
+        year: "int",
+        month: "int",
+        day: "int",
+        hour: "int",
+        minute: "int",
+        second: "int",
+        readonly: "bool",
+        hidden: "bool",
+        system: "bool",
+        archive: "bool",
+        directory: "bool",
+    ) -> None:
+        self.exist = exist
+        self.size = size
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hour = hour
+        self.minute = minute
+        self.second = second
+        self.readonly = readonly
+        self.hidden = hidden
+        self.system = system
+        self.archive = archive
+        self.directory = directory
+
+
+class EmmcPathInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30102
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class EmmcFile(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30103
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+        2: protobuf.Field("offset", "uint32", repeated=False, required=True),
+        3: protobuf.Field("len", "uint32", repeated=False, required=True),
+        4: protobuf.Field("data", "bytes", repeated=False, required=False),
+        5: protobuf.Field("data_hash", "uint32", repeated=False, required=False),
+        6: protobuf.Field("processed_byte", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+        offset: "int",
+        len: "int",
+        data: Optional["bytes"] = None,
+        data_hash: Optional["int"] = None,
+        processed_byte: Optional["int"] = None,
+    ) -> None:
+        self.path = path
+        self.offset = offset
+        self.len = len
+        self.data = data
+        self.data_hash = data_hash
+        self.processed_byte = processed_byte
+
+
+class EmmcFileRead(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30104
+    FIELDS = {
+        1: protobuf.Field("file", "EmmcFile", repeated=False, required=True),
+        2: protobuf.Field("ui_percentage", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        file: "EmmcFile",
+        ui_percentage: Optional["int"] = None,
+    ) -> None:
+        self.file = file
+        self.ui_percentage = ui_percentage
+
+
+class EmmcFileWrite(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30105
+    FIELDS = {
+        1: protobuf.Field("file", "EmmcFile", repeated=False, required=True),
+        2: protobuf.Field("overwrite", "bool", repeated=False, required=True),
+        3: protobuf.Field("append", "bool", repeated=False, required=True),
+        4: protobuf.Field("ui_percentage", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        file: "EmmcFile",
+        overwrite: "bool",
+        append: "bool",
+        ui_percentage: Optional["int"] = None,
+    ) -> None:
+        self.file = file
+        self.overwrite = overwrite
+        self.append = append
+        self.ui_percentage = ui_percentage
+
+
+class EmmcFileDelete(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30106
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class EmmcDir(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30107
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+        2: protobuf.Field("child_dirs", "string", repeated=False, required=False),
+        3: protobuf.Field("child_files", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+        child_dirs: Optional["str"] = None,
+        child_files: Optional["str"] = None,
+    ) -> None:
+        self.path = path
+        self.child_dirs = child_dirs
+        self.child_files = child_files
+
+
+class EmmcDirList(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30108
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class EmmcDirMake(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30109
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
+
+
+class EmmcDirRemove(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30110
+    FIELDS = {
+        1: protobuf.Field("path", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        path: "str",
+    ) -> None:
+        self.path = path
 
 
 class EosGetPublicKey(protobuf.MessageType):

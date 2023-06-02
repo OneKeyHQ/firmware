@@ -73,6 +73,8 @@ if TYPE_CHECKING:
         FirmwareRequest = 8
         FirmwareErase_ex = 16
         SelfTest = 32
+        Reboot = 30000
+        FirmwareUpdateEmmc = 30001
         GetPublicKey = 11
         PublicKey = 12
         SignTx = 15
@@ -115,6 +117,17 @@ if TYPE_CHECKING:
         DebugLinkRecordScreen = 9003
         DebugLinkEraseSdCard = 9005
         DebugLinkWatchLayout = 9006
+        EmmcFixPermission = 30100
+        EmmcPath = 30101
+        EmmcPathInfo = 30102
+        EmmcFile = 30103
+        EmmcFileRead = 30104
+        EmmcFileWrite = 30105
+        EmmcFileDelete = 30106
+        EmmcDir = 30107
+        EmmcDirList = 30108
+        EmmcDirMake = 30109
+        EmmcDirRemove = 30110
         EthereumGetPublicKey = 450
         EthereumPublicKey = 451
         EthereumGetAddress = 56

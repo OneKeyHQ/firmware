@@ -291,6 +291,29 @@ uint32_t spi_read_retry(uint8_t *buf) {
   }
 }
 
+uint32_t spi_read_blocking(uint8_t *buf, int timeout) {
+  spi_rx_event = 1;
+
+  // check if there already some data
+  int r = spi_slave_poll(buf);
+
+  // yes, retrun
+  if (r != 0) {
+    return r;
+  }
+
+  // no, try read with timeout
+  switch (wait_spi_rx_event(timeout)) {
+    case 0:
+      return spi_slave_poll(buf);
+      break;
+    case -1:
+    default:
+      return 0;
+      break;
+  }
+}
+
 void SPIx_DMA_RX_IRQHandler(void) { HAL_DMA_IRQHandler(spi.hdmarx); }
 
 void SPIx_DMA_TX_IRQHandler(void) { HAL_DMA_IRQHandler(spi.hdmatx); }

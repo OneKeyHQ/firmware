@@ -1,5 +1,1 @@
-^\./common/
-^\./core/embed/
-^\./crypto/
-^\./legacy/
-^\./storage/
+^\./core/embed/emmc_wrapper

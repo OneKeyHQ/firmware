@@ -51,6 +51,7 @@ bool ble_ver_state(void);
 bool ble_battery_state(void);
 bool ble_charging_state(void);
 uint32_t ble_power_button_state(void);
+void ble_power_button_state_clear(void);
 char *ble_get_name(void);
 char *ble_get_ver(void);
 bool ble_switch_state(void);

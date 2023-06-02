@@ -99,6 +99,7 @@ const char *format_ver(const char *format, uint32_t version) {
 
 static uint16_t boot_background;
 static bool ble_name_show = false;
+static int ui_bootloader_page_current = 0;
 
 void ui_logo_center(void) {
   display_image(203, 56, 74, 74, toi_icon_onekey_74x74 + 12,
@@ -376,6 +377,36 @@ void ui_screen_install_confirm_newvendor_or_downgrade_wipe(
 #endif
 }
 
+void ui_screen_progress_bar_prepare(char *title, char *notes) {
+  ui_title_update();
+  ui_logo_center();
+  ui_screen_progress_bar_update(title, notes, -1);
+}
+
+void ui_screen_progress_bar_update(char *title, char *notes, int progress) {
+  if (title != NULL)
+    display_text_center(DISPLAY_RESX / 2, 180, title, -1, FONT_PJKS_BOLD_38,
+                        COLOR_BL_FG, COLOR_BL_BG);
+
+  if ((progress >= 0) || (progress <= 100)) {
+    display_bar(60, 740, 360, 12, COLOR_WHITE);
+    display_bar(61, 740 + 1, 358, 10, COLOR_BLACK);
+    if (progress > 0) {
+      uint16_t width = progress * 10 * 360 / 1000;
+      display_bar(62, 740 + 2, width, 8, COLOR_WHITE);
+    }
+    display_progress_percent(MAX_DISPLAY_RESX / 2, 740 + 40, progress);
+  } else
+    display_bar(60, 740, 360, 12, COLOR_BLACK);
+
+  if (notes != NULL)
+    display_text_center(MAX_DISPLAY_RESX / 2, 722, notes, -1, FONT_NORMAL,
+                        COLOR_WHITE, COLOR_BLACK);
+  else
+    display_text_center(MAX_DISPLAY_RESX / 2, 722, "Please keep connected", -1,
+                        FONT_NORMAL, COLOR_WHITE, COLOR_BLACK);
+}
+
 void ui_screen_install_start(void) {
 #if PRODUCTION_MODEL == 'H'
   ui_title_update();
@@ -545,10 +576,10 @@ void ui_screen_fail(void) {
 
 // general functions
 
-void ui_fadein(void) { display_fade(0, BACKLIGHT_NORMAL, 1000); }
+void ui_fadein(void) { display_fade(0, BACKLIGHT_NORMAL, 200); }
 
 void ui_fadeout(void) {
-  display_fade(BACKLIGHT_NORMAL, 0, 500);
+  display_fade(BACKLIGHT_NORMAL, 0, 200);
   display_clear();
 }
 
@@ -772,6 +803,8 @@ void ui_install_ble_confirm(void) {
 }
 
 void ui_bootloader_first(const image_header *const hdr) {
+  ui_bootloader_page_current = 0;
+
   ui_title_update();
   ui_logo_center();
   display_text_center(DISPLAY_RESX / 2, 190, "Update Mode", -1,
@@ -796,6 +829,8 @@ void ui_bootloader_first(const image_header *const hdr) {
 }
 
 void ui_bootloader_second(const image_header *const hdr) {
+  ui_bootloader_page_current = 1;
+
   int offset_x = 8, offset_y = 90, offset_seg = 44, offset_line = 30;
   const char *ver_str = NULL;
 
@@ -877,13 +912,11 @@ void ui_bootloader_factory(void) {
 }
 
 void ui_bootloader_page_switch(const image_header *const hdr) {
-  static int current = 0;
   int response;
 
-  if (current == 0) {
+  if (ui_bootloader_page_current == 0) {
     response = ui_input_poll(INPUT_NEXT, false);
     if (INPUT_NEXT == response) {
-      current = 1;
       display_clear();
       ui_bootloader_second(hdr);
     }
@@ -893,7 +926,6 @@ void ui_bootloader_page_switch(const image_header *const hdr) {
   } else {
     response = ui_input_poll(INPUT_PREVIOUS | INPUT_RESTART, false);
     if (INPUT_PREVIOUS == response) {
-      current = 0;
       display_clear();
       ui_bootloader_first(hdr);
     } else if (INPUT_RESTART == response) {

@@ -1,8 +1,78 @@
----
-BasedOnStyle: Google
-# Google style has a default of 80 lines, but clang-format 7 disregards it in
-# a weird case in modtrezorio-fatfs.h. Setting it explicitly helps.
-ColumnLimit: 80
-# This setting differs between clang-format 7 and 9.
-# Let's set it explicitly to v7 value
-IncludeBlocks: Preserve
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Auto
+DisableFormat: false
+UseCRLF: false
+UseTab: Never
+ColumnLimit: 110
+IndentWidth: 4
+PPIndentWidth: 2
+AccessModifierOffset: -4
+MaxEmptyLinesToKeep: 1
+FixNamespaceComments: true
+SortUsingDeclarations: true
+BreakInheritanceList: BeforeComma
+AlignAfterOpenBracket: BlockIndent
+# AlignArrayOfStructures: Left
+# AlignConsecutiveAssignments:
+#   Enabled: true
+#   AcrossEmptyLines: true
+#   AcrossComments: false
+AlignConsecutiveBitFields:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AlwaysBreakBeforeMultilineStrings : true
+BraceWrapping:
+  AfterCaseLabel : false
+  AfterClass : true
+  AfterControlStatement : Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
+BreakBeforeBraces: Custom
+IndentAccessModifiers: false
+IndentCaseBlocks: true
+IndentCaseLabels: false
+IndentExternBlock: AfterExternBlock
+IndentGotoLabels: true
+IndentPPDirectives: BeforeHash
+# InsertTrailingCommas: Wrapped
+LambdaBodyIndentation: Signature
+NamespaceIndentation: All
+PointerAlignment: Left
+QualifierAlignment: Left
+ReferenceAlignment: Right
+ReflowComments: true
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpacesInConditionalStatement: true
+SpacesInContainerLiterals: true

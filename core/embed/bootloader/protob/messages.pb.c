@@ -24,6 +24,9 @@ PB_BIND(Success, Success, 2)
 PB_BIND(Failure, Failure, 2)
 
 
+PB_BIND(WipeDevice, WipeDevice, AUTO)
+
+
 PB_BIND(ButtonRequest, ButtonRequest, AUTO)
 
 
@@ -40,6 +43,45 @@ PB_BIND(FirmwareErase_ex, FirmwareErase_ex, AUTO)
 
 
 PB_BIND(FirmwareUpload, FirmwareUpload, AUTO)
+
+
+PB_BIND(Reboot, Reboot, AUTO)
+
+
+PB_BIND(FirmwareUpdateEmmc, FirmwareUpdateEmmc, 2)
+
+
+PB_BIND(EmmcFixPermission, EmmcFixPermission, AUTO)
+
+
+PB_BIND(EmmcPath, EmmcPath, AUTO)
+
+
+PB_BIND(EmmcPathInfo, EmmcPathInfo, 2)
+
+
+PB_BIND(EmmcFile, EmmcFile, 2)
+
+
+PB_BIND(EmmcFileRead, EmmcFileRead, 2)
+
+
+PB_BIND(EmmcFileWrite, EmmcFileWrite, 2)
+
+
+PB_BIND(EmmcFileDelete, EmmcFileDelete, 2)
+
+
+PB_BIND(EmmcDir, EmmcDir, 2)
+
+
+PB_BIND(EmmcDirList, EmmcDirList, 2)
+
+
+PB_BIND(EmmcDirMake, EmmcDirMake, 2)
+
+
+PB_BIND(EmmcDirRemove, EmmcDirRemove, 2)
 
 
 PB_BIND(DeviceInfoSettings, DeviceInfoSettings, AUTO)
@@ -70,6 +112,7 @@ PB_BIND(SESignMessage, SESignMessage, 2)
 
 
 PB_BIND(SEMessageSignature, SEMessageSignature, AUTO)
+
 
 
 

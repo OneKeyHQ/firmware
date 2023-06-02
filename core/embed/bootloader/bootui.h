@@ -49,6 +49,9 @@ void ui_screen_install_start(void);
 void ui_screen_install_progress_erase(int pos, int len);
 void ui_screen_install_progress_upload(int pos);
 
+void ui_screen_progress_bar_prepare(char* title, char* notes);
+void ui_screen_progress_bar_update(char* msg_status, char* notes, int progress);
+
 void ui_screen_wipe_confirm(void);
 void ui_screen_wipe(void);
 void ui_screen_wipe_progress(int pos, int len);

@@ -66,6 +66,10 @@ bool ble_charging_state(void) { return get_ble_charging; }
 
 uint32_t ble_power_button_state(void) { return dev_press_sta; }
 
+// Since RELEASED event won't be reported
+// we have to clear this locally cached status
+void ble_power_button_state_clear(void) { dev_press_sta = 0; }
+
 char *ble_get_name(void) { return ble_name; }
 
 char *ble_get_ver(void) { return ble_ver; }

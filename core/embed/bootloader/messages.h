@@ -20,7 +20,16 @@
 #ifndef __MESSAGES_H__
 #define __MESSAGES_H__
 
+#include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
+
+#include <pb.h>
+#include <pb_decode.h>
+#include <pb_encode.h>
+
+#include "messages.pb.h"
+
 #include "image.h"
 #include "secbool.h"
 
@@ -29,10 +38,13 @@
 
 #define FIRMWARE_UPLOAD_CHUNK_RETRY_COUNT 2
 
-secbool msg_parse_header(const uint8_t *buf, uint16_t *msg_id,
-                         uint32_t *msg_size);
+void send_failure(uint8_t iface_num, FailureType type, const char *text);
+void send_success(uint8_t iface_num, const char *text);
 
 void send_user_abort(uint8_t iface_num, const char *msg);
+
+secbool msg_parse_header(const uint8_t *buf, uint16_t *msg_id,
+                         uint32_t *msg_size);
 
 void process_msg_Initialize(uint8_t iface_num, uint32_t msg_size, uint8_t *buf,
                             const vendor_header *const vhdr,
@@ -41,12 +53,12 @@ void process_msg_GetFeatures(uint8_t iface_num, uint32_t msg_size, uint8_t *buf,
                              const vendor_header *const vhdr,
                              const image_header *const hdr);
 void process_msg_Ping(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
+void process_msg_Reboot(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
 void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
                                uint8_t *buf);
 int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
                                uint8_t *buf);
 int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
-void process_msg_unknown(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
 
 void process_msg_DeviceInfoSettings(uint8_t iface_num, uint32_t msg_size,
                                     uint8_t *buf);
@@ -63,5 +75,7 @@ void process_msg_SESignMessage(uint8_t iface_num, uint32_t msg_size,
 
 void process_msg_FirmwareEraseBLE(uint8_t iface_num, uint32_t msg_size,
                                   uint8_t *buf);
+
+void process_msg_unknown(uint8_t iface_num, uint32_t msg_size, uint8_t *buf);
 
 #endif
