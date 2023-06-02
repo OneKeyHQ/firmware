@@ -133,6 +133,8 @@ enum MessageType {
     MessageType_FirmwareUpload = 7 [(wire_in) = true, (wire_bootloader) = true];
     MessageType_FirmwareRequest = 8 [(wire_out) = true, (wire_bootloader) = true];
     MessageType_SelfTest = 32 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_Reboot = 30000 [(bitcoin_only) = true, (wire_in) = true, (wire_bootloader) = true];
+    MessageType_FirmwareUpdateEmmc = 30001 [(bitcoin_only) = true, (wire_in) = true, (wire_bootloader) = true];
 
     // Bitcoin
     MessageType_GetPublicKey = 11 [(bitcoin_only) = true, (wire_in) = true];
@@ -180,6 +182,19 @@ enum MessageType {
     MessageType_DebugLinkRecordScreen = 9003 [(bitcoin_only) = true, (wire_debug_in) = true];
     MessageType_DebugLinkEraseSdCard = 9005 [(bitcoin_only) = true, (wire_debug_in) = true];
     MessageType_DebugLinkWatchLayout = 9006 [(bitcoin_only) = true, (wire_debug_in) = true];
+
+    // Emmc
+    MessageType_EmmcFixPermission = 30100 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_EmmcPath = 30101 [(wire_in) = true, (wire_out) = true, (wire_bootloader) = false];
+    MessageType_EmmcPathInfo = 30102 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_EmmcFile = 30103 [(wire_in) = true, (wire_out) = true, (wire_bootloader) = false];
+    MessageType_EmmcFileRead = 30104 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_EmmcFileWrite = 30105 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_EmmcFileDelete = 30106 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_EmmcDir = 30107 [(wire_out) = true, (wire_bootloader) = false];
+    MessageType_EmmcDirList = 30108 [(wire_in) = true, (wire_bootloader) = true];
+    MessageType_EmmcDirMake = 30109 [(wire_in) = true, (wire_bootloader) = false];
+    MessageType_EmmcDirRemove = 30110 [(wire_in) = true, (wire_bootloader) = true];
 
     // Ethereum
     MessageType_EthereumGetPublicKey = 450 [(wire_in) = true];
