@@ -107,14 +107,14 @@ static void write_dev_dummy_config() {
   ATCAConfiguration atca_configuration;
   ATCAPairingInfo pair_info_obj = {0};
   uint8_t se_serial_no[32] = {0};
-  FlashLockedData *flash_otp_data = (FlashLockedData *)0x081E0000;
+  FlashLockedData* flash_otp_data = (FlashLockedData*)0x081E0000;
 
   // get otp data
   memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
          sizeof(pair_info_obj));
 
   // get se config
-  atca_assert(atca_read_config_zone((uint8_t *)&atca_configuration),
+  atca_assert(atca_read_config_zone((uint8_t*)&atca_configuration),
               "get config");
 
   // get se sn from config
@@ -243,8 +243,8 @@ static void usb_init_all(secbool usb21_landing) {
   usb_start();
 }
 
-static secbool bootloader_usb_loop(const vendor_header *const vhdr,
-                                   const image_header *const hdr) {
+static secbool bootloader_usb_loop(const vendor_header* const vhdr,
+                                   const image_header* const hdr) {
   // if both are NULL, we don't have a firmware installed
   // let's show a webusb landing page in this case
   usb_init_all((vhdr == NULL && hdr == NULL) ? sectrue : secfalse);
@@ -423,8 +423,8 @@ static secbool bootloader_usb_loop(const vendor_header *const vhdr,
   }
 }
 
-secbool bootloader_usb_loop_factory(const vendor_header *const vhdr,
-                                    const image_header *const hdr) {
+secbool bootloader_usb_loop_factory(const vendor_header* const vhdr,
+                                    const image_header* const hdr) {
   // if both are NULL, we don't have a firmware installed
   // let's show a webusb landing page in this case
   usb_init_all((vhdr == NULL && hdr == NULL) ? sectrue : secfalse);
@@ -510,13 +510,13 @@ secbool bootloader_usb_loop_factory(const vendor_header *const vhdr,
   return sectrue;
 }
 
-secbool load_vendor_header_keys(const uint8_t *const data,
-                                vendor_header *const vhdr) {
+secbool load_vendor_header_keys(const uint8_t* const data,
+                                vendor_header* const vhdr) {
   return load_vendor_header(data, BOOTLOADER_KEY_M, BOOTLOADER_KEY_N,
                             BOOTLOADER_KEYS, vhdr);
 }
 
-static secbool check_vendor_header_lock(const vendor_header *const vhdr) {
+static secbool check_vendor_header_lock(const vendor_header* const vhdr) {
   uint8_t lock[FLASH_OTP_BLOCK_SIZE];
   ensure(flash_otp_read(FLASH_OTP_BLOCK_VENDOR_HEADER_LOCK, 0, lock,
                         FLASH_OTP_BLOCK_SIZE),
@@ -582,8 +582,8 @@ int main(void) {
   if (!serial_set) {
     pcb_version = PCB_VERSION_2_1_0;
   } else {
-    char *factory_data = NULL;
-    char *serial;
+    char* factory_data = NULL;
+    char* serial;
     device_get_serial(&serial);
     factory_data = serial + 7;
     if (memcmp(factory_data, "20220910", 8) >= 0) {
@@ -675,63 +675,77 @@ int main(void) {
   }
 #endif
 
-  // if stay_in_bootloader flag is set
-  if (stay_in_bootloader == sectrue) {
-    display_clear();
-    ui_bootloader_first(NULL);
-
-    // and start the usb loop
-    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-      return 1;
-    }
-  }
-
-  // check firmware
+  // firmware check
   vendor_header vhdr;
   image_header hdr;
-  secbool firmware_present = secfalse;
+  secbool firmware_headers_valid = secfalse;
+  secbool firmware_valid = secfalse;
 
+  // headers
   while (true) {
     if (sectrue !=
-        load_vendor_header_keys((const uint8_t *)FIRMWARE_START, &vhdr))
+        load_vendor_header_keys((const uint8_t*)FIRMWARE_START, &vhdr))
       break;
 
     if (sectrue != check_vendor_header_lock(&vhdr)) break;
 
     if (sectrue !=
-        load_image_header((const uint8_t *)(FIRMWARE_START + vhdr.hdrlen),
+        load_image_header((const uint8_t*)(FIRMWARE_START + vhdr.hdrlen),
                           FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
                           vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr))
       break;
 
-    if (sectrue != check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
-                                        FIRMWARE_SECTORS,
-                                        FIRMWARE_SECTORS_COUNT))
-      break;
-
     // all check passed, set flag to true
-    firmware_present = sectrue;
+    firmware_headers_valid = sectrue;
     break;
   }
 
-  // if no firmware found
-  if (firmware_present != sectrue) {
+  // if stay_in_bootloader flag is set
+  if (stay_in_bootloader == sectrue) {
     display_clear();
-    ui_bootloader_first(NULL);
-
-    // and start the usb loop
-    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-      return 1;
+    if (sectrue == firmware_headers_valid) {
+      ui_bootloader_first(&hdr);
+      if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
+        return 1;
+      }
+    } else {
+      ui_bootloader_first(NULL);
+      if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+        return 1;
+      }
     }
   }
 
-  // if firmware found
-  ensure(load_vendor_header_keys((const uint8_t *)FIRMWARE_START, &vhdr),
+  // firmware code
+  if (sectrue == firmware_headers_valid) {
+    firmware_valid =
+        check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
+                             FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT);
+  }
+
+  // if firmware not valid
+  if (firmware_valid != sectrue) {
+    display_clear();
+    if (sectrue == firmware_headers_valid) {
+      ui_bootloader_first(&hdr);
+      if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
+        return 1;
+      }
+    } else {
+      ui_bootloader_first(NULL);
+      if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+        return 1;
+      }
+    }
+  }
+
+  // if firmware valid
+  ensure(load_vendor_header_keys((const uint8_t*)FIRMWARE_START, &vhdr),
          "invalid vendor header");
 
   ensure(check_vendor_header_lock(&vhdr), "unauthorized vendor keys");
 
-  ensure(load_image_header((const uint8_t *)(FIRMWARE_START + vhdr.hdrlen),
+  ensure(load_image_header((const uint8_t*)(FIRMWARE_START + vhdr.hdrlen),
                            FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
                            vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr),
          "invalid firmware header");
