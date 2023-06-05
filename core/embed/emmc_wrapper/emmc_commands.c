@@ -954,7 +954,7 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             );
             // update progress (erase)
             ui_screen_install_progress_upload(
-                (250 * flash_sectors_index / FIRMWARE_SECTORS_COUNT) +
+                (250 * flash_sectors_index / (emmc_file_size / flash_sector_size(flash_sectors_index))) +
                 (750 * processed_bytes / emmc_file_size)
             );
 
@@ -995,10 +995,17 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
 
             // update progress (write)
             ui_screen_install_progress_upload(
-                (250 * flash_sectors_index / FIRMWARE_SECTORS_COUNT) +
+                (250 * flash_sectors_index / (emmc_file_size / flash_sector_size(flash_sectors_index))) +
                 (750 * processed_bytes / emmc_file_size)
             );
 
+            flash_sectors_index++;
+        }
+
+        // wipe unused sectors
+        while ( flash_sectors_index < FIRMWARE_SECTORS_COUNT )
+        {
+            flash_erase(FIRMWARE_SECTORS[flash_sectors_index]);
             flash_sectors_index++;
         }
 
@@ -1021,6 +1028,9 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         // As the firmware in flash has is the the same as the one from file, and it has been verified, we
         // could use file_vhdr and file_hdr, instead of read them from flash again.
         // firmware_headers_store((const uint8_t*)FIRMWARE_START, file_vhdr.hdrlen + file_hdr.hdrlen);
+
+        // update progress (final)
+        ui_screen_install_progress_upload(1000);
 
         // MCU update done
         // emmc_fs_file_delete(msg_recv.path);
