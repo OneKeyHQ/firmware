@@ -256,22 +256,22 @@ void layoutProgress(const char *desc, int permil) {
 void disBatteryLevel(uint8_t cur_level) {
   switch (cur_level) {
     case 0:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_0);
+      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_status_battery_0);
       break;
     case 1:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_1);
+      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_status_battery_1);
       break;
     case 2:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_2);
+      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_status_battery_2);
       break;
     case 3:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_3);
+      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_status_battery_3);
       break;
     case 4:
-      oledDrawBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_4);
+      oledDrawBitmap(OLED_WIDTH - 16, 0, &bmp_status_battery_4);
       break;
     default:
-      oledClearBitmap(OLED_WIDTH - 18, 0, &bmp_status_battery_4);
+      oledClearBitmap(OLED_WIDTH - 16, 0, &bmp_status_battery_4);
       break;
   }
 }
@@ -282,7 +282,7 @@ uint8_t layoutStatusLogo(bool force_fresh) {
   static bool ble_adv_status_bak = false;
   static bool usb_status_bak = false;
   static uint8_t battery_bak = 0xff;
-  uint8_t pad = 18;
+  uint8_t pad = 16;
   bool refresh = false;
   uint8_t ret = 0;
 

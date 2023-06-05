@@ -209,12 +209,12 @@ parser_error_t _toStringCompactInt(const compactInt_t *c, uint8_t decimalPlaces,
     return parser_unexpected_value;
   }
 
-  if (z_str3join(bufferUI, sizeof(bufferUI), prefix, postfix) != zxerr_ok) {
-    return parser_unexpected_buffer_end;
+  if (trimTrailingZeros) {
+    number_inplace_trimming(bufferUI, 0);
   }
 
-  if (trimTrailingZeros) {
-    number_inplace_trimming(bufferUI, 1);
+  if (z_str3join(bufferUI, sizeof(bufferUI), prefix, postfix) != zxerr_ok) {
+    return parser_unexpected_buffer_end;
   }
 
   pageString(outValue, outValueLen, bufferUI, pageIdx, pageCount);
@@ -290,7 +290,7 @@ parser_error_t _readCompactBalance(parser_context_t *c,
 parser_error_t _toStringCompactIndex(const pd_CompactIndex_t *v, char *outValue,
                                      uint16_t outValueLen, uint8_t pageIdx,
                                      uint8_t *pageCount) {
-  return _toStringCompactInt(&v->index, 0, false, "", "", outValue, outValueLen,
+  return _toStringCompactInt(&v->index, 0, true, "", "", outValue, outValueLen,
                              pageIdx, pageCount);
 }
 

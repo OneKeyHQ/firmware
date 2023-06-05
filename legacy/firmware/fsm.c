@@ -365,21 +365,14 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       }
     }
 
-    if (key == KEY_NULL) {
-      while (1) {
-        key = protectButtonValue(ButtonRequestType_ButtonRequest_Address, false,
-                                 button_request, 0);
-        if (key == KEY_CONFIRM || key == KEY_CANCEL) {
-          break;
-        }
-      }
+    if ((key == KEY_NULL) && (!protectAbortedBySleep)) {
+      key = protectWaitKeyValue(ButtonRequestType_ButtonRequest_Address,
+                                button_request, 0, 1);
     }
 
     if (key == KEY_CONFIRM) {
       if (multisig) {
-        // todo
         screen = (screen + 1) % screens;
-
       } else {
         if (screen == 1 || screen == 2) {
           return true;
@@ -403,6 +396,16 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
     } else if (protectAbortedByTimeout) {
       layoutHome();
       return false;
+    } else if (protectAbortedBySleep) {
+      protectAbortedBySleep = false;
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return false;
+#if !EMULATOR
+    } else if ((host_channel == CHANNEL_USB) && ((sys_usbState() == false))) {
+      layoutHome();
+      return false;
+#endif
     }
   }
 }

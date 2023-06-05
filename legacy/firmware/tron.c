@@ -310,6 +310,166 @@ int pack_contract(TronSignTx *msg, uint8_t *buf, int *index,
     }
   }
 
+  if (msg->contract.has_withdraw_balance_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.WithdrawBalanceContract", 52);
+    write_varint(buf, index, 13);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+  }
+
+  if (msg->contract.has_freeze_balance_v2_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.FreezeBalanceV2Contract", 52);
+
+    write_varint(buf, index, 54);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
+    cmessage_len +=
+        write_varint(cmessage, &cmessage_index,
+                     msg->contract.freeze_balance_v2_contract.frozen_balance);
+
+    if (msg->contract.freeze_balance_v2_contract.has_resource) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.freeze_balance_v2_contract.resource);
+    }
+  }
+
+  if (msg->contract.has_unfreeze_balance_v2_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.UnfreezeBalanceV2Contract",
+        54);
+    write_varint(buf, index, 55);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
+    cmessage_len += write_varint(
+        cmessage, &cmessage_index,
+        msg->contract.unfreeze_balance_v2_contract.unfreeze_balance);
+
+    if (msg->contract.unfreeze_balance_v2_contract.has_resource) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.unfreeze_balance_v2_contract.resource);
+    }
+  }
+
+  if (msg->contract.has_withdraw_expire_unfreeze_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t
+             *)"type.googleapis.com/protocol.WithdrawExpireUnfreezeContract",
+        59);
+    write_varint(buf, index, 56);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+  }
+
+  if (msg->contract.has_delegate_resource_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.DelegateResourceContract", 53);
+    write_varint(buf, index, 57);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
+    cmessage_len +=
+        write_varint(cmessage, &cmessage_index,
+                     msg->contract.delegate_resource_contract.resource);
+    cmessage_len += add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
+    cmessage_len +=
+        write_varint(cmessage, &cmessage_index,
+                     msg->contract.delegate_resource_contract.balance);
+    if (msg->contract.delegate_resource_contract.has_receiver_address) {
+      uint8_t receiver_raw[MAX_ADDR_RAW_SIZE] = {0};
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 4, PROTO_TYPE_STRING);
+      len = base58_decode_check(
+          msg->contract.delegate_resource_contract.receiver_address,
+          HASHER_SHA2D, receiver_raw, MAX_ADDR_RAW_SIZE);
+      cmessage_len +=
+          write_bytes_with_length(cmessage, &cmessage_index, receiver_raw, len);
+    }
+    if (msg->contract.delegate_resource_contract.has_lock) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 5, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.delegate_resource_contract.lock);
+    }
+  }
+
+  if (msg->contract.has_undelegate_resource_contract) {
+    capi_len += add_field(capi, &capi_index, 1, PROTO_TYPE_STRING);
+    capi_len += write_bytes_with_length(
+        capi, &capi_index,
+        (uint8_t *)"type.googleapis.com/protocol.UnDelegateResourceContract",
+        55);
+    write_varint(buf, index, 58);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 1, PROTO_TYPE_STRING);
+    len = base58_decode_check(owner_address, HASHER_SHA2D, addr_raw,
+                              MAX_ADDR_RAW_SIZE);
+    cmessage_len +=
+        write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
+
+    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
+    cmessage_len +=
+        write_varint(cmessage, &cmessage_index,
+                     msg->contract.undelegate_resource_contract.resource);
+    cmessage_len += add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
+    cmessage_len +=
+        write_varint(cmessage, &cmessage_index,
+                     msg->contract.undelegate_resource_contract.balance);
+    if (msg->contract.undelegate_resource_contract.has_receiver_address) {
+      uint8_t receiver_raw[MAX_ADDR_RAW_SIZE] = {0};
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 4, PROTO_TYPE_STRING);
+      len = base58_decode_check(
+          msg->contract.undelegate_resource_contract.receiver_address,
+          HASHER_SHA2D, receiver_raw, MAX_ADDR_RAW_SIZE);
+      cmessage_len +=
+          write_bytes_with_length(cmessage, &cmessage_index, receiver_raw, len);
+    }
+  }
+
   uint8_t tmp[8] = {0};
   int cmessage_varint_len = 0;
   write_varint(tmp, &cmessage_varint_len, cmessage_len);
@@ -367,7 +527,7 @@ bool layoutFreezeSign(TronSignTx *msg) {
   uint8_t max_index = 0;
   char amount_str[60];
   char duration_str[32];
-  const char **tx_msg = format_tx_message("Tron");
+  const char **tx_msg = format_tx_message("TRON");
 
   ButtonRequest resp = {0};
   memzero(&resp, sizeof(ButtonRequest));
@@ -394,7 +554,7 @@ refresh_menu:
 
   if (index == 0) {
     layoutHeader(tx_msg[0]);
-    oledDrawStringAdapter(0, y, "Type:", FONT_STANDARD);
+    oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
     if (msg->contract.has_freeze_balance_contract) {
       oledDrawStringAdapter(0, y + 10, "Freeze", FONT_STANDARD);
     } else {
@@ -405,18 +565,18 @@ refresh_menu:
   } else if (index == 1) {
     layoutHeader(tx_msg[0]);
     if (msg->contract.has_freeze_balance_contract) {
-      oledDrawStringAdapter(0, y, "Frozen Balance:", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, _("Balance:"), FONT_STANDARD);
       oledDrawStringAdapter(0, y + 10, amount_str, FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y, "Resource:", FONT_STANDARD);
-      if (msg->contract.freeze_balance_contract.resource ==
+      oledDrawStringAdapter(0, y, _("Resource:"), FONT_STANDARD);
+      if (msg->contract.unfreeze_balance_contract.resource ==
           TronResourceCode_BANDWIDTH) {
-        oledDrawStringAdapter(0, y + 10, "BANDWIDTH", FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 10, _("BANDWIDTH"), FONT_STANDARD);
       } else {
-        oledDrawStringAdapter(0, y + 10, "ENERGY", FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 10, _("ENERGY"), FONT_STANDARD);
       }
     }
-    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if (max_index == index) {
     layoutHeader(_("Sign Transaction"));
@@ -429,7 +589,7 @@ refresh_menu:
       oledDrawStringAdapter(0, y, "Frozen duration:", FONT_STANDARD);
       oledDrawStringAdapter(0, y + 10, duration_str, FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y, "Receiver:", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, _("Receiver:"), FONT_STANDARD);
       oledDrawStringAdapter(
           0, y + 10, msg->contract.unfreeze_balance_contract.receiver_address,
           FONT_STANDARD);
@@ -438,21 +598,249 @@ refresh_menu:
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if (index == 3) {
     layoutHeader(tx_msg[0]);
-    oledDrawStringAdapter(0, y, "Resource:", FONT_STANDARD);
+    oledDrawStringAdapter(0, y, _("Resource:"), FONT_STANDARD);
     if (msg->contract.freeze_balance_contract.resource ==
         TronResourceCode_BANDWIDTH) {
-      oledDrawStringAdapter(0, y + 10, "BANDWIDTH", FONT_STANDARD);
+      oledDrawStringAdapter(0, y + 10, _("BANDWIDTH"), FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y + 10, "ENERGY", FONT_STANDARD);
+      oledDrawStringAdapter(0, y + 10, _("ENERGY"), FONT_STANDARD);
     }
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if (index == 4) {
     layoutHeader(tx_msg[0]);
-    oledDrawStringAdapter(0, y, "Receiver:", FONT_STANDARD);
+    oledDrawStringAdapter(0, y, _("Receiver:"), FONT_STANDARD);
     oledDrawStringAdapter(
         0, y + 10, msg->contract.freeze_balance_contract.receiver_address,
         FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  }
+  oledRefresh();
+
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      goto refresh_menu;
+    case KEY_DOWN:
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      if (max_index == index) {
+        result = true;
+        break;
+      }
+      if (index < max_index) {
+        index++;
+      }
+      goto refresh_menu;
+    case KEY_CANCEL:
+      if (0 == index || max_index == index) {
+        result = false;
+        break;
+      }
+      if (index > 0) {
+        index--;
+      }
+      goto refresh_menu;
+    default:
+      break;
+  }
+
+  return result;
+}
+
+bool layoutFreezeV2Sign(TronSignTx *msg) {
+  bool result = false;
+  int index = 0;
+  int y = 0;
+  uint8_t key = KEY_NULL;
+  uint8_t max_index = 3;
+  TronResourceCode resource;
+  char amount_str[60];
+  const char **tx_msg = format_tx_message("TRON");
+
+  ButtonRequest resp = {0};
+  memzero(&resp, sizeof(ButtonRequest));
+  resp.has_code = true;
+  resp.code = ButtonRequestType_ButtonRequest_SignTx;
+  msg_write(MessageType_MessageType_ButtonRequest, &resp);
+
+  if (msg->contract.has_freeze_balance_v2_contract) {
+    tron_format_amount(msg->contract.freeze_balance_v2_contract.frozen_balance,
+                       amount_str, sizeof(amount_str));
+    resource = msg->contract.freeze_balance_v2_contract.resource;
+  } else if (msg->contract.has_unfreeze_balance_v2_contract) {
+    tron_format_amount(
+        msg->contract.unfreeze_balance_v2_contract.unfreeze_balance, amount_str,
+        sizeof(amount_str));
+    resource = msg->contract.unfreeze_balance_v2_contract.resource;
+  } else {
+    return false;
+  }
+
+refresh_menu:
+  layoutSwipe();
+  oledClear();
+  y = 13;
+
+  if (index == 0) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
+    if (msg->contract.has_freeze_balance_v2_contract) {
+      oledDrawStringAdapter(0, y + 10, "FreezeBalanceV2Contract",
+                            FONT_STANDARD);
+    } else {
+      oledDrawStringAdapter(0, y + 10, "UnfreezeBalanceV2Contract",
+                            FONT_STANDARD);
+    }
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (index == 1) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Balance:"), FONT_STANDARD);
+    oledDrawStringAdapter(0, y + 10, amount_str, FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (index == 2) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Resource:"), FONT_STANDARD);
+    if (resource == TronResourceCode_BANDWIDTH) {
+      oledDrawStringAdapter(0, y + 10, _("BANDWIDTH"), FONT_STANDARD);
+    } else {
+      oledDrawStringAdapter(0, y + 10, _("ENERGY"), FONT_STANDARD);
+    }
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else {
+    layoutHeader(_("Sign Transaction"));
+    oledDrawStringAdapter(0, 13, tx_msg[1], FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
+  }
+  oledRefresh();
+
+  key = protectWaitKey(0, 0);
+  switch (key) {
+    case KEY_UP:
+      goto refresh_menu;
+    case KEY_DOWN:
+      goto refresh_menu;
+    case KEY_CONFIRM:
+      if (max_index == index) {
+        result = true;
+        break;
+      }
+      if (index < max_index) {
+        index++;
+      }
+      goto refresh_menu;
+    case KEY_CANCEL:
+      if (0 == index || max_index == index) {
+        result = false;
+        break;
+      }
+      if (index > 0) {
+        index--;
+      }
+      goto refresh_menu;
+    default:
+      break;
+  }
+
+  return result;
+}
+
+bool layoutDelegateResourceSign(TronSignTx *msg) {
+  bool result = false;
+  int index = 0;
+  int y = 0;
+  uint8_t key = KEY_NULL;
+  uint8_t max_index = 0;
+  char amount_str[60];
+  const char **tx_msg = format_tx_message("TRON");
+
+  TronResourceCode resource;
+  ButtonRequest resp = {0};
+  memzero(&resp, sizeof(ButtonRequest));
+  resp.has_code = true;
+  resp.code = ButtonRequestType_ButtonRequest_SignTx;
+  msg_write(MessageType_MessageType_ButtonRequest, &resp);
+
+  if (msg->contract.has_delegate_resource_contract) {
+    max_index = 5;
+    tron_format_amount(msg->contract.delegate_resource_contract.balance,
+                       amount_str, sizeof(amount_str));
+    resource = msg->contract.delegate_resource_contract.resource;
+  } else if (msg->contract.has_undelegate_resource_contract) {
+    max_index = 4;
+    tron_format_amount(msg->contract.undelegate_resource_contract.balance,
+                       amount_str, sizeof(amount_str));
+    resource = msg->contract.undelegate_resource_contract.resource;
+  } else {
+    return false;
+  }
+
+refresh_menu:
+  layoutSwipe();
+  oledClear();
+  y = 13;
+
+  if (index == 0) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
+    if (msg->contract.has_delegate_resource_contract) {
+      oledDrawStringAdapter(0, y + 10, "DelegateResourceContract",
+                            FONT_STANDARD);
+    } else {
+      oledDrawStringAdapter(0, y + 10, "UnDelegateResourceContract",
+                            FONT_STANDARD);
+    }
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (index == 1) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Resource:"), FONT_STANDARD);
+    if (resource == TronResourceCode_BANDWIDTH) {
+      oledDrawStringAdapter(0, y + 10, _("BANDWIDTH"), FONT_STANDARD);
+    } else {
+      oledDrawStringAdapter(0, y + 10, _("ENERGY"), FONT_STANDARD);
+    }
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (index == 2) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Balance:"), FONT_STANDARD);
+    oledDrawStringAdapter(0, y + 10, amount_str, FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (index == 3) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Receiver:"), FONT_STANDARD);
+    if (msg->contract.has_delegate_resource_contract) {
+      oledDrawStringAdapter(
+          0, y + 10, msg->contract.delegate_resource_contract.receiver_address,
+          FONT_STANDARD);
+    } else {
+      oledDrawStringAdapter(
+          0, y + 10,
+          msg->contract.undelegate_resource_contract.receiver_address,
+          FONT_STANDARD);
+    }
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (max_index == index) {
+    layoutHeader(_("Sign Transaction"));
+    oledDrawStringAdapter(0, 13, tx_msg[1], FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
+  } else if (index == 4) {
+    layoutHeader(tx_msg[0]);
+    oledDrawStringAdapter(0, y, _("Lock:"), FONT_STANDARD);
+    if (msg->contract.delegate_resource_contract.lock) {
+      oledDrawStringAdapter(0, y + 10, "True", FONT_STANDARD);
+    } else {
+      oledDrawStringAdapter(0, y + 10, "False", FONT_STANDARD);
+    }
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   }
@@ -495,6 +883,11 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
   uint64_t amount = 0;
   uint8_t value_bytes[32];
   char to_str[36];
+  char signer_str[36];
+  uint8_t eth_address[20];
+  const char **tx_msg = format_tx_message("TRON");
+  if (!hdnode_get_ethereum_pubkeyhash(node, eth_address)) return false;
+  tron_eth_2_trx_address(eth_address, signer_str, sizeof(signer_str));
 
   int index = 0;
   uint8_t *raw = resp->serialized_tx.bytes;
@@ -510,12 +903,12 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
   } else if (msg->contract.has_trigger_smart_contract) {
     if (!msg->contract.trigger_smart_contract.has_data) {
       fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Invalid Tron contract call data"));
+                      _("Invalid TRON contract call data"));
       return false;
     }
     if (msg->contract.trigger_smart_contract.data.size < 4) {
       fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Invalid Tron contract call data"));
+                      _("Invalid TRON contract call data"));
       return false;
     }
 
@@ -531,7 +924,7 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
               &msg->contract.trigger_smart_contract.data.bytes[4 + 12], to_str,
               sizeof(to_str)) < 34) {
         fsm_sendFailure(FailureType_Failure_DataError,
-                        _("Failed to encode to Tron address"));
+                        _("Failed to encode to TRON address"));
         return false;
       }
       memcpy(value_bytes,
@@ -540,42 +933,83 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
       memcpy(to_str, msg->contract.trigger_smart_contract.contract_address, 36);
     }
   } else if (msg->contract.has_freeze_balance_contract) {
-  } else if (msg->contract.has_unfreeze_balance_contract) {
-  } else {
-    fsm_sendFailure(FailureType_Failure_DataError, "unsupported contract type");
-    return false;
-  }
-
-  serialize(msg, raw, &index, owner_address);
-
-  // layout
-  char amount_str[60];
-  int to_len = strlen(to_str);
-  char signer_str[36];
-  uint8_t eth_address[20];
-  if (!hdnode_get_ethereum_pubkeyhash(node, eth_address)) return false;
-  tron_eth_2_trx_address(eth_address, signer_str, sizeof(signer_str));
-
-  if (msg->contract.has_freeze_balance_contract ||
-      msg->contract.has_unfreeze_balance_contract) {
     if (!layoutFreezeSign(msg)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
       layoutHome();
       return false;
     }
+  } else if (msg->contract.has_unfreeze_balance_contract) {
+    if (!layoutFreezeSign(msg)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      return false;
+    }
+  } else if (msg->contract.has_withdraw_balance_contract) {
+    layoutDialogAdapterEx(tx_msg[0], &bmp_bottom_left_close, NULL,
+                          &bmp_bottom_right_arrow, NULL, NULL, _("Type:"),
+                          "TronWithdrawBalanceContract", NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
+    layoutDialogAdapterEx(_("Sign Transaction"), &bmp_bottom_left_close, NULL,
+                          &bmp_bottom_right_confirm, NULL, NULL, tx_msg[1],
+                          NULL, NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
+  } else if (msg->contract.has_freeze_balance_v2_contract ||
+             msg->contract.has_unfreeze_balance_v2_contract) {
+    if (!layoutFreezeV2Sign(msg)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      return false;
+    }
+  } else if (msg->contract.has_withdraw_expire_unfreeze_contract) {
+    layoutDialogAdapterEx(tx_msg[0], &bmp_bottom_left_close, NULL,
+                          &bmp_bottom_right_arrow, NULL, NULL, _("Type:"),
+                          "WithdrawExpireUnfreezeContract", NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
+    layoutDialogAdapterEx(_("Sign Transaction"), &bmp_bottom_left_close, NULL,
+                          &bmp_bottom_right_confirm, NULL, NULL, tx_msg[1],
+                          NULL, NULL, NULL);
+    if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
+  } else if (msg->contract.has_delegate_resource_contract ||
+             msg->contract.has_undelegate_resource_contract) {
+    if (!layoutDelegateResourceSign(msg)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      return false;
+    }
   } else {
+    if (!layoutBlindSign("TRON", true, to_str, signer_str,
+                         msg->contract.trigger_smart_contract.data.bytes,
+                         msg->contract.trigger_smart_contract.data.size, NULL,
+                         NULL, NULL, NULL, NULL, NULL)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
+      return false;
+    }
+  }
+
+  if (msg->contract.has_transfer_contract ||
+      msg->contract.has_trigger_smart_contract) {
+    char amount_str[60];
+    int to_len = strlen(to_str);
     if (0 == to_len) memcpy(to_str, _("to new contract?"), sizeof(to_str));
     if (token == NULL) {
       if (amount == 0) {
         strcpy(amount_str, _("message"));
       } else {
         tron_format_amount(amount, amount_str, sizeof(amount_str));
-        if (!layoutTransactionSign("Tron", false, amount_str, to_str,
+        if (!layoutTransactionSign("TRON", 0, false, amount_str, to_str,
                                    signer_str, NULL, NULL, NULL, 0, NULL, NULL,
                                    NULL, NULL, NULL, NULL, NULL, NULL)) {
           fsm_sendFailure(FailureType_Failure_ActionCancelled,
                           "Signing cancelled");
-          layoutHome();
           return false;
         }
       }
@@ -587,38 +1021,37 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
       if (msg->has_fee_limit) {
         char gas_value[32];
         tron_format_amount(msg->fee_limit, gas_value, sizeof(gas_value));
-        if (!layoutTransactionSign("Tron", true, amount_str, to_str, signer_str,
-                                   NULL, NULL, NULL, 0, _("Maximum Fee"),
-                                   gas_value, NULL, NULL, NULL, NULL, NULL,
-                                   NULL)) {
-          fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                          "Signing cancelled");
-          layoutHome();
-          return false;
-        }
-      } else {
-        if (!layoutTransactionSign("Tron", true, amount_str, to_str, signer_str,
-                                   NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL,
+        if (!layoutTransactionSign("TRON", 0, true, amount_str, to_str,
+                                   signer_str, NULL, NULL, NULL, 0,
+                                   _("Maximum Fee:"), gas_value, NULL, NULL,
                                    NULL, NULL, NULL, NULL)) {
           fsm_sendFailure(FailureType_Failure_ActionCancelled,
                           "Signing cancelled");
-          layoutHome();
+          return false;
+        }
+      } else {
+        if (!layoutTransactionSign("TRON", 0, true, amount_str, to_str,
+                                   signer_str, NULL, NULL, NULL, 0, NULL, NULL,
+                                   NULL, NULL, NULL, NULL, NULL, NULL)) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                          "Signing cancelled");
           return false;
         }
       }
     }
-  }
-
-  if ((token == NULL) && (msg->contract.has_trigger_smart_contract)) {
-    if (!layoutBlindSign("Tron", true, to_str, signer_str,
-                         msg->contract.trigger_smart_contract.data.bytes,
-                         msg->contract.trigger_smart_contract.data.size, NULL,
-                         NULL, NULL, NULL, NULL, NULL)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
-      layoutHome();
-      return false;
+    if ((token == NULL) && (msg->contract.has_trigger_smart_contract)) {
+      if (!layoutBlindSign("TRON", true, to_str, signer_str,
+                           msg->contract.trigger_smart_contract.data.bytes,
+                           msg->contract.trigger_smart_contract.data.size, NULL,
+                           NULL, NULL, NULL, NULL, NULL)) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                        "Signing cancelled");
+        return false;
+      }
     }
   }
+
+  serialize(msg, raw, &index, owner_address);
 
   // hash the tx
   uint8_t hash[32];

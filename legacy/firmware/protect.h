@@ -47,6 +47,8 @@ bool protectChangeWipeCode(bool removal);
 bool protectPassphrase(char* passphrase);
 bool protectSeedPin(bool force_pin, bool setpin, bool update_pin);
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode);
+uint8_t protectWaitKeyValue(ButtonRequestType type, bool requset,
+                            uint32_t time_out, uint8_t mode);
 uint8_t blindsignWaitKey(void);
 const char* protectInputPin(const char* text, uint8_t min_pin_len,
                             uint8_t max_pin_len, bool cancel_allowed);
@@ -67,4 +69,5 @@ extern bool protectAbortedByCancel;
 extern bool protectAbortedByInitialize;
 extern bool protectAbortedByInitializeOnboarding;
 extern bool protectAbortedByTimeout;
+extern bool protectAbortedBySleep;
 #endif

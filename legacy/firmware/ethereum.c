@@ -346,6 +346,8 @@ static bool layoutEthereumConfirmTx(
   uint8_t pad_val[32] = {0};
   char tx_value[32] = {0};
   char gas_value[32] = {0};
+  const char *chain_name = NULL;
+  ASSIGN_ETHEREUM_NAME(chain_name, params->chain_id);
   // gas
   memzero(tx_value, sizeof(tx_value));
   memzero(gas_value, sizeof(gas_value));
@@ -398,25 +400,24 @@ static bool layoutEthereumConfirmTx(
     ethereum_address_checksum(recipient, recip, rskip60, chain_id);
     if (!is_eip1559) {
       return layoutTransactionSign(
-          "NFT", true, token_amount, to_str, signer, recip, token_id, NULL, 0,
-          _("Maximum Fee:"), gas_value, NULL, NULL, NULL, NULL, NULL, NULL);
+          chain_name, params->chain_id, true, token_amount, to_str, signer,
+          recip, token_id, NULL, 0, _("Maximum Fee:"), gas_value, NULL, NULL,
+          NULL, NULL, NULL, NULL);
     } else {
-      return layoutTransactionSign("NFT", true, token_amount, to_str, signer,
-                                   recip, token_id, NULL, 0, key1, value1, key2,
+      return layoutTransactionSign(chain_name, params->chain_id, true,
+                                   token_amount, to_str, signer, recip,
+                                   token_id, NULL, 0, key1, value1, key2,
                                    value2, key3, value3, NULL, NULL);
     }
   } else if (token == NULL) {
-    if (bn_is_zero(&val)) {
-      strcpy(amount, _("message"));
-      if (!is_eip1559 && data_total > 0) {
-        return layoutBlindSign(
-            "Ethereum", true, to_str, signer, params->data_initial_chunk_bytes,
-            data_total, _("Maximum Fee:"), gas_value, NULL, NULL, NULL, NULL);
-      } else if (is_eip1559 && data_total > 0) {
-        return layoutBlindSign("Ethereum", true, to_str, signer,
-                               params->data_initial_chunk_bytes, data_total,
-                               key1, value1, key2, value2, key3, value3);
-      }
+    if (!is_eip1559 && data_total > 0) {
+      return layoutBlindSign(
+          "Ethereum", true, to_str, signer, params->data_initial_chunk_bytes,
+          data_total, _("Maximum Fee:"), gas_value, NULL, NULL, NULL, NULL);
+    } else if (is_eip1559 && data_total > 0) {
+      return layoutBlindSign("Ethereum", true, to_str, signer,
+                             params->data_initial_chunk_bytes, data_total, key1,
+                             value1, key2, value2, key3, value3);
     } else {
       bn_add(&total, &val);
       bn_add(&total, &gas);
@@ -424,15 +425,15 @@ static bool layoutEthereumConfirmTx(
       ethereumFormatAmount(&total, NULL, total_amount, sizeof(total_amount));
       if (!is_eip1559) {
         return layoutTransactionSign(
-            "Ethereum", false, amount, to_str, signer, NULL, NULL,
-            params->data_initial_chunk_bytes, data_total, _("Maximum Fee:"),
-            gas_value, _("Total Amount:"), total_amount, NULL, NULL, NULL,
-            NULL);
+            chain_name, params->chain_id, false, amount, to_str, signer, NULL,
+            NULL, params->data_initial_chunk_bytes, data_total,
+            _("Maximum Fee:"), gas_value, _("Total Amount:"), total_amount,
+            NULL, NULL, NULL, NULL);
       } else {
         return layoutTransactionSign(
-            "Ethereum", false, amount, to_str, signer, NULL, NULL,
-            params->data_initial_chunk_bytes, data_total, key1, value1, key2,
-            value2, key3, value3, _("Total Amount:"), total_amount);
+            chain_name, params->chain_id, false, amount, to_str, signer, NULL,
+            NULL, params->data_initial_chunk_bytes, data_total, key1, value1,
+            key2, value2, key3, value3, _("Total Amount:"), total_amount);
       }
     }
   } else {
@@ -441,14 +442,15 @@ static bool layoutEthereumConfirmTx(
     strcat(total_amount, "\n");
     strcat(total_amount, gas_value);
     if (!is_eip1559) {
-      return layoutTransactionSign("Ethereum", true, amount, to_str, signer,
-                                   NULL, NULL, NULL, 0, _("Maximum Fee:"),
-                                   gas_value, _("Total Amount:"), total_amount,
-                                   NULL, NULL, NULL, NULL);
-    } else {
       return layoutTransactionSign(
-          "Ethereum", true, amount, to_str, signer, NULL, NULL, NULL, 0, key1,
-          value1, key2, value2, key3, value3, _("Total Amount:"), total_amount);
+          chain_name, params->chain_id, true, amount, to_str, signer, NULL,
+          NULL, NULL, 0, _("Maximum Fee:"), gas_value, _("Total Amount:"),
+          total_amount, NULL, NULL, NULL, NULL);
+    } else {
+      return layoutTransactionSign(chain_name, params->chain_id, true, amount,
+                                   to_str, signer, NULL, NULL, NULL, 0, key1,
+                                   value1, key2, value2, key3, value3,
+                                   _("Total Amount:"), total_amount);
     }
   }
 

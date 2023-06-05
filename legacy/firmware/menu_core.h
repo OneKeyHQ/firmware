@@ -14,6 +14,7 @@ struct menu_item {
   };
   char *((*para)(void));
   bool go_prev;
+  int((*index)(void));
 };
 
 enum {

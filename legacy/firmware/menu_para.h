@@ -12,6 +12,16 @@ char* menu_para_sol_switch(void);
 char* menu_para_passphrase(void);
 char* menu_para_trezor_comp_mode_state(void);
 char* menu_para_safety_checks_state(void);
+char* menu_para_usb_lock(void);
+
+int menu_para_ble_index(void);
+int menu_para_language_index(void);
+int menu_para_shutdown_index(void);
+int menu_para_autolock_index(void);
+int menu_para_passphrase_index(void);
+int menu_para_trezor_comp_mode_index(void);
+int menu_para_safety_checks_index(void);
+int menu_para_usb_lock_index(void);
 
 void menu_para_set_ble(int index);
 void menu_para_set_language(int index);

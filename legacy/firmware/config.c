@@ -114,7 +114,9 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 
 #define KEY_COIN_FUNCTION_SWITCH (39 | APP | FLAG_PUBLIC_SHIFTED)       // uint32
 
-#define KEY_TREZOR_COMP_MODE (40 | APP | FLAG_PUBLIC_SHIFTED)       // bool
+#define KEY_TREZOR_COMP_MODE (40 | APP | FLAG_PUBLIC_SHIFTED)           // bool
+
+#define KEY_USB_LOCK (41 | APP | FLAG_PUBLIC_SHIFTED)                   // bool
 
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)            // string(10)
 // clang-format on
@@ -739,7 +741,7 @@ const uint8_t *config_getSeed(void) {
     // passphrase is used - confirm on the display
     if (passphrase[0] != 0) {
       layoutDialogCenterAdapterV2(
-          "Access Hidden Wallet", NULL, &bmp_bottom_left_close,
+          _("Access Hidden Wallet"), NULL, &bmp_bottom_left_close,
           &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
           _("Next screen will show the\npassphrase!"));
       if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
@@ -1608,3 +1610,11 @@ bool config_getDeriveCardano(void) {
 }
 
 void config_setDeriveCardano(bool on) { derive_cardano = on; }
+
+bool config_hasUsblock(void) { return sectrue == storage_has(KEY_USB_LOCK); }
+
+void config_setUsblock(bool lock) { config_set_bool(KEY_USB_LOCK, lock); }
+
+bool config_getUsblock(bool *lock) {
+  return sectrue == config_get_bool(KEY_USB_LOCK, lock);
+}
