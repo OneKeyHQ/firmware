@@ -301,7 +301,6 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
   char address[65] = {0};
   char *var_name;
   near_get_address_from_public_key(node->public_key + 1, address);
-
   int action_type = parse_transaction(msg, &processed, receiver);
   switch (action_type) {
     case at_create_account:
@@ -371,9 +370,9 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
       memcpy(_amount_str + len, " NEAR", 6);
     }
     memcpy(_to1, receiver, receiver_len);
-    if (!layoutTransactionSign("Near", false, _amount_str, _to1, address, NULL,
-                               NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL,
-                               NULL, NULL, NULL)) {
+    if (!layoutTransactionSign("Near", 0, false, _amount_str, _to1, address,
+                               NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL,
+                               NULL, NULL, NULL, NULL)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
       layoutHome();
       return false;

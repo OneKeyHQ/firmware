@@ -420,14 +420,14 @@ static bool layoutConfluxConfirmTx(
     } else {
       confluxFormatAmount(&val, NULL, amount, sizeof(amount));
       return layoutTransactionSign(
-          "Conflux", false, amount, to_str, signer, NULL, NULL, NULL, 0,
-          _("Maximum Fee"), gas_value, NULL, NULL, NULL, NULL, NULL, NULL);
+          "Conflux", 0, false, amount, to_str, signer, NULL, NULL, NULL, 0,
+          _("Maximum Fee:"), gas_value, NULL, NULL, NULL, NULL, NULL, NULL);
     }
   } else {
     confluxFormatAmount(&val, token, amount, sizeof(amount));
-    return layoutTransactionSign("Conflux", true, amount, to_str, signer, NULL,
-                                 NULL, NULL, 0, _("Maximum Fee"), gas_value,
-                                 NULL, NULL, NULL, NULL, NULL, NULL);
+    return layoutTransactionSign("Conflux", 0, true, amount, to_str, signer,
+                                 NULL, NULL, NULL, 0, _("Maximum Fee"),
+                                 gas_value, NULL, NULL, NULL, NULL, NULL, NULL);
   }
   return true;
 }

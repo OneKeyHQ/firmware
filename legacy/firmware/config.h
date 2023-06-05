@@ -236,6 +236,10 @@ bool config_getTrezorCompMode(bool *trezor_comp_mode);
 bool config_getDeriveCardano(void);
 void config_setDeriveCardano(bool on);
 
+bool config_hasUsblock(void);
+void config_setUsblock(bool lock);
+bool config_getUsblock(bool *lock);
+
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 
 #endif

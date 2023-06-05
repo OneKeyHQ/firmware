@@ -43,7 +43,6 @@ bool ethereum_parse(const char *address, uint8_t pubkeyhash[20]);
 void ethereum_message_sign_eip712(const EthereumSignMessageEIP712 *msg,
                                   const HDNode *node,
                                   EthereumMessageSignature *resp);
-const char *get_chain_name(uint32_t chain_id);
 
 // To reduce space, only some EVM networks are supported
 #define ASSIGN_ETHEREUM_NAME(chain_name, chain_id) \

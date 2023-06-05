@@ -887,7 +887,7 @@ bool recovery_on_device(void) {
   }
 prompt_recovery:
   layoutDialogAdapterEx(
-      _("Import Wallet"), &bmp_bottom_left_arrow, NULL, &bmp_bottom_right_arrow,
+      _("Import Wallet"), &bmp_bottom_left_close, NULL, &bmp_bottom_right_arrow,
       NULL,
       _("Restore the wallet you\npreviously used from a \nrecovery phrase"),
       NULL, NULL, NULL, NULL);
