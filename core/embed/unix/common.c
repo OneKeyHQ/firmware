@@ -177,6 +177,8 @@ void emulator_poll_events(void) {
   SDL_FilterEvents(emulator_event_filter, NULL);
 }
 
+void error_pin_max(void){};
+
 uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
 
 void collect_hw_entropy(void) { memzero(HW_ENTROPY_DATA, HW_ENTROPY_LEN); }
