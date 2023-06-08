@@ -42,6 +42,7 @@
 #define MAX_WRONG_PINS 15
 
 bool protectAbortedByCancel = false;
+bool protectAbortedBySleep = false;
 // allow the app to connect to the device when in the tutorial page
 bool protectAbortedByInitializeOnboarding = false;
 bool protectAbortedByInitialize = false;
@@ -252,7 +253,8 @@ uint8_t protectButtonValue(ButtonRequestType type, bool confirm_only,
 
 const char *requestPin(PinMatrixRequestType type, const char *text,
                        const char **new_pin) {
-  bool button_no = false;
+  bool button_no = false, pinmatrix_show = true;
+  uint32_t timer_out_count = 0;
   PinMatrixRequest resp = {0};
   *new_pin = NULL;
   memzero(&resp, sizeof(PinMatrixRequest));
@@ -260,9 +262,14 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
   resp.type = type;
   usbTiny(1);
   msg_write(MessageType_MessageType_PinMatrixRequest, &resp);
-  pinmatrix_start(text);
   timer_out_set(timer_out_oper, default_oper_time);
-  while (timer_out_get(timer_out_oper)) {
+  timer_out_count = default_oper_time;
+  while (timer_out_count) {
+    timer_out_count = timer_out_get(timer_out_oper);
+    if ((timer_out_count < (default_oper_time - timer1s)) && pinmatrix_show) {
+      pinmatrix_start(text);
+      pinmatrix_show = false;
+    }
     usbPoll();
     buttonUpdate();
     if (msg_tiny_id == MessageType_MessageType_PinMatrixAck) {
@@ -590,15 +597,19 @@ bool protectPassphrase(char *passphrase) {
   usbTiny(1);
   msg_write(MessageType_MessageType_PassphraseRequest, &resp);
 
-  if (!g_bIsBixinAPP) {
-    layoutDialogAdapterEx(_("Enter Passphrase"), NULL, NULL, NULL, NULL,
-                          _("Enter your Passphrase on\nconnnected device."),
-                          NULL, NULL, NULL, NULL);
-  }
-
-  bool result = false;
+  bool result = false, show = true;
+  uint32_t timer_out_count = 0;
   timer_out_set(timer_out_oper, default_oper_time);
-  while (timer_out_get(timer_out_oper)) {
+  timer_out_count = default_oper_time;
+  while (timer_out_count) {
+    timer_out_count = timer_out_get(timer_out_oper);
+    if ((timer_out_count < (default_oper_time - timer1s)) && show) {
+      layoutDialogAdapterEx(_("Enter Passphrase"), &bmp_bottom_left_close, NULL,
+                            NULL, NULL,
+                            _("Enter your Passphrase on\nconnnected device."),
+                            NULL, NULL, NULL, NULL);
+      show = false;
+    }
     usbPoll();
     buttonUpdate();
     if (msg_tiny_id == MessageType_MessageType_PassphraseAck) {
@@ -757,8 +768,16 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
-    layoutEnterSleep();
+    if (layoutEnterSleep(1)) {
+      protectAbortedBySleep = true;
+      break;
+    }
     usbPoll();
+#if !EMULATOR
+    if ((host_channel == CHANNEL_USB) && ((sys_usbState() == false))) {
+      return KEY_NULL;
+    }
+#endif
     if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
     protectAbortedByInitialize =
         (msg_tiny_id == MessageType_MessageType_Initialize);
@@ -795,6 +814,18 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   }
 
   return key;
+}
+
+uint8_t protectWaitKeyValue(ButtonRequestType type, bool requset,
+                            uint32_t time_out, uint8_t mode) {
+  if (requset) {
+    ButtonRequest resp = {0};
+    memzero(&resp, sizeof(ButtonRequest));
+    resp.has_code = true;
+    resp.code = type;
+    msg_write(MessageType_MessageType_ButtonRequest, &resp);
+  }
+  return protectWaitKey(time_out, mode);
 }
 
 const char *protectInputPin(const char *text, uint8_t min_pin_len,

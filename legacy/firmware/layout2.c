@@ -250,12 +250,12 @@ void refreshNfcIcon(bool force_flag) {
   if (sys_nfcState() == true) {
     if (force_flag || false == nfc_status_old) {
       nfc_status_old = true;
-      oledDrawBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 18, 0, &bmp_nfc);
+      oledDrawBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 16, 0, &bmp_nfc);
       layout_refresh = true;
     }
   } else if (true == nfc_status_old) {
     nfc_status_old = false;
-    oledClearBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 18, 0, &bmp_nfc);
+    oledClearBitmap(OLED_WIDTH - 3 * LOGO_WIDTH - 16, 0, &bmp_nfc);
     layout_refresh = true;
   }
 }
@@ -268,7 +268,7 @@ uint8_t refreshBleIcon(bool force_flag) {
     if (sys_bleState() == true) {
       if (force_flag || false == ble_conn_status_old) {
         ble_conn_status_old = true;
-        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 18, 0,
+        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0,
                        &bmp_status_ble_connect);
         layout_refresh = true;
       }
@@ -277,7 +277,7 @@ uint8_t refreshBleIcon(bool force_flag) {
         ble_conn_status_old = false;
         ret = 1;
       }
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 18, 0, &bmp_status_ble);
+      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
       layout_refresh = true;
     }
     ble_icon_status_old = true;
@@ -287,7 +287,7 @@ uint8_t refreshBleIcon(bool force_flag) {
       ret = 1;
     }
     ble_icon_status_old = false;
-    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 18, 0, &bmp_status_ble);
+    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
     layout_refresh = true;
   }
   return ret;
@@ -407,12 +407,12 @@ void disUsbConnectSomething(uint8_t force_flag) {
 
     if (force_flag || false == usb_status_old) {
       usb_status_old = true;
-      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 18, 0, &bmp_status_usb);
+      oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_status_usb);
       layout_refresh = true;
     }
   } else if (true == usb_status_old) {
     usb_status_old = false;
-    oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - 18, 0, &bmp_status_usb);
+    oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_status_usb);
     layout_refresh = true;
     cur_level_dis = battery_old;
     dis_power_flag = 0;
@@ -511,9 +511,8 @@ static void layoutWelcome(void) {
   strcat(desc, _("key to continue"));
   oledDrawStringAdapter(offset, 34, desc, FONT_STANDARD);
 
-  oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_arrow);
-  oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                 &bmp_bottom_right_arrow);
+  oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_arrow);
+  oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_arrow);
 
   oledRefresh();
 }
@@ -702,9 +701,9 @@ static void _layout_home(bool update_menu) {
     }
 
     int l = oledStringWidth(ble_get_name(), FONT_STANDARD);
-    oledBox(OLED_WIDTH / 2 - l / 2 - 2, OLED_HEIGHT - 12,
+    oledBox(OLED_WIDTH / 2 - l / 2 - 2, OLED_HEIGHT - 11,
             OLED_WIDTH / 2 + l / 2, OLED_HEIGHT, 0);
-    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 10, ble_get_name(),
+    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 9, ble_get_name(),
                          FONT_STANDARD);
   } else {
     if (backup_only) {
@@ -714,11 +713,16 @@ static void _layout_home(bool update_menu) {
     } else {
       char label[MAX_LABEL_LEN + 1] = "";
       config_getLabel(label, sizeof(label));
-      oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
+      oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11,
                      &bmp_bottom_right_arrow);
       if (session_isUnlocked() || !config_hasPin()) {
         oledDrawBitmap(52, 0, &bmp_onekey_logo);
-        oledDrawStringCenterAdapter(OLED_WIDTH / 2, 29, label, FONT_STANDARD);
+        if (needs_backup) {
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, 29, _("NEEDS BACKUP!"),
+                                      FONT_STANDARD);
+        } else {
+          oledDrawStringCenterAdapter(OLED_WIDTH / 2, 29, label, FONT_STANDARD);
+        }
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, OLED_HEIGHT - 10,
                                     ble_get_name(), FONT_STANDARD);
       } else {
@@ -1326,15 +1330,13 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
 
   if (last) {
     if (pass == 1) {
-      oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
+      oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11,
                      &bmp_bottom_right_confirm);
     } else {
-      oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                     &bmp_bottom_right_next);
+      oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_next);
     }
   } else {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                   &bmp_bottom_right_arrow);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_arrow);
   }
 
   oledRefresh();
@@ -1841,9 +1843,8 @@ void layoutShowPassphrase(const char *passphrase) {
 
   oledDrawStringAdapter(0, 13, passphrase, FONT_STANDARD);
 
-  oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_close);
-  oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                 &bmp_bottom_right_confirm);
+  oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_close);
+  oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_confirm);
 
   oledRefresh();
 }
@@ -2049,12 +2050,14 @@ void layoutHomeInfo(void) {
   uint8_t key = KEY_NULL;
   key = keyScan();
   if (layoutLast == onboarding) {
+#if !EMULATOR
     if (ble_passkey_state()) {
       return;
     }
+#endif
     onboarding(key);
   } else {
-    layoutEnterSleep();
+    layoutEnterSleep(0);
     if (layoutNeedRefresh()) {
       layoutHome();
     }
@@ -2137,9 +2140,8 @@ void layoutConfirmAutoLockDelay(uint32_t delay_ms) {
                                 FONT_STANDARD);
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, 28, line, FONT_STANDARD);
   }
-  oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_close);
-  oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                 &bmp_bottom_right_confirm);
+  oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_close);
+  oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_confirm);
   oledRefresh();
 }
 
@@ -2359,7 +2361,7 @@ void layoutButtonNoAdapter(const char *btnNo, const BITMAP *icon) {
   const struct font_desc *font = find_cur_font();
   int icon_width = 0;
   if (!btnNo) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, icon);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, icon);
     return;
   }
   if (icon) {
@@ -2377,7 +2379,7 @@ void layoutButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
   const struct font_desc *font = find_cur_font();
   int icon_width = 0;
   if (!btnYes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, icon);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, icon);
     return;
   }
   if (icon) {
@@ -2554,7 +2556,7 @@ void layoutDialogCenterAdapter(const BITMAP *icon, const BITMAP *bmp_no,
   if (btnYes) {
     layoutButtonYesAdapter(btnYes, bmp_yes);
   } else if (bmp_yes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, bmp_yes);
   }
 
   oledRefresh();
@@ -2612,10 +2614,10 @@ void layoutDialogAdapterEx(const char *title, const BITMAP *bmp_no,
   }
 
   if (btnNo || bmp_no) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, bmp_no);
   }
   if (btnYes || bmp_yes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, bmp_yes);
   }
   oledRefresh();
 }
@@ -2691,10 +2693,10 @@ void layoutDialogCenterAdapterV2(const char *title, const BITMAP *icon,
     }
   }
   if (bmp_no) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, bmp_no);
   }
   if (bmp_yes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, bmp_yes);
   }
   if (bmp_up) {
     oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8, bmp_up);
@@ -2844,16 +2846,15 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
   }
 
   if (pos == 0) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_close);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_close);
   } else if (pos != 0 || cancel_allowed) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_delete);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_delete);
   }
 
   if (pos < MAX_PIN_LEN - 1) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                   &bmp_bottom_right_arrow);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_arrow);
   } else {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11,
                    &bmp_bottom_right_confirm);
   }
 
@@ -2880,9 +2881,8 @@ void layoutInputWord(const char *text, uint8_t prefix_len, const char *prefix,
   }
 
   layoutItemsSelect(x + 9 * prefix_len + 7, y, letter, FONT_STANDARD);
-  oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_arrow);
-  oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11,
-                 &bmp_bottom_right_arrow);
+  oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_arrow);
+  oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_arrow);
 
   oledRefresh();
 }
@@ -2970,9 +2970,9 @@ void layoutInputPassphrase(const char *text, uint8_t prefix_len,
   }
 
   if (prefix_len == 0) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_close);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_close);
   } else {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, &bmp_bottom_left_delete);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_delete);
   }
 
   oledRefresh();
@@ -3085,15 +3085,18 @@ void layoutItemsSelectAdapterEx(
   (void)btnNo;
   (void)btnYes;
   int x, l, y;
-  int step = 2;
+  uint32_t step = 2, line = 0;
   char index_str[16] = "";
   const struct font_desc *cur_font = find_cur_font();
   int item_height = 9;
   x = 1;
   y = 1;
   l = 0;
-  oledClear_ex();
   if (title) {
+#if !EMULATOR
+    hide_icon = true;
+#endif
+    oledClear_ex();
     layoutHeader(title);
     step = 4;
     y = 18;
@@ -3101,6 +3104,7 @@ void layoutItemsSelectAdapterEx(
 #if !EMULATOR
     hide_icon = false;
 #endif
+    oledClear_ex();
     if (cur_font->pixel > 8) {
       y = 9;
     } else {
@@ -3108,7 +3112,7 @@ void layoutItemsSelectAdapterEx(
     }
   }
 
-  if (count > 4 || (title && count > 3)) {
+  if (title && count > 3) {
     // scrollbar
     drawScrollbar(count, index - 1);
 
@@ -3166,6 +3170,7 @@ void layoutItemsSelectAdapterEx(
         oledDrawStringAdapter(x, y, pre_pre_previous, FONT_STANDARD);
       }
       y += item_height + step;
+      line++;
     }
     if (pre_previous) {
       if (title) {
@@ -3175,6 +3180,7 @@ void layoutItemsSelectAdapterEx(
         oledDrawStringAdapter(x, y, pre_previous, FONT_STANDARD);
       }
       y += item_height + step;
+      line++;
     }
     if (previous) {
       if (bmp_up) {
@@ -3186,6 +3192,7 @@ void layoutItemsSelectAdapterEx(
         oledDrawStringAdapter(x, y, previous, FONT_STANDARD);
       }
       y += item_height + step;
+      line++;
     }
     if (title) {
       l = oledStringWidthAdapter(current, FONT_STANDARD);
@@ -3206,6 +3213,7 @@ void layoutItemsSelectAdapterEx(
         }
       }
       y += item_height + step;
+      line++;
     } else {
       oledDrawStringAdapter(x, y, current, FONT_STANDARD);
       if (param) {
@@ -3222,21 +3230,20 @@ void layoutItemsSelectAdapterEx(
         oledInvert(0, y - 2, OLED_WIDTH, y + item_height - 1);
       }
       y += item_height + step;
+      line++;
     }
 
-    if (next) {
+    if (next && (line < 4)) {
       if (title) {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, next, FONT_STANDARD);
       } else {
         oledDrawStringAdapter(x, y, next, FONT_STANDARD);
       }
       y += item_height + step;
-      if (bmp_down) {
-        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8, bmp_down);
-      }
+      line++;
     }
 
-    if (next_next) {
+    if (next_next && (line < 4)) {
       if (title) {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, next_next,
                                     FONT_STANDARD);
@@ -3244,8 +3251,9 @@ void layoutItemsSelectAdapterEx(
         oledDrawStringAdapter(x, y, next_next, FONT_STANDARD);
       }
       y += item_height + step;
+      line++;
     }
-    if (next_next_next) {
+    if (next_next_next && (line < 4)) {
       if (title) {
         oledDrawStringCenterAdapter(OLED_WIDTH / 2, y, next_next_next,
                                     FONT_STANDARD);
@@ -3253,7 +3261,12 @@ void layoutItemsSelectAdapterEx(
         oledDrawStringAdapter(x, y, next_next_next, FONT_STANDARD);
       }
       y += item_height + step;
+      line++;
     }
+  }
+
+  if ((index < count) && bmp_down) {
+    oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8, bmp_down);
   }
 
   if (show_index) {
@@ -3266,10 +3279,10 @@ void layoutItemsSelectAdapterEx(
   }
 
   if (bmp_no) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, bmp_no);
   }
   if (bmp_yes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, bmp_yes);
   }
   oledRefresh();
 }
@@ -3405,10 +3418,10 @@ void layoutItemsSelectAdapterWords(
   }
 
   if (bmp_no) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, bmp_no);
   }
   if (bmp_yes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, bmp_yes);
   }
 
   oledRefresh();
@@ -3477,10 +3490,10 @@ void layoutWords(const char *title, const BITMAP *bmp_up,
   }
 
   if (bmp_no) {
-    oledDrawBitmap(1, OLED_HEIGHT - 11, bmp_no);
+    oledDrawBitmap(0, OLED_HEIGHT - 11, bmp_no);
   }
   if (bmp_yes) {
-    oledDrawBitmap(OLED_WIDTH - 16 - 1, OLED_HEIGHT - 11, bmp_yes);
+    oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, bmp_yes);
   }
   oledRefresh();
 }
@@ -3848,12 +3861,15 @@ refresh_menu:
   }
 }
 
-void layoutEnterSleep(void) {
+bool layoutEnterSleep(int mode) {
 #if !EMULATOR
   static uint32_t system_millis_logo_refresh = 0;
 
   if (config_getSleepDelayMs() > 0) {
     if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
+      if (mode) {
+        return true;
+      }
       enter_sleep();
     }
   }
@@ -3862,13 +3878,6 @@ void layoutEnterSleep(void) {
     if ((timer_ms() - system_millis_logo_refresh) >= 1000) {
       layoutStatusLogoEx(true, false);
       system_millis_logo_refresh = timer_ms();
-
-      if (layoutLast == layoutHome) {
-        oledBox(96, 0, 128, 8, 0);
-        refreshBleIcon(true);
-        disUsbConnectSomething(true);
-        refreshBatteryLevel(true);
-      }
     }
   }
 
@@ -3878,6 +3887,7 @@ void layoutEnterSleep(void) {
     layoutScreensaver();
   }
 #endif
+  return false;
 }
 
 void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
@@ -3895,15 +3905,16 @@ void layoutScroollbarButtonYesAdapter(const char *btnYes, const BITMAP *icon) {
              OLED_HEIGHT - (font->pixel + 2), OLED_WIDTH - 4, OLED_HEIGHT);
 }
 
-bool layoutTransactionSign(const char *chain_name, bool token_transfer,
-                           const char *amount, const char *to_str,
-                           const char *signer, const char *recipient,
-                           const char *token_id, const uint8_t *data,
-                           uint16_t len, const char *key1, const char *value1,
-                           const char *key2, const char *value2,
-                           const char *key3, const char *value3,
-                           const char *key4, const char *value4) {
-  bool result = false;
+bool layoutTransactionSign(const char *chain_name, uint64_t chain_id,
+                           bool token_transfer, const char *amount,
+                           const char *to_str, const char *signer,
+                           const char *recipient, const char *token_id,
+                           const uint8_t *data, uint16_t len, const char *key1,
+                           const char *value1, const char *key2,
+                           const char *value2, const char *key3,
+                           const char *value3, const char *key4,
+                           const char *value4) {
+  bool result = false, has_chain_id = false;
   int index = 0, sub_index = 0, tokenid_len = 0, token_id_rowcount = 0;
   int i, y = 0, bar_heght, bar_start = 12, bar_end = 52;
   uint8_t key = KEY_NULL;
@@ -3912,6 +3923,7 @@ bool layoutTransactionSign(const char *chain_name, bool token_transfer,
   char title[64] = {0};
   char title_data[32] = {0};
   char lines[21] = {0};
+  char chain_id_str[21] = {0};
   int data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
   uint32_t rowlen = 21;
   const char **str;
@@ -3919,9 +3931,17 @@ bool layoutTransactionSign(const char *chain_name, bool token_transfer,
     tokenid_len = strlen(token_id);
     token_id_rowcount = tokenid_len / rowlen + 1;
   }
+  if (strncmp(chain_name, "EVM", 3) == 0) {
+    has_chain_id = true;
+    max_index++;
+    snprintf(chain_id_str, 21, "%" PRIu64, chain_id);
+  }
   const char **tx_msg = format_tx_message(chain_name);
-  if (token_transfer && token_id == NULL) {
+  if (token_transfer && (token_id == NULL)) {
     strcat(title, "Token");
+    strcat(title, _("Transfer"));
+  } else if (token_transfer && (token_id != NULL)) {
+    strcat(title, "NFT");
     strcat(title, _("Transfer"));
   } else {
     strcat(title, chain_name);
@@ -3950,7 +3970,15 @@ refresh_menu:
   layoutSwipe();
   oledClear();
   y = 13;
-  if (0 == index) {
+  if ((has_chain_id == true) && (0 == index)) {
+    sub_index = 0;
+    layoutHeader(title);
+    oledDrawStringAdapter(0, y, _("Chain ID:"), FONT_STANDARD);
+    oledDrawStringAdapter(0, y + 10, chain_id_str, FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+  } else if (((has_chain_id == false) && (0 == index)) ||
+             ((has_chain_id == true) && (1 == index))) {
     sub_index = 0;
     layoutHeader(title);
     memset(desc, 0, 64);
@@ -3964,18 +3992,20 @@ refresh_menu:
     oledDrawStringAdapter(0, y + 10, amount, FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if (1 == index && token_transfer &&
-             token_id) {  // nft contract address
+  } else if (((has_chain_id == false && 1 == index) ||
+              (has_chain_id == true && 2 == index)) &&
+             token_transfer && token_id) {  // nft contract address
     sub_index = 0;
     layoutHeader(title);
     oledDrawStringAdapter(0, y, _("Token Contract:"), FONT_STANDARD);
     oledDrawStringAdapter(0, y + 10, to_str, FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if (2 == index && token_transfer && token_id) {  // nft token id
+  } else if (((has_chain_id == false && 2 == index) ||
+              (has_chain_id == true && 3 == index)) &&
+             token_transfer && token_id) {  // nft token id
     layoutHeader(title);
-
-    if (strlen(token_id) / rowlen > 3) {
+    if (token_id_rowcount > 3) {
       str = split_message((const uint8_t *)token_id, tokenid_len, rowlen);
       if (0 == sub_index) {
         oledDrawStringAdapter(0, 13, _("Token ID:"), FONT_STANDARD);
@@ -4012,22 +4042,27 @@ refresh_menu:
 
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if (3 == index && token_transfer && token_id) {  // nft recipient
+  } else if (((has_chain_id == false && 3 == index) ||
+              (has_chain_id == true && 4 == index)) &&
+             token_transfer && token_id) {  // nft recipient
     sub_index = 0;
     layoutHeader(title);
     oledDrawStringAdapter(0, y, _("Send to:"), FONT_STANDARD);
     oledDrawStringAdapter(0, y + 10, recipient, FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if ((1 == index && token_id == NULL)) {  // To
+  } else if ((has_chain_id == false && 1 == index && token_id == NULL) ||
+             (has_chain_id == true && 2 == index && token_id == NULL)) {  // To
     sub_index = 0;
     layoutHeader(title);
     oledDrawStringAdapter(0, y, _("Send to:"), FONT_STANDARD);
     oledDrawStringAdapter(0, y + 10, to_str, FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if ((2 == index && token_id == NULL) ||
-             (4 == index && token_id)) {  // From
+  } else if ((has_chain_id == false &&
+              ((2 == index && token_id == NULL) || (4 == index && token_id))) ||
+             (has_chain_id == true && ((3 == index && token_id == NULL) ||
+                                       (5 == index && token_id)))) {  // From
     sub_index = 0;
     layoutHeader(title);
     memset(desc, 0, 64);
@@ -4037,8 +4072,12 @@ refresh_menu:
     oledDrawStringAdapter(0, y + 10, signer, FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if ((3 == index && len > 0 && token_id == NULL) ||
-             (5 == index && len > 0 && token_id)) {  // data
+  } else if ((has_chain_id == false &&
+              ((3 == index && len > 0 && token_id == NULL) ||
+               (5 == index && len > 0 && token_id))) ||
+             (has_chain_id == true &&
+              ((4 == index && len > 0 && token_id == NULL) ||
+               (6 == index && len > 0 && token_id)))) {  // data
     layoutHeader(title_data);
     if (data_rowcount > 4) {
       data2hexaddr(data + 10 * (sub_index), 10, lines);
@@ -4107,23 +4146,36 @@ refresh_menu:
   } else {  // key*
     sub_index = 0;
     layoutHeader(title);
-    if ((3 == index && len == 0 && !token_id) ||
-        (4 == index && len > 0 && !token_id) || (5 == index && token_id)) {
+    if ((has_chain_id == false && 3 == index && len == 0 && !token_id) ||
+        (has_chain_id == false && 4 == index && len > 0 && !token_id) ||
+        (has_chain_id == false && 5 == index && token_id) ||
+        (has_chain_id == true && 4 == index && len == 0 && !token_id) ||
+        (has_chain_id == true && 5 == index && len > 0 && !token_id) ||
+        (has_chain_id == true && 6 == index && token_id)) {
       oledDrawStringAdapter(0, y, key1, FONT_STANDARD);
       oledDrawStringAdapter(0, y + 10, value1, FONT_STANDARD);
-    } else if ((4 == index && len == 0 && !token_id) ||
-               (5 == index && len > 0 && !token_id) ||
-               (6 == index && token_id)) {
+    } else if ((has_chain_id == false && 4 == index && len == 0 && !token_id) ||
+               (has_chain_id == false && 5 == index && len > 0 && !token_id) ||
+               (has_chain_id == false && 6 == index && token_id) ||
+               (has_chain_id == true && 5 == index && len == 0 && !token_id) ||
+               (has_chain_id == true && 6 == index && len > 0 && !token_id) ||
+               (has_chain_id == true && 7 == index && token_id)) {
       oledDrawStringAdapter(0, y, key2, FONT_STANDARD);
       oledDrawStringAdapter(0, y + 10, value2, FONT_STANDARD);
-    } else if ((5 == index && len == 0 && !token_id) ||
-               (6 == index && len > 0 && !token_id) ||
-               (7 == index && token_id)) {
+    } else if ((has_chain_id == false && 5 == index && len == 0 && !token_id) ||
+               (has_chain_id == false && 6 == index && len > 0 && !token_id) ||
+               (has_chain_id == false && 7 == index && token_id) ||
+               (has_chain_id == true && 6 == index && len == 0 && !token_id) ||
+               (has_chain_id == true && 7 == index && len > 0 && !token_id) ||
+               (has_chain_id == true && 8 == index && token_id)) {
       oledDrawStringAdapter(0, y, key3, FONT_STANDARD);
       oledDrawStringAdapter(0, y + 10, value3, FONT_STANDARD);
-    } else if ((6 == index && len == 0 && !token_id) ||
-               (7 == index && len > 0 && !token_id) ||
-               (8 == index && token_id)) {
+    } else if ((has_chain_id == false && 6 == index && len == 0 && !token_id) ||
+               (has_chain_id == false && 7 == index && len > 0 && !token_id) ||
+               (has_chain_id == false && 8 == index && token_id) ||
+               (has_chain_id == true && 7 == index && len == 0 && !token_id) ||
+               (has_chain_id == true && 8 == index && len > 0 && !token_id) ||
+               (has_chain_id == true && 9 == index && token_id)) {
       oledDrawStringAdapter(0, y, key4, FONT_STANDARD);
       oledDrawStringAdapter(0, y + 10, value4, FONT_STANDARD);
     }
@@ -4140,11 +4192,16 @@ refresh_menu:
       }
       goto refresh_menu;
     case KEY_DOWN:
-      if (len > 0 && index == 3 && sub_index < data_rowcount - 4) {
+      if ((has_chain_id == false && len > 0 && index == 3 &&
+           sub_index < data_rowcount - 4) ||
+          (has_chain_id == true && len > 0 && index == 4 &&
+           sub_index < data_rowcount - 4)) {
         sub_index++;
       }
-      if (token_transfer && token_id && index == 2 &&
-          sub_index < token_id_rowcount - 3) {  // token_id
+      if ((has_chain_id == false && token_transfer && token_id && index == 2 &&
+           sub_index < token_id_rowcount - 3) ||
+          (has_chain_id == true && token_transfer && token_id && index == 3 &&
+           sub_index < token_id_rowcount - 3)) {  // token_id
         sub_index++;
       }
       goto refresh_menu;

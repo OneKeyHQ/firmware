@@ -119,8 +119,15 @@ void menu_down(void) {
 void menu_enter(void) {
   if (!currentMenu->items[currentMenu->current].is_function &&
       currentMenu->items[currentMenu->current].sub_menu) {
-    currentMenu = currentMenu->items[currentMenu->current].sub_menu;
-    currentMenu->current = currentMenu->start;
+    if ((currentMenu->items[currentMenu->current].para != NULL) &&
+        (currentMenu->items[currentMenu->current].index != NULL)) {
+      int index = currentMenu->items[currentMenu->current].index();
+      currentMenu = currentMenu->items[currentMenu->current].sub_menu;
+      currentMenu->current = index;
+    } else {
+      currentMenu = currentMenu->items[currentMenu->current].sub_menu;
+      currentMenu->current = currentMenu->start;
+    }
   } else if (currentMenu->items[currentMenu->current].func != NULL) {
     currentMenu->items[currentMenu->current].func(currentMenu->current);
     if (layoutLast != layoutHome) layoutLast = menu_run;

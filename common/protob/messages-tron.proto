@@ -77,11 +77,44 @@ message TronSignTx {
             optional TronResourceCode resource = 1; // Resource type
             optional string receiver_address = 2;   // Rental Freeze receiver address - base 58
         }
+        // Withdraw witness balance
+        message TronWithdrawBalanceContract {
+            optional bytes owner_address = 1;
+        }
+
+        // stake 2.0
+        message TronFreezeBalanceV2Contract {
+            optional uint64 frozen_balance = 2;
+            optional TronResourceCode resource = 3;
+        }
+        message TronUnfreezeBalanceV2Contract {
+            optional uint64 unfreeze_balance = 2;
+            optional TronResourceCode resource = 3;
+        }
+        message TronWithdrawExpireUnfreezeContract {
+        }
+        message TronDelegateResourceContract {
+            optional TronResourceCode resource = 2;
+            optional uint64 balance = 3;
+            optional string receiver_address = 4;
+            optional bool  lock = 5;
+        }
+        message TronUnDelegateResourceContract {
+            optional TronResourceCode resource = 2;
+            optional uint64 balance = 3;
+            optional string receiver_address = 4;
+        }
 
         optional TronTransferContract transfer_contract = 2;
         optional TronFreezeBalanceContract freeze_balance_contract = 11;
         optional TronUnfreezeBalanceContract unfreeze_balance_contract = 12;
+        optional TronWithdrawBalanceContract withdraw_balance_contract = 13;
         optional TronTriggerSmartContract trigger_smart_contract = 31;
+        optional TronFreezeBalanceV2Contract freeze_balance_v2_contract = 54;
+        optional TronUnfreezeBalanceV2Contract unfreeze_balance_v2_contract = 55;
+        optional TronWithdrawExpireUnfreezeContract withdraw_expire_unfreeze_contract = 56;
+        optional TronDelegateResourceContract delegate_resource_contract = 57;
+        optional TronUnDelegateResourceContract undelegate_resource_contract = 58;
     }
 }
 

@@ -14,6 +14,11 @@ TronTriggerSmartContract.data               max_size:2048
 TronFreezeBalanceContract.receiver_address  max_size:36
 TronUnfreezeBalanceContract.receiver_address    max_size:36
 
+TronWithdrawBalanceContract.owner_address   max_size:36
+TronDelegateResourceContract.receiver_address   max_size:36
+TronUnDelegateResourceContract.receiver_address max_size:36
+
+
 TronSignedTx.signature                      max_size:65
 TronSignedTx.serialized_tx                  max_size:2048
 

@@ -8738,7 +8738,13 @@ class TronContract(protobuf.MessageType):
         2: protobuf.Field("transfer_contract", "TronTransferContract", repeated=False, required=False, default=None),
         11: protobuf.Field("freeze_balance_contract", "TronFreezeBalanceContract", repeated=False, required=False, default=None),
         12: protobuf.Field("unfreeze_balance_contract", "TronUnfreezeBalanceContract", repeated=False, required=False, default=None),
+        13: protobuf.Field("withdraw_balance_contract", "TronWithdrawBalanceContract", repeated=False, required=False, default=None),
         31: protobuf.Field("trigger_smart_contract", "TronTriggerSmartContract", repeated=False, required=False, default=None),
+        54: protobuf.Field("freeze_balance_v2_contract", "TronFreezeBalanceV2Contract", repeated=False, required=False, default=None),
+        55: protobuf.Field("unfreeze_balance_v2_contract", "TronUnfreezeBalanceV2Contract", repeated=False, required=False, default=None),
+        56: protobuf.Field("withdraw_expire_unfreeze_contract", "TronWithdrawExpireUnfreezeContract", repeated=False, required=False, default=None),
+        57: protobuf.Field("delegate_resource_contract", "TronDelegateResourceContract", repeated=False, required=False, default=None),
+        58: protobuf.Field("undelegate_resource_contract", "TronUnDelegateResourceContract", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -8747,12 +8753,24 @@ class TronContract(protobuf.MessageType):
         transfer_contract: Optional["TronTransferContract"] = None,
         freeze_balance_contract: Optional["TronFreezeBalanceContract"] = None,
         unfreeze_balance_contract: Optional["TronUnfreezeBalanceContract"] = None,
+        withdraw_balance_contract: Optional["TronWithdrawBalanceContract"] = None,
         trigger_smart_contract: Optional["TronTriggerSmartContract"] = None,
+        freeze_balance_v2_contract: Optional["TronFreezeBalanceV2Contract"] = None,
+        unfreeze_balance_v2_contract: Optional["TronUnfreezeBalanceV2Contract"] = None,
+        withdraw_expire_unfreeze_contract: Optional["TronWithdrawExpireUnfreezeContract"] = None,
+        delegate_resource_contract: Optional["TronDelegateResourceContract"] = None,
+        undelegate_resource_contract: Optional["TronUnDelegateResourceContract"] = None,
     ) -> None:
         self.transfer_contract = transfer_contract
         self.freeze_balance_contract = freeze_balance_contract
         self.unfreeze_balance_contract = unfreeze_balance_contract
+        self.withdraw_balance_contract = withdraw_balance_contract
         self.trigger_smart_contract = trigger_smart_contract
+        self.freeze_balance_v2_contract = freeze_balance_v2_contract
+        self.unfreeze_balance_v2_contract = unfreeze_balance_v2_contract
+        self.withdraw_expire_unfreeze_contract = withdraw_expire_unfreeze_contract
+        self.delegate_resource_contract = delegate_resource_contract
+        self.undelegate_resource_contract = undelegate_resource_contract
 
 
 class TronTransferContract(protobuf.MessageType):
@@ -8835,6 +8853,101 @@ class TronUnfreezeBalanceContract(protobuf.MessageType):
         receiver_address: Optional["str"] = None,
     ) -> None:
         self.resource = resource
+        self.receiver_address = receiver_address
+
+
+class TronWithdrawBalanceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("owner_address", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        owner_address: Optional["bytes"] = None,
+    ) -> None:
+        self.owner_address = owner_address
+
+
+class TronFreezeBalanceV2Contract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("frozen_balance", "uint64", repeated=False, required=False, default=None),
+        3: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        frozen_balance: Optional["int"] = None,
+        resource: Optional["TronResourceCode"] = None,
+    ) -> None:
+        self.frozen_balance = frozen_balance
+        self.resource = resource
+
+
+class TronUnfreezeBalanceV2Contract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("unfreeze_balance", "uint64", repeated=False, required=False, default=None),
+        3: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        unfreeze_balance: Optional["int"] = None,
+        resource: Optional["TronResourceCode"] = None,
+    ) -> None:
+        self.unfreeze_balance = unfreeze_balance
+        self.resource = resource
+
+
+class TronWithdrawExpireUnfreezeContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+
+
+class TronDelegateResourceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False, default=None),
+        3: protobuf.Field("balance", "uint64", repeated=False, required=False, default=None),
+        4: protobuf.Field("receiver_address", "string", repeated=False, required=False, default=None),
+        5: protobuf.Field("lock", "bool", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        resource: Optional["TronResourceCode"] = None,
+        balance: Optional["int"] = None,
+        receiver_address: Optional["str"] = None,
+        lock: Optional["bool"] = None,
+    ) -> None:
+        self.resource = resource
+        self.balance = balance
+        self.receiver_address = receiver_address
+        self.lock = lock
+
+
+class TronUnDelegateResourceContract(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        2: protobuf.Field("resource", "TronResourceCode", repeated=False, required=False, default=None),
+        3: protobuf.Field("balance", "uint64", repeated=False, required=False, default=None),
+        4: protobuf.Field("receiver_address", "string", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        resource: Optional["TronResourceCode"] = None,
+        balance: Optional["int"] = None,
+        receiver_address: Optional["str"] = None,
+    ) -> None:
+        self.resource = resource
+        self.balance = balance
         self.receiver_address = receiver_address
 
 

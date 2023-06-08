@@ -295,9 +295,10 @@ bool ripple_sign_tx(const RippleSignTx *msg, HDNode *node,
 
   ripple_format_amount(msg->payment.amount, amount, sizeof(amount));
   ripple_format_amount(msg->fee, gas_value, sizeof(gas_value));
-  if (!layoutTransactionSign("Ripple", false, amount, msg->payment.destination,
-                             address, NULL, NULL, NULL, 0, _("Maximum Fee:"),
-                             gas_value, NULL, NULL, NULL, NULL, NULL, NULL)) {
+  if (!layoutTransactionSign("Ripple", 0, false, amount,
+                             msg->payment.destination, address, NULL, NULL,
+                             NULL, 0, _("Maximum Fee:"), gas_value, NULL, NULL,
+                             NULL, NULL, NULL, NULL)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
     layoutHome();
     return false;

@@ -168,7 +168,7 @@ parser_error_t polkadot_parser_getItem(const parser_context_t *ctx,
       err = _toStringCompactBalance(&ctx->tx_obj->tip, outVal, outValLen,
                                     pageIdx, pageCount);
       if (err != parser_ok) return err;
-      number_inplace_trimming(outVal, 1);
+      number_inplace_trimming(outVal, 0);
       return err;
     }
 
