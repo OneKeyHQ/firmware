@@ -325,7 +325,7 @@ void fsm_msgGetAddress(const GetAddress *msg) {
     }
 
     bool is_cashaddr = coin->cashaddr_prefix != NULL;
-    if (!fsm_layoutAddress(address, desc, is_cashaddr,
+    if (!fsm_layoutAddress(address, desc, false,
                            is_cashaddr ? strlen(coin->cashaddr_prefix) + 1 : 0,
                            msg->address_n, msg->address_n_count, false,
                            msg->has_multisig ? &(msg->multisig) : NULL,

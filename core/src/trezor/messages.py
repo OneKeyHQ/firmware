@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     from trezor.enums import StellarSignerType  # noqa: F401
     from trezor.enums import TezosBallotType  # noqa: F401
     from trezor.enums import TezosContractType  # noqa: F401
+    from trezor.enums import TronResourceCode  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
 
     class AlgorandGetAddress(protobuf.MessageType):
@@ -7238,13 +7239,29 @@ if TYPE_CHECKING:
 
     class TronContract(protobuf.MessageType):
         transfer_contract: "TronTransferContract | None"
+        freeze_balance_contract: "TronFreezeBalanceContract | None"
+        unfreeze_balance_contract: "TronUnfreezeBalanceContract | None"
+        withdraw_balance_contract: "TronWithdrawBalanceContract | None"
         trigger_smart_contract: "TronTriggerSmartContract | None"
+        freeze_balance_v2_contract: "TronFreezeBalanceV2Contract | None"
+        unfreeze_balance_v2_contract: "TronUnfreezeBalanceV2Contract | None"
+        withdraw_expire_unfreeze_contract: "TronWithdrawExpireUnfreezeContract | None"
+        delegate_resource_contract: "TronDelegateResourceContract | None"
+        undelegate_resource_contract: "TronUnDelegateResourceContract | None"
 
         def __init__(
             self,
             *,
             transfer_contract: "TronTransferContract | None" = None,
+            freeze_balance_contract: "TronFreezeBalanceContract | None" = None,
+            unfreeze_balance_contract: "TronUnfreezeBalanceContract | None" = None,
+            withdraw_balance_contract: "TronWithdrawBalanceContract | None" = None,
             trigger_smart_contract: "TronTriggerSmartContract | None" = None,
+            freeze_balance_v2_contract: "TronFreezeBalanceV2Contract | None" = None,
+            unfreeze_balance_v2_contract: "TronUnfreezeBalanceV2Contract | None" = None,
+            withdraw_expire_unfreeze_contract: "TronWithdrawExpireUnfreezeContract | None" = None,
+            delegate_resource_contract: "TronDelegateResourceContract | None" = None,
+            undelegate_resource_contract: "TronUnDelegateResourceContract | None" = None,
         ) -> None:
             pass
 
@@ -7288,6 +7305,132 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["TronTriggerSmartContract"]:
+            return isinstance(msg, cls)
+
+    class TronFreezeBalanceContract(protobuf.MessageType):
+        frozen_balance: "int | None"
+        frozen_duration: "int | None"
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            frozen_balance: "int | None" = None,
+            frozen_duration: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronFreezeBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronUnfreezeBalanceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnfreezeBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronWithdrawBalanceContract(protobuf.MessageType):
+        owner_address: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            owner_address: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronWithdrawBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronFreezeBalanceV2Contract(protobuf.MessageType):
+        frozen_balance: "int | None"
+        resource: "TronResourceCode | None"
+
+        def __init__(
+            self,
+            *,
+            frozen_balance: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronFreezeBalanceV2Contract"]:
+            return isinstance(msg, cls)
+
+    class TronUnfreezeBalanceV2Contract(protobuf.MessageType):
+        unfreeze_balance: "int | None"
+        resource: "TronResourceCode | None"
+
+        def __init__(
+            self,
+            *,
+            unfreeze_balance: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnfreezeBalanceV2Contract"]:
+            return isinstance(msg, cls)
+
+    class TronWithdrawExpireUnfreezeContract(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronWithdrawExpireUnfreezeContract"]:
+            return isinstance(msg, cls)
+
+    class TronDelegateResourceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        balance: "int | None"
+        receiver_address: "str | None"
+        lock: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            balance: "int | None" = None,
+            receiver_address: "str | None" = None,
+            lock: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronDelegateResourceContract"]:
+            return isinstance(msg, cls)
+
+    class TronUnDelegateResourceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        balance: "int | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            balance: "int | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnDelegateResourceContract"]:
             return isinstance(msg, cls)
 
     class WebAuthnListResidentCredentials(protobuf.MessageType):
