@@ -58,6 +58,7 @@ bool ble_switch_state(void);
 void ble_set_switch(bool flag);
 bool ble_get_switch(void);
 void ble_get_dev_info(void);
+void ble_refresh_dev_info(void);
 #else
 #define ble_name_state(...) false
 #define ble_ver_state(...) false

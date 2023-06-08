@@ -664,8 +664,6 @@ void ui_title_update(void) {
   uint32_t offset_y = 6;
   uint16_t battery_color = COLOR_WHITE;
 
-  bool usb_conn = is_usb_connected();
-
   ble_get_dev_info();
   display_bar(0, 0, DISPLAY_RESX, 44, boot_background);
 
@@ -704,7 +702,7 @@ void ui_title_update(void) {
                  FONT_PJKS_REGULAR_20, COLOR_BL_SUBTITLE, boot_background);
   }
   if (ble_connect_state()) {
-    offset_x += 26;
+    offset_x += 32;
     display_icon(DISPLAY_RESX - offset_x, offset_y, 32, 32,
                  toi_icon_bluetooth_connected + 12,
                  sizeof(toi_icon_bluetooth_connected) - 12, COLOR_BL_FG,
@@ -723,7 +721,7 @@ void ui_title_update(void) {
     }
   }
 
-  if (usb_conn) {
+  if (is_usb_connected()) {
     offset_x += 26;
     display_icon(DISPLAY_RESX - offset_x, offset_y, 32, 32, toi_icon_usb + 12,
                  sizeof(toi_icon_usb) - 12, COLOR_BL_FG, boot_background);
@@ -851,6 +849,19 @@ void ui_bootloader_second(const image_header *const hdr) {
                  COLOR_BL_TAGVALUE, COLOR_BL_BG);
   } else {
     display_text(offset_x, offset_y, "No Firmware", -1, FONT_NORMAL,
+                 COLOR_BL_TAGVALUE, COLOR_BL_BG);
+  }
+  offset_y += offset_seg;
+
+  display_text(offset_x, offset_y, "Bluetooth Version", -1, FONT_PJKS_BOLD_26,
+               COLOR_BL_FG, COLOR_BL_BG);
+  offset_y += offset_line;
+  if (ble_ver_state()) {
+    ver_str = ble_get_ver();
+    display_text(offset_x, offset_y, ver_str, -1, FONT_NORMAL,
+                 COLOR_BL_TAGVALUE, COLOR_BL_BG);
+  } else {
+    display_text(offset_x, offset_y, "Pending", -1, FONT_NORMAL,
                  COLOR_BL_TAGVALUE, COLOR_BL_BG);
   }
   offset_y += offset_seg;

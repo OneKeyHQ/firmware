@@ -300,6 +300,7 @@ bool updateBle(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
 
 void bluetooth_reset() {
   ble_usart_irq_disable();
+  SET_COMBUS_HIGH();  // make sure dfu io released
   BLE_RST_PIN_LOW();  // reset ble
   hal_delay(100);
   BLE_RST_PIN_HIGH();
@@ -317,10 +318,6 @@ bool bluetooth_enter_dfu() {
       return false;
     }
   }
-
-  if (set_prn() != true) return false;
-  if (get_mtu() != true) return false;
-
   return true;
 }
 
@@ -332,6 +329,10 @@ bool bluetooth_update(uint8_t *init_data, uint8_t init_len, uint8_t *firmware,
   uint32_t offset_i = 0;
   uint32_t len;
   uint32_t totol_len = fm_len;
+
+  // communication config
+  if (set_prn() != true) return false;
+  if (get_mtu() != true) return false;
 
   // init data
   if (create_object(init_type, init_len) != true) return false;
