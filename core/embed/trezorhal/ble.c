@@ -192,3 +192,20 @@ void ble_get_dev_info(void) {
     hal_delay(5);
   }
 }
+
+void ble_refresh_dev_info(void) {
+  // get_ble_name = false;
+  // while(false == get_ble_name)
+  // {
+  //   ble_cmd_req(BLE_VER, BLE_VER_ADV);
+  //   hal_delay(5);
+  //   ble_uart_poll();
+  // }
+
+  get_ble_ver = false;
+  while (!get_ble_ver) {
+    ble_cmd_req(BLE_VER, BLE_VER_FW);
+    hal_delay(5);
+    ble_uart_poll();
+  }
+}

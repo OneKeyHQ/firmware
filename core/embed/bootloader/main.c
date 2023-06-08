@@ -113,16 +113,6 @@ static void write_dev_dummy_config() {
   memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
          sizeof(pair_info_obj));
 
-  // get se config
-  atca_assert(atca_read_config_zone((uint8_t*)&atca_configuration),
-              "get config");
-
-  // get se sn from config
-  memset(se_serial_no, 0xff, sizeof(se_serial_no));
-  memcpy(se_serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
-  memcpy(se_serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
-         ATECC608_SN2_SIZE);
-
   uint8_t dummy_key[32] = {
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,  // 0-7
       0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,  // 8-15
@@ -130,11 +120,6 @@ static void write_dev_dummy_config() {
       0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0,  // 24-32
   };
 
-  if (check_all_ones(pair_info_obj.serial, sizeof(pair_info_obj.serial))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, se_serial_no,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-  }
   if (check_all_ones(pair_info_obj.protect_key,
                      sizeof(pair_info_obj.protect_key))) {
     ensure(flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, dummy_key,
@@ -163,6 +148,25 @@ static void write_dev_dummy_config() {
   }
 
   atca_config_init();
+
+  // get se config
+  atca_assert(atca_read_config_zone((uint8_t*)&atca_configuration),
+              "get config");
+
+  // get se sn from config
+  memset(se_serial_no, 0xff, sizeof(se_serial_no));
+  memcpy(se_serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
+  memcpy(se_serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
+         ATECC608_SN2_SIZE);
+
+  // write sn if not already
+  if (atca_configuration.lock_value == ATCA_LOCKED) {
+    if (check_all_ones(pair_info_obj.serial, sizeof(pair_info_obj.serial))) {
+      ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, se_serial_no,
+                             FLASH_OTP_BLOCK_SIZE),
+             NULL);
+    }
+  }
 
   // se cert
   uint8_t dummy_cert[] = {
@@ -253,24 +257,36 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
   int r;
 
   for (;;) {
-    ble_uart_poll();
+    while (true) {
+      ble_uart_poll();
 
-    // give a way to go back to bootloader home page
-
-    // if(ble_power_button_state() == 1) // short press
-    if (ble_power_button_state() == 2)  // long press
-    {
-      ble_power_button_state_clear();
-      ui_progress_bar_visible_clear();
-      ui_fadeout();
-      ui_bootloader_first(NULL);
-      ui_fadein();
-    }
-
-    r = spi_slave_poll(buf);
-    if (r != USB_PACKET_SIZE) {
-      r = usb_webusb_read_blocking(USB_IFACE_NUM, buf, USB_PACKET_SIZE, 200);
-      if (r != USB_PACKET_SIZE) {
+      // check usb
+      if (USB_PACKET_SIZE == spi_slave_poll(buf)) {
+        host_channel = CHANNEL_SLAVE;
+        break;
+      }
+      // check bluetooth
+      else if (USB_PACKET_SIZE == usb_webusb_read_blocking(USB_IFACE_NUM, buf,
+                                                           USB_PACKET_SIZE,
+                                                           200)) {
+        host_channel = CHANNEL_USB;
+        break;
+      }
+      // no packet, check if power button pressed
+      // else if ( ble_power_button_state() == 1 ) // short press
+      else if (ble_power_button_state() == 2)  // long press
+      {
+        // give a way to go back to bootloader home page
+        ble_power_button_state_clear();
+        ui_progress_bar_visible_clear();
+        ui_fadeout();
+        ui_bootloader_first(NULL);
+        ui_fadein();
+        memzero(buf, USB_PACKET_SIZE);
+        continue;
+      }
+      // no packet, no pwer button pressed
+      else {
         ui_bootloader_page_switch(hdr);
         static uint32_t tickstart = 0;
         if ((HAL_GetTick() - tickstart) >= 1000) {
@@ -279,9 +295,6 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
         }
         continue;
       }
-      host_channel = CHANNEL_USB;
-    } else {
-      host_channel = CHANNEL_SLAVE;
     }
 
     uint16_t msg_id;

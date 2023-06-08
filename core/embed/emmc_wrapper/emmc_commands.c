@@ -667,6 +667,9 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             }
         );
 
+        // make sure we have latest bluetooth status
+        ble_refresh_dev_info();
+
         // ui confirm
         ui_fadeout();
         ui_install_ble_confirm();
@@ -714,8 +717,8 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             }
         );
 
-        // reset
-        bluetooth_reset();
+        // update progress (final)
+        ui_screen_progress_bar_update(NULL, NULL, 100);
 
         // buetooth update done
         // emmc_fs_file_delete(msg_recv.path);
@@ -730,6 +733,11 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             ui_fadeout();
             ui_bootloader_first(NULL);
             ui_fadein();
+
+            // reboot bluetooth
+            bluetooth_reset();
+            // make sure we have latest bluetooth status
+            ble_refresh_dev_info();
         }
         return 0;
     }
@@ -1332,7 +1340,6 @@ int process_msg_EmmcFileWrite(uint8_t iface_num, uint32_t msg_size, uint8_t* buf
             send_failure(iface_num, FailureType_Failure_ProcessError, "Percentage invalid!");
             return -1;
         }
-
         else if ( msg_recv.ui_percentage < 100 )
         {
             if ( !ui_progress_bar_visible )
