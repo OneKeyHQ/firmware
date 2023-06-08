@@ -354,7 +354,7 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
     ethereumFormatAmount(&val, token, amount, sizeof(amount));
   }
 
-  char _to1[30] = "to 0x__________";
+  char _to1[30] = "to ____________";
   char _to2[30] = "_______________";
   char _to3[] = "_______________?";
 
@@ -374,12 +374,12 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
 
     ethereum_address_checksum(to, to_str, rskip60, chain_id);
     if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-      memcpy(_to1 + 5, to_str, 15);
-      memcpy(_to2, to_str + 15, 25);
+      memcpy(_to1 + 3, to_str, 12);
+      memcpy(_to2, to_str + 12, 30);
     } else {
-      memcpy(_to1 + 5, to_str, 10);
-      memcpy(_to2, to_str + 10, 15);
-      memcpy(_to3, to_str + 25, 15);
+      memcpy(_to1 + 3, to_str, 12);
+      memcpy(_to2, to_str + 12, 15);
+      memcpy(_to3, to_str + 27, 15);
     }
 
   } else {
@@ -949,10 +949,8 @@ void ethereum_message_sign_eip712(const EthereumSignMessageEIP712 *msg,
     return;
   }
 
-  resp->address[0] = '0';
-  resp->address[1] = 'x';
   // ethereum_address_checksum adds trailing zero
-  ethereum_address_checksum(pubkeyhash, resp->address + 2, false, 0);
+  ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
 
   uint8_t hash[32] = {0};
   struct SHA3_CTX ctx = {0};

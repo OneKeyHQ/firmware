@@ -95,6 +95,8 @@ const char *languages[][2] = {
     {"BACK", "返回"},
     // layout2.c
     {"BACKUP FAILED!", "备份失败"},
+    // tron.c
+    {"BANDWIDTH", "带宽"},
     // layout2.c
     {"BLE Name:", "蓝牙名称:"},
     // layout2.c
@@ -107,6 +109,8 @@ const char *languages[][2] = {
     {"Back", "返回"},
     // layout2.c
     {"Backup Only", "仅备份"},
+    // tron.c
+    {"Balance:", "金额:"},
     // menu_list.c
     {"Before you reset the\ndevice, please ensure\nyou've backed up "
      "your\nrecovery phrase",
@@ -241,6 +245,7 @@ const char *languages[][2] = {
     {"Confirm fee", "确认交易费"},
     // layout2.c lisk.c
     {"Confirm sending", "确认发送"},
+    {"Confirm sending:", "确认发送:"},
     // starcoin.c aptos.c
     {"Confirm signing", "确认签名"},
     // lisk.c lisk.c lisk.c lisk.c
@@ -338,6 +343,8 @@ const char *languages[][2] = {
     {"Download OneKey", "下载OneKey"},
     // menu_list.c
     {"Download OneKey Apps", "官网下载OneKey客户端"},
+    // tron.c
+    {"ENERGY", "能量"},
     //
     {"ETH advance signing turn", "ETH高级签名"},
     // ethereum.c
@@ -507,8 +514,12 @@ const char *languages[][2] = {
     {"Levy is", ""},
     // fsm_msg_common.h
     {"Loading private seed", "导入私钥"},
+    // signing.c
+    {"Loading transaction", "加载交易"},
     // trezor.c
     {"Lock Device", "锁定设备"},
+    // tron.c
+    {"Lock:", "锁定:"},
     //
     {"Locktime for this", "该交易时间锁定"},
     // layout2.c
@@ -741,6 +752,7 @@ const char *languages[][2] = {
     // ethereum.c layout2.c
     {"Really send", "确认发送"},
     {"Receiver", "接收方"},
+    {"Receiver:", "接收方:"},
     {"Recipient", "接收方"},
     // reset.c
     {"Recovery Phrase", "助记词"},
@@ -763,6 +775,8 @@ const char *languages[][2] = {
     {"Reset Device?", "确定要重置吗?"},
     {"Reset successfully,\nrestart the device", "重置成功,请重启"},
     {"Reset successfully.\nPlease restart the\ndevice.", "重置成功,请重启."},
+    // tron.c
+    {"Resource:", "资源:"},
     //
     {"Restore", "恢复钱包"},
     {"Restore Wallet", "恢复钱包"},
@@ -923,6 +937,7 @@ const char *languages[][2] = {
     {"Txtype out of bounds", ""},
     // cosmos.c
     {"Type", "类型"},
+    {"Type:", "类型:"},
     // fsm_msg_common.h
     {"U2F counter set", ""},
     // layout2.c
@@ -1157,6 +1172,8 @@ const char *languages[][2] = {
     {"in the same mosaic", ""},
     // u2f.c u2f.c
     {"in this application.", ""},
+    // layout2.c
+    {"including fee:", "交易费:"},
     // fsm_msg_common.h
     {"increase and retrieve", ""},
     // fsm_msg_common.h

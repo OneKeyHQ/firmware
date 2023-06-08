@@ -616,3 +616,7 @@ if TYPE_CHECKING:
         Yay = 0
         Nay = 1
         Pass = 2
+
+    class TronResourceCode(IntEnum):
+        BANDWIDTH = 0
+        ENERGY = 1
