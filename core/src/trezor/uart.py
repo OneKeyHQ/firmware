@@ -166,7 +166,7 @@ async def _deal_button_press(value: bytes) -> None:
                 utils.AUTO_POWER_OFF = True
                 if config.has_pin() and config.is_unlocked():
                     config.lock()
-                await safe_reloop()
+                await loop.race(safe_reloop(), loop.sleep(200))
                 # single to restart the main loop
                 raise loop.TASK_CLOSED
         else:
@@ -208,10 +208,9 @@ async def _deal_charging_state(value: bytes) -> None:
             return
         CHARGING = False
         StatusBar.get_instance().show_charging()
+        StatusBar.get_instance().show_usb(False)
         if utils.BATTERY_CAP:
             StatusBar.get_instance().set_battery_img(utils.BATTERY_CAP, CHARGING)
-    if res == _USB_STATUS_PLUG_OUT:
-        StatusBar.get_instance().show_usb(False)
 
 
 async def _deal_pair_res(value: bytes) -> None:

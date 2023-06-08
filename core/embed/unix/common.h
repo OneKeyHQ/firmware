@@ -61,7 +61,7 @@ void emulator_poll_events(void);
 void collect_hw_entropy(void);
 #define HW_ENTROPY_LEN (12 + 32)
 extern uint8_t HW_ENTROPY_DATA[HW_ENTROPY_LEN];
-
+void error_pin_max(void);
 #define reboot_to_boot(void)
 
 #endif
