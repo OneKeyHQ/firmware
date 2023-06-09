@@ -687,6 +687,10 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             return -4;
         }
 
+        // return success as bluetooth will be disconnected, we have no way to send result back if the update
+        // started via bluetooth
+        send_success_nocheck(iface_num, "Succeed");
+
         // ui start install
         ui_fadeout();
         ui_screen_progress_bar_prepare("Installing", NULL);
@@ -720,9 +724,13 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         // update progress (final)
         ui_screen_progress_bar_update(NULL, NULL, 100);
 
+        // reboot bluetooth
+        bluetooth_reset();
+        // make sure we have latest bluetooth status (and wait for bluetooth become ready)
+        ble_refresh_dev_info();
+
         // buetooth update done
         // emmc_fs_file_delete(msg_recv.path);
-        send_success_nocheck(iface_num, "Succeed");
         if ( msg_recv.has_reboot_on_success && msg_recv.reboot_on_success )
         {
             *STAY_IN_FLAG_ADDR = 0;
@@ -733,11 +741,6 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             ui_fadeout();
             ui_bootloader_first(NULL);
             ui_fadein();
-
-            // reboot bluetooth
-            bluetooth_reset();
-            // make sure we have latest bluetooth status
-            ble_refresh_dev_info();
         }
         return 0;
     }
