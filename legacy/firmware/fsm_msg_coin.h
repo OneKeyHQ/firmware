@@ -226,7 +226,7 @@ bool fsm_checkCoinPath(const CoinInfo *coin, InputScriptType script_type,
   }
 
   if (show_warning) {
-    return fsm_layoutPathWarning();
+    return fsm_layoutPathWarning(address_n_count, address_n);
   }
 
   return true;
@@ -723,7 +723,7 @@ void fsm_msgAuthorizeCoinJoin(const AuthorizeCoinJoin *msg) {
 
   bool path_warning_shown = false;
   if (msg->address_n[0] != PATH_SLIP25_PURPOSE) {
-    if (!fsm_layoutPathWarning()) {
+    if (!fsm_layoutPathWarning(msg->address_n_count, msg->address_n)) {
       layoutHome();
       return;
     }

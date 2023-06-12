@@ -246,7 +246,7 @@ void fsm_msgCosmosSignTx(const CosmosSignTx *msg);
 // polkadot
 void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg);
 void fsm_msgPolkadotSignTx(const PolkadotSignTx *msg);
-bool fsm_layoutPathWarning(void);
+bool fsm_layoutPathWarning(uint32_t address_n_count, const uint32_t *address_n);
 bool fsm_checkCoinPath(const CoinInfo *coin, InputScriptType script_type,
                        uint32_t address_n_count, const uint32_t *address_n,
                        bool has_multisig, MessageType message_type,

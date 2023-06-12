@@ -233,7 +233,7 @@ void layoutInputPassphrase(const char *text, uint8_t prefix_len,
                            uint8_t input_type);
 
 void layoutDeviceParameters(int num);
-void layoutEnterSleep(void);
+bool layoutEnterSleep(int mode);
 
 #define layoutMenuItems(btn_yes, bmp_yes, index, count, title, current,        \
                         previous, next)                                        \
