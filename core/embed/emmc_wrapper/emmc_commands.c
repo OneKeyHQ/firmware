@@ -690,6 +690,8 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         // return success as bluetooth will be disconnected, we have no way to send result back if the update
         // started via bluetooth
         send_success_nocheck(iface_num, "Succeed");
+        // may have to delay a bit to allow the message be sent out (if ui fade in and out time is too short)
+        // hal_delay(50);
 
         // ui start install
         ui_fadeout();
@@ -724,6 +726,9 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         // update progress (final)
         ui_screen_progress_bar_update(NULL, NULL, 100);
 
+        // delay before kick it out of DFU
+        // this is important, otherwise the update may fail
+        hal_delay(50);
         // reboot bluetooth
         bluetooth_reset();
         // make sure we have latest bluetooth status (and wait for bluetooth become ready)
