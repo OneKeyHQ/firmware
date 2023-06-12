@@ -47,6 +47,7 @@
 bool protectAbortedByCancel = false;
 bool protectAbortedByInitialize = false;
 bool protectAbortedByTimeout = false;
+bool protectAbortedBySleep = false;
 
 extern bool exitBlindSignByInitialize;
 
@@ -771,10 +772,14 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
 
   protectAbortedByInitialize = false;
+  protectAbortedBySleep = false;
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
-    layoutEnterSleep();
+    if (layoutEnterSleep(1)) {
+      protectAbortedBySleep = true;
+      break;
+    }
     usbPoll();
     if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
     protectAbortedByInitialize =
@@ -822,6 +827,18 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   }
 
   return key;
+}
+
+uint8_t protectWaitKeyValue(ButtonRequestType type, bool requset,
+                            uint32_t time_out, uint8_t mode) {
+  if (requset) {
+    ButtonRequest resp = {0};
+    memzero(&resp, sizeof(ButtonRequest));
+    resp.has_code = true;
+    resp.code = type;
+    msg_write(MessageType_MessageType_ButtonRequest, &resp);
+  }
+  return protectWaitKey(time_out, mode);
 }
 
 const char *protectInputPin(const char *text, uint8_t min_pin_len,

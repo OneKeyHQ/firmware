@@ -7,6 +7,9 @@ const char *languages[][2] = {
     {" On", "已开启"},
     // layout2.c
     {" decrypt for:", "解密"},
+    // fsm.c
+    {" is a non-standard path. Are you sure to use this path?",
+     " 是非标准路径, 确定要继续使用该路径吗?"},
     // layout2.c
     {" login to:", "登录到"},
     //

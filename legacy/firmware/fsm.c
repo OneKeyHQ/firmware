@@ -358,8 +358,9 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       }
     }
 #if ONEKEY_MINI
-    uint8_t key = protectButtonValue(ButtonRequestType_ButtonRequest_Address,
-                                     false, button_request, 0);
+    uint8_t key = protectWaitKeyValue(ButtonRequestType_ButtonRequest_Address,
+                                      button_request, 0, 0);
+
     if (key == KEY_CONFIRM) {
       return true;
     }
@@ -369,6 +370,11 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       layoutHome();
       return false;
     } else if (protectAbortedByTimeout) {
+      layoutHome();
+      return false;
+    } else if (protectAbortedBySleep) {
+      protectAbortedBySleep = false;
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       layoutHome();
       return false;
     }
@@ -537,10 +543,13 @@ void fsm_postMsgCleanup(MessageType message_type) {
   }
 }
 
-bool fsm_layoutPathWarning(void) {
-  layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
-                    _("Wrong address path"), _("for selected coin."), NULL,
-                    _("Continue at your"), _("own risk!"), NULL);
+bool fsm_layoutPathWarning(uint32_t address_n_count,
+                           const uint32_t *address_n) {
+  char desc[128] = {0};
+  strcat(desc, address_n_str(address_n, address_n_count, false));
+  strcat(desc, _(" is a non-standard path. Are you sure to use this path?"));
+  layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL, desc,
+                    NULL, NULL, NULL, NULL, NULL);
   if (!protectButton(ButtonRequestType_ButtonRequest_UnknownDerivationPath,
                      false)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);

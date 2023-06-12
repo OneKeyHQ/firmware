@@ -89,139 +89,39 @@ void chargeDisTimer(void) {
 
 #if !BITCOIN_ONLY
 
-static const char *slip44_extras(uint32_t coin_type) {
-  if ((coin_type & PATH_HARDENED) == 0) {
-    return 0;
-  }
-  switch (coin_type & PATH_UNHARDEN_MASK) {
-    case 40:
-      return "EXP";  // Expanse
-    case 43:
-      return "NEM";  // NEM
-    case 60:
-      return "ETH";  // Ethereum Mainnet
-    case 61:
-      return "ETC";  // Ethereum Classic Mainnet
-    case 108:
-      return "UBQ";  // UBIQ
-    case 137:
-      return "RSK";  // Rootstock Mainnet
-    case 37310:
-      return "tRSK";  // Rootstock Testnet
-  }
-  return 0;
-}
+// static const char *slip44_extras(uint32_t coin_type) {
+//   if ((coin_type & PATH_HARDENED) == 0) {
+//     return 0;
+//   }
+//   switch (coin_type & PATH_UNHARDEN_MASK) {
+//     case 40:
+//       return "EXP";  // Expanse
+//     case 43:
+//       return "NEM";  // NEM
+//     case 60:
+//       return "ETH";  // Ethereum Mainnet
+//     case 61:
+//       return "ETC";  // Ethereum Classic Mainnet
+//     case 108:
+//       return "UBQ";  // UBIQ
+//     case 137:
+//       return "RSK";  // Rootstock Mainnet
+//     case 37310:
+//       return "tRSK";  // Rootstock Testnet
+//   }
+//   return 0;
+// }
 
 #endif
 
 const char *address_n_str(const uint32_t *address_n, size_t address_n_count,
                           bool address_is_account) {
+  (void)address_is_account;
   if (address_n_count > 8) {
     return _("Unknown long path");
   }
   if (address_n_count == 0) {
     return _("Path: m");
-  }
-
-  enum {
-    ACCOUNT_NONE,
-    ACCOUNT_BIP44,
-    ACCOUNT_BIP49,
-    ACCOUNT_BIP84,
-    ACCOUNT_BIP86,
-    ACCOUNT_SLIP25
-  } account_type = ACCOUNT_NONE;
-
-  if ((address_n[1] & PATH_HARDENED) && (address_n[2] & PATH_HARDENED) &&
-      (address_n[address_n_count - 2] <= PATH_MAX_CHANGE) &&
-      (address_n[address_n_count - 1] <= PATH_MAX_ADDRESS_INDEX)) {
-    if (address_n_count == 5 && address_n[0] == PATH_HARDENED + 44) {
-      account_type = ACCOUNT_BIP44;
-    } else if (address_n_count == 5 && address_n[0] == PATH_HARDENED + 49) {
-      account_type = ACCOUNT_BIP49;
-    } else if (address_n_count == 5 && address_n[0] == PATH_HARDENED + 84) {
-      account_type = ACCOUNT_BIP84;
-    } else if (address_n_count == 5 && address_n[0] == PATH_HARDENED + 86) {
-      account_type = ACCOUNT_BIP86;
-    } else if (address_n_count == 6 && address_n[0] == PATH_SLIP25_PURPOSE &&
-               (address_n[3] & PATH_HARDENED)) {
-      account_type = ACCOUNT_SLIP25;
-    }
-  }
-
-  // known BIP44/49/84/86 path
-  static char path[100];
-  if (account_type != ACCOUNT_NONE) {
-    bool legacy = false;
-    const CoinInfo *coin = coinBySlip44(address_n[1]);
-    const char *abbr = 0;
-    if (account_type == ACCOUNT_BIP86 || account_type == ACCOUNT_SLIP25) {
-      if (coin && coin->has_taproot && coin->bech32_prefix) {
-        abbr = coin->coin_shortcut;
-      }
-    } else if (account_type == ACCOUNT_BIP84) {
-      if (coin && coin->has_segwit && coin->bech32_prefix) {
-        abbr = coin->coin_shortcut;
-      }
-    } else if (account_type == ACCOUNT_BIP49) {
-      if (coin && coin->has_segwit) {
-        abbr = coin->coin_shortcut;
-      }
-    } else {
-      if (coin) {
-        if (coin->has_segwit) {
-          legacy = true;
-        }
-        abbr = coin->coin_shortcut;
-#if !BITCOIN_ONLY
-      } else {
-        abbr = slip44_extras(address_n[1]);
-#endif
-      }
-    }
-    const uint32_t accnum = address_is_account
-                                ? ((address_n[4] & PATH_UNHARDEN_MASK) + 1)
-                                : (address_n[2] & PATH_UNHARDEN_MASK) + 1;
-    if (abbr && accnum < 100) {
-      memzero(path, sizeof(path));
-      strlcpy(path, abbr, sizeof(path));
-      // Account naming:
-      // "Legacy", "Legacy SegWit", "SegWit", "Taproot" and "Coinjoin" for
-      // BIP44/P2PKH, BIP49/P2SH-P2WPKH, BIP84/P2WPKH, BIP86/P2TR, SLIP25/P2TR
-      // respectively. For non-segwit coins we use only BIP44 with no special
-      // naming.
-      if (legacy) {
-        strlcat(path, " Legacy", sizeof(path));
-      } else if (account_type == ACCOUNT_BIP49) {
-        strlcat(path, " L.SegWit", sizeof(path));
-      } else if (account_type == ACCOUNT_BIP84) {
-        strlcat(path, " SegWit", sizeof(path));
-      } else if (account_type == ACCOUNT_BIP86) {
-        strlcat(path, " Taproot", sizeof(path));
-      } else if (account_type == ACCOUNT_SLIP25) {
-        strlcat(path, " Coinjoin", sizeof(path));
-      }
-
-      if (address_is_account) {
-        strlcat(path, " address", sizeof(path));
-      } else {
-        strlcat(path, " account", sizeof(path));
-      }
-
-      if (!(account_type == ACCOUNT_SLIP25 && accnum == 1)) {
-        char acc[5] = {' ', '#'};
-        if (accnum < 10) {
-          acc[2] = '0' + accnum;
-          acc[3] = '\0';
-        } else {
-          acc[2] = '0' + (accnum / 10);
-          acc[3] = '0' + (accnum % 10);
-          acc[4] = '\0';
-        }
-        strlcat(path, acc, sizeof(path));
-      }
-      return path;
-    }
   }
 
   //                  "Path: m"    /    i   '
@@ -247,18 +147,6 @@ const char *address_n_str(const uint32_t *address_n, size_t address_n_count,
     c--;
   }
   *c = 'm';
-  c--;
-  *c = ' ';
-  c--;
-  *c = ':';
-  c--;
-  *c = 'h';
-  c--;
-  *c = 't';
-  c--;
-  *c = 'a';
-  c--;
-  *c = 'P';
 
   return c;
 }
@@ -1985,7 +1873,7 @@ void layoutHomeInfo(void) {
   if (layoutLast == layout_language_set) {
     layout_language_set(key);
   } else {
-    layoutEnterSleep();
+    layoutEnterSleep(0);
     if (layoutNeedRefresh()) {
       layoutHome();
     }
@@ -3546,11 +3434,13 @@ scan_key:
   }
 }
 
-void layoutEnterSleep(void) {
+bool layoutEnterSleep(int mode) {
 #if !EMULATOR
-
   if (config_getSleepDelayMs() > 0) {
     if (timer_get_sleep_count() >= config_getSleepDelayMs()) {
+      if (mode) {
+        return true;
+      }
       timer_sleep_start_reset();
       enter_sleep();
     }
@@ -3572,6 +3462,7 @@ void layoutEnterSleep(void) {
     layoutScreensaver();
   }
 #endif
+  return false;
 }
 void layoutConfirmHash(const BITMAP *icon, const char *description,
                        const uint8_t *hash, uint32_t len) {

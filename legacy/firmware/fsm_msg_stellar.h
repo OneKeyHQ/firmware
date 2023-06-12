@@ -28,7 +28,7 @@ static bool fsm_stellarCheckPath(uint32_t address_n_count,
     return false;
   }
 
-  return fsm_layoutPathWarning();
+  return fsm_layoutPathWarning(address_n_count, address_n);
 }
 
 void fsm_msgStellarGetAddress(const StellarGetAddress *msg) {
