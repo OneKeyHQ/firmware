@@ -262,14 +262,21 @@ void refreshNfcIcon(bool force_flag) {
 uint8_t refreshBleIcon(bool force_flag) {
   static bool ble_conn_status_old = false;
   static bool ble_icon_status_old = false;
+  static bool usb_status = false;
   uint8_t ret = 0;
+  usb_status = sys_usbState();
 
   if (ble_get_switch() == true) {
     if (sys_bleState() == true) {
       if (force_flag || false == ble_conn_status_old) {
         ble_conn_status_old = true;
-        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0,
-                       &bmp_status_ble_connect);
+        if (usb_status) {
+          oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0,
+                         &bmp_status_ble_connect);
+        } else {
+          oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0,
+                         &bmp_status_ble_connect);
+        }
         layout_refresh = true;
       }
     } else if (force_flag || true == ble_icon_status_old) {
@@ -277,7 +284,11 @@ uint8_t refreshBleIcon(bool force_flag) {
         ble_conn_status_old = false;
         ret = 1;
       }
-      oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
+      if (usb_status) {
+        oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
+      } else {
+        oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_status_ble);
+      }
       layout_refresh = true;
     }
     ble_icon_status_old = true;
@@ -287,7 +298,11 @@ uint8_t refreshBleIcon(bool force_flag) {
       ret = 1;
     }
     ble_icon_status_old = false;
-    oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
+    if (usb_status) {
+      oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
+    } else {
+      oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_status_ble);
+    }
     layout_refresh = true;
   }
   return ret;
@@ -405,8 +420,9 @@ void disUsbConnectSomething(uint8_t force_flag) {
   if (sys_usbState() == true) {
     refreshBatteryFlash();
 
-    if (force_flag || false == usb_status_old) {
+    if (force_flag || false == usb_status_old || layoutLast == layoutHome) {
       usb_status_old = true;
+      oledClearBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_status_usb);
       oledDrawBitmap(OLED_WIDTH - LOGO_WIDTH - 16, 0, &bmp_status_usb);
       layout_refresh = true;
     }
@@ -694,17 +710,6 @@ static void _layout_home(bool update_menu) {
     b.height = 64;
     b.data = homescreen;
     oledDrawBitmap(0, 0, &b);
-
-    if (!session_isUnlocked()) {
-      oledBox(128 / 2 - 5, 0, 128 / 2 + 4, 7, 0);
-      oledDrawBitmap(128 / 2 - 4, 0, &bmp_status_locked);
-    }
-
-    int l = oledStringWidth(ble_get_name(), FONT_STANDARD);
-    oledBox(OLED_WIDTH / 2 - l / 2 - 2, OLED_HEIGHT - 11,
-            OLED_WIDTH / 2 + l / 2, OLED_HEIGHT, 0);
-    oledDrawStringCenter(OLED_WIDTH / 2, OLED_HEIGHT - 9, ble_get_name(),
-                         FONT_STANDARD);
   } else {
     if (backup_only) {
       oledDrawStringCenterAdapter(OLED_WIDTH / 2, 20, _("Backup Mode"),
@@ -3934,8 +3939,13 @@ bool layoutTransactionSign(const char *chain_name, uint64_t chain_id,
   if (strncmp(chain_name, "EVM", 3) == 0) {
     has_chain_id = true;
     max_index++;
-    snprintf(chain_id_str, 21, "%" PRIu64, chain_id);
+#if EMULATOR
+    snprintf(chain_id_str, 21, "%u", (uint32_t)chain_id);
+#else
+    snprintf(chain_id_str, 21, "%lu", (uint32_t)chain_id);
+#endif
   }
+
   const char **tx_msg = format_tx_message(chain_name);
   if (token_transfer && (token_id == NULL)) {
     strcat(title, "Token");
