@@ -765,6 +765,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
 
   protectAbortedByInitialize = false;
   protectAbortedByInitializeOnboarding = false;
+  protectAbortedBySleep = false;
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {

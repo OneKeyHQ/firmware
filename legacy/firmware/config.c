@@ -201,7 +201,7 @@ static uint32_t autoSleepDelayMs = sleepDelayMsDefault;
 
 static uint32_t deviceState = 0;
 
-static SafetyCheckLevel safetyCheckLevel = SafetyCheckLevel_PromptAlways;
+static SafetyCheckLevel safetyCheckLevel = SafetyCheckLevel_Strict;
 
 static const uint32_t CONFIG_VERSION = 11;
 
@@ -1406,7 +1406,7 @@ void config_wipe(void) {
   random_buffer((uint8_t *)config_uuid, sizeof(config_uuid));
   data2hex((const uint8_t *)config_uuid, sizeof(config_uuid), config_uuid_str);
   autoLockDelayMsCached = secfalse;
-  safetyCheckLevel = SafetyCheckLevel_PromptAlways;
+  safetyCheckLevel = SafetyCheckLevel_Strict;
   storage_set(KEY_UUID, config_uuid, sizeof(config_uuid));
   storage_set(KEY_VERSION, &CONFIG_VERSION, sizeof(CONFIG_VERSION));
   session_clear(false);
