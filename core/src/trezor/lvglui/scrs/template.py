@@ -28,6 +28,7 @@ class Address(FullSizeWindow):
         xpubs=None,
         address_qr=None,
         multisig_index: int | None = 0,
+        addr_type=None,
     ):
         super().__init__(
             title,
@@ -43,6 +44,7 @@ class Address(FullSizeWindow):
         self.address = address
         self.address_qr = address_qr
         self.icon = icon_path
+        self.addr_type = addr_type
         if primary_color:
             self.title.add_style(StyleWrapper().text_color(primary_color), 0)
         if __debug__:
@@ -65,6 +67,10 @@ class Address(FullSizeWindow):
         self.container = ContainerFlexCol(
             self.content_area, self.subtitle, pos=(0, 16), padding_row=8
         )
+        if self.addr_type:
+            self.item1 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), self.addr_type
+            )
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__PATH__COLON), self.path
         )
