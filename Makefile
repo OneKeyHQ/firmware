@@ -6,7 +6,6 @@ help: ## show this help
 ## style commands:
 
 PY_FILES = $(shell find . -type f -name '*.py'   | sed 'sO^\./OO' | grep -f ./tools/style.py.include | grep -v -f ./tools/style.py.exclude )
-C_FILES_OLD_FORMAT =  $(shell find . -type f -name '*.[ch]' | grep -f ./tools/style.c.old.include  | grep -v -f ./tools/style.c.old.exclude )
 C_FILES =  $(shell find . -type f -name '*.[ch]' | grep -f ./tools/style.c.include  | grep -v -f ./tools/style.c.exclude )
 
 
@@ -71,16 +70,12 @@ editor_check: ## check editorconfig formatting
 
 cstyle_check: ## run code style check on low-level C code
 	clang-format --version
-	@echo [CLANG-FORMAT OLD STYLE]
-	@clangFormatOptions=--style=file:./.clang-format-old ./tools/clang-format-check $(C_FILES_OLD_FORMAT)
 	@echo [CLANG-FORMAT]
-	@clangFormatOptions=--style=file:./.clang-format ./tools/clang-format-check $(C_FILES)
+	@./tools/clang-format-check $(C_FILES)
 
 cstyle: ## apply code style on low-level C code
-	@echo [CLANG-FORMAT OLD STYLE]
-	@clang-format --style=file:.clang-format-old -i $(C_FILES_OLD_FORMAT)
 	@echo [CLANG-FORMAT]
-	@clang-format --style=file:.clang-format -i $(C_FILES)
+	@clang-format -i $(C_FILES)
 
 defs_check: ## check validity of coin definitions and protobuf files
 	jsonlint common/defs/*.json common/defs/*/*.json
