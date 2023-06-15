@@ -289,6 +289,7 @@ async def show_address(
     address_extra: str | None = None,
     title_qr: str | None = None,
     title: str = "",
+    addr_type: str | None = None,
 ) -> None:
     is_multisig = len(xpubs) > 0
     from trezor.lvglui.scrs.template import Address
@@ -318,6 +319,7 @@ async def show_address(
             ctx.primary_color,
             ctx.icon_path,
             address_qr=address_qr,
+            addr_type=addr_type,
         ),
         "show_address",
         ButtonRequestType.Address,
