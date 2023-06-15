@@ -1526,11 +1526,11 @@ class AboutSetting(Screen):
         if not device.is_trezor_compatible():
             self.trezor_mode.clear_state()
 
-        self.board_loader = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
-        )
-        self.board_loader.set_style_bg_color(lv_colors.BLACK, 0)
-        self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+        # self.board_loader = ListItemBtn(
+        #     self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
+        # )
+        # self.board_loader.set_style_bg_color(lv_colors.BLACK, 0)
+        # self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
         self.firmware_update = NormalButton(
             self.content_area, _(i18n_keys.BUTTON__SYSTEM_UPDATE)
         )
@@ -1542,18 +1542,19 @@ class AboutSetting(Screen):
 
     def on_click(self, event_obj):
         target = event_obj.get_target()
-        if target == self.board_loader:
-            GO2BoardLoader()
+        # if target == self.board_loader:
+        #     GO2BoardLoader()
         if target == self.firmware_update:
             Go2UpdateMode(self)
 
     def on_long_pressed(self, event_obj):
         target = event_obj.get_target()
         if target == self.serial:
-            if self.board_loader.has_flag(lv.obj.FLAG.HIDDEN):
-                self.board_loader.clear_flag(lv.obj.FLAG.HIDDEN)
-            else:
-                self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+            # if self.board_loader.has_flag(lv.obj.FLAG.HIDDEN):
+            #     self.board_loader.clear_flag(lv.obj.FLAG.HIDDEN)
+            # else:
+            #     self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+            GO2BoardLoader()
 
     def on_value_changed(self, event_obj):
         code = event_obj.code

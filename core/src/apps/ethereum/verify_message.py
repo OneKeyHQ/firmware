@@ -54,6 +54,7 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
         decode_message(msg.message),
         address=address,
         verify=True,
+        evm_chain_id=None if network else msg.chain_id,
     )
     from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
