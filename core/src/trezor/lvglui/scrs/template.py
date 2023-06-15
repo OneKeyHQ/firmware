@@ -29,6 +29,7 @@ class Address(FullSizeWindow):
         address_qr=None,
         multisig_index: int | None = 0,
         addr_type=None,
+        evm_chain_id: int | None = None,
     ):
         super().__init__(
             title,
@@ -56,9 +57,9 @@ class Address(FullSizeWindow):
                 StyleWrapper().text_font(font_PJSBOLD48).text_color(lv_colors.WHITE), 0
             )
         self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 48)
-        self.show_address()
+        self.show_address(evm_chain_id=evm_chain_id)
 
-    def show_address(self):
+    def show_address(self, evm_chain_id: int | None = None):
         self.current = self.SHOW_TYPE.ADDRESS
         if hasattr(self, "qr"):
             self.qr.delete()
@@ -68,15 +69,17 @@ class Address(FullSizeWindow):
             self.content_area, self.subtitle, pos=(0, 16), padding_row=8
         )
         if self.addr_type:
-            self.item1 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), self.addr_type
+            self.item1_0 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), self.addr_type)
+        if evm_chain_id:
+            self.item2 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(evm_chain_id),
             )
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__PATH__COLON), self.path
         )
-        # self.item2 = DisplayItem(
-        #     self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
-        # )
         # if xpubs:
         #     self.title.align(lv.ALIGN.TOP_MID, 0, 100)
         #     self.btn_yes.align(lv.ALIGN.BOTTOM_MID, 0, -30)
@@ -149,7 +152,14 @@ class XpubOrPub(FullSizeWindow):
 
 class Message(FullSizeWindow):
     def __init__(
-        self, title, address, message, primary_color, icon_path, verify: bool = False
+        self,
+        title,
+        address,
+        message,
+        primary_color,
+        icon_path,
+        verify: bool = False,
+        evm_chain_id: int | None = None,
     ):
         super().__init__(
             title,
@@ -164,6 +174,12 @@ class Message(FullSizeWindow):
         self.container = ContainerFlexCol(
             self.content_area, self.title, pos=(0, 40), padding_row=8
         )
+        if evm_chain_id:
+            self.item3 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(evm_chain_id),
+            )
         self.item1 = DisplayItem(
             self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
         )
@@ -253,6 +269,7 @@ class TransactionDetailsETH(FullSizeWindow):
         primary_color=lv_colors.ONEKEY_GREEN,
         contract_addr=None,
         token_id=None,
+        evm_chain_id=None,
     ):
         super().__init__(
             title,
@@ -262,6 +279,12 @@ class TransactionDetailsETH(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        if evm_chain_id:
+            self.item0_1 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(evm_chain_id),
+            )
         if contract_addr:
             self.item0 = DisplayItem(
                 self.container,

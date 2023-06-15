@@ -68,7 +68,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Expanse Network",
         rskip60=False,
         icon="evm-exp.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=3,
@@ -113,7 +113,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="ThaiChain",
         rskip60=False,
         icon="evm-tch.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=8,
@@ -122,7 +122,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ubiq",
         rskip60=False,
         icon="evm-ubq.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=9,
@@ -149,7 +149,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Metadium",
         rskip60=False,
         icon="evm-meta.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=12,
@@ -176,7 +176,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Flare",
         rskip60=False,
         icon="evm-flr.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=15,
@@ -185,7 +185,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Diode Prenet",
         rskip60=False,
         icon="evm-diode.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=16,
@@ -203,7 +203,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="ThaiChain 2.0 ThaiFi",
         rskip60=False,
         icon="evm-tfi.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=18,
@@ -221,7 +221,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Songbird Canary-Network",
         rskip60=False,
         icon="evm-sgb.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=20,
@@ -230,7 +230,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Elastos Smart Chain",
         rskip60=False,
         icon="evm-ela.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=24,
@@ -239,7 +239,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Dithereum",
         rskip60=False,
         icon="evm-dth.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=25,
@@ -257,7 +257,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="ShibaChain",
         rskip60=False,
         icon="evm-shib.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=29,
@@ -266,7 +266,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Genesis L1",
         rskip60=False,
         icon="evm-l1.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=30,
@@ -275,7 +275,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="RSK",
         rskip60=True,
         icon="evm-rbtc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=31,
@@ -293,7 +293,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="GoodData",
         rskip60=False,
         icon="evm-good.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=35,
@@ -302,7 +302,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="TBWG Chain",
         rskip60=False,
         icon="evm-tbg.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=38,
@@ -311,7 +311,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Valorbit",
         rskip60=False,
         icon="evm-val.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=40,
@@ -320,7 +320,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Telos EVM",
         rskip60=False,
         icon="evm-tlos.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=42,
@@ -338,7 +338,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Darwinia Crab Network",
         rskip60=False,
         icon="evm-crab.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=50,
@@ -347,7 +347,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="XinFin Network",
         rskip60=False,
         icon="evm-xdc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=51,
@@ -365,7 +365,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="CoinEx Smart Chain",
         rskip60=False,
         icon="evm-cet.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=55,
@@ -374,7 +374,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Zyx",
         rskip60=False,
         icon="evm-zyx.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=56,
@@ -392,7 +392,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ontology",
         rskip60=False,
         icon="evm-ong.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=60,
@@ -401,7 +401,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="GoChain",
         rskip60=False,
         icon="evm-go.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=61,
@@ -437,7 +437,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ellaism",
         rskip60=False,
         icon="evm-ella.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=66,
@@ -446,7 +446,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="OKXChain",
         rskip60=False,
         icon="evm-okt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=67,
@@ -464,7 +464,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="SoterOne",
         rskip60=False,
         icon="evm-soter.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=69,
@@ -482,7 +482,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="IDChain",
         rskip60=False,
         icon="evm-eidi.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=76,
@@ -491,7 +491,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Mix",
         rskip60=False,
         icon="evm-mix.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=77,
@@ -500,7 +500,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="POA Network Sokol",
         rskip60=False,
         icon="evm-spoa.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=78,
@@ -509,7 +509,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="PrimusChain",
         rskip60=False,
         icon="evm-peth.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=80,
@@ -518,7 +518,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="GeneChain",
         rskip60=False,
         icon="evm-rna.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=82,
@@ -527,7 +527,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Meter",
         rskip60=False,
         icon="evm-mtr.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=86,
@@ -536,7 +536,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="GateChain",
         rskip60=False,
         icon="evm-gt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=87,
@@ -545,7 +545,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Nova Network",
         rskip60=False,
         icon="evm-snt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=88,
@@ -554,7 +554,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="TomoChain",
         rskip60=False,
         icon="evm-tomo.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=90,
@@ -563,7 +563,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Garizon Stage0",
         rskip60=False,
         icon="evm-gar.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=96,
@@ -572,7 +572,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="NEXT Smart Chain",
         rskip60=False,
         icon="evm-next.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=97,
@@ -590,7 +590,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="POA Network Core",
         rskip60=False,
         icon="evm-poa.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100,
@@ -599,7 +599,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Gnosis Chain (formerly xDai)",
         rskip60=False,
         icon="evm-xdai.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=101,
@@ -608,7 +608,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="EtherInc",
         rskip60=False,
         icon="evm-eti.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=105,
@@ -617,7 +617,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Web3Games Devnet",
         rskip60=False,
         icon="evm-w3g.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=106,
@@ -626,7 +626,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Velas EVM",
         rskip60=False,
         icon="evm-vlx.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=108,
@@ -635,7 +635,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="ThunderCore",
         rskip60=False,
         icon="evm-tt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=111,
@@ -644,7 +644,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="EtherLite Chain",
         rskip60=False,
         icon="evm-etl.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=122,
@@ -653,7 +653,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Fuse",
         rskip60=False,
         icon="evm-fuse.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=123,
@@ -662,7 +662,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Fuse Sparknet",
         rskip60=False,
         icon="evm-spark.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=124,
@@ -671,7 +671,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Decentralized Web",
         rskip60=False,
         icon="evm-dwu.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=126,
@@ -680,7 +680,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="OYchain",
         rskip60=False,
         icon="evm-oy.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=127,
@@ -689,7 +689,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Factory 127",
         rskip60=False,
         icon="evm-feth.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=128,
@@ -716,7 +716,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="DAX CHAIN",
         rskip60=False,
         icon="evm-dax.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=162,
@@ -734,7 +734,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Lightstreams",
         rskip60=False,
         icon="evm-pht.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=186,
@@ -743,7 +743,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Seele",
         rskip60=False,
         icon="evm-seele.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=188,
@@ -752,7 +752,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="BMC",
         rskip60=False,
         icon="evm-btm.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=199,
@@ -761,7 +761,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="BitTorrent Chain",
         rskip60=False,
         icon="evm-btt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=211,
@@ -770,7 +770,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Freight Trust Network",
         rskip60=False,
         icon="evm-0xf.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=222,
@@ -779,7 +779,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Permission",
         rskip60=False,
         icon="evm-ask.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=225,
@@ -788,7 +788,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="LACHAIN",
         rskip60=False,
         icon="evm-la.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=246,
@@ -797,7 +797,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Energy Web Chain",
         rskip60=False,
         icon="evm-ewt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=250,
@@ -824,7 +824,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Setheum",
         rskip60=False,
         icon="evm-setm.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=262,
@@ -833,7 +833,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="SUR Blockchain Network",
         rskip60=False,
         icon="evm-srn.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=269,
@@ -842,7 +842,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="High Performance Blockchain",
         rskip60=False,
         icon="evm-hpb.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=288,
@@ -854,12 +854,30 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         primary_color=0xCCFF00,
     )
     yield NetworkInfo(
+        chain_id=314,
+        slip44=60,
+        shortcut="FIL",
+        name="Filecoin",
+        rskip60=False,
+        icon="evm-filecoin.png",
+        primary_color=0x0090FF,
+    )
+    yield NetworkInfo(
         chain_id=321,
         slip44=60,
         shortcut="KCS",
         name="KCC",
         rskip60=False,
         icon="evm-kcs.png",
+        primary_color=0xD2D2D2,
+    )
+    yield NetworkInfo(
+        chain_id=324,
+        slip44=60,
+        shortcut="ETH",
+        name="zkSync Era",
+        rskip60=False,
+        icon="evm-zksync-era.png",
         primary_color=0xFFFFFF,
     )
     yield NetworkInfo(
@@ -869,7 +887,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Web3Q",
         rskip60=False,
         icon="evm-w3q.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=336,
@@ -878,7 +896,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Shiden",
         rskip60=False,
         icon="evm-sdn.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=369,
@@ -887,7 +905,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="PulseChain",
         rskip60=False,
         icon="evm-pls.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=385,
@@ -896,7 +914,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Lisinski",
         rskip60=False,
         icon="evm-lisinski.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=420,
@@ -914,7 +932,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Rupaya",
         rskip60=False,
         icon="evm-rupx.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=512,
@@ -923,7 +941,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Double-A Chain",
         rskip60=False,
         icon="evm-aac.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=555,
@@ -932,7 +950,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Vela1 Chain",
         rskip60=False,
         icon="evm-class.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=558,
@@ -941,7 +959,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Tao Network",
         rskip60=False,
         icon="evm-tao.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=595,
@@ -959,7 +977,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Karura Network",
         rskip60=False,
         icon="evm-kar.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=707,
@@ -968,7 +986,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="BlockChain Station",
         rskip60=False,
         icon="evm-bcs.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=777,
@@ -977,7 +995,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="cheapETH",
         rskip60=False,
         icon="evm-cth.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=787,
@@ -986,7 +1004,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Acala Network",
         rskip60=False,
         icon="evm-aca.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=803,
@@ -995,7 +1013,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Haic",
         rskip60=False,
         icon="evm-haic.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=820,
@@ -1004,7 +1022,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Callisto",
         rskip60=False,
         icon="evm-clo.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=821,
@@ -1022,7 +1040,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ambros Chain",
         rskip60=False,
         icon="evm-ambr.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=888,
@@ -1031,7 +1049,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Wanchain",
         rskip60=False,
         icon="evm-wan.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=977,
@@ -1040,7 +1058,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Nepal Blockchain Network",
         rskip60=False,
         icon="evm-yeti.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=998,
@@ -1049,7 +1067,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Lucky Network",
         rskip60=False,
         icon="evm-l99.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1001,
@@ -1076,7 +1094,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Evrice Network",
         rskip60=False,
         icon="evm-evc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1012,
@@ -1085,7 +1103,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Newton",
         rskip60=False,
         icon="evm-new.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1022,
@@ -1094,7 +1112,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Sakura",
         rskip60=False,
         icon="evm-sku.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1024,
@@ -1103,7 +1121,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Clover",
         rskip60=False,
         icon="evm-clv.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1030,
@@ -1112,7 +1130,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Conflux eSpace",
         rskip60=False,
         icon="evm-cfx.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1088,
@@ -1121,7 +1139,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Metis Andromeda",
         rskip60=False,
         icon="evm-metis.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1139,
@@ -1130,7 +1148,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="MathChain",
         rskip60=False,
         icon="evm-math.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1140,
@@ -1148,7 +1166,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Iora Chain",
         rskip60=False,
         icon="evm-iora.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1202,
@@ -1157,7 +1175,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="World Trade Technical Chain",
         rskip60=False,
         icon="evm-wtt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1213,
@@ -1166,7 +1184,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Popcateum",
         rskip60=False,
         icon="evm-pop.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1214,
@@ -1175,7 +1193,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="EnterChain",
         rskip60=False,
         icon="evm-enter.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1280,
@@ -1184,7 +1202,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="HALO",
         rskip60=False,
         icon="evm-ho.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1284,
@@ -1193,7 +1211,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Moonbeam",
         rskip60=False,
         icon="evm-glmr.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1285,
@@ -1202,7 +1220,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Moonriver",
         rskip60=False,
         icon="evm-movr.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1287,
@@ -1211,7 +1229,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Moonbase Alpha",
         rskip60=False,
         icon="evm-dev.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1288,
@@ -1220,7 +1238,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Moonrock",
         rskip60=False,
         icon="evm-roc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1618,
@@ -1229,7 +1247,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Catecoin Chain",
         rskip60=False,
         icon="evm-cate.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1657,
@@ -1238,7 +1256,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Btachain",
         rskip60=False,
         icon="evm-bta.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1856,
@@ -1247,7 +1265,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Teslafunds",
         rskip60=False,
         icon="evm-tsf.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1898,
@@ -1256,7 +1274,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="BON Network",
         rskip60=False,
         icon="evm-boy.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1987,
@@ -1265,7 +1283,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="EtherGem",
         rskip60=False,
         icon="evm-egem.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2020,
@@ -1274,7 +1292,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="420coin",
         rskip60=False,
         icon="evm-420.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2021,
@@ -1283,7 +1301,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Edgeware",
         rskip60=False,
         icon="evm-edg.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2025,
@@ -1292,7 +1310,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Rangers Protocol",
         rskip60=False,
         icon="evm-rpg.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2100,
@@ -1301,7 +1319,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ecoball",
         rskip60=False,
         icon="evm-eco.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2213,
@@ -1310,7 +1328,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Evanesco",
         rskip60=False,
         icon="evm-eva.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2559,
@@ -1319,7 +1337,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Kortho",
         rskip60=False,
         icon="evm-kto.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=3400,
@@ -1328,7 +1346,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Paribu Net",
         rskip60=False,
         icon="evm-prb.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=3966,
@@ -1337,7 +1355,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="DYNO",
         rskip60=False,
         icon="evm-dyno.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=4689,
@@ -1346,7 +1364,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="IoTeX Network",
         rskip60=False,
         icon="evm-iotx.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=5197,
@@ -1355,7 +1373,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="EraSwap",
         rskip60=False,
         icon="evm-es.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=5315,
@@ -1364,7 +1382,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Uzmi Network",
         rskip60=False,
         icon="evm-uzmi.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=5869,
@@ -1373,7 +1391,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Wegochain Rubidium",
         rskip60=False,
         icon="evm-rbd.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=6626,
@@ -1382,7 +1400,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Pixie Chain",
         rskip60=False,
         icon="evm-pix.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=8000,
@@ -1391,7 +1409,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Teleport",
         rskip60=False,
         icon="evm-tele.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=8217,
@@ -1400,7 +1418,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Klaytn",
         rskip60=False,
         icon="evm-klay.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=8723,
@@ -1409,7 +1427,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="TOOL Global",
         rskip60=False,
         icon="evm-olo.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=8995,
@@ -1418,7 +1436,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="bloxberg",
         rskip60=False,
         icon="evm-u+25b3.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=9001,
@@ -1427,7 +1445,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Evmos",
         rskip60=False,
         icon="evm-evmos.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=9100,
@@ -1436,7 +1454,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Genesis Coin",
         rskip60=False,
         icon="evm-gnc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=10101,
@@ -1445,7 +1463,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Blockchain Genesis",
         rskip60=False,
         icon="evm-gen.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=10823,
@@ -1454,7 +1472,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="CryptoCoinPay",
         rskip60=False,
         icon="evm-ccp.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=11111,
@@ -1463,7 +1481,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="WAGMI",
         rskip60=False,
         icon="evm-wgm.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=12052,
@@ -1472,7 +1490,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Singularity ZERO",
         rskip60=False,
         icon="evm-zero.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=13381,
@@ -1481,7 +1499,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Phoenix",
         rskip60=False,
         icon="evm-phx.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=16000,
@@ -1490,7 +1508,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="MetaDot",
         rskip60=False,
         icon="evm-mtt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=19845,
@@ -1499,7 +1517,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="BTCIX Network",
         rskip60=False,
         icon="evm-btcix.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=21816,
@@ -1508,7 +1526,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="omChain",
         rskip60=False,
         icon="evm-oml.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=24484,
@@ -1517,7 +1535,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Webchain",
         rskip60=False,
         icon="evm-web.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=24734,
@@ -1526,7 +1544,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="MintMe.com Coin",
         rskip60=False,
         icon="evm-mintme.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=31102,
@@ -1535,7 +1553,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ethersocial Network",
         rskip60=False,
         icon="evm-esn.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=32659,
@@ -1544,7 +1562,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Fusion",
         rskip60=False,
         icon="evm-fsn.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=39797,
@@ -1553,7 +1571,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Energi",
         rskip60=False,
         icon="evm-nrg.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=42069,
@@ -1562,7 +1580,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="pegglecoin",
         rskip60=False,
         icon="evm-peggle.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=42161,
@@ -1589,7 +1607,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Emerald Paratime",
         rskip60=False,
         icon="evm-rose.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=43113,
@@ -1625,7 +1643,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="REI Network",
         rskip60=False,
         icon="evm-rei.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=49797,
@@ -1643,7 +1661,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="DFK Chain",
         rskip60=False,
         icon="evm-jewel.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=62320,
@@ -1661,7 +1679,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="eCredits",
         rskip60=False,
         icon="evm-ecs.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=73799,
@@ -1673,13 +1691,22 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         primary_color=0x969696,
     )
     yield NetworkInfo(
+        chain_id=73927,
+        slip44=60,
+        shortcut="ETH",
+        name="Mixin Virtual Machine",
+        rskip60=False,
+        icon="evm-mixin.png",
+        primary_color=0x5959D8,
+    )
+    yield NetworkInfo(
         chain_id=78110,
         slip44=60,
         shortcut="FIN",
         name="Firenze test network",
         rskip60=False,
         icon="evm-fin.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=80001,
@@ -1697,7 +1724,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="UB Smart Chain",
         rskip60=False,
         icon="evm-ubc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100000,
@@ -1706,7 +1733,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100001,
@@ -1715,7 +1742,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100002,
@@ -1724,7 +1751,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100003,
@@ -1733,7 +1760,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100004,
@@ -1742,7 +1769,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100005,
@@ -1751,7 +1778,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100006,
@@ -1760,7 +1787,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100007,
@@ -1769,7 +1796,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=100008,
@@ -1778,7 +1805,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="QuarkChain",
         rskip60=False,
         icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=108801,
@@ -1787,7 +1814,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="BROChain",
         rskip60=False,
         icon="evm-bro.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=200625,
@@ -1796,7 +1823,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Akroma",
         rskip60=False,
         icon="evm-aka.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=201018,
@@ -1805,7 +1832,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Alaya",
         rskip60=False,
         icon="evm-atp.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=210425,
@@ -1814,7 +1841,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="PlatON",
         rskip60=False,
         icon="evm-lat.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=246529,
@@ -1823,7 +1850,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="ARTIS sigma1",
         rskip60=False,
         icon="evm-ats.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=246785,
@@ -1841,7 +1868,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Social Smart Chain",
         rskip60=False,
         icon="evm-$oc.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=333999,
@@ -1850,7 +1877,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Polis",
         rskip60=False,
         icon="evm-polis.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=888888,
@@ -1859,7 +1886,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Vision -",
         rskip60=False,
         icon="evm-vs.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=955305,
@@ -1868,7 +1895,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Eluvio Content Fabric",
         rskip60=False,
         icon="evm-elv.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1313114,
@@ -1877,7 +1904,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Etho Protocol",
         rskip60=False,
         icon="evm-etho.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1313500,
@@ -1886,7 +1913,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Xerom",
         rskip60=False,
         icon="evm-xero.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=7762959,
@@ -1895,7 +1922,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Musicoin",
         rskip60=False,
         icon="evm-music.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=11155111,
@@ -1913,7 +1940,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="PepChain Churchill",
         rskip60=False,
         icon="evm-tpep.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=18289463,
@@ -1922,7 +1949,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="IOLite",
         rskip60=False,
         icon="evm-ilt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=20181205,
@@ -1931,7 +1958,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="quarkblockchain",
         rskip60=False,
         icon="evm-qki.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=28945486,
@@ -1940,7 +1967,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Auxilium Network",
         rskip60=False,
         icon="evm-aux.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=35855456,
@@ -1949,7 +1976,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Joys Digital",
         rskip60=False,
         icon="evm-joys.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=61717561,
@@ -1958,7 +1985,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Aquachain",
         rskip60=False,
         icon="evm-aqua.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=99415706,
@@ -1976,7 +2003,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Neon EVM",
         rskip60=False,
         icon="evm-neon.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=311752642,
@@ -1985,7 +2012,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="OneLedger",
         rskip60=False,
         icon="evm-olt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1122334455,
@@ -1994,7 +2021,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="IPOS Network",
         rskip60=False,
         icon="evm-ipos.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1313161554,
@@ -2003,7 +2030,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Aurora",
         rskip60=False,
         icon="evm-aurora.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1666600000,
@@ -2021,7 +2048,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Harmony",
         rskip60=False,
         icon="evm-one.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1666600002,
@@ -2030,7 +2057,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Harmony",
         rskip60=False,
         icon="evm-one.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=1666600003,
@@ -2039,7 +2066,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Harmony",
         rskip60=False,
         icon="evm-one.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=2021121117,
@@ -2048,7 +2075,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="DataHopper",
         rskip60=False,
         icon="evm-hop.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=3125659152,
@@ -2057,7 +2084,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Pirl",
         rskip60=False,
         icon="evm-pirl.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=11297108109,
@@ -2066,7 +2093,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Palm",
         rskip60=False,
         icon="evm-palm.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=197710212030,
@@ -2075,7 +2102,7 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Ntity",
         rskip60=False,
         icon="evm-ntt.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
     yield NetworkInfo(
         chain_id=6022140761023,
@@ -2084,5 +2111,5 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         name="Molereum Network",
         rskip60=False,
         icon="evm-mole.png",
-        primary_color=0xFFFFFF,
+        primary_color=0xD2D2D2,
     )
