@@ -429,7 +429,8 @@ def _load_ethereum_networks() -> Coins:
         # strip out bullcrap in network naming
         if "mainnet" in name.lower():
             name = re.sub(r" mainnet.*$", "", name, flags=re.IGNORECASE)
-
+            if name.endswith("-"):
+                name = name[:-1].strip()
         network = dict(
             chain=chain_data["shortName"],
             chain_id=chain_data["chainId"],

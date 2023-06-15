@@ -70,7 +70,8 @@ class Address(FullSizeWindow):
         )
         if self.addr_type:
             self.item1_0 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), self.addr_type)
+                self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), self.addr_type
+            )
         if evm_chain_id:
             self.item2 = DisplayItem(
                 self.container,
