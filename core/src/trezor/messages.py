@@ -2145,6 +2145,7 @@ if TYPE_CHECKING:
         coin_switch: "int | None"
         build_id: "str | None"
         battery_level: "int | None"
+        trezor_compat_mode: "bool | None"
 
         def __init__(
             self,
@@ -2206,6 +2207,7 @@ if TYPE_CHECKING:
             coin_switch: "int | None" = None,
             build_id: "str | None" = None,
             battery_level: "int | None" = None,
+            trezor_compat_mode: "bool | None" = None,
         ) -> None:
             pass
 
@@ -3926,14 +3928,12 @@ if TYPE_CHECKING:
     class EthereumGetPublicKey(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
-        chain_id: "int | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
-            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -3960,14 +3960,14 @@ if TYPE_CHECKING:
     class EthereumGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
-        chain_id: "int | None"
+        encoded_network: "bytes | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
-            chain_id: "int | None" = None,
+            encoded_network: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -4000,6 +4000,7 @@ if TYPE_CHECKING:
         data_length: "int"
         chain_id: "int"
         tx_type: "int | None"
+        definitions: "EthereumDefinitions | None"
 
         def __init__(
             self,
@@ -4014,6 +4015,7 @@ if TYPE_CHECKING:
             data_initial_chunk: "bytes | None" = None,
             data_length: "int | None" = None,
             tx_type: "int | None" = None,
+            definitions: "EthereumDefinitions | None" = None,
         ) -> None:
             pass
 
@@ -4033,6 +4035,7 @@ if TYPE_CHECKING:
         data_length: "int"
         chain_id: "int"
         access_list: "list[EthereumAccessList]"
+        definitions: "EthereumDefinitions | None"
 
         def __init__(
             self,
@@ -4048,6 +4051,7 @@ if TYPE_CHECKING:
             access_list: "list[EthereumAccessList] | None" = None,
             to: "str | None" = None,
             data_initial_chunk: "bytes | None" = None,
+            definitions: "EthereumDefinitions | None" = None,
         ) -> None:
             pass
 
@@ -4092,14 +4096,14 @@ if TYPE_CHECKING:
     class EthereumSignMessage(protobuf.MessageType):
         address_n: "list[int]"
         message: "bytes"
-        chain_id: "int | None"
+        encoded_network: "bytes | None"
 
         def __init__(
             self,
             *,
             message: "bytes",
             address_n: "list[int] | None" = None,
-            chain_id: "int | None" = None,
+            encoded_network: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -4127,7 +4131,6 @@ if TYPE_CHECKING:
         signature: "bytes"
         message: "bytes"
         address: "str"
-        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4135,7 +4138,6 @@ if TYPE_CHECKING:
             signature: "bytes",
             message: "bytes",
             address: "str",
-            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4143,29 +4145,11 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumVerifyMessage"]:
             return isinstance(msg, cls)
 
-    class EthereumSignMessageEIP712(protobuf.MessageType):
-        address_n: "list[int]"
-        domain_hash: "bytes | None"
-        message_hash: "bytes | None"
-
-        def __init__(
-            self,
-            *,
-            address_n: "list[int] | None" = None,
-            domain_hash: "bytes | None" = None,
-            message_hash: "bytes | None" = None,
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["EthereumSignMessageEIP712"]:
-            return isinstance(msg, cls)
-
     class EthereumSignTypedHash(protobuf.MessageType):
         address_n: "list[int]"
         domain_separator_hash: "bytes"
         message_hash: "bytes | None"
-        chain_id: "int | None"
+        encoded_network: "bytes | None"
 
         def __init__(
             self,
@@ -4173,7 +4157,7 @@ if TYPE_CHECKING:
             domain_separator_hash: "bytes",
             address_n: "list[int] | None" = None,
             message_hash: "bytes | None" = None,
-            chain_id: "int | None" = None,
+            encoded_network: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -4217,7 +4201,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         primary_type: "str"
         metamask_v4_compat: "bool"
-        chain_id: "int | None"
+        definitions: "EthereumDefinitions | None"
 
         def __init__(
             self,
@@ -4225,7 +4209,7 @@ if TYPE_CHECKING:
             primary_type: "str",
             address_n: "list[int] | None" = None,
             metamask_v4_compat: "bool | None" = None,
-            chain_id: "int | None" = None,
+            definitions: "EthereumDefinitions | None" = None,
         ) -> None:
             pass
 

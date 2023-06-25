@@ -122,6 +122,8 @@ trezor.enums.SdProtectOperationType
 import trezor.enums.SdProtectOperationType
 trezor.enums.SeedRequestType
 import trezor.enums.SeedRequestType
+trezor.enums.TronResourceCode
+import trezor.enums.TronResourceCode
 trezor.enums.WL_OperationType
 import trezor.enums.WL_OperationType
 trezor.enums.WordRequestType
