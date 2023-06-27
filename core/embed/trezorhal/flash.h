@@ -154,6 +154,11 @@ secbool __wur flash_write_word(uint8_t sector, uint32_t offset, uint32_t data);
 secbool __wur flash_write_words(uint8_t sector, uint32_t offset,
                                 uint32_t data[8]);
 
+bool flash_check_ecc_fault();
+bool flash_clear_ecc_fault(uint32_t address);
+bool flash_fix_ecc_fault_FIRMWARE(uint32_t address);
+bool flash_fix_ecc_fault_FIRMWARE_v2(uint32_t address);
+
 #define FLASH_OTP_NUM_BLOCKS 16
 #define FLASH_OTP_BLOCK_SIZE 32
 
