@@ -95,7 +95,10 @@ __Z_INLINE parser_error_t parser_printBigIntFixedPointTotal(
   bignum256 total = {0}, val = {0}, gas = {0}, limit = {0};
   uint8_t val_bytes[32] = {0};
   uint8_t gas_bytes[32] = {0};
-  memcpy(val_bytes + (32 - value->len + 1), value->buffer + 1, value->len - 1);
+  if (value->len > 0) {
+    memcpy(val_bytes + (32 - value->len + 1), value->buffer + 1,
+           value->len - 1);
+  }
   memcpy(gas_bytes + (32 - gasfeecap->len + 1), gasfeecap->buffer + 1,
          gasfeecap->len - 1);
 

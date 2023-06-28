@@ -355,7 +355,7 @@ void menu_set_trezor_compatibility(int index) {
 
   uint8_t key = KEY_NULL;
 
-  if (index) {
+  if (0 == index) {
     layoutDialogAdapterEx(_("Restore Trezor Compat"), &bmp_bottom_left_close,
                           NULL, &bmp_bottom_right_confirm, NULL, NULL,
                           _("It will take effect after \ndevice restart."),

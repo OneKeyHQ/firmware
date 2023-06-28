@@ -283,24 +283,31 @@ void u2fhid_read_start(const U2FHID_FRAME *f) {
       buttonUpdate();
       if (button.YesUp && (last_req_state == AUTH || last_req_state == REG)) {
         if (next_page == true) {
-          dialog_timeout = 10 * U2F_TIMEOUT;
+          // standard requires to remember button press for 10 seconds.
+          // dialog_timeout = 10 * U2F_TIMEOUT;
           if (last_req_state == REG) {
             layoutDialogCenterAdapterV2(
-                _("U2F Register"), NULL, NULL, &bmp_bottom_right_confirm, NULL,
-                NULL, NULL, NULL, NULL, NULL, _("Register U2F Security\nKey?"));
+                _("U2F Register"), NULL, &bmp_bottom_left_close,
+                &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+                _("Register U2F Security\nKey?"));
           } else {
-            layoutDialogCenterAdapterV2(_("U2F Authenticate"), NULL, NULL,
-                                        &bmp_bottom_right_confirm, NULL, NULL,
-                                        NULL, NULL, NULL, NULL,
-                                        _("Authenticate U2F Security\nKey?"));
+            layoutDialogCenterAdapterV2(
+                _("U2F Authenticate"), NULL, &bmp_bottom_left_close,
+                &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+                _("Authenticate U2F Security\nKey?"));
           }
           next_page = false;
         } else {
           last_req_state++;
-          // standard requires to remember button press for 10 seconds.
-          dialog_timeout = 10 * U2F_TIMEOUT;
         }
       }
+      // if (button.NoUp && (last_req_state == AUTH || last_req_state == REG) &&
+      //     false == next_page) {
+      //   send_u2fhid_error(cid, ERR_MSG_TIMEOUT);
+      //   usbTiny(0);
+      //   layoutHome();
+      //   return;
+      // }
       if (reader == 0) {
         layoutHome();
         return;

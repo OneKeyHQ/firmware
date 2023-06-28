@@ -1001,7 +1001,7 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
     int to_len = strlen(to_str);
     if (0 == to_len) memcpy(to_str, _("to new contract?"), sizeof(to_str));
     if (token == NULL) {
-      if (amount == 0) {
+      if (amount == 0 && msg->contract.has_trigger_smart_contract) {
         strcpy(amount_str, _("message"));
       } else {
         tron_format_amount(amount, amount_str, sizeof(amount_str));

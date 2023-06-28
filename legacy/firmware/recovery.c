@@ -897,7 +897,7 @@ prompt_recovery:
   }
 
 select_mnemonic_count:
-  if (!protectSelectMnemonicNumber(&word_count, false)) {
+  if (!protectSelectMnemonicNumber(&word_count, true)) {
     goto_check(prompt_recovery);
   }
 

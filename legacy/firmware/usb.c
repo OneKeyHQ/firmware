@@ -456,16 +456,16 @@ void usbPoll(void) {
   config_getUsblock(&lock);
   if (usb_connect_status && !usb_status_bak) {
     usb_status_bak = true;
-    if (config_hasPin() && session_isUnlocked() && lock) {
+    if (config_hasPin() && session_isUnlocked()) {
       reset = true;
     }
   } else if (!usb_connect_status && usb_status_bak) {
     usb_status_bak = false;
-    if (config_hasPin() && session_isUnlocked() && lock) {
+    if (config_hasPin() && session_isUnlocked()) {
       reset = true;
     }
   }
-  if (reset) {
+  if (reset && lock) {
     svc_system_privileged();
     vector_table_t *ivt = (vector_table_t *)FLASH_PTR(FLASH_APP_START);
     __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));
@@ -473,6 +473,12 @@ void usbPoll(void) {
       mpu_config_firmware();
     }
     __asm__ volatile("b reset_handler");
+  } else if (reset) {
+    clear_msg_out();
+
+    RCC_AHB2RSTR |= RCC_AHB2RSTR_OTGFSRST;
+    RCC_AHB2RSTR &= ~RCC_AHB2RSTR_OTGFSRST;
+    usbInit();
   }
 
   i2c_slave_poll();

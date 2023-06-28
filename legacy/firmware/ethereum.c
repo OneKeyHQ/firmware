@@ -412,10 +412,10 @@ static bool layoutEthereumConfirmTx(
   } else if (token == NULL) {
     if (!is_eip1559 && data_total > 0) {
       return layoutBlindSign(
-          "Ethereum", true, to_str, signer, params->data_initial_chunk_bytes,
+          chain_name, true, to_str, signer, params->data_initial_chunk_bytes,
           data_total, _("Maximum Fee:"), gas_value, NULL, NULL, NULL, NULL);
     } else if (is_eip1559 && data_total > 0) {
-      return layoutBlindSign("Ethereum", true, to_str, signer,
+      return layoutBlindSign(chain_name, true, to_str, signer,
                              params->data_initial_chunk_bytes, data_total, key1,
                              value1, key2, value2, key3, value3);
     } else {
