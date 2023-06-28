@@ -776,6 +776,8 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     usbPoll();
 #if !EMULATOR
     if ((host_channel == CHANNEL_USB) && ((sys_usbState() == false))) {
+      usbTiny(0);
+      layoutHome();
       return KEY_NULL;
     }
 #endif
@@ -1502,7 +1504,11 @@ bool protectPassphraseOnDevice(char *passphrase) {
   if (timeout_flag) protectAbortedByTimeout = true;
 
   if (result) {
-    return inputPassphraseOnDevice(passphrase);
+    if (false == inputPassphraseOnDevice(passphrase)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return false;
+    }
+    return true;
   }
   return false;
 }

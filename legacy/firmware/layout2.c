@@ -375,7 +375,7 @@ void disPowerChargeTips(void) {
   }
 }
 void disUsbConnectTips(void) {
-  oledClearPart();
+  oledClear();
   if (usb_connect_status == 1) {
     disPcConnectTips();
   } else {
@@ -452,8 +452,13 @@ uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh) {
   disLongPressBleTips();
 
   disUsbConnectSomething(force_fresh);
-
-  refreshBatteryLevel(force_fresh);
+#if !EMULATOR
+  if (sys_usbState() == false) {
+    refreshBatteryLevel(true);
+  } else {
+    refreshBatteryLevel(force_fresh);
+  }
+#endif
 
   if (need_fresh) {
     if (layout_refresh) oledRefresh();

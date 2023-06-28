@@ -387,7 +387,7 @@ static bool layoutConfluxConfirmTx(
     uint8_t *to, uint32_t to_len, const char *signer, const uint8_t *value,
     uint32_t value_len, const ConfluxTokenType *token, uint32_t chain_ids,
     const uint8_t *gas_price, uint32_t gas_price_len, const uint8_t *gas_limit,
-    uint32_t gas_limit_len) {
+    uint32_t gas_limit_len, bool has_data) {
   bignum256 val = {0}, gas = {0};
   uint8_t pad_val[32] = {0};
   char gas_value[32] = {0};
@@ -415,7 +415,7 @@ static bool layoutConfluxConfirmTx(
     strlcpy(to_str, _("to new contract?"), sizeof(to_str));
   }
   if (token == NULL) {
-    if (bn_is_zero(&val)) {
+    if (bn_is_zero(&val) && has_data) {
       strcpy(amount, _("message"));  // contract
     } else {
       confluxFormatAmount(&val, NULL, amount, sizeof(amount));
@@ -565,11 +565,11 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
   }
 
   if (token != NULL) {
-    if (!layoutConfluxConfirmTx(msg->data_initial_chunk.bytes + 16, 20, signer,
-                                msg->data_initial_chunk.bytes + 36, 32, token,
-                                msg->chain_id, msg->gas_price.bytes,
-                                msg->gas_price.size, msg->gas_limit.bytes,
-                                msg->gas_limit.size)) {
+    if (!layoutConfluxConfirmTx(
+            msg->data_initial_chunk.bytes + 16, 20, signer,
+            msg->data_initial_chunk.bytes + 36, 32, token, msg->chain_id,
+            msg->gas_price.bytes, msg->gas_price.size, msg->gas_limit.bytes,
+            msg->gas_limit.size, data_total > 0 ? true : false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       conflux_signing_abort();
       return;
@@ -579,7 +579,8 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
       if (!layoutConfluxConfirmTx(pubkeyhash, 20, signer, msg->value.bytes,
                                   msg->value.size, NULL, msg->chain_id,
                                   msg->gas_price.bytes, msg->gas_price.size,
-                                  msg->gas_limit.bytes, msg->gas_limit.size)) {
+                                  msg->gas_limit.bytes, msg->gas_limit.size,
+                                  data_total > 0 ? true : false)) {
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         conflux_signing_abort();
         return;
@@ -588,7 +589,8 @@ void conflux_signing_init(ConfluxSignTx *msg, const HDNode *node) {
       if (!layoutConfluxConfirmTx(pubkeyhash, 0, signer, msg->value.bytes,
                                   msg->value.size, NULL, msg->chain_id,
                                   msg->gas_price.bytes, msg->gas_price.size,
-                                  msg->gas_limit.bytes, msg->gas_limit.size)) {
+                                  msg->gas_limit.bytes, msg->gas_limit.size,
+                                  data_total > 0 ? true : false)) {
         fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         conflux_signing_abort();
         return;

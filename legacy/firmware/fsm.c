@@ -368,6 +368,10 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
     if ((key == KEY_NULL) && (!protectAbortedBySleep)) {
       key = protectWaitKeyValue(ButtonRequestType_ButtonRequest_Address,
                                 button_request, 0, 1);
+      if (key == KEY_NULL) {
+        return false;
+      }
+      button_request = false;
     }
 
     if (key == KEY_CONFIRM) {
