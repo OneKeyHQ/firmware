@@ -193,7 +193,9 @@ int main(void) {
                                    // unpredictable stack protection checks
   oledInit();
 #else
-  // check_and_replace_bootloader(true);
+#if !FIRMWARE_QA
+  check_and_replace_bootloader(true);
+#endif
   setupApp();
   atca_init();
 #if ONEKEY_MINI
