@@ -1,0 +1,67 @@
+name: "build-mini-qa"
+
+on:
+  schedule:
+    - cron: '30 19 * * 0,1,2,3,4'
+  workflow_dispatch:
+
+jobs:
+  build-mini:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        with:
+          ref: mini
+
+      - name: Populate vars
+        id: vars
+        run: |
+          BOOT_VERSION=$(./tools/version.sh ./legacy/bootloader/version.h)
+          FIRMWARE_VERSION=$(cat ./legacy/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
+          BUILD_DATE=$(date +"%Y%m%d")
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          echo "BOOT_VERSION=$BOOT_VERSION" >> $GITHUB_ENV
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
+          echo "FIRMWARE_VERSION=$FIRMWARE_VERSION" >> $GITHUB_ENV
+          echo "ARTIFACTS_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"" >> $GITHUB_ENV
+
+      - name: "Build mini firmware"
+        run: |
+          sh <(curl -L https://nixos.org/nix/install) --no-daemon
+          . $HOME/.nix-profile/etc/profile.d/nix.sh
+          nix-shell --run "poetry install"
+          nix-shell --run "poetry run ./legacy/script/setup"
+          nix-shell --run "export ONEKEY_MINI=1 && export FIRMWARE_QA=1 && poetry run ./legacy/script/cibuild"
+
+
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-${{ github.sha }}
+          path: |
+            ./legacy/firmware/mini*Stable*.bin
+            ./legacy/bootloader/bootloader*Stable*.bin
+            ./legacy/intermediate_fw/mini*.bin
+
+      - name: "Set Env"
+        run: |
+          artifacts_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          echo "ARTIFACTS_URL=$artifacts_url" >> $GITHUB_ENV
+
+      - name: "Notify to Slack"
+        uses: onekeyhq/actions/notice-slack-app-update@main
+        with:
+          web-hook-url: ${{ secrets.SLACK_DEV_RELEASE_WEBHOOK }}
+          artifact-type: MINI-FIRMWARE
+          artifact-name: Mini-Hardware-Firmware
+          artifact-bundle-id: 'so.onekey.firmware.mini'
+          artifact-version-name: '${{ env.FIRMWARE_VERSION }}'
+          artifact-version-code: '${{ env.SHORT_HASH }}-${{ env.BUILD_DATE }}'
+          artifact-download-url: '${{ env.ARTIFACTS_URL }}'
+          change-log: 'firmware@${{ env.FIRMWARE_VERSION }} / boot@${{ env.BOOT_VERSION }}'
+          custom-issue-url: ''
+          custom-message-title: ''
+          custom-message-payload: ''
