@@ -209,12 +209,12 @@ parser_error_t _toStringCompactInt(const compactInt_t *c, uint8_t decimalPlaces,
     return parser_unexpected_value;
   }
 
-  if (z_str3join(bufferUI, sizeof(bufferUI), prefix, postfix) != zxerr_ok) {
-    return parser_unexpected_buffer_end;
+  if (trimTrailingZeros) {
+    number_inplace_trimming(bufferUI, 0);
   }
 
-  if (trimTrailingZeros) {
-    number_inplace_trimming(bufferUI, 1);
+  if (z_str3join(bufferUI, sizeof(bufferUI), prefix, postfix) != zxerr_ok) {
+    return parser_unexpected_buffer_end;
   }
 
   pageString(outValue, outValueLen, bufferUI, pageIdx, pageCount);
@@ -290,7 +290,7 @@ parser_error_t _readCompactBalance(parser_context_t *c,
 parser_error_t _toStringCompactIndex(const pd_CompactIndex_t *v, char *outValue,
                                      uint16_t outValueLen, uint8_t pageIdx,
                                      uint8_t *pageCount) {
-  return _toStringCompactInt(&v->index, 0, false, "", "", outValue, outValueLen,
+  return _toStringCompactInt(&v->index, 0, true, "", "", outValue, outValueLen,
                              pageIdx, pageCount);
 }
 
@@ -369,9 +369,9 @@ uint16_t _detectAddressType(const parser_context_t *c) {
     return 2;
   } else if (!strncmp(polkadot_network, "astar", 5)) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_18;
-    memcpy(__polkadot_ticker, ASTAR_COIN_TICKER, 4);
+    memcpy(__polkadot_ticker, ASTAR_COIN_TICKER, 5);
     return 5;
-  } else if (!strncmp(polkadot_network, "westend", 5)) {
+  } else if (!strncmp(polkadot_network, "westend", 7)) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_12;
     memcpy(__polkadot_ticker, WESTEND_COIN_TICKER, 4);
     return 42;
