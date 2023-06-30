@@ -211,6 +211,66 @@ static void write_dev_dummy_config() {
 }
 #endif
 
+// this is mainly for ignore/supress faults during flash content read (for check
+// purpose) if bus fault enabled, it will catched by BusFault_Handler, then we
+// could ignore it if bus fault disabled, it will elevate to hard fault, this is
+// not what we want
+static secbool handle_flash_ecc_error = secfalse;
+static void set_handle_flash_ecc_error(secbool val) {
+  handle_flash_ecc_error = val;
+}
+static void bus_fault_enable() { SCB->SHCSR |= SCB_SHCSR_BUSFAULTENA_Msk; }
+static void bus_fault_disable() { SCB->SHCSR &= ~SCB_SHCSR_BUSFAULTENA_Msk; }
+
+void HardFault_Handler(void) {
+  error_shutdown("Internal error", "(HF)", NULL, NULL);
+}
+
+void MemManage_Handler_MM(void) {
+  error_shutdown("Internal error", "(MM)", NULL, NULL);
+}
+
+void MemManage_Handler_SO(void) {
+  error_shutdown("Internal error", "(SO)", NULL, NULL);
+}
+
+void BusFault_Handler(void) {
+  // if want handle flash ecc error
+  if (handle_flash_ecc_error == sectrue) {
+    // dbgprintf_Wait("Internal flash ECC error detected at 0x%X", SCB->BFAR);
+
+    // check if it's triggered by flash DECC
+    if (flash_check_ecc_fault()) {
+      // reset flash controller error flags
+      flash_clear_ecc_fault(SCB->BFAR);
+
+      // reset bus fault error flags
+      SCB->CFSR &= ~(SCB_CFSR_BFARVALID_Msk | SCB_CFSR_PRECISERR_Msk);
+      __DSB();
+      SCB->SHCSR &= ~(SCB_SHCSR_BUSFAULTACT_Msk);
+      __DSB();
+
+      // try to fix ecc error and reboot
+      if (flash_fix_ecc_fault_FIRMWARE(SCB->BFAR)) {
+        error_shutdown("Internal flash ECC error", "Cleanup successful",
+                       "Firmware reinstall required",
+                       "If the issue persists, contact support.");
+      } else {
+        error_shutdown("Internal error", "Cleanup failed",
+                       "Reboot to try again",
+                       "If the issue persists, contact support.");
+      }
+    }
+  }
+
+  // normal route
+  error_shutdown("Internal error", "(BF)", NULL, NULL);
+}
+
+void UsageFault_Handler(void) {
+  error_shutdown("Internal error", "(UF)", NULL, NULL);
+}
+
 static void usb_init_all(secbool usb21_landing) {
   usb_dev_info_t dev_info = {
       .device_class = 0x00,
@@ -576,20 +636,38 @@ static void check_bootloader_version(void) {
 
 static secbool validate_firmware_headers(vendor_header* const vhdr,
                                          image_header* const hdr) {
-  // check
-  if (sectrue != load_vendor_header_keys((const uint8_t*)FIRMWARE_START, vhdr))
-    return secfalse;
+  set_handle_flash_ecc_error(sectrue);
+  secbool result = secfalse;
+  while (true) {
+    // check
+    if (sectrue !=
+        load_vendor_header_keys((const uint8_t*)FIRMWARE_START, vhdr))
+      break;
 
-  if (sectrue != check_vendor_header_lock(vhdr)) return secfalse;
+    if (sectrue != check_vendor_header_lock(vhdr)) break;
 
-  if (sectrue !=
-      load_image_header((const uint8_t*)(FIRMWARE_START + vhdr->hdrlen),
-                        FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
-                        vhdr->vsig_m, vhdr->vsig_n, vhdr->vpub, hdr))
-    return secfalse;
+    if (sectrue !=
+        load_image_header((const uint8_t*)(FIRMWARE_START + vhdr->hdrlen),
+                          FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
+                          vhdr->vsig_m, vhdr->vsig_n, vhdr->vpub, hdr))
+      break;
 
-  // passed, return true
-  return sectrue;
+    // passed, return true
+    result = sectrue;
+    break;
+  }
+  set_handle_flash_ecc_error(secfalse);
+  return result;
+}
+
+static secbool validate_firmware_code(vendor_header* const vhdr,
+                                      image_header* const hdr) {
+  set_handle_flash_ecc_error(sectrue);
+  secbool result =
+      check_image_contents(hdr, IMAGE_HEADER_SIZE + vhdr->hdrlen,
+                           FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT);
+  set_handle_flash_ecc_error(secfalse);
+  return result;
 }
 
 int main(void) {
@@ -638,6 +716,8 @@ int main(void) {
   // write_dev_dummy_config();
   UNUSED(write_dev_dummy_config);
 #endif
+
+  bus_fault_enable();
 
   device_test();
 
@@ -727,9 +807,7 @@ int main(void) {
 
   // check if firmware valid
   if (sectrue == validate_firmware_headers(&vhdr, &hdr)) {
-    if (sectrue == check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
-                                        FIRMWARE_SECTORS,
-                                        FIRMWARE_SECTORS_COUNT)) {
+    if (sectrue == validate_firmware_code(&vhdr, &hdr)) {
       // __asm("nop"); // all good, do nothing
     } else {
       display_clear();
@@ -748,9 +826,7 @@ int main(void) {
 
   // check if firmware valid again to make sure
   ensure(validate_firmware_headers(&vhdr, &hdr), "invalid firmware header");
-  ensure(check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
-                              FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT),
-         "invalid firmware hash");
+  ensure(validate_firmware_code(&vhdr, &hdr), "invalid firmware code");
 
   // if all VTRUST flags are unset = ultimate trust => skip the procedure
   if ((vhdr.vtrust & VTRUST_ALL) != VTRUST_ALL) {
@@ -779,6 +855,7 @@ int main(void) {
 
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
+  bus_fault_disable();
   mpu_config_off();
   jump_to(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 
