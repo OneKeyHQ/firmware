@@ -287,14 +287,13 @@ void u2fhid_read_start(const U2FHID_FRAME *f) {
           // dialog_timeout = 10 * U2F_TIMEOUT;
           if (last_req_state == REG) {
             layoutDialogCenterAdapterV2(
-                _("U2F Register"), NULL, &bmp_bottom_left_close,
-                &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
-                _("Register U2F Security\nKey?"));
+                _("U2F Register"), NULL, NULL, &bmp_bottom_right_confirm, NULL,
+                NULL, NULL, NULL, NULL, NULL, _("Register U2F Security\nKey?"));
           } else {
-            layoutDialogCenterAdapterV2(
-                _("U2F Authenticate"), NULL, &bmp_bottom_left_close,
-                &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
-                _("Authenticate U2F Security\nKey?"));
+            layoutDialogCenterAdapterV2(_("U2F Authenticate"), NULL, NULL,
+                                        &bmp_bottom_right_confirm, NULL, NULL,
+                                        NULL, NULL, NULL, NULL,
+                                        _("Authenticate U2F Security\nKey?"));
           }
           next_page = false;
         } else {

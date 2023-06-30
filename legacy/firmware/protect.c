@@ -812,7 +812,8 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   protectAbortedByInitializeOnboarding = protectAbortedByInitialize;
   if (protectAbortedByInitialize) {
     if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    // this error code will be sent when the message processing fails
+    // fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
   }
 
