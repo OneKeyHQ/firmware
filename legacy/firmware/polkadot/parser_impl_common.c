@@ -211,6 +211,8 @@ parser_error_t _toStringCompactInt(const compactInt_t *c, uint8_t decimalPlaces,
 
   if (trimTrailingZeros) {
     number_inplace_trimming(bufferUI, 0);
+    const size_t len = strlen(bufferUI);
+    if (bufferUI[len - 1] == '.') bufferUI[len - 1] = '\0';
   }
 
   if (z_str3join(bufferUI, sizeof(bufferUI), prefix, postfix) != zxerr_ok) {
