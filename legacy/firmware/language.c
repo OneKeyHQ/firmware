@@ -1176,7 +1176,7 @@ const char *languages[][2] = {
     // u2f.c u2f.c
     {"in this application.", ""},
     // layout2.c
-    {"including fee:", "交易费:"},
+    {"including fee:", "包含交易费:"},
     // fsm_msg_common.h
     {"increase and retrieve", ""},
     // fsm_msg_common.h

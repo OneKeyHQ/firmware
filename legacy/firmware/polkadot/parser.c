@@ -169,6 +169,8 @@ parser_error_t polkadot_parser_getItem(const parser_context_t *ctx,
                                     pageIdx, pageCount);
       if (err != parser_ok) return err;
       number_inplace_trimming(outVal, 0);
+      const size_t len = strlen(outVal);
+      if (outVal[len - 1] == '.') outVal[len - 1] = '\0';
       return err;
     }
 
