@@ -341,7 +341,8 @@ parser_error_t _substrate_toStringBalance(const pd_Balance_t* v, char* outValue,
   }
 
   number_inplace_trimming(bufferUI, 0);
-  number_inplace_trimming(bufferUI, 0);
+  const size_t len = strlen(bufferUI);
+  if (bufferUI[len - 1] == '.') bufferUI[len - 1] = '\0';
   if (z_str3join(bufferUI, sizeof(bufferUI), "", __polkadot_ticker) !=
       zxerr_ok) {
     return parser_print_not_supported;

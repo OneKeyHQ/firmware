@@ -56,6 +56,7 @@
 
 /* Display info timeout */
 uint32_t system_millis_display_info_start = 0;
+bool msg_command_inprogress = false;
 
 #if !EMULATOR
 static volatile uint8_t charge_dis_timer_counter = 0;
@@ -2067,6 +2068,7 @@ void layoutHomeInfo(void) {
 #endif
     onboarding(key);
   } else {
+    msg_command_inprogress = false;
     layoutEnterSleep(0);
     if (layoutNeedRefresh()) {
       layoutHome();

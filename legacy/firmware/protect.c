@@ -759,6 +759,7 @@ uint8_t blindsignWaitKey(void) {
 }
 
 extern bool u2f_init_command;
+extern bool msg_command_inprogress;
 
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
@@ -775,7 +776,8 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     }
     usbPoll();
 #if !EMULATOR
-    if ((host_channel == CHANNEL_USB) && ((sys_usbState() == false))) {
+    if ((host_channel == CHANNEL_USB) && ((sys_usbState() == false)) &&
+        msg_command_inprogress) {
       usbTiny(0);
       layoutHome();
       return KEY_NULL;
@@ -813,7 +815,9 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   if (protectAbortedByInitialize) {
     if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
     // this error code will be sent when the message processing fails
-    // fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    if (false == msg_command_inprogress) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    }
     layoutHome();
   }
 
@@ -1198,6 +1202,7 @@ void enter_sleep(void) {
     }
   }
 
+  host_channel = CHANNEL_NULL;
   layoutScreensaver();
   if (sleep_count == 1) {
   sleep_loop:

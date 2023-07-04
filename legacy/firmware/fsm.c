@@ -323,6 +323,10 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       case 0: {  // show address
         key = layoutAddress(address, desc, false, false, ignorecase, address_n,
                             address_n_count, address_is_account);
+        if (protectAbortedByInitialize) {
+          fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+          return false;
+        }
         break;
       }
       case 1: {
@@ -368,7 +372,8 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
     if ((key == KEY_NULL) && (!protectAbortedBySleep)) {
       key = protectWaitKeyValue(ButtonRequestType_ButtonRequest_Address,
                                 button_request, 0, 1);
-      if (key == KEY_NULL) {
+      if (protectAbortedByInitialize) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
         return false;
       }
       button_request = false;
