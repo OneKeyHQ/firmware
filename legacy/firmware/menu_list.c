@@ -418,9 +418,13 @@ void menu_set_trezor_compatibility(int index) {
     }
   }
 
+  bool trezor_comp_mode = false;
+  config_getTrezorCompMode(&trezor_comp_mode);
   config_setTrezorCompMode(index ? false : true);
 #if !EMULATOR
-  svc_system_reset();
+  if ((index && trezor_comp_mode) || (!index && !trezor_comp_mode)) {
+    svc_system_reset();
+  }
 #endif
 }
 

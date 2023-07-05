@@ -276,6 +276,7 @@ const char *languages[][2] = {
     {"Decrypted signed message", "解密签名消息"},
     // cosmos.c
     {"Delegate", "委托"},
+    {"Delegate Resource Contract", "资源委托合约"},
     {"Delegator", "代理方"},
     {"Deposit", "存款"},
     {"Deposit Amount", "存款金额"},
@@ -419,6 +420,9 @@ const char *languages[][2] = {
     {"For more information", "了解更多"},
     // layout2.c
     {"Format:", "格式:"},
+    // tron.c
+    {"Freeze Balance V2 Contract", "冻结余额 V2 合约"},
+    // layout2.c
     {"From", "发送方"},
     // layout2.c
     {"GPG sign for:", ""},
@@ -793,6 +797,9 @@ const char *languages[][2] = {
     {"U2F Register", "U2F 注册"},
     // menu_list.c
     {"USB Lock", "USB 锁"},
+    // tron.c
+    {"UnDelegate Resource Contract", "取消资源委托合约"},
+    {"UnFreeze Balance V2 Contract", "解冻余额 V2 合约"},
     // fsm_msg_ethereum.h
     {"Unable to show EIP-712 data. Sign at your own risk.",
      "无法显示 EIP-712 数据.\n请谨慎甄别项目方后决定是否签名, 自负风险"},
@@ -848,6 +855,9 @@ const char *languages[][2] = {
     {"Warning!", "警告"},
     // layout2.c
     {"Welcome to OneKey!", "感谢使用 OneKey!"},
+    // tron.c
+    {"Withdraw Balance Contract", "余额提现合约"},
+    {"Withdraw Expire Unfreeze Contract", "撤销到期解冻合约"},
     // cosmos.c
     {"Withdraw Reward", "提取奖励"},
     {"Withdraw Validator Commission", "提取验证者佣金"},
@@ -1012,7 +1022,7 @@ const char *languages[][2] = {
     //
     {"transaction is set to", "被设定为"},
     // layout2.c layout2.c
-    {"transaction?", "交易?"},
+    {"transaction?", "交易吗?"},
     {"user: ", "用户:"},
     // u2f.c
     {"was used to register", "注册"},

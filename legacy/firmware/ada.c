@@ -459,7 +459,7 @@ static bool layoutOutput(const CardanoTxOutput *output) {
           ret = true;
           break;
         }
-        if (key == KEY_CANCEL) {
+        if (key == KEY_CANCEL || key == KEY_NULL) {
           return false;
         }
       }
@@ -488,7 +488,7 @@ static bool layoutOutput(const CardanoTxOutput *output) {
         ret = true;
         break;
       }
-      if (key == KEY_CANCEL) {
+      if (key == KEY_CANCEL || key == KEY_NULL) {
         return false;
       }
     }
@@ -562,7 +562,7 @@ static bool layoutOutput(const CardanoTxOutput *output) {
         case KEY_CANCEL:
           return false;
         default:
-          goto refresh_addr;
+          return false;
       }
     } else {
       oledClear();
@@ -578,7 +578,7 @@ static bool layoutOutput(const CardanoTxOutput *output) {
           ret = true;
           break;
         }
-        if (key == KEY_CANCEL) {
+        if (key == KEY_CANCEL || key == KEY_NULL) {
           ret = false;
           break;
         }
@@ -604,7 +604,7 @@ static bool layoutFinal(void) {
       return true;
       break;
     }
-    if (key == KEY_CANCEL) {
+    if (key == KEY_CANCEL || key == KEY_NULL) {
       return false;
     }
   }
@@ -633,7 +633,7 @@ static bool layoutFee(void) {
     if (key == KEY_CONFIRM) {
       break;
     }
-    if (key == KEY_CANCEL) {
+    if (key == KEY_CANCEL || key == KEY_NULL) {
       return false;
     }
   }
@@ -790,6 +790,7 @@ refresh_layout:
       ret = false;
       break;
     default:
+      ret = false;
       break;
   }
   if (!ret) {
@@ -863,7 +864,7 @@ static bool layoutCertificate(const CardanoTxCertificate *cert) {
     if (key == KEY_CONFIRM) {
       break;
     }
-    if (key == KEY_CANCEL) {
+    if (key == KEY_CANCEL || key == KEY_NULL) {
       return false;
     }
   }
@@ -884,7 +885,7 @@ static bool layoutCertificate(const CardanoTxCertificate *cert) {
       if (key == KEY_CONFIRM) {
         break;
       }
-      if (key == KEY_CANCEL) {
+      if (key == KEY_CANCEL || key == KEY_NULL) {
         return false;
       }
     }
@@ -907,7 +908,7 @@ static bool layoutCertificate(const CardanoTxCertificate *cert) {
       if (key == KEY_CONFIRM) {
         break;
       }
-      if (key == KEY_CANCEL) {
+      if (key == KEY_CANCEL || key == KEY_NULL) {
         return false;
       }
     }
