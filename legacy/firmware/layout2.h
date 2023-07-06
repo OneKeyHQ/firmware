@@ -289,6 +289,6 @@ bool layoutSignHash(const char *chain_name, bool verify, const char *signer,
 bool layoutPaginated(const char *title, const uint8_t *data, uint16_t len);
 
 void onboarding(uint8_t key);
-void hide_icons(void);
+void hide_icons(bool hide);
 
 #endif

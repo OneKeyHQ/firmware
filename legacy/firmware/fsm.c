@@ -536,8 +536,8 @@ bool fsm_layoutPathWarning(uint32_t address_n_count,
                         &bmp_bottom_right_confirm, NULL, desc, NULL, NULL, NULL,
                         NULL);
 
-  if (!protectButton(ButtonRequestType_ButtonRequest_UnknownDerivationPath,
-                     false)) {
+  if (protectWaitKeyValue(ButtonRequestType_ButtonRequest_UnknownDerivationPath,
+                          true, 0, 1) != KEY_CONFIRM) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     return false;
   }

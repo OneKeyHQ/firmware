@@ -771,6 +771,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   timer_out_set(timer_out_oper, time_out);
   while (1) {
     if (layoutEnterSleep(1)) {
+      key = KEY_NULL;
       protectAbortedBySleep = true;
       break;
     }
@@ -1252,6 +1253,7 @@ void enter_sleep(void) {
     oledBufferRestore(oled_prev);
     oledRefresh();
     device_sleep_state = SLEEP_NONE;
+    hide_icons(false);
     return;
   }
 }

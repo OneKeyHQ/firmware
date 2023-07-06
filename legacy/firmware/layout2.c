@@ -81,7 +81,7 @@ void chargeDisTimer(void) {
 #endif
 #define LOCKTIME_TIMESTAMP_MIN_VALUE 500000000
 
-void hide_icons(void) { hide_icon = true; }
+void hide_icons(bool hide) { hide_icon = hide; }
 
 const char *address_n_str(const uint32_t *address_n, size_t address_n_count,
                           bool address_is_account) {
@@ -271,6 +271,8 @@ uint8_t refreshBleIcon(bool force_flag) {
     if (sys_bleState() == true) {
       if (force_flag || false == ble_conn_status_old) {
         ble_conn_status_old = true;
+        oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0,
+                        &bmp_status_ble_connect);
         if (usb_status) {
           oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0,
                          &bmp_status_ble_connect);
@@ -285,6 +287,7 @@ uint8_t refreshBleIcon(bool force_flag) {
         ble_conn_status_old = false;
         ret = 1;
       }
+      oledClearBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
       if (usb_status) {
         oledDrawBitmap(OLED_WIDTH - 2 * LOGO_WIDTH - 16, 0, &bmp_status_ble);
       } else {
@@ -448,7 +451,11 @@ uint8_t layoutStatusLogoEx(bool need_fresh, bool force_fresh) {
 
   refreshNfcIcon(force_fresh);
 
-  ret = refreshBleIcon(force_fresh);
+  if (layoutLast == layoutHome) {
+    refreshBleIcon(true);
+  } else {
+    refreshBleIcon(force_fresh);
+  }
 
   disLongPressBleTips();
 
@@ -962,7 +969,7 @@ refresh_menu:
     case KEY_CANCEL:
       return false;
     default:
-      break;
+      return false;
   }
 
   return true;
@@ -1120,7 +1127,7 @@ bool layoutConfirmTx(const CoinInfo *coin, AmountUnit amount_unit,
     if (key == KEY_CONFIRM) {
       break;
     }
-    if (key == KEY_CANCEL) {
+    if (key == KEY_CANCEL || key == KEY_NULL) {
       return false;
     }
   }
@@ -1137,7 +1144,7 @@ bool layoutConfirmTx(const CoinInfo *coin, AmountUnit amount_unit,
     if (key == KEY_CONFIRM) {
       break;
     }
-    if (key == KEY_CANCEL) {
+    if (key == KEY_CANCEL || key == KEY_NULL) {
       return false;
     }
   }

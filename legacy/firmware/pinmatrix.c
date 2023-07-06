@@ -33,7 +33,7 @@ void pinmatrix_draw(const char *text) {
       &bmp_digit5, &bmp_digit6, &bmp_digit7, &bmp_digit8, &bmp_digit9,
   };
   oledClear();
-  hide_icons();
+  hide_icons(true);
   if (text) {
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, text, FONT_STANDARD);
   }
