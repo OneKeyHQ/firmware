@@ -22,6 +22,7 @@
  */
 
 #include "secp256k1.h"
+#include "curves.h"
 
 const ecdsa_curve secp256k1 = {
     /* .prime */ {/*.val =*/{0x1ffffc2f, 0x1ffffff7, 0x1fffffff, 0x1fffffff,
@@ -58,6 +59,7 @@ const ecdsa_curve secp256k1 = {
 };
 
 const curve_info secp256k1_info = {
+    .curve_name = SECP256K1_NAME,
     .bip32_name = "Bitcoin seed",
     .params = &secp256k1,
     .hasher_base58 = HASHER_SHA2D,
@@ -67,6 +69,7 @@ const curve_info secp256k1_info = {
 };
 
 const curve_info secp256k1_decred_info = {
+    .curve_name = SECP256K1_DECRED_NAME,
     .bip32_name = "Bitcoin seed",
     .params = &secp256k1,
     .hasher_base58 = HASHER_BLAKED,
@@ -76,6 +79,7 @@ const curve_info secp256k1_decred_info = {
 };
 
 const curve_info secp256k1_groestl_info = {
+    .curve_name = SECP256K1_GROESTL_NAME,
     .bip32_name = "Bitcoin seed",
     .params = &secp256k1,
     .hasher_base58 = HASHER_GROESTLD_TRUNC,
@@ -85,6 +89,7 @@ const curve_info secp256k1_groestl_info = {
 };
 
 const curve_info secp256k1_smart_info = {
+    .curve_name = SECP256K1_SMART_NAME,
     .bip32_name = "Bitcoin seed",
     .params = &secp256k1,
     .hasher_base58 = HASHER_SHA3K,

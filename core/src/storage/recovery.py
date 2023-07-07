@@ -1,19 +1,31 @@
 from micropython import const
 
 from storage import common
+from trezor import utils
 
 # Namespace:
 _NAMESPACE = common.APP_RECOVERY
 
 # fmt: off
-# Keys:
-_IN_PROGRESS               = const(0x00)  # bool
-_DRY_RUN                   = const(0x01)  # bool
-_SLIP39_IDENTIFIER         = const(0x03)  # bytes
-_SLIP39_THRESHOLD          = const(0x04)  # int
-_REMAINING                 = const(0x05)  # int
-_SLIP39_ITERATION_EXPONENT = const(0x06)  # int
-_SLIP39_GROUP_COUNT        = const(0x07)  # int
+if utils.USE_THD89:
+    from storage.device import (
+        _IN_PROGRESS,
+        _DRY_RUN,
+        _SLIP39_IDENTIFIER_RECOVER,
+        _SLIP39_THRESHOLD,
+        _REMAINING,
+        _SLIP39_ITERATION_E_RECOVER,
+        _SLIP39_GROUP_COUNT,
+    )
+else:
+    # Keys:
+    _IN_PROGRESS                = (0x00)  # bool
+    _DRY_RUN                    = (0x01)  # bool
+    _SLIP39_IDENTIFIER_RECOVER  = (0x03)  # bytes
+    _SLIP39_THRESHOLD           = (0x04)  # int
+    _REMAINING                  = (0x05)  # int
+    _SLIP39_ITERATION_E_RECOVER = (0x06)  # int
+    _SLIP39_GROUP_COUNT         = (0x07)  # int
 
 # Deprecated Keys:
 # _WORD_COUNT                = const(0x02)  # int
@@ -48,22 +60,22 @@ def is_dry_run() -> bool:
 
 def set_slip39_identifier(identifier: int) -> None:
     _require_progress()
-    common.set_uint16(_NAMESPACE, _SLIP39_IDENTIFIER, identifier)
+    common.set_uint16(_NAMESPACE, _SLIP39_IDENTIFIER_RECOVER, identifier)
 
 
 def get_slip39_identifier() -> int | None:
     _require_progress()
-    return common.get_uint16(_NAMESPACE, _SLIP39_IDENTIFIER)
+    return common.get_uint16(_NAMESPACE, _SLIP39_IDENTIFIER_RECOVER)
 
 
 def set_slip39_iteration_exponent(exponent: int) -> None:
     _require_progress()
-    common.set_uint8(_NAMESPACE, _SLIP39_ITERATION_EXPONENT, exponent)
+    common.set_uint8(_NAMESPACE, _SLIP39_ITERATION_E_RECOVER, exponent)
 
 
 def get_slip39_iteration_exponent() -> int | None:
     _require_progress()
-    return common.get_uint8(_NAMESPACE, _SLIP39_ITERATION_EXPONENT)
+    return common.get_uint8(_NAMESPACE, _SLIP39_ITERATION_E_RECOVER)
 
 
 def set_slip39_group_count(group_count: int) -> None:
@@ -128,9 +140,9 @@ def end_progress() -> None:
     _require_progress()
     common.delete(_NAMESPACE, _IN_PROGRESS)
     common.delete(_NAMESPACE, _DRY_RUN)
-    common.delete(_NAMESPACE, _SLIP39_IDENTIFIER)
+    common.delete(_NAMESPACE, _SLIP39_IDENTIFIER_RECOVER)
     common.delete(_NAMESPACE, _SLIP39_THRESHOLD)
     common.delete(_NAMESPACE, _REMAINING)
-    common.delete(_NAMESPACE, _SLIP39_ITERATION_EXPONENT)
+    common.delete(_NAMESPACE, _SLIP39_ITERATION_E_RECOVER)
     common.delete(_NAMESPACE, _SLIP39_GROUP_COUNT)
     recovery_shares.delete()

@@ -26,6 +26,10 @@
 #include "zkp_ecdsa.h"
 #endif
 
+#if USE_THD89
+#include "se_thd89.h"
+#endif
+
 /// package: trezorcrypto.secp256k1
 
 /// def generate_secret() -> bytes:
@@ -167,6 +171,11 @@ STATIC mp_obj_t mod_trezorcrypto_secp256k1_sign(size_t n_args,
   vstr_init_len(&sig, 65);
   uint8_t pby = 0;
   int ret = 0;
+
+#if USE_THD89
+  ret = se_secp256k1_sign_digest((const uint8_t *)dig.buf,
+                                 (uint8_t *)sig.buf + 1, &pby, is_canonical);
+#else
 #ifdef USE_SECP256K1_ZKP_ECDSA
   if (!is_canonical) {
     ret = zkp_ecdsa_sign_digest(&secp256k1, (const uint8_t *)sk.buf,
@@ -179,10 +188,12 @@ STATIC mp_obj_t mod_trezorcrypto_secp256k1_sign(size_t n_args,
                             (const uint8_t *)dig.buf, (uint8_t *)sig.buf + 1,
                             &pby, is_canonical);
   }
+#endif
   if (0 != ret) {
     vstr_clear(&sig);
     mp_raise_ValueError("Signing failed");
   }
+
   sig.buf[0] = 27 + pby + compressed * 4;
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &sig);
 }
@@ -292,11 +303,27 @@ STATIC mp_obj_t mod_trezorcrypto_secp256k1_multiply(mp_obj_t secret_key,
   }
   vstr_t out = {0};
   vstr_init_len(&out, 65);
+#if USE_THD89
+  uint8_t pubkey[65] = {0};
+  if (pk.len == 33) {
+    if (!ecdsa_uncompress_pubkey(&secp256k1, pk.buf, pubkey)) {
+      mp_raise_ValueError("Invalid public key");
+    }
+  } else {
+    memcpy(pubkey, pk.buf, 65);
+  }
+  if (0 != se_get_shared_key(SECP256K1_NAME, (const uint8_t *)pubkey,
+                             (uint8_t *)out.buf)) {
+    vstr_clear(&out);
+    mp_raise_ValueError("Multiply failed");
+  }
+#else
   if (0 != ecdh_multiply(&secp256k1, (const uint8_t *)sk.buf,
                          (const uint8_t *)pk.buf, (uint8_t *)out.buf)) {
     vstr_clear(&out);
     mp_raise_ValueError("Multiply failed");
   }
+#endif
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &out);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_secp256k1_multiply_obj,

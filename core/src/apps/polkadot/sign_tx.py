@@ -1,4 +1,4 @@
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto.curve import ed25519
 from trezor.messages import PolkadotSignedTx, PolkadotSignTx
 from trezor.ui.layouts import confirm_final
@@ -22,7 +22,10 @@ async def sign_tx(
         raise FORBIDDEN_KEY_PATH
 
     node = keychain.derive(msg.address_n)
-    public_key = ed25519.publickey(node.private_key())
+    if utils.USE_THD89:
+        public_key = node.public_key()[1:]
+    else:
+        public_key = ed25519.publickey(node.private_key())
     address_type = helper.get_address_type(msg.network)
     address = helper.ss58_encode(public_key, address_type)
     chain_name, symbol, decimal = helper.update_chain_res(ctx, msg.network)

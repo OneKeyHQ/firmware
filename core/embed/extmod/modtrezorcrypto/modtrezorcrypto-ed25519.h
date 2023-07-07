@@ -24,6 +24,10 @@
 
 #include "rand.h"
 
+#if USE_THD89
+#include "se_thd89.h"
+#endif
+
 /// package: trezorcrypto.ed25519
 
 /// def generate_secret() -> bytes:
@@ -77,11 +81,15 @@ STATIC mp_obj_t mod_trezorcrypto_ed25519_sign(size_t n_args,
   if (msg.len == 0) {
     mp_raise_ValueError("Empty data to sign");
   }
-  mp_buffer_info_t hash_func = {0};
+  
   vstr_t sig = {0};
   vstr_init_len(&sig, sizeof(ed25519_signature));
 
+#if USE_THD89
+  se_ed25519_sign(msg.buf, msg.len, (uint8_t *)sig.buf);
+#else
   if (n_args == 3) {
+    mp_buffer_info_t hash_func = {0};
     mp_get_buffer_raise(args[2], &hash_func, MP_BUFFER_READ);
     // if hash_func == 'keccak':
     if (memcmp(hash_func.buf, "keccak", sizeof("keccak")) == 0) {
@@ -95,6 +103,7 @@ STATIC mp_obj_t mod_trezorcrypto_ed25519_sign(size_t n_args,
     ed25519_sign(msg.buf, msg.len, *(const ed25519_secret_key *)sk.buf,
                  *(ed25519_signature *)sig.buf);
   }
+#endif
 
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &sig);
 }

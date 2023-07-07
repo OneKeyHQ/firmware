@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto import bip32, cardano
 
 from apps.common.seed import get_seed
 
-from . import paths
+from . import CURVE, paths
 
 if TYPE_CHECKING:
     from typing import Callable, Awaitable, TypeVar
@@ -26,14 +26,21 @@ if TYPE_CHECKING:
 
 class Keychain:
     def __init__(self, root: bip32.HDNode) -> None:
-        self.byron_root = self._derive_path(root, paths.BYRON_ROOT)
+        if utils.USE_THD89:
+            self.byron_root = root.clone()
+        else:
+            self.byron_root = self._derive_path(root, paths.BYRON_ROOT)
         root.__del__()
 
     @staticmethod
     def _derive_path(root: bip32.HDNode, path: Bip32Path) -> bip32.HDNode:
         """Clone and derive path from the root."""
-        node = root.clone()
-        node.derive_path(path)
+        if utils.USE_THD89:
+            node = root.clone()
+            node.se_derive_path(path)
+        else:
+            node = root.clone()
+            node.derive_path(path)
         return node
 
     def verify_path(self, path: Bip32Path) -> None:
@@ -51,10 +58,14 @@ class Keychain:
 
     def derive(self, node_path: Bip32Path) -> bip32.HDNode:
         self.verify_path(node_path)
-        path_root = self._get_path_root(node_path)
-        suffix = node_path[len(paths.BYRON_ROOT) :]
-        # derive child node from the root
-        return self._derive_path(path_root, suffix)
+        if utils.USE_THD89:
+            path_root = self._get_path_root(node_path)
+            return self._derive_path(path_root, node_path)
+        else:
+            path_root = self._get_path_root(node_path)
+            suffix = node_path[len(paths.BYRON_ROOT) :]
+            # derive child node from the root
+            return self._derive_path(path_root, suffix)
 
     # XXX the root node remains in session cache so we should not delete it
     # def __del__(self) -> None:
@@ -67,7 +78,18 @@ def is_byron_path(path: Bip32Path) -> bool:
 
 async def get_keychain(ctx: wire.Context) -> Keychain:
     seed = await get_seed(ctx)
-    return Keychain(cardano.from_seed_ledger(seed))
+    if utils.USE_THD89:
+        node = bip32.HDNode(
+            depth=0,
+            fingerprint=0,
+            child_num=0,
+            chain_code=bytearray(32),
+            public_key=bytearray(33),
+            curve_name="ed25519-ledger",
+        )
+        return Keychain(node)
+    else:
+        return Keychain(cardano.from_seed_ledger(seed))
 
 
 def with_keychain(func: HandlerWithKeychain[MsgIn, MsgOut]) -> Handler[MsgIn, MsgOut]:

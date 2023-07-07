@@ -104,22 +104,32 @@ async def _finish_recovery_dry_run(
     if backup_type is None:
         raise RuntimeError
 
-    digest_input = sha256(secret).digest()
-    stored = mnemonic.get_secret()
-    digest_stored = sha256(stored).digest()
-    result = utils.consteq(digest_stored, digest_input)
+    if utils.USE_THD89:
+        is_slip39 = backup_types.is_slip39_backup_type(backup_type)
+        if is_slip39:
+            raise wire.ProcessError("THD89 does not support SLIP-39")
 
-    is_slip39 = backup_types.is_slip39_backup_type(backup_type)
-    # Check that the identifier and iteration exponent match as well
-    if is_slip39:
-        result &= (
-            storage.device.get_slip39_identifier()
-            == storage.recovery.get_slip39_identifier()
-        )
-        result &= (
-            storage.device.get_slip39_iteration_exponent()
-            == storage.recovery.get_slip39_iteration_exponent()
-        )
+        from trezor.crypto import se_thd89
+
+        result = se_thd89.check(secret)
+
+    else:
+        digest_input = sha256(secret).digest()
+        stored = mnemonic.get_secret()
+        digest_stored = sha256(stored).digest()
+        result = utils.consteq(digest_stored, digest_input)
+
+        is_slip39 = backup_types.is_slip39_backup_type(backup_type)
+        # Check that the identifier and iteration exponent match as well
+        if is_slip39:
+            result &= (
+                storage.device.get_slip39_identifier()
+                == storage.recovery.get_slip39_identifier()
+            )
+            result &= (
+                storage.device.get_slip39_iteration_exponent()
+                == storage.recovery.get_slip39_iteration_exponent()
+            )
 
     storage.recovery.end_progress()
 
@@ -136,7 +146,6 @@ async def _finish_recovery(
 ) -> Success:
     if backup_type is None:
         raise RuntimeError
-
     storage.device.store_mnemonic_secret(
         secret, backup_type, needs_backup=False, no_backup=False
     )

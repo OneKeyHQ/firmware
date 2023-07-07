@@ -24,37 +24,50 @@ def is_bip39() -> bool:
 
 
 def get_seed(passphrase: str = "", progress_bar: bool = True) -> bytes:
-    mnemonic_secret = get_secret()
-    if mnemonic_secret is None:
-        raise ValueError  # Mnemonic not set
+    if not utils.USE_THD89:
+        mnemonic_secret = get_secret()
+        if mnemonic_secret is None:
+            raise ValueError  # Mnemonic not set
 
-    render_func = None
-    if progress_bar and not utils.DISABLE_ANIMATION:
-        _start_progress()
-        render_func = _render_progress
+        render_func = None
+        if progress_bar and not utils.DISABLE_ANIMATION:
+            _start_progress()
+            render_func = _render_progress
 
-    if is_bip39():
-        from trezor.crypto import bip39
+        if is_bip39():
+            from trezor.crypto import bip39
 
-        seed = bip39.seed(mnemonic_secret.decode(), passphrase, render_func)
+            seed = bip39.seed(mnemonic_secret.decode(), passphrase, render_func)
 
-    else:  # SLIP-39
-        from trezor.crypto import slip39
+        else:  # SLIP-39
+            from trezor.crypto import slip39
 
-        identifier = storage.device.get_slip39_identifier()
-        iteration_exponent = storage.device.get_slip39_iteration_exponent()
-        if identifier is None or iteration_exponent is None:
-            # Identifier or exponent expected but not found
-            raise RuntimeError
-        seed = slip39.decrypt(
-            mnemonic_secret,
-            passphrase.encode(),
-            iteration_exponent,
-            identifier,
-            render_func,
-        )
+            identifier = storage.device.get_slip39_identifier()
+            iteration_exponent = storage.device.get_slip39_iteration_exponent()
+            if identifier is None or iteration_exponent is None:
+                # Identifier or exponent expected but not found
+                raise RuntimeError
+            seed = slip39.decrypt(
+                mnemonic_secret,
+                passphrase.encode(),
+                iteration_exponent,
+                identifier,
+                render_func,
+            )
 
-    return seed
+        return seed
+    else:
+        from trezor.crypto import se_thd89
+
+        render_func = None
+        if progress_bar and not utils.DISABLE_ANIMATION:
+            # _start_progress()
+            # render_func = _render_progress
+            pass
+        if is_bip39():
+            if not se_thd89.seed(passphrase, render_func):
+                raise RuntimeError
+        return None
 
 
 if not utils.BITCOIN_ONLY:

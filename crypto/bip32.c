@@ -49,6 +49,7 @@
 #include "memzero.h"
 
 const curve_info ed25519_info = {
+    .curve_name = ED25519_NAME,
     .bip32_name = ED25519_SEED_NAME,
     .params = NULL,
     .hasher_base58 = HASHER_SHA2D,
@@ -58,6 +59,7 @@ const curve_info ed25519_info = {
 };
 
 const curve_info ed25519_sha3_info = {
+    .curve_name = ED25519_SHA3_NAME,
     .bip32_name = "ed25519-sha3 seed",
     .params = NULL,
     .hasher_base58 = HASHER_SHA2D,
@@ -68,6 +70,7 @@ const curve_info ed25519_sha3_info = {
 
 #if USE_KECCAK
 const curve_info ed25519_keccak_info = {
+    .curve_name = ED25519_KECCAK_NAME,
     .bip32_name = "ed25519-keccak seed",
     .params = NULL,
     .hasher_base58 = HASHER_SHA2D,
@@ -78,6 +81,7 @@ const curve_info ed25519_keccak_info = {
 #endif
 
 const curve_info curve25519_info = {
+    .curve_name = CURVE25519_NAME,
     .bip32_name = "curve25519 seed",
     .params = NULL,
     .hasher_base58 = HASHER_SHA2D,
@@ -492,6 +496,8 @@ int hdnode_fill_public_key(HDNode *node) {
     } else if (node->curve == &ed25519_cardano_info) {
       ed25519_publickey_ext(node->private_key, node->public_key + 1);
 #endif
+    } else if (node->curve == &ed25519_ledger_info) {
+      ed25519_publickey(node->private_key, node->public_key + 1);
     }
   }
 #else
@@ -510,10 +516,7 @@ int hdnode_get_ethereum_pubkeyhash(const HDNode *node, uint8_t *pubkeyhash) {
   SHA3_CTX ctx = {0};
 
   /* get uncompressed public key */
-  if (ecdsa_get_public_key65(node->curve->params, node->private_key, buf) !=
-      0) {
-    return 0;
-  }
+  ecdsa_uncompress_pubkey(node->curve->params, node->public_key, buf);
 
   /* compute sha3 of x and y coordinate without 04 prefix */
   sha3_256_Init(&ctx);
@@ -652,6 +655,8 @@ int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
     } else if (node->curve == &ed25519_keccak_info) {
       ed25519_sign_keccak(msg, msg_len, node->private_key, sig);
 #endif
+    } else if (node->curve == &ed25519_ledger_info) {
+      ed25519_sign(msg, msg_len, node->private_key, sig);
     } else {
       return 1;  // unknown or unsupported curve
     }
@@ -812,6 +817,9 @@ const curve_info *get_curve_by_name(const char *curve_name) {
 #endif
   if (strcmp(curve_name, CURVE25519_NAME) == 0) {
     return &curve25519_info;
+  }
+  if (strcmp(curve_name, ED25519_LEDGER_NAME) == 0) {
+    return &ed25519_ledger_info;
   }
   return 0;
 }

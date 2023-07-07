@@ -27,7 +27,6 @@
 #include "ble.h"
 #include "nordic_dfu.h"
 #include "sdram.h"
-#include "se_atca.h"
 #include "spi.h"
 #include "usb.h"
 

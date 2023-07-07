@@ -66,6 +66,9 @@ static void wrapped_ui_wait_callback(uint32_t current, uint32_t total) {
 #include "modtrezorcrypto-sha512.h"
 #include "modtrezorcrypto-shamir.h"
 #include "modtrezorcrypto-slip39.h"
+#if USE_THD89
+#include "modtrezorcrypto-se-thd89.h"
+#endif
 #if !BITCOIN_ONLY
 #include "modtrezorcrypto-cardano.h"
 #include "modtrezorcrypto-monero.h"
@@ -126,6 +129,10 @@ STATIC const mp_rom_map_elem_t mp_module_trezorcrypto_globals_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_sha512_256_module)},
     {MP_ROM_QSTR(MP_QSTR_schnorr_bch),
      MP_ROM_PTR(&mod_trezorcrypto_schnorr_bch_module)},
+#if USE_THD89
+    {MP_ROM_QSTR(MP_QSTR_se_thd89),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_module)},
+#endif
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_trezorcrypto_globals,
                             mp_module_trezorcrypto_globals_table);

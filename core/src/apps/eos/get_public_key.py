@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto.curve import secp256k1
 from trezor.lvglui.scrs import lv
 from trezor.messages import EosGetPublicKey, EosPublicKey
@@ -17,7 +17,10 @@ if TYPE_CHECKING:
 
 def _get_public_key(node: bip32.HDNode) -> tuple[str, bytes]:
     seckey = node.private_key()
-    public_key = secp256k1.publickey(seckey, True)
+    if utils.USE_THD89:
+        public_key = node.public_key()
+    else:
+        public_key = secp256k1.publickey(seckey, True)
     wif = public_key_to_wif(public_key)
     return wif, public_key
 

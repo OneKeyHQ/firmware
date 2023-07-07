@@ -1,9 +1,6 @@
 #include STM32_HAL_H
 
 #include "device.h"
-#include "atca_api.h"
-#include "atca_command.h"
-#include "atca_hal.h"
 #include "common.h"
 #include "display.h"
 #include "emmc.h"
@@ -270,20 +267,6 @@ void device_test(void) {
 
   display_clear();
 
-  uint8_t rand_buffer[32];
-  atca_init();
-  atca_config_init();
-
-  if (atca_random(rand_buffer)) {
-    display_text(0, 20, "SE test faild", -1, FONT_NORMAL, COLOR_RED,
-                 COLOR_BLACK);
-    while (1)
-      ;
-  } else {
-    display_text(0, 20, "SE test done", -1, FONT_NORMAL, COLOR_WHITE,
-                 COLOR_BLACK);
-  }
-
   qspi_flash_init();
   if (qspi_flash_read_id() == 0) {
     display_text(0, 50, "SPI-FLASH test faild", -1, FONT_NORMAL, COLOR_RED,
@@ -346,7 +329,7 @@ void device_test(void) {
   }
 
   uint8_t buf[FLASH_OTP_BLOCK_SIZE] = {0};
-  memcpy(buf, (uint8_t *)ATCA_CONFIG_VERSION, strlen(ATCA_CONFIG_VERSION));
+  memcpy(buf, "test passed", strlen("test passed"));
   ensure(flash_otp_write(FLASH_OTP_FACTORY_TEST, 0, buf, FLASH_OTP_BLOCK_SIZE),
          NULL);
   ensure(flash_otp_lock(FLASH_OTP_FACTORY_TEST), NULL);
@@ -417,14 +400,12 @@ void device_burnin_test(void) {
 
   uint32_t start, current, remain, previous;
   uint8_t rand_buffer[32];
-  uint32_t se_err = 0;
   char remain_timer[16] = {0};
 
   volatile uint64_t emmc_cap = 0;
   volatile uint32_t flash_id = 0;
   volatile uint32_t index = 0, index_bak = 0xff;
   volatile uint32_t click = 0, click_pre = 0, click_now = 0;
-  volatile uint32_t se_pre = 0, se_now = 0;
   FRESULT res;
   FIL fil;
 
@@ -611,22 +592,6 @@ void device_burnin_test(void) {
                           COLOR_BLACK);
       while (1)
         ;
-    }
-
-    se_now = __HAL_TIM_GET_COUNTER(&TimHandle);
-    // 500 ms
-    if (se_now - se_pre >= (TIMER_1S / 2)) {
-      se_pre = se_now;
-      if (atca_random(rand_buffer)) {
-        se_err++;
-        if (se_err == 10) {
-          display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
-                              "SE test faild", -1, FONT_NORMAL, COLOR_RED,
-                              COLOR_BLACK);
-          while (1)
-            ;
-        }
-      }
     }
 
     if (!ble_name_state()) {

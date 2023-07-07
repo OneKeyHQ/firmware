@@ -20,9 +20,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "atca_api.h"
-#include "atca_command.h"
-#include "atca_hal.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "device.h"
@@ -35,8 +32,10 @@
 #include "nand_flash.h"
 #include "qspi_flash.h"
 #include "random_delays.h"
-#include "se_atca.h"
+#include "se_thd89.h"
 #include "secbool.h"
+#include "thd89.h"
+#include "thd89_boot.h"
 #ifdef TREZOR_MODEL_T
 #include "touch.h"
 #endif
@@ -63,16 +62,9 @@
 #endif
 
 #include "emmc_wrapper.h"
-#if PRODUCTION
 const uint8_t BOOTLOADER_KEY_M = 4;
 const uint8_t BOOTLOADER_KEY_N = 7;
-#else
-const uint8_t BOOTLOADER_KEY_M = 2;
-const uint8_t BOOTLOADER_KEY_N = 3;
-#endif
-
 const uint8_t * const BOOTLOADER_KEYS[] = {
-#if PRODUCTION
     (const uint8_t *)"\x15\x4b\x8a\xb2\x61\xcc\x88\x79\x48\x3f\x68\x9a\x2d\x41\x24\x3a\xe7\xdb\xc4\x02\x16\x72\xbb\xd2\x5c\x33\x8a\xe8\x4d\x93\x11\x54",
     (const uint8_t *)"\xa9\xe6\x5e\x07\xfe\x6d\x39\xa8\xa8\x4e\x11\xa9\x96\xa0\x28\x3f\x88\x1e\x17\x5c\xba\x60\x2e\xb5\xac\x44\x2f\xb7\x5b\x39\xe8\xe0",
     (const uint8_t *)"\x6c\x88\x05\xab\xb2\xdf\x9d\x36\x79\xf1\xd2\x8a\x40\xcd\x99\x03\x99\xb9\x9f\xc3\xee\x4e\x06\x57\xd8\x1d\x38\x1e\xa1\x48\x8a\x12",
@@ -80,204 +72,13 @@ const uint8_t * const BOOTLOADER_KEYS[] = {
     (const uint8_t *)"\x54\xa4\x06\x33\xbf\xd9\xe6\x0b\x8a\x39\x12\x65\xb2\xe0\x06\x37\x4a\xbe\x63\x1d\x1e\x11\x07\x33\x2b\xca\x56\xbf\x9f\x8c\x5c\x99",
     (const uint8_t *)"\x4b\x71\x13\x4f\x18\xe0\x07\x87\xc5\x83\xd4\x07\x42\xcc\x18\x8e\x17\xfc\x85\xad\xe4\xcb\x47\x2d\xae\x5e\xf8\xe0\x69\xf0\xfe\xc5",
     (const uint8_t *)"\x2e\xcf\x80\xc8\x2b\x44\x98\x48\xc0\x00\x33\x50\x92\x13\x95\x51\xbf\xe4\x7b\x3c\x73\x17\xb4\x99\x50\xf6\x5e\x1d\x82\x43\x20\x24",
-#else
-    (const uint8_t *)"\x57\x11\x4f\x0a\xa6\x69\xd2\xf8\x37\xe0\x40\xab\x9b\xb5\x1c\x00\x99\x12\x09\xf8\x4b\xfd\x7b\xf0\xf8\x93\x67\x62\x46\xfb\xa2\x4a",
-    (const uint8_t *)"\xdc\xae\x8e\x37\xdf\x5c\x24\x60\x27\xc0\x3a\xa9\x51\xbd\x6e\xc6\xca\xa7\xad\x32\xc1\x66\xb1\xf5\x48\xa4\xef\xcd\x88\xca\x3c\xa5",
-    (const uint8_t *)"\x77\x29\x12\xab\x61\xd1\xdc\x4f\x91\x33\x32\x5e\x57\xe1\x46\xab\x9f\xac\x17\xa4\x57\x2c\x6f\xcd\xf3\x55\xf8\x00\x36\x10\x00\x04",
-#endif
+// comment the lines above and uncomment the lines below to use a custom signed onekey vendorheader
+  //  (const uint8_t *)"\xEC\x3C\x75\x23\xE9\x1D\x55\x7D\xD2\xA5\x83\x05\xD6\xF9\x77\x64\xB2\xA2\x54\xC6\x19\x97\x7B\x25\x10\xD4\xE7\xE1\x8A\x83\x21\x14",
+  //  (const uint8_t *)"\xF4\x79\xA8\x44\x45\x22\xB3\xF5\x81\x49\xB3\x31\x85\xA5\x07\x68\xCD\xFF\xC0\x28\x5D\x54\x69\xF4\x0D\xB6\x55\x45\x8E\x86\xED\x60",
+  //  (const uint8_t *)"\x6D\xDA\xA3\x3C\x09\x1F\x0C\xB0\x20\x43\xF6\x9E\x2D\x2A\xF7\x93\x29\x6F\x65\x91\x3C\x2F\xBC\x65\xCD\xC5\x64\x67\xB1\x80\x30\xBA",
 };
 
 #define USB_IFACE_NUM 0
-
-#if !PRODUCTION
-#define atca_assert(expr, msg) \
-  (((expr) == ATCA_SUCCESS)    \
-       ? (void)0               \
-       : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
-
-// Note: this is for developers to setup a dummy config only!
-// configuration to SE is permanent, there is no way to reset it!
-static void write_dev_dummy_config() {
-  // DO NOT ENABLE THIS UNLESS YOU KNOW WHAT YOU ARE DOING
-  // reset OTP to pair with a new SE
-  // ensure(flash_erase(FLASH_SECTOR_OTP_EMULATOR), NULL);
-
-  mpu_config_off();
-
-  // device serial
-  if (!device_serial_set()) {
-    device_set_serial("TCTestSerialNumberXXXXXXXXXXXXX");
-  }
-
-  // se keys
-  atca_init();
-
-  ATCAConfiguration atca_configuration;
-  ATCAPairingInfo pair_info_obj = {0};
-  uint8_t se_serial_no[32] = {0};
-  FlashLockedData* flash_otp_data = (FlashLockedData*)0x081E0000;
-
-  // get otp data
-  memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
-         sizeof(pair_info_obj));
-
-  uint8_t dummy_key[32] = {
-      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,  // 0-7
-      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,  // 8-15
-      0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,  // 16-23
-      0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0,  // 24-32
-  };
-
-  if (check_all_ones(pair_info_obj.protect_key,
-                     sizeof(pair_info_obj.protect_key))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, dummy_key,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-    ATCA_STATUS ret =
-        atca_write_zone(ATCA_ZONE_DATA, SLOT_IO_PROTECT_KEY, 0, 0,
-                        pair_info_obj.protect_key, ATCA_BLOCK_SIZE);
-    // atca_assert(ret, "init IO key");
-    UNUSED(ret);
-  }
-  if (check_all_ones(pair_info_obj.init_pin, sizeof(pair_info_obj.init_pin))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_INIT_PIN, 0, dummy_key,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-
-    ATCA_STATUS ret = atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_PIN, 0, 0,
-                                      pair_info_obj.init_pin, ATCA_BLOCK_SIZE);
-    // atca_assert(ret, "init IO key");
-    UNUSED(ret);
-  }
-  if (check_all_ones(pair_info_obj.hash_mix, sizeof(pair_info_obj.hash_mix))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_MIX_PIN, 0, dummy_key,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-  }
-
-  atca_config_init();
-
-  // get se config
-  atca_assert(atca_read_config_zone((uint8_t*)&atca_configuration),
-              "get config");
-
-  // get se sn from config
-  memset(se_serial_no, 0xff, sizeof(se_serial_no));
-  memcpy(se_serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
-  memcpy(se_serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
-         ATECC608_SN2_SIZE);
-
-  // write sn if not already
-  if (atca_configuration.lock_value == ATCA_LOCKED) {
-    if (check_all_ones(pair_info_obj.serial, sizeof(pair_info_obj.serial))) {
-      ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, se_serial_no,
-                             FLASH_OTP_BLOCK_SIZE),
-             NULL);
-    }
-  }
-
-  // se cert
-  uint8_t dummy_cert[] = {
-      0x30, 0x82, 0x01, 0x58, 0x30, 0x82, 0x01, 0x0A, 0xA0, 0x03, 0x02, 0x01,
-      0x02, 0x02, 0x08, 0x44, 0x9F, 0x65, 0xB6, 0x90, 0xE4, 0x90, 0x09, 0x30,
-      0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x30, 0x36, 0x31, 0x0F, 0x30, 0x0D,
-      0x06, 0x03, 0x55, 0x04, 0x0A, 0x13, 0x06, 0x4F, 0x6E, 0x65, 0x4B, 0x65,
-      0x79, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x02,
-      0x4E, 0x41, 0x31, 0x16, 0x30, 0x14, 0x06, 0x03, 0x55, 0x04, 0x03, 0x0C,
-      0x0D, 0x4F, 0x4E, 0x45, 0x4B, 0x45, 0x59, 0x5F, 0x44, 0x45, 0x56, 0x5F,
-      0x43, 0x41, 0x30, 0x22, 0x18, 0x0F, 0x39, 0x39, 0x39, 0x39, 0x31, 0x32,
-      0x33, 0x31, 0x32, 0x33, 0x35, 0x39, 0x35, 0x39, 0x5A, 0x18, 0x0F, 0x39,
-      0x39, 0x39, 0x39, 0x31, 0x32, 0x33, 0x31, 0x32, 0x33, 0x35, 0x39, 0x35,
-      0x39, 0x5A, 0x30, 0x2A, 0x31, 0x28, 0x30, 0x26, 0x06, 0x03, 0x55, 0x04,
-      0x03, 0x13, 0x1F, 0x54, 0x43, 0x54, 0x65, 0x73, 0x74, 0x53, 0x65, 0x72,
-      0x69, 0x61, 0x6C, 0x4E, 0x75, 0x6D, 0x62, 0x65, 0x72, 0x58, 0x58, 0x58,
-      0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x30, 0x59,
-      0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06,
-      0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
-      0x04, 0x20, 0x32, 0xF5, 0xC1, 0x3B, 0x55, 0x5C, 0x8B, 0xF7, 0xE0, 0xB4,
-      0x8A, 0x83, 0x5C, 0x67, 0xD3, 0xC2, 0x04, 0xB7, 0x90, 0x2F, 0x49, 0x78,
-      0xF8, 0x5D, 0x2B, 0xFE, 0xA1, 0xAF, 0x0B, 0xCA, 0x6F, 0x94, 0xD3, 0x20,
-      0xD9, 0x04, 0x5B, 0xD7, 0x0B, 0xB2, 0x8D, 0xA7, 0xF1, 0x8D, 0x39, 0xA9,
-      0xC5, 0x44, 0x53, 0x67, 0x5C, 0xA9, 0x6D, 0x5F, 0x45, 0x74, 0x77, 0x32,
-      0x38, 0x8D, 0x91, 0x5F, 0xE2, 0xA3, 0x0F, 0x30, 0x0D, 0x30, 0x0B, 0x06,
-      0x03, 0x55, 0x1D, 0x0F, 0x04, 0x04, 0x03, 0x02, 0x07, 0x80, 0x30, 0x05,
-      0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x41, 0x00, 0x9F, 0x5D, 0x95, 0xFB,
-      0x4A, 0xAD, 0xE6, 0xC6, 0x3B, 0x8E, 0x15, 0xB0, 0xBD, 0x0D, 0xF0, 0x70,
-      0x81, 0x4E, 0x05, 0x9A, 0xAD, 0xC4, 0xE4, 0x6E, 0x44, 0xDE, 0xF1, 0xDB,
-      0x51, 0xCB, 0x85, 0xB7, 0x5F, 0xAF, 0x55, 0xEB, 0x28, 0x9A, 0x66, 0x95,
-      0xAA, 0x08, 0x66, 0x8E, 0x84, 0xC1, 0x22, 0x5D, 0x34, 0x75, 0xF3, 0x01,
-      0x2F, 0x6D, 0x33, 0x21, 0x35, 0x1E, 0x54, 0xEC, 0x71, 0xEC, 0x3D, 0x04};
-
-  atca_config_check();
-  uint32_t cert_len = 0;
-  if (!se_get_certificate_len(&cert_len)) {
-    if (!se_write_certificate(dummy_cert, sizeof(dummy_cert)))
-      ensure(secfalse, "set cert failed");
-  }
-
-  mpu_config_bootloader();
-}
-#endif
-
-// this is mainly for ignore/supress faults during flash content read (for check
-// purpose) if bus fault enabled, it will catched by BusFault_Handler, then we
-// could ignore it if bus fault disabled, it will elevate to hard fault, this is
-// not what we want
-static secbool handle_flash_ecc_error = secfalse;
-static void set_handle_flash_ecc_error(secbool val) {
-  handle_flash_ecc_error = val;
-}
-static void bus_fault_enable() { SCB->SHCSR |= SCB_SHCSR_BUSFAULTENA_Msk; }
-static void bus_fault_disable() { SCB->SHCSR &= ~SCB_SHCSR_BUSFAULTENA_Msk; }
-
-void HardFault_Handler(void) {
-  error_shutdown("Internal error", "(HF)", NULL, NULL);
-}
-
-void MemManage_Handler_MM(void) {
-  error_shutdown("Internal error", "(MM)", NULL, NULL);
-}
-
-void MemManage_Handler_SO(void) {
-  error_shutdown("Internal error", "(SO)", NULL, NULL);
-}
-
-void BusFault_Handler(void) {
-  // if want handle flash ecc error
-  if (handle_flash_ecc_error == sectrue) {
-    // dbgprintf_Wait("Internal flash ECC error detected at 0x%X", SCB->BFAR);
-
-    // check if it's triggered by flash DECC
-    if (flash_check_ecc_fault()) {
-      // reset flash controller error flags
-      flash_clear_ecc_fault(SCB->BFAR);
-
-      // reset bus fault error flags
-      SCB->CFSR &= ~(SCB_CFSR_BFARVALID_Msk | SCB_CFSR_PRECISERR_Msk);
-      __DSB();
-      SCB->SHCSR &= ~(SCB_SHCSR_BUSFAULTACT_Msk);
-      __DSB();
-
-      // try to fix ecc error and reboot
-      if (flash_fix_ecc_fault_FIRMWARE(SCB->BFAR)) {
-        error_shutdown("Internal flash ECC error", "Cleanup successful",
-                       "Firmware reinstall required",
-                       "If the issue persists, contact support.");
-      } else {
-        error_shutdown("Internal error", "Cleanup failed",
-                       "Reboot to try again",
-                       "If the issue persists, contact support.");
-      }
-    }
-  }
-
-  // normal route
-  error_shutdown("Internal error", "(BF)", NULL, NULL);
-}
-
-void UsageFault_Handler(void) {
-  error_shutdown("Internal error", "(UF)", NULL, NULL);
-}
 
 static void usb_init_all(secbool usb21_landing) {
   usb_dev_info_t dev_info = {
@@ -457,7 +258,7 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
           hal_delay(1000);
           usb_stop();
           usb_deinit();
-          display_clear();
+          ui_fadeout();
           return sectrue;  // jump to firmware
         }
         break;
@@ -642,42 +443,6 @@ static void check_bootloader_version(void) {
 
 #endif
 
-static secbool validate_firmware_headers(vendor_header* const vhdr,
-                                         image_header* const hdr) {
-  set_handle_flash_ecc_error(sectrue);
-  secbool result = secfalse;
-  while (true) {
-    // check
-    if (sectrue !=
-        load_vendor_header_keys((const uint8_t*)FIRMWARE_START, vhdr))
-      break;
-
-    if (sectrue != check_vendor_header_lock(vhdr)) break;
-
-    if (sectrue !=
-        load_image_header((const uint8_t*)(FIRMWARE_START + vhdr->hdrlen),
-                          FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
-                          vhdr->vsig_m, vhdr->vsig_n, vhdr->vpub, hdr))
-      break;
-
-    // passed, return true
-    result = sectrue;
-    break;
-  }
-  set_handle_flash_ecc_error(secfalse);
-  return result;
-}
-
-static secbool validate_firmware_code(vendor_header* const vhdr,
-                                      image_header* const hdr) {
-  set_handle_flash_ecc_error(sectrue);
-  secbool result =
-      check_image_contents(hdr, IMAGE_HEADER_SIZE + vhdr->hdrlen,
-                           FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT);
-  set_handle_flash_ecc_error(secfalse);
-  return result;
-}
-
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
   bool serial_set = false, cert_set = false;
@@ -696,19 +461,8 @@ int main(void) {
     serial_set = device_serial_set();
   }
 
-  if (!serial_set) {
-    pcb_version = PCB_VERSION_2_1_0;
-  } else {
-    char* factory_data = NULL;
-    char* serial;
-    device_get_serial(&serial);
-    factory_data = serial + 7;
-    if (memcmp(factory_data, "20220910", 8) >= 0) {
-      pcb_version = PCB_VERSION_2_1_0;
-    } else {
-      pcb_version = PCB_VERSION_1_0_0;
-    }
-  }
+  pcb_version = PCB_VERSION_2_1_0;
+
 #if defined TREZOR_MODEL_T
   // display_set_little_endian();
   touch_init();
@@ -720,21 +474,12 @@ int main(void) {
   rgb_led_init();
 #endif
 
-#if !PRODUCTION
-  // write_dev_dummy_config();
-  UNUSED(write_dev_dummy_config);
-#endif
-
-  bus_fault_enable();
+  thd89_init();
 
   device_test();
 
-  atca_init();
-  atca_config_check();
-
   if (!cert_set) {
-    uint32_t cert_len = 0;
-    cert_set = se_get_certificate_len(&cert_len);
+    cert_set = se_has_cerrificate();
   }
 
   if (!serial_set || !cert_set) {
@@ -767,10 +512,19 @@ int main(void) {
   motor_init();
   spi_slave_init();
 
+  ensure(se_sync_session_key(), "se start up failed");
+  se_clearSecsta();
+
+  uint8_t se_state;
+  se_get_state(&se_state);
+
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 
   if (stay_in_bootloader_flag == STAY_IN_BOOTLOADER_FLAG) {
     *STAY_IN_FLAG_ADDR = 0;
+    stay_in_bootloader = sectrue;
+  }
+  if (se_state == THD89_STATE_BOOT) {
     stay_in_bootloader = sectrue;
   }
 
@@ -794,13 +548,35 @@ int main(void) {
   }
 #endif
 
+  // firmware check
   vendor_header vhdr;
   image_header hdr;
+  secbool firmware_headers_valid = secfalse;
+  secbool firmware_valid = secfalse;
 
-  // check stay_in_bootloader flag
+  // headers
+  while (true) {
+    if (sectrue !=
+        load_vendor_header_keys((const uint8_t*)FIRMWARE_START, &vhdr))
+      break;
+
+    if (sectrue != check_vendor_header_lock(&vhdr)) break;
+
+    if (sectrue !=
+        load_image_header((const uint8_t*)(FIRMWARE_START + vhdr.hdrlen),
+                          FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
+                          vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr))
+      break;
+
+    // all check passed, set flag to true
+    firmware_headers_valid = sectrue;
+    break;
+  }
+
+  // if stay_in_bootloader flag is set
   if (stay_in_bootloader == sectrue) {
     display_clear();
-    if (sectrue == validate_firmware_headers(&vhdr, &hdr)) {
+    if (sectrue == firmware_headers_valid) {
       ui_bootloader_first(&hdr);
       if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
         return 1;
@@ -813,30 +589,46 @@ int main(void) {
     }
   }
 
-  // check if firmware valid
-  if (sectrue == validate_firmware_headers(&vhdr, &hdr)) {
-    if (sectrue == validate_firmware_code(&vhdr, &hdr)) {
-      // __asm("nop"); // all good, do nothing
-    } else {
-      display_clear();
+  // firmware code
+  if (sectrue == firmware_headers_valid) {
+    firmware_valid =
+        check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
+                             FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT);
+  }
+
+  // if firmware not valid
+  if (firmware_valid != sectrue) {
+    display_clear();
+    if (sectrue == firmware_headers_valid) {
       ui_bootloader_first(&hdr);
       if (bootloader_usb_loop(&vhdr, &hdr) != sectrue) {
         return 1;
       }
-    }
-  } else {
-    display_clear();
-    ui_bootloader_first(NULL);
-    if (bootloader_usb_loop(NULL, NULL) != sectrue) {
-      return 1;
+    } else {
+      ui_bootloader_first(NULL);
+      if (bootloader_usb_loop(NULL, NULL) != sectrue) {
+        return 1;
+      }
     }
   }
 
-  // check if firmware valid again to make sure
-  ensure(validate_firmware_headers(&vhdr, &hdr), "invalid firmware header");
-  ensure(validate_firmware_code(&vhdr, &hdr), "invalid firmware code");
+  // if firmware valid
+  ensure(load_vendor_header_keys((const uint8_t*)FIRMWARE_START, &vhdr),
+         "invalid vendor header");
+
+  ensure(check_vendor_header_lock(&vhdr), "unauthorized vendor keys");
+
+  ensure(load_image_header((const uint8_t*)(FIRMWARE_START + vhdr.hdrlen),
+                           FIRMWARE_IMAGE_MAGIC, FIRMWARE_IMAGE_MAXSIZE,
+                           vhdr.vsig_m, vhdr.vsig_n, vhdr.vpub, &hdr),
+         "invalid firmware header");
+
+  ensure(check_image_contents(&hdr, IMAGE_HEADER_SIZE + vhdr.hdrlen,
+                              FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT),
+         "invalid firmware hash");
 
   // if all VTRUST flags are unset = ultimate trust => skip the procedure
+
   if ((vhdr.vtrust & VTRUST_ALL) != VTRUST_ALL) {
     // ui_fadeout();  // no fadeout - we start from black screen
     ui_screen_boot(&vhdr, &hdr);
@@ -858,12 +650,12 @@ int main(void) {
       while (touch_read() == 0)
         ;
     }
-    display_clear();
+
+    ui_fadeout();
   }
 
   // mpu_config_firmware();
   // jump_to_unprivileged(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
-  bus_fault_disable();
   mpu_config_off();
   jump_to(FIRMWARE_START + vhdr.hdrlen + IMAGE_HEADER_SIZE);
 

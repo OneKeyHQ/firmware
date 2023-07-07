@@ -211,7 +211,42 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_derive_path(mp_obj_t self,
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_derive_path_obj,
                                  mod_trezorcrypto_HDNode_derive_path);
+#if USE_THD89
+#include "se_thd89.h"
+/// def se_derive_path(self, path: Sequence[int]) -> None:
+///     """
+///     Go through a list of indexes and iteratively derive a child node in
+///     place.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_HDNode_se_derive_path(mp_obj_t self,
+                                                       mp_obj_t path) {
+  mp_obj_HDNode_t *o = MP_OBJ_TO_PTR(self);
 
+  // get path objects and length
+  size_t plen = 0;
+  mp_obj_t *pitems = NULL;
+  mp_obj_get_array(path, &plen, &pitems);
+  if (plen > 32) {
+    mp_raise_ValueError("Path cannot be longer than 32 indexes");
+  }
+
+  uint32_t address_n[plen];
+
+  for (uint32_t pi = 0; pi < plen; pi++) {
+    address_n[pi] = trezor_obj_get_uint(pitems[pi]);
+  }
+  const char *curve = o->hdnode.curve->curve_name;
+  if (!se_derive_keys(&o->hdnode, curve, address_n, plen, &o->fingerprint)) {
+    o->fingerprint = 0;
+    memzero(&o->hdnode, sizeof(o->hdnode));
+    mp_raise_ValueError("Failed to derive path");
+  }
+
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_se_derive_path_obj,
+                                 mod_trezorcrypto_HDNode_se_derive_path);
+#endif
 /// def serialize_public(self, version: int) -> str:
 ///     """
 ///     Serialize the public info from HD node to base58 string.
@@ -490,6 +525,10 @@ STATIC const mp_rom_map_elem_t mod_trezorcrypto_HDNode_locals_dict_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_nem_encrypt_obj)},
     {MP_ROM_QSTR(MP_QSTR_ethereum_pubkeyhash),
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_ethereum_pubkeyhash_obj)},
+#endif
+#if USE_THD89
+    {MP_ROM_QSTR(MP_QSTR_se_derive_path),
+     MP_ROM_PTR(&mod_trezorcrypto_HDNode_se_derive_path_obj)},
 #endif
 };
 STATIC MP_DEFINE_CONST_DICT(mod_trezorcrypto_HDNode_locals_dict,

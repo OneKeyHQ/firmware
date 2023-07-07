@@ -20,6 +20,9 @@ def check_address_mac(
 
 
 def get_address_mac(address: str, slip44: int, keychain: Keychain) -> bytes:
+    if utils.USE_THD89:
+        # slip21 not implemented in se
+        return None
     # k = Key(m/"SLIP-0024"/"Address MAC key")
     node = keychain.derive_slip21(_ADDRESS_MAC_KEY_PATH)
 

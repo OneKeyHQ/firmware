@@ -45,7 +45,7 @@ static I2C_HandleTypeDef i2c_handle;
 #define Y_POS_MSB (touch_data[2])
 #define Y_POS_LSB (touch_data[3] & 0x0FU)
 
-void _i2c_msp_init(void) {
+static void _i2c_msp_init(void) {
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();

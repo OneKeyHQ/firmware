@@ -227,12 +227,10 @@ typedef long mp_off_t;
 
 extern const struct _mp_obj_module_t mp_module_lvgl;
 extern const struct _mp_obj_module_t mp_module_lvgldrv;
-extern const struct _mp_obj_module_t mp_module_atca;
 
 #define MICROPY_PORT_BUILTIN_MODULES \
    { MP_OBJ_NEW_QSTR(MP_QSTR_lvgl), (mp_obj_t)&mp_module_lvgl }, \
-   { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldrv }, \
-   { MP_OBJ_NEW_QSTR(MP_QSTR_atca), (mp_obj_t)&mp_module_atca },
+   { MP_OBJ_NEW_QSTR(MP_QSTR_lvgldrv), (mp_obj_t)&mp_module_lvgldrv },
 
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>

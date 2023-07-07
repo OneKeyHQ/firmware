@@ -135,25 +135,40 @@ async def handle_Initialize(ctx: wire.Context, msg: Initialize) -> Features:
     session_id = storage.cache.start_session(msg.session_id)
 
     if not utils.BITCOIN_ONLY:
-        derive_cardano = storage.cache.get(storage.cache.APP_COMMON_DERIVE_CARDANO)
-        have_seed = storage.cache.is_set(storage.cache.APP_COMMON_SEED)
+        if utils.USE_THD89:
+            if msg.derive_cardano is not None and msg.derive_cardano:
+                # THD89 is not capable of Cardano
+                raise wire.ProcessError("Device is not capable of Cardano")
+                from trezor.crypto import se_thd89
 
-        if (
-            have_seed
-            and msg.derive_cardano is not None
-            and msg.derive_cardano != bool(derive_cardano)
-        ):
-            # seed is already derived, and host wants to change derive_cardano setting
-            # => create a new session
-            storage.cache.end_current_session()
-            session_id = storage.cache.start_session()
-            have_seed = False
+                state = se_thd89.get_session_state()
+                if not bool(state[2]):
+                    storage.cache.end_current_session()
+                    session_id = storage.cache.start_session()
+                    storage.cache.SESSION_DIRIVE_CARDANO = True
+            else:
+                storage.cache.SESSION_DIRIVE_CARDANO = False
 
-        if not have_seed:
-            storage.cache.set(
-                storage.cache.APP_COMMON_DERIVE_CARDANO,
-                b"\x01" if msg.derive_cardano else b"",
-            )
+        else:
+            derive_cardano = storage.cache.get(storage.cache.APP_COMMON_DERIVE_CARDANO)
+            have_seed = storage.cache.is_set(storage.cache.APP_COMMON_SEED)
+
+            if (
+                have_seed
+                and msg.derive_cardano is not None
+                and msg.derive_cardano != bool(derive_cardano)
+            ):
+                # seed is already derived, and host wants to change derive_cardano setting
+                # => create a new session
+                storage.cache.end_current_session()
+                session_id = storage.cache.start_session()
+                have_seed = False
+
+            if not have_seed:
+                storage.cache.set(
+                    storage.cache.APP_COMMON_DERIVE_CARDANO,
+                    b"\x01" if msg.derive_cardano else b"",
+                )
 
     features = get_features()
     features.session_id = session_id

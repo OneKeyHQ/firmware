@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from trezor import utils
 from trezor.crypto.curve import secp256k1
 from trezor.lvglui.scrs import lv
 from trezor.messages import FilecoinAddress, FilecoinGetAddress
@@ -21,7 +22,12 @@ async def get_address(
     await paths.validate_path(ctx, keychain, msg.address_n)
 
     node = keychain.derive(msg.address_n)
-    public_key = secp256k1.publickey(node.private_key(), False)
+    if utils.USE_THD89:
+        from trezor.crypto import se_thd89
+
+        public_key = se_thd89.uncompress_pubkey("secp256k1", node.public_key())
+    else:
+        public_key = secp256k1.publickey(node.private_key(), False)
     address = helper.pubkey_to_address(public_key, "t" if msg.testnet else "f")
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)

@@ -23,6 +23,10 @@
 
 #include "rand.h"
 
+#if USE_THD89
+#include "se_thd89.h"
+#endif
+
 /// package: trezorcrypto.curve25519
 
 /// def generate_secret() -> bytes:
@@ -79,8 +83,16 @@ STATIC mp_obj_t mod_trezorcrypto_curve25519_multiply(mp_obj_t secret_key,
   }
   vstr_t out = {0};
   vstr_init_len(&out, 32);
+#if USE_THD89
+  if (0 != se_get_shared_key(CURVE25519_NAME, (const uint8_t *)pk.buf,
+                             (uint8_t *)out.buf)) {
+    vstr_clear(&out);
+    mp_raise_ValueError("Multiply failed");
+  }
+#else
   curve25519_scalarmult((uint8_t *)out.buf, (const uint8_t *)sk.buf,
                         (const uint8_t *)pk.buf);
+#endif
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &out);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_curve25519_multiply_obj,

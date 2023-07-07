@@ -3,6 +3,7 @@ from trezorcrypto import random  # avoid pulling in trezor.crypto
 from typing import TYPE_CHECKING
 
 from trezor import utils
+from trezor.crypto import se_thd89
 
 if TYPE_CHECKING:
     from typing import Sequence, TypeVar, overload
@@ -32,8 +33,7 @@ STORAGE_DEVICE_EXPERIMENTAL_FEATURES = 2 | _SESSIONLESS_FLAG
 APP_COMMON_REQUEST_PIN_LAST_UNLOCK = 3 | _SESSIONLESS_FLAG
 APP_COMMON_BUSY_DEADLINE_MS = 4 | _SESSIONLESS_FLAG
 
-APP_BLE_NAME = 4 | _SESSIONLESS_FLAG
-APP_CHARGING_STATE = 5 | _SESSIONLESS_FLAG
+SESSION_DIRIVE_CARDANO = False
 
 
 # === Homescreen storage ===
@@ -139,8 +139,6 @@ class SessionlessCache(DataCache):
             1,  # APP_COMMON_SAFETY_CHECKS_TEMPORARY
             1,  # STORAGE_DEVICE_EXPERIMENTAL_FEATURES
             8,  # APP_COMMON_REQUEST_PIN_LAST_UNLOCK
-            8,  # APP_BLE_NAME
-            1,  # APP_CHARGING_STATE
             8,  # APP_COMMON_BUSY_DEADLINE_MS
         )
         super().__init__()
@@ -172,66 +170,78 @@ _session_usage_counter = 0
 
 
 def start_session(received_session_id: bytes | None = None) -> bytes:
-    global _active_session_idx
-    global _session_usage_counter
+    if not utils.USE_THD89:
+        global _active_session_idx
+        global _session_usage_counter
 
-    if (
-        received_session_id is not None
-        and len(received_session_id) != _SESSION_ID_LENGTH
-    ):
-        # Prevent the caller from setting received_session_id=b"" and finding a cleared
-        # session. More generally, short-circuit the session id search, because we know
-        # that wrong-length session ids should not be in cache.
-        # Reduce to "session id not provided" case because that's what we do when
-        # caller supplies an id that is not found.
-        received_session_id = None
+        if (
+            received_session_id is not None
+            and len(received_session_id) != _SESSION_ID_LENGTH
+        ):
+            # Prevent the caller from setting received_session_id=b"" and finding a cleared
+            # session. More generally, short-circuit the session id search, because we know
+            # that wrong-length session ids should not be in cache.
+            # Reduce to "session id not provided" case because that's what we do when
+            # caller supplies an id that is not found.
+            received_session_id = None
 
-    _session_usage_counter += 1
+        _session_usage_counter += 1
 
-    # attempt to find specified session id
-    if received_session_id:
+        # attempt to find specified session id
+        if received_session_id:
+            for i in range(_MAX_SESSIONS_COUNT):
+                if _SESSIONS[i].session_id == received_session_id:
+                    _active_session_idx = i
+                    _SESSIONS[i].last_usage = _session_usage_counter
+                    return received_session_id
+
+        # allocate least recently used session
+        lru_counter = _session_usage_counter
+        lru_session_idx = 0
         for i in range(_MAX_SESSIONS_COUNT):
-            if _SESSIONS[i].session_id == received_session_id:
-                _active_session_idx = i
-                _SESSIONS[i].last_usage = _session_usage_counter
-                return received_session_id
+            if _SESSIONS[i].last_usage < lru_counter:
+                lru_counter = _SESSIONS[i].last_usage
+                lru_session_idx = i
 
-    # allocate least recently used session
-    lru_counter = _session_usage_counter
-    lru_session_idx = 0
-    for i in range(_MAX_SESSIONS_COUNT):
-        if _SESSIONS[i].last_usage < lru_counter:
-            lru_counter = _SESSIONS[i].last_usage
-            lru_session_idx = i
-
-    _active_session_idx = lru_session_idx
-    selected_session = _SESSIONS[lru_session_idx]
-    selected_session.clear()
-    selected_session.last_usage = _session_usage_counter
-    return selected_session.export_session_id()
+        _active_session_idx = lru_session_idx
+        selected_session = _SESSIONS[lru_session_idx]
+        selected_session.clear()
+        selected_session.last_usage = _session_usage_counter
+        return selected_session.export_session_id()
+    else:
+        return se_thd89.start_session(received_session_id)
 
 
 def end_current_session() -> None:
-    global _active_session_idx
+    if not utils.USE_THD89:
+        global _active_session_idx
 
-    if _active_session_idx is None:
-        return
+        if _active_session_idx is None:
+            return
 
-    _SESSIONS[_active_session_idx].clear()
-    _active_session_idx = None
+        _SESSIONS[_active_session_idx].clear()
+        _active_session_idx = None
+    else:
+        pass
 
 
 def is_session_started() -> bool:
-    return _active_session_idx is not None
+    if not utils.USE_THD89:
+        return _active_session_idx is not None
+    else:
+        pass
 
 
 def set(key: int, value: bytes) -> None:
     if key & _SESSIONLESS_FLAG:
         _SESSIONLESS_CACHE.set(key ^ _SESSIONLESS_FLAG, value)
         return
-    if _active_session_idx is None:
-        raise InvalidSessionError
-    _SESSIONS[_active_session_idx].set(key, value)
+    if not utils.USE_THD89:
+        if _active_session_idx is None:
+            raise InvalidSessionError
+        _SESSIONS[_active_session_idx].set(key, value)
+    else:
+        return
 
 
 def set_int(key: int, value: int) -> None:
@@ -265,9 +275,12 @@ if TYPE_CHECKING:
 def get(key: int, default: T | None = None) -> bytes | T | None:  # noqa: F811
     if key & _SESSIONLESS_FLAG:
         return _SESSIONLESS_CACHE.get(key ^ _SESSIONLESS_FLAG, default)
-    if _active_session_idx is None:
-        raise InvalidSessionError
-    return _SESSIONS[_active_session_idx].get(key, default)
+    if not utils.USE_THD89:
+        if _active_session_idx is None:
+            raise InvalidSessionError
+        return _SESSIONS[_active_session_idx].get(key, default)
+    else:
+        return None
 
 
 def get_int(key: int, default: T | None = None) -> int | T | None:  # noqa: F811
