@@ -11,6 +11,7 @@ from trezorutils import (  # noqa: F401; FIRMWARE_SECTORS_COUNT,; firmware_secto
     MODEL,
     ONEKEY_VERSION,
     SCM_REVISION,
+    USE_THD89,
     VERSION_MAJOR,
     VERSION_MINOR,
     VERSION_PATCH,

@@ -133,6 +133,30 @@ secbool load_ble_image_header(const uint8_t *const data, const uint32_t magic,
   return sectrue;
 }
 
+secbool load_thd89_image_header(const uint8_t *const data, const uint32_t magic,
+                                const uint32_t maxsize,
+                                image_header_old *const hdr) {
+  memcpy(&hdr->magic, data, 4);
+  if (hdr->magic != magic) return secfalse;
+
+  memcpy(&hdr->hdrlen, data + 4, 4);
+  // if (hdr->hdrlen != IMAGE_HEADER_SIZE) return secfalse;
+
+  memcpy(&hdr->expiry, data + 8, 4);
+  // TODO: expiry mechanism needs to be ironed out before production or those
+  // devices won't accept expiring bootloaders (due to boardloader write
+  // protection).
+  // if (hdr->expiry != 0) return secfalse;
+
+  memcpy(&hdr->codelen, data + 12, 4);
+
+  memcpy(hdr->hashes, data + 32, 512);
+
+  memcpy(hdr->sig1, data + 32 + 512, 64);
+
+  return sectrue;
+}
+
 secbool read_vendor_header(const uint8_t *const data,
                            vendor_header *const vhdr) {
   memcpy(&vhdr->magic, data, 4);

@@ -38,6 +38,7 @@
 #define ADDRESS_MAXLEN 39
 
 typedef struct {
+  const char *curve_name;
   const char *bip32_name;     // string for generating BIP32 xprv from seed
   const ecdsa_curve *params;  // ecdsa curve parameters, null for ed25519
 

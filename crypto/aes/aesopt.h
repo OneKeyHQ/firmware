@@ -347,7 +347,9 @@ Issue Date: 20/12/2007
     must be called to compute them before the code is first used.
 */
 #if 1 && !(defined( _MSC_VER ) && ( _MSC_VER <= 800 ))
-#  define STATIC_TABLES
+#ifndef STATIC_TABLES
+#   define STATIC_TABLES 1
+#endif
 #endif
 
 /*  9. MASKING OR CASTING FROM LONGER VALUES TO BYTES

@@ -35,6 +35,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     _validate_reset_device(msg)
     from trezor.ui.layouts import show_popup
 
+    newpin = None
+
     if msg.language is not None:
         i18n_refresh(msg.language)
     await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT), None, timeout_ms=1000)
@@ -66,8 +68,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # request and set new PIN
         if msg.pin_protection:
             newpin = await request_pin_confirm(ctx)
-            if not config.change_pin("", newpin, None, None):
-                raise wire.ProcessError("Failed to set PIN")
+            # if not config.change_pin("", newpin, None, None):
+            #     raise wire.ProcessError("Failed to set PIN")
 
         # generate and display internal entropy
         int_entropy = random.bytes(32)
@@ -120,6 +122,11 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
             needs_backup=not perform_backup,
             no_backup=bool(msg.no_backup),
         )
+
+        if newpin is not None:
+            if not config.change_pin("", newpin, None, None):
+                raise wire.ProcessError("Failed to set PIN")
+            config.unlock(newpin, None)
 
         # if we backed up the wallet, show success message
         if perform_backup:

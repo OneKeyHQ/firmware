@@ -20,9 +20,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "atca_api.h"
-#include "atca_command.h"
-#include "atca_hal.h"
 #include "common.h"
 #include "compiler_traits.h"
 #include "device.h"
@@ -35,8 +32,10 @@
 #include "nand_flash.h"
 #include "qspi_flash.h"
 #include "random_delays.h"
-#include "se_atca.h"
+#include "se_thd89.h"
 #include "secbool.h"
+#include "thd89.h"
+#include "thd89_boot.h"
 #ifdef TREZOR_MODEL_T
 #include "touch.h"
 #endif
@@ -81,143 +80,13 @@ const uint8_t * const BOOTLOADER_KEYS[] = {
 
 #define USB_IFACE_NUM 0
 
-#if !PRODUCTION
-#define atca_assert(expr, msg) \
-  (((expr) == ATCA_SUCCESS)    \
-       ? (void)0               \
-       : __fatal_error(#expr, msg, __FILE__, __LINE__, __func__))
-
-// Note: this is for developers to setup a dummy config only!
-// configuration to SE is permanent, there is no way to reset it!
-static void write_dev_dummy_config() {
-  // DO NOT ENABLE THIS UNLESS YOU KNOW WHAT YOU ARE DOING
-  // reset OTP to pair with a new SE
-  // ensure(flash_erase(FLASH_SECTOR_OTP_EMULATOR), NULL);
-
-  mpu_config_off();
-
-  // device serial
-  if (!device_serial_set()) {
-    device_set_serial("TCTestSerialNumberXXXXXXXXXXXXX");
-  }
-
-  // se keys
-  atca_init();
-
-  ATCAConfiguration atca_configuration;
-  ATCAPairingInfo pair_info_obj = {0};
-  uint8_t se_serial_no[32] = {0};
-  FlashLockedData* flash_otp_data = (FlashLockedData*)0x081E0000;
-
-  // get otp data
-  memcpy(&pair_info_obj, flash_otp_data->flash_otp[FLASH_OTP_BLOCK_608_SERIAL],
-         sizeof(pair_info_obj));
-
-  uint8_t dummy_key[32] = {
-      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,  // 0-7
-      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,  // 8-15
-      0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,  // 16-23
-      0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0,  // 24-32
-  };
-
-  if (check_all_ones(pair_info_obj.protect_key,
-                     sizeof(pair_info_obj.protect_key))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_PROTECT_KEY, 0, dummy_key,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-    ATCA_STATUS ret =
-        atca_write_zone(ATCA_ZONE_DATA, SLOT_IO_PROTECT_KEY, 0, 0,
-                        pair_info_obj.protect_key, ATCA_BLOCK_SIZE);
-    // atca_assert(ret, "init IO key");
-    UNUSED(ret);
-  }
-  if (check_all_ones(pair_info_obj.init_pin, sizeof(pair_info_obj.init_pin))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_INIT_PIN, 0, dummy_key,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-
-    ATCA_STATUS ret = atca_write_zone(ATCA_ZONE_DATA, SLOT_USER_PIN, 0, 0,
-                                      pair_info_obj.init_pin, ATCA_BLOCK_SIZE);
-    // atca_assert(ret, "init IO key");
-    UNUSED(ret);
-  }
-  if (check_all_ones(pair_info_obj.hash_mix, sizeof(pair_info_obj.hash_mix))) {
-    ensure(flash_otp_write(FLASH_OTP_BLOCK_608_MIX_PIN, 0, dummy_key,
-                           FLASH_OTP_BLOCK_SIZE),
-           NULL);
-  }
-
-  atca_config_init();
-
-  // get se config
-  atca_assert(atca_read_config_zone((uint8_t*)&atca_configuration),
-              "get config");
-
-  // get se sn from config
-  memset(se_serial_no, 0xff, sizeof(se_serial_no));
-  memcpy(se_serial_no, atca_configuration.sn1, ATECC608_SN1_SIZE);
-  memcpy(se_serial_no + ATECC608_SN1_SIZE, atca_configuration.sn2,
-         ATECC608_SN2_SIZE);
-
-  // write sn if not already
-  if (atca_configuration.lock_value == ATCA_LOCKED) {
-    if (check_all_ones(pair_info_obj.serial, sizeof(pair_info_obj.serial))) {
-      ensure(flash_otp_write(FLASH_OTP_BLOCK_608_SERIAL, 0, se_serial_no,
-                             FLASH_OTP_BLOCK_SIZE),
-             NULL);
-    }
-  }
-
-  // se cert
-  uint8_t dummy_cert[] = {
-      0x30, 0x82, 0x01, 0x58, 0x30, 0x82, 0x01, 0x0A, 0xA0, 0x03, 0x02, 0x01,
-      0x02, 0x02, 0x08, 0x44, 0x9F, 0x65, 0xB6, 0x90, 0xE4, 0x90, 0x09, 0x30,
-      0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x30, 0x36, 0x31, 0x0F, 0x30, 0x0D,
-      0x06, 0x03, 0x55, 0x04, 0x0A, 0x13, 0x06, 0x4F, 0x6E, 0x65, 0x4B, 0x65,
-      0x79, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x0B, 0x13, 0x02,
-      0x4E, 0x41, 0x31, 0x16, 0x30, 0x14, 0x06, 0x03, 0x55, 0x04, 0x03, 0x0C,
-      0x0D, 0x4F, 0x4E, 0x45, 0x4B, 0x45, 0x59, 0x5F, 0x44, 0x45, 0x56, 0x5F,
-      0x43, 0x41, 0x30, 0x22, 0x18, 0x0F, 0x39, 0x39, 0x39, 0x39, 0x31, 0x32,
-      0x33, 0x31, 0x32, 0x33, 0x35, 0x39, 0x35, 0x39, 0x5A, 0x18, 0x0F, 0x39,
-      0x39, 0x39, 0x39, 0x31, 0x32, 0x33, 0x31, 0x32, 0x33, 0x35, 0x39, 0x35,
-      0x39, 0x5A, 0x30, 0x2A, 0x31, 0x28, 0x30, 0x26, 0x06, 0x03, 0x55, 0x04,
-      0x03, 0x13, 0x1F, 0x54, 0x43, 0x54, 0x65, 0x73, 0x74, 0x53, 0x65, 0x72,
-      0x69, 0x61, 0x6C, 0x4E, 0x75, 0x6D, 0x62, 0x65, 0x72, 0x58, 0x58, 0x58,
-      0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x30, 0x59,
-      0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06,
-      0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
-      0x04, 0x20, 0x32, 0xF5, 0xC1, 0x3B, 0x55, 0x5C, 0x8B, 0xF7, 0xE0, 0xB4,
-      0x8A, 0x83, 0x5C, 0x67, 0xD3, 0xC2, 0x04, 0xB7, 0x90, 0x2F, 0x49, 0x78,
-      0xF8, 0x5D, 0x2B, 0xFE, 0xA1, 0xAF, 0x0B, 0xCA, 0x6F, 0x94, 0xD3, 0x20,
-      0xD9, 0x04, 0x5B, 0xD7, 0x0B, 0xB2, 0x8D, 0xA7, 0xF1, 0x8D, 0x39, 0xA9,
-      0xC5, 0x44, 0x53, 0x67, 0x5C, 0xA9, 0x6D, 0x5F, 0x45, 0x74, 0x77, 0x32,
-      0x38, 0x8D, 0x91, 0x5F, 0xE2, 0xA3, 0x0F, 0x30, 0x0D, 0x30, 0x0B, 0x06,
-      0x03, 0x55, 0x1D, 0x0F, 0x04, 0x04, 0x03, 0x02, 0x07, 0x80, 0x30, 0x05,
-      0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x41, 0x00, 0x9F, 0x5D, 0x95, 0xFB,
-      0x4A, 0xAD, 0xE6, 0xC6, 0x3B, 0x8E, 0x15, 0xB0, 0xBD, 0x0D, 0xF0, 0x70,
-      0x81, 0x4E, 0x05, 0x9A, 0xAD, 0xC4, 0xE4, 0x6E, 0x44, 0xDE, 0xF1, 0xDB,
-      0x51, 0xCB, 0x85, 0xB7, 0x5F, 0xAF, 0x55, 0xEB, 0x28, 0x9A, 0x66, 0x95,
-      0xAA, 0x08, 0x66, 0x8E, 0x84, 0xC1, 0x22, 0x5D, 0x34, 0x75, 0xF3, 0x01,
-      0x2F, 0x6D, 0x33, 0x21, 0x35, 0x1E, 0x54, 0xEC, 0x71, 0xEC, 0x3D, 0x04};
-
-  atca_config_check();
-  uint32_t cert_len = 0;
-  if (!se_get_certificate_len(&cert_len)) {
-    if (!se_write_certificate(dummy_cert, sizeof(dummy_cert)))
-      ensure(secfalse, "set cert failed");
-  }
-
-  mpu_config_bootloader();
-}
-#endif
-
 static void usb_init_all(secbool usb21_landing) {
   usb_dev_info_t dev_info = {
       .device_class = 0x00,
       .device_subclass = 0x00,
       .device_protocol = 0x00,
       .vendor_id = 0x1209,
-      .product_id = 0x4F4A,
+      .product_id = 0x53C0,
       .release_num = 0x0200,
       .manufacturer = "OneKey",
       .product = "ONEKEY Touch Boot",
@@ -592,19 +461,8 @@ int main(void) {
     serial_set = device_serial_set();
   }
 
-  if (!serial_set) {
-    pcb_version = PCB_VERSION_2_1_0;
-  } else {
-    char* factory_data = NULL;
-    char* serial;
-    device_get_serial(&serial);
-    factory_data = serial + 7;
-    if (memcmp(factory_data, "20220910", 8) >= 0) {
-      pcb_version = PCB_VERSION_2_1_0;
-    } else {
-      pcb_version = PCB_VERSION_1_0_0;
-    }
-  }
+  pcb_version = PCB_VERSION_2_1_0;
+  
 #if defined TREZOR_MODEL_T
   // display_set_little_endian();
   touch_init();
@@ -616,19 +474,12 @@ int main(void) {
   rgb_led_init();
 #endif
 
-#if !PRODUCTION
-  // write_dev_dummy_config();
-  UNUSED(write_dev_dummy_config);
-#endif
+  thd89_init();
 
   device_test();
 
-  atca_init();
-  atca_config_check();
-
   if (!cert_set) {
-    uint32_t cert_len = 0;
-    cert_set = se_get_certificate_len(&cert_len);
+    cert_set = se_has_cerrificate();
   }
 
   if (!serial_set || !cert_set) {
@@ -661,10 +512,19 @@ int main(void) {
   motor_init();
   spi_slave_init();
 
+  ensure(se_sync_session_key(), "se start up failed");
+  se_clearSecsta();
+
+  uint8_t se_state;
+  se_get_state(&se_state);
+
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 
   if (stay_in_bootloader_flag == STAY_IN_BOOTLOADER_FLAG) {
     *STAY_IN_FLAG_ADDR = 0;
+    stay_in_bootloader = sectrue;
+  }
+  if (se_state == THD89_STATE_BOOT) {
     stay_in_bootloader = sectrue;
   }
 

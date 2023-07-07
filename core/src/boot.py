@@ -58,9 +58,10 @@ async def boot_animation() -> None:
     await loop.sleep(500)
     bootscreen.del_delayed(100)
     loop.close(lvgl_task)
-    if not can_lock_device():
-        await verify_user_pin()
-        storage.init_unlocked()
+    if not utils.USE_THD89:
+        if not can_lock_device():
+            await verify_user_pin()
+            storage.init_unlocked()
 
 
 ui.display.backlight(ui.BACKLIGHT_NONE)

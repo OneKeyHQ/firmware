@@ -1,7 +1,7 @@
 import sys
 from typing import TYPE_CHECKING
 
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto import bip32
 
 from . import paths, safety_checks
@@ -122,15 +122,26 @@ class Keychain:
         path: paths.PathType,
         new_root: Callable[[], NodeType],
     ) -> NodeType:
-        cached_prefix = tuple(path[:prefix_len])
-        cached_root: NodeType | None = self._cache.get(cached_prefix)
-        if cached_root is None:
-            cached_root = new_root()
-            cached_root.derive_path(cached_prefix)
-            self._cache.insert(cached_prefix, cached_root)
+        if not utils.USE_THD89:
+            cached_prefix = tuple(path[:prefix_len])
+            cached_root: NodeType | None = self._cache.get(cached_prefix)
+            if cached_root is None:
+                cached_root = new_root()
+                cached_root.derive_path(cached_prefix)
+                self._cache.insert(cached_prefix, cached_root)
 
-        node = cached_root.clone()
-        node.derive_path(path[prefix_len:])
+            node = cached_root.clone()
+            node.derive_path(path[prefix_len:])
+        else:
+            node = bip32.HDNode(
+                depth=0,
+                fingerprint=0,
+                child_num=0,
+                chain_code=bytearray(32),
+                public_key=bytearray(33),
+                curve_name=self.curve,
+            )
+            node.se_derive_path(path)
         return node
 
     def root_fingerprint(self) -> int:
@@ -177,8 +188,12 @@ async def get_keychain(
     schemas: Iterable[paths.PathSchemaType],
     slip21_namespaces: Iterable[paths.Slip21Path] = (),
 ) -> Keychain:
-    seed = await get_seed(ctx)
-    keychain = Keychain(seed, curve, schemas, slip21_namespaces)
+    if utils.USE_THD89:
+        await get_seed(ctx)
+        keychain = Keychain(None, curve, schemas, slip21_namespaces)
+    else:
+        seed = await get_seed(ctx)
+        keychain = Keychain(seed, curve, schemas, slip21_namespaces)
     return keychain
 
 

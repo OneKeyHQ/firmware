@@ -21,11 +21,12 @@
 #include "br_check.h"
 #include "common.h"
 #include "device.h"
+#include "display.h"
 #include "flash.h"
 #include "image.h"
-#include "sdram.h"
-#include "se_atca.h"
+#include "se_thd89.h"
 #include "secbool.h"
+#include "thd89_boot.h"
 #include "usb.h"
 #include "version.h"
 
@@ -44,6 +45,7 @@
 
 #define UPDATE_BLE 0x5A
 #define UPDATE_ST 0x55
+#define UPDATE_THD89 0xAA
 
 static uint8_t update_mode = 0;
 
@@ -332,7 +334,6 @@ static void send_msg_features(uint8_t iface_num,
                               const image_header *const hdr) {
   MSG_SEND_INIT(Features);
   if (device_is_factory_mode()) {
-    uint32_t cert_len = 0;
     uint32_t init_state = 0;
     MSG_SEND_ASSIGN_STRING(vendor, "onekey.so");
     MSG_SEND_ASSIGN_REQUIRED_VALUE(major_version, VERSION_MAJOR);
@@ -341,7 +342,7 @@ static void send_msg_features(uint8_t iface_num,
     MSG_SEND_ASSIGN_VALUE(bootloader_mode, true);
     MSG_SEND_ASSIGN_STRING(model, "factory");
     init_state |= device_serial_set() ? 1 : 0;
-    init_state |= se_get_certificate_len(&cert_len) ? (1 << 2) : 0;
+    init_state |= se_has_cerrificate() ? (1 << 2) : 0;
     MSG_SEND_ASSIGN_VALUE(initstates, init_state);
 
   } else {
@@ -450,7 +451,7 @@ void process_msg_Reboot(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
 }
 
 static uint32_t firmware_remaining, firmware_len, firmware_block,
-    chunk_requested;
+    chunk_requested, thd89_offset;
 
 void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
                                uint8_t *buf) {
@@ -485,9 +486,9 @@ void process_msg_FirmwareErase(uint8_t iface_num, uint32_t msg_size,
 static uint32_t chunk_size = 0;
 
 #if defined(STM32H747xx)
-// USE SDRAM
-uint8_t *const chunk_buffer =
-    (uint8_t *const)FMC_SDRAM_BOOLOADER_BUFFER_ADDRESS;
+// SRAM is unused, so we can use it for chunk buffer
+uint8_t *const chunk_buffer = (uint8_t *const)0x24000000;
+uint8_t *const thd89_buffer = (uint8_t *const)(0x24000000 + 0x20000);
 #else
 // SRAM is unused, so we can use it for chunk buffer
 uint8_t *const chunk_buffer = (uint8_t *const)0x20000000;
@@ -504,7 +505,7 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
   uint32_t offset = (uint32_t)(*arg);
   uint32_t buffer_size = BUFSIZE;
 
-  if (update_mode == UPDATE_BLE) {
+  if (update_mode == UPDATE_BLE || update_mode == UPDATE_THD89) {
     buffer_size = 4096;
   }
 
@@ -525,6 +526,9 @@ static bool _read_payload(pb_istream_t *stream, const pb_field_t *field,
     // update loader but skip first block
     if (update_mode == UPDATE_BLE) {
       ui_screen_install_progress_upload(1000 * chunk_written / firmware_len);
+    } else if (update_mode == UPDATE_THD89) {
+      ui_screen_install_progress_upload(1000 * (chunk_written + thd89_offset) /
+                                        firmware_len);
     } else {
       if (firmware_block > 0) {
         ui_screen_install_progress_upload(
@@ -624,13 +628,56 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
   }
 
   static image_header hdr, ble_hdr;
+  static image_header_old thd89_hdr;
   static secbool is_upgrade = secfalse;
   static secbool is_downgrade_wipe = secfalse;
 
   if (firmware_block == 0) {
     if (headers_offset == 0) {
-      if (memcmp(chunk_buffer, "5283", 4) == 0) {
-        update_mode = UPDATE_BLE;
+      if (memcmp(chunk_buffer, "32C1", 4) == 0) {
+        if (sectrue !=
+            load_thd89_image_header(chunk_buffer, FIRMWARE_IMAGE_MAGIC_THD89,
+                                    FIRMWARE_IMAGE_MAXSIZE_THD89, &thd89_hdr)) {
+          send_failure(iface_num, FailureType_Failure_ProcessError,
+                       "Invalid firmware header");
+          return -3;
+        }
+        const char *se_version = se_get_version();
+        if (!se_back_to_boot_progress()) {
+          send_failure(iface_num, FailureType_Failure_ProcessError,
+                       "SE back to boot error");
+          return -1;
+        }
+
+        if (!se_verify_firmware(thd89_hdr.hashes, thd89_hdr.sig1)) {
+          send_failure(iface_num, FailureType_Failure_ProcessError,
+                       "SE verify header error");
+          return -1;
+        }
+
+        ui_fadeout();
+        ui_install_thd89_confirm(se_version);
+        ui_fadein();
+
+        int response = INPUT_CANCEL;
+        response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
+
+        if (INPUT_CANCEL == response) {
+          ui_fadeout();
+          ui_bootloader_first(NULL);
+          ui_fadein();
+          send_user_abort(iface_num, "Firmware install cancelled");
+          update_mode = 0;
+          return -4;
+        }
+
+        headers_offset = IMAGE_HEADER_SIZE;
+
+        update_mode = UPDATE_THD89;
+
+        thd89_offset = 0;
+
+      } else if (memcmp(chunk_buffer, "5283", 4) == 0) {
         if (sectrue !=
             load_ble_image_header(chunk_buffer, FIRMWARE_IMAGE_MAGIC_BLE,
                                   FIRMWARE_IMAGE_MAXSIZE_BLE, &ble_hdr)) {
@@ -656,24 +703,9 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
           return -4;
         }
 
-        ui_fadeout();
-        ui_screen_install_start();
-        ui_fadein();
-
         headers_offset = IMAGE_HEADER_SIZE;
-        read_offset = IMAGE_INIT_CHUNK_SIZE;
 
-        firmware_remaining -= read_offset;
-
-        chunk_requested = (firmware_remaining > IMAGE_CHUNK_SIZE)
-                              ? IMAGE_CHUNK_SIZE
-                              : firmware_remaining;
-
-        // request the rest of the first chunk
-        MSG_SEND_INIT(FirmwareRequest);
-        MSG_SEND_ASSIGN_VALUE(offset, read_offset);
-        MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
-        MSG_SEND(FirmwareRequest);
+        update_mode = UPDATE_BLE;
 
       } else {
         update_mode = UPDATE_ST;
@@ -710,75 +742,62 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
         } else if (sectrue == is_upgrade) {
           // firmware upgrade
           ui_fadeout();
-#if PRODUCTION_MODEL == 'H'
           ui_install_confirm(&current_hdr, &hdr);
-#else
-          ui_screen_install_confirm_upgrade(&vhdr, &hdr);
-#endif
           ui_fadein();
-#if PRODUCTION_MODEL == 'H'
           response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
-#else
-          response = ui_user_input(INPUT_CONFIRM | INPUT_CANCEL);
-#endif
+
         } else {
           // downgrade with wipe or new firmware vendor
           ui_fadeout();
           ui_screen_install_confirm_newvendor_or_downgrade_wipe(
               &vhdr, &hdr, is_downgrade_wipe);
           ui_fadein();
-#if PRODUCTION_MODEL == 'H'
           response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
-#else
-          response = ui_user_input(INPUT_CONFIRM | INPUT_CANCEL);
-#endif
         }
 
         if (INPUT_CANCEL == response) {
           ui_fadeout();
-#if PRODUCTION_MODEL == 'H'
           ui_bootloader_first(&current_hdr);
-#else
-          ui_screen_firmware_info(&current_vhdr, &current_hdr);
-#endif
           ui_fadein();
           send_user_abort(iface_num, "Firmware install cancelled");
           update_mode = 0;
           return -4;
         }
 
-        ui_fadeout();
-        ui_screen_install_start();
-        ui_fadein();
-
         headers_offset = IMAGE_HEADER_SIZE + vhdr.hdrlen;
-        read_offset = IMAGE_INIT_CHUNK_SIZE;
-
-        // request the rest of the first chunk
-        MSG_SEND_INIT(FirmwareRequest);
-        chunk_requested = IMAGE_CHUNK_SIZE - read_offset;
-        MSG_SEND_ASSIGN_VALUE(offset, read_offset);
-        MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
-        MSG_SEND(FirmwareRequest);
-
-        firmware_remaining -= read_offset;
       }
+
+      ui_fadeout();
+      ui_screen_install_start();
+      ui_fadein();
+
+      read_offset = IMAGE_INIT_CHUNK_SIZE;
+      firmware_remaining -= read_offset;
+
+      uint32_t chunk_limit = (firmware_remaining > IMAGE_CHUNK_SIZE)
+                                 ? IMAGE_CHUNK_SIZE
+                                 : firmware_remaining;
+      chunk_requested = chunk_limit - read_offset;
+
+      // request the rest of the first chunk
+      MSG_SEND_INIT(FirmwareRequest);
+      MSG_SEND_ASSIGN_VALUE(offset, read_offset);
+      MSG_SEND_ASSIGN_VALUE(length, chunk_requested);
+      MSG_SEND(FirmwareRequest);
 
       return (int)firmware_remaining;
     } else {
       // first block with the headers parsed -> the first chunk is now complete
       read_offset = 0;
 
-      if (update_mode == UPDATE_BLE) {
+      if (update_mode == UPDATE_BLE || update_mode == UPDATE_THD89) {
       } else {
         // if firmware is not upgrade, erase storage
         if (sectrue != is_upgrade) {
-          se_set_wiping(true);
           se_reset_storage();
           ensure(
               flash_erase_sectors(STORAGE_SECTORS, STORAGE_SECTORS_COUNT, NULL),
               NULL);
-          se_reset_state();
         }
         ensure(flash_erase_sectors(FIRMWARE_SECTORS, FIRMWARE_SECTORS_COUNT,
                                    ui_screen_install_progress_erase),
@@ -809,7 +828,35 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
     } else {
       return 0;
     }
+  } else if (update_mode == UPDATE_THD89) {
+    memcpy(thd89_buffer + thd89_offset, chunk_buffer, chunk_size);
+    thd89_offset += chunk_size;
+    if ((firmware_remaining - chunk_requested) == 0) {
+      if (thd89_offset - IMAGE_HEADER_SIZE != thd89_hdr.codelen) {
+        send_failure(iface_num, FailureType_Failure_ProcessError,
+                     "SE len error");
+        return -1;
+      }
 
+      // ui start install
+      ui_fadeout();
+      ui_screen_install_start();
+      ui_fadein();
+      // ui start install
+      if (!se_update_firmware(thd89_buffer + IMAGE_HEADER_SIZE,
+                              thd89_hdr.codelen,
+                              ui_screen_install_progress_upload)) {
+        send_failure(iface_num, FailureType_Failure_ProcessError,
+                     "SE update error");
+        return -1;
+      }
+
+      if (!se_active_app_progress()) {
+        send_failure(iface_num, FailureType_Failure_ProcessError,
+                     "SE activate app error");
+        return -1;
+      }
+    }
   } else {
     // should not happen, but double-check
     if (firmware_block >= FIRMWARE_SECTORS_COUNT) {
@@ -998,9 +1045,7 @@ int process_msg_WipeDevice(uint8_t iface_num, uint32_t msg_size, uint8_t *buf) {
   };
 #endif
 #if PRODUCTION_MODEL == 'H'
-  se_set_wiping(true);
   se_reset_storage();
-  se_reset_state();
 #endif
   if (sectrue !=
       flash_erase_sectors(sectors, sizeof(sectors), ui_screen_wipe_progress)) {

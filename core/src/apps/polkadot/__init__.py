@@ -1,6 +1,6 @@
 from apps.common.paths import PATTERN_BIP44
 
-CURVE = "secp256k1"
+CURVE = "ed25519-ledger"
 SLIP44_ID = 354
 PATTERN = PATTERN_BIP44
 PRIMARY_COLOR = 0xE6007A

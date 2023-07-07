@@ -52,13 +52,13 @@
 #endif
 #include "rng.h"
 // #include "sdcard.h"
-#include "atca_api.h"
-#include "atca_hal.h"
 #include "device.h"
 #include "mipi_lcd.h"
 #include "qspi_flash.h"
+#include "se_thd89.h"
 #include "spi.h"
 #include "supervise.h"
+#include "thd89.h"
 #include "timer.h"
 #include "touch.h"
 #ifdef USE_SECP256K1_ZKP
@@ -92,15 +92,7 @@ int main(void) {
 
   device_para_init();
 
-  char *factory_data = NULL;
-  char *serial;
-  device_get_serial(&serial);
-  factory_data = serial + 7;
-  if (memcmp(factory_data, "20220910", 8) >= 0) {
-    pcb_version = PCB_VERSION_2_1_0;
-  } else {
-    pcb_version = PCB_VERSION_1_0_0;
-  }
+  pcb_version = PCB_VERSION_2_1_0;
 
   // Enable MPU
   mpu_config_firmware();
@@ -143,10 +135,6 @@ int main(void) {
   // Init peripherals
   pendsv_init();
 
-  // #ifdef USE_DMA2D
-  //   dma2d_init();
-  // #endif
-
 #if !PRODUCTION
   // enable BUS fault and USAGE fault handlers
   SCB->SHCSR |= (SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk);
@@ -166,8 +154,8 @@ int main(void) {
   touch_power_on();
   spi_slave_init();
 
-  atca_init();
-  atca_config_check();
+  thd89_init();
+  ensure(se_sync_session_key(), "se start up failed");
 
   emmc_init();
   timer_init();

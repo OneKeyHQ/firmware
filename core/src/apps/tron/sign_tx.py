@@ -1,4 +1,4 @@
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha256
 from trezor.lvglui.scrs import lv
@@ -25,7 +25,12 @@ async def sign_tx(
     node = keychain.derive(address_n)
 
     seckey = node.private_key()
-    public_key = secp256k1.publickey(seckey, False)
+    if utils.USE_THD89:
+        from trezor.crypto import se_thd89
+
+        public_key = se_thd89.uncompress_pubkey("secp256k1", node.public_key())
+    else:
+        public_key = secp256k1.publickey(seckey, False)
     address = get_address_from_public_key(public_key[:65])
     ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     try:

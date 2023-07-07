@@ -2,6 +2,9 @@
 #include "emmc_commands_macros.h"
 #include "emmc_debug_utils.h"
 
+#include "se_thd89.h"
+#include "thd89_boot.h"
+
 // ######## global vars ########
 // SDRAM BUFFER
 bootloader_buffer* bl_buffer = (bootloader_buffer*)FMC_SDRAM_BOOLOADER_BUFFER_ADDRESS;
@@ -648,6 +651,7 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
 
     vendor_header file_vhdr;
     image_header file_hdr;
+    image_header_old thd89_hdr;
 
     // detect firmware type
     if ( memcmp(bl_buffer->misc_buff, "5283", 4) == 0 )
@@ -735,6 +739,95 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         ble_refresh_dev_info();
 
         // buetooth update done
+        // emmc_fs_file_delete(msg_recv.path);
+        if ( msg_recv.has_reboot_on_success && msg_recv.reboot_on_success )
+        {
+            *STAY_IN_FLAG_ADDR = 0;
+            restart();
+        }
+        else
+        {
+            ui_fadeout();
+            ui_bootloader_first(NULL);
+            ui_fadein();
+        }
+        return 0;
+    }
+    else if ( memcmp(bl_buffer->misc_buff, "32C1", 4) == 0 )
+    {
+        // se thd89 update
+        // check header
+        ExecuteCheck_MSGS_ADV(
+            load_thd89_image_header(
+                bl_buffer->misc_buff, FIRMWARE_IMAGE_MAGIC_THD89, FIRMWARE_IMAGE_MAXSIZE_THD89, &thd89_hdr
+            ),
+            sectrue,
+            {
+                emmc_fs_file_delete(msg_recv.path);
+                send_failure(iface_num, FailureType_Failure_ProcessError, "Update file header invalid!");
+                return -3;
+            }
+        );
+
+        // check file size
+        ExecuteCheck_MSGS_ADV((emmc_file_size == thd89_hdr.codelen + IMAGE_HEADER_SIZE), true, {
+            emmc_fs_file_delete(msg_recv.path);
+            send_failure(iface_num, FailureType_Failure_ProcessError, "Firmware file length error!");
+            return -1;
+        });
+        const char *se_version = se_get_version();
+        if ( !se_back_to_boot_progress() )
+        {
+            send_failure(iface_num, FailureType_Failure_ProcessError, "SE back to boot error");
+            return -1;
+        }
+
+        if ( !se_verify_firmware(thd89_hdr.hashes, thd89_hdr.sig1) )
+        {
+            send_failure(iface_num, FailureType_Failure_ProcessError, "SE verify header error");
+            return -1;
+        }
+        // ui confirm
+        ui_fadeout();
+        ui_install_thd89_confirm(se_version);
+        ui_fadein();
+
+        int response = ui_input_poll(INPUT_CONFIRM | INPUT_CANCEL, true);
+        if ( INPUT_CONFIRM != response )
+        {
+            // We could but should not remove the file if user cancels
+            // emmc_fs_file_delete(msg_recv.path);
+            ui_fadeout();
+            ui_bootloader_first(NULL);
+            ui_fadein();
+            send_user_abort_nocheck(iface_num, "Firmware install cancelled");
+            return -4;
+        }
+
+        // ui start install
+        ui_fadeout();
+        ui_screen_install_start();
+        // ui_screen_progress_bar_prepare("Installing", NULL);
+        ui_fadein();
+
+        // install
+        if(!se_update_firmware(bl_buffer->misc_buff + IMAGE_HEADER_SIZE, thd89_hdr.codelen,ui_screen_install_progress_upload))
+        {
+            send_failure(iface_num, FailureType_Failure_ProcessError, "SE update error");
+            return -1;
+        }
+
+        if ( !se_active_app_progress() )
+        {
+            send_failure(iface_num, FailureType_Failure_ProcessError, "SE activate app error");
+            return -1;
+        }
+
+        // update progress (final)
+        ui_screen_progress_bar_update(NULL, NULL, 100);
+
+        send_success(iface_num, "Succeed");
+
         // emmc_fs_file_delete(msg_recv.path);
         if ( msg_recv.has_reboot_on_success && msg_recv.reboot_on_success )
         {
@@ -932,7 +1025,6 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         // selectively wipe user data and reset se
         if ( sectrue == wipe_required )
         {
-            se_set_wiping(true);
             se_reset_storage();
 
             // erease with retry, max 10 retry allowed, 10ms delay in between
@@ -946,8 +1038,6 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
                 },
                 10, 10
             );
-
-            se_reset_state();
         }
 
         // write firmware

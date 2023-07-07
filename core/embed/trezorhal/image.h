@@ -47,6 +47,9 @@
 #define FIRMWARE_IMAGE_MAGIC_BLE 0x33383235
 #define FIRMWARE_IMAGE_MAXSIZE_BLE (128 * 1024)
 
+#define FIRMWARE_IMAGE_MAGIC_THD89 0x31433233
+#define FIRMWARE_IMAGE_MAXSIZE_THD89 (370 * 1024)
+
 typedef struct {
   uint32_t magic;
   uint32_t hdrlen;
@@ -57,11 +60,32 @@ typedef struct {
   uint32_t onekey_version;
   // uint8_t reserved[4];
   uint8_t hashes[512];
-  // uint8_t reserved[415];
+  uint8_t reserved[415];
   uint8_t sigmask;
   uint8_t sig[64];
   uint8_t fingerprint[32];
 } image_header;
+
+typedef struct {
+  uint32_t magic;
+  uint32_t hdrlen;
+  uint32_t expiry;
+  uint32_t codelen;
+  uint32_t version;
+  uint32_t fix_version;
+  uint32_t hw_model;
+  uint8_t __reserved1[4];
+  uint8_t hashes[512];
+  uint8_t sig1[64];
+  uint8_t sig2[64];
+  uint8_t sig3[64];
+  uint8_t sigindex1;
+  uint8_t sigindex2;
+  uint8_t sigindex3;
+  uint8_t __reserved2[220];
+  uint8_t __sigmask;
+  uint8_t __sig[64];
+} __attribute__((packed)) image_header_old;
 
 #define MAX_VENDOR_PUBLIC_KEYS 8
 
@@ -97,6 +121,11 @@ secbool __wur load_ble_image_header(const uint8_t *const data,
                                     const uint32_t magic,
                                     const uint32_t maxsize,
                                     image_header *const hdr);
+
+secbool __wur load_thd89_image_header(const uint8_t *const data,
+                                      const uint32_t magic,
+                                      const uint32_t maxsize,
+                                      image_header_old *const hdr);
 
 secbool __wur load_vendor_header(const uint8_t *const data, uint8_t key_m,
                                  uint8_t key_n, const uint8_t *const *keys,

@@ -5,7 +5,7 @@ from trezor.crypto.hashlib import sha3_256
 from trezor.lvglui.scrs import lv
 from trezor.messages import TronMessageSignature, TronSignMessage
 from trezor.ui.layouts import confirm_signverify
-from trezor.utils import HashWriter
+from trezor.utils import USE_THD89, HashWriter
 
 from apps.common import paths
 from apps.common.helpers import validate_message
@@ -28,8 +28,13 @@ async def sign_message(
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(address_n)
 
-    seckey = node.private_key()
-    public_key = secp256k1.publickey(seckey, False)
+    if utils.USE_THD89:
+        from trezor.crypto import se_thd89
+
+        public_key = se_thd89.uncompress_pubkey("secp256k1", node.public_key())
+    else:
+        seckey = node.private_key()
+        public_key = secp256k1.publickey(seckey, False)
     address = get_address_from_public_key(public_key[:65])
     ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_signverify(

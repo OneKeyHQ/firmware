@@ -31,6 +31,12 @@ class HDNode:
         place.
         """
 
+    def se_derive_path(self, path: Sequence[int]) -> None:
+        """
+        Go through a list of indexes and iteratively derive a child node in
+        place.
+        """
+
     def serialize_public(self, version: int) -> str:
         """
         Serialize the public info from HD node to base58 string.

@@ -560,6 +560,8 @@ int main(void) {
     SCB_CleanDCache();
   }
 
+  jump_to(BOOTLOADER_START + IMAGE_HEADER_SIZE);
+
   image_header hdr_inner, hdr_sd;
 
   const uint8_t sectors[] = {

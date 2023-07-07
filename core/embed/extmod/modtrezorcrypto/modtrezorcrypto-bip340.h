@@ -24,6 +24,10 @@
 #include "rand.h"
 #include "zkp_bip340.h"
 
+#if USE_THD89
+#include "se_thd89.h"
+#endif
+
 /// package: trezorcrypto.bip340
 
 /// def generate_secret() -> bytes:
@@ -102,9 +106,13 @@ STATIC mp_obj_t mod_trezorcrypto_bip340_sign(mp_obj_t secret_key,
 
   vstr_t sig = {0};
   vstr_init_len(&sig, 64);
+#if USE_THD89
+  int ret = se_bip340_sign_digest((const uint8_t *)dig.buf, (uint8_t *)sig.buf);
+#else
   int ret =
       zkp_bip340_sign_digest((const uint8_t *)sk.buf, (const uint8_t *)dig.buf,
                              (uint8_t *)sig.buf, NULL);
+#endif
   if (0 != ret) {
     vstr_clear(&sig);
     mp_raise_ValueError("Signing failed");
@@ -228,8 +236,13 @@ STATIC mp_obj_t mod_trezorcrypto_bip340_tweak_secret_key(size_t n_args,
 
   vstr_t tsk = {0};
   vstr_init_len(&tsk, 32);
+#if USE_THD89
+  (void)rh_ptr;
+  int ret = se_derive_tweak_private_keys() ? 0 : -1;
+#else
   int ret = zkp_bip340_tweak_private_key((const uint8_t *)sk.buf, rh_ptr,
                                          (uint8_t *)tsk.buf);
+#endif
   if (ret != 0) {
     vstr_clear(&tsk);
     mp_raise_ValueError("Failed to tweak secret key");

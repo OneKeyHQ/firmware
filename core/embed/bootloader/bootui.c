@@ -53,6 +53,7 @@
 #include "icon_onekey.h"
 #include "image.h"
 #include "sys.h"
+#include "thd89_boot.h"
 #include "usb.h"
 extern secbool load_vendor_header_keys(const uint8_t *const data,
                                        vendor_header *const vhdr);
@@ -696,7 +697,7 @@ void ui_title_update(void) {
   if (battery_cap != 0xFF && dev_pwr_sta == 1) {
     offset_x += 4;
     mini_snprintf(battery_str, sizeof(battery_str), "%d%%", battery_cap);
-    len = display_text_width(battery_str, -1, FONT_ROBOT_REGULAR_24);
+    len = display_text_width(battery_str, -1, FONT_PJKS_REGULAR_20);
     offset_x += len;
     display_text(DISPLAY_RESX - offset_x, 24 + offset_y, battery_str, -1,
                  FONT_PJKS_REGULAR_20, COLOR_BL_SUBTITLE, boot_background);
@@ -800,8 +801,31 @@ void ui_install_ble_confirm(void) {
                       FONT_PJKS_BOLD_26, COLOR_BL_DONE, COLOR_BL_ICON);
 }
 
+void ui_install_thd89_confirm(const char *old_ver) {
+  char str[128] = {0};
+  ui_title_update();
+  ui_logo_center();
+  display_text_center(DISPLAY_RESX / 2, 190, "SE Update", -1, FONT_PJKS_BOLD_38,
+                      COLOR_BL_FG, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, 240,
+                      "A new SE firmware is avaliable! The", -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  strcat(str, "current version is ");
+  strcat(str, old_ver);
+  display_text_center(DISPLAY_RESX / 2, 268, str, -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
+
+  display_bar(8, 694, 231, 98, COLOR_BL_ICON);
+  display_text_center(DISPLAY_RESX / 4, 755, "Cancel", -1, FONT_PJKS_BOLD_26,
+                      COLOR_BL_FG, COLOR_BL_ICON);
+  display_bar(241, 694, 231, 98, COLOR_BL_ICON);
+  display_text_center(DISPLAY_RESX - DISPLAY_RESX / 4, 755, "Install", -1,
+                      FONT_PJKS_BOLD_26, COLOR_BL_DONE, COLOR_BL_ICON);
+}
+
 void ui_bootloader_first(const image_header *const hdr) {
   ui_bootloader_page_current = 0;
+  uint8_t se_state;
 
   ui_title_update();
   ui_logo_center();
@@ -819,6 +843,14 @@ void ui_bootloader_first(const image_header *const hdr) {
     const char *ver_str = format_ver("%d.%d.%d", (hdr->onekey_version));
     display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 125, ver_str, -1,
                         FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  }
+  if (se_get_state(&se_state)) {
+    if (se_state == THD89_STATE_BOOT) {
+      display_text_center(DISPLAY_RESX / 2, 300, "se in bootloader state", -1,
+                          FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
+      display_text_center(DISPLAY_RESX / 2, 330, "please install se firmware",
+                          -1, FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
+    }
   }
 
   display_bar(8, 694, 464, 98, COLOR_BL_ICON);

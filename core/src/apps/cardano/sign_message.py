@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from trezor import utils
 from trezor.crypto import hashlib
 from trezor.ui.layouts import confirm_signverify
 
@@ -60,7 +61,10 @@ async def sign_message(
 
     # verification_key
     node = keychain.derive(msg.address_n)
-    verification_key = ed25519.publickey(node.private_key())
+    if utils.USE_THD89:
+        verification_key = node.public_key()[1:]
+    else:
+        verification_key = ed25519.publickey(node.private_key())
     verification_key_hash = hashlib.blake2b(verification_key, outlen=28).digest()
     KEY_NONE = 6  # Payment key hash only
     header = (KEY_NONE << 4 | msg.network_id).to_bytes(1, "big")

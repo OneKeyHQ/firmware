@@ -51,31 +51,42 @@ if not utils.BITCOIN_ONLY:
         if not device.is_initialized():
             raise wire.NotInitialized("Device is not initialized")
 
-        need_seed = not cache.is_set(cache.APP_COMMON_SEED)
-        need_cardano_secret = cache.get(
-            cache.APP_COMMON_DERIVE_CARDANO
-        ) and not cache.is_set(cache.APP_CARDANO_ICARUS_SECRET)
+        if not utils.USE_THD89:
+            need_seed = not cache.is_set(cache.APP_COMMON_SEED)
+            need_cardano_secret = cache.get(
+                cache.APP_COMMON_DERIVE_CARDANO
+            ) and not cache.is_set(cache.APP_CARDANO_ICARUS_SECRET)
 
-        if not need_seed and not need_cardano_secret:
-            return
+            if not need_seed and not need_cardano_secret:
+                return
 
-        passphrase = await get_passphrase(ctx)
+            passphrase = await get_passphrase(ctx)
 
-        if need_seed:
+            if need_seed:
+                common_seed = mnemonic.get_seed(passphrase, progress_bar=False)
+                cache.set(cache.APP_COMMON_SEED, common_seed)
+
+            if need_cardano_secret:
+                from apps.cardano.seed import derive_and_store_secrets
+
+                derive_and_store_secrets(passphrase)
+        else:
+            passphrase = await get_passphrase(ctx)
             common_seed = mnemonic.get_seed(passphrase, progress_bar=False)
-            cache.set(cache.APP_COMMON_SEED, common_seed)
+            if cache.SESSION_DIRIVE_CARDANO:
+                from apps.cardano.seed import derive_and_store_secrets
 
-        if need_cardano_secret:
-            from apps.cardano.seed import derive_and_store_secrets
-
-            derive_and_store_secrets(passphrase)
+                derive_and_store_secrets(passphrase)
 
     @cache.stored_async(cache.APP_COMMON_SEED)
     async def get_seed(ctx: wire.Context) -> bytes:
         await derive_and_store_roots(ctx)
         common_seed = cache.get(cache.APP_COMMON_SEED)
-        assert common_seed is not None
-        return common_seed
+        if not utils.USE_THD89:
+            assert common_seed is not None
+            return common_seed
+        else:
+            return None
 
 else:
     # === Bitcoin-only variant ===

@@ -20,6 +20,7 @@ CPPDEFINES_MOD += [
     'AES_128',
     'AES_192',
     'USE_KECCAK',
+    'RAND_PLATFORM_INDEPENDENT',
     'ED25519_NO_PRECOMP',
 ]
 SOURCE_MOD += [
@@ -36,6 +37,10 @@ SOURCE_MOD += [
     'vendor/trezor-crypto/memzero.c',
     'vendor/trezor-crypto/rand.c',
     'vendor/trezor-crypto/sha2.c',
+    'vendor/trezor-crypto/aes/aes_modes.c',
+    'vendor/trezor-crypto/aes/aescrypt.c',
+    'vendor/trezor-crypto/aes/aeskey.c',
+    'vendor/trezor-crypto/aes/aestab.c',
 ]
 
 # modtrezorui
@@ -181,10 +186,6 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/usbd_msc_scsi.c',
     'embed/trezorhal/usbd_msc_storage.c',
     'embed/trezorhal/usbd_desc.c',
-    'embed/trezorhal/atca/atca_hal.c',
-    'embed/trezorhal/atca/atca_command.c',
-    'embed/trezorhal/atca/atca_api.c',
-    'embed/trezorhal/atca/se_atca.c',
     'embed/trezorhal/trans_fifo.c',
     'embed/trezorhal/spi.c',
     'embed/trezorhal/usart.c',
@@ -197,6 +198,9 @@ SOURCE_TREZORHAL = [
     'embed/trezorhal/fatfs/ffunicode.c',
     'embed/trezorhal/fatfs/diskio.c',
     'embed/trezorhal/jpeg_dma.c',
+    'embed/trezorhal/thd89.c',
+    'embed/trezorhal/thd89_boot.c',
+    'embed/trezorhal/se_thd89.c',
     'embed/trezorhal/util.s',
     'embed/trezorhal/vectortable.s',
 
@@ -265,7 +269,6 @@ if PRODUCTION_MODEL == 'H':
             'embed/bootloader/nanopb',
             'embed/bootloader/protob',
             'embed/trezorhal',
-            'embed/trezorhal/atca',
             'embed/trezorhal/fatfs',
             'embed/extmod/modtrezorui',
             'vendor/micropython/lib/stm32lib/STM32H7xx_HAL_Driver/Inc',
@@ -277,7 +280,6 @@ if PRODUCTION_MODEL == 'H':
         CPPDEFINES=[
             'TREZOR_MODEL_'+TREZOR_MODEL,
             ('PRODUCTION_MODEL', '$PRODUCTION_MODEL'),
-            'RAND_PLATFORM_INDEPENDENT',
             CPU_MODEL,
             CORE_MODEL,
             'USE_HAL_DRIVER',
@@ -286,6 +288,7 @@ if PRODUCTION_MODEL == 'H':
             'PB_ENCODE_ARRAYS_UNPACKED',
             'PB_VALIDATE_UTF8',
             'BOOT_ONLY',
+            ('STATIC_TABLES', 0),
         ] + CPPDEFINES_MOD,
         ASFLAGS=CPU_ASFLAGS,
         ASPPFLAGS='$CFLAGS $CCFLAGS', )

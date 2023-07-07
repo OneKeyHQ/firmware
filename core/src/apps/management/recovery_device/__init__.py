@@ -60,12 +60,13 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
             )
             if not config.check_pin(curpin, salt):
                 await error_pin_invalid(ctx)
+        newpin = None
 
         if not msg.dry_run:
             # set up pin if requested
             if msg.pin_protection:
                 newpin = await request_pin_confirm(ctx, allow_cancel=False)
-                config.change_pin("", newpin, None, None)
+                # config.change_pin("", newpin, None, None)
 
             storage.device.set_passphrase_enabled(bool(msg.passphrase_protection))
             if msg.u2f_counter is not None:
@@ -77,6 +78,10 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
         storage.recovery.set_dry_run(bool(msg.dry_run))
         # workflow.set_default(recovery_homescreen)
         result = await recovery_process(ctx)
+        if Success.is_type_of(result):
+            if newpin is not None:
+                config.change_pin("", newpin, None, None)
+                config.unlock(newpin, None)
     except BaseException as e:
         raise e
     else:
