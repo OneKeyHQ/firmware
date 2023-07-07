@@ -130,6 +130,7 @@ OBJS += polkadot/tx.o
 OBJS += ada.o
 OBJS += cbor.o
 OBJS += kaspa.o
+OBJS += nexa.o
 endif
 
 OBJS += debug.o
@@ -189,6 +190,7 @@ OBJS += ../vendor/trezor-crypto/nem.o
 OBJS += ../vendor/trezor-crypto/cardano.o
 
 OBJS += ../vendor/trezor-crypto/sha512.o
+OBJS += ../vendor/trezor-crypto/schnorr_bch.o
 
 OBJS += ../vendor/QR-Code-generator/c/qrcodegen.o
 
@@ -225,6 +227,7 @@ OBJS += protob/messages-cosmos.pb.o
 OBJS += protob/messages-polkadot.pb.o
 OBJS += protob/messages-cardano.pb.o
 OBJS += protob/messages-kaspa.pb.o
+OBJS += protob/messages-nexa.pb.o
 endif
 
 OPTFLAGS ?= -Os

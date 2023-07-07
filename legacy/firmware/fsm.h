@@ -35,6 +35,7 @@
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-nexa.pb.h"
 #include "messages-polkadot.pb.h"
 #include "messages-ripple.pb.h"
 #include "messages-solana.pb.h"
@@ -286,4 +287,10 @@ void fsm_msgCardanoSignMessage(CardanoSignMessage *msg);
 void fsm_msgKaspaGetAddress(const KaspaGetAddress *msg);
 void fsm_msgKaspaSignTx(const KaspaSignTx *msg);
 void fsm_msgKaspaTxInputAck(const KaspaTxInputAck *msg);
+
+// Nexa
+void fsm_msgNexaGetAddress(const NexaGetAddress *msg);
+void fsm_msgNexaSignTx(const NexaSignTx *msg);
+void fsm_msgNexaTxInputAck(const NexaTxInputAck *msg);
+
 #endif

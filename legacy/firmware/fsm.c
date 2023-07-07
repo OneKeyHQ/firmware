@@ -75,6 +75,7 @@
 #include "near.h"
 #include "nem.h"
 #include "nem2.h"
+#include "nexa.h"
 #include "polkadot.h"
 #include "ripple.h"
 #include "solana.h"
@@ -575,6 +576,7 @@ bool fsm_layoutPathWarning(uint32_t address_n_count,
 #include "fsm_msg_kaspa.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
+#include "fsm_msg_nexa.h"
 #include "fsm_msg_polkadot.h"
 #include "fsm_msg_ripple.h"
 #include "fsm_msg_solana.h"
@@ -582,4 +584,5 @@ bool fsm_layoutPathWarning(uint32_t address_n_count,
 #include "fsm_msg_stellar.h"
 #include "fsm_msg_sui.h"
 #include "fsm_msg_tron.h"
+
 #endif
