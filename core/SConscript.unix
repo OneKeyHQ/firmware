@@ -158,6 +158,7 @@ SOURCE_MOD += [
     'vendor/trezor-crypto/shamir.c',
     'vendor/trezor-crypto/slip39.c',
     'vendor/trezor-crypto/sha512.c',
+    'vendor/trezor-crypto/schnorr_bch.c',
 ]
 if EVERYTHING:
     SOURCE_MOD += [

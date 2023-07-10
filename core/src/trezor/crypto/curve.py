@@ -1,1 +1,8 @@
-from trezorcrypto import bip340, curve25519, ed25519, nist256p1, secp256k1  # noqa: F401
+from trezorcrypto import (  # noqa: F401
+    bip340,
+    curve25519,
+    ed25519,
+    nist256p1,
+    schnorr_bch,
+    secp256k1,
+)

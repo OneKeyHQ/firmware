@@ -6123,6 +6123,106 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["NEMCosignatoryModification"]:
             return isinstance(msg, cls)
 
+    class NexaGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        prefix: "str"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            prefix: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaGetAddress"]:
+            return isinstance(msg, cls)
+
+    class NexaAddress(protobuf.MessageType):
+        address: "str"
+        public_key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+            public_key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaAddress"]:
+            return isinstance(msg, cls)
+
+    class NexaSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+        prefix: "str"
+        input_count: "int"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+            prefix: "str | None" = None,
+            input_count: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaSignTx"]:
+            return isinstance(msg, cls)
+
+    class NexaTxInputRequest(protobuf.MessageType):
+        request_index: "int"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            request_index: "int",
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaTxInputRequest"]:
+            return isinstance(msg, cls)
+
+    class NexaTxInputAck(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaTxInputAck"]:
+            return isinstance(msg, cls)
+
+    class NexaSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaSignedTx"]:
+            return isinstance(msg, cls)
+
     class PolkadotGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         prefix: "int"

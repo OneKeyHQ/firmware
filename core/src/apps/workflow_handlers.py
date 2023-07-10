@@ -292,6 +292,12 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.KaspaSignTx:
             return "apps.kaspa.sign_tx"
 
+        # nexa
+        if msg_type == MessageType.NexaGetAddress:
+            return "apps.nexa.get_address"
+        if msg_type == MessageType.NexaSignTx:
+            return "apps.nexa.sign_tx"
+
     raise ValueError
 
 
