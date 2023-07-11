@@ -1,6 +1,5 @@
 #include "emmc_commands.h"
 #include "emmc_commands_macros.h"
-#include "emmc_debug_utils.h"
 
 // ######## global vars ########
 // SDRAM BUFFER

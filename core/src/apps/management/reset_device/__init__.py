@@ -107,8 +107,6 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # generate and display backup information for the master secret
         if perform_backup:
             await backup_seed(ctx, msg.backup_type, secret)
-            if not __debug__:
-                await show_bip39_dotmap(ctx, secret)
         # write settings and master secret into storage
         if msg.label is not None:
             storage.device.set_label(msg.label)
@@ -120,9 +118,10 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
             needs_backup=not perform_backup,
             no_backup=bool(msg.no_backup),
         )
-
         # if we backed up the wallet, show success message
         if perform_backup:
+            if not __debug__:
+                await show_bip39_dotmap(ctx, secret)
             await layout.show_backup_success(ctx)
         if isinstance(ctx, wire.DummyContext):
             utils.make_show_app_guide()

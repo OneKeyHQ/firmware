@@ -146,10 +146,10 @@ def encode_data(value: Any, type_name: str) -> bytes:
 
 @expect(messages.EthereumAddress, field="address", ret_type=str)
 def get_address(
-    client: "TrezorClient", n: "Address", show_display: bool = False
+    client: "TrezorClient", n: "Address", show_display: bool = False, chain_id: int = 1
 ) -> "MessageType":
     return client.call(
-        messages.EthereumGetAddress(address_n=n, show_display=show_display)
+        messages.EthereumGetAddress(address_n=n, show_display=show_display, chain_id=chain_id)
     )
 
 

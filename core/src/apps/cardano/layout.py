@@ -934,7 +934,7 @@ async def show_cardano_address(
 ) -> None:
     CAT = CardanoAddressType  # local_cache_global
 
-    network_name = None
+    network_name = "Cardano"
     if not protocol_magics.is_mainnet(protocol_magic):
         network_name = protocol_magics.to_ui_string(protocol_magic)
 
@@ -959,8 +959,8 @@ async def show_cardano_address(
     await show_address(
         ctx,
         address,
-        title=title,
-        network=network_name if network_name is not None else "Unknown",
+        network=network_name,
         address_n=address_extra,
         title_qr=title_qr,
+        addr_type=title,
     )

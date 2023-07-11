@@ -177,11 +177,12 @@ def cli() -> None:
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
 @click.option("-d", "--show-display", is_flag=True)
+@click.option("-c", "--chain-id", type=int, help="EIP-155 chain id")
 @with_client
-def get_address(client: "TrezorClient", address: str, show_display: bool) -> str:
+def get_address(client: "TrezorClient", address: str, show_display: bool, chain_id: int) -> str:
     """Get Ethereum address in hex encoding."""
     address_n = tools.parse_path(address)
-    return ethereum.get_address(client, address_n, show_display)
+    return ethereum.get_address(client, address_n, show_display, chain_id)
 
 
 @cli.command()

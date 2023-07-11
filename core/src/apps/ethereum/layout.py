@@ -63,6 +63,7 @@ def require_confirm_fee(
     network: str | None = None,
     contract_addr: str | None = None,
     token_id: int | None = None,
+    evm_chain_id: int | None = None,
 ) -> Awaitable[None]:
     fee_max = gas_price * gas_limit
     return confirm_total_ethereum(
@@ -78,6 +79,7 @@ def require_confirm_fee(
         else None,
         contract_addr,
         token_id,
+        evm_chain_id=evm_chain_id,
     )
 
 
@@ -94,6 +96,7 @@ async def require_confirm_eip1559_fee(
     network: str | None = None,
     contract_addr: str | None = None,
     token_id: int | None = None,
+    evm_chain_id: int | None = None,
 ) -> None:
 
     fee_max = max_gas_fee * gas_limit
@@ -111,6 +114,7 @@ async def require_confirm_eip1559_fee(
         else None,
         contract_addr,
         token_id,
+        evm_chain_id=evm_chain_id,
     )
 
 

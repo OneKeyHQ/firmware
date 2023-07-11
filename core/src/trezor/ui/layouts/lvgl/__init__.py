@@ -288,7 +288,9 @@ async def show_address(
     xpubs: Sequence[str] = (),
     address_extra: str | None = None,
     title_qr: str | None = None,
+    evm_chain_id: int | None = None,
     title: str = "",
+    addr_type: str | None = None,
 ) -> None:
     is_multisig = len(xpubs) > 0
     from trezor.lvglui.scrs.template import Address
@@ -318,6 +320,8 @@ async def show_address(
             ctx.primary_color,
             ctx.icon_path,
             address_qr=address_qr,
+            addr_type=addr_type,
+            evm_chain_id=evm_chain_id,
         ),
         "show_address",
         ButtonRequestType.Address,
@@ -885,7 +889,12 @@ async def confirm_sign_identity(
 
 
 async def confirm_signverify(
-    ctx: wire.GenericContext, coin: str, message: str, address: str, verify: bool
+    ctx: wire.GenericContext,
+    coin: str,
+    message: str,
+    address: str,
+    verify: bool,
+    evm_chain_id: int | None = None,
 ) -> None:
     if verify:
         header = _(i18n_keys.TITLE__VERIFY_STR_MESSAGE).format(coin)
@@ -898,7 +907,15 @@ async def confirm_signverify(
     await raise_if_cancelled(
         interact(
             ctx,
-            Message(header, address, message, ctx.primary_color, ctx.icon_path, verify),
+            Message(
+                header,
+                address,
+                message,
+                ctx.primary_color,
+                ctx.icon_path,
+                verify,
+                evm_chain_id,
+            ),
             br_type,
             ButtonRequestType.Other,
         )

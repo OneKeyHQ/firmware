@@ -18,6 +18,7 @@ async def confirm_total_ethereum(
     total_amount: str | None,
     contract_addr: str | None,
     token_id: int | None,
+    evm_chain_id: int | None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
@@ -39,6 +40,7 @@ async def confirm_total_ethereum(
         primary_color=ctx.primary_color,
         contract_addr=contract_addr,
         token_id=str(token_id),
+        evm_chain_id=evm_chain_id,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
@@ -57,6 +59,7 @@ async def confirm_total_ethereum_eip1559(
     total_amount: str | None,
     contract_addr: str | None,
     token_id: int | None,
+    evm_chain_id: int | None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
@@ -80,6 +83,7 @@ async def confirm_total_ethereum_eip1559(
         primary_color=ctx.primary_color,
         contract_addr=contract_addr,
         token_id=str(token_id),
+        evm_chain_id=evm_chain_id,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)

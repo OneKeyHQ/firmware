@@ -132,17 +132,17 @@ def get_color_and_icon(chain_id: int | None):
     from trezor.lvglui.scrs import lv
 
     if chain_id is None:
-        return lv.color_hex(0xFFFFFF), "A:/res/evm-eth.png"
+        return lv.color_hex(0xD2D2D2), "A:/res/evm-none.png"
     network: NetworkInfo | None = networks.by_chain_id(chain_id)
     if network:
         return lv.color_hex(network.primary_color), f"A:/res/{network.icon}"
     else:
-        return lv.color_hex(0xFFFFFF), "A:/res/evm-eth.png"
+        return lv.color_hex(0xD2D2D2), "A:/res/evm-none.png"
 
 
 def get_display_network_name(network: NetworkInfo | None):
     if network is None:
-        return "Ethereum"
+        return "EVM"
     # elif len(network.name) <= 8:
     #     return network.name
     else:
