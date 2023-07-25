@@ -7,7 +7,11 @@ SKIPPED_MESSAGES := Binance DebugMonero Eos Monero Ontology SdProtect Tezos WebA
 	DebugLinkLayout GetNonce \
 	TxAckInput TxAckOutput TxAckPrev TxAckPaymentRequest \
 	EthereumSignTypedData EthereumTypedDataStructRequest EthereumTypedDataStructAck \
-	EthereumTypedDataValueRequest EthereumTypedDataValueAck
+	EthereumTypedDataValueRequest EthereumTypedDataValueAck \
+        EthereumTypedDataValueRequest EthereumTypedDataValueAck \
+        EthereumSignTypedDataOneKey EthereumTypedDataStructRequestOneKey EthereumTypedDataStructAckOneKey \
+        EthereumTypedDataValueRequestOneKey EthereumTypedDataValueAckOneKey
+
 
 ifeq ($(BITCOIN_ONLY), 1)
 SKIPPED_MESSAGES += Ethereum NEM Stellar Solana Starcoin Aptos Near Conflux Algorand \
@@ -15,7 +19,8 @@ SKIPPED_MESSAGES += Ethereum NEM Stellar Solana Starcoin Aptos Near Conflux Algo
 endif
 
 PROTO_NAMES = messages messages-bitcoin messages-common messages-crypto messages-debug \
-	messages-ethereum messages-management messages-nem messages-stellar messages-solana \
+	messages-ethereum-onekey messages-ethereum messages-ethereum-definitions \
+	messages-management messages-nem messages-stellar messages-solana \
 	messages-starcoin messages-tron messages-aptos messages-near messages-conflux \
 	messages-algorand messages-ripple messages-sui messages-filecoin messages-cosmos \
 	messages-polkadot messages-cardano messages-kaspa messages-nexa
