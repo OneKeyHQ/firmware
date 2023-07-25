@@ -1,5 +1,5 @@
 NearGetAddress.address_n                                   max_count:8
-NearAddress.address                                        max_size:67
+NearAddress.address                                        max_size:65
 
 NearSignTx.address_n                                       max_count:8
 NearSignTx.raw_tx                                          max_size:1024
