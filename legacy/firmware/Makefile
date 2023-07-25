@@ -81,7 +81,11 @@ OBJS += crypto.o
 ifneq ($(BITCOIN_ONLY),1)
 OBJS += u2f.o
 OBJS += ethereum.o
+OBJS += ethereum_definitions.o
+OBJS += ethereum_networks.o
 OBJS += ethereum_tokens.o
+OBJS += ethereum_onekey.o
+OBJS += ethereum_tokens_onekey.o
 OBJS += nem2.o
 OBJS += nem_mosaics.o
 OBJS += solana.o
@@ -211,6 +215,8 @@ OBJS += protob/messages-management.pb.o
 ifneq ($(BITCOIN_ONLY),1)
 OBJS += ../vendor/trezor-crypto/cash_addr.o
 OBJS += protob/messages-ethereum.pb.o
+OBJS += protob/messages-ethereum-definitions.pb.o
+OBJS += protob/messages-ethereum-onekey.pb.o
 OBJS += protob/messages-nem.pb.o
 OBJS += protob/messages-solana.pb.o
 OBJS += protob/messages-starcoin.pb.o
@@ -245,7 +251,7 @@ ifeq ($(EMULATOR),1)
 CFLAGS += --warn-no-unused-parameter
 CFLAGS += -fstack-protector-all
 else
-CFLAGS += -fstack-protector-strong
+#CFLAGS += -fstack-protector-strong
 endif
 CFLAGS += -Wno-sequence-point
 CFLAGS += -I../vendor/nanopb -Iprotob -DPB_FIELD_16BIT=1 -DPB_ENCODE_ARRAYS_UNPACKED=1 -DPB_VALIDATE_UTF8=1
