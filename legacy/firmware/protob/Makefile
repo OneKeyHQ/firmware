@@ -11,14 +11,14 @@ SKIPPED_MESSAGES := Binance DebugMonero Eos Monero Ontology SdProtect Tezos WebA
 
 ifeq ($(BITCOIN_ONLY), 1)
 SKIPPED_MESSAGES += Ethereum NEM Stellar Solana Starcoin Aptos Near Conflux Algorand \
-	Filecoin Cosmos Polkadot Sui Kaspa
+	Filecoin Cosmos Polkadot Sui Kaspa Nexa
 endif
 
 PROTO_NAMES = messages messages-bitcoin messages-common messages-crypto messages-debug \
 	messages-ethereum messages-management messages-nem messages-stellar messages-solana \
 	messages-starcoin messages-tron messages-aptos messages-near messages-conflux \
 	messages-algorand messages-ripple messages-sui messages-filecoin messages-cosmos \
-	messages-polkadot messages-cardano messages-kaspa
+	messages-polkadot messages-cardano messages-kaspa messages-nexa
 
 PROTO_OPTIONS = $(PROTO_NAMES:=.options)
 PROTO_COMPILED = $(PROTO_NAMES:=.pb)

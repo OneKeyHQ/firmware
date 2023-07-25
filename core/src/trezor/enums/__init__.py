@@ -331,6 +331,12 @@ if TYPE_CHECKING:
         KaspaSignedTx = 11303
         KaspaTxInputRequest = 11304
         KaspaTxInputAck = 11305
+        NexaGetAddress = 11400
+        NexaAddress = 11401
+        NexaSignTx = 11402
+        NexaSignedTx = 11403
+        NexaTxInputRequest = 11404
+        NexaTxInputAck = 11405
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003

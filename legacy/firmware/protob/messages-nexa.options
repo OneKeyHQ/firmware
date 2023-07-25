@@ -1,0 +1,11 @@
+NexaGetAddress.address_n                                   max_count:8
+NexaGetAddress.prefix                                      max_size:9
+NexaAddress.address                                        max_size:58
+NexaAddress.public_key                                     max_size:33
+NexaSignTx.address_n                                       max_count:8
+NexaSignTx.raw_message                                     max_size:512
+NexaSignTx.prefix                                          max_size:9
+NexaTxInputRequest.signature                               max_size:64
+NexaTxInputAck.address_n                                   max_count:8
+NexaTxInputAck.raw_message                                 max_size:512
+NexaSignedTx.signature                                     max_size:64
