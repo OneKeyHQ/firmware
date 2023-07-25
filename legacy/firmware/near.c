@@ -224,7 +224,7 @@ static int borsh_skip(const NearSignTx *msg, uint32_t *processed, uint32_t c) {
 }
 
 static void strcpy_ellipsis(size_t dst_size, char *dst, size_t src_size,
-                            char *src) {
+                            const char *src) {
   if (dst_size >= src_size + 1) {
     memcpy(dst, src, src_size);
     dst[src_size] = 0;
@@ -244,11 +244,14 @@ static void strcpy_ellipsis(size_t dst_size, char *dst, size_t src_size,
 static int parse_transaction(const NearSignTx *msg, uint32_t *processed,
                              char *receiver) {
   char singer[65] = {0};
-  char *var_name = NULL;
+  char var_name[65] = {0};
   uint32_t len = 0;
 
   // singer
   if (borsh_read_buffer(msg, &len, (const uint8_t **)&var_name, processed)) {
+    return -1;
+  }
+  if (len != 64) {
     return -1;
   }
   strcpy_ellipsis(sizeof(singer), singer, len, var_name);
@@ -263,6 +266,9 @@ static int parse_transaction(const NearSignTx *msg, uint32_t *processed,
   }
   // receiver
   if (borsh_read_buffer(msg, &len, (const uint8_t **)&var_name, processed)) {
+    return -1;
+  }
+  if (len != 64) {
     return -1;
   }
   strcpy_ellipsis(sizeof(singer), singer, len, var_name);
