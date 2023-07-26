@@ -108,8 +108,7 @@ void nexa_sign_sighash(HDNode *node, const uint8_t *raw_message,
   nexa_get_address(node->public_key, PUBKEY_ECDSA_LEN, prefix, address);
   // show display
   if (show_confirm_signing(address, sizeof(address))) {
-    if (!layoutBlindSign("Nexa", false, NULL, address, raw_message,
-                         raw_message_len, NULL, NULL, NULL, NULL, NULL, NULL)) {
+    if (!layoutBlindSign("Nexa", address)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled,
                       "Signing cancelled by user");
       nexa_signing_abort();
