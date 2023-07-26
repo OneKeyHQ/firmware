@@ -19,7 +19,7 @@ jobs:
         id: vars
         run: |
           BOOT_VERSION=$(./tools/version.sh ./legacy/bootloader/version.h)
-          FIRMWARE_VERSION=$(cat ./legacy/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
+          FIRMWARE_VERSION=$(cat ./legacy/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $2}')
           BUILD_DATE=$(date +"%Y%m%d")
           SHORT_HASH=$(git rev-parse --short HEAD)
           echo "BOOT_VERSION=$BOOT_VERSION" >> $GITHUB_ENV
@@ -34,6 +34,10 @@ jobs:
           . $HOME/.nix-profile/etc/profile.d/nix.sh
           nix-shell --run "poetry install"
           nix-shell --run "poetry run ./legacy/script/setup"
+          nix-shell --run "export FIRMWARE_QA=1 && export ONEKEY_MINI=1 && poetry run ./legacy/script/cibuild"
+          nix-shell --run "poetry run pip install ecdsa && poetry run ./legacy/debug_signing/sign_onekey_qa.py ./legacy/firmware/mini*Stable*.bin -S 1:${{ secrets.SECRET_QA_KEY_1 }} -S 2:${{ secrets.SECRET_QA_KEY_2 }} -S 3:${{ secrets.SECRET_QA_KEY_3 }} -S 4:${{ secrets.SECRET_QA_KEY_4 }}"
+          mkdir -p qa && cp ./legacy/firmware/mini*Stable*.qa.signed.bin qa
+          nix-shell --run "poetry run ./legacy/script/setup"
           nix-shell --run "export ONEKEY_MINI=1 && poetry run ./legacy/script/cibuild"
 
 
@@ -45,6 +49,7 @@ jobs:
             ./legacy/firmware/mini*Stable*.bin
             ./legacy/bootloader/bootloader*Stable*.bin
             ./legacy/intermediate_fw/mini*.bin
+            ./qa
 
       - name: "Set Env"
         run: |
