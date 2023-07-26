@@ -61,6 +61,7 @@ from . import (
     polkadot,
     with_client,
     kaspa,
+    nexa,
 )
 
 F = TypeVar("F", bound=Callable)
@@ -104,6 +105,7 @@ COMMAND_ALIASES = {
     "cosmos": cosmos.cli,
     "polkadot": polkadot.cli,
     "kaspa": kaspa.cli,
+    "nexa": nexa.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -449,6 +451,7 @@ cli.add_command(sui.cli)
 cli.add_command(cosmos.cli)
 cli.add_command(polkadot.cli)
 cli.add_command(kaspa.cli)
+cli.add_command(nexa.cli)
 
 #
 # Main

@@ -655,6 +655,14 @@ apps.near.sign_tx
 import apps.near.sign_tx
 apps.near.transaction
 import apps.near.transaction
+apps.nexa
+import apps.nexa
+apps.nexa.addresses
+import apps.nexa.addresses
+apps.nexa.get_address
+import apps.nexa.get_address
+apps.nexa.sign_tx
+import apps.nexa.sign_tx
 apps.polkadot
 import apps.polkadot
 apps.polkadot.codec

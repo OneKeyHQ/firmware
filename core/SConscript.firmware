@@ -124,6 +124,7 @@ SOURCE_MOD += [
     'vendor/trezor-crypto/shamir.c',
     'vendor/trezor-crypto/slip39.c',
     'vendor/trezor-crypto/sha512.c',
+    'vendor/trezor-crypto/schnorr_bch.c',
 ]
 if EVERYTHING:
     SOURCE_MOD += [
@@ -935,6 +936,7 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/polkadot/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/polkadot/*/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/kaspa/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/nexa/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Zcash*.py'))
 
     source_mpy = env.FrozenModule(source=SOURCE_PY, source_dir=SOURCE_PY_DIR, bitcoin_only=BITCOIN_ONLY)

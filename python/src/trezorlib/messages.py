@@ -338,6 +338,12 @@ class MessageType(IntEnum):
     KaspaSignedTx = 11303
     KaspaTxInputRequest = 11304
     KaspaTxInputAck = 11305
+    NexaGetAddress = 11400
+    NexaAddress = 11401
+    NexaSignTx = 11402
+    NexaSignedTx = 11403
+    NexaTxInputRequest = 11404
+    NexaTxInputAck = 11405
     DeviceBackToBoot = 903
     RebootToBoardloader = 904
     DeviceInfoSettings = 10001
@@ -7759,6 +7765,114 @@ class NEMCosignatoryModification(protobuf.MessageType):
     ) -> None:
         self.type = type
         self.public_key = public_key
+
+
+class NexaGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11400
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+        3: protobuf.Field("prefix", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+        prefix: Optional["str"] = 'nexa',
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+        self.prefix = prefix
+
+
+class NexaAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11401
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=True),
+        2: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "str",
+        public_key: "bytes",
+    ) -> None:
+        self.address = address
+        self.public_key = public_key
+
+
+class NexaSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11402
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("prefix", "string", repeated=False, required=False),
+        4: protobuf.Field("input_count", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+        prefix: Optional["str"] = 'nexa',
+        input_count: Optional["int"] = 1,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_message = raw_message
+        self.prefix = prefix
+        self.input_count = input_count
+
+
+class NexaTxInputRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11404
+    FIELDS = {
+        1: protobuf.Field("request_index", "uint32", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        request_index: "int",
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.request_index = request_index
+        self.signature = signature
+
+
+class NexaTxInputAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11405
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_message = raw_message
+
+
+class NexaSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11403
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class PolkadotGetAddress(protobuf.MessageType):
