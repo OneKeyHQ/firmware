@@ -3816,7 +3816,7 @@ refresh_menu:
   switch (index) {
     case 0:
       oledDrawBitmap((OLED_WIDTH - bmp_Icon_fc.width) / 2, 4, &bmp_Icon_fc);
-      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 40, "FCC ID:2AV5MBIXINKEY1",
+      oledDrawStringCenterAdapter(OLED_WIDTH / 2, 40, "FCC ID: 2BB8VC1",
                                   FONT_STANDARD);
       break;
     case 1:
