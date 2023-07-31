@@ -1187,6 +1187,10 @@ async def show_onekey_app_guide():
         app_guide.GuideAppDownload()
         await app_guide.request()
 
+        from apps.base import set_homescreen
+
+        set_homescreen()
+
 
 async def confirm_set_homescreen(ctx, replace: bool = False):
     await confirm_action(

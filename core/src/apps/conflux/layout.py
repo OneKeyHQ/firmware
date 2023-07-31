@@ -38,10 +38,7 @@ def require_confirm_tx(
     else:
         to_str = to
     if token is None:
-        if value == 0:
-            amount = "message"
-        else:
-            amount = format_conflux_amount(value, None)
+        amount = format_conflux_amount(value, None)
     else:
         amount = format_conflux_amount(value, token)
 

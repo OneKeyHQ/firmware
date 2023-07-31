@@ -667,7 +667,7 @@ class SettingsScreen(Screen):
             elif target == self.develop:
                 DevelopSettings(self)
             elif target == self.power:
-                PowerOff(self)
+                PowerOff()
             else:
                 if __debug__:
                     if target == self.test:
@@ -1518,6 +1518,15 @@ class AboutSetting(Screen):
         self.serial.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
         self.serial.set_style_bg_color(lv_colors.BLACK, 0)
         self.serial.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+        self.fcc_id = DisplayItem(self.container, "FCC ID", "2BB8VT1")
+        self.fcc_id.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
+        )
+        self.fcc_id.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.fcc_id.set_style_bg_color(lv_colors.BLACK, 0)
+        self.fcc_icon = lv.img(self.fcc_id)
+        self.fcc_icon.set_src("A:/res/fcc-logo.png")
+        self.fcc_icon.align(lv.ALIGN.RIGHT_MID, 0, -5)
 
         self.trezor_mode = ListItemBtnWithSwitch(
             self.container, _(i18n_keys.ITEM__COMPATIBLE_WITH_TREZOR)
@@ -1666,29 +1675,30 @@ class Go2UpdateMode(Screen):
                 self.load_screen(self.prev_scr, destroy_self=True)
 
 
-class PowerOff(Screen):
-    def __init__(self, prev_scr=None, re_loop: bool = False):
-        super().__init__(
-            prev_scr=prev_scr,
-            title=_(i18n_keys.TITLE__POWER_OFF),
-        )
-        self.btn_yes = NormalButton(self.content_area, _(i18n_keys.ITEM__POWER_OFF))
-        self.btn_yes.set_size(231, 98)
-        self.btn_yes.align(lv.ALIGN.BOTTOM_RIGHT, -8, -8)
-        self.btn_yes.enable(lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
+class PowerOff(FullSizeWindow):
+    IS_ACTIVE = False
 
-        self.btn_no = NormalButton(self.content_area, _(i18n_keys.BUTTON__CANCEL))
-        self.btn_no.set_size(231, 98)
-        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
+    def __init__(self, re_loop: bool = False):
+        if PowerOff.IS_ACTIVE:
+            return
+        PowerOff.IS_ACTIVE = True
+        super().__init__(
+            title=_(i18n_keys.TITLE__POWER_OFF),
+            confirm_text=_(i18n_keys.BUTTON__POWER_OFF),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            subtitle="",
+        )
+        self.btn_yes.enable(lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
         self.re_loop = re_loop
         from trezor import config
 
         self.has_pin = config.has_pin()
-        if self.has_pin:
+        if self.has_pin and device.is_initialized():
             config.lock()
 
     def back(self):
-        self.load_screen(self.prev_scr, destroy_self=True)
+        PowerOff.IS_ACTIVE = False
+        self.destroy(100)
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -1699,7 +1709,11 @@ class PowerOff(Screen):
             if target == self.btn_yes:
                 ShutingDown()
             elif target == self.btn_no:
-                if self.has_pin and device.is_initialized():
+                if (
+                    not utils.is_initialization_processing()
+                    and self.has_pin
+                    and device.is_initialized()
+                ):
                     from apps.common.request_pin import verify_user_pin
 
                     workflow.spawn(
@@ -1711,9 +1725,6 @@ class PowerOff(Screen):
                     )
                 else:
                     self.back()
-
-    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
-        lv.scr_load(scr)
 
 
 class DevelopSettings(Screen):
