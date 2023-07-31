@@ -15,8 +15,6 @@ from trezor.ui.layouts import (
     show_onekey_app_guide,
 )
 
-from apps.base import set_homescreen
-
 from .. import backup_types
 from ..change_pin import request_pin_confirm
 from . import layout
@@ -35,6 +33,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     _validate_reset_device(msg)
     from trezor.ui.layouts import show_popup
 
+    utils.mark_initialization_processing()
     if msg.language is not None:
         i18n_refresh(msg.language)
     await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT), None, timeout_ms=1000)
@@ -127,12 +126,12 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
             utils.make_show_app_guide()
         else:
             await show_onekey_app_guide()
-            set_homescreen()
     except BaseException as e:
         raise e
     else:
         return Success(message="Initialized")
     finally:
+        utils.mark_initialization_done()
         if isinstance(ctx, wire.DummyContext):
             loop.clear()
 
