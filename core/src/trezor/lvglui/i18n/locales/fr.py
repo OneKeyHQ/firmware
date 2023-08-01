@@ -628,5 +628,7 @@ translations = [
     "Ressource:",
     "Bande passante",
     "Énergie",
+    "Portefeuille créé",
+    "Serrure:",
 ]
 # fmt: on

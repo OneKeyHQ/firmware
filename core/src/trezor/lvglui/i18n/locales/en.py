@@ -628,5 +628,7 @@ translations = [
     "Resource:",
     "Bandwidth",
     "Energy",
+    "Wallet Created",
+    "Lock:",
 ]
 # fmt: on

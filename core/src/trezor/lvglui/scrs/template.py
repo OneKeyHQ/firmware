@@ -1001,7 +1001,7 @@ class AlgoCommon(FullSizeWindow):
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         self.item1 = DisplayItem(
             self.container,
-            _(i18n_keys.LIST_KEY__FORMAT__COLON),
+            _(i18n_keys.LIST_KEY__TYPE__COLON),
             type,
         )
 
@@ -1798,6 +1798,7 @@ class TronAssetFreeze(FullSizeWindow):
         balance,
         duration,
         receiver,
+        lock,
         primary_color,
     ):
         super().__init__(
@@ -1816,18 +1817,26 @@ class TronAssetFreeze(FullSizeWindow):
             self.item2 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__RESOURCE_COLON), resource
             )
-        if is_freeze:
-            if balance:
-                self.item2 = DisplayItem(
+        if balance:
+            if is_freeze:
+                self.item3 = DisplayItem(
                     self.container, _(i18n_keys.LIST_KEY__FROZEN_BALANCE_COLON), balance
                 )
-            if duration:
-                self.item2 = DisplayItem(
-                    self.container,
-                    _(i18n_keys.LIST_KEY__FROZEN_DURATION_COLON),
-                    duration,
+            else:
+                self.item3 = DisplayItem(
+                    self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), balance
                 )
-        if receiver is not None:
+        if duration:
             self.item4 = DisplayItem(
+                self.container,
+                _(i18n_keys.LIST_KEY__FROZEN_DURATION_COLON),
+                duration,
+            )
+        if receiver is not None:
+            self.item5 = DisplayItem(
                 self.container, _(i18n_keys.LIST_KEY__RECEIVER_ADDRESS_COLON), receiver
+            )
+        if lock is not None:
+            self.item6 = DisplayItem(
+                self.container, _(i18n_keys.LIST_KEY__LOCK_COLON), lock
             )
