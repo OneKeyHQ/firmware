@@ -118,11 +118,11 @@ def require_confirm_freeze(
 
     return confirm_tron_freeze(
         ctx,
-        "Freeze",
+        "Freeze" if receiver_address is not None else "Freeze Balance V2 Contract",
         signer,
         res,
         format_amount_trx(frozen_balance, None) if frozen_balance is not None else None,
-        str(frozen_duration),
+        str(frozen_duration) if frozen_duration is not None else None,
         receiver_address,
     )
 
@@ -132,6 +132,7 @@ def require_confirm_unfreeze(
     signer: str,
     resource: int | None = None,
     receiver_address: str | None = None,
+    unfrozen_balance: int | None = None,
 ) -> Awaitable[None]:
     from trezor.ui.layouts.lvgl import confirm_tron_freeze
 
@@ -146,9 +147,90 @@ def require_confirm_unfreeze(
         "UnFreeze",
         signer,
         res,
-        None,
+        format_amount_trx(unfrozen_balance, None)
+        if unfrozen_balance is not None
+        else None,
         None,
         receiver_address,
+    )
+
+
+def require_confirm_unfreeze_v2(
+    ctx: Context,
+    signer: str,
+    resource: int | None = None,
+    unfrozen_balance: int | None = None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_unfreeze
+
+    if resource is TronResourceCode.BANDWIDTH:
+        res = _(i18n_keys.LIST_KEY__BANDWIDTH)
+    elif resource == TronResourceCode.ENERGY:
+        res = _(i18n_keys.LIST_KEY__ENERGY)
+    else:
+        res = None
+    return confirm_tron_unfreeze(
+        ctx,
+        "UnFreeze Balance V2 Contract",
+        signer,
+        res,
+        format_amount_trx(unfrozen_balance, None)
+        if unfrozen_balance is not None
+        else None,
+    )
+
+
+def require_confirm_delegate(
+    ctx: Context,
+    signer: str,
+    resource: int | None = None,
+    balance: int | None = None,
+    receiver_address: str | None = None,
+    lock: bool | None = None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_delegate
+
+    if resource is TronResourceCode.BANDWIDTH:
+        res = _(i18n_keys.LIST_KEY__BANDWIDTH)
+    elif resource == TronResourceCode.ENERGY:
+        res = _(i18n_keys.LIST_KEY__ENERGY)
+    else:
+        res = None
+    return confirm_tron_delegate(
+        ctx,
+        "Delegate Resource Contract",
+        signer,
+        res,
+        format_amount_trx(balance, None) if balance is not None else None,
+        receiver_address,
+        str(lock) if lock is not None else None,
+    )
+
+
+def require_confirm_undelegate(
+    ctx: Context,
+    signer: str,
+    resource: int | None = None,
+    balance: int | None = None,
+    receiver_address: str | None = None,
+    lock: bool | None = None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_delegate
+
+    if resource is TronResourceCode.BANDWIDTH:
+        res = _(i18n_keys.LIST_KEY__BANDWIDTH)
+    elif resource == TronResourceCode.ENERGY:
+        res = _(i18n_keys.LIST_KEY__ENERGY)
+    else:
+        res = None
+    return confirm_tron_delegate(
+        ctx,
+        "UnDelegate Resource Contract",
+        signer,
+        res,
+        format_amount_trx(balance, None) if balance is not None else None,
+        receiver_address,
+        str(lock) if lock is not None else None,
     )
 
 

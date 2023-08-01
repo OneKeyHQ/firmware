@@ -1838,8 +1838,79 @@ async def confirm_tron_freeze(
         balance,
         duration,
         receiver,
+        None,
         ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "tron_asset_freeze", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_unfreeze(
+    ctx: wire.GenericContext,
+    title: str,
+    sender: str,
+    resource: str | None = None,
+    balance: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import TronAssetFreeze, AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "tron_asset_freeze_v2", ButtonRequestType.ProtectCall)
+    )
+    screen = TronAssetFreeze(
+        False,
+        sender,
+        resource,
+        balance,
+        None,
+        None,
+        None,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "tron_asset_freeze_v2", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_delegate(
+    ctx: wire.GenericContext,
+    title: str,
+    sender: str,
+    resource: str | None = None,
+    balance: str | None = None,
+    receiver: str | None = None,
+    lock: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import TronAssetFreeze, AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_delegate", ButtonRequestType.ProtectCall)
+    )
+    screen = TronAssetFreeze(
+        False,
+        sender,
+        resource,
+        balance,
+        None,
+        receiver,
+        lock,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_delegate", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_common(
+    ctx: wire.GenericContext,
+    title: str,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_common", ButtonRequestType.ProtectCall)
     )
