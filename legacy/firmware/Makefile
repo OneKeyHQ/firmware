@@ -2,11 +2,15 @@ APPVER = 1.8.0
 
 FIRMWARE_BUILD_VERSION=$(shell cat version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $$2}')
 FIRMWARE_BUILD_DATE=$(shell date "+%m%d")
+ifeq ($(EMULATOR),1)
+NAME = onekey_emu
+else
 ifndef BUILD_ID
 BUILD_COMMIT=$(shell git rev-parse HEAD | cut -c1-7)
 NAME=classic.$(FIRMWARE_BUILD_VERSION)-Stable-$(FIRMWARE_BUILD_DATE)-$(BUILD_COMMIT)
 else
 NAME=classic.$(FIRMWARE_BUILD_VERSION)-Alpha-$(FIRMWARE_BUILD_DATE)-$(BUILD_ID)
+endif
 endif
 
 SECP256K1_ZKP ?= 1

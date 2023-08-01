@@ -253,25 +253,25 @@ release: $(NAME).bin
 	chmod -x $(NAME)-$(APPVER).bin
 	xxd -p $(NAME)-$(APPVER).bin | tr -d '\n' > $(NAME)-$(APPVER).bin.hex
 
-$(NAME).bin: onekey_emu.elf
+$(NAME).bin: $(NAME).elf
 	@printf "  OBJCOPY $@\n"
-	$(Q)$(OBJCOPY) -Obinary onekey_emu.elf $(NAME).bin
+	$(Q)$(OBJCOPY) -Obinary $(NAME).elf $(NAME).bin
 
-$(NAME).hex: onekey_emu.elf
+$(NAME).hex: $(NAME).elf
 	@printf "  OBJCOPY $@\n"
-	$(Q)$(OBJCOPY) -Oihex onekey_emu.elf $(NAME).hex
+	$(Q)$(OBJCOPY) -Oihex $(NAME).elf $(NAME).hex
 
-$(NAME).srec: onekey_emu.elf
+$(NAME).srec: $(NAME).elf
 	@printf "  OBJCOPY $@\n"
-	$(Q)$(OBJCOPY) -Osrec onekey_emu.elf $(NAME).srec
+	$(Q)$(OBJCOPY) -Osrec $(NAME).elf $(NAME).srec
 
-$(NAME).list: onekey_emu.elf
+$(NAME).list: $(NAME).elf
 	@printf "  OBJDUMP $@\n"
-	$(Q)$(OBJDUMP) -S onekey_emu.elf > $(NAME).list
+	$(Q)$(OBJDUMP) -S $(NAME).elf > $(NAME).list
 
-onekey_emu.elf: $(OBJS) $(LDSCRIPT) $(LIBDEPS)
+$(NAME).elf: $(OBJS) $(LDSCRIPT) $(LIBDEPS)
 	@printf "  LD      $@\n"
-	$(Q)$(LD) -o onekey_emu.elf $(OBJS) $(LDLIBS) $(LDFLAGS)
+	$(Q)$(LD) -o $(NAME).elf $(OBJS) $(LDLIBS) $(LDFLAGS)
 
 precomputed_ecmult.o:
 	@printf "  CC      $@\n"
