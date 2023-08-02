@@ -770,7 +770,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
-    if (layoutEnterSleep(1)) {
+    if (layoutEnterSleep(1) && (layoutLast != layoutScreensaver)) {
       key = KEY_NULL;
       protectAbortedBySleep = true;
       break;
