@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 
 # Maximum data size we support
-MAX_VALUE_BYTE_SIZE = 1024
+MAX_VALUE_BYTE_SIZE = 1536  # 1.5 KB
 
 
 @with_keychain_from_path(*PATTERNS_ADDRESS)
