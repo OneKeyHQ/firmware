@@ -1,0 +1,68 @@
+syntax = "proto2";
+package hw.trezor.messages.nexa;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageNexa";
+
+/**
+ * Request: Ask device for address corresponding to address_n path
+ * @start
+ * @next Address
+ * @next Failure
+ */
+message NexaGetAddress {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+    optional bool show_display = 2;                                     // optionally show on display before sending the result
+    optional string prefix = 3 [default="nexa"];                       // prefix for address
+}
+
+/**
+ * Response: Contains address derived from device private seed
+ * @end
+ */
+message NexaAddress {
+    required string address = 1;
+    required bytes public_key = 2;
+}
+
+/**
+ * Request: Ask device to sign transaction
+ * @start
+ * @next NexaSignedTx
+ * @next NexaTxInputRequest
+ * @next Failure
+ */
+message NexaSignTx {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+    required bytes raw_message = 2;                                     // the bip143-like pre-hashed message to be signed
+    optional string prefix = 3 [default="nexa"];                        // prefix for address
+    optional uint32 input_count = 4 [default=1];                         // number of inputs in the transaction
+}
+
+/**
+ * Request: Ask client for corresponding input
+ * @next NexaTxInputAck
+ * @next Failure
+ */
+message NexaTxInputRequest {
+    required uint32 request_index = 1;                                            // index of the input to sign
+    optional bytes signature = 2;                                                // signature of the pervious input
+}
+
+/**
+ * Response: Contains input to be signed
+ * @next KaspaSignedTx
+ * @next Failure
+ */
+message NexaTxInputAck {
+    repeated uint32 address_n = 1;                                               // BIP-32 path to derive the key from master node
+    required bytes raw_message = 2;                                              // the bip143-like pre-hashed message to be signed
+}
+/**
+ * Response: transaction signature
+ * @end
+ */
+ message NexaSignedTx {
+    required bytes signature = 1;   // signature of the message
+}

@@ -506,6 +506,14 @@ enum MessageType {
     MessageType_KaspaTxInputRequest = 11304 [(wire_out) = true];
     MessageType_KaspaTxInputAck = 11305 [(wire_in) = true];
 
+    // Nexa
+    MessageType_NexaGetAddress = 11400 [(wire_in) = true];
+    MessageType_NexaAddress = 11401 [(wire_out) = true];
+    MessageType_NexaSignTx = 11402 [(wire_in) = true];
+    MessageType_NexaSignedTx = 11403 [(wire_out) = true];
+    MessageType_NexaTxInputRequest = 11404 [(wire_out) = true];
+    MessageType_NexaTxInputAck = 11405 [(wire_in) = true];
+    
     // onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
