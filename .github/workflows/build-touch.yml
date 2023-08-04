@@ -27,21 +27,6 @@ jobs:
           echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
           echo "ARTIFACTS_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"" >> $GITHUB_ENV
 
-      - name: "Build boardloader bootloader firmware for qa"
-        env:
-          PRODUCTION: 0
-        run: |
-          sh <(curl -L https://nixos.org/nix/install) --no-daemon
-          . $HOME/.nix-profile/etc/profile.d/nix.sh
-          nix-shell --run "poetry install"
-          git submodule update --init --recursive
-          nix-shell --run "poetry run make -C core build_boardloader"
-          nix-shell --run "poetry run make -C core build_bootloader"
-          nix-shell --run "poetry run make -C core build_firmware"
-          nix-shell --run "poetry run core/tools/headertool.py -h core/build/firmware/touch*Stable*.bin -S 1:${{ secrets.SECRET_QA_KEY_1 }} -S 2:${{ secrets.SECRET_QA_KEY_2 }}"
-          mkdir -p core/build/qa
-          cp ./core/build/boardloader/boardloader.bin ./core/build/bootloader/bootloader*Stable*.bin ./core/build/firmware/touch*Stable*.bin core/build/qa
-
       - name: "Build boardloader bootloader firmware"
         env:
           PRODUCTION: 1
@@ -54,16 +39,33 @@ jobs:
           nix-shell --run "poetry run make -C core build_bootloader"
           nix-shell --run "poetry run make -C core build_firmware"
           nix-shell --run "poetry run core/tools/headertool.py -h core/build/firmware/touch*Stable*.bin -S 1:${{ secrets.SECRET_KEY_1 }} -S 2:${{ secrets.SECRET_KEY_2 }}"
+          mkdir -p core/build/output/boardloader && mkdir -p core/build/output/bootloader && mkdir -p core/build/output/firmware
+          cp ./core/build/boardloader/boardloader.bin core/build/output/boardloader
+          cp ./core/build/bootloader/bootloader*Stable*.bin core/build/output/bootloader
+          cp ./core/build/firmware/touch*Stable*.bin core/build/output/firmware
+
+      - name: "Build boardloader bootloader firmware for qa"
+        env:
+          PRODUCTION: 0
+        run: |
+          sh <(curl -L https://nixos.org/nix/install) --no-daemon
+          . $HOME/.nix-profile/etc/profile.d/nix.sh
+          nix-shell --run "poetry install"
+          git submodule update --init --recursive
+          nix-shell --run "poetry run make -C core clean"
+          nix-shell --run "poetry run make -C core build_boardloader"
+          nix-shell --run "poetry run make -C core build_bootloader"
+          nix-shell --run "poetry run make -C core build_firmware"
+          nix-shell --run "poetry run core/tools/headertool.py -h core/build/firmware/touch*Stable*.bin -S 1:${{ secrets.SECRET_QA_KEY_1 }} -S 2:${{ secrets.SECRET_QA_KEY_2 }}"
+          mkdir -p core/build/output/qa
+          cp ./core/build/boardloader/boardloader.bin ./core/build/bootloader/bootloader*Stable*.bin ./core/build/firmware/touch*Stable*.bin core/build/output/qa
 
       - name: "Upload Artifacts"
         uses: actions/upload-artifact@v3
         with:
           name: firmware-${{ github.sha }}
           path: |
-            ./core/build/boardloader/boardloader.bin
-            ./core/build/bootloader/bootloader*Stable*.bin
-            ./core/build/firmware/touch*Stable*.bin
-            ./core/build/qa
+            ./core/build/output
 
       - name: "Notify to Slack"
         uses: onekeyhq/actions/notice-slack-app-update@main
