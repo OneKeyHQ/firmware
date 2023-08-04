@@ -675,8 +675,6 @@ apps.polkadot.get_address
 import apps.polkadot.get_address
 apps.polkadot.helper
 import apps.polkadot.helper
-apps.polkadot.layout
-import apps.polkadot.layout
 apps.polkadot.paths
 import apps.polkadot.paths
 apps.polkadot.seed
