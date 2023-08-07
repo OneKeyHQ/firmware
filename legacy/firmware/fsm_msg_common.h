@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "config.h"
 #include "flash.h"
 #include "menu_list.h"
 #include "mi2c.h"
@@ -27,12 +28,11 @@ extern char bootloader_version[8];
 bool get_features(Features *resp) {
   char *sn_version = NULL;
   char *serial = NULL;
-  bool trezor_comp_mode = false;
-  config_getTrezorCompMode(&trezor_comp_mode);
-
   resp->has_fw_vendor = true;
+  resp->has_vendor = true;
 #if EMULATOR
   strlcpy(resp->fw_vendor, "EMULATOR", sizeof(resp->fw_vendor));
+  strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
 #else
   const image_header *hdr =
       (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
@@ -42,13 +42,13 @@ bool get_features(Features *resp) {
   } else {
     strlcpy(resp->fw_vendor, "UNSAFE, DO NOT USE!", sizeof(resp->fw_vendor));
   }
-#endif
-  resp->has_vendor = true;
-  if (trezor_comp_mode) {
+  bool trezor_comp_mode = false;
+  if (config_getTrezorCompMode(&trezor_comp_mode)) {
     strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   } else {
     strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
   }
+#endif
   resp->major_version = VERSION_MAJOR;
   resp->minor_version = VERSION_MINOR;
   resp->patch_version = VERSION_PATCH;
@@ -337,6 +337,22 @@ void fsm_msgChangeWipeCode(const ChangeWipeCode *msg) {
 
 void fsm_msgWipeDevice(const WipeDevice *msg) {
   (void)msg;
+#if DEBUG_LINK
+  layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
+                    _("Do you really want to"), _("wipe the device?"), NULL,
+                    _("All data will be lost."), NULL, NULL);
+  if (!protectButton(ButtonRequestType_ButtonRequest_WipeDevice, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+  config_wipe();
+  // the following does not work on Mac anyway :-/ Linux/Windows are fine, so it
+  // is not needed usbReconnect(); // force re-enumeration because of the serial
+  // number change
+  fsm_sendSuccess(_("Device wiped"));
+  layoutHome();
+#else
   uint8_t key = KEY_NULL;
 
   if (!layoutEraseDevice()) {
@@ -384,6 +400,7 @@ void fsm_msgWipeDevice(const WipeDevice *msg) {
 #if !EMULATOR
   // svc_system_reset();
   reset_to_firmware();
+#endif
 #endif
 }
 
