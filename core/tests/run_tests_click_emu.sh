@@ -15,8 +15,8 @@ if [[ $RUN_TEST_EMU > 0 ]]; then
   source ../trezor_cmd.sh
 
   # remove flash and sdcard files before run to prevent inconsistent states
-  mv "${TREZOR_PROFILE_DIR}/trezor.flash" "${TREZOR_PROFILE_DIR}/trezor.flash.bkp" 2>/dev/null
-  mv "${TREZOR_PROFILE_DIR}/trezor.sdcard" "${TREZOR_PROFILE_DIR}/trezor.sdcard.bkp" 2>/dev/null
+  mv "${TREZOR_PROFILE_DIR}/onekey.flash" "${TREZOR_PROFILE_DIR}/onekey.flash.bkp" 2>/dev/null
+  mv "${TREZOR_PROFILE_DIR}/onkey.sdcard" "${TREZOR_PROFILE_DIR}/onekey.sdcard.bkp" 2>/dev/null
 
   cd "${TREZOR_SRC}"
   echo "Starting emulator: $MICROPYTHON $ARGS ${MAIN}"

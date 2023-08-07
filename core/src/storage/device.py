@@ -576,6 +576,8 @@ def set_experimental_features(enabled: bool) -> None:
 
 
 def is_trezor_compatible() -> bool:
+    if utils.EMULATOR:  # in order to work with hwi
+        return False
     enabled = common.get(_NAMESPACE, _TREZOR_COMPATIBLE, public=True)
     if enabled == common._FALSE_BYTE:
         return False
