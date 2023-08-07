@@ -14,36 +14,31 @@ if TYPE_CHECKING:
     from trezor.wire import Context
 
     from apps.common.keychain import Keychain
+    from .definitions import Definitions
 
 
 @with_keychain_from_path(*PATTERNS_ADDRESS)
 async def get_address(
-    ctx: Context, msg: EthereumGetAddress, keychain: Keychain
+    ctx: Context, msg: EthereumGetAddress, keychain: Keychain, defs: Definitions
 ) -> EthereumAddress:
     await paths.validate_path(ctx, keychain, msg.address_n)
 
     node = keychain.derive(msg.address_n)
 
-    if msg.chain_id:
-        network = networks.by_chain_id(msg.chain_id)
-    else:
-        if len(msg.address_n) > 1:  # path has slip44 network identifier
-            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
-        else:
-            network = None
-    address = address_from_bytes(node.ethereum_pubkeyhash(), network)
-
+    address = address_from_bytes(node.ethereum_pubkeyhash(), defs.network)
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
         ctx.primary_color, ctx.icon_path = get_color_and_icon(
-            network.chain_id if network else None
+            defs.network.chain_id if defs.network else None
         )
         await show_address(
             ctx,
             address=address,
             address_n=path,
-            network=get_display_network_name(network),
-            evm_chain_id=None if network else msg.chain_id,
+            network=get_display_network_name(defs.network),
+            evm_chain_id=defs.chain_id
+            if defs.network is networks.UNKNOWN_NETWORK
+            else None,
         )
 
     return EthereumAddress(address=address)

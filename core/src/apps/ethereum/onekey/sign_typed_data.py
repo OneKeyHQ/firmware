@@ -3,26 +3,27 @@ from typing import TYPE_CHECKING
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
-from trezor.enums import EthereumDataType
+from trezor.enums import EthereumDataTypeOneKey as EthereumDataType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.messages import (
-    EthereumFieldType,
-    EthereumSignTypedData,
-    EthereumTypedDataSignature,
-    EthereumTypedDataStructAck,
-    EthereumTypedDataStructRequest,
-    EthereumTypedDataValueAck,
-    EthereumTypedDataValueRequest,
+    EthereumFieldTypeOneKey as EthereumFieldType,
+    EthereumSignTypedDataOneKey as EthereumSignTypedData,
+    EthereumTypedDataSignatureOneKey as EthereumTypedDataSignature,
+    EthereumTypedDataStructAckOneKey as EthereumTypedDataStructAck,
+    EthereumTypedDataStructRequestOneKey as EthereumTypedDataStructRequest,
+    EthereumTypedDataValueAckOneKey as EthereumTypedDataValueAck,
+    EthereumTypedDataValueRequestOneKey as EthereumTypedDataValueRequest,
 )
 from trezor.utils import HashWriter
 
 from apps.common import paths
 
-from .helpers import (
+from .. import networks
+from ..helpers import (
     address_from_bytes,
     get_color_and_icon,
     get_display_network_name,
-    get_type_name,
+    get_type_name_onekey,
 )
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 from .layout import (
@@ -36,20 +37,25 @@ from .layout import (
 if TYPE_CHECKING:
     from apps.common.keychain import Keychain
     from trezor.wire import Context
-    from .definitions import Definitions
 
 
 # Maximum data size we support
-MAX_VALUE_BYTE_SIZE = 1536  # 1.5 KB
+MAX_VALUE_BYTE_SIZE = 1024
 
 
 @with_keychain_from_path(*PATTERNS_ADDRESS)
 async def sign_typed_data(
-    ctx: Context, msg: EthereumSignTypedData, keychain: Keychain, defs: Definitions
+    ctx: Context, msg: EthereumSignTypedData, keychain: Keychain
 ) -> EthereumTypedDataSignature:
     await paths.validate_path(ctx, keychain, msg.address_n)
 
-    network = defs.network
+    if msg.chain_id:
+        network = networks.by_chain_id(msg.chain_id)
+    else:
+        if len(msg.address_n) > 1:  # path has slip44 network identifier
+            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+        else:
+            network = None
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
@@ -206,7 +212,9 @@ class TypedDataEnvelope:
 
         for type_name in [primary_type] + sorted(deps):
             members = self.types[type_name].members
-            fields = ",".join(f"{get_type_name(m.type)} {m.name}" for m in members)
+            fields = ",".join(
+                f"{get_type_name_onekey(m.type)} {m.name}" for m in members
+            )
             result.append(f"{type_name}({fields})")
 
         return "".join(result).encode()
@@ -297,7 +305,7 @@ class TypedDataEnvelope:
                     show_array = await should_show_array(
                         ctx=self.ctx,
                         parent_objects=current_parent_objects,
-                        data_type=get_type_name(entry_type),
+                        data_type=get_type_name_onekey(entry_type),
                         size=array_size,
                     )
                 else:

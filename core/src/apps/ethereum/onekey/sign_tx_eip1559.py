@@ -4,13 +4,17 @@ from trezor import wire
 from trezor.crypto import rlp
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
-from trezor.messages import EthereumAccessList, EthereumTxRequest
+from trezor.messages import (
+    EthereumAccessListOneKey as EthereumAccessList,
+    EthereumTxRequestOneKey as EthereumTxRequest,
+)
 from trezor.ui.layouts import confirm_final
 from trezor.utils import HashWriter
 
 from apps.common import paths
 
-from .helpers import (
+from .. import networks
+from ..helpers import (
     address_from_bytes,
     bytes_from_address,
     get_color_and_icon,
@@ -30,10 +34,9 @@ from .sign_tx import (
 )
 
 if TYPE_CHECKING:
-    from trezor.messages import EthereumSignTxEIP1559
+    from trezor.messages import EthereumSignTxEIP1559OneKey as EthereumSignTxEIP1559
 
     from apps.common.keychain import Keychain
-    from .definitions import Definitions
 
 TX_TYPE = 2
 
@@ -65,7 +68,7 @@ def write_access_list(w: HashWriter, access_list: list[EthereumAccessList]) -> N
 
 @with_keychain_from_chain_id
 async def sign_tx_eip1559(
-    ctx: wire.Context, msg: EthereumSignTxEIP1559, keychain: Keychain, defs: Definitions
+    ctx: wire.Context, msg: EthereumSignTxEIP1559, keychain: Keychain
 ) -> EthereumTxRequest:
     check(msg)
 
@@ -75,7 +78,13 @@ async def sign_tx_eip1559(
     token, address_bytes, recipient, value = await handle_erc20(ctx, msg)
 
     data_total = msg.data_length
-    network = defs.network
+    if msg.chain_id:
+        network = networks.by_chain_id(msg.chain_id)
+    else:
+        if len(msg.address_n) > 1:  # path has slip44 network identifier
+            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
+        else:
+            network = networks.UNKNOWN_NETWORK
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
