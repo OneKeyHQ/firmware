@@ -13,7 +13,7 @@
 
 extern uint8_t ui_language;
 bool exitBlindSignByInitialize;
-static struct menu settings_menu, main_menu, security_set_menu;
+static struct menu settings_menu, main_menu, security_set_menu, about_menu;
 
 void menu_recovery_device(int index) {
   (void)index;
@@ -630,6 +630,112 @@ static struct menu security_set_menu = {
     .previous = &main_menu,
 };
 
+void menu_set_trezor_compatibility(int index) {
+  (void)index;
+
+  uint8_t key = KEY_NULL;
+
+  if (0 == index) {
+    layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Cancel"), &bmp_btn_forward,
+                           _("Confirm"), NULL, NULL,
+                           _("It will take effect\nafter device restart."),
+                           NULL, NULL, NULL, NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        break;
+      }
+      if (key == KEY_CANCEL) {
+        return;
+      }
+    }
+  } else {
+  _layout_disable:
+    layoutDialogAdapter_ex(
+        NULL, &bmp_btn_back, _("Cancel"), &bmp_btn_forward, _("Confirm"), NULL,
+        NULL,
+        _("This will prevent you\nfrom using third-party\nwallet clients and\n"
+          "websites which only\nsupport Trezor."),
+        NULL, NULL, NULL, NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        break;
+      }
+      if (key == KEY_CANCEL) {
+        return;
+      }
+    }
+
+    layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Cancel"), &bmp_btn_forward,
+                           _("Confirm"), NULL, NULL,
+                           _("It will take effect\nafter device restart."),
+                           NULL, NULL, NULL, NULL);
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        break;
+      }
+      if (key == KEY_CANCEL) {
+        goto _layout_disable;
+      }
+    }
+
+    layoutDialogAdapter_ex(NULL, &bmp_btn_back, _("Cancel"), &bmp_btn_forward,
+                           _("Confirm"), NULL, NULL,
+                           _("Do not change this\nsetting if you no\nsure."),
+                           NULL, NULL, NULL, NULL);
+
+    while (1) {
+      key = protectWaitKey(0, 1);
+      if (key == KEY_CONFIRM) {
+        break;
+      }
+      if (key == KEY_CANCEL) {
+        return;
+      }
+    }
+  }
+
+  bool trezor_comp_mode = false;
+  config_getTrezorCompMode(&trezor_comp_mode);
+  config_setTrezorCompMode(index ? false : true);
+#if !EMULATOR
+  if ((index && trezor_comp_mode) || (!index && !trezor_comp_mode)) {
+    svc_system_reset();
+  }
+#endif
+}
+
+static struct menu_item trezor_compatibility_set_menu_items[] = {
+    {"On", NULL, true, menu_set_trezor_compatibility, NULL, true},
+    {"Off", NULL, true, menu_set_trezor_compatibility, NULL, true}};
+
+static struct menu trezor_compatibility_set_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(trezor_compatibility_set_menu_items),
+    .title = "Trezor Compatibility",
+    .items = trezor_compatibility_set_menu_items,
+    .previous = &about_menu,
+};
+
+static struct menu_item about_menu_items[] = {
+    {"Device Info", NULL, true, layoutDeviceParameters, NULL, false},
+    {"Trezor Compat", NULL, false, .sub_menu = &trezor_compatibility_set_menu,
+     menu_para_trezor_comp_mode_state, true},
+};
+
+static struct menu about_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(about_menu_items),
+    .title = NULL,
+    .items = about_menu_items,
+    .previous = &main_menu,
+    .button_type = BTN_TYPE_NEXT,
+};
+
 static struct menu_item main_menu_items[] = {
 #if ONEKEY_MINI
     {"Settings ", NULL, false, .sub_menu = &settings_menu, NULL, false},
@@ -637,7 +743,7 @@ static struct menu_item main_menu_items[] = {
     {"Settings", NULL, false, .sub_menu = &settings_menu, NULL, false},
 #endif
     {"Security", NULL, false, .sub_menu = &security_set_menu, NULL, false},
-    {"About", NULL, true, layoutDeviceParameters, NULL, false}};
+    {"About", NULL, false, .sub_menu = &about_menu, NULL, false}};
 
 static struct menu main_menu = {
     .start = 0,
