@@ -27,6 +27,9 @@ extern char bootloader_version[8];
 bool get_features(Features *resp) {
   char *sn_version = NULL;
   char *serial = NULL;
+  bool trezor_comp_mode = false;
+  config_getTrezorCompMode(&trezor_comp_mode);
+
   resp->has_fw_vendor = true;
 #if EMULATOR
   strlcpy(resp->fw_vendor, "EMULATOR", sizeof(resp->fw_vendor));
@@ -41,7 +44,11 @@ bool get_features(Features *resp) {
   }
 #endif
   resp->has_vendor = true;
-  strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
+  if (trezor_comp_mode) {
+    strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
+  } else {
+    strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));
+  }
   resp->major_version = VERSION_MAJOR;
   resp->minor_version = VERSION_MINOR;
   resp->patch_version = VERSION_PATCH;

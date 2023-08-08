@@ -141,6 +141,24 @@ class MessageType(IntEnum):
     EthereumTypedDataValueAck = 468
     EthereumTypedDataSignature = 469
     EthereumSignTypedHash = 470
+    EthereumGetPublicKeyOneKey = 20100
+    EthereumPublicKeyOneKey = 20101
+    EthereumGetAddressOneKey = 20102
+    EthereumAddressOneKey = 20103
+    EthereumSignTxOneKey = 20104
+    EthereumSignTxEIP1559OneKey = 20105
+    EthereumTxRequestOneKey = 20106
+    EthereumTxAckOneKey = 20107
+    EthereumSignMessageOneKey = 20108
+    EthereumVerifyMessageOneKey = 20109
+    EthereumMessageSignatureOneKey = 20110
+    EthereumSignTypedDataOneKey = 20111
+    EthereumTypedDataStructRequestOneKey = 20112
+    EthereumTypedDataStructAckOneKey = 20113
+    EthereumTypedDataValueRequestOneKey = 20114
+    EthereumTypedDataValueAckOneKey = 20115
+    EthereumTypedDataSignatureOneKey = 20116
+    EthereumSignTypedHashOneKey = 20117
     NEMGetAddress = 67
     NEMAddress = 68
     NEMSignTx = 69
@@ -584,6 +602,22 @@ class DebugButton(IntEnum):
     NO = 0
     YES = 1
     INFO = 2
+
+
+class EthereumDefinitionType(IntEnum):
+    NETWORK = 0
+    TOKEN = 1
+
+
+class EthereumDataTypeOneKey(IntEnum):
+    UINT = 1
+    INT = 2
+    BYTES = 3
+    STRING = 4
+    BOOL = 5
+    ADDRESS = 6
+    ARRAY = 7
+    STRUCT = 8
 
 
 class EthereumDataType(IntEnum):
@@ -5337,12 +5371,85 @@ class EosActionUnknown(protobuf.MessageType):
         self.data_chunk = data_chunk
 
 
-class EthereumSignTypedData(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 464
+class EthereumNetworkInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("chain_id", "uint64", repeated=False, required=True),
+        2: protobuf.Field("symbol", "string", repeated=False, required=True),
+        3: protobuf.Field("slip44", "uint32", repeated=False, required=True),
+        4: protobuf.Field("name", "string", repeated=False, required=True),
+        101: protobuf.Field("icon", "string", repeated=False, required=False, default=None),
+        102: protobuf.Field("primary_color", "uint64", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        chain_id: "int",
+        symbol: "str",
+        slip44: "int",
+        name: "str",
+        icon: Optional["str"] = None,
+        primary_color: Optional["int"] = None,
+    ) -> None:
+        self.chain_id = chain_id
+        self.symbol = symbol
+        self.slip44 = slip44
+        self.name = name
+        self.icon = icon
+        self.primary_color = primary_color
+
+
+class EthereumTokenInfo(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address", "bytes", repeated=False, required=True),
+        2: protobuf.Field("chain_id", "uint64", repeated=False, required=True),
+        3: protobuf.Field("symbol", "string", repeated=False, required=True),
+        4: protobuf.Field("decimals", "uint32", repeated=False, required=True),
+        5: protobuf.Field("name", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "bytes",
+        chain_id: "int",
+        symbol: "str",
+        decimals: "int",
+        name: "str",
+    ) -> None:
+        self.address = address
+        self.chain_id = chain_id
+        self.symbol = symbol
+        self.decimals = decimals
+        self.name = name
+
+
+class EthereumDefinitions(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("encoded_network", "bytes", repeated=False, required=False, default=None),
+        2: protobuf.Field("encoded_token", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        encoded_network: Optional["bytes"] = None,
+        encoded_token: Optional["bytes"] = None,
+    ) -> None:
+        self.encoded_network = encoded_network
+        self.encoded_token = encoded_token
+
+
+class EthereumSignTypedDataOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20111
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("primary_type", "string", repeated=False, required=True),
         3: protobuf.Field("metamask_v4_compat", "bool", repeated=False, required=False, default=True),
+        4: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -5351,10 +5458,131 @@ class EthereumSignTypedData(protobuf.MessageType):
         primary_type: "str",
         address_n: Optional[Sequence["int"]] = None,
         metamask_v4_compat: Optional["bool"] = True,
+        chain_id: Optional["int"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.primary_type = primary_type
         self.metamask_v4_compat = metamask_v4_compat
+        self.chain_id = chain_id
+
+
+class EthereumTypedDataStructRequestOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20112
+    FIELDS = {
+        1: protobuf.Field("name", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        name: "str",
+    ) -> None:
+        self.name = name
+
+
+class EthereumTypedDataStructAckOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20113
+    FIELDS = {
+        1: protobuf.Field("members", "EthereumStructMemberOneKey", repeated=True, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        members: Optional[Sequence["EthereumStructMemberOneKey"]] = None,
+    ) -> None:
+        self.members: Sequence["EthereumStructMemberOneKey"] = members if members is not None else []
+
+
+class EthereumTypedDataValueRequestOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20114
+    FIELDS = {
+        1: protobuf.Field("member_path", "uint32", repeated=True, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        member_path: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.member_path: Sequence["int"] = member_path if member_path is not None else []
+
+
+class EthereumTypedDataValueAckOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20115
+    FIELDS = {
+        1: protobuf.Field("value", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        value: "bytes",
+    ) -> None:
+        self.value = value
+
+
+class EthereumStructMemberOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("type", "EthereumFieldTypeOneKey", repeated=False, required=True),
+        2: protobuf.Field("name", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        type: "EthereumFieldTypeOneKey",
+        name: "str",
+    ) -> None:
+        self.type = type
+        self.name = name
+
+
+class EthereumFieldTypeOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("data_type", "EthereumDataTypeOneKey", repeated=False, required=True),
+        2: protobuf.Field("size", "uint32", repeated=False, required=False, default=None),
+        3: protobuf.Field("entry_type", "EthereumFieldTypeOneKey", repeated=False, required=False, default=None),
+        4: protobuf.Field("struct_name", "string", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_type: "EthereumDataTypeOneKey",
+        size: Optional["int"] = None,
+        entry_type: Optional["EthereumFieldTypeOneKey"] = None,
+        struct_name: Optional["str"] = None,
+    ) -> None:
+        self.data_type = data_type
+        self.size = size
+        self.entry_type = entry_type
+        self.struct_name = struct_name
+
+
+class EthereumSignTypedData(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 464
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("primary_type", "string", repeated=False, required=True),
+        3: protobuf.Field("metamask_v4_compat", "bool", repeated=False, required=False, default=True),
+        4: protobuf.Field("definitions", "EthereumDefinitions", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        primary_type: "str",
+        address_n: Optional[Sequence["int"]] = None,
+        metamask_v4_compat: Optional["bool"] = True,
+        definitions: Optional["EthereumDefinitions"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.primary_type = primary_type
+        self.metamask_v4_compat = metamask_v4_compat
+        self.definitions = definitions
 
 
 class EthereumTypedDataStructRequest(protobuf.MessageType):
@@ -5453,8 +5681,8 @@ class EthereumFieldType(protobuf.MessageType):
         self.struct_name = struct_name
 
 
-class EthereumGetPublicKey(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 450
+class EthereumGetPublicKeyOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20100
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
@@ -5473,8 +5701,8 @@ class EthereumGetPublicKey(protobuf.MessageType):
         self.chain_id = chain_id
 
 
-class EthereumPublicKey(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 451
+class EthereumPublicKeyOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20101
     FIELDS = {
         1: protobuf.Field("node", "HDNodeType", repeated=False, required=True),
         2: protobuf.Field("xpub", "string", repeated=False, required=True),
@@ -5490,8 +5718,8 @@ class EthereumPublicKey(protobuf.MessageType):
         self.xpub = xpub
 
 
-class EthereumGetAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 56
+class EthereumGetAddressOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20102
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
@@ -5510,8 +5738,8 @@ class EthereumGetAddress(protobuf.MessageType):
         self.chain_id = chain_id
 
 
-class EthereumAddress(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 57
+class EthereumAddressOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20103
     FIELDS = {
         1: protobuf.Field("_old_address", "bytes", repeated=False, required=False, default=None),
         2: protobuf.Field("address", "string", repeated=False, required=False, default=None),
@@ -5527,8 +5755,8 @@ class EthereumAddress(protobuf.MessageType):
         self.address = address
 
 
-class EthereumSignTx(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 58
+class EthereumSignTxOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20104
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("nonce", "bytes", repeated=False, required=False, default=b''),
@@ -5568,6 +5796,339 @@ class EthereumSignTx(protobuf.MessageType):
         self.tx_type = tx_type
 
 
+class EthereumSignTxEIP1559OneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20105
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("nonce", "bytes", repeated=False, required=True),
+        3: protobuf.Field("max_gas_fee", "bytes", repeated=False, required=True),
+        4: protobuf.Field("max_priority_fee", "bytes", repeated=False, required=True),
+        5: protobuf.Field("gas_limit", "bytes", repeated=False, required=True),
+        6: protobuf.Field("to", "string", repeated=False, required=False, default=''),
+        7: protobuf.Field("value", "bytes", repeated=False, required=True),
+        8: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=False, default=b''),
+        9: protobuf.Field("data_length", "uint32", repeated=False, required=True),
+        10: protobuf.Field("chain_id", "uint64", repeated=False, required=True),
+        11: protobuf.Field("access_list", "EthereumAccessListOneKey", repeated=True, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        nonce: "bytes",
+        max_gas_fee: "bytes",
+        max_priority_fee: "bytes",
+        gas_limit: "bytes",
+        value: "bytes",
+        data_length: "int",
+        chain_id: "int",
+        address_n: Optional[Sequence["int"]] = None,
+        access_list: Optional[Sequence["EthereumAccessListOneKey"]] = None,
+        to: Optional["str"] = '',
+        data_initial_chunk: Optional["bytes"] = b'',
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.access_list: Sequence["EthereumAccessListOneKey"] = access_list if access_list is not None else []
+        self.nonce = nonce
+        self.max_gas_fee = max_gas_fee
+        self.max_priority_fee = max_priority_fee
+        self.gas_limit = gas_limit
+        self.value = value
+        self.data_length = data_length
+        self.chain_id = chain_id
+        self.to = to
+        self.data_initial_chunk = data_initial_chunk
+
+
+class EthereumTxRequestOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20106
+    FIELDS = {
+        1: protobuf.Field("data_length", "uint32", repeated=False, required=False, default=None),
+        2: protobuf.Field("signature_v", "uint32", repeated=False, required=False, default=None),
+        3: protobuf.Field("signature_r", "bytes", repeated=False, required=False, default=None),
+        4: protobuf.Field("signature_s", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: Optional["int"] = None,
+        signature_v: Optional["int"] = None,
+        signature_r: Optional["bytes"] = None,
+        signature_s: Optional["bytes"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.signature_v = signature_v
+        self.signature_r = signature_r
+        self.signature_s = signature_s
+
+
+class EthereumTxAckOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20107
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: "bytes",
+    ) -> None:
+        self.data_chunk = data_chunk
+
+
+class EthereumSignMessageOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20108
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+        chain_id: Optional["int"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+        self.chain_id = chain_id
+
+
+class EthereumMessageSignatureOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20110
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        3: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class EthereumVerifyMessageOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20109
+    FIELDS = {
+        2: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        3: protobuf.Field("message", "bytes", repeated=False, required=True),
+        4: protobuf.Field("address", "string", repeated=False, required=True),
+        5: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        message: "bytes",
+        address: "str",
+        chain_id: Optional["int"] = None,
+    ) -> None:
+        self.signature = signature
+        self.message = message
+        self.address = address
+        self.chain_id = chain_id
+
+
+class EthereumSignTypedHashOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20117
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("domain_separator_hash", "bytes", repeated=False, required=True),
+        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False, default=None),
+        4: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        domain_separator_hash: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+        message_hash: Optional["bytes"] = None,
+        chain_id: Optional["int"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.domain_separator_hash = domain_separator_hash
+        self.message_hash = message_hash
+        self.chain_id = chain_id
+
+
+class EthereumTypedDataSignatureOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 20116
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.address = address
+
+
+class EthereumSignMessageEIP712(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10200
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False, default=None),
+        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        domain_hash: Optional["bytes"] = None,
+        message_hash: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.domain_hash = domain_hash
+        self.message_hash = message_hash
+
+
+class EthereumAccessListOneKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = None
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=True),
+        2: protobuf.Field("storage_keys", "bytes", repeated=True, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "str",
+        storage_keys: Optional[Sequence["bytes"]] = None,
+    ) -> None:
+        self.storage_keys: Sequence["bytes"] = storage_keys if storage_keys is not None else []
+        self.address = address
+
+
+class EthereumGetPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 450
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class EthereumPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 451
+    FIELDS = {
+        1: protobuf.Field("node", "HDNodeType", repeated=False, required=True),
+        2: protobuf.Field("xpub", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        node: "HDNodeType",
+        xpub: "str",
+    ) -> None:
+        self.node = node
+        self.xpub = xpub
+
+
+class EthereumGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 56
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+        3: protobuf.Field("encoded_network", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+        encoded_network: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+        self.encoded_network = encoded_network
+
+
+class EthereumAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 57
+    FIELDS = {
+        1: protobuf.Field("_old_address", "bytes", repeated=False, required=False, default=None),
+        2: protobuf.Field("address", "string", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        _old_address: Optional["bytes"] = None,
+        address: Optional["str"] = None,
+    ) -> None:
+        self._old_address = _old_address
+        self.address = address
+
+
+class EthereumSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 58
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("nonce", "bytes", repeated=False, required=False, default=b''),
+        3: protobuf.Field("gas_price", "bytes", repeated=False, required=True),
+        4: protobuf.Field("gas_limit", "bytes", repeated=False, required=True),
+        11: protobuf.Field("to", "string", repeated=False, required=False, default=''),
+        6: protobuf.Field("value", "bytes", repeated=False, required=False, default=b''),
+        7: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=False, default=b''),
+        8: protobuf.Field("data_length", "uint32", repeated=False, required=False, default=0),
+        9: protobuf.Field("chain_id", "uint64", repeated=False, required=True),
+        10: protobuf.Field("tx_type", "uint32", repeated=False, required=False, default=None),
+        12: protobuf.Field("definitions", "EthereumDefinitions", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        gas_price: "bytes",
+        gas_limit: "bytes",
+        chain_id: "int",
+        address_n: Optional[Sequence["int"]] = None,
+        nonce: Optional["bytes"] = b'',
+        to: Optional["str"] = '',
+        value: Optional["bytes"] = b'',
+        data_initial_chunk: Optional["bytes"] = b'',
+        data_length: Optional["int"] = 0,
+        tx_type: Optional["int"] = None,
+        definitions: Optional["EthereumDefinitions"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.gas_price = gas_price
+        self.gas_limit = gas_limit
+        self.chain_id = chain_id
+        self.nonce = nonce
+        self.to = to
+        self.value = value
+        self.data_initial_chunk = data_initial_chunk
+        self.data_length = data_length
+        self.tx_type = tx_type
+        self.definitions = definitions
+
+
 class EthereumSignTxEIP1559(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 452
     FIELDS = {
@@ -5582,6 +6143,7 @@ class EthereumSignTxEIP1559(protobuf.MessageType):
         9: protobuf.Field("data_length", "uint32", repeated=False, required=True),
         10: protobuf.Field("chain_id", "uint64", repeated=False, required=True),
         11: protobuf.Field("access_list", "EthereumAccessList", repeated=True, required=False, default=None),
+        12: protobuf.Field("definitions", "EthereumDefinitions", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -5598,6 +6160,7 @@ class EthereumSignTxEIP1559(protobuf.MessageType):
         access_list: Optional[Sequence["EthereumAccessList"]] = None,
         to: Optional["str"] = '',
         data_initial_chunk: Optional["bytes"] = b'',
+        definitions: Optional["EthereumDefinitions"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.access_list: Sequence["EthereumAccessList"] = access_list if access_list is not None else []
@@ -5610,6 +6173,7 @@ class EthereumSignTxEIP1559(protobuf.MessageType):
         self.chain_id = chain_id
         self.to = to
         self.data_initial_chunk = data_initial_chunk
+        self.definitions = definitions
 
 
 class EthereumTxRequest(protobuf.MessageType):
@@ -5654,7 +6218,7 @@ class EthereumSignMessage(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("message", "bytes", repeated=False, required=True),
-        3: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
+        3: protobuf.Field("encoded_network", "bytes", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -5662,11 +6226,11 @@ class EthereumSignMessage(protobuf.MessageType):
         *,
         message: "bytes",
         address_n: Optional[Sequence["int"]] = None,
-        chain_id: Optional["int"] = None,
+        encoded_network: Optional["bytes"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.message = message
-        self.chain_id = chain_id
+        self.encoded_network = encoded_network
 
 
 class EthereumMessageSignature(protobuf.MessageType):
@@ -5692,7 +6256,6 @@ class EthereumVerifyMessage(protobuf.MessageType):
         2: protobuf.Field("signature", "bytes", repeated=False, required=True),
         3: protobuf.Field("message", "bytes", repeated=False, required=True),
         4: protobuf.Field("address", "string", repeated=False, required=True),
-        5: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -5701,32 +6264,10 @@ class EthereumVerifyMessage(protobuf.MessageType):
         signature: "bytes",
         message: "bytes",
         address: "str",
-        chain_id: Optional["int"] = None,
     ) -> None:
         self.signature = signature
         self.message = message
         self.address = address
-        self.chain_id = chain_id
-
-
-class EthereumSignMessageEIP712(protobuf.MessageType):
-    MESSAGE_WIRE_TYPE = 10200
-    FIELDS = {
-        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
-        2: protobuf.Field("domain_hash", "bytes", repeated=False, required=False, default=None),
-        3: protobuf.Field("message_hash", "bytes", repeated=False, required=False, default=None),
-    }
-
-    def __init__(
-        self,
-        *,
-        address_n: Optional[Sequence["int"]] = None,
-        domain_hash: Optional["bytes"] = None,
-        message_hash: Optional["bytes"] = None,
-    ) -> None:
-        self.address_n: Sequence["int"] = address_n if address_n is not None else []
-        self.domain_hash = domain_hash
-        self.message_hash = message_hash
 
 
 class EthereumSignTypedHash(protobuf.MessageType):
@@ -5735,7 +6276,7 @@ class EthereumSignTypedHash(protobuf.MessageType):
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("domain_separator_hash", "bytes", repeated=False, required=True),
         3: protobuf.Field("message_hash", "bytes", repeated=False, required=False, default=None),
-        4: protobuf.Field("chain_id", "uint64", repeated=False, required=False, default=None),
+        4: protobuf.Field("encoded_network", "bytes", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -5744,12 +6285,12 @@ class EthereumSignTypedHash(protobuf.MessageType):
         domain_separator_hash: "bytes",
         address_n: Optional[Sequence["int"]] = None,
         message_hash: Optional["bytes"] = None,
-        chain_id: Optional["int"] = None,
+        encoded_network: Optional["bytes"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.domain_separator_hash = domain_separator_hash
         self.message_hash = message_hash
-        self.chain_id = chain_id
+        self.encoded_network = encoded_network
 
 
 class EthereumTypedDataSignature(protobuf.MessageType):
