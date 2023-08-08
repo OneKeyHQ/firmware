@@ -33,12 +33,14 @@ extern const char NIST256P1_NAME[];
 extern const char ED25519_NAME[];
 extern const char ED25519_SEED_NAME[];
 extern const char ED25519_CARDANO_NAME[];
+extern const char ED25519_CARDANO_TREZOR_NAME[];
+extern const char ED25519_CARDANO_LEDGER_NAME[];
 extern const char ED25519_SHA3_NAME[];
 extern const char SR25519_NAME[];
 #if USE_KECCAK
 extern const char ED25519_KECCAK_NAME[];
 #endif
 extern const char CURVE25519_NAME[];
-extern const char ED25519_LEDGER_NAME[];
+extern const char ED25519_POLKADOT_NAME[];
 
 #endif

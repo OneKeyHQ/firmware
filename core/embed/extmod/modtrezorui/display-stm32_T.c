@@ -118,7 +118,9 @@ static void display_unsleep(void) {
   }
 }
 
-static struct { uint16_t x, y; } BUFFER_OFFSET;
+static struct {
+  uint16_t x, y;
+} BUFFER_OFFSET;
 
 void display_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
   x0 += BUFFER_OFFSET.x;

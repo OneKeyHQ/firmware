@@ -34,7 +34,8 @@
 #define CARDANO_ICARUS_PBKDF2_ROUNDS 4096
 
 extern const curve_info ed25519_cardano_info;
-extern const curve_info ed25519_ledger_info;
+extern const curve_info ed25519_cardano_ledger_info;
+extern const curve_info ed25519_cardano_trezor_info;
 
 int hdnode_private_ckd_cardano(HDNode *inout, uint32_t i);
 

@@ -24,7 +24,7 @@ async def backup_device(ctx: wire.Context, msg: BackupDevice) -> Success:
         raise RuntimeError
 
     storage.device.set_unfinished_backup(True)
-    storage.device.set_backed_up()
+    storage.device.set_backed_up(False)
 
     await backup_seed(ctx, mnemonic_type, mnemonic_secret)
 

@@ -35,12 +35,8 @@ class Keychain:
     @staticmethod
     def _derive_path(root: bip32.HDNode, path: Bip32Path) -> bip32.HDNode:
         """Clone and derive path from the root."""
-        if utils.USE_THD89:
-            node = root.clone()
-            node.se_derive_path(path)
-        else:
-            node = root.clone()
-            node.derive_path(path)
+        node = root.clone()
+        node.derive_path(path)
         return node
 
     def verify_path(self, path: Bip32Path) -> None:
@@ -85,7 +81,7 @@ async def get_keychain(ctx: wire.Context) -> Keychain:
             child_num=0,
             chain_code=bytearray(32),
             public_key=bytearray(33),
-            curve_name="ed25519-ledger",
+            curve_name="ed25519-polkadot",
         )
         return Keychain(node)
     else:

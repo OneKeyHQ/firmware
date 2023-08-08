@@ -11,7 +11,7 @@
 // Trezor One must have bootloader version >= 1.8.0 (before that version the hdrlen used to be reset vector)
 
 g_header:
-    .byte 'O','K','T','F'            // magic
+    .byte 'T','C','2','F'            // magic
     .word g_header_end - g_header    // hdrlen
     .word 0                          // expiry
     .word _codelen                   // codelen

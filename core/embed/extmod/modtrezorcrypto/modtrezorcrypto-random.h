@@ -23,6 +23,10 @@
 
 #include "rand.h"
 
+#if USE_THD89
+#include "se_thd89.h"
+#endif
+
 /// package: trezorcrypto.random
 
 /// def uniform(n: int) -> int:
@@ -51,7 +55,13 @@ STATIC mp_obj_t mod_trezorcrypto_random_bytes(mp_obj_t len) {
   }
   vstr_t vstr = {0};
   vstr_init_len(&vstr, l);
+#if USE_THD89
+  if (sectrue != se_random_encrypted((uint8_t *)vstr.buf, l)) {
+    mp_raise_ValueError("se_random_encrypted failed");
+  }
+#else
   random_buffer((uint8_t *)vstr.buf, l);
+#endif
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_random_bytes_obj,

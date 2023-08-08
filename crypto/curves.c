@@ -32,6 +32,8 @@ const char ED25519_SEED_NAME[] = "ed25519 seed";
 const char SR25519_NAME[] = "sr25519";
 #if USE_CARDANO
 const char ED25519_CARDANO_NAME[] = "ed25519 cardano seed";
+const char ED25519_CARDANO_TREZOR_NAME[] = "ed25519 cardano trezor seed";
+const char ED25519_CARDANO_LEDGER_NAME[] = "ed25519 cardano ledger seed";
 #endif
 const char ED25519_SHA3_NAME[] = "ed25519-sha3";
 #if USE_KECCAK
@@ -39,5 +41,4 @@ const char ED25519_KECCAK_NAME[] = "ed25519-keccak";
 #endif
 const char CURVE25519_NAME[] = "curve25519";
 
-// for CIP03 polkadot
-const char ED25519_LEDGER_NAME[] = "ed25519-ledger";
+const char ED25519_POLKADOT_NAME[] = "ed25519-polkadot";

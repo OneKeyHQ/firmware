@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto import aes, hmac
 from trezor.messages import CipheredKeyValue
 from trezor.ui.layouts import confirm_action
@@ -42,15 +42,31 @@ def compute_cipher_key_value(msg: CipherKeyValue, seckey: bytes) -> bytes:
     data = msg.key.encode()
     data += b"E1" if msg.ask_on_encrypt else b"E0"
     data += b"D1" if msg.ask_on_decrypt else b"D0"
-    data = hmac(hmac.SHA512, seckey, data).digest()
-    key = data[:32]
-    if msg.iv and len(msg.iv) == 16:
-        iv = msg.iv
-    else:
-        iv = data[32:48]
+    if utils.USE_THD89:
+        from trezor.crypto import se_thd89
 
-    ctx = aes(aes.CBC, key, iv)
-    if msg.encrypt:
-        return ctx.encrypt(msg.value)
+        if msg.iv and len(msg.iv) == 16:
+            iv = msg.iv
+            if msg.encrypt:
+                return se_thd89.aes256_encrypt(data, msg.value, msg.iv)
+            else:
+                return se_thd89.aes256_decrypt(data, msg.value, msg.iv)
+        else:
+            if msg.encrypt:
+                return se_thd89.aes256_encrypt(data, msg.value)
+            else:
+                return se_thd89.aes256_decrypt(data, msg.value)
+
     else:
-        return ctx.decrypt(msg.value)
+        data = hmac(hmac.SHA512, seckey, data).digest()
+        key = data[:32]
+        if msg.iv and len(msg.iv) == 16:
+            iv = msg.iv
+        else:
+            iv = None
+
+        ctx = aes(aes.CBC, key, iv)
+        if msg.encrypt:
+            return ctx.encrypt(msg.value)
+        else:
+            return ctx.decrypt(msg.value)

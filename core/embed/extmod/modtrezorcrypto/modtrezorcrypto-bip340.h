@@ -237,8 +237,7 @@ STATIC mp_obj_t mod_trezorcrypto_bip340_tweak_secret_key(size_t n_args,
   vstr_t tsk = {0};
   vstr_init_len(&tsk, 32);
 #if USE_THD89
-  (void)rh_ptr;
-  int ret = se_derive_tweak_private_keys() ? 0 : -1;
+  int ret = se_derive_tweak_private_keys(rh_ptr) ? 0 : -1;
 #else
   int ret = zkp_bip340_tweak_private_key((const uint8_t *)sk.buf, rh_ptr,
                                          (uint8_t *)tsk.buf);

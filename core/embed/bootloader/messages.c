@@ -634,7 +634,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
 
   if (firmware_block == 0) {
     if (headers_offset == 0) {
-      if (memcmp(chunk_buffer, "32C1", 4) == 0) {
+      if (memcmp(chunk_buffer, "TF89", 4) == 0) {
         if (sectrue !=
             load_thd89_image_header(chunk_buffer, FIRMWARE_IMAGE_MAGIC_THD89,
                                     FIRMWARE_IMAGE_MAXSIZE_THD89, &thd89_hdr)) {
@@ -649,7 +649,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
           return -1;
         }
 
-        if (!se_verify_firmware(thd89_hdr.hashes, thd89_hdr.sig1)) {
+        if (!se_verify_firmware(chunk_buffer, IMAGE_HEADER_SIZE)) {
           send_failure(iface_num, FailureType_Failure_ProcessError,
                        "SE verify header error");
           return -1;
@@ -774,10 +774,9 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
       read_offset = IMAGE_INIT_CHUNK_SIZE;
       firmware_remaining -= read_offset;
 
-      uint32_t chunk_limit = (firmware_remaining > IMAGE_CHUNK_SIZE)
-                                 ? IMAGE_CHUNK_SIZE
-                                 : firmware_remaining;
-      chunk_requested = chunk_limit - read_offset;
+      chunk_requested = (firmware_remaining > (IMAGE_CHUNK_SIZE - read_offset))
+                            ? (IMAGE_CHUNK_SIZE - read_offset)
+                            : firmware_remaining;
 
       // request the rest of the first chunk
       MSG_SEND_INIT(FirmwareRequest);
@@ -851,9 +850,15 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
         return -1;
       }
 
+      if (!se_check_firmware()) {
+        send_failure(iface_num, FailureType_Failure_ProcessError,
+                     "SE firmware check error");
+        return -1;
+      }
+
       if (!se_active_app_progress()) {
         send_failure(iface_num, FailureType_Failure_ProcessError,
-                     "SE activate app error");
+                     "SE firmware activate error");
         return -1;
       }
     }
@@ -1150,8 +1155,8 @@ void process_msg_ReadSEPublicCert(uint8_t iface_num, uint32_t msg_size,
   MSG_RECV_INIT(ReadSEPublicCert);
   MSG_RECV(ReadSEPublicCert);
 
-  uint32_t cert_len = 0;
-  uint8_t cert[416] = {0};
+  uint16_t cert_len = 0;
+  uint8_t cert[512] = {0};
 
   MSG_SEND_INIT(SEPublicCert);
   if (se_read_certificate(cert, &cert_len)) {

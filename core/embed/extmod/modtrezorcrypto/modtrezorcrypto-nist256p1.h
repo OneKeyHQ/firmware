@@ -115,7 +115,7 @@ STATIC mp_obj_t mod_trezorcrypto_nist256p1_sign(size_t n_args,
   uint8_t pby = 0;
 #if USE_THD89
   if (0 != se_nist256p1_sign_digest((const uint8_t *)dig.buf,
-                                    (uint8_t *)sig.buf + 1, &pby, NULL)) {
+                                    (uint8_t *)sig.buf + 1, &pby)) {
     vstr_clear(&sig);
     mp_raise_ValueError("Signing failed");
   }

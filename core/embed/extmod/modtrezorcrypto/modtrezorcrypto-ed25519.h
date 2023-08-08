@@ -81,29 +81,33 @@ STATIC mp_obj_t mod_trezorcrypto_ed25519_sign(size_t n_args,
   if (msg.len == 0) {
     mp_raise_ValueError("Empty data to sign");
   }
-  
+
   vstr_t sig = {0};
   vstr_init_len(&sig, sizeof(ed25519_signature));
 
-#if USE_THD89
-  se_ed25519_sign(msg.buf, msg.len, (uint8_t *)sig.buf);
-#else
   if (n_args == 3) {
     mp_buffer_info_t hash_func = {0};
     mp_get_buffer_raise(args[2], &hash_func, MP_BUFFER_READ);
     // if hash_func == 'keccak':
     if (memcmp(hash_func.buf, "keccak", sizeof("keccak")) == 0) {
+#if USE_THD89
+      se_ed25519_sign_keccak(msg.buf, msg.len, (uint8_t *)sig.buf);
+#else
       ed25519_sign_keccak(msg.buf, msg.len, *(const ed25519_secret_key *)sk.buf,
                           *(ed25519_signature *)sig.buf);
+#endif
     } else {
       vstr_clear(&sig);
       mp_raise_ValueError("Unknown hash function");
     }
   } else {
+#if USE_THD89
+    se_ed25519_sign(msg.buf, msg.len, (uint8_t *)sig.buf);
+#else
     ed25519_sign(msg.buf, msg.len, *(const ed25519_secret_key *)sk.buf,
                  *(ed25519_signature *)sig.buf);
-  }
 #endif
+  }
 
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &sig);
 }
@@ -136,9 +140,13 @@ STATIC mp_obj_t mod_trezorcrypto_ed25519_sign_ext(mp_obj_t secret_key,
   }
   vstr_t sig = {0};
   vstr_init_len(&sig, sizeof(ed25519_signature));
+#if USE_THD89
+  se_ed25519_sign_ext(msg.buf, msg.len, (uint8_t *)sig.buf);
+#else
   ed25519_sign_ext(msg.buf, msg.len, *(const ed25519_secret_key *)sk.buf,
                    *(const ed25519_secret_key *)skext.buf,
                    *(ed25519_signature *)sig.buf);
+#endif
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &sig);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(mod_trezorcrypto_ed25519_sign_ext_obj,

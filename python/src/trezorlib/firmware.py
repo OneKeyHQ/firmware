@@ -106,8 +106,8 @@ class ToifMode(Enum):
 
 
 class HeaderType(Enum):
-    FIRMWARE = b"OKTF"
-    BOOTLOADER = b"OKTB"
+    FIRMWARE = b"TC2F"
+    BOOTLOADER = b"TC2B"
 
 
 class EnumAdapter(c.Adapter):
