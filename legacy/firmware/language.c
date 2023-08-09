@@ -319,6 +319,9 @@ const char *languages[][2] = {
     {"Device successfully initialized", ""},  // msg
     // fsm_msg_common.h
     {"Device wiped", ""},  // msg
+    // menu_list.c
+    {"Do not change this\nsetting if you no\nsure.",
+     "如果您不确定此操作的后果, 请勿更改此设置."},  // msg
     // layout2.c lisk.c recovery.c reset.c trezor.c
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
     // fsm_msg_common.h fsm_msg_common.h fsm_msg_common.h
@@ -509,6 +512,9 @@ const char *languages[][2] = {
     {"Invalid transaction type", ""},  // msg
     // fsm_msg_common.h
     {"Invalid word count", ""},  // msg
+    // menu_list.c
+    {"It will take effect\nafter device restart.",
+     "将在设备重启后生效."},  // msg
     // layout2.c
     {"Label:", "设备名称:"},
     // layout2.c layout2.c
@@ -904,6 +910,10 @@ const char *languages[][2] = {
     {"This cannot be undo!", "本操作不可撤销!"},
     // protect.c fsm_msg_common.h
     {"This firmware is incapable of passphrase entry on the device.", ""},
+    // menu_list.c
+    {"This will prevent you\nfrom using third-party\nwallet clients and\n"
+     "websites which only\nsupport Trezor.",
+     "这将会导致您无法使用一些仅支持 Trezor 的第三方客户端和网站."},
     // signing.c fsm_msg_coin.h
     {"Timestamp must be set.", ""},
     // signing.c fsm_msg_coin.h
@@ -934,6 +944,9 @@ const char *languages[][2] = {
     // fsm_msg_coin.h
     {"Transaction must have at least one output", ""},
     {"Transfer", "发送"},
+    // menu_list.c
+    {"Trezor Compat", "Trezor 兼容性"},
+    {"Trezor Compatibility", "Trezor 兼容性"},
     // algo
     {"Txn type", "类型"},
     // ethereum.c

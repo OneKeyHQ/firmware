@@ -17,10 +17,11 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-static bool fsm_ethereumCheckPath(uint32_t address_n_count,
-                                  const uint32_t *address_n, bool pubkey_export,
-                                  const EthereumNetworkInfo *network) {
-  if (ethereum_path_check(address_n_count, address_n, pubkey_export, network)) {
+static bool fsm_ethereumCheckPathOneKey(uint32_t address_n_count,
+                                        const uint32_t *address_n,
+                                        bool pubkey_export, uint64_t chain_id) {
+  if (ethereum_path_check_onekey(address_n_count, address_n, pubkey_export,
+                                 chain_id)) {
     return true;
   }
 
@@ -32,40 +33,8 @@ static bool fsm_ethereumCheckPath(uint32_t address_n_count,
   return fsm_layoutPathWarning(address_n_count, address_n);
 }
 
-static const EthereumDefinitionsDecoded *get_definitions(
-    bool has_definitions, const EthereumDefinitions *definitions,
-    uint64_t chain_id, const char *to) {
-  const EncodedNetwork *encoded_network = NULL;
-  const EncodedToken *encoded_token = NULL;
-  if (has_definitions && definitions) {
-    if (definitions->has_encoded_network) {
-      encoded_network = &definitions->encoded_network;
-    }
-    if (definitions->has_encoded_token) {
-      encoded_token = &definitions->encoded_token;
-    }
-  }
-
-  return ethereum_get_definitions(encoded_network, encoded_token, chain_id,
-                                  SLIP44_UNKNOWN, to);
-}
-
-static const EthereumNetworkInfo *get_network_definition_only(
-    bool has_encoded_network, const EncodedNetwork *encoded_network,
-    const uint32_t slip44) {
-  const EncodedNetwork *en = NULL;
-  if (has_encoded_network) {
-    en = encoded_network;
-  }
-
-  const EthereumDefinitionsDecoded *defs =
-      ethereum_get_definitions(en, NULL, CHAIN_ID_UNKNOWN, slip44, NULL);
-
-  return defs ? defs->network : NULL;
-}
-
-void fsm_msgEthereumGetPublicKey(const EthereumGetPublicKey *msg) {
-  RESP_INIT(EthereumPublicKey);
+void fsm_msgEthereumGetPublicKeyOneKey(const EthereumGetPublicKeyOneKey *msg) {
+  RESP_INIT(EthereumPublicKeyOneKey);
 
   CHECK_INITIALIZED
 
@@ -75,13 +44,8 @@ void fsm_msgEthereumGetPublicKey(const EthereumGetPublicKey *msg) {
   const CoinInfo *coin = fsm_getCoin(true, "Bitcoin");
   if (!coin) return;
 
-  // Only allow m/44' and m/45' subtrees. This allows usage with _any_ SLIP-44
-  // (Ethereum or otherwise), plus the Casa multisig subtree. Anything else must
-  // go through (a) GetPublicKey or (b) a dedicated coin-specific message.
-  if (!msg->address_n_count || (msg->address_n[0] != (44 | PATH_HARDENED) &&
-                                msg->address_n[0] != (45 | PATH_HARDENED))) {
-    fsm_sendFailure(FailureType_Failure_DataError,
-                    _("Invalid path for EthereumGetPublicKey"));
+  if (!fsm_ethereumCheckPathOneKey(msg->address_n_count, msg->address_n, true,
+                                   CHAIN_ID_UNKNOWN)) {
     layoutHome();
     return;
   }
@@ -120,21 +84,17 @@ void fsm_msgEthereumGetPublicKey(const EthereumGetPublicKey *msg) {
   hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub,
                           sizeof(resp->xpub));
 
-  msg_write(MessageType_MessageType_EthereumPublicKey, resp);
+  msg_write(MessageType_MessageType_EthereumPublicKeyOneKey, resp);
   layoutHome();
 }
 
-void fsm_msgEthereumSignTx(const EthereumSignTx *msg) {
+void fsm_msgEthereumSignTxOneKey(const EthereumSignTxOneKey *msg) {
   CHECK_INITIALIZED
 
   CHECK_PIN
 
-  const EthereumDefinitionsDecoded *defs =
-      get_definitions(msg->has_definitions, &msg->definitions, msg->chain_id,
-                      msg->has_to ? msg->to : NULL);
-
-  if (!defs || !fsm_ethereumCheckPath(msg->address_n_count, msg->address_n,
-                                      false, defs->network)) {
+  if (!fsm_ethereumCheckPathOneKey(msg->address_n_count, msg->address_n, false,
+                                   msg->chain_id)) {
     layoutHome();
     return;
   }
@@ -143,20 +103,17 @@ void fsm_msgEthereumSignTx(const EthereumSignTx *msg) {
                                           msg->address_n_count, NULL);
   if (!node) return;
 
-  ethereum_signing_init(msg, node, defs);
+  ethereum_signing_init_onekey(msg, node);
 }
 
-void fsm_msgEthereumSignTxEIP1559(const EthereumSignTxEIP1559 *msg) {
+void fsm_msgEthereumSignTxEIP1559OneKey(
+    const EthereumSignTxEIP1559OneKey *msg) {
   CHECK_INITIALIZED
 
   CHECK_PIN
 
-  const EthereumDefinitionsDecoded *defs =
-      get_definitions(msg->has_definitions, &msg->definitions, msg->chain_id,
-                      msg->has_to ? msg->to : NULL);
-
-  if (!defs || !fsm_ethereumCheckPath(msg->address_n_count, msg->address_n,
-                                      false, defs->network)) {
+  if (!fsm_ethereumCheckPathOneKey(msg->address_n_count, msg->address_n, false,
+                                   msg->chain_id)) {
     layoutHome();
     return;
   }
@@ -165,32 +122,24 @@ void fsm_msgEthereumSignTxEIP1559(const EthereumSignTxEIP1559 *msg) {
                                           msg->address_n_count, NULL);
   if (!node) return;
 
-  ethereum_signing_init_eip1559(msg, node, defs);
+  ethereum_signing_init_eip1559_onekey(msg, node);
 }
 
-void fsm_msgEthereumTxAck(const EthereumTxAck *msg) {
+void fsm_msgEthereumTxAckOneKey(const EthereumTxAckOneKey *msg) {
   CHECK_UNLOCKED
 
-  ethereum_signing_txack(msg);
+  ethereum_signing_txack_onekey(msg);
 }
 
-void fsm_msgEthereumGetAddress(const EthereumGetAddress *msg) {
-  RESP_INIT(EthereumAddress);
+void fsm_msgEthereumGetAddressOneKey(const EthereumGetAddressOneKey *msg) {
+  RESP_INIT(EthereumAddressOneKey);
 
   CHECK_INITIALIZED
 
   CHECK_PIN
 
-  uint32_t slip44 = (msg->address_n_count > 1)
-                        ? (msg->address_n[1] & PATH_UNHARDEN_MASK)
-                        : SLIP44_UNKNOWN;
-
-  const EthereumNetworkInfo *network = get_network_definition_only(
-      msg->has_encoded_network, (const EncodedNetwork *)&msg->encoded_network,
-      slip44);
-
-  if (!network || !fsm_ethereumCheckPath(msg->address_n_count, msg->address_n,
-                                         false, network)) {
+  if (!fsm_ethereumCheckPathOneKey(msg->address_n_count, msg->address_n, false,
+                                   CHAIN_ID_UNKNOWN)) {
     layoutHome();
     return;
   }
@@ -205,6 +154,9 @@ void fsm_msgEthereumGetAddress(const EthereumGetAddress *msg) {
     layoutHome();
     return;
   }
+
+  uint32_t slip44 =
+      (msg->address_n_count > 1) ? (msg->address_n[1] & PATH_UNHARDEN_MASK) : 0;
   bool rskip60 = false;
   uint64_t chain_id = 0;
   // constants from trezor-common/defs/ethereum/networks.json
@@ -233,27 +185,19 @@ void fsm_msgEthereumGetAddress(const EthereumGetAddress *msg) {
     }
   }
 
-  msg_write(MessageType_MessageType_EthereumAddress, resp);
+  msg_write(MessageType_MessageType_EthereumAddressOneKey, resp);
   layoutHome();
 }
 
-void fsm_msgEthereumSignMessage(const EthereumSignMessage *msg) {
-  RESP_INIT(EthereumMessageSignature);
+void fsm_msgEthereumSignMessageOneKey(const EthereumSignMessageOneKey *msg) {
+  RESP_INIT(EthereumMessageSignatureOneKey);
 
   CHECK_INITIALIZED
 
   CHECK_PIN
 
-  uint32_t slip44 = (msg->address_n_count > 1)
-                        ? (msg->address_n[1] & PATH_UNHARDEN_MASK)
-                        : SLIP44_UNKNOWN;
-
-  const EthereumNetworkInfo *network = get_network_definition_only(
-      msg->has_encoded_network, (const EncodedNetwork *)&msg->encoded_network,
-      slip44);
-
-  if (!network || !fsm_ethereumCheckPath(msg->address_n_count, msg->address_n,
-                                         false, network)) {
+  if (!fsm_ethereumCheckPathOneKey(msg->address_n_count, msg->address_n, false,
+                                   CHAIN_ID_UNKNOWN)) {
     layoutHome();
     return;
   }
@@ -284,18 +228,19 @@ void fsm_msgEthereumSignMessage(const EthereumSignMessage *msg) {
     return;
   }
 
-  ethereum_message_sign(msg, node, resp);
+  ethereum_message_sign_onekey(msg, node, resp);
   layoutHome();
 }
 
-void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg) {
-  if (ethereum_message_verify(msg) != 0) {
+void fsm_msgEthereumVerifyMessageOneKey(
+    const EthereumVerifyMessageOneKey *msg) {
+  if (ethereum_message_verify_onekey(msg) != 0) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Invalid signature"));
     return;
   }
 
   uint8_t pubkeyhash[20];
-  if (!ethereum_parse(msg->address, pubkeyhash)) {
+  if (!ethereum_parse_onekey(msg->address, pubkeyhash)) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Invalid address"));
     return;
   }
@@ -325,9 +270,52 @@ void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg) {
 
   layoutHome();
 }
+void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
+  RESP_INIT(EthereumMessageSignature);
 
-void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
-  RESP_INIT(EthereumTypedDataSignature);
+  CHECK_INITIALIZED
+
+  CHECK_PIN
+
+  if (msg->domain_hash.size != 32 || msg->message_hash.size != 32) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, "data length error");
+    return;
+  }
+
+  if (!config_getCoinSwitch(COIN_SWITCH_ETH_EIP712)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("EIP712 blind sign is disabled"));
+    return;
+  }
+
+  if (!fsm_layoutSignMessage_ex("DomainSeparator Hash?", msg->domain_hash.bytes,
+                                msg->domain_hash.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  if (!fsm_layoutSignMessage_ex("Messages Hash?", msg->message_hash.bytes,
+                                msg->message_hash.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
+                                          msg->address_n_count, NULL);
+  if (!node) {
+    fsm_sendFailure(FailureType_Failure_DataError, NULL);
+    return;
+  }
+
+  ethereum_message_sign_eip712(msg, node, resp);
+  layoutHome();
+}
+
+void fsm_msgEthereumSignTypedHashOneKey(
+    const EthereumSignTypedHashOneKey *msg) {
+  RESP_INIT(EthereumTypedDataSignatureOneKey);
 
   CHECK_INITIALIZED
 
@@ -339,16 +327,8 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
     return;
   }
 
-  uint32_t slip44 = (msg->address_n_count > 1)
-                        ? (msg->address_n[1] & PATH_UNHARDEN_MASK)
-                        : SLIP44_UNKNOWN;
-
-  const EthereumNetworkInfo *network = get_network_definition_only(
-      msg->has_encoded_network, (const EncodedNetwork *)&msg->encoded_network,
-      slip44);
-
-  if (!network || !fsm_ethereumCheckPath(msg->address_n_count, msg->address_n,
-                                         false, network)) {
+  if (!fsm_ethereumCheckPathOneKey(msg->address_n_count, msg->address_n, false,
+                                   CHAIN_ID_UNKNOWN)) {
     layoutHome();
     return;
   }
@@ -402,6 +382,6 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
     }
   }
 
-  ethereum_typed_hash_sign(msg, node, resp);
+  ethereum_typed_hash_sign_onekey(msg, node, resp);
   layoutHome();
 }
