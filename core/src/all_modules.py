@@ -75,6 +75,8 @@ trezor.crypto.bech32
 import trezor.crypto.bech32
 trezor.crypto.cashaddr
 import trezor.crypto.cashaddr
+trezor.crypto.cosi
+import trezor.crypto.cosi
 trezor.crypto.curve
 import trezor.crypto.curve
 trezor.crypto.der
@@ -793,6 +795,10 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.CardanoTxWitnessType
     trezor.enums.EthereumDataType
     import trezor.enums.EthereumDataType
+    trezor.enums.EthereumDataTypeOneKey
+    import trezor.enums.EthereumDataTypeOneKey
+    trezor.enums.EthereumDefinitionType
+    import trezor.enums.EthereumDefinitionType
     trezor.enums.MoneroNetworkType
     import trezor.enums.MoneroNetworkType
     trezor.enums.NEMImportanceTransferMode
@@ -915,6 +921,10 @@ if not utils.BITCOIN_ONLY:
     import apps.eos.writers
     apps.ethereum
     import apps.ethereum
+    apps.ethereum.definitions
+    import apps.ethereum.definitions
+    apps.ethereum.definitions_constants
+    import apps.ethereum.definitions_constants
     apps.ethereum.get_address
     import apps.ethereum.get_address
     apps.ethereum.get_public_key
@@ -927,6 +937,26 @@ if not utils.BITCOIN_ONLY:
     import apps.ethereum.layout
     apps.ethereum.networks
     import apps.ethereum.networks
+    apps.ethereum.onekey.get_address
+    import apps.ethereum.onekey.get_address
+    apps.ethereum.onekey.get_public_key
+    import apps.ethereum.onekey.get_public_key
+    apps.ethereum.onekey.keychain
+    import apps.ethereum.onekey.keychain
+    apps.ethereum.onekey.layout
+    import apps.ethereum.onekey.layout
+    apps.ethereum.onekey.sign_message
+    import apps.ethereum.onekey.sign_message
+    apps.ethereum.onekey.sign_tx
+    import apps.ethereum.onekey.sign_tx
+    apps.ethereum.onekey.sign_tx_eip1559
+    import apps.ethereum.onekey.sign_tx_eip1559
+    apps.ethereum.onekey.sign_typed_data
+    import apps.ethereum.onekey.sign_typed_data
+    apps.ethereum.onekey.sign_typed_data_hash
+    import apps.ethereum.onekey.sign_typed_data_hash
+    apps.ethereum.onekey.verify_message
+    import apps.ethereum.onekey.verify_message
     apps.ethereum.sign_message
     import apps.ethereum.sign_message
     apps.ethereum.sign_tx

@@ -96,7 +96,7 @@ async def apply_settings(ctx: wire.Context, msg: ApplySettings) -> Success:
         storage.device.set_autolock_delay_ms(msg.auto_lock_delay_ms)
 
     if msg.safety_checks is not None:
-        await require_confirm_safety_checks(ctx, msg.safety_checks)
+        # await require_confirm_safety_checks(ctx, msg.safety_checks)
         safety_checks.apply_setting(msg.safety_checks)
 
     if msg.display_rotation is not None:

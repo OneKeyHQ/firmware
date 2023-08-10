@@ -2,9 +2,12 @@ from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor import ui
-from trezor.enums import ButtonRequestType, EthereumDataType
+from trezor.enums import ButtonRequestType, EthereumDataTypeOneKey as EthereumDataType
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.messages import EthereumFieldType, EthereumStructMember
+from trezor.messages import (
+    EthereumFieldTypeOneKey as EthereumFieldType,
+    EthereumStructMemberOneKey as EthereumStructMember,
+)
 from trezor.strings import format_amount
 from trezor.ui.layouts import (
     confirm_action,
@@ -20,8 +23,8 @@ from trezor.ui.layouts.lvgl.altcoin import (
     confirm_total_ethereum_eip1559,
 )
 
-from . import networks, tokens
-from .helpers import address_from_bytes, decode_typed_data, get_type_name
+from .. import networks, tokens
+from ..helpers import address_from_bytes, decode_typed_data, get_type_name_onekey
 
 if TYPE_CHECKING:
     from typing import Awaitable, Iterable
@@ -291,7 +294,7 @@ async def confirm_typed_value(
     field: EthereumFieldType,
     array_index: int | None = None,
 ) -> None:
-    type_name = get_type_name(field)
+    type_name = get_type_name_onekey(field)
 
     if array_index is not None:
         title = limit_str(".".join(parent_objects + [name]))
