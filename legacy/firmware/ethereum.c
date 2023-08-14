@@ -226,7 +226,7 @@ static uint32_t rlp_calculate_access_list_length(
 static void send_request_chunk(void) {
   int progress = 1000 - (data_total > 1000000 ? data_left / (data_total / 800)
                                               : data_left * 800 / data_total);
-  layoutProgress(_("Signing"), progress);
+  layoutProgressAdapter(_("Signing"), progress);
   msg_tx_request.has_data_length = true;
   msg_tx_request.data_length = data_left <= 1024 ? data_left : 1024;
   msg_write(MessageType_MessageType_EthereumTxRequest, &msg_tx_request);
@@ -240,7 +240,7 @@ int ethereum_is_canonic(uint8_t v, uint8_t signature[64]) {
 static void send_signature(void) {
   uint8_t hash[32] = {0}, sig[64] = {0};
   uint8_t v = 0;
-  layoutProgress(_("Signing"), 1000);
+  layoutProgressAdapter(_("Signing"), 1000);
 
   if (eip1559) {
     hash_rlp_list_length(rlp_calculate_access_list_length(
@@ -663,7 +663,7 @@ void ethereum_signing_init(const EthereumSignTx *msg, const HDNode *node,
   /* Stage 1: Calculate total RLP length */
   uint32_t rlp_length = 0;
 
-  layoutProgress(_("Signing"), 0);
+  layoutProgressAdapter(_("Signing"), 0);
 
   rlp_length += rlp_calculate_length(msg->nonce.size, msg->nonce.bytes[0]);
   rlp_length +=
@@ -685,7 +685,7 @@ void ethereum_signing_init(const EthereumSignTx *msg, const HDNode *node,
   /* Stage 2: Store header fields */
   hash_rlp_list_length(rlp_length);
 
-  layoutProgress(_("Signing"), 100);
+  layoutProgressAdapter(_("Signing"), 100);
 
   if (tx_type) {
     hash_rlp_number(tx_type);
@@ -777,7 +777,7 @@ void ethereum_signing_init_eip1559(const EthereumSignTxEIP1559 *msg,
   /* Stage 1: Calculate total RLP length */
   uint32_t rlp_length = 0;
 
-  layoutProgress(_("Signing"), 0);
+  layoutProgressAdapter(_("Signing"), 0);
 
   rlp_length += rlp_calculate_number_length(chain_id);
   rlp_length += rlp_calculate_length(msg->nonce.size, msg->nonce.bytes[0]);
@@ -802,7 +802,7 @@ void ethereum_signing_init_eip1559(const EthereumSignTxEIP1559 *msg,
   hash_rlp_number(EIP1559_TX_TYPE);
   hash_rlp_list_length(rlp_length);
 
-  layoutProgress(_("Signing"), 100);
+  layoutProgressAdapter(_("Signing"), 100);
 
   hash_rlp_number(chain_id);
   hash_rlp_field(msg->nonce.bytes, msg->nonce.size);

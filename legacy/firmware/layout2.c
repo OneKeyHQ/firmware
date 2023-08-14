@@ -3470,12 +3470,12 @@ void layoutConfirmHash(const BITMAP *icon, const char *description,
 
   layoutSwipe();
   oledClear();
-  oledDrawBitmap(0, 0, icon);
-  oledDrawString(20, 0 * 9, description, FONT_STANDARD);
-  oledDrawString(20, 1 * 9, str[0], FONT_FIXED);
-  oledDrawString(20, 2 * 9, str[1], FONT_FIXED);
-  oledDrawString(20, 3 * 9, str[2], FONT_FIXED);
-  oledDrawString(20, 4 * 9, str[3], FONT_FIXED);
+  oledDrawBitmap(0, 0 + 2, icon);
+  oledDrawString(20, 0 * 9 + 2, description, FONT_STANDARD);
+  oledDrawString(20, 1 * 9 + 2, str[0], FONT_FIXED);
+  oledDrawString(20, 2 * 9 + 2, str[1], FONT_FIXED);
+  oledDrawString(20, 3 * 9 + 2, str[2], FONT_FIXED);
+  oledDrawString(20, 4 * 9 + 2, str[3], FONT_FIXED);
   oledHLine(OLED_HEIGHT - 13);
 
   layoutButtonNoAdapter(_("Cancel"), &bmp_btn_cancel);
