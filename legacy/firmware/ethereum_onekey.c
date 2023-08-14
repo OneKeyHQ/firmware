@@ -786,7 +786,7 @@ void ethereum_signing_init_eip1559_onekey(
   /* Stage 1: Calculate total RLP length */
   uint32_t rlp_length = 0;
 
-  layoutProgress(_("Signing"), 0);
+  layoutProgressAdapter(_("Signing"), 0);
 
   rlp_length += rlp_calculate_number_length(chain_id);
   rlp_length += rlp_calculate_length(msg->nonce.size, msg->nonce.bytes[0]);
@@ -811,7 +811,7 @@ void ethereum_signing_init_eip1559_onekey(
   hash_rlp_number(EIP1559_TX_TYPE);
   hash_rlp_list_length(rlp_length);
 
-  layoutProgress(_("Signing"), 100);
+  layoutProgressAdapter(_("Signing"), 100);
 
   hash_rlp_number(chain_id);
   hash_rlp_field(msg->nonce.bytes, msg->nonce.size);

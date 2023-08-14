@@ -300,6 +300,8 @@ const char *languages[][2] = {
     {"Destination Coins", "来源金额"},
     // layout2.c
     {"Device ID:", "设备ID:"},
+    // menu_list.c
+    {"Device Info", "设备信息"},
     // reset.c reset.c
     {"Device failed initialized", ""},  // msg
     //
