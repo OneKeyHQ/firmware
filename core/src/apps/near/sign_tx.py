@@ -22,7 +22,7 @@ async def sign_tx(
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(msg.address_n)
     pubkey = node.public_key()[1:]
-    address = "0x" + hexlify(pubkey).decode()
+    address = hexlify(pubkey).decode()
     ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     # parse message
     try:
