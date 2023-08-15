@@ -57,9 +57,8 @@ void fsm_msgConfluxGetAddress(const ConfluxGetAddress *msg) {
     return;
   }
   if (msg->has_show_display && msg->show_display) {
-    char desc[16] = {0};
-    strcat(desc, "Conflux");
-    strcat(desc, _("Address:"));
+    char desc[20] = {0};
+    snprintf(desc, 20, "%s %s", "Conflux", _("Address:"));
     if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
                            msg->address_n_count, false, NULL, 0, 0, NULL)) {
       return;
