@@ -39,9 +39,8 @@ void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg) {
   }
   if (!get_filecoin_addr(pk, resp)) return;
   if (msg->has_show_display && msg->show_display) {
-    char desc[16] = {0};
-    strcat(desc, "Filecoin");
-    strcat(desc, _("Address:"));
+    char desc[20] = {0};
+    snprintf(desc, 20, "%s %s", "Filecoin", _("Address:"));
     if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
