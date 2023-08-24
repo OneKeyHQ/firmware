@@ -182,7 +182,7 @@ def get_color_and_icon(chain_id: int | None):
     if chain_id is None:
         return lv.color_hex(0xD2D2D2), "A:/res/evm-none.png"
     network: EthereumNetworkInfo | None = networks.by_chain_id(chain_id)
-    if network:
+    if network and network is not networks.UNKNOWN_NETWORK:
         return lv.color_hex(network.primary_color), f"A:/res/{network.icon}"
     else:
         return lv.color_hex(0xD2D2D2), "A:/res/evm-none.png"
