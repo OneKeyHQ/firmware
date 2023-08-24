@@ -10,6 +10,7 @@ from apps.common import paths
 from apps.common.helpers import validate_message
 from apps.common.signverify import decode_message
 
+from . import networks
 from .helpers import address_from_bytes, get_color_and_icon, get_display_network_name
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
@@ -50,7 +51,9 @@ async def sign_message(
         decode_message(msg.message),
         address,
         verify=False,
-        evm_chain_id=None,
+        evm_chain_id=None
+        if network is not networks.UNKNOWN_NETWORK
+        else network.chain_id,
     )
 
     signature = secp256k1.sign(

@@ -121,7 +121,7 @@ async def sign_tx_eip1559(
         if token_id is not None
         else None,
         token_id=token_id,
-        evm_chain_id=None if network else msg.chain_id,
+        evm_chain_id=None if network is not networks.UNKNOWN_NETWORK else msg.chain_id,
     )
     data = bytearray()
     data += msg.data_initial_chunk

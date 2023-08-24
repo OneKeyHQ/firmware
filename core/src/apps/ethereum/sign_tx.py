@@ -10,7 +10,7 @@ from trezor.utils import HashWriter
 
 from apps.common import paths
 
-from . import tokens
+from . import networks, tokens
 from .helpers import (
     address_from_bytes,
     bytes_from_address,
@@ -85,7 +85,7 @@ async def sign_tx(
         if token_id is not None
         else None,
         token_id=token_id,
-        evm_chain_id=None if network else msg.chain_id,
+        evm_chain_id=None if network is not networks.UNKNOWN_NETWORK else msg.chain_id,
     )
 
     data = bytearray()
