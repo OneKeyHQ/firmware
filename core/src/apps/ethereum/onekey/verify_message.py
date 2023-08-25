@@ -44,17 +44,15 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
     if msg.chain_id:
         network = networks.by_chain_id(msg.chain_id)
     else:
-        network = None
-    ctx.primary_color, ctx.icon_path = get_color_and_icon(
-        network.chain_id if network else None
-    )
+        network = networks.UNKNOWN_NETWORK
+    ctx.primary_color, ctx.icon_path = get_color_and_icon(network.chain_id)
     await confirm_signverify(
         ctx,
         get_display_network_name(network),
         decode_message(msg.message),
         address=address,
         verify=True,
-        evm_chain_id=None if network else msg.chain_id,
+        evm_chain_id=None if network is not networks.UNKNOWN_NETWORK else msg.chain_id,
     )
     from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 

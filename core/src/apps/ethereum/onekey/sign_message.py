@@ -57,7 +57,7 @@ async def sign_message(
         decode_message(msg.message),
         address,
         verify=False,
-        evm_chain_id=None if network else msg.chain_id,
+        evm_chain_id=None if network is not networks.UNKNOWN_NETWORK else msg.chain_id,
     )
 
     signature = secp256k1.sign(
