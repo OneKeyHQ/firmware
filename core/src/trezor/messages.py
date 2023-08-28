@@ -2145,7 +2145,6 @@ if TYPE_CHECKING:
         coin_switch: "int | None"
         build_id: "str | None"
         battery_level: "int | None"
-        trezor_compat_mode: "bool | None"
 
         def __init__(
             self,
@@ -2207,7 +2206,6 @@ if TYPE_CHECKING:
             coin_switch: "int | None" = None,
             build_id: "str | None" = None,
             battery_level: "int | None" = None,
-            trezor_compat_mode: "bool | None" = None,
         ) -> None:
             pass
 
