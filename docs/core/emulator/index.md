@@ -65,9 +65,9 @@ To use the "all all all" seed defined in [SLIP-14](https://github.com/satoshilab
 
 ### Storage and Profiles
 
-Internal Onekey's storage is emulated and stored in the `/var/tmp/trezor.flash` file by
+Internal Onekey's storage is emulated and stored in the `/var/tmp/onekey.flash` file by
 default. Deleting this file is similar to calling _wipe device_. You can also find
-`/var/tmp/trezor.sdcard` for SD card.
+`/var/tmp/onekey.sdcard` for SD card.
 
 You can specify a different location for the storage and log files via the `-p` /
 `--profile` option:
@@ -76,7 +76,7 @@ You can specify a different location for the storage and log files via the `-p` 
 ./emu.py -p foobar
 ```
 
-This will create a profile directory in your home `~/.trezoremu/foobar` containing
+This will create a profile directory in your home `~/.onekeyemu/foobar` containing
 emulator run files. Alternatively you can set a full path like so:
 
 ```sh
