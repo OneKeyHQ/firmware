@@ -630,5 +630,7 @@ translations = [
     "Energy",
     "Wallet Created",
     "Lock:",
+    "Transaction Details",
+    "View Details",
 ]
 # fmt: on

@@ -630,5 +630,7 @@ translations = [
     "Energía",
     "Monedero creado",
     "Cerrar con llave:",
+    "Detalles de la transacción",
+    "Ver detalles",
 ]
 # fmt: on

@@ -14,23 +14,23 @@ async def confirm_total_ethereum(
     fee_max: str,
     from_address: str | None,
     to_address: str | None,
-    network: str | None,
     total_amount: str | None,
     contract_addr: str | None,
     token_id: int | None,
     evm_chain_id: int | None,
+    raw_data: bytes | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
-    if contract_addr:
-        title = _(i18n_keys.TITLE__NFT_TRANSFER)
-    else:
-        if total_amount:
-            title = _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network)
-        else:
-            title = _(i18n_keys.TITLE__TOKEN_TRANSFER)
+    # if contract_addr:
+    #     title = _(i18n_keys.TITLE__NFT_TRANSFER)
+    # else:
+    #     if total_amount:
+    #         title = _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network)
+    #     else:
+    #         title = _(i18n_keys.TITLE__TOKEN_TRANSFER)
     screen = TransactionDetailsETH(
-        title,
+        _(i18n_keys.TITLE__TRANSACTION_DETAILS),
         from_address,
         to_address,
         amount,
@@ -41,6 +41,7 @@ async def confirm_total_ethereum(
         contract_addr=contract_addr,
         token_id=str(token_id),
         evm_chain_id=evm_chain_id,
+        raw_data=raw_data,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)
@@ -55,23 +56,23 @@ async def confirm_total_ethereum_eip1559(
     fee_max: str,
     from_address: str | None,
     to_address: str | None,
-    network: str | None,
     total_amount: str | None,
     contract_addr: str | None,
     token_id: int | None,
     evm_chain_id: int | None,
+    raw_data: bytes | None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionDetailsETH
 
-    if contract_addr:
-        title = _(i18n_keys.TITLE__NFT_TRANSFER)
-    else:
-        if total_amount:
-            title = _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network)
-        else:
-            title = _(i18n_keys.TITLE__TOKEN_TRANSFER)
+    # if contract_addr:
+    #     title = _(i18n_keys.TITLE__NFT_TRANSFER)
+    # else:
+    #     if total_amount:
+    #         title = _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format(network)
+    #     else:
+    #         title = _(i18n_keys.TITLE__TOKEN_TRANSFER)
     screen = TransactionDetailsETH(
-        title,
+        _(i18n_keys.TITLE__TRANSACTION_DETAILS),
         from_address,
         to_address,
         amount,
@@ -84,6 +85,7 @@ async def confirm_total_ethereum_eip1559(
         contract_addr=contract_addr,
         token_id=str(token_id),
         evm_chain_id=evm_chain_id,
+        raw_data=raw_data,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_total", ButtonRequestType.SignTx)

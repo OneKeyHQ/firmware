@@ -58,7 +58,7 @@ async def sign_tx(
         else:
             break
 
-    await confirm_final(ctx)
+    await confirm_final(ctx, "KAS")
     return KaspaSignedTx(signature=signature)
 
 

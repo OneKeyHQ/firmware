@@ -138,7 +138,7 @@ async def sign_tx(ctx: Context, msg: TezosSignTx, keychain: Keychain) -> TezosSi
     sig_prefixed = helpers.base58_encode_check(
         signature, prefix=helpers.TEZOS_SIGNATURE_PREFIX
     )
-    await confirm_final(ctx)
+    await confirm_final(ctx, "XTZ")
     return TezosSignedTx(
         signature=sig_prefixed, sig_op_contents=sig_op_contents, operation_hash=ophash
     )

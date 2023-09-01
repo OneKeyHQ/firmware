@@ -25,14 +25,14 @@ from ..helpers import (
     get_display_network_name,
     get_type_name_onekey,
 )
-from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
-from .layout import (
+from ..layout import (
     confirm_empty_typed_message,
     confirm_typed_data_final,
-    confirm_typed_value,
+    confirm_typed_value_onekey,
     should_show_array,
     should_show_struct,
 )
+from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
 if TYPE_CHECKING:
     from apps.common.keychain import Keychain
@@ -344,7 +344,7 @@ class TypedDataEnvelope:
                         value = await get_value(self.ctx, entry_type, el_member_path)
                         encode_field(arr_w, entry_type, value)
                         if show_array:
-                            await confirm_typed_value(
+                            await confirm_typed_value_onekey(
                                 ctx=self.ctx,
                                 name=field_name,
                                 value=value,
@@ -357,7 +357,7 @@ class TypedDataEnvelope:
                 value = await get_value(self.ctx, field_type, member_value_path)
                 encode_field(w, field_type, value)
                 if show_data:
-                    await confirm_typed_value(
+                    await confirm_typed_value_onekey(
                         ctx=self.ctx,
                         name=field_name,
                         value=value,
@@ -558,6 +558,6 @@ async def confirm_domain(ctx: Context, typed_data_envelope: TypedDataEnvelope) -
         member_value_path[-1] = member_index
         value = await get_value(ctx, member.type, member_value_path)
         eip712_domain[member.name] = value
-    from .layout import confirm_domain
+    from ..layout import confirm_domain
 
     await confirm_domain(ctx, eip712_domain)

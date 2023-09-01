@@ -45,7 +45,7 @@ async def sign_tx(
     # sign
     digest = sha256(w).digest()
     signature = ed25519.sign(node.private_key(), digest)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "XLM")
     # Add the public key for verification that the right account was used for signing
     return StellarSignedTx(public_key=pubkey, signature=signature)
 

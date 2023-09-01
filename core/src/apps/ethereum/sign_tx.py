@@ -21,8 +21,8 @@ from .keychain import with_keychain_from_chain_id
 from .layout import (
     require_confirm_data,
     require_confirm_fee,
-    require_confirm_tx,
     require_confirm_unknown_token,
+    require_show_overview,
 )
 
 if TYPE_CHECKING:
@@ -62,31 +62,42 @@ async def sign_tx(
             is_nft_transfer = True
             from_addr, recipient, token_id, value = res
 
-    await require_confirm_tx(
-        ctx, recipient, value, msg.chain_id, token, is_nft_transfer
-    )
-    if token is None and token_id is None and msg.data_length > 0:
-        await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
-
-    node = keychain.derive(msg.address_n)
-    recipient_str = address_from_bytes(recipient, network)
-    from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
-    await require_confirm_fee(
+    show_details = await require_show_overview(
         ctx,
+        get_display_network_name(network),
+        recipient,
         value,
-        int.from_bytes(msg.gas_price, "big"),
-        int.from_bytes(msg.gas_limit, "big"),
         msg.chain_id,
         token,
-        from_address=from_str,
-        to_address=recipient_str,
-        network=get_display_network_name(network),
-        contract_addr=address_from_bytes(address_bytes, network)
-        if token_id is not None
-        else None,
-        token_id=token_id,
-        evm_chain_id=None if network is not networks.UNKNOWN_NETWORK else msg.chain_id,
+        is_nft_transfer,
     )
+
+    if show_details:
+        has_raw_data = False
+        if token is None and token_id is None and msg.data_length > 0:
+            has_raw_data = True
+            # await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
+        node = keychain.derive(msg.address_n)
+        recipient_str = address_from_bytes(recipient, network)
+        from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
+        await require_confirm_fee(
+            ctx,
+            value,
+            int.from_bytes(msg.gas_price, "big"),
+            int.from_bytes(msg.gas_limit, "big"),
+            msg.chain_id,
+            token,
+            from_address=from_str,
+            to_address=recipient_str,
+            contract_addr=address_from_bytes(address_bytes, network)
+            if token_id is not None
+            else None,
+            token_id=token_id,
+            evm_chain_id=None
+            if network is not networks.UNKNOWN_NETWORK
+            else msg.chain_id,
+            raw_data=msg.data_initial_chunk if has_raw_data else None,
+        )
 
     data = bytearray()
     data += msg.data_initial_chunk
@@ -121,7 +132,7 @@ async def sign_tx(
 
     digest = sha.get_digest()
     result = sign_digest(msg, keychain, digest)
-    await confirm_final(ctx)
+    await confirm_final(ctx, get_display_network_name(network))
     return result
 
 

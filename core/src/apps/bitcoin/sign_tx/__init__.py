@@ -94,7 +94,7 @@ async def sign_tx(
             if req.request_type == RequestType.TXFINISHED:
                 from trezor.ui.layouts import confirm_final
 
-                await confirm_final(ctx)
+                await confirm_final(ctx, coin.coin_name)
                 return req
             res = await ctx.call(req, request_class)
         elif isinstance(req, helpers.UiConfirm):

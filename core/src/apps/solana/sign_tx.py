@@ -103,7 +103,7 @@ async def sign_tx(
             #     print("Unknown instruction detached")
     from trezor.ui.layouts import confirm_final
 
-    await confirm_final(ctx)
+    await confirm_final(ctx, "SOL")
     signature = ed25519.sign(node.private_key(), msg.raw_tx)
     return SolanaSignedTx(signature=signature)
 

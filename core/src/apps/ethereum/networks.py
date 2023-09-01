@@ -152,7 +152,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         10,  # chain_id
         60,  # slip44
         "ETH",  # symbol
-        "Optimism",  # name
+        "OP",  # name
         "evm-oeth.png",  # name
         0xFF0420,  # primary_color
     )
@@ -352,7 +352,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         56,  # chain_id
         714,  # slip44
         "BNB",  # symbol
-        "Binance Smart Chain",  # name
+        "BNB Smart Chain",  # name
         "evm-bnb.png",  # name
         0xF0B90B,  # primary_color
     )
@@ -496,7 +496,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         97,  # chain_id
         1,  # slip44
         "tBNB",  # symbol
-        "Binance Smart Chain Testnet",  # name
+        "BNB Smart Chain Testnet",  # name
         "evm-tbnb.png",  # name
         0x969696,  # primary_color
     )
@@ -832,7 +832,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         595,  # chain_id
         1,  # slip44
         "tmACA",  # symbol
-        "Acala Mandala Testnet",  # name
+        "Acala Mandala Testnet TC9",  # name
         "evm-tmaca.png",  # name
         0x969696,  # primary_color
     )
@@ -1165,6 +1165,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         0xD2D2D2,  # primary_color
     )
     yield (
+        5000,  # chain_id
+        60,  # slip44
+        "MNT",  # symbol
+        "Mantle",  # name
+        "evm-mnt.png",  # name
+        0xFFFFFF,  # primary_color
+    )
+    yield (
         5197,  # chain_id
         60,  # slip44
         "ES",  # symbol
@@ -1211,6 +1219,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "Klaytn",  # name
         "evm-klay.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        8453,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Base",  # name
+        "evm-base.png",  # name
+        0x0052FF,  # primary_color
     )
     yield (
         8723,  # chain_id
@@ -1411,6 +1427,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "DFK Chain",  # name
         "evm-jewel.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        59144,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Linea",  # name
+        "evm-linea.png",  # name
+        0xFFFFFF,  # primary_color
     )
     yield (
         62320,  # chain_id
@@ -1726,7 +1750,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     )
     yield (
         1666600000,  # chain_id
-        60,  # slip44
+        1023,  # slip44
         "ONE",  # symbol
         "Harmony",  # name
         "evm-one.png",  # name
@@ -1734,7 +1758,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     )
     yield (
         1666600001,  # chain_id
-        60,  # slip44
+        1023,  # slip44
         "ONE",  # symbol
         "Harmony",  # name
         "evm-one.png",  # name
@@ -1742,7 +1766,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     )
     yield (
         1666600002,  # chain_id
-        60,  # slip44
+        1023,  # slip44
         "ONE",  # symbol
         "Harmony",  # name
         "evm-one.png",  # name
@@ -1750,7 +1774,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     )
     yield (
         1666600003,  # chain_id
-        60,  # slip44
+        1023,  # slip44
         "ONE",  # symbol
         "Harmony",  # name
         "evm-one.png",  # name

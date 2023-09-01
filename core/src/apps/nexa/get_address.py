@@ -36,7 +36,7 @@ async def get_address(
             ctx,
             address=address,
             address_n=path,
-            network="Nexa",
+            network="NEXA",
         )
 
     return NexaAddress(address=address, public_key=node.public_key())

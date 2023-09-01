@@ -54,7 +54,7 @@ async def sign_tx(
         else:
             break
 
-    await confirm_final(ctx)
+    await confirm_final(ctx, "NEXA")
     return NexaSignedTx(signature=signature)
 
 
