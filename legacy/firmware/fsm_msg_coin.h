@@ -293,16 +293,16 @@ void fsm_msgGetAddress(const GetAddress *msg) {
   }
 
   if (msg->has_show_display && msg->show_display) {
-    char desc[20] = {0};
+    char desc[32] = {0};
     int multisig_index = 0;
     if (msg->has_multisig) {
-      strlcpy(desc, "Multisig __ of __:", sizeof(desc));
       const uint32_t m = msg->multisig.m;
       const uint32_t n = cryptoMultisigPubkeyCount(&(msg->multisig));
-      desc[9] = (m < 10) ? ' ' : ('0' + (m / 10));
-      desc[10] = '0' + (m % 10);
-      desc[15] = (n < 10) ? ' ' : ('0' + (n / 10));
-      desc[16] = '0' + (n % 10);
+#if !EMULATOR
+      snprintf(desc, 32, "%s(%ld-%ld)", _("Multisig Address"), m, n);
+#else
+      snprintf(desc, 32, "%s(%d-%d)", _("Multisig Address"), m, n);
+#endif
       multisig_index =
           cryptoMultisigPubkeyIndex(coin, &(msg->multisig), node->public_key);
     } else {
@@ -325,7 +325,7 @@ void fsm_msgGetAddress(const GetAddress *msg) {
     }
 
     bool is_cashaddr = coin->cashaddr_prefix != NULL;
-    if (!fsm_layoutAddress(address, desc, false,
+    if (!fsm_layoutAddress(address, NULL, desc, false,
                            is_cashaddr ? strlen(coin->cashaddr_prefix) + 1 : 0,
                            msg->address_n, msg->address_n_count, false,
                            msg->has_multisig ? &(msg->multisig) : NULL,

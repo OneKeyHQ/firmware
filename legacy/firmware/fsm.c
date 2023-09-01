@@ -307,10 +307,10 @@ static bool fsm_getSlip21Key(const char *path[], size_t path_count,
   return true;
 }
 
-static bool fsm_layoutAddress(const char *address, const char *desc,
-                              bool ignorecase, size_t prefixlen,
-                              const uint32_t *address_n, size_t address_n_count,
-                              bool address_is_account,
+static bool fsm_layoutAddress(const char *address, const char *address_type,
+                              const char *desc, bool ignorecase,
+                              size_t prefixlen, const uint32_t *address_n,
+                              size_t address_n_count, bool address_is_account,
                               const MultisigRedeemScriptType *multisig,
                               int multisig_index, uint32_t multisig_xpub_magic,
                               const CoinInfo *coin) {
@@ -319,14 +319,16 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
   uint8_t key = KEY_NULL;
   int screen = 0, screens = 3;
   if (multisig) {
-    screens += 2 * cryptoMultisigPubkeyCount(multisig);
+    screens += cryptoMultisigPubkeyCount(multisig);
   }
+
   for (;;) {
     key = KEY_NULL;
     switch (screen) {
       case 0: {  // show address
-        key = layoutAddress(address, desc, false, false, ignorecase, address_n,
-                            address_n_count, address_is_account);
+        key = layoutAddress(address, address_type, desc, false, false,
+                            ignorecase, address_n, address_n_count,
+                            address_is_account, multisig != NULL);
         if (protectAbortedByInitialize) {
           fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
           return false;
@@ -334,18 +336,19 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
         break;
       }
       case 1: {
-        layoutAddress(address, desc, false, true, ignorecase, address_n,
-                      address_n_count, address_is_account);
+        layoutAddress(address, address_type, desc, false, true, ignorecase,
+                      address_n, address_n_count, address_is_account,
+                      multisig != NULL);
         break;
       }
-      case 2: {  // show QR code
-        layoutAddress(address, desc, true, false, ignorecase, address_n,
-                      address_n_count, address_is_account);
+      case 2: {
+        layoutAddress(address, address_type, desc, true, false, ignorecase,
+                      address_n, address_n_count, address_is_account,
+                      multisig != NULL);
         break;
       }
       default: {  // show XPUBs
-        int index = (screen - 2) / 2;
-        int page = (screen - 2) % 2;
+        int index = screen - 3;
         char xpub[XPUB_MAXLEN] = {0};
         const HDNodeType *node_ptr = NULL;
         if (multisig->nodes_count) {  // use multisig->nodes
@@ -368,8 +371,8 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
                                     multisig_xpub_magic, xpub, sizeof(xpub));
           }
         }
-        layoutXPUBMultisig(xpub, index, page, multisig_index == index);
-        break;
+        key = layoutXPUBMultisig(desc, xpub, index, 0, multisig_index == index,
+                                 screen == (screens - 1));
       }
     }
 
@@ -385,7 +388,11 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
 
     if (key == KEY_CONFIRM) {
       if (multisig) {
-        screen = (screen + 1) % screens;
+        if ((screen == (screens - 1)) || (screen == 2)) {
+          return true;
+        }
+        screen++;
+        if (screen == 2) screen++;
       } else {
         if (screen == 1 || screen == 2) {
           return true;
@@ -393,12 +400,25 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
         screen++;
       }
     } else {
-      if (screen == 0)
-        screen = 2;
-      else if (screen == 1)
-        screen = 2;
-      else if (screen == 2)
-        screen = 0;
+      if (!multisig) {
+        if (screen == 0)
+          screen = 2;
+        else if (screen == 1)
+          screen = 2;
+        else if (screen == 2)
+          screen = 0;
+      } else {
+        if (screen == 0)
+          screen = 2;
+        else if (screen == 1)
+          screen = 2;
+        else if (screen == 2)
+          screen = 0;
+        else {
+          screen--;
+          if (screen == 2) screen--;
+        }
+      }
     }
 
     if (g_bIsBixinAPP) button_request = false;

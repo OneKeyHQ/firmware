@@ -417,6 +417,10 @@ void usbInit(void) {
   }
   if (!config_hasUsblock()) {
     config_setUsblock(true);
+  } else {
+    bool lock = false;
+    config_getUsblock(&lock, true);
+    config_setUsblock(lock);
   }
   // dev_descr.idProduct = trezor_comp_mode ? 0x53c1 : 0x4F4B;
   if (trezor_comp_mode) {
@@ -451,9 +455,12 @@ void usbPoll(void) {
   bool lock = true;
 
   static bool usb_status_bak = false;
+  if (sys_usbState() == false) {
+    usb_connect_status = 0;
+  }
 
   ble_update_poll();
-  config_getUsblock(&lock);
+  config_getUsblock(&lock, false);
   if (usb_connect_status && !usb_status_bak) {
     usb_status_bak = true;
     if (config_hasPin() && session_isUnlocked()) {

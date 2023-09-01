@@ -43,7 +43,7 @@ void fsm_msgKaspaGetAddress(const KaspaGetAddress *msg) {
     char desc[16] = {0};
     strcat(desc, "Kaspa");
     strcat(desc, _("Address:"));
-    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+    if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }

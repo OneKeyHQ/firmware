@@ -151,12 +151,24 @@ void menu_para_set_sleep(int index) {
 
 char* menu_para_usb_lock(void) {
   bool lock = false;
-  config_getUsblock(&lock);
+  config_getUsblock(&lock, true);
   return lock ? _(" Enabled") : _(" Disabled");
 };
 
 int menu_para_usb_lock_index(void) {
   bool lock = false;
-  config_getUsblock(&lock);
+  config_getUsblock(&lock, true);
   return lock ? 0 : 1;
+}
+
+char* menu_para_input_direction(void) {
+  bool d = false;
+  config_getInputDirection(&d);
+  return d ? _("Reverse") : _("Default");
+};
+
+int menu_para_input_direction_index(void) {
+  bool d = false;
+  config_getInputDirection(&d);
+  return d ? 1 : 0;
 }

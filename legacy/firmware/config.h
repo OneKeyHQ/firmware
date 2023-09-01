@@ -238,7 +238,10 @@ void config_setDeriveCardano(bool on);
 
 bool config_hasUsblock(void);
 void config_setUsblock(bool lock);
-bool config_getUsblock(bool *lock);
+bool config_getUsblock(bool *lock, bool mode);
+
+void config_setInputDirection(bool dir);
+bool config_getInputDirection(bool *dir);
 
 extern char config_uuid_str[2 * UUID_SIZE + 1];
 

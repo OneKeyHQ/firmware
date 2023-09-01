@@ -7158,6 +7158,38 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["SuiSignedTx"]:
             return isinstance(msg, cls)
 
+    class SuiSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SuiSignMessage"]:
+            return isinstance(msg, cls)
+
+    class SuiMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SuiMessageSignature"]:
+            return isinstance(msg, cls)
+
     class TezosGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"

@@ -37,7 +37,7 @@ void fsm_msgSuiGetAddress(const SuiGetAddress *msg) {
     char desc[16] = {0};
     strcat(desc, "Sui");
     strcat(desc, _("Address:"));
-    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+    if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }
@@ -62,5 +62,31 @@ void fsm_msgSuiSignTx(const SuiSignTx *msg) {
 
   sui_sign_tx(msg, node, resp);
 
+  layoutHome();
+}
+
+void fsm_msgSuiSignMessage(SuiSignMessage *msg) {
+  RESP_INIT(SuiMessageSignature);
+
+  CHECK_INITIALIZED
+
+  CHECK_PIN
+
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
+
+  hdnode_fill_public_key(node);
+
+  sui_get_address_from_public_key(node->public_key + 1, resp->address);
+
+  if (!fsm_layoutSignMessage("Sui", resp->address, msg->message.bytes,
+                             msg->message.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  sui_message_sign(msg, node, resp);
   layoutHome();
 }

@@ -55,9 +55,9 @@ void fsm_msgStellarGetAddress(const StellarGetAddress *msg) {
                              sizeof(resp->address));
 
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, _("Public account ID"), false, 0,
-                           msg->address_n, msg->address_n_count, true, NULL, 0,
-                           0, NULL)) {
+    if (!fsm_layoutAddress(resp->address, NULL, _("Public account ID"), false,
+                           0, msg->address_n, msg->address_n_count, true, NULL,
+                           0, 0, NULL)) {
       return;
     }
   }

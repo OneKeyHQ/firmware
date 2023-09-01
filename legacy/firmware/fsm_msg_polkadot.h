@@ -65,7 +65,7 @@ void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg) {
     desc[0] = desc[0] - ('a' - 'A');
     strcat(desc, " ");
     strcat(desc, _("Address:"));
-    if (!fsm_layoutAddress(resp->address, desc, false, 0, msg->address_n,
+    if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }

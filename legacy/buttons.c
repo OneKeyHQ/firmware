@@ -22,6 +22,8 @@
 #include "oled.h"
 #include "util.h"
 
+#include "layout.h"
+
 struct buttonState button = {0};
 static volatile bool btn_up_long = false, btn_down_long = false;
 #define SHAKE_DELAY 3
@@ -43,6 +45,9 @@ static volatile int button_timer_enable = 0;
 static volatile uint32_t button_timer_counter = 0;
 static volatile uint32_t up_btn_timer_counter = 0;
 static volatile int up_btn_timer_enable = 0;
+static volatile uint32_t down_btn_timer_counter = 0;
+static volatile int down_btn_timer_enable = 0;
+static volatile int long_press_enable = false;
 
 uint16_t buttonRead(void) {
   uint16_t tmp = 0x00;
@@ -104,6 +109,18 @@ void exti0_isr(void) {
   }
 }
 #endif
+
+void enableLongPress(bool on) { long_press_enable = on; }
+
+bool getLongPressStatus(void) { return long_press_enable; }
+
+bool isLongPress(uint8_t key) {
+  if (key == KEY_UP_OR_DOWN) return btn_up_long || btn_down_long;
+  if (key == KEY_UP) return btn_up_long;
+  if (key == KEY_DOWN) return btn_down_long;
+  return false;
+}
+
 void buttonsTimer(void) {
   if (button_timer_enable) {
     button_timer_counter++;
@@ -117,26 +134,29 @@ void buttonsTimer(void) {
       sys_shutdown();
     }
   }
-#ifdef BLE_SWITCH
+}
+
+void longPressTimer(void) {
   if ((buttonRead() & BTN_PIN_UP) == 0 && up_btn_timer_enable == 0) {
     up_btn_timer_counter++;
     if (up_btn_timer_counter > 2) {
       up_btn_timer_enable = 1;
-      up_btn_timer_counter = 0;
       btn_up_long = true;
-      if (ble_get_switch() == true) {
-        change_ble_sta_flag = BUTTON_PRESS_BLE_OFF;
-        change_ble_sta(BLE_ADV_OFF);
-      } else {
-        change_ble_sta_flag = BUTTON_PRESS_BLE_ON;
-        change_ble_sta(BLE_ADV_ON);
-      }
     }
   } else {
     up_btn_timer_counter = 0;
     up_btn_timer_enable = 0;
   }
-#endif
+  if ((buttonRead() & BTN_PIN_DOWN) == 0 && down_btn_timer_enable == 0) {
+    down_btn_timer_counter++;
+    if (down_btn_timer_counter > 2) {
+      down_btn_timer_enable = 1;
+      btn_down_long = true;
+    }
+  } else {
+    down_btn_timer_counter = 0;
+    down_btn_timer_enable = 0;
+  }
 }
 
 bool checkButtonOrTimeout(uint8_t btn, TimerOut type) {
@@ -286,6 +306,7 @@ void buttonUpdate() {
     } else {  // last UP was up
       button.UpDown = 0;
       button.UpUp = false;
+      btn_up_long = false;
     }
   }
 
@@ -300,11 +321,17 @@ void buttonUpdate() {
   } else {  // down button is up
     if ((last_state & BTN_PIN_DOWN) == 0 &&
         button.DownDown > SHAKE_DELAY) {  // last down was down
-      button.DownUp = true;
+      if (btn_down_long) {
+        btn_down_long = false;
+        button.DownUp = false;
+      } else {
+        button.DownUp = true;
+      }
       button.DownDown = 0;
     } else {  // last down was up
       button.DownDown = 0;
       button.DownUp = false;
+      btn_down_long = false;
     }
   }
 #if !EMULATOR

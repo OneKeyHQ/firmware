@@ -325,6 +325,9 @@ static void ethereumFormatAmount(const bignum256 *amnt, const TokenType *token,
   } else if (token != NULL) {
     suffix = token->ticker;
     decimals = token->decimals;
+  } else if (bn_is_zero(amnt)) {
+    ASSIGN_ETHEREUM_SUFFIX(suffix, chain_id);
+    decimals = 0;
   } else if (bn_is_less(amnt, &bn1e9)) {
     suffix = " Wei";
     decimals = 0;
@@ -399,15 +402,15 @@ static bool layoutEthereumConfirmTx(
     }
     ethereum_address_checksum(recipient, recip, rskip60, chain_id);
     if (!is_eip1559) {
-      return layoutTransactionSign(
+      return layoutTransactionSignEVM(
           chain_name, params->chain_id, true, token_amount, to_str, signer,
           recip, token_id, NULL, 0, _("Maximum Fee:"), gas_value, NULL, NULL,
           NULL, NULL, NULL, NULL);
     } else {
-      return layoutTransactionSign(chain_name, params->chain_id, true,
-                                   token_amount, to_str, signer, recip,
-                                   token_id, NULL, 0, key1, value1, key2,
-                                   value2, key3, value3, NULL, NULL);
+      return layoutTransactionSignEVM(chain_name, params->chain_id, true,
+                                      token_amount, to_str, signer, recip,
+                                      token_id, NULL, 0, key1, value1, key2,
+                                      value2, key3, value3, NULL, NULL);
     }
   } else if (token == NULL) {
     if (!is_eip1559 && data_total > 0) {
@@ -424,13 +427,13 @@ static bool layoutEthereumConfirmTx(
       ethereumFormatAmount(&val, NULL, amount, sizeof(amount));
       ethereumFormatAmount(&total, NULL, total_amount, sizeof(total_amount));
       if (!is_eip1559) {
-        return layoutTransactionSign(
+        return layoutTransactionSignEVM(
             chain_name, params->chain_id, false, amount, to_str, signer, NULL,
             NULL, params->data_initial_chunk_bytes, data_total,
             _("Maximum Fee:"), gas_value, _("Total Amount:"), total_amount,
             NULL, NULL, NULL, NULL);
       } else {
-        return layoutTransactionSign(
+        return layoutTransactionSignEVM(
             chain_name, params->chain_id, false, amount, to_str, signer, NULL,
             NULL, params->data_initial_chunk_bytes, data_total, key1, value1,
             key2, value2, key3, value3, _("Total Amount:"), total_amount);
@@ -442,15 +445,15 @@ static bool layoutEthereumConfirmTx(
     strcat(total_amount, "\n");
     strcat(total_amount, gas_value);
     if (!is_eip1559) {
-      return layoutTransactionSign(
+      return layoutTransactionSignEVM(
           chain_name, params->chain_id, true, amount, to_str, signer, NULL,
           NULL, NULL, 0, _("Maximum Fee:"), gas_value, _("Total Amount:"),
           total_amount, NULL, NULL, NULL, NULL);
     } else {
-      return layoutTransactionSign(chain_name, params->chain_id, true, amount,
-                                   to_str, signer, NULL, NULL, NULL, 0, key1,
-                                   value1, key2, value2, key3, value3,
-                                   _("Total Amount:"), total_amount);
+      return layoutTransactionSignEVM(chain_name, params->chain_id, true,
+                                      amount, to_str, signer, NULL, NULL, NULL,
+                                      0, key1, value1, key2, value2, key3,
+                                      value3, _("Total Amount:"), total_amount);
     }
   }
 
@@ -865,7 +868,7 @@ void ethereum_signing_init_eip1559_onekey(
           &params, signer, msg->max_gas_fee.bytes, msg->max_gas_fee.size,
           msg->gas_limit.bytes, msg->gas_limit.size, true, is_nft_transfer,
           recipient, token_id, token_value, _("Maximum Fee Per Gas:"),
-          max_fee_per_gas_str, _("Priority fee per gas:"),
+          max_fee_per_gas_str, _("Priority Fee Per Gas:"),
           priority_fee_per_gas_str, _("Maximum Fee:"), max_fee_str)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     ethereum_signing_abort_onekey();

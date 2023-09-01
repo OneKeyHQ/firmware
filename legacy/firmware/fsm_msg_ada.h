@@ -72,11 +72,17 @@ void fsm_msgCardanoGetAddress(CardanoGetAddress *msg) {
     return;
   }
   if (msg->has_show_display && msg->show_display) {
-    char desc[16] = {0};
-    strcat(desc, "Cardano");
-    strcat(desc, _("Address:"));
+    char desc[20] = {0};
+    char addr_type[32] = {0};
+    snprintf(desc, 20, "Cardano %s", _("Address:"));
+    if (msg->address_parameters.address_type == CardanoAddressType_BASE) {
+      snprintf(addr_type, 32, "Base %s", _("Address:"));
+    } else if (msg->address_parameters.address_type ==
+               CardanoAddressType_REWARD) {
+      snprintf(addr_type, 32, "Reward %s", _("Address:"));
+    }
     if (msg->address_parameters.address_n_count > 0) {
-      if (!fsm_layoutAddress(resp->address, desc, false, 0,
+      if (!fsm_layoutAddress(resp->address, addr_type, desc, false, 0,
                              msg->address_parameters.address_n,
                              msg->address_parameters.address_n_count, true,
                              NULL, 0, 0, NULL)) {
@@ -84,7 +90,7 @@ void fsm_msgCardanoGetAddress(CardanoGetAddress *msg) {
         return;
       }
     } else {
-      if (!fsm_layoutAddress(resp->address, desc, false, 0,
+      if (!fsm_layoutAddress(resp->address, addr_type, desc, false, 0,
                              msg->address_parameters.address_n_staking,
                              msg->address_parameters.address_n_staking_count,
                              true, NULL, 0, 0, NULL)) {
