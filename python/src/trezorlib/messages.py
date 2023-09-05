@@ -347,6 +347,8 @@ class MessageType(IntEnum):
     SuiAddress = 11101
     SuiSignTx = 11102
     SuiSignedTx = 11103
+    SuiSignMessage = 11104
+    SuiMessageSignature = 11105
     FilecoinGetAddress = 11200
     FilecoinAddress = 11201
     FilecoinSignTx = 11202
@@ -9346,6 +9348,40 @@ class SuiSignedTx(protobuf.MessageType):
     ) -> None:
         self.public_key = public_key
         self.signature = signature
+
+
+class SuiSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11104
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+
+
+class SuiMessageSignature(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11105
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        address: "str",
+    ) -> None:
+        self.signature = signature
+        self.address = address
 
 
 class TezosGetAddress(protobuf.MessageType):
