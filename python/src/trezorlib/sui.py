@@ -16,10 +16,10 @@
 # along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, AnyStr
 
 from . import messages
-from .tools import expect
+from .tools import expect, prepare_message_bytes
 
 if TYPE_CHECKING:
     from .client import TrezorClient
@@ -40,3 +40,16 @@ def get_address(
 def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
     return client.call(messages.SuiSignTx(address_n=address_n, raw_tx=rawtx))
 
+
+@expect(messages.SuiMessageSignature)
+def sign_message(
+    client: "TrezorClient",
+    n: "Address",
+    message: AnyStr,
+) -> "MessageType":
+    return client.call(
+        messages.SuiSignMessage(
+            address_n=n,
+            message=prepare_message_bytes(message),
+        )
+    )

@@ -743,6 +743,8 @@ apps.sui.get_address
 import apps.sui.get_address
 apps.sui.helper
 import apps.sui.helper
+apps.sui.sign_message
+import apps.sui.sign_message
 apps.sui.sign_tx
 import apps.sui.sign_tx
 apps.tron
