@@ -748,9 +748,9 @@ refresh_menu:
     oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
     y += font->pixel + 5;
     if (msg->contract.has_withdraw_balance_contract) {
-      oledDrawStringAdapter(0, y, "TronWithdrawBalanceContract", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, "Withdraw Balance Contract", FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y, "WithdrawExpireUnfreezeContract",
+      oledDrawStringAdapter(0, y, "Withdraw Expire Unfreeze Contract",
                             FONT_STANDARD);
     }
 
@@ -858,9 +858,10 @@ refresh_menu:
     oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
     y += font->pixel + 5;
     if (msg->contract.has_freeze_balance_v2_contract) {
-      oledDrawStringAdapter(0, y, "FreezeBalanceV2Contract", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, "Freeze Balance V2 Contract", FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y, "UnfreezeBalanceV2Contract", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, "UnFreeze Balance V2 Contract",
+                            FONT_STANDARD);
     }
 
     // scrollbar
@@ -1005,9 +1006,10 @@ refresh_menu:
     oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
     y += font->pixel + 5;
     if (msg->contract.has_delegate_resource_contract) {
-      oledDrawStringAdapter(0, y, "DelegateResourceContract", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, "Delegate Resource Contract", FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y, "UnDelegateResourceContract", FONT_STANDARD);
+      oledDrawStringAdapter(0, y, "UnDelegate Resource Contract",
+                            FONT_STANDARD);
     }
 
     // scrollbar

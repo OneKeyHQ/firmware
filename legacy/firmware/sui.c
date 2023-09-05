@@ -51,3 +51,32 @@ void sui_sign_tx(const SuiSignTx *msg, const HDNode *node, SuiSignedTx *resp) {
   resp->public_key.size = 32;
   msg_write(MessageType_MessageType_SuiSignedTx, resp);
 }
+
+static void uleb_encode(int num, uint8_t *num_bytes, int *len) {
+  while (num > 0) {
+    num_bytes[*len] = num & 127;
+    if (num >>= 7) {
+      num_bytes[*len] |= 128;
+    }
+    *len += 1;
+  }
+}
+
+void sui_message_sign(const SuiSignMessage *msg, const HDNode *node,
+                      SuiMessageSignature *resp) {
+  uint8_t digest[32] = {0};
+  uint8_t num_bytes[32] = {0x3, 0x0, 0x0};  // Personal Message
+  int num_bytes_len = 3;
+
+  uleb_encode(msg->message.size, num_bytes, &num_bytes_len);
+
+  BLAKE2B_CTX ctx;
+  blake2b_Init(&ctx, 32);
+  blake2b_Update(&ctx, num_bytes, num_bytes_len);
+  blake2b_Update(&ctx, msg->message.bytes, msg->message.size);
+  blake2b_Final(&ctx, digest, 32);
+
+  ed25519_sign(digest, 32, node->private_key, resp->signature.bytes);
+  resp->signature.size = 64;
+  msg_write(MessageType_MessageType_SuiMessageSignature, resp);
+}

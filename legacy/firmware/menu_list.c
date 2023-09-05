@@ -23,7 +23,6 @@ void menu_recovery_device(int index) {
   recovery_on_device();
   if (config_isInitialized()) {
 #if ONEKEY_MINI
-  refresh:
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
         &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("Done"), NULL,
@@ -36,9 +35,7 @@ void menu_recovery_device(int index) {
 #endif
 
 #if ONEKEY_MINI
-    uint8_t key = protectWaitKey(0, 1);
-    setRgbBitmap(false);
-    if (key != KEY_CONFIRM) goto refresh;
+    protectWaitKey(0, 1);
 #else
     protectWaitKey(0, 1);
 #endif
@@ -54,7 +51,6 @@ void menu_reset_device(int index) {
   reset_on_device();
   if (config_isInitialized()) {
 #if ONEKEY_MINI
-  refresh:
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
         &bmp_icon_success, NULL, NULL, &bmp_button_forward, _("Done"), NULL,
@@ -67,9 +63,7 @@ void menu_reset_device(int index) {
 #endif
 
 #if ONEKEY_MINI
-    uint8_t key = protectWaitKey(0, 1);
-    setRgbBitmap(false);
-    if (key != KEY_CONFIRM) goto refresh;
+    protectWaitKey(0, 1);
 #else
     protectWaitKey(0, 1);
 #endif

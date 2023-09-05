@@ -6,3 +6,9 @@ SuiSignTx.raw_tx                                          max_size:4096
 
 SuiSignedTx.public_key                                    max_size:32
 SuiSignedTx.signature                                     max_size:64
+
+SuiSignMessage.address_n	                              max_count:8
+SuiSignMessage.message		                              max_size:1024
+
+SuiMessageSignature.address	                              max_size:70
+SuiMessageSignature.signature	                          max_size:64

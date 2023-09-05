@@ -731,7 +731,7 @@ refresh_menu:
   return true;
 }
 
-static bool recovery_check_words(void) {
+static bool recovery_check_words(bool *is_back) {
   uint8_t key = KEY_NULL;
   uint32_t index = 0;
 
@@ -779,6 +779,7 @@ refresh_menu:
       if (pages > 2) {
         oledDrawBitmap(OLED_WIDTH / 2, OLED_HEIGHT - 9, &bmp_btn_down);
       } else {
+        layoutButtonNoAdapter(_("Back"), &bmp_button_back);
         layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
       }
       break;
@@ -794,6 +795,7 @@ refresh_menu:
                                 (j + 2) * (font->pixel + 1), desc, FONT_FIXED);
         }
       }
+      layoutButtonNoAdapter(_("Back"), &bmp_button_back);
       layoutButtonYesAdapter(_("Next"), &bmp_btn_forward);
       break;
     default:
@@ -811,6 +813,10 @@ refresh_menu:
       if (index < pages - 1) index++;
       goto refresh_menu;
     case KEY_CANCEL:
+      if (index == pages - 1) {
+        *is_back = true;
+        return false;
+      }
       goto refresh_menu;
     case KEY_CONFIRM:
       if (index == pages - 1) {
@@ -962,6 +968,7 @@ refresh_menu:
 bool recovery_on_device(void) {
   char desc[72] = "";
   uint8_t key = KEY_NULL;
+  bool is_back = false;
 
 prompt_recovery:
 #if ONEKEY_MINI
@@ -1031,6 +1038,7 @@ input_word:
     goto_check(select_mnemonic_count);
   }
 
+check_words_retry:
   memzero(desc, sizeof(desc));
 #if ONEKEY_MINI
   switch (word_count) {
@@ -1068,8 +1076,12 @@ input_word:
   }
 
 check_word:
-  if (!recovery_check_words()) {
+  is_back = false;
+  if (!recovery_check_words(&is_back)) {
 #if ONEKEY_MINI
+    if (is_back) {
+      goto check_words_retry;
+    }
     setRgbBitmap(true);
     layoutDialogSwipeCenterAdapterEx(
         &bmp_icon_forbid, NULL, NULL, &bmp_btn_retry, _("RETRY"), NULL, true,

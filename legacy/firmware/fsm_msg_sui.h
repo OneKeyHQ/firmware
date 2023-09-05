@@ -64,3 +64,28 @@ void fsm_msgSuiSignTx(const SuiSignTx *msg) {
 
   layoutHome();
 }
+
+void fsm_msgSuiSignMessage(SuiSignMessage *msg) {
+  RESP_INIT(SuiMessageSignature);
+
+  CHECK_INITIALIZED
+
+  CHECK_PIN
+
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
+
+  hdnode_fill_public_key(node);
+
+  sui_get_address_from_public_key(node->public_key + 1, resp->address);
+
+  if (!fsm_layoutSignMessage(msg->message.bytes, msg->message.size)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return;
+  }
+
+  sui_message_sign(msg, node, resp);
+  layoutHome();
+}
