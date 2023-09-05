@@ -2,9 +2,14 @@ from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor import ui
-from trezor.enums import ButtonRequestType, EthereumDataType
+from trezor.enums import ButtonRequestType, EthereumDataType, EthereumDataTypeOneKey
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
-from trezor.messages import EthereumFieldType, EthereumStructMember
+from trezor.messages import (
+    EthereumFieldType,
+    EthereumFieldTypeOneKey,
+    EthereumStructMember,
+    EthereumStructMemberOneKey,
+)
 from trezor.strings import format_amount
 from trezor.ui.layouts import (
     confirm_action,
@@ -13,6 +18,7 @@ from trezor.ui.layouts import (
     confirm_output,
     confirm_sign_typed_hash,
     confirm_text,
+    should_show_details,
     should_show_more,
 )
 from trezor.ui.layouts.lvgl.altcoin import (
@@ -21,7 +27,12 @@ from trezor.ui.layouts.lvgl.altcoin import (
 )
 
 from . import networks, tokens
-from .helpers import address_from_bytes, decode_typed_data, get_type_name
+from .helpers import (
+    address_from_bytes,
+    decode_typed_data,
+    get_type_name,
+    get_type_name_onekey,
+)
 
 if TYPE_CHECKING:
     from typing import Awaitable, Iterable
@@ -51,6 +62,28 @@ def require_confirm_tx(
     )
 
 
+def require_show_overview(
+    ctx: Context,
+    network: str,
+    to_bytes: bytes,
+    value: int,
+    chain_id: int,
+    token: tokens.EthereumTokenInfo | None = None,
+    is_nft: bool = False,
+) -> Awaitable[bool]:
+    if to_bytes:
+        to_str = address_from_bytes(to_bytes, networks.by_chain_id(chain_id))
+    else:
+        to_str = _(i18n_keys.LIST_VALUE__NEW_CONTRACT)
+    return should_show_details(
+        ctx,
+        title=_(i18n_keys.TITLE__STR_TRANSACTION).format(network),
+        address=to_str,
+        amount=format_ethereum_amount(value, token, chain_id, is_nft),
+        br_code=ButtonRequestType.SignTx,
+    )
+
+
 def require_confirm_fee(
     ctx: Context,
     spending: int,
@@ -60,10 +93,10 @@ def require_confirm_fee(
     token: tokens.EthereumTokenInfo | None = None,
     from_address: str | None = None,
     to_address: str | None = None,
-    network: str | None = None,
     contract_addr: str | None = None,
     token_id: int | None = None,
     evm_chain_id: int | None = None,
+    raw_data: bytes | None = None,
 ) -> Awaitable[None]:
     fee_max = gas_price * gas_limit
     return confirm_total_ethereum(
@@ -73,13 +106,13 @@ def require_confirm_fee(
         format_ethereum_amount(fee_max, None, chain_id),
         from_address,
         to_address,
-        network,
         format_ethereum_amount(spending + fee_max, None, chain_id)
         if (token is None and contract_addr is None)
         else None,
         contract_addr,
         token_id,
         evm_chain_id=evm_chain_id,
+        raw_data=raw_data,
     )
 
 
@@ -93,10 +126,10 @@ async def require_confirm_eip1559_fee(
     token: tokens.EthereumTokenInfo | None = None,
     from_address: str | None = None,
     to_address: str | None = None,
-    network: str | None = None,
     contract_addr: str | None = None,
     token_id: int | None = None,
     evm_chain_id: int | None = None,
+    raw_data: bytes | None = None,
 ) -> None:
 
     fee_max = max_gas_fee * gas_limit
@@ -108,13 +141,13 @@ async def require_confirm_eip1559_fee(
         format_ethereum_amount(fee_max, None, chain_id),
         from_address,
         to_address,
-        network,
         format_ethereum_amount(spending + fee_max, None, chain_id)
         if (token is None and contract_addr is None)
         else None,
         contract_addr,
         token_id,
         evm_chain_id=evm_chain_id,
+        raw_data=raw_data,
     )
 
 
@@ -242,7 +275,7 @@ async def should_show_domain(ctx: Context, name: bytes, version: bytes) -> bool:
 async def should_show_struct(
     ctx: Context,
     description: str,
-    data_members: list[EthereumStructMember],
+    data_members: list[EthereumStructMember] | list[EthereumStructMemberOneKey],
     title: str = "Confirm struct",
     button_text: str = "Show full struct",
 ) -> bool:
@@ -323,6 +356,49 @@ async def confirm_typed_value(
         )
 
 
+async def confirm_typed_value_onekey(
+    ctx: Context,
+    name: str,
+    value: bytes,
+    parent_objects: list[str],
+    field: EthereumFieldTypeOneKey,
+    array_index: int | None = None,
+) -> None:
+    type_name = get_type_name_onekey(field)
+
+    if array_index is not None:
+        title = limit_str(".".join(parent_objects + [name]))
+        description = f"[{array_index}] ({type_name}):"
+    else:
+        title = limit_str(".".join(parent_objects))
+        description = f"{name} ({type_name}):"
+
+    data = decode_typed_data(value, type_name)
+
+    if field.data_type in (
+        EthereumDataTypeOneKey.ADDRESS,
+        EthereumDataTypeOneKey.BYTES,
+    ):
+        await confirm_blob(
+            ctx,
+            "confirm_typed_value",
+            title=title,
+            data=data,
+            description=description,
+            ask_pagination=True,
+            icon=None,
+        )
+    else:
+        await confirm_text(
+            ctx,
+            "confirm_typed_value",
+            title=title,
+            data=data,
+            description=description,
+            icon=None,
+        )
+
+
 def format_ethereum_amount(
     value: int,
     token: tokens.EthereumTokenInfo | None,
@@ -339,9 +415,9 @@ def format_ethereum_amount(
         decimals = 18
 
     # Don't want to display wei values for tokens with small decimal numbers
-    if decimals > 9 and value < 10 ** (decimals - 9):
-        suffix = "Wei " + suffix
-        decimals = 0
+    # if decimals > 9 and value < 10 ** (decimals - 9):
+    #     suffix = "Wei " + suffix
+    #     decimals = 0
 
     return f"{format_amount(value, decimals)} {suffix}"
 

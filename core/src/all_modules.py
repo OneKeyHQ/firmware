@@ -943,8 +943,6 @@ if not utils.BITCOIN_ONLY:
     import apps.ethereum.onekey.get_public_key
     apps.ethereum.onekey.keychain
     import apps.ethereum.onekey.keychain
-    apps.ethereum.onekey.layout
-    import apps.ethereum.onekey.layout
     apps.ethereum.onekey.sign_message
     import apps.ethereum.onekey.sign_message
     apps.ethereum.onekey.sign_tx

@@ -55,14 +55,20 @@ def get_address(client: "TrezorClient", address: str, hrp: str, show_display: bo
     type=click.File("r"),
     default="-",
     help="Transaction file in JSON format",
+    required=False,
 )
+@click.option("-r", "--raw", help="Raw transaction in hex format", required=False)
 @with_client
-def sign_tx(client: "TrezorClient", address: str, file: TextIO):
+def sign_tx(client: "TrezorClient", address: str, file: TextIO, raw: str):
     """Sign Cosmos transaction."""
     address_n = tools.parse_path(address)
     msg = json.load(file)
-    message_str = json.dumps(msg, separators=(",", ":"), sort_keys=True)
-    message_bytes = message_str.encode("utf-8")
+    if raw:
+        message_bytes = bytes.fromhex(raw)
+    else:
+        msg = json.load(file)
+        message_str = json.dumps(msg, separators=(",", ":"), sort_keys=True)
+        message_bytes = message_str.encode("utf-8")
     ret = cosmos.sign_tx(client, address_n, message_bytes)
     output = {
         "signature": "0x%s" % ret.signature.hex(),

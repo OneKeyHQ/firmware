@@ -11,8 +11,8 @@ from apps.common.signverify import decode_message
 
 from .. import networks
 from ..helpers import address_from_bytes, get_color_and_icon, get_display_network_name
+from ..layout import confirm_typed_hash, confirm_typed_hash_final
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
-from .layout import confirm_typed_hash, confirm_typed_hash_final
 from .sign_typed_data import keccak256
 
 if TYPE_CHECKING:

@@ -97,12 +97,12 @@ class ListItemWithLeadingCheckbox(lv.obj):
 
 
 class DisplayItem(lv.obj):
-    def __init__(self, parent, title, content):
+    def __init__(self, parent, title, content, bg_color=lv_colors.ONEKEY_GRAY_3):
         super().__init__(parent)
         self.set_size(464, lv.SIZE.CONTENT)
         self.add_style(
             StyleWrapper()
-            .bg_color(lv_colors.ONEKEY_GRAY_3)
+            .bg_color(bg_color)
             .bg_opa(lv.OPA.COVER)
             .min_height(88)
             .border_width(0)
@@ -112,6 +112,7 @@ class DisplayItem(lv.obj):
             0,
         )
         self.label_top = lv.label(self)
+        self.label_top.set_recolor(True)
         self.label_top.set_size(lv.pct(100), lv.SIZE.CONTENT)
         self.label_top.set_long_mode(lv.label.LONG.WRAP)
         self.label_top.set_text(title)
@@ -138,6 +139,15 @@ class DisplayItem(lv.obj):
             0,
         )
         self.label.align_to(self.label_top, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 4)
+
+
+class DisplayItemNoBgc(DisplayItem):
+    def __init__(self, parent, title, content):
+        super().__init__(parent, title, content, bg_color=lv_colors.BLACK)
+        self.add_style(
+            StyleWrapper().min_height(0).pad_hor(0),
+            0,
+        )
 
 
 class ImgGridItem(lv.img):

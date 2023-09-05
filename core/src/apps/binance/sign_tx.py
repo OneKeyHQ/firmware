@@ -51,7 +51,9 @@ async def sign_tx(
         await layout.require_confirm_cancel(ctx, msg)
     else:
         raise wire.ProcessError("input message unrecognized")
+    from trezor.ui.layouts import confirm_final
 
+    await confirm_final(ctx, "BNB")
     signature_bytes = generate_content_signature(msg_json.encode(), node.private_key())
 
     return BinanceSignedTx(signature=signature_bytes, public_key=node.public_key())

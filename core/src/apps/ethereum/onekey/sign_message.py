@@ -1,10 +1,8 @@
 from typing import TYPE_CHECKING
 
 from trezor.crypto.curve import secp256k1
-from trezor.crypto.hashlib import sha3_256
 from trezor.messages import EthereumMessageSignatureOneKey as EthereumMessageSignature
 from trezor.ui.layouts import confirm_signverify
-from trezor.utils import HashWriter
 
 from apps.common import paths
 from apps.common.helpers import validate_message
@@ -12,6 +10,7 @@ from apps.common.signverify import decode_message
 
 from .. import networks
 from ..helpers import address_from_bytes, get_color_and_icon, get_display_network_name
+from ..sign_message import message_digest
 from .keychain import PATTERNS_ADDRESS, with_keychain_from_path
 
 if TYPE_CHECKING:
@@ -19,15 +18,6 @@ if TYPE_CHECKING:
     from trezor.wire import Context
 
     from apps.common.keychain import Keychain
-
-
-def message_digest(message: bytes) -> bytes:
-    h = HashWriter(sha3_256(keccak=True))
-    signed_message_header = b"\x19Ethereum Signed Message:\n"
-    h.extend(signed_message_header)
-    h.extend(str(len(message)).encode())
-    h.extend(message)
-    return h.get_digest()
 
 
 @with_keychain_from_path(*PATTERNS_ADDRESS)

@@ -75,7 +75,7 @@ async def get_address(
             address=addr,
             address_qr="monero:" + addr,
             address_n=path,
-            network="XMR",
+            network="MONERO",
         )
 
     return MoneroAddress(address=addr.encode())

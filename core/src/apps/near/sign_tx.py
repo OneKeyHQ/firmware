@@ -41,5 +41,5 @@ async def sign_tx(
 
     hash = sha256(msg.raw_tx).digest()
     signature = ed25519.sign(node.private_key(), hash)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "NEAR")
     return NearSignedTx(signature=signature)

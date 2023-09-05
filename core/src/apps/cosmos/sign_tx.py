@@ -21,7 +21,7 @@ from apps.common import paths
 from apps.common.keychain import Keychain, auto_keychain
 
 from . import ICON, PRIMARY_COLOR
-from .networks import formatAmont, getChainHrp
+from .networks import formatAmont, getChainHrp, getChainName
 from .transaction import DelegateTxn, SendTxn, Transaction
 
 
@@ -108,7 +108,7 @@ async def sign_tx(
         await confirm_cosmos_memo(
             ctx, _(i18n_keys.TITLE__MEMO), _(i18n_keys.LIST_KEY__MEMO__COLON), tx.memo
         )
-    await confirm_final(ctx)
+    await confirm_final(ctx, getChainName(tx.chain_id) or "Cosmos")
 
     data_hash = sha256(msg.raw_tx).digest()
     signature = secp256k1.sign(privkey, data_hash, False)[1:]

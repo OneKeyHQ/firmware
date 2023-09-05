@@ -45,7 +45,7 @@ async def sign_tx(
         msg.payment.destination_tag,
     )
     signature = ecdsa_sign(node.private_key(), first_half_of_sha512(to_sign))
-    await confirm_final(ctx)
+    await confirm_final(ctx, "XRP")
     tx = serialize(msg, source_address, pubkey=node.public_key(), signature=signature)
     return RippleSignedTx(signature=signature, serialized_tx=tx)
 

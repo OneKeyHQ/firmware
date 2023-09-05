@@ -167,7 +167,7 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
     else:
         raise wire.DataError("Invalid transaction type")
 
-    await confirm_final(ctx)
+    await confirm_final(ctx, "TRON")
 
 
 def validate(msg: TronSignTx):

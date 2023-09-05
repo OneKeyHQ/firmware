@@ -223,5 +223,5 @@ async def sign_tx(
         await confirm_blind_sign_common(ctx, address, msg.raw_tx)
 
     signature = ed25519.sign(node.private_key(), msg.raw_tx)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "ALGO")
     return AlgorandSignedTx(signature=signature)

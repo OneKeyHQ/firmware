@@ -128,6 +128,8 @@ def ble_enabled() -> bool:
 
 
 def set_ble_status(enable: bool) -> None:
+    if ble_enabled() == enable:
+        return
     common.set(
         _NAMESPACE,
         _BLE_ENABLED,

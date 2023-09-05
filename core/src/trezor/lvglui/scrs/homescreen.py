@@ -62,7 +62,7 @@ class MainScreen(Screen):
             if self.bottom_tips:
                 self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
             if self.apps:
-                self.apps.tips.set_text(_(i18n_keys.CONTENT__SWIPE_DOWN_TO_CLOSE))
+                self.apps.refresh_text()
             return
         self.subtitle.set_style_text_color(lv_colors.WHITE, 0)
         if dev_state:
@@ -237,26 +237,54 @@ class MainScreen(Screen):
                 .bg_img_recolor_opa(lv.OPA._30)
                 .bg_img_recolor(lv_colors.BLACK)
             )
-
+            default_desc_style = (
+                StyleWrapper()
+                .width(170)
+                .text_font(font_PJSREG24)
+                .text_color(lv_colors.WHITE)
+                .text_align_center()
+            )
+            pressed_desc_style = StyleWrapper().text_opa(lv.OPA._70)
             self.settings = lv.imgbtn(self)
             self.settings.set_pos(78, 134)
             self.settings.set_style_bg_img_src("A:/res/settings.png", 0)
             self.settings.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.settings.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.settings_desc = lv.label(self)
+            self.settings_desc.set_text(_(i18n_keys.APP__SETTINGS))
+            self.settings_desc.add_style(default_desc_style, 0)
+            self.settings_desc.add_style(
+                pressed_desc_style, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+            self.settings_desc.align_to(self.settings, lv.ALIGN.OUT_BOTTOM_MID, 0, 4)
 
             self.guide = lv.imgbtn(self)
             self.guide.align_to(self.settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
             self.guide.set_style_bg_img_src("A:/res/guide.png", 0)
             self.guide.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.guide_desc = lv.label(self)
+            self.guide_desc.set_text(_(i18n_keys.APP__TIPS))
+            self.guide_desc.add_style(default_desc_style, 0)
+            self.guide_desc.add_style(
+                pressed_desc_style, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+            self.guide_desc.align_to(self.guide, lv.ALIGN.OUT_BOTTOM_MID, 0, 4)
 
             self.nft = lv.imgbtn(self)
             self.nft.set_style_bg_img_src("A:/res/app_nft.png", 0)
             self.nft.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.nft.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
             self.nft.align_to(self.settings, lv.ALIGN.OUT_BOTTOM_MID, 0, 65)
+            self.nft_desc = lv.label(self)
+            self.nft_desc.set_text(_(i18n_keys.APP__NFT_GALLERY))
+            self.nft_desc.add_style(default_desc_style, 0)
+            self.nft_desc.add_style(pressed_desc_style, lv.PART.MAIN | lv.STATE.PRESSED)
+            self.nft_desc.align_to(self.nft, lv.ALIGN.OUT_BOTTOM_MID, 0, 4)
 
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            self.add_event_cb(self.on_pressed, lv.EVENT.PRESSED, None)
+            self.add_event_cb(self.on_released, lv.EVENT.RELEASED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
             self.show_anim = Anim(
                 800, 0, self.set_pos, start_cb=self.anim_start_cb, delay=10
@@ -305,6 +333,32 @@ class MainScreen(Screen):
                 elif target == self.nft:
                     NftGallery(self.parent)
 
+        def on_pressed(self, event_obj):
+            code = event_obj.code
+            target = event_obj.get_target()
+            if code == lv.EVENT.PRESSED:
+                if utils.lcd_resume():
+                    return
+                if target == self.settings:
+                    self.settings_desc.add_state(lv.STATE.PRESSED)
+                elif target == self.guide:
+                    self.guide_desc.add_state(lv.STATE.PRESSED)
+                elif target == self.nft:
+                    self.nft_desc.add_state(lv.STATE.PRESSED)
+
+        def on_released(self, event_obj):
+            code = event_obj.code
+            target = event_obj.get_target()
+            if code == lv.EVENT.RELEASED:
+                if utils.lcd_resume():
+                    return
+                if target == self.settings:
+                    self.settings_desc.clear_state(lv.STATE.PRESSED)
+                elif target == self.guide:
+                    self.guide_desc.clear_state(lv.STATE.PRESSED)
+                elif target == self.nft:
+                    self.nft_desc.clear_state(lv.STATE.PRESSED)
+
         def on_slide_down(self, event_obj):
             code = event_obj.code
             if code == lv.EVENT.GESTURE:
@@ -313,6 +367,12 @@ class MainScreen(Screen):
                     # lv.indev_get_act().wait_release()
                     self.slide = True
                     self.dismiss()
+
+        def refresh_text(self):
+            self.tips.set_text(_(i18n_keys.CONTENT__SWIPE_DOWN_TO_CLOSE))
+            self.settings_desc.set_text(_(i18n_keys.APP__SETTINGS))
+            self.guide_desc.set_text(_(i18n_keys.APP__TIPS))
+            self.nft_desc.set_text(_(i18n_keys.APP__NFT_GALLERY))
 
 
 class NftGallery(Screen):
