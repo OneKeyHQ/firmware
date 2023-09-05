@@ -253,6 +253,7 @@ void fsm_msgRippleSignTx(RippleSignTx *msg);
 // sui
 void fsm_msgSuiGetAddress(const SuiGetAddress *msg);
 void fsm_msgSuiSignTx(const SuiSignTx *msg);
+void fsm_msgSuiSignMessage(SuiSignMessage *msg);
 
 // filecoin
 void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg);

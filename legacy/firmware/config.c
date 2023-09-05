@@ -118,6 +118,8 @@ static const uint32_t META_MAGIC_V10 = 0xFFFFFFFF;
 
 #define KEY_USB_LOCK (41 | APP | FLAG_PUBLIC_SHIFTED)                   // bool
 
+#define KEY_INPUT_DIRECTION (42 | APP | FLAG_PUBLIC_SHIFTED)            // bool
+
 #define KEY_DEBUG_LINK_PIN (255 | APP | FLAG_PUBLIC_SHIFTED)            // string(10)
 // clang-format on
 
@@ -133,6 +135,8 @@ _Static_assert(sizeof(config_language) == MAX_LANGUAGE_LEN,
                "config_language has wrong size");
 
 char config_uuid_str[2 * UUID_SIZE + 1] = {0};
+
+static secbool usb_lock = secfalse;
 
 /*
  Old storage layout:
@@ -1613,8 +1617,23 @@ void config_setDeriveCardano(bool on) { derive_cardano = on; }
 
 bool config_hasUsblock(void) { return sectrue == storage_has(KEY_USB_LOCK); }
 
-void config_setUsblock(bool lock) { config_set_bool(KEY_USB_LOCK, lock); }
+void config_setUsblock(bool lock) {
+  config_set_bool(KEY_USB_LOCK, lock);
+  usb_lock = lock;
+}
 
-bool config_getUsblock(bool *lock) {
+bool config_getUsblock(bool *lock, bool mode) {
+  if (!mode) {
+    *lock = usb_lock;
+    return true;
+  }
   return sectrue == config_get_bool(KEY_USB_LOCK, lock);
+}
+
+void config_setInputDirection(bool d) {
+  config_set_bool(KEY_INPUT_DIRECTION, d);
+}
+
+bool config_getInputDirection(bool *d) {
+  return sectrue == config_get_bool(KEY_INPUT_DIRECTION, d);
 }

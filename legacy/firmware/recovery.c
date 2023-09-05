@@ -795,8 +795,15 @@ static bool input_words(void) {
   char desc[64] = "";
   char title[13] = "";
   char last_letter = 0;
+  bool ret = false;
+  bool d = false;
+  config_getInputDirection(&d);
 
   memzero(words[word_index], sizeof(words[word_index]));
+
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 
 refresh_menu:
   memzero(desc, sizeof(desc));
@@ -809,6 +816,22 @@ refresh_menu:
                                                   letter_list);
   layoutInputWord(desc, prefix_len, words[word_index], letter_list + 2 * index);
   key = protectWaitKey(0, 0);
+#if !EMULATOR
+  if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+    if (isLongPress(KEY_UP)) {
+      if (!d)
+        key = KEY_UP;
+      else
+        key = KEY_DOWN;
+    } else if (isLongPress(KEY_DOWN)) {
+      if (!d)
+        key = KEY_DOWN;
+      else
+        key = KEY_UP;
+    }
+    delay_ms(75);
+  }
+#endif
   switch (key) {
     case KEY_DOWN:
       if (index < letter_count - 1)
@@ -836,7 +859,8 @@ refresh_menu:
         strcat(title, "_");
         select_complete_word(title, candidate_location, letter_count);
         if (word_index == word_count) {
-          return true;
+          ret = true;
+          goto __ret;
         } else {  // next word
           prefix_len = 0;
           index = 0;
@@ -871,7 +895,12 @@ refresh_menu:
     default:
       break;
   }
-  return false;
+
+__ret:
+#if !EMULATOR
+  enableLongPress(false);
+#endif
+  return ret;
 }
 
 bool recovery_on_device(void) {

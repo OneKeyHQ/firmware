@@ -154,6 +154,30 @@ void menu_set_usb_lock(int index) {
   config_setUsblock(index ? false : true);
 }
 
+void menu_set_input_direction(int index) {
+  uint8_t key = KEY_NULL;
+  if (!layoutInputDirection(index)) {
+    return;
+  }
+  if (index) {
+    layoutDialogCenterAdapterV2(
+        NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+        &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+        _("Do you want to reverse the\ninput direction?"));
+  } else {
+    layoutDialogCenterAdapterV2(
+        NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+        &bmp_bottom_right_confirm, NULL, NULL, NULL, NULL, NULL, NULL,
+        _("Do you want to restore the\ninput direction to default?"));
+  }
+  key = protectWaitKey(0, 1);
+  if (key != KEY_CONFIRM) {
+    return;
+  }
+
+  config_setInputDirection(index ? true : false);
+}
+
 static struct menu_item ble_set_menu_items[] = {
     {"Enable", NULL, true, menu_para_set_ble, NULL, true, NULL},
     {"Disable", NULL, true, menu_para_set_ble, NULL, true, NULL}};
@@ -233,6 +257,19 @@ static struct menu usb_lock_set_menu = {
     .previous = &settings_menu,
 };
 
+static struct menu_item input_direction_set_menu_items[] = {
+    {"Default", NULL, true, menu_set_input_direction, NULL, true, NULL},
+    {"Reverse", NULL, true, menu_set_input_direction, NULL, true, NULL}};
+
+static struct menu input_direction_set_menu = {
+    .start = 0,
+    .current = 0,
+    .counts = COUNT_OF(input_direction_set_menu_items),
+    .title = "Input Direction",
+    .items = input_direction_set_menu_items,
+    .previous = &settings_menu,
+};
+
 static struct menu_item passphrase_set_menu_items[] = {
     {"Enable", NULL, true, menu_set_passphrase, NULL, true, NULL},
     {"Disable", NULL, true, menu_set_passphrase, NULL, true, NULL}};
@@ -256,7 +293,9 @@ static struct menu_item settings_menu_items[] = {
     {"Shutdown", NULL, false, .sub_menu = &shutdown_set_menu,
      menu_para_shutdown, false, menu_para_shutdown_index},
     {"USB Lock", NULL, false, .sub_menu = &usb_lock_set_menu,
-     menu_para_usb_lock, false, menu_para_usb_lock_index}};
+     menu_para_usb_lock, false, menu_para_usb_lock_index},
+    {"Input Direction", NULL, false, .sub_menu = &input_direction_set_menu,
+     menu_para_input_direction, false, menu_para_input_direction_index}};
 
 static struct menu settings_menu = {
     .start = 0,

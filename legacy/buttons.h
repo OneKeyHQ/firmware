@@ -41,21 +41,33 @@ extern uint8_t change_ble_sta_flag;
 #endif
 extern struct buttonState button;
 
+enum {
+  KEY_UP_OR_DOWN,
+  KEY_UP,
+  KEY_DOWN,
+};
+
 uint16_t buttonRead(void);
 void buttonUpdate(void);
 bool hasbutton(void);
 void buttonsIrqInit(void);
 void buttonsTimer(void);
+void longPressTimer(void);
 bool checkButtonOrTimeout(uint8_t btn, TimerOut type);
 bool waitButtonResponse(uint8_t btn, uint32_t time_out);
 uint8_t keyScan(void);
 uint8_t waitKey(uint32_t time_out, uint8_t mode);
+void enableLongPress(bool on);
+bool getLongPressStatus(void);
+bool isLongPress(uint8_t key);
 
 #define KEY_NULL 0
 #define KEY_UP 'U'
 #define KEY_DOWN 'D'
 #define KEY_CONFIRM 'O'
 #define KEY_CANCEL 'C'
+#define KEY_UP_LONG 'V'
+#define KEY_DOWN_LONG 'E'
 
 #ifndef BTN_PORT
 #define BTN_PORT GPIOC

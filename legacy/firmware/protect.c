@@ -807,6 +807,11 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
         if (key == KEY_CONFIRM || key == KEY_CANCEL) break;
       }
     }
+#if !EMULATOR
+    if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+      break;
+    }
+#endif
     if (device_sleep_state == SLEEP_REENTER) {
       break;
     }
@@ -844,8 +849,14 @@ const char *protectInputPin(const char *text, uint8_t min_pin_len,
   int index = 0, max_index = 0;
   bool update = true, first_num = false;
   static char pin[10] = "";
+  bool d = false;
+  config_getInputDirection(&d);
 
   memzero(pin, sizeof(pin));
+
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 
 refresh_menu:
   if (update) {
@@ -871,6 +882,44 @@ refresh_menu:
 
   layoutInputPin(counter, text, index, cancel_allowed);
   key = protectWaitKey(0, 0);
+#if !EMULATOR
+  if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+    if (isLongPress(KEY_UP)) {  // up
+      if (!d) {                 // default direction
+        if (index > 1)
+          index--;
+        else
+          index = max_index;
+      } else {
+        if (index < max_index)
+          index++;
+        else
+          index = 1;
+      }
+    } else if (isLongPress(KEY_DOWN)) {  // down
+      if (!d) {
+        if (index < max_index)
+          index++;
+        else
+          index = 1;
+      } else {
+        if (index > 1)
+          index--;
+        else
+          index = max_index;
+      }
+    }
+    delay_ms(75);
+    goto refresh_menu;
+  }
+#endif
+  if (d) {  // Reverse direction
+    if (key == KEY_UP) {
+      key = KEY_DOWN;
+    } else if (key == KEY_DOWN) {
+      key = KEY_UP;
+    }
+  }
   switch (key) {
     case KEY_UP:
       if (index > 1)
@@ -887,10 +936,18 @@ refresh_menu:
     case KEY_CONFIRM:
       (void)pin;
       if (index == 10) {
+#if !EMULATOR
+        enableLongPress(false);
+#endif
         return pin;
       } else {
         pin[counter++] = index + '0';
-        if (counter == max_pin_len) return pin;
+        if (counter == max_pin_len) {
+#if !EMULATOR
+          enableLongPress(false);
+#endif
+          return pin;
+        }
         update = true;
         goto refresh_menu;
       }
@@ -905,6 +962,11 @@ refresh_menu:
     default:
       break;
   }
+
+#if !EMULATOR
+  enableLongPress(false);
+#endif
+
   return NULL;
 }
 
@@ -1271,12 +1333,35 @@ bool inputPassphraseOnDevice(char *passphrase) {
   uint8_t counter = 0, index = 0, symbol_index = 0;
   static uint8_t symbol_table[33] = " \'\",./_\?!:;&*$#=+-()[]{}<>@\\^`%|~";
   static uint8_t last_symbol = 0;
+  bool ret = false;
+  bool d = false;
+  config_getInputDirection(&d);
+
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 
 input_passphrase:
   layoutInputPassphrase(_("Enter Passphrase"), counter, words, index,
                         input_type);
 wait_key:
   key = protectWaitKey(0, 0);
+#if !EMULATOR
+  if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+    if (isLongPress(KEY_UP)) {
+      if (!d)
+        key = KEY_UP;
+      else
+        key = KEY_DOWN;
+    } else if (isLongPress(KEY_DOWN)) {
+      if (!d)
+        key = KEY_DOWN;
+      else
+        key = KEY_UP;
+    }
+    delay_ms(75);
+  }
+#endif
   if (MENU_INPUT_PASSPHRASE == menu_status) {
     if (index == 0) {
       if (key == KEY_CONFIRM) {
@@ -1402,19 +1487,22 @@ wait_key:
             index = symbol_table[symbol_index];
           }
         } else {
-          return false;
+          ret = false;
+          goto __ret;
         }
         goto input_passphrase;
       case KEY_CONFIRM:
         if (index == INPUT_CONFIRM) {
           strlcpy(passphrase, words, sizeof(words));
-          return true;
+          ret = true;
+          goto __ret;
         }
         if (counter < MAX_PASSPHRASE_LEN) {
           words[counter++] = index;
           if (counter == MAX_PASSPHRASE_LEN) {
             strlcpy(passphrase, words, sizeof(words));
-            return true;
+            ret = true;
+            goto __ret;
           }
         }
         if (INPUT_LOWERCASE == input_type) {
@@ -1460,7 +1548,12 @@ wait_key:
         break;
     }
   }
-  return false;
+
+__ret:
+#if !EMULATOR
+  enableLongPress(false);
+#endif
+  return ret;
 }
 
 bool protectPassphraseOnDevice(char *passphrase) {

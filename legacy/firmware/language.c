@@ -57,7 +57,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Acitve", "激活"},
     // fsm_msg_coin.h fsm_msg_lisk.h
-    {"Address:", "地址"},
+    {"Address:", "地址:"},
     //
     {"Advance CFX Sign", "CFX高级签名"},
     //
@@ -250,7 +250,7 @@ const char *languages[][2] = {
     {"Continue only if you", "继续"},
     // layout2.c
     {"Continue?", "继续"},
-    {"Contract:", "合约:"},
+    {"Contract Address:", "合约地址:"},
     // recovery.c
     {"Correct!", "没问题!"},
     // layout2.c
@@ -274,9 +274,10 @@ const char *languages[][2] = {
     {"Decrypted message", "解密消息"},
     // layout2.c
     {"Decrypted signed message", "解密签名消息"},
+    // menu_list.c
+    {"Default", "默认"},
     // cosmos.c
     {"Delegate", "委托"},
-    {"Delegate Resource Contract", "资源委托合约"},
     {"Delegator", "代理方"},
     {"Deposit", "存款"},
     {"Deposit Amount", "存款金额"},
@@ -285,6 +286,8 @@ const char *languages[][2] = {
     {"Description", "描述"},
     {"Destination Address", "目标地址"},
     {"Destination Coins", "来源金额"},
+    // layout2.c
+    {"Details", "交易详情"},
     // menu_list.c
     {"Device Info", "设备信息"},
     // reset.c reset.c
@@ -330,6 +333,11 @@ const char *languages[][2] = {
     {"Do you want to enable\npassphrase protection?",
      "要启用 passphrase 加密吗?"},
     {"Do you want to restart", "确定要重启设备并进入更新"},
+    // menu_list.c
+    {"Do you want to restore the\ninput direction to default?",
+     "确定要将输入方向恢复为默\n认值吗?"},
+    {"Do you want to reverse the\ninput direction?", "确定要反转输入方向吗?"},
+    //
     {"Do you want to set", "请确认设置"},
     // layout2.c
     {"Do you want to sign in?", "请确认登录"},
@@ -420,8 +428,6 @@ const char *languages[][2] = {
     {"For more information", "了解更多"},
     // layout2.c
     {"Format:", "格式:"},
-    // tron.c
-    {"Freeze Balance V2 Contract", "冻结余额 V2 合约"},
     // layout2.c
     {"From", "发送方"},
     // layout2.c
@@ -453,6 +459,8 @@ const char *languages[][2] = {
     {"Incorrect PIN", "PIN码错误"},
     // reset.c
     {"Incorrect word! check your", "单词不正确! 请再次检查您"},
+    // menu_list.c
+    {"Input Direction", "输入方向"},
     // protect.c
     {"Invalid Recovery Phrase. \nCheck your backup and try again.",
      "无效助记词.\n请检查你的备份后重试."},
@@ -487,8 +495,8 @@ const char *languages[][2] = {
     {"Make sure you still have a backup of current wallet.",
      "继续该操作前, 请确保你仍持有当前钱包的助记词."},
     // layout2.c
-    {"Maximum Fee Per Gas:", "交易费上限单价:"},
     {"Maximum Fee", "交易费上限"},
+    {"Maximum Fee Per Gas:", "每份燃料的交易费上限:"},
     {"Maximum Fee:", "交易费上限:"},
     // cosmos.c
     {"Memo", "备注"},
@@ -500,6 +508,8 @@ const char *languages[][2] = {
     {"Mnemonic", "助记词"},
     // cosmos.c
     {"Multi Send", "多签"},
+    // coin.h
+    {"Multisig Address", "多签地址"},
     // signing.c signing.c
     {"Multisig field provided but not expected.", ""},
     // layout2.c
@@ -592,7 +602,7 @@ const char *languages[][2] = {
     //
     {"Prev", "后退"},
     // ethereum.c
-    {"Priority fee per gas:", "每份燃料消耗的优先费用:"},
+    {"Priority Fee Per Gas:", "每份燃料消耗的矿工小费:"},
     // storage.c
     {"Processing...", "处理中..."},
     // cosmos.c
@@ -654,6 +664,8 @@ const char *languages[][2] = {
      "输入助记词来恢复您曾使用\n过的钱包."},
     //
     {"Retry", "重试"},
+    // menu_list.c
+    {"Reverse", "反转"},
     // recovery.c
     {"Review Wordlist", "再次检查单词"},
     // layout2.c
@@ -768,6 +780,7 @@ const char *languages[][2] = {
     // layout2.c
     {"Token Amount:", "代币金额:"},
     {"Token Contract:", "Token 地址:"},
+    {"Token Transfer", "代币转账"},
     // ethereum.c
     {"Total Amount", "总金额"},
     {"Total Amount:", "总金额:"},
@@ -797,9 +810,6 @@ const char *languages[][2] = {
     {"U2F Register", "U2F 注册"},
     // menu_list.c
     {"USB Lock", "USB 锁"},
-    // tron.c
-    {"UnDelegate Resource Contract", "取消资源委托合约"},
-    {"UnFreeze Balance V2 Contract", "解冻余额 V2 合约"},
     // fsm_msg_ethereum.h
     {"Unable to show EIP-712 data. Sign at your own risk.",
      "无法显示 EIP-712 数据.\n请谨慎甄别项目方后决定是否签名, 自负风险"},
@@ -807,6 +817,8 @@ const char *languages[][2] = {
     {"Undelegate", "取消委托"},
     // starcoin.c
     {"Unknown", "未知"},
+    // layout2.c
+    {"Unknown EVM Chain\nthe chain ID is", "未知的 EVM 网络\n链 ID 为"},
     // layout2.c
     {"Unknown Mosaic", ""},
     // tron_ui.c
@@ -855,9 +867,6 @@ const char *languages[][2] = {
     {"Warning!", "警告"},
     // layout2.c
     {"Welcome to OneKey!", "感谢使用 OneKey!"},
-    // tron.c
-    {"Withdraw Balance Contract", "余额提现合约"},
-    {"Withdraw Expire Unfreeze Contract", "撤销到期解冻合约"},
     // cosmos.c
     {"Withdraw Reward", "提取奖励"},
     {"Withdraw Validator Commission", "提取验证者佣金"},
@@ -913,6 +922,8 @@ const char *languages[][2] = {
     {"change the home screen", "修改屏保"},
     // signing.c
     {"changed", "修改"},
+    // layout2.c
+    {"cosigner", "共同签名者"},
     // reset.c
     {"create a new wallet?", "创建新的钱包?"},
     // tron_ui.c
@@ -958,6 +969,7 @@ const char *languages[][2] = {
     // ethereum.c ethereum.c
     {"message", "消息"},
     // layout2.c
+    {"mine", "我的"},
     {"minute", "分钟"},
     //
     {"minutes", "分钟"},

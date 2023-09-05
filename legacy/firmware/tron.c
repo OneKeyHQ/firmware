@@ -687,10 +687,10 @@ refresh_menu:
     layoutHeader(tx_msg[0]);
     oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
     if (msg->contract.has_freeze_balance_v2_contract) {
-      oledDrawStringAdapter(0, y + 10, _("Freeze Balance V2 Contract"),
+      oledDrawStringAdapter(0, y + 10, "Freeze Balance V2 Contract",
                             FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y + 10, _("UnFreeze Balance V2 Contract"),
+      oledDrawStringAdapter(0, y + 10, "UnFreeze Balance V2 Contract",
                             FONT_STANDARD);
     }
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
@@ -789,10 +789,10 @@ refresh_menu:
     layoutHeader(tx_msg[0]);
     oledDrawStringAdapter(0, y, _("Type:"), FONT_STANDARD);
     if (msg->contract.has_delegate_resource_contract) {
-      oledDrawStringAdapter(0, y + 10, _("Delegate Resource Contract"),
+      oledDrawStringAdapter(0, y + 10, "Delegate Resource Contract",
                             FONT_STANDARD);
     } else {
-      oledDrawStringAdapter(0, y + 10, _("UnDelegate Resource Contract"),
+      oledDrawStringAdapter(0, y + 10, "UnDelegate Resource Contract",
                             FONT_STANDARD);
     }
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
@@ -946,7 +946,7 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
   } else if (msg->contract.has_withdraw_balance_contract) {
     layoutDialogAdapterEx(tx_msg[0], &bmp_bottom_left_close, NULL,
                           &bmp_bottom_right_arrow, NULL, NULL, _("Type:"),
-                          _("Withdraw Balance Contract"), NULL, NULL);
+                          "Withdraw Balance Contract", NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;
@@ -967,7 +967,7 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
   } else if (msg->contract.has_withdraw_expire_unfreeze_contract) {
     layoutDialogAdapterEx(tx_msg[0], &bmp_bottom_left_close, NULL,
                           &bmp_bottom_right_arrow, NULL, NULL, _("Type:"),
-                          _("Withdraw Expire Unfreeze Contract"), NULL, NULL);
+                          "Withdraw Expire Unfreeze Contract", NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;

@@ -295,6 +295,7 @@ void u2fhid_read_start(const U2FHID_FRAME *f) {
                                         NULL, NULL, NULL, NULL,
                                         _("Authenticate U2F Security\nKey?"));
           }
+          delay_ms(100);
           next_page = false;
         } else {
           last_req_state++;
@@ -303,6 +304,7 @@ void u2fhid_read_start(const U2FHID_FRAME *f) {
       // if (button.NoUp && (last_req_state == AUTH || last_req_state == REG) &&
       //     false == next_page) {
       //   send_u2fhid_error(cid, ERR_MSG_TIMEOUT);
+      //   last_req_state = AUTH;
       //   usbTiny(0);
       //   layoutHome();
       //   return;
