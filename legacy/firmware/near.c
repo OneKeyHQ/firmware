@@ -18,6 +18,7 @@
  */
 
 #include "near.h"
+#include <stdio.h>
 #include "config.h"
 #include "fsm.h"
 #include "gettext.h"
@@ -338,49 +339,10 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
       return false;
   }
   if (at_transfer == action_type) {
-    char _to1[70] = "to ____________";
-    char _amount_str[32] = {0};
-    int i, receiver_len = strlen(receiver);
-    bool has_dot = false;
-    int len = strlen(amount);
-    // retain 5 decimal places
-    for (i = 0; i < len; i++) {
-      _amount_str[i] = amount[i];
-      if (amount[i] == '.') {
-        has_dot = true;
-        if ((len - i) >= 6) {
-          memcpy(_amount_str + i, amount + i, 6);
-          i += 6;
-        } else {
-          memcpy(_amount_str + i, amount + i, len - i);
-          i += len - i;
-        }
-        break;
-      }
-    }
-    len = strlen(_amount_str);
-    if (0 == strncmp(_amount_str, "0.00000", 7)) {
-      memcpy(_amount_str, "< 0.00001 NEAR", 15);
-    } else if (has_dot) {  // rstrip("0") & rstrip(".")
-      for (i = len - 1; i >= 0; i--) {
-        if (_amount_str[i] == '0') {
-          _amount_str[i] = 0;
-        } else if (_amount_str[i] == '.') {
-          _amount_str[i] = 0;
-          break;
-        } else {
-          break;
-        }
-      }
-      memcpy(_amount_str + strlen(_amount_str), " NEAR", 6);
-    } else {
-      memcpy(_amount_str + len, " NEAR", 6);
-    }
-    memcpy(_to1 + 3, receiver, receiver_len);
-    memcpy(_to1 + 3 + receiver_len, "?", 2);
-
+    char _amount_str[64 + 5] = {0};
+    snprintf(_amount_str, 69, "%s NEAR", amount);
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Send"), _amount_str, _to1, NULL, NULL, NULL);
+                      _("Send"), _amount_str, receiver, NULL, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;

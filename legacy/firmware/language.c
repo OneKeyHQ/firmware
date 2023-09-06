@@ -14,6 +14,8 @@ const char *languages[][2] = {
     {" login to:", "登录到"},
     //
     {" to", "到"},
+    // layout2.c
+    {"(Recommended.)", "(推荐开启.)"},
     // recovery.c
     {"##th", "第##个"},
     {"2 wrong attemps,\nyou have 8 more\nchance",
@@ -75,10 +77,10 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"All data will be lost.", "所有数据将丢失"},
     // u2f.c
-    {"Already registered.", "已注册"},
+    {"Already registered.", "已注册."},
     {"Amount", "金额"},
     // u2f.c
-    {"Another U2F device", "另外的U2F设备"},
+    {"Another U2F device", "另一个 U2F 设备"},
     //
     {"Are you sure to reset?", "确定要重置吗?"},
     //
@@ -621,7 +623,7 @@ const char *languages[][2] = {
     // signing.c
     {"Not in Signing mode", ""},
     // u2f.c
-    {"Not registered.", ""},
+    {"Not registered.", "未注册."},
     // algorand.c
     {"Note", "备注"},
     // layout2.c u2f.c u2f.c fsm_msg_common.h
@@ -907,7 +909,7 @@ const char *languages[][2] = {
     // protect.c
     {"The wipe code must be different from your PIN.", ""},
     // u2f.c
-    {"This U2F device is", ""},
+    {"This U2F device is", "此 U2F 设备"},
     //
     {"This cannot be undo!", "本操作不可撤销!"},
     // protect.c fsm_msg_common.h
@@ -1090,6 +1092,7 @@ const char *languages[][2] = {
     {"[Address]", "[地址]"},
     {"[QR Code]", "[二维码]"},
     // layout2.c
+    {"actions which might", "具有潜在风险的"},
     {"active device", "激活设备"},
     // fsm_msg_common.h
     {"addres is existed", ""},
@@ -1102,7 +1105,7 @@ const char *languages[][2] = {
     // recovery.c reset.c
     {"agree to trezor.io/tos", " "},
     // u2f.c
-    {"already registered", "已注册"},
+    {"already registered", "已在该应用程序"},
     // recovery.c
     {"and MATCHES", ""},
     // layout2.c
@@ -1121,6 +1124,9 @@ const char *languages[][2] = {
     {"backup of seed phrases", "助记词的物理备份"},
     // fsm_msg_common.h
     {"backup only", "仅备份"},
+    // layout2.c
+    {"be temporarily able", "暂时允许"},
+    {"be unsafe?", "操作吗?"},
     //
     {"blockheight:", "区块高度:"},
     // bl_check.c
@@ -1147,6 +1153,8 @@ const char *languages[][2] = {
     {"change-outputs.", ""},
     // signing.c
     {"changed", "修改"},
+    // layout2.c
+    {"checks?", "检查吗?"},
     // bl_check.c bl_check.c
     {"contact our support.", ""},
     // reset.c
@@ -1165,6 +1173,8 @@ const char *languages[][2] = {
     {"doing!", "操作"},
     // fsm_msg_common.h
     {"enable passphrase", "使用密语"},
+    // layout2.c
+    {"enforce strict safety", "执行严格的安全"},
     // lisk.c
     {"fee:", "手续费"},
     // ethereum.c
@@ -1189,7 +1199,7 @@ const char *languages[][2] = {
     // layout2.c
     {"in the same mosaic", ""},
     // u2f.c u2f.c
-    {"in this application.", ""},
+    {"in this application.", "中注册."},
     // layout2.c
     {"including fee:", "包含交易费:"},
     // fsm_msg_common.h
@@ -1282,6 +1292,9 @@ const char *languages[][2] = {
     {"times", "次"},
     //
     {"timestamp:", "时间戳:"},
+    // layout2.c
+    {"to approve some", "执行一些"},
+    //
     {"to back", "键返回"},
     {"to cancel", "键取消/返回"},
     {"to confirm", "键确认"},
@@ -1308,10 +1321,10 @@ const char *languages[][2] = {
     //
     {"transaction is set to", "被设定为"},
     // layout2.c layout2.c
-    {"transaction?", "交易?"},
+    {"transaction?", "交易吗?"},
     {"user: ", "用户:"},
     // u2f.c
-    {"was used to register", "注册"},
+    {"was used to register", "已在该应用程序"},
     // fsm_msg_common.h
     {"wipe code?", "擦除PIN码"},
     // fsm_msg_common.h

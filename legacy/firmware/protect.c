@@ -1400,6 +1400,11 @@ wait_key:
         goto wait_key;
       }
     }
+    if (key == KEY_UP) {
+      key = KEY_DOWN;
+    } else if (key == KEY_DOWN) {
+      key = KEY_UP;
+    }
     switch (key) {
       case KEY_UP:
         if (index == 0) {
