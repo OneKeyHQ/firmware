@@ -632,5 +632,8 @@ translations = [
     "Serrure:",
     "détails de la transaction",
     "Voir les détails",
+    "Mettre à jour la transaction",
+    "Finaliser la transaction",
+    "Transaction de fusion",
 ]
 # fmt: on

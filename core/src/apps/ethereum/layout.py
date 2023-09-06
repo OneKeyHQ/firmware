@@ -101,7 +101,9 @@ def require_confirm_fee(
     fee_max = gas_price * gas_limit
     return confirm_total_ethereum(
         ctx,
-        format_ethereum_amount(spending, token, chain_id),
+        format_ethereum_amount(
+            spending, token, chain_id, is_nft=True if token_id else False
+        ),
         format_ethereum_amount(gas_price, None, chain_id),
         format_ethereum_amount(fee_max, None, chain_id),
         from_address,
@@ -135,7 +137,9 @@ async def require_confirm_eip1559_fee(
     fee_max = max_gas_fee * gas_limit
     await confirm_total_ethereum_eip1559(
         ctx,
-        format_ethereum_amount(spending, token, chain_id),
+        format_ethereum_amount(
+            spending, token, chain_id, is_nft=True if token_id else False
+        ),
         format_ethereum_amount(max_priority_fee, None, chain_id),
         format_ethereum_amount(max_gas_fee, None, chain_id),
         format_ethereum_amount(fee_max, None, chain_id),

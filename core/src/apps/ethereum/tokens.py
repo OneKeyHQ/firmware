@@ -37,7 +37,7 @@ def token_by_chain_address(chain_id: int, address: bytes) -> EthereumTokenInfo |
                 chain_id=chain_id,
                 name=name,
             )
-    return None
+    return UNKNOWN_TOKEN
 
 
 def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:

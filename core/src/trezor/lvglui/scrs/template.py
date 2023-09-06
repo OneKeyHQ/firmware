@@ -311,6 +311,22 @@ class TransactionDetailsETH(FullSizeWindow):
                 _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
                 str(evm_chain_id),
             )
+
+        self.item1 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__AMOUNT__COLON),
+            amount,
+        )
+        self.item4 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__TO__COLON),
+            address_to,
+        )
+        self.item5 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__FROM__COLON),
+            address_from,
+        )
         if contract_addr:
             self.item0 = DisplayItemNoBgc(
                 self.container,
@@ -322,21 +338,10 @@ class TransactionDetailsETH(FullSizeWindow):
                 _(i18n_keys.LIST_KEY__TOKEN_ID__COLON),
                 token_id,
             )
-        else:
-            self.item1 = DisplayItemNoBgc(
-                self.container,
-                _(i18n_keys.LIST_KEY__AMOUNT__COLON),
-                amount,
-            )
-        self.item4 = DisplayItemNoBgc(
+        self.item3 = DisplayItemNoBgc(
             self.container,
-            _(i18n_keys.LIST_KEY__TO__COLON),
-            address_to,
-        )
-        self.item5 = DisplayItemNoBgc(
-            self.container,
-            _(i18n_keys.LIST_KEY__FROM__COLON),
-            address_from,
+            _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON),
+            fee_max,
         )
         if not is_eip1559:
             self.item2 = DisplayItemNoBgc(
@@ -355,16 +360,10 @@ class TransactionDetailsETH(FullSizeWindow):
                 _(i18n_keys.LIST_KEY__MAXIMUM_FEE_PER_GAS__COLON),
                 max_fee_per_gas,
             )
-        self.item3 = DisplayItemNoBgc(
-            self.container,
-            _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON),
-            fee_max,
-        )
-
         if total_amount is None:
-            if not contract_addr:
+            if not contract_addr:  # token transfer
                 total_amount = f"{amount}\n{fee_max}"
-            else:
+            else:  # nft transfer
                 total_amount = f"{fee_max}"
         self.item6 = DisplayItemNoBgc(
             self.container,
