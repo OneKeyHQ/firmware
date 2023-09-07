@@ -325,6 +325,8 @@ if not utils.BITCOIN_ONLY:
     SuiAddress = 11101
     SuiSignTx = 11102
     SuiSignedTx = 11103
+    SuiSignMessage = 11104
+    SuiMessageSignature = 11105
     FilecoinGetAddress = 11200
     FilecoinAddress = 11201
     FilecoinSignTx = 11202
@@ -335,6 +337,12 @@ if not utils.BITCOIN_ONLY:
     KaspaSignedTx = 11303
     KaspaTxInputRequest = 11304
     KaspaTxInputAck = 11305
+    NexaGetAddress = 11400
+    NexaAddress = 11401
+    NexaSignTx = 11402
+    NexaSignedTx = 11403
+    NexaTxInputRequest = 11404
+    NexaTxInputAck = 11405
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
