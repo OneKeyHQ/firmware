@@ -129,7 +129,7 @@ __Z_INLINE parser_error_t parser_formatAmountItem(uint16_t amountToken,
 
   if (numElements == 0) {
     *pageCount = 1;
-    snprintf(outVal, outValLen, _("none"));
+    snprintf(outVal, outValLen, "%s", _("none"));
     return parser_ok;
   }
 
@@ -264,7 +264,7 @@ __Z_INLINE parser_error_t parser_formatAmount(uint16_t amountToken,
 
   if (totalPages == 0) {
     *pageCount = 1;
-    snprintf(outVal, outValLen, _("none"));
+    snprintf(outVal, outValLen, "%s", _("none"));
     return parser_ok;
   }
 
