@@ -3901,8 +3901,7 @@ refresh_menu:
       y += font->pixel + 4;
       oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, BUILD_ID + strlen(BUILD_ID) - 7,
-                            FONT_STANDARD);
+      oledDrawStringAdapter(0, y, _(BUILD_ID), FONT_STANDARD);
       break;
     case 4:
       oledDrawStringAdapter(0, y, _("DEVICE ID:"), FONT_STANDARD);
