@@ -1493,14 +1493,14 @@ wait_key:
         goto input_passphrase;
       case KEY_CONFIRM:
         if (index == INPUT_CONFIRM) {
-          strlcpy(passphrase, words, sizeof(words));
+          strlcpy(passphrase, words, MAX_PASSPHRASE_LEN + 1);
           ret = true;
           goto __ret;
         }
         if (counter < MAX_PASSPHRASE_LEN) {
           words[counter++] = index;
           if (counter == MAX_PASSPHRASE_LEN) {
-            strlcpy(passphrase, words, sizeof(words));
+            strlcpy(passphrase, words, MAX_PASSPHRASE_LEN + 1);
             ret = true;
             goto __ret;
           }
