@@ -20,13 +20,14 @@ void layoutTronConfirmTx(const char *to_str, const uint64_t value,
     tron_format_token_amount(&val, token, amount, sizeof(amount));
   }
 
-  char _to1[] = "to   ________";
+  char _to1[30] = {0};
   char _to2[] = "_____________";
   char _to3[] = "_____________?";
 
+  snprintf(_to1, 30, "%s   ________", _("to"));
   int to_len = strlen(to_str);
   if (to_len) {
-    memcpy(_to1 + 5, to_str, 8);
+    memcpy(_to1 + strlen(_("to")) + 3, to_str, 8);
     memcpy(_to2, to_str + 8, 13);
     memcpy(_to3, to_str + 21, 13);
   } else {

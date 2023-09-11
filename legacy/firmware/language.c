@@ -1293,6 +1293,7 @@ const char *languages[][2] = {
     //
     {"timestamp:", "时间戳:"},
     // layout2.c
+    {"to", "到 "},
     {"to approve some", "执行一些"},
     //
     {"to back", "键返回"},

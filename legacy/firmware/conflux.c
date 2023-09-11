@@ -404,18 +404,19 @@ static void layoutConfluxConfirmTx(uint8_t *to, uint32_t to_len,
     confluxFormatAmount(&val, token, amount, sizeof(amount));
   }
 
-  char _to1[30] = "to ____________";
+  char _to1[30] = {0};
   char _to2[30] = "______________";
   char _to3[] = "________________?";
 
+  snprintf(_to1, 30, "%s ____________", _("to"));
   if (to_len) {
     char to_str[52] = {0};
     get_base32_encode_address(to, to_str, sizeof(to_str), chain_ids, true);
     if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-      memcpy(_to1 + 3, to_str, 20);
+      memcpy(_to1 + strlen(_("to")) + 1, to_str, 20);
       memcpy(_to2, to_str + 20, strlen(to_str) - 20);
     } else {
-      memcpy(_to1 + 3, to_str, 16);
+      memcpy(_to1 + strlen(_("to")) + 1, to_str, 16);
       memcpy(_to2, to_str + 16, strlen(to_str) - 32);
       memcpy(_to3, to_str + (strlen(to_str) - 16), 16);
     }

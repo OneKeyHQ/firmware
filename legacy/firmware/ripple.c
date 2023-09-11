@@ -281,11 +281,12 @@ void layoutRippleConfirmTx(const char *to_str, const uint64_t value) {
   char amount[60];
   ripple_format_amount(value, amount, sizeof(amount));
 
-  char _to1[] = "to   ________";
+  char _to1[16] = {0};
   char _to2[] = "_____________";
   char _to3[] = "_____________?";
 
-  memcpy(_to1 + 5, to_str, 8);
+  snprintf(_to1, 16, "%s   ________", _("to"));
+  memcpy(_to1 + strlen(_("to")) + 3, to_str, 8);
   memcpy(_to2, to_str + 8, 13);
   memcpy(_to3, to_str + 21, 13);
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
