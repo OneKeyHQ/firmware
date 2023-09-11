@@ -342,7 +342,7 @@ bool near_sign_tx(const NearSignTx *msg, const HDNode *node,
     char _amount_str[64 + 5] = {0};
     snprintf(_amount_str, 69, "%s NEAR", amount);
     layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                      _("Send"), _amount_str, receiver, NULL, NULL, NULL);
+                      _("Send"), _amount_str, _("to"), receiver, NULL, NULL);
     if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
       return false;

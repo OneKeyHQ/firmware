@@ -20,6 +20,7 @@
  */
 
 #include "ethereum.h"
+#include <stdio.h>
 #include "address.h"
 #include "crypto.h"
 #include "ecdsa.h"
@@ -351,10 +352,11 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
     ethereumFormatAmount(&val, token, amount, sizeof(amount));
   }
 
-  char _to1[30] = "to ____________";
+  char _to1[30] = {0};
   char _to2[30] = "_______________";
   char _to3[] = "_______________?";
 
+  snprintf(_to1, 30, "%s ____________", _("to"));
   if (to_len) {
     char to_str[43] = {0};
 
@@ -371,10 +373,10 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
 
     ethereum_address_checksum(to, to_str, rskip60, chain_id);
     if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
-      memcpy(_to1 + 3, to_str, 12);
+      memcpy(_to1 + strlen(_("to")) + 1, to_str, 12);
       memcpy(_to2, to_str + 12, 30);
     } else {
-      memcpy(_to1 + 3, to_str, 12);
+      memcpy(_to1 + strlen(_("to")) + 1, to_str, 12);
       memcpy(_to2, to_str + 12, 15);
       memcpy(_to3, to_str + 27, 15);
     }
