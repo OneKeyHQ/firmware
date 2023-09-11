@@ -234,6 +234,7 @@ OBJS += protob/messages-cardano.pb.o
 OBJS += protob/messages-sui.pb.o
 OBJS += protob/messages-kaspa.pb.o
 OBJS += protob/messages-nexa.pb.o
+OBJS += protob/messages-nervos.pb.o
 endif
 
 OPTFLAGS ?= -Os

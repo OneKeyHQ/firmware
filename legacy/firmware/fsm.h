@@ -44,6 +44,8 @@
 #include "messages-stellar.pb.h"
 #include "messages-sui.pb.h"
 #include "messages-tron.pb.h"
+#include "messages-nervos.pb.h"
+
 
 // CoinJoin fee rate multiplier.
 #define FEE_RATE_DECIMALS (1000000)
@@ -136,6 +138,10 @@ void fsm_msgEthereumTxAck(const EthereumTxAck *msg);
 void fsm_msgEthereumSignMessage(const EthereumSignMessage *msg);
 void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg);
 void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg);
+
+// nervos
+void fsm_msgNervosGetAddress(const NervosGetAddress *msg);
+void fsm_msgNervosSignTx(const EthereumSignTx *msg);
 
 // ethereum onekey
 void fsm_msgEthereumGetAddressOneKey(const EthereumGetAddressOneKey *msg);

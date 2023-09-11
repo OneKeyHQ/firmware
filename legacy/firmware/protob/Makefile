@@ -21,7 +21,8 @@ PROTO_NAMES = messages messages-bitcoin messages-common messages-crypto messages
 	messages-ethereum-onekey messages-ethereum messages-ethereum-definitions messages-management messages-nem messages-stellar  \
 	messages-solana messages-starcoin messages-tron messages-aptos messages-near messages-conflux \
 	messages-algorand messages-ripple messages-filecoin messages-cosmos \
-	messages-polkadot messages-cardano messages-sui messages-kaspa messages-nexa
+	messages-polkadot messages-cardano messages-sui messages-kaspa messages-nexa \
+	messages-nervos 
 
 PROTO_OPTIONS = $(PROTO_NAMES:=.options)
 PROTO_COMPILED = $(PROTO_NAMES:=.pb)
