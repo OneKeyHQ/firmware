@@ -632,5 +632,8 @@ translations = [
     "Sperren:",
     "Transaktionsdetails",
     "Details anzeigen",
+    "Transaktion aktualisieren",
+    "Transaktion abschließen",
+    "Transaktion melden",
 ]
 # fmt: on

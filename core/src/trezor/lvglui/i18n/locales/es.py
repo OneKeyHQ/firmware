@@ -632,5 +632,8 @@ translations = [
     "Cerrar con llave:",
     "Detalles de la transacción",
     "Ver detalles",
+    "Actualizar transacción",
+    "Finalizar transacción",
+    "Transacción de fusión",
 ]
 # fmt: on

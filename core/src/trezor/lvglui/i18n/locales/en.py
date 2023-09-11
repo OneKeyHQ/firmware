@@ -632,5 +632,8 @@ translations = [
     "Lock:",
     "Transaction Details",
     "View Details",
+    "Update Transaction",
+    "Finalize Transaction",
+    "Meld Transaction",
 ]
 # fmt: on
