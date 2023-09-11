@@ -364,7 +364,7 @@ void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg) {
   // ethereum_address_checksum adds trailing zero
 
   char warn_msg[128] = {0};
-  strcat(warn_msg, _("Unable to show EIP-712 data. Sign at your own risk."));
+  strcat(warn_msg, _("Unable to decode EIP-712 data. Sign at your own risk."));
   if (msg->has_message_hash) {
     char domain_hash[65] = {0};
     char msg_hash[65] = {0};

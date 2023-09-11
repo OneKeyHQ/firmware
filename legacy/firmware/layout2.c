@@ -4853,11 +4853,11 @@ bool layoutBlindSign(const char *chain_name, bool is_contract,
   int address_rowcount = addrlen / rowlen + 1;
   int data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
   const char **tx_msg = format_tx_message(chain_name);
-  bool d = false;
-  config_getInputDirection(&d);
+
   if (key1) detail_total_index++;
   if (key2) detail_total_index++;
   if (key3) detail_total_index++;
+  if (key1 == NULL && key2 == NULL && key3 == NULL) max_index--;
 
   strcat(title_data, _("View Data"));
   strcat(title_data, " (");
@@ -4882,13 +4882,12 @@ refresh_layout:
     if (0 == ui_language) {
       layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
-                                NULL, "Unable to decode data",
-                                "from this transaction. ",
+                                NULL, "Unable to decode", "transaction data.",
                                 "Sign at your own risk");
     } else {
       layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
-                                NULL, "无法解析交易数据.",
+                                NULL, "无法解析交易数据",
                                 "可能存在风险, 请谨慎甄别", NULL);
     }
   } else if (1 == index) {
@@ -5062,15 +5061,9 @@ refresh_layout:
 #if !EMULATOR
   if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
     if (isLongPress(KEY_UP)) {
-      if (!d)
-        key = KEY_UP;
-      else
-        key = KEY_DOWN;
+      key = KEY_UP;
     } else if (isLongPress(KEY_DOWN)) {
-      if (!d)
-        key = KEY_DOWN;
-      else
-        key = KEY_UP;
+      key = KEY_DOWN;
     }
     delay_ms(75);
   }
@@ -5144,6 +5137,10 @@ bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
   } else {
     data_rowcount = len % 20 ? len / 20 + 1 : len / 20;
   }
+
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 
   if (verify) {
     strcat(title, _("Confirm Address"));
@@ -5312,6 +5309,16 @@ refresh_layout:
   oledRefresh();
 
   key = protectWaitKey(0, 0);
+#if !EMULATOR
+  if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+    if (isLongPress(KEY_UP)) {
+      key = KEY_UP;
+    } else if (isLongPress(KEY_DOWN)) {
+      key = KEY_DOWN;
+    }
+    delay_ms(75);
+  }
+#endif
   switch (key) {
     case KEY_UP:
       if (sub_index > 0) {
@@ -5349,6 +5356,9 @@ refresh_layout:
       break;
   }
 
+#if !EMULATOR
+  enableLongPress(false);
+#endif
   return result;
 }
 
@@ -5394,13 +5404,13 @@ refresh_layout:
     if (ui_language == 0) {
       layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
-                                NULL, "Unable to show EIP-712",
+                                NULL, "Unable to decode EIP-712",
                                 "data. Sign at your own risk", NULL);
     } else {
       layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
                                 NULL, "无法显示 EIP-712 数据.",
-                                "请谨慎甄别项目方后决定是", "否签名, 自负风险");
+                                "可能存在风险, 请谨慎甄别", NULL);
     }
   } else if (1 == index) {
     layoutHeader(title);
