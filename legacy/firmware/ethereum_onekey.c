@@ -867,9 +867,9 @@ void ethereum_signing_init_eip1559_onekey(
   if (!ethereum_signing_confirm_common(
           &params, signer, msg->max_gas_fee.bytes, msg->max_gas_fee.size,
           msg->gas_limit.bytes, msg->gas_limit.size, true, is_nft_transfer,
-          recipient, token_id, token_value, _("Maximum Fee Per Gas:"),
-          max_fee_per_gas_str, _("Priority Fee Per Gas:"),
-          priority_fee_per_gas_str, _("Maximum Fee:"), max_fee_str)) {
+          recipient, token_id, token_value, _("Maximum Fee:"), max_fee_str,
+          _("Maximum Fee Per Gas:"), max_fee_per_gas_str,
+          _("Priority Fee Per Gas:"), priority_fee_per_gas_str)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     ethereum_signing_abort_onekey();
     return;

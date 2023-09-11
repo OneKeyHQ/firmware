@@ -48,6 +48,7 @@ bool protectAbortedByInitializeOnboarding = false;
 bool protectAbortedByInitialize = false;
 bool protectAbortedByTimeout = false;
 extern bool exitBlindSignByInitialize;
+extern bool msg_command_inprogress;
 
 static uint8_t device_sleep_state = SLEEP_NONE;
 
@@ -402,7 +403,9 @@ bool protectPin(bool use_cached) {
   bool ret = config_unlock(pin);
   if (!ret) {
     fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
+    msg_command_inprogress = false;
     protectPinCheck(false);
+    msg_command_inprogress = true;
   }
   return ret;
 }
@@ -759,7 +762,6 @@ uint8_t blindsignWaitKey(void) {
 }
 
 extern bool u2f_init_command;
-extern bool msg_command_inprogress;
 
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
@@ -1349,17 +1351,18 @@ wait_key:
 #if !EMULATOR
   if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
     if (isLongPress(KEY_UP)) {
-      if (!d)
-        key = KEY_UP;
-      else
-        key = KEY_DOWN;
+      key = KEY_UP;
     } else if (isLongPress(KEY_DOWN)) {
-      if (!d)
-        key = KEY_DOWN;
-      else
-        key = KEY_UP;
+      key = KEY_DOWN;
     }
     delay_ms(75);
+  }
+  if (d && menu_status == MENU_INPUT_PASSPHRASE) {  // Reverse direction
+    if (key == KEY_UP) {
+      key = KEY_DOWN;
+    } else if (key == KEY_DOWN) {
+      key = KEY_UP;
+    }
   }
 #endif
   if (MENU_INPUT_PASSPHRASE == menu_status) {

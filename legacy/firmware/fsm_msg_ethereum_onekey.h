@@ -283,7 +283,7 @@ void fsm_msgEthereumSignMessageEIP712(const EthereumSignMessageEIP712 *msg) {
   data2hex(msg->message_hash.bytes, 32, msg_hash);
   if (!fsm_layoutSignHash(
           "Ethereum", resp->address, domain_hash, msg_hash,
-          _("Unable to show EIP-712 data. Sign at your own risk."))) {
+          _("Unable to decode EIP-712 data. Sign at your own risk."))) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;

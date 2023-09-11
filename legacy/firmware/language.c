@@ -779,7 +779,7 @@ const char *languages[][2] = {
     {"To Pool:", "目标质押池:"},
     // layout2.c
     {"Token Amount:", "代币金额:"},
-    {"Token Contract:", "Token 地址:"},
+    {"Token Contract:", "合约地址:"},
     {"Token Transfer", "代币转账"},
     // ethereum.c
     {"Total Amount", "总金额"},
@@ -811,8 +811,8 @@ const char *languages[][2] = {
     // menu_list.c
     {"USB Lock", "USB 锁"},
     // fsm_msg_ethereum.h
-    {"Unable to show EIP-712 data. Sign at your own risk.",
-     "无法显示 EIP-712 数据.\n请谨慎甄别项目方后决定是否签名, 自负风险"},
+    {"Unable to decode EIP-712 data. Sign at your own risk.",
+     "无法显示 EIP-712 数据.\n可能存在风险, 请谨慎甄别"},
     // cosmos.c
     {"Undelegate", "取消委托"},
     // starcoin.c
