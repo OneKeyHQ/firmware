@@ -281,3 +281,11 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDecimals=6,
         hrp="quick",
     )
+    yield NetworkInfo(
+        chainId="fetchhub-4",
+        chainName="Fetch.ai",
+        coinDenom="FET",
+        coinMinimalDenom="afet",
+        coinDecimals=18,
+        hrp="fetch",
+    )
