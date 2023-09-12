@@ -80,6 +80,7 @@
 #include "nem.h"
 #include "nem2.h"
 #include "nexa.h"
+#include "nervos.h"
 #include "polkadot.h"
 #include "ripple.h"
 #include "solana.h"

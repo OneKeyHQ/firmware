@@ -135,6 +135,7 @@ OBJS += cbor.o
 OBJS += sui.o
 OBJS += kaspa.o
 OBJS += nexa.o
+OBJS += nervos.o
 endif
 
 OBJS += debug.o

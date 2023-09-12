@@ -18,154 +18,31 @@
  */
 
 static bool fsm_nervosCheckPath(uint32_t address_n_count,
-                                  const uint32_t *address_n, bool pubkey_export,
-                                  const EthereumNetworkInfo *network) {
-  if (ethereum_path_check(address_n_count, address_n, pubkey_export, network)) {
+                                        const uint32_t *address_n,
+                                        bool pubkey_export) {
+  if (nervos_path_check(address_n_count, address_n, pubkey_export)) {
     return true;
   }
-
   if (config_getSafetyCheckLevel() == SafetyCheckLevel_Strict) {
     fsm_sendFailure(FailureType_Failure_DataError, _("Forbidden key path"));
     return false;
   }
-
   return fsm_layoutPathWarning(address_n_count, address_n);
 }
 
 
-void fsm_msgNervosGetPublicKey(const EthereumGetPublicKey *msg) {
-  RESP_INIT(EthereumPublicKey);
-
-  CHECK_INITIALIZED
-
-  CHECK_PIN
-
-  // we use Bitcoin-like format for ETH
-  const CoinInfo *coin = fsm_getCoin(true, "Bitcoin");
-  if (!coin) return;
-
-  // Only allow m/44' and m/45' subtrees. This allows usage with _any_ SLIP-44
-  // (Ethereum or otherwise), plus the Casa multisig subtree. Anything else must
-  // go through (a) GetPublicKey or (b) a dedicated coin-specific message.
-  if (!msg->address_n_count || (msg->address_n[0] != (44 | PATH_HARDENED) &&
-                                msg->address_n[0] != (45 | PATH_HARDENED))) {
-    fsm_sendFailure(FailureType_Failure_DataError,
-                    _("Invalid path for EthereumGetPublicKey"));
-    layoutHome();
-    return;
-  }
-
-  const char *curve = coin->curve_name;
-  uint32_t fingerprint;
-  HDNode *node = fsm_getDerivedNode(curve, msg->address_n, msg->address_n_count,
-                                    &fingerprint);
-  if (!node) return;
-
-  if (hdnode_fill_public_key(node) != 0) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive public key"));
-    layoutHome();
-    return;
-  }
-
-  if (msg->has_show_display && msg->show_display) {
-    char pubkey[65] = {0};
-    data2hexaddr(node->public_key, 32, pubkey);
-    if (!layoutXPUB("Ethereum", pubkey, msg->address_n, msg->address_n_count)) {
-      memzero(resp, sizeof(PublicKey));
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-
-  resp->node.depth = node->depth;
-  resp->node.fingerprint = fingerprint;
-  resp->node.child_num = node->child_num;
-  resp->node.chain_code.size = 32;
-  memcpy(resp->node.chain_code.bytes, node->chain_code, 32);
-  resp->node.has_private_key = false;
-  resp->node.public_key.size = 33;
-  memcpy(resp->node.public_key.bytes, node->public_key, 33);
-
-  hdnode_serialize_public(node, fingerprint, coin->xpub_magic, resp->xpub,
-                          sizeof(resp->xpub));
-
-  msg_write(MessageType_MessageType_EthereumPublicKey, resp);
-  layoutHome();
-}
-
-void fsm_msgNervosSignTx(const EthereumSignTx *msg) {
-  CHECK_INITIALIZED
-
-  CHECK_PIN
-  debugLog(0, "", "### fsm_msgNervosSignTx ###");
-  const EthereumDefinitionsDecoded *defs =
-      get_definitions(msg->has_definitions, &msg->definitions, msg->chain_id,
-                      msg->has_to ? msg->to : NULL);
-
-  if (!defs || !fsm_nervosCheckPath(msg->address_n_count, msg->address_n,
-                                      false, defs->network)) {
-    layoutHome();
-    return;
-  }
-
-  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
-                                          msg->address_n_count, NULL);
-  if (!node) return;
-
-  ethereum_signing_init(msg, node, defs);
-}
-
-void fsm_msgNervosSignTxEIP1559(const EthereumSignTxEIP1559 *msg) {
-  CHECK_INITIALIZED
-
-  CHECK_PIN
-  debugLog(0, "", "### fsm_msgNervosSignTxEIP1559 ###");
-
-  const EthereumDefinitionsDecoded *defs =
-      get_definitions(msg->has_definitions, &msg->definitions, msg->chain_id,
-                      msg->has_to ? msg->to : NULL);
-
-  if (!defs || !fsm_nervosCheckPath(msg->address_n_count, msg->address_n,
-                                      false, defs->network)) {
-    layoutHome();
-    return;
-  }
-
-  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
-                                          msg->address_n_count, NULL);
-  if (!node) return;
-
-  ethereum_signing_init_eip1559(msg, node, defs);
-}
-
-void fsm_msgNervosTxAck(const EthereumTxAck *msg) {
-  CHECK_UNLOCKED
-
-  ethereum_signing_txack(msg);
-}
-
 void fsm_msgNervosGetAddress(const NervosGetAddress *msg) {
-  RESP_INIT(EthereumAddress);
+  RESP_INIT(NervosAddress);
 
   CHECK_INITIALIZED
 
   CHECK_PIN
-  debugLog(0, "", "### fsm_msgNervosGetAddress ###");
-  uint32_t slip44 = (msg->address_n_count > 1)
-                        ? (msg->address_n[1] & PATH_UNHARDEN_MASK)
-                        : SLIP44_UNKNOWN;
 
-  const EthereumNetworkInfo *network = get_network_definition_only(
-      msg->has_encoded_network, (const EncodedNetwork *)&msg->encoded_network,
-      slip44);
-
-  if (!network || !fsm_nervosCheckPath(msg->address_n_count, msg->address_n,
-                                         false, network)) {
+  if (!fsm_nervosCheckPath(msg->address_n_count, msg->address_n, false)) {
     layoutHome();
     return;
   }
+
 
   const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                           msg->address_n_count, NULL);
@@ -177,190 +54,34 @@ void fsm_msgNervosGetAddress(const NervosGetAddress *msg) {
     layoutHome();
     return;
   }
-  bool rskip60 = false;
-  uint64_t chain_id = 0;
-  // constants from trezor-common/defs/ethereum/networks.json
-  switch (slip44) {
-    case 137:
-      rskip60 = true;
-      chain_id = 30;
-      break;
-    case 37310:
-      rskip60 = true;
-      chain_id = 31;
-      break;
+  char hrp[4] = {"ckb"};
+  uint32_t hashtype = 1;
+  if (msg->has_is_testnet && msg->is_testnet){
+    strlcpy(hrp, "ckt", sizeof(hrp));
+  }
+
+  if (msg->has_hashtype){
+    hashtype = msg->hashtype;
+  }
+  if(!nervos_generate_ckb_address(resp->address,pubkeyhash,hrp,hashtype)){
+    layoutHome();
+    return;
   }
 
   resp->has_address = true;
-  ethereum_address_checksum(pubkeyhash, resp->address, rskip60, chain_id);
-  // ethereum_address_checksum adds trailing zero
-
   if (msg->has_show_display && msg->show_display) {
     char desc[257] = {0};
-    const char *chain_name = NULL;
-    strlcpy(desc, "Address:", sizeof(desc));
-    if (strlen(network->name) == 0) {
-      ASSIGN_ETHEREUM_NAME(chain_name, network->chain_id)
-      snprintf(desc, 257, "%s %s", chain_name, _("Address:"));
-    } else {
-      snprintf(desc, 257, "%s %s", network->name, _("Address:"));
+    if (msg->has_is_testnet && msg->is_testnet){
+      strlcpy(desc, "Testnet Address:", sizeof(desc));
     }
-
+    else{
+      strlcpy(desc, "Mainnet Address:", sizeof(desc));
+    }
     if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }
   }
-
-  msg_write(MessageType_MessageType_EthereumAddress, resp);
-  layoutHome();
-}
-
-void fsm_msgNervosSignMessage(const EthereumSignMessage *msg) {
-  RESP_INIT(EthereumMessageSignature);
-
-  CHECK_INITIALIZED
-
-  CHECK_PIN
-  debugLog(0, "", "### fsm_msgNervosSignMessage ###");
-
-  uint32_t slip44 = (msg->address_n_count > 1)
-                        ? (msg->address_n[1] & PATH_UNHARDEN_MASK)
-                        : SLIP44_UNKNOWN;
-
-  const EthereumNetworkInfo *network = get_network_definition_only(
-      msg->has_encoded_network, (const EncodedNetwork *)&msg->encoded_network,
-      slip44);
-
-  if (!network || !fsm_nervosCheckPath(msg->address_n_count, msg->address_n,
-                                         false, network)) {
-    layoutHome();
-    return;
-  }
-
-  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
-                                          msg->address_n_count, NULL);
-  if (!node) return;
-
-  uint8_t pubkeyhash[20] = {0};
-  if (!hdnode_get_ethereum_pubkeyhash(node, pubkeyhash)) {
-    layoutHome();
-    return;
-  }
-
-  ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
-  // ethereum_address_checksum adds trailing zero
-
-  if (!fsm_layoutSignMessage("Ethereum", resp->address, msg->message.bytes,
-                             msg->message.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  ethereum_message_sign(msg, node, resp);
-  layoutHome();
-}
-
-void fsm_msgNervosVerifyMessage(const EthereumVerifyMessage *msg) {
-  if (ethereum_message_verify(msg) != 0) {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Invalid signature"));
-    return;
-  }
-
-  uint8_t pubkeyhash[20];
-  if (!ethereum_parse(msg->address, pubkeyhash)) {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Invalid address"));
-    return;
-  }
-
-  if (!fsm_layoutVerifyMessage("Ethereum", msg->address, msg->message.bytes,
-                               msg->message.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  layoutDialogSwipe(&bmp_icon_ok, NULL, _("Continue"), NULL, NULL,
-                    _("The signature is valid."), NULL, NULL, NULL, NULL);
-  if (!protectButton(ButtonRequestType_ButtonRequest_Other, true)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-
-  fsm_sendSuccess(_("Message verified"));
-
-  layoutHome();
-}
-
-void fsm_msgNervosSignTypedHash(const EthereumSignTypedHash *msg) {
-  RESP_INIT(EthereumTypedDataSignature);
-
-  CHECK_INITIALIZED
-
-  CHECK_PIN
-  debugLog(0, "", "### fsm_msgNervosSignTypedHash ###");
-
-  if (msg->domain_separator_hash.size != 32 ||
-      (msg->has_message_hash && msg->message_hash.size != 32)) {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Invalid hash length"));
-    return;
-  }
-
-  uint32_t slip44 = (msg->address_n_count > 1)
-                        ? (msg->address_n[1] & PATH_UNHARDEN_MASK)
-                        : SLIP44_UNKNOWN;
-
-  const EthereumNetworkInfo *network = get_network_definition_only(
-      msg->has_encoded_network, (const EncodedNetwork *)&msg->encoded_network,
-      slip44);
-
-  if (!network || !fsm_nervosCheckPath(msg->address_n_count, msg->address_n,
-                                         false, network)) {
-    layoutHome();
-    return;
-  }
-
-  const HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
-                                          msg->address_n_count, NULL);
-  if (!node) return;
-
-  uint8_t pubkeyhash[20] = {0};
-  if (!hdnode_get_ethereum_pubkeyhash(node, pubkeyhash)) {
-    layoutHome();
-    return;
-  }
-
-  ethereum_address_checksum(pubkeyhash, resp->address, false, 0);
-  // ethereum_address_checksum adds trailing zero
-
-  char warn_msg[128] = {0};
-  strcat(warn_msg, _("Unable to show EIP-712 data. Sign at your own risk."));
-  if (msg->has_message_hash) {
-    char domain_hash[65] = {0};
-    char msg_hash[65] = {0};
-    data2hex(msg->domain_separator_hash.bytes, 32, domain_hash);
-    data2hex(msg->message_hash.bytes, 32, msg_hash);
-    if (!fsm_layoutSignHash("Ethereum", resp->address, domain_hash, msg_hash,
-                            warn_msg)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  } else {
-    // No message hash when setting primaryType="EIP712Domain"
-    // https://ethereum-magicians.org/t/eip-712-standards-clarification-primarytype-as-domaintype/3286
-    char domain_hash[65] = {0};
-    data2hex(msg->domain_separator_hash.bytes, 32, domain_hash);
-    if (!fsm_layoutSignHash("Ethereum", resp->address, domain_hash, NULL,
-                            warn_msg)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return;
-    }
-  }
-
-  ethereum_typed_hash_sign(msg, node, resp);
+  msg_write(MessageType_MessageType_NervosAddress, resp);
   layoutHome();
 }
