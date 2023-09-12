@@ -159,6 +159,8 @@ class MessageType(IntEnum):
     EthereumTypedDataValueAckOneKey = 20115
     EthereumTypedDataSignatureOneKey = 20116
     EthereumSignTypedHashOneKey = 20117
+    NervosGetAddress = 30056
+    NervosAddress = 30057
     NEMGetAddress = 67
     NEMAddress = 68
     NEMSignTx = 69
@@ -7894,6 +7896,43 @@ class NEMCosignatoryModification(protobuf.MessageType):
     ) -> None:
         self.type = type
         self.public_key = public_key
+
+
+class NervosGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30056
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+        3: protobuf.Field("hashtype", "uint32", repeated=False, required=False, default=1),
+        4: protobuf.Field("is_testnet", "bool", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+        hashtype: Optional["int"] = 1,
+        is_testnet: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+        self.hashtype = hashtype
+        self.is_testnet = is_testnet
+
+
+class NervosAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 30057
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: Optional["str"] = None,
+    ) -> None:
+        self.address = address
 
 
 class NexaGetAddress(protobuf.MessageType):

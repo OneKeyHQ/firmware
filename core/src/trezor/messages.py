@@ -6240,6 +6240,40 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["NEMCosignatoryModification"]:
             return isinstance(msg, cls)
 
+    class NervosGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        hashtype: "int"
+        is_testnet: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            hashtype: "int | None" = None,
+            is_testnet: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosGetAddress"]:
+            return isinstance(msg, cls)
+
+    class NervosAddress(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosAddress"]:
+            return isinstance(msg, cls)
+
     class NexaGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"

@@ -37,31 +37,86 @@ on one page here.
     --help                    Show this message and exit.
 
   Commands:
+    algorand           algorand commands.
+    aptos              Aptos commands.
     binance            Binance Chain commands.
+    bixin              Device management commands - setup, recover seed, wipe, etc.
     btc                Bitcoin and Bitcoin-like coins commands.
     cardano            Cardano commands.
     clear-session      Clear session (remove cached PIN, passphrase, etc.).
+    conflux            Conflux Chain commands.
     cosi               CoSi (Cothority / collective signing) commands.
+    cosmos             Cosmos commands.
     crypto             Miscellaneous cryptography features.
     debug              Miscellaneous debug features.
     device             Device management commands - setup, recover seed, wipe, etc.
     eos                EOS commands.
     ethereum           Ethereum commands.
     fido               FIDO2, U2F and WebAuthN management commands.
+    filecoin           Filecoin commands.
     firmware           Firmware commands.
     get-features       Retrieve device features and settings.
     get-session        Get a session ID for subsequent commands.
+    kaspa              Kaspa commands
     list               List connected Trezor devices.
     monero             Monero commands.
+    near               Near commands.
     nem                NEM commands.
+    nervos             Nervos commands.
     ping               Send ping message.
+    polkadot           Polkadot commands.
     ripple             Ripple commands.
     set                Device settings.
+    sol                Solana commands.
+    starcoin           Starcoin commands.
     stellar            Stellar commands.
+    sui                Sui commands.
     tezos              Tezos commands.
+    tron               Tron Chain commands.
     usb-reset          Perform USB reset on stuck devices.
     version            Show version of trezorctl/trezorlib.
     wait-for-emulator  Wait until Trezor Emulator comes up.
+
+algorand commands.
+~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl algorand --help
+
+.. code::
+
+  Usage: trezorctl algorand [OPTIONS] COMMAND [ARGS]...
+
+    algorand commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address           Get Algorand address for specified path.
+    sign-raw-transaction  Sign a hex-encoded transaction .
+
+Aptos commands.
+~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl aptos --help
+
+.. code::
+
+  Usage: trezorctl aptos [OPTIONS] COMMAND [ARGS]...
+
+    Aptos commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address   Get Aptos address in hex encoding.
+    sign-message  Sign formatted message.
+    sign-raw-tx   Sign a hex-encoded raw message with out prefix_bytes...
 
 Binance Chain commands.
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,6 +138,27 @@ Binance Chain commands.
     get-address     Get Binance address for specified path.
     get-public-key  Get Binance public key.
     sign-tx         Sign Binance transaction.
+
+Device management commands - setup, recover seed, wipe, etc.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl bixin --help
+
+.. code::
+
+  Usage: trezorctl bixin [OPTIONS] COMMAND [ARGS]...
+
+    Device management commands - setup, recover seed, wipe, etc.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    free       set pay no pin or no confirm
+    self-test  Perform a self-test.
+    verify     Perform device verify.
 
 Bitcoin and Bitcoin-like coins commands.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,10 +201,31 @@ Cardano commands.
     --help  Show this message and exit.
 
   Commands:
-    get-address             Get Cardano address.
-    get-native-script-hash  Get Cardano native script hash.
-    get-public-key          Get Cardano public key.
-    sign-tx                 Sign Cardano transaction.
+    get-address     Get Cardano address.
+    get-public-key  Get Cardano public key.
+    sign-tx         Sign Cardano transaction.
+
+Conflux Chain commands.
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl conflux --help
+
+.. code::
+
+  Usage: trezorctl conflux [OPTIONS] COMMAND [ARGS]...
+
+    Conflux Chain commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address         Get Conflux address for specified path.
+    sign-message        Sign message with Conflux address.
+    sign-message-cip23  Sign message with Conflux address.
+    sign-tx             Sign Conflux transaction.
 
 CoSi (Cothority / collective signing) commands.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,6 +247,26 @@ CoSi (Cothority / collective signing) commands.
     commit  Ask device to commit to CoSi signing.
     sign    Ask device to sign using CoSi.
 
+Cosmos commands.
+~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl cosmos --help
+
+.. code::
+
+  Usage: trezorctl cosmos [OPTIONS] COMMAND [ARGS]...
+
+    Cosmos commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address  Get Cosmos address for specified path.
+    sign-tx      Sign Cosmos transaction.
+
 Miscellaneous cryptography features.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -167,9 +284,10 @@ Miscellaneous cryptography features.
     --help  Show this message and exit.
 
   Commands:
-    decrypt-keyvalue  Decrypt value by given key and path.
-    encrypt-keyvalue  Encrypt value by given key and path.
-    get-entropy       Get random bytes from device.
+    batch-get-publickeys  Batch get publicKeys by given paths.
+    decrypt-keyvalue      Decrypt value by given key and path.
+    encrypt-keyvalue      Encrypt value by given key and path.
+    get-entropy           Get random bytes from device.
 
 Miscellaneous debug features.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -210,6 +328,7 @@ Device management commands - setup, recover seed, wipe, etc.
   Commands:
     backup                Perform device seed backup.
     load                  Upload seed and custom configuration to the device.
+    reboot                Perform device reboot.
     reboot-to-bootloader  Reboot device into bootloader mode.
     recover               Start safe recovery workflow.
     sd-protect            Secure the device with SD card protection.
@@ -283,6 +402,26 @@ FIDO2, U2F and WebAuthN management commands.
     counter      Get or set the FIDO/U2F counter value.
     credentials  Manage FIDO2 resident credentials.
 
+Filecoin commands.
+~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl filecoin --help
+
+.. code::
+
+  Usage: trezorctl filecoin [OPTIONS] COMMAND [ARGS]...
+
+    Filecoin commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address           Get filecoin address.
+    sign-raw-transaction  Sign a hex-encoded transaction .
+
 Firmware commands.
 ~~~~~~~~~~~~~~~~~~
 
@@ -305,6 +444,26 @@ Firmware commands.
     update    Upload new firmware to device.
     verify    Verify the integrity of the firmware data stored in a file.
 
+Kaspa commands
+~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl kaspa --help
+
+.. code::
+
+  Usage: trezorctl kaspa [OPTIONS] COMMAND [ARGS]...
+
+    Kaspa commands
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address  Get address for specified path.
+    sign-tx      Sign a hex-encoded raw message which is the data used to calculate the...
+
 Monero commands.
 ~~~~~~~~~~~~~~~~
 
@@ -325,6 +484,26 @@ Monero commands.
     get-address    Get Monero address for specified path.
     get-watch-key  Get Monero watch key for specified path.
 
+Near commands.
+~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl near --help
+
+.. code::
+
+  Usage: trezorctl near [OPTIONS] COMMAND [ARGS]...
+
+    Near commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address           Get near address.
+    sign-raw-transaction  Sign a hex-encoded transaction .
+
 NEM commands.
 ~~~~~~~~~~~~~
 
@@ -344,6 +523,45 @@ NEM commands.
   Commands:
     get-address  Get NEM address for specified path.
     sign-tx      Sign (and optionally broadcast) NEM transaction.
+
+Nervos commands.
+~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl nervos --help
+
+.. code::
+
+  Usage: trezorctl nervos [OPTIONS] COMMAND [ARGS]...
+
+    Nervos commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address  Get Nervos address in hex encoding.
+
+Polkadot commands.
+~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl polkadot --help
+
+.. code::
+
+  Usage: trezorctl polkadot [OPTIONS] COMMAND [ARGS]...
+
+    Polkadot commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address           Get polkadot address.
+    sign-raw-transaction  Sign a hex-encoded transaction .
 
 Ripple commands.
 ~~~~~~~~~~~~~~~~
@@ -383,15 +601,62 @@ Device settings.
 
   Commands:
     auto-lock-delay        Set auto-lock delay (in seconds).
+    bixin                  set bixin app.
+    ble                    use/unuse ble feature.
     display-rotation       Set display rotation.
     experimental-features  Enable or disable experimental message types.
     flags                  Set device flags.
     homescreen             Set new homescreen.
     label                  Set new device label.
+    language               set language.
     passphrase             Enable, disable or configure passphrase protection.
     pin                    Set, change or remove PIN.
     safety-checks          Set safety check level.
+    se                     use/unuse se chip.
     wipe-code              Set or remove the wipe code.
+
+Solana commands.
+~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl sol --help
+
+.. code::
+
+  Usage: trezorctl sol [OPTIONS] COMMAND [ARGS]...
+
+    Solana commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address  Get Solana address for specified path.
+    sign-tx      Sign Solala transaction.
+
+Starcoin commands.
+~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl starcoin --help
+
+.. code::
+
+  Usage: trezorctl starcoin [OPTIONS] COMMAND [ARGS]...
+
+    Starcoin commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address           Get starcoin public address.
+    get-public-key        Get starcoin public key for specified path.
+    sign-message          Sign message with Starcoin address.
+    sign-raw-transaction  Sign a hex-encoded transaction .
+    verify-message        Verify message signed with Starcoin address.
 
 Stellar commands.
 ~~~~~~~~~~~~~~~~~
@@ -413,6 +678,26 @@ Stellar commands.
     get-address       Get Stellar public address.
     sign-transaction  Sign a base64-encoded transaction envelope.
 
+Sui commands.
+~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl sui --help
+
+.. code::
+
+  Usage: trezorctl sui [OPTIONS] COMMAND [ARGS]...
+
+    Sui commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address  Get Sui address in hex encoding.
+    sign-raw-tx  Sign a base64 encoded of the transaction data(from sui client...
+
 Tezos commands.
 ~~~~~~~~~~~~~~~
 
@@ -433,4 +718,25 @@ Tezos commands.
     get-address     Get Tezos address for specified path.
     get-public-key  Get Tezos public key.
     sign-tx         Sign Tezos transaction.
+
+Tron Chain commands.
+~~~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  trezorctl tron --help
+
+.. code::
+
+  Usage: trezorctl tron [OPTIONS] COMMAND [ARGS]...
+
+    Tron Chain commands.
+
+  Options:
+    --help  Show this message and exit.
+
+  Commands:
+    get-address   Get Tron address for specified path.
+    sign-message  Sign message with Tron address.
+    sign-tx       Sign tron transaction.
 

@@ -151,6 +151,8 @@ if TYPE_CHECKING:
         EthereumTypedDataValueAckOneKey = 20115
         EthereumTypedDataSignatureOneKey = 20116
         EthereumSignTypedHashOneKey = 20117
+        NervosGetAddress = 30056
+        NervosAddress = 30057
         NEMGetAddress = 67
         NEMAddress = 68
         NEMSignTx = 69
