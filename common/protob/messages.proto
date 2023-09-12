@@ -189,11 +189,9 @@ enum MessageType {
     // Ethereum
     MessageType_EthereumGetPublicKey = 450 [(wire_in) = true];
     MessageType_EthereumPublicKey = 451 [(wire_out) = true];
-    //MessageType_EthereumGetAddress = 56 [(wire_in) = true];
-    MessageType_NervosGetAddress = 56 [(wire_in) = true];
+    MessageType_EthereumGetAddress = 56 [(wire_in) = true];
     MessageType_EthereumAddress = 57 [(wire_out) = true];
-    //MessageType_EthereumSignTx = 58 [(wire_in) = true];
-    MessageType_NervosSignTx = 58 [(wire_in) = true];
+    MessageType_EthereumSignTx = 58 [(wire_in) = true];
     MessageType_EthereumSignTxEIP1559 = 452 [(wire_in) = true];
     MessageType_EthereumTxRequest = 59 [(wire_out) = true];
     MessageType_EthereumTxAck = 60 [(wire_in) = true];
@@ -207,10 +205,6 @@ enum MessageType {
     MessageType_EthereumTypedDataValueAck = 468 [(wire_in) = true];
     MessageType_EthereumTypedDataSignature = 469 [(wire_out) = true];
     MessageType_EthereumSignTypedHash = 470 [(wire_in) = true];
-
-
-    //MessageType_NervosGetAddress = 30056 [(wire_in) = true];
-    //MessageType_NervosSignTx = 30057 [(wire_in) = true];
 
     // Ethereum ONEKEY
     MessageType_EthereumGetPublicKeyOneKey = 20100 [(wire_in) = true];
@@ -231,6 +225,10 @@ enum MessageType {
     MessageType_EthereumTypedDataValueAckOneKey = 20115 [(wire_in) = true];
     MessageType_EthereumTypedDataSignatureOneKey = 20116 [(wire_out) = true];
     MessageType_EthereumSignTypedHashOneKey = 20117 [(wire_in) = true];
+
+    // Nervos
+    MessageType_NervosGetAddress = 30056 [(wire_in) = true];
+    MessageType_NervosAddress = 30057 [(wire_out) = true];
 
     // NEM
     MessageType_NEMGetAddress = 67 [(wire_in) = true];
