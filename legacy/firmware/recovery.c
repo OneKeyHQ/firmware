@@ -819,17 +819,18 @@ refresh_menu:
 #if !EMULATOR
   if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
     if (isLongPress(KEY_UP)) {
-      if (!d)
-        key = KEY_UP;
-      else
-        key = KEY_DOWN;
+      key = KEY_UP;
     } else if (isLongPress(KEY_DOWN)) {
-      if (!d)
-        key = KEY_DOWN;
-      else
-        key = KEY_UP;
+      key = KEY_DOWN;
     }
     delay_ms(75);
+  }
+  if (d) {  // Reverse direction
+    if (key == KEY_UP) {
+      key = KEY_DOWN;
+    } else if (key == KEY_DOWN) {
+      key = KEY_UP;
+    }
   }
 #endif
   switch (key) {

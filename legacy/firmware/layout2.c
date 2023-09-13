@@ -5400,7 +5400,7 @@ refresh_layout:
   oledClear();
 
   if (0 == index) {
-    // Unable to show EIP-712 data. Sign at your own risk
+    // Unable to decode EIP-712 data. Sign at your own risk
     if (ui_language == 0) {
       layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
@@ -5409,7 +5409,7 @@ refresh_layout:
     } else {
       layoutDialogCenterAdapter(&bmp_icon_warning, &bmp_bottom_left_close, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
-                                NULL, "无法显示 EIP-712 数据.",
+                                NULL, "无法解析 EIP-712 数据.",
                                 "可能存在风险, 请谨慎甄别", NULL);
     }
   } else if (1 == index) {
