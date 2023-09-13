@@ -812,7 +812,7 @@ const char *languages[][2] = {
     {"USB Lock", "USB 锁"},
     // fsm_msg_ethereum.h
     {"Unable to decode EIP-712 data. Sign at your own risk.",
-     "无法显示 EIP-712 数据.\n可能存在风险, 请谨慎甄别"},
+     "无法解析 EIP-712 数据.\n可能存在风险, 请谨慎甄别"},
     // cosmos.c
     {"Undelegate", "取消委托"},
     // starcoin.c

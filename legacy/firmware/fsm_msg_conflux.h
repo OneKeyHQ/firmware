@@ -127,7 +127,7 @@ void fsm_msgConfluxSignMessageCIP23(const ConfluxSignMessageCIP23 *msg) {
   data2hex(msg->message_hash.bytes, 32, msg_hash);
   if (!fsm_layoutSignHash(
           "Conflux", signer_str, domain_hash, msg_hash,
-          _("Unable to show CIP-712 data. Sign at your own risk."))) {
+          _("Unable to decode EIP-712 data. Sign at your own risk."))) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
