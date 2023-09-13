@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define COSMOS_NETWORK_COUNT 28
+#define COSMOS_NETWORK_COUNT 29
 
 typedef struct {
   const char *const chain_id;
