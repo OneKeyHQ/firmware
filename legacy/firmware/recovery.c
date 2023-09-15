@@ -688,6 +688,10 @@ static void select_complete_word(char *title, int start, int len) {
   uint8_t key = KEY_NULL;
   int index = 0;
 
+#if !EMULATOR
+  enableLongPress(false);
+#endif
+
 refresh_menu:
   layoutItemsSelectAdapterWords(
       &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
@@ -720,6 +724,10 @@ refresh_menu:
     default:
       break;
   }
+
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 }
 
 static uint8_t recovery_check_words(void) {
