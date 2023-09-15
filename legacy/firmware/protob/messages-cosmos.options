@@ -4,6 +4,6 @@ CosmosGetAddress.hrp                                         max_size:32
 CosmosAddress.address                                        max_size:65
 
 CosmosSignTx.address_n                                       max_count:8
-CosmosSignTx.raw_tx                                          max_size:2048
+CosmosSignTx.raw_tx                                          max_size:4096
 
 CosmosSignedTx.signature                                     max_size:64

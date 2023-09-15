@@ -1370,6 +1370,9 @@ wait_key:
       if (key == KEY_CONFIRM) {
         layoutInputMethod(input_type);
         menu_status = MENU_INPUT_SELECT;
+#if !EMULATOR
+        enableLongPress(false);
+#endif
         goto wait_key;
       }
     }
@@ -1546,6 +1549,9 @@ wait_key:
           symbol_index = 0;
           index = symbol_table[symbol_index];
         }
+#if !EMULATOR
+        enableLongPress(true);
+#endif
         goto input_passphrase;
       default:
         break;
@@ -1589,6 +1595,7 @@ bool protectPassphraseOnDevice(char *passphrase) {
     if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
       msg_tiny_id = 0xFFFF;
       result = true;
+      timeout_flag = false;
       break;
     }
 
