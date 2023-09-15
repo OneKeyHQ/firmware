@@ -1601,6 +1601,7 @@ bool protectPassphraseOnDevice(char *passphrase) {
     // check for ButtonAck
     if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
       msg_tiny_id = 0xFFFF;
+      timeout_flag = false;
       result = true;
       break;
     }
