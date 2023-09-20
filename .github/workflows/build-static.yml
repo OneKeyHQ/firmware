@@ -1,0 +1,88 @@
+name: "Release Assets Builder"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-static:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Populate vars"
+        run: |
+          FIRMWARE_VERSION=$(cat ./core/embed/firmware/version.h | grep "ONEKEY_VERSION " | awk -F "[\"\"]" '{print $2}')
+          BUILD_DATE=$(date +"%Y%m%d")
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          echo "FIRMWARE_VERSION=$FIRMWARE_VERSION" >> $GITHUB_ENV
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          echo "SHORT_HASH=$SHORT_HASH" >> $GITHUB_ENV
+          echo "ARTIFACTS_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"" >> $GITHUB_ENV
+
+      - name: "Download base resources"
+        run: |
+          mkdir dist
+          wget -P dist/ https://web.onekey-asset.com/hardware/touch/resource/resource-base-v4.0.0.zip
+
+      - name: "Clean only emulator used resources"
+        run: >
+          pushd core/src/trezor/lvglui/res &&
+          rm
+          JetBrainsMono-Bold-32.bin
+          JetBrainsMono-Medium-24.bin
+          JetBrainsMono-Medium-28.bin
+          LANG-MIX-TITLE.bin
+          LANG-MIX.bin
+          PlusJakartaSans-Bold-20.bin
+          PlusJakartaSans-Bold-24.bin
+          PlusJakartaSans-Bold-30.bin
+          PlusJakartaSans-Bold-32.bin
+          PlusJakartaSans-Bold-36.bin
+          PlusJakartaSans-Bold-48.bin
+          PlusJakartaSans-Medium-20.bin
+          PlusJakartaSans-Medium-24.bin
+          PlusJakartaSans-Medium-28.bin
+          PlusJakartaSans-Medium-30.bin
+          PlusJakartaSans-Regular-24.bin
+          PlusJakartaSans-Regular-30.bin
+          lv_font_scs_bold_24.bin
+          lv_font_scs_bold_36.bin
+          lv_font_scs_reg_24.bin;
+          popd
+
+      - name: "Diff two folders and output the delta to a new folder"
+        run: |
+          sudo apt update
+          sudo apt install -y xattr git-lfs
+          git lfs pull
+          mkdir dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}
+          unzip dist/resource-base-v4.0.0.zip -d dist
+          ls core/src/trezor/lvglui/res |xargs -I{} xattr -d com.apple.quarantine core/src/trezor/lvglui/res/{}
+          chmod 666 core/src/trezor/lvglui/res/*
+          diff -qr core/src/trezor/lvglui/res dist/res | grep 'Only in core/src/trezor/lvglui/res' | cut -d ':' -f2 | xargs -I{} cp core/src/trezor/lvglui/res/{} dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}
+          zip -rj dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}.zip dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}
+          zip -rj dist/res-${{ env.FIRMWARE_VERSION }}.zip core/src/trezor/lvglui/res
+
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: Firmware-resource-${{ env.FIRMWARE_VERSION }}
+          path: |
+            dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}.zip
+            dist/res-${{ env.FIRMWARE_VERSION }}.zip
+
+      - name: "Notify to Slack"
+        uses: onekeyhq/actions/notice-slack-app-update@main
+        with:
+          web-hook-url: ${{ secrets.SLACK_DEV_RELEASE_WEBHOOK }}
+          artifact-type: TOUCH-FIRMWARE
+          artifact-name: Touch-Static-Resource
+          artifact-bundle-id: "so.onekey.firmware.touch"
+          artifact-version-name: "${{ env.FIRMWARE_VERSION }}"
+          artifact-version-code: "${{ env.SHORT_HASH }}-${{ env.BUILD_DATE }}"
+          artifact-download-url: "${{ env.ARTIFACTS_URL }}"
+          change-log: ""
+          custom-issue-url: ""
+          custom-message-title: ""
+          custom-message-payload: ""
