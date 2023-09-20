@@ -1,6 +1,7 @@
 from trezor import utils
 from trezor.lvglui.scrs.components.button import NormalButton
 from trezor.lvglui.scrs.components.pageable import PageAbleMessage
+from trezor.lvglui.scrs.components.transition import BtnClickTransition
 
 from ..i18n import gettext as _, keys as i18n_keys
 from ..lv_colors import lv_colors
@@ -414,6 +415,15 @@ class TransactionDetailsETH(FullSizeWindow):
                     .border_width(2)
                     .border_color(lv_colors.ONEKEY_GRAY_1),
                     0,
+                )
+                self.view_btn.add_style(
+                    StyleWrapper()
+                    .bg_opa(lv.OPA.COVER)
+                    .bg_color(lv_colors.ONEKEY_GRAY_3)
+                    .transform_height(-2)
+                    .transform_width(-2)
+                    .transition(BtnClickTransition()),
+                    lv.PART.MAIN | lv.STATE.PRESSED,
                 )
 
                 self.view_btn.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)

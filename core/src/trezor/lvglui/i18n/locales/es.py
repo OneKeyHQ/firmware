@@ -174,7 +174,6 @@ translations = [
     "¿Usar esta frase de contraseña?",
     "Modelo",
     "Almacenamiento",
-    "Versión del sistema",
     "PIN incorrecto, este es tu último intento.",
     "Modificar la tarifa",
     "Cantidad (tu gastas):",
@@ -368,7 +367,6 @@ translations = [
     "Actualización de recursos",
     "¿Quieres actualizar el recurso de firmware?",
     "Actualizar",
-    "Versión Bluetooth",
     "Transacción firmada",
     "Cerrar ({}s)",
     "Nota:",
@@ -442,8 +440,6 @@ translations = [
     "Memorándum:",
     "Ver nota",
     "Nombre Bluetooth",
-    "Versión del cargador de arranque",
-    "Versión del cargador de placas",
     "Número de serie",
     "Actualizacion del sistema",
     "Pantalla de inicio",
@@ -635,5 +631,7 @@ translations = [
     "Actualizar transacción",
     "Finalizar transacción",
     "Transacción de fusión",
+    "Sistema",
+    "Cargador de arranque",
 ]
 # fmt: on
