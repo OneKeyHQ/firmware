@@ -174,7 +174,6 @@ translations = [
     "Use This Passphrase?",
     "Model",
     "Storage",
-    "System Version",
     "Incorrect PIN, this is your last attempt.",
     "Modify Fee",
     "Amount (You Spend):",
@@ -368,7 +367,6 @@ translations = [
     "Resource Update",
     "Do you want to update firmware resource?",
     "Update",
-    "Bluetooth Version",
     "Transaction Signed",
     "Close ({}s)",
     "Note:",
@@ -442,8 +440,6 @@ translations = [
     "Memo:",
     "View Memo",
     "Bluetooth Name",
-    "Bootloader Version",
-    "Boardloader Version",
     "Serial Number",
     "System Update",
     "Homescreen",
@@ -635,5 +631,7 @@ translations = [
     "Update Transaction",
     "Finalize Transaction",
     "Meld Transaction",
+    "System",
+    "Bootloader",
 ]
 # fmt: on

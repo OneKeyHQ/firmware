@@ -174,7 +174,6 @@ translations = [
     "Utiliser cette phrase secrète?",
     "Modèle",
     "Stockage",
-    "Version du système",
     "PIN incorrect, c'est votre dernière tentative.",
     "Modifier la redevance",
     "Montant (vous dépensez):",
@@ -368,7 +367,6 @@ translations = [
     "Mise à jour des ressources",
     "Voulez-vous mettre à jour la ressource du micrologiciel?",
     "Mise à jour",
-    "VersionBluetooth",
     "Transaction signée",
     "Se ferme)",
     "Noter:",
@@ -442,8 +440,6 @@ translations = [
     "Note:",
     "Afficher le mémo",
     "Nom Bluetooth",
-    "Version du chargeur de démarrage",
-    "Version chargeur de carte",
     "Numéro de série",
     "Mise à jour du système",
     "Écran d'accueil",
@@ -635,5 +631,7 @@ translations = [
     "Mettre à jour la transaction",
     "Finaliser la transaction",
     "Transaction de fusion",
+    "Système",
+    "Chargeur de démarrage",
 ]
 # fmt: on
