@@ -357,14 +357,15 @@ def set_busy(client: "TrezorClient", expiry_ms: Optional[int]) -> "MessageType":
 # new feautres
 # Reboot
 @session
-def reboot(client: "TrezorClient", reboot_type:messages.RebootType) -> "MessageType":
-    resp = client.call(messages.Reboot(reboot_type))
+@expect(messages.Success, field="message", ret_type=str)
+def bl_reboot(client: "TrezorClient", reboot_type:messages.RebootType) -> "MessageType":
+    resp = client.call(messages.Reboot(reboot_type=reboot_type))
     return resp
 
 # FirmwareUpdateEmmc
 @session
 def firmware_update_emmc(client: "TrezorClient", path_file: str, force_erease: bool) -> "MessageType":
-    msg = messages.FirmwareUpdateEmmc(path=path_file, force_erease=force_erease)
+    msg = messages.FirmwareUpdateEmmc(path=path_file, reboot_on_success=force_erease)
     resp = client.call(msg)
     return resp
 
