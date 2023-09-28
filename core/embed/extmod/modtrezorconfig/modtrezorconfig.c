@@ -38,6 +38,9 @@
 #include "emmc.h"
 #include "mini_printf.h"
 #include "se_thd89.h"
+
+#define MAX_MNEMONIC_LEN 240
+
 #endif
 
 static secbool wrapped_ui_wait_callback(uint32_t wait, uint32_t progress,
@@ -151,9 +154,6 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_lock_obj,
 ///     Returns True if storage is unlocked, False otherwise.
 ///     """
 STATIC mp_obj_t mod_trezorconfig_is_unlocked(void) {
-  if (sectrue != se_hasPin()) {
-    return mp_const_true;
-  }
   if (sectrue != se_getSecsta()) {
     return mp_const_false;
   }
@@ -218,7 +218,6 @@ STATIC mp_obj_t mod_trezorconfig_change_pin(size_t n_args,
       return mp_const_false;
     }
   }
-  se_setPinValidtime(SE_PIN_TIMEOUT_MAX);
   return mp_const_true;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorconfig_change_pin_obj, 4,
@@ -274,11 +273,7 @@ STATIC mp_obj_t mod_trezorconfig_change_wipe_code(size_t n_args,
     }
   }
 
-  if (sectrue != se_verifyPin(pin_b.buf)) {
-    return mp_const_false;
-  }
-
-  if (sectrue != se_changeWipeCode(wipe_code_b.buf)) {
+  if (sectrue != se_changeWipeCode(pin_b.buf, wipe_code_b.buf)) {
     return mp_const_false;
   }
   return mp_const_true;
@@ -286,6 +281,38 @@ STATIC mp_obj_t mod_trezorconfig_change_wipe_code(size_t n_args,
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(
     mod_trezorconfig_change_wipe_code_obj, 3, 3,
     mod_trezorconfig_change_wipe_code);
+
+/// def get_needs_backup() -> bool:
+///     """
+///     Returns needs_backup.
+///     """
+STATIC mp_obj_t mod_trezorconfig_get_needs_backup(void) {
+  bool needs_backup = false;
+  if (sectrue != se_get_needs_backup(&needs_backup)) {
+    return mp_const_false;
+  }
+
+  return needs_backup ? mp_const_true : mp_const_false;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_get_needs_backup_obj,
+                                 mod_trezorconfig_get_needs_backup);
+
+/// def set_needs_backup(needs_backup: bool = False) -> bool:
+///     """
+///     Set needs_backup.
+///     """
+STATIC mp_obj_t mod_trezorconfig_set_needs_backup(mp_obj_t needs_backup) {
+  bool needs_backup_b = mp_obj_is_true(needs_backup);
+
+  if (sectrue != se_set_needs_backup(needs_backup_b)) {
+    return mp_const_false;
+  }
+
+  return mp_const_true;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorconfig_set_needs_backup_obj,
+                                 mod_trezorconfig_set_needs_backup);
 
 /// def get(app: int, key: int, public: bool = False) -> bytes | None:
 ///     """
@@ -321,6 +348,7 @@ STATIC mp_obj_t mod_trezorconfig_get(size_t n_args, const mp_obj_t *args) {
   }
   vstr_t vstr = {0};
   vstr_init_len(&vstr, len);
+  vstr.len = len;
   if (sectrue != reader(key + 3, vstr.buf, vstr.len)) {
     vstr_clear(&vstr);
     mp_raise_msg(&mp_type_RuntimeError, "Failed to get value from storage.");
@@ -423,8 +451,9 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorconfig_next_counter_obj, 2,
 ///     Erases the whole config. Use with caution!
 ///     """
 STATIC mp_obj_t mod_trezorconfig_wipe(void) {
-  se_reset_storage();
-  se_clearSecsta();
+  if (sectrue != se_reset_storage()) {
+    mp_raise_msg(&mp_type_RuntimeError, "Failed to reset storage.");
+  }
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_wipe_obj,
@@ -438,16 +467,7 @@ STATIC mp_obj_t mod_trezorconfig_se_import_mnemonic(mp_obj_t mnemonic) {
   if (sectrue != se_set_mnemonic(mnemo.buf, mnemo.len)) {
     return mp_const_false;
   }
-  uint8_t entropy[33] = {0};
-  int mnemonic_bits_len = mnemonic_to_bits(mnemo.buf, entropy);
-  int words_count = mnemonic_bits_len / 11;
-  // set entropy to SE
-  if (sectrue != se_set_entropy(entropy, words_count / 3 * 4)) {
-    return mp_const_false;
-  }
-  if (!generate_seed_steps()) {
-    return mp_const_false;
-  }
+
   return mp_const_true;
 }
 
@@ -455,26 +475,16 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorconfig_se_import_mnemonic_obj,
                                  mod_trezorconfig_se_import_mnemonic);
 
 STATIC mp_obj_t mod_trezorconfig_se_export_mnemonic(void) {
-  // uint8_t seed[64] = {0};
-  // uint32_t strength = 0;
+  char mnemonic[MAX_MNEMONIC_LEN + 1];
 
-  // if (sectrue != se_isInitialized()) {
-  //   // mp_raise_ValueError("Device not initialized");
-  //   return mp_const_none;
-  // }
-  // if (sectrue != se_getSeedStrength(&strength)) {
-  //   mp_raise_ValueError("Get mnemonic strength");
-  // }
+  if (sectrue != se_exportMnemonic(mnemonic, sizeof(mnemonic))) {
+    mp_raise_ValueError("Get se mnemonic");
+  }
 
-  // if (sectrue != se_export_seed(seed)) {
-  //   mp_raise_ValueError("Get mnemonic seed");
-  // }
-  // const char *mnemonic = mnemonic_from_data(seed, strength / 8);
-  // mp_obj_t res = mp_obj_new_str_copy(&mp_type_bytes, (const uint8_t
-  // *)mnemonic,
-  //                                    strlen(mnemonic));
-  // mnemonic_clear();
-  return mp_const_none;
+  mp_obj_t res = mp_obj_new_str_copy(&mp_type_bytes, (const uint8_t *)mnemonic,
+                                     strlen(mnemonic));
+  memzero(mnemonic, sizeof(mnemonic));
+  return res;
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorconfig_se_export_mnemonic_obj,
@@ -1034,6 +1044,10 @@ STATIC const mp_rom_map_elem_t mp_module_trezorconfig_globals_table[] = {
      MP_ROM_PTR(&mod_trezorconfig_get_serial_obj)},
     {MP_ROM_QSTR(MP_QSTR_get_capacity),
      MP_ROM_PTR(&mod_trezorconfig_get_capacity_obj)},
+    {MP_ROM_QSTR(MP_QSTR_get_needs_backup),
+     MP_ROM_PTR(&mod_trezorconfig_get_needs_backup_obj)},
+    {MP_ROM_QSTR(MP_QSTR_set_needs_backup),
+     MP_ROM_PTR(&mod_trezorconfig_set_needs_backup_obj)},
 #endif
 #if USE_THD89
     {MP_ROM_QSTR(MP_QSTR_is_initialized),

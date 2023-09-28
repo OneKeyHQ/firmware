@@ -1,7 +1,7 @@
 from micropython import const
 from typing import TYPE_CHECKING
 
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto import bech32, bip32, der
 from trezor.crypto.curve import bip340, secp256k1
 from trezor.crypto.hashlib import sha256
@@ -98,6 +98,8 @@ NONSEGWIT_INPUT_SCRIPT_TYPES = (
 
 
 def ecdsa_sign(node: bip32.HDNode, digest: bytes) -> bytes:
+    if utils.USE_THD89:
+        node.derive_path(node.address_n())
     sig = secp256k1.sign(node.private_key(), digest)
     sigder = der.encode_seq((sig[1:33], sig[33:65]))
     return sigder

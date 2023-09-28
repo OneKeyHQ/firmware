@@ -19,6 +19,7 @@
 
 #include STM32_HAL_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -414,12 +415,13 @@ HAL_StatusTypeDef i2c_master_send(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
   }
 }
 
-HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
-                                    uint16_t DevAddress, uint8_t *pData,
-                                    uint16_t *Size, uint32_t Timeout) {
+#define I2C_RECV_BUFFER_TOO_SMALL (0x80)
+
+int i2c_master_recive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
+                      uint8_t *pData, uint16_t *Size, uint32_t Timeout) {
   uint32_t tickstart, tickstart1;
   uint8_t data[4];
-  uint16_t data_len;
+  uint16_t temp_len, data_len;
   uint8_t *data_ptr = pData;
   uint8_t xor = 0x00;
   sw1 = sw2 = 0;
@@ -464,7 +466,7 @@ HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
 
       tickstart1 = HAL_GetTick();
       if (I2C_WaitOnRXNEFlagUntilTimeout(hi2c, 5, tickstart1) != HAL_OK) {
-        hal_delay(3);
+        hal_delay(2);
         continue;
       }
       data[0] = (uint8_t)hi2c->Instance->RXDR;
@@ -474,13 +476,17 @@ HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
       }
       data[1] = (uint8_t)hi2c->Instance->RXDR;
 
-      data_len = (data[0] << 8) + data[1];
-      *Size = data_len -= 2;
+      temp_len = (data[0] << 8) + data[1] - 2;
+      data_len = temp_len;
+
+      if (data_len > *Size) {
+        return I2C_RECV_BUFFER_TOO_SMALL;
+      }
 
       xor = xor_check(0, data, 2);
-      while (data_len > 0) {
+      while (temp_len > 0) {
         uint8_t data_len_tmp =
-            data_len > MAX_NBYTE_SIZE ? MAX_NBYTE_SIZE : data_len;
+            temp_len > MAX_NBYTE_SIZE ? MAX_NBYTE_SIZE : temp_len;
         I2C_TransferConfig(hi2c, DevAddress, data_len_tmp, I2C_RELOAD_MODE,
                            I2C_NO_STARTSTOP);
         for (int i = 0; i < data_len_tmp; i++) {
@@ -490,7 +496,7 @@ HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
           }
           *data_ptr++ = (uint8_t)hi2c->Instance->RXDR;
         }
-        data_len -= data_len_tmp;
+        temp_len -= data_len_tmp;
       }
 
       // sw1 sw2 xor
@@ -525,7 +531,7 @@ HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
 
     /* Process Unlocked */
     __HAL_UNLOCK(hi2c);
-    xor = xor_check(xor, pData, *Size);
+    xor = xor_check(xor, pData, data_len);
     xor = xor_check(xor, data, 2);
     if (xor != data[2]) {
       *Size = 0;
@@ -534,13 +540,7 @@ HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
     sw1 = data[0];
     sw2 = data[1];
 
-    if ((0x90 != sw1) || (0x00 != sw2)) {
-      if (sw1 == 0x6c || sw1 == 0x90) {
-        pData[0] = sw2;
-        *Size = 1;
-      }
-      return HAL_ERROR;
-    }
+    *Size = data_len;
 
     return HAL_OK;
   } else {
@@ -550,17 +550,23 @@ HAL_StatusTypeDef i2c_master_recive(I2C_HandleTypeDef *hi2c,
 
 secbool thd89_transmit(uint8_t *cmd, uint16_t len, uint8_t *resp,
                        uint16_t *resp_len) {
-  *resp_len = 0;
-
+  int ret = 0;
   if (i2c_master_send(&i2c_handle, THD89_ADDRESS, cmd, len, 500) != HAL_OK) {
     ensure(secfalse, "se send error");
     return secfalse;
   }
-  if (i2c_master_recive(&i2c_handle, THD89_ADDRESS, resp, resp_len,
-                        HAL_MAX_DELAY) != HAL_OK) {
-    if (sw1 != 0x90) {
-      // ensure(secfalse, "se recive error");
+  hal_delay(1);
+  ret = i2c_master_recive(&i2c_handle, THD89_ADDRESS, resp, resp_len,
+                          HAL_MAX_DELAY);
+  if (ret != HAL_OK) {
+    if (ret == I2C_RECV_BUFFER_TOO_SMALL) {
+      ensure(secfalse, "se recive buffer too small");
+    } else {
+      ensure(secfalse, "se recive error");
     }
+    return secfalse;
+  }
+  if ((0x90 != sw1) || (0x00 != sw2)) {
     return secfalse;
   }
 

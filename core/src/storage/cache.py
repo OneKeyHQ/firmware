@@ -35,6 +35,8 @@ APP_COMMON_BUSY_DEADLINE_MS = 4 | _SESSIONLESS_FLAG
 
 SESSION_DIRIVE_CARDANO = False
 
+_NONCE_CACHE = bytearray(32)
+
 
 # === Homescreen storage ===
 # This does not logically belong to the "cache" functionality, but the cache module is
@@ -209,7 +211,8 @@ def start_session(received_session_id: bytes | None = None) -> bytes:
         selected_session.last_usage = _session_usage_counter
         return selected_session.export_session_id()
     else:
-        return se_thd89.start_session(received_session_id)
+        received_session_id = se_thd89.start_session(received_session_id)
+        return received_session_id
 
 
 def end_current_session() -> None:
@@ -222,14 +225,14 @@ def end_current_session() -> None:
         _SESSIONS[_active_session_idx].clear()
         _active_session_idx = None
     else:
-        pass
+        se_thd89.end_session()
 
 
 def is_session_started() -> bool:
     if not utils.USE_THD89:
         return _active_session_idx is not None
     else:
-        pass
+        return se_thd89.session_is_open()
 
 
 def set(key: int, value: bytes) -> None:
@@ -241,6 +244,8 @@ def set(key: int, value: bytes) -> None:
             raise InvalidSessionError
         _SESSIONS[_active_session_idx].set(key, value)
     else:
+        if key == APP_COMMON_NONCE:
+            _NONCE_CACHE[:] = value
         return
 
 
@@ -280,6 +285,8 @@ def get(key: int, default: T | None = None) -> bytes | T | None:  # noqa: F811
             raise InvalidSessionError
         return _SESSIONS[_active_session_idx].get(key, default)
     else:
+        if key == APP_COMMON_NONCE:
+            return bytes(_NONCE_CACHE)
         return None
 
 
@@ -302,9 +309,14 @@ def is_set(key: int) -> bool:
 def delete(key: int) -> None:
     if key & _SESSIONLESS_FLAG:
         return _SESSIONLESS_CACHE.delete(key ^ _SESSIONLESS_FLAG)
-    if _active_session_idx is None:
-        raise InvalidSessionError
-    return _SESSIONS[_active_session_idx].delete(key)
+    if not utils.USE_THD89:
+        if _active_session_idx is None:
+            raise InvalidSessionError
+        return _SESSIONS[_active_session_idx].delete(key)
+    else:
+        if key == APP_COMMON_NONCE:
+            _NONCE_CACHE[:] = b""
+        return
 
 
 if TYPE_CHECKING:

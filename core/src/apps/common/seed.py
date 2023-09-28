@@ -18,13 +18,18 @@ class Slip21Node:
     """
 
     def __init__(self, seed: bytes | None = None, data: bytes | None = None) -> None:
-        assert seed is None or data is None, "Specify exactly one of: seed, data"
-        if data is not None:
-            self.data = data
-        elif seed is not None:
-            self.data = hmac(hmac.SHA512, b"Symmetric key seed", seed).digest()
+        if utils.USE_THD89:
+            from trezor.crypto import se_thd89
+
+            self.data = se_thd89.slip21_node()
         else:
-            raise ValueError  # neither seed nor data specified
+            assert seed is None or data is None, "Specify exactly one of: seed, data"
+            if data is not None:
+                self.data = data
+            elif seed is not None:
+                    self.data = hmac(hmac.SHA512, b"Symmetric key seed", seed).digest()
+            else:
+                raise ValueError  # neither seed nor data specified
 
     def __del__(self) -> None:
         del self.data
@@ -71,12 +76,18 @@ if not utils.BITCOIN_ONLY:
 
                 derive_and_store_secrets(passphrase)
         else:
-            passphrase = await get_passphrase(ctx)
-            common_seed = mnemonic.get_seed(passphrase, progress_bar=False)
-            if cache.SESSION_DIRIVE_CARDANO:
-                from apps.cardano.seed import derive_and_store_secrets
+            from trezor.crypto import se_thd89
 
-                derive_and_store_secrets(passphrase)
+            state = se_thd89.get_session_state()
+
+            if not state[0] & 0x80:
+                passphrase = await get_passphrase(ctx)
+                mnemonic.get_seed(passphrase, progress_bar=False)
+
+                if cache.SESSION_DIRIVE_CARDANO:
+                    from apps.cardano.seed import derive_and_store_secrets
+
+                    derive_and_store_secrets(passphrase)
 
     @cache.stored_async(cache.APP_COMMON_SEED)
     async def get_seed(ctx: wire.Context) -> bytes:

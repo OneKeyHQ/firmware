@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from storage import cache, device
-from trezor import wire
+from trezor import utils, wire
 from trezor.crypto import bip32, cardano
 from trezor.enums import CardanoDerivationType
 
@@ -37,14 +37,17 @@ class Keychain:
     """
 
     def __init__(self, root: bip32.HDNode) -> None:
-        self.byron_root = self._derive_path(root, paths.BYRON_ROOT)
-        self.shelley_root = self._derive_path(root, paths.SHELLEY_ROOT)
-        self.multisig_root = self._derive_path(root, paths.MULTISIG_ROOT)
-        self.minting_root = self._derive_path(root, paths.MINTING_ROOT)
+        if utils.USE_THD89:
+            self.master_root = root.clone()
+        else:
+            self.byron_root = self._derive_path(root, paths.BYRON_ROOT)
+            self.shelley_root = self._derive_path(root, paths.SHELLEY_ROOT)
+            self.multisig_root = self._derive_path(root, paths.MULTISIG_ROOT)
+            self.minting_root = self._derive_path(root, paths.MINTING_ROOT)
         root.__del__()
 
     @staticmethod
-    def _derive_path(root: bip32.HDNode, path: Bip32Path) -> bip32.HDNode:
+    def _derive_path(root: bip32.HDNode, path: Bip32Path) -> bip32.HDNode:        
         """Clone and derive path from the root."""
         node = root.clone()
         node.derive_path(path)
@@ -76,18 +79,21 @@ class Keychain:
 
     def derive(self, node_path: Bip32Path) -> bip32.HDNode:
         self.verify_path(node_path)
-        path_root = self._get_path_root(node_path)
+        if utils.USE_THD89:
+            return self._derive_path(self.master_root, node_path)
+        else:
+            path_root = self._get_path_root(node_path)
 
-        # this is true now, so for simplicity we don't branch on path type
-        assert (
-            len(paths.BYRON_ROOT) == len(paths.SHELLEY_ROOT)
-            and len(paths.MULTISIG_ROOT) == len(paths.SHELLEY_ROOT)
-            and len(paths.MINTING_ROOT) == len(paths.SHELLEY_ROOT)
-        )
-        suffix = node_path[len(paths.SHELLEY_ROOT) :]
+            # this is true now, so for simplicity we don't branch on path type
+            assert (
+                len(paths.BYRON_ROOT) == len(paths.SHELLEY_ROOT)
+                and len(paths.MULTISIG_ROOT) == len(paths.SHELLEY_ROOT)
+                and len(paths.MINTING_ROOT) == len(paths.SHELLEY_ROOT)
+            )
+            suffix = node_path[len(paths.SHELLEY_ROOT) :]
 
-        # derive child node from the root
-        return self._derive_path(path_root, suffix)
+            # derive child node from the root
+            return self._derive_path(path_root, suffix)
 
     # XXX the root node remains in session cache so we should not delete it
     # def __del__(self) -> None:
@@ -112,28 +118,37 @@ def is_minting_path(path: Bip32Path) -> bool:
 
 def derive_and_store_secrets(passphrase: str) -> None:
     assert device.is_initialized()
-    assert cache.get(cache.APP_COMMON_DERIVE_CARDANO)
 
     if not mnemonic.is_bip39():
         # nothing to do for SLIP-39, where we can derive the root from the main seed
         return
 
-    icarus_secret = mnemonic.derive_cardano_icarus(passphrase, trezor_derivation=False)
+    if not utils.USE_THD89:
+        assert cache.get(cache.APP_COMMON_DERIVE_CARDANO)
 
-    words = mnemonic.get_secret()
-    assert words is not None, "Mnemonic is not set"
-    # count ASCII spaces, add 1 to get number of words
-    words_count = sum(c == 0x20 for c in words) + 1
-
-    if words_count == 24:
-        icarus_trezor_secret = mnemonic.derive_cardano_icarus(
-            passphrase, trezor_derivation=True
+        icarus_secret = mnemonic.derive_cardano_icarus(
+            passphrase, trezor_derivation=False
         )
-    else:
-        icarus_trezor_secret = icarus_secret
 
-    cache.set(cache.APP_CARDANO_ICARUS_SECRET, icarus_secret)
-    cache.set(cache.APP_CARDANO_ICARUS_TREZOR_SECRET, icarus_trezor_secret)
+        words = mnemonic.get_secret()
+        assert words is not None, "Mnemonic is not set"
+        # count ASCII spaces, add 1 to get number of words
+        words_count = sum(c == 0x20 for c in words) + 1
+
+        if words_count == 24:
+            icarus_trezor_secret = mnemonic.derive_cardano_icarus(
+                passphrase, trezor_derivation=True
+            )
+        else:
+            icarus_trezor_secret = icarus_secret
+
+        cache.set(cache.APP_CARDANO_ICARUS_SECRET, icarus_secret)
+        cache.set(cache.APP_CARDANO_ICARUS_TREZOR_SECRET, icarus_trezor_secret)
+    else:
+        from trezor.crypto import se_thd89
+
+        if not se_thd89.cardano_seed(passphrase):
+            raise RuntimeError
 
 
 async def _get_secret(ctx: wire.Context, cache_entry: int) -> bytes:
@@ -151,20 +166,40 @@ async def _get_keychain_bip39(
     if not device.is_initialized():
         raise wire.NotInitialized("Device is not initialized")
 
-    if derivation_type == CardanoDerivationType.LEDGER:
-        seed = await get_seed(ctx)
-        return Keychain(cardano.from_seed_ledger(seed))
+    if not utils.USE_THD89:
 
-    if not cache.get(cache.APP_COMMON_DERIVE_CARDANO):
-        raise wire.ProcessError("Cardano derivation is not enabled for this session")
+        if derivation_type == CardanoDerivationType.LEDGER:
+            seed = await get_seed(ctx)
+            return Keychain(cardano.from_seed_ledger(seed))
 
-    if derivation_type == CardanoDerivationType.ICARUS:
-        cache_entry = cache.APP_CARDANO_ICARUS_SECRET
+        if not cache.get(cache.APP_COMMON_DERIVE_CARDANO):
+            raise wire.ProcessError(
+                "Cardano derivation is not enabled for this session"
+            )
+
+        if derivation_type == CardanoDerivationType.ICARUS:
+            cache_entry = cache.APP_CARDANO_ICARUS_SECRET
+        else:
+            cache_entry = cache.APP_CARDANO_ICARUS_TREZOR_SECRET
+
+        secret = await _get_secret(ctx, cache_entry)
+        root = cardano.from_secret(secret)
     else:
-        cache_entry = cache.APP_CARDANO_ICARUS_TREZOR_SECRET
-
-    secret = await _get_secret(ctx, cache_entry)
-    root = cardano.from_secret(secret)
+        if derivation_type == CardanoDerivationType.LEDGER:
+            curve_name = "ed25519 cardano ledger seed"
+        elif derivation_type == CardanoDerivationType.ICARUS_TREZOR:
+            curve_name = "ed25519 cardano trezor seed"
+        else:
+            curve_name = "ed25519 cardano seed"
+        await derive_and_store_roots(ctx)
+        root = bip32.HDNode(
+            depth=0,
+            fingerprint=0,
+            child_num=0,
+            chain_code=bytearray(32),
+            public_key=bytearray(33),
+            curve_name=curve_name,
+        )
     return Keychain(root)
 
 

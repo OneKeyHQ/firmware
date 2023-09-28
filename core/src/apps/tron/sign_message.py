@@ -28,7 +28,7 @@ async def sign_message(
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(address_n)
 
-    if utils.USE_THD89:
+    if USE_THD89:
         from trezor.crypto import se_thd89
 
         public_key = se_thd89.uncompress_pubkey("secp256k1", node.public_key())

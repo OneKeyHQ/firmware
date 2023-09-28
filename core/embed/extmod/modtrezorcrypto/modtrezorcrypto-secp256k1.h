@@ -150,14 +150,17 @@ STATIC mp_obj_t mod_trezorcrypto_secp256k1_sign(size_t n_args,
   mp_get_buffer_raise(args[1], &dig, MP_BUFFER_READ);
   bool compressed = (n_args < 3) || (args[2] == mp_const_true);
   int (*is_canonical)(uint8_t by, uint8_t sig[64]) = NULL;
+  uint8_t canonical_type = 0;
 #if !BITCOIN_ONLY
   mp_int_t canonical = (n_args > 3) ? mp_obj_get_int(args[3]) : 0;
   switch (canonical) {
     case CANONICAL_SIG_ETHEREUM:
       is_canonical = ethereum_is_canonical;
+      canonical_type = 1;
       break;
     case CANONICAL_SIG_EOS:
       is_canonical = eos_is_canonical;
+      canonical_type = 2;
       break;
   }
 #endif
@@ -173,9 +176,11 @@ STATIC mp_obj_t mod_trezorcrypto_secp256k1_sign(size_t n_args,
   int ret = 0;
 
 #if USE_THD89
-  ret = se_secp256k1_sign_digest((const uint8_t *)dig.buf,
-                                 (uint8_t *)sig.buf + 1, &pby, is_canonical);
+  (void)is_canonical;
+  ret = se_secp256k1_sign_digest(canonical_type, (const uint8_t *)dig.buf,
+                                 (uint8_t *)sig.buf + 1, &pby);
 #else
+  (void)canonical_type;
 #ifdef USE_SECP256K1_ZKP_ECDSA
   if (!is_canonical) {
     ret = zkp_ecdsa_sign_digest(&secp256k1, (const uint8_t *)sk.buf,

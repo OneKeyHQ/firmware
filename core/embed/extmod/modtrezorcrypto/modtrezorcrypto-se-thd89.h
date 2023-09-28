@@ -59,7 +59,7 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_seed(size_t n_args,
     // se_set_ui_callback(NULL);
   }
 
-  if (!se_gen_session_seed(ppassphrase)) {
+  if (!se_gen_session_seed(ppassphrase, false)) {
     return mp_const_false;
   }
   return mp_const_true;
@@ -67,6 +67,37 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_seed(size_t n_args,
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_trezorcrypto_se_thd89_seed_obj,
                                            1, 2,
                                            mod_trezorcrypto_se_thd89_seed);
+
+/// def cardano_seed(
+///     passphrase: str,
+///     callback: Callable[[int, int], None] | None = None,
+/// ) -> bool:
+///     """
+///     Generate seed from mnemonic and passphrase.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_cardano_seed(size_t n_args,
+                                                       const mp_obj_t *args) {
+  mp_buffer_info_t phrase = {0};
+  mp_get_buffer_raise(args[0], &phrase, MP_BUFFER_READ);
+  const char *ppassphrase = phrase.len > 0 ? phrase.buf : "";
+  if (n_args > 1) {
+    // generate with a progress callback
+    ui_wait_callback = args[1];
+    // se_set_ui_callback(ui_wait_callback);
+    ui_wait_callback = mp_const_none;
+  } else {
+    // generate without callback
+    // se_set_ui_callback(NULL);
+  }
+
+  if (!se_gen_session_seed(ppassphrase, true)) {
+    return mp_const_false;
+  }
+  return mp_const_true;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(
+    mod_trezorcrypto_se_thd89_cardano_seed_obj, 1, 2,
+    mod_trezorcrypto_se_thd89_cardano_seed);
 
 /// def start_session(
 ///     session_id: bytes,
@@ -106,15 +137,28 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorcrypto_se_thd89_end_session_obj,
 ///     get current session secret state.
 ///     """
 STATIC mp_obj_t mod_trezorcrypto_se_thd89_get_session_state(void) {
-  uint8_t status[3] = {0};
-  if (!se_getSessionCachedState((se_session_cached_status *)&status)) {
+  uint8_t status[2] = {0};
+  if (!se_get_session_seed_state(status)) {
     mp_raise_msg(&mp_type_RuntimeError, "Failed to get se state.");
   }
-  return mp_obj_new_bytes(status, 3);
+  return mp_obj_new_bytes(status, 2);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(
     mod_trezorcrypto_se_thd89_get_session_state_obj,
     mod_trezorcrypto_se_thd89_get_session_state);
+
+/// def session_is_open() -> bool:
+///     """
+///     get current session secret state.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_session_is_open(void) {
+  if (!se_session_is_open()) {
+    return mp_const_false;
+  }
+  return mp_const_true;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorcrypto_se_thd89_session_is_open_obj,
+                                 mod_trezorcrypto_se_thd89_session_is_open);
 
 /// def nist256p1_sign(
 ///     secret_key: bytes, digest: bytes, compressed: bool = True
@@ -139,7 +183,7 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_nist256p1_sign(size_t n_args,
   vstr_init_len(&sig, 65);
   uint8_t pby = 0;
   if (0 != se_nist256p1_sign_digest((const uint8_t *)dig.buf,
-                                    (uint8_t *)sig.buf + 1, &pby, NULL)) {
+                                    (uint8_t *)sig.buf + 1, &pby)) {
     vstr_clear(&sig);
     mp_raise_ValueError("Signing failed");
   }
@@ -166,15 +210,15 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_secp256k1_sign_digest(
   // mp_get_buffer_raise(args[0], &sk, MP_BUFFER_READ);
   mp_get_buffer_raise(args[1], &dig, MP_BUFFER_READ);
   bool compressed = (n_args < 3) || (args[2] == mp_const_true);
-  int (*is_canonical)(uint8_t by, uint8_t sig[64]) = NULL;
+  uint8_t canonical_type = 0;
 #if !BITCOIN_ONLY
   mp_int_t canonical = (n_args > 3) ? mp_obj_get_int(args[3]) : 0;
   switch (canonical) {
     case CANONICAL_SIG_ETHEREUM:
-      is_canonical = ethereum_is_canonical;
+      canonical_type = 1;
       break;
     case CANONICAL_SIG_EOS:
-      is_canonical = eos_is_canonical;
+      canonical_type = 2;
       break;
   }
 #endif
@@ -188,8 +232,8 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_secp256k1_sign_digest(
   vstr_init_len(&sig, 65);
   uint8_t pby = 0;
   int ret = 0;
-  ret = se_secp256k1_sign_digest((const uint8_t *)dig.buf,
-                                 (uint8_t *)sig.buf + 1, &pby, is_canonical);
+  ret = se_secp256k1_sign_digest(canonical_type, (const uint8_t *)dig.buf,
+                                 (uint8_t *)sig.buf + 1, &pby);
 
   if (0 != ret) {
     vstr_clear(&sig);
@@ -322,30 +366,6 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_ecdh(mp_obj_t curve,
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_se_thd89_ecdh_obj,
                                  mod_trezorcrypto_se_thd89_ecdh);
 
-/// def bip340_ecdh(public_key: bytes) -> bytes:
-///     """
-///     Multiplies point defined by public_key with scalar defined by
-///     secret_key. Useful for ECDH.
-///     """
-STATIC mp_obj_t mod_trezorcrypto_se_thd89_bip340_ecdh(mp_obj_t public_key) {
-  mp_buffer_info_t pk = {0};
-  mp_get_buffer_raise(public_key, &pk, MP_BUFFER_READ);
-
-  if (pk.len != 33 && pk.len != 65) {
-    mp_raise_ValueError("Invalid length of public key");
-  }
-
-  vstr_t out = {0};
-  vstr_init_len(&out, 65);
-  if (0 != se_bip340_ecdh((const uint8_t *)pk.buf, (uint8_t *)out.buf)) {
-    vstr_clear(&out);
-    mp_raise_ValueError("Multiply failed");
-  }
-  return mp_obj_new_str_from_vstr(&mp_type_bytes, &out);
-}
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_se_thd89_bip340_ecdh_obj,
-                                 mod_trezorcrypto_se_thd89_bip340_ecdh);
-
 /// def uncompress_pubkey(pubkey: bytes) -> bytes:
 ///     """
 ///     Uncompress public.
@@ -394,18 +414,190 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(
     mod_trezorcrypto_se_thd89_uncompress_pubkey_obj,
     mod_trezorcrypto_se_thd89_uncompress_pubkey);
 
+/// def aes256_encrypt(data: bytes, value: bytes, iv: bytes | None) ->
+/// bytes:
+///     """
+///     Uses secret key to produce the signature of message.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_aes256_encrypt(size_t n_args,
+                                                         const mp_obj_t *args) {
+  mp_buffer_info_t data = {0};
+  mp_buffer_info_t value = {0};
+  mp_get_buffer_raise(args[0], &data, MP_BUFFER_READ);
+  mp_get_buffer_raise(args[1], &value, MP_BUFFER_READ);
+
+  mp_buffer_info_t iv = {0};
+  const uint8_t *piv = NULL;
+  if (n_args == 3) {
+    mp_get_buffer_raise(args[2], &iv, MP_BUFFER_READ);
+    if (iv.len != 16) {
+      mp_raise_ValueError("Invalid length of iv");
+    }
+    piv = (const uint8_t *)iv.buf;
+  }
+
+  vstr_t vstr = {0};
+  vstr_init_len(&vstr, value.len);
+
+  if (se_aes256_encrypt(data.buf, data.len, piv, value.buf, value.len,
+                        (uint8_t *)vstr.buf) != 0) {
+    mp_raise_ValueError("Encrypt failed");
+  }
+
+  return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(
+    mod_trezorcrypto_se_thd89_aes256_encrypt_obj, 2, 3,
+    mod_trezorcrypto_se_thd89_aes256_encrypt);
+
+/// def aes256_decrypt(data: bytes, value: bytes, iv: bytes | None) ->
+/// bytes:
+///     """
+///     Uses secret key to produce the signature of message.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_aes256_decrypt(size_t n_args,
+                                                         const mp_obj_t *args) {
+  mp_buffer_info_t data = {0};
+  mp_buffer_info_t value = {0};
+  mp_get_buffer_raise(args[0], &data, MP_BUFFER_READ);
+  mp_get_buffer_raise(args[1], &value, MP_BUFFER_READ);
+
+  mp_buffer_info_t iv = {0};
+  const uint8_t *piv = NULL;
+  if (n_args == 3) {
+    mp_get_buffer_raise(args[2], &iv, MP_BUFFER_READ);
+    if (iv.len != 16) {
+      mp_raise_ValueError("Invalid length of iv");
+    }
+    piv = (const uint8_t *)iv.buf;
+  }
+
+  vstr_t vstr = {0};
+  vstr_init_len(&vstr, value.len);
+
+  if (se_aes256_decrypt(data.buf, data.len, piv, value.buf, value.len,
+                        (uint8_t *)vstr.buf) != 0) {
+    mp_raise_ValueError("Encrypt failed");
+  }
+
+  return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(
+    mod_trezorcrypto_se_thd89_aes256_decrypt_obj, 2, 3,
+    mod_trezorcrypto_se_thd89_aes256_decrypt);
+
+/// def slip21_node() -> bytes:
+///     """
+///     Returns slip21 node.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_slip21_node(void) {
+  vstr_t vstr = {0};
+  vstr_init_len(&vstr, 64);
+  if (se_slip21_node((uint8_t *)vstr.buf) != 0) {
+    mp_raise_ValueError("slip21_node failed");
+  }
+  return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorcrypto_se_thd89_slip21_node_obj,
+                                 mod_trezorcrypto_se_thd89_slip21_node);
+
+/// def authorization_set(
+///     authorization_type: int,
+///     authorization: bytes,
+/// ) -> bool:
+///     """
+///     authorization_set.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_authorization_set(
+    mp_obj_t authorization_type, mp_obj_t authorization_data) {
+  uint32_t auth_type = trezor_obj_get_uint(authorization_type);
+  mp_buffer_info_t auth_data = {0};
+  mp_get_buffer_raise(authorization_data, &auth_data, MP_BUFFER_READ);
+
+  if (auth_data.len > MAX_AUTHORIZATION_LEN) {
+    mp_raise_ValueError("Invalid length of authorization data");
+  }
+
+  if (sectrue !=
+      se_authorization_set(auth_type, auth_data.buf, auth_data.len)) {
+    mp_raise_ValueError("authorization_set failed");
+  }
+  return mp_const_true;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(
+    mod_trezorcrypto_se_thd89_authorization_set_obj,
+    mod_trezorcrypto_se_thd89_authorization_set);
+
+/// def authorization_get_type(
+/// ) -> int:
+///     """
+///     authorization_get.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_authorization_get_type(void) {
+  uint32_t auth_type = 0;
+
+  if (sectrue != se_authorization_get_type(&auth_type)) {
+    return mp_const_none;
+  }
+  return mp_obj_new_int_from_uint(auth_type);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(
+    mod_trezorcrypto_se_thd89_authorization_get_type_obj,
+    mod_trezorcrypto_se_thd89_authorization_get_type);
+
+/// def authorization_get_data(
+/// ) -> bytes:
+///     """
+///     authorization_get.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_authorization_get_data(void) {
+  uint32_t data_len = 0;
+
+  vstr_t resp = {0};
+  vstr_init_len(&resp, MAX_AUTHORIZATION_LEN);
+
+  if (sectrue != se_authorization_get_data((uint8_t *)resp.buf, &data_len)) {
+    mp_raise_ValueError("authorization_get failed");
+  }
+  resp.len = data_len;
+  return mp_obj_new_str_from_vstr(&mp_type_bytes, &resp);
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(
+    mod_trezorcrypto_se_thd89_authorization_get_data_obj,
+    mod_trezorcrypto_se_thd89_authorization_get_data);
+
+/// def authorization_clear(
+/// ) -> None:
+///     """
+///     authorization clear.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_se_thd89_authorization_clear(void) {
+  se_authorization_clear();
+  return mp_const_none;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(
+    mod_trezorcrypto_se_thd89_authorization_clear_obj,
+    mod_trezorcrypto_se_thd89_authorization_clear);
+
 STATIC const mp_rom_map_elem_t mod_trezorcrypto_se_thd89_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_se_thd89)},
     {MP_ROM_QSTR(MP_QSTR_check),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_check_obj)},
     {MP_ROM_QSTR(MP_QSTR_seed),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_seed_obj)},
+    {MP_ROM_QSTR(MP_QSTR_cardano_seed),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_cardano_seed_obj)},
     {MP_ROM_QSTR(MP_QSTR_start_session),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_start_session_obj)},
     {MP_ROM_QSTR(MP_QSTR_end_session),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_end_session_obj)},
     {MP_ROM_QSTR(MP_QSTR_get_session_state),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_get_session_state_obj)},
+    {MP_ROM_QSTR(MP_QSTR_session_is_open),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_session_is_open_obj)},
     {MP_ROM_QSTR(MP_QSTR_nist256p1_sign),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_nist256p1_sign_obj)},
     {MP_ROM_QSTR(MP_QSTR_secp256k1_sign_digest),
@@ -416,10 +608,22 @@ STATIC const mp_rom_map_elem_t mod_trezorcrypto_se_thd89_globals_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_ed25519_sign_obj)},
     {MP_ROM_QSTR(MP_QSTR_ecdh),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_ecdh_obj)},
-    {MP_ROM_QSTR(MP_QSTR_bip340_ecdh),
-     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_bip340_ecdh_obj)},
     {MP_ROM_QSTR(MP_QSTR_uncompress_pubkey),
      MP_ROM_PTR(&mod_trezorcrypto_se_thd89_uncompress_pubkey_obj)},
+    {MP_ROM_QSTR(MP_QSTR_aes256_encrypt),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_aes256_encrypt_obj)},
+    {MP_ROM_QSTR(MP_QSTR_aes256_decrypt),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_aes256_decrypt_obj)},
+    {MP_ROM_QSTR(MP_QSTR_slip21_node),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_slip21_node_obj)},
+    {MP_ROM_QSTR(MP_QSTR_authorization_set),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_authorization_set_obj)},
+    {MP_ROM_QSTR(MP_QSTR_authorization_get_type),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_authorization_get_type_obj)},
+    {MP_ROM_QSTR(MP_QSTR_authorization_get_data),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_authorization_get_data_obj)},
+    {MP_ROM_QSTR(MP_QSTR_authorization_clear),
+     MP_ROM_PTR(&mod_trezorcrypto_se_thd89_authorization_clear_obj)},
 };
 STATIC MP_DEFINE_CONST_DICT(mod_trezorcrypto_se_thd89_globals,
                             mod_trezorcrypto_se_thd89_globals_table);

@@ -21,7 +21,6 @@ typedef struct __attribute__((packed)) {
   char serial[32];
   char cpu_info[16];
   char pre_firmware[16];
-  char se_config[8];
   uint32_t st_id[3];
   bool random_key_init;
   uint8_t random_key[32];
