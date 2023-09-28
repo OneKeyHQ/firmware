@@ -90,6 +90,16 @@ const curve_info curve25519_info = {
     .hasher_script = HASHER_SHA2,
 };
 
+const curve_info ed25519_polkadot_info = {
+    .curve_name = ED25519_POLKADOT_NAME,
+    .bip32_name = ED25519_SEED_NAME,
+    .params = NULL,
+    .hasher_base58 = HASHER_SHA2D,
+    .hasher_sign = HASHER_SHA2D,
+    .hasher_pubkey = HASHER_SHA2_RIPEMD,
+    .hasher_script = HASHER_SHA2,
+};
+
 int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
                      const uint8_t *chain_code, const uint8_t *public_key,
                      const char *curve, HDNode *out) {
@@ -482,7 +492,7 @@ int hdnode_fill_public_key(HDNode *node) {
     }
   } else {
     node->public_key[0] = 1;
-    if (node->curve == &ed25519_info) {
+    if (node->curve == &ed25519_info || node->curve == &ed25519_polkadot_info) {
       ed25519_publickey(node->private_key, node->public_key + 1);
     } else if (node->curve == &ed25519_sha3_info) {
       ed25519_publickey_sha3(node->private_key, node->public_key + 1);
@@ -493,15 +503,14 @@ int hdnode_fill_public_key(HDNode *node) {
     } else if (node->curve == &curve25519_info) {
       curve25519_scalarmult_basepoint(node->public_key + 1, node->private_key);
 #if USE_CARDANO
-    } else if (node->curve == &ed25519_cardano_info) {
+    } else if (node->curve == &ed25519_cardano_info ||
+               node->curve == &ed25519_cardano_ledger_info ||
+               node->curve == &ed25519_cardano_trezor_info) {
       ed25519_publickey_ext(node->private_key, node->public_key + 1);
 #endif
-    } else if (node->curve == &ed25519_ledger_info) {
-      ed25519_publickey(node->private_key, node->public_key + 1);
     }
   }
 #else
-
   if (ecdsa_get_public_key33(node->curve->params, node->private_key,
                              node->public_key) != 0) {
     return 1;
@@ -647,7 +656,9 @@ int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
   } else if (node->curve == &curve25519_info) {
     return 1;  // signatures are not supported
   } else {
-    if (node->curve == &ed25519_info) {
+    if (node->curve == &ed25519_info || node->curve == &ed25519_cardano_info ||
+        node->curve == &ed25519_cardano_ledger_info ||
+        node->curve == &ed25519_cardano_trezor_info) {
       ed25519_sign(msg, msg_len, node->private_key, sig);
     } else if (node->curve == &ed25519_sha3_info) {
       ed25519_sign_sha3(msg, msg_len, node->private_key, sig);
@@ -655,8 +666,6 @@ int hdnode_sign(HDNode *node, const uint8_t *msg, uint32_t msg_len,
     } else if (node->curve == &ed25519_keccak_info) {
       ed25519_sign_keccak(msg, msg_len, node->private_key, sig);
 #endif
-    } else if (node->curve == &ed25519_ledger_info) {
-      ed25519_sign(msg, msg_len, node->private_key, sig);
     } else {
       return 1;  // unknown or unsupported curve
     }
@@ -806,6 +815,12 @@ const curve_info *get_curve_by_name(const char *curve_name) {
   if (strcmp(curve_name, ED25519_CARDANO_NAME) == 0) {
     return &ed25519_cardano_info;
   }
+  if (strcmp(curve_name, ED25519_CARDANO_TREZOR_NAME) == 0) {
+    return &ed25519_cardano_trezor_info;
+  }
+  if (strcmp(curve_name, ED25519_CARDANO_LEDGER_NAME) == 0) {
+    return &ed25519_cardano_ledger_info;
+  }
 #endif
   if (strcmp(curve_name, ED25519_SHA3_NAME) == 0) {
     return &ed25519_sha3_info;
@@ -818,8 +833,8 @@ const curve_info *get_curve_by_name(const char *curve_name) {
   if (strcmp(curve_name, CURVE25519_NAME) == 0) {
     return &curve25519_info;
   }
-  if (strcmp(curve_name, ED25519_LEDGER_NAME) == 0) {
-    return &ed25519_ledger_info;
+  if (strcmp(curve_name, ED25519_POLKADOT_NAME) == 0) {
+    return &ed25519_polkadot_info;
   }
   return 0;
 }

@@ -141,7 +141,7 @@ class Keychain:
                 public_key=bytearray(33),
                 curve_name=self.curve,
             )
-            node.se_derive_path(path)
+            node.derive_path(path)
         return node
 
     def root_fingerprint(self) -> int:
@@ -168,12 +168,16 @@ class Keychain:
             ns == path[: len(ns)] for ns in self.slip21_namespaces
         ):
             raise FORBIDDEN_KEY_PATH
-
-        return self._derive_with_cache(
-            prefix_len=1,
-            path=path,
-            new_root=lambda: Slip21Node(seed=self.seed),
-        )
+        if utils.USE_THD89:
+            node = Slip21Node(seed= b'\x00' * 32)
+            node.derive_path(path)
+            return node
+        else:
+            return self._derive_with_cache(
+                prefix_len=1,
+                path=path,
+                new_root=lambda: Slip21Node(seed=self.seed),
+            )
 
     def __enter__(self) -> "Keychain":
         return self

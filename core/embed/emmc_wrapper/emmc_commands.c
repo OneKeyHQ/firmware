@@ -752,7 +752,7 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
         }
         return 0;
     }
-    else if ( memcmp(bl_buffer->misc_buff, "32C1", 4) == 0 )
+    else if ( memcmp(bl_buffer->misc_buff, "TF89", 4) == 0 )
     {
         // se thd89 update
         // check header
@@ -781,7 +781,7 @@ int process_msg_FirmwareUpdateEmmc(uint8_t iface_num, uint32_t msg_size, uint8_t
             return -1;
         }
 
-        if ( !se_verify_firmware(thd89_hdr.hashes, thd89_hdr.sig1) )
+        if ( !se_verify_firmware(bl_buffer->misc_buff, IMAGE_HEADER_SIZE))
         {
             send_failure(iface_num, FailureType_Failure_ProcessError, "SE verify header error");
             return -1;

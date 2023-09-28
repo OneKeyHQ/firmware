@@ -49,8 +49,18 @@ const curve_info ed25519_cardano_info = {
     .hasher_script = HASHER_SHA2,
 };
 
-const curve_info ed25519_ledger_info = {
-    .curve_name = ED25519_LEDGER_NAME,
+const curve_info ed25519_cardano_ledger_info = {
+    .curve_name = ED25519_CARDANO_LEDGER_NAME,
+    .bip32_name = ED25519_SEED_NAME,
+    .params = NULL,
+    .hasher_base58 = HASHER_SHA2D,
+    .hasher_sign = HASHER_SHA2D,
+    .hasher_pubkey = HASHER_SHA2_RIPEMD,
+    .hasher_script = HASHER_SHA2,
+};
+
+const curve_info ed25519_cardano_trezor_info = {
+    .curve_name = ED25519_CARDANO_TREZOR_NAME,
     .bip32_name = ED25519_SEED_NAME,
     .params = NULL,
     .hasher_base58 = HASHER_SHA2D,
@@ -86,7 +96,8 @@ static void cardano_ed25519_tweak_bits(uint8_t private_key[32]) {
 
 int hdnode_private_ckd_cardano(HDNode *inout, uint32_t index) {
   if (inout->curve != &ed25519_cardano_info ||
-      inout->curve != &ed25519_ledger_info) {
+      inout->curve != &ed25519_cardano_ledger_info ||
+      inout->curve != &ed25519_cardano_trezor_info) {
     return 0;
   }
 

@@ -445,9 +445,12 @@ static void check_bootloader_version(void) {
 
 int main(void) {
   volatile uint32_t stay_in_bootloader_flag = *STAY_IN_FLAG_ADDR;
-  bool serial_set = false, cert_set = false;
 
   SystemCoreClockUpdate();
+
+  thd89_init();
+  se_reset_se();
+  hal_delay(350);  // time for se to reset
 
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   lcd_pwm_init();
@@ -456,10 +459,6 @@ int main(void) {
   ble_usart_init();
 
   device_para_init();
-
-  if (!serial_set) {
-    serial_set = device_serial_set();
-  }
 
   pcb_version = PCB_VERSION_2_1_0;
 
@@ -474,9 +473,15 @@ int main(void) {
   rgb_led_init();
 #endif
 
-  thd89_init();
-
   device_test();
+
+#if PRODUCTION
+
+  bool serial_set = false, cert_set = false;
+
+  if (!serial_set) {
+    serial_set = device_serial_set();
+  }
 
   if (!cert_set) {
     cert_set = se_has_cerrificate();
@@ -491,7 +496,6 @@ int main(void) {
     }
   }
 
-#if PRODUCTION
   device_burnin_test();
 #endif
 
@@ -512,11 +516,8 @@ int main(void) {
   motor_init();
   spi_slave_init();
 
-  ensure(se_sync_session_key(), "se start up failed");
-  se_clearSecsta();
-
   uint8_t se_state;
-  se_get_state(&se_state);
+  ensure(se_get_state(&se_state) ? sectrue : secfalse, "get se state failed");
 
   secbool stay_in_bootloader = secfalse;  // flag to stay in bootloader
 

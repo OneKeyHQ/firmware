@@ -8,8 +8,10 @@
 #include "mini_printf.h"
 #include "qspi_flash.h"
 #include "rand.h"
+#include "se_thd89.h"
 #include "sha2.h"
 #include "sys.h"
+#include "thd89.h"
 #include "touch.h"
 
 #include "ble.h"
@@ -43,10 +45,14 @@ void device_para_init(void) {
   dev_info.st_id[1] = HAL_GetUIDw1();
   dev_info.st_id[2] = HAL_GetUIDw2();
 
-  if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
-    strlcpy(dev_info.se_config,
-            (char *)flash_otp_data->flash_otp[FLASH_OTP_FACTORY_TEST],
-            sizeof(dev_info.se_config));
+  if (secfalse == flash_otp_is_locked(FLASH_OTP_BLOCK_THD89_SESSION_KEY)) {
+    uint8_t entropy[FLASH_OTP_BLOCK_SIZE];
+    random_buffer(entropy, FLASH_OTP_BLOCK_SIZE);
+    ensure(se_set_session_key(entropy), NULL);
+    ensure(flash_otp_write(FLASH_OTP_BLOCK_THD89_SESSION_KEY, 0, entropy,
+                           FLASH_OTP_BLOCK_SIZE),
+           NULL);
+    ensure(flash_otp_lock(FLASH_OTP_BLOCK_THD89_SESSION_KEY), NULL);
   }
 
   if (!flash_otp_is_locked(FLASH_OTP_RANDOM_KEY)) {
@@ -164,14 +170,6 @@ bool device_get_cpu_firmware(char **cpu_info, char **firmware_ver) {
   return false;
 }
 
-char *device_get_se_config_version(void) {
-  if (check_all_ones(dev_info.se_config, sizeof(dev_info.se_config))) {
-    return "0.0.1";
-  } else {
-    return dev_info.se_config;
-  }
-}
-
 void device_get_enc_key(uint8_t key[32]) {
   SHA256_CTX ctx = {0};
 
@@ -266,6 +264,18 @@ void device_test(void) {
   ui_test_input();
 
   display_clear();
+
+  uint8_t rand_buffer[32];
+
+  if (!se_get_rand(rand_buffer, 32)) {
+    display_text(0, 20, "SE test faild", -1, FONT_NORMAL, COLOR_RED,
+                 COLOR_BLACK);
+    while (1)
+      ;
+  } else {
+    display_text(0, 20, "SE test done", -1, FONT_NORMAL, COLOR_WHITE,
+                 COLOR_BLACK);
+  }
 
   qspi_flash_init();
   if (qspi_flash_read_id() == 0) {
@@ -406,6 +416,7 @@ void device_burnin_test(void) {
   volatile uint32_t flash_id = 0;
   volatile uint32_t index = 0, index_bak = 0xff;
   volatile uint32_t click = 0, click_pre = 0, click_now = 0;
+  volatile uint32_t se_pre = 0, se_now = 0;
   FRESULT res;
   FIL fil;
 
@@ -592,6 +603,18 @@ void device_burnin_test(void) {
                           COLOR_BLACK);
       while (1)
         ;
+    }
+
+    se_now = __HAL_TIM_GET_COUNTER(&TimHandle);
+    // 500 ms
+    if (se_now - se_pre >= (TIMER_1S / 2)) {
+      se_pre = se_now;
+      if (!se_get_rand(rand_buffer, 32)) {
+        display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "SE test faild",
+                            -1, FONT_NORMAL, COLOR_RED, COLOR_BLACK);
+        while (1)
+          ;
+      }
     }
 
     if (!ble_name_state()) {

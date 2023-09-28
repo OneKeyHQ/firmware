@@ -15,7 +15,7 @@ USE_THD89 = ARGUMENTS.get('USE_THD89', '0')
 FEATURE_FLAGS = {
     "RDI": True,
     "SECP256K1_ZKP": True,  # required for trezor.crypto.curve.bip340 (BIP340/Taproot)
-    "SYSTEM_VIEW": True,
+    "SYSTEM_VIEW": False,
 }
 
 CCFLAGS_MOD = ''

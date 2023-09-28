@@ -19,6 +19,16 @@ def seed(
 
 
 # extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def cardano_seed(
+    passphrase: str,
+    callback: Callable[[int, int], None] | None = None,
+) -> bool:
+    """
+    Generate seed from mnemonic and passphrase.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
 def start_session(
     session_id: bytes,
 ) -> bytes:
@@ -36,6 +46,13 @@ def end_session() -> None:
 
 # extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
 def get_session_state() -> bytes:
+    """
+    get current session secret state.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def session_is_open() -> bool:
     """
     get current session secret state.
     """
@@ -89,15 +106,48 @@ def ecdh(curve: str, public_key: bytes) -> bytes:
 
 
 # extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
-def bip340_ecdh(public_key: bytes) -> bytes:
+def uncompress_pubkey(pubkey: bytes) -> bytes:
     """
-    Multiplies point defined by public_key with scalar defined by
-    secret_key. Useful for ECDH.
+    Uncompress public.
     """
 
 
 # extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
-def uncompress_pubkey(pubkey: bytes) -> bytes:
+def aes256_encrypt(data: bytes, value: bytes, iv: bytes | None) ->
+bytes:
     """
-    Uncompress public.
+    Uses secret key to produce the signature of message.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def aes256_decrypt(data: bytes, value: bytes, iv: bytes | None) ->
+bytes:
+    """
+    Uses secret key to produce the signature of message.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def slip21_node() -> bytes:
+    """
+    Returns slip21 node.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def authorization_set(
+    authorization_type: int,
+    authorization: bytes,
+) -> bool:
+    """
+    authorization_set.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def authorization_get_type(
+) -> int:
+    """
+    authorization_get.
     """

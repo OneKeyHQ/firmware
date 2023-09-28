@@ -51,6 +51,8 @@ typedef struct {
 typedef struct {
   uint32_t depth;
   uint32_t child_num;
+  uint32_t address_count;
+  uint32_t address_n[8]; 
   uint8_t chain_code[32];
 
   uint8_t private_key[32];

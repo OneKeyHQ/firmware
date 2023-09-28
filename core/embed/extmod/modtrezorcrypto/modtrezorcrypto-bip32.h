@@ -30,6 +30,10 @@
 #include "nem.h"
 #endif
 
+#if USE_THD89
+#include "se_thd89.h"
+#endif
+
 /// package: trezorcrypto.bip32
 
 /// class HDNode:
@@ -194,6 +198,20 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_derive_path(mp_obj_t self,
     mp_raise_ValueError("Path cannot be longer than 32 indexes");
   }
 
+#if USE_THD89
+  uint32_t address_n[plen];
+
+  for (uint32_t pi = 0; pi < plen; pi++) {
+    address_n[pi] = trezor_obj_get_uint(pitems[pi]);
+  }
+  const char *curve = o->hdnode.curve->curve_name;
+  if (!se_derive_keys(&o->hdnode, curve, address_n, plen, &o->fingerprint)) {
+    o->fingerprint = 0;
+    memzero(&o->hdnode, sizeof(o->hdnode));
+    mp_raise_ValueError("Failed to derive path");
+  }
+#else
+
   for (uint32_t pi = 0; pi < plen; pi++) {
     if (pi == plen - 1) {
       // fingerprint is calculated from the parent of the final derivation
@@ -206,47 +224,12 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_derive_path(mp_obj_t self,
       mp_raise_ValueError("Failed to derive path");
     }
   }
-
+#endif
   return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_derive_path_obj,
                                  mod_trezorcrypto_HDNode_derive_path);
-#if USE_THD89
-#include "se_thd89.h"
-/// def se_derive_path(self, path: Sequence[int]) -> None:
-///     """
-///     Go through a list of indexes and iteratively derive a child node in
-///     place.
-///     """
-STATIC mp_obj_t mod_trezorcrypto_HDNode_se_derive_path(mp_obj_t self,
-                                                       mp_obj_t path) {
-  mp_obj_HDNode_t *o = MP_OBJ_TO_PTR(self);
 
-  // get path objects and length
-  size_t plen = 0;
-  mp_obj_t *pitems = NULL;
-  mp_obj_get_array(path, &plen, &pitems);
-  if (plen > 32) {
-    mp_raise_ValueError("Path cannot be longer than 32 indexes");
-  }
-
-  uint32_t address_n[plen];
-
-  for (uint32_t pi = 0; pi < plen; pi++) {
-    address_n[pi] = trezor_obj_get_uint(pitems[pi]);
-  }
-  const char *curve = o->hdnode.curve->curve_name;
-  if (!se_derive_keys(&o->hdnode, curve, address_n, plen, &o->fingerprint)) {
-    o->fingerprint = 0;
-    memzero(&o->hdnode, sizeof(o->hdnode));
-    mp_raise_ValueError("Failed to derive path");
-  }
-
-  return mp_const_none;
-}
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_se_derive_path_obj,
-                                 mod_trezorcrypto_HDNode_se_derive_path);
-#endif
 /// def serialize_public(self, version: int) -> str:
 ///     """
 ///     Serialize the public info from HD node to base58 string.
@@ -391,6 +374,25 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_address(mp_obj_t self,
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_HDNode_address_obj,
                                  mod_trezorcrypto_HDNode_address);
 
+/// def address_n(self) -> list[int]:
+///     """
+///     Compute a base58-encoded address string from the HD node.
+///     """
+STATIC mp_obj_t mod_trezorcrypto_HDNode_address_n(mp_obj_t self) {
+  mp_obj_HDNode_t *o = MP_OBJ_TO_PTR(self);
+
+  uint8_t address_count = o->hdnode.address_count;
+
+  mp_obj_list_t *path = MP_OBJ_TO_PTR(mp_obj_new_list(address_count, NULL));
+  for (size_t i = 0; i < address_count; ++i) {
+    path->items[i] = mp_obj_new_int_from_uint(o->hdnode.address_n[i]);
+  }
+
+  return MP_OBJ_FROM_PTR(path);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorcrypto_HDNode_address_n_obj,
+                                 mod_trezorcrypto_HDNode_address_n);
+
 #if !BITCOIN_ONLY
 
 /// def nem_address(self, network: int) -> str:
@@ -449,11 +451,19 @@ STATIC mp_obj_t mod_trezorcrypto_HDNode_nem_encrypt(size_t n_args,
 
   vstr_t vstr = {0};
   vstr_init_len(&vstr, NEM_ENCRYPTED_SIZE(payload.len));
+#if USE_THD89
+  (void)o;
+  if (se_nem_aes256_encrypt(transfer_pk.buf, iv.buf, salt.buf, payload.buf,
+                            payload.len, (uint8_t *)vstr.buf) != 0) {
+    mp_raise_ValueError("HDNode nem encrypt failed");
+  }
+#else
   if (!hdnode_nem_encrypt(
           &o->hdnode, *(const ed25519_public_key *)transfer_pk.buf, iv.buf,
           salt.buf, payload.buf, payload.len, (uint8_t *)vstr.buf)) {
     mp_raise_ValueError("HDNode nem encrypt failed");
   }
+#endif
   return mp_obj_new_str_from_vstr(&mp_type_bytes, &vstr);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(
@@ -518,6 +528,8 @@ STATIC const mp_rom_map_elem_t mod_trezorcrypto_HDNode_locals_dict_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_public_key_obj)},
     {MP_ROM_QSTR(MP_QSTR_address),
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_address_obj)},
+    {MP_ROM_QSTR(MP_QSTR_address_n),
+     MP_ROM_PTR(&mod_trezorcrypto_HDNode_address_n_obj)},
 #if !BITCOIN_ONLY
     {MP_ROM_QSTR(MP_QSTR_nem_address),
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_nem_address_obj)},
@@ -525,10 +537,6 @@ STATIC const mp_rom_map_elem_t mod_trezorcrypto_HDNode_locals_dict_table[] = {
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_nem_encrypt_obj)},
     {MP_ROM_QSTR(MP_QSTR_ethereum_pubkeyhash),
      MP_ROM_PTR(&mod_trezorcrypto_HDNode_ethereum_pubkeyhash_obj)},
-#endif
-#if USE_THD89
-    {MP_ROM_QSTR(MP_QSTR_se_derive_path),
-     MP_ROM_PTR(&mod_trezorcrypto_HDNode_se_derive_path_obj)},
 #endif
 };
 STATIC MP_DEFINE_CONST_DICT(mod_trezorcrypto_HDNode_locals_dict,

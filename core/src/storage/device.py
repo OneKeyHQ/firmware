@@ -704,7 +704,7 @@ def store_mnemonic_secret(
     common.set_uint8(_NAMESPACE, _BACKUP_TYPE, backup_type)
     common.set_true_or_delete(_NAMESPACE, _NO_BACKUP, no_backup)
     if not no_backup:
-        common.set_true_or_delete(_NAMESPACE, _NEEDS_BACKUP, needs_backup)
+        set_backed_up(needs_backup)
         _NEEDS_BACKUP_VALUE = needs_backup
     _NO_BACKUP_VALUE = no_backup
     _BACKUP_TYPE_VALUE = backup_type
@@ -712,11 +712,18 @@ def store_mnemonic_secret(
 
 
 def needs_backup() -> bool:
-    return common.get_bool(_NAMESPACE, _NEEDS_BACKUP)
+    if utils.EMULATOR:
+        return common.get_bool(_NAMESPACE, _NEEDS_BACKUP)
+    else:
+        return config.get_needs_backup()
 
 
-def set_backed_up() -> None:
-    common.delete(_NAMESPACE, _NEEDS_BACKUP)
+
+def set_backed_up(stat: bool) -> None:
+    if utils.EMULATOR:
+        common.delete(_NAMESPACE, _NEEDS_BACKUP)
+    else:
+        config.set_needs_backup(stat)
 
 
 def unfinished_backup() -> bool:
@@ -949,3 +956,56 @@ def enable_trezor_compatible(enable: bool) -> None:
         common._TRUE_BYTE if enable else common._FALSE_BYTE,
         public=True,
     )
+
+def clear_global_cache() -> None:
+    global _LANGUAGE_VALUE
+    global _LABEL_VALUE
+    global _USE_PASSPHRASE_VALUE
+    global _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE
+    global _AUTOLOCK_DELAY_MS_VALUE
+    global _HOMESCREEN_VALUE
+    global _BLE_NAME_VALUE
+    global _BLE_VERSION_VALUE
+    global _BLE_ENABLED_VALUE
+    global _AUTOSHUTDOWN_DELAY_MS_VALUE
+    global _WALLPAPER_COUNTS_VALUE
+    global _USE_USB_PROTECT_VALUE
+    global _USE_RANDOM_PIN_MAP_VALUE
+    global _TAP_AWAKE_VALUE
+    global _KEYBOARD_HAPTIC_VALUE
+    global _ANIMATION_VALUE
+    global _EXPERIMENTAL_FEATURES_VALUE
+    global _ROTATION_VALUE
+
+    global _INITIALIZED_VALUE
+    global _FLAGS_VALUE
+    global _UNFINISHED_BACKUP_VALUE
+    global _NO_BACKUP_VALUE
+    global _BACKUP_TYPE_VALUE
+    global _SAFETY_CHECK_LEVEL_VALUE
+
+    _LANGUAGE_VALUE= None
+    _LABEL_VALUE = None
+    _USE_PASSPHRASE_VALUE = None
+    _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE = None
+    _AUTOLOCK_DELAY_MS_VALUE = None
+    _HOMESCREEN_VALUE = None
+    _BLE_NAME_VALUE = None
+    _BLE_VERSION_VALUE = None
+    _BLE_ENABLED_VALUE = None
+    _AUTOSHUTDOWN_DELAY_MS_VALUE = None
+    _WALLPAPER_COUNTS_VALUE = None
+    _USE_USB_PROTECT_VALUE = None
+    _USE_RANDOM_PIN_MAP_VALUE = None
+    _TAP_AWAKE_VALUE = None
+    _KEYBOARD_HAPTIC_VALUE = None
+    _ANIMATION_VALUE = None
+    _EXPERIMENTAL_FEATURES_VALUE = None
+    _ROTATION_VALUE = None
+
+    _INITIALIZED_VALUE = None
+    _FLAGS_VALUE = None
+    _UNFINISHED_BACKUP_VALUE = None
+    _NO_BACKUP_VALUE = None
+    _BACKUP_TYPE_VALUE = None
+    _SAFETY_CHECK_LEVEL_VALUE = None

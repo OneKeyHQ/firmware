@@ -93,14 +93,14 @@ def get_features() -> Features:
             Capability.Crypto,
             Capability.EOS,
             Capability.Ethereum,
-            Capability.Monero,
+            # Capability.Monero,
             Capability.NEM,
             Capability.Ripple,
             Capability.Stellar,
             Capability.Tezos,
-            Capability.U2F,
-            Capability.Shamir,
-            Capability.ShamirGroups,
+            # Capability.U2F,
+            # Capability.Shamir,
+            # Capability.ShamirGroups,
         ]
 
     # Other models are not capable of PassphraseEntry
@@ -138,14 +138,14 @@ async def handle_Initialize(ctx: wire.Context, msg: Initialize) -> Features:
         if utils.USE_THD89:
             if msg.derive_cardano is not None and msg.derive_cardano:
                 # THD89 is not capable of Cardano
-                raise wire.ProcessError("Device is not capable of Cardano")
                 from trezor.crypto import se_thd89
 
                 state = se_thd89.get_session_state()
-                if not bool(state[2]):
+                if state[0] & 0x80 and not state[0] & 0x40:
                     storage.cache.end_current_session()
                     session_id = storage.cache.start_session()
-                    storage.cache.SESSION_DIRIVE_CARDANO = True
+
+                storage.cache.SESSION_DIRIVE_CARDANO = True
             else:
                 storage.cache.SESSION_DIRIVE_CARDANO = False
 
