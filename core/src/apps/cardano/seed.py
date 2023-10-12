@@ -47,7 +47,7 @@ class Keychain:
         root.__del__()
 
     @staticmethod
-    def _derive_path(root: bip32.HDNode, path: Bip32Path) -> bip32.HDNode:        
+    def _derive_path(root: bip32.HDNode, path: Bip32Path) -> bip32.HDNode:
         """Clone and derive path from the root."""
         node = root.clone()
         node.derive_path(path)

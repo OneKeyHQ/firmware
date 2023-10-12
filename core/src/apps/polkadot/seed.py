@@ -5,7 +5,7 @@ from trezor.crypto import bip32, cardano
 
 from apps.common.seed import get_seed
 
-from . import CURVE, paths
+from . import paths
 
 if TYPE_CHECKING:
     from typing import Callable, Awaitable, TypeVar

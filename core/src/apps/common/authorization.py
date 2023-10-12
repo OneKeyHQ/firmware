@@ -2,9 +2,9 @@ from typing import Iterable
 
 import storage.cache
 from trezor import protobuf, utils
+from trezor.crypto import se_thd89
 from trezor.enums import MessageType
 from trezor.utils import ensure
-from trezor.crypto import se_thd89
 
 WIRE_TYPES: dict[int, tuple[int, ...]] = {
     MessageType.AuthorizeCoinJoin: (MessageType.SignTx, MessageType.GetOwnershipProof),
@@ -39,14 +39,16 @@ def set(auth_message: protobuf.MessageType) -> None:
 
 
 def get() -> protobuf.MessageType | None:
-    if utils.USE_THD89:        
+    if utils.USE_THD89:
         auth_type = se_thd89.authorization_get_type()
         if auth_type is None:
             return None
         msg_wire_type = auth_type
         buffer = se_thd89.authorization_get_data()
-    else:    
-        stored_auth_type = storage.cache.get(storage.cache.APP_COMMON_AUTHORIZATION_TYPE)
+    else:
+        stored_auth_type = storage.cache.get(
+            storage.cache.APP_COMMON_AUTHORIZATION_TYPE
+        )
         if not stored_auth_type:
             return None
 
@@ -62,7 +64,9 @@ def get_wire_types() -> Iterable[int]:
             return ()
         msg_wire_type = auth_type
     else:
-        stored_auth_type = storage.cache.get(storage.cache.APP_COMMON_AUTHORIZATION_TYPE)
+        stored_auth_type = storage.cache.get(
+            storage.cache.APP_COMMON_AUTHORIZATION_TYPE
+        )
         if stored_auth_type is None:
             return ()
 

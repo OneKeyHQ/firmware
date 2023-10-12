@@ -100,6 +100,20 @@ def change_wipe_code(
 
 
 # extmod/modtrezorconfig/modtrezorconfig.c
+def get_needs_backup() -> bool:
+    """
+    Returns needs_backup.
+    """
+
+
+# extmod/modtrezorconfig/modtrezorconfig.c
+def set_needs_backup(needs_backup: bool = False) -> bool:
+    """
+    Set needs_backup.
+    """
+
+
+# extmod/modtrezorconfig/modtrezorconfig.c
 def get(app: int, key: int, public: bool = False) -> bytes | None:
     """
     Gets the value of the given key for the given app (or None if not set).
@@ -147,6 +161,13 @@ def next_counter(
 def wipe() -> None:
     """
     Erases the whole config. Use with caution!
+    """
+
+
+# extmod/modtrezorconfig/modtrezorconfig.c
+def se_export_mnemonic() -> bytes:
+    """
+    Export mnemonic from SE.
     """
 
 

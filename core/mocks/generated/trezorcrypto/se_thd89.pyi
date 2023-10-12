@@ -2,7 +2,7 @@ from typing import *
 
 
 # extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
-def check(mnemonic: str) -> bool:
+def check(mnemonic: bytes) -> bool:
     """
     Check whether given mnemonic is valid.
     """
@@ -106,7 +106,7 @@ def ecdh(curve: str, public_key: bytes) -> bytes:
 
 
 # extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
-def uncompress_pubkey(pubkey: bytes) -> bytes:
+def uncompress_pubkey(curve: str, pubkey: bytes) -> bytes:
     """
     Uncompress public.
     """
@@ -150,4 +150,20 @@ def authorization_get_type(
 ) -> int:
     """
     authorization_get.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def authorization_get_data(
+) -> bytes:
+    """
+    authorization_get.
+    """
+
+
+# extmod/modtrezorcrypto/modtrezorcrypto-se-thd89.h
+def authorization_clear(
+) -> None:
+    """
+    authorization clear.
     """

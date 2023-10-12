@@ -474,6 +474,10 @@ STATIC mp_obj_t mod_trezorconfig_se_import_mnemonic(mp_obj_t mnemonic) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mod_trezorconfig_se_import_mnemonic_obj,
                                  mod_trezorconfig_se_import_mnemonic);
 
+/// def se_export_mnemonic() -> bytes:
+///     """
+///     Export mnemonic from SE.
+///     """
 STATIC mp_obj_t mod_trezorconfig_se_export_mnemonic(void) {
   char mnemonic[MAX_MNEMONIC_LEN + 1];
 
