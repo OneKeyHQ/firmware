@@ -51,6 +51,11 @@ RESOURCE_UPLOAD_PURPOSE = {
     "wallpaper": messages.ResourceType.WallPaper,
     "nft": messages.ResourceType.Nft,
 }
+BL_REBOOT_TYPE = {
+    "firmware": messages.RebootType.Normal,
+    "boardloader": messages.RebootType.Boardloader,
+    "bootloader": messages.RebootType.BootLoader,
+    }
 
 
 @click.group(name="device")
@@ -336,7 +341,7 @@ def upload_res(
     client: "TrezorClient",
     fullpath: str,
     zoompath: str,
-    purpose: int,
+    purpose: messages.ResourceType,
     metadata: str
 ) -> None:
     """Upload wallpaper/nft to device."""
@@ -430,7 +435,8 @@ def set_busy(
         )
 
     return device.set_busy(client, expiry * 1000)
-# new feautres
+
+# new feautres only available in bootloader
 
 # helper functions
 def header_printer(header:str) -> None:
@@ -442,7 +448,7 @@ def print_buffer(buffer:bytes) -> None:
     print(''.join(format(x, '02x') for x in buffer))
 
 def parse_human_readable_size(size:str):
-    
+
     # units = {"B": 1, "KB": 10**3, "MB": 10**6, "GB": 10**9, "TB": 10**12} #Unix
     units = {"B": 1, "KB": 2**10, "MB": 2**20, "GB": 2**30, "TB": 2**40} #Windows
 
@@ -471,13 +477,12 @@ LINE_CLEAR = '\x1b[2K'
 # EmmcPathInfo
 @cli.command()
 # fmt: off
-@click.option("-t", "--reboot_type", required=True, default=0, help="0:Normal, 1:Boardloader, 2:Bootloader")
+@click.option("-t", "--reboot_type", type=ChoiceType(BL_REBOOT_TYPE), default="firmware", help="Reboot type")
 # fmt: on
 @with_client
-def reboot(client: "TrezorClient", reboot_type: int) -> None:
-    result = device.reboot(client, reboot_type=reboot_type)
-    print(result.message)
-
+def bl_reboot(client: "TrezorClient", reboot_type: messages.RebootType) -> str:
+    result = device.bl_reboot(client, reboot_type=reboot_type)
+    return result
 # FirmwareUpdateEmmc
 @cli.command()
 # fmt: off
@@ -537,10 +542,10 @@ def emmc_file_read_lowlevel(client: "TrezorClient", local: str, remote: str, off
 
     if len > parse_human_readable_size(max_chunk_size):
         raise RuntimeError(f"Max len is limited to {max_chunk_size}!")
-    
+
     if append and force:
         raise RuntimeError("Both append and overwrite are enabled!")
-    
+
     emmc_file = device.emmc_file_read(client, remote, len, offset, ui_percentage=None)
 
     file = open(local, 'wb')
@@ -566,7 +571,7 @@ def emmc_file_read(client: "TrezorClient", local: str, remote: str, force: bool,
     processed_size = 0
 
     print(f'Chunk size {chunk_size_bytes}')
-    
+
     if os.path.exists(local) and not force:
         raise RuntimeError(f"{local} exist and force set to false!")
 
@@ -599,7 +604,7 @@ def emmc_file_read(client: "TrezorClient", local: str, remote: str, force: bool,
 
         # display progress
         print(f'\rProgress: {round(100*(processed_size/remote_file_size),2)}% {processed_size}/{remote_file_size}\nui_percentage={ui_percentage}', end='', flush=True)
-    
+
     file.close()
 
     print(f'\nWrote {processed_size} bytes to {local}\n')
@@ -622,7 +627,7 @@ def emmc_file_write_lowlevel(client: "TrezorClient", local: str, remote: str, of
 
     if len > parse_human_readable_size(max_chunk_size):
         raise RuntimeError(f"Max len is limited to {max_chunk_size}!")
-    
+
     if append and force:
         raise RuntimeError("Both append and overwrite are enabled!")
 
