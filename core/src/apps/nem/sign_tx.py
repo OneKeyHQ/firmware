@@ -89,7 +89,7 @@ async def sign_tx(ctx: wire.Context, msg: NEMSignTx, keychain: Keychain) -> NEMS
                 seed.remove_ed25519_prefix(node.public_key()), msg.transaction, tx
             )
     signature = ed25519.sign(node.private_key(), tx, NEM_HASH_ALG)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "NEM")
 
     return NEMSignedTx(
         data=tx,

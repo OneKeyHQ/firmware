@@ -114,9 +114,7 @@ __fatal_error(const char *expr, const char *msg, const char *file, int line,
   display_printf("\n\n");
   display_image(9, 50, 46, 40, toi_icon_warning + 12,
                 sizeof(toi_icon_warning) - 12);
-  display_text(8, 140, "System problem. Hold the power button", -1, FONT_NORMAL,
-               COLOR_WHITE, COLOR_BLACK);
-  display_text(8, 164, "to restart.", -1, FONT_NORMAL, COLOR_WHITE,
+  display_text(8, 140, "System problem detected.", -1, FONT_NORMAL, COLOR_WHITE,
                COLOR_BLACK);
   display_text(8, 784, "Tap to restart ...", -1, FONT_NORMAL, COLOR_WHITE,
                COLOR_BLACK);
@@ -137,9 +135,7 @@ error_shutdown(const char *line1, const char *line2, const char *line3,
   display_clear();
   display_image(9, 50, 46, 40, toi_icon_warning + 12,
                 sizeof(toi_icon_warning) - 12);
-  display_text(8, 140, "System problem. Hold the power button", -1, FONT_NORMAL,
-               COLOR_WHITE, COLOR_BLACK);
-  display_text(8, 164, "to restart.", -1, FONT_NORMAL, COLOR_WHITE,
+  display_text(8, 140, "System problem detected.", -1, FONT_NORMAL, COLOR_WHITE,
                COLOR_BLACK);
   display_text(8, 784, "Tap to restart ...", -1, FONT_NORMAL, COLOR_WHITE,
                COLOR_BLACK);
@@ -210,9 +206,7 @@ void error_reset(const char *line1, const char *line2, const char *line3,
   display_printf("\n\n");
   display_image(9, 50, 46, 40, toi_icon_warning + 12,
                 sizeof(toi_icon_warning) - 12);
-  display_text(8, 140, "System problem. Hold the power button", -1, FONT_NORMAL,
-               COLOR_WHITE, COLOR_BLACK);
-  display_text(8, 164, "to restart.", -1, FONT_NORMAL, COLOR_WHITE,
+  display_text(8, 140, "System problem detected.", -1, FONT_NORMAL, COLOR_WHITE,
                COLOR_BLACK);
   display_text(8, 784, "It will be restart 5s later.", -1, FONT_NORMAL,
                COLOR_WHITE, COLOR_BLACK);

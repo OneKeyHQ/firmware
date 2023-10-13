@@ -50,7 +50,7 @@ class Transaction:
     def deserialize(raw_message: bytes) -> "Transaction":
         # singer
         len = int.from_bytes(raw_message[0:4], "little")
-        signerId = "0x" + raw_message[4 : len + 4].decode("utf-8")
+        signerId = raw_message[4 : len + 4].decode("utf-8")
         offset = len + 4
         # publicKey
         publicKey = raw_message[offset : offset + 33]
@@ -60,7 +60,7 @@ class Transaction:
         offset += 8
         # receiverId
         len = int.from_bytes(raw_message[offset : offset + 4], "little")
-        receiverId = "0x" + raw_message[offset + 4 : offset + 4 + len].decode("utf-8")
+        receiverId = raw_message[offset + 4 : offset + 4 + len].decode("utf-8")
         offset += len + 4
         # blockHash
         blockHash = raw_message[offset : offset + 32]

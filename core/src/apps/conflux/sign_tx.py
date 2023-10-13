@@ -144,7 +144,7 @@ async def sign_tx(
     signature = secp256k1.sign(
         node.private_key(), digest, False, secp256k1.CANONICAL_SIG_ETHEREUM
     )
-    await confirm_final(ctx)
+    await confirm_final(ctx, "CFX")
     req = ConfluxTxRequest()
     req.signature_v = signature[0] - 27
     req.signature_r = signature[1:33]

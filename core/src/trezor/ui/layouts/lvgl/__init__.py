@@ -68,6 +68,7 @@ __all__ = (
     "show_bip39_dotmap",
     "confirm_sign_typed_hash",
     "confirm_polkadot_balances",
+    "should_show_details",
 )
 
 
@@ -288,7 +289,9 @@ async def show_address(
     xpubs: Sequence[str] = (),
     address_extra: str | None = None,
     title_qr: str | None = None,
+    evm_chain_id: int | None = None,
     title: str = "",
+    addr_type: str | None = None,
 ) -> None:
     is_multisig = len(xpubs) > 0
     from trezor.lvglui.scrs.template import Address
@@ -318,6 +321,8 @@ async def show_address(
             ctx.primary_color,
             ctx.icon_path,
             address_qr=address_qr,
+            addr_type=addr_type,
+            evm_chain_id=evm_chain_id,
         ),
         "show_address",
         ButtonRequestType.Address,
@@ -496,6 +501,39 @@ async def confirm_output(
             br_code,
         )
     )
+
+
+async def should_show_details(
+    ctx: wire.GenericContext,
+    address: str,
+    amount: str,
+    title: str,
+    br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
+) -> bool:
+    from trezor.lvglui.scrs.template import TransactionOverview
+
+    res = await interact(
+        ctx,
+        TransactionOverview(
+            title,
+            amount,
+            address,
+            primary_color=ctx.primary_color,
+            icon_path=ctx.icon_path,
+            has_details=True,
+        ),
+        "confirm_output",
+        br_code,
+    )
+    if not res:
+        from trezor import loop
+
+        await loop.sleep(300)
+        raise wire.ActionCancelled()
+    elif res == 2:  # show more
+        return True
+    else:  # confirm
+        return False
 
 
 async def confirm_payment_request(
@@ -885,7 +923,12 @@ async def confirm_sign_identity(
 
 
 async def confirm_signverify(
-    ctx: wire.GenericContext, coin: str, message: str, address: str, verify: bool
+    ctx: wire.GenericContext,
+    coin: str,
+    message: str,
+    address: str,
+    verify: bool,
+    evm_chain_id: int | None = None,
 ) -> None:
     if verify:
         header = _(i18n_keys.TITLE__VERIFY_STR_MESSAGE).format(coin)
@@ -898,7 +941,15 @@ async def confirm_signverify(
     await raise_if_cancelled(
         interact(
             ctx,
-            Message(header, address, message, ctx.primary_color, ctx.icon_path, verify),
+            Message(
+                header,
+                address,
+                message,
+                ctx.primary_color,
+                ctx.icon_path,
+                verify,
+                evm_chain_id,
+            ),
             br_type,
             ButtonRequestType.Other,
         )
@@ -1122,14 +1173,16 @@ async def confirm_sol_memo(
     )
 
 
-async def confirm_final(ctx: wire.Context) -> None:
+async def confirm_final(ctx: wire.Context, chain_name: str) -> None:
     from trezor.ui.layouts.lvgl import confirm_action
 
     await confirm_action(
         ctx,
         "confirm_final",
         title=_(i18n_keys.TITLE__CONFIRM_TRANSACTION),
-        action=_(i18n_keys.SUBTITLE__DO_YOU_WANT_TO_SIGN__THIS_TX),
+        action=_(i18n_keys.SUBTITLE__DO_YOU_WANT_TO_SIGN__THIS_STR_TX).format(
+            chain_name
+        ),
         verb=_(i18n_keys.BUTTON__SLIDE_TO_SIGN),
         hold=True,
         anim_dir=0,
@@ -1169,6 +1222,10 @@ async def show_onekey_app_guide():
 
         app_guide.GuideAppDownload()
         await app_guide.request()
+
+        from apps.base import set_homescreen
+
+        set_homescreen()
 
 
 async def confirm_set_homescreen(ctx, replace: bool = False):
@@ -1686,7 +1743,7 @@ async def confirm_cosmos_sign_combined(
 ) -> None:
     from trezor.lvglui.scrs.template import CosmosSignCombined
 
-    screen = CosmosSignCombined(chain_id, signer, fee, msgs)
+    screen = CosmosSignCombined(chain_id, signer, fee, msgs, ctx.primary_color)
     await raise_if_cancelled(
         interact(
             ctx, screen, "confirm_cosmos_sign_combined", ButtonRequestType.ProtectCall
@@ -1817,8 +1874,79 @@ async def confirm_tron_freeze(
         balance,
         duration,
         receiver,
+        None,
         ctx.primary_color,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "tron_asset_freeze", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_unfreeze(
+    ctx: wire.GenericContext,
+    title: str,
+    sender: str,
+    resource: str | None = None,
+    balance: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import TronAssetFreeze, AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "tron_asset_freeze_v2", ButtonRequestType.ProtectCall)
+    )
+    screen = TronAssetFreeze(
+        False,
+        sender,
+        resource,
+        balance,
+        None,
+        None,
+        None,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "tron_asset_freeze_v2", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_delegate(
+    ctx: wire.GenericContext,
+    title: str,
+    sender: str,
+    resource: str | None = None,
+    balance: str | None = None,
+    receiver: str | None = None,
+    lock: str | None = None,
+) -> None:
+    from trezor.lvglui.scrs.template import TronAssetFreeze, AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_delegate", ButtonRequestType.ProtectCall)
+    )
+    screen = TronAssetFreeze(
+        False,
+        sender,
+        resource,
+        balance,
+        None,
+        receiver,
+        lock,
+        ctx.primary_color,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_delegate", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_common(
+    ctx: wire.GenericContext,
+    title: str,
+) -> None:
+    from trezor.lvglui.scrs.template import AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_common", ButtonRequestType.ProtectCall)
     )

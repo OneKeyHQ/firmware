@@ -380,16 +380,32 @@ ETH_PRIMARY_COLOR_MAPPING = {
     137: "0x8247E5",
     250: "0x1969FF",
     288: "0xCCFF00",
+    314: "0x0090FF",
+    324: "0xFFFFFF",
     2222: "0xFF433E",
+    5000: "0xFFFFFF",
+    8453: "0x0052FF",
     42161: "0x28A0F0",
     42170: "0xEF8220",
     42220: "0x35D07F",
     43114: "0xE84142",
+    59144: "0xFFFFFF",
     513100: "0xC3B6FF",
+    73927: "0x5959D8",
     1666600000: "0x33D3D5",
     13131615554: "0x5DEB5A",
 }
-EVM_ICON_NAME_OVERRIDE = {10: "oeth", 288: "boba", 42161: "arb1", 1313161554: "aurora"}
+EVM_ICON_NAME_OVERRIDE = {
+    10: "oeth",
+    288: "boba",
+    314: "filecoin",
+    324: "zksync-era",
+    8453: "base",
+    42161: "arb1",
+    59144: "linea",
+    73927: "mixin",
+    1313161554: "aurora",
+}
 
 
 def _load_ethereum_networks() -> Coins:
@@ -418,7 +434,8 @@ def _load_ethereum_networks() -> Coins:
         # strip out bullcrap in network naming
         if "mainnet" in name.lower():
             name = re.sub(r" mainnet.*$", "", name, flags=re.IGNORECASE)
-
+            if name.endswith("-"):
+                name = name[:-1].strip()
         network = dict(
             chain=chain_data["shortName"],
             chain_id=chain_data["chainId"],
@@ -430,7 +447,7 @@ def _load_ethereum_networks() -> Coins:
             key=f"eth:{shortcut}",
             icon=f"evm-{EVM_ICON_NAME_OVERRIDE.get(chain_data['chainId'], None) or shortcut.lower()}.png",
             primary_color=ETH_PRIMARY_COLOR_MAPPING.get(
-                chain_data["chainId"], "0xFFFFFF" if not is_testnet else "0x969696"
+                chain_data["chainId"], "0xD2D2D2" if not is_testnet else "0x969696"
             ),
         )
         networks.append(cast(Coin, network))

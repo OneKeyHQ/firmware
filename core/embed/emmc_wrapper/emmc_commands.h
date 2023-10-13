@@ -39,6 +39,9 @@
 // emmc_fs
 #include "emmc_fs.h"
 
+// emmc_debug
+#include "emmc_debug_utils.h"
+
 // ######## macros, defines, typedefs ########
 // Note: Some macros has been moved to "emmc_commands_macros.h" and included in "emmc_commands.c"
 // to avoid conflict with legacy "message.c/.h".

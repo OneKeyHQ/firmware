@@ -42,7 +42,7 @@ async def sign_tx(
         utils.unimport_end(mods)
 
         received_msg = await ctx.read_any(accept_msgs)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "MONERO")
     utils.unimport_end(mods)
     return result_msg
 

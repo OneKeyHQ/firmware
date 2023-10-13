@@ -43,6 +43,7 @@ def init_lvgl() -> None:
     indev_drv.init()
     indev_drv.type = lv.INDEV_TYPE.POINTER
     indev_drv.read_cb = lcd.ts_read
+    indev_drv.long_press_time = 2000
     indev_drv.register()
 
 

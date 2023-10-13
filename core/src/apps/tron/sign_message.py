@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING
 
+from trezor import utils
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
 from trezor.lvglui.scrs import lv
 from trezor.messages import TronMessageSignature, TronSignMessage
 from trezor.ui.layouts import confirm_signverify
-from trezor.utils import USE_THD89, HashWriter
+from trezor.utils import HashWriter
 
 from apps.common import paths
 from apps.common.helpers import validate_message
@@ -28,7 +29,7 @@ async def sign_message(
     await paths.validate_path(ctx, keychain, msg.address_n)
     node = keychain.derive(address_n)
 
-    if USE_THD89:
+    if utils.USE_THD89:
         from trezor.crypto import se_thd89
 
         public_key = se_thd89.uncompress_pubkey("secp256k1", node.public_key())

@@ -141,8 +141,8 @@ class Keychain:
                 public_key=bytearray(33),
                 curve_name=self.curve,
             )
-            node.derive_path(path)
-        return node
+            node.derive_path(path)  # type: ignore[Argument of type "PathType@_derive_with_cache" cannot be assigned to parameter "path" of type "Sequence[int]" in function "derive_path"]
+        return node  # type: ignore[Expression of type "NodeType@_derive_with_cache | NodeProtocol[Unknown]* | HDNode" cannot be assigned to return type "NodeType@_derive_with_cache"]
 
     def root_fingerprint(self) -> int:
         if self._root_fingerprint is None:
@@ -169,7 +169,7 @@ class Keychain:
         ):
             raise FORBIDDEN_KEY_PATH
         if utils.USE_THD89:
-            node = Slip21Node(seed= b'\x00' * 32)
+            node = Slip21Node(seed=b"\x00" * 32)
             node.derive_path(path)
             return node
         else:
@@ -194,7 +194,7 @@ async def get_keychain(
 ) -> Keychain:
     if utils.USE_THD89:
         await get_seed(ctx)
-        keychain = Keychain(None, curve, schemas, slip21_namespaces)
+        keychain = Keychain(b"", curve, schemas, slip21_namespaces)
     else:
         seed = await get_seed(ctx)
         keychain = Keychain(seed, curve, schemas, slip21_namespaces)

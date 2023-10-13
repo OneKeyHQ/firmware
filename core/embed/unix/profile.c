@@ -57,18 +57,18 @@ const char *profile_dir(void) {
 
 const char *profile_flash_path(void) {
   SVAR(_flash_path);
-  FILE_PATH(_flash_path, "/trezor.flash");
+  FILE_PATH(_flash_path, "/onekey.flash");
   return _flash_path;
 }
 
 const char *profile_sdcard_path(void) {
   SVAR(_sdcard_path);
-  FILE_PATH(_sdcard_path, "/trezor.sdcard");
+  FILE_PATH(_sdcard_path, "/onekey.sdcard");
   return _sdcard_path;
 }
 
 const char *profile_usb_disconnect_path(void) {
   SVAR(_disconnect_path);
-  FILE_PATH(_disconnect_path, "/trezor.usb_data_disconnected");
+  FILE_PATH(_disconnect_path, "/onekey.usb_data_disconnected");
   return _disconnect_path;
 }

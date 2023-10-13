@@ -30,7 +30,7 @@ class Slider(lv.slider):
 
         self.add_style(
             StyleWrapper()
-            .border_width(1)
+            .border_width(2)
             .border_color(lv_colors.WHITE)
             .bg_color(lv_colors.ONEKEY_BLACK_4)
             .bg_opa(lv.OPA.COVER)

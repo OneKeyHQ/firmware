@@ -226,17 +226,18 @@ class BasicApprover(Approver):
     ) -> None:
         if not orig_txs:
             return
+        from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
         if self.is_payjoin():
             description = "PayJoin"
         elif tx_info.rbf_disabled() and any(
             not orig.rbf_disabled() for orig in orig_txs
         ):
-            description = "Finalize transaction"
+            description = _(i18n_keys.TITLE__FINALIZE_TRANSACTION)
         elif len(orig_txs) > 1:
-            description = "Meld transactions"
+            description = _(i18n_keys.TITLE__MELD_TRANSACTION)
         else:
-            description = "Update transaction"
+            description = _(i18n_keys.TITLE__UPDATE_TRANSACTION)
 
         for orig in orig_txs:
             await helpers.confirm_replacement(description, orig.orig_hash)

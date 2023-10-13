@@ -171,7 +171,7 @@ _active_session_idx: int | None = None
 _session_usage_counter = 0
 
 
-def start_session(received_session_id: bytes | None = None) -> bytes:
+def start_session(received_session_id: bytes | None = None) -> bytes | None:
     if not utils.USE_THD89:
         global _active_session_idx
         global _session_usage_counter
@@ -316,7 +316,7 @@ def delete(key: int) -> None:
     else:
         if key == APP_COMMON_NONCE:
             _NONCE_CACHE[:] = b""
-        return
+    return None
 
 
 if TYPE_CHECKING:

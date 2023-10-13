@@ -162,7 +162,7 @@ class ListItemBtnWithSwitch(lv.btn):
         super().__init__(parent)
         self.remove_style_all()
 
-        self.set_size(lv.pct(100), 94)
+        self.set_size(464, 94)
         self.add_style(
             StyleWrapper()
             .bg_color(lv_colors.ONEKEY_GRAY_3)

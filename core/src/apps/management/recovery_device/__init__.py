@@ -34,6 +34,7 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     the device anytime and continue without a computer.
     """
     _validate(msg)
+    utils.mark_initialization_processing()
     if not msg.dry_run:
         from trezor.ui.layouts import show_popup
 
@@ -87,6 +88,7 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     else:
         return result
     finally:
+        utils.mark_initialization_done()
         if isinstance(ctx, wire.DummyContext):
             if msg.dry_run:
                 utils.set_up()

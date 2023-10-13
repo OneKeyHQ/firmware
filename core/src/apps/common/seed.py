@@ -27,7 +27,7 @@ class Slip21Node:
             if data is not None:
                 self.data = data
             elif seed is not None:
-                    self.data = hmac(hmac.SHA512, b"Symmetric key seed", seed).digest()
+                self.data = hmac(hmac.SHA512, b"Symmetric key seed", seed).digest()
             else:
                 raise ValueError  # neither seed nor data specified
 
@@ -97,7 +97,7 @@ if not utils.BITCOIN_ONLY:
             assert common_seed is not None
             return common_seed
         else:
-            return None
+            return b""
 
 else:
     # === Bitcoin-only variant ===

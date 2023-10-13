@@ -1,14 +1,15 @@
 from trezor import utils
 from trezor.lvglui.scrs.components.button import NormalButton
 from trezor.lvglui.scrs.components.pageable import PageAbleMessage
+from trezor.lvglui.scrs.components.transition import BtnClickTransition
 
 from ..i18n import gettext as _, keys as i18n_keys
 from ..lv_colors import lv_colors
-from . import font_PJSBOLD36, font_PJSBOLD48, font_STATUS_BAR
+from . import font_MONO24, font_PJSBOLD36, font_PJSBOLD48, font_STATUS_BAR
 from .common import FullSizeWindow, lv
 from .components.banner import Banner
 from .components.container import ContainerFlexCol
-from .components.listitem import DisplayItem
+from .components.listitem import DisplayItemNoBgc
 from .components.qrcode import QRCode
 from .widgets.style import StyleWrapper
 
@@ -28,6 +29,8 @@ class Address(FullSizeWindow):
         xpubs=None,
         address_qr=None,
         multisig_index: int | None = 0,
+        addr_type=None,
+        evm_chain_id: int | None = None,
     ):
         super().__init__(
             title,
@@ -43,6 +46,7 @@ class Address(FullSizeWindow):
         self.address = address
         self.address_qr = address_qr
         self.icon = icon_path
+        self.addr_type = addr_type
         if primary_color:
             self.title.add_style(StyleWrapper().text_color(primary_color), 0)
         if __debug__:
@@ -54,9 +58,9 @@ class Address(FullSizeWindow):
                 StyleWrapper().text_font(font_PJSBOLD48).text_color(lv_colors.WHITE), 0
             )
         self.subtitle.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 48)
-        self.show_address()
+        self.show_address(evm_chain_id=evm_chain_id)
 
-    def show_address(self):
+    def show_address(self, evm_chain_id: int | None = None):
         self.current = self.SHOW_TYPE.ADDRESS
         if hasattr(self, "qr"):
             self.qr.delete()
@@ -65,18 +69,25 @@ class Address(FullSizeWindow):
         self.container = ContainerFlexCol(
             self.content_area, self.subtitle, pos=(0, 16), padding_row=8
         )
-        self.item1 = DisplayItem(
+        if self.addr_type:
+            self.item1_0 = DisplayItemNoBgc(
+                self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), self.addr_type
+            )
+        if evm_chain_id:
+            self.item2 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(evm_chain_id),
+            )
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__PATH__COLON), self.path
         )
-        # self.item2 = DisplayItem(
-        #     self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
-        # )
         # if xpubs:
         #     self.title.align(lv.ALIGN.TOP_MID, 0, 100)
         #     self.btn_yes.align(lv.ALIGN.BOTTOM_MID, 0, -30)
         self.current = 0
         for i, xpub in enumerate(self.xpubs or []):
-            self.item3 = DisplayItem(
+            self.item3 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__XPUB_STR_MINE__COLON).format(i + 1)
                 if i == self.multisig_index
@@ -129,10 +140,10 @@ class XpubOrPub(FullSizeWindow):
         self.container = ContainerFlexCol(
             self.content_area, self.title, pos=(0, 40), padding_row=16
         )
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__PATH__COLON), path
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__XPUB__COLON)
             if xpub
@@ -143,7 +154,14 @@ class XpubOrPub(FullSizeWindow):
 
 class Message(FullSizeWindow):
     def __init__(
-        self, title, address, message, primary_color, icon_path, verify: bool = False
+        self,
+        title,
+        address,
+        message,
+        primary_color,
+        icon_path,
+        verify: bool = False,
+        evm_chain_id: int | None = None,
     ):
         super().__init__(
             title,
@@ -158,7 +176,13 @@ class Message(FullSizeWindow):
         self.container = ContainerFlexCol(
             self.content_area, self.title, pos=(0, 40), padding_row=8
         )
-        self.item1 = DisplayItem(
+        if evm_chain_id:
+            self.item3 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(evm_chain_id),
+            )
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
         )
         self.long_message = False
@@ -172,7 +196,7 @@ class Message(FullSizeWindow):
             self.long_message = True
             self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
         else:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__MESSAGE__COLON), message
             )
 
@@ -199,27 +223,51 @@ class Message(FullSizeWindow):
 
 
 class TransactionOverview(FullSizeWindow):
-    def __init__(self, title, amount, address, primary_color, icon_path):
+    def __init__(
+        self, title, amount, address, primary_color, icon_path, has_details=None
+    ):
         if __debug__:
             self.layout_address = address
 
         super().__init__(
             title,
             None,
-            _(i18n_keys.BUTTON__VIEW),
+            _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__REJECT),
             anim_dir=2,
             primary_color=primary_color,
             icon_path=icon_path,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
-            f"#878787 {_(i18n_keys.INSERT__SEND)}#  {amount}  #878787 {_(i18n_keys.INSERT__TO)}#",
+            f"#FFFFFF {_(i18n_keys.INSERT__SEND)}#  {amount}  #FFFFFF {_(i18n_keys.INSERT__TO)}#",
             address,
         )
-        self.item1.label_top.set_recolor(True)
-        self.item1.set_style_bg_color(lv_colors.BLACK, 0)
+        self.item1.label_top.add_style(
+            StyleWrapper().text_color(lv.color_hex(0xE1E1E1)), 0
+        )
+        if has_details:
+            self.view_btn = NormalButton(
+                self.content_area, _(i18n_keys.BUTTON__VIEW_DETAILS)
+            )
+            self.view_btn.add_style(
+                StyleWrapper()
+                .border_width(2)
+                .border_color(lv_colors.ONEKEY_GRAY_1)
+                .bg_color(lv_colors.ONEKEY_BLACK_3),
+                0,
+            )
+            self.view_btn.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 16)
+            self.view_btn.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.view_btn:
+                self.destroy(400)
+                self.channel.publish(2)
 
     if __debug__:
 
@@ -247,6 +295,8 @@ class TransactionDetailsETH(FullSizeWindow):
         primary_color=lv_colors.ONEKEY_GREEN,
         contract_addr=None,
         token_id=None,
+        evm_chain_id=None,
+        raw_data=None,
     ):
         super().__init__(
             title,
@@ -256,51 +306,144 @@ class TransactionDetailsETH(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        if evm_chain_id:
+            self.item0_1 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(evm_chain_id),
+            )
+
+        self.item1 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__AMOUNT__COLON),
+            amount,
+        )
+        self.item4 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__TO__COLON),
+            address_to,
+        )
+        self.item5 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__FROM__COLON),
+            address_from,
+        )
         if contract_addr:
-            self.item0 = DisplayItem(
+            self.item0 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__CONTRACT_ADDRESS__COLON),
                 contract_addr,
             )
-            self.item1 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__TOKEN_ID__COLON), token_id
+            self.item1 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__TOKEN_ID__COLON),
+                token_id,
             )
-        else:
-            self.item1 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
-            )
+        self.item3 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON),
+            fee_max,
+        )
         if not is_eip1559:
-            self.item2 = DisplayItem(
-                self.container, _(i18n_keys.LIST_KEY__GAS_PRICE__COLON), gas_price
+            self.item2 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__GAS_PRICE__COLON),
+                gas_price,
             )
         else:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__PRIORITY_FEE_PER_GAS__COLON),
                 max_priority_fee_per_gas,
             )
-            self.item2_1 = DisplayItem(
+            self.item2_1 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__MAXIMUM_FEE_PER_GAS__COLON),
                 max_fee_per_gas,
             )
-        self.item3 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee_max
-        )
-        self.item4 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
-        )
-        self.item5 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
-        )
         if total_amount is None:
-            if not contract_addr:
+            if not contract_addr:  # token transfer
                 total_amount = f"{amount}\n{fee_max}"
-            else:
+            else:  # nft transfer
                 total_amount = f"{fee_max}"
-        self.item6 = DisplayItem(
-            self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
+        self.item6 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON),
+            total_amount,
         )
+        if raw_data:
+            self.item7 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__DATA__COLON),
+                _(i18n_keys.SUBTITLE__STR_BYTES).format(len(raw_data)),
+            )
+            self.panel = lv.obj(self.content_area)
+            self.panel.clear_flag(lv.obj.FLAG.SCROLLABLE)
+            self.panel.add_style(
+                StyleWrapper()
+                .width(464)
+                .height(lv.SIZE.CONTENT)
+                .bg_color(lv_colors.ONEKEY_BLACK_3)
+                .bg_opa()
+                .border_width(1)
+                .border_color(lv_colors.ONEKEY_GRAY_1)
+                .pad_all(8)
+                .radius(0)
+                .max_height(256)
+                .text_font(font_MONO24)
+                .text_color(lv_colors.LIGHT_GRAY)
+                .text_align_left()
+                .text_letter_space(-1),
+                0,
+            )
+            self.panel.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+            self.content = lv.label(self.panel)
+            self.content.set_align(lv.ALIGN.TOP_LEFT)
+            self.content.set_size(lv.pct(100), lv.SIZE.CONTENT)
+            from binascii import hexlify
+
+            self.data_str = f"0x{hexlify(raw_data).decode()}"
+            if len(self.data_str) > 216:
+                self.content.set_long_mode(lv.label.LONG.WRAP)
+                self.content.set_text(self.data_str[:213] + "...")
+                self.view_btn = NormalButton(self.panel, _(i18n_keys.BUTTON__VIEW))
+                self.view_btn.set_width(246)
+                self.view_btn.align(lv.ALIGN.CENTER, 0, 0)
+                self.view_btn.add_style(
+                    StyleWrapper()
+                    .bg_color(lv_colors.ONEKEY_BLACK_3)
+                    .border_width(2)
+                    .border_color(lv_colors.ONEKEY_GRAY_1),
+                    0,
+                )
+                self.view_btn.add_style(
+                    StyleWrapper()
+                    .bg_opa(lv.OPA.COVER)
+                    .bg_color(lv_colors.ONEKEY_GRAY_3)
+                    .transform_height(-2)
+                    .transform_width(-2)
+                    .transition(BtnClickTransition()),
+                    lv.PART.MAIN | lv.STATE.PRESSED,
+                )
+
+                self.view_btn.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            else:
+                self.content.set_text(self.data_str)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.view_btn:
+                PageAbleMessage(
+                    _(i18n_keys.TITLE__VIEW_DATA),
+                    self.data_str,
+                    channel=None,
+                    cancel_text=_(i18n_keys.BUTTON__CLOSE),
+                    confirm_text=None,
+                    page_size=405,
+                    font=font_MONO24,
+                )
 
 
 class ContractDataOverview(FullSizeWindow):
@@ -314,7 +457,7 @@ class ContractDataOverview(FullSizeWindow):
         )
         self.primary_color = primary_color
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__SIZE__COLON), description
         )
         self.long_data = False
@@ -323,7 +466,7 @@ class ContractDataOverview(FullSizeWindow):
             self.long_data = True
             self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
         else:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__DATA__COLON), data
             )
 
@@ -338,6 +481,8 @@ class ContractDataOverview(FullSizeWindow):
                         self.data,
                         self.channel,
                         primary_color=self.primary_color,
+                        font=font_MONO24,
+                        page_size=405,
                     )
                     self.destroy()
                 else:
@@ -367,8 +512,9 @@ class BlobDisPlay(FullSizeWindow):
             anim_dir=anim_dir,
             primary_color=primary_color or lv_colors.ONEKEY_GREEN,
         )
+        self.primary_color = primary_color
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(self.container, description, content)
+        self.item1 = DisplayItemNoBgc(self.container, description, content)
         self.long_message = False
         if len(content) > 240:
             self.long_message = True
@@ -385,6 +531,7 @@ class BlobDisPlay(FullSizeWindow):
                         _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
                         self.data,
                         self.channel,
+                        primary_color=self.primary_color,
                     )
                     self.destroy()
                 else:
@@ -413,7 +560,7 @@ class ConfirmMetaData(FullSizeWindow):
             self.container = ContainerFlexCol(
                 self.content_area, self.subtitle, pos=(0, 40)
             )
-            self.item1 = DisplayItem(self.container, description, data)
+            self.item1 = DisplayItemNoBgc(self.container, description, data)
 
     if __debug__:
 
@@ -435,11 +582,13 @@ class TransactionDetailsBTC(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
-        self.item3 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
+        )
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total
         )
 
@@ -454,10 +603,10 @@ class JointTransactionDetailsBTC(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT_YOU_SPEND__COLON), amount
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total
         )
 
@@ -472,8 +621,8 @@ class ModifyFee(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(self.container, description, fee_change)
-        self.item2 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(self.container, description, fee_change)
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__NEW_FEE__COLON), fee_new
         )
 
@@ -495,11 +644,11 @@ class ModifyOutput(FullSizeWindow):
             primary_color=primary_Color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
         )
-        self.item2 = DisplayItem(self.container, description, amount_change)
-        self.item3 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(self.container, description, amount_change)
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__NEW_AMOUNT__COLON), amount_new
         )
 
@@ -514,7 +663,7 @@ class ConfirmReplacement(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TRANSACTION_ID__COLON), txid
         )
 
@@ -529,10 +678,10 @@ class ConfirmPaymentRequest(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), to_addr
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
 
@@ -549,10 +698,10 @@ class ConfirmDecredSstxSubmission(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), to_addr
         )
 
@@ -574,13 +723,13 @@ class ConfirmCoinJoin(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__COIN_NAME__COLON), coin_name
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_ROUNDS__COLON), max_rounds
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__MAXIMUM_MINING_FEE__COLON),
             max_fee_per_vbyte,
@@ -598,7 +747,7 @@ class ConfirmSignIdentity(FullSizeWindow):
         )
         align_base = self.title if subtitle is None else self.subtitle
         self.container = ContainerFlexCol(self.content_area, align_base, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__IDENTITY__COLON), identity
         )
 
@@ -614,7 +763,7 @@ class ConfirmProperties(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         for key, value in properties:
-            self.item = DisplayItem(self.container, f"{key.upper()}", value)
+            self.item = DisplayItemNoBgc(self.container, f"{key.upper()}", value)
 
 
 class ConfirmTransferBinance(FullSizeWindow):
@@ -629,11 +778,11 @@ class ConfirmTransferBinance(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         for key, value, address in items:
-            self.item1 = DisplayItem(self.container, key, "")
-            self.item2 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(self.container, key, "")
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), value
             )
-            self.item3 = DisplayItem(
+            self.item3 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__TO__COLON), address
             )
 
@@ -650,7 +799,7 @@ class ShouldShowMore(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item = DisplayItem(self.container, f"{key}:", value)
+        self.item = DisplayItemNoBgc(self.container, f"{key}:", value)
         self.show_more = NormalButton(self.content_area, button_text)
         self.show_more.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
         self.show_more.add_event_cb(self.on_show_more, lv.EVENT.CLICKED, None)
@@ -678,25 +827,25 @@ class EIP712DOMAIN(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         if kwargs.get("name"):
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, "name (string):", kwargs.get("name")
             )
         if kwargs.get("version"):
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, "version (string):", kwargs.get("version")
             )
         if kwargs.get("chainId"):
-            self.item3 = DisplayItem(
+            self.item3 = DisplayItemNoBgc(
                 self.container, "chainId (uint256):", kwargs.get("chainId")
             )
         if kwargs.get("verifyingContract"):
-            self.item4 = DisplayItem(
+            self.item4 = DisplayItemNoBgc(
                 self.container,
                 "verifyingContract (address):",
                 kwargs.get("verifyingContract"),
             )
         if kwargs.get("salt"):
-            self.item5 = DisplayItem(
+            self.item5 = DisplayItemNoBgc(
                 self.container, "salt (bytes32):", kwargs.get("salt")
             )
 
@@ -720,21 +869,21 @@ class TransactionDetailsTRON(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee_max
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
         )
         if total_amount is None:
             total_amount = f"{amount}\n{fee_max}"
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
 
@@ -806,15 +955,15 @@ class SolBlindingSign(FullSizeWindow):
             icon_path=icon_path,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
             _(i18n_keys.LIST_VALUE__UNKNOWN__COLON),
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MESSAGE_HASH__COLON), message_hex
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
         )
 
@@ -831,16 +980,16 @@ class SolTransfer(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), to_addr
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), from_addr
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
         )
 
@@ -863,21 +1012,21 @@ class SolCreateAssociatedTokenAccount(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__NEW_TOKEN_ACCOUNT),
             associated_token_account,
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__OWNER), wallet_address
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MINT_ADDRESS), token_mint
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FUNDED_BY__COLON), funding_account
         )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
         )  # _(i18n_keys.LIST_KEY__FEE_PAYER__COLON)
 
@@ -901,23 +1050,23 @@ class SolTokenTransfer(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO_TOKEN_ACCOUNT__COLON), to
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM_TOKEN_ACCOUNT__COLON), from_addr
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), source_owner
         )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FEE_PAYER__COLON), fee_payer
         )
         if token_mint:
-            self.item6 = DisplayItem(
+            self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__MINT_ADDRESS), token_mint
             )
 
@@ -933,12 +1082,12 @@ class BlindingSignCommon(FullSizeWindow):
             icon_path=icon_path,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
             _(i18n_keys.LIST_VALUE__UNKNOWN__COLON),
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
         )
 
@@ -969,9 +1118,9 @@ class AlgoCommon(FullSizeWindow):
             icon_path=icon_path,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
-            _(i18n_keys.LIST_KEY__FORMAT__COLON),
+            _(i18n_keys.LIST_KEY__TYPE__COLON),
             type,
         )
 
@@ -997,34 +1146,34 @@ class AlgoPayment(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), receiver
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
         if note is not None:
-            self.item5 = DisplayItem(
+            self.item5 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
             )
         if close_to is not None:
-            self.item6 = DisplayItem(
+            self.item6 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__CLOSE_REMAINDER_TO__COLON),
                 close_to,
             )
         if rekey_to is not None:
-            self.item7 = DisplayItem(
+            self.item7 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
         if genesis_id is not None:
-            self.item8 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
+            self.item8 = DisplayItemNoBgc(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoAssetFreeze(FullSizeWindow):
@@ -1049,35 +1198,35 @@ class AlgoAssetFreeze(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FREEZE_ACCOUNT__COLON), target
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__FREEZE_ASSET_ID__COLON),
             _(i18n_keys.LIST_VALUE__TRUE)
             if new_freeze_state is True
             else _(i18n_keys.LIST_VALUE__FALSE),
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__ASSET_ID__COLON), index
         )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
         if note is not None:
-            self.item6 = DisplayItem(
+            self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
             )
         if rekey_to is not None:
-            self.item7 = DisplayItem(
+            self.item7 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
         if genesis_id is not None:
-            self.item8 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
+            self.item8 = DisplayItemNoBgc(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoAssetXfer(FullSizeWindow):
@@ -1103,43 +1252,43 @@ class AlgoAssetXfer(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), receiver
         )
         if revocation_target is not None:
-            self.item4 = DisplayItem(
+            self.item4 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__REVOCATION_ADDRESS__COLON),
                 revocation_target,
             )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__ASSET_ID__COLON), index
         )
-        self.item6 = DisplayItem(
+        self.item6 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
         if note is not None:
-            self.item7 = DisplayItem(
+            self.item7 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
             )
         if rekey_to is not None:
-            self.item8 = DisplayItem(
+            self.item8 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
         if close_assets_to is not None:
-            self.item9 = DisplayItem(
+            self.item9 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__CLOSE_ASSET_TO__COLON),
                 close_assets_to,
             )
         if genesis_id is not None:
-            self.item10 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
+            self.item10 = DisplayItemNoBgc(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoAssetCfg(FullSizeWindow):
@@ -1173,37 +1322,37 @@ class AlgoAssetCfg(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
         if asset_name is not None:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__ASSET_NAME__COLON), asset_name
             )
         if index is not None and index != "0":
-            self.item3 = DisplayItem(
+            self.item3 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__ASSET_ID__COLON), index
             )
         if url is not None:
-            self.item14 = DisplayItem(
+            self.item14 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__URL__COLON), url
             )
         if manager is not None:
-            self.item5 = DisplayItem(
+            self.item5 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__MANAGER_ADDRESS__COLON), manager
             )
         if reserve is not None:
-            self.item6 = DisplayItem(
+            self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__RESERVE_ADDRESS__COLON), reserve
             )
         if clawback is not None:
-            self.item7 = DisplayItem(
+            self.item7 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__CLAW_BACK_ADDRESS__COLON),
                 clawback,
             )
         if default_frozen is not None:
-            self.item8 = DisplayItem(
+            self.item8 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__FREEZE_ADDRESS__QUESTION),
                 _(i18n_keys.LIST_VALUE__TRUE)
@@ -1211,40 +1360,40 @@ class AlgoAssetCfg(FullSizeWindow):
                 else _(i18n_keys.LIST_VALUE__FALSE),
             )
         if freeze is not None:
-            self.item9 = DisplayItem(
+            self.item9 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__FREEZE_ADDRESS__COLON), freeze
             )
         if total is not None:
-            self.item10 = DisplayItem(
+            self.item10 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__TOTAL__COLON), total
             )
         if decimals is not None and decimals != "0":
-            self.item11 = DisplayItem(
+            self.item11 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__DECIMALS__COLON), decimals
             )
         if unit_name is not None:
-            self.item12 = DisplayItem(
+            self.item12 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__UNIT_NAME__COLON), unit_name
             )
         if metadata_hash is not None:
-            self.item13 = DisplayItem(
+            self.item13 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__METADATA_HASH__COLON),
                 metadata_hash,
             )
-        self.item14 = DisplayItem(
+        self.item14 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
         if note is not None:
-            self.item15 = DisplayItem(
+            self.item15 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
             )
         if rekey_to is not None:
-            self.item16 = DisplayItem(
+            self.item16 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
         if genesis_id is not None:
-            self.item17 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
+            self.item17 = DisplayItemNoBgc(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoKeyregOnline(FullSizeWindow):
@@ -1269,34 +1418,34 @@ class AlgoKeyregOnline(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__VRF_PUBLIC_KEY__COLON), selkey
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__VOTE_PUBLIC_KEY__COLON), votekey
         )
         if sprfkey is not None:
-            self.item4 = DisplayItem(
+            self.item4 = DisplayItemNoBgc(
                 self.container,
                 _(i18n_keys.LIST_KEY__STATE_PROOF_PUBLIC_KEY__COLON),
                 sprfkey,
             )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
         if note is not None:
-            self.item6 = DisplayItem(
+            self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
             )
         if rekey_to is not None:
-            self.item7 = DisplayItem(
+            self.item7 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
         if genesis_id is not None:
-            self.item8 = DisplayItem(self.container, "GENESIS ID:", genesis_id)
+            self.item8 = DisplayItemNoBgc(self.container, "GENESIS ID:", genesis_id)
 
 
 class AlgoKeyregNonp(FullSizeWindow):
@@ -1310,17 +1459,17 @@ class AlgoKeyregNonp(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee
         )
         if note is not None:
-            self.item3 = DisplayItem(
+            self.item3 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__NOTE__COLON), note
             )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__NONPARTICIPATION__COLON),
             _(i18n_keys.LIST_VALUE__FALSE)
@@ -1328,7 +1477,7 @@ class AlgoKeyregNonp(FullSizeWindow):
             else _(i18n_keys.LIST_VALUE__TRUE),
         )
         if rekey_to is not None:
-            self.item5 = DisplayItem(
+            self.item5 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__REKEY_TO__COLON), rekey_to
             )
 
@@ -1344,12 +1493,12 @@ class AlgoApplication(FullSizeWindow):
             icon_path=icon_path,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__FORMAT__COLON),
             "Application",
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
         )
 
@@ -1374,25 +1523,25 @@ class RipplePayment(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
         )
         if tag is not None:
-            self.item4 = DisplayItem(
+            self.item4 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__DESTINATION_TAG__COLON), tag
             )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MAXIMUM_FEE__COLON), fee_max
         )
         if total_amount is None:
             total_amount = f"{amount}\n{fee_max}"
-        self.item6 = DisplayItem(
+        self.item6 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
 
@@ -1434,25 +1583,25 @@ class FilecoinPayment(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__GAS_LIMIT__COLON), gaslimit
         )
-        self.item5 = DisplayItem(
+        self.item5 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__GAS_FEE_CAP__COLON), gasfeecap
         )
-        self.item6 = DisplayItem(
+        self.item6 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__GAS_PREMIUM__COLON), gaspremium
         )
-        self.item6 = DisplayItem(
+        self.item6 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON), total_amount
         )
 
@@ -1470,7 +1619,7 @@ class CosmosTransactionOverview(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
         if type == _(i18n_keys.TITLE__SEND):
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container,
                 f"#878787 {_(i18n_keys.INSERT__SEND)}#  {amount}  #878787 {_(i18n_keys.INSERT__TO)}#",
                 address,
@@ -1478,7 +1627,7 @@ class CosmosTransactionOverview(FullSizeWindow):
             self.item1.label_top.set_recolor(True)
             self.item1.set_style_bg_color(lv_colors.BLACK, 0)
         else:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container,
                 f"#878787 {_(i18n_keys.LIST_KEY__TYPE__COLON)}#",
                 value,
@@ -1507,22 +1656,24 @@ class CosmosSend(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
         )
-        self.item4 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        self.item4 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
+        )
         if chain_name is not None:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
             )
         else:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
             )
 
@@ -1547,22 +1698,24 @@ class CosmosDelegate(FullSizeWindow):
             primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__DELEGATOR__COLON), delegator
         )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__VALIDATOR__COLON), validator
         )
-        self.item4 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        self.item4 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
+        )
         if chain_name is not None:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
             )
         else:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
             )
 
@@ -1585,22 +1738,22 @@ class CosmosSignCommon(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         if chain_name is not None:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
             )
         else:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
             )
         if signer:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
             )
-        self.item3 = DisplayItem(
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__TYPE__COLON), value
         )
         if fee is not None:
-            self.item4 = DisplayItem(
+            self.item4 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
             )
 
@@ -1619,7 +1772,7 @@ class CosmosSignContent(FullSizeWindow):
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         for key, value in msgs_item.items():
             if len(value) <= 80:
-                self.item2 = DisplayItem(self.container, key, value)
+                self.item2 = DisplayItemNoBgc(self.container, key, value)
 
 
 class CosmosLongValue(FullSizeWindow):
@@ -1636,33 +1789,37 @@ class CosmosLongValue(FullSizeWindow):
             _(i18n_keys.BUTTON__CANCEL),
             primary_color=primary_color or lv_colors.ONEKEY_GREEN,
         )
-
+        self.primary_color = primary_color
         PageAbleMessage(
             title,
             content,
             self.channel,
-            primary_color=lv_colors.ONEKEY_GREEN,
+            primary_color=self.primary_color,
         )
         self.destroy()
 
 
 class CosmosSignCombined(FullSizeWindow):
-    def __init__(self, chain_id: str, signer: str, fee: str, msgs: str):
+    def __init__(self, chain_id: str, signer: str, fee: str, msgs: str, primary_color):
         super().__init__(
             _(i18n_keys.TITLE__VIEW_TRANSACTION),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color,
         )
+        self.primary_color = primary_color
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__CHAIN_ID__COLON), chain_id
         )
         if signer:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), signer
             )
-        self.item3 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee)
+        self.item3 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__FEE__COLON), fee
+        )
         self.show_full_message = NormalButton(
             self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
         )
@@ -1679,7 +1836,7 @@ class CosmosSignCombined(FullSizeWindow):
                     _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE),
                     self.message,
                     self.channel,
-                    primary_color=lv_colors.ONEKEY_GREEN,
+                    primary_color=self.primary_color,
                 )
 
 
@@ -1701,12 +1858,12 @@ class ConfirmTypedHash(FullSizeWindow):
         self.icon.align_to(self.banner, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.title.align_to(self.icon, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 16)
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container,
             _(i18n_keys.LIST_KEY__DOMAIN_SEPARATOR_HASH__COLON),
             domain_hash,
         )
-        self.item2 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__MESSAGE_HASH__COLON), message_hash
         )
 
@@ -1734,27 +1891,29 @@ class PolkadotBalances(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         if balance:
-            self.item1 = DisplayItem(
+            self.item1 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), balance
             )
-        self.item2 = DisplayItem(self.container, _(i18n_keys.LIST_KEY__TO__COLON), dest)
-        self.item3 = DisplayItem(
+        self.item2 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), dest
+        )
+        self.item3 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__SIGNER__COLON), sender
         )
-        self.item4 = DisplayItem(
+        self.item4 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__CHAIN_NAME__COLON), chain_name
         )
-        # self.item5 = DisplayItem(self.container, module, method)
+        # self.item5 = DisplayItemNoBgc(self.container, module, method)
         if source:
-            self.item6 = DisplayItem(
+            self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__SOURCE_COLON), source
             )
         if tip is not None:
-            self.item7 = DisplayItem(
+            self.item7 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__TIP_COLON), tip
             )
         if keep_alive is not None:
-            self.item8 = DisplayItem(
+            self.item8 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__KEEP_ALIVE_COLON), keep_alive
             )
 
@@ -1768,6 +1927,7 @@ class TronAssetFreeze(FullSizeWindow):
         balance,
         duration,
         receiver,
+        lock,
         primary_color,
     ):
         super().__init__(
@@ -1779,25 +1939,33 @@ class TronAssetFreeze(FullSizeWindow):
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
 
-        self.item1 = DisplayItem(
+        self.item1 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__FROM__COLON), sender
         )
         if resource is not None:
-            self.item2 = DisplayItem(
+            self.item2 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__RESOURCE_COLON), resource
             )
-        if is_freeze:
-            if balance:
-                self.item2 = DisplayItem(
+        if balance:
+            if is_freeze:
+                self.item3 = DisplayItemNoBgc(
                     self.container, _(i18n_keys.LIST_KEY__FROZEN_BALANCE_COLON), balance
                 )
-            if duration:
-                self.item2 = DisplayItem(
-                    self.container,
-                    _(i18n_keys.LIST_KEY__FROZEN_DURATION_COLON),
-                    duration,
+            else:
+                self.item3 = DisplayItemNoBgc(
+                    self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), balance
                 )
+        if duration:
+            self.item4 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__FROZEN_DURATION_COLON),
+                duration,
+            )
         if receiver is not None:
-            self.item4 = DisplayItem(
+            self.item5 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__RECEIVER_ADDRESS_COLON), receiver
+            )
+        if lock is not None:
+            self.item6 = DisplayItemNoBgc(
+                self.container, _(i18n_keys.LIST_KEY__LOCK_COLON), lock
             )

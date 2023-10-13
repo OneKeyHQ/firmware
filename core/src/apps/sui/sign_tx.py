@@ -25,7 +25,7 @@ async def sign_tx(ctx: wire.Context, msg: SuiSignTx, keychain: Keychain) -> SuiS
         raise wire.DataError("Invalid raw tx")
 
     await confirm_blind_sign_common(ctx, address, msg.raw_tx)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "SUI")
     signature = ed25519.sign(
         node.private_key(), blake2b(data=msg.raw_tx, outlen=32).digest()
     )

@@ -26,7 +26,7 @@ async def sign_tx(
 
     ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_blind_sign_common(ctx, address, msg.raw_tx)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "STC")
     prefix_bytes = sha3_256(TRANSACTION_PREFIX).digest()
     raw_tx = prefix_bytes + msg.raw_tx
     signature = ed25519.sign(node.private_key(), raw_tx)

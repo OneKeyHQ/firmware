@@ -29,11 +29,11 @@ SRC_DIR = HERE / "src"
 
 PROFILING_WRAPPER = HERE / "prof" / "prof.py"
 
-PROFILE_BASE = Path.home() / ".trezoremu"
+PROFILE_BASE = Path.home() / ".onekeyemu"
 
 TREZOR_STORAGE_FILES = (
-    "trezor.flash",
-    "trezor.sdcard",
+    "onekey.flash",
+    "onekey.sdcard",
 )
 
 

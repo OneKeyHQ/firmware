@@ -24,7 +24,7 @@
 
 /// package: trezorcrypto.se_thd89
 
-/// def check(mnemonic: str) -> bool:
+/// def check(mnemonic: bytes) -> bool:
 ///     """
 ///     Check whether given mnemonic is valid.
 ///     """
@@ -366,7 +366,7 @@ STATIC mp_obj_t mod_trezorcrypto_se_thd89_ecdh(mp_obj_t curve,
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorcrypto_se_thd89_ecdh_obj,
                                  mod_trezorcrypto_se_thd89_ecdh);
 
-/// def uncompress_pubkey(pubkey: bytes) -> bytes:
+/// def uncompress_pubkey(curve: str, pubkey: bytes) -> bytes:
 ///     """
 ///     Uncompress public.
 ///     """

@@ -53,9 +53,9 @@ def compute_cipher_key_value(msg: CipherKeyValue, seckey: bytes) -> bytes:
                 return se_thd89.aes256_decrypt(data, msg.value, msg.iv)
         else:
             if msg.encrypt:
-                return se_thd89.aes256_encrypt(data, msg.value)
+                return se_thd89.aes256_encrypt(data, msg.value, None)
             else:
-                return se_thd89.aes256_decrypt(data, msg.value)
+                return se_thd89.aes256_decrypt(data, msg.value, None)
 
     else:
         data = hmac(hmac.SHA512, seckey, data).digest()

@@ -1,5 +1,5 @@
 import storage.device
-from trezor import config, ui, utils, workflow
+from trezor import ui, utils, workflow
 from trezor.enums import BackupType
 
 
@@ -8,12 +8,7 @@ def get() -> tuple[bytes | None, BackupType]:
 
 
 def get_secret() -> bytes | None:
-    if utils.EMULATOR:
-        return storage.device.get_mnemonic_secret()
-    else:
-         return config.se_export_mnemonic()
-
-    
+    return storage.device.get_mnemonic_secret()
 
 
 def get_type() -> BackupType:
@@ -72,7 +67,7 @@ def get_seed(passphrase: str = "", progress_bar: bool = True) -> bytes:
         if is_bip39():
             if not se_thd89.seed(passphrase, render_func):
                 raise RuntimeError
-        return None
+        return b""
 
 
 if not utils.BITCOIN_ONLY:

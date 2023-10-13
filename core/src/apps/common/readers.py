@@ -44,3 +44,13 @@ def read_uint64_be(r: BufferReader) -> int:
     for _ in range(7):
         n = (n << 8) + r.get()
     return n
+
+
+def read_uint16_le(r: BufferReader) -> int:
+    data = r.read_memoryview(2)
+    return int.from_bytes(data, "little")
+
+
+def read_uint32_le(r: BufferReader) -> int:
+    data = r.read_memoryview(4)
+    return int.from_bytes(data, "little")

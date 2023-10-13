@@ -43,6 +43,7 @@ from . import (
     device,
     eos,
     ethereum,
+    ethereum_onekey,
     fido,
     firmware,
     monero,
@@ -61,6 +62,7 @@ from . import (
     polkadot,
     with_client,
     kaspa,
+    nexa,
 )
 
 F = TypeVar("F", bound=Callable)
@@ -104,6 +106,7 @@ COMMAND_ALIASES = {
     "cosmos": cosmos.cli,
     "polkadot": polkadot.cli,
     "kaspa": kaspa.cli,
+    "nexa": nexa.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -430,6 +433,7 @@ cli.add_command(crypto.cli)
 cli.add_command(device.cli)
 cli.add_command(eos.cli)
 cli.add_command(ethereum.cli)
+cli.add_command(ethereum_onekey.cli)
 cli.add_command(fido.cli)
 cli.add_command(monero.cli)
 cli.add_command(nem.cli)
@@ -449,6 +453,7 @@ cli.add_command(sui.cli)
 cli.add_command(cosmos.cli)
 cli.add_command(polkadot.cli)
 cli.add_command(kaspa.cli)
+cli.add_command(nexa.cli)
 
 #
 # Main

@@ -18,7 +18,6 @@ from trezor.utils import HashWriter
 
 from apps.common import paths
 
-from . import networks
 from .helpers import (
     address_from_bytes,
     get_color_and_icon,
@@ -37,25 +36,20 @@ from .layout import (
 if TYPE_CHECKING:
     from apps.common.keychain import Keychain
     from trezor.wire import Context
+    from .definitions import Definitions
 
 
 # Maximum data size we support
-MAX_VALUE_BYTE_SIZE = 1024
+MAX_VALUE_BYTE_SIZE = 1536  # 1.5 KB
 
 
 @with_keychain_from_path(*PATTERNS_ADDRESS)
 async def sign_typed_data(
-    ctx: Context, msg: EthereumSignTypedData, keychain: Keychain
+    ctx: Context, msg: EthereumSignTypedData, keychain: Keychain, defs: Definitions
 ) -> EthereumTypedDataSignature:
     await paths.validate_path(ctx, keychain, msg.address_n)
 
-    if msg.chain_id:
-        network = networks.by_chain_id(msg.chain_id)
-    else:
-        if len(msg.address_n) > 1:  # path has slip44 network identifier
-            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
-        else:
-            network = None
+    network = defs.network
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )

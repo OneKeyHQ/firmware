@@ -163,6 +163,8 @@ async def _deal_button_press(value: bytes) -> None:
         if display.backlight():
             display.backlight(0)
             if device.is_initialized():
+                if utils.is_initialization_processing():
+                    return
                 utils.AUTO_POWER_OFF = True
                 if config.has_pin() and config.is_unlocked():
                     config.lock()
@@ -174,12 +176,11 @@ async def _deal_button_press(value: bytes) -> None:
     elif res == _PRESS_LONG:
         from trezor.lvglui.scrs.homescreen import PowerOff
 
-        if device.is_initialized():
-            PowerOff(re_loop=True)
-        else:
-            from trezor.lvglui.scrs.initscreen import InitScreen
-
-            PowerOff(InitScreen._instance)
+        PowerOff(
+            re_loop=True
+            if not utils.is_initialization_processing() and device.is_initialized()
+            else False
+        )
         await loop.sleep(200)
         utils.lcd_resume()
 
