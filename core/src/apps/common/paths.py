@@ -342,6 +342,11 @@ PATTERN_BIP44_PUBKEY = "m/44'/coin_type'/account'/*"
 PATTERN_SEP5 = "m/44'/coin_type'/account'"
 # Starcoin derive path
 PATTERN_BIP44_ED25519 = "m/44'/coin_type'/account'/change'/*'"
+# SEP-0005 Ledger Live legacy path
+# https://github.com/trezor/trezor-firmware/issues/1749
+PATTERN_SEP5_LEDGER_LIVE_LEGACY = "m/44'/coin_type'/0'/account"
+
+PATTERN_CASA = "m/45'/coin_type/account/change/address_index"
 
 
 async def validate_path(

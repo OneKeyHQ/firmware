@@ -486,7 +486,7 @@ MP_NOINLINE int main_(int argc, char **argv) {
 
   pre_process_options(argc, argv);
 
-  // Map trezor.flash to memory.
+  // Map onekey.flash to memory.
   flash_init();
 
 #if MICROPY_ENABLE_GC

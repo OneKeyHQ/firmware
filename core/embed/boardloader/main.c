@@ -28,7 +28,6 @@
 #include "flash.h"
 #include "image.h"
 #include "mipi_lcd.h"
-#include "qspi_flash.h"
 #include "rng.h"
 #ifdef TREZOR_MODEL_T
 #include "sdcard.h"
@@ -116,7 +115,7 @@ static const uint8_t toi_icon_safeos[] = {
 };
 // clang-format on
 
-#define BOARD_VERSION "OneKey Boardloader 1.4.0\n"
+#define BOARD_VERSION "OneKey Boardloader 1.5.0\n"
 
 #if defined(STM32H747xx)
 
@@ -442,10 +441,6 @@ int main(void) {
   gpio_init();
 
   sdram_init();
-
-  qspi_flash_init();
-  qspi_flash_config();
-  qspi_flash_memory_mapped();
 
   mpu_config();
 

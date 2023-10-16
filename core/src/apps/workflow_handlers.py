@@ -139,6 +139,24 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.EthereumSignTypedHash:
             return "apps.ethereum.sign_typed_data_hash"
 
+        # ethereum onekey
+        if msg_type == MessageType.EthereumGetAddressOneKey:
+            return "apps.ethereum.onekey.get_address"
+        if msg_type == MessageType.EthereumGetPublicKeyOneKey:
+            return "apps.ethereum.onekey.get_public_key"
+        if msg_type == MessageType.EthereumSignTxOneKey:
+            return "apps.ethereum.onekey.sign_tx"
+        if msg_type == MessageType.EthereumSignTxEIP1559OneKey:
+            return "apps.ethereum.onekey.sign_tx_eip1559"
+        if msg_type == MessageType.EthereumSignMessageOneKey:
+            return "apps.ethereum.onekey.sign_message"
+        if msg_type == MessageType.EthereumVerifyMessageOneKey:
+            return "apps.ethereum.onekey.verify_message"
+        if msg_type == MessageType.EthereumSignTypedDataOneKey:
+            return "apps.ethereum.onekey.sign_typed_data"
+        if msg_type == MessageType.EthereumSignTypedHashOneKey:
+            return "apps.ethereum.onekey.sign_typed_data_hash"
+
         # monero
         if msg_type == MessageType.MoneroGetAddress:
             return "apps.monero.get_address"
@@ -273,6 +291,8 @@ def find_message_handler_module(msg_type: int) -> str:
             return "apps.sui.get_address"
         if msg_type == MessageType.SuiSignTx:
             return "apps.sui.sign_tx"
+        if msg_type == MessageType.SuiSignMessage:
+            return "apps.sui.sign_message"
 
         # filecoin
         if msg_type == MessageType.FilecoinGetAddress:
@@ -291,6 +311,12 @@ def find_message_handler_module(msg_type: int) -> str:
             return "apps.kaspa.get_address"
         if msg_type == MessageType.KaspaSignTx:
             return "apps.kaspa.sign_tx"
+
+        # nexa
+        if msg_type == MessageType.NexaGetAddress:
+            return "apps.nexa.get_address"
+        if msg_type == MessageType.NexaSignTx:
+            return "apps.nexa.sign_tx"
 
     raise ValueError
 

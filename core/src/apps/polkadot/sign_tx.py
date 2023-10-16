@@ -31,7 +31,7 @@ async def sign_tx(
     chain_name, symbol, decimal = helper.update_chain_res(ctx, msg.network)
     tx = transaction.Transaction.deserialize(msg.raw_tx, msg.network)
     await tx.layout(ctx, address, chain_name, symbol, decimal)
-    await confirm_final(ctx)
+    await confirm_final(ctx, chain_name)
     signature = ed25519.sign(node.private_key(), msg.raw_tx)
 
     return PolkadotSignedTx(signature=signature)

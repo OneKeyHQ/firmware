@@ -55,7 +55,6 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
     # Confirm transaction
     contract = transaction.contract
     if contract.transfer_contract:
-
         if contract.transfer_contract.amount is None:
             raise wire.DataError("Invalid Tron transfer amount")
 
@@ -126,11 +125,54 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
             owner_address,
             contract.unfreeze_balance_contract.resource,
             contract.unfreeze_balance_contract.receiver_address,
+            None,
+        )
+    elif contract.withdraw_balance_contract:
+        from trezor.ui.layouts.lvgl import confirm_tron_common
+
+        await confirm_tron_common(ctx, "Withdraw Balance Contract")
+    elif contract.freeze_balance_v2_contract:
+        await layout.require_confirm_freeze(
+            ctx,
+            owner_address,
+            contract.freeze_balance_v2_contract.frozen_balance,
+            None,
+            contract.freeze_balance_v2_contract.resource,
+            None,
+        )
+    elif contract.unfreeze_balance_v2_contract:
+        await layout.require_confirm_unfreeze_v2(
+            ctx,
+            owner_address,
+            contract.unfreeze_balance_v2_contract.resource,
+            contract.unfreeze_balance_v2_contract.unfreeze_balance,
+        )
+    elif contract.withdraw_expire_unfreeze_contract:
+        from trezor.ui.layouts.lvgl import confirm_tron_common
+
+        await confirm_tron_common(ctx, "Withdraw Expire Unfreeze Contract")
+    elif contract.delegate_resource_contract:
+        await layout.require_confirm_delegate(
+            ctx,
+            owner_address,
+            contract.delegate_resource_contract.resource,
+            contract.delegate_resource_contract.balance,
+            contract.delegate_resource_contract.receiver_address,
+            contract.delegate_resource_contract.lock,
+        )
+    elif contract.undelegate_resource_contract:
+        await layout.require_confirm_undelegate(
+            ctx,
+            owner_address,
+            contract.undelegate_resource_contract.resource,
+            contract.undelegate_resource_contract.balance,
+            contract.undelegate_resource_contract.receiver_address,
+            None,
         )
     else:
         raise wire.DataError("Invalid transaction type")
 
-    await confirm_final(ctx)
+    await confirm_final(ctx, "TRON")
 
 
 def validate(msg: TronSignTx):

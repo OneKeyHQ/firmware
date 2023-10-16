@@ -49,5 +49,5 @@ async def sign_tx(
     signature = secp256k1.sign(node.private_key(), message_digest, False)
     signature = signature[1:65] + bytes([(~signature[0] & 0x01)])
 
-    await confirm_final(ctx)
+    await confirm_final(ctx, "Filecoin")
     return FilecoinSignedTx(signature=signature)

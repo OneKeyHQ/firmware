@@ -28,6 +28,7 @@ These include:
 - unit tests (using Check - check.sf.net; in test_check.c)
 - tests against OpenSSL (in test_openssl.c)
 - integrated Wycheproof tests
+- Schnorr BCH variant signing/verifying (for Nexa)
 
 Distibuted under MIT License.
 

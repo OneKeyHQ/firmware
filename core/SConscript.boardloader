@@ -176,6 +176,7 @@ else:
 env = Environment(ENV=os.environ, CFLAGS='%s -DPRODUCTION=%s' % (ARGUMENTS.get('CFLAGS', ''), ARGUMENTS.get('PRODUCTION', '0')))
 
 env.Replace(
+    DD='dd',
     AS='arm-none-eabi-as',
     AR='arm-none-eabi-ar',
     CC='arm-none-eabi-gcc',
@@ -289,5 +290,9 @@ program_elf = env.Command(
 program_bin = env.Command(
     target='boardloader.bin',
     source=program_elf,
-    action='$OBJCOPY -O binary $SOURCE $TARGET',
+    action=[
+        '$OBJCOPY -O binary $SOURCE $TARGET',
+        '$DD if=$TARGET of=$TARGET bs=1 count=0 seek=128K',
+    ]
+    
 )

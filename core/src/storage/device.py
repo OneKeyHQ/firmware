@@ -45,61 +45,61 @@ if utils.USE_THD89:
     _PUBLIC_REGION_SIZE = const(0x600)
     _PRIVATE_REGION_SIZE = const(0x200)
 
-    struct_bool = {
+    struct_bool: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "value": 3 | uctypes.UINT8,
     }
 
-    struct_uint32 = {
+    struct_uint32: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "value": 3 | uctypes.UINT32,
     }
 
-    struct_uuid = {
+    struct_uuid: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "uuid": (3 | uctypes.ARRAY, 25 | uctypes.UINT8),
     }
 
-    struct_language = {
+    struct_language: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "language": (3 | uctypes.ARRAY, 17 | uctypes.UINT8),
     }
 
-    struct_label = {
+    struct_label: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "uuid": (3 | uctypes.ARRAY, 13 | uctypes.UINT8),
     }
 
-    struct_homescreen = {
+    struct_homescreen: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "uuid": (3 | uctypes.ARRAY, 128 | uctypes.UINT8),
     }
 
-    struct_sessionkey = {
+    struct_sessionkey: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "uuid": (3 | uctypes.ARRAY, 16 | uctypes.UINT8),
     }
 
-    struct_ble_name = {
+    struct_ble_name: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "ble_name": (3 | uctypes.ARRAY, 16 | uctypes.UINT8),
     }
 
-    struct_ble_version = {
+    struct_ble_version: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "ble_version": (3 | uctypes.ARRAY, 8 | uctypes.UINT8),
     }
 
-    struct_SD_auth_key = {
+    struct_SD_auth_key: uctypes.StructDict = {
         "has_value": 0 | uctypes.UINT8,
         "size": 1 | uctypes.UINT16,
         "ble_version": (3 | uctypes.ARRAY, 12 | uctypes.UINT8),
@@ -174,9 +174,9 @@ if utils.USE_THD89:
     struct_public["slip39_group_count"] = (offset, struct_uint32)
     offset += uctypes.sizeof(struct_uint32, uctypes.LITTLE_ENDIAN)
     # public_field = uctypes.struct(0, struct_public, uctypes.LITTLE_ENDIAN)
-    assert uctypes.sizeof(
-        struct_public, uctypes.LITTLE_ENDIAN
-    ) < _PUBLIC_REGION_SIZE, "public region size too large"
+    assert (
+        uctypes.sizeof(struct_public, uctypes.LITTLE_ENDIAN) < _PUBLIC_REGION_SIZE
+    ), "public region size too large"
 
     struct_private = {}
     offset = 0
@@ -195,9 +195,9 @@ if utils.USE_THD89:
     struct_private["sd_auth_key"] = (offset, struct_SD_auth_key)
     offset += uctypes.sizeof(struct_SD_auth_key, uctypes.LITTLE_ENDIAN)
     # private_field = uctypes.struct(0, struct_private, uctypes.LITTLE_ENDIAN)
-    assert uctypes.sizeof(
-        struct_private, uctypes.LITTLE_ENDIAN
-    ) < _PRIVATE_REGION_SIZE, "private region size too large"
+    assert (
+        uctypes.sizeof(struct_private, uctypes.LITTLE_ENDIAN) < _PRIVATE_REGION_SIZE
+    ), "private region size too large"
 
     _PRIVATE_FLAG = const(1 << 31)
 
@@ -206,8 +206,7 @@ if utils.USE_THD89:
     _LANGUAGE = struct_public["language"][0]
     _LABEL = struct_public["label"][0]
     _USE_PASSPHRASE = struct_public["use_passphrase"][0]
-    _PASSPHRASE_ALWAYS_ON_DEVICE = struct_public[
-        "passphrase_always_on_device"][0]
+    _PASSPHRASE_ALWAYS_ON_DEVICE = struct_public["passphrase_always_on_device"][0]
     _AUTOLOCK_DELAY_MS = struct_public["autolock_delay_ms"][0]
     _HOMESCREEN = struct_public["homescreen"][0]
     _BLE_NAME = struct_public["ble_name"][0]
@@ -227,9 +226,9 @@ if utils.USE_THD89:
     _SLIP39_IDENTIFIER_DEVICE = struct_public["slip39_identifier_device"][0]
     _SLIP39_ITERATION_E_DEVICE = struct_public["slip39_iteration_e_device"][0]
 
-    U2F_COUNTER = 0x00 #u2f counter
+    U2F_COUNTER = 0x00  # u2f counter
 
-    #recovery key
+    # recovery key
     _IN_PROGRESS = struct_public["in_progress"][0]
     _DRY_RUN = struct_public["dry_run"][0]
     _SLIP39_IDENTIFIER_RECOVER = struct_public["slip39_identifier_recover"][0]
@@ -287,14 +286,13 @@ else:
     _TAP_AWAKE = (0x89)  # bool
     _ANIMATION = (0x8A)  # bool
     _TREZOR_COMPATIBLE = (0x8B)
-
-SAFETY_CHECK_LEVEL_STRICT  : Literal[0] = const(0)
-SAFETY_CHECK_LEVEL_PROMPT  : Literal[1] = const(1)
+    # fmt: on
+SAFETY_CHECK_LEVEL_STRICT: Literal[0] = const(0)
+SAFETY_CHECK_LEVEL_PROMPT: Literal[1] = const(1)
 _DEFAULT_SAFETY_CHECK_LEVEL = SAFETY_CHECK_LEVEL_STRICT
 
 if TYPE_CHECKING:
     StorageSafetyCheckLevel = Literal[0, 1]
-# fmt: on
 
 HOMESCREEN_MAXSIZE = 16384
 LABEL_MAXLENGTH = 32
@@ -307,8 +305,7 @@ else:
 AUTOLOCK_DELAY_DEFAULT = AUTOSHUTDOWN_DELAY_DEFAULT = 10 * 60 * 1000  # 10 minutes
 # autolock intervals larger than AUTOLOCK_DELAY_MAXIMUM cause issues in the scheduler
 if __debug__:
-    AUTOSHUTDOWN_DELAY_MAXIMUM = AUTOLOCK_DELAY_MAXIMUM = (0x2000_0000
-                                                           )  # ~6 days
+    AUTOSHUTDOWN_DELAY_MAXIMUM = AUTOLOCK_DELAY_MAXIMUM = 0x2000_0000  # ~6 days
 else:
     AUTOSHUTDOWN_DELAY_MAXIMUM = AUTOLOCK_DELAY_MAXIMUM = 0x1000_0000  # ~3 days
 
@@ -367,13 +364,14 @@ def ble_enabled() -> bool:
 
 def set_ble_status(enable: bool) -> None:
     global _BLE_ENABLED_VALUE
-    if _BLE_ENABLED_VALUE != enable:
-        common.set_bool(
-            _NAMESPACE,
-            _BLE_ENABLED,
-            enable,
-            public=True,
-        )
+    if _BLE_ENABLED_VALUE == enable:
+        return
+    common.set_bool(
+        _NAMESPACE,
+        _BLE_ENABLED,
+        enable,
+        public=True,
+    )
     _BLE_ENABLED_VALUE = enable
 
 
@@ -404,10 +402,7 @@ def get_serial() -> str:
 
 def set_brightness(brightness: int) -> None:
     # valid value range  0-255
-    common.set(_NAMESPACE,
-               _BRIGHTNESS,
-               brightness.to_bytes(2, "big"),
-               public=True)
+    common.set(_NAMESPACE, _BRIGHTNESS, brightness.to_bytes(2, "big"), public=True)
 
 
 def get_brightness() -> int:
@@ -433,18 +428,18 @@ def set_random_pin_map_enable(enable: bool):
 def is_random_pin_map_enabled() -> bool:
     global _USE_RANDOM_PIN_MAP_VALUE
     if _USE_RANDOM_PIN_MAP_VALUE is None:
-        _USE_RANDOM_PIN_MAP_VALUE = common.get_bool(_NAMESPACE,
-                                                    _USE_RANDOM_PIN_MAP,
-                                                    public=True)
+        _USE_RANDOM_PIN_MAP_VALUE = common.get_bool(
+            _NAMESPACE, _USE_RANDOM_PIN_MAP, public=True
+        )
     return _USE_RANDOM_PIN_MAP_VALUE
 
 
 def is_usb_lock_enabled() -> bool:
     global _USE_USB_PROTECT_VALUE
     if _USE_USB_PROTECT_VALUE is None:
-        _USE_USB_PROTECT_VALUE = common.get_bool(_NAMESPACE,
-                                                 _USE_USB_PROTECT,
-                                                 public=True)
+        _USE_USB_PROTECT_VALUE = common.get_bool(
+            _NAMESPACE, _USE_USB_PROTECT, public=True
+        )
     return _USE_USB_PROTECT_VALUE
 
 
@@ -518,10 +513,7 @@ def increase_wp_cnts() -> None:
     global _WALLPAPER_COUNTS_VALUE
     cur_cnt = get_wp_cnts()
     cnts = cur_cnt + 1
-    common.set(_NAMESPACE,
-               _WALLPAPER_COUNTS,
-               cnts.to_bytes(2, "big"),
-               public=True)
+    common.set(_NAMESPACE, _WALLPAPER_COUNTS, cnts.to_bytes(2, "big"), public=True)
     _WALLPAPER_COUNTS_VALUE = cnts
 
 
@@ -627,22 +619,22 @@ def get_mnemonic_secret() -> bytes | None:
     if utils.EMULATOR:
         return common.get(_NAMESPACE, _MNEMONIC_SECRET)
     else:
-        return config.se_export_mnemonic(
-        )  # type: ignore["se_export_mnemonic" is not a known member of module]
+        return config.se_export_mnemonic()
 
 
 def get_backup_type() -> BackupType:
     from trezor.enums import BackupType
+
     global _BACKUP_TYPE_VALUE
     if _BACKUP_TYPE_VALUE is None:
         backup_type = common.get_uint8(_NAMESPACE, _BACKUP_TYPE)
         if backup_type is None:
-            backup_type = BackupType.Bip39   
+            backup_type = BackupType.Bip39
 
         if backup_type not in (
-                BackupType.Bip39,
-                BackupType.Slip39_Basic,
-                BackupType.Slip39_Advanced,
+            BackupType.Bip39,
+            BackupType.Slip39_Basic,
+            BackupType.Slip39_Advanced,
         ):
             # Invalid backup type
             raise RuntimeError
@@ -652,7 +644,7 @@ def get_backup_type() -> BackupType:
 
 def is_passphrase_enabled() -> bool:
     global _USE_PASSPHRASE_VALUE
-    if _USE_PASSPHRASE_VALUE is None:        
+    if _USE_PASSPHRASE_VALUE is None:
         _USE_PASSPHRASE_VALUE = common.get_bool(_NAMESPACE, _USE_PASSPHRASE)
     return _USE_PASSPHRASE_VALUE
 
@@ -669,11 +661,12 @@ def set_passphrase_enabled(enable: bool) -> None:
 
 def get_homescreen() -> str | None:
     global _HOMESCREEN_VALUE
-    
+
     if _HOMESCREEN_VALUE is None:
         homescreen = common.get(_NAMESPACE, _HOMESCREEN, public=True)
-        _HOMESCREEN_VALUE = homescreen.decode(
-        ) if homescreen else "A:/res/wallpaper-1.png"
+        _HOMESCREEN_VALUE = (
+            homescreen.decode() if homescreen else "A:/res/wallpaper-1.png"
+        )
     return _HOMESCREEN_VALUE
 
 
@@ -704,9 +697,8 @@ def store_mnemonic_secret(
     common.set_true_or_delete(_NAMESPACE, _NO_BACKUP, no_backup)
     if not no_backup:
         set_backed_up(needs_backup)
-        _NEEDS_BACKUP_VALUE = needs_backup    
+        _NEEDS_BACKUP_VALUE = needs_backup
     _NO_BACKUP_VALUE = no_backup
-    _BACKUP_TYPE_VALUE = backup_type
     _INITIALIZED_VALUE = True
 
 
@@ -715,7 +707,6 @@ def needs_backup() -> bool:
         return common.get_bool(_NAMESPACE, _NEEDS_BACKUP)
     else:
         return config.get_needs_backup()
-    
 
 
 def set_backed_up(stat: bool) -> None:
@@ -759,7 +750,8 @@ def get_passphrase_always_on_device() -> bool:
     global _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE
     if _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE is None:
         _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE = common.get_bool(
-            _NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE)
+            _NAMESPACE, _PASSPHRASE_ALWAYS_ON_DEVICE
+        )
     return _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE
     # return is_passphrase_enabled()
 
@@ -801,8 +793,11 @@ def get_autolock_delay_ms() -> int:
     global _AUTOLOCK_DELAY_MS_VALUE
     if _AUTOLOCK_DELAY_MS_VALUE is None:
         b = common.get(_NAMESPACE, _AUTOLOCK_DELAY_MS)
-        _AUTOLOCK_DELAY_MS_VALUE = _normalize_autolock_delay(
-            int.from_bytes(b, "big")) if b else AUTOLOCK_DELAY_DEFAULT
+        _AUTOLOCK_DELAY_MS_VALUE = (
+            _normalize_autolock_delay(int.from_bytes(b, "big"))
+            if b
+            else AUTOLOCK_DELAY_DEFAULT
+        )
     return _AUTOLOCK_DELAY_MS_VALUE
 
 
@@ -824,8 +819,11 @@ def get_autoshutdown_delay_ms() -> int:
     global _AUTOSHUTDOWN_DELAY_MS_VALUE
     if _AUTOSHUTDOWN_DELAY_MS_VALUE is None:
         b = common.get(_NAMESPACE, _AUTOSHUTDOWN_DELAY_MS, public=True)
-        _AUTOSHUTDOWN_DELAY_MS_VALUE = _normalize_autoshutdown_delay(
-            int.from_bytes(b, "big")) if b else AUTOSHUTDOWN_DELAY_DEFAULT
+        _AUTOSHUTDOWN_DELAY_MS_VALUE = (
+            _normalize_autoshutdown_delay(int.from_bytes(b, "big"))
+            if b
+            else AUTOSHUTDOWN_DELAY_DEFAULT
+        )
     return _AUTOSHUTDOWN_DELAY_MS_VALUE
 
 
@@ -833,10 +831,9 @@ def set_autoshutdown_delay_ms(delay_ms: int) -> None:
     global _AUTOSHUTDOWN_DELAY_MS_VALUE
     _AUTOSHUTDOWN_DELAY_MS_VALUE = delay_ms
     delay_ms = _normalize_autoshutdown_delay(delay_ms)
-    common.set(_NAMESPACE,
-               _AUTOSHUTDOWN_DELAY_MS,
-               delay_ms.to_bytes(4, "big"),
-               public=True)
+    common.set(
+        _NAMESPACE, _AUTOSHUTDOWN_DELAY_MS, delay_ms.to_bytes(4, "big"), public=True
+    )
 
 
 def next_u2f_counter() -> int:
@@ -907,8 +904,9 @@ def safety_check_level() -> StorageSafetyCheckLevel:
         if level not in (SAFETY_CHECK_LEVEL_STRICT, SAFETY_CHECK_LEVEL_PROMPT):
             _SAFETY_CHECK_LEVEL_VALUE = _DEFAULT_SAFETY_CHECK_LEVEL
         else:
-            _SAFETY_CHECK_LEVEL_VALUE = level  # type: ignore [int-into-enum]
-    return _SAFETY_CHECK_LEVEL_VALUE
+            _SAFETY_CHECK_LEVEL_VALUE = level
+    assert _SAFETY_CHECK_LEVEL_VALUE is not None
+    return _SAFETY_CHECK_LEVEL_VALUE  # type: ignore [int-into-enum]
 
 
 # do not use this function directly, see apps.common.safety_checks instead
@@ -934,12 +932,13 @@ def get_experimental_features() -> bool:
 
 def set_experimental_features(enabled: bool) -> None:
     cached_bytes = b"\x01" if enabled else b""
-    storage.cache.set(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES,
-                      cached_bytes)
+    storage.cache.set(storage.cache.STORAGE_DEVICE_EXPERIMENTAL_FEATURES, cached_bytes)
     common.set_true_or_delete(_NAMESPACE, _EXPERIMENTAL_FEATURES, enabled)
 
 
 def is_trezor_compatible() -> bool:
+    if utils.EMULATOR:  # in order to work with hwi
+        return False
     enabled = common.get(_NAMESPACE, _TREZOR_COMPATIBLE, public=True)
     if enabled == common._FALSE_BYTE:
         return False
@@ -954,34 +953,35 @@ def enable_trezor_compatible(enable: bool) -> None:
         public=True,
     )
 
+
 def clear_global_cache() -> None:
     global _LANGUAGE_VALUE
-    global _LABEL_VALUE 
-    global _USE_PASSPHRASE_VALUE 
-    global _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE 
-    global _AUTOLOCK_DELAY_MS_VALUE 
-    global _HOMESCREEN_VALUE 
-    global _BLE_NAME_VALUE 
-    global _BLE_VERSION_VALUE 
-    global _BLE_ENABLED_VALUE 
-    global _AUTOSHUTDOWN_DELAY_MS_VALUE 
-    global _WALLPAPER_COUNTS_VALUE 
-    global _USE_USB_PROTECT_VALUE 
-    global _USE_RANDOM_PIN_MAP_VALUE 
-    global _TAP_AWAKE_VALUE 
-    global _KEYBOARD_HAPTIC_VALUE 
-    global _ANIMATION_VALUE 
-    global _EXPERIMENTAL_FEATURES_VALUE 
-    global _ROTATION_VALUE 
+    global _LABEL_VALUE
+    global _USE_PASSPHRASE_VALUE
+    global _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE
+    global _AUTOLOCK_DELAY_MS_VALUE
+    global _HOMESCREEN_VALUE
+    global _BLE_NAME_VALUE
+    global _BLE_VERSION_VALUE
+    global _BLE_ENABLED_VALUE
+    global _AUTOSHUTDOWN_DELAY_MS_VALUE
+    global _WALLPAPER_COUNTS_VALUE
+    global _USE_USB_PROTECT_VALUE
+    global _USE_RANDOM_PIN_MAP_VALUE
+    global _TAP_AWAKE_VALUE
+    global _KEYBOARD_HAPTIC_VALUE
+    global _ANIMATION_VALUE
+    global _EXPERIMENTAL_FEATURES_VALUE
+    global _ROTATION_VALUE
 
-    global _INITIALIZED_VALUE 
-    global _FLAGS_VALUE 
-    global _UNFINISHED_BACKUP_VALUE 
-    global _NO_BACKUP_VALUE 
-    global _BACKUP_TYPE_VALUE 
-    global _SAFETY_CHECK_LEVEL_VALUE 
+    global _INITIALIZED_VALUE
+    global _FLAGS_VALUE
+    global _UNFINISHED_BACKUP_VALUE
+    global _NO_BACKUP_VALUE
+    global _BACKUP_TYPE_VALUE
+    global _SAFETY_CHECK_LEVEL_VALUE
 
-    _LANGUAGE_VALUE= None
+    _LANGUAGE_VALUE = None
     _LABEL_VALUE = None
     _USE_PASSPHRASE_VALUE = None
     _PASSPHRASE_ALWAYS_ON_DEVICE_VALUE = None

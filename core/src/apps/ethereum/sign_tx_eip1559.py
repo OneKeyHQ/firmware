@@ -18,11 +18,7 @@ from .helpers import (
     get_display_network_name,
 )
 from .keychain import with_keychain_from_chain_id
-from .layout import (
-    require_confirm_data,
-    require_confirm_eip1559_fee,
-    require_confirm_tx,
-)
+from .layout import require_confirm_eip1559_fee, require_show_overview
 from .sign_tx import (
     check_common_fields,
     handle_erc20,
@@ -34,6 +30,7 @@ if TYPE_CHECKING:
     from trezor.messages import EthereumSignTxEIP1559
 
     from apps.common.keychain import Keychain
+    from .definitions import Definitions
 
 TX_TYPE = 2
 
@@ -65,7 +62,7 @@ def write_access_list(w: HashWriter, access_list: list[EthereumAccessList]) -> N
 
 @with_keychain_from_chain_id
 async def sign_tx_eip1559(
-    ctx: wire.Context, msg: EthereumSignTxEIP1559, keychain: Keychain
+    ctx: wire.Context, msg: EthereumSignTxEIP1559, keychain: Keychain, defs: Definitions
 ) -> EthereumTxRequest:
     check(msg)
 
@@ -75,13 +72,7 @@ async def sign_tx_eip1559(
     token, address_bytes, recipient, value = await handle_erc20(ctx, msg)
 
     data_total = msg.data_length
-    if msg.chain_id:
-        network = networks.by_chain_id(msg.chain_id)
-    else:
-        if len(msg.address_n) > 1:  # path has slip44 network identifier
-            network = networks.by_slip44(msg.address_n[1] & 0x7FFF_FFFF)
-        else:
-            network = None
+    network = defs.network
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
@@ -93,32 +84,43 @@ async def sign_tx_eip1559(
         if res is not None:
             is_nft_transfer = True
             from_addr, recipient, token_id, value = res
-    await require_confirm_tx(
-        ctx, recipient, value, msg.chain_id, token, is_nft_transfer
-    )
-    if token is None and token_id is None and msg.data_length > 0:
-        await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
-
-    node = keychain.derive(msg.address_n)
-
-    recipient_str = address_from_bytes(recipient, network)
-    from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
-    await require_confirm_eip1559_fee(
+    show_details = await require_show_overview(
         ctx,
+        get_display_network_name(network),
+        recipient,
         value,
-        int.from_bytes(msg.max_priority_fee, "big"),
-        int.from_bytes(msg.max_gas_fee, "big"),
-        int.from_bytes(msg.gas_limit, "big"),
         msg.chain_id,
         token,
-        from_address=from_str,
-        to_address=recipient_str,
-        network=get_display_network_name(network),
-        contract_addr=address_from_bytes(address_bytes, network)
-        if token_id is not None
-        else None,
-        token_id=token_id,
+        is_nft_transfer,
     )
+    if show_details:
+        has_raw_data = False
+        if token is None and token_id is None and msg.data_length > 0:
+            has_raw_data = True
+            # await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
+        node = keychain.derive(msg.address_n)
+
+        recipient_str = address_from_bytes(recipient, network)
+        from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
+        await require_confirm_eip1559_fee(
+            ctx,
+            value,
+            int.from_bytes(msg.max_priority_fee, "big"),
+            int.from_bytes(msg.max_gas_fee, "big"),
+            int.from_bytes(msg.gas_limit, "big"),
+            msg.chain_id,
+            token,
+            from_address=from_str,
+            to_address=recipient_str,
+            contract_addr=address_from_bytes(address_bytes, network)
+            if token_id is not None
+            else None,
+            token_id=token_id,
+            evm_chain_id=None
+            if network is not networks.UNKNOWN_NETWORK
+            else msg.chain_id,
+            raw_data=msg.data_initial_chunk if has_raw_data else None,
+        )
     data = bytearray()
     data += msg.data_initial_chunk
     data_left = data_total - len(msg.data_initial_chunk)
@@ -158,7 +160,7 @@ async def sign_tx_eip1559(
 
     digest = sha.get_digest()
     result = sign_digest(msg, keychain, digest)
-    await confirm_final(ctx)
+    await confirm_final(ctx, get_display_network_name(network))
     return result
 
 

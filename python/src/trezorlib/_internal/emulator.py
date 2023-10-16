@@ -70,12 +70,12 @@ class Emulator:
         if logfile:
             self.logfile = logfile
         else:
-            self.logfile = self.profile_dir / "trezor.log"
+            self.logfile = self.profile_dir / "onekey.log"
 
         self.client: Optional[TrezorClientDebugLink] = None
         self.process: Optional[subprocess.Popen] = None
 
-        self.port = 21324
+        self.port = 54935
         self.headless = headless
         self.debug = debug
         self.auto_interact = auto_interact
@@ -158,8 +158,8 @@ class Emulator:
             self.process.kill()
             raise
 
-        (self.profile_dir / "trezor.pid").write_text(str(self.process.pid) + "\n")
-        (self.profile_dir / "trezor.port").write_text(str(self.port) + "\n")
+        (self.profile_dir / "onekey.pid").write_text(str(self.process.pid) + "\n")
+        (self.profile_dir / "onekey.port").write_text(str(self.port) + "\n")
 
         transport = self._get_transport()
         self.client = TrezorClientDebugLink(transport, auto_interact=self.auto_interact)
@@ -183,8 +183,8 @@ class Emulator:
                 LOG.info("Emulator seems stuck. Sending kill signal.")
                 self.process.kill()
 
-        _rm_f(self.profile_dir / "trezor.pid")
-        _rm_f(self.profile_dir / "trezor.port")
+        _rm_f(self.profile_dir / "onekey.pid")
+        _rm_f(self.profile_dir / "onekey.port")
         self.process = None
 
     def restart(self) -> None:
@@ -202,7 +202,7 @@ class Emulator:
 
 
 class CoreEmulator(Emulator):
-    STORAGE_FILENAME = "trezor.flash"
+    STORAGE_FILENAME = "onekey.flash"
 
     def __init__(
         self,
@@ -219,7 +219,7 @@ class CoreEmulator(Emulator):
         if workdir is not None:
             self.workdir = Path(workdir).resolve()
 
-        self.sdcard = self.profile_dir / "trezor.sdcard"
+        self.sdcard = self.profile_dir / "onekey.sdcard"
         if sdcard is not None:
             self.sdcard.write_bytes(sdcard)
 

@@ -27,7 +27,7 @@ def get(index: int, group_index: int) -> str | None:
 
 def fetch_group(group_index: int) -> list[str]:
     if utils.USE_THD89:
-        return None
+        return []
     mnemonics = []
     for index in range(slip39.MAX_SHARE_COUNT):
         m = get(index, group_index)
@@ -42,3 +42,4 @@ def delete() -> None:
         return None
     for index in range(slip39.MAX_SHARE_COUNT * slip39.MAX_GROUP_COUNT):
         common.delete(common.APP_RECOVERY_SHARES, index)
+    return None

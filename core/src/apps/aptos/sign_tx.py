@@ -29,5 +29,5 @@ async def sign_tx(
     prefix_bytes = sha3_256(TRANSACTION_PREFIX).digest()
     raw_tx = prefix_bytes + msg.raw_tx
     signature = ed25519.sign(node.private_key(), raw_tx)
-    await confirm_final(ctx)
+    await confirm_final(ctx, "APTOS")
     return AptosSignedTx(public_key=pub_key_bytes, signature=signature)

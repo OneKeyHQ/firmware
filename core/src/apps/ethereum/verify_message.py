@@ -8,7 +8,6 @@ from trezor.ui.layouts import confirm_signverify, show_success
 
 from apps.common.signverify import decode_message
 
-from . import networks
 from .helpers import (
     address_from_bytes,
     bytes_from_address,
@@ -41,10 +40,7 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
 
     address = address_from_bytes(address_bytes)
 
-    if msg.chain_id:
-        network = networks.by_chain_id(msg.chain_id)
-    else:
-        network = None
+    network = None
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
         network.chain_id if network else None
     )
@@ -54,6 +50,7 @@ async def verify_message(ctx: Context, msg: EthereumVerifyMessage) -> Success:
         decode_message(msg.message),
         address=address,
         verify=True,
+        evm_chain_id=None,
     )
     from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 

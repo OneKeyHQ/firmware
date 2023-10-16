@@ -80,7 +80,7 @@ cstyle: ## apply code style on low-level C code
 defs_check: ## check validity of coin definitions and protobuf files
 	jsonlint common/defs/*.json common/defs/*/*.json
 	python3 common/tools/cointool.py check
-	python3 common/tools/support.py check
+	python3 common/tools/support.py check -m
 	python3 common/protob/check.py
 	python3 common/protob/graph.py common/protob/*.proto
 

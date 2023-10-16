@@ -1,2088 +1,1830 @@
 # generated from networks.py.mako
 # (by running `make templates` in `core`)
 # do not edit manually!
-from typing import Iterator
+
+# NOTE: using positional arguments saves 4400 bytes in flash size,
+# returning tuples instead of classes saved 800 bytes
+
+from typing import TYPE_CHECKING
+
+from trezor.messages import EthereumNetworkInfo
 
 from apps.common.paths import HARDENED
+
+if TYPE_CHECKING:
+    from typing import Iterator
+
+    # Removing the necessity to construct object to save space
+    # fmt: off
+    NetworkInfoTuple = tuple[
+        int,  # chain_id
+        int,  # slip44
+        str,  # symbol
+        str,  # name
+        str,  # icon
+        int,  # primary_color
+    ]
+    # fmt: on
+
+UNKNOWN_NETWORK = EthereumNetworkInfo(
+    chain_id=0,
+    slip44=0,
+    symbol="UNKN",
+    name="Unknown network",
+)
 
 
 def shortcut_by_chain_id(chain_id: int) -> str:
     n = by_chain_id(chain_id)
-    return n.shortcut if n is not None else "UNKN"
-
-
-def by_chain_id(chain_id: int) -> "NetworkInfo" | None:
-    for n in _networks_iterator():
-        if n.chain_id == chain_id:
-            return n
-    return None
-
-
-def by_slip44(slip44: int) -> "NetworkInfo" | None:
-    for n in _networks_iterator():
-        if n.slip44 == slip44:
-            return n
-    return None
+    return n.symbol if n is not None else "UNKN"
 
 
 def all_slip44_ids_hardened() -> Iterator[int]:
     for n in _networks_iterator():
-        yield n.slip44 | HARDENED
+        yield n[1] | HARDENED
 
 
-class NetworkInfo:
-    def __init__(
-        self,
-        chain_id: int,
-        slip44: int,
-        shortcut: str,
-        name: str,
-        rskip60: bool,
-        icon: str,
-        primary_color: int,
-    ) -> None:
-        self.chain_id = chain_id
-        self.slip44 = slip44
-        self.shortcut = shortcut
-        self.name = name
-        self.rskip60 = rskip60
-        self.icon = icon
-        self.primary_color = primary_color
+def by_chain_id(chain_id: int) -> EthereumNetworkInfo:
+    for n in _networks_iterator():
+        n_chain_id = n[0]
+        if n_chain_id == chain_id:
+            return EthereumNetworkInfo(
+                chain_id=n[0],
+                slip44=n[1],
+                symbol=n[2],
+                name=n[3],
+                icon=n[4],
+                primary_color=n[5],
+            )
+    return UNKNOWN_NETWORK
+
+
+def by_slip44(slip44: int) -> EthereumNetworkInfo:
+    for n in _networks_iterator():
+        n_slip44 = n[1]
+        if n_slip44 == slip44:
+            return EthereumNetworkInfo(
+                chain_id=n[0],
+                slip44=n[1],
+                symbol=n[2],
+                name=n[3],
+                icon=n[4],
+                primary_color=n[5],
+            )
+    return UNKNOWN_NETWORK
 
 
 # fmt: off
-def _networks_iterator() -> Iterator[NetworkInfo]:
-    yield NetworkInfo(
-        chain_id=1,
-        slip44=60,
-        shortcut="ETH",
-        name="Ethereum",
-        rskip60=False,
-        icon="evm-eth.png",
-        primary_color=0x637FFF,
-    )
-    yield NetworkInfo(
-        chain_id=2,
-        slip44=40,
-        shortcut="EXP",
-        name="Expanse Network",
-        rskip60=False,
-        icon="evm-exp.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=3,
-        slip44=1,
-        shortcut="tROP",
-        name="Ropsten",
-        rskip60=False,
-        icon="evm-trop.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=4,
-        slip44=1,
-        shortcut="tRIN",
-        name="Rinkeby",
-        rskip60=False,
-        icon="evm-trin.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=5,
-        slip44=1,
-        shortcut="tGOR",
-        name="Görli",
-        rskip60=False,
-        icon="evm-tgor.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=6,
-        slip44=1,
-        shortcut="tKOT",
-        name="Ethereum Classic Testnet Kotti",
-        rskip60=False,
-        icon="evm-tkot.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=7,
-        slip44=60,
-        shortcut="TCH",
-        name="ThaiChain",
-        rskip60=False,
-        icon="evm-tch.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=8,
-        slip44=108,
-        shortcut="UBQ",
-        name="Ubiq",
-        rskip60=False,
-        icon="evm-ubq.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=9,
-        slip44=1,
-        shortcut="TUBQ",
-        name="Ubiq Network Testnet",
-        rskip60=False,
-        icon="evm-tubq.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=10,
-        slip44=60,
-        shortcut="ETH",
-        name="Optimism",
-        rskip60=False,
-        icon="evm-oeth.png",
-        primary_color=0xFF0420,
-    )
-    yield NetworkInfo(
-        chain_id=11,
-        slip44=916,
-        shortcut="META",
-        name="Metadium",
-        rskip60=False,
-        icon="evm-meta.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=12,
-        slip44=1,
-        shortcut="tKAL",
-        name="Metadium Testnet",
-        rskip60=False,
-        icon="evm-tkal.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=13,
-        slip44=1,
-        shortcut="tsDIODE",
-        name="Diode Testnet Staging",
-        rskip60=False,
-        icon="evm-tsdiode.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=14,
-        slip44=60,
-        shortcut="FLR",
-        name="Flare",
-        rskip60=False,
-        icon="evm-flr.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=15,
-        slip44=60,
-        shortcut="DIODE",
-        name="Diode Prenet",
-        rskip60=False,
-        icon="evm-diode.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=16,
-        slip44=1,
-        shortcut="tCFLR",
-        name="Flare Testnet Coston",
-        rskip60=False,
-        icon="evm-tcflr.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=17,
-        slip44=60,
-        shortcut="TFI",
-        name="ThaiChain 2.0 ThaiFi",
-        rskip60=False,
-        icon="evm-tfi.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=18,
-        slip44=1,
-        shortcut="TST",
-        name="ThunderCore Testnet",
-        rskip60=False,
-        icon="evm-tst.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=19,
-        slip44=60,
-        shortcut="SGB",
-        name="Songbird Canary-Network",
-        rskip60=False,
-        icon="evm-sgb.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=20,
-        slip44=60,
-        shortcut="ELA",
-        name="Elastos Smart Chain",
-        rskip60=False,
-        icon="evm-ela.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=24,
-        slip44=60,
-        shortcut="DTH",
-        name="Dithereum",
-        rskip60=False,
-        icon="evm-dth.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=25,
-        slip44=60,
-        shortcut="CRO",
-        name="Cronos",
-        rskip60=False,
-        icon="evm-cro.png",
-        primary_color=0x1199FA,
-    )
-    yield NetworkInfo(
-        chain_id=27,
-        slip44=60,
-        shortcut="SHIB",
-        name="ShibaChain",
-        rskip60=False,
-        icon="evm-shib.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=29,
-        slip44=60,
-        shortcut="L1",
-        name="Genesis L1",
-        rskip60=False,
-        icon="evm-l1.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=30,
-        slip44=137,
-        shortcut="RBTC",
-        name="RSK",
-        rskip60=True,
-        icon="evm-rbtc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=31,
-        slip44=1,
-        shortcut="tRBTC",
-        name="RSK Testnet",
-        rskip60=False,
-        icon="evm-trbtc.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=33,
-        slip44=60,
-        shortcut="GooD",
-        name="GoodData",
-        rskip60=False,
-        icon="evm-good.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=35,
-        slip44=60,
-        shortcut="TBG",
-        name="TBWG Chain",
-        rskip60=False,
-        icon="evm-tbg.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=38,
-        slip44=538,
-        shortcut="VAL",
-        name="Valorbit",
-        rskip60=False,
-        icon="evm-val.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=40,
-        slip44=60,
-        shortcut="TLOS",
-        name="Telos EVM",
-        rskip60=False,
-        icon="evm-tlos.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=42,
-        slip44=1,
-        shortcut="tKOV",
-        name="Kovan",
-        rskip60=False,
-        icon="evm-tkov.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=44,
-        slip44=60,
-        shortcut="CRAB",
-        name="Darwinia Crab Network",
-        rskip60=False,
-        icon="evm-crab.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=50,
-        slip44=60,
-        shortcut="XDC",
-        name="XinFin Network",
-        rskip60=False,
-        icon="evm-xdc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=51,
-        slip44=1,
-        shortcut="TXDC",
-        name="XinFin Apothem Testnet",
-        rskip60=False,
-        icon="evm-txdc.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=52,
-        slip44=60,
-        shortcut="cet",
-        name="CoinEx Smart Chain",
-        rskip60=False,
-        icon="evm-cet.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=55,
-        slip44=60,
-        shortcut="ZYX",
-        name="Zyx",
-        rskip60=False,
-        icon="evm-zyx.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=56,
-        slip44=714,
-        shortcut="BNB",
-        name="Binance Smart Chain",
-        rskip60=False,
-        icon="evm-bnb.png",
-        primary_color=0xF0B90B,
-    )
-    yield NetworkInfo(
-        chain_id=58,
-        slip44=60,
-        shortcut="ONG",
-        name="Ontology",
-        rskip60=False,
-        icon="evm-ong.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=60,
-        slip44=6060,
-        shortcut="GO",
-        name="GoChain",
-        rskip60=False,
-        icon="evm-go.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=61,
-        slip44=61,
-        shortcut="ETC",
-        name="Ethereum Classic",
-        rskip60=False,
-        icon="evm-etc.png",
-        primary_color=0x328332,
-    )
-    yield NetworkInfo(
-        chain_id=62,
-        slip44=1,
-        shortcut="TETC",
-        name="Ethereum Classic Testnet Morden",
-        rskip60=False,
-        icon="evm-tetc.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=63,
-        slip44=1,
-        shortcut="tMETC",
-        name="Ethereum Classic Testnet Mordor",
-        rskip60=False,
-        icon="evm-tmetc.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=64,
-        slip44=163,
-        shortcut="ELLA",
-        name="Ellaism",
-        rskip60=False,
-        icon="evm-ella.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=66,
-        slip44=60,
-        shortcut="OKT",
-        name="OKXChain",
-        rskip60=False,
-        icon="evm-okt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=67,
-        slip44=1,
-        shortcut="tDBM",
-        name="DBChain Testnet",
-        rskip60=False,
-        icon="evm-tdbm.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=68,
-        slip44=60,
-        shortcut="SOTER",
-        name="SoterOne",
-        rskip60=False,
-        icon="evm-soter.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=69,
-        slip44=1,
-        shortcut="tKOR",
-        name="Optimism Kovan",
-        rskip60=False,
-        icon="evm-tkor.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=74,
-        slip44=60,
-        shortcut="EIDI",
-        name="IDChain",
-        rskip60=False,
-        icon="evm-eidi.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=76,
-        slip44=76,
-        shortcut="MIX",
-        name="Mix",
-        rskip60=False,
-        icon="evm-mix.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=77,
-        slip44=60,
-        shortcut="SPOA",
-        name="POA Network Sokol",
-        rskip60=False,
-        icon="evm-spoa.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=78,
-        slip44=60,
-        shortcut="PETH",
-        name="PrimusChain",
-        rskip60=False,
-        icon="evm-peth.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=80,
-        slip44=60,
-        shortcut="RNA",
-        name="GeneChain",
-        rskip60=False,
-        icon="evm-rna.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=82,
-        slip44=60,
-        shortcut="MTR",
-        name="Meter",
-        rskip60=False,
-        icon="evm-mtr.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=86,
-        slip44=60,
-        shortcut="GT",
-        name="GateChain",
-        rskip60=False,
-        icon="evm-gt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=87,
-        slip44=60,
-        shortcut="SNT",
-        name="Nova Network",
-        rskip60=False,
-        icon="evm-snt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=88,
-        slip44=889,
-        shortcut="TOMO",
-        name="TomoChain",
-        rskip60=False,
-        icon="evm-tomo.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=90,
-        slip44=60,
-        shortcut="GAR",
-        name="Garizon Stage0",
-        rskip60=False,
-        icon="evm-gar.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=96,
-        slip44=60,
-        shortcut="NEXT",
-        name="NEXT Smart Chain",
-        rskip60=False,
-        icon="evm-next.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=97,
-        slip44=1,
-        shortcut="tBNB",
-        name="Binance Smart Chain Testnet",
-        rskip60=False,
-        icon="evm-tbnb.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=99,
-        slip44=178,
-        shortcut="POA",
-        name="POA Network Core",
-        rskip60=False,
-        icon="evm-poa.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100,
-        slip44=700,
-        shortcut="xDAI",
-        name="Gnosis Chain (formerly xDai)",
-        rskip60=False,
-        icon="evm-xdai.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=101,
-        slip44=464,
-        shortcut="ETI",
-        name="EtherInc",
-        rskip60=False,
-        icon="evm-eti.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=105,
-        slip44=60,
-        shortcut="W3G",
-        name="Web3Games Devnet",
-        rskip60=False,
-        icon="evm-w3g.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=106,
-        slip44=60,
-        shortcut="VLX",
-        name="Velas EVM",
-        rskip60=False,
-        icon="evm-vlx.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=108,
-        slip44=1001,
-        shortcut="TT",
-        name="ThunderCore",
-        rskip60=False,
-        icon="evm-tt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=111,
-        slip44=60,
-        shortcut="ETL",
-        name="EtherLite Chain",
-        rskip60=False,
-        icon="evm-etl.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=122,
-        slip44=60,
-        shortcut="FUSE",
-        name="Fuse",
-        rskip60=False,
-        icon="evm-fuse.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=123,
-        slip44=60,
-        shortcut="SPARK",
-        name="Fuse Sparknet",
-        rskip60=False,
-        icon="evm-spark.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=124,
-        slip44=60,
-        shortcut="DWU",
-        name="Decentralized Web",
-        rskip60=False,
-        icon="evm-dwu.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=126,
-        slip44=126,
-        shortcut="OY",
-        name="OYchain",
-        rskip60=False,
-        icon="evm-oy.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=127,
-        slip44=127,
-        shortcut="FETH",
-        name="Factory 127",
-        rskip60=False,
-        icon="evm-feth.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=128,
-        slip44=1010,
-        shortcut="HT",
-        name="Huobi ECO Chain",
-        rskip60=False,
-        icon="evm-ht.png",
-        primary_color=0x01943F,
-    )
-    yield NetworkInfo(
-        chain_id=137,
-        slip44=966,
-        shortcut="MATIC",
-        name="Polygon",
-        rskip60=False,
-        icon="evm-matic.png",
-        primary_color=0x8247E5,
-    )
-    yield NetworkInfo(
-        chain_id=142,
-        slip44=60,
-        shortcut="DAX",
-        name="DAX CHAIN",
-        rskip60=False,
-        icon="evm-dax.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=162,
-        slip44=1,
-        shortcut="tPHT",
-        name="Lightstreams Testnet",
-        rskip60=False,
-        icon="evm-tpht.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=163,
-        slip44=60,
-        shortcut="PHT",
-        name="Lightstreams",
-        rskip60=False,
-        icon="evm-pht.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=186,
-        slip44=60,
-        shortcut="Seele",
-        name="Seele",
-        rskip60=False,
-        icon="evm-seele.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=188,
-        slip44=60,
-        shortcut="BTM",
-        name="BMC",
-        rskip60=False,
-        icon="evm-btm.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=199,
-        slip44=60,
-        shortcut="BTT",
-        name="BitTorrent Chain",
-        rskip60=False,
-        icon="evm-btt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=211,
-        slip44=60,
-        shortcut="0xF",
-        name="Freight Trust Network",
-        rskip60=False,
-        icon="evm-0xf.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=222,
-        slip44=2221,
-        shortcut="ASK",
-        name="Permission",
-        rskip60=False,
-        icon="evm-ask.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=225,
-        slip44=60,
-        shortcut="LA",
-        name="LACHAIN",
-        rskip60=False,
-        icon="evm-la.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=246,
-        slip44=246,
-        shortcut="EWT",
-        name="Energy Web Chain",
-        rskip60=False,
-        icon="evm-ewt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=250,
-        slip44=60,
-        shortcut="FTM",
-        name="Fantom Opera",
-        rskip60=False,
-        icon="evm-ftm.png",
-        primary_color=0x1969FF,
-    )
-    yield NetworkInfo(
-        chain_id=256,
-        slip44=1,
-        shortcut="thtt",
-        name="Huobi ECO Chain Testnet",
-        rskip60=False,
-        icon="evm-thtt.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=258,
-        slip44=60,
-        shortcut="SETM",
-        name="Setheum",
-        rskip60=False,
-        icon="evm-setm.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=262,
-        slip44=60,
-        shortcut="SRN",
-        name="SUR Blockchain Network",
-        rskip60=False,
-        icon="evm-srn.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=269,
-        slip44=269,
-        shortcut="HPB",
-        name="High Performance Blockchain",
-        rskip60=False,
-        icon="evm-hpb.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=288,
-        slip44=60,
-        shortcut="ETH",
-        name="Boba Network",
-        rskip60=False,
-        icon="evm-boba.png",
-        primary_color=0xCCFF00,
-    )
-    yield NetworkInfo(
-        chain_id=321,
-        slip44=60,
-        shortcut="KCS",
-        name="KCC",
-        rskip60=False,
-        icon="evm-kcs.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=333,
-        slip44=60,
-        shortcut="W3Q",
-        name="Web3Q",
-        rskip60=False,
-        icon="evm-w3q.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=336,
-        slip44=60,
-        shortcut="SDN",
-        name="Shiden",
-        rskip60=False,
-        icon="evm-sdn.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=369,
-        slip44=60,
-        shortcut="PLS",
-        name="PulseChain",
-        rskip60=False,
-        icon="evm-pls.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=385,
-        slip44=60,
-        shortcut="LISINSKI",
-        name="Lisinski",
-        rskip60=False,
-        icon="evm-lisinski.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=420,
-        slip44=1,
-        shortcut="tGOR",
-        name="Optimistic Ethereum Testnet Goerli",
-        rskip60=False,
-        icon="evm-tgor.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=499,
-        slip44=499,
-        shortcut="RUPX",
-        name="Rupaya",
-        rskip60=False,
-        icon="evm-rupx.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=512,
-        slip44=1512,
-        shortcut="AAC",
-        name="Double-A Chain",
-        rskip60=False,
-        icon="evm-aac.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=555,
-        slip44=60,
-        shortcut="CLASS",
-        name="Vela1 Chain",
-        rskip60=False,
-        icon="evm-class.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=558,
-        slip44=60,
-        shortcut="TAO",
-        name="Tao Network",
-        rskip60=False,
-        icon="evm-tao.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=595,
-        slip44=1,
-        shortcut="tmACA",
-        name="Acala Mandala Testnet",
-        rskip60=False,
-        icon="evm-tmaca.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=686,
-        slip44=686,
-        shortcut="KAR",
-        name="Karura Network",
-        rskip60=False,
-        icon="evm-kar.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=707,
-        slip44=60,
-        shortcut="BCS",
-        name="BlockChain Station",
-        rskip60=False,
-        icon="evm-bcs.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=777,
-        slip44=60,
-        shortcut="cTH",
-        name="cheapETH",
-        rskip60=False,
-        icon="evm-cth.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=787,
-        slip44=787,
-        shortcut="ACA",
-        name="Acala Network",
-        rskip60=False,
-        icon="evm-aca.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=803,
-        slip44=60,
-        shortcut="HAIC",
-        name="Haic",
-        rskip60=False,
-        icon="evm-haic.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=820,
-        slip44=820,
-        shortcut="CLO",
-        name="Callisto",
-        rskip60=False,
-        icon="evm-clo.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=821,
-        slip44=1,
-        shortcut="TCLO",
-        name="Callisto Testnet",
-        rskip60=False,
-        icon="evm-tclo.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=880,
-        slip44=60,
-        shortcut="AMBR",
-        name="Ambros Chain",
-        rskip60=False,
-        icon="evm-ambr.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=888,
-        slip44=5718350,
-        shortcut="WAN",
-        name="Wanchain",
-        rskip60=False,
-        icon="evm-wan.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=977,
-        slip44=60,
-        shortcut="YETI",
-        name="Nepal Blockchain Network",
-        rskip60=False,
-        icon="evm-yeti.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=998,
-        slip44=60,
-        shortcut="L99",
-        name="Lucky Network",
-        rskip60=False,
-        icon="evm-l99.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1001,
-        slip44=1,
-        shortcut="tKLAY",
-        name="Klaytn Testnet Baobab",
-        rskip60=False,
-        icon="evm-tklay.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=1007,
-        slip44=1,
-        shortcut="tNEW",
-        name="Newton Testnet",
-        rskip60=False,
-        icon="evm-tnew.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=1010,
-        slip44=1020,
-        shortcut="EVC",
-        name="Evrice Network",
-        rskip60=False,
-        icon="evm-evc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1012,
-        slip44=60,
-        shortcut="NEW",
-        name="Newton",
-        rskip60=False,
-        icon="evm-new.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1022,
-        slip44=60,
-        shortcut="SKU",
-        name="Sakura",
-        rskip60=False,
-        icon="evm-sku.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1024,
-        slip44=60,
-        shortcut="CLV",
-        name="Clover",
-        rskip60=False,
-        icon="evm-clv.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1030,
-        slip44=60,
-        shortcut="CFX",
-        name="Conflux eSpace",
-        rskip60=False,
-        icon="evm-cfx.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1088,
-        slip44=60,
-        shortcut="METIS",
-        name="Metis Andromeda",
-        rskip60=False,
-        icon="evm-metis.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1139,
-        slip44=60,
-        shortcut="MATH",
-        name="MathChain",
-        rskip60=False,
-        icon="evm-math.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1140,
-        slip44=1,
-        shortcut="tMATH",
-        name="MathChain Testnet",
-        rskip60=False,
-        icon="evm-tmath.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=1197,
-        slip44=60,
-        shortcut="IORA",
-        name="Iora Chain",
-        rskip60=False,
-        icon="evm-iora.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1202,
-        slip44=60,
-        shortcut="WTT",
-        name="World Trade Technical Chain",
-        rskip60=False,
-        icon="evm-wtt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1213,
-        slip44=60,
-        shortcut="POP",
-        name="Popcateum",
-        rskip60=False,
-        icon="evm-pop.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1214,
-        slip44=60,
-        shortcut="ENTER",
-        name="EnterChain",
-        rskip60=False,
-        icon="evm-enter.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1280,
-        slip44=60,
-        shortcut="HO",
-        name="HALO",
-        rskip60=False,
-        icon="evm-ho.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1284,
-        slip44=60,
-        shortcut="GLMR",
-        name="Moonbeam",
-        rskip60=False,
-        icon="evm-glmr.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1285,
-        slip44=60,
-        shortcut="MOVR",
-        name="Moonriver",
-        rskip60=False,
-        icon="evm-movr.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1287,
-        slip44=60,
-        shortcut="DEV",
-        name="Moonbase Alpha",
-        rskip60=False,
-        icon="evm-dev.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1288,
-        slip44=60,
-        shortcut="ROC",
-        name="Moonrock",
-        rskip60=False,
-        icon="evm-roc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1618,
-        slip44=60,
-        shortcut="CATE",
-        name="Catecoin Chain",
-        rskip60=False,
-        icon="evm-cate.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1657,
-        slip44=60,
-        shortcut="BTA",
-        name="Btachain",
-        rskip60=False,
-        icon="evm-bta.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1856,
-        slip44=60,
-        shortcut="TSF",
-        name="Teslafunds",
-        rskip60=False,
-        icon="evm-tsf.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1898,
-        slip44=60,
-        shortcut="BOY",
-        name="BON Network",
-        rskip60=False,
-        icon="evm-boy.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1987,
-        slip44=1987,
-        shortcut="EGEM",
-        name="EtherGem",
-        rskip60=False,
-        icon="evm-egem.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2020,
-        slip44=60,
-        shortcut="420",
-        name="420coin",
-        rskip60=False,
-        icon="evm-420.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2021,
-        slip44=60,
-        shortcut="EDG",
-        name="Edgeware",
-        rskip60=False,
-        icon="evm-edg.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2025,
-        slip44=1008,
-        shortcut="RPG",
-        name="Rangers Protocol",
-        rskip60=False,
-        icon="evm-rpg.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2100,
-        slip44=60,
-        shortcut="ECO",
-        name="Ecoball",
-        rskip60=False,
-        icon="evm-eco.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2213,
-        slip44=60,
-        shortcut="EVA",
-        name="Evanesco",
-        rskip60=False,
-        icon="evm-eva.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2559,
-        slip44=60,
-        shortcut="KTO",
-        name="Kortho",
-        rskip60=False,
-        icon="evm-kto.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=3400,
-        slip44=60,
-        shortcut="PRB",
-        name="Paribu Net",
-        rskip60=False,
-        icon="evm-prb.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=3966,
-        slip44=60,
-        shortcut="DYNO",
-        name="DYNO",
-        rskip60=False,
-        icon="evm-dyno.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=4689,
-        slip44=60,
-        shortcut="IOTX",
-        name="IoTeX Network",
-        rskip60=False,
-        icon="evm-iotx.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=5197,
-        slip44=60,
-        shortcut="ES",
-        name="EraSwap",
-        rskip60=False,
-        icon="evm-es.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=5315,
-        slip44=60,
-        shortcut="UZMI",
-        name="Uzmi Network",
-        rskip60=False,
-        icon="evm-uzmi.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=5869,
-        slip44=60,
-        shortcut="RBD",
-        name="Wegochain Rubidium",
-        rskip60=False,
-        icon="evm-rbd.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=6626,
-        slip44=60,
-        shortcut="PIX",
-        name="Pixie Chain",
-        rskip60=False,
-        icon="evm-pix.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=8000,
-        slip44=60,
-        shortcut="TELE",
-        name="Teleport",
-        rskip60=False,
-        icon="evm-tele.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=8217,
-        slip44=8217,
-        shortcut="KLAY",
-        name="Klaytn",
-        rskip60=False,
-        icon="evm-klay.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=8723,
-        slip44=479,
-        shortcut="OLO",
-        name="TOOL Global",
-        rskip60=False,
-        icon="evm-olo.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=8995,
-        slip44=60,
-        shortcut="U+25B3",
-        name="bloxberg",
-        rskip60=False,
-        icon="evm-u+25b3.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=9001,
-        slip44=60,
-        shortcut="EVMOS",
-        name="Evmos",
-        rskip60=False,
-        icon="evm-evmos.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=9100,
-        slip44=60,
-        shortcut="GNC",
-        name="Genesis Coin",
-        rskip60=False,
-        icon="evm-gnc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=10101,
-        slip44=60,
-        shortcut="GEN",
-        name="Blockchain Genesis",
-        rskip60=False,
-        icon="evm-gen.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=10823,
-        slip44=60,
-        shortcut="CCP",
-        name="CryptoCoinPay",
-        rskip60=False,
-        icon="evm-ccp.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=11111,
-        slip44=60,
-        shortcut="WGM",
-        name="WAGMI",
-        rskip60=False,
-        icon="evm-wgm.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=12052,
-        slip44=621,
-        shortcut="ZERO",
-        name="Singularity ZERO",
-        rskip60=False,
-        icon="evm-zero.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=13381,
-        slip44=60,
-        shortcut="PHX",
-        name="Phoenix",
-        rskip60=False,
-        icon="evm-phx.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=16000,
-        slip44=60,
-        shortcut="MTT",
-        name="MetaDot",
-        rskip60=False,
-        icon="evm-mtt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=19845,
-        slip44=60,
-        shortcut="BTCIX",
-        name="BTCIX Network",
-        rskip60=False,
-        icon="evm-btcix.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=21816,
-        slip44=60,
-        shortcut="OML",
-        name="omChain",
-        rskip60=False,
-        icon="evm-oml.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=24484,
-        slip44=227,
-        shortcut="WEB",
-        name="Webchain",
-        rskip60=False,
-        icon="evm-web.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=24734,
-        slip44=60,
-        shortcut="MINTME",
-        name="MintMe.com Coin",
-        rskip60=False,
-        icon="evm-mintme.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=31102,
-        slip44=31102,
-        shortcut="ESN",
-        name="Ethersocial Network",
-        rskip60=False,
-        icon="evm-esn.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=32659,
-        slip44=60,
-        shortcut="FSN",
-        name="Fusion",
-        rskip60=False,
-        icon="evm-fsn.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=39797,
-        slip44=39797,
-        shortcut="NRG",
-        name="Energi",
-        rskip60=False,
-        icon="evm-nrg.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=42069,
-        slip44=60,
-        shortcut="peggle",
-        name="pegglecoin",
-        rskip60=False,
-        icon="evm-peggle.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=42161,
-        slip44=60,
-        shortcut="ETH",
-        name="Arbitrum One",
-        rskip60=False,
-        icon="evm-arb1.png",
-        primary_color=0x28A0F0,
-    )
-    yield NetworkInfo(
-        chain_id=42220,
-        slip44=60,
-        shortcut="CELO",
-        name="Celo",
-        rskip60=False,
-        icon="evm-celo.png",
-        primary_color=0x35D07F,
-    )
-    yield NetworkInfo(
-        chain_id=42262,
-        slip44=60,
-        shortcut="ROSE",
-        name="Emerald Paratime",
-        rskip60=False,
-        icon="evm-rose.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=43113,
-        slip44=1,
-        shortcut="tAVAX",
-        name="Avalanche Fuji Testnet",
-        rskip60=False,
-        icon="evm-tavax.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=43114,
-        slip44=9005,
-        shortcut="AVAX",
-        name="Avalanche C-Chain",
-        rskip60=False,
-        icon="evm-avax.png",
-        primary_color=0xE84142,
-    )
-    yield NetworkInfo(
-        chain_id=44787,
-        slip44=1,
-        shortcut="tCELO",
-        name="Celo Alfajores Testnet",
-        rskip60=False,
-        icon="evm-tcelo.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=47805,
-        slip44=60,
-        shortcut="REI",
-        name="REI Network",
-        rskip60=False,
-        icon="evm-rei.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=49797,
-        slip44=1,
-        shortcut="tNRG",
-        name="Energi Testnet",
-        rskip60=False,
-        icon="evm-tnrg.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=53935,
-        slip44=60,
-        shortcut="JEWEL",
-        name="DFK Chain",
-        rskip60=False,
-        icon="evm-jewel.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=62320,
-        slip44=1,
-        shortcut="tCELO",
-        name="Celo Baklava Testnet",
-        rskip60=False,
-        icon="evm-tcelo.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=63000,
-        slip44=60,
-        shortcut="ECS",
-        name="eCredits",
-        rskip60=False,
-        icon="evm-ecs.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=73799,
-        slip44=1,
-        shortcut="tVT",
-        name="Energy Web Volta Testnet",
-        rskip60=False,
-        icon="evm-tvt.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=78110,
-        slip44=60,
-        shortcut="FIN",
-        name="Firenze test network",
-        rskip60=False,
-        icon="evm-fin.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=80001,
-        slip44=1,
-        shortcut="tMATIC",
-        name="Mumbai",
-        rskip60=False,
-        icon="evm-tmatic.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=99999,
-        slip44=60,
-        shortcut="UBC",
-        name="UB Smart Chain",
-        rskip60=False,
-        icon="evm-ubc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100000,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100001,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100002,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100003,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100004,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100005,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100006,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100007,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=100008,
-        slip44=60,
-        shortcut="QKC",
-        name="QuarkChain",
-        rskip60=False,
-        icon="evm-qkc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=108801,
-        slip44=60,
-        shortcut="BRO",
-        name="BROChain",
-        rskip60=False,
-        icon="evm-bro.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=200625,
-        slip44=200625,
-        shortcut="AKA",
-        name="Akroma",
-        rskip60=False,
-        icon="evm-aka.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=201018,
-        slip44=60,
-        shortcut="atp",
-        name="Alaya",
-        rskip60=False,
-        icon="evm-atp.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=210425,
-        slip44=60,
-        shortcut="lat",
-        name="PlatON",
-        rskip60=False,
-        icon="evm-lat.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=246529,
-        slip44=246529,
-        shortcut="ATS",
-        name="ARTIS sigma1",
-        rskip60=False,
-        icon="evm-ats.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=246785,
-        slip44=1,
-        shortcut="tATS",
-        name="ARTIS Testnet tau1",
-        rskip60=False,
-        icon="evm-tats.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=281121,
-        slip44=60,
-        shortcut="$OC",
-        name="Social Smart Chain",
-        rskip60=False,
-        icon="evm-$oc.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=333999,
-        slip44=60,
-        shortcut="POLIS",
-        name="Polis",
-        rskip60=False,
-        icon="evm-polis.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=888888,
-        slip44=60,
-        shortcut="VS",
-        name="Vision -",
-        rskip60=False,
-        icon="evm-vs.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=955305,
-        slip44=1011,
-        shortcut="ELV",
-        name="Eluvio Content Fabric",
-        rskip60=False,
-        icon="evm-elv.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1313114,
-        slip44=1313114,
-        shortcut="ETHO",
-        name="Etho Protocol",
-        rskip60=False,
-        icon="evm-etho.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1313500,
-        slip44=60,
-        shortcut="XERO",
-        name="Xerom",
-        rskip60=False,
-        icon="evm-xero.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=7762959,
-        slip44=184,
-        shortcut="MUSIC",
-        name="Musicoin",
-        rskip60=False,
-        icon="evm-music.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=11155111,
-        slip44=1,
-        shortcut="tSEP",
-        name="Sepolia",
-        rskip60=False,
-        icon="evm-tsep.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=13371337,
-        slip44=60,
-        shortcut="TPEP",
-        name="PepChain Churchill",
-        rskip60=False,
-        icon="evm-tpep.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=18289463,
-        slip44=60,
-        shortcut="ILT",
-        name="IOLite",
-        rskip60=False,
-        icon="evm-ilt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=20181205,
-        slip44=60,
-        shortcut="QKI",
-        name="quarkblockchain",
-        rskip60=False,
-        icon="evm-qki.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=28945486,
-        slip44=344,
-        shortcut="AUX",
-        name="Auxilium Network",
-        rskip60=False,
-        icon="evm-aux.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=35855456,
-        slip44=60,
-        shortcut="JOYS",
-        name="Joys Digital",
-        rskip60=False,
-        icon="evm-joys.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=61717561,
-        slip44=61717561,
-        shortcut="AQUA",
-        name="Aquachain",
-        rskip60=False,
-        icon="evm-aqua.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=99415706,
-        slip44=1,
-        shortcut="TOYS",
-        name="Joys Digital TestNet",
-        rskip60=False,
-        icon="evm-toys.png",
-        primary_color=0x969696,
-    )
-    yield NetworkInfo(
-        chain_id=245022934,
-        slip44=60,
-        shortcut="NEON",
-        name="Neon EVM",
-        rskip60=False,
-        icon="evm-neon.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=311752642,
-        slip44=60,
-        shortcut="OLT",
-        name="OneLedger",
-        rskip60=False,
-        icon="evm-olt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1122334455,
-        slip44=60,
-        shortcut="IPOS",
-        name="IPOS Network",
-        rskip60=False,
-        icon="evm-ipos.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1313161554,
-        slip44=60,
-        shortcut="ETH",
-        name="Aurora",
-        rskip60=False,
-        icon="evm-aurora.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1666600000,
-        slip44=60,
-        shortcut="ONE",
-        name="Harmony",
-        rskip60=False,
-        icon="evm-one.png",
-        primary_color=0x33D3D5,
-    )
-    yield NetworkInfo(
-        chain_id=1666600001,
-        slip44=60,
-        shortcut="ONE",
-        name="Harmony",
-        rskip60=False,
-        icon="evm-one.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1666600002,
-        slip44=60,
-        shortcut="ONE",
-        name="Harmony",
-        rskip60=False,
-        icon="evm-one.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=1666600003,
-        slip44=60,
-        shortcut="ONE",
-        name="Harmony",
-        rskip60=False,
-        icon="evm-one.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=2021121117,
-        slip44=60,
-        shortcut="HOP",
-        name="DataHopper",
-        rskip60=False,
-        icon="evm-hop.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=3125659152,
-        slip44=164,
-        shortcut="PIRL",
-        name="Pirl",
-        rskip60=False,
-        icon="evm-pirl.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=11297108109,
-        slip44=60,
-        shortcut="PALM",
-        name="Palm",
-        rskip60=False,
-        icon="evm-palm.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=197710212030,
-        slip44=60,
-        shortcut="NTT",
-        name="Ntity",
-        rskip60=False,
-        icon="evm-ntt.png",
-        primary_color=0xFFFFFF,
-    )
-    yield NetworkInfo(
-        chain_id=6022140761023,
-        slip44=60,
-        shortcut="MOLE",
-        name="Molereum Network",
-        rskip60=False,
-        icon="evm-mole.png",
-        primary_color=0xFFFFFF,
+def _networks_iterator() -> Iterator[NetworkInfoTuple]:
+    yield (
+        1,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Ethereum",  # name
+        "evm-eth.png",  # name
+        0x637FFF,  # primary_color
+    )
+    yield (
+        2,  # chain_id
+        40,  # slip44
+        "EXP",  # symbol
+        "Expanse Network",  # name
+        "evm-exp.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        3,  # chain_id
+        1,  # slip44
+        "tROP",  # symbol
+        "Ropsten",  # name
+        "evm-trop.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        4,  # chain_id
+        1,  # slip44
+        "tRIN",  # symbol
+        "Rinkeby",  # name
+        "evm-trin.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        6,  # chain_id
+        1,  # slip44
+        "tKOT",  # symbol
+        "Ethereum Classic Testnet Kotti",  # name
+        "evm-tkot.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        7,  # chain_id
+        60,  # slip44
+        "TCH",  # symbol
+        "ThaiChain",  # name
+        "evm-tch.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        8,  # chain_id
+        108,  # slip44
+        "UBQ",  # symbol
+        "Ubiq",  # name
+        "evm-ubq.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        9,  # chain_id
+        1,  # slip44
+        "TUBQ",  # symbol
+        "Ubiq Network Testnet",  # name
+        "evm-tubq.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        10,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Optimism",  # name
+        "evm-oeth.png",  # name
+        0xFF0420,  # primary_color
+    )
+    yield (
+        11,  # chain_id
+        916,  # slip44
+        "META",  # symbol
+        "Metadium",  # name
+        "evm-meta.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        12,  # chain_id
+        1,  # slip44
+        "tKAL",  # symbol
+        "Metadium Testnet",  # name
+        "evm-tkal.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        13,  # chain_id
+        1,  # slip44
+        "tsDIODE",  # symbol
+        "Diode Testnet Staging",  # name
+        "evm-tsdiode.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        14,  # chain_id
+        60,  # slip44
+        "FLR",  # symbol
+        "Flare",  # name
+        "evm-flr.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        15,  # chain_id
+        60,  # slip44
+        "DIODE",  # symbol
+        "Diode Prenet",  # name
+        "evm-diode.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        16,  # chain_id
+        1,  # slip44
+        "tCFLR",  # symbol
+        "Flare Testnet Coston",  # name
+        "evm-tcflr.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        17,  # chain_id
+        60,  # slip44
+        "TFI",  # symbol
+        "ThaiChain 2.0 ThaiFi",  # name
+        "evm-tfi.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        18,  # chain_id
+        1,  # slip44
+        "TST",  # symbol
+        "ThunderCore Testnet",  # name
+        "evm-tst.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        19,  # chain_id
+        60,  # slip44
+        "SGB",  # symbol
+        "Songbird Canary-Network",  # name
+        "evm-sgb.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        20,  # chain_id
+        60,  # slip44
+        "ELA",  # symbol
+        "Elastos Smart Chain",  # name
+        "evm-ela.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        24,  # chain_id
+        60,  # slip44
+        "DTH",  # symbol
+        "Dithereum",  # name
+        "evm-dth.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        25,  # chain_id
+        60,  # slip44
+        "CRO",  # symbol
+        "Cronos",  # name
+        "evm-cro.png",  # name
+        0x1199FA,  # primary_color
+    )
+    yield (
+        27,  # chain_id
+        60,  # slip44
+        "SHIB",  # symbol
+        "ShibaChain",  # name
+        "evm-shib.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        29,  # chain_id
+        60,  # slip44
+        "L1",  # symbol
+        "Genesis L1",  # name
+        "evm-l1.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        30,  # chain_id
+        137,  # slip44
+        "RBTC",  # symbol
+        "RSK",  # name
+        "evm-rbtc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        31,  # chain_id
+        1,  # slip44
+        "tRBTC",  # symbol
+        "RSK Testnet",  # name
+        "evm-trbtc.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        33,  # chain_id
+        60,  # slip44
+        "GooD",  # symbol
+        "GoodData",  # name
+        "evm-good.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        35,  # chain_id
+        60,  # slip44
+        "TBG",  # symbol
+        "TBWG Chain",  # name
+        "evm-tbg.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        38,  # chain_id
+        538,  # slip44
+        "VAL",  # symbol
+        "Valorbit",  # name
+        "evm-val.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        40,  # chain_id
+        60,  # slip44
+        "TLOS",  # symbol
+        "Telos EVM",  # name
+        "evm-tlos.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        42,  # chain_id
+        1,  # slip44
+        "tKOV",  # symbol
+        "Kovan",  # name
+        "evm-tkov.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        44,  # chain_id
+        60,  # slip44
+        "CRAB",  # symbol
+        "Darwinia Crab Network",  # name
+        "evm-crab.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        50,  # chain_id
+        60,  # slip44
+        "XDC",  # symbol
+        "XinFin Network",  # name
+        "evm-xdc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        51,  # chain_id
+        1,  # slip44
+        "TXDC",  # symbol
+        "XinFin Apothem Testnet",  # name
+        "evm-txdc.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        52,  # chain_id
+        60,  # slip44
+        "cet",  # symbol
+        "CoinEx Smart Chain",  # name
+        "evm-cet.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        55,  # chain_id
+        60,  # slip44
+        "ZYX",  # symbol
+        "Zyx",  # name
+        "evm-zyx.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        58,  # chain_id
+        60,  # slip44
+        "ONG",  # symbol
+        "Ontology",  # name
+        "evm-ong.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        60,  # chain_id
+        6060,  # slip44
+        "GO",  # symbol
+        "GoChain",  # name
+        "evm-go.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        61,  # chain_id
+        61,  # slip44
+        "ETC",  # symbol
+        "Ethereum Classic",  # name
+        "evm-etc.png",  # name
+        0x328332,  # primary_color
+    )
+    yield (
+        62,  # chain_id
+        1,  # slip44
+        "TETC",  # symbol
+        "Ethereum Classic Testnet Morden",  # name
+        "evm-tetc.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        63,  # chain_id
+        1,  # slip44
+        "tMETC",  # symbol
+        "Ethereum Classic Testnet Mordor",  # name
+        "evm-tmetc.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        64,  # chain_id
+        163,  # slip44
+        "ELLA",  # symbol
+        "Ellaism",  # name
+        "evm-ella.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        66,  # chain_id
+        60,  # slip44
+        "OKT",  # symbol
+        "OKXChain",  # name
+        "evm-okt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        67,  # chain_id
+        1,  # slip44
+        "tDBM",  # symbol
+        "DBChain Testnet",  # name
+        "evm-tdbm.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        68,  # chain_id
+        60,  # slip44
+        "SOTER",  # symbol
+        "SoterOne",  # name
+        "evm-soter.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        69,  # chain_id
+        1,  # slip44
+        "tKOR",  # symbol
+        "Optimism Kovan",  # name
+        "evm-tkor.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        74,  # chain_id
+        60,  # slip44
+        "EIDI",  # symbol
+        "IDChain",  # name
+        "evm-eidi.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        77,  # chain_id
+        60,  # slip44
+        "SPOA",  # symbol
+        "POA Network Sokol",  # name
+        "evm-spoa.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        78,  # chain_id
+        60,  # slip44
+        "PETH",  # symbol
+        "PrimusChain",  # name
+        "evm-peth.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        80,  # chain_id
+        60,  # slip44
+        "RNA",  # symbol
+        "GeneChain",  # name
+        "evm-rna.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        82,  # chain_id
+        60,  # slip44
+        "MTR",  # symbol
+        "Meter",  # name
+        "evm-mtr.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        86,  # chain_id
+        60,  # slip44
+        "GT",  # symbol
+        "GateChain",  # name
+        "evm-gt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        87,  # chain_id
+        60,  # slip44
+        "SNT",  # symbol
+        "Nova Network",  # name
+        "evm-snt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        88,  # chain_id
+        889,  # slip44
+        "TOMO",  # symbol
+        "TomoChain",  # name
+        "evm-tomo.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        90,  # chain_id
+        60,  # slip44
+        "GAR",  # symbol
+        "Garizon Stage0",  # name
+        "evm-gar.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        96,  # chain_id
+        60,  # slip44
+        "NEXT",  # symbol
+        "NEXT Smart Chain",  # name
+        "evm-next.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        99,  # chain_id
+        178,  # slip44
+        "POA",  # symbol
+        "POA Network Core",  # name
+        "evm-poa.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        101,  # chain_id
+        464,  # slip44
+        "ETI",  # symbol
+        "EtherInc",  # name
+        "evm-eti.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        105,  # chain_id
+        60,  # slip44
+        "W3G",  # symbol
+        "Web3Games Devnet",  # name
+        "evm-w3g.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        106,  # chain_id
+        60,  # slip44
+        "VLX",  # symbol
+        "Velas EVM",  # name
+        "evm-vlx.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        108,  # chain_id
+        1001,  # slip44
+        "TT",  # symbol
+        "ThunderCore",  # name
+        "evm-tt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        111,  # chain_id
+        60,  # slip44
+        "ETL",  # symbol
+        "EtherLite Chain",  # name
+        "evm-etl.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        122,  # chain_id
+        60,  # slip44
+        "FUSE",  # symbol
+        "Fuse",  # name
+        "evm-fuse.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        123,  # chain_id
+        60,  # slip44
+        "SPARK",  # symbol
+        "Fuse Sparknet",  # name
+        "evm-spark.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        124,  # chain_id
+        60,  # slip44
+        "DWU",  # symbol
+        "Decentralized Web",  # name
+        "evm-dwu.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        126,  # chain_id
+        126,  # slip44
+        "OY",  # symbol
+        "OYchain",  # name
+        "evm-oy.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        127,  # chain_id
+        127,  # slip44
+        "FETH",  # symbol
+        "Factory 127",  # name
+        "evm-feth.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        128,  # chain_id
+        1010,  # slip44
+        "HT",  # symbol
+        "Huobi ECO Chain",  # name
+        "evm-ht.png",  # name
+        0x01943F,  # primary_color
+    )
+    yield (
+        137,  # chain_id
+        966,  # slip44
+        "MATIC",  # symbol
+        "Polygon",  # name
+        "evm-matic.png",  # name
+        0x8247E5,  # primary_color
+    )
+    yield (
+        142,  # chain_id
+        60,  # slip44
+        "DAX",  # symbol
+        "DAX CHAIN",  # name
+        "evm-dax.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        162,  # chain_id
+        1,  # slip44
+        "tPHT",  # symbol
+        "Lightstreams Testnet",  # name
+        "evm-tpht.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        163,  # chain_id
+        60,  # slip44
+        "PHT",  # symbol
+        "Lightstreams",  # name
+        "evm-pht.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        186,  # chain_id
+        60,  # slip44
+        "Seele",  # symbol
+        "Seele",  # name
+        "evm-seele.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        188,  # chain_id
+        60,  # slip44
+        "BTM",  # symbol
+        "BMC",  # name
+        "evm-btm.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        199,  # chain_id
+        60,  # slip44
+        "BTT",  # symbol
+        "BitTorrent Chain",  # name
+        "evm-btt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        211,  # chain_id
+        60,  # slip44
+        "0xF",  # symbol
+        "Freight Trust Network",  # name
+        "evm-0xf.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        222,  # chain_id
+        2221,  # slip44
+        "ASK",  # symbol
+        "Permission",  # name
+        "evm-ask.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        225,  # chain_id
+        60,  # slip44
+        "LA",  # symbol
+        "LACHAIN",  # name
+        "evm-la.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        246,  # chain_id
+        246,  # slip44
+        "EWT",  # symbol
+        "Energy Web Chain",  # name
+        "evm-ewt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        250,  # chain_id
+        60,  # slip44
+        "FTM",  # symbol
+        "Fantom Opera",  # name
+        "evm-ftm.png",  # name
+        0x1969FF,  # primary_color
+    )
+    yield (
+        256,  # chain_id
+        1,  # slip44
+        "thtt",  # symbol
+        "Huobi ECO Chain Testnet",  # name
+        "evm-thtt.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        258,  # chain_id
+        60,  # slip44
+        "SETM",  # symbol
+        "Setheum",  # name
+        "evm-setm.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        262,  # chain_id
+        60,  # slip44
+        "SRN",  # symbol
+        "SUR Blockchain Network",  # name
+        "evm-srn.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        269,  # chain_id
+        269,  # slip44
+        "HPB",  # symbol
+        "High Performance Blockchain",  # name
+        "evm-hpb.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        288,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Boba Network",  # name
+        "evm-boba.png",  # name
+        0xCCFF00,  # primary_color
+    )
+    yield (
+        321,  # chain_id
+        60,  # slip44
+        "KCS",  # symbol
+        "KCC",  # name
+        "evm-kcs.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        333,  # chain_id
+        60,  # slip44
+        "W3Q",  # symbol
+        "Web3Q",  # name
+        "evm-w3q.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        336,  # chain_id
+        60,  # slip44
+        "SDN",  # symbol
+        "Shiden",  # name
+        "evm-sdn.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        369,  # chain_id
+        60,  # slip44
+        "PLS",  # symbol
+        "PulseChain",  # name
+        "evm-pls.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        385,  # chain_id
+        60,  # slip44
+        "LISINSKI",  # symbol
+        "Lisinski",  # name
+        "evm-lisinski.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        499,  # chain_id
+        499,  # slip44
+        "RUPX",  # symbol
+        "Rupaya",  # name
+        "evm-rupx.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        512,  # chain_id
+        1512,  # slip44
+        "AAC",  # symbol
+        "Double-A Chain",  # name
+        "evm-aac.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        555,  # chain_id
+        60,  # slip44
+        "CLASS",  # symbol
+        "Vela1 Chain",  # name
+        "evm-class.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        558,  # chain_id
+        60,  # slip44
+        "TAO",  # symbol
+        "Tao Network",  # name
+        "evm-tao.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        595,  # chain_id
+        1,  # slip44
+        "tmACA",  # symbol
+        "Acala Mandala Testnet",  # name
+        "evm-tmaca.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        686,  # chain_id
+        686,  # slip44
+        "KAR",  # symbol
+        "Karura Network",  # name
+        "evm-kar.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        707,  # chain_id
+        60,  # slip44
+        "BCS",  # symbol
+        "BlockChain Station",  # name
+        "evm-bcs.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        777,  # chain_id
+        60,  # slip44
+        "cTH",  # symbol
+        "cheapETH",  # name
+        "evm-cth.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        787,  # chain_id
+        787,  # slip44
+        "ACA",  # symbol
+        "Acala Network",  # name
+        "evm-aca.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        803,  # chain_id
+        60,  # slip44
+        "HAIC",  # symbol
+        "Haic",  # name
+        "evm-haic.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        820,  # chain_id
+        820,  # slip44
+        "CLO",  # symbol
+        "Callisto",  # name
+        "evm-clo.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        821,  # chain_id
+        1,  # slip44
+        "TCLO",  # symbol
+        "Callisto Testnet",  # name
+        "evm-tclo.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        880,  # chain_id
+        60,  # slip44
+        "AMBR",  # symbol
+        "Ambros Chain",  # name
+        "evm-ambr.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        888,  # chain_id
+        5718350,  # slip44
+        "WAN",  # symbol
+        "Wanchain",  # name
+        "evm-wan.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        977,  # chain_id
+        60,  # slip44
+        "YETI",  # symbol
+        "Nepal Blockchain Network",  # name
+        "evm-yeti.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        998,  # chain_id
+        60,  # slip44
+        "L99",  # symbol
+        "Lucky Network",  # name
+        "evm-l99.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1001,  # chain_id
+        1,  # slip44
+        "tKLAY",  # symbol
+        "Klaytn Testnet Baobab",  # name
+        "evm-tklay.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        1007,  # chain_id
+        1,  # slip44
+        "tNEW",  # symbol
+        "Newton Testnet",  # name
+        "evm-tnew.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        1010,  # chain_id
+        1020,  # slip44
+        "EVC",  # symbol
+        "Evrice Network",  # name
+        "evm-evc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1012,  # chain_id
+        60,  # slip44
+        "NEW",  # symbol
+        "Newton",  # name
+        "evm-new.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1022,  # chain_id
+        60,  # slip44
+        "SKU",  # symbol
+        "Sakura",  # name
+        "evm-sku.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1024,  # chain_id
+        60,  # slip44
+        "CLV",  # symbol
+        "Clover",  # name
+        "evm-clv.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1030,  # chain_id
+        60,  # slip44
+        "CFX",  # symbol
+        "Conflux eSpace",  # name
+        "evm-cfx.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1088,  # chain_id
+        60,  # slip44
+        "METIS",  # symbol
+        "Metis Andromeda",  # name
+        "evm-metis.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1139,  # chain_id
+        60,  # slip44
+        "MATH",  # symbol
+        "MathChain",  # name
+        "evm-math.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1140,  # chain_id
+        1,  # slip44
+        "tMATH",  # symbol
+        "MathChain Testnet",  # name
+        "evm-tmath.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        1197,  # chain_id
+        60,  # slip44
+        "IORA",  # symbol
+        "Iora Chain",  # name
+        "evm-iora.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1202,  # chain_id
+        60,  # slip44
+        "WTT",  # symbol
+        "World Trade Technical Chain",  # name
+        "evm-wtt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1213,  # chain_id
+        60,  # slip44
+        "POP",  # symbol
+        "Popcateum",  # name
+        "evm-pop.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1214,  # chain_id
+        60,  # slip44
+        "ENTER",  # symbol
+        "EnterChain",  # name
+        "evm-enter.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1280,  # chain_id
+        60,  # slip44
+        "HO",  # symbol
+        "HALO",  # name
+        "evm-ho.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1284,  # chain_id
+        60,  # slip44
+        "GLMR",  # symbol
+        "Moonbeam",  # name
+        "evm-glmr.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1285,  # chain_id
+        60,  # slip44
+        "MOVR",  # symbol
+        "Moonriver",  # name
+        "evm-movr.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1287,  # chain_id
+        60,  # slip44
+        "DEV",  # symbol
+        "Moonbase Alpha",  # name
+        "evm-dev.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1288,  # chain_id
+        60,  # slip44
+        "ROC",  # symbol
+        "Moonrock",  # name
+        "evm-roc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1618,  # chain_id
+        60,  # slip44
+        "CATE",  # symbol
+        "Catecoin Chain",  # name
+        "evm-cate.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1657,  # chain_id
+        60,  # slip44
+        "BTA",  # symbol
+        "Btachain",  # name
+        "evm-bta.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1856,  # chain_id
+        60,  # slip44
+        "TSF",  # symbol
+        "Teslafunds",  # name
+        "evm-tsf.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1898,  # chain_id
+        60,  # slip44
+        "BOY",  # symbol
+        "BON Network",  # name
+        "evm-boy.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1987,  # chain_id
+        1987,  # slip44
+        "EGEM",  # symbol
+        "EtherGem",  # name
+        "evm-egem.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2020,  # chain_id
+        60,  # slip44
+        "420",  # symbol
+        "420coin",  # name
+        "evm-420.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2021,  # chain_id
+        60,  # slip44
+        "EDG",  # symbol
+        "Edgeware",  # name
+        "evm-edg.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2025,  # chain_id
+        1008,  # slip44
+        "RPG",  # symbol
+        "Rangers Protocol",  # name
+        "evm-rpg.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2100,  # chain_id
+        60,  # slip44
+        "ECO",  # symbol
+        "Ecoball",  # name
+        "evm-eco.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2213,  # chain_id
+        60,  # slip44
+        "EVA",  # symbol
+        "Evanesco",  # name
+        "evm-eva.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2559,  # chain_id
+        60,  # slip44
+        "KTO",  # symbol
+        "Kortho",  # name
+        "evm-kto.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        3400,  # chain_id
+        60,  # slip44
+        "PRB",  # symbol
+        "Paribu Net",  # name
+        "evm-prb.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        3966,  # chain_id
+        60,  # slip44
+        "DYNO",  # symbol
+        "DYNO",  # name
+        "evm-dyno.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        4689,  # chain_id
+        60,  # slip44
+        "IOTX",  # symbol
+        "IoTeX Network",  # name
+        "evm-iotx.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        5197,  # chain_id
+        60,  # slip44
+        "ES",  # symbol
+        "EraSwap",  # name
+        "evm-es.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        5315,  # chain_id
+        60,  # slip44
+        "UZMI",  # symbol
+        "Uzmi Network",  # name
+        "evm-uzmi.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        5869,  # chain_id
+        60,  # slip44
+        "RBD",  # symbol
+        "Wegochain Rubidium",  # name
+        "evm-rbd.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        6626,  # chain_id
+        60,  # slip44
+        "PIX",  # symbol
+        "Pixie Chain",  # name
+        "evm-pix.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        8000,  # chain_id
+        60,  # slip44
+        "TELE",  # symbol
+        "Teleport",  # name
+        "evm-tele.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        8217,  # chain_id
+        8217,  # slip44
+        "KLAY",  # symbol
+        "Klaytn",  # name
+        "evm-klay.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        8723,  # chain_id
+        479,  # slip44
+        "OLO",  # symbol
+        "TOOL Global",  # name
+        "evm-olo.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        8995,  # chain_id
+        60,  # slip44
+        "U+25B3",  # symbol
+        "bloxberg",  # name
+        "evm-u+25b3.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        9001,  # chain_id
+        60,  # slip44
+        "EVMOS",  # symbol
+        "Evmos",  # name
+        "evm-evmos.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        9100,  # chain_id
+        60,  # slip44
+        "GNC",  # symbol
+        "Genesis Coin",  # name
+        "evm-gnc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        10101,  # chain_id
+        60,  # slip44
+        "GEN",  # symbol
+        "Blockchain Genesis",  # name
+        "evm-gen.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        10823,  # chain_id
+        60,  # slip44
+        "CCP",  # symbol
+        "CryptoCoinPay",  # name
+        "evm-ccp.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        11111,  # chain_id
+        60,  # slip44
+        "WGM",  # symbol
+        "WAGMI",  # name
+        "evm-wgm.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        13381,  # chain_id
+        60,  # slip44
+        "PHX",  # symbol
+        "Phoenix",  # name
+        "evm-phx.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        16000,  # chain_id
+        60,  # slip44
+        "MTT",  # symbol
+        "MetaDot",  # name
+        "evm-mtt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        19845,  # chain_id
+        60,  # slip44
+        "BTCIX",  # symbol
+        "BTCIX Network",  # name
+        "evm-btcix.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        21816,  # chain_id
+        60,  # slip44
+        "OML",  # symbol
+        "omChain",  # name
+        "evm-oml.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        24484,  # chain_id
+        227,  # slip44
+        "WEB",  # symbol
+        "Webchain",  # name
+        "evm-web.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        24734,  # chain_id
+        60,  # slip44
+        "MINTME",  # symbol
+        "MintMe.com Coin",  # name
+        "evm-mintme.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        31102,  # chain_id
+        31102,  # slip44
+        "ESN",  # symbol
+        "Ethersocial Network",  # name
+        "evm-esn.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        32659,  # chain_id
+        60,  # slip44
+        "FSN",  # symbol
+        "Fusion",  # name
+        "evm-fsn.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        39797,  # chain_id
+        39797,  # slip44
+        "NRG",  # symbol
+        "Energi",  # name
+        "evm-nrg.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        42069,  # chain_id
+        60,  # slip44
+        "peggle",  # symbol
+        "pegglecoin",  # name
+        "evm-peggle.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        42161,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Arbitrum One",  # name
+        "evm-arb1.png",  # name
+        0x28A0F0,  # primary_color
+    )
+    yield (
+        42220,  # chain_id
+        60,  # slip44
+        "CELO",  # symbol
+        "Celo",  # name
+        "evm-celo.png",  # name
+        0x35D07F,  # primary_color
+    )
+    yield (
+        42262,  # chain_id
+        60,  # slip44
+        "ROSE",  # symbol
+        "Emerald Paratime",  # name
+        "evm-rose.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        43113,  # chain_id
+        1,  # slip44
+        "tAVAX",  # symbol
+        "Avalanche Fuji Testnet",  # name
+        "evm-tavax.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        43114,  # chain_id
+        9005,  # slip44
+        "AVAX",  # symbol
+        "Avalanche C-Chain",  # name
+        "evm-avax.png",  # name
+        0xE84142,  # primary_color
+    )
+    yield (
+        44787,  # chain_id
+        1,  # slip44
+        "tCELO",  # symbol
+        "Celo Alfajores Testnet",  # name
+        "evm-tcelo.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        47805,  # chain_id
+        60,  # slip44
+        "REI",  # symbol
+        "REI Network",  # name
+        "evm-rei.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        49797,  # chain_id
+        1,  # slip44
+        "tNRG",  # symbol
+        "Energi Testnet",  # name
+        "evm-tnrg.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        53935,  # chain_id
+        60,  # slip44
+        "JEWEL",  # symbol
+        "DFK Chain",  # name
+        "evm-jewel.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        62320,  # chain_id
+        1,  # slip44
+        "tCELO",  # symbol
+        "Celo Baklava Testnet",  # name
+        "evm-tcelo.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        63000,  # chain_id
+        60,  # slip44
+        "ECS",  # symbol
+        "eCredits",  # name
+        "evm-ecs.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        73799,  # chain_id
+        1,  # slip44
+        "tVT",  # symbol
+        "Energy Web Volta Testnet",  # name
+        "evm-tvt.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        78110,  # chain_id
+        60,  # slip44
+        "FIN",  # symbol
+        "Firenze test network",  # name
+        "evm-fin.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        80001,  # chain_id
+        1,  # slip44
+        "tMATIC",  # symbol
+        "Mumbai",  # name
+        "evm-tmatic.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        99999,  # chain_id
+        60,  # slip44
+        "UBC",  # symbol
+        "UB Smart Chain",  # name
+        "evm-ubc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100000,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100001,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100002,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100003,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100004,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100005,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100006,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100007,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        100008,  # chain_id
+        60,  # slip44
+        "QKC",  # symbol
+        "QuarkChain",  # name
+        "evm-qkc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        108801,  # chain_id
+        60,  # slip44
+        "BRO",  # symbol
+        "BROChain",  # name
+        "evm-bro.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        200625,  # chain_id
+        200625,  # slip44
+        "AKA",  # symbol
+        "Akroma",  # name
+        "evm-aka.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        201018,  # chain_id
+        60,  # slip44
+        "atp",  # symbol
+        "Alaya",  # name
+        "evm-atp.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        210425,  # chain_id
+        60,  # slip44
+        "lat",  # symbol
+        "PlatON",  # name
+        "evm-lat.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        246529,  # chain_id
+        246529,  # slip44
+        "ATS",  # symbol
+        "ARTIS sigma1",  # name
+        "evm-ats.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        246785,  # chain_id
+        1,  # slip44
+        "tATS",  # symbol
+        "ARTIS Testnet tau1",  # name
+        "evm-tats.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        281121,  # chain_id
+        60,  # slip44
+        "$OC",  # symbol
+        "Social Smart Chain",  # name
+        "evm-$oc.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        333999,  # chain_id
+        60,  # slip44
+        "POLIS",  # symbol
+        "Polis",  # name
+        "evm-polis.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        888888,  # chain_id
+        60,  # slip44
+        "VS",  # symbol
+        "Vision",  # name
+        "evm-vs.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        955305,  # chain_id
+        1011,  # slip44
+        "ELV",  # symbol
+        "Eluvio Content Fabric",  # name
+        "evm-elv.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1313114,  # chain_id
+        1313114,  # slip44
+        "ETHO",  # symbol
+        "Etho Protocol",  # name
+        "evm-etho.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1313500,  # chain_id
+        60,  # slip44
+        "XERO",  # symbol
+        "Xerom",  # name
+        "evm-xero.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        7762959,  # chain_id
+        184,  # slip44
+        "MUSIC",  # symbol
+        "Musicoin",  # name
+        "evm-music.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        11155111,  # chain_id
+        1,  # slip44
+        "tSEP",  # symbol
+        "Sepolia",  # name
+        "evm-tsep.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        13371337,  # chain_id
+        60,  # slip44
+        "TPEP",  # symbol
+        "PepChain Churchill",  # name
+        "evm-tpep.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        18289463,  # chain_id
+        60,  # slip44
+        "ILT",  # symbol
+        "IOLite",  # name
+        "evm-ilt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        20181205,  # chain_id
+        60,  # slip44
+        "QKI",  # symbol
+        "quarkblockchain",  # name
+        "evm-qki.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        28945486,  # chain_id
+        344,  # slip44
+        "AUX",  # symbol
+        "Auxilium Network",  # name
+        "evm-aux.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        35855456,  # chain_id
+        60,  # slip44
+        "JOYS",  # symbol
+        "Joys Digital",  # name
+        "evm-joys.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        61717561,  # chain_id
+        61717561,  # slip44
+        "AQUA",  # symbol
+        "Aquachain",  # name
+        "evm-aqua.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        99415706,  # chain_id
+        1,  # slip44
+        "TOYS",  # symbol
+        "Joys Digital TestNet",  # name
+        "evm-toys.png",  # name
+        0x969696,  # primary_color
+    )
+    yield (
+        245022934,  # chain_id
+        60,  # slip44
+        "NEON",  # symbol
+        "Neon EVM",  # name
+        "evm-neon.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        311752642,  # chain_id
+        60,  # slip44
+        "OLT",  # symbol
+        "OneLedger",  # name
+        "evm-olt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1122334455,  # chain_id
+        60,  # slip44
+        "IPOS",  # symbol
+        "IPOS Network",  # name
+        "evm-ipos.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1313161554,  # chain_id
+        60,  # slip44
+        "ETH",  # symbol
+        "Aurora",  # name
+        "evm-aurora.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1666600000,  # chain_id
+        60,  # slip44
+        "ONE",  # symbol
+        "Harmony",  # name
+        "evm-one.png",  # name
+        0x33D3D5,  # primary_color
+    )
+    yield (
+        1666600001,  # chain_id
+        60,  # slip44
+        "ONE",  # symbol
+        "Harmony",  # name
+        "evm-one.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1666600002,  # chain_id
+        60,  # slip44
+        "ONE",  # symbol
+        "Harmony",  # name
+        "evm-one.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        1666600003,  # chain_id
+        60,  # slip44
+        "ONE",  # symbol
+        "Harmony",  # name
+        "evm-one.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        2021121117,  # chain_id
+        60,  # slip44
+        "HOP",  # symbol
+        "DataHopper",  # name
+        "evm-hop.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        3125659152,  # chain_id
+        164,  # slip44
+        "PIRL",  # symbol
+        "Pirl",  # name
+        "evm-pirl.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        11297108109,  # chain_id
+        60,  # slip44
+        "PALM",  # symbol
+        "Palm",  # name
+        "evm-palm.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        197710212030,  # chain_id
+        60,  # slip44
+        "NTT",  # symbol
+        "Ntity",  # name
+        "evm-ntt.png",  # name
+        0xD2D2D2,  # primary_color
+    )
+    yield (
+        6022140761023,  # chain_id
+        60,  # slip44
+        "MOLE",  # symbol
+        "Molereum Network",  # name
+        "evm-mole.png",  # name
+        0xD2D2D2,  # primary_color
     )

@@ -29,6 +29,9 @@ async def sign_tx(ctx: wire.Context, msg: EosSignTx, keychain: Keychain) -> EosS
     writers.write_uvarint(sha, 0)
     writers.write_bytes_fixed(sha, bytearray(32), 32)
 
+    from trezor.ui.layouts import confirm_final
+
+    await confirm_final(ctx, "EOS")
     digest = sha.get_digest()
     signature = secp256k1.sign(
         node.private_key(), digest, True, secp256k1.CANONICAL_SIG_EOS

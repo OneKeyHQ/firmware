@@ -391,6 +391,125 @@ uint32_t flash_sector_size(uint8_t sector) {
   }
   return 0;
 }
+
+bool flash_check_ecc_fault() {
+  if ((FLASH->SR1 & (FLASH_FLAG_SNECCERR_BANK1 | FLASH_FLAG_DBECCERR_BANK1)) !=
+          0U ||
+      (FLASH->SR2 & (FLASH_FLAG_SNECCERR_BANK2 | FLASH_FLAG_DBECCERR_BANK2) &
+       0x7FFFFFFFU) != 0U) {
+    return true;
+  }
+  return false;
+}
+
+bool flash_clear_ecc_fault(uint32_t address) {
+  if (IS_FLASH_PROGRAM_ADDRESS_BANK1(address)) {
+    FLASH->CCR1 |= (FLASH_FLAG_SNECCERR_BANK1 | FLASH_CCR_CLR_DBECCERR_Msk);
+    __DSB();
+    return true;
+  }
+
+  if (IS_FLASH_PROGRAM_ADDRESS_BANK2(address)) {
+    FLASH->CCR2 |= (FLASH_FLAG_SNECCERR_BANK1 | FLASH_CCR_CLR_DBECCERR_Msk);
+    __DSB();
+    return true;
+  }
+  return false;
+}
+
+// sector erase method, large effect area
+bool flash_fix_ecc_fault_FIRMWARE(uint32_t address) {
+  const size_t header_backup_len = 4096;
+
+  if (!((IS_FLASH_PROGRAM_ADDRESS_BANK1(address)) ||
+        (IS_FLASH_PROGRAM_ADDRESS_BANK2(address)))) {
+    return false;
+  }
+
+  // find which sector the address is on
+  uint32_t offset = address - FLASH_BANK1_BASE;
+  uint8_t sector = offset / FLASH_FIRMWARE_SECTOR_SIZE;
+
+  // sanity check
+  if (sector < FLASH_SECTOR_FIRMWARE_START ||
+      sector > FLASH_SECTOR_FIRMWARE_END) {
+    return false;
+  }
+
+  // wipe sector
+  if (sector == FLASH_SECTOR_FIRMWARE_START) {
+    // backup header
+    uint8_t temp_header_backup[header_backup_len];
+    memcpy(temp_header_backup, flash_get_address(sector, 0, header_backup_len),
+           header_backup_len);
+    // wipe sector
+    flash_erase(sector);
+    // restore header
+    if (sectrue != flash_unlock_write()) {
+      return false;
+    }
+    for (size_t sector_offset = 0; sector_offset < header_backup_len;
+         sector_offset += 32) {
+      if (sectrue !=
+          flash_write_words(sector, sector_offset,
+                            (uint32_t *)(temp_header_backup + sector_offset))) {
+        return false;
+      }
+    }
+    if (sectrue != flash_lock_write()) {
+      return false;
+    }
+  } else {
+    if (sectrue == flash_erase(sector)) {
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// write zero method, smaller effect area
+bool flash_fix_ecc_fault_FIRMWARE_v2(uint32_t address) {
+  // sanity check
+  if (!((IS_FLASH_PROGRAM_ADDRESS_BANK1(address)) ||
+        (IS_FLASH_PROGRAM_ADDRESS_BANK2(address)))) {
+    return false;
+  }
+
+  // find which sector the address is on
+  uint32_t offset = address - FLASH_BANK1_BASE;
+  uint8_t sector = offset / FLASH_FIRMWARE_SECTOR_SIZE;
+
+  // sanity check
+  if (sector < FLASH_SECTOR_FIRMWARE_START ||
+      sector > FLASH_SECTOR_FIRMWARE_END) {
+    return false;
+  }
+
+  uint8_t zeros[32];  // has to be 32 bytes
+  memset(zeros, 0x00, 32);
+  uint32_t overwrite_offset =
+      (address / sizeof(zeros)) * sizeof(zeros);  // force align
+
+  // unlock for write
+  if (sectrue != flash_unlock_write()) {
+    return false;
+  }
+
+  // overwrite
+  if (HAL_OK != HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, overwrite_offset,
+                                  (uint32_t)&zeros)) {
+    return false;
+  }
+
+  // lock back
+  if (sectrue != flash_lock_write()) {
+    return false;
+  }
+
+  return true;
+}
 #else
 
 const void *flash_get_address(uint8_t sector, uint32_t offset, uint32_t size) {

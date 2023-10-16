@@ -1,24 +1,27 @@
 from typing import TYPE_CHECKING
-from ubinascii import hexlify, unhexlify
-
-from trezor import wire
-from trezor.enums import EthereumDataType
-from trezor.messages import EthereumFieldType
+from ubinascii import hexlify
 
 from . import networks
 
 if TYPE_CHECKING:
-    from .networks import NetworkInfo
+    from trezor.messages import EthereumFieldType, EthereumFieldTypeOneKey
+    from .networks import EthereumNetworkInfo
 
 
-def address_from_bytes(address_bytes: bytes, network: NetworkInfo | None = None) -> str:
+RSKIP60_NETWORKS = (30, 31)
+
+
+def address_from_bytes(
+    address_bytes: bytes, network: EthereumNetworkInfo = networks.UNKNOWN_NETWORK
+) -> str:
     """
     Converts address in bytes to a checksummed string as defined
     in https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md
     """
     from trezor.crypto.hashlib import sha3_256
 
-    if network is not None and network.rskip60:
+    if network.chain_id in RSKIP60_NETWORKS:
+        # rskip60 is a different way to calculate checksum
         prefix = str(network.chain_id) + "0x"
     else:
         prefix = ""
@@ -26,7 +29,7 @@ def address_from_bytes(address_bytes: bytes, network: NetworkInfo | None = None)
     address_hex = hexlify(address_bytes).decode()
     digest = sha3_256((prefix + address_hex).encode(), keccak=True).digest()
 
-    def maybe_upper(i: int) -> str:
+    def _maybe_upper(i: int) -> str:
         """Uppercase i-th letter only if the corresponding nibble has high bit set."""
         digest_byte = digest[i // 2]
         hex_letter = address_hex[i]
@@ -41,10 +44,13 @@ def address_from_bytes(address_bytes: bytes, network: NetworkInfo | None = None)
         else:
             return hex_letter
 
-    return "0x" + "".join(maybe_upper(i) for i in range(len(address_hex)))
+    return "0x" + "".join(_maybe_upper(i) for i in range(len(address_hex)))
 
 
 def bytes_from_address(address: str) -> bytes:
+    from ubinascii import unhexlify
+    from trezor import wire
+
     if len(address) == 40:
         return unhexlify(address)
 
@@ -61,6 +67,8 @@ def bytes_from_address(address: str) -> bytes:
 
 def get_type_name(field: EthereumFieldType) -> str:
     """Create a string from type definition (like uint256 or bytes16)."""
+    from trezor.enums import EthereumDataType
+
     data_type = field.data_type
     size = field.size
 
@@ -97,6 +105,46 @@ def get_type_name(field: EthereumFieldType) -> str:
         return TYPE_TRANSLATION_DICT[data_type]
 
 
+def get_type_name_onekey(field: EthereumFieldTypeOneKey) -> str:
+    """Create a string from type definition (like uint256 or bytes16)."""
+    from trezor.enums import EthereumDataTypeOneKey
+
+    data_type = field.data_type
+    size = field.size
+
+    TYPE_TRANSLATION_DICT = {
+        EthereumDataTypeOneKey.UINT: "uint",
+        EthereumDataTypeOneKey.INT: "int",
+        EthereumDataTypeOneKey.BYTES: "bytes",
+        EthereumDataTypeOneKey.STRING: "string",
+        EthereumDataTypeOneKey.BOOL: "bool",
+        EthereumDataTypeOneKey.ADDRESS: "address",
+    }
+
+    if data_type == EthereumDataTypeOneKey.STRUCT:
+        assert field.struct_name is not None  # validate_field_type
+        return field.struct_name
+    elif data_type == EthereumDataTypeOneKey.ARRAY:
+        assert field.entry_type is not None  # validate_field_type
+        type_name = get_type_name_onekey(field.entry_type)
+        if size is None:
+            return f"{type_name}[]"
+        else:
+            return f"{type_name}[{size}]"
+    elif data_type in (EthereumDataTypeOneKey.UINT, EthereumDataTypeOneKey.INT):
+        assert size is not None  # validate_field_type
+        return TYPE_TRANSLATION_DICT[data_type] + str(size * 8)
+    elif data_type == EthereumDataTypeOneKey.BYTES:
+        if size:
+            return TYPE_TRANSLATION_DICT[data_type] + str(size)
+        else:
+            return TYPE_TRANSLATION_DICT[data_type]
+    else:
+        # all remaining types can use the name directly
+        # if the data_type is left out, this will raise KeyError
+        return TYPE_TRANSLATION_DICT[data_type]
+
+
 def decode_typed_data(data: bytes, type_name: str) -> str:
     """Used by sign_typed_data module to show data to user."""
     if type_name.startswith("bytes"):
@@ -111,12 +159,12 @@ def decode_typed_data(data: bytes, type_name: str) -> str:
         return str(int.from_bytes(data, "big"))
     elif type_name.startswith("int"):
         # Micropython does not implement "signed" arg in int.from_bytes()
-        return str(from_bytes_bigendian_signed(data))
+        return str(_from_bytes_bigendian_signed(data))
 
     raise ValueError  # Unsupported data type for direct field decoding
 
 
-def from_bytes_bigendian_signed(b: bytes) -> int:
+def _from_bytes_bigendian_signed(b: bytes) -> int:
     negative = b[0] & 0x80
     if negative:
         neg_b = bytearray(b)
@@ -132,17 +180,17 @@ def get_color_and_icon(chain_id: int | None):
     from trezor.lvglui.scrs import lv
 
     if chain_id is None:
-        return lv.color_hex(0xFFFFFF), "A:/res/evm-eth.png"
-    network: NetworkInfo | None = networks.by_chain_id(chain_id)
-    if network:
+        return lv.color_hex(0xD2D2D2), "A:/res/evm-none.png"
+    network: EthereumNetworkInfo | None = networks.by_chain_id(chain_id)
+    if network and network is not networks.UNKNOWN_NETWORK:
         return lv.color_hex(network.primary_color), f"A:/res/{network.icon}"
     else:
-        return lv.color_hex(0xFFFFFF), "A:/res/evm-eth.png"
+        return lv.color_hex(0xD2D2D2), "A:/res/evm-none.png"
 
 
-def get_display_network_name(network: NetworkInfo | None):
-    if network is None:
-        return "Ethereum"
+def get_display_network_name(network: EthereumNetworkInfo | None):
+    if network is networks.UNKNOWN_NETWORK or network is None:
+        return "EVM"
     # elif len(network.name) <= 8:
     #     return network.name
     else:

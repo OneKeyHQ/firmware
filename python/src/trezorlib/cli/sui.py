@@ -59,3 +59,22 @@ def sign_raw_tx(client: "TrezorClient", address: str, message: str):
     }
     return result
 
+
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.argument("message")
+@with_client
+def sign_message(
+    client: "TrezorClient",
+    address: str,
+    message: str,
+) -> dict:
+    """Sign message with Sui address."""
+    address_n = tools.parse_path(address)
+    ret = sui.sign_message(client, address_n, message)
+    output = {
+        "message": message,
+        "address": ret.address,
+        "signature": ret.signature.hex(),
+    }
+    return output

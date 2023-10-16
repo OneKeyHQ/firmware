@@ -220,6 +220,27 @@ enum MessageType {
     MessageType_EthereumTypedDataSignature = 469 [(wire_out) = true];
     MessageType_EthereumSignTypedHash = 470 [(wire_in) = true];
 
+    // Ethereum ONEKEY
+    MessageType_EthereumGetPublicKeyOneKey = 20100 [(wire_in) = true];
+    MessageType_EthereumPublicKeyOneKey = 20101 [(wire_out) = true];
+    MessageType_EthereumGetAddressOneKey = 20102 [(wire_in) = true];
+    MessageType_EthereumAddressOneKey = 20103 [(wire_out) = true];
+    MessageType_EthereumSignTxOneKey = 20104 [(wire_in) = true];
+    MessageType_EthereumSignTxEIP1559OneKey = 20105 [(wire_in) = true];
+    MessageType_EthereumTxRequestOneKey = 20106 [(wire_out) = true];
+    MessageType_EthereumTxAckOneKey = 20107 [(wire_in) = true];
+    MessageType_EthereumSignMessageOneKey = 20108 [(wire_in) = true];
+    MessageType_EthereumVerifyMessageOneKey = 20109 [(wire_in) = true];
+    MessageType_EthereumMessageSignatureOneKey = 20110 [(wire_out) = true];
+    MessageType_EthereumSignTypedDataOneKey = 20111 [(wire_in) = true];
+    MessageType_EthereumTypedDataStructRequestOneKey = 20112 [(wire_out) = true];
+    MessageType_EthereumTypedDataStructAckOneKey = 20113 [(wire_in) = true];
+    MessageType_EthereumTypedDataValueRequestOneKey = 20114 [(wire_out) = true];
+    MessageType_EthereumTypedDataValueAckOneKey = 20115 [(wire_in) = true];
+    MessageType_EthereumTypedDataSignatureOneKey = 20116 [(wire_out) = true];
+    MessageType_EthereumSignTypedHashOneKey = 20117 [(wire_in) = true];
+    MessageType_EthereumSignMessageEIP712 = 10200 [(wire_in) = true];
+
     // NEM
     MessageType_NEMGetAddress = 67 [(wire_in) = true];
     MessageType_NEMAddress = 68 [(wire_out) = true];
@@ -450,12 +471,15 @@ enum MessageType {
     MessageType_SuiAddress = 11101 [(wire_out) = true];
     MessageType_SuiSignTx = 11102 [(wire_in) = true];
     MessageType_SuiSignedTx = 11103 [(wire_out) = true];
+    MessageType_SuiSignMessage = 11104 [(wire_in) = true];
+    MessageType_SuiMessageSignature = 11105 [(wire_out) = true];
 
     // Filecoin
     MessageType_FilecoinGetAddress = 11200 [(wire_in) = true];
     MessageType_FilecoinAddress = 11201 [(wire_out) = true];
     MessageType_FilecoinSignTx = 11202 [(wire_in) = true];
     MessageType_FilecoinSignedTx = 11203 [(wire_out) = true];
+
     // Kaspa
     MessageType_KaspaGetAddress = 11300 [(wire_in) = true];
     MessageType_KaspaAddress = 11301 [(wire_out) = true];
@@ -463,6 +487,14 @@ enum MessageType {
     MessageType_KaspaSignedTx = 11303 [(wire_out) = true];
     MessageType_KaspaTxInputRequest = 11304 [(wire_out) = true];
     MessageType_KaspaTxInputAck = 11305 [(wire_in) = true];
+    
+    // Nexa
+    MessageType_NexaGetAddress = 11400 [(wire_in) = true];
+    MessageType_NexaAddress = 11401 [(wire_out) = true];
+    MessageType_NexaSignTx = 11402 [(wire_in) = true];
+    MessageType_NexaSignedTx = 11403 [(wire_out) = true];
+    MessageType_NexaTxInputRequest = 11404 [(wire_out) = true];
+    MessageType_NexaTxInputAck = 11405 [(wire_in) = true];
 
     //onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];

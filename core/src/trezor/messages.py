@@ -38,6 +38,8 @@ if TYPE_CHECKING:
     from trezor.enums import DebugSwipeDirection  # noqa: F401
     from trezor.enums import DecredStakingSpendType  # noqa: F401
     from trezor.enums import EthereumDataType  # noqa: F401
+    from trezor.enums import EthereumDataTypeOneKey  # noqa: F401
+    from trezor.enums import EthereumDefinitionType  # noqa: F401
     from trezor.enums import FailureType  # noqa: F401
     from trezor.enums import InputScriptType  # noqa: F401
     from trezor.enums import MessageType  # noqa: F401
@@ -4341,7 +4343,69 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["EosActionUnknown"]:
             return isinstance(msg, cls)
 
-    class EthereumSignTypedData(protobuf.MessageType):
+    class EthereumNetworkInfo(protobuf.MessageType):
+        chain_id: "int"
+        symbol: "str"
+        slip44: "int"
+        name: "str"
+        icon: "str | None"
+        primary_color: "int | None"
+
+        def __init__(
+            self,
+            *,
+            chain_id: "int",
+            symbol: "str",
+            slip44: "int",
+            name: "str",
+            icon: "str | None" = None,
+            primary_color: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumNetworkInfo"]:
+            return isinstance(msg, cls)
+
+    class EthereumTokenInfo(protobuf.MessageType):
+        address: "bytes"
+        chain_id: "int"
+        symbol: "str"
+        decimals: "int"
+        name: "str"
+
+        def __init__(
+            self,
+            *,
+            address: "bytes",
+            chain_id: "int",
+            symbol: "str",
+            decimals: "int",
+            name: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTokenInfo"]:
+            return isinstance(msg, cls)
+
+    class EthereumDefinitions(protobuf.MessageType):
+        encoded_network: "bytes | None"
+        encoded_token: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            encoded_network: "bytes | None" = None,
+            encoded_token: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumDefinitions"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignTypedDataOneKey(protobuf.MessageType):
         address_n: "list[int]"
         primary_type: "str"
         metamask_v4_compat: "bool"
@@ -4354,6 +4418,118 @@ if TYPE_CHECKING:
             address_n: "list[int] | None" = None,
             metamask_v4_compat: "bool | None" = None,
             chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignTypedDataOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTypedDataStructRequestOneKey(protobuf.MessageType):
+        name: "str"
+
+        def __init__(
+            self,
+            *,
+            name: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTypedDataStructRequestOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTypedDataStructAckOneKey(protobuf.MessageType):
+        members: "list[EthereumStructMemberOneKey]"
+
+        def __init__(
+            self,
+            *,
+            members: "list[EthereumStructMemberOneKey] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTypedDataStructAckOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTypedDataValueRequestOneKey(protobuf.MessageType):
+        member_path: "list[int]"
+
+        def __init__(
+            self,
+            *,
+            member_path: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTypedDataValueRequestOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTypedDataValueAckOneKey(protobuf.MessageType):
+        value: "bytes"
+
+        def __init__(
+            self,
+            *,
+            value: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTypedDataValueAckOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumStructMemberOneKey(protobuf.MessageType):
+        type: "EthereumFieldTypeOneKey"
+        name: "str"
+
+        def __init__(
+            self,
+            *,
+            type: "EthereumFieldTypeOneKey",
+            name: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumStructMemberOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumFieldTypeOneKey(protobuf.MessageType):
+        data_type: "EthereumDataTypeOneKey"
+        size: "int | None"
+        entry_type: "EthereumFieldTypeOneKey | None"
+        struct_name: "str | None"
+
+        def __init__(
+            self,
+            *,
+            data_type: "EthereumDataTypeOneKey",
+            size: "int | None" = None,
+            entry_type: "EthereumFieldTypeOneKey | None" = None,
+            struct_name: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumFieldTypeOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignTypedData(protobuf.MessageType):
+        address_n: "list[int]"
+        primary_type: "str"
+        metamask_v4_compat: "bool"
+        definitions: "EthereumDefinitions | None"
+
+        def __init__(
+            self,
+            *,
+            primary_type: "str",
+            address_n: "list[int] | None" = None,
+            metamask_v4_compat: "bool | None" = None,
+            definitions: "EthereumDefinitions | None" = None,
         ) -> None:
             pass
 
@@ -4453,7 +4629,7 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["EthereumFieldType"]:
             return isinstance(msg, cls)
 
-    class EthereumGetPublicKey(protobuf.MessageType):
+    class EthereumGetPublicKeyOneKey(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
         chain_id: "int | None"
@@ -4464,6 +4640,294 @@ if TYPE_CHECKING:
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
             chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumGetPublicKeyOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumPublicKeyOneKey(protobuf.MessageType):
+        node: "HDNodeType"
+        xpub: "str"
+
+        def __init__(
+            self,
+            *,
+            node: "HDNodeType",
+            xpub: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumPublicKeyOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumGetAddressOneKey(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        chain_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumGetAddressOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumAddressOneKey(protobuf.MessageType):
+        address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumAddressOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignTxOneKey(protobuf.MessageType):
+        address_n: "list[int]"
+        nonce: "bytes"
+        gas_price: "bytes"
+        gas_limit: "bytes"
+        to: "str"
+        value: "bytes"
+        data_initial_chunk: "bytes"
+        data_length: "int"
+        chain_id: "int"
+        tx_type: "int | None"
+
+        def __init__(
+            self,
+            *,
+            gas_price: "bytes",
+            gas_limit: "bytes",
+            chain_id: "int",
+            address_n: "list[int] | None" = None,
+            nonce: "bytes | None" = None,
+            to: "str | None" = None,
+            value: "bytes | None" = None,
+            data_initial_chunk: "bytes | None" = None,
+            data_length: "int | None" = None,
+            tx_type: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignTxOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignTxEIP1559OneKey(protobuf.MessageType):
+        address_n: "list[int]"
+        nonce: "bytes"
+        max_gas_fee: "bytes"
+        max_priority_fee: "bytes"
+        gas_limit: "bytes"
+        to: "str"
+        value: "bytes"
+        data_initial_chunk: "bytes"
+        data_length: "int"
+        chain_id: "int"
+        access_list: "list[EthereumAccessListOneKey]"
+
+        def __init__(
+            self,
+            *,
+            nonce: "bytes",
+            max_gas_fee: "bytes",
+            max_priority_fee: "bytes",
+            gas_limit: "bytes",
+            value: "bytes",
+            data_length: "int",
+            chain_id: "int",
+            address_n: "list[int] | None" = None,
+            access_list: "list[EthereumAccessListOneKey] | None" = None,
+            to: "str | None" = None,
+            data_initial_chunk: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignTxEIP1559OneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTxRequestOneKey(protobuf.MessageType):
+        data_length: "int | None"
+        signature_v: "int | None"
+        signature_r: "bytes | None"
+        signature_s: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data_length: "int | None" = None,
+            signature_v: "int | None" = None,
+            signature_r: "bytes | None" = None,
+            signature_s: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTxRequestOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTxAckOneKey(protobuf.MessageType):
+        data_chunk: "bytes"
+
+        def __init__(
+            self,
+            *,
+            data_chunk: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTxAckOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignMessageOneKey(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+        chain_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            address_n: "list[int] | None" = None,
+            chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignMessageOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumMessageSignatureOneKey(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumMessageSignatureOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumVerifyMessageOneKey(protobuf.MessageType):
+        signature: "bytes"
+        message: "bytes"
+        address: "str"
+        chain_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            message: "bytes",
+            address: "str",
+            chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumVerifyMessageOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignTypedHashOneKey(protobuf.MessageType):
+        address_n: "list[int]"
+        domain_separator_hash: "bytes"
+        message_hash: "bytes | None"
+        chain_id: "int | None"
+
+        def __init__(
+            self,
+            *,
+            domain_separator_hash: "bytes",
+            address_n: "list[int] | None" = None,
+            message_hash: "bytes | None" = None,
+            chain_id: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignTypedHashOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumTypedDataSignatureOneKey(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumTypedDataSignatureOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumSignMessageEIP712(protobuf.MessageType):
+        address_n: "list[int]"
+        domain_hash: "bytes | None"
+        message_hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            domain_hash: "bytes | None" = None,
+            message_hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignMessageEIP712"]:
+            return isinstance(msg, cls)
+
+    class EthereumAccessListOneKey(protobuf.MessageType):
+        address: "str"
+        storage_keys: "list[bytes]"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+            storage_keys: "list[bytes] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["EthereumAccessListOneKey"]:
+            return isinstance(msg, cls)
+
+    class EthereumGetPublicKey(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
         ) -> None:
             pass
 
@@ -4490,14 +4954,14 @@ if TYPE_CHECKING:
     class EthereumGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
-        chain_id: "int | None"
+        encoded_network: "bytes | None"
 
         def __init__(
             self,
             *,
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
-            chain_id: "int | None" = None,
+            encoded_network: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -4530,6 +4994,7 @@ if TYPE_CHECKING:
         data_length: "int"
         chain_id: "int"
         tx_type: "int | None"
+        definitions: "EthereumDefinitions | None"
 
         def __init__(
             self,
@@ -4544,6 +5009,7 @@ if TYPE_CHECKING:
             data_initial_chunk: "bytes | None" = None,
             data_length: "int | None" = None,
             tx_type: "int | None" = None,
+            definitions: "EthereumDefinitions | None" = None,
         ) -> None:
             pass
 
@@ -4563,6 +5029,7 @@ if TYPE_CHECKING:
         data_length: "int"
         chain_id: "int"
         access_list: "list[EthereumAccessList]"
+        definitions: "EthereumDefinitions | None"
 
         def __init__(
             self,
@@ -4578,6 +5045,7 @@ if TYPE_CHECKING:
             access_list: "list[EthereumAccessList] | None" = None,
             to: "str | None" = None,
             data_initial_chunk: "bytes | None" = None,
+            definitions: "EthereumDefinitions | None" = None,
         ) -> None:
             pass
 
@@ -4622,14 +5090,14 @@ if TYPE_CHECKING:
     class EthereumSignMessage(protobuf.MessageType):
         address_n: "list[int]"
         message: "bytes"
-        chain_id: "int | None"
+        encoded_network: "bytes | None"
 
         def __init__(
             self,
             *,
             message: "bytes",
             address_n: "list[int] | None" = None,
-            chain_id: "int | None" = None,
+            encoded_network: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -4657,7 +5125,6 @@ if TYPE_CHECKING:
         signature: "bytes"
         message: "bytes"
         address: "str"
-        chain_id: "int | None"
 
         def __init__(
             self,
@@ -4665,7 +5132,6 @@ if TYPE_CHECKING:
             signature: "bytes",
             message: "bytes",
             address: "str",
-            chain_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -4677,7 +5143,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         domain_separator_hash: "bytes"
         message_hash: "bytes | None"
-        chain_id: "int | None"
+        encoded_network: "bytes | None"
 
         def __init__(
             self,
@@ -4685,7 +5151,7 @@ if TYPE_CHECKING:
             domain_separator_hash: "bytes",
             address_n: "list[int] | None" = None,
             message_hash: "bytes | None" = None,
-            chain_id: "int | None" = None,
+            encoded_network: "bytes | None" = None,
         ) -> None:
             pass
 
@@ -6123,6 +6589,106 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["NEMCosignatoryModification"]:
             return isinstance(msg, cls)
 
+    class NexaGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        prefix: "str"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            prefix: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaGetAddress"]:
+            return isinstance(msg, cls)
+
+    class NexaAddress(protobuf.MessageType):
+        address: "str"
+        public_key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+            public_key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaAddress"]:
+            return isinstance(msg, cls)
+
+    class NexaSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+        prefix: "str"
+        input_count: "int"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+            prefix: "str | None" = None,
+            input_count: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaSignTx"]:
+            return isinstance(msg, cls)
+
+    class NexaTxInputRequest(protobuf.MessageType):
+        request_index: "int"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            request_index: "int",
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaTxInputRequest"]:
+            return isinstance(msg, cls)
+
+    class NexaTxInputAck(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaTxInputAck"]:
+            return isinstance(msg, cls)
+
+    class NexaSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NexaSignedTx"]:
+            return isinstance(msg, cls)
+
     class PolkadotGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         prefix: "int"
@@ -6941,6 +7507,38 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["SuiSignedTx"]:
             return isinstance(msg, cls)
 
+    class SuiSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SuiSignMessage"]:
+            return isinstance(msg, cls)
+
+    class SuiMessageSignature(protobuf.MessageType):
+        signature: "bytes"
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SuiMessageSignature"]:
+            return isinstance(msg, cls)
+
     class TezosGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"
@@ -7357,7 +7955,13 @@ if TYPE_CHECKING:
         transfer_contract: "TronTransferContract | None"
         freeze_balance_contract: "TronFreezeBalanceContract | None"
         unfreeze_balance_contract: "TronUnfreezeBalanceContract | None"
+        withdraw_balance_contract: "TronWithdrawBalanceContract | None"
         trigger_smart_contract: "TronTriggerSmartContract | None"
+        freeze_balance_v2_contract: "TronFreezeBalanceV2Contract | None"
+        unfreeze_balance_v2_contract: "TronUnfreezeBalanceV2Contract | None"
+        withdraw_expire_unfreeze_contract: "TronWithdrawExpireUnfreezeContract | None"
+        delegate_resource_contract: "TronDelegateResourceContract | None"
+        undelegate_resource_contract: "TronUnDelegateResourceContract | None"
 
         def __init__(
             self,
@@ -7365,7 +7969,13 @@ if TYPE_CHECKING:
             transfer_contract: "TronTransferContract | None" = None,
             freeze_balance_contract: "TronFreezeBalanceContract | None" = None,
             unfreeze_balance_contract: "TronUnfreezeBalanceContract | None" = None,
+            withdraw_balance_contract: "TronWithdrawBalanceContract | None" = None,
             trigger_smart_contract: "TronTriggerSmartContract | None" = None,
+            freeze_balance_v2_contract: "TronFreezeBalanceV2Contract | None" = None,
+            unfreeze_balance_v2_contract: "TronUnfreezeBalanceV2Contract | None" = None,
+            withdraw_expire_unfreeze_contract: "TronWithdrawExpireUnfreezeContract | None" = None,
+            delegate_resource_contract: "TronDelegateResourceContract | None" = None,
+            undelegate_resource_contract: "TronUnDelegateResourceContract | None" = None,
         ) -> None:
             pass
 
@@ -7445,6 +8055,96 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["TronUnfreezeBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronWithdrawBalanceContract(protobuf.MessageType):
+        owner_address: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            owner_address: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronWithdrawBalanceContract"]:
+            return isinstance(msg, cls)
+
+    class TronFreezeBalanceV2Contract(protobuf.MessageType):
+        frozen_balance: "int | None"
+        resource: "TronResourceCode | None"
+
+        def __init__(
+            self,
+            *,
+            frozen_balance: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronFreezeBalanceV2Contract"]:
+            return isinstance(msg, cls)
+
+    class TronUnfreezeBalanceV2Contract(protobuf.MessageType):
+        unfreeze_balance: "int | None"
+        resource: "TronResourceCode | None"
+
+        def __init__(
+            self,
+            *,
+            unfreeze_balance: "int | None" = None,
+            resource: "TronResourceCode | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnfreezeBalanceV2Contract"]:
+            return isinstance(msg, cls)
+
+    class TronWithdrawExpireUnfreezeContract(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronWithdrawExpireUnfreezeContract"]:
+            return isinstance(msg, cls)
+
+    class TronDelegateResourceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        balance: "int | None"
+        receiver_address: "str | None"
+        lock: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            balance: "int | None" = None,
+            receiver_address: "str | None" = None,
+            lock: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronDelegateResourceContract"]:
+            return isinstance(msg, cls)
+
+    class TronUnDelegateResourceContract(protobuf.MessageType):
+        resource: "TronResourceCode | None"
+        balance: "int | None"
+        receiver_address: "str | None"
+
+        def __init__(
+            self,
+            *,
+            resource: "TronResourceCode | None" = None,
+            balance: "int | None" = None,
+            receiver_address: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronUnDelegateResourceContract"]:
             return isinstance(msg, cls)
 
     class WebAuthnListResidentCredentials(protobuf.MessageType):

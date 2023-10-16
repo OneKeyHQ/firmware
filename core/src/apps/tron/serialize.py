@@ -101,10 +101,10 @@ def pack_contract(contract, owner_address):
         add_field(cmessage, 3, TYPE_VARINT)
         write_varint(cmessage, contract.freeze_balance_contract.frozen_duration)
         if contract.freeze_balance_contract.resource is not None:
-            add_field(cmessage, 10, TYPE_VARINT)
+            add_field(cmessage, 4, TYPE_VARINT)
             write_varint(cmessage, contract.freeze_balance_contract.resource)
         if contract.freeze_balance_contract.receiver_address is not None:
-            add_field(cmessage, 15, TYPE_STRING)
+            add_field(cmessage, 5, TYPE_STRING)
             write_bytes_with_length(
                 cmessage,
                 base58.decode_check(contract.freeze_balance_contract.receiver_address),
@@ -118,16 +118,87 @@ def pack_contract(contract, owner_address):
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
 
         if contract.unfreeze_balance_contract.resource is not None:
-            add_field(cmessage, 10, TYPE_VARINT)
+            add_field(cmessage, 2, TYPE_VARINT)
             write_varint(cmessage, contract.unfreeze_balance_contract.resource)
         if contract.unfreeze_balance_contract.receiver_address is not None:
-            add_field(cmessage, 15, TYPE_STRING)
+            add_field(cmessage, 3, TYPE_STRING)
             write_bytes_with_length(
                 cmessage,
                 base58.decode_check(
                     contract.unfreeze_balance_contract.receiver_address
                 ),
             )
+
+    if contract.withdraw_balance_contract:
+        write_varint(retc, 13)
+        api = "WithdrawBalanceContract"
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+    if contract.freeze_balance_v2_contract:
+        write_varint(retc, 54)
+        api = "FreezeBalanceV2Contract"
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+        add_field(cmessage, 2, TYPE_VARINT)
+        write_varint(cmessage, contract.freeze_balance_v2_contract.frozen_balance)
+        if contract.freeze_balance_v2_contract.resource is not None:
+            add_field(cmessage, 3, TYPE_VARINT)
+            write_varint(cmessage, contract.freeze_balance_v2_contract.resource)
+
+    if contract.unfreeze_balance_v2_contract:
+        write_varint(retc, 55)
+        api = "UnfreezeBalanceV2Contract"
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+        add_field(cmessage, 2, TYPE_VARINT)
+        write_varint(cmessage, contract.unfreeze_balance_v2_contract.unfreeze_balance)
+        if contract.unfreeze_balance_v2_contract.resource is not None:
+            add_field(cmessage, 3, TYPE_VARINT)
+            write_varint(cmessage, contract.unfreeze_balance_v2_contract.resource)
+
+    if contract.withdraw_expire_unfreeze_contract:
+        write_varint(retc, 56)
+        api = "WithdrawExpireUnfreezeContract"
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+    if contract.delegate_resource_contract:
+        write_varint(retc, 57)
+        api = "DelegateResourceContract"
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+        add_field(cmessage, 2, TYPE_VARINT)
+        write_varint(cmessage, contract.delegate_resource_contract.resource)
+        add_field(cmessage, 3, TYPE_VARINT)
+        write_varint(cmessage, contract.delegate_resource_contract.balance)
+        add_field(cmessage, 4, TYPE_STRING)
+        write_bytes_with_length(
+            cmessage,
+            base58.decode_check(contract.delegate_resource_contract.receiver_address),
+        )
+        if contract.delegate_resource_contract.lock is not None:
+            add_field(cmessage, 5, TYPE_VARINT)
+            write_varint(cmessage, contract.delegate_resource_contract.lock)
+
+    if contract.undelegate_resource_contract:
+        write_varint(retc, 58)
+        api = "UnDelegateResourceContract"
+        add_field(cmessage, 1, TYPE_STRING)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+
+        add_field(cmessage, 2, TYPE_VARINT)
+        write_varint(cmessage, contract.undelegate_resource_contract.resource)
+        add_field(cmessage, 3, TYPE_VARINT)
+        write_varint(cmessage, contract.undelegate_resource_contract.balance)
+        add_field(cmessage, 4, TYPE_STRING)
+        write_bytes_with_length(
+            cmessage,
+            base58.decode_check(contract.undelegate_resource_contract.receiver_address),
+        )
 
     # write API
     capi = bytearray()

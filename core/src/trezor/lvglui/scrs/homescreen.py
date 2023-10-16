@@ -62,7 +62,7 @@ class MainScreen(Screen):
             if self.bottom_tips:
                 self.bottom_tips.set_text(_(i18n_keys.BUTTON__SWIPE_TO_SHOW_APPS))
             if self.apps:
-                self.apps.tips.set_text(_(i18n_keys.CONTENT__SWIPE_DOWN_TO_CLOSE))
+                self.apps.refresh_text()
             return
         self.subtitle.set_style_text_color(lv_colors.WHITE, 0)
         if dev_state:
@@ -237,26 +237,54 @@ class MainScreen(Screen):
                 .bg_img_recolor_opa(lv.OPA._30)
                 .bg_img_recolor(lv_colors.BLACK)
             )
-
+            default_desc_style = (
+                StyleWrapper()
+                .width(170)
+                .text_font(font_PJSREG24)
+                .text_color(lv_colors.WHITE)
+                .text_align_center()
+            )
+            pressed_desc_style = StyleWrapper().text_opa(lv.OPA._70)
             self.settings = lv.imgbtn(self)
             self.settings.set_pos(78, 134)
             self.settings.set_style_bg_img_src("A:/res/settings.png", 0)
             self.settings.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.settings.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.settings_desc = lv.label(self)
+            self.settings_desc.set_text(_(i18n_keys.APP__SETTINGS))
+            self.settings_desc.add_style(default_desc_style, 0)
+            self.settings_desc.add_style(
+                pressed_desc_style, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+            self.settings_desc.align_to(self.settings, lv.ALIGN.OUT_BOTTOM_MID, 0, 4)
 
             self.guide = lv.imgbtn(self)
             self.guide.align_to(self.settings, lv.ALIGN.OUT_RIGHT_MID, 64, 0)
             self.guide.set_style_bg_img_src("A:/res/guide.png", 0)
             self.guide.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.guide.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
+            self.guide_desc = lv.label(self)
+            self.guide_desc.set_text(_(i18n_keys.APP__TIPS))
+            self.guide_desc.add_style(default_desc_style, 0)
+            self.guide_desc.add_style(
+                pressed_desc_style, lv.PART.MAIN | lv.STATE.PRESSED
+            )
+            self.guide_desc.align_to(self.guide, lv.ALIGN.OUT_BOTTOM_MID, 0, 4)
 
             self.nft = lv.imgbtn(self)
             self.nft.set_style_bg_img_src("A:/res/app_nft.png", 0)
             self.nft.add_style(click_style, lv.PART.MAIN | lv.STATE.PRESSED)
             self.nft.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
             self.nft.align_to(self.settings, lv.ALIGN.OUT_BOTTOM_MID, 0, 65)
+            self.nft_desc = lv.label(self)
+            self.nft_desc.set_text(_(i18n_keys.APP__NFT_GALLERY))
+            self.nft_desc.add_style(default_desc_style, 0)
+            self.nft_desc.add_style(pressed_desc_style, lv.PART.MAIN | lv.STATE.PRESSED)
+            self.nft_desc.align_to(self.nft, lv.ALIGN.OUT_BOTTOM_MID, 0, 4)
 
             self.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            self.add_event_cb(self.on_pressed, lv.EVENT.PRESSED, None)
+            self.add_event_cb(self.on_released, lv.EVENT.RELEASED, None)
             self.add_event_cb(self.on_slide_down, lv.EVENT.GESTURE, None)
             self.show_anim = Anim(
                 800, 0, self.set_pos, start_cb=self.anim_start_cb, delay=10
@@ -305,6 +333,32 @@ class MainScreen(Screen):
                 elif target == self.nft:
                     NftGallery(self.parent)
 
+        def on_pressed(self, event_obj):
+            code = event_obj.code
+            target = event_obj.get_target()
+            if code == lv.EVENT.PRESSED:
+                if utils.lcd_resume():
+                    return
+                if target == self.settings:
+                    self.settings_desc.add_state(lv.STATE.PRESSED)
+                elif target == self.guide:
+                    self.guide_desc.add_state(lv.STATE.PRESSED)
+                elif target == self.nft:
+                    self.nft_desc.add_state(lv.STATE.PRESSED)
+
+        def on_released(self, event_obj):
+            code = event_obj.code
+            target = event_obj.get_target()
+            if code == lv.EVENT.RELEASED:
+                if utils.lcd_resume():
+                    return
+                if target == self.settings:
+                    self.settings_desc.clear_state(lv.STATE.PRESSED)
+                elif target == self.guide:
+                    self.guide_desc.clear_state(lv.STATE.PRESSED)
+                elif target == self.nft:
+                    self.nft_desc.clear_state(lv.STATE.PRESSED)
+
         def on_slide_down(self, event_obj):
             code = event_obj.code
             if code == lv.EVENT.GESTURE:
@@ -313,6 +367,12 @@ class MainScreen(Screen):
                     # lv.indev_get_act().wait_release()
                     self.slide = True
                     self.dismiss()
+
+        def refresh_text(self):
+            self.tips.set_text(_(i18n_keys.CONTENT__SWIPE_DOWN_TO_CLOSE))
+            self.settings_desc.set_text(_(i18n_keys.APP__SETTINGS))
+            self.guide_desc.set_text(_(i18n_keys.APP__TIPS))
+            self.nft_desc.set_text(_(i18n_keys.APP__NFT_GALLERY))
 
 
 class NftGallery(Screen):
@@ -667,7 +727,7 @@ class SettingsScreen(Screen):
             elif target == self.develop:
                 DevelopSettings(self)
             elif target == self.power:
-                PowerOff(self)
+                PowerOff()
             else:
                 if __debug__:
                     if target == self.test:
@@ -1518,18 +1578,28 @@ class AboutSetting(Screen):
         self.serial.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
         self.serial.set_style_bg_color(lv_colors.BLACK, 0)
         self.serial.add_flag(lv.obj.FLAG.EVENT_BUBBLE)
-
-        # self.trezor_mode = ListItemBtnWithSwitch(
-        #     self.container, _(i18n_keys.ITEM__COMPATIBLE_WITH_TREZOR)
-        # )
-        # self.trezor_mode.set_style_bg_color(lv_colors.BLACK, 0)
-        # if not device.is_trezor_compatible():
-        #     self.trezor_mode.clear_state()
-        self.board_loader = ListItemBtn(
-            self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
+        self.fcc_id = DisplayItem(self.container, "FCC ID", "2BB8VT1")
+        self.fcc_id.label.add_style(
+            StyleWrapper().text_font(font_PJSREG24).text_color(lv_colors.LIGHT_GRAY), 0
         )
-        self.board_loader.set_style_bg_color(lv_colors.BLACK, 0)
-        self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+        self.fcc_id.label_top.add_style(StyleWrapper().text_color(lv_colors.WHITE), 0)
+        self.fcc_id.set_style_bg_color(lv_colors.BLACK, 0)
+        self.fcc_icon = lv.img(self.fcc_id)
+        self.fcc_icon.set_src("A:/res/fcc-logo.png")
+        self.fcc_icon.align(lv.ALIGN.RIGHT_MID, 0, -5)
+
+        self.trezor_mode = ListItemBtnWithSwitch(
+            self.container, _(i18n_keys.ITEM__COMPATIBLE_WITH_TREZOR)
+        )
+        self.trezor_mode.set_style_bg_color(lv_colors.BLACK, 0)
+        if not device.is_trezor_compatible():
+            self.trezor_mode.clear_state()
+
+        # self.board_loader = ListItemBtn(
+        #     self.container, _(i18n_keys.ITEM__BOARDLOADER), has_next=False
+        # )
+        # self.board_loader.set_style_bg_color(lv_colors.BLACK, 0)
+        # self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
         self.firmware_update = NormalButton(
             self.content_area, _(i18n_keys.BUTTON__SYSTEM_UPDATE)
         )
@@ -1541,18 +1611,19 @@ class AboutSetting(Screen):
 
     def on_click(self, event_obj):
         target = event_obj.get_target()
-        if target == self.board_loader:
-            GO2BoardLoader()
+        # if target == self.board_loader:
+        #     GO2BoardLoader()
         if target == self.firmware_update:
             Go2UpdateMode(self)
 
     def on_long_pressed(self, event_obj):
         target = event_obj.get_target()
         if target == self.serial:
-            if self.board_loader.has_flag(lv.obj.FLAG.HIDDEN):
-                self.board_loader.clear_flag(lv.obj.FLAG.HIDDEN)
-            else:
-                self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+            # if self.board_loader.has_flag(lv.obj.FLAG.HIDDEN):
+            #     self.board_loader.clear_flag(lv.obj.FLAG.HIDDEN)
+            # else:
+            #     self.board_loader.add_flag(lv.obj.FLAG.HIDDEN)
+            GO2BoardLoader()
 
     def on_value_changed(self, event_obj):
         code = event_obj.code
@@ -1664,29 +1735,30 @@ class Go2UpdateMode(Screen):
                 self.load_screen(self.prev_scr, destroy_self=True)
 
 
-class PowerOff(Screen):
-    def __init__(self, prev_scr=None, re_loop: bool = False):
-        super().__init__(
-            prev_scr=prev_scr,
-            title=_(i18n_keys.TITLE__POWER_OFF),
-        )
-        self.btn_yes = NormalButton(self.content_area, _(i18n_keys.ITEM__POWER_OFF))
-        self.btn_yes.set_size(231, 98)
-        self.btn_yes.align(lv.ALIGN.BOTTOM_RIGHT, -8, -8)
-        self.btn_yes.enable(lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
+class PowerOff(FullSizeWindow):
+    IS_ACTIVE = False
 
-        self.btn_no = NormalButton(self.content_area, _(i18n_keys.BUTTON__CANCEL))
-        self.btn_no.set_size(231, 98)
-        self.btn_no.align(lv.ALIGN.BOTTOM_LEFT, 8, -8)
+    def __init__(self, re_loop: bool = False):
+        if PowerOff.IS_ACTIVE:
+            return
+        PowerOff.IS_ACTIVE = True
+        super().__init__(
+            title=_(i18n_keys.TITLE__POWER_OFF),
+            confirm_text=_(i18n_keys.BUTTON__POWER_OFF),
+            cancel_text=_(i18n_keys.BUTTON__CANCEL),
+            subtitle="",
+        )
+        self.btn_yes.enable(lv_colors.ONEKEY_RED_1, text_color=lv_colors.BLACK)
         self.re_loop = re_loop
         from trezor import config
 
         self.has_pin = config.has_pin()
-        if self.has_pin:
+        if self.has_pin and device.is_initialized():
             config.lock()
 
     def back(self):
-        self.load_screen(self.prev_scr, destroy_self=True)
+        PowerOff.IS_ACTIVE = False
+        self.destroy(100)
 
     def eventhandler(self, event_obj):
         code = event_obj.code
@@ -1697,7 +1769,11 @@ class PowerOff(Screen):
             if target == self.btn_yes:
                 ShutingDown()
             elif target == self.btn_no:
-                if self.has_pin and device.is_initialized():
+                if (
+                    not utils.is_initialization_processing()
+                    and self.has_pin
+                    and device.is_initialized()
+                ):
                     from apps.common.request_pin import verify_user_pin
 
                     workflow.spawn(
@@ -1709,9 +1785,6 @@ class PowerOff(Screen):
                     )
                 else:
                     self.back()
-
-    def _load_scr(self, scr: "Screen", back: bool = False) -> None:
-        lv.scr_load(scr)
 
 
 class DevelopSettings(Screen):

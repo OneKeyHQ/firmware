@@ -23,7 +23,8 @@ async def button_request(
 ) -> None:
     if __debug__:
         log.debug(__name__, "ButtonRequest.type=%s", br_type)
-    workflow.close_others()
+    if not isinstance(ctx, wire.DummyContext):
+        workflow.close_others()
     await ctx.call(ButtonRequest(code=code), ButtonAck)
 
 

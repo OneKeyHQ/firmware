@@ -50,8 +50,8 @@ async def require_confirm_final(ctx: Context, fee: int) -> None:
         ctx,
         "confirm_final",
         title="Final confirm",
-        content="Sign this transaction {} for network fee?",
-        param=f"and pay {format_amount(fee, NEM_MAX_DIVISIBILITY)} XEM",
+        content=f"Sign this transaction and pay {format_amount(fee, NEM_MAX_DIVISIBILITY)} XEM for network fee?",
+        param="",
         hide_continue=True,
         hold=True,
     )

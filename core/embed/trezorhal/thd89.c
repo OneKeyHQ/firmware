@@ -416,6 +416,7 @@ HAL_StatusTypeDef i2c_master_send(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
 }
 
 #define I2C_RECV_BUFFER_TOO_SMALL (0x80)
+#define I2C_RECV_TIMEOUT (5 * 1000)  // 5s
 
 int i2c_master_recive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress,
                       uint8_t *pData, uint16_t *Size, uint32_t Timeout) {
@@ -557,7 +558,7 @@ secbool thd89_transmit(uint8_t *cmd, uint16_t len, uint8_t *resp,
   }
   hal_delay(1);
   ret = i2c_master_recive(&i2c_handle, THD89_ADDRESS, resp, resp_len,
-                          HAL_MAX_DELAY);
+                          I2C_RECV_TIMEOUT);
   if (ret != HAL_OK) {
     if (ret == I2C_RECV_BUFFER_TOO_SMALL) {
       ensure(secfalse, "se recive buffer too small");

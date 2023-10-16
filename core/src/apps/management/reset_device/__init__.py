@@ -15,8 +15,6 @@ from trezor.ui.layouts import (
     show_onekey_app_guide,
 )
 
-from apps.base import set_homescreen
-
 from .. import backup_types
 from ..change_pin import request_pin_confirm
 from . import layout
@@ -35,8 +33,7 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     _validate_reset_device(msg)
     from trezor.ui.layouts import show_popup
 
-    newpin = None
-
+    utils.mark_initialization_processing()
     if msg.language is not None:
         i18n_refresh(msg.language)
     await show_popup(_(i18n_keys.TITLE__PLEASE_WAIT), None, timeout_ms=1000)
@@ -68,8 +65,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # request and set new PIN
         if msg.pin_protection:
             newpin = await request_pin_confirm(ctx)
-            # if not config.change_pin("", newpin, None, None):
-            #     raise wire.ProcessError("Failed to set PIN")
+            if not config.change_pin("", newpin, None, None):
+                raise wire.ProcessError("Failed to set PIN")
 
         # generate and display internal entropy
         int_entropy = random.bytes(32)
@@ -109,8 +106,6 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         # generate and display backup information for the master secret
         if perform_backup:
             await backup_seed(ctx, msg.backup_type, secret)
-            if not __debug__:
-                await show_bip39_dotmap(ctx, secret)
         # write settings and master secret into storage
         if msg.label is not None:
             storage.device.set_label(msg.label)
@@ -122,25 +117,21 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
             needs_backup=not perform_backup,
             no_backup=bool(msg.no_backup),
         )
-
-        if newpin is not None:
-            if not config.change_pin("", newpin, None, None):
-                raise wire.ProcessError("Failed to set PIN")
-            config.unlock(newpin, None)
-
         # if we backed up the wallet, show success message
         if perform_backup:
+            if not __debug__:
+                await show_bip39_dotmap(ctx, secret)
             await layout.show_backup_success(ctx)
         if isinstance(ctx, wire.DummyContext):
             utils.make_show_app_guide()
         else:
             await show_onekey_app_guide()
-            set_homescreen()
     except BaseException as e:
         raise e
     else:
         return Success(message="Initialized")
     finally:
+        utils.mark_initialization_done()
         if isinstance(ctx, wire.DummyContext):
             loop.clear()
 
