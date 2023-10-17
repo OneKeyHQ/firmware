@@ -52,6 +52,7 @@
 #include "flash.h"
 #include "icon_onekey.h"
 #include "image.h"
+#include "se_thd89.h"
 #include "sys.h"
 #include "thd89_boot.h"
 #include "usb.h"
@@ -914,7 +915,11 @@ void ui_bootloader_second(const image_header *const hdr) {
   display_text(offset_x, offset_y, "SE", -1, FONT_PJKS_BOLD_26, COLOR_BL_FG,
                COLOR_BL_BG);
   offset_y += offset_line;
-  display_text(offset_x, offset_y, "ATECC608A", -1, FONT_NORMAL,
+  const char *se_version = se_get_version();
+  char se_version_str[32] = {0};
+  strcat(se_version_str, "THD89-");
+  strcat(se_version_str, se_version);
+  display_text(offset_x, offset_y, se_version_str, -1, FONT_NORMAL,
                COLOR_BL_TAGVALUE, COLOR_BL_BG);
 
   offset_y += offset_seg;
