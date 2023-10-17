@@ -484,8 +484,6 @@ int main(void) {
 
   device_test();
 
-#if PRODUCTION
-
   bool serial_set = false, cert_set = false;
 
   if (!serial_set) {
@@ -506,7 +504,6 @@ int main(void) {
   }
 
   device_burnin_test();
-#endif
 
   qspi_flash_init();
   qspi_flash_config();
