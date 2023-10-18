@@ -628,33 +628,42 @@ int ui_user_input(int zones) {
 int ui_input_poll(int zones, bool poll) {
   do {
     uint32_t evt = touch_click();
-    uint16_t x = touch_unpack_x(evt);
-    uint16_t y = touch_unpack_y(evt);
-    // clicked on Cancel button
-    if ((zones & INPUT_CANCEL) && x >= 8 && x < 8 + 231 && y > 694 &&
-        y < 694 + 98) {
-      return INPUT_CANCEL;
+    if (evt) {
+      hal_delay(50);
+      uint16_t x = touch_unpack_x(evt);
+      uint16_t y = touch_unpack_y(evt);
+      // clicked on Cancel button
+      if ((zones & INPUT_CANCEL) && x >= 8 && x < 8 + 231 && y > 694 &&
+          y < 694 + 98) {
+        return INPUT_CANCEL;
+      }
+      // clicked on Confirm button
+      if ((zones & INPUT_CONFIRM) && x >= 241 && x < 241 + 231 && y > 694 &&
+          y < 694 + 98) {
+        return INPUT_CONFIRM;
+      }
+      // clicked on next button
+      if ((zones & INPUT_NEXT) && x >= 8 && x < 8 + 464 && y > 694 &&
+          y < 694 + 98) {
+        return (zones & INPUT_NEXT);
+      }
+      // clicked on previous button
+      if ((zones & INPUT_PREVIOUS) && x >= 8 && x < 8 + 231 && y > 694 &&
+          y < 694 + 98) {
+        return (zones & INPUT_PREVIOUS);
+      }
+      // clicked on restart button
+      if ((zones & INPUT_RESTART) && x >= 241 && x < 241 + 231 && y > 694 &&
+          y < 694 + 98) {
+        return (zones & INPUT_RESTART);
+      }
+
+      if ((zones & INPUT_VERSION_INFO) && x >= 0 && x <= 480 && y > 500 &&
+          y < 580) {
+        return (zones & INPUT_VERSION_INFO);
+      }
     }
-    // clicked on Confirm button
-    if ((zones & INPUT_CONFIRM) && x >= 241 && x < 241 + 231 && y > 694 &&
-        y < 694 + 98) {
-      return INPUT_CONFIRM;
-    }
-    // clicked on next button
-    if ((zones & INPUT_NEXT) && x >= 8 && x < 8 + 464 && y > 694 &&
-        y < 694 + 98) {
-      return (zones & INPUT_NEXT);
-    }
-    // clicked on previous button
-    if ((zones & INPUT_PREVIOUS) && x >= 8 && x < 8 + 231 && y > 694 &&
-        y < 694 + 98) {
-      return (zones & INPUT_PREVIOUS);
-    }
-    // clicked on restart button
-    if ((zones & INPUT_RESTART) && x >= 241 && x < 241 + 231 && y > 694 &&
-        y < 694 + 98) {
-      return (zones & INPUT_RESTART);
-    }
+
   } while (poll);
   return 0;
 }
@@ -959,8 +968,23 @@ void ui_bootloader_factory(void) {
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
 }
 
+void ui_bootloader_device_test(void) {
+  ui_bootloader_page_current = 2;
+  display_text_center(DISPLAY_RESX / 2, 277, "Test Mode", -1, FONT_PJKS_BOLD_38,
+                      COLOR_BL_FG, COLOR_BL_BG);
+
+  display_bar(8, 694, 231, 98, COLOR_BL_ICON);
+  display_text_center(DISPLAY_RESX / 4, 755, "device test", -1,
+                      FONT_PJKS_BOLD_26, COLOR_BL_FG, COLOR_BL_ICON);
+  display_bar(241, 694, 231, 98, COLOR_BL_ICON);
+  display_text_center(DISPLAY_RESX - DISPLAY_RESX / 4, 755, "aging test", -1,
+                      FONT_PJKS_BOLD_26, COLOR_BL_FG, COLOR_BL_ICON);
+}
+
 void ui_bootloader_page_switch(const image_header *const hdr) {
   int response;
+
+  static uint32_t click = 0, click_pre = 0, click_now = 0;
 
   if (ui_bootloader_page_current == 0) {
     response = ui_input_poll(INPUT_NEXT, false);
@@ -971,13 +995,39 @@ void ui_bootloader_page_switch(const image_header *const hdr) {
     if (!ble_name_show && ble_name_state()) {
       ui_bootloader_first(hdr);
     }
-  } else {
-    response = ui_input_poll(INPUT_PREVIOUS | INPUT_RESTART, false);
+  } else if (ui_bootloader_page_current == 1) {
+    click_now = HAL_GetTick();
+    if ((click_now - click_pre) > (1000 / 2)) {
+      click = 0;
+    }
+    response = ui_input_poll(
+        INPUT_PREVIOUS | INPUT_RESTART | INPUT_VERSION_INFO, false);
     if (INPUT_PREVIOUS == response) {
       display_clear();
       ui_bootloader_first(hdr);
     } else if (INPUT_RESTART == response) {
       HAL_NVIC_SystemReset();
+    } else if (INPUT_VERSION_INFO == response) {
+      click++;
+      click_pre = click_now;
+      if (click == 5) {
+        click = 0;
+        display_clear();
+        ui_bootloader_device_test();
+        click_pre = click_now;
+      }
+    }
+  } else if (ui_bootloader_page_current == 2) {
+    response = ui_input_poll(INPUT_PREVIOUS | INPUT_RESTART, false);
+    if (INPUT_PREVIOUS == response) {
+      device_test(true);
+    } else if (INPUT_RESTART == response) {
+      device_burnin_test(true);
+    }
+    click_now = HAL_GetTick();
+    if (click_now - click_pre > (1000 * 3)) {
+      display_clear();
+      ui_bootloader_first(hdr);
     }
   }
 }

@@ -71,6 +71,7 @@ void ui_fadeout(void);
 #define INPUT_NEXT 0x10          // Next icon
 #define INPUT_PREVIOUS 0x20      // Previous icon
 #define INPUT_RESTART 0x40       // Restart icon
+#define INPUT_VERSION_INFO 0x80         // Touchscreen
 
 enum BAT_LEVEL {
   BAT_LEVEL_0,

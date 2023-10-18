@@ -250,8 +250,8 @@ static bool ui_response(void) {
   }
 }
 
-void device_test(void) {
-  if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST)) {
+void device_test(bool force) {
+  if (flash_otp_is_locked(FLASH_OTP_FACTORY_TEST) && !force) {
     return;
   }
   display_bar(0, 0, MAX_DISPLAY_RESX, 266, COLOR_RED);
@@ -397,18 +397,14 @@ static void lock_burnin_test_otp(void) {
 #define TIMER_1S 10000
 #define TEST_DURATION (3 * 60 * 60 * TIMER_1S)  // 3 hours
 
-void device_burnin_test(void) {
-  if (flash_otp_is_locked(FLASH_OTP_BLOCK_BURNIN_TEST)) {
-    return;
-  }
-
+void device_burnin_test(bool force) {
   char *serial;
   device_get_serial(&serial);
   if (memcmp(serial + 7, "20230201", 8) < 0) {
     return;
   }
 
-  uint32_t start, current, remain, previous;
+  uint32_t start = 0, current, remain, previous_remain, previous;
   uint8_t rand_buffer[32];
   char remain_timer[16] = {0};
 
@@ -416,7 +412,8 @@ void device_burnin_test(void) {
   volatile uint32_t flash_id = 0;
   volatile uint32_t index = 0, index_bak = 0xff;
   volatile uint32_t click = 0, click_pre = 0, click_now = 0;
-  volatile uint32_t se_pre = 0, se_now = 0;
+  volatile uint32_t buzzer_pre = 0, buzzer_now = 0;
+
   FRESULT res;
   FIL fil;
 
@@ -424,11 +421,6 @@ void device_burnin_test(void) {
   test_result test_res = {0};
 
   emmc_init();
-  qspi_flash_init();
-  timer_init();
-  jpeg_init();
-
-  start = __HAL_TIM_GET_COUNTER(&TimHandle);
 
   res = f_mount(&fs_instance, "", 1);
   if (res != FR_OK) {
@@ -442,35 +434,87 @@ void device_burnin_test(void) {
   f_open(&fil, "test_res", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
   f_chmod("test_res", AM_SYS | AM_HID, AM_SYS | AM_HID);
 
+  if (force) {
+    f_write(&fil, &test_res, sizeof(test_res), &bw);
+    f_sync(&fil);
+  }
+
   f_read(&fil, &test_res, sizeof(test_res), &br);
   if (br == 0) {
     test_res.flag = TEST_TESTING;
-    test_res.time = start;
+    test_res.time = 0;
     f_write(&fil, &test_res, sizeof(test_res), &bw);
     f_sync(&fil);
-  } else {
-    if (test_res.flag == TEST_TESTING) {
-      start = test_res.time;
-    } else if (test_res.flag == TEST_PASS) {
-      if (test_res.touch != TEST_PASS) {
-        ui_test_input();
-        test_res.touch = TEST_PASS;
-        f_lseek(&fil, 0);
-        f_write(&fil, &test_res, sizeof(test_res), &bw);
-        f_sync(&fil);
-        ble_cmd_req(BLE_BT, BLE_BT_ON);
-        lock_burnin_test_otp();
-        restart();
-      }
-      return;
-    }
+  }
+  if (flash_otp_is_locked(FLASH_OTP_BLOCK_BURNIN_TEST) &&
+      (test_res.touch == TEST_PASS)) {
+    return;
   }
 
+  qspi_flash_init();
+  timer_init();
+  jpeg_init();
+  buzzer_init();
+  motor_init();
+
+  if (test_res.flag == TEST_TESTING) {
+    start = test_res.time;
+  } else if (test_res.flag == TEST_PASS) {
+    if (test_res.touch != TEST_PASS) {
+      ui_test_input();
+
+      for (int i = 0; i < 2; i++) {
+        display_clear();
+        ui_generic_confirm_simple("BEEP test");
+        buzzer_ctrl(1);
+        hal_delay(1000);
+        buzzer_ctrl(0);
+
+        if (ui_response()) {
+          display_text(0, 110, "BEEP test done", -1, FONT_NORMAL, COLOR_WHITE,
+                       COLOR_BLACK);
+        } else {
+          display_text(0, 110, "BEEP test faild", -1, FONT_NORMAL, COLOR_RED,
+                       COLOR_BLACK);
+          while (1)
+            ;
+        }
+        display_bar(0, 130, DISPLAY_RESX, DISPLAY_RESY - 100, COLOR_BLACK);
+
+        ui_generic_confirm_simple("MOTOR test");
+
+        motor_ctrl(MOTOR_REVERSE);
+        hal_delay(2000);
+        motor_ctrl(MOTOR_BRAKE);
+
+        if (ui_response()) {
+          display_text(0, 140, "MOTOR test done", -1, FONT_NORMAL, COLOR_WHITE,
+                       COLOR_BLACK);
+        } else {
+          display_text(0, 140, "MOTOR test faild", -1, FONT_NORMAL, COLOR_RED,
+                       COLOR_BLACK);
+          while (1)
+            ;
+        }
+      }
+      test_res.touch = TEST_PASS;
+      f_lseek(&fil, 0);
+      f_write(&fil, &test_res, sizeof(test_res), &bw);
+      f_sync(&fil);
+      ble_cmd_req(BLE_BT, BLE_BT_ON);
+      lock_burnin_test_otp();
+      restart();
+    }
+    return;
+  }
+
+  previous_remain = 0;
   previous = 0;
 
   do {
     ble_uart_poll();
     if (touch_click()) {
+      hal_delay(50);
       if (click == 0) {
         click_now = __HAL_TIM_GET_COUNTER(&TimHandle);
       }
@@ -503,12 +547,12 @@ void device_burnin_test(void) {
     current = start + __HAL_TIM_GET_COUNTER(&TimHandle);
 
     remain = TEST_DURATION - current;
-    if (previous == 0) {
-      previous = remain;
+    if (previous_remain == 0) {
+      previous_remain = remain;
     }
 
-    if (previous - remain >= (TIMER_1S / 2)) {
-      previous = remain;
+    if (previous_remain - remain >= (TIMER_1S / 2)) {
+      previous_remain = remain;
       remain /= TIMER_1S;
       uint8_t hour = remain / 3600;
       uint8_t min = (remain % 3600) / 60;
@@ -583,51 +627,78 @@ void device_burnin_test(void) {
             }
           }
 
+          buzzer_pre = buzzer_now = __HAL_TIM_GET_COUNTER(&TimHandle);
+
           break;
         default:
           break;
       }
     }
+    // 100ms
+    if ((current - previous) > (TIMER_1S / 10)) {
+      previous = current;
+      emmc_cap = emmc_get_capacity_in_bytes();
+      if (emmc_cap == 0) {
+        display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
+                            "EMMC test faild", -1, FONT_NORMAL, COLOR_RED,
+                            COLOR_BLACK);
+        while (1)
+          ;
+      }
+      flash_id = qspi_flash_read_id();
+      if (flash_id == 0) {
+        display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
+                            "SPI-FLASH test faild", -1, FONT_NORMAL, COLOR_RED,
+                            COLOR_BLACK);
+        while (1)
+          ;
+      }
 
-    emmc_cap = emmc_get_capacity_in_bytes();
-    if (emmc_cap == 0) {
-      display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "EMMC test faild",
-                          -1, FONT_NORMAL, COLOR_RED, COLOR_BLACK);
-      while (1)
-        ;
-    }
-    flash_id = qspi_flash_read_id();
-    if (flash_id == 0) {
-      display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2,
-                          "SPI-FLASH test faild", -1, FONT_NORMAL, COLOR_RED,
-                          COLOR_BLACK);
-      while (1)
-        ;
-    }
-
-    se_now = __HAL_TIM_GET_COUNTER(&TimHandle);
-    // 500 ms
-    if (se_now - se_pre >= (TIMER_1S / 2)) {
-      se_pre = se_now;
       if (!se_get_rand(rand_buffer, 32)) {
         display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY / 2, "SE test faild",
                             -1, FONT_NORMAL, COLOR_RED, COLOR_BLACK);
         while (1)
           ;
       }
-    }
 
-    if (!ble_name_state()) {
-      ble_cmd_req(BLE_VER, BLE_VER_ADV);
-      hal_delay(5);
-    }
-    if (!ble_battery_state()) {
-      ble_cmd_req(BLE_PWR, BLE_PWR_EQ);
-      hal_delay(5);
-    }
-    if (!ble_switch_state()) {
-      ble_cmd_req(BLE_BT, BLE_BT_STA);
-      hal_delay(5);
+      if (!ble_name_state()) {
+        ble_cmd_req(BLE_VER, BLE_VER_ADV);
+        hal_delay(5);
+      }
+      if (!ble_battery_state()) {
+        ble_cmd_req(BLE_PWR, BLE_PWR_EQ);
+        hal_delay(5);
+      }
+      if (!ble_switch_state()) {
+        ble_cmd_req(BLE_BT, BLE_BT_STA);
+        hal_delay(5);
+      }
+
+      if (index == 3) {
+        buzzer_now = __HAL_TIM_GET_COUNTER(&TimHandle);
+        if (buzzer_now - buzzer_pre < (TIMER_1S * 15) / 10) {
+          display_bar(8, 400, 150, 30, COLOR_GREEN);
+          display_text_center(158 / 2, 425, "buzzer on", -1, FONT_PJKS_BOLD_26,
+                              COLOR_WHITE, COLOR_GREEN);
+          display_bar(8, 480, 150, 30, COLOR_RED);
+          display_text_center(158 / 2, 505, "motor off", -1, FONT_PJKS_BOLD_26,
+                              COLOR_WHITE, COLOR_RED);
+          buzzer_ctrl(1);
+          motor_ctrl(MOTOR_BRAKE);
+        } else {
+          display_bar(8, 400, 150, 30, COLOR_RED);
+          display_text_center(158 / 2, 425, "buzzer off", -1, FONT_PJKS_BOLD_26,
+                              COLOR_WHITE, COLOR_RED);
+          display_bar(8, 480, 150, 30, COLOR_GREEN);
+          display_text_center(158 / 2, 505, "motor on", -1, FONT_PJKS_BOLD_26,
+                              COLOR_WHITE, COLOR_GREEN);
+          motor_ctrl(MOTOR_REVERSE);
+          buzzer_ctrl(0);
+        }
+      } else {
+        buzzer_ctrl(0);
+        motor_ctrl(MOTOR_BRAKE);
+      }
     }
 
     if ((current - start) > 15 * 60 * TIMER_1S) {
@@ -638,7 +709,7 @@ void device_burnin_test(void) {
       f_sync(&fil);
       restart();
     }
-    hal_delay(5);
+
   } while (current < TEST_DURATION);
 
   test_res.flag = TEST_PASS;
