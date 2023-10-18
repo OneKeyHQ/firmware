@@ -334,9 +334,8 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
         break;
       }
       // check bluetooth
-      else if (USB_PACKET_SIZE == usb_webusb_read_blocking(USB_IFACE_NUM, buf,
-                                                           USB_PACKET_SIZE,
-                                                           200)) {
+      else if (USB_PACKET_SIZE == usb_webusb_read_blocking(
+                                      USB_IFACE_NUM, buf, USB_PACKET_SIZE, 5)) {
         host_channel = CHANNEL_USB;
         break;
       }
@@ -727,7 +726,7 @@ int main(void) {
 
   bus_fault_enable();
 
-  device_test();
+  device_test(false);
 
   atca_init();
   atca_config_check();
@@ -747,7 +746,7 @@ int main(void) {
   }
 
 #if PRODUCTION
-  device_burnin_test();
+  device_burnin_test(false);
 #endif
 
   qspi_flash_init();
