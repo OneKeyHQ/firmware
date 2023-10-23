@@ -93,7 +93,7 @@ void ui_wipe_confirm(const image_header* const hdr);
 void ui_install_confirm(image_header* current_hdr,
                         const image_header* const new_hdr);
 void ui_install_ble_confirm(void);
-void ui_install_thd89_confirm(const char* old_ver);
+void ui_install_thd89_confirm(const char* old_ver, const char* boot_ver);
 void ui_install_progress(image_header* current_hdr,
                          const image_header* const new_hdr);
 void ui_bootloader_page_switch(const image_header* const hdr);

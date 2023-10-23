@@ -811,7 +811,7 @@ void ui_install_ble_confirm(void) {
                       FONT_PJKS_BOLD_26, COLOR_BL_DONE, COLOR_BL_ICON);
 }
 
-void ui_install_thd89_confirm(const char *old_ver) {
+void ui_install_thd89_confirm(const char *old_ver, const char *boot_ver) {
   char str[128] = {0};
   ui_title_update();
   ui_logo_center();
@@ -823,6 +823,11 @@ void ui_install_thd89_confirm(const char *old_ver) {
   strcat(str, "current version is ");
   strcat(str, old_ver);
   display_text_center(DISPLAY_RESX / 2, 268, str, -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  memset(str, 0, sizeof(str));
+  strcat(str, "boot version is ");
+  strcat(str, boot_ver);
+  display_text_center(DISPLAY_RESX / 2, 296, str, -1, FONT_NORMAL,
                       COLOR_BL_SUBTITLE, COLOR_BL_BG);
 
   display_bar(8, 694, 231, 98, COLOR_BL_ICON);
