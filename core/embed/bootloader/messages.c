@@ -642,12 +642,15 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
                        "Invalid firmware header");
           return -3;
         }
-        const char *se_version = se_get_version();
+        char se_ver[16] = {0}, boot_ver[16] = {0};
+        strncpy(se_ver, se_get_version(), sizeof(se_ver));
         if (!se_back_to_boot_progress()) {
           send_failure(iface_num, FailureType_Failure_ProcessError,
                        "SE back to boot error");
           return -1;
         }
+
+        strncpy(boot_ver, se_get_version(), sizeof(boot_ver));
 
         if (!se_verify_firmware(chunk_buffer, IMAGE_HEADER_SIZE)) {
           send_failure(iface_num, FailureType_Failure_ProcessError,
@@ -656,7 +659,7 @@ int process_msg_FirmwareUpload(uint8_t iface_num, uint32_t msg_size,
         }
 
         ui_fadeout();
-        ui_install_thd89_confirm(se_version);
+        ui_install_thd89_confirm(se_ver, boot_ver);
         ui_fadein();
 
         int response = INPUT_CANCEL;
@@ -1155,8 +1158,8 @@ void process_msg_ReadSEPublicCert(uint8_t iface_num, uint32_t msg_size,
   MSG_RECV_INIT(ReadSEPublicCert);
   MSG_RECV(ReadSEPublicCert);
 
-  uint16_t cert_len = 0;
   uint8_t cert[512] = {0};
+  uint16_t cert_len = sizeof(cert);
 
   MSG_SEND_INIT(SEPublicCert);
   if (se_read_certificate(cert, &cert_len)) {

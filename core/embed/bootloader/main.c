@@ -460,21 +460,21 @@ int main(void) {
   lcd_para_init(DISPLAY_RESX, DISPLAY_RESY, LCD_PIXEL_FORMAT_RGB565);
   lcd_pwm_init();
 
+#if defined TREZOR_MODEL_T
+  // display_set_little_endian();
+  touch_init();
+  touch_power_on();
+#endif
+
   thd89_init();
   se_reset_se();
-  hal_delay(350);  // time for se to reset
+  hal_delay(500);  // time for se to reset
 
   random_delays_init();
 
   ble_usart_init();
 
   device_para_init();
-
-#if defined TREZOR_MODEL_T
-  // display_set_little_endian();
-  touch_init();
-  touch_power_on();
-#endif
 
 #if defined TREZOR_MODEL_R
   button_init();

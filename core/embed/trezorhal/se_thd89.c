@@ -395,7 +395,7 @@ secbool se_read_certificate(uint8_t *cert, uint16_t *len) {
 
 secbool se_has_cerrificate(void) {
   uint8_t cert[512];
-  uint16_t cert_len;
+  uint16_t cert_len = sizeof(cert);
   return se_read_certificate(cert, &cert_len);
 }
 
