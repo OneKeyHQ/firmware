@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+file=$1
+
+dd if=$file of=${file/.bin/_p1.bin} skip=0 bs=128k count=12
+dd if=$file of=${file/.bin/_p2.bin} skip=12 bs=128k
+
