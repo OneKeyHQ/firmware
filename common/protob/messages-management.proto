@@ -133,6 +133,31 @@ message Features {
     optional uint32 coin_switch = 517;
     optional string build_id = 518;
     optional uint32 battery_level = 520;
+
+    enum OneKeyDeviceType {
+        CLASSIC = 0x00;
+        CLASSIC1S = 0x01;
+        MINI = 0x02;
+        TOUCH = 0x03;
+        TOUCH_PRO = 0x04;
+    }
+    optional OneKeyDeviceType onekey_device_type = 600;
+    enum OneKeySeType {
+        THD89 = 0x00;
+        SE608A = 0x01;
+    }
+    optional OneKeySeType onekey_se_type = 601;
+    optional string onekey_board_version = 602;
+    optional bytes onekey_board_hash = 603;
+    optional string onekey_boot_version = 604;
+    optional bytes onekey_boot_hash = 605;
+    optional string onekey_se_version = 606;
+    optional bytes onekey_se_hash = 607;
+    optional string onekey_se_build_id = 608;
+    optional string onekey_firmware_version = 609;
+    optional bytes onekey_firmware_hash  = 610;
+    optional string onekey_firmware_build_id = 611;
+    optional string onekey_serial_no = 612;
 }
 
 /**
