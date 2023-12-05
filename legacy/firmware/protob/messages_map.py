@@ -10,6 +10,7 @@ from messages_pb2 import (
     wire_in,
     wire_no_fsm,
     wire_out,
+    factory,
 )
 
 fh = open("messages_map.h", "wt")
@@ -55,6 +56,7 @@ def handle_message(fh, fl, skipped, message, extension):
     options = message.GetOptions()
     bootloader = options.Extensions[wire_bootloader]
     no_fsm = options.Extensions[wire_no_fsm]
+    factory_cmd = options.Extensions[factory]
 
     if getattr(options, "deprecated", None):
         fh.write(f"\t// Message {short_name} is deprecated\n")
@@ -72,7 +74,7 @@ def handle_message(fh, fl, skipped, message, extension):
         process_func = "0"
 
     cmd_flags = "CommandFlags_"
-    if getattr(options, "factory", None):
+    if factory_cmd:
         cmd_flags += "Factory_Only"
     else:
         cmd_flags += "Default"

@@ -1133,9 +1133,10 @@ void fsm_msgSpiFlashRead(const SpiFlashRead *msg) {
   (void)msg;
 #if ONEKEY_MINI
   RESP_INIT(SpiFlashData);
-
-  if (flash_read_enc(resp->data.bytes, msg->address, msg->len)) {
-    resp->data.size = msg->len;
+  uint32_t len =
+      msg->len > sizeof(resp->data.bytes) ? sizeof(resp->data.bytes) : msg->len;
+  if (flash_read_enc(resp->data.bytes, msg->address, len)) {
+    resp->data.size = len;
     msg_write(MessageType_MessageType_SpiFlashData, resp);
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Read failed"));
