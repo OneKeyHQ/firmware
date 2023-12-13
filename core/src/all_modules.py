@@ -106,6 +106,10 @@ trezor.enums.InputScriptType
 import trezor.enums.InputScriptType
 trezor.enums.MessageType
 import trezor.enums.MessageType
+trezor.enums.OneKeyDeviceType
+import trezor.enums.OneKeyDeviceType
+trezor.enums.OneKeySeType
+import trezor.enums.OneKeySeType
 trezor.enums.OutputScriptType
 import trezor.enums.OutputScriptType
 trezor.enums.PinMatrixRequestType
