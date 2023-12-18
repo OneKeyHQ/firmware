@@ -441,6 +441,13 @@ static void rx_callback(usbd_device *dev, uint8_t ep) {
           show_halt("Wrong firmware", "header.");
           return;
         }
+        uint8_t *p_version = (uint8_t *)(p + 24);
+        if (p_version[0] < 0x36) {
+          send_msg_failure(dev, 9);  // Failure_ProcessError
+          flash_state = STATE_END;
+          show_halt("Wrong firmware", "version.");
+          return;
+        }
         update_mode = UPDATE_ST;
 
 #else
@@ -841,6 +848,8 @@ void update_from_spi_flash(void) {
   if (hdr.magic != FIRMWARE_MAGIC_NEW) return;
   if (hdr.codelen > FLASH_APP_LEN) return;
   if (hdr.codelen < 4096) return;
+  // version must be greater than 0x36
+  if ((hdr.onekey_version & 0xff) < 0x36) return;
 
   int signed_firmware = signatures_match(&hdr, NULL);
   if (SIG_OK != signed_firmware) {
