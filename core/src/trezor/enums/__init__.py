@@ -359,6 +359,16 @@ if TYPE_CHECKING:
         NexaSignedTx = 11403
         NexaTxInputRequest = 11404
         NexaTxInputAck = 11405
+        NostrGetPublicKey = 11500
+        NostrPublicKey = 11501
+        NostrSignEvent = 11502
+        NostrSignedEvent = 11503
+        NostrEncryptMessage = 11504
+        NostrEncryptedMessage = 11505
+        NostrDecryptMessage = 11506
+        NostrDecryptedMessage = 11507
+        NostrSignSchnorr = 11508
+        NostrSignedSchnorr = 11509
         DeviceBackToBoot = 903
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
@@ -578,6 +588,17 @@ if TYPE_CHECKING:
         Shamir = 15
         ShamirGroups = 16
         PassphraseEntry = 17
+
+    class OneKeyDeviceType(IntEnum):
+        CLASSIC = 0
+        CLASSIC1S = 1
+        MINI = 2
+        TOUCH = 3
+        TOUCH_PRO = 4
+
+    class OneKeySeType(IntEnum):
+        THD89 = 0
+        SE608A = 1
 
     class ExportType(IntEnum):
         SeedEncExportType_NO = 0

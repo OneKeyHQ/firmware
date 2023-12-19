@@ -381,6 +381,16 @@ class MessageType(IntEnum):
     NexaSignedTx = 11403
     NexaTxInputRequest = 11404
     NexaTxInputAck = 11405
+    NostrGetPublicKey = 11500
+    NostrPublicKey = 11501
+    NostrSignEvent = 11502
+    NostrSignedEvent = 11503
+    NostrEncryptMessage = 11504
+    NostrEncryptedMessage = 11505
+    NostrDecryptMessage = 11506
+    NostrDecryptedMessage = 11507
+    NostrSignSchnorr = 11508
+    NostrSignedSchnorr = 11509
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
@@ -611,6 +621,19 @@ class Capability(IntEnum):
     Shamir = 15
     ShamirGroups = 16
     PassphraseEntry = 17
+
+
+class OneKeyDeviceType(IntEnum):
+    CLASSIC = 0
+    CLASSIC1S = 1
+    MINI = 2
+    TOUCH = 3
+    TOUCH_PRO = 4
+
+
+class OneKeySeType(IntEnum):
+    THD89 = 0
+    SE608A = 1
 
 
 class ExportType(IntEnum):
@@ -3808,6 +3831,19 @@ class Features(protobuf.MessageType):
         517: protobuf.Field("coin_switch", "uint32", repeated=False, required=False),
         518: protobuf.Field("build_id", "string", repeated=False, required=False),
         520: protobuf.Field("battery_level", "uint32", repeated=False, required=False),
+        600: protobuf.Field("onekey_device_type", "OneKeyDeviceType", repeated=False, required=False),
+        601: protobuf.Field("onekey_se_type", "OneKeySeType", repeated=False, required=False),
+        602: protobuf.Field("onekey_board_version", "string", repeated=False, required=False),
+        603: protobuf.Field("onekey_board_hash", "bytes", repeated=False, required=False),
+        604: protobuf.Field("onekey_boot_version", "string", repeated=False, required=False),
+        605: protobuf.Field("onekey_boot_hash", "bytes", repeated=False, required=False),
+        606: protobuf.Field("onekey_se_version", "string", repeated=False, required=False),
+        607: protobuf.Field("onekey_se_hash", "bytes", repeated=False, required=False),
+        608: protobuf.Field("onekey_se_build_id", "string", repeated=False, required=False),
+        609: protobuf.Field("onekey_firmware_version", "string", repeated=False, required=False),
+        610: protobuf.Field("onekey_firmware_hash", "bytes", repeated=False, required=False),
+        611: protobuf.Field("onekey_firmware_build_id", "string", repeated=False, required=False),
+        612: protobuf.Field("onekey_serial_no", "string", repeated=False, required=False),
     }
 
     def __init__(
@@ -3871,6 +3907,19 @@ class Features(protobuf.MessageType):
         coin_switch: Optional["int"] = None,
         build_id: Optional["str"] = None,
         battery_level: Optional["int"] = None,
+        onekey_device_type: Optional["OneKeyDeviceType"] = None,
+        onekey_se_type: Optional["OneKeySeType"] = None,
+        onekey_board_version: Optional["str"] = None,
+        onekey_board_hash: Optional["bytes"] = None,
+        onekey_boot_version: Optional["str"] = None,
+        onekey_boot_hash: Optional["bytes"] = None,
+        onekey_se_version: Optional["str"] = None,
+        onekey_se_hash: Optional["bytes"] = None,
+        onekey_se_build_id: Optional["str"] = None,
+        onekey_firmware_version: Optional["str"] = None,
+        onekey_firmware_hash: Optional["bytes"] = None,
+        onekey_firmware_build_id: Optional["str"] = None,
+        onekey_serial_no: Optional["str"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3930,6 +3979,19 @@ class Features(protobuf.MessageType):
         self.coin_switch = coin_switch
         self.build_id = build_id
         self.battery_level = battery_level
+        self.onekey_device_type = onekey_device_type
+        self.onekey_se_type = onekey_se_type
+        self.onekey_board_version = onekey_board_version
+        self.onekey_board_hash = onekey_board_hash
+        self.onekey_boot_version = onekey_boot_version
+        self.onekey_boot_hash = onekey_boot_hash
+        self.onekey_se_version = onekey_se_version
+        self.onekey_se_hash = onekey_se_hash
+        self.onekey_se_build_id = onekey_se_build_id
+        self.onekey_firmware_version = onekey_firmware_version
+        self.onekey_firmware_hash = onekey_firmware_hash
+        self.onekey_firmware_build_id = onekey_firmware_build_id
+        self.onekey_serial_no = onekey_serial_no
 
 
 class LockDevice(protobuf.MessageType):
@@ -8635,6 +8697,176 @@ class NexaSignedTx(protobuf.MessageType):
         signature: "bytes",
     ) -> None:
         self.signature = signature
+
+
+class NostrGetPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11500
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class NostrPublicKey(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11501
+    FIELDS = {
+        1: protobuf.Field("publickey", "string", repeated=False, required=False),
+        2: protobuf.Field("npub", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        publickey: Optional["str"] = None,
+        npub: Optional["str"] = None,
+    ) -> None:
+        self.publickey = publickey
+        self.npub = npub
+
+
+class NostrSignEvent(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11502
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("event", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        event: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.event = event
+
+
+class NostrSignedEvent(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11503
+    FIELDS = {
+        1: protobuf.Field("event", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        event: "bytes",
+    ) -> None:
+        self.event = event
+
+
+class NostrSignSchnorr(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11508
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("hash", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        hash: "str",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.hash = hash
+
+
+class NostrSignedSchnorr(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11509
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
+
+
+class NostrEncryptMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11504
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("pubkey", "string", repeated=False, required=True),
+        3: protobuf.Field("msg", "string", repeated=False, required=True),
+        4: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        pubkey: "str",
+        msg: "str",
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.pubkey = pubkey
+        self.msg = msg
+        self.show_display = show_display
+
+
+class NostrEncryptedMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11505
+    FIELDS = {
+        1: protobuf.Field("msg", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        msg: "str",
+    ) -> None:
+        self.msg = msg
+
+
+class NostrDecryptMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11506
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("pubkey", "string", repeated=False, required=True),
+        3: protobuf.Field("msg", "string", repeated=False, required=True),
+        4: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        pubkey: "str",
+        msg: "str",
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.pubkey = pubkey
+        self.msg = msg
+        self.show_display = show_display
+
+
+class NostrDecryptedMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11507
+    FIELDS = {
+        1: protobuf.Field("msg", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        msg: "str",
+    ) -> None:
+        self.msg = msg
 
 
 class PolkadotGetAddress(protobuf.MessageType):
