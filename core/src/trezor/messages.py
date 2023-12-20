@@ -6567,6 +6567,166 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["NexaSignedTx"]:
             return isinstance(msg, cls)
 
+    class NostrGetPublicKey(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrGetPublicKey"]:
+            return isinstance(msg, cls)
+
+    class NostrPublicKey(protobuf.MessageType):
+        publickey: "str | None"
+        npub: "str | None"
+
+        def __init__(
+            self,
+            *,
+            publickey: "str | None" = None,
+            npub: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrPublicKey"]:
+            return isinstance(msg, cls)
+
+    class NostrSignEvent(protobuf.MessageType):
+        address_n: "list[int]"
+        event: "bytes"
+
+        def __init__(
+            self,
+            *,
+            event: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrSignEvent"]:
+            return isinstance(msg, cls)
+
+    class NostrSignedEvent(protobuf.MessageType):
+        event: "bytes"
+
+        def __init__(
+            self,
+            *,
+            event: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrSignedEvent"]:
+            return isinstance(msg, cls)
+
+    class NostrSignSchnorr(protobuf.MessageType):
+        address_n: "list[int]"
+        hash: "str"
+
+        def __init__(
+            self,
+            *,
+            hash: "str",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrSignSchnorr"]:
+            return isinstance(msg, cls)
+
+    class NostrSignedSchnorr(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrSignedSchnorr"]:
+            return isinstance(msg, cls)
+
+    class NostrEncryptMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        pubkey: "str"
+        msg: "str"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            pubkey: "str",
+            msg: "str",
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrEncryptMessage"]:
+            return isinstance(msg, cls)
+
+    class NostrEncryptedMessage(protobuf.MessageType):
+        msg: "str"
+
+        def __init__(
+            self,
+            *,
+            msg: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrEncryptedMessage"]:
+            return isinstance(msg, cls)
+
+    class NostrDecryptMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        pubkey: "str"
+        msg: "str"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            pubkey: "str",
+            msg: "str",
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrDecryptMessage"]:
+            return isinstance(msg, cls)
+
+    class NostrDecryptedMessage(protobuf.MessageType):
+        msg: "str"
+
+        def __init__(
+            self,
+            *,
+            msg: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NostrDecryptedMessage"]:
+            return isinstance(msg, cls)
+
     class PolkadotGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         prefix: "int"

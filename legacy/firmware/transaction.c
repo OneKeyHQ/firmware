@@ -545,6 +545,13 @@ bool tx_sign_bip340(const uint8_t *private_key, const uint8_t *hash,
   return ret;
 }
 
+bool tx_sign_bip340_internal(const uint8_t *private_key, const uint8_t *hash,
+                             uint8_t *out, pb_size_t *size) {
+  bool ret = (zkp_bip340_sign_digest(private_key, hash, out, NULL) == 0);
+  *size = ret ? 64 : 0;
+  return ret;
+}
+
 // tx methods
 bool tx_input_check_hash(Hasher *hasher, const TxInputType *input) {
   hasher_Update(hasher, (const uint8_t *)&input->address_n_count,

@@ -18,6 +18,8 @@
  */
 
 #include "util.h"
+#include <stdio.h>
+#include <string.h>
 
 inline void delay(uint32_t wait) {
   while (--wait > 0) __asm__("nop");
@@ -91,4 +93,32 @@ bool check_all_zeros(const void *data, int len) {
   }
 
   return (result == 0x00);
+}
+
+int hex2data(const char *hexStr, unsigned char *output,
+             unsigned int *outputLen) {
+  size_t len = strlen(hexStr);
+  if (len % 2 != 0) {
+    return -1;
+  }
+  size_t finalLen = len / 2;
+  *outputLen = finalLen;
+  for (size_t inIdx = 0, outIdx = 0; outIdx < finalLen; inIdx += 2, outIdx++) {
+    if ((hexStr[inIdx] - 48) <= 9 && (hexStr[inIdx + 1] - 48) <= 9) {
+      goto convert;
+    } else {
+      if (((hexStr[inIdx] - 65) <= 5 && (hexStr[inIdx + 1] - 65) <= 5) ||
+          ((hexStr[inIdx] - 97) <= 5 && (hexStr[inIdx + 1] - 97) <= 5)) {
+        goto convert;
+      } else {
+        *outputLen = 0;
+        return -1;
+      }
+    }
+  convert:
+    output[outIdx] =
+        (hexStr[inIdx] % 32 + 9) % 25 * 16 + (hexStr[inIdx + 1] % 32 + 9) % 25;
+  }
+  output[finalLen] = '\0';
+  return 0;
 }

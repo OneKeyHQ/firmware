@@ -500,6 +500,18 @@ enum MessageType {
     MessageType_NexaTxInputRequest = 11404 [(wire_out) = true];
     MessageType_NexaTxInputAck = 11405 [(wire_in) = true];
 
+    // Nostr
+    MessageType_NostrGetPublicKey = 11500 [(wire_in) = true];
+    MessageType_NostrPublicKey = 11501 [(wire_out) = true];
+    MessageType_NostrSignEvent = 11502 [(wire_in) = true];
+    MessageType_NostrSignedEvent = 11503 [(wire_out) = true];
+    MessageType_NostrEncryptMessage = 11504 [(wire_in) = true];
+    MessageType_NostrEncryptedMessage = 11505 [(wire_out) = true];
+    MessageType_NostrDecryptMessage = 11506 [(wire_in) = true];
+    MessageType_NostrDecryptedMessage = 11507 [(wire_out) = true];
+    MessageType_NostrSignSchnorr = 11508 [(wire_in) = true];
+    MessageType_NostrSignedSchnorr = 11509 [(wire_out) = true];
+
     //onekey
     MessageType_DeviceInfoSettings = 10001 [(wire_in) = true];
     MessageType_GetDeviceInfo = 10002 [(wire_in) = true];

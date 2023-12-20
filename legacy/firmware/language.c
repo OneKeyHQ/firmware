@@ -283,6 +283,8 @@ const char *languages[][2] = {
     // signing.c
     {"Decred script version does not match previous output", ""},  // msg
     // layout2.c
+    {"Decrypt Message", "解密消息"},
+    {"Decrypt Nostr Message", "解密 Nostr 消息"},
     {"Decrypt for:", "解密"},
     // layout2.c
     {"Decrypt value of this key?", "为该值解密"},
@@ -342,7 +344,9 @@ const char *languages[][2] = {
     // fsm_msg_common.h
     {"Do you want to", "请确认"},
     // layout2.c
+    {"Do you want to decrypt\nNostr message?", "确认要解密本次 Nostr 消息吗?"},
     {"Do you want to decrypt?", "请确认解密"},
+    {"Do you want to encrypt\nNostr message?", "确认要加密本次 Nostr 消息吗?"},
     // fsm_msg_common.h
     {"Do you want to set", "请确认设置"},
     // layout2.c
@@ -362,6 +366,8 @@ const char *languages[][2] = {
     // signing.c signing.c
     {"Encountered invalid prevhash", ""},  // msg
     // layout2.c
+    {"Encrypt Message", "加密消息"},
+    {"Encrypt Nostr Message", "加密 Nostr 消息"},
     {"Encrypt message?", "加密消息"},
     // layout2.c
     {"Encrypt value of this key?", "为这个值加密"},

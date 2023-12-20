@@ -910,19 +910,23 @@ bool hash_stage() {
       }
       break;
     case TX_HASH_BUILDER_IN_CERTIFICATES:
-      if (ada_signer.remainingCertificates > 0) {
-        msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-      }
+      msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
       break;
     case TX_HASH_BUILDER_IN_WITHDRAWALS:
       if (ada_signer.remainingWithdrawals > 0) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
+      } else {
+        ada_signer.state = TX_HASH_BUILDER_IN_AUX_DATA;
+        hash_stage();
       }
       break;
     case TX_HASH_BUILDER_IN_AUX_DATA:
       if (ada_signer.signertx.has_auxiliary_data &&
           ada_signer.tx_dict_items_count > 0) {
         msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
+      } else {
+        ada_signer.state = TX_HASH_BUILDER_IN_VALIDITY_INTERVAL_START;
+        hash_stage();
       }
       break;
     case TX_HASH_BUILDER_IN_VALIDITY_INTERVAL_START:
@@ -1007,6 +1011,12 @@ bool hash_stage() {
     //   break;
     default:
       break;
+  }
+
+  if (!ada_signer.is_finished && 0 == ada_signer.tx_dict_items_count &&
+      ada_signer.state != TX_HASH_BUILDER_FINISHED) {  // finish
+    msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
+    ada_signer.state = TX_HASH_BUILDER_FINISHED;
   }
 
   return true;
