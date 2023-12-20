@@ -111,7 +111,7 @@ const char *languages[][2] = {
     // layout2.c
     {"BLUETOOTH NAME:", "蓝牙名称:"},
     //
-    {"BLUETOOTH VERSION:", "蓝牙版本:"},
+    {"BLUETOOTH:", "蓝牙版本:"},
     //
     {"BOOTLOADER:", "BOOTLOADER版本:"},
     // layout2.c
@@ -267,6 +267,8 @@ const char *languages[][2] = {
     // ethereum.c
     {"Data length exceeds limit", ""},  // msg
     // layout2.c
+    {"Decrypt Message", "解密消息"},
+    {"Decrypt Nostr Message", "解密 Nostr 消息"},
     {"Decrypt for:", "解密"},
     // layout2.c
     {"Decrypt value of this key?", "为该值解密"},
@@ -324,6 +326,7 @@ const char *languages[][2] = {
     {"Do you want to", "请确认"},
     {"Do you want to change the\nhome screen?", "确定要更改主屏幕吗?"},
     // layout2.c
+    {"Do you want to decrypt\nNostr message?", "确认要解密本次 Nostr 消息吗?"},
     {"Do you want to decrypt?", "请确认解密"},
     // fsm_msg_common.h
     {"Do you want to disable\nUSB Lock?", "要禁用 USB 锁吗?"},
@@ -332,6 +335,7 @@ const char *languages[][2] = {
     {"Do you want to enable\nUSB Lock?", "要启用 USB 锁吗?"},
     {"Do you want to enable\npassphrase protection?",
      "要启用 passphrase 加密吗?"},
+    {"Do you want to encrypt\nNostr message?", "确认要加密本次 Nostr 消息吗?"},
     {"Do you want to restart", "确定要重启设备并进入更新"},
     // menu_list.c
     {"Do you want to restore the\ninput direction to default?",
@@ -359,6 +363,8 @@ const char *languages[][2] = {
     {"Enable Passphrase", "启用 Passphrase"},
     {"Enable USB Lock", "启用 USB 锁"},
     // layout2.c
+    {"Encrypt Message", "加密消息"},
+    {"Encrypt Nostr Message", "加密 Nostr 消息"},
     {"Encrypt message?", "加密消息"},
     // layout2.c
     {"Encrypt value of this key?", "为这个值加密"},
@@ -401,7 +407,7 @@ const char *languages[][2] = {
     {"Error computing multisig fingerprint", ""},
     //
     {"Exit", "退出"},
-    {"FIRMWARE VERSION:", "固件版本:"},
+    {"FIRMWARE:", "固件版本:"},
     // signing.c signing.c signing.c signing.c
     // signing.c
     // signing.c
@@ -523,7 +529,7 @@ const char *languages[][2] = {
     {"Next screen will show the\npassphrase!",
      "接下来, 将在屏幕中展示输\n入的 Passphrase"},
     {"Next, Follow the onscreen\ninstructions to set up your\nOneKey Classic.",
-     "接下来,请按照屏幕上的指令\n完成开始设置您的 \nOneKey Classic"},
+     "接下来,请按照屏幕上\n的指令开始设置您的 \nOneKey Classic"},
     {"Next, check the written ", "接下来, 请再次检查刚刚抄写\n的 "},
     {"Next, follow the guide and\ncheck words one by one.",
      "接下来, 请跟随引导, 逐一核\n对单词."},

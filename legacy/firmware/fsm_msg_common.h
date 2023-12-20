@@ -43,7 +43,8 @@ bool get_features(Features *resp) {
     strlcpy(resp->fw_vendor, "UNSAFE, DO NOT USE!", sizeof(resp->fw_vendor));
   }
   bool trezor_comp_mode = false;
-  if (config_getTrezorCompMode(&trezor_comp_mode)) {
+  config_getTrezorCompMode(&trezor_comp_mode);
+  if (trezor_comp_mode) {
     strlcpy(resp->vendor, "trezor.io", sizeof(resp->vendor));
   } else {
     strlcpy(resp->vendor, "onekey.so", sizeof(resp->vendor));

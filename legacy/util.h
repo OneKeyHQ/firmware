@@ -61,6 +61,9 @@ void data2hexaddr(const uint8_t *data, uint32_t len, char *str);
 
 void uint2str(uint32_t num, char *str);
 
+int hex2data(const char *hexStr, unsigned char *output,
+             unsigned int *outputLen);
+
 // defined in startup.s (or setup.c for emulator)
 extern void __attribute__((noreturn)) shutdown(void);
 
