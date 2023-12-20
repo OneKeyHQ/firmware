@@ -377,6 +377,10 @@ uint16_t _detectAddressType(const parser_context_t *c) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_12;
     memcpy(__polkadot_ticker, WESTEND_COIN_TICKER, 4);
     return 42;
+  } else if (!strncmp(polkadot_network, "joystream", 9)) {
+    __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES;
+    memcpy(__polkadot_ticker, JOY_COIN_TICKER, 4);
+    return 126;
   }
 
   return 42;

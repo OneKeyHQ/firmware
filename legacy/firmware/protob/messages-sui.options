@@ -2,7 +2,7 @@ SuiGetAddress.address_n                                   max_count:8
 SuiAddress.address                                        max_size:70
 
 SuiSignTx.address_n                                       max_count:8
-SuiSignTx.raw_tx                                          max_size:4096
+SuiSignTx.raw_tx                                          max_size:6144
 
 SuiSignedTx.public_key                                    max_size:32
 SuiSignedTx.signature                                     max_size:64

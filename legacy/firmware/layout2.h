@@ -295,9 +295,14 @@ bool layoutBlindSign(const char *chain_name, bool is_contract,
                      const char *key3, const char *value3);
 bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
                        const uint8_t *data, uint16_t len, bool is_ascii);
+bool layoutNostrEncryptMessage(const char *chain_name, bool verify,
+                               const char *signer, const uint8_t *data,
+                               uint16_t len, bool is_ascii);
 bool layoutSignHash(const char *chain_name, bool verify, const char *signer,
                     const char *domain_hash, const char *message_hash,
                     const char *tips);
+bool layoutSignSchnorrHash(const char *chain_name, const char *signer,
+                           const char *hash);
 bool layoutPaginated(const char *title, const uint8_t *data, uint16_t len);
 
 void onboarding(uint8_t key);

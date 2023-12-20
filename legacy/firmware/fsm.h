@@ -37,6 +37,7 @@
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
 #include "messages-nexa.pb.h"
+#include "messages-nostr.pb.h"
 #include "messages-polkadot.pb.h"
 #include "messages-ripple.pb.h"
 #include "messages-solana.pb.h"
@@ -300,5 +301,12 @@ void fsm_msgKaspaTxInputAck(const KaspaTxInputAck *msg);
 void fsm_msgNexaGetAddress(const NexaGetAddress *msg);
 void fsm_msgNexaSignTx(const NexaSignTx *msg);
 void fsm_msgNexaTxInputAck(const NexaTxInputAck *msg);
+
+// Nostr
+void fsm_msgNostrGetPublicKey(const NostrGetPublicKey *msg);
+void fsm_msgNostrSignEvent(const NostrSignEvent *msg);
+void fsm_msgNostrEncryptMessage(NostrEncryptMessage *msg);
+void fsm_msgNostrDecryptMessage(NostrDecryptMessage *msg);
+void fsm_msgNostrSignSchnorr(const NostrSignSchnorr *msg);
 
 #endif

@@ -335,3 +335,13 @@ if not utils.BITCOIN_ONLY:
     NexaSignedTx = 11403
     NexaTxInputRequest = 11404
     NexaTxInputAck = 11405
+    NostrGetPublicKey = 11500
+    NostrPublicKey = 11501
+    NostrSignEvent = 11502
+    NostrSignedEvent = 11503
+    NostrEncryptMessage = 11504
+    NostrEncryptedMessage = 11505
+    NostrDecryptMessage = 11506
+    NostrDecryptedMessage = 11507
+    NostrSignSchnorr = 11508
+    NostrSignedSchnorr = 11509
