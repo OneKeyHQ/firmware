@@ -1,0 +1,2 @@
+NervosGetAddress.address_n            max_count:8
+NervosGetAddress.encoded_network      max_size:1024

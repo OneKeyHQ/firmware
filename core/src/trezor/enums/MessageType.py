@@ -345,3 +345,5 @@ if not utils.BITCOIN_ONLY:
     NostrDecryptedMessage = 11507
     NostrSignSchnorr = 11508
     NostrSignedSchnorr = 11509
+    NervosGetAddress = 19999
+    NervosSignTx = 20000

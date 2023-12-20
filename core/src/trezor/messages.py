@@ -4620,6 +4620,24 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["EthereumGetAddress"]:
             return isinstance(msg, cls)
 
+    class NervosGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+        encoded_network: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+            encoded_network: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosGetAddress"]:
+            return isinstance(msg, cls)
+
     class EthereumAddress(protobuf.MessageType):
         address: "str | None"
 
@@ -4666,6 +4684,47 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["EthereumSignTx"]:
+            return isinstance(msg, cls)
+    
+    class NervosGetAddress(protobuf.MessageType):
+        MESSAGE_WIRE_TYPE = 58  # 假设的 Nervos 地址请求消息类型
+        FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+    }
+
+    class NervosSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        nonce: "bytes"
+        gas_price: "bytes"
+        gas_limit: "bytes"
+        to: "str"
+        value: "bytes"
+        data_initial_chunk: "bytes"
+        data_length: "int"
+        chain_id: "int"
+        tx_type: "int | None"
+        definitions: "NervosDefinitions | None"
+
+        def __init__(
+            self,
+            *,
+            gas_price: "bytes",
+            gas_limit: "bytes",
+            chain_id: "int",
+            address_n: "list[int] | None" = None,
+            nonce: "bytes | None" = None,
+            to: "str | None" = None,
+            value: "bytes | None" = None,
+            data_initial_chunk: "bytes | None" = None,
+            data_length: "int | None" = None,
+            tx_type: "int | None" = None,
+            definitions: "NervosDefinitions | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosSignTx"]:
             return isinstance(msg, cls)
 
     class EthereumSignTxEIP1559(protobuf.MessageType):

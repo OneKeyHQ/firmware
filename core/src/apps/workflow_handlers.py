@@ -116,6 +116,12 @@ def _find_message_handler_module(msg_type: int) -> str:
             return "apps.ethereum.verify_message"
         if msg_type == MessageType.EthereumSignTypedData:
             return "apps.ethereum.sign_typed_data"
+        
+        # nervos
+        if msg_type == MessageType.NervosGetAddress:
+            return "apps.nervos.get_address"
+        if msg_type == MessageType.NervosSignTx:
+            return "apps.nervos.sign_tx"
 
         # monero
         if msg_type == MessageType.MoneroGetAddress:

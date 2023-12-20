@@ -138,6 +138,9 @@ void fsm_msgEthereumSignMessage(const EthereumSignMessage *msg);
 void fsm_msgEthereumVerifyMessage(const EthereumVerifyMessage *msg);
 void fsm_msgEthereumSignTypedHash(const EthereumSignTypedHash *msg);
 
+// nervos
+void fsm_msgNervosGetAddress(const NervosGetAddress *msg);
+
 // ethereum onekey
 void fsm_msgEthereumGetAddressOneKey(const EthereumGetAddressOneKey *msg);
 void fsm_msgEthereumGetPublicKeyOneKey(const EthereumGetPublicKeyOneKey *msg);

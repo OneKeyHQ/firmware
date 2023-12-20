@@ -206,6 +206,10 @@ enum MessageType {
     MessageType_EthereumTypedDataSignature = 469 [(wire_out) = true];
     MessageType_EthereumSignTypedHash = 470 [(wire_in) = true];
 
+    //Nervos
+    MessageType_NervosGetAddress = 19999[(wire_in) = true];    //test code 
+    MessageType_EthereumSignTx = 20000 [(wire_in) = true];        //test code
+
     // Ethereum ONEKEY
     MessageType_EthereumGetPublicKeyOneKey = 20100 [(wire_in) = true];
     MessageType_EthereumPublicKeyOneKey = 20101 [(wire_out) = true];

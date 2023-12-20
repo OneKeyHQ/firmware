@@ -207,3 +207,30 @@ def check_common_fields(msg: EthereumSignTxAny) -> None:
 
     if msg.chain_id == 0:
         raise DataError("Chain ID out of bounds")
+    
+####以下为对应Nervos的签名逻辑(测试代码)
+@with_keychain_from_chain_id  
+async def sign_nervos_tx(
+    ctx: Context, msg: NervosSignTx, keychain: Keychain
+) -> NervosTxAck:
+    # Nervos 交易的处理逻辑
+
+
+    # 创建 Nervos 交易
+    nervos_digest = create_nervos_digest(msg)
+
+    # 签名
+    signature = sign_digest_nervos(msg, keychain, nervos_digest)
+
+    # 创建并返回响应消息
+    return NervosTxAck(signature=signature)
+
+def create_nervos_digest(msg: NervosSignTx) -> bytes:
+    # 创建并返回 Nervos 交易
+    # 这需要根据 Nervos 的具体交易格式来实现
+    # ...
+    pass
+
+def sign_digest_nervos(msg: NervosSignTx, keychain: Keychain, digest: bytes) -> bytes:
+    # 使用摘要签名 Nervos 交易
+    pass

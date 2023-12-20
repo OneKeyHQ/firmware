@@ -6080,6 +6080,23 @@ class EthereumGetAddress(protobuf.MessageType):
         self.encoded_network = encoded_network
 
 
+class NervosGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 58  # 假设的 Nervos 地址请求消息类型
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
 class EthereumAddress(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 57
     FIELDS = {
