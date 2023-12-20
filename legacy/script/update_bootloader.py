@@ -84,7 +84,6 @@ def load_hash_entries(txt_file) -> dict[bytes, str]:
 
 def regenerate_bl_check(
     hash_entries: t.Iterable[tuple[bytes, str]],
-    version,
     begin,
     end,
 ) -> None:
@@ -103,7 +102,7 @@ def regenerate_bl_check(
                 BL_CHECK_PATTERN.format(
                     line1=cstrify(digest[:16]),
                     line2=cstrify(digest[16:]),
-                    version=version,
+                    version=comment[0:5],
                     comment=comment,
                 )
             )
@@ -162,7 +161,7 @@ def main(comment: str | None, qa: bool) -> None:
         click.echo("Inserted new entry: " + comment)
 
     # rewrite bl_check.c
-    regenerate_bl_check(entries.items(), load_version(BOOTLOADER_VERSION), begin, end)
+    regenerate_bl_check(entries.items(), begin, end)
     click.echo("Regenerated bl_check.c")
 
     # overwrite bootloader.dat

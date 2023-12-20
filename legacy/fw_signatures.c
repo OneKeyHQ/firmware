@@ -173,8 +173,10 @@ int signatures_ok(const image_header *hdr, uint8_t store_fingerprint[32],
     pubkey_ptr = pubkey_v3;
     compute_firmware_fingerprint_for_verifymessage(hdr, hash);
   } else {
+#if !BOOTLOADER_QA
     pubkey_ptr = pubkey_v3_old;
     compute_firmware_fingerprint(hdr, hash);
+#endif
   }
 
   if (store_fingerprint) {
