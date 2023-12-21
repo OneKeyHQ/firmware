@@ -14,5 +14,6 @@
 #define KUSAMA_COIN_TICKER " KSM"
 #define WESTEND_COIN_TICKER " WND"
 #define ASTAR_COIN_TICKER " ASTR"
+#define JOY_COIN_TICKER " JOY"
 
 #endif

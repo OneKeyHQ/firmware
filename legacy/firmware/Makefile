@@ -135,6 +135,8 @@ OBJS += ada.o
 OBJS += cbor.o
 OBJS += kaspa.o
 OBJS += nexa.o
+OBJS += nostr.o
+OBJS += base64.o
 endif
 
 OBJS += debug.o
@@ -234,6 +236,7 @@ OBJS += protob/messages-polkadot.pb.o
 OBJS += protob/messages-cardano.pb.o
 OBJS += protob/messages-kaspa.pb.o
 OBJS += protob/messages-nexa.pb.o
+OBJS += protob/messages-nostr.pb.o
 endif
 
 OPTFLAGS ?= -Os

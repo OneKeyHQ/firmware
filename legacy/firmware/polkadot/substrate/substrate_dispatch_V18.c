@@ -32,6 +32,47 @@ __Z_INLINE parser_error_t _readMethod_balances_transfer_all_V18(
   return parser_ok;
 }
 
+parser_error_t _readAccountIdLookupOfT_joy(parser_context_t* c,
+                                           pd_AccountIdLookupOfT_V18_t* v) {
+  CHECK_INPUT()
+  CHECK_ERROR(_readAccountId_V18(c, &v->id))
+  return parser_ok;
+}
+
+__Z_INLINE parser_error_t _readMethod_balances_transfer_joy(
+    parser_context_t* c, pd_balances_transfer_V18_t* m) {
+  m->dest.value = 0;
+  CHECK_ERROR(_readAccountIdLookupOfT_joy(c, &m->dest))
+  CHECK_ERROR(_readCompactBalance(c, &m->amount))
+  return parser_ok;
+}
+
+__Z_INLINE parser_error_t _readMethod_balances_force_transfer_joy(
+    parser_context_t* c, pd_balances_force_transfer_V18_t* m) {
+  m->source.value = 0;
+  CHECK_ERROR(_readAccountIdLookupOfT_joy(c, &m->source))
+  m->dest.value = 0;
+  CHECK_ERROR(_readAccountIdLookupOfT_joy(c, &m->dest))
+  CHECK_ERROR(_readCompactBalance(c, &m->amount))
+  return parser_ok;
+}
+
+__Z_INLINE parser_error_t _readMethod_balances_transfer_keep_alive_joystream(
+    parser_context_t* c, pd_balances_transfer_keep_alive_V18_t* m) {
+  m->dest.value = 0;
+  CHECK_ERROR(_readAccountIdLookupOfT_joy(c, &m->dest))
+  CHECK_ERROR(_readCompactBalance(c, &m->amount))
+  return parser_ok;
+}
+
+__Z_INLINE parser_error_t _readMethod_balances_transfer_all_joy(
+    parser_context_t* c, pd_balances_transfer_all_V18_t* m) {
+  m->dest.value = 0;
+  CHECK_ERROR(_readAccountIdLookupOfT_joy(c, &m->dest))
+  CHECK_ERROR(_readbool(c, &m->keep_alive))
+  return parser_ok;
+}
+
 parser_error_t _readMethod_V18(parser_context_t* c, uint8_t moduleIdx,
                                uint8_t callIdx, pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
@@ -134,6 +175,29 @@ parser_error_t _readMethod_astar(parser_context_t* c, uint8_t moduleIdx,
       break;
     case 7940: /* module 31 call 4 */
       CHECK_ERROR(_readMethod_balances_transfer_all_V18(
+          c, &method->basic.balances_transfer_all_V18))
+      break;
+    default:
+      return parser_unexpected_callIndex;
+  }
+
+  return parser_ok;
+}
+
+parser_error_t _readMethod_joystream(parser_context_t* c, uint8_t moduleIdx,
+                                     uint8_t callIdx, pd_Method_V18_t* method) {
+  uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
+  switch (callPrivIdx) {
+    case 1280: /* module 5 call 0 */
+      CHECK_ERROR(_readMethod_balances_transfer_joy(
+          c, &method->nested.balances_transfer_V18))
+      break;
+    case 1283: /* module 5 call 3 */
+      CHECK_ERROR(_readMethod_balances_transfer_keep_alive_joystream(
+          c, &method->nested.balances_transfer_keep_alive_V18))
+      break;
+    case 1284: /* module 5 call 4 */
+      CHECK_ERROR(_readMethod_balances_transfer_all_joy(
           c, &method->basic.balances_transfer_all_V18))
       break;
     default:

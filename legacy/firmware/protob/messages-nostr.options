@@ -1,0 +1,21 @@
+NostrGetPublicKey.address_n                               max_count:8
+NostrPublicKey.publickey                                  max_size:65
+NostrPublicKey.npub                                       max_size:92
+
+NostrSignEvent.address_n                                  max_count:8
+NostrSignEvent.event                                      max_size:2048
+NostrSignedEvent.event                                    max_size:512
+
+NostrSignSchnorr.address_n                                max_count:8
+NostrSignSchnorr.hash                                     max_size:65
+NostrSignedSchnorr.signature                              max_size:65
+
+NostrEncryptMessage.address_n                             max_count:8
+NostrEncryptMessage.pubkey                                max_size:92
+NostrEncryptMessage.msg                                   max_size:1563
+NostrEncryptedMessage.msg                                 max_size:1563
+
+NostrDecryptMessage.address_n                             max_count:8
+NostrDecryptMessage.pubkey                                max_size:92
+NostrDecryptMessage.msg                                   max_size:1563
+NostrDecryptedMessage.msg                                 max_size:1563

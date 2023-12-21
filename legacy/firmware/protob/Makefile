@@ -23,7 +23,7 @@ PROTO_NAMES = messages messages-bitcoin messages-common messages-crypto messages
 	messages-management messages-nem messages-stellar messages-solana \
 	messages-starcoin messages-tron messages-aptos messages-near messages-conflux \
 	messages-algorand messages-ripple messages-sui messages-filecoin messages-cosmos \
-	messages-polkadot messages-cardano messages-kaspa messages-nexa
+	messages-polkadot messages-cardano messages-kaspa messages-nexa messages-nostr
 
 PROTO_OPTIONS = $(PROTO_NAMES:=.options)
 PROTO_COMPILED = $(PROTO_NAMES:=.pb)
