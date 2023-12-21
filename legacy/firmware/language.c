@@ -529,7 +529,7 @@ const char *languages[][2] = {
     {"Next screen will show the\npassphrase!",
      "接下来, 将在屏幕中展示输\n入的 Passphrase"},
     {"Next, Follow the onscreen\ninstructions to set up your\nOneKey Classic.",
-     "接下来,请按照屏幕上\n的指令开始设置您的 \nOneKey Classic"},
+     "接下来, 请按照屏幕上的指令\n开始设置 OneKey Classic"},
     {"Next, check the written ", "接下来, 请再次检查刚刚抄写\n的 "},
     {"Next, follow the guide and\ncheck words one by one.",
      "接下来, 请跟随引导, 逐一核\n对单词."},
@@ -721,6 +721,7 @@ const char *languages[][2] = {
     {"Sign at you own risk", "签名可能存在安全风险,请谨慎操作"},
     // layout2.c
     {"Sign message?", "签名消息"},
+    {"Signed by:", "签名者:"},
     {"Signer:", "签名者:"},
     // ethereum.c ethereum.c ethereum.c ethereum.c lisk.c
     {"Signing", "签名中"},
@@ -974,6 +975,7 @@ const char *languages[][2] = {
     {"lock your Trezor?", "锁定设备"},
     // ethereum.c ethereum.c
     {"message", "消息"},
+    {"message?", "消息吗?"},
     // layout2.c
     {"mine", "我的"},
     {"minute", "分钟"},

@@ -5126,7 +5126,7 @@ bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
   uint8_t max_index = 3;
   uint8_t key = KEY_NULL;
   char title[64] = {0};
-  char title_tx[64] = {0};
+  char title_tx[128] = {0};
   char lines[21] = {0};
   uint32_t rowlen = 21;
   const char **str;
@@ -5149,8 +5149,8 @@ bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
     strcat(title, chain_name);
     strcat(title, " ");
     strcat(title, _("Message"));
-    snprintf(title_tx, 64, "%s%s %s?", _("Do you want to sign this\n"),
-             chain_name, _("message"));
+    snprintf(title_tx, 128, "%s%s %s", _("Do you want to sign this\n"),
+             chain_name, _("message?"));
   }
 
   ButtonRequest resp = {0};
