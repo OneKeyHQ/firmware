@@ -69,6 +69,7 @@ __all__ = (
     "confirm_sign_typed_hash",
     "confirm_polkadot_balances",
     "should_show_details",
+    "confirm_nostrmessage",
 )
 
 
@@ -929,12 +930,16 @@ async def confirm_signverify(
     address: str,
     verify: bool,
     evm_chain_id: int | None = None,
+    title: str | None = None,
 ) -> None:
     if verify:
         header = _(i18n_keys.TITLE__VERIFY_STR_MESSAGE).format(coin)
         br_type = "verify_message"
     else:
-        header = _(i18n_keys.TITLE__SIGN_STR_MESSAGE).format(coin)
+        if title is not None:
+            header = title
+        else:
+            header = _(i18n_keys.TITLE__SIGN_STR_MESSAGE).format(coin)
         br_type = "sign_message"
     from trezor.lvglui.scrs.template import Message
 
@@ -1949,4 +1954,32 @@ async def confirm_tron_common(
     screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_tron_common", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_nostrmessage(
+    ctx: wire.GenericContext,
+    message: str,
+    address: str,
+    encrypt: bool,
+    title: str,
+) -> None:
+    from trezor.lvglui.scrs.template import MessageNostr
+
+    header = title
+    br_type = "sign_message"
+    await raise_if_cancelled(
+        interact(
+            ctx,
+            MessageNostr(
+                header,
+                address,
+                message,
+                encrypt,
+                ctx.primary_color,
+                ctx.icon_path,
+            ),
+            br_type,
+            ButtonRequestType.Other,
+        )
     )

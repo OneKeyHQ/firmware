@@ -318,6 +318,17 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.NexaSignTx:
             return "apps.nexa.sign_tx"
 
+        if msg_type == MessageType.NostrGetPublicKey:
+            return "apps.nostr.get_public_key"
+        if msg_type == MessageType.NostrSignEvent:
+            return "apps.nostr.sign_event"
+        if msg_type == MessageType.NostrEncryptMessage:
+            return "apps.nostr.encrypt"
+        if msg_type == MessageType.NostrDecryptMessage:
+            return "apps.nostr.decrypt"
+        if msg_type == MessageType.NostrSignSchnorr:
+            return "apps.nostr.schnorr"
+
     raise ValueError
 
 
