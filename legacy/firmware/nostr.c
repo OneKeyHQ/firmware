@@ -49,6 +49,12 @@ bool nostr_sign_event(const NostrSignEvent *msg, const HDNode *node,
   int tlen;
 
   nostr_get_pubkey(npub, node->public_key + 1);
+  layoutVerifyAddress(NULL, npub);
+  if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    layoutHome();
+    return false;
+  }
   if (!fsm_layoutSignMessage(msg->event.bytes, msg->event.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
@@ -159,10 +165,19 @@ bool nostr_encrypt_message(NostrEncryptMessage *msg, const HDNode *node,
                            NostrEncryptedMessage *resp) {
   uint8_t shared_secret[33] = {0};
   uint8_t pk[33] = {0};
+  char npub[92] = {0};
   unsigned int pk_len = 0;
   pk[0] = 0x02;
 
+  nostr_get_pubkey(npub, node->public_key + 1);
+
   if (msg->has_show_display && msg->show_display) {
+    layoutVerifyAddress(NULL, npub);
+    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return false;
+    }
     if (!fsm_layoutSignMessage_ex(_("Encrypt Message"),
                                   (const uint8_t *)msg->msg,
                                   strlen(msg->msg))) {
@@ -214,12 +229,21 @@ bool nostr_decrypt_message(NostrDecryptMessage *msg, const HDNode *node,
                            NostrDecryptedMessage *resp) {
   uint8_t shared_secret[33] = {0};
   uint8_t pk[33] = {0};
+  char npub[92] = {0};
   uint8_t ct[1563] = {0};
   uint8_t iv[16] = {0};
   unsigned int pk_len = 0;
   int ct_len, ret, pad_val;
 
+  nostr_get_pubkey(npub, node->public_key + 1);
+
   if (msg->has_show_display && msg->show_display) {
+    layoutVerifyAddress(NULL, npub);
+    if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      layoutHome();
+      return false;
+    }
     if (!fsm_layoutSignMessage_ex(_("Decrypt Message"),
                                   (const uint8_t *)msg->msg,
                                   strlen(msg->msg))) {

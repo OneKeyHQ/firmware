@@ -40,7 +40,7 @@ void polkadot_get_address_from_public_key(const uint8_t *public_key,
   crypto_SS58EncodePubkey((uint8_t *)address, 64, addressType, public_key);
 }
 
-static bool layoutPolkadotSign(void) {
+static bool layoutPolkadotSign(char *signer) {
   const struct font_desc *font = find_cur_font();
   bool result = false;
   int index = 1;
@@ -59,7 +59,7 @@ static bool layoutPolkadotSign(void) {
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
   polkadot_tx_getNumItems(&numItems);
-  max_index = numItems - 1;
+  max_index = numItems;
 refresh_menu:
   layoutSwipe();
   oledClear();
@@ -76,7 +76,7 @@ refresh_menu:
     for (int i = 0; i < OLED_HEIGHT; i += 3) {
       oledDrawPixel(OLED_WIDTH - 1, i);
     }
-    for (int i = 0; i < OLED_HEIGHT / (numItems - 1); i++) {
+    for (int i = 0; i < OLED_HEIGHT / numItems; i++) {
       oledDrawPixel(OLED_WIDTH - 1, i);
       oledDrawPixel(OLED_WIDTH - 2, i);
     }
@@ -86,16 +86,15 @@ refresh_menu:
     oledDrawBitmap((OLED_WIDTH - bmp_btn_down.width) / 2, 0, &bmp_btn_up);
     y += bmp_btn_up.height + 1;
 
-    oledDrawStringAdapter(0, y, _(token_key), FONT_STANDARD);
+    oledDrawStringAdapter(0, y, _("Signed by:"), FONT_STANDARD);
     y += font->pixel + 5;
-    oledDrawStringAdapter(0, y, token_val, FONT_STANDARD);
+    oledDrawStringAdapter(0, y, signer, FONT_STANDARD);
 
     // scrollbar
     for (int i = 0; i < OLED_HEIGHT; i += 3) {
       oledDrawPixel(OLED_WIDTH - 1, i);
     }
-    for (int i = (index - 1) * OLED_HEIGHT / (numItems - 1); i < OLED_HEIGHT;
-         i++) {
+    for (int i = (index - 1) * OLED_HEIGHT / numItems; i < OLED_HEIGHT; i++) {
       oledDrawPixel(OLED_WIDTH - 1, i);
       oledDrawPixel(OLED_WIDTH - 2, i);
     }
@@ -114,8 +113,8 @@ refresh_menu:
     for (int i = 0; i < OLED_HEIGHT; i += 3) {
       oledDrawPixel(OLED_WIDTH - 1, i);
     }
-    for (int i = (index - 1) * OLED_HEIGHT / (numItems - 1);
-         i < (index)*OLED_HEIGHT / (numItems - 1); i++) {
+    for (int i = (index - 1) * OLED_HEIGHT / numItems;
+         i < (index)*OLED_HEIGHT / numItems; i++) {
       oledDrawPixel(OLED_WIDTH - 1, i);
       oledDrawPixel(OLED_WIDTH - 2, i);
     }
@@ -204,7 +203,7 @@ bool polkadot_sign_tx(const PolkadotSignTx *msg, const HDNode *node,
     layoutHome();
     return false;
   } else {
-    if (!layoutPolkadotSign()) {
+    if (!layoutPolkadotSign(signer)) {
       fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
       layoutHome();
       return false;

@@ -78,7 +78,7 @@ parser_error_t _readMethod_V18(parser_context_t* c, uint8_t moduleIdx,
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
   switch (callPrivIdx) {
-    case 1280: /* module 5 call 0 */
+    case 1287: /* module 5 call 0 */
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
       break;
@@ -106,7 +106,7 @@ parser_error_t _readMethod_V18_kusama(parser_context_t* c, uint8_t moduleIdx,
                                       pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
   switch (callPrivIdx) {
-    case 1024: /* module 4 call 0 */
+    case 1031: /* module 4 call 0 */
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
       break;
@@ -161,7 +161,7 @@ parser_error_t _readMethod_astar(parser_context_t* c, uint8_t moduleIdx,
                                  uint8_t callIdx, pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
   switch (callPrivIdx) {
-    case 7936: /* module 31 call 0 */
+    case 7943: /* module 31 call 0 */
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
       break;
