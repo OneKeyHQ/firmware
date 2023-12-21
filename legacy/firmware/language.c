@@ -559,7 +559,7 @@ const char *languages[][2] = {
     // ethereum.c
     {"Message Hash", "消息哈希值"},
     // layout2.c lisk.c
-    {"Message signed by:", ""},
+    {"Message signed by:", "消息签名者:"},
     // messages.c
     {"Message too big", ""},
     // fsm_msg_coin.h fsm_msg_ethereum.h fsm_msg_lisk.h
@@ -864,6 +864,8 @@ const char *languages[][2] = {
     {"Sign binary message?", ""},
     // layout2.c
     {"Sign message?", "签名消息"},
+    {"Signed by", "签名者"},
+    {"Signed by:", "签名者:"},
     // ethereum.c ethereum.c ethereum.c ethereum.c lisk.c
     {"Signing", "签名中"},
     // signing.c
