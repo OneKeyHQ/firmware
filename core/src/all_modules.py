@@ -665,6 +665,18 @@ apps.nexa.get_address
 import apps.nexa.get_address
 apps.nexa.sign_tx
 import apps.nexa.sign_tx
+apps.nostr
+import apps.nostr
+apps.nostr.decrypt
+import apps.nostr.decrypt
+apps.nostr.encrypt
+import apps.nostr.encrypt
+apps.nostr.get_public_key
+import apps.nostr.get_public_key
+apps.nostr.schnorr
+import apps.nostr.schnorr
+apps.nostr.sign_event
+import apps.nostr.sign_event
 apps.polkadot
 import apps.polkadot
 apps.polkadot.codec

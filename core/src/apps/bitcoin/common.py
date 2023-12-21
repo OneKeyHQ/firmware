@@ -109,6 +109,11 @@ def bip340_sign(node: bip32.HDNode, digest: bytes) -> bytes:
     return bip340.sign(output_private_key, digest)
 
 
+def bip340_sign_internal(node: bip32.HDNode, digest: bytes) -> bytes:
+    internal_private_key = node.private_key()
+    return bip340.sign(internal_private_key, digest)
+
+
 def ecdsa_hash_pubkey(pubkey: bytes, coin: CoinInfo) -> bytes:
     if pubkey[0] == 0x04:
         ensure(len(pubkey) == 65)  # uncompressed format

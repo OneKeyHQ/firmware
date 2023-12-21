@@ -1969,3 +1969,61 @@ class TronAssetFreeze(FullSizeWindow):
             self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__LOCK_COLON), lock
             )
+
+
+class MessageNostr(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        address,
+        message,
+        encrypt,
+        primary_color,
+        icon_path,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.ACTION__ENCRYPT) if encrypt else _(i18n_keys.ACTION__DECRYPT),
+            _(i18n_keys.BUTTON__CANCEL),
+            anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
+        )
+        self.primary_color = primary_color
+        self.container = ContainerFlexCol(
+            self.content_area, self.title, pos=(0, 40), padding_row=8
+        )
+        self.long_message = False
+        if len(message) > 80:
+            self.message = message
+            self.long_message = True
+            self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
+        else:
+            self.item2 = DisplayItemNoBgc(
+                self.container, _(i18n_keys.LIST_KEY__MESSAGE__COLON), message
+            )
+        self.item1 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__PUBLIC_KEY__COLON), address
+        )
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_yes:
+                if self.long_message:
+                    PageAbleMessage(
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
+                        self.message,
+                        self.channel,
+                        primary_color=self.primary_color,
+                        confirm_text=_(i18n_keys.BUTTON__SIGN),
+                    )
+                    self.destroy()
+                else:
+                    self.show_unload_anim()
+                    self.channel.publish(1)
+            elif target == self.btn_no:
+                self.show_dismiss_anim()
+                self.channel.publish(0)

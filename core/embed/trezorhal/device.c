@@ -662,9 +662,6 @@ void device_burnin_test(bool force) {
           ;
       }
 
-
-
-    
       if (atca_random(rand_buffer)) {
         se_err++;
         if (se_err == 10) {

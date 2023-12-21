@@ -52,7 +52,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 1280:
+        if callPrivIdx == 1287:
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 0)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -80,7 +80,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 1024:
+        if callPrivIdx == 1031:
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 2)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -136,7 +136,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 7936:
+        if callPrivIdx == 7943:
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 5)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -160,6 +160,28 @@ class Transaction:
         return tx
 
     @staticmethod
+    def deserialize_joy(
+        rawtx: codec.base.ScaleBytes, callPrivIdx: int
+    ) -> "Transaction":
+        tx = TransactionUnknown(rawtx)
+        if callPrivIdx == 1280:
+            dest = helper.ss58_encode(rawtx.get_next_bytes(32), 126)
+            obj = codec.types.Compact(rawtx)
+            balance = obj.decode(check_remaining=False)
+            tx = BalancesTransfer(dest, balance)
+        elif callPrivIdx == 1283:
+            dest = helper.ss58_encode(rawtx.get_next_bytes(32), 126)
+            obj = codec.types.Compact(rawtx)
+            balance = obj.decode(check_remaining=False)
+            tx = BalancesTransferKeepAlive(dest, balance)
+        elif callPrivIdx == 1284:
+            dest = helper.ss58_encode(rawtx.get_next_bytes(32), 126)
+            keep_alive = rawtx.get_next_bytes(1)[0]
+            tx = BalancesTransferAll(dest, keep_alive)
+
+        return tx
+
+    @staticmethod
     def deserialize(raw_tx: bytes, network: str) -> "Transaction":
         rawtx = codec.base.ScaleBytes(raw_tx)
         moduleIdx = rawtx.get_next_bytes(1)
@@ -175,6 +197,8 @@ class Transaction:
             tx = Transaction.deserialize_westend(rawtx, callPrivIdx)
         elif network == "astar":
             tx = Transaction.deserialize_astar(rawtx, callPrivIdx)
+        elif network == "joystream":
+            tx = Transaction.deserialize_joy(rawtx, callPrivIdx)
         else:
             tx = TransactionUnknown(raw_tx)
 
@@ -213,7 +237,7 @@ class TransactionUnknown(Transaction):
     ) -> None:
         from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
-        await confirm_blind_sign_common(ctx, sender, self.data.data)
+        await confirm_blind_sign_common(ctx, sender, self.data)
 
 
 class BalancesTransfer(Transaction):

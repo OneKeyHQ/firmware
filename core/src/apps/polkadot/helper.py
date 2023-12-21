@@ -7,10 +7,12 @@ from trezor.lvglui.scrs import lv
 from . import (
     ICON,
     ICON_ASTAR,
+    ICON_JOY,
     ICON_KSM,
     ICON_WESTEND,
     PRIMARY_COLOR,
     PRIMARY_COLOR_ASTAR,
+    PRIMARY_COLOR_JOY,
     PRIMARY_COLOR_KSM,
     PRIMARY_COLOR_WESTEND,
 )
@@ -24,6 +26,7 @@ POLKADOT_ADDRESS_TYPES = [
     ["kusama", 2],
     ["westend", 42],
     ["astar", 5],
+    ["joystream", 126],
 ]
 
 COIN_AMOUNT_DECIMAL_PLACES = 10
@@ -33,6 +36,7 @@ POLKADOT_TICKER = "DOT"
 KUSAMA_COIN_TICKER = "KSM"
 WESTEND_COIN_TICKER = "WND"
 ASTAR_COIN_TICKER = "ASTR"
+JOY_COIN_TICKER = "JOY"
 
 
 def ss58_encode(address: bytes, ss58_format: int = 42) -> str:
@@ -100,6 +104,11 @@ def update_chain_res(ctx: Context, network: str) -> tuple[str, str, int]:
         chain_name = "Astar"
         symbol = ASTAR_COIN_TICKER
         decimal = COIN_AMOUNT_DECIMAL_PLACES_18
+    elif network == "joystream":
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR_JOY), ICON_JOY
+        chain_name = "Joystream"
+        symbol = JOY_COIN_TICKER
+        decimal = COIN_AMOUNT_DECIMAL_PLACES
     else:
         ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         chain_name = "UNKN Chain"
