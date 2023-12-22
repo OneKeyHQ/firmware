@@ -1439,7 +1439,11 @@ uint8_t layoutAddress(const char *address, const char *address_type,
         if (address_type) {
           oledDrawStringAdapter(0, 13, address_type, FONT_STANDARD);
         } else {
-          oledDrawStringAdapter(0, 13, _("Address:"), FONT_STANDARD);
+          if (address && (memcmp(address, "npub", 4) == 0)) {
+            oledDrawStringAdapter(0, 13, _("Public Key:"), FONT_STANDARD);
+          } else {
+            oledDrawStringAdapter(0, 13, _("Address:"), FONT_STANDARD);
+          }
         }
         oledDrawStringAdapter(0, 13 + 1 * 10, str[0], FONT_STANDARD);
         oledDrawStringAdapter(0, 13 + 2 * 10, str[1], FONT_STANDARD);
