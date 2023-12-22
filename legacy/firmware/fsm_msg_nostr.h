@@ -47,9 +47,8 @@ void fsm_msgNostrGetPublicKey(const NostrGetPublicKey *msg) {
 
   if (msg->has_show_display && msg->show_display) {
     char desc[32] = {0};
-    strcat(desc, "Nostr");
-    strcat(desc, " ");
-    strcat(desc, _("Address:"));
+    strcat(desc, "Nostr ");
+    strcat(desc, _("Public Key"));
     if (!fsm_layoutAddress(resp->npub, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;

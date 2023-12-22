@@ -230,8 +230,11 @@ const char* _getMethod_Name_V18(uint8_t moduleIdx, uint8_t callIdx) {
 
   switch (callPrivIdx) {
     case 1280: /* module 5 call 0 */
+    case 1287:
     case 1024:
+    case 1031:
     case 7936:
+    case 7943:
       return STR_ME_TRANSFER;
     case 1282: /* module 5 call 2 */
     case 1026:
@@ -266,8 +269,11 @@ uint8_t _getMethod_NumItems_V18(uint8_t moduleIdx, uint8_t callIdx) {
 
   switch (callPrivIdx) {
     case 1280: /* module 5 call 0 */
+    case 1287:
     case 1024:
+    case 1031:
     case 7936:
+    case 7943:
       return 2;
     case 1282: /* module 5 call 2 */
     case 1026:
@@ -294,8 +300,11 @@ const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
 
   switch (callPrivIdx) {
     case 1280: /* module 5 call 0 */
+    case 1287:
     case 1024:
+    case 1031:
     case 7936:
+    case 7943:
       switch (itemIdx) {
         case 0:
           return STR_IT_amount;
@@ -354,8 +363,11 @@ parser_error_t _getMethod_ItemValue_V18(pd_Method_V18_t* m, uint8_t moduleIdx,
 
   switch (callPrivIdx) {
     case 1280: /* module 5 call 0 */
+    case 1287: /* module 5 call 0 */
     case 1024: /* module 5 call 0 */
+    case 1031: /* module 5 call 0 */
     case 7936: /* module 5 call 0 */
+    case 7943:
       switch (itemIdx) {
         case 0: /* balances_transfer_V18 - amount */;
           return _toStringCompactBalance(
@@ -439,8 +451,11 @@ bool _getMethod_IsNestingSupported_V18(uint8_t moduleIdx, uint8_t callIdx) {
 
   switch (callPrivIdx) {  // Balances & BlindSign
     case 1280:            /* module 5 call 0 */
+    case 1287:            /* module 5 call 0 */
     case 1024:            /* module 5 call 0 */
+    case 1031:            /* module 5 call 0 */
     case 7936:            /* module 5 call 0 */
+    case 7943:
     case 1282:
     case 1026:
     case 7938:
