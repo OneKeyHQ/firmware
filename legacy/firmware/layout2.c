@@ -1316,10 +1316,17 @@ void layoutAddress(const char *address, const char *desc, bool qrcode,
       }
     }
 #if ONEKEY_MINI
-    layoutTransInformation(&bmp_button_up, NULL, NULL, &bmp_button_forward,
-                           NULL, _("OK"), _("Verify Address"), _("[QR Code]"),
-                           NULL, false, true,
-                           ignorecase ? address_upcase : address);
+    if (address && (memcmp(address, "npub", 4) == 0)) {
+      layoutTransInformation(&bmp_button_up, NULL, NULL, &bmp_button_forward,
+                             NULL, _("OK"), _("Verify Public Key"),
+                             _("[QR Code]"), NULL, false, true,
+                             ignorecase ? address_upcase : address);
+    } else {
+      layoutTransInformation(&bmp_button_up, NULL, NULL, &bmp_button_forward,
+                             NULL, _("OK"), _("Verify Address"), _("[QR Code]"),
+                             NULL, false, true,
+                             ignorecase ? address_upcase : address);
+    }
 #else
     uint8_t codedata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
     uint8_t tempdata[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_MAX_VERSION)] = {0};
@@ -1359,9 +1366,15 @@ void layoutAddress(const char *address, const char *desc, bool qrcode,
     (void)address_n;
     (void)address_n_count;
     (void)desc;
-    layoutTransInformation(NULL, &bmp_button_down, NULL, &bmp_button_forward,
-                           NULL, _("OK"), _("Verify Address"), _("[Address]"),
-                           NULL, false, false, address);
+    if (address && (memcmp(address, "npub", 4) == 0)) {
+      layoutTransInformation(NULL, &bmp_button_down, NULL, &bmp_button_forward,
+                             NULL, _("OK"), _("Verify Public Key"),
+                             _("[Public Key]"), NULL, false, false, address);
+    } else {
+      layoutTransInformation(NULL, &bmp_button_down, NULL, &bmp_button_forward,
+                             NULL, _("OK"), _("Verify Address"), _("[Address]"),
+                             NULL, false, false, address);
+    }
 #else
     uint32_t i = 0;
     if (desc) {

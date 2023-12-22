@@ -1028,6 +1028,7 @@ const char *languages[][2] = {
     {"Verify Address", "校验地址"},
     {"Verify All Words", "依次核对"},
     {"Verify PIN", "请输入原PIN码"},
+    {"Verify Public Key", "校验公钥"},
     {"Verify Specified Word", "自由核对"},
     // fsm_msg_coin.h
     {"Verifying", ""},
@@ -1098,6 +1099,7 @@ const char *languages[][2] = {
     // recovery.c
     {"Your wallet has\nsuccessfully restored", "钱包恢复成功"},
     {"[Address]", "[地址]"},
+    {"[Public Key]", "[公钥]"},
     {"[QR Code]", "[二维码]"},
     // layout2.c
     {"actions which might", "具有潜在风险的"},
