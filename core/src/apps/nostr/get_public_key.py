@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 from ubinascii import hexlify
 
 from trezor.crypto import bech32
+from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.lvglui.scrs import lv
 from trezor.messages import NostrPublicKey
 from trezor.ui.layouts import show_address
@@ -37,6 +38,7 @@ async def get_public_key(
             address=npub,
             address_n=path,
             network="Nostr",
+            title=_(i18n_keys.TITLE__STR_PUBLIC_KEY).format("Nostr"),
         )
 
     return NostrPublicKey(publickey=pubkey, npub=npub)
