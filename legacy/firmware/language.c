@@ -617,7 +617,8 @@ const char *languages[][2] = {
     {"Propose", "投票"},
     {"Proposer", "提案申请人"},
     // lisk.c
-    {"Public Key:", "公钥"},
+    {"Public Key", "公钥"},
+    {"Public Key:", "公钥:"},
     // layout2.c
     {"QR Code", "二维码"},
     //
