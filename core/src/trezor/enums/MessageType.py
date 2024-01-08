@@ -353,6 +353,8 @@ if not utils.BITCOIN_ONLY:
     NostrDecryptedMessage = 11507
     NostrSignSchnorr = 11508
     NostrSignedSchnorr = 11509
+    LnurlAuth = 11600
+    LnurlAuthResp = 11601
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
