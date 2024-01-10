@@ -125,8 +125,12 @@ trezor.enums.SdProtectOperationType
 import trezor.enums.SdProtectOperationType
 trezor.enums.TronResourceCode
 import trezor.enums.TronResourceCode
+trezor.enums.WalletVersion
+import trezor.enums.WalletVersion
 trezor.enums.WordRequestType
 import trezor.enums.WordRequestType
+trezor.enums.WorkChain
+import trezor.enums.WorkChain
 trezor.enums
 import trezor.enums
 trezor.errors
@@ -763,6 +767,46 @@ apps.sui.sign_message
 import apps.sui.sign_message
 apps.sui.sign_tx
 import apps.sui.sign_tx
+apps.ton
+import apps.ton
+apps.ton.get_address
+import apps.ton.get_address
+apps.ton.sign_message
+import apps.ton.sign_message
+apps.ton.tonsdk
+import apps.ton.tonsdk
+apps.ton.tonsdk.boc
+import apps.ton.tonsdk.boc
+apps.ton.tonsdk.boc._bit_string
+import apps.ton.tonsdk.boc._bit_string
+apps.ton.tonsdk.boc._builder
+import apps.ton.tonsdk.boc._builder
+apps.ton.tonsdk.boc._cell
+import apps.ton.tonsdk.boc._cell
+apps.ton.tonsdk.boc._dict_builder
+import apps.ton.tonsdk.boc._dict_builder
+apps.ton.tonsdk.boc.dict
+import apps.ton.tonsdk.boc.dict
+apps.ton.tonsdk.boc.dict.find_common_prefix
+import apps.ton.tonsdk.boc.dict.find_common_prefix
+apps.ton.tonsdk.boc.dict.serialize_dict
+import apps.ton.tonsdk.boc.dict.serialize_dict
+apps.ton.tonsdk.contract
+import apps.ton.tonsdk.contract
+apps.ton.tonsdk.contract.wallet
+import apps.ton.tonsdk.contract.wallet
+apps.ton.tonsdk.contract.wallet._wallet_contract
+import apps.ton.tonsdk.contract.wallet._wallet_contract
+apps.ton.tonsdk.contract.wallet._wallet_contract_v3
+import apps.ton.tonsdk.contract.wallet._wallet_contract_v3
+apps.ton.tonsdk.contract.wallet._wallet_contract_v4
+import apps.ton.tonsdk.contract.wallet._wallet_contract_v4
+apps.ton.tonsdk.utils
+import apps.ton.tonsdk.utils
+apps.ton.tonsdk.utils._address
+import apps.ton.tonsdk.utils._address
+apps.ton.tonsdk.utils._utils
+import apps.ton.tonsdk.utils._utils
 apps.tron
 import apps.tron
 apps.tron.address

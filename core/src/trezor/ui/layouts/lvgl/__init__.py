@@ -71,6 +71,7 @@ __all__ = (
     "should_show_details",
     "confirm_nostrmessage",
     "confirm_lnurl_auth",
+    "confirm_ton_transfer",
 )
 
 
@@ -2010,4 +2011,20 @@ async def confirm_lnurl_auth(
             br_type,
             ButtonRequestType.Other,
         )
+    )
+
+
+async def confirm_ton_transfer(
+    ctx: wire.GenericContext,
+    from_addr: str,
+    to_addr: str,
+    amount: str,
+    memo: str | None,
+):
+    from trezor.lvglui.scrs.template import TonTransfer
+
+    screen = TonTransfer(from_addr, to_addr, amount, memo, ctx.primary_color)
+
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_ton_transfer", ButtonRequestType.ProtectCall)
     )

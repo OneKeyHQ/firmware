@@ -332,6 +332,11 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.LnurlAuth:
             return "apps.lnurl.auth"
 
+        # ton
+        if msg_type == MessageType.TonGetAddress:
+            return "apps.ton.get_address"
+        if msg_type == MessageType.TonSignMessage:
+            return "apps.ton.sign_message"
     raise ValueError
 
 

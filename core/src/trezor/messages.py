@@ -61,7 +61,9 @@ if TYPE_CHECKING:
     from trezor.enums import TezosBallotType  # noqa: F401
     from trezor.enums import TezosContractType  # noqa: F401
     from trezor.enums import TronResourceCode  # noqa: F401
+    from trezor.enums import WalletVersion  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
+    from trezor.enums import WorkChain  # noqa: F401
 
     class AlgorandGetAddress(protobuf.MessageType):
         address_n: "list[int]"
@@ -8037,6 +8039,96 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["TezosManagerTransfer"]:
+            return isinstance(msg, cls)
+
+    class TonGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        version: "WalletVersion"
+        workchain: "WorkChain"
+        bounceable: "bool"
+        wallet_id: "int"
+        is_test_only: "bool"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            version: "WalletVersion | None" = None,
+            workchain: "WorkChain | None" = None,
+            bounceable: "bool | None" = None,
+            wallet_id: "int | None" = None,
+            is_test_only: "bool | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TonGetAddress"]:
+            return isinstance(msg, cls)
+
+    class TonAddress(protobuf.MessageType):
+        address: "str"
+        public_key: "bytes"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+            public_key: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TonAddress"]:
+            return isinstance(msg, cls)
+
+    class TonSignMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        recipient: "str"
+        amount: "int"
+        expiration_time: "int"
+        seqno: "int"
+        memo: "str | None"
+        wallet_id: "int"
+        version: "WalletVersion"
+        workchain: "WorkChain"
+        bounceable: "bool"
+        is_test_only: "bool"
+
+        def __init__(
+            self,
+            *,
+            recipient: "str",
+            amount: "int",
+            expiration_time: "int",
+            seqno: "int",
+            address_n: "list[int] | None" = None,
+            memo: "str | None" = None,
+            wallet_id: "int | None" = None,
+            version: "WalletVersion | None" = None,
+            workchain: "WorkChain | None" = None,
+            bounceable: "bool | None" = None,
+            is_test_only: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TonSignMessage"]:
+            return isinstance(msg, cls)
+
+    class TonSignedMessage(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TonSignedMessage"]:
             return isinstance(msg, cls)
 
     class TronGetAddress(protobuf.MessageType):

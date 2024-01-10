@@ -1,0 +1,67 @@
+syntax = "proto2";
+package hw.trezor.messages.ton;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageTon";
+
+enum WorkChain {
+    BASECHAIN = 0;
+    MASTERCHAIN = 1;
+}
+enum WalletVersion {
+    V3R1 = 0;
+    V3R2 = 1;
+    V4R1 = 2;
+    V4R2 = 3;
+}
+/**
+ * Request: Address at the specified index
+ * @start
+ * @next TonAddress
+ */
+message TonGetAddress {
+    repeated uint32 address_n = 1;                    // BIP-32 path to derive the key from master node
+    optional WalletVersion version = 2 [default=V3R2]; // version of the address format (default is "v3r2")
+    optional WorkChain workchain = 3 [default=BASECHAIN];
+    optional bool bounceable = 4 [default=false];     // bounceable flag (default is false)
+    optional uint32 wallet_id = 5[default=698983191]; // wallet id (default is 698983191)
+    optional bool is_test_only = 6 [default=false];   // test only flag (default is false)
+    optional bool show_display = 7;                   // optionally show on display before sending the result
+}
+
+/**
+ * Response: Address for the given index
+ * @end
+ */
+message TonAddress {
+    required string address = 1;                // Address in user friendly format (base64_urlsafe)
+    required bytes public_key = 2;
+}
+
+/**
+ * Request: ask device to sign ton message
+ * @start
+ * @next TonSignedMessage
+ */
+message TonSignMessage {
+    repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
+    required string recipient = 2;          // recipient address
+    required uint64 amount = 3;             // amount to send
+    required uint32 expiration_time = 4;    // expiration time of the message
+    required uint32 seqno = 5;              // sequence number of the message
+    optional string memo = 6;                // optional memo to be displayed on device
+    optional uint32 wallet_id = 7[default=698983191]; // wallet id (default is 698983191)
+    optional WalletVersion version = 8[default=V3R2];     // version of the address format
+    optional WorkChain workchain = 9[default=BASECHAIN];
+    optional bool bounceable = 10 [default=false];     // bounceable flag (default is false)
+    optional bool is_test_only = 11 [default=false];   // test only flag (default is false)
+}
+
+/**
+ * Response: signature for transaction
+ * @end
+ */
+message TonSignedMessage {
+    required bytes signature = 1;           // the signature of the raw transaction
+}

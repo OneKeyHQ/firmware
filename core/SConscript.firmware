@@ -938,6 +938,10 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/polkadot/*/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/kaspa/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/nexa/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/ton/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/ton/*/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/ton/*/*/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/ton/*/*/*/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'trezor/enums/Zcash*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/nostr/*.py'))
@@ -1002,7 +1006,7 @@ def cargo_build():
     else:
         profile = ''
 
-    features = ['micropython', 'protobuf', f'model_t{TREZOR_MODEL.lower()}']
+    features = ['micropython', 'protobuf']
     if BITCOIN_ONLY == '1':
         features.append('bitcoin_only')
     if UI2:
