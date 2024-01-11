@@ -70,6 +70,7 @@ __all__ = (
     "confirm_polkadot_balances",
     "should_show_details",
     "confirm_nostrmessage",
+    "confirm_lnurl_auth",
 )
 
 
@@ -1978,6 +1979,30 @@ async def confirm_nostrmessage(
                 encrypt,
                 ctx.primary_color,
                 ctx.icon_path,
+            ),
+            br_type,
+            ButtonRequestType.Other,
+        )
+    )
+
+
+async def confirm_lnurl_auth(
+    ctx: wire.GenericContext,
+    title: str,
+    domain: str,
+    data: str,
+) -> None:
+    from trezor.lvglui.scrs.template import LnurlAuth
+
+    br_type = "sign_message"
+    await raise_if_cancelled(
+        interact(
+            ctx,
+            LnurlAuth(
+                title,
+                domain,
+                data,
+                ctx.primary_color,
             ),
             br_type,
             ButtonRequestType.Other,
