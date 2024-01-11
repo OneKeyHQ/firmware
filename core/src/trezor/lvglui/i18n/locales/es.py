@@ -735,5 +735,11 @@ translations = [
     "Regrese a la aplicación y escanee el código QR firmado a continuación.",
     "cifrar",
     "Descifrar",
+    "Levante y ajuste la posición, luego toque el botón de encendido nuevamente.",
+    "Limpia el botón de encendido y vuelve a intentarlo.",
+    "Coloque el dedo en el botón de encendido y manténgalo en su lugar.",
+    "Dominio",
+    "Autenticación LNURL",
+    "Aprobar la autorización de LNURL",
 ]
 # fmt: on

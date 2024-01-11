@@ -1603,4 +1603,16 @@ CONTENT__RETUNRN_TO_THE_APP_AND_SCAN_THE_SIGNED_TX_QR_CODE_BELOW = 732
 ACTION__ENCRYPT = 733
 # Decrypt
 ACTION__DECRYPT = 734
+# Lift and fine-tune the position, then touch power button again.
+MSG__LIFT_AND_FINE_TUNE_THE_POSITION_THEN_TOUCH_POWER_BUTTON_AGAIN = 735
+# Clean power button and try again.
+MSG__CLEAN_FINGERPRINT_SENSOR_AND_TRY_AGAIN = 736
+# Put finger on the power button and keep in place.
+MSG__PUT_FINGER_ON_THE_FINGERPRINT = 737
+# Domain
+LIST_KEY__DOMAIN__COLON = 738
+# LNURL Auth
+FORM__LNURL_AUTH = 739
+# Approve LNURL Authorization
+TITLE__APPROVE_LNURL_AUTHORIZATION = 740
 # fmt: on

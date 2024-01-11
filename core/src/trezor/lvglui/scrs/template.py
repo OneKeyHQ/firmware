@@ -2027,3 +2027,31 @@ class MessageNostr(FullSizeWindow):
             elif target == self.btn_no:
                 self.show_dismiss_anim()
                 self.channel.publish(0)
+
+
+class LnurlAuth(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        domain,
+        data,
+        primary_color,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__SIGN),
+            _(i18n_keys.BUTTON__REJECT),
+            anim_dir=2,
+            primary_color=primary_color,
+        )
+        self.primary_color = primary_color
+        self.container = ContainerFlexCol(
+            self.content_area, self.title, pos=(0, 40), padding_row=8
+        )
+        self.item1 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__DOMAIN__COLON), domain
+        )
+        self.item2 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__DATA__COLON), data
+        )
