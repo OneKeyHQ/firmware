@@ -363,6 +363,8 @@ if TYPE_CHECKING:
         NostrDecryptedMessage = 11507
         NostrSignSchnorr = 11508
         NostrSignedSchnorr = 11509
+        LnurlAuth = 11600
+        LnurlAuthResp = 11601
         DeviceEraseSector = 10026
 
     class FailureType(IntEnum):

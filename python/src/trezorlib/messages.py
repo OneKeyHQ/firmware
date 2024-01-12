@@ -371,6 +371,8 @@ class MessageType(IntEnum):
     NostrDecryptedMessage = 11507
     NostrSignSchnorr = 11508
     NostrSignedSchnorr = 11509
+    LnurlAuth = 11600
+    LnurlAuthResp = 11601
     DeviceEraseSector = 10026
 
 
@@ -6515,6 +6517,43 @@ class KaspaSignedTx(protobuf.MessageType):
         *,
         signature: "bytes",
     ) -> None:
+        self.signature = signature
+
+
+class LnurlAuth(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11600
+    FIELDS = {
+        2: protobuf.Field("domain", "bytes", repeated=False, required=True),
+        3: protobuf.Field("data", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        domain: "bytes",
+        data: "bytes",
+    ) -> None:
+        self.domain = domain
+        self.data = data
+
+
+class LnurlAuthResp(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11601
+    FIELDS = {
+        1: protobuf.Field("publickey", "string", repeated=False, required=False, default=None),
+        2: protobuf.Field("path", "string", repeated=False, required=False, default=None),
+        3: protobuf.Field("signature", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        publickey: Optional["str"] = None,
+        path: Optional["str"] = None,
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.publickey = publickey
+        self.path = path
         self.signature = signature
 
 

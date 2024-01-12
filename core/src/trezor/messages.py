@@ -5008,6 +5008,40 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["KaspaSignedTx"]:
             return isinstance(msg, cls)
 
+    class LnurlAuth(protobuf.MessageType):
+        domain: "bytes"
+        data: "bytes"
+
+        def __init__(
+            self,
+            *,
+            domain: "bytes",
+            data: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["LnurlAuth"]:
+            return isinstance(msg, cls)
+
+    class LnurlAuthResp(protobuf.MessageType):
+        publickey: "str | None"
+        path: "str | None"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            publickey: "str | None" = None,
+            path: "str | None" = None,
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["LnurlAuthResp"]:
+            return isinstance(msg, cls)
+
     class MoneroTransactionSourceEntry(protobuf.MessageType):
         outputs: "list[MoneroOutputEntry]"
         real_output: "int | None"

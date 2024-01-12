@@ -1,0 +1,26 @@
+syntax = "proto2";
+package hw.trezor.messages.lnurl;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageLnurl";
+
+/**
+ * Request: linkingKey derivation
+ * @start
+ * @next LnurlPublicKey
+ */
+message LnurlAuth {
+    required bytes domain = 2;                  // domain
+    required bytes data = 3;                    // random_data
+}
+
+/**
+ * Response: LnurlPublicKey for the given index
+ * @end
+ */
+message LnurlAuthResp {
+    optional string publickey = 1;
+    optional string path = 2;
+    optional bytes signature = 3;
+}

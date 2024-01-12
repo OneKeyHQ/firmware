@@ -882,8 +882,8 @@ bool tron_sign_tx(TronSignTx *msg, const char *owner_address,
   ConstTronTokenPtr token = NULL;
   uint64_t amount = 0;
   uint8_t value_bytes[32];
-  char to_str[36];
-  char signer_str[36];
+  char to_str[36] = {0};
+  char signer_str[36] = {0};
   uint8_t eth_address[20];
   const char **tx_msg = format_tx_message("TRON");
   if (!hdnode_get_ethereum_pubkeyhash(node, eth_address)) return false;
