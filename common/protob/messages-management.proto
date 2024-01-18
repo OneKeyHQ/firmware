@@ -158,6 +158,11 @@ message Features {
     optional bytes onekey_firmware_hash  = 610;
     optional string onekey_firmware_build_id = 611;
     optional string onekey_serial_no = 612;
+    optional string onekey_boot_build_id = 613;
+    optional string onekey_ble_name = 614;
+    optional string onekey_ble_version = 615;
+    optional string onekey_ble_build_id = 616;
+    optional bytes onekey_ble_hash = 617;
 }
 
 /**
