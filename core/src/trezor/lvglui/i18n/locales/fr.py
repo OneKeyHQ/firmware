@@ -735,5 +735,11 @@ translations = [
     "Revenez à l'application et scannez le code QR de signature signé ci-dessous.",
     "Crypter",
     "Décrypter",
+    "Soulevez et ajustez la position, puis appuyez à nouveau sur le bouton d'alimentation.",
+    "Nettoyez le bouton d'alimentation et réessayez.",
+    "Mettez le doigt sur le bouton d'alimentation et maintenez-le en place.",
+    "Domaine",
+    "Authentification LNURL",
+    "Approuver l'autorisation LNURL",
 ]
 # fmt: on

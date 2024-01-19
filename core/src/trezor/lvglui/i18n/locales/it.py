@@ -735,5 +735,11 @@ translations = [
     "Torna all'app e scansiona il codice QR della firma firmata di seguito.",
     "Crittografare",
     "Decifrare",
+    "Sollevare e ottimizzare la posizione, quindi toccare nuovamente il pulsante di accensione.",
+    "Pulisci il pulsante di accensione e riprova.",
+    "Metti il dito sul pulsante di accensione e mantienilo in posizione.",
+    "Dominio",
+    "LNURL Aut",
+    "Approva l'autorizzazione LNURL",
 ]
 # fmt: on

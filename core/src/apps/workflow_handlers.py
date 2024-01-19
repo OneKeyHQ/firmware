@@ -329,6 +329,9 @@ def find_message_handler_module(msg_type: int) -> str:
         if msg_type == MessageType.NostrSignSchnorr:
             return "apps.nostr.schnorr"
 
+        if msg_type == MessageType.LnurlAuth:
+            return "apps.lnurl.auth"
+
     raise ValueError
 
 

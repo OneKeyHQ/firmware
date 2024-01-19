@@ -496,6 +496,7 @@ enum MessageType {
     MessageType_NexaTxInputRequest = 11404 [(wire_out) = true];
     MessageType_NexaTxInputAck = 11405 [(wire_in) = true];
 
+    /* light network */
     // Nostr
     MessageType_NostrGetPublicKey = 11500 [(wire_in) = true];
     MessageType_NostrPublicKey = 11501 [(wire_out) = true];
@@ -507,6 +508,11 @@ enum MessageType {
     MessageType_NostrDecryptedMessage = 11507 [(wire_out) = true];
     MessageType_NostrSignSchnorr = 11508 [(wire_in) = true];
     MessageType_NostrSignedSchnorr = 11509 [(wire_out) = true];
+
+    // lnurl
+    MessageType_LnurlAuth = 11600 [(wire_in) = true];
+    MessageType_LnurlAuthResp = 11601 [(wire_out) = true];
+
 
     //onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];

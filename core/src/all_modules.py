@@ -583,6 +583,10 @@ apps.kaspa.get_address
 import apps.kaspa.get_address
 apps.kaspa.sign_tx
 import apps.kaspa.sign_tx
+apps.lnurl
+import apps.lnurl
+apps.lnurl.auth
+import apps.lnurl.auth
 apps.management.apply_flags
 import apps.management.apply_flags
 apps.management.apply_settings
