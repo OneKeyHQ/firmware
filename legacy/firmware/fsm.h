@@ -33,6 +33,7 @@
 #include "messages-ethereum.pb.h"
 #include "messages-filecoin.pb.h"
 #include "messages-kaspa.pb.h"
+#include "messages-lnurl.pb.h"
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
@@ -255,6 +256,7 @@ void fsm_msgRippleSignTx(RippleSignTx *msg);
 void fsm_msgSuiGetAddress(const SuiGetAddress *msg);
 void fsm_msgSuiSignTx(const SuiSignTx *msg);
 void fsm_msgSuiSignMessage(SuiSignMessage *msg);
+void fsm_msgSuiTxAck(SuiTxAck *msg);
 
 // filecoin
 void fsm_msgFilecoinGetAddress(const FilecoinGetAddress *msg);
@@ -308,5 +310,8 @@ void fsm_msgNostrSignEvent(const NostrSignEvent *msg);
 void fsm_msgNostrEncryptMessage(NostrEncryptMessage *msg);
 void fsm_msgNostrDecryptMessage(NostrDecryptMessage *msg);
 void fsm_msgNostrSignSchnorr(const NostrSignSchnorr *msg);
+
+// lnurl
+void fsm_msgLnurlAuth(const LnurlAuth *msg);
 
 #endif

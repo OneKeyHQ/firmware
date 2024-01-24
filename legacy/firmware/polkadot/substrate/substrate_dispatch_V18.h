@@ -19,6 +19,8 @@ parser_error_t _readMethod_astar(parser_context_t* c, uint8_t moduleIdx,
                                  uint8_t callIdx, pd_Method_V18_t* method);
 parser_error_t _readMethod_joystream(parser_context_t* c, uint8_t moduleIdx,
                                      uint8_t callIdx, pd_Method_V18_t* method);
+parser_error_t _readMethod_manta(parser_context_t* c, uint8_t moduleIdx,
+                                 uint8_t callIdx, pd_Method_V18_t* method);
 
 const char* _getMethod_ModuleName_V18(uint8_t moduleIdx);
 

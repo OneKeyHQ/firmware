@@ -1,0 +1,6 @@
+LnurlAuth.domain                                    max_size:256
+LnurlAuth.data                                      max_size:33
+
+LnurlAuthResp.publickey                             max_size:67
+LnurlAuthResp.path                                  max_size:64
+LnurlAuthResp.signature                             max_size:128

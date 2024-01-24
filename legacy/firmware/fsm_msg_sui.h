@@ -59,10 +59,18 @@ void fsm_msgSuiSignTx(const SuiSignTx *msg) {
   if (!node) return;
 
   hdnode_fill_public_key(node);
+  if (msg->has_data_length && msg->data_length > 0) {
+    sui_signing_init(msg, node);
+  } else {
+    sui_sign_tx(msg, node, resp);
+    layoutHome();
+  }
+}
 
-  sui_sign_tx(msg, node, resp);
+void fsm_msgSuiTxAck(SuiTxAck *msg) {
+  CHECK_UNLOCKED
 
-  layoutHome();
+  sui_signing_txack(msg);
 }
 
 void fsm_msgSuiSignMessage(SuiSignMessage *msg) {

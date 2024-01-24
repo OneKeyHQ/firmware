@@ -17,6 +17,8 @@ parser_error_t _readMethod(parser_context_t* c, uint8_t moduleIdx,
     return _readMethod_astar(c, moduleIdx, callIdx, &method->V18);
   } else if (!strncmp(polkadot_network, "joystream", 9)) {
     return _readMethod_joystream(c, moduleIdx, callIdx, &method->V18);
+  } else if (!strncmp(polkadot_network, "manta", 5)) {
+    return _readMethod_manta(c, moduleIdx, callIdx, &method->V18);
   } else {
     return parser_tx_version_not_supported;
   }

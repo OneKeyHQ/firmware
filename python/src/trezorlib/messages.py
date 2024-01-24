@@ -345,6 +345,8 @@ class MessageType(IntEnum):
     SuiSignedTx = 11103
     SuiSignMessage = 11104
     SuiMessageSignature = 11105
+    SuiTxRequest = 11106
+    SuiTxAck = 11107
     FilecoinGetAddress = 11200
     FilecoinAddress = 11201
     FilecoinSignTx = 11202
@@ -371,6 +373,8 @@ class MessageType(IntEnum):
     NostrDecryptedMessage = 11507
     NostrSignSchnorr = 11508
     NostrSignedSchnorr = 11509
+    LnurlAuth = 11600
+    LnurlAuthResp = 11601
     DeviceEraseSector = 10026
 
 
@@ -6518,6 +6522,43 @@ class KaspaSignedTx(protobuf.MessageType):
         self.signature = signature
 
 
+class LnurlAuth(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11600
+    FIELDS = {
+        2: protobuf.Field("domain", "bytes", repeated=False, required=True),
+        3: protobuf.Field("data", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        domain: "bytes",
+        data: "bytes",
+    ) -> None:
+        self.domain = domain
+        self.data = data
+
+
+class LnurlAuthResp(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11601
+    FIELDS = {
+        1: protobuf.Field("publickey", "string", repeated=False, required=False, default=None),
+        2: protobuf.Field("path", "string", repeated=False, required=False, default=None),
+        3: protobuf.Field("signature", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        publickey: Optional["str"] = None,
+        path: Optional["str"] = None,
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.publickey = publickey
+        self.path = path
+        self.signature = signature
+
+
 class MoneroTransactionSourceEntry(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
@@ -9069,6 +9110,8 @@ class SuiSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=False, default=b''),
+        4: protobuf.Field("data_length", "uint32", repeated=False, required=False, default=None),
     }
 
     def __init__(
@@ -9076,9 +9119,13 @@ class SuiSignTx(protobuf.MessageType):
         *,
         raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
+        data_initial_chunk: Optional["bytes"] = b'',
+        data_length: Optional["int"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.data_initial_chunk = data_initial_chunk
+        self.data_length = data_length
 
 
 class SuiSignedTx(protobuf.MessageType):
@@ -9096,6 +9143,40 @@ class SuiSignedTx(protobuf.MessageType):
     ) -> None:
         self.public_key = public_key
         self.signature = signature
+
+
+class SuiTxRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11106
+    FIELDS = {
+        1: protobuf.Field("data_length", "uint32", repeated=False, required=False, default=None),
+        2: protobuf.Field("public_key", "bytes", repeated=False, required=False, default=None),
+        3: protobuf.Field("signature", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: Optional["int"] = None,
+        public_key: Optional["bytes"] = None,
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.public_key = public_key
+        self.signature = signature
+
+
+class SuiTxAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11107
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: "bytes",
+    ) -> None:
+        self.data_chunk = data_chunk
 
 
 class SuiSignMessage(protobuf.MessageType):

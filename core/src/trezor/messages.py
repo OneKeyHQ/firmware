@@ -5008,6 +5008,40 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["KaspaSignedTx"]:
             return isinstance(msg, cls)
 
+    class LnurlAuth(protobuf.MessageType):
+        domain: "bytes"
+        data: "bytes"
+
+        def __init__(
+            self,
+            *,
+            domain: "bytes",
+            data: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["LnurlAuth"]:
+            return isinstance(msg, cls)
+
+    class LnurlAuthResp(protobuf.MessageType):
+        publickey: "str | None"
+        path: "str | None"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            publickey: "str | None" = None,
+            path: "str | None" = None,
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["LnurlAuthResp"]:
+            return isinstance(msg, cls)
+
     class MoneroTransactionSourceEntry(protobuf.MessageType):
         outputs: "list[MoneroOutputEntry]"
         real_output: "int | None"
@@ -7289,12 +7323,16 @@ if TYPE_CHECKING:
     class SuiSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_tx: "bytes"
+        data_initial_chunk: "bytes"
+        data_length: "int | None"
 
         def __init__(
             self,
             *,
             raw_tx: "bytes",
             address_n: "list[int] | None" = None,
+            data_initial_chunk: "bytes | None" = None,
+            data_length: "int | None" = None,
         ) -> None:
             pass
 
@@ -7316,6 +7354,38 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["SuiSignedTx"]:
+            return isinstance(msg, cls)
+
+    class SuiTxRequest(protobuf.MessageType):
+        data_length: "int | None"
+        public_key: "bytes | None"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data_length: "int | None" = None,
+            public_key: "bytes | None" = None,
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SuiTxRequest"]:
+            return isinstance(msg, cls)
+
+    class SuiTxAck(protobuf.MessageType):
+        data_chunk: "bytes"
+
+        def __init__(
+            self,
+            *,
+            data_chunk: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SuiTxAck"]:
             return isinstance(msg, cls)
 
     class SuiSignMessage(protobuf.MessageType):

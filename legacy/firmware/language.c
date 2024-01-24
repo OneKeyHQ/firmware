@@ -80,6 +80,8 @@ const char *languages[][2] = {
      "还有其他问题? 请前往帮助\n中心寻求解答:\nhelp.onekey.so"},
     // u2f.c
     {"App Name:", "应用名称:"},
+    // lnurl
+    {"Approve Request", "批准请求"},
     // reset.c
     {"Are you sure to abort this\nprocess? All progress\nwill be lost.",
      "确定要终止本次流程吗? \n所有的进度都将丢失."},
@@ -266,6 +268,8 @@ const char *languages[][2] = {
     {"Data error", "数据错误"},
     // ethereum.c
     {"Data length exceeds limit", ""},  // msg
+    // lnurl
+    {"Data:", "数据:"},
     // layout2.c
     {"Decrypt Message", "解密消息"},
     {"Decrypt Nostr Message", "解密 Nostr 消息"},
@@ -324,6 +328,10 @@ const char *languages[][2] = {
      "要启用passphrase加密吗?"},
     // fsm_msg_common.h
     {"Do you want to", "请确认"},
+    // lnurl
+    {"Do you want to approve\nLNURL Auth request?",
+     "确认要批准本次\nLNURL Auth 请求吗?"},
+    //
     {"Do you want to change the\nhome screen?", "确定要更改主屏幕吗?"},
     // layout2.c
     {"Do you want to decrypt\nNostr message?", "确认要解密本次 Nostr 消息吗?"},
@@ -347,6 +355,8 @@ const char *languages[][2] = {
     {"Do you want to sign in?", "请确认登录"},
     {"Do you want to sign this\n", "确认要签署此 "},
     {"Do you want to verify this message?", "确认要验证此消息吗?"},
+    // lnurl
+    {"Domain:", "域名:"},
     //
     {"Done", "完成"},
     {"Done!", "完成!"},
@@ -478,6 +488,8 @@ const char *languages[][2] = {
     {"Invalid!", "无效!"},
     // menu_list.c
     {"It will take effect after \ndevice restart.", "将在设备重启后生效."},
+    // lnurl.c
+    {"LNURL Authorization", "LNURL 授权"},
     // layout2.c
     {"Label:", "设备名称:"},
     // layout2.c layout2.c
