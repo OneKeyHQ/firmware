@@ -35,10 +35,33 @@ def get_address(
         messages.SuiGetAddress(address_n=address_n, show_display=show_display)
     )
 
-
 @expect(messages.SuiSignedTx)
 def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: bytes):
     return client.call(messages.SuiSignTx(address_n=address_n, raw_tx=rawtx))
+
+@expect(messages.SuiSignedTx)
+def sign_tx_v2(client: "TrezorClient", address_n: "Address", data: bytes):
+    msg = messages.SuiSignTx(
+        address_n=address_n,
+        raw_tx=b'',
+    )
+    msg.data_length = len(data)
+    data, chunk = data[1024:], data[:1024]
+    msg.data_initial_chunk = chunk
+
+    response = client.call(msg)
+    if isinstance(response, messages.SuiSignedTx):
+        return response
+    assert isinstance(response, messages.SuiTxRequest)
+    while response.data_length is not None:
+        data_length = response.data_length
+        data, chunk = data[data_length:], data[:data_length]
+        response = client.call(messages.SuiTxAck(data_chunk=chunk))
+        if isinstance(response, messages.SuiSignedTx):
+            break
+
+    assert response.signature is not None
+    return response
 
 
 @expect(messages.SuiMessageSignature)

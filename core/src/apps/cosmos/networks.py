@@ -289,3 +289,11 @@ def _networks_iterator() -> Iterator[NetworkInfo]:
         coinDecimals=18,
         hrp="fetch",
     )
+    yield NetworkInfo(
+        chainId="celestia",
+        chainName="Celestia",
+        coinDenom="TIA",
+        coinMinimalDenom="utia",
+        coinDecimals=6,
+        hrp="celestia",
+    )

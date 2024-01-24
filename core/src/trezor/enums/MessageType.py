@@ -323,6 +323,8 @@ if not utils.BITCOIN_ONLY:
     SuiSignedTx = 11103
     SuiSignMessage = 11104
     SuiMessageSignature = 11105
+    SuiTxRequest = 11106
+    SuiTxAck = 11107
     FilecoinGetAddress = 11200
     FilecoinAddress = 11201
     FilecoinSignTx = 11202

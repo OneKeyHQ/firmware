@@ -59,6 +59,21 @@ def sign_raw_tx(client: "TrezorClient", address: str, message: str):
     }
     return result
 
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.argument("message")
+@with_client
+def sign_tx_v2(client: "TrezorClient", address: str, message: str):
+    """Sign a base64 encoded of the transaction data(from sui client serialize-transfer-sui command)."""
+    address_n = tools.parse_path(address)
+
+    resp = sui.sign_tx_v2(client, address_n, base64.b64decode(message))
+    result = {
+        "public_key": f"0x{resp.public_key.hex()}",
+        "signature": f"0x{resp.signature.hex()}",
+    }
+    return result
+
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
