@@ -1202,7 +1202,10 @@ async def confirm_final(ctx: wire.Context, chain_name: str) -> None:
 
 
 async def confirm_blind_sign_common(
-    ctx: wire.Context, signer: str, raw_message: bytes
+    ctx: wire.Context,
+    signer: str,
+    raw_message: bytes,
+    hash: bytes | None = None,
 ) -> None:
 
     from trezor.lvglui.scrs.template import BlindingSignCommon
@@ -1211,15 +1214,16 @@ async def confirm_blind_sign_common(
     await raise_if_cancelled(
         interact(ctx, screen, "common_blinding_sign", ButtonRequestType.ProtectCall)
     )
-    data_size = len(raw_message)
-    await confirm_data(
-        ctx,
-        "confirm_data",
-        title=_(i18n_keys.TITLE__VIEW_DATA),
-        description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_size),
-        data=raw_message,
-        br_code=ButtonRequestType.SignTx,
-    )
+    if hash is None:
+        data_size = len(raw_message)
+        await confirm_data(
+            ctx,
+            "confirm_data",
+            title=_(i18n_keys.TITLE__VIEW_DATA),
+            description=_(i18n_keys.SUBTITLE__STR_BYTES).format(data_size),
+            data=raw_message,
+            br_code=ButtonRequestType.SignTx,
+        )
 
 
 async def show_onekey_app_guide():

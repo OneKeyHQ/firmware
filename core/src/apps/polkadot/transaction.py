@@ -182,6 +182,34 @@ class Transaction:
         return tx
 
     @staticmethod
+    def deserialize_manta(
+        rawtx: codec.base.ScaleBytes, callPrivIdx: int
+    ) -> "Transaction":
+        tx = TransactionUnknown(rawtx)
+        if callPrivIdx == 2567:
+            desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
+            obj = codec.types.Compact(rawtx)
+            balance = obj.decode(check_remaining=False)
+            tx = BalancesTransfer(desc, balance)
+        elif callPrivIdx == 2563:
+            desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
+            obj = codec.types.Compact(rawtx)
+            balance = obj.decode(check_remaining=False)
+            tx = BalancesTransferKeepAlive(desc, balance)
+        elif callPrivIdx == 2564:
+            desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
+            keep_alive = rawtx.get_next_bytes(1)[0]
+            tx = BalancesTransferAll(desc, keep_alive)
+        elif callPrivIdx == 2562:
+            source = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
+            dest = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
+            obj = codec.types.Compact(rawtx)
+            balance = obj.decode(check_remaining=False)
+            tx = BalancesForceTransfer(source, dest, balance)
+
+        return tx
+
+    @staticmethod
     def deserialize(raw_tx: bytes, network: str) -> "Transaction":
         rawtx = codec.base.ScaleBytes(raw_tx)
         moduleIdx = rawtx.get_next_bytes(1)
@@ -199,6 +227,8 @@ class Transaction:
             tx = Transaction.deserialize_astar(rawtx, callPrivIdx)
         elif network == "joystream":
             tx = Transaction.deserialize_joy(rawtx, callPrivIdx)
+        elif network == "manta":
+            tx = Transaction.deserialize_manta(rawtx, callPrivIdx)
         else:
             tx = TransactionUnknown(raw_tx)
 

@@ -37,5 +37,4 @@ def cli():
 @with_client
 def auth(client: "TrezorClient", domain: str, random_data: str) -> str:
     """Get lnurl address in hex encoding."""
-    print("random_data: ", random_data)
     return lnurl.auth(client, domain.encode("utf-8"), bytes.fromhex(random_data))

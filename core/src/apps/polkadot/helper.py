@@ -9,11 +9,13 @@ from . import (
     ICON_ASTAR,
     ICON_JOY,
     ICON_KSM,
+    ICON_MANTA,
     ICON_WESTEND,
     PRIMARY_COLOR,
     PRIMARY_COLOR_ASTAR,
     PRIMARY_COLOR_JOY,
     PRIMARY_COLOR_KSM,
+    PRIMARY_COLOR_MAMTA,
     PRIMARY_COLOR_WESTEND,
 )
 
@@ -27,6 +29,7 @@ POLKADOT_ADDRESS_TYPES = [
     ["westend", 42],
     ["astar", 5],
     ["joystream", 126],
+    ["manta", 77],
 ]
 
 COIN_AMOUNT_DECIMAL_PLACES = 10
@@ -37,6 +40,7 @@ KUSAMA_COIN_TICKER = "KSM"
 WESTEND_COIN_TICKER = "WND"
 ASTAR_COIN_TICKER = "ASTR"
 JOY_COIN_TICKER = "JOY"
+MANTA_COIN_TICKER = "MANTA"
 
 
 def ss58_encode(address: bytes, ss58_format: int = 42) -> str:
@@ -109,6 +113,11 @@ def update_chain_res(ctx: Context, network: str) -> tuple[str, str, int]:
         chain_name = "Joystream"
         symbol = JOY_COIN_TICKER
         decimal = COIN_AMOUNT_DECIMAL_PLACES
+    elif network == "manta":
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR_MAMTA), ICON_MANTA
+        chain_name = "Manta"
+        symbol = MANTA_COIN_TICKER
+        decimal = COIN_AMOUNT_DECIMAL_PLACES_18
     else:
         ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         chain_name = "UNKN Chain"

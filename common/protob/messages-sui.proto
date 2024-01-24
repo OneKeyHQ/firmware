@@ -26,12 +26,15 @@ message SuiAddress {
 /**
  * Request: ask device to sign Sui transaction
  * @start
- * @next SuiSignedTx
+ * @next SuiSignedTx/SuiTxRequest
  */
 message SuiSignTx {
     repeated uint32 address_n = 1;         // BIP-32 path to derive the key from master node
     required bytes raw_tx = 2;             // serialized raw transaction
+    optional bytes data_initial_chunk = 3 [default=''];                        // The initial data chunk (<= 1024 bytes)
+    optional uint32 data_length = 4;                                           // Length of transaction payload
 }
+
 
 /**
  * Response: signature for transaction
@@ -40,6 +43,27 @@ message SuiSignTx {
 message SuiSignedTx {
     required bytes public_key = 1;  // public key for the private key used to sign tx
     required bytes signature = 2;           // the signature of the raw transaction
+}
+
+/**
+ * Response: Device asks for more data from transaction payload, or returns the signature.
+ * If data_length is set, device awaits that many more bytes of payload.
+ * Otherwise, the signature fields contain the computed transaction signature. All three fields will be present.
+ * @end
+ * @next SuiTxAck
+ */
+ message SuiTxRequest {
+    optional uint32 data_length = 1;    // Number of bytes being requested (<= 1024)
+    optional bytes public_key = 2;  // public key for the private key used to sign tx
+    optional bytes signature = 3;           // the signature of the raw transaction
+}
+
+/**
+ * Request: Transaction payload data.
+ * @next SuiTxRequest
+ */
+ message SuiTxAck {
+    required bytes data_chunk = 1;  // Bytes from transaction payload (<= 1024 bytes)
 }
 
 /**
