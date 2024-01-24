@@ -473,6 +473,8 @@ enum MessageType {
     MessageType_SuiSignedTx = 11103 [(wire_out) = true];
     MessageType_SuiSignMessage = 11104 [(wire_in) = true];
     MessageType_SuiMessageSignature = 11105 [(wire_out) = true];
+    MessageType_SuiTxRequest = 11106 [(wire_out) = true];
+    MessageType_SuiTxAck = 11107 [(wire_in) = true];
 
     // Filecoin
     MessageType_FilecoinGetAddress = 11200 [(wire_in) = true];

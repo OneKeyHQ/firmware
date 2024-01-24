@@ -15,5 +15,6 @@
 #define WESTEND_COIN_TICKER " WND"
 #define ASTAR_COIN_TICKER " ASTR"
 #define JOY_COIN_TICKER " JOY"
+#define MANTA_COIN_TICKER " MANTA"
 
 #endif

@@ -4,7 +4,7 @@ PolkadotAddress.address                                        max_size:64
 PolkadotAddress.public_key                                     max_size:65
 
 PolkadotSignTx.address_n                                       max_count:8
-PolkadotSignTx.raw_tx                                          max_size:1024
+PolkadotSignTx.raw_tx                                          max_size:4096
 PolkadotSignTx.network                                         max_size:64
 
 PolkadotSignedTx.signature                                     max_size:64

@@ -24,8 +24,7 @@ bool layout_lnurl_auth(const LnurlAuth *msg) {
   char data[65] = {0};
   if (msg->data.size > 0 && msg->data.size != 32) return false;
   data2hexaddr(msg->data.bytes, msg->data.size, data);
-  printf("domain: %s\n", (char *)msg->domain.bytes);
-  printf("data: %s\n", data);
+
 loop:
   layoutDialogAdapterEx(_("LNURL Authorization"), &bmp_bottom_left_close, NULL,
                         &bmp_bottom_right_arrow, NULL, NULL, _("Domain:"),

@@ -3,6 +3,12 @@ SuiAddress.address                                        max_size:70
 
 SuiSignTx.address_n                                       max_count:8
 SuiSignTx.raw_tx                                          max_size:6144
+SuiSignTx.data_initial_chunk                              max_size:1024
+
+SuiTxRequest.public_key                                   max_size:32
+SuiTxRequest.signature                                    max_size:64
+
+SuiTxAck.data_chunk                                       max_size:1024
 
 SuiSignedTx.public_key                                    max_size:32
 SuiSignedTx.signature                                     max_size:64

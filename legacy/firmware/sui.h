@@ -27,4 +27,7 @@ void sui_get_address_from_public_key(const uint8_t *public_key, char *address);
 void sui_sign_tx(const SuiSignTx *msg, const HDNode *node, SuiSignedTx *resp);
 void sui_message_sign(const SuiSignMessage *msg, const HDNode *node,
                       SuiMessageSignature *resp);
+void sui_signing_init(const SuiSignTx *msg, const HDNode *node);
+void sui_signing_txack(SuiTxAck *msg);
+
 #endif  // __SUI_H__

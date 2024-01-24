@@ -381,6 +381,10 @@ uint16_t _detectAddressType(const parser_context_t *c) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES;
     memcpy(__polkadot_ticker, JOY_COIN_TICKER, 4);
     return 126;
+  } else if (!strncmp(polkadot_network, "manta", 5)) {
+    __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES_18;
+    memcpy(__polkadot_ticker, MANTA_COIN_TICKER, 6);
+    return 77;
   }
 
   return 42;
