@@ -17,16 +17,11 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SUI_H__
-#define __SUI_H__
-#include <stdint.h>
-#include "bip32.h"
-#include "messages-sui.pb.h"
+#ifndef __LNURL_H__
+#define __LNURL_H__
 
-void sui_get_address_from_public_key(const uint8_t *public_key, char *address);
-void sui_sign_tx(const SuiSignTx *msg, const HDNode *node, SuiSignedTx *resp);
-void sui_message_sign(const SuiSignMessage *msg, const HDNode *node,
-                      SuiMessageSignature *resp);
-void sui_signing_init(const SuiSignTx *msg, const HDNode *node);
-void sui_signing_txack(SuiTxAck *msg);
-#endif  // __SUI_H__
+#include "messages-lnurl.pb.h"
+
+bool layout_lnurl_auth(const LnurlAuth *msg);
+
+#endif  // __LNURL_H__

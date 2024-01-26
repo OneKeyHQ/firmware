@@ -3405,7 +3405,7 @@ refresh_menu:
 #ifdef BUILD_ID
       oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, BUILD_ID, FONT_FIXED);
+      oledDrawStringAdapter(0, y, BUILD_ID + strlen(BUILD_ID) - 7, FONT_FIXED);
       y += font->pixel + 1;
 #endif
       break;

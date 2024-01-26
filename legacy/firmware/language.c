@@ -272,6 +272,8 @@ const char *languages[][2] = {
     {"Create multisig", "创建多重签名"},
     {"DONE", "完成"},
     {"Dashboard", "控制中心"},
+    // lnurl.c
+    {"Data", "数据"},
     // fsm.c
     {"Data error", "数据错误"},
     // ethereum.c
@@ -352,6 +354,8 @@ const char *languages[][2] = {
     // layout2.c
     {"Do you want to sign in?", "请确认登录"},
     {"Do you want to sign this\n", "确认要签署此 "},
+    // lnurl
+    {"Domain", "域名"},
     //
     {"Done", "完成"},
     {"Download OneKey", "下载OneKey"},
