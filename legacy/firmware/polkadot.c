@@ -173,6 +173,8 @@ static bool get_signer_address(const PolkadotSignTx *msg, const HDNode *node,
     addressType = 42;
   } else if (!strncmp(msg->network, "joystream", 9)) {
     addressType = 126;
+  } else if (!strncmp(msg->network, "manta", 5)) {
+    addressType = 77;
   } else {
     return false;
   }

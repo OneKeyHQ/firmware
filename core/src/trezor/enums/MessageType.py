@@ -318,6 +318,8 @@ if not utils.BITCOIN_ONLY:
     SuiSignedTx = 11103
     SuiSignMessage = 11104
     SuiMessageSignature = 11105
+    SuiTxRequest = 11106
+    SuiTxAck = 11107
     FilecoinGetAddress = 11200
     FilecoinAddress = 11201
     FilecoinSignTx = 11202
@@ -344,6 +346,8 @@ if not utils.BITCOIN_ONLY:
     NostrDecryptedMessage = 11507
     NostrSignSchnorr = 11508
     NostrSignedSchnorr = 11509
+    LnurlAuth = 11600
+    LnurlAuthResp = 11601
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003

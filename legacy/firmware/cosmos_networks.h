@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 
-#define COSMOS_NETWORK_COUNT 29
+#define COSMOS_NETWORK_COUNT 30
 
 typedef struct {
   const char *const chain_id;
+  const char *const hrp;
   const char *const chain_name;
   const char *const coin_denom;
   const char *const coin_minimal_denom;
@@ -16,5 +17,6 @@ typedef struct {
 extern const CosmosNetworkType cosmos_networks[COSMOS_NETWORK_COUNT];
 
 const CosmosNetworkType *cosmosnetworkByChainId(const char *chain_id);
+const CosmosNetworkType *cosmosnetworkByHrp(const char *hrp);
 
 #endif

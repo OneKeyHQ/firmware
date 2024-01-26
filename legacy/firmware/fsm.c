@@ -17,8 +17,9 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "fsm.h"
 #include <libopencm3/stm32/flash.h>
-
+#include <stdio.h>
 #include "address.h"
 #include "aes/aes.h"
 #include "base58.h"
@@ -34,7 +35,6 @@
 #include "curves.h"
 #include "debug.h"
 #include "ecdsa.h"
-#include "fsm.h"
 #include "fw_signatures.h"
 #include "gettext.h"
 #include "hmac.h"
@@ -75,6 +75,7 @@
 #include "ethereum_onekey.h"
 #include "filecoin.h"
 #include "kaspa.h"
+#include "lnurl.h"
 #include "near.h"
 #include "nem.h"
 #include "nem2.h"
@@ -579,6 +580,7 @@ bool fsm_layoutPathWarning(uint32_t address_n_count,
 #include "fsm_msg_ethereum_onekey.h"
 #include "fsm_msg_filecoin.h"
 #include "fsm_msg_kaspa.h"
+#include "fsm_msg_lnurl.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
 #include "fsm_msg_nexa.h"
