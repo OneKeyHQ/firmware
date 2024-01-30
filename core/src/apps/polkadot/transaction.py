@@ -186,7 +186,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 2567:
+        if callPrivIdx == 2560:
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -266,8 +266,7 @@ class TransactionUnknown(Transaction):
         self, ctx: Context, sender: str, chain_name: str, symbol: str, decimal: int
     ) -> None:
         from trezor.ui.layouts.lvgl import confirm_blind_sign_common
-
-        await confirm_blind_sign_common(ctx, sender, self.data)
+        await confirm_blind_sign_common(ctx, sender, self.data.data)
 
 
 class BalancesTransfer(Transaction):
