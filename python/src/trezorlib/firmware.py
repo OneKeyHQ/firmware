@@ -112,13 +112,9 @@ class ToifMode(Enum):
     grayscale = b"g"
 
 
-# class HeaderType(Enum):
-#     FIRMWARE = b"OKTF"
-#     BOOTLOADER = b"OKTB"
-
 class HeaderType(Enum):
-    FIRMWARE = b"TC2F"
-    BOOTLOADER = b"TC2B"
+    FIRMWARE = b"OKTF"
+    BOOTLOADER = b"OKTB"
 
 
 class EnumAdapter(c.Adapter):
