@@ -291,7 +291,7 @@ def parse(data: bytes) -> ParsedFirmware:
     elif data[:4] == b"OKTV":
         version = FirmwareFormat.TREZOR_T
         cls = VendorFirmware
-    elif data[:4] == b"OKTF":
+    elif data[:4] == b"TC2F":
         version = FirmwareFormat.TREZOR_ONE_V2
         cls = FirmwareImage
     else:
