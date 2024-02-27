@@ -513,6 +513,13 @@ enum MessageType {
     MessageType_LnurlAuth = 11600 [(wire_in) = true];
     MessageType_LnurlAuthResp = 11601 [(wire_out) = true];
 
+    // nervos
+    MessageType_NervosGetAddress = 11701 [(wire_in) = true];
+    MessageType_NervosAddress = 11702 [(wire_out) = true];
+    MessageType_NervosSignTx = 11703 [(wire_in) = true];
+    MessageType_NervosSignedTx = 11704 [(wire_out) = true];
+
+
     //onekey
     MessageType_DeviceEraseSector= 10026 [deprecated = true];
 

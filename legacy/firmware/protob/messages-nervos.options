@@ -1,0 +1,7 @@
+NervosGetAddress.address_n                                   max_count:8
+NervosAddress.address                                        max_size:45
+
+NervosSignTx.address_n                                       max_count:8
+NervosSignTx.raw_message                                     max_size:512
+
+NervosSignedTx.signature                                     max_size:128

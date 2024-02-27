@@ -138,6 +138,7 @@ OBJS += nexa.o
 OBJS += nostr.o
 OBJS += base64.o
 OBJS += lnurl.o
+OBJS += nervos.o
 endif
 
 OBJS += debug.o
@@ -239,6 +240,7 @@ OBJS += protob/messages-kaspa.pb.o
 OBJS += protob/messages-nexa.pb.o
 OBJS += protob/messages-nostr.pb.o
 OBJS += protob/messages-lnurl.pb.o
+OBJS += protob/messages-nervos.pb.o
 endif
 
 OPTFLAGS ?= -Os
