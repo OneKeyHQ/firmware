@@ -48,6 +48,7 @@ from . import (
     firmware,
     monero,
     near,
+    nervos,
     nem,
     ripple,
     settings,
@@ -102,6 +103,7 @@ COMMAND_ALIASES = {
     "sol": sol.cli,
     "starcoin": starcoin.cli,
     "near": near.cli,
+    "nervos":nervos.cli,
     "aptos": aptos.cli,
     "sui": sui.cli,
     "filecoin": filecoin.cli,
@@ -453,6 +455,7 @@ cli.add_command(starcoin.cli)
 cli.add_command(firmware.cli)
 cli.add_command(debug.cli)
 cli.add_command(near.cli)
+cli.add_command(nervos.cli)
 cli.add_command(sui.cli)
 cli.add_command(cosmos.cli)
 cli.add_command(polkadot.cli)

@@ -926,6 +926,7 @@ if FROZEN:
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/aptos/*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/near/*.py'))
+        SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/nervos/*.py'))
 
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/algorand/*.py'))
         SOURCE_PY.extend(Glob(SOURCE_PY_DIR + 'apps/algorand/*/*.py'))

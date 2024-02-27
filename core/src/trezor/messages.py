@@ -6623,6 +6623,70 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["NEMCosignatoryModification"]:
             return isinstance(msg, cls)
 
+    class NervosGetAddress(protobuf.MessageType):
+        address_n: "list[int]"
+        show_display: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            address_n: "list[int] | None" = None,
+            show_display: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosGetAddress"]:
+            return isinstance(msg, cls)
+
+    class NervosAddress(protobuf.MessageType):
+        address: "str"
+
+        def __init__(
+            self,
+            *,
+            address: "str",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosAddress"]:
+            return isinstance(msg, cls)
+
+    class NervosSignTx(protobuf.MessageType):
+        address_n: "list[int]"
+        raw_message: "bytes"
+        prefix: "str"
+        input_count: "int"
+
+        def __init__(
+            self,
+            *,
+            raw_message: "bytes",
+            address_n: "list[int] | None" = None,
+            prefix: "str | None" = None,
+            input_count: "int | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosSignTx"]:
+            return isinstance(msg, cls)
+
+    class NervosSignedTx(protobuf.MessageType):
+        signature: "bytes"
+
+        def __init__(
+            self,
+            *,
+            signature: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosSignedTx"]:
+            return isinstance(msg, cls)
+
     class NexaGetAddress(protobuf.MessageType):
         address_n: "list[int]"
         show_display: "bool | None"

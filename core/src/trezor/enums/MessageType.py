@@ -291,6 +291,10 @@ if not utils.BITCOIN_ONLY:
     NearAddress = 10702
     NearSignTx = 10703
     NearSignedTx = 10704
+    NervosGetAddress = 11701
+    NervosAddress = 11702
+    NervosSignTx = 11703
+    NervosSignedTx = 11704
     AptosGetAddress = 10600
     AptosAddress = 10601
     AptosSignTx = 10602

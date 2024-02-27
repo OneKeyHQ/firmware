@@ -317,6 +317,10 @@ class MessageType(IntEnum):
     NearAddress = 10702
     NearSignTx = 10703
     NearSignedTx = 10704
+    NervosGetAddress = 11701
+    NervosAddress = 11702
+    NervosSignTx = 11703
+    NervosSignedTx = 11704
     AptosGetAddress = 10600
     AptosAddress = 10601
     AptosSignTx = 10602
@@ -8377,6 +8381,74 @@ class NEMCosignatoryModification(protobuf.MessageType):
     ) -> None:
         self.type = type
         self.public_key = public_key
+
+
+class NervosGetAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11701
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("show_display", "bool", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        address_n: Optional[Sequence["int"]] = None,
+        show_display: Optional["bool"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.show_display = show_display
+
+
+class NervosAddress(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11702
+    FIELDS = {
+        1: protobuf.Field("address", "string", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        address: "str",
+    ) -> None:
+        self.address = address
+
+
+class NervosSignTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11703
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("prefix", "string", repeated=False, required=False),
+        4: protobuf.Field("input_count", "uint32", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+        prefix: Optional["str"] = 'nervos',
+        input_count: Optional["int"] = 1,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_message = raw_message
+        self.prefix = prefix
+        self.input_count = input_count
+
+
+class NervosSignedTx(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11704
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+    ) -> None:
+        self.signature = signature
 
 
 class NexaGetAddress(protobuf.MessageType):
