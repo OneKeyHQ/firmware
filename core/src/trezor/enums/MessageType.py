@@ -348,6 +348,10 @@ if not utils.BITCOIN_ONLY:
     NostrSignedSchnorr = 11509
     LnurlAuth = 11600
     LnurlAuthResp = 11601
+    NervosGetAddress = 11701
+    NervosAddress = 11702
+    NervosSignTx = 11703
+    NervosSignedTx = 11704
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
