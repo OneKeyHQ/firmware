@@ -48,12 +48,10 @@ void fsm_msgNervosSignTx(const NervosSignTx *msg) {
   CHECK_INITIALIZED
   CHECK_PIN
   RESP_INIT(NervosSignedTx);
-
   HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                   msg->address_n_count, NULL);
   if (!node) return;
   hdnode_fill_public_key(node);
-
   nervos_get_address_from_public_key(node->public_key, resp->address, msg->network);
 
   if (!fsm_layoutSignMessage("Nervos", resp->address, msg->raw_message.bytes,
@@ -62,7 +60,6 @@ void fsm_msgNervosSignTx(const NervosSignTx *msg) {
     layoutHome();
     return;
   }
-
   nervos_sign_sighash(node, msg->raw_message.bytes, msg->raw_message.size, resp->signature.bytes, &resp->signature.size);   
   msg_write(MessageType_MessageType_NervosSignedTx, resp);  
   layoutHome();
