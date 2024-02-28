@@ -198,9 +198,6 @@ void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
     if (ecdsa_sign_digest(&secp256k1, node->private_key, raw_message,sig, &v1,NULL) != 0) {
           fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));                 
         }
-    //uint8_t final_sin[65];
-    //memcpy(final_sin, sig, 64);
-    //final_sin[64] = v1;
     memcpy(signature, sig, 64);
     signature[64] = v1;
     *signature_len = 65;
