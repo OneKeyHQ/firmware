@@ -30,17 +30,16 @@ if TYPE_CHECKING:
 def get_address(
     client: "TrezorClient",
     address_n: "Address",
+    network: str,
     show_display: bool = False,
 ) -> "MessageType":
-    print("test2")
     res =  client.call(
-        messages.NervosGetAddress(address_n=address_n, show_display=show_display)
+        messages.NervosGetAddress(address_n=address_n, network=network, show_display=show_display)
     )
-    print("test2.1")
     return res
 
 
 @expect(messages.NervosSignedTx)
-def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: str):
+def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: str,network: str,):
     raw_tx_bytes = bytes.fromhex(rawtx)
-    return client.call(messages.NervosSignTx(address_n=address_n,  raw_message=raw_tx_bytes))
+    return client.call(messages.NervosSignTx(address_n=address_n,  raw_message=raw_tx_bytes, network=network))

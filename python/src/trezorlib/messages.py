@@ -7955,16 +7955,19 @@ class NervosGetAddress(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 11701
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
-        2: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
+        2: protobuf.Field("network", "string", repeated=False, required=True),
+        3: protobuf.Field("show_display", "bool", repeated=False, required=False, default=None),
     }
 
     def __init__(
         self,
         *,
+        network: "str",
         address_n: Optional[Sequence["int"]] = None,
         show_display: Optional["bool"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.network = network
         self.show_display = show_display
 
 
@@ -7987,30 +7990,36 @@ class NervosSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("network", "string", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
         raw_message: "bytes",
+        network: "str",
         address_n: Optional[Sequence["int"]] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_message = raw_message
+        self.network = network
 
 
 class NervosSignedTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 11704
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("address", "string", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
         signature: "bytes",
+        address: "str",
     ) -> None:
         self.signature = signature
+        self.address = address
 
 
 class NexaGetAddress(protobuf.MessageType):
