@@ -33,6 +33,6 @@
 void nervos_get_address_from_public_key(const uint8_t *public_key,
                                         char *address,const char *network);
 void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
-                         uint32_t raw_message_len, uint8_t *signature,
+                         uint32_t raw_message_len,const uint8_t *witness_buffer,uint32_t witness_buffer_len, uint8_t *signature,
                          pb_size_t *signature_len) ;
 #endif  

@@ -6309,12 +6309,14 @@ if TYPE_CHECKING:
     class NervosSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_message: "bytes"
+        witness_buffer: "bytes"
         network: "str"
 
         def __init__(
             self,
             *,
             raw_message: "bytes",
+            witness_buffer: "bytes",
             network: "str",
             address_n: "list[int] | None" = None,
         ) -> None:

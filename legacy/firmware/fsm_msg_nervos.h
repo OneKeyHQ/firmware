@@ -42,12 +42,15 @@ void fsm_msgNervosGetAddress(const NervosGetAddress *msg) {
 }
 
 
-
-
 void fsm_msgNervosSignTx(const NervosSignTx *msg) {
   CHECK_INITIALIZED
   CHECK_PIN
   RESP_INIT(NervosSignedTx);
+  if (strcmp(msg->network, "ckt") != 0 && strcmp(msg->network, "ckb") != 0) {
+     fsm_sendFailure(FailureType_Failure_ProcessError, _("network format error"));
+     layoutHome();
+     return; 
+   }
   HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
                                   msg->address_n_count, NULL);                              
   if (!node) return;
@@ -55,19 +58,13 @@ void fsm_msgNervosSignTx(const NervosSignTx *msg) {
   hdnode_fill_public_key(node);
   nervos_get_address_from_public_key(node->public_key, resp->address, msg->network);
 
-  if (!(strstr(msg->network, "ckt") || strstr(msg->network, "ckb"))) {
-    fsm_sendFailure(FailureType_Failure_ProcessError, _("network format error"));
-    layoutHome();
-    return; 
-  }
-
   if (!fsm_layoutSignMessage("Nervos", resp->address, msg->raw_message.bytes,
                              msg->raw_message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
   }
-  nervos_sign_sighash(node, msg->raw_message.bytes, msg->raw_message.size, resp->signature.bytes, &resp->signature.size);   
+  nervos_sign_sighash(node, msg->raw_message.bytes, msg->raw_message.size,msg->witness_buffer.bytes,msg -> witness_buffer.size, resp->signature.bytes, &resp->signature.size);   
   msg_write(MessageType_MessageType_NervosSignedTx, resp);  
   layoutHome();
 }

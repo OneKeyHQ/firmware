@@ -38,8 +38,7 @@ def get_address(
     )
     return res
 
-
 @expect(messages.NervosSignedTx)
-def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: str,network: str,):
-    raw_tx_bytes = bytes.fromhex(rawtx)
-    return client.call(messages.NervosSignTx(address_n=address_n,  raw_message=raw_tx_bytes, network=network))
+def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: str,witness_buffer: str,network: str):
+
+    return client.call(messages.NervosSignTx(address_n=address_n,  raw_message=rawtx,witness_buffer = witness_buffer, network=network))
