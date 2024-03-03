@@ -2,7 +2,8 @@ NervosGetAddress.address_n                                   max_count:8
 NervosGetAddress.network                                     max_size:6
 NervosAddress.address                                        max_size:72
 NervosSignTx.address_n                                       max_count:8
-NervosSignTx.raw_message                                     max_size:128
+NervosSignTx.raw_message                                     max_size:1024
+NervosSignTx.witness_buffer                                  max_size:256
 NervosSignTx.network                                         max_size:45
 NervosSignedTx.signature                                     max_size:128
 NervosSignedTx.address                                       max_size:72

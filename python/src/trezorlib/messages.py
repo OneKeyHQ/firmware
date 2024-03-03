@@ -8248,18 +8248,21 @@ class NervosSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
         2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
-        3: protobuf.Field("network", "string", repeated=False, required=True),
+        3: protobuf.Field("witness_buffer", "bytes", repeated=False, required=True),
+        4: protobuf.Field("network", "string", repeated=False, required=True),
     }
 
     def __init__(
         self,
         *,
         raw_message: "bytes",
+        witness_buffer: "bytes",
         network: "str",
         address_n: Optional[Sequence["int"]] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_message = raw_message
+        self.witness_buffer = witness_buffer
         self.network = network
 
 

@@ -36,7 +36,8 @@ message NervosAddress {
 message NervosSignTx {
     repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
     required bytes  raw_message = 2;                                    // the bip143-like pre-hashed message to be signed
-    required string network = 3;                                        // Network name
+    required bytes  witness_buffer = 3;
+    required string network = 4;                                        // Network name
    }
 
 /**
@@ -46,4 +47,4 @@ message NervosSignTx {
  message NervosSignedTx {
     required bytes signature = 1;   // signature of the message
     required string address  = 2;
-}
+ }
