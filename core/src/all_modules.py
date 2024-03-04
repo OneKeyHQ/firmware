@@ -669,6 +669,8 @@ apps.nervos.hash
 import apps.nervos.hash
 apps.nervos.sign_tx
 import apps.nervos.sign_tx
+apps.nervos.utils
+import apps.nervos.utils
 apps.nexa
 import apps.nexa
 apps.nexa.addresses

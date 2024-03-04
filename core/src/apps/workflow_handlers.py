@@ -266,7 +266,7 @@ def find_message_handler_module(msg_type: int) -> str:
             return "apps.near.get_address"
         if msg_type == MessageType.NearSignTx:
             return "apps.near.sign_tx"
-        
+
         # nervos
         if msg_type == MessageType.NervosGetAddress:
             return "apps.nervos.get_address"

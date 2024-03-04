@@ -6625,11 +6625,13 @@ if TYPE_CHECKING:
 
     class NervosGetAddress(protobuf.MessageType):
         address_n: "list[int]"
+        network: "str"
         show_display: "bool | None"
 
         def __init__(
             self,
             *,
+            network: "str",
             address_n: "list[int] | None" = None,
             show_display: "bool | None" = None,
         ) -> None:
@@ -6656,16 +6658,16 @@ if TYPE_CHECKING:
     class NervosSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_message: "bytes"
-        prefix: "str"
-        input_count: "int"
+        witness_buffer: "bytes"
+        network: "str"
 
         def __init__(
             self,
             *,
             raw_message: "bytes",
+            witness_buffer: "bytes",
+            network: "str",
             address_n: "list[int] | None" = None,
-            prefix: "str | None" = None,
-            input_count: "int | None" = None,
         ) -> None:
             pass
 
@@ -6675,11 +6677,13 @@ if TYPE_CHECKING:
 
     class NervosSignedTx(protobuf.MessageType):
         signature: "bytes"
+        address: "str"
 
         def __init__(
             self,
             *,
             signature: "bytes",
+            address: "str",
         ) -> None:
             pass
 
