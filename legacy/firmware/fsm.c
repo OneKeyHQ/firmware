@@ -80,6 +80,7 @@
 #include "near.h"
 #include "nem.h"
 #include "nem2.h"
+#include "nervos.h"
 #include "nexa.h"
 #include "nostr.h"
 #include "polkadot.h"
@@ -89,7 +90,6 @@
 #include "stellar.h"
 #include "sui.h"
 #include "tron.h"
-#include "nervos.h"
 #endif
 
 #if EMULATOR
@@ -590,6 +590,7 @@ bool fsm_layoutPathWarning(uint32_t address_n_count,
 #include "fsm_msg_lnurl.h"
 #include "fsm_msg_near.h"
 #include "fsm_msg_nem.h"
+#include "fsm_msg_nervos.h"
 #include "fsm_msg_nexa.h"
 #include "fsm_msg_nostr.h"
 #include "fsm_msg_polkadot.h"
@@ -599,6 +600,5 @@ bool fsm_layoutPathWarning(uint32_t address_n_count,
 #include "fsm_msg_stellar.h"
 #include "fsm_msg_sui.h"
 #include "fsm_msg_tron.h"
-#include "fsm_msg_nervos.h"
 
 #endif

@@ -44,12 +44,12 @@ void withnesss_to_hex_str(const uint8_t *withnesss, size_t withnesss_len,
     hex_str[2 * i] = hex_chars[(withnesss[i] >> 4) & 0x0F];
     hex_str[2 * i + 1] = hex_chars[withnesss[i] & 0x0F];
   }
-  hex_str[2 * withnesss_len] = '\0'; 
+  hex_str[2 * withnesss_len] = '\0';
 }
 
 void ckb_hasher_init(blake2b_state *S) {
   const uint8_t personal[] = "ckb-default-hash";
-  size_t outlen = 32; 
+  size_t outlen = 32;
   blake2b_InitPersonal(S, outlen, personal, sizeof(personal) - 1);
 }
 
@@ -63,11 +63,8 @@ void ckb_hash(const uint8_t *message, size_t message_len, uint8_t *output) {
 void ckb_blake160(const uint8_t *message, size_t message_len, char *output) {
   uint8_t hash[32];
   ckb_hash(message, message_len, hash);
-  withnesss_to_hex_str(
-      hash, 20,
-      output); 
+  withnesss_to_hex_str(hash, 20, output);
 }
-
 
 uint32_t bech32_polymod(const uint8_t *values, size_t len) {
   static const uint32_t generator[] = {0x3b6a57b2, 0x26508e6d, 0x1ea119fa,
@@ -151,7 +148,6 @@ void extend_uint64(uint8_t *buffer, size_t *buffer_len, uint64_t n) {
   }
 }
 
-
 void nervos_get_address_from_public_key(const uint8_t *public_key,
                                         char *address, const char *network) {
   size_t public_key_len = 33;
@@ -197,38 +193,30 @@ void nervos_get_address_from_public_key(const uint8_t *public_key,
   address[strlen(network) + 1 + combined_len] = '\0';
 }
 
-
-
-
-
-
-
 void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
                          uint32_t raw_message_len,
                          const uint8_t *witness_buffer,
                          uint32_t witness_buffer_len, uint8_t *signature,
                          pb_size_t *signature_len) {
-  
-
-    uint8_t hash_output[32];
-    ckb_hash(raw_message, raw_message_len, hash_output);
-    blake2b_state S;
-    ckb_hasher_init(&S);
-    blake2b_Update(&S,hash_output , 32);
-    uint8_t buffer[8];  
-    size_t buffer_len = 0; 
-    extend_uint64(buffer, &buffer_len, witness_buffer_len);
-    blake2b_Update(&S, buffer, 8);
-    blake2b_Update(&S, witness_buffer, witness_buffer_len);
-    uint8_t output[32];
-    blake2b_Final(&S, output, 32);
-    uint8_t v1;
-    uint8_t sig[64];
+  uint8_t hash_output[32];
+  ckb_hash(raw_message, raw_message_len, hash_output);
+  blake2b_state S;
+  ckb_hasher_init(&S);
+  blake2b_Update(&S, hash_output, 32);
+  uint8_t buffer[8];
+  size_t buffer_len = 0;
+  extend_uint64(buffer, &buffer_len, witness_buffer_len);
+  blake2b_Update(&S, buffer, 8);
+  blake2b_Update(&S, witness_buffer, witness_buffer_len);
+  uint8_t output[32];
+  blake2b_Final(&S, output, 32);
+  uint8_t v1;
+  uint8_t sig[64];
   if (ecdsa_sign_digest(&secp256k1, node->private_key, output, sig, &v1,
                         NULL) != 0) {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));
   }
-    memcpy(signature, sig, 64);
-    signature[64] = v1;
-    *signature_len = 65;
+  memcpy(signature, sig, 64);
+  signature[64] = v1;
+  *signature_len = 65;
 }

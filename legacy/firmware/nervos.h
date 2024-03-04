@@ -22,8 +22,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "bip32.h"
-#include "messages-nervos.pb.h"
 #include "debug.h"
+#include "messages-nervos.pb.h"
 
 /**
  * Size of Public key in bytes
@@ -31,8 +31,10 @@
 #define SIZE_PUBKEY 32
 
 void nervos_get_address_from_public_key(const uint8_t *public_key,
-                                        char *address,const char *network);
+                                        char *address, const char *network);
 void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
-                         uint32_t raw_message_len,const uint8_t *witness_buffer,uint32_t witness_buffer_len, uint8_t *signature,
-                         pb_size_t *signature_len) ;
-#endif  
+                         uint32_t raw_message_len,
+                         const uint8_t *witness_buffer,
+                         uint32_t witness_buffer_len, uint8_t *signature,
+                         pb_size_t *signature_len);
+#endif
