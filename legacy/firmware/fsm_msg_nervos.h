@@ -17,7 +17,6 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 void fsm_msgNervosGetAddress(const NervosGetAddress *msg) {
   CHECK_INITIALIZED
   CHECK_PIN
@@ -26,14 +25,15 @@ void fsm_msgNervosGetAddress(const NervosGetAddress *msg) {
                                     msg->address_n_count, NULL);
   hdnode_fill_public_key(node);
   if (!node) return;
-  nervos_get_address_from_public_key(node->public_key, resp->address, msg->network);
+  nervos_get_address_from_public_key(node->public_key, resp->address,
+                                     msg->network);
 
   if (msg->has_show_display && msg->show_display) {
     char desc[16] = {0};
     strcat(desc, "Nervos");
     strcat(desc, _("Address:"));
-    if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0,msg->address_n,
-                               msg->address_n_count, false, NULL, 0, 0, NULL)) {
+    if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
+                           msg->address_n_count, false, NULL, 0, 0, NULL)) {
       return;
     }
   }
@@ -41,29 +41,32 @@ void fsm_msgNervosGetAddress(const NervosGetAddress *msg) {
   layoutHome();
 }
 
-
 void fsm_msgNervosSignTx(const NervosSignTx *msg) {
   CHECK_INITIALIZED
   CHECK_PIN
   RESP_INIT(NervosSignedTx);
   if (strcmp(msg->network, "ckt") != 0 && strcmp(msg->network, "ckb") != 0) {
-     fsm_sendFailure(FailureType_Failure_ProcessError, _("network format error"));
-     layoutHome();
-     return; 
-   }
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    _("network format error"));
+    layoutHome();
+    return;
+  }
   HDNode *node = fsm_getDerivedNode(SECP256K1_NAME, msg->address_n,
-                                  msg->address_n_count, NULL);                              
+                                    msg->address_n_count, NULL);
   if (!node) return;
 
   hdnode_fill_public_key(node);
-  nervos_get_address_from_public_key(node->public_key, resp->address, msg->network);
-   if (!fsm_layoutSignMessage("Nervos", resp->address, msg->raw_message.bytes,
+  nervos_get_address_from_public_key(node->public_key, resp->address,
+                                     msg->network);
+  if (!fsm_layoutSignMessage("Nervos", resp->address, msg->raw_message.bytes,
                              msg->raw_message.size)) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
     layoutHome();
     return;
   }
-  nervos_sign_sighash(node, msg->raw_message.bytes, msg->raw_message.size,msg->witness_buffer.bytes,msg -> witness_buffer.size, resp->signature.bytes, &resp->signature.size);   
-  msg_write(MessageType_MessageType_NervosSignedTx, resp);  
+  nervos_sign_sighash(node, msg->raw_message.bytes, msg->raw_message.size,
+                      msg->witness_buffer.bytes, msg->witness_buffer.size,
+                      resp->signature.bytes, &resp->signature.size);
+  msg_write(MessageType_MessageType_NervosSignedTx, resp);
   layoutHome();
 }

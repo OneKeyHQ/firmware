@@ -37,6 +37,7 @@
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-nervos.pb.h"
 #include "messages-nexa.pb.h"
 #include "messages-nostr.pb.h"
 #include "messages-polkadot.pb.h"
@@ -46,7 +47,6 @@
 #include "messages-stellar.pb.h"
 #include "messages-sui.pb.h"
 #include "messages-tron.pb.h"
-#include "messages-nervos.pb.h"
 
 // CoinJoin fee rate multiplier.
 #define FEE_RATE_DECIMALS (1000000)
@@ -322,6 +322,5 @@ void fsm_msgLnurlAuth(const LnurlAuth *msg);
 // nervos
 void fsm_msgNervosGetAddress(const NervosGetAddress *msg);
 void fsm_msgNervosSignTx(const NervosSignTx *msg);
-
 
 #endif

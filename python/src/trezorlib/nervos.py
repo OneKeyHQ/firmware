@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 
-
-
 # This file is part of the Trezor project.
 
 #
@@ -35,11 +33,7 @@
 
 from typing import TYPE_CHECKING
 
-
-
-
 from . import messages
-
 from .tools import expect
 
 if TYPE_CHECKING:
@@ -51,33 +45,36 @@ if TYPE_CHECKING:
     from .protobuf import MessageType
 
 
-
 @expect(messages.NervosAddress, field="address", ret_type=str)
-
 def get_address(
-
     client: "TrezorClient",
-
     address_n: "Address",
-
     network: str,
-
     show_display: bool = False,
-
 ) -> "MessageType":
 
-    res =  client.call(
-
-        messages.NervosGetAddress(address_n=address_n, network=network, show_display=show_display)
-
+    res = client.call(
+        messages.NervosGetAddress(
+            address_n=address_n, network=network, show_display=show_display
+        )
     )
 
     return res
 
 
-
-
 @expect(messages.NervosSignedTx)
-
-def sign_tx(client: "TrezorClient", address_n: "Address", rawtx: str,witness_buffer: str,network: str):
-    return client.call(messages.NervosSignTx(address_n=address_n,  raw_message=rawtx,witness_buffer = witness_buffer, network=network))
+def sign_tx(
+    client: "TrezorClient",
+    address_n: "Address",
+    rawtx: bytes,
+    witness_buffer: bytes,
+    network: str,
+):
+    return client.call(
+        messages.NervosSignTx(
+            address_n=address_n,
+            raw_message=rawtx,
+            witness_buffer=witness_buffer,
+            network=network,
+        )
+    )
