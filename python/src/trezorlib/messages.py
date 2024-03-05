@@ -365,6 +365,8 @@ class MessageType(IntEnum):
     SuiSignedTx = 11103
     SuiSignMessage = 11104
     SuiMessageSignature = 11105
+    SuiTxRequest = 11106
+    SuiTxAck = 11107
     FilecoinGetAddress = 11200
     FilecoinAddress = 11201
     FilecoinSignTx = 11202
@@ -391,6 +393,8 @@ class MessageType(IntEnum):
     NostrDecryptedMessage = 11507
     NostrSignSchnorr = 11508
     NostrSignedSchnorr = 11509
+    LnurlAuth = 11600
+    LnurlAuthResp = 11601
     DeviceBackToBoot = 903
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
@@ -3844,6 +3848,11 @@ class Features(protobuf.MessageType):
         610: protobuf.Field("onekey_firmware_hash", "bytes", repeated=False, required=False),
         611: protobuf.Field("onekey_firmware_build_id", "string", repeated=False, required=False),
         612: protobuf.Field("onekey_serial_no", "string", repeated=False, required=False),
+        613: protobuf.Field("onekey_boot_build_id", "string", repeated=False, required=False),
+        614: protobuf.Field("onekey_ble_name", "string", repeated=False, required=False),
+        615: protobuf.Field("onekey_ble_version", "string", repeated=False, required=False),
+        616: protobuf.Field("onekey_ble_build_id", "string", repeated=False, required=False),
+        617: protobuf.Field("onekey_ble_hash", "bytes", repeated=False, required=False),
     }
 
     def __init__(
@@ -3920,6 +3929,11 @@ class Features(protobuf.MessageType):
         onekey_firmware_hash: Optional["bytes"] = None,
         onekey_firmware_build_id: Optional["str"] = None,
         onekey_serial_no: Optional["str"] = None,
+        onekey_boot_build_id: Optional["str"] = None,
+        onekey_ble_name: Optional["str"] = None,
+        onekey_ble_version: Optional["str"] = None,
+        onekey_ble_build_id: Optional["str"] = None,
+        onekey_ble_hash: Optional["bytes"] = None,
     ) -> None:
         self.capabilities: Sequence["Capability"] = capabilities if capabilities is not None else []
         self.major_version = major_version
@@ -3992,6 +4006,11 @@ class Features(protobuf.MessageType):
         self.onekey_firmware_hash = onekey_firmware_hash
         self.onekey_firmware_build_id = onekey_firmware_build_id
         self.onekey_serial_no = onekey_serial_no
+        self.onekey_boot_build_id = onekey_boot_build_id
+        self.onekey_ble_name = onekey_ble_name
+        self.onekey_ble_version = onekey_ble_version
+        self.onekey_ble_build_id = onekey_ble_build_id
+        self.onekey_ble_hash = onekey_ble_hash
 
 
 class LockDevice(protobuf.MessageType):
@@ -7185,6 +7204,43 @@ class KaspaSignedTx(protobuf.MessageType):
         self.signature = signature
 
 
+class LnurlAuth(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11600
+    FIELDS = {
+        2: protobuf.Field("domain", "bytes", repeated=False, required=True),
+        3: protobuf.Field("data", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        domain: "bytes",
+        data: "bytes",
+    ) -> None:
+        self.domain = domain
+        self.data = data
+
+
+class LnurlAuthResp(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11601
+    FIELDS = {
+        1: protobuf.Field("publickey", "string", repeated=False, required=False),
+        2: protobuf.Field("path", "string", repeated=False, required=False),
+        3: protobuf.Field("signature", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        publickey: Optional["str"] = None,
+        path: Optional["str"] = None,
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.publickey = publickey
+        self.path = path
+        self.signature = signature
+
+
 class MoneroTransactionSourceEntry(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = None
     FIELDS = {
@@ -9754,6 +9810,8 @@ class SuiSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=False),
+        4: protobuf.Field("data_length", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -9761,9 +9819,13 @@ class SuiSignTx(protobuf.MessageType):
         *,
         raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
+        data_initial_chunk: Optional["bytes"] = b'',
+        data_length: Optional["int"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.data_initial_chunk = data_initial_chunk
+        self.data_length = data_length
 
 
 class SuiSignedTx(protobuf.MessageType):
@@ -9781,6 +9843,40 @@ class SuiSignedTx(protobuf.MessageType):
     ) -> None:
         self.public_key = public_key
         self.signature = signature
+
+
+class SuiTxRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11106
+    FIELDS = {
+        1: protobuf.Field("data_length", "uint32", repeated=False, required=False),
+        2: protobuf.Field("public_key", "bytes", repeated=False, required=False),
+        3: protobuf.Field("signature", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: Optional["int"] = None,
+        public_key: Optional["bytes"] = None,
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.public_key = public_key
+        self.signature = signature
+
+
+class SuiTxAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11107
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: "bytes",
+    ) -> None:
+        self.data_chunk = data_chunk
 
 
 class SuiSignMessage(protobuf.MessageType):
