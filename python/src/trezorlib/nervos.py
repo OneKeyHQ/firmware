@@ -41,24 +41,6 @@ def get_address(
     return res
 
 
-# @expect(messages.NervosSignedTx)
-# def sign_tx(
-#     client: "TrezorClient",
-#     address_n: "Address",
-#     rawtx: bytes,
-#     witness_buffer: bytes,
-#     network: str,
-# ):
-
-#     return client.call(
-#         messages.NervosSignTx(
-#             address_n=address_n,
-#             raw_message=rawtx,
-#             witness_buffer=witness_buffer,
-#             network=network,
-#         )
-#     )
-
 
 def sign_tx(
     client: "TrezorClient",
@@ -69,10 +51,6 @@ def sign_tx(
 ) -> Sequence[bytes]:
 
     inputs = rawtx.split("-")
-    print("input0:" + str(inputs[0]))
-    print("input1:" + str(inputs[1]))
-    print("inputlenth:" + str(len(inputs)))
-    # print("input1:"+str(inputs[1]))
     assert len(inputs) >= 1, "Invalid raw message"
     if len(address_n) != len(inputs) and len(address_n) != 1:
         raise ValueError("Number of addresses must match number of inputs")
@@ -91,7 +69,6 @@ def sign_tx(
 
     while isinstance(resp, messages.NervosTxInputRequest):
         signatures.append(resp.signature)
-        print("nervostxinputrequest:" + str(resp.request_index))
         resp = client.call(
             messages.NervosTxInputAck(
                 address_n=address_n[resp.request_index if len(address_n) > 1 else 0],

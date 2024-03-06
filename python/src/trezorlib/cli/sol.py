@@ -17,8 +17,9 @@
 
 from typing import TYPE_CHECKING, Optional
 
-import base58
 import click
+
+import base58
 
 from .. import solana, tools
 from . import with_client
