@@ -371,6 +371,8 @@ if TYPE_CHECKING:
         NervosAddress = 11702
         NervosSignTx = 11703
         NervosSignedTx = 11704
+        NervosTxInputRequest = 11705
+        NervosTxInputAck = 11706
         DeviceEraseSector = 10026
 
     class FailureType(IntEnum):

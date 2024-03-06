@@ -37,4 +37,10 @@ void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
                          const uint8_t *witness_buffer,
                          uint32_t witness_buffer_len, uint8_t *signature,
                          pb_size_t *signature_len);
+void nervos_signing_abort(void);
+void nervos_signing_init(const NervosSignTx *msg);
+extern const uint8_t *global_witness_buffer;
+extern uint16_t input_count_nervos;
+extern uint16_t input_index_nervos;
+extern uint32_t witness_buffer_len_nervos;
 #endif

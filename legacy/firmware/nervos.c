@@ -22,6 +22,7 @@
 #include "blake2b.h"
 #include "buttons.h"
 #include "config.h"
+#include "debug.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -30,6 +31,14 @@
 #include "protect.h"
 #include "schnorr_bch.h"
 #include "secp256k1.h"
+
+uint16_t input_count_nervos;
+uint16_t input_index_nervos;
+uint32_t witness_buffer_len_nervos;
+const uint8_t *global_witness_buffer = NULL;
+static bool nervos_signing = false;
+static char previous_address[72] = {0};
+static char network_name[10] = {0};
 
 #define MAX_ADDRESS_LENGTH 100
 #define CODE_INDEX_SECP256K1_SINGLE 0x00
@@ -193,11 +202,53 @@ void nervos_get_address_from_public_key(const uint8_t *public_key,
   address[strlen(network) + 1 + combined_len] = '\0';
 }
 
+void nervos_signing_init(const NervosSignTx *msg) {
+  nervos_signing = true;
+  input_count_nervos = msg->input_count;
+  input_index_nervos = 1;
+  uint8_t *temp = malloc(msg->witness_buffer.size);
+  memcpy(temp, msg->witness_buffer.bytes, msg->witness_buffer.size);
+  global_witness_buffer = temp;
+  memcpy(network_name, msg->network, sizeof(msg->network));
+}
+
+static bool show_confirm_signing(const char *address, uint8_t address_len) {
+  if (strcmp(address, previous_address) == 0) {
+    return false;
+  } else {
+    memcpy(previous_address, address, address_len);
+    return true;
+  }
+}
+
 void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
                          uint32_t raw_message_len,
                          const uint8_t *witness_buffer,
                          uint32_t witness_buffer_len, uint8_t *signature,
                          pb_size_t *signature_len) {
+  if (!nervos_signing) {
+    fsm_sendFailure(FailureType_Failure_UnexpectedMessage,
+                    "Not in Nervos signing mode");
+    layoutHome();
+    return;
+  }
+
+  input_count_nervos--;
+  char address[72] = {0};
+
+  nervos_get_address_from_public_key(node->public_key, address, network_name);
+
+  // show display
+  if (show_confirm_signing(address, sizeof(address))) {
+    if (!layoutBlindSign("Nervos", false, NULL, address, raw_message,
+                         raw_message_len, NULL, NULL, NULL, NULL, NULL, NULL)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                      "Signing cancelled by user");
+      nervos_signing_abort();
+      return;
+    }
+  }
+
   uint8_t hash_output[32];
   ckb_hash(raw_message, raw_message_len, hash_output);
   blake2b_state S;
@@ -219,4 +270,16 @@ void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
   memcpy(signature, sig, 64);
   signature[64] = v1;
   *signature_len = 65;
+}
+
+void nervos_signing_abort(void) {
+  if (nervos_signing) {
+    nervos_signing = false;
+    input_count_nervos = 0;
+    input_index_nervos = 0;
+    free((void *)global_witness_buffer);
+    global_witness_buffer = NULL;
+    memset(previous_address, 0, sizeof(previous_address));
+    layoutHome();
+  }
 }

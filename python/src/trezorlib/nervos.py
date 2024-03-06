@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 from . import messages
 from .tools import expect
@@ -41,20 +41,65 @@ def get_address(
     return res
 
 
-@expect(messages.NervosSignedTx)
+# @expect(messages.NervosSignedTx)
+# def sign_tx(
+#     client: "TrezorClient",
+#     address_n: "Address",
+#     rawtx: bytes,
+#     witness_buffer: bytes,
+#     network: str,
+# ):
+
+#     return client.call(
+#         messages.NervosSignTx(
+#             address_n=address_n,
+#             raw_message=rawtx,
+#             witness_buffer=witness_buffer,
+#             network=network,
+#         )
+#     )
+
+
 def sign_tx(
     client: "TrezorClient",
-    address_n: "Address",
-    rawtx: bytes,
-    witness_buffer: bytes,
+    address_n: Sequence["Address"],
+    rawtx: str,
+    witness_buffer: str,
     network: str,
-):
+) -> Sequence[bytes]:
 
-    return client.call(
+    inputs = rawtx.split("-")
+    print("input0:" + str(inputs[0]))
+    print("input1:" + str(inputs[1]))
+    print("inputlenth:" + str(len(inputs)))
+    # print("input1:"+str(inputs[1]))
+    assert len(inputs) >= 1, "Invalid raw message"
+    if len(address_n) != len(inputs) and len(address_n) != 1:
+        raise ValueError("Number of addresses must match number of inputs")
+
+    signatures = []
+
+    resp = client.call(
         messages.NervosSignTx(
-            address_n=address_n,
-            raw_message=rawtx,
-            witness_buffer=witness_buffer,
+            address_n=address_n[0],
+            raw_message=bytes.fromhex(inputs[0]),
+            witness_buffer=bytes.fromhex(witness_buffer),
             network=network,
+            input_count=len(inputs),
         )
     )
+
+    while isinstance(resp, messages.NervosTxInputRequest):
+        signatures.append(resp.signature)
+        print("nervostxinputrequest:" + str(resp.request_index))
+        resp = client.call(
+            messages.NervosTxInputAck(
+                address_n=address_n[resp.request_index if len(address_n) > 1 else 0],
+                raw_message=bytes.fromhex(inputs[resp.request_index]),
+            )
+        )
+    if isinstance(resp, messages.NervosSignedTx):
+        signatures.append(resp.signature)
+    else:
+        raise ValueError("Invalid response")
+    return signatures
