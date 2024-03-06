@@ -523,6 +523,8 @@ enum MessageType {
     MessageType_NervosAddress = 11702 [(wire_out) = true];
     MessageType_NervosSignTx = 11703 [(wire_in) = true];
     MessageType_NervosSignedTx = 11704 [(wire_out) = true];
+    MessageType_NervosTxInputRequest = 11705 [(wire_out) = true];
+    MessageType_NervosTxInputAck = 11706 [(wire_in) = true];
 
 
     //onekey

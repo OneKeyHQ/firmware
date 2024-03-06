@@ -375,6 +375,8 @@ if TYPE_CHECKING:
         NervosAddress = 11702
         NervosSignTx = 11703
         NervosSignedTx = 11704
+        NervosTxInputRequest = 11705
+        NervosTxInputAck = 11706
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003

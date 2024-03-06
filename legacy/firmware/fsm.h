@@ -322,5 +322,5 @@ void fsm_msgLnurlAuth(const LnurlAuth *msg);
 // nervos
 void fsm_msgNervosGetAddress(const NervosGetAddress *msg);
 void fsm_msgNervosSignTx(const NervosSignTx *msg);
-
+void fsm_msgNervosTxInputAck(const NervosTxInputAck *msg);
 #endif

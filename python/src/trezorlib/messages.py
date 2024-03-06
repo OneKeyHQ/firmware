@@ -384,6 +384,8 @@ class MessageType(IntEnum):
     NervosAddress = 11702
     NervosSignTx = 11703
     NervosSignedTx = 11704
+    NervosTxInputRequest = 11705
+    NervosTxInputAck = 11706
     DeviceInfoSettings = 10001
     GetDeviceInfo = 10002
     DeviceInfo = 10003
@@ -8250,6 +8252,7 @@ class NervosSignTx(protobuf.MessageType):
         2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
         3: protobuf.Field("witness_buffer", "bytes", repeated=False, required=True),
         4: protobuf.Field("network", "string", repeated=False, required=True),
+        5: protobuf.Field("input_count", "uint32", repeated=False, required=False, default=1),
     }
 
     def __init__(
@@ -8259,11 +8262,13 @@ class NervosSignTx(protobuf.MessageType):
         witness_buffer: "bytes",
         network: "str",
         address_n: Optional[Sequence["int"]] = None,
+        input_count: Optional["int"] = 1,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_message = raw_message
         self.witness_buffer = witness_buffer
         self.network = network
+        self.input_count = input_count
 
 
 class NervosSignedTx(protobuf.MessageType):
@@ -8281,6 +8286,40 @@ class NervosSignedTx(protobuf.MessageType):
     ) -> None:
         self.signature = signature
         self.address = address
+
+
+class NervosTxInputRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11705
+    FIELDS = {
+        1: protobuf.Field("request_index", "uint32", repeated=False, required=True),
+        2: protobuf.Field("signature", "bytes", repeated=False, required=False, default=None),
+    }
+
+    def __init__(
+        self,
+        *,
+        request_index: "int",
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.request_index = request_index
+        self.signature = signature
+
+
+class NervosTxInputAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11706
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False, default=None),
+        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        raw_message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.raw_message = raw_message
 
 
 class NexaGetAddress(protobuf.MessageType):

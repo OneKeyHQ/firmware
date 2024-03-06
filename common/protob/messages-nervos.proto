@@ -38,6 +38,7 @@ message NervosSignTx {
     required bytes  raw_message = 2;                                    // the bip143-like pre-hashed message to be signed
     required bytes  witness_buffer = 3;
     required string network = 4;                                        // Network name
+    optional uint32 input_count = 5 [default=1];                        // number of inputs in the transaction
    }
 
 /**
@@ -47,4 +48,24 @@ message NervosSignTx {
  message NervosSignedTx {
     required bytes signature = 1;   // signature of the message
     required string address  = 2;
- }
+}
+
+/**
+ * Request: Ask client for corresponding input
+ * @next NervosTxInputAck
+ * @next Failure
+ */
+message NervosTxInputRequest { 
+    required uint32 request_index = 1;                                            // index of the input to sign
+    optional bytes  signature = 2;                                                // signature of the pervious input
+}
+
+/**
+ * Response: Contains input to be signed
+ * @next NervosSignedTx
+ * @next Failure
+ */
+message NervosTxInputAck {
+    repeated uint32 address_n = 1;                                               // BIP-32 path to derive the key from master node
+    required bytes raw_message = 2;                                              // the bip143-like pre-hashed message to be signed
+}
