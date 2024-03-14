@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from trezor.enums import NEMMosaicLevy  # noqa: F401
     from trezor.enums import NEMSupplyChangeType  # noqa: F401
     from trezor.enums import OneKeyDeviceType  # noqa: F401
+    from trezor.enums import OneKeySEState  # noqa: F401
     from trezor.enums import OneKeySeType  # noqa: F401
     from trezor.enums import OutputScriptType  # noqa: F401
     from trezor.enums import PinMatrixRequestType  # noqa: F401
@@ -2113,7 +2114,6 @@ if TYPE_CHECKING:
         fw_minor: "int | None"
         fw_patch: "int | None"
         fw_vendor: "str | None"
-        fw_vendor_keys: "bytes | None"
         unfinished_backup: "bool | None"
         no_backup: "bool | None"
         recovery_mode: "bool | None"
@@ -2145,17 +2145,18 @@ if TYPE_CHECKING:
         cpu_info: "str | None"
         pre_firmware: "str | None"
         coin_switch: "int | None"
-        build_id: "str | None"
-        battery_level: "int | None"
+        build_id: "bytes | None"
+        boardloader_version: "str | None"
+        busy: "bool | None"
         onekey_device_type: "OneKeyDeviceType | None"
         onekey_se_type: "OneKeySeType | None"
         onekey_board_version: "str | None"
         onekey_board_hash: "bytes | None"
         onekey_boot_version: "str | None"
         onekey_boot_hash: "bytes | None"
-        onekey_se_version: "str | None"
-        onekey_se_hash: "bytes | None"
-        onekey_se_build_id: "str | None"
+        onekey_se01_version: "str | None"
+        onekey_se01_hash: "bytes | None"
+        onekey_se01_build_id: "str | None"
         onekey_firmware_version: "str | None"
         onekey_firmware_hash: "bytes | None"
         onekey_firmware_build_id: "str | None"
@@ -2165,6 +2166,13 @@ if TYPE_CHECKING:
         onekey_ble_version: "str | None"
         onekey_ble_build_id: "str | None"
         onekey_ble_hash: "bytes | None"
+        onekey_se02_version: "str | None"
+        onekey_se03_version: "str | None"
+        onekey_se04_version: "str | None"
+        onekey_se01_state: "OneKeySEState | None"
+        onekey_se02_state: "OneKeySEState | None"
+        onekey_se03_state: "OneKeySEState | None"
+        onekey_se04_state: "OneKeySEState | None"
 
         def __init__(
             self,
@@ -2193,7 +2201,6 @@ if TYPE_CHECKING:
             fw_minor: "int | None" = None,
             fw_patch: "int | None" = None,
             fw_vendor: "str | None" = None,
-            fw_vendor_keys: "bytes | None" = None,
             unfinished_backup: "bool | None" = None,
             no_backup: "bool | None" = None,
             recovery_mode: "bool | None" = None,
@@ -2224,17 +2231,18 @@ if TYPE_CHECKING:
             cpu_info: "str | None" = None,
             pre_firmware: "str | None" = None,
             coin_switch: "int | None" = None,
-            build_id: "str | None" = None,
-            battery_level: "int | None" = None,
+            build_id: "bytes | None" = None,
+            boardloader_version: "str | None" = None,
+            busy: "bool | None" = None,
             onekey_device_type: "OneKeyDeviceType | None" = None,
             onekey_se_type: "OneKeySeType | None" = None,
             onekey_board_version: "str | None" = None,
             onekey_board_hash: "bytes | None" = None,
             onekey_boot_version: "str | None" = None,
             onekey_boot_hash: "bytes | None" = None,
-            onekey_se_version: "str | None" = None,
-            onekey_se_hash: "bytes | None" = None,
-            onekey_se_build_id: "str | None" = None,
+            onekey_se01_version: "str | None" = None,
+            onekey_se01_hash: "bytes | None" = None,
+            onekey_se01_build_id: "str | None" = None,
             onekey_firmware_version: "str | None" = None,
             onekey_firmware_hash: "bytes | None" = None,
             onekey_firmware_build_id: "str | None" = None,
@@ -2244,11 +2252,118 @@ if TYPE_CHECKING:
             onekey_ble_version: "str | None" = None,
             onekey_ble_build_id: "str | None" = None,
             onekey_ble_hash: "bytes | None" = None,
+            onekey_se02_version: "str | None" = None,
+            onekey_se03_version: "str | None" = None,
+            onekey_se04_version: "str | None" = None,
+            onekey_se01_state: "OneKeySEState | None" = None,
+            onekey_se02_state: "OneKeySEState | None" = None,
+            onekey_se03_state: "OneKeySEState | None" = None,
+            onekey_se04_state: "OneKeySEState | None" = None,
         ) -> None:
             pass
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["Features"]:
+            return isinstance(msg, cls)
+
+    class OnekeyFeatures(protobuf.MessageType):
+        onekey_device_type: "OneKeyDeviceType | None"
+        onekey_board_version: "str | None"
+        onekey_boot_version: "str | None"
+        onekey_firmware_version: "str | None"
+        onekey_board_hash: "bytes | None"
+        onekey_boot_hash: "bytes | None"
+        onekey_firmware_hash: "bytes | None"
+        onekey_board_build_id: "str | None"
+        onekey_boot_build_id: "str | None"
+        onekey_firmware_build_id: "str | None"
+        onekey_serial_no: "str | None"
+        onekey_ble_name: "str | None"
+        onekey_ble_version: "str | None"
+        onekey_ble_build_id: "str | None"
+        onekey_ble_hash: "bytes | None"
+        onekey_se_type: "OneKeySeType | None"
+        onekey_se01_state: "OneKeySEState | None"
+        onekey_se02_state: "OneKeySEState | None"
+        onekey_se03_state: "OneKeySEState | None"
+        onekey_se04_state: "OneKeySEState | None"
+        onekey_se01_version: "str | None"
+        onekey_se02_version: "str | None"
+        onekey_se03_version: "str | None"
+        onekey_se04_version: "str | None"
+        onekey_se01_hash: "bytes | None"
+        onekey_se02_hash: "bytes | None"
+        onekey_se03_hash: "bytes | None"
+        onekey_se04_hash: "bytes | None"
+        onekey_se01_build_id: "str | None"
+        onekey_se02_build_id: "str | None"
+        onekey_se03_build_id: "str | None"
+        onekey_se04_build_id: "str | None"
+        onekey_se01_boot_version: "str | None"
+        onekey_se02_boot_version: "str | None"
+        onekey_se03_boot_version: "str | None"
+        onekey_se04_boot_version: "str | None"
+        onekey_se01_boot_hash: "bytes | None"
+        onekey_se02_boot_hash: "bytes | None"
+        onekey_se03_boot_hash: "bytes | None"
+        onekey_se04_boot_hash: "bytes | None"
+        onekey_se01_boot_build_id: "str | None"
+        onekey_se02_boot_build_id: "str | None"
+        onekey_se03_boot_build_id: "str | None"
+        onekey_se04_boot_build_id: "str | None"
+
+        def __init__(
+            self,
+            *,
+            onekey_device_type: "OneKeyDeviceType | None" = None,
+            onekey_board_version: "str | None" = None,
+            onekey_boot_version: "str | None" = None,
+            onekey_firmware_version: "str | None" = None,
+            onekey_board_hash: "bytes | None" = None,
+            onekey_boot_hash: "bytes | None" = None,
+            onekey_firmware_hash: "bytes | None" = None,
+            onekey_board_build_id: "str | None" = None,
+            onekey_boot_build_id: "str | None" = None,
+            onekey_firmware_build_id: "str | None" = None,
+            onekey_serial_no: "str | None" = None,
+            onekey_ble_name: "str | None" = None,
+            onekey_ble_version: "str | None" = None,
+            onekey_ble_build_id: "str | None" = None,
+            onekey_ble_hash: "bytes | None" = None,
+            onekey_se_type: "OneKeySeType | None" = None,
+            onekey_se01_state: "OneKeySEState | None" = None,
+            onekey_se02_state: "OneKeySEState | None" = None,
+            onekey_se03_state: "OneKeySEState | None" = None,
+            onekey_se04_state: "OneKeySEState | None" = None,
+            onekey_se01_version: "str | None" = None,
+            onekey_se02_version: "str | None" = None,
+            onekey_se03_version: "str | None" = None,
+            onekey_se04_version: "str | None" = None,
+            onekey_se01_hash: "bytes | None" = None,
+            onekey_se02_hash: "bytes | None" = None,
+            onekey_se03_hash: "bytes | None" = None,
+            onekey_se04_hash: "bytes | None" = None,
+            onekey_se01_build_id: "str | None" = None,
+            onekey_se02_build_id: "str | None" = None,
+            onekey_se03_build_id: "str | None" = None,
+            onekey_se04_build_id: "str | None" = None,
+            onekey_se01_boot_version: "str | None" = None,
+            onekey_se02_boot_version: "str | None" = None,
+            onekey_se03_boot_version: "str | None" = None,
+            onekey_se04_boot_version: "str | None" = None,
+            onekey_se01_boot_hash: "bytes | None" = None,
+            onekey_se02_boot_hash: "bytes | None" = None,
+            onekey_se03_boot_hash: "bytes | None" = None,
+            onekey_se04_boot_hash: "bytes | None" = None,
+            onekey_se01_boot_build_id: "str | None" = None,
+            onekey_se02_boot_build_id: "str | None" = None,
+            onekey_se03_boot_build_id: "str | None" = None,
+            onekey_se04_boot_build_id: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["OnekeyFeatures"]:
             return isinstance(msg, cls)
 
     class LockDevice(protobuf.MessageType):
@@ -3167,20 +3282,6 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["FileInfoList"]:
-            return isinstance(msg, cls)
-
-    class DeviceEraseSector(protobuf.MessageType):
-        sector: "int"
-
-        def __init__(
-            self,
-            *,
-            sector: "int",
-        ) -> None:
-            pass
-
-        @classmethod
-        def is_type_of(cls, msg: protobuf.MessageType) -> TypeGuard["DeviceEraseSector"]:
             return isinstance(msg, cls)
 
     class FileInfo(protobuf.MessageType):

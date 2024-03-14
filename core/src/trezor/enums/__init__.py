@@ -396,8 +396,8 @@ if TYPE_CHECKING:
         ResourceUpdate = 10022
         ListResDir = 10023
         FileInfoList = 10024
-        RebootToBoardloader = 10025
-        DeviceEraseSector = 10026
+        OnekeyGetFeatures = 10025
+        OnekeyFeatures = 10026
 
     class BinanceOrderType(IntEnum):
         OT_UNKNOWN = 0
@@ -574,6 +574,21 @@ if TYPE_CHECKING:
         PromptAlways = 1
         PromptTemporarily = 2
 
+    class OneKeyDeviceType(IntEnum):
+        CLASSIC = 0
+        CLASSIC1S = 1
+        MINI = 2
+        TOUCH = 3
+        PRO = 5
+
+    class OneKeySeType(IntEnum):
+        THD89 = 0
+        SE608A = 1
+
+    class OneKeySEState(IntEnum):
+        BOOT = 0
+        APP = 1
+
     class Capability(IntEnum):
         Bitcoin = 1
         Bitcoin_like = 2
@@ -592,17 +607,6 @@ if TYPE_CHECKING:
         Shamir = 15
         ShamirGroups = 16
         PassphraseEntry = 17
-
-    class OneKeyDeviceType(IntEnum):
-        CLASSIC = 0
-        CLASSIC1S = 1
-        MINI = 2
-        TOUCH = 3
-        TOUCH_PRO = 4
-
-    class OneKeySeType(IntEnum):
-        THD89 = 0
-        SE608A = 1
 
     class ExportType(IntEnum):
         SeedEncExportType_NO = 0
