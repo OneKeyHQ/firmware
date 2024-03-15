@@ -562,7 +562,7 @@ enum MessageType {
     MessageType_ResourceUpdate = 10022 [(wire_in) = true];
     MessageType_ListResDir = 10023 [(wire_in) = true];
     MessageType_FileInfoList = 10024 [(wire_out) = true];
-    MessageType_RebootToBoardloader = 10025 [(wire_in) = true];
-    MessageType_DeviceEraseSector= 10026 [(wire_in) = true];
+    MessageType_OnekeyGetFeatures = 10025 [(wire_in) = true];
+    MessageType_OnekeyFeatures = 10026 [(wire_out) = true];
 
 }

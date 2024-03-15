@@ -2,8 +2,5 @@
 # fmt: off
 # isort:skip_file
 
-CLASSIC = 0
-CLASSIC1S = 1
-MINI = 2
-TOUCH = 3
-PRO = 5
+BOOT = 0
+APP = 1

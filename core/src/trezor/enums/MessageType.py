@@ -380,5 +380,5 @@ if not utils.BITCOIN_ONLY:
     ResourceUpdate = 10022
     ListResDir = 10023
     FileInfoList = 10024
-    RebootToBoardloader = 10025
-    DeviceEraseSector = 10026
+    OnekeyGetFeatures = 10025
+    OnekeyFeatures = 10026
