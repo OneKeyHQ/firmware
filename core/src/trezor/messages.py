@@ -6657,17 +6657,19 @@ if TYPE_CHECKING:
 
     class NervosSignTx(protobuf.MessageType):
         address_n: "list[int]"
-        raw_message: "bytes"
+        data_initial_chunk: "bytes"
         witness_buffer: "bytes"
         network: "str"
+        data_length: "int | None"
 
         def __init__(
             self,
             *,
-            raw_message: "bytes",
+            data_initial_chunk: "bytes",
             witness_buffer: "bytes",
             network: "str",
             address_n: "list[int] | None" = None,
+            data_length: "int | None" = None,
         ) -> None:
             pass
 
@@ -6689,6 +6691,38 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["NervosSignedTx"]:
+            return isinstance(msg, cls)
+
+    class NervosTxRequest(protobuf.MessageType):
+        data_length: "int | None"
+        public_key: "bytes | None"
+        signature: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            data_length: "int | None" = None,
+            public_key: "bytes | None" = None,
+            signature: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosTxRequest"]:
+            return isinstance(msg, cls)
+
+    class NervosTxAck(protobuf.MessageType):
+        data_chunk: "bytes"
+
+        def __init__(
+            self,
+            *,
+            data_chunk: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["NervosTxAck"]:
             return isinstance(msg, cls)
 
     class NexaGetAddress(protobuf.MessageType):

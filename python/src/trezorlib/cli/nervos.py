@@ -55,8 +55,9 @@ def get_address(client: "TrezorClient", address: str, network: str,show_display:
 @click.argument("message")
 @click.option("-w", "--witness_buffer", help="witness_buffer")
 @click.option("-N", "--network", help="Network Name")
+@click.option("-d", "--data_length", help="data_length")
 @with_client
-def sign_tx(client: "TrezorClient", address: str, message:str,witness_buffer: str, network: str):
+def sign_tx(client: "TrezorClient", address: str, message:str,witness_buffer: str, network: str, data_length : int):
     """Sign a hex-encoded raw message which is the data used to calculate the bip143-like sig-hash.
     If more than one input is needed, the message should be separated by a dash (-).
     If more than one address is needed. the address should be separated by a dash (-).
@@ -64,5 +65,9 @@ def sign_tx(client: "TrezorClient", address: str, message:str,witness_buffer: st
     address_n = tools.parse_path(address)
     message_bytes = bytes.fromhex(message)
     witness_buffer_bytes = bytes.fromhex(witness_buffer)
-    resp = nervos.sign_tx(client, address_n, message_bytes,witness_buffer_bytes,network)
+    data_length_int = None
+    if data_length is not None:
+        data_length_int = int(data_length)
+
+    resp = nervos.sign_tx(client, address_n, message_bytes,witness_buffer_bytes,network,data_length_int)
     return resp.signature.hex()

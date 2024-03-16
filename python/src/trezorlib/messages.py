@@ -321,6 +321,8 @@ class MessageType(IntEnum):
     NervosAddress = 11702
     NervosSignTx = 11703
     NervosSignedTx = 11704
+    NervosTxRequest = 11705
+    NervosTxAck = 11706
     AptosGetAddress = 10600
     AptosAddress = 10601
     AptosSignTx = 10602
@@ -8421,23 +8423,26 @@ class NervosSignTx(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 11703
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
-        2: protobuf.Field("raw_message", "bytes", repeated=False, required=True),
+        2: protobuf.Field("data_initial_chunk", "bytes", repeated=False, required=True),
         3: protobuf.Field("witness_buffer", "bytes", repeated=False, required=True),
         4: protobuf.Field("network", "string", repeated=False, required=True),
+        5: protobuf.Field("data_length", "uint32", repeated=False, required=False),
     }
 
     def __init__(
         self,
         *,
-        raw_message: "bytes",
+        data_initial_chunk: "bytes",
         witness_buffer: "bytes",
         network: "str",
         address_n: Optional[Sequence["int"]] = None,
+        data_length: Optional["int"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
-        self.raw_message = raw_message
+        self.data_initial_chunk = data_initial_chunk
         self.witness_buffer = witness_buffer
         self.network = network
+        self.data_length = data_length
 
 
 class NervosSignedTx(protobuf.MessageType):
@@ -8455,6 +8460,40 @@ class NervosSignedTx(protobuf.MessageType):
     ) -> None:
         self.signature = signature
         self.address = address
+
+
+class NervosTxRequest(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11705
+    FIELDS = {
+        1: protobuf.Field("data_length", "uint32", repeated=False, required=False),
+        2: protobuf.Field("public_key", "bytes", repeated=False, required=False),
+        3: protobuf.Field("signature", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_length: Optional["int"] = None,
+        public_key: Optional["bytes"] = None,
+        signature: Optional["bytes"] = None,
+    ) -> None:
+        self.data_length = data_length
+        self.public_key = public_key
+        self.signature = signature
+
+
+class NervosTxAck(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 11706
+    FIELDS = {
+        1: protobuf.Field("data_chunk", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        data_chunk: "bytes",
+    ) -> None:
+        self.data_chunk = data_chunk
 
 
 class NexaGetAddress(protobuf.MessageType):

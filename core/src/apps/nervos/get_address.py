@@ -13,7 +13,6 @@ from apps.nervos.hash import ckb_blake160
 if TYPE_CHECKING:
     from trezor.messages import NervosGetAddress
 
-
 CODE_INDEX_SECP256K1_SINGLE = 0x00
 FORMAT_TYPE_SHORT = 0x01
 
@@ -59,8 +58,6 @@ def generate_ckb_short_address(node: bip32.HDNode, network="mainnet") -> str:
     data_part = convertbits(payload, 8, 5)
     if data_part is None:
         data_part = []
-    elif not all(isinstance(x, int) for x in data_part):
-        raise ValueError("data_part")
     values = hrpexp + data_part
     polymod = bech32_polymod(values + [0, 0, 0, 0, 0, 0]) ^ 1
     checksum = [(polymod >> 5 * (5 - i)) & 31 for i in range(6)]
