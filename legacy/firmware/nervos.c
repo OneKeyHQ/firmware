@@ -30,6 +30,7 @@
 #include "protect.h"
 #include "schnorr_bch.h"
 #include "secp256k1.h"
+#include "util.h"
 
 #define MAX_ADDRESS_LENGTH 100
 #define CODE_INDEX_SECP256K1_SINGLE 0x00
@@ -43,16 +44,6 @@ static bool nervos_signing = false;
 uint8_t global_hash_output[32];
 HDNode *globalNode = NULL;
 blake2b_state S_GLOBAL;
-
-void withnesss_to_hex_str(const uint8_t *withnesss, size_t withnesss_len,
-                          char *hex_str) {
-  const char hex_chars[] = "0123456789abcdef";
-  for (size_t i = 0; i < withnesss_len; i++) {
-    hex_str[2 * i] = hex_chars[(withnesss[i] >> 4) & 0x0F];
-    hex_str[2 * i + 1] = hex_chars[withnesss[i] & 0x0F];
-  }
-  hex_str[2 * withnesss_len] = '\0';
-}
 
 void ckb_hasher_init(blake2b_state *S) {
   const uint8_t personal[] = "ckb-default-hash";
@@ -70,7 +61,7 @@ void ckb_hash(const uint8_t *message, size_t message_len, uint8_t *output) {
 void ckb_blake160(const uint8_t *message, size_t message_len, char *output) {
   uint8_t hash[32];
   ckb_hash(message, message_len, hash);
-  withnesss_to_hex_str(hash, 20, output);
+  data2hexaddr(hash, 20, output);
 }
 
 uint32_t bech32_polymod(const uint8_t *values, size_t len) {
