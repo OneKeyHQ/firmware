@@ -22,7 +22,6 @@
 #include "blake2b.h"
 #include "buttons.h"
 #include "config.h"
-#include "debug.h"
 #include "fsm.h"
 #include "gettext.h"
 #include "layout2.h"
@@ -31,30 +30,20 @@
 #include "protect.h"
 #include "schnorr_bch.h"
 #include "secp256k1.h"
-
-uint16_t input_count_nervos;
-uint16_t input_index_nervos;
-uint32_t witness_buffer_len_nervos;
-const uint8_t *global_witness_buffer = NULL;
-static bool nervos_signing = false;
-static char previous_address[72] = {0};
-static char network_name[10] = {0};
+#include "util.h"
 
 #define MAX_ADDRESS_LENGTH 100
 #define CODE_INDEX_SECP256K1_SINGLE 0x00
 #define FORMAT_TYPE_SHORT 0x01
 
+const uint8_t *global_witness_buffer = NULL;
 const char CHARSET[] = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-
-void withnesss_to_hex_str(const uint8_t *withnesss, size_t withnesss_len,
-                          char *hex_str) {
-  const char hex_chars[] = "0123456789abcdef";
-  for (size_t i = 0; i < withnesss_len; i++) {
-    hex_str[2 * i] = hex_chars[(withnesss[i] >> 4) & 0x0F];
-    hex_str[2 * i + 1] = hex_chars[withnesss[i] & 0x0F];
-  }
-  hex_str[2 * withnesss_len] = '\0';
-}
+static NervosTxRequest msg_tx_request;
+static uint32_t data_total, data_left, witness_buffer_len_nervos;
+static bool nervos_signing = false;
+uint8_t global_hash_output[32];
+HDNode *globalNode = NULL;
+blake2b_state S_GLOBAL;
 
 void ckb_hasher_init(blake2b_state *S) {
   const uint8_t personal[] = "ckb-default-hash";
@@ -72,7 +61,7 @@ void ckb_hash(const uint8_t *message, size_t message_len, uint8_t *output) {
 void ckb_blake160(const uint8_t *message, size_t message_len, char *output) {
   uint8_t hash[32];
   ckb_hash(message, message_len, hash);
-  withnesss_to_hex_str(hash, 20, output);
+  data2hexaddr(hash, 20, output);
 }
 
 uint32_t bech32_polymod(const uint8_t *values, size_t len) {
@@ -157,6 +146,18 @@ void extend_uint64(uint8_t *buffer, size_t *buffer_len, uint64_t n) {
   }
 }
 
+// Function to initialize the global hash state
+void global_hasher_init(void) { ckb_hasher_init(&S_GLOBAL); }
+
+// Function to update the global hash state
+void global_hash_update(const uint8_t *data, uint32_t data_len) {
+  blake2b_Update(&S_GLOBAL, data, data_len);
+}
+// Function to get the global hash result
+void global_hash_finalize(uint8_t *output) {
+  blake2b_Final(&S_GLOBAL, output, 32);
+}
+
 void nervos_get_address_from_public_key(const uint8_t *public_key,
                                         char *address, const char *network) {
   size_t public_key_len = 33;
@@ -202,58 +203,17 @@ void nervos_get_address_from_public_key(const uint8_t *public_key,
   address[strlen(network) + 1 + combined_len] = '\0';
 }
 
-void nervos_signing_init(const NervosSignTx *msg) {
-  nervos_signing = true;
-  input_count_nervos = msg->input_count;
-  input_index_nervos = 1;
-  uint8_t *temp = malloc(msg->witness_buffer.size);
-  memcpy(temp, msg->witness_buffer.bytes, msg->witness_buffer.size);
-  global_witness_buffer = temp;
-  memcpy(network_name, msg->network, sizeof(msg->network));
-}
-
-static bool show_confirm_signing(const char *address, uint8_t address_len) {
-  if (strcmp(address, previous_address) == 0) {
-    return false;
-  } else {
-    memcpy(previous_address, address, address_len);
-    return true;
-  }
-}
-
-void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
-                         uint32_t raw_message_len,
+void nervos_sign_sighash(HDNode *node, const uint8_t *data_initial_chunk,
+                         uint32_t data_initial_chunk_len,
                          const uint8_t *witness_buffer,
                          uint32_t witness_buffer_len, uint8_t *signature,
                          pb_size_t *signature_len) {
-  if (!nervos_signing) {
-    fsm_sendFailure(FailureType_Failure_UnexpectedMessage,
-                    "Not in Nervos signing mode");
-    layoutHome();
-    return;
-  }
-
-  input_count_nervos--;
-  char address[72] = {0};
-
-  nervos_get_address_from_public_key(node->public_key, address, network_name);
-
-  // show display
-  if (show_confirm_signing(address, sizeof(address))) {
-    if (!layoutBlindSign("Nervos", false, NULL, address, raw_message,
-                         raw_message_len, NULL, NULL, NULL, NULL, NULL, NULL)) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled,
-                      "Signing cancelled by user");
-      nervos_signing_abort();
-      return;
-    }
-  }
-
   uint8_t hash_output[32];
-  ckb_hash(raw_message, raw_message_len, hash_output);
+  ckb_hash(data_initial_chunk, data_initial_chunk_len, hash_output);
   blake2b_state S;
   ckb_hasher_init(&S);
   blake2b_Update(&S, hash_output, 32);
+
   uint8_t buffer[8];
   size_t buffer_len = 0;
   extend_uint64(buffer, &buffer_len, witness_buffer_len);
@@ -261,25 +221,119 @@ void nervos_sign_sighash(HDNode *node, const uint8_t *raw_message,
   blake2b_Update(&S, witness_buffer, witness_buffer_len);
   uint8_t output[32];
   blake2b_Final(&S, output, 32);
+
   uint8_t v1;
   uint8_t sig[64];
+
   if (ecdsa_sign_digest(&secp256k1, node->private_key, output, sig, &v1,
                         NULL) != 0) {
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));
   }
+
   memcpy(signature, sig, 64);
   signature[64] = v1;
   *signature_len = 65;
 }
 
+static void send_request_chunk(void) {
+  msg_tx_request.has_data_length = true;
+  msg_tx_request.data_length = data_left <= 1024 ? data_left : 1024;
+  msg_write(MessageType_MessageType_NervosTxRequest, &msg_tx_request);
+}
+
+// In the case of multi-package, initialize first
+void nervos_sign_sighash_init(HDNode *node, const uint8_t *data_initial_chunk,
+                              uint32_t data_initial_chunk_len,
+                              const uint8_t *witness_buffer,
+                              uint32_t witness_buffer_len,
+                              uint32_t data_length) {
+  nervos_signing = true;
+  globalNode = malloc(sizeof(HDNode));
+
+  if (globalNode != NULL) {
+    memcpy(globalNode, node, sizeof(HDNode));
+  }
+  uint8_t *temp = malloc(witness_buffer_len);
+  memcpy(temp, witness_buffer, witness_buffer_len);
+  global_witness_buffer = temp;
+  witness_buffer_len_nervos = witness_buffer_len;
+  data_total = data_length;
+  data_left = data_total - data_initial_chunk_len;
+  global_hasher_init();
+  global_hash_update(data_initial_chunk, data_initial_chunk_len);
+  send_request_chunk();
+}
+
+void nervos_signing_txack(const NervosTxAck *tx) {
+  if (!nervos_signing) {
+    fsm_sendFailure(FailureType_Failure_UnexpectedMessage,
+                    _("Not in nervos signing mode"));
+    layoutHome();
+    return;
+  }
+  if (tx->data_chunk.size > data_left) {
+    fsm_sendFailure(FailureType_Failure_DataError, _("Too much data"));
+    nervos_signing_abort();
+    return;
+  }
+  if (data_left > 0 && tx->data_chunk.size == 0) {
+    fsm_sendFailure(FailureType_Failure_DataError,
+                    _("Empty data chunk received"));
+    nervos_signing_abort();
+    return;
+  }
+  global_hash_update(tx->data_chunk.bytes, tx->data_chunk.size);
+  data_left -= tx->data_chunk.size;
+  if (data_left > 0) {
+    send_request_chunk();
+  } else {
+    global_hash_finalize(global_hash_output);
+    send_signature();
+  }
+}
+
+void send_signature(void) {
+  NervosSignedTx tx_resp;
+  blake2b_state S;
+  ckb_hasher_init(&S);
+  blake2b_Update(&S, global_hash_output, 32);
+  uint8_t buffer[8];
+  size_t buffer_len = 0;
+  debugInt(witness_buffer_len_nervos);
+
+  extend_uint64(buffer, &buffer_len, witness_buffer_len_nervos);
+  blake2b_Update(&S, buffer, 8);
+  blake2b_Update(&S, global_witness_buffer, witness_buffer_len_nervos);
+  uint8_t output[32];
+  blake2b_Final(&S, output, 32);
+  uint8_t v1;
+  uint8_t sig[64];
+  if (ecdsa_sign_digest(&secp256k1, globalNode->private_key, output, sig, &v1,
+                        NULL) != 0) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));
+  }
+  memcpy(tx_resp.signature.bytes, sig, 64);
+  tx_resp.signature.bytes[64] = v1;
+  tx_resp.signature.size = 65;
+  msg_write(MessageType_MessageType_NervosSignedTx, &tx_resp);
+  layoutHome();
+}
+
 void nervos_signing_abort(void) {
-  if (nervos_signing) {
-    nervos_signing = false;
-    input_count_nervos = 0;
-    input_index_nervos = 0;
+  if (globalNode != NULL) {
+    free(globalNode);
+    globalNode = NULL;
+  }
+  if (global_witness_buffer != NULL) {
     free((void *)global_witness_buffer);
     global_witness_buffer = NULL;
-    memset(previous_address, 0, sizeof(previous_address));
-    layoutHome();
   }
+  data_total = 0;
+  data_left = 0;
+  witness_buffer_len_nervos = 0;
+  nervos_signing = false;
+  global_witness_buffer = NULL;
+  memset(global_hash_output, 0, sizeof(global_hash_output));
+  memset(&S_GLOBAL, 0, sizeof(S_GLOBAL));
+  memset(&msg_tx_request, 0, sizeof(msg_tx_request));
 }

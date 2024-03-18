@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING
 
 from . import messages
 from .tools import expect
@@ -41,42 +41,26 @@ def get_address(
     return res
 
 
-
+@expect(messages.NervosSignedTx)
 def sign_tx(
     client: "TrezorClient",
-    address_n: Sequence["Address"],
-    rawtx: str,
-    witness_buffer: str,
+    address_n: "Address",
+    rawtx: bytes,
+    witness_buffer: bytes,
     network: str,
-) -> Sequence[bytes]:
-
-    inputs = rawtx.split("-")
-    assert len(inputs) >= 1, "Invalid raw message"
-    if len(address_n) != len(inputs) and len(address_n) != 1:
-        raise ValueError("Number of addresses must match number of inputs")
-
-    signatures = []
-
+    data_length: int,
+):
     resp = client.call(
         messages.NervosSignTx(
-            address_n=address_n[0],
-            raw_message=bytes.fromhex(inputs[0]),
-            witness_buffer=bytes.fromhex(witness_buffer),
+            address_n=address_n,
+            data_initial_chunk=rawtx,
+            witness_buffer=witness_buffer,
             network=network,
-            input_count=len(inputs),
+            data_length=data_length,
         )
     )
-
-    while isinstance(resp, messages.NervosTxInputRequest):
-        signatures.append(resp.signature)
-        resp = client.call(
-            messages.NervosTxInputAck(
-                address_n=address_n[resp.request_index if len(address_n) > 1 else 0],
-                raw_message=bytes.fromhex(inputs[resp.request_index]),
-            )
-        )
-    if isinstance(resp, messages.NervosSignedTx):
-        signatures.append(resp.signature)
-    else:
-        raise ValueError("Invalid response")
-    return signatures
+    while isinstance(resp, messages.NervosTxRequest):
+        print("ack request")
+        data_chunk = bytes.fromhex("0000000000")
+        resp = client.call(messages.NervosTxAck(data_chunk=data_chunk))
+    return resp
