@@ -661,6 +661,16 @@ apps.near.sign_tx
 import apps.near.sign_tx
 apps.near.transaction
 import apps.near.transaction
+apps.nervos
+import apps.nervos
+apps.nervos.get_address
+import apps.nervos.get_address
+apps.nervos.hash
+import apps.nervos.hash
+apps.nervos.sign_tx
+import apps.nervos.sign_tx
+apps.nervos.utils
+import apps.nervos.utils
 apps.nexa
 import apps.nexa
 apps.nexa.addresses

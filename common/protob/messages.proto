@@ -428,6 +428,14 @@ enum MessageType {
     MessageType_NearSignTx = 10703 [(wire_in) = true];
     MessageType_NearSignedTx = 10704 [(wire_out) = true];
 
+    // nervos
+    MessageType_NervosGetAddress = 11701 [(wire_in) = true];
+    MessageType_NervosAddress = 11702 [(wire_out) = true];
+    MessageType_NervosSignTx = 11703 [(wire_in) = true];
+    MessageType_NervosSignedTx = 11704 [(wire_out) = true];
+    MessageType_NervosTxRequest = 11705 [(wire_out) = true];
+    MessageType_NervosTxAck = 11706 [(wire_in) = true];
+
     // Aptos
     MessageType_AptosGetAddress = 10600 [(wire_in) = true];
     MessageType_AptosAddress = 10601 [(wire_out) = true];

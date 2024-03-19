@@ -1,0 +1,76 @@
+syntax = "proto2";
+package hw.trezor.messages.nervos;
+
+// Sugar for easier handling in Java
+option java_package = "com.satoshilabs.trezor.lib.protobuf";
+option java_outer_classname = "TrezorMessageNervos";
+
+
+/**
+ * Request: Ask device for address corresponding to address_n path
+ * @start
+ * @next Address
+ * @next Failure
+ */
+message NervosGetAddress {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+    required string network = 2;                                        // Network name
+    optional bool show_display = 3;                                     // optionally show on display before sending the result
+}
+
+/**
+ * Response: Contains address derived from device private seed
+ * @end
+ */
+message NervosAddress {
+    required string address = 1;
+}
+
+/**
+ * Request: Ask device to sign transaction
+ * @start
+ * @next NervosSignedTx
+ * @next NervosTxInputRequest
+ * @next Failure
+ */
+message NervosSignTx {
+    repeated uint32 address_n = 1;                                      // BIP-32 path to derive the key from master node
+    required bytes  data_initial_chunk = 2;                                    // the bip143-like pre-hashed message to be signed
+    required bytes  witness_buffer = 3;
+    required string network = 4;                                        // Network name
+    optional uint32 data_length = 5;                                    // Length of transaction payload
+   }
+
+/**
+ * Response: transaction signature
+ * @end
+ */
+ message NervosSignedTx {
+    required bytes signature = 1;   // signature of the message
+    required string address  = 2;
+}
+
+
+
+/**
+ * Response: Device asks for more data from transaction payload, or returns the signature.
+ * If data_length is set, device awaits that many more bytes of payload.
+ * Otherwise, the signature fields contain the computed transaction signature. All three fields will be present.
+ * @end
+ * @next NervosTxAck
+ */
+ message NervosTxRequest {
+    optional uint32 data_length = 1;    // Number of bytes being requested (<= 1024)
+    optional bytes public_key = 2;      // public key for the private key used to sign tx
+    optional bytes signature = 3;       // the signature of the raw transaction
+}
+
+/**
+ * Request: Transaction payload data.
+ * @next NervosTxRequest
+ */
+ message NervosTxAck {
+    required bytes data_chunk = 1;  // Bytes from transaction payload (<= 1024 bytes)
+}
+
+
