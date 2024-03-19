@@ -159,7 +159,7 @@ int main(void) {
   oledInit();
 #else
 #if !FIRMWARE_QA
-  check_and_replace_bootloader(true);
+  // check_and_replace_bootloader(true);
 #endif
   setupApp();
   ble_reset();

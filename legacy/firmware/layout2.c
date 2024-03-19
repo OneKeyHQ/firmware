@@ -1034,8 +1034,8 @@ void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
     str = split_message(data, size, 20);
   }
   layoutDialogSwipe(&bmp_icon_question, _("Cancel"), _("Confirm"), NULL,
-                    _("Confirm OP_RETURN:"), str[0], str[1], str[2], str[3],
-                    NULL);
+                    _("Confirm OP_RETURN:"), NULL, str[0], str[1], str[2],
+                    str[3]);
 }
 
 static bool formatAmountDifference(const CoinInfo *coin, AmountUnit amount_unit,
@@ -1360,7 +1360,7 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
   oledRefresh();
 }
 
-static void drawScrollbar(int pages, int index) {
+void drawScrollbar(int pages, int index) {
   int i, bar_start = 12, bar_end = 52;
   int bar_heght = 40 - 2 * (pages - 1);
   for (i = bar_start; i < bar_end; i += 2) {  // 40 pixel
@@ -4134,6 +4134,11 @@ bool layoutTransactionSign(const char *chain_name, uint64_t chain_id,
   int data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
   uint32_t rowlen = 21;
   const char **str;
+  int to_str_rowcount = strlen(to_str) / rowlen;
+  int signer_rowcount = strlen(signer) / rowlen;
+  if (strlen(to_str) / rowlen) to_str_rowcount++;
+  if (strlen(signer) / rowlen) signer_rowcount++;
+
   if (token_id) {
     tokenid_len = strlen(token_id);
     token_id_rowcount = tokenid_len / rowlen + 1;
@@ -4269,23 +4274,75 @@ refresh_menu:
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if ((has_chain_id == false && 1 == index && token_id == NULL) ||
              (has_chain_id == true && 2 == index && token_id == NULL)) {  // To
-    sub_index = 0;
     layoutHeader(title);
     oledDrawStringAdapter(0, y, _("Send to:"), FONT_STANDARD);
-    oledDrawStringAdapter(0, y + 10, to_str, FONT_STANDARD);
+    if (to_str_rowcount > 3) {
+      str = split_message((const uint8_t *)to_str, strlen(to_str), rowlen);
+      if (sub_index == 0) {
+        oledDrawStringAdapter(0, y + 1 * 10, str[0], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 2 * 10, str[1], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 3 * 10, str[2], FONT_STANDARD);
+        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_down);
+      } else {
+        oledDrawStringAdapter(0, y + 1 * 10, str[sub_index], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 2 * 10, str[sub_index + 1], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 3 * 10, str[sub_index + 2], FONT_STANDARD);
+        if (sub_index == to_str_rowcount - 3) {
+          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_up);
+        } else {
+          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_up);
+          oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_down);
+        }
+      }
+      drawScrollbar(to_str_rowcount - 2, sub_index);
+    } else {
+      sub_index = 0;
+      oledDrawStringAdapter(0, y + 10, to_str, FONT_STANDARD);
+    }
+
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if ((has_chain_id == false &&
               ((2 == index && token_id == NULL) || (4 == index && token_id))) ||
              (has_chain_id == true && ((3 == index && token_id == NULL) ||
                                        (5 == index && token_id)))) {  // From
-    sub_index = 0;
     layoutHeader(title);
     memset(desc, 0, 64);
     strcat(desc, _("From"));
     strcat(desc, ":");
     oledDrawStringAdapter(0, y, desc, FONT_STANDARD);
-    oledDrawStringAdapter(0, y + 10, signer, FONT_STANDARD);
+    if (signer_rowcount > 3) {
+      str = split_message((const uint8_t *)signer, strlen(signer), rowlen);
+      if (sub_index == 0) {
+        oledDrawStringAdapter(0, y + 1 * 10, str[0], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 2 * 10, str[1], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 3 * 10, str[2], FONT_STANDARD);
+        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                       &bmp_bottom_middle_arrow_down);
+      } else {
+        oledDrawStringAdapter(0, y + 1 * 10, str[sub_index], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 2 * 10, str[sub_index + 1], FONT_STANDARD);
+        oledDrawStringAdapter(0, y + 3 * 10, str[sub_index + 2], FONT_STANDARD);
+        if (sub_index == signer_rowcount - 3) {
+          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_up);
+        } else {
+          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_up);
+          oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
+                         &bmp_bottom_middle_arrow_down);
+        }
+      }
+      drawScrollbar(signer_rowcount - 2, sub_index);
+    } else {
+      sub_index = 0;
+      oledDrawStringAdapter(0, y + 10, signer, FONT_STANDARD);
+    }
+
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
   } else if ((has_chain_id == false &&
@@ -4420,6 +4477,20 @@ refresh_menu:
            sub_index < token_id_rowcount - 3)) {  // token_id
         sub_index++;
       }
+
+      if ((has_chain_id == false && 1 == index && token_id == NULL &&
+           sub_index < to_str_rowcount - 3) ||
+          (has_chain_id == true && 2 == index && token_id == NULL &&
+           sub_index < to_str_rowcount - 3)) {  // To
+        sub_index++;
+      }
+      if ((has_chain_id == false && sub_index < signer_rowcount - 3 &&
+           ((2 == index && token_id == NULL) || (4 == index && token_id))) ||
+          (has_chain_id == true && sub_index < signer_rowcount - 3 &&
+           ((3 == index && token_id == NULL) ||
+            (5 == index && token_id)))) {  // From
+        sub_index++;
+      }
       goto refresh_menu;
     case KEY_CONFIRM:
       if (index == max_index - 1) {
@@ -4429,6 +4500,7 @@ refresh_menu:
       if (index < max_index) {
         index++;
       }
+      sub_index = 0;
       goto refresh_menu;
     case KEY_CANCEL:
       if ((0 == index) || (index == max_index - 1)) {
@@ -4438,6 +4510,7 @@ refresh_menu:
       if (index > 0) {
         index--;
       }
+      sub_index = 0;
       goto refresh_menu;
     default:
       break;
