@@ -371,6 +371,12 @@ if TYPE_CHECKING:
         NostrSignedSchnorr = 11509
         LnurlAuth = 11600
         LnurlAuthResp = 11601
+        NervosGetAddress = 11701
+        NervosAddress = 11702
+        NervosSignTx = 11703
+        NervosSignedTx = 11704
+        NervosTxRequest = 11705
+        NervosTxAck = 11706
         DeviceInfoSettings = 10001
         GetDeviceInfo = 10002
         DeviceInfo = 10003
