@@ -52,7 +52,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 1287:
+        if callPrivIdx in (1287, 1280):
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 0)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -80,7 +80,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 1031:
+        if callPrivIdx in (1031, 1024):
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 2)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -136,7 +136,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 7943:
+        if callPrivIdx in (7943, 7936):
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 5)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -186,7 +186,7 @@ class Transaction:
         rawtx: codec.base.ScaleBytes, callPrivIdx: int
     ) -> "Transaction":
         tx = TransactionUnknown(rawtx)
-        if callPrivIdx == 2567:
+        if callPrivIdx == 2560:
             desc = Transaction._readAccountIdLookupOfT_V15(rawtx, 77)
             obj = codec.types.Compact(rawtx)
             balance = obj.decode(check_remaining=False)
@@ -215,7 +215,6 @@ class Transaction:
         moduleIdx = rawtx.get_next_bytes(1)
         idx = rawtx.get_next_bytes(1)
         callPrivIdx = (moduleIdx[0] << 8) + idx[0]
-
         tx = Transaction()
         if network == "polkadot":
             tx = Transaction.deserialize_polkadot(rawtx, callPrivIdx)
@@ -267,7 +266,7 @@ class TransactionUnknown(Transaction):
     ) -> None:
         from trezor.ui.layouts.lvgl import confirm_blind_sign_common
 
-        await confirm_blind_sign_common(ctx, sender, self.data)
+        await confirm_blind_sign_common(ctx, sender, self.data.data)
 
 
 class BalancesTransfer(Transaction):
