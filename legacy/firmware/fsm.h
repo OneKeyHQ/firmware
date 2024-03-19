@@ -37,6 +37,7 @@
 #include "messages-management.pb.h"
 #include "messages-near.pb.h"
 #include "messages-nem.pb.h"
+#include "messages-nervos.pb.h"
 #include "messages-nexa.pb.h"
 #include "messages-nostr.pb.h"
 #include "messages-polkadot.pb.h"
@@ -313,5 +314,10 @@ void fsm_msgNostrSignSchnorr(const NostrSignSchnorr *msg);
 
 // lnurl
 void fsm_msgLnurlAuth(const LnurlAuth *msg);
+
+// nervos
+void fsm_msgNervosGetAddress(const NervosGetAddress *msg);
+void fsm_msgNervosSignTx(const NervosSignTx *msg);
+void fsm_msgNervosTxAck(const NervosTxAck *msg);
 
 #endif

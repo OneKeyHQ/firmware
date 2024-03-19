@@ -52,6 +52,7 @@ from . import (
     monero,
     near,
     nem,
+    nervos,
     polkadot,
     ripple,
     settings,
@@ -106,6 +107,7 @@ COMMAND_ALIASES = {
     "algorand": algorand.cli,
     "kaspa": kaspa.cli,
     "sui": sui.cli,
+    "nervos": nervos.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -454,6 +456,7 @@ cli.add_command(algorand.cli)
 cli.add_command(sol.cli)
 cli.add_command(kaspa.cli)
 cli.add_command(sui.cli)
+cli.add_command(nervos.cli)
 
 #
 # Main

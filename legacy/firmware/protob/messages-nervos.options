@@ -1,0 +1,12 @@
+NervosGetAddress.address_n                                   max_count:8
+NervosGetAddress.network                                     max_size:6
+NervosAddress.address                                        max_size:72
+NervosSignTx.address_n                                       max_count:8
+NervosSignTx.data_initial_chunk                              max_size:1024
+NervosSignTx.witness_buffer                                  max_size:256
+NervosSignTx.network                                         max_size:45
+NervosSignedTx.signature                                     max_size:128
+NervosSignedTx.address                                       max_size:72
+NervosTxRequest.public_key                                   max_size:32
+NervosTxRequest.signature                                    max_size:64
+NervosTxAck.data_chunk                                       max_size:1024
