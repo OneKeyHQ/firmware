@@ -63,23 +63,11 @@ void fsm_msgNervosSignTx(const NervosSignTx *msg) {
   hdnode_fill_public_key(node);
   nervos_get_address_from_public_key(node->public_key, resp->address,
                                      msg->network);
-
-  if (!fsm_layoutSignMessage(msg->data_initial_chunk.bytes,
-                             msg->data_initial_chunk.size)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-    layoutHome();
-    return;
-  }
-  if (msg->data_length && msg->data_length > 0 &&
+  if (msg->has_data_length && msg->data_length > 0 &&
       msg->data_length > msg->data_initial_chunk.size) {
-    nervos_sign_sighash_init(
-        node, msg->data_initial_chunk.bytes, msg->data_initial_chunk.size,
-        msg->witness_buffer.bytes, msg->witness_buffer.size, msg->data_length);
+    nervos_sign_sighash_init(node, msg, resp);
   } else {
-    nervos_sign_sighash(node, msg->data_initial_chunk.bytes,
-                        msg->data_initial_chunk.size, msg->witness_buffer.bytes,
-                        msg->witness_buffer.size, resp->signature.bytes,
-                        &resp->signature.size);
+    nervos_sign_sighash(node, msg, resp);
     msg_write(MessageType_MessageType_NervosSignedTx, resp);
     layoutHome();
   }

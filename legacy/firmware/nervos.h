@@ -33,16 +33,10 @@
 void nervos_get_address_from_public_key(const uint8_t *public_key,
                                         char *address, const char *network);
 void nervos_signing_txack(const NervosTxAck *tx);
-void nervos_sign_sighash(HDNode *node, const uint8_t *data_initial_chunk,
-                         uint32_t data_initial_chunk_len,
-                         const uint8_t *witness_buffer,
-                         uint32_t witness_buffer_len, uint8_t *signature,
-                         pb_size_t *signature_len);
-void nervos_sign_sighash_init(HDNode *node, const uint8_t *data_initial_chunk,
-                              uint32_t data_initial_chunk_len,
-                              const uint8_t *witness_buffer,
-                              uint32_t witness_buffer_len,
-                              uint32_t data_length);
+void nervos_sign_sighash(HDNode *node, const NervosSignTx *msg,
+                         NervosSignedTx *resp);
+void nervos_sign_sighash_init(HDNode *node, const NervosSignTx *msg,
+                              NervosSignedTx *resp);
 void send_signature(void);
 void global_hasher_init(void);
 void global_hash_update(const uint8_t *data, uint32_t data_len);
