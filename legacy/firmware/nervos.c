@@ -203,22 +203,27 @@ void nervos_get_address_from_public_key(const uint8_t *public_key,
   address[strlen(network) + 1 + combined_len] = '\0';
 }
 
-void nervos_sign_sighash(HDNode *node, const uint8_t *data_initial_chunk,
-                         uint32_t data_initial_chunk_len,
-                         const uint8_t *witness_buffer,
-                         uint32_t witness_buffer_len, uint8_t *signature,
-                         pb_size_t *signature_len) {
+void nervos_sign_sighash(HDNode *node, const NervosSignTx *msg,
+                         NervosSignedTx *resp) {
+  if (!layoutBlindSign("Nervos", resp->address)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                    "Signing cancelled by user");
+    nervos_signing_abort();
+    return;
+  }
+
   uint8_t hash_output[32];
-  ckb_hash(data_initial_chunk, data_initial_chunk_len, hash_output);
+  ckb_hash(msg->data_initial_chunk.bytes, msg->data_initial_chunk.size,
+           hash_output);
   blake2b_state S;
   ckb_hasher_init(&S);
   blake2b_Update(&S, hash_output, 32);
 
   uint8_t buffer[8];
   size_t buffer_len = 0;
-  extend_uint64(buffer, &buffer_len, witness_buffer_len);
+  extend_uint64(buffer, &buffer_len, msg->witness_buffer.size);
   blake2b_Update(&S, buffer, 8);
-  blake2b_Update(&S, witness_buffer, witness_buffer_len);
+  blake2b_Update(&S, msg->witness_buffer.bytes, msg->witness_buffer.size);
   uint8_t output[32];
   blake2b_Final(&S, output, 32);
 
@@ -230,9 +235,9 @@ void nervos_sign_sighash(HDNode *node, const uint8_t *data_initial_chunk,
     fsm_sendFailure(FailureType_Failure_ProcessError, _("Signing failed"));
   }
 
-  memcpy(signature, sig, 64);
-  signature[64] = v1;
-  *signature_len = 65;
+  memcpy(resp->signature.bytes, sig, 64);
+  resp->signature.bytes[64] = v1;
+  *resp->signature.bytes = 65;
 }
 
 static void send_request_chunk(void) {
@@ -242,25 +247,30 @@ static void send_request_chunk(void) {
 }
 
 // In the case of multi-package, initialize first
-void nervos_sign_sighash_init(HDNode *node, const uint8_t *data_initial_chunk,
-                              uint32_t data_initial_chunk_len,
-                              const uint8_t *witness_buffer,
-                              uint32_t witness_buffer_len,
-                              uint32_t data_length) {
+void nervos_sign_sighash_init(HDNode *node, const NervosSignTx *msg,
+                              NervosSignedTx *resp) {
+  if (!layoutBlindSign("Nervos", resp->address)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                    "Signing cancelled by user");
+    nervos_signing_abort();
+    return;
+  }
+
   nervos_signing = true;
   globalNode = malloc(sizeof(HDNode));
 
   if (globalNode != NULL) {
     memcpy(globalNode, node, sizeof(HDNode));
   }
-  uint8_t *temp = malloc(witness_buffer_len);
-  memcpy(temp, witness_buffer, witness_buffer_len);
+  uint8_t *temp = malloc(msg->witness_buffer.size);
+  memcpy(temp, &msg->witness_buffer, msg->witness_buffer.size);
   global_witness_buffer = temp;
-  witness_buffer_len_nervos = witness_buffer_len;
-  data_total = data_length;
-  data_left = data_total - data_initial_chunk_len;
+  witness_buffer_len_nervos = msg->witness_buffer.size;
+  data_total = msg->data_length;
+  data_left = data_total - msg->data_initial_chunk.size;
   global_hasher_init();
-  global_hash_update(data_initial_chunk, data_initial_chunk_len);
+  global_hash_update(msg->data_initial_chunk.bytes,
+                     msg->data_initial_chunk.size);
   send_request_chunk();
 }
 
