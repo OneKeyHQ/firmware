@@ -78,6 +78,7 @@ parser_error_t _readMethod_V18(parser_context_t* c, uint8_t moduleIdx,
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
 
   switch (callPrivIdx) {
+    case 1280: /* module 5 call 0 */
     case 1287: /* module 5 call 0 */
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
@@ -106,6 +107,7 @@ parser_error_t _readMethod_V18_kusama(parser_context_t* c, uint8_t moduleIdx,
                                       pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
   switch (callPrivIdx) {
+    case 1024: /* module 4 call 0 */
     case 1031: /* module 4 call 0 */
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
@@ -161,6 +163,7 @@ parser_error_t _readMethod_astar(parser_context_t* c, uint8_t moduleIdx,
                                  uint8_t callIdx, pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
   switch (callPrivIdx) {
+    case 7936: /* module 31 call 0 */
     case 7943: /* module 31 call 0 */
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
@@ -211,7 +214,7 @@ parser_error_t _readMethod_manta(parser_context_t* c, uint8_t moduleIdx,
                                  uint8_t callIdx, pd_Method_V18_t* method) {
   uint16_t callPrivIdx = ((uint16_t)moduleIdx << 8u) + callIdx;
   switch (callPrivIdx) {
-    case 2567:
+    case 2560:
       CHECK_ERROR(_readMethod_balances_transfer_V18(
           c, &method->nested.balances_transfer_V18))
       break;
@@ -243,6 +246,7 @@ const char* _getMethod_ModuleName_V18(uint8_t moduleIdx) {
   switch (moduleIdx) {
     case 4:
     case 5:
+    case 10:
     case 31:
       return STR_MO_BALANCES;
     default:
@@ -262,7 +266,7 @@ const char* _getMethod_Name_V18(uint8_t moduleIdx, uint8_t callIdx) {
     case 1031:
     case 7936:
     case 7943:
-    case 2567:
+    case 2560:
       return STR_ME_TRANSFER;
     case 1282: /* module 5 call 2 */
     case 1026:
@@ -305,7 +309,7 @@ uint8_t _getMethod_NumItems_V18(uint8_t moduleIdx, uint8_t callIdx) {
     case 1031:
     case 7936:
     case 7943:
-    case 2567:
+    case 2560:
       return 2;
     case 1282: /* module 5 call 2 */
     case 1026:
@@ -340,7 +344,7 @@ const char* _getMethod_ItemName_V18(uint8_t moduleIdx, uint8_t callIdx,
     case 1031:
     case 7936:
     case 7943:
-    case 2567:
+    case 2560:
       switch (itemIdx) {
         case 0:
           return STR_IT_amount;
@@ -407,7 +411,7 @@ parser_error_t _getMethod_ItemValue_V18(pd_Method_V18_t* m, uint8_t moduleIdx,
     case 1031: /* module 5 call 0 */
     case 7936: /* module 5 call 0 */
     case 7943:
-    case 2567:
+    case 2560:
       switch (itemIdx) {
         case 0: /* balances_transfer_V18 - amount */;
           return _toStringCompactBalance(
@@ -504,7 +508,7 @@ bool _getMethod_IsNestingSupported_V18(uint8_t moduleIdx, uint8_t callIdx) {
     case 1283:
     case 1027:
     case 7939:
-    case 2567:
+    case 2560:
     case 2562:
     case 2563:
     case 2564:
