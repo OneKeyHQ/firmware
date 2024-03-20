@@ -237,7 +237,7 @@ void nervos_sign_sighash(HDNode *node, const NervosSignTx *msg,
 
   memcpy(resp->signature.bytes, sig, 64);
   resp->signature.bytes[64] = v1;
-  *resp->signature.bytes = 65;
+  resp->signature.size = 65;
 }
 
 static void send_request_chunk(void) {
@@ -263,7 +263,7 @@ void nervos_sign_sighash_init(HDNode *node, const NervosSignTx *msg,
     memcpy(globalNode, node, sizeof(HDNode));
   }
   uint8_t *temp = malloc(msg->witness_buffer.size);
-  memcpy(temp, &msg->witness_buffer, msg->witness_buffer.size);
+  memcpy(temp, &msg->witness_buffer.bytes, msg->witness_buffer.size);
   global_witness_buffer = temp;
   witness_buffer_len_nervos = msg->witness_buffer.size;
   data_total = msg->data_length;
