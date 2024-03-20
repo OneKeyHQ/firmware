@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
-
 from trezor import wire
 from trezor.crypto.curve import secp256k1
 from trezor.messages import NervosSignedTx, NervosSignTx, NervosTxAck, NervosTxRequest
-from trezor.ui.layouts import confirm_final,confirm_blind_sign_common
+from trezor.ui.layouts import confirm_final, confirm_blind_sign_common
 from trezor.lvglui.scrs import lv
 from apps.common import paths
 from apps.common.keychain import auto_keychain
