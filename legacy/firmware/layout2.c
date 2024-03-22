@@ -33,6 +33,7 @@
 #include "config.h"
 #include "crypto.h"
 #include "font.h"
+#include "fw_signatures.h"
 #include "gettext.h"
 #include "layout2.h"
 #include "memory.h"
@@ -3269,6 +3270,22 @@ void layoutDeviceParameters(int num) {
   char desc[33] = "";
 #endif
 
+  char firmware_ver[64] = "";
+  char boot_version[32] = "";
+  uint8_t hash[32] = {0};
+  char hash_str[8] = {0};
+  const image_header *hdr =
+      (const image_header *)FLASH_PTR(FLASH_FWHEADER_START);
+  data2hexaddr(get_firmware_hash(hdr), 4, hash_str);
+  hash_str[7] = 0;
+  snprintf(firmware_ver, 64, "%s[%s-%s]", ONEKEY_VERSION,
+           BUILD_ID + strlen(BUILD_ID) - 7, hash_str);
+
+  memory_bootloader_hash(hash);
+  data2hexaddr(hash, 4, hash_str);
+  hash_str[7] = 0;
+  snprintf(boot_version, 32, "%s[%s]", bootloader_version, hash_str);
+
 refresh_menu:
 #if !EMULATOR
   y = 9;
@@ -3286,7 +3303,7 @@ refresh_menu:
       y += font->pixel + 1;
       oledDrawStringAdapter(0, y, _("FIRMWARE:"), FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, ONEKEY_VERSION, FONT_FIXED);
+      oledDrawStringAdapter(0, y, firmware_ver, FONT_FIXED);
 
       y += font->pixel + 1;
       y += font->pixel + 1;
@@ -3356,7 +3373,7 @@ refresh_menu:
 
       oledDrawString(0, y, "BOOTLOADER:", FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawString(0, y, bootloader_version, FONT_FIXED);
+      oledDrawString(0, y, boot_version, FONT_FIXED);
 #else
 
       y += font->pixel + 1;
@@ -3402,12 +3419,6 @@ refresh_menu:
       y += font->pixel + 1;
       y += font->pixel + 1;
 
-#ifdef BUILD_ID
-      oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
-      y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, BUILD_ID + strlen(BUILD_ID) - 7, FONT_FIXED);
-      y += font->pixel + 1;
-#endif
       break;
 #endif
     default:
