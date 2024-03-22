@@ -305,3 +305,29 @@ int check_firmware_hashes(const image_header *hdr) {
   // all OK
   return SIG_OK;
 }
+
+uint8_t *get_firmware_hash(const image_header *hdr) {
+  static uint8_t onekey_firmware_hash[32] = {0};
+  static bool onekey_firmware_hash_cached = false;
+  if (!onekey_firmware_hash_cached) {
+    onekey_firmware_hash_cached = true;
+
+    SHA256_CTX context = {0};
+    uint8_t chunks = hdr->codelen / FW_CHUNK_SIZE;
+    uint32_t offset = 0;
+    sha256_Init(&context);
+    for (uint8_t i = 0; i < chunks; i++) {
+      offset = i * FW_CHUNK_SIZE;
+      sha256_Update(&context, FLASH_PTR(FLASH_APP_START + offset),
+                    FW_CHUNK_SIZE);
+    }
+    if (hdr->codelen % FW_CHUNK_SIZE) {
+      offset += FW_CHUNK_SIZE;
+      sha256_Update(&context, FLASH_PTR(FLASH_APP_START + offset),
+                    hdr->codelen % FW_CHUNK_SIZE);
+    }
+    sha256_Final(&context, onekey_firmware_hash);
+  }
+
+  return onekey_firmware_hash;
+}

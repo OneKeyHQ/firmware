@@ -144,6 +144,8 @@ int signatures_match(const image_header *hdr, uint8_t store_fingerprint[32]);
  */
 int check_firmware_hashes(const image_header *hdr);
 
+uint8_t *get_firmware_hash(const image_header *hdr);
+
 /**
  * Check that block of memory is zeroed. Not constant-time.
  *
