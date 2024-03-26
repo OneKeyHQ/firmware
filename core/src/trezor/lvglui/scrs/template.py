@@ -207,7 +207,7 @@ class Message(FullSizeWindow):
             if target == self.btn_yes:
                 if self.long_message:
                     PageAbleMessage(
-                        _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON),
                         self.message,
                         self.channel,
                         primary_color=self.primary_color,
@@ -528,7 +528,7 @@ class BlobDisPlay(FullSizeWindow):
             if target == self.btn_yes:
                 if self.long_message:
                     PageAbleMessage(
-                        _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON),
                         self.data,
                         self.channel,
                         primary_color=self.primary_color,
@@ -2014,7 +2014,7 @@ class MessageNostr(FullSizeWindow):
             if target == self.btn_yes:
                 if self.long_message:
                     PageAbleMessage(
-                        _(i18n_keys.LIST_KEY__MESSAGE__COLON)[:-1],
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON),
                         self.message,
                         self.channel,
                         primary_color=self.primary_color,

@@ -46,15 +46,15 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
         if msg.language is not None:
             storage.device.set_language(msg.language)
             i18n_refresh()
-    if storage.recovery.is_in_progress():
-        return await recovery_process(ctx)
+    # if storage.recovery.is_in_progress():
+    #     return await recovery_process(ctx)
 
-    await _continue_dialog(ctx, msg)
+    try:
+        await _continue_dialog(ctx, msg)
 
-    if isinstance(ctx, wire.DummyContext):
-        utils.play_dead()
-
-    try:  # for dry run pin needs to be entered
+        if isinstance(ctx, wire.DummyContext):
+            utils.play_dead()
+        # for dry run pin needs to be entered
         if msg.dry_run:
             curpin, salt = await request_pin_and_sd_salt(
                 ctx, _(i18n_keys.TITLE__ENTER_PIN)
