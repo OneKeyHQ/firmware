@@ -33,6 +33,7 @@
 #include "config.h"
 #include "crypto.h"
 #include "font.h"
+#include "fw_signatures.h"
 #include "gettext.h"
 #include "layout2.h"
 #include "memory.h"
@@ -242,6 +243,14 @@ void getBleDevInformation(void) {
   }
   if (!ble_battery_state()) {
     ble_request_info(BLE_CMD_BATTERY);
+    delay_ms(5);
+  }
+  if (!ble_build_id_state()) {
+    ble_request_info(BLE_CMD_BUILD_ID);
+    delay_ms(5);
+  }
+  if (!ble_hash_state()) {
+    ble_request_info(BLE_CMD_HASH);
     delay_ms(5);
   }
 }
@@ -3842,6 +3851,34 @@ void layoutDeviceParameters(int num) {
   int index = 0;
   uint8_t key = KEY_NULL;
   char index_str[16] = "";
+  char firmware_ver[32] = "";
+  char boot_version[32] = "";
+  char bt_ver[32] = "";
+  uint8_t hash[32] = {0};
+  char hash_str[8] = {0};
+  const image_header *hdr = (const image_header *)FLASH_PTR(
+      FLASH_FWHEADER_START);  // allow both v2 and v3 signatures
+
+  data2hexaddr(get_firmware_hash(hdr), 4, hash_str);
+  hash_str[7] = 0;
+  snprintf(firmware_ver, 32, "%s[%s-%s]", ONEKEY_VERSION,
+           BUILD_ID + strlen(BUILD_ID) - 7, hash_str);
+
+  memory_bootloader_hash(hash);
+  data2hexaddr(hash, 4, hash_str);
+  hash_str[7] = 0;
+  snprintf(boot_version, 32, "%s[%s]", bootloader_version, hash_str);
+
+  if (ble_build_id_state() && ble_hash_state()) {
+    data2hexaddr((uint8_t *)ble_get_hash(), 4, hash_str);
+    hash_str[7] = 0;
+    snprintf(bt_ver, 32, "%s[%s-%s]", ble_get_ver(), ble_get_build_id(),
+             hash_str);
+  } else if (ble_build_id_state()) {
+    snprintf(bt_ver, 32, "%s[%s]", ble_get_ver(), ble_get_build_id());
+  } else {
+    snprintf(bt_ver, 32, "%s", ble_get_ver());
+  }
 
 refresh_menu:
   y = 9;
@@ -3872,12 +3909,12 @@ refresh_menu:
 
       oledDrawStringAdapter(0, y, _("FIRMWARE:"), FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, ONEKEY_VERSION, FONT_STANDARD);
+      oledDrawStringAdapter(0, y, firmware_ver, FONT_STANDARD);
       y += font->pixel + 4;
 
       oledDrawStringAdapter(0, y, _("BLUETOOTH:"), FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, ble_get_ver(), FONT_STANDARD);
+      oledDrawStringAdapter(0, y, bt_ver, FONT_STANDARD);
       break;
 
     case 2:
@@ -3890,7 +3927,7 @@ refresh_menu:
 #if !EMULATOR
       oledDrawStringAdapter(0, y, _("BOOTLOADER:"), FONT_STANDARD);
       y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, bootloader_version, FONT_STANDARD);
+      oledDrawStringAdapter(0, y, boot_version, FONT_STANDARD);
       y += font->pixel + 1;
 #endif
       break;
@@ -3901,12 +3938,6 @@ refresh_menu:
 
       se_get_sn(&se_sn);
       oledDrawStringAdapter(0, y, se_sn, FONT_STANDARD);
-
-      y += font->pixel + 4;
-      oledDrawStringAdapter(0, y, _("BUILD ID:"), FONT_STANDARD);
-      y += font->pixel + 1;
-      oledDrawStringAdapter(0, y, BUILD_ID + strlen(BUILD_ID) - 7,
-                            FONT_STANDARD);
       break;
     case 4:
       oledDrawStringAdapter(0, y, _("DEVICE ID:"), FONT_STANDARD);
