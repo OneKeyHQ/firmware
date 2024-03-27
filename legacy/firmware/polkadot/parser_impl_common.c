@@ -361,6 +361,7 @@ uint16_t _getAddressType() { return __address_type; }
 
 uint16_t _detectAddressType(const parser_context_t *c) {
   (void)c;
+  memset(__polkadot_ticker, 0, sizeof(__polkadot_ticker));
   if (!strncmp(polkadot_network, "polkadot", 8)) {
     __polkadot_dicimal = COIN_AMOUNT_DECIMAL_PLACES;
     memcpy(__polkadot_ticker, COIN_TICKER, 4);

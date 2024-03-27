@@ -245,13 +245,13 @@ void getBleDevInformation(void) {
     ble_request_info(BLE_CMD_BATTERY);
     delay_ms(5);
   }
-  if (!ble_build_id_state()) {
-    ble_request_info(BLE_CMD_BUILD_ID);
-    delay_ms(5);
-  }
-  if (!ble_hash_state()) {
-    ble_request_info(BLE_CMD_HASH);
-    delay_ms(5);
+  if (ble_ver_state()) {  // > 1.5.1
+    if (strcmp(ble_get_ver(), "1.5.1") > 0) {
+      if (!ble_build_id_state()) {
+        ble_request_info(BLE_CMD_BUILD_ID);
+        delay_ms(5);
+      }
+    }
   }
 }
 void refreshNfcIcon(bool force_flag) {
