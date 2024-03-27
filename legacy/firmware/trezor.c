@@ -161,6 +161,7 @@ int main(void) {
 #if !FIRMWARE_QA
   // check_and_replace_bootloader(true);
 #endif
+  gen_bootloader_version();
   setupApp();
   ble_reset();
 #if !EMULATOR

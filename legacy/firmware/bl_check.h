@@ -23,5 +23,6 @@
 #include <stdbool.h>
 
 void check_and_replace_bootloader(bool shutdown_on_replace);
+void gen_bootloader_version(void);
 
 #endif
