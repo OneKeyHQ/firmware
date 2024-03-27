@@ -3,12 +3,15 @@ from ubinascii import unhexlify
 
 from trezor import wire
 from trezor.crypto import bip32
+from trezor.lvglui.scrs import lv
 from trezor.messages import NervosAddress
 from trezor.ui.layouts import show_address
 
 from apps.common import paths
 from apps.common.keychain import auto_keychain
 from apps.nervos.hash import ckb_blake160
+
+from . import ICON, PRIMARY_COLOR
 
 if TYPE_CHECKING:
     from trezor.messages import NervosGetAddress
@@ -102,6 +105,7 @@ async def get_address(
     address = generate_ckb_short_address(node, network=msg.network)
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
+        ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         await show_address(
             ctx,
             address=address,
