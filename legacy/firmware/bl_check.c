@@ -103,6 +103,7 @@ static int known_bootloader(int r, const uint8_t *hash) {
   }
   // END AUTO-GENERATED QA BOOTLOADER ENTRIES (bl_check_qa.txt)
 
+  memcpy(bootloader_version, "Unknown", strlen("Unknown"));
   return 0;
 }
 #endif
@@ -177,6 +178,8 @@ static int known_bootloader(int r, const uint8_t *hash) {
     return 1;  // 2.0.0 shipped with fw 3.0.0
   }
   // END AUTO-GENERATED BOOTLOADER ENTRIES (bl_check.txt)
+
+  memcpy(bootloader_version, "Unknown", strlen("Unknown"));
   return 0;
 }
 
@@ -298,4 +301,10 @@ void check_and_replace_bootloader(bool shutdown_on_replace) {
 #endif
   // prevent compiler warning when PRODUCTION==0
   (void)shutdown_on_replace;
+}
+
+void gen_bootloader_version(void) {
+  uint8_t hash[32] = {0};
+  int r = memory_bootloader_hash(hash);
+  known_bootloader(r, hash);
 }
