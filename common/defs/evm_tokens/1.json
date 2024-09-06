@@ -158,6 +158,32 @@
       "marketCap": "6126893790.915463"
     },
     {
+      "_id": "62e8a3d28edb7c3c91a5586b",
+      "name": "Polygon",
+      "symbol": "POL",
+      "address": "0x455e53CBB86018Ac2B8092FdCd39d8444aFFC3F6",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-1/0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0.jpg",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "1",
+      "source": [
+        "sushi",
+        "Uniswap Labs Default",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "matic-network",
+      "swftId": "MATIC",
+      "createdAt": "2022-08-02T04:10:58.228Z",
+      "updatedAt": "2022-11-16T13:02:51.357Z",
+      "__v": 0,
+      "marketCap": "6126893790.915463"
+    },
+    {
       "_id": "62e8a3d28edb7c3c91a5585f",
       "name": "Wrapped BTC",
       "symbol": "WBTC",

@@ -253,6 +253,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "OMGToken",
         )
         yield (  # address, symbol, decimals, name
+            b"\x45\x5e\x53\xcb\xb8\x60\x18\xac\x2b\x80\x92\xfd\xcd\x39\xd8\x44\x4a\xff\xc3\xf6",
+            "POL",
+            18,
+            "Polygon",
+        )
+        yield (  # address, symbol, decimals, name
             b"\x95\xad\x61\xb0\xa1\x50\xd7\x92\x19\xdc\xf6\x4e\x1e\x6c\xc0\x1f\x0b\x64\xc4\xce",
             "SHIB",
             18,

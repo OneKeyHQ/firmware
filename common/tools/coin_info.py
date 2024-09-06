@@ -397,6 +397,7 @@ ETH_PRIMARY_COLOR_MAPPING = {
 }
 EVM_ICON_NAME_OVERRIDE = {
     10: "oeth",
+    137: "matic",
     288: "boba",
     314: "filecoin",
     324: "zksync-era",
