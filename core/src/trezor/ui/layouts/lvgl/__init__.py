@@ -1123,6 +1123,24 @@ async def confirm_domain(ctx: wire.GenericContext, **kwargs) -> None:
     )
 
 
+async def confirm_eip712_warning(
+    ctx: wire.GenericContext, primary_type: str, warning_level: int, text: str
+) -> None:
+    from trezor.lvglui.scrs.template import EIP712Warning
+
+    screen = EIP712Warning(
+        _(i18n_keys.TITLE__STR_TYPED_DATA).format(ctx.name),
+        warning_level,
+        text,
+        primary_type,
+        ctx.primary_color,
+        ctx.icon_path,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_eip712_warning", ButtonRequestType.ProtectCall)
+    )
+
+
 async def confirm_security_check(ctx: wire.GenericContext) -> None:
     from trezor.lvglui.scrs.template import SecurityCheck
 

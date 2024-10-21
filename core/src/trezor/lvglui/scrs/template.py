@@ -1068,6 +1068,27 @@ class TransactionDetailsTON(FullSizeWindow):
                     font=font_MONO24,
                 )
 
+class EIP712Warning(FullSizeWindow):
+    def __init__(
+        self, title: str, warning_level, text, primary_type, primary_color, icon_path
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
+        )
+        self.warning_banner = Banner(self.content_area, warning_level, text)
+        self.warning_banner.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
+        self.primary_type = DisplayItemNoBgc(
+            self.content_area,
+            "PrimaryType:",
+            primary_type,
+        )
+        self.primary_type.align_to(self.warning_banner, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 24)
 
 class TransactionDetailsTRON(FullSizeWindow):
     def __init__(

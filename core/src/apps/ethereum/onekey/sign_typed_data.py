@@ -90,7 +90,9 @@ async def generate_typed_data_hash(
         metamask_v4_compat=metamask_v4_compat,
     )
     await typed_data_envelope.collect_types()
+    from ..sign_typed_data import show_eip712_warning
 
+    await show_eip712_warning(ctx, primary_type)
     await confirm_domain(ctx, typed_data_envelope)
     domain_separator = await typed_data_envelope.hash_struct(
         primary_type="EIP712Domain",

@@ -1497,8 +1497,8 @@ TITLE__LITE_PIN_ERROR = 684
 TITLE__LITE_PIN_ERROR_DESC = 685
 # Lite has been Reset
 TITLE__LITE_HAS_BEEN_RESET = 686
-# The PIN has been entered incorrectly more than 10 times. OneKey Lite has bee
-# n self-erased to prevent brute force cracking of the backup data.
+# After 10 consecutive incorrect PIN entries, OneKey Lite has been automatical
+# ly wiped to prevent brute force attacks on backup data.
 TITLE__LITE_HAS_BEEN_RESET_DESC = 687
 # I Got It
 BUTTON__I_GOT_IT = 688
@@ -1580,7 +1580,7 @@ ITEM__ONEKEY_WALLET = 720
 FORM__FINGER_STR = 721
 # Charging
 MSG__CHARGING = 722
-# Scan transaction QR code or sign message
+# Scan the QR Code displayed on the app
 CONTENT__SCAN_THE_QR_CODE_DISPLAYED_ON_THE_APP = 723
 # Unsupported data format
 TITLE__DATA_FORMAT_NOT_SUPPORT = 724
@@ -1621,7 +1621,7 @@ TITLE__DISABLE_AIR_GAP = 740
 CONTENT__ARE_YOU_SURE_TO_DISABLE_AIRGAP_MODE = 741
 # Select the chain you need, then click Create button.
 SUBTITLE__ADD_ACCOUNT_2__TUTORIAL_AFTER_INIT = 742
-# ETH and EVM‒compatible chains
+# ETH and EVM‒compatible networks
 CONTENT__ETH_AND_EVM_POWERED_NETWORK = 743
 # fingerprint not recognized, try again
 MSG__FINGERPRINT_NOT_RECOGNIZED_TRY_AGAIN = 744
@@ -1724,31 +1724,50 @@ TITLE_CONFIRM_ADDRESS = 785
 TITLE_CONFIRM_ADDRESS_DESC = 786
 # BTC and EVM‒compatible networks
 CONTENT__BTC_AND_EVM_COMPATIBLE_NETWORKS = 787
-# ETH and EVM‒compatible networks
-CONTENT__ETH_AND_EVM_COMPATIBLE_NETWORKS = 788
 # Open OneKey and scan the QR code below
-CONTENT__OPEN_ONEKEY_AND_SCAN_THE_QR_CODE_BELOW = 789
+CONTENT__OPEN_ONEKEY_AND_SCAN_THE_QR_CODE_BELOW = 788
 # Export Account
-CONTENT__EXPORT_ACCOUNT = 790
+CONTENT__EXPORT_ACCOUNT = 789
 # Connecting...
-TITLE__CONNECTING = 791
+TITLE__CONNECTING = 790
 # Set OneKey Lite PIN
-TITLE__SET_ONEKEY_LITE_PIN = 792
+TITLE__SET_ONEKEY_LITE_PIN = 791
 # I understand that the backup will be overwritten
-FORM__I_UNDERSTAND_THAT_THE_BACKUP_WILL_BE_OVERWRITTEN = 793
+FORM__I_UNDERSTAND_THAT_THE_BACKUP_WILL_BE_OVERWRITTEN = 792
 # Confirm OneKey Lite PIN
-TITLE__CONFIRM_ONEKEY_LITE_PIN = 794
+TITLE__CONFIRM_ONEKEY_LITE_PIN = 793
 # PINs do not match, please reconfirm.
-CONTENT__PINS_DO_NOT_MATCH = 795
+CONTENT__PINS_DO_NOT_MATCH = 794
 # Connect again
-TITLE__CONNECT_AGAIN = 796
-# Eixt
-BUTTON__EXIT = 797
+TITLE__CONNECT_AGAIN = 795
+# Exit
+BUTTON__EXIT = 796
 # The two OneKey Lite used for connection are not the same.
-CONTENT__THE_TWO_ONEKEY_LITE_USED_FOR_CONNECTION_ARE_NOT_THE_SAME = 798
+CONTENT__THE_TWO_ONEKEY_LITE_USED_FOR_CONNECTION_ARE_NOT_THE_SAME = 797
 # Exit Backup Process?
-TITLE__EXIT_BACKUP_PROCESS = 799
+TITLE__EXIT_BACKUP_PROCESS = 798
 # If you exit now, you will need to re-verify your recovery phrase when you re
 # -enter. Are you sure you want to exit?
-TITLE__EXIT_BACKUP_PROCESS_DESC = 800
+TITLE__EXIT_BACKUP_PROCESS_DESC = 799
+# Unsupported Recovery Phrase
+TITLE__UNSUPPORTED_RECOVERY_PHRASE = 800
+# The current hardware wallet only supports 12, 18, and 24-word recovery phras
+# es.\nThis Lite backup cannot be restored.
+TITLE__UNSUPPORTED_RECOVERY_PHRASE_DESC = 801
+# Open OneKey and scan the QR code, supporting BTC and EVM networks.
+CONTENT__OPEN_ONEKEY_SCAN_THE_QRCODE = 802
+# Wallet Mismatch
+CONTENT__WALLET_MISMATCH = 803
+# Your selected wallet in the app does not match the hardware wallet. Please c
+# heck and try again.
+CONTENT__WALLET_MISMATCH_DESC = 804
+# Non-standard message signature.
+CONTENT__NON_STANDARD_MESSAGE_SIGNATURE = 805
+# Send Tokens
+TITLE__SEND_TOKENS = 806
+# The following transaction output contains contract data:
+CONTENT__FOLLOWING_TRANSACTION_CONTAINS_CONTRACT = 807
+# You are using {type} authorization, ensure the dApp is trustworthy to avoid
+# asset loss.
+MSG___PERMIT_SIGN_ALERT = 808
 # fmt: on

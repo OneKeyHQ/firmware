@@ -42,6 +42,19 @@ if TYPE_CHECKING:
 # Maximum data size we support
 MAX_VALUE_BYTE_SIZE = 1536  # 1.5 KB
 
+HIGH_RISK_PRIMARY_TYPES_PERMIT = (
+    "Permit",
+    "PermitBatch",
+    "PermitBatchTransferFrom",
+    "PermitSingle",
+    "PermitTransferFrom",
+)
+
+HIGH_RISK_PRIMARY_TYPES_ORDER = (
+    "Order",
+    "OrderComponents",
+)
+
 
 @with_keychain_from_path(*PATTERNS_ADDRESS)
 async def sign_typed_data(
@@ -84,7 +97,7 @@ async def generate_typed_data_hash(
         metamask_v4_compat=metamask_v4_compat,
     )
     await typed_data_envelope.collect_types()
-
+    await show_eip712_warning(ctx, primary_type)
     await confirm_domain(ctx, typed_data_envelope)
     domain_separator = await typed_data_envelope.hash_struct(
         primary_type="EIP712Domain",
@@ -553,3 +566,18 @@ async def confirm_domain(ctx: Context, typed_data_envelope: TypedDataEnvelope) -
     from .layout import confirm_domain
 
     await confirm_domain(ctx, eip712_domain)
+
+
+async def show_eip712_warning(ctx: Context, primary_type: str) -> None:
+    warning_level = 0
+    permit_type = "signTypedData"
+    if primary_type in HIGH_RISK_PRIMARY_TYPES_PERMIT:
+        warning_level = 2
+        permit_type = "Permit"
+    elif primary_type in HIGH_RISK_PRIMARY_TYPES_ORDER:
+        warning_level = 2
+        permit_type = "Order"
+    warning_text = _(i18n_keys.MSG___PERMIT_SIGN_ALERT).format(type=permit_type)
+    from trezor.ui.layouts.lvgl import confirm_eip712_warning
+
+    await confirm_eip712_warning(ctx, primary_type, warning_level, warning_text)
