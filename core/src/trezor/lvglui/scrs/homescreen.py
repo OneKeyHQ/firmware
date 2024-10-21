@@ -636,6 +636,7 @@ class SettingsScreen(Screen):
             super().__init__(**kwargs)
         else:
             self.refresh_text()
+            self.container.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 30)
             return
         # if __debug__:
         #     self.add_style(StyleWrapper().bg_color(lv_colors.ONEKEY_GREEN_1), 0)

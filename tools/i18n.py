@@ -6,7 +6,7 @@ LOKALISE_PROJECT_ID = "393278776072b9891cb763.27916840"
 BASE_PATH = os.path.join(
     os.path.dirname(__file__), "..", "core/src/trezor/lvglui/i18n/"
 )
-SUPPORTED_LANGS = ("en", "zh_CN", "zh_HK", "ja", "ko", "fr", "de", "ru", "es", "it")
+SUPPORTED_LANGS = ("en", "zh_CN", "zh_HK", "ja", "ko", "fr", "de", "ru", "es", "it", "pt_BR")
 CHARS_NORMAL = set()
 CHARS_TITLE = set()
 CHARS_SUBTITLE = set()
@@ -25,6 +25,7 @@ LANG_MAP = {
     'ko': 'Korean',
     'mn_MN': 'Mongolian',
     'pt': 'Portuguese',
+    'pt_BR': 'Portuguese (Brazil)',
     'ru': 'Russian',
     'es': 'Spanish',
     'th': 'Thai',

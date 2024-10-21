@@ -167,6 +167,8 @@ trezor.lvglui.i18n.locales.ja
 import trezor.lvglui.i18n.locales.ja
 trezor.lvglui.i18n.locales.ko
 import trezor.lvglui.i18n.locales.ko
+trezor.lvglui.i18n.locales.pt_br
+import trezor.lvglui.i18n.locales.pt_br
 trezor.lvglui.i18n.locales.ru
 import trezor.lvglui.i18n.locales.ru
 trezor.lvglui.i18n.locales.zh_cn
