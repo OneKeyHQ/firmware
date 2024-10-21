@@ -106,22 +106,24 @@ def try_remove_scr(screen):
         pass
 
 
-def turn_on_lcd_if_possible() -> bool:
-    return lcd_resume()
+def turn_on_lcd_if_possible(timeouts_ms: int | None = None) -> bool:
+    return lcd_resume(timeouts_ms)
 
 
-def lcd_resume() -> bool:
+def lcd_resume(timeouts_ms: int | None = None) -> bool:
     from trezor.ui import display
     from storage import device
     from apps import base
     from trezor import config
 
-    if display.backlight() != device.get_brightness():
+    if display.backlight() != device.get_brightness() or timeouts_ms:
         global AUTO_POWER_OFF
         display.backlight(device.get_brightness())
         AUTO_POWER_OFF = False
         base.reload_settings_from_storage(
-            timeout_ms=SHORT_AUTO_LOCK_TIME_MS if not config.is_unlocked() else None
+            timeout_ms=(SHORT_AUTO_LOCK_TIME_MS if not timeouts_ms else timeouts_ms)
+            if not config.is_unlocked()
+            else None
         )
         return True
     return False
