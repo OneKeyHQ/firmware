@@ -60,29 +60,43 @@ extern secbool load_vendor_header_keys(const uint8_t *const data,
 
 #define BACKLIGHT_NORMAL 150
 
-#define COLOR_BL_BG COLOR_BLACK                    // background
-#define COLOR_BL_FG COLOR_WHITE                    // foreground
-#define COLOR_BL_FAIL RGB16(0xFF, 0x00, 0x00)      // red
-#define COLOR_BL_DANGER RGB16(0xFF, 0x11, 0x00)    // onekey red
-#define COLOR_BL_DONE RGB16(0x00, 0xFF, 0x33)      // green
-#define COLOR_BL_PROCESS RGB16(0x4A, 0x90, 0xE2)   // blue
-#define COLOR_BL_GRAY RGB16(0x99, 0x99, 0x99)      // gray
-#define COLOR_BL_DARK RGB16(0x2D, 0x2D, 0x2D)      // gray
-#define COLOR_BL_ICON RGB16(0x33, 0x33, 0x33)      // gray
-#define COLOR_BL_TAGVALUE RGB16(0xB4, 0xB4, 0xB4)  //
-#define COLOR_BL_SUBTITLE RGB16(0xD2, 0xD2, 0xD2)  //
+#define COLOR_BL_BG COLOR_BLACK                        // background
+#define COLOR_BL_FG COLOR_WHITE                        // foreground
+#define COLOR_BL_FAIL RGB16(0xFF, 0x00, 0x00)          // red
+#define COLOR_BL_DANGER RGB16(0xFF, 0x11, 0x00)        // onekey red
+#define COLOR_BL_DONE RGB16(0x00, 0xFF, 0x33)          // green
+#define COLOR_BL_PROCESS RGB16(0x4A, 0x90, 0xE2)       // blue
+#define COLOR_BL_GRAY RGB16(0x99, 0x99, 0x99)          // gray
+#define COLOR_BL_DARK RGB16(0x2D, 0x2D, 0x2D)          // gray
+#define COLOR_BL_ICON RGB16(0x33, 0x33, 0x33)          // gray
+#define COLOR_BL_TAGVALUE RGB16(0xB4, 0xB4, 0xB4)      //
+#define COLOR_BL_SUBTITLE RGB16(0xD2, 0xD2, 0xD2)      //
+#define COLOR_BL_FG_INFO_ICON RGB16(0x96, 0x96, 0x96)  // info icon foreground
 
+#define STATUS_BAR_HEIGHT 44
+#define LOGO_SIZE 128
+#define LOGO_OFFSET_X ((DISPLAY_RESX - LOGO_SIZE) / 2)
+#define LOGO_OFFSET_Y (STATUS_BAR_HEIGHT + 92)
+
+#define INFO_ICON_SIZE 48
+#define INFO_ICON_OFFSET_X (DISPLAY_RESX - 20 - INFO_ICON_SIZE)
+#define INFO_ICON_OFFSET_Y (STATUS_BAR_HEIGHT + 16)
+#define CLOCK_AREA_EXPAND 10
+#define TITLE_OFFSET_Y (STATUS_BAR_HEIGHT + 274)
+#define SUBTITLE_OFFSET_Y (STATUS_BAR_HEIGHT + 332)
 #define COLOR_WELCOME_BG COLOR_WHITE  // welcome background
 #define COLOR_WELCOME_FG COLOR_BLACK  // welcome foreground
-
+#define BUTTON_RADIUS 4
 // common shared functions
 
 static void ui_confirm_cancel_buttons(void) {
-  display_bar_radius(9, 184, 108, 50, COLOR_BL_FAIL, COLOR_BL_BG, 4);
+  display_bar_radius(9, 184, 108, 50, COLOR_BL_FAIL, COLOR_BL_BG,
+                     BUTTON_RADIUS);
   display_icon(9 + (108 - 16) / 2, 184 + (50 - 16) / 2, 16, 16,
                toi_icon_cancel + 12, sizeof(toi_icon_cancel) - 12, COLOR_BL_BG,
                COLOR_BL_FAIL);
-  display_bar_radius(123, 184, 108, 50, COLOR_BL_DONE, COLOR_BL_BG, 4);
+  display_bar_radius(123, 184, 108, 50, COLOR_BL_DONE, COLOR_BL_BG,
+                     BUTTON_RADIUS);
   display_icon(123 + (108 - 19) / 2, 184 + (50 - 16) / 2, 20, 16,
                toi_icon_confirm + 12, sizeof(toi_icon_confirm) - 12,
                COLOR_BL_BG, COLOR_BL_DONE);
@@ -103,9 +117,11 @@ static uint16_t boot_background;
 static bool ble_name_show = false;
 static int ui_bootloader_page_current = 0;
 
-void ui_logo_center(void) {
-  display_image(203, 56, 74, 74, toi_icon_onekey_74x74 + 12,
-                sizeof(toi_icon_onekey_74x74) - 12);
+int get_ui_bootloader_page_current(void) { return ui_bootloader_page_current; }
+
+void ui_logo_onekey(void) {
+  display_image(LOGO_OFFSET_X, LOGO_OFFSET_Y, LOGO_SIZE, LOGO_SIZE,
+                toi_icon_onekey + 12, sizeof(toi_icon_onekey) - 12);
 }
 
 void ui_screen_boot(const vendor_header *const vhdr,
@@ -167,7 +183,7 @@ void ui_screen_boot_wait(int wait_seconds) {
   mini_snprintf(wait_str, sizeof(wait_str), "Starting in %d s", wait_seconds);
   display_bar(0, DISPLAY_RESY - 5 - 20, DISPLAY_RESX, 5 + 20, boot_background);
 #if PRODUCTION_MODEL == 'H'
-  ui_title_update();
+  ui_statusbar_update();
   display_bar(0, 600, DISPLAY_RESX, 100, boot_background);
   display_text_center(DISPLAY_RESX / 2, 655, wait_str, -1, FONT_NORMAL,
                       COLOR_BL_FG, boot_background);
@@ -273,7 +289,8 @@ void ui_screen_firmware_fingerprint(const image_header *const hdr) {
                         FONT_NORMAL, COLOR_BL_FG, COLOR_BL_BG);
   }
 
-  display_bar_radius(9, 184, 222, 50, COLOR_BL_DONE, COLOR_BL_BG, 4);
+  display_bar_radius(9, 184, 222, 50, COLOR_BL_DONE, COLOR_BL_BG,
+                     BUTTON_RADIUS);
   display_icon(9 + (222 - 19) / 2, 184 + (50 - 16) / 2, 20, 16,
                toi_icon_confirm + 12, sizeof(toi_icon_confirm) - 12,
                COLOR_BL_BG, COLOR_BL_DONE);
@@ -319,8 +336,8 @@ void ui_screen_install_confirm_newvendor_or_downgrade_wipe(
   }
 
   display_clear();
-  ui_title_update();
-  ui_logo_center();
+  ui_statusbar_update();
+  ui_logo_onekey();
 
   display_text_center(
       MAX_DISPLAY_RESX / 2, 190,
@@ -380,15 +397,15 @@ void ui_screen_install_confirm_newvendor_or_downgrade_wipe(
 }
 
 void ui_screen_progress_bar_prepare(char *title, char *notes) {
-  ui_title_update();
-  ui_logo_center();
+  ui_statusbar_update();
+  ui_logo_onekey();
   ui_screen_progress_bar_update(title, notes, -1);
 }
 
 void ui_screen_progress_bar_update(char *title, char *notes, int progress) {
   if (title != NULL)
-    display_text_center(DISPLAY_RESX / 2, 180, title, -1, FONT_PJKS_BOLD_38,
-                        COLOR_BL_FG, COLOR_BL_BG);
+    display_text_center(DISPLAY_RESX / 2, TITLE_OFFSET_Y, title, -1,
+                        FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
 
   if ((progress >= 0) || (progress <= 100)) {
     display_bar(60, 740, 360, 12, COLOR_WHITE);
@@ -411,9 +428,9 @@ void ui_screen_progress_bar_update(char *title, char *notes, int progress) {
 
 void ui_screen_install_start(void) {
 #if PRODUCTION_MODEL == 'H'
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 180, "Installing", -1,
+  ui_statusbar_update();
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y, "Installing", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
 #else
   display_clear();
@@ -433,9 +450,9 @@ void ui_screen_install_start(void) {
 
 void ui_screen_install_progress_erase(int pos, int len) {
 #if PRODUCTION_MODEL == 'H'
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 180, "Installing", -1,
+  ui_statusbar_update();
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y, "Installing", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
 #endif
   display_loader(250 * pos / len, false, -20, COLOR_BL_PROCESS, COLOR_BL_BG,
@@ -449,9 +466,9 @@ void ui_screen_install_progress_erase(int pos, int len) {
 
 void ui_screen_install_progress_upload(int pos) {
 #if PRODUCTION_MODEL == 'H'
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 180, "Installing", -1,
+  ui_statusbar_update();
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y, "Installing", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
 #endif
   display_loader(pos, false, -20, COLOR_BL_PROCESS, COLOR_BL_BG,
@@ -485,14 +502,16 @@ void ui_screen_wipe_confirm(void) {
 void ui_screen_wipe(void) {
 #if PRODUCTION_MODEL == 'H'
   display_clear();
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 190, "Wipe Device", -1,
+  ui_statusbar_update();
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y, "Wipe Device", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
-  display_text_center(DISPLAY_RESX / 2, 240, "Do you want to wipe the device?",
-                      -1, FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
-  display_text_center(DISPLAY_RESX / 2, 268, "Recovery phrase will be erased",
-                      -1, FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y + 50,
+                      "Do you want to wipe the device?", -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y + 78,
+                      "Recovery phrase will be erased", -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
 #else
   display_clear();
 #endif
@@ -527,7 +546,7 @@ void ui_screen_done(int restart_seconds, secbool full_redraw) {
   if (sectrue == full_redraw) {
 #if PRODUCTION_MODEL == 'H'
     display_clear();
-    ui_title_update();
+    ui_statusbar_update();
     display_image(203, 56, 74, 74, toi_icon_onekey_74x74 + 12,
                   sizeof(toi_icon_onekey_74x74) - 12);
 #else
@@ -558,8 +577,8 @@ void ui_screen_done(int restart_seconds, secbool full_redraw) {
 void ui_screen_fail(void) {
 #if PRODUCTION_MODEL == 'H'
   display_bar(0, DISPLAY_RESY / 2, DISPLAY_RESX, DISPLAY_RESY, COLOR_BL_BG);
-  ui_title_update();
-  ui_logo_center();
+  ui_statusbar_update();
+  ui_logo_onekey();
 #else
   display_clear();
 #endif
@@ -642,6 +661,13 @@ int ui_input_poll(int zones, bool poll) {
           y < 694 + 98) {
         return INPUT_CONFIRM;
       }
+      // clicked on Info icon
+      if ((zones & INPUT_INFO) && x >= INFO_ICON_OFFSET_X - CLOCK_AREA_EXPAND &&
+          x < INFO_ICON_OFFSET_X + INFO_ICON_SIZE + CLOCK_AREA_EXPAND &&
+          y > INFO_ICON_OFFSET_Y - CLOCK_AREA_EXPAND &&
+          y < INFO_ICON_OFFSET_Y + INFO_ICON_SIZE + CLOCK_AREA_EXPAND) {
+        return INPUT_INFO;
+      }
       // clicked on next button
       if ((zones & INPUT_NEXT) && x >= 8 && x < 8 + 464 && y > 694 &&
           y < 694 + 98) {
@@ -668,7 +694,7 @@ int ui_input_poll(int zones, bool poll) {
   return 0;
 }
 
-void ui_title_update(void) {
+void ui_statusbar_update(void) {
   char battery_str[8] = {0};
   uint32_t len = 0;
   uint32_t offset_x = 8;
@@ -740,19 +766,21 @@ void ui_title_update(void) {
 }
 
 void ui_wipe_confirm(const image_header *const hdr) {
-  ui_title_update();
-  ui_logo_center();
+  ui_statusbar_update();
+  ui_logo_onekey();
   // if (hdr && (hdr->onekey_version != 0)) {
   //   const char *ver_str = format_ver("v%d.%d.%d", (hdr->onekey_version));
   //   display_text_center(DISPLAY_RESX / 2, 246, ver_str, -1, FONT_NORMAL,
   //                       COLOR_BL_GRAY, COLOR_BL_BG);
   // }
-  display_text_center(DISPLAY_RESX / 2, 190, "Wipe Device", -1,
+  display_text_center(DISPLAY_RESX / 2, TITLE_OFFSET_Y, "Wipe Device", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
-  display_text_center(DISPLAY_RESX / 2, 240, "Do you want to wipe the device?",
-                      -1, FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
-  display_text_center(DISPLAY_RESX / 2, 268, "Recovery phrase will be erased",
-                      -1, FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y + 50,
+                      "Do you want to wipe the device?", -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y + 78,
+                      "Recovery phrase will be erased", -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
   display_bar(8, 694, 231, 98, COLOR_BL_ICON);
   display_text_center(DISPLAY_RESX / 4, 755, "Cancel", -1, FONT_PJKS_BOLD_26,
                       COLOR_BL_FG, COLOR_BL_ICON);
@@ -764,21 +792,22 @@ void ui_wipe_confirm(const image_header *const hdr) {
 void ui_install_confirm(image_header *current_hdr,
                         const image_header *const new_hdr) {
   if ((current_hdr == NULL) || (new_hdr == NULL)) return;
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 190, "System Update", -1,
+  ui_statusbar_update();
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, TITLE_OFFSET_Y, "System Update", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
-  display_text_center(DISPLAY_RESX / 2, 240, "Install firmware by OneKey?", -1,
-                      FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y,
+                      "Install firmware by OneKey?", -1, FONT_NORMAL,
+                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
 
   const char *ver_str = format_ver("%d.%d.%d", current_hdr->onekey_version);
-  display_text_right(DISPLAY_RESX / 2 - 25, 320, ver_str, -1, FONT_NORMAL,
-                     COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_right(DISPLAY_RESX / 2 - 25, SUBTITLE_OFFSET_Y + 90, ver_str, -1,
+                     FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
   ver_str = format_ver("%d.%d.%d", new_hdr->onekey_version);
-  display_text(DISPLAY_RESX / 2 + 25, 320, ver_str, -1, FONT_NORMAL,
-               COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text(DISPLAY_RESX / 2 + 25, SUBTITLE_OFFSET_Y + 90, ver_str, -1,
+               FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
 
-  display_image(231, 303, 17, 14, toi_icon_arrow_right + 12,
+  display_image(231, SUBTITLE_OFFSET_Y + 70, 17, 14, toi_icon_arrow_right + 12,
                 sizeof(toi_icon_arrow_right) - 12);
 
   display_bar(8, 694, 231, 98, COLOR_BL_ICON);
@@ -791,17 +820,17 @@ void ui_install_confirm(image_header *current_hdr,
 
 void ui_install_ble_confirm(void) {
   char str[128] = {0};
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 190, "Bluetooth Update", -1,
+  ui_statusbar_update();
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, TITLE_OFFSET_Y, "Bluetooth Update", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
-  display_text_center(DISPLAY_RESX / 2, 240,
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y,
                       "A new bluetooth firmware is avaliable! The", -1,
                       FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
   strcat(str, "current version is ");
   strcat(str, ble_get_ver());
-  display_text_center(DISPLAY_RESX / 2, 268, str, -1, FONT_NORMAL,
-                      COLOR_BL_SUBTITLE, COLOR_BL_BG);
+  display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y + 30, str, -1,
+                      FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
 
   display_bar(8, 694, 231, 98, COLOR_BL_ICON);
   display_text_center(DISPLAY_RESX / 4, 755, "Cancel", -1, FONT_PJKS_BOLD_26,
@@ -814,27 +843,30 @@ void ui_install_ble_confirm(void) {
 void ui_bootloader_first(const image_header *const hdr) {
   ui_bootloader_page_current = 0;
 
-  ui_title_update();
-  ui_logo_center();
-  display_text_center(DISPLAY_RESX / 2, 190, "Update Mode", -1,
+  ui_statusbar_update();
+  // info icon 48 * 48 - the entry point of the bootloader details
+  display_icon(INFO_ICON_OFFSET_X, INFO_ICON_OFFSET_Y, INFO_ICON_SIZE,
+               INFO_ICON_SIZE, toi_ok_icon_info + 12,
+               sizeof(toi_ok_icon_info) - 12, COLOR_BL_FG_INFO_ICON,
+               COLOR_BL_BG);
+  ui_logo_onekey();
+  display_text_center(DISPLAY_RESX / 2, TITLE_OFFSET_Y, "Update Mode", -1,
                       FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
 
   if (ble_name_state()) {
     char *ble_name;
     ble_name = ble_get_name();
-    display_text_center(DISPLAY_RESX / 2, 240, ble_name, -1, FONT_NORMAL,
-                        COLOR_BL_SUBTITLE, COLOR_BL_BG);
+    display_text_center(DISPLAY_RESX / 2, SUBTITLE_OFFSET_Y, ble_name, -1,
+                        FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
     ble_name_show = true;
   }
+  display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 92, "SafeOS", -1,
+                      FONT_PJKS_BOLD_38, COLOR_BL_FG, COLOR_BL_BG);
   if (hdr) {
     const char *ver_str = format_ver("%d.%d.%d", (hdr->onekey_version));
-    display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 125, ver_str, -1,
+    display_text_center(DISPLAY_RESX / 2, DISPLAY_RESY - 50, ver_str, -1,
                         FONT_NORMAL, COLOR_BL_SUBTITLE, COLOR_BL_BG);
   }
-
-  display_bar(8, 694, 464, 98, COLOR_BL_ICON);
-  display_text_center(DISPLAY_RESX / 2, 755, "View Details", -1,
-                      FONT_PJKS_BOLD_26, COLOR_BL_FG, COLOR_BL_ICON);
 }
 
 void ui_bootloader_view_details(const image_header *const hdr) {
@@ -843,7 +875,7 @@ void ui_bootloader_view_details(const image_header *const hdr) {
   int offset_x = 8, offset_y = 90, offset_seg = 44, offset_line = 30;
   const char *ver_str = NULL;
 
-  ui_title_update();
+  ui_statusbar_update();
   display_text(offset_x, offset_y, "Model", -1, FONT_PJKS_BOLD_26, COLOR_BL_FG,
                COLOR_BL_BG);
   offset_y += offset_line;
@@ -929,7 +961,7 @@ void ui_bootloader_view_details(const image_header *const hdr) {
 void ui_bootloader_restart_confirm(void) {
   ui_bootloader_page_current = 4;
 
-  ui_title_update();
+  ui_statusbar_update();
   int title_offset_y = 90;
   int title_offset_x = 12;
   display_text(title_offset_x, title_offset_y, "Restart  Device?", -1,
@@ -977,8 +1009,8 @@ void ui_bootloader_page_switch(const image_header *const hdr) {
   static uint32_t click = 0, click_pre = 0, click_now = 0;
 
   if (ui_bootloader_page_current == 0) {
-    response = ui_input_poll(INPUT_NEXT, false);
-    if (INPUT_NEXT == response) {
+    response = ui_input_poll(INPUT_INFO, false);
+    if (INPUT_INFO == response) {
       display_clear();
       ui_bootloader_view_details(hdr);
     }
