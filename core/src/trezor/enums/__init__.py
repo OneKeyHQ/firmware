@@ -91,6 +91,8 @@ if TYPE_CHECKING:
         GetOwnershipProof = 49
         OwnershipProof = 50
         AuthorizeCoinJoin = 51
+        SignPsbt = 10052
+        SignedPsbt = 10053
         CipherKeyValue = 23
         CipheredKeyValue = 48
         SignIdentity = 53

@@ -453,6 +453,18 @@ apps.bitcoin.multisig
 import apps.bitcoin.multisig
 apps.bitcoin.ownership
 import apps.bitcoin.ownership
+apps.bitcoin.psbt
+import apps.bitcoin.psbt
+apps.bitcoin.psbt.key
+import apps.bitcoin.psbt.key
+apps.bitcoin.psbt.psbt
+import apps.bitcoin.psbt.psbt
+apps.bitcoin.psbt.script
+import apps.bitcoin.psbt.script
+apps.bitcoin.psbt.serialize
+import apps.bitcoin.psbt.serialize
+apps.bitcoin.psbt.tx
+import apps.bitcoin.psbt.tx
 apps.bitcoin.readers
 import apps.bitcoin.readers
 apps.bitcoin.scripts
@@ -461,6 +473,8 @@ apps.bitcoin.scripts_decred
 import apps.bitcoin.scripts_decred
 apps.bitcoin.sign_message
 import apps.bitcoin.sign_message
+apps.bitcoin.sign_taproot
+import apps.bitcoin.sign_taproot
 apps.bitcoin.sign_tx
 import apps.bitcoin.sign_tx
 apps.bitcoin.sign_tx.approvers

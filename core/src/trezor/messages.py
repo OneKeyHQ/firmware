@@ -1147,6 +1147,36 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["AuthorizeCoinJoin"]:
             return isinstance(msg, cls)
 
+    class SignPsbt(protobuf.MessageType):
+        psbt: "bytes"
+        coin_name: "str"
+
+        def __init__(
+            self,
+            *,
+            psbt: "bytes",
+            coin_name: "str | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SignPsbt"]:
+            return isinstance(msg, cls)
+
+    class SignedPsbt(protobuf.MessageType):
+        psbt: "bytes"
+
+        def __init__(
+            self,
+            *,
+            psbt: "bytes",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SignedPsbt"]:
+            return isinstance(msg, cls)
+
     class HDNodePathType(protobuf.MessageType):
         node: "HDNodeType"
         address_n: "list[int]"

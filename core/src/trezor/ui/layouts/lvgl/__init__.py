@@ -620,10 +620,9 @@ async def confirm_blob(
     from trezor.lvglui.scrs.template import BlobDisPlay
 
     if isinstance(data, (bytes, bytearray)):
-        try:
-            data_str = data.decode()
-        except UnicodeDecodeError:
-            data_str = hexlify(data).decode()
+        from trezor import strings
+
+        data_str = strings.format_customer_data(data)
     else:
         data_str = data
     blob = BlobDisPlay(

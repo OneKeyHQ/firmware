@@ -448,6 +448,10 @@ class BufferReader:
         self.offset += 1
         return byte
 
+    def tell(self) -> int:
+        """Return the current offset."""
+        return self.offset
+
 
 def obj_eq(self: Any, __o: Any) -> bool:
     """

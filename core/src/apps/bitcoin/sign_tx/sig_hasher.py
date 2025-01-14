@@ -126,6 +126,7 @@ class BitcoinSigHasher:
         i: int,
         tx: SignTx | PrevTx,
         sighash_type: SigHashType,
+        leaf_hash: bytes | None = None,  # for script path
     ) -> bytes:
         h_sigmsg = tagged_hashwriter(b"TapSighash")
 
@@ -167,10 +168,22 @@ class BitcoinSigHasher:
         )
 
         # spend_type 0 (no tapscript message extension, no annex)
-        writers.write_uint8(h_sigmsg, 0)
+        spend_type = 0
+        if leaf_hash is not None:
+            # script path spending, no annex
+            spend_type = 2
+        writers.write_uint8(h_sigmsg, spend_type)
 
         # input_index
         writers.write_uint32(h_sigmsg, i)
+
+        if leaf_hash is not None:
+            # leaf hash
+            writers.write_bytes_fixed(h_sigmsg, leaf_hash, writers.TX_HASH_SIZE)
+            # key version
+            writers.write_uint8(h_sigmsg, 0)
+            # codesep_pos (signed int32, default -1)
+            writers.write_bytes_unchecked(h_sigmsg, b"\xff\xff\xff\xff")
 
         return h_sigmsg.get_digest()
 

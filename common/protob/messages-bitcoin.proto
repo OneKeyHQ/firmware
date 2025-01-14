@@ -622,3 +622,21 @@ message AuthorizeCoinJoin {
     optional AmountUnit amount_unit = 8 [default=BITCOIN];              // show amounts in
 }
 
+/**
+ * Request: Ask device to sign a taproot transaction
+ * @start
+ * @next SignedPsbt
+ * @next Failure
+ */
+ message SignPsbt {
+    required bytes psbt = 1;             // PSBT to be signed
+    optional string coin_name = 2[default='Bitcoin'];
+}
+
+/**
+ * Response: Contains the signed PSBT
+ * @end
+ */
+message SignedPsbt {
+    required bytes psbt = 1;             // PSBT to be finalized
+}

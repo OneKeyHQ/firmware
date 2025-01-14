@@ -99,6 +99,8 @@ class MessageType(IntEnum):
     GetOwnershipProof = 49
     OwnershipProof = 50
     AuthorizeCoinJoin = 51
+    SignPsbt = 10052
+    SignedPsbt = 10053
     CipherKeyValue = 23
     CipheredKeyValue = 48
     SignIdentity = 53
@@ -2024,6 +2026,37 @@ class AuthorizeCoinJoin(protobuf.MessageType):
         self.coin_name = coin_name
         self.script_type = script_type
         self.amount_unit = amount_unit
+
+
+class SignPsbt(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10052
+    FIELDS = {
+        1: protobuf.Field("psbt", "bytes", repeated=False, required=True),
+        2: protobuf.Field("coin_name", "string", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        psbt: "bytes",
+        coin_name: Optional["str"] = 'Bitcoin',
+    ) -> None:
+        self.psbt = psbt
+        self.coin_name = coin_name
+
+
+class SignedPsbt(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10053
+    FIELDS = {
+        1: protobuf.Field("psbt", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        psbt: "bytes",
+    ) -> None:
+        self.psbt = psbt
 
 
 class HDNodePathType(protobuf.MessageType):
