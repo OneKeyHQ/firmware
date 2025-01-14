@@ -27,8 +27,15 @@ def message_digest(coin: CoinInfo, message: bytes) -> bytes:
     return ret
 
 
+def is_non_printable(message: str) -> bool:
+    return any(ord(c) < 32 or ord(c) == 127 for c in message)
+
+
 def decode_message(message: bytes) -> str:
     try:
-        return bytes(message).decode()
+        decoded_message = bytes(message).decode()
+        if is_non_printable(decoded_message):
+            return f"0x{hexlify(message).decode()}"
+        return decoded_message
     except UnicodeError:
         return f"0x{hexlify(message).decode()}"
