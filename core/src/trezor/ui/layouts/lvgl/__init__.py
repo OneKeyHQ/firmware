@@ -938,6 +938,7 @@ async def confirm_signverify(
     verify: bool,
     evm_chain_id: int | None = None,
     title: str | None = None,
+    is_standard: bool = True,
 ) -> None:
     if verify:
         header = _(i18n_keys.TITLE__VERIFY_STR_MESSAGE).format(coin)
@@ -961,6 +962,7 @@ async def confirm_signverify(
                 ctx.icon_path,
                 verify,
                 evm_chain_id,
+                is_standard=is_standard,
             ),
             br_type,
             ButtonRequestType.Other,

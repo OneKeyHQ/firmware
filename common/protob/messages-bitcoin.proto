@@ -154,6 +154,7 @@ message SignMessage {
     optional string coin_name = 3 [default='Bitcoin'];                  // coin to use for signing
     optional InputScriptType script_type = 4 [default=SPENDADDRESS];    // used to distinguish between various address formats (non-segwit, segwit, etc.)
     optional bool no_script_type = 5;                                   // don't include script type information in the recovery byte of the signature, same as in Bitcoin Core
+    optional bool is_bip322_simple = 10[default=false];                 // use BIP-322 simple format for signing
 }
 
 /**

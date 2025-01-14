@@ -162,6 +162,7 @@ class Message(FullSizeWindow):
         icon_path,
         verify: bool = False,
         evm_chain_id: int | None = None,
+        is_standard: bool = True,
     ):
         super().__init__(
             title,
@@ -173,8 +174,18 @@ class Message(FullSizeWindow):
             icon_path=icon_path,
         )
         self.primary_color = primary_color
+        if not is_standard:
+            self.warning_banner = Banner(
+                self.content_area,
+                2,
+                _(i18n_keys.CONTENT__NON_STANDARD_MESSAGE_SIGNATURE),
+            )
+            self.warning_banner.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
         self.container = ContainerFlexCol(
-            self.content_area, self.title, pos=(0, 40), padding_row=8
+            self.content_area,
+            self.title if is_standard else self.warning_banner,
+            pos=(0, 40),
+            padding_row=8,
         )
         if evm_chain_id:
             self.item3 = DisplayItemNoBgc(

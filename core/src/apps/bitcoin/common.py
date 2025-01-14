@@ -187,6 +187,10 @@ def tagged_hashwriter(tag: bytes) -> HashWriter:
     return HashWriter(ctx)
 
 
+def create_hashwriter() -> HashWriter:
+    return HashWriter(sha256())
+
+
 def format_fee_rate(
     fee_rate: float, coin: CoinInfo, include_shortcut: bool = False
 ) -> str:

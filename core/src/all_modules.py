@@ -435,6 +435,8 @@ apps.bitcoin.authorization
 import apps.bitcoin.authorization
 apps.bitcoin.authorize_coinjoin
 import apps.bitcoin.authorize_coinjoin
+apps.bitcoin.bip322_simple
+import apps.bitcoin.bip322_simple
 apps.bitcoin.common
 import apps.bitcoin.common
 apps.bitcoin.get_address
