@@ -222,6 +222,8 @@ def auto_keychain(
     pattern = getattr(parent_module, "PATTERN")
     curve = getattr(parent_module, "CURVE")
     slip44_id = getattr(parent_module, "SLIP44_ID")
+
+    pattern = pattern if isinstance(pattern, tuple) else (pattern,)
     return with_slip44_keychain(
-        pattern, slip44_id=slip44_id, curve=curve, allow_testnet=allow_testnet
+        *pattern, slip44_id=slip44_id, curve=curve, allow_testnet=allow_testnet
     )
