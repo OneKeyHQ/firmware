@@ -369,6 +369,13 @@ class BufferWriter:
         self.offset += nwrite
         return nwrite
 
+    def append(self, b: int) -> None:
+        self.buffer[self.offset] = b
+        self.offset += 1
+
+    def extend(self, src: bytes) -> None:
+        self.write(src)
+
 
 class BufferReader:
     """Seekable and readable view into a buffer."""

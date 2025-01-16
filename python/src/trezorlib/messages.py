@@ -339,6 +339,8 @@ class MessageType(IntEnum):
     SolanaAddress = 10101
     SolanaSignTx = 10102
     SolanaSignedTx = 10103
+    SolanaSignMessage = 10104
+    SolanaSignedMessage = 10105
     CosmosGetAddress = 10800
     CosmosAddress = 10801
     CosmosSignTx = 10802
@@ -720,6 +722,15 @@ class NEMModificationType(IntEnum):
 class NEMImportanceTransferMode(IntEnum):
     ImportanceTransfer_Activate = 1
     ImportanceTransfer_Deactivate = 2
+
+
+class SolanaMessageVersion(IntEnum):
+    MESSAGE_VERSION_0 = 0
+
+
+class SolanaMessageFormat(IntEnum):
+    V0_RESTRICTED_ASCII = 0
+    V0_LIMITED_UTF8 = 1
 
 
 class StellarAssetType(IntEnum):
@@ -9182,6 +9193,49 @@ class SolanaSignedTx(protobuf.MessageType):
         signature: "bytes",
     ) -> None:
         self.signature = signature
+
+
+class SolanaSignMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10104
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+        3: protobuf.Field("message_version", "SolanaMessageVersion", repeated=False, required=False),
+        4: protobuf.Field("message_format", "SolanaMessageFormat", repeated=False, required=False),
+        5: protobuf.Field("application_domain", "bytes", repeated=False, required=False),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+        message_version: Optional["SolanaMessageVersion"] = SolanaMessageVersion.MESSAGE_VERSION_0,
+        message_format: Optional["SolanaMessageFormat"] = SolanaMessageFormat.V0_RESTRICTED_ASCII,
+        application_domain: Optional["bytes"] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+        self.message_version = message_version
+        self.message_format = message_format
+        self.application_domain = application_domain
+
+
+class SolanaSignedMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10105
+    FIELDS = {
+        1: protobuf.Field("signature", "bytes", repeated=False, required=True),
+        2: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        signature: "bytes",
+        public_key: "bytes",
+    ) -> None:
+        self.signature = signature
+        self.public_key = public_key
 
 
 class StarcoinGetAddress(protobuf.MessageType):

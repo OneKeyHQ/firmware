@@ -161,8 +161,11 @@ class Message(FullSizeWindow):
         primary_color,
         icon_path,
         verify: bool = False,
-        evm_chain_id: int | None = None,
+        *,
+        item_other: int | str | None = None,
+        item_addr_title: str | None = None,
         is_standard: bool = True,
+        item_other_title: str | None = None,
     ):
         super().__init__(
             title,
@@ -187,14 +190,16 @@ class Message(FullSizeWindow):
             pos=(0, 40),
             padding_row=8,
         )
-        if evm_chain_id:
+        if item_other:
             self.item3 = DisplayItemNoBgc(
                 self.container,
-                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
-                str(evm_chain_id),
+                item_other_title or _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(item_other),
             )
         self.item1 = DisplayItemNoBgc(
-            self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
+            self.container,
+            item_addr_title or _(i18n_keys.LIST_KEY__ADDRESS__COLON),
+            address,
         )
         self.long_message = False
         if len(message) > 80:

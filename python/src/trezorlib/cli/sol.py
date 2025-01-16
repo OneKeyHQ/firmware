@@ -17,17 +17,28 @@
 
 from typing import TYPE_CHECKING
 
+from typing import Optional
+
 import base58
 import click
 
-from .. import solana, tools
-from . import with_client
+from .. import solana, tools, messages
+from . import with_client, ChoiceType
 
 if TYPE_CHECKING:
     from ..client import TrezorClient
+
+
 PATH_HELP = "BIP-32 path, e.g. m/44'/501'/0'/0'"
 PATH_RAW_TX = "Base58 encoded transaction"
 
+MESSAGE_VERSIONS = {
+    "v0": messages.SolanaMessageVersion.MESSAGE_VERSION_0,
+}
+MESSAGE_FORMATS = {
+    "ascii": messages.SolanaMessageFormat.V0_RESTRICTED_ASCII,
+    "utf8": messages.SolanaMessageFormat.V0_LIMITED_UTF8,
+}
 
 @click.group(name="sol")
 def cli():
@@ -53,3 +64,25 @@ def sign_tx(client: "TrezorClient", address: str, raw_tx: str) -> str:
     address_n = tools.parse_path(address)
     transaction = solana.sign_tx(client, address_n, base58.b58decode(raw_tx))
     return transaction.signature.hex()
+
+@cli.command()
+@click.option("-n", "--address", required=True, help=PATH_HELP)
+@click.option("-v", "--message-version", type=ChoiceType(MESSAGE_VERSIONS), default="v0")
+@click.option("-f", "--message-format", type=ChoiceType(MESSAGE_FORMATS), default="ascii")
+@click.option("-d", "--application-domain", default=None, help="32 bytes hex encoded application domain or None")
+@click.argument("message")
+@with_client
+def sign_message(client: "TrezorClient",
+    address: str,
+    message: str,
+    message_version: str,
+    message_format: str,
+    application_domain: Optional[str]
+):
+    """Sign Solana message."""
+    address_n = tools.parse_path(address)
+    rep = solana.sign_message(client, address_n, tools.prepare_message_bytes(message), message_version, message_format, application_domain)
+    return {
+        "public_key": f"0x{rep.public_key.hex()}",
+        "signature": f"0x{rep.signature.hex()}",
+    }

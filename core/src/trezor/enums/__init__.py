@@ -331,6 +331,8 @@ if TYPE_CHECKING:
         SolanaAddress = 10101
         SolanaSignTx = 10102
         SolanaSignedTx = 10103
+        SolanaSignMessage = 10104
+        SolanaSignedMessage = 10105
         CosmosGetAddress = 10800
         CosmosAddress = 10801
         CosmosSignTx = 10802
@@ -668,6 +670,13 @@ if TYPE_CHECKING:
     class NEMImportanceTransferMode(IntEnum):
         ImportanceTransfer_Activate = 1
         ImportanceTransfer_Deactivate = 2
+
+    class SolanaMessageVersion(IntEnum):
+        MESSAGE_VERSION_0 = 0
+
+    class SolanaMessageFormat(IntEnum):
+        V0_RESTRICTED_ASCII = 0
+        V0_LIMITED_UTF8 = 1
 
     class StellarAssetType(IntEnum):
         NATIVE = 0

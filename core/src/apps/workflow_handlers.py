@@ -250,6 +250,8 @@ def find_message_handler_module(msg_type: int) -> str:
             return "apps.solana.get_address"
         if msg_type == MessageType.SolanaSignTx:
             return "apps.solana.sign_tx"
+        if msg_type == MessageType.SolanaSignMessage:
+            return "apps.solana.sign_message"
 
         # starcoin
         if msg_type == MessageType.StarcoinGetAddress:
