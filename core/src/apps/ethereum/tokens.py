@@ -175,6 +175,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "Huobi BTC",
         )
         yield (  # address, symbol, decimals, name
+            b"\xe7\xc6\xbf\x46\x9e\x97\xee\xb0\xbf\xb7\x4c\x8d\xbf\xf5\xbd\x47\xd4\xc1\xc9\x8a",
+            "HSK",
+            18,
+            "HashKey Platform Token",
+        )
+        yield (  # address, symbol, decimals, name
             b"\x6f\x25\x96\x37\xdc\xd7\x4c\x76\x77\x81\xe3\x7b\xc6\x13\x3c\xd6\xa6\x8a\xa1\x61",
             "HT",
             18,
@@ -1561,6 +1567,31 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             18,
             "(PoS) yearn.finance",
         )
+    if chain_id == 177:  # HashKey Chain
+        yield (  # address, symbol, decimals, name
+            b"\xf1\xb5\x0e\xd6\x7a\x9e\x2c\xc9\x4a\xd3\xc4\x77\x77\x9e\x2d\x4c\xbf\xff\x90\x29",
+            "USDT",
+            6,
+            "Tether USD",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x61\x19\xca\x49\xa7\x9f\x58\x25\xc8\xb3\x45\xf8\xd7\xac\x36\xb2\x72\x56\x5b\x14",
+            "WBTC",
+            8,
+            "Wrapped BTC",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xef\xd4\xbc\x9a\xfd\x21\x05\x17\x80\x3f\x29\x3a\xba\xbd\x70\x1c\xae\xec\xdf\xd0",
+            "WETH",
+            18,
+            "Wrapped Ether",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xb2\x10\xd2\x12\x0d\x57\xb7\x58\xee\x16\x3c\xff\xb4\x3e\x73\x72\x8c\x47\x1c\xf1",
+            "WHSK",
+            18,
+            "Wrapped HSK",
+        )
     if chain_id == 250:  # FTM
         yield (  # address, symbol, decimals, name
             b"\x6a\x07\xa7\x92\xab\x29\x65\xc7\x2a\x5b\x80\x88\xd3\xa0\x69\xa7\xac\x3a\x99\x3b",
@@ -1754,6 +1785,61 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "SB",
             18,
             "Shibui",
+        )
+    if chain_id == 9798:  # Data Trade Chain
+        yield (  # address, symbol, decimals, name
+            b"\x8e\x79\x85\x0c\x50\xe5\x25\xeb\x6b\xa6\x3e\x60\x1e\x7b\x41\x88\x8a\x1c\x91\x02",
+            "BV",
+            2,
+            "BV",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x89\x9f\x0b\x9d\x67\xdd\x1b\x83\x3f\xda\xa9\x0c\x8b\x09\xea\x61\x6d\x0e\x9e\x98",
+            "CNV",
+            2,
+            "CNV",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xe8\x95\xc5\x77\xd7\x47\xbb\x5d\xbb\xc1\xf0\x6c\xb4\x4d\x60\x67\x68\x0b\xe4\xbe",
+            "dBTC",
+            8,
+            "dBTC",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x8b\x71\x60\xc1\xe9\xfd\xb6\x89\xa0\x60\xff\x09\x19\xe8\x49\x15\xb0\xdf\xa0\x4a",
+            "dETH",
+            18,
+            "dETH",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x74\x5c\x11\xfb\x47\x83\xbd\x00\xa8\x8a\x0b\x99\x42\x02\x62\xf4\x09\xfa\x8b\xb8",
+            "DOS",
+            2,
+            "DOS",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x36\xe6\x50\x4c\x96\x8f\x5c\x2a\x31\x0b\x6a\xf7\xb9\x7b\xc2\x2c\xdd\x34\x02\xcc",
+            "dUSDT",
+            6,
+            "dUSDT",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xb8\x8a\xd7\x67\xb4\x16\x19\x7e\x62\x93\x9d\xec\x20\x74\x31\xb5\x61\xa9\x38\x3b",
+            "FEC",
+            4,
+            "FEC",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xe5\x2a\x73\x68\x28\xc7\x82\xc2\xa4\xa3\x45\xbb\xe8\x05\x2a\xed\x01\x0f\xc8\x2d",
+            "HLT",
+            2,
+            "HLT",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x6d\x88\x5b\x0b\x37\xc6\x2b\xe0\xc7\x2e\xcd\x6a\x61\xaf\x2b\xff\xf6\x81\x41\x9e",
+            "STC08375",
+            0,
+            "STC08375",
         )
     if chain_id == 42161:  # Arbitrum
         yield (  # address, symbol, decimals, name

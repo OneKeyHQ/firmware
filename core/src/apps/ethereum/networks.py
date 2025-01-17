@@ -621,6 +621,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         0xD2D2D2,  # primary_color
     )
     yield (
+        146,  # chain_id
+        60,  # slip44
+        "S",  # symbol
+        "Sonic",  # name
+        "evm-s.png",  # name
+        0xFFFFFF,  # primary_color
+    )
+    yield (
         162,  # chain_id
         1,  # slip44
         "tPHT",  # symbol
@@ -635,6 +643,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "Lightstreams",  # name
         "evm-pht.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        177,  # chain_id
+        60,  # slip44
+        "HSK",  # symbol
+        "HashKey Chain",  # name
+        "evm-hsk.png",  # name
+        0xFFFFFF,  # primary_color
     )
     yield (
         186,  # chain_id
@@ -919,9 +935,9 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     yield (
         1001,  # chain_id
         1,  # slip44
-        "tKLAY",  # symbol
-        "Kaia Testnet Kairos",  # name
-        "evm-tklay.png",  # name
+        "tKAIA",  # symbol
+        "Kaia Kairos Testnet",  # name
+        "evm-tkaia.png",  # name
         0x969696,  # primary_color
     )
     yield (
@@ -1215,9 +1231,9 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     yield (
         8217,  # chain_id
         8217,  # slip44
-        "KLAY",  # symbol
+        "KAIA",  # symbol
         "Kaia",  # name
-        "evm-klay.png",  # name
+        "evm-kaia.png",  # name
         0xD2D2D2,  # primary_color
     )
     yield (
@@ -1307,6 +1323,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "MetaDot",  # name
         "evm-mtt.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        19515,  # chain_id
+        1,  # slip44
+        "tSEP",  # symbol
+        "SEC Testnet",  # name
+        "evm-tsep.png",  # name
+        0x969696,  # primary_color
     )
     yield (
         19845,  # chain_id
@@ -1448,7 +1472,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         63000,  # chain_id
         60,  # slip44
         "ECS",  # symbol
-        "eCredits",  # name
+        "eSync Network",  # name
         "evm-ecs.png",  # name
         0xD2D2D2,  # primary_color
     )
@@ -1827,4 +1851,12 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "Molereum Network",  # name
         "evm-mole.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        9798,  # chain_id
+        9798,  # slip44
+        "DTT",  # symbol
+        "Data Trade Chain",  # name
+        "evm-dtt.png",  # icon
+        0x1A2A5F,  # primary_color
     )

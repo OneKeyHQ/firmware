@@ -1,0 +1,69 @@
+{
+    "name": "Data Trade Chain",
+    "chain": "Data Trade Chain",
+    "tokens": [
+        {
+            "id": "837d169e-6f33-535a-988c-8b2eb31dd0bd",
+            "name": "HLT",
+            "symbol": "HLT",
+            "address": "0xE52a736828c782C2a4A345bBE8052aed010fc82D",
+            "decimals": 2
+        },
+        {
+            "id": "e2c7ceec-289d-5508-8c3d-ab33d36d6ecd",
+            "name": "BV",
+            "symbol": "BV",
+            "address": "0x8E79850C50E525eB6Ba63e601E7b41888A1c9102",
+            "decimals": 2
+        },
+        {
+            "id": "ce5883e4-213b-55cb-b49c-2df48e5dea8e",
+            "name": "dUSDT",
+            "symbol": "dUSDT",
+            "address": "0x36E6504c968f5C2A310B6AF7B97BC22cdd3402cc",
+            "decimals": 6
+        },
+        {
+            "id": "79cab3e2-b87b-53a3-9b5b-c120b9287749",
+            "name": "dBTC",
+            "symbol": "dBTC",
+            "address": "0xE895c577D747bB5dbBc1F06cb44d6067680bE4be",
+            "decimals": 8
+        },
+        {
+            "id": "3f348ef3-1ced-5c1f-b25b-dbde27a12ab1",
+            "name": "dETH",
+            "symbol": "dETH",
+            "address": "0x8B7160C1E9fDb689A060Ff0919E84915B0dFa04a",
+            "decimals": 18
+        },
+        {
+            "id": "ad4ea990-8cfe-5372-8102-a9aa7574a65c",
+            "name": "DOS",
+            "symbol": "DOS",
+            "address": "0x745C11Fb4783Bd00A88a0B99420262f409FA8Bb8",
+            "decimals": 2
+        },
+        {
+            "id": "0128716b-1bc9-542b-a322-51d4e3be9270",
+            "name": "CNV",
+            "symbol": "CNV",
+            "address": "0x899f0B9d67DD1B833fdaa90c8b09ea616d0e9E98",
+            "decimals": 2
+        },
+        {
+            "id": "7f37f71c-aee4-5876-9781-61eb5ede3e61",
+            "name": "FEC",
+            "symbol": "FEC",
+            "address": "0xb88ad767B416197e62939dEc207431b561A9383B",
+            "decimals": 4
+        },
+        {
+            "id": "1e46303c-dcc6-5899-8b44-84dd2f348644",
+            "name": "STC08375",
+            "symbol": "STC08375",
+            "address": "0x6d885b0B37C62Be0c72Ecd6a61Af2bfFf681419e",
+            "decimals": 0
+        }
+    ]
+}

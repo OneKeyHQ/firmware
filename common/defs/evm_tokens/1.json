@@ -1289,6 +1289,31 @@
       "updatedAt": "2022-09-16T16:46:49.461Z",
       "__v": 0,
       "marketCap": "192347985.13471806"
+    },
+    {
+      "_id": "",
+      "name": "HashKey Platform Token",
+      "symbol": "HSK",
+      "address": "0xe7c6bf469e97eeb0bfb74c8dbff5bd47d4c1c98a",
+      "decimals": 18,
+      "logoURI": "",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "1",
+      "source": [
+        "sushi",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "",
+      "swftId": "",
+      "createdAt": "",
+      "updatedAt": "",
+      "__v": 0,
+      "marketCap": ""
     }
   ]
 }
