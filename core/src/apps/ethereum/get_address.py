@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 async def get_address(
     ctx: Context, msg: EthereumGetAddress, keychain: Keychain, defs: Definitions
 ) -> EthereumAddress:
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
 
-    node = keychain.derive(msg.address_n)
+    node = keychain.derive(msg.address_n, force_strict=False)
 
     address = address_from_bytes(node.ethereum_pubkeyhash(), defs.network)
     if msg.show_display:

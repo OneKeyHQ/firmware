@@ -47,7 +47,7 @@ MAX_VALUE_BYTE_SIZE = 1536  # 1.5 KB
 async def sign_typed_data(
     ctx: Context, msg: EthereumSignTypedData, keychain: Keychain
 ) -> EthereumTypedDataSignature:
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
 
     if msg.chain_id:
         network = networks.by_chain_id(msg.chain_id)
@@ -64,7 +64,7 @@ async def sign_typed_data(
         ctx, msg.primary_type, msg.metamask_v4_compat
     )
 
-    node = keychain.derive(msg.address_n)
+    node = keychain.derive(msg.address_n, force_strict=False)
     signature = secp256k1.sign(
         node.private_key(), data_hash, False, secp256k1.CANONICAL_SIG_ETHEREUM
     )

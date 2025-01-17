@@ -60,7 +60,7 @@ HIGH_RISK_PRIMARY_TYPES_ORDER = (
 async def sign_typed_data(
     ctx: Context, msg: EthereumSignTypedData, keychain: Keychain, defs: Definitions
 ) -> EthereumTypedDataSignature:
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
 
     network = defs.network
     ctx.primary_color, ctx.icon_path = get_color_and_icon(
@@ -71,7 +71,7 @@ async def sign_typed_data(
         ctx, msg.primary_type, msg.metamask_v4_compat
     )
 
-    node = keychain.derive(msg.address_n)
+    node = keychain.derive(msg.address_n, force_strict=False)
     signature = secp256k1.sign(
         node.private_key(), data_hash, False, secp256k1.CANONICAL_SIG_ETHEREUM
     )

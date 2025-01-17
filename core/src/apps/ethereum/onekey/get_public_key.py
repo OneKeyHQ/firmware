@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 async def get_public_key(
     ctx: Context, msg: EthereumGetPublicKey, keychain: Keychain
 ) -> EthereumPublicKey:
-    await paths.validate_path(ctx, keychain, msg.address_n)
-    node = keychain.derive(msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
+    node = keychain.derive(msg.address_n, force_strict=False)
 
     # we use the Bitcoin format for Ethereum xpubs
     btc = coins.by_name("Bitcoin")

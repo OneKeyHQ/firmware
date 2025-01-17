@@ -101,11 +101,11 @@ class Keychain:
         del self._cache
         del self.seed
 
-    def verify_path(self, path: paths.Bip32Path) -> None:
+    def verify_path(self, path: paths.Bip32Path, force_strict: bool = True) -> None:
         if "ed25519" in self.curve and not paths.path_is_hardened(path):
             raise wire.DataError("Non-hardened paths unsupported on Ed25519")
 
-        if not safety_checks.is_strict():
+        if not safety_checks.is_strict() and not force_strict:
             return
 
         if self.is_in_keychain(path):
@@ -144,8 +144,8 @@ class Keychain:
             self._root_fingerprint = n.fingerprint()
         return self._root_fingerprint
 
-    def derive(self, path: paths.Bip32Path) -> bip32.HDNode:
-        self.verify_path(path)
+    def derive(self, path: paths.Bip32Path, force_strict: bool = True) -> bip32.HDNode:
+        self.verify_path(path, force_strict)
         return self._derive_with_cache(
             prefix_len=3,
             path=path,
