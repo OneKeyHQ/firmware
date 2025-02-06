@@ -301,7 +301,8 @@ bool layoutBlindSign(const char *chain_name, bool is_contract,
                      const char *value1, const char *key2, const char *value2,
                      const char *key3, const char *value3);
 bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
-                       const uint8_t *data, uint16_t len, bool is_ascii);
+                       const uint8_t *data, uint16_t len, bool is_printable,
+                       const char *item_name, const char *item_value);
 bool layoutNostrEncryptMessage(const char *chain_name, bool verify,
                                const char *signer, const uint8_t *data,
                                uint16_t len, bool is_ascii);

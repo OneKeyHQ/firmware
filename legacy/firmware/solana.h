@@ -33,4 +33,7 @@ void solana_get_address_from_public_key(const uint8_t *public_key,
                                         char *address);
 void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
                     SolanaSignedTx *resp);
+bool solana_sign_message(const SolanaSignMessage *msg, const HDNode *node,
+                         SolanaSignedMessage *resp);
+bool solana_sanitize_message(const SolanaSignMessage *msg);
 #endif  // __SOLANA_H__

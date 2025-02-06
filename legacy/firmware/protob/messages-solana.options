@@ -5,3 +5,11 @@ SolanaSignTx.address_n                                       max_count:8
 SolanaSignTx.raw_tx                                          max_size:1280
 
 SolanaSignedTx.signature                                     max_size:64
+
+
+SolanaSignMessage.address_n                                   max_count:8
+SolanaSignMessage.application_domain                          max_size:32
+SolanaSignMessage.message                                     max_size:1212
+
+SolanaSignedMessage.public_key                                max_size:32
+SolanaSignedMessage.signature                                 max_size:64

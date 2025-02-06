@@ -30,6 +30,22 @@
 #include "sol/parser.h"
 #include "sol/printer.h"
 #include "sol/transaction_summary.h"
+#include "util.h"
+
+static const uint8_t _SIGN_DOMAIN[] =
+    "\xff"
+    "solana offchain";
+static const uint8_t _SIGNER_COUNT = 1;
+#define _APPLICATION_DOMAIN_LENGTH (32)
+#define _PREAMBLE_LENGTH                                                       \
+  (16 + 1 + _APPLICATION_DOMAIN_LENGTH + 1 + 1 + _SIGNER_COUNT * SIZE_PUBKEY + \
+   2)
+#define _PREAMBLE_LENGTH_LEDGER (16 + 1 + 1 + 2)
+#define _MAX_MESSAGE_LENGTH_WITH_PREAMBLE (1232)
+#define _MAX_MESSAGE_LENGTH \
+  (_MAX_MESSAGE_LENGTH_WITH_PREAMBLE - _PREAMBLE_LENGTH)
+#define _MAX_MESSAGE_LENGTH_LEDGER \
+  (_MAX_MESSAGE_LENGTH_WITH_PREAMBLE - _PREAMBLE_LENGTH_LEDGER)
 
 void solana_get_address_from_public_key(const uint8_t *public_key,
                                         char *address) {
@@ -169,4 +185,96 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
     return;
   }
   msg_write(MessageType_MessageType_SolanaSignedTx, resp);
+}
+
+/**
+ * Prepare the message for signing
+ */
+static void prepare_message(const SolanaSignMessage *msg,
+                            const uint8_t *public_key, BufferWriter *writer) {
+  write_bytes(writer, _SIGN_DOMAIN, 16);
+  write_bytes(writer, (uint8_t *)&msg->message_version, 1);
+  if (msg->has_application_domain) {
+    write_bytes(writer, msg->application_domain.bytes,
+                _APPLICATION_DOMAIN_LENGTH);
+  }
+  write_bytes(writer, (uint8_t *)&msg->message_format, 1);
+  if (msg->has_application_domain) {
+    write_bytes(writer, &_SIGNER_COUNT, 1);
+    write_bytes(writer, public_key, SIZE_PUBKEY);
+  }
+  write_bytes(writer, (uint8_t *)&msg->message.size, 2);
+  write_bytes(writer, msg->message.bytes, msg->message.size);
+}
+
+bool solana_sign_message(const SolanaSignMessage *msg, const HDNode *node,
+                         SolanaSignedMessage *resp) {
+  // address
+  char address[BASE58_PUBKEY_LENGTH] = {0};
+  solana_get_address_from_public_key(node->public_key + 1, address);
+  // show message
+  char application_domain[45] = {0};
+  bool is_new_version = msg->has_application_domain;
+  if (is_new_version) {
+    encode_base58(msg->application_domain.bytes, _APPLICATION_DOMAIN_LENGTH,
+                  application_domain, sizeof(application_domain));
+  }
+  if (!layoutSignMessage(
+          "SOL", false, address, msg->message.bytes, msg->message.size,
+          msg->message_format == SolanaMessageFormat_V0_RESTRICTED_ASCII,
+          is_new_version ? "Application domain:" : NULL,
+          is_new_version ? application_domain : NULL)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "user cancelled");
+    return false;
+  }
+  BufferWriter writer = {0};
+  uint32_t preamble_length =
+      msg->has_application_domain ? _PREAMBLE_LENGTH : _PREAMBLE_LENGTH_LEDGER;
+  uint8_t message[msg->message.size + preamble_length];
+  init_buffer_writer(&writer, message, sizeof(message));
+  prepare_message(msg, node->public_key + 1, &writer);
+  // sign message
+  ed25519_sign(message, sizeof(message), node->private_key,
+               resp->signature.bytes);
+  resp->signature.size = 64;
+  return true;
+}
+
+bool solana_sanitize_message(const SolanaSignMessage *msg) {
+  if (msg->has_application_domain &&
+      msg->application_domain.size != _APPLICATION_DOMAIN_LENGTH) {
+    fsm_sendFailure(FailureType_Failure_DataError,
+                    "Application domain must be 32 bytes");
+    return false;
+  }
+  if (msg->has_application_domain && msg->message.size > _MAX_MESSAGE_LENGTH) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Message is too long");
+    return false;
+  }
+  if (msg->message_version != SolanaMessageVersion_MESSAGE_VERSION_0) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Message version must be 0");
+    return false;
+  }
+  switch (msg->message_format) {
+    case SolanaMessageFormat_V0_RESTRICTED_ASCII:
+      if (!is_valid_ascii(msg->message.bytes, msg->message.size)) {
+        fsm_sendFailure(
+            FailureType_Failure_DataError,
+            "Message format 0 must contain only printable characters");
+        return false;
+      }
+      break;
+    case SolanaMessageFormat_V0_LIMITED_UTF8:
+      if (!is_valid_utf8(msg->message.bytes, msg->message.size)) {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        "Message format 1 must be a valid UTF-8 string");
+        return false;
+      }
+      break;
+    default:
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      "Message format must be 0 or 1");
+      return false;
+  }
+  return true;
 }

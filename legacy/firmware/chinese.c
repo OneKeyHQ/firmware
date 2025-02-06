@@ -127,15 +127,25 @@ void oledDrawStringRightAdapter(int x, int y, const char *text, uint8_t font) {
   x -= oledStringWidthAdapter(text, font);
   oledDrawStringAdapter(x, y, text, font);
 }
+#include "memzero.h"
+#include "util.h"
 
 uint8_t oledDrawPageableStringAdapter(int x, int y, const char *text,
                                       uint8_t font, const BITMAP *btn_no_icon,
                                       const BITMAP *btn_yes_icon) {
   size_t text_len = strlen(text);
-  uint32_t rowlen = 21;
+  size_t rowlen = 21;
   int index = 0, rowcount = text_len / rowlen + 1;
   if (rowcount > 3) {
-    const char **str = split_message((const uint8_t *)text, text_len, rowlen);
+    char str[rowcount][rowlen + 1];
+    memzero(str, sizeof(str));
+    for (int i = 0; i < rowcount; ++i) {
+      size_t show_len = strnlen((char *)text, MIN(rowlen, text_len));
+      memcpy(str[i], (char *)text, show_len);
+      str[i][show_len] = '\0';
+      text += show_len;
+      text_len -= show_len;
+    }
 
   refresh_text:
     oledClear_ext(x, y);

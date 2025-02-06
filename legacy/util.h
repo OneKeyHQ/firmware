@@ -22,6 +22,7 @@
 
 #include <setup.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #if !EMULATOR
@@ -29,6 +30,12 @@
 #include <libopencm3/cm3/vector.h>
 #include "timer.h"
 #endif
+
+typedef struct {
+  uint8_t *buffer;
+  size_t length;
+  size_t position;
+} BufferWriter;
 
 // Statement expressions make these macros side-effect safe
 #define MIN_8bits(a, b)                  \
@@ -63,6 +70,10 @@ void uint2str(uint32_t num, char *str);
 
 int hex2data(const char *hexStr, unsigned char *output,
              unsigned int *outputLen);
+
+bool is_valid_utf8(const uint8_t *data, size_t length);
+void init_buffer_writer(BufferWriter *writer, uint8_t *buffer, size_t length);
+int write_bytes(BufferWriter *writer, const uint8_t *src, size_t count);
 
 // defined in startup.s (or setup.c for emulator)
 extern void __attribute__((noreturn)) shutdown(void);

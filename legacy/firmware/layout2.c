@@ -5244,247 +5244,92 @@ refresh_layout:
 }
 
 bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
-                       const uint8_t *data, uint16_t len, bool is_ascii) {
+                       const uint8_t *data, uint16_t len, bool is_printable,
+                       const char *item_name, const char *item_value) {
   bool result = false;
-  int index = 0, sub_index = 0, data_rowcount;
-  int i, bar_heght, bar_start = 12, bar_end = 52;
-  uint8_t max_index = 3;
-  uint8_t key = KEY_NULL;
-  char title[64] = {0};
-  char title_tx[128] = {0};
-  char lines[21] = {0};
-  uint32_t rowlen = 21;
-  const char **str;
-  uint32_t addrlen = strlen(signer);
-  int address_rowcount = addrlen / rowlen + 1;
-  if (!is_ascii) {
-    data_rowcount = len % 10 ? len / 10 + 1 : len / 10;
-  } else {
-    data_rowcount = len % 20 ? len / 20 + 1 : len / 20;
+  int index = 0;
+  uint8_t max_index = 2;
+  if (item_name != NULL) {
+    max_index = 3;
   }
-
-#if !EMULATOR
-  enableLongPress(true);
-#endif
+  uint8_t bubble_key;
+  char title[64] = {0};
+  char warning_content[64] = {0};
 
   if (verify) {
     strcat(title, _("Confirm Address"));
-    strcat(title_tx, _("Do you want to verify this message?"));
+    strcat(warning_content, _("Do you want to verify this message?"));
   } else {
     strcat(title, chain_name);
     strcat(title, " ");
     strcat(title, _("Message"));
-    snprintf(title_tx, 128, "%s%s %s", _("Do you want to sign this\n"),
+    snprintf(warning_content, 128, "%s%s %s", _("Do you want to sign this\n"),
              chain_name, _("message?"));
   }
-
   ButtonRequest resp = {0};
   memzero(&resp, sizeof(ButtonRequest));
   resp.has_code = true;
-  resp.code = ButtonRequestType_ButtonRequest_SignTx;
+  resp.code = ButtonRequestType_ButtonRequest_ProtectCall;
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
 
-refresh_layout:
+refresh_menu:
   layoutSwipe();
   oledClear();
 
+  uint8_t y = 13;
+  layoutHeader(title);
+  bubble_key = KEY_NULL;
   if (0 == index) {
-    layoutHeader(title);
-    if (address_rowcount > 4) {
-      str = split_message((const uint8_t *)signer, addrlen, rowlen);
-      if (0 == sub_index) {
-        oledDrawStringAdapter(0, 13, _("Signed by:"), FONT_STANDARD);
-        oledDrawStringAdapter(0, 13 + 1 * 10, str[0], FONT_STANDARD);
-        oledDrawStringAdapter(0, 13 + 2 * 10, str[1], FONT_STANDARD);
-        oledDrawStringAdapter(0, 13 + 3 * 10, str[2], FONT_STANDARD);
-        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
-                       &bmp_bottom_middle_arrow_down);
-      } else {
-        oledDrawStringAdapter(0, 13, str[sub_index - 1], FONT_STANDARD);
-        oledDrawStringAdapter(0, 13 + 1 * 10, str[sub_index], FONT_STANDARD);
-        oledDrawStringAdapter(0, 13 + 2 * 10, str[sub_index + 1],
-                              FONT_STANDARD);
-        oledDrawStringAdapter(0, 13 + 3 * 10, str[sub_index + 2],
-                              FONT_STANDARD);
-        if (sub_index == address_rowcount - 3) {
-          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
-                         &bmp_bottom_middle_arrow_up);
-        } else {
-          oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
-                         &bmp_bottom_middle_arrow_up);
-          oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
-                         &bmp_bottom_middle_arrow_down);
-        }
-      }
-
-      // scrollbar
-      drawScrollbar(2, sub_index);
+    oledDrawStringAdapter(0, y, _("Signed by:"), FONT_STANDARD);
+    if (strlen(signer) > 63) {
+      bubble_key = oledDrawPageableStringAdapter(
+          0, y + 10, signer, FONT_STANDARD, &bmp_bottom_left_close,
+          &bmp_bottom_right_arrow);
     } else {
-      oledDrawStringAdapter(0, 13, _("Signer:"), FONT_STANDARD);
-      oledDrawStringAdapter(0, 13 + 10, signer, FONT_STANDARD);
+      oledDrawStringAdapter(0, y + 10, signer, FONT_STANDARD);
+      layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+      layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
     }
-
-    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
-    layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
-  } else if (1 == index) {
-    if (verify) {
-      layoutHeader(_("Verified message"));
+  } else if (index == max_index - 1) {
+    char message_colon[16] = {0};
+    strcat(message_colon, _("Message"));
+    strcat(message_colon, ":");
+    oledDrawStringAdapter(0, y, message_colon, FONT_STANDARD);
+    size_t message_len = (is_printable ? len : len * 2) + 1;
+    char message[message_len];
+    if (is_printable) {
+      memcpy(message, data, len);
+      message[len] = 0;
     } else {
-      layoutHeader(title);
+      data2hex(data, len, message);
     }
-    if (data_rowcount > 4) {
-      if (is_ascii) {
-        memcpy(lines, data + 20 * (sub_index), 20);
-        oledDrawStringAdapter(0, 13, lines, FONT_STANDARD);
-        memcpy(lines, data + 20 * (sub_index + 1), 20);
-        oledDrawStringAdapter(0, 13 + 1 * 10, lines, FONT_STANDARD);
-        memcpy(lines, data + 20 * (sub_index + 2), 20);
-        oledDrawStringAdapter(0, 13 + 2 * 10, lines, FONT_STANDARD);
-        if (sub_index >= data_rowcount - 4) {
-          if (len % 20) {
-            memset(lines, 0, 21);
-            memcpy(lines, data + 20 * (sub_index + 3), len % 20);
-          } else {
-            memcpy(lines, data + 20 * (sub_index + 3), 20);
-          }
-        } else {
-          memcpy(lines, data + 20 * (sub_index + 3), 20);
-        }
-        oledDrawStringAdapter(0, 13 + 3 * 10, lines, FONT_STANDARD);
-      } else {
-        data2hexaddr(data + 10 * (sub_index), 10, lines);
-        oledDrawStringAdapter(0, 13, lines, FONT_STANDARD);
-        data2hexaddr(data + 10 * (sub_index + 1), 10, lines);
-        oledDrawStringAdapter(0, 13 + 1 * 10, lines, FONT_STANDARD);
-        data2hexaddr(data + 10 * (sub_index + 2), 10, lines);
-        oledDrawStringAdapter(0, 13 + 2 * 10, lines, FONT_STANDARD);
-        if (sub_index >= data_rowcount - 4) {
-          if (len % 10) {
-            data2hexaddr(data + 10 * (sub_index + 3), len % 10, lines);
-          } else {
-            data2hexaddr(data + 10 * (sub_index + 3), 10, lines);
-          }
-        } else {
-          data2hexaddr(data + 10 * (sub_index + 3), 10, lines);
-        }
-        oledDrawStringAdapter(0, 13 + 3 * 10, lines, FONT_STANDARD);
-      }
-
-      // scrollbar
-      bar_heght = 40 - 2 * (data_rowcount - 5);
-      if (bar_heght < 6) bar_heght = 6;
-      for (i = bar_start; i < bar_end; i += 2) {  // 40 pixel
-        oledDrawPixel(OLED_WIDTH - 1, i);
-      }
-      if (sub_index <= 18) {
-        for (i = bar_start + 2 * ((int)sub_index);
-             i < (bar_start + bar_heght + 2 * ((int)sub_index - 1)) - 1; i++) {
-          oledDrawPixel(OLED_WIDTH - 1, i);
-          oledDrawPixel(OLED_WIDTH - 2, i);
-        }
-      } else {
-        for (i = bar_start + 2 * 18;
-             i < (bar_start + bar_heght + 2 * (18 - 1)) - 1; i++) {
-          oledDrawPixel(OLED_WIDTH - 1, i);
-          oledDrawPixel(OLED_WIDTH - 2, i);
-        }
-      }
-
-      if (sub_index == 0) {
-        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
-                       &bmp_bottom_middle_arrow_down);
-      } else if (sub_index == data_rowcount - 4) {
-        oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
-                       &bmp_bottom_middle_arrow_up);
-      } else {
-        oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
-                       &bmp_bottom_middle_arrow_up);
-        oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
-                       &bmp_bottom_middle_arrow_down);
-      }
+    if (strlen(message) > 63) {
+      bubble_key = oledDrawPageableStringAdapter(
+          0, y + 10, message, FONT_STANDARD, &bmp_bottom_left_arrow,
+          &bmp_bottom_right_arrow);
+    } else {
+      oledDrawStringAdapter(0, y + 10, message, FONT_STANDARD);
       layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
-      layoutButtonYesAdapter(NULL, &bmp_bottom_right_next);
+      layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
+    }
+  } else if (index == max_index - 2 && item_name != NULL) {
+    oledDrawStringAdapter(0, y, item_name, FONT_STANDARD);
+    if (strlen(item_value) > 63) {
+      bubble_key = oledDrawPageableStringAdapter(
+          0, y + 10, item_value, FONT_STANDARD, &bmp_bottom_left_arrow,
+          &bmp_bottom_right_arrow);
     } else {
-      if (is_ascii) {
-        oledDrawStringAdapter(0, 13, (char *)data, FONT_STANDARD);
-      } else {
-        char buf[90] = {0};
-        data2hexaddr(data, len, buf);
-        oledDrawStringAdapter(0, 13, buf, FONT_STANDARD);
-      }
+      oledDrawStringAdapter(0, y + 10, item_value, FONT_STANDARD);
       layoutButtonNoAdapter(NULL, &bmp_bottom_left_arrow);
       layoutButtonYesAdapter(NULL, &bmp_bottom_right_arrow);
     }
   } else {
-    if (verify) {
-      if (is_ascii)
-        layoutHeader(_("Verified message"));
-      else
-        layoutHeader(_("Verified binary message?"));
-    } else {
-      if (is_ascii)
-        layoutHeader(_("Sign Message"));
-      else
-        layoutHeader(_("Sign Binary Message?"));
-    }
-    oledDrawStringAdapter(0, 13, title_tx, FONT_STANDARD);
+    oledDrawStringAdapter(0, y, warning_content, FONT_STANDARD);
     layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
     layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
   }
   oledRefresh();
-
-  key = protectWaitKey(0, 0);
-#if !EMULATOR
-  if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
-    if (isLongPress(KEY_UP)) {
-      key = KEY_UP;
-    } else if (isLongPress(KEY_DOWN)) {
-      key = KEY_DOWN;
-    }
-    delay_ms(75);
-  }
-#endif
-  switch (key) {
-    case KEY_UP:
-      if (sub_index > 0) {
-        sub_index--;
-      }
-      goto refresh_layout;
-    case KEY_DOWN:
-      if (index == 0 && sub_index < address_rowcount - 3) {
-        sub_index++;
-      }
-      if (index == 1 && sub_index < data_rowcount - 4) {
-        sub_index++;
-      }
-      goto refresh_layout;
-    case KEY_CONFIRM:
-      if (index == max_index - 1) {
-        result = true;
-        break;
-      }
-      if (index < max_index) {
-        index++;
-      }
-      sub_index = 0;
-      goto refresh_layout;
-    case KEY_CANCEL:
-      if (0 == index || index == max_index - 1) {
-        result = false;
-        break;
-      }
-      if (index > 0) {
-        index--;
-      }
-      goto refresh_layout;
-    default:
-      break;
-  }
-
-#if !EMULATOR
-  enableLongPress(false);
-#endif
-  return result;
+  HANDLE_KEY(bubble_key);
 }
 
 bool layoutNostrEncryptMessage(const char *chain_name, bool en,

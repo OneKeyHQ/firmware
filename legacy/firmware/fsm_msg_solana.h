@@ -68,3 +68,32 @@ void fsm_msgSolanaSignTx(const SolanaSignTx *msg) {
 
   layoutHome();
 }
+
+void fsm_msgSolanaSignMessage(const SolanaSignMessage *msg) {
+  CHECK_INITIALIZED
+  CHECK_PARAM(fsm_common_path_check(msg->address_n, msg->address_n_count,
+                                    COIN_TYPE, ED25519_NAME, true),
+              "Invalid path");
+  if (!solana_sanitize_message(msg)) {
+    layoutHome();
+    return;
+  }
+  CHECK_PIN
+
+  RESP_INIT(SolanaSignedMessage);
+
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
+
+  hdnode_fill_public_key(node);
+
+  if (!solana_sign_message(msg, node, resp)) {
+    layoutHome();
+    return;
+  }
+  resp->public_key.size = 32;
+  memcpy(resp->public_key.bytes, node->public_key + 1, 32);
+  msg_write(MessageType_MessageType_SolanaSignedMessage, resp);
+  layoutHome();
+}
