@@ -7,7 +7,7 @@ HRP_ADDRESS = "addr"
 HRP_TESTNET_ADDRESS = "addr_test"
 HRP_REWARD_ADDRESS = "stake"
 HRP_TESTNET_REWARD_ADDRESS = "stake_test"
-HRP_GOVERNANCE_PUBLIC_KEY = "gov_vk"
+HRP_CVOTE_PUBLIC_KEY = "cvote_vk"
 HRP_SCRIPT_HASH = "script"
 HRP_KEY_HASH = "addr_vkh"
 HRP_SHARED_KEY_HASH = "addr_shared_vkh"
@@ -15,6 +15,8 @@ HRP_STAKE_KEY_HASH = "stake_vkh"
 HRP_REQUIRED_SIGNER_KEY_HASH = "req_signer_vkh"
 HRP_OUTPUT_DATUM_HASH = "datum"
 HRP_SCRIPT_DATA_HASH = "script_data"
+HRP_DREP_KEY_HASH = "drep"
+HRP_DREP_SCRIPT_HASH = "drep_script"
 
 
 def encode(hrp: str, data: bytes) -> str:
@@ -27,19 +29,13 @@ def decode_unsafe(bech: str) -> bytes:
     return _decode(hrp, bech)
 
 
-def get_hrp(bech: str) -> str:
-    return bech.rsplit(HRP_SEPARATOR, 1)[0]
-
-
 def _decode(hrp: str, bech: str) -> bytes:
     decoded_hrp, data, spec = bech32.bech32_decode(bech, 130)
     if decoded_hrp != hrp:
         raise ValueError
     if spec != bech32.Encoding.BECH32:
         raise ValueError
-
-    if data is not None:
-        decoded = bech32.convertbits(data, 5, 8, False)
-    else:
+    if data is None:
         raise ValueError
+    decoded = bech32.convertbits(data, 5, 8, False)
     return bytes(decoded)

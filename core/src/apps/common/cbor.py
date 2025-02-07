@@ -2,13 +2,13 @@
 Minimalistic CBOR implementation, supports only what we need in cardano.
 """
 
-import ustruct as struct
 from micropython import const
 from typing import TYPE_CHECKING
 
-from trezor import log, utils
+from trezor.utils import BufferReader
 
-from . import readers
+if __debug__:
+    from trezor import log
 
 if TYPE_CHECKING:
     from typing import Any, Generic, Iterator, TypeVar
@@ -44,20 +44,26 @@ _CBOR_FALSE = const(0x14)
 _CBOR_TRUE = const(0x15)
 _CBOR_NULL = const(0x16)
 _CBOR_BREAK = const(0x1F)
-_CBOR_RAW_TAG = const(0x18)
+
+
+# See https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml
+_CBOR_RAW_TAG = const(0x18)  # Tag 24
+_CBOR_SET_TAG = const(0x102)  # Tag 258
 
 
 def _header(typ: int, l: int) -> bytes:
+    from ustruct import pack
+
     if l < 24:
-        return struct.pack(">B", typ + l)
+        return pack(">B", typ + l)
     elif l < 2**8:
-        return struct.pack(">BB", typ + 24, l)
+        return pack(">BB", typ + 24, l)
     elif l < 2**16:
-        return struct.pack(">BH", typ + 25, l)
+        return pack(">BH", typ + 25, l)
     elif l < 2**32:
-        return struct.pack(">BI", typ + 26, l)
+        return pack(">BI", typ + 26, l)
     elif l < 2**64:
-        return struct.pack(">BQ", typ + 27, l)
+        return pack(">BQ", typ + 27, l)
     else:
         raise NotImplementedError  # Length not supported
 
@@ -117,7 +123,9 @@ def _cbor_encode(value: Value) -> Iterator[bytes]:
         raise NotImplementedError
 
 
-def _read_length(r: utils.BufferReader, aux: int) -> int:
+def _read_length(r: BufferReader, aux: int) -> int:
+    from . import readers
+
     if aux < _CBOR_UINT8_FOLLOWS:
         return aux
     elif aux == _CBOR_UINT8_FOLLOWS:
@@ -132,7 +140,7 @@ def _read_length(r: utils.BufferReader, aux: int) -> int:
         raise NotImplementedError  # Length not supported
 
 
-def _cbor_decode(r: utils.BufferReader) -> Value:
+def _cbor_decode(r: BufferReader) -> Value:
     fb = r.get()
     fb_type = fb & _CBOR_TYPE_MASK
     fb_aux = fb & _CBOR_INFO_BITS
@@ -271,40 +279,9 @@ def encode_streamed(value: Value) -> Iterator[bytes]:
     return _cbor_encode(value)
 
 
-def encode_chunked(value: Value, max_chunk_size: int) -> Iterator[bytes]:
-    """
-    Returns the encoded value as an iterable of chunks of a given size,
-    removing the need to reserve a continuous chunk of memory for the
-    full serialized representation of the value.
-    """
-    if max_chunk_size <= 0:
-        raise ValueError
-
-    chunks = encode_streamed(value)
-
-    chunk_buffer = utils.empty_bytearray(max_chunk_size)
-    try:
-        current_chunk_view = utils.BufferReader(next(chunks))
-        while True:
-            num_bytes_to_write = min(
-                current_chunk_view.remaining_count(),
-                max_chunk_size - len(chunk_buffer),
-            )
-            chunk_buffer.extend(current_chunk_view.read(num_bytes_to_write))
-
-            if len(chunk_buffer) >= max_chunk_size:
-                yield chunk_buffer
-                chunk_buffer[:] = bytes()
-
-            if current_chunk_view.remaining_count() == 0:
-                current_chunk_view = utils.BufferReader(next(chunks))
-    except StopIteration:
-        if len(chunk_buffer) > 0:
-            yield chunk_buffer
-
-
 def decode(cbor: bytes, offset: int = 0) -> Value:
-    r = utils.BufferReader(cbor)
+
+    r = BufferReader(cbor)
     r.seek(offset)
     res = _cbor_decode(r)
     if r.remaining_count():
@@ -326,6 +303,10 @@ def create_embedded_cbor_bytes_header(size: int) -> bytes:
     https://datatracker.ietf.org/doc/html/rfc7049#section-2.4.4.1
     """
     return _header(_CBOR_TAG, _CBOR_RAW_TAG) + _header(_CBOR_BYTE_STRING, size)
+
+
+def create_tagged_set_header(size: int) -> bytes:
+    return _header(_CBOR_TAG, _CBOR_SET_TAG) + _header(_CBOR_ARRAY, size)
 
 
 def precedes(prev: bytes, curr: bytes) -> bool:

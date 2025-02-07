@@ -91,7 +91,7 @@ Since Alonzo era, network id may be included as an item in the transaction body.
 
 ## Key types
 
-In Shelley two types of keys are used. Payment key and staking key. Payment keys are derived from _m/1852'/1815'/x/[0,1]/y_ paths and are used for holding/transferring funds. Staking keys are derived from _m/1852'/1815'/x/2/0_ paths, thus there is only one staking key per account. They are used for staking operations - certificates, withdrawals. Shelley addresses are built from the combination of hashes of these keys.
+In Shelley two types of keys are used. Payment key and staking key. Payment keys are derived from _m/1852'/1815'/x/[0,1]/y_ paths and are used for holding/transferring funds. Staking keys are derived from _m/1852'/1815'/x/2/y_ paths (in the past, the only allowed value of `y` was `0`). They are used for staking operations - certificates, withdrawals. Shelley addresses are built from the combination of hashes of these keys.
 
 [Multi-sig paths (1854')](https://cips.cardano.org/cips/cip1854/) are used to generate keys which should be used in native scripts and also to sign multi-sig transactions. [Minting paths (1855')](https://cips.cardano.org/cips/cip1855/) are used for creating minting policies and for witnessing minting transactions.
 
@@ -291,9 +291,9 @@ Each transaction may contain auxiliary data. Auxiliary data format can be found 
 
 Auxiliary data can be sent to Trezor as a hash or as an object with parameters. The hash will be included in the transaction body as is and will be shown to the user.
 
-The only object currently supported is governance voting key registration (currently, this is used only by Catalyst, but there may be other governance use cases in the future). To be in compliance with the CDDL and other Cardano tools, governance voting key registration object is being wrapped in a tuple and an empty tuple follows it. The empty tuple represents `auxiliary_scripts` which are not yet supported on Trezor and are thus always empty. Byron addresses are not supported as governance reward addresses. The governance registration signature is returned in the form of `CardanoTxAuxiliaryDataSupplement` which also contains the auxiliary data hash calculated by Trezor.
+The only object currently supported is CIP-15/CIP-36 vote key registration (currently, this is used only by Catalyst, but there may be other voting use cases in the future). To be in compliance with the CDDL and other Cardano tools, vote key registration object is being wrapped in a tuple and an empty tuple follows it. The empty tuple represents `auxiliary_scripts` which are not yet supported on Trezor and are thus always empty. Byron addresses are not supported as the addresses to receive rewards. The registration signature is returned in the form of `CardanoTxAuxiliaryDataSupplement` which also contains the auxiliary data hash calculated by Trezor.
 
-[Governance Registration Transaction Metadata Format](https://cips.cardano.org/cips/cip36/)
+[CIP-36 Vote Registration Transaction Metadata Format](https://cips.cardano.org/cips/cip36/)
 
 ### Native scripts
 

@@ -56,6 +56,16 @@ enum CardanoCertificateType {
     STAKE_DEREGISTRATION = 1;
     STAKE_DELEGATION = 2;
     STAKE_POOL_REGISTRATION = 3;
+    STAKE_REGISTRATION_CONWAY = 7;
+    STAKE_DEREGISTRATION_CONWAY = 8;
+    VOTE_DELEGATION = 9;
+}
+
+enum CardanoDRepType {
+    KEY_HASH = 0;
+    SCRIPT_HASH = 1;
+    ABSTAIN = 2;
+    NO_CONFIDENCE = 3;
 }
 
 enum CardanoPoolRelayType {
@@ -66,10 +76,10 @@ enum CardanoPoolRelayType {
 
 enum CardanoTxAuxiliaryDataSupplementType {
     NONE = 0;
-    GOVERNANCE_REGISTRATION_SIGNATURE = 1;
+    CVOTE_REGISTRATION_SIGNATURE = 1;
 }
 
-enum CardanoGovernanceRegistrationFormat {
+enum CardanoCVoteRegistrationFormat {
     CIP15 = 0;
     CIP36 = 1;
 }
@@ -164,6 +174,7 @@ message CardanoGetAddress {
     required uint32 network_id = 4;                                 // network id - mainnet or testnet
     required CardanoAddressParametersType address_parameters = 5;   // parameters used to derive the address
     required CardanoDerivationType derivation_type = 6;
+    optional bool chunkify = 7;                                     // display the address in chunks of 4 characters
 }
 
 /**
@@ -223,6 +234,8 @@ message CardanoSignTxInit {
     optional bool has_collateral_return = 19 [default=false];
     optional uint64 total_collateral = 20;
     optional uint32 reference_inputs_count = 21 [default=0];
+    optional bool chunkify = 22;                                // display the address in chunks of 4 characters
+    optional bool tag_cbor_sets = 23 [default=false];           // use tag 258 for sets in cbor
 }
 
 /**
@@ -334,6 +347,16 @@ message CardanoPoolParametersType {
 }
 
 /**
+ * DRep delegation parameters
+ * @embed
+*/
+message CardanoDRep {
+    required CardanoDRepType type = 1;  // drep type
+    optional bytes key_hash = 2;        // drep key hash
+    optional bytes script_hash = 3;     // drep script hash
+}
+
+/**
  * Request: Transaction certificate data
  * @next CardanoTxItemAck
  */
@@ -344,6 +367,8 @@ message CardanoTxCertificate {
     optional CardanoPoolParametersType pool_parameters = 4;   // used for stake pool registration certificate
     optional bytes script_hash = 5;                           // stake credential script hash
     optional bytes key_hash = 6;                              // stake credential key hash
+    optional uint64 deposit = 7;                              // used for stake key registration certificate
+    optional CardanoDRep drep = 8;                            // used for vote delegation certificate
 }
 
 /**
@@ -360,22 +385,23 @@ message CardanoTxWithdrawal {
 /**
  * @embed
  */
-message CardanoGovernanceRegistrationDelegation {
-    required bytes voting_public_key = 1;
+message CardanoCVoteRegistrationDelegation {
+    required bytes vote_public_key = 1;
     required uint32 weight = 2;
 }
 
 /**
  * @embed
  */
-message CardanoGovernanceRegistrationParametersType {
-    optional bytes voting_public_key = 1;
+message CardanoCVoteRegistrationParametersType {
+    optional bytes vote_public_key = 1; // mutually exclusive with delegations
     repeated uint32 staking_path = 2;
-    required CardanoAddressParametersType reward_address_parameters = 3;
+    optional CardanoAddressParametersType payment_address_parameters = 3; // mutually exclusive with payment_address
     required uint64 nonce = 4;
-    optional CardanoGovernanceRegistrationFormat format = 5 [default=CIP15];
-    repeated CardanoGovernanceRegistrationDelegation delegations = 6;  // mutually exclusive with voting_public_key; max 32 delegations
+    optional CardanoCVoteRegistrationFormat format = 5 [default=CIP15];
+    repeated CardanoCVoteRegistrationDelegation delegations = 6;  // mutually exclusive with vote_public_key; max 32 delegations
     optional uint64 voting_purpose = 7;
+    optional string payment_address = 8; // mutually exclusive with payment_address_parameters
 }
 
 /**
@@ -384,7 +410,7 @@ message CardanoGovernanceRegistrationParametersType {
  * @next CardanoTxAuxiliaryDataSupplement
  */
 message CardanoTxAuxiliaryData {
-    optional CardanoGovernanceRegistrationParametersType governance_registration_parameters = 1;
+    optional CardanoCVoteRegistrationParametersType cvote_registration_parameters = 1;
     optional bytes hash = 2;
 }
 
@@ -452,7 +478,7 @@ message CardanoTxItemAck {
 message CardanoTxAuxiliaryDataSupplement {
     required CardanoTxAuxiliaryDataSupplementType type = 1;
     optional bytes auxiliary_data_hash = 2;
-    optional bytes governance_signature = 3;
+    optional bytes cvote_registration_signature = 3;
 }
 
 /**
@@ -504,7 +530,7 @@ message CardanoSignTxFinished {
  * @next CardanoMessageSignature
  * @next Failure
  */
- message CardanoSignMessage {
+message CardanoSignMessage {
     repeated uint32 address_n = 1;
     required bytes message = 2;
     required CardanoDerivationType derivation_type = 3;

@@ -2,5 +2,7 @@
 # fmt: off
 # isort:skip_file
 
-NONE = 0
-CVOTE_REGISTRATION_SIGNATURE = 1
+KEY_HASH = 0
+SCRIPT_HASH = 1
+ABSTAIN = 2
+NO_CONFIDENCE = 3

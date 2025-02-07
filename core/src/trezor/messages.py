@@ -24,9 +24,10 @@ if TYPE_CHECKING:
     from trezor.enums import ButtonRequestType  # noqa: F401
     from trezor.enums import Capability  # noqa: F401
     from trezor.enums import CardanoAddressType  # noqa: F401
+    from trezor.enums import CardanoCVoteRegistrationFormat  # noqa: F401
     from trezor.enums import CardanoCertificateType  # noqa: F401
+    from trezor.enums import CardanoDRepType  # noqa: F401
     from trezor.enums import CardanoDerivationType  # noqa: F401
-    from trezor.enums import CardanoGovernanceRegistrationFormat  # noqa: F401
     from trezor.enums import CardanoNativeScriptHashDisplayFormat  # noqa: F401
     from trezor.enums import CardanoNativeScriptType  # noqa: F401
     from trezor.enums import CardanoPoolRelayType  # noqa: F401
@@ -1501,6 +1502,7 @@ if TYPE_CHECKING:
         network_id: "int"
         address_parameters: "CardanoAddressParametersType"
         derivation_type: "CardanoDerivationType"
+        chunkify: "bool | None"
 
         def __init__(
             self,
@@ -1510,6 +1512,7 @@ if TYPE_CHECKING:
             address_parameters: "CardanoAddressParametersType",
             derivation_type: "CardanoDerivationType",
             show_display: "bool | None" = None,
+            chunkify: "bool | None" = None,
         ) -> None:
             pass
 
@@ -1587,6 +1590,8 @@ if TYPE_CHECKING:
         has_collateral_return: "bool"
         total_collateral: "int | None"
         reference_inputs_count: "int"
+        chunkify: "bool | None"
+        tag_cbor_sets: "bool"
 
         def __init__(
             self,
@@ -1612,6 +1617,8 @@ if TYPE_CHECKING:
             has_collateral_return: "bool | None" = None,
             total_collateral: "int | None" = None,
             reference_inputs_count: "int | None" = None,
+            chunkify: "bool | None" = None,
+            tag_cbor_sets: "bool | None" = None,
         ) -> None:
             pass
 
@@ -1811,6 +1818,24 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["CardanoPoolParametersType"]:
             return isinstance(msg, cls)
 
+    class CardanoDRep(protobuf.MessageType):
+        type: "CardanoDRepType"
+        key_hash: "bytes | None"
+        script_hash: "bytes | None"
+
+        def __init__(
+            self,
+            *,
+            type: "CardanoDRepType",
+            key_hash: "bytes | None" = None,
+            script_hash: "bytes | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoDRep"]:
+            return isinstance(msg, cls)
+
     class CardanoTxCertificate(protobuf.MessageType):
         type: "CardanoCertificateType"
         path: "list[int]"
@@ -1818,6 +1843,8 @@ if TYPE_CHECKING:
         pool_parameters: "CardanoPoolParametersType | None"
         script_hash: "bytes | None"
         key_hash: "bytes | None"
+        deposit: "int | None"
+        drep: "CardanoDRep | None"
 
         def __init__(
             self,
@@ -1828,6 +1855,8 @@ if TYPE_CHECKING:
             pool_parameters: "CardanoPoolParametersType | None" = None,
             script_hash: "bytes | None" = None,
             key_hash: "bytes | None" = None,
+            deposit: "int | None" = None,
+            drep: "CardanoDRep | None" = None,
         ) -> None:
             pass
 
@@ -1855,56 +1884,58 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["CardanoTxWithdrawal"]:
             return isinstance(msg, cls)
 
-    class CardanoGovernanceRegistrationDelegation(protobuf.MessageType):
-        voting_public_key: "bytes"
+    class CardanoCVoteRegistrationDelegation(protobuf.MessageType):
+        vote_public_key: "bytes"
         weight: "int"
 
         def __init__(
             self,
             *,
-            voting_public_key: "bytes",
+            vote_public_key: "bytes",
             weight: "int",
         ) -> None:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoGovernanceRegistrationDelegation"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoCVoteRegistrationDelegation"]:
             return isinstance(msg, cls)
 
-    class CardanoGovernanceRegistrationParametersType(protobuf.MessageType):
-        voting_public_key: "bytes | None"
+    class CardanoCVoteRegistrationParametersType(protobuf.MessageType):
+        vote_public_key: "bytes | None"
         staking_path: "list[int]"
-        reward_address_parameters: "CardanoAddressParametersType"
+        payment_address_parameters: "CardanoAddressParametersType | None"
         nonce: "int"
-        format: "CardanoGovernanceRegistrationFormat"
-        delegations: "list[CardanoGovernanceRegistrationDelegation]"
+        format: "CardanoCVoteRegistrationFormat"
+        delegations: "list[CardanoCVoteRegistrationDelegation]"
         voting_purpose: "int | None"
+        payment_address: "str | None"
 
         def __init__(
             self,
             *,
-            reward_address_parameters: "CardanoAddressParametersType",
             nonce: "int",
             staking_path: "list[int] | None" = None,
-            delegations: "list[CardanoGovernanceRegistrationDelegation] | None" = None,
-            voting_public_key: "bytes | None" = None,
-            format: "CardanoGovernanceRegistrationFormat | None" = None,
+            delegations: "list[CardanoCVoteRegistrationDelegation] | None" = None,
+            vote_public_key: "bytes | None" = None,
+            payment_address_parameters: "CardanoAddressParametersType | None" = None,
+            format: "CardanoCVoteRegistrationFormat | None" = None,
             voting_purpose: "int | None" = None,
+            payment_address: "str | None" = None,
         ) -> None:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoGovernanceRegistrationParametersType"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["CardanoCVoteRegistrationParametersType"]:
             return isinstance(msg, cls)
 
     class CardanoTxAuxiliaryData(protobuf.MessageType):
-        governance_registration_parameters: "CardanoGovernanceRegistrationParametersType | None"
+        cvote_registration_parameters: "CardanoCVoteRegistrationParametersType | None"
         hash: "bytes | None"
 
         def __init__(
             self,
             *,
-            governance_registration_parameters: "CardanoGovernanceRegistrationParametersType | None" = None,
+            cvote_registration_parameters: "CardanoCVoteRegistrationParametersType | None" = None,
             hash: "bytes | None" = None,
         ) -> None:
             pass
@@ -1984,14 +2015,14 @@ if TYPE_CHECKING:
     class CardanoTxAuxiliaryDataSupplement(protobuf.MessageType):
         type: "CardanoTxAuxiliaryDataSupplementType"
         auxiliary_data_hash: "bytes | None"
-        governance_signature: "bytes | None"
+        cvote_registration_signature: "bytes | None"
 
         def __init__(
             self,
             *,
             type: "CardanoTxAuxiliaryDataSupplementType",
             auxiliary_data_hash: "bytes | None" = None,
-            governance_signature: "bytes | None" = None,
+            cvote_registration_signature: "bytes | None" = None,
         ) -> None:
             pass
 
