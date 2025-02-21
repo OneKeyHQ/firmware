@@ -127,6 +127,10 @@ trezor.enums.SafetyCheckLevel
 import trezor.enums.SafetyCheckLevel
 trezor.enums.SdProtectOperationType
 import trezor.enums.SdProtectOperationType
+trezor.enums.TonWalletVersion
+import trezor.enums.TonWalletVersion
+trezor.enums.TonWorkChain
+import trezor.enums.TonWorkChain
 trezor.enums.TronResourceCode
 import trezor.enums.TronResourceCode
 trezor.enums.WordRequestType
@@ -779,6 +783,70 @@ apps.sui.sign_message
 import apps.sui.sign_message
 apps.sui.sign_tx
 import apps.sui.sign_tx
+apps.ton
+import apps.ton
+apps.ton.get_address
+import apps.ton.get_address
+apps.ton.layout
+import apps.ton.layout
+apps.ton.sign_message
+import apps.ton.sign_message
+apps.ton.sign_proof
+import apps.ton.sign_proof
+apps.ton.tokens
+import apps.ton.tokens
+apps.ton.tonsdk
+import apps.ton.tonsdk
+apps.ton.tonsdk.boc
+import apps.ton.tonsdk.boc
+apps.ton.tonsdk.boc._bit_string
+import apps.ton.tonsdk.boc._bit_string
+apps.ton.tonsdk.boc._builder
+import apps.ton.tonsdk.boc._builder
+apps.ton.tonsdk.boc._cell
+import apps.ton.tonsdk.boc._cell
+apps.ton.tonsdk.boc._dict_builder
+import apps.ton.tonsdk.boc._dict_builder
+apps.ton.tonsdk.boc.dict
+import apps.ton.tonsdk.boc.dict
+apps.ton.tonsdk.boc.dict.find_common_prefix
+import apps.ton.tonsdk.boc.dict.find_common_prefix
+apps.ton.tonsdk.boc.dict.serialize_dict
+import apps.ton.tonsdk.boc.dict.serialize_dict
+apps.ton.tonsdk.contract
+import apps.ton.tonsdk.contract
+apps.ton.tonsdk.contract.token
+import apps.ton.tonsdk.contract.token
+apps.ton.tonsdk.contract.token.ft
+import apps.ton.tonsdk.contract.token.ft
+apps.ton.tonsdk.contract.token.ft.jetton_minter
+import apps.ton.tonsdk.contract.token.ft.jetton_minter
+apps.ton.tonsdk.contract.token.ft.jetton_wallet
+import apps.ton.tonsdk.contract.token.ft.jetton_wallet
+apps.ton.tonsdk.contract.token.nft
+import apps.ton.tonsdk.contract.token.nft
+apps.ton.tonsdk.contract.token.nft.nft_collection
+import apps.ton.tonsdk.contract.token.nft.nft_collection
+apps.ton.tonsdk.contract.token.nft.nft_item
+import apps.ton.tonsdk.contract.token.nft.nft_item
+apps.ton.tonsdk.contract.token.nft.nft_sale
+import apps.ton.tonsdk.contract.token.nft.nft_sale
+apps.ton.tonsdk.contract.token.nft.nft_utils
+import apps.ton.tonsdk.contract.token.nft.nft_utils
+apps.ton.tonsdk.contract.wallet
+import apps.ton.tonsdk.contract.wallet
+apps.ton.tonsdk.contract.wallet._wallet_contract
+import apps.ton.tonsdk.contract.wallet._wallet_contract
+apps.ton.tonsdk.contract.wallet._wallet_contract_v3
+import apps.ton.tonsdk.contract.wallet._wallet_contract_v3
+apps.ton.tonsdk.contract.wallet._wallet_contract_v4
+import apps.ton.tonsdk.contract.wallet._wallet_contract_v4
+apps.ton.tonsdk.utils
+import apps.ton.tonsdk.utils
+apps.ton.tonsdk.utils._address
+import apps.ton.tonsdk.utils._address
+apps.ton.tonsdk.utils._utils
+import apps.ton.tonsdk.utils._utils
 apps.tron
 import apps.tron
 apps.tron.address

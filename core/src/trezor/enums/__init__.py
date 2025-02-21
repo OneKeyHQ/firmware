@@ -375,6 +375,12 @@ if TYPE_CHECKING:
         NostrDecryptedMessage = 11507
         NostrSignSchnorr = 11508
         NostrSignedSchnorr = 11509
+        TonGetAddress = 11901
+        TonAddress = 11902
+        TonSignMessage = 11903
+        TonSignedMessage = 11904
+        TonSignProof = 11905
+        TonSignedProof = 11906
         LnurlAuth = 11600
         LnurlAuthResp = 11601
         DeviceBackToBoot = 903
@@ -686,6 +692,13 @@ if TYPE_CHECKING:
         Yay = 0
         Nay = 1
         Pass = 2
+
+    class TonWalletVersion(IntEnum):
+        V4R2 = 3
+
+    class TonWorkChain(IntEnum):
+        BASECHAIN = 0
+        MASTERCHAIN = 1
 
     class TronResourceCode(IntEnum):
         BANDWIDTH = 0

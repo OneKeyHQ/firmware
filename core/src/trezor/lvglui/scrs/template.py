@@ -850,6 +850,225 @@ class EIP712DOMAIN(FullSizeWindow):
             )
 
 
+class TonMessage(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        address,
+        message,
+        domain,
+        primary_color,
+        icon_path,
+        verify: bool = False,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__VERIFY) if verify else _(i18n_keys.BUTTON__SIGN),
+            _(i18n_keys.BUTTON__CANCEL),
+            anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
+        )
+        self.primary_color = primary_color
+        self.container = ContainerFlexCol(
+            self.content_area, self.title, pos=(0, 40), padding_row=8
+        )
+        if domain:
+            self.item3 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__DOMAIN__COLON),
+                str(domain),
+            )
+        self.item1 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
+        )
+        self.long_message = False
+        if len(message) > 80:
+            # self.show_full_message = NormalButton(
+            #     self, _(i18n_keys.BUTTON__VIEW_FULL_MESSAGE)
+            # )
+            # self.show_full_message.align_to(self.item2, lv.ALIGN.OUT_BOTTOM_MID, 0, 32)
+            # self.show_full_message.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            self.message = message
+            self.long_message = True
+            self.btn_yes.label.set_text(_(i18n_keys.BUTTON__VIEW))
+        else:
+            self.item2 = DisplayItemNoBgc(
+                self.container, _(i18n_keys.LIST_KEY__MESSAGE__COLON), message
+            )
+
+    def eventhandler(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.btn_yes:
+                if self.long_message:
+                    PageAbleMessage(
+                        _(i18n_keys.LIST_KEY__MESSAGE__COLON),
+                        self.message,
+                        self.channel,
+                        primary_color=self.primary_color,
+                        confirm_text=_(i18n_keys.BUTTON__SIGN),
+                    )
+                    self.destroy()
+                else:
+                    self.show_unload_anim()
+                    self.channel.publish(1)
+            elif target == self.btn_no:
+                self.show_dismiss_anim()
+                self.channel.publish(0)
+
+
+class TransactionDetailsTON(FullSizeWindow):
+    def __init__(
+        self,
+        title,
+        address_from,
+        address_to,
+        amount,
+        fee_max,
+        is_eip1559=False,
+        gas_price=None,
+        max_priority_fee_per_gas=None,
+        max_fee_per_gas=None,
+        total_amount=None,
+        primary_color=lv_colors.ONEKEY_GREEN,
+        contract_addr=None,
+        token_id=None,
+        evm_chain_id=None,
+        raw_data=None,
+        is_raw_data=False,
+        sub_icon_path=None,
+        striped=False,
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.primary_color = primary_color
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+
+        self.item1 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__AMOUNT__COLON),
+            amount,
+        )
+        self.item4 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__TO__COLON),
+            address_to,
+        )
+        self.item5 = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__FROM__COLON),
+            address_from,
+        )
+        if contract_addr:
+            self.item0 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__CONTRACT_ADDRESS__COLON),
+                contract_addr,
+            )
+            self.item1 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__TOKEN_ID__COLON),
+                token_id,
+            )
+
+        # if total_amount is None:
+        #     if not contract_addr:  # token transfer
+        #         total_amount = f"{amount}\n{fee_max}"
+        #     else:  # nft transfer
+        #         total_amount = f"{fee_max}"
+        # self.item6 = DisplayItemNoBgc(
+        #     self.container,
+        #     _(i18n_keys.LIST_KEY__TOTAL_AMOUNT__COLON),
+        #     total_amount,
+        # )
+
+        if raw_data:
+            from trezor import strings
+
+            self.data_str = strings.format_customer_data(raw_data)
+
+            self.item7 = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.LIST_KEY__DATA__COLON)
+                if self.data_str.startswith("b5ee9c72")
+                else _(i18n_keys.LIST_KEY__MEMO__COLON),
+                _(i18n_keys.SUBTITLE__STR_BYTES).format(len(raw_data)),
+            )
+            self.panel = lv.obj(self.content_area)
+            self.panel.clear_flag(lv.obj.FLAG.SCROLLABLE)
+            self.panel.add_style(
+                StyleWrapper()
+                .width(464)
+                .height(lv.SIZE.CONTENT)
+                .bg_color(lv_colors.ONEKEY_BLACK_3)
+                .bg_opa()
+                .border_width(1)
+                .border_color(lv_colors.ONEKEY_GRAY_1)
+                .pad_all(8)
+                .radius(0)
+                .max_height(256)
+                .text_font(font_MONO24)
+                .text_color(lv_colors.LIGHT_GRAY)
+                .text_align_left()
+                .text_letter_space(-1),
+                0,
+            )
+            self.panel.align_to(self.container, lv.ALIGN.OUT_BOTTOM_MID, 0, 8)
+            self.content = lv.label(self.panel)
+            self.content.set_align(lv.ALIGN.TOP_LEFT)
+            self.content.set_size(lv.pct(100), lv.SIZE.CONTENT)
+
+            if len(self.data_str) > 216:
+                self.content.set_long_mode(lv.label.LONG.WRAP)
+                self.content.set_text(self.data_str[:213] + "...")
+                self.view_btn = NormalButton(self.panel, _(i18n_keys.BUTTON__VIEW))
+                self.view_btn.set_width(246)
+                self.view_btn.align(lv.ALIGN.CENTER, 0, 0)
+                self.view_btn.add_style(
+                    StyleWrapper()
+                    .bg_color(lv_colors.ONEKEY_BLACK_3)
+                    .border_width(2)
+                    .border_color(lv_colors.ONEKEY_GRAY_1),
+                    0,
+                )
+                self.view_btn.add_style(
+                    StyleWrapper()
+                    .bg_opa(lv.OPA.COVER)
+                    .bg_color(lv_colors.ONEKEY_GRAY_3)
+                    .transform_height(-2)
+                    .transform_width(-2)
+                    .transition(BtnClickTransition()),
+                    lv.PART.MAIN | lv.STATE.PRESSED,
+                )
+
+                self.view_btn.add_event_cb(self.on_click, lv.EVENT.CLICKED, None)
+            else:
+                self.content.set_text(self.data_str)
+
+    def on_click(self, event_obj):
+        code = event_obj.code
+        target = event_obj.get_target()
+        if code == lv.EVENT.CLICKED:
+            if target == self.view_btn:
+                PageAbleMessage(
+                    _(i18n_keys.TITLE__VIEW_DATA),
+                    self.data_str,
+                    channel=None,
+                    cancel_text=_(i18n_keys.BUTTON__CLOSE),
+                    confirm_text=None,
+                    page_size=405,
+                    font=font_MONO24,
+                )
+
+
 class TransactionDetailsTRON(FullSizeWindow):
     def __init__(
         self,
@@ -2055,3 +2274,35 @@ class LnurlAuth(FullSizeWindow):
         self.item2 = DisplayItemNoBgc(
             self.container, _(i18n_keys.LIST_KEY__DATA__COLON), data
         )
+
+
+class TonTransfer(FullSizeWindow):
+    def __init__(
+        self,
+        address_from,
+        address_to,
+        amount,
+        memo,
+        primary_color=None,
+    ):
+        super().__init__(
+            _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("TON"),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        self.item1 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__AMOUNT__COLON), amount
+        )
+        self.item2 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__TO__COLON), address_to
+        )
+        self.item3 = DisplayItemNoBgc(
+            self.container, _(i18n_keys.LIST_KEY__FROM__COLON), address_from
+        )
+        if memo:
+            self.item4 = DisplayItemNoBgc(
+                self.container, _(i18n_keys.LIST_KEY__MEMO__COLON), memo
+            )

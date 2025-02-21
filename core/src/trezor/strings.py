@@ -90,3 +90,20 @@ def format_timestamp(timestamp: int) -> str:
     # that is used internally.
     d = utime.gmtime2000(timestamp - _SECONDS_1970_TO_2000)
     return f"{d[0]}-{d[1]:02d}-{d[2]:02d} {d[3]:02d}:{d[4]:02d}:{d[5]:02d}"
+
+
+def format_customer_data(data: bytes | None) -> str:
+    """
+    Returns human-friendly representation of a customer data.
+    """
+    if data is None or len(data) == 0:
+        return ""
+    try:
+        formatted = data.decode()
+        if all((c <= 0x20 or c == 0x7F) for c in data[:33]):
+            raise UnicodeError  # non-printable characters
+    except UnicodeError:  # mp has no UnicodeDecodeError
+        from binascii import hexlify
+
+        formatted = f"0x{hexlify(data).decode()}"
+    return formatted

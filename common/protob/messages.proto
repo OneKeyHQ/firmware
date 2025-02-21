@@ -498,7 +498,7 @@ enum MessageType {
     MessageType_KaspaSignedTx = 11303 [(wire_out) = true];
     MessageType_KaspaTxInputRequest = 11304 [(wire_out) = true];
     MessageType_KaspaTxInputAck = 11305 [(wire_in) = true];
-    
+
     // Nexa
     MessageType_NexaGetAddress = 11400 [(wire_in) = true];
     MessageType_NexaAddress = 11401 [(wire_out) = true];
@@ -520,10 +520,17 @@ enum MessageType {
     MessageType_NostrSignSchnorr = 11508 [(wire_in) = true];
     MessageType_NostrSignedSchnorr = 11509 [(wire_out) = true];
 
+    // Ton
+    MessageType_TonGetAddress = 11901 [(wire_in) = true];
+    MessageType_TonAddress = 11902 [(wire_out) = true];
+    MessageType_TonSignMessage = 11903 [(wire_in) = true];
+    MessageType_TonSignedMessage = 11904 [(wire_out) = true];
+    MessageType_TonSignProof = 11905 [(wire_in) = true];
+    MessageType_TonSignedProof = 11906 [(wire_out) = true];
+
     // lnurl
     MessageType_LnurlAuth = 11600 [(wire_in) = true];
     MessageType_LnurlAuthResp = 11601 [(wire_out) = true];
-
 
     //onekey
     MessageType_DeviceBackToBoot = 903 [(wire_in) = true];

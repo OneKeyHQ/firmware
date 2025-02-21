@@ -66,6 +66,7 @@ from . import (
     nexa,
     nostr,
     lnurl,
+    ton,
 )
 
 F = TypeVar("F", bound=Callable)
@@ -113,6 +114,7 @@ COMMAND_ALIASES = {
     "nexa": nexa.cli,
     "nostr": nostr.cli,
     "lnurl": lnurl.cli,
+    "ton": ton.cli,
     # firmware aliases:
     "fw": firmware.cli,
     "update-firmware": firmware.update,
@@ -470,6 +472,7 @@ cli.add_command(kaspa.cli)
 cli.add_command(nexa.cli)
 cli.add_command(nostr.cli)
 cli.add_command(lnurl.cli)
+cli.add_command(ton.cli)
 
 #
 # Main
