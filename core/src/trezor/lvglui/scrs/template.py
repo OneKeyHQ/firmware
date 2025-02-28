@@ -164,8 +164,9 @@ class Message(FullSizeWindow):
         *,
         item_other: int | str | None = None,
         item_addr_title: str | None = None,
-        is_standard: bool = True,
         item_other_title: str | None = None,
+        is_standard: bool = True,
+        warning_banner_text: str | None = None,
     ):
         super().__init__(
             title,
@@ -181,7 +182,8 @@ class Message(FullSizeWindow):
             self.warning_banner = Banner(
                 self.content_area,
                 2,
-                _(i18n_keys.CONTENT__NON_STANDARD_MESSAGE_SIGNATURE),
+                warning_banner_text
+                or _(i18n_keys.CONTENT__NON_STANDARD_MESSAGE_SIGNATURE),
             )
             self.warning_banner.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
         self.container = ContainerFlexCol(

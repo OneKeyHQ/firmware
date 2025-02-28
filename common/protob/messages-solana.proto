@@ -8,14 +8,14 @@ option java_outer_classname = "TrezorMessageSolana";
 /**
  * Message version for Solana SignMessage
  */
-enum SolanaMessageVersion {
+enum SolanaOffChainMessageVersion {
     MESSAGE_VERSION_0 = 0;
 }
 
 /**
  * Message format for Solana SignMessage
  */
-enum SolanaMessageFormat {
+enum SolanaOffChainMessageFormat {
     V0_RESTRICTED_ASCII = 0;
     V0_LIMITED_UTF8 = 1;
 }
@@ -57,24 +57,35 @@ message SolanaSignedTx {
 }
 
 /**
- * Request: ask device to sign a message
+ * Request: ask device to sign a off-chain message
  * @start
- * @next SolanaSignedMessage
+ * @next SolanaMessageSignature
  * @next Failure
  */
-message SolanaSignMessage {
+message SolanaSignOffChainMessage {
     repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
     required bytes message = 2;             // the message to sign
-    optional SolanaMessageVersion message_version = 3[default = MESSAGE_VERSION_0];
-    optional SolanaMessageFormat message_format = 4[default = V0_RESTRICTED_ASCII];
+    optional SolanaOffChainMessageVersion message_version = 3[default = MESSAGE_VERSION_0];
+    optional SolanaOffChainMessageFormat message_format = 4[default = V0_RESTRICTED_ASCII];
     optional bytes application_domain = 5;  // application domain must be 32 bytes
 }
 
 /**
- * Response: signature for message
+ * Request: ask device to sign arbitrary message except valid solana transaction
+ * @start
+ * @next SolanaMessageSignature
+ * @next Failure
+ */
+message SolanaSignUnsafeMessage {
+    repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
+    required bytes message = 2;             // the message to sign
+}
+
+/**
+ * Response: signature for message signing
  * @end
  */
-message SolanaSignedMessage {
+message SolanaMessageSignature {
     required bytes signature = 1;           // the signature of the message
-    required bytes public_key = 2;          // the public key of the signer
+    optional bytes public_key = 2;          // the public key of the signer
 }

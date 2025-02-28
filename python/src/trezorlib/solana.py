@@ -29,20 +29,32 @@ def sign_tx(
     )
     return client.call(msg)
 
-@expect(messages.SolanaSignedMessage)
-def sign_message(
+@expect(messages.SolanaMessageSignature)
+def sign_offchain_message(
     client: "TrezorClient",
     n: "Address",
     message: bytes,
-    message_version: messages.SolanaMessageVersion,
-    message_format: messages.SolanaMessageFormat,
+    message_version: messages.SolanaOffChainMessageVersion,
+    message_format: messages.SolanaOffChainMessageFormat,
     application_domain: Optional[str] = None
 ):
-    msg = messages.SolanaSignMessage(
+    msg = messages.SolanaSignOffChainMessage(
         message=message,
         address_n=n,
         message_version=message_version,
         message_format=message_format,
         application_domain=bytes.fromhex(application_domain) if application_domain else None,
+    )
+    return client.call(msg)
+
+@expect(messages.SolanaMessageSignature)
+def sign_unsafe_message(
+    client: "TrezorClient",
+    n: "Address",
+    message: bytes,
+):
+    msg = messages.SolanaSignUnsafeMessage(
+        message=message,
+        address_n=n,
     )
     return client.call(msg)

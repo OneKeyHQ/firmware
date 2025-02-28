@@ -1240,7 +1240,11 @@ async def confirm_sol_memo(
 
 
 async def confirm_sol_message(
-    ctx: wire.GenericContext, address: str, app_domain_fd: str | None, message: str
+    ctx: wire.GenericContext,
+    address: str,
+    app_domain_fd: str | None,
+    message: str,
+    is_unsafe: bool = False,
 ) -> None:
     from trezor.lvglui.scrs.template import Message
 
@@ -1253,6 +1257,10 @@ async def confirm_sol_message(
         False,
         item_other=app_domain_fd,
         item_other_title="Application Domain:" if app_domain_fd else None,
+        is_standard=not is_unsafe,
+        warning_banner_text=_(i18n_keys.SECURITY__SOLANA_RAW_SIGNING_TX_WARNING)
+        if is_unsafe
+        else None,
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_sol_message", ButtonRequestType.ProtectCall)

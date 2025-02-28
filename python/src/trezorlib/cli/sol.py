@@ -33,11 +33,11 @@ PATH_HELP = "BIP-32 path, e.g. m/44'/501'/0'/0'"
 PATH_RAW_TX = "Base58 encoded transaction"
 
 MESSAGE_VERSIONS = {
-    "v0": messages.SolanaMessageVersion.MESSAGE_VERSION_0,
+    "v0": messages.SolanaOffChainMessageVersion.MESSAGE_VERSION_0,
 }
 MESSAGE_FORMATS = {
-    "ascii": messages.SolanaMessageFormat.V0_RESTRICTED_ASCII,
-    "utf8": messages.SolanaMessageFormat.V0_LIMITED_UTF8,
+    "ascii": messages.SolanaOffChainMessageFormat.V0_RESTRICTED_ASCII,
+    "utf8": messages.SolanaOffChainMessageFormat.V0_LIMITED_UTF8,
 }
 
 @click.group(name="sol")
@@ -70,6 +70,7 @@ def sign_tx(client: "TrezorClient", address: str, raw_tx: str) -> str:
 @click.option("-v", "--message-version", type=ChoiceType(MESSAGE_VERSIONS), default="v0")
 @click.option("-f", "--message-format", type=ChoiceType(MESSAGE_FORMATS), default="ascii")
 @click.option("-d", "--application-domain", default=None, help="32 bytes hex encoded application domain or None")
+@click.option("-u", "--unsafe", is_flag=True, help="Use unsafe message signing protocol")
 @click.argument("message")
 @with_client
 def sign_message(client: "TrezorClient",
@@ -77,12 +78,16 @@ def sign_message(client: "TrezorClient",
     message: str,
     message_version: str,
     message_format: str,
-    application_domain: Optional[str]
+    application_domain: Optional[str],
+    unsafe: bool
 ):
     """Sign Solana message."""
     address_n = tools.parse_path(address)
-    rep = solana.sign_message(client, address_n, tools.prepare_message_bytes(message), message_version, message_format, application_domain)
+    if unsafe:
+        rep = solana.sign_unsafe_message(client, address_n, tools.prepare_message_bytes(message))
+    else:
+        rep = solana.sign_offchain_message(client, address_n, tools.prepare_message_bytes(message), message_version, message_format, application_domain)
     return {
-        "public_key": f"0x{rep.public_key.hex()}",
+        "public_key": f"0x{rep.public_key.hex()}" if not unsafe else None,
         "signature": f"0x{rep.signature.hex()}",
     }

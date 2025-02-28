@@ -57,8 +57,8 @@ if TYPE_CHECKING:
     from trezor.enums import ResourceType  # noqa: F401
     from trezor.enums import SafetyCheckLevel  # noqa: F401
     from trezor.enums import SdProtectOperationType  # noqa: F401
-    from trezor.enums import SolanaMessageFormat  # noqa: F401
-    from trezor.enums import SolanaMessageVersion  # noqa: F401
+    from trezor.enums import SolanaOffChainMessageFormat  # noqa: F401
+    from trezor.enums import SolanaOffChainMessageVersion  # noqa: F401
     from trezor.enums import StellarAssetType  # noqa: F401
     from trezor.enums import StellarMemoType  # noqa: F401
     from trezor.enums import StellarSignerType  # noqa: F401
@@ -7321,11 +7321,11 @@ if TYPE_CHECKING:
         def is_type_of(cls, msg: Any) -> TypeGuard["SolanaSignedTx"]:
             return isinstance(msg, cls)
 
-    class SolanaSignMessage(protobuf.MessageType):
+    class SolanaSignOffChainMessage(protobuf.MessageType):
         address_n: "list[int]"
         message: "bytes"
-        message_version: "SolanaMessageVersion"
-        message_format: "SolanaMessageFormat"
+        message_version: "SolanaOffChainMessageVersion"
+        message_format: "SolanaOffChainMessageFormat"
         application_domain: "bytes | None"
 
         def __init__(
@@ -7333,30 +7333,46 @@ if TYPE_CHECKING:
             *,
             message: "bytes",
             address_n: "list[int] | None" = None,
-            message_version: "SolanaMessageVersion | None" = None,
-            message_format: "SolanaMessageFormat | None" = None,
+            message_version: "SolanaOffChainMessageVersion | None" = None,
+            message_format: "SolanaOffChainMessageFormat | None" = None,
             application_domain: "bytes | None" = None,
         ) -> None:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["SolanaSignMessage"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["SolanaSignOffChainMessage"]:
             return isinstance(msg, cls)
 
-    class SolanaSignedMessage(protobuf.MessageType):
+    class SolanaSignUnsafeMessage(protobuf.MessageType):
+        address_n: "list[int]"
+        message: "bytes"
+
+        def __init__(
+            self,
+            *,
+            message: "bytes",
+            address_n: "list[int] | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["SolanaSignUnsafeMessage"]:
+            return isinstance(msg, cls)
+
+    class SolanaMessageSignature(protobuf.MessageType):
         signature: "bytes"
-        public_key: "bytes"
+        public_key: "bytes | None"
 
         def __init__(
             self,
             *,
             signature: "bytes",
-            public_key: "bytes",
+            public_key: "bytes | None" = None,
         ) -> None:
             pass
 
         @classmethod
-        def is_type_of(cls, msg: Any) -> TypeGuard["SolanaSignedMessage"]:
+        def is_type_of(cls, msg: Any) -> TypeGuard["SolanaMessageSignature"]:
             return isinstance(msg, cls)
 
     class StarcoinGetAddress(protobuf.MessageType):

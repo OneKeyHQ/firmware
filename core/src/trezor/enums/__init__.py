@@ -331,8 +331,9 @@ if TYPE_CHECKING:
         SolanaAddress = 10101
         SolanaSignTx = 10102
         SolanaSignedTx = 10103
-        SolanaSignMessage = 10104
-        SolanaSignedMessage = 10105
+        SolanaSignOffChainMessage = 10104
+        SolanaMessageSignature = 10105
+        SolanaSignUnsafeMessage = 10106
         CosmosGetAddress = 10800
         CosmosAddress = 10801
         CosmosSignTx = 10802
@@ -671,10 +672,10 @@ if TYPE_CHECKING:
         ImportanceTransfer_Activate = 1
         ImportanceTransfer_Deactivate = 2
 
-    class SolanaMessageVersion(IntEnum):
+    class SolanaOffChainMessageVersion(IntEnum):
         MESSAGE_VERSION_0 = 0
 
-    class SolanaMessageFormat(IntEnum):
+    class SolanaOffChainMessageFormat(IntEnum):
         V0_RESTRICTED_ASCII = 0
         V0_LIMITED_UTF8 = 1
 

@@ -339,8 +339,9 @@ class MessageType(IntEnum):
     SolanaAddress = 10101
     SolanaSignTx = 10102
     SolanaSignedTx = 10103
-    SolanaSignMessage = 10104
-    SolanaSignedMessage = 10105
+    SolanaSignOffChainMessage = 10104
+    SolanaMessageSignature = 10105
+    SolanaSignUnsafeMessage = 10106
     CosmosGetAddress = 10800
     CosmosAddress = 10801
     CosmosSignTx = 10802
@@ -724,11 +725,11 @@ class NEMImportanceTransferMode(IntEnum):
     ImportanceTransfer_Deactivate = 2
 
 
-class SolanaMessageVersion(IntEnum):
+class SolanaOffChainMessageVersion(IntEnum):
     MESSAGE_VERSION_0 = 0
 
 
-class SolanaMessageFormat(IntEnum):
+class SolanaOffChainMessageFormat(IntEnum):
     V0_RESTRICTED_ASCII = 0
     V0_LIMITED_UTF8 = 1
 
@@ -9195,13 +9196,13 @@ class SolanaSignedTx(protobuf.MessageType):
         self.signature = signature
 
 
-class SolanaSignMessage(protobuf.MessageType):
+class SolanaSignOffChainMessage(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 10104
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("message", "bytes", repeated=False, required=True),
-        3: protobuf.Field("message_version", "SolanaMessageVersion", repeated=False, required=False),
-        4: protobuf.Field("message_format", "SolanaMessageFormat", repeated=False, required=False),
+        3: protobuf.Field("message_version", "SolanaOffChainMessageVersion", repeated=False, required=False),
+        4: protobuf.Field("message_format", "SolanaOffChainMessageFormat", repeated=False, required=False),
         5: protobuf.Field("application_domain", "bytes", repeated=False, required=False),
     }
 
@@ -9210,8 +9211,8 @@ class SolanaSignMessage(protobuf.MessageType):
         *,
         message: "bytes",
         address_n: Optional[Sequence["int"]] = None,
-        message_version: Optional["SolanaMessageVersion"] = SolanaMessageVersion.MESSAGE_VERSION_0,
-        message_format: Optional["SolanaMessageFormat"] = SolanaMessageFormat.V0_RESTRICTED_ASCII,
+        message_version: Optional["SolanaOffChainMessageVersion"] = SolanaOffChainMessageVersion.MESSAGE_VERSION_0,
+        message_format: Optional["SolanaOffChainMessageFormat"] = SolanaOffChainMessageFormat.V0_RESTRICTED_ASCII,
         application_domain: Optional["bytes"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
@@ -9221,18 +9222,35 @@ class SolanaSignMessage(protobuf.MessageType):
         self.application_domain = application_domain
 
 
-class SolanaSignedMessage(protobuf.MessageType):
+class SolanaSignUnsafeMessage(protobuf.MessageType):
+    MESSAGE_WIRE_TYPE = 10106
+    FIELDS = {
+        1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
+        2: protobuf.Field("message", "bytes", repeated=False, required=True),
+    }
+
+    def __init__(
+        self,
+        *,
+        message: "bytes",
+        address_n: Optional[Sequence["int"]] = None,
+    ) -> None:
+        self.address_n: Sequence["int"] = address_n if address_n is not None else []
+        self.message = message
+
+
+class SolanaMessageSignature(protobuf.MessageType):
     MESSAGE_WIRE_TYPE = 10105
     FIELDS = {
         1: protobuf.Field("signature", "bytes", repeated=False, required=True),
-        2: protobuf.Field("public_key", "bytes", repeated=False, required=True),
+        2: protobuf.Field("public_key", "bytes", repeated=False, required=False),
     }
 
     def __init__(
         self,
         *,
         signature: "bytes",
-        public_key: "bytes",
+        public_key: Optional["bytes"] = None,
     ) -> None:
         self.signature = signature
         self.public_key = public_key

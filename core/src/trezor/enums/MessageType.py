@@ -313,8 +313,9 @@ if not utils.BITCOIN_ONLY:
     SolanaAddress = 10101
     SolanaSignTx = 10102
     SolanaSignedTx = 10103
-    SolanaSignMessage = 10104
-    SolanaSignedMessage = 10105
+    SolanaSignOffChainMessage = 10104
+    SolanaMessageSignature = 10105
+    SolanaSignUnsafeMessage = 10106
     CosmosGetAddress = 10800
     CosmosAddress = 10801
     CosmosSignTx = 10802

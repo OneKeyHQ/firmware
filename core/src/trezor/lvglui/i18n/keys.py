@@ -1042,6 +1042,7 @@ MSG__SAFETY_CHECKS_PROMPT_WARNING = 471
 SUBTITLE__FIDO2_AUTHENTICATE_NOT_REGISTERED = 472
 # QR Code
 BUTTON__QRCODE = 473
+BUTTON__QR_CODE = 473
 # {} Message
 TITLE__STR_MESSAGE = 474
 # Entering Boardloader
@@ -1280,7 +1281,7 @@ SUBTITLE__SKIP_BACKUP = 581
 # If you want to make another KeyTag backup, you can view the KeyTag  dotmap i
 # n "Wallet - Check Recovery Phrase" after verifying your recovery phrase.
 SUBTITLE__FINISH_KEYTAG_BACKUP = 582
-# Authenticity Check
+# Device Authentication
 TITLE__SECURITY_CHECK = 583
 # Disable Trezor Compatibility
 TITLE__DISABLE_TREZOR_COMPATIBILITY = 584
@@ -1629,7 +1630,7 @@ MSG__FINGERPRINT_NOT_RECOGNIZED_TRY_AGAIN = 744
 MSG__USE_FINGERPRINT_OR_TAP_TO_UNLOCK = 745
 # SE Firmware
 ITEM__SE_FIRMWARE = 746
-# Low battery (<10%). To keep the battery healthy, please ensure the device is
+# Low battery (<20%). To keep the battery healthy, please ensure the device is
 # fully charged before long-term storage.
 CONTENT__POWER_OFF_LOW_BATTERY_DESC = 747
 # Select the way to connect
@@ -1770,4 +1771,129 @@ CONTENT__FOLLOWING_TRANSACTION_CONTAINS_CONTRACT = 807
 # You are using {type} authorization, ensure the dApp is trustworthy to avoid
 # asset loss.
 MSG___PERMIT_SIGN_ALERT = 808
+# Backup Limited
+TITLE__BACKUP_LIMITED = 809
+# Airgap mode is enabled and NFC is disabled, so you cannot back up to OneKey
+# Lite. Please disable Airgap mode and try again.
+TITLE__BACKUP_LIMITED_DESC = 810
+# Go Settings
+BUTTON__GO_SETTINGS = 811
+# Certifications
+CONTENT__CERTIFICATIONS = 812
+# My Address
+APP__ADDRESS = 813
+# Select Network
+TITLE__SELECT_NETWORK = 814
+# {network} Address
+TITLE__NETWORK_ADDRESS = 815
+# Select Derivation Path
+TITLE__SELECT_DERIVATION_PATH = 816
+# Select Account
+TITLE__SELECT_ACCOUNT = 817
+# Go To Account
+TITLE__SET_INITIAL_ACCOUNT = 818
+# Input formatting error
+TITLE__SET_INITIAL_ACCOUNT_ERROR = 819
+# Your address is an EVM network address. You can use it to manage your assets
+# across other EVM-compatible networks (such as Ethereum, BNB Chain, Polygon,
+# Arbitrum One, Avalanche, etc.).
+CONTENT__NETWORK_ADDRESS_ETHEREUM = 820
+# Security Keys
+APP__SECURITY = 821
+# Wallet Setup Required
+ONBOARDING_BLUETOOTH_PAIRING_BEFORE_SETUP_PIN_TITLE = 822
+# To pair your device via Bluetooth, please create a wallet on your hardware d
+# evice first. This is necessary for secure connection
+ONBOARDING_BLUETOOTH_PAIRING_BEFORE_SETUP_PIN_DESC = 823
+# Bluetooth pairing unavailable while in Boot mode
+BOOT_BLUETOOTH_PAIRING_ERROR_TITLE = 824
+# To update your device, visit firmware.onekey.so on your computer and connect
+# via USB to install firmware.
+BOOT_BLUETOOTH_PAIRING_ERROR_DESC = 825
+# Verify Now
+ACTION_VERIFY_NOW = 826
+# Connect Device
+VERIFY_DEVICE_CONNECT_DEVICE_TITLE = 827
+# Open OneKey App and connect your device to create a wallet. Device verificat
+# ion will be performed automatically
+VERIFY_DEVICE_CONNECT_DEVICE_DESC = 828
+# Verify Device
+TITLE__VEIRIFY_DEVICE = 829
+# Visit https://bit.ly/3ZsHB40 for additional verification methods
+VERIFY_DEVICE_HELP_CENTER_TEXT = 830
+# More Networks
+BUTTON__MORE_NETWORKS = 831
+# Show Less
+BUTTON__LESS_NETWORKS = 832
+# Bootloader URL requires device verification in OneKey App 5.5.0+
+VERIFY_DEVICE_BOOTLOADER_DESC = 833
+# Download OneKey App at: onekey.so/download
+FORM__DOWNLOAD_APP_FROM_DOWNLOAD_CENTER = 834
+# FIDO Keys
+FIDO_FIDO_KEYS_LABEL = 835
+# Secure accounts with FIDO security keys
+FIDO_FIDO_KEYS_DESC = 836
+# Remove FIDO Key?
+FIDO_REMOVE_KEY_TITLE = 837
+# This FIDO key will be removed permanently
+FIDO_REMOVE_KEY_DESC = 838
+# FIDO Key Removed
+FIDO_REMOVE_KEY_SUCCESS_TITLE = 839
+# Key Limit Reached
+FIDO_ADD_KEY_LIMIT_REACHED_TITLE = 840
+# 60 FIDO keys limit reached. Remove unused to add new
+FIDO_ADD_KEY_LIMIT_REACHED_DESC = 841
+# Manage FIDO Keys
+FIDO_MANAGE_KEY_CTA_LABEL = 842
+# No FIDO keys yet
+FIDO_LIST_EMPTY_TEXT = 843
+# Using OneKey Devices as Security Keys
+TIPS_SECURITY_KEYS_TEXT = 844
+# Register
+TIPS_SECURITY_KEYS_REGISTER_TITLE = 845
+# Plug in your OneKey to your computer
+TIPS_SECURITY_KEYS_REGISTER_PLUG_IN = 846
+# Go to security settings of the website (e.g. Google, Facebook)
+TIPS_SECURITY_KEYS_REGISTER_GO_TO_WEBSITE = 847
+# Select "Add Security Key" option
+TIPS_SECURITY_KEYS_REGISTER_SELECT_OPTION = 848
+# Confirm with OneKey (unlock required)
+TIPS_SECURITY_KEYS_REGISTER_CONFIRM = 849
+# Choose "Security Key" at login
+TIPS_SECURITY_KEYS_AUTHENTICATE_CHOOSE_OPTION = 850
+# Approve with OneKey
+TIPS_SECURITY_KEYS_AUTHENTICATE_APPROVE = 851
+# Authenticate
+TIPS_SECURITY_KEYS_AUTHENTICATE_TITLE = 852
+# Slide to unlock
+MISTOUCH_PROTECTION_TITLE = 853
+# 5 failed tries. Slide to continue
+MISTOUCH_PROTECTION_DESC = 854
+# Slide to continue
+MISTOUCH_PROTECTION_SLIDE_TEXT = 855
+# Back to home
+BUTTON__BACK_TO_HOME = 856
+# Registering fido key...
+FIDO_KEY_REGISTERING_DESC = 857
+# FIDO Key Registered
+FIDO_KEY_REGISTERED_TITLE = 858
+# Low Battery
+POWER_ON_LOW_BATTERY_TITLE = 859
+# Powering off
+POWER_ON_LOW_BATTERY_DESC = 860
+# Auto Lock/Shutdown
+ITEM__AUTO_LOCK_AND_SHUTDOWN = 861
+# Solana Raw Signing
+SECURITY__SOLANA_RAW_SIGNING_TITLE = 862
+# Allows signing raw Solana messages without processing or validation. This ma
+# y expose you to phishing, blind signing, and unauthorized approvals. Use wit
+# h caution.
+SECURITY__SOLANA_RAW_SIGNING_DESC = 863
+# Enable Solana Raw Signing?
+SECURITY__SOLANA_RAW_SIGNING_ENABLE_TITLE = 864
+# This may expose you to phishing, blind signing, and unauthorized transaction
+# s. Enable only if you fully understand the risks.
+SECURITY__SOLANA_RAW_SIGNING_ENABLE_DESC = 865
+# Risk of phishing & blind signing. Proceed only if you trust the source.
+SECURITY__SOLANA_RAW_SIGNING_TX_WARNING = 866
 # fmt: on
