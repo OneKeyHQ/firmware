@@ -1086,6 +1086,7 @@ class TransactionDetailsTON(FullSizeWindow):
                     font=font_MONO24,
                 )
 
+
 class EIP712Warning(FullSizeWindow):
     def __init__(
         self, title: str, warning_level, text, primary_type, primary_color, icon_path
@@ -1107,6 +1108,7 @@ class EIP712Warning(FullSizeWindow):
             primary_type,
         )
         self.primary_type.align_to(self.warning_banner, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 24)
+
 
 class TransactionDetailsTRON(FullSizeWindow):
     def __init__(

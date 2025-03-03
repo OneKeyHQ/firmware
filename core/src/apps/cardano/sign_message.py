@@ -36,8 +36,9 @@ async def sign_message(
         ctx,
         keychain,
         msg.address_n,
+        True,
         # path must match the PUBKEY schema
-        SCHEMA_PUBKEY.match(msg.address_n) or SCHEMA_MINT.match(msg.address_n),
+        (SCHEMA_PUBKEY.match(msg.address_n) or SCHEMA_MINT.match(msg.address_n)),
     )
     if msg.network_id != network_ids.MAINNET:
         raise wire.ProcessError("Invalid Networ ID")

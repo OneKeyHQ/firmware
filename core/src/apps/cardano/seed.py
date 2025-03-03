@@ -37,10 +37,10 @@ class Keychain:
     """
 
     def __init__(self, root: bip32.HDNode) -> None:
-        self.byron_root = self._derive_path(root, paths.BYRON_ROOT)
-        self.shelley_root = self._derive_path(root, paths.SHELLEY_ROOT)
-        self.multisig_root = self._derive_path(root, paths.MULTISIG_ROOT)
-        self.minting_root = self._derive_path(root, paths.MINTING_ROOT)
+        self.byron_root = self._derive_path(root, BYRON_ROOT)
+        self.shelley_root = self._derive_path(root, SHELLEY_ROOT)
+        self.multisig_root = self._derive_path(root, MULTISIG_ROOT)
+        self.minting_root = self._derive_path(root, MINTING_ROOT)
         root.__del__()
 
     @staticmethod
@@ -50,7 +50,7 @@ class Keychain:
         node.derive_path(path)
         return node
 
-    def verify_path(self, path: Bip32Path) -> None:
+    def verify_path(self, path: Bip32Path, _force_strict: bool = True) -> None:
         if not self.is_in_keychain(path):
             raise wire.DataError("Forbidden key path")
 

@@ -30,8 +30,9 @@ async def get_public_key(
         ctx,
         keychain,
         address_n,
+        True,
         # path must match the PUBKEY schema
-        SCHEMA_PUBKEY.match(address_n) or SCHEMA_MINT.match(address_n),
+        (SCHEMA_PUBKEY.match(address_n) or SCHEMA_MINT.match(address_n)),
     )
     from . import ICON, PRIMARY_COLOR
     from trezor.lvglui.scrs import lv
