@@ -20,6 +20,7 @@ from .constents import (  # STAKE_PROGRAM_ID,; VOTE_PROGRAM_ID,
     SPL_MEMO_PROGRAM_ID,
     SPL_TOKEN_PROGRAM_ID,
     SYS_PROGRAM_ID,
+    COMPUTE_BUDGET_PROGRAM_ID,
 )
 
 if TYPE_CHECKING:
@@ -31,6 +32,7 @@ CURRENT_ALLOWED_PROGRAM_IDS = [
     SPL_TOKEN_PROGRAM_ID,
     SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
     SPL_MEMO_PROGRAM_ID,
+    COMPUTE_BUDGET_PROGRAM_ID,
 ]
 
 
@@ -99,6 +101,8 @@ async def sign_tx(
                 from .spl.memo.memo_program import parse
 
                 await parse(ctx, accounts, i.data)
+            # elif program_id == COMPUTE_BUDGET_PROGRAM_ID:
+            #    pass
             # # elif program_id == STAKE_PROGRAM_ID:
             # #     raise wire.ProcessError("Stake program not support for now")
             # # elif program_id == VOTE_PROGRAM_ID:
