@@ -743,7 +743,7 @@ translations = [
     "Disable Air Gap",
     "Are you sure to disable Air Gap mode? After disable, it will be able to connect your device via USB or Bluetooth.",
     "Select the chain you need, then click Create button.",
-    "ETH and EVM‒compatible networks",
+    "ETH & EVM networks",
     "fingerprint not recognized, try again",
     "Use fingerprint or tap to unlock",
     "SE Firmware",
@@ -867,5 +867,12 @@ translations = [
     "Enable Solana Raw Signing?",
     "This may expose you to phishing, blind signing, and unauthorized transactions. Enable only if you fully understand the risks.",
     "Risk of phishing & blind signing. Proceed only if you trust the source.",
+    "Security Protection",
+    "Basic Tutorial",
+    "BTC, SOL, ETH & EVM networks",
+    "OneKey App",
+    "Candidate",
+    "Target network",
+    "Remove vote",
 ]
 # fmt: on

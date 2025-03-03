@@ -1622,7 +1622,7 @@ TITLE__DISABLE_AIR_GAP = 740
 CONTENT__ARE_YOU_SURE_TO_DISABLE_AIRGAP_MODE = 741
 # Select the chain you need, then click Create button.
 SUBTITLE__ADD_ACCOUNT_2__TUTORIAL_AFTER_INIT = 742
-# ETH and EVM‒compatible networks
+# ETH & EVM networks
 CONTENT__ETH_AND_EVM_POWERED_NETWORK = 743
 # fingerprint not recognized, try again
 MSG__FINGERPRINT_NOT_RECOGNIZED_TRY_AGAIN = 744
@@ -1896,4 +1896,18 @@ SECURITY__SOLANA_RAW_SIGNING_ENABLE_TITLE = 864
 SECURITY__SOLANA_RAW_SIGNING_ENABLE_DESC = 865
 # Risk of phishing & blind signing. Proceed only if you trust the source.
 SECURITY__SOLANA_RAW_SIGNING_TX_WARNING = 866
+# Security Protection
+ITEM__SECURITY_PROTECTION = 867
+# Basic Tutorial
+ITEM__BASIC_TUTORIAL = 868
+# BTC, SOL, ETH & EVM networks
+CONTENT__BTC_SOL_ETH_N_EVM_NETWORKS = 869
+# OneKey App
+TITLE__ONEKEY_APP = 870
+# Candidate
+GLOBAL_CANDIDATE = 871
+# Target network
+GLOBAL_TARGET_NETWORK = 872
+# Remove vote
+TITLE_REMOVE_VOTE = 873
 # fmt: on

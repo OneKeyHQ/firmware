@@ -743,7 +743,7 @@ translations = [
     "Deshabilitar el espacio de aire",
     "¿Estás seguro de desactivar el modo Air Gap? Después de desactivarlo, podrá conectar su dispositivo a través de Bluetooth o USB.",
     "Seleccione la cadena que necesita y luego haga clic en el botón Crear.",
-    "Cadenas compatibles con ETH y EVM",
+    "Redes ETH y EVM",
     "huella digital no reconocida, inténtalo de nuevo",
     "Use huella digital o toque para desbloquear",
     "Firmware SE",
@@ -867,5 +867,12 @@ translations = [
     "¿Habilitar la firma sin procesar de Solana?",
     "Esto puede exponerte a phishing, firmas ciegas y transacciones no autorizadas. Activa solo si comprendes completamente los riesgos.",
     "Riesgo de phishing y firma a ciegas. Proceda solo si confía en la fuente.",
+    "Protección de seguridad",
+    "Tutorial básico",
+    "Redes BTC, SOL, ETH y EVM",
+    "OneKey App",
+    "Candidato",
+    "Red objetivo",
+    "Eliminar voto",
 ]
 # fmt: on

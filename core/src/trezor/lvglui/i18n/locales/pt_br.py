@@ -743,7 +743,7 @@ translations = [
     "Desative o Air Gap",
     "Você tem certeza de que deseja desativar o modo Air Gap? Após a desativação, será possível conectar seu dispositivo via USB ou Bluetooth.",
     "Selecione a corrente que você precisa, depois clique no botão Criar.",
-    "ETH e cadeias compatíveis com EVM",
+    "Redes ETH e EVM",
     "impressão digital não reconhecida, tente novamente",
     "Use a impressão digital ou toque para desbloquear",
     "Firmware SE",
@@ -867,5 +867,12 @@ translations = [
     "Ativar Assinatura Bruta Solana?",
     "Isso pode expor você a phishing, assinaturas cegas e transações não autorizadas. Ative apenas se você compreender totalmente os riscos.",
     "Risco de phishing e assinatura cega. Prossiga apenas se confiar na fonte.",
+    "Proteção de Segurança",
+    "Tutorial Básico",
+    "Redes BTC, SOL, ETH e EVM",
+    "OneKey App",
+    "Candidato",
+    "Rede alvo",
+    "Remover voto",
 ]
 # fmt: on

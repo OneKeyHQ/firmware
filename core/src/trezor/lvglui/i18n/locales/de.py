@@ -743,7 +743,7 @@ translations = [
     "Luftspalt deaktivieren",
     "Sind Sie sicher, den Air Gap-Modus zu deaktivieren? Nach der Deaktivierung kann Ihr Gerät über Bluetooth oder USB verbunden werden.",
     "Wählen Sie die gewünschte Kette aus und klicken Sie dann auf die Schaltfläche „Erstellen“.",
-    "ETH- und EVM-kompatible Ketten",
+    "ETH- und EVM-Netzwerke",
     "Fingerabdruck nicht erkannt, versuchen Sie es erneut",
     "Verwenden Sie zum Entsperren den Fingerabdruck oder tippen Sie darauf",
     "SE Firmware",
@@ -867,5 +867,12 @@ translations = [
     "Solana Raw Signing aktivieren?",
     "Dies kann Sie Phishing, blindem Signieren und unautorisierten Transaktionen aussetzen. Aktivieren Sie dies nur, wenn Sie die Risiken vollständig verstehen.",
     "Risiko von Phishing & blindem Signieren. Fahren Sie nur fort, wenn Sie der Quelle vertrauen.",
+    "Sicherheitsschutz",
+    "Grundlegendes Tutorial",
+    "BTC-, SOL-, ETH- und EVM-Netzwerke",
+    "OneKey App",
+    "Kandidat",
+    "Zielnetzwerk",
+    "Stimme entfernen",
 ]
 # fmt: on

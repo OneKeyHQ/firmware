@@ -743,7 +743,7 @@ translations = [
     "Désactiver l'espace d'air",
     "Êtes-vous sûr de désactiver le mode Air Gap ? Après désactivation, il pourra connecter votre appareil via Bluetooth ou USB.",
     "Sélectionnez la chaîne dont vous avez besoin, puis cliquez sur le bouton Créer.",
-    "Chaînes compatibles ETH et EVM",
+    "Réseaux ETH et EVM",
     "empreinte digitale non reconnue, réessayez",
     "Utilisez l'empreinte digitale ou appuyez pour déverrouiller",
     "SE Firmware",
@@ -867,5 +867,12 @@ translations = [
     "Activer la signature brute Solana ?",
     "Cela peut vous exposer à des tentatives de phishing, à des signatures à l'aveugle et à des transactions non autorisées. Activez uniquement si vous comprenez pleinement les risques.",
     "Risque de phishing et de signature à l'aveugle. Ne continuez que si vous faites confiance à la source.",
+    "Protection de sécurité",
+    "Tutoriel de base",
+    "Réseaux BTC, SOL, ETH et EVM",
+    "OneKey App",
+    "Candidat",
+    "Réseau cible",
+    "Retirer le vote",
 ]
 # fmt: on
