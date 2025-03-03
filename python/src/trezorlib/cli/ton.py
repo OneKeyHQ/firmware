@@ -15,7 +15,7 @@
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple, Dict
 
 import click
 import time
@@ -58,7 +58,7 @@ def get_address(client: "TrezorClient",
                 version: messages.TonWalletVersion,
                 workchain: messages.TonWorkChain,
                 show_display: bool
-                ) -> str:
+                ) -> Dict[str, str]:
     """Get Ton address for specified path."""
     address_n = tools.parse_path(address)
     resp = ton.get_address(client, address_n, version, workchain, bounceable, test_only, wallet_id, show_display)
@@ -109,11 +109,11 @@ def sign_message(client: "TrezorClient",
                 workchain: messages.TonWorkChain,
                 bounceable: bool,
                 test_only: bool,
-                ext_destination: tuple[str, ...],
-                ext_ton_amount: tuple[int, ...],
-                ext_payload: tuple[str, ...],
+                ext_destination: Tuple[str, ...],
+                ext_ton_amount: Tuple[int, ...],
+                ext_payload: Tuple[str, ...],
                 signing_message_hash: str
-                ) -> bytes:
+                ) -> Dict[str, str]:
     """Sign Ton Transaction."""
     address_n = tools.parse_path(address)
     # expire_at = int(time.time()) + 300
@@ -142,8 +142,9 @@ def sign_message(client: "TrezorClient",
                 list(ext_payload),
                 signing_message_hash
     )
-
-    return resp.signature.hex(), resp.signning_message.hex()
+    assert resp.signature is not None
+    assert resp.signning_message is not None
+    return {"signature": f"0x{resp.signature.hex()}", "signed_message": f"0x{resp.signning_message.hex()}"}
 
 @cli.command()
 @click.option("-n", "--address", required=True, help=PATH_HELP)
@@ -165,12 +166,12 @@ def sign_proof(client: "TrezorClient",
                 workchain: messages.TonWorkChain,
                 bounceable: bool,
                 test_only: bool
-                ) -> bytes:
+                ) -> Dict[str, str]:
     """Sign Ton Proof."""
     address_n = tools.parse_path(address)
     # expire_at = int(time.time()) + 300
     expire_at = 1979465599
-    signature = ton.sign_proof(
+    resp = ton.sign_proof(
                 client,
                 address_n,
                 expire_at,
@@ -181,6 +182,6 @@ def sign_proof(client: "TrezorClient",
                 workchain,
                 bounceable,
                 test_only
-    ).signature.hex()
-
-    return {"signature": f"0x{signature}"}
+    )
+    assert resp.signature is not None
+    return {"signature": f"0x{resp.signature.hex()}"}

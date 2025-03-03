@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 from . import messages
 from .tools import expect
@@ -49,10 +49,10 @@ def sign_message(client: "TrezorClient",
                 workchain: messages.TonWorkChain=messages.TonWorkChain.BASECHAIN,
                 bounceable: bool = False,
                 test_only: bool = False,
-                ext_destination: list[str] = None,
-                ext_ton_amount: list[int] = None,
-                ext_payload: list[str] = None,
-                signing_message_hash: str = None
+                ext_destination: Optional[List[str]] = None,
+                ext_ton_amount: Optional[List[int]] = None,
+                ext_payload: Optional[List[str]] = None,
+                signing_message_hash: Optional[str] = None
                 ):
     if jetton_amount_bytes is not None:
         jetton_amount_bytes = int(jetton_amount_bytes).to_bytes((int(jetton_amount_bytes).bit_length() + 7) // 8, byteorder='big')
