@@ -36,9 +36,9 @@ async def sign_message(
     ctx: Context, msg: EthereumSignMessage, keychain: Keychain, defs: Definitions
 ) -> EthereumMessageSignature:
     validate_message(msg.message)
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
 
-    node = keychain.derive(msg.address_n)
+    node = keychain.derive(msg.address_n, force_strict=False)
     address = address_from_bytes(node.ethereum_pubkeyhash())
 
     network = defs.network

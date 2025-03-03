@@ -47,7 +47,7 @@ MAX_VALUE_BYTE_SIZE = 1536  # 1.5 KB
 async def sign_typed_data(
     ctx: Context, msg: EthereumSignTypedData, keychain: Keychain
 ) -> EthereumTypedDataSignature:
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
 
     if msg.chain_id:
         network = networks.by_chain_id(msg.chain_id)
@@ -64,7 +64,7 @@ async def sign_typed_data(
         ctx, msg.primary_type, msg.metamask_v4_compat
     )
 
-    node = keychain.derive(msg.address_n)
+    node = keychain.derive(msg.address_n, force_strict=False)
     signature = secp256k1.sign(
         node.private_key(), data_hash, False, secp256k1.CANONICAL_SIG_ETHEREUM
     )
@@ -90,7 +90,9 @@ async def generate_typed_data_hash(
         metamask_v4_compat=metamask_v4_compat,
     )
     await typed_data_envelope.collect_types()
+    from ..sign_typed_data import show_eip712_warning
 
+    await show_eip712_warning(ctx, primary_type)
     await confirm_domain(ctx, typed_data_envelope)
     domain_separator = await typed_data_envelope.hash_struct(
         primary_type="EIP712Domain",

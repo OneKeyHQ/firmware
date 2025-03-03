@@ -156,6 +156,8 @@ enum MessageType {
     MessageType_GetOwnershipProof = 49 [(bitcoin_only) = true, (wire_in) = true];
     MessageType_OwnershipProof = 50 [(bitcoin_only) = true, (wire_out) = true];
     MessageType_AuthorizeCoinJoin = 51 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_SignPsbt = 10052 [(bitcoin_only) = true, (wire_in) = true];
+    MessageType_SignedPsbt = 10053 [(bitcoin_only) = true, (wire_out) = true];
 
     // Crypto
     MessageType_CipherKeyValue = 23 [(bitcoin_only) = true, (wire_in) = true];
@@ -455,6 +457,9 @@ enum MessageType {
     MessageType_SolanaAddress = 10101 [(wire_out) = true];
     MessageType_SolanaSignTx = 10102 [(wire_in) = true];
     MessageType_SolanaSignedTx = 10103 [(wire_out) = true];
+    MessageType_SolanaSignOffChainMessage = 10104 [(wire_in) = true];
+    MessageType_SolanaMessageSignature = 10105 [(wire_out) = true];
+    MessageType_SolanaSignUnsafeMessage = 10106 [(wire_in) = true];
 
     // Cosmos
     MessageType_CosmosGetAddress = 10800 [(wire_in) = true];

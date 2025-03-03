@@ -636,6 +636,7 @@ class SettingsScreen(Screen):
             super().__init__(**kwargs)
         else:
             self.refresh_text()
+            self.container.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 30)
             return
         # if __debug__:
         #     self.add_style(StyleWrapper().bg_color(lv_colors.ONEKEY_GREEN_1), 0)
@@ -840,6 +841,9 @@ class GeneralScreen(Screen):
                 if value == "1"
                 else i18n_keys.OPTION__STR_HOURS
             ).format(value)
+        elif auto_lock_time < 1:
+            value = str(time_ms // 1000).split(".")[0]
+            text = _(i18n_keys.OPTION__STR_SECONDS).format(value)
         else:
             value = str(auto_lock_time).split(".")[0]
             text = _(
@@ -886,7 +890,7 @@ class AutoLockSetting(Screen):
         )
 
         self.container = ContainerFlexCol(self.content_area, self.title, padding_row=2)
-        self.setting_items = [1, 2, 5, 10, 30, "Never", None]
+        self.setting_items = [0.5, 1, 2, 5, 10, 30, "Never", None]
         has_custom = True
         self.checked_index = 0
         self.btns: [ListItemBtn] = [None] * (len(self.setting_items))
@@ -894,11 +898,14 @@ class AutoLockSetting(Screen):
             if item is None:
                 break
             if not item == "Never":  # last item
-                item = _(
-                    i18n_keys.ITEM__STATUS__STR_MINUTES
-                    if item != 1
-                    else i18n_keys.OPTION__STR_MINUTE
-                ).format(item)
+                if item == 0.5:
+                    item = _(i18n_keys.OPTION__STR_SECONDS).format(int(item * 60))
+                else:
+                    item = _(
+                        i18n_keys.ITEM__STATUS__STR_MINUTES
+                        if item != 1
+                        else i18n_keys.OPTION__STR_MINUTE
+                    ).format(item)
             else:
                 item = _(i18n_keys.ITEM__STATUS__NEVER)
             self.btns[index] = ListItemBtn(
@@ -970,13 +977,13 @@ class AutoLockSetting(Screen):
                         item.set_checked()
                         self.btns[self.checked_index].set_uncheck()
                         self.checked_index = index
-                        if index == 5:
+                        if index == 6:
                             auto_lock_time = device.AUTOLOCK_DELAY_MAXIMUM
-                        elif index == 6:
+                        elif index == 7:
                             auto_lock_time = self.custom
                         else:
                             auto_lock_time = self.setting_items[index] * 60 * 1000
-                        device.set_autolock_delay_ms(auto_lock_time)
+                        device.set_autolock_delay_ms(int(auto_lock_time))
                         GeneralScreen.cur_auto_lock_ms = auto_lock_time
                         self.fresh_tips()
                         from apps.base import reload_settings_from_storage

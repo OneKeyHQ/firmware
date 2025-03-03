@@ -10,6 +10,7 @@ langs = [
     ("ru", "Russian"),
     ("es", "Spanish"),
     ("it", "Italiano"),
+    ("pt_br", "Portuguese (Brazil)"),
 ]
 
 langs_keys = [x[0] for x in langs]

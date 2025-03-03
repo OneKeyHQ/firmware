@@ -101,11 +101,11 @@ class Keychain:
         del self._cache
         del self.seed
 
-    def verify_path(self, path: paths.Bip32Path) -> None:
+    def verify_path(self, path: paths.Bip32Path, force_strict: bool = True) -> None:
         if "ed25519" in self.curve and not paths.path_is_hardened(path):
             raise wire.DataError("Non-hardened paths unsupported on Ed25519")
 
-        if not safety_checks.is_strict():
+        if not safety_checks.is_strict() and not force_strict:
             return
 
         if self.is_in_keychain(path):
@@ -139,17 +139,17 @@ class Keychain:
             n = self._derive_with_cache(
                 prefix_len=0,
                 path=[0 | paths.HARDENED],
-                new_root=lambda: bip32.from_seed(self.seed, self.curve),
+                new_root=lambda: bip32.from_seed(self.seed, self.curve),  # type: ignore[Argument of type "() -> HDNode" cannot be assigned to parameter "new_root" of type "() -> NodeType@_derive_with_cache" in function "_derive_with_cache"]
             )
-            self._root_fingerprint = n.fingerprint()
+            self._root_fingerprint = n.fingerprint()  # type: ignore[Cannot access member "fingerprint" for type "NodeProtocol[Unknown]*"]
         return self._root_fingerprint
 
-    def derive(self, path: paths.Bip32Path) -> bip32.HDNode:
-        self.verify_path(path)
-        return self._derive_with_cache(
+    def derive(self, path: paths.Bip32Path, force_strict: bool = True) -> bip32.HDNode:
+        self.verify_path(path, force_strict)
+        return self._derive_with_cache(  # type: ignore[Expression of type "NodeType@_derive_with_cache" cannot be assigned to return type "HDNode"]
             prefix_len=3,
             path=path,
-            new_root=lambda: bip32.from_seed(self.seed, self.curve),
+            new_root=lambda: bip32.from_seed(self.seed, self.curve),  # type: ignore[Argument of type "() -> HDNode" cannot be assigned to parameter "new_root" of type "() -> NodeType@_derive_with_cache" in function "_derive_with_cache"]
         )
 
     def derive_slip21(self, path: paths.Slip21Path) -> Slip21Node:
@@ -222,6 +222,8 @@ def auto_keychain(
     pattern = getattr(parent_module, "PATTERN")
     curve = getattr(parent_module, "CURVE")
     slip44_id = getattr(parent_module, "SLIP44_ID")
+
+    pattern = pattern if isinstance(pattern, tuple) else (pattern,)
     return with_slip44_keychain(
-        pattern, slip44_id=slip44_id, curve=curve, allow_testnet=allow_testnet
+        *pattern, slip44_id=slip44_id, curve=curve, allow_testnet=allow_testnet
     )

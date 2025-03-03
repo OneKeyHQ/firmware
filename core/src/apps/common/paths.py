@@ -5,19 +5,11 @@ HARDENED = const(0x8000_0000)
 SLIP25_PURPOSE = const(10025 | HARDENED)
 
 if TYPE_CHECKING:
-    from typing import (
-        Any,
-        Callable,
-        Collection,
-        Container,
-        Iterable,
-        Sequence,
-        TypeVar,
-    )
-    from typing_extensions import Protocol
+    from typing import Any, Callable, Collection, Container, Iterable, Sequence, TypeVar
     from trezor import wire
+    from typing_extensions import Protocol
 
-    Bip32Path = Sequence[int]
+    Bip32Path = list[int]
     Slip21Path = Sequence[bytes]
     PathType = TypeVar("PathType", Bip32Path, Slip21Path, contravariant=True)
 
@@ -29,7 +21,7 @@ if TYPE_CHECKING:
         def is_in_keychain(self, path: Bip32Path) -> bool:
             ...
 
-        def verify_path(self, path: Bip32Path) -> None:
+        def verify_path(self, path: Bip32Path, force_strict: bool = True) -> None:
             ...
 
 
@@ -197,23 +189,24 @@ class PathSchema:
 
             # optionally replace a keyword
             component = cls.REPLACEMENTS.get(component, component)
+            append = schema.append  # local_cache_attribute
 
             if "-" in component:
                 # parse as a range
                 a, b = [parse(s) for s in component.split("-", 1)]
-                schema.append(Interval(a, b))
+                append(Interval(a, b))
 
             elif "," in component:
                 # parse as a list of values
-                schema.append(set(parse(s) for s in component.split(",")))
+                append(set(parse(s) for s in component.split(",")))
 
             elif component == "coin_type":
                 # substitute SLIP-44 ids
-                schema.append(set(parse(s) for s in slip44_id))
+                append(set(parse(s) for s in slip44_id))
 
             else:
                 # plain constant
-                schema.append((parse(component),))
+                append((parse(component),))
 
         return cls(schema, trailing_components, compact=True)
 
@@ -258,18 +251,19 @@ class PathSchema:
         path. If the restriction results in a never-matching schema, then False
         is returned.
         """
+        schema = self.schema  # local_cache_attribute
 
         for i, value in enumerate(path):
-            if i < len(self.schema):
+            if i < len(schema):
                 # Ensure that the path is a prefix of the schema.
-                if value not in self.schema[i]:
+                if value not in schema[i]:
                     self.set_never_matching()
                     return False
 
                 # Restrict the schema component if there are multiple choices.
-                component = self.schema[i]
+                component = schema[i]
                 if not isinstance(component, tuple) or len(component) != 1:
-                    self.schema[i] = (value,)
+                    schema[i] = (value,)
             else:
                 # The path is longer than the schema. We need to restrict the
                 # trailing components.
@@ -278,7 +272,7 @@ class PathSchema:
                     self.set_never_matching()
                     return False
 
-                self.schema.append((value,))
+                schema.append((value,))
 
         return True
 
@@ -286,15 +280,13 @@ class PathSchema:
 
         def __repr__(self) -> str:
             components = ["m"]
-
-            def unharden(item: int) -> int:
-                return item ^ (item & HARDENED)
+            append = components.append  # local_cache_attribute
 
             for component in self.schema:
                 if isinstance(component, Interval):
                     a, b = component.min, component.max
                     prime = "'" if a & HARDENED else ""
-                    components.append(f"[{unharden(a)}-{unharden(b)}]{prime}")
+                    append(f"[{unharden(a)}-{unharden(b)}]{prime}")
                 else:
                     # typechecker thinks component is a Contanier but we're using it
                     # as a Collection.
@@ -307,15 +299,15 @@ class PathSchema:
                         component_str = "[" + component_str + "]"
                     if next(iter(collection)) & HARDENED:
                         component_str += "'"
-                    components.append(component_str)
+                    append(component_str)
 
             if self.trailing_components:
                 for key, val in self.WILDCARD_RANGES.items():
                     if self.trailing_components is val:
-                        components.append(key)
+                        append(key)
                         break
                 else:
-                    components.append("???")
+                    append("???")
 
             return "<schema:" + "/".join(components) + ">"
 
@@ -324,12 +316,6 @@ class AlwaysMatchingSchema:
     @staticmethod
     def match(path: Bip32Path) -> bool:
         return True
-
-
-class NeverMatchingSchema:
-    @staticmethod
-    def match(path: Bip32Path) -> bool:
-        return False
 
 
 # BIP-44 for basic (legacy) Bitcoin accounts, and widely used for other currencies:
@@ -353,9 +339,10 @@ async def validate_path(
     ctx: wire.Context,
     keychain: KeychainValidatorType,
     path: Bip32Path,
+    force_strict: bool = True,
     *additional_checks: bool,
 ) -> None:
-    keychain.verify_path(path)
+    keychain.verify_path(path, force_strict)
     if not keychain.is_in_keychain(path) or not all(additional_checks):
         await show_path_warning(ctx, path)
 
@@ -375,7 +362,7 @@ def path_is_hardened(address_n: Bip32Path) -> bool:
 
 
 def address_n_to_str(address_n: Iterable[int]) -> str:
-    def path_item(i: int) -> str:
+    def _path_item(i: int) -> str:
         if i & HARDENED:
             return str(i ^ HARDENED) + "'"
         else:
@@ -384,4 +371,65 @@ def address_n_to_str(address_n: Iterable[int]) -> str:
     if not address_n:
         return "m"
 
-    return "m/" + "/".join(path_item(i) for i in address_n)
+    return "m/" + "/".join(_path_item(i) for i in address_n)
+
+
+def parse_path(path: str) -> list[int]:
+    def _parse_path_item(item: str) -> int:
+        if item.endswith("'") or item.endswith("h") or item.endswith("H"):
+            return HARDENED | int(item[:-1])
+        else:
+            return int(item)
+
+    if not path:
+        return []
+    if path.startswith("m/"):
+        path = path[2:]
+    return [_parse_path_item(item) for item in path.split("/")]
+
+
+def unharden(item: int) -> int:
+    return item ^ (item & HARDENED)
+
+
+def get_account_name(
+    coin: str, address_n: Bip32Path, pattern: str | Sequence[str], slip44_id: int
+) -> str | None:
+    account_num = _get_account_num(address_n, pattern, slip44_id)
+    if account_num is None:
+        return None
+    return f"{coin} #{account_num}"
+
+
+def _get_account_num(
+    address_n: Bip32Path, pattern: str | Sequence[str], slip44_id: int
+) -> int | None:
+    if isinstance(pattern, str):
+        pattern = [pattern]
+
+    # Trying all possible patterns - at least one should match
+    for patt in pattern:
+        try:
+            return _get_account_num_single(address_n, patt, slip44_id)
+        except ValueError:
+            pass
+
+    # This function should not raise
+    return None
+
+
+def _get_account_num_single(address_n: Bip32Path, pattern: str, slip44_id: int) -> int:
+    # Validating address_n is compatible with pattern
+    if not PathSchema.parse(pattern, slip44_id).match(address_n):
+        raise ValueError
+
+    account_pos = pattern.find("/account")
+    if account_pos >= 0:
+        i = pattern.count("/", 0, account_pos)
+        num = address_n[i]
+        if is_hardened(num):
+            return unharden(num) + 1
+        else:
+            return num + 1
+    else:
+        raise ValueError

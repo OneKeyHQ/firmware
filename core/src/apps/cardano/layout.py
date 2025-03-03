@@ -1,28 +1,22 @@
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
-from trezor import messages, ui
+from trezor import messages
 from trezor.enums import (
     ButtonRequestType,
     CardanoAddressType,
     CardanoCertificateType,
+    CardanoDRepType,
+    CardanoNativeScriptHashDisplayFormat,
     CardanoNativeScriptType,
 )
 from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 from trezor.strings import format_amount
-from trezor.ui.layouts import (
-    confirm_blob,
-    confirm_metadata,
-    confirm_output,
-    confirm_path_warning,
-    confirm_properties,
-    confirm_text,
-    should_show_more,
-    show_address,
-)
+from trezor.ui import layouts
+from trezor.ui.layouts import confirm_metadata, confirm_output, confirm_properties
 
 from apps.common.paths import address_n_to_str
 
-from . import addresses, seed
+from . import addresses
 from .helpers import bech32, protocol_magics
 from .helpers.utils import (
     format_account_number,
@@ -32,15 +26,13 @@ from .helpers.utils import (
 )
 
 if TYPE_CHECKING:
-    from trezor import wire
+    from typing import Literal
 
-    from trezor.wire import Context
-    from trezor.enums import CardanoNativeScriptHashDisplayFormat
     from trezor.ui.layouts.lvgl import PropertyType
 
     from .helpers.credential import Credential
     from .seed import Keychain
-
+    from trezor import wire
 
 ADDRESS_TYPE_NAMES = {
     CardanoAddressType.BYRON: "Legacy",
@@ -67,14 +59,19 @@ SCRIPT_TYPE_NAMES = {
 
 CERTIFICATE_TYPE_NAMES = {
     CardanoCertificateType.STAKE_REGISTRATION: "Stake key registration",
+    CardanoCertificateType.STAKE_REGISTRATION_CONWAY: "Stake key registration",
     CardanoCertificateType.STAKE_DEREGISTRATION: "Stake key deregistration",
+    CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY: "Stake key deregistration",
     CardanoCertificateType.STAKE_DELEGATION: "Stake delegation",
     CardanoCertificateType.STAKE_POOL_REGISTRATION: "Stakepool registration",
+    CardanoCertificateType.VOTE_DELEGATION: "Vote delegation",
 }
 
 TITLE = _(i18n_keys.TITLE__CONFIRM_TRANSACTION)
 
 BRT_Other = ButtonRequestType.Other  # global_import_cache
+
+CVOTE_REWARD_ELIGIBILITY_WARNING = "Reward eligibility warning"
 
 
 def format_coin_amount(amount: int, network_id: int) -> str:
@@ -158,11 +155,10 @@ async def show_native_script(
 
 
 async def show_script_hash(
-    ctx: Context,
+    ctx: wire.Context,
     script_hash: bytes,
     display_format: CardanoNativeScriptHashDisplayFormat,
 ) -> None:
-    from trezor.enums import CardanoNativeScriptHashDisplayFormat
 
     assert display_format in (
         CardanoNativeScriptHashDisplayFormat.BECH32,
@@ -178,7 +174,7 @@ async def show_script_hash(
             br_code=BRT_Other,
         )
     elif display_format == CardanoNativeScriptHashDisplayFormat.POLICY_ID:
-        await confirm_blob(
+        await layouts.confirm_blob(
             ctx,
             "verify_script",
             "Verify script",
@@ -188,22 +184,23 @@ async def show_script_hash(
         )
 
 
-async def show_tx_init(ctx: Context, title: str) -> bool:
-    should_show_details = await should_show_more(
-        ctx,
-        TITLE,
-        (
-            (
-                ui.BOLD,
-                title,
-            ),
-            (ui.NORMAL, "Choose level of details:"),
-        ),
-        "Show All",
-        br_type="Show Simple",
-    )
+async def show_tx_init(ctx: wire.Context, title: str) -> bool:
+    # should_show_details = await should_show_more(
+    #     ctx,
+    #     TITLE,
+    #     (
+    #         (
+    #             ui.BOLD,
+    #             title,
+    #         ),
+    #         (ui.NORMAL, "Choose level of details:"),
+    #     ),
+    #     "Show All",
+    #     br_type="Show Simple",
+    # )
 
-    return should_show_details
+    # return should_show_details
+    return True
 
 
 async def confirm_input(ctx: wire.Context, input: messages.CardanoTxInput) -> None:
@@ -220,11 +217,12 @@ async def confirm_input(ctx: wire.Context, input: messages.CardanoTxInput) -> No
 
 
 async def confirm_sending(
-    ctx: Context,
+    ctx: wire.Context,
     ada_amount: int,
     to: str,
     output_type: Literal["address", "change", "collateral-return"],
     network_id: int,
+    chunkify: bool = False,
 ) -> None:
     if output_type not in ("address", "change", "collateral-return"):
         raise RuntimeError  # should be unreachable
@@ -262,7 +260,7 @@ async def confirm_sending_token(
     )
 
 
-async def confirm_datum_hash(ctx: Context, datum_hash: bytes) -> None:
+async def confirm_datum_hash(ctx: wire.Context, datum_hash: bytes) -> None:
     await confirm_properties(
         ctx,
         "confirm_datum_hash",
@@ -330,41 +328,66 @@ async def show_credentials(
     stake_credential: Credential,
 ) -> None:
     intro_text = "Address"
-    await _show_credential(ctx, payment_credential, intro_text, is_output=False)
-    await _show_credential(ctx, stake_credential, intro_text, is_output=False)
+    await _show_credential(ctx, payment_credential, intro_text, purpose="address")
+    await _show_credential(ctx, stake_credential, intro_text, purpose="address")
 
 
 async def show_change_output_credentials(
-    ctx: Context,
+    ctx: wire.Context,
     payment_credential: Credential,
     stake_credential: Credential,
 ) -> None:
     intro_text = "The following address is a change address. Its"
-    await _show_credential(ctx, payment_credential, intro_text, is_output=True)
-    await _show_credential(ctx, stake_credential, intro_text, is_output=True)
+    await _show_credential(ctx, payment_credential, intro_text, purpose="output")
+    await _show_credential(ctx, stake_credential, intro_text, purpose="output")
 
 
 async def show_device_owned_output_credentials(
-    ctx: Context,
+    ctx: wire.Context,
     payment_credential: Credential,
     stake_credential: Credential,
     show_both_credentials: bool,
 ) -> None:
     intro_text = "The following address is owned by this device. Its"
-    await _show_credential(ctx, payment_credential, intro_text, is_output=True)
+    await _show_credential(ctx, payment_credential, intro_text, purpose="output")
     if show_both_credentials:
-        await _show_credential(ctx, stake_credential, intro_text, is_output=True)
+        await _show_credential(ctx, stake_credential, intro_text, purpose="output")
+
+
+async def show_cvote_registration_payment_credentials(
+    ctx: wire.Context,
+    payment_credential: Credential,
+    stake_credential: Credential,
+    show_both_credentials: bool,
+    show_payment_warning: bool,
+) -> None:
+    intro_text = "Registration Payment"
+    await _show_credential(
+        ctx, payment_credential, intro_text, purpose="cvote_reg_payment_address"
+    )
+    if show_both_credentials or show_payment_warning:
+        extra_text = CVOTE_REWARD_ELIGIBILITY_WARNING if show_payment_warning else None
+        await _show_credential(
+            ctx,
+            stake_credential,
+            intro_text,
+            purpose="cvote_reg_payment_address",
+            extra_text=extra_text,
+        )
 
 
 async def _show_credential(
-    ctx: Context,
+    ctx: wire.Context,
     credential: Credential,
     intro_text: str,
-    is_output: bool,
+    purpose: Literal["address", "output", "cvote_reg_payment_address"],
+    extra_text: str | None = None,
 ) -> None:
-    title = (
-        TITLE if is_output else f"{ADDRESS_TYPE_NAMES[credential.address_type]} address"
-    )
+    title = {
+        "address": f"{ADDRESS_TYPE_NAMES[credential.address_type]} address",
+        "output": TITLE,
+        "cvote_reg_payment_address": TITLE,
+    }[purpose]
 
     props: list[PropertyType] = []
     append = props.append  # local_cache_attribute
@@ -374,6 +397,7 @@ async def _show_credential(
     # show some of the "props".
     if credential.is_set():
         credential_title = credential.get_title()
+        # TODO: handle translation
         append(
             (
                 f"{intro_text} {credential.type_name} credential is a {credential_title}:",
@@ -386,7 +410,8 @@ async def _show_credential(
         append((None, "Path is unusual."))
     if credential.is_mismatch:
         append((None, "Credential doesn't match payment credential."))
-    if credential.is_reward:
+    if credential.is_reward and purpose != "cvote_reg_payment_address":
+        # for cvote registrations, this is handled by extra_text at the end
         append(("Address is a reward address.", None))
     if credential.is_no_staking:
         append(
@@ -396,21 +421,25 @@ async def _show_credential(
             )
         )
 
-    await confirm_properties(
-        ctx,
-        "confirm_credential",
-        title,
-        props,
-        br_code=BRT_Other,
-    )
+    if extra_text:
+        append((extra_text, None))
+
+    if len(props) > 0:
+        await confirm_properties(
+            ctx,
+            "confirm_credential",
+            title,
+            props,
+            br_code=BRT_Other,
+        )
 
 
-async def warn_path(ctx: Context, path: list[int], title: str) -> None:
-    await confirm_path_warning(ctx, address_n_to_str(path), path_type=title)
+async def warn_path(ctx: wire.Context, path: list[int], title: str) -> None:
+    await layouts.confirm_path_warning(ctx, address_n_to_str(path), path_type=title)
 
 
 async def warn_tx_output_contains_tokens(
-    ctx: Context, is_collateral_return: bool = False
+    ctx: wire.Context, is_collateral_return: bool = False
 ) -> None:
     content = (
         "The collateral return\noutput contains tokens."
@@ -426,7 +455,7 @@ async def warn_tx_output_contains_tokens(
     )
 
 
-async def warn_tx_contains_mint(ctx: Context) -> None:
+async def warn_tx_contains_mint(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_tokens",
@@ -436,7 +465,7 @@ async def warn_tx_contains_mint(ctx: Context) -> None:
     )
 
 
-async def warn_tx_output_no_datum(ctx: Context) -> None:
+async def warn_tx_output_no_datum(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_no_datum_hash",
@@ -446,7 +475,7 @@ async def warn_tx_output_no_datum(ctx: Context) -> None:
     )
 
 
-async def warn_no_script_data_hash(ctx: Context) -> None:
+async def warn_no_script_data_hash(ctx: wire.Context) -> None:
     await confirm_metadata(
         ctx,
         "confirm_no_script_data_hash",
@@ -477,9 +506,11 @@ async def warn_unknown_total_collateral(ctx: wire.Context) -> None:
 
 
 async def confirm_witness_request(
-    ctx: Context,
+    ctx: wire.Context,
     witness_path: list[int],
 ) -> None:
+    from . import seed
+
     if seed.is_multisig_path(witness_path):
         path_title = "multi-sig path"
     elif seed.is_minting_path(witness_path):
@@ -487,7 +518,7 @@ async def confirm_witness_request(
     else:
         path_title = "path"
 
-    await confirm_text(
+    await layouts.confirm_text(
         ctx,
         "confirm_total",
         TITLE,
@@ -539,7 +570,9 @@ async def confirm_tx(
 
 
 async def confirm_certificate(
-    ctx: wire.Context, certificate: messages.CardanoTxCertificate
+    ctx: wire.Context,
+    certificate: messages.CardanoTxCertificate,
+    network_id: int,
 ) -> None:
     # stake pool registration requires custom confirmation logic not covered
     # in this call
@@ -552,7 +585,7 @@ async def confirm_certificate(
     elif certificate.type == CardanoCertificateType.STAKE_DELEGATION:
         transaction_type_value = _(i18n_keys.LIST_VALUE__STAKE_DELEGATION)
     else:
-        transaction_type_value = _(i18n_keys.LIST_VALUE__STAKEPOOL_REGISTRATION)
+        transaction_type_value = CERTIFICATE_TYPE_NAMES[certificate.type]
 
     props: list[PropertyType] = [
         (_(i18n_keys.LIST_KEY__TRANSACTION_TYPE__COLON), transaction_type_value),
@@ -569,6 +602,21 @@ async def confirm_certificate(
                 format_stake_pool_id(certificate.pool),
             )
         )
+    elif certificate.type in (
+        CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
+        CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
+    ):
+        assert certificate.deposit is not None  # validate_certificate
+        props.append(
+            (
+                _(i18n_keys.LIST_VALUE__DEPOSIT) + ":",
+                format_coin_amount(certificate.deposit, network_id),
+            )
+        )
+
+    elif certificate.type == CardanoCertificateType.VOTE_DELEGATION:
+        assert certificate.drep is not None  # validate_certificate
+        props.append(_format_drep(certificate.drep))
 
     await confirm_properties(
         ctx,
@@ -687,7 +735,7 @@ async def confirm_stake_pool_metadata(
 
 
 async def confirm_stake_pool_registration_final(
-    ctx: Context,
+    ctx: wire.Context,
     protocol_magic: int,
     ttl: int | None,
     validity_interval_start: int | None,
@@ -726,7 +774,12 @@ async def confirm_withdrawal(
             )
         )
 
-    props.append(("Amount:", format_coin_amount(withdrawal.amount, network_id)))
+    props.append(
+        (
+            _(i18n_keys.LIST_KEY__AMOUNT__COLON),
+            format_coin_amount(withdrawal.amount, network_id),
+        )
+    )
 
     await confirm_properties(
         ctx,
@@ -740,12 +793,19 @@ async def confirm_withdrawal(
 def _format_stake_credential(
     path: list[int], script_hash: bytes | None, key_hash: bytes | None
 ) -> tuple[str, str]:
-    from .helpers.utils import to_account_path
+    from .helpers.paths import ADDRESS_INDEX_PATH_INDEX, RECOMMENDED_ADDRESS_INDEX
 
     if path:
+        account_number = format_account_number(path)
+        address_index = path[ADDRESS_INDEX_PATH_INDEX]
+        if address_index == RECOMMENDED_ADDRESS_INDEX:
+            return (
+                f"for account {account_number}:",
+                address_n_to_str(path),
+            )
         return (
-            _(i18n_keys.LIST_KEY__ACCOUNT__COLON),
-            address_n_to_str(to_account_path(path)),
+            f"for account {account_number} and index {address_index}:",
+            address_n_to_str(path),
         )
     elif key_hash:
         return ("for key hash:", bech32.encode(bech32.HRP_STAKE_KEY_HASH, key_hash))
@@ -756,13 +816,35 @@ def _format_stake_credential(
         raise ValueError
 
 
-async def confirm_governance_registration_delegation(
+def _format_drep(drep: messages.CardanoDRep) -> tuple[str, str]:
+    if drep.type == CardanoDRepType.KEY_HASH:
+        assert drep.key_hash is not None  # validate_drep
+        return (
+            "Delegating to key hash:",
+            bech32.encode(bech32.HRP_DREP_KEY_HASH, drep.key_hash),
+        )
+    elif drep.type == CardanoDRepType.SCRIPT_HASH:
+        assert drep.script_hash is not None  # validate_drep
+        return (
+            "Delegating to script:",
+            bech32.encode(bech32.HRP_DREP_SCRIPT_HASH, drep.script_hash),
+        )
+    elif drep.type == CardanoDRepType.ABSTAIN:
+        return ("Delegating to:", "Always Abstain")
+    elif drep.type == CardanoDRepType.NO_CONFIDENCE:
+        return ("Delegating to:", "Always No Confidence")
+    else:
+        # should be unreachable unless there's a bug in validation
+        raise ValueError
+
+
+async def confirm_cvote_registration_delegation(
     ctx: wire.Context,
     public_key: str,
     weight: int,
 ) -> None:
     props: list[PropertyType] = [
-        ("Governance voting key registration", None),
+        ("Vote key registration (CIP-36)", None),
         ("Delegating to:", public_key),
     ]
     if weight is not None:
@@ -770,31 +852,49 @@ async def confirm_governance_registration_delegation(
 
     await confirm_properties(
         ctx,
-        "confirm_governance_registration_delegation",
+        "confirm_cvote_registration_delegation",
         title=TITLE,
         props=props,
         br_code=ButtonRequestType.Other,
     )
 
 
-async def confirm_governance_registration(
+async def confirm_cvote_registration_payment_address(
     ctx: wire.Context,
-    public_key: str | None,
+    payment_address: str,
+    should_show_payment_warning: bool,
+) -> None:
+    props = [
+        ("Vote key registration (CIP-36)", None),
+        ("Rewards go to:", payment_address),
+    ]
+    if should_show_payment_warning:
+        props.append((CVOTE_REWARD_ELIGIBILITY_WARNING, None))
+    await confirm_properties(
+        ctx,
+        "confirm_cvote_registration_payment_address",
+        title=TITLE,
+        props=props,
+        br_code=ButtonRequestType.Other,
+    )
+
+
+async def confirm_cvote_registration(
+    ctx: wire.Context,
+    vote_public_key: str | None,
     staking_path: list[int],
-    reward_address: str,
     nonce: int,
     voting_purpose: int | None,
 ) -> None:
-    props: list[PropertyType] = [("Governance voting key registration", None)]
-    if public_key is not None:
-        props.append(("Voting public key:", public_key))
+    props: list[PropertyType] = [("Vote key registration (CIP-36)", None)]
+    if vote_public_key is not None:
+        props.append(("Vote public key:", vote_public_key))
     props.extend(
         [
             (
-                f"Staking key for account {format_account_number(staking_path)}:",
+                f"Staking key for account: {format_account_number(staking_path)}:",
                 address_n_to_str(staking_path),
             ),
-            ("Rewards go to:", reward_address),
             ("Nonce:", str(nonce)),
         ]
     )
@@ -802,20 +902,22 @@ async def confirm_governance_registration(
         props.append(
             (
                 "Voting purpose:",
-                "Catalyst" if voting_purpose == 0 else f"{voting_purpose} (other)",
+                ("Catalyst" if voting_purpose == 0 else f"{voting_purpose} (Other)"),
             )
         )
 
     await confirm_properties(
         ctx,
-        "confirm_governance_registration",
+        "confirm_cvote_registration",
         title=TITLE,
         props=props,
         br_code=ButtonRequestType.Other,
     )
 
 
-async def show_auxiliary_data_hash(ctx: Context, auxiliary_data_hash: bytes) -> None:
+async def show_auxiliary_data_hash(
+    ctx: wire.Context, auxiliary_data_hash: bytes
+) -> None:
     await confirm_properties(
         ctx,
         "confirm_auxiliary_data",
@@ -842,7 +944,9 @@ async def confirm_token_minting(
                 ),
             ),
             (
-                "Amount minted:" if token.mint_amount >= 0 else "Amount burned:",
+                "Amount minted (decimals unknown):"
+                if token.mint_amount >= 0
+                else "Amount burned (decimals unknown):",
                 format_amount(token.mint_amount, 0),
             ),
         ),
@@ -860,7 +964,7 @@ async def warn_tx_network_unverifiable(ctx: wire.Context) -> None:
     )
 
 
-async def confirm_script_data_hash(ctx: Context, script_data_hash: bytes) -> None:
+async def confirm_script_data_hash(ctx: wire.Context, script_data_hash: bytes) -> None:
     await confirm_properties(
         ctx,
         "confirm_script_data_hash",
@@ -931,6 +1035,7 @@ async def show_cardano_address(
     address_parameters: messages.CardanoAddressParametersType,
     address: str,
     protocol_magic: int,
+    chunkify: bool,
 ) -> None:
     CAT = CardanoAddressType  # local_cache_global
 
@@ -939,8 +1044,7 @@ async def show_cardano_address(
         network_name = protocol_magics.to_ui_string(protocol_magic)
 
     title = f"{ADDRESS_TYPE_NAMES[address_parameters.address_type]} address"
-    address_extra = None
-    title_qr = title
+    path = None
     if address_parameters.address_type in (
         CAT.BYRON,
         CAT.BASE,
@@ -950,17 +1054,14 @@ async def show_cardano_address(
         CAT.REWARD,
     ):
         if address_parameters.address_n:
-            address_extra = address_n_to_str(address_parameters.address_n)
-            title_qr = address_n_to_str(address_parameters.address_n)
+            path = address_n_to_str(address_parameters.address_n)
         elif address_parameters.address_n_staking:
-            address_extra = address_n_to_str(address_parameters.address_n_staking)
-            title_qr = address_n_to_str(address_parameters.address_n_staking)
+            path = address_n_to_str(address_parameters.address_n_staking)
 
-    await show_address(
+    await layouts.show_address(
         ctx,
         address,
         network=network_name,
-        address_n=address_extra,
-        title_qr=title_qr,
+        address_n=path,
         addr_type=title,
     )

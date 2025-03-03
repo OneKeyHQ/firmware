@@ -161,7 +161,12 @@ class Message(FullSizeWindow):
         primary_color,
         icon_path,
         verify: bool = False,
-        evm_chain_id: int | None = None,
+        *,
+        item_other: int | str | None = None,
+        item_addr_title: str | None = None,
+        item_other_title: str | None = None,
+        is_standard: bool = True,
+        warning_banner_text: str | None = None,
     ):
         super().__init__(
             title,
@@ -173,17 +178,30 @@ class Message(FullSizeWindow):
             icon_path=icon_path,
         )
         self.primary_color = primary_color
+        if not is_standard:
+            self.warning_banner = Banner(
+                self.content_area,
+                2,
+                warning_banner_text
+                or _(i18n_keys.CONTENT__NON_STANDARD_MESSAGE_SIGNATURE),
+            )
+            self.warning_banner.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
         self.container = ContainerFlexCol(
-            self.content_area, self.title, pos=(0, 40), padding_row=8
+            self.content_area,
+            self.title if is_standard else self.warning_banner,
+            pos=(0, 40),
+            padding_row=8,
         )
-        if evm_chain_id:
+        if item_other:
             self.item3 = DisplayItemNoBgc(
                 self.container,
-                _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
-                str(evm_chain_id),
+                item_other_title or _(i18n_keys.LIST_KEY__CHAIN_ID__COLON),
+                str(item_other),
             )
         self.item1 = DisplayItemNoBgc(
-            self.container, _(i18n_keys.LIST_KEY__ADDRESS__COLON), address
+            self.container,
+            item_addr_title or _(i18n_keys.LIST_KEY__ADDRESS__COLON),
+            address,
         )
         self.long_message = False
         if len(message) > 80:
@@ -1067,6 +1085,29 @@ class TransactionDetailsTON(FullSizeWindow):
                     page_size=405,
                     font=font_MONO24,
                 )
+
+
+class EIP712Warning(FullSizeWindow):
+    def __init__(
+        self, title: str, warning_level, text, primary_type, primary_color, icon_path
+    ):
+        super().__init__(
+            title,
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            anim_dir=2,
+            primary_color=primary_color,
+            icon_path=icon_path,
+        )
+        self.warning_banner = Banner(self.content_area, warning_level, text)
+        self.warning_banner.align_to(self.title, lv.ALIGN.OUT_BOTTOM_MID, 0, 40)
+        self.primary_type = DisplayItemNoBgc(
+            self.content_area,
+            "PrimaryType:",
+            primary_type,
+        )
+        self.primary_type.align_to(self.warning_banner, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 24)
 
 
 class TransactionDetailsTRON(FullSizeWindow):

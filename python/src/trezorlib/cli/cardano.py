@@ -25,7 +25,7 @@ from . import ChoiceType, with_client
 if TYPE_CHECKING:
     from ..client import TrezorClient
 
-PATH_HELP = "BIP-32 path to key, e.g. m/44'/1815'/0'/0/0"
+PATH_HELP = "BIP-32 path to key, e.g. m/44h/1815h/0h/0/0"
 
 TESTNET_CHOICES = {
     "preprod": "testnet_preprod",
@@ -60,6 +60,8 @@ def cli() -> None:
     default=messages.CardanoDerivationType.ICARUS,
 )
 @click.option("-i", "--include-network-id", is_flag=True)
+@click.option("-C", "chunkify", is_flag=True)
+@click.option("-T", "--tag-cbor-sets", is_flag=True)
 @with_client
 def sign_tx(
     client: "TrezorClient",
@@ -70,6 +72,8 @@ def sign_tx(
     testnet: str,
     derivation_type: messages.CardanoDerivationType,
     include_network_id: bool,
+    chunkify: bool,
+    tag_cbor_sets: bool,
 ) -> cardano.SignTxResponse:
     """Sign Cardano transaction."""
     transaction = json.load(file)
@@ -143,6 +147,8 @@ def sign_tx(
         additional_witness_requests,
         derivation_type=derivation_type,
         include_network_id=include_network_id,
+        chunkify=chunkify,
+        tag_cbor_sets=tag_cbor_sets,
     )
 
     sign_tx_response["tx_hash"] = sign_tx_response["tx_hash"].hex()
@@ -151,9 +157,11 @@ def sign_tx(
             "type": witness["type"],
             "pub_key": witness["pub_key"].hex(),
             "signature": witness["signature"].hex(),
-            "chain_code": witness["chain_code"].hex()
-            if witness["chain_code"] is not None
-            else None,
+            "chain_code": (
+                witness["chain_code"].hex()
+                if witness["chain_code"] is not None
+                else None
+            ),
         }
         for witness in sign_tx_response["witnesses"]
     ]
@@ -162,11 +170,13 @@ def sign_tx(
         auxiliary_data_supplement["auxiliary_data_hash"] = auxiliary_data_supplement[
             "auxiliary_data_hash"
         ].hex()
-        governance_signature = auxiliary_data_supplement.get("governance_signature")
-        if governance_signature:
-            auxiliary_data_supplement[
-                "governance_signature"
-            ] = governance_signature.hex()
+        cvote_registration_signature = auxiliary_data_supplement.get(
+            "cvote_registration_signature"
+        )
+        if cvote_registration_signature:
+            auxiliary_data_supplement["cvote_registration_signature"] = (
+                cvote_registration_signature.hex()
+            )
         sign_tx_response["auxiliary_data_supplement"] = auxiliary_data_supplement
     return sign_tx_response
 
@@ -198,6 +208,7 @@ def sign_tx(
     type=ChoiceType({m.name: m for m in messages.CardanoDerivationType}),
     default=messages.CardanoDerivationType.ICARUS,
 )
+@click.option("-C", "--chunkify", is_flag=True)
 @with_client
 def get_address(
     client: "TrezorClient",
@@ -215,6 +226,7 @@ def get_address(
     show_display: bool,
     testnet: str,
     derivation_type: messages.CardanoDerivationType,
+    chunkify: bool,
 ) -> str:
     """
     Get Cardano address.
@@ -258,6 +270,7 @@ def get_address(
         network_id,
         show_display,
         derivation_type=derivation_type,
+        chunkify=chunkify,
     )
 
 
@@ -269,16 +282,20 @@ def get_address(
     type=ChoiceType({m.name: m for m in messages.CardanoDerivationType}),
     default=messages.CardanoDerivationType.ICARUS,
 )
+@click.option("-d", "--show-display", is_flag=True)
 @with_client
 def get_public_key(
     client: "TrezorClient",
     address: str,
     derivation_type: messages.CardanoDerivationType,
+    show_display: bool,
 ) -> messages.CardanoPublicKey:
     """Get Cardano public key."""
     address_n = tools.parse_path(address)
     client.init_device(derive_cardano=True)
-    return cardano.get_public_key(client, address_n, derivation_type=derivation_type)
+    return cardano.get_public_key(
+        client, address_n, derivation_type=derivation_type, show_display=show_display
+    )
 
 
 @cli.command()

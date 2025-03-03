@@ -46,7 +46,7 @@ async def sign_tx(
     ctx: wire.Context, msg: EthereumSignTx, keychain: Keychain
 ) -> EthereumTxRequest:
     check(msg)
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    await paths.validate_path(ctx, keychain, msg.address_n, force_strict=False)
 
     # Handle ERC20s
     token, address_bytes, recipient, value = await handle_erc20(ctx, msg)
@@ -86,7 +86,7 @@ async def sign_tx(
         if token is None and token_id is None and msg.data_length > 0:
             has_raw_data = True
             # await require_confirm_data(ctx, msg.data_initial_chunk, data_total)
-        node = keychain.derive(msg.address_n)
+        node = keychain.derive(msg.address_n, force_strict=False)
         recipient_str = address_from_bytes(recipient, network)
         from_str = address_from_bytes(from_addr or node.ethereum_pubkeyhash(), network)
         await require_confirm_fee(
@@ -255,7 +255,7 @@ async def send_request_chunk(ctx: wire.Context, data_left: int) -> EthereumTxAck
 def sign_digest(
     msg: EthereumSignTx, keychain: Keychain, digest: bytes
 ) -> EthereumTxRequest:
-    node = keychain.derive(msg.address_n)
+    node = keychain.derive(msg.address_n, force_strict=False)
     signature = secp256k1.sign(
         node.private_key(), digest, False, secp256k1.CANONICAL_SIG_ETHEREUM
     )

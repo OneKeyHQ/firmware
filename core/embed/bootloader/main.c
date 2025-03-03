@@ -344,11 +344,13 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
       else if (ble_power_button_state() == 2)  // long press
       {
         // give a way to go back to bootloader home page
-        ble_power_button_state_clear();
-        ui_progress_bar_visible_clear();
-        ui_fadeout();
-        ui_bootloader_first(NULL);
-        ui_fadein();
+        if (get_ui_bootloader_page_current() != 0) {
+          ble_power_button_state_clear();
+          ui_progress_bar_visible_clear();
+          ui_fadeout();
+          ui_bootloader_first(NULL);
+          ui_fadein();
+        }
         memzero(buf, USB_PACKET_SIZE);
         continue;
       }
@@ -357,7 +359,7 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
         ui_bootloader_page_switch(hdr);
         static uint32_t tickstart = 0;
         if ((HAL_GetTick() - tickstart) >= 1000) {
-          ui_title_update();
+          ui_statusbar_update();
           tickstart = HAL_GetTick();
         }
         continue;
@@ -470,7 +472,21 @@ static secbool bootloader_usb_loop(const vendor_header* const vhdr,
         process_msg_Reboot(USB_IFACE_NUM, msg_size, buf);
         break;
       case MSG_NAME_TO_ID(FirmwareUpdateEmmc):  // FirmwareUpdateEmmc
-        process_msg_FirmwareUpdateEmmc(USB_IFACE_NUM, msg_size, buf);
+        r = process_msg_FirmwareUpdateEmmc(USB_IFACE_NUM, msg_size, buf);
+        if (r < 0 && r != -4) {  // error
+          ui_fadeout();
+          ui_screen_fail();
+          ui_fadein();
+          while (!touch_click()) {
+            hal_delay(10);
+          }
+          bluetooth_reset();
+          // make sure we have latest bluetooth status (and wait for bluetooth
+          // become ready)
+          ble_refresh_dev_info();
+          reboot_to_boot();
+          return secfalse;  // shutdown
+        }
         break;
       case MSG_NAME_TO_ID(EmmcFixPermission):  // EmmcFixPermission
         process_msg_EmmcFixPermission(USB_IFACE_NUM, msg_size, buf);

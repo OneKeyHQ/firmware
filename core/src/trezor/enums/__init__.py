@@ -91,6 +91,8 @@ if TYPE_CHECKING:
         GetOwnershipProof = 49
         OwnershipProof = 50
         AuthorizeCoinJoin = 51
+        SignPsbt = 10052
+        SignedPsbt = 10053
         CipherKeyValue = 23
         CipheredKeyValue = 48
         SignIdentity = 53
@@ -329,6 +331,9 @@ if TYPE_CHECKING:
         SolanaAddress = 10101
         SolanaSignTx = 10102
         SolanaSignedTx = 10103
+        SolanaSignOffChainMessage = 10104
+        SolanaMessageSignature = 10105
+        SolanaSignUnsafeMessage = 10106
         CosmosGetAddress = 10800
         CosmosAddress = 10801
         CosmosSignTx = 10802
@@ -528,6 +533,15 @@ if TYPE_CHECKING:
         STAKE_DEREGISTRATION = 1
         STAKE_DELEGATION = 2
         STAKE_POOL_REGISTRATION = 3
+        STAKE_REGISTRATION_CONWAY = 7
+        STAKE_DEREGISTRATION_CONWAY = 8
+        VOTE_DELEGATION = 9
+
+    class CardanoDRepType(IntEnum):
+        KEY_HASH = 0
+        SCRIPT_HASH = 1
+        ABSTAIN = 2
+        NO_CONFIDENCE = 3
 
     class CardanoPoolRelayType(IntEnum):
         SINGLE_HOST_IP = 0
@@ -536,9 +550,9 @@ if TYPE_CHECKING:
 
     class CardanoTxAuxiliaryDataSupplementType(IntEnum):
         NONE = 0
-        GOVERNANCE_REGISTRATION_SIGNATURE = 1
+        CVOTE_REGISTRATION_SIGNATURE = 1
 
-    class CardanoGovernanceRegistrationFormat(IntEnum):
+    class CardanoCVoteRegistrationFormat(IntEnum):
         CIP15 = 0
         CIP36 = 1
 
@@ -666,6 +680,13 @@ if TYPE_CHECKING:
     class NEMImportanceTransferMode(IntEnum):
         ImportanceTransfer_Activate = 1
         ImportanceTransfer_Deactivate = 2
+
+    class SolanaOffChainMessageVersion(IntEnum):
+        MESSAGE_VERSION_0 = 0
+
+    class SolanaOffChainMessageFormat(IntEnum):
+        V0_RESTRICTED_ASCII = 0
+        V0_LIMITED_UTF8 = 1
 
     class StellarAssetType(IntEnum):
         NATIVE = 0

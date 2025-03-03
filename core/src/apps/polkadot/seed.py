@@ -36,7 +36,7 @@ class Keychain:
         node.derive_path(path)
         return node
 
-    def verify_path(self, path: Bip32Path) -> None:
+    def verify_path(self, path: Bip32Path, _force_strict: bool = True) -> None:
         if not self.is_in_keychain(path):
             raise wire.DataError("Forbidden key path")
 

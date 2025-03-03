@@ -127,6 +127,10 @@ trezor.enums.SafetyCheckLevel
 import trezor.enums.SafetyCheckLevel
 trezor.enums.SdProtectOperationType
 import trezor.enums.SdProtectOperationType
+trezor.enums.SolanaOffChainMessageFormat
+import trezor.enums.SolanaOffChainMessageFormat
+trezor.enums.SolanaOffChainMessageVersion
+import trezor.enums.SolanaOffChainMessageVersion
 trezor.enums.TonWalletVersion
 import trezor.enums.TonWalletVersion
 trezor.enums.TonWorkChain
@@ -167,6 +171,8 @@ trezor.lvglui.i18n.locales.ja
 import trezor.lvglui.i18n.locales.ja
 trezor.lvglui.i18n.locales.ko
 import trezor.lvglui.i18n.locales.ko
+trezor.lvglui.i18n.locales.pt_br
+import trezor.lvglui.i18n.locales.pt_br
 trezor.lvglui.i18n.locales.ru
 import trezor.lvglui.i18n.locales.ru
 trezor.lvglui.i18n.locales.zh_cn
@@ -433,6 +439,8 @@ apps.bitcoin.authorization
 import apps.bitcoin.authorization
 apps.bitcoin.authorize_coinjoin
 import apps.bitcoin.authorize_coinjoin
+apps.bitcoin.bip322_simple
+import apps.bitcoin.bip322_simple
 apps.bitcoin.common
 import apps.bitcoin.common
 apps.bitcoin.get_address
@@ -449,6 +457,18 @@ apps.bitcoin.multisig
 import apps.bitcoin.multisig
 apps.bitcoin.ownership
 import apps.bitcoin.ownership
+apps.bitcoin.psbt
+import apps.bitcoin.psbt
+apps.bitcoin.psbt.key
+import apps.bitcoin.psbt.key
+apps.bitcoin.psbt.psbt
+import apps.bitcoin.psbt.psbt
+apps.bitcoin.psbt.script
+import apps.bitcoin.psbt.script
+apps.bitcoin.psbt.serialize
+import apps.bitcoin.psbt.serialize
+apps.bitcoin.psbt.tx
+import apps.bitcoin.psbt.tx
 apps.bitcoin.readers
 import apps.bitcoin.readers
 apps.bitcoin.scripts
@@ -457,6 +477,8 @@ apps.bitcoin.scripts_decred
 import apps.bitcoin.scripts_decred
 apps.bitcoin.sign_message
 import apps.bitcoin.sign_message
+apps.bitcoin.sign_taproot
+import apps.bitcoin.sign_taproot
 apps.bitcoin.sign_tx
 import apps.bitcoin.sign_tx
 apps.bitcoin.sign_tx.approvers
@@ -731,8 +753,12 @@ apps.solana.message
 import apps.solana.message
 apps.solana.publickey
 import apps.solana.publickey
+apps.solana.sign_offchain_message
+import apps.solana.sign_offchain_message
 apps.solana.sign_tx
 import apps.solana.sign_tx
+apps.solana.sign_unsafe_message
+import apps.solana.sign_unsafe_message
 apps.solana.spl._layouts
 import apps.solana.spl._layouts
 apps.solana.spl._layouts.token_instructions
@@ -875,12 +901,14 @@ if not utils.BITCOIN_ONLY:
     import trezor.enums.BinanceTimeInForce
     trezor.enums.CardanoAddressType
     import trezor.enums.CardanoAddressType
+    trezor.enums.CardanoCVoteRegistrationFormat
+    import trezor.enums.CardanoCVoteRegistrationFormat
     trezor.enums.CardanoCertificateType
     import trezor.enums.CardanoCertificateType
+    trezor.enums.CardanoDRepType
+    import trezor.enums.CardanoDRepType
     trezor.enums.CardanoDerivationType
     import trezor.enums.CardanoDerivationType
-    trezor.enums.CardanoGovernanceRegistrationFormat
-    import trezor.enums.CardanoGovernanceRegistrationFormat
     trezor.enums.CardanoNativeScriptHashDisplayFormat
     import trezor.enums.CardanoNativeScriptHashDisplayFormat
     trezor.enums.CardanoNativeScriptType

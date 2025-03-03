@@ -86,3 +86,11 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         ${n.primary_color},  # primary_color
     )
 % endfor
+    yield (
+        9798,  # chain_id
+        9798,  # slip44
+        "DTT",  # symbol
+        "Data Trade Chain",  # name
+        "evm-dtt.png",  # icon
+        0x1A2A5F,  # primary_color
+    )

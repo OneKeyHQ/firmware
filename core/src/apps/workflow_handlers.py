@@ -92,6 +92,8 @@ def find_message_handler_module(msg_type: int) -> str:
         return "apps.bitcoin.sign_message"
     if msg_type == MessageType.VerifyMessage:
         return "apps.bitcoin.verify_message"
+    if msg_type == MessageType.SignPsbt:
+        return "apps.bitcoin.sign_taproot"
 
     # misc
     if msg_type == MessageType.GetEntropy:
@@ -248,6 +250,10 @@ def find_message_handler_module(msg_type: int) -> str:
             return "apps.solana.get_address"
         if msg_type == MessageType.SolanaSignTx:
             return "apps.solana.sign_tx"
+        if msg_type == MessageType.SolanaSignUnsafeMessage:
+            return "apps.solana.sign_unsafe_message"
+        if msg_type == MessageType.SolanaSignOffChainMessage:
+            return "apps.solana.sign_offchain_message"
 
         # starcoin
         if msg_type == MessageType.StarcoinGetAddress:

@@ -1,0 +1,30 @@
+{
+    "name": "HashKey Chain",
+    "chain": "HashKey Chain",
+    "tokens": [
+        {
+            "name": "Wrapped HSK",
+            "symbol": "WHSK",
+            "address": "0xB210D2120d57b758EE163cFfb43e73728c471Cf1",
+            "decimals": 18
+        },
+        {
+            "name": "Wrapped Ether",
+            "symbol": "WETH",
+            "address": "0xefd4bC9afD210517803f293ABABd701CaeeCdfd0",
+            "decimals": 18
+        },
+        {
+            "name": "Tether USD",
+            "symbol": "USDT",
+            "address": "0xF1B50eD67A9e2CC94Ad3c477779E2d4cBfFf9029",
+            "decimals": 6
+        },
+        {
+            "name": "Wrapped BTC",
+            "symbol": "WBTC",
+            "address": "0x6119CA49a79f5825C8B345F8d7aC36B272565b14",
+            "decimals": 8
+        }
+    ]
+}

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from trezor.ui.layouts import confirm_signverify
 
 from apps.common import cbor
+from apps.common.seed import remove_ed25519_prefix
 from apps.common.signverify import decode_message
 
 from . import seed
@@ -35,8 +36,9 @@ async def sign_message(
         ctx,
         keychain,
         msg.address_n,
+        True,
         # path must match the PUBKEY schema
-        SCHEMA_PUBKEY.match(msg.address_n) or SCHEMA_MINT.match(msg.address_n),
+        (SCHEMA_PUBKEY.match(msg.address_n) or SCHEMA_MINT.match(msg.address_n)),
     )
     if msg.network_id != network_ids.MAINNET:
         raise wire.ProcessError("Invalid Networ ID")
@@ -78,7 +80,7 @@ async def sign_message(
 
     # verification_key
     node = keychain.derive(msg.address_n)
-    verification_key = ed25519.publickey(node.private_key())
+    verification_key = remove_ed25519_prefix(node.public_key())
     # Sign1Message
     # msg = Sign1Message(
     #     phdr={

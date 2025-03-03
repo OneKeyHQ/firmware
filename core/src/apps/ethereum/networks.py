@@ -120,7 +120,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         6,  # chain_id
         1,  # slip44
         "tKOT",  # symbol
-        "Ethereum Classic Testnet Kotti",  # name
+        "Kotti Testnet",  # name
         "evm-tkot.png",  # name
         0x969696,  # primary_color
     )
@@ -200,7 +200,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         16,  # chain_id
         1,  # slip44
         "tCFLR",  # symbol
-        "Flare Testnet Coston",  # name
+        "Songbird Testnet Coston",  # name
         "evm-tcflr.png",  # name
         0x969696,  # primary_color
     )
@@ -264,7 +264,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         30,  # chain_id
         137,  # slip44
         "RBTC",  # symbol
-        "RSK",  # name
+        "Rootstock",  # name
         "evm-rbtc.png",  # name
         0xD2D2D2,  # primary_color
     )
@@ -272,7 +272,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         31,  # chain_id
         1,  # slip44
         "tRBTC",  # symbol
-        "RSK Testnet",  # name
+        "Rootstock Testnet",  # name
         "evm-trbtc.png",  # name
         0x969696,  # primary_color
     )
@@ -312,7 +312,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         44,  # chain_id
         60,  # slip44
         "CRAB",  # symbol
-        "Darwinia Crab Network",  # name
+        "Crab Network",  # name
         "evm-crab.png",  # name
         0xD2D2D2,  # primary_color
     )
@@ -320,7 +320,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         50,  # chain_id
         60,  # slip44
         "XDC",  # symbol
-        "XinFin XDC Network",  # name
+        "XDC Network",  # name
         "evm-xdc.png",  # name
         0xD2D2D2,  # primary_color
     )
@@ -384,7 +384,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         62,  # chain_id
         1,  # slip44
         "TETC",  # symbol
-        "Ethereum Classic Testnet Morden",  # name
+        "Morden Testnet",  # name
         "evm-tetc.png",  # name
         0x969696,  # primary_color
     )
@@ -392,7 +392,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         63,  # chain_id
         1,  # slip44
         "tMETC",  # symbol
-        "Ethereum Classic Testnet Mordor",  # name
+        "Mordor Testnet",  # name
         "evm-tmetc.png",  # name
         0x969696,  # primary_color
     )
@@ -479,9 +479,9 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     yield (
         88,  # chain_id
         889,  # slip44
-        "TOMO",  # symbol
-        "TomoChain",  # name
-        "evm-tomo.png",  # name
+        "VIC",  # symbol
+        "Viction",  # name
+        "evm-vic.png",  # name
         0xD2D2D2,  # primary_color
     )
     yield (
@@ -607,7 +607,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     yield (
         137,  # chain_id
         966,  # slip44
-        "MATIC",  # symbol
+        "POL",  # symbol
         "Polygon",  # name
         "evm-matic.png",  # name
         0x8247E5,  # primary_color
@@ -619,6 +619,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "DAX CHAIN",  # name
         "evm-dax.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        146,  # chain_id
+        60,  # slip44
+        "S",  # symbol
+        "Sonic",  # name
+        "evm-s.png",  # name
+        0xFFFFFF,  # primary_color
     )
     yield (
         162,  # chain_id
@@ -635,6 +643,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "Lightstreams",  # name
         "evm-pht.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        177,  # chain_id
+        60,  # slip44
+        "HSK",  # symbol
+        "HashKey Chain",  # name
+        "evm-hsk.png",  # name
+        0xFFFFFF,  # primary_color
     )
     yield (
         186,  # chain_id
@@ -760,7 +776,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         324,  # chain_id
         60,  # slip44
         "ETH",  # symbol
-        "zkSync Era",  # name
+        "zkSync",  # name
         "evm-zksync-era.png",  # name
         0xFFFFFF,  # primary_color
     )
@@ -919,9 +935,9 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     yield (
         1001,  # chain_id
         1,  # slip44
-        "tKLAY",  # symbol
-        "Klaytn Testnet Baobab",  # name
-        "evm-tklay.png",  # name
+        "tKAIA",  # symbol
+        "Kaia Kairos Testnet",  # name
+        "evm-tkaia.png",  # name
         0x969696,  # primary_color
     )
     yield (
@@ -1054,7 +1070,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     )
     yield (
         1287,  # chain_id
-        60,  # slip44
+        1,  # slip44
         "DEV",  # symbol
         "Moonbase Alpha",  # name
         "evm-dev.png",  # name
@@ -1215,9 +1231,9 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     yield (
         8217,  # chain_id
         8217,  # slip44
-        "KLAY",  # symbol
-        "Klaytn",  # name
-        "evm-klay.png",  # name
+        "KAIA",  # symbol
+        "Kaia",  # name
+        "evm-kaia.png",  # name
         0xD2D2D2,  # primary_color
     )
     yield (
@@ -1307,6 +1323,14 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "MetaDot",  # name
         "evm-mtt.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        19515,  # chain_id
+        1,  # slip44
+        "tSEP",  # symbol
+        "SEC Testnet",  # name
+        "evm-tsep.png",  # name
+        0x969696,  # primary_color
     )
     yield (
         19845,  # chain_id
@@ -1448,7 +1472,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         63000,  # chain_id
         60,  # slip44
         "ECS",  # symbol
-        "eCredits",  # name
+        "eSync Network",  # name
         "evm-ecs.png",  # name
         0xD2D2D2,  # primary_color
     )
@@ -1470,7 +1494,7 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
     )
     yield (
         78110,  # chain_id
-        60,  # slip44
+        1,  # slip44
         "FIN",  # symbol
         "Firenze test network",  # name
         "evm-fin.png",  # name
@@ -1827,4 +1851,12 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "Molereum Network",  # name
         "evm-mole.png",  # name
         0xD2D2D2,  # primary_color
+    )
+    yield (
+        9798,  # chain_id
+        9798,  # slip44
+        "DTT",  # symbol
+        "Data Trade Chain",  # name
+        "evm-dtt.png",  # icon
+        0x1A2A5F,  # primary_color
     )

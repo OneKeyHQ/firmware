@@ -228,6 +228,7 @@ async def _deal_pair_res(value: bytes) -> None:
     if res == _BLE_PAIR_FAILED:
         from trezor.ui.layouts import show_pairing_error
 
+        StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_ENABLED)
         await show_pairing_error()
 
 
@@ -237,6 +238,7 @@ async def _deal_ble_status(value: bytes) -> None:
     if res == _BLE_STATUS_CONNECTED:
         utils.BLE_CONNECTED = True
         # show icon in status bar
+        utils.turn_on_lcd_if_possible(2 * 60 * 1000)
         StatusBar.get_instance().show_ble(StatusBar.BLE_STATE_CONNECTED)
     elif res == _BLE_STATUS_DISCONNECTED:
         utils.BLE_CONNECTED = False

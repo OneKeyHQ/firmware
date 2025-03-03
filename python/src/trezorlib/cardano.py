@@ -61,12 +61,11 @@ REQUIRED_FIELDS_POOL_PARAMETERS = (
     "owners",
 )
 REQUIRED_FIELDS_TOKEN_GROUP = ("policy_id", "tokens")
-REQUIRED_FIELDS_GOVERNANCE_REGISTRATION = (
+REQUIRED_FIELDS_CVOTE_REGISTRATION = (
     "staking_path",
     "nonce",
-    "reward_address_parameters",
 )
-REQUIRED_FIELDS_GOVERNANCE_DELEGATION = ("voting_public_key", "weight")
+REQUIRED_FIELDS_CVOTE_DELEGATION = ("vote_public_key", "weight")
 
 INCOMPLETE_OUTPUT_ERROR_MESSAGE = "The output is missing some fields"
 
@@ -421,6 +420,27 @@ def parse_certificate(certificate: dict) -> CertificateWithPoolOwnersAndRelays:
             ),
             None,
         )
+    elif certificate_type in (
+        messages.CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
+        messages.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
+    ):
+        if "deposit" not in certificate:
+            raise CERTIFICATE_MISSING_FIELDS_ERROR
+
+        path, script_hash, key_hash = _parse_credential(
+            certificate, CERTIFICATE_MISSING_FIELDS_ERROR
+        )
+
+        return (
+            messages.CardanoTxCertificate(
+                type=certificate_type,
+                path=path,
+                script_hash=script_hash,
+                key_hash=key_hash,
+                deposit=int(certificate["deposit"]),
+            ),
+            None,
+        )
     elif certificate_type == messages.CardanoCertificateType.STAKE_POOL_REGISTRATION:
         pool_parameters = certificate["pool_parameters"]
 
@@ -465,6 +485,30 @@ def parse_certificate(certificate: dict) -> CertificateWithPoolOwnersAndRelays:
                 ),
             ),
             (owners, relays),
+        )
+    if certificate_type == messages.CardanoCertificateType.VOTE_DELEGATION:
+        if "drep" not in certificate:
+            raise CERTIFICATE_MISSING_FIELDS_ERROR
+
+        path, script_hash, key_hash = _parse_credential(
+            certificate, CERTIFICATE_MISSING_FIELDS_ERROR
+        )
+
+        return (
+            messages.CardanoTxCertificate(
+                type=certificate_type,
+                path=path,
+                script_hash=script_hash,
+                key_hash=key_hash,
+                drep=messages.CardanoDRep(
+                    type=messages.CardanoDRepType(certificate["drep"]["type"]),
+                    key_hash=parse_optional_bytes(certificate["drep"].get("key_hash")),
+                    script_hash=parse_optional_bytes(
+                        certificate["drep"].get("script_hash")
+                    ),
+                ),
+            ),
+            None,
         )
     else:
         raise ValueError("Unknown certificate type")
@@ -563,55 +607,55 @@ def parse_auxiliary_data(
     # include all provided fields so we can test validation in FW
     hash = parse_optional_bytes(auxiliary_data.get("hash"))
 
-    governance_registration_parameters = None
-    if "governance_registration_parameters" in auxiliary_data:
-        governance_registration = auxiliary_data["governance_registration_parameters"]
-        if not all(
-            k in governance_registration
-            for k in REQUIRED_FIELDS_GOVERNANCE_REGISTRATION
-        ):
+    cvote_registration_parameters = None
+    if "cvote_registration_parameters" in auxiliary_data:
+        cvote_registration = auxiliary_data["cvote_registration_parameters"]
+        if not all(k in cvote_registration for k in REQUIRED_FIELDS_CVOTE_REGISTRATION):
             raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
 
-        serialization_format = governance_registration.get("format")
+        serialization_format = cvote_registration.get("format")
 
         delegations = []
-        for delegation in governance_registration.get("delegations", []):
-            if not all(k in delegation for k in REQUIRED_FIELDS_GOVERNANCE_DELEGATION):
+        for delegation in cvote_registration.get("delegations", []):
+            if not all(k in delegation for k in REQUIRED_FIELDS_CVOTE_DELEGATION):
                 raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
             delegations.append(
-                messages.CardanoGovernanceRegistrationDelegation(
-                    voting_public_key=bytes.fromhex(delegation["voting_public_key"]),
+                messages.CardanoCVoteRegistrationDelegation(
+                    vote_public_key=bytes.fromhex(delegation["vote_public_key"]),
                     weight=int(delegation["weight"]),
                 )
             )
 
         voting_purpose = None
-        if serialization_format == messages.CardanoGovernanceRegistrationFormat.CIP36:
-            voting_purpose = governance_registration.get("voting_purpose")
+        if serialization_format == messages.CardanoCVoteRegistrationFormat.CIP36:
+            voting_purpose = cvote_registration.get("voting_purpose")
 
-        governance_registration_parameters = (
-            messages.CardanoGovernanceRegistrationParametersType(
-                voting_public_key=parse_optional_bytes(
-                    governance_registration.get("voting_public_key")
-                ),
-                staking_path=tools.parse_path(governance_registration["staking_path"]),
-                nonce=governance_registration["nonce"],
-                reward_address_parameters=_parse_address_parameters(
-                    governance_registration["reward_address_parameters"],
+        cvote_registration_parameters = messages.CardanoCVoteRegistrationParametersType(
+            vote_public_key=parse_optional_bytes(
+                cvote_registration.get("vote_public_key")
+            ),
+            staking_path=tools.parse_path(cvote_registration["staking_path"]),
+            nonce=cvote_registration["nonce"],
+            payment_address=cvote_registration.get("payment_address"),
+            payment_address_parameters=(
+                _parse_address_parameters(
+                    cvote_registration["payment_address_parameters"],
                     str(AUXILIARY_DATA_MISSING_FIELDS_ERROR),
-                ),
-                format=serialization_format,
-                delegations=delegations,
-                voting_purpose=voting_purpose,
-            )
+                )
+                if "payment_address_parameters" in cvote_registration
+                else None
+            ),
+            format=serialization_format,
+            delegations=delegations,
+            voting_purpose=voting_purpose,
         )
 
-    if hash is None and governance_registration_parameters is None:
+    if hash is None and cvote_registration_parameters is None:
         raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
 
     return messages.CardanoTxAuxiliaryData(
         hash=hash,
-        governance_registration_parameters=governance_registration_parameters,
+        cvote_registration_parameters=cvote_registration_parameters,
     )
 
 
@@ -687,6 +731,9 @@ def _get_witness_requests(
                 in (
                     messages.CardanoCertificateType.STAKE_DEREGISTRATION,
                     messages.CardanoCertificateType.STAKE_DELEGATION,
+                    messages.CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
+                    messages.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
+                    messages.CardanoCertificateType.VOTE_DELEGATION,
                 )
                 and certificate.path
             ):
@@ -784,6 +831,7 @@ def get_address(
     network_id: int = NETWORK_IDS["mainnet"],
     show_display: bool = False,
     derivation_type: messages.CardanoDerivationType = messages.CardanoDerivationType.ICARUS,
+    chunkify: bool = False,
 ) -> "MessageType":
     return client.call(
         messages.CardanoGetAddress(
@@ -792,6 +840,7 @@ def get_address(
             network_id=network_id,
             show_display=show_display,
             derivation_type=derivation_type,
+            chunkify=chunkify,
         )
     )
 
@@ -801,10 +850,13 @@ def get_public_key(
     client: "TrezorClient",
     address_n: List[int],
     derivation_type: messages.CardanoDerivationType = messages.CardanoDerivationType.ICARUS,
+    show_display: bool = False,
 ) -> "MessageType":
     return client.call(
         messages.CardanoGetPublicKey(
-            address_n=address_n, derivation_type=derivation_type
+            address_n=address_n,
+            derivation_type=derivation_type,
+            show_display=show_display,
         )
     )
 
@@ -848,6 +900,8 @@ def sign_tx(
     additional_witness_requests: Sequence[Path] = (),
     derivation_type: messages.CardanoDerivationType = messages.CardanoDerivationType.ICARUS,
     include_network_id: bool = False,
+    chunkify: bool = False,
+    tag_cbor_sets: bool = False,
 ) -> Dict[str, Any]:
     UNEXPECTED_RESPONSE_ERROR = exceptions.TrezorException("Unexpected response")
 
@@ -884,6 +938,8 @@ def sign_tx(
             witness_requests_count=len(witness_requests),
             derivation_type=derivation_type,
             include_network_id=include_network_id,
+            chunkify=chunkify,
+            tag_cbor_sets=tag_cbor_sets,
         )
     )
     if not isinstance(response, messages.CardanoTxItemAck):
@@ -911,9 +967,9 @@ def sign_tx(
             auxiliary_data_supplement.type
             != messages.CardanoTxAuxiliaryDataSupplementType.NONE
         ):
-            sign_tx_response[
-                "auxiliary_data_supplement"
-            ] = auxiliary_data_supplement.__dict__
+            sign_tx_response["auxiliary_data_supplement"] = (
+                auxiliary_data_supplement.__dict__
+            )
 
         response = client.call(messages.CardanoTxHostAck())
         if not isinstance(response, messages.CardanoTxItemAck):

@@ -24,8 +24,8 @@ async def sign_message(
     ctx: Context, msg: TronSignMessage, keychain: Keychain
 ) -> TronMessageSignature:
     validate_message(msg.message)
-    address_n = msg.address_n or ()
-    await paths.validate_path(ctx, keychain, msg.address_n)
+    address_n = msg.address_n
+    await paths.validate_path(ctx, keychain, address_n)
     node = keychain.derive(address_n)
 
     seckey = node.private_key()

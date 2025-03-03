@@ -54,6 +54,7 @@ __all__ = (
     "confirm_sol_create_ata",
     "confirm_sol_token_transfer",
     "confirm_sol_memo",
+    "confirm_sol_message",
     "confirm_data",
     "confirm_final",
     "confirm_blind_sign_common",
@@ -620,10 +621,9 @@ async def confirm_blob(
     from trezor.lvglui.scrs.template import BlobDisPlay
 
     if isinstance(data, (bytes, bytearray)):
-        try:
-            data_str = data.decode()
-        except UnicodeDecodeError:
-            data_str = hexlify(data).decode()
+        from trezor import strings
+
+        data_str = strings.format_customer_data(data)
     else:
         data_str = data
     blob = BlobDisPlay(
@@ -938,6 +938,7 @@ async def confirm_signverify(
     verify: bool,
     evm_chain_id: int | None = None,
     title: str | None = None,
+    is_standard: bool = True,
 ) -> None:
     if verify:
         header = _(i18n_keys.TITLE__VERIFY_STR_MESSAGE).format(coin)
@@ -960,7 +961,8 @@ async def confirm_signverify(
                 ctx.primary_color,
                 ctx.icon_path,
                 verify,
-                evm_chain_id,
+                item_other=evm_chain_id,
+                is_standard=is_standard,
             ),
             br_type,
             ButtonRequestType.Other,
@@ -1123,6 +1125,24 @@ async def confirm_domain(ctx: wire.GenericContext, **kwargs) -> None:
     )
 
 
+async def confirm_eip712_warning(
+    ctx: wire.GenericContext, primary_type: str, warning_level: int, text: str
+) -> None:
+    from trezor.lvglui.scrs.template import EIP712Warning
+
+    screen = EIP712Warning(
+        _(i18n_keys.TITLE__STR_TYPED_DATA).format(ctx.name),
+        warning_level,
+        text,
+        primary_type,
+        ctx.primary_color,
+        ctx.icon_path,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_eip712_warning", ButtonRequestType.ProtectCall)
+    )
+
+
 async def confirm_security_check(ctx: wire.GenericContext) -> None:
     from trezor.lvglui.scrs.template import SecurityCheck
 
@@ -1216,6 +1236,34 @@ async def confirm_sol_memo(
     screen = BlobDisPlay(title, description, memo, None)
     await raise_if_cancelled(
         interact(ctx, screen, "sol_memo", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_sol_message(
+    ctx: wire.GenericContext,
+    address: str,
+    app_domain_fd: str | None,
+    message: str,
+    is_unsafe: bool = False,
+) -> None:
+    from trezor.lvglui.scrs.template import Message
+
+    screen = Message(
+        _(i18n_keys.TITLE__SIGN_STR_MESSAGE).format("SOL"),
+        address,
+        message,
+        ctx.primary_color,
+        ctx.icon_path,
+        False,
+        item_other=app_domain_fd,
+        item_other_title="Application Domain:" if app_domain_fd else None,
+        is_standard=not is_unsafe,
+        warning_banner_text=_(i18n_keys.SECURITY__SOLANA_RAW_SIGNING_TX_WARNING)
+        if is_unsafe
+        else None,
+    )
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_sol_message", ButtonRequestType.ProtectCall)
     )
 
 
