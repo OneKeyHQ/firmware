@@ -65,7 +65,7 @@ jobs:
           dd if=$firmware_file of=$firmware_file.p2 skip=12 bs=128k
 
       - name: "Upload Artifacts"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: firmware-${{ github.sha }}
           path: |
