@@ -37,3 +37,6 @@ The Token Program can be used to wrap native SOL. Doing so allows native SOL to 
 other Token program token type and can be useful when being called from other programs that interact
 with the Token Program's interface.
 """
+
+COMPUTE_BUDGET_PROGRAM_ID = PublicKey("ComputeBudget111111111111111111111111111111")
+"""Public key of the Compute Budget Program."""
