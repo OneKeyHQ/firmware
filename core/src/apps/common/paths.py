@@ -87,7 +87,7 @@ class PathSchema:
     REPLACEMENTS = {
         "account": "0-2147483647",  # origin "0-100"
         "change": "0,1",
-        "address_index": "0-1000000",
+        "address_index": "0-2147483647",  # origin "0-1000000"
     }
 
     WILDCARD_RANGES = {
