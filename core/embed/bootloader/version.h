@@ -1,6 +1,6 @@
 #define VERSION_MAJOR 2
 #define VERSION_MINOR 5
-#define VERSION_PATCH 1
+#define VERSION_PATCH 2
 #define VERSION_BUILD 0
 #define VERSION_UINT32                                            \
   (VERSION_MAJOR | (VERSION_MINOR << 8) | (VERSION_PATCH << 16) | \
@@ -8,7 +8,7 @@
 
 #define FIX_VERSION_MAJOR 2
 #define FIX_VERSION_MINOR 5
-#define FIX_VERSION_PATCH 1
+#define FIX_VERSION_PATCH 2
 #define FIX_VERSION_BUILD 0
 
 #define VERSION_MONOTONIC 1
