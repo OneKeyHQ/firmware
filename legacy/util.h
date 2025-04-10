@@ -71,9 +71,11 @@ void uint2str(uint32_t num, char *str);
 int hex2data(const char *hexStr, unsigned char *output,
              unsigned int *outputLen);
 
+bool is_valid_ascii(const uint8_t *data, uint32_t length);
 bool is_valid_utf8(const uint8_t *data, size_t length);
+bool is_printable(const uint8_t *data, uint32_t length);
 void init_buffer_writer(BufferWriter *writer, uint8_t *buffer, size_t length);
-int write_bytes(BufferWriter *writer, const uint8_t *src, size_t count);
+int write_bytes(const uint8_t *src, size_t count, BufferWriter *writer);
 
 // defined in startup.s (or setup.c for emulator)
 extern void __attribute__((noreturn)) shutdown(void);

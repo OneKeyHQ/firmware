@@ -383,8 +383,9 @@ enum MessageType {
     MessageType_SolanaAddress = 10101 [(wire_out) = true];
     MessageType_SolanaSignTx = 10102 [(wire_in) = true];
     MessageType_SolanaSignedTx = 10103 [(wire_out) = true];
-    MessageType_SolanaSignMessage = 10104 [(wire_in) = true];
-    MessageType_SolanaSignedMessage = 10105 [(wire_out) = true];
+    MessageType_SolanaSignOffChainMessage = 10104 [(wire_in) = true];
+    MessageType_SolanaMessageSignature = 10105 [(wire_out) = true];
+    MessageType_SolanaSignUnsafeMessage = 10106 [(wire_in) = true];
 
     // Starcoin
     MessageType_StarcoinGetAddress = 10300 [(wire_in) = true];

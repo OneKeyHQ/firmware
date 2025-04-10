@@ -98,6 +98,15 @@ int hex2data(const char *hexStr, unsigned char *output,
   return 0;
 }
 
+bool is_valid_ascii(const uint8_t *data, uint32_t length) {
+  for (uint32_t i = 0; i < length; i++) {
+    if (data[i] < ' ' || data[i] > '~') {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Checks if data is in UTF-8 format.
  * Adapted from: https://www.cl.cam.ac.uk/~mgk25/ucs/utf8_check.c
@@ -149,13 +158,17 @@ bool is_valid_utf8(const uint8_t *data, size_t length) {
   return true;
 }
 
+bool is_printable(const uint8_t *data, uint32_t length) {
+  return is_valid_ascii(data, length) || is_valid_utf8(data, length);
+}
+
 void init_buffer_writer(BufferWriter *writer, uint8_t *buffer, size_t length) {
   writer->buffer = buffer;
   writer->length = length;
   writer->position = 0;
 }
 
-int write_bytes(BufferWriter *writer, const uint8_t *src, size_t count) {
+int write_bytes(const uint8_t *src, size_t count, BufferWriter *writer) {
   if (writer->buffer == NULL && writer->length == 0) {
     writer->position += count;
     return 1;

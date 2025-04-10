@@ -1027,18 +1027,9 @@ void layoutConfirmOmni(const uint8_t *data, uint32_t size) {
                     NULL);
 }
 
-bool is_valid_ascii(const uint8_t *data, uint32_t size) {
-  for (uint32_t i = 0; i < size; i++) {
-    if (data[i] < ' ' || data[i] > '~') {
-      return false;
-    }
-  }
-  return true;
-}
-
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
   const char **str = NULL;
-  if (!is_valid_ascii(data, size)) {
+  if (!is_printable(data, size)) {
     str = split_message_hex(data, size);
   } else {
     str = split_message(data, size, 20);
@@ -5245,7 +5236,8 @@ refresh_layout:
 
 bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
                        const uint8_t *data, uint16_t len, bool is_printable,
-                       const char *item_name, const char *item_value) {
+                       const char *item_name, const char *item_value,
+                       bool is_unsafe) {
   bool result = false;
   int index = 0;
   uint8_t max_index = 2;
@@ -5279,6 +5271,24 @@ refresh_menu:
   uint8_t y = 13;
   layoutHeader(title);
   bubble_key = KEY_NULL;
+  if (is_unsafe && index == 0) {
+    layoutDialogCenterAdapterV2(NULL, &bmp_icon_warning, &bmp_bottom_left_close,
+                                &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
+                                NULL, NULL,
+                                _("Risk of phishing & blind\nsigning. Proceed "
+                                  "only\nif you trust the source."));
+    while (1) {
+      uint8_t key = protectWaitKey(0, 0);
+      if (key == KEY_CANCEL) {
+        return false;
+      } else if (key == KEY_CONFIRM) {
+        oledClear();
+        layoutHeader(title);
+        break;
+      }
+      delay_ms(10);
+    }
+  }
   if (0 == index) {
     oledDrawStringAdapter(0, y, _("Signed by:"), FONT_STANDARD);
     if (strlen(signer) > 63) {

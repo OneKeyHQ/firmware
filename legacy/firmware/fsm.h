@@ -162,7 +162,8 @@ void fsm_msgNEMDecryptMessage(
 // solana
 void fsm_msgSolanaGetAddress(const SolanaGetAddress *msg);
 void fsm_msgSolanaSignTx(const SolanaSignTx *msg);
-void fsm_msgSolanaSignMessage(const SolanaSignMessage *msg);
+void fsm_msgSolanaSignOffChainMessage(const SolanaSignOffChainMessage *msg);
+void fsm_msgSolanaSignUnsafeMessage(const SolanaSignUnsafeMessage *msg);
 
 // starcoin
 void fsm_msgStarcoinGetAddress(const StarcoinGetAddress *msg);
