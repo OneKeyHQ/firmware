@@ -58,7 +58,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   MessageHeader header;
   if (parse_message_header(&parser, &header)) {
     // This is not a valid Solana message
-    fsm_sendFailure(FailureType_Failure_DataError, _("Invalid message"));
+    fsm_sendFailure(FailureType_Failure_DataError, "Invalid message");
     return;
   } else {
     uint8_t signer_pubkey[SIZE_PUBKEY];
@@ -72,7 +72,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       }
     }
     if (i >= signer_count) {
-      fsm_sendFailure(FailureType_Failure_DataError, _("Invalid params"));
+      fsm_sendFailure(FailureType_Failure_DataError, "Invalid params");
       return;
     }
   }
@@ -95,7 +95,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       summary_item_set_hash(item, "Message Hash", &UnrecognizedMessageHash);
     } else {
       fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Please confirm the BlindSign enabled"));
+                      "Please confirm the BlindSign enabled");
       return;
     }
   }
@@ -113,7 +113,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       0) {
     for (size_t i = 0; i < num_summary_steps; i++) {
       if (transaction_summary_display_item(i, DisplayFlagAll)) {
-        fsm_sendFailure(FailureType_Failure_DataError, _("Parse error"));
+        fsm_sendFailure(FailureType_Failure_DataError, "Parse error");
         layoutHome();
         return;
       } else {

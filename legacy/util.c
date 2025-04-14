@@ -70,6 +70,14 @@ void uint2str(uint32_t num, char *str) {
   }
 }
 
+void int2str(int64_t num, char *str) {
+  if (num < 0) {
+    str[0] = '-';
+    num = -num;
+  }
+  uint2str(num, str + (num < 0));
+}
+
 int hex2data(const char *hexStr, unsigned char *output,
              unsigned int *outputLen) {
   size_t len = strlen(hexStr);

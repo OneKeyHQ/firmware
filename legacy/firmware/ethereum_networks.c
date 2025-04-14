@@ -46,7 +46,7 @@ static const EthereumNetworkInfo networks[NETWORKS_COUNT] = {
     {
         .chain_id = 137,
         .slip44 = 966,
-        .symbol = "MATIC", /* Polygon */
+        .symbol = "POL", /* Polygon */
         .name = "",
     },
 };

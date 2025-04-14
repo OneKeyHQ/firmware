@@ -71,6 +71,8 @@ void uint2str(uint32_t num, char *str);
 int hex2data(const char *hexStr, unsigned char *output,
              unsigned int *outputLen);
 
+void int2str(int64_t num, char *str);
+
 bool is_valid_ascii(const uint8_t *data, uint32_t length);
 bool is_valid_utf8(const uint8_t *data, size_t length);
 bool is_printable(const uint8_t *data, uint32_t length);

@@ -48,11 +48,12 @@ CardanoTxWithdrawal.path                                    max_count:8
 CardanoTxWithdrawal.script_hash                             max_size:28
 CardanoTxWithdrawal.key_hash                                max_size:28
 
-CardanoGovernanceRegistrationDelegation.voting_public_key   max_size:128
+CardanoCVoteRegistrationDelegation.vote_public_key   max_size:128
 
-CardanoGovernanceRegistrationParametersType.voting_public_key   max_size:128
-CardanoGovernanceRegistrationParametersType.staking_path        max_count:8
-CardanoGovernanceRegistrationParametersType.delegations         max_count:32
+CardanoCVoteRegistrationParametersType.vote_public_key   max_size:128
+CardanoCVoteRegistrationParametersType.staking_path        max_count:8
+CardanoCVoteRegistrationParametersType.delegations         max_count:32
+CardanoCVoteRegistrationParametersType.payment_address     max_size:128
 
 CardanoTxAuxiliaryData.hash                                     max_size:32
 
@@ -65,7 +66,7 @@ CardanoTxReferenceInput.prev_hash                               max_size:32
 
 
 CardanoTxAuxiliaryDataSupplement.auxiliary_data_hash            max_size:32
-CardanoTxAuxiliaryDataSupplement.governance_signature           max_size:64
+CardanoTxAuxiliaryDataSupplement.cvote_registration_signature           max_size:64
 
 CardanoTxWitnessRequest.path                                    max_count:8
 
@@ -81,3 +82,5 @@ CardanoSignMessage.message                                      max_size:1024
 CardanoMessageSignature.signature                               max_size:1024
 CardanoMessageSignature.key                                     max_size:64
 
+CardanoDRep.key_hash                                           max_size:28
+CardanoDRep.script_hash                                        max_size:28
