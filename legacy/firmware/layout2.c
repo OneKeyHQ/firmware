@@ -2917,7 +2917,7 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
       oledDrawStringAdapter(x + 13 * i + 7 - l / 2, y, buf, FONT_STANDARD);
     }
   }
-  if (index > 0 && index < 10) {
+  if (index < 10) {
     layoutItemsSelect(x + 13 * pos + 7, y, table[index], FONT_STANDARD);
   } else {
     layoutBmpSelect(x + 13 * pos + 7, y, &bmp_input_submit);
@@ -2929,7 +2929,7 @@ void layoutInputPin(uint8_t pos, const char *text, int index,
     oledDrawBitmap(0, OLED_HEIGHT - 11, &bmp_bottom_left_delete);
   }
 
-  if (pos < MAX_PIN_LEN - 1) {
+  if ((pos < MAX_PIN_LEN - 1) && (index < 10)) {
     oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11, &bmp_bottom_right_arrow);
   } else {
     oledDrawBitmap(OLED_WIDTH - 16, OLED_HEIGHT - 11,
