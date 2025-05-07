@@ -382,8 +382,7 @@ bool ada_get_address(const CardanoGetAddress *msg, char *address) {
   int address_bytes_len = 0;
   memset(&ada_node, 0, sizeof(HDNode));
   if (!config_getCardanoRootNode(&ada_node)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Deriving root failed"));
+    fsm_sendFailure(FailureType_Failure_ProcessError, "Deriving root failed");
     return false;
   }
   if (!derive_bytes(&msg->address_parameters, msg->network_id,
@@ -1962,6 +1961,10 @@ bool ada_sign_messages(const CardanoSignMessage *msg,
   if (address_params.address_n_staking_count > 0) {
     memcpy(address_params.address_n_staking, staking_path,
            address_params.address_n_staking_count * sizeof(uint32_t));
+  }
+  if (!config_getCardanoRootNode(&ada_node)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, "Deriving root failed");
+    return false;
   }
   if (!derive_bytes(&address_params, msg->network_id, MAINNET_PROTOCOL_MAGIC,
                     address_bytes, &address_bytes_len)) {
