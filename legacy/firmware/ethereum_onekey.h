@@ -71,6 +71,9 @@ bool ethereum_parse_onekey(const char *address, uint8_t pubkeyhash[20]);
     case 137:                                      \
       chain_name = "Polygon";                      \
       break;                                       \
+    case 250:                                      \
+      chain_name = "Fantom";                       \
+      break;                                       \
     case 324:                                      \
       chain_name = "zkSync Era";                   \
       break;                                       \
