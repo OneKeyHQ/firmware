@@ -1289,6 +1289,12 @@
       "updatedAt": "2022-09-16T16:46:49.461Z",
       "__v": 0,
       "marketCap": "192347985.13471806"
+    },
+    {
+      "name": "Wrapped Ether",
+      "symbol": "WETH",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "decimals": 18
     }
   ]
 }

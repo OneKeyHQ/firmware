@@ -133,18 +133,26 @@ void oledDrawStringRightAdapter(int x, int y, const char *text, uint8_t font) {
 uint8_t oledDrawPageableStringAdapter(int x, int y, const char *text,
                                       uint8_t font, const BITMAP *btn_no_icon,
                                       const BITMAP *btn_yes_icon) {
-  size_t text_len = strlen(text);
   size_t rowlen = 21;
-  int index = 0, rowcount = text_len / rowlen + 1;
+  size_t rowcount = 0, index = 0;
+
+  const char *p = text;
+
+  while (*p) {
+    const char *next = memchr(p, '\n', MIN(rowlen, strlen(p)));
+    p = next ? (next + 1) : (p + MIN(rowlen, strlen(p)));
+    rowcount++;
+  }
   if (rowcount > 3) {
     char str[rowcount][rowlen + 1];
     memzero(str, sizeof(str));
-    for (int i = 0; i < rowcount; ++i) {
-      size_t show_len = strnlen((char *)text, MIN(rowlen, text_len));
-      memcpy(str[i], (char *)text, show_len);
-      str[i][show_len] = '\0';
-      text += show_len;
-      text_len -= show_len;
+    p = text;
+    for (size_t i = 0; i < rowcount && *p; i++) {
+      const char *next = memchr(p, '\n', MIN(rowlen, strlen(p)));
+      size_t line_len = next ? (size_t)(next - p) : MIN(rowlen, strlen(p));
+      memcpy(str[i], p, line_len);
+      str[i][line_len] = '\0';
+      p = next ? (next + 1) : (p + line_len);
     }
 
   refresh_text:
@@ -193,6 +201,10 @@ uint8_t oledDrawPageableStringAdapter(int x, int y, const char *text,
       default:
         return key;
     }
+  } else {
+    oledDrawStringAdapter(0, y, text, FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, btn_no_icon);
+    layoutButtonYesAdapter(NULL, btn_yes_icon);
   }
   return KEY_NULL;
 }

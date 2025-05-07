@@ -372,7 +372,7 @@ static bool layoutEthereumConfirmTx(
   bn_read_be(pad_val, &val);
 
   char to_str[52] = "____________";
-  char amount[32] = {0};
+  char amount[64] = {0};
   char total_amount[64] = {0};
   if (to_len) {
     bool rskip60 = false;

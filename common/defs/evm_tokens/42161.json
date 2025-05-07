@@ -31,8 +31,8 @@
     },
     {
       "_id": "62e8a3d58edb7c3c91a56aaa",
-      "name": "USD Coin",
-      "symbol": "USDC",
+      "name": "Bridged USDC",
+      "symbol": "USDC.e",
       "address": "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
       "decimals": 6,
       "logoURI": "https://common.onekey-asset.com/token/evm-1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.jpg",
@@ -788,6 +788,18 @@
       "updatedAt": "2022-09-16T16:46:53.782Z",
       "__v": 0,
       "marketCap": 0
+    },
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "decimals": 6
+    },
+    {
+      "name": "Arbitrum",
+      "symbol": "ARB",
+      "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",
+      "decimals": 18
     }
   ]
 }

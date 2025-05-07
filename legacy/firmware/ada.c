@@ -1854,10 +1854,14 @@ bool cardano_txwitness(const CardanoTxWitnessRequest *msg,
   if (ada_signer.state == TX_HASH_BUILDER_FINISHED &&
       ada_signer.remainingWitnessRequestsCount > 0) {
     ada_signer.remainingWitnessRequestsCount--;
-    blake2b_Final(&ada_signer.ctx, ada_signer.digest, 32);
-    if (!layoutFee()) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
-      return false;
+    if (!ada_signer.is_finished) {
+      ada_signer.is_finished = true;
+      blake2b_Final(&ada_signer.ctx, ada_signer.digest, 32);
+      if (!layoutFee()) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled,
+                        "Signing cancelled");
+        return false;
+      }
     }
   } else {
     fsm_sendFailure(FailureType_Failure_ProcessError,
@@ -1875,7 +1879,9 @@ bool cardano_txwitness(const CardanoTxWitnessRequest *msg,
   memcpy(resp->pub_key.bytes, node.public_key + 1, 32);
   ed25519_sign_ext(ada_signer.digest, 32, node.private_key,
                    node.private_key_extension, resp->signature.bytes);
-  memset(&ada_node, 0, sizeof(HDNode));
+  if (ada_signer.remainingWitnessRequestsCount == 0) {
+    memset(&ada_node, 0, sizeof(HDNode));
+  }
   resp->signature.size = 64;
   if ((msg->path[0] == 2147483692) &&
       (msg->path[1] == 2147485463)) {  // BYRON_ROOT = [44,1815...]
@@ -1888,9 +1894,6 @@ bool cardano_txwitness(const CardanoTxWitnessRequest *msg,
     resp->has_chain_code = false;
   }
   msg_write(MessageType_MessageType_CardanoTxWitnessResponse, resp);
-  if (ada_signer.remainingWitnessRequestsCount > 0) {
-    msg_write(MessageType_MessageType_CardanoTxItemAck, &ada_msg_item_ack);
-  }
   return true;
 }
 

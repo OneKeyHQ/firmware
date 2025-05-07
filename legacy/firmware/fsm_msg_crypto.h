@@ -356,10 +356,10 @@ static bool is_all_harden(Path *path, size_t size) {
   return true;
 }
 
-static void ed25519x_public_key_copy(uint8_t *dest, uint8_t *source) {
+static void ed25519x_public_key_copy(uint8_t *dest, const uint8_t *source) {
   memcpy(dest, source + 1, ED25519_PUBLICKEY_SIZE);
 }
-static void secp256k1_public_key_copy(uint8_t *dest, uint8_t *source) {
+static void secp256k1_public_key_copy(uint8_t *dest, const uint8_t *source) {
   memcpy(dest, source, SECP256K1_COMPRESSED_PUBLICKEY_SIZE);
 }
 void fsm_msgBatchGetPublickeys(const BatchGetPublickeys *msg) {
@@ -380,9 +380,10 @@ void fsm_msgBatchGetPublickeys(const BatchGetPublickeys *msg) {
 
   RESP_INIT(EcdsaPublicKeys)
 
-  void (*m_copy)(uint8_t *, uint8_t *);
+  void (*m_copy)(uint8_t *, const uint8_t *);
   uint8_t key_size;
-  if (strcmp(curve_name, SECP256K1_NAME) == 0) {
+  bool is_secp256k1 = strcmp(curve_name, SECP256K1_NAME) == 0;
+  if (is_secp256k1) {
     m_copy = secp256k1_public_key_copy;
     key_size = SECP256K1_COMPRESSED_PUBLICKEY_SIZE;
   } else {
@@ -390,16 +391,44 @@ void fsm_msgBatchGetPublickeys(const BatchGetPublickeys *msg) {
     key_size = ED25519_PUBLICKEY_SIZE;
   }
   size_t size = msg->paths_count;
+  resp->has_root_fingerprint = false;
+  bool include_node =
+      is_secp256k1 && msg->has_include_node && msg->include_node;
+  if (include_node) {
+    uint32_t root_fingerprint;
+    uint32_t path[1] = {PATH_HARDENED | 0};
+    HDNode *node = fsm_getDerivedNode(curve_name, path, 1, &root_fingerprint);
+    CHECK_PARAM(node, "Failed to derive root node")
+    resp->has_root_fingerprint = true;
+    resp->root_fingerprint = root_fingerprint;
+  }
   for (size_t i = 0; i < size; i++) {
-    HDNode *node = fsm_getDerivedNode(curve_name, msg->paths[i].address_n,
-                                      msg->paths[i].address_n_count, NULL);
-    CHECK_PARAM(node, "Firmware error")
+    uint32_t fingerprint;
+    HDNode *node =
+        fsm_getDerivedNode(curve_name, msg->paths[i].address_n,
+                           msg->paths[i].address_n_count, &fingerprint);
+    CHECK_PARAM(node, "Failed to derive node")
 
     CHECK_PARAM(!hdnode_fill_public_key(node), "Failed to derive public key")
-    resp->public_keys[i].size = key_size;
-    m_copy(resp->public_keys[i].bytes, node->public_key);
+    if (include_node) {
+      resp->hd_nodes[i].depth = node->depth;
+      resp->hd_nodes[i].fingerprint = fingerprint;
+      resp->hd_nodes[i].child_num = node->child_num;
+      resp->hd_nodes[i].chain_code.size = 32;
+      memcpy(resp->hd_nodes[i].chain_code.bytes, node->chain_code, 32);
+      resp->hd_nodes[i].has_private_key = false;
+      resp->hd_nodes[i].public_key.size = key_size;
+      m_copy(resp->hd_nodes[i].public_key.bytes, node->public_key);
+    } else {
+      resp->public_keys[i].size = key_size;
+      m_copy(resp->public_keys[i].bytes, node->public_key);
+    }
   }
-  resp->public_keys_count = size;
+  if (include_node) {
+    resp->hd_nodes_count = size;
+  } else {
+    resp->public_keys_count = size;
+  }
   msg_write(MessageType_MessageType_EcdsaPublicKeys, resp);
   layoutHome();
 }
