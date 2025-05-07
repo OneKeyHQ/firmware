@@ -135,8 +135,6 @@ const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen);
 const char **split_message_hex(const uint8_t *msg, uint32_t len);
 const char **format_tx_message(const char *chain_name);
 
-bool is_valid_ascii(const uint8_t *data, uint32_t size);
-
 void layoutQRCode(const char *index, const BITMAP *bmp_up,
                   const BITMAP *bmp_down, const char *title, const char *text);
 
@@ -301,7 +299,9 @@ bool layoutBlindSign(const char *chain_name, bool is_contract,
                      const char *value1, const char *key2, const char *value2,
                      const char *key3, const char *value3);
 bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
-                       const uint8_t *data, uint16_t len, bool is_ascii);
+                       const uint8_t *data, uint16_t len, bool is_printable,
+                       const char *item_name, const char *item_value,
+                       bool is_unsafe);
 bool layoutNostrEncryptMessage(const char *chain_name, bool verify,
                                const char *signer, const uint8_t *data,
                                uint16_t len, bool is_ascii);

@@ -77,11 +77,17 @@ bool ethereum_parse_onekey(const char *address, uint8_t pubkeyhash[20]);
     case 1030:                                     \
       chain_name = "Conflux eSpace";               \
       break;                                       \
+    case 8453:                                     \
+      chain_name = "Base";                         \
+      break;                                       \
     case 42161:                                    \
       chain_name = "Arbitrum One";                 \
       break;                                       \
     case 42170:                                    \
       chain_name = "Arbitrum Nova";                \
+      break;                                       \
+    case 43114:                                    \
+      chain_name = "AVAX";                         \
       break;                                       \
     default:                                       \
       chain_name = "EVM";                          \

@@ -31,7 +31,6 @@ void fsm_msgSolanaGetAddress(const SolanaGetAddress *msg) {
                                     msg->address_n_count, NULL);
   if (!node) return;
 
-  resp->has_address = true;
   hdnode_fill_public_key(node);
   solana_get_address_from_public_key(&node->public_key[1], resp->address);
 
@@ -66,5 +65,67 @@ void fsm_msgSolanaSignTx(const SolanaSignTx *msg) {
 
   solana_sign_tx(msg, node, resp);
 
+  layoutHome();
+}
+
+void fsm_msgSolanaSignOffChainMessage(const SolanaSignOffChainMessage *msg) {
+  CHECK_INITIALIZED
+  CHECK_PARAM(fsm_common_path_check(msg->address_n, msg->address_n_count,
+                                    COIN_TYPE, ED25519_NAME, true),
+              "Invalid path");
+  if (!solana_sanitize_offchain_message(msg)) {
+    layoutHome();
+    return;
+  }
+  CHECK_PIN
+
+  RESP_INIT(SolanaMessageSignature);
+
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
+
+  hdnode_fill_public_key(node);
+
+  if (!solana_sign_offchain_message(msg, node, resp)) {
+    layoutHome();
+    return;
+  }
+  resp->has_public_key = true;
+  resp->public_key.size = 32;
+  memcpy(resp->public_key.bytes, node->public_key + 1, 32);
+  msg_write(MessageType_MessageType_SolanaMessageSignature, resp);
+  layoutHome();
+}
+
+void fsm_msgSolanaSignUnsafeMessage(const SolanaSignUnsafeMessage *msg) {
+  CHECK_INITIALIZED
+
+  CHECK_PARAM(fsm_common_path_check(msg->address_n, msg->address_n_count,
+                                    COIN_TYPE, ED25519_NAME, true),
+              "Invalid path");
+  Parser parser = {msg->message.bytes, msg->message.size};
+  MessageHeader header;
+  if (parse_message_header(&parser, &header) == 0) {
+    fsm_sendFailure(FailureType_Failure_DataError,
+                    "Valid transaction message format is not allowed");
+    layoutHome();
+    return;
+  }
+  CHECK_PIN
+
+  RESP_INIT(SolanaMessageSignature);
+
+  HDNode *node = fsm_getDerivedNode(ED25519_NAME, msg->address_n,
+                                    msg->address_n_count, NULL);
+  if (!node) return;
+  hdnode_fill_public_key(node);
+
+  if (!solana_sign_unsafe_message(msg, node, resp)) {
+    layoutHome();
+    return;
+  }
+  resp->has_public_key = false;
+  msg_write(MessageType_MessageType_SolanaMessageSignature, resp);
   layoutHome();
 }

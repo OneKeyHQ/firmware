@@ -409,20 +409,23 @@ def _load_ethereum_networks() -> Coins:
 
 def _load_erc20_tokens() -> Coins:
     """Load ERC20 tokens from `ethereum/tokens` submodule."""
-    networks = _load_ethereum_networks()
+    # networks = _load_ethereum_networks()
     tokens: Coins = []
-    for network in networks:
-        chain = network["chain"]
+    # for network in networks:
+    #     chain = network["chain"]
 
-        chain_path = DEFS_DIR / "ethereum" / "tokens" / "tokens" / chain
-        for file in sorted(chain_path.glob("*.json")):
-            token: Coin = load_json(file)
+    chain_path = DEFS_DIR / "evm_tokens"
+    for file in sorted(chain_path.glob("*.json")):
+        chain = load_json(file)
+        chain_name = chain["chain"]
+        _tokens = chain["tokens"]
+        for token in _tokens:
             token.update(
-                chain=chain,
-                chain_id=network["chain_id"],
+                chain=chain_name,
+                chain_id=int(file.name.split(".")[0]),
                 address_bytes=bytes.fromhex(token["address"][2:]),
                 shortcut=token["symbol"],
-                key=f"erc20:{chain}:{token['symbol']}",
+                key=f"erc20:{chain_name.lower()}:{token['symbol']}",
             )
             tokens.append(token)
 

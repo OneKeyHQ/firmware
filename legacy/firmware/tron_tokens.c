@@ -1,10 +1,11 @@
 #include "tron_tokens.h"
 #include <string.h>
 
-#define TRON_TOKENS_COUNT 14
+#define TRON_TOKENS_COUNT 15
 const TronTokenType tron_tokens[TRON_TOKENS_COUNT + 1] = {
     {"TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", " USDT", 6},
     {"TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR", " WTRX", 6},
+    {"TAFjULxiVgT4qWk6UZwjqwZXTSaGaqnVp4", " BTT", 18},
     {"TKfjV9RNKJJCqPvBtK8L7Knykh7DNWvnYt", " WBTT", 6},
     {"TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9", " JST", 18},
     {"TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7", " WIN", 6},

@@ -460,7 +460,6 @@ void usbPoll(void) {
   }
 
   ble_update_poll();
-  config_getUsblock(&lock, false);
   if (usb_connect_status && !usb_status_bak) {
     usb_status_bak = true;
     if (config_hasPin() && session_isUnlocked()) {
@@ -472,7 +471,18 @@ void usbPoll(void) {
       reset = true;
     }
   }
+  if (reset) config_getUsblock(&lock, false);
   if (reset && lock) {
+    if (host_channel == CHANNEL_SLAVE) {
+      Failure resp = {
+          .has_code = true,
+          .code = FailureType_Failure_ActionCancelled,
+          .has_message = true,
+          .message = "Disconnected by device",
+      };
+      msg_write(MessageType_MessageType_Failure, &resp);
+    }
+    config_lockDevice();
     svc_system_privileged();
     vector_table_t *ivt = (vector_table_t *)FLASH_PTR(FLASH_APP_START);
     __asm__ volatile("msr msp, %0" ::"r"(ivt->initial_sp_value));

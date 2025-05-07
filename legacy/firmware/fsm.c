@@ -506,19 +506,23 @@ static bool fsm_layoutPaginated(const char *description, const uint8_t *msg,
 
 bool fsm_layoutSignMessage(const char *chain_name, const char *signer,
                            const uint8_t *msg, uint32_t len) {
-  if (is_valid_ascii(msg, len)) {
-    return layoutSignMessage(chain_name, false, signer, msg, len, true);
+  if (is_printable(msg, len)) {
+    return layoutSignMessage(chain_name, false, signer, msg, len, true, NULL,
+                             NULL, false);
   } else {
-    return layoutSignMessage(chain_name, false, signer, msg, len, false);
+    return layoutSignMessage(chain_name, false, signer, msg, len, false, NULL,
+                             NULL, false);
   }
 }
 
 bool fsm_layoutVerifyMessage(const char *chain_name, const char *signer,
                              const uint8_t *msg, uint32_t len) {
-  if (is_valid_ascii(msg, len)) {
-    return layoutSignMessage(chain_name, true, signer, msg, len, true);
+  if (is_printable(msg, len)) {
+    return layoutSignMessage(chain_name, true, signer, msg, len, true, NULL,
+                             NULL, false);
   } else {
-    return layoutSignMessage(chain_name, true, signer, msg, len, false);
+    return layoutSignMessage(chain_name, true, signer, msg, len, false, NULL,
+                             NULL, false);
   }
 }
 

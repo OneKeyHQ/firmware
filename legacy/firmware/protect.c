@@ -288,14 +288,14 @@ const char *requestPin(PinMatrixRequestType type, const char *text,
       else
         return 0;
     } else if (msg_tiny_id == MessageType_MessageType_BixinPinInputOnDevice) {
-      uint8_t min_pin_len = MIN_PIN_LEN;
-      if (PinMatrixRequestType_PinMatrixRequestType_NewFirst == type ||
-          PinMatrixRequestType_PinMatrixRequestType_NewSecond == type) {
-        min_pin_len = DEFAULT_PIN_LEN;
-      }
+      // uint8_t min_pin_len = MIN_PIN_LEN;
+      // if (PinMatrixRequestType_PinMatrixRequestType_NewFirst == type ||
+      //     PinMatrixRequestType_PinMatrixRequestType_NewSecond == type) {
+      //   min_pin_len = DEFAULT_PIN_LEN;
+      // }
       msg_tiny_id = 0xFFFF;
       usbTiny(0);
-      return protectInputPin(text, min_pin_len, MAX_PIN_LEN, true);
+      return protectInputPin(text, DEFAULT_PIN_LEN, MAX_PIN_LEN, true);
     }
     if (button.NoUp) {
       timer_out_set(timer_out_oper, 0);
@@ -404,7 +404,7 @@ bool protectPin(bool use_cached) {
   if (!ret) {
     fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
     msg_command_inprogress = false;
-    protectPinCheck(false);
+    protectPinErrorTips(false);
     msg_command_inprogress = true;
   }
   return ret;
@@ -432,7 +432,7 @@ bool protectChangePin(bool removal) {
     usbTiny(0);
     if (ret == false) {
       fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
-      protectPinCheck(false);
+      protectPinErrorTips(false);
       return false;
     }
 
@@ -507,7 +507,7 @@ bool protectChangePin(bool removal) {
       fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
     } else {
       fsm_sendFailure(FailureType_Failure_ProcessError,
-                      _("The new PIN must be different from your wipe code."));
+                      "The new PIN must be different from your wipe code.");
     }
   }
   return ret;
@@ -554,7 +554,7 @@ bool protectChangeWipeCode(bool removal) {
     if (strncmp(pin, input, sizeof(pin)) == 0) {
       memzero(pin, sizeof(pin));
       fsm_sendFailure(FailureType_Failure_ProcessError,
-                      _("The wipe code must be different from your PIN."));
+                      "The wipe code must be different from your PIN.");
       return false;
     }
     strlcpy(wipe_code, input, sizeof(wipe_code));
@@ -623,8 +623,8 @@ bool protectPassphrase(char *passphrase) {
       }
       if (!ppa->has_passphrase) {
         fsm_sendFailure(FailureType_Failure_DataError,
-                        _("No passphrase provided. Use empty string to set an "
-                          "empty passphrase."));
+                        "No passphrase provided. Use empty string to set an "
+                        "empty passphrase.");
         result = false;
         break;
       }
@@ -686,7 +686,7 @@ bool protectSeedPin(bool force_pin, bool setpin, bool update_pin) {
       bool ret = config_unlock(pin);
       if (!ret) {
         fsm_sendFailure(FailureType_Failure_PinInvalid, NULL);
-        protectPinCheck(false);
+        protectPinErrorTips(false);
         return false;
       }
     } else {
@@ -765,17 +765,25 @@ extern bool u2f_init_command;
 
 uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   uint8_t key = KEY_NULL;
+  uint32_t start = timer_ms();
 
   protectAbortedByInitialize = false;
   protectAbortedByInitializeOnboarding = false;
   protectAbortedBySleep = false;
+  protectAbortedByCancel = false;
   usbTiny(1);
-  timer_out_set(timer_out_oper, time_out);
   while (1) {
     if (layoutEnterSleep(1) && (layoutLast != layoutScreensaver)) {
-      key = KEY_NULL;
-      protectAbortedBySleep = true;
-      break;
+      if (layoutLast == onboarding) {
+#if !EMULATOR
+        timer_sleep_start_reset();
+        unregister_timer("poweroff");
+#endif
+      } else {
+        key = KEY_NULL;
+        protectAbortedBySleep = true;
+        break;
+      }
     }
     usbPoll();
 #if !EMULATOR
@@ -786,10 +794,11 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
       return KEY_NULL;
     }
 #endif
-    if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
+    if (time_out > 0 && (timer_ms() - start) >= time_out) break;
     protectAbortedByInitialize =
         (msg_tiny_id == MessageType_MessageType_Initialize);
-    if (protectAbortedByInitialize) {
+    protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
+    if (protectAbortedByInitialize || protectAbortedByCancel) {
       msg_tiny_id = 0xFFFF;
       break;
     }
@@ -820,7 +829,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   }
   usbTiny(0);
   protectAbortedByInitializeOnboarding = protectAbortedByInitialize;
-  if (protectAbortedByInitialize) {
+  if (protectAbortedByInitialize || protectAbortedByCancel) {
     if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
     // this error code will be sent when the message processing fails
     if (false == msg_command_inprogress) {
@@ -832,9 +841,9 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   return key;
 }
 
-uint8_t protectWaitKeyValue(ButtonRequestType type, bool requset,
+uint8_t protectWaitKeyValue(ButtonRequestType type, bool request,
                             uint32_t time_out, uint8_t mode) {
-  if (requset) {
+  if (request) {
     ButtonRequest resp = {0};
     memzero(&resp, sizeof(ButtonRequest));
     resp.has_code = true;
@@ -849,7 +858,7 @@ const char *protectInputPin(const char *text, uint8_t min_pin_len,
   uint8_t key = KEY_NULL;
   uint8_t counter = 0;
   int index = 0, max_index = 0;
-  bool update = true, first_num = false;
+  bool update = true;
   static char pin[10] = "";
   bool d = false;
   config_getInputDirection(&d);
@@ -863,23 +872,14 @@ const char *protectInputPin(const char *text, uint8_t min_pin_len,
 refresh_menu:
   if (update) {
     update = false;
-    first_num = false;
-    if (counter >= min_pin_len) {
-      max_index = 10;
-    } else {
-      max_index = 9;
-    }
+    max_index = (counter >= min_pin_len) ? 10 : 9;
     if (counter >= DEFAULT_PIN_LEN) {
-      do {
-        index = random_uniform(10);
-      } while (index == 0);
-      first_num = true;
+      index = 10;
     } else {
       do {
         index = random_uniform(10);
       } while (index == 0);
     }
-  } else if (first_num) {
   }
 
   layoutInputPin(counter, text, index, cancel_allowed);
@@ -982,7 +982,7 @@ bool protectPinOnDevice(bool use_cached, bool cancel_allowed) {
 input:
   if (config_hasPin()) {
     // input_pin = true;
-    pin = protectInputPin(_("Enter PIN"), MIN_PIN_LEN, MAX_PIN_LEN,
+    pin = protectInputPin(_("Enter PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN,
                           cancel_allowed);
     // input_pin = false;
     if (!pin) {
@@ -993,10 +993,8 @@ input:
 
   bool ret = config_unlock(pin);
   if (ret == false) {
-    if (protectPinCheck(true)) {
-      goto input;
-    } else
-      return false;
+    protectPinErrorTips(true);
+    goto input;
   }
   return ret;
 }
@@ -1012,7 +1010,7 @@ pin_set:
   if (config_hasPin()) {
     is_change = true;
   input:
-    pin = protectInputPin(_("Enter PIN"), MIN_PIN_LEN, MAX_PIN_LEN, true);
+    pin = protectInputPin(_("Enter PIN"), DEFAULT_PIN_LEN, MAX_PIN_LEN, true);
 
     if (pin == NULL) {
       return false;
@@ -1021,10 +1019,8 @@ pin_set:
 
     bool ret = config_unlock(pin);
     if (ret == false) {
-      if (protectPinCheck(true)) {
-        goto input;
-      } else
-        return false;
+      protectPinErrorTips(true);
+      goto input;
     }
     layoutDialogAdapterEx(_("Set PIN"), &bmp_bottom_left_arrow, NULL,
                           &bmp_bottom_right_arrow, NULL,
@@ -1132,8 +1128,8 @@ refresh_menu:
   layoutItemsSelectAdapterEx(
       &bmp_bottom_middle_arrow_up, &bmp_bottom_middle_arrow_down,
       cancel_allowed ? &bmp_bottom_left_arrow : NULL, &bmp_bottom_right_arrow,
-      NULL, NULL, index + 1, 3, _("Select Number of Word"), _(numbers[index]),
-      _(numbers[index]), NULL, NULL, index > 0 ? numbers[index - 1] : NULL,
+      NULL, NULL, index + 1, 3, _("Select Number of Word"), numbers[index],
+      numbers[index], NULL, NULL, index > 0 ? numbers[index - 1] : NULL,
       index > 1 ? numbers[index - 2] : NULL, NULL,
       index < 2 ? numbers[index + 1] : NULL,
       index < 1 ? numbers[index + 2] : NULL, NULL, false);
@@ -1159,17 +1155,10 @@ refresh_menu:
   }
 }
 
-bool protectPinCheck(bool retry) {
-  char desc[64] = "";
-
+void protectPinErrorTips(bool retry) {
+  char desc[128] = "";
   uint32_t fails = config_getPinFails();
-  if (fails == 1) {
-    layoutDialogCenterAdapter(
-        &bmp_icon_warning, NULL, NULL,
-        retry ? &bmp_bottom_right_retry : &bmp_bottom_right_confirm, NULL, NULL,
-        NULL, NULL, NULL, _("Incorrect PIN"), _("9 attempts left, try again."),
-        NULL);
-  } else if (fails > 1 && fails < 10) {
+  if (fails > 0 && fails < 10) {
     if (ui_language == 0) {
       uint2str(10 - fails, desc);
       strcat(desc, " attempts left, try again.");
@@ -1198,7 +1187,7 @@ bool protectPinCheck(bool retry) {
     if (ui_language == 0) {
       layoutDialogCenterAdapter(
           &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
-          NULL, NULL, _("Device reset complete,"), _("restart now!"), NULL);
+          NULL, NULL, "Device reset complete,", "restart now!", NULL);
     } else {
       layoutDialogCenterAdapter(
           &bmp_icon_ok, NULL, NULL, &bmp_bottom_right_confirm, NULL, NULL, NULL,
@@ -1211,19 +1200,17 @@ bool protectPinCheck(bool retry) {
   }
   protectWaitKey(0, 0);
 
-  if (fails >= 5) {
-    memset(desc, 0, 64);
+  if (fails >= 5 && !(protectAbortedByInitialize || protectAbortedByCancel)) {
+    fsm_sendFailure(FailureType_Failure_PinCancelled, NULL);
+    memset(desc, 0, 128);
     strcat(desc, _("after "));
     uint2str(10 - fails, desc + strlen(desc));
     if (ui_language == 0) {
-      strcat(desc, _(" attempts wrong,"));
+      strcat(desc, " attempts wrong,");
       layoutDialogCenterAdapter(
           &bmp_icon_info, NULL, NULL, &bmp_bottom_right_arrow, NULL, NULL, NULL,
-          NULL, NULL, _("CAUTION!"), desc, "the device will be reset.");
+          NULL, NULL, "CAUTION!", desc, "the device will be reset.");
     } else {
-      memset(desc, 0, 64);
-      strcat(desc, _("after "));
-      uint2str(10 - fails, desc + strlen(desc));
       strcat(desc, _(" attempts wrong, the device will be reset."));
       layoutDialogCenterAdapter(&bmp_icon_info, NULL, NULL,
                                 &bmp_bottom_right_arrow, NULL, NULL, NULL, NULL,
@@ -1231,8 +1218,6 @@ bool protectPinCheck(bool retry) {
     }
     protectWaitKey(0, 0);
   }
-
-  return true;
 }
 
 #if !EMULATOR
@@ -1258,6 +1243,7 @@ void enter_sleep(void) {
   sleep_count++;
   if (sleep_count == 1) {
     timer_sleep_start_reset();
+    config_getAutoLockDelayMs();
     register_timer("poweroff", timer1s, auto_poweroff_timer);
     layoutBack = layoutLast;
     oledBufferLoad(oled_prev);

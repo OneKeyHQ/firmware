@@ -31,6 +31,9 @@
 #define SCRIPT_HASH_SIZE 28
 #define OUTPUT_DATUM_HASH_SIZE 32
 #define SCRIPT_DATA_HASH_SIZE 32
+#define NETWORK_ID_MAINNET 1
+#define NETWORK_ID_TESTNET 0
+#define MAX_CHUNK_SIZE 1024
 
 #define HRP_SEPARATOR "1"
 // CIP-0005 prefixes -
@@ -67,6 +70,16 @@ enum {
   TX_BODY_KEY_TOTAL_COLLATERAL = 17,
   TX_BODY_KEY_REFERENCE_INPUTS = 18,
 };
+enum {
+  BABBAGE_OUTPUT_KEY_ADDRESS,
+  BABBAGE_OUTPUT_KEY_AMOUNT,
+  BABBAGE_OUTPUT_KEY_DATUM_OPTION,
+  BABBAGE_OUTPUT_KEY_REFERENCE_SCRIPT,
+};
+enum {
+  BABBAGE_OUTPUT_KEY_DATUM_HASH = 0,
+  BABBAGE_OUTPUT_KEY_INLINE_DATUM = 1,
+};
 
 /* The state machine of the tx hash builder is driven by user calls.
  * E.g., when the user calls txHashBuilder_addInput(), the input is only
@@ -90,7 +103,7 @@ typedef enum {
   TX_HASH_BUILDER_IN_COLLATERAL_INPUTS = 1200,
   TX_HASH_BUILDER_IN_REQUIRED_SIGNERS = 1300,
   TX_HASH_BUILDER_IN_NETWORK_ID = 1400,
-  TX_HASH_BUILDER_IN_COLLATERAL_OUTPUT = 1500,
+  TX_HASH_BUILDER_IN_COLLATERAL_RETURN = 1500,
   TX_HASH_BUILDER_IN_TOTAL_COLLATERAL = 1600,
   TX_HASH_BUILDER_IN_REFERENCE_INPUTS = 1700,
   TX_HASH_BUILDER_FINISHED = 1800,
@@ -98,17 +111,26 @@ typedef enum {
 } tx_hash_builder_state_t;
 
 typedef enum {
-  TX_OUTPUT_INIT =
-      10,  //  tx_hash_builder_state moved to TX_HASH_BUILDER_IN_OUTPUTS
-  TX_OUTPUT_TOP_LEVEL_DATA = 11,  // output address was added, coin was added,
-                                  // multiasset map is being added (if included)
-  TX_OUTPUT_ASSET_GROUP = 13,     // asset group map is being added
-  TX_OUTPUT_DATUM_HASH = 20,      //  Datum hash added
-  TX_OUTPUT_FINISHED = 21,
+  STATE_OUTPUT_TOP_LEVEL_DATA,
+  STATE_OUTPUT_ASSET_GROUP,
+  STATE_OUTPUT_TOKEN,
+  STATE_OUTPUT_DATUM,
+  STATE_OUTPUT_DATUM_INLINE_CHUNKS,
+  STATE_OUTPUT_REFERENCE_SCRIPT,
+  STATE_OUTPUT_REFERENCE_SCRIPT_CHUNKS,
+  STATE_OUTPUT_CONFIRM,
+  STATE_OUTPUT_FINISHED,
 } tx_hash_builder_output_state_t;
 
+typedef enum {
+  STATE_MINT_TOP_LEVEL_DATA = 9,
+  STATE_MINT_ASSET_GROUP = 10,
+  STATE_MINT_TOKEN = 11,
+  STATE_MINT_FINISHED = 12,
+} tx_hash_builder_mint_state_t;
+
 struct AdaSigner {
-  CardanoSignTxInit signertx;
+  const CardanoSignTxInit *signertx;
   BLAKE2B_CTX ctx;
   uint8_t digest[32];
   int tx_dict_items_count;
@@ -120,9 +142,14 @@ struct AdaSigner {
   uint16_t remainingRequiredSigners;
   uint16_t remainingReferenceInputs;
   uint16_t remainingMintingAssetGroupsCount;
-
-  uint16_t output_asset_groups_count;
+  uint16_t remainingMintingAssetTokensCount;
+  uint16_t remainingOutputAssetTokensCount;
+  uint16_t remainingOutputAssetGroupsCount;
+  uint16_t remainingWitnessRequestsCount;
+  uint16_t remainingInlineDatumChunksCount;
+  uint16_t remainingReferenceScriptChunksCount;
   tx_hash_builder_output_state_t outputState;
+  tx_hash_builder_mint_state_t mintState;
   tx_hash_builder_state_t state;
 
   bool is_feeed;
@@ -132,18 +159,19 @@ struct AdaSigner {
   uint16_t policy_id_size;
   uint8_t datum_hash[32];
   uint16_t datum_hash_size;
+  uint32_t inline_datum_size;
+  uint32_t reference_script_size;
 };
-
 bool fsm_getCardanoIcaruNode(HDNode *node, const uint32_t *address_n,
                              size_t address_n_count, uint32_t *fingerprint);
 
 bool ada_get_address(const CardanoGetAddress *msg, char *address);
 bool validate_network_info(int network_id, int protocol_magic);
 
-bool _processs_tx_init(CardanoSignTxInit *msg);
-bool hash_stage(void);
+bool _processs_tx_init(const CardanoSignTxInit *msg);
+void state_transmute(void);
 
-void txHashBuilder_addInput(const CardanoTxInput *input);
+bool txHashBuilder_addInput(const CardanoTxInput *input);
 bool txHashBuilder_addOutput(const CardanoTxOutput *output);
 bool txHashBuilder_addAssetGroup(const CardanoAssetGroup *msg);
 bool txHashBuilder_addToken(const CardanoToken *msg);
@@ -151,11 +179,15 @@ bool txHashBuilder_addCertificate(const CardanoTxCertificate *cert);
 bool txHashBuilder_addWithdrawal(const CardanoTxWithdrawal *wdr);
 bool txHashBuilder_addAuxiliaryData(const CardanoTxAuxiliaryData *wdr);
 bool txHashBuilder_addMintingAssetGroups(const CardanoTxAuxiliaryData *wdr);
-
-void cardano_txack(void);
-bool cardano_txwitness(CardanoTxWitnessRequest *msg,
+bool txHashBuilder_addMint(const CardanoTxMint *mint);
+bool txHashBuilder_addRequiredSigner(const CardanoTxRequiredSigner *req);
+bool txHashBuilder_addInlineDatumChunk(const CardanoTxInlineDatumChunk *chunk);
+bool txHashBuilder_addReferenceScriptChunk(
+    const CardanoTxReferenceScriptChunk *chunk);
+bool cardano_txack(void);
+bool cardano_txwitness(const CardanoTxWitnessRequest *msg,
                        CardanoTxWitnessResponse *resp);
-bool ada_sign_messages(const HDNode *node, CardanoSignMessage *msg,
+bool ada_sign_messages(const CardanoSignMessage *msg,
                        CardanoMessageSignature *resp);
 
 #endif  // __ADA_H__

@@ -1,3 +1,4 @@
+// clang-format off
 #include "language.h"
 
 const char *const languages[][2] = {
@@ -688,6 +689,8 @@ const char *const languages[][2] = {
     {"Reverse", "反转"},
     // recovery.c
     {"Review Wordlist", "再次检查单词"},
+    // layout2.c
+    {"Risk of phishing & blind\nsigning. Proceed only\nif you trust the source.", "存在钓鱼和盲签的风险. 只有在信任来源的情况下才继续."},
     // layout2.c
     {"SE VERSION:", "SE版本:"},
     //

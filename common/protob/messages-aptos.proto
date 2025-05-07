@@ -31,6 +31,12 @@ message AptosAddress {
 message AptosSignTx {
     repeated uint32 address_n = 1;         // BIP-32 path to derive the key from master node
     required bytes raw_tx = 2;              // serialized raw transaction
+    optional AptosTransactionType tx_type = 3[default = STANDARD];
+
+    enum AptosTransactionType {
+        STANDARD = 0; // with salt "APTOS::RawTransaction"
+        WITH_DATA = 1; // with salt "APTOS::RawTransactionWithData"
+    }
 }
 
 /**
