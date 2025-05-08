@@ -160,18 +160,35 @@ const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen) {
   }
 
   memzero(str, sizeof(str));
-  for (int i = 0; i < 4; ++i) {
-    size_t show_len = strnlen((char *)msg, MIN(rowlen, len));
-    memcpy(str[i], (char *)msg, show_len);
-    str[i][show_len] = '\0';
-    msg += show_len;
-    len -= show_len;
+  uint32_t line = 0, col = 0;
+  for (uint32_t i = 0; i < len && line < 4; ++i) {
+    if (msg[i] == '\n') {
+      str[line][col] = '\0';
+      line++;
+      col = 0;
+      continue;
+    }
+    if (col >= rowlen) {
+      str[line][col] = '\0';
+      line++;
+      col = 0;
+      if (line >= 4) break;
+    }
+    if (line < 4) {
+      str[line][col++] = msg[i];
+    }
+  }
+  if (line < 4) {
+    str[line][col] = '\0';
   }
 
-  if (len > 0) {
-    str[3][rowlen - 1] = '.';
-    str[3][rowlen - 2] = '.';
-    str[3][rowlen - 3] = '.';
+  if (line == 4 && (len > 4 * rowlen)) {
+    int l = strlen(str[3]);
+    if (l >= 3) {
+      str[3][l - 1] = '.';
+      str[3][l - 2] = '.';
+      str[3][l - 3] = '.';
+    }
   }
   static const char *ret[4] = {str[0], str[1], str[2], str[3]};
   return ret;
@@ -931,14 +948,6 @@ void layoutConfirmOmni(const uint8_t *data, uint32_t size) {
                     NULL);
 }
 
-bool is_valid_ascii(const uint8_t *data, uint32_t size) {
-  for (uint32_t i = 0; i < size; i++) {
-    if (data[i] < ' ' || data[i] > '~') {
-      return false;
-    }
-  }
-  return true;
-}
 
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
   const char **str = NULL;

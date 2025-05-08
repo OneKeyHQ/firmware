@@ -476,7 +476,7 @@ static bool fsm_layoutPaginated(const char *description, const uint8_t *msg,
 }
 
 bool fsm_layoutSignMessage(const uint8_t *msg, uint32_t len) {
-  if (is_valid_ascii(msg, len)) {
+  if (is_printable(msg, len)) {
     return fsm_layoutPaginated(_("Sign message?"), msg, len, true);
   } else {
     return fsm_layoutPaginated(_("Sign binary message?"), msg, len, false);
@@ -485,7 +485,7 @@ bool fsm_layoutSignMessage(const uint8_t *msg, uint32_t len) {
 
 bool fsm_layoutSignMessage_ex(const char *description, const uint8_t *msg,
                               uint32_t len) {
-  if (is_valid_ascii(msg, len)) {
+  if (is_printable(msg, len)) {
     return fsm_layoutPaginated(description, msg, len, true);
   } else {
     return fsm_layoutPaginated(description, msg, len, false);
@@ -493,7 +493,7 @@ bool fsm_layoutSignMessage_ex(const char *description, const uint8_t *msg,
 }
 
 bool fsm_layoutVerifyMessage(const uint8_t *msg, uint32_t len) {
-  if (is_valid_ascii(msg, len)) {
+  if (is_printable(msg, len)) {
     return fsm_layoutPaginated(_("Verified message?"), msg, len, true);
   } else {
     return fsm_layoutPaginated(_("Verified binary message?"), msg, len, false);

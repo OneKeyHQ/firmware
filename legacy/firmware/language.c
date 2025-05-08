@@ -805,6 +805,8 @@ const char *languages[][2] = {
     {"Restore Wallet", "恢复钱包"},
     //
     {"Retry", "重试"},
+    {"Risk of phishing. Proceed only if you trust the source.",
+     "存在钓鱼风险。只有在信任来源的情况下才继续。"},
     // layout2.c
     {"SE version:", "SE版本:"},
     // layout2.c

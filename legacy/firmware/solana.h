@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include "bip32.h"
 #include "messages-solana.pb.h"
+#include "sol/parser.h"
 
 /**
  * Size of Public key in bytes
@@ -33,4 +34,9 @@ void solana_get_address_from_public_key(const uint8_t *public_key,
                                         char *address);
 void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
                     SolanaSignedTx *resp);
+
+bool solana_sanitize_offchain_message(const SolanaSignOffChainMessage *msg);
+void solana_sign_offchain_message(const SolanaSignOffChainMessage *msg,
+                                  const HDNode *node,
+                                  SolanaMessageSignature *resp);
 #endif  // __SOLANA_H__

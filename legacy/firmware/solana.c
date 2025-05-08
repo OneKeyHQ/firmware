@@ -30,6 +30,22 @@
 #include "sol/parser.h"
 #include "sol/printer.h"
 #include "sol/transaction_summary.h"
+#include "util.h"
+
+static const uint8_t _SIGN_DOMAIN[] =
+    "\xff"
+    "solana offchain";
+static const uint8_t _SIGNER_COUNT = 1;
+#define _APPLICATION_DOMAIN_LENGTH (32)
+#define _PREAMBLE_LENGTH                                                       \
+  (16 + 1 + _APPLICATION_DOMAIN_LENGTH + 1 + 1 + _SIGNER_COUNT * SIZE_PUBKEY + \
+   2)
+#define _PREAMBLE_LENGTH_LEDGER (16 + 1 + 1 + 2)
+#define _MAX_MESSAGE_LENGTH_WITH_PREAMBLE (1232)
+#define _MAX_MESSAGE_LENGTH \
+  (_MAX_MESSAGE_LENGTH_WITH_PREAMBLE - _PREAMBLE_LENGTH)
+#define _MAX_MESSAGE_LENGTH_LEDGER \
+  (_MAX_MESSAGE_LENGTH_WITH_PREAMBLE - _PREAMBLE_LENGTH_LEDGER)
 
 void solana_get_address_from_public_key(const uint8_t *public_key,
                                         char *address) {
@@ -42,7 +58,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   MessageHeader header;
   if (parse_message_header(&parser, &header)) {
     // This is not a valid Solana message
-    fsm_sendFailure(FailureType_Failure_DataError, _("Invalid message"));
+    fsm_sendFailure(FailureType_Failure_DataError, "Invalid message");
     return;
   } else {
     uint8_t signer_pubkey[SIZE_PUBKEY];
@@ -56,7 +72,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       }
     }
     if (i >= signer_count) {
-      fsm_sendFailure(FailureType_Failure_DataError, _("Invalid params"));
+      fsm_sendFailure(FailureType_Failure_DataError, "Invalid params");
       return;
     }
   }
@@ -77,10 +93,6 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
 
       item = transaction_summary_general_item();
       summary_item_set_hash(item, "Message Hash", &UnrecognizedMessageHash);
-    } else {
-      fsm_sendFailure(FailureType_Failure_DataError,
-                      _("Please confirm the BlindSign enabled"));
-      return;
     }
   }
   // Set fee-payer if it hasn't already been resolved by
@@ -95,7 +107,7 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
       0) {
     for (size_t i = 0; i < num_summary_steps; i++) {
       if (transaction_summary_display_item(i, DisplayFlagAll)) {
-        fsm_sendFailure(FailureType_Failure_DataError, _("Parse error"));
+        fsm_sendFailure(FailureType_Failure_DataError, "Parse error");
         layoutHome();
         return;
       } else {
@@ -156,11 +168,86 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
     }
     ed25519_sign(msg->raw_tx.bytes, msg->raw_tx.size, node->private_key,
                  resp->signature.bytes);
-    resp->has_signature = true;
     resp->signature.size = 64;
   } else {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Parse error"));
+    fsm_sendFailure(FailureType_Failure_DataError, "Parse error");
     return;
   }
   msg_write(MessageType_MessageType_SolanaSignedTx, resp);
+}
+
+
+//=====================Offchain Message Signing=====================
+/**
+ * Prepare the message for signing
+ */
+static void prepare_message(const SolanaSignOffChainMessage *msg,
+                     const uint8_t *public_key, BufferWriter *writer) {
+  write_bytes(_SIGN_DOMAIN, 16, writer);
+  write_bytes((uint8_t *)&msg->message_version, 1, writer);
+  if (msg->has_application_domain) {
+    write_bytes(msg->application_domain.bytes, _APPLICATION_DOMAIN_LENGTH,
+                writer);
+  }
+  write_bytes((uint8_t *)&msg->message_format, 1, writer);
+  if (msg->has_application_domain) {
+    write_bytes(&_SIGNER_COUNT, 1, writer);
+    write_bytes(public_key, SIZE_PUBKEY, writer);
+  }
+  write_bytes((uint8_t *)&msg->message.size, 2, writer);
+  write_bytes(msg->message.bytes, msg->message.size, writer);
+}
+
+void solana_sign_offchain_message(const SolanaSignOffChainMessage *msg,
+                                  const HDNode *node,
+                                  SolanaMessageSignature *resp) {
+  BufferWriter writer = {0};
+  uint32_t preamble_length =
+      msg->has_application_domain ? _PREAMBLE_LENGTH : _PREAMBLE_LENGTH_LEDGER;
+  uint8_t message[msg->message.size + preamble_length];
+  init_buffer_writer(&writer, message, sizeof(message));
+  prepare_message(msg, node->public_key + 1, &writer);
+  // sign message
+  ed25519_sign(message, sizeof(message), node->private_key,
+               resp->signature.bytes);
+  resp->signature.size = 64;
+}
+
+bool solana_sanitize_offchain_message(const SolanaSignOffChainMessage *msg) {
+  if (msg->has_application_domain &&
+      msg->application_domain.size != _APPLICATION_DOMAIN_LENGTH) {
+    fsm_sendFailure(FailureType_Failure_DataError,
+                    "Application domain must be 32 bytes");
+    return false;
+  }
+  if (msg->has_application_domain && msg->message.size > _MAX_MESSAGE_LENGTH) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Message is too long");
+    return false;
+  }
+  if (msg->message_version != SolanaOffChainMessageVersion_MESSAGE_VERSION_0) {
+    fsm_sendFailure(FailureType_Failure_DataError, "Message version must be 0");
+    return false;
+  }
+  switch (msg->message_format) {
+    case SolanaOffChainMessageFormat_V0_RESTRICTED_ASCII:
+      if (!is_valid_ascii(msg->message.bytes, msg->message.size)) {
+        fsm_sendFailure(
+            FailureType_Failure_DataError,
+            "Message format 0 must contain only printable characters");
+        return false;
+      }
+      break;
+    case SolanaOffChainMessageFormat_V0_LIMITED_UTF8:
+      if (!is_valid_utf8(msg->message.bytes, msg->message.size)) {
+        fsm_sendFailure(FailureType_Failure_DataError,
+                        "Message format 1 must be a valid UTF-8 string");
+        return false;
+      }
+      break;
+    default:
+      fsm_sendFailure(FailureType_Failure_DataError,
+                      "Message format must be 0 or 1");
+      return false;
+  }
+  return true;
 }
