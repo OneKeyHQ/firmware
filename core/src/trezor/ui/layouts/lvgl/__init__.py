@@ -1235,11 +1235,19 @@ async def confirm_sol_token_transfer(
 
 
 async def confirm_sol_memo(
-    ctx: wire.GenericContext, title: str, description: str, memo: str
+    ctx: wire.GenericContext, title: str, memo: str, signer: str
 ) -> None:
-    from trezor.lvglui.scrs.template import BlobDisPlay
+    from trezor.lvglui.scrs.template import Message
 
-    screen = BlobDisPlay(title, description, memo, None)
+    screen = Message(
+        title,
+        signer,
+        memo,
+        ctx.primary_color,
+        ctx.icon_path,
+        False,
+        item_addr_title=_(i18n_keys.LIST_KEY__SIGNER__COLON),
+    )
     await raise_if_cancelled(
         interact(ctx, screen, "sol_memo", ButtonRequestType.ProtectCall)
     )

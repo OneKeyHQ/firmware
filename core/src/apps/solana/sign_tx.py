@@ -62,6 +62,10 @@ async def sign_tx(
     # verify fee payer
     if not multiple_signers:
         if fee_payer.get() != signer_pub_key_bytes:
+            if __debug__:
+                print(
+                    f"Invalid signer used: {PublicKey(fee_payer.get())} != {PublicKey(signer_pub_key_bytes)}"
+                )
             raise wire.DataError("Invalid signer used")
     else:
         if PublicKey(signer_pub_key_bytes) not in accounts_keys[:sigs_count]:
@@ -100,7 +104,7 @@ async def sign_tx(
             elif program_id == SPL_MEMO_PROGRAM_ID:
                 from .spl.memo.memo_program import parse
 
-                await parse(ctx, accounts, i.data)
+                await parse(ctx, accounts if len(accounts) > 0 else [fee_payer], i.data)
             # elif program_id == COMPUTE_BUDGET_PROGRAM_ID:
             #    pass
             # # elif program_id == STAKE_PROGRAM_ID:

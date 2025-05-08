@@ -18,10 +18,11 @@ async def parse(ctx: wire.Context, accounts: list[PublicKey], data: bytes) -> No
     """Parse memo instruction params."""
     from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
-    params = MemoParams(signer=accounts[0], message=data)
-    memo = params.message.decode("utf-8")
+    signer = accounts[0]
+    params = MemoParams(signer=signer, message=data)
+    from apps.common.signverify import decode_message
+
+    memo = decode_message(params.message)
     from trezor.ui.layouts.lvgl import confirm_sol_memo
 
-    await confirm_sol_memo(
-        ctx, _(i18n_keys.TITLE__MEMO), _(i18n_keys.LIST_KEY__MESSAGE__COLON), memo
-    )
+    await confirm_sol_memo(ctx, _(i18n_keys.TITLE__MEMO), memo, str(signer))
