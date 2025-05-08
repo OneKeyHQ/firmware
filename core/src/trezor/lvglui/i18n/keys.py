@@ -18,10 +18,10 @@ TITLE__RESTORE_WALLET = 5
 BUTTON__CANCEL = 6
 # Confirm
 BUTTON__CONFIRM = 7
-# Using a strong PIN to protects your wallet from unauthorized physical access
-# .
+# Using a strong PIN to protect your wallet from unauthorized physical access.
 CHECK__SETUP_SET_A_PIN__1 = 8
-# Keeping your PIN secured, be sure to store it separate from recovery phrase.
+# Keep your PIN secure, and be sure to store it separately from your recovery
+# phrase.
 CHECK__SETUP_SET_A_PIN__2 = 9
 # Set a PIN
 TITLE__SET_A_PIN = 10
