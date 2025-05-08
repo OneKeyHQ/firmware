@@ -5,7 +5,7 @@
 #include "ethereum_tokens_onekey.h"
 
 const TokenType tokens[TOKENS_COUNT] = {
-% for t in supported_on("trezor1", erc20):
+% for t in sorted(erc20, key=lambda t: t.chain_id):
 	{${"{:>2}".format(t.chain_id)}, ${c_str(t.address_bytes)}, " ${ascii(t.symbol)}", ${t.decimals}}, // ${t.chain} / ${t.name}
 % endfor
 };

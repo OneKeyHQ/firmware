@@ -1,0 +1,102 @@
+{
+  "name": "Boba Network",
+  "chain": "Boba",
+  "tokens":
+  [
+    {
+      "_id": "62e8a3d58edb7c3c91a56cfc",
+      "name": "BobaDoge",
+      "symbol": "BDoge",
+      "address": "0x121636c43e96d97ab00b6c6994cddebef27de1c7",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-288/0x121636C43E96D97AB00B6c6994cDDEBEf27dE1C7.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "288",
+      "source": [
+        "Boba Community TL",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "bobadoge",
+      "createdAt": "2022-08-02T04:11:01.909Z",
+      "updatedAt": "2022-09-16T16:46:54.125Z",
+      "__v": 0,
+      "marketCap": 0
+    },
+    {
+      "_id": "62e8a3d58edb7c3c91a56d02",
+      "name": "Brewery",
+      "symbol": "BRE",
+      "address": "0x3a93bd0fa10050d206370eea53276542a105c885",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-288/0x3A93bD0fA10050d206370eeA53276542A105C885.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "288",
+      "source": [
+        "Boba Community TL",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "boba-brewery",
+      "createdAt": "2022-08-02T04:11:01.914Z",
+      "updatedAt": "2022-09-16T16:46:54.132Z",
+      "__v": 0,
+      "marketCap": 0
+    },
+    {
+      "_id": "62e8a3d58edb7c3c91a56d11",
+      "name": "Shibui",
+      "symbol": "SB",
+      "address": "0xf08ad7c3f6b1c6843ba027ad54ed8ddb6d71169b",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-288/0xF08AD7C3f6b1c6843ba027AD54Ed8DDB6D71169b.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "288",
+      "source": [
+        "Boba Community TL",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "shibui-dao",
+      "createdAt": "2022-08-02T04:11:01.923Z",
+      "updatedAt": "2022-09-16T16:46:54.141Z",
+      "__v": 0,
+      "marketCap": 0
+    },
+    {
+      "_id": "62e8a3d58edb7c3c91a56d0b",
+      "name": "K\u014dy\u014d Token",
+      "symbol": "KYO",
+      "address": "0x618cc6549ddf12de637d46cddadafc0c2951131c",
+      "decimals": 18,
+      "logoURI": "https://common.onekey-asset.com/token/evm-288/0x618CC6549ddf12de637d46CDDadaFC0C2951131C.png",
+      "impl": "evm",
+      "status": "LISTED",
+      "verified": true,
+      "security": false,
+      "addToIndex": false,
+      "chainId": "288",
+      "source": [
+        "Boba Community TL",
+        "Coingecko"
+      ],
+      "checked": true,
+      "coingeckoId": "koyo",
+      "createdAt": "2022-08-02T04:11:01.920Z",
+      "updatedAt": "2022-09-16T16:46:54.138Z",
+      "__v": 0
+    }
+  ]
+}
