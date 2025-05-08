@@ -4165,7 +4165,7 @@ bool layoutTransactionSign(const char *chain_name, uint64_t chain_id,
   (void)signer;
   (void)recipient;
   bool result = false, has_chain_id = false;
-  int index = 0, sub_index = 0, tokenid_len = 0, token_id_rowcount = 0;
+  int index = 0, sub_index = 0;
   int i, y = 0, bar_heght, bar_start = 12, bar_end = 52;
   uint8_t key = KEY_NULL;
   uint8_t max_index = 3;
@@ -4182,10 +4182,10 @@ bool layoutTransactionSign(const char *chain_name, uint64_t chain_id,
   if (strlen(to_str) / rowlen) to_str_rowcount++;
   // if (strlen(signer) / rowlen) signer_rowcount++;
 
-  if (token_id) {
-    tokenid_len = strlen(token_id);
-    token_id_rowcount = tokenid_len / rowlen + 1;
-  }
+  // if (token_id) {
+  //   tokenid_len = strlen(token_id);
+  //   // token_id_rowcount = tokenid_len / rowlen + 1;
+  // }
   if (strncmp(chain_name, "EVM", 3) == 0) {
     has_chain_id = true;
     max_index++;
@@ -4221,7 +4221,9 @@ bool layoutTransactionSign(const char *chain_name, uint64_t chain_id,
   resp.has_code = true;
   resp.code = ButtonRequestType_ButtonRequest_SignTx;
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
-
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 refresh_menu:
   layoutSwipe();
   oledClear();
@@ -4390,6 +4392,16 @@ refresh_menu:
   oledRefresh();
 
   key = protectWaitKey(0, 0);
+#if !EMULATOR
+  if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+    if (isLongPress(KEY_UP)) {
+      key = KEY_UP;
+    } else if (isLongPress(KEY_DOWN)) {
+      key = KEY_DOWN;
+    }
+    delay_ms(75);
+  }
+#endif
   switch (key) {
     case KEY_UP:
       if (sub_index > 0) {
@@ -4397,22 +4409,16 @@ refresh_menu:
       }
       goto refresh_menu;
     case KEY_DOWN:
-      if ((has_chain_id == false && len > 0 && index == 3 &&
+      if ((has_chain_id == false && len > 0 && index == 2 &&
            sub_index < data_rowcount - 4) ||
-          (has_chain_id == true && len > 0 && index == 4 &&
+          (has_chain_id == true && len > 0 && index == 3 &&
            sub_index < data_rowcount - 4)) {
         sub_index++;
       }
-      if ((has_chain_id == false && token_transfer && token_id && index == 2 &&
-           sub_index < token_id_rowcount - 3) ||
-          (has_chain_id == true && token_transfer && token_id && index == 3 &&
-           sub_index < token_id_rowcount - 3)) {  // token_id
-        sub_index++;
-      }
 
-      if ((has_chain_id == false && 1 == index && token_id == NULL &&
+      if ((has_chain_id == false && 0 == index && token_id == NULL &&
            sub_index < to_str_rowcount - 3) ||
-          (has_chain_id == true && 2 == index && token_id == NULL &&
+          (has_chain_id == true && 1 == index && token_id == NULL &&
            sub_index < to_str_rowcount - 3)) {  // To
         sub_index++;
       }
@@ -4440,7 +4446,9 @@ refresh_menu:
     default:
       break;
   }
-
+#if !EMULATOR
+  enableLongPress(false);
+#endif
   return result;
 }
 
