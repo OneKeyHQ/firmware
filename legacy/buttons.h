@@ -123,4 +123,5 @@ bool isLongPress(uint8_t key);
     default:                                            \
       break;                                            \
   }                                                     \
+  enableLongPress(false);                               \
   return result;

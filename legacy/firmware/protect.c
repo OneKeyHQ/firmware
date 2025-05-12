@@ -820,6 +820,12 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     }
 #if !EMULATOR
     if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
+      if (isLongPress(KEY_UP)) {
+        key = KEY_UP;
+      } else if (isLongPress(KEY_DOWN)) {
+        key = KEY_DOWN;
+      }
+      delay_ms(50);
       break;
     }
 #endif

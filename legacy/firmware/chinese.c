@@ -129,6 +129,7 @@ void oledDrawStringRightAdapter(int x, int y, const char *text, uint8_t font) {
 }
 #include "memzero.h"
 #include "util.h"
+extern void drawScrollbar_ext(int pages, int index, int bar_start);
 
 uint8_t oledDrawPageableStringAdapter(int x, int y, const char *text,
                                       uint8_t font, const BITMAP *btn_no_icon,
@@ -180,7 +181,7 @@ uint8_t oledDrawPageableStringAdapter(int x, int y, const char *text,
       }
     }
     // scrollbar
-    drawScrollbar(rowcount - 2, index);
+    drawScrollbar_ext(rowcount - 2, index, y1);
     // bottom button
     layoutButtonNoAdapter(NULL, btn_no_icon);
     layoutButtonYesAdapter(NULL, btn_yes_icon);

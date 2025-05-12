@@ -669,13 +669,11 @@ refresh_layout:
   if (0 == index) {
     oledDrawStringAdapter(0, 13, _("Asset Fingerprint:"), FONT_STANDARD);
     oledDrawStringAdapter(0, 13 + 10, fingerprint, FONT_STANDARD);
-    oledDrawStringAdapter(0, 13 + 30, _("Token Amount:"), FONT_STANDARD);
     oledDrawBitmap(3 * OLED_WIDTH / 4 - 8, OLED_HEIGHT - 8,
                    &bmp_bottom_middle_arrow_down);
   } else {
-    oledDrawStringAdapter(0, 13, fingerprint, FONT_STANDARD);
-    oledDrawStringAdapter(0, 13 + 20, _("Token Amount:"), FONT_STANDARD);
-    oledDrawStringAdapter(0, 13 + 30, amount, FONT_STANDARD);
+    oledDrawStringAdapter(0, 13, _("Token Amount:"), FONT_STANDARD);
+    oledDrawStringAdapter(0, 13 + 10, amount, FONT_STANDARD);
     oledDrawBitmap(OLED_WIDTH / 4, OLED_HEIGHT - 8,
                    &bmp_bottom_middle_arrow_up);
   }
@@ -805,8 +803,16 @@ bool txHashBuilder_addOutput(const CardanoTxOutput *output) {
   if (!get_address_bytes(output, address_bytes, &address_bytes_len))
     return false;
   bool has_datum_hash = output->has_datum_hash && output->datum_hash.size > 0;
-
+  bool has_inline_datum =
+      output->has_inline_datum_size && output->inline_datum_size > 0;
+  bool has_reference_script =
+      output->has_reference_script_size && output->reference_script_size > 0;
+  ada_signer.output_type = output->format;
   if (output->format == CardanoTxOutputSerializationFormat_ARRAY_LEGACY) {
+    if (has_inline_datum || has_reference_script) {
+      fsm_sendFailure(FailureType_Failure_ProcessError, "Invalid output");
+      return false;
+    }
     BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, output_items_count);
 
     BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, address_bytes_len);
@@ -845,18 +851,13 @@ bool txHashBuilder_addOutput(const CardanoTxOutput *output) {
     BUILDER_APPEND_DATA(address_bytes, address_bytes_len);
 
     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, BABBAGE_OUTPUT_KEY_AMOUNT);
-    bool has_inline_datum =
-        output->has_inline_datum_size && output->inline_datum_size > 0;
-    bool has_reference_script =
-        output->has_reference_script_size && output->reference_script_size > 0;
+
     if (output->asset_groups_count == 0) {
       BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, output->amount);
-      if (has_datum_hash || has_inline_datum) {
+      if (has_datum_hash) {
         BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
                             BABBAGE_OUTPUT_KEY_DATUM_OPTION);
         BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
-      }
-      if (has_datum_hash) {
         BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, BABBAGE_OUTPUT_KEY_DATUM_HASH);
         BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, output->datum_hash.size);
         BUILDER_APPEND_DATA(output->datum_hash.bytes, output->datum_hash.size);
@@ -864,6 +865,9 @@ bool txHashBuilder_addOutput(const CardanoTxOutput *output) {
         ada_signer.inline_datum_size = 0;
         ada_signer.remainingInlineDatumChunksCount = 0;
       } else if (has_inline_datum) {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+                            BABBAGE_OUTPUT_KEY_DATUM_OPTION);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
         BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
                             BABBAGE_OUTPUT_KEY_INLINE_DATUM);
         BUILDER_APPEND_CBOR(CBOR_TYPE_TAG, CBOR_TAG_EMBEDDED_CBOR_BYTE_STRING);
@@ -879,19 +883,15 @@ bool txHashBuilder_addOutput(const CardanoTxOutput *output) {
         ada_signer.datum_hash_size = 0;
       }
       if (has_reference_script) {
-        if (!has_datum_hash) {
-          BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
-                              BABBAGE_OUTPUT_KEY_REFERENCE_SCRIPT);
-          BUILDER_APPEND_CBOR(CBOR_TYPE_TAG,
-                              CBOR_TAG_EMBEDDED_CBOR_BYTE_STRING);
-          BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, output->reference_script_size);
-          ada_signer.outputState = STATE_OUTPUT_REFERENCE_SCRIPT_CHUNKS;
-        } else {
+        if (!has_inline_datum) {
           ada_signer.outputState = STATE_OUTPUT_REFERENCE_SCRIPT;
         }
         ada_signer.reference_script_size = output->reference_script_size;
         ada_signer.remainingReferenceScriptChunksCount =
             DIV_ROUND_UP(output->reference_script_size, MAX_CHUNK_SIZE);
+      } else {
+        ada_signer.remainingReferenceScriptChunksCount = 0;
+        ada_signer.reference_script_size = 0;
       }
       if (ada_signer.remainingOutputs == 0 && !has_inline_datum &&
           !has_reference_script) {
@@ -1008,19 +1008,27 @@ bool txHashBuilder_addToken(const CardanoToken *msg) {
   if (is_output_state) {
     if ((ada_signer.remainingOutputAssetTokensCount == 0) &&
         (ada_signer.remainingOutputAssetGroupsCount == 0)) {
-      if (ada_signer.datum_hash_size > 0 || ada_signer.inline_datum_size > 0) {
+      if (ada_signer.datum_hash_size > 0) {
+        if (ada_signer.output_type ==
+            CardanoTxOutputSerializationFormat_MAP_BABBAGE) {
+          BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+                              BABBAGE_OUTPUT_KEY_DATUM_OPTION);
+          BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+          BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+                              BABBAGE_OUTPUT_KEY_DATUM_HASH);
+          ada_signer.outputState =
+              ada_signer.remainingReferenceScriptChunksCount > 0
+                  ? STATE_OUTPUT_REFERENCE_SCRIPT
+                  : STATE_OUTPUT_FINISHED;
+        } else {
+          ada_signer.outputState = STATE_OUTPUT_FINISHED;
+        }
+        BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, ada_signer.datum_hash_size);
+        BUILDER_APPEND_DATA(ada_signer.datum_hash, ada_signer.datum_hash_size);
+      } else if (ada_signer.inline_datum_size > 0) {
         BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
                             BABBAGE_OUTPUT_KEY_DATUM_OPTION);
         BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
-      }
-      if (ada_signer.datum_hash_size > 0) {
-        BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, ada_signer.datum_hash_size);
-        BUILDER_APPEND_DATA(ada_signer.datum_hash, ada_signer.datum_hash_size);
-        ada_signer.outputState =
-            ada_signer.remainingReferenceScriptChunksCount > 0
-                ? STATE_OUTPUT_REFERENCE_SCRIPT
-                : STATE_OUTPUT_FINISHED;
-      } else if (ada_signer.inline_datum_size > 0) {
         BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
                             BABBAGE_OUTPUT_KEY_INLINE_DATUM);
         BUILDER_APPEND_CBOR(CBOR_TYPE_TAG, CBOR_TAG_EMBEDDED_CBOR_BYTE_STRING);

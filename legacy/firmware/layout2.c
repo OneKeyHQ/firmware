@@ -1379,6 +1379,7 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
 void drawScrollbar(int pages, int index) {
   int i, bar_start = 12, bar_end = 52;
   int bar_heght = 40 - 2 * (pages - 1);
+  if (bar_heght < 6) bar_heght = 6;
   for (i = bar_start; i < bar_end; i += 2) {  // 40 pixel
     oledDrawPixel(OLED_WIDTH - 1, i);
   }
@@ -1386,6 +1387,28 @@ void drawScrollbar(int pages, int index) {
        i < (bar_start + bar_heght + 2 * ((int)index)) - 1; i++) {
     oledDrawPixel(OLED_WIDTH - 1, i);
     oledDrawPixel(OLED_WIDTH - 2, i);
+  }
+}
+
+void drawScrollbar_ext(int pages, int index, int bar_start) {
+  int i, bar_end = 52;
+  int bar_heght = 40 - 2 * (pages - 1);
+  if (bar_heght < 6) bar_heght = 6;
+  for (i = bar_start; i < bar_end; i += 2) {  // 40 pixel
+    oledDrawPixel(OLED_WIDTH - 1, i);
+  }
+  if (index <= 12) {
+    for (i = bar_start + 2 * ((int)index);
+         i < (bar_start + bar_heght + 2 * ((int)index)) - 1; i++) {
+      oledDrawPixel(OLED_WIDTH - 1, i);
+      oledDrawPixel(OLED_WIDTH - 2, i);
+    }
+  } else {
+    for (i = bar_start + 2 * 12; i < (bar_start + bar_heght + 2 * (12 - 1)) - 1;
+         i++) {
+      oledDrawPixel(OLED_WIDTH - 1, i);
+      oledDrawPixel(OLED_WIDTH - 2, i);
+    }
   }
 }
 
@@ -5168,6 +5191,9 @@ bool layoutSignMessage(const char *chain_name, bool verify, const char *signer,
   resp.has_code = true;
   resp.code = ButtonRequestType_ButtonRequest_ProtectCall;
   msg_write(MessageType_MessageType_ButtonRequest, &resp);
+#if !EMULATOR
+  enableLongPress(true);
+#endif
 
 refresh_menu:
   layoutSwipe();
@@ -5193,6 +5219,7 @@ refresh_menu:
       }
       delay_ms(10);
     }
+    is_unsafe = false;
   }
   if (0 == index) {
     oledDrawStringAdapter(0, y, _("Signed by:"), FONT_STANDARD);
