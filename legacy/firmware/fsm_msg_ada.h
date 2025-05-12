@@ -35,9 +35,11 @@ void fsm_msgCardanoGetPublicKey(CardanoGetPublicKey *msg) {
   }
   HDNode node = {0};
   uint32_t fingerprint;
-  fsm_getCardanoIcaruNode(&node, msg->address_n, msg->address_n_count,
-                          &fingerprint);
-
+  if (!fsm_getCardanoIcaruNode(&node, msg->address_n, msg->address_n_count,
+                               &fingerprint)) {
+    layoutHome();
+    return;
+  }
   resp->node.depth = node.depth;
   resp->node.fingerprint = fingerprint;
   resp->node.child_num = node.child_num;
@@ -75,15 +77,14 @@ void fsm_msgCardanoGetAddress(CardanoGetAddress *msg) {
                               COIN_TYPE, ED25519_CARDANO_NAME, false),
         "Invalid path");
   }
-
-  CHECK_PIN
-
-  RESP_INIT(CardanoAddress);
   if (msg->derivation_type != CardanoDerivationType_ICARUS) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
                     "Only support ICARUS scheme");
     return;
   }
+  CHECK_PIN
+
+  RESP_INIT(CardanoAddress);
 
   if (!ada_get_address(msg, resp->address)) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
@@ -121,11 +122,14 @@ void fsm_msgCardanoGetAddress(CardanoGetAddress *msg) {
 void fsm_msgCardanoTxWitnessRequest(CardanoTxWitnessRequest *msg) {
   RESP_INIT(CardanoTxWitnessResponse);
   cardano_txwitness(msg, resp);
-  msg_write(MessageType_MessageType_CardanoTxWitnessResponse, resp);
   layoutHome();
 }
 
-void fsm_msgCardanoTxHostAck(void) { cardano_txack(); }
+void fsm_msgCardanoTxHostAck(void) {
+  if (!cardano_txack()) {
+    layoutHome();
+  }
+}
 
 void fsm_msgCardanoSignTxInit(CardanoSignTxInit *msg) {
   CHECK_INITIALIZED
@@ -137,85 +141,112 @@ void fsm_msgCardanoSignTxInit(CardanoSignTxInit *msg) {
 }
 
 void fsm_msgCardanoTxInput(CardanoTxInput *msg) {
-  txHashBuilder_addInput(msg);
-  hash_stage();
+  if (txHashBuilder_addInput(msg)) {
+    state_transmute();
+  }
 }
 
 void fsm_msgCardanoTxOutput(CardanoTxOutput *msg) {
-  txHashBuilder_addOutput(msg);
-  hash_stage();
+  if (txHashBuilder_addOutput(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
 
 void fsm_msgCardanoAssetGroup(CardanoAssetGroup *msg) {
-  txHashBuilder_addAssetGroup(msg);
-  hash_stage();
+  if (txHashBuilder_addAssetGroup(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
 
 void fsm_msgCardanoToken(CardanoToken *msg) {
-  txHashBuilder_addToken(msg);
-  hash_stage();
+  if (txHashBuilder_addToken(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
 
 void fsm_msgCardanoTxCertificate(CardanoTxCertificate *msg) {
-  if (!txHashBuilder_addCertificate(msg)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    "Invalid Certificate request");
-    layoutHome();
-    return;
+  if (txHashBuilder_addCertificate(msg)) {
+    state_transmute();
   }
-  hash_stage();
+  layoutHome();
 }
 
 void fsm_msgCardanoTxWithdrawal(CardanoTxWithdrawal *msg) {
-  if (!txHashBuilder_addWithdrawal(msg)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    "Invalid Withdrawal request");
-    layoutHome();
-    return;
+  if (txHashBuilder_addWithdrawal(msg)) {
+    state_transmute();
   }
-  hash_stage();
+  layoutHome();
 }
 
 void fsm_msgCardanoTxAuxiliaryData(CardanoTxAuxiliaryData *msg) {
   if (!txHashBuilder_addAuxiliaryData(msg)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError,
-                    "Invalid AuxiliaryData request");
     layoutHome();
-    return;
   }
 }
 
 void fsm_msgCardanoPoolOwner(CardanoPoolOwner *msg) {  // unsupport
   (void)msg;
+  fsm_sendFailure(FailureType_Failure_ProcessError, "Unsupported pool owner");
+  layoutHome();
 }
 void fsm_msgCardanoPoolRelayParameters(
     CardanoPoolRelayParameters *msg) {  // unsupport
   (void)msg;
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "Unsupported pool relay parameters");
+  layoutHome();
 }
 void fsm_msgCardanoGetNativeScriptHash(void) {  // unsupport
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "Unsupported native script hash");
+  layoutHome();
 }
-void fsm_msgCardanoTxMint(CardanoTxMint *msg) {  // unsupport
-  (void)msg;
+void fsm_msgCardanoTxMint(CardanoTxMint *msg) {
+  if (txHashBuilder_addMint(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
 void fsm_msgCardanoTxCollateralInput(
     CardanoTxCollateralInput *msg) {  // unsupport
   (void)msg;
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "Unsupported collateral input");
+  layoutHome();
 }
-void fsm_msgCardanoTxRequiredSigner(
-    CardanoTxRequiredSigner *msg) {  // unsupport
-  (void)msg;
+void fsm_msgCardanoTxRequiredSigner(CardanoTxRequiredSigner *msg) {
+  if (txHashBuilder_addRequiredSigner(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
-void fsm_msgCardanoTxInlineDatumChunk(
-    CardanoTxInlineDatumChunk *msg) {  // unsupport
-  (void)msg;
+void fsm_msgCardanoTxInlineDatumChunk(CardanoTxInlineDatumChunk *msg) {
+  if (txHashBuilder_addInlineDatumChunk(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
-void fsm_msgCardanoTxReferenceScriptChunk(
-    CardanoTxReferenceScriptChunk *msg) {  // unsupport
-  (void)msg;
+void fsm_msgCardanoTxReferenceScriptChunk(CardanoTxReferenceScriptChunk *msg) {
+  if (txHashBuilder_addReferenceScriptChunk(msg)) {
+    state_transmute();
+  }
+  layoutHome();
 }
 void fsm_msgCardanoTxReferenceInput(
     CardanoTxReferenceInput *msg) {  // unsupport
   (void)msg;
+  fsm_sendFailure(FailureType_Failure_ProcessError,
+                  "Unsupported reference input");
+  layoutHome();
+}
+
+static inline bool check_payment_path(const uint32_t *path, uint32_t count) {
+  const uint32_t ADA_PURPOSE = 1852 | PATH_HARDENED;
+
+  return (count == 5) && (path[0] == ADA_PURPOSE) && (path[3] <= 1);
 }
 
 void fsm_msgCardanoSignMessage(CardanoSignMessage *msg) {
@@ -224,7 +255,8 @@ void fsm_msgCardanoSignMessage(CardanoSignMessage *msg) {
   CHECK_INITIALIZED
 
   CHECK_PARAM(fsm_common_path_check(msg->address_n, msg->address_n_count,
-                                    COIN_TYPE, ED25519_CARDANO_NAME, false),
+                                    COIN_TYPE, ED25519_CARDANO_NAME, false) &&
+                  check_payment_path(msg->address_n, msg->address_n_count),
               "Invalid path");
   CHECK_PIN
 
@@ -232,13 +264,9 @@ void fsm_msgCardanoSignMessage(CardanoSignMessage *msg) {
     fsm_sendFailure(FailureType_Failure_ProcessError, "Invalid Networ ID");
     return;
   }
-  HDNode node = {0};
-  uint32_t fingerprint;
-  bool res = fsm_getCardanoIcaruNode(&node, msg->address_n,
-                                     msg->address_n_count, &fingerprint);
-  if (!res) return;
-
-  if (!ada_sign_messages(&node, msg, resp)) {
+  if (!ada_sign_messages(msg, resp)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError, "Failed to sign message");
+    layoutHome();
     return;
   }
 
