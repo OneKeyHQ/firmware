@@ -40,8 +40,9 @@ ECDHSessionKey.public_key               max_size:33
 
 
 BatchGetPublickeys.ecdsa_curve_name     max_size:32
-BatchGetPublickeys.paths                max_count:20
+BatchGetPublickeys.paths                max_count:10
 
 Path.address_n                          max_count:8
 
-EcdsaPublicKeys.public_keys             max_count:20 max_size:33
+EcdsaPublicKeys.public_keys             max_count:10 max_size:33
+EcdsaPublicKeys.hd_nodes                max_count:10
