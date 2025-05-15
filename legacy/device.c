@@ -11,7 +11,7 @@ static DeviceInfomation dev_info = {0};
 static bool serial_set = false;
 static bool factory_mode = false;
 
-static bool is_valid_ascii(const uint8_t *data, uint32_t size) {
+static bool is_valid_serial(const uint8_t *data, uint32_t size) {
   for (uint32_t i = 0; i < size; i++) {
     if (data[i] == 0) {
       break;
@@ -75,7 +75,7 @@ void device_init(void) {
       (char *)(FLASH_OTP_BASE + FLASH_OTP_DEVICE_SERIAL * FLASH_OTP_BLOCK_SIZE),
       sizeof(dev_info.serial));
 
-  if (is_valid_ascii((uint8_t *)dev_info.serial, FLASH_OTP_BLOCK_SIZE)) {
+  if (is_valid_serial((uint8_t *)dev_info.serial, FLASH_OTP_BLOCK_SIZE)) {
     serial_set = true;
   }
 
@@ -91,7 +91,7 @@ bool device_set_serial(char *dev_serial) {
     return false;
   }
 
-  if (!is_valid_ascii((uint8_t *)dev_serial, FLASH_OTP_BLOCK_SIZE - 1)) {
+  if (!is_valid_serial((uint8_t *)dev_serial, FLASH_OTP_BLOCK_SIZE - 1)) {
     return false;
   }
 

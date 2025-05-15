@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "protect.h"
 #include "buttons.h"
 #include "common.h"
@@ -773,6 +772,7 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
 
   protectAbortedByInitialize = false;
   protectAbortedBySleep = false;
+  protectAbortedByCancel = false;
   usbTiny(1);
   timer_out_set(timer_out_oper, time_out);
   while (1) {
@@ -784,7 +784,8 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
     if (time_out > 0 && timer_out_get(timer_out_oper) == 0) break;
     protectAbortedByInitialize =
         (msg_tiny_id == MessageType_MessageType_Initialize);
-    if (protectAbortedByInitialize) {
+    protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
+    if (protectAbortedByInitialize || protectAbortedByCancel) {
       msg_tiny_id = 0xFFFF;
       break;
     }
@@ -818,7 +819,6 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   usbTiny(0);
   if (protectAbortedByInitialize) {
     if (device_sleep_state) device_sleep_state = SLEEP_CANCEL_BY_USB;
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
 #if ONEKEY_MINI
     // open back light
     timer_enable_oc_output(TIM3, TIM_OC2);
@@ -829,17 +829,17 @@ uint8_t protectWaitKey(uint32_t time_out, uint8_t mode) {
   return key;
 }
 
-uint8_t protectWaitKeyValue(ButtonRequestType type, bool requset,
-                            uint32_t time_out, uint8_t mode) {
-  if (requset) {
-    ButtonRequest resp = {0};
-    memzero(&resp, sizeof(ButtonRequest));
-    resp.has_code = true;
-    resp.code = type;
-    msg_write(MessageType_MessageType_ButtonRequest, &resp);
-  }
-  return protectWaitKey(time_out, mode);
-}
+// uint8_t protectWaitKeyValue(ButtonRequestType type, bool requset,
+//                             uint32_t time_out, uint8_t mode) {
+//   if (requset) {
+//     ButtonRequest resp = {0};
+//     memzero(&resp, sizeof(ButtonRequest));
+//     resp.has_code = true;
+//     resp.code = type;
+//     msg_write(MessageType_MessageType_ButtonRequest, &resp);
+//   }
+//   return protectWaitKey(time_out, mode);
+// }
 
 const char *protectInputPin(const char *text, uint8_t min_pin_len,
                             uint8_t max_pin_len, bool cancel_allowed) {

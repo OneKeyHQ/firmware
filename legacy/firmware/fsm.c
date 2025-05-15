@@ -158,6 +158,38 @@ static uint32_t unlock_path = 0;
     return;                                                     \
   }
 
+bool button_request(const ButtonRequestType code) {
+  bool result = false;
+  ButtonRequest resp = {0};
+  resp.has_code = true;
+  resp.code = code;
+  usbTiny(1);
+  buttonUpdate();  // Clear button state
+  msg_write(MessageType_MessageType_ButtonRequest, &resp);
+  for (;;) {
+    usbPoll();
+
+    // check for ButtonAck
+    if (msg_tiny_id == MessageType_MessageType_ButtonAck) {
+      msg_tiny_id = 0xFFFF;
+      result = true;
+      break;
+    }
+
+    // check for Cancel / Initialize
+    protectAbortedByCancel = (msg_tiny_id == MessageType_MessageType_Cancel);
+    protectAbortedByInitialize =
+        (msg_tiny_id == MessageType_MessageType_Initialize);
+    if (protectAbortedByCancel || protectAbortedByInitialize) {
+      msg_tiny_id = 0xFFFF;
+      result = false;
+      break;
+    }
+  }
+  usbTiny(0);
+  return result;
+}
+
 void fsm_sendSuccess(const char *text) {
   RESP_INIT(Success);
   if (text) {
@@ -313,10 +345,13 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
                               const MultisigRedeemScriptType *multisig,
                               int multisig_index, uint32_t multisig_xpub_magic,
                               const CoinInfo *coin) {
-  bool button_request = true;
   int screen = 0, screens = 2;
   if (multisig) {
     screens += 2 * cryptoMultisigPubkeyCount(multisig);
+  }
+  if (!button_request(ButtonRequestType_ButtonRequest_Address)) {
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+    return false;
   }
   for (;;) {
     switch (screen) {
@@ -333,6 +368,10 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       case 1: {  // show QR code
         layoutAddress(address, desc, true, ignorecase, address_n,
                       address_n_count, address_is_account);
+        if (multisig) {
+          oledDrawBitmap(62, OLED_HEIGHT - 11, &bmp_button_down);
+          oledRefresh();
+        }
         break;
       }
       default: {  // show XPUBs
@@ -365,51 +404,36 @@ static bool fsm_layoutAddress(const char *address, const char *desc,
       }
     }
 #if ONEKEY_MINI
-    uint8_t key = protectWaitKeyValue(ButtonRequestType_ButtonRequest_Address,
-                                      button_request, 0, 0);
+    uint8_t key = protectWaitKey(0, 0);
 
     if (key == KEY_CONFIRM) {
       return true;
     }
-    if (g_bIsBixinAPP) button_request = false;
-    if (protectAbortedByCancel || protectAbortedByInitialize) {
+    if (protectAbortedByCancel || protectAbortedByInitialize ||
+        protectAbortedBySleep || protectAbortedByTimeout) {
+      if (protectAbortedBySleep) {
+        protectAbortedBySleep = false;
+      }
       fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return false;
-    } else if (protectAbortedByTimeout) {
-      layoutHome();
-      return false;
-    } else if (protectAbortedBySleep) {
-      protectAbortedBySleep = false;
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
       return false;
     }
-    if (screen % 2) {
-      if (key == KEY_UP) {
-        screen = (screen + 1) % screens;
-      }
+    if (screen > 1) {
+      uint8_t setp = key == KEY_CANCEL ? 2 : 1;
+      screen = (screen + setp) % screens;
     } else {
-      if (key == KEY_DOWN) {
-        screen = (screen + 1) % screens;
+      if (screen % 2) {
+        if (key == KEY_UP) {
+          screen = (screen + 1) % 2;
+        }
+        if (key == KEY_DOWN && multisig) {
+          screen = (screen + 1) % screens;
+        }
+      } else {
+        if (key == KEY_DOWN) {
+          screen = (screen + 1) % 2;
+        }
       }
     }
-
-#else
-    if (protectButton_ex(ButtonRequestType_ButtonRequest_Address, false,
-                         button_request, 0)) {
-      return true;
-    }
-    if (g_bIsBixinAPP) button_request = false;
-    if (protectAbortedByCancel || protectAbortedByInitialize) {
-      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
-      layoutHome();
-      return false;
-    } else if (protectAbortedByTimeout) {
-      layoutHome();
-      return false;
-    }
-    screen = (screen + 1) % screens;
 #endif
   }
 }
