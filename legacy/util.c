@@ -77,7 +77,6 @@ void int2str(int64_t num, char *str) {
   uint2str(num, str + (num < 0));
 }
 
-
 bool check_all_ones(const void *data, int len) {
   if (!data) return false;
   uint8_t result = 0xff;

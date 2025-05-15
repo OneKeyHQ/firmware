@@ -66,7 +66,6 @@ void fsm_msgSolanaSignTx(const SolanaSignTx *msg) {
   layoutHome();
 }
 
-
 void fsm_msgSolanaSignOffChainMessage(const SolanaSignOffChainMessage *msg) {
   CHECK_INITIALIZED
   CHECK_PARAM(fsm_common_path_check(msg->address_n, msg->address_n_count,
@@ -90,7 +89,6 @@ void fsm_msgSolanaSignOffChainMessage(const SolanaSignOffChainMessage *msg) {
   solana_get_address_from_public_key(node->public_key + 1, address);
   layoutVerifyAddress(NULL, address);
   if (!protectButton(ButtonRequestType_ButtonRequest_Other, false)) {
-
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "user cancelled");
     layoutHome();
     return;
@@ -130,15 +128,17 @@ void fsm_msgSolanaSignUnsafeMessage(const SolanaSignUnsafeMessage *msg) {
                                     msg->address_n_count, NULL);
   if (!node) return;
   hdnode_fill_public_key(node);
-  layoutDialogSwipe(&bmp_icon_warning, _("Abort"), _("Continue"), NULL,
-                    _("Risk of phishing. Proceed only if you trust the source."), NULL, NULL, NULL, NULL, NULL);
+  layoutDialogSwipe(
+      &bmp_icon_warning, _("Abort"), _("Continue"), NULL,
+      _("Risk of phishing. Proceed only if you trust the source."), NULL, NULL,
+      NULL, NULL, NULL);
   uint8_t key = protectWaitKey(0, 1);
   if (key != KEY_CONFIRM) {
     fsm_sendFailure(FailureType_Failure_ActionCancelled, "user cancelled");
     layoutHome();
     return;
   }
-    // address
+  // address
   char address[45] = {0};
   solana_get_address_from_public_key(node->public_key + 1, address);
   layoutVerifyAddress(NULL, address);

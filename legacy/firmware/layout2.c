@@ -948,7 +948,6 @@ void layoutConfirmOmni(const uint8_t *data, uint32_t size) {
                     NULL);
 }
 
-
 void layoutConfirmOpReturn(const uint8_t *data, uint32_t size) {
   const char **str = NULL;
   if (!is_valid_ascii(data, size)) {

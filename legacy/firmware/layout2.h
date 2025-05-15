@@ -137,7 +137,6 @@ const char **split_message(const uint8_t *msg, uint32_t len, uint32_t rowlen);
 const char **split_message_hex(const uint8_t *msg, uint32_t len);
 const char **format_tx_message(const char *chain_name);
 
-
 void layoutQRCode(const char *index, const BITMAP *bmp_up,
                   const BITMAP *bmp_down, const char *title, const char *text);
 

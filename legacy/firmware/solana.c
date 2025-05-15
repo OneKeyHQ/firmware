@@ -176,13 +176,12 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   msg_write(MessageType_MessageType_SolanaSignedTx, resp);
 }
 
-
 //=====================Offchain Message Signing=====================
 /**
  * Prepare the message for signing
  */
 static void prepare_message(const SolanaSignOffChainMessage *msg,
-                     const uint8_t *public_key, BufferWriter *writer) {
+                            const uint8_t *public_key, BufferWriter *writer) {
   write_bytes(_SIGN_DOMAIN, 16, writer);
   write_bytes((uint8_t *)&msg->message_version, 1, writer);
   if (msg->has_application_domain) {

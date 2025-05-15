@@ -640,9 +640,9 @@ bool txHashBuilder_addOutput(const CardanoTxOutput *output) {
     return false;
   bool has_datum_hash = output->has_datum_hash && output->datum_hash.size > 0;
   bool has_inline_datum =
-        output->has_inline_datum_size && output->inline_datum_size > 0;
-    bool has_reference_script =
-        output->has_reference_script_size && output->reference_script_size > 0;
+      output->has_inline_datum_size && output->inline_datum_size > 0;
+  bool has_reference_script =
+      output->has_reference_script_size && output->reference_script_size > 0;
   ada_signer.output_format = output->format;
   if (output->format == CardanoTxOutputSerializationFormat_ARRAY_LEGACY) {
     if (has_inline_datum || has_reference_script) {
