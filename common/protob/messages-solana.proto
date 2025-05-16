@@ -6,6 +6,21 @@ option java_package = "com.satoshilabs.trezor.lib.protobuf";
 option java_outer_classname = "TrezorMessageSolana";
 
 /**
+ * Message version for Solana SignMessage
+ */
+enum SolanaOffChainMessageVersion {
+    MESSAGE_VERSION_0 = 0;
+}
+
+/**
+ * Message format for Solana SignMessage
+ */
+enum SolanaOffChainMessageFormat {
+    V0_RESTRICTED_ASCII = 0;
+    V0_LIMITED_UTF8 = 1;
+}
+
+/**
  * Request: Address at the specified index
  * @start
  * @next SolanaAddress
@@ -20,7 +35,7 @@ message SolanaGetAddress {
  * @end
  */
 message SolanaAddress {
-    optional string address = 1;                // Address in Solana format (base58 of a pubkey)
+    required string address = 1;                // Address in Solana format (base58 of a pubkey)
 }
 
 /**
@@ -38,5 +53,39 @@ message SolanaSignTx {
  * @end
  */
 message SolanaSignedTx {
-    optional bytes signature = 1;           // the signature of the raw transaction
+    required bytes signature = 1;           // the signature of the raw transaction
+}
+
+/**
+ * Request: ask device to sign a off-chain message
+ * @start
+ * @next SolanaMessageSignature
+ * @next Failure
+ */
+message SolanaSignOffChainMessage {
+    repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
+    required bytes message = 2;             // the message to sign
+    optional SolanaOffChainMessageVersion message_version = 3[default = MESSAGE_VERSION_0];
+    optional SolanaOffChainMessageFormat message_format = 4[default = V0_RESTRICTED_ASCII];
+    optional bytes application_domain = 5;  // application domain must be 32 bytes
+}
+
+/**
+ * Request: ask device to sign arbitrary message except valid solana transaction
+ * @start
+ * @next SolanaMessageSignature
+ * @next Failure
+ */
+message SolanaSignUnsafeMessage {
+    repeated uint32 address_n = 1;          // BIP-32 path to derive the key from master node
+    required bytes message = 2;             // the message to sign
+}
+
+/**
+ * Response: signature for message signing
+ * @end
+ */
+message SolanaMessageSignature {
+    required bytes signature = 1;           // the signature of the message
+    optional bytes public_key = 2;          // the public key of the signer
 }

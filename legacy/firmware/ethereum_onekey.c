@@ -343,7 +343,7 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
   memcpy(pad_val + (32 - value_len), value, value_len);
   bn_read_be(pad_val, &val);
 
-  char amount[32] = {0};
+  char amount[64] = {0};
   if (token == NULL) {
     if (bn_is_zero(&val)) {
       strcpy(amount, _("message"));
@@ -355,7 +355,7 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
   }
 
   char _to1[30] = "to ____________";
-  char _to2[30] = "_______________";
+  char _to2[32] = "_______________";
   char _to3[] = "_______________?";
 
   if (to_len) {
@@ -376,6 +376,8 @@ static void layoutEthereumConfirmTx(const uint8_t *to, uint32_t to_len,
     if (oledStringWidthAdapter(amount, FONT_STANDARD) > (OLED_WIDTH - 20)) {
       memcpy(_to1 + 3, to_str, 12);
       memcpy(_to2, to_str + 12, 30);
+      _to2[30] = '?';
+      _to2[31] = '\0';
     } else {
       memcpy(_to1 + 3, to_str, 12);
       memcpy(_to2, to_str + 12, 15);

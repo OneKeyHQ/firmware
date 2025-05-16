@@ -15,6 +15,13 @@ static const uint8_t APTOS_RAW_TX_PREFIX[32] = {
     54,  67,  169, 188, 111, 102, 147, 189, 220, 26,  159,
     236, 158, 103, 74,  70,  30,  170, 0,   177, 147};
 
+// Prefix_bytes with SHA3_256 hash bytes of string
+// `APTOS::RawTransactionWithData`
+static const uint8_t APTOS_RAW_TX_WITH_DATA_PREFIX[32] = {
+    94,  250, 60,  79,  2,   248, 58,  15,  75,  45,  105,
+    252, 149, 198, 7,   204, 2,   130, 92,  196, 231, 190,
+    83,  110, 240, 153, 45,  240, 80,  217, 230, 124};
+
 static const char *MESSAGE_PREFIX = "APTOS\n";
 
 void aptos_get_address_from_public_key(const uint8_t *public_key,
@@ -45,7 +52,11 @@ void aptos_sign_tx(const AptosSignTx *msg, const HDNode *node,
   }
 
   uint8_t buf[sizeof(AptosSignTx_raw_tx_t) + 32] = {0};
-  memcpy(buf, APTOS_RAW_TX_PREFIX, 32);
+  memcpy(buf,
+         msg->tx_type == AptosTransactionType_WITH_DATA
+             ? APTOS_RAW_TX_WITH_DATA_PREFIX
+             : APTOS_RAW_TX_PREFIX,
+         32);
   memcpy(buf + 32, msg->raw_tx.bytes, msg->raw_tx.size);
   ed25519_sign(buf, msg->raw_tx.size + 32, node->private_key,
                resp->signature.bytes);

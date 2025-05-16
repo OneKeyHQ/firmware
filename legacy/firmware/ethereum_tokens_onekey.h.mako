@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-<% erc20_list = list(supported_on("trezor1", erc20)) %>\
+<% erc20_list = list(erc20) %>\
 #define TOKENS_COUNT ${len(erc20_list)}
 
 typedef struct {
