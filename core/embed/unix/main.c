@@ -495,7 +495,7 @@ MP_NOINLINE int main_(int argc, char **argv) {
 #endif
 
 #if MICROPY_ENABLE_PYSTACK
-  static mp_obj_t pystack[1024];
+  static mp_obj_t pystack[4096];
   mp_pystack_init(pystack, &pystack[MP_ARRAY_SIZE(pystack)]);
 #endif
 
