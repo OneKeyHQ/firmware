@@ -19,10 +19,10 @@ let
     sha256 = "02s3qkb6kz3ndyx7rfndjbvp4vlwiqc42fxypn3g6jnc0v5jyz95";
   }) { };
   # commit emulator works fine
-  # sdlnixpkgs = import (builtins.fetchTarball {
-  #   url = "https://github.com/NixOS/nixpkgs/archive/1882c6b7368fd284ad01b0a5b5601ef136321292.tar.gz";
-  #   sha256 = "0zg7ak2mcmwzi2kg29g4v9fvbvs0viykjsg2pwaphm1fi13s7s0i";
-  # }) { };
+  sdlnixpkgs = import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/1882c6b7368fd284ad01b0a5b5601ef136321292.tar.gz";
+    sha256 = "0zg7ak2mcmwzi2kg29g4v9fvbvs0viykjsg2pwaphm1fi13s7s0i";
+  }) { };
   moneroTests = nixpkgs.fetchurl {
     url = "https://github.com/ph4r05/monero/releases/download/v0.18.1.1-dev-tests-u18.04-02/trezor_tests";
     sha256 = "81424cfc3965abdc24de573274bf631337b52fd25cefc895513214c613fe05c9";
@@ -77,8 +77,6 @@ stdenvNoCC.mkDerivation ({
     oldPythonNixpkgs.python37
     oldPythonNixpkgs.python36
   ] ++ [
-    SDL2
-    SDL2_image
     bash
     check
     curl  # for connect tests
@@ -102,11 +100,15 @@ stdenvNoCC.mkDerivation ({
     zlib
     moreutils
   ] ++ lib.optionals (!stdenv.isDarwin) [
+    SDL2
+    SDL2_image
     autoPatchelfHook
     gcc11
     procps
     valgrind
   ] ++ lib.optionals (stdenv.isDarwin) [
+    sdlnixpkgs.SDL2
+    sdlnixpkgs.SDL2_image
     darwin.apple_sdk.frameworks.CoreAudio
     darwin.apple_sdk.frameworks.AudioToolbox
     darwin.apple_sdk.frameworks.ForceFeedback
