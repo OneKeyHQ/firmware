@@ -1216,7 +1216,7 @@ async def confirm_sol_token_transfer(
     amount: str,
     source_owner: str,
     fee_payer: str,
-    token_mint: str = None,
+    token_mint: str | None = None,
 ):
     from trezor.lvglui.scrs.template import SolTokenTransfer
 

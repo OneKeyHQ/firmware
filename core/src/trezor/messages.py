@@ -2546,12 +2546,14 @@ if TYPE_CHECKING:
     class BatchGetPublickeys(protobuf.MessageType):
         ecdsa_curve_name: "str"
         paths: "list[Path]"
+        include_node: "bool"
 
         def __init__(
             self,
             *,
             paths: "list[Path] | None" = None,
             ecdsa_curve_name: "str | None" = None,
+            include_node: "bool | None" = None,
         ) -> None:
             pass
 
@@ -2561,11 +2563,15 @@ if TYPE_CHECKING:
 
     class EcdsaPublicKeys(protobuf.MessageType):
         public_keys: "list[bytes]"
+        hd_nodes: "list[HDNodeType]"
+        root_fingerprint: "int | None"
 
         def __init__(
             self,
             *,
             public_keys: "list[bytes] | None" = None,
+            hd_nodes: "list[HDNodeType] | None" = None,
+            root_fingerprint: "int | None" = None,
         ) -> None:
             pass
 
@@ -5414,6 +5420,7 @@ if TYPE_CHECKING:
         show_display: "bool | None"
         prefix: "str"
         scheme: "str"
+        use_tweak: "bool"
 
         def __init__(
             self,
@@ -5422,6 +5429,7 @@ if TYPE_CHECKING:
             show_display: "bool | None" = None,
             prefix: "str | None" = None,
             scheme: "str | None" = None,
+            use_tweak: "bool | None" = None,
         ) -> None:
             pass
 
@@ -5449,6 +5457,7 @@ if TYPE_CHECKING:
         scheme: "str"
         prefix: "str"
         input_count: "int"
+        use_tweak: "bool"
 
         def __init__(
             self,
@@ -5458,6 +5467,7 @@ if TYPE_CHECKING:
             scheme: "str | None" = None,
             prefix: "str | None" = None,
             input_count: "int | None" = None,
+            use_tweak: "bool | None" = None,
         ) -> None:
             pass
 
