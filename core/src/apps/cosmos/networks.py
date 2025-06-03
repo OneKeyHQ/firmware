@@ -1,8 +1,24 @@
-from typing import Iterator
+from typing import TYPE_CHECKING
 
 from trezor.strings import format_amount
 
 from . import ICON, PRIMARY_COLOR
+
+if TYPE_CHECKING:
+    from typing import Iterator
+
+    # fmt: off
+    NetworkInfoTuple = tuple[
+        str,  # chain_id
+        str,  # chain_name
+        str,  # coin_denom
+        str,  # coin_minimal_denom
+        int,  # coin_decimals
+        str,  # hrp
+        str,  # icon
+        int,  # primary_color
+    ]
+    # fmt: on
 
 
 class NetworkInfo:
@@ -35,12 +51,12 @@ def getChainName(chainId: str) -> str | None:
     return n.chainName
 
 
-def retrieve_theme_by_hrp(hrp: str | None) -> tuple[int, str]:
-    if hrp is not None:
-        for n in _networks_iterator():
-            if n.hrp == hrp:
-                return (n.primary_color, n.icon)
-    return (PRIMARY_COLOR, ICON)
+def retrieve_theme_by_hrp(hrp: str | None) -> tuple[str, int, str]:
+    if hrp:
+        for _, chain_name, *_, _hrp, icon, primary_color in _networks_iterator():
+            if hrp == _hrp:
+                return (chain_name, primary_color, icon)
+    return ("Cosmos", PRIMARY_COLOR, ICON)
 
 
 def getChainHrp(chainId: str) -> str | None:
@@ -54,320 +70,339 @@ def getChainHrp(chainId: str) -> str | None:
 def formatAmont(chainId: str, amount: str, denom: str) -> str:
     n = by_chain_id(chainId)
     if n is None:
-        return amount + " " + denom
+        return f"{amount} {denom}"
 
     if denom == n.coinMinimalDenom:
-        sum = f"{format_amount(int(amount), n.coinDecimals)} {n.coinDenom}"
-        return sum
+        return f"{format_amount(int(amount), n.coinDecimals)} {n.coinDenom}"
 
-    return amount + " " + denom
+    return f"{amount} {denom}"
 
 
-def by_chain_id(chainId: str) -> "NetworkInfo" | None:
-    for n in _networks_iterator():
-        if n.chainId == chainId:
-            return n
+def by_chain_id(chainId: str) -> NetworkInfo | None:
+    for network_info in _networks_iterator():
+        if network_info[0] == chainId:
+            return NetworkInfo(*network_info)
     return None
 
 
-def _networks_iterator() -> Iterator[NetworkInfo]:
-    yield NetworkInfo(
-        chainId="cosmoshub-4",
-        chainName="Cosmos Hub",
-        coinDenom="ATOM",
-        coinMinimalDenom="uatom",
-        coinDecimals=6,
-        hrp="cosmos",
-        icon="A:/res/chain-atom.png",
-        primary_color=0xE0E0E0,
+def _networks_iterator() -> Iterator[NetworkInfoTuple]:
+    yield (
+        "cosmoshub-4",
+        "Cosmos Hub",
+        "ATOM",
+        "uatom",
+        6,
+        "cosmos",
+        "A:/res/chain-atom.png",
+        0xE0E0E0,
     )
-    yield NetworkInfo(
-        chainId="osmosis-1",
-        chainName="Osmosis",
-        coinDenom="OSMO",
-        coinMinimalDenom="uosmo",
-        coinDecimals=6,
-        hrp="osmo",
-        icon="A:/res/chain-osmo.png",
-        primary_color=0x4D4996,
+    yield (
+        "osmosis-1",
+        "Osmosis",
+        "OSMO",
+        "uosmo",
+        6,
+        "osmo",
+        "A:/res/chain-osmo.png",
+        0x4D4996,
     )
-    yield NetworkInfo(
-        chainId="secret-4",
-        chainName="Secret Network",
-        coinDenom="SCRT",
-        coinMinimalDenom="uscrt",
-        coinDecimals=6,
-        hrp="secret",
-        icon="A:/res/chain-scrt.png",
-        primary_color=0x626B75,
+    yield (
+        "secret-4",
+        "Secret Network",
+        "SCRT",
+        "uscrt",
+        6,
+        "secret",
+        "A:/res/chain-scrt.png",
+        0x626B75,
     )
-    yield NetworkInfo(
-        chainId="akashnet-2",
-        chainName="Akash",
-        coinDenom="AKT",
-        coinMinimalDenom="uakt",
-        coinDecimals=6,
-        hrp="akash",
-        icon="A:/res/chain-akt.png",
-        primary_color=0xFF414C,
+    yield (
+        "akashnet-2",
+        "Akash",
+        "AKT",
+        "uakt",
+        6,
+        "akash",
+        "A:/res/chain-akt.png",
+        0xFF414C,
     )
-    yield NetworkInfo(
-        chainId="crypto-org-chain-mainnet-1",
-        chainName="Crypto.org",
-        coinDenom="CRO",
-        coinMinimalDenom="basecro",
-        coinDecimals=8,
-        hrp="cro",
-        icon="A:/res/chain-cro.png",
-        primary_color=0x0F50AB,
+    yield (
+        "crypto-org-chain-mainnet-1",
+        "Crypto.org",
+        "CRO",
+        "basecro",
+        8,
+        "cro",
+        "A:/res/chain-cro.png",
+        0x0F50AB,
     )
-    yield NetworkInfo(
-        chainId="iov-mainnet-ibc",
-        chainName="Starname",
-        coinDenom="IOV",
-        coinMinimalDenom="uiov",
-        coinDecimals=6,
-        hrp="star",
-        icon="A:/res/chain-iov.png",
-        primary_color=0x5C67B0,
+    yield (
+        "iov-mainnet-ibc",
+        "Starname",
+        "IOV",
+        "uiov",
+        6,
+        "star",
+        "A:/res/chain-iov.png",
+        0x5C67B0,
     )
-    yield NetworkInfo(
-        chainId="sifchain-1",
-        chainName="Sifchain",
-        coinDenom="ROWAN",
-        coinMinimalDenom="rowan",
-        coinDecimals=18,
-        hrp="sif",
-        icon="A:/res/chain-rowan.png",
-        primary_color=0xF9DB6C,
+    yield (
+        "sifchain-1",
+        "Sifchain",
+        "ROWAN",
+        "rowan",
+        18,
+        "sif",
+        "A:/res/chain-rowan.png",
+        0xF9DB6C,
     )
-    yield NetworkInfo(
-        chainId="shentu-2.2",
-        chainName="Shentu",
-        coinDenom="CTK",
-        coinMinimalDenom="uctk",
-        coinDecimals=6,
-        hrp="certik",
-        icon="A:/res/chain-ctk.png",
-        primary_color=0xE5AE4D,
+    yield (
+        "shentu-2.2",
+        "Shentu",
+        "CTK",
+        "uctk",
+        6,
+        "certik",
+        "A:/res/chain-ctk.png",
+        0xE5AE4D,
     )
-    yield NetworkInfo(
-        chainId="irishub-1",
-        chainName="IRISnet",
-        coinDenom="IRIS",
-        coinMinimalDenom="uiris",
-        coinDecimals=6,
-        hrp="iaa",
-        icon="A:/res/chain-iris.png",
-        primary_color=0x4947BC,
+    yield (
+        "irishub-1",
+        "IRISnet",
+        "IRIS",
+        "uiris",
+        6,
+        "iaa",
+        "A:/res/chain-iris.png",
+        0x4947BC,
     )
-    yield NetworkInfo(
-        chainId="regen-1",
-        chainName="Regen",
-        coinDenom="REGEN",
-        coinMinimalDenom="uregen",
-        coinDecimals=6,
-        hrp="regen",
-        icon="A:/res/chain-regen.png",
-        primary_color=0x30A95B,
+    yield (
+        "regen-1",
+        "Regen",
+        "REGEN",
+        "uregen",
+        6,
+        "regen",
+        "A:/res/chain-regen.png",
+        0x30A95B,
     )
-    yield NetworkInfo(
-        chainId="core-1",
-        chainName="Persistence",
-        coinDenom="XPRT",
-        coinMinimalDenom="uxprt",
-        coinDecimals=6,
-        hrp="persistence",
-        icon="A:/res/chain-xprt.png",
-        primary_color=0xE50913,
+    yield (
+        "core-1",
+        "Persistence",
+        "XPRT",
+        "uxprt",
+        6,
+        "persistence",
+        "A:/res/chain-xprt.png",
+        0xE50913,
     )
-    yield NetworkInfo(
-        chainId="sentinelhub-2",
-        chainName="Sentinel",
-        coinDenom="DVPN",
-        coinMinimalDenom="udvpn",
-        coinDecimals=6,
-        hrp="sent",
-        icon="A:/res/chain-dvpn.png",
-        primary_color=0x0155FB,
+    yield (
+        "sentinelhub-2",
+        "Sentinel",
+        "DVPN",
+        "udvpn",
+        6,
+        "sent",
+        "A:/res/chain-dvpn.png",
+        0x0155FB,
     )
-    yield NetworkInfo(
-        chainId="ixo-4",
-        chainName="ixo",
-        coinDenom="IXO",
-        coinMinimalDenom="uixo",
-        coinDecimals=6,
-        hrp="ixo",
-        icon="A:/res/chain-ixo.png",
-        primary_color=0x00D2FF,
+    yield (
+        "ixo-4",
+        "ixo",
+        "IXO",
+        "uixo",
+        6,
+        "ixo",
+        "A:/res/chain-ixo.png",
+        0x00D2FF,
     )
-    yield NetworkInfo(
-        chainId="emoney-3",
-        chainName="e-Money",
-        coinDenom="NGM",
-        coinMinimalDenom="ungm",
-        coinDecimals=6,
-        hrp="emoney",
-        icon="A:/res/chain-ngm.png",
-        primary_color=0xCCF7EE,
+    yield (
+        "emoney-3",
+        "e-Money",
+        "NGM",
+        "ungm",
+        6,
+        "emoney",
+        "A:/res/chain-ngm.png",
+        0xCCF7EE,
     )
-    yield NetworkInfo(
-        chainId="agoric-3",
-        chainName="Agoric",
-        coinDenom="BLD",
-        coinMinimalDenom="ubld",
-        coinDecimals=6,
-        hrp="agoric",
-        icon="A:/res/chain-bld.png",
-        primary_color=0xD73252,
+    yield (
+        "agoric-3",
+        "Agoric",
+        "BLD",
+        "ubld",
+        6,
+        "agoric",
+        "A:/res/chain-bld.png",
+        0xD73252,
     )
-    yield NetworkInfo(
-        chainId="bostrom",
-        chainName="Bostrom",
-        coinDenom="BOOT",
-        coinMinimalDenom="boot",
-        coinDecimals=0,
-        hrp="bostrom",
-        icon="A:/res/chain-boot.png",
-        primary_color=0x00AF02,
+    yield (
+        "bostrom",
+        "Bostrom",
+        "BOOT",
+        "boot",
+        0,
+        "bostrom",
+        "A:/res/chain-boot.png",
+        0x00AF02,
     )
-    yield NetworkInfo(
-        chainId="juno-1",
-        chainName="Juno",
-        coinDenom="JUNO",
-        coinMinimalDenom="ujuno",
-        coinDecimals=6,
-        hrp="juno",
-        icon="A:/res/chain-juno.png",
-        primary_color=0xFF7B7C,
+    yield (
+        "juno-1",
+        "Juno",
+        "JUNO",
+        "ujuno",
+        6,
+        "juno",
+        "A:/res/chain-juno.png",
+        0xFF7B7C,
     )
-    yield NetworkInfo(
-        chainId="stargaze-1",
-        chainName="Stargaze",
-        coinDenom="STARS",
-        coinMinimalDenom="ustars",
-        coinDecimals=6,
-        hrp="stars",
-        icon="A:/res/chain-stars.png",
-        primary_color=0xDB2877,
+    yield (
+        "stargaze-1",
+        "Stargaze",
+        "STARS",
+        "ustars",
+        6,
+        "stars",
+        "A:/res/chain-stars.png",
+        0xDB2877,
     )
-    yield NetworkInfo(
-        chainId="axelar-dojo-1",
-        chainName="Axelar",
-        coinDenom="AXL",
-        coinMinimalDenom="uaxl",
-        coinDecimals=6,
-        hrp="axelar",
-        icon="A:/res/chain-axl.png",
-        primary_color=0x54607C,
+    yield (
+        "axelar-dojo-1",
+        "Axelar",
+        "AXL",
+        "uaxl",
+        6,
+        "axelar",
+        "A:/res/chain-axl.png",
+        0x54607C,
     )
-    yield NetworkInfo(
-        chainId="sommelier-3",
-        chainName="Sommelier",
-        coinDenom="SOMM",
-        coinMinimalDenom="usomm",
-        coinDecimals=6,
-        hrp="somm",
-        icon="A:/res/chain-somm.png",
-        primary_color=0xF26057,
+    yield (
+        "sommelier-3",
+        "Sommelier",
+        "SOMM",
+        "usomm",
+        6,
+        "somm",
+        "A:/res/chain-somm.png",
+        0xF26057,
     )
-    yield NetworkInfo(
-        chainId="umee-1",
-        chainName="Umee",
-        coinDenom="UMEE",
-        coinMinimalDenom="uumee",
-        coinDecimals=6,
-        hrp="umee",
-        icon="A:/res/chain-umee.png",
-        primary_color=0xDDB1FF,
+    yield (
+        "umee-1",
+        "Umee",
+        "UMEE",
+        "uumee",
+        6,
+        "umee",
+        "A:/res/chain-umee.png",
+        0xDDB1FF,
     )
-    yield NetworkInfo(
-        chainId="gravity-bridge-3",
-        chainName="Gravity Bridge",
-        coinDenom="GRAV",
-        coinMinimalDenom="ugraviton",
-        coinDecimals=6,
-        hrp="gravity",
-        icon="A:/res/chain-grav.png",
-        primary_color=0x2946B4,
+    yield (
+        "gravity-bridge-3",
+        "Gravity Bridge",
+        "GRAV",
+        "ugraviton",
+        6,
+        "gravity",
+        "A:/res/chain-grav.png",
+        0x2946B4,
     )
-    yield NetworkInfo(
-        chainId="tgrade-mainnet-1",
-        chainName="Tgrade",
-        coinDenom="TGD",
-        coinMinimalDenom="utgd",
-        coinDecimals=6,
-        hrp="tgrade",
-        icon="A:/res/chain-tgd.png",
-        primary_color=0x4F5D87,
+    yield (
+        "tgrade-mainnet-1",
+        "Tgrade",
+        "TGD",
+        "utgd",
+        6,
+        "tgrade",
+        "A:/res/chain-tgd.png",
+        0x4F5D87,
     )
-    yield NetworkInfo(
-        chainId="stride-1",
-        chainName="Stride",
-        coinDenom="STRD",
-        coinMinimalDenom="ustrd",
-        coinDecimals=6,
-        hrp="stride",
-        icon="A:/res/chain-strd.png",
-        primary_color=0xE6007A,
+    yield (
+        "stride-1",
+        "Stride",
+        "STRD",
+        "ustrd",
+        6,
+        "stride",
+        "A:/res/chain-strd.png",
+        0xE6007A,
     )
-    yield NetworkInfo(
-        chainId="evmos_9001-2",
-        chainName="Evmos",
-        coinDenom="EVMOS",
-        coinMinimalDenom="aevmos",
-        coinDecimals=18,
-        hrp="evmos",
-        icon="A:/res/chain-evmos.png",
-        primary_color=0xEC4C32,
+    yield (
+        "evmos_9001-2",
+        "Evmos",
+        "EVMOS",
+        "aevmos",
+        18,
+        "evmos",
+        "A:/res/chain-evmos.png",
+        0xEC4C32,
     )
-    yield NetworkInfo(
-        chainId="injective-1",
-        chainName="Injective",
-        coinDenom="INJ",
-        coinMinimalDenom="inj",
-        coinDecimals=18,
-        hrp="inj",
-        icon="A:/res/chain-ing.png",
-        primary_color=0x01A8FC,
+    yield (
+        "injective-1",
+        "Injective",
+        "INJ",
+        "inj",
+        18,
+        "inj",
+        "A:/res/chain-ing.png",
+        0x01A8FC,
     )
-    yield NetworkInfo(
-        chainId="kava_2222-10",
-        chainName="Kava",
-        coinDenom="KAVA",
-        coinMinimalDenom="ukava",
-        coinDecimals=6,
-        hrp="kava",
-        icon="A:/res/chain-kava.png",
-        primary_color=0xFF433E,
+    yield (
+        "kava_2222-10",
+        "Kava",
+        "KAVA",
+        "ukava",
+        6,
+        "kava",
+        "A:/res/chain-kava.png",
+        0xFF433E,
     )
-    yield NetworkInfo(
-        chainId="quicksilver-1",
-        chainName="Quicksilver",
-        coinDenom="QCK",
-        coinMinimalDenom="uqck",
-        coinDecimals=6,
-        hrp="quick",
-        icon="A:/res/chain-qck.png",
-        primary_color=0x858585,
+    yield (
+        "quicksilver-1",
+        "Quicksilver",
+        "QCK",
+        "uqck",
+        6,
+        "quick",
+        "A:/res/chain-qck.png",
+        0x858585,
     )
-    yield NetworkInfo(
-        chainId="fetchhub-4",
-        chainName="Fetch.ai",
-        coinDenom="FET",
-        coinMinimalDenom="afet",
-        coinDecimals=18,
-        hrp="fetch",
-        icon="A:/res/chain-fet.png",
-        primary_color=0x4C4CAE,
+    yield (
+        "fetchhub-4",
+        "Fetch.ai",
+        "FET",
+        "afet",
+        18,
+        "fetch",
+        "A:/res/chain-fet.png",
+        0x4C4CAE,
     )
-    yield NetworkInfo(
-        chainId="celestia",
-        chainName="Celestia",
-        coinDenom="TIA",
-        coinMinimalDenom="utia",
-        coinDecimals=6,
-        hrp="celestia",
-        icon="A:/res/chain-tia.png",
-        primary_color=0x802EF4,
+    yield (
+        "celestia",
+        "Celestia",
+        "TIA",
+        "utia",
+        6,
+        "celestia",
+        "A:/res/chain-tia.png",
+        0x802EF4,
+    )
+    yield (
+        "bbn-1",
+        "Babylon",
+        "BABY",
+        "ubbn",
+        6,
+        "bbn",
+        "A:/res/chain-baby.png",
+        0xCF6533,
+    )
+    yield (
+        "noble-1",
+        "Noble",
+        "USDC",
+        "uusdc",
+        6,
+        "noble",
+        "A:/res/chain-noble.png",
+        0x41498D,
     )

@@ -1713,6 +1713,7 @@ async def confirm_cosmos_tx(
     address: str | None,
     amount: str | None,
     br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
+    chain_name: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import CosmosTransactionOverview
 
@@ -1720,7 +1721,7 @@ async def confirm_cosmos_tx(
         interact(
             ctx,
             CosmosTransactionOverview(
-                _(i18n_keys.TITLE__STR_TRANSACTION).format("Cosmos"),
+                _(i18n_keys.TITLE__STR_TRANSACTION).format(chain_name or "Cosmos"),
                 title,
                 value,
                 amount,
@@ -1802,11 +1803,13 @@ async def confirm_cosmos_sign_common(
         CosmosLongValue,
     )
 
-    screen = CosmosSignCommon(chain_id, chain_name, signer, fee, title, value)
+    screen = CosmosSignCommon(
+        chain_id, chain_name, signer, fee, title, value, primary_color=ctx.primary_color
+    )
     await raise_if_cancelled(
         interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
     )
-    screen = CosmosSignContent(msgs_item)
+    screen = CosmosSignContent(msgs_item, primary_color=ctx.primary_color)
     await raise_if_cancelled(
         interact(ctx, screen, "cosmos_sign_common", ButtonRequestType.ProtectCall)
     )
@@ -1826,7 +1829,9 @@ async def confirm_cosmos_memo(
 ) -> None:
     from trezor.lvglui.scrs.template import BlobDisPlay
 
-    screen = BlobDisPlay(title, description, memo, None)
+    screen = BlobDisPlay(
+        title, description, memo, None, primary_color=ctx.primary_color
+    )
     await raise_if_cancelled(
         interact(ctx, screen, "cosmos_memo", ButtonRequestType.ProtectCall)
     )

@@ -1989,12 +1989,14 @@ class CosmosSignCommon(FullSizeWindow):
         fee: str,
         title: str,
         value: str,
+        primary_color: int | None = None,
     ):
         super().__init__(
             title,
             None,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         if chain_name is not None:
@@ -2022,12 +2024,14 @@ class CosmosSignContent(FullSizeWindow):
     def __init__(
         self,
         msgs_item: dict,
+        primary_color: int | None = None,
     ):
         super().__init__(
             _(i18n_keys.TITLE__CONTENT),
             None,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
+            primary_color=primary_color,
         )
         self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 48))
         for key, value in msgs_item.items():
