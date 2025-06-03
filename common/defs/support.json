@@ -4948,6 +4948,7 @@
       "tron:TRC20:USDT": "3.0.0",
       "tron:TRC20:WBTC": "3.0.0",
       "tron:TRC20:WBTT": "3.0.0",
+      "tron:TRC20:BTT": "4.11.0",
       "tron:TRC20:WIN": "3.0.0",
       "tron:TRC20:WTRX": "3.0.0"
     },
