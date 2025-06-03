@@ -673,6 +673,12 @@
       "createdAt": "2022-08-02T04:11:00.203Z",
       "updatedAt": "2022-09-16T16:46:52.000Z",
       "__v": 0
+    },
+    {
+      "name": "Frapped USDT",
+      "symbol": "fUSDT",
+      "address": "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+      "decimals": 18
     }
   ]
 }

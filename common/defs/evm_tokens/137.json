@@ -5,7 +5,7 @@
   [
     {
       "_id": "62e8a3d38edb7c3c91a55cbe",
-      "name": "Tether",
+      "name": "(PoS) Tether USD",
       "symbol": "USDT",
       "address": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
       "decimals": 6,
@@ -32,8 +32,8 @@
     },
     {
       "_id": "62e8a3d38edb7c3c91a55cbb",
-      "name": "USD Coin",
-      "symbol": "USDC",
+      "name": "USD Coin (PoS)",
+      "symbol": "USDC.e",
       "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
       "decimals": 6,
       "logoURI": "https://common.onekey-asset.com/token/evm-1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.jpg",
@@ -1240,6 +1240,12 @@
       "updatedAt": "2022-09-16T16:46:51.463Z",
       "__v": 0,
       "marketCap": 0
+    },
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "address": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "decimals": 6
     }
   ]
 }
