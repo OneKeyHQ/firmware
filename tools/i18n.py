@@ -76,7 +76,7 @@ def write_langfile(lang_map):
         f.write("# according to ISO_639-1 and ISO-3166 country codes\n")
         f.write("\n".join(content) + "\n")
         f.write("\nlangs_keys = [x[0] for x in langs]\n")
-        f.write("\nlangs_values = \"\\n\".join([v[1] for v in langs])\n")
+        f.write('\nlangs_values = "\\n".join([v[1] for v in langs])\n')
 
 
 def main():
@@ -91,9 +91,22 @@ def main():
     for lang_display_text in languages_map.values():
         CHARS_NORMAL.update(c for c in lang_display_text if len(c.encode("UTF-8")) > 1)
 
-    all_keys = client.keys(
-        LOKALISE_PROJECT_ID, {"include_translations": 1, "limit": 1000}
-    ).items
+    all_keys = []
+    page = 1
+    PAGE_SIZE = 1000
+
+    while True:
+        response = client.keys(
+            LOKALISE_PROJECT_ID,
+            {"include_translations": 1, "limit": PAGE_SIZE, "page": page},
+        )
+        items = response.items
+        if not items:
+            break
+        all_keys.extend(items)
+        if len(items) < PAGE_SIZE:
+            break
+        page += 1
     all_keys.sort(key=lambda k: k.key_id)
 
     index = 0
@@ -144,6 +157,8 @@ def main():
         chars_list = list(chars[0])
         chars_list.sort()
         print(chars[1], "".join(chars_list))
+    print(f"total keys: {len(all_keys)}")
+
 
 
 if __name__ == "__main__":

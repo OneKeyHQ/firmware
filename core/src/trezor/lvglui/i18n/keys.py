@@ -152,7 +152,7 @@ TITLE__ENTER_OLD_PIN = 67
 BUTTON__CLOSE = 68
 # The PIN you entered is incorrect.
 SUBTITLE__SET_PIN_WRONG_PIN = 69
-# Wrong PIN
+# Incorrect PIN
 TITLE__WRONG_PIN = 70
 # PIN Changed
 TITLE__PIN_CHANGED = 71
@@ -170,6 +170,7 @@ TITLE__ENTER_PIN = 76
 MSG__INCORRECT_PIN_STR_ATTEMPTS_LEFT = 77
 # Enable Passphrase
 TITLE__ENABLE_PASSPHRASE = 78
+PASSPHRASE__ENABLE_PASSPHRASE = 78
 # Disable Passphrase
 TITLE__DISABLE_PASSPHRASE = 79
 # Do you want to disable passphrase encryption?
@@ -183,6 +184,7 @@ SUBTITLE__SET_PASSPHRASE_ENABLED_NO_FORCE_ON_DEVICE = 83
 # Enter Passphrase
 TITLE__ENTER_PASSPHRASE = 84
 CONTENT__ENTER_PASSPHRASE_COLON = 84
+BUTTON__ENTER_PASSPHRASE = 84
 # Please type your passphrase on the connected device.
 SUBTITLE__ENTER_PASSPHRASE_ON_SOFTWARE = 85
 # Verify PIN
@@ -243,6 +245,7 @@ TITLE__SIGN_STR_TRANSACTION = 110
 BUTTON__HOLD_TO_SIGN = 111
 # Amount
 LIST_KEY__AMOUNT__COLON = 112
+LIST_KEY__AMOUNT = 112
 # Gas Price
 LIST_KEY__GAS_PRICE__COLON = 113
 # Maximum Fee
@@ -448,7 +451,7 @@ SUBTITLE__DO_YOU_REALLY_WANT_TO_AUTO_LOCK_YOUR_DEVICE_AFTER_STR = 203
 TITLE__EXPERIMENTAL_MODE = 204
 # Enable experimental features?
 SUBTITLE__ENABLE_EXPERIMENTAL_FEATURES = 205
-# Please Wait
+# One moment...
 TITLE__PLEASE_WAIT = 206
 # new contract?
 LIST_VALUE__NEW_CONTRACT = 207
@@ -491,7 +494,7 @@ LIST_KEY__BLOCK_HEIGHT_COLON = 224
 SUBTITLE__TRANSACTION_FEE = 225
 # Change Count
 LIST_KEY__CHANGE_COUNT_COLON = 226
-# FIDO2 Reset
+# Reset Security Key
 TITLE__FIDO2_RESET = 227
 # Do you really want to erase all credentials?
 SUBTITLE__DO_YOU_REALLY_WANT_TO_ERASE_ALL_CREDENTIALS = 228
@@ -542,23 +545,23 @@ SUBTITLE__U2F_ALREADY_REGISTERED = 248
 TITLE__U2F_NOT_REGISTERED = 249
 # This device is not registered with this application.
 SUBTITLE__U2F_NOT_REGISTERED = 250
-# FIDO2 Already Registered
+# Security Key Already Added
 TITLE__FIDO2_ALREADY_REGISTERED = 251
 # U2F Register
 TITLE__U2F_REGISTER = 252
 # U2F Authenticate
 TITLE__U2F_AUTHENTICATE = 253
-# This device is already registered with {}.
+# This device has already been added in {}.
 SUBTITLE__THIS_DEVICE_IS_AREADY_REGISTERED_WITH_STR = 254
-# FIDO2 Verify User
+# Security Key User Verification
 TITLE__FIDO2_VERIFY_USER = 255
 # Unable to verify user, please enable PIN protection.
 SUBTITLE__FIDO2_VERIFY_USER = 256
-# FIDO2 Authenticate Not Registered
+# Security Key Authenticator Not Added
 TITLE__FIDO2_AUTHENTICATE_NOT_REGISTERED = 257
-# FIDO2 Register
+# Add Security Key
 TITLE__FIDO2_REGISTER = 258
-# FIDO2 Authenticate
+# Security Key Authenticate
 TITLE__FIDO2_AUTHENTICATE = 259
 # Brightness
 TITLE__BRIGHTNESS = 260
@@ -681,7 +684,7 @@ CONTENT__PASSPHRASE_DISABLED__HINT = 308
 SUBTITLE__ENABLE_PASSPHRASE = 309
 # Disable
 BUTTON__DISABLE = 310
-# Check the phrase you entered and make sure it is correct.
+# Remember your passphrase: Irrecoverable if lost.
 SUBTITLE__USE_THIS_PASSPHRASE = 311
 # {} Transfer
 TITLE__STR_TRANSFER = 312
@@ -785,9 +788,9 @@ BUTTON__SET_WALLPAPER = 355
 # Lock Screen
 ITEM__LOCK_SCREEN = 356
 TITLE__LOCK_SCREEN = 356
-# During locked, tap the screen to wake up the display.
+# During locked, double-tap the screen to wake up the display.
 CONTENT__TAP_TO_WAKE_ENABLED__HINT = 357
-# Tap to Wake
+# Double-tap to Wake
 ITEM__TAP_TO_WAKE = 358
 # During locked, press the power button to wake the display.
 CONTENT__TAP_TO_WAKE_DISABLED__HINT = 359
@@ -803,6 +806,7 @@ TITLE__RESOURCE_UPDATE = 363
 SUBTITLE__RESOURCE_UPDATE = 364
 # Update
 BUTTON__UPDATE = 365
+PASSPHRASE__PIN_UPDATE = 365
 # Transaction Signed
 TITLE__TRANSACTION_SIGNED = 366
 # Close ({}s)
@@ -1038,7 +1042,7 @@ TITLE__WORD_STR = 470
 # Safety-Checks protects you from performing potentially risky actions. it is
 # highly recommended to turn it on.
 MSG__SAFETY_CHECKS_PROMPT_WARNING = 471
-# This device is not registered with {}.
+# This device has not been added in {}.
 SUBTITLE__FIDO2_AUTHENTICATE_NOT_REGISTERED = 472
 # QR Code
 BUTTON__QRCODE = 473
@@ -1086,6 +1090,7 @@ TITLE__REMOVE_NFT = 491
 SUBTITLE__COLLECT_NFT_AND_DELETE = 492
 # Remove
 BUTTON__REMOVE = 493
+PASSPHRASE__PIN_REMOVE = 493
 # Are you sure to remove this NFT? You can always add existing NFT back afterw
 # ard.
 SUBTITLE__REMOVE_NFT = 494
@@ -1408,6 +1413,7 @@ TITLE__FINGERPRINT_DESC = 642
 BUTTON__ADD_FINGERPRINT = 643
 # Get Started
 TITLE__GET_STARTED = 644
+TITLE__GET_STARTED = 644
 # Place your finger on the sensor located on the side of the device.
 CONTENT__PLACE_YOUR_FINGER_ON_THE_SENSOR_LOCATED_ON_THE_SIDE_OF_THE_PHONE = 645
 # Place Finger
@@ -1575,13 +1581,14 @@ CONTENT__WHAT_DOES_AIR_GAP_MEANS = 717
 ITEM__OKX_WALLET = 718
 # MetaMask
 ITEM__METAMASK_WALLET = 719
-# OneKey Wallet
+# OneKey App
 ITEM__ONEKEY_WALLET = 720
+TITLE__ONEKEY_APP = 720
 # Finger {}
 FORM__FINGER_STR = 721
 # Charging
 MSG__CHARGING = 722
-# Scan the QR Code displayed on the app
+# Scan the QR Code on the app
 CONTENT__SCAN_THE_QR_CODE_DISPLAYED_ON_THE_APP = 723
 # Unsupported data format
 TITLE__DATA_FORMAT_NOT_SUPPORT = 724
@@ -1661,8 +1668,8 @@ ACTION__LEARN_MORE = 758
 CONTENT__SCAN_THE_QR_CODE_TO_VIEW_THE_DETAILED_TUTORIAL = 759
 # Access Wallet
 FORM__ACCESS_WALLET = 760
-# Open the OKX Mobile App, go to Wallet, select "I already have one" > "Hardwa
-# re wallet" > "OneKey".
+# Open the OKX Mobile App, go to Wallet, select "Add wallet" > "Hardware walle
+# t" > "OneKey".
 FORM__ACCESS_WALLET_DESC = 761
 # Import Wallet Accounts
 FORM__IMPORT_WALLET_ACCOUNTS = 762
@@ -1690,17 +1697,17 @@ CONTENT__BROWSER_EXTENSION = 771
 FORM__OPEN_METAMASK_IN_YOUR_BROWSER = 772
 # Connect Hardware Wallet
 FORM__CONNECT_HARDWARE_WALLET = 773
-# Choose "TREZOR", click "Continue", select "Allow once for this session", and
-# follow the on-screen instructions to export. Input your OneKey wallet PIN w
-# hen prompted.
+# Select "OneKey" > "Continue", then choose your device in the dialog box and
+# click "Connect". On the authorization page, select "Allow this session", and
+# follow the on-screen instructions to export your account.
 FORM__CONNECT_HARDWARE_WALLET_DESC = 774
 # Unlock Account
 FORM__UNLOCK_ACCOUNT = 775
 # From the list of accounts, select the one you wish to connect and click "Unl
 # ock".
 FORM__UNLOCK_ACCOUNT_DESC = 776
-# Open the OKX wallet extension, select "Import Wallet" > "Hardware wallet" >
-# "OneKey".
+# Open the OKX wallet extension, select "Add wallet" > "Connect hardware walle
+# t" > "OneKey".
 FORM__OPEN_THE_OKX_WALLET_EXTENSION = 777
 # Install OneKey Bridge
 FORM__INSTALL_ONEKEY_BRIDGE = 778
@@ -1723,7 +1730,7 @@ TITLE_RESTART_DEVICE_DESC = 784
 TITLE_CONFIRM_ADDRESS = 785
 # Return to the app, and scan the QR code below.
 TITLE_CONFIRM_ADDRESS_DESC = 786
-# BTC and EVM‒compatible networks
+# BTC, ETH & EVM networks
 CONTENT__BTC_AND_EVM_COMPATIBLE_NETWORKS = 787
 # Open OneKey and scan the QR code below
 CONTENT__OPEN_ONEKEY_AND_SCAN_THE_QR_CODE_BELOW = 788
@@ -1755,7 +1762,7 @@ TITLE__UNSUPPORTED_RECOVERY_PHRASE = 800
 # The current hardware wallet only supports 12, 18, and 24-word recovery phras
 # es.\nThis Lite backup cannot be restored.
 TITLE__UNSUPPORTED_RECOVERY_PHRASE_DESC = 801
-# Open OneKey and scan the QR code, supporting BTC and EVM networks.
+# Open OneKey App and scan the QR Code.
 CONTENT__OPEN_ONEKEY_SCAN_THE_QRCODE = 802
 # Wallet Mismatch
 CONTENT__WALLET_MISMATCH = 803
@@ -1800,6 +1807,7 @@ TITLE__SET_INITIAL_ACCOUNT_ERROR = 819
 CONTENT__NETWORK_ADDRESS_ETHEREUM = 820
 # Security Keys
 APP__SECURITY = 821
+FIDO_FIDO_KEYS_LABEL = 821
 # Wallet Setup Required
 ONBOARDING_BLUETOOTH_PAIRING_BEFORE_SETUP_PIN_TITLE = 822
 # To pair your device via Bluetooth, please create a wallet on your hardware d
@@ -1829,85 +1837,252 @@ BUTTON__LESS_NETWORKS = 832
 VERIFY_DEVICE_BOOTLOADER_DESC = 833
 # Download OneKey App at: onekey.so/download
 FORM__DOWNLOAD_APP_FROM_DOWNLOAD_CENTER = 834
-# FIDO Keys
-FIDO_FIDO_KEYS_LABEL = 835
-# Secure accounts with FIDO security keys
-FIDO_FIDO_KEYS_DESC = 836
-# Remove FIDO Key?
-FIDO_REMOVE_KEY_TITLE = 837
-# This FIDO key will be removed permanently
-FIDO_REMOVE_KEY_DESC = 838
-# FIDO Key Removed
-FIDO_REMOVE_KEY_SUCCESS_TITLE = 839
+# Secure accounts with security keys
+FIDO_FIDO_KEYS_DESC = 835
+# Remove Security Key?
+FIDO_REMOVE_KEY_TITLE = 836
+# This security key will be permanently removed.
+FIDO_REMOVE_KEY_DESC = 837
+# Security Key Removed
+FIDO_REMOVE_KEY_SUCCESS_TITLE = 838
 # Key Limit Reached
-FIDO_ADD_KEY_LIMIT_REACHED_TITLE = 840
-# 60 FIDO keys limit reached. Remove unused to add new
-FIDO_ADD_KEY_LIMIT_REACHED_DESC = 841
-# Manage FIDO Keys
-FIDO_MANAGE_KEY_CTA_LABEL = 842
-# No FIDO keys yet
-FIDO_LIST_EMPTY_TEXT = 843
+FIDO_ADD_KEY_LIMIT_REACHED_TITLE = 839
+# 60 security keys limit reached. Remove unused to add new
+FIDO_ADD_KEY_LIMIT_REACHED_DESC = 840
+# Manage Security Keys
+FIDO_MANAGE_KEY_CTA_LABEL = 841
+# No security keys added yet
+FIDO_LIST_EMPTY_TEXT = 842
 # Using OneKey Devices as Security Keys
-TIPS_SECURITY_KEYS_TEXT = 844
+TIPS_SECURITY_KEYS_TEXT = 843
 # Register
-TIPS_SECURITY_KEYS_REGISTER_TITLE = 845
+TIPS_SECURITY_KEYS_REGISTER_TITLE = 844
 # Plug in your OneKey to your computer
-TIPS_SECURITY_KEYS_REGISTER_PLUG_IN = 846
+TIPS_SECURITY_KEYS_REGISTER_PLUG_IN = 845
 # Go to security settings of the website (e.g. Google, Facebook)
-TIPS_SECURITY_KEYS_REGISTER_GO_TO_WEBSITE = 847
+TIPS_SECURITY_KEYS_REGISTER_GO_TO_WEBSITE = 846
 # Select "Add Security Key" option
-TIPS_SECURITY_KEYS_REGISTER_SELECT_OPTION = 848
+TIPS_SECURITY_KEYS_REGISTER_SELECT_OPTION = 847
 # Confirm with OneKey (unlock required)
-TIPS_SECURITY_KEYS_REGISTER_CONFIRM = 849
+TIPS_SECURITY_KEYS_REGISTER_CONFIRM = 848
 # Choose "Security Key" at login
-TIPS_SECURITY_KEYS_AUTHENTICATE_CHOOSE_OPTION = 850
+TIPS_SECURITY_KEYS_AUTHENTICATE_CHOOSE_OPTION = 849
 # Approve with OneKey
-TIPS_SECURITY_KEYS_AUTHENTICATE_APPROVE = 851
+TIPS_SECURITY_KEYS_AUTHENTICATE_APPROVE = 850
 # Authenticate
-TIPS_SECURITY_KEYS_AUTHENTICATE_TITLE = 852
+TIPS_SECURITY_KEYS_AUTHENTICATE_TITLE = 851
 # Slide to unlock
-MISTOUCH_PROTECTION_TITLE = 853
-# 5 failed tries. Slide to continue
-MISTOUCH_PROTECTION_DESC = 854
+MISTOUCH_PROTECTION_TITLE = 852
+# 3 failed tries. Slide to continue
+MISTOUCH_PROTECTION_DESC = 853
 # Slide to continue
-MISTOUCH_PROTECTION_SLIDE_TEXT = 855
+MISTOUCH_PROTECTION_SLIDE_TEXT = 854
 # Back to home
-BUTTON__BACK_TO_HOME = 856
-# Registering fido key...
-FIDO_KEY_REGISTERING_DESC = 857
-# FIDO Key Registered
-FIDO_KEY_REGISTERED_TITLE = 858
+BUTTON__BACK_TO_HOME = 855
+# Adding Security Key…
+FIDO_KEY_REGISTERING_DESC = 856
+# Security Key Added
+FIDO_KEY_REGISTERED_TITLE = 857
 # Low Battery
-POWER_ON_LOW_BATTERY_TITLE = 859
+POWER_ON_LOW_BATTERY_TITLE = 858
 # Powering off
-POWER_ON_LOW_BATTERY_DESC = 860
+POWER_ON_LOW_BATTERY_DESC = 859
 # Auto Lock/Shutdown
-ITEM__AUTO_LOCK_AND_SHUTDOWN = 861
+ITEM__AUTO_LOCK_AND_SHUTDOWN = 860
 # Solana Raw Signing
-SECURITY__SOLANA_RAW_SIGNING_TITLE = 862
+SECURITY__SOLANA_RAW_SIGNING_TITLE = 861
 # Allows signing raw Solana messages without processing or validation. This ma
 # y expose you to phishing, blind signing, and unauthorized approvals. Use wit
 # h caution.
-SECURITY__SOLANA_RAW_SIGNING_DESC = 863
+SECURITY__SOLANA_RAW_SIGNING_DESC = 862
 # Enable Solana Raw Signing?
-SECURITY__SOLANA_RAW_SIGNING_ENABLE_TITLE = 864
+SECURITY__SOLANA_RAW_SIGNING_ENABLE_TITLE = 863
 # This may expose you to phishing, blind signing, and unauthorized transaction
 # s. Enable only if you fully understand the risks.
-SECURITY__SOLANA_RAW_SIGNING_ENABLE_DESC = 865
+SECURITY__SOLANA_RAW_SIGNING_ENABLE_DESC = 864
 # Risk of phishing & blind signing. Proceed only if you trust the source.
-SECURITY__SOLANA_RAW_SIGNING_TX_WARNING = 866
+SECURITY__SOLANA_RAW_SIGNING_TX_WARNING = 865
 # Security Protection
-ITEM__SECURITY_PROTECTION = 867
+ITEM__SECURITY_PROTECTION = 866
 # Basic Tutorial
-ITEM__BASIC_TUTORIAL = 868
+ITEM__BASIC_TUTORIAL = 867
 # BTC, SOL, ETH & EVM networks
-CONTENT__BTC_SOL_ETH_N_EVM_NETWORKS = 869
-# OneKey App
-TITLE__ONEKEY_APP = 870
+CONTENT__BTC_SOL_ETH_N_EVM_NETWORKS = 868
 # Candidate
-GLOBAL_CANDIDATE = 871
+GLOBAL_CANDIDATE = 869
 # Target network
-GLOBAL_TARGET_NETWORK = 872
+GLOBAL_TARGET_NETWORK = 870
 # Remove vote
-TITLE_REMOVE_VOTE = 873
+TITLE_REMOVE_VOTE = 871
+# High-risk operation: This transaction contains delegatecall, which could all
+# ow external code to control your wallet
+GNOSIS_SAFE_SIG_DELEGATECALL_WARNING_TEXT = 872
+# Operation
+GLOBAL_OPERATION = 873
+# Gnosis Safe Transaction
+GNOSIS_SAFE_SIG_TITLE = 874
+# Safe Tx Gas
+GNOSIS_SAGE_SIG_SAFE_TX_GAS = 875
+# Base Gas
+GLOBAL_BASE_GAS = 876
+# Gas Token
+GLOBAL_GAS_TOKEN = 877
+# Refund Receiver
+GNOSIS_SAGE_SIG_REFUND_RECEIVER = 878
+# Do you want to sign this Gnosis Safe transaction?
+GNOSIS_SAGE_SIG_DOUBLE_CHECK_TO_CONFIRM_DESC_TEXT = 879
+# Enable Security Keys
+SECURITY__ENABLE_FIDO_KEYS = 880
+# When enabled, OneKey works as a security key for passwordless login and 2FA
+# across websites and apps.
+SECURITY__ENABLE_FIDO_KEYS_DESC = 881
+# Security keys disabled. Cannot register or verify credentials. Re-enable to
+# restore.
+FIDO_DISABLED_INFO_TEXT = 882
+# Disable Security Keys
+SECURITY__DISABLE_FIDO_KEYS = 883
+# Invalid Phrases
+INVALID_PHRASES__TITLE = 884
+# You can edit a single word or start over.
+INVALID_PHRASES__DESC = 885
+# Start over
+GLOBAL__START_OVER = 886
+# Forgetting your passphrase will lose access to funds
+PASSPHRASE_FORGETTING_WARNING_TEXT = 887
+# Edit
+GLOBAL__EDIT = 888
+# Vote count
+GLOBAL__VOTE_COUNT = 889
+# Adds an extra word to your recovery phrase, unlocking hidden wallets.
+PASSPHRASE__ENABLE_DESC = 890
+# Advance
+PASSPHRASE__ADVANCE = 891
+# Attach to PIN
+PASSPHRASE__ATTACH_TO_PIN = 892
+# Unlock your hidden wallet using PIN
+PASSPHRASE__ATTACH_TO_PIN_DESC = 893
+# Set Hidden Wallet PIN
+PASSPHRASE__SET_PASSPHRASE_PIN = 894
+# Fingerprint Upgrade
+TITLE__FINGERPRINT_UPGRADE = 895
+# Set up now
+BUTTON__SET_UP_NOW = 896
+# Put your finger on the power button and lift it afterwards, Move your finger
+# as guided by the light dot, repeating this step.
+TITLE__GET_STARTED_DESC = 897
+# No Passphrase Linked to This PIN
+PASSPHRASE__PIN_NOT_ATTACHED = 898
+# Attach Passphrase
+PASSPHRASE__PIN_ATTACHED_ONE = 899
+# PIN has attached one Passphrase
+PASSPHRASE__PIN_ATTACHED = 900
+# You can attach a passphrase to this PIN.
+PASSPHRASE__PIN_NOT_ATTACHED_DESC = 901
+# You can remove this PIN or attach a new Passphrase.
+PASSPHRASE__PIN_ATTACHED_DESC = 902
+# PIN Already Used
+PASSPHRASE__PIN_USED = 903
+# This PIN has already been used. Please try a different one.
+PASSPHRASE__PIN_USED_DESC = 904
+# Hit the Limit
+PASSPHRASE__PIN_HIT_LIMIT = 905
+# You’ve reached the maximum of 30 PINs. Please remove some before adding new
+# ones.
+PASSPHRASE__PIN_HIT_LIMIT_DESC = 906
+# Put your finger on the power button and lift it afterwards.
+MSG__PUT_YOUR_FINGER_ON_THE_POWER_BUTTON_AND_LIFT_IT_AFTERWARDS = 907
+# Follow the on-screen guidance to fine-tune finger position.
+MSG__FOLLOW_THE_ON_SCREEN_GUIDANCE_TO_FINE_TUNE_FINGER_POSITION = 908
+# Enrolling fingerprint...
+MSG__ENROLLING_FINGERPRINT = 909
+# Attach One Passphrase
+PASSPHRASE__ATTACH_ONE_PASSPHRASE = 910
+# I understand the Passphrase PIN is an alternative login for hidden wallet.
+PASSPHRASE__ATTACH_ONE_PASSPHRASE_DESC1 = 911
+# I know that if I forget the word, I might lose my assets.
+PASSPHRASE__ATTACH_ONE_PASSPHRASE_DESC2 = 912
+# Keep going to capture the edges of your print.
+TITLE__ADJUST_YOUR_GRIP_DESC = 913
+# Adjust Your Grip
+TITLE__ADJUST_YOUR_GRIP = 914
+# Save Your Passphrase
+PASSPHRASE__SAVE = 915
+# Forget your Passphrase will lose access to funds linked to your hidden walle
+# t.
+PASSPHRASE__SAVE_DESC = 916
+# I undersand
+PASSPHRASE__UNDERSTAND = 917
+# Passphrase set and attached to PIN
+PASSPHRASE__SET = 918
+# This PIN is only used to unlock the hidden wallet. All security-related oper
+# ations require the main PIN.
+PASSPHRASE__SET_DESC = 919
+# Fingerprint data is protected by security chips.
+CONTENT__FINGERPRINT_DATA_IS_PROTECTED_BY_SECURITY_CHIPS = 920
+# Once removed, you won’t be able to unlock the device with this PIN.
+PASSPHRASE__REMOVE_DESC = 921
+# Remove PIN successful
+PASSPHRASE__REMOVE_SUCCESSFUL = 922
+# Fingerprint Enrollment Timeout
+TITLE__FINGERPRINT_ENROLLMENT_TIMEOUT = 923
+# Re-enrolling your fingerprint will remove current fingerprint data and enhan
+# ce your unlocking accuracy. Set up now?
+TITLE__FINGERPRINT_UPGRADE_DESC = 924
+# Wallet information is protected with a security chip. You should back up you
+# r new wallet right now.
+TITLE__WALLET_CREATED_DESC = 925
+# Your PIN is protected by security chips.
+TITLE__PIN_CHANGED_DESC = 926
+# The security key is protected by security chips.
+TITLE__FIDO_KEY_REGISTERED_DESC = 927
+# Confirm remove PIN
+PASSPHRASE__REMOVE = 928
+# Scanning... Hold still
+CONTENT__SCANNING_HOLD_STILL = 929
+# By setting up different PIN codes linked to different passphrases, you can e
+# asily access different wallets. Just enter a specific PIN, and you’ll open t
+# he wallet that’s tied to it.
+ITEM__ATTACH_TO_PIN_DESC = 930
+# Turbo Mode
+ACTION__TURBO_MODE = 931
+TITLE__TURBO_MODE = 931
+# Sign transactions with one click. (only EVM Network and Solana)
+CONTENT__SIGN_TRANSACTIONS_WITH_ONE_CLICK_ONLY_EVM_NETWORK_AND_SOLANA = 932
+# Enable Turbo Mode?
+TITLE__ENABLE_TURBO_MODE = 933
+# Sign transactions with one click.
+CONTENT__SIGN_TRANSACTIONS_WITH_ONE_CLICK = 934
+# Once enabled, the device will omit details when reviewing transactions. I kn
+# ow the risks.
+ACTION__ONCE_ENABLED_THE_DEVICE_WILL_OMIT_DETAILS_WHEN_REVIEWING_TRANSACTIONS_I_KNOW_THE_RISKS = 935
+# Slide to Enable
+ACTION__SLIDE_TO_ENABLE = 936
+# Send {num} {token} to {addr}
+MSG__SEND_TURBO = 937
+# Sign Message
+MSG__SIGN_MESSAGE = 938
+# Sign Transaction
+MSG__SIGN_TRANSACTION = 939
+# Your Fingerprint (SE) needs an update. Please visit https://firmware.onekey.
+# so/ to update it and try again.
+CONTENT__YOUR_FINGERPRINT_SE_VERSION_IS_OUTDATED = 940
+# OP_RETURN
+TITLE__OP_RETURN = 941
+# This transaction contains a non-zero OP_RETURN value. Once confirmed, your f
+# unds will be permanently locked.
+TITLE__OP_RETURN_DESC = 942
+# PIN for standard wallet
+CONTENT__PIN_FOR_STANDARD_WALLET = 943
+# Enter Hidden Wallet PIN
+TITLE__ENTER_HIDDEN_WALLET_PIN = 944
+# Standard Wallet
+TITLE__STANDARD_WALLET = 945
+# Hidden Wallet
+TITLE__HIDDEN_WALLET = 946
+# Tap to send
+ITEM__TAP_TO_SEND = 947
+# Unknown Message
+MSG__UNKNOWN_MESSAGE = 948
+# Unknown Network
+MSG__UNKNOWN_NETWORK = 949
 # fmt: on
