@@ -520,10 +520,13 @@ class BlobDisPlay(FullSizeWindow):
         icon_path: str = "A:/res/warning.png",
         anim_dir: int = 1,
         primary_color=lv_colors.ONEKEY_GREEN,
+        subtitle: str | None = None,
+        item_key: str | None = None,
+        item_value: str | None = None,
     ):
         super().__init__(
             title,
-            None,
+            subtitle,
             _(i18n_keys.BUTTON__CONTINUE),
             _(i18n_keys.BUTTON__CANCEL),
             icon_path=icon_path,
@@ -531,7 +534,14 @@ class BlobDisPlay(FullSizeWindow):
             primary_color=primary_color or lv_colors.ONEKEY_GREEN,
         )
         self.primary_color = primary_color
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        self.container = ContainerFlexCol(
+            self.content_area,
+            self.subtitle if subtitle else self.title,
+            pos=(0, 40),
+            padding_row=0,
+        )
+        if item_key and item_value:
+            self.item_key_value = DisplayItemNoBgc(self.container, item_key, item_value)
         self.item1 = DisplayItemNoBgc(self.container, description, content)
         self.long_message = False
         if len(content) > 240:

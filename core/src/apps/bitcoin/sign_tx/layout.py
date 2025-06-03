@@ -60,13 +60,7 @@ async def confirm_output(
             )
         else:
             # generic OP_RETURN
-            layout = layouts.confirm_blob(
-                ctx,
-                "op_return",
-                title="OP_RETURN",
-                data=data,
-                br_code=ButtonRequestType.ConfirmOutput,
-            )
+            layout = confirm_op_return(ctx, data, output.amount, coin)
     else:
         assert output.address is not None
         address_short = addresses.address_short(coin, output.address)
@@ -261,4 +255,27 @@ async def confirm_nondefault_locktime(
         param,
         br_code=ButtonRequestType.SignTx,
         description=description,
+    )
+
+
+async def confirm_op_return(
+    ctx: wire.Context, data: bytes, amount: int, coin: CoinInfo
+) -> None:
+    amount_params = (
+        {
+            "subtitle": _(i18n_keys.TITLE__OP_RETURN_DESC),
+            "item_key": _(i18n_keys.LIST_KEY__AMOUNT),
+            "item_value": format_coin_amount(amount, coin, AmountUnit.BITCOIN),
+        }
+        if amount != 0
+        else {}
+    )
+
+    await layouts.confirm_blob(
+        ctx,
+        "op_return",
+        title="OP_RETURN",
+        data=data,
+        br_code=ButtonRequestType.ConfirmOutput,
+        **amount_params,
     )
