@@ -17,6 +17,7 @@ def __getattr__(name: str) -> Any:
 if TYPE_CHECKING:
     from typing import TypeGuard
     from trezor.enums import AmountUnit  # noqa: F401
+    from trezor.enums import AptosTransactionType  # noqa: F401
     from trezor.enums import BackupType  # noqa: F401
     from trezor.enums import BinanceOrderSide  # noqa: F401
     from trezor.enums import BinanceOrderType  # noqa: F401
@@ -163,12 +164,14 @@ if TYPE_CHECKING:
     class AptosSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_tx: "bytes"
+        tx_type: "AptosTransactionType"
 
         def __init__(
             self,
             *,
             raw_tx: "bytes",
             address_n: "list[int] | None" = None,
+            tx_type: "AptosTransactionType | None" = None,
         ) -> None:
             pass
 

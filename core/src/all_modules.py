@@ -91,6 +91,8 @@ trezor.crypto.slip39
 import trezor.crypto.slip39
 trezor.enums.AmountUnit
 import trezor.enums.AmountUnit
+trezor.enums.AptosTransactionType
+import trezor.enums.AptosTransactionType
 trezor.enums.BackupType
 import trezor.enums.BackupType
 trezor.enums.ButtonRequestType

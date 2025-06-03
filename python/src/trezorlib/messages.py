@@ -8,6 +8,11 @@ from typing import Sequence, Optional
 from . import protobuf
 
 
+class AptosTransactionType(IntEnum):
+    STANDARD = 0
+    WITH_DATA = 1
+
+
 class BinanceOrderType(IntEnum):
     OT_UNKNOWN = 0
     MARKET = 1
@@ -887,6 +892,7 @@ class AptosSignTx(protobuf.MessageType):
     FIELDS = {
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
+        3: protobuf.Field("tx_type", "AptosTransactionType", repeated=False, required=False),
     }
 
     def __init__(
@@ -894,9 +900,11 @@ class AptosSignTx(protobuf.MessageType):
         *,
         raw_tx: "bytes",
         address_n: Optional[Sequence["int"]] = None,
+        tx_type: Optional["AptosTransactionType"] = AptosTransactionType.STANDARD,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
+        self.tx_type = tx_type
 
 
 class AptosSignedTx(protobuf.MessageType):

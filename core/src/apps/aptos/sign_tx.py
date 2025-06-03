@@ -8,7 +8,7 @@ from apps.common import paths, seed
 from apps.common.keychain import Keychain, auto_keychain
 
 from . import ICON, PRIMARY_COLOR
-from .helper import TRANSACTION_PREFIX, aptos_address_from_pubkey
+from .helper import aptos_address_from_pubkey, aptos_transaction_prefix
 
 
 @auto_keychain(__name__)
@@ -26,7 +26,7 @@ async def sign_tx(
 
     ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
     await confirm_blind_sign_common(ctx, address, msg.raw_tx)
-    prefix_bytes = sha3_256(TRANSACTION_PREFIX).digest()
+    prefix_bytes = sha3_256(aptos_transaction_prefix(msg.tx_type)).digest()
     raw_tx = prefix_bytes + msg.raw_tx
     signature = ed25519.sign(node.private_key(), raw_tx)
     await confirm_final(ctx, "APTOS")

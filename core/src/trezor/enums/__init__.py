@@ -3,6 +3,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from enum import IntEnum
 
+    class AptosTransactionType(IntEnum):
+        STANDARD = 0
+        WITH_DATA = 1
+
     class BinanceOrderType(IntEnum):
         OT_UNKNOWN = 0
         MARKET = 1
