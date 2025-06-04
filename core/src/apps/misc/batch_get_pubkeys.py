@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from trezor import wire
-from trezor.messages import EcdsaPublicKeys
+from trezor.messages import EcdsaPublicKeys, HDNodeType
 
 from apps.common import paths
 from apps.common.keychain import get_keychain
@@ -21,16 +21,37 @@ async def batch_get_pubkeys(
     validate(msg)
     keychain = await get_keychain(ctx, msg.ecdsa_curve_name, [AlwaysMatchingSchema])
     pubkeys = []
-
+    nodes = []
     translator = (
         (lambda pubkey: pubkey)
         if "secp256k1" == msg.ecdsa_curve_name
         else (lambda pubkey: pubkey[1:])
     )
+    include_node = False
+    root_fingerprint = None
+    if "ed25519" not in msg.ecdsa_curve_name and msg.include_node:
+        include_node = True
+        root_fingerprint = keychain.root_fingerprint()
     for path in msg.paths:
         node = keychain.derive(path.address_n)
-        pubkeys.append(translator(node.public_key()))
-    return EcdsaPublicKeys(public_keys=pubkeys)
+        pubkey = translator(node.public_key())
+        if include_node:
+            nodes.append(
+                HDNodeType(
+                    depth=node.depth(),
+                    child_num=node.child_num(),
+                    fingerprint=node.fingerprint(),
+                    chain_code=node.chain_code(),
+                    public_key=pubkey,
+                )
+            )
+        else:
+            pubkeys.append(pubkey)
+    return EcdsaPublicKeys(
+        public_keys=pubkeys or None,
+        hd_nodes=nodes or None,
+        root_fingerprint=root_fingerprint,
+    )
 
 
 def validate(msg: BatchGetPublickeys):

@@ -5,6 +5,10 @@ package hw.trezor.messages.aptos;
 option java_package = "com.satoshilabs.trezor.lib.protobuf";
 option java_outer_classname = "TrezorMessageAptos";
 
+enum AptosTransactionType {
+    STANDARD = 0; // with salt "APTOS::RawTransaction"
+    WITH_DATA = 1; // with salt "APTOS::RawTransactionWithData"
+}
 /**
  * Request: Address at the specified index
  * @start
@@ -31,6 +35,7 @@ message AptosAddress {
 message AptosSignTx {
     repeated uint32 address_n = 1;         // BIP-32 path to derive the key from master node
     required bytes raw_tx = 2;              // serialized raw transaction
+    optional AptosTransactionType tx_type = 3[default = STANDARD];
 }
 
 /**

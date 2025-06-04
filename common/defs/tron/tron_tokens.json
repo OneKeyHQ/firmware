@@ -138,5 +138,15 @@
         "links": {
           "Homepage": "https://dogecoin.com/"
         }
+    },
+    {
+      "symbol": "BTT",
+      "name": "BitTorrent",
+      "type": "TRC20",
+      "address": "TAFjULxiVgT4qWk6UZwjqwZXTSaGaqnVp4",
+      "decimals": 18,
+      "links": {
+        "Homepage": "https://bittorrentchain.io/"
+      }
     }
 ]

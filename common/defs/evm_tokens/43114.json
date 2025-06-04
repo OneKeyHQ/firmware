@@ -781,6 +781,12 @@
       "createdAt": "2022-09-16T16:22:33.196Z",
       "updatedAt": "2022-09-19T01:27:42.874Z",
       "__v": 0
+    },
+    {
+      "name": "Wrapped BTC",
+      "symbol": "WBTC",
+      "address": "0x408D4cD0ADb7ceBd1F1A1C33A0Ba2098E1295bAB",
+      "decimals": 8
     }
   ]
 }

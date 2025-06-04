@@ -17,6 +17,7 @@ def __getattr__(name: str) -> Any:
 if TYPE_CHECKING:
     from typing import TypeGuard
     from trezor.enums import AmountUnit  # noqa: F401
+    from trezor.enums import AptosTransactionType  # noqa: F401
     from trezor.enums import BackupType  # noqa: F401
     from trezor.enums import BinanceOrderSide  # noqa: F401
     from trezor.enums import BinanceOrderType  # noqa: F401
@@ -163,12 +164,14 @@ if TYPE_CHECKING:
     class AptosSignTx(protobuf.MessageType):
         address_n: "list[int]"
         raw_tx: "bytes"
+        tx_type: "AptosTransactionType"
 
         def __init__(
             self,
             *,
             raw_tx: "bytes",
             address_n: "list[int] | None" = None,
+            tx_type: "AptosTransactionType | None" = None,
         ) -> None:
             pass
 
@@ -2543,12 +2546,14 @@ if TYPE_CHECKING:
     class BatchGetPublickeys(protobuf.MessageType):
         ecdsa_curve_name: "str"
         paths: "list[Path]"
+        include_node: "bool"
 
         def __init__(
             self,
             *,
             paths: "list[Path] | None" = None,
             ecdsa_curve_name: "str | None" = None,
+            include_node: "bool | None" = None,
         ) -> None:
             pass
 
@@ -2558,11 +2563,15 @@ if TYPE_CHECKING:
 
     class EcdsaPublicKeys(protobuf.MessageType):
         public_keys: "list[bytes]"
+        hd_nodes: "list[HDNodeType]"
+        root_fingerprint: "int | None"
 
         def __init__(
             self,
             *,
             public_keys: "list[bytes] | None" = None,
+            hd_nodes: "list[HDNodeType] | None" = None,
+            root_fingerprint: "int | None" = None,
         ) -> None:
             pass
 
@@ -5411,6 +5420,7 @@ if TYPE_CHECKING:
         show_display: "bool | None"
         prefix: "str"
         scheme: "str"
+        use_tweak: "bool"
 
         def __init__(
             self,
@@ -5419,6 +5429,7 @@ if TYPE_CHECKING:
             show_display: "bool | None" = None,
             prefix: "str | None" = None,
             scheme: "str | None" = None,
+            use_tweak: "bool | None" = None,
         ) -> None:
             pass
 
@@ -5446,6 +5457,7 @@ if TYPE_CHECKING:
         scheme: "str"
         prefix: "str"
         input_count: "int"
+        use_tweak: "bool"
 
         def __init__(
             self,
@@ -5455,6 +5467,7 @@ if TYPE_CHECKING:
             scheme: "str | None" = None,
             prefix: "str | None" = None,
             input_count: "int | None" = None,
+            use_tweak: "bool | None" = None,
         ) -> None:
             pass
 

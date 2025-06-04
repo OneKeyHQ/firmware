@@ -79,7 +79,7 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
 
         if action == "Transfer":
             token = tokens.token_by_address(
-                "TRC20", contract.trigger_smart_contract.contract_address
+                contract.trigger_smart_contract.contract_address
             )
             recipient = _address_base58(b"\x41" + data[16:36])
             value = int.from_bytes(data[36:68], "big")

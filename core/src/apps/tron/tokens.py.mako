@@ -2,6 +2,8 @@
 # do not edit manually!
 # flake8: noqa
 # fmt: off
+
+from typing import Iterator
 <%
 from collections import defaultdict
 
@@ -12,21 +14,37 @@ def group_tokens(tokens):
     return r
 %>\
 
+
 class TokenInfo:
-    def __init__(self, symbol: str, decimals: int) -> None:
+    def __init__(self, address: str, symbol: str, decimals: int, name: str) -> None:
+        self.address = address
         self.symbol = symbol
         self.decimals = decimals
+        self.name = name
 
 
-UNKNOWN_TOKEN = TokenInfo("UNKN", 0)
+UNKNOWN_TOKEN = TokenInfo("", "UNKN", 0, "Unknown Token")
 
 
-def token_by_address(token_type, address) -> TokenInfo:
-% for t_type, tokens in group_tokens(supported_on("trezor2", tron)).items():
-    if token_type == "${t_type}":
+def token_by_address(address: str) -> TokenInfo:
+    for addr, symbol, decimal, name in _token_iterator():
+        if address == addr:
+            return TokenInfo(
+                symbol=symbol,
+                decimals=decimal,
+                address=addr,
+                name=name
+            )
+    return UNKNOWN_TOKEN
+
+def _token_iterator() -> Iterator[tuple[str, str, int, str]]:
+% for _, tokens in group_tokens(supported_on("trezor2", tron)).items():
         % for t in tokens:
-        if address == ${black_repr(t.address)}:
-            return TokenInfo(${black_repr(t.symbol)}, ${t.decimals})
+        yield (  # address, symbol, decimals, name
+            ${black_repr(t.address)},
+            ${black_repr(t.symbol)},
+            ${t.decimals},
+            ${black_repr(t.name)}
+        )
         % endfor
 % endfor
-    return UNKNOWN_TOKEN

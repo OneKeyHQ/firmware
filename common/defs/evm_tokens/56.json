@@ -1239,6 +1239,12 @@
       "updatedAt": "2022-09-16T16:46:52.106Z",
       "__v": 0,
       "marketCap": 0
+    },
+    {
+      "name": "Wrapped BNB",
+      "symbol": "WBNB",
+      "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      "decimals": 18
     }
   ]
 }

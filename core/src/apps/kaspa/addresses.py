@@ -39,17 +39,20 @@ class Prefix:
 
 def encode_address(
     node: bip32.HDNode,
-    schema: str,
+    scheme: str,
     prefix: str = Prefix.Mainnet,
+    use_tweak: bool = True,
 ) -> str:
-    if schema == "schnorr":
-        pubkey = bip340.tweak_public_key(node.public_key()[1:])
+    raw_pubkey = node.public_key()
+    if scheme == "schnorr":
+        pubkey = (
+            bip340.tweak_public_key(raw_pubkey[1:]) if use_tweak else raw_pubkey[1:]
+        )
         assert len(pubkey) == Version.public_key_len(Version.PubKey)
         version = Version.PubKey
     else:
-        pubkey = node.public_key()
+        pubkey = raw_pubkey
         assert len(pubkey) == Version.public_key_len(Version.PubKeyECDSA)
         version = Version.PubKeyECDSA
 
-    address = cashaddr.encode(prefix, version, pubkey)
-    return address
+    return cashaddr.encode(prefix, version, pubkey)

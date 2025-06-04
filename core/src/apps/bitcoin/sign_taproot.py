@@ -53,6 +53,7 @@ async def sign_taproot(
     change_out = 0
     master_fp = keychain.root_fingerprint().to_bytes(4, "big")
     found_ours = False
+    contains_script_path_spending = False
     for i, input in enumerate(psbt.inputs):
         assert input.prev_txid is not None
         assert input.prev_out is not None
@@ -87,6 +88,8 @@ async def sign_taproot(
             else:
                 script, _ = list(input.tap_scripts.keys())[0]
                 assert key in script, "Invalid script"
+                if not contains_script_path_spending:
+                    contains_script_path_spending = True
 
         sig_hasher.add_input(
             txi=TxInput(
@@ -124,7 +127,10 @@ async def sign_taproot(
                 coin.b58_hash,
             )
         elif out.is_opreturn():
-            assert out.nValue == 0, "OpReturn output should have 0 value"
+            if out.nValue != 0:
+                assert (
+                    contains_script_path_spending and len(psbt.inputs) == 1
+                ), "OpReturn output should have 0 value"
             op_return_data = out.scriptPubKey[2:]
         else:
             raise Exception("Invalid output type")
@@ -161,16 +167,17 @@ async def sign_taproot(
 
         if not is_change_out:
             # display the the output
+            output_params = (
+                {
+                    "op_return_data": op_return_data,
+                    "script_type": OutputScriptType.PAYTOOPRETURN,
+                }
+                if op_return_data
+                else {}
+            )
             await layout.confirm_output(
                 ctx,
-                TxOutput(
-                    amount=out.nValue,
-                    address=out_address,
-                    op_return_data=op_return_data if op_return_data else None,
-                    script_type=OutputScriptType.PAYTOOPRETURN
-                    if op_return_data
-                    else None,
-                ),
+                TxOutput(amount=out.nValue, address=out_address, **output_params),
                 coin,
                 AmountUnit.BITCOIN,
             )

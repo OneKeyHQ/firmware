@@ -199,7 +199,7 @@ int main(void) {
   mp_stack_set_limit((char *)&_estack - (char *)&_sstack - 1024);
 
 #if MICROPY_ENABLE_PYSTACK
-  static mp_obj_t pystack[1024];
+  static mp_obj_t pystack[2048];
   mp_pystack_init(pystack, &pystack[MP_ARRAY_SIZE(pystack)]);
 #endif
 

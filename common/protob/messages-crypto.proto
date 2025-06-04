@@ -8,7 +8,7 @@ option java_outer_classname = "TrezorMessageCrypto";
 option (include_in_bitcoin_only) = true;
 
 import "messages.proto";
-
+import "messages-common.proto";
 /**
  * Request: Ask device to encrypt or decrypt value of given key
  * @start
@@ -143,6 +143,7 @@ message BatchGetPublickeys {
     }
     optional string ecdsa_curve_name = 1 [default="ed25519"];
     repeated Path paths = 2;
+    optional bool include_node = 3 [default=false];
 }
 
 /**
@@ -151,4 +152,6 @@ message BatchGetPublickeys {
  */
 message EcdsaPublicKeys {
     repeated bytes public_keys = 1;
+    repeated common.HDNodeType hd_nodes = 2;
+    optional uint32 root_fingerprint = 3;
 }

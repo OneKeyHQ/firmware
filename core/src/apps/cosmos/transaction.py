@@ -6,7 +6,7 @@ from trezor.lvglui.i18n import gettext as _, keys as i18n_keys
 
 import ujson as json
 
-from .networks import formatAmont, getChainName
+from .networks import format_amount, formatAmont, getChainName
 
 MessageArgs = namedtuple(
     "MessageArgs",
@@ -51,6 +51,9 @@ KEY_SUBSTITUTIONS = [
     ["msgs/value/amount", "Amount"],
     ["msgs/value/voter", "Description"],
     ["msgs/value/option", "Option"],
+    ["msgs/value/vault", "Vault Type"],
+    ["msgs/value/signer", "Signer"],
+    ["msgs/value/paused", "Paused Type"],
 ]
 
 VALUE_SUBSTITUTIONS = [
@@ -64,6 +67,9 @@ VALUE_SUBSTITUTIONS = [
     ["cosmos-sdk/MsgWithdrawDelegationReward", "Withdraw Reward"],
     ["cosmos-sdk/MsgWithdrawValidatorCommission", "Withdraw Val. Commission"],
     ["cosmos-sdk/MsgMultiSend", "Multi Send"],
+    ["dollar/vaults/Lock", "Lock"],
+    ["dollar/vaults/Unlock", "Unlock"],
+    ["dollar/vaults/SetPausedState", "Set Paused State"],
 ]
 
 AMOUNT_KEY = [
@@ -117,24 +123,25 @@ class Transaction:
         self.msgs_item = {}
 
     def display(self, j: Any, level: int, key_prefix: str) -> None:
-        if type(j) == str:
-            self.msgs_item[key_prefix] = j
-            return
+        if isinstance(j, (list, dict)):
+            if level >= 2:
+                self.msgs_item[key_prefix] = json.dumps(j)
+                return
 
-        if level == 2:
-            self.msgs_item[key_prefix] = json.dumps(j)
-        elif type(j) == dict:
-            for key, value in j.items():
-                self.display(value, level + 1, key_prefix + "/" + key)
-        elif type(j) == list:
-            for element in j:
-                self.display(element, level + 1, key_prefix)
+            if isinstance(j, dict):
+                for key, value in j.items():
+                    self.display(value, level + 1, f"{key_prefix}/{key}")
+            else:
+                for i, element in enumerate(j):
+                    self.display(element, level + 1, f"{key_prefix}[{i}]")
         else:
-            self.msgs_item[key_prefix] = json.dumps(j)
+            self.msgs_item[key_prefix] = j
 
     # not support combined & group tx
     def get_tx_type(self) -> None:
         for key, value in self.msgs_item.items():
+            if __debug__:
+                print(f"key: {key}, value: {value}")
             if key != "Type":
                 continue
             if value == "Send":
@@ -142,54 +149,54 @@ class Transaction:
                 to = self.msgs_item["To"]
                 amount = self.msgs_item["Amount"]
                 self.tx = SendTxn(from_address, to, amount)
-                self.msgs_item.pop("Type", None)
             elif value == "Delegate":
                 delegator = self.msgs_item["Delegator"]
                 validator = self.msgs_item["Validator"]
                 amount = self.msgs_item["Amount"]
                 self.tx = DelegateTxn(delegator, validator, amount)
-                self.msgs_item.pop("Type", None)
             elif value == "Undelegate":
                 self.tx = UndelegateTxn()
-                self.msgs_item.pop("Type", None)
             elif value == "Redelegate":
                 self.tx = RedelegateTxn()
-                self.msgs_item.pop("Type", None)
             elif value == "Propose":
                 self.tx = ProposeTxn()
-                self.msgs_item.pop("Type", None)
             elif value == "Deposit":
                 self.tx = DepositTxn()
-                self.msgs_item.pop("Type", None)
             elif value == "Vote":
                 self.tx = VoteTxn()
                 self.msgs_item.pop("Type", None)
             elif value == "Withdraw Reward":
                 self.tx = WithdrawRewardTxn()
-                self.msgs_item.pop("Type", None)
             elif value == "Withdraw Val. Commission":
                 self.tx = WithdrawValCommissionTxn()
-                self.msgs_item.pop("Type", None)
             elif value == "Multi Send":
                 self.tx = MultiSendTxn()
-                self.msgs_item.pop("Type", None)
+            elif value in ["Lock", "Unlock", "Set Paused State"]:
+                self.tx = NobleVaultTxn(value, self.msgs_item)
             else:
                 self.tx = UnknownTxn(key, value)
             break
 
         # Separate page
         self.msgs_item.pop("Memo", None)
-        if hasattr(self, "tx") is False:
+        if not hasattr(self, "tx"):
             self.tx = UnknownTxn("Unknown type", "")
 
     def tx_display_make_friendly(self) -> None:
         for key, value in self.msgs_item.items():
             if key in AMOUNT_KEY:
                 j = json.loads(value)
-                if type(j) == dict:
+                if isinstance(j, dict):
                     v = formatAmont(self.chain_id, j["amount"], j["denom"])
-                else:
+                elif isinstance(j, list):
                     v = formatAmont(self.chain_id, j[0]["amount"], j[0]["denom"])
+                else:
+                    try:
+                        amount = int(j)
+                    except Exception:
+                        v = str(j)
+                    else:
+                        v = formatAmont(self.chain_id, str(amount), "UNKN")
                 self.msgs_item[key] = v
             else:
                 for element in VALUE_SUBSTITUTIONS:
@@ -213,34 +220,17 @@ class Transaction:
 
     @staticmethod
     def deserialize(raw_message: bytes) -> "Transaction":
-        j = json.loads(raw_message.decode("utf-8"))
-        if (
-            "account_number" not in j
-            or "chain_id" not in j
-            or "fee" not in j
-            or "memo" not in j
-            or "msgs" not in j
-            or "sequence" not in j
+        try:
+            j = json.loads(raw_message.decode())
+        except Exception:
+            raise wire.DataError("invalid JSON")
+        if any(
+            k not in j
+            for k in ["account_number", "chain_id", "fee", "memo", "msgs", "sequence"]
         ):
-            raise wire.DataError("Invalid action")
+            raise wire.DataError("invalid payload")
 
-        account_number = j["account_number"]
-        chain_id = j["chain_id"]
-        fee = j["fee"]
-        memo = j["memo"]
-        msgs = j["msgs"]
-        sequence = j["sequence"]
-
-        return Transaction(
-            MessageArgs(
-                account_number=account_number,
-                chain_id=chain_id,
-                fee=fee,
-                memo=memo,
-                msgs=msgs,
-                sequence=sequence,
-            )
-        )
+        return Transaction(MessageArgs(**j))
 
 
 class SendTxn:
@@ -307,6 +297,45 @@ class MultiSendTxn:
     def __init__(self):
         self.i18n_title = _(i18n_keys.TITLE__MULTI_SEND)
         self.i18n_value = "MsgMultiSend"
+
+
+class NobleVaultTxn:
+    DECIMAL_PLACES = 6
+    TOKEN_SYMBOL = "USDN"
+    VAULT_TYPES = {1: "STAKE", 2: "FLEXIBLE"}
+    DEFAULT_VAULT_TYPE = "UNSPECIFIED"
+    PAUSED_TYPES = {1: "LOCK", 2: "UNLOCK", 3: "ALL"}
+    DEFAULT_PAUSED_TYPE = "NONE"
+
+    def __init__(self, msg_type: str, msgs_item: dict):
+        if msg_type in ["Lock", "Unlock"]:
+            self._handle_lock_unlock(msg_type, msgs_item)
+        elif msg_type == "Set Paused State":
+            self._handle_paused_state(msgs_item)
+        else:
+            self.tx = UnknownTxn("Unknown type", "")
+
+    def _handle_lock_unlock(self, msg_type: str, msgs_item: dict):
+        amount = msgs_item["Amount"].split()[0]
+        msgs_item[
+            "Amount"
+        ] = f"{format_amount(int(amount), self.DECIMAL_PLACES)} {self.TOKEN_SYMBOL}"
+
+        vault_type = msgs_item["Vault Type"]
+        msgs_item["Vault Type"] = self.VAULT_TYPES.get(
+            vault_type, self.DEFAULT_VAULT_TYPE
+        )
+
+        self.i18n_title = f"Noble {msg_type}"
+        self.i18n_value = f"Msg{msg_type}"
+
+    def _handle_paused_state(self, msgs_item: dict):
+        self.i18n_title = "Noble Paused"
+        self.i18n_value = "MsgSetPausedState"
+        paused_type = msgs_item["Paused Type"]
+        msgs_item["Paused Type"] = self.PAUSED_TYPES.get(
+            paused_type, self.DEFAULT_PAUSED_TYPE
+        )
 
 
 class UnknownTxn:

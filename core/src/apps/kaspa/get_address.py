@@ -30,7 +30,12 @@ async def get_address(
     if msg.scheme not in ALLOWED_SCHEMES:
         raise wire.DataError("Invalid address scheme provided.")
     node = keychain.derive(msg.address_n)
-    address = encode_address(node, prefix=msg.prefix, schema=msg.scheme)
+    address = encode_address(
+        node,
+        prefix=msg.prefix,
+        scheme=msg.scheme,
+        use_tweak=getattr(msg, "use_tweak", True),
+    )
 
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)

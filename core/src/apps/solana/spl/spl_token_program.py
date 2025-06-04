@@ -347,13 +347,12 @@ async def parse(ctx: wire.Context, accounts: list[PublicKey], data: bytes) -> No
             amount=parsed_data.amount,
         )
         from trezor.ui.layouts import confirm_sol_token_transfer
-        from ..utils.helpers import sol_format_amount
 
         await confirm_sol_token_transfer(
             ctx,
             from_addr=str(params.source),
             to_addr=str(params.dest),
-            amount=sol_format_amount(params.amount, True),
+            amount=f"{params.amount} Lamports Token",
             source_owner=str(params.owner),
             fee_payer=str(params.owner),
         )
@@ -361,10 +360,9 @@ async def parse(ctx: wire.Context, accounts: list[PublicKey], data: bytes) -> No
         parsed_data = AMOUNT_LAYOUT.parse(data)
         params = ApproveParams(
             source=accounts[0],
-            mint=accounts[1],
-            delegate=accounts[2],
-            owner=accounts[3],
-            signers=accounts[4:] if len(accounts) > 4 else [],
+            delegate=accounts[1],
+            owner=accounts[2],
+            signers=accounts[3:] if len(accounts) > 3 else [],
             amount=parsed_data.amount,
         )
     elif instruction_type == InstructionType.REVOKE:
@@ -435,16 +433,18 @@ async def parse(ctx: wire.Context, accounts: list[PublicKey], data: bytes) -> No
             decimals=parsed_data.decimals,
         )
         from trezor.ui.layouts import confirm_sol_token_transfer
-        from ..utils.helpers import sol_format_amount
+        from ..utils.helpers import sol_format_amount, get_spl_token
 
         await confirm_sol_token_transfer(
             ctx,
             from_addr=str(params.source),
             to_addr=str(params.dest),
-            amount=sol_format_amount(params.amount, True, decimals=params.decimals),
+            amount=sol_format_amount(
+                params.amount, decimals=params.decimals, token_mint=params.mint
+            ),
             source_owner=str(params.owner),
             fee_payer=str(params.owner),
-            token_mint=str(params.mint),
+            token_mint=None if get_spl_token(str(params.mint)) else str(params.mint),
         )
     elif instruction_type == InstructionType.APPROVE2:
         parsed_data = AMOUNT2_LAYOUT.parse(data)

@@ -337,6 +337,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "Wrapped BTC",
         )
         yield (  # address, symbol, decimals, name
+            b"\xc0\x2a\xaa\x39\xb2\x23\xfe\x8d\x0a\x0e\x5c\x4f\x27\xea\xd9\x08\x3c\x75\x6c\xc2",
+            "WETH",
+            18,
+            "Wrapped Ether",
+        )
+        yield (  # address, symbol, decimals, name
             b"\x46\x91\x93\x7a\x75\x08\x86\x0f\x87\x6c\x9c\x0a\x2a\x61\x7e\x7d\x9e\x94\x5d\x4b",
             "WOO",
             18,
@@ -374,6 +380,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "ChainLink Token",
         )
         yield (  # address, symbol, decimals, name
+            b"\x42\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x42",
+            "OP",
+            18,
+            "Optimism",
+        )
+        yield (  # address, symbol, decimals, name
             b"\x9e\x10\x28\xf5\xf1\xd5\xed\xe5\x97\x48\xff\xce\xe5\x53\x25\x09\x97\x68\x40\xe0",
             "PERP",
             18,
@@ -398,6 +410,18 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "Uniswap",
         )
         yield (  # address, symbol, decimals, name
+            b"\x0b\x2c\x63\x9c\x53\x38\x13\xf4\xaa\x9d\x78\x37\xca\xf6\x26\x53\xd0\x97\xff\x85",
+            "USDC",
+            6,
+            "USD Coin",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x7f\x5c\x76\x4c\xbc\x14\xf9\x66\x9b\x88\x83\x7c\xa1\x49\x0c\xca\x17\xc3\x16\x07",
+            "USDC.e",
+            6,
+            "USD Coin (Bridged from Ethereum)",
+        )
+        yield (  # address, symbol, decimals, name
             b"\x94\xb0\x08\xaa\x00\x57\x9c\x13\x07\xb0\xef\x2c\x49\x9a\xd9\x8a\x8c\xe5\x8e\x58",
             "USDT",
             6,
@@ -408,6 +432,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "WBTC",
             8,
             "Wrapped BTC",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x42\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06",
+            "WETH",
+            18,
+            "Wrapped Ether",
         )
     if chain_id == 25:  # CRO
         yield (  # address, symbol, decimals, name
@@ -746,6 +776,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "VAI",
             18,
             "VAI Stablecoin",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xbb\x4c\xdb\x9c\xbd\x36\xb0\x1b\xd1\xcb\xae\xbf\x2d\xe0\x8d\x91\x73\xbc\x09\x5c",
+            "WBNB",
+            18,
+            "Wrapped BNB",
         )
         yield (  # address, symbol, decimals, name
             b"\x8b\x30\x3d\x5b\xbf\xbb\xf4\x6f\x1a\x4d\x97\x41\xe4\x91\xe0\x69\x86\x89\x4e\x18",
@@ -1520,16 +1556,22 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "Uniswap (PoS)",
         )
         yield (  # address, symbol, decimals, name
-            b"\x27\x91\xbc\xa1\xf2\xde\x46\x61\xed\x88\xa3\x0c\x99\xa7\xa9\x44\x9a\xa8\x41\x74",
+            b"\x3c\x49\x9c\x54\x2c\xef\x5e\x38\x11\xe1\x19\x2c\xe7\x0d\x8c\xc0\x3d\x5c\x33\x59",
             "USDC",
             6,
             "USD Coin",
         )
         yield (  # address, symbol, decimals, name
+            b"\x27\x91\xbc\xa1\xf2\xde\x46\x61\xed\x88\xa3\x0c\x99\xa7\xa9\x44\x9a\xa8\x41\x74",
+            "USDC.e",
+            6,
+            "USD Coin (PoS)",
+        )
+        yield (  # address, symbol, decimals, name
             b"\xc2\x13\x2d\x05\xd3\x1c\x91\x4a\x87\xc6\x61\x1c\x10\x74\x8a\xeb\x04\xb5\x8e\x8f",
             "USDT",
             6,
-            "Tether",
+            "(PoS) Tether USD",
         )
         yield (  # address, symbol, decimals, name
             b"\xd0\x25\x8a\x3f\xd0\x0f\x38\xaa\x80\x90\xdf\xee\x34\x3f\x10\xa9\xd4\xd3\x0d\x3f",
@@ -1678,6 +1720,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "Frax",
         )
         yield (  # address, symbol, decimals, name
+            b"\x04\x9d\x68\x02\x96\x88\xea\xbf\x47\x30\x97\xa2\xfc\x38\xef\x61\x63\x3a\x3c\x7a",
+            "fUSDT",
+            18,
+            "Frapped USDT",
+        )
+        yield (  # address, symbol, decimals, name
             b"\x7d\x01\x6e\xec\x9c\x25\x23\x2b\x01\xf2\x3e\xf9\x92\xd9\x8c\xa9\x7f\xc2\xaf\x5a",
             "FXS",
             18,
@@ -1786,6 +1834,31 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             18,
             "Shibui",
         )
+    if chain_id == 8453:  # Base
+        yield (  # address, symbol, decimals, name
+            b"\x50\xc5\x72\x59\x49\xa6\xf0\xc7\x2e\x6c\x4a\x64\x1f\x24\x04\x9a\x91\x7d\xb0\xcb",
+            "DAI",
+            18,
+            "Dai Stablecoin",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x83\x35\x89\xfc\xd6\xed\xb6\xe0\x8f\x4c\x7c\x32\xd4\xf7\x1b\x54\xbd\xa0\x29\x13",
+            "USDC",
+            6,
+            "USD Coin",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xfd\xe4\xc9\x6c\x85\x93\x53\x6e\x31\xf2\x29\xea\x8f\x37\xb2\xad\xa2\x69\x9b\xb2",
+            "USDT",
+            6,
+            "Bridged Tether USD",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x42\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06",
+            "WETH",
+            18,
+            "Wrapped Ether",
+        )
     if chain_id == 9798:  # Data Trade Chain
         yield (  # address, symbol, decimals, name
             b"\x8e\x79\x85\x0c\x50\xe5\x25\xeb\x6b\xa6\x3e\x60\x1e\x7b\x41\x88\x8a\x1c\x91\x02",
@@ -1847,6 +1920,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "ADoge",
             18,
             "ArbiDoge",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x91\x2c\xe5\x91\x44\x19\x1c\x12\x04\xe6\x45\x59\xfe\x82\x53\xa0\xe4\x9e\x65\x48",
+            "ARB",
+            18,
+            "Arbitrum",
         )
         yield (  # address, symbol, decimals, name
             b"\x9f\x20\xde\x1f\xc9\xb1\x61\xb3\x40\x89\xcb\xea\xe8\x88\x16\x8b\x44\xb0\x34\x61",
@@ -1993,10 +2072,16 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "Uniswap",
         )
         yield (  # address, symbol, decimals, name
-            b"\xff\x97\x0a\x61\xa0\x4b\x1c\xa1\x48\x34\xa4\x3f\x5d\xe4\x53\x3e\xbd\xdb\x5c\xc8",
+            b"\xaf\x88\xd0\x65\xe7\x7c\x8c\xc2\x23\x93\x27\xc5\xed\xb3\xa4\x32\x26\x8e\x58\x31",
             "USDC",
             6,
             "USD Coin",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\xff\x97\x0a\x61\xa0\x4b\x1c\xa1\x48\x34\xa4\x3f\x5d\xe4\x53\x3e\xbd\xdb\x5c\xc8",
+            "USDC.e",
+            6,
+            "Bridged USDC",
         )
         yield (  # address, symbol, decimals, name
             b"\xfd\x08\x6b\xc7\xcd\x5c\x48\x1d\xcc\x9c\x85\xeb\xe4\x78\xa1\xc0\xb6\x9f\xcb\xb9",
@@ -2281,6 +2366,12 @@ def _token_iterator(chain_id: int) -> Iterator[tuple[bytes, str, int, str]]:
             "WAVAX",
             18,
             "Wrapped AVAX",
+        )
+        yield (  # address, symbol, decimals, name
+            b"\x40\x8d\x4c\xd0\xad\xb7\xce\xbd\x1f\x1a\x1c\x33\xa0\xba\x20\x98\xe1\x29\x5b\xab",
+            "WBTC",
+            8,
+            "Wrapped BTC",
         )
         yield (  # address, symbol, decimals, name
             b"\x50\xb7\x54\x56\x27\xa5\x16\x2f\x82\xa9\x92\xc3\x3b\x87\xad\xc7\x51\x87\xb2\x18",

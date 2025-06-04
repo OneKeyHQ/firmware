@@ -32,13 +32,13 @@ async def get_address(
     address = bech32.bech32_encode(hrp, convertedbits, bech32.Encoding.BECH32)
     if msg.show_display:
         path = paths.address_n_to_str(msg.address_n)
-        primary_color, ctx.icon_path = retrieve_theme_by_hrp(hrp)
+        chain_name, primary_color, ctx.icon_path = retrieve_theme_by_hrp(hrp)
         ctx.primary_color = lv.color_hex(primary_color)
         await show_address(
             ctx,
             address=address,
             address_n=path,
-            network="Cosmos",
+            network=chain_name,
         )
 
     return CosmosAddress(address=address)
