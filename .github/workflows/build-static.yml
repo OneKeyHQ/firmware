@@ -58,7 +58,7 @@ jobs:
           git lfs pull
           mkdir dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}
           unzip dist/resource-base-v4.0.0.zip -d dist
-          ls core/src/trezor/lvglui/res |xargs -I{} xattr -d com.apple.quarantine core/src/trezor/lvglui/res/{}
+          ls core/src/trezor/lvglui/res | xargs -I{} xattr -d com.apple.quarantine core/src/trezor/lvglui/res/{} || true
           chmod 666 core/src/trezor/lvglui/res/*
           diff -qr core/src/trezor/lvglui/res dist/res | grep 'Only in core/src/trezor/lvglui/res' | cut -d ':' -f2 | xargs -I{} cp core/src/trezor/lvglui/res/{} dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}
           diff -qr core/src/trezor/lvglui/res dist/res | grep 'differ$' | cut -d ' ' -f2 | xargs -I{} cp {} dist/res-4.0.0-${{ env.FIRMWARE_VERSION }}
