@@ -8,9 +8,11 @@ import ujson as json
 
 from .networks import format_amount, formatAmont, getChainName
 
+required_keys = ["account_number", "chain_id", "fee", "memo", "msgs", "sequence"]
+_optional_keys = ["timeout_height"]
 MessageArgs = namedtuple(
     "MessageArgs",
-    ["account_number", "chain_id", "fee", "memo", "msgs", "sequence"],
+    required_keys,
 )
 
 KEY_SUBSTITUTIONS = [
@@ -224,13 +226,18 @@ class Transaction:
             j = json.loads(raw_message.decode())
         except Exception:
             raise wire.DataError("invalid JSON")
-        if any(
-            k not in j
-            for k in ["account_number", "chain_id", "fee", "memo", "msgs", "sequence"]
-        ):
+        if any(k not in j for k in required_keys):
             raise wire.DataError("invalid payload")
-
-        return Transaction(MessageArgs(**j))
+        return Transaction(
+            MessageArgs(
+                account_number=j["account_number"],
+                chain_id=j["chain_id"],
+                fee=j["fee"],
+                memo=j["memo"],
+                msgs=j["msgs"],
+                sequence=j["sequence"],
+            )
+        )
 
 
 class SendTxn:
