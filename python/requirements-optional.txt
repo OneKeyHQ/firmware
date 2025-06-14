@@ -3,3 +3,4 @@ web3 >= 4.8
 Pillow
 stellar-sdk>=4.0.0,<6.0.0
 rlp>=1.1.0 ; python_version<'3.7'
+requests>=2.32.4 # not directly required, pinned by Snyk to avoid a vulnerability
