@@ -406,3 +406,13 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "A:/res/chain-noble.png",
         0x41498D,
     )
+        yield (
+        "columbus-5",
+        "Terra Classic",
+        "LUNC",
+        "uluna",
+        6,
+        "LUNC",
+        "A:/res/chain-terra.png",
+        0x41498D,
+    )
