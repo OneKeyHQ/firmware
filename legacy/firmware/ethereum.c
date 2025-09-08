@@ -54,7 +54,7 @@ static bool eip1559;
 struct SHA3_CTX keccak_ctx = {0};
 
 static uint32_t signing_access_list_count;
-static EthereumAccessList signing_access_list[16];
+static EthereumAccessList signing_access_list[8];
 _Static_assert(sizeof(signing_access_list) ==
                    sizeof(((EthereumSignTxEIP1559 *)NULL)->access_list),
                "access_list buffer size mismatch");
