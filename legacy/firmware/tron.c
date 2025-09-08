@@ -408,11 +408,13 @@ int pack_contract(TronSignTx *msg, uint8_t *buf, int *index,
                               MAX_ADDR_RAW_SIZE);
     cmessage_len +=
         write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
-
-    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
-    cmessage_len +=
-        write_varint(cmessage, &cmessage_index,
-                     msg->contract.delegate_resource_contract.resource);
+    if (msg->contract.delegate_resource_contract.has_resource) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.delegate_resource_contract.resource);
+    }
     cmessage_len += add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
     cmessage_len +=
         write_varint(cmessage, &cmessage_index,
@@ -434,6 +436,13 @@ int pack_contract(TronSignTx *msg, uint8_t *buf, int *index,
           write_varint(cmessage, &cmessage_index,
                        msg->contract.delegate_resource_contract.lock);
     }
+    if (msg->contract.delegate_resource_contract.has_lock_period) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 6, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.delegate_resource_contract.lock_period);
+    }
   }
 
   if (msg->contract.has_undelegate_resource_contract) {
@@ -450,10 +459,13 @@ int pack_contract(TronSignTx *msg, uint8_t *buf, int *index,
     cmessage_len +=
         write_bytes_with_length(cmessage, &cmessage_index, addr_raw, len);
 
-    cmessage_len += add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
-    cmessage_len +=
-        write_varint(cmessage, &cmessage_index,
-                     msg->contract.undelegate_resource_contract.resource);
+    if (msg->contract.undelegate_resource_contract.has_resource) {
+      cmessage_len +=
+          add_field(cmessage, &cmessage_index, 2, PROTO_TYPE_VARINT);
+      cmessage_len +=
+          write_varint(cmessage, &cmessage_index,
+                       msg->contract.undelegate_resource_contract.resource);
+    }
     cmessage_len += add_field(cmessage, &cmessage_index, 3, PROTO_TYPE_VARINT);
     cmessage_len +=
         write_varint(cmessage, &cmessage_index,

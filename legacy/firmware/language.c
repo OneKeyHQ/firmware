@@ -448,6 +448,8 @@ const char *const languages[][2] = {
     {"Format:", "格式:"},
     // layout2.c
     {"From", "发送方"},
+    // solana.c
+    {"From (Token Account)", "发送方 (代币账户)"}, 
     // layout2.c
     {"GPG sign for:", ""},
     {"Gas Fee Cap", "燃料单价上限"},
@@ -798,6 +800,8 @@ const char *const languages[][2] = {
     {"Tip Amount", "小费金额"},
     {"Tipper", "小费支付方"},
     {"Title", "标题"},
+    // solana.c
+    {"To (Token Account)", "接收方 (代币账户)"},
     // signing.c fsm_msg_coin.h
     // ada.c
     {"To Pool:", "目标质押池:"},

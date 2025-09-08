@@ -107,10 +107,10 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
   size_t num_summary_steps = 0;
   size_t steps = 0;
   uint8_t steps_list[MAX_TRANSACTION_SUMMARY_ITEMS];
-  char title_str[65] = {0};
-  snprintf(title_str, 65, "%s %s", "Solana", _("Transaction"));
+  const char **tx_msg = format_tx_message("Solana");
   if (transaction_summary_finalize(summary_step_kinds, &num_summary_steps) ==
       0) {
+    char desc[64];
     for (size_t i = 0; i < num_summary_steps; i++) {
       if (transaction_summary_display_item(i, DisplayFlagAll)) {
         fsm_sendFailure(FailureType_Failure_DataError, "Parse error");
@@ -131,26 +131,33 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
         } else if (strcmp(title, "Funded by") == 0) {
           continue;
         } else if (strcmp(title, "Owner") == 0) {
-          title = "From";
+          continue;
+        } else if (strcmp(title, "Max fees") == 0) {
+          continue;
         } else if (strcmp(title, "Owned by") == 0) {
-          title = "To";
+          continue;
+        } else if (strcmp(title, "Sender") == 0) {
+          title = "From";
+        } else if (strcmp(title, "Recipient") == 0) {
+          title = "Send to";
         } else if (strcmp(title, "Transfer tokens") == 0 ||
                    strcmp(title, "Transfer") == 0) {
           title = "Amount";
+        } else if (strcmp(title, "Token Sender") == 0) {
+          title = "From (Token Account)";
+        } else if (strcmp(title, "Token Recipient") == 0) {
+          title = "To (Token Account)";
         }
 
-        char desc[64];
-        memset(desc, 0, sizeof(desc));
-        strcat(desc, _(title));
-        strcat(desc, ":");
+        snprintf(desc, sizeof(desc), "%s:", _(title));
 
         steps_list[steps++] = i;
 
-        layoutDialogAdapterEx(title_str, &bmp_bottom_left_close, NULL,
+        layoutDialogAdapterEx(tx_msg[0], &bmp_bottom_left_close, NULL,
                               i < num_summary_steps - 1
                                   ? &bmp_bottom_right_arrow
                                   : &bmp_bottom_right_confirm,
-                              NULL, NULL, desc, _(text), NULL, NULL);
+                              NULL, NULL, desc, text, NULL, NULL);
 
         uint8_t key;
       button_scan:
@@ -176,11 +183,21 @@ void solana_sign_tx(const SolanaSignTx *msg, const HDNode *node,
         }
       }
     }
+    oledClear_ex();
+    layoutHeader(_("Sign Transaction"));
+    oledDrawStringAdapter(0, 13, tx_msg[1], FONT_STANDARD);
+    layoutButtonNoAdapter(NULL, &bmp_bottom_left_close);
+    layoutButtonYesAdapter(NULL, &bmp_bottom_right_confirm);
+    oledRefresh();
+    if (!protectButton(ButtonRequestType_ButtonRequest_SignTx, false)) {
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      return;
+    }
     ed25519_sign(msg->raw_tx.bytes, msg->raw_tx.size, node->private_key,
                  resp->signature.bytes);
     resp->signature.size = 64;
   } else {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Parse error"));
+    fsm_sendFailure(FailureType_Failure_DataError, "Parse error");
     return;
   }
   msg_write(MessageType_MessageType_SolanaSignedTx, resp);

@@ -882,9 +882,7 @@ refresh_menu:
     if (counter >= DEFAULT_PIN_LEN) {
       index = 10;
     } else {
-      do {
-        index = random_uniform(10);
-      } while (index == 0);
+      index = random_uniform(10);
     }
   }
 
@@ -894,7 +892,7 @@ refresh_menu:
   if (isLongPress(KEY_UP_OR_DOWN) && getLongPressStatus()) {
     if (isLongPress(KEY_UP)) {  // up
       if (!d) {                 // default direction
-        if (index > 1)
+        if (index > 0)
           index--;
         else
           index = max_index;
@@ -902,16 +900,16 @@ refresh_menu:
         if (index < max_index)
           index++;
         else
-          index = 1;
+          index = 0;
       }
     } else if (isLongPress(KEY_DOWN)) {  // down
       if (!d) {
         if (index < max_index)
           index++;
         else
-          index = 1;
+          index = 0;
       } else {
-        if (index > 1)
+        if (index > 0)
           index--;
         else
           index = max_index;
@@ -930,7 +928,7 @@ refresh_menu:
   }
   switch (key) {
     case KEY_UP:
-      if (index > 1)
+      if (index > 0)
         index--;
       else
         index = max_index;
@@ -939,7 +937,7 @@ refresh_menu:
       if (index < max_index)
         index++;
       else
-        index = 1;
+        index = 0;
       goto refresh_menu;
     case KEY_CONFIRM:
       (void)pin;

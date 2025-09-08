@@ -25,7 +25,7 @@
 #include "pinmatrix.h"
 #include "rng.h"
 
-static char pinmatrix_perm[10] = "XXXXXXXXX";
+static char pinmatrix_perm[11] = "XXXXXXXXX";
 
 void pinmatrix_draw(const char *text) {
   const BITMAP *bmp_digits[10] = {
@@ -37,21 +37,23 @@ void pinmatrix_draw(const char *text) {
   if (text) {
     oledDrawStringCenterAdapter(OLED_WIDTH / 2, 0, text, FONT_STANDARD);
   }
-  const int w = bmp_digit0.width, h = bmp_digit0.height, pad = 2;
+  const int w = bmp_digit0.width, h = bmp_digit0.height, pad = 1;
+  int k = 0;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       // use (2 - j) instead of j to achieve 789456123 layout
-      int k = pinmatrix_perm[i + (2 - j) * 3] - '0';
+      k = pinmatrix_perm[i + (2 - j) * 3] - '0';
       oledDrawBitmap((OLED_WIDTH - 3 * w - 2 * pad) / 2 + i * (w + pad),
-                     OLED_HEIGHT - 3 * h - 2 * pad + j * (h + pad),
+                     OLED_HEIGHT - 4 * h - 3 * pad + j * (h + pad),
                      bmp_digits[k]);
     }
   }
-  for (int i = 0; i < 3; i++) {
-    // 36 is the maximum pixels used for a pin matrix pixel row
-    // but we use 56 pixels to add some extra
-    oledSCAInside(12 + i * (h + pad), 12 + i * (h + pad) + h - 1, 56, 38,
-                  OLED_WIDTH - 38);
+  k = pinmatrix_perm[9] - '0';
+  oledBox(27, 52, 101, 64, true);
+  oledDrawBitmap(52, 52, bmp_digits[k]);
+  for (int i = 0; i < 4; i++) {
+    oledSCAInside(13 + i * (h + pad), 13 + i * (h + pad) + h - 1, 76, 27,
+                  OLED_WIDTH - 27);
   }
   oledRefresh();
 }
@@ -60,8 +62,9 @@ void pinmatrix_start(const char *text) {
   for (int i = 0; i < 9; i++) {
     pinmatrix_perm[i] = '1' + i;
   }
-  pinmatrix_perm[9] = 0;
-  random_permute(pinmatrix_perm, 9);
+  pinmatrix_perm[9] = '0';
+  pinmatrix_perm[10] = 0;
+  random_permute(pinmatrix_perm, 10);
   pinmatrix_draw(text);
 }
 
@@ -70,7 +73,8 @@ secbool pinmatrix_done(bool clear, char *pin) {
   secbool ret = sectrue;
   while (pin && pin[i]) {
     k = pin[i] - '1';
-    if (k >= 0 && k <= 8) {
+    if (k == -1) k = 9;
+    if (k >= 0 && k <= 9) {
       pin[i] = pinmatrix_perm[k];
     } else {
       pin[i] = 'X';

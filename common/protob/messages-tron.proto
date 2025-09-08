@@ -98,6 +98,7 @@ message TronSignTx {
             optional uint64 balance = 3;
             optional string receiver_address = 4;
             optional bool  lock = 5;
+            optional uint64 lock_period = 6;
         }
         message TronUnDelegateResourceContract {
             optional TronResourceCode resource = 2;
