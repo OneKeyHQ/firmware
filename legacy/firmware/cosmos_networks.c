@@ -6,7 +6,8 @@ const CosmosNetworkType cosmos_networks[COSMOS_NETWORK_COUNT] = {
     {"osmosis-1", "osmo", "Osmosis", "OSMO", "uosmo", 6},
     {"secret-4", "secret", "Secret Network", "SCRT", "uscrt", 6},
     {"akashnet-2", "akash", "Akash", "AKT", "uakt", 6},
-    {"crypto-org-chain-mainnet-1", "cro", "Crypto.org", "CRO", "basecro", 8},
+    {"crypto-org-chain-mainnet-1", "cro", "Cronos POS Chain", "CRO", "basecro",
+     8},
     {"iov-mainnet-ibc", "star", "Starname", "IOV", "uiov", 6},
     {"sifchain-1", "sif", "Sifchain", "ROWAN", "rowan", 18},
     {"shentu-2.2", "certik", "Shentu", "CTK", "uctk", 6},
@@ -32,6 +33,7 @@ const CosmosNetworkType cosmos_networks[COSMOS_NETWORK_COUNT] = {
     {"quicksilver-1", "quick", "Quicksilver", "QCK", "uqck", 6},
     {"fetchhub-4", "fetch", "Fetch.ai", "FET", "afet", 18},
     {"celestia", "celestia", "Celestia", "TIA", "utia", 6},
+    {"bbn-1", "bbn", "BABYLON", "BABY", "ubbn", 6},
 };
 
 const CosmosNetworkType *cosmosnetworkByChainId(const char *chain_id) {
