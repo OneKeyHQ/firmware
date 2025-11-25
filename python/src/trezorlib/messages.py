@@ -9080,6 +9080,7 @@ class PolkadotSignTx(protobuf.MessageType):
         1: protobuf.Field("address_n", "uint32", repeated=True, required=False),
         2: protobuf.Field("raw_tx", "bytes", repeated=False, required=True),
         3: protobuf.Field("network", "string", repeated=False, required=True),
+        4: protobuf.Field("prefix", "uint32", repeated=False, required=False),
     }
 
     def __init__(
@@ -9088,10 +9089,12 @@ class PolkadotSignTx(protobuf.MessageType):
         raw_tx: "bytes",
         network: "str",
         address_n: Optional[Sequence["int"]] = None,
+        prefix: Optional["int"] = None,
     ) -> None:
         self.address_n: Sequence["int"] = address_n if address_n is not None else []
         self.raw_tx = raw_tx
         self.network = network
+        self.prefix = prefix
 
 
 class PolkadotSignedTx(protobuf.MessageType):

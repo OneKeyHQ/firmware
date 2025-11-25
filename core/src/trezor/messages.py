@@ -7189,6 +7189,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         raw_tx: "bytes"
         network: "str"
+        prefix: "int | None"
 
         def __init__(
             self,
@@ -7196,6 +7197,7 @@ if TYPE_CHECKING:
             raw_tx: "bytes",
             network: "str",
             address_n: "list[int] | None" = None,
+            prefix: "int | None" = None,
         ) -> None:
             pass
 
