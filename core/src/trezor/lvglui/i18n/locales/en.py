@@ -950,5 +950,6 @@ translations = [
     "Tap to send",
     "Unknown Message",
     "Unknown Network",
+    "Recipient is a known energy rental service provider address.",
 ]
 # fmt: on

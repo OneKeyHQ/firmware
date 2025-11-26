@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from trezor.crypto.curve import secp256k1
 from trezor.crypto.hashlib import sha3_256
+from trezor.enums import TronMessageType
 from trezor.lvglui.scrs import lv
 from trezor.messages import TronMessageSignature, TronSignMessage
 from trezor.ui.layouts import confirm_signverify
@@ -38,12 +39,15 @@ async def sign_message(
 
     # hash the message
     h = HashWriter(sha3_256(keccak=True))
-    h.extend(msg.message)
-    data_hash = h.get_digest()
-
+    if msg.message_type == TronMessageType.V2:
+        signing_message = msg.message
+    else:
+        h.extend(msg.message)
+        signing_message = h.get_digest()
+    message_digest = make_message_digest(signing_message)
     signature = secp256k1.sign(
         node.private_key(),
-        message_digest(data_hash),
+        message_digest,
         False,
         secp256k1.CANONICAL_SIG_ETHEREUM,
     )
@@ -54,7 +58,7 @@ async def sign_message(
     )
 
 
-def message_digest(message: bytes) -> bytes:
+def make_message_digest(message: bytes) -> bytes:
     h = HashWriter(sha3_256(keccak=True))
     signed_message_header = b"\x19TRON Signed Message:\n"
     h.extend(signed_message_header)

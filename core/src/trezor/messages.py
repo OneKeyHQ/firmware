@@ -68,6 +68,7 @@ if TYPE_CHECKING:
     from trezor.enums import TezosContractType  # noqa: F401
     from trezor.enums import TonWalletVersion  # noqa: F401
     from trezor.enums import TonWorkChain  # noqa: F401
+    from trezor.enums import TronMessageType  # noqa: F401
     from trezor.enums import TronResourceCode  # noqa: F401
     from trezor.enums import WordRequestType  # noqa: F401
 
@@ -7189,6 +7190,7 @@ if TYPE_CHECKING:
         address_n: "list[int]"
         raw_tx: "bytes"
         network: "str"
+        prefix: "int | None"
 
         def __init__(
             self,
@@ -7196,6 +7198,7 @@ if TYPE_CHECKING:
             raw_tx: "bytes",
             network: "str",
             address_n: "list[int] | None" = None,
+            prefix: "int | None" = None,
         ) -> None:
             pass
 
@@ -8588,7 +8591,7 @@ if TYPE_CHECKING:
         ref_block_bytes: "bytes"
         ref_block_hash: "bytes"
         expiration: "int"
-        data: "str | None"
+        data: "bytes | None"
         contract: "TronContract"
         timestamp: "int"
         fee_limit: "int | None"
@@ -8602,7 +8605,7 @@ if TYPE_CHECKING:
             contract: "TronContract",
             timestamp: "int",
             address_n: "list[int] | None" = None,
-            data: "str | None" = None,
+            data: "bytes | None" = None,
             fee_limit: "int | None" = None,
         ) -> None:
             pass
@@ -8630,12 +8633,14 @@ if TYPE_CHECKING:
     class TronSignMessage(protobuf.MessageType):
         address_n: "list[int]"
         message: "bytes"
+        message_type: "TronMessageType"
 
         def __init__(
             self,
             *,
             message: "bytes",
             address_n: "list[int] | None" = None,
+            message_type: "TronMessageType | None" = None,
         ) -> None:
             pass
 
@@ -8661,6 +8666,7 @@ if TYPE_CHECKING:
 
     class TronContract(protobuf.MessageType):
         transfer_contract: "TronTransferContract | None"
+        vote_witness_contract: "TronVoteWitnessContract | None"
         freeze_balance_contract: "TronFreezeBalanceContract | None"
         unfreeze_balance_contract: "TronUnfreezeBalanceContract | None"
         withdraw_balance_contract: "TronWithdrawBalanceContract | None"
@@ -8670,11 +8676,16 @@ if TYPE_CHECKING:
         withdraw_expire_unfreeze_contract: "TronWithdrawExpireUnfreezeContract | None"
         delegate_resource_contract: "TronDelegateResourceContract | None"
         undelegate_resource_contract: "TronUnDelegateResourceContract | None"
+        cancel_all_unfreeze_v2_contract: "TronCancelAllUnfreezeV2Contract | None"
+        provider: "bytes | None"
+        contract_name: "bytes | None"
+        permission_id: "int | None"
 
         def __init__(
             self,
             *,
             transfer_contract: "TronTransferContract | None" = None,
+            vote_witness_contract: "TronVoteWitnessContract | None" = None,
             freeze_balance_contract: "TronFreezeBalanceContract | None" = None,
             unfreeze_balance_contract: "TronUnfreezeBalanceContract | None" = None,
             withdraw_balance_contract: "TronWithdrawBalanceContract | None" = None,
@@ -8684,6 +8695,10 @@ if TYPE_CHECKING:
             withdraw_expire_unfreeze_contract: "TronWithdrawExpireUnfreezeContract | None" = None,
             delegate_resource_contract: "TronDelegateResourceContract | None" = None,
             undelegate_resource_contract: "TronUnDelegateResourceContract | None" = None,
+            cancel_all_unfreeze_v2_contract: "TronCancelAllUnfreezeV2Contract | None" = None,
+            provider: "bytes | None" = None,
+            contract_name: "bytes | None" = None,
+            permission_id: "int | None" = None,
         ) -> None:
             pass
 
@@ -8822,6 +8837,7 @@ if TYPE_CHECKING:
         balance: "int | None"
         receiver_address: "str | None"
         lock: "bool | None"
+        lock_period: "int | None"
 
         def __init__(
             self,
@@ -8830,6 +8846,7 @@ if TYPE_CHECKING:
             balance: "int | None" = None,
             receiver_address: "str | None" = None,
             lock: "bool | None" = None,
+            lock_period: "int | None" = None,
         ) -> None:
             pass
 
@@ -8853,6 +8870,44 @@ if TYPE_CHECKING:
 
         @classmethod
         def is_type_of(cls, msg: Any) -> TypeGuard["TronUnDelegateResourceContract"]:
+            return isinstance(msg, cls)
+
+    class TronCancelAllUnfreezeV2Contract(protobuf.MessageType):
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronCancelAllUnfreezeV2Contract"]:
+            return isinstance(msg, cls)
+
+    class TronVoteWitnessContract(protobuf.MessageType):
+        votes: "list[Vote]"
+        support: "bool | None"
+
+        def __init__(
+            self,
+            *,
+            votes: "list[Vote] | None" = None,
+            support: "bool | None" = None,
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["TronVoteWitnessContract"]:
+            return isinstance(msg, cls)
+
+    class Vote(protobuf.MessageType):
+        vote_address: "str"
+        vote_count: "int"
+
+        def __init__(
+            self,
+            *,
+            vote_address: "str",
+            vote_count: "int",
+        ) -> None:
+            pass
+
+        @classmethod
+        def is_type_of(cls, msg: Any) -> TypeGuard["Vote"]:
             return isinstance(msg, cls)
 
     class WebAuthnListResidentCredentials(protobuf.MessageType):

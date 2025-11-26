@@ -725,6 +725,11 @@ if TYPE_CHECKING:
         BASECHAIN = 0
         MASTERCHAIN = 1
 
+    class TronMessageType(IntEnum):
+        V1 = 1
+        V2 = 2
+
     class TronResourceCode(IntEnum):
         BANDWIDTH = 0
         ENERGY = 1
+        TRON_POWER = 2

@@ -32,6 +32,7 @@ def require_confirm_tx(
     ctx: Context,
     to: str,
     value: int,
+    banner_text: str | None = None,
 ) -> Awaitable[None]:
     to_str = to
     return confirm_output(
@@ -41,6 +42,7 @@ def require_confirm_tx(
         font_amount=ui.BOLD,
         color_to=ui.GREY,
         br_code=ButtonRequestType.SignTx,
+        banner_text=banner_text,
     )
 
 
@@ -231,6 +233,33 @@ def require_confirm_undelegate(
         format_amount_trx(balance, None) if balance is not None else None,
         receiver_address,
         str(lock) if lock is not None else None,
+    )
+
+
+def require_confirm_cancel_all_unfreeze_v2(
+    ctx: Context,
+    signer: str,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_unfreeze
+
+    return confirm_tron_unfreeze(ctx, "Cancel All UnStaking", signer, None, None)
+
+
+def require_confirm_vote_witness(
+    ctx: Context,
+    signer: str,
+    votes: list[tuple[str, int]],
+    support: bool | None,
+) -> Awaitable[None]:
+    from trezor.ui.layouts.lvgl import confirm_tron_vote
+
+    return confirm_tron_vote(
+        ctx,
+        "Vote for Witness"
+        if (support is None or support)
+        else "Remove Vote for Witness",
+        signer,
+        votes,
     )
 
 

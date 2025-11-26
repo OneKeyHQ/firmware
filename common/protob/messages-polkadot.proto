@@ -36,6 +36,7 @@ message PolkadotSignTx {
     repeated uint32 address_n = 1;                  // BIP-32 path to derive the key from master node
     required bytes raw_tx = 2;                      // serialized raw transaction
     required string network = 3;                    // Network name
+    optional uint32 prefix = 4;                     // SS58 address-type
 }
 
 /**

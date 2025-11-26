@@ -98,7 +98,7 @@ def main():
     while True:
         response = client.keys(
             LOKALISE_PROJECT_ID,
-            {"include_translations": 1, "limit": PAGE_SIZE, "page": page},
+            {"include_translations": 1, "limit": PAGE_SIZE, "page": page, "replace_breaks": 1},
         )
         items = response.items
         if not items:

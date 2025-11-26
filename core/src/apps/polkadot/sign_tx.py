@@ -16,7 +16,7 @@ async def sign_tx(
 
     node = keychain.derive(msg.address_n)
     public_key = ed25519.publickey(node.private_key())
-    address_type = helper.get_address_type(msg.network)
+    address_type = helper.get_address_type(msg.network, msg.prefix)
     address = helper.ss58_encode(public_key, address_type)
     chain_name, symbol, decimal = helper.update_chain_res(ctx, msg.network)
     tx = transaction.Transaction.deserialize(msg.raw_tx, msg.network)

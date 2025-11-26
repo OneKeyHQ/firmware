@@ -950,5 +950,6 @@ translations = [
     "Tippen zum Senden",
     "Unbekannte Nachricht",
     "Unbekanntes Netzwerk",
+    "Der Empfänger ist eine bekannte Adresse eines Energie-Mietdienstleisters.",
 ]
 # fmt: on

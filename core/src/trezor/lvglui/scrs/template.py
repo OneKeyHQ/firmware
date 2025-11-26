@@ -242,7 +242,14 @@ class Message(FullSizeWindow):
 
 class TransactionOverview(FullSizeWindow):
     def __init__(
-        self, title, amount, address, primary_color, icon_path, has_details=None
+        self,
+        title,
+        amount,
+        address,
+        primary_color,
+        icon_path,
+        has_details=None,
+        banner_text=None,
     ):
         if __debug__:
             self.layout_address = address
@@ -256,7 +263,18 @@ class TransactionOverview(FullSizeWindow):
             primary_color=primary_color,
             icon_path=icon_path,
         )
-        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+        if banner_text:
+            self.warning_banner = Banner(
+                self.content_area,
+                0,
+                banner_text,
+            )
+            self.warning_banner.align_to(self.title, lv.ALIGN.OUT_BOTTOM_LEFT, 0, 40)
+        self.container = ContainerFlexCol(
+            self.content_area,
+            self.title if not banner_text else self.warning_banner,
+            pos=(0, 24),
+        )
         self.item1 = DisplayItemNoBgc(
             self.container,
             f"#FFFFFF {_(i18n_keys.INSERT__SEND)}#  {amount}  #FFFFFF {_(i18n_keys.INSERT__TO)}#",
@@ -2242,6 +2260,44 @@ class TronAssetFreeze(FullSizeWindow):
         if lock is not None:
             self.item6 = DisplayItemNoBgc(
                 self.container, _(i18n_keys.LIST_KEY__LOCK_COLON), lock
+            )
+
+
+class TronVoteWitness(FullSizeWindow):
+    def __init__(
+        self,
+        voter,
+        votes,
+        primary_color,
+    ):
+        super().__init__(
+            _(i18n_keys.TITLE__SIGN_STR_TRANSACTION).format("Tron"),
+            None,
+            _(i18n_keys.BUTTON__CONTINUE),
+            _(i18n_keys.BUTTON__REJECT),
+            primary_color=primary_color,
+        )
+        self.container = ContainerFlexCol(self.content_area, self.title, pos=(0, 40))
+
+        self.item_voter = DisplayItemNoBgc(
+            self.container,
+            _(i18n_keys.LIST_KEY__VOTER__COLON),
+            voter,
+        )
+        multi_vote = len(votes) > 1
+        for i, (candidate, count) in enumerate(votes):
+            self.item_vote = DisplayItemNoBgc(
+                self.container,
+                f"{_(i18n_keys.GLOBAL_CANDIDATE)} #{i + 1}"
+                if multi_vote
+                else _(i18n_keys.GLOBAL_CANDIDATE),
+                candidate,
+            )
+            self.item_vote.label_top.set_recolor(False)
+            self.item_vote_count = DisplayItemNoBgc(
+                self.container,
+                _(i18n_keys.GLOBAL__VOTE_COUNT),
+                str(count),
             )
 
 

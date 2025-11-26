@@ -7,12 +7,18 @@ from trezor.lvglui.scrs import lv
 from . import (
     ICON,
     ICON_ASTAR,
+    ICON_BIFROST,
+    ICON_BIFROST_KSM,
+    ICON_HYDRATION,
     ICON_JOY,
     ICON_KSM,
     ICON_MANTA,
     ICON_WESTEND,
     PRIMARY_COLOR,
     PRIMARY_COLOR_ASTAR,
+    PRIMARY_COLOR_BIFROST,
+    PRIMARY_COLOR_BIFROST_KSMC,
+    PRIMARY_COLOR_HYDRATION,
     PRIMARY_COLOR_JOY,
     PRIMARY_COLOR_KSM,
     PRIMARY_COLOR_MAMTA,
@@ -30,6 +36,9 @@ POLKADOT_ADDRESS_TYPES = [
     ["astar", 5],
     ["joystream", 126],
     ["manta", 77],
+    ["hydration", 0],
+    ["bifrost", 0],
+    ["bifrost-ksm", 0],
 ]
 
 COIN_AMOUNT_DECIMAL_PLACES = 10
@@ -41,6 +50,8 @@ WESTEND_COIN_TICKER = "WND"
 ASTAR_COIN_TICKER = "ASTR"
 JOY_COIN_TICKER = "JOY"
 MANTA_COIN_TICKER = "MANTA"
+HYDRATION_COIN_TICKER = "HDX"
+BIFROST_COIN_TICKER = "BNC"
 
 
 def ss58_encode(address: bytes, ss58_format: int = 42) -> str:
@@ -118,6 +129,30 @@ def update_chain_res(ctx: Context, network: str) -> tuple[str, str, int]:
         chain_name = "Manta"
         symbol = MANTA_COIN_TICKER
         decimal = COIN_AMOUNT_DECIMAL_PLACES_18
+    elif network == "hydration":
+        ctx.primary_color, ctx.icon_path = (
+            lv.color_hex(PRIMARY_COLOR_HYDRATION),
+            ICON_HYDRATION,
+        )
+        chain_name = "Hydration"
+        symbol = HYDRATION_COIN_TICKER
+        decimal = COIN_AMOUNT_DECIMAL_PLACES_12
+    elif network == "bifrost":
+        ctx.primary_color, ctx.icon_path = (
+            lv.color_hex(PRIMARY_COLOR_BIFROST),
+            ICON_BIFROST,
+        )
+        chain_name = "Bifrost"
+        symbol = BIFROST_COIN_TICKER
+        decimal = COIN_AMOUNT_DECIMAL_PLACES_12
+    elif network == "bifrost-ksm":
+        ctx.primary_color, ctx.icon_path = (
+            lv.color_hex(PRIMARY_COLOR_BIFROST_KSMC),
+            ICON_BIFROST_KSM,
+        )
+        chain_name = "Bifrost-KSM"
+        symbol = BIFROST_COIN_TICKER
+        decimal = COIN_AMOUNT_DECIMAL_PLACES_12
     else:
         ctx.primary_color, ctx.icon_path = lv.color_hex(PRIMARY_COLOR), ICON
         chain_name = "UNKN Chain"
@@ -126,10 +161,10 @@ def update_chain_res(ctx: Context, network: str) -> tuple[str, str, int]:
     return chain_name, symbol, decimal
 
 
-def get_address_type(network: str) -> int:
-    address_type = 42
+def get_address_type(network: str, preset_prefix: int | None = None) -> int:
+    address_type = preset_prefix if preset_prefix is not None else 42
     for element in POLKADOT_ADDRESS_TYPES:
         if network == element[0]:
             address_type = element[1]
-
+            break
     return address_type

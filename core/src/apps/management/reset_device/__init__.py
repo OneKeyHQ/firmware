@@ -122,10 +122,10 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
             if not __debug__:
                 await show_bip39_dotmap(ctx, secret)
             await layout.show_backup_success(ctx)
-        if isinstance(ctx, wire.DummyContext):
-            utils.make_show_app_guide()
-        else:
-            await show_onekey_app_guide()
+        # if isinstance(ctx, wire.DummyContext):
+        #     utils.make_show_app_guide()
+        # else:
+        await show_onekey_app_guide()
     except BaseException as e:
         raise e
     else:

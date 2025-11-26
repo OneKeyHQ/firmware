@@ -11,6 +11,7 @@ from apps.tron.address import _address_base58, get_address_from_public_key
 from apps.tron.serialize import serialize
 
 from . import ICON, PRIMARY_COLOR, layout, tokens
+from .providers import provider_by_address
 
 
 @auto_keychain(__name__)
@@ -43,20 +44,24 @@ async def sign_tx(
 
 
 async def _require_confirm_by_type(ctx, transaction, owner_address):
-    # Confirm extra data if exist
-    if transaction.data:
-        await layout.require_confirm_data(ctx, transaction.data, len(transaction.data))
 
     # Confirm transaction
     contract = transaction.contract
     if contract.transfer_contract:
         if contract.transfer_contract.amount is None:
             raise wire.DataError("Invalid Tron transfer amount")
+        recipient = contract.transfer_contract.to_address
+        banner_text = None
+        if provider_by_address(recipient) is not None:
+            from trezor.lvglui.i18n import gettext as _
+            from trezor.lvglui.i18n import keys as i18n_keys
 
+            banner_text = _(i18n_keys.BANNER_ENERGY_RENTAL)
         await layout.require_confirm_tx(
             ctx,
-            contract.transfer_contract.to_address,
+            recipient,
             contract.transfer_contract.amount,
+            banner_text=banner_text,
         )
     elif contract.trigger_smart_contract:
         # check if TRC20 transfer/approval
@@ -164,8 +169,24 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
             contract.undelegate_resource_contract.receiver_address,
             None,
         )
+    elif contract.cancel_all_unfreeze_v2_contract:
+        await layout.require_confirm_cancel_all_unfreeze_v2(
+            ctx,
+            owner_address,
+        )
+    elif contract.vote_witness_contract:
+        vote_contract = contract.vote_witness_contract
+        await layout.require_confirm_vote_witness(
+            ctx,
+            owner_address,
+            [(vote.vote_address, vote.vote_count) for vote in vote_contract.votes],
+            vote_contract.support,
+        )
     else:
         raise wire.DataError("Invalid transaction type")
+    # Confirm extra data if exist
+    if transaction.data:
+        await layout.require_confirm_data(ctx, transaction.data, len(transaction.data))
 
     await confirm_final(ctx, "TRON")
 

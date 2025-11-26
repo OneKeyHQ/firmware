@@ -51,7 +51,7 @@ BATTERY_CAP: int | None = None
 SHORT_AUTO_LOCK_TIME_MS = 10 * 1000
 DEFAULT_LABEL = "OneKey Touch"
 AUTO_POWER_OFF = False
-_SHOW_APP_GUIDE = False
+# _SHOW_APP_GUIDE = False
 _INITIALIZATION_PROCESSING = False
 if __debug__:
     if EMULATOR:
@@ -161,17 +161,17 @@ def is_low_battery():
     return False
 
 
-def show_app_guide():
-    global _SHOW_APP_GUIDE
-    if _SHOW_APP_GUIDE:
-        _SHOW_APP_GUIDE = False
-        return True
-    return False
+# def show_app_guide():
+#     global _SHOW_APP_GUIDE
+#     if _SHOW_APP_GUIDE:
+#         _SHOW_APP_GUIDE = False
+#         return True
+#     return False
 
 
-def make_show_app_guide():
-    global _SHOW_APP_GUIDE
-    _SHOW_APP_GUIDE = True
+# def make_show_app_guide():
+#     global _SHOW_APP_GUIDE
+#     _SHOW_APP_GUIDE = True
 
 
 def mark_initialization_processing():
