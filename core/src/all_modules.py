@@ -137,6 +137,8 @@ trezor.enums.TonWalletVersion
 import trezor.enums.TonWalletVersion
 trezor.enums.TonWorkChain
 import trezor.enums.TonWorkChain
+trezor.enums.TronMessageType
+import trezor.enums.TronMessageType
 trezor.enums.TronResourceCode
 import trezor.enums.TronResourceCode
 trezor.enums.WordRequestType
@@ -885,6 +887,8 @@ apps.tron.get_address
 import apps.tron.get_address
 apps.tron.layout
 import apps.tron.layout
+apps.tron.providers
+import apps.tron.providers
 apps.tron.serialize
 import apps.tron.serialize
 apps.tron.sign_message

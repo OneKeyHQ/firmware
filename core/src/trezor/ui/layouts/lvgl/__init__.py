@@ -75,6 +75,11 @@ __all__ = (
     "confirm_ton_transfer",
     "confirm_unknown_token_transfer",
     "confirm_ton_signverify",
+    "confirm_tron_vote",
+    "confirm_tron_unfreeze",
+    "confirm_tron_freeze",
+    "confirm_tron_delegate",
+    "confirm_tron_common",
 )
 
 
@@ -488,6 +493,7 @@ async def confirm_output(
     width_paginated: int = MONO_ADDR_PER_LINE - 1,
     br_code: ButtonRequestType = ButtonRequestType.ConfirmOutput,
     icon: str = ui.ICON_SEND,
+    banner_text: str | None = None,
 ) -> None:
     from trezor.lvglui.scrs.template import TransactionOverview
 
@@ -502,6 +508,7 @@ async def confirm_output(
                 address,
                 primary_color=ctx.primary_color,
                 icon_path=ctx.icon_path,
+                banner_text=banner_text,
             ),
             "confirm_output",
             br_code,
@@ -2070,6 +2077,26 @@ async def confirm_tron_delegate(
     )
     await raise_if_cancelled(
         interact(ctx, screen, "confirm_tron_delegate", ButtonRequestType.ProtectCall)
+    )
+
+
+async def confirm_tron_vote(
+    ctx: wire.GenericContext,
+    title: str,
+    voter: str,
+    votes: list[tuple[str, int]],
+) -> None:
+    from trezor.lvglui.scrs.template import TronVoteWitness, AlgoCommon
+
+    screen = AlgoCommon(title, ctx.primary_color, ctx.icon_path)
+    await raise_if_cancelled(
+        interact(
+            ctx, screen, "confirm_tron_vote_overview", ButtonRequestType.ProtectCall
+        )
+    )
+    screen = TronVoteWitness(voter, votes, ctx.primary_color)
+    await raise_if_cancelled(
+        interact(ctx, screen, "confirm_tron_vote", ButtonRequestType.ProtectCall)
     )
 
 

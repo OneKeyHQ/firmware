@@ -29,10 +29,10 @@ loop.schedule(handle_usb_state())
 loop.schedule(lvgl_tick())
 
 utils.set_up()
-if utils.show_app_guide():
-    from trezor.ui.layouts import show_onekey_app_guide
+# if utils.show_app_guide():
+#     from trezor.ui.layouts import show_onekey_app_guide
 
-    loop.schedule(show_onekey_app_guide())
+#     loop.schedule(show_onekey_app_guide())
 
 loop.run()
 

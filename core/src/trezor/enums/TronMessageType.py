@@ -2,6 +2,4 @@
 # fmt: off
 # isort:skip_file
 
-BANDWIDTH = 0
-ENERGY = 1
-TRON_POWER = 2
+V2 = 2

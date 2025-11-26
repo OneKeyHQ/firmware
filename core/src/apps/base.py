@@ -346,10 +346,8 @@ ALLOW_WHILE_LOCKED = (
 
 def set_homescreen() -> None:
     import lvgl as lv  # type: ignore[Import "lvgl" could not be resolved]
-    from trezor import uart
 
     ble_name = storage.device.get_ble_name()
-    uart.get_ble_con_status()
     if storage.device.is_initialized():
         dev_state = get_state()
         device_name = storage.device.get_label()

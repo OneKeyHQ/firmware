@@ -2085,4 +2085,6 @@ ITEM__TAP_TO_SEND = 947
 MSG__UNKNOWN_MESSAGE = 948
 # Unknown Network
 MSG__UNKNOWN_NETWORK = 949
+# Recipient is a known energy rental service provider address.
+BANNER_ENERGY_RENTAL = 950
 # fmt: on

@@ -7,21 +7,16 @@ from apps.common.writers import write_bytes_fixed
 # PROTOBUF3 types
 TYPE_VARINT = 0
 TYPE_DOUBLE = 1
-TYPE_STRING = 2
-TYPE_GROUPS = 3
-TYPE_GROUPE = 4
+TYPE_LEN = 2
 TYPE_FLOAT = 5
 
 
-def add_field(w, fnumber, ftype):
-    if fnumber > 15:
-        w.append(fnumber << 3 | ftype)
-        w.append(0x01)
-    else:
-        w.append(fnumber << 3 | ftype)
+def write_field(w: bytearray, fnumber: int, ftype: int):
+    tag = fnumber << 3 | ftype
+    write_varint(w, tag)
 
 
-def write_varint(w, value):
+def write_varint(w: bytearray, value: int):
     """
     Implements Base 128 variant
     See: https://developers.google.com/protocol-buffers/docs/encoding#varints
@@ -36,9 +31,9 @@ def write_varint(w, value):
             w.append(byte | 0x80)
 
 
-def write_bytes_with_length(w, buf: bytes):
+def write_bytes_with_length(w, buf: bytes | bytearray):
     write_varint(w, len(buf))
-    write_bytes_fixed(w, buf, len(buf))
+    write_bytes_fixed(w, bytes(buf), len(buf))
 
 
 def pack_contract(contract, owner_address):
@@ -48,7 +43,7 @@ def pack_contract(contract, owner_address):
     and https://github.com/tronprotocol/protocol/blob/master/core/contract/smart_contract.proto
     """
     retc = bytearray()
-    add_field(retc, 1, TYPE_VARINT)
+    write_field(retc, 1, TYPE_VARINT)
     # contract message
     cmessage = bytearray()
     api = ""
@@ -56,72 +51,89 @@ def pack_contract(contract, owner_address):
         write_varint(retc, 1)
         api = "TransferContract"
 
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
-        add_field(cmessage, 2, TYPE_STRING)
+        write_field(cmessage, 2, TYPE_LEN)
         write_bytes_with_length(
             cmessage, base58.decode_check(contract.transfer_contract.to_address)
         )
-        add_field(cmessage, 3, TYPE_VARINT)
+        write_field(cmessage, 3, TYPE_VARINT)
         write_varint(cmessage, contract.transfer_contract.amount)
+    elif contract.vote_witness_contract:
+        write_varint(retc, 4)
+        api = "VoteWitnessContract"
 
-    if contract.trigger_smart_contract:
+        write_field(cmessage, 1, TYPE_LEN)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+        for vote in contract.vote_witness_contract.votes:
+            v_message = bytearray()
+            write_field(cmessage, 2, TYPE_LEN)
+            write_field(v_message, 1, TYPE_LEN)
+            write_bytes_with_length(v_message, base58.decode_check(vote.vote_address))
+            write_field(v_message, 2, TYPE_VARINT)
+            write_varint(v_message, vote.vote_count)
+            write_bytes_with_length(cmessage, v_message)
+        if contract.vote_witness_contract.support is not None:
+            write_field(cmessage, 3, TYPE_VARINT)
+            write_varint(cmessage, int(contract.vote_witness_contract.support))
+
+    elif contract.trigger_smart_contract:
         write_varint(retc, 31)
         api = "TriggerSmartContract"
 
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
-        add_field(cmessage, 2, TYPE_STRING)
+        write_field(cmessage, 2, TYPE_LEN)
         write_bytes_with_length(
             cmessage,
             base58.decode_check(contract.trigger_smart_contract.contract_address),
         )
         if contract.trigger_smart_contract.call_value:
-            add_field(cmessage, 3, TYPE_VARINT)
+            write_field(cmessage, 3, TYPE_VARINT)
             write_varint(cmessage, contract.trigger_smart_contract.call_value)
 
         # Contract data
-        add_field(cmessage, 4, TYPE_STRING)
+        write_field(cmessage, 4, TYPE_LEN)
         write_bytes_with_length(cmessage, contract.trigger_smart_contract.data)
 
         if contract.trigger_smart_contract.call_token_value:
-            add_field(cmessage, 5, TYPE_VARINT)
+            write_field(cmessage, 5, TYPE_VARINT)
             write_varint(cmessage, contract.trigger_smart_contract.call_token_value)
-            add_field(cmessage, 6, TYPE_VARINT)
+            write_field(cmessage, 6, TYPE_VARINT)
             write_varint(cmessage, contract.trigger_smart_contract.asset_id)
 
-    if contract.freeze_balance_contract:
+    elif contract.freeze_balance_contract:
         write_varint(retc, 11)
         api = "FreezeBalanceContract"
 
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
-        add_field(cmessage, 2, TYPE_VARINT)
+        write_field(cmessage, 2, TYPE_VARINT)
         write_varint(cmessage, contract.freeze_balance_contract.frozen_balance)
-        add_field(cmessage, 3, TYPE_VARINT)
+        write_field(cmessage, 3, TYPE_VARINT)
         write_varint(cmessage, contract.freeze_balance_contract.frozen_duration)
         if contract.freeze_balance_contract.resource is not None:
-            add_field(cmessage, 4, TYPE_VARINT)
+            write_field(cmessage, 10, TYPE_VARINT)
             write_varint(cmessage, contract.freeze_balance_contract.resource)
         if contract.freeze_balance_contract.receiver_address is not None:
-            add_field(cmessage, 5, TYPE_STRING)
+            write_field(cmessage, 15, TYPE_LEN)
             write_bytes_with_length(
                 cmessage,
                 base58.decode_check(contract.freeze_balance_contract.receiver_address),
             )
 
-    if contract.unfreeze_balance_contract:
+    elif contract.unfreeze_balance_contract:
         write_varint(retc, 12)
         api = "UnfreezeBalanceContract"
 
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
 
         if contract.unfreeze_balance_contract.resource is not None:
-            add_field(cmessage, 2, TYPE_VARINT)
+            write_field(cmessage, 10, TYPE_VARINT)
             write_varint(cmessage, contract.unfreeze_balance_contract.resource)
         if contract.unfreeze_balance_contract.receiver_address is not None:
-            add_field(cmessage, 3, TYPE_STRING)
+            write_field(cmessage, 15, TYPE_LEN)
             write_bytes_with_length(
                 cmessage,
                 base58.decode_check(
@@ -129,117 +141,137 @@ def pack_contract(contract, owner_address):
                 ),
             )
 
-    if contract.withdraw_balance_contract:
+    elif contract.withdraw_balance_contract:
         write_varint(retc, 13)
         api = "WithdrawBalanceContract"
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
 
-    if contract.freeze_balance_v2_contract:
+    elif contract.freeze_balance_v2_contract:
         write_varint(retc, 54)
         api = "FreezeBalanceV2Contract"
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
 
-        add_field(cmessage, 2, TYPE_VARINT)
+        write_field(cmessage, 2, TYPE_VARINT)
         write_varint(cmessage, contract.freeze_balance_v2_contract.frozen_balance)
         if contract.freeze_balance_v2_contract.resource is not None:
-            add_field(cmessage, 3, TYPE_VARINT)
+            write_field(cmessage, 3, TYPE_VARINT)
             write_varint(cmessage, contract.freeze_balance_v2_contract.resource)
 
-    if contract.unfreeze_balance_v2_contract:
+    elif contract.unfreeze_balance_v2_contract:
         write_varint(retc, 55)
         api = "UnfreezeBalanceV2Contract"
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
 
-        add_field(cmessage, 2, TYPE_VARINT)
+        write_field(cmessage, 2, TYPE_VARINT)
         write_varint(cmessage, contract.unfreeze_balance_v2_contract.unfreeze_balance)
         if contract.unfreeze_balance_v2_contract.resource is not None:
-            add_field(cmessage, 3, TYPE_VARINT)
+            write_field(cmessage, 3, TYPE_VARINT)
             write_varint(cmessage, contract.unfreeze_balance_v2_contract.resource)
 
-    if contract.withdraw_expire_unfreeze_contract:
+    elif contract.withdraw_expire_unfreeze_contract:
         write_varint(retc, 56)
         api = "WithdrawExpireUnfreezeContract"
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
 
-    if contract.delegate_resource_contract:
+    elif contract.delegate_resource_contract:
         write_varint(retc, 57)
         api = "DelegateResourceContract"
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
-
-        add_field(cmessage, 2, TYPE_VARINT)
-        write_varint(cmessage, contract.delegate_resource_contract.resource)
-        add_field(cmessage, 3, TYPE_VARINT)
+        if contract.delegate_resource_contract.resource is not None:
+            write_field(cmessage, 2, TYPE_VARINT)
+            write_varint(cmessage, contract.delegate_resource_contract.resource)
+        write_field(cmessage, 3, TYPE_VARINT)
         write_varint(cmessage, contract.delegate_resource_contract.balance)
-        add_field(cmessage, 4, TYPE_STRING)
+        write_field(cmessage, 4, TYPE_LEN)
         write_bytes_with_length(
             cmessage,
             base58.decode_check(contract.delegate_resource_contract.receiver_address),
         )
         if contract.delegate_resource_contract.lock is not None:
-            add_field(cmessage, 5, TYPE_VARINT)
+            write_field(cmessage, 5, TYPE_VARINT)
             write_varint(cmessage, contract.delegate_resource_contract.lock)
+        if contract.delegate_resource_contract.lock_period is not None:
+            write_field(cmessage, 6, TYPE_VARINT)
+            write_varint(cmessage, contract.delegate_resource_contract.lock_period)
 
-    if contract.undelegate_resource_contract:
+    elif contract.undelegate_resource_contract:
         write_varint(retc, 58)
         api = "UnDelegateResourceContract"
-        add_field(cmessage, 1, TYPE_STRING)
+        write_field(cmessage, 1, TYPE_LEN)
         write_bytes_with_length(cmessage, base58.decode_check(owner_address))
-
-        add_field(cmessage, 2, TYPE_VARINT)
-        write_varint(cmessage, contract.undelegate_resource_contract.resource)
-        add_field(cmessage, 3, TYPE_VARINT)
+        if contract.undelegate_resource_contract.resource is not None:
+            write_field(cmessage, 2, TYPE_VARINT)
+            write_varint(cmessage, contract.undelegate_resource_contract.resource)
+        write_field(cmessage, 3, TYPE_VARINT)
         write_varint(cmessage, contract.undelegate_resource_contract.balance)
-        add_field(cmessage, 4, TYPE_STRING)
+        write_field(cmessage, 4, TYPE_LEN)
         write_bytes_with_length(
             cmessage,
             base58.decode_check(contract.undelegate_resource_contract.receiver_address),
         )
+    elif contract.cancel_all_unfreeze_v2_contract:
+        write_varint(retc, 59)
+        api = "CancelAllUnfreezeV2Contract"
+        write_field(cmessage, 1, TYPE_LEN)
+        write_bytes_with_length(cmessage, base58.decode_check(owner_address))
+    else:
+        raise ValueError("Unsupported contract type")
 
     # write API
     capi = bytearray()
-    add_field(capi, 1, TYPE_STRING)
+    write_field(capi, 1, TYPE_LEN)
     # write_bytes_with_length(capi, "type.googleapis.com/protocol." + api)
     write_bytes_with_length(capi, bytes("type.googleapis.com/protocol." + api, "ascii"))
 
     # extend to capi
-    add_field(capi, 2, TYPE_STRING)
+    write_field(capi, 2, TYPE_LEN)
     write_bytes_with_length(capi, cmessage)
 
     # extend to contract
-    add_field(retc, 2, TYPE_STRING)
+    write_field(retc, 2, TYPE_LEN)
     write_bytes_with_length(retc, capi)
+
+    if contract.provider:
+        write_field(retc, 3, TYPE_LEN)
+        write_bytes_with_length(retc, contract.provider)
+    if contract.contract_name:
+        write_field(retc, 4, TYPE_LEN)
+        write_bytes_with_length(retc, contract.contract_name)
+    if contract.permission_id is not None:
+        write_field(retc, 5, TYPE_VARINT)
+        write_varint(retc, contract.permission_id)
     return retc
 
 
 def serialize(transaction: TronSignTx, owner_address: str):
     # transaction parameters
     ret = bytearray()
-    add_field(ret, 1, TYPE_STRING)
+    write_field(ret, 1, TYPE_LEN)
     write_bytes_with_length(ret, transaction.ref_block_bytes)
-    add_field(ret, 4, TYPE_STRING)
+    write_field(ret, 4, TYPE_LEN)
     write_bytes_with_length(ret, transaction.ref_block_hash)
-    add_field(ret, 8, TYPE_VARINT)
+    write_field(ret, 8, TYPE_VARINT)
     write_varint(ret, transaction.expiration)
     if transaction.data is not None:
-        add_field(ret, 10, TYPE_STRING)
-        write_bytes_with_length(ret, bytes(transaction.data, "ascii"))
+        write_field(ret, 10, TYPE_LEN)
+        write_bytes_with_length(ret, transaction.data)
 
     # add Contract
     retc = pack_contract(transaction.contract, owner_address)
 
-    add_field(ret, 11, TYPE_STRING)
+    write_field(ret, 11, TYPE_LEN)
     write_bytes_with_length(ret, retc)
     # add timestamp
-    add_field(ret, 14, TYPE_VARINT)
+    write_field(ret, 14, TYPE_VARINT)
     write_varint(ret, transaction.timestamp)
     # add fee_limit if any
     if transaction.fee_limit:
-        add_field(ret, 18, TYPE_VARINT)
+        write_field(ret, 18, TYPE_VARINT)
         write_varint(ret, transaction.fee_limit)
 
     return ret

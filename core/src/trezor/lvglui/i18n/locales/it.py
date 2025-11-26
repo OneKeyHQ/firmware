@@ -950,5 +950,6 @@ translations = [
     "Tocca per inviare",
     "Messaggio sconosciuto",
     "Rete sconosciuta",
+    "Il destinatario è un indirizzo noto di un fornitore di servizi di noleggio di energia.",
 ]
 # fmt: on
