@@ -6,6 +6,7 @@ from enum import IntEnum
 from typing import Sequence, Optional
 
 from . import protobuf
+from .messages_special import *
 
 
 class AptosTransactionType(IntEnum):
@@ -34,6 +35,19 @@ class BinanceTimeInForce(IntEnum):
 
 
 class MessageType(IntEnum):
+
+    SignDigest = 1001
+    DigestSignature = 1002
+    SignData = 1003
+    DataSignature = 1004
+    ExportEd25519PublicKey = 1005
+    Ed25519PublicKey = 1006
+    GetEd25519Nonce = 1007
+    Ed25519Nonce = 1008
+    CosignEd25519 = 1009
+    Ed25519Signature = 1010
+    Ed25519Verify = 1011
+
     Initialize = 0
     Ping = 1
     Success = 2

@@ -67,6 +67,7 @@ from . import (
     nostr,
     lnurl,
     ton,
+	special,
 )
 
 F = TypeVar("F", bound=Callable)
@@ -473,6 +474,15 @@ cli.add_command(nexa.cli)
 cli.add_command(nostr.cli)
 cli.add_command(lnurl.cli)
 cli.add_command(ton.cli)
+
+cli.add_command(special.sign_firmware)
+cli.add_command(special.export_ed25519_pubkey)
+cli.add_command(special.ed25519_test)
+cli.add_command(special.ed25519_commit)
+cli.add_command(special.ed25519_global_combine)
+cli.add_command(special.ed25519_cosign)
+cli.add_command(special.ed25519_combine_sigs)
+cli.add_command(special.ed25519_devmode_test)
 
 #
 # Main
