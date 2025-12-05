@@ -32,13 +32,17 @@ def require_confirm_tx(
     ctx: Context,
     to: str,
     value: int,
-    banner_text: str | None = None,
+    token: tokens.TokenInfo | None = None,
 ) -> Awaitable[None]:
-    to_str = to
+    banner_text = None
+    from .providers import provider_by_address
+
+    if provider_by_address(to) is not None:
+        banner_text = _(i18n_keys.BANNER_ENERGY_RENTAL)
     return confirm_output(
         ctx,
-        address=to_str,
-        amount=format_amount_trx(value, None),
+        address=to,
+        amount=format_amount_trx(value, token),
         font_amount=ui.BOLD,
         color_to=ui.GREY,
         br_code=ButtonRequestType.SignTx,
@@ -46,29 +50,12 @@ def require_confirm_tx(
     )
 
 
-def require_confirm_trigger_trc20(
-    ctx: Context,
-    verified: bool,
-    contract_address: str,
-    amount: int,
-    token: tokens.TokenInfo,
-    toAddress: str,
-) -> Awaitable[None]:
-    if verified:
-        return confirm_output(
-            ctx,
-            address=toAddress,
-            amount=format_amount_trx(amount, token),
-            font_amount=ui.BOLD,
-            color_to=ui.GREY,
-            br_code=ButtonRequestType.SignTx,
-        )
+def require_confirm_unknown_token(ctx: Context, token_addr: str) -> Awaitable[None]:
 
-    # Unknown token
     return confirm_address(
         ctx,
         _(i18n_keys.TITLE__UNKNOWN_TOKEN),
-        contract_address,
+        token_addr,
         description=_(i18n_keys.LIST_KEY__CONTRACT__COLON),
         br_type="unknown_token",
         icon="A:/res/warning.png",

@@ -11,7 +11,6 @@ from apps.tron.address import _address_base58, get_address_from_public_key
 from apps.tron.serialize import serialize
 
 from . import ICON, PRIMARY_COLOR, layout, tokens
-from .providers import provider_by_address
 
 
 @auto_keychain(__name__)
@@ -51,17 +50,10 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
         if contract.transfer_contract.amount is None:
             raise wire.DataError("Invalid Tron transfer amount")
         recipient = contract.transfer_contract.to_address
-        banner_text = None
-        if provider_by_address(recipient) is not None:
-            from trezor.lvglui.i18n import gettext as _
-            from trezor.lvglui.i18n import keys as i18n_keys
-
-            banner_text = _(i18n_keys.BANNER_ENERGY_RENTAL)
         await layout.require_confirm_tx(
             ctx,
             recipient,
             contract.transfer_contract.amount,
-            banner_text=banner_text,
         )
     elif contract.trigger_smart_contract:
         # check if TRC20 transfer/approval
@@ -83,18 +75,17 @@ async def _require_confirm_by_type(ctx, transaction, owner_address):
             action = "Approve"
 
         if action == "Transfer":
-            token = tokens.token_by_address(
-                contract.trigger_smart_contract.contract_address
-            )
+            token_addr = contract.trigger_smart_contract.contract_address
+            token = tokens.token_by_address(token_addr)
             recipient = _address_base58(b"\x41" + data[16:36])
             value = int.from_bytes(data[36:68], "big")
-            await layout.require_confirm_trigger_trc20(
+            if token is tokens.UNKNOWN_TOKEN:
+                await layout.require_confirm_unknown_token(ctx, token_addr)
+            await layout.require_confirm_tx(
                 ctx,
-                False if token is tokens.UNKNOWN_TOKEN else True,
-                contract.trigger_smart_contract.contract_address,
+                recipient,
                 value,
                 token,
-                recipient,
             )
             if transaction.fee_limit:
                 await layout.require_confirm_fee(
