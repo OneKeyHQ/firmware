@@ -1273,6 +1273,9 @@ bool protectPinCheck(bool retry) {
     if (key == KEY_CONFIRM) {
       return true;
     } else if (key == KEY_NULL) {
+      if (protectAbortedByInitialize) {
+        fsm_sendFailure(FailureType_Failure_ActionCancelled, NULL);
+      }
       return false;
     }
   }
