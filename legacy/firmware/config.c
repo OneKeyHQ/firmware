@@ -467,6 +467,14 @@ void config_init(void) {
   config_upgrade_v10();
 
   storage_init(&protectPinUiCallback, HW_ENTROPY_DATA, HW_ENTROPY_LEN);
+  // Restore safetyCheckLevel from soft reset if preserved
+  uint16_t preserved_level = soft_reset_get_preserved_data();
+  if (preserved_level != PRESERVED_RESET_DATA_INVALID) {
+    if (preserved_level == SafetyCheckLevel_PromptTemporarily) {
+      safetyCheckLevel = (SafetyCheckLevel)preserved_level;
+    }
+    soft_reset_clear_preserved_data();
+  }
   memzero(HW_ENTROPY_DATA, sizeof(HW_ENTROPY_DATA));
 
   // get whether use se flag

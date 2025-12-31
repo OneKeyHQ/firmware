@@ -70,4 +70,14 @@ extern bool protectAbortedByInitialize;
 extern bool protectAbortedByInitializeOnboarding;
 extern bool protectAbortedByTimeout;
 extern bool protectAbortedBySleep;
+
+#define WAIT_KEY_OR_ABORT(timeout, mode, key)                   \
+  do {                                                          \
+    key = protectWaitKey(timeout, mode);                        \
+    if (protectAbortedByInitialize || protectAbortedByCancel) { \
+      enableLongPress(false);                                   \
+      return false;                                             \
+    }                                                           \
+  } while (0)
+
 #endif

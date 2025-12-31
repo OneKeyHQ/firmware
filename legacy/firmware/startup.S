@@ -51,10 +51,18 @@ reset_handler:
   isb
 
   .setup_as_unprivileged:
+  // Preserve data across soft reset - load from fixed address before RAM clear
+  ldr r0, =_preserved_reset_data_addr  // Address for preserved data (defined in linker script)
+  ldr r11, [r0]        // r11 = preserve value in register (survives RAM clear)
+
   ldr r0, =_ram_start // r0 - point to beginning of SRAM
   ldr r1, =_ram_end   // r1 - point to byte after the end of SRAM
   ldr r2, =0          // r2 - the byte-sized value to be written
   bl memset_reg
+
+  // Restore preserved data after RAM clear 
+  ldr r0, =_preserved_reset_data_addr  // Address for preserved data
+  str r11, [r0]        // Store preserved value back to memory        
 
   // copy .data section from flash to SRAM
   ldr r0, =_data          // dst addr

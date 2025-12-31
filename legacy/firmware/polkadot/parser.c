@@ -41,7 +41,14 @@ static parser_error_t polkadot_parser_parse_dispatch(parser_context_t *ctx,
 
 parser_error_t polkadot_parser_parse(parser_context_t *ctx, const uint8_t *data,
                                      size_t dataLen, parser_tx_t *tx_obj) {
-  __address_type = _detectAddressType(ctx);
+  int8_t ret = detectNetworkMetadata();
+  if (ret < 0) {
+    if (ctx->has_preset_address_type) {
+      setAddressType(ctx->preset_address_type);
+    } else {
+      setAddressType(42);
+    }
+  }
   parser_error_t err = POLKADOT_PARSER_PARSE_V26;
   if (err != parser_ok && err != parser_unexpected_callIndex) {
     err = POLKADOT_PARSER_PARSE_V25;

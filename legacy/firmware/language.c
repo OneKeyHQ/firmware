@@ -649,6 +649,7 @@ const char *const languages[][2] = {
     {"Receiver:", "接收方:"},
     //
     {"Recipient", "接收方"},
+    {"Recipient is a known energy rental service provider address.", "收款地址是已知的能量租赁服务提供商."},
     //
     {"Recovery Phrase ", "助记词"},
     {"Recovery Phrase is the \nonly way to restore the \nprivate keys that own "
@@ -772,6 +773,7 @@ const char *const languages[][2] = {
     {"Switch Input (Number)", "切换输入法 (数字)"},
     {"Switch Input (Symbol)", "切换输入法 (符号)"},
     {"Switch Input (Uppercase)", "切换输入法 (大写字母)"},
+    {"TRON Energy Rental", "TRON 能量租赁"}, 
     // protect.c
     {"The device is reset,\nrestart now!", "设备已重置, 请重启!"},
     {"The following transaction output contains tokens.",

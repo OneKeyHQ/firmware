@@ -172,11 +172,11 @@ parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v,
                                 bool mode_enabled);
 // parser_error_t _checkVersions(parser_context_t *c);
 
-uint16_t _getAddressType(void);
-
+uint16_t getAddressType(void);
+void setAddressType(uint16_t addressType);
 parser_error_t _readCompactIndex(parser_context_t *c, pd_CompactIndex_t *v);
 
-uint16_t _detectAddressType(const parser_context_t *c);
+int8_t detectNetworkMetadata(void);
 
 parser_error_t _toStringCompactInt(const compactInt_t *c, uint8_t decimalPlaces,
                                    bool trimTrailingZeros, char postfix[],

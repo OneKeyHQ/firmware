@@ -43,6 +43,8 @@ typedef struct {
   uint16_t bufferLen;
   uint16_t offset;
   parser_tx_t *tx_obj;
+  bool has_preset_address_type;
+  uint16_t preset_address_type;
 } parser_context_t;
 
 #endif

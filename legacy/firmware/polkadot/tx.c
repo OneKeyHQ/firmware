@@ -6,7 +6,11 @@
 static parser_tx_t tx_obj = {0};
 static parser_context_t ctx_parsed_tx = {0};
 
-parser_error_t polkadot_tx_parse(const uint8_t *data, size_t dataLen) {
+parser_error_t polkadot_tx_parse(const uint8_t *data, size_t dataLen,
+                                 bool has_preset_address_type,
+                                 uint16_t preset_address_type) {
+  ctx_parsed_tx.has_preset_address_type = has_preset_address_type;
+  ctx_parsed_tx.preset_address_type = preset_address_type;
   uint8_t err = polkadot_parser_parse(&ctx_parsed_tx, data, dataLen, &tx_obj);
   if (err != parser_ok) {
     return err;

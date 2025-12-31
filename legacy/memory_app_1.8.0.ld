@@ -25,6 +25,7 @@ _codelen = SIZEOF(.text) + SIZEOF(.data) + SIZEOF(.ARM.exidx);
 _ram_start = ORIGIN(ram);
 _ram_end = ORIGIN(ram) + LENGTH(ram);
 _stay_in_bootloader_flag_addr = ABSOLUTE(0x20010000);
+_preserved_reset_data_addr = ABSOLUTE(0x20010004);  /* Data to preserve across soft reset */
 _stack = _ram_end - 8;
 __stack_chk_guard = _ram_end - 8;
 system_millis = _ram_end - 4;
