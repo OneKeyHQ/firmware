@@ -57,6 +57,8 @@ const char *const languages[][2] = {
     {"Account:", "账号:"},
     // layout2.c
     {"Active", "激活"},
+    {"Add Trust:", "添加信任:"},
+    {"Address", "地址"},
     // fsm_msg_coin.h fsm_msg_lisk.h
     {"Address:", "地址:"},
     //
@@ -74,6 +76,7 @@ const char *const languages[][2] = {
     // u2f.c
     {"Already registered.", "已注册"},
     {"Amount", "金额"},
+    {"Amount:", "金额:"},
     // u2f.c
     {"Another U2F device", "另外的U2F设备"},
     // layout2.c
@@ -94,6 +97,7 @@ const char *const languages[][2] = {
     {"Are you sure to reset?", "确定要重置吗?"},
     // ada.c
     {"Asset Fingerprint:", "资产指纹:"},
+    {"Asset Issuer:", "资产发行人:"},
     // u2f.c
     {"Authenticate", "认证"},
     {"Authenticate U2F Security\nKey?", "要认证 U2F 安全密钥吗?"},
@@ -430,6 +434,7 @@ const char *const languages[][2] = {
     // layout2.c
     {"Fee included:", "已包含手续费"},
     {"Fee payer", "手续费支付方"},
+    {"Fee:", "手续费:"},
     // layout2.c
     {"Finish", "完成"},
     // fsm.c
@@ -526,6 +531,7 @@ const char *const languages[][2] = {
     {"Message", "消息"},
     // ethereum.c
     {"Message Hash", "消息哈希值"},
+    {"Missing Memo/Tag during exchange deposits may result in fund loss.", "向交易所充值时如未填写 Memo/Tag, 可能会导致资金丢失."},
     //
     {"Mnemonic", "助记词"},
     // cosmos.c
@@ -671,6 +677,7 @@ const char *const languages[][2] = {
     {"Rekey to", "重新授权给"},
     // layout2.c
     {"Remaining times:", "剩余次数"},
+    {"Remove Trust:", "移除信任:"},
     //
     {"Reset", "重置设备"},
     //
@@ -723,6 +730,7 @@ const char *const languages[][2] = {
     {"Send to:", "发送给:"},
     //
     {"Sender", "发送方"},
+    {"Sequence Number:", "序号:"},
     // protect.c
     {"Set PIN", "设置 PIN 码"},
     // layout2.c
@@ -754,6 +762,7 @@ const char *const languages[][2] = {
     {"Skip pin check:", "免密支付"},
     //
     {"Sleep Mode", "休眠模式"},
+    {"Source Account:", "源账户:"},
     // cosmos.c
     {"Source Address", "来源地址"},
     {"Source Coins", "来源金额"},
@@ -826,8 +835,10 @@ const char *const languages[][2] = {
     // menu_list.c
     {"Trezor Compat", "Trezor 兼容性"},
     {"Trezor Compatibility", "Trezor 兼容性"},
+    {"Trust Account", "信认账户:"},
     //
     {"Try again.", "请重试."},
+    {"Tx Source:", "Tx 源:"},
     // algo
     {"Txn type", "类型"},
     // cosmos.c

@@ -62,9 +62,7 @@ void fsm_msgNEMGetAddress(NEMGetAddress *msg) {
 
   if (msg->has_show_display && msg->show_display) {
     char desc[16];
-    strlcpy(desc, network, sizeof(desc));
-    strlcat(desc, ":", sizeof(desc));
-
+    snprintf(desc, 16, "%s %s", network, _("Address"));
     if (!fsm_layoutAddress(resp->address, NULL, desc, true, 0, msg->address_n,
                            msg->address_n_count, false, NULL, 0, 0, NULL)) {
       return;

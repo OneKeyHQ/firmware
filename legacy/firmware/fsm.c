@@ -301,9 +301,8 @@ static const CoinInfo *fsm_getCoin(bool has_name, const char *name) {
   return coin;
 }
 
-static HDNode *fsm_getDerivedNode(const char *curve, const uint32_t *address_n,
-                                  size_t address_n_count,
-                                  uint32_t *fingerprint) {
+HDNode *fsm_getDerivedNode(const char *curve, const uint32_t *address_n,
+                           size_t address_n_count, uint32_t *fingerprint) {
   static CONFIDENTIAL HDNode node;
   if (fingerprint) {
     *fingerprint = 0;
