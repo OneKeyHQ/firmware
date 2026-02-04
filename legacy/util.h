@@ -82,10 +82,11 @@ int write_bytes(const uint8_t *src, size_t count, BufferWriter *writer);
 // defined in startup.s (or setup.c for emulator)
 extern void __attribute__((noreturn)) shutdown(void);
 
+#define PRESERVED_RESET_DATA_INVALID 0xFFFF
 #if !EMULATOR
 // defined in memory.ld
 extern uint8_t _ram_start[], _ram_end[];
-
+extern uint32_t _preserved_reset_data_addr;
 // defined in startup.s
 extern void memset_reg(void *start, void *stop, uint32_t val);
 
@@ -132,10 +133,37 @@ static inline bool is_mode_unprivileged(void) {
   __asm__ volatile("mrs %0, control" : "=r"(r0));
   return r0 & 1;
 }
+#define PRESERVED_RESET_DATA_MAGIC 0xDCBA0000
+#define PRESERVED_RESET_DATA_MASK 0x0000FFFF
 
+#define PRESERVED_RESET_DATA_ADDR \
+  ((volatile uint32_t *)&_preserved_reset_data_addr)
+
+static inline void soft_reset_set_preserved_data(uint16_t data) {
+  uint32_t value =
+      PRESERVED_RESET_DATA_MAGIC | (data & PRESERVED_RESET_DATA_MASK);
+  *PRESERVED_RESET_DATA_ADDR = value;
+}
+
+static inline uint16_t soft_reset_get_preserved_data(void) {
+  uint32_t value = *PRESERVED_RESET_DATA_ADDR;
+  if ((value & PRESERVED_RESET_DATA_MAGIC) == PRESERVED_RESET_DATA_MAGIC) {
+    return (uint16_t)(value & PRESERVED_RESET_DATA_MASK);
+  }
+  return PRESERVED_RESET_DATA_INVALID;
+}
+
+static inline void soft_reset_clear_preserved_data(void) {
+  *PRESERVED_RESET_DATA_ADDR = 0;
+}
 #else /* EMULATOR */
 
 static inline bool is_mode_unprivileged(void) { return true; }
+static inline void soft_reset_set_preserved_data(uint16_t data) { (void)data; }
+static inline uint16_t soft_reset_get_preserved_data(void) {
+  return PRESERVED_RESET_DATA_INVALID;
+}
+static inline void soft_reset_clear_preserved_data(void) {}
 #endif
 
 #endif

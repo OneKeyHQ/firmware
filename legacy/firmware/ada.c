@@ -1981,7 +1981,9 @@ bool ada_sign_messages(const CardanoSignMessage *msg,
     fsm_sendFailure(FailureType_Failure_ProcessError, "Deriving root failed");
     return false;
   }
-  if (!derive_bytes(&address_params, msg->network_id, MAINNET_PROTOCOL_MAGIC,
+  if (!derive_bytes(&address_params, msg->network_id,
+                    msg->has_protocol_magic ? msg->protocol_magic
+                                            : MAINNET_PROTOCOL_MAGIC,
                     address_bytes, &address_bytes_len)) {
     return false;
   }

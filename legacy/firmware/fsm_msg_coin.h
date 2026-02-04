@@ -308,7 +308,7 @@ void fsm_msgGetAddress(const GetAddress *msg) {
     } else {
       strcat(desc, coin->coin_name);
       strcat(desc, " ");
-      strlcpy(desc + strlen(desc), _("Address:"), sizeof(desc));
+      strlcpy(desc + strlen(desc), _("Address"), sizeof(desc));
     }
 
     uint32_t multisig_xpub_magic = coin->xpub_magic;

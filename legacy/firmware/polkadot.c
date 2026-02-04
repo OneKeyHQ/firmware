@@ -130,40 +130,18 @@ scan_key:
   return result;
 }
 
-static bool get_signer_address(const PolkadotSignTx *msg, const HDNode *node,
-                               char *address) {
-  uint16_t addressType = 0;
-  if (!strncmp(msg->network, "polkadot", 8)) {
-    addressType = 0;
-  } else if (!strncmp(msg->network, "kusama", 6)) {
-    addressType = 2;
-  } else if (!strncmp(msg->network, "astar", 5)) {
-    addressType = 5;
-  } else if (!strncmp(msg->network, "westend", 7)) {
-    addressType = 42;
-  } else if (!strncmp(msg->network, "joystream", 9)) {
-    addressType = 126;
-  } else if (!strncmp(msg->network, "manta", 5)) {
-    addressType = 77;
-  } else {
-    return false;
-  }
-  polkadot_get_address_from_public_key(node->public_key + 1, address,
-                                       addressType);
-  return true;
-}
+extern uint16_t getAddressType(void);
 
 bool polkadot_sign_tx(const PolkadotSignTx *msg, const HDNode *node,
                       PolkadotSignedTx *resp) {
-  char signer[64] = {0};
-  if (!get_signer_address(msg, node, signer)) {
-    fsm_sendFailure(FailureType_Failure_ActionCancelled, "Signing cancelled");
-    layoutHome();
-    return false;
-  }
-
+  memzero(polkadot_network, sizeof(polkadot_network));
   memcpy(polkadot_network, msg->network, strlen(msg->network) + 1);
-  parser_error_t ret = polkadot_tx_parse(msg->raw_tx.bytes, msg->raw_tx.size);
+  parser_error_t ret =
+      polkadot_tx_parse(msg->raw_tx.bytes, msg->raw_tx.size, msg->has_prefix,
+                        msg->has_prefix ? msg->prefix : 0);
+  char signer[64] = {0};
+  polkadot_get_address_from_public_key(node->public_key + 1, signer,
+                                       getAddressType());
   if (ret == parser_unexpected_callIndex) {
     polkadot_network[0] -= 32;
     if (!layoutBlindSign(polkadot_network, false, NULL, signer,

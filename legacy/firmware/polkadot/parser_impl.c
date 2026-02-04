@@ -19,6 +19,13 @@ parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v,
   CHECK_ERROR(_readCompactIndex(c, &v->nonce))
   CHECK_ERROR(_readCompactBalance(c, &v->tip))
   if (mode_enabled) {
+    if (c->bufferLen - c->offset >
+        74) {  // 74 is the length without assetId but with mode
+      CHECK_ERROR(_readCompactInt(c, &v->assetId))
+      // uint64_t assetId;
+      // CHECK_ERROR(_getValue(&v->assetId, &assetId));
+      // TODO: when assetId is not 0, read XCM asset location
+    }
     CHECK_ERROR(_readu8(c, &v->mode))
   }
   CHECK_ERROR(_readu32(c, &v->specVersion))
@@ -32,13 +39,6 @@ parser_error_t _polkadot_readTx(parser_context_t *c, parser_tx_t *v,
     if (v->mode == 1 || optMetadataHash == 1) {
       return parser_unexpected_value;
     }
-  }
-  if (c->offset < c->bufferLen) {
-    return parser_unexpected_unparsed_bytes;
-  }
-
-  if (c->offset > c->bufferLen) {
-    return parser_unexpected_buffer_end;
   }
   return parser_ok;
 }

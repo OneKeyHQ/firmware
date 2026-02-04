@@ -24,7 +24,7 @@ static bool fsm_stellarCheckPath(uint32_t address_n_count,
   }
 
   if (config_getSafetyCheckLevel() == SafetyCheckLevel_Strict) {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Forbidden key path"));
+    fsm_sendFailure(FailureType_Failure_DataError, "Forbidden key path");
     return false;
   }
 
@@ -43,21 +43,22 @@ void fsm_msgStellarGetAddress(const StellarGetAddress *msg) {
     return;
   }
 
-  const HDNode *node = stellar_deriveNode(msg->address_n, msg->address_n_count);
+  HDNode *node = stellar_deriveNode(msg->address_n, msg->address_n_count);
   if (!node) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
+                    "Failed to derive private key");
     layoutHome();
     return;
   }
-
+  hdnode_fill_public_key(node);
   stellar_publicAddressAsStr(node->public_key + 1, resp->address,
                              sizeof(resp->address));
 
   if (msg->has_show_display && msg->show_display) {
-    if (!fsm_layoutAddress(resp->address, NULL, _("Public account ID"), false,
-                           0, msg->address_n, msg->address_n_count, true, NULL,
-                           0, 0, NULL)) {
+    char desc[16] = {0};
+    snprintf(desc, 16, "%s %s", "XLM", _("Address"));
+    if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
+                           msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
     }
   }
@@ -78,7 +79,7 @@ void fsm_msgStellarSignTx(const StellarSignTx *msg) {
 
   if (!stellar_signingInit(msg)) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
+                    "Failed to derive private key");
     layoutHome();
     return;
   }
@@ -92,24 +93,25 @@ void fsm_msgStellarSignTx(const StellarSignTx *msg) {
   msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
 }
 
+#define GO_AHEAD                                                   \
+  do {                                                             \
+    if (stellar_allOperationsConfirmed()) {                        \
+      RESP_INIT(StellarSignedTx);                                  \
+      stellar_fillSignedTx(resp);                                  \
+      msg_write(MessageType_MessageType_StellarSignedTx, resp);    \
+      layoutHome();                                                \
+    } else {                                                       \
+      RESP_INIT(StellarTxOpRequest);                               \
+      msg_write(MessageType_MessageType_StellarTxOpRequest, resp); \
+    }                                                              \
+  } while (0);
+
 void fsm_msgStellarCreateAccountOp(const StellarCreateAccountOp *msg) {
   CHECK_UNLOCKED
 
   if (!stellar_confirmCreateAccountOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarPaymentOp(const StellarPaymentOp *msg) {
@@ -119,19 +121,7 @@ void fsm_msgStellarPaymentOp(const StellarPaymentOp *msg) {
   if (!stellar_confirmPaymentOp(msg)) return;
 
   // Last operation was confirmed, send a StellarSignedTx
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarPathPaymentStrictReceiveOp(
@@ -140,19 +130,7 @@ void fsm_msgStellarPathPaymentStrictReceiveOp(
 
   if (!stellar_confirmPathPaymentStrictReceiveOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarPathPaymentStrictSendOp(
@@ -161,19 +139,7 @@ void fsm_msgStellarPathPaymentStrictSendOp(
 
   if (!stellar_confirmPathPaymentStrictSendOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarManageBuyOfferOp(const StellarManageBuyOfferOp *msg) {
@@ -181,19 +147,7 @@ void fsm_msgStellarManageBuyOfferOp(const StellarManageBuyOfferOp *msg) {
 
   if (!stellar_confirmManageBuyOfferOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarManageSellOfferOp(const StellarManageSellOfferOp *msg) {
@@ -201,19 +155,7 @@ void fsm_msgStellarManageSellOfferOp(const StellarManageSellOfferOp *msg) {
 
   if (!stellar_confirmManageSellOfferOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarCreatePassiveSellOfferOp(
@@ -222,19 +164,7 @@ void fsm_msgStellarCreatePassiveSellOfferOp(
 
   if (!stellar_confirmCreatePassiveSellOfferOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarSetOptionsOp(const StellarSetOptionsOp *msg) {
@@ -242,19 +172,7 @@ void fsm_msgStellarSetOptionsOp(const StellarSetOptionsOp *msg) {
 
   if (!stellar_confirmSetOptionsOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarChangeTrustOp(const StellarChangeTrustOp *msg) {
@@ -262,19 +180,7 @@ void fsm_msgStellarChangeTrustOp(const StellarChangeTrustOp *msg) {
 
   if (!stellar_confirmChangeTrustOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarAllowTrustOp(const StellarAllowTrustOp *msg) {
@@ -282,19 +188,7 @@ void fsm_msgStellarAllowTrustOp(const StellarAllowTrustOp *msg) {
 
   if (!stellar_confirmAllowTrustOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarAccountMergeOp(const StellarAccountMergeOp *msg) {
@@ -302,19 +196,7 @@ void fsm_msgStellarAccountMergeOp(const StellarAccountMergeOp *msg) {
 
   if (!stellar_confirmAccountMergeOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarManageDataOp(const StellarManageDataOp *msg) {
@@ -322,19 +204,7 @@ void fsm_msgStellarManageDataOp(const StellarManageDataOp *msg) {
 
   if (!stellar_confirmManageDataOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }
 
 void fsm_msgStellarBumpSequenceOp(const StellarBumpSequenceOp *msg) {
@@ -342,17 +212,5 @@ void fsm_msgStellarBumpSequenceOp(const StellarBumpSequenceOp *msg) {
 
   if (!stellar_confirmBumpSequenceOp(msg)) return;
 
-  if (stellar_allOperationsConfirmed()) {
-    RESP_INIT(StellarSignedTx);
-
-    stellar_fillSignedTx(resp);
-    msg_write(MessageType_MessageType_StellarSignedTx, resp);
-    layoutHome();
-  }
-  // Request the next operation to sign
-  else {
-    RESP_INIT(StellarTxOpRequest);
-
-    msg_write(MessageType_MessageType_StellarTxOpRequest, resp);
-  }
+  GO_AHEAD
 }

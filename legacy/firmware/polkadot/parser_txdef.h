@@ -23,6 +23,8 @@ typedef struct {
   pd_Hash_t blockHash;
 
   pd_NestCallIdx_t nestCallIdx;
+  compactInt_t assetId;
+  // TODO: XCM asset location
 } parser_tx_t;
 
 #endif

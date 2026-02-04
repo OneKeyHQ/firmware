@@ -338,38 +338,51 @@ parser_error_t _toStringCompactBalance(const pd_CompactBalance_t *v,
 
 uint16_t __address_type;
 
-uint16_t _getAddressType() { return __address_type; }
+uint16_t getAddressType(void) { return __address_type; }
+void setAddressType(uint16_t addressType) { __address_type = addressType; }
 
-uint16_t _detectAddressType(const parser_context_t *c) {
-  (void)c;
+int8_t detectNetworkMetadata(void) {
   memset(__polkadot_ticker, 0, sizeof(__polkadot_ticker));
-  if (!strncmp(polkadot_network, "polkadot", 8)) {
+  if (!strcmp(polkadot_network, "polkadot")) {
     __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES;
     memcpy(__polkadot_ticker, COIN_TICKER, 4);
-    return 0;
-  } else if (!strncmp(polkadot_network, "kusama", 6)) {
+    setAddressType(0);
+  } else if (!strcmp(polkadot_network, "kusama")) {
     __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES_12;
     memcpy(__polkadot_ticker, KUSAMA_COIN_TICKER, 4);
-    return 2;
-  } else if (!strncmp(polkadot_network, "astar", 5)) {
+    setAddressType(2);
+  } else if (!strcmp(polkadot_network, "astar")) {
     __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES_18;
     memcpy(__polkadot_ticker, ASTAR_COIN_TICKER, 5);
-    return 5;
-  } else if (!strncmp(polkadot_network, "westend", 7)) {
+    setAddressType(5);
+  } else if (!strcmp(polkadot_network, "westend")) {
     __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES_12;
     memcpy(__polkadot_ticker, WESTEND_COIN_TICKER, 4);
-    return 42;
-  } else if (!strncmp(polkadot_network, "joystream", 9)) {
+    setAddressType(42);
+  } else if (!strcmp(polkadot_network, "joystream")) {
     __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES;
     memcpy(__polkadot_ticker, JOY_COIN_TICKER, 4);
-    return 126;
-  } else if (!strncmp(polkadot_network, "manta", 5)) {
+    setAddressType(126);
+  } else if (!strcmp(polkadot_network, "manta")) {
     __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES_18;
     memcpy(__polkadot_ticker, MANTA_COIN_TICKER, 6);
-    return 77;
+    setAddressType(77);
+  } else if (!strcmp(polkadot_network, "hydration")) {
+    __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES_12;
+    memcpy(__polkadot_ticker, HYDRATION_COIN_TICKER, 4);
+    setAddressType(0);
+  } else if (!strcmp(polkadot_network, "bifrost") ||
+             !strcmp(polkadot_network, "bifrost-ksm")) {
+    __polkadot_decimal = COIN_AMOUNT_DECIMAL_PLACES_12;
+    memcpy(__polkadot_ticker, BIFROST_COIN_TICKER, 4);
+    setAddressType(0);
+  } else {
+    __polkadot_decimal = 0;
+    memcpy(__polkadot_ticker, " UNKN", 5);
+    memcpy(polkadot_network, "unkn Chain", 11);
+    return -1;
   }
-
-  return 42;
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////////

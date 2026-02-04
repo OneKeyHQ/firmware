@@ -35,7 +35,7 @@ message TronSignTx {
     required bytes ref_block_bytes = 2;             // Reference block number
     required bytes ref_block_hash = 3;              // Reference block hash
     required uint64 expiration = 4;                 // Transaction expiration
-    optional string data = 5;                       // Extra transaction info
+    optional bytes data = 5;                       // Extra transaction info
     required TronContract contract = 6;             // Contract messages
     required uint64 timestamp = 7;                  // UTC timestamp
     optional uint64 fee_limit = 8;                  // Fee limit for smartcontracts
@@ -63,6 +63,7 @@ message TronSignTx {
         enum TronResourceCode {
             BANDWIDTH = 0x00;
             ENERGY = 0x01;
+            TRON_POWER = 0x02;
         }
 
         // Freeze TRX balance
@@ -116,6 +117,9 @@ message TronSignTx {
         optional TronWithdrawExpireUnfreezeContract withdraw_expire_unfreeze_contract = 56;
         optional TronDelegateResourceContract delegate_resource_contract = 57;
         optional TronUnDelegateResourceContract undelegate_resource_contract = 58;
+        optional bytes provider = 3;
+        optional bytes contract_name = 5;
+        optional uint32 permission_id = 6;
     }
 }
 
@@ -128,6 +132,11 @@ message TronSignedTx {
     optional bytes serialized_tx = 2; // Serialized transaction
 }
 
+enum TronMessageType {
+    V1 = 1 [deprecated = true];
+    V2 = 2;
+}
+
 /**
  * Request: Ask device to sign message
  * @next TronMessageSignature
@@ -136,6 +145,7 @@ message TronSignedTx {
  message TronSignMessage {
     repeated uint32 address_n = 1;                          // BIP-32 path to derive the key from master node
     required bytes message = 2;                             // message to be signed
+    optional TronMessageType message_type = 3[default = V1];              // message type
 }
 
 /**

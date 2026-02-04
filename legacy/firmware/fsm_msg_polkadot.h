@@ -39,20 +39,20 @@ void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg) {
   res = secret_from_seed_cardano_ledger(seed, 64, ledger_secret);
   if (res != 1) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Unexpected failure in Ledger derivation"));
+                    "Unexpected failure in Ledger derivation");
     return;
   }
   res = hdnode_from_secret_cardano(ledger_secret, &node);
   if (res != 1) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Unexpected failure in constructing polkadot node"));
+                    "Unexpected failure in constructing polkadot node");
     return;
   }
 
   if (hdnode_private_ckd_cached(&node, msg->address_n, msg->address_n_count,
                                 NULL) == 0) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
+                    "Failed to derive private key");
     return;
   }
   ed25519_publickey(node.private_key, node.public_key + 1);
@@ -68,7 +68,7 @@ void fsm_msgPolkadotGetAddress(PolkadotGetAddress *msg) {
     strcat(desc, msg->network);
     desc[0] = desc[0] - ('a' - 'A');
     strcat(desc, " ");
-    strcat(desc, _("Address:"));
+    strcat(desc, _("Address"));
     if (!fsm_layoutAddress(resp->address, NULL, desc, false, 0, msg->address_n,
                            msg->address_n_count, true, NULL, 0, 0, NULL)) {
       return;
@@ -99,27 +99,27 @@ void fsm_msgPolkadotSignTx(const PolkadotSignTx *msg) {
   res = secret_from_seed_cardano_ledger(seed, 64, ledger_secret);
   if (res != 1) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Unexpected failure in Ledger derivation"));
+                    "Unexpected failure in Ledger derivation");
     return;
   }
 
   res = hdnode_from_secret_cardano(ledger_secret, &node);
   if (res != 1) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Unexpected failure in constructing Polkadot node"));
+                    "Unexpected failure in constructing Polkadot node");
     return;
   }
 
   if (hdnode_private_ckd_cached(&node, msg->address_n, msg->address_n_count,
                                 NULL) == 0) {
     fsm_sendFailure(FailureType_Failure_ProcessError,
-                    _("Failed to derive private key"));
+                    "Failed to derive private key");
     return;
   }
   ed25519_publickey(node.private_key, node.public_key + 1);
 
   if (!polkadot_sign_tx(msg, &node, resp)) {
-    fsm_sendFailure(FailureType_Failure_DataError, _("Signing failed"));
+    fsm_sendFailure(FailureType_Failure_DataError, "Signing failed");
     layoutHome();
     return;
   }

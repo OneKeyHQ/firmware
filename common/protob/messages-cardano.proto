@@ -538,6 +538,7 @@ message CardanoSignMessage {
     required CardanoDerivationType derivation_type = 3;
     required uint32 network_id = 4;                                 // network id - mainnet or testnet
     optional CardanoAddressType address_type = 5;                   // one of the CardanoAddressType
+    optional uint32 protocol_magic = 6;                             // network's protocol magic - needed for Byron addresses on testnets
 }
 
 /**

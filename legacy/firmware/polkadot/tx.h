@@ -5,7 +5,9 @@
 #include "common_defs.h"
 #include "parser_common.h"
 
-parser_error_t polkadot_tx_parse(const uint8_t *data, size_t dataLen);
+parser_error_t polkadot_tx_parse(const uint8_t *data, size_t dataLen,
+                                 bool has_preset_address_type,
+                                 uint16_t preset_address_type);
 
 /// Return the number of items in the transaction
 zxerr_t polkadot_tx_getNumItems(uint8_t *num_items);

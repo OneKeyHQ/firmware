@@ -96,12 +96,12 @@ void fsm_msgCardanoGetAddress(CardanoGetAddress *msg) {
   if (msg->has_show_display && msg->show_display) {
     char desc[20] = {0};
     char addr_type[32] = {0};
-    snprintf(desc, 20, "Cardano %s", _("Address:"));
+    snprintf(desc, 20, "Cardano %s", _("Address"));
     if (msg->address_parameters.address_type == CardanoAddressType_BASE) {
-      snprintf(addr_type, 32, "Base %s", _("Address:"));
+      snprintf(addr_type, 32, "Base %s", _("Address"));
     } else if (msg->address_parameters.address_type ==
                CardanoAddressType_REWARD) {
-      snprintf(addr_type, 32, "Reward %s", _("Address:"));
+      snprintf(addr_type, 32, "Reward %s", _("Address"));
     }
     if (msg->address_parameters.address_n_count > 0) {
       if (!fsm_layoutAddress(resp->address, addr_type, desc, false, 0,
@@ -268,8 +268,9 @@ void fsm_msgCardanoSignMessage(CardanoSignMessage *msg) {
               "Invalid path");
   CHECK_PIN
 
-  if ((msg->network_id != 0) && (msg->network_id != 1)) {
-    fsm_sendFailure(FailureType_Failure_ProcessError, "Invalid Networ ID");
+  if (!msg->has_protocol_magic && (msg->network_id != 1)) {
+    fsm_sendFailure(FailureType_Failure_ProcessError,
+                    "Invalid Network ID, need protocol magic provide");
     return;
   }
   if (!ada_sign_messages(msg, resp)) {
