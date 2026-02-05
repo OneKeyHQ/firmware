@@ -55,7 +55,13 @@ static bool eip1559;
 static struct SHA3_CTX keccak_ctx = {0};
 
 static uint32_t signing_access_list_count;
-static EthereumAccessListOneKey signing_access_list[16];
+// NOTE: Increse signing_access_list size will affect the other functions
+// max local buffer size used by fido: U2F_MAXIMUM_PAYLOAD_LENGTH 7609
+// memory layout(total avaiable ram 128K):
+//   text       data        bss      total
+//   769080     3220        115304   887604   // current
+//                          120024            // access_list 16
+static EthereumAccessListOneKey signing_access_list[8];
 _Static_assert(sizeof(signing_access_list) ==
                    sizeof(((EthereumSignTxEIP1559OneKey *)NULL)->access_list),
                "access_list buffer size mismatch");

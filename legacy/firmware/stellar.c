@@ -231,7 +231,8 @@ bool stellar_confirmCreateAccountOp(const StellarCreateAccountOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
 
@@ -282,7 +283,8 @@ bool stellar_confirmPaymentOp(const StellarPaymentOp *msg) {
                                 _("Missing Memo/Tag during exchange deposits "
                                   "may result in fund loss."));
     if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-      stellar_signingFail("User canceled");
+      fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+      stellar_signingAbort();
       return false;
     }
   }
@@ -296,7 +298,8 @@ bool stellar_confirmPaymentOp(const StellarPaymentOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
 
@@ -390,7 +393,8 @@ bool stellar_confirmPathPaymentStrictReceiveOp(
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Note: no confirmation for intermediate steps since they don't impact the
@@ -489,7 +493,8 @@ bool stellar_confirmPathPaymentStrictSendOp(
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Note: no confirmation for intermediate steps since they don't impact the
@@ -602,7 +607,8 @@ bool stellar_confirmManageBuyOfferOp(const StellarManageBuyOfferOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
 
@@ -708,7 +714,8 @@ bool stellar_confirmManageSellOfferOp(const StellarManageSellOfferOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash selling asset
@@ -810,7 +817,8 @@ bool stellar_confirmCreatePassiveSellOfferOp(
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash selling asset
@@ -1079,7 +1087,8 @@ bool stellar_confirmSetOptionsOp(const StellarSetOptionsOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash: signer type
@@ -1127,7 +1136,6 @@ bool stellar_confirmChangeTrustOp(const StellarChangeTrustOp *msg) {
   // Validate destination account and convert to bytes
   uint8_t asset_issuer_bytes[STELLAR_KEY_SIZE] = {0};
   if (!stellar_getAddressBytes(msg->asset.issuer, asset_issuer_bytes)) {
-    stellar_signingFail("User canceled");
     fsm_sendFailure(FailureType_Failure_ProcessError, "Invalid asset issuer");
     return false;
   }
@@ -1148,7 +1156,8 @@ bool stellar_confirmChangeTrustOp(const StellarChangeTrustOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash: asset
@@ -1208,7 +1217,8 @@ bool stellar_confirmAllowTrustOp(const StellarAllowTrustOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash: trustor account (the account being allowed to access the asset)
@@ -1265,7 +1275,8 @@ bool stellar_confirmAccountMergeOp(const StellarAccountMergeOp *msg) {
                               NULL, NULL,
                               "All XLM will be sent to destination account");
   if (!protectButton(ButtonRequestType_ButtonRequest_ProtectCall, false)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   const char *const expeted_keys[] = {
@@ -1275,7 +1286,8 @@ bool stellar_confirmAccountMergeOp(const StellarAccountMergeOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
 
@@ -1320,7 +1332,8 @@ bool stellar_confirmManageDataOp(const StellarManageDataOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash: key
@@ -1357,7 +1370,8 @@ bool stellar_confirmBumpSequenceOp(const StellarBumpSequenceOp *msg) {
   stellar_activeTx.confirmed_operations++;
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return false;
   }
   // Hash: bump to
@@ -1859,7 +1873,8 @@ void stellar_layoutTransactionSummary(const StellarSignTx *msg) {
   const char *const values[] = {memo, signer_addr, str_seq_num, str_fee};
   if (!stellar_layoutTransactionDialog(ARRAY_SIZE(expeted_keys), expeted_keys,
                                        values)) {
-    stellar_signingFail("User canceled");
+    fsm_sendFailure(FailureType_Failure_ActionCancelled, "User canceled");
+    stellar_signingAbort();
     return;
   }
 
