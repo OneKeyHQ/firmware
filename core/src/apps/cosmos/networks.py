@@ -406,3 +406,11 @@ def _networks_iterator() -> Iterator[NetworkInfoTuple]:
         "A:/res/chain-noble.png",
         0x41498D,
     )
+    yield NetworkInfo(
+        chainId="kaiyo-1",
+        chainName="Kujira",
+        coinDenom="KUJI",
+        coinMinimalDenom="ukuji",
+        coinDecimals=6,
+        hrp="kujira",
+    )
